@@ -82,6 +82,13 @@ test("turning secondary subtitles off clears a previously selected track", () =>
   assert.deepEqual(select(null, [primary, track("text", "subrip", { secondary: true })]), [null]);
 });
 
+test("a disabled automatic language suppresses secondary subtitles but permits manual selection", () => {
+  const text = track("text", "subrip");
+  assert.deepEqual(select("auto", [primary, text], ""), []);
+  assert.deepEqual(select("auto", [primary, { ...text, secondary: true }], ""), [null]);
+  assert.deepEqual(select("text", [primary, text], ""), ["text"]);
+});
+
 test("known bitmap formats are excluded while text and unknown tracks remain eligible", () => {
   for (const codec of [
     "PGS",

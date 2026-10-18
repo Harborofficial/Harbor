@@ -57,15 +57,23 @@ function prepared(url: string): PreparedSubtitle {
   };
 }
 
-async function runSelection(order: SubResult[], delays: Record<string, number>) {
+async function runSelection(
+  order: SubResult[],
+  delays: Record<string, number>,
+  deferAutoSelection = false,
+) {
   let selectedUrl: string | null = null;
-  const calls: Array<{ url: string; select: boolean }> = [];
+  const calls: Array<{ url: string; select: boolean; eligible: boolean }> = [];
   const result = await fetchSubtitlesIntoPlayer(
     {
       bridge: {
         addSubtitle: async (_url, _lang, _title, select, metadata) => {
           const originalUrl = metadata?.originalUrl ?? "";
-          calls.push({ url: originalUrl, select: select === true });
+          calls.push({
+            url: originalUrl,
+            select: select === true,
+            eligible: metadata?.autoSelectionEligible === true,
+          });
           if (originalUrl === top.url) return false;
           if (select === true) selectedUrl = originalUrl;
           return true;
@@ -85,6 +93,7 @@ async function runSelection(order: SubResult[], delays: Record<string, number>) 
       durationSec: 120,
       isActive: () => true,
       shouldAutoSelect: () => true,
+      deferAutoSelection,
     },
     {
       search: async () => order,
@@ -96,6 +105,13 @@ async function runSelection(order: SubResult[], delays: Record<string, number>) 
   );
   return { calls, selectedUrl, result };
 }
+
+test("deferred original-language selection publishes safe external tracks without enabling them", async () => {
+  const value = await runSelection([fallback], {}, true);
+  assert.equal(value.selectedUrl, null);
+  assert.equal(value.result.selected, null);
+  assert.deepEqual(value.calls, [{ url: fallback.url, select: false, eligible: true }]);
+});
 
 test("provider completion order and top-candidate add failure select the same fallback", async () => {
   const first = await runSelection([fallback, top], { [top.url]: 20, [fallback.url]: 1 });

@@ -8,6 +8,11 @@ import { publishSubtitleSearch } from "@/components/player/subtitle-menu/subtitl
 import { publishSubtitleContext } from "@/components/player/subtitle-menu/subtitle-context-store";
 import { readPlayerPrefs, type PerShowPrefs } from "@/lib/player-prefs";
 import { tmdbImdbId } from "@/lib/providers/tmdb";
+import { originalLanguageSubtitlePolicy } from "@/lib/player/original-language-subtitles";
+import {
+  audioLanguageOrder,
+  resolveOriginalAudioLanguage,
+} from "@/lib/player/original-audio-language";
 import type { Addon } from "@/lib/addons";
 import type { GeneratedSubtitleGroup } from "@/lib/subtitles/types";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
@@ -105,6 +110,33 @@ export function useTrackAutoload(params: {
       cancelled = true;
     };
   }, [src.imdbId, src.imdbIdVerified, src.meta.id, settings.tmdbKey]);
+
+  const [originalLanguageResult, setOriginalLanguageResult] = useState<{
+    meta: typeof src.meta;
+    language: string | null;
+  } | null>(null);
+  const originalAudioLanguage =
+    originalLanguageResult?.meta === src.meta ? originalLanguageResult.language : null;
+  const subtitlePolicy = originalLanguageSubtitlePolicy(
+    settings.englishSubsForForeignOriginal,
+    originalAudioLanguage,
+  );
+  useEffect(() => {
+    let cancelled = false;
+    setOriginalLanguageResult(null);
+    if (!settings.preferOriginalAudioLanguage && !settings.englishSubsForForeignOriginal) return;
+    void resolveOriginalAudioLanguage(settings.tmdbKey, src.meta).then((language) => {
+      if (!cancelled) setOriginalLanguageResult({ meta: src.meta, language });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    settings.preferOriginalAudioLanguage,
+    settings.englishSubsForForeignOriginal,
+    settings.tmdbKey,
+    src.meta,
+  ]);
 
   const [userAddonsState, setUserAddonsState] = useState<{
     authKey: string | null;
@@ -239,7 +271,9 @@ export function useTrackAutoload(params: {
       !!src.meta.id?.startsWith("kitsu:") ||
       !!src.meta.id?.startsWith("mal:") ||
       (src.meta.genres ?? []).some((g) => g.toLowerCase() === "anime");
-    const rawLangs = resolveLangPreference(settings.preferredSubLangs, settings.preferredLanguages);
+    const rawLangs = settings.englishSubsForForeignOriginal
+      ? ["en"]
+      : resolveLangPreference(settings.preferredSubLangs, settings.preferredLanguages);
     const strippedLangs = rawLangs.filter((l) => !isJapanese(l));
     const langs = subIsAnime || strippedLangs.length === 0 ? rawLangs : strippedLangs;
     const candidateIds = buildStreamIds(
@@ -306,6 +340,7 @@ export function useTrackAutoload(params: {
       const base = {
         src,
         settings,
+        deferAutoSelection: settings.englishSubsForForeignOriginal,
         addons: readyAddons,
         langs,
         searchImdbId,
@@ -319,6 +354,9 @@ export function useTrackAutoload(params: {
         selectedId: subtitleSelectionStateRef.current.selectedId,
       };
       const shouldAutoSelectForStage = (lateHash: boolean) => {
+        // The track effect owns this policy, including late embedded tracks.
+        if (settings.englishSubsForForeignOriginal)
+          return bridgeRef.current?.canAutoSelectSubtitle?.() !== false;
         if (bridgeRef.current?.canAutoSelectSubtitle?.() === false) return false;
         const state = subtitleSelectionStateRef.current;
         const currentTrack = snapRef.current.subtitleTracks.find((track) => track.selected) ?? null;
@@ -544,6 +582,7 @@ export function useTrackAutoload(params: {
   }, [src.url]);
   useEffect(() => {
     if (src.subtitlePreselect) return;
+    if (settings.englishSubsForForeignOriginal) return;
     const remembered = readRememberedSub(
       subtitleMediaKey(src.meta.id, src.episode?.season, src.episode?.episode),
     );
@@ -748,6 +787,7 @@ export function useTrackAutoload(params: {
     subRestoreTick,
     settings.subsourceApiKey,
     settings.subdlApiKey,
+    settings.englishSubsForForeignOriginal,
   ]);
   useEffect(() => {
     if (engine !== "mpv") return;
@@ -767,6 +807,9 @@ export function useTrackAutoload(params: {
       settings.forcedSubsWhenNativeAudio,
       settings.subtitlesOffByDefault,
       settings.trackBlockWords,
+      settings.preferOriginalAudioLanguage,
+      settings.englishSubsForForeignOriginal,
+      originalAudioLanguage,
     ]);
     const key = `${src.url}|${audioIdSig}|${subIdSig}|${preferenceSig}`;
     if (autoTrackKeyRef.current === key) return;
@@ -791,12 +834,17 @@ export function useTrackAutoload(params: {
     const baseSub = stripJaForNonAnime(
       resolveLangPreference(settings.preferredSubLangs, settings.preferredLanguages),
     );
-    const audioLangs = prefs?.audioLang
-      ? [prefs.audioLang, ...baseAudio.filter((l) => l !== prefs.audioLang)]
-      : baseAudio;
-    const subLangs = prefs?.subLang
-      ? [prefs.subLang, ...baseSub.filter((l) => l !== prefs.subLang)]
-      : baseSub;
+    const audioLangs = audioLanguageOrder(
+      baseAudio,
+      settings.preferOriginalAudioLanguage ? originalAudioLanguage : null,
+      prefs?.audioLang,
+    );
+    const subLangs =
+      subtitlePolicy === "english"
+        ? ["en"]
+        : prefs?.subLang
+          ? [prefs.subLang, ...baseSub.filter((l) => l !== prefs.subLang)]
+          : baseSub;
 
     const allow = <T extends { title?: string; label?: string }>(tracks: T[]): T[] => {
       const words = blockWords(settings);
@@ -821,27 +869,42 @@ export function useTrackAutoload(params: {
         }
       }
     }
-    const subsOff = subsOffFor(prefs, settings);
+    const subsOff =
+      subtitlePolicy === "normal" ? subsOffFor(prefs, settings) : subtitlePolicy === "off";
     if (subsOff) {
-      if (snap.subtitleTracks.some((t) => t.selected))
+      if (
+        bridgeRef.current?.canAutoSelectSubtitle?.() !== false &&
+        !src.subtitlePreselect &&
+        snap.subtitleTracks.some((t) => t.selected)
+      )
         bridgeRef.current?.setSubtitleTrack(null, "automatic");
     } else if (
       bridgeRef.current?.canAutoSelectSubtitle?.() !== false &&
-      !rememberedSubAppliesToStream(
-        readRememberedSub(subtitleMediaKey(src.meta.id, src.episode?.season, src.episode?.episode)),
-        src.streamRef,
-      ) &&
+      (subtitlePolicy === "english" ||
+        !rememberedSubAppliesToStream(
+          readRememberedSub(
+            subtitleMediaKey(src.meta.id, src.episode?.season, src.episode?.episode),
+          ),
+          src.streamRef,
+        )) &&
       !src.subtitlePreselect &&
       snap.subtitleTracks.length > 0 &&
       subLangs.length > 0
     ) {
       const current = snap.subtitleTracks.find((t) => t.selected) ?? null;
       const userPicked =
-        current != null && autoSubIdRef.current != null && current.id !== autoSubIdRef.current;
+        subtitlePolicy === "normal" &&
+        current != null &&
+        autoSubIdRef.current != null &&
+        current.id !== autoSubIdRef.current;
       const lockedToAuto =
-        current != null && autoSubIdRef.current != null && !settings.subtitleAutoUpgrade;
+        subtitlePolicy === "normal" &&
+        current != null &&
+        autoSubIdRef.current != null &&
+        !settings.subtitleAutoUpgrade;
       if (!userPicked && !lockedToAuto) {
         const nativeAudio =
+          subtitlePolicy === "normal" &&
           settings.forcedSubsWhenNativeAudio &&
           effAudio != null &&
           langScore(effAudio.lang ?? "", subLangs) >= 0;
@@ -854,11 +917,13 @@ export function useTrackAutoload(params: {
           : pickDesiredSubtitleTrack(
               allow(snap.subtitleTracks),
               subLangs,
-              settings.preferEmbeddedSubs,
+              subtitlePolicy === "english" || settings.preferEmbeddedSubs,
             );
         if (want) {
           if (want.id !== current?.id) bridgeRef.current?.setSubtitleTrack(want.id, "automatic");
           autoSubIdRef.current = want.id;
+        } else if (subtitlePolicy === "english" && current) {
+          bridgeRef.current?.setSubtitleTrack(null, "automatic");
         }
       }
     }
@@ -871,13 +936,23 @@ export function useTrackAutoload(params: {
         bridgeRef.current?.setRate(wanted);
       }
     }
-  }, [engine, src.url, src.meta.id, snap.audioTracks, snap.subtitleTracks, snap.rate, settings]);
+  }, [
+    engine,
+    src.url,
+    src.meta.id,
+    snap.audioTracks,
+    snap.subtitleTracks,
+    snap.rate,
+    settings,
+    originalAudioLanguage,
+  ]);
 
   useEffect(() => {
     bridgeRef.current?.setSubDelay(readPlayerPrefs(src.meta.id)?.subDelaySec ?? 0);
   }, [src.url, src.meta.id]);
 
   useEffect(() => {
+    if (settings.englishSubsForForeignOriginal) return;
     if (!subsOffFor(readPlayerPrefs(src.meta.id), settings)) return;
     const selected = snap.subtitleTracks.find((t) => t.selected);
     if (selected) bridgeRef.current?.setSubtitleTrack(null, "automatic");

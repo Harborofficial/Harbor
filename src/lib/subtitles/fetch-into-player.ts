@@ -74,6 +74,8 @@ export type SubFetchParams = {
   deep?: boolean;
   autoSelect?: boolean;
   shouldAutoSelect?: () => boolean;
+  /** Publish safe candidates for selection by the original-language policy. */
+  deferAutoSelection?: boolean;
   providers?: {
     opensubtitles?: boolean;
     wyzie?: boolean;
@@ -422,7 +424,8 @@ export async function fetchSubtitlesIntoPlayer(
         autoSelect: p.autoSelect !== false && selected == null,
         selectionLeaseValid: p.shouldAutoSelect?.() ?? true,
       });
-      const shouldSelect = selected == null && preferred != null && autoSelectionEligible;
+      const shouldSelect =
+        !p.deferAutoSelection && selected == null && preferred != null && autoSelectionEligible;
       registerPreparedSubtitle(item.prepared);
       const itemMeta = {
         ...meta(item.candidate),
