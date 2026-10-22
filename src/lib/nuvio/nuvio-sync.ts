@@ -23,6 +23,9 @@ import { reconcileNuvioWatchedEpisodes } from "@/lib/manual-watched";
 import { clearAllLocalCw, clearLocalCw, saveLocalCw } from "@/lib/local-cw";
 import { clearResume } from "@/lib/resume";
 import { readCachedNuvioPlaybackItems, writeCachedNuvioPlaybackItems } from "./nuvio-playback";
+import type { Addon } from "@/lib/addons";
+import { fetchManifestAt } from "@/lib/addon-store";
+import { recordNuvioAddons } from "./nuvio-addon-registry";
 
 /**
  * Returns true if Nuvio is the currently active account provider in Harbor.
@@ -562,10 +565,10 @@ export async function pullWatchedItemsFromNuvio(
 export async function reconcileNuvioWatched(
   harborProfileId?: string | number,
 ): Promise<void> {
-  if (!isNuvioSignedIn() || !isNuvioProviderActive()) return;
+  if (!isNuvioSignedIn()) return;
   const profileIndex = resolveNuvioProfileIndex(harborProfileId);
   const items = await pullWatchedItemsFromNuvio(profileIndex);
-  if (!items) return;
+  if (!items || items.length === 0) return;
 
   const serverWatchedIds = new Set<string>();
   const serverMovieIds = new Set<string>();
@@ -596,21 +599,23 @@ export async function reconcileNuvioWatched(
   }
 
   // 3. Prune any locally flagged items that were deleted/unmarked on Nuvio cloud
-  try {
-    const flagKey = `harbor.watchedFlag.nuvio.v1.${profileIndex}`;
-    const rawFlags = localStorage.getItem(flagKey);
-    if (rawFlags) {
-      const stored = JSON.parse(rawFlags);
-      if (Array.isArray(stored)) {
-        for (const localId of stored) {
-          if (!serverWatchedIds.has(localId)) {
-            setWatchedFlag(localId, false);
-            setMovieWatchedLocal(localId, false);
+  if (serverWatchedIds.size > 0) {
+    try {
+      const flagKey = `harbor.watchedFlag.nuvio.v1.${profileIndex}`;
+      const rawFlags = localStorage.getItem(flagKey);
+      if (rawFlags) {
+        const stored = JSON.parse(rawFlags);
+        if (Array.isArray(stored)) {
+          for (const localId of stored) {
+            if (!serverWatchedIds.has(localId)) {
+              setWatchedFlag(localId, false);
+              setMovieWatchedLocal(localId, false);
+            }
           }
         }
       }
-    }
-  } catch {}
+    } catch {}
+  }
 
   window.dispatchEvent(
     new CustomEvent("harbor:nuvio-watched-reconciled", { detail: { profileIndex } }),
@@ -1101,11 +1106,65 @@ export async function pullWatchProgressFromNuvio(
 }
 
 /**
+ * Cached Nuvio Addon storage helpers
+ */
+const memoryAddonCache = new Map<string, NuvioAddonItem[]>();
+
+function getNuvioAddonsCacheKey(slot?: number, accountId?: string): string {
+  const acc = accountId || getNuvioAccountId() || "default";
+  return `harbor.nuvio.addons.v1.${acc}.slot.${slot ?? 1}`;
+}
+
+export function readCachedNuvioAddons(
+  slot?: number,
+  accountId?: string,
+): NuvioAddonItem[] {
+  const key = getNuvioAddonsCacheKey(slot, accountId);
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(key) : null;
+    if (!raw) return memoryAddonCache.get(key) || [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as NuvioAddonItem[]) : [];
+  } catch {
+    return memoryAddonCache.get(key) || [];
+  }
+}
+
+export function writeCachedNuvioAddons(
+  slot: number,
+  items: NuvioAddonItem[],
+  accountId?: string,
+): void {
+  const key = getNuvioAddonsCacheKey(slot, accountId);
+  memoryAddonCache.set(key, items);
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(key, JSON.stringify(items));
+    }
+  } catch {}
+}
+
+export function clearCachedNuvioAddons(): void {
+  memoryAddonCache.clear();
+  try {
+    if (typeof localStorage === "undefined") return;
+    const toRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("harbor.nuvio.addons.v1.")) {
+        toRemove.push(key);
+      }
+    }
+    for (const k of toRemove) localStorage.removeItem(k);
+  } catch {}
+}
+
+/**
  * Pulls addons for the specified profile from Nuvio.
  * If uses_primary_addons is enabled on this profile, pulls profile 1's addons.
  */
 export async function pullAddonsFromNuvio(
-  harborProfileId: string,
+  harborProfileId?: string | number,
 ): Promise<NuvioAddonItem[]> {
   if (!isNuvioSignedIn()) return [];
 
@@ -1121,21 +1180,100 @@ export async function pullAddonsFromNuvio(
       `/rest/v1/addons?profile_id=eq.${profileIndex}&order=sort_order.asc`,
     );
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.warn(`[nuvio] failed to pull addons (status ${res.status}) for profile ${profileIndex}`);
+      return readCachedNuvioAddons(profileIndex);
+    }
 
     const list = (await res.json()) as NuvioAddonItem[];
-    return Array.isArray(list) ? list : [];
+    const safeList = Array.isArray(list) ? list : [];
+    writeCachedNuvioAddons(profileIndex, safeList);
+    return safeList;
   } catch (err) {
     console.warn("[nuvio] failed to pull addons", err);
-    return [];
+    return readCachedNuvioAddons(profileIndex);
   }
+}
+
+const NUVIO_MANIFEST_CACHE_PREFIX = "harbor.nuvio.manifest_cache.v1.";
+
+function getCachedNuvioManifest(url: string): Addon["manifest"] | null {
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(`${NUVIO_MANIFEST_CACHE_PREFIX}${url}`) : null;
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedNuvioManifest(url: string, manifest: Addon["manifest"]): void {
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(`${NUVIO_MANIFEST_CACHE_PREFIX}${url}`, JSON.stringify(manifest));
+    }
+  } catch {}
+}
+
+/**
+ * Resolves full Harbor Addon objects from Nuvio for the given profile.
+ * Falls back to cache if network is unavailable or slow.
+ */
+export async function fetchNuvioAddons(
+  harborProfileId?: string | number,
+): Promise<Addon[]> {
+  if (!isNuvioSignedIn()) return [];
+
+  const profileIndex = resolveNuvioProfileIndex(harborProfileId);
+  const cachedItems = readCachedNuvioAddons(profileIndex);
+  let items = cachedItems;
+
+  try {
+    const fresh = await pullAddonsFromNuvio(profileIndex);
+    if (fresh.length > 0 || cachedItems.length === 0) {
+      items = fresh;
+    }
+  } catch {
+    // Keep cachedItems
+  }
+
+  if (items.length === 0) return [];
+
+  const addons: Addon[] = await Promise.all(
+    items.map(async (n): Promise<Addon> => {
+      const cached = getCachedNuvioManifest(n.url);
+      if (cached) {
+        return {
+          transportUrl: n.url,
+          manifest: cached,
+        };
+      }
+      let manifest: Addon["manifest"] = {
+        id: n.url,
+        name: n.name || "Addon",
+      };
+      try {
+        const fetched = await fetchManifestAt(n.url);
+        if (fetched) {
+          manifest = fetched;
+          setCachedNuvioManifest(n.url, fetched);
+        }
+      } catch {}
+      return {
+        transportUrl: n.url,
+        manifest,
+      };
+    }),
+  );
+
+  recordNuvioAddons(addons);
+  return addons;
 }
 
 /**
  * Pushes installed addons to Nuvio using the `sync_push_addons` RPC
  */
 export async function pushAddonsToNuvio(
-  harborProfileId: string,
+  harborProfileId: string | number,
   addons: NuvioAddonItem[],
 ): Promise<boolean> {
   if (!isNuvioSignedIn()) return false;

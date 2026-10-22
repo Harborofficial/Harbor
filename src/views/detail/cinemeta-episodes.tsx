@@ -40,12 +40,14 @@ export function CinemetaEpisodes({
   videos,
   stremioWatched,
   resumeSeason,
+  resumeEpisode,
   imdbId,
 }: {
   meta: Meta;
   videos: NonNullable<Meta["videos"]>;
   stremioWatched?: Set<string>;
   resumeSeason?: number;
+  resumeEpisode?: number;
   imdbId?: string | null;
 }) {
   const t = useT();
@@ -72,13 +74,24 @@ export function CinemetaEpisodes({
   const grouped = useMemo(() => groupEpisodes(videos), [videos]);
   const combinedWatched = useMemo(() => {
     const watched = new Set(stremioWatched ?? []);
-    const manual = manualEpisodeKeys(meta.id);
+    if (resumeSeason != null && resumeEpisode != null && (resumeSeason > 1 || resumeEpisode > 1)) {
+      for (const v of videos) {
+        const s = v.season ?? 0;
+        const e = v.episode ?? v.number ?? 0;
+        if (s >= 1 && e >= 1) {
+          if (s < resumeSeason || (s === resumeSeason && e < resumeEpisode)) {
+            watched.add(`${s}:${e}`);
+          }
+        }
+      }
+    }
+    const manual = manualEpisodeKeys(meta.id, [imdbId]);
 
     for (const key of manual.watched) watched.add(key);
     for (const key of manual.unwatched) watched.delete(key);
 
     return watched;
-  }, [meta.id, stremioWatched, mwVersion]);
+  }, [meta.id, imdbId, stremioWatched, mwVersion, resumeSeason, resumeEpisode, videos]);
   const seasonStats = useMemo(
     () =>
       grouped.map((group) => ({
@@ -92,7 +105,7 @@ export function CinemetaEpisodes({
     () =>
       grouped.flatMap((g) =>
         g.episodes.map((ep, i) => ({
-          season: ep.season ?? 0,
+          season: ep.season ?? (g.seasonNumber || 1),
           episode: ep.episode ?? ep.number ?? (ep.season == null ? i + 1 : 1),
           released: ep.released ?? null,
         })),
@@ -130,7 +143,7 @@ export function CinemetaEpisodes({
   const watchedAt = (season: number, number: number): boolean => {
     const st = manualWatchedState(meta.id, season, number);
     return (
-      st === true || (st === undefined && (stremioWatched?.has(`${season}:${number}`) ?? false))
+      st === true || (st === undefined && combinedWatched.has(`${season}:${number}`))
     );
   };
 
@@ -277,6 +290,7 @@ export function CinemetaEpisodes({
             background: meta.background,
           }}
           target={watchedMenu}
+          imdbId={imdbId}
           allEpisodes={allEpisodesOrdered}
           onClose={() => setWatchedMenu(null)}
         />

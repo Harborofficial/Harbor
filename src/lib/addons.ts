@@ -4,6 +4,8 @@ import { addonConfigurationKey } from "@/lib/addon-configuration-key";
 import { allowDirectHost, safeFetch as fetch } from "@/lib/safe-fetch";
 import type { AddonOrigin, Meta } from "./cinemeta";
 import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 
 const STREMIO_API = "https://api.strem.io/api";
 const MAX_ROWS = 24;
@@ -316,7 +318,9 @@ export function withDebridKeys(addons: Addon[], keys: DebridKeySet): Addon[] {
 export async function gatherCatalogAddons(authKey: string | null): Promise<Addon[]> {
   const stremioRaw = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
   const stremio = filterEnabled(stremioRaw);
-  const seen = new Set(stremio.map((a) => a.transportUrl));
+  const nuvioRaw = isNuvioSignedIn() ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
+  const nuvio = filterEnabled(nuvioRaw);
+  const seen = new Set([...stremio, ...nuvio].map((a) => a.transportUrl));
   const localOnly = filterEnabled(loadInstalled()).filter((l) => !seen.has(l.transportUrl));
   const localFull = await Promise.all(
     localOnly.map(async (l): Promise<Addon | null> => {
@@ -325,7 +329,7 @@ export async function gatherCatalogAddons(authKey: string | null): Promise<Addon
       return manifest ? { manifest, transportUrl: l.transportUrl } : null;
     }),
   );
-  return [...stremio, ...localFull.filter((a): a is Addon => a != null)];
+  return [...stremio, ...nuvio, ...localFull.filter((a): a is Addon => a != null)];
 }
 
 const NON_CONTENT_TYPES = new Set(["addon_catalog"]);

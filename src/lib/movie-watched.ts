@@ -96,8 +96,15 @@ function persist(next: Set<string>): void {
   for (const fn of subs) fn();
 }
 
-export function isMovieWatchedLocal(metaId: string): boolean {
-  return load().has(metaId);
+export function isMovieWatchedLocal(metaId: string, altIds?: Array<string | null | undefined>): boolean {
+  const set = load();
+  if (set.has(metaId)) return true;
+  if (altIds) {
+    for (const alt of altIds) {
+      if (alt && set.has(alt)) return true;
+    }
+  }
+  return false;
 }
 
 export function movieWatchedIds(): Set<string> {

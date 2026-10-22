@@ -1,6 +1,7 @@
 import { ArrowUpDown, Columns2, Rows3, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
+import { AccountOriginBadge } from "@/components/account-origin-badge";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { isAddonEnabled, setAddonEnabled } from "@/lib/addon-store";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
@@ -227,9 +228,12 @@ function InstalledRow({
         />
       </div>
       <div className={`flex min-w-0 flex-1 flex-col ${large ? "gap-1" : "gap-0.5"} ${enabled ? "" : "opacity-55"}`}>
-        <span className={`truncate font-medium text-ink ${large ? "text-[16px]" : "text-[14px]"}`}>
-          {nameOf(r)}
-        </span>
+        <div className="flex items-center gap-2 truncate">
+          <span className={`truncate font-medium text-ink ${large ? "text-[16px]" : "text-[14px]"}`}>
+            {nameOf(r)}
+          </span>
+          <AccountOriginBadge addonUrl={r.transportUrl} />
+        </div>
         <span className={`truncate text-ink-subtle ${large ? "text-[13px]" : "text-[11.5px]"}`}>
           {enabled ? subtitleFromManifest(r) : t("Off · catalogs and streams hidden")}
         </span>

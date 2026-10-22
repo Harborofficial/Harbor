@@ -88,9 +88,11 @@ import { useTrakt } from "@/lib/trakt/provider";
 import { noteLocalImdbId, toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
 import {
   pullWatchProgressFromNuvio,
+  pullWatchedItemsFromNuvio,
   reconcileNuvioWatched,
   isNuvioProviderActive,
 } from "@/lib/nuvio/nuvio-sync";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { PopIcon } from "@/components/pop-icon";
 import { useInLocalLibrary } from "@/lib/local-library";
 import { LocalLibraryBrand } from "@/components/local-library-brand";
@@ -798,34 +800,74 @@ export function DetailView({
   useEffect(() => {
     setLibraryItem(null);
     noteLocalImdbId(meta.id, detail?.imdbId);
-    if (settings.accountProvider === "nuvio") {
+    if (settings.accountProvider === "nuvio" || isNuvioSignedIn()) {
       let cancelled = false;
-      pullWatchProgressFromNuvio()
-        .then((progressItems) => {
+      Promise.all([
+        pullWatchProgressFromNuvio(),
+        pullWatchedItemsFromNuvio(),
+      ])
+        .then(([progressItems, watchedItems]) => {
           if (cancelled) return;
+          const targetIds = new Set<string>();
+          if (meta.id) targetIds.add(meta.id);
+          if (detail?.imdbId) targetIds.add(detail.imdbId);
+          if (detail?.id != null) {
+            const tid = String(detail.id);
+            targetIds.add(tid);
+            targetIds.add(`series:${tid}`);
+            targetIds.add(`tmdb:${tid}`);
+          }
+          for (const id of [...targetIds]) {
+            const clean = id.replace(/^(series|movie|tmdb):/, "");
+            targetIds.add(clean);
+            targetIds.add(`series:${clean}`);
+            targetIds.add(`tmdb:${clean}`);
+          }
+
+          const watchedKeys = new Set<string>();
+          for (const w of watchedItems) {
+            if (
+              targetIds.has(w.content_id) &&
+              w.season != null &&
+              w.episode != null
+            ) {
+              watchedKeys.add(`${w.season}:${w.episode}`);
+            }
+          }
           const matches = progressItems.filter(
-            (p) =>
-              p.content_id === meta.id ||
-              (detail?.imdbId && p.content_id === detail.imdbId),
+            (p) => targetIds.has(p.content_id),
           );
+          for (const m of matches) {
+            if (m.season != null && m.episode != null && m.season >= 1 && m.episode >= 1) {
+              const dur = m.duration_seconds || 1;
+              if (m.progress_seconds > dur * 0.9) {
+                watchedKeys.add(`${m.season}:${m.episode}`);
+              }
+              // Prior episodes in the same season
+              for (let ep = 1; ep < m.episode; ep++) {
+                watchedKeys.add(`${m.season}:${ep}`);
+              }
+              // Prior seasons
+              if (m.season > 1 && detail?.seasons) {
+                for (const sn of detail.seasons) {
+                  if (sn.seasonNumber >= 1 && sn.seasonNumber < m.season) {
+                    for (let ep = 1; ep <= (sn.episodeCount || 50); ep++) {
+                      watchedKeys.add(`${sn.seasonNumber}:${ep}`);
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if (watchedKeys.size > 0) {
+            setStremioWatched((prev) => new Set([...prev, ...watchedKeys]));
+          }
           if (matches.length > 0) {
             matches.sort((a, b) => {
               const ta = a.updated_at ? Date.parse(a.updated_at) : 0;
               const tb = b.updated_at ? Date.parse(b.updated_at) : 0;
               return tb - ta;
             });
-            const watchedKeys = new Set<string>();
-            for (const m of matches) {
-              if (m.season != null && m.episode != null) {
-                const dur = m.duration_seconds || 1;
-                if (m.progress_seconds > dur * 0.9) {
-                  watchedKeys.add(`${m.season}:${m.episode}`);
-                }
-              }
-            }
-            if (watchedKeys.size > 0) {
-              setStremioWatched(watchedKeys);
-            }
             let latest = matches[0];
             if (latest.season != null && latest.episode != null) {
               const dur = latest.duration_seconds || 1;
@@ -1371,10 +1413,10 @@ export function DetailView({
   }, [isAnime, animeCanonicalId, meta.id, meta.type, meta.name, title, settings.tmdbKey]);
 
   useSyncExternalStore(subscribeMovieWatched, movieWatchedVersion, movieWatchedVersion);
-  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive() || isNuvioSignedIn();
   const watchedMark =
     meta.type === "movie" &&
-    (isMovieWatchedLocal(meta.id) || (!isNuvio && stremioMovieWatched(libraryItem)));
+    (isMovieWatchedLocal(meta.id, [detail?.imdbId]) || (!isNuvio && stremioMovieWatched(libraryItem)));
   const markThisMovieWatched = () => {
     const tmdb = meta.id.startsWith("tmdb:") ? meta.id.split(":")[2] : null;
     if (watchedMark) {
@@ -2352,6 +2394,7 @@ export function DetailView({
                 videos={cinemetaFull.videos}
                 stremioWatched={stremioWatched}
                 resumeSeason={lastPlay?.season}
+                resumeEpisode={lastPlay?.episode}
               />
             </FadeInUp>
           )}

@@ -120,7 +120,7 @@ export const ContinueCard = memo(function ContinueCard({
   useSnapshotVersion();
   const newEpisode = useHasNewEpisode(item);
   const snapshot = readSnapshot(item._id);
-  const isExternal = !!item.external;
+  const isExternal = !!item.external && item.external !== "nuvio";
   const externalLogo =
     item.external === "trakt"
       ? traktLogo

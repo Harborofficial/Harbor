@@ -18,6 +18,13 @@ import { markMovieWatchedStremio } from "@/lib/stremio-watched-sync";
 import { syncSeriesWatchedToStremio } from "@/lib/stremio-episode-watched";
 import { tmdbImdbCached } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 import { airedOnly } from "@/lib/aired";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import {
+  resolveNuvioProfileIndex,
+  pushWatchedItemToNuvio,
+  deleteWatchedItemFromNuvio,
+  deleteWatchProgressFromNuvio,
+} from "@/lib/nuvio/nuvio-sync";
 
 export async function markMovieWatched(
   meta: Meta,
@@ -45,6 +52,33 @@ export async function markMovieWatched(
   }
   const pmdbTarget = stremioIdToPmdbTarget(meta.id, undefined, "movie");
   if (pmdbTarget) writes.push(markPmdbWatched(pmdbTarget));
+  if (isNuvioSignedIn()) {
+    const slot = resolveNuvioProfileIndex();
+    const primaryId = imdb ?? (meta.id.startsWith("tt") ? meta.id : meta.id);
+    const altId = meta.id !== primaryId ? meta.id : undefined;
+    writes.push(
+      pushWatchedItemToNuvio(slot, [
+        {
+          contentId: primaryId,
+          contentType: "movie",
+          title: meta.name,
+          watchedAt: Date.now(),
+        },
+        ...(altId
+          ? [
+              {
+                contentId: altId,
+                contentType: "movie",
+                title: meta.name,
+                watchedAt: Date.now(),
+              },
+            ]
+          : []),
+      ]),
+      deleteWatchProgressFromNuvio(slot, primaryId),
+    );
+    if (altId) writes.push(deleteWatchProgressFromNuvio(slot, altId));
+  }
   await Promise.allSettled(writes);
 }
 
@@ -55,10 +89,21 @@ export async function unmarkMovieWatched(meta: Meta, imdbId?: string | null): Pr
   const authKey = readActiveStremioAuthKey();
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
   const pmdbTarget = stremioIdToPmdbTarget(meta.id, undefined, "movie");
-  await Promise.allSettled([
-    authKey && cid ? markMovieWatchedStremio(authKey, meta, cid, false) : Promise.resolve(),
-    pmdbTarget ? unmarkPmdbWatched(pmdbTarget) : Promise.resolve(),
-  ]);
+  const writes: Promise<unknown>[] = [];
+  if (authKey && cid) writes.push(markMovieWatchedStremio(authKey, meta, cid, false));
+  if (pmdbTarget) writes.push(unmarkPmdbWatched(pmdbTarget));
+  if (isNuvioSignedIn()) {
+    const slot = resolveNuvioProfileIndex();
+    const primaryId = imdb ?? (meta.id.startsWith("tt") ? meta.id : meta.id);
+    const altId = meta.id !== primaryId ? meta.id : undefined;
+    writes.push(
+      deleteWatchedItemFromNuvio(slot, [
+        { contentId: primaryId },
+        ...(altId ? [{ contentId: altId }] : []),
+      ]),
+    );
+  }
+  await Promise.allSettled(writes);
 }
 
 function resolveSeriesImdb(meta: Meta, imdbId?: string | null): string | null {
@@ -136,6 +181,34 @@ export async function markMetaWatched(
     const target = stremioIdToPmdbTarget(imdb ?? meta.id, episode, "tv");
     if (target) void markPmdbWatched(target);
   }
+  if (isNuvioSignedIn() && eps.length > 0) {
+    const slot = resolveNuvioProfileIndex();
+    const primaryId = imdb ?? (meta.id.startsWith("tt") ? meta.id : meta.id);
+    const altId = meta.id !== primaryId ? meta.id : undefined;
+    const items = eps.flatMap((e) => [
+      {
+        contentId: primaryId,
+        contentType: "series" as const,
+        title: meta.name,
+        season: e.season,
+        episode: e.episode,
+        watchedAt: Date.now(),
+      },
+      ...(altId
+        ? [
+            {
+              contentId: altId,
+              contentType: "series" as const,
+              title: meta.name,
+              season: e.season,
+              episode: e.episode,
+              watchedAt: Date.now(),
+            },
+          ]
+        : []),
+    ]);
+    void pushWatchedItemToNuvio(slot, items);
+  }
 }
 
 export async function unmarkMetaWatched(meta: Meta, imdbId?: string | null): Promise<void> {
@@ -151,5 +224,15 @@ export async function unmarkMetaWatched(meta: Meta, imdbId?: string | null): Pro
   for (const episode of eps) {
     const target = stremioIdToPmdbTarget(resolvedImdb ?? meta.id, episode, "tv");
     if (target) void unmarkPmdbWatched(target);
+  }
+  if (isNuvioSignedIn() && eps.length > 0) {
+    const slot = resolveNuvioProfileIndex();
+    const primaryId = resolvedImdb ?? (meta.id.startsWith("tt") ? meta.id : meta.id);
+    const altId = meta.id !== primaryId ? meta.id : undefined;
+    const keys = eps.flatMap((e) => [
+      { contentId: primaryId, season: e.season, episode: e.episode },
+      ...(altId ? [{ contentId: altId, season: e.season, episode: e.episode }] : []),
+    ]);
+    void deleteWatchedItemFromNuvio(slot, keys);
   }
 }

@@ -1,6 +1,7 @@
 import { Check, Download } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { AddonLogo } from "@/components/addon-logo";
+import { AccountOriginBadge } from "@/components/account-origin-badge";
 import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { DubSubPill, streamDubSub } from "@/components/dub-sub-pill";
 import { FormatBadge, RuleBadges, streamBadges } from "@/components/format-badge";
@@ -61,9 +62,12 @@ export function StremioRow({
         />
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
-        <p className="whitespace-pre-line text-[16px] font-semibold leading-snug text-ink [overflow-wrap:anywhere]">
-          {headline}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="whitespace-pre-line text-[16px] font-semibold leading-snug text-ink [overflow-wrap:anywhere]">
+            {headline}
+          </p>
+          <AccountOriginBadge addonUrl={stream.addonUrl || stream.addonId} size="sm" />
+        </div>
         {description && (
           <p className="whitespace-pre-line text-[14px] leading-snug text-ink-muted [overflow-wrap:anywhere]">
             {description}

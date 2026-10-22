@@ -20,7 +20,7 @@ test("anime detection keys on the PRIMARY country, not any country in the list",
 
 test("the Kitsu fallback only runs when the show's origin is unknown", () => {
   assert.match(animeDetect, /const originUnknown = !m \|\| !primaryCountry\(m\)/);
-  assert.match(animeDetect, /if \(!anime && originUnknown &&/);
+  assert.match(animeDetect, /if \(!anime && needsMapping\)/);
 });
 
 test("the poisoned detected-anime set is purged via a storage version bump", () => {

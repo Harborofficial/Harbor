@@ -14,7 +14,8 @@ import {
   saveNuvioState,
 } from "./nuvio-client";
 import { clearAllNuvioPinCaches, clearNuvioSessionUnlocks } from "./nuvio-profiles";
-import { clearCachedWatchProgress } from "./nuvio-sync";
+import { clearCachedWatchProgress, clearCachedNuvioAddons, fetchNuvioAddons } from "./nuvio-sync";
+import { recordNuvioAddons } from "./nuvio-addon-registry";
 import { clearCachedPlaybackItems } from "./nuvio-playback";
 import { clearAllNuvioLocalCw } from "@/lib/local-cw";
 import { clearAllNuvioResume } from "@/lib/resume";
@@ -74,6 +75,9 @@ export async function signInWithEmailPassword(
 
     // Fetch user profiles immediately after login
     await fetchNuvioProfiles();
+    void fetchNuvioAddons().then(() => {
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+    });
 
     return { ok: true, session };
   } catch (e) {
@@ -186,6 +190,9 @@ export async function pollDeviceCodeSession(
         const state = loadNuvioState();
         saveNuvioState({ ...state, session });
         await fetchNuvioProfiles();
+        void fetchNuvioAddons().then(() => {
+          window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+        });
         return session;
       }
     }
@@ -278,6 +285,8 @@ export async function signOutNuvio(): Promise<void> {
   clearCachedPlaybackItems();
   clearAllNuvioLocalCw();
   clearAllNuvioResume();
+  clearCachedNuvioAddons();
+  recordNuvioAddons([]);
 
   const wasNuvio = localStorage.getItem("harbor.account-provider") === "nuvio";
   if (wasNuvio) {

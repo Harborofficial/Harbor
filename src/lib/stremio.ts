@@ -120,6 +120,7 @@ export function cwSortKey(i: LibraryItem): number {
 
 export function isCwMember(i: LibraryItem): boolean {
   if (i.removed && !i.temp) return false;
+  if (i.upNext) return true;
   if (!i.state) {
     const local = resumeForItem(i)?.ms ?? 0;
     return local > 0;
@@ -128,6 +129,14 @@ export function isCwMember(i: LibraryItem): boolean {
   const finishedByRatio = duration > 0 && i.state.timeOffset / duration >= CW_FINISHED_RATIO;
   if (i.type === "movie" && ((i.state.flaggedWatched ?? 0) > 0 || finishedByRatio)) return false;
   if (i.state.timeOffset > 0) return true;
+  if (
+    i.type === "series" &&
+    i.state.season != null &&
+    i.state.episode != null &&
+    (i.state.flaggedWatched ?? 0) === 0
+  ) {
+    return true;
+  }
   if ((i.state.flaggedWatched ?? 0) > 0) return false;
   const local = resumeForItem(i)?.ms ?? 0;
   if (local <= 0) return false;

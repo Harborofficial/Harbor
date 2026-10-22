@@ -5,6 +5,8 @@ import { HostSourceBanner } from "@/components/host-source-banner";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { fetchInstalledAddons } from "@/lib/addon-store";
 import { userAddons, type Addon } from "@/lib/addons";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 import { useAuth } from "@/lib/auth";
 import { peekPickerCache, subscribePickerCache } from "@/lib/picker-cache";
 import { useSettings } from "@/lib/settings";
@@ -117,8 +119,9 @@ export function StreamSwitcher({
     (async () => {
       const installed = await fetchInstalledAddons().catch(() => [] as Addon[]);
       const stremio = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+      const nuvio = isNuvioSignedIn() ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
       if (cancelled) return;
-      setAddonLogos(addonLogoMap([...installed, ...stremio]));
+      setAddonLogos(addonLogoMap([...installed, ...stremio, ...nuvio]));
     })();
     return () => {
       cancelled = true;

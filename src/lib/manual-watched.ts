@@ -277,15 +277,26 @@ export function manualWatchedState(
   return undefined;
 }
 
-export function manualEpisodeKeys(metaId: string): {
+export function manualEpisodeKeys(
+  metaId: string,
+  altIds?: Array<string | null | undefined>,
+): {
   watched: Set<string>;
   unwatched: Set<string>;
 } {
-  const prefix = `${metaId}|`;
+  const ids = [metaId, ...(altIds ?? [])].filter(
+    (id): id is string => typeof id === "string" && id.trim().length > 0,
+  );
+  const allIds = new Set<string>(ids);
+  for (const id of ids) {
+    if (id.startsWith("tmdb:")) allIds.add(id.replace("tmdb:", ""));
+    else if (/^\d+$/.test(id)) allIds.add(`tmdb:${id}`);
+  }
+  const prefixes = Array.from(allIds).map((id) => `${id}|`);
   const collect = (src: Set<string>): Set<string> => {
     const out = new Set<string>();
     for (const k of src) {
-      if (!k.startsWith(prefix)) continue;
+      if (!prefixes.some((p) => k.startsWith(p))) continue;
       const parts = k.split("|");
       if (parts.length === 3) out.add(`${parts[1]}:${parts[2]}`);
     }
@@ -315,10 +326,22 @@ export function reconcileNuvioWatchedEpisodes(
     }
   }
 
-  for (const lKey of currentLocalWatched) {
-    if (!serverEpisodeKeys.has(lKey)) {
-      currentLocalWatched.delete(lKey);
-      changed = true;
+  // Only prune local episodes if server actually returned watched items,
+  // and only for shows the server returned records for!
+  if (serverEpisodeKeys.size > 0) {
+    const serverShowsWithEpisodes = new Set<string>();
+    for (const sKey of serverEpisodeKeys) {
+      const parts = sKey.split("|");
+      if (parts[0]) serverShowsWithEpisodes.add(parts[0]);
+    }
+
+    for (const lKey of currentLocalWatched) {
+      const parts = lKey.split("|");
+      const showId = parts[0];
+      if (serverShowsWithEpisodes.has(showId) && !serverEpisodeKeys.has(lKey)) {
+        currentLocalWatched.delete(lKey);
+        changed = true;
+      }
     }
   }
 

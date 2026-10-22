@@ -5,6 +5,7 @@
 
 import { nuvioFetch, loadNuvioState, saveNuvioState, isNuvioSignedIn, getNuvioAccountId } from "./nuvio-client";
 import { safeFetch } from "@/lib/safe-fetch";
+import { fetchNuvioAddons } from "./nuvio-sync";
 import { hashProfilePassword } from "@/lib/profile-password";
 import type {
   NuvioProfile,
@@ -932,6 +933,9 @@ export function setActiveNuvioProfile(
   window.dispatchEvent(
     new CustomEvent("harbor:nuvio-profile-changed", { detail: { profileIndex: bounded } }),
   );
+  void fetchNuvioAddons(bounded).then(() => {
+    window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+  });
   return true;
 }
 
