@@ -48,12 +48,14 @@ export function AccountMenu({
     selectProfile,
   } = ctrl;
 
+  const isNuvio = settings.accountProvider === "nuvio";
   const kid = !!activeProfile?.kid;
   const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
     ? null
     : settings.harborAvatar;
-  const name =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+  const name = isNuvio
+    ? (activeProfile?.name || t("profile.fallback"))
+    : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback"));
   const showStatus = !!author && !kid;
 
   const vpos = placement === "up" ? "bottom-full mb-1.5" : "top-full mt-2";
@@ -73,8 +75,8 @@ export function AccountMenu({
     <span className="relative inline-flex shrink-0">
       <ProfileAvatar
         profile={activeProfile}
-        user={user}
-        fallbackAvatar={harborAvatar}
+        user={isNuvio ? null : user}
+        fallbackAvatar={isNuvio ? null : harborAvatar}
         size={size}
       />
       {showStatus && (

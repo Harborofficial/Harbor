@@ -32,16 +32,16 @@ export function SecondaryPrivilegesCard() {
     try {
       for (const storageKey of ["harbor.settings.shared", "harbor.settings"]) {
         const raw = localStorage.getItem(storageKey);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (isNuvio) {
-            parsed.nuvioSecondaryPrivileges = nextPrivs;
-          } else {
-            parsed.secondaryPrivileges = nextPrivs;
-          }
-          localStorage.setItem(storageKey, JSON.stringify(parsed));
+        const parsed = raw ? JSON.parse(raw) : {};
+        if (isNuvio) {
+          parsed.nuvioSecondaryPrivileges = nextPrivs;
+        } else {
+          parsed.secondaryPrivileges = nextPrivs;
         }
+        localStorage.setItem(storageKey, JSON.stringify(parsed));
       }
+      window.dispatchEvent(new CustomEvent("harbor:settings-changed"));
+      window.dispatchEvent(new CustomEvent("harbor:secondary-privileges-changed", { detail: nextPrivs }));
     } catch {}
   };
 

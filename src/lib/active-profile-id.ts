@@ -61,7 +61,7 @@ export function isStremioActivePrimary(
     if (profilesList.length === 1) return true;
     if (!activeProfile) return false;
     const primary = profilesList.find((p) => p.isPrimary) ?? profilesList[0];
-    return activeProfile.id === primary.id && activeProfile.isPrimary === true;
+    return activeProfile.id === primary.id || activeProfile.isPrimary === true;
   }
   const s = readState();
   if (!s || !Array.isArray(s.profiles) || s.profiles.length === 0) return true;
@@ -72,6 +72,9 @@ export function isStremioActivePrimary(
 }
 
 export function activeProfileIsPrimary(): boolean {
+  if (isNuvioProviderActive()) {
+    return getNuvioActiveSlot() === 1;
+  }
   return isStremioActivePrimary();
 }
 

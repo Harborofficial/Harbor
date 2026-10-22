@@ -19,11 +19,14 @@ import { configureRosterStore } from "./profile-sync/roster-store";
 import { noteProfileDeleted } from "./profile-sync/roster-section";
 import { refuseProfileSelect } from "./profile-sync/profile-lock";
 import type { LocalProfileLike } from "./profile-sync/types";
+import type { NuvioProfile } from "./nuvio/nuvio-types";
 import { loadNuvioState } from "./nuvio/nuvio-client";
 import {
   clearNuvioSessionUnlocks,
   isNuvioProfileUnlocked,
   setActiveNuvioProfile,
+  resolveNuvioAvatar,
+  updateNuvioProfile,
 } from "./nuvio/nuvio-profiles";
 
 export const PROFILE_COLORS = [
@@ -40,6 +43,22 @@ export const PROFILE_COLORS = [
 ] as const;
 
 export type ProfileColor = string;
+
+export function nuvioProfileToHarborProfile(p: NuvioProfile): Profile {
+  return {
+    id: `nuvio-${p.profile_index}`,
+    name: p.name || `Profile ${p.profile_index}`,
+    avatar: resolveNuvioAvatar(p),
+    color: p.avatar_color_hex || PROFILE_COLORS[(p.profile_index - 1) % PROFILE_COLORS.length],
+    isPrimary: p.profile_index === 1,
+    shareStremioWith: null,
+    passwordHash: p.pin_enabled ? "pin-protected" : null,
+    hideContent: null,
+    lockedTabs: null,
+    kid: p.is_kids ? { age: 7, curfewMinutes: null, parentPinHash: null } : null,
+    createdAt: p.created_at ? new Date(p.created_at).getTime() : Date.now(),
+  };
+}
 
 export type KidConfig = {
   age: number;
@@ -507,9 +526,26 @@ export function CompanionProfilesProvider({ children }: { children: ReactNode })
     const mainWindowOnly = (): never => {
       throw new Error("Profile changes must be made in the main Harbor window");
     };
+    const isNuvio = isNuvioProviderActive();
+    const nuvioState = isNuvio ? loadNuvioState() : null;
+    const activeNuvio = nuvioState
+      ? (nuvioState.profiles.find((p) => p.profile_index === (nuvioState.activeProfileIndex || 1)) || nuvioState.profiles[0] || null)
+      : null;
+    const effectiveActiveProfile = isNuvio && activeNuvio
+      ? nuvioProfileToHarborProfile(activeNuvio)
+      : (state.profiles.find((p) => p.id === state.activeId) ?? null);
+    const effectiveProfiles = isNuvio && nuvioState && nuvioState.profiles.length > 0
+      ? nuvioState.profiles.map(nuvioProfileToHarborProfile)
+      : state.profiles;
+    const effectiveActiveId = isNuvio && activeNuvio
+      ? `nuvio-${activeNuvio.profile_index}`
+      : state.activeId;
+
     return {
       ...state,
-      activeProfile: state.profiles.find((p) => p.id === state.activeId) ?? null,
+      profiles: effectiveProfiles,
+      activeId: effectiveActiveId,
+      activeProfile: effectiveActiveProfile,
       pickerOpen: false,
       pickerView: { kind: "list" },
       sessionUnlockedIds: new Set(),
@@ -632,10 +668,55 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     window.dispatchEvent(new CustomEvent("harbor:profiles-updated"));
   }, [state]);
 
-  const activeProfile = useMemo(
-    () => state.profiles.find((p) => p.id === state.activeId) ?? null,
-    [state.profiles, state.activeId],
-  );
+  const [nuvioState, setNuvioState] = useState(() => loadNuvioState());
+  const [isNuvio, setIsNuvio] = useState(() => isNuvioProviderActive());
+
+  useEffect(() => {
+    const onProviderChange = () => {
+      setIsNuvio(isNuvioProviderActive());
+      setNuvioState(loadNuvioState());
+    };
+    const onNuvioSync = () => {
+      setNuvioState(loadNuvioState());
+    };
+    window.addEventListener("harbor:account-provider-changed", onProviderChange);
+    window.addEventListener("harbor:nuvio-state-changed", onNuvioSync);
+    window.addEventListener("harbor:nuvio-profile-changed", onNuvioSync);
+    window.addEventListener("harbor:nuvio-profiles-updated", onNuvioSync);
+    return () => {
+      window.removeEventListener("harbor:account-provider-changed", onProviderChange);
+      window.removeEventListener("harbor:nuvio-state-changed", onNuvioSync);
+      window.removeEventListener("harbor:nuvio-profile-changed", onNuvioSync);
+      window.removeEventListener("harbor:nuvio-profiles-updated", onNuvioSync);
+    };
+  }, []);
+
+  const activeNuvio = useMemo(() => {
+    if (!isNuvio) return null;
+    const slot = nuvioState.activeProfileIndex || 1;
+    return nuvioState.profiles.find((p) => p.profile_index === slot) || nuvioState.profiles[0] || null;
+  }, [isNuvio, nuvioState.profiles, nuvioState.activeProfileIndex]);
+
+  const effectiveActiveProfile = useMemo(() => {
+    if (isNuvio && activeNuvio) {
+      return nuvioProfileToHarborProfile(activeNuvio);
+    }
+    return state.profiles.find((p) => p.id === state.activeId) ?? null;
+  }, [isNuvio, activeNuvio, state.profiles, state.activeId]);
+
+  const effectiveProfiles = useMemo(() => {
+    if (isNuvio && nuvioState.profiles.length > 0) {
+      return nuvioState.profiles.map(nuvioProfileToHarborProfile);
+    }
+    return state.profiles;
+  }, [isNuvio, nuvioState.profiles, state.profiles]);
+
+  const effectiveActiveId = useMemo(() => {
+    if (isNuvio && activeNuvio) {
+      return `nuvio-${activeNuvio.profile_index}`;
+    }
+    return state.activeId;
+  }, [isNuvio, activeNuvio, state.activeId]);
 
   const [sessionUnlockedIds, setSessionUnlockedIds] = useState<Set<string>>(() => new Set());
   // Read through refs so the gate can see current state without giving selectProfile a
@@ -684,6 +765,14 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
   }, [clearSessionUnlocks]);
 
   const selectProfile = useCallback((id: string, opts?: { unlocked?: boolean }) => {
+    if (isNuvioProviderActive() || id.startsWith("nuvio-")) {
+      const match = id.match(/\d+/);
+      const slot = match ? parseInt(match[0], 10) : 1;
+      setActiveNuvioProfile(slot, opts);
+      setPickerOpen(false);
+      setPickerViewState({ kind: "list" });
+      return true;
+    }
     // THE GATE LIVES HERE, not in the UI. It used to be duplicated in picker-modal and
     // use-account-menu, and RemoteOpenBridge has neither: it calls selectProfile(id)
     // straight off a harbor:remote-set-profile event, so a paired phone walked past
@@ -788,6 +877,17 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
   );
 
   const updateProfile = useCallback<ProfilesValue["updateProfile"]>((id, patch) => {
+    if (isNuvioProviderActive() || id.startsWith("nuvio-")) {
+      const match = id.match(/\d+/);
+      const slot = match ? parseInt(match[0], 10) : (loadNuvioState().activeProfileIndex || 1);
+      const nuvioPatch: any = {};
+      if (patch.name !== undefined) nuvioPatch.name = patch.name;
+      if (patch.color !== undefined) nuvioPatch.avatarColorHex = patch.color;
+      if (patch.avatar !== undefined) nuvioPatch.avatarUrl = patch.avatar;
+      if (patch.kid !== undefined) nuvioPatch.is_kids = Boolean(patch.kid);
+      updateNuvioProfile(slot, nuvioPatch);
+      return;
+    }
     setState((s) => ({
       ...s,
       profiles: s.profiles.map((p) =>
@@ -863,9 +963,9 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<ProfilesValue>(
     () => ({
-      profiles: state.profiles,
-      activeId: state.activeId,
-      activeProfile,
+      profiles: effectiveProfiles,
+      activeId: effectiveActiveId,
+      activeProfile: effectiveActiveProfile,
       pickerOpen,
       pickerView,
       openPicker,
@@ -881,9 +981,9 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       clearSessionUnlocks,
     }),
     [
-      state.profiles,
-      state.activeId,
-      activeProfile,
+      effectiveProfiles,
+      effectiveActiveId,
+      effectiveActiveProfile,
       pickerOpen,
       pickerView,
       sessionUnlockedIds,

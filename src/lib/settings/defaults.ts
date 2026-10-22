@@ -669,14 +669,6 @@ export function getSecondaryPrivileges(
     }
   }
 
-  const directSource = isNuvio ? settings?.nuvioSecondaryPrivileges : settings?.secondaryPrivileges;
-  if (directSource) {
-    return {
-      ...DEFAULT_SECONDARY_PRIVILEGES,
-      ...directSource,
-    };
-  }
-
   let sharedBlob: {
     secondaryPrivileges?: Partial<SecondaryProfilePrivileges> | null;
     nuvioSecondaryPrivileges?: Partial<SecondaryProfilePrivileges> | null;
@@ -687,12 +679,15 @@ export function getSecondaryPrivileges(
     if (raw) sharedBlob = JSON.parse(raw);
   } catch {}
 
-  const fallbackSource = isNuvio
+  const sharedSource = isNuvio
     ? sharedBlob?.nuvioSecondaryPrivileges
     : sharedBlob?.secondaryPrivileges;
 
+  const directSource = isNuvio ? settings?.nuvioSecondaryPrivileges : settings?.secondaryPrivileges;
+
   return {
     ...DEFAULT_SECONDARY_PRIVILEGES,
-    ...(fallbackSource ?? {}),
+    ...(directSource ?? {}),
+    ...(sharedSource ?? {}),
   };
 }

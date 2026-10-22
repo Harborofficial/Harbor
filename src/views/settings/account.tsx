@@ -52,7 +52,9 @@ export function AccountStub() {
     window.addEventListener("harbor:nuvio-profiles-updated", onSync);
     window.addEventListener("harbor:active-profile-changed", onProfileSync);
     window.addEventListener("harbor:profiles-updated", onProfileSync);
+    window.addEventListener("harbor:secondary-privileges-changed", onProfileSync);
     return () => {
+      window.removeEventListener("harbor:secondary-privileges-changed", onProfileSync);
       window.removeEventListener("harbor:nuvio-state-changed", onSync);
       window.removeEventListener("harbor:nuvio-profile-changed", onSync);
       window.removeEventListener("harbor:nuvio-profiles-updated", onSync);
@@ -62,7 +64,7 @@ export function AccountStub() {
   }, []);
 
   const isPrimary = isNuvio
-    ? Number(nuvioState.activeProfileIndex) === 1
+    ? Number(nuvioState.activeProfileIndex ?? 1) === 1
     : isStremioActivePrimary(activeProfile, profiles);
 
   const tabs = [
@@ -79,7 +81,7 @@ export function AccountStub() {
 
   const handleTabSelect = (next: Tab) => {
     const liveIsPrimary = isNuvio
-      ? Number(loadNuvioState().activeProfileIndex) === 1
+      ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
       : isStremioActivePrimary(activeProfile, profiles);
 
     if (liveIsPrimary) {
@@ -227,14 +229,14 @@ function ProfilesTab() {
   const { profiles, activeProfile } = useProfiles();
   const isNuvio = settings.accountProvider === "nuvio";
   const isPrimary = isNuvio
-    ? loadNuvioState().activeProfileIndex === 1
+    ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
     : isStremioActivePrimary(activeProfile, profiles);
 
   if (isNuvio) {
     return <NuvioProfilesTab />;
   }
 
-  const canManageStartup = isPrimary || getSecondaryPrivileges(settings, false).canManageStartup;
+  const canManageStartup = isPrimary || getSecondaryPrivileges(settings, isNuvio).canManageStartup;
 
   return (
     <Section

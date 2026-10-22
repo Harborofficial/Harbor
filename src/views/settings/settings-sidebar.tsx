@@ -142,8 +142,10 @@ function RailAccount() {
     }
   };
 
-  const name =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+  const isNuvio = settings.accountProvider === "nuvio";
+  const name = isNuvio
+    ? (activeProfile?.name || t("profile.fallback"))
+    : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback"));
 
   return (
     <div data-tv-nav-cell className="hset-rail-me">
@@ -155,8 +157,8 @@ function RailAccount() {
       >
         <ProfileAvatar
           profile={activeProfile}
-          user={user}
-          fallbackAvatar={harborAvatar}
+          user={isNuvio ? null : user}
+          fallbackAvatar={isNuvio ? null : harborAvatar}
           size="lg"
         />
         <span

@@ -95,3 +95,31 @@ test("Nuvio core avatars are preloaded and picker handles missing/failed images 
   assert.match(pickerModal, /NuvioAvatarDisplay/);
   assert.match(pickerModal, /onError=\{\(\) => setError\(true\)\}/);
 });
+
+const activeProfileId = read("../src/lib/active-profile-id.ts");
+const defaults = read("../src/lib/settings/defaults.ts");
+const signedOutHero = read("../src/views/account/signed-out-hero.tsx");
+const profilesModule = read("../src/lib/profiles.tsx");
+const accountMenuParts = read("../src/chrome/account-menu/account-menu-parts.tsx");
+
+test("isStremioActivePrimary and activeProfileIsPrimary evaluate primary status accurately", () => {
+  assert.match(activeProfileId, /activeProfile\.id === primary\.id \|\| activeProfile\.isPrimary === true/);
+  assert.match(activeProfileId, /if \(isNuvioProviderActive\(\)\) \{\s*return getNuvioActiveSlot\(\) === 1;\s*\}/);
+});
+
+test("secondary privileges inherit shared settings configured by primary profile", () => {
+  assert.match(defaults, /\.\.\.\(directSource \?\? \{\}\),\s*\.\.\.\(sharedSource \?\? \{\}\)/);
+});
+
+test("SignedOutHero adapts to active provider with Nuvio branding and link", () => {
+  assert.match(signedOutHero, /isNuvio \? nuvioLogo : stremioLogo/);
+  assert.match(signedOutHero, /isNuvio \? t\("Bringing your Nuvio library\?"\) : t\("Bringing your Stremio library\?"\)/);
+  assert.match(signedOutHero, /settingsAnchor\(isNuvio \? "Nuvio" : "Stremio"\)/);
+});
+
+test("ProfilesProvider synthesizes Nuvio activeProfile with avatar, color ring and slot", () => {
+  assert.match(profilesModule, /nuvioProfileToHarborProfile/);
+  assert.match(profilesModule, /resolveNuvioAvatar\(p\)/);
+  assert.match(profilesModule, /effectiveActiveProfile/);
+  assert.match(accountMenuParts, /profile\.name\.slice\(0, 2\)/);
+});
