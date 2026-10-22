@@ -15,7 +15,6 @@ import { EditorView } from "./editor-view";
 import { PasswordPrompt } from "./password-prompt";
 import { ProfileTile } from "./profile-tile";
 import { PinEntry } from "./pin-entry";
-import { NuvioProfileEditor } from "@/views/settings/account/nuvio-profiles-tab";
 import { isNuvioSignedIn, loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { getSecondaryPrivileges } from "@/lib/settings/defaults";
 import {
@@ -164,7 +163,7 @@ export function ProfilePickerModal() {
   };
 
   const proceedSelectNuvio = (p: NuvioProfile) => {
-    if (p.pin_enabled && !isNuvioProfileUnlocked(p.profile_index)) {
+    if (p.pin_enabled) {
       setPickerView({ kind: "unlock", profileId: String(p.profile_index) });
       return;
     }
@@ -328,48 +327,29 @@ export function ProfilePickerModal() {
             )
           )}
           {pickerView.kind === "create" && (
-            isNuvio ? (
-              <NuvioProfileEditor mode={{ kind: "create" }} onCancel={finishEditor} onDone={finishEditor} portal={false} />
-            ) : (
-              <EditorView mode={{ kind: "create" }} onCancel={finishEditor} onDone={finishEditor} />
-            )
+            <EditorView mode={{ kind: "create" }} onCancel={finishEditor} onDone={finishEditor} />
           )}
           {pickerView.kind === "edit" &&
-            (isNuvio ? (
-              (() => {
-                const target =
-                  nuvioState.profiles.find((p) => String(p.profile_index) === pickerView.profileId) ||
-                  nuvioState.profiles[0];
-                if (!target) return <NotFoundFallback onBack={finishEditor} />;
-                return (
-                  <NuvioProfileEditor
-                    mode={{ kind: "edit", profile: target }}
-                    onCancel={finishEditor}
-                    onDone={finishEditor}
-                    portal={false}
-                  />
-                );
-              })()
-            ) : (
-              (() => {
-                const target = profiles.find((p) => p.id === pickerView.profileId);
-                if (!target) {
-                  return <NotFoundFallback onBack={finishEditor} />;
-                }
-                return (
-                  <EditorView
-                    mode={{ kind: "edit", profile: target }}
-                    onCancel={finishEditor}
-                    onDone={finishEditor}
-                  />
-                );
-              })()
-            ))}
+            (() => {
+              const target = profiles.find(
+                (p) => p.id === pickerView.profileId || p.id === `nuvio-${pickerView.profileId}`,
+              );
+              if (!target) {
+                return <NotFoundFallback onBack={finishEditor} />;
+              }
+              return (
+                <EditorView
+                  mode={{ kind: "edit", profile: target }}
+                  onCancel={finishEditor}
+                  onDone={finishEditor}
+                />
+              );
+            })()}
           {pickerView.kind === "unlock" &&
             (isNuvio ? (
               (() => {
                 const target = nuvioState.profiles.find(
-                  (p) => String(p.profile_index) === pickerView.profileId,
+                  (p) => String(p.profile_index) === pickerView.profileId || `nuvio-${p.profile_index}` === pickerView.profileId,
                 );
                 if (!target || !target.pin_enabled) {
                   return <NotFoundFallback onBack={goList} />;
@@ -404,7 +384,7 @@ export function ProfilePickerModal() {
             (isNuvio ? (
               (() => {
                 const target = nuvioState.profiles.find(
-                  (p) => String(p.profile_index) === pickerView.profileId,
+                  (p) => String(p.profile_index) === pickerView.profileId || `nuvio-${p.profile_index}` === pickerView.profileId,
                 );
                 if (!target || !target.pin_enabled) {
                   return <NotFoundFallback onBack={goList} />;

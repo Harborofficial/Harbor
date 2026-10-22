@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { HiddenTabs } from "./lockable-tabs";
+import { anyTabLocked, type HiddenTabs } from "./lockable-tabs";
 import type { ContentFilters } from "./settings";
 import { isRemovedBuiltinAvatar } from "./avatars/catalog";
 import { deleteProfileBgImage } from "./theme-storage";
@@ -27,6 +27,8 @@ import {
   setActiveNuvioProfile,
   resolveNuvioAvatar,
   updateNuvioProfile,
+  deleteNuvioProfile,
+  transferPrimaryNuvioProfile,
 } from "./nuvio/nuvio-profiles";
 
 export const PROFILE_COLORS = [
@@ -45,6 +47,13 @@ export const PROFILE_COLORS = [
 export type ProfileColor = string;
 
 export function nuvioProfileToHarborProfile(p: NuvioProfile): Profile {
+  let lockedTabs: HiddenTabs | null = null;
+  try {
+    const raw = localStorage.getItem(`harbor.nuvio.locked-tabs.${p.profile_index}`);
+    if (raw) lockedTabs = JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
   return {
     id: `nuvio-${p.profile_index}`,
     name: p.name || `Profile ${p.profile_index}`,
@@ -54,7 +63,7 @@ export function nuvioProfileToHarborProfile(p: NuvioProfile): Profile {
     shareStremioWith: null,
     passwordHash: p.pin_enabled ? "pin-protected" : null,
     hideContent: null,
-    lockedTabs: null,
+    lockedTabs,
     kid: p.is_kids ? { age: 7, curfewMinutes: null, parentPinHash: null } : null,
     createdAt: p.created_at ? new Date(p.created_at).getTime() : Date.now(),
   };
@@ -885,6 +894,14 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       if (patch.color !== undefined) nuvioPatch.avatarColorHex = patch.color;
       if (patch.avatar !== undefined) nuvioPatch.avatarUrl = patch.avatar;
       if (patch.kid !== undefined) nuvioPatch.is_kids = Boolean(patch.kid);
+      if (patch.lockedTabs !== undefined) {
+        if (patch.lockedTabs && anyTabLocked(patch.lockedTabs)) {
+          localStorage.setItem(`harbor.nuvio.locked-tabs.${slot}`, JSON.stringify(patch.lockedTabs));
+        } else {
+          localStorage.removeItem(`harbor.nuvio.locked-tabs.${slot}`);
+        }
+        window.dispatchEvent(new Event("harbor:nuvio-profiles-updated"));
+      }
       updateNuvioProfile(slot, nuvioPatch);
       return;
     }
@@ -905,6 +922,14 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   const deleteProfile = useCallback<ProfilesValue["deleteProfile"]>(
     (id) => {
+      if (isNuvioProviderActive() || id.startsWith("nuvio-")) {
+        const match = id.match(/\d+/);
+        if (match) {
+          const slot = parseInt(match[0], 10);
+          void deleteNuvioProfile(slot);
+        }
+        return;
+      }
       const target = state.profiles.find((p) => p.id === id);
       if (!target || target.isPrimary) return;
       // Before the purge, while the id map still resolves. Without a tombstone the
@@ -946,6 +971,14 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setPrimary = useCallback<ProfilesValue["setPrimary"]>((id) => {
+    if (isNuvioProviderActive() || id.startsWith("nuvio-")) {
+      const match = id.match(/\d+/);
+      if (match) {
+        const slot = parseInt(match[0], 10);
+        void transferPrimaryNuvioProfile(slot);
+      }
+      return;
+    }
     setState((s) => {
       if (!s.profiles.some((p) => p.id === id && !p.isPrimary && !p.kid)) return s;
       return {

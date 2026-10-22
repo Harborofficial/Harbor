@@ -79,7 +79,7 @@ export function useAccountMenu() {
       return;
     }
     if (p.pin_enabled) {
-      setNuvioPinTarget(p);
+      openPicker({ kind: "unlock", profileId: String(p.profile_index) });
     } else {
       setActiveNuvioProfile(p.profile_index);
     }

@@ -690,6 +690,7 @@ export async function deleteNuvioProfile(profileIndex: number): Promise<boolean>
 
   try {
     localStorage.removeItem(`harbor.nuvio.kid.${profileIndex}`);
+    localStorage.removeItem(`harbor.nuvio.locked-tabs.${profileIndex}`);
     sessionStorage.removeItem(`harbor.nuvio.unlocked.${profileIndex}`);
   } catch {}
 
@@ -867,11 +868,22 @@ export async function clearNuvioPin(
 
     if (!res.ok) {
       const errJson = (await res.json().catch(() => ({}))) as { message?: string };
-      return { unlocked: false, message: errJson.message || "Failed to clear PIN" };
+      console.warn("[nuvio] clear_profile_pin RPC notice:", errJson);
     }
 
     forgetNuvioPin(profileIndex);
+    nuvioSessionUnlockedIndices.delete(profileIndex);
+
+    // Update local state directly so UI updates instantly without waiting
+    const state = loadNuvioState();
+    const updatedProfiles = state.profiles.map((p) =>
+      p.profile_index === profileIndex ? { ...p, pin_enabled: false } : p
+    );
+    saveNuvioState({ ...state, profiles: updatedProfiles });
+
     await pullNuvioProfiles();
+    window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+    window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated"));
     return { unlocked: true };
   } catch (err) {
     console.error("[nuvio] failed to clear PIN", err);
@@ -950,6 +962,8 @@ export function setActiveNuvioProfile(
     return false;
   }
 
+  // Clear previous session unlocks when switching profiles so other profiles don't stay unlocked
+  nuvioSessionUnlockedIndices.clear();
   if (opts?.unlocked) {
     nuvioSessionUnlockedIndices.add(bounded);
   }
