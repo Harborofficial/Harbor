@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
-import { signInWithEmailPassword, startNuvioWebAuth } from "@/lib/nuvio/nuvio-auth";
+import { activateNuvioAccountProvider, signInWithEmailPassword, startNuvioWebAuth } from "@/lib/nuvio/nuvio-auth";
 import { NUVIO_OFFICIAL_WEB_URL } from "@/lib/nuvio/nuvio-client";
 
 export function NuvioAuthModal({
@@ -38,6 +38,7 @@ export function NuvioAuthModal({
     try {
       const res = await signInWithEmailPassword(email, password, remember);
       if (res.ok) {
+        activateNuvioAccountProvider();
         onSuccess?.();
         onClose();
       } else {
@@ -57,6 +58,7 @@ export function NuvioAuthModal({
       await startNuvioWebAuth((info) => {
         setWebCode(info.userCode);
       });
+      activateNuvioAccountProvider();
       onSuccess?.();
       onClose();
     } catch (e) {

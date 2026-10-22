@@ -25,6 +25,7 @@ import {
   isNuvioProfileUnlocked,
   markNuvioProfileUnlocked,
   pullNuvioProfiles,
+  fetchNuvioAvatarCatalog,
 } from "@/lib/nuvio/nuvio-profiles";
 import type { NuvioProfile } from "@/lib/nuvio/nuvio-types";
 import { isStremioActivePrimary } from "@/lib/active-profile-id";
@@ -50,6 +51,7 @@ export function ProfilePickerModal() {
 
   useEffect(() => {
     if (!isNuvio) return;
+    void fetchNuvioAvatarCatalog();
     const onNuvioSync = () => setNuvioState(loadNuvioState());
     window.addEventListener("harbor:nuvio-state-changed", onNuvioSync);
     window.addEventListener("harbor:nuvio-profile-changed", onNuvioSync);
@@ -706,6 +708,43 @@ function NuvioListView({
 }
 
 
+function NuvioAvatarDisplay({
+  url,
+  color,
+  name,
+  fontSizeClass = "text-[22px]",
+}: {
+  url: string | null;
+  color: string;
+  name: string;
+  fontSizeClass?: string;
+}) {
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    setError(false);
+  }, [url]);
+
+  if (!url || error) {
+    return (
+      <span
+        className={`flex h-full w-full items-center justify-center font-bold text-white ${fontSizeClass}`}
+        style={{ backgroundColor: color }}
+      >
+        {name.slice(0, 2).toUpperCase() || "P"}
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt=""
+      className="h-full w-full object-cover"
+      onError={() => setError(true)}
+    />
+  );
+}
+
 function NuvioPasswordPrompt({
   profile,
   subtitle,
@@ -728,16 +767,12 @@ function NuvioPasswordPrompt({
           className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-elevated ring-[3px]"
           style={{ boxShadow: `0 0 0 3px ${color}` }}
         >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <span
-              className="flex h-full w-full items-center justify-center text-[22px] font-bold text-white"
-              style={{ backgroundColor: color }}
-            >
-              {profile.name.slice(0, 2).toUpperCase() || "P"}
-            </span>
-          )}
+          <NuvioAvatarDisplay
+            url={avatarUrl}
+            color={color}
+            name={profile.name}
+            fontSizeClass="text-[26px]"
+          />
         </span>
         <span className="absolute -bottom-1 -end-1 flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink shadow-md ring-1 ring-edge">
           <Lock size={13} strokeWidth={2.4} />
@@ -791,16 +826,12 @@ function NuvioProfileTile({
             className={`relative flex ${dim} items-center justify-center overflow-hidden rounded-full bg-elevated ${ring} transition-all duration-200 group-hover:scale-[1.04]`}
             style={{ boxShadow: `0 0 0 3px ${color}` }}
           >
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <span
-                className="flex h-full w-full items-center justify-center text-[22px] font-bold text-white"
-                style={{ backgroundColor: color }}
-              >
-                {profile.name.slice(0, 2).toUpperCase() || "P"}
-              </span>
-            )}
+            <NuvioAvatarDisplay
+              url={avatarUrl}
+              color={color}
+              name={profile.name}
+              fontSizeClass={size === "lg" ? "text-[26px]" : size === "md" ? "text-[18px]" : "text-[14px]"}
+            />
           </span>
         </button>
         {profile.pin_enabled && (

@@ -53,6 +53,7 @@ import { KidToggle } from "@/components/profile-picker/kid-toggle";
 import { KidsSetupPanel } from "@/components/profile-picker/kids-setup-panel";
 import { PinEntry } from "@/components/profile-picker/pin-entry";
 import { NuvioAuthModal } from "@/components/nuvio-auth-modal";
+import { activateNuvioAccountProvider } from "@/lib/nuvio/nuvio-auth";
 import { hashProfilePassword, verifyProfilePassword } from "@/lib/profile-password";
 import type { KidConfig } from "@/lib/profiles";
 
@@ -141,7 +142,7 @@ export function NuvioProfilesTab() {
             {t("Connect Nuvio account")}
           </button>
         </div>
-        {showAuthModal && <NuvioAuthModal onClose={() => setShowAuthModal(false)} />}
+        {showAuthModal && <NuvioAuthModal onClose={() => setShowAuthModal(false)} onSuccess={activateNuvioAccountProvider} />}
       </Section>
     );
   }

@@ -13,6 +13,24 @@ import {
   nuvioFetch,
   saveNuvioState,
 } from "./nuvio-client";
+import { fetchNuvioAvatarCatalog } from "./nuvio-profiles";
+import { fetchNuvioPlaybackItems } from "./nuvio-playback";
+
+export function activateNuvioAccountProvider(): void {
+  try {
+    localStorage.setItem("harbor.account-provider", "nuvio");
+    for (const key of ["harbor.settings", "harbor.settings.shared", "harbor.settings.v1"]) {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const p = JSON.parse(raw);
+        localStorage.setItem(key, JSON.stringify({ ...p, accountProvider: "nuvio" }));
+      }
+    }
+  } catch {}
+  window.dispatchEvent(
+    new CustomEvent("harbor:account-provider-changed", { detail: { provider: "nuvio" } }),
+  );
+}
 import { clearAllNuvioPinCaches, clearNuvioSessionUnlocks } from "./nuvio-profiles";
 import { clearCachedWatchProgress, clearCachedNuvioAddons, fetchNuvioAddons } from "./nuvio-sync";
 import { recordNuvioAddons } from "./nuvio-addon-registry";
@@ -72,11 +90,16 @@ export async function signInWithEmailPassword(
 
     const state = loadNuvioState();
     saveNuvioState({ ...state, session });
+    activateNuvioAccountProvider();
 
-    // Fetch user profiles immediately after login
+    // Fetch user profiles and avatar catalog immediately after login
     await fetchNuvioProfiles();
+    void fetchNuvioAvatarCatalog();
     void fetchNuvioAddons().then(() => {
       window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+    });
+    void fetchNuvioPlaybackItems().then(() => {
+      window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
     });
 
     return { ok: true, session };
@@ -178,20 +201,40 @@ export async function pollDeviceCodeSession(
 
       if (tokenData.access_token) {
         const nowSec = Math.floor(Date.now() / 1000);
+        let user = tokenData.user as NuvioSession["user"];
+        if (!user?.id) {
+          try {
+            const parts = String(tokenData.access_token).split(".");
+            if (parts.length >= 2) {
+              const payload = JSON.parse(atob(parts[1]));
+              user = {
+                id: String(payload.sub || payload.user_id || tokenData.user_id || ""),
+                email: payload.email ? String(payload.email) : undefined,
+              };
+            }
+          } catch {}
+        }
+        if (!user?.id) {
+          user = { id: String(tokenData.user_id || "") };
+        }
         const session: NuvioSession = {
           access_token: String(tokenData.access_token),
           refresh_token: String(tokenData.refresh_token || ""),
           expires_at: nowSec + (typeof tokenData.expires_in === "number" ? tokenData.expires_in : 3600),
           token_type: "bearer",
-          user:
-            (tokenData.user as NuvioSession["user"]) || { id: String(tokenData.user_id || "") },
+          user,
         };
 
         const state = loadNuvioState();
         saveNuvioState({ ...state, session });
+        activateNuvioAccountProvider();
         await fetchNuvioProfiles();
+        void fetchNuvioAvatarCatalog();
         void fetchNuvioAddons().then(() => {
           window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+        });
+        void fetchNuvioPlaybackItems().then(() => {
+          window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
         });
         return session;
       }

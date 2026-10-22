@@ -8,11 +8,17 @@ const markWatched = read("../src/lib/mark-watched.ts");
 const episodeWatchedMenu = read("../src/components/episode-watched-menu.tsx");
 const manualWatched = read("../src/lib/manual-watched.ts");
 const nuvioSync = read("../src/lib/nuvio/nuvio-sync.ts");
+const nuvioAuth = read("../src/lib/nuvio/nuvio-auth.ts");
+const nuvioPlayback = read("../src/lib/nuvio/nuvio-playback.ts");
+const nuvioProfiles = read("../src/lib/nuvio/nuvio-profiles.ts");
+const resume = read("../src/lib/resume.ts");
 const seriesEpisodes = read("../src/views/detail/series-episodes.tsx");
 const cinemetaEpisodes = read("../src/views/detail/cinemeta-episodes.tsx");
 const detail = read("../src/views/detail.tsx");
 const stremio = read("../src/lib/stremio.ts");
 const continueWatching = read("../src/lib/continue-watching.ts");
+const pickerModal = read("../src/components/profile-picker/picker-modal.tsx");
+const externalCw = read("../src/lib/feed/external-cw.ts");
 
 test("watchedProviderWrites connects Nuvio cloud sync for both movies and series", () => {
   assert.match(mediaProviderActions, /if \(isNuvioSignedIn\(\)\)/);
@@ -62,12 +68,30 @@ test("marking episode unwatched in series updates CW and Nuvio progress instead 
 });
 
 test("detail and episode lists infer prior episodes as watched up to current progression", () => {
-  // detail.tsx adds prior episodes from progress matches
   assert.match(detail, /for \(let ep = 1; ep < m\.episode; ep\+\+\) \{\s*watchedKeys\.add\(`\$\{m\.season\}:\$\{ep\}`\);/);
-  // series-episodes infers prior episodes up to resumeSeason:resumeEpisode
   assert.match(seriesEpisodes, /if \(season\.seasonNumber >= 1 && season\.seasonNumber < resumeSeason\)/);
   assert.match(seriesEpisodes, /stremioWatched: combinedWatched/);
-  // cinemeta-episodes infers prior episodes up to resumeSeason:resumeEpisode
   assert.match(cinemetaEpisodes, /s < resumeSeason \|\| \(s === resumeSeason && e < resumeEpisode\)/);
   assert.match(cinemetaEpisodes, /combinedWatched\.has\(`\$\{season\}:\$\{number\}`\)/);
+});
+
+test("Nuvio authentication automatically activates account provider and populates CW", () => {
+  assert.match(nuvioAuth, /export function activateNuvioAccountProvider\(\)/);
+  assert.match(nuvioAuth, /localStorage\.setItem\("harbor\.account-provider", "nuvio"\)/);
+  assert.match(nuvioAuth, /activateNuvioAccountProvider\(\);/);
+});
+
+test("Continue Watching recency preserves remote watched timestamps rather than Date.now()", () => {
+  assert.match(resume, /atTimestamp\?: number/);
+  assert.match(resume, /t: atTimestamp && atTimestamp > 0 \? atTimestamp : Date\.now\(\)/);
+  assert.match(nuvioPlayback, /saveResumeMs\(item\._id, offsetMs, undefined, undefined, undefined, pct01, "nuvio", ownerId, remoteT\)/);
+  assert.match(nuvioPlayback, /saveResumeMs\(\s*item\._id,\s*targetOffsetMs,\s*targetSeason,\s*targetEpisode,\s*undefined,\s*pct01,\s*"nuvio",\s*ownerId,\s*remoteT,?\s*\)/);
+  assert.match(externalCw, /void refreshExternalCw\(true\)/);
+});
+
+test("Nuvio core avatars are preloaded and picker handles missing/failed images gracefully", () => {
+  assert.match(nuvioProfiles, /import DEFAULT_AVATAR_CATALOG from "\.\/nuvio-avatar-catalog-data\.json"/);
+  assert.match(nuvioProfiles, /localStorage\.getItem\(AVATAR_CATALOG_STORAGE_KEY\)/);
+  assert.match(pickerModal, /NuvioAvatarDisplay/);
+  assert.match(pickerModal, /onError=\{\(\) => setError\(true\)\}/);
 });

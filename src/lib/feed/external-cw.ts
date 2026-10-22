@@ -341,7 +341,14 @@ if (typeof window !== "undefined") {
   subscribePmdbSession(onSessionChange);
   window.addEventListener("harbor:active-profile-changed", onProfileChange);
   window.addEventListener("harbor:profiles-updated", onProfileChange);
-  window.addEventListener("harbor:nuvio-state-changed", onSessionChange);
+  window.addEventListener("harbor:nuvio-state-changed", () => {
+    onSessionChange();
+    void refreshExternalCw(true);
+  });
+  window.addEventListener("harbor:account-provider-changed", () => {
+    onSessionChange();
+    void refreshExternalCw(true);
+  });
   window.addEventListener("harbor:nuvio-profile-changed", onProfileChange);
   window.addEventListener("harbor:nuvio-profiles-updated", () => {
     void refreshExternalCw(false);
@@ -409,14 +416,22 @@ export function useExternalCw(enabled = true): LibraryItem[] {
       } catch {}
     }
     onSessionChange();
-    void refreshExternalCw();
+    if (isNuvioSignedIn() && isNuvioProviderActive()) {
+      void refreshExternalCw(true);
+    } else {
+      void refreshExternalCw();
+    }
     const onFocus = (): void => {
-      if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
+      const isNuvio = isNuvioSignedIn() && isNuvioProviderActive();
+      const threshold = isNuvio ? 10_000 : FOCUS_STALE_MS;
+      if (Date.now() - fetchedAt > threshold) void refreshExternalCw(true);
       else void refreshExternalCw();
     };
     const onVisible = (): void => {
       if (document.visibilityState !== "visible") return;
-      if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
+      const isNuvio = isNuvioSignedIn() && isNuvioProviderActive();
+      const threshold = isNuvio ? 10_000 : FOCUS_STALE_MS;
+      if (Date.now() - fetchedAt > threshold) void refreshExternalCw(true);
       else void refreshExternalCw();
     };
     window.addEventListener("focus", onFocus);

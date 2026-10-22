@@ -5,6 +5,7 @@ import { SButton } from "../ui";
 import { useT } from "@/lib/i18n";
 import nuvioIcon from "@/assets/nuvio.png";
 import { NuvioAuthModal } from "@/components/nuvio-auth-modal";
+import { activateNuvioAccountProvider } from "@/lib/nuvio/nuvio-auth";
 import { fetchNuvioProfiles, signOutNuvio } from "@/lib/nuvio/nuvio-auth";
 import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import type { NuvioAccountState } from "@/lib/nuvio/nuvio-types";
@@ -50,7 +51,7 @@ export function NuvioCard() {
             {t("Connect Nuvio")}
           </SButton>
         </SettingRow>
-        {showAuth && <NuvioAuthModal onClose={() => setShowAuth(false)} />}
+        {showAuth && <NuvioAuthModal onClose={() => setShowAuth(false)} onSuccess={activateNuvioAccountProvider} />}
       </>
     );
   }
@@ -93,7 +94,7 @@ export function NuvioCard() {
         </SButton>
       </SettingRow>
 
-      {showAuth && <NuvioAuthModal onClose={() => setShowAuth(false)} />}
+      {showAuth && <NuvioAuthModal onClose={() => setShowAuth(false)} onSuccess={activateNuvioAccountProvider} />}
     </>
   );
 }

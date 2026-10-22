@@ -16,6 +16,8 @@ import type {
 
 export const MAX_NUVIO_PROFILES = 6;
 
+import DEFAULT_AVATAR_CATALOG from "./nuvio-avatar-catalog-data.json";
+
 export const NUVIO_PROFILE_COLORS = [
   "#1E88E5", "#E53935", "#43A047", "#FB8C00",
   "#8E24AA", "#00ACC1", "#F4511E", "#3949AB",
@@ -23,10 +25,30 @@ export const NUVIO_PROFILE_COLORS = [
   "#7CB342", "#039BE5", "#FFB300", "#6D4C41",
 ];
 
-let catalogCache: AvatarCatalogItem[] = [];
+const AVATAR_CATALOG_STORAGE_KEY = "harbor.nuvio.avatar_catalog";
+
+function loadInitialAvatarCatalog(): AvatarCatalogItem[] {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(AVATAR_CATALOG_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+  }
+  return (DEFAULT_AVATAR_CATALOG as AvatarCatalogItem[]) || [];
+}
+
+let catalogCache: AvatarCatalogItem[] = loadInitialAvatarCatalog();
 
 export function setAvatarCatalogCache(items: AvatarCatalogItem[]): void {
   catalogCache = items;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(AVATAR_CATALOG_STORAGE_KEY, JSON.stringify(items));
+    } catch {}
+  }
 }
 
 export function getAvatarCatalogCache(): AvatarCatalogItem[] {
@@ -62,9 +84,14 @@ export function resolveNuvioAvatar(
   const avatarId = profile.avatar_id?.trim();
   if (avatarId) {
     const list = catalog && catalog.length > 0 ? catalog : catalogCache;
-    const matched = list.find((item) => item.id === avatarId);
+    const matched =
+      list.find((item) => item.id === avatarId) ||
+      (DEFAULT_AVATAR_CATALOG as AvatarCatalogItem[]).find((item) => item.id === avatarId);
     if (matched?.storage_path) {
       return getNuvioAvatarUrl(matched.storage_path);
+    }
+    if (avatarId.includes("/") || avatarId.endsWith(".png") || avatarId.endsWith(".webp")) {
+      return getNuvioAvatarUrl(avatarId);
     }
     return getNuvioAvatarUrl(avatarId);
   }

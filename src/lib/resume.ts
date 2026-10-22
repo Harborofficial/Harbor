@@ -109,6 +109,7 @@ export function saveResumeMs(
   pct?: number,
   source?: ExternalCwSource,
   ownerId?: string,
+  atTimestamp?: number,
 ): void {
   if (!Number.isFinite(ms) || ms < 0) return;
   if (typeof season === "number" && typeof episode === "number") {
@@ -118,7 +119,7 @@ export function saveResumeMs(
   const p = pct !== undefined && Number.isFinite(pct) && pct >= 0 && pct <= 1 ? pct : undefined;
   const entry: Entry = {
     ms,
-    t: Date.now(),
+    t: atTimestamp && atTimestamp > 0 ? atTimestamp : Date.now(),
     ...(s !== undefined ? { s } : {}),
     ...(p !== undefined ? { pct: p } : {}),
     ...(source !== undefined ? { source } : {}),

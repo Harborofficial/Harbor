@@ -192,7 +192,7 @@ export function buildNuvioPlaybackItems(
 
       if (shouldWrite) {
         const pct01 = durMs > 0 ? Math.min(1, offsetMs / durMs) : undefined;
-        saveResumeMs(item._id, offsetMs, undefined, undefined, undefined, pct01, "nuvio", ownerId);
+        saveResumeMs(item._id, offsetMs, undefined, undefined, undefined, pct01, "nuvio", ownerId, remoteT);
       }
 
       items.push(item);
@@ -296,6 +296,7 @@ export function buildNuvioPlaybackItems(
         pct01,
         "nuvio",
         ownerId,
+        remoteT,
       );
     }
 
