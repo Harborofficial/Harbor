@@ -83,7 +83,14 @@ async fn run_with_fallback(
         .ok()
         .map(|path| path.join("music/yt-dlp"));
     let remote = match directory {
-        Some(directory) => cached_executable(&directory).await,
+        Some(directory) => {
+            let cached = read_verified(&directory).await;
+            let path = cached.and_then(|entry| entry.filename()).map(|name| directory.join(name));
+            // Playback uses the verified local extractor immediately. Network
+            // update checks must not hold the first trailer behind a download.
+            tokio::spawn(async move { let _ = cached_executable(&directory).await; });
+            path
+        },
         None => None,
     };
     if let Some(executable) = remote {
