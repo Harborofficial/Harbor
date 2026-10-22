@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { EBookChapter, EBookChapterContent } from "@/lib/ebook/providers";
 import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
@@ -38,6 +39,13 @@ export function EBookReader({
   const { activeId } = useProfiles();
   const profile = activeId ?? "default";
   const direction = textDirection(content?.text ?? "");
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("harbor:immersive", { detail: true }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("harbor:immersive", { detail: false }));
+    };
+  }, []);
 
   if (!content || error) {
     return (

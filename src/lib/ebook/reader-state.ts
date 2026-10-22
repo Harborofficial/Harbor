@@ -19,6 +19,7 @@ export type EBookReaderPrefs = {
   focusMode: boolean;
   mouseLineTrack: boolean;
   lineTrackColor: string;
+  pageTurnSound: boolean;
   font: "literary" | "arabic" | "classic";
   customFontId?: string;
   narrationVoice: string;
@@ -78,6 +79,7 @@ const DEFAULTS: EBookReaderPrefs = {
   focusMode: false,
   mouseLineTrack: false,
   lineTrackColor: "#ff9f4d",
+  pageTurnSound: true,
   font: "literary",
   narrationVoice: "en-US-AvaNeural",
 };
