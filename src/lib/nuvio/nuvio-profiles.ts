@@ -414,6 +414,26 @@ export async function createNuvioProfile(opts: {
     avatar_url: avatarUrl,
   });
 
+  // OPTIMISTIC LOCAL UPDATE: Immediately add to local state for 0ms latency
+  const newProfile: NuvioProfile = {
+    id: `temp-${nextIndex}`,
+    user_id: state.session?.user?.id || existing[0]?.user_id || "",
+    profile_index: nextIndex,
+    name: opts.name.trim() || `Profile ${nextIndex}`,
+    avatar_color_hex: opts.avatarColorHex || NUVIO_PROFILE_COLORS[(nextIndex - 1) % NUVIO_PROFILE_COLORS.length],
+    uses_primary_addons: Boolean(opts.usesPrimaryAddons),
+    uses_primary_plugins: false,
+    avatar_id: avatarId,
+    avatar_url: avatarUrl,
+    pin_enabled: false,
+    is_kids: false,
+    created_at: new Date().toISOString(),
+  };
+  const updatedProfiles = [...existing, newProfile];
+  saveNuvioState({ ...state, profiles: updatedProfiles });
+  window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }));
+  window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+
   return pushNuvioProfiles(payloads);
 }
 
@@ -515,6 +535,30 @@ export async function updateNuvioProfile(
       profile_background_url: p.profile_background_url ?? null,
     };
   });
+
+  const chosenAvatarUrl =
+    resolvedAvatarUrl !== undefined
+      ? resolvedAvatarUrl
+      : (updates.avatar_url !== undefined
+          ? updates.avatar_url
+          : (updates.avatarUrl !== undefined ? updates.avatarUrl : undefined));
+
+  // OPTIMISTIC LOCAL UPDATE: Apply updates immediately to local state for 0ms lag
+  const optimisticProfiles: NuvioProfile[] = existing.map((p) => {
+    if (p.profile_index === profileIndex) {
+      return {
+        ...p,
+        name: updates.name !== undefined ? updates.name.trim() : p.name,
+        avatar_color_hex: updates.avatar_color_hex ?? updates.avatarColorHex ?? p.avatar_color_hex ?? "#1E88E5",
+        uses_primary_addons: updates.uses_primary_addons !== undefined ? updates.uses_primary_addons : Boolean(p.uses_primary_addons),
+        avatar_url: chosenAvatarUrl !== undefined ? chosenAvatarUrl : p.avatar_url,
+      };
+    }
+    return p;
+  });
+  saveNuvioState({ ...state, profiles: optimisticProfiles });
+  window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+  window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
 
   const ok = await pushNuvioProfiles(payloads);
   if (ok) {

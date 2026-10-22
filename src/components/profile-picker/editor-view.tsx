@@ -20,6 +20,7 @@ import { DiscoverIcon } from "@/components/icons/discover-icon";
 import { LibraryIcon } from "@/components/icons/library-icon";
 import { LiveTvIcon } from "@/components/icons/live-tv-icon";
 import { MoviesIcon } from "@/components/icons/movies-icon";
+import { SportsIcon } from "@/components/icons/sports-icon";
 import { TvIcon } from "@/components/icons/tv-icon";
 import {
   anyTabLocked,
@@ -119,6 +120,7 @@ export function EditorView({
   const [anilistAvatarError, setAnilistAvatarError] = useState<string | null>(null);
   const [loadingSimklAvatar, setLoadingSimklAvatar] = useState(false);
   const [simklAvatarError, setSimklAvatarError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const [nuvioState] = useState(() => loadNuvioState());
   const editing = mode.kind === "edit" ? mode.profile : null;
@@ -376,67 +378,86 @@ export function EditorView({
   };
 
   const submit = async () => {
-    if (!canSave) return;
-    let kidToSave = isPrimary ? null : draftKid;
-    if (draftKid && !isPrimary) {
-      let parentPinHash = editing?.kid?.parentPinHash ?? null;
-      if (draftParentPin && draftParentPin.length === 4) {
-        parentPinHash = await hashProfilePassword(draftParentPin);
+    if (!canSave || saving) return;
+    setSaving(true);
+    try {
+      let kidToSave = isPrimary ? null : draftKid;
+      if (draftKid && !isPrimary) {
+        let parentPinHash = editing?.kid?.parentPinHash ?? null;
+        if (draftParentPin && draftParentPin.length === 4) {
+          parentPinHash = await hashProfilePassword(draftParentPin);
+        }
+        kidToSave = {
+          age: draftKid.age,
+          curfewMinutes: draftKid.curfewMinutes ?? null,
+          parentPinHash,
+        };
       }
-      kidToSave = {
-        age: draftKid.age,
-        curfewMinutes: draftKid.curfewMinutes ?? null,
-        parentPinHash,
-      };
-    }
-    if (isNuvio) {
-      let finalAvatarUrl = avatar;
-      const targetSlot = nuvioSlot ?? (loadNuvioState().profiles.length + 1);
-      if (pendingAvatarFile) {
-        const uploaded = await uploadNuvioCustomAvatar(pendingAvatarFile, targetSlot);
-        if (uploaded) finalAvatarUrl = uploaded;
-      }
+      if (isNuvio) {
+        let finalAvatarUrl = avatar;
+        const targetSlot = nuvioSlot ?? (() => {
+          const existingIndices = new Set(loadNuvioState().profiles.map((p) => p.profile_index));
+          let next = 1;
+          while (next <= 6 && existingIndices.has(next)) next++;
+          return next;
+        })();
 
-      if (mode.kind === "create") {
-        await createNuvioProfile({
-          name: trimmed,
-          avatarColorHex: color,
-          avatarUrl: finalAvatarUrl,
-          usesPrimaryAddons,
-        });
-        if (draftPin) {
-          await setNuvioPin(targetSlot, draftPin);
+        if (pendingAvatarFile) {
+          try {
+            const uploaded = await uploadNuvioCustomAvatar(pendingAvatarFile, targetSlot);
+            if (uploaded) finalAvatarUrl = uploaded;
+          } catch (err) {
+            console.warn("[nuvio] avatar upload failed", err);
+          }
         }
-        if (anyTabLocked(draftLockedTabs)) {
-          localStorage.setItem(`harbor.nuvio.locked-tabs.${targetSlot}`, JSON.stringify(draftLockedTabs));
-        }
-        if (kidToSave) {
-          localStorage.setItem(`harbor.nuvio.kid.${targetSlot}`, JSON.stringify(kidToSave));
-        }
-        selectProfile(`nuvio-${targetSlot}`, { unlocked: true });
-      } else {
-        await updateNuvioProfile(nuvioSlot!, {
-          name: trimmed,
-          avatar_color_hex: color,
-          avatar_url: finalAvatarUrl,
-          uses_primary_addons: isPrimary ? false : usesPrimaryAddons,
-        });
-        if (anyTabLocked(draftLockedTabs)) {
-          localStorage.setItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`, JSON.stringify(draftLockedTabs));
+
+        if (mode.kind === "create") {
+          await createNuvioProfile({
+            name: trimmed,
+            avatarColorHex: color,
+            avatarUrl: finalAvatarUrl,
+            usesPrimaryAddons,
+          });
+          if (draftPin) {
+            await setNuvioPin(targetSlot, draftPin);
+          }
+          if (anyTabLocked(draftLockedTabs)) {
+            localStorage.setItem(`harbor.nuvio.locked-tabs.${targetSlot}`, JSON.stringify(draftLockedTabs));
+          }
+          if (kidToSave) {
+            localStorage.setItem(`harbor.nuvio.kid.${targetSlot}`, JSON.stringify(kidToSave));
+          }
+          selectProfile(`nuvio-${targetSlot}`, { unlocked: true });
         } else {
-          localStorage.removeItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`);
+          await updateNuvioProfile(nuvioSlot!, {
+            name: trimmed,
+            avatar_color_hex: color,
+            avatar_url: finalAvatarUrl,
+            uses_primary_addons: isPrimary ? false : usesPrimaryAddons,
+          });
+          if (anyTabLocked(draftLockedTabs)) {
+            localStorage.setItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`, JSON.stringify(draftLockedTabs));
+          } else {
+            localStorage.removeItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`);
+          }
+          if (kidToSave && !isPrimary) {
+            localStorage.setItem(`harbor.nuvio.kid.${nuvioSlot}`, JSON.stringify(kidToSave));
+          } else {
+            localStorage.removeItem(`harbor.nuvio.kid.${nuvioSlot}`);
+          }
         }
-        if (kidToSave && !isPrimary) {
-          localStorage.setItem(`harbor.nuvio.kid.${nuvioSlot}`, JSON.stringify(kidToSave));
-        } else {
-          localStorage.removeItem(`harbor.nuvio.kid.${nuvioSlot}`);
+        if (avatarSource && (isOwnProfile || mode.kind === "create")) {
+          update({
+            useAnilistAvatar: avatarSource === "anilist",
+            useTraktAvatar: avatarSource === "trakt",
+            useSimklAvatar: avatarSource === "simkl",
+          });
         }
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated"));
+        onDone();
+        return;
       }
-      window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
-      window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated"));
-      onDone();
-      return;
-    }
 
     if (editing) {
       updateProfile(editing.id, {
@@ -477,6 +498,9 @@ export function EditorView({
       });
     }
     onDone();
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (subView.kind === "pin-set") {
@@ -607,10 +631,10 @@ export function EditorView({
         initial={editing?.lockedTabs ?? draftLockedTabs ?? null}
         onBack={() => setSubView({ kind: "security" })}
         onSave={(next) => {
+          const locked = anyTabLocked(next) ? next : null;
+          setDraftLockedTabs(locked);
           if (editing) {
-            updateProfile(editing.id, { lockedTabs: anyTabLocked(next) ? next : null });
-          } else {
-            setDraftLockedTabs(anyTabLocked(next) ? next : null);
+            updateProfile(editing.id, { lockedTabs: locked });
           }
           setSubView({ kind: "security" });
         }}
@@ -833,7 +857,7 @@ export function EditorView({
         </div>
       )}
 
-      {showAdvanced && !draftKid && canShare && primary && (
+      {showAdvanced && !draftKid && !isNuvio && canShare && primary && (
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {t("Stremio account")}
@@ -1252,10 +1276,11 @@ export function EditorView({
         <button
           type="button"
           onClick={() => void submit()}
-          disabled={!canSave}
+          disabled={!canSave || saving}
           className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {editing ? t("Save changes") : t("Create profile")}
+          {saving && <Loader2 size={16} className="animate-spin" />}
+          <span>{editing ? t("Save changes") : t("Create profile")}</span>
         </button>
       </div>
       {avatarPickerOpen && (
@@ -1606,6 +1631,8 @@ function TabIcon({ iconKey }: { iconKey: LockableTabMeta["iconKey"] }) {
       return <MoviesIcon active={false} />;
     case "shows":
       return <TvIcon active={false} />;
+    case "sports":
+      return <SportsIcon active={false} />;
     case "anime":
       return <AnimeIcon active={false} />;
     case "liveTv":

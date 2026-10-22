@@ -327,7 +327,7 @@ export function ProfilePickerModal() {
             )
           )}
           {pickerView.kind === "create" && (
-            <EditorView mode={{ kind: "create" }} onCancel={finishEditor} onDone={finishEditor} />
+            <EditorView mode={{ kind: "create" }} onCancel={finishEditor} onDone={() => closePicker()} />
           )}
           {pickerView.kind === "edit" &&
             (() => {

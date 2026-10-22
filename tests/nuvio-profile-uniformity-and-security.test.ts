@@ -34,11 +34,15 @@ test("EditorView provides 1:1 layout uniformity for Nuvio with identical styling
   assert.match(editorView, /t\("Nuvio account"\)/);
   assert.match(editorView, /t\("Use primary addons"\)/);
   assert.match(editorView, /t\("Use separate addons"\)/);
+  // Stremio account section is strictly hidden in Nuvio mode
+  assert.match(editorView, /!isNuvio && canShare && primary/);
   // Handles Nuvio custom avatar upload via uploadNuvioCustomAvatar
   assert.match(editorView, /uploadNuvioCustomAvatar/);
 });
 
-test("Security tab locks are supported and persisted for Nuvio profiles", () => {
+test("Security tab locks are supported and persisted for Nuvio profiles with sports logo", () => {
+  // SportsIcon is wired in TabIcon
+  assert.match(editorView, /case "sports":\s*return <SportsIcon/);
   // EditorView saves locked tabs for Nuvio slots
   assert.match(editorView, /harbor\.nuvio\.locked-tabs\./);
   // profiles.tsx nuvioProfileToHarborProfile loads lockedTabs
@@ -66,4 +70,14 @@ test("PIN switch security strictly prevents bypassing PIN when changing profiles
   // account-menu triggers unlock picker for PIN-protected Nuvio profiles
   assert.match(accountMenu, /if \(p\.pin_enabled\)/);
   assert.match(accountMenu, /openPicker\(\{\s*kind:\s*"unlock",\s*profileId:\s*String\(p\.profile_index\)\s*\}\)/);
+});
+
+test("Smooth profile save with optimistic local state updates and loading spinner", () => {
+  // createNuvioProfile updates local state optimistically
+  assert.match(nuvioProfiles, /OPTIMISTIC LOCAL UPDATE: Immediately add to local state/);
+  // updateNuvioProfile updates local state optimistically
+  assert.match(nuvioProfiles, /OPTIMISTIC LOCAL UPDATE: Apply updates immediately to local state/);
+  // EditorView has saving state with spinner feedback
+  assert.match(editorView, /const \[saving, setSaving\] = useState\(false\)/);
+  assert.match(editorView, /saving && <Loader2 size=\{16\} className="animate-spin"/);
 });
