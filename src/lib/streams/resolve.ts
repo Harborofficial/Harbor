@@ -1,4 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { invoke } from "@tauri-apps/api/core";
 import { dwarn } from "@/lib/debug";
 import { completedTorrentDownloadFor } from "@/lib/download/downloads-store";
 import { hasUncachedMarker, isP2pStream } from "./cached";
@@ -167,7 +168,14 @@ export async function resolveStream(
     return { ok: false, code: "external-url-only", tried: [] };
   }
   if (stream.ytId) {
-    return { ok: false, code: "youtube-only", tried: [] };
+    if (signal.aborted) return { ok: false, code: "aborted", tried };
+    try {
+      const data = await invoke<DirectLink>("resolve_youtube_stream", { videoId: stream.ytId });
+      if (signal.aborted) return { ok: false, code: "aborted", tried };
+      return { ok: true, data: { ...data, subtitles: streamSubtitles(stream) }, via: "youtube" };
+    } catch {
+      return { ok: false, code: signal.aborted ? "aborted" : "youtube-only", tried };
+    }
   }
   if (stream.nzbUrl) {
     return { ok: false, code: "nzb-needs-external-player", tried: [] };

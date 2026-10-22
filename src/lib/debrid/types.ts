@@ -21,6 +21,7 @@ export type CacheMap = Record<string, boolean>;
 
 export type DirectLink = {
   url: string;
+  transcode?: boolean;
   fileIdx?: number | null;
   filename?: string;
   filesize?: number;

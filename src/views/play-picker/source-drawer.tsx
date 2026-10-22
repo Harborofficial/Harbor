@@ -265,7 +265,7 @@ function SourceRow({
                 <Zap size={11} strokeWidth={2} />
                 {t("Cached")}
               </span>
-            ) : !stream.url && !stream.infoHash && (stream.externalUrl || stream.ytId) ? (
+            ) : !stream.url && !stream.infoHash && stream.externalUrl ? (
               <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
                 <ExternalLink size={11} strokeWidth={2.2} />
                 {t("External")}
@@ -278,7 +278,7 @@ function SourceRow({
             ) : null}
             {resolving ? (
               <Loader2 size={16} className="animate-spin text-ink-muted" />
-            ) : !stream.url && !stream.infoHash && (stream.externalUrl || stream.ytId) ? (
+            ) : !stream.url && !stream.infoHash && stream.externalUrl ? (
               <ExternalLink
                 size={14}
                 strokeWidth={2.2}

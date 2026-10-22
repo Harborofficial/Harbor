@@ -300,9 +300,9 @@ export function usePickHandler({
       // Native mpv can consume ordinary debrid URLs directly. Keep the local
       // proxy off the startup path unless the source actually requires custom
       // request headers.
-      if (intent !== "download" && hasProxyHeaders) {
+      if (intent !== "download" && (hasProxyHeaders || r.data.transcode)) {
         try {
-          const proxied = await registerStreamProxy(r.data.url, r.data.headers);
+          const proxied = await registerStreamProxy(r.data.url, r.data.headers, { transcode: r.data.transcode });
           playUrl = proxied.url;
           proxySessionId = proxied.sessionId;
         } catch {
@@ -319,6 +319,7 @@ export function usePickHandler({
         intent === "download" ||
         r.via === "p2p" ||
         r.via === "direct" ||
+        r.via === "youtube" ||
         r.via === "local-download" ||
         r.readiness?.exactUrlValidated === true
       );
@@ -518,10 +519,6 @@ export function usePickHandler({
     autoPickRef.current = auto;
     if (!stream.url && stream.externalUrl) {
       openUrl(stream.externalUrl);
-      return;
-    }
-    if (!stream.url && stream.ytId) {
-      openUrl(`https://www.youtube.com/watch?v=${stream.ytId}`);
       return;
     }
     if (streamMode === "p2p" && committed && stream.infoHash && engineP2pEligible(stream)) {
