@@ -5,6 +5,7 @@ import { getCuesAnySource } from "@/lib/subtitles/extract";
 import { toSrt } from "@/lib/subtitles/serialize";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isAssTrack, isImageSubTrack } from "@/lib/player/sub-format";
+import { hasCustomMpvSubtitleStyle } from "@/lib/player/mpv-tuning";
 import { clearImportedSubs } from "@/lib/player/imported-subs";
 import { readPlayerVolume } from "@/lib/player-volume";
 import { playerMagnetUrl, setPlayerActions } from "@/lib/player-actions";
@@ -231,8 +232,15 @@ export function usePlayerMedia(params: {
   // Addon ASS subtitles render in mpv like embedded ones, so "Use my style" keeps signs in place.
   // Harbor's HTML overlay only has their plain text and would move every sign to the bottom.
   const subAssNative = subEmbed && selectedAssSub;
+  // Advanced mpv.conf subtitle styling needs libmpv's native renderer:
+  // the HTML cue overlay cannot interpret those options.
+  const customNativeSubStyle = subEmbed && hasCustomMpvSubtitleStyle(settings.mpvExtraOptions);
   const subNativeRender =
-    hdrNativeSurface || subAssNative || mpvNativeWindow || (subEmbed && selectedImageSub);
+    hdrNativeSurface ||
+    subAssNative ||
+    mpvNativeWindow ||
+    customNativeSubStyle ||
+    (subEmbed && selectedImageSub);
   const assNativeActive = selectedAssSub && (subNativeRender || !subEmbed);
   const imageNativeActive = selectedImageSub && (subNativeRender || !subEmbed);
   const assNormalizeScale = useAssNormalize({
@@ -251,8 +259,7 @@ export function usePlayerMedia(params: {
       snap.videoWidth > 0 ||
       snap.audioTracks.length > 0 ||
       snap.subtitleTracks.length > 0);
-  const suppressHtmlSubs =
-    subAssNative || mpvNativeWindow || (subEmbed && selectedImageSub) || hdrNativeSurface;
+  const suppressHtmlSubs = subNativeRender;
   const sdhFilterAllowed =
     !selectedSubTrack?.forced &&
     !selectedSubTrack?.foreignOnly &&

@@ -41,6 +41,7 @@ function nativeStyle(handler = async () => {}) {
         return handler(args);
       },
     },
+    "./mpv-tuning": { mpvExtraOptionKeys: () => new Set() },
   });
   return { apply: style.applySecondarySubNative, calls };
 }

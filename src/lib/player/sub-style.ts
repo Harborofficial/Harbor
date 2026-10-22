@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { Settings } from "@/lib/settings";
+import { mpvExtraOptionKeys } from "./mpv-tuning";
 
 function clamp(n: number, lo: number, hi: number): number {
   if (!Number.isFinite(n)) return lo;
@@ -139,10 +140,31 @@ function applyFontOnlyOverrides(fontOnly: boolean, font: string): Promise<void> 
   return styleOverridesQueue;
 }
 
-export async function applySubStyle(
+const DEFAULT_CONTEXT: SubRenderContext = {
+  assNativeActive: false,
+  imageNativeActive: false,
+};
+
+/** mpv exposes some subtitle properties under legacy alias names. Pinning any
+ * alias must stop Harbor writing the rest, or the alias write overwrites it. */
+const SUB_PROPERTY_ALIASES: Record<string, string> = {
+  "sub-outline-color": "sub-border-color",
+  "sub-outline-size": "sub-border-size",
+  "sub-shadow-color": "sub-back-color",
+};
+
+function canonicalSubProperty(name: string): string {
+  return SUB_PROPERTY_ALIASES[name] ?? name;
+}
+
+/**
+ * The subtitle properties Harbor owns. Keys set explicitly in Advanced
+ * (mpv.conf) are left out so they keep the value mpv_start applied.
+ */
+export function subStyleProperties(
   s: Settings,
-  context: SubRenderContext = { assNativeActive: false, imageNativeActive: false },
-): Promise<void> {
+  context: SubRenderContext = DEFAULT_CONTEXT,
+): Array<[string, unknown]> {
   const override = s.subAssOverride;
   // "Change font only" keeps the ASS look like "no". mpv's "yes" then lets the style override
   // below swap in the user's font.
@@ -188,8 +210,18 @@ export async function applySubStyle(
     ["sub-bold", s.subBold ? "yes" : "no"],
     ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
   ];
+  const overridden = new Set([...mpvExtraOptionKeys(s.mpvExtraOptions)].map(canonicalSubProperty));
+  return props.filter(([name]) => !overridden.has(canonicalSubProperty(name)));
+}
+
+export async function applySubStyle(
+  s: Settings,
+  context: SubRenderContext = DEFAULT_CONTEXT,
+): Promise<void> {
   await Promise.all([
-    ...props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})),
-    applyFontOnlyOverrides(fontOnly, font),
+    ...subStyleProperties(s, context).map(([name, value]) =>
+      invoke("mpv_set_property", { name, value }).catch(() => {}),
+    ),
+    applyFontOnlyOverrides(s.subAssOverride === "font", mpvFontFor(s.subFontFamily, customFontName(s))),
   ]);
 }

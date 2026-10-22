@@ -66,6 +66,7 @@ function styleHarness(overrides: string[] = []) {
   };
   new Function("require", "module", "exports", compiled)(
     (id: string) => {
+      if (id === "./mpv-tuning") return { mpvExtraOptionKeys: () => new Set<string>() };
       if (id !== "@tauri-apps/api/core") throw new Error(`Unexpected dependency: ${id}`);
       return {
         invoke: async (command: string, args: { name: string; value: unknown }) => {
