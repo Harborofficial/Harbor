@@ -19,6 +19,7 @@ import {
 } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 import { useSettings } from "@/lib/settings";
 import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime-mapping";
+import { simklAnimeArtworkIds } from "@/lib/simkl/anime-artwork-ids";
 import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
 import { sizeImageUrl, qualityMultiplier } from "@/lib/img-size";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
@@ -108,14 +109,14 @@ function useAnimeRpdbIds(
   const { settings } = useSettings();
   const [animeImdb, setAnimeImdb] = useState<string>();
   const [animeTvdb, setAnimeTvdb] = useState<string>();
-  const isAnime = /^(kitsu|mal|anilist|anidb):/.test(metaId);
+  const isAnime = /^(kitsu|mal|anilist|anidb|simkl):/.test(metaId);
   useEffect(() => {
     setAnimeImdb(undefined);
     setAnimeTvdb(undefined);
   }, [metaId]);
   useEffect(() => {
     if (!isAnime || (!rpdbKey && !settings.posterBaseUrl)) return;
-    const m = metaId.match(/^(kitsu|mal|anilist|anidb):(\d+)/);
+    const m = metaId.match(/^(kitsu|mal|anilist|anidb|simkl):(\d+)/);
     if (!m) return;
     const source = m[1];
     const idNum = Number(m[2]);
@@ -123,18 +124,35 @@ function useAnimeRpdbIds(
     let cancelled = false;
     (async () => {
       let kitsuId: number | null = source === "kitsu" ? idNum : null;
-      if (kitsuId == null) {
+      let directImdb: string | undefined;
+      let directTvdb: number | undefined;
+      if (source === "simkl") {
+        const ids = await simklAnimeArtworkIds(idNum);
+        if (cancelled) return;
+        directImdb = ids.imdb;
+        directTvdb = ids.tvdb;
+        if (kitsuId == null) {
+          if (ids.kitsu) kitsuId = ids.kitsu;
+          else if (ids.mal)
+            kitsuId = await externalToKitsu("myanimelist", ids.mal).catch(() => null);
+          else if (ids.anidb)
+            kitsuId = await externalToKitsu("anidb", ids.anidb).catch(() => null);
+        }
+      } else if (kitsuId == null) {
         const armSource = source === "mal" ? "myanimelist" : source;
         kitsuId = await externalToKitsu(armSource, idNum).catch(() => null);
       }
-      if (cancelled || kitsuId == null) return;
+      if (cancelled) return;
+      if (directImdb) setAnimeImdb(directImdb);
+      if (directTvdb) setAnimeTvdb(String(directTvdb));
+      if (kitsuId == null) return;
       const [tt, tv] = await Promise.all([
         kitsuToImdb(kitsuId).catch(() => null),
         kitsuToTvdb(kitsuId).catch(() => null),
       ]);
       if (cancelled) return;
-      if (tt) setAnimeImdb(tt);
-      if (tv) setAnimeTvdb(String(tv));
+      if (tt && !directImdb) setAnimeImdb(tt);
+      if (tv && !directTvdb) setAnimeTvdb(String(tv));
     })();
     return () => {
       cancelled = true;

@@ -9,7 +9,7 @@ import { usePosterChain } from "@/components/poster";
 import { ensureStaticHeroArt, peekStaticHeroArt } from "@/lib/providers/anime-hero-art-static";
 import { prepareExpandingCardArtwork } from "@/lib/expanding-card-artwork";
 
-const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
+const ANIME_ID = /^(kitsu|mal|anilist|anidb|simkl):/;
 
 const POS = {
   center: "inset-0 items-center justify-center text-center",

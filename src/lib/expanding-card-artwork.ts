@@ -4,8 +4,7 @@ import { resolveExternalKitsuId } from "@/lib/providers/anime-entry";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { tmdbAnimeMatch, tmdbIdFromImdb, tmdbMovieImages } from "@/lib/providers/tmdb";
 import { fetchTvdbArtwork } from "@/lib/providers/tvdb-proxy";
-import { getLocalCache } from "@/lib/simkl/activities";
-import { simklRequest } from "@/lib/simkl/client";
+import { simklAnimeArtworkIds } from "@/lib/simkl/anime-artwork-ids";
 import {
   isSuitableWideArtworkSize,
   pickAlternativeWideArtwork,
@@ -28,17 +27,6 @@ type AnimeArtworkIds = {
   imdb?: string;
   tvdb?: number;
   tmdbMetaId?: string;
-};
-
-type SimklAnimeDetail = {
-  ids?: {
-    kitsu?: number | string;
-    mal?: number;
-    anidb?: number;
-    imdb?: string;
-    tvdb?: number;
-    tmdb?: number;
-  };
 };
 
 function rememberPrepared(key: string, url: string): void {
@@ -66,10 +54,6 @@ function uniqueAlternatives(candidates: string[], current: Array<string | undefi
   return out;
 }
 
-function reverseSimklKey(map: Record<string, number>, simklId: number): string | undefined {
-  return Object.keys(map).find((key) => map[key] === simklId);
-}
-
 async function resolveAnimeArtworkIds(meta: Meta): Promise<AnimeArtworkIds> {
   let kitsuId = parseKitsuId(meta.id) ?? undefined;
   let imdb: string | undefined;
@@ -91,37 +75,15 @@ async function resolveAnimeArtworkIds(meta: Meta): Promise<AnimeArtworkIds> {
 
   const simklMatch = meta.id.match(/^simkl:(\d+)/);
   if (simklMatch) {
-    const simklId = Number(simklMatch[1]);
-    const cache = getLocalCache();
-    if (cache) {
-      const cachedKitsu = reverseSimklKey(cache.kitsuToSimkl, simklId);
-      const cachedMal = reverseSimklKey(cache.malToSimkl, simklId);
-      const cachedImdb = reverseSimklKey(cache.imdbToSimkl, simklId);
-      const cachedTmdb = reverseSimklKey(cache.tmdbToSimkl, simklId);
-      if (cachedKitsu) kitsuId = Number(cachedKitsu) || undefined;
-      if (cachedMal) malId = Number(cachedMal) || undefined;
-      if (cachedImdb) imdb = cachedImdb;
-      if (cachedTmdb && /^(movie|tv):\d+$/.test(cachedTmdb)) {
-        tmdbMetaId = `tmdb:${cachedTmdb}`;
-      }
-    }
-
-    if (!kitsuId && !imdb && !tvdb && !tmdbMetaId) {
-      const detail = await simklRequest<SimklAnimeDetail>(`/anime/${simklId}`, {
-        method: "GET",
-        authed: false,
-      }).catch(() => null);
-      const ids = detail?.ids;
-      const detailKitsu = Number(ids?.kitsu);
-      if (!kitsuId && Number.isFinite(detailKitsu) && detailKitsu > 0) kitsuId = detailKitsu;
-      if (!malId && typeof ids?.mal === "number") malId = ids.mal;
-      if (!anidbId && typeof ids?.anidb === "number") anidbId = ids.anidb;
-      if (!imdb && typeof ids?.imdb === "string") imdb = ids.imdb;
-      if (!tvdb && typeof ids?.tvdb === "number") tvdb = ids.tvdb;
-      if (!tmdbMetaId && typeof ids?.tmdb === "number") {
-        const kind = meta.type === "movie" ? "movie" : "tv";
-        tmdbMetaId = `tmdb:${kind}:${ids.tmdb}`;
-      }
+    const simklIds = await simklAnimeArtworkIds(Number(simklMatch[1]));
+    if (!kitsuId && simklIds.kitsu) kitsuId = simklIds.kitsu;
+    if (!malId && simklIds.mal) malId = simklIds.mal;
+    if (!anidbId && simklIds.anidb) anidbId = simklIds.anidb;
+    if (!imdb && simklIds.imdb) imdb = simklIds.imdb;
+    if (!tvdb && simklIds.tvdb) tvdb = simklIds.tvdb;
+    if (!tmdbMetaId && simklIds.tmdb) {
+      const kind = meta.type === "movie" ? "movie" : "tv";
+      tmdbMetaId = `tmdb:${kind}:${simklIds.tmdb}`;
     }
   }
 
