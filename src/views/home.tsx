@@ -140,8 +140,9 @@ export function Home({
   const { authKey, user } = useAuth();
   const { activeProfile, profiles } = useProfiles();
   const { settings, update } = useSettings();
+  const isNuvioProvider = settings.accountProvider === "nuvio";
   const hideSharedCw =
-    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+    !isNuvioProvider && settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const heroFull = settings.heroFull;
   const contentDrag = useContentDrag();
   const t = useT();
@@ -155,7 +156,6 @@ export function Home({
   const [traktRows, setTraktRows] = useState<HomeRow[]>([]);
   const [simklRows, setSimklRows] = useState<HomeRow[]>([]);
   const [letterboxdRows, setLetterboxdRows] = useState<HomeRow[]>([]);
-  const isNuvioProvider = settings.accountProvider === "nuvio";
   const externalCw = useExternalCw(
     isNuvioProvider ||
       (!hideSharedCw &&

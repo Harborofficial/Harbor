@@ -412,7 +412,11 @@ export function useCwAdvance(
         );
       };
       const candidates = items.filter(
-        (i) => currentEpisode(i) != null && (isFinishedSeries(i) || completedRemotely(i)),
+        (i) =>
+          currentEpisode(i) != null &&
+          (isFinishedSeries(i) ||
+            completedRemotely(i) ||
+            (i.upNext === true && (i.state?.timeOffset ?? 0) === 0)),
       );
       const next = new Map<string, LibraryItem>();
       const remove = new Set<string>();
@@ -495,6 +499,21 @@ export function useCwAdvance(
             }
           }
         }
+        const curEpInList = list.find((e) => e.season === effCur.season && e.episode === effCur.episode);
+        if (i.upNext && curEpInList && !nextEpAired(list, curEpInList, isAnime)) {
+          if (animeCwEnd === "timer" && (curEpInList.airDate || isAnime)) {
+            next.set(i._id, {
+              ...i,
+              waitingForAir: true as const,
+              nextAirDate: curEpInList.airDate,
+            } as LibraryItem);
+            continue;
+          } else if (animeCwEnd === "hide" || hideCaughtUp) {
+            remove.add(i._id);
+            continue;
+          }
+        }
+
         const checkWatched = watchedPredicate(
           i,
           effCur,
@@ -508,7 +527,7 @@ export function useCwAdvance(
         const watchedCur =
           checkWatched(effCur.season, effCur.episode) ||
           aliasCur.some((a) => checkWatched(a.season, a.episode));
-        if (!watchedCur) continue;
+        if (!watchedCur && !i.upNext) continue;
         const nextSkip = episodeHiding
           ? (s: number, e: number) => isEpisodeHidden(i._id, s, e)
           : undefined;
@@ -565,8 +584,21 @@ export function useCwAdvance(
             upNext: true,
           });
         } else if (animeCwEnd === "timer" && nextEp && (nextEp.airDate || isAnime)) {
+          const displaySeason = remappedMixed
+            ? nextEp.season
+            : origCur.season !== effCur.season
+              ? origCur.season
+              : nextEp.season;
           next.set(i._id, {
             ...i,
+            state: {
+              ...i.state!,
+              season: displaySeason,
+              episode: nextEp.episode,
+              video_id: `${i._id}:${displaySeason}:${nextEp.episode}`,
+              timeOffset: 0,
+              flaggedWatched: 0,
+            },
             waitingForAir: true as const,
             nextAirDate: nextEp.airDate,
           } as LibraryItem);

@@ -212,7 +212,7 @@ export function buildNuvioPlaybackItems(
           ? localMatch.durationMs
           : DURATION_MS.series;
     const latestOffsetMs = latestProgressSec * 1000;
-    const isLatestFinished = latestDurMs > 0 && latestOffsetMs / latestDurMs >= 0.90;
+    const isLatestFinished = (latestDurMs > 0 && latestOffsetMs / latestDurMs >= 0.90) || (latest as Record<string, unknown>).watched === true;
 
     let targetSeason = latestSeason;
     let targetEpisode = latestEpisode;
@@ -235,10 +235,13 @@ export function buildNuvioPlaybackItems(
         targetOffsetMs = subProg * 1000;
         isUpNext = targetOffsetMs < 5000;
       } else {
+        // In Stremio mode, finished episodes keep flaggedWatched = 1 on the watched episode,
+        // allowing useCwAdvance to check TMDB air dates, advance to next episode if aired,
+        // or display the release countdown (Timer) if the next episode has not aired yet.
         targetSeason = latestSeason;
-        targetEpisode = latestEpisode + 1;
-        targetOffsetMs = 0;
-        isUpNext = true;
+        targetEpisode = latestEpisode;
+        targetOffsetMs = latestOffsetMs;
+        isUpNext = false;
       }
     } else {
       isUpNext = latestOffsetMs < 5000;

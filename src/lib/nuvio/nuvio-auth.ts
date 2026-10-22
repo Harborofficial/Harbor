@@ -38,6 +38,8 @@ import { clearCachedPlaybackItems } from "./nuvio-playback";
 import { clearAllNuvioLocalCw } from "@/lib/local-cw";
 import { clearAllNuvioResume } from "@/lib/resume";
 import { clearNuvioLibraryCache } from "./nuvio-library";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+
 import type {
 
   NuvioDeviceCodeSession,
@@ -331,7 +333,28 @@ export async function signOutNuvio(): Promise<void> {
   clearCachedNuvioAddons();
   recordNuvioAddons([]);
 
-  const wasNuvio = localStorage.getItem("harbor.account-provider") === "nuvio";
+
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k) continue;
+      if (
+        k.startsWith("harbor.nuvio.") ||
+        k.startsWith("harbor.newEpisodes.dismissed.nuvio.") ||
+        k.startsWith("harbor.manualWatched.nuvio.") ||
+        k.startsWith("harbor.movieWatched.nuvio.") ||
+        k.startsWith("harbor.theme-session.nuvio")
+      ) {
+        keysToRemove.push(k);
+      }
+    }
+    for (const k of keysToRemove) {
+      localStorage.removeItem(k);
+    }
+  } catch {}
+
+  const wasNuvio = isNuvioProviderActive() || localStorage.getItem("harbor.account-provider") === "nuvio";
   if (wasNuvio) {
     try {
       localStorage.setItem("harbor.account-provider", "stremio");
@@ -361,6 +384,10 @@ export async function signOutNuvio(): Promise<void> {
       new CustomEvent("harbor:account-provider-changed", { detail: { provider: "stremio", skipPicker: true } }),
     );
   }
+  window.dispatchEvent(new CustomEvent("harbor:nuvio-state-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+  window.dispatchEvent(new CustomEvent("harbor:profiles-changed"));
 
   if (token) {
     try {

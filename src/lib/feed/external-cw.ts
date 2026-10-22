@@ -383,10 +383,12 @@ if (typeof window !== "undefined") {
   window.addEventListener("harbor:active-profile-changed", onProfileChange);
   window.addEventListener("harbor:profiles-updated", onProfileChange);
   window.addEventListener("harbor:nuvio-state-changed", () => {
+    clearNuvioCwMemoryCache();
     onSessionChange();
     void refreshExternalCw(true);
   });
   window.addEventListener("harbor:account-provider-changed", () => {
+    clearNuvioCwMemoryCache();
     onSessionChange();
     void refreshExternalCw(true);
   });

@@ -30,6 +30,7 @@ import { CwEndPreview } from "./cw-end-preview";
 export function HomeTab() {
   const { settings, update } = useSettings();
   const t = useT();
+  const isNuvio = settings.accountProvider === "nuvio";
   return (
     <>
       <Section
@@ -234,14 +235,16 @@ export function HomeTab() {
             onChange={(v) => update({ animeOnlyInAnimeRoom: v })}
             preview={<HomeRowPreview kind="anime-room" />}
           />
-          <ToggleRow
-            label={t("Keep Continue Watching private to each profile")}
-            sub={t(
-              "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this Stremio account.",
-            )}
-            value={settings.cwPerProfile}
-            onChange={(v) => update({ cwPerProfile: v })}
-          />
+          {!isNuvio && (
+            <ToggleRow
+              label={t("Keep Continue Watching private to each profile")}
+              sub={t(
+                "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this Stremio account.",
+              )}
+              value={settings.cwPerProfile}
+              onChange={(v) => update({ cwPerProfile: v })}
+            />
+          )}
         </SettingGroup>
 
         <SettingGroup label={t("Continue Watching sources")}>
@@ -251,12 +254,16 @@ export function HomeTab() {
             )}
           </p>
           <ToggleRow
-            label={t("Harbor library")}
-            sub={t("Your own Harbor account progress. The primary source for almost everyone.")}
+            label={isNuvio ? t("Nuvio library") : t("Harbor library")}
+            sub={
+              isNuvio
+                ? t("Your own Nuvio account progress. The primary source for almost everyone.")
+                : t("Your own Harbor account progress. The primary source for almost everyone.")
+            }
             value={settings.cwSources.library}
             onChange={(v) => update({ cwSources: { ...settings.cwSources, library: v } })}
             lockReason={
-              settings.cwPerProfile
+              !isNuvio && settings.cwPerProfile
                 ? t("Unavailable while Continue Watching is kept private to each profile.")
                 : undefined
             }
@@ -276,7 +283,7 @@ export function HomeTab() {
             value={settings.cwSources.trakt}
             onChange={(v) => update({ cwSources: { ...settings.cwSources, trakt: v } })}
             lockReason={
-              settings.cwPerProfile
+              !isNuvio && settings.cwPerProfile
                 ? t(
                     "Unavailable while Continue Watching is kept private to each profile, because Trakt progress is shared across every profile on this account.",
                   )
@@ -292,7 +299,7 @@ export function HomeTab() {
             value={settings.cwSources.simkl}
             onChange={(v) => update({ cwSources: { ...settings.cwSources, simkl: v } })}
             lockReason={
-              settings.cwPerProfile
+              !isNuvio && settings.cwPerProfile
                 ? t(
                     "Unavailable while Continue Watching is kept private to each profile, because Simkl progress is shared across every profile on this account.",
                   )

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { meta as fetchMeta } from "@/lib/cinemeta";
+import { manualWatchedState } from "@/lib/manual-watched";
 import type { LibraryItem } from "@/lib/stremio";
 
 const TTL = 6 * 60 * 60 * 1000;
@@ -70,13 +71,18 @@ export type NewEpisode = {
   released: number;
 };
 
-const DISMISS_KEY = "harbor.newEpisodes.dismissed.v1";
+const DEFAULT_DISMISS_KEY = "harbor.newEpisodes.dismissed.v1";
 const listCache = new Map<string, { at: number; items: NewEpisode[] }>();
 const listInflight = new Map<string, Promise<NewEpisode[]>>();
 
-function readDismissed(): Set<string> {
+function resolveDismissKey(scopeKey?: string): string {
+  if (scopeKey) return `harbor.newEpisodes.dismissed.${scopeKey}`;
+  return DEFAULT_DISMISS_KEY;
+}
+
+function readDismissed(scopeKey?: string): Set<string> {
   try {
-    const raw = localStorage.getItem(DISMISS_KEY);
+    const raw = localStorage.getItem(resolveDismissKey(scopeKey));
     const arr = raw ? (JSON.parse(raw) as unknown) : [];
     return new Set(Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : []);
   } catch {
@@ -84,22 +90,22 @@ function readDismissed(): Set<string> {
   }
 }
 
-function writeDismissed(keys: Set<string>): void {
+function writeDismissed(keys: Set<string>, scopeKey?: string): void {
   try {
-    localStorage.setItem(DISMISS_KEY, JSON.stringify([...keys].slice(-600)));
+    localStorage.setItem(resolveDismissKey(scopeKey), JSON.stringify([...keys].slice(-600)));
   } catch {
     /* private mode or quota */
   }
 }
 
-export function dismissEpisodes(keys: string[]): void {
-  const set = readDismissed();
+export function dismissEpisodes(keys: string[], scopeKey?: string): void {
+  const set = readDismissed(scopeKey);
   for (const k of keys) set.add(k);
-  writeDismissed(set);
+  writeDismissed(set, scopeKey);
 }
 
-export function isDismissed(key: string): boolean {
-  return readDismissed().has(key);
+export function isDismissed(key: string, scopeKey?: string): boolean {
+  return readDismissed(scopeKey).has(key);
 }
 
 async function computeList(item: LibraryItem, lastWatchedMs: number): Promise<NewEpisode[]> {
@@ -117,6 +123,7 @@ async function computeList(item: LibraryItem, lastWatchedMs: number): Promise<Ne
     const season = v.season ?? 0;
     const episode = v.episode ?? v.number ?? 0;
     if (season === 0 && episode === 0) continue;
+    if (manualWatchedState(item._id, season, episode) === true) continue;
 
     out.push({
       key: `${item._id}:${season}:${episode}`,

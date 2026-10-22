@@ -215,7 +215,7 @@ export function AccountMenuPanel({
 
         {!kid && (
           <div className="flex flex-col">
-            {author && (
+            {(author || (isNuvio && nuvioState.session)) && (
               <button onClick={viewMyProfile} className={ITEM}>
                 <UserRound size={14} strokeWidth={2.2} />
                 {t("View my profile")}

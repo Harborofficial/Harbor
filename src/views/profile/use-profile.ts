@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { authToken, currentAuthor, refreshToken, subscribeAuthor } from "@/lib/theme-auth";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
+import { resolveNuvioAvatar } from "@/lib/nuvio/nuvio-profiles";
 import { fetchActivity, fetchBadges, fetchFriends, fetchSummary, ProfileNotFound } from "./profile-api";
 import type { ActivityItem, Badge, Friend, LoadState, ProfileSummary } from "./profile-types";
 
@@ -88,6 +91,45 @@ export function useProfile(handle: string): ProfileBundle {
       })
       .catch((e) => {
         if (ac.signal.aborted) return;
+        if (isNuvioProviderActive()) {
+          try {
+            const ns = loadNuvioState();
+            const primary = ns.profiles.find((p) => p.profile_index === 1) || ns.profiles[0];
+            const nuvioHandle = (
+              primary?.name?.toLowerCase().replace(/\s+/g, "") ||
+              ns.email?.split("@")[0] ||
+              "nuvio"
+            ).toLowerCase();
+            if (handle.toLowerCase() === nuvioHandle || handle.toLowerCase() === "me") {
+              const fallback: ProfileSummary = {
+                handle: nuvioHandle,
+                alias: primary?.name || ns.email?.split("@")[0] || "Nuvio User",
+                avatarUrl: resolveNuvioAvatar(primary) || undefined,
+                verified: false,
+                featured: false,
+                level: 1,
+                xp: 0,
+                xpToNext: 100,
+                online: true,
+                memberSince: new Date().toISOString(),
+                counts: {
+                  watched: 0,
+                  episodesWatched: 0,
+                  moviesWatched: 0,
+                  hoursWatched: 0,
+                  minutesWatched: 0,
+                  friends: 0,
+                  badges: 0,
+                  mangaRead: 0,
+                },
+                isOwner: true,
+              };
+              setSummary(fallback);
+              setState("ready");
+              return;
+            }
+          } catch {}
+        }
         setState(e instanceof ProfileNotFound ? "empty" : "error");
       });
     return () => ac.abort();
