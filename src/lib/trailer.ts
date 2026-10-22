@@ -2,6 +2,7 @@ import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { lruSet } from "@/lib/cache";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { tmdbTrailerList } from "@/lib/providers/tmdb";
+import { registerStreamProxy } from "@/lib/stream-proxy";
 
 export type TrailerInfo = {
   file_path: string;
@@ -22,6 +23,7 @@ export const TRAILER_FETCH_TIMEOUT_MS = 400_000;
 const CACHE_MAX = 64;
 
 const cache = new Map<string, Promise<TrailerInfo | null>>();
+const streamCache = new Map<string, { expires: number; request: Promise<TrailerInfo | null> }>();
 const prefetchQueue: Array<() => Promise<unknown>> = [];
 let prefetchActive = false;
 
@@ -60,9 +62,29 @@ export function shouldPrefetch(): boolean {
 export function fetchTrailer(
   videoId: string,
   quality: Quality = getQualityHint(),
+  download = false,
 ): Promise<TrailerInfo | null> {
   if (!isTauri || !videoId) return Promise.resolve(null);
   const key = cacheKey(videoId, quality);
+  if (!download) {
+    const hit = streamCache.get(key);
+    if (hit && hit.expires > Date.now()) return hit.request;
+    const request = invoke<{ url: string; headers: Record<string, string>; transcode?: boolean }>(
+      "resolve_youtube_stream", { videoId, quality },
+    ).then(async (stream): Promise<TrailerInfo> => {
+      const expiry = Number(new URL(stream.url).searchParams.get("expire"));
+      const cached = streamCache.get(key);
+      if (cached && expiry > 0) cached.expires = Math.min(cached.expires, expiry * 1000 - 30_000);
+      const proxy = await registerStreamProxy(stream.url, stream.headers, { transcode: stream.transcode, fragmentedMp4: true });
+      return { file_path: "", stream_url: proxy.url, quality, duration_seconds: 0, title: "", size_bytes: 0 };
+    }).catch(() => {
+      streamCache.delete(key);
+      return fetchTrailer(videoId, quality, true);
+    });
+    streamCache.set(key, { expires: Date.now() + 5 * 60_000, request });
+    while (streamCache.size > CACHE_MAX) streamCache.delete(streamCache.keys().next().value!);
+    return request;
+  }
   const hit = cache.get(key);
   if (hit) {
     cache.delete(key);
@@ -130,7 +152,8 @@ export function prefetchTrailer(videoId: string, quality: Quality = "360p"): voi
   if (!isTauri || !videoId) return;
   if (!shouldPrefetch()) return;
   const key = cacheKey(videoId, quality);
-  if (cache.has(key)) return;
+  const hit = streamCache.get(key);
+  if (hit && hit.expires > Date.now()) return;
   prefetchQueue.push(() => fetchTrailer(videoId, quality));
   drainPrefetch();
 }

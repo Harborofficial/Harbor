@@ -63,7 +63,7 @@ export async function saveTrailerToDisk(
 ): Promise<SaveOutcome> {
   if (!IS_TAURI) return { saved: false, path: null };
   const { fetchTrailer } = await import("@/lib/trailer");
-  const info = await fetchTrailer(ytId, quality);
+  const info = await fetchTrailer(ytId, quality, true);
   if (!info) return { saved: false, path: null };
   const res = await fetch(convertFileSrc(info.file_path));
   const bytes = new Uint8Array(await res.arrayBuffer());
