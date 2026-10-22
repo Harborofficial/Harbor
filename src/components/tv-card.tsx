@@ -86,6 +86,7 @@ export const TvCard = memo(function TvCard({
         kids={kids}
         logo={logo}
         posterSrc={poster.src}
+        backdropSrc={poster.backdrop}
         onPosterError={poster.onError}
         reason={reason}
       />
@@ -131,6 +132,7 @@ export function TvCardArtwork({
   kids = false,
   logo,
   posterSrc,
+  backdropSrc,
   onPosterError,
   reason,
 }: {
@@ -138,16 +140,20 @@ export function TvCardArtwork({
   kids?: boolean;
   logo?: string;
   posterSrc?: string;
+  backdropSrc?: string;
   onPosterError?: () => void;
   reason?: string;
 }) {
   const { settings } = useSettings();
   const [failedBackdrop, setFailedBackdrop] = useState<string>();
   const animeBackdrop = useAnimeBackdrop(meta);
-  const backdrop =
+  const fallbackBackdrop =
     meta.background && meta.background !== meta.poster ? meta.background : animeBackdrop;
-  const wide = backdrop && backdrop !== failedBackdrop ? backdrop : undefined;
-  const pos = POS[settings.tvCardLogoPos] ?? POS.bottomStart;
+  const wide = [backdropSrc, fallbackBackdrop].find((url) => url && url !== failedBackdrop);
+  const pos =
+    settings.tvCardLogoPos === "off"
+      ? null
+      : (POS[settings.tvCardLogoPos] ?? POS.bottomStart);
 
   return (
     <>
@@ -157,7 +163,7 @@ export function TvCardArtwork({
           alt=""
           draggable={false}
           loading="lazy"
-          onError={() => setFailedBackdrop(backdrop)}
+          onError={() => setFailedBackdrop(wide)}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
@@ -171,48 +177,52 @@ export function TvCardArtwork({
         />
       )}
 
-      <span
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            settings.tvCardLogoPos === "center"
-              ? "linear-gradient(0deg, color-mix(in oklch, var(--color-canvas), transparent 20%) 0%, color-mix(in oklch, var(--color-canvas), transparent 55%) 50%, color-mix(in oklch, var(--color-canvas), transparent 30%) 100%)"
-              : "linear-gradient(0deg, var(--color-canvas) 2%, color-mix(in oklch, var(--color-canvas), transparent 35%) 34%, color-mix(in oklch, var(--color-canvas), transparent 82%) 62%, transparent 84%)",
-        }}
-      />
-
-      <span className={`absolute z-10 flex gap-2.5 ${pos}`}>
-        <span className="h-[54px] w-[36px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-8px_rgba(0,0,0,0.9)] ring-1 ring-white/12">
-          <img
-            src={posterSrc}
-            onError={onPosterError}
-            alt=""
-            draggable={false}
-            className="h-full w-full object-cover"
+      {pos && (
+        <>
+          <span
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                settings.tvCardLogoPos === "center"
+                  ? "linear-gradient(0deg, color-mix(in oklch, var(--color-canvas), transparent 20%) 0%, color-mix(in oklch, var(--color-canvas), transparent 55%) 50%, color-mix(in oklch, var(--color-canvas), transparent 30%) 100%)"
+                  : "linear-gradient(0deg, var(--color-canvas) 2%, color-mix(in oklch, var(--color-canvas), transparent 35%) 34%, color-mix(in oklch, var(--color-canvas), transparent 82%) 62%, transparent 84%)",
+            }}
           />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col justify-end gap-1">
-          {logo ? (
-            <img
-              src={logo}
-              alt={meta.name}
-              draggable={false}
-              loading="lazy"
-              className="max-h-[34px] w-auto max-w-full self-start object-contain object-left [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.8))]"
-            />
-          ) : (
-            <span className="line-clamp-2 text-[14.5px] font-semibold leading-tight text-ink [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
-              {meta.name}
+
+          <span className={`absolute z-10 flex gap-2.5 ${pos}`}>
+            <span className="h-[54px] w-[36px] shrink-0 overflow-hidden rounded-sm shadow-[0_8px_18px_-8px_rgba(0,0,0,0.9)] ring-1 ring-white/12">
+              <img
+                src={posterSrc}
+                onError={onPosterError}
+                alt=""
+                draggable={false}
+                className="h-full w-full object-cover"
+              />
             </span>
-          )}
-          {!kids && (meta.releaseInfo || reason) && (
-            <span className="truncate text-[11px] tabular-nums text-ink-muted [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
-              {[meta.releaseInfo, reason].filter(Boolean).join(" · ")}
+            <span className="flex min-w-0 flex-1 flex-col justify-end gap-1">
+              {logo ? (
+                <img
+                  src={logo}
+                  alt={meta.name}
+                  draggable={false}
+                  loading="lazy"
+                  className="max-h-[34px] w-auto max-w-full self-start object-contain object-left [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.8))]"
+                />
+              ) : (
+                <span className="line-clamp-2 text-[14.5px] font-semibold leading-tight text-ink [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
+                  {meta.name}
+                </span>
+              )}
+              {!kids && (meta.releaseInfo || reason) && (
+                <span className="truncate text-[11px] tabular-nums text-ink-muted [text-shadow:0_1px_6px_rgba(0,0,0,0.9)]">
+                  {[meta.releaseInfo, reason].filter(Boolean).join(" · ")}
+                </span>
+              )}
             </span>
-          )}
-        </span>
-      </span>
+          </span>
+        </>
+      )}
     </>
   );
 }

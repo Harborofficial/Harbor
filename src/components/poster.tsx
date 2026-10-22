@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { needsImdbForPoster, needsTmdbForPoster, rpdbPoster } from "@/lib/providers/rpdb";
+import { needsImdbForPoster, needsTmdbForPoster, rpdbBackdrop, rpdbPoster } from "@/lib/providers/rpdb";
 import { useTitlePoster } from "@/lib/title-poster";
 import {
   tmdbIdFromImdb,
@@ -205,6 +205,35 @@ export function usePosterChain(
     pinned,
   ]);
   const sig = candidates.join("|");
+  const backdrop = useMemo(() => {
+    if (pending) return undefined;
+    return (
+      (animeImdb
+        ? rpdbBackdrop(rpdbKey, animeImdb, undefined, animeTmdb, settings.posterBaseUrl, type)
+        : undefined) ??
+      (animeTvdb
+        ? rpdbBackdrop(
+            rpdbKey,
+            `tvdb:${animeTvdb}`,
+            undefined,
+            undefined,
+            settings.posterBaseUrl,
+            type,
+          )
+        : undefined) ??
+      rpdbBackdrop(rpdbKey, metaId, undefined, altId, settings.posterBaseUrl, type)
+    );
+  }, [
+    rpdbKey,
+    settings.posterBaseUrl,
+    type,
+    metaId,
+    altId,
+    animeImdb,
+    animeTvdb,
+    animeTmdb,
+    pending,
+  ]);
   const failedRef = useRef<Set<string>>(new Set());
   const sigRef = useRef(sig);
   const [, bump] = useReducer((n: number) => n + 1, 0);
@@ -222,6 +251,7 @@ export function usePosterChain(
   return {
     src,
     onError,
+    backdrop,
   };
 }
 

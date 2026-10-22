@@ -451,7 +451,7 @@ export type Settings = {
     | "spotlight"
     | "custom";
   rowCardStyle: "poster" | "tv";
-  tvCardLogoPos: "center" | "bottomStart" | "bottomEnd";
+  tvCardLogoPos: "center" | "bottomStart" | "bottomEnd" | "off";
   scrollUpTrailer: boolean;
   cardHoverShine: boolean;
   customHoverId: string;

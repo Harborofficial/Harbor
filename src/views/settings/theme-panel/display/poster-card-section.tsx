@@ -62,6 +62,7 @@ export function PosterCardSection() {
                 { value: "bottomStart", label: t("Start") },
                 { value: "center", label: t("Center") },
                 { value: "bottomEnd", label: t("End") },
+                { value: "off", label: t("Off") },
               ]}
               onChange={(v) => update({ tvCardLogoPos: v })}
             />
