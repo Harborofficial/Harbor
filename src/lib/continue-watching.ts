@@ -114,8 +114,10 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       publicmetadb: cwSources.publicmetadb,
     });
   }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb]);
+  const isNuvioProvider = settings.accountProvider === "nuvio";
   const externalCw = useExternalCw(
-    !hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb),
+    isNuvioProvider ||
+      (!hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb)),
   );
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);
@@ -171,16 +173,28 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
 
   return useMemo(() => {
     void localVersion;
+    const isNuvio = settings.accountProvider === "nuvio";
     const disabledSources = new Set<ExternalCwSource>();
     if (!cwSources.simkl) disabledSources.add("simkl");
     if (!cwSources.trakt) disabledSources.add("trakt");
     if (!cwSources.publicmetadb) disabledSources.add("publicmetadb");
-    const base = hideSharedCw
-      ? []
-      : [
-          ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
-          ...externalCw.filter((i) => !(i.external && disabledSources.has(i.external))),
-        ];
+
+    const externalAllowed = externalCw.filter((i) => {
+      if (!i.external) return false;
+      if (i.external === "nuvio") return true;
+      if (disabledSources.has(i.external)) return false;
+      if (hideSharedCw) return false;
+      return true;
+    });
+
+    const base = isNuvio
+      ? externalAllowed
+      : hideSharedCw
+        ? []
+        : [
+            ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
+            ...externalAllowed.filter((i) => i.external !== "nuvio"),
+          ];
     const local = listLocalCw(hideSharedCw).filter((e) =>
       e.source === "library" ? cwSources.library : cwSources.local,
     );

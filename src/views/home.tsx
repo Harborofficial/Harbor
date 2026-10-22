@@ -157,7 +157,9 @@ export function Home({
   const [letterboxdRows, setLetterboxdRows] = useState<HomeRow[]>([]);
   const isNuvioProvider = settings.accountProvider === "nuvio";
   const externalCw = useExternalCw(
-    isNuvioProvider || (!hideSharedCw && (settings.cwSources.trakt || settings.cwSources.simkl)),
+    isNuvioProvider ||
+      (!hideSharedCw &&
+        (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb)),
   );
   const [traktWatched, setTraktWatched] = useState<Set<string>>(() => peekTraktWatched());
   const [simklWatchedMap, setSimklWatchedMap] = useState<Map<string, Set<string>>>(() =>
@@ -681,13 +683,26 @@ export function Home({
     }));
   }, [localCwVer, hideSharedCw, activeProfile?.id, isNuvioProvider]);
   const continueWatching = useMemo(() => {
+    const disabledSources = new Set<string>();
+    if (!settings.cwSources.simkl) disabledSources.add("simkl");
+    if (!settings.cwSources.trakt) disabledSources.add("trakt");
+    if (!settings.cwSources.publicmetadb) disabledSources.add("publicmetadb");
+
+    const externalAllowed = externalCw.filter((i) => {
+      if (!i.external) return false;
+      if (i.external === "nuvio") return true;
+      if (disabledSources.has(i.external)) return false;
+      if (hideSharedCw) return false;
+      return true;
+    });
+
     const cwBase = isNuvioProvider
-      ? externalCw.filter((i) => i.external === "nuvio")
+      ? externalAllowed
       : hideSharedCw
         ? []
         : [
             ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
-            ...externalCw.filter((i) => i.external !== "nuvio"),
+            ...externalAllowed.filter((i) => i.external !== "nuvio"),
           ];
     const eligible = (
       isNuvioProvider
@@ -718,20 +733,83 @@ export function Home({
       const mt = typeof m === "number" ? m : Date.parse(String(m ?? ""));
       return Number.isFinite(mt) ? mt : 0;
     };
+
+    const resolveCollision = (held: LibraryItem, incoming: LibraryItem): LibraryItem => {
+      const heldIsNuvio = held.external === "nuvio";
+      const incIsNuvio = incoming.external === "nuvio";
+
+      if (isNuvioProvider) {
+        if (heldIsNuvio && !incIsNuvio) {
+          if (lastWatchedOf(incoming) > lastWatchedOf(held)) {
+            return {
+              ...held,
+              state: {
+                ...held.state,
+                ...incoming.state,
+                video_id: incoming.state?.video_id ?? held.state?.video_id,
+                season: incoming.state?.season ?? held.state?.season,
+                episode: incoming.state?.episode ?? held.state?.episode,
+                timeOffset: incoming.state?.timeOffset ?? held.state?.timeOffset,
+                duration: incoming.state?.duration ?? held.state?.duration,
+                lastWatched: incoming.state?.lastWatched ?? held.state?.lastWatched,
+              },
+              _mtime: incoming._mtime ?? held._mtime,
+            };
+          }
+          return held;
+        }
+        if (!heldIsNuvio && incIsNuvio) {
+          if (lastWatchedOf(held) > lastWatchedOf(incoming)) {
+            return {
+              ...incoming,
+              state: {
+                ...incoming.state,
+                ...held.state,
+                video_id: held.state?.video_id ?? incoming.state?.video_id,
+                season: held.state?.season ?? incoming.state?.season,
+                episode: held.state?.episode ?? incoming.state?.episode,
+                timeOffset: held.state?.timeOffset ?? incoming.state?.timeOffset,
+                duration: held.state?.duration ?? incoming.state?.duration,
+                lastWatched: held.state?.lastWatched ?? incoming.state?.lastWatched,
+              },
+              _mtime: held._mtime ?? incoming._mtime,
+            };
+          }
+          return incoming;
+        }
+      }
+
+      // In Stremio mode: native Stremio item (no external property) has precedence
+      const heldIsNativeStremio = !held.external && !isNuvioProvider;
+      const incIsNativeStremio = !incoming.external && !isNuvioProvider;
+      if (heldIsNativeStremio && !incIsNativeStremio) return held;
+      if (!heldIsNativeStremio && incIsNativeStremio) return incoming;
+
+      return lastWatchedOf(incoming) > lastWatchedOf(held) ? incoming : held;
+    };
+
     const byId = new Map<string, LibraryItem>();
     const byName = new Map<string, LibraryItem>();
     for (const i of eligible) {
-      if (byId.has(i._id)) continue;
       const nm = norm(i.name ?? "");
       const key = `${i.type}:${nm}`;
+
+      const heldById = byId.get(i._id);
+      if (heldById) {
+        const resolved = resolveCollision(heldById, i);
+        byId.set(resolved._id, resolved);
+        if (nm) byName.set(key, resolved);
+        continue;
+      }
+
       if (nm) {
-        const held = byName.get(key);
-        if (held) {
-          if (lastWatchedOf(i) > lastWatchedOf(held)) {
-            byId.delete(held._id);
-            byName.set(key, i);
-            byId.set(i._id, i);
-          }
+        const heldByName = byName.get(key);
+        if (heldByName) {
+          const resolved = resolveCollision(heldByName, i);
+          if (resolved._id !== heldByName._id) byId.delete(heldByName._id);
+          if (resolved._id !== i._id) byId.delete(i._id);
+          byId.set(resolved._id, resolved);
+          byName.set(key, resolved);
           continue;
         }
         byName.set(key, i);
@@ -754,6 +832,9 @@ export function Home({
     cwRootVersion,
     settings.animeOnlyInAnimeRoom,
     settings.hideContent.anime,
+    settings.cwSources.trakt,
+    settings.cwSources.simkl,
+    settings.cwSources.publicmetadb,
     hideSharedCw,
     animeDetectVer,
     isNuvioProvider,
@@ -774,7 +855,7 @@ export function Home({
   }, [localCwItems, externalCw]);
   const resurfaceLibrary = useMemo(() => {
     if (isNuvioProvider) {
-      return externalCw.filter((i) => i.external === "nuvio" && i.type === "series");
+      return externalCw.filter((i) => (i.external === "nuvio" || i.external === "trakt" || i.external === "simkl") && i.type === "series");
     }
     const pool = [
       ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),

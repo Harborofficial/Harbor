@@ -96,23 +96,63 @@ function activityOf(i: LibraryItem): number {
   return Number.isFinite(m) ? m : 0;
 }
 
-function mergeKey(i: LibraryItem): string {
-  const se = episodeFromVideoId(i.state?.video_id);
-  const season = i.state?.season ?? se?.season;
-  const episode = i.state?.episode ?? se?.episode;
-  return `${i._id}|${season ?? ""}|${episode ?? ""}`;
+function mergeItem(existing: LibraryItem, incoming: LibraryItem): LibraryItem {
+  const isExistingNuvio = existing.external === "nuvio";
+  const isIncomingNuvio = incoming.external === "nuvio";
+
+  if (isExistingNuvio && !isIncomingNuvio) {
+    if (activityOf(incoming) > activityOf(existing)) {
+      return {
+        ...existing,
+        state: {
+          ...existing.state,
+          ...incoming.state,
+          video_id: incoming.state?.video_id ?? existing.state?.video_id,
+          season: incoming.state?.season ?? existing.state?.season,
+          episode: incoming.state?.episode ?? existing.state?.episode,
+          timeOffset: incoming.state?.timeOffset ?? existing.state?.timeOffset,
+          duration: incoming.state?.duration ?? existing.state?.duration,
+          lastWatched: incoming.state?.lastWatched ?? existing.state?.lastWatched,
+        },
+        _mtime: incoming._mtime ?? existing._mtime,
+      };
+    }
+    return existing;
+  }
+
+  if (!isExistingNuvio && isIncomingNuvio) {
+    if (activityOf(existing) > activityOf(incoming)) {
+      return {
+        ...incoming,
+        state: {
+          ...incoming.state,
+          ...existing.state,
+          video_id: existing.state?.video_id ?? incoming.state?.video_id,
+          season: existing.state?.season ?? incoming.state?.season,
+          episode: existing.state?.episode ?? incoming.state?.episode,
+          timeOffset: existing.state?.timeOffset ?? incoming.state?.timeOffset,
+          duration: existing.state?.duration ?? incoming.state?.duration,
+          lastWatched: existing.state?.lastWatched ?? incoming.state?.lastWatched,
+        },
+        _mtime: existing._mtime ?? incoming._mtime,
+      };
+    }
+    return incoming;
+  }
+
+  return activityOf(incoming) > activityOf(existing) ? incoming : existing;
 }
 
 function merge(lists: LibraryItem[][]): LibraryItem[] {
-  const byKey = new Map<string, LibraryItem>();
+  const byId = new Map<string, LibraryItem>();
   for (const list of lists) {
     for (const i of list) {
-      const key = mergeKey(i);
-      const held = byKey.get(key);
-      if (!held || activityOf(i) > activityOf(held)) byKey.set(key, i);
+      const held = byId.get(i._id);
+      if (!held) byId.set(i._id, i);
+      else byId.set(i._id, mergeItem(held, i));
     }
   }
-  return [...byKey.values()].sort((a, b) => activityOf(b) - activityOf(a));
+  return [...byId.values()].sort((a, b) => activityOf(b) - activityOf(a));
 }
 
 let sourceMask = { trakt: true, simkl: true, publicmetadb: false, nuvio: isNuvioProviderActive() };
@@ -317,15 +357,16 @@ function onProfileChange(): void {
   if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
     const currentSlot = resolveNuvioProfileIndex();
     const cached = getCachedNuvioItemsForSlot(currentSlot);
+    const nonNuvio = items.filter((i) => i.external !== "nuvio");
     if (cached.length > 0) {
-      setItems(cached);
+      setItems(merge([cached, nonNuvio]));
     } else {
       const built = readCachedNuvioPlaybackItems(currentSlot);
       if (built.length > 0) {
         slotCwMemoryCache.set(currentSlot, built);
-        setItems(built);
+        setItems(merge([built, nonNuvio]));
       } else {
-        setItems(EMPTY);
+        setItems(nonNuvio);
       }
     }
   } else {
@@ -363,7 +404,8 @@ if (typeof window !== "undefined") {
         const fresh = readCachedNuvioPlaybackItems(slot);
         if (fresh.length > 0) {
           slotCwMemoryCache.set(slot, fresh);
-          setItems(fresh);
+          const nonNuvio = items.filter((i) => i.external !== "nuvio");
+          setItems(merge([fresh, nonNuvio]));
         }
       }
     }
@@ -384,7 +426,8 @@ if (typeof window !== "undefined") {
         }
         const fresh = readCachedNuvioPlaybackItems(slot).filter((i) => !contentId || i._id !== contentId);
         slotCwMemoryCache.set(slot, fresh);
-        setItems(fresh);
+        const nonNuvio = items.filter((i) => i.external !== "nuvio" && (!contentId || i._id !== contentId));
+        setItems(merge([fresh, nonNuvio]));
       }
     }
   });
@@ -396,7 +439,8 @@ if (typeof window !== "undefined") {
       if (slot === current) {
         const fresh = readCachedNuvioPlaybackItems(slot);
         slotCwMemoryCache.set(slot, fresh);
-        setItems(fresh);
+        const nonNuvio = items.filter((i) => i.external !== "nuvio");
+        setItems(merge([fresh, nonNuvio]));
       }
     }
   });
@@ -411,7 +455,8 @@ export function useExternalCw(enabled = true): LibraryItem[] {
         const slot = resolveNuvioProfileIndex();
         const cached = getCachedNuvioItemsForSlot(slot);
         if (cached.length > 0) {
-          setItems(cached);
+          const nonNuvio = items.filter((i) => i.external !== "nuvio");
+          setItems(merge([cached, nonNuvio]));
         }
       } catch {}
     }
