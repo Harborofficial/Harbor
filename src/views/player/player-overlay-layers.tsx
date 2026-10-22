@@ -1,6 +1,7 @@
 import { memo, type ComponentProps, type RefObject } from "react";
 import { DrawCanvas, StrokesLayer, type Stroke } from "@/components/player/draw-canvas";
 import { cropTransform } from "./hooks/use-video-fill";
+import type { HoldSpeed } from "./hooks/use-hold-speed";
 import { StreamSwitcher } from "@/components/player/stream-switcher";
 import { StreamCheckPill } from "@/components/player/stream-check-pill";
 import { AdReportButton } from "@/components/player/ad-report-button";
@@ -66,6 +67,7 @@ export type PlayerOverlayLayersProps = {
   toggleFullscreen: () => void;
   onVolumeWheel: (deltaY: number) => void;
   onVolumeFeedback: (volume: number, muted: boolean) => void;
+  holdSpeed: HoldSpeed;
   isLocalSrc: boolean;
   sourceFailed: boolean;
   swappingEp: boolean;
@@ -255,6 +257,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         onClick={p.playPauseToggle}
         onDoubleClick={p.toggleFullscreen}
         onWheelVolume={p.onVolumeWheel}
+        holdSpeed={p.holdSpeed}
       />
 
       {p.tenFoot ? (

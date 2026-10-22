@@ -53,6 +53,7 @@ import { isWeb } from "@/lib/platform";
 import { usePauseOnInactive } from "./player/hooks/use-pause-on-inactive";
 import { spoilerMaskFor } from "@/lib/spoilers";
 import { usePlayerWatched } from "./player/hooks/use-player-watched";
+import { useHoldSpeed } from "./player/hooks/use-hold-speed";
 import { EXTERNAL_PLAYER_CLOSED_EVENT } from "@/lib/player/external-mpv";
 import { useRoomSync } from "./player/hooks/use-room-sync";
 import { useHostSource } from "./player/hooks/use-host-source";
@@ -946,85 +947,12 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     snap.videoSourceWidth,
     bridgeReady,
   );
-  const [mouseHoldSpeedActive, setMouseHoldSpeedActive] = useState(false);
-  const mouseHoldRef = useRef<{
-    pointerId: number | null;
-    timer: number | null;
-    engaged: boolean;
-    baseRate: number;
-  }>({ pointerId: null, timer: null, engaged: false, baseRate: 1 });
-  const suppressMouseClickRef = useRef(false);
-  const suppressMouseClickTimerRef = useRef<number | null>(null);
-
-  const releaseMouseHoldSpeed = useCallback(
-    (suppressClick: boolean) => {
-      const hold = mouseHoldRef.current;
-      if (hold.pointerId == null) return;
-      if (hold.timer != null) {
-        window.clearTimeout(hold.timer);
-        hold.timer = null;
-      }
-      const wasEngaged = hold.engaged;
-      hold.pointerId = null;
-      hold.engaged = false;
-      if (!wasEngaged) return;
-
-      bridgeRef.current?.setRate(hold.baseRate);
-      setMouseHoldSpeedActive(false);
-      if (!suppressClick) return;
-
-      suppressMouseClickRef.current = true;
-      if (suppressMouseClickTimerRef.current != null) {
-        window.clearTimeout(suppressMouseClickTimerRef.current);
-      }
-      suppressMouseClickTimerRef.current = window.setTimeout(() => {
-        suppressMouseClickRef.current = false;
-        suppressMouseClickTimerRef.current = null;
-      }, 0);
-    },
-    [bridgeRef],
-  );
-
-  useEffect(() => {
-    return () => {
-      const hold = mouseHoldRef.current;
-      if (hold.timer != null) window.clearTimeout(hold.timer);
-      if (hold.engaged) {
-        bridgeRef.current?.setRate(hold.baseRate);
-        setMouseHoldSpeedActive(false);
-      }
-      hold.pointerId = null;
-      hold.timer = null;
-      hold.engaged = false;
-      suppressMouseClickRef.current = false;
-      if (suppressMouseClickTimerRef.current != null) {
-        window.clearTimeout(suppressMouseClickTimerRef.current);
-      }
-    };
-  }, [bridgeRef, src.url]);
-
-  useEffect(() => {
-    const clear = (e: PointerEvent) => {
-      const hold = mouseHoldRef.current;
-      if (hold.pointerId == null || hold.pointerId !== e.pointerId) return;
-      if (hold.timer != null) {
-        window.clearTimeout(hold.timer);
-        hold.timer = null;
-      }
-      if (hold.engaged) {
-        bridgeRef.current?.setRate(hold.baseRate);
-        setMouseHoldSpeedActive(false);
-      }
-      hold.pointerId = null;
-      hold.engaged = false;
-    };
-    window.addEventListener("pointerup", clear);
-    window.addEventListener("pointercancel", clear);
-    return () => {
-      window.removeEventListener("pointerup", clear);
-      window.removeEventListener("pointercancel", clear);
-    };
-  }, [bridgeRef]);
+  const holdSpeed = useHoldSpeed({
+    enabled: !drawMode && !pipMode && !screenLocked,
+    getRate: () => snapRef.current.rate,
+    canEngage: () => snapRef.current.status === "playing",
+    setRate: (rate) => bridgeRef.current?.setRate(rate),
+  });
 
   const reloadBusyRef = useRef(false);
   const reloadSource = useCallback(() => {
@@ -1470,7 +1398,8 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     subShowInPip: settings.subShowInPip,
     subAssNative,
     showStats,
-    holdSpeedActive: holdSpeedActive || mouseHoldSpeedActive,
+    holdSpeedActive: holdSpeedActive || holdSpeed.active,
+    holdSpeed,
     subtitleOffsetSec,
     volumeIndicator,
     volumeHudPosition: settings.playerVolumeHudPosition,
@@ -1695,63 +1624,14 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
           transition:
             "left 340ms cubic-bezier(0.22,1,0.36,1), bottom 340ms cubic-bezier(0.22,1,0.36,1), width 340ms cubic-bezier(0.22,1,0.36,1), height 340ms cubic-bezier(0.22,1,0.36,1)",
         }}
-        onPointerDown={(e) => {
-          if (e.target !== e.currentTarget) return;
-          if (
-            e.pointerType !== "mouse" ||
-            !e.isPrimary ||
-            e.button !== 0 ||
-            drawMode ||
-            pipMode ||
-            screenLocked
-          ) {
-            return;
-          }
-          const hold = mouseHoldRef.current;
-          if (hold.pointerId != null) return;
-          const pointerId = e.pointerId;
-          hold.pointerId = pointerId;
-          hold.baseRate = snapRef.current.rate;
-          const stage = e.currentTarget;
-          hold.timer = window.setTimeout(() => {
-            hold.timer = null;
-            if (hold.pointerId !== pointerId || snapRef.current.status !== "playing") return;
-            hold.engaged = true;
-            try {
-              stage.setPointerCapture(pointerId);
-            } catch {
-              hold.pointerId = null;
-              hold.engaged = false;
-              return;
-            }
-            setMouseHoldSpeedActive(true);
-            bridgeRef.current?.setRate(Math.max(2, hold.baseRate));
-          }, 350);
-        }}
-        onPointerUp={(e) => {
-          if (mouseHoldRef.current.pointerId !== e.pointerId) return;
-          releaseMouseHoldSpeed(true);
-          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-            e.currentTarget.releasePointerCapture(e.pointerId);
-          }
-        }}
-        onPointerCancel={(e) => {
-          if (mouseHoldRef.current.pointerId === e.pointerId) releaseMouseHoldSpeed(false);
-        }}
-        onLostPointerCapture={(e) => {
-          if (mouseHoldRef.current.pointerId === e.pointerId) releaseMouseHoldSpeed(false);
-        }}
+        onPointerDown={holdSpeed.onPointerDown}
+        onPointerUp={holdSpeed.onPointerUp}
+        onPointerCancel={holdSpeed.onPointerCancel}
+        onLostPointerCapture={holdSpeed.onLostPointerCapture}
         onClick={(e) => {
           if (e.target !== e.currentTarget) return;
           if (drawMode || pipMode) return;
-          if (suppressMouseClickRef.current) {
-            suppressMouseClickRef.current = false;
-            if (suppressMouseClickTimerRef.current != null) {
-              window.clearTimeout(suppressMouseClickTimerRef.current);
-              suppressMouseClickTimerRef.current = null;
-            }
-            return;
-          }
+          if (holdSpeed.consumeClick()) return;
           if (dismissedJustNow()) {
             clearOverlayDismiss();
             return;

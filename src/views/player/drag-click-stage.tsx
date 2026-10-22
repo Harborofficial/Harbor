@@ -1,11 +1,14 @@
+import type { HoldSpeed } from "./hooks/use-hold-speed";
+
 export function DragClickStage(props: {
   drawMode: boolean;
   pipMode: boolean;
   onClick: () => void;
   onDoubleClick: () => void;
   onWheelVolume?: (deltaY: number) => void;
+  holdSpeed?: HoldSpeed;
 }) {
-  const { drawMode, pipMode, onClick, onDoubleClick, onWheelVolume } = props;
+  const { drawMode, pipMode, onClick, onDoubleClick, onWheelVolume, holdSpeed } = props;
   return (
     <div
       data-player-click-stage
@@ -15,6 +18,10 @@ export function DragClickStage(props: {
         if (e.ctrlKey || e.metaKey) return;
         onWheelVolume?.(e.deltaY);
       }}
+      onPointerDown={holdSpeed?.onPointerDown}
+      onPointerUp={holdSpeed?.onPointerUp}
+      onPointerCancel={holdSpeed?.onPointerCancel}
+      onLostPointerCapture={holdSpeed?.onLostPointerCapture}
       onMouseDown={(e) => {
         if (e.target !== e.currentTarget) return;
         if (drawMode || pipMode) return;
@@ -32,6 +39,8 @@ export function DragClickStage(props: {
             dragStarted = true;
             window.removeEventListener("mousemove", onMove);
             window.removeEventListener("mouseup", onUp);
+            // The pressure that started a window drag is not a speed hold.
+            holdSpeed?.cancel();
             import("@tauri-apps/api/window")
               .then(({ getCurrentWindow }) => getCurrentWindow().startDragging())
               .catch(() => {});
@@ -40,7 +49,7 @@ export function DragClickStage(props: {
         const onUp = () => {
           window.removeEventListener("mousemove", onMove);
           window.removeEventListener("mouseup", onUp);
-          if (!dragStarted) onClick();
+          if (!dragStarted && !holdSpeed?.consumeClick()) onClick();
         };
         window.addEventListener("mousemove", onMove);
         window.addEventListener("mouseup", onUp);
