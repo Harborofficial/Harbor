@@ -36,7 +36,16 @@ import {
   type SpotifyLibraryPlaylist,
 } from "@/lib/music/spotify-library";
 import type { MusicPlaylist, MusicTrack } from "@/lib/music/types";
-import { registerMusicQueueOrigin } from "@/lib/music/playback-origin";
+import {
+  getMusicPlaybackOrigin,
+  registerMusicQueueOrigin,
+  setMusicPlaybackOrigin,
+  useMusicPlaybackOrigin,
+  type MusicPlaybackOrigin,
+} from "@/lib/music/playback-origin";
+import { getMusicState, setMusicQueue } from "@/lib/music/player";
+import { queueTrackKey } from "@/lib/music/queue-order";
+import { readSpotifyQueuePages } from "@/lib/music/queue-continuation";
 import { openUrl } from "@/lib/window";
 import { useMusicConnections } from "./music-connections";
 import { MusicServiceLogo } from "./music-service-logo";
@@ -89,6 +98,10 @@ export function MusicSpotifyLibrary({
   onFocusedRef.current = onFocused;
   const selectedId = selected?.id;
   const player = useMusicPlayback();
+  const playbackOrigin = useMusicPlaybackOrigin();
+  const [queueFill, setQueueFill] =
+    useState<Extract<MusicPlaybackOrigin, { kind: "spotify" }> | null>(null);
+  const fillGeneration = useRef(0);
   const collection = usePlaylistFilters(selectedId ?? kind, page?.tracks, { addedAt: page?.trackAddedAt, recentFirst: kind === "liked" && !selected });
   const filteringCollection = collection.active || collection.filters.sort !== "default";
 
@@ -299,13 +312,42 @@ export function MusicSpotifyLibrary({
 
   const title = selected?.name ?? t("music.spotifyLibrary.title");
   const play = (track: MusicTrack, queue: MusicTrack[]) => {
-    registerMusicQueueOrigin(queue, {
+    const from: Extract<MusicPlaybackOrigin, { kind: "spotify" }> = {
       kind: "spotify", id: selected?.id ?? "spotify:liked",
       name: selected?.name ?? t("music.spotifyLibrary.liked"),
       collection: selected ? "playlist" : "liked", nextOffset: page?.nextOffset ?? null,
-    });
+    };
+    registerMusicQueueOrigin(queue, from);
+    // The page only holds the pages scrolled so far. Once this queue takes over, fill it
+    // with the rest of the playlist instead of stopping after the visible page. A filtered
+    // or re-sorted view is already loading every page for its own order, so leave it alone.
+    fillGeneration.current += 1;
+    setQueueFill(from.nextOffset === null || filteringCollection ? null : from);
     openSourcePicker(track, queue);
   };
+  useEffect(() => {
+    // beginMusicQueue applies the exact origin object registered for this queue, so
+    // identity proves this queue has taken over rather than the previous one still playing.
+    if (!queueFill || playbackOrigin !== queueFill) return;
+    const offset = queueFill.nextOffset;
+    setQueueFill(null);
+    if (offset === null) return;
+    const run = fillGeneration.current;
+    const wanted = queueFill;
+    void readSpotifyQueuePages(wanted, offset, (tracks, nextOffset) => {
+      if (fillGeneration.current !== run) return false;
+      const current = getMusicPlaybackOrigin();
+      if (current?.kind !== "spotify" || current.id !== wanted.id || current.collection !== wanted.collection)
+        return false;
+      const snapshot = getMusicState();
+      const held = new Set(snapshot.queue.map(queueTrackKey));
+      const fresh = tracks.filter(track => !held.has(queueTrackKey(track)));
+      if (fresh.length) setMusicQueue([...snapshot.queue, ...fresh]);
+      setMusicPlaybackOrigin({ ...current, nextOffset });
+      return true;
+    }).catch(() => {});
+  }, [playbackOrigin, queueFill]);
+  useEffect(() => () => { fillGeneration.current += 1; }, []);
   const removeTrack = async (track: MusicTrack) => {
     if (!selected?.editable || working) return;
     const playlist = selected;
