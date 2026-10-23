@@ -21,7 +21,7 @@ const NUVIO_PROFILE_MAP_KEY_PREFIX = "harbor.nuvio.profile-map.";
  */
 export function loadNuvioState(): NuvioAccountState {
   try {
-    const raw = localStorage.getItem(NUVIO_STATE_KEY);
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(NUVIO_STATE_KEY) : null;
     if (!raw) return { session: null, profiles: [], activeProfileIndex: 1, lastSyncedAt: null };
     const parsed = JSON.parse(raw) as Partial<NuvioAccountState>;
     return {
@@ -40,8 +40,12 @@ export function loadNuvioState(): NuvioAccountState {
  */
 export function saveNuvioState(state: NuvioAccountState): void {
   try {
-    localStorage.setItem(NUVIO_STATE_KEY, JSON.stringify(state));
-    window.dispatchEvent(new CustomEvent("harbor:nuvio-state-changed", { detail: state }));
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(NUVIO_STATE_KEY, JSON.stringify(state));
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-state-changed", { detail: state }));
+    }
   } catch (e) {
     console.error("[nuvio] failed to save state", e);
   }

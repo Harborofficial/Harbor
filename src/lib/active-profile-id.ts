@@ -15,15 +15,14 @@ function readState(): MinimalState | null {
 
 export function isNuvioProviderActive(): boolean {
   try {
-    const explicit = localStorage.getItem("harbor.account-provider");
+    const explicit = typeof localStorage !== "undefined" ? localStorage.getItem("harbor.account-provider") : null;
     if (explicit === "nuvio") return true;
     if (explicit === "stremio") return false;
     for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {
-      const raw = localStorage.getItem(key);
+      const raw = typeof localStorage !== "undefined" ? localStorage.getItem(key) : null;
       if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.accountProvider === "nuvio") return true;
-        if (parsed.accountProvider === "stremio") return false;
+        if (raw.includes('"accountProvider":"nuvio"')) return true;
+        if (raw.includes('"accountProvider":"stremio"')) return false;
       }
     }
   } catch {}

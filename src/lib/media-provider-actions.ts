@@ -37,7 +37,7 @@ import {
 } from "./publicmetadb/watchlist";
 import type { PmdbTarget } from "./publicmetadb/types";
 import { getPmdbDefaultListId } from "./publicmetadb/lists";
-import { isNuvioSignedIn } from "./nuvio/nuvio-client";
+import { isNuvioSignedIn, isNuvioProviderActive } from "./nuvio/nuvio-client";
 import {
   resolveNuvioProfileIndex,
   pushWatchedItemToNuvio,
@@ -455,7 +455,7 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
           });
       },
     });
-  if (isNuvioSignedIn())
+  if (isNuvioProviderActive() && isNuvioSignedIn())
     writes.push({
       provider: "Nuvio",
       run: async (assertCurrent) => {

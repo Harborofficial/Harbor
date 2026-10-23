@@ -5,7 +5,7 @@ import { HostSourceBanner } from "@/components/host-source-banner";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { fetchInstalledAddons } from "@/lib/addon-store";
 import { userAddons, type Addon } from "@/lib/addons";
-import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 import { useAuth } from "@/lib/auth";
 import { peekPickerCache, subscribePickerCache } from "@/lib/picker-cache";
@@ -117,9 +117,23 @@ export function StreamSwitcher({
     if (!open) return;
     let cancelled = false;
     (async () => {
+      const isNuvio = isNuvioProviderActive();
+      let nuvioAddonMode = "separate";
+      try {
+        const raw = typeof localStorage !== "undefined"
+          ? (localStorage.getItem("harbor.settings") || localStorage.getItem("harbor.settings.shared"))
+          : null;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.nuvioAddonMode) nuvioAddonMode = parsed.nuvioAddonMode;
+        }
+      } catch {}
+      const shouldStremio = !isNuvio || nuvioAddonMode === "combined";
+      const shouldNuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn();
+
       const installed = await fetchInstalledAddons().catch(() => [] as Addon[]);
-      const stremio = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
-      const nuvio = isNuvioSignedIn() ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
+      const stremio = shouldStremio && authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+      const nuvio = shouldNuvio ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
       if (cancelled) return;
       setAddonLogos(addonLogoMap([...installed, ...stremio, ...nuvio]));
     })();

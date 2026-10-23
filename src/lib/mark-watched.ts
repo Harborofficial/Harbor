@@ -52,7 +52,7 @@ export async function markMovieWatched(
   }
   const pmdbTarget = stremioIdToPmdbTarget(meta.id, undefined, "movie");
   if (pmdbTarget) writes.push(markPmdbWatched(pmdbTarget));
-  if (isNuvioSignedIn()) {
+  if (isNuvioProviderActive() && isNuvioSignedIn()) {
     const slot = resolveNuvioProfileIndex();
     const primaryId = imdb ?? (meta.id.startsWith("tt") ? meta.id : meta.id);
     const altId = meta.id !== primaryId ? meta.id : undefined;
@@ -92,7 +92,7 @@ export async function unmarkMovieWatched(meta: Meta, imdbId?: string | null): Pr
   const writes: Promise<unknown>[] = [];
   if (authKey && cid) writes.push(markMovieWatchedStremio(authKey, meta, cid, false));
   if (pmdbTarget) writes.push(unmarkPmdbWatched(pmdbTarget));
-  if (isNuvioSignedIn()) {
+  if (isNuvioProviderActive() && isNuvioSignedIn()) {
     const slot = resolveNuvioProfileIndex();
     const primaryId = imdb ?? (meta.id.startsWith("tt") ? meta.id : meta.id);
     const altId = meta.id !== primaryId ? meta.id : undefined;
@@ -181,7 +181,7 @@ export async function markMetaWatched(
     const target = stremioIdToPmdbTarget(imdb ?? meta.id, episode, "tv");
     if (target) void markPmdbWatched(target);
   }
-  if (isNuvioSignedIn() && eps.length > 0) {
+  if (isNuvioProviderActive() && isNuvioSignedIn() && eps.length > 0) {
     const slot = resolveNuvioProfileIndex();
     const primaryId = imdb ?? (meta.id.startsWith("tt") ? meta.id : meta.id);
     const altId = meta.id !== primaryId ? meta.id : undefined;
@@ -225,7 +225,7 @@ export async function unmarkMetaWatched(meta: Meta, imdbId?: string | null): Pro
     const target = stremioIdToPmdbTarget(resolvedImdb ?? meta.id, episode, "tv");
     if (target) void unmarkPmdbWatched(target);
   }
-  if (isNuvioSignedIn() && eps.length > 0) {
+  if (isNuvioProviderActive() && isNuvioSignedIn() && eps.length > 0) {
     const slot = resolveNuvioProfileIndex();
     const primaryId = resolvedImdb ?? (meta.id.startsWith("tt") ? meta.id : meta.id);
     const altId = meta.id !== primaryId ? meta.id : undefined;

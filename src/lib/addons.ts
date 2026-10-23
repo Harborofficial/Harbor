@@ -316,9 +316,24 @@ export function withDebridKeys(addons: Addon[], keys: DebridKeySet): Addon[] {
 }
 
 export async function gatherCatalogAddons(authKey: string | null): Promise<Addon[]> {
-  const stremioRaw = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+  const isNuvio = isNuvioProviderActive();
+  let nuvioAddonMode = "separate";
+  try {
+    const raw = typeof localStorage !== "undefined"
+      ? (localStorage.getItem("harbor.settings") || localStorage.getItem("harbor.settings.shared"))
+      : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.nuvioAddonMode) nuvioAddonMode = parsed.nuvioAddonMode;
+    }
+  } catch {}
+
+  const shouldStremio = !isNuvio || nuvioAddonMode === "combined";
+  const shouldNuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn();
+
+  const stremioRaw = shouldStremio && authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
   const stremio = filterEnabled(stremioRaw);
-  const nuvioRaw = isNuvioSignedIn() ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
+  const nuvioRaw = shouldNuvio ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
   const nuvio = filterEnabled(nuvioRaw);
   const seen = new Set([...stremio, ...nuvio].map((a) => a.transportUrl));
   const localOnly = filterEnabled(loadInstalled()).filter((l) => !seen.has(l.transportUrl));

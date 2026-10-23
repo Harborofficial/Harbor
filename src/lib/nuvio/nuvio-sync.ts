@@ -30,22 +30,8 @@ import { recordNuvioAddons } from "./nuvio-addon-registry";
 /**
  * Returns true if Nuvio is the currently active account provider in Harbor.
  */
-export function isNuvioProviderActive(): boolean {
-  try {
-    const explicit = localStorage.getItem("harbor.account-provider");
-    if (explicit === "nuvio") return true;
-    if (explicit === "stremio") return false;
-    for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {
-      const raw = localStorage.getItem(key);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.accountProvider === "nuvio") return true;
-        if (parsed.accountProvider === "stremio") return false;
-      }
-    }
-  } catch {}
-  return false;
-}
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+export { isNuvioProviderActive };
 
 /**
  * Resolves the effective Nuvio profile index (1..6) considering active provider setting.

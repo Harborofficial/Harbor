@@ -800,7 +800,8 @@ export function DetailView({
   useEffect(() => {
     setLibraryItem(null);
     noteLocalImdbId(meta.id, detail?.imdbId);
-    if (settings.accountProvider === "nuvio" || isNuvioSignedIn()) {
+    const isNuvioActiveMode = (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
+    if (isNuvioActiveMode) {
       let cancelled = false;
       Promise.all([
         pullWatchProgressFromNuvio(),
@@ -1413,7 +1414,7 @@ export function DetailView({
   }, [isAnime, animeCanonicalId, meta.id, meta.type, meta.name, title, settings.tmdbKey]);
 
   useSyncExternalStore(subscribeMovieWatched, movieWatchedVersion, movieWatchedVersion);
-  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive() || isNuvioSignedIn();
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const watchedMark =
     meta.type === "movie" &&
     (isMovieWatchedLocal(meta.id, [detail?.imdbId]) || (!isNuvio && stremioMovieWatched(libraryItem)));
