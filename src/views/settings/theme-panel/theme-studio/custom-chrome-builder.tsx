@@ -18,12 +18,14 @@ import { IconPicker } from "./icon-picker";
 
 export function CustomChromeBuilder({
   config,
+  resetConfig,
   dirty,
   onChange,
   onRegenerate,
   onOpenCode,
 }: {
   config: ChromeConfig;
+  resetConfig: ChromeConfig;
   dirty: boolean;
   onChange: (next: ChromeConfig) => void;
   onRegenerate: () => void;
@@ -66,7 +68,14 @@ export function CustomChromeBuilder({
 
       {!dirty && (
         <>
-          <Field label={t("Position")}>
+          <Field
+            label={t("Position")}
+            action={
+              <FieldReset
+                onClick={() => onChange({ ...config, position: resetConfig.position })}
+              />
+            }
+          >
             <div className="grid grid-cols-2 gap-2">
               <PosButton
                 active={config.position === "sidebar"}
@@ -83,7 +92,12 @@ export function CustomChromeBuilder({
             </div>
           </Field>
 
-          <Field label={t("Brand name")}>
+          <Field
+            label={t("Brand name")}
+            action={
+              <FieldReset onClick={() => onChange({ ...config, brand: resetConfig.brand })} />
+            }
+          >
             <input
               type="text"
               value={config.brand}
@@ -93,7 +107,21 @@ export function CustomChromeBuilder({
             />
           </Field>
 
-          <Field label={t("Menu items")}>
+          <Field
+            label={t("Menu items")}
+            action={
+              <FieldReset
+                onClick={() =>
+                  onChange({
+                    ...config,
+                    items: [...resetConfig.items],
+                    labels: resetConfig.labels ? { ...resetConfig.labels } : undefined,
+                    icons: resetConfig.icons ? { ...resetConfig.icons } : undefined,
+                  })
+                }
+              />
+            }
+          >
             <div className="flex flex-col gap-1.5">
               {enabled.map((id, i) => (
                 <MenuItemRow
@@ -236,12 +264,39 @@ function MenuItemRow({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  action,
+  children,
+}: {
+  label: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{label}</span>
+      <div className="flex min-h-8 items-center gap-2">
+        <span className="min-w-0 flex-1 text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">
+          {label}
+        </span>
+        {action}
+      </div>
       {children}
     </div>
+  );
+}
+
+function FieldReset({ onClick }: { onClick: () => void }) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-8 items-center gap-1 rounded-md px-2 text-[13.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+    >
+      <RotateCcw size={14} strokeWidth={2.2} />
+      {t("Reset")}
+    </button>
   );
 }
 
