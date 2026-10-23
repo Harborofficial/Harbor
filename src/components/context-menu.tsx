@@ -2,6 +2,7 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
+  Ban,
   BookOpen,
   Bookmark,
   BookmarkCheck,
@@ -42,6 +43,7 @@ import type { ParticipantLocation } from "@/lib/together/protocol";
 import { useView } from "@/lib/view";
 import { useInWatchlist } from "@/lib/watchlist";
 import {
+  dropContextTitle,
   setContextFavorite,
   setContextWatchlist,
   setContextWatched,
@@ -52,6 +54,8 @@ import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useIsFavorite } from "@/lib/media-favorites";
 import { MyListSubmenu } from "./context-menu/my-list-submenu";
 import { useSettings } from "@/lib/settings";
+import { DropShowConfirmModal } from "@/components/drop-show-confirm-modal";
+import { getAnimeCanonicalId, getAnimeCwId } from "@/lib/anime-cw-ids";
 import {
   NAV_ITEMS,
   effectiveNavOrder,
@@ -180,6 +184,74 @@ export function ContextMenu() {
   const { beginManualDownload, manualDownloadDialog } = useManualDownload({
     actorKey: `${activeProfile?.id ?? ""}:${authorId ?? ""}:${stremioUser?._id ?? ""}`,
   });
+  const [dropRequest, setDropRequest] = useState<{
+    id: string;
+    type?: string;
+    name: string;
+    poster?: string;
+    imdbId?: string | null;
+    background?: string | null;
+    animeId?: string | null;
+  } | null>(null);
+   const dropConfirmDialog = dropRequest ? (
+    <DropShowConfirmModal
+      title={dropRequest.name}
+      onClose={() => setDropRequest(null)}
+      onConfirm={async () => {
+        const { animeId, ...input } = dropRequest;
+        const result = await dropContextTitle(input, { animeId });
+        requireMediaActionSuccess(result);
+        emitListToast(t("Dropped {title}", { title: input.name }));
+      }}
+    />
+  ) : null;
+  if (!state)
+    return (
+      <>
+        {viewer}
+        {manualDownloadDialog}
+        {dropConfirmDialog}
+      </>
+    );
+     if (organizedMedia && meta.type !== "movie" && !playerActions) {
+      items.push(
+        <Item
+          key="drop-show"
+          icon={<Ban size={14} strokeWidth={2.1} className="text-danger" />}
+          label={t("Drop show")}
+          danger
+          onClick={() => {
+            const animeId =
+              getAnimeCwId(meta.id) ??
+              (targetImdb ? getAnimeCwId(targetImdb) : null) ??
+              getAnimeCanonicalId(meta.id) ??
+              (targetImdb ? getAnimeCanonicalId(targetImdb) : null);
+            setDropRequest({
+              id: meta.id,
+              type: meta.type,
+              name: meta.name,
+              poster: meta.poster,
+              imdbId: targetImdb,
+              background: meta.background,
+              animeId,
+            });
+            close(false);
+          }}
+        />,
+      );
+    }
+    if (meta.type !== "movie" && meta.type !== "series")
+      items.push(
+        <Item
+          key="share-link"
+          icon={<Share2 size={14} strokeWidth={2} />}
+          label={t("Share as link")}
+          onClick={() => shareLink(meta.type, meta.id)}
+        />,
+      );
+       {dropConfirmDialog}
+      <LastPlaybackCommand key={state.session} enabled={isBackground} onClose={close}>
+        {(_last, lastRow) => (
   useEffect(() => {
     closeCurrent(false);
   }, [topPath, activeProfile?.id, authorId, stremioUser?._id, closeCurrent]);
@@ -288,6 +360,12 @@ export function ContextMenu() {
   const resolvedEpisodeImdb = useTmdbImdbId(episodeMetaId);
   const episodeImdb = targetEpisode?.imdbId ?? resolvedEpisodeImdb;
   const targetImdb = useTmdbImdbId(targetMetaId);
+  const targetAnimeId =
+    (targetMetaId ? getAnimeCwId(targetMetaId) : null) ??
+    (targetImdb ? getAnimeCwId(targetImdb) : null);
+  const episodeAnimeId =
+    (episodeMetaId ? getAnimeCwId(episodeMetaId) : null) ??
+    (episodeImdb ? getAnimeCwId(episodeImdb.split(":")[0]) : null);
   const episodeScope =
     state?.target.kind === "meta" && (state.target.watchScope === "episode" || !!targetEpisode);
   const watchedState = useContextWatchedState(
@@ -298,6 +376,7 @@ export function ContextMenu() {
       ? {
           meta: state.target.meta,
           imdbId: episodeScope ? episodeImdb : targetImdb,
+          animeId: episodeScope ? episodeAnimeId : targetAnimeId,
           episode: targetEpisode,
           episodeScope,
         }
@@ -413,7 +492,6 @@ export function ContextMenu() {
     return () => document.removeEventListener("contextmenu", handler);
   }, [open, closeCurrent, player?.meta, topKind, activeAddon, pageContext, inSession]);
 
-  if (!state) return manualDownloadDialog;
 
   const subtitleDetails = state.target.kind === "subtitle" ? (state.target.details ?? null) : null;
   const target = state.target;
@@ -793,15 +871,6 @@ export function ContextMenu() {
           </p>,
         );
     }
-    if (meta.type !== "movie" && meta.type !== "series")
-      items.push(
-        <Item
-          key="share-link"
-          icon={<Share2 size={14} strokeWidth={2} />}
-          label={t("Share as link")}
-          onClick={() => shareLink(meta.type, meta.id)}
-        />,
-      );
     if (organizedMedia && inSession && !playerActions) {
       items.push(
         <Item
@@ -1273,14 +1342,13 @@ export function ContextMenu() {
       <>
         <EmptyMenu session={state.session} close={closeCurrent} completeClose={completeClose} />
         {manualDownloadDialog}
+        {dropConfirmDialog}
       </>
     );
 
   return (
     <>
       {manualDownloadDialog}
-      <LastPlaybackCommand key={state.session} enabled={isBackground} onClose={close}>
-        {(_last, lastRow) => (
           <MenuSurface
             key={state.session}
             point={state.pos}
@@ -1502,12 +1570,14 @@ function Item({
   label,
   onClick,
   accent,
+  danger,
   disabled = false,
 }: {
   icon: React.ReactNode;
   label: string;
   onClick: () => void | Promise<void>;
   accent?: boolean;
+  danger?: boolean;
   disabled?: boolean;
 }) {
   const pending = useRef(false);
@@ -1540,14 +1610,14 @@ function Item({
         disabled={disabled}
         aria-disabled={disabled || busy || execution?.busy || undefined}
         aria-busy={busy || undefined}
-        className={menuItemClass}
+        className={`${menuItemClass} ${danger ? "text-danger hover:bg-danger/10" : ""}`}
         data-active={accent || undefined}
       >
         <MenuIcon action={{ icon, active: accent }} />
         {label}
       </button>
       {error && (
-        <p role="alert" className="px-3 py-2 text-[12px] text-danger">
+        <p role="alert" className="whitespace-pre-line px-3 py-2 text-[12px] text-danger">
           {error}
         </p>
       )}

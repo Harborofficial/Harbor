@@ -8,7 +8,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { Check, Plus } from "lucide-react";
+import { Ban, Check, Plus } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { animePlayEpisode } from "./detail/anime-play-episode";
 import {
@@ -120,6 +120,9 @@ import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import { useScrollMemory, useView, type PlayEpisode } from "@/lib/view";
 import { prefetchSegments } from "@/lib/skip-intro";
 import { useT } from "@/lib/i18n";
+import { emitListToast } from "@/components/lists/list-toast";
+import { DropShowConfirmModal } from "@/components/drop-show-confirm-modal";
+import { dropContextTitle, requireMediaActionSuccess } from "@/lib/media-context-actions";
 import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { ReminderButton } from "@/components/reminder-button";
@@ -2192,6 +2195,28 @@ export function DetailView({
           })
         : t("Play");
 
+  const canDropTitle =
+    !liveContext &&
+    meta.type !== "movie" &&
+    (isSeries || isAnime || meta.type === "series" || meta.type === "anime");
+  const [dropConfirmOpen, setDropConfirmOpen] = useState(false);
+  const handleDropTitle = async () => {
+    const displayTitle = title || meta.name;
+    const result = await dropContextTitle(
+      {
+        id: meta.id,
+        type: isAnime ? "anime" : "series",
+        name: displayTitle,
+        poster: meta.poster ?? detail?.poster,
+        imdbId: detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null),
+        background: meta.background,
+      },
+      { animeId: isAnime ? (animeCanonicalId ?? meta.id) : null },
+    );
+    requireMediaActionSuccess(result);
+    emitListToast(t("Dropped {title}", { title: displayTitle }));
+  };
+
   const playOnTrigger = usePlayOnTrigger(() => ({
     meta,
     episode: lastPlay ? { season: lastPlay.season, episode: lastPlay.episode } : undefined,
@@ -2538,6 +2563,16 @@ export function DetailView({
                     type={meta.type === "movie" ? "movie" : "series"}
                   />
                 )}
+                {actionStage < 2 && canDropTitle && (
+                  <button
+                    type="button"
+                    onClick={() => setDropConfirmOpen(true)}
+                    className="flex h-12 items-center gap-2.5 rounded-full border border-danger/30 bg-danger/10 px-5 text-[15px] font-medium text-danger transition-[transform,background-color,border-color] duration-200 hover:bg-danger/15 active:scale-[0.98]"
+                  >
+                    <Ban size={17} strokeWidth={2.1} />
+                    {t("Drop show")}
+                  </button>
+                )}
                 {!liveContext && (
                   <RateButton
                     target={ratingTarget(
@@ -2600,6 +2635,8 @@ export function DetailView({
                       harborId: isAnime ? (animeCanonicalId ?? meta.id) : meta.id,
                       type: meta.type === "movie" ? "movie" : "series",
                     }}
+                    canDrop={canDropTitle}
+                    onDrop={() => setDropConfirmOpen(true)}
                   />
                 ) : (
                   <>
@@ -3150,6 +3187,13 @@ export function DetailView({
           title={title}
           logo={logo}
           onClose={() => setTrailerOpen(false)}
+        />
+      )}
+      {dropConfirmOpen && (
+        <DropShowConfirmModal
+          title={title || meta.name}
+          onClose={() => setDropConfirmOpen(false)}
+          onConfirm={handleDropTitle}
         />
       )}
     </main>

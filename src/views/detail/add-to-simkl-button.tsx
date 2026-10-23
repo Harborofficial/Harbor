@@ -20,6 +20,7 @@ import type { SimklTarget } from "@/lib/simkl/types";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { SimklRatingPicker } from "./simkl-rating-picker";
+import { useTrackerStatusVersion } from "@/lib/tracker-status-events";
 
 type Translator = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -44,6 +45,7 @@ export function AddToSimklButton({
   const t = useT();
   const { isConnected } = useSimkl();
   const { settings } = useSettings();
+  const trackerStatusVersion = useTrackerStatusVersion();
   const [target, setTarget] = useState<SimklTarget | null>(null);
   const [status, setStatus] = useState<WatchlistStatus | null>(null);
   const [ready, setReady] = useState(false);
@@ -85,7 +87,7 @@ export function AddToSimklButton({
     return () => {
       cancelled = true;
     };
-  }, [harborId, isConnected, type]);
+  }, [harborId, isConnected, type, trackerStatusVersion]);
 
   if (!isConnected || !target || !ready) return null;
 

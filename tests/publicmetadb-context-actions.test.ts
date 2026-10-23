@@ -22,6 +22,7 @@ function load<T>(path: string, mocks: Record<string, unknown>): T {
 }
 
 const movie: Meta = { id: "tt123", type: "movie", name: "Fixture" };
+const series: Meta = { id: "tt456", type: "series", name: "Fixture series" };
 const anime: Meta = { id: "mal:123", type: "anime", name: "Fixture anime" };
 function harness() {
   let session = { apiKey: "fixture-a" };
@@ -71,8 +72,18 @@ function harness() {
       "./simkl/watchlist": {},
       "./simkl/history": {},
       "./anilist/session": disconnected,
+      "./anilist/sync": {},
+      "./anilist/mutations": {},
       "./mal/session": disconnected,
+      "./mal/mutations": {},
       "./publicmetadb/session": { getSession: () => session, isAuthenticated: () => true },
+      "./publicmetadb/scrobble": {
+        pmdbDeleteResumesForTitle: async (target: PmdbTarget, options: any) => {
+          options.assertCurrent();
+          calls.push({ kind: "resume-clear", target });
+          return 1;
+        },
+      },
       "./publicmetadb/mappings": { getTmdbForExternal: async () => ({ tmdb_id: 456 }) },
       "./publicmetadb/ids": {
         resolvePmdbTarget: async (_id: string, type: string) => {
@@ -202,6 +213,16 @@ test("PMDB removal and watched writes require a positive service acknowledgement
   assert.deepEqual(
     h.calls.map((call) => call.kind),
     ["remove", "mark"],
+  );
+});
+
+test("PMDB Drop removes watchlist membership and resume progress without touching history", async () => {
+  const h = harness();
+  h.alreadyListed();
+  await h.providers.dropProviderWrites(series)[0].run(h.validate);
+  assert.deepEqual(
+    h.calls.map((call) => call.kind),
+    ["remove", "resume-clear"],
   );
 });
 
