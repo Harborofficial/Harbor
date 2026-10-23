@@ -22,6 +22,8 @@ export type Meta = {
   id: string;
   type: MetaType;
   name: string;
+  /** Verified alternative titles from the same metadata record for stream matching. */
+  alternateTitles?: string[];
   poster?: string;
   background?: string;
   logo?: string;

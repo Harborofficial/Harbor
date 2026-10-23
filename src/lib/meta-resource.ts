@@ -1,7 +1,7 @@
 import { cinemetaEnabled, meta as cinemetaMeta, type Meta } from "./cinemeta";
 import { safeFetch as fetch } from "./safe-fetch";
 import { addonAccepts, userAddons, type Addon } from "./addons";
-import { loadInstalled } from "./addon-store";
+import { filterEnabled, loadInstalled } from "./addon-store";
 import { readActiveStremioAuthKey } from "./auth";
 import { lruSet } from "./cache";
 
@@ -24,7 +24,7 @@ export function preferCustomMeta(): boolean {
 }
 
 function localAddons(): Addon[] {
-  return loadInstalled()
+  return filterEnabled(loadInstalled())
     .filter((a) => !!a.manifest)
     .map((a) => ({ manifest: a.manifest!, transportUrl: a.transportUrl }));
 }
@@ -33,11 +33,17 @@ export async function resolveMeta(
   authKey: string | null,
   type: "movie" | "series",
   id: string,
+  options: { requireVideos?: boolean; preferAddons?: boolean } = {},
 ): Promise<Meta | null> {
-  const cinemetaPromise = cinemetaMeta(type, id).catch(() => null);
+  const normalizedId = /^tmdb:\d+$/.test(id)
+    ? id.replace("tmdb:", type === "series" ? "tmdb:tv:" : "tmdb:movie:")
+    : id;
+  const bareId = normalizedId.replace(/^tmdb:(?:movie|tv):/, "tmdb:");
+  const candidateIds = [...new Set([id, normalizedId, bareId])];
+  const cinemetaPromise = cinemetaMeta(type, normalizedId).catch(() => null);
   const cinemetaOff = !cinemetaEnabled();
 
-  if (!cinemetaOff && !preferCustomMeta()) {
+  if (!cinemetaOff && !preferCustomMeta() && !options.preferAddons) {
     const early = await cinemetaPromise;
     if (early?.poster) return early;
   }
@@ -49,14 +55,41 @@ export async function resolveMeta(
     const key = a.transportUrl || a.manifest.id;
     if (seen.has(key)) continue;
     seen.add(key);
-    if (addonAccepts(a, "meta", type, id) && !isCinemeta(a)) candidates.push(a);
+    if (!isCinemeta(a) && candidateIds.some((candidateId) => addonAccepts(a, "meta", type, candidateId))) candidates.push(a);
   }
 
   if (candidates.length === 0) {
-    return cinemetaOff ? cinemetaMeta(type, id, true).catch(() => null) : cinemetaPromise;
+    return cinemetaOff ? cinemetaMeta(type, normalizedId, true).catch(() => null) : cinemetaPromise;
   }
 
-  const addonRaces = candidates.map((a) => ({ a, p: fetchAddonMeta(a, type, id) }));
+  const addonRaces = candidates.map((a) => ({ a, p: (async () => {
+    let first: Meta | null = null;
+    for (const candidateId of candidateIds) {
+      if (!addonAccepts(a, "meta", type, candidateId)) continue;
+      const found = await fetchAddonMeta(a, type, candidateId);
+      if (!found) continue;
+      if (!first) first = found;
+      if (!options.requireVideos || found.videos?.length) return found;
+    }
+    return first;
+  })() }));
+
+  if (options.preferAddons) {
+    let first: Meta | null = null;
+    for (const { a, p } of addonRaces) {
+      const result = await p;
+      if (!result) continue;
+      const fromAddon = withOrigin(result, a);
+      if (!first) first = fromAddon;
+      if (!options.requireVideos) return fromAddon;
+      // Honour the first metadata addon's title/artwork overrides, while
+      // obtaining episodes from whichever compatible addon supplies them.
+      if (result.videos?.length) return first === fromAddon ? fromAddon : { ...fromAddon, ...first, videos: result.videos };
+    }
+    const fallback = await cinemetaPromise;
+    if (first && fallback?.videos?.length) return { ...fallback, ...first, videos: fallback.videos };
+    return first ?? fallback;
+  }
 
   if (cinemetaOff) {
     let firstAny: Meta | null = null;
@@ -71,7 +104,7 @@ export async function resolveMeta(
       }
     }
     if (firstAny && firstAddon) return withOrigin(firstAny, firstAddon);
-    return cinemetaMeta(type, id, true).catch(() => null);
+    return cinemetaMeta(type, normalizedId, true).catch(() => null);
   }
 
   if (preferCustomMeta()) {

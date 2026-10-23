@@ -839,12 +839,14 @@ export function DetailView({
     // The origin check above covers an addon but not a plugin: a plugin's origin carries the base it
     // was installed from rather than a manifest, so `addonOrigin.base` is set for an addon and this
     // is what is left. `resolveMeta` has nothing to resolve for these ids either way.
-    if (meta.addonOrigin?.base) return;
     if (isCapstanId(meta.id)) return;
-    if (/^(tt\d|tmdb:|kitsu:|mal:|anilist:|anidb:|simkl:)/.test(meta.id)) return;
+    if (!/^(tt\d|tmdb:|kitsu:|mal:|anilist:|anidb:|simkl:)/.test(meta.id)) return;
     if (cinemetaFull?.videos && cinemetaFull.videos.length > 0) return;
     let cancelled = false;
-    resolveMeta(authKey, narrowMediaType(meta.type), meta.id)
+    resolveMeta(authKey, narrowMediaType(meta.type), meta.id, {
+      preferAddons: true,
+      requireVideos: true,
+    })
       .then((full) => {
         if (cancelled || !full?.videos?.length) return;
         keepProviderListing(full);
@@ -1140,9 +1142,19 @@ export function DetailView({
       // The catalogue types a row from the first type its provider declares, which is wrong for any
       // provider that carries both movies and series. The bridge said which it returned, so the
       // record is asked for as that kind rather than as the guess.
-      const lookup = capstanCanonicalId
+      const sourceLookup = capstanCanonicalId
         ? { ...meta, id: capstanCanonicalId, type: capstanMeta?.kind ?? meta.type }
         : meta;
+      // Some Stremio catalogs use the bare tmdb:123 ID instead of tmdb:tv:123.
+      const lookup = /^tmdb:\d+$/.test(sourceLookup.id)
+        ? {
+            ...sourceLookup,
+            id: sourceLookup.id.replace(
+              "tmdb:",
+              sourceLookup.type === "series" ? "tmdb:tv:" : "tmdb:movie:",
+            ),
+          }
+        : sourceLookup;
       let applyAnimeExtras: (() => void) | undefined;
       const work = isAnime
         ? animeDetails(
@@ -1623,6 +1635,15 @@ export function DetailView({
     () => ({
       ...meta,
       name: title,
+      alternateTitles: [
+        ...new Set(
+          [meta.name, cinemetaFull?.name, detail?.originalTitle, ...(meta.alternateTitles ?? [])]
+            .filter(
+              (candidate): candidate is string =>
+                typeof candidate === "string" && candidate.trim().length > 0,
+            ),
+        ),
+      ],
       // The stream request is typed from this, and for a native addon it is passed through whole
       // (`episode-pipeline-input.ts:77`). The catalogue types a row from the first type its provider
       // declares, so a provider carrying both movies and series has its series asked for as a movie
@@ -1644,6 +1665,8 @@ export function DetailView({
       backdrop,
       detail?.releaseDate,
       detail?.year,
+      detail?.originalTitle,
+      cinemetaFull?.name,
       cinemetaFull?.releaseInfo,
       cinemetaFull?.behaviorHints,
       cinemetaFull?.videos,
@@ -3185,7 +3208,7 @@ export function DetailView({
           return <DetailLayoutEditor sections={railSections} />;
         })()}
 
-        {!loading && !detail && !isAnime && !addonNative && !settings.tmdbKey && (
+        {!loading && !detail && !cinemetaFull && !isAnime && !addonNative && !settings.tmdbKey && (
           <div className="rounded-2xl bg-canvas/50 px-6 py-12 text-center text-[14px] text-ink-muted">
             {t("Add a TMDB key in Settings to see cast, related titles, and trailers here.")}
           </div>
