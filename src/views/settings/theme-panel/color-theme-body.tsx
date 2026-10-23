@@ -8,6 +8,7 @@ import {
   THEME_PRESETS,
   type ActiveThemeId,
   type FontPairId,
+  type ThemeSettings,
 } from "@/lib/theme";
 import { useT } from "@/lib/i18n";
 import { CustomEditor } from "./custom-editor";
@@ -18,6 +19,7 @@ export function ColorThemeBody({
   activePreset,
   fontPair,
   customColors,
+  restoreTheme,
   onSelect,
   onSaveCustom,
   onClearCustom,
@@ -25,6 +27,7 @@ export function ColorThemeBody({
   activePreset: ActiveThemeId;
   fontPair: FontPairId;
   customColors: CustomColors | null;
+  restoreTheme: ThemeSettings;
   onSelect: (id: ActiveThemeId) => void;
   onSaveCustom: (c: CustomColors) => void;
   onClearCustom: () => void;
@@ -64,6 +67,8 @@ export function ColorThemeBody({
         <CustomEditor
           seed={customColors ?? DEFAULT_CUSTOM_COLORS}
           fontPair={fontPair}
+          restoreTheme={restoreTheme}
+          onCancel={() => showEditor(false)}
           onSave={(c) => {
             onSaveCustom(c);
             showEditor(false);

@@ -116,6 +116,7 @@ function ThemeTab() {
           activePreset={theme.preset}
           fontPair={theme.fontPair}
           customColors={theme.customColors}
+          restoreTheme={theme}
           onSelect={(id) =>
             setTheme({
               preset: id,
