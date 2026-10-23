@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
+import * as mediaFile from "../src/lib/media-file.ts";
 import type { LocalEntry } from "../src/lib/local-library.ts";
 
 const KEY = "harbor.library.local.v1";
@@ -43,6 +44,7 @@ function harness(initial: LocalEntry[], legacy?: LocalEntry[]) {
     const removals = load("src/lib/local-library/removals.ts", {}, storage);
     const library = load("src/lib/local-library.ts", {
       react: {},
+      "@/lib/media-file": mediaFile,
       "@/lib/episode-span": { parseEpisodeSpan: () => null },
       "@/lib/local-library/removals": removals,
       "@/lib/local-library/storage": {

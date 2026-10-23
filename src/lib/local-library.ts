@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { episodeSpanContains, parseEpisodeSpan } from "@/lib/episode-span";
+import { isPlayableVideoPath, stripPlayableVideoExtension } from "@/lib/media-file";
 import { loadLocalLibraryStore, saveLocalLibraryStore } from "@/lib/local-library/storage";
 import {
   clearLocalRemovals,
@@ -440,25 +441,8 @@ export function useInLocalLibrary(
   return has;
 }
 
-const VIDEO_EXTS = new Set([
-  "mkv",
-  "mp4",
-  "m4v",
-  "mov",
-  "avi",
-  "wmv",
-  "webm",
-  "ts",
-  "m2ts",
-  "mpg",
-  "mpeg",
-  "flv",
-  "ogv",
-]);
-
 export function isVideoFile(name: string): boolean {
-  const ext = name.split(".").pop()?.toLowerCase() ?? "";
-  return VIDEO_EXTS.has(ext);
+  return isPlayableVideoPath(name);
 }
 
 const NOISE = [
@@ -515,7 +499,7 @@ export type ParsedFilename = {
 };
 
 export function parseFilename(filename: string): ParsedFilename {
-  const stem = filename.replace(/\.(mkv|mp4|m4v|mov|avi|wmv|webm|ts|m2ts|mpg|mpeg|flv|ogv)$/i, "");
+  const stem = stripPlayableVideoExtension(filename);
   const span = parseEpisodeSpan(stem);
   const tv = stem.match(TV_RX);
   const extras = !span && !tv ? stem.match(EXTRAS_RX) : null;

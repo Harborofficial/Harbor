@@ -1,4 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { isPlayableVideoPath } from "@/lib/media-file";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
 import {
   hashFromMagnet,
@@ -12,7 +13,6 @@ import {
 } from "./types";
 
 const BASE = "https://api.real-debrid.com/rest/1.0";
-const VIDEO_EXTS = [".mkv", ".mp4", ".avi", ".m4v", ".webm", ".ts", ".mov", ".wmv"];
 const POLL_DELAY_MS = 600;
 const POLL_MAX_ATTEMPTS = 18;
 const LIBRARY_TTL_MS = 5 * 60_000;
@@ -241,7 +241,7 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
 
 function pickRdFiles(files: RdFile[], fileIdx: number | undefined): number[] {
   if (fileIdx != null && files[fileIdx]) return [files[fileIdx].id];
-  const videos = files.filter((f) => VIDEO_EXTS.some((ext) => f.path.toLowerCase().endsWith(ext)));
+  const videos = files.filter((f) => isPlayableVideoPath(f.path));
   if (videos.length === 0) return files.map((f) => f.id);
   return videos.map((f) => f.id);
 }
