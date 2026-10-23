@@ -144,7 +144,9 @@ function pushArtwork(artwork: string | null): void {
   if (key === lastArt) return;
   lastArt = key;
   invoke("media_controls_music_art", { artUrl: url, appIcon }).catch(() => {});
-  if (!url) void restoreAppIcon();
+  // Disabling album-art icons must restore Harbor's configured window icon,
+  // even when a song is still playing and its artwork URL remains available.
+  if (!url || !appIcon) void restoreAppIcon();
 }
 
 export function syncMusicTaskbarArtwork(): void {
