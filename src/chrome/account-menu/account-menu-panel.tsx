@@ -215,7 +215,7 @@ export function AccountMenuPanel({
 
         {!kid && (
           <div className="flex flex-col">
-            {(author || (isNuvio && nuvioState.session)) && (
+            {isPrimary && (author || (isNuvio && nuvioState.session)) && (
               <button onClick={viewMyProfile} className={ITEM}>
                 <UserRound size={14} strokeWidth={2.2} />
                 {t("View my profile")}
@@ -229,7 +229,7 @@ export function AccountMenuPanel({
             )}
             <button
               onClick={() => setManageOpen((o) => !o)}
-              className={`${ITEM} ${author ? "border-t border-edge-soft" : ""}`}
+              className={`${ITEM} ${(isPrimary && (author || (isNuvio && nuvioState.session))) || author ? "border-t border-edge-soft" : ""}`}
             >
               <Users size={14} strokeWidth={2.2} />
               {t("Manage profiles")}
@@ -321,18 +321,18 @@ export function AccountMenuPanel({
               </button>
             )}
 
-            {/* HARBOR SIGN OUT / SIGN IN (when not Nuvio) */}
-            {!isNuvio && (author ? (
+            {/* HARBOR SIGN OUT / SIGN IN */}
+            {author ? (
               <button onClick={signOutHarbor} className={`${ITEM} border-t border-edge-soft`}>
                 <LogOut size={14} strokeWidth={2.2} />
                 {t("Sign out of Harbor")}
               </button>
-            ) : (
+            ) : !isNuvio ? (
               <button onClick={openHarborAuth} className={`${ITEM} border-t border-edge-soft`}>
                 <LogIn size={14} strokeWidth={2.2} />
                 {t("Sign in to Harbor")}
               </button>
-            ))}
+            ) : null}
           </div>
         )}
       </div>

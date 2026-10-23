@@ -16,7 +16,7 @@ import { useActiveKid, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { openMyProfile } from "@/lib/social/open-my-profile";
 import { canOpenProfile } from "@/lib/social/open-profile";
-import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { isNuvioProviderActive, activeProfileIsPrimary } from "@/lib/active-profile-id";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { captureSocialActor, assertSocialActor } from "@/lib/social/action-actor";
@@ -205,8 +205,9 @@ export function usePageContextTarget({ includePlayer = false } = {}): ContextMen
       };
     });
     const isNuvioActive = isNuvioProviderActive();
+    const isPrimary = activeProfileIsPrimary();
     const canOpen = isNuvioActive ? isNuvioSignedIn() : !!author;
-    if (!kid && !locked && (isNuvioActive || !author?.handle || canOpenProfile(author.handle))) {
+    if (isPrimary && !kid && !locked && (isNuvioActive || !author?.handle || canOpenProfile(author.handle))) {
       const actor = captureSocialActor();
       rows.push({
         id: "page:my-profile",

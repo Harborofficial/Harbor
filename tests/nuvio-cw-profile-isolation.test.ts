@@ -210,3 +210,89 @@ test("Trakt watchlist export and import work with Nuvio library in Nuvio mode", 
   assert.equal(updatedLib.length, 2);
   assert.ok(updatedLib.some((i) => i.content_id === "tt3032476"));
 });
+
+test("View my profile is restricted to primary profile in Stremio and Nuvio", async () => {
+  const { activeProfileIsPrimary, isStremioActivePrimary } = await import("../src/lib/active-profile-id.ts");
+
+  // Nuvio mode: slot 1 is primary, slot 2 is secondary
+  localStorage.setItem("harbor.account-provider", "nuvio");
+  saveNuvioState({ activeProfileIndex: 1, profiles: [], lastSyncedAt: Date.now() });
+  assert.equal(activeProfileIsPrimary(), true);
+
+  saveNuvioState({ activeProfileIndex: 2, profiles: [], lastSyncedAt: Date.now() });
+  assert.equal(activeProfileIsPrimary(), false);
+
+  // Stremio mode: primary flag or first profile
+  localStorage.setItem("harbor.account-provider", "stremio");
+  const profiles = [
+    { id: "p1", name: "Captain", isPrimary: true },
+    { id: "p2", name: "Guest", isPrimary: false },
+  ];
+  assert.equal(isStremioActivePrimary(profiles[0], profiles), true);
+  assert.equal(isStremioActivePrimary(profiles[1], profiles), false);
+});
+
+test("openMyProfile prioritizes Harbor-authorized handle over profile name in Nuvio mode", async () => {
+  localStorage.clear();
+  localStorage.setItem("harbor.account-provider", "nuvio");
+  saveNuvioState({
+    session: {
+      access_token: "tok",
+      refresh_token: "ref",
+      expires_at: Date.now() + 3600,
+      token_type: "bearer",
+      user: { id: "u1", email: "nuvio@harbor.local" },
+    },
+    profiles: [
+      { profile_index: 1, name: "Heisenberg" },
+      { profile_index: 2, name: "Pinkman" },
+    ],
+    activeProfileIndex: 1,
+    lastSyncedAt: Date.now(),
+  });
+
+  const { reloadSession } = await import("../src/lib/theme-auth.ts");
+
+  // 1. With Harbor authorized session, handle must be author.handle ("walter_harbor"), NOT profile name ("heisenberg")
+  localStorage.setItem(
+    "harbor.theme-session.nuvio",
+    JSON.stringify({
+      token: "tok_harbor",
+      user: { id: "auth1", username: "Walter", handle: "walter_harbor" },
+    }),
+  );
+  reloadSession(true);
+
+  const { openMyProfile } = await import("../src/lib/social/open-my-profile.ts");
+  const { subscribeOpenProfile } = await import("../src/lib/social/open-profile.ts");
+
+  let openedHandle = "";
+  let isMyProfileOpt = false;
+  let unsub = subscribeOpenProfile((h, opts) => {
+    openedHandle = h;
+    isMyProfileOpt = opts?.isMyProfile === true;
+  });
+
+  let ok = await openMyProfile();
+  unsub();
+
+  assert.equal(ok, true);
+  assert.equal(openedHandle, "walter_harbor");
+  assert.equal(isMyProfileOpt, true);
+
+  // 2. Without Harbor session, handle falls back to primary profile name ("heisenberg")
+  localStorage.removeItem("harbor.theme-session.nuvio");
+  reloadSession(true);
+
+  unsub = subscribeOpenProfile((h, opts) => {
+    openedHandle = h;
+    isMyProfileOpt = opts?.isMyProfile === true;
+  });
+
+  ok = await openMyProfile();
+  unsub();
+
+  assert.equal(ok, true);
+  assert.equal(openedHandle, "heisenberg");
+  assert.equal(isMyProfileOpt, true);
+});

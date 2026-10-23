@@ -9,15 +9,17 @@ export async function openMyProfile(fallbackHandle?: string | null): Promise<boo
   if (isNuvioProviderActive()) {
     const nuvioState = loadNuvioState();
     if (nuvioState.session?.access_token) {
+      const author = currentAuthor();
       const primary =
         nuvioState.profiles.find((p) => p.profile_index === 1) || nuvioState.profiles[0];
       const handle = (
+        author?.handle ||
         primary?.name?.toLowerCase().replace(/\s+/g, "") ||
         nuvioState.session.user?.email?.split("@")[0] ||
         "nuvio"
       ).trim();
       if (handle) {
-        requestOpenProfile(handle);
+        requestOpenProfile(handle, { isMyProfile: true });
         return true;
       }
     }
@@ -32,6 +34,6 @@ export async function openMyProfile(fallbackHandle?: string | null): Promise<boo
   }
   if (!handle) return false;
   assertSocialActor(actor);
-  requestOpenProfile(handle);
+  requestOpenProfile(handle, { isMyProfile: true });
   return true;
 }

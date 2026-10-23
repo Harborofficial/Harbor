@@ -1982,7 +1982,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <div {...layerProps(profileTop)}>
                 <Suspense fallback={null}>
                   <ProfileView
-                    key={`profile-${profileHandle}`}
+                    key={`profile-${settings.accountProvider}-${profileHandle}`}
                     handle={profileHandle}
                     onOpenProfile={requestOpenProfile}
                     onOpenMeta={(id, kind, hint) => {

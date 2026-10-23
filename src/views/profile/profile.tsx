@@ -80,10 +80,18 @@ export function ProfileView({
     : null;
 
   const nuvioEmail = nuvioState.session?.user?.email;
-  const primaryHandle = primaryNuvioProfile
-    ? (primaryNuvioProfile.name?.toLowerCase().replace(/\s+/g, "") || nuvioEmail?.split("@")[0] || "nuvio").toLowerCase()
-    : "nuvio";
-  const isNuvioPrimaryMatch = isNuvio && (handle.toLowerCase() === primaryHandle || handle.toLowerCase() === "me");
+  const author = currentAuthor();
+  const primaryHandle = (
+    author?.handle ||
+    (primaryNuvioProfile
+      ? (primaryNuvioProfile.name?.toLowerCase().replace(/\s+/g, "") || nuvioEmail?.split("@")[0] || "nuvio")
+      : "nuvio")
+  ).toLowerCase();
+  const isNuvioPrimaryMatch =
+    isNuvio &&
+    (handle.toLowerCase() === primaryHandle ||
+      (author?.handle && handle.toLowerCase() === author.handle.toLowerCase()) ||
+      handle.toLowerCase() === "me");
   const activeNuvioProfile = primaryNuvioProfile;
 
 
@@ -128,28 +136,15 @@ export function ProfileView({
       const detail = (e as CustomEvent)?.detail;
       const nextProvider = detail?.provider || (isNuvio ? "nuvio" : "stremio");
       if (nextProvider === "stremio") {
-        const stremioHandle = currentAuthor()?.handle || user?.name || "";
-        if (stremioHandle && stremioHandle.toLowerCase() !== handle.toLowerCase() && onOpenProfile) {
-          onOpenProfile(stremioHandle);
-        } else if (!stremioHandle && isNuvio) {
+        const stremioHandle = currentAuthor()?.handle || "";
+        if (!stremioHandle && isNuvio) {
           goBack();
-        }
-      } else if (nextProvider === "nuvio") {
-        const ns = loadNuvioState();
-        const primary = ns.profiles.find((pr) => pr.profile_index === 1) || ns.profiles[0];
-        const nuvioHandle = (
-          primary?.name?.toLowerCase().replace(/\s+/g, "") ||
-          ns.email?.split("@")[0] ||
-          "nuvio"
-        ).toLowerCase();
-        if (nuvioHandle && nuvioHandle !== handle.toLowerCase() && onOpenProfile) {
-          onOpenProfile(nuvioHandle);
         }
       }
     };
     window.addEventListener("harbor:account-provider-changed", onProviderChange);
     return () => window.removeEventListener("harbor:account-provider-changed", onProviderChange);
-  }, [goBack, handle, isNuvio, onOpenProfile, user?.name]);
+  }, [goBack, isNuvio]);
 
   const libWatched = useLibraryWatchedCount(authKey, isOwner);
   const watchedBreakdown = useLibraryWatchedBreakdown(authKey, isOwner);
@@ -365,12 +360,17 @@ export function ProfileView({
   const presentCards = CARD_ORDER_DEFAULT.filter((k) => cardNodes[k] != null);
   const orderedCards = effectiveOrder(layout, presentCards);
 
+  const resolvedHandle =
+    (author?.handle && (summary.isOwner || isNuvioPrimaryMatch) ? author.handle : null) ||
+    (summary?.handle && summary.handle !== "me" ? summary.handle : null) ||
+    primaryHandle;
+
   const heroSummary =
     isNuvio && (summary.isOwner || isNuvioPrimaryMatch)
       ? {
           ...summary,
           alias: primaryNuvioProfile?.name || nuvioEmail?.split("@")[0] || summary.alias,
-          handle: primaryHandle,
+          handle: resolvedHandle,
           counts: {
             ...summary.counts,
             watched: nuvioStats.episodes + nuvioStats.movies,
