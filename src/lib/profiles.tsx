@@ -46,7 +46,23 @@ export const PROFILE_COLORS = [
 
 export type ProfileColor = string;
 
-export function nuvioProfileToHarborProfile(p: NuvioProfile): Profile {
+export function defaultNuvioHarborProfile(slot = 1): Profile {
+  return {
+    id: `nuvio-${slot}`,
+    name: slot === 1 ? "Primary" : `Profile ${slot}`,
+    avatar: null,
+    color: PROFILE_COLORS[(slot - 1) % PROFILE_COLORS.length],
+    isPrimary: slot === 1,
+    shareStremioWith: null,
+    passwordHash: null,
+    hideContent: null,
+    lockedTabs: null,
+    kid: null,
+    createdAt: Date.now(),
+  };
+}
+
+function nuvioProfileToHarborProfile(p: NuvioProfile): Profile {
   let lockedTabs: HiddenTabs | null = null;
   try {
     const raw = localStorage.getItem(`harbor.nuvio.locked-tabs.${p.profile_index}`);
@@ -364,6 +380,25 @@ export function readActiveProfileIdentity(): {
   color: string;
 } | null {
   try {
+    if (isNuvioProviderActive()) {
+      const nuvioState = loadNuvioState();
+      const slot = nuvioState.activeProfileIndex || 1;
+      const active = nuvioState.profiles.find((p) => p.profile_index === slot) || nuvioState.profiles[0];
+      if (active) {
+        return {
+          id: `nuvio-${active.profile_index}`,
+          name: active.name || `Profile ${active.profile_index}`,
+          avatar: resolveNuvioAvatar(active),
+          color: active.avatar_color_hex || PROFILE_COLORS[(active.profile_index - 1) % PROFILE_COLORS.length],
+        };
+      }
+      return {
+        id: "nuvio-1",
+        name: "Primary",
+        avatar: null,
+        color: PROFILE_COLORS[0],
+      };
+    }
     const { profiles, activeId } = readState();
     if (!profiles.length) return null;
     const active =
@@ -383,6 +418,23 @@ export function readAllProfilesIdentity(): Array<{
   color: string;
 }> {
   try {
+    if (isNuvioProviderActive()) {
+      const nuvioState = loadNuvioState();
+      if (nuvioState.profiles.length > 0) {
+        return nuvioState.profiles.map((p) => ({
+          id: `nuvio-${p.profile_index}`,
+          name: p.name || `Profile ${p.profile_index}`,
+          avatar: resolveNuvioAvatar(p),
+          color: p.avatar_color_hex || PROFILE_COLORS[(p.profile_index - 1) % PROFILE_COLORS.length],
+        }));
+      }
+      return [{
+        id: "nuvio-1",
+        name: "Primary",
+        avatar: null,
+        color: PROFILE_COLORS[0],
+      }];
+    }
     return readState().profiles.map((p) => ({
       id: p.id,
       name: p.name,
@@ -540,14 +592,16 @@ export function CompanionProfilesProvider({ children }: { children: ReactNode })
     const activeNuvio = nuvioState
       ? (nuvioState.profiles.find((p) => p.profile_index === (nuvioState.activeProfileIndex || 1)) || nuvioState.profiles[0] || null)
       : null;
-    const effectiveActiveProfile = isNuvio && activeNuvio
-      ? nuvioProfileToHarborProfile(activeNuvio)
+    const effectiveActiveProfile = isNuvio
+      ? (activeNuvio ? nuvioProfileToHarborProfile(activeNuvio) : defaultNuvioHarborProfile(1))
       : (state.profiles.find((p) => p.id === state.activeId) ?? null);
-    const effectiveProfiles = isNuvio && nuvioState && nuvioState.profiles.length > 0
-      ? nuvioState.profiles.map(nuvioProfileToHarborProfile)
+    const effectiveProfiles = isNuvio
+      ? (nuvioState && nuvioState.profiles.length > 0
+          ? nuvioState.profiles.map(nuvioProfileToHarborProfile)
+          : [defaultNuvioHarborProfile(1)])
       : state.profiles;
-    const effectiveActiveId = isNuvio && activeNuvio
-      ? `nuvio-${activeNuvio.profile_index}`
+    const effectiveActiveId = isNuvio
+      ? (activeNuvio ? `nuvio-${activeNuvio.profile_index}` : "nuvio-1")
       : state.activeId;
 
     return {
@@ -707,22 +761,24 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
   }, [isNuvio, nuvioState.profiles, nuvioState.activeProfileIndex]);
 
   const effectiveActiveProfile = useMemo(() => {
-    if (isNuvio && activeNuvio) {
-      return nuvioProfileToHarborProfile(activeNuvio);
+    if (isNuvio) {
+      return activeNuvio ? nuvioProfileToHarborProfile(activeNuvio) : defaultNuvioHarborProfile(1);
     }
     return state.profiles.find((p) => p.id === state.activeId) ?? null;
   }, [isNuvio, activeNuvio, state.profiles, state.activeId]);
 
   const effectiveProfiles = useMemo(() => {
-    if (isNuvio && nuvioState.profiles.length > 0) {
-      return nuvioState.profiles.map(nuvioProfileToHarborProfile);
+    if (isNuvio) {
+      return nuvioState.profiles.length > 0
+        ? nuvioState.profiles.map(nuvioProfileToHarborProfile)
+        : [defaultNuvioHarborProfile(1)];
     }
     return state.profiles;
   }, [isNuvio, nuvioState.profiles, state.profiles]);
 
   const effectiveActiveId = useMemo(() => {
-    if (isNuvio && activeNuvio) {
-      return `nuvio-${activeNuvio.profile_index}`;
+    if (isNuvio) {
+      return activeNuvio ? `nuvio-${activeNuvio.profile_index}` : "nuvio-1";
     }
     return state.activeId;
   }, [isNuvio, activeNuvio, state.activeId]);

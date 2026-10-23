@@ -5,6 +5,9 @@
 
 import { nuvioFetch, loadNuvioState, saveNuvioState, isNuvioSignedIn, getNuvioAccountId } from "./nuvio-client";
 import { safeFetch } from "@/lib/safe-fetch";
+import { uploadAvatar } from "@/lib/social/avatar";
+import { authToken } from "@/lib/theme-auth";
+import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 import { fetchNuvioAddons } from "./nuvio-sync";
 import { hashProfilePassword } from "@/lib/profile-password";
 import type {
@@ -237,69 +240,51 @@ export async function uploadNuvioCustomAvatar(
 
   const timestamp = Date.now();
   let ext = "webp";
-  let payloadDataUrl: string | null = null;
   let payloadFilename = `avatar_p${profileIndex}_${timestamp}.webp`;
   let blob: Blob | null = null;
 
   if (typeof input === "string") {
-    payloadDataUrl = input;
     if (input.startsWith("data:")) {
       const match = input.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);
       if (match && match[1]) {
         ext = match[1] === "jpeg" ? "jpg" : match[1];
         payloadFilename = `avatar_p${profileIndex}_${timestamp}.${ext}`;
       }
+      try {
+        const res = await fetch(input);
+        blob = await res.blob();
+      } catch {}
     } else if (input.startsWith("/")) {
       const parts = input.split("/");
       payloadFilename = parts[parts.length - 1] || payloadFilename;
+      try {
+        const res = await fetch(input);
+        blob = await res.blob();
+      } catch {}
     }
   } else if (input instanceof Blob) {
     blob = input;
     if (blob.type.includes("jpeg") || blob.type.includes("jpg")) ext = "jpg";
     else if (blob.type.includes("png")) ext = "png";
     payloadFilename = `avatar_p${profileIndex}_${timestamp}.${ext}`;
-    try {
-      payloadDataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(input);
-      });
-    } catch {
-      payloadDataUrl = null;
-    }
   }
 
-  // 1. Primary Strategy: Use the local same-origin /api/upload-avatar endpoint
-  // This executes server-side in Node.js, completely bypassing all browser CORS restrictions.
-  if (payloadDataUrl) {
+  // 1. Primary Strategy: If signed into Harbor, upload via Harbor's social avatar storage
+  // This directly updates Harbor author's pfp and yields an official public HTTPS URL
+  const token = authToken();
+  if (token && blob) {
     try {
-      const res = await window.fetch("/api/upload-avatar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dataUrl: payloadDataUrl, filename: payloadFilename }),
-      });
-
-      if (res.ok) {
-        const json = (await res.json()) as { url?: string };
-        if (json.url && (json.url.startsWith("http://") || json.url.startsWith("https://"))) {
-          console.log("[nuvio] Avatar uploaded via local endpoint:", json.url);
-          return json.url;
-        }
+      const summary = await uploadAvatar(blob);
+      if (summary?.avatarUrl && (summary.avatarUrl.startsWith("http://") || summary.avatarUrl.startsWith("https://"))) {
+        console.log("[nuvio] Avatar uploaded via Harbor social storage:", summary.avatarUrl);
+        return summary.avatarUrl;
       }
-    } catch (localErr) {
-      console.warn("[nuvio] /api/upload-avatar not reachable, falling back to safeFetch:", localErr);
+    } catch (harborErr) {
+      console.warn("[nuvio] Harbor avatar upload failed, falling back to public hosts:", harborErr);
     }
   }
 
-  // 2. Secondary Strategy (for standalone production Tauri builds): safeFetch
-  if (!blob && typeof input === "string") {
-    try {
-      const res = await window.fetch(input);
-      blob = await res.blob();
-    } catch {}
-  }
-
+  // 2. Secondary Strategy: Upload via public image hosts (Catbox / Freeimage)
   if (blob) {
     try {
       const fd = new FormData();
@@ -386,8 +371,9 @@ export async function createNuvioProfile(opts: {
       if (uploaded) {
         avatarUrl = uploaded;
         avatarId = null;
-      } else {
-        avatarUrl = null;
+      }
+      if (nextIndex === 1 && avatarUrl) {
+        void pushAvatarToEcosystem(avatarUrl);
       }
     }
   }
@@ -482,6 +468,11 @@ export async function updateNuvioProfile(
         );
         saveNuvioState({ ...state, profiles: optimisticProfiles });
 
+        // If primary profile (slot 1), also push to Harbor ecosystem pfp
+        if (profileIndex === 1) {
+          void pushAvatarToEcosystem(trimmed);
+        }
+
         // Upload to obtain public HTTPS URL
         const uploadedUrl = await uploadNuvioCustomAvatar(trimmed, profileIndex);
         if (uploadedUrl) {
@@ -493,9 +484,12 @@ export async function updateNuvioProfile(
               : p,
           );
           saveNuvioState({ ...loadNuvioState(), profiles: updatedWithRemoteUrl });
+          if (profileIndex === 1) {
+            void pushAvatarToEcosystem(uploadedUrl);
+          }
         } else {
-          // Fallback if network completely unavailable
-          resolvedAvatarUrl = null;
+          // Keep local dataUrl in Harbor so Harbor never loses the pfp!
+          resolvedAvatarUrl = trimmed;
         }
       }
     }

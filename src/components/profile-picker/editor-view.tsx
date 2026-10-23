@@ -74,6 +74,7 @@ import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { AvatarRing } from "@/views/settings/account/avatar-ring";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { resizeAvatar } from "@/views/settings/account/avatar-utils";
+import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
 import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
 import { ColorPicker } from "@/views/settings/color-picker";
@@ -418,6 +419,9 @@ export function EditorView({
             avatarUrl: finalAvatarUrl,
             usesPrimaryAddons,
           });
+          if (targetSlot === 1 && finalAvatarUrl) {
+            void pushAvatarToEcosystem(finalAvatarUrl);
+          }
           if (draftPin) {
             await setNuvioPin(targetSlot, draftPin);
           }
@@ -435,6 +439,9 @@ export function EditorView({
             avatar_url: finalAvatarUrl,
             uses_primary_addons: isPrimary ? false : usesPrimaryAddons,
           });
+          if ((isPrimary || nuvioSlot === 1) && finalAvatarUrl) {
+            void pushAvatarToEcosystem(finalAvatarUrl);
+          }
           if (anyTabLocked(draftLockedTabs)) {
             localStorage.setItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`, JSON.stringify(draftLockedTabs));
           } else {

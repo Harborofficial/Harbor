@@ -213,7 +213,7 @@ export function ProfileView({
   const locked = summary.private && !summary.isOwner;
 
   const ownerAvatar = (summary.isOwner || isNuvioPrimaryMatch)
-    ? (isNuvio && activeNuvioProfile
+    ? (isNuvio
         ? (resolveNuvioAvatar(primaryNuvioProfile) || undefined)
         : activeProfile?.avatar ||
           settings.harborAvatar ||
@@ -222,10 +222,10 @@ export function ProfileView({
           undefined)
     : undefined;
   const heroAvatar = (summary.isOwner || isNuvioPrimaryMatch)
-    ? ownerAvatar || summary.avatarUrl
+    ? (isNuvio ? (ownerAvatar || undefined) : (ownerAvatar || summary.avatarUrl))
     : summary.avatarUrl || undefined;
   const heroAvatarFallback = (summary.isOwner || isNuvioPrimaryMatch)
-    ? (isNuvio && primaryNuvioProfile ? resolveNuvioAvatar(primaryNuvioProfile) || undefined : summary.avatarUrl || undefined)
+    ? (isNuvio ? (resolveNuvioAvatar(primaryNuvioProfile) || undefined) : summary.avatarUrl || undefined)
     : undefined;
   const mangaReadCount = isNuvio ? 0 : (summary.isOwner ? mangaProgress.length : undefined);
 

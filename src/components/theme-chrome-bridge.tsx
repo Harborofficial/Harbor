@@ -6,6 +6,7 @@ import { NotificationCenter } from "@/components/notification-center/notificatio
 import { useAuth } from "@/lib/auth";
 import { useActiveKid, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { anchorFromElement, openAccountMenu, type AccountMenuAnchor } from "@/lib/social/account-menu-open";
 import { openNotificationCenter } from "@/lib/social/notification-open";
 import { currentStatus, setStatus, subscribeStatus, type PresenceStatus } from "@/lib/social/presence";
@@ -146,8 +147,13 @@ export function ThemeChromeBridge() {
   const preview = useThemePreview();
   const { activeProfile } = useProfiles();
   const { user } = useAuth();
-  const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/") ? null : settings.harborAvatar;
-  const avatarUrl = activeProfile?.avatar ?? harborAvatar ?? user?.avatar ?? null;
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const harborAvatar = isNuvio
+    ? null
+    : (settings.harborAvatar?.startsWith("/kids/avatars/") ? null : settings.harborAvatar);
+  const avatarUrl = isNuvio
+    ? (activeProfile?.avatar ?? null)
+    : (activeProfile?.avatar ?? harborAvatar ?? user?.avatar ?? null);
   const avatarRef = useRef(avatarUrl);
   avatarRef.current = avatarUrl;
   const bpOffer = useBigPictureEntry().offer;

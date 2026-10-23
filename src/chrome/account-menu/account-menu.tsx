@@ -2,6 +2,7 @@ import { HarborAccountDialog } from "@/views/account/harbor-account-dialog";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { verifyProfilePassword } from "@/lib/profile-password";
 import { StatusDot, StatusPicker } from "@/chrome/sidebar/status-control";
 import { AccountMenuPanel } from "./account-menu-panel";
@@ -48,7 +49,7 @@ export function AccountMenu({
     selectProfile,
   } = ctrl;
 
-  const isNuvio = settings.accountProvider === "nuvio";
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const kid = !!activeProfile?.kid;
   const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
     ? null
