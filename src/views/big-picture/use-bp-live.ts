@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { headersFromChannel } from "@/lib/iptv/channel-headers";
 import { recordChannelPlay } from "@/lib/iptv/channel-stats";
+import { liveChannelSource } from "@/lib/iptv/playback-source";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { isHydratableChannel } from "@/lib/iptv/channel-hydration";
 import { computeTvgIdCounts } from "@/lib/iptv/epg-resolver";
 import { useFavorites } from "@/lib/iptv/favorites";
@@ -12,7 +13,6 @@ import type { EpgIndex, EpgProgram, IptvChannel, IptvPlaylistSource } from "@/li
 import { useChannelHydration } from "@/views/live/hooks/use-channel-hydration";
 import { useEpg } from "@/views/live/hooks/use-epg";
 import { useIptvPlaylist } from "@/views/live/hooks/use-iptv-playlist";
-import { synthChannelMeta } from "@/views/live/hooks/use-live-actions";
 import { useXtreamEpgFallback } from "@/views/live/hooks/use-xtream-epg-fallback";
 import {
   buildNowItem,
@@ -71,16 +71,7 @@ export function useBpLivePlay(): (ch: IptvChannel, current?: EpgProgram | null) 
     (ch: IptvChannel, current?: EpgProgram | null) => {
       if (!ch.url) return;
       recordChannelPlay(ch);
-      openPlayer({
-        meta: synthChannelMeta(ch),
-        url: ch.url,
-        title: ch.name,
-        subtitle: ch.group ?? "Live",
-        notWebReady: true,
-        isLive: true,
-        headers: headersFromChannel(ch),
-        liveProgram: current?.title || undefined,
-      });
+      openPlayer(liveChannelSource(ch, ch.group ?? "Live", current?.title || undefined));
     },
     [openPlayer],
   );
@@ -137,12 +128,13 @@ export type BpLive = {
 
 export function useBpLive(enabled = true): BpLive {
   const { settings } = useSettings();
+  const playlists = usePlaylists();
   const favorites = useFavorites();
   const play = useBpLivePlay();
 
   const sources = useMemo<IptvPlaylistSource[]>(
     () =>
-      settings.iptvPlaylists
+      playlists
         .filter((p) => (p.kind ?? "m3u") !== "epg")
         .map((p) => ({
           id: p.id,
@@ -152,7 +144,7 @@ export function useBpLive(enabled = true): BpLive {
           kind: p.kind,
           xtream: p.xtream,
         })),
-    [settings.iptvPlaylists],
+    [playlists],
   );
 
   const [storedId, setStoredId] = useState<string | null>(() => readActiveId());
@@ -170,8 +162,8 @@ export function useBpLive(enabled = true): BpLive {
   const playlist = state.kind === "ready" ? state.playlist : null;
 
   const epgOnlyUrls = useMemo(
-    () => settings.iptvPlaylists.filter((s) => s.kind === "epg").map((s) => s.epgUrl || s.url),
-    [settings.iptvPlaylists],
+    () => playlists.filter((s) => s.kind === "epg").map((s) => s.epgUrl || s.url),
+    [playlists],
   );
   const { index: baseEpg } = useEpg(enabled ? activeSource : null, epgOnlyUrls);
   const epg = useXtreamEpgFallback(activeSource, playlist?.channels ?? EMPTY_CHANNELS, baseEpg);

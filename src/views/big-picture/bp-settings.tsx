@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { exitBigPicture, goBigPictureTab } from "@/lib/big-picture";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import {
   getSportsConsentServerSnapshot,
   getSportsConsentSnapshot,
@@ -46,6 +47,7 @@ const PAGE =
 export function BpSettings() {
   const t = useBpT();
   const facts = useBpOnboardFacts();
+  const playlists = usePlaylists();
   const { settings, overscan, commit, auditionSound } = useBpSettingsWriter();
   const [pane, setPane] = useState<Pane>("root");
   const [depth, setDepth] = useState(1);
@@ -195,8 +197,8 @@ export function BpSettings() {
                         ? connected.length > 0
                           ? t("Connected: {list}", { list: connected.join(", ") })
                           : control.detail
-                        : settings.iptvPlaylists.length > 0
-                          ? t("{count} added", { count: settings.iptvPlaylists.length })
+                        : playlists.length > 0
+                          ? t("{count} added", { count: playlists.length })
                           : control.detail
                     }
                     autofocus={i === 0}
