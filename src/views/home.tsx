@@ -555,7 +555,7 @@ export function Home({
             ? libItems.filter((i) => !isCorruptAnimeEntry(i))
             : libItems;
           setItems(view);
-          if (!hideSharedCw && !isNuvioProvider) absorbCloudAnimeCw(view);
+          if (!hideSharedCw) absorbCloudAnimeCw(view);
           if (!isNuvioProvider) reconcileRemoteWatched(view);
           const importKey = `harbor.discover.libImported.${user?._id ?? "anon"}`;
           let importedSince = 0;
@@ -817,13 +817,32 @@ export function Home({
       }
 
       if (nm) {
-        const heldByName = byName.get(key);
-        if (heldByName) {
-          const resolved = resolveCollision(heldByName, i);
-          if (resolved._id !== heldByName._id) byId.delete(heldByName._id);
-          if (resolved._id !== i._id) byId.delete(i._id);
-          byId.set(resolved._id, resolved);
-          byName.set(key, resolved);
+        const held = byName.get(key);
+        if (held) {
+          if (lastWatchedOf(i) > lastWatchedOf(held)) {
+            if (isNuvioProvider && held.external === "nuvio" && i.external !== "nuvio") {
+              const updated: LibraryItem = {
+                ...held,
+                state: {
+                  ...held.state,
+                  ...i.state,
+                  video_id: i.state?.video_id ?? held.state?.video_id,
+                  season: i.state?.season ?? held.state?.season,
+                  episode: i.state?.episode ?? held.state?.episode,
+                  timeOffset: i.state?.timeOffset ?? held.state?.timeOffset,
+                  duration: i.state?.duration ?? held.state?.duration,
+                  lastWatched: i.state?.lastWatched ?? held.state?.lastWatched,
+                },
+                _mtime: i._mtime ?? held._mtime,
+              };
+              byId.set(held._id, updated);
+              byName.set(key, updated);
+            } else {
+              byId.delete(held._id);
+              byName.set(key, i);
+              byId.set(i._id, i);
+            }
+          }
           continue;
         }
         byName.set(key, i);
@@ -929,20 +948,19 @@ export function Home({
   const onDismissCw = useCallback(
     (item: LibraryItem) => {
       if (item.manualWatched) {
-        dismissManualWatched(item._id);
+        dismissManualWatched(item._id, { acknowledged: true });
         return;
       }
-      if (isNuvioProvider || item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
+      if (isNuvioProviderActive() || item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
         const slot = resolveNuvioProfileIndex();
         removeExternalCwItem(item);
         clearLocalCw(item._id, `nuvio-${slot}`);
-        clearLocalCw(item._id);
+        clearLocalCw(item._id, { acknowledged: true });
         const se = episodeFromVideoId(item.state?.video_id);
         const season = item.state?.season ?? se?.season;
         const episode = item.state?.episode ?? se?.episode;
         clearResume(item._id, undefined, undefined, `nuvio-${slot}`);
         clearResume(item._id);
-        dismissCw(item, authKey);
         void deleteWatchProgressFromNuvio(
           slot,
           item._id,
@@ -950,16 +968,15 @@ export function Home({
           season,
           episode,
         );
-        return;
+        return dismissCw(item, authKey, { acknowledged: true });
       }
       if (item.local) {
-        clearLocalCw(item._id);
-        dismissCw(item, authKey);
-        return;
+        clearLocalCw(item._id, { acknowledged: true });
+        return dismissCw(item, authKey, { acknowledged: true });
       }
-      dismissCw(item, authKey);
+      return dismissCw(item, authKey, { acknowledged: true });
     },
-    [authKey, isNuvioProvider],
+    [authKey],
   );
 
   const { items: favItems } = useMediaFavorites();

@@ -101,14 +101,18 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { activeProfile, profiles } = useProfiles();
-  const hideSharedCw =
-    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
-  const hideAnime = useHideAnime();
   const isNuvioProvider = settings.accountProvider === "nuvio";
+  const hideSharedCw =
+    !isNuvioProvider &&
+    settings.cwPerProfile &&
+    anyProfileSharesStremioWith(activeProfile, profiles);
+  const hideAnime = useHideAnime();
   const externalCw = useExternalCw(
-    isNuvioProvider ||
-      (!hideSharedCw &&
-        (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb)),
+    Boolean(
+      isNuvioProvider ||
+        (!hideSharedCw &&
+          (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb)),
+    ),
   );
   const [items, setItems] = useState<LibraryItem[]>(() =>
     authKey && cloudKey === authKey ? cloudCache : [],

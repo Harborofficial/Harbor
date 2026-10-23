@@ -584,21 +584,8 @@ export function useCwAdvance(
             upNext: true,
           });
         } else if (animeCwEnd === "timer" && nextEp && (nextEp.airDate || isAnime)) {
-          const displaySeason = remappedMixed
-            ? nextEp.season
-            : origCur.season !== effCur.season
-              ? origCur.season
-              : nextEp.season;
           next.set(i._id, {
             ...i,
-            state: {
-              ...i.state!,
-              season: displaySeason,
-              episode: nextEp.episode,
-              video_id: `${i._id}:${displaySeason}:${nextEp.episode}`,
-              timeOffset: 0,
-              flaggedWatched: 0,
-            },
             waitingForAir: true as const,
             nextAirDate: nextEp.airDate,
           } as LibraryItem);

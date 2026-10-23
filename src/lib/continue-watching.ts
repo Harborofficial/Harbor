@@ -104,20 +104,27 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { activeProfile, profiles } = useProfiles();
+  const isNuvioProvider = settings.accountProvider === "nuvio";
   const hideSharedCw =
-    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+    !isNuvioProvider &&
+    settings.cwPerProfile &&
+    anyProfileSharesStremioWith(activeProfile, profiles);
   const cwSources = settings.cwSources;
   useEffect(() => {
-    setExternalCwSources({
-      trakt: cwSources.trakt,
-      simkl: cwSources.simkl,
-      publicmetadb: cwSources.publicmetadb,
-    });
-  }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb]);
-  const isNuvioProvider = settings.accountProvider === "nuvio";
+    const mask: { trakt: boolean; simkl: boolean; publicmetadb?: boolean; nuvio?: boolean } = {
+      trakt: !!cwSources.trakt,
+      simkl: !!cwSources.simkl,
+    };
+    if (cwSources.publicmetadb !== undefined) mask.publicmetadb = !!cwSources.publicmetadb;
+    if (isNuvioProvider) mask.nuvio = true;
+    setExternalCwSources(mask);
+  }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb, isNuvioProvider]);
   const externalCw = useExternalCw(
-    isNuvioProvider ||
-      (!hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb)),
+    Boolean(
+      isNuvioProvider ||
+        (!hideSharedCw &&
+          (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb)),
+    ),
   );
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);

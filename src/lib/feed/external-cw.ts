@@ -153,6 +153,7 @@ let inflight: Promise<void> | null = null;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 let retryAttempt = 0;
 let refreshGen = 0;
+let lastAppliedGen = 0;
 const subs = new Set<() => void>();
 
 function emit(): void {
@@ -192,9 +193,6 @@ export function setExternalCwSources(mask: {
     nuvio === sourceMask.nuvio
   )
     return;
-
-  const traktTurnedOn = mask.trakt && !sourceMask.trakt;
-  const simklTurnedOn = mask.simkl && !sourceMask.simkl;
 
   sourceMask = { trakt: mask.trakt, simkl: mask.simkl, publicmetadb: pm, nuvio };
   fetchedAt = 0;
@@ -272,6 +270,7 @@ async function runRefresh(gen: number): Promise<boolean> {
       },
     });
   }
+
   const results = await Promise.all(
     enabled.map(async ({ fetch }) => {
       try {
@@ -281,8 +280,11 @@ async function runRefresh(gen: number): Promise<boolean> {
       }
     }),
   );
-  // A disabled source or superseded request must not publish its late response.
-  if (gen !== refreshGen) return true;
+
+  // If a newer generation has already finished and applied, ignore this superseded run
+  if (gen < lastAppliedGen) return true;
+  lastAppliedGen = gen;
+
   const complete = results.every((r) => r !== null);
   fetchedAt = complete ? Date.now() : 0;
   const succeeded = results.filter((r): r is LibraryItem[] => r !== null);
@@ -291,7 +293,14 @@ async function runRefresh(gen: number): Promise<boolean> {
     enabled.filter((_, index) => results[index] === null).map(({ source }) => source),
   );
   const retained = items.filter((i) => i.external && failedSources.has(i.external));
-  setItems(merge([...succeeded, retained]));
+  const activeItems = [...succeeded, retained].flat().filter((i) => {
+    if (i.external === "trakt") return sourceMask.trakt && !!getTraktSession();
+    if (i.external === "simkl") return sourceMask.simkl && !!getSimklSession();
+    if (i.external === "publicmetadb") return sourceMask.publicmetadb && !!getPmdbSession();
+    if (i.external === "nuvio") return sourceMask.nuvio && isNuvioSignedIn() && isNuvioProviderActive();
+    return true;
+  });
+  setItems(merge([activeItems]));
   if (complete) retryAttempt = 0;
   return complete;
 }
@@ -337,9 +346,8 @@ export function refreshExternalCw(force = false): Promise<void> {
   }
   if (inflight) {
     if (!force) return inflight;
-    refreshGen += 1;
-    cancelRetry();
-    return inflight.then(() => refreshExternalCw(true));
+    // Don't kill the active in-flight request: let it deliver, then run another if needed
+    return inflight.then(() => refreshExternalCw(false));
   }
   if (!force && fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS) return Promise.resolve();
   cancelRetry();

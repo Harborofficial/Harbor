@@ -20,14 +20,16 @@ const DURATION_MS = { movie: 6_300_000, series: 2_640_000 };
 
 function movieMetaId(ids?: TraktIds): string | null {
   if (!ids) return null;
-  if (ids.imdb && /^tt\d+$/.test(ids.imdb)) return ids.imdb;
+  const imdb = ids.imdb ? String(ids.imdb).trim().toLowerCase() : null;
+  if (imdb && /^tt\d+$/.test(imdb)) return imdb;
   if (ids.tmdb) return `tmdb:movie:${ids.tmdb}`;
   return null;
 }
 
 function seriesMetaId(ids?: TraktIds): string | null {
   if (!ids) return null;
-  if (ids.imdb && /^tt\d+$/.test(ids.imdb)) return ids.imdb;
+  const imdb = ids.imdb ? String(ids.imdb).trim().toLowerCase() : null;
+  if (imdb && /^tt\d+$/.test(imdb)) return imdb;
   if (ids.tmdb) return `tmdb:tv:${ids.tmdb}`;
   return null;
 }
@@ -43,7 +45,7 @@ function buildItem(
   episode?: number,
 ): LibraryItem {
   const hasEpisode =
-    type === "series" && season != null && season > 0 && episode != null && episode > 0;
+    type === "series" && season != null && season >= 0 && episode != null && episode >= 0;
   return {
     _id: id,
     type,
@@ -66,7 +68,7 @@ function buildItem(
 
 function toLibraryItem(raw: RawPlayback): LibraryItem | null {
   const pct = Math.min(100, Math.max(0, raw.progress ?? 0));
-  if (pct < 1 || pct > 98) return null;
+  if (pct <= 0 || pct > 99.9) return null;
   const when = raw.paused_at ?? new Date(0).toISOString();
 
   if (raw.movie && !raw.episode) {
@@ -77,6 +79,8 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
   if (raw.show) {
     const id = seriesMetaId(raw.show.ids);
     if (!id) return null;
+    const season = raw.episode?.season;
+    const episode = raw.episode?.number ?? (raw.episode as any)?.episode;
     return buildItem(
       id,
       "series",
@@ -84,8 +88,8 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
       pct,
       DURATION_MS.series,
       when,
-      raw.episode?.season,
-      raw.episode?.number,
+      season,
+      episode,
     );
   }
   return null;
