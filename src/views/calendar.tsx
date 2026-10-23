@@ -12,7 +12,7 @@ import {
   todayLocalISO,
   type CalendarFilter,
   type CalendarItem,
-} from "@/lib/calendar";
+} from "@/lib/calendar-core";
 import { CalendarSkeleton } from "./calendar/calendar-skeleton";
 import { CalendarConfigRail } from "./calendar/config/config-rail";
 import { buildActiveCount } from "./calendar/config/rail-sources";
