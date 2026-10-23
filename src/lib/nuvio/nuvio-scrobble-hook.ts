@@ -141,6 +141,7 @@ export function useNuvioScrobble({
 
   // Flush on unmount, pagehide, and beforeunload
   useEffect(() => {
+    if (!isNuvioSignedIn() || !isNuvioProviderActive()) return;
     const handleUnload = () => {
       void doPush("unload");
     };

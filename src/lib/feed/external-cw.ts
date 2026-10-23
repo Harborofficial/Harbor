@@ -468,6 +468,7 @@ if (typeof window !== "undefined") {
   });
   window.addEventListener("harbor:account-provider-changed", onProfileChange);
   window.addEventListener("harbor:playback-session-ended", () => {
+    if (!isNuvioProviderActive()) return;
     void refreshExternalCw(true);
   });
   window.addEventListener("harbor:nuvio-progress-pushed", (e) => {
