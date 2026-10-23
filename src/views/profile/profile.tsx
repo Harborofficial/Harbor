@@ -77,9 +77,11 @@ export function ProfileView({
   const nuvioState = loadNuvioState();
   const primaryNuvioProfile = isNuvio
     ? (nuvioState.profiles.find((p) => p.profile_index === 1) || nuvioState.profiles[0] || null)
+    : null;
 
+  const nuvioEmail = nuvioState.session?.user?.email;
   const primaryHandle = primaryNuvioProfile
-    ? (primaryNuvioProfile.name?.toLowerCase().replace(/\s+/g, "") || nuvioState.email?.split("@")[0] || "nuvio").toLowerCase()
+    ? (primaryNuvioProfile.name?.toLowerCase().replace(/\s+/g, "") || nuvioEmail?.split("@")[0] || "nuvio").toLowerCase()
     : "nuvio";
   const isNuvioPrimaryMatch = isNuvio && (handle.toLowerCase() === primaryHandle || handle.toLowerCase() === "me");
   const activeNuvioProfile = primaryNuvioProfile;
@@ -367,7 +369,7 @@ export function ProfileView({
     isNuvio && (summary.isOwner || isNuvioPrimaryMatch)
       ? {
           ...summary,
-          alias: primaryNuvioProfile?.name || nuvioState.email?.split("@")[0] || summary.alias,
+          alias: primaryNuvioProfile?.name || nuvioEmail?.split("@")[0] || summary.alias,
           handle: primaryHandle,
           counts: {
             ...summary.counts,

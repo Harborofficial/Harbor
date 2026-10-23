@@ -16,6 +16,9 @@ import {
 } from "./kit";
 import { TrackerIdentity } from "./tracker-identity";
 import { WatchlistSync } from "./trakt-panel/watchlist-sync";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
+import { updateNuvioProfile } from "@/lib/nuvio/nuvio-profiles";
 
 export function TraktPanel() {
   const t = useT();
@@ -40,8 +43,14 @@ export function TraktPanel() {
     };
   }, [isConnected]);
 
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const pushAvatar = (url: string | null) => {
-    if (activeProfile) updateProfile(activeProfile.id, { avatar: url });
+    if (isNuvio) {
+      const slot = resolveNuvioProfileIndex();
+      void updateNuvioProfile(slot, { avatar_url: url });
+    } else if (activeProfile) {
+      updateProfile(activeProfile.id, { avatar: url });
+    }
   };
 
   useEffect(() => {

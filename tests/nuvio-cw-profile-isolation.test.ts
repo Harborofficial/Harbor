@@ -153,3 +153,60 @@ test("signOutNuvio purges all nuvio cache, resets provider to stremio, and dispa
   assert.equal(localStorage.getItem("harbor.nuvio.local-cw.1"), null);
   assert.equal(localStorage.getItem("harbor.newEpisodes.dismissed.nuvio.1"), null);
 });
+
+test("Trakt watchlist export and import work with Nuvio library in Nuvio mode", async () => {
+  localStorage.clear();
+  localStorage.setItem("harbor.account-provider", "nuvio");
+  saveNuvioState({
+    session: {
+      access_token: "mock-token",
+      refresh_token: "ref",
+      expires_at: Date.now() + 3600,
+      token_type: "bearer",
+      user: { id: "u1" },
+    },
+    profiles: [{ profile_index: 1, name: "Heisenberg" }],
+    activeProfileIndex: 1,
+    lastSyncedAt: Date.now(),
+  });
+
+  const { addNuvioLibraryItem, readCachedNuvioLibrary } = await import("../src/lib/nuvio/nuvio-library.ts");
+  const { planExport, traktItemToStremioId } = await import("../src/lib/trakt/watchlist-sync.ts");
+
+  // Add items to Nuvio library
+  addNuvioLibraryItem(1, {
+    content_id: "tt0903747",
+    content_type: "series",
+    name: "Breaking Bad",
+    added_at: Date.now(),
+  });
+
+  const nuvioLib = readCachedNuvioLibrary(1);
+  assert.equal(nuvioLib.length, 1);
+
+  // Plan export for Nuvio library items
+  const sources = nuvioLib.map((i) => ({ id: i.content_id, type: i.content_type }));
+  const plan = planExport(sources);
+  assert.equal(plan.shows.length, 1);
+  assert.equal(plan.shows[0].ids.imdb, "tt0903747");
+
+  // Import Trakt item into Nuvio
+  const traktShow = {
+    title: "Better Call Saul",
+    type: "show",
+    ids: { imdb: "tt3032476", tmdb: 60059 },
+  };
+  const importedId = traktItemToStremioId(traktShow as any);
+  assert.equal(importedId, "tt3032476");
+
+  addNuvioLibraryItem(1, {
+    content_id: importedId!,
+    content_type: traktShow.type === "show" ? "series" : "movie",
+    name: traktShow.title,
+    added_at: Date.now(),
+  });
+
+  const updatedLib = readCachedNuvioLibrary(1);
+  assert.equal(updatedLib.length, 2);
+  assert.ok(updatedLib.some((i) => i.content_id === "tt3032476"));
+});

@@ -95,15 +95,16 @@ export function useProfile(handle: string): ProfileBundle {
           try {
             const ns = loadNuvioState();
             const primary = ns.profiles.find((p) => p.profile_index === 1) || ns.profiles[0];
+            const email = ns.session?.user?.email;
             const nuvioHandle = (
               primary?.name?.toLowerCase().replace(/\s+/g, "") ||
-              ns.email?.split("@")[0] ||
+              email?.split("@")[0] ||
               "nuvio"
             ).toLowerCase();
             if (handle.toLowerCase() === nuvioHandle || handle.toLowerCase() === "me") {
               const fallback: ProfileSummary = {
                 handle: nuvioHandle,
-                alias: primary?.name || ns.email?.split("@")[0] || "Nuvio User",
+                alias: primary?.name || email?.split("@")[0] || "Nuvio User",
                 avatarUrl: resolveNuvioAvatar(primary) || undefined,
                 verified: false,
                 featured: false,
