@@ -122,6 +122,7 @@ import { prefetchSegments } from "@/lib/skip-intro";
 import { useT } from "@/lib/i18n";
 import { emitListToast } from "@/components/lists/list-toast";
 import { DropShowConfirmModal } from "@/components/drop-show-confirm-modal";
+import { useCanDropShow } from "@/lib/drop-show-eligibility";
 import { dropContextTitle, requireMediaActionSuccess } from "@/lib/media-context-actions";
 import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
@@ -2195,10 +2196,20 @@ export function DetailView({
           })
         : t("Play");
 
-  const canDropTitle =
+  const isDroppableSeries =
     !liveContext &&
     meta.type !== "movie" &&
     (isSeries || isAnime || meta.type === "series" || meta.type === "anime");
+  const canDropTitle = useCanDropShow(
+    isDroppableSeries
+      ? {
+          id: meta.id,
+          type: isAnime ? "anime" : "series",
+          imdbId: detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null),
+          animeId: isAnime ? (animeCanonicalId ?? meta.id) : null,
+        }
+      : null,
+  );
   const [dropConfirmOpen, setDropConfirmOpen] = useState(false);
   const handleDropTitle = async () => {
     const displayTitle = title || meta.name;

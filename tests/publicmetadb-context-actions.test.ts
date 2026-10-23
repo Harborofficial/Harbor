@@ -84,6 +84,13 @@ function harness() {
           return 1;
         },
       },
+      "./publicmetadb/dropped": {
+        dropPmdbShow: async (target: PmdbTarget, options: any) => {
+          options.assertCurrent();
+          calls.push({ kind: "drop", target });
+          return writeSucceeds;
+        },
+      },
       "./publicmetadb/mappings": { getTmdbForExternal: async () => ({ tmdb_id: 456 }) },
       "./publicmetadb/ids": {
         resolvePmdbTarget: async (_id: string, type: string) => {
@@ -216,13 +223,33 @@ test("PMDB removal and watched writes require a positive service acknowledgement
   );
 });
 
-test("PMDB Drop removes watchlist membership and resume progress without touching history", async () => {
+test("PMDB Drop marks the show dropped, then removes watchlist membership and resume progress", async () => {
   const h = harness();
   h.alreadyListed();
   await h.providers.dropProviderWrites(series)[0].run(h.validate);
   assert.deepEqual(
     h.calls.map((call) => call.kind),
-    ["remove", "resume-clear"],
+    ["drop", "remove", "resume-clear"],
+  );
+});
+
+test("PMDB Drop still marks a progressed show dropped when it is not in the watchlist", async () => {
+  const h = harness();
+  await h.providers.dropProviderWrites(series)[0].run(h.validate);
+  assert.deepEqual(
+    h.calls.map((call) => call.kind),
+    ["drop", "resume-clear"],
+  );
+});
+
+test("PMDB Drop does not clear other PMDB state when native dropped status is not confirmed", async () => {
+  const h = harness();
+  h.alreadyListed();
+  h.failWrite();
+  await assert.rejects(h.providers.dropProviderWrites(series)[0].run(h.validate), /dropped status/);
+  assert.deepEqual(
+    h.calls.map((call) => call.kind),
+    ["drop"],
   );
 });
 
@@ -365,4 +392,28 @@ test("PMDB mutation guards run after mapping or list preparation and before the 
     /owner changed/,
   );
   assert.deepEqual(writes, []);
+});
+
+test("PMDB native Drop uses the external dropped-show endpoint", async () => {
+  const requests: Array<{ path: string; options: any }> = [];
+  const api = load<typeof import("../src/lib/publicmetadb/dropped")>(
+    "src/lib/publicmetadb/dropped.ts",
+    {
+      "./client": {
+        pmdbRequest: async (path: string, options: any) => {
+          requests.push({ path, options });
+          return { success: true };
+        },
+      },
+      "./session": { isAuthenticated: () => true },
+    },
+  );
+  const target: PmdbTarget = { tmdb_id: 456, media_type: "tv" };
+  assert.equal(await api.dropPmdbShow(target), true);
+  assert.deepEqual(requests, [
+    {
+      path: "/api/external/dropped",
+      options: { method: "POST", body: { tmdb_id: 456, media_type: "tv" } },
+    },
+  ]);
 });

@@ -1,7 +1,8 @@
 import { Ban, Loader2, X } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useState, useSyncExternalStore } from "react";
 import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { useT } from "@/lib/i18n";
+import { getSession as getPmdbSession, subscribeSession as subscribePmdbSession } from "@/lib/publicmetadb/session";
 
 export function DropShowConfirmModal({
   title,
@@ -13,6 +14,7 @@ export function DropShowConfirmModal({
   onConfirm: () => void | Promise<void>;
 }) {
   const t = useT();
+  const pmdbSession = useSyncExternalStore(subscribePmdbSession, getPmdbSession);
   const titleId = useId();
   const { closing, close } = useModalExit(onClose);
   const [busy, setBusy] = useState(false);
@@ -64,9 +66,11 @@ export function DropShowConfirmModal({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-6">
-        <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("PublicMetaDB does not have a Dropped status, so Harbor will remove this show from your PMDB watchlist and clear its saved resume progress instead. Watch history is kept.")}
-        </p>
+        {pmdbSession?.apiKey && (
+          <p className="text-[12.5px] leading-relaxed text-ink-subtle">
+            {t("PublicMetaDB will mark this show as Dropped, remove it from your PMDB watchlist if present, and clear saved resume progress. Watched episode history is kept.")}
+          </p>
+        )}
         {error && (
           <p role="alert" className="whitespace-pre-line rounded-md bg-danger/10 px-3 py-2.5 text-[12px] leading-relaxed text-danger">
             {error}

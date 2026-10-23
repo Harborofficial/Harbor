@@ -64,6 +64,7 @@ import { saveLocalCw, clearLocalCw } from "./local-cw";
 import { saveResumeMs } from "./resume";
 import { loadStoredSettings } from "./settings/load";
 import { pmdbDeleteResumesForTitle } from "./publicmetadb/scrobble";
+import { dropPmdbShow } from "./publicmetadb/dropped";
 
 export type ProviderWrite = {
   provider: string;
@@ -629,6 +630,10 @@ export function dropProviderWrites(
         };
         const resolved = await prepare(assertCurrent);
         if (!resolved) return "No verified PublicMetaDB identity is available for this title.";
+        const dropped = await dropPmdbShow(resolved, { assertCurrent: validate });
+        validate();
+        if (!dropped) throw new Error("PublicMetaDB did not confirm dropped status.");
+
         const items = await fetchPmdbWatchlist({
           listId,
           strict: true,

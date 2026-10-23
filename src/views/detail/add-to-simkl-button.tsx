@@ -20,7 +20,7 @@ import type { SimklTarget } from "@/lib/simkl/types";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { SimklRatingPicker } from "./simkl-rating-picker";
-import { useTrackerStatusVersion } from "@/lib/tracker-status-events";
+import { notifyTrackerStatusChanged, useTrackerStatusVersion } from "@/lib/tracker-status-events";
 
 type Translator = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -107,6 +107,7 @@ export function AddToSimklButton({
     try {
       const saved = await setSimklStatus(target, next);
       setStatus(saved);
+      notifyTrackerStatusChanged();
     } catch (e) {
       setStatus(prev);
       flash(errMsg(t, e));
@@ -123,6 +124,7 @@ export function AddToSimklButton({
     setMenuOpen(false);
     try {
       await clearSimklStatus(target);
+      notifyTrackerStatusChanged();
     } catch (e) {
       setStatus(prev);
       flash(errMsg(t, e));
