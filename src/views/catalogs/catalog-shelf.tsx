@@ -82,6 +82,25 @@ export function CatalogShelf({ catalog }: { catalog: BrowseCatalog }) {
             title: catalog.name,
             fetcher: browseFetcher(catalog, null),
             initial: items ?? undefined,
+            filter:
+              catalog.genres.length > 0
+                ? {
+                    label: t("Filter"),
+                    options: [
+                      {
+                        value: "",
+                        label: t("All genres"),
+                        fetcher: browseFetcher(catalog, null),
+                        initial: items ?? undefined,
+                      },
+                      ...catalog.genres.map((genre) => ({
+                        value: genre,
+                        label: genre,
+                        fetcher: browseFetcher(catalog, genre),
+                      })),
+                    ],
+                  }
+                : undefined,
           })
         }
       />
