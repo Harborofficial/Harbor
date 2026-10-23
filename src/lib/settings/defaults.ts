@@ -475,6 +475,7 @@ export const DEFAULT: Settings = {
   musicSpeedPresets: [],
   homeMode: "harbor",
   classicCatalogSource: "all",
+  nuvioAddonMode: "separate",
   homeShowAllAddonRows: false,
   homeNewEpisodes: false,
   libraryBookmarkedOnly: true,

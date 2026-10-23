@@ -50,6 +50,22 @@ export function isNuvioProviderActive(): boolean {
 /**
  * Resolves the effective Nuvio profile index (1..6) considering active provider setting.
  */
+/**
+ * Resolves the effective Nuvio profile index for addon operations.
+ * If this profile has uses_primary_addons set to true (the default for secondary profiles),
+ * it returns slot 1 (Primary). If uses_primary_addons is false, it maintains its own slot (e.g. 2..6).
+ */
+export function resolveEffectiveNuvioAddonSlot(harborProfileId?: string | number): number {
+  const slot = resolveNuvioProfileIndex(harborProfileId);
+  if (slot === 1) return 1;
+  const state = loadNuvioState();
+  const profile = state.profiles.find((p) => p.profile_index === slot);
+  if (profile && profile.uses_primary_addons !== false) {
+    return 1;
+  }
+  return slot;
+}
+
 export function resolveNuvioProfileIndex(harborProfileId?: string | number): number {
   if (typeof harborProfileId === "number") {
     if (harborProfileId >= 1 && harborProfileId <= 6) return harborProfileId;
@@ -1168,12 +1184,7 @@ export async function pullAddonsFromNuvio(
 ): Promise<NuvioAddonItem[]> {
   if (!isNuvioSignedIn()) return [];
 
-  let profileIndex = resolveNuvioProfileIndex(harborProfileId);
-  const state = loadNuvioState();
-  const profile = state.profiles.find((p) => p.profile_index === profileIndex);
-  if (profile?.uses_primary_addons) {
-    profileIndex = 1;
-  }
+  const profileIndex = resolveEffectiveNuvioAddonSlot(harborProfileId);
 
   try {
     const res = await nuvioFetch(
@@ -1223,7 +1234,7 @@ export async function fetchNuvioAddons(
 ): Promise<Addon[]> {
   if (!isNuvioSignedIn()) return [];
 
-  const profileIndex = resolveNuvioProfileIndex(harborProfileId);
+  const profileIndex = resolveEffectiveNuvioAddonSlot(harborProfileId);
   const cachedItems = readCachedNuvioAddons(profileIndex);
   let items = cachedItems;
 
@@ -1278,7 +1289,8 @@ export async function pushAddonsToNuvio(
 ): Promise<boolean> {
   if (!isNuvioSignedIn()) return false;
 
-  const profileIndex = resolveNuvioProfileIndex(harborProfileId);
+  const profileIndex = resolveEffectiveNuvioAddonSlot(harborProfileId);
+  writeCachedNuvioAddons(profileIndex, addons);
 
   try {
     const clientId = getOrCreateSyncClientId();
@@ -1303,4 +1315,60 @@ export async function pushAddonsToNuvio(
     console.warn("[nuvio] failed to push addons", err);
     return false;
   }
+}
+
+/**
+ * Adds an addon URL to the effective Nuvio profile's collection and syncs to Nuvio cloud.
+ */
+export async function addAddonToNuvio(
+  harborProfileId: string | number,
+  item: { url: string; name?: string },
+): Promise<boolean> {
+  if (!isNuvioSignedIn()) return false;
+  const slot = resolveEffectiveNuvioAddonSlot(harborProfileId);
+  const current = readCachedNuvioAddons(slot);
+  const existingIdx = current.findIndex((a) => a.url === item.url);
+  const updated = [...current];
+  if (existingIdx >= 0) {
+    updated[existingIdx] = {
+      ...updated[existingIdx],
+      name: item.name || updated[existingIdx].name,
+      enabled: true,
+    };
+  } else {
+    updated.push({
+      url: item.url,
+      name: item.name || "Addon",
+      enabled: true,
+      sort_order: updated.length,
+    });
+  }
+  writeCachedNuvioAddons(slot, updated);
+  return pushAddonsToNuvio(slot, updated);
+}
+
+/**
+ * Deletes an addon URL from the effective Nuvio profile's collection and syncs deletion to Nuvio cloud.
+ */
+export async function deleteAddonFromNuvio(
+  harborProfileId: string | number,
+  manifestUrl: string,
+): Promise<boolean> {
+  if (!isNuvioSignedIn()) return false;
+  const slot = resolveEffectiveNuvioAddonSlot(harborProfileId);
+  const current = readCachedNuvioAddons(slot);
+  const remaining = current.filter(
+    (a) => a.url !== manifestUrl && !a.url.endsWith(manifestUrl) && !manifestUrl.endsWith(a.url),
+  );
+  writeCachedNuvioAddons(slot, remaining);
+
+  try {
+    // Delete directly from Supabase addons table if permissible
+    await nuvioFetch(
+      `/rest/v1/addons?profile_id=eq.${slot}&url=eq.${encodeURIComponent(manifestUrl)}`,
+      { method: "DELETE" },
+    ).catch(() => {});
+  } catch {}
+
+  return pushAddonsToNuvio(slot, remaining);
 }

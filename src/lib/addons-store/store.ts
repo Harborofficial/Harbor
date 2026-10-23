@@ -7,7 +7,8 @@ import { listAddons } from "@/lib/providers/stremio-addons";
 import { isAdultText } from "./adult-filter";
 import { fetchCommunityAddons, fetchManifest } from "./community";
 import { CURATED_ADDONS, type CuratedEntry } from "./curated";
-import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
+import { useSettings } from "@/lib/settings";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 import { recordStremioAddons, recordNuvioAddons } from "@/lib/nuvio/nuvio-addon-registry";
 
@@ -45,6 +46,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
   refetch: () => void;
 } {
   const { authKey } = useAuth();
+  const { settings } = useSettings();
   const [byId, setById] = useState<Map<string, ResolvedAddon>>(new Map());
   const [loading, setLoading] = useState(true);
   const [installedIds, setInstalledIds] = useState<Set<string>>(new Set());
@@ -55,9 +57,16 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
     let cancelled = false;
     setLoading(true);
     (async () => {
+      const isNuvio = isNuvioProviderActive();
+      const nuvioAddonMode = settings.nuvioAddonMode ?? "separate";
+
       const local = await fetchInstalledAddons().catch(() => [] as Addon[]);
-      const stremio = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
-      const nuvio = isNuvioSignedIn() ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
+      const stremio = (!isNuvio || nuvioAddonMode === "combined") && authKey
+        ? await userAddons(authKey).catch(() => [] as Addon[])
+        : [];
+      const nuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
+        ? await fetchNuvioAddons().catch(() => [] as Addon[])
+        : [];
 
       recordStremioAddons(stremio);
       if (nuvio.length > 0) recordNuvioAddons(nuvio);
@@ -270,7 +279,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
     return () => {
       cancelled = true;
     };
-  }, [authKey, adultsAllowed, tick]);
+  }, [authKey, adultsAllowed, tick, settings.nuvioAddonMode, settings.accountProvider]);
 
   useEffect(() => {
     const onChange = (e: Event) => {

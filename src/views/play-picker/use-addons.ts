@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
 import { userAddons, withDebridKeys, type Addon } from "@/lib/addons";
-import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 import { recordStremioAddons, recordNuvioAddons } from "@/lib/nuvio/nuvio-addon-registry";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
@@ -79,15 +79,27 @@ export function useAddons(
       dlKey: settings.dlKey,
     };
     (async () => {
-      const stremioAddons = filterEnabled(authKey ? await userAddons(authKey).catch(() => []) : []);
-      const nuvioAddons = isNuvioSignedIn() ? filterEnabled(await fetchNuvioAddons().catch(() => [])) : [];
+      const isNuvio = isNuvioProviderActive();
+      const nuvioAddonMode = settings.nuvioAddonMode ?? "separate";
+
+      const stremioAddons = (!isNuvio || nuvioAddonMode === "combined") && authKey
+        ? filterEnabled(await userAddons(authKey).catch(() => []))
+        : [];
+      const nuvioAddons = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
+        ? filterEnabled(await fetchNuvioAddons().catch(() => []))
+        : [];
       const installed = filterEnabled(await fetchInstalledAddons().catch(() => []));
       if (cancelled) return;
       recordStremioAddons(stremioAddons);
       if (nuvioAddons.length > 0) recordNuvioAddons(nuvioAddons);
       const merged: Addon[] = [];
       const idxByUrl = new Map<string, number>();
-      for (const a of [...stremioAddons, ...nuvioAddons, ...installed]) {
+      const candidateAddons = isNuvio && nuvioAddonMode === "separate"
+        ? [...nuvioAddons, ...installed]
+        : !isNuvio
+          ? [...stremioAddons, ...installed]
+          : [...stremioAddons, ...nuvioAddons, ...installed];
+      for (const a of candidateAddons) {
         const existingIdx = idxByUrl.get(a.transportUrl);
         if (existingIdx === undefined) {
           idxByUrl.set(a.transportUrl, merged.length);
@@ -154,6 +166,8 @@ export function useAddons(
     settings.pluginsGroupByRepo,
     pluginTick,
     nuvioTick,
+    settings.nuvioAddonMode,
+    settings.accountProvider,
   ]);
 
   return { addons, userHasStreamAddons };
