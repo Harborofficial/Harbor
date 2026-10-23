@@ -91,13 +91,55 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
   return null;
 }
 
+export const TRAKT_PLAYBACK_CACHE_KEY = "harbor.trakt.playback_items";
+let memoryTraktPlaybackCache: LibraryItem[] | null = null;
+
+export function readCachedTraktPlaybackItems(): LibraryItem[] {
+  if (memoryTraktPlaybackCache && memoryTraktPlaybackCache.length > 0) {
+    return memoryTraktPlaybackCache;
+  }
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(TRAKT_PLAYBACK_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        memoryTraktPlaybackCache = parsed;
+        return parsed;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function writeCachedTraktPlaybackItems(items: LibraryItem[]): void {
+  memoryTraktPlaybackCache = items;
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(TRAKT_PLAYBACK_CACHE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
+export function clearCachedTraktPlaybackItems(): void {
+  memoryTraktPlaybackCache = null;
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(TRAKT_PLAYBACK_CACHE_KEY);
+  } catch {}
+}
+
 export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
   if (!getSession()) return [];
   let raw: RawPlayback[];
   try {
     raw = await traktRequest<RawPlayback[]>("/sync/playback?limit=40");
   } catch (e) {
-    if (e instanceof TraktApiError && e.status === 404) return [];
+    if (e instanceof TraktApiError && e.status === 404) {
+      writeCachedTraktPlaybackItems([]);
+      return [];
+    }
+    const cached = readCachedTraktPlaybackItems();
+    if (cached.length > 0) return cached;
     throw e;
   }
   if (!Array.isArray(raw)) return [];
@@ -139,5 +181,6 @@ export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
       );
     }
   }
+  writeCachedTraktPlaybackItems(items);
   return items;
 }

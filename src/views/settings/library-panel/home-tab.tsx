@@ -16,6 +16,7 @@ import {
   Volume2,
 } from "../icons";
 import { useSettings } from "@/lib/settings";
+import { setExternalCwSources } from "@/lib/feed/external-cw";
 import { clearAllSnapshots, snapshotCount } from "@/lib/snapshots";
 import { useT } from "@/lib/i18n";
 import { Dropdown, type DropdownOption } from "@/components/dropdown";
@@ -281,7 +282,15 @@ export function HomeTab() {
               "Pulls what you have part-watched on Trakt into the row, marked with the Trakt logo. Requires a connected Trakt account.",
             )}
             value={settings.cwSources.trakt}
-            onChange={(v) => update({ cwSources: { ...settings.cwSources, trakt: v } })}
+            onChange={(v) => {
+              update({ cwSources: { ...settings.cwSources, trakt: v } });
+              setExternalCwSources({
+                trakt: v,
+                simkl: settings.cwSources.simkl,
+                publicmetadb: settings.cwSources.publicmetadb,
+                nuvio: isNuvio,
+              });
+            }}
             lockReason={
               !isNuvio && settings.cwPerProfile
                 ? t(
@@ -297,7 +306,15 @@ export function HomeTab() {
               "Pulls what you have part-watched on Simkl into the row, marked with the Simkl logo. Requires a connected Simkl account.",
             )}
             value={settings.cwSources.simkl}
-            onChange={(v) => update({ cwSources: { ...settings.cwSources, simkl: v } })}
+            onChange={(v) => {
+              update({ cwSources: { ...settings.cwSources, simkl: v } });
+              setExternalCwSources({
+                trakt: settings.cwSources.trakt,
+                simkl: v,
+                publicmetadb: settings.cwSources.publicmetadb,
+                nuvio: isNuvio,
+              });
+            }}
             lockReason={
               !isNuvio && settings.cwPerProfile
                 ? t(
@@ -312,7 +329,15 @@ export function HomeTab() {
               "Pulls what you have part-watched on PublicMetaDB into the row, marked with the PublicMetaDB logo. Requires a connected PublicMetaDB account.",
             )}
             value={settings.cwSources.publicmetadb}
-            onChange={(v) => update({ cwSources: { ...settings.cwSources, publicmetadb: v } })}
+            onChange={(v) => {
+              update({ cwSources: { ...settings.cwSources, publicmetadb: v } });
+              setExternalCwSources({
+                trakt: settings.cwSources.trakt,
+                simkl: settings.cwSources.simkl,
+                publicmetadb: v,
+                nuvio: isNuvio,
+              });
+            }}
           />
         </SettingGroup>
 

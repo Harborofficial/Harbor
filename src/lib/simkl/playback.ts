@@ -182,6 +182,43 @@ export async function hasActiveSimklPlayback(
   return false;
 }
 
+export const SIMKL_PLAYBACK_CACHE_KEY = "harbor.simkl.playback_items";
+let memorySimklPlaybackCache: LibraryItem[] | null = null;
+
+export function readCachedSimklPlaybackItems(): LibraryItem[] {
+  if (memorySimklPlaybackCache && memorySimklPlaybackCache.length > 0) {
+    return memorySimklPlaybackCache;
+  }
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(SIMKL_PLAYBACK_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        memorySimklPlaybackCache = parsed;
+        return parsed;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function writeCachedSimklPlaybackItems(items: LibraryItem[]): void {
+  memorySimklPlaybackCache = items;
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(SIMKL_PLAYBACK_CACHE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
+export function clearCachedSimklPlaybackItems(): void {
+  memorySimklPlaybackCache = null;
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(SIMKL_PLAYBACK_CACHE_KEY);
+  } catch {}
+}
+
 export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
   const owner = getSession();
   if (!owner) return [];
@@ -189,7 +226,12 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
   try {
     raw = await simklRequest<RawSession[]>("/sync/playback?hide_watched=true&limit=40");
   } catch (e) {
-    if (e instanceof SimklApiError && e.status === 404) return [];
+    if (e instanceof SimklApiError && e.status === 404) {
+      writeCachedSimklPlaybackItems([]);
+      return [];
+    }
+    const cached = readCachedSimklPlaybackItems();
+    if (cached.length > 0) return cached;
     throw e;
   }
   if (getSession() !== owner) throw new Error("SIMKL session changed");
@@ -235,5 +277,6 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
       ]);
     }
   }
+  writeCachedSimklPlaybackItems(items);
   return items;
 }

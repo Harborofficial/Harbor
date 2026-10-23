@@ -49,10 +49,25 @@ function fixture(initialNuvioActive = true, nuvioSignedIn = true) {
   let isNuvioActive = initialNuvioActive;
   let isSignedIn = nuvioSignedIn;
 
+  let traktCache: LibraryItem[] = [];
+  let simklCache: LibraryItem[] = [];
+
   const mocks: Record<string, unknown> = {
     react: {},
-    "@/lib/simkl/playback": { fetchSimklPlaybackItems: () => providers.simkl() },
-    "@/lib/trakt/playback": { fetchTraktPlaybackItems: () => providers.trakt() },
+    "@/lib/simkl/playback": {
+      fetchSimklPlaybackItems: () => providers.simkl(),
+      readCachedSimklPlaybackItems: () => simklCache,
+      writeCachedSimklPlaybackItems: (_items: LibraryItem[]) => {
+        simklCache = _items;
+      },
+    },
+    "@/lib/trakt/playback": {
+      fetchTraktPlaybackItems: () => providers.trakt(),
+      readCachedTraktPlaybackItems: () => traktCache,
+      writeCachedTraktPlaybackItems: (_items: LibraryItem[]) => {
+        traktCache = _items;
+      },
+    },
     "@/lib/publicmetadb/playback": {
       fetchPublicMetaDbPlaybackItems: () => providers.publicmetadb(),
     },
@@ -135,6 +150,12 @@ function fixture(initialNuvioActive = true, nuvioSignedIn = true) {
     setNuvioItems: (items: LibraryItem[]) => {
       nuvioItems = items;
     },
+    setTraktCache: (items: LibraryItem[]) => {
+      traktCache = items;
+    },
+    setSimklCache: (items: LibraryItem[]) => {
+      simklCache = items;
+    },
     triggerEvent: (name: string, detail?: unknown) => {
       if (listeners[name]) {
         listeners[name]({ detail } as unknown);
@@ -199,4 +220,39 @@ test("Shows from Trakt and Simkl deduplicate without duplicate cards", async () 
   assert.equal(cw.length, 1, "Only one card should exist for the same show");
   assert.equal(cw[0].external, "trakt", "Newer tracker activity wins card source");
   assert.equal(cw[0].state?.episode, 2);
+});
+
+test("Toggling Trakt progress ON restores cached cards synchronously and instantly", () => {
+  const h = fixture(true, true);
+  const cachedTrakt = makeItem("trakt", "tt11280740", "Severance", 2, 2, "2026-10-22T11:00:00Z");
+  h.setTraktCache([cachedTrakt]);
+
+  // Disable trakt first
+  h.api.setExternalCwSources({ trakt: false, simkl: false, nuvio: true });
+  assert.equal(h.api.listExternalCw().length, 0);
+
+  // Now enable trakt - should be synchronous and instant from cache
+  h.api.setExternalCwSources({ trakt: true, simkl: false, nuvio: true });
+  const cw = h.api.listExternalCw();
+  assert.equal(cw.length, 1, "Cached Trakt card must appear synchronously without waiting for network");
+  assert.equal(cw[0]._id, "tt11280740");
+  assert.equal(cw[0].external, "trakt");
+});
+
+test("Toggling Trakt progress OFF immediately drops cards synchronously", () => {
+  const h = fixture(true, true);
+  const cachedTrakt = makeItem("trakt", "tt11280740", "Severance", 2, 2, "2026-10-22T11:00:00Z");
+  const nuvioShow = makeItem("nuvio", "tt0903747", "Breaking Bad", 1, 3, "2026-10-22T12:00:00Z");
+
+  h.setNuvioItems([nuvioShow]);
+  h.setTraktCache([cachedTrakt]);
+
+  h.api.setExternalCwSources({ trakt: true, simkl: false, nuvio: true });
+  assert.equal(h.api.listExternalCw().length, 2);
+
+  // Toggle off Trakt
+  h.api.setExternalCwSources({ trakt: false, simkl: false, nuvio: true });
+  const cw = h.api.listExternalCw();
+  assert.equal(cw.length, 1, "Trakt card must vanish immediately");
+  assert.equal(cw[0]._id, "tt0903747", "Nuvio card must be preserved");
 });

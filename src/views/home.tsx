@@ -98,7 +98,7 @@ import {
   peekSimklWatchedMap,
   type WatchlistStatus,
 } from "@/lib/simkl/list-status";
-import { removeExternalCwItem, useExternalCw } from "@/lib/feed/external-cw";
+import { removeExternalCwItem, setExternalCwSources, useExternalCw } from "@/lib/feed/external-cw";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useAnilist } from "@/lib/anilist/provider";
 import { loadAnilistWatchedMap } from "@/lib/anilist/watched-map";
@@ -161,6 +161,19 @@ export function Home({
       (!hideSharedCw &&
         (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb)),
   );
+  useEffect(() => {
+    setExternalCwSources({
+      trakt: settings.cwSources.trakt,
+      simkl: settings.cwSources.simkl,
+      publicmetadb: settings.cwSources.publicmetadb,
+      nuvio: isNuvioProvider,
+    });
+  }, [
+    settings.cwSources.trakt,
+    settings.cwSources.simkl,
+    settings.cwSources.publicmetadb,
+    isNuvioProvider,
+  ]);
   const [traktWatched, setTraktWatched] = useState<Set<string>>(() => peekTraktWatched());
   const [simklWatchedMap, setSimklWatchedMap] = useState<Map<string, Set<string>>>(() =>
     peekSimklWatchedMap(),
@@ -706,9 +719,10 @@ export function Home({
           ];
     const eligible = (
       isNuvioProvider
-        ? (cwBase.length > 0
-            ? cwBase
-            : localCwItems.map((i) => ({ ...i, external: "nuvio" as const })))
+        ? [
+            ...cwBase,
+            ...localCwItems.map((i) => ({ ...i, external: "nuvio" as const })),
+          ]
         : [
             ...cwBase,
             ...localCwItems,
