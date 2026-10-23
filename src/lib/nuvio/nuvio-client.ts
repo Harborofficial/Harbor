@@ -4,6 +4,7 @@
  */
 
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+export { isNuvioProviderActive } from "@/lib/active-profile-id";
 import type { NuvioAccountState, NuvioSession } from "./nuvio-types";
 
 export const NUVIO_DEFAULT_API = "https://api.nuvio.tv";
