@@ -20,7 +20,7 @@ import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { signOutNuvio } from "@/lib/nuvio/nuvio-auth";
 import { resolveNuvioAvatar } from "@/lib/nuvio/nuvio-profiles";
 import type { NuvioProfile } from "@/lib/nuvio/nuvio-types";
-import { isStremioActivePrimary } from "@/lib/active-profile-id";
+import { isStremioActivePrimary, activeProfileIsPrimary } from "@/lib/active-profile-id";
 
 const ITEM =
   "flex items-center gap-2.5 px-4 py-2.5 text-start text-[13.5px] text-ink-muted transition-colors duration-150 ease-[var(--ease-out)] hover:bg-raised hover:text-ink active:scale-[0.98]";
@@ -73,7 +73,15 @@ export function AccountMenuPanel({
     window.addEventListener("harbor:nuvio-state-changed", onNuvioChange);
     window.addEventListener("harbor:nuvio-profile-changed", onNuvioChange);
     window.addEventListener("harbor:nuvio-profiles-updated", onNuvioChange);
+    window.addEventListener("harbor:secondary-privileges-changed", onNuvioChange);
+    window.addEventListener("harbor:settings-changed", onNuvioChange);
+    window.addEventListener("harbor:profiles-updated", onNuvioChange);
+    window.addEventListener("harbor:active-profile-changed", onNuvioChange);
     return () => {
+      window.removeEventListener("harbor:secondary-privileges-changed", onNuvioChange);
+      window.removeEventListener("harbor:settings-changed", onNuvioChange);
+      window.removeEventListener("harbor:profiles-updated", onNuvioChange);
+      window.removeEventListener("harbor:active-profile-changed", onNuvioChange);
       window.removeEventListener("harbor:nuvio-state-changed", onNuvioChange);
       window.removeEventListener("harbor:nuvio-profile-changed", onNuvioChange);
       window.removeEventListener("harbor:nuvio-profiles-updated", onNuvioChange);
@@ -98,9 +106,9 @@ export function AccountMenuPanel({
     ? (activeNuvioProfile?.name ?? nuvioEmail?.split("@")[0] ?? t("profile.fallback"))
     : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback"));
 
-  const isPrimary = isNuvio
+  const isPrimary = activeProfileIsPrimary() || (isNuvio
     ? activeNuvioProfile?.profile_index === 1
-    : isStremioActivePrimary(activeProfile, profiles);
+    : isStremioActivePrimary(activeProfile, profiles));
 
   const privs = getSecondaryPrivileges(settings, isNuvio);
   const canAddProfiles = isPrimary || privs.canAddProfiles;
@@ -318,6 +326,20 @@ export function AccountMenuPanel({
               >
                 <LogIn size={14} strokeWidth={2.2} />
                 {t("Sign in to Nuvio")}
+              </button>
+            )}
+
+            {/* STREMIO SIGN OUT */}
+            {!isNuvio && user && canSignOutRoot && (
+              <button
+                onClick={() => {
+                  signOut();
+                  setMenuOpen(false);
+                }}
+                className={`${ITEM} border-t border-edge-soft`}
+              >
+                <LogOut size={14} strokeWidth={2.2} />
+                {t("Sign out of Stremio")}
               </button>
             )}
 

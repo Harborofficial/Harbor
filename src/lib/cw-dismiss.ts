@@ -6,6 +6,7 @@ import { episodeFromVideoId, type LibraryItem } from "./stremio";
 import { cloudLibraryPut } from "./stremio-write-queue";
 import { privateCwProfileId } from "./cw-profile";
 import { isNuvioSignedIn } from "./nuvio/nuvio-client";
+import { removeExternalCwItem } from "@/lib/feed/external-cw";
 import {
   deleteWatchProgressFromNuvio,
   isNuvioProviderActive,
@@ -333,6 +334,8 @@ export function dismissCw(
     try {
       const slot = resolveNuvioProfileIndex();
       clearLocalCw(id, `nuvio-${slot}`);
+      clearLocalCw(id);
+      removeExternalCwItem(item);
       void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
     } catch {}
     return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;

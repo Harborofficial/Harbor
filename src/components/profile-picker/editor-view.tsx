@@ -137,6 +137,17 @@ export function EditorView({
   const isOwnProfile = isNuvio ? (nuvioSlot !== null && nuvioSlot === activeNuvioSlot) : (editing?.id === activeProfile?.id);
   const canEditAdvanced = activeIsPrimary;
   const canCreate = isNuvio ? (activeIsPrimary || getSecondaryPrivileges(settings, true).canAddProfiles) : (activeIsPrimary || getSecondaryPrivileges(settings, false).canAddProfiles);
+  const [, setPrivVersion] = useState(0);
+  useEffect(() => {
+    const onSync = () => setPrivVersion((v) => v + 1);
+    window.addEventListener("harbor:secondary-privileges-changed", onSync);
+    window.addEventListener("harbor:settings-changed", onSync);
+    return () => {
+      window.removeEventListener("harbor:secondary-privileges-changed", onSync);
+      window.removeEventListener("harbor:settings-changed", onSync);
+    };
+  }, []);
+
   const [usesPrimaryAddons, setUsesPrimaryAddons] = useState(() => {
     if (isNuvio && nuvioSlot) {
       const found = nuvioState.profiles.find((p) => p.profile_index === nuvioSlot);

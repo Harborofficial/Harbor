@@ -626,6 +626,10 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
   // Instant UI dispatch
   window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }));
   window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:active-profile-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:secondary-privileges-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:active-profile-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:secondary-privileges-changed"));
 
   // 2. BACKGROUND CLOUD SYNC: Propagate swapped slots to Nuvio backend
   (async () => {

@@ -27,7 +27,7 @@ import { SecondaryPrivilegesCard } from "./account/secondary-privileges-card";
 import { SettingsModal, ModalButton } from "./kit";
 import { ShieldAlert } from "lucide-react";
 import { getSecondaryPrivileges } from "@/lib/settings/defaults";
-import { isStremioActivePrimary } from "@/lib/active-profile-id";
+import { isStremioActivePrimary, activeProfileIsPrimary } from "@/lib/active-profile-id";
 
 type Tab = "provider" | "you" | "profiles" | "harbor" | "stremio" | "nuvio";
 
@@ -53,8 +53,10 @@ export function AccountStub() {
     window.addEventListener("harbor:active-profile-changed", onProfileSync);
     window.addEventListener("harbor:profiles-updated", onProfileSync);
     window.addEventListener("harbor:secondary-privileges-changed", onProfileSync);
+    window.addEventListener("harbor:settings-changed", onProfileSync);
     return () => {
       window.removeEventListener("harbor:secondary-privileges-changed", onProfileSync);
+      window.removeEventListener("harbor:settings-changed", onProfileSync);
       window.removeEventListener("harbor:nuvio-state-changed", onSync);
       window.removeEventListener("harbor:nuvio-profile-changed", onSync);
       window.removeEventListener("harbor:nuvio-profiles-updated", onSync);
@@ -63,9 +65,9 @@ export function AccountStub() {
     };
   }, []);
 
-  const isPrimary = isNuvio
+  const isPrimary = activeProfileIsPrimary() || (isNuvio
     ? Number(nuvioState.activeProfileIndex ?? 1) === 1
-    : isStremioActivePrimary(activeProfile, profiles);
+    : isStremioActivePrimary(activeProfile, profiles));
 
   const tabs = [
     { id: "provider" as const, label: t("Account provider") },
@@ -79,10 +81,21 @@ export function AccountStub() {
 
   const [tab, setTab] = useState<Tab>(() => (isPrimary ? "provider" : "you"));
 
-  const handleTabSelect = (next: Tab) => {
-    const liveIsPrimary = isNuvio
+  useEffect(() => {
+    const liveIsPrimary = activeProfileIsPrimary() || (isNuvio
       ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
-      : isStremioActivePrimary(activeProfile, profiles);
+      : isStremioActivePrimary(activeProfile, profiles));
+    if (liveIsPrimary) return;
+    const currentPrivs = getSecondaryPrivileges(settings, isNuvio);
+    if (tab === "provider" && !currentPrivs.canViewAccountProvider) setTab("you");
+    if (tab === "harbor" && !currentPrivs.canViewHarborAccount) setTab("you");
+    if ((tab === "stremio" || tab === "nuvio") && !currentPrivs.canViewProviderAccount) setTab("you");
+  }, [tab, isPrimary, isNuvio, forceTick]);
+
+  const handleTabSelect = (next: Tab) => {
+    const liveIsPrimary = activeProfileIsPrimary() || (isNuvio
+      ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
+      : isStremioActivePrimary(activeProfile, profiles));
 
     if (liveIsPrimary) {
       setTab(next);

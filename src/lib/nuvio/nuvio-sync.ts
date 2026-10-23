@@ -22,7 +22,7 @@ import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { reconcileNuvioWatchedEpisodes } from "@/lib/manual-watched";
 import { clearAllLocalCw, clearLocalCw, saveLocalCw } from "@/lib/local-cw";
 import { clearResume } from "@/lib/resume";
-import { readCachedNuvioPlaybackItems, writeCachedNuvioPlaybackItems } from "./nuvio-playback";
+import { readCachedNuvioPlaybackItems, writeCachedNuvioPlaybackItems, buildNuvioPlaybackItems } from "./nuvio-playback";
 import type { Addon } from "@/lib/addons";
 import { fetchManifestAt } from "@/lib/addon-store";
 import { recordNuvioAddons } from "./nuvio-addon-registry";
@@ -213,6 +213,10 @@ export async function pushWatchProgressToNuvio(
     const filtered = cached.filter((p) => p.progress_key !== progressKey);
     filtered.unshift(mergedPayload);
     writeCachedWatchProgress(profileIndex, filtered);
+    try {
+      const built = buildNuvioPlaybackItems(filtered, profileIndex);
+      writeCachedNuvioPlaybackItems(profileIndex, built);
+    } catch {}
 
     // Save to local continue watching immediately
     saveLocalCw(
@@ -747,6 +751,10 @@ export async function deleteWatchProgressFromNuvio(
       (p) => !keysToDelete.has(p.progress_key) && p.content_id !== normalizedContentId,
     );
     writeCachedWatchProgress(profileIndex, filtered);
+    try {
+      const built = buildNuvioPlaybackItems(filtered, profileIndex);
+      writeCachedNuvioPlaybackItems(profileIndex, built);
+    } catch {}
   } catch {}
 
   // Prune local CW, resume states, and playback items for this content across all scopes
@@ -955,6 +963,10 @@ export async function pullWatchProgressFromNuvio(
         if (!isCurrentAccount()) return [];
 
         writeCachedWatchProgress(profileIndex, serverItems, startingAccountId);
+        try {
+          const built = buildNuvioPlaybackItems(serverItems, profileIndex);
+          writeCachedNuvioPlaybackItems(profileIndex, built, startingAccountId);
+        } catch {}
         for (const m of serverItems) {
           if (!m.content_id) continue;
           saveLocalCw(
@@ -1084,6 +1096,10 @@ export async function pullWatchProgressFromNuvio(
         if (!isCurrentAccount()) return [];
 
         writeCachedWatchProgress(profileIndex, serverItems, startingAccountId);
+        try {
+          const built = buildNuvioPlaybackItems(serverItems, profileIndex);
+          writeCachedNuvioPlaybackItems(profileIndex, built, startingAccountId);
+        } catch {}
         for (const m of serverItems) {
           if (!m.content_id) continue;
           saveLocalCw(

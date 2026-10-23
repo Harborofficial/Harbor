@@ -94,6 +94,8 @@ export function usePlayerExit(params: {
       clearInvite();
     }
     exitPlayback();
+    window.dispatchEvent(new CustomEvent("harbor:playback-session-ended"));
+    window.dispatchEvent(new CustomEvent("harbor:playback-session-ended"));
   }, [
     captureExitSnapshot,
     exitPlayback,

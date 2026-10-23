@@ -55,7 +55,13 @@ export function ProfilePickerModal() {
     window.addEventListener("harbor:nuvio-state-changed", onNuvioSync);
     window.addEventListener("harbor:nuvio-profile-changed", onNuvioSync);
     window.addEventListener("harbor:nuvio-profiles-updated", onNuvioSync);
+    window.addEventListener("harbor:secondary-privileges-changed", onNuvioSync);
+    window.addEventListener("harbor:settings-changed", onNuvioSync);
+    window.addEventListener("harbor:profiles-updated", onNuvioSync);
     return () => {
+      window.removeEventListener("harbor:secondary-privileges-changed", onNuvioSync);
+      window.removeEventListener("harbor:settings-changed", onNuvioSync);
+      window.removeEventListener("harbor:profiles-updated", onNuvioSync);
       window.removeEventListener("harbor:nuvio-state-changed", onNuvioSync);
       window.removeEventListener("harbor:nuvio-profile-changed", onNuvioSync);
       window.removeEventListener("harbor:nuvio-profiles-updated", onNuvioSync);

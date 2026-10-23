@@ -467,6 +467,9 @@ if (typeof window !== "undefined") {
     void refreshExternalCw(false);
   });
   window.addEventListener("harbor:account-provider-changed", onProfileChange);
+  window.addEventListener("harbor:playback-session-ended", () => {
+    void refreshExternalCw(true);
+  });
   window.addEventListener("harbor:nuvio-progress-pushed", (e) => {
     if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
       const detail = (e as CustomEvent)?.detail;
@@ -547,20 +550,26 @@ export function useExternalCw(enabled = true): LibraryItem[] {
     }
     const onFocus = (): void => {
       const isNuvio = isNuvioSignedIn() && isNuvioProviderActive();
-      const threshold = isNuvio ? 10_000 : FOCUS_STALE_MS;
-      if (Date.now() - fetchedAt > threshold) void refreshExternalCw(true);
-      else void refreshExternalCw();
+      if (isNuvio) {
+        void refreshExternalCw(true);
+      } else {
+        if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
+        else void refreshExternalCw();
+      }
     };
     const onVisible = (): void => {
       if (document.visibilityState !== "visible") return;
       const isNuvio = isNuvioSignedIn() && isNuvioProviderActive();
-      const threshold = isNuvio ? 10_000 : FOCUS_STALE_MS;
-      if (Date.now() - fetchedAt > threshold) void refreshExternalCw(true);
-      else void refreshExternalCw();
+      if (isNuvio) {
+        void refreshExternalCw(true);
+      } else {
+        if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
+        else void refreshExternalCw();
+      }
     };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisible);
-    const pollMs = isNuvioSignedIn() && isNuvioProviderActive() ? 10_000 : STALE_MS;
+    const pollMs = isNuvioSignedIn() && isNuvioProviderActive() ? 5_000 : STALE_MS;
     const timer = window.setInterval(onVisible, pollMs);
     return () => {
       window.removeEventListener("focus", onFocus);

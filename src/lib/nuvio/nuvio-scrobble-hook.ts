@@ -151,7 +151,9 @@ export function useNuvioScrobble({
     return () => {
       window.removeEventListener("pagehide", handleUnload);
       window.removeEventListener("beforeunload", handleUnload);
-      void doPush("unmount");
+      void doPush("unmount").finally(() => {
+        window.dispatchEvent(new CustomEvent("harbor:playback-session-ended"));
+      });
     };
   }, [metaId, effSeason, effEpisode]);
 }

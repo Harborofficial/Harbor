@@ -53,8 +53,12 @@ export function NuvioProfilesTab() {
     window.addEventListener("harbor:nuvio-state-changed", handleProfileChange);
     window.addEventListener("harbor:nuvio-profile-changed", handleProfileChange);
     window.addEventListener("harbor:nuvio-profiles-updated", handleProfileChange);
+    window.addEventListener("harbor:secondary-privileges-changed", handleProfileChange);
+    window.addEventListener("harbor:settings-changed", handleProfileChange);
 
     return () => {
+      window.removeEventListener("harbor:secondary-privileges-changed", handleProfileChange);
+      window.removeEventListener("harbor:settings-changed", handleProfileChange);
       window.removeEventListener("harbor:nuvio-state-changed", handleProfileChange);
       window.removeEventListener("harbor:nuvio-profile-changed", handleProfileChange);
       window.removeEventListener("harbor:nuvio-profiles-updated", handleProfileChange);

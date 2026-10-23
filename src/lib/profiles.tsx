@@ -1037,17 +1037,23 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     }
     setState((s) => {
       if (!s.profiles.some((p) => p.id === id && !p.isPrimary && !p.kid)) return s;
-      return {
+      const nextProfiles = s.profiles.map((p) =>
+        p.id === id
+          ? { ...p, isPrimary: true, kid: null, shareStremioWith: null }
+          : p.isPrimary
+            ? { ...p, isPrimary: false }
+            : p,
+      );
+      const nextState = {
         ...s,
-        profiles: s.profiles.map((p) =>
-          p.id === id
-            ? { ...p, isPrimary: true, kid: null, shareStremioWith: null }
-            : p.isPrimary
-              ? { ...p, isPrimary: false }
-              : p,
-        ),
+        profiles: nextProfiles,
       };
+      writeState(nextState);
+      return nextState;
     });
+    window.dispatchEvent(new CustomEvent("harbor:profiles-updated"));
+    window.dispatchEvent(new CustomEvent("harbor:active-profile-changed"));
+    window.dispatchEvent(new CustomEvent("harbor:secondary-privileges-changed"));
   }, []);
 
   const value = useMemo<ProfilesValue>(
