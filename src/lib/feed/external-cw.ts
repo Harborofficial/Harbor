@@ -29,7 +29,7 @@ import {
   getSession as getPmdbSession,
   subscribeSession as subscribePmdbSession,
 } from "@/lib/publicmetadb/session";
-import { episodeFromVideoId, type LibraryItem } from "@/lib/stremio";
+import { type LibraryItem } from "@/lib/stremio";
 
 const STALE_MS = 300_000;
 const FOCUS_STALE_MS = 30_000;
@@ -77,8 +77,8 @@ function mergeItem(existing: LibraryItem, incoming: LibraryItem): LibraryItem {
           video_id: incoming.state?.video_id ?? existing.state?.video_id,
           season: incoming.state?.season ?? existing.state?.season,
           episode: incoming.state?.episode ?? existing.state?.episode,
-          timeOffset: incoming.state?.timeOffset ?? existing.state?.timeOffset,
-          duration: incoming.state?.duration ?? existing.state?.duration,
+          timeOffset: incoming.state?.timeOffset ?? existing.state?.timeOffset ?? 0,
+          duration: incoming.state?.duration ?? existing.state?.duration ?? 0,
           lastWatched: incoming.state?.lastWatched ?? existing.state?.lastWatched,
         },
         _mtime: incoming._mtime ?? existing._mtime,
@@ -97,8 +97,8 @@ function mergeItem(existing: LibraryItem, incoming: LibraryItem): LibraryItem {
           video_id: existing.state?.video_id ?? incoming.state?.video_id,
           season: existing.state?.season ?? incoming.state?.season,
           episode: existing.state?.episode ?? incoming.state?.episode,
-          timeOffset: existing.state?.timeOffset ?? incoming.state?.timeOffset,
-          duration: existing.state?.duration ?? incoming.state?.duration,
+          timeOffset: existing.state?.timeOffset ?? incoming.state?.timeOffset ?? 0,
+          duration: existing.state?.duration ?? incoming.state?.duration ?? 0,
           lastWatched: existing.state?.lastWatched ?? incoming.state?.lastWatched,
         },
         _mtime: existing._mtime ?? incoming._mtime,

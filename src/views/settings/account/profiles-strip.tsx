@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Check, Lock, Pencil, Plus } from "../icons";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { useProfiles } from "@/lib/profiles";
@@ -20,7 +21,7 @@ export function ProfilesStrip() {
   const { settings } = useSettings();
   const [, setVersion] = useState(0);
   useEffect(() => {
-    const onSync = () => setVersion((v) => v + 1);
+    const onSync = () => setVersion((v: number) => v + 1);
     window.addEventListener("harbor:secondary-privileges-changed", onSync);
     window.addEventListener("harbor:settings-changed", onSync);
     window.addEventListener("harbor:profiles-updated", onSync);

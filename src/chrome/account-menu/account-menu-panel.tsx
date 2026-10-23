@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
 import {
   Bell,
   ChevronDown,
@@ -43,6 +44,7 @@ export function AccountMenuPanel({
   settingsActive?: boolean;
 }) {
   const t = useT();
+  const { signOut } = useAuth();
   const { settings } = useSettings();
   const isNuvio = settings.accountProvider === "nuvio";
 

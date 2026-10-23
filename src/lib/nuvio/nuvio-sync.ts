@@ -737,10 +737,6 @@ export async function deleteWatchProgressFromNuvio(
       (p) => !keysToDelete.has(p.progress_key) && p.content_id !== normalizedContentId,
     );
     writeCachedWatchProgress(profileIndex, filtered);
-    try {
-      const built = buildNuvioPlaybackItems(filtered, profileIndex);
-      writeCachedNuvioPlaybackItems(profileIndex, built);
-    } catch {}
   } catch {}
 
   // Prune local CW, resume states, and playback items for this content across all scopes

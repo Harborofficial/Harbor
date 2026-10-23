@@ -56,7 +56,6 @@ export function isStremioActivePrimary(
   activeProfile?: { id?: string; isPrimary?: boolean } | null,
   profilesList?: Array<{ id: string; isPrimary?: boolean }>,
 ): boolean {
-  if (activeProfile?.isPrimary === true) return true;
   if (profilesList && profilesList.length > 0) {
     if (profilesList.length === 1) return true;
     const primary = profilesList.find((p) => p.isPrimary) ?? profilesList[0];
@@ -68,6 +67,7 @@ export function isStremioActivePrimary(
     const activeId = s?.activeId || diskPrimary?.id;
     return activeId === diskPrimary?.id;
   }
+  if (activeProfile?.isPrimary === true) return true;
   const s = readState();
   if (!s || !Array.isArray(s.profiles) || s.profiles.length === 0) return true;
   if (s.profiles.length === 1) return true;

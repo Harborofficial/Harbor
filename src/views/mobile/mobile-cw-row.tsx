@@ -17,7 +17,7 @@ import {
   isNuvioProviderActive,
   resolveNuvioProfileIndex,
 } from "@/lib/nuvio/nuvio-sync";
-import { clearResume } from "@/lib/player/resume-store";
+import { clearResume } from "@/lib/resume";
 import { franchiseDedupKey } from "@/lib/providers/jikan";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
 import { useSettings } from "@/lib/settings";
@@ -101,7 +101,7 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { activeProfile, profiles } = useProfiles();
-  const isNuvioProvider = settings.accountProvider === "nuvio";
+  const isNuvioProvider = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const hideSharedCw =
     !isNuvioProvider &&
     settings.cwPerProfile &&
@@ -121,6 +121,10 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   const dismissVersion = useCwDismissVersion();
 
   useEffect(() => {
+    if (isNuvioProvider) {
+      markCwReady();
+      return;
+    }
     if (!authKey) {
       cloudKey = null;
       cloudCache = [];
@@ -142,9 +146,25 @@ export function useMobileCw(limit = 14): LibraryItem[] {
     return () => {
       cancelled = true;
     };
-  }, [authKey]);
+  }, [authKey, isNuvioProvider]);
 
-  useEffect(() => subscribeLocalCw(() => setLocalVersion((v) => v + 1)), []);
+  useEffect(() => {
+    const bump = () => setLocalVersion((v) => v + 1);
+    const unsub = subscribeLocalCw(bump);
+    window.addEventListener("harbor:account-provider-changed", bump);
+    window.addEventListener("harbor:nuvio-progress-pushed", bump);
+    window.addEventListener("harbor:nuvio-progress-deleted", bump);
+    window.addEventListener("harbor:nuvio-playback-synced", bump);
+    window.addEventListener("harbor:nuvio-profile-changed", bump);
+    return () => {
+      unsub();
+      window.removeEventListener("harbor:account-provider-changed", bump);
+      window.removeEventListener("harbor:nuvio-progress-pushed", bump);
+      window.removeEventListener("harbor:nuvio-progress-deleted", bump);
+      window.removeEventListener("harbor:nuvio-playback-synced", bump);
+      window.removeEventListener("harbor:nuvio-profile-changed", bump);
+    };
+  }, []);
 
   return useMemo(() => {
     void localVersion;
@@ -212,8 +232,8 @@ export function useMobileCw(limit = 14): LibraryItem[] {
                 video_id: incoming.state?.video_id ?? held.state?.video_id,
                 season: incoming.state?.season ?? held.state?.season,
                 episode: incoming.state?.episode ?? held.state?.episode,
-                timeOffset: incoming.state?.timeOffset ?? held.state?.timeOffset,
-                duration: incoming.state?.duration ?? held.state?.duration,
+                timeOffset: incoming.state?.timeOffset ?? held.state?.timeOffset ?? 0,
+                duration: incoming.state?.duration ?? held.state?.duration ?? 0,
                 lastWatched: incoming.state?.lastWatched ?? held.state?.lastWatched,
               },
               _mtime: incoming._mtime ?? held._mtime,
@@ -231,8 +251,8 @@ export function useMobileCw(limit = 14): LibraryItem[] {
                 video_id: held.state?.video_id ?? incoming.state?.video_id,
                 season: held.state?.season ?? incoming.state?.season,
                 episode: held.state?.episode ?? incoming.state?.episode,
-                timeOffset: held.state?.timeOffset ?? incoming.state?.timeOffset,
-                duration: held.state?.duration ?? incoming.state?.duration,
+                timeOffset: held.state?.timeOffset ?? incoming.state?.timeOffset ?? 0,
+                duration: held.state?.duration ?? incoming.state?.duration ?? 0,
                 lastWatched: held.state?.lastWatched ?? incoming.state?.lastWatched,
               },
               _mtime: held._mtime ?? incoming._mtime,
@@ -319,7 +339,7 @@ export function MobileCwRow({
   useSnapshotVersion();
   const metas = useMemo(() => items.map(toMeta), [items]);
   const logos = useHeroLogos(metas, settings);
-  const isNuvioProvider = settings.accountProvider === "nuvio";
+  const isNuvioProvider = settings.accountProvider === "nuvio" || isNuvioProviderActive();
 
   const handleDismiss = useCallback(
     (item: LibraryItem) => {

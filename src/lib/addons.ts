@@ -4,7 +4,7 @@ import { addonConfigurationKey } from "@/lib/addon-configuration-key";
 import { allowDirectHost, safeFetch as fetch } from "@/lib/safe-fetch";
 import type { AddonOrigin, Meta } from "./cinemeta";
 import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
-import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 
 const STREMIO_API = "https://api.strem.io/api";

@@ -92,7 +92,6 @@ export function ProfileView({
     (handle.toLowerCase() === primaryHandle ||
       (author?.handle && handle.toLowerCase() === author.handle.toLowerCase()) ||
       handle.toLowerCase() === "me");
-  const activeNuvioProfile = primaryNuvioProfile;
 
 
   const scrollRef = useRef<HTMLDivElement>(null);

@@ -666,7 +666,7 @@ export function getSecondaryPrivileges(
     } else {
       try {
         const explicit = localStorage.getItem("harbor.account-provider");
-        isNuvio = explicit === "nuvio" || (!explicit && localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"'));
+        isNuvio = explicit === "nuvio" || Boolean(!explicit && localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"'));
       } catch {}
     }
   }

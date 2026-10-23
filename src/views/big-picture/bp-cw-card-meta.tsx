@@ -348,11 +348,12 @@ export function BpCwCardPill({
     : upNext
       ? t("Up Next")
       : meta.episodeTitle || remaining;
-  if (!sub && !trailing && !external) return null;
+  const isTracker = !!external && external !== "nuvio";
+  if (!sub && !trailing && !isTracker) return null;
 
   return (
     <span data-bp-cw-pill className={PILL}>
-      {external ? (
+      {isTracker ? (
         <img
           src={external === "trakt" ? traktLogo : external === "publicmetadb" ? publicmetadbLogo : simklLogo}
           alt=""
