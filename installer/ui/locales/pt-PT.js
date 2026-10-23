@@ -75,3 +75,16 @@ export const PT_PT = {
     'Um marcador de reprodução sincronizado e uma fila a que todos podem juntar.',
   'Harbor will open when this window closes.': 'O Harbor abrirá quando esta janela fechar.'
 };
+
+Object.assign(PT_PT, {
+  "Clean install": "Instalação limpa",
+  "Permanently removes Harbor settings, accounts, library, add-ons and cached data before reinstalling. Starts fresh with first-run setup.": "Remove permanentemente configurações, contas, biblioteca, complementos e dados em cache do Harbour antes de reinstalar. Começa do zero com a configuração inicial.",
+  "Erase old Harbor data?": "Apagar dados antigos do Harbour?",
+  "Clean install permanently deletes your local Harbor settings, sign-ins, library, add-ons, cached data and saves stored in Harbor's data folders. This cannot be undone. Harbor will start with first-run setup after installation.": "A instalação limpa exclui permanentemente as configurações locais do Harbour, logins, biblioteca, complementos, dados em cache e salvamentos armazenados nas pastas de dados do Harbour. Isto não pode ser desfeito. O Harbour começará com a configuração inicial após a instalação.",
+  "Confirm clean install": "Confirme a instalação limpa",
+  "All local Harbor data will be permanently removed": "Todos os dados locais do porto serão removidos permanentemente",
+  "Not in this build": "Não nesta construção",
+  "Plugins tab only; the extension runtime is not part of this build": "Apenas guia Plugins; o tempo de execução da extensão não faz parte desta compilação",
+  "Games tab only; the engine is not part of this build": "Apenas guia Jogos; o motor não faz parte desta compilação",
+  "Tab only": "Apenas guia"
+});

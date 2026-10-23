@@ -225,3 +225,16 @@ export const AR = {
   'Version {version}, {size}': 'الإصدار {version}، {size}',
   'Installed to {path}': 'مثبَّت في {path}'
 };
+
+Object.assign(AR, {
+  "Clean install": "تثبيت نظيف",
+  "Permanently removes Harbor settings, accounts, library, add-ons and cached data before reinstalling. Starts fresh with first-run setup.": "يقوم بإزالة إعدادات Harbour والحسابات والمكتبة والوظائف الإضافية والبيانات المخزنة مؤقتًا بشكل دائم قبل إعادة التثبيت. يبدأ من جديد مع الإعداد الذي يتم تشغيله لأول مرة.",
+  "Erase old Harbor data?": "محو بيانات هاربور القديمة؟",
+  "Clean install permanently deletes your local Harbor settings, sign-ins, library, add-ons, cached data and saves stored in Harbor's data folders. This cannot be undone. Harbor will start with first-run setup after installation.": "يؤدي التثبيت النظيف إلى حذف إعدادات Harbour المحلية وتسجيلات الدخول والمكتبة والوظائف الإضافية والبيانات المخزنة مؤقتًا والحفظ المخزن في مجلدات بيانات Harbour بشكل دائم. لا يمكن التراجع عن هذا. سيبدأ Harbour بالإعداد الذي يتم تشغيله لأول مرة بعد التثبيت.",
+  "Confirm clean install": "تأكيد التثبيت النظيف",
+  "All local Harbor data will be permanently removed": "ستتم إزالة جميع بيانات Harbour المحلية نهائيًا",
+  "Not in this build": "ليس في هذا البناء",
+  "Plugins tab only; the extension runtime is not part of this build": "علامة التبويب الإضافات فقط؛ وقت تشغيل الامتداد ليس جزءًا من هذا الإصدار",
+  "Games tab only; the engine is not part of this build": "علامة التبويب \"الألعاب\" فقط؛ المحرك ليس جزءًا من هذا البناء",
+  "Tab only": "علامة التبويب فقط"
+});

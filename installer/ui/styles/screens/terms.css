@@ -131,6 +131,23 @@
   margin-top: 12px;
 }
 
+.hb-terms-lang-select {
+  height: 30px;
+  min-width: 190px;
+  max-width: min(300px, 75%);
+  padding: 0 12px;
+  border-radius: var(--r-sm);
+  background: var(--elevated);
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  cursor: pointer;
+}
+
+.hb-terms-lang-select option {
+  color: var(--ink);
+  background: var(--surface);
+}
+
 .hb-terms-langs {
   display: flex;
   gap: 6px;
