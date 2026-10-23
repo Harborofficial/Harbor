@@ -429,6 +429,7 @@ export function EditorView({
             avatarColorHex: color,
             avatarUrl: finalAvatarUrl,
             usesPrimaryAddons,
+            profileIndex: targetSlot,
           });
           if (targetSlot === 1 && finalAvatarUrl) {
             void pushAvatarToEcosystem(finalAvatarUrl);

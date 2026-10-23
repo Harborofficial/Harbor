@@ -597,7 +597,7 @@ export function CompanionProfilesProvider({ children }: { children: ReactNode })
       : (state.profiles.find((p) => p.id === state.activeId) ?? null);
     const effectiveProfiles = isNuvio
       ? (nuvioState && nuvioState.profiles.length > 0
-          ? nuvioState.profiles.map(nuvioProfileToHarborProfile)
+          ? [...nuvioState.profiles].sort((a, b) => a.profile_index - b.profile_index).map(nuvioProfileToHarborProfile)
           : [defaultNuvioHarborProfile(1)])
       : state.profiles;
     const effectiveActiveId = isNuvio
@@ -769,8 +769,9 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   const effectiveProfiles = useMemo(() => {
     if (isNuvio) {
-      return nuvioState.profiles.length > 0
-        ? nuvioState.profiles.map(nuvioProfileToHarborProfile)
+      const sorted = [...nuvioState.profiles].sort((a, b) => a.profile_index - b.profile_index);
+      return sorted.length > 0
+        ? sorted.map(nuvioProfileToHarborProfile)
         : [defaultNuvioHarborProfile(1)];
     }
     return state.profiles;

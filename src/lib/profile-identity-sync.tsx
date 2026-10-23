@@ -31,7 +31,6 @@ export function ProfileIdentitySync() {
   }, [activeProfile?.id, activeProfile?.avatar]);
 
   useEffect(() => {
-    if (isNuvio) return;
     if (!activeProfile || activeProfile.kid) return;
     if (activeProfile.name && displayName !== activeProfile.name) {
       setDisplayName(activeProfile.name);

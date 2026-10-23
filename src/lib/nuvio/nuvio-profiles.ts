@@ -343,6 +343,7 @@ export async function createNuvioProfile(opts: {
   avatarId?: string | null;
   avatarUrl?: string | null;
   usesPrimaryAddons?: boolean;
+  profileIndex?: number;
 }): Promise<boolean> {
   let state = loadNuvioState();
   if (!state.profiles || state.profiles.length === 0) {
@@ -355,7 +356,13 @@ export async function createNuvioProfile(opts: {
   }
 
   const existingIndices = new Set(existing.map((p) => p.profile_index));
-  let nextIndex = 1;
+  let nextIndex =
+    opts.profileIndex &&
+    !existingIndices.has(opts.profileIndex) &&
+    opts.profileIndex >= 1 &&
+    opts.profileIndex <= MAX_NUVIO_PROFILES
+      ? opts.profileIndex
+      : 1;
   while (nextIndex <= MAX_NUVIO_PROFILES && existingIndices.has(nextIndex)) {
     nextIndex++;
   }
@@ -415,7 +422,8 @@ export async function createNuvioProfile(opts: {
     is_kids: false,
     created_at: new Date().toISOString(),
   };
-  const updatedProfiles = [...existing, newProfile];
+  const updatedProfiles = [...existing.filter((p) => p.profile_index !== nextIndex), newProfile];
+  updatedProfiles.sort((a, b) => a.profile_index - b.profile_index);
   saveNuvioState({ ...state, profiles: updatedProfiles });
   window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }));
   window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
@@ -634,24 +642,39 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
   // 2. BACKGROUND CLOUD SYNC: Propagate swapped slots to Nuvio backend
   (async () => {
     try {
-      const payloads: ProfilePushPayload[] = [
-        {
-          profile_index: 1,
-          name: targetSlot.name,
-          avatar_id: targetSlot.avatar_id,
-          avatar_url: targetSlot.avatar_url,
-          avatar_color_hex: targetSlot.avatar_color_hex || "#1E88E5",
-          uses_primary_addons: false,
-        },
-        {
-          profile_index: targetSlotIndex,
-          name: slot1.name,
-          avatar_id: slot1.avatar_id,
-          avatar_url: slot1.avatar_url,
-          avatar_color_hex: slot1.avatar_color_hex || "#1E88E5",
-          uses_primary_addons: slot1.uses_primary_addons ?? true,
-        },
-      ];
+      const payloads: ProfilePushPayload[] = state.profiles.map((p) => {
+        if (p.profile_index === 1) {
+          return {
+            profile_index: 1,
+            name: targetSlot.name,
+            avatar_id: targetSlot.avatar_id,
+            avatar_url: targetSlot.avatar_url,
+            avatar_color_hex: targetSlot.avatar_color_hex || "#1E88E5",
+            uses_primary_addons: false,
+          };
+        }
+        if (p.profile_index === targetSlotIndex) {
+          return {
+            profile_index: targetSlotIndex,
+            name: slot1.name,
+            avatar_id: slot1.avatar_id,
+            avatar_url: slot1.avatar_url,
+            avatar_color_hex: slot1.avatar_color_hex || "#1E88E5",
+            uses_primary_addons: slot1.uses_primary_addons ?? true,
+          };
+        }
+        return {
+          profile_index: p.profile_index,
+          name: p.name,
+          avatar_id: p.avatar_id,
+          avatar_url: p.avatar_url,
+          avatar_color_hex: p.avatar_color_hex || "#1E88E5",
+          uses_primary_addons: Boolean(p.uses_primary_addons),
+          uses_primary_plugins: Boolean(p.uses_primary_plugins),
+          profile_background_id: p.profile_background_id || null,
+          profile_background_url: p.profile_background_url || null,
+        };
+      });
       await pushNuvioProfiles(payloads);
       await pullNuvioProfiles();
       window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated"));
