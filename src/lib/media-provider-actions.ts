@@ -461,6 +461,7 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
       run: async (assertCurrent) => {
         assertCurrent();
         if (!isNuvioSignedIn()) throw new Error("Nuvio disconnected.");
+        if (!isNuvioProviderActive()) return;
         const slot = resolveNuvioProfileIndex();
         const primaryId = input.imdbId || (input.id.startsWith("tt") ? input.id : input.id);
         const altId = input.id !== primaryId ? input.id : undefined;
@@ -738,6 +739,7 @@ export function watchedProviderWrites(
       run: async (assertCurrent) => {
         assertCurrent();
         if (!isNuvioSignedIn()) throw new Error("Nuvio disconnected.");
+        if (!isNuvioProviderActive()) return;
         const slot = resolveNuvioProfileIndex();
         const primaryId = options.imdbId || (meta.id.startsWith("tt") ? meta.id : meta.id);
         const altId = meta.id !== primaryId ? meta.id : undefined;

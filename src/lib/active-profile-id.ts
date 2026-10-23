@@ -21,8 +21,8 @@ export function isNuvioProviderActive(): boolean {
     for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {
       const raw = typeof localStorage !== "undefined" ? localStorage.getItem(key) : null;
       if (raw) {
-        if (raw.includes('"accountProvider":"nuvio"')) return true;
-        if (raw.includes('"accountProvider":"stremio"')) return false;
+        if (/"accountProvider"\s*:\s*"nuvio"/.test(raw)) return true;
+        if (/"accountProvider"\s*:\s*"stremio"/.test(raw)) return false;
       }
     }
   } catch {}

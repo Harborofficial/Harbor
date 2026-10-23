@@ -1710,7 +1710,7 @@ export function DetailView({
         });
         return;
       }
-      if (settings.accountProvider === "nuvio") {
+      if (isNuvio) {
         const progressItems = await pullWatchProgressFromNuvio().catch(() => []);
         const matches = progressItems.filter(
           (p) => p.content_id === meta.id || (detail?.imdbId && p.content_id === detail.imdbId),
