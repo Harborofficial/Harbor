@@ -30,6 +30,7 @@ import {
   setManualMapping,
 } from "@/lib/media-server/index-store";
 import { dedupePhysicalEpisodeItems, groupMediaServerTitles } from "@/lib/media-server/selectors";
+import { filterMediaServerCollections } from "@/lib/media-server/collection-search";
 import {
   currentMediaServerSyncProgress,
   mediaServerAdapter,
@@ -96,6 +97,8 @@ export function MediaServersTab({ scrollRef }: { scrollRef?: RefObject<HTMLEleme
   const [activeCollection, setActiveCollection] = useState<MediaServerCollection | null>(null);
   const [collectionIds, setCollectionIds] = useState<Set<string> | null>(null);
   const collectionIdsCache = useRef(new Map<string, Set<string>>());
+  const [collectionCacheEpoch, setCollectionCacheEpoch] = useState(0);
+  const [collectionSearchRevision, setCollectionSearchRevision] = useState(0);
   // Count-based dismissal (like the local library's review banner): a dismissal
   // silences exactly the titles seen so far, and a later sync that adds more
   // unmatched titles brings the banner back. Profile-scoped so one profile's
@@ -174,6 +177,8 @@ export function MediaServersTab({ scrollRef }: { scrollRef?: RefObject<HTMLEleme
         if (!progress.active) {
           // Collection membership may have changed; drop the cached ids.
           collectionIdsCache.current.clear();
+          setCollections(null);
+          setCollectionCacheEpoch((value) => value + 1);
           void reload();
         } else {
           // Stream items in as they arrive, throttled, so a fresh connection is
@@ -328,7 +333,10 @@ export function MediaServersTab({ scrollRef }: { scrollRef?: RefObject<HTMLEleme
     },
     [pumpMeta],
   );
-  const connectionsKey = connections.map((connection) => connection.id).join(",");
+  const enabledConnectionsKey = connections
+    .filter((connection) => connection.enabled)
+    .map((connection) => connection.id)
+    .join(",");
   useEffect(() => {
     let alive = true;
     const capable = connections.filter(
@@ -347,7 +355,7 @@ export function MediaServersTab({ scrollRef }: { scrollRef?: RefObject<HTMLEleme
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectionsKey]);
+  }, [enabledConnectionsKey, collectionCacheEpoch]);
   useEffect(() => {
     if (!activeCollection) {
       setCollectionIds(null);
@@ -377,8 +385,10 @@ export function MediaServersTab({ scrollRef }: { scrollRef?: RefObject<HTMLEleme
       .collectionItemIds(connection, activeCollection.id)
       .then((ids) => {
         const set = new Set(ids.map((id) => `${prefix}${id}`));
-        collectionIdsCache.current.set(cacheKey, set);
-        if (alive) setCollectionIds(set);
+        if (alive) {
+          collectionIdsCache.current.set(cacheKey, set);
+          setCollectionIds(set);
+        }
       })
       .catch(() => {
         if (alive) setCollectionIds(new Set());
@@ -386,7 +396,46 @@ export function MediaServersTab({ scrollRef }: { scrollRef?: RefObject<HTMLEleme
     return () => {
       alive = false;
     };
-  }, [activeCollection]);
+  }, [activeCollection, collectionCacheEpoch]);
+  const searchingCollections = type === "collections" && !!query.trim() && !activeCollection;
+  useEffect(() => {
+    if (!searchingCollections || !collections) return;
+    const byConnection = new Map(
+      mediaServerConnections()
+        .filter((connection) => connection.enabled)
+        .map((connection) => [connection.id, connection]),
+    );
+    const queue = collections.filter(
+      (collection) =>
+        (server === "all" || collection.connectionId === server) &&
+        byConnection.has(collection.connectionId) &&
+        !collectionIdsCache.current.has(`${collection.connectionId}:${collection.id}`),
+    );
+    let alive = true;
+    const loadNext = async () => {
+      while (alive && queue.length > 0) {
+        const collection = queue.shift()!;
+        const connection = byConnection.get(collection.connectionId)!;
+        const key = `${connection.id}:${collection.id}`;
+        try {
+          const ids = await mediaServerAdapter(connection).collectionItemIds!(
+            connection,
+            collection.id,
+          );
+          if (!alive) return;
+          collectionIdsCache.current.set(key, new Set(ids.map((id) => `${connection.id}:${id}`)));
+        } catch {
+          if (!alive) return;
+          collectionIdsCache.current.set(key, new Set());
+        }
+        setCollectionSearchRevision((value) => value + 1);
+      }
+    };
+    void Promise.all(Array.from({ length: Math.min(4, queue.length) }, () => loadNext()));
+    return () => {
+      alive = false;
+    };
+  }, [searchingCollections, collections, server, collectionCacheEpoch, enabledConnectionsKey]);
   useEffect(() => {
     if (type === "collections") return;
     // Remember the last real filter so the grid can stay mounted (and keep its
@@ -492,6 +541,50 @@ export function MediaServersTab({ scrollRef }: { scrollRef?: RefObject<HTMLEleme
       })),
     [cards],
   );
+  const collectionTitlesByItemKey = useMemo(() => {
+    const titlesByKey = new Map(
+      items
+        .filter((item) => item.kind === "movie" || item.kind === "series")
+        .map((item) => [`${item.connectionId}:${item.id}`, item.title.toLowerCase()]),
+    );
+    for (const card of cards) {
+      for (const key of card.title.itemKeys) {
+        const title = titlesByKey.get(key);
+        if (title) titlesByKey.set(key, `${title} ${card.meta.name.toLowerCase()}`);
+      }
+    }
+    return titlesByKey;
+  }, [items, cards]);
+  const matchingCollections = useMemo(
+    () =>
+      filterMediaServerCollections(
+        (collections ?? []).filter(
+          (collection) =>
+            (server === "all" || collection.connectionId === server) &&
+            connectionById.get(collection.connectionId)?.enabled,
+        ),
+        query,
+        collectionIdsCache.current,
+        collectionTitlesByItemKey,
+      ),
+    [
+      collections,
+      server,
+      connectionById,
+      query,
+      collectionTitlesByItemKey,
+      collectionSearchRevision,
+      collectionCacheEpoch,
+    ],
+  );
+  const collectionSearchPending =
+    searchingCollections &&
+    (collections ?? []).some(
+      (collection) =>
+        (server === "all" || collection.connectionId === server) &&
+        connectionById.get(collection.connectionId)?.enabled &&
+        !collectionIdsCache.current.has(`${collection.connectionId}:${collection.id}`),
+    );
   const gridType: TypeKey = type === "collections" ? lastGridType.current : type;
   const visible = useMemo(() => {
     if (type === "collections" && activeCollection && collectionIds) {
@@ -734,46 +827,64 @@ export function MediaServersTab({ scrollRef }: { scrollRef?: RefObject<HTMLEleme
       )}
       {type === "collections" &&
         !activeCollection &&
-        (collections && collections.length > 0 ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-4 gap-y-8">
-            {collections.map((collection) => {
-              const poster = collectionPoster(collection);
-              const connection = connectionById.get(collection.connectionId);
-              return (
-                <button
-                  key={`${collection.connectionId}:${collection.id}`}
-                  type="button"
-                  onClick={() => setActiveCollection(collection)}
-                  className="group flex flex-col gap-2 text-start"
-                >
-                  <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-raised ring-1 ring-edge-soft">
-                    {poster ? (
-                      <img
-                        src={poster}
-                        alt={collection.name}
-                        loading="lazy"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-full w-full place-items-center text-ink-subtle">
-                        <Layers size={22} />
-                      </div>
-                    )}
-                  </div>
-                  <span className="truncate text-[13px] font-semibold text-ink">
-                    {collection.name}
-                  </span>
-                  <span className="truncate text-[11px] text-ink-subtle">
-                    {connection?.name}
-                    {collection.childCount != null ? ` · ${collection.childCount}` : ""}
-                  </span>
-                </button>
-              );
-            })}
+        (collections === null ? (
+          <div className="grid place-items-center py-10 text-ink-subtle">
+            <LoaderCircle size={18} className="animate-spin" />
+          </div>
+        ) : matchingCollections.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-4 gap-y-8">
+              {matchingCollections.map((collection) => {
+                const poster = collectionPoster(collection);
+                const connection = connectionById.get(collection.connectionId);
+                return (
+                  <button
+                    key={`${collection.connectionId}:${collection.id}`}
+                    type="button"
+                    onClick={() => setActiveCollection(collection)}
+                    className="group flex flex-col gap-2 text-start"
+                  >
+                    <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-raised ring-1 ring-edge-soft">
+                      {poster ? (
+                        <img
+                          src={poster}
+                          alt={collection.name}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="grid h-full w-full place-items-center text-ink-subtle">
+                          <Layers size={22} />
+                        </div>
+                      )}
+                    </div>
+                    <span className="truncate text-[13px] font-semibold text-ink">
+                      {collection.name}
+                    </span>
+                    <span className="truncate text-[11px] text-ink-subtle">
+                      {connection?.name}
+                      {collection.childCount != null ? ` · ${collection.childCount}` : ""}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {collectionSearchPending && (
+              <div className="flex items-center gap-2 text-[12px] text-ink-muted">
+                <LoaderCircle size={14} className="animate-spin" />
+                {t("Loading…")}
+              </div>
+            )}
+          </div>
+        ) : collectionSearchPending ? (
+          <div className="grid place-items-center py-10 text-ink-subtle">
+            <LoaderCircle size={18} className="animate-spin" />
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-edge-soft px-6 py-10 text-center text-[13px] text-ink-muted">
-            {t("No collections on these servers.")}
+            {query.trim()
+              ? t("No matches for these filters.")
+              : t("No collections on these servers.")}
           </div>
         ))}
       {/* Keep the title grid mounted (only hidden) while the Collections list is

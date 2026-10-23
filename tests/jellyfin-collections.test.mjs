@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { groupMediaServerTitles } from "../src/lib/media-server/selectors.ts";
+import { filterMediaServerCollections } from "../src/lib/media-server/collection-search.ts";
 
 const source = readFileSync(
   new URL("../src/lib/media-server/jellyfin-emby.ts", import.meta.url),
@@ -124,4 +125,37 @@ test("collection membership remains ungrouped across pages", async () => {
   const ids = await adapter.collectionItemIds(connection, "collection");
   assert.equal(ids.length, 501);
   assert.equal(new Set(ids).size, 501);
+});
+
+test("collection search returns every collection containing a matching movie or series", () => {
+  const collections = [
+    { id: "marvel", connectionId: "server", name: "Marvel" },
+    { id: "sony", connectionId: "server", name: "Sony" },
+    { id: "tv", connectionId: "server", name: "TV favorites" },
+    { id: "other", connectionId: "other-server", name: "Other library" },
+  ];
+  const members = new Map([
+    ["server:marvel", new Set(["server:spider", "server:iron"])],
+    ["server:sony", new Set(["server:spider"])],
+    ["server:tv", new Set(["server:show"])],
+    ["other-server:other", new Set(["other-server:spider"])],
+  ]);
+  const titles = new Map([
+    ["server:spider", "Spider-Man: No Way Home"],
+    ["server:iron", "iron man"],
+    ["server:show", "the last of us"],
+  ]);
+  assert.deepEqual(
+    filterMediaServerCollections(collections, "  SPIDER-MAN  ", members, titles).map((c) => c.name),
+    ["Marvel", "Sony"],
+  );
+  assert.deepEqual(
+    filterMediaServerCollections(collections, "last of us", members, titles).map((c) => c.name),
+    ["TV favorites"],
+  );
+  assert.deepEqual(
+    filterMediaServerCollections(collections, "marvel", members, titles).map((c) => c.name),
+    ["Marvel"],
+  );
+  assert.deepEqual(filterMediaServerCollections(collections, "  ", members, titles), collections);
 });
