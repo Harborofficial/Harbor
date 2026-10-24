@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRatingPoster } from "@/lib/ratings/poster";
 import { createPortal } from "react-dom";
-import { Eye, Loader2, X } from "lucide-react";
+import { Eye, Loader2, MessageSquare, X } from "lucide-react";
 import { Poster } from "@/components/poster";
 import { RatingStars } from "@/components/ratings/rating-stars";
 import { useT } from "@/lib/i18n";
@@ -35,11 +35,13 @@ export function UserRatings({
   alias,
   onOpenMeta,
   onClose,
+  onComment,
 }: {
   handle: string;
   alias: string;
   onOpenMeta?: (metaId: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
   onClose: () => void;
+  onComment?: (rating: PublicRating) => void;
 }) {
   const t = useT();
   const [type, setType] = useState("all");
@@ -182,7 +184,7 @@ export function UserRatings({
           ) : (
             <div className="flex flex-col gap-3">
               {items.map((r) => (
-                <RatingRow key={r.itemKey} r={r} onOpenMeta={onOpenMeta} />
+                <RatingRow key={r.itemKey} r={r} onOpenMeta={onOpenMeta} onComment={onComment} />
               ))}
               {cursor && (
                 <button
@@ -207,9 +209,11 @@ export function UserRatings({
 function RatingRow({
   r,
   onOpenMeta,
+  onComment,
 }: {
   r: PublicRating;
   onOpenMeta?: (metaId: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
+  onComment?: (rating: PublicRating) => void;
 }) {
   const t = useT();
   const [revealed, setRevealed] = useState(false);
@@ -280,6 +284,15 @@ function RatingRow({
               </button>
             )}
           </div>
+        )}
+        {onComment && (
+          <button
+            type="button"
+            onClick={() => onComment(r)}
+            className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-edge px-3 py-1.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+          >
+            <MessageSquare size={14} /> {t("Comment on it")}
+          </button>
         )}
       </div>
     </div>
