@@ -6,7 +6,7 @@ import { useT } from "@/lib/i18n";
 import { curatedList, itemMeta } from "@/lib/curated/registry";
 import type { CuratedList, ListBrand } from "@/lib/curated/types";
 import { useView } from "@/lib/view";
-import { Row } from "./row";
+import { Row, usePosterRow } from "./row";
 
 const BRAND_MARK: Record<ListBrand, { src: string; alt: string; height: number }> = {
   nyt: { src: nytLogo, alt: "The New York Times", height: 13 },
@@ -32,6 +32,7 @@ function ListHeading({ list, label }: { list: CuratedList; label: string }) {
 export function CuratedListRow({ listId, title }: { listId: string; title?: string }) {
   const t = useT();
   const { openCuratedList } = useView();
+  const sizing = usePosterRow(180);
   const list = curatedList(listId);
   const cards = useMemo(
     () => (list ? list.head.map((item) => ({ item, meta: itemMeta(list, item) })) : []),
@@ -43,15 +44,14 @@ export function CuratedListRow({ listId, title }: { listId: string; title?: stri
   return (
     <Row
       title={<ListHeading list={list} label={label} />}
-      min={180}
-      shape="portrait"
+      {...sizing}
       scrollKey={`discover:list:${list.id}`}
       onViewAll={() => openCuratedList(list.id)}
     >
       {cards.map(({ item, meta }) => (
         <span key={meta.id} className="relative block min-w-0">
           <PickCard meta={meta} />
-          <CuratedCardBadge list={list} item={item} />
+          <CuratedCardBadge list={list} item={item} shape={sizing.shape} />
         </span>
       ))}
     </Row>

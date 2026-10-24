@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { CuratedCardBadge } from "@/components/curated-card-badge";
 import { PickCard } from "@/components/pick-card";
+import type { RowShape } from "@/components/row";
 import { useT } from "@/lib/i18n";
 import { itemMeta } from "@/lib/curated/registry";
+import { useSettings } from "@/lib/settings";
 import type { CuratedList, CuratedListItem, ListOrdering } from "@/lib/curated/types";
 
 type ListSort = "order" | "title" | "newest" | "oldest";
@@ -32,12 +34,16 @@ export function ListGrid({
   list,
   items,
   scrollRoot,
+  sizing,
 }: {
   list: CuratedList;
   items: readonly CuratedListItem[];
   scrollRoot: RefObject<HTMLElement | null>;
+  sizing: { min: number; shape: RowShape };
 }) {
   const t = useT();
+  const { settings } = useSettings();
+  const minCardWidth = Math.max(72, Math.round(sizing.min * settings.posterScale));
   const [sort, setSort] = useState<ListSort>("order");
   const [shown, setShown] = useState(PAGE);
   const sentinel = useRef<HTMLDivElement>(null);
@@ -65,11 +71,14 @@ export function ListGrid({
   return (
     <section className="flex flex-col gap-7">
       <SortBar sort={sort} onSort={setSort} orderLabel={ORDER_LABEL[list.ordering]} />
-      <div className="grid grid-cols-3 gap-x-4 gap-y-8 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div
+        className="grid gap-x-5 gap-y-8"
+        style={{ gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${minCardWidth}px), 1fr))` }}
+      >
         {visible.map((item) => (
           <span key={item.imdb} className="relative block min-w-0">
             <PickCard meta={itemMeta(list, item)} />
-            <CuratedCardBadge list={list} item={item} />
+            <CuratedCardBadge list={list} item={item} shape={sizing.shape} />
           </span>
         ))}
       </div>
