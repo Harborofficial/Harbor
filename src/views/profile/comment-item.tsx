@@ -1,10 +1,12 @@
 import { ChevronDown, Copy, Heart, Reply, Trash2, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
+import { parseQuotedBody } from "@/lib/ratings/quote";
 import { segmentMentions } from "@/lib/social/mentions";
 import { Avatar, timeAgo } from "./profile-bits";
 import { CommentCompose } from "./comment-compose";
 import { MentionLink } from "./mention-link";
+import { QuotedRating } from "./quoted-rating";
 import { segmentProfanity, type ComposeIssue } from "./text-safety";
 import { UserHoverCard } from "./user-hover-card";
 import { useSelfAvatar } from "./use-self-avatar";
@@ -65,6 +67,7 @@ export function CommentItem({
   replyToId,
   replies,
   sending,
+  onOpenMeta,
 }: {
   c: Comment;
   canDelete: boolean;
@@ -76,9 +79,11 @@ export function CommentItem({
   replyToId?: string;
   replies?: Comment[];
   sending?: boolean;
+  onOpenMeta?: (metaId: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
 }) {
   const t = useT();
   const self = useSelfAvatar();
+  const { quote, text } = parseQuotedBody(c.body);
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const mine = !!self.handle && self.handle.toLowerCase() === c.authorHandle.toLowerCase();
@@ -95,9 +100,9 @@ export function CommentItem({
     danger: true,
     disabled: !canDelete,
     confirmation: {
-      key: JSON.stringify(["profile-comment:delete", actor, c.id, c.authorHandle, c.body]),
+      key: JSON.stringify(["profile-comment:delete", actor, c.id, c.authorHandle, text]),
       title: t("Delete comment"),
-      description: `${t("Delete the comment by @{handle}? This cannot be undone.", { handle: c.authorHandle })}\n\n${c.body.slice(0, 160)}${c.body.length > 160 ? "…" : ""}`,
+      description: `${t("Delete the comment by @{handle}? This cannot be undone.", { handle: c.authorHandle })}\n\n${text.trim().slice(0, 160)}${text.trim().length > 160 ? "…" : ""}`,
       confirmLabel: t("Delete comment"),
       pendingLabel: t("Deleting…"),
       successLabel: t("Comment deleted"),
@@ -139,7 +144,7 @@ export function CommentItem({
         label: t("Copy Text"),
         icon: <Copy size={16} />,
         quickCopy: true,
-        run: () => copyContextText(c.body),
+        run: () => copyContextText(text.trim()),
       },
       ...(signedIn && onToggleLike
         ? [
@@ -200,7 +205,10 @@ export function CommentItem({
               </span>
             )}
           </div>
-          <SafeBody body={c.body} onOpenAuthor={onOpenAuthor} />
+          {quote && (
+            <QuotedRating quote={quote} onOpenMeta={onOpenMeta} onOpenAuthor={onOpenAuthor} />
+          )}
+          {text.trim() ? <SafeBody body={text} onOpenAuthor={onOpenAuthor} /> : null}
           <div className="mt-1.5 flex items-center gap-1">
             <button
               onClick={() => void act(() => onToggleLike?.(c.id))}
@@ -288,6 +296,7 @@ export function CommentItem({
                   onReply={onReply}
                   sending={sending}
                   onOpenAuthor={onOpenAuthor}
+                  onOpenMeta={onOpenMeta}
                 />
               ))}
             </div>

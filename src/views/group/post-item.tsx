@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import { Copy, Heart, Loader2, Pencil, Pin, PinOff, Trash2, UserRound } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useAutosize } from "@/lib/use-autosize";
+import { composeQuotedBody, parseQuotedBody, type RatingQuote } from "@/lib/ratings/quote";
+import { QuoteChip } from "@/views/profile/rating-picker";
 import { PostBody } from "./post-body";
 import {
   deleteGroupPost,
@@ -47,29 +49,34 @@ export function PostItem({
   const [actionError, setActionError] = useState("");
   const bodyRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(post.body);
+  const [draft, setDraft] = useState(() => parseQuotedBody(post.body).text);
+  const [editQuote, setEditQuote] = useState<RatingQuote | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
   const editRef = useRef<HTMLTextAreaElement>(null);
   useAutosize(editRef, draft);
   const actor = captureSocialActor();
 
   const beginEdit = () => {
-    setDraft(post.body);
+    const quoted = parseQuotedBody(post.body);
+    setDraft(quoted.text);
+    setEditQuote(quoted.quote);
     setEditError(null);
     setEditing(true);
   };
 
   const saveEdit = async () => {
     const next = draft.trim();
+    const composed = editQuote ? composeQuotedBody(editQuote, next) : next;
     if (!next || busy) return;
-    if (next === post.body.trim()) {
+    // The quoted rating travels inside the body, so an edit keeps it unless it was removed here.
+    if (composed === post.body.trim()) {
       setEditing(false);
       return;
     }
     setBusy(true);
     setEditError(null);
     try {
-      onChanged(await editGroupPost(groupId, post.id, next));
+      onChanged(await editGroupPost(groupId, post.id, composed));
       setEditing(false);
     } catch (e) {
       setEditError((e as Error).message || t("Could not save that edit."));
@@ -236,6 +243,7 @@ export function PostItem({
 
         {editing ? (
           <div className="flex flex-col gap-2">
+            {editQuote && <QuoteChip quote={editQuote} onRemove={() => setEditQuote(null)} />}
             <textarea
               ref={editRef}
               value={draft}

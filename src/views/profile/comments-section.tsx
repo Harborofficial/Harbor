@@ -1,7 +1,9 @@
 import { MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
+import type { RatingQuote } from "@/lib/ratings/quote";
 import { CommentCompose } from "./comment-compose";
+import { useRatingSources } from "./rating-picker";
 import { CommentItem } from "./comment-item";
 import type { Comment } from "./profile-types";
 import { useComments } from "./use-comments";
@@ -14,19 +16,33 @@ export function CommentsSection({
   isOwner,
   signedIn,
   onOpenAuthor,
+  onOpenMeta,
+  seedQuote,
 }: {
   handle: string;
   isOwner: boolean;
   signedIn: boolean;
   onOpenAuthor?: (h: string) => void;
+  onOpenMeta?: (metaId: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
+  seedQuote?: { quote: RatingQuote; nonce: number } | null;
 }) {
   const t = useT();
-  const { state, comments, total, hasMore, loadMore, submit, remove, toggleLike, sending } = useComments(handle);
+  const { state, comments, total, hasMore, loadMore, submit, remove, toggleLike, sending } =
+    useComments(handle);
   const [shown, setShown] = useState(COMMENTS_PAGE);
+  const [quote, setQuote] = useState<RatingQuote | null>(null);
+  const [focusSignal, setFocusSignal] = useState(0);
+  const sources = useRatingSources(handle);
 
   useEffect(() => {
     setShown(COMMENTS_PAGE);
   }, [handle]);
+
+  useEffect(() => {
+    if (!seedQuote) return;
+    setQuote(seedQuote.quote);
+    setFocusSignal((n) => n + 1);
+  }, [seedQuote]);
 
   const ids = new Set(comments.map((c) => c.id));
   const roots = comments.filter((c) => !c.parentId || !ids.has(c.parentId));
@@ -59,7 +75,15 @@ export function CommentsSection({
       </div>
 
       <div className="mb-4">
-        <CommentCompose onSubmit={submit} sending={sending} disabled={!signedIn} />
+        <CommentCompose
+          onSubmit={submit}
+          sending={sending}
+          disabled={!signedIn}
+          quote={quote}
+          onQuoteChange={setQuote}
+          focusSignal={focusSignal}
+          sources={sources}
+        />
       </div>
 
       {state === "loading" && (
@@ -77,7 +101,9 @@ export function CommentsSection({
       )}
 
       {state === "error" && (
-        <p className="py-6 text-center text-[13px] text-ink-subtle">{t("Could not load comments")}</p>
+        <p className="py-6 text-center text-[13px] text-ink-subtle">
+          {t("Could not load comments")}
+        </p>
       )}
 
       {state === "empty" && (
@@ -101,6 +127,7 @@ export function CommentsSection({
               onReply={submit}
               sending={sending}
               onOpenAuthor={onOpenAuthor}
+              onOpenMeta={onOpenMeta}
             />
           ))}
           {canShowMore && (

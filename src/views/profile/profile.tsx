@@ -37,6 +37,8 @@ import { AboutCard } from "./about-card";
 import { FavoritesCard } from "./favorites-card";
 import { FavoritesPicker } from "./favorites-picker";
 import type { FavoriteKind } from "./use-favorites";
+import type { PublicRating } from "@/lib/ratings/types";
+import { ratingQuoteFrom, type RatingQuote } from "@/lib/ratings/quote";
 import { RatingsCard } from "./ratings-card";
 import { UserRatings } from "@/views/ratings/user-ratings";
 import { ImportModal } from "@/views/ratings/import/import-modal";
@@ -76,7 +78,9 @@ export function ProfileView({
   const isNuvio = settings.accountProvider === "nuvio";
   const nuvioState = loadNuvioState();
   const activeNuvioProfile = isNuvio
-    ? (nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) || nuvioState.profiles[0] || null)
+    ? nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) ||
+      nuvioState.profiles[0] ||
+      null
     : null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -84,6 +88,8 @@ export function ProfileView({
   const [pickingFav, setPickingFav] = useState<FavoriteKind | null>(null);
   const [expanded, setExpanded] = useState<null | "lists" | "badges" | "activity">(null);
   const [showRatings, setShowRatings] = useState(false);
+  const [quoteSeed, setQuoteSeed] = useState<{ quote: RatingQuote; nonce: number } | null>(null);
+  const commentsRef = useRef<HTMLDivElement>(null);
   const [importingRatings, setImportingRatings] = useState(false);
   const [arranging, setArranging] = useState(false);
   const [nuvioStats, setNuvioStats] = useState({ episodes: 0, movies: 0, minutes: 0 });
@@ -181,13 +187,13 @@ export function ProfileView({
   const locked = summary.private && !summary.isOwner;
 
   const ownerAvatar = summary.isOwner
-    ? (isNuvio && activeNuvioProfile
-        ? (resolveNuvioAvatar(activeNuvioProfile) || currentAuthor()?.avatar || undefined)
-        : activeProfile?.avatar ||
-          settings.harborAvatar ||
-          user?.avatar ||
-          currentAuthor()?.avatar ||
-          undefined)
+    ? isNuvio && activeNuvioProfile
+      ? resolveNuvioAvatar(activeNuvioProfile) || currentAuthor()?.avatar || undefined
+      : activeProfile?.avatar ||
+        settings.harborAvatar ||
+        user?.avatar ||
+        currentAuthor()?.avatar ||
+        undefined
     : undefined;
   const heroAvatar = summary.isOwner
     ? ownerAvatar || summary.avatarUrl
@@ -225,6 +231,18 @@ export function ProfileView({
     const next = { order, hidden };
     patchSummary({ ...summary, cardLayout: next });
     void socialPatch("/social/me/profile", { cardLayout: next }).catch(() => {});
+  };
+  // Quoting a rating closes the ratings view, hands the rating to the comments composer and takes
+  // the viewer there, so the next thing they type replies to that review.
+  const commentOnRating = (rating: PublicRating) => {
+    setShowRatings(false);
+    setQuoteSeed((prev) => ({
+      quote: ratingQuoteFrom(rating, handle),
+      nonce: (prev?.nonce ?? 0) + 1,
+    }));
+    requestAnimationFrame(() => {
+      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   };
   const cardNodes: Partial<Record<CardKey, ReactNode>> = {
     about: (
@@ -320,6 +338,8 @@ export function ProfileView({
         isOwner={summary.isOwner}
         signedIn={viewerSignedIn}
         onOpenAuthor={onOpenProfile}
+        onOpenMeta={onOpenMeta}
+        seedQuote={quoteSeed}
       />
     ),
   };
@@ -337,7 +357,9 @@ export function ProfileView({
             moviesWatched: Math.max(summary.counts.moviesWatched ?? 0, nuvioStats.movies),
             episodesWatched: Math.max(summary.counts.episodesWatched ?? 0, nuvioStats.episodes),
             minutesWatched: Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes),
-            hoursWatched: Math.floor(Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes) / 60),
+            hoursWatched: Math.floor(
+              Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes) / 60,
+            ),
           },
         }
       : summary.isOwner && watchedBreakdown.ready
@@ -383,6 +405,8 @@ export function ProfileView({
               isOwner={summary.isOwner}
               signedIn={!!authKey}
               onOpenAuthor={onOpenProfile}
+              onOpenMeta={onOpenMeta}
+              seedQuote={quoteSeed}
             />
           </div>
         ) : (
@@ -392,7 +416,7 @@ export function ProfileView({
                 const isHidden = hiddenSet.has(k);
                 if (isHidden && !arranging) return null;
                 return (
-                  <div key={k}>
+                  <div key={k} ref={k === "comments" ? commentsRef : undefined}>
                     {arranging && summary.isOwner && (
                       <ProfileCardControls
                         cardKey={k}
@@ -496,6 +520,7 @@ export function ProfileView({
             alias={summary.alias}
             onOpenMeta={onOpenMeta}
             onClose={() => setShowRatings(false)}
+            onComment={viewerSignedIn ? commentOnRating : undefined}
           />
         )}
         {importingRatings && (
