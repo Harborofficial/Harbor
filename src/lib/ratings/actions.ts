@@ -2,6 +2,9 @@ import { getRating, setRatingLocal, removeRatingLocal } from "./store";
 import { upsertRating, deleteRatingRemote } from "@/lib/social/ratings-api";
 import type { MyRating, RatingTarget } from "./types";
 
+/** Longest review a rating may carry. Shared so every review surface agrees. */
+export const REVIEW_MAX = 4000;
+
 function statusOf(e: unknown): number | undefined {
   return (e as { status?: number })?.status;
 }

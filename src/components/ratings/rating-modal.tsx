@@ -7,12 +7,12 @@ import { useT } from "@/lib/i18n";
 import { authToken } from "@/lib/theme-auth";
 import { useView } from "@/lib/view";
 import { useRating } from "@/lib/ratings/store";
-import { rate, unrate } from "@/lib/ratings/actions";
+import { rate, unrate, REVIEW_MAX } from "@/lib/ratings/actions";
 import type { RatingTarget } from "@/lib/ratings/types";
 import { emitListToast } from "@/components/lists/list-toast";
 import { RatingStars } from "./rating-stars";
 
-const REVIEW_MAX = 4000;
+
 
 function errorText(e: unknown, t: (s: string) => string, action: "save" | "remove"): string {
   const status = (e as { status?: number })?.status;

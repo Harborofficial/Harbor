@@ -76,7 +76,9 @@ export function ProfileView({
   const isNuvio = settings.accountProvider === "nuvio";
   const nuvioState = loadNuvioState();
   const activeNuvioProfile = isNuvio
-    ? (nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) || nuvioState.profiles[0] || null)
+    ? nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) ||
+      nuvioState.profiles[0] ||
+      null
     : null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -181,13 +183,13 @@ export function ProfileView({
   const locked = summary.private && !summary.isOwner;
 
   const ownerAvatar = summary.isOwner
-    ? (isNuvio && activeNuvioProfile
-        ? (resolveNuvioAvatar(activeNuvioProfile) || currentAuthor()?.avatar || undefined)
-        : activeProfile?.avatar ||
-          settings.harborAvatar ||
-          user?.avatar ||
-          currentAuthor()?.avatar ||
-          undefined)
+    ? isNuvio && activeNuvioProfile
+      ? resolveNuvioAvatar(activeNuvioProfile) || currentAuthor()?.avatar || undefined
+      : activeProfile?.avatar ||
+        settings.harborAvatar ||
+        user?.avatar ||
+        currentAuthor()?.avatar ||
+        undefined
     : undefined;
   const heroAvatar = summary.isOwner
     ? ownerAvatar || summary.avatarUrl
@@ -337,7 +339,9 @@ export function ProfileView({
             moviesWatched: Math.max(summary.counts.moviesWatched ?? 0, nuvioStats.movies),
             episodesWatched: Math.max(summary.counts.episodesWatched ?? 0, nuvioStats.episodes),
             minutesWatched: Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes),
-            hoursWatched: Math.floor(Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes) / 60),
+            hoursWatched: Math.floor(
+              Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes) / 60,
+            ),
           },
         }
       : summary.isOwner && watchedBreakdown.ready
@@ -494,6 +498,7 @@ export function ProfileView({
           <UserRatings
             handle={handle}
             alias={summary.alias}
+            isOwner={summary.isOwner}
             onOpenMeta={onOpenMeta}
             onClose={() => setShowRatings(false)}
           />

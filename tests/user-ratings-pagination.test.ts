@@ -14,20 +14,27 @@ function deferred() {
 }
 
 const counts = { total: 300, movie: 100, series: 120, anime: 60, manga: 20 };
-const page = (ids: string[], nextCursor?: string, totals = counts) => ({
-  items: ids.map((itemKey) => ({
+const page = (
+  ids: string[],
+  nextCursor?: string,
+  totals = counts,
+  scores?: number[],
+  reviews: (string | undefined)[] = [],
+) => ({
+  items: ids.map((itemKey, i) => ({
     itemKey,
     title: itemKey,
     mediaType: "movie",
-    score: 8,
+    score: scores?.[i] ?? 8,
     at: "2026-01-01",
+    review: reviews[i],
   })),
   nextCursor,
   counts: totals,
   avg: 8,
 });
 
-function ratingsHarness() {
+function ratingsHarness(options: { failRate?: boolean } = {}) {
   const states: any[] = [],
     refs: any[] = [],
     memos: any[] = [];
@@ -78,11 +85,19 @@ function ratingsHarness() {
     job: ReturnType<typeof deferred>;
   }> = [];
   const jsx = (type: any, props: any, key: any) => ({ type, props, key });
+  const rates: Array<{ itemKey: string; score: number; review?: string }> = [];
   const mocks: Record<string, any> = {
     react,
     "react/jsx-runtime": { jsx, jsxs: jsx },
     "react-dom": { createPortal: (child: any) => child },
-    "lucide-react": { Eye: "eye", Loader2: "loader", X: "x" },
+    "lucide-react": {
+      ChevronDown: "chevron-down",
+      ChevronUp: "chevron-up",
+      Eye: "eye",
+      Loader2: "loader",
+      MessageSquare: "message-square",
+      X: "x",
+    },
     "@/lib/ratings/poster": {},
     "@/components/poster": {},
     "@/components/ratings/rating-stars": {},
@@ -91,6 +106,17 @@ function ratingsHarness() {
     "@/lib/social/profile-media-meta": {},
     "@/components/context-menu/use-title-context": {},
     "@/lib/i18n": { useT: () => (value: string) => value },
+    "@/components/icons/search-icon": { Search: "search" },
+    "@/lib/ratings/actions": {
+      REVIEW_MAX: 4000,
+      rate(target: any, score: number, extra: any) {
+        rates.push({ itemKey: target.itemKey, score, review: extra?.review });
+        return options.failRate ? Promise.reject(new Error("fixture offline")) : Promise.resolve();
+      },
+      unrate() {
+        return Promise.resolve();
+      },
+    },
     "@/lib/social/ratings-api": {
       fetchUserRatings(handle: string, opts: any, signal?: AbortSignal) {
         const job = deferred();
@@ -153,6 +179,11 @@ function ratingsHarness() {
     assert.ok(found, `missing button ${label}`);
     return found;
   }
+  function input() {
+    const found = nodes(tree).find((n) => n.type === "input");
+    assert.ok(found, "missing search input");
+    return found;
+  }
   async function settle() {
     for (let i = 0; i < 8; i++) await Promise.resolve();
     render();
@@ -168,6 +199,36 @@ function ratingsHarness() {
     resolve,
     settle,
     button,
+    bodyText: () => text(tree),
+    rows: () => nodes(tree).filter((n) => n.props?.r),
+    rates: () => rates,
+    type(value: string) {
+      input().props.onChange({ target: { value } });
+      render();
+    },
+    order(which: string) {
+      const target =
+        which === "default"
+          ? nodes(tree).find(
+              (n) => n.props?.["aria-pressed"] === true && n.props?.["aria-label"] !== undefined,
+            )
+          : nodes(tree).find(
+              (n) =>
+                n.props?.["aria-label"] ===
+                (which === "high" ? "Highest rated first" : "Lowest rated first"),
+            );
+      assert.ok(target, `missing ordering control for ${which}`);
+      target.props.onClick();
+      render();
+    },
+    async submitRow(itemKey: string, score: number, review?: string) {
+      const row = nodes(tree).find((n) => n.props?.r?.itemKey === itemKey);
+      assert.ok(row, `missing row ${itemKey}`);
+      assert.ok(row.props.onRate, "row is not editable");
+      row.props.onRate(row.props.r, score, review);
+      render();
+      await settle();
+    },
     click(label: string) {
       const result = button(label).props.onClick();
       render();
@@ -295,4 +356,181 @@ test("failed pagination retains its items/cursor and can be retried", async () =
   assert.deepEqual(h.requests[2].opts, { type: "all", cursor: "next" });
   await h.resolve(2, page(["two"]));
   assert.deepEqual(h.ids(), ["one", "two"]);
+});
+
+test("a search walks the remaining cursor chain so matches past the first page are found", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha", "beta"], "cursor-1"));
+  assert.deepEqual(h.ids(), ["alpha", "beta"]);
+  h.type("target");
+  assert.deepEqual(h.requests[1].opts, { type: "all", cursor: "cursor-1" });
+  await h.resolve(1, page(["gamma", "target-two"], "cursor-2"));
+  assert.deepEqual(h.ids(), ["target-two"], "search streams matches while the walk continues");
+  await h.resolve(2, page(["target-three"]));
+  assert.deepEqual(h.ids(), ["target-two", "target-three"]);
+  assert.ok(!h.buttons().includes("Load more"), "a completed search leaves nothing to paginate");
+});
+
+test("a search matches titles case-insensitively without reloading the first page", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["Target One", "other"], "cursor-1"));
+  h.type("TARGET");
+  assert.deepEqual(h.ids(), ["Target One"]);
+  assert.deepEqual(
+    h.requests.map((r) => r.opts.cursor),
+    [undefined, "cursor-1"],
+    "the first page is reused, not refetched",
+  );
+});
+
+test("clearing the search keeps the pages the walk loaded", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha"], "cursor-1"));
+  h.type("target");
+  await h.resolve(1, page(["target-two"], "cursor-2"));
+  assert.deepEqual(h.ids(), ["target-two"]);
+  // The walk has already asked for cursor-2; clearing abandons that in-flight
+  // request (the controller is shared with tab pagination) but issues no new one.
+  const issued = h.requests.length;
+  h.type("");
+  assert.equal(h.requests.length, issued, "clearing must not issue another request");
+  assert.deepEqual(h.ids(), ["alpha", "target-two"]);
+});
+
+test("a query with no matches reports it rather than showing the empty-ratings message", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha"]));
+  h.type("zeta");
+  assert.deepEqual(h.ids(), []);
+  assert.ok(h.bodyText().includes("No ratings match your search"));
+});
+
+test("switching tabs during a search cancels the old walk and paginates the new tab", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha"], "next"));
+  h.type("target");
+  h.click("Movies");
+  await h.resolve(2, page(["target-movie"], "movie-next"));
+  await h.resolve(1, page(["stale"], "stale-next"));
+  assert.deepEqual(h.ids(), ["target-movie"]);
+  assert.equal(h.requests[1].signal?.aborted, true);
+  assert.deepEqual(h.requests[3].opts, { type: "movie", cursor: "movie-next" });
+});
+
+test("closing during a search walk cancels it and writes nothing after unmount", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha"], "cursor-1"));
+  h.type("target");
+  assert.equal(h.requests[1].opts.cursor, "cursor-1");
+  h.unmount();
+  h.requests[1].job.resolve(page(["target-two"], "cursor-2"));
+  for (let i = 0; i < 8; i++) await Promise.resolve();
+  assert.equal(h.requests[1].signal?.aborted, true);
+  assert.equal(h.requests.length, 2, "an aborted walk must not request another page");
+  assert.equal(h.writesAfterUnmount(), 0);
+});
+
+test("ordering by highest rating finishes the pagination before it sorts", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["a", "b"], "cursor-1", counts, [3, 9]));
+  assert.deepEqual(h.ids(), ["a", "b"], "ordering off keeps the server order");
+  h.order("high");
+  assert.deepEqual(h.requests[1].opts, { type: "all", cursor: "cursor-1" });
+  await h.resolve(1, page(["c"], undefined, counts, [7]));
+  assert.deepEqual(h.ids(), ["b", "c", "a"]);
+});
+
+test("ordering by lowest rating sorts ascending", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["a", "b", "c"], undefined, counts, [5, 1, 9]));
+  h.order("low");
+  assert.deepEqual(h.ids(), ["b", "a", "c"]);
+  assert.equal(h.requests.length, 1, "a fully loaded list needs no further page");
+});
+
+test("returning to the default order restores the server order without a walk", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["a", "b"], undefined, counts, [1, 5]));
+  h.order("high");
+  assert.deepEqual(h.ids(), ["b", "a"]);
+  h.order("default");
+  assert.deepEqual(h.ids(), ["a", "b"]);
+  assert.equal(h.requests.length, 1, "ordering off must not trigger a walk");
+});
+
+test("a visitor gets no quick-edit affordance", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha"]));
+  assert.ok(h.rows().every((row) => row.props.onRate === undefined));
+});
+
+test("the profile owner can change a score in place and it is saved", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha", "beta"]));
+  h.render({ isOwner: true });
+  await h.submitRow("alpha", 4);
+  assert.deepEqual(h.rates(), [{ itemKey: "alpha", score: 4, review: undefined }]);
+  assert.equal(h.rows().find((n) => n.props.r.itemKey === "alpha")?.props.r.score, 4);
+  assert.equal(h.rows().find((n) => n.props.r.itemKey === "beta")?.props.r.score, 8);
+});
+
+test("a rejected quick edit rolls the row back to the saved score", async () => {
+  const h = ratingsHarness({ failRate: true });
+  await h.resolve(0, page(["alpha"]));
+  h.render({ isOwner: true });
+  await h.submitRow("alpha", 3);
+  assert.equal(h.rows()[0]?.props.r.score, 8, "a failed save must not look saved");
+});
+
+test("ordering holds the list until every page is loaded so the order never churns", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["a", "b"], "cursor-1", counts, [3, 9]));
+  h.order("high");
+  assert.deepEqual(h.ids(), [], "a part-loaded order is not shown");
+  assert.ok(h.bodyText().includes("Loading all ratings"));
+  await h.resolve(1, page(["c"], undefined, counts, [7]));
+  assert.deepEqual(h.ids(), ["b", "c", "a"], "the settled order is shown once");
+});
+
+test("an owner edit saves the review text alongside the score", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha"], undefined, counts, [8], ["first watch"]));
+  h.render({ isOwner: true });
+  await h.submitRow("alpha", 6, "second watch");
+  assert.deepEqual(h.rates(), [{ itemKey: "alpha", score: 6, review: "second watch" }]);
+  assert.equal(h.rows()[0]?.props.r.score, 6);
+  assert.equal(h.rows()[0]?.props.r.review, "second watch");
+});
+
+test("clearing the review text sends it as absent rather than blank", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["alpha"], undefined, counts, [8], ["first watch"]));
+  h.render({ isOwner: true });
+  await h.submitRow("alpha", 8, "   ");
+  assert.deepEqual(h.rates(), [{ itemKey: "alpha", score: 8, review: undefined }]);
+  assert.equal(h.rows()[0]?.props.r.review, undefined);
+});
+
+test("the review filter walks the whole list and keeps only ratings with a review", async () => {
+  const h = ratingsHarness();
+  await h.resolve(0, page(["a", "b"], "cursor-1", counts, undefined, [undefined, "loved it"]));
+  assert.deepEqual(h.ids(), ["a", "b"], "the filter is off by default");
+  h.click("With review");
+  assert.deepEqual(h.requests[1].opts, { type: "all", cursor: "cursor-1" });
+  await h.resolve(1, page(["c", "d"], undefined, counts, undefined, ["also good", undefined]));
+  assert.deepEqual(h.ids(), ["b", "c"]);
+});
+
+test("the review filter and a query apply together", async () => {
+  const h = ratingsHarness();
+  await h.resolve(
+    0,
+    page(["alpha", "beta"], undefined, counts, undefined, ["seen it", "seen it too"]),
+  );
+  h.type("beta");
+  assert.deepEqual(h.ids(), ["beta"]);
+  h.click("With review");
+  assert.deepEqual(h.ids(), ["beta"]);
+  h.type("alpha");
+  assert.deepEqual(h.ids(), ["alpha"]);
 });
