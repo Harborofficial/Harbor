@@ -5,6 +5,9 @@ import { allowDirectHost, safeFetch as fetch } from "@/lib/safe-fetch";
 import type { AddonOrigin, Meta } from "./cinemeta";
 import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
 
+import { activeProfileId } from "./active-profile-id";
+import { catalogAccountAddons, catalogSource, rememberCatalogAddons } from "./local-catalogs";
+
 const STREMIO_API = "https://api.strem.io/api";
 const MAX_ROWS = 24;
 const CATALOG_LANES = 6;
@@ -153,11 +156,19 @@ async function call<T>(path: string, body: object): Promise<T | null> {
 }
 
 export async function userAddons(authKey: string): Promise<Addon[]> {
+  const profile = activeProfileId();
   const result = await call<{ addons: Addon[] }>("addonCollectionGet", {
     authKey,
     type: "user",
     update: false,
   });
+  if (Array.isArray(result?.addons)) {
+    try {
+      rememberCatalogAddons(result.addons, profile);
+    } catch {
+      /* Account reads still work if storage is full. */
+    }
+  }
   return result?.addons ?? [];
 }
 
@@ -182,12 +193,18 @@ export async function setUserAddons(authKey: string, addons: Addon[]): Promise<b
 }
 
 export async function getUserAddonsRaw(authKey: string): Promise<Addon[] | null> {
+  const profile = activeProfileId();
   const result = await call<{ addons: Addon[] }>("addonCollectionGet", {
     authKey,
     type: "user",
     update: false,
   });
   if (!result || !Array.isArray(result.addons)) return null;
+  try {
+    rememberCatalogAddons(result.addons, profile);
+  } catch {
+    /* Keep account reads available. */
+  }
   return result.addons;
 }
 
@@ -314,8 +331,10 @@ export function withDebridKeys(addons: Addon[], keys: DebridKeySet): Addon[] {
 }
 
 export async function gatherCatalogAddons(authKey: string | null): Promise<Addon[]> {
-  const stremioRaw = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+  const source = catalogSource();
+  const stremioRaw = await catalogAccountAddons(authKey, getUserAddonsRaw);
   const stremio = filterEnabled(stremioRaw);
+  if (source === "stremio") return stremio;
   const seen = new Set(stremio.map((a) => a.transportUrl));
   const localOnly = filterEnabled(loadInstalled()).filter((l) => !seen.has(l.transportUrl));
   const localFull = await Promise.all(

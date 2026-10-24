@@ -1,3 +1,4 @@
+import { purgeLocalCatalogs } from "./local-catalogs";
 import { purgeGameNotes } from "./games/game-notes";
 import {
   createContext,
@@ -98,7 +99,16 @@ const PROFILE_KEY_PREFIXES = [
 ];
 
 function purgeProfileStorage(id: string): void {
-  try { purgeGameNotes(id); } catch { /* Keep the existing profile cleanup best-effort. */ }
+  try {
+    purgeGameNotes(id);
+  } catch {
+    /* Keep the existing profile cleanup best-effort. */
+  }
+  try {
+    purgeLocalCatalogs(id);
+  } catch {
+    /* Continue deleting the rest of the profile. */
+  }
   try {
     for (const prefix of PROFILE_KEY_PREFIXES) localStorage.removeItem(`${prefix}${id}`);
     localStorage.removeItem(`harbor.games.search-history.v1:${encodeURIComponent(id)}`);

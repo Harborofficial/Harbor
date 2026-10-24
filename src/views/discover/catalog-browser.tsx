@@ -1,3 +1,5 @@
+import { useProfiles } from "@/lib/profiles";
+import { CatalogSourcePicker, useCatalogSource } from "@/components/catalog-source-picker";
 import { ChevronDown } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -143,6 +145,8 @@ function PillSelect({
 export function CatalogBrowser() {
   const t = useT();
   const { authKey } = useAuth();
+  const source = useCatalogSource();
+  const { activeProfile } = useProfiles();
   const { settings } = useSettings();
   const { openGrid } = useView();
   const [catalogs, setCatalogs] = useState<BrowseCatalog[]>([]);
@@ -164,7 +168,7 @@ export function CatalogBrowser() {
       cancelled = true;
       stop();
     };
-  }, [authKey, settings.pluginsOutsideTab]);
+  }, [authKey, settings.pluginsOutsideTab, source, activeProfile?.id]);
 
   const types = useMemo(() => {
     const seen = new Set<string>();
@@ -204,7 +208,10 @@ export function CatalogBrowser() {
 
   return (
     <div className="flex shrink-0 flex-col gap-3">
-      <h2 className="text-[15px] font-semibold tracking-tight text-ink">{t("Browse your catalogs")}</h2>
+      <h2 className="text-[15px] font-semibold tracking-tight text-ink">
+        {t("Browse your catalogs")}
+      </h2>
+      <CatalogSourcePicker authKey={authKey} />
       <div className="flex w-fit max-w-full flex-wrap items-center gap-2 rounded-2xl bg-elevated/30 p-2 ring-1 ring-edge-soft/50">
         <PillSelect
           label={t("Type")}

@@ -92,6 +92,7 @@ export const BACKUP_SECTIONS: readonly BackupSection[] = [
     patterns: [
       "harbor.installed-addons",
       "harbor.addons.",
+      "harbor.catalogs.local.",
       "harbor.addonOrder",
       "harbor.addonOrderBackups",
       "harbor.sa.v1.",

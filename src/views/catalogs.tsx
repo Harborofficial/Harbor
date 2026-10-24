@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { CatalogSourcePicker, useCatalogSource } from "@/components/catalog-source-picker";
+import { saveLocalCatalogOrder } from "@/lib/local-catalogs";
 import { Check, Pin, Puzzle, SlidersHorizontal, X } from "lucide-react";
 import { PencilOutlineIcon } from "@/components/icons/pencil-outline";
 import { Search } from "@/components/icons/search-icon";
+import { useProfiles } from "@/lib/profiles";
 import { useAuth } from "@/lib/auth";
 import {
   catalogTypeLabelKey,
@@ -21,6 +24,8 @@ import { useContentDrag } from "@/lib/window-drag";
 export function Catalogs({ active = true }: { active?: boolean }) {
   const t = useT();
   const { authKey } = useAuth();
+  const source = useCatalogSource();
+  const { activeProfile } = useProfiles();
   const { setView } = useView();
   const { settings, update } = useSettings();
   const contentDrag = useContentDrag();
@@ -43,7 +48,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [authKey, settings.pluginsOutsideTab]);
+  }, [authKey, settings.pluginsOutsideTab, source, activeProfile?.id]);
 
   // A plugin's own catalogs arrive after its runtime is up, which is later than the addons.
   useEffect(() => {
@@ -57,7 +62,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
       cancelled = true;
       stop();
     };
-  }, [authKey, settings.pluginsOutsideTab]);
+  }, [authKey, settings.pluginsOutsideTab, source, activeProfile?.id]);
 
   const pinned = settings.catalogsPinned ?? [];
   const hidden = settings.catalogsHidden ?? [];
@@ -83,6 +88,17 @@ export function Catalogs({ active = true }: { active?: boolean }) {
     if (i < 0 || j < 0 || j >= arr.length) return;
     [arr[i], arr[j]] = [arr[j], arr[i]];
     update({ catalogsPinned: arr });
+  };
+
+  const moveLocal = (key: string, dir: -1 | 1) => {
+    const i = filtered.findIndex((c) => c.key === key);
+    const neighbor = filtered[i + dir];
+    if (i < 0 || !neighbor) return;
+    const keys = catalogs.map((c) => c.key);
+    const a = keys.indexOf(key);
+    const b = keys.indexOf(neighbor.key);
+    [keys[a], keys[b]] = [keys[b], keys[a]];
+    saveLocalCatalogOrder(keys);
   };
 
   const hiddenCount = useMemo(
@@ -122,6 +138,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
             )}
           </div>
 
+          <CatalogSourcePicker authKey={authKey} />
           {!loading && catalogs.length > 0 && (
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-3">
@@ -193,7 +210,22 @@ export function Catalogs({ active = true }: { active?: boolean }) {
               onTogglePin={togglePin}
               onToggleHide={toggleHide}
               onMovePin={movePin}
+              onMoveCatalog={source === "local" ? moveLocal : undefined}
             />
+          )
+        ) : source === "local" ? (
+          filtered.some((c) => !hiddenSet.has(c.key)) ? (
+            <div className="flex flex-col gap-7">
+              {filtered
+                .filter((c) => !hiddenSet.has(c.key))
+                .map((c) => (
+                  <CatalogShelf key={c.key} catalog={c} />
+                ))}
+            </div>
+          ) : hiddenCount > 0 ? (
+            <AllHidden count={hiddenCount} onCustomize={() => setCustomize(true)} />
+          ) : (
+            <NoMatch />
           )
         ) : pinnedCats.length === 0 && groups.length === 0 ? (
           hiddenCount > 0 ? (
