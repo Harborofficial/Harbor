@@ -143,6 +143,7 @@ export function TvCardArtwork({
 }) {
   const { settings } = useSettings();
   const [failedBackdrop, setFailedBackdrop] = useState<string>();
+  const [logoAspect, setLogoAspect] = useState<{ src: string; compact: boolean }>();
   const animeBackdrop = useAnimeBackdrop(meta);
   const backdrop =
     meta.background && meta.background !== meta.poster ? meta.background : animeBackdrop;
@@ -199,7 +200,13 @@ export function TvCardArtwork({
               alt={meta.name}
               draggable={false}
               loading="lazy"
-              className="max-h-[34px] w-auto max-w-full self-start object-contain object-left [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.8))]"
+              onLoad={(event) => {
+                const { naturalWidth, naturalHeight } = event.currentTarget;
+                const ratio = naturalHeight > 0 ? naturalWidth / naturalHeight : Infinity;
+                const threshold = naturalWidth <= 500 ? 2.1 : 2.7;
+                setLogoAspect({ src: logo, compact: ratio < threshold });
+              }}
+              className={`${logoAspect?.src === logo && logoAspect.compact ? "max-h-[54px]" : "max-h-[34px]"} w-auto max-w-full self-start object-contain object-left [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.8))]`}
             />
           ) : (
             <span className="line-clamp-2 text-[14.5px] font-semibold leading-tight text-ink [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
