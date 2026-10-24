@@ -414,9 +414,21 @@ export function EditorView({
           return next;
         })();
 
-        if (pendingAvatarFile) {
+        if (avatar === null) {
+          finalAvatarUrl = null;
+          try {
+            localStorage.removeItem(`harbor.nuvio.local-avatar.${targetSlot}`);
+          } catch {}
+        } else if (pendingAvatarFile) {
           try {
             const uploaded = await uploadNuvioCustomAvatar(pendingAvatarFile, targetSlot);
+            if (uploaded) finalAvatarUrl = uploaded;
+          } catch (err) {
+            console.warn("[nuvio] avatar upload failed", err);
+          }
+        } else if (finalAvatarUrl && (finalAvatarUrl.startsWith("data:") || finalAvatarUrl.startsWith("/"))) {
+          try {
+            const uploaded = await uploadNuvioCustomAvatar(finalAvatarUrl, targetSlot);
             if (uploaded) finalAvatarUrl = uploaded;
           } catch (err) {
             console.warn("[nuvio] avatar upload failed", err);

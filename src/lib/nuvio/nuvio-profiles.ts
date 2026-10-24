@@ -98,6 +98,10 @@ export function resolveNuvioAvatar(
     }
     return getNuvioAvatarUrl(avatarId);
   }
+  try {
+    const local = localStorage.getItem(`harbor.nuvio.local-avatar.${profile.profile_index}`);
+    if (local?.trim()) return local.trim();
+  } catch {}
   return null;
 }
 
@@ -122,20 +126,33 @@ export async function pullNuvioProfiles(): Promise<NuvioProfile[]> {
     const data = (await res.json()) as NuvioProfile[];
     if (Array.isArray(data)) {
       const sorted = [...data].sort((a, b) => a.profile_index - b.profile_index);
+      const merged = sorted.map((p) => {
+        if (!p.avatar_url && !p.avatar_id) {
+          try {
+            const local = localStorage.getItem(`harbor.nuvio.local-avatar.${p.profile_index}`);
+            if (local?.trim()) return { ...p, avatar_url: local.trim() };
+          } catch {}
+        } else if (p.avatar_url?.trim()) {
+          try {
+            localStorage.setItem(`harbor.nuvio.local-avatar.${p.profile_index}`, p.avatar_url.trim());
+          } catch {}
+        }
+        return p;
+      });
       const state = loadNuvioState();
       // Ensure activeProfileIndex is valid
-      const activeIdx = sorted.some((p) => p.profile_index === state.activeProfileIndex)
+      const activeIdx = merged.some((p) => p.profile_index === state.activeProfileIndex)
         ? state.activeProfileIndex
-        : (sorted[0]?.profile_index ?? 1);
+        : (merged[0]?.profile_index ?? 1);
 
       saveNuvioState({
         ...state,
-        profiles: sorted,
+        profiles: merged,
         activeProfileIndex: activeIdx,
         lastSyncedAt: Date.now(),
       });
-      window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: sorted }));
-      return sorted;
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: merged }));
+      return merged;
     }
     return [];
   } catch (err) {
@@ -253,14 +270,30 @@ export async function uploadNuvioCustomAvatar(
       try {
         const res = await fetch(input);
         blob = await res.blob();
-      } catch {}
+      } catch {
+        try {
+          const base64Data = input.split(",")[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Uint8Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          blob = new Blob([byteNumbers], { type: match ? `image/${match[1]}` : "image/webp" });
+        } catch {}
+      }
     } else if (input.startsWith("/")) {
       const parts = input.split("/");
       payloadFilename = parts[parts.length - 1] || payloadFilename;
       try {
-        const res = await fetch(input);
+        const fullUrl = typeof window !== "undefined" && window.location?.origin ? `${window.location.origin}${input}` : input;
+        const res = await fetch(fullUrl);
         blob = await res.blob();
-      } catch {}
+      } catch {
+        try {
+          const res = await fetch(input);
+          blob = await res.blob();
+        } catch {}
+      }
     }
   } else if (input instanceof Blob) {
     blob = input;
@@ -284,8 +317,9 @@ export async function uploadNuvioCustomAvatar(
     }
   }
 
-  // 2. Secondary Strategy: Upload via public image hosts (Catbox / Freeimage)
+  // 2. Secondary Strategy: Upload via public image hosts (Catbox -> Tmpfiles -> Freeimage)
   if (blob) {
+    // 2a. Catbox
     try {
       const fd = new FormData();
       fd.append("reqtype", "fileupload");
@@ -304,9 +338,32 @@ export async function uploadNuvioCustomAvatar(
         }
       }
     } catch (catboxErr) {
-      console.warn("[nuvio] Catbox safeFetch failed:", catboxErr);
+      console.warn("[nuvio] Catbox safeFetch failed, trying tmpfiles:", catboxErr);
     }
 
+    // 2b. Tmpfiles (returns direct image download link)
+    try {
+      const fdTmp = new FormData();
+      fdTmp.append("file", blob, payloadFilename);
+
+      const resTmp = await safeFetch("https://tmpfiles.org/api/v1/upload", {
+        method: "POST",
+        body: fdTmp,
+      });
+
+      if (resTmp.ok) {
+        const json = (await resTmp.json()) as { status?: string; data?: { url?: string } };
+        if (json?.status === "success" && json.data?.url) {
+          const directUrl = json.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+          console.log("[nuvio] Avatar uploaded via safeFetch (Tmpfiles):", directUrl);
+          return directUrl;
+        }
+      }
+    } catch (tmpErr) {
+      console.warn("[nuvio] Tmpfiles safeFetch failed, trying freeimage:", tmpErr);
+    }
+
+    // 2c. Freeimage
     try {
       const fd2 = new FormData();
       fd2.append("key", "6d207e02198a847aa98d0a2a901485a5");
@@ -370,18 +427,22 @@ export async function createNuvioProfile(opts: {
 
   let avatarUrl = opts.avatarUrl?.trim() || null;
   let avatarId = opts.avatarId ?? null;
+  if (avatarUrl) {
+    try {
+      localStorage.setItem(`harbor.nuvio.local-avatar.${nextIndex}`, avatarUrl);
+    } catch {}
+  }
   if (avatarUrl && (avatarUrl.startsWith("data:") || avatarUrl.startsWith("/"))) {
-    if (avatarUrl.startsWith("/kids/avatars/")) {
-      // Local bundled kid avatar
-    } else {
-      const uploaded = await uploadNuvioCustomAvatar(avatarUrl, nextIndex);
-      if (uploaded) {
-        avatarUrl = uploaded;
-        avatarId = null;
-      }
-      if (nextIndex === 1 && avatarUrl) {
-        void pushAvatarToEcosystem(avatarUrl);
-      }
+    const uploaded = await uploadNuvioCustomAvatar(avatarUrl, nextIndex);
+    if (uploaded) {
+      avatarUrl = uploaded;
+      avatarId = null;
+      try {
+        localStorage.setItem(`harbor.nuvio.local-avatar.${nextIndex}`, uploaded);
+      } catch {}
+    }
+    if (nextIndex === 1 && avatarUrl) {
+      void pushAvatarToEcosystem(avatarUrl);
     }
   }
 
@@ -453,45 +514,106 @@ export async function updateNuvioProfile(
     if (rawAvatarUrl === null || rawAvatarUrl === "") {
       resolvedAvatarUrl = null;
       resolvedAvatarId = null;
+      try {
+        localStorage.removeItem(`harbor.nuvio.local-avatar.${profileIndex}`);
+      } catch {}
+      const optimisticProfiles = existing.map((p) =>
+        p.profile_index === profileIndex
+          ? { ...p, avatar_url: null, avatar_id: null }
+          : p,
+      );
+      saveNuvioState({ ...state, profiles: optimisticProfiles });
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
     } else if (typeof rawAvatarUrl === "string") {
       const trimmed = rawAvatarUrl.trim();
       if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
         resolvedAvatarUrl = trimmed;
         resolvedAvatarId = null;
+        try {
+          localStorage.setItem(`harbor.nuvio.local-avatar.${profileIndex}`, trimmed);
+        } catch {}
+        const optimisticProfiles = existing.map((p) =>
+          p.profile_index === profileIndex
+            ? { ...p, avatar_url: trimmed, avatar_id: null }
+            : p,
+        );
+        saveNuvioState({ ...state, profiles: optimisticProfiles });
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
       } else if (trimmed.startsWith("/kids/avatars/")) {
         resolvedAvatarUrl = trimmed;
         resolvedAvatarId = null;
+        try {
+          localStorage.setItem(`harbor.nuvio.local-avatar.${profileIndex}`, trimmed);
+        } catch {}
         const optimisticProfiles = existing.map((p) =>
           p.profile_index === profileIndex
             ? { ...p, avatar_url: trimmed, avatar_id: null }
             : p,
         );
         saveNuvioState({ ...state, profiles: optimisticProfiles });
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+        // Attempt upload in background to get permanent HTTPS URL for cloud
+        void uploadNuvioCustomAvatar(trimmed, profileIndex).then((uploadedUrl) => {
+          if (uploadedUrl) {
+            try {
+              localStorage.setItem(`harbor.nuvio.local-avatar.${profileIndex}`, uploadedUrl);
+            } catch {}
+            const currentProfiles = loadNuvioState().profiles.map((p) =>
+              p.profile_index === profileIndex
+                ? { ...p, avatar_url: uploadedUrl, avatar_id: null }
+                : p,
+            );
+            saveNuvioState({ ...loadNuvioState(), profiles: currentProfiles });
+            const payloads: ProfilePushPayload[] = currentProfiles.map((p) => ({
+              profile_index: p.profile_index,
+              name: p.name,
+              avatar_color_hex: p.avatar_color_hex || "#1E88E5",
+              uses_primary_addons: Boolean(p.uses_primary_addons),
+              uses_primary_plugins: Boolean(p.uses_primary_plugins),
+              avatar_id: null,
+              avatar_url: p.avatar_url,
+            }));
+            void pushNuvioProfiles(payloads);
+          }
+        });
       } else if (trimmed.startsWith("data:") || trimmed.startsWith("/")) {
-        // Optimistically apply local dataUrl or path to state so UI updates instantly
+        // Optimistically apply local dataUrl or path to state so UI updates instantly (0ms)
+        try {
+          localStorage.setItem(`harbor.nuvio.local-avatar.${profileIndex}`, trimmed);
+        } catch {}
         const optimisticProfiles = existing.map((p) =>
           p.profile_index === profileIndex
             ? { ...p, avatar_url: trimmed, avatar_id: null }
             : p,
         );
         saveNuvioState({ ...state, profiles: optimisticProfiles });
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
 
         // If primary profile (slot 1), also push to Harbor ecosystem pfp
         if (profileIndex === 1) {
           void pushAvatarToEcosystem(trimmed);
         }
 
-        // Upload to obtain public HTTPS URL
+        // Upload to obtain public HTTPS URL for Nuvio Cloud
         const uploadedUrl = await uploadNuvioCustomAvatar(trimmed, profileIndex);
         if (uploadedUrl) {
           resolvedAvatarUrl = uploadedUrl;
           resolvedAvatarId = null;
+          try {
+            localStorage.setItem(`harbor.nuvio.local-avatar.${profileIndex}`, uploadedUrl);
+          } catch {}
           const updatedWithRemoteUrl = loadNuvioState().profiles.map((p) =>
             p.profile_index === profileIndex
               ? { ...p, avatar_url: uploadedUrl, avatar_id: null }
               : p,
           );
           saveNuvioState({ ...loadNuvioState(), profiles: updatedWithRemoteUrl });
+          window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedWithRemoteUrl }));
+          window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
           if (profileIndex === 1) {
             void pushAvatarToEcosystem(uploadedUrl);
           }

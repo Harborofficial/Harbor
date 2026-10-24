@@ -962,19 +962,34 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       updateNuvioProfile(slot, nuvioPatch);
       return;
     }
-    setState((s) => ({
-      ...s,
-      profiles: s.profiles.map((p) =>
-        p.id === id
-          ? {
-              ...p,
-              ...patch,
-              kid: p.isPrimary ? null : (patch.kid !== undefined ? patch.kid : p.kid),
-              name: patch.name != null ? patch.name.trim().slice(0, 32) || p.name : p.name,
+    setState((s) => {
+      const isTargetPrimary = s.profiles.find((p) => p.id === id)?.isPrimary;
+      if (isTargetPrimary && patch.avatar !== undefined) {
+        try {
+          for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              parsed.harborAvatar = patch.avatar;
+              localStorage.setItem(key, JSON.stringify(parsed));
             }
-          : p,
-      ),
-    }));
+          }
+        } catch {}
+      }
+      return {
+        ...s,
+        profiles: s.profiles.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                ...patch,
+                kid: p.isPrimary ? null : (patch.kid !== undefined ? patch.kid : p.kid),
+                name: patch.name != null ? patch.name.trim().slice(0, 32) || p.name : p.name,
+              }
+            : p,
+        ),
+      };
+    });
   }, []);
 
   const deleteProfile = useCallback<ProfilesValue["deleteProfile"]>(
