@@ -691,7 +691,7 @@ export const ContinueCard = memo(function ContinueCard({
     });
 
   return (
-    <div className="group relative w-full min-w-0" onContextMenu={onCardContext}>
+    <div className="group relative w-full min-w-0 animate-in fade-in-50 zoom-in-[0.98] duration-300 ease-out" onContextMenu={onCardContext}>
       <button
         ref={cardRef}
         type="button"

@@ -637,10 +637,15 @@ export function Home({
     };
   }, [authKey, active, hideSharedCw, isNuvioProvider]);
 
+  const [nuvioProfileSwitching, setNuvioProfileSwitching] = useState(false);
   useEffect(() => {
+    let timer: any = null;
     const onProfile = () => {
+      setNuvioProfileSwitching(true);
       setBuildTick((n) => n + 1);
       if (isNuvioProvider) void reconcileNuvioWatched();
+      clearTimeout(timer);
+      timer = setTimeout(() => setNuvioProfileSwitching(false), 300);
     };
     if (isNuvioProvider) void reconcileNuvioWatched();
     const onFocus = () => {
@@ -653,6 +658,7 @@ export function Home({
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onFocus);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("harbor:nuvio-profile-changed", onProfile);
       window.removeEventListener("harbor:account-provider-changed", onProfile);
       window.removeEventListener("focus", onFocus);
@@ -1432,6 +1438,7 @@ export function Home({
             items={cwItems}
             watchedSet={traktWatched}
             onDismiss={onDismissCw}
+            loading={nuvioProfileSwitching}
           />
         )}
         {settings.homeNewEpisodes && !newEpisodesHidden && (

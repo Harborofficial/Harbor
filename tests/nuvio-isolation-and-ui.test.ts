@@ -70,6 +70,20 @@ test("useCwAdvance preserves sequential rewatch and prevents jumping to later se
   assert.match(useCwAdvance, /if \(immediateNext && nextEp && nextEp\.season > immediateNext\.season\)/);
 });
 
+const cwProfile = read("../src/lib/cw-profile.ts");
+
+test("cwProfileScope isolates Continue Watching profile scope by active Nuvio slot", () => {
+  assert.match(cwProfile, /if \(isNuvioProviderActive\(\)\)/);
+  assert.match(cwProfile, /const slot = getNuvioActiveSlot\(\)/);
+  assert.match(cwProfile, /const pid = ownerId \?\? `nuvio-\$\{slot\}`/);
+});
+
+test("CWSection maintains stable Row key and supports loading skeletons for smooth transitions", () => {
+  assert.match(cwSection, /loading\?: boolean/);
+  assert.match(cwSection, /key="home:cw"/);
+  assert.match(cwSection, /aspect-\[16\/9\] w-full rounded-xl bg-elevated/);
+});
+
 test("signing out or switching accounts cleanly purges watched badges and catalog caches", () => {
   const auth = read("../src/lib/auth.tsx");
   const nuvioAuth = read("../src/lib/nuvio/nuvio-auth.ts");

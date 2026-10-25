@@ -427,16 +427,15 @@ function onProfileChange(): void {
   if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
     const currentSlot = resolveNuvioProfileIndex();
     const cached = getCachedNuvioItemsForSlot(currentSlot);
-    const nonNuvio = items.filter((i) => i.external !== "nuvio");
     if (cached.length > 0) {
-      setItems(merge([cached, nonNuvio]));
+      setItems(cached);
     } else {
       const built = readCachedNuvioPlaybackItems(currentSlot);
       if (built.length > 0) {
         slotCwMemoryCache.set(currentSlot, built);
-        setItems(merge([built, nonNuvio]));
+        setItems(built);
       } else {
-        setItems(nonNuvio);
+        setItems(EMPTY);
       }
     }
   } else {

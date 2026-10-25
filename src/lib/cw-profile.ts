@@ -1,3 +1,5 @@
+import { isNuvioProviderActive, getNuvioActiveSlot } from "./active-profile-id";
+
 type CwProfile = {
   id: string;
   isPrimary?: boolean;
@@ -17,6 +19,11 @@ export function cwProfileScope(ownerId?: string): {
   private: boolean;
 } {
   try {
+    if (isNuvioProviderActive()) {
+      const slot = getNuvioActiveSlot();
+      const pid = ownerId ?? `nuvio-${slot}`;
+      return { profileId: pid, sharedId: pid, private: true };
+    }
     const rawRoster = localStorage.getItem("harbor.profiles.v1");
     if (rawRoster !== rosterRaw) {
       roster = JSON.parse(rawRoster ?? "null");
