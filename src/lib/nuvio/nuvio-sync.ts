@@ -598,10 +598,10 @@ export async function reconcileNuvioWatched(
 
   // 2. Update watched flags for all items reported by Nuvio Cloud
   for (const id of serverWatchedIds) {
-    setWatchedFlag(id, true);
+    setWatchedFlag(id, true, profileIndex);
   }
   for (const id of serverMovieIds) {
-    setMovieWatchedLocal(id, true);
+    setMovieWatchedLocal(id, true, profileIndex);
   }
 
   // 3. Prune any locally flagged items that were deleted/unmarked on Nuvio cloud
@@ -614,8 +614,8 @@ export async function reconcileNuvioWatched(
         if (Array.isArray(stored)) {
           for (const localId of stored) {
             if (!serverWatchedIds.has(localId)) {
-              setWatchedFlag(localId, false);
-              setMovieWatchedLocal(localId, false);
+              setWatchedFlag(localId, false, profileIndex);
+              setMovieWatchedLocal(localId, false, profileIndex);
             }
           }
         }

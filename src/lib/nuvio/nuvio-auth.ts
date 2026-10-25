@@ -388,6 +388,7 @@ export async function signOutNuvio(): Promise<void> {
   window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
   window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
   window.dispatchEvent(new CustomEvent("harbor:profiles-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:settings-changed"));
 
   if (token) {
     try {

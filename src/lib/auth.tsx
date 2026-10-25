@@ -61,6 +61,29 @@ export function readActiveStremioAuthKey(): string | null {
   }
 }
 
+export function readPrimaryStremioSession(): Session | null {
+  try {
+    const raw = localStorage.getItem("harbor.profiles.v1");
+    if (raw) {
+      const state = JSON.parse(raw) as { profiles?: Profile[]; activeId?: string | null };
+      const profiles = Array.isArray(state.profiles) ? state.profiles : [];
+      const active = profiles.find((p) => p.id === state.activeId) ?? profiles.find((p) => p.isPrimary) ?? profiles[0] ?? null;
+      const sourceId = stremioSourceProfileId(active, profiles);
+      if (sourceId) {
+        const sess = readProfileSession(sourceId);
+        if (sess) return sess;
+      }
+      for (const p of profiles) {
+        const sess = readProfileSession(p.id);
+        if (sess) return sess;
+      }
+    }
+    return readProfileSession("default");
+  } catch {
+    return null;
+  }
+}
+
 const Ctx = createContext<AuthValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {

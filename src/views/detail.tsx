@@ -90,6 +90,7 @@ import {
   pullWatchProgressFromNuvio,
   pullWatchedItemsFromNuvio,
   reconcileNuvioWatched,
+  resolveNuvioProfileIndex,
   isNuvioProviderActive,
 } from "@/lib/nuvio/nuvio-sync";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
@@ -322,6 +323,19 @@ export function DetailView({
     meta.videos && meta.videos.length > 0 ? meta : null,
   );
   const [libraryItem, setLibraryItem] = useState<LibraryItem | null>(null);
+  const [stremioWatched, setStremioWatched] = useState<Set<string>>(new Set());
+  const [profileTick, setProfileTick] = useState(0);
+  useEffect(() => {
+    const onProfile = () => setProfileTick((t) => t + 1);
+    window.addEventListener("harbor:active-profile-changed", onProfile);
+    window.addEventListener("harbor:nuvio-profile-changed", onProfile);
+    window.addEventListener("harbor:nuvio-state-changed", onProfile);
+    return () => {
+      window.removeEventListener("harbor:active-profile-changed", onProfile);
+      window.removeEventListener("harbor:nuvio-profile-changed", onProfile);
+      window.removeEventListener("harbor:nuvio-state-changed", onProfile);
+    };
+  }, []);
   const [nuvioEpisodeProgress, setNuvioEpisodeProgress] = useState<{
     season: number;
     episode: number;
@@ -799,6 +813,8 @@ export function DetailView({
 
   useEffect(() => {
     setLibraryItem(null);
+    setStremioWatched(new Set());
+    setNuvioEpisodeProgress(null);
     noteLocalImdbId(meta.id, detail?.imdbId);
     const isNuvioActiveMode = (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
     if (isNuvioActiveMode) {
@@ -862,6 +878,8 @@ export function DetailView({
           }
           if (watchedKeys.size > 0) {
             setStremioWatched((prev) => new Set([...prev, ...watchedKeys]));
+          } else {
+            setStremioWatched(new Set());
           }
           if (matches.length > 0) {
             matches.sort((a, b) => {
@@ -931,11 +949,12 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [authKey, meta.id, detail?.imdbId, settings.accountProvider]);
+  }, [authKey, meta.id, detail?.imdbId, settings.accountProvider, profileTick]);
 
-  const [stremioWatched, setStremioWatched] = useState<Set<string>>(new Set());
   useEffect(() => {
     let cancelled = false;
+    const isNuvioActiveMode = (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
+    if (isNuvioActiveMode) return;
     decodeWatchedEpisodes(libraryItem?.state?.watched, cinemetaFull?.videos)
       .then((keys) => {
         if (!cancelled) setStremioWatched(keys);
@@ -944,7 +963,7 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [libraryItem?.state?.watched, cinemetaFull?.videos]);
+  }, [libraryItem?.state?.watched, cinemetaFull?.videos, settings.accountProvider]);
 
   useEffect(() => {
     if (!libraryItem?.state) return;
@@ -1453,7 +1472,7 @@ export function DetailView({
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [isNuvio]);
+  }, [isNuvio, profileTick]);
 
   useEffect(() => {
     if (seriesWatchedVer === prevSeriesWatchedVerRef.current) return;

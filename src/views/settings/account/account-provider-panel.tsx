@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Check, LogIn } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { useAuth } from "@/lib/auth";
+import { useAuth, readPrimaryStremioSession } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import stremioLogo from "@/assets/stremio.png";
 import nuvioLogo from "@/assets/nuvio.png";
@@ -14,6 +14,7 @@ import { SButton } from "../ui";
 export function AccountProviderPanel() {
   const t = useT();
   const { user } = useAuth();
+  const stremioUser = user ?? readPrimaryStremioSession()?.user ?? null;
   const { settings, update } = useSettings();
   const [nuvioState, setNuvioState] = useState(() => loadNuvioState());
   const [showStremioAuth, setShowStremioAuth] = useState(false);
@@ -87,11 +88,11 @@ export function AccountProviderPanel() {
                   <div className="flex items-center gap-1.5 text-[12px] text-ink-subtle">
                     <span
                       className={`h-2 w-2 rounded-full ${
-                        user ? "bg-emerald-400" : "bg-neutral-500"
+                        stremioUser ? "bg-emerald-400" : "bg-neutral-500"
                       }`}
                     />
                     <span>
-                      {user ? t("Connected as {email}", { email: user.email }) : t("Not connected")}
+                      {stremioUser ? t("Connected as {email}", { email: stremioUser.email }) : t("Not connected")}
                     </span>
                   </div>
                 </div>
@@ -143,7 +144,7 @@ export function AccountProviderPanel() {
           </div>
 
           <div className="mt-6 flex items-center justify-between border-t border-edge-soft pt-4">
-            {!user ? (
+            {!stremioUser ? (
               <div onClick={(e) => e.stopPropagation()}>
                 <SButton
                   variant="primary"
@@ -157,7 +158,7 @@ export function AccountProviderPanel() {
               </div>
             ) : (
               <span className="text-[12px] text-ink-subtle font-mono truncate max-w-[200px]">
-                {user.email}
+                {stremioUser.email}
               </span>
             )}
 

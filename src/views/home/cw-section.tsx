@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
 import { LogIn } from "lucide-react";
 import stremioWordmark from "@/assets/stremio-wordmark.png";
+import nuvioLogo from "@/assets/nuvio.png";
 import { AuthModal } from "@/components/auth-modal";
+import { NuvioAuthModal } from "@/components/nuvio-auth-modal";
+import { activateNuvioAccountProvider } from "@/lib/nuvio/nuvio-auth";
 import { ContinueCard } from "@/components/continue-card";
 import { Row } from "@/components/row";
 import { useT } from "@/lib/i18n";
@@ -11,12 +14,13 @@ import type { ContinueDismiss } from "@/lib/continue-card-actions";
 
 type Props = {
   signedIn: boolean;
+  isNuvio?: boolean;
   items: LibraryItem[];
   watchedSet?: Set<string>;
   onDismiss: ContinueDismiss;
 };
 
-export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
+export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss }: Props) {
   const t = useT();
   const [showAuth, setShowAuth] = useState(false);
   const rowKey = useMemo(() => {
@@ -35,7 +39,16 @@ export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
     </button>
   );
 
-  const authModal = showAuth ? <AuthModal onClose={() => setShowAuth(false)} /> : null;
+  const authModal = showAuth ? (
+    isNuvio ? (
+      <NuvioAuthModal
+        onClose={() => setShowAuth(false)}
+        onSuccess={activateNuvioAccountProvider}
+      />
+    ) : (
+      <AuthModal onClose={() => setShowAuth(false)} />
+    )
+  ) : null;
 
   if (items.length > 0) {
     return (
@@ -69,6 +82,20 @@ export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
           <p className="text-[15.5px] leading-relaxed text-ink-muted">
             {t("Nothing in progress yet. Press Play on something.")}
           </p>
+        ) : isNuvio ? (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-[15.5px] leading-relaxed text-ink-muted">
+              {t("Sign in to your Nuvio account to sync continue watching and watch history.")}
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowAuth(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-hover"
+            >
+              <img src={nuvioLogo} alt="Nuvio" className="h-4 w-4 object-contain rounded-sm" />
+              <span>{t("Sign in to Nuvio")}</span>
+            </button>
+          </div>
         ) : (
           <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[15.5px] leading-relaxed text-ink-muted">
             <span>{t("Sign in to")}</span>

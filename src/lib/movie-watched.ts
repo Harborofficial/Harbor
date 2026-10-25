@@ -45,13 +45,17 @@ function primaryProfileId(): string {
   }
 }
 
-function storeKey(): string {
+export function movieWatchedStoreKey(slotOrProfile?: string | number): string {
   if (isNuvioProviderActive()) {
-    const slot = getNuvioActiveSlot();
+    const slot = slotOrProfile != null ? Number(slotOrProfile) || getNuvioActiveSlot() : getNuvioActiveSlot();
     return `harbor.moviewatched.nuvio.v1.${slot}`;
   }
-  const id = activeProfileId();
+  const id = slotOrProfile ? String(slotOrProfile) : activeProfileId();
   return id ? KEY_PREFIX + id : LEGACY_KEY;
+}
+
+function storeKey(): string {
+  return movieWatchedStoreKey();
 }
 
 function migrateLegacy(): void {
@@ -87,11 +91,12 @@ function load(): Set<string> {
   return cache;
 }
 
-function persist(next: Set<string>): void {
-  const sk = storeKey();
-  currentScope = sk;
-  cache = next;
-  version += 1;
+function persist(next: Set<string>, sk = storeKey()): void {
+  if (sk === storeKey()) {
+    currentScope = sk;
+    cache = next;
+    version += 1;
+  }
   persistCritical(sk, JSON.stringify([...next]));
   for (const fn of subs) fn();
 }
@@ -117,23 +122,49 @@ export function useMovieWatchedIds(): Set<string> {
   return useSyncExternalStore(subscribeMovieWatched, load, () => EMPTY_MOVIE_WATCHED_IDS);
 }
 
-export function setMovieWatchedLocal(metaId: string, watched: boolean): void {
-  const cur = load();
-  if (cur.has(metaId) === watched) return;
-  const next = new Set(cur);
+export function setMovieWatchedLocal(metaId: string, watched: boolean, profileOrSlot?: string | number): void {
+  const sk = movieWatchedStoreKey(profileOrSlot);
+  let s: Set<string>;
+  if (sk === storeKey() && cache) {
+    s = cache;
+  } else {
+    try {
+      const arr = JSON.parse(localStorage.getItem(sk) ?? "[]");
+      s = new Set(Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : []);
+    } catch {
+      s = new Set();
+    }
+  }
+  if (s.has(metaId) === watched) return;
+  const next = new Set(s);
   if (watched) next.add(metaId);
   else next.delete(metaId);
-  persist(next);
+  persist(next, sk);
 }
 
-export function setMovieWatchedLocalAcknowledged(metaId: string, watched: boolean): void {
-  const next = new Set(load());
+export function setMovieWatchedLocalAcknowledged(metaId: string, watched: boolean, profileOrSlot?: string | number): void {
+  const sk = movieWatchedStoreKey(profileOrSlot);
+  let s: Set<string>;
+  if (sk === storeKey() && cache) {
+    s = cache;
+  } else {
+    try {
+      const arr = JSON.parse(localStorage.getItem(sk) ?? "[]");
+      s = new Set(Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : []);
+    } catch {
+      s = new Set();
+    }
+  }
+  const next = new Set(s);
   if (watched) next.add(metaId);
   else next.delete(metaId);
-  localStorage.setItem(storeKey(), JSON.stringify([...next]));
-  cache = next;
-  version += 1;
-  for (const fn of subs) fn();
+  localStorage.setItem(sk, JSON.stringify([...next]));
+  if (sk === storeKey()) {
+    currentScope = sk;
+    cache = next;
+    version += 1;
+    for (const fn of subs) fn();
+  }
 }
 
 export function subscribeMovieWatched(fn: () => void): () => void {

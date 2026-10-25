@@ -47,6 +47,11 @@ export function AccountStub() {
   useEffect(() => {
     const onSync = () => setNuvioState(loadNuvioState());
     const onProfileSync = () => setForceTick((t) => t + 1);
+    const onProviderChanged = () => {
+      setTab("provider");
+      setForceTick((t) => t + 1);
+    };
+    window.addEventListener("harbor:account-provider-changed", onProviderChanged);
     window.addEventListener("harbor:nuvio-state-changed", onSync);
     window.addEventListener("harbor:nuvio-profile-changed", onSync);
     window.addEventListener("harbor:nuvio-profiles-updated", onSync);
@@ -55,6 +60,7 @@ export function AccountStub() {
     window.addEventListener("harbor:secondary-privileges-changed", onProfileSync);
     window.addEventListener("harbor:settings-changed", onProfileSync);
     return () => {
+      window.removeEventListener("harbor:account-provider-changed", onProviderChanged);
       window.removeEventListener("harbor:secondary-privileges-changed", onProfileSync);
       window.removeEventListener("harbor:settings-changed", onProfileSync);
       window.removeEventListener("harbor:nuvio-state-changed", onSync);

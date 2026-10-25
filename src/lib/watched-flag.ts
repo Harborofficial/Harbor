@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { isMovieWatchedLocal, subscribeMovieWatched } from "./movie-watched";
 import { persistCritical } from "./storage-recovery";
+import { isNuvioProviderActive, getNuvioActiveSlot } from "./active-profile-id";
 
 const KEY_PREFIX = "harbor.watchedFlag.v1.";
 const LEGACY_KEY = "harbor.watchedFlag.v1";
@@ -9,6 +10,7 @@ const PROFILES_KEY = "harbor.profiles.v1";
 const subs = new Set<() => void>();
 let version = 0;
 let cache: Set<string> | null = null;
+let currentScope = "";
 
 function activeProfileId(): string {
   try {
@@ -45,12 +47,21 @@ function primaryProfileId(): string {
   }
 }
 
-function storeKey(): string {
-  const id = activeProfileId();
+export function watchedFlagStoreKey(slotOrProfile?: string | number): string {
+  if (isNuvioProviderActive()) {
+    const slot = slotOrProfile != null ? Number(slotOrProfile) || getNuvioActiveSlot() : getNuvioActiveSlot();
+    return `harbor.watchedFlag.nuvio.v1.${slot}`;
+  }
+  const id = slotOrProfile ? String(slotOrProfile) : activeProfileId();
   return id ? KEY_PREFIX + id : LEGACY_KEY;
 }
 
+function storeKey(): string {
+  return watchedFlagStoreKey();
+}
+
 function migrateLegacy(): void {
+  if (isNuvioProviderActive()) return;
   try {
     const legacy = localStorage.getItem(LEGACY_KEY);
     if (!legacy) return;
@@ -65,10 +76,12 @@ function migrateLegacy(): void {
 }
 
 function load(): Set<string> {
-  if (cache) return cache;
+  const sk = storeKey();
+  if (cache && currentScope === sk) return cache;
+  currentScope = sk;
   migrateLegacy();
   try {
-    const arr = JSON.parse(localStorage.getItem(storeKey()) ?? "[]");
+    const arr = JSON.parse(localStorage.getItem(sk) ?? "[]");
     cache = new Set(
       Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [],
     );
@@ -78,10 +91,13 @@ function load(): Set<string> {
   return cache;
 }
 
-function persist(next: Set<string>): void {
-  cache = next;
-  version += 1;
-  persistCritical(storeKey(), JSON.stringify([...next]));
+function persist(next: Set<string>, sk = storeKey()): void {
+  if (sk === storeKey()) {
+    currentScope = sk;
+    cache = next;
+    version += 1;
+  }
+  persistCritical(sk, JSON.stringify([...next]));
   for (const fn of subs) fn();
 }
 
@@ -99,23 +115,49 @@ export function useWatchedFlagIds(): Set<string> {
   return useSyncExternalStore(subscribe, load, () => EMPTY_FLAG_IDS);
 }
 
-export function setWatchedFlag(metaId: string, watched: boolean): void {
-  const cur = load();
-  if (cur.has(metaId) === watched) return;
-  const next = new Set(cur);
+export function setWatchedFlag(metaId: string, watched: boolean, profileOrSlot?: string | number): void {
+  const sk = watchedFlagStoreKey(profileOrSlot);
+  let s: Set<string>;
+  if (sk === storeKey() && cache) {
+    s = cache;
+  } else {
+    try {
+      const arr = JSON.parse(localStorage.getItem(sk) ?? "[]");
+      s = new Set(Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : []);
+    } catch {
+      s = new Set();
+    }
+  }
+  if (s.has(metaId) === watched) return;
+  const next = new Set(s);
   if (watched) next.add(metaId);
   else next.delete(metaId);
-  persist(next);
+  persist(next, sk);
 }
 
-export function setWatchedFlagAcknowledged(metaId: string, watched: boolean): void {
-  const next = new Set(load());
+export function setWatchedFlagAcknowledged(metaId: string, watched: boolean, profileOrSlot?: string | number): void {
+  const sk = watchedFlagStoreKey(profileOrSlot);
+  let s: Set<string>;
+  if (sk === storeKey() && cache) {
+    s = cache;
+  } else {
+    try {
+      const arr = JSON.parse(localStorage.getItem(sk) ?? "[]");
+      s = new Set(Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : []);
+    } catch {
+      s = new Set();
+    }
+  }
+  const next = new Set(s);
   if (watched) next.add(metaId);
   else next.delete(metaId);
-  localStorage.setItem(storeKey(), JSON.stringify([...next]));
-  cache = next;
-  version += 1;
-  for (const fn of subs) fn();
+  localStorage.setItem(sk, JSON.stringify([...next]));
+  if (sk === storeKey()) {
+    currentScope = sk;
+    cache = next;
+    version += 1;
+    for (const fn of subs) fn();
+  }
 }
 
 function subscribe(fn: () => void): () => void {
@@ -149,15 +191,18 @@ export function useMetaWatched(
 }
 
 if (typeof window !== "undefined") {
-  let lastProfile = activeProfileId();
-  const onProfileChange = () => {
-    const p = activeProfileId();
-    if (p === lastProfile) return;
-    lastProfile = p;
+  let lastScope = storeKey();
+  const onScopeChange = () => {
+    const nextScope = storeKey();
+    if (nextScope === lastScope) return;
+    lastScope = nextScope;
     cache = null;
     version += 1;
     for (const fn of subs) fn();
   };
-  window.addEventListener("harbor:active-profile-changed", onProfileChange);
-  window.addEventListener("harbor:profiles-updated", onProfileChange);
+  window.addEventListener("harbor:active-profile-changed", onScopeChange);
+  window.addEventListener("harbor:profiles-updated", onScopeChange);
+  window.addEventListener("harbor:account-provider-changed", onScopeChange);
+  window.addEventListener("harbor:nuvio-profile-changed", onScopeChange);
+  window.addEventListener("harbor:nuvio-state-changed", onScopeChange);
 }

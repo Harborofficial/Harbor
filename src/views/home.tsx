@@ -1426,7 +1426,8 @@ export function Home({
         )}
         {!cwHidden && (
           <CWSection
-            signedIn={!!authKey}
+            signedIn={isNuvioProvider ? (isNuvioProviderActive() && isNuvioSignedIn()) : !!authKey}
+            isNuvio={isNuvioProvider}
             items={cwItems}
             watchedSet={traktWatched}
             onDismiss={onDismissCw}

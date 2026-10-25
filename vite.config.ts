@@ -88,7 +88,7 @@ export default defineConfig(({ mode }) => {
         }
       : { build: { rollupOptions: { input: { main: "index.html", retro: "retro-player.html" } } } }),
     server: {
-      host: devHost || "localhost",
+      host: devHost || "0.0.0.0",
       port: 1420,
       strictPort: true,
       ...(devHost ? { hmr: { protocol: "ws", host: devHost, port: 1421 } } : {}),
