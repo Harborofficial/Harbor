@@ -715,15 +715,6 @@ export function DetailView({
   ]);
 
   useEffect(() => {
-    if (!animeCanonicalId) return;
-    if (meta.id.startsWith("tt") || meta.id.startsWith("tmdb:tv:")) {
-      recordAnimeCwId(meta.id, animeCanonicalId);
-    }
-    const imdb = detail?.imdbId;
-    if (imdb?.startsWith("tt") && imdb !== meta.id) recordAnimeCwId(imdb, animeCanonicalId);
-  }, [animeCanonicalId, meta.id, detail?.imdbId]);
-
-  useEffect(() => {
     if (meta.type !== "series") return;
     const imdb = meta.id.startsWith("tt")
       ? meta.id
@@ -815,9 +806,7 @@ export function DetailView({
         .then((progressItems) => {
           if (cancelled) return;
           const matches = progressItems.filter(
-            (p) =>
-              p.content_id === meta.id ||
-              (detail?.imdbId && p.content_id === detail.imdbId),
+            (p) => p.content_id === meta.id || (detail?.imdbId && p.content_id === detail.imdbId),
           );
           if (matches.length > 0) {
             matches.sort((a, b) => {
@@ -843,8 +832,17 @@ export function DetailView({
               const isFinished = latest.progress_seconds > dur * 0.9;
               if (isFinished) {
                 const subsequent = matches.find((m) => {
-                  if (m.season == null || m.episode == null || latest.season == null || latest.episode == null) return false;
-                  return m.season > latest.season || (m.season === latest.season && m.episode > latest.episode);
+                  if (
+                    m.season == null ||
+                    m.episode == null ||
+                    latest.season == null ||
+                    latest.episode == null
+                  )
+                    return false;
+                  return (
+                    m.season > latest.season ||
+                    (m.season === latest.season && m.episode > latest.episode)
+                  );
                 });
                 if (subsequent) {
                   latest = subsequent;
@@ -977,6 +975,26 @@ export function DetailView({
             return null;
           }
           setAnimeEpisodes(res.episodes);
+          // Only record identities after this detail request has resolved. The
+          // previous page's canonical state must not seed a newly opened title.
+          const canonical = `kitsu:${res.kitsuId}`;
+          // The detail provider may show a parent TV series for a one-episode
+          // special. Never save the parent's identity under that special's ID.
+          // A multi-episode ONA/OVA is its own entry, so format alone must not
+          // disqualify it from recording the canonical mapping.
+          const isSideEntry = res.requestedKitsuId !== res.kitsuId;
+          if (!isSideEntry) recordAnimeCwId(meta.id, canonical);
+          const seriesImdb = res.detail.imdbId;
+          // Standalone specials can share a parent series' IMDb id. Only an
+          // actual multi-episode show (or a movie) can record the shared alias.
+          if (
+            seriesImdb?.startsWith("tt") &&
+            seriesImdb !== meta.id &&
+            !isSideEntry &&
+            (meta.type === "movie" || res.episodes.length > 1)
+          ) {
+            recordAnimeCwId(seriesImdb, canonical);
+          }
           setFranchise([]);
           void res.franchisePromise
             .then((fr) => {
@@ -1465,7 +1483,16 @@ export function DetailView({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seriesWatchedVer, authKey, isSeries, isAnime, cinemetaFull?.videos, detail?.imdbId, meta.id, settings.accountProvider]);
+  }, [
+    seriesWatchedVer,
+    authKey,
+    isSeries,
+    isAnime,
+    cinemetaFull?.videos,
+    detail?.imdbId,
+    meta.id,
+    settings.accountProvider,
+  ]);
 
   const upcoming = !loading && isTitleUpcoming(detail, meta);
   const currentFranchiseId = animeCanonicalId ?? meta.id;
@@ -1700,10 +1727,23 @@ export function DetailView({
           const isFinished = matched.progress_seconds > dur * 0.9;
           if (isFinished) {
             const subsequent = matches.find((m) => {
-              if (m.season == null || m.episode == null || matched.season == null || matched.episode == null) return false;
-              return m.season > matched.season || (m.season === matched.season && m.episode > matched.episode);
+              if (
+                m.season == null ||
+                m.episode == null ||
+                matched.season == null ||
+                matched.episode == null
+              )
+                return false;
+              return (
+                m.season > matched.season ||
+                (m.season === matched.season && m.episode > matched.episode)
+              );
             });
-            if (subsequent && typeof subsequent.season === "number" && typeof subsequent.episode === "number") {
+            if (
+              subsequent &&
+              typeof subsequent.season === "number" &&
+              typeof subsequent.episode === "number"
+            ) {
               matched = subsequent;
             } else {
               matched = { ...matched, episode: matched.episode + 1 };
@@ -2076,7 +2116,11 @@ export function DetailView({
                           releaseInfo: meta.releaseInfo,
                           imdbRating: meta.imdbRating,
                           genres: meta.genres,
-                          posterShape: ((meta as unknown as Record<string, unknown>).posterShape as "POSTER" | "SQUARE" | "LANDSCAPE") || "POSTER",
+                          posterShape:
+                            ((meta as unknown as Record<string, unknown>).posterShape as
+                              | "POSTER"
+                              | "SQUARE"
+                              | "LANDSCAPE") || "POSTER",
                         })
                       }
                       className={`flex h-12 items-center gap-2.5 whitespace-nowrap rounded-full px-6 text-[15px] font-medium transition-[transform,background-color] duration-200 active:scale-[0.98] ${
@@ -2166,7 +2210,11 @@ export function DetailView({
                         releaseInfo: meta.releaseInfo,
                         imdbRating: meta.imdbRating,
                         genres: meta.genres,
-                        posterShape: ((meta as unknown as Record<string, unknown>).posterShape as "POSTER" | "SQUARE" | "LANDSCAPE") || "POSTER",
+                        posterShape:
+                          ((meta as unknown as Record<string, unknown>).posterShape as
+                            | "POSTER"
+                            | "SQUARE"
+                            | "LANDSCAPE") || "POSTER",
                       })
                     }
                     simkl={{

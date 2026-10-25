@@ -55,7 +55,11 @@ const { applyAnidbSeasonWindow } = load("src/lib/providers/anime-mapping.ts", {
   "@/lib/providers/kitsu": { kitsuMainTvSeries: async () => null },
   "@/lib/streams/anime-identity-core": { selectSiblingWindows: () => [] },
   "./mapping-store": {
-    mappingStore: () => ({ get: () => undefined, set: () => {} }),
+    mappingStore: () => ({ ready: Promise.resolve(), get: () => undefined, set: () => {} }),
+  },
+  "@/lib/anime-identity-db": {
+    animeDbReadProvider: async () => null,
+    animeDbWriteProvider: async () => true,
   },
 });
 

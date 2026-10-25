@@ -69,6 +69,8 @@ export type AnimeDetailResult = {
   extrasPromise: Promise<AnimeDetailExtras>;
   heroBgPromise: Promise<string | undefined>;
   kitsuId: number;
+  /** Entry requested before any single-episode special was redirected to a TV parent. */
+  requestedKitsuId: number;
 };
 
 function emptyDetail(kind: "movie" | "tv"): TmdbDetail {
@@ -375,6 +377,7 @@ export async function animeDetails(
     }
   }
   if (kitsuId == null) return null;
+  const requestedKitsuId = kitsuId;
 
   let anime = await kitsuAnime(kitsuId);
   if (
@@ -728,5 +731,6 @@ export async function animeDetails(
     extrasPromise,
     heroBgPromise,
     kitsuId,
+    requestedKitsuId,
   };
 }

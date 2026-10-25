@@ -163,11 +163,20 @@ function harness() {
     },
     "@/lib/hidden-episodes": { isEpisodeHidden: () => false },
     "@/lib/season-view-pref": { getViewedSeason: () => undefined },
-    "@/lib/anime-cw-ids": { getAnimeCwId: () => null },
+    "@/lib/anime-cw-ids": {
+      getAnimeCwId: () => null,
+      animeCwIdsVersion: () => 0,
+      subscribeAnimeCwIds: () => () => {},
+    },
+    "@/lib/cw-anime-identity": {
+      cwAnimeIdentityKey: () => null,
+      dedupeAnimeCw: (items: any[]) => items,
+      warmCwAnimeIdentities: async () => {},
+    },
     "@/lib/providers/anime-franchise-root": { isSplitFranchiseKitsu: () => false },
     "@/lib/providers/kitsu": { parseKitsuId: () => null },
     "@/lib/providers/jikan": { franchiseDedupKey: (name: string) => name.toLowerCase() },
-    "@/lib/local-cw": { listLocalCw: () => [] },
+    "@/lib/local-cw": { listLocalCw: () => [], localCwSourceEnabled: () => true },
     "@/lib/continue-watching": { localToLibraryItem: (i: any) => i },
     "@/lib/cw-anime-episode": {},
   };

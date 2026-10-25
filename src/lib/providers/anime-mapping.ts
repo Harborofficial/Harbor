@@ -16,6 +16,7 @@ import {
 } from "@/lib/providers/kitsu";
 import { selectSiblingWindows, type AnimeListWindow } from "@/lib/streams/anime-identity-core";
 import { mappingStore } from "./mapping-store";
+import { animeDbReadProvider, animeDbWriteProvider } from "@/lib/anime-identity-db";
 
 const SIDE_ENTRY_TYPES = new Set(["ova", "ona", "special", "music"]);
 
@@ -64,16 +65,12 @@ function readJson<T>(key: string, fallback: T): T {
   }
 }
 
-function writeJson(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {}
-}
 
 const inflightArm = new Map<number, Promise<ArmKitsuEntry | null>>();
 const armKitsuCache = mappingStore<ArmKitsuEntry>(ARM_KITSU_KEY);
 
 async function armFromKitsu(kitsuId: number): Promise<ArmKitsuEntry | null> {
+  await armKitsuCache.ready;
   const hit = armKitsuCache.get(String(kitsuId));
   if (hit && Date.now() - hit.t < ARM_TTL_MS) return hit;
   const existing = inflightArm.get(kitsuId);
@@ -108,6 +105,7 @@ const inflightExt = new Map<string, Promise<number | null>>();
 const extKitsuCache = mappingStore<{ kitsu: number | null; t: number }>(EXT_KITSU_KEY);
 
 export async function externalToKitsu(source: string, id: number): Promise<number | null> {
+  await extKitsuCache.ready;
   const key = `${source}:${id}`;
   const hit = extKitsuCache.get(key);
   const ttl = hit?.kitsu == null ? ARM_NEG_TTL_MS : ARM_TTL_MS;
@@ -137,16 +135,47 @@ export async function externalToKitsu(source: string, id: number): Promise<numbe
 let xmlInflight: Promise<AnidbMapCache> | null = null;
 let xmlMemory: AnidbMapCache | null = null;
 let xmlRetryAfter = 0;
+const xmlCacheKey = `mapping-store:${ANIDB_TVDB_KEY}`;
+let xmlWarm: Promise<AnidbMapCache | null> | null = null;
+function loadStoredXml(): Promise<AnidbMapCache | null> {
+  if (xmlWarm) return xmlWarm;
+  xmlWarm = (async (): Promise<AnidbMapCache | null> => {
+    const old = readJson<AnidbMapCache | null>(ANIDB_TVDB_KEY, null);
+    const stored = await animeDbReadProvider<AnidbMapCache>(xmlCacheKey);
+    if (stored?.value) {
+      if (old) {
+        try {
+          localStorage.removeItem(ANIDB_TVDB_KEY);
+        } catch {}
+      }
+      return stored.value;
+    }
+    if (!old) return null;
+    const ok = await animeDbWriteProvider({
+      key: xmlCacheKey,
+      value: old,
+      expiresAt: Number.MAX_SAFE_INTEGER,
+      fetchedAt: Date.now(),
+    });
+    if (ok) {
+      try {
+        localStorage.removeItem(ANIDB_TVDB_KEY);
+      } catch {}
+    }
+    return old;
+  })();
+  return xmlWarm;
+}
 
 export async function loadAnidbMaps(): Promise<AnidbMapCache> {
   if (xmlInflight) return xmlInflight;
-  const cached = xmlMemory ?? readJson<AnidbMapCache | null>(ANIDB_TVDB_KEY, null);
-  xmlMemory = cached;
-  if (cached && cached.byTvdb && Date.now() - cached.t < XML_TTL_MS) return cached;
-  if (Date.now() < xmlRetryAfter) return cached ?? { tvdb: {}, imdb: {}, t: 0 };
-  // Avoid repeated downloads/parsing when storage is full or the provider fails.
-  xmlRetryAfter = Date.now() + 60_000;
-  xmlInflight = (async () => {
+  const task = (async () => {
+    const cached = xmlMemory ?? await loadStoredXml();
+    xmlMemory = cached;
+    if (cached && cached.byTvdb && Date.now() - cached.t < XML_TTL_MS) return cached;
+    if (Date.now() < xmlRetryAfter) return cached ?? { tvdb: {}, imdb: {}, t: 0 };
+    // Avoid repeated downloads/parsing when storage is full or the provider fails.
+    xmlRetryAfter = Date.now() + 60_000;
     try {
       const r = await fetch(ANIME_LIST_URL, { signal: AbortSignal.timeout(15_000) });
       if (!r.ok) return cached ?? { tvdb: {}, imdb: {}, t: 0 };
@@ -200,15 +229,23 @@ export async function loadAnidbMaps(): Promise<AnidbMapCache> {
       }
       const out: AnidbMapCache = { tvdb, imdb, byTvdb, byImdb, t: Date.now() };
       xmlMemory = out;
-      writeJson(ANIDB_TVDB_KEY, out);
+      void animeDbWriteProvider({
+        key: xmlCacheKey,
+        value: out,
+        expiresAt: Number.MAX_SAFE_INTEGER,
+        fetchedAt: Date.now(),
+      });
       return out;
     } catch {
       return cached ?? { tvdb: {}, imdb: {}, t: 0 };
-    } finally {
-      xmlInflight = null;
     }
-  })();
-  return xmlInflight;
+  })().finally(() => {
+    // Calls cannot replace this promise while it is pending, since all callers
+    // return the same xmlInflight value.
+    xmlInflight = null;
+  });
+  xmlInflight = task;
+  return task;
 }
 
 export async function findSiblingAnidbEntries(
@@ -299,6 +336,7 @@ const inflightArmSrc = new Map<string, Promise<number | null>>();
 const armSrcCache = mappingStore<{ mal: number | null; t: number }>(ARM_SRC_KEY);
 
 async function armSourceToMal(source: "anilist" | "anidb", id: number): Promise<number | null> {
+  await armSrcCache.ready;
   const key = `${source}:${id}`;
   const hit = armSrcCache.get(key);
   if (hit && Date.now() - hit.t < ARM_TTL_MS) return hit.mal;
@@ -332,6 +370,7 @@ const ANILIST_IDMAL_QUERY = `query ($id: Int) { Media(id: $id, type: ANIME) { id
 
 // ARM and AniZip both miss some newer entries while AniList itself carries idMal.
 async function anilistIdMal(anilistId: number): Promise<number | null> {
+  await anilistMalCache.ready;
   const key = String(anilistId);
   const hit = anilistMalCache.get(key);
   if (hit && Date.now() - hit.t < ARM_TTL_MS) return hit.mal;
@@ -487,7 +526,7 @@ export async function imdbToKitsu(imdbId: string): Promise<number | null> {
     return preferFirstCour(k, az);
   }
   const maps = await loadAnidbMaps();
-  if (!imdbAnidbIndex) {
+  if (!imdbAnidbIndex && maps.t > 0) {
     const idx: Record<string, number> = {};
     for (const [anidb, imdb] of Object.entries(maps.imdb)) {
       const n = Number(anidb);
@@ -495,7 +534,7 @@ export async function imdbToKitsu(imdbId: string): Promise<number | null> {
     }
     imdbAnidbIndex = idx;
   }
-  const anidb = imdbAnidbIndex[imdbId];
+  const anidb = (imdbAnidbIndex ?? {})[imdbId];
   if (!anidb) return null;
   const fallback = await externalToKitsu("anidb", anidb);
   // No AniZip record for the shared id here, so verify against the id itself.

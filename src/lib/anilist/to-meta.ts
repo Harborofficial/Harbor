@@ -1,5 +1,6 @@
 import type { Meta } from "@/lib/cinemeta";
 import type { AnilistMedia, AnilistMediaEntry } from "./types";
+import { recordAnilistMalAlias } from "@/lib/anime-cw-ids";
 
 function stripHtml(s: string): string {
   return s
@@ -10,6 +11,9 @@ function stripHtml(s: string): string {
 }
 
 export function anilistMediaToMeta(m: AnilistMedia): Meta | null {
+  // AniList already returned both IDs. Cache their equivalence locally so
+  // Continue Watching never has to request an extra AniZip mapping.
+  recordAnilistMalAlias(m.id, m.idMal);
   const name = m.title.english || m.title.userPreferred || m.title.romaji;
   if (!name) return null;
   const id = m.idMal != null ? `mal:${m.idMal}` : `anilist:${m.id}`;

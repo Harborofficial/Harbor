@@ -175,11 +175,16 @@ test("a cached miss is retried after the short negative TTL", async () => {
       "@/lib/streams/anime-identity-core": { selectSiblingWindows: () => [] },
       "./mapping-store": {
         mappingStore: (key: string) => ({
+          ready: Promise.resolve(),
           get: () => (key === "harbor.extkitsucache.v2" ? stored : undefined),
           set: (_key: string, value: { kitsu: number | null; t: number }) => {
             stored = value;
           },
         }),
+      },
+      "@/lib/anime-identity-db": {
+        animeDbReadProvider: async () => null,
+        animeDbWriteProvider: async () => true,
       },
     });
     assert.equal(await module.externalToKitsu("myanimelist", 63181), 51018);
