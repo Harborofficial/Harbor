@@ -688,6 +688,7 @@ export function Home({
         flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
         lastWatched: new Date(e.t).toISOString(),
       },
+      upNext: e.type === "series" && e.positionMs === 0,
       removed: false,
       temp: false,
       _ctime: new Date(e.t).toISOString(),

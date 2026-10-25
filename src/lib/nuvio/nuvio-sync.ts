@@ -20,7 +20,7 @@ import type {
 import { setWatchedFlag } from "@/lib/watched-flag";
 import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { reconcileNuvioWatchedEpisodes } from "@/lib/manual-watched";
-import { clearAllLocalCw, clearLocalCw, saveLocalCw } from "@/lib/local-cw";
+import { clearAllLocalCw, clearLocalCw, listLocalCw, saveLocalCw } from "@/lib/local-cw";
 import { clearResume } from "@/lib/resume";
 import { readCachedNuvioPlaybackItems, writeCachedNuvioPlaybackItems, buildNuvioPlaybackItems } from "./nuvio-playback";
 import type { Addon } from "@/lib/addons";
@@ -619,6 +619,54 @@ export async function reconcileNuvioWatched(
             }
           }
         }
+      }
+    } catch {}
+  }
+
+  // 4. Update Continue Watching tray if any active CW series had its episode watched on mobile
+  if (serverEpisodeKeys.size > 0) {
+    try {
+      const localEntries = listLocalCw(false);
+      let cwChanged = false;
+      for (const entry of localEntries) {
+        if (entry.type !== "series" || entry.season == null || entry.episode == null) continue;
+        const key = `${entry.id}|${entry.season}|${entry.episode}`;
+        if (serverEpisodeKeys.has(key)) {
+          let maxSeason = entry.season;
+          let maxEpisode = entry.episode;
+          for (const sKey of serverEpisodeKeys) {
+            if (sKey.startsWith(`${entry.id}|`)) {
+              const parts = sKey.split("|");
+              const s = Number(parts[1]);
+              const e = Number(parts[2]);
+              if (s > maxSeason || (s === maxSeason && e > maxEpisode)) {
+                maxSeason = s;
+                maxEpisode = e;
+              }
+            }
+          }
+          saveLocalCw(
+            {
+              ...entry,
+              season: maxSeason,
+              episode: maxEpisode + 1,
+              positionMs: 0,
+              t: Date.now(),
+            },
+            `nuvio-${profileIndex}`,
+          );
+          saveLocalCw({
+            ...entry,
+            season: maxSeason,
+            episode: maxEpisode + 1,
+            positionMs: 0,
+            t: Date.now(),
+          });
+          cwChanged = true;
+        }
+      }
+      if (cwChanged) {
+        window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
       }
     } catch {}
   }

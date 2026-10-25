@@ -46,7 +46,8 @@ import {
   deleteWatchProgressFromNuvio,
 } from "./nuvio/nuvio-sync";
 import { addNuvioLibraryItem, removeNuvioLibraryItem } from "./nuvio/nuvio-library";
-import { saveLocalCw } from "./local-cw";
+import { saveLocalCw, clearLocalCw } from "./local-cw";
+import { saveResumeMs } from "./resume";
 
 export type ProviderWrite = {
   provider: string;
@@ -805,8 +806,9 @@ export function watchedProviderWrites(
             );
             const lastEp = sorted[sorted.length - 1];
             if (lastEp) {
-              let nextSeason = lastEp.season;
-              let nextEpisode = lastEp.episode + 1;
+              let nextSeason: number | null = lastEp.season;
+              let nextEpisode: number | null = lastEp.episode + 1;
+              let hasNext = true;
               if (options.videos?.length) {
                 const orderedVideos = options.videos
                   .flatMap((v) => {
@@ -823,63 +825,94 @@ export function watchedProviderWrites(
                 if (nextVid) {
                   nextSeason = nextVid.season;
                   nextEpisode = nextVid.episode;
+                } else {
+                  hasNext = false;
+                  nextSeason = null;
+                  nextEpisode = null;
                 }
               }
 
-              const metaInfo = {
-                title: meta.name,
-                name: meta.name,
-                poster: meta.poster,
-                background: meta.background,
-              };
-              await pushWatchProgressToNuvio(
-                slot,
-                primaryId,
-                0,
-                2640,
-                nextSeason,
-                nextEpisode,
-                metaInfo,
-              );
-              if (altId) {
+              // Always delete older watch progress from Nuvio Cloud for this series
+              // so mobile CW tray does not remain stuck on older paused episodes!
+              await deleteWatchProgressFromNuvio(slot, primaryId);
+              if (altId) await deleteWatchProgressFromNuvio(slot, altId);
+
+              if (hasNext && nextSeason != null && nextEpisode != null) {
+                const metaInfo = {
+                  title: meta.name,
+                  name: meta.name,
+                  poster: meta.poster,
+                  background: meta.background,
+                };
                 await pushWatchProgressToNuvio(
                   slot,
-                  altId,
+                  primaryId,
                   0,
                   2640,
                   nextSeason,
                   nextEpisode,
                   metaInfo,
                 );
-              }
+                if (altId) {
+                  await pushWatchProgressToNuvio(
+                    slot,
+                    altId,
+                    0,
+                    2640,
+                    nextSeason,
+                    nextEpisode,
+                    metaInfo,
+                  );
+                }
 
-              const nextCw = {
-                id: meta.id,
-                type: "series" as const,
-                name: meta.name,
-                poster: meta.poster,
-                background: meta.background,
-                season: nextSeason,
-                episode: nextEpisode,
-                positionMs: 0,
-                durationMs: 2640000,
-                t: Date.now(),
-              };
-              saveLocalCw(nextCw);
-              saveLocalCw(nextCw, `nuvio-${slot}`);
-              if (altId) {
-                saveLocalCw({ ...nextCw, id: altId });
-                saveLocalCw({ ...nextCw, id: altId }, `nuvio-${slot}`);
+                const nextCw = {
+                  id: meta.id,
+                  type: "series" as const,
+                  name: meta.name,
+                  poster: meta.poster,
+                  background: meta.background,
+                  season: nextSeason,
+                  episode: nextEpisode,
+                  positionMs: 0,
+                  durationMs: 2640000,
+                  isAnime: meta.type === "anime",
+                  t: Date.now(),
+                };
+                saveLocalCw(nextCw);
+                saveLocalCw(nextCw, `nuvio-${slot}`);
+                saveResumeMs(
+                  meta.id,
+                  0,
+                  nextSeason,
+                  nextEpisode,
+                  undefined,
+                  0,
+                  "nuvio",
+                  `nuvio-${slot}`,
+                );
+                if (altId) {
+                  saveLocalCw({ ...nextCw, id: altId });
+                  saveLocalCw({ ...nextCw, id: altId }, `nuvio-${slot}`);
+                }
+                window.dispatchEvent(
+                  new CustomEvent("harbor:nuvio-progress-pushed", {
+                    detail: {
+                      profileIndex: slot,
+                      progressKey: `${primaryId}_s${nextSeason}e${nextEpisode}`,
+                    },
+                  }),
+                );
+              } else {
+                clearLocalCw(primaryId);
+                clearLocalCw(primaryId, `nuvio-${slot}`);
+                if (altId) {
+                  clearLocalCw(altId);
+                  clearLocalCw(altId, `nuvio-${slot}`);
+                }
+                clearLocalCw(meta.id);
+                clearLocalCw(meta.id, `nuvio-${slot}`);
               }
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
-              window.dispatchEvent(
-                new CustomEvent("harbor:nuvio-progress-pushed", {
-                  detail: {
-                    profileIndex: slot,
-                    progressKey: `${primaryId}_s${nextSeason}e${nextEpisode}`,
-                  },
-                }),
-              );
             }
           } else {
             const keysToDelete = options.episodes.flatMap((ep) => [

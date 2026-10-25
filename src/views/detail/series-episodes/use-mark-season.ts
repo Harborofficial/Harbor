@@ -12,7 +12,11 @@ import {
   resolveNuvioProfileIndex,
   pushWatchedItemToNuvio,
   deleteWatchedItemFromNuvio,
+  deleteWatchProgressFromNuvio,
+  pushWatchProgressToNuvio,
 } from "@/lib/nuvio/nuvio-sync";
+import { saveLocalCw } from "@/lib/local-cw";
+import { saveResumeMs } from "@/lib/resume";
 import { airedOnly } from "../helpers";
 
 export function useMarkSeason({
@@ -58,6 +62,34 @@ export function useMarkSeason({
             watchedAt: Date.now(),
           }));
           void pushWatchedItemToNuvio(slot, items);
+          void (async () => {
+            await deleteWatchProgressFromNuvio(slot, primaryId);
+            const nextSeason = active + 1;
+            const metaInfo = {
+              title: meta.name,
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+            };
+            await pushWatchProgressToNuvio(slot, primaryId, 0, 2640, nextSeason, 1, metaInfo);
+            const nextCw = {
+              id: meta.id,
+              type: "series" as const,
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+              season: nextSeason,
+              episode: 1,
+              positionMs: 0,
+              durationMs: 2640000,
+              isAnime: meta.type === "anime",
+              t: Date.now(),
+            };
+            saveLocalCw(nextCw);
+            saveLocalCw(nextCw, `nuvio-${slot}`);
+            saveResumeMs(meta.id, 0, nextSeason, 1, undefined, 0, "nuvio", `nuvio-${slot}`);
+            window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+          })();
         } else {
           const keys = airedEpisodes.map((e) => ({
             contentId: primaryId,
@@ -65,6 +97,32 @@ export function useMarkSeason({
             episode: e.episodeNumber,
           }));
           void deleteWatchedItemFromNuvio(slot, keys);
+          void (async () => {
+            const metaInfo = {
+              title: meta.name,
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+            };
+            await pushWatchProgressToNuvio(slot, primaryId, 0, 2640, active, 1, metaInfo);
+            const resetCw = {
+              id: meta.id,
+              type: "series" as const,
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+              season: active,
+              episode: 1,
+              positionMs: 0,
+              durationMs: 2640000,
+              isAnime: meta.type === "anime",
+              t: Date.now(),
+            };
+            saveLocalCw(resetCw);
+            saveLocalCw(resetCw, `nuvio-${slot}`);
+            saveResumeMs(meta.id, 0, active, 1, undefined, 0, "nuvio", `nuvio-${slot}`);
+            window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+          })();
         }
       }
       if (!simklConnected) return;

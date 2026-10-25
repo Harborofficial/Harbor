@@ -1589,25 +1589,97 @@ export function DetailView({
     ) {
       candidates.push(nuvioEpisodeProgress);
     }
+
+    const orderedVideos = (cinemetaFull?.videos ?? [])
+      .map((v) => ({ season: v.season ?? 1, episode: v.episode ?? v.number ?? 0 }))
+      .filter((v) => v.season >= 1 && v.episode >= 1)
+      .sort((a, b) => a.season - b.season || a.episode - b.episode);
+    const orderedFromDetail: Array<{ season: number; episode: number }> = [];
+    if (orderedVideos.length === 0 && detail?.seasons) {
+      for (const s of detail.seasons) {
+        if (s.seasonNumber >= 1 && s.episodeCount) {
+          for (let ep = 1; ep <= s.episodeCount; ep++) {
+            orderedFromDetail.push({ season: s.seasonNumber, episode: ep });
+          }
+        }
+      }
+    }
+    const allOrdered = orderedVideos.length > 0 ? orderedVideos : orderedFromDetail;
+
+    const isWatched = (s: number, e: number): boolean => {
+      for (const id of ids) {
+        const man = manualWatchedState(id, s, e);
+        if (man !== undefined) return man;
+      }
+      if (stremioWatched.has(`${s}:${e}`)) return true;
+      for (const id of ids) {
+        const entry = readResumeEntry(id, s, e);
+        if (entry && entry.ms > 0 && typeof entry.pct === "number" && entry.pct >= 0.9) return true;
+      }
+      return false;
+    };
+
+    let highestWatchedIdx = -1;
+    for (let i = 0; i < allOrdered.length; i++) {
+      if (isWatched(allOrdered[i].season, allOrdered[i].episode)) {
+        highestWatchedIdx = i;
+      }
+    }
+
     const eligible = candidates.filter(
-      (c) => manualWatchedState(meta.id, c.season, c.episode) !== false,
+      (c) => ids.every((id) => manualWatchedState(id, c.season, c.episode) !== false),
     );
-    if (eligible.length === 0) return null;
-    eligible.sort((a, b) => b.t - a.t);
-    return advancePastFinished(
-      meta.id,
-      { season: eligible[0].season, episode: eligible[0].episode },
-      cinemetaFull?.videos,
-    );
+
+    if (eligible.length > 0) {
+      eligible.sort((a, b) => b.t - a.t);
+      const top = eligible[0];
+      const topWatched = isWatched(top.season, top.episode);
+      const topIdx = allOrdered.findIndex(
+        (v) => v.season === top.season && v.episode === top.episode,
+      );
+
+      if (highestWatchedIdx >= 0 && (topWatched || highestWatchedIdx > topIdx)) {
+        for (let i = highestWatchedIdx + 1; i < allOrdered.length; i++) {
+          if (!isWatched(allOrdered[i].season, allOrdered[i].episode)) {
+            return allOrdered[i];
+          }
+        }
+        return null;
+      }
+
+      if (!topWatched) {
+        return { season: top.season, episode: top.episode };
+      }
+
+      return advancePastFinished(
+        meta.id,
+        { season: top.season, episode: top.episode },
+        allOrdered,
+        stremioWatched,
+      );
+    }
+
+    if (highestWatchedIdx >= 0) {
+      for (let i = highestWatchedIdx + 1; i < allOrdered.length; i++) {
+        if (!isWatched(allOrdered[i].season, allOrdered[i].episode)) {
+          return allOrdered[i];
+        }
+      }
+      return null;
+    }
+
+    return null;
   }, [
     meta.id,
     detail?.imdbId,
     detail?.id,
+    detail?.seasons,
     libraryItem,
     nuvioEpisodeProgress,
     isAnime,
     episodeHint,
     seriesWatchedVer,
+    stremioWatched,
     cinemetaFull?.videos,
   ]);
 
@@ -2095,10 +2167,15 @@ export function DetailView({
                         e.preventDefault();
                         void smartPlay(true);
                       }}
-                      className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                      className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
                     >
                       <Play size={18} fill="currentColor" />
-                      {smartPlayLabel}
+                      <span
+                        key={smartPlayLabel}
+                        className="inline-block transition-all duration-200 animate-in fade-in slide-in-from-bottom-1"
+                      >
+                        {smartPlayLabel}
+                      </span>
                     </button>
                   </PlayModeHint>
                 )}
