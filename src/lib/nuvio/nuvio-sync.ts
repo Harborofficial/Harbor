@@ -654,7 +654,6 @@ export async function reconcileNuvioWatched(
       t: s.watchedAt,
     };
     saveLocalCw(nextCw, `nuvio-${profileIndex}`);
-    saveLocalCw(nextCw);
   }
 
   window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));

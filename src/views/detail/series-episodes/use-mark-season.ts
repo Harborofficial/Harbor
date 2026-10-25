@@ -73,7 +73,6 @@ export function useMarkSeason({
               durationMs: 2640000,
               t: Date.now(),
             };
-            saveLocalCw(nextCw);
             saveLocalCw(nextCw, `nuvio-${slot}`);
             window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
           }
@@ -98,7 +97,6 @@ export function useMarkSeason({
               durationMs: 2640000,
               t: Date.now(),
             };
-            saveLocalCw(unwatchedCw);
             saveLocalCw(unwatchedCw, `nuvio-${slot}`);
             window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
           }

@@ -16,6 +16,7 @@ const useMarkSeason = read("../src/views/detail/series-episodes/use-mark-season.
 const nuvioAuth = read("../src/lib/nuvio/nuvio-auth.ts");
 const nuvioPlayback = read("../src/lib/nuvio/nuvio-playback.ts");
 const auth = read("../src/lib/auth.tsx");
+const localCw = read("../src/lib/local-cw.ts");
 
 test("watched-flag scopes storage key by active Nuvio slot", () => {
   assert.match(watchedFlag, /harbor\.watchedFlag\.nuvio\.v1\.\$\{slot\}/);
@@ -97,4 +98,14 @@ test("reconcileNuvioWatched advances series to next episode in Continue Watching
   assert.match(nuvioSync, /const nextEpisode = s\.maxEpisode \+ 1/);
   assert.match(nuvioSync, /saveLocalCw\(nextCw, `nuvio-\$\{profileIndex\}`\)/);
   assert.match(nuvioSync, /harbor:continue-watching-updated/);
+});
+
+test("localCw isolates storage keys by Nuvio profile slot and changes identity on slot switch", () => {
+  assert.match(localCw, /\$\{KEY_PREFIX\}\$\{acc\}\.nuvio-\$\{slot\}/);
+  assert.match(localCw, /nuvio\|.*?nuvioActiveSlot/);
+});
+
+test("useCwAdvance handles season finale boundary advancing to next season episode 1", () => {
+  assert.match(useCwAdvance, /effCur\.episode > maxEpInSeason/);
+  assert.match(useCwAdvance, /const nextSeasonEp = list\.find\(\(e\) => e\.season > effCur\.season\)/);
 });
