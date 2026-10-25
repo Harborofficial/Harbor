@@ -11,6 +11,7 @@ import {
   manualWatchedVersion,
   subscribeManualWatched,
 } from "@/lib/manual-watched";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { Poster } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
 import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
@@ -75,12 +76,14 @@ export function CinemetaEpisodes({
   const combinedWatched = useMemo(() => {
     const watched = new Set(stremioWatched ?? []);
     if (resumeSeason != null && resumeEpisode != null && (resumeSeason > 1 || resumeEpisode > 1)) {
-      for (const v of videos) {
-        const s = v.season ?? 0;
-        const e = v.episode ?? v.number ?? 0;
-        if (s >= 1 && e >= 1) {
-          if (s < resumeSeason || (s === resumeSeason && e < resumeEpisode)) {
-            watched.add(`${s}:${e}`);
+      if (!isNuvioProviderActive()) {
+        for (const v of videos) {
+          const s = v.season ?? 0;
+          const e = v.episode ?? v.number ?? 0;
+          if (s >= 1 && e >= 1) {
+            if (s < resumeSeason || (s === resumeSeason && e < resumeEpisode)) {
+              watched.add(`${s}:${e}`);
+            }
           }
         }
       }

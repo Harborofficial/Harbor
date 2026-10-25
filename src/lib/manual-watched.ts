@@ -321,6 +321,7 @@ export function manualEpisodeKeys(
 export function reconcileNuvioWatchedEpisodes(
   slot: number,
   serverEpisodeKeys: Set<string>,
+  targetSeriesIds?: Set<string>,
 ): void {
   const sk = `${PREFIXES.watched}nuvio.${slot}`;
   const unsk = `${PREFIXES.unwatched}nuvio.${slot}`;
@@ -357,14 +358,55 @@ export function reconcileNuvioWatchedEpisodes(
     const serverShowsWithEpisodes = new Set<string>();
     for (const sKey of serverEpisodeKeys) {
       const parts = sKey.split("|");
-      if (parts[0]) serverShowsWithEpisodes.add(parts[0]);
+      if (parts[0]) {
+        const sid = parts[0];
+        const clean = sid.replace(/^(series|movie|tmdb):/, "");
+        serverShowsWithEpisodes.add(sid);
+        serverShowsWithEpisodes.add(clean);
+        serverShowsWithEpisodes.add(`tmdb:${clean}`);
+        serverShowsWithEpisodes.add(`series:${clean}`);
+      }
+    }
+    if (targetSeriesIds) {
+      for (const tid of targetSeriesIds) {
+        const clean = tid.replace(/^(series|movie|tmdb):/, "");
+        serverShowsWithEpisodes.add(tid);
+        serverShowsWithEpisodes.add(clean);
+        serverShowsWithEpisodes.add(`tmdb:${clean}`);
+        serverShowsWithEpisodes.add(`series:${clean}`);
+      }
     }
 
-    for (const lKey of currentLocalWatched) {
+    for (const lKey of Array.from(currentLocalWatched)) {
       const parts = lKey.split("|");
       const showId = parts[0];
+      const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
       if (serverShowsWithEpisodes.has(showId) && !serverEpisodeKeys.has(lKey)) {
         currentLocalWatched.delete(lKey);
+        currentLocalUnwatched.add(lKey);
+        changed = true;
+      } else if (cleanShowId && serverShowsWithEpisodes.has(cleanShowId) && !serverEpisodeKeys.has(lKey)) {
+        currentLocalWatched.delete(lKey);
+        currentLocalUnwatched.add(lKey);
+        changed = true;
+      }
+    }
+  } else if (targetSeriesIds && targetSeriesIds.size > 0) {
+    const targetShowsClean = new Set<string>();
+    for (const tid of targetSeriesIds) {
+      const clean = tid.replace(/^(series|movie|tmdb):/, "");
+      targetShowsClean.add(tid);
+      targetShowsClean.add(clean);
+      targetShowsClean.add(`tmdb:${clean}`);
+      targetShowsClean.add(`series:${clean}`);
+    }
+    for (const lKey of Array.from(currentLocalWatched)) {
+      const parts = lKey.split("|");
+      const showId = parts[0];
+      const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
+      if (targetShowsClean.has(showId) || (cleanShowId && targetShowsClean.has(cleanShowId))) {
+        currentLocalWatched.delete(lKey);
+        currentLocalUnwatched.add(lKey);
         changed = true;
       }
     }
@@ -376,6 +418,10 @@ export function reconcileNuvioWatchedEpisodes(
     if (currentScope === sk) {
       watchedCache = currentLocalWatched;
       unwatchedCache = currentLocalUnwatched;
+    } else {
+      watchedCache = null;
+      unwatchedCache = null;
+      currentScope = "";
     }
     version += 1;
     notifySubs();

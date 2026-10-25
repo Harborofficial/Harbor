@@ -12,6 +12,7 @@ import {
   manualWatchedVersion,
   subscribeManualWatched,
 } from "@/lib/manual-watched";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { useHiddenEpisodes } from "@/lib/hidden-episodes";
 import type { Meta } from "@/lib/cinemeta";
 import { episodeSearchVideos } from "@/lib/episode-search";
@@ -126,15 +127,17 @@ export function SeriesEpisodes({
   const combinedWatched = useMemo(() => {
     const s = new Set<string>(stremioWatched ?? []);
     if (resumeSeason != null && resumeEpisode != null && (resumeSeason > 1 || resumeEpisode > 1)) {
-      for (const season of seasons) {
-        if (season.seasonNumber >= 1 && season.seasonNumber < resumeSeason) {
-          const count = season.episodeCount || 50;
-          for (let ep = 1; ep <= count; ep++) {
-            s.add(`${season.seasonNumber}:${ep}`);
-          }
-        } else if (season.seasonNumber === resumeSeason) {
-          for (let ep = 1; ep < resumeEpisode; ep++) {
-            s.add(`${resumeSeason}:${ep}`);
+      if (!isNuvioProviderActive()) {
+        for (const season of seasons) {
+          if (season.seasonNumber >= 1 && season.seasonNumber < resumeSeason) {
+            const count = season.episodeCount || 50;
+            for (let ep = 1; ep <= count; ep++) {
+              s.add(`${season.seasonNumber}:${ep}`);
+            }
+          } else if (season.seasonNumber === resumeSeason) {
+            for (let ep = 1; ep < resumeEpisode; ep++) {
+              s.add(`${resumeSeason}:${ep}`);
+            }
           }
         }
       }

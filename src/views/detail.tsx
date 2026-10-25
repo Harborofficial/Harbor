@@ -81,6 +81,7 @@ import {
   manualEpisodeKeys,
   manualWatchedState,
   manualWatchedVersion,
+  reconcileNuvioWatchedEpisodes,
   subscribeManualWatched,
 } from "@/lib/manual-watched";
 import { useTogether } from "@/lib/together/provider";
@@ -90,6 +91,7 @@ import {
   pullWatchProgressFromNuvio,
   pullWatchedItemsFromNuvio,
   reconcileNuvioWatched,
+  resolveNuvioProfileIndex,
   isNuvioProviderActive,
 } from "@/lib/nuvio/nuvio-sync";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
@@ -893,6 +895,15 @@ export function DetailView({
               }
             }
           }
+          const profileIndex = resolveNuvioProfileIndex();
+          const serverEpisodeKeys = new Set<string>();
+          for (const it of watchedItems) {
+            if (typeof it.season === "number" && typeof it.episode === "number" && it.content_id) {
+              serverEpisodeKeys.add(`${it.content_id}|${it.season}|${it.episode}`);
+            }
+          }
+          reconcileNuvioWatchedEpisodes(profileIndex, serverEpisodeKeys, targetIds);
+
           const localManual = manualEpisodeKeys(meta.id, [
             detail?.imdbId,
             detail?.id != null ? String(detail.id) : null,
@@ -901,6 +912,7 @@ export function DetailView({
           for (const k of localManual.unwatched) watchedKeys.delete(k);
           if (watchedKeys.size > 0) {
             setStremioWatched((prev) => new Set([...prev, ...watchedKeys]));
+            setStremioWatched(new Set(watchedKeys));
           } else {
             setStremioWatched(new Set());
           }
@@ -1002,7 +1014,7 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [libraryItem?.state?.watched, cinemetaFull?.videos, settings.accountProvider]);
+  }, [libraryItem?.state?.watched, cinemetaFull?.videos, settings.accountProvider, nuvioWatchedTick, profileTick, meta.id]);
 
   useEffect(() => {
     if (!libraryItem?.state) return;
