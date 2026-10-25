@@ -117,8 +117,6 @@ mod pip;
 mod pip_mac;
 mod pip_window;
 #[cfg(desktop)]
-mod playback_cache;
-#[cfg(desktop)]
 mod roku;
 #[cfg(desktop)]
 mod shaders;
@@ -1686,6 +1684,7 @@ pub fn run() {
             music::music_local_collection,
             temp_prune::temp_usage_bytes,
             temp_prune::temp_clear,
+            temp_prune::cleanup_legacy_playback_cache,
             download::download_start,
             download::download_cancel,
             download_files::download_file_info,

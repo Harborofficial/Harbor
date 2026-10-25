@@ -46,7 +46,8 @@ test("HLS reconnect options never retry normal streamed EOF", () => {
     assert.doesNotMatch(read(path), /reconnect_streamed=1/);
     assert.match(read(path), /reconnect=1/);
   }
-  assert.match(read("src-tauri/src/mpv.rs"), /"demuxer-cache-dir"/);
+  assert.match(read("src-tauri/src/mpv.rs"), /set_property\("cache-on-disk", "no"\)/);
+  assert.doesNotMatch(read("src-tauri/src/mpv.rs"), /set_property\("demuxer-cache-dir"/);
 });
 
 test("desktop rule integration retains destination setup and available-channel guards", () => {

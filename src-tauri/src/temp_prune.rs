@@ -142,6 +142,23 @@ pub fn temp_clear() -> u64 {
     before
 }
 
+#[tauri::command]
+pub fn cleanup_legacy_playback_cache(dir: String) -> Result<(), String> {
+    let root = PathBuf::from(dir.trim());
+    if !root.is_absolute() {
+        return Err("Legacy playback cache folder must be absolute".to_string());
+    }
+    if !root.exists() {
+        return Err("Legacy playback cache folder is unavailable".to_string());
+    }
+    let target = root.join("harbor-playback-cache");
+    match std::fs::remove_dir_all(&target) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(format!("Could not remove legacy playback cache: {error}")),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -196,16 +213,72 @@ mod tests {
         assert!(saved.join("kept.srt").exists());
         std::fs::remove_dir_all(root).unwrap();
     }
+
+    #[test]
+    fn mpv_cache_sweep_removes_only_leftovers_past_the_grace() {
+        let dir = std::env::temp_dir().join(format!(
+            "harbor-mpv-cache-test-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("mpv-cache-old.dat"), b"leftover").unwrap();
+
+        assert_eq!(sweep_mpv_cache_at(dir.clone(), SystemTime::now()), 0);
+        assert!(dir.join("mpv-cache-old.dat").exists());
+
+        let freed = sweep_mpv_cache_at(
+            dir.clone(),
+            SystemTime::now() + MPV_CACHE_RECENT_GRACE + Duration::from_secs(1),
+        );
+
+        assert!(freed >= 8);
+        assert!(!dir.join("mpv-cache-old.dat").exists());
+        std::fs::remove_dir_all(dir).unwrap();
+    }
+
+    #[test]
+    fn legacy_playback_cache_cleanup_removes_only_the_owned_subfolder() {
+        let root = std::env::temp_dir().join(format!(
+            "harbor-legacy-playback-cache-test-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let target = root.join("harbor-playback-cache");
+        std::fs::create_dir_all(&target).unwrap();
+        std::fs::write(target.join("mpv-cache-old.dat"), b"leftover").unwrap();
+        std::fs::create_dir_all(root.join("keep")).unwrap();
+
+        cleanup_legacy_playback_cache(root.to_string_lossy().into_owned()).unwrap();
+
+        assert!(!target.exists());
+        assert!(root.join("keep").exists());
+        assert!(cleanup_legacy_playback_cache("relative".to_string()).is_err());
+        assert!(
+            cleanup_legacy_playback_cache(root.join("missing").to_string_lossy().into_owned())
+                .is_err()
+        );
+        std::fs::remove_dir_all(root).unwrap();
+    }
 }
 
-const MPV_CACHE_MAX_AGE: Duration = Duration::from_secs(6 * 60 * 60);
+/// Removes leftover mpv demuxer-cache files. Harbor no longer writes its
+/// demuxer cache to disk, so anything in this directory is from an older
+/// version or a crashed session. A short grace keeps an active cache file safe
+/// while an older build is still shutting down.
+const MPV_CACHE_RECENT_GRACE: Duration = Duration::from_secs(10 * 60);
 
-pub fn sweep_mpv_cache(dir: PathBuf) -> u64 {
+fn sweep_mpv_cache_at(dir: PathBuf, now: SystemTime) -> u64 {
     let entries = match std::fs::read_dir(&dir) {
         Ok(e) => e,
         Err(_) => return 0,
     };
-    let now = SystemTime::now();
     let mut freed = 0_u64;
     for entry in entries.flatten() {
         let path = entry.path();
@@ -215,9 +288,9 @@ pub fn sweep_mpv_cache(dir: PathBuf) -> u64 {
         let age = meta
             .modified()
             .ok()
-            .and_then(|m| now.duration_since(m).ok())
+            .and_then(|modified| now.duration_since(modified).ok())
             .unwrap_or_default();
-        if age < MPV_CACHE_MAX_AGE {
+        if age < MPV_CACHE_RECENT_GRACE {
             continue;
         }
         let size = if meta.is_dir() {
@@ -235,7 +308,11 @@ pub fn sweep_mpv_cache(dir: PathBuf) -> u64 {
         }
     }
     if freed > 0 {
-        eprintln!("[temp-prune] mpv cache reclaimed {freed} bytes");
+        eprintln!("[temp-prune] removed leftover mpv cache: {freed} bytes");
     }
     freed
+}
+
+pub fn sweep_mpv_cache(dir: PathBuf) -> u64 {
+    sweep_mpv_cache_at(dir, SystemTime::now())
 }

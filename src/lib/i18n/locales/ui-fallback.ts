@@ -1167,6 +1167,13 @@ const uiFallback: Record<string, string> = {
     "Ten-foot uses large controls built for a remote across the room. Desktop keeps the same player you use in the normal window, which is quicker with a mouse and keyboard.",
   "Ten-foot": "Ten-foot",
   Desktop: "Desktop",
+  "Downloads the whole torrent into Harbor's stream cache in the background as you watch, even while paused, so big remuxes pre-load. P2P only: debrid and other HTTPS streams stay in memory and are never written to disk. Uses more disk and bandwidth; cleared when you switch or close.":
+    "Downloads the whole torrent into Harbor's stream cache in the background as you watch, even while paused, so big remuxes pre-load. P2P only: debrid and other HTTPS streams stay in memory and are never written to disk. Uses more disk and bandwidth; cleared when you switch or close.",
+  "Sizes the cache from this computer's memory: about 1/16 of RAM, between 256 MB and 1 GB, split 75% ahead and 25% behind. Recommended for most connections.":
+    "Sizes the cache from this computer's memory: about 1/16 of RAM, between 256 MB and 1 GB, split 75% ahead and 25% behind. Recommended for most connections.",
+  "Maximum memory used for buffered video, ahead and behind.":
+    "Maximum memory used for buffered video, ahead and behind.",
+  "Capped to {size} to protect memory.": "Capped to {size} to protect memory.",
 };
 
 export default uiFallback;

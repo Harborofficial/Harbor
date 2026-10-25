@@ -4946,21 +4946,6 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["p2p chip", "peers", "speed", "progress overlay", "status chip", "player overlay"],
   },
   {
-    label: "Playback cache folder",
-    section: "player",
-    tab: "play",
-    anchorTitle: "Streams",
-    keywords: [
-      "debrid cache",
-      "video cache",
-      "buffer folder",
-      "system drive full",
-      "cache location",
-      "remux",
-      "mpv cache",
-    ],
-  },
-  {
     label: "Download the whole file while streaming",
     section: "player",
     tab: "play",

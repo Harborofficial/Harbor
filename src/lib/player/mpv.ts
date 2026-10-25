@@ -18,6 +18,8 @@ import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import type { MonitorInfo } from "@/lib/monitors";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { autoBufferProfile, formatMpvBytes } from "./buffer-profile";
+import { getTotalPhysBytes } from "@/lib/native-memory";
 import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
 import type { SubCue } from "@/lib/subtitles/parser";
 import {
@@ -151,7 +153,6 @@ export type MpvOptions = {
   renderer?: "gpu-next" | "gpu";
   forceYuv420p?: boolean;
   extraOptions?: string;
-  fullDownload?: boolean;
   separateDisplay?: MonitorInfo | null;
   separateCoverTaskbar?: boolean;
   getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
@@ -170,7 +171,6 @@ function mpvReuseConfigKey(options: MpvOptions | undefined, hdrToSdr: boolean): 
     renderer: options?.renderer ?? "gpu-next",
     forceYuv420p: options?.forceYuv420p === true,
     extraOptions: options?.extraOptions ?? "",
-    fullDownload: options?.fullDownload === true,
   });
 }
 
@@ -196,12 +196,19 @@ function defaultVodBufferProperties(
   phase: BufferPhase,
 ): Array<[string, string]> {
   const highBitrate = profile === "high-bitrate";
+  // Automatic sizing: 1/16 of physical RAM, 256 MiB..1 GiB, 75/25 split.
+  const auto = autoBufferProfile(getTotalPhysBytes());
+  const steadyForward = auto.maxBytes;
+  const steadyBack = auto.maxBackBytes;
+  const mib = 1024 * 1024;
   if (phase === "startup") {
+    const forward = Math.min(highBitrate ? 256 * mib : 128 * mib, steadyForward);
+    const back = Math.min(highBitrate ? 64 * mib : 32 * mib, steadyBack);
     return [
       ["cache-secs", highBitrate ? "45" : "30"],
       ["cache-pause-wait", highBitrate ? "2" : "1"],
-      ["demuxer-max-bytes", highBitrate ? "256MiB" : "128MiB"],
-      ["demuxer-max-back-bytes", highBitrate ? "64MiB" : "32MiB"],
+      ["demuxer-max-bytes", formatMpvBytes(forward)],
+      ["demuxer-max-back-bytes", formatMpvBytes(back)],
       ["demuxer-readahead-secs", highBitrate ? "45" : "30"],
       ["stream-buffer-size", highBitrate ? "32MiB" : "16MiB"],
     ];
@@ -209,8 +216,8 @@ function defaultVodBufferProperties(
   return [
     ["cache-secs", "300"],
     ["cache-pause-wait", highBitrate ? "2" : "1"],
-    ["demuxer-max-bytes", highBitrate ? "768MiB" : "512MiB"],
-    ["demuxer-max-back-bytes", "64MiB"],
+    ["demuxer-max-bytes", formatMpvBytes(steadyForward)],
+    ["demuxer-max-back-bytes", formatMpvBytes(steadyBack)],
     ["demuxer-readahead-secs", "300"],
     ["stream-buffer-size", highBitrate ? "64MiB" : "32MiB"],
   ];
@@ -346,7 +353,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     profile: "standard" | "high-bitrate",
     phase: BufferPhase,
   ) => {
-    if (mpvOptions?.fullDownload || hasCustomBufferPolicy(mpvOptions?.extraOptions)) return;
+    if (hasCustomBufferPolicy(mpvOptions?.extraOptions)) return;
     await Promise.all(
       defaultVodBufferProperties(profile, phase).map(async ([name, value]) => {
         try {
@@ -1258,7 +1265,6 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             d3d11Flip: opts.d3d11Flip === true,
             macEdr: opts.macEdr === true,
             isLive: src.isLive === true,
-            fullDownload: opts.fullDownload === true,
             startupProfile: nextStartupProfile,
             headers: src.headers ?? null,
             renderer: opts.renderer ?? "gpu-next",
