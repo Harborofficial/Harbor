@@ -34,6 +34,124 @@ test("group list URLs normalize supported providers without retaining query cred
     assert.equal(parseGroupListUrl(url), null);
 });
 
+test("MDBList list URLs support percent-encoded and unencoded international slugs", () => {
+  const encoded = "https://mdblist.com/lists/jarvis-16246724/netflix-nouveaut%C3%A9s-s%C3%A9ries";
+  const raw = "https://mdblist.com/lists/jarvis-16246724/netflix-nouveaut\u00e9s-s\u00e9ries";
+  const expected = {
+    source: "mdblist",
+    path: "lists/jarvis-16246724/netflix-nouveaut%C3%A9s-s%C3%A9ries",
+    url: encoded,
+  };
+  assert.deepEqual(parseGroupListUrl(encoded), expected);
+  assert.deepEqual(parseGroupListUrl(raw), expected);
+  assert.deepEqual(parseGroupListUrl(encoded + "/?apikey=not-saved"), expected);
+  const persisted = normalizeLibraryGroups([
+    { id: "fr", name: "French series", lists: [{ id: "1", name: "New series", url: raw }] },
+  ]);
+  assert.equal(persisted[0].lists[0].url, encoded);
+});
+
+test("MDBList list URL validation rejects unsafe or malformed encoded slug segments", () => {
+  const base = "https://mdblist.com/lists/alice/";
+  for (const slug of [
+    "season%2Ffinale",
+    "season%5Cfinale",
+    "season%20finale",
+    "season%25finale",
+    "season%E9finale",
+    "season%00finale",
+    "%2e%2e/admin",
+  ]) {
+    assert.equal(parseGroupListUrl(base + slug), null, "rejected " + slug);
+  }
+  assert.equal(parseGroupListUrl("https://mdblist.com/lists/%2Fadmin/shows"), null);
+});
+
+test("international scripts and combining marks work for both list providers", () => {
+  const slugs = [
+    "fran\u00e7ais",
+    "ni\u00f1os",
+    "\u00fcber",
+    "a\u00e7\u00e3o",
+    "\u0627\u0644\u0639\u0631\u0628\u064a\u0629",
+    "\u0939\u093f\u0928\u094d\u0926\u0940",
+    "\u65e5\u672c\u8a9e",
+    "\ud55c\uad6d\uc5b4",
+    "\u4e2d\u6587",
+    "\u0440\u0443\u0441\u0441\u043a\u0438\u0439",
+    "\u03c3\u03b5\u03b9\u03c1\u03ad\u03c2",
+    "\u0e20\u0e32\u0e29\u0e32\u0e44\u0e17\u0e22",
+    "e\u0301pisodes",
+  ];
+  for (const slug of slugs) {
+    const encoded = encodeURIComponent(slug);
+    for (const [host, prefix, source] of [
+      ["mdblist.com", "lists/alice/", "mdblist"],
+      ["app.trakt.tv", "users/alice/lists/", "trakt"],
+    ] as const) {
+      const input = "https://" + host + "/" + prefix + slug;
+      const parsed = parseGroupListUrl(input);
+      assert.equal(parsed?.source, source, input);
+      assert.equal(parsed?.path, prefix + encoded, input);
+      assert.equal(
+        parsed?.url,
+        "https://" + (source === "trakt" ? "trakt.tv" : host) + "/" + prefix + encoded,
+      );
+      assert.deepEqual(parseGroupListUrl("https://" + host + "/" + prefix + encoded), parsed);
+    }
+  }
+});
+
+test("Trakt international list URLs normalize and preserve existing supported formats", () => {
+  const raw =
+    "https://app.trakt.tv/users/\u00e9quipe/lists/\u65e5\u672c\u8a9e-s\u00e9ries?token=private";
+  const canonical =
+    "https://trakt.tv/users/%C3%A9quipe/lists/%E6%97%A5%E6%9C%AC%E8%AA%9E-s%C3%A9ries";
+  const parsed = parseGroupListUrl(raw);
+  assert.deepEqual(parsed, {
+    source: "trakt",
+    path: "users/%C3%A9quipe/lists/%E6%97%A5%E6%9C%AC%E8%AA%9E-s%C3%A9ries",
+    url: canonical,
+  });
+  assert.deepEqual(parseGroupListUrl(canonical), parsed);
+  assert.deepEqual(parseGroupListUrl(canonical + "/"), parsed);
+  assert.deepEqual(
+    parseGroupListUrl(
+      "https://www.trakt.tv/users/\u00e9quipe/lists/\u65e5\u672c\u8a9e-s\u00e9ries",
+    ),
+    parsed,
+  );
+  assert.equal(parseGroupListUrl("https://trakt.tv/lists/123456")?.path, "lists/123456");
+  assert.equal(parseGroupListUrl("https://trakt.tv/lists/official/\u65e5\u672c\u8a9e"), null);
+  assert.equal(
+    normalizeLibraryGroups([
+      { id: "trakt-group", name: "Lists", lists: [{ id: "list", name: "Latest", url: raw }] },
+    ])[0].lists[0].url,
+    canonical,
+  );
+});
+
+test("Trakt rejects encoded separators, invalid UTF-8, and unsafe URL variants", () => {
+  const base = "https://trakt.tv/users/alice/lists/";
+  for (const slug of [
+    "test%2Fother",
+    "test%5Cother",
+    "test%20other",
+    "test%25other",
+    "test%E9other",
+    "test%00other",
+    "test%3Fother",
+    "test%23other",
+    "test%3Aother",
+    "film\u{1F3AC}",
+  ])
+    assert.equal(parseGroupListUrl(base + slug), null, "rejected " + slug);
+  assert.equal(parseGroupListUrl("https://trakt.tv/users/%2Fadmin/lists/good"), null);
+  assert.equal(parseGroupListUrl("https://trakt.tv.evil.invalid/users/alice/lists/show"), null);
+  assert.equal(parseGroupListUrl("https://user:pass@trakt.tv/users/alice/lists/show"), null);
+  assert.equal(parseGroupListUrl("http://trakt.tv/users/alice/lists/show"), null);
+});
+
 test("groups preserve list references and isolate invalid persisted entries", () => {
   const groups = normalizeLibraryGroups([
     {

@@ -7,6 +7,13 @@ export type LibraryGroup = {
   pinnedToHome?: boolean;
 };
 
+// Accept international slugs while keeping each URL/API path segment safe.
+function normalizedListPath(pathname: string): { parts: string[]; path: string } | null {
+  const parts = pathname.split("/").filter(Boolean).map(decodeURIComponent);
+  if (!parts.every((part) => /^[\p{L}\p{M}\p{N}_-]+$/u.test(part))) return null;
+  return { parts, path: parts.map(encodeURIComponent).join("/") };
+}
+
 export function parseMdblistUrl(value: string): { url: string; path: string } | null {
   try {
     const url = new URL(value.trim());
@@ -18,11 +25,11 @@ export function parseMdblistUrl(value: string): { url: string; path: string } | 
       url.port
     )
       return null;
-    const parts = url.pathname.split("/").filter(Boolean);
+    const normalized = normalizedListPath(url.pathname);
+    if (!normalized) return null;
+    const { parts, path } = normalized;
     if (parts[0] !== "lists" || parts.length < 2 || parts.length > 3) return null;
-    if (!parts.slice(1).every((part) => /^[a-zA-Z0-9_-]+$/.test(part))) return null;
     if (parts.length === 2 && !/^\d+$/.test(parts[1])) return null;
-    const path = parts.join("/");
     return { url: `https://mdblist.com/${path}`, path };
   } catch {
     return null;
@@ -56,12 +63,12 @@ export function parseGroupListUrl(
       url.port
     )
       return null;
-    const parts = url.pathname.split("/").filter(Boolean);
-    if (!parts.every((part) => /^[a-zA-Z0-9_-]+$/.test(part))) return null;
+    const normalized = normalizedListPath(url.pathname);
+    if (!normalized) return null;
+    const { parts, path } = normalized;
     const personal = parts.length === 4 && parts[0] === "users" && parts[2] === "lists";
     const global = parts.length === 2 && parts[0] === "lists" && /^\d+$/.test(parts[1]);
     if (!personal && !global) return null;
-    const path = parts.join("/");
     return { url: `https://trakt.tv/${path}`, path, source: "trakt" };
   } catch {
     return null;
