@@ -39,6 +39,9 @@ import { clearAllNuvioLocalCw } from "@/lib/local-cw";
 import { clearAllNuvioResume } from "@/lib/resume";
 import { clearNuvioLibraryCache } from "./nuvio-library";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { clearWatchedFlagMemoryCache } from "@/lib/watched-flag";
+import { clearMovieWatchedMemoryCache } from "@/lib/movie-watched";
+import { clearManualWatchedMemoryCache } from "@/lib/manual-watched";
 
 import type {
 
@@ -332,20 +335,17 @@ export async function signOutNuvio(): Promise<void> {
   clearAllNuvioResume();
   clearCachedNuvioAddons();
   recordNuvioAddons([]);
-
+  clearWatchedFlagMemoryCache();
+  clearMovieWatchedMemoryCache();
+  clearManualWatchedMemoryCache();
 
   try {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
       if (!k) continue;
-      if (
-        k.startsWith("harbor.nuvio.") ||
-        k.startsWith("harbor.newEpisodes.dismissed.nuvio.") ||
-        k.startsWith("harbor.manualWatched.nuvio.") ||
-        k.startsWith("harbor.movieWatched.nuvio.") ||
-        k.startsWith("harbor.theme-session.nuvio")
-      ) {
+      const lower = k.toLowerCase();
+      if (lower.startsWith("harbor.") && lower.includes("nuvio")) {
         keysToRemove.push(k);
       }
     }

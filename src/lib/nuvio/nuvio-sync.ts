@@ -20,7 +20,7 @@ import type {
 import { setWatchedFlag } from "@/lib/watched-flag";
 import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { reconcileNuvioWatchedEpisodes } from "@/lib/manual-watched";
-import { clearAllLocalCw, clearLocalCw, saveLocalCw } from "@/lib/local-cw";
+import { clearAllLocalCw, clearLocalCw, saveLocalCw, type LocalCwEntry } from "@/lib/local-cw";
 import { clearResume } from "@/lib/resume";
 import { readCachedNuvioPlaybackItems, writeCachedNuvioPlaybackItems, buildNuvioPlaybackItems } from "./nuvio-playback";
 import type { Addon } from "@/lib/addons";
@@ -579,6 +579,7 @@ export async function reconcileNuvioWatched(
   const serverWatchedIds = new Set<string>();
   const serverMovieIds = new Set<string>();
   const serverEpisodeKeys = new Set<string>();
+  const seriesWatched = new Map<string, { maxSeason: number; maxEpisode: number; title?: string; watchedAt: number }>();
 
   for (const it of items) {
     if (!it.content_id) continue;
@@ -589,6 +590,20 @@ export async function reconcileNuvioWatched(
       }
     } else if (typeof it.season === "number" && typeof it.episode === "number") {
       serverEpisodeKeys.add(`${it.content_id}|${it.season}|${it.episode}`);
+      const t = typeof it.watched_at === "number" ? it.watched_at : Date.parse(String(it.watched_at || "")) || Date.now();
+      const existing = seriesWatched.get(it.content_id);
+      if (
+        !existing ||
+        it.season > existing.maxSeason ||
+        (it.season === existing.maxSeason && it.episode > existing.maxEpisode)
+      ) {
+        seriesWatched.set(it.content_id, {
+          maxSeason: it.season,
+          maxEpisode: it.episode,
+          title: it.title,
+          watchedAt: Math.max(t, existing?.watchedAt || 0),
+        });
+      }
     }
   }
 
@@ -623,6 +638,26 @@ export async function reconcileNuvioWatched(
     } catch {}
   }
 
+  // 4. Ensure series marked watched on Nuvio mobile stay in Continue Watching as Next Up
+  for (const [contentId, s] of seriesWatched.entries()) {
+    if (serverWatchedIds.has(contentId)) continue;
+    const nextSeason = s.maxSeason;
+    const nextEpisode = s.maxEpisode + 1;
+    const nextCw: LocalCwEntry = {
+      id: contentId,
+      type: "series",
+      name: s.title || contentId,
+      season: nextSeason,
+      episode: nextEpisode,
+      positionMs: 0,
+      durationMs: 2640000,
+      t: s.watchedAt,
+    };
+    saveLocalCw(nextCw, `nuvio-${profileIndex}`);
+    saveLocalCw(nextCw);
+  }
+
+  window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
   window.dispatchEvent(
     new CustomEvent("harbor:nuvio-watched-reconciled", { detail: { profileIndex } }),
   );

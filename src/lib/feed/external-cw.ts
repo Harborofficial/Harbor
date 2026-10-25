@@ -527,6 +527,11 @@ if (typeof window !== "undefined") {
       }
     }
   });
+  window.addEventListener("harbor:nuvio-watched-reconciled", () => {
+    if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
+      void refreshExternalCw(false);
+    }
+  });
 }
 
 export function useExternalCw(enabled = true): LibraryItem[] {

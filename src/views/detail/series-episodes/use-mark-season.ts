@@ -13,6 +13,7 @@ import {
   pushWatchedItemToNuvio,
   deleteWatchedItemFromNuvio,
 } from "@/lib/nuvio/nuvio-sync";
+import { saveLocalCw } from "@/lib/local-cw";
 import { airedOnly } from "../helpers";
 
 export function useMarkSeason({
@@ -58,6 +59,24 @@ export function useMarkSeason({
             watchedAt: Date.now(),
           }));
           void pushWatchedItemToNuvio(slot, items);
+          const lastEp = airedEpisodes[airedEpisodes.length - 1];
+          if (lastEp) {
+            const nextCw = {
+              id: meta.id,
+              type: "series" as const,
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+              season: lastEp.seasonNumber + 1,
+              episode: 1,
+              positionMs: 0,
+              durationMs: 2640000,
+              t: Date.now(),
+            };
+            saveLocalCw(nextCw);
+            saveLocalCw(nextCw, `nuvio-${slot}`);
+            window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+          }
         } else {
           const keys = airedEpisodes.map((e) => ({
             contentId: primaryId,
@@ -65,6 +84,24 @@ export function useMarkSeason({
             episode: e.episodeNumber,
           }));
           void deleteWatchedItemFromNuvio(slot, keys);
+          const firstEp = airedEpisodes[0];
+          if (firstEp) {
+            const unwatchedCw = {
+              id: meta.id,
+              type: "series" as const,
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+              season: firstEp.seasonNumber,
+              episode: firstEp.episodeNumber,
+              positionMs: 0,
+              durationMs: 2640000,
+              t: Date.now(),
+            };
+            saveLocalCw(unwatchedCw);
+            saveLocalCw(unwatchedCw, `nuvio-${slot}`);
+            window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+          }
         }
       }
       if (!simklConnected) return;

@@ -624,25 +624,32 @@ export function manualWatchedVersion(): number {
   return version;
 }
 
+export function clearManualWatchedMemoryCache(): void {
+  currentScope = "";
+  watchedCache = null;
+  unwatchedCache = null;
+  metaCache = null;
+  dismissedCache = null;
+  unwatchedAtCache = null;
+  remoteCache = null;
+  version += 1;
+  notifySubs();
+}
+
 if (typeof window !== "undefined") {
   let lastScope = isNuvioProviderActive() ? `nuvio.${getNuvioActiveSlot()}` : activeProfileId();
   const onScopeChange = () => {
     const nextScope = isNuvioProviderActive() ? `nuvio.${getNuvioActiveSlot()}` : activeProfileId();
     if (nextScope === lastScope) return;
     lastScope = nextScope;
-    currentScope = "";
-    watchedCache = null;
-    unwatchedCache = null;
-    metaCache = null;
-    dismissedCache = null;
-    unwatchedAtCache = null;
-    remoteCache = null;
-    version += 1;
-    notifySubs();
+    clearManualWatchedMemoryCache();
   };
   window.addEventListener("harbor:active-profile-changed", onScopeChange);
   window.addEventListener("harbor:profiles-updated", onScopeChange);
   window.addEventListener("harbor:account-provider-changed", onScopeChange);
   window.addEventListener("harbor:nuvio-profile-changed", onScopeChange);
-  window.addEventListener("harbor:nuvio-state-changed", onScopeChange);
+  window.addEventListener("harbor:nuvio-state-changed", () => {
+    lastScope = "";
+    clearManualWatchedMemoryCache();
+  });
 }

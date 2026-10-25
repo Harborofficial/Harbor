@@ -190,19 +190,27 @@ export function useMetaWatched(
   );
 }
 
+export function clearWatchedFlagMemoryCache(): void {
+  cache = null;
+  currentScope = "";
+  version += 1;
+  for (const fn of subs) fn();
+}
+
 if (typeof window !== "undefined") {
   let lastScope = storeKey();
   const onScopeChange = () => {
     const nextScope = storeKey();
     if (nextScope === lastScope) return;
     lastScope = nextScope;
-    cache = null;
-    version += 1;
-    for (const fn of subs) fn();
+    clearWatchedFlagMemoryCache();
   };
   window.addEventListener("harbor:active-profile-changed", onScopeChange);
   window.addEventListener("harbor:profiles-updated", onScopeChange);
   window.addEventListener("harbor:account-provider-changed", onScopeChange);
   window.addEventListener("harbor:nuvio-profile-changed", onScopeChange);
-  window.addEventListener("harbor:nuvio-state-changed", onScopeChange);
+  window.addEventListener("harbor:nuvio-state-changed", () => {
+    lastScope = "";
+    clearWatchedFlagMemoryCache();
+  });
 }

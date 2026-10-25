@@ -9,6 +9,9 @@ import {
 } from "react";
 import { stremioSourceProfileId, useProfiles, type Profile } from "./profiles";
 import { getUser, login as apiLogin, type User } from "./stremio";
+import { clearWatchedFlagMemoryCache } from "./watched-flag";
+import { clearMovieWatchedMemoryCache } from "./movie-watched";
+import { clearManualWatchedMemoryCache } from "./manual-watched";
 
 type Session = { authKey: string; user: User };
 type AuthValue = {
@@ -132,6 +135,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(() => {
+    clearWatchedFlagMemoryCache();
+    clearMovieWatchedMemoryCache();
+    clearManualWatchedMemoryCache();
     if (!activeProfile) {
       setSession(null);
       return;
@@ -140,6 +146,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updateProfile(activeProfile.id, { shareStremioWith: null });
     } else {
       writeProfileSession(activeProfile.id, null);
+      try {
+        localStorage.removeItem(`harbor.watchedFlag.v1.${activeProfile.id}`);
+        localStorage.removeItem(`harbor.moviewatched.v1.${activeProfile.id}`);
+        localStorage.removeItem(`harbor.manualwatched.v1.${activeProfile.id}`);
+      } catch {}
     }
     setSession(null);
   }, [activeProfile, updateProfile]);

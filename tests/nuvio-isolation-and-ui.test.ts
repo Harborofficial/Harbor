@@ -13,6 +13,9 @@ const home = read("../src/views/home.tsx");
 const cwSection = read("../src/views/home/cw-section.tsx");
 const useCwAdvance = read("../src/views/home/hooks/use-cw-advance.ts");
 const useMarkSeason = read("../src/views/detail/series-episodes/use-mark-season.ts");
+const nuvioAuth = read("../src/lib/nuvio/nuvio-auth.ts");
+const nuvioPlayback = read("../src/lib/nuvio/nuvio-playback.ts");
+const auth = read("../src/lib/auth.tsx");
 
 test("watched-flag scopes storage key by active Nuvio slot", () => {
   assert.match(watchedFlag, /harbor\.watchedFlag\.nuvio\.v1\.\$\{slot\}/);
@@ -68,4 +71,30 @@ test("detail view advances sequentially on episode completion and never jumps to
 
 test("useCwAdvance preserves sequential rewatch and prevents jumping to later seasons", () => {
   assert.match(useCwAdvance, /if \(immediateNext && nextEp && nextEp\.season > immediateNext\.season\)/);
+});
+
+test("signOutNuvio purges all Nuvio keys and resets watched memory caches", () => {
+  assert.match(nuvioAuth, /clearWatchedFlagMemoryCache\(\)/);
+  assert.match(nuvioAuth, /clearMovieWatchedMemoryCache\(\)/);
+  assert.match(nuvioAuth, /clearManualWatchedMemoryCache\(\)/);
+  assert.match(nuvioAuth, /lower\.startsWith\("harbor\."\) && lower\.includes\("nuvio"\)/);
+});
+
+test("signOut clears Stremio watched flags and memory caches", () => {
+  assert.match(auth, /clearWatchedFlagMemoryCache\(\)/);
+  assert.match(auth, /clearMovieWatchedMemoryCache\(\)/);
+  assert.match(auth, /clearManualWatchedMemoryCache\(\)/);
+  assert.match(auth, /localStorage\.removeItem\(`harbor\.watchedFlag\.v1\.\$\{activeProfile\.id\}`\)/);
+});
+
+test("buildNuvioPlaybackItems advances finished series episode to Next Up with isUpNext = true", () => {
+  assert.match(nuvioPlayback, /targetEpisode = latestEpisode \+ 1/);
+  assert.match(nuvioPlayback, /isUpNext = true/);
+  assert.match(home, /upNext: e\.type === "series" && e\.positionMs === 0/);
+});
+
+test("reconcileNuvioWatched advances series to next episode in Continue Watching", () => {
+  assert.match(nuvioSync, /const nextEpisode = s\.maxEpisode \+ 1/);
+  assert.match(nuvioSync, /saveLocalCw\(nextCw, `nuvio-\$\{profileIndex\}`\)/);
+  assert.match(nuvioSync, /harbor:continue-watching-updated/);
 });
