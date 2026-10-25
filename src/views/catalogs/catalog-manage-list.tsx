@@ -14,6 +14,7 @@ export function CatalogManageList({
   onTogglePin,
   onToggleHide,
   onMovePin,
+  onMoveCatalog,
 }: {
   filtered: BrowseCatalog[];
   pinnedCats: BrowseCatalog[];
@@ -22,6 +23,7 @@ export function CatalogManageList({
   onTogglePin: (key: string) => void;
   onToggleHide: (key: string) => void;
   onMovePin: (key: string, dir: -1 | 1) => void;
+  onMoveCatalog?: (key: string, dir: -1 | 1) => void;
 }) {
   const t = useT();
   const rest = useMemo<AddonGroup[]>(() => {
@@ -38,6 +40,27 @@ export function CatalogManageList({
     return [...m.values()];
   }, [filtered, pinnedSet]);
 
+  if (onMoveCatalog)
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-[13px] text-ink-muted">
+          {t(
+            "Move or hide catalogs here. This order is saved on this device and never changes your Stremio account.",
+          )}
+        </p>
+        {filtered.map((c, index) => (
+          <ManageRow
+            key={c.key}
+            catalog={c}
+            pinned={false}
+            hidden={hiddenSet.has(c.key)}
+            onToggleHide={() => onToggleHide(c.key)}
+            moveUp={index > 0 ? () => onMoveCatalog(c.key, -1) : undefined}
+            moveDown={index < filtered.length - 1 ? () => onMoveCatalog(c.key, 1) : undefined}
+          />
+        ))}
+      </div>
+    );
   return (
     <div className="flex flex-col gap-8">
       <p className="rounded-2xl border border-edge-soft bg-elevated/25 px-5 py-3.5 text-[13px] leading-relaxed text-ink-muted">
@@ -112,7 +135,7 @@ function ManageRow({
   catalog: BrowseCatalog;
   pinned: boolean;
   hidden: boolean;
-  onTogglePin: () => void;
+  onTogglePin?: () => void;
   onToggleHide: () => void;
   moveUp?: () => void;
   moveDown?: () => void;
@@ -152,7 +175,7 @@ function ManageRow({
         </div>
       </div>
 
-      {pinned && (
+      {(pinned || moveUp || moveDown) && (
         <div className="flex items-center">
           <IconBtn label={t("Move up")} onClick={moveUp} disabled={!moveUp}>
             <ChevronUp size={16} />
@@ -177,9 +200,15 @@ function ManageRow({
       >
         {hidden ? <EyeOff size={16} /> : <Eye size={16} />}
       </IconBtn>
-      <IconBtn label={pinned ? t("Unpin") : t("Pin to top")} onClick={onTogglePin} active={pinned}>
-        {pinned ? <PinOff size={16} /> : <Pin size={16} />}
-      </IconBtn>
+      {onTogglePin && (
+        <IconBtn
+          label={pinned ? t("Unpin") : t("Pin to top")}
+          onClick={onTogglePin}
+          active={pinned}
+        >
+          {pinned ? <PinOff size={16} /> : <Pin size={16} />}
+        </IconBtn>
+      )}
     </div>
   );
 }
