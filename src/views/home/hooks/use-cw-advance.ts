@@ -531,6 +531,15 @@ export function useCwAdvance(
         const nextSkip = episodeHiding
           ? (s: number, e: number) => isEpisodeHidden(i._id, s, e)
           : undefined;
+        const curIdx = list.findIndex((e) => e.season === effCur.season && e.episode === effCur.episode);
+        let immediateNext: PlayEpisode | null = null;
+        if (curIdx >= 0) {
+          for (let k = curIdx + 1; k < list.length; k++) {
+            if (nextSkip?.(list[k].season, list[k].episode)) continue;
+            immediateNext = list[k];
+            break;
+          }
+        }
         let nextEp = unplacedCur
           ? null
           : nextUnwatchedAfter(
@@ -547,6 +556,9 @@ export function useCwAdvance(
               },
               nextSkip,
             );
+        if (immediateNext && nextEp && nextEp.season > immediateNext.season) {
+          nextEp = immediateNext;
+        }
         // A sequel season can be missing from the provider list entirely, even
         // for a catalog row the app never flagged as anime (an IMDb/TMDB row not
         // covered by detection). When the provider list cannot place the

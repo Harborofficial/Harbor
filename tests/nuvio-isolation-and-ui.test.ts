@@ -11,6 +11,7 @@ const accountSettings = read("../src/views/settings/account.tsx");
 const accountProviderPanel = read("../src/views/settings/account/account-provider-panel.tsx");
 const home = read("../src/views/home.tsx");
 const cwSection = read("../src/views/home/cw-section.tsx");
+const useCwAdvance = read("../src/views/home/hooks/use-cw-advance.ts");
 const useMarkSeason = read("../src/views/detail/series-episodes/use-mark-season.ts");
 
 test("watched-flag scopes storage key by active Nuvio slot", () => {
@@ -58,4 +59,13 @@ test("home continue watching uses Nuvio sign-in state in Nuvio mode", () => {
   assert.match(home, /isNuvio=\{isNuvioProvider\}/);
   assert.match(cwSection, /Nothing in progress yet\. Press Play on something\./);
   assert.match(cwSection, /Sign in to your Nuvio account/);
+});
+
+test("detail view advances sequentially on episode completion and never jumps to past seasons", () => {
+  assert.doesNotMatch(detail, /m\.season > latest\.season/);
+  assert.match(detail, /nextEpisode = latest\.episode \+ 1/);
+});
+
+test("useCwAdvance preserves sequential rewatch and prevents jumping to later seasons", () => {
+  assert.match(useCwAdvance, /if \(immediateNext && nextEp && nextEp\.season > immediateNext\.season\)/);
 });

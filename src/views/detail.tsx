@@ -892,16 +892,32 @@ export function DetailView({
               const dur = latest.duration_seconds || 1;
               const isFinished = latest.progress_seconds > dur * 0.9;
               if (isFinished) {
-                const subsequent = matches.find((m) => {
-                  if (m.season == null || m.episode == null || latest.season == null || latest.episode == null) return false;
-                  return m.season > latest.season || (m.season === latest.season && m.episode > latest.episode);
-                });
-                if (subsequent) {
-                  latest = subsequent;
+                const curSeasonObj = detail?.seasons?.find((s) => s.seasonNumber === latest.season);
+                const hasSeasonBoundary = curSeasonObj && typeof curSeasonObj.episodeCount === "number" && curSeasonObj.episodeCount > 0;
+                let nextSeason = latest.season;
+                let nextEpisode = latest.episode + 1;
+
+                if (hasSeasonBoundary && latest.episode >= curSeasonObj.episodeCount) {
+                  const nextSeasonObj = detail?.seasons?.find((s) => s.seasonNumber === latest.season + 1);
+                  if (nextSeasonObj) {
+                    nextSeason = nextSeasonObj.seasonNumber;
+                    nextEpisode = 1;
+                  }
+                }
+
+                const immediateInProgress = matches.find(
+                  (m) => m.season === nextSeason && m.episode === nextEpisode,
+                );
+                if (
+                  immediateInProgress &&
+                  (immediateInProgress.progress_seconds || 0) < (immediateInProgress.duration_seconds || 1) * 0.9
+                ) {
+                  latest = immediateInProgress;
                 } else {
                   latest = {
                     ...latest,
-                    episode: latest.episode + 1,
+                    season: nextSeason,
+                    episode: nextEpisode,
                     progress_seconds: 0,
                   };
                 }
