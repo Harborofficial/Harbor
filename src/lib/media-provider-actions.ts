@@ -865,8 +865,10 @@ export function watchedProviderWrites(
                 durationMs: 2640000,
                 t: Date.now(),
               };
+              saveLocalCw(nextCw);
               saveLocalCw(nextCw, `nuvio-${slot}`);
               if (altId) {
+                saveLocalCw({ ...nextCw, id: altId });
                 saveLocalCw({ ...nextCw, id: altId }, `nuvio-${slot}`);
               }
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
@@ -930,8 +932,10 @@ export function watchedProviderWrites(
                 durationMs: 2640000,
                 t: Date.now(),
               };
+              saveLocalCw(unwatchedCw);
               saveLocalCw(unwatchedCw, `nuvio-${slot}`);
               if (altId) {
+                saveLocalCw({ ...unwatchedCw, id: altId });
                 saveLocalCw({ ...unwatchedCw, id: altId }, `nuvio-${slot}`);
               }
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));

@@ -71,31 +71,9 @@ function primaryProfileId(): string {
   }
 }
 
-function nuvioActiveSlot(): number {
-  try {
-    const raw = localStorage.getItem("harbor.nuvio.state.v1") || localStorage.getItem("harbor.nuvio.state");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return typeof parsed.activeProfileIndex === "number" ? parsed.activeProfileIndex : 1;
-    }
-  } catch {}
-  return 1;
-}
-
 function storeKey(privateOnly = false, ownerId?: string): string {
-  if (isNuvioMode()) {
-    const acc = nuvioAccountId();
-    let slot = nuvioActiveSlot();
-    if (ownerId && ownerId.startsWith("nuvio-")) {
-      const parsed = Number(ownerId.slice(6));
-      if (!Number.isNaN(parsed)) slot = parsed;
-    } else if (typeof ownerId === "number") {
-      slot = ownerId;
-    }
-    return `${KEY_PREFIX}${acc}.nuvio-${slot}`;
-  }
   const scope = cwProfileScope(ownerId);
-  if (scope.profileId.startsWith("nuvio-")) {
+  if (isNuvioMode() || scope.profileId.startsWith("nuvio-")) {
     const acc = nuvioAccountId();
     return `${KEY_PREFIX}${acc}.${scope.profileId}`;
   }
@@ -275,11 +253,8 @@ export function localCwVersion(): number {
 
 if (typeof window !== "undefined") {
   const identity = () => {
-    if (isNuvioMode()) {
-      return `nuvio|${nuvioAccountId()}|${nuvioActiveSlot()}`;
-    }
     const s = cwProfileScope();
-    const acc = s.profileId.startsWith("nuvio-") ? nuvioAccountId() : "";
+    const acc = isNuvioMode() || s.profileId.startsWith("nuvio-") ? nuvioAccountId() : "";
     return `${acc}|${s.profileId}|${s.sharedId}`;
   };
   let lastProfile = identity();

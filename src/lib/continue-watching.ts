@@ -100,6 +100,11 @@ const CW_RETRY_DELAYS_MS = [1000, 4000, 10000];
 let cwCacheKey: string | null = null;
 let cwCacheItems: LibraryItem[] = [];
 
+export function clearCwCache(): void {
+  cwCacheKey = null;
+  cwCacheItems = [];
+}
+
 export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();

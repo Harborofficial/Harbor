@@ -8,10 +8,16 @@ import {
   type ReactNode,
 } from "react";
 import { stremioSourceProfileId, useProfiles, type Profile } from "./profiles";
-import { getUser, login as apiLogin, type User } from "./stremio";
-import { clearWatchedFlagMemoryCache } from "./watched-flag";
-import { clearMovieWatchedMemoryCache } from "./movie-watched";
-import { clearManualWatchedMemoryCache } from "./manual-watched";
+import { getUser, login as apiLogin, invalidateLibraryCache, type User } from "./stremio";
+import { clearWatchedFlags } from "./watched-flag";
+import { clearMovieWatched } from "./movie-watched";
+import { clearManualWatched } from "./manual-watched";
+import { clearStremioFreshWatched } from "./stremio-watched-sync";
+import { resetReconciledStremioWatched } from "./stremio-watched-pull";
+import { clearAllLocalCw } from "./local-cw";
+import { clearAllResumeForProfile } from "./resume";
+import { clearCwCache } from "./continue-watching";
+import { clearWatchlistCache } from "./watchlist";
 
 type Session = { authKey: string; user: User };
 type AuthValue = {
@@ -87,6 +93,69 @@ export function readPrimaryStremioSession(): Session | null {
   }
 }
 
+export function purgeStremioAccountData(profileId?: string): void {
+  const pid = profileId || "default";
+  clearWatchedFlags(pid);
+  clearWatchedFlags();
+  clearMovieWatched(pid);
+  clearMovieWatched();
+  clearManualWatched(pid);
+  clearManualWatched();
+  clearStremioFreshWatched(pid);
+  resetReconciledStremioWatched();
+  clearAllLocalCw(pid);
+  clearAllLocalCw();
+  clearAllResumeForProfile(pid);
+  clearCwCache();
+  invalidateLibraryCache();
+  clearWatchlistCache(pid);
+
+  try {
+    const keys = [
+      `harbor.watchedFlag.v1.${pid}`,
+      "harbor.watchedFlag.v1",
+      `harbor.moviewatched.v1.${pid}`,
+      "harbor.moviewatched.v1",
+      `harbor.manualwatched.v1.${pid}`,
+      "harbor.manualwatched.v1",
+      `harbor.manualunwatched.v1.${pid}`,
+      "harbor.manualunwatched.v1",
+      `harbor.manualwatched.meta.v1.${pid}`,
+      "harbor.manualwatched.meta.v1",
+      `harbor.manualwatched.dismissed.v1.${pid}`,
+      "harbor.manualwatched.dismissed.v1",
+      `harbor.manualunwatched.at.v1.${pid}`,
+      "harbor.manualunwatched.at.v1",
+      `harbor.manualwatched.fromremote.v1.${pid}`,
+      "harbor.manualwatched.fromremote.v1",
+      `harbor.stremio.freshwatched.v1.${pid}`,
+      "harbor.stremio.freshwatched.v1",
+      `harbor.localcw.v1.${pid}`,
+      "harbor.localcw.v1",
+      `harbor.localcw.private.v1.${pid}`,
+      `harbor.resume.private.v1.${pid}`,
+      "harbor.resume",
+      `harbor.cw.dismissed.${pid}`,
+      `harbor.cw.dismissed.private.v1.${pid}`,
+      `harbor.watchevents.v1.${pid}`,
+      `harbor.playback-history.v1.${pid}`,
+      `harbor.watchlist.v1.${pid}`,
+      "harbor.watchlist.v1",
+      `harbor.watchlist.aggregate.v1.${pid}`,
+      "harbor.watchlist.aggregate.v1",
+      `harbor.newEpisodes.dismissed.${pid}`,
+    ];
+    for (const k of keys) localStorage.removeItem(k);
+  } catch {}
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+    window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+    window.dispatchEvent(new CustomEvent("harbor:library-changed"));
+    window.dispatchEvent(new CustomEvent("harbor:watchlist-changed"));
+  }
+}
+
 const Ctx = createContext<AuthValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -103,6 +172,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const commitSession = useCallback(
     (fresh: Session) => {
+      const prevSession = activeProfile ? readProfileSession(activeProfile.id) : null;
+      if (prevSession?.user?._id && prevSession.user._id !== fresh.user._id) {
+        purgeStremioAccountData(activeProfile?.id ?? "default");
+      }
       if (!activeProfile) {
         setSession(fresh);
         return;
@@ -135,10 +208,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(() => {
-    clearWatchedFlagMemoryCache();
-    clearMovieWatchedMemoryCache();
-    clearManualWatchedMemoryCache();
+    const pid = activeProfile?.id ?? "default";
     if (!activeProfile) {
+      purgeStremioAccountData("default");
       setSession(null);
       return;
     }
@@ -146,12 +218,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updateProfile(activeProfile.id, { shareStremioWith: null });
     } else {
       writeProfileSession(activeProfile.id, null);
-      try {
-        localStorage.removeItem(`harbor.watchedFlag.v1.${activeProfile.id}`);
-        localStorage.removeItem(`harbor.moviewatched.v1.${activeProfile.id}`);
-        localStorage.removeItem(`harbor.manualwatched.v1.${activeProfile.id}`);
-      } catch {}
     }
+    purgeStremioAccountData(pid);
     setSession(null);
   }, [activeProfile, updateProfile]);
 

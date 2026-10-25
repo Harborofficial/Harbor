@@ -190,27 +190,55 @@ export function useMetaWatched(
   );
 }
 
-export function clearWatchedFlagMemoryCache(): void {
-  cache = null;
+export function clearWatchedFlags(profileOrSlot?: string | number): void {
+  const sk = watchedFlagStoreKey(profileOrSlot);
+  try {
+    localStorage.removeItem(sk);
+    if (profileOrSlot == null) {
+      localStorage.removeItem(LEGACY_KEY);
+    }
+  } catch {}
   currentScope = "";
+  cache = null;
+  version += 1;
+  for (const fn of subs) fn();
+}
+
+export function clearAllNuvioWatchedFlags(): void {
+  try {
+    const toRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith("harbor.watchedFlag.nuvio.v1.") || k.startsWith("harbor.watchedFlag.nuvio."))) {
+        toRemove.push(k);
+      }
+    }
+    for (const k of toRemove) localStorage.removeItem(k);
+  } catch {}
+  currentScope = "";
+  cache = null;
+  version += 1;
+  for (const fn of subs) fn();
+}
+
+export function resetWatchedFlagCache(): void {
+  currentScope = "";
+  cache = null;
   version += 1;
   for (const fn of subs) fn();
 }
 
 if (typeof window !== "undefined") {
-  let lastScope = storeKey();
-  const onScopeChange = () => {
-    const nextScope = storeKey();
-    if (nextScope === lastScope) return;
-    lastScope = nextScope;
-    clearWatchedFlagMemoryCache();
+  const onReset = () => {
+    currentScope = "";
+    cache = null;
+    version += 1;
+    for (const fn of subs) fn();
   };
-  window.addEventListener("harbor:active-profile-changed", onScopeChange);
-  window.addEventListener("harbor:profiles-updated", onScopeChange);
-  window.addEventListener("harbor:account-provider-changed", onScopeChange);
-  window.addEventListener("harbor:nuvio-profile-changed", onScopeChange);
-  window.addEventListener("harbor:nuvio-state-changed", () => {
-    lastScope = "";
-    clearWatchedFlagMemoryCache();
-  });
+  window.addEventListener("harbor:active-profile-changed", onReset);
+  window.addEventListener("harbor:profiles-updated", onReset);
+  window.addEventListener("harbor:account-provider-changed", onReset);
+  window.addEventListener("harbor:nuvio-profile-changed", onReset);
+  window.addEventListener("harbor:nuvio-state-changed", onReset);
+  window.addEventListener("harbor:watched-changed", onReset);
 }

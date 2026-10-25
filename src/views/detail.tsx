@@ -90,7 +90,6 @@ import {
   pullWatchProgressFromNuvio,
   pullWatchedItemsFromNuvio,
   reconcileNuvioWatched,
-  resolveNuvioProfileIndex,
   isNuvioProviderActive,
 } from "@/lib/nuvio/nuvio-sync";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
@@ -897,8 +896,8 @@ export function DetailView({
                 let nextSeason = latest.season;
                 let nextEpisode = latest.episode + 1;
 
-                if (hasSeasonBoundary && latest.episode >= curSeasonObj.episodeCount) {
-                  const nextSeasonObj = detail?.seasons?.find((s) => s.seasonNumber === latest.season + 1);
+                if (hasSeasonBoundary && latest.season != null && latest.episode >= curSeasonObj.episodeCount) {
+                  const nextSeasonObj = detail?.seasons?.find((s) => s.seasonNumber === latest.season! + 1);
                   if (nextSeasonObj) {
                     nextSeason = nextSeasonObj.seasonNumber;
                     nextEpisode = 1;

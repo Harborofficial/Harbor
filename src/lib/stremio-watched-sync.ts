@@ -111,6 +111,18 @@ export function freshWatchedIds(): string[] {
   return [...freshWatched.keys()];
 }
 
+export function clearStremioFreshWatched(profileId?: string): void {
+  freshWatched.clear();
+  freshLoaded = false;
+  try {
+    if (profileId) {
+      localStorage.removeItem(FRESH_KEY_PREFIX + profileId);
+    }
+    localStorage.removeItem(LEGACY_FRESH_KEY);
+    localStorage.removeItem(storeKey());
+  } catch {}
+}
+
 type CinemetaVideo = NonNullable<Meta["videos"]>[number];
 
 type FullState = {

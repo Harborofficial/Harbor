@@ -38,10 +38,12 @@ import { clearCachedPlaybackItems } from "./nuvio-playback";
 import { clearAllNuvioLocalCw } from "@/lib/local-cw";
 import { clearAllNuvioResume } from "@/lib/resume";
 import { clearNuvioLibraryCache } from "./nuvio-library";
+import { clearAllNuvioWatchedFlags } from "@/lib/watched-flag";
+import { clearAllNuvioMovieWatched } from "@/lib/movie-watched";
+import { clearAllNuvioManualWatched } from "@/lib/manual-watched";
+import { clearCwCache } from "@/lib/continue-watching";
+import { clearWatchlistCache } from "@/lib/watchlist";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
-import { clearWatchedFlagMemoryCache } from "@/lib/watched-flag";
-import { clearMovieWatchedMemoryCache } from "@/lib/movie-watched";
-import { clearManualWatchedMemoryCache } from "@/lib/manual-watched";
 
 import type {
 
@@ -94,6 +96,18 @@ export async function signInWithEmailPassword(
     };
 
     const state = loadNuvioState();
+    if (state.session?.user?.id && state.session.user.id !== session.user.id) {
+      clearAllNuvioWatchedFlags();
+      clearAllNuvioMovieWatched();
+      clearAllNuvioManualWatched();
+      clearAllNuvioLocalCw();
+      clearAllNuvioResume();
+      clearCachedPlaybackItems();
+      clearCachedWatchProgress();
+      clearNuvioLibraryCache();
+      clearCwCache();
+      clearWatchlistCache();
+    }
     saveNuvioState({ ...state, session });
     activateNuvioAccountProvider();
 
@@ -231,6 +245,18 @@ export async function pollDeviceCodeSession(
         };
 
         const state = loadNuvioState();
+        if (state.session?.user?.id && state.session.user.id !== user.id) {
+          clearAllNuvioWatchedFlags();
+          clearAllNuvioMovieWatched();
+          clearAllNuvioManualWatched();
+          clearAllNuvioLocalCw();
+          clearAllNuvioResume();
+          clearCachedPlaybackItems();
+          clearCachedWatchProgress();
+          clearNuvioLibraryCache();
+          clearCwCache();
+          clearWatchlistCache();
+        }
         saveNuvioState({ ...state, session });
         activateNuvioAccountProvider();
         await fetchNuvioProfiles();
@@ -335,17 +361,32 @@ export async function signOutNuvio(): Promise<void> {
   clearAllNuvioResume();
   clearCachedNuvioAddons();
   recordNuvioAddons([]);
-  clearWatchedFlagMemoryCache();
-  clearMovieWatchedMemoryCache();
-  clearManualWatchedMemoryCache();
+
+  clearAllNuvioWatchedFlags();
+  clearAllNuvioMovieWatched();
+  clearAllNuvioManualWatched();
+  clearCwCache();
+  clearWatchlistCache();
 
   try {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
       if (!k) continue;
-      const lower = k.toLowerCase();
-      if (lower.startsWith("harbor.") && lower.includes("nuvio")) {
+      if (
+        k.startsWith("harbor.nuvio.") ||
+        k.startsWith("harbor.newEpisodes.dismissed.nuvio.") ||
+        k.startsWith("harbor.manualwatched.") ||
+        k.startsWith("harbor.manualunwatched.") ||
+        k.startsWith("harbor.moviewatched.nuvio.") ||
+        k.startsWith("harbor.watchedFlag.nuvio.") ||
+        k.startsWith("harbor.watchlist.v1.nuvio.") ||
+        k.startsWith("harbor.watchlist.aggregate.v1.nuvio.") ||
+        k.startsWith("harbor.localcw.v1.nuvio-") ||
+        k.startsWith("harbor.localcw.private.v1.nuvio-") ||
+        k.startsWith("harbor.resume.private.v1.nuvio-") ||
+        k.startsWith("harbor.theme-session.nuvio")
+      ) {
         keysToRemove.push(k);
       }
     }
@@ -387,6 +428,9 @@ export async function signOutNuvio(): Promise<void> {
   window.dispatchEvent(new CustomEvent("harbor:nuvio-state-changed"));
   window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
   window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+  window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:library-changed"));
+  window.dispatchEvent(new CustomEvent("harbor:watchlist-changed"));
   window.dispatchEvent(new CustomEvent("harbor:profiles-changed"));
   window.dispatchEvent(new CustomEvent("harbor:settings-changed"));
 

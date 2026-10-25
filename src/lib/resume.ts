@@ -232,6 +232,18 @@ export function clearAllNuvioResume(): void {
   } catch {}
 }
 
+export function clearAllResumeForProfile(profileId?: string): void {
+  try {
+    if (profileId) {
+      const k = `${PRIVATE_PREFIX}${profileId}`;
+      localStorage.removeItem(k);
+      parsedResume.delete(k);
+    }
+    localStorage.removeItem(KEY);
+    parsedResume.delete(KEY);
+  } catch {}
+}
+
 export function clearResume(
   id: string,
   season?: number,

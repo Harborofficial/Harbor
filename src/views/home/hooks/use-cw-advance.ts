@@ -475,16 +475,6 @@ export function useCwAdvance(
             !unplacedCur &&
             !list.some((e) => e.season === effCur.season && e.episode === effCur.episode)
           ) {
-            const seasonEps = list.filter((e) => e.season === effCur.season);
-            if (seasonEps.length > 0) {
-              const maxEpInSeason = Math.max(...seasonEps.map((e) => e.episode));
-              if (effCur.episode > maxEpInSeason) {
-                const nextSeasonEp = list.find((e) => e.season > effCur.season);
-                if (nextSeasonEp) {
-                  effCur = { season: nextSeasonEp.season, episode: nextSeasonEp.episode };
-                }
-              }
-            }
             if (scoped) {
               const hintSeason = preferredMixedSeason(
                 privacyOwner ? undefined : getViewedSeason(i._id),

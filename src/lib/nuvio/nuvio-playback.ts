@@ -235,13 +235,13 @@ export function buildNuvioPlaybackItems(
         targetOffsetMs = subProg * 1000;
         isUpNext = targetOffsetMs < 5000;
       } else {
-        // When the latest episode is finished and there is no subsequent playback record,
-        // advance target to the next episode in sequence as Up Next so the series remains in Continue Watching.
+        // In Stremio mode, finished episodes keep flaggedWatched = 1 on the watched episode,
+        // allowing useCwAdvance to check TMDB air dates, advance to next episode if aired,
+        // or display the release countdown (Timer) if the next episode has not aired yet.
         targetSeason = latestSeason;
-        targetEpisode = latestEpisode + 1;
-        targetOffsetMs = 0;
-        targetDurMs = DURATION_MS.series;
-        isUpNext = true;
+        targetEpisode = latestEpisode;
+        targetOffsetMs = latestOffsetMs;
+        isUpNext = false;
       }
     } else {
       isUpNext = latestOffsetMs < 5000;

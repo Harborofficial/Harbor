@@ -624,7 +624,7 @@ export function manualWatchedVersion(): number {
   return version;
 }
 
-export function clearManualWatchedMemoryCache(): void {
+export function resetManualWatchedCache(): void {
   currentScope = "";
   watchedCache = null;
   unwatchedCache = null;
@@ -636,20 +636,56 @@ export function clearManualWatchedMemoryCache(): void {
   notifySubs();
 }
 
+export function clearManualWatched(profileOrSlot?: string | number): void {
+  try {
+    for (const kind of Object.keys(PREFIXES) as Array<keyof typeof PREFIXES>) {
+      if (profileOrSlot != null) {
+        localStorage.removeItem(`${PREFIXES[kind]}${profileOrSlot}`);
+      } else {
+        localStorage.removeItem(LEGACY_KEYS[kind]);
+        const id = activeProfileId();
+        if (id) localStorage.removeItem(`${PREFIXES[kind]}${id}`);
+      }
+    }
+  } catch {}
+  resetManualWatchedCache();
+}
+
+export function clearAllNuvioManualWatched(): void {
+  try {
+    const toRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (
+        k &&
+        (k.startsWith("harbor.manualwatched.") ||
+          k.startsWith("harbor.manualunwatched.") ||
+          k.includes(".nuvio."))
+      ) {
+        toRemove.push(k);
+      }
+    }
+    for (const k of toRemove) localStorage.removeItem(k);
+  } catch {}
+  resetManualWatchedCache();
+}
+
 if (typeof window !== "undefined") {
-  let lastScope = isNuvioProviderActive() ? `nuvio.${getNuvioActiveSlot()}` : activeProfileId();
-  const onScopeChange = () => {
-    const nextScope = isNuvioProviderActive() ? `nuvio.${getNuvioActiveSlot()}` : activeProfileId();
-    if (nextScope === lastScope) return;
-    lastScope = nextScope;
-    clearManualWatchedMemoryCache();
+  const onReset = () => {
+    currentScope = "";
+    watchedCache = null;
+    unwatchedCache = null;
+    metaCache = null;
+    dismissedCache = null;
+    unwatchedAtCache = null;
+    remoteCache = null;
+    version += 1;
+    notifySubs();
   };
-  window.addEventListener("harbor:active-profile-changed", onScopeChange);
-  window.addEventListener("harbor:profiles-updated", onScopeChange);
-  window.addEventListener("harbor:account-provider-changed", onScopeChange);
-  window.addEventListener("harbor:nuvio-profile-changed", onScopeChange);
-  window.addEventListener("harbor:nuvio-state-changed", () => {
-    lastScope = "";
-    clearManualWatchedMemoryCache();
-  });
+  window.addEventListener("harbor:active-profile-changed", onReset);
+  window.addEventListener("harbor:profiles-updated", onReset);
+  window.addEventListener("harbor:account-provider-changed", onReset);
+  window.addEventListener("harbor:nuvio-profile-changed", onReset);
+  window.addEventListener("harbor:nuvio-state-changed", onReset);
+  window.addEventListener("harbor:watched-changed", onReset);
 }

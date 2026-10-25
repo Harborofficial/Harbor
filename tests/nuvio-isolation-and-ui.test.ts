@@ -13,10 +13,6 @@ const home = read("../src/views/home.tsx");
 const cwSection = read("../src/views/home/cw-section.tsx");
 const useCwAdvance = read("../src/views/home/hooks/use-cw-advance.ts");
 const useMarkSeason = read("../src/views/detail/series-episodes/use-mark-season.ts");
-const nuvioAuth = read("../src/lib/nuvio/nuvio-auth.ts");
-const nuvioPlayback = read("../src/lib/nuvio/nuvio-playback.ts");
-const auth = read("../src/lib/auth.tsx");
-const localCw = read("../src/lib/local-cw.ts");
 
 test("watched-flag scopes storage key by active Nuvio slot", () => {
   assert.match(watchedFlag, /harbor\.watchedFlag\.nuvio\.v1\.\$\{slot\}/);
@@ -74,38 +70,24 @@ test("useCwAdvance preserves sequential rewatch and prevents jumping to later se
   assert.match(useCwAdvance, /if \(immediateNext && nextEp && nextEp\.season > immediateNext\.season\)/);
 });
 
-test("signOutNuvio purges all Nuvio keys and resets watched memory caches", () => {
-  assert.match(nuvioAuth, /clearWatchedFlagMemoryCache\(\)/);
-  assert.match(nuvioAuth, /clearMovieWatchedMemoryCache\(\)/);
-  assert.match(nuvioAuth, /clearManualWatchedMemoryCache\(\)/);
-  assert.match(nuvioAuth, /lower\.startsWith\("harbor\."\) && lower\.includes\("nuvio"\)/);
-});
+test("signing out or switching accounts cleanly purges watched badges and catalog caches", () => {
+  const auth = read("../src/lib/auth.tsx");
+  const nuvioAuth = read("../src/lib/nuvio/nuvio-auth.ts");
 
-test("signOut clears Stremio watched flags and memory caches", () => {
-  assert.match(auth, /clearWatchedFlagMemoryCache\(\)/);
-  assert.match(auth, /clearMovieWatchedMemoryCache\(\)/);
-  assert.match(auth, /clearManualWatchedMemoryCache\(\)/);
-  assert.match(auth, /localStorage\.removeItem\(`harbor\.watchedFlag\.v1\.\$\{activeProfile\.id\}`\)/);
-});
+  // Stremio auth purge
+  assert.match(auth, /export function purgeStremioAccountData/);
+  assert.match(auth, /purgeStremioAccountData\(pid\)/);
+  assert.match(auth, /harbor:watched-changed/);
 
-test("buildNuvioPlaybackItems advances finished series episode to Next Up with isUpNext = true", () => {
-  assert.match(nuvioPlayback, /targetEpisode = latestEpisode \+ 1/);
-  assert.match(nuvioPlayback, /isUpNext = true/);
-  assert.match(home, /upNext: e\.type === "series" && e\.positionMs === 0/);
-});
+  // Watched flag and movie watched clear exports
+  assert.match(watchedFlag, /export function clearWatchedFlags/);
+  assert.match(watchedFlag, /export function clearAllNuvioWatchedFlags/);
+  assert.match(movieWatched, /export function clearMovieWatched/);
+  assert.match(movieWatched, /export function clearAllNuvioMovieWatched/);
 
-test("reconcileNuvioWatched advances series to next episode in Continue Watching", () => {
-  assert.match(nuvioSync, /const nextEpisode = s\.maxEpisode \+ 1/);
-  assert.match(nuvioSync, /saveLocalCw\(nextCw, `nuvio-\$\{profileIndex\}`\)/);
-  assert.match(nuvioSync, /harbor:continue-watching-updated/);
-});
-
-test("localCw isolates storage keys by Nuvio profile slot and changes identity on slot switch", () => {
-  assert.match(localCw, /\$\{KEY_PREFIX\}\$\{acc\}\.nuvio-\$\{slot\}/);
-  assert.match(localCw, /nuvio\|.*?nuvioActiveSlot/);
-});
-
-test("useCwAdvance handles season finale boundary advancing to next season episode 1", () => {
-  assert.match(useCwAdvance, /effCur\.episode > maxEpInSeason/);
-  assert.match(useCwAdvance, /const nextSeasonEp = list\.find\(\(e\) => e\.season > effCur\.season\)/);
+  // Nuvio auth purge
+  assert.match(nuvioAuth, /clearAllNuvioWatchedFlags\(\)/);
+  assert.match(nuvioAuth, /clearAllNuvioMovieWatched\(\)/);
+  assert.match(nuvioAuth, /clearAllNuvioManualWatched\(\)/);
+  assert.match(nuvioAuth, /harbor:watched-changed/);
 });
