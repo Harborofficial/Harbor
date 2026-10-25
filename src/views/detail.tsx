@@ -328,11 +328,9 @@ export function DetailView({
     const onProfile = () => setProfileTick((t) => t + 1);
     window.addEventListener("harbor:active-profile-changed", onProfile);
     window.addEventListener("harbor:nuvio-profile-changed", onProfile);
-    window.addEventListener("harbor:nuvio-state-changed", onProfile);
     return () => {
       window.removeEventListener("harbor:active-profile-changed", onProfile);
       window.removeEventListener("harbor:nuvio-profile-changed", onProfile);
-      window.removeEventListener("harbor:nuvio-state-changed", onProfile);
     };
   }, []);
   const [nuvioEpisodeProgress, setNuvioEpisodeProgress] = useState<{
@@ -810,10 +808,16 @@ export function DetailView({
     };
   }, [meta.id, meta.type, meta.addonOrigin?.base, authKey, cinemetaFull?.videos?.length]);
 
+  const prevDetailMetaIdRef = useRef<string>(meta.id);
   useEffect(() => {
-    setLibraryItem(null);
-    setStremioWatched(new Set());
-    setNuvioEpisodeProgress(null);
+    const metaChanged = prevDetailMetaIdRef.current !== meta.id;
+    prevDetailMetaIdRef.current = meta.id;
+
+    if (metaChanged) {
+      setLibraryItem(null);
+      setStremioWatched(new Set());
+      setNuvioEpisodeProgress(null);
+    }
     noteLocalImdbId(meta.id, detail?.imdbId);
     const isNuvioActiveMode = (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
     if (isNuvioActiveMode) {
@@ -1638,25 +1642,26 @@ export function DetailView({
         (v) => v.season === top.season && v.episode === top.episode,
       );
 
-      if (highestWatchedIdx >= 0 && (topWatched || highestWatchedIdx > topIdx)) {
-        for (let i = highestWatchedIdx + 1; i < allOrdered.length; i++) {
-          if (!isWatched(allOrdered[i].season, allOrdered[i].episode)) {
-            return allOrdered[i];
+      if (topWatched) {
+        if (topIdx >= 0) {
+          for (let i = topIdx + 1; i < allOrdered.length; i++) {
+            if (!isWatched(allOrdered[i].season, allOrdered[i].episode)) {
+              return allOrdered[i];
+            }
           }
+          return null;
         }
-        return null;
+        return advancePastFinished(
+          meta.id,
+          { season: top.season, episode: top.episode },
+          allOrdered,
+          stremioWatched,
+        );
       }
 
       if (!topWatched) {
         return { season: top.season, episode: top.episode };
       }
-
-      return advancePastFinished(
-        meta.id,
-        { season: top.season, episode: top.episode },
-        allOrdered,
-        stremioWatched,
-      );
     }
 
     if (highestWatchedIdx >= 0) {

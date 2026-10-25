@@ -38,12 +38,12 @@ export function loadNuvioState(): NuvioAccountState {
 /**
  * Persists Nuvio account state
  */
-export function saveNuvioState(state: NuvioAccountState): void {
+export function saveNuvioState(state: NuvioAccountState, options?: { silent?: boolean }): void {
   try {
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(NUVIO_STATE_KEY, JSON.stringify(state));
     }
-    if (typeof window !== "undefined") {
+    if (!options?.silent && typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("harbor:nuvio-state-changed", { detail: state }));
     }
   } catch (e) {

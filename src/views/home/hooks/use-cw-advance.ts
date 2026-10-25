@@ -221,12 +221,20 @@ function watchedPredicate(
     return (season: number, episode: number) =>
       season === cur.season && episode === cur.episode && finished;
   }
-  const traktImdb = i._id.startsWith("tt") ? i._id : null;
+  const traktImdb = i._id.startsWith("tt")
+    ? i._id
+    : i.state?.video_id && i.state.video_id.startsWith("tt")
+      ? i.state.video_id.split(":")[0]
+      : null;
+  const cleanId = i._id.replace(/^(series|movie|tmdb):/, "");
+  const altIds = [traktImdb, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`].filter(
+    (x): x is string => !!x && x !== i._id,
+  );
   const simklSet = simklWatchedForId(simklWatched, i._id);
   const aniSet = anilistWatched.get(i._id);
   const simklCompleted = statusForId(simklStatus, i._id) === "completed";
   return (season: number, episode: number): boolean => {
-    if (manualWatchedState(i._id, season, episode) === false) return false;
+    if (manualWatchedState(i._id, season, episode, altIds) === false) return false;
     const prog = getEpisodeProgress(
       i._id,
       season,
@@ -238,7 +246,7 @@ function watchedPredicate(
       aniSet,
       simklSet,
     );
-    if (prog.watched) return true;
+    if (prog.watched || manualWatchedState(i._id, season, episode, altIds) === true) return true;
     if (season === cur.season && episode === cur.episode) return finished;
     if (simklCompleted && (season < cur.season || (season === cur.season && episode < cur.episode)))
       return true;

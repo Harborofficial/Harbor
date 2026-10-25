@@ -158,6 +158,12 @@ export async function pushWatchProgressToNuvio(
   const progSec = Math.max(0, Math.round(progressSeconds));
   const durSec = Math.max(0, Math.round(durationSeconds));
 
+  if (progSec <= 0) {
+    // 0 progress seconds means unstarted. Do not push 0-progress records to Supabase watch_progress
+    // as it suppresses Next Up resolution in Nuvio Mobile and violates progress semantics.
+    return true;
+  }
+
   const progressKey =
     season != null && episode != null
       ? `${contentId}_s${season}e${episode}`
@@ -630,22 +636,54 @@ export async function reconcileNuvioWatched(
       let cwChanged = false;
       const seenShowIds = new Set<string>();
 
-      // Group serverEpisodeKeys by showId to find max watched season & episode
-      const showMaxWatched = new Map<string, { season: number; episode: number; title?: string }>();
+      // Group serverEpisodeKeys by showId to find most recently watched season & episode
+      const showMaxWatched = new Map<
+        string,
+        { season: number; episode: number; title?: string; watchedAt: number }
+      >();
       for (const item of items) {
         if (!item.content_id || item.season == null || item.episode == null) continue;
         const s = item.season;
         const e = item.episode;
-        const prev = showMaxWatched.get(item.content_id);
-        if (!prev || s > prev.season || (s === prev.season && e > prev.episode)) {
-          showMaxWatched.set(item.content_id, { season: s, episode: e, title: item.title });
-        }
+        const itemTime = item.watched_at
+          ? typeof item.watched_at === "number"
+            ? item.watched_at
+            : Date.parse(item.watched_at)
+          : 0;
+
+        const register = (cid: string) => {
+          const prev = showMaxWatched.get(cid);
+          const prevTime = prev?.watchedAt ?? 0;
+          if (
+            !prev ||
+            itemTime > prevTime ||
+            (itemTime === prevTime && (s > prev.season || (s === prev.season && e > prev.episode)))
+          ) {
+            showMaxWatched.set(cid, {
+              season: s,
+              episode: e,
+              title: item.title,
+              watchedAt: itemTime,
+            });
+          }
+        };
+
+        register(item.content_id);
+        const cleanId = item.content_id.replace(/^(series|movie|tmdb):/, "");
+        register(cleanId);
+        register(`tmdb:${cleanId}`);
+        register(`series:${cleanId}`);
       }
 
       for (const entry of localEntries) {
         if (entry.type !== "series" || entry.season == null || entry.episode == null) continue;
         seenShowIds.add(entry.id);
-        const maxInfo = showMaxWatched.get(entry.id);
+        const cleanEntryId = entry.id.replace(/^(series|movie|tmdb):/, "");
+        const maxInfo =
+          showMaxWatched.get(entry.id) ||
+          showMaxWatched.get(cleanEntryId) ||
+          showMaxWatched.get(`tmdb:${cleanEntryId}`) ||
+          showMaxWatched.get(`series:${cleanEntryId}`);
         if (
           maxInfo &&
           (maxInfo.season > entry.season ||
@@ -926,7 +964,7 @@ export async function pullWatchProgressFromNuvio(
           } catch {}
           const state = loadNuvioState();
           if (state.session?.user?.id === startingAccountId) {
-            saveNuvioState({ ...state, lastSyncedAt: Date.now() });
+            saveNuvioState({ ...state, lastSyncedAt: Date.now() }, { silent: true });
           }
           window.dispatchEvent(
             new CustomEvent("harbor:nuvio-progress-reconciled", { detail: { profileIndex, count: 0 } }),
@@ -1033,7 +1071,7 @@ export async function pullWatchProgressFromNuvio(
 
         const state = loadNuvioState();
         if (state.session?.user?.id === startingAccountId) {
-          saveNuvioState({ ...state, lastSyncedAt: Date.now() });
+          saveNuvioState({ ...state, lastSyncedAt: Date.now() }, { silent: true });
         }
         window.dispatchEvent(
           new CustomEvent("harbor:nuvio-progress-reconciled", { detail: { profileIndex, count: serverItems.length } }),
