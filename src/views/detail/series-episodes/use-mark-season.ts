@@ -50,16 +50,20 @@ export function useMarkSeason({
       );
       if (isNuvioSignedIn() && isNuvioProviderActive()) {
         const slot = resolveNuvioProfileIndex();
+        const clean = meta.id.replace(/^(series|movie|tmdb):/, "");
+        const idVariants = Array.from(new Set([meta.id, clean, `tmdb:${clean}`, `series:${clean}`]));
         const primaryId = meta.id;
         if (watched) {
-          const items = airedEpisodes.map((e) => ({
-            contentId: primaryId,
-            contentType: "series" as const,
-            title: meta.name,
-            season: e.seasonNumber,
-            episode: e.episodeNumber,
-            watchedAt: Date.now(),
-          }));
+          const items = airedEpisodes.flatMap((e) =>
+            idVariants.map((cid) => ({
+              contentId: cid,
+              contentType: "series" as const,
+              title: meta.name,
+              season: e.seasonNumber,
+              episode: e.episodeNumber,
+              watchedAt: Date.now(),
+            })),
+          );
           void pushWatchedItemToNuvio(slot, items);
           void (async () => {
             for (const ep of airedEpisodes) {
@@ -85,11 +89,13 @@ export function useMarkSeason({
             window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
           })();
         } else {
-          const keys = airedEpisodes.map((e) => ({
-            contentId: primaryId,
-            season: e.seasonNumber,
-            episode: e.episodeNumber,
-          }));
+          const keys = airedEpisodes.flatMap((e) =>
+            idVariants.map((cid) => ({
+              contentId: cid,
+              season: e.seasonNumber,
+              episode: e.episodeNumber,
+            })),
+          );
           void deleteWatchedItemFromNuvio(slot, keys);
           void (async () => {
             const resetCw = {

@@ -46,7 +46,7 @@ import { resolveMeta } from "@/lib/meta-resource";
 import { useMdblistScores } from "@/lib/providers/mdblist";
 import { lastPlayedEpisode, readResumeEntry, saveResumeMs } from "@/lib/resume";
 import { advancePastFinished } from "@/lib/detail-resume-advance";
-import { localCwEntry } from "@/lib/local-cw";
+import { localCwEntry, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import { omdbPrefetch, omdbScores, type OmdbScores } from "@/lib/providers/omdb";
 import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
 import { awardSummary, pickHeroAwards, useAwards } from "@/lib/providers/wikidata";
@@ -1473,6 +1473,11 @@ export function DetailView({
     manualWatchedVersion,
     manualWatchedVersion,
   );
+  const localCwVer = useSyncExternalStore(
+    subscribeLocalCw,
+    localCwVersion,
+    localCwVersion,
+  );
   const prevSeriesWatchedVerRef = useRef(seriesWatchedVer);
   const stremioVideosRef = useRef<{ imdb: string; videos: NonNullable<Meta["videos"]> } | null>(
     null,
@@ -1544,15 +1549,24 @@ export function DetailView({
     if (episodeHint) return episodeHint;
     if (isAnime) return lastPlayedEpisode(meta.id);
     const candidates: Array<{ season: number; episode: number; t: number }> = [];
-    const ids = Array.from(
-      new Set(
-        [
-          meta.id,
-          detail?.imdbId ?? null,
-          detail?.id != null ? `tmdb:tv:${detail.id}` : null,
-        ].filter((x): x is string => !!x),
-      ),
-    );
+    const rawIds = [
+      meta.id,
+      detail?.imdbId ?? null,
+      detail?.id != null ? String(detail.id) : null,
+      detail?.id != null ? `tmdb:tv:${detail.id}` : null,
+      detail?.id != null ? `tmdb:${detail.id}` : null,
+    ].filter((x): x is string => !!x);
+    const expandedIds = new Set<string>();
+    for (const rid of rawIds) {
+      expandedIds.add(rid);
+      const clean = rid.replace(/^(series|movie|tmdb):/, "").replace(/^tv:/, "");
+      if (clean) {
+        expandedIds.add(clean);
+        expandedIds.add(`tmdb:${clean}`);
+        expandedIds.add(`series:${clean}`);
+      }
+    }
+    const ids = Array.from(expandedIds);
     for (const id of ids) {
       const lc = localCwEntry(id);
       if (
@@ -1611,10 +1625,8 @@ export function DetailView({
     const allOrdered = orderedVideos.length > 0 ? orderedVideos : orderedFromDetail;
 
     const isWatched = (s: number, e: number): boolean => {
-      for (const id of ids) {
-        const man = manualWatchedState(id, s, e);
-        if (man !== undefined) return man;
-      }
+      const man = manualWatchedState(meta.id, s, e, ids);
+      if (man !== undefined) return man;
       if (stremioWatched.has(`${s}:${e}`)) return true;
       for (const id of ids) {
         const entry = readResumeEntry(id, s, e);
@@ -1631,7 +1643,7 @@ export function DetailView({
     }
 
     const eligible = candidates.filter(
-      (c) => ids.every((id) => manualWatchedState(id, c.season, c.episode) !== false),
+      (c) => ids.every((id) => manualWatchedState(id, c.season, c.episode, ids) !== false),
     );
 
     if (eligible.length > 0) {
@@ -1684,6 +1696,7 @@ export function DetailView({
     isAnime,
     episodeHint,
     seriesWatchedVer,
+    localCwVer,
     stremioWatched,
     cinemetaFull?.videos,
   ]);

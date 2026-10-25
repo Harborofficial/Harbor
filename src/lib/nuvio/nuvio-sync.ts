@@ -679,6 +679,20 @@ export async function reconcileNuvioWatched(
         if (entry.type !== "series" || entry.season == null || entry.episode == null) continue;
         seenShowIds.add(entry.id);
         const cleanEntryId = entry.id.replace(/^(series|movie|tmdb):/, "");
+
+        // If whole series is marked watched, remove it from Continue Watching tray immediately
+        if (
+          serverWatchedIds.has(entry.id) ||
+          serverWatchedIds.has(cleanEntryId) ||
+          serverWatchedIds.has(`tmdb:${cleanEntryId}`) ||
+          serverWatchedIds.has(`series:${cleanEntryId}`)
+        ) {
+          clearLocalCw(entry.id, `nuvio-${profileIndex}`);
+          clearLocalCw(entry.id);
+          cwChanged = true;
+          continue;
+        }
+
         const maxInfo =
           showMaxWatched.get(entry.id) ||
           showMaxWatched.get(cleanEntryId) ||
@@ -691,24 +705,26 @@ export async function reconcileNuvioWatched(
         ) {
           const nextS = maxInfo.season;
           const nextE = maxInfo.episode + 1;
-          saveLocalCw(
-            {
+          if (entry.season !== nextS || entry.episode !== nextE || entry.positionMs !== 0) {
+            saveLocalCw(
+              {
+                ...entry,
+                season: nextS,
+                episode: nextE,
+                positionMs: 0,
+                t: maxInfo.watchedAt || Date.now(),
+              },
+              `nuvio-${profileIndex}`,
+            );
+            saveLocalCw({
               ...entry,
               season: nextS,
               episode: nextE,
               positionMs: 0,
-              t: Date.now(),
-            },
-            `nuvio-${profileIndex}`,
-          );
-          saveLocalCw({
-            ...entry,
-            season: nextS,
-            episode: nextE,
-            positionMs: 0,
-            t: Date.now(),
-          });
-          cwChanged = true;
+              t: maxInfo.watchedAt || Date.now(),
+            });
+            cwChanged = true;
+          }
         }
       }
 
@@ -738,9 +754,15 @@ export async function deleteEpisodeWatchProgressFromNuvio(
   const normalizedContentId = contentId.trim();
   if (!normalizedContentId) return false;
 
-  const episodeKey1 = `${normalizedContentId}_s${season}e${episode}`;
-  const episodeKey2 = `${normalizedContentId}:${season}:${episode}`;
-  const keysToDelete = [episodeKey1, episodeKey2];
+  const cleanId = normalizedContentId.replace(/^(series|movie|tmdb):/, "");
+  const idVariants = Array.from(new Set([normalizedContentId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]));
+  const keysToDelete: string[] = [];
+  for (const id of idVariants) {
+    keysToDelete.push(`${id}_s${season}e${episode}`);
+    keysToDelete.push(`${id}:${season}:${episode}`);
+  }
+  const deleteKeySet = new Set(keysToDelete);
+  const idVariantSet = new Set(idVariants);
 
   // 1. Prune from local cached watch progress
   try {
@@ -748,18 +770,18 @@ export async function deleteEpisodeWatchProgressFromNuvio(
     const filtered = cached.filter(
       (p) =>
         !(
-          p.content_id === normalizedContentId &&
-          ((p.season === season && p.episode === episode) ||
-            p.progress_key === episodeKey1 ||
-            p.progress_key === episodeKey2)
+          (idVariantSet.has(p.content_id) && p.season === season && p.episode === episode) ||
+          (p.progress_key && deleteKeySet.has(p.progress_key))
         ),
     );
     writeCachedWatchProgress(profileIndex, filtered);
   } catch {}
 
-  // 2. Clear local resume for this specific episode
-  clearResume(normalizedContentId, season, episode, `nuvio-${profileIndex}`);
-  clearResume(normalizedContentId, season, episode);
+  // 2. Clear local resume for this specific episode across all alias IDs
+  for (const id of idVariants) {
+    clearResume(id, season, episode, `nuvio-${profileIndex}`);
+    clearResume(id, season, episode);
+  }
 
   // 3. Dispatch local event
   window.dispatchEvent(
@@ -791,13 +813,15 @@ export async function deleteEpisodeWatchProgressFromNuvio(
     if (rpcRes.ok) rpcSuccess = true;
   } catch {}
 
-  // 5. Also execute table delete for this specific episode
-  try {
-    await nuvioFetch(
-      `/rest/v1/watch_progress?profile_id=eq.${profileIndex}&content_id=eq.${encodeURIComponent(normalizedContentId)}&season=eq.${season}&episode=eq.${episode}`,
-      { method: "DELETE" },
-    );
-  } catch {}
+  // 5. Also execute table delete for this specific episode across all ID variants
+  for (const id of idVariants) {
+    try {
+      await nuvioFetch(
+        `/rest/v1/watch_progress?profile_id=eq.${profileIndex}&content_id=eq.${encodeURIComponent(id)}&season=eq.${season}&episode=eq.${episode}`,
+        { method: "DELETE" },
+      );
+    } catch {}
+  }
 
   return rpcSuccess;
 }

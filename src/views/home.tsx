@@ -760,6 +760,15 @@ export function Home({
       const incIsNuvio = incoming.external === "nuvio";
 
       if (isNuvioProvider) {
+        if (heldIsNuvio && incIsNuvio) {
+          const hs = held.state?.season ?? 0;
+          const he = held.state?.episode ?? 0;
+          const is = incoming.state?.season ?? 0;
+          const ie = incoming.state?.episode ?? 0;
+          if (is > hs || (is === hs && ie > he)) return incoming;
+          if (hs > is || (hs === is && he > ie)) return held;
+          return lastWatchedOf(incoming) > lastWatchedOf(held) ? incoming : held;
+        }
         if (heldIsNuvio && !incIsNuvio) {
           if (lastWatchedOf(incoming) > lastWatchedOf(held)) {
             return {

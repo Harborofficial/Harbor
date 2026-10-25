@@ -263,16 +263,26 @@ export function manualWatchedState(
   episode: number,
   altIds?: Array<string | null | undefined>,
 ): boolean | undefined {
-  const k = key(metaId, season, episode);
-  if (watchedSet().has(k)) return true;
-  if (unwatchedSet().has(k)) return false;
+  const cleanId = metaId.replace(/^(series|movie|tmdb):/, "");
+  const allCandidateIds = new Set<string>([metaId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]);
   if (altIds && altIds.length > 0) {
     for (const alt of altIds) {
-      if (!alt || alt === metaId) continue;
-      const altK = key(alt, season, episode);
-      if (watchedSet().has(altK)) return true;
-      if (unwatchedSet().has(altK)) return false;
+      if (!alt) continue;
+      const cleanAlt = alt.replace(/^(series|movie|tmdb):/, "");
+      allCandidateIds.add(alt);
+      allCandidateIds.add(cleanAlt);
+      allCandidateIds.add(`tmdb:${cleanAlt}`);
+      allCandidateIds.add(`series:${cleanAlt}`);
     }
+  }
+
+  const watched = watchedSet();
+  const unwatched = unwatchedSet();
+
+  for (const id of allCandidateIds) {
+    const k = key(id, season, episode);
+    if (watched.has(k)) return true;
+    if (unwatched.has(k)) return false;
   }
   return undefined;
 }
@@ -317,6 +327,19 @@ export function reconcileNuvioWatchedEpisodes(
   const currentLocalUnwatched = loadSet(unsk);
 
   let changed = false;
+
+  for (const sKey of Array.from(serverEpisodeKeys)) {
+    const parts = sKey.split("|");
+    if (parts.length === 3) {
+      const showId = parts[0];
+      const s = parts[1];
+      const e = parts[2];
+      const clean = showId.replace(/^(series|movie|tmdb):/, "");
+      serverEpisodeKeys.add(`${clean}|${s}|${e}`);
+      serverEpisodeKeys.add(`tmdb:${clean}|${s}|${e}`);
+      serverEpisodeKeys.add(`series:${clean}|${s}|${e}`);
+    }
+  }
 
   for (const sKey of serverEpisodeKeys) {
     if (!currentLocalWatched.has(sKey)) {
@@ -640,7 +663,11 @@ export function clearManualWatched(profileOrSlot?: string | number): void {
   try {
     for (const kind of Object.keys(PREFIXES) as Array<keyof typeof PREFIXES>) {
       if (profileOrSlot != null) {
-        localStorage.removeItem(`${PREFIXES[kind]}${profileOrSlot}`);
+        const slotKey =
+          typeof profileOrSlot === "number" || /^\d+$/.test(String(profileOrSlot))
+            ? `nuvio.${profileOrSlot}`
+            : String(profileOrSlot);
+        localStorage.removeItem(`${PREFIXES[kind]}${slotKey}`);
       } else {
         localStorage.removeItem(LEGACY_KEYS[kind]);
         const id = activeProfileId();
@@ -658,8 +685,12 @@ export function clearAllNuvioManualWatched(): void {
       const k = localStorage.key(i);
       if (
         k &&
-        (k.startsWith("harbor.manualwatched.") ||
-          k.startsWith("harbor.manualunwatched.") ||
+        (k.startsWith("harbor.manualwatched.v1.nuvio.") ||
+          k.startsWith("harbor.manualunwatched.v1.nuvio.") ||
+          k.startsWith("harbor.manualwatched.meta.v1.nuvio.") ||
+          k.startsWith("harbor.manualwatched.dismissed.v1.nuvio.") ||
+          k.startsWith("harbor.manualunwatched.at.v1.nuvio.") ||
+          k.startsWith("harbor.manualwatched.fromremote.v1.nuvio.") ||
           k.includes(".nuvio."))
       ) {
         toRemove.push(k);

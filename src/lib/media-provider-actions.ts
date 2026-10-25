@@ -746,59 +746,49 @@ export function watchedProviderWrites(
         const primaryId = options.imdbId || (meta.id.startsWith("tt") ? meta.id : meta.id);
         const altId = meta.id !== primaryId ? meta.id : undefined;
 
+        const rawIds = [options.imdbId, meta.id].filter(Boolean) as string[];
+        const idVariants = new Set<string>();
+        for (const rid of rawIds) {
+          idVariants.add(rid);
+          const clean = rid.replace(/^(series|movie|tmdb):/, "");
+          if (clean) {
+            idVariants.add(clean);
+            idVariants.add(`tmdb:${clean}`);
+            idVariants.add(`series:${clean}`);
+          }
+        }
+        const allIds = Array.from(idVariants);
+
         if (movie) {
           if (watched) {
-            const items = [
-              {
-                contentId: primaryId,
-                contentType: "movie" as const,
-                title: meta.name,
-                watchedAt: Date.now(),
-              },
-              ...(altId
-                ? [
-                    {
-                      contentId: altId,
-                      contentType: "movie" as const,
-                      title: meta.name,
-                      watchedAt: Date.now(),
-                    },
-                  ]
-                : []),
-            ];
+            const items = allIds.map((cid) => ({
+              contentId: cid,
+              contentType: "movie" as const,
+              title: meta.name,
+              watchedAt: Date.now(),
+            }));
             await pushWatchedItemToNuvio(slot, items);
-            await deleteWatchProgressFromNuvio(slot, primaryId);
-            if (altId) await deleteWatchProgressFromNuvio(slot, altId);
+            for (const cid of allIds) {
+              await deleteWatchProgressFromNuvio(slot, cid);
+            }
           } else {
-            await deleteWatchedItemFromNuvio(slot, [
-              { contentId: primaryId },
-              ...(altId ? [{ contentId: altId }] : []),
-            ]);
+            await deleteWatchedItemFromNuvio(
+              slot,
+              allIds.map((cid) => ({ contentId: cid })),
+            );
           }
         } else {
           if (watched) {
-            const itemsToPush = options.episodes.flatMap((ep) => [
-              {
-                contentId: primaryId,
+            const itemsToPush = options.episodes.flatMap((ep) =>
+              allIds.map((cid) => ({
+                contentId: cid,
                 contentType: "series" as const,
                 title: meta.name,
                 season: ep.season,
                 episode: ep.episode,
                 watchedAt: Date.now(),
-              },
-              ...(altId
-                ? [
-                    {
-                      contentId: altId,
-                      contentType: "series" as const,
-                      title: meta.name,
-                      season: ep.season,
-                      episode: ep.episode,
-                      watchedAt: Date.now(),
-                    },
-                  ]
-                : []),
-            ]);
+              })),
+            );
             await pushWatchedItemToNuvio(slot, itemsToPush);
 
             // Compute next episode to advance Continue Watching instantly
@@ -921,10 +911,9 @@ export function watchedProviderWrites(
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
             }
           } else {
-            const keysToDelete = options.episodes.flatMap((ep) => [
-              { contentId: primaryId, season: ep.season, episode: ep.episode },
-              ...(altId ? [{ contentId: altId, season: ep.season, episode: ep.episode }] : []),
-            ]);
+            const keysToDelete = options.episodes.flatMap((ep) =>
+              allIds.map((cid) => ({ contentId: cid, season: ep.season, episode: ep.episode })),
+            );
             await deleteWatchedItemFromNuvio(slot, keysToDelete);
 
             const sorted = [...options.episodes].sort(
