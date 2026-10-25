@@ -423,6 +423,40 @@ pub async fn mpv_audio_devices(state: State<'_, MpvState>) -> Result<Vec<AudioDe
     Ok(read_audio_devices(&mpv))
 }
 
+// Selecting a removed USB/Bluetooth/WASAPI endpoint can make mpv disable audio
+// entirely while video keeps playing. Check the effective option (including any
+// advanced mpv.conf override) against mpv's own enumeration before loadfile.
+// An empty list can also mean the backend cannot enumerate, so never replace a
+// preferred output without positive evidence that it is missing.
+#[cfg(any(windows, test))]
+fn audio_device_unavailable(selected: &str, devices: &[AudioDevice]) -> bool {
+    !selected.is_empty()
+        && selected != "auto"
+        && !devices.is_empty()
+        && !devices.iter().any(|device| device.name == selected)
+}
+
+#[cfg(windows)]
+fn fallback_missing_audio_device(mpv: &Mpv) {
+    let selected = match mpv.get_property::<String>("audio-device") {
+        Ok(device) => device,
+        Err(_) => return,
+    };
+    if selected == "auto" || selected.is_empty() {
+        return;
+    }
+    let available = read_audio_devices(mpv);
+    if !audio_device_unavailable(&selected, &available) {
+        return;
+    }
+    // Do not overwrite Harbor's saved preference. The device can be used again
+    // after it reconnects; only this mpv session falls back to system default.
+    match mpv.set_property("audio-device", "auto") {
+        Ok(()) => eprintln!("[harbor::mpv] configured audio device unavailable; using system default for this session"),
+        Err(err) => eprintln!("[harbor::mpv] failed to fall back to system audio device: {err}"),
+    }
+}
+
 fn mpv_header_field(name: &str, value: &str) -> String {
     // mpv parses this option as a comma-separated string list. An unescaped
     // Accept-Language comma creates an invalid second HTTP header (HTTP 400).
@@ -1172,6 +1206,8 @@ pub async fn mpv_start(
     if let Some(extra) = args.extra_options.as_deref() {
         apply_extra_mpv_options(&mpv, extra);
     }
+    #[cfg(windows)]
+    fallback_missing_audio_device(&mpv);
     // Keep network playback RAM-only even if an advanced option tried to
     // re-enable mpv's disk cache above.
     let _ = mpv.set_property("cache-on-disk", "no");
@@ -4051,5 +4087,41 @@ mod script_pre_init_tests {
             join_init_only_pairs(&init_only),
             vec![("load-scripts".to_string(), "no".to_string())]
         );
+    }
+}
+
+#[cfg(test)]
+mod audio_device_fallback_tests {
+    use super::{audio_device_unavailable, AudioDevice};
+
+    fn device(name: &str) -> AudioDevice {
+        AudioDevice {
+            name: name.to_string(),
+            description: "Test output".to_string(),
+        }
+    }
+
+    #[test]
+    fn missing_explicit_output_uses_default() {
+        let available = [device("wasapi/new"), device("wasapi/other")];
+        assert!(audio_device_unavailable("wasapi/removed", &available));
+    }
+
+    #[test]
+    fn connected_explicit_output_is_preserved() {
+        let available = [device("wasapi/preferred")];
+        assert!(!audio_device_unavailable("wasapi/preferred", &available));
+    }
+
+    #[test]
+    fn default_output_is_never_overridden() {
+        let available = [device("wasapi/preferred")];
+        assert!(!audio_device_unavailable("auto", &available));
+        assert!(!audio_device_unavailable("", &available));
+    }
+
+    #[test]
+    fn enumeration_failure_does_not_clobber_a_valid_preference() {
+        assert!(!audio_device_unavailable("wasapi/preferred", &[]));
     }
 }
