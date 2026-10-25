@@ -465,6 +465,7 @@ export function useCwAdvance(
         // scan is meaningless then, and the row needs the anime-entry fallback
         // before any drop decision.
         let unplacedCur = false;
+        let nextEp: PlayEpisode | null = null;
         const scoped = scopedSplitItem(i._id);
         if (fetchOk && list.length > 0) {
           const maxKey = list.reduce((m, e) => Math.max(m, orderKey(e.season, e.episode)), 0);
@@ -480,7 +481,6 @@ export function useCwAdvance(
             }
           }
           if (
-            !unplacedCur &&
             !list.some((e) => e.season === effCur.season && e.episode === effCur.episode)
           ) {
             const seasonEps = list.filter((e) => e.season === effCur.season);
@@ -491,13 +491,72 @@ export function useCwAdvance(
                 .filter((e) => e.season > effCur.season)
                 .sort((a, b) => a.season - b.season || a.episode - b.episode);
               if (nextSeasonEps.length > 0) {
-                effCur = { season: nextSeasonEps[0].season, episode: nextSeasonEps[0].episode };
+                const checkWatched = watchedPredicate(
+                  i,
+                  effCur,
+                  traktWatched,
+                  effectiveSimklWatched,
+                  anilistWatched,
+                  effectiveSimklStatus,
+                  !!privacyOwner,
+                );
+                const nextUnwatched = nextSeasonEps.find(
+                  (e) => !checkWatched(e.season, e.episode),
+                );
+                if (nextUnwatched) {
+                  next.set(i._id, {
+                    ...i,
+                    state: {
+                      ...i.state!,
+                      season: nextUnwatched.season,
+                      episode: nextUnwatched.episode,
+                      video_id: `${i._id}:${nextUnwatched.season}:${nextUnwatched.episode}`,
+                      timeOffset: 0,
+                      flaggedWatched: 0,
+                    },
+                    upNext: true,
+                  });
+                  continue;
+                } else {
+                  // Entire series is completed; remove from Continue Watching
+                  remove.add(i._id);
+                  continue;
+                }
               } else {
-                // Entire series is completed; remove from Continue Watching
-                remove.add(i._id);
-                continue;
+                // No next season in provider list: check if an anime sequel cour exists
+                let followUp: PlayEpisode | null = null;
+                const tryAnimeEntry = isAnime || i._id.startsWith("tt") || i._id.startsWith("tmdb:");
+                if (tryAnimeEntry && !privacyOwner) {
+                  const checkWatched = watchedPredicate(
+                    i,
+                    effCur,
+                    traktWatched,
+                    effectiveSimklWatched,
+                    anilistWatched,
+                    effectiveSimklStatus,
+                    !!privacyOwner,
+                  );
+                  followUp = await animeEntryFollowUp(
+                    i,
+                    effCur,
+                    tmdbKey,
+                    checkWatched,
+                    undefined,
+                    listCacheRef.current,
+                  );
+                }
+                if (followUp) {
+                  nextEp = followUp;
+                  unplacedCur = false;
+                } else if (isAnime && animeCwEnd === "timer") {
+                  unplacedCur = true;
+                } else {
+                  // Entire series is completed; remove from Continue Watching
+                  remove.add(i._id);
+                  continue;
+                }
               }
-            } else if (scoped) {
+            } else if (!unplacedCur && scoped) {
               const hintSeason = preferredMixedSeason(
                 privacyOwner ? undefined : getViewedSeason(i._id),
                 lastPlayedEpisode(i._id)?.season,
@@ -562,9 +621,10 @@ export function useCwAdvance(
             break;
           }
         }
-        let nextEp = unplacedCur
-          ? null
-          : nextUnwatchedAfter(
+        if (!nextEp) {
+          nextEp = unplacedCur
+            ? null
+            : nextUnwatchedAfter(
               list,
               effCur,
               (s: number, e: number): boolean => {
@@ -578,6 +638,7 @@ export function useCwAdvance(
               },
               nextSkip,
             );
+        }
         if (immediateNext && nextEp && nextEp.season > immediateNext.season) {
           nextEp = immediateNext;
         }

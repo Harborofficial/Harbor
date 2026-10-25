@@ -333,6 +333,20 @@ export function DetailView({
       window.removeEventListener("harbor:nuvio-profile-changed", onProfile);
     };
   }, []);
+  const [nuvioWatchedTick, setNuvioWatchedTick] = useState(0);
+  useEffect(() => {
+    const onWatchedUpdated = () => setNuvioWatchedTick((t) => t + 1);
+    window.addEventListener("harbor:nuvio-watched-reconciled", onWatchedUpdated);
+    window.addEventListener("harbor:series-watched-changed", onWatchedUpdated);
+    window.addEventListener("harbor:manual-watched-changed", onWatchedUpdated);
+    window.addEventListener("harbor:continue-watching-updated", onWatchedUpdated);
+    return () => {
+      window.removeEventListener("harbor:nuvio-watched-reconciled", onWatchedUpdated);
+      window.removeEventListener("harbor:series-watched-changed", onWatchedUpdated);
+      window.removeEventListener("harbor:manual-watched-changed", onWatchedUpdated);
+      window.removeEventListener("harbor:continue-watching-updated", onWatchedUpdated);
+    };
+  }, []);
   const [nuvioEpisodeProgress, setNuvioEpisodeProgress] = useState<{
     season: number;
     episode: number;
@@ -879,6 +893,12 @@ export function DetailView({
               }
             }
           }
+          const localManual = manualEpisodeKeys(meta.id, [
+            detail?.imdbId,
+            detail?.id != null ? String(detail.id) : null,
+          ]);
+          for (const k of localManual.watched) watchedKeys.add(k);
+          for (const k of localManual.unwatched) watchedKeys.delete(k);
           if (watchedKeys.size > 0) {
             setStremioWatched((prev) => new Set([...prev, ...watchedKeys]));
           } else {
@@ -968,7 +988,7 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [authKey, meta.id, detail?.imdbId, settings.accountProvider, profileTick]);
+  }, [authKey, meta.id, detail?.imdbId, detail?.id, settings.accountProvider, profileTick, nuvioWatchedTick]);
 
   useEffect(() => {
     let cancelled = false;

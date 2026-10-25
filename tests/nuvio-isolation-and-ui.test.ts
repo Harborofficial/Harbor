@@ -136,5 +136,7 @@ test("dismissedNextUpKeys syncs to Nuvio Cloud, isolates profile slots, and prev
   // reconcileNuvioWatched checks dismissedKeys and seeds un-dismissed midway shows
   assert.match(nuvioSync, /const dismissedKeys = await pullDismissedNextUpKeysFromNuvio\(profileIndex\)/);
   assert.match(nuvioSync, /if \(isDismissedNextUp\(entry\.id, entry\.season, entry\.episode, dismissedKeys\)\)/);
-  assert.match(nuvioSync, /if \(\s*isDismissedNextUp\(item\.content_id, maxInfo\.season, maxInfo\.episode, dismissedKeys\) \|\|\s*isDismissedNextUp\(item\.content_id, nextS, nextE, dismissedKeys\) \|\|\s*isDismissedNextUp\(item\.content_id, -1, -1, dismissedKeys\)\s*\) \{\s*continue;\s*\}/);
+  assert.match(nuvioSync, /if \(\s*isDismissedNextUp\(item\.content_id, maxInfo\.season, maxInfo\.episode, dismissedKeys\) \|\|\s*isDismissedNextUp\(item\.content_id, nextS, nextE, dismissedKeys\)\s*\) \{\s*continue;\s*\}/);
+  assert.match(nuvioSync, /content_id=in\.\(\${inClause}\)/);
+  assert.match(nuvioSync, /order\(s, e\) > order\(prev\.season, prev\.episode\)/);
 });

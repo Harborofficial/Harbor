@@ -299,8 +299,10 @@ export function manualEpisodeKeys(
   );
   const allIds = new Set<string>(ids);
   for (const id of ids) {
-    if (id.startsWith("tmdb:")) allIds.add(id.replace("tmdb:", ""));
-    else if (/^\d+$/.test(id)) allIds.add(`tmdb:${id}`);
+    const clean = id.replace(/^(series|movie|tmdb):/, "");
+    allIds.add(clean);
+    allIds.add(`tmdb:${clean}`);
+    allIds.add(`series:${clean}`);
   }
   const prefixes = Array.from(allIds).map((id) => `${id}|`);
   const collect = (src: Set<string>): Set<string> => {
