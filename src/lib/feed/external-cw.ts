@@ -490,6 +490,7 @@ if (typeof window !== "undefined") {
   window.addEventListener("harbor:nuvio-progress-deleted", (e) => {
     if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
       const detail = (e as CustomEvent)?.detail;
+      if (detail?.episodeOnly) return;
       const slot =
         typeof detail?.profileIndex === "number" ? detail.profileIndex : resolveNuvioProfileIndex();
       const current = resolveNuvioProfileIndex();

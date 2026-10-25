@@ -527,7 +527,7 @@ export function useCwAdvance(
         const watchedCur =
           checkWatched(effCur.season, effCur.episode) ||
           aliasCur.some((a) => checkWatched(a.season, a.episode));
-        if (!watchedCur && !i.upNext) continue;
+        if (!watchedCur) continue;
         const nextSkip = episodeHiding
           ? (s: number, e: number) => isEpisodeHidden(i._id, s, e)
           : undefined;

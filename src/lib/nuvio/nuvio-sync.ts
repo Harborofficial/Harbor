@@ -628,28 +628,36 @@ export async function reconcileNuvioWatched(
     try {
       const localEntries = listLocalCw(false);
       let cwChanged = false;
+      const seenShowIds = new Set<string>();
+
+      // Group serverEpisodeKeys by showId to find max watched season & episode
+      const showMaxWatched = new Map<string, { season: number; episode: number; title?: string }>();
+      for (const item of items) {
+        if (!item.content_id || item.season == null || item.episode == null) continue;
+        const s = item.season;
+        const e = item.episode;
+        const prev = showMaxWatched.get(item.content_id);
+        if (!prev || s > prev.season || (s === prev.season && e > prev.episode)) {
+          showMaxWatched.set(item.content_id, { season: s, episode: e, title: item.title });
+        }
+      }
+
       for (const entry of localEntries) {
         if (entry.type !== "series" || entry.season == null || entry.episode == null) continue;
-        const key = `${entry.id}|${entry.season}|${entry.episode}`;
-        if (serverEpisodeKeys.has(key)) {
-          let maxSeason = entry.season;
-          let maxEpisode = entry.episode;
-          for (const sKey of serverEpisodeKeys) {
-            if (sKey.startsWith(`${entry.id}|`)) {
-              const parts = sKey.split("|");
-              const s = Number(parts[1]);
-              const e = Number(parts[2]);
-              if (s > maxSeason || (s === maxSeason && e > maxEpisode)) {
-                maxSeason = s;
-                maxEpisode = e;
-              }
-            }
-          }
+        seenShowIds.add(entry.id);
+        const maxInfo = showMaxWatched.get(entry.id);
+        if (
+          maxInfo &&
+          (maxInfo.season > entry.season ||
+            (maxInfo.season === entry.season && maxInfo.episode >= entry.episode))
+        ) {
+          const nextS = maxInfo.season;
+          const nextE = maxInfo.episode + 1;
           saveLocalCw(
             {
               ...entry,
-              season: maxSeason,
-              episode: maxEpisode + 1,
+              season: nextS,
+              episode: nextE,
               positionMs: 0,
               t: Date.now(),
             },
@@ -657,14 +665,34 @@ export async function reconcileNuvioWatched(
           );
           saveLocalCw({
             ...entry,
-            season: maxSeason,
-            episode: maxEpisode + 1,
+            season: nextS,
+            episode: nextE,
             positionMs: 0,
             t: Date.now(),
           });
           cwChanged = true;
         }
       }
+
+      // If a series has watched episodes on mobile but was not yet in local CW tray:
+      for (const [showId, maxInfo] of showMaxWatched) {
+        if (!seenShowIds.has(showId)) {
+          const nextCw = {
+            id: showId,
+            type: "series" as const,
+            name: maxInfo.title || showId,
+            season: maxInfo.season,
+            episode: maxInfo.episode + 1,
+            positionMs: 0,
+            durationMs: 2640000,
+            t: Date.now(),
+          };
+          saveLocalCw(nextCw, `nuvio-${profileIndex}`);
+          saveLocalCw(nextCw);
+          cwChanged = true;
+        }
+      }
+
       if (cwChanged) {
         window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
       }
@@ -717,7 +745,14 @@ export async function deleteEpisodeWatchProgressFromNuvio(
   // 3. Dispatch local event
   window.dispatchEvent(
     new CustomEvent("harbor:nuvio-progress-deleted", {
-      detail: { profileIndex, contentId: normalizedContentId, keys: keysToDelete },
+      detail: {
+        profileIndex,
+        contentId: normalizedContentId,
+        keys: keysToDelete,
+        episodeOnly: true,
+        season,
+        episode,
+      },
     }),
   );
 

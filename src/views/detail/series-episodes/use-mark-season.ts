@@ -13,6 +13,7 @@ import {
   pushWatchedItemToNuvio,
   deleteWatchedItemFromNuvio,
   deleteWatchProgressFromNuvio,
+  deleteEpisodeWatchProgressFromNuvio,
   pushWatchProgressToNuvio,
 } from "@/lib/nuvio/nuvio-sync";
 import { saveLocalCw } from "@/lib/local-cw";
@@ -63,7 +64,9 @@ export function useMarkSeason({
           }));
           void pushWatchedItemToNuvio(slot, items);
           void (async () => {
-            await deleteWatchProgressFromNuvio(slot, primaryId);
+            for (const ep of airedEpisodes) {
+              await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.seasonNumber, ep.episodeNumber);
+            }
             const nextSeason = active + 1;
             const metaInfo = {
               title: meta.name,

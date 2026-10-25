@@ -44,6 +44,7 @@ import {
   deleteWatchedItemFromNuvio,
   pushWatchProgressToNuvio,
   deleteWatchProgressFromNuvio,
+  deleteEpisodeWatchProgressFromNuvio,
 } from "./nuvio/nuvio-sync";
 import { addNuvioLibraryItem, removeNuvioLibraryItem } from "./nuvio/nuvio-library";
 import { saveLocalCw, clearLocalCw } from "./local-cw";
@@ -832,12 +833,14 @@ export function watchedProviderWrites(
                 }
               }
 
-              // Always delete older watch progress from Nuvio Cloud for this series
-              // so mobile CW tray does not remain stuck on older paused episodes!
-              await deleteWatchProgressFromNuvio(slot, primaryId);
-              if (altId) await deleteWatchProgressFromNuvio(slot, altId);
-
               if (hasNext && nextSeason != null && nextEpisode != null) {
+                // Delete watch progress only for the completed episodes so mobile CW
+                // advances cleanly without wiping the entire series from CW!
+                for (const ep of options.episodes) {
+                  await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.season, ep.episode);
+                  if (altId) await deleteEpisodeWatchProgressFromNuvio(slot, altId, ep.season, ep.episode);
+                }
+
                 const metaInfo = {
                   title: meta.name,
                   name: meta.name,
@@ -903,6 +906,9 @@ export function watchedProviderWrites(
                   }),
                 );
               } else {
+                // Entire series is completed (no further episodes exist)
+                await deleteWatchProgressFromNuvio(slot, primaryId);
+                if (altId) await deleteWatchProgressFromNuvio(slot, altId);
                 clearLocalCw(primaryId);
                 clearLocalCw(primaryId, `nuvio-${slot}`);
                 if (altId) {

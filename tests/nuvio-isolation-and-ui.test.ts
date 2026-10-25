@@ -105,3 +105,21 @@ test("signing out or switching accounts cleanly purges watched badges and catalo
   assert.match(nuvioAuth, /clearAllNuvioManualWatched\(\)/);
   assert.match(nuvioAuth, /harbor:watched-changed/);
 });
+
+test("CW tray retains next up episode and protects against unwanted removal upon marking episodes", () => {
+  const nuvioSync = read("../src/lib/nuvio/nuvio-sync.ts");
+  const extCw = read("../src/lib/feed/external-cw.ts");
+  const mediaActions = read("../src/lib/media-provider-actions.ts");
+
+  // useCwAdvance does not drop unwatched upNext cards
+  assert.match(useCwAdvance, /if \(!watchedCur\) continue;/);
+  assert.doesNotMatch(useCwAdvance, /if \(!watchedCur && !i\.upNext\) continue;/);
+
+  // deleteEpisodeWatchProgressFromNuvio sends episodeOnly: true
+  assert.match(nuvioSync, /episodeOnly: true/);
+  assert.match(extCw, /if \(detail\?\.episodeOnly\) return;/);
+
+  // mediaProviderActions deletes only episode progress when hasNext is true
+  assert.match(mediaActions, /deleteEpisodeWatchProgressFromNuvio\(slot, primaryId, ep\.season, ep\.episode\)/);
+  assert.match(useMarkSeason, /deleteEpisodeWatchProgressFromNuvio\(slot, primaryId, ep\.seasonNumber, ep\.episodeNumber\)/);
+});
