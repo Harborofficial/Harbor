@@ -483,7 +483,21 @@ export function useCwAdvance(
             !unplacedCur &&
             !list.some((e) => e.season === effCur.season && e.episode === effCur.episode)
           ) {
-            if (scoped) {
+            const seasonEps = list.filter((e) => e.season === effCur.season);
+            const maxSeasonEp = seasonEps.reduce((max, e) => Math.max(max, e.episode), 0);
+            if (seasonEps.length > 0 && effCur.episode > maxSeasonEp) {
+              // Season was completed; advance to first episode of next season
+              const nextSeasonEps = list
+                .filter((e) => e.season > effCur.season)
+                .sort((a, b) => a.season - b.season || a.episode - b.episode);
+              if (nextSeasonEps.length > 0) {
+                effCur = { season: nextSeasonEps[0].season, episode: nextSeasonEps[0].episode };
+              } else {
+                // Entire series is completed; remove from Continue Watching
+                remove.add(i._id);
+                continue;
+              }
+            } else if (scoped) {
               const hintSeason = preferredMixedSeason(
                 privacyOwner ? undefined : getViewedSeason(i._id),
                 lastPlayedEpisode(i._id)?.season,

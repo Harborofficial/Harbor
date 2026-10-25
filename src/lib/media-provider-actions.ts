@@ -45,6 +45,7 @@ import {
   pushWatchProgressToNuvio,
   deleteWatchProgressFromNuvio,
   deleteEpisodeWatchProgressFromNuvio,
+  undismissNextUpInNuvioCloud,
 } from "./nuvio/nuvio-sync";
 import { addNuvioLibraryItem, removeNuvioLibraryItem } from "./nuvio/nuvio-library";
 import { saveLocalCw, clearLocalCw } from "./local-cw";
@@ -824,6 +825,8 @@ export function watchedProviderWrites(
               }
 
               if (hasNext && nextSeason != null && nextEpisode != null) {
+                void undismissNextUpInNuvioCloud(slot, primaryId);
+                if (altId) void undismissNextUpInNuvioCloud(slot, altId);
                 // Delete watch progress only for the completed episodes so mobile CW
                 // advances cleanly without wiping the entire series from CW!
                 for (const ep of options.episodes) {

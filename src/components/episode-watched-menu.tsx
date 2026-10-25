@@ -85,19 +85,33 @@ export function EpisodeWatchedMenu({
     }
   }, [activeId, onClose]);
   const runWatched = async (watched: boolean, episodes?: WatchedEpisode[]) => {
-    const result = await setContextWatched({ id: metaId, ...meta, type: "series" }, watched, {
-      imdbId,
-      syncMetaId,
-      ...(episodes
-        ? { episodes }
-        : {
-            episode: {
-              season: target.season,
-              episode: target.episode,
-              absoluteNumber: target.absoluteNumber,
-            },
-          }),
-    });
+    const result = await setContextWatched(
+      {
+        id: metaId,
+        ...meta,
+        type: "series",
+        videos: allEpisodes?.map((e) => ({
+          season: e.season,
+          episode: e.episode,
+          number: e.episode,
+          released: e.released ?? undefined,
+        })),
+      },
+      watched,
+      {
+        imdbId,
+        syncMetaId,
+        ...(episodes
+          ? { episodes }
+          : {
+              episode: {
+                season: target.season,
+                episode: target.episode,
+                absoluteNumber: target.absoluteNumber,
+              },
+            }),
+      },
+    );
     if (
       !watched &&
       result.outcomes.some(

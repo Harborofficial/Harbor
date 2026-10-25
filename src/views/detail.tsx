@@ -1672,6 +1672,22 @@ export function DetailView({
       }
 
       if (!topWatched) {
+        if (topIdx >= 0) {
+          return { season: top.season, episode: top.episode };
+        }
+        // If top does not exist in allOrdered, it could be an overflow episode (e.g. S1E8 when S1 only has 7 eps)
+        const seasonEps = allOrdered.filter((v) => v.season === top.season);
+        const maxEpInSeason = seasonEps.reduce((m, v) => Math.max(m, v.episode), 0);
+        if (seasonEps.length > 0 && top.episode > maxEpInSeason) {
+          const nextSeasonEp = allOrdered.find(
+            (v) => v.season > top.season && !isWatched(v.season, v.episode),
+          );
+          if (nextSeasonEp) return nextSeasonEp;
+          return null; // Series fully finished!
+        }
+        if (highestWatchedIdx >= 0 && highestWatchedIdx + 1 < allOrdered.length) {
+          return allOrdered[highestWatchedIdx + 1];
+        }
         return { season: top.season, episode: top.episode };
       }
     }

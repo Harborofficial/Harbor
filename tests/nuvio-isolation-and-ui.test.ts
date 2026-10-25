@@ -123,3 +123,18 @@ test("CW tray retains next up episode and protects against unwanted removal upon
   assert.match(mediaActions, /deleteEpisodeWatchProgressFromNuvio\(slot, primaryId, ep\.season, ep\.episode\)/);
   assert.match(useMarkSeason, /deleteEpisodeWatchProgressFromNuvio\(slot, primaryId, ep\.seasonNumber, ep\.episodeNumber\)/);
 });
+
+test("dismissedNextUpKeys syncs to Nuvio Cloud, isolates profile slots, and prevents resurrecting dismissed series", () => {
+  // nuvio-sync exports and storage isolation
+  assert.match(nuvioSync, /export function readCachedDismissedNextUpKeys/);
+  assert.match(nuvioSync, /export function writeCachedDismissedNextUpKeys/);
+  assert.match(nuvioSync, /export function isDismissedNextUp/);
+  assert.match(nuvioSync, /export async function pullDismissedNextUpKeysFromNuvio/);
+  assert.match(nuvioSync, /export async function undismissNextUpInNuvioCloud/);
+  assert.match(nuvioSync, /harbor\.nuvio\.dismissedNextUp\.v1\.\$\{profileIndex\}/);
+
+  // reconcileNuvioWatched checks dismissedKeys and seeds un-dismissed midway shows
+  assert.match(nuvioSync, /const dismissedKeys = await pullDismissedNextUpKeysFromNuvio\(profileIndex\)/);
+  assert.match(nuvioSync, /if \(isDismissedNextUp\(entry\.id, entry\.season, entry\.episode, dismissedKeys\)\)/);
+  assert.match(nuvioSync, /if \(\s*isDismissedNextUp\(item\.content_id, maxInfo\.season, maxInfo\.episode, dismissedKeys\) \|\|\s*isDismissedNextUp\(item\.content_id, nextS, nextE, dismissedKeys\) \|\|\s*isDismissedNextUp\(item\.content_id, -1, -1, dismissedKeys\)\s*\) \{\s*continue;\s*\}/);
+});
