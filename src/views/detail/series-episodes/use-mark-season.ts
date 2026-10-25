@@ -12,7 +12,6 @@ import {
   resolveNuvioProfileIndex,
   pushWatchedItemToNuvio,
   deleteWatchedItemFromNuvio,
-  deleteWatchProgressFromNuvio,
   deleteEpisodeWatchProgressFromNuvio,
   pushWatchProgressToNuvio,
 } from "@/lib/nuvio/nuvio-sync";
