@@ -20,7 +20,7 @@ import type {
 import { setWatchedFlag } from "@/lib/watched-flag";
 import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { reconcileNuvioWatchedEpisodes } from "@/lib/manual-watched";
-import { clearAllLocalCw, clearLocalCw, listLocalCw, saveLocalCw } from "@/lib/local-cw";
+import { clearLocalCw, listLocalCw, saveLocalCw } from "@/lib/local-cw";
 import { clearResume } from "@/lib/resume";
 import { readCachedNuvioPlaybackItems, writeCachedNuvioPlaybackItems, buildNuvioPlaybackItems } from "./nuvio-playback";
 import type { Addon } from "@/lib/addons";
@@ -674,25 +674,6 @@ export async function reconcileNuvioWatched(
         }
       }
 
-      // If a series has watched episodes on mobile but was not yet in local CW tray:
-      for (const [showId, maxInfo] of showMaxWatched) {
-        if (!seenShowIds.has(showId)) {
-          const nextCw = {
-            id: showId,
-            type: "series" as const,
-            name: maxInfo.title || showId,
-            season: maxInfo.season,
-            episode: maxInfo.episode + 1,
-            positionMs: 0,
-            durationMs: 2640000,
-            t: Date.now(),
-          };
-          saveLocalCw(nextCw, `nuvio-${profileIndex}`);
-          saveLocalCw(nextCw);
-          cwChanged = true;
-        }
-      }
-
       if (cwChanged) {
         window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
       }
@@ -939,7 +920,6 @@ export async function pullWatchProgressFromNuvio(
           if (!isCurrentAccount()) return [];
           // Cloud has NO watch progress for this profile slot (all items deleted on another device or empty)
           writeCachedWatchProgress(profileIndex, [], startingAccountId);
-          clearAllLocalCw(`nuvio-${profileIndex}`);
           writeCachedNuvioPlaybackItems(profileIndex, [], startingAccountId);
           try {
             localStorage.removeItem(`harbor.nuvio.playback_items.slot.${profileIndex}`);
@@ -1002,8 +982,6 @@ export async function pullWatchProgressFromNuvio(
         // Reconcile: identify any cached items that were deleted on another device!
         for (const prev of prevCached) {
           if (!serverProgressKeys.has(prev.progress_key) && !serverContentIds.has(prev.content_id)) {
-            clearLocalCw(prev.content_id, `nuvio-${profileIndex}`);
-            clearLocalCw(prev.content_id);
             clearResume(prev.content_id, undefined, undefined, `nuvio-${profileIndex}`);
             clearResume(prev.content_id);
           }
@@ -1083,8 +1061,6 @@ export async function pullWatchProgressFromNuvio(
         if (list.length === 0) {
           if (!isCurrentAccount()) return [];
           writeCachedWatchProgress(profileIndex, [], startingAccountId);
-          clearAllLocalCw(`nuvio-${profileIndex}`);
-          clearAllLocalCw();
           writeCachedNuvioPlaybackItems(profileIndex, [], startingAccountId);
           try {
             localStorage.removeItem(`harbor.nuvio.playback_items.slot.${profileIndex}`);
@@ -1139,8 +1115,6 @@ export async function pullWatchProgressFromNuvio(
 
         for (const prev of prevCached) {
           if (!serverProgressKeys.has(prev.progress_key) && !serverContentIds.has(prev.content_id)) {
-            clearLocalCw(prev.content_id, `nuvio-${profileIndex}`);
-            clearLocalCw(prev.content_id);
             clearResume(prev.content_id, undefined, undefined, `nuvio-${profileIndex}`);
             clearResume(prev.content_id);
           }
