@@ -81,9 +81,9 @@ export function useMarkSeason({
               positionMs: 0,
               durationMs: 2640000,
               isAnime: meta.type === "anime",
+              external: "nuvio" as const,
               t: Date.now(),
             };
-            saveLocalCw(nextCw);
             saveLocalCw(nextCw, `nuvio-${slot}`);
             saveResumeMs(meta.id, 0, nextSeason, 1, undefined, 0, "nuvio", `nuvio-${slot}`);
             window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
@@ -109,9 +109,9 @@ export function useMarkSeason({
               positionMs: 0,
               durationMs: 2640000,
               isAnime: meta.type === "anime",
+              external: "nuvio" as const,
               t: Date.now(),
             };
-            saveLocalCw(resetCw);
             saveLocalCw(resetCw, `nuvio-${slot}`);
             saveResumeMs(meta.id, 0, active, 1, undefined, 0, "nuvio", `nuvio-${slot}`);
             window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));

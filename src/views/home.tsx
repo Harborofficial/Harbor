@@ -695,6 +695,7 @@ export function Home({
         lastWatched: new Date(e.t).toISOString(),
       },
       upNext: e.type === "series" && e.positionMs === 0,
+      external: (e as any).external,
       removed: false,
       temp: false,
       _ctime: new Date(e.t).toISOString(),
@@ -732,7 +733,7 @@ export function Home({
           ]
         : [
             ...cwBase,
-            ...localCwItems,
+            ...localCwItems.filter((i) => i.external !== "nuvio"),
           ]
     )
       .filter(
@@ -741,6 +742,7 @@ export function Home({
           !i._id.startsWith("iptv:") &&
           !isCwDismissed(i) &&
           isCwMember(i) &&
+          (!isNuvioProvider ? i.external !== "nuvio" : true) &&
           !((settings.animeOnlyInAnimeRoom || settings.hideContent.anime) && isAnimeCwItem(i)),
       )
       .map((i) => ({ i, k: cwSortKey(i) }))
@@ -908,7 +910,7 @@ export function Home({
     }
     const pool = [
       ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
-      ...localCwItems.filter((i) => i.type === "series"),
+      ...localCwItems.filter((i) => i.type === "series" && i.external !== "nuvio"),
     ];
     const manual = manualWatchedLibraryItems();
     if (manual.length === 0) return pool;
@@ -971,12 +973,10 @@ export function Home({
         const slot = resolveNuvioProfileIndex();
         removeExternalCwItem(item);
         clearLocalCw(item._id, `nuvio-${slot}`);
-        clearLocalCw(item._id, { acknowledged: true });
         const se = episodeFromVideoId(item.state?.video_id);
         const season = item.state?.season ?? se?.season;
         const episode = item.state?.episode ?? se?.episode;
         clearResume(item._id, undefined, undefined, `nuvio-${slot}`);
-        clearResume(item._id);
         void deleteWatchProgressFromNuvio(
           slot,
           item._id,

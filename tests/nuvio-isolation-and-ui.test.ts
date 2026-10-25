@@ -140,3 +140,50 @@ test("dismissedNextUpKeys syncs to Nuvio Cloud, isolates profile slots, and prev
   assert.match(nuvioSync, /content_id=in\.\(\${inClause}\)/);
   assert.match(nuvioSync, /order\(s, e\) > order\(prev\.season, prev\.episode\)/);
 });
+
+test("readActiveStremioAuthKey is blocked when Nuvio provider is active", () => {
+  const auth = read("../src/lib/auth.tsx");
+  assert.match(auth, /if \(isNuvioProviderActive\(\)\) return null;/);
+});
+
+test("stremio-episode-watched is guarded against syncing in Nuvio mode", () => {
+  const stremioEp = read("../src/lib/stremio-episode-watched.ts");
+  assert.match(stremioEp, /if \(isNuvioProviderActive\(\)\) return;/);
+});
+
+test("mark-watched functions guard Stremio cloud writes against Nuvio mode", () => {
+  const markWatched = read("../src/lib/mark-watched.ts");
+  assert.match(markWatched, /if \(authKey && cid && !isNuvioProviderActive\(\)\) writes\.push\(markMovieWatchedStremio\(authKey, meta, cid, true\)\);/);
+  assert.match(markWatched, /if \(authKey && cid && !isNuvioProviderActive\(\)\) writes\.push\(markMovieWatchedStremio\(authKey, meta, cid, false\)\);/);
+  assert.match(markWatched, /if \(!isNuvioProviderActive\(\)\) void syncSeriesWatchedToStremio\(meta, resolvedImdb\);/);
+});
+
+test("media-provider-actions guards Stremio writes and eliminates unscoped CW calls in Nuvio mode", () => {
+  const mediaActions = read("../src/lib/media-provider-actions.ts");
+  assert.match(mediaActions, /if \(authKey && !isNuvioProviderActive\(\)\)/);
+  assert.doesNotMatch(mediaActions, /saveLocalCw\(nextCw\);\s*saveLocalCw\(nextCw, `nuvio-/);
+  assert.doesNotMatch(mediaActions, /saveLocalCw\(unwatchedCw\);\s*saveLocalCw\(unwatchedCw, `nuvio-/);
+  assert.doesNotMatch(mediaActions, /clearLocalCw\(primaryId\);\s*clearLocalCw\(primaryId, `nuvio-/);
+  assert.match(mediaActions, /saveLocalCw\(\{ \.\.\.nextCw, external: "nuvio" \}, `nuvio-\${slot}`\);/);
+});
+
+test("local-cw strictly isolates Nuvio profile slots, blocks cross-contamination, and provides Stremio sanitizer", () => {
+  const localCw = read("../src/lib/local-cw.ts");
+  assert.match(localCw, /if \(isNuvio\) \{\s*const eff = effectiveOwner\(ownerId\) \|\| `nuvio-\${getNuvioActiveSlot\(\)}`;\s*const nuvioEntry = \{ \.\.\.entry, external: "nuvio" as const \};\s*saveEntry\(storeKey\(false, eff\), nuvioEntry\);/);
+  assert.match(localCw, /if \(\(entry as any\)\.external === "nuvio"\) return;/);
+  assert.match(localCw, /export function sanitizeStremioLocalCw/);
+  assert.match(localCw, /entries\.filter\(\(e\) => !\(e\.id && \(e as any\)\.external === "nuvio"\)\)/);
+});
+
+test("unscoped local CW calls are eliminated from nuvio-sync and useMarkSeason", () => {
+  const nuvioSync = read("../src/lib/nuvio/nuvio-sync.ts");
+  const useMarkSeason = read("../src/views/detail/series-episodes/use-mark-season.ts");
+  assert.doesNotMatch(nuvioSync, /saveLocalCw\(midwayEntry, `nuvio-\${profileIndex}`\);\s*saveLocalCw\(midwayEntry\);/);
+  assert.doesNotMatch(useMarkSeason, /saveLocalCw\(nextCw\);\s*saveLocalCw\(nextCw, `nuvio-/);
+  assert.doesNotMatch(useMarkSeason, /saveLocalCw\(resetCw\);\s*saveLocalCw\(resetCw, `nuvio-/);
+});
+
+test("stremio module exports expungeLeachedNuvioItemsFromStremio to sanitize leached cloud entries", () => {
+  const stremio = read("../src/lib/stremio.ts");
+  assert.match(stremio, /export async function expungeLeachedNuvioItemsFromStremio/);
+});

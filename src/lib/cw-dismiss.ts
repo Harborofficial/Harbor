@@ -334,7 +334,6 @@ export function dismissCw(
     try {
       const slot = resolveNuvioProfileIndex();
       clearLocalCw(id, `nuvio-${slot}`);
-      clearLocalCw(id);
       removeExternalCwItem(item);
       void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
     } catch {}

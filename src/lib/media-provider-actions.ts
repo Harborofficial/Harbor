@@ -434,7 +434,7 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
     });
   }
   const authKey = readActiveStremioAuthKey();
-  if (authKey)
+  if (authKey && !isNuvioProviderActive())
     writes.push({
       provider: "Stremio",
       run: async (assertCurrent) => {
@@ -690,7 +690,7 @@ export function watchedProviderWrites(
       },
     });
   const authKey = readActiveStremioAuthKey();
-  if (authKey)
+  if (authKey && !isNuvioProviderActive())
     writes.push({
       provider: "Stremio",
       run: async (assertCurrent) => {
@@ -874,8 +874,7 @@ export function watchedProviderWrites(
                   isAnime: meta.type === "anime",
                   t: Date.now(),
                 };
-                saveLocalCw(nextCw);
-                saveLocalCw(nextCw, `nuvio-${slot}`);
+                saveLocalCw({ ...nextCw, external: "nuvio" }, `nuvio-${slot}`);
                 saveResumeMs(
                   meta.id,
                   0,
@@ -887,8 +886,7 @@ export function watchedProviderWrites(
                   `nuvio-${slot}`,
                 );
                 if (altId) {
-                  saveLocalCw({ ...nextCw, id: altId });
-                  saveLocalCw({ ...nextCw, id: altId }, `nuvio-${slot}`);
+                  saveLocalCw({ ...nextCw, id: altId, external: "nuvio" }, `nuvio-${slot}`);
                 }
                 window.dispatchEvent(
                   new CustomEvent("harbor:nuvio-progress-pushed", {
@@ -902,13 +900,10 @@ export function watchedProviderWrites(
                 // Entire series is completed (no further episodes exist)
                 await deleteWatchProgressFromNuvio(slot, primaryId);
                 if (altId) await deleteWatchProgressFromNuvio(slot, altId);
-                clearLocalCw(primaryId);
                 clearLocalCw(primaryId, `nuvio-${slot}`);
                 if (altId) {
-                  clearLocalCw(altId);
                   clearLocalCw(altId, `nuvio-${slot}`);
                 }
-                clearLocalCw(meta.id);
                 clearLocalCw(meta.id, `nuvio-${slot}`);
               }
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
@@ -961,12 +956,11 @@ export function watchedProviderWrites(
                 episode: firstEp.episode,
                 positionMs: 0,
                 durationMs: 2640000,
+                external: "nuvio" as const,
                 t: Date.now(),
               };
-              saveLocalCw(unwatchedCw);
               saveLocalCw(unwatchedCw, `nuvio-${slot}`);
               if (altId) {
-                saveLocalCw({ ...unwatchedCw, id: altId });
                 saveLocalCw({ ...unwatchedCw, id: altId }, `nuvio-${slot}`);
               }
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));

@@ -38,6 +38,7 @@ export function localToLibraryItem(e: ReturnType<typeof listLocalCw>[number]): L
     poster: e.poster,
     background: e.background,
     isAnime: e.isAnime,
+    external: (e as any).external,
     upNext: e.type === "series" && e.positionMs === 0,
     state: {
       timeOffset: e.positionMs,

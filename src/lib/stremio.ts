@@ -277,6 +277,18 @@ export async function removeStremioLibraryItem(authKey: string, id: string): Pro
   });
 }
 
+export async function expungeLeachedNuvioItemsFromStremio(
+  authKey: string,
+  leachedIds: string[] = ["tt0944947", "tt21868350"],
+): Promise<void> {
+  if (!authKey) return;
+  for (const id of leachedIds) {
+    try {
+      await removeStremioLibraryItem(authKey, id);
+    } catch {}
+  }
+}
+
 export const CLOUD_OK = /^(tt\d|kitsu:|mal:|anilist:|anidb:|tmdb:)/;
 
 export const ANIME_CLOUD_ID = /^(kitsu|mal|anilist|anidb):/;

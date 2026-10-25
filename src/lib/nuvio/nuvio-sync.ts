@@ -893,7 +893,6 @@ export async function reconcileNuvioWatched(
         // Check if dismissed in Nuvio Cloud
         if (isDismissedNextUp(entry.id, entry.season, entry.episode, dismissedKeys)) {
           clearLocalCw(entry.id, `nuvio-${profileIndex}`);
-          clearLocalCw(entry.id);
           cwChanged = true;
           continue;
         }
@@ -906,7 +905,6 @@ export async function reconcileNuvioWatched(
           serverWatchedIds.has(`series:${cleanEntryId}`)
         ) {
           clearLocalCw(entry.id, `nuvio-${profileIndex}`);
-          clearLocalCw(entry.id);
           cwChanged = true;
           continue;
         }
@@ -930,17 +928,11 @@ export async function reconcileNuvioWatched(
                 season: nextS,
                 episode: nextE,
                 positionMs: 0,
+                external: "nuvio" as const,
                 t: maxInfo.watchedAt || Date.now(),
               },
               `nuvio-${profileIndex}`,
             );
-            saveLocalCw({
-              ...entry,
-              season: nextS,
-              episode: nextE,
-              positionMs: 0,
-              t: maxInfo.watchedAt || Date.now(),
-            });
             cwChanged = true;
           }
         }
@@ -1011,11 +1003,11 @@ export async function reconcileNuvioWatched(
           episode: nextE,
           positionMs: 0,
           durationMs: 2640000,
+          external: "nuvio" as const,
           t: maxInfo.watchedAt || Date.now(),
         };
 
         saveLocalCw(midwayEntry, `nuvio-${profileIndex}`);
-        saveLocalCw(midwayEntry);
         cwChanged = true;
       }
 
@@ -1172,9 +1164,7 @@ export async function deleteWatchProgressFromNuvio(
   // Prune local CW, resume states, and playback items for this content across all scopes and variants
   for (const vid of idVariants) {
     clearLocalCw(vid, `nuvio-${profileIndex}`);
-    clearLocalCw(vid);
     clearResume(vid, undefined, undefined, `nuvio-${profileIndex}`);
-    clearResume(vid);
   }
 
   try {

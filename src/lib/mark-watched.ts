@@ -45,7 +45,7 @@ export async function markMovieWatched(
   const authKey = readActiveStremioAuthKey();
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
   const writes: Promise<unknown>[] = [];
-  if (authKey && cid) writes.push(markMovieWatchedStremio(authKey, meta, cid, true));
+  if (authKey && cid && !isNuvioProviderActive()) writes.push(markMovieWatchedStremio(authKey, meta, cid, true));
   if (imdb || tmdb) {
     const ids = { ...(imdb ? { imdb } : {}), ...(tmdb ? { tmdb } : {}) };
     writes.push(pushWatched({ kind: "movie", ids }), simklAddToHistory({ kind: "movie", ids }));
@@ -92,7 +92,7 @@ export async function unmarkMovieWatched(meta: Meta, imdbId?: string | null): Pr
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
   const pmdbTarget = stremioIdToPmdbTarget(meta.id, undefined, "movie");
   const writes: Promise<unknown>[] = [];
-  if (authKey && cid) writes.push(markMovieWatchedStremio(authKey, meta, cid, false));
+  if (authKey && cid && !isNuvioProviderActive()) writes.push(markMovieWatchedStremio(authKey, meta, cid, false));
   if (pmdbTarget) writes.push(unmarkPmdbWatched(pmdbTarget));
   if (isNuvioSignedIn()) {
     if (isNuvioProviderActive()) {
@@ -166,7 +166,7 @@ export async function markMetaWatched(
   const eps = await releasedEpisodes(meta, resolvedImdb);
   if (activeProfileId() !== ownerProfile) return;
   if (eps.length > 0) setManualWatchedMany(meta.id, eps, true);
-  void syncSeriesWatchedToStremio(meta, resolvedImdb);
+  if (!isNuvioProviderActive()) void syncSeriesWatchedToStremio(meta, resolvedImdb);
   const isAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
   const imdb = resolvedImdb ?? (meta.id.startsWith("tt") ? meta.id : undefined);
   const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : (tmdbId ?? undefined);
@@ -226,7 +226,7 @@ export async function unmarkMetaWatched(meta: Meta, imdbId?: string | null): Pro
   const resolvedImdb = resolveSeriesImdb(meta, imdbId);
   const eps = await releasedEpisodes(meta, resolvedImdb);
   if (eps.length > 0) setManualWatchedMany(meta.id, eps, false);
-  void syncSeriesWatchedToStremio(meta, resolvedImdb);
+  if (!isNuvioProviderActive()) void syncSeriesWatchedToStremio(meta, resolvedImdb);
   for (const episode of eps) {
     const target = stremioIdToPmdbTarget(resolvedImdb ?? meta.id, episode, "tv");
     if (target) void unmarkPmdbWatched(target);

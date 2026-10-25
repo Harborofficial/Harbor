@@ -55,7 +55,10 @@ function writeProfileSession(id: string, session: Session | null): void {
   }
 }
 
+import { isNuvioProviderActive } from "./active-profile-id";
+
 export function readActiveStremioAuthKey(): string | null {
+  if (isNuvioProviderActive()) return null;
   try {
     const raw = localStorage.getItem("harbor.profiles.v1");
     if (!raw) return null;

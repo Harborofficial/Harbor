@@ -6,6 +6,8 @@ import { useSettings } from "@/lib/settings";
 import stremioLogo from "@/assets/stremio.png";
 import nuvioLogo from "@/assets/nuvio.png";
 import { isNuvioSignedIn, loadNuvioState } from "@/lib/nuvio/nuvio-client";
+import { sanitizeStremioLocalCw } from "@/lib/local-cw";
+import { expungeLeachedNuvioItemsFromStremio } from "@/lib/stremio";
 import { AuthModal } from "@/components/auth-modal";
 import { NuvioAuthModal } from "@/components/nuvio-auth-modal";
 import { Section } from "../shared";
@@ -30,6 +32,18 @@ export function AccountProviderPanel() {
   const nuvioUser = nuvioState.session?.user;
   const activeProvider = settings.accountProvider || "stremio";
 
+  useEffect(() => {
+    if (activeProvider === "stremio") {
+      sanitizeStremioLocalCw(["tt0944947", "tt21868350"]);
+      const stremioAuth = readPrimaryStremioSession()?.authKey;
+      if (stremioAuth && !localStorage.getItem("harbor.stremio.nuvio_leached_expunged.v1")) {
+        void expungeLeachedNuvioItemsFromStremio(stremioAuth).then(() => {
+          localStorage.setItem("harbor.stremio.nuvio_leached_expunged.v1", "1");
+        });
+      }
+    }
+  }, [activeProvider]);
+
   const selectProvider = (provider: "stremio" | "nuvio") => {
     if (provider === "nuvio" && !nuvioConnected) {
       setShowNuvioAuth(true);
@@ -50,6 +64,15 @@ export function AccountProviderPanel() {
       }
     } catch {}
     update({ accountProvider: provider });
+    if (provider === "stremio") {
+      sanitizeStremioLocalCw(["tt0944947", "tt21868350"]);
+      const stremioAuth = readPrimaryStremioSession()?.authKey;
+      if (stremioAuth && !localStorage.getItem("harbor.stremio.nuvio_leached_expunged.v1")) {
+        void expungeLeachedNuvioItemsFromStremio(stremioAuth).then(() => {
+          localStorage.setItem("harbor.stremio.nuvio_leached_expunged.v1", "1");
+        });
+      }
+    }
     window.dispatchEvent(
       new CustomEvent("harbor:account-provider-changed", { detail: { provider } }),
     );
