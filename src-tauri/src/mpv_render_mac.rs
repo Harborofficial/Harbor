@@ -96,6 +96,29 @@ fn main_queue() -> *mut c_void {
     unsafe { (&_dispatch_main_q as *const c_void) as *mut c_void }
 }
 
+// The rounded main window normally needs a painted backing so that a
+// transparent WKWebView never exposes the desktop. During libmpv playback the
+// backing must instead be clear: an NSOpenGLView can be composited behind the
+// contentView's layer on macOS, hiding the video behind a solid black surface.
+// Restore the painted backing as soon as the embed is torn down.
+fn set_content_backing(window: &NSWindow, video_active: bool) {
+    unsafe {
+        let Some(content_view) = window.contentView() else {
+            return;
+        };
+        let _: () = msg_send![&*content_view, setWantsLayer: true];
+        if let Some(layer) = content_view.layer() {
+            let color: *mut AnyObject = if video_active {
+                msg_send![objc2::class!(NSColor), clearColor]
+            } else {
+                msg_send![objc2::class!(NSColor), blackColor]
+            };
+            let cg_color: *mut AnyObject = msg_send![color, CGColor];
+            let _: () = msg_send![&*layer, setBackgroundColor: cg_color];
+        }
+    }
+}
+
 pub struct Embed {
     view: Retained<NSOpenGLView>,
     web_view: Option<Retained<NSView>>,
@@ -104,6 +127,26 @@ pub struct Embed {
     video_window: Option<Retained<NSWindow>>,
     css: Option<MpvGeometry>,
     render: Mutex<RenderContext>,
+}
+
+// macOS can rebuild the content-view layers when entering or leaving native
+// fullscreen. Keep the video backing clear and its sibling below the webview.
+fn refresh_compositing(embed: &Embed) {
+    set_content_backing(&embed.ns_window, true);
+    if embed.video_window.is_none() {
+        if let (Some(parent), Some(web_view)) =
+            (embed.ns_window.contentView(), embed.web_view.as_deref())
+        {
+            let view_as_view: &NSView = embed.view.as_super();
+            unsafe {
+                parent.addSubview_positioned_relativeTo(
+                    view_as_view,
+                    NSWindowOrderingMode::Below,
+                    Some(web_view),
+                );
+            }
+        }
+    }
 }
 
 // SAFETY: the mutex moves ownership into a process-global slot, but every path
@@ -287,7 +330,7 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
             schedule_redraw();
         });
 
-        *slot().lock().map_err(|e| format!("slot lock: {}", e))? = Some(Embed {
+        let embed = Embed {
             view,
             web_view: first_subview,
             web_view_was_opaque,
@@ -295,7 +338,13 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
             video_window,
             css: None,
             render: Mutex::new(render),
-        });
+        };
+        refresh_compositing(&embed);
+        eprintln!(
+            "[harbor::mpv_mac] video backing clear, child window={}",
+            edr
+        );
+        *slot().lock().map_err(|e| format!("slot lock: {}", e))? = Some(embed);
 
         schedule_redraw();
         eprintln!("[harbor::mpv_mac] installed");
@@ -362,10 +411,10 @@ pub fn install_window_rounding(ns_window_ptr: i64) -> Result<(), String> {
                 let _: () = msg_send![&*layer, setCornerRadius: WINDOW_CORNER_RADIUS];
                 let _: () = msg_send![&*layer, setMasksToBounds: true];
                 // The window stays clear so the rounded corners show the desktop.
-                // The content layer must still be opaque: the webview draws no
-                // background and the page root is transparent while mpv is
-                // embedded, so a clear layer here leaves the whole window
-                // see-through after macOS recomposites it (e.g. on focus).
+                // Outside embedded playback the content layer needs a solid
+                // backing: the webview does not draw a background, so a clear
+                // backing can expose the desktop when macOS recomposites it.
+                // The mpv embed temporarily clears this backing while active.
                 let black: *mut AnyObject = msg_send![class!(NSColor), blackColor];
                 let cg_black: *mut AnyObject = msg_send![&*black, CGColor];
                 let _: () = msg_send![&*layer, setBackgroundColor: cg_black];
@@ -444,8 +493,8 @@ pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
             return Ok(());
         };
         embed.css = Some(css);
-        unsafe {
-            sync_frame(embed);
+        if unsafe { sync_frame(embed) } {
+            refresh_compositing(embed);
         }
     }
     schedule_redraw();
@@ -486,6 +535,9 @@ pub fn render_now() -> Result<(), String> {
         }
         let packed = ((w as u64) << 32) | (h as u32 as u64);
         let resized = LAST_SURFACE.swap(packed, Ordering::Relaxed) != packed;
+        if moved || resized {
+            refresh_compositing(embed);
+        }
         if resized {
             eprintln!(
                 "[harbor::mpv_mac] render surface {}x{} px (bounds {}x{} pt)",
@@ -543,6 +595,8 @@ fn teardown_embed(embed: Embed) {
                 let _: () = msg_send![&*layer, setOpaque: restored];
             }
         }
+        set_content_backing(&embed.ns_window, false);
+        eprintln!("[harbor::mpv_mac] video backing restored");
     }
 }
 
