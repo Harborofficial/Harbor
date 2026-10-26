@@ -41,13 +41,10 @@ import { buildArabicHomeRows } from "@/lib/arabic/home-rows";
 import { buildRussianHomeRows } from "@/lib/russian/home-rows";
 import { resolveAddonOrigin } from "@/lib/nuvio/nuvio-addon-registry";
 import {
-  deleteWatchProgressFromNuvio,
   isNuvioProviderActive,
   reconcileNuvioWatched,
-  resolveNuvioProfileIndex,
 } from "@/lib/nuvio/nuvio-sync";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
-import { clearResume } from "@/lib/resume";
 import { useAuth } from "@/lib/auth";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { type Meta } from "@/lib/cinemeta";
@@ -58,7 +55,7 @@ import { trackEvent } from "@/lib/discover";
 import { publishResumeStates } from "@/lib/hover-preview/store";
 import { readResumeEntry, saveResumeBatch } from "@/lib/resume";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
-import { clearLocalCw, listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import { listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -98,7 +95,7 @@ import {
   peekSimklWatchedMap,
   type WatchlistStatus,
 } from "@/lib/simkl/list-status";
-import { removeExternalCwItem, setExternalCwSources, useExternalCw } from "@/lib/feed/external-cw";
+import { setExternalCwSources, useExternalCw } from "@/lib/feed/external-cw";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useAnilist } from "@/lib/anilist/provider";
 import { loadAnilistWatchedMap } from "@/lib/anilist/watched-map";
@@ -968,27 +965,6 @@ export function Home({
       if (item.manualWatched) {
         dismissManualWatched(item._id, { acknowledged: true });
         return;
-      }
-      if (isNuvioProviderActive() || item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
-        const slot = resolveNuvioProfileIndex();
-        removeExternalCwItem(item);
-        clearLocalCw(item._id, `nuvio-${slot}`);
-        const se = episodeFromVideoId(item.state?.video_id);
-        const season = item.state?.season ?? se?.season;
-        const episode = item.state?.episode ?? se?.episode;
-        clearResume(item._id, undefined, undefined, `nuvio-${slot}`);
-        void deleteWatchProgressFromNuvio(
-          slot,
-          item._id,
-          undefined,
-          season,
-          episode,
-        );
-        return dismissCw(item, authKey, { acknowledged: true });
-      }
-      if (item.local) {
-        clearLocalCw(item._id, { acknowledged: true });
-        return dismissCw(item, authKey, { acknowledged: true });
       }
       return dismissCw(item, authKey, { acknowledged: true });
     },

@@ -46,6 +46,7 @@ function fixture(initial: LibraryItem | null) {
       return { ok: true, status: 200, text: async () => JSON.stringify({ result }) };
     } },
     "@/lib/resume": { readResumeEntry: () => null, readResumeSource: () => undefined },
+    "./active-profile-id": { isNuvioProviderActive: () => false },
   });
   const history = load("src/views/library/history-merge.ts", {
     "@/lib/stremio": api, "./shared": { parseTs: Date.parse },

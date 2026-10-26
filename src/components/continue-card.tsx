@@ -58,6 +58,7 @@ import { capturePlaybackActor, isPlaybackActorCurrent } from "@/lib/playback-his
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { localCwEntry } from "@/lib/local-cw";
 import { isManualWatchedDismissed } from "@/lib/manual-watched";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 
 // Bleach: Thousand-Year Blood War is split across four cours that carry their
 // own arc name appended to the base title (e.g. "... - The Separation"). The
@@ -630,6 +631,9 @@ export const ContinueCard = memo(function ContinueCard({
         const current = latest.current.item;
         if (current.manualWatched) return !isManualWatchedDismissed(current._id);
         if (isCwDismissed(current)) return false;
+        if (isNuvioProviderActive() || current.external === "nuvio") {
+          return true;
+        }
         return !current.local || !!localCwEntry(current._id);
       },
       t,

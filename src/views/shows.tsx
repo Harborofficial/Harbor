@@ -27,7 +27,6 @@ import {
 } from "@/lib/stremio";
 import { listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import { localToLibraryItem } from "@/lib/continue-watching";
-import { clearLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -335,9 +334,7 @@ export function Shows({ active = true }: { active?: boolean }) {
                   onDismiss={(item) =>
                     item.manualWatched
                       ? dismissManualWatched(item._id, { acknowledged: true })
-                      : item.local
-                        ? clearLocalCw(item._id, { acknowledged: true })
-                        : dismissCw(item, authKey, { acknowledged: true })
+                      : dismissCw(item, authKey, { acknowledged: true })
                   }
                 />
               ))}

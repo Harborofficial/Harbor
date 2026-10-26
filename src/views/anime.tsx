@@ -98,7 +98,7 @@ import {
   library,
   type LibraryItem,
 } from "@/lib/stremio";
-import { clearLocalCw, listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import { listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -981,7 +981,6 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                             dismissManualWatched(it._id, { acknowledged: true });
                             return;
                           }
-                          if (it.local) clearLocalCw(it._id, { acknowledged: true });
                           return dismissCw(it, authKey, { acknowledged: true });
                         }}
                       />

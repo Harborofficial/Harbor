@@ -527,6 +527,15 @@ if (typeof window !== "undefined") {
       }
     }
   });
+  window.addEventListener("harbor:continue-watching-updated", () => {
+    if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
+      const slot = resolveNuvioProfileIndex();
+      const fresh = readCachedNuvioPlaybackItems(slot);
+      slotCwMemoryCache.set(slot, fresh);
+      const nonNuvio = items.filter((i) => i.external !== "nuvio");
+      setItems(merge([fresh, nonNuvio]));
+    }
+  });
 }
 
 export function useExternalCw(enabled = true): LibraryItem[] {

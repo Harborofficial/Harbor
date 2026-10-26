@@ -9,6 +9,7 @@ import { isNuvioSignedIn } from "./nuvio/nuvio-client";
 import { removeExternalCwItem } from "@/lib/feed/external-cw";
 import {
   deleteWatchProgressFromNuvio,
+  dismissNextUpInNuvioCloud,
   isNuvioProviderActive,
   resolveNuvioProfileIndex,
 } from "./nuvio/nuvio-sync";
@@ -324,18 +325,19 @@ export function dismissCw(
   emit();
   if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
     const { season, episode } = resolveEpisode(item);
+    const slot = resolveNuvioProfileIndex();
     try {
-      clearResume(id, season, episode, options);
+      clearResume(id, season, episode, { ...options, ownerId: `nuvio-${slot}` });
     } catch {
       throw new Error(
         "Removed from Continue Watching, but the saved position could not be cleared.",
       );
     }
     try {
-      const slot = resolveNuvioProfileIndex();
       clearLocalCw(id, `nuvio-${slot}`);
       removeExternalCwItem(item);
       void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
+      void dismissNextUpInNuvioCloud(slot, id, season, episode);
     } catch {}
     return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;
   }
