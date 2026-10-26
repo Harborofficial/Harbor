@@ -131,14 +131,20 @@ function readAll(key: string): Record<string, LocalCwEntry> {
 }
 
 function writeAll(key: string, all: Record<string, LocalCwEntry>, acknowledged = false): void {
+  const previous = cache.get(key);
   cache.set(key, all);
   try {
     localStorage.setItem(key, JSON.stringify(all));
   } catch (error) {
-    if (acknowledged)
+    if (acknowledged) {
+      // An acknowledged change whose write failed must not leave the memory
+      // cache ahead of storage: callers retry against the previous snapshot.
+      if (previous) cache.set(key, previous);
+      else cache.delete(key);
       throw new Error("Could not save the change. Check available storage and try again.", {
         cause: error,
       });
+    }
   }
 }
 
