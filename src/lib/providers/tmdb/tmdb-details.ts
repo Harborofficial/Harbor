@@ -217,6 +217,12 @@ export async function tmdbDetails(key: string, meta: Meta, lang?: string): Promi
   } else if (meta.id.startsWith("tmdb:tv:")) {
     kind = "tv";
     id = meta.id.slice("tmdb:tv:".length);
+  } else if (meta.id.startsWith("tmdb:")) {
+    kind = meta.type === "movie" ? "movie" : "tv";
+    id = meta.id.slice("tmdb:".length);
+  } else if (/^\d+$/.test(meta.id)) {
+    kind = meta.type === "movie" ? "movie" : "tv";
+    id = meta.id;
   } else if (meta.id.startsWith("tt")) {
     const findKey = `${meta.id}:${meta.type}`;
     const cached = findCache()[findKey];

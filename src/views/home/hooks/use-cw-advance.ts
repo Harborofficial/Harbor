@@ -38,6 +38,7 @@ import { isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { listLocalCw } from "@/lib/local-cw";
 import { localToLibraryItem } from "@/lib/continue-watching";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 
 const FINISHED_RATIO = 0.9;
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -431,6 +432,7 @@ export function useCwAdvance(
       for (const i of candidates) {
         const cur = currentEpisode(i)!;
         const isAnime = isAnimeCwItem(i) || ANIME_ID.test(i._id);
+        const isNuvioItem = isNuvioProviderActive() || i.external === "nuvio";
         let list = listCacheRef.current.get(i._id);
         let fetchOk = list !== undefined;
         if (list === undefined) {
@@ -519,7 +521,9 @@ export function useCwAdvance(
                   continue;
                 } else {
                   // Entire series is completed; remove from Continue Watching
-                  remove.add(i._id);
+                  if (!isNuvioItem) {
+                    remove.add(i._id);
+                  }
                   continue;
                 }
               } else {
@@ -552,7 +556,9 @@ export function useCwAdvance(
                   unplacedCur = true;
                 } else {
                   // Entire series is completed; remove from Continue Watching
-                  remove.add(i._id);
+                  if (!isNuvioItem) {
+                    remove.add(i._id);
+                  }
                   continue;
                 }
               }
@@ -582,6 +588,14 @@ export function useCwAdvance(
         }
         const curEpInList = list.find((e) => e.season === effCur.season && e.episode === effCur.episode);
         if (i.upNext && curEpInList && !nextEpAired(list, curEpInList, isAnime)) {
+          if (isNuvioItem) {
+            next.set(i._id, {
+              ...i,
+              waitingForAir: true as const,
+              nextAirDate: curEpInList.airDate,
+            } as LibraryItem);
+            continue;
+          }
           if (animeCwEnd === "timer" && (curEpInList.airDate || isAnime)) {
             next.set(i._id, {
               ...i,
@@ -660,12 +674,13 @@ export function useCwAdvance(
           );
           if (followUp) nextEp = followUp;
         }
-        if (nextEp && nextEpAired(list, nextEp, isAnime)) {
+        if (nextEp && (isNuvioItem || nextEpAired(list, nextEp, isAnime))) {
           const displaySeason = remappedMixed
             ? nextEp.season
             : origCur.season !== effCur.season
               ? origCur.season
               : nextEp.season;
+          const aired = nextEpAired(list, nextEp, isAnime);
           next.set(i._id, {
             ...i,
             state: {
@@ -677,6 +692,9 @@ export function useCwAdvance(
               flaggedWatched: 0,
             },
             upNext: true,
+            ...(isNuvioItem && !aired
+              ? { waitingForAir: true as const, nextAirDate: nextEp.airDate }
+              : {}),
           });
         } else if (animeCwEnd === "timer" && nextEp && (nextEp.airDate || isAnime)) {
           next.set(i._id, {
@@ -694,6 +712,7 @@ export function useCwAdvance(
             waitingForAir: true as const,
           } as LibraryItem);
         } else if (
+          !isNuvioItem &&
           shouldDropFinished(
             list,
             fetchOk,

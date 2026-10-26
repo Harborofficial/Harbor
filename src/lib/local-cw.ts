@@ -212,14 +212,23 @@ export function clearLocalCw(
     }
     targetKeys.add(LEGACY_KEY);
   }
+  const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
+  const idVariants = new Set([id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]);
   let changed = false;
   for (const key of targetKeys) {
     const all = readAll(key);
-    if (!(id in all)) continue;
+    let keyChanged = false;
     const next = { ...all };
-    delete next[id];
-    writeAll(key, next, acknowledged);
-    changed = true;
+    for (const vid of idVariants) {
+      if (vid in next) {
+        delete next[vid];
+        keyChanged = true;
+      }
+    }
+    if (keyChanged) {
+      writeAll(key, next, acknowledged);
+      changed = true;
+    }
   }
   if (changed) emit();
 }

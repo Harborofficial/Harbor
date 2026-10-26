@@ -326,15 +326,24 @@ export function dismissCw(
   if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
     const { season, episode } = resolveEpisode(item);
     const slot = resolveNuvioProfileIndex();
+    const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
+    const idVariants = [id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`];
     try {
-      clearResume(id, season, episode, { ...options, ownerId: `nuvio-${slot}` });
+      for (const vid of idVariants) {
+        clearResume(vid, undefined, undefined, { ...options, ownerId: `nuvio-${slot}` });
+        if (season != null && episode != null) {
+          clearResume(vid, season, episode, { ...options, ownerId: `nuvio-${slot}` });
+        }
+      }
     } catch {
       throw new Error(
         "Removed from Continue Watching, but the saved position could not be cleared.",
       );
     }
     try {
-      clearLocalCw(id, `nuvio-${slot}`);
+      for (const vid of idVariants) {
+        clearLocalCw(vid, `nuvio-${slot}`);
+      }
       removeExternalCwItem(item);
       void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
       void dismissNextUpInNuvioCloud(slot, id, season, episode);

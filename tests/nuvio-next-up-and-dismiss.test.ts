@@ -124,3 +124,56 @@ test("Nuvio Next Up: fully watched series does not generate Next Up cards", () =
   const items = buildNuvioPlaybackItems(records, 0, watchedItems);
   assert.equal(items.length, 0, "Fully watched series must not appear in Continue Watching");
 });
+
+test("Nuvio Next Up: wildcard |-1|-1 dismissals and TMDB ID variants match", () => {
+  // Mobile app pushes whole-series dismissal as "${contentId}|-1|-1"
+  const dismissedKeys = new Set<string>([
+    "tt9999999|-1|-1",
+    "213375|-1|-1",
+    "tt8888888|2|-1",
+  ]);
+
+  // Whole series dismissal matches any episode
+  assert.equal(isDismissedNextUp("tt9999999", 1, 1, dismissedKeys), true);
+  assert.equal(isDismissedNextUp("tt9999999", 2, 5, dismissedKeys), true);
+  assert.equal(isDismissedNextUp("tt9999999", -1, -1, dismissedKeys), true);
+
+  // TMDB prefixed ID matches numeric key and vice versa
+  assert.equal(isDismissedNextUp("tmdb:213375", 1, 1, dismissedKeys), true);
+  assert.equal(isDismissedNextUp("213375", 1, 2, dismissedKeys), true);
+  assert.equal(isDismissedNextUp("series:213375", 1, 1, dismissedKeys), true);
+
+  // Season-level wildcard matches that season but not another
+  assert.equal(isDismissedNextUp("tt8888888", 2, 1, dismissedKeys), true);
+  assert.equal(isDismissedNextUp("tt8888888", 2, 8, dismissedKeys), true);
+  assert.equal(isDismissedNextUp("tt8888888", 1, 1, dismissedKeys), false);
+
+  // Seed episode dismissal
+  const seedDismissed = new Set<string>(["tt7777777|1|2"]);
+  // Target Next Up episode is S1E3, seed episode is S1E2 -> isDismissedNextUp(..., 1, 3) must be true
+  assert.equal(isDismissedNextUp("tt7777777", 1, 3, seedDismissed), true);
+});
+
+test("Nuvio Next Up: unaired / upcoming series (e.g. Vision Quest) generates Next Up card and preserves metadata", () => {
+  const records: NuvioWatchProgress[] = [];
+  const watchedItems: NuvioWatchedItem[] = [
+    {
+      profile_id: 0,
+      content_id: "tmdb:213375",
+      content_type: "series",
+      title: "Vision Quest",
+      season: 1,
+      episode: 1,
+      watched_at: Date.now(),
+    },
+  ];
+
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems);
+  assert.equal(items.length, 1, "Unaired next episode must generate Next Up card");
+  assert.equal(items[0]._id, "tmdb:213375");
+  assert.equal(items[0].name, "Vision Quest");
+  assert.equal(items[0].state?.season, 1);
+  assert.equal(items[0].state?.episode, 2);
+  assert.equal(items[0].upNext, true);
+  assert.equal(items[0].external, "nuvio");
+});
