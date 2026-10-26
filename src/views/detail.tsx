@@ -1637,11 +1637,15 @@ export function DetailView({
       name: title,
       alternateTitles: [
         ...new Set(
-          [meta.name, cinemetaFull?.name, detail?.originalTitle, ...(meta.alternateTitles ?? [])]
-            .filter(
-              (candidate): candidate is string =>
-                typeof candidate === "string" && candidate.trim().length > 0,
-            ),
+          [
+            meta.name,
+            cinemetaFull?.name,
+            detail?.originalTitle,
+            ...(meta.alternateTitles ?? []),
+          ].filter(
+            (candidate): candidate is string =>
+              typeof candidate === "string" && candidate.trim().length > 0,
+          ),
         ),
       ],
       // The stream request is typed from this, and for a native addon it is passed through whole
