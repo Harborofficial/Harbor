@@ -159,6 +159,22 @@ export function purgeStremioAccountData(profileId?: string): void {
   }
 }
 
+export function clearPrimaryStremioSession(): void {
+  try {
+    const raw = localStorage.getItem("harbor.profiles.v1");
+    if (raw) {
+      const state = JSON.parse(raw) as { profiles?: Profile[]; activeId?: string | null };
+      const profiles = Array.isArray(state.profiles) ? state.profiles : [];
+      for (const p of profiles) {
+        writeProfileSession(p.id, null);
+        purgeStremioAccountData(p.id);
+      }
+    }
+    writeProfileSession("default", null);
+    purgeStremioAccountData("default");
+  } catch {}
+}
+
 const Ctx = createContext<AuthValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -168,6 +184,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() =>
     sourceId ? readProfileSession(sourceId) : null,
   );
+  const [provider, setProvider] = useState<string>(() =>
+    typeof localStorage !== "undefined"
+      ? (localStorage.getItem("harbor.account-provider") || "stremio")
+      : "stremio",
+  );
+
+  useEffect(() => {
+    const handler = () => {
+      setProvider(
+        typeof localStorage !== "undefined"
+          ? (localStorage.getItem("harbor.account-provider") || "stremio")
+          : "stremio",
+      );
+    };
+    window.addEventListener("harbor:account-provider-changed", handler);
+    window.addEventListener("storage", handler);
+    return () => {
+      window.removeEventListener("harbor:account-provider-changed", handler);
+      window.removeEventListener("storage", handler);
+    };
+  }, []);
+
+  const isNuvio = isNuvioProviderActive() || provider === "nuvio";
 
   useEffect(() => {
     setSession(sourceId ? readProfileSession(sourceId) : null);
@@ -211,6 +250,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(() => {
+    if (isNuvioProviderActive()) {
+      clearPrimaryStremioSession();
+      setSession(null);
+      return;
+    }
     const pid = activeProfile?.id ?? "default";
     if (!activeProfile) {
       purgeStremioAccountData("default");
@@ -228,13 +272,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthValue>(
     () => ({
-      user: session?.user ?? null,
-      authKey: session?.authKey ?? null,
+      user: isNuvio ? null : (session?.user ?? null),
+      authKey: isNuvio ? null : (session?.authKey ?? null),
       signIn,
       signInWithKey,
       signOut,
     }),
-    [session, signIn, signInWithKey, signOut],
+    [isNuvio, session, signIn, signInWithKey, signOut],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

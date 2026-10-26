@@ -1,6 +1,9 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { readResumeEntry, readResumeSource } from "@/lib/resume";
 import { isDetectedAnime } from "./anime-detect";
+import { isNuvioProviderActive } from "./active-profile-id";
+import { collectAllNuvioItemIds } from "./nuvio/nuvio-client";
+import { sanitizeStremioLocalCw } from "./local-cw";
 
 const API = "https://api.strem.io/api";
 
@@ -251,7 +254,50 @@ export async function libraryGetOneStrict(
   return items?.find((it) => it._id === id) ?? null;
 }
 
-export async function libraryPut(authKey: string, item: LibraryItem): Promise<void> {
+function readPrimaryStremioAuthKey(): string | null {
+  try {
+    const raw = localStorage.getItem("harbor.profiles.v1");
+    if (raw) {
+      const state = JSON.parse(raw) as { profiles?: any[]; activeId?: string | null };
+      const profiles = Array.isArray(state.profiles) ? state.profiles : [];
+      const active =
+        profiles.find((p) => p.id === state.activeId) ??
+        profiles.find((p) => p.isPrimary) ??
+        profiles[0] ??
+        null;
+      const sourceId = active?.shareStremioWith || active?.id || "default";
+      const sessRaw =
+        localStorage.getItem(`harbor.auth.${sourceId}`) ||
+        localStorage.getItem("harbor.auth.default");
+      if (sessRaw) {
+        const sess = JSON.parse(sessRaw);
+        if (sess?.authKey) return sess.authKey;
+      }
+      for (const p of profiles) {
+        const pSessRaw = localStorage.getItem(`harbor.auth.${p.id}`);
+        if (pSessRaw) {
+          const sess = JSON.parse(pSessRaw);
+          if (sess?.authKey) return sess.authKey;
+        }
+      }
+    }
+    const def = localStorage.getItem("harbor.auth.default");
+    if (def) {
+      const sess = JSON.parse(def);
+      if (sess?.authKey) return sess.authKey;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function libraryPut(
+  authKey: string,
+  item: LibraryItem,
+  forceAllow = false,
+): Promise<void> {
+  if (isNuvioProviderActive() && !forceAllow) return;
   if (ANIME_CLOUD_ID.test(item._id) && item.removed !== true) return;
   await call<unknown>("datastorePut", {
     authKey,
@@ -260,7 +306,11 @@ export async function libraryPut(authKey: string, item: LibraryItem): Promise<vo
   });
 }
 
-export async function removeStremioLibraryItem(authKey: string, id: string): Promise<void> {
+export async function removeStremioLibraryItem(
+  authKey: string,
+  id: string,
+  forceAllow = false,
+): Promise<void> {
   const items = await call<LibraryItem[]>("datastoreGet", {
     authKey,
     collection: "libraryItem",
@@ -269,24 +319,60 @@ export async function removeStremioLibraryItem(authKey: string, id: string): Pro
   });
   const item = items?.find((it) => it._id === id);
   if (!item) return;
-  await libraryPut(authKey, {
-    ...item,
-    removed: true,
-    temp: false,
-    _mtime: new Date().toISOString(),
-  });
+  await libraryPut(
+    authKey,
+    {
+      ...item,
+      removed: true,
+      temp: false,
+      _mtime: new Date().toISOString(),
+      state: {
+        duration: item.state?.duration ?? 0,
+        ...(item.state || {}),
+        timeOffset: 0,
+        video_id: undefined,
+        flaggedWatched: 0,
+      },
+    },
+    forceAllow,
+  );
 }
 
 export async function expungeLeachedNuvioItemsFromStremio(
-  authKey: string,
+  authKey?: string | null,
   leachedIds: string[] = ["tt0944947", "tt21868350"],
 ): Promise<void> {
-  if (!authKey) return;
-  for (const id of leachedIds) {
+  const ak = authKey || readPrimaryStremioAuthKey();
+  if (!ak) return;
+  const targetIds = new Set<string>(leachedIds);
+  try {
+    for (const id of collectAllNuvioItemIds()) {
+      targetIds.add(id);
+    }
+  } catch {}
+
+  for (const id of targetIds) {
     try {
-      await removeStremioLibraryItem(authKey, id);
+      await removeStremioLibraryItem(ak, id, true);
     } catch {}
   }
+
+  try {
+    const rawQ = localStorage.getItem("harbor.stremio.write-queue.v1");
+    if (rawQ) {
+      const q = JSON.parse(rawQ);
+      if (Array.isArray(q)) {
+        const filtered = q.filter((entry: any) => !targetIds.has(entry?.item?._id));
+        localStorage.setItem("harbor.stremio.write-queue.v1", JSON.stringify(filtered));
+      }
+    }
+  } catch {}
+
+  try {
+    sanitizeStremioLocalCw(Array.from(targetIds));
+  } catch {}
+
+  invalidateLibraryCache();
 }
 
 export const CLOUD_OK = /^(tt\d|kitsu:|mal:|anilist:|anidb:|tmdb:)/;
@@ -309,6 +395,7 @@ export async function saveStremioBookmark(
   input: { type?: string; name?: string; poster?: string },
   strict = false,
 ): Promise<void> {
+  if (isNuvioProviderActive()) return;
   const now = new Date().toISOString();
   let existing: LibraryItem | null;
   try {
@@ -356,6 +443,7 @@ export async function removeStremioBookmark(
   id: string,
   _strict = true,
 ): Promise<void> {
+  if (isNuvioProviderActive()) return;
   const existing = await libraryGetOneStrict(authKey, id);
   if (!existing || existing.removed) return;
   await libraryPut(authKey, {

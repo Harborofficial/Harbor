@@ -34,12 +34,10 @@ export function AccountProviderPanel() {
 
   useEffect(() => {
     if (activeProvider === "stremio") {
-      sanitizeStremioLocalCw(["tt0944947", "tt21868350"]);
+      sanitizeStremioLocalCw();
       const stremioAuth = readPrimaryStremioSession()?.authKey;
-      if (stremioAuth && !localStorage.getItem("harbor.stremio.nuvio_leached_expunged.v1")) {
-        void expungeLeachedNuvioItemsFromStremio(stremioAuth).then(() => {
-          localStorage.setItem("harbor.stremio.nuvio_leached_expunged.v1", "1");
-        });
+      if (stremioAuth) {
+        void expungeLeachedNuvioItemsFromStremio(stremioAuth);
       }
     }
   }, [activeProvider]);
@@ -65,12 +63,15 @@ export function AccountProviderPanel() {
     } catch {}
     update({ accountProvider: provider });
     if (provider === "stremio") {
-      sanitizeStremioLocalCw(["tt0944947", "tt21868350"]);
+      sanitizeStremioLocalCw();
       const stremioAuth = readPrimaryStremioSession()?.authKey;
-      if (stremioAuth && !localStorage.getItem("harbor.stremio.nuvio_leached_expunged.v1")) {
-        void expungeLeachedNuvioItemsFromStremio(stremioAuth).then(() => {
-          localStorage.setItem("harbor.stremio.nuvio_leached_expunged.v1", "1");
-        });
+      if (stremioAuth) {
+        void expungeLeachedNuvioItemsFromStremio(stremioAuth);
+      }
+    } else {
+      const stremioAuth = readPrimaryStremioSession()?.authKey;
+      if (stremioAuth) {
+        void expungeLeachedNuvioItemsFromStremio(stremioAuth);
       }
     }
     window.dispatchEvent(

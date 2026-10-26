@@ -1,5 +1,6 @@
 import { cwProfileScope, privateCwProfileId } from "./cw-profile";
 import { isNuvioProviderActive, getNuvioActiveSlot } from "./active-profile-id";
+import { collectAllNuvioItemIds } from "./nuvio/nuvio-client";
 
 const KEY_PREFIX = "harbor.localcw.v1.";
 const PRIVATE_PREFIX = "harbor.localcw.private.v1.";
@@ -226,6 +227,11 @@ export function clearLocalCw(
 export function sanitizeStremioLocalCw(extraPurgeIds?: string[]): void {
   try {
     const purgeSet = new Set(extraPurgeIds ?? []);
+    try {
+      for (const id of collectAllNuvioItemIds()) {
+        purgeSet.add(id);
+      }
+    } catch {}
     let changed = false;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);

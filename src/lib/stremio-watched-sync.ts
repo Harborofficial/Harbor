@@ -4,6 +4,7 @@ import { cloudLibraryPut } from "@/lib/stremio-write-queue";
 import { decodeWatchedEpisodes, encodeWatchedEpisodes } from "@/lib/stremio-watched";
 import { withItemLock } from "@/lib/stremio-item-lock";
 import { detectAnimeForCw, isDetectedAnime } from "@/lib/anime-detect";
+import { isNuvioProviderActive } from "./active-profile-id";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
@@ -169,6 +170,7 @@ async function putWithState(
     prev: FullState,
   ) => Partial<FullState> | Promise<Partial<FullState>>,
 ): Promise<boolean> {
+  if (isNuvioProviderActive()) return true;
   return withItemLock(canonicalId, async () => {
     let base: LibraryItem | null;
     try {
@@ -218,6 +220,7 @@ export function markMovieWatchedStremio(
   canonicalId: string,
   watched: boolean,
 ): Promise<boolean> {
+  if (isNuvioProviderActive()) return Promise.resolve(true);
   return putWithState(authKey, meta, canonicalId, (_base, prev) => ({
     flaggedWatched: watched ? 1 : 0,
     timesWatched: watched ? Math.max(1, prev.timesWatched) : 0,
@@ -232,6 +235,7 @@ export async function setEpisodesWatchedStremio(
   localWatched: Set<string>,
   localUnwatched: Set<string>,
 ): Promise<boolean> {
+  if (isNuvioProviderActive()) return false;
   if (ANIME_ID.test(meta.id) || meta.type === "anime") return false;
   if (/^tt\d+$/.test(meta.id) && !isDetectedAnime(meta.id)) {
     await detectAnimeForCw([{ _id: meta.id, type: "series" }]);

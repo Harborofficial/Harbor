@@ -1,4 +1,5 @@
 import { libraryGetOneStrict, libraryPut, type LibraryItem } from "@/lib/stremio";
+import { isNuvioProviderActive } from "./active-profile-id";
 
 const KEY = "harbor.stremio.write-queue.v1";
 
@@ -61,6 +62,7 @@ export async function cloudLibraryPut(
   item: LibraryItem,
   options: { acknowledged?: boolean } = {},
 ): Promise<boolean> {
+  if (isNuvioProviderActive()) return true;
   load();
   const key = queueKey(authKey, item._id);
   const queuedAtStart = queue.get(key);
@@ -103,6 +105,14 @@ export async function cloudLibraryPut(
 }
 
 export async function flushWriteQueue(): Promise<void> {
+  if (isNuvioProviderActive()) {
+    load();
+    if (queue.size > 0) {
+      queue.clear();
+      persist();
+    }
+    return;
+  }
   load();
   if (queue.size === 0) return;
   // Snapshot this pass: writes queued during an awaited request belong to the next pass.
@@ -136,7 +146,7 @@ export async function flushWriteQueue(): Promise<void> {
 }
 
 export function startWriteQueueFlusher(): void {
-  if (started || typeof window === "undefined") return;
+  if (started || typeof window === "undefined" || isNuvioProviderActive()) return;
   started = true;
   load();
   window.addEventListener("online", () => void flushWriteQueue());

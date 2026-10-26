@@ -15,6 +15,7 @@ import {
 } from "./nuvio-client";
 import { fetchNuvioAvatarCatalog } from "./nuvio-profiles";
 import { fetchNuvioPlaybackItems } from "./nuvio-playback";
+import { expungeLeachedNuvioItemsFromStremio } from "@/lib/stremio";
 
 export function activateNuvioAccountProvider(): void {
   try {
@@ -26,6 +27,9 @@ export function activateNuvioAccountProvider(): void {
         localStorage.setItem(key, JSON.stringify({ ...p, accountProvider: "nuvio" }));
       }
     }
+  } catch {}
+  try {
+    void expungeLeachedNuvioItemsFromStremio().catch(() => {});
   } catch {}
   window.dispatchEvent(
     new CustomEvent("harbor:account-provider-changed", { detail: { provider: "nuvio" } }),

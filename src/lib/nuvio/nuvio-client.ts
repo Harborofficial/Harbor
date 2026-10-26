@@ -226,3 +226,72 @@ export function getOrCreateSyncClientId(): string {
     return "harbor-desktop-sync-client-id-012345";
   }
 }
+
+/**
+ * Scans local storage across all Nuvio profiles, cw trays, watched states,
+ * and library slots to collect every item ID associated with Nuvio.
+ */
+export function collectAllNuvioItemIds(): Set<string> {
+  const ids = new Set<string>(["tt0944947", "tt21868350"]);
+  if (typeof window === "undefined" || !window.localStorage) return ids;
+
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+
+      if (
+        key.startsWith("harbor.nuvio.") ||
+        key.includes(".nuvio.") ||
+        key.includes("nuvio-") ||
+        key.includes("nuvio_") ||
+        key.startsWith("harbor.watchedFlag.nuvio") ||
+        key.startsWith("harbor.moviewatched.nuvio") ||
+        key.startsWith("harbor.manualwatched.v1.nuvio")
+      ) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) continue;
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            for (const item of parsed) {
+              if (item && typeof item === "object") {
+                const id =
+                  item._id ||
+                  item.id ||
+                  item.contentId ||
+                  item.imdb_id ||
+                  item.imdbId ||
+                  item.content_id;
+                if (typeof id === "string" && id.length > 0) ids.add(id);
+              } else if (typeof item === "string" && item.length > 0) {
+                const baseId = item.split(":")[0];
+                if (baseId) ids.add(baseId);
+              }
+            }
+          } else if (parsed && typeof parsed === "object") {
+            for (const k of Object.keys(parsed)) {
+              if (k.startsWith("tt") || k.includes(":")) {
+                const baseId = k.split(":")[0];
+                if (baseId) ids.add(baseId);
+              }
+              const val = parsed[k];
+              if (val && typeof val === "object") {
+                const id =
+                  val._id ||
+                  val.id ||
+                  val.contentId ||
+                  val.imdb_id ||
+                  val.imdbId ||
+                  val.content_id;
+                if (typeof id === "string" && id.length > 0) ids.add(id);
+              }
+            }
+          }
+        } catch {}
+      }
+    }
+  } catch {}
+
+  return ids;
+}

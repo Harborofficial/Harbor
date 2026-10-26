@@ -28,6 +28,7 @@ import { meta as fetchMeta } from "@/lib/cinemeta";
 import type { Addon } from "@/lib/addons";
 import { fetchManifestAt } from "@/lib/addon-store";
 import { recordNuvioAddons } from "./nuvio-addon-registry";
+import { expungeLeachedNuvioItemsFromStremio } from "@/lib/stremio";
 
 /**
  * Returns true if Nuvio is the currently active account provider in Harbor.
@@ -1090,6 +1091,9 @@ export async function reconcileNuvioWatched(
   window.dispatchEvent(
     new CustomEvent("harbor:nuvio-watched-reconciled", { detail: { profileIndex } }),
   );
+  try {
+    void expungeLeachedNuvioItemsFromStremio().catch(() => {});
+  } catch {}
 }
 
 /**

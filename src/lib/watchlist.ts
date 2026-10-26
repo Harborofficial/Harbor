@@ -509,6 +509,7 @@ async function syncWithSimkl(metaId: string, added: boolean): Promise<void> {
 }
 
 async function syncWithStremio(input: string | WatchlistInput, added: boolean): Promise<void> {
+  if (isNuvioProviderActive()) return;
   const authKey = readActiveStremioAuthKey();
   if (!authKey) return;
   const id = typeof input === "string" ? input : input.id;
