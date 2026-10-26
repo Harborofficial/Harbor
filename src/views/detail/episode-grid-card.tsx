@@ -46,13 +46,17 @@ export function EpisodeGridCard({
   const { settings } = useSettings();
   const cardMeta = g.meta ?? meta;
   const [imgIdx, setImgIdx] = useState(0);
-  useEffect(() => setImgIdx(0), [g.key]);
+  // Enrichment can replace a broken addon still with a working provider still
+  // for the same episode. Retry the new primary instead of staying on fallback.
+  const stillsKey = g.stills.join("\n");
+  useEffect(() => setImgIdx(0), [g.key, stillsKey]);
   const [preview, setPreview] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  const still = g.stills[imgIdx];
+  const still = g.stills[Math.min(imgIdx, Math.max(0, g.stills.length - 1))];
+  const airDate = formatAirDate(g.airDate);
   const watched = progress.watched;
   const partial = !watched && progress.ratio > 0.01;
   const minsLeft =
@@ -100,7 +104,7 @@ export function EpisodeGridCard({
               seed={g.key}
               ratio="landscape"
               lazy
-              onError={() => setImgIdx((i) => i + 1)}
+              onError={() => setImgIdx((i) => Math.min(i + 1, Math.max(0, g.stills.length - 1)))}
             />
           </div>
           <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink">
@@ -138,7 +142,7 @@ export function EpisodeGridCard({
           <span className="text-[11.5px] text-ink-subtle">
             {bidiIsolate(g.seasonLabel ? `${g.seasonLabel} · E${g.number}` : `E${g.number}`)}
             {g.runtime ? ` · ${bidiIsolate(t("{n} min", { n: g.runtime }))}` : ""}
-            {formatAirDate(g.airDate) ? ` · ${bidiIsolate(formatAirDate(g.airDate))}` : ""}
+            {airDate ? ` · ${bidiIsolate(airDate)}` : ""}
           </span>
           {settings.showEpisodeDescription && g.overview && (
             <p
@@ -158,7 +162,11 @@ export function EpisodeGridCard({
           <div className="aspect-video" />
           <div className="flex justify-end">
             <span className="pointer-events-auto">
-              <EpisodeReviewsIconButton onClick={() => setReviewsOpen(true)} compact className="shrink-0" />
+              <EpisodeReviewsIconButton
+                onClick={() => setReviewsOpen(true)}
+                compact
+                className="shrink-0"
+              />
             </span>
           </div>
         </div>
@@ -289,7 +297,9 @@ export function EpisodePreview({
           <h4 className="line-clamp-1 min-w-0 flex-1 text-[14px] font-semibold leading-snug text-ink">
             {g.title}
           </h4>
-          {onReviews && <EpisodeReviewsIconButton onClick={onReviews} compact className="shrink-0" />}
+          {onReviews && (
+            <EpisodeReviewsIconButton onClick={onReviews} compact className="shrink-0" />
+          )}
         </div>
         <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
           <span className="font-semibold text-ink-muted">

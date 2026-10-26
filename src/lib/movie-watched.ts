@@ -1,6 +1,7 @@
 import {
   isNuvioProviderActive,
-  getNuvioActiveSlot,
+  nuvioWatchedScope,
+  canPersistWatched,
   stremioProfileId as activeProfileId,
   primaryProfileId,
 } from "./active-profile-id";
@@ -16,8 +17,7 @@ let cache: Set<string> | null = null;
 
 function storeKey(): string {
   if (isNuvioProviderActive()) {
-    const slot = getNuvioActiveSlot();
-    return `harbor.moviewatched.nuvio.v1.${slot}`;
+    return `harbor.moviewatched.${nuvioWatchedScope()}`;
   }
   const id = activeProfileId();
   return id ? KEY_PREFIX + id : LEGACY_KEY;
@@ -57,11 +57,39 @@ function load(): Set<string> {
 }
 
 function persist(next: Set<string>): void {
+  if (!canPersistWatched()) return;
   const sk = storeKey();
   currentScope = sk;
   cache = next;
   version += 1;
   persistCritical(sk, JSON.stringify([...next]));
+  for (const fn of subs) fn();
+}
+
+/** Apply one verified Nuvio snapshot without quadratic storage writes. */
+export function reconcileNuvioMovieWatched(
+  slot: number,
+  serverIds: ReadonlySet<string>,
+  accountId: string,
+): void {
+  if (!accountId) return;
+  const key = `harbor.moviewatched.${nuvioWatchedScope(slot, accountId)}`;
+  let previous: string[] = [];
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? "[]");
+    if (Array.isArray(parsed))
+      previous = parsed.filter((id): id is string => typeof id === "string");
+  } catch {
+    // Replace malformed cache with the verified cloud state.
+  }
+  const next = new Set(serverIds);
+  if (previous.length === next.size && previous.every((id) => next.has(id))) return;
+  persistCritical(key, JSON.stringify([...next]));
+  if (storeKey() === key) {
+    currentScope = key;
+    cache = next;
+  }
+  version += 1;
   for (const fn of subs) fn();
 }
 
@@ -89,6 +117,7 @@ export function setMovieWatchedLocal(metaId: string, watched: boolean): void {
 }
 
 export function setMovieWatchedLocalAcknowledged(metaId: string, watched: boolean): void {
+  if (!canPersistWatched()) return;
   const next = new Set(load());
   if (watched) next.add(metaId);
   else next.delete(metaId);

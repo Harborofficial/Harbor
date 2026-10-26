@@ -1,4 +1,4 @@
-#[cfg(desktop)]
+#[cfg(all(desktop, feature = "music"))]
 mod ytmusic;
 // Modules that build on every target, desktop and Android alike. Nothing in
 // here may reach a `#[cfg(desktop)]` tauri API: every Window setter (show,
@@ -60,7 +60,7 @@ mod asr_model;
 mod browser;
 mod browser_args;
 #[cfg(desktop)]
-mod capstan;
+mod native_module;
 #[cfg(desktop)]
 mod captions;
 #[cfg(desktop)]
@@ -78,6 +78,8 @@ mod discord_rp;
 #[cfg(desktop)]
 mod display_fit;
 #[cfg(desktop)]
+mod ytdlp_update;
+#[cfg(all(desktop, feature = "music"))]
 mod dj_deck;
 #[cfg(desktop)]
 mod dlna;
@@ -87,7 +89,7 @@ mod dvr;
 mod external_player;
 #[cfg(desktop)]
 mod fullscreen;
-#[cfg(desktop)]
+#[cfg(all(desktop, feature = "games"))]
 mod games;
 #[cfg(desktop)]
 mod harbor_lan;
@@ -104,12 +106,14 @@ mod monitors;
 #[cfg(desktop)]
 mod mpv;
 #[cfg(target_os = "linux")]
+mod linux_gamescope;
+#[cfg(target_os = "linux")]
 mod mpv_render_linux;
 #[cfg(target_os = "macos")]
 mod mpv_render_mac;
 #[cfg(desktop)]
 mod multiview;
-#[cfg(desktop)]
+#[cfg(all(desktop, feature = "music"))]
 mod music;
 #[cfg(desktop)]
 mod pip;
@@ -178,9 +182,11 @@ pub(crate) fn release_stremio_scheme(app: &tauri::AppHandle) {
 #[cfg(desktop)]
 pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
     release_stremio_scheme(app);
+    native_module::shutdown();
     thumbs::shutdown(app);
     multiview::shutdown(app);
     dvr::shutdown(app);
+    #[cfg(feature = "music")]
     music::shutdown(app);
     stream_proxy::shutdown(app);
     cast_server::stop();
@@ -208,6 +214,8 @@ fn desktop_invoke_handler<F>(
 where
     F: Fn(tauri::ipc::Invoke<tauri::Wry>) -> bool + Send + Sync + 'static,
 {
+    let music_enabled = install_features::music_enabled();
+    let games_enabled = install_features::games_enabled();
     move |invoke| {
         // Plugin commands use capabilities; local app commands need this explicit popup boundary.
         #[cfg(windows)]
@@ -223,6 +231,14 @@ where
                     .reject("Command unavailable to the tray menu");
                 return true;
             }
+        }
+        if install_features::is_music_command(invoke.message.command()) && !music_enabled {
+            invoke.resolver.reject("Music is unavailable in this installation.");
+            return true;
+        }
+        if invoke.message.command().starts_with("games_") && !games_enabled {
+            invoke.resolver.reject("Games are unavailable in this installation.");
+            return true;
         }
         handler(invoke)
     }
@@ -923,15 +939,21 @@ pub fn run() {
 
 #[cfg(desktop)]
 pub fn run() {
+    #[cfg(target_os = "linux")]
+    linux_gamescope::prepare();
+    #[cfg(feature = "music")]
     if music::try_run_connector_worker() {
         return;
     }
+    #[cfg(feature = "games")]
     if games::try_run_achievement_worker() {
         return;
     }
+    #[cfg(feature = "games")]
     if games::try_run_archive_worker() {
         return;
     }
+    #[cfg(feature = "games")]
     if games::try_run_hydra_import_worker() {
         return;
     }
@@ -1034,7 +1056,6 @@ pub fn run() {
         })
         .manage(proxy_state)
         .manage(mpv_state)
-        .manage(music::MusicState::new())
         .manage(pip_state)
         .manage(pip_window_state)
         .manage(fullscreen_state)
@@ -1044,6 +1065,13 @@ pub fn run() {
         .manage(modal_overlay_state)
         .manage(discord_rp::DiscordState::new())
         .manage(download::DownloadState::new());
+
+    #[cfg(feature = "music")]
+    let app_builder = if install_features::music_enabled() {
+        app_builder.manage(music::MusicState::new())
+    } else {
+        app_builder
+    };
 
     let app_builder = if cfg!(feature = "context-review") {
         app_builder.plugin(context_review::plugin())
@@ -1084,8 +1112,14 @@ pub fn run() {
             if !cfg!(feature = "context-review") {
                 proc_guard::reap_orphans();
             }
-            games::initialize_download_preparation(app.handle());
-            music::initialize(app.handle()).map_err(std::io::Error::other)?;
+            #[cfg(feature = "games")]
+            if install_features::games_enabled() {
+                games::initialize_download_preparation(app.handle());
+            }
+            #[cfg(feature = "music")]
+            if install_features::music_enabled() {
+                music::initialize(app.handle()).map_err(std::io::Error::other)?;
+            }
             #[cfg(windows)]
             if !cfg!(feature = "context-review") {
                 use tauri_plugin_deep_link::DeepLinkExt;
@@ -1276,236 +1310,467 @@ pub fn run() {
             }
         })
         .invoke_handler(desktop_invoke_handler(tauri::generate_handler![
+            #[cfg(feature = "games")]
             games::games_pokemon,
+            #[cfg(feature = "games")]
             games::games_scan_steam,
+            #[cfg(feature = "games")]
             games::steam_shortcut_commands::games_scan_steam_shortcuts,
+            #[cfg(feature = "games")]
             games::steam_shortcut_commands::games_launch_steam_shortcut,
+            #[cfg(feature = "games")]
             games::steam_shortcut_commands::games_steam_shortcut_icons,
+            #[cfg(feature = "games")]
             games::steam_shortcut_commands::games_launch_steam_shortcut_direct,
+            #[cfg(feature = "games")]
             games::steam_shortcut_commands::games_steam_shortcut_running,
+            #[cfg(feature = "games")]
             games::games_scan_launchers,
+            #[cfg(feature = "games")]
             games::games_wow_addons,
+            #[cfg(feature = "games")]
             games::games_sims_folders,
+            #[cfg(feature = "games")]
             games::games_sims_workspace,
+            #[cfg(feature = "games")]
             games::games_sims_inspect,
+            #[cfg(feature = "games")]
             games::games_sims_metadata,
+            #[cfg(feature = "games")]
             games::games_sims_packs,
+            #[cfg(feature = "games")]
             games::games_sims_duplicates,
+            #[cfg(feature = "games")]
             games::games_sims_dependencies,
+            #[cfg(feature = "games")]
             games::games_sims_tray_preview,
+            #[cfg(feature = "games")]
             games::games_sims_tray_content,
+            #[cfg(feature = "games")]
             games::games_sims_kept_folder,
+            #[cfg(feature = "games")]
             games::games_sims_catalog,
+            #[cfg(feature = "games")]
             games::games_sims_lot51_catalog,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_folders,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_inspect,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_updates,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_cancel,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_workspace,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_review,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_apply,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_recover,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_discard,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_catalog,
+            #[cfg(feature = "games")]
             games::stardew_commands::games_stardew_creator_review,
+            #[cfg(feature = "games")]
             games::games_sims_mts_detail,
+            #[cfg(feature = "games")]
             games::games_sims_mts_browse,
+            #[cfg(feature = "games")]
             games::games_sims_mts_review,
+            #[cfg(feature = "games")]
             games::games_sims_lot51_detail,
+            #[cfg(feature = "games")]
             games::games_sims_lot51_review,
+            #[cfg(feature = "games")]
             games::games_sims_creator_review,
+            #[cfg(feature = "games")]
             games::games_sims_review,
+            #[cfg(feature = "games")]
             games::games_sims_apply,
+            #[cfg(feature = "games")]
             games::games_sims_cancel,
+            #[cfg(feature = "games")]
             games::games_sims_sets,
+            #[cfg(feature = "games")]
             games::games_sims_set_save,
+            #[cfg(feature = "games")]
             games::games_sims_set_remove,
+            #[cfg(feature = "games")]
             games::games_sims_discard,
+            #[cfg(feature = "games")]
             games::games_sims_recover,
+            #[cfg(feature = "games")]
             games::games_sims_save_context,
+            #[cfg(feature = "games")]
             games::games_sims_save_recover,
+            #[cfg(feature = "games")]
             games::games_save_recovery_status,
+            #[cfg(feature = "games")]
             games::games_recover_save_restore,
+            #[cfg(feature = "games")]
             games::games_sims_save_list,
+            #[cfg(feature = "games")]
             games::games_sims_save_snapshot,
+            #[cfg(feature = "games")]
             games::games_sims_save_review,
+            #[cfg(feature = "games")]
             games::games_wow_addon_package,
+            #[cfg(feature = "games")]
             games::games_wow_addon_workspace,
+            #[cfg(feature = "games")]
             games::games_wow_addon_review,
+            #[cfg(feature = "games")]
             games::games_wow_addon_apply,
+            #[cfg(feature = "games")]
             games::games_wow_addon_discard,
+            #[cfg(feature = "games")]
             games::games_wow_addon_cancel,
+            #[cfg(feature = "games")]
             games::games_wow_addon_recover,
+            #[cfg(feature = "games")]
             games::games_launch_launcher_game,
+            #[cfg(feature = "games")]
             games::games_launcher_sessions,
+            #[cfg(feature = "games")]
             games::games_inspect_archive,
+            #[cfg(feature = "games")]
             games::games_inspect_setup,
+            #[cfg(feature = "games")]
             games::games_setup_icon,
+            #[cfg(feature = "games")]
             games::games_start_setup,
+            #[cfg(feature = "games")]
             games::games_setup_jobs,
+            #[cfg(feature = "games")]
             games::games_recover_setup,
+            #[cfg(feature = "games")]
             games::games_reveal_setup,
+            #[cfg(feature = "games")]
             games::games_observe_setup,
+            #[cfg(feature = "games")]
             games::games_archive_space,
+            #[cfg(feature = "games")]
             games::games_extract_archive,
+            #[cfg(feature = "games")]
             games::games_cancel_archive,
+            #[cfg(feature = "games")]
             games::games_discard_archive,
+            #[cfg(feature = "games")]
             games::games_archive_jobs,
+            #[cfg(feature = "games")]
             games::games_review_archive_cleanup,
+            #[cfg(feature = "games")]
             games::games_discard_archive_cleanup,
+            #[cfg(feature = "games")]
             games::games_recycle_archive_sources,
+            #[cfg(feature = "games")]
             games::games_archive_cleanup_records,
+            #[cfg(feature = "games")]
             games::games_archive_cleanup_action,
+            #[cfg(feature = "games")]
             games::games_start_archive,
+            #[cfg(feature = "games")]
             games::games_prepare_archive,
+            #[cfg(feature = "games")]
             games::games_preparation_choices,
+            #[cfg(feature = "games")]
             games::games_preparation_version,
+            #[cfg(feature = "games")]
             games::games_preparation_candidates,
+            #[cfg(feature = "games")]
             games::games_set_preparation,
+            #[cfg(feature = "games")]
             games::games_disable_preparation,
+            #[cfg(feature = "games")]
             games::games_remove_archive_job,
+            #[cfg(feature = "games")]
             games::games_steam_account_status,
+            #[cfg(feature = "games")]
             games::games_battlenet_account,
+            #[cfg(feature = "games")]
             games::games_battlenet_import,
+            #[cfg(feature = "games")]
             games::games_battlenet_cancel,
+            #[cfg(feature = "games")]
             games::games_battlenet_preferences,
+            #[cfg(feature = "games")]
             games::games_battlenet_disconnect,
+            #[cfg(feature = "games")]
             games::games_minecraft_status,
+            #[cfg(feature = "games")]
             games::games_minecraft_begin,
+            #[cfg(feature = "games")]
             games::games_minecraft_poll,
+            #[cfg(feature = "games")]
             games::games_minecraft_cancel,
+            #[cfg(feature = "games")]
             games::games_minecraft_refresh,
+            #[cfg(feature = "games")]
             games::games_minecraft_disconnect,
+            #[cfg(feature = "games")]
             games::games_minecraft_apply_skin,
+            #[cfg(feature = "games")]
             games::games_minecraft_apply_cape,
+            #[cfg(feature = "games")]
             games::games_minecraft_texture,
+            #[cfg(feature = "games")]
             games::games_minecraft_catalog,
+            #[cfg(feature = "games")]
             games::games_minecraft_instances,
+            #[cfg(feature = "games")]
             games::games_minecraft_instance_create,
+            #[cfg(feature = "games")]
             games::games_minecraft_instance_rename,
+            #[cfg(feature = "games")]
             games::games_minecraft_instance_folder,
+            #[cfg(feature = "games")]
             games::games_minecraft_content,
+            #[cfg(feature = "games")]
             games::games_minecraft_fabric_versions,
+            #[cfg(feature = "games")]
             games::games_minecraft_loader_versions,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_update_state,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_update_review,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_update_select,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_update_apply,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_update_discard,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_update_cancel,
+            #[cfg(feature = "games")]
             games::games_minecraft_instance_export_review,
+            #[cfg(feature = "games")]
             games::games_minecraft_instance_export_apply,
+            #[cfg(feature = "games")]
             games::games_minecraft_instance_storage,
+            #[cfg(feature = "games")]
             games::games_minecraft_instance_remove_review,
+            #[cfg(feature = "games")]
             games::games_minecraft_instance_remove_apply,
+            #[cfg(feature = "games")]
             games::games_minecraft_lifecycle_discard,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_review,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_install,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_cancel,
+            #[cfg(feature = "games")]
             games::games_minecraft_pack_discard,
+            #[cfg(feature = "games")]
             games::games_minecraft_runtime_state,
+            #[cfg(feature = "games")]
             games::games_minecraft_runtime_review,
+            #[cfg(feature = "games")]
             games::games_minecraft_runtime_install,
+            #[cfg(feature = "games")]
             games::games_minecraft_runtime_cancel,
+            #[cfg(feature = "games")]
             games::games_minecraft_runtime_discard,
+            #[cfg(feature = "games")]
             games::games_minecraft_java_state,
+            #[cfg(feature = "games")]
             games::games_minecraft_java_review,
+            #[cfg(feature = "games")]
             games::games_minecraft_java_select,
+            #[cfg(feature = "games")]
             games::games_minecraft_java_memory,
+            #[cfg(feature = "games")]
             games::games_minecraft_java_install,
+            #[cfg(feature = "games")]
             games::games_minecraft_java_discard,
+            #[cfg(feature = "games")]
             games::games_minecraft_launch_state,
+            #[cfg(feature = "games")]
             games::games_minecraft_launch,
+            #[cfg(feature = "games")]
             games::games_connect_steam_account,
+            #[cfg(feature = "games")]
             games::games_refresh_steam_account,
+            #[cfg(feature = "games")]
             games::games_disconnect_steam_account,
+            #[cfg(feature = "games")]
             games::games_steam_achievements,
+            #[cfg(feature = "games")]
             games::games_read_local_achievements,
+            #[cfg(feature = "games")]
             games::games_apply_local_achievements,
+            #[cfg(feature = "games")]
             games::games_discard_local_achievements,
+            #[cfg(feature = "games")]
             games::games_install_steam,
+            #[cfg(feature = "games")]
             games::games_list_transfers,
+            #[cfg(feature = "games")]
             games::games_transfer_settings,
+            #[cfg(feature = "games")]
             games::games_transfer_storage,
+            #[cfg(feature = "games")]
             games::games_download_locations,
+            #[cfg(feature = "games")]
             games::games_set_transfer_bandwidth,
+            #[cfg(feature = "games")]
             games::games_source_public_review,
+            #[cfg(feature = "games")]
             games::games_source_public_prepare,
+            #[cfg(feature = "games")]
             games::games_source_public_prepare_batch,
+            #[cfg(feature = "games")]
             games::games_source_public_cancel_batch,
+            #[cfg(feature = "games")]
             games::games_hydra_import_review,
+            #[cfg(feature = "games")]
             games::games_hydra_import_cancel,
+            #[cfg(feature = "games")]
             games::games_cloud_list,
+            #[cfg(feature = "games")]
             games::games_cloud_download,
+            #[cfg(feature = "games")]
             games::games_cloud_resolve_link,
+            #[cfg(feature = "games")]
             games::games_cloud_host_check,
+            #[cfg(feature = "games")]
             games::games_cloud_ad_prepare,
+            #[cfg(feature = "games")]
             games::games_cloud_ad_status,
+            #[cfg(feature = "games")]
             games::games_cloud_web_create,
+            #[cfg(feature = "games")]
             games::games_cloud_web_list,
+            #[cfg(feature = "games")]
             games::games_cloud_web_status,
+            #[cfg(feature = "games")]
             games::games_cloud_web_download,
+            #[cfg(feature = "games")]
             games::games_cloud_web_find,
+            #[cfg(feature = "games")]
             games::games_cloud_pm_create,
+            #[cfg(feature = "games")]
             games::games_cloud_pm_list,
+            #[cfg(feature = "games")]
             games::games_cloud_pm_status,
+            #[cfg(feature = "games")]
             games::games_cloud_pm_download,
+            #[cfg(feature = "games")]
             games::games_cloud_pm_retry,
+            #[cfg(feature = "games")]
             games::games_modrinth,
+            #[cfg(feature = "games")]
             games::games_mod_workspace,
+            #[cfg(feature = "games")]
             games::games_review_mods,
+            #[cfg(feature = "games")]
             games::games_install_mods,
+            #[cfg(feature = "games")]
             games::games_mod_action,
+            #[cfg(feature = "games")]
             games::games_cancel_mods,
+            #[cfg(feature = "games")]
             games::games_discard_mods,
+            #[cfg(feature = "games")]
             games::games_list_torrents,
+            #[cfg(feature = "games")]
             games::games_inspect_torrent,
+            #[cfg(feature = "games")]
             games::games_cancel_torrent_inspection,
+            #[cfg(feature = "games")]
             games::games_discard_torrent,
+            #[cfg(feature = "games")]
             games::games_start_torrent,
+            #[cfg(feature = "games")]
             games::games_torrent_action,
+            #[cfg(feature = "games")]
             games::games_seed_torrent,
+            #[cfg(feature = "games")]
             games::games_list_save_snapshots,
+            #[cfg(feature = "games")]
             games::games_validate_custom_launch,
+            #[cfg(feature = "games")]
             games::games_game_shortcuts,
+            #[cfg(feature = "games")]
             games::games_allow_game_execution,
+            #[cfg(feature = "games")]
             games::games_custom_running,
+            #[cfg(feature = "games")]
             games::games_custom_history,
+            #[cfg(feature = "games")]
             games::games_validate_custom_artwork,
+            #[cfg(feature = "games")]
             games::games_launch_custom,
+            #[cfg(feature = "games")]
             games::games_create_save_snapshot,
+            #[cfg(feature = "games")]
             games::games_prepare_save_restore,
+            #[cfg(feature = "games")]
             games::games_restore_save_snapshot,
+            #[cfg(feature = "games")]
             games::games_cancel_save_operation,
+            #[cfg(feature = "games")]
             games::games_discard_save_restore,
+            #[cfg(feature = "games")]
             games::games_source_browser_choose,
+            #[cfg(feature = "games")]
             games::games_source_browser_close,
+            #[cfg(feature = "games")]
             games::games_source_verify,
+            #[cfg(feature = "games")]
             games::games_source_verify_cancel,
+            #[cfg(feature = "games")]
             games::games_source_verified_fetch,
+            #[cfg(feature = "games")]
             games::games_source_http_fetch,
+            #[cfg(feature = "games")]
             games::games_source_http_cancel,
+            #[cfg(feature = "games")]
             games::games_add_transfer,
+            #[cfg(feature = "games")]
             games::games_add_transfer_batch,
+            #[cfg(feature = "games")]
             games::games_transfer_action,
+            #[cfg(feature = "games")]
             games::games_relink_transfer,
+            #[cfg(feature = "games")]
             games::games_download_patch,
+            #[cfg(feature = "games")]
             games::games_cancel_patch_download,
+            #[cfg(feature = "games")]
             games::games_match_patch_sources,
+            #[cfg(feature = "games")]
             games::games_prepare_patch,
+            #[cfg(feature = "games")]
             games::games_write_patch,
+            #[cfg(feature = "games")]
             games::games_discard_patch,
+            #[cfg(feature = "games")]
             games::games_scan_roms,
+            #[cfg(feature = "games")]
             games::games_find_emulators,
+            #[cfg(feature = "games")]
             games::games_validate_emulator,
+            #[cfg(feature = "games")]
             games::games_emulation_running,
+            #[cfg(feature = "games")]
             games::games_launch_emulated,
+            #[cfg(feature = "games")]
             games::games_retro_status,
+            #[cfg(feature = "games")]
             games::games_retro_start,
+            #[cfg(feature = "games")]
             games::games_retro_close,
+            #[cfg(feature = "games")]
             games::games_launch_steam,
+            #[cfg(feature = "games")]
             games::library_management::games_manage_steam,
+            #[cfg(feature = "games")]
             games::library_management::games_manage_launcher,
+            #[cfg(feature = "games")]
             games::library_management::games_open_installed_apps,
             privacy::privacy_status,
             privacy::privacy_set_enabled,
@@ -1531,6 +1796,7 @@ pub fn run() {
             installer_handoff::modify_probe,
             installer_handoff::modify_open,
             install_features::install_features,
+            native_module::native_module_call,
             power::power_inhibit,
             harbor_set_webview_memory_low,
             harbor_set_webview_visible,
@@ -1578,109 +1844,214 @@ pub fn run() {
             diagnostics::diagnostics_collect,
             diagnostics::diagnostics_cleanup,
             trailer::fetch_trailer,
+            trailer::resolve_youtube_stream,
+            #[cfg(feature = "music")]
             music::music_health,
+            #[cfg(feature = "music")]
             music::music_source_candidates,
+            #[cfg(feature = "music")]
             music::music_spotify_status,
+            #[cfg(feature = "music")]
             music::music_spotify_connect,
+            #[cfg(feature = "music")]
             music::music_spotify_device_start,
+            #[cfg(feature = "music")]
             music::music_spotify_device_poll,
+            #[cfg(feature = "music")]
             music::music_spotify_device_cancel,
+            #[cfg(feature = "music")]
             music::music_spotify_browse_connect,
+            #[cfg(feature = "music")]
             music::music_spotify_disconnect,
+            #[cfg(feature = "music")]
             music::music_spotify_devices,
+            #[cfg(feature = "music")]
             music::music_spotify_set_device,
+            #[cfg(feature = "music")]
             music::music_spotify_device,
+            #[cfg(feature = "music")]
             music::music_spotify_library_page,
+            #[cfg(feature = "music")]
             music::music_spotify_create_playlist,
+            #[cfg(feature = "music")]
             music::music_spotify_add_to_playlist,
+            #[cfg(feature = "music")]
             music::music_spotify_remove_from_playlist,
+            #[cfg(feature = "music")]
             music::music_spotify_rename_playlist,
+            #[cfg(feature = "music")]
             music::music_spotify_set_playlist_cover,
+            #[cfg(feature = "music")]
             music::music_lastfm_auth,
+            #[cfg(feature = "music")]
             music::music_lastfm_complete_auth,
+            #[cfg(feature = "music")]
             music::music_lastfm_status,
+            #[cfg(feature = "music")]
             music::run_connector_worker,
+            #[cfg(feature = "music")]
             music::music_search,
+            #[cfg(feature = "music")]
             music::music_resolve_stream,
+            #[cfg(feature = "music")]
             music::music_db_init,
+            #[cfg(feature = "music")]
             music::music_track_upsert,
+            #[cfg(feature = "music")]
             music::music_track_get,
+            #[cfg(feature = "music")]
             music::music_resolve_cached,
+            #[cfg(feature = "music")]
             music::music_get_liked,
+            #[cfg(feature = "music")]
             music::music_set_liked,
+            #[cfg(feature = "music")]
             music::music_get_recents,
+            #[cfg(feature = "music")]
             music::music_add_recent,
+            #[cfg(feature = "music")]
             music::music_get_queue,
+            #[cfg(feature = "music")]
             music::music_set_queue,
+            #[cfg(feature = "music")]
             music::music_list_albums,
+            #[cfg(feature = "music")]
             music::music_list_artists,
+            #[cfg(feature = "music")]
             music::music_list_playlists,
+            #[cfg(feature = "music")]
             music::music_create_playlist,
+            #[cfg(feature = "music")]
             music::music_add_to_playlist,
+            #[cfg(feature = "music")]
             music::music_add_tracks_to_playlist,
+            #[cfg(feature = "music")]
             music::music_rename_playlist,
+            #[cfg(feature = "music")]
             music::music_delete_playlist,
+            #[cfg(feature = "music")]
             music::music_reorder_playlist,
+            #[cfg(feature = "music")]
             music::music_remove_from_playlist,
+            #[cfg(feature = "music")]
             music::music_import_m3u,
+            #[cfg(feature = "music")]
             music::music_export_m3u,
+            #[cfg(feature = "music")]
             music::music_play_track,
+            #[cfg(feature = "music")]
             music::music_spotify_preload,
+            #[cfg(feature = "music")]
             music::music_engine_pause,
+            #[cfg(feature = "music")]
             music::music_paused_for_video,
+            #[cfg(feature = "music")]
             music::music_resume_after_video,
+            #[cfg(feature = "music")]
             music::music_engine_seek,
+            #[cfg(feature = "music")]
             music::music_deck_loop,
+            #[cfg(feature = "music")]
             music::music_deck_scratch,
+            #[cfg(feature = "music")]
             music::music_prewarm_track,
+            #[cfg(feature = "music")]
             music::music_scratch_window,
+            #[cfg(feature = "music")]
             music::music_scratch_hold,
+            #[cfg(feature = "music")]
             music::music_cable_status,
+            #[cfg(feature = "music")]
             music::music_cable_create,
+            #[cfg(feature = "music")]
             music::music_cable_destroy,
+            #[cfg(feature = "music")]
             music::music_deck_play,
+            #[cfg(feature = "music")]
             music::music_deck_pause,
+            #[cfg(feature = "music")]
             music::music_deck_seek,
+            #[cfg(feature = "music")]
             music::music_deck_volume,
+            #[cfg(feature = "music")]
             music::music_deck_stop,
+            #[cfg(feature = "music")]
             music::music_deck_states,
+            #[cfg(feature = "music")]
             music::music_deck_primary,
+            #[cfg(feature = "music")]
             music::music_deck_crossfade,
+            #[cfg(feature = "music")]
             music::music_deck_crossfade_get,
+            #[cfg(feature = "music")]
             music::music_fx_set,
+            #[cfg(feature = "music")]
             music::music_fx_clear,
+            #[cfg(feature = "music")]
             music::music_fx_get,
+            #[cfg(feature = "music")]
             music::music_engine_set_volume,
+            #[cfg(feature = "music")]
             music::music_audio_devices,
+            #[cfg(feature = "music")]
             music::music_audio_settings_get,
+            #[cfg(feature = "music")]
             music::music_audio_meter_set_enabled,
+            #[cfg(feature = "music")]
             music::music_audio_meter_snapshot,
+            #[cfg(feature = "music")]
             music::music_audio_settings_set,
+            #[cfg(feature = "music")]
             music::music_export_filtered,
+            #[cfg(feature = "music")]
             music::music_broadcast_targets,
+            #[cfg(feature = "music")]
             music::music_broadcast_start,
+            #[cfg(feature = "music")]
             music::music_broadcast_stop,
+            #[cfg(feature = "music")]
             music::music_broadcast_status,
+            #[cfg(feature = "music")]
             dj_deck::dj_deck_open,
+            #[cfg(feature = "music")]
             dj_deck::dj_deck_close,
+            #[cfg(feature = "music")]
             music::music_engine_stop,
+            #[cfg(feature = "music")]
             music::music_engine_state,
+            #[cfg(feature = "music")]
             music::music_home_rows,
+            #[cfg(feature = "music")]
             music::music_browse_connector,
+            #[cfg(feature = "music")]
             music::music_album_tracks,
+            #[cfg(feature = "music")]
             music::music_artist_top,
+            #[cfg(feature = "music")]
             music::music_artist_catalog,
+            #[cfg(feature = "music")]
             music::music_artist_rows,
+            #[cfg(feature = "music")]
             music::music_catalog_playlist_tracks,
+            #[cfg(feature = "music")]
             music::music_station_tracks,
+            #[cfg(feature = "music")]
             music::music_search_typed,
+            #[cfg(feature = "music")]
             music::music_video_stream,
+            #[cfg(feature = "music")]
             music::music_search_videos,
+            #[cfg(feature = "music")]
             music::music_search_video_page,
+            #[cfg(feature = "music")]
             music::music_connections,
+            #[cfg(feature = "music")]
             music::music_connect,
+            #[cfg(feature = "music")]
             music::music_disconnect,
+            #[cfg(feature = "music")]
             music::music_local_scan,
+            #[cfg(feature = "music")]
             music::music_local_collection,
             temp_prune::temp_usage_bytes,
             temp_prune::temp_clear,
@@ -1762,16 +2133,23 @@ pub fn run() {
             fullscreen::window_fullscreen_exit,
             browser::browser_open,
             browser::browser_close,
+            #[cfg(feature = "music")]
             ytmusic::ytmusic_open,
+            #[cfg(feature = "music")]
             ytmusic::ytmusic_close,
+            #[cfg(feature = "music")]
             ytmusic::ytmusic_is_open,
             #[cfg(windows)]
+            #[cfg(feature = "music")]
             ytmusic::ytmusic_embed,
             #[cfg(windows)]
+            #[cfg(feature = "music")]
             ytmusic::ytmusic_set_geometry,
             #[cfg(windows)]
+            #[cfg(feature = "music")]
             ytmusic::ytmusic_unembed,
             #[cfg(windows)]
+            #[cfg(feature = "music")]
             ytmusic::ytmusic_set_visible,
             thumbs::thumbs_set_url,
             thumbs::thumbs_spawn_eager,
@@ -1793,19 +2171,10 @@ pub fn run() {
             http_fetch::harbor_upload,
             http_fetch::clear_thumb_cache,
             http_fetch::thumb_cache_size,
+            http_fetch::cached_thumb_path,
             subtitle_credentials::subtitle_credential_bind,
             subtitle_credentials::subtitle_credentials_clear,
             cf_solver::cf_report,
-            capstan::capstan_ping,
-            capstan::capstan_install,
-            capstan::capstan_uninstall,
-            capstan::capstan_extensions,
-            capstan::capstan_providers,
-            capstan::capstan_search,
-            capstan::capstan_load,
-            capstan::capstan_load_links,
-            capstan::capstan_catalogue,
-            capstan::capstan_catalogue_page,
             discord_rp::discord_set_presence,
             discord_rp::discord_clear,
             media_controls::media_controls_update,

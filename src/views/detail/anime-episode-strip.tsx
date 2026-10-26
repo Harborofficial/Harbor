@@ -1,6 +1,6 @@
 import { Check, Eye } from "lucide-react";
 import { HoverTooltip } from "@/components/hover-tooltip";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { DragStrip } from "@/components/drag-strip";
 import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
@@ -8,7 +8,11 @@ import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { useSettings } from "@/lib/settings";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
 import { useView } from "@/lib/view";
-import { animePlayEpisode, animeSeasonKey, resolveAnimeDetailTarget } from "./anime-episodes/anime-season-key";
+import {
+  animePlayEpisode,
+  animeSeasonKey,
+  resolveAnimeDetailTarget,
+} from "./anime-episodes/anime-season-key";
 import { formatAirDate } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
 import { EpisodeGrid } from "./episode-grid";
@@ -56,42 +60,57 @@ export function AnimeEpisodeStrip({
   const { settings } = useSettings();
   const t = useT();
 
-  const gridEpisodes = useMemo<GridEpisode[]>(
-    () =>
-      episodes.map((ep) => {
-        const epMeta = metaForEp ? metaForEp(ep) : meta;
-        return {
-          key: String(ep.id),
-          number: ep.number,
-          season: animeSeasonKey(ep),
-          absoluteNumber: ep.absoluteNumber,
-          seasonLabel: showSeason ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1}` : undefined,
-          title: ep.title || t("Episode {n}", { n: ep.number }),
-          stills: [ep.thumbnail, ep.thumbnailFallback, meta.background].filter((u): u is string => !!u),
-          runtime: ep.length,
-          airDate: ep.airdate,
-          overview: ep.synopsis || undefined,
-          rating: ep.rating ?? undefined,
-          ratingIsImdb: ep.rating != null ? !!ep.ratingIsImdb : false,
-          filler: ep.filler,
-          upcoming: isUpcomingDate(ep.airdate) || (!!unairedIds && unairedIds.has(ep.id)),
-          meta: epMeta,
-          sourceMetaId: ep.sourceMetaId,
-          // Anime numbering differs from IMDb's, so reviews use the IMDb season and episode.
-          reviews: episodeReviewsTarget(ep.imdbId, ep.imdbSeason, ep.imdbEpisode),
-          play: (opts) =>
-            openPicker(
-              epMeta,
-              animePlayEpisode(ep),
-              { autoPlay: settings.instantPlay, resume: opts?.resume },
-            ),
-          openDetail: () => {
-            const target = resolveAnimeDetailTarget(ep, meta, epMeta);
-            openEpisodeDetail(target.seriesId, target.season, target.episode, target.seriesMeta, target.playback);
-          },
-        };
-      }),
-    [episodes, meta, metaForEp, openEpisodeDetail, openPicker, settings.instantPlay, t, showSeason, unairedIds],
+  const presentEpisode = useCallback(
+    (ep: KitsuEpisode): GridEpisode => {
+      const epMeta = metaForEp ? metaForEp(ep) : meta;
+      return {
+        key: String(ep.id),
+        number: ep.number,
+        season: animeSeasonKey(ep),
+        absoluteNumber: ep.absoluteNumber,
+        seasonLabel: showSeason ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1}` : undefined,
+        title: ep.title || t("Episode {n}", { n: ep.number }),
+        stills: [ep.thumbnail, ep.thumbnailFallback, meta.background].filter(
+          (u): u is string => !!u,
+        ),
+        runtime: ep.length,
+        airDate: ep.airdate,
+        overview: ep.synopsis || undefined,
+        rating: ep.rating ?? undefined,
+        ratingIsImdb: ep.rating != null ? !!ep.ratingIsImdb : false,
+        filler: ep.filler,
+        upcoming: isUpcomingDate(ep.airdate) || (!!unairedIds && unairedIds.has(ep.id)),
+        meta: epMeta,
+        sourceMetaId: ep.sourceMetaId,
+        // Anime numbering differs from IMDb's, so reviews use the IMDb season and episode.
+        reviews: episodeReviewsTarget(ep.imdbId, ep.imdbSeason, ep.imdbEpisode),
+        play: (opts) =>
+          openPicker(epMeta, animePlayEpisode(ep), {
+            autoPlay: settings.instantPlay,
+            resume: opts?.resume,
+          }),
+        openDetail: () => {
+          const target = resolveAnimeDetailTarget(ep, meta, epMeta);
+          openEpisodeDetail(
+            target.seriesId,
+            target.season,
+            target.episode,
+            target.seriesMeta,
+            target.playback,
+          );
+        },
+      };
+    },
+    [
+      meta,
+      metaForEp,
+      openEpisodeDetail,
+      openPicker,
+      settings.instantPlay,
+      t,
+      showSeason,
+      unairedIds,
+    ],
   );
   const epByKey = useMemo(() => {
     const m = new Map<string, KitsuEpisode>();
@@ -103,7 +122,9 @@ export function AnimeEpisodeStrip({
     return (
       <EpisodeGrid
         meta={meta}
-        episodes={gridEpisodes}
+        episodes={episodes}
+        present={presentEpisode}
+        itemKey={(ep) => String(ep.id)}
         progressFor={(g) => progressFor(epByKey.get(g.key)!)}
         spoilerFor={spoilerFor ? (g) => spoilerFor(epByKey.get(g.key)!) : undefined}
         onContextMenu={onContextMenu}
@@ -166,11 +187,10 @@ function AnimeEpisodeStripCard({
   const upcoming = isUpcomingDate(ep.airdate) || !!forceUpcoming;
 
   const handlePlayClick = () => {
-    openPicker(
-      meta,
-      animePlayEpisode(ep),
-      { autoPlay: settings.instantPlay, resume: !progress.watched && progress.ratio > 0.01 },
-    );
+    openPicker(meta, animePlayEpisode(ep), {
+      autoPlay: settings.instantPlay,
+      resume: !progress.watched && progress.ratio > 0.01,
+    });
   };
 
   return (
@@ -194,8 +214,17 @@ function AnimeEpisodeStripCard({
         onClick={handlePlayClick}
         className="relative aspect-video overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
       >
-        <div className={`${spoiler?.thumb ? SPOILER_THUMB_CLASS : ""} ${upcoming ? "opacity-55 saturate-50" : ""}`}>
-          <Poster src={ep.thumbnail ?? undefined} seed={String(ep.id)} ratio="landscape" className="" lazy fallbacks={[ep.thumbnailFallback, meta.background]} />
+        <div
+          className={`${spoiler?.thumb ? SPOILER_THUMB_CLASS : ""} ${upcoming ? "opacity-55 saturate-50" : ""}`}
+        >
+          <Poster
+            src={ep.thumbnail ?? undefined}
+            seed={String(ep.id)}
+            ratio="landscape"
+            className=""
+            lazy
+            fallbacks={[ep.thumbnailFallback, meta.background]}
+          />
         </div>
         {upcoming && (
           <span className="absolute bottom-2 start-2 transition-opacity group-hover:opacity-0">
@@ -226,7 +255,10 @@ function AnimeEpisodeStripCard({
         )}
         {progress.ratio > 0.01 && (
           <div className="absolute inset-x-0 bottom-0 z-10 h-[3px] bg-black/55 transition-opacity group-hover:opacity-0">
-            <div className="h-full bg-accent" style={{ width: `${Math.max(2, progress.ratio * 100)}%` }} />
+            <div
+              className="h-full bg-accent"
+              style={{ width: `${Math.max(2, progress.ratio * 100)}%` }}
+            />
           </div>
         )}
       </button>
@@ -237,13 +269,17 @@ function AnimeEpisodeStripCard({
           className="flex min-w-0 flex-1 flex-col gap-0.5 text-start focus-visible:outline-none"
         >
           <span className="flex items-center gap-2">
-            <span className={`truncate text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
+            <span
+              className={`truncate text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}
+            >
               {ep.title || t("Episode {n}", { n: ep.number })}
             </span>
             {ep.filler && <FillerBadge />}
           </span>
           <span className="text-[11.5px] text-ink-subtle">
-            {showSeason ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1} · E${ep.number}` : `E${ep.number}`}
+            {showSeason
+              ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1} · E${ep.number}`
+              : `E${ep.number}`}
             {ep.length ? ` · ${t("{n} min", { n: ep.length })}` : ""}
             {upcoming && ep.airdate ? ` · ${formatAirDate(ep.airdate)}` : ""}
           </span>

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { scrollToDataEp } from "@/lib/episode-scroll";
 import { type FranchiseEntry } from "@/lib/providers/anime-detail";
@@ -58,8 +66,10 @@ import { effectiveTmdbLanguage, tmdbLanguageIso } from "@/lib/providers/tmdb/tmd
 import {
   episodeArtworkFor,
   unairedIndexes,
+  withEpisodeImdbRatings,
   type EpisodeArtwork,
 } from "@/lib/providers/anime-episode-enrich";
+import { useHarborEpisodeRatings } from "./use-episode-imdb-ratings";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
 import { SeasonExplorer } from "./season-explorer";
 import { useSeasonExplorerView } from "./use-season-explorer";
@@ -105,7 +115,7 @@ function useEpisodeArtwork(
   return art;
 }
 
-export function AnimeEpisodes({
+export const AnimeEpisodes = memo(function AnimeEpisodes({
   meta,
   episodes,
   franchise,
@@ -272,19 +282,7 @@ export function AnimeEpisodes({
     return null;
   }, [episodes, episodeHint]);
   const { settings, update } = useSettings();
-  const order = useAnimeOrder(
-    imdbId ?? null,
-    meta.id,
-    episodes,
-    effectiveOrderProvider(settings),
-    settings.tvdbSeasonType,
-    settings.tvdbKey,
-    preferredSeasonKey ?? undefined,
-    intentSeasonKey ?? undefined,
-    soloEntry,
-  );
   const routing = useAnimeWatchedRouting(meta, franchise, trackId);
-  const effectiveOrder = order;
   const { openMeta } = useView();
   const [activeEntryId, setActiveEntryId] = useState(currentId);
   useEffect(() => {
@@ -327,6 +325,19 @@ export function AnimeEpisodes({
     franchise,
     meta.id,
   );
+  const order = useAnimeOrder(
+    imdbId ?? null,
+    meta.id,
+    episodes,
+    effectiveOrderProvider(settings),
+    settings.tvdbSeasonType,
+    settings.tvdbKey,
+    preferredSeasonKey ?? undefined,
+    intentSeasonKey ?? undefined,
+    soloEntry,
+    !tvdbPanel.active,
+  );
+  const effectiveOrder = order;
 
   const onSeasonArtRef = useRef(onSeasonArt);
   onSeasonArtRef.current = onSeasonArt;
@@ -378,13 +389,22 @@ export function AnimeEpisodes({
     episodes.length,
     settings.tvdbSeasonType,
   );
-  const baseDisplay = tvdbPanel.panel
+  const ratings = useHarborEpisodeRatings(imdbId ?? null);
+  const unratedDisplay = tvdbPanel.panel
     ? tvdbPanel.panel.visibleEpisodes
     : !activeIsAnchor
       ? entryEpisodes
       : effectiveOrder
         ? effectiveOrder.visibleEpisodes
         : episodes;
+  const baseDisplay = useMemo(
+    () =>
+      withEpisodeImdbRatings(unratedDisplay, ratings, {
+        seriesMetaId: meta.id,
+        seriesImdbId: imdbId ?? null,
+      }),
+    [unratedDisplay, ratings, meta.id, imdbId],
+  );
   const artworkSeasons = useMemo(
     () => [
       ...new Set(
@@ -894,4 +914,4 @@ export function AnimeEpisodes({
       )}
     </div>
   );
-}
+});

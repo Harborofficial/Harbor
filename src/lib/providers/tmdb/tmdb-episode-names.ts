@@ -1,4 +1,5 @@
 import { lruSet } from "@/lib/cache";
+import { onMediaCacheClear, mediaCacheGeneration, MEDIA_TTL } from "@/lib/media-cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { isGenericEpisodeName } from "../anime-episode-build";
 import { tmdbSeasonEpisodes } from "./tmdb-details";
@@ -8,8 +9,12 @@ import { tmdbStillUrl } from "./tmdb-image-rungs";
 import type { TmdbEpisodeText } from "./tmdb-episode-name-merge";
 
 const NAMES_MAX = 120;
-const namesCache = new Map<string, Map<number, TmdbEpisodeText>>();
+const namesCache = new Map<string, { value: Map<number, TmdbEpisodeText>; expires: number }>();
 const inflight = new Map<string, Promise<Map<number, TmdbEpisodeText>>>();
+onMediaCacheClear(() => {
+  namesCache.clear();
+  inflight.clear();
+});
 const NO_NAMES: Map<number, TmdbEpisodeText> = new Map();
 
 registerCache("tmdb:episodeNames", () => namesCache.size);
@@ -29,11 +34,12 @@ export async function tmdbEpisodeNames(
   season: number,
 ): Promise<Map<number, TmdbEpisodeText>> {
   if (!key || !metaId || season < 1) return NO_NAMES;
-  const cacheKey = `${metaId}:${season}:${effectiveTmdbLanguage() || "en"}`;
+  const cacheKey = `${key}:${metaId}:${season}:${effectiveTmdbLanguage() || "en"}`;
   const hit = namesCache.get(cacheKey);
-  if (hit) return hit;
+  if (hit && hit.expires > Date.now()) return hit.value;
   const running = inflight.get(cacheKey);
   if (running) return running;
+  const generation = mediaCacheGeneration();
   const run = (async () => {
     const tvId = await seriesTvId(key, metaId).catch(() => null);
     const raw = tvId == null ? [] : await tmdbSeasonEpisodes(key, tvId, season).catch(() => []);
@@ -47,9 +53,17 @@ export async function tmdbEpisodeNames(
         still: tmdbStillUrl(e.stillPath),
       });
     }
-    if (tvId == null || raw.length > 0) lruSet(namesCache, cacheKey, out, NAMES_MAX);
+    if (generation === mediaCacheGeneration() && (tvId == null || raw.length > 0))
+      lruSet(
+        namesCache,
+        cacheKey,
+        { value: out, expires: Date.now() + MEDIA_TTL.recent },
+        NAMES_MAX,
+      );
     return out;
-  })().finally(() => inflight.delete(cacheKey));
+  })().finally(() => {
+    if (inflight.get(cacheKey) === run) inflight.delete(cacheKey);
+  });
   inflight.set(cacheKey, run);
   return run;
 }

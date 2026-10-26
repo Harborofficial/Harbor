@@ -1,3 +1,4 @@
+import { startNuvioMutationRetry } from "@/lib/nuvio/nuvio-sync";
 import { GAMES_IN_NAV } from "@/chrome/nav-items";
 import { GameAccessProvider } from "@/views/games/game-access-context";
 import { GameLibraryDock } from "@/views/games/game-library-dock";
@@ -174,9 +175,7 @@ import { SpooktoberHome } from "@/views/spooktober/spooktober-home";
 // Memoizing the view stops that from cascading into a full re-render of the home feed, which the
 // profiler measured rendering ~18 times a second while the user was on other tabs.
 const MemoSpooktoberHome = memo(SpooktoberHome);
-import { MusicDock } from "@/components/music/music-dock";
-import { useInstallFeatures } from "@/lib/features/install";
-import { MusicSurprisePrompt } from "@/components/music/music-surprise-prompt";
+import { useInstallFeatures, useInstallFeaturesReady } from "@/lib/features/install";
 import { ParentalProvider } from "@/lib/parental";
 import { TraktProvider } from "@/lib/trakt/provider";
 import { AnilistProvider } from "@/lib/anilist/provider";
@@ -198,9 +197,18 @@ import { BigPictureEntryButton } from "@/views/big-picture/bp-entry-button";
 import { releaseBigPictureFullscreen } from "@/views/big-picture/use-bp-fullscreen";
 import { getNavFocusTarget } from "@/lib/keyboard-navigation/geometry";
 import { SFX } from "@/lib/sfx";
-import { startMusicTaskbarButtons, syncMusicTaskbarArtwork } from "@/lib/music/taskbar-buttons";
-import { resetMusicForProfile } from "@/lib/music/player";
 import { startMediaSessionWindowTracking } from "@/lib/media-session";
+
+// Keep the Music UI outside the core startup graph. These chunks are not loaded
+// at all when the installer reports Music as unavailable.
+const MusicDock = lazy(() =>
+  import("@/components/music/music-dock").then((m) => ({ default: m.MusicDock })),
+);
+const MusicSurprisePrompt = lazy(() =>
+  import("@/components/music/music-surprise-prompt").then((m) => ({
+    default: m.MusicSurprisePrompt,
+  })),
+);
 
 const importAnime = () => import("@/views/anime");
 const importCalendar = () => import("@/views/calendar");
@@ -537,6 +545,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                       </AfterFirstPaint>
                                                       <AfterFirstPaint>
                                                         <MediaServerSyncRunner />
+                                                        <NuvioMutationRetryRunner />
                                                         <AutoDownloadRunner />
                                                         <RemindersRunner />
                                                         <GameDownloadNotificationsRunner />
@@ -1494,7 +1503,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const kidsTop = topKind === "kids";
   const showsTop = topKind === "shows";
   const installFeatures = useInstallFeatures();
-  const musicTop = topKind === "music" && installFeatures.music;
+  const installFeaturesReady = useInstallFeaturesReady();
+  const musicEnabled = installFeaturesReady && installFeatures.music;
+  const musicTop = topKind === "music" && musicEnabled;
   const gamesTop = topKind === "games" && installFeatures.games;
   const [gamesNavigationOpen, setGamesNavigationOpen] = useState(false);
 
@@ -1580,9 +1591,30 @@ function Shell({ onReady }: { onReady?: () => void }) {
   });
 
   useEffect(() => startMediaSessionWindowTracking(), []);
-  useEffect(() => startMusicTaskbarButtons(), []);
-  useEffect(() => syncMusicTaskbarArtwork(), [settings.musicArtworkAppIcon]);
-  useEffect(() => resetMusicForProfile(), [activeProfileForMusic]);
+  useEffect(() => {
+    if (!musicEnabled) return;
+    let disposed = false;
+    let stop: (() => void) | undefined;
+    void import("@/lib/music/taskbar-buttons").then(({ startMusicTaskbarButtons }) => {
+      if (!disposed) stop = startMusicTaskbarButtons();
+    });
+    return () => {
+      disposed = true;
+      stop?.();
+    };
+  }, [musicEnabled]);
+  useEffect(() => {
+    if (musicEnabled) {
+      void import("@/lib/music/taskbar-buttons").then(({ syncMusicTaskbarArtwork }) =>
+        syncMusicTaskbarArtwork(),
+      );
+    }
+  }, [musicEnabled, settings.musicArtworkAppIcon]);
+  useEffect(() => {
+    if (musicEnabled) {
+      void import("@/lib/music/player").then(({ resetMusicForProfile }) => resetMusicForProfile());
+    }
+  }, [musicEnabled, activeProfileForMusic]);
 
   const overlayPinned = useOverlayPinned();
   const homeAlive = useIdleEvict(homeTop);
@@ -1748,8 +1780,12 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <WindowControls />
             </div>
           )}
-          {installFeatures.music && <MusicDock />}
-          <MusicSurprisePrompt />
+          {musicEnabled && (
+            <Suspense fallback={null}>
+              <MusicDock />
+              <MusicSurprisePrompt />
+            </Suspense>
+          )}
           {!playerActive && <WindowResizeEdges />}
           <HybridTitleBar suppressed={playerActive || immersive || chromeHidden} />
           <div
@@ -2266,3 +2302,8 @@ function Shell({ onReady }: { onReady?: () => void }) {
 }
 
 export type { Frame };
+
+function NuvioMutationRetryRunner() {
+  useEffect(() => startNuvioMutationRetry(), []);
+  return null;
+}

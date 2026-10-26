@@ -20,6 +20,9 @@ function load(path: string, mocks: Record<string, unknown>) {
 }
 
 const { pickTvdbImage } = load("src/lib/providers/tvdb-proxy.ts", {
+  "@/lib/cache": {
+    lruSet: (map: Map<unknown, unknown>, key: unknown, value: unknown) => map.set(key, value),
+  },
   "@/lib/safe-fetch": { safeFetch: async () => ({ ok: false }) },
   "./anime-mapping": { kitsuToTvdb: async () => null },
   "@/lib/config/endpoints": {

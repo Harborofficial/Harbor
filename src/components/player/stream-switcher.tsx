@@ -356,6 +356,7 @@ export function StreamSwitcher({
 
   return (
     <div
+      data-harbor-stream-switcher
       className="pointer-events-auto absolute inset-0 z-[60] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();

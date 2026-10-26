@@ -224,8 +224,10 @@ function EpisodeStripCard({
 
   const [imgIdx, setImgIdx] = useState(0);
   useEffect(() => {
+    // Provider stills can arrive after the first render; retry the new source
+    // instead of keeping the fallback selected for this episode.
     setImgIdx(0);
-  }, [ep.id]);
+  }, [ep.id, ep.stillPath, ep.stillUrl, thumbnail, settings.hdEpisodeImages]);
 
   const still = useMemo(() => {
     const tmdbSize = settings.hdEpisodeImages ? "original" : "w300";
@@ -346,7 +348,11 @@ function EpisodeStripCard({
             size={30}
           />
           {reviewsImdbId && (
-            <EpisodeReviewsIconButton onClick={() => setReviewsOpen(true)} compact className="shrink-0" />
+            <EpisodeReviewsIconButton
+              onClick={() => setReviewsOpen(true)}
+              compact
+              className="shrink-0"
+            />
           )}
           <HoverTooltip label={t("Episode details")} align="center" className="shrink-0">
             <button

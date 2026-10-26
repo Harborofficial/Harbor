@@ -14,6 +14,7 @@ const ALL_ON: InstallFeatures = {
 
 let snapshot: InstallFeatures = ALL_ON;
 let loading: Promise<void> | null = null;
+let ready = false;
 const listeners = new Set<() => void>();
 
 export async function readInstallFeatures(): Promise<InstallFeatures> {
@@ -22,34 +23,50 @@ export async function readInstallFeatures(): Promise<InstallFeatures> {
 }
 
 export function getInstallFeatures(): InstallFeatures {
-  ensureLoaded();
+  loadInstallFeatures();
   return snapshot;
 }
 
 function publish(next: InstallFeatures) {
   snapshot = next;
+  ready = true;
   listeners.forEach((listener) => listener());
 }
 
-/** One read per session. A missing marker (dev builds, NSIS installs, other platforms) keeps
- * every feature on, so gating only ever removes what the installer was told to remove. */
-function ensureLoaded() {
-  if (loading) return;
+/** One read per session. Native availability combines compiled components and the install
+ * marker; older builds and web previews retain their existing all-enabled fallback. */
+export function loadInstallFeatures(): Promise<void> {
+  if (loading) return loading;
   loading = readInstallFeatures()
     .then(publish)
     .catch(() => {
       loading = null; // web preview or an older build: let the next mount try again
+      if (!ready) publish(ALL_ON);
     });
+  return loading;
 }
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  ensureLoaded();
+  loadInstallFeatures();
   return () => {
     listeners.delete(listener);
   };
 }
 
 export function useInstallFeatures(): InstallFeatures {
-  return useSyncExternalStore(subscribe, () => snapshot, () => ALL_ON);
+  return useSyncExternalStore(
+    subscribe,
+    () => snapshot,
+    () => ALL_ON,
+  );
+}
+
+/** Prevent Music startup work until native component availability is known. */
+export function useInstallFeaturesReady(): boolean {
+  return useSyncExternalStore(
+    subscribe,
+    () => ready,
+    () => false,
+  );
 }

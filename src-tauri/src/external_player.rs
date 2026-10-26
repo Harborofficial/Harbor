@@ -333,6 +333,8 @@ pub async fn external_player_start(
         .to_string();
 
     let mut cmd = Command::new(&binary);
+    #[cfg(target_os = "linux")]
+    crate::linux_gamescope::configure_external_mpv(&mut cmd);
     cmd.arg(format!("--input-ipc-server={path}"))
         .arg("--force-window=immediate");
     if let Some(start) = args.start_at_sec.filter(|s| *s > 0.0) {

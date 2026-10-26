@@ -45,9 +45,9 @@ const OPTIONAL_GROUPS = [
     ],
   },
   {
-    heading: "Optional tabs",
+    heading: "Other optional features",
     items: [
-      { key: "music", bucket: null, name: "Music", note: "Music tab, dock and playback" },
+      { key: "music", bucket: "music", name: "Music", note: "Music tab, dock and playback" },
       { key: "ebook", bucket: null, name: "eBook", note: "eBook tab" },
       { key: "manga", bucket: null, name: "Manga", note: "Manga tab" },
     ],
@@ -426,8 +426,18 @@ export function render(mount, ctx) {
     }
     OPTIONAL_GROUPS[1].items.forEach((item) => {
       toggles[item.key].size.classList.remove("hb-skeleton");
-      toggles[item.key].size.textContent = t("Tab only");
+      toggles[item.key].size.textContent =
+        item.key === "music" && (byKey.music || 0) > 0 ? mb(byKey.music) : t("Tab only");
     });
+    if (!(byKey.music > 0)) {
+      toggles.music.note.textContent = t(
+        "Music tab only; the removable native runtime is not part of this build",
+      );
+    } else {
+      toggles.music.note.textContent = t(
+        "Music playback module and tab; personal playlists and sign-ins are preserved",
+      );
+    }
 
     const wv = cells.webview2;
     if (f.webview2_present) {

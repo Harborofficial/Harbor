@@ -17,7 +17,12 @@ function load(file, storage, fetcher) {
     stringify: JSON.stringify,
   };
   new Function("require", "exports", "localStorage", "fetch", "JSON", code)(
-    () => ({ mappingStore: () => ({}), privateCwProfileId: () => "" }),
+    () => ({
+      mappingStore: () => ({}),
+      privateCwProfileId: () => "",
+      isNuvioProviderActive: () => false,
+      getNuvioActiveSlot: () => 1,
+    }),
     api,
     storage,
     fetcher,

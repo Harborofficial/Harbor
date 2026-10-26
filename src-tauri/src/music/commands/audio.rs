@@ -1,4 +1,4 @@
-use super::super::{audio::MusicAudioSettings, MusicState, ACTIVE_SPOTIFY};
+use super::super::{audio::MusicAudioSettings, m3u, MusicState, ACTIVE_SPOTIFY, ACTIVE_MODULE, ACTIVE_MODULE_SPOTIFY};
 
 #[tauri::command]
 pub async fn music_audio_devices(
@@ -19,7 +19,28 @@ pub async fn music_audio_settings_set(
     state: tauri::State<'_, MusicState>,
     settings: MusicAudioSettings,
 ) -> Result<MusicAudioSettings, String> {
-    state.engine.set_audio_settings(settings).await
+    if state.active_engine() == ACTIVE_MODULE {
+        // Harbor retains the original settings file and is authoritative for persistence.
+        // Apply the native settings before committing them to disk, restoring the prior
+        // sidecar configuration if Harbor fails to persist the update.
+        let previous = state.engine.audio_settings()?;
+        let applied: MusicAudioSettings = serde_json::from_value(
+            m3u::module_request_async(serde_json::json!({
+                "command": "mpv_audio_settings_set", "settings": settings
+            })).await?
+        ).map_err(|e|format!("Music host returned invalid audio settings: {e}"))?;
+        match state.engine.set_audio_settings(applied).await {
+            Ok(saved) => Ok(saved),
+            Err(error) => {
+                let _ = m3u::module_request_async(serde_json::json!({
+                    "command":"mpv_audio_settings_set","settings":previous
+                })).await;
+                Err(error)
+            }
+        }
+    } else {
+        state.engine.set_audio_settings(settings).await
+    }
 }
 
 #[tauri::command]
@@ -27,6 +48,18 @@ pub async fn music_audio_meter_set_enabled(
     state: tauri::State<'_, MusicState>,
     enabled: bool,
 ) -> Result<(), String> {
+    if state.active_engine() == ACTIVE_MODULE {
+        m3u::module_request_async(serde_json::json!({
+            "command":"mpv_meter_set","enabled":enabled
+        })).await?;
+        return Ok(());
+    }
+    if state.active_engine() == ACTIVE_MODULE_SPOTIFY {
+        m3u::module_request_async(serde_json::json!({
+            "command":"spotify_meter_set","enabled":enabled
+        })).await?;
+        return Ok(());
+    }
     if state.active_engine() == ACTIVE_SPOTIFY {
         state.spotify.set_meter_enabled(enabled).await;
         return Ok(());
@@ -38,6 +71,18 @@ pub async fn music_audio_meter_set_enabled(
 pub async fn music_audio_meter_snapshot(
     state: tauri::State<'_, MusicState>,
 ) -> Result<Option<super::super::engine::MusicMeterSnapshot>, String> {
+    if state.active_engine() == ACTIVE_MODULE {
+        let result = m3u::module_request_async(serde_json::json!({
+            "command":"mpv_meter_snapshot","deck":0
+        })).await?;
+        return serde_json::from_value(result).map_err(|e|e.to_string());
+    }
+    if state.active_engine() == ACTIVE_MODULE_SPOTIFY {
+        let result=m3u::module_request_async(serde_json::json!({
+            "command":"spotify_meter_snapshot"
+        })).await?;
+        return serde_json::from_value(result).map_err(|e|e.to_string());
+    }
     if state.active_engine() == ACTIVE_SPOTIFY {
         return Ok(state.spotify.meter_snapshot().await);
     }
@@ -57,6 +102,20 @@ pub async fn music_broadcast_start(
     state: tauri::State<'_, MusicState>,
     device: Option<String>,
 ) -> Result<super::super::engine::BroadcastStatus, String> {
+    if state.active_engine()==ACTIVE_MODULE {
+        // Retain Harbor's established virtual-device classification and
+        // interactive device selection instead of trusting arbitrary paths.
+        let targets=state.engine.broadcast_targets().await?;
+        let choice=device.or_else(||targets.devices.first().map(|d|d.name.clone()))
+            .ok_or_else(||"No virtual audio device was found".to_string())?;
+        if !targets.devices.iter().any(|d|d.name==choice){
+            return Err("That broadcast output is no longer available".into());
+        }
+        let response=m3u::module_request_async(serde_json::json!({
+            "command":"mpv_broadcast_start","device":choice
+        })).await?;
+        return serde_json::from_value(response).map_err(|e|e.to_string());
+    }
     state.engine.start_broadcast(app, device).await
 }
 
@@ -64,6 +123,12 @@ pub async fn music_broadcast_start(
 pub async fn music_broadcast_stop(
     state: tauri::State<'_, MusicState>,
 ) -> Result<super::super::engine::BroadcastStatus, String> {
+    if state.active_engine()==ACTIVE_MODULE {
+        let response=m3u::module_request_async(serde_json::json!({
+            "command":"mpv_broadcast_stop"
+        })).await?;
+        return serde_json::from_value(response).map_err(|e|e.to_string());
+    }
     state.engine.stop_broadcast().await
 }
 
@@ -71,6 +136,12 @@ pub async fn music_broadcast_stop(
 pub async fn music_broadcast_status(
     state: tauri::State<'_, MusicState>,
 ) -> Result<super::super::engine::BroadcastStatus, String> {
+    if state.active_engine()==ACTIVE_MODULE {
+        let response=m3u::module_request_async(serde_json::json!({
+            "command":"mpv_broadcast_status"
+        })).await?;
+        return serde_json::from_value(response).map_err(|e|e.to_string());
+    }
     Ok(state.engine.broadcast_status().await)
 }
 

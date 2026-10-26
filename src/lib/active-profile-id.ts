@@ -93,7 +93,11 @@ export function getNuvioActiveSlot(): number {
     if (raw) {
       const parsed = JSON.parse(raw);
       cachedNuvioSlot =
-        typeof parsed.activeProfileIndex === "number" ? parsed.activeProfileIndex : 1;
+        Number.isInteger(parsed.activeProfileIndex) &&
+        parsed.activeProfileIndex >= 1 &&
+        parsed.activeProfileIndex <= 6
+          ? parsed.activeProfileIndex
+          : 1;
       return cachedNuvioSlot;
     }
   } catch {}
@@ -163,4 +167,32 @@ export function profilesForSessionAdoption(): string[] {
     out.push(id);
   }
   return out;
+}
+
+let cachedWatchedOwnerRaw: string | null = null;
+let cachedWatchedOwner: string | undefined;
+
+/** Watched history belongs to a Nuvio account and slot, including while offline. */
+export function nuvioWatchedScope(slot = getNuvioActiveSlot(), accountId?: string): string {
+  let id = accountId;
+  if (id === undefined) {
+    try {
+      const raw = localStorage.getItem("harbor.nuvio.state.v1");
+      if (raw !== cachedWatchedOwnerRaw) {
+        cachedWatchedOwnerRaw = raw;
+        cachedWatchedOwner = undefined;
+        cachedWatchedOwner = raw ? JSON.parse(raw).session?.user?.id : undefined;
+      }
+      id = cachedWatchedOwner;
+    } catch {
+      /* An unknown owner must never adopt legacy history. */
+    }
+  }
+  return typeof id === "string" && id.length > 0
+    ? `nuvio.v2.${encodeURIComponent(id)}.slot.${slot}`
+    : "nuvio.v2.unowned";
+}
+
+export function canPersistWatched(): boolean {
+  return !isNuvioProviderActive() || nuvioWatchedScope() !== "nuvio.v2.unowned";
 }

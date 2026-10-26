@@ -53,6 +53,9 @@ function harness(layout: "list" | "grid" | "strip", videos: NonNullable<Meta["vi
     "react-dom": { createPortal() {} },
     "lucide-react": { Check: "Check", ChevronDown: "ChevronDown" },
     "@/components/icons/play-filled": { Play: "Play" },
+    "@/components/episode-release-countdown": {
+      EpisodeReleaseCountdown: "EpisodeReleaseCountdown",
+    },
     "@/components/episode-watched-menu": { EpisodeWatchedMenu: "EpisodeWatchedMenu" },
     "@/lib/manual-watched": {
       manualEpisodeKeys: () => ({ watched: [], unwatched: [] }),

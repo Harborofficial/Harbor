@@ -1,11 +1,19 @@
-use crate::music::{duration_label, MusicTrack};
+use crate::music::MusicTrack;
+#[cfg(feature = "music-legacy-metadata")]
+use crate::music::duration_label;
+#[cfg(feature = "music-legacy-metadata")]
 use lofty::file::{AudioFile, TaggedFileExt};
+#[cfg(feature = "music-legacy-metadata")]
 use lofty::picture::{Picture, PictureType};
+#[cfg(feature = "music-legacy-metadata")]
 use lofty::tag::{Accessor, ItemKey, Tag};
-use std::path::{Path, PathBuf};
+use std::path::Path;
+#[cfg(feature = "music-legacy-metadata")]
+use std::path::PathBuf;
 
 pub const AUDIO_EXTENSIONS: [&str; 8] = ["flac", "mp3", "m4a", "aac", "ogg", "opus", "wav", "wv"];
 
+#[cfg(feature = "music-legacy-metadata")]
 const SIDECAR_COVERS: [&str; 9] = [
     "cover.jpg",
     "cover.jpeg",
@@ -18,6 +26,8 @@ const SIDECAR_COVERS: [&str; 9] = [
     "front.png",
 ];
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all="camelCase")]
 pub struct TrackFields {
     pub title: String,
     pub artist: String,
@@ -43,6 +53,8 @@ impl TrackFields {
     }
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all="camelCase")]
 pub struct ScannedTrack {
     pub track: MusicTrack,
     pub fields: TrackFields,
@@ -77,6 +89,20 @@ pub fn stable_key(value: &str) -> String {
 }
 
 pub fn read(path: &Path, covers: &Path) -> Result<ScannedTrack, String> {
+    // Prefer the external component when available. The legacy reader stays
+    // until every Music runtime path has been migrated and Shipyard guarantees
+    // the complete module is installed.
+    if let Some(result) = crate::music::m3u::module_request(serde_json::json!({
+        "command": "read_tags",
+        "path": path.to_string_lossy(),
+        "covers": covers.to_string_lossy()
+    })) {
+        return serde_json::from_value(result?).map_err(|e| format!("Music tag reader returned invalid track: {e}"));
+    }
+    #[cfg(not(feature = "music-legacy-metadata"))]
+    return Err("Music component is unavailable; repair Music in Shipyard".into());
+    #[cfg(feature = "music-legacy-metadata")]
+    {
     let tagged = lofty::read_from_path(path).map_err(|error| error.to_string())?;
     let duration_seconds = tagged.properties().duration().as_secs();
     let tag = tagged.primary_tag().or_else(|| tagged.first_tag());
@@ -101,8 +127,42 @@ pub fn read(path: &Path, covers: &Path) -> Result<ScannedTrack, String> {
         },
         fields,
     })
+    }
 }
 
+/// Read changed local files in one bounded module request instead of spawning
+/// the native sidecar once for every file in a large scan.
+pub fn read_batch(paths: &[String], covers: &Path) -> Result<Vec<Option<ScannedTrack>>, String> {
+    if paths.len() > 64 {
+        return Err("Music tag batch exceeds 64 tracks".into());
+    }
+    if paths.is_empty() {
+        return Ok(Vec::new());
+    }
+    if let Some(result) = crate::music::m3u::module_request(serde_json::json!({
+        "command": "batch_read_tags",
+        "paths": paths,
+        "covers": covers.to_string_lossy()
+    })) {
+        let tracks: Vec<Option<ScannedTrack>> = serde_json::from_value(result?)
+            .map_err(|error| format!("Music module returned invalid batch: {error}"))?;
+        if tracks.len() != paths.len() {
+            return Err("Music module returned an incomplete tag batch".into());
+        }
+        // The module must not substitute tracks from unrelated file paths.
+        for (input, entry) in paths.iter().zip(tracks.iter()) {
+            if let Some(track) = entry {
+                if track.track.source_id.as_deref() != Some(input.as_str()) {
+                    return Err("Music module returned a mismatched track path".into());
+                }
+            }
+        }
+        return Ok(tracks);
+    }
+    Ok(paths.iter().map(|path| read(Path::new(path), covers).ok()).collect())
+}
+
+#[cfg(feature = "music-legacy-metadata")]
 pub fn fields(tag: Option<&Tag>, path: &Path) -> TrackFields {
     TrackFields {
         title: clean(tag.and_then(|tag| tag.title())).unwrap_or_else(|| file_title(path)),
@@ -116,6 +176,7 @@ pub fn fields(tag: Option<&Tag>, path: &Path) -> TrackFields {
     }
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 fn artwork(tag: Option<&Tag>, path: &Path, album_key: Option<&str>, covers: &Path) -> String {
     let key = album_key
         .map(str::to_string)
@@ -126,6 +187,7 @@ fn artwork(tag: Option<&Tag>, path: &Path, album_key: Option<&str>, covers: &Pat
         .unwrap_or_default()
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 fn cover_picture(pictures: &[Picture]) -> Option<&Picture> {
     pictures
         .iter()
@@ -133,6 +195,7 @@ fn cover_picture(pictures: &[Picture]) -> Option<&Picture> {
         .or_else(|| pictures.first())
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 fn cache_cover(picture: &Picture, key: &str, covers: &Path) -> Option<String> {
     let data = picture.data();
     if data.len() < 8 {
@@ -149,6 +212,7 @@ fn cache_cover(picture: &Picture, key: &str, covers: &Path) -> Option<String> {
     Some(asset_url(&target))
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 fn sniff(data: &[u8]) -> &'static str {
     if data.starts_with(&[0x89, b'P', b'N', b'G']) {
         "png"
@@ -157,6 +221,7 @@ fn sniff(data: &[u8]) -> &'static str {
     }
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 fn sidecar_cover(path: &Path) -> Option<PathBuf> {
     let parent = path.parent()?;
     let mut best: Option<(usize, PathBuf)> = None;
@@ -175,6 +240,7 @@ fn sidecar_cover(path: &Path) -> Option<PathBuf> {
     best.map(|(_, path)| path)
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 pub fn asset_url(path: &Path) -> String {
     let encoded = encode_component(&path.to_string_lossy());
     if cfg!(windows) {
@@ -184,6 +250,7 @@ pub fn asset_url(path: &Path) -> String {
     }
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 fn encode_component(value: &str) -> String {
     let mut encoded = String::with_capacity(value.len());
     for byte in value.bytes() {
@@ -206,12 +273,14 @@ fn encode_component(value: &str) -> String {
     encoded
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 fn clean(value: Option<impl AsRef<str>>) -> Option<String> {
     value
         .map(|value| value.as_ref().trim().to_string())
         .filter(|value| !value.is_empty())
 }
 
+#[cfg(feature = "music-legacy-metadata")]
 fn file_title(path: &Path) -> String {
     path.file_stem()
         .and_then(|value| value.to_str())
@@ -236,7 +305,7 @@ fn hash(value: &str) -> u64 {
         })
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "music-legacy-metadata"))]
 mod tests {
     use super::*;
     use lofty::picture::MimeType;

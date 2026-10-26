@@ -1,3 +1,4 @@
+import { buildExtensionsModule } from "./build-extensions-module.mjs";
 /*
  * capstan-stage.mjs
  *
@@ -82,7 +83,14 @@ import {
 import { delimiter, dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { FIX, hostTriple, markLaunchers, releaseLabel, resolveJdks } from "./capstan-jdk.mjs";
-import { dest, readManifest, report, stagedJava, structureProblems, verifyStage } from "./capstan-verify.mjs";
+import {
+  dest,
+  readManifest,
+  report,
+  stagedJava,
+  structureProblems,
+  verifyStage,
+} from "./capstan-verify.mjs";
 
 const MODULES = [
   "java.base",
@@ -196,7 +204,10 @@ function ensureLayer() {
   const want = layerSourceHash();
   if (!existsSync(jar) || readStamp() !== want) {
     buildLayer();
-    writeFileSync(stamp, `${JSON.stringify({ format: STAGE_FORMAT, sourceHash: want }, null, 2)}\n`);
+    writeFileSync(
+      stamp,
+      `${JSON.stringify({ format: STAGE_FORMAT, sourceHash: want }, null, 2)}\n`,
+    );
   }
   return want;
 }
@@ -253,7 +264,8 @@ function stage() {
   const jlink = join(hostJdk, "bin", exe("jlink"));
   const jmods = join(targetJdk, "jmods");
   if (!existsSync(jlink)) die(`no jlink at ${jlink}`, ...FIX);
-  if (!existsSync(jmods)) die(`no jmods/ under ${targetJdk}. A JRE cannot build a runtime, a JDK can.`, ...FIX);
+  if (!existsSync(jmods))
+    die(`no jmods/ under ${targetJdk}. A JRE cannot build a runtime, a JDK can.`, ...FIX);
 
   rmSync(dest, { recursive: true, force: true });
   mkdirSync(dest, { recursive: true });
@@ -263,13 +275,17 @@ function stage() {
   execFileSync(
     jlink,
     [
-      "--module-path", jmods,
-      "--add-modules", MODULES.join(","),
-      "--output", join(dest, "runtime"),
+      "--module-path",
+      jmods,
+      "--add-modules",
+      MODULES.join(","),
+      "--output",
+      join(dest, "runtime"),
       "--strip-debug",
       "--no-header-files",
       "--no-man-pages",
-      "--compress", compress,
+      "--compress",
+      compress,
     ],
     { stdio: ["ignore", "inherit", "inherit"] },
   );
@@ -320,10 +336,8 @@ async function verifyOrDie() {
   );
 }
 
-// pnpm dev runs the app straight from the checkout: src-tauri/src/capstan/locate.rs walks up for
-// android-extension-compat/out/capstan.jar and falls back to JAVA_HOME for a runtime, so a
-// developer needs the layer built but not staged. Name whichever of those is missing, then let
-// the dev server start regardless.
+// Development uses the same staged native module as installed builds.
+// Report missing resources without preventing unrelated development work.
 function devPreflight() {
   // tauri.conf.json names resources/capstan/ unconditionally and tauri dev validates resource
   // paths, so a missing directory stops the dev server before it starts. Git never tracks empty
@@ -331,6 +345,17 @@ function devPreflight() {
   // the empty directory the bundler accepts and move on.
   if (!existsSync(dest)) mkdirSync(dest, { recursive: true });
   const off = (...lines) => warn("extensions are off in this dev session.", ...lines);
+  if (
+    !existsSync(
+      join(
+        dest,
+        target.includes("windows") ? "harbor-extensions-module.exe" : "harbor-extensions-module",
+      ),
+    )
+  ) {
+    off("The native Extensions module has not been staged.", "Run: pnpm run setup:capstan");
+    return;
+  }
   if (!existsSync(src)) {
     off(
       "The compat layer is not in this checkout, and everything else runs without it.",
@@ -339,7 +364,10 @@ function devPreflight() {
     return;
   }
   if (!existsSync(jar)) {
-    off("The compat layer has not been built.", "Run: cd android-extension-compat && sh tools/build.sh");
+    off(
+      "The compat layer has not been built.",
+      "Run: cd android-extension-compat && sh tools/build.sh",
+    );
     return;
   }
   if (readStamp() !== layerSourceHash()) {
@@ -364,6 +392,9 @@ function devPreflight() {
 // declared to have no extension support, or it stops here rather than producing an installer
 // whose extensions cannot work.
 async function withoutSources() {
+  if (mode !== "check" && existsSync(join(dest, "capstan.jar"))) {
+    buildExtensionsModule(target);
+  }
   if (readManifest()?.length && !structureProblems().length) {
     log("no layer sources in this checkout, verifying the stage already here");
     await verifyOrDie();
@@ -401,7 +432,10 @@ function posixShells() {
   if (process.env.LOCALAPPDATA) roots.push(join(process.env.LOCALAPPDATA, "Programs", "Git"));
   roots.push("C:\\msys64");
   try {
-    const execPath = execFileSync("git", ["--exec-path"], { encoding: "utf8", windowsHide: true }).trim();
+    const execPath = execFileSync("git", ["--exec-path"], {
+      encoding: "utf8",
+      windowsHide: true,
+    }).trim();
     // C:/.../Git/mingw64/libexec/git-core -> C:/.../Git
     roots.push(join(execPath, "..", "..", ".."));
   } catch {
@@ -483,10 +517,16 @@ async function main() {
     await withoutSources();
     return;
   }
-  const gaps = [["libs", libs], ["dex tools", dexLib]].filter(([, path]) => !existsSync(path));
+  const gaps = [
+    ["libs", libs],
+    ["dex tools", dexLib],
+  ].filter(([, path]) => !existsSync(path));
   if (gaps.length) {
     if (mode === "check") {
-      die(`missing ${gaps.map(([label]) => label).join(" and ")} at ${src}`, "Run: pnpm run setup:capstan");
+      die(
+        `missing ${gaps.map(([label]) => label).join(" and ")} at ${src}`,
+        "Run: pnpm run setup:capstan",
+      );
     }
     fetchLayerDeps();
     for (const [label, path] of gaps) {
@@ -506,7 +546,8 @@ async function main() {
 
   if (mode === "check") {
     if (!existsSync(jar)) die("no out/capstan.jar to check the stage against.");
-    if (!stagedPlanHash()) die("nothing is staged at src-tauri/resources/capstan.", "Run: pnpm run setup:capstan");
+    if (!stagedPlanHash())
+      die("nothing is staged at src-tauri/resources/capstan.", "Run: pnpm run setup:capstan");
     if (stagedPlanHash() !== planHash(layerSourceHash())) {
       die("the staged runtime is out of date with the layer.", "Run: pnpm run setup:capstan");
     }
@@ -521,8 +562,9 @@ async function main() {
     log("stage is current, nothing to restage");
   } else {
     stage();
-    writeManifest(sourceHash, want);
   }
+  buildExtensionsModule(target);
+  writeManifest(sourceHash, want);
   await verifyOrDie();
   report((line) => log(line));
 }

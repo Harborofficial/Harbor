@@ -29,8 +29,8 @@ const EXTERNAL: Array<[prefix: string, source: string]> = [
  * ARM is only the fallback, so a missing or stale mapping cannot send an
  * episode list or a detail page to the parent cour.
  */
-export async function resolveAnimeEntry(id: string): Promise<AnimeEntry | null> {
-  const meta = await animeKitsuMeta(id).catch(() => null);
+export async function resolveAnimeEntry(id: string, maxAge?: number): Promise<AnimeEntry | null> {
+  const meta = await animeKitsuMeta(id, maxAge).catch(() => null);
   const direct = parseKitsuId(meta?.id ?? "");
   if (direct != null) return { kitsuId: direct, meta };
   for (const [prefix, source] of EXTERNAL) {

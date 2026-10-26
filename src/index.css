@@ -115,6 +115,41 @@ html[data-os="linux"][data-mpv-embed="1"] [data-harbor-player] * {
   backdrop-filter: none !important;
 }
 
+/* Steam Deck diagnostic: render the source selector as an opaque, static layer
+   while Linux is displaying the embedded native mpv surface. The general player
+   blur mitigation above is not enough on every WebKitGTK build; transitions,
+   animated descendants, translucent panels and compositor hints can still cause
+   repeated layer allocation. Leave other platforms and external mpv unchanged. */
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] {
+  background: #080808 !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  will-change: auto !important;
+}
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] *,
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher]::before,
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher]::after,
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] *::before,
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] *::after {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  will-change: auto !important;
+}
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] > div:not(.pointer-events-none) {
+  background: #222228 !important;
+  background-image: none !important;
+}
+
 /* #31: avoid Library backdrop-filter layers on WebKitGTK. The captured
    WebProcess stack waits on the compositor, which repeatedly traverses its
    layer tree. Keep accelerated compositing enabled for the native player;

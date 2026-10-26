@@ -1,4 +1,4 @@
-//! Keep Music's YouTube extractor current without replacing the bundled fallback.
+//! Keep the shared YouTube extractor current without replacing the bundled fallback.
 //! Every executable is matched to the official release's SHA-256 manifest before use.
 
 use crate::trailer::YtDlpOutput;

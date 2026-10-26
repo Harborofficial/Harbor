@@ -98,8 +98,9 @@ if (-not $SkipApp) {
     Invoke-Tool 'pnpm' @('tauri', 'build', '--no-bundle')
   }
 }
-if (-not (Test-Path -LiteralPath $appExe)) {
-  throw "Missing $appExe. Run without -SkipApp first, or build it with: pnpm tauri build --no-bundle"
+$payloadCore = if ($env:HARBOR_MUSIC_CORE_EXE) { $env:HARBOR_MUSIC_CORE_EXE } else { $appExe }
+if (-not (Test-Path -LiteralPath $payloadCore)) {
+  throw "Missing $payloadCore. Build Harbor Core before creating the Shipyard payload."
 }
 
 Step 'Uninstaller build'

@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are outside the browser tsconfig.
 import test from "node:test";
 import ts from "typescript";
+import { memoryMediaCache } from "./helpers/media-cache.mjs";
 import { nextAnimeEntry } from "../src/lib/providers/anime-entry.ts";
 import type { AnimeKitsuMeta, AnimeKitsuVideo } from "../src/lib/providers/anime-kitsu-addon.ts";
 
@@ -72,6 +73,7 @@ function seriesModule() {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
   }).outputText;
   const mocks: Record<string, unknown> = {
+    "@/lib/media-cache": memoryMediaCache(),
     "@/lib/cache": {
       lruSet: (map: Map<unknown, unknown>, key: unknown, value: unknown) => map.set(key, value),
     },
@@ -84,7 +86,10 @@ function seriesModule() {
       tmdbEpisodeNames: async () => new Map(),
       tmdbSeasonEpisodes: async () => [],
     },
-    "./providers/tmdb/tmdb-client": { tmdbLanguageIso: () => "en" },
+    "./providers/tmdb/tmdb-client": {
+      tmdbLanguageIso: () => "en",
+      effectiveTmdbLanguage: () => "en",
+    },
     "./providers/tmdb/tmdb-image-rungs": { tmdbStillUrl: () => undefined },
     "./localized-text": { pickLocalizedText: () => undefined },
     "./meta-resource": {

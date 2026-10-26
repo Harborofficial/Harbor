@@ -874,6 +874,7 @@ pub async fn mpv_start(
     let separate_screen_for_init = None;
     #[cfg(not(windows))]
     let separate_screen_size_for_init = None;
+    #[cfg(feature = "music")]
     if let Err(error) = crate::music::pause_for_video(&app).await {
         eprintln!("[harbor::music] could not pause for video: {error}");
     }

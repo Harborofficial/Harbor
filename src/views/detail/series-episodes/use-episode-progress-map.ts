@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { getEpisodeProgress } from "@/lib/episode-progress";
+import { getEpisodeProgress, createEpisodeProgressSnapshot } from "@/lib/episode-progress";
 import { episodeSpoilerMasks, spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
 import type { Episode } from "@/lib/providers/tmdb";
 import { airedOnly } from "../helpers";
@@ -26,6 +26,7 @@ export function useEpisodeProgressMap({
   settings: Parameters<typeof spoilerMaskFor>[0];
 }) {
   const progressByEp = useMemo(() => {
+    const local = createEpisodeProgressSnapshot();
     const m = new Map<number, ReturnType<typeof getEpisodeProgress>>();
     for (const ep of episodes) {
       m.set(
@@ -44,6 +45,8 @@ export function useEpisodeProgressMap({
           undefined,
           undefined,
           pmdbWatched,
+          undefined,
+          local,
         ),
       );
     }

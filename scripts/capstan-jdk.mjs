@@ -44,7 +44,8 @@ const API = "https://api.adoptium.net/v3";
 const DEFAULT_FEATURE = 17;
 
 const exe = (name) => (process.platform === "win32" ? `${name}.exe` : name);
-const cacheRoot = () => process.env.HARBOR_CAPSTAN_CACHE ?? join(homedir(), ".harbor", "capstan-jdk");
+const cacheRoot = () =>
+  process.env.HARBOR_CAPSTAN_CACHE ?? join(homedir(), ".harbor", "capstan-jdk");
 
 export function hostTriple() {
   const arch = process.arch === "arm64" ? "aarch64" : "x86_64";
@@ -63,7 +64,12 @@ export function releaseLabel(dir) {
   try {
     const text = readFileSync(join(dir, "release"), "utf8");
     const pick = (key) => text.match(new RegExp(`^${key}="([^"]+)"`, "m"))?.[1];
-    return pick("IMPLEMENTOR_VERSION") ?? pick("JAVA_RUNTIME_VERSION") ?? pick("JAVA_VERSION") ?? "unknown";
+    return (
+      pick("IMPLEMENTOR_VERSION") ??
+      pick("JAVA_RUNTIME_VERSION") ??
+      pick("JAVA_VERSION") ??
+      "unknown"
+    );
   } catch {
     return "unknown";
   }
@@ -71,21 +77,45 @@ export function releaseLabel(dir) {
 
 export function featureOf(jdk) {
   try {
-    const printed = execFileSync(join(jdk, "bin", exe("jlink")), ["--version"], { encoding: "utf8" });
+    const printed = execFileSync(join(jdk, "bin", exe("jlink")), ["--version"], {
+      encoding: "utf8",
+    });
     return Number.parseInt(printed.trim().split(".")[0], 10) || DEFAULT_FEATURE;
   } catch {
     return DEFAULT_FEATURE;
   }
 }
 
-async function releaseName(feature) {
-  if (process.env.HARBOR_CAPSTAN_JDK_VERSION) return process.env.HARBOR_CAPSTAN_JDK_VERSION;
-  const range = `%5B${feature}%2C${feature + 1}%29`;
-  const res = await fetch(`${API}/info/release_names?release_type=ga&page_size=1&sort_order=DESC&version=${range}`);
-  if (!res.ok) throw new Error(`Adoptium would not list a JDK ${feature} release (${res.status} ${res.statusText})`);
-  const name = (await res.json()).releases?.[0];
-  if (!name) throw new Error(`Adoptium listed no JDK ${feature} release`);
-  return name;
+/*
+ * Adoptium tags a release before every platform build is uploaded, and it skips platforms
+ * outright (there is no Temurin 17 for Windows on arm64). The newest name in release_names is
+ * therefore not always downloadable for the triple being staged, and asking for its binary
+ * answers 404. The assets endpoint answers the question that actually matters: the newest
+ * release that has a build for this os/architecture, with the archive link to go with it.
+ */
+async function releaseFor(triple, feature) {
+  const { os, arch } = TARGETS[triple];
+  const pinned = process.env.HARBOR_CAPSTAN_JDK_VERSION;
+  if (pinned) {
+    return {
+      name: pinned,
+      url: `${API}/binary/version/${encodeURIComponent(pinned)}/${os}/${arch}/jdk/hotspot/normal/eclipse`,
+    };
+  }
+  const res = await fetch(
+    `${API}/assets/latest/${feature}/hotspot?os=${os}&architecture=${arch}&image_type=jdk`,
+  );
+  if (!res.ok) {
+    throw new Error(
+      `Adoptium would not list JDK ${feature} assets for ${os}/${arch} (${res.status} ${res.statusText})`,
+    );
+  }
+  const asset = (await res.json())?.[0];
+  const name = asset?.release_name;
+  const url = asset?.binary?.package?.link;
+  if (!name || !url)
+    throw new Error(`Adoptium publishes no Temurin JDK ${feature} for ${os}/${arch}`);
+  return { name, url };
 }
 
 // The archive is written into the directory it unpacks into and named by hand, because GNU tar
@@ -98,11 +128,18 @@ function unpack(buf, kind, into) {
   try {
     if (kind === "zip" && process.platform === "win32") {
       const command = `Expand-Archive -LiteralPath "${archive}" -DestinationPath "${into}" -Force`;
-      execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-Command", command], { stdio: "inherit" });
+      execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-Command", command], {
+        stdio: "inherit",
+      });
     } else if (kind === "zip") {
       execFileSync("unzip", ["-oq", name], { cwd: into, stdio: "inherit" });
     } else {
-      execFileSync("tar", ["-xzf", name], { cwd: into, stdio: "inherit" });
+      // Temurin's legal/ entries are symlinks to ../java.base, and Windows cannot create a
+      // symlink without developer mode or elevation, so tar fails every one of them. jlink reads
+      // only jmods/ and writes its own legal files into the image, so they are dropped here.
+      const args = ["-xzf", name];
+      if (process.platform === "win32") args.push("--exclude", "*/legal/*");
+      execFileSync("tar", args, { cwd: into, stdio: "inherit" });
     }
   } finally {
     rmSync(archive, { force: true });
@@ -118,7 +155,7 @@ const onlyChild = (dir) => {
 
 async function fetchJdk(triple, feature, log) {
   const { os, arch } = TARGETS[triple];
-  const name = await releaseName(feature);
+  const { name, url } = await releaseFor(triple, feature);
   const into = join(cacheRoot(), `${name.replace(/\+/g, "_")}-${os}-${arch}`);
   const cached = jdkHome(onlyChild(into));
   if (hasJmods(cached)) {
@@ -126,13 +163,14 @@ async function fetchJdk(triple, feature, log) {
     return cached;
   }
   log(`fetching ${name} for ${os}/${arch}, once, into ${into}`);
-  const url = `${API}/binary/version/${encodeURIComponent(name)}/${os}/${arch}/jdk/hotspot/normal/eclipse`;
   const res = await fetch(url, { redirect: "follow" });
-  if (!res.ok) throw new Error(`no Temurin ${name} for ${os}/${arch} (${res.status} ${res.statusText})`);
+  if (!res.ok)
+    throw new Error(`no Temurin ${name} for ${os}/${arch} (${res.status} ${res.statusText})`);
   rmSync(into, { recursive: true, force: true });
   unpack(Buffer.from(await res.arrayBuffer()), os === "windows" ? "zip" : "tar.gz", into);
   const home = jdkHome(onlyChild(into));
-  if (!hasJmods(home)) throw new Error(`${name} for ${os}/${arch} unpacked without a jmods/ directory`);
+  if (!hasJmods(home))
+    throw new Error(`${name} for ${os}/${arch} unpacked without a jmods/ directory`);
   return home;
 }
 
@@ -199,7 +237,8 @@ function jdkOnPath() {
  * which is every build that is not cross staging.
  */
 export async function resolveJdks(target, log) {
-  if (!TARGETS[target]) throw new Error(`unknown target ${target}, known: ${Object.keys(TARGETS).join(", ")}`);
+  if (!TARGETS[target])
+    throw new Error(`unknown target ${target}, known: ${Object.keys(TARGETS).join(", ")}`);
   const host = hostTriple();
   const fits = (dir) => hasJmods(dir) && existsSync(join(dir, "bin", exe("jlink")));
   const named = jdkHome(process.env.HARBOR_CAPSTAN_JDK ?? process.env.JAVA_HOME ?? "");
@@ -218,7 +257,9 @@ export async function resolveJdks(target, log) {
   if (target === host) return { hostJdk, targetJdk: hostJdk };
 
   const forTarget = jdkHome(process.env.HARBOR_CAPSTAN_JDK_TARGET ?? "");
-  const targetJdk = hasJmods(forTarget) ? forTarget : await fetchJdk(target, featureOf(hostJdk), log);
+  const targetJdk = hasJmods(forTarget)
+    ? forTarget
+    : await fetchJdk(target, featureOf(hostJdk), log);
   checkPlatform(targetJdk, target);
   return { hostJdk, targetJdk };
 }

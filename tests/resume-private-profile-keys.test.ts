@@ -17,6 +17,7 @@ function harness(privateProfileId: string | null) {
   let failingKey: string | null = null;
   const mocks: Record<string, unknown> = {
     "./cw-profile": { privateCwProfileId: () => privateProfileId },
+    "./active-profile-id": { isNuvioProviderActive: () => false, getNuvioActiveSlot: () => 1 },
   };
   const output = ts.transpileModule(read("src/lib/resume.ts"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },

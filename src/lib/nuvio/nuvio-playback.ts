@@ -1,5 +1,6 @@
 import {
   pullWatchProgressFromNuvio,
+  isNuvioProviderActive,
   readCachedWatchProgress,
   resolveNuvioProfileIndex,
 } from "./nuvio-sync";
@@ -55,10 +56,7 @@ export function writeCachedNuvioPlaybackItems(
   accountId?: string,
 ): void {
   try {
-    localStorage.setItem(
-      getPlaybackItemsKey(slot, accountId),
-      JSON.stringify(items),
-    );
+    localStorage.setItem(getPlaybackItemsKey(slot, accountId), JSON.stringify(items));
   } catch {}
 }
 
@@ -131,10 +129,13 @@ export function buildNuvioPlaybackItems(
           (r.progress_key && (r.progress_key.includes("_s") || r.progress_key.includes(":"))),
       );
 
-    const localMatch = localCwEntry(contentId, true, ownerId) || localCwEntry(contentId, false, ownerId);
-    const resolvedName = libMatch?.name || list[0]?.name || list[0]?.title || localMatch?.name || contentId;
+    const localMatch =
+      localCwEntry(contentId, true, ownerId) || localCwEntry(contentId, false, ownerId);
+    const resolvedName =
+      libMatch?.name || list[0]?.name || list[0]?.title || localMatch?.name || contentId;
     const resolvedPoster = libMatch?.poster || list[0]?.poster || localMatch?.poster || undefined;
-    const resolvedBackground = libMatch?.background || list[0]?.background || localMatch?.background || undefined;
+    const resolvedBackground =
+      libMatch?.background || list[0]?.background || localMatch?.background || undefined;
 
     if (!isSeries) {
       // Movie
@@ -144,23 +145,27 @@ export function buildNuvioPlaybackItems(
       const durMs =
         durationSec > 0
           ? durationSec * 1000
-          : (localMatch?.durationMs && localMatch.durationMs > 0)
+          : localMatch?.durationMs && localMatch.durationMs > 0
             ? localMatch.durationMs
             : DURATION_MS.movie;
       let offsetMs = progressSec * 1000;
 
-      const when = r.updated_at || (r.last_watched ? new Date(r.last_watched).toISOString() : new Date().toISOString());
+      const when =
+        r.updated_at ||
+        (r.last_watched ? new Date(r.last_watched).toISOString() : new Date().toISOString());
       const remoteT = r.last_watched || Date.parse(when) || 0;
 
       // Prefer newer local playback offset if available
-      const existing = readResumeEntry(contentId);
+      const existing = readResumeEntry(contentId, undefined, undefined, ownerId);
       if (existing && existing.t > remoteT && existing.ms > 0) {
         offsetMs = existing.ms;
       }
 
       // Filter out movies that are finished (> 92%) or barely started (< 5 seconds)
       if (durMs > 0 && offsetMs / durMs >= 0.92) {
-        setMovieWatchedLocal(contentId, true);
+        if (isNuvioProviderActive() && profileIndex === resolveNuvioProfileIndex()) {
+          setMovieWatchedLocal(contentId, true);
+        }
         continue;
       }
       if (offsetMs < 5000 && durMs > 60000) continue;
@@ -186,9 +191,7 @@ export function buildNuvioPlaybackItems(
       if (isCwDismissed(item)) continue;
 
       const shouldWrite =
-        !existing ||
-        (remoteT >= existing.t) ||
-        (!existing.t && offsetMs > existing.ms);
+        !existing || remoteT >= existing.t || (!existing.t && offsetMs > existing.ms);
 
       if (shouldWrite) {
         const pct01 = durMs > 0 ? Math.min(1, offsetMs / durMs) : undefined;
@@ -208,11 +211,11 @@ export function buildNuvioPlaybackItems(
     const latestDurMs =
       latestDurationSec > 0
         ? latestDurationSec * 1000
-        : (localMatch?.durationMs && localMatch.durationMs > 0)
+        : localMatch?.durationMs && localMatch.durationMs > 0
           ? localMatch.durationMs
           : DURATION_MS.series;
     const latestOffsetMs = latestProgressSec * 1000;
-    const isLatestFinished = latestDurMs > 0 && latestOffsetMs / latestDurMs >= 0.90;
+    const isLatestFinished = latestDurMs > 0 && latestOffsetMs / latestDurMs >= 0.9;
 
     let targetSeason = latestSeason;
     let targetEpisode = latestEpisode;
@@ -244,11 +247,15 @@ export function buildNuvioPlaybackItems(
       isUpNext = latestOffsetMs < 5000;
     }
 
-    const when = latest.updated_at || (latest.last_watched ? new Date(latest.last_watched).toISOString() : new Date().toISOString());
+    const when =
+      latest.updated_at ||
+      (latest.last_watched
+        ? new Date(latest.last_watched).toISOString()
+        : new Date().toISOString());
     const remoteT = latest.last_watched || Date.parse(when) || 0;
 
     // Check if local playback has a more recent position for the target episode
-    const existing = readResumeEntry(contentId, targetSeason, targetEpisode);
+    const existing = readResumeEntry(contentId, targetSeason, targetEpisode, ownerId);
     if (existing && existing.t > remoteT && existing.ms > 0) {
       targetOffsetMs = existing.ms;
       isUpNext = false;
@@ -281,9 +288,9 @@ export function buildNuvioPlaybackItems(
 
     const shouldWrite =
       !existing ||
-      (remoteT >= existing.t) ||
+      remoteT >= existing.t ||
       (!existing.t && targetOffsetMs > existing.ms) ||
-      (targetOffsetMs === 0 && (!existing || (remoteT >= existing.t)));
+      (targetOffsetMs === 0 && (!existing || remoteT >= existing.t));
 
     if (shouldWrite) {
       const pct01 = targetDurMs > 0 ? Math.min(1, targetOffsetMs / targetDurMs) : undefined;
@@ -317,13 +324,17 @@ export function buildNuvioPlaybackItems(
           if (
             loc.season > curSeason ||
             (loc.season === curSeason && loc.episode > curEpisode) ||
-            (loc.season === curSeason && loc.episode === curEpisode && locT > itemT && loc.positionMs > 0)
+            (loc.season === curSeason &&
+              loc.episode === curEpisode &&
+              locT > itemT &&
+              loc.positionMs > 0)
           ) {
             existingItem.state.season = loc.season;
             existingItem.state.episode = loc.episode;
             existingItem.state.video_id = loc.videoId ?? `${loc.id}:${loc.season}:${loc.episode}`;
             existingItem.state.timeOffset = loc.positionMs;
-            existingItem.state.duration = loc.durationMs > 0 ? loc.durationMs : existingItem.state.duration;
+            existingItem.state.duration =
+              loc.durationMs > 0 ? loc.durationMs : existingItem.state.duration;
             existingItem.state.lastWatched = new Date(locT).toISOString();
             existingItem.upNext = false;
           }
@@ -334,7 +345,9 @@ export function buildNuvioPlaybackItems(
       const dur =
         loc.durationMs > 0
           ? loc.durationMs
-          : (loc.type === "movie" ? DURATION_MS.movie : DURATION_MS.series);
+          : loc.type === "movie"
+            ? DURATION_MS.movie
+            : DURATION_MS.series;
       if (dur > 0 && loc.positionMs / dur >= 0.92 && loc.type === "movie") continue;
       if (loc.positionMs < 5000 && dur > 60000) continue;
       const when = new Date(loc.t).toISOString();
@@ -381,6 +394,7 @@ export async function fetchNuvioPlaybackItems(targetSlot?: number): Promise<Libr
   if (!isNuvioSignedIn()) return [];
 
   const accountId = getNuvioAccountId();
+  const activeSlot = resolveNuvioProfileIndex();
   const profileIndex = targetSlot ?? resolveNuvioProfileIndex();
   let records: NuvioWatchProgress[] | null = null;
   try {
@@ -388,7 +402,13 @@ export async function fetchNuvioPlaybackItems(targetSlot?: number): Promise<Libr
   } catch {
     records = null;
   }
-  if (!isNuvioSignedIn() || getNuvioAccountId() !== accountId) return [];
+  if (
+    !isNuvioSignedIn() ||
+    !isNuvioProviderActive() ||
+    getNuvioAccountId() !== accountId ||
+    resolveNuvioProfileIndex() !== activeSlot
+  )
+    return [];
   // Only fall back to local disk cache if network threw an error (records === null)
   if (records === null) {
     records = readCachedWatchProgress(profileIndex);

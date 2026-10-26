@@ -52,40 +52,54 @@ function toCharacter(edge: RawEdge): AnimeCharacter | null {
     name,
     nativeName: node.name.native ?? undefined,
     image: node.image?.medium ?? node.image?.large ?? undefined,
-    role: edge.role ? ROLE_LABELS[edge.role] ?? undefined : undefined,
+    role: edge.role ? (ROLE_LABELS[edge.role] ?? undefined) : undefined,
     favourites:
       typeof node.favourites === "number" && node.favourites > 0 ? node.favourites : undefined,
   };
 }
 
 const cache = new Map<number, AnimeCharacter[]>();
+const expires = new Map<number, number>();
+const inflight = new Map<number, Promise<AnimeCharacter[]>>();
 const CACHE_MAX = 250;
 registerEvictable("anime-characters", (aggressive) => {
-  if (aggressive) cache.clear();
+  if (aggressive) {
+    cache.clear();
+    expires.clear();
+  }
 });
 
 export async function fetchAnimeCharacters(anilistId: number): Promise<AnimeCharacter[]> {
   const cached = cache.get(anilistId);
-  if (cached) return cached;
-  try {
-    const data = await anilistRequest<CharactersResponse>(
-      CHARACTERS_QUERY,
-      { id: anilistId },
-      undefined,
-      true,
-    );
-    const edges = data?.Media?.characters?.edges ?? [];
-    const result: AnimeCharacter[] = [];
-    for (const edge of edges) {
-      const character = toCharacter(edge);
-      if (character) result.push(character);
+  if (cached && (expires.get(anilistId) ?? 0) > Date.now()) return cached;
+  const shared = inflight.get(anilistId);
+  if (shared) return shared;
+  const request = (async () => {
+    try {
+      const data = await anilistRequest<CharactersResponse>(
+        CHARACTERS_QUERY,
+        { id: anilistId },
+        undefined,
+        true,
+      );
+      const edges = data?.Media?.characters?.edges ?? [];
+      const result: AnimeCharacter[] = [];
+      for (const edge of edges) {
+        const character = toCharacter(edge);
+        if (character) result.push(character);
+      }
+      lruSet(cache, anilistId, result, CACHE_MAX);
+      expires.set(anilistId, Date.now() + 30 * 60_000);
+      for (const id of expires.keys()) if (!cache.has(id)) expires.delete(id);
+      return result;
+    } catch {
+      return [];
+    } finally {
+      inflight.delete(anilistId);
     }
-    lruSet(cache, anilistId, result, CACHE_MAX);
-    return result;
-  } catch {
-    lruSet(cache, anilistId, [], CACHE_MAX);
-    return [];
-  }
+  })();
+  inflight.set(anilistId, request);
+  return request;
 }
 
 export async function fetchAnimeCharactersByKitsu(kitsuId: number): Promise<AnimeCharacter[]> {

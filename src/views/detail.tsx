@@ -1,4 +1,5 @@
 import {
+  startTransition,
   useCallback,
   useEffect,
   useMemo,
@@ -12,6 +13,7 @@ import { Play } from "@/components/icons/play-filled";
 import { animePlayEpisode } from "./detail/anime-play-episode";
 import {
   animeDetails,
+  animeDetailsNeedRefresh,
   type AnimeDetailExtras,
   type FranchiseEntry,
 } from "@/lib/providers/anime-detail";
@@ -30,8 +32,6 @@ import type { KitsuEpisode, KitsuStreamer } from "@/lib/providers/kitsu";
 import { AnimeAwardsBlock } from "@/components/anime-awards-block";
 import { AwardsBlock } from "@/components/awards-block";
 import { BackToTop } from "@/components/back-to-top";
-import { PickCard } from "@/components/pick-card";
-import { Row } from "@/components/row";
 import {
   meta as fetchCinemetaMeta,
   narrowMediaType,
@@ -71,6 +71,7 @@ import {
 } from "@/lib/stremio";
 import { decodeWatchedEpisodes, stremioMovieWatched } from "@/lib/stremio-watched";
 import { setEpisodesWatchedStremio } from "@/lib/stremio-watched-sync";
+import { mergeAnimeDetailExtras } from "@/lib/providers/anime-detail-extras";
 import { useHideAnimeMetas } from "@/lib/anime-hide";
 import {
   isMovieWatchedLocal,
@@ -157,7 +158,12 @@ import { usePlayOnTrigger } from "@/components/play-on-trigger";
 import { UpcomingCta } from "./detail/upcoming-cta";
 import { MovieReleaseCountdowns } from "./detail/movie-release-countdowns";
 import { Synopsis } from "./detail/synopsis";
-import { CastCard } from "./detail/cast-card";
+import {
+  DetailCastRail,
+  DetailCharacterRail,
+  DetailProviderCastRail,
+  DetailRecommendationRail,
+} from "./detail/media-rails";
 import { UiIcon } from "@/components/ui-icon";
 import { HeroActionOverflow, useHeroActionOverflow } from "./detail/hero-action-overflow";
 import { useTvdbCastFallback } from "./detail/use-tvdb-cast-fallback";
@@ -179,7 +185,6 @@ import { AnimeAiringBanner } from "./detail/anime-airing-banner";
 import { AnimeStatsDonut } from "./detail/anime-stats-donut";
 import { AnimeRelatedRail } from "./detail/anime-related-rail";
 import { MangaAwardCorner } from "./manga/collection-badge";
-import { CharacterCard } from "./detail/character-card";
 import { useAnimeAnilistDetails } from "./detail/use-anime-anilist-details";
 import { useAnimeCharacters } from "./detail/use-anime-characters";
 import { TraktComments } from "./detail/trakt-comments";
@@ -284,10 +289,12 @@ export function DetailView({
       }
       seasonEntryRef.current = sel.entryId;
       const cachedLogo = peekAnimeArt(sel.entryId)?.logo;
-      setSeasonArt({
-        background: sel.background,
-        description: sel.description,
-        logo: cachedLogo ?? sel.logo,
+      startTransition(() => {
+        setSeasonArt({
+          background: sel.background,
+          description: sel.description,
+          logo: cachedLogo ?? sel.logo,
+        });
       });
       if (!cachedLogo && sel.name) {
         const entryId = sel.entryId;
@@ -298,7 +305,7 @@ export function DetailView({
         )
           .then((u) => {
             if (u && seasonEntryRef.current === entryId) {
-              setSeasonArt((p) => (p ? { ...p, logo: u } : p));
+              startTransition(() => setSeasonArt((p) => (p ? { ...p, logo: u } : p)));
             }
           })
           .catch(() => {});
@@ -947,6 +954,7 @@ export function DetailView({
 
   useEffect(() => {
     let cancelled = false;
+    let generation = 0;
     // A plugin names an id of its own only sometimes. When it does, the same loaders that describe
     // every other title can describe this one too; when it does not, there is nothing to resolve
     // and the item keeps the provider's own answer alone.
@@ -954,131 +962,165 @@ export function DetailView({
       setLoading(false);
       return;
     }
-    setLoading(true);
-    // The catalogue types a row from the first type its provider declares, which is wrong for any
-    // provider that carries both movies and series. The bridge said which it returned, so the
-    // record is asked for as that kind rather than as the guess.
-    const lookup = capstanCanonicalId
-      ? { ...meta, id: capstanCanonicalId, type: capstanMeta?.kind ?? meta.type }
-      : meta;
-    const work = isAnime
-      ? animeDetails(
-          settingsRef.current,
-          detectedKitsu != null ? { ...meta, id: `kitsu:${detectedKitsu}` } : lookup,
-        ).then((res) => {
-          if (cancelled) return null;
-          if (!res) {
-            if (detectedKitsu != null) {
-              failedKitsu.current = detectedKitsu;
-              setDetectedKitsu(null);
+    const load = (refreshing = false) => {
+      const request = ++generation;
+      if (!refreshing) setLoading(true);
+      // The catalogue types a row from the first type its provider declares, which is wrong for any
+      // provider that carries both movies and series. The bridge said which it returned, so the
+      // record is asked for as that kind rather than as the guess.
+      const lookup = capstanCanonicalId
+        ? { ...meta, id: capstanCanonicalId, type: capstanMeta?.kind ?? meta.type }
+        : meta;
+      let applyAnimeExtras: (() => void) | undefined;
+      const work = isAnime
+        ? animeDetails(
+            settingsRef.current,
+            detectedKitsu != null ? { ...meta, id: `kitsu:${detectedKitsu}` } : lookup,
+            (earlyEpisodes, kitsuId) => {
+              if (cancelled || request !== generation) return;
+              setAnimeCanonicalId(`kitsu:${kitsuId}`);
+              setAnimeEpisodes(earlyEpisodes);
+            },
+          ).then((res) => {
+            if (cancelled || request !== generation) return null;
+            if (!res) {
+              if (detectedKitsu != null) {
+                failedKitsu.current = detectedKitsu;
+                setDetectedKitsu(null);
+              }
+              return null;
             }
-            return null;
-          }
-          setAnimeEpisodes(res.episodes);
-          // Only record identities after this detail request has resolved. The
-          // previous page's canonical state must not seed a newly opened title.
-          const canonical = `kitsu:${res.kitsuId}`;
-          // The detail provider may show a parent TV series for a one-episode
-          // special. Never save the parent's identity under that special's ID.
-          // A multi-episode ONA/OVA is its own entry, so format alone must not
-          // disqualify it from recording the canonical mapping.
-          const isSideEntry = res.requestedKitsuId !== res.kitsuId;
-          if (!isSideEntry) recordAnimeCwId(meta.id, canonical);
-          const seriesImdb = res.detail.imdbId;
-          // Standalone specials can share a parent series' IMDb id. Only an
-          // actual multi-episode show (or a movie) can record the shared alias.
-          if (
-            seriesImdb?.startsWith("tt") &&
-            seriesImdb !== meta.id &&
-            !isSideEntry &&
-            (meta.type === "movie" || res.episodes.length > 1)
-          ) {
-            recordAnimeCwId(seriesImdb, canonical);
-          }
-          setFranchise([]);
-          void res.franchisePromise
-            .then((fr) => {
-              if (!cancelled) setFranchise(fr);
-            })
-            .catch(() => {});
-          void res.enrichPromise
-            .then((eps) => {
-              if (!cancelled) setAnimeEpisodes([...eps]);
-            })
-            .catch(() => {});
-          void res.heroBgPromise
-            .then((bg) => {
-              if (cancelled || !bg) return;
-              setEnrichedBg(bg);
-              saveAnimeArt(meta.id, { bg });
-            })
-            .catch(() => {});
-          void res.extrasPromise
-            .then((patch) => {
-              if (cancelled) return;
-              setDetail((prev) => (prev ? { ...prev, ...patch } : prev));
-              if (patch.gallery?.backdrops?.length) setBackdrops(patch.gallery.backdrops);
-              saveAnimeArt(meta.id, {
-                logo: patch.logo,
-                backdrops: patch.gallery?.backdrops,
-              });
-            })
-            .catch(() => {});
-          setAnimeCanonicalId(`kitsu:${res.kitsuId}`);
-          setStreamers(res.streamers);
-          setBackdrops(res.backdrops);
-          return res.detail;
-        })
-      : settingsRef.current.tmdbKey
-        ? tmdbDetails(settingsRef.current.tmdbKey, lookup).then((d) => d ?? cinemetaDetails(lookup))
-        : cinemetaDetails(lookup);
-    work
-      .then((d) => {
-        if (cancelled) return;
-        // The provider named the id, so it is the provider's claim that has to hold up: if the
-        // record it points at is not this title, the page is better off without it.
-        if (d && capstanCanonicalId && !titlesAgree(capstanMeta?.meta.name || meta.name, d.title)) {
-          setDetail(null);
-          setLoading(false);
-          return;
-        }
-        setDetail((prev) => {
-          if (!d) return d;
-          if (
-            prev &&
-            isAnime &&
-            !idAnime &&
-            (settingsRef.current.translateTitles || settingsRef.current.translateDescriptions)
-          ) {
-            const lang = settingsRef.current.tmdbLanguage || settingsRef.current.uiLanguage || "en";
-            const pickedTitle = settingsRef.current.translateTitles
-              ? pickLocalizedText([{ text: prev.title }, { text: d.title }], {
-                  forName: true,
-                  lang,
+            setAnimeEpisodes(res.episodes);
+            // Only record identities after this detail request has resolved. The
+            // previous page's canonical state must not seed a newly opened title.
+            const canonical = `kitsu:${res.kitsuId}`;
+            // The detail provider may show a parent TV series for a one-episode
+            // special. Never save the parent's identity under that special's ID.
+            // A multi-episode ONA/OVA is its own entry, so format alone must not
+            // disqualify it from recording the canonical mapping.
+            const isSideEntry = res.requestedKitsuId !== res.kitsuId;
+            if (!isSideEntry) recordAnimeCwId(meta.id, canonical);
+            const seriesImdb = res.detail.imdbId;
+            // Standalone specials can share a parent series' IMDb id. Only an
+            // actual multi-episode show (or a movie) can record the shared alias.
+            if (
+              seriesImdb?.startsWith("tt") &&
+              seriesImdb !== meta.id &&
+              !isSideEntry &&
+              (meta.type === "movie" || res.episodes.length > 1)
+            ) {
+              recordAnimeCwId(seriesImdb, canonical);
+            }
+            if (!refreshing) setFranchise([]);
+            void res.franchisePromise
+              .then((fr) => {
+                if (!cancelled && request === generation) setFranchise(fr);
+              })
+              .catch(() => {});
+            void res.enrichPromise
+              .then((eps) => {
+                if (!cancelled && request === generation) setAnimeEpisodes(eps);
+              })
+              .catch(() => {});
+            void res.heroBgPromise
+              .then((bg) => {
+                if (cancelled || request !== generation || !bg) return;
+                setEnrichedBg(bg);
+                saveAnimeArt(meta.id, { bg });
+              })
+              .catch(() => {});
+            // Install the base detail before subscribing: on a warm cache this
+            // promise can settle before the shared work.then below runs.
+            applyAnimeExtras = () => {
+              void res.extrasPromise
+                .then((patch) => {
+                  if (cancelled || request !== generation) return;
+                  setDetail((prev) => (prev ? mergeAnimeDetailExtras(prev, patch) : prev));
+                  if (patch.gallery?.backdrops?.length) setBackdrops(patch.gallery.backdrops);
+                  saveAnimeArt(meta.id, {
+                    logo: patch.logo,
+                    backdrops: patch.gallery?.backdrops,
+                  });
                 })
-              : undefined;
-            const pickedOverview = settingsRef.current.translateDescriptions
-              ? pickLocalizedText([{ text: prev.overview }, { text: d.overview }], { lang })
-              : undefined;
-            return {
-              ...d,
-              title: pickedTitle ?? (settingsRef.current.translateTitles ? prev.title : d.title),
-              overview:
-                pickedOverview ??
-                (settingsRef.current.translateDescriptions ? prev.overview : d.overview),
-              tagline: settingsRef.current.translateDescriptions ? prev.tagline : d.tagline,
+                .catch(() => {});
             };
+            setAnimeCanonicalId(`kitsu:${res.kitsuId}`);
+            setStreamers(res.streamers);
+            setBackdrops(res.backdrops);
+            return res.detail;
+          })
+        : settingsRef.current.tmdbKey
+          ? tmdbDetails(settingsRef.current.tmdbKey, lookup).then(
+              (d) => d ?? cinemetaDetails(lookup),
+            )
+          : cinemetaDetails(lookup);
+      work
+        .then((d) => {
+          if (cancelled || request !== generation) return;
+          // The provider named the id, so it is the provider's claim that has to hold up: if the
+          // record it points at is not this title, the page is better off without it.
+          if (
+            d &&
+            capstanCanonicalId &&
+            !titlesAgree(capstanMeta?.meta.name || meta.name, d.title)
+          ) {
+            setDetail(null);
+            setLoading(false);
+            return;
           }
-          return d;
+          setDetail((prev) => {
+            if (!d) return refreshing ? prev : d;
+            if (
+              prev &&
+              isAnime &&
+              !idAnime &&
+              (settingsRef.current.translateTitles || settingsRef.current.translateDescriptions)
+            ) {
+              const lang =
+                settingsRef.current.tmdbLanguage || settingsRef.current.uiLanguage || "en";
+              const pickedTitle = settingsRef.current.translateTitles
+                ? pickLocalizedText([{ text: prev.title }, { text: d.title }], {
+                    forName: true,
+                    lang,
+                  })
+                : undefined;
+              const pickedOverview = settingsRef.current.translateDescriptions
+                ? pickLocalizedText([{ text: prev.overview }, { text: d.overview }], { lang })
+                : undefined;
+              return {
+                ...d,
+                title: pickedTitle ?? (settingsRef.current.translateTitles ? prev.title : d.title),
+                overview:
+                  pickedOverview ??
+                  (settingsRef.current.translateDescriptions ? prev.overview : d.overview),
+                tagline: settingsRef.current.translateDescriptions ? prev.tagline : d.tagline,
+              };
+            }
+            return d;
+          });
+          setLoading(false);
+          applyAnimeExtras?.();
+        })
+        .catch(() => {
+          if (cancelled || request !== generation) return;
+          setLoading(false);
         });
-        setLoading(false);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setLoading(false);
-      });
+    };
+    const onWake = () => {
+      if (!isAnime || document.visibilityState !== "visible") return;
+      const lookup = capstanCanonicalId
+        ? { ...meta, id: capstanCanonicalId, type: capstanMeta?.kind ?? meta.type }
+        : meta;
+      const seed = detectedKitsu != null ? { ...meta, id: `kitsu:${detectedKitsu}` } : lookup;
+      if (animeDetailsNeedRefresh(settingsRef.current, seed)) load(true);
+    };
+    load();
+    window.addEventListener("focus", onWake);
+    document.addEventListener("visibilitychange", onWake);
     return () => {
       cancelled = true;
+      window.removeEventListener("focus", onWake);
+      document.removeEventListener("visibilitychange", onWake);
     };
   }, [
     meta.id,
@@ -1362,22 +1404,36 @@ export function DetailView({
     }
     return stremioIdToTraktTarget(meta.id);
   }, [meta.id, isSeries, isAnime, detail?.imdbId, detail?.id, detail?.kind]);
-  const playMeta: Meta = {
-    ...meta,
-    name: title,
-    // The stream request is typed from this, and for a native addon it is passed through whole
-    // (`episode-pipeline-input.ts:77`). The catalogue types a row from the first type its provider
-    // declares, so a provider carrying both movies and series has its series asked for as a movie
-    // -- and the episode branch is then never reached, which is a silent zero streams. The
-    // provider's own word is the one that decides.
-    type: capstanMeta ? capstanMeta.kind : meta.type,
-    logo,
-    background: backdrop,
-    releaseDate: detail?.releaseDate ?? meta.releaseDate,
-    releaseInfo: detail?.year ?? meta.releaseInfo ?? cinemetaFull?.releaseInfo,
-    behaviorHints: meta.behaviorHints ?? cinemetaFull?.behaviorHints,
-    videos: meta.videos ?? cinemetaFull?.videos,
-  };
+  const playMeta = useMemo<Meta>(
+    () => ({
+      ...meta,
+      name: title,
+      // The stream request is typed from this, and for a native addon it is passed through whole
+      // (`episode-pipeline-input.ts:77`). The catalogue types a row from the first type its provider
+      // declares, so a provider carrying both movies and series has its series asked for as a movie
+      // -- and the episode branch is then never reached, which is a silent zero streams. The
+      // provider's own word is the one that decides.
+      type: capstanMeta ? capstanMeta.kind : meta.type,
+      logo,
+      background: backdrop,
+      releaseDate: detail?.releaseDate ?? meta.releaseDate,
+      releaseInfo: detail?.year ?? meta.releaseInfo ?? cinemetaFull?.releaseInfo,
+      behaviorHints: meta.behaviorHints ?? cinemetaFull?.behaviorHints,
+      videos: meta.videos ?? cinemetaFull?.videos,
+    }),
+    [
+      meta,
+      title,
+      capstanMeta?.kind,
+      logo,
+      backdrop,
+      detail?.releaseDate,
+      detail?.year,
+      cinemetaFull?.releaseInfo,
+      cinemetaFull?.behaviorHints,
+      cinemetaFull?.videos,
+    ],
+  );
 
   useEffect(() => {
     if (!isAnime) return;
@@ -2362,6 +2418,7 @@ export function DetailView({
           </div>
         )}
         {loading &&
+          !(isAnime && animeEpisodes.length > 1) &&
           (meta.type === "series" || isAnime) &&
           (meta.type === "movie" || /^(MOVIE|OVA|SPECIAL|MUSIC)$/i.test(meta.animeFormat ?? "") ? (
             <MovieEntrySkeleton />
@@ -2369,33 +2426,30 @@ export function DetailView({
             <EpisodeGridSkeleton />
           ))}
 
-        {!liveContext &&
-          detail &&
-          isAnime &&
-          (animeEpisodes.length > 1 || franchise.length > 1) && (
-            <FadeInUp>
-              <AnimeEpisodes
-                meta={playMeta}
-                episodes={animeEpisodes}
-                franchise={franchise}
-                currentId={currentFranchiseId}
-                scrollRef={scrollRef}
-                trackId={animeCanonicalId ?? undefined}
-                episodeHint={episodeHint}
-                imdbId={
-                  detail.imdbId ??
-                  animeEpisodes.find((e) => e.imdbId)?.imdbId ??
-                  (meta.id.startsWith("tt") ? meta.id : null)
-                }
-                onSeasonArt={handleSeasonArt}
-                localizedOverview={localizedAnimeOverview}
-                seasonOverviews={detail.seasonOverviews}
-                tmdbTvId={detail.tmdbTvId}
-                tmdbSeasons={detail.seasons}
-                seasonPosters={detail.seasonPosters}
-              />
-            </FadeInUp>
-          )}
+        {!liveContext && isAnime && (animeEpisodes.length > 1 || franchise.length > 1) && (
+          <FadeInUp>
+            <AnimeEpisodes
+              meta={playMeta}
+              episodes={animeEpisodes}
+              franchise={franchise}
+              currentId={currentFranchiseId}
+              scrollRef={scrollRef}
+              trackId={animeCanonicalId ?? undefined}
+              episodeHint={episodeHint}
+              imdbId={
+                detail?.imdbId ??
+                animeEpisodes.find((e) => e.imdbId)?.imdbId ??
+                (meta.id.startsWith("tt") ? meta.id : null)
+              }
+              onSeasonArt={handleSeasonArt}
+              localizedOverview={localizedAnimeOverview}
+              seasonOverviews={detail?.seasonOverviews}
+              tmdbTvId={detail?.tmdbTvId}
+              tmdbSeasons={detail?.seasons}
+              seasonPosters={detail?.seasonPosters}
+            />
+          </FadeInUp>
+        )}
 
         {!liveContext && tmdbEpisodeList && !isAnime && isSeries && (
           <FadeInUp>
@@ -2514,13 +2568,7 @@ export function DetailView({
               key: "cast",
               label: t("Cast"),
               minHeight: 240,
-              node: (
-                <Row title={t("Cast · {n}", { n: detail.cast.length })} min={128}>
-                  {detail.cast.map((c, i) => (
-                    <CastCard key={`${c.id}-${i}`} cast={c} />
-                  ))}
-                </Row>
-              ),
+              node: <DetailCastRail cast={detail.cast} />,
             });
           }
           if (capstanMeta && capstanMeta.cast.length > 0 && !(detail && detail.cast.length > 0)) {
@@ -2528,19 +2576,7 @@ export function DetailView({
               key: "cast",
               label: t("Cast"),
               minHeight: 240,
-              node: (
-                <Row title={t("Cast · {n}", { n: capstanMeta.cast.length })} min={128}>
-                  {capstanMeta.cast.map((name, i) => (
-                    <CastCard
-                      key={`${name}-${i}`}
-                      // The provider names people and nothing else: no id to open and no photo, so
-                      // the card falls back to its own placeholder exactly as it does for an
-                      // unresolved TMDB credit.
-                      cast={{ id: 0, name, character: "", profilePath: null, order: i }}
-                    />
-                  ))}
-                </Row>
-              ),
+              node: <DetailProviderCastRail cast={capstanMeta.cast} />,
             });
           }
           if (isAnime && animeCharacters.length > 0) {
@@ -2548,13 +2584,7 @@ export function DetailView({
               key: "animeCharacters",
               label: t("Characters"),
               minHeight: 240,
-              node: (
-                <Row title={t("Characters · {n}", { n: animeCharacters.length })} min={128}>
-                  {animeCharacters.map((c) => (
-                    <CharacterCard key={c.id} character={c} />
-                  ))}
-                </Row>
-              ),
+              node: <DetailCharacterRail characters={animeCharacters} />,
             });
           }
           if (detail?.collection) {
@@ -2569,16 +2599,11 @@ export function DetailView({
               key: "moreLikeThis",
               label: t("More Like This"),
               node: (
-                <Row title={t("More Like This")}>
-                  {reasonedRecommendations.map((r) => (
-                    <PickCard
-                      key={r.id}
-                      meta={r}
-                      reason={graphReasons.get(r.id)?.label}
-                      reasonDetail={graphReasons.get(r.id)?.detail}
-                    />
-                  ))}
-                </Row>
+                <DetailRecommendationRail
+                  title={t("More Like This")}
+                  items={reasonedRecommendations}
+                  reasons={graphReasons}
+                />
               ),
             });
           }
@@ -2591,11 +2616,10 @@ export function DetailView({
               key: "moreLikeThis",
               label: t("More Like This"),
               node: (
-                <Row title={t("More Like This")}>
-                  {capstanMeta.recommendations.map((r) => (
-                    <PickCard key={r.id} meta={r} />
-                  ))}
-                </Row>
+                <DetailRecommendationRail
+                  title={t("More Like This")}
+                  items={capstanMeta.recommendations}
+                />
               ),
             });
           }
@@ -2604,16 +2628,11 @@ export function DetailView({
               key: "similar",
               label: t("You Might Also Like"),
               node: (
-                <Row title={t("You Might Also Like")}>
-                  {reasonedSimilar.map((r) => (
-                    <PickCard
-                      key={`s-${r.id}`}
-                      meta={r}
-                      reason={graphReasons.get(r.id)?.label}
-                      reasonDetail={graphReasons.get(r.id)?.detail}
-                    />
-                  ))}
-                </Row>
+                <DetailRecommendationRail
+                  title={t("You Might Also Like")}
+                  items={reasonedSimilar}
+                  reasons={graphReasons}
+                />
               ),
             });
           }

@@ -62,10 +62,12 @@ export function EpisodeRow({
     return out;
   }, [tmdbStill, cinemetaThumbnail]);
   const [imgIdx, setImgIdx] = useState(0);
+  const candidatesKey = candidates.join("\n");
   useEffect(() => {
+    // A late Cinemeta/TVDB still must retry the primary, not stay on a fallback.
     setImgIdx(0);
-  }, [ep.id]);
-  const still = candidates[imgIdx];
+  }, [ep.id, candidatesKey]);
+  const still = candidates[Math.min(imgIdx, Math.max(0, candidates.length - 1))];
   const watchedAgo = progress.startedAt > 0 ? formatRelativeWatched(progress.startedAt) : "";
   const resolvedImdbId = useMemo(() => {
     const v = cinemetaVideos?.find(
@@ -115,7 +117,7 @@ export function EpisodeRow({
               seed={String(ep.id)}
               ratio="landscape"
               lazy
-              onError={() => setImgIdx((i) => i + 1)}
+              onError={() => setImgIdx((i) => Math.min(i + 1, Math.max(0, candidates.length - 1)))}
             />
           </div>
           <div className="absolute inset-0 flex items-center justify-center bg-canvas/40 opacity-0 transition-opacity group-hover:opacity-100">

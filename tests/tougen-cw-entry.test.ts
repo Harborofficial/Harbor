@@ -64,6 +64,16 @@ function seriesModule(overrides: Record<string, unknown> = {}) {
       lruSet: (map: Map<unknown, unknown>, key: unknown, value: unknown) => map.set(key, value),
     },
     "@/lib/memory-profiler": { registerCache() {} },
+    "@/lib/media-cache": {
+      onMediaCacheClear() {},
+      mediaCacheGeneration: () => 0,
+      MEDIA_TTL: {
+        recent: 60 * 60_000,
+        episodes: 12 * 60 * 60_000,
+        settled: 7 * 24 * 60 * 60_000,
+        stale: 30 * 24 * 60 * 60_000,
+      },
+    },
     "@/lib/safe-fetch": {
       safeFetch: async () => {
         throw new Error("unexpected live request");
@@ -85,7 +95,10 @@ function seriesModule(overrides: Record<string, unknown> = {}) {
       tmdbEpisodeNames: async () => null,
       tmdbSeasonEpisodes: async () => [],
     },
-    "./providers/tmdb/tmdb-client": { tmdbLanguageIso: () => "en" },
+    "./providers/tmdb/tmdb-client": {
+      effectiveTmdbLanguage: () => "en",
+      tmdbLanguageIso: () => "en",
+    },
     "./providers/tmdb/tmdb-image-rungs": { tmdbStillUrl: () => undefined },
     "./localized-text": { pickLocalizedText: () => undefined },
     "./providers/anime-kitsu-addon": addon,
