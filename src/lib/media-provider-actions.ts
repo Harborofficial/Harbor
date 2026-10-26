@@ -50,6 +50,7 @@ import {
 import { addNuvioLibraryItem, removeNuvioLibraryItem } from "./nuvio/nuvio-library";
 import { saveLocalCw, clearLocalCw } from "./local-cw";
 import { saveResumeMs } from "./resume";
+import { loadStoredSettings } from "./settings/load";
 
 export type ProviderWrite = {
   provider: string;
@@ -901,14 +902,36 @@ export function watchedProviderWrites(
                   }),
                 );
               } else {
-                // Entire series is completed (no further episodes exist)
-                await deleteWatchProgressFromNuvio(slot, primaryId);
-                if (altId) await deleteWatchProgressFromNuvio(slot, altId);
-                clearLocalCw(primaryId, `nuvio-${slot}`);
-                if (altId) {
-                  clearLocalCw(altId, `nuvio-${slot}`);
+                const settings = loadStoredSettings();
+                const keepForTimer = settings.animeCwEnd === "timer" && !settings.cwHideCaughtUp;
+                if (keepForTimer) {
+                  const nextCw = {
+                    id: meta.id,
+                    type: "series" as const,
+                    name: meta.name,
+                    poster: meta.poster,
+                    background: meta.background,
+                    season: lastEp.season,
+                    episode: lastEp.episode,
+                    positionMs: 0,
+                    durationMs: 2640000,
+                    isAnime: meta.type === "anime",
+                    t: Date.now(),
+                  };
+                  saveLocalCw({ ...nextCw, external: "nuvio" }, `nuvio-${slot}`);
+                  if (altId) {
+                    saveLocalCw({ ...nextCw, id: altId, external: "nuvio" }, `nuvio-${slot}`);
+                  }
+                } else {
+                  // Entire series is completed (no further episodes exist)
+                  await deleteWatchProgressFromNuvio(slot, primaryId);
+                  if (altId) await deleteWatchProgressFromNuvio(slot, altId);
+                  clearLocalCw(primaryId, `nuvio-${slot}`);
+                  if (altId) {
+                    clearLocalCw(altId, `nuvio-${slot}`);
+                  }
+                  clearLocalCw(meta.id, `nuvio-${slot}`);
                 }
-                clearLocalCw(meta.id, `nuvio-${slot}`);
               }
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
             }

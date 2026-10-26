@@ -917,11 +917,29 @@ export function Home({
   }, [localCwItems, externalCw]);
   const resurfaceLibrary = useMemo(() => {
     if (isNuvioProvider) {
-      return externalCw.filter((i) => (i.external === "nuvio" || i.external === "trakt" || i.external === "simkl") && i.type === "series");
+      return [
+        ...externalCw.filter(
+          (i) =>
+            (i.external === "nuvio" || i.external === "trakt" || i.external === "simkl") &&
+            i.type === "series",
+        ),
+        ...localCwItems.filter((i) => i.type === "series"),
+      ];
     }
+    const disabledSources = new Set<string>();
+    if (!settings.cwSources.simkl) disabledSources.add("simkl");
+    if (!settings.cwSources.trakt) disabledSources.add("trakt");
+    if (!settings.cwSources.publicmetadb) disabledSources.add("publicmetadb");
+    const externalForStremio = hideSharedCw
+      ? []
+      : externalCw.filter((i) => {
+          if (!i.external || i.external === "nuvio" || i.type !== "series") return false;
+          return !disabledSources.has(i.external);
+        });
     const pool = [
       ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
       ...localCwItems.filter((i) => i.type === "series" && i.external !== "nuvio"),
+      ...externalForStremio,
     ];
     const manual = manualWatchedLibraryItems();
     if (manual.length === 0) return pool;
@@ -930,7 +948,7 @@ export function Home({
     if (usable.length === 0) return pool;
     const overrideIds = new Set(usable.map((i) => i._id));
     return [...pool.filter((i) => !overrideIds.has(i._id)), ...usable];
-  }, [items, localCwItems, manualWatchedVer, isNuvioProvider, externalCw]);
+  }, [items, localCwItems, manualWatchedVer, isNuvioProvider, externalCw, settings.cwSources, hideSharedCw]);
   useEffect(() => {
     if (!anilistConnected) {
       setAnilistWatchedMap((prev) => (prev.size ? new Map() : prev));

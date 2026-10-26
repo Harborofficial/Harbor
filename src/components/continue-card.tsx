@@ -771,7 +771,10 @@ export const ContinueCard = memo(function ContinueCard({
               )}
               {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
               {waitingForAir && countdown ? (
-                <span className="shrink-0 font-medium text-amber-500">{countdown}</span>
+                <>
+                  {sub && <span className="shrink-0 text-ink-subtle">·</span>}
+                  <span className="shrink-0 font-medium text-amber-500">{countdown}</span>
+                </>
               ) : upNext ? (
                 <>
                   {sub && <span className="shrink-0 text-ink-subtle">·</span>}

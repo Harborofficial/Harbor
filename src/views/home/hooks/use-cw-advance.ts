@@ -20,7 +20,7 @@ import {
   type LibraryItem,
 } from "@/lib/stremio";
 import { isEpisodeHidden } from "@/lib/hidden-episodes";
-import { isNextAired, resurfaceCandidates, type AnimeMode } from "@/lib/cw-resurface";
+import { isNextAired, resurfaceCandidates, type AnimeMode, type ResurfaceTarget } from "@/lib/cw-resurface";
 import { lastPlayedEpisode, readResumeEntry } from "@/lib/resume";
 import { getViewedSeason } from "@/lib/season-view-pref";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
@@ -521,7 +521,7 @@ export function useCwAdvance(
                   continue;
                 } else {
                   // Entire series is completed; keep if timer enabled or nuvio
-                  if (animeCwEnd === "timer" || isNuvioItem) {
+                  if ((animeCwEnd === "timer" || isNuvioItem) && !hideCaughtUp) {
                     next.set(i._id, {
                       ...i,
                       waitingForAir: true as const,
@@ -557,7 +557,7 @@ export function useCwAdvance(
                 if (followUp) {
                   nextEp = followUp;
                   unplacedCur = false;
-                } else if (animeCwEnd === "timer" || isNuvioItem) {
+                } else if ((animeCwEnd === "timer" || isNuvioItem) && !hideCaughtUp) {
                   unplacedCur = true;
                   next.set(i._id, {
                     ...i,
@@ -727,7 +727,7 @@ export function useCwAdvance(
             waitingForAir: true as const,
             nextAirDate: nextEp.airDate,
           } as LibraryItem);
-        } else if (animeCwEnd === "timer" || isNuvioItem) {
+        } else if ((animeCwEnd === "timer" || isNuvioItem) && !hideCaughtUp) {
           next.set(i._id, {
             ...i,
             waitingForAir: true as const,
@@ -798,9 +798,9 @@ export function useCwAdvance(
       const resurfaced = await resurfaceCandidates(
         lib,
         inCw,
-        { tmdbKey, animeMode },
+        { tmdbKey, animeMode, animeCwEnd, hideCaughtUp },
         watchedFor,
-      ).catch(() => new Map<string, { season: number; episode: number }>());
+      ).catch(() => new Map<string, ResurfaceTarget>());
       if (cancelled) return;
       const extraItems: LibraryItem[] = [];
       for (const [id, ep] of resurfaced) {
@@ -818,11 +818,13 @@ export function useCwAdvance(
             flaggedWatched: 0,
           },
           upNext: true,
+          waitingForAir: ep.waitingForAir,
+          nextAirDate: ep.airDate,
         });
       }
       if (!cancelled && animeCwEnd === "timer") {
         let soonest = Infinity;
-        for (const it of next.values()) {
+        for (const it of [...next.values(), ...extraItems]) {
           const air = (it as Record<string, unknown>).nextAirDate;
           if (typeof air !== "string") continue;
           const at = Date.parse(air);
