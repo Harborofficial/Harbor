@@ -520,8 +520,13 @@ export function useCwAdvance(
                   });
                   continue;
                 } else {
-                  // Entire series is completed; remove from Continue Watching
-                  if (!isNuvioItem) {
+                  // Entire series is completed; keep if timer enabled or nuvio
+                  if (animeCwEnd === "timer" || isNuvioItem) {
+                    next.set(i._id, {
+                      ...i,
+                      waitingForAir: true as const,
+                    } as LibraryItem);
+                  } else {
                     remove.add(i._id);
                   }
                   continue;
@@ -552,13 +557,16 @@ export function useCwAdvance(
                 if (followUp) {
                   nextEp = followUp;
                   unplacedCur = false;
-                } else if (isAnime && animeCwEnd === "timer") {
+                } else if (animeCwEnd === "timer" || isNuvioItem) {
                   unplacedCur = true;
+                  next.set(i._id, {
+                    ...i,
+                    waitingForAir: true as const,
+                  } as LibraryItem);
+                  continue;
                 } else {
                   // Entire series is completed; remove from Continue Watching
-                  if (!isNuvioItem) {
-                    remove.add(i._id);
-                  }
+                  remove.add(i._id);
                   continue;
                 }
               }
@@ -588,15 +596,7 @@ export function useCwAdvance(
         }
         const curEpInList = list.find((e) => e.season === effCur.season && e.episode === effCur.episode);
         if (i.upNext && curEpInList && !nextEpAired(list, curEpInList, isAnime)) {
-          if (isNuvioItem) {
-            next.set(i._id, {
-              ...i,
-              waitingForAir: true as const,
-              nextAirDate: curEpInList.airDate,
-            } as LibraryItem);
-            continue;
-          }
-          if (animeCwEnd === "timer" && (curEpInList.airDate || isAnime)) {
+          if (isNuvioItem || animeCwEnd === "timer") {
             next.set(i._id, {
               ...i,
               waitingForAir: true as const,
@@ -674,7 +674,7 @@ export function useCwAdvance(
           );
           if (followUp) nextEp = followUp;
         }
-        if (nextEp && (isNuvioItem || nextEpAired(list, nextEp, isAnime))) {
+        if (nextEp && (isNuvioItem || animeCwEnd === "timer" || nextEpAired(list, nextEp, isAnime))) {
           const displaySeason = remappedMixed
             ? nextEp.season
             : origCur.season !== effCur.season
@@ -692,27 +692,31 @@ export function useCwAdvance(
               flaggedWatched: 0,
             },
             upNext: true,
-            ...(isNuvioItem && !aired
+            ...(!aired
               ? { waitingForAir: true as const, nextAirDate: nextEp.airDate }
               : {}),
           });
-        } else if (animeCwEnd === "timer" && nextEp && (nextEp.airDate || isAnime)) {
+        } else if ((animeCwEnd === "timer" || isNuvioItem) && nextEp) {
           next.set(i._id, {
             ...i,
+            state: {
+              ...i.state!,
+              season: nextEp.season,
+              episode: nextEp.episode,
+              video_id: `${i._id}:${nextEp.season}:${nextEp.episode}`,
+              timeOffset: 0,
+              flaggedWatched: 0,
+            },
+            upNext: true,
             waitingForAir: true as const,
             nextAirDate: nextEp.airDate,
           } as LibraryItem);
-        } else if (animeCwEnd === "timer" && unplacedCur && tryAnimeEntry) {
-          // The provider list does not know the season this row finished (a
-          // sequel it has not listed) and no anime entry could be resolved to
-          // date the follow-up. Keep the card rather than calling it caught up;
-          // the countdown appears once any source can place the next episode.
+        } else if (animeCwEnd === "timer" || isNuvioItem) {
           next.set(i._id, {
             ...i,
             waitingForAir: true as const,
           } as LibraryItem);
         } else if (
-          !isNuvioItem &&
           shouldDropFinished(
             list,
             fetchOk,

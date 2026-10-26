@@ -29,6 +29,10 @@ import type { Addon } from "@/lib/addons";
 import { fetchManifestAt } from "@/lib/addon-store";
 import { recordNuvioAddons } from "./nuvio-addon-registry";
 import { expungeLeachedNuvioItemsFromStremio } from "@/lib/stremio";
+import { undismissCw } from "@/lib/cw-dismiss";
+import { loadStoredSettings } from "@/lib/settings/load";
+import { tmdbDetails } from "@/lib/providers/tmdb/tmdb-details";
+import { parseTmdbTvId, fetchSeasonEpisodes } from "@/lib/series-episodes";
 
 /**
  * Returns true if Nuvio is the currently active account provider in Harbor.
@@ -613,6 +617,10 @@ export async function undismissNextUpInNuvioCloud(
 
     const filtered = dismissed.filter(
       (k) =>
+        k !== normalizedContentId &&
+        k !== cleanId &&
+        k !== `tmdb:${cleanId}` &&
+        k !== `series:${cleanId}` &&
         !k.startsWith(`${normalizedContentId}|`) &&
         !k.startsWith(`${cleanId}|`) &&
         !k.startsWith(`tmdb:${cleanId}|`) &&
@@ -872,7 +880,22 @@ async function resolveNextEpisodeForSeries(
         lookupId = `tmdb:${lookupId}`;
       }
     }
-    const m = await fetchMeta("series", lookupId).catch(() => null);
+    let m = await fetchMeta("series", lookupId).catch(() => null);
+    if (!m && lookupId.startsWith("tmdb:")) {
+      const tmdbNum = parseTmdbTvId(lookupId);
+      const key = loadStoredSettings().tmdbKey;
+      if (tmdbNum && key) {
+        const episodes = await fetchSeasonEpisodes({ id: lookupId, type: "series", name: "" }, lastSeason, { tmdbKey: key }).catch(() => []);
+        if (episodes && episodes.length > 0) {
+          const nextInSeason = episodes.find((e) => e.episode > lastEpisode);
+          if (nextInSeason) return { season: lastSeason, episode: nextInSeason.episode };
+          const nextSeasonEps = await fetchSeasonEpisodes({ id: lookupId, type: "series", name: "" }, lastSeason + 1, { tmdbKey: key }).catch(() => []);
+          if (nextSeasonEps && nextSeasonEps.length > 0) {
+            return { season: lastSeason + 1, episode: nextSeasonEps[0].episode };
+          }
+        }
+      }
+    }
     if (m?.videos && m.videos.length > 0) {
       const orderedVideos = m.videos
         .flatMap((v) => {
@@ -994,6 +1017,26 @@ export async function reconcileNuvioWatched(
         register(`series:${cleanId}`);
       }
 
+      // Any show with active watched episodes should have prior dismissals un-dismissed (matching Nuvio Mobile)
+      for (const [showId] of showMaxWatched) {
+        if (serverWatchedIds.has(showId)) continue;
+        undismissCw(showId);
+        const clean = showId.replace(/^(series|movie|tmdb):/, "").trim();
+        for (const k of Array.from(dismissedKeys)) {
+          if (
+            k === showId ||
+            k === clean ||
+            k.startsWith(`${showId}|`) ||
+            k.startsWith(`${clean}|`) ||
+            k.startsWith(`tmdb:${clean}|`) ||
+            k.startsWith(`series:${clean}|`)
+          ) {
+            dismissedKeys.delete(k);
+          }
+        }
+      }
+      writeCachedDismissedNextUpKeys(profileIndex, dismissedKeys);
+
       for (const entry of localEntries) {
         if (entry.type !== "series" || entry.season == null || entry.episode == null) continue;
         seenShowIds.add(entry.id);
@@ -1107,13 +1150,18 @@ export async function reconcileNuvioWatched(
         const maxInfo = showMaxWatched.get(item.content_id) || showMaxWatched.get(cleanShowId);
         if (!maxInfo) continue;
 
-        const nextTarget = await resolveNextEpisodeForSeries(
+        let nextTarget = await resolveNextEpisodeForSeries(
           item.content_id,
           maxInfo.season,
           maxInfo.episode,
         );
         if (!nextTarget) {
-          continue;
+          const curSettings = loadStoredSettings();
+          if (curSettings.animeCwEnd === "timer" || isNuvioProviderActive()) {
+            nextTarget = { season: maxInfo.season, episode: maxInfo.episode };
+          } else {
+            continue;
+          }
         }
         const nextS = nextTarget.season;
         const nextE = nextTarget.episode;
@@ -1133,12 +1181,22 @@ export async function reconcileNuvioWatched(
 
         if (!poster || title === cleanShowId) {
           try {
-            const metaLookup = item.content_id.startsWith("tt")
-              ? item.content_id
-              : item.content_id.startsWith("tmdb:")
-                ? item.content_id
-                : `tmdb:${cleanShowId}`;
-            const m = await fetchMeta("series", metaLookup).catch(() => null);
+            let m: any = null;
+            if (item.content_id.startsWith("tt")) {
+              m = await fetchMeta("series", item.content_id).catch(() => null);
+            } else {
+              const tmdbNum = parseTmdbTvId(item.content_id);
+              const key = loadStoredSettings().tmdbKey;
+              if (tmdbNum && key) {
+                m = await tmdbDetails(key, { id: String(tmdbNum), type: "series", name: "" }).catch(() => null);
+              }
+              if (!m && title && title !== cleanShowId) {
+                const searchRes = await fetch(
+                  `https://v3-cinemeta.strem.io/catalog/series/top/search=${encodeURIComponent(title)}.json`,
+                ).then((r) => r.json()).catch(() => null);
+                m = searchRes?.metas?.[0];
+              }
+            }
             if (m) {
               if (m.name && title === cleanShowId) title = m.name;
               if (m.poster && !poster) poster = m.poster;

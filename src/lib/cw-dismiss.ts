@@ -395,6 +395,22 @@ export function dismissCw(
   );
 }
 
+export function undismissCw(id: string): void {
+  loadDismissed();
+  const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = [id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`, `nuvio|${id}`, `nuvio|${cleanId}`];
+  let changed = false;
+  for (const v of variants) {
+    if (dismissed.delete(v)) changed = true;
+    if (dismissedVid.delete(v)) changed = true;
+    if (dismissedPos.delete(v)) changed = true;
+  }
+  if (changed) {
+    persistDismissed(dismissed, dismissedVid, false, dismissedPos);
+    emit();
+  }
+}
+
 function subscribe(cb: () => void): () => void {
   listeners.add(cb);
   return () => {

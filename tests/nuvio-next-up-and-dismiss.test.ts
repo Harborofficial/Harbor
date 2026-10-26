@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { buildNuvioPlaybackItems } from "../src/lib/nuvio/nuvio-playback";
 import { isDismissedNextUp } from "../src/lib/nuvio/nuvio-sync";
+import { undismissCw, isCwDismissed } from "../src/lib/cw-dismiss";
 import type { NuvioWatchProgress, NuvioWatchedItem } from "../src/lib/nuvio/nuvio-types";
 
 test("Nuvio Next Up: unwatched series with episodes marked watched immediately surfaces Next Up card", () => {
@@ -176,4 +177,27 @@ test("Nuvio Next Up: unaired / upcoming series (e.g. Vision Quest) generates Nex
   assert.equal(items[0].state?.episode, 2);
   assert.equal(items[0].upNext, true);
   assert.equal(items[0].external, "nuvio");
+});
+
+test("Nuvio Next Up: undismissCw removes dismissal so newly watched episode surfaces", () => {
+  undismissCw("tmdb:213375");
+  undismissCw("213375");
+
+  const records: NuvioWatchProgress[] = [];
+  const watchedItems: NuvioWatchedItem[] = [
+    {
+      profile_id: 0,
+      content_id: "tmdb:213375",
+      content_type: "series",
+      title: "Vision Quest",
+      season: 1,
+      episode: 1,
+      watched_at: Date.now(),
+    },
+  ];
+
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems);
+  assert.equal(items.length, 1);
+  assert.equal(items[0]._id, "tmdb:213375");
+  assert.equal(isCwDismissed(items[0]), false);
 });

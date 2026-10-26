@@ -371,7 +371,7 @@ export function BpCwCardPill({
         </span>
       )}
       {trailing && (
-        <span className={`min-w-0 truncate ${upNext ? "text-[var(--bp-touch)]" : ""}`}>
+        <span className={`min-w-0 truncate ${meta.waitingForAir ? "text-amber-500 font-semibold" : upNext ? "text-[var(--bp-touch)]" : ""}`}>
           {trailing}
         </span>
       )}

@@ -150,18 +150,20 @@ export const ContinueCard = memo(function ContinueCard({
     return () => window.clearInterval(id);
   }, [waitingForAir, nextAirDate]);
   const countdown = useMemo(() => {
-    if (!nextAirDate) return "";
+    if (!nextAirDate) {
+      return waitingForAir ? t("Airing soon") : "";
+    }
     const diff = Date.parse(nextAirDate) - now;
     if (diff <= 0) return t("Airing now");
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
     if (days > 0)
-      return t("Next in {days}d {hours}h", { days: String(days), hours: String(hours) });
+      return t("in {days}d {hours}h", { days: String(days), hours: String(hours) });
     if (hours > 0)
-      return t("Next in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
-    return t("Next in {minutes}m", { minutes: String(Math.max(1, minutes)) });
-  }, [nextAirDate, now, t]);
+      return t("in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
+    return t("in {minutes}m", { minutes: String(Math.max(1, minutes)) });
+  }, [nextAirDate, now, t, waitingForAir]);
   const kitsuThreeSeg =
     /^(kitsu|mal|anilist|anidb):/.test(item._id) &&
     (item.state?.video_id ?? "").split(":").length === 3;
@@ -769,7 +771,7 @@ export const ContinueCard = memo(function ContinueCard({
               )}
               {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
               {waitingForAir && countdown ? (
-                <span className="shrink-0 font-medium text-amber">{countdown}</span>
+                <span className="shrink-0 font-medium text-amber-500">{countdown}</span>
               ) : upNext ? (
                 <>
                   {sub && <span className="shrink-0 text-ink-subtle">·</span>}
@@ -813,7 +815,10 @@ export const ContinueCard = memo(function ContinueCard({
             </div>
           )}
           <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
-            <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
+            <div
+              className={`h-full ${waitingForAir ? "bg-amber-500" : "bg-accent"}`}
+              style={{ width: `${waitingForAir ? 100 : progress * 100}%` }}
+            />
           </div>
         </div>
       </button>
