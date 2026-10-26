@@ -504,7 +504,7 @@ export function isDismissedNextUp(
   const s = season ?? -1;
   const e = episode ?? -1;
 
-  // 3. Check exact (season, episode), seed episode (season, episode - 1), and season wildcard (season, -1)
+  // 3. Check exact (season, episode), seed episode dismissal (season, episode - 1), and season wildcard (season, -1)
   for (const v of idVariants) {
     if (s >= 0 && e >= 0) {
       if (dismissedKeys.has(`${v}|${s}|${e}`)) return true;
@@ -866,8 +866,9 @@ async function resolveNextEpisodeForSeries(
   seriesId: string,
   lastSeason: number,
   lastEpisode: number,
+  seriesTitle?: string,
 ): Promise<{ season: number; episode: number } | null> {
-  const cleanId = seriesId.replace(/^(series|movie):/, "");
+  const cleanId = seriesId.replace(/^(series|movie|tmdb):/, "").trim();
   try {
     let lookupId = cleanId;
     if (
@@ -881,6 +882,20 @@ async function resolveNextEpisodeForSeries(
       }
     }
     let m = await fetchMeta("series", lookupId).catch(() => null);
+    if (!m && seriesTitle) {
+      const searchRes = await fetch(
+        `https://v3-cinemeta.strem.io/catalog/series/top/search=${encodeURIComponent(
+          seriesTitle,
+        )}.json`,
+      ).catch(() => null);
+      if (searchRes && searchRes.ok) {
+        const searchData = await searchRes.json().catch(() => null);
+        const firstHit = searchData?.metas?.[0];
+        if (firstHit?.id) {
+          m = await fetchMeta("series", firstHit.id).catch(() => null);
+        }
+      }
+    }
     if (!m && lookupId.startsWith("tmdb:")) {
       const tmdbNum = parseTmdbTvId(lookupId);
       const key = loadStoredSettings().tmdbKey;
@@ -913,7 +928,7 @@ async function resolveNextEpisodeForSeries(
       return null;
     }
   } catch {}
-  return { season: lastSeason, episode: lastEpisode + 1 };
+  return null;
 }
 
 export async function reconcileNuvioWatched(
@@ -945,7 +960,7 @@ export async function reconcileNuvioWatched(
 
   // 1. Reconcile episodes with local storage: adds server episodes and removes
   // unflagged episodes (handling single unmarks, up-to unmarks, and whole-season unmarks from Nuvio mobile)
-  reconcileNuvioWatchedEpisodes(profileIndex, serverEpisodeKeys);
+  const { newlyWatchedShows } = reconcileNuvioWatchedEpisodes(profileIndex, serverEpisodeKeys);
 
   // 2. Update watched flags for all items reported by Nuvio Cloud
   for (const id of serverWatchedIds) {
@@ -1017,8 +1032,9 @@ export async function reconcileNuvioWatched(
         register(`series:${cleanId}`);
       }
 
-      // Any show with active watched episodes should have prior dismissals un-dismissed (matching Nuvio Mobile)
-      for (const [showId] of showMaxWatched) {
+      // Only un-dismiss shows that gained newly watched episodes from the server (e.g. watched on mobile),
+      // preserving local dismissals so titles removed via (X) do not resurrect on every sync tick.
+      for (const showId of newlyWatchedShows) {
         if (serverWatchedIds.has(showId)) continue;
         undismissCw(showId);
         const clean = showId.replace(/^(series|movie|tmdb):/, "").trim();
@@ -1035,7 +1051,9 @@ export async function reconcileNuvioWatched(
           }
         }
       }
-      writeCachedDismissedNextUpKeys(profileIndex, dismissedKeys);
+      if (newlyWatchedShows.size > 0) {
+        writeCachedDismissedNextUpKeys(profileIndex, dismissedKeys);
+      }
 
       for (const entry of localEntries) {
         if (entry.type !== "series" || entry.season == null || entry.episode == null) continue;

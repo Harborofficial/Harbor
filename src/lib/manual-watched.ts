@@ -322,7 +322,7 @@ export function reconcileNuvioWatchedEpisodes(
   slot: number,
   serverEpisodeKeys: Set<string>,
   targetSeriesIds?: Set<string>,
-): void {
+): { changed: boolean; newlyWatchedShows: Set<string> } {
   const sk = `${PREFIXES.watched}nuvio.${slot}`;
   const unsk = `${PREFIXES.unwatched}nuvio.${slot}`;
 
@@ -330,6 +330,7 @@ export function reconcileNuvioWatchedEpisodes(
   const currentLocalUnwatched = loadSet(unsk);
 
   let changed = false;
+  const newlyWatchedShows = new Set<string>();
 
   for (const sKey of Array.from(serverEpisodeKeys)) {
     const parts = sKey.split("|");
@@ -349,6 +350,14 @@ export function reconcileNuvioWatchedEpisodes(
       currentLocalWatched.add(sKey);
       currentLocalUnwatched.delete(sKey);
       changed = true;
+      const sid = sKey.split("|")[0];
+      if (sid) {
+        newlyWatchedShows.add(sid);
+        const clean = sid.replace(/^(series|movie|tmdb):/, "");
+        newlyWatchedShows.add(clean);
+        newlyWatchedShows.add(`tmdb:${clean}`);
+        newlyWatchedShows.add(`series:${clean}`);
+      }
     }
   }
 
@@ -426,6 +435,7 @@ export function reconcileNuvioWatchedEpisodes(
     version += 1;
     notifySubs();
   }
+  return { changed, newlyWatchedShows };
 }
 
 export function manualWatchedRawKeys(): string[] {

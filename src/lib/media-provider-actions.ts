@@ -800,9 +800,16 @@ export function watchedProviderWrites(
             if (lastEp) {
               let nextSeason: number | null = lastEp.season;
               let nextEpisode: number | null = lastEp.episode + 1;
-              let hasNext = true;
-              if (options.videos?.length) {
-                const orderedVideos = options.videos
+              let hasNext = false;
+              let videosToScan = options.videos;
+              if (!videosToScan?.length) {
+                const fetchedMeta = await fetchMeta("series", primaryId).catch(() => null);
+                if (fetchedMeta?.videos?.length) {
+                  videosToScan = fetchedMeta.videos;
+                }
+              }
+              if (videosToScan?.length) {
+                const orderedVideos = videosToScan
                   .flatMap((v) => {
                     const s = v.season ?? 0;
                     const e = v.episode ?? v.number ?? 0;
@@ -815,12 +822,9 @@ export function watchedProviderWrites(
                     (v.season === lastEp.season && v.episode > lastEp.episode),
                 );
                 if (nextVid) {
+                  hasNext = true;
                   nextSeason = nextVid.season;
                   nextEpisode = nextVid.episode;
-                } else {
-                  hasNext = false;
-                  nextSeason = null;
-                  nextEpisode = null;
                 }
               }
 

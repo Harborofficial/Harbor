@@ -55,7 +55,7 @@ import { trackEvent } from "@/lib/discover";
 import { publishResumeStates } from "@/lib/hover-preview/store";
 import { readResumeEntry, saveResumeBatch } from "@/lib/resume";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
-import { listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import { clearLocalCw, listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -980,6 +980,9 @@ export function Home({
         dismissManualWatched(item._id, { acknowledged: true });
         return;
       }
+      // The cloud feed re-absorbs a local entry unless the local store is purged
+      // too, so a dismissal must drop both copies in one step.
+      clearLocalCw(item._id, { acknowledged: true });
       return dismissCw(item, authKey, { acknowledged: true });
     },
     [authKey],

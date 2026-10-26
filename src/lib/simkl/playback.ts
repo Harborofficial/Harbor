@@ -2,6 +2,7 @@ import { simklRequest, SimklApiError } from "./client";
 import { getSession } from "./session";
 import { simklEntryIdKeys, simklEpisodeWatchKeys, simklLookupIds } from "./ids";
 import type { SimklEpisodeCoords } from "./ids";
+import { loadSimklProgress } from "./list-status";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { readResumeEntry, saveResumeBatch } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
@@ -239,12 +240,17 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
 
   const items: LibraryItem[] = [];
   const seen = new Set<string>();
+  const seenSeries = new Set<string>();
   for (const r of raw) {
     const item = await toLibraryItem(r);
     if (!item?.state) continue;
     const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
     if (seen.has(key)) continue;
     seen.add(key);
+    seenSeries.add(item._id);
+    const cleanId = item._id.replace(/^(series|movie|tmdb|tmdb:tv):/, "");
+    seenSeries.add(cleanId);
+    seenSeries.add(`tmdb:tv:${cleanId}`);
     items.push(item);
     // A dismissed card must not be resurrected by this backfill: dismiss clears the
     // resume entry, and rewriting it with t=now would manufacture fresh activity that
@@ -277,6 +283,30 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
       ]);
     }
   }
+
+  try {
+    const progress = await loadSimklProgress();
+    if (progress && Array.isArray(progress.completedSeries)) {
+      for (const comp of progress.completedSeries) {
+        if (!comp || !comp._id) continue;
+        const cleanId = comp._id.replace(/^(series|movie|tmdb|tmdb:tv):/, "");
+        if (
+          seenSeries.has(comp._id) ||
+          seenSeries.has(cleanId) ||
+          seenSeries.has(`tmdb:tv:${cleanId}`)
+        ) {
+          continue;
+        }
+        if (isCwDismissed(comp)) continue;
+        seenSeries.add(comp._id);
+        seenSeries.add(cleanId);
+        items.push({
+          ...comp,
+          upNext: true,
+        });
+      }
+    }
+  } catch {}
   writeCachedSimklPlaybackItems(items);
   return items;
 }

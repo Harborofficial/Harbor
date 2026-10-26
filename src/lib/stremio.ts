@@ -1,9 +1,9 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { readResumeEntry, readResumeSource } from "@/lib/resume";
 import { isDetectedAnime } from "./anime-detect";
-import { isNuvioProviderActive } from "./active-profile-id";
-import { collectAllNuvioItemIds } from "./nuvio/nuvio-client";
-import { sanitizeStremioLocalCw } from "./local-cw";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { collectAllNuvioItemIds } from "@/lib/nuvio/nuvio-client";
+import { sanitizeStremioLocalCw } from "@/lib/local-cw";
 
 const API = "https://api.strem.io/api";
 
@@ -45,6 +45,8 @@ export type LibraryItem = {
   altIds?: string[];
   isAnime?: boolean;
   upNext?: boolean;
+  waitingForAir?: boolean;
+  nextAirDate?: string;
   local?: boolean;
   manualWatched?: boolean;
 };
@@ -124,6 +126,7 @@ export function cwSortKey(i: LibraryItem): number {
 export function isCwMember(i: LibraryItem): boolean {
   if (i.removed && !i.temp) return false;
   if (i.upNext) return true;
+  if (i.waitingForAir) return true;
   if (!i.state) {
     const local = resumeForItem(i)?.ms ?? 0;
     return local > 0;

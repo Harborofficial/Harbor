@@ -98,7 +98,7 @@ import {
   library,
   type LibraryItem,
 } from "@/lib/stremio";
-import { listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import { clearLocalCw, listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -981,6 +981,9 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                             dismissManualWatched(it._id, { acknowledged: true });
                             return;
                           }
+                          // The cloud feed re-absorbs a local entry unless the local
+                          // store is purged too, so both copies drop in one step.
+                          if (it.local) clearLocalCw(it._id, { acknowledged: true });
                           return dismissCw(it, authKey, { acknowledged: true });
                         }}
                       />

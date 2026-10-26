@@ -117,15 +117,19 @@ function readAll(key: string): Record<string, LocalCwEntry> {
 }
 
 function writeAll(key: string, all: Record<string, LocalCwEntry>, acknowledged = false): void {
-  cache.set(key, all);
   try {
     localStorage.setItem(key, JSON.stringify(all));
   } catch (error) {
+    // The in-memory cache must never claim a write the store refused: drop it so
+    // the next read falls back to what is actually persisted.
+    cache.delete(key);
     if (acknowledged)
       throw new Error("Could not save the change. Check available storage and try again.", {
         cause: error,
       });
+    return;
   }
+  cache.set(key, all);
 }
 
 function emit(): void {

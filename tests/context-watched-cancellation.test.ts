@@ -68,6 +68,14 @@ function harness() {
     "./mal/session": disconnected,
     "./stremio-item-lock": {},
     "./stremio-watched-sync": {},
+    // media-provider-actions gained the Nuvio/local-CW/resume writers after this
+    // harness was written; stubbing them keeps the module boundary assert honest
+    // without pretending the Trakt pagination paths touch them.
+    "./nuvio/nuvio-client": { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false },
+    "./nuvio/nuvio-sync": {},
+    "./nuvio/nuvio-library": {},
+    "./local-cw": { saveLocalCw: () => {}, clearLocalCw: () => {} },
+    "./resume": { saveResumeMs: () => {} },
     "./trakt/client": {
       traktRequest: async (path: string) => {
         reads.push(path);

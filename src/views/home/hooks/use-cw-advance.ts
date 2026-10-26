@@ -663,6 +663,11 @@ export function useCwAdvance(
         // ordinary series, so the attempt stays bounded to unplaceable rows.
         const tryAnimeEntry =
           isAnime || (unplacedCur && (i._id.startsWith("tt") || i._id.startsWith("tmdb:")));
+        // A follow-up resolved from the recorded anime entry while the finished
+        // episode is unplaceable in provider space. When that follow-up has not
+        // aired yet its provider numbering cannot be trusted, so the card keeps the
+        // finished episode and only shows the countdown for the recorded air date.
+        let unplacedFollowUp: PlayEpisode | null = null;
         if ((!nextEp || unplacedCur) && tryAnimeEntry && !privacyOwner) {
           const followUp = await animeEntryFollowUp(
             i,
@@ -672,7 +677,18 @@ export function useCwAdvance(
             nextSkip,
             listCacheRef.current,
           );
-          if (followUp) nextEp = followUp;
+          if (followUp) {
+            nextEp = followUp;
+            if (unplacedCur) unplacedFollowUp = followUp;
+          }
+        }
+        if (unplacedFollowUp && !nextEpAired(list, unplacedFollowUp, isAnime)) {
+          next.set(i._id, {
+            ...i,
+            waitingForAir: true as const,
+            nextAirDate: unplacedFollowUp.airDate,
+          } as LibraryItem);
+          continue;
         }
         if (nextEp && (isNuvioItem || animeCwEnd === "timer" || nextEpAired(list, nextEp, isAnime))) {
           const displaySeason = remappedMixed

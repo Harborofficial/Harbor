@@ -82,12 +82,16 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
   const animeDetectVer = useDetectedAnimeVersion();
   const { cwSources } = settings;
   useEffect(() => {
-    setExternalCwSources({
-      trakt: cwSources.trakt,
-      simkl: cwSources.simkl,
-      publicmetadb: cwSources.publicmetadb,
-      nuvio: isNuvio,
-    });
+    // Only the sources this row actually gates on may be published: writing an
+    // explicit `nuvio: false` / `publicmetadb: undefined` would clobber the mask
+    // the home feed installed and drop publicmetadb CW for every other row.
+    const mask: { trakt: boolean; simkl: boolean; publicmetadb?: boolean; nuvio?: boolean } = {
+      trakt: !!cwSources.trakt,
+      simkl: !!cwSources.simkl,
+    };
+    if (cwSources.publicmetadb !== undefined) mask.publicmetadb = !!cwSources.publicmetadb;
+    if (isNuvio) mask.nuvio = true;
+    setExternalCwSources(mask);
   }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb, isNuvio]);
   const trackerCw = useExternalCw(
     isNuvio || (!hideSharedCw && (cwSources.trakt || cwSources.simkl)),
