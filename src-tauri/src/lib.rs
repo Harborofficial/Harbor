@@ -1617,6 +1617,10 @@ pub fn run() {
             #[cfg(feature = "games")]
             games::games_download_locations,
             #[cfg(feature = "games")]
+            games::games_download_folders,
+            #[cfg(feature = "games")]
+            games::games_delete_game_downloads,
+            #[cfg(feature = "games")]
             games::games_set_transfer_bandwidth,
             #[cfg(feature = "games")]
             games::games_source_public_review,
@@ -1635,7 +1639,15 @@ pub fn run() {
             #[cfg(feature = "games")]
             games::games_cloud_download,
             #[cfg(feature = "games")]
+            games::games_cloud_tb_recovery_catalog,
+            #[cfg(feature = "games")]
             games::games_cloud_resolve_link,
+            #[cfg(feature = "games")]
+            games::games_cloud_magnet_create,
+            #[cfg(feature = "games")]
+            games::games_cloud_magnet_status,
+            #[cfg(feature = "games")]
+            games::games_cloud_magnet_download,
             #[cfg(feature = "games")]
             games::games_cloud_host_check,
             #[cfg(feature = "games")]

@@ -83,7 +83,7 @@ fn api(key: String) -> Result<Api> {
     Api::new(&Request { provider: "ad".into(), key, parent: String::new(), file: String::new(), page: 0 })
 }
 impl Api {
-    async fn ad_prepare(&self, link: &str, password: &str) -> Result<AdLink> {
+    pub(super) async fn ad_prepare(&self, link: &str, password: &str) -> Result<AdLink> {
         let link = links::source_link(link)?;
         if password.len() > 1024 || password.chars().any(char::is_control) { return Err("cloud_password"); }
         let mut form = vec![("link", link)];

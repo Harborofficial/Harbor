@@ -2,6 +2,10 @@ use notify_rust::{Notification, NotificationResponse};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tauri::Emitter;
 
+#[cfg(windows)]
+#[path = "windows_toast_identity.rs"]
+mod windows_toast_identity;
+
 // Waiting for a click response blocks its thread until the OS notification
 // server reports the toast closed. That's bounded on Windows (winrt_notification
 // auto-dismisses after its display duration), but some minimal Linux D-Bus
@@ -57,13 +61,9 @@ fn cache_poster_image(bytes: &[u8]) -> Option<std::path::PathBuf> {
     Some(path)
 }
 
-// Windows toasts fall back to the "Windows PowerShell" system AUMID unless we
-// set our own — but that AUMID only shows up correctly for the *installed*
-// app (it needs a matching Start Menu shortcut). In an unpackaged dev build
-// there is no such shortcut, so setting it there breaks toasts entirely.
-// Mirrors the same dev/prod check tauri-plugin-notification's own desktop
-// backend uses internally (src-tauri isn't able to reuse that logic directly
-// since it's private to the plugin).
+// A Windows toast must use an AUMID registered in a Start Menu shortcut.
+// Installed apps use Tauri's app identity. Unpackaged development builds now
+// register their own Harbor identity instead of displaying "Windows PowerShell".
 #[cfg(windows)]
 fn windows_app_id(app: &tauri::AppHandle) -> Option<String> {
     use std::path::MAIN_SEPARATOR as SEP;
@@ -72,7 +72,7 @@ fn windows_app_id(app: &tauri::AppHandle) -> Option<String> {
     let is_dev = exe_dir.ends_with(format!("{SEP}target{SEP}debug").as_str())
         || exe_dir.ends_with(format!("{SEP}target{SEP}release").as_str());
     if is_dev {
-        None
+        windows_toast_identity::app_id(&exe)
     } else {
         Some(app.config().identifier.clone())
     }

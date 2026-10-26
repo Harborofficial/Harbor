@@ -23,13 +23,14 @@ export function GameCloudDialog({ downloads, keys, openSettings, onClose, initia
   const [scope,setScope]=useState(initialScope);
   const [result, setResult] = useState<CloudPage | null>(null), [loading, setLoading] = useState(false), [error, setError] = useState(""), [retry, setRetry] = useState(0), [resolving, setResolving] = useState("");
   const [selected, setSelected] = useState<CloudFileDownload | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const key = keys[provider]?.trim() ?? "", parent = trail.at(-1)?.entry.id ?? "", service = CLOUD_PROVIDERS.find(v => v.id === provider)!;
   const jobs=scope==='web'&&(provider==='tb'||provider==='pm'),folder=trail.at(-1)?.entry.kind==='folder',jobCommand=`games_cloud_${provider==='pm'?'pm':'web'}`;
   const saving = downloads.busy.includes("new"), available = downloads.available, connected = !!key;
   const dismiss = () => { if (!saving) close(); };
   const back = () => {
     if (saving) return;
-    if (selected) { setSelected(null); setError(""); downloads.dismissError(); requestAnimationFrame(() => { list.current?.scrollTo(0, scrollTarget.current); search.current?.focus({preventScroll:true}); }); return; }
+    if (selected) { setSelected(null); setSelectedFileId(null); setError(""); downloads.dismissError(); requestAnimationFrame(() => { list.current?.scrollTo(0, scrollTarget.current); search.current?.focus({preventScroll:true}); }); return; }
     if (trail.length) { const previous = trail.at(-1)!; scrollTarget.current=previous.scroll; setTrail(v => v.slice(0, -1)); setPage(previous.page); setQuery(previous.query); return; }
     dismiss();
   };
@@ -40,7 +41,7 @@ export function GameCloudDialog({ downloads, keys, openSettings, onClose, initia
     document.addEventListener("keydown", trap); return () => { alive.current = false; revision.current++; document.removeEventListener("keydown", trap); previous?.focus({ preventScroll: true }); };
   }, []);
   useEffect(() => {
-    const current = ++revision.current; setSelected(null); setResolving(""); pending.current = false; setResult(null); setError(""); setLimit(100);
+    const current = ++revision.current; setSelected(null); setSelectedFileId(null); setResolving(""); pending.current = false; setResult(null); setError(""); setLimit(100);
     if (!connected || !available) { setLoading(false); return; }
     setLoading(true);
     const request={args:{provider,key,parent,page}};
@@ -52,7 +53,7 @@ export function GameCloudDialog({ downloads, keys, openSettings, onClose, initia
     if (pending.current || saving) return;
     if (entry.kind !== "file") { setTrail(v => [...v, { entry, page, query, scroll: list.current?.scrollTop ?? 0 }]); scrollTarget.current=0; setPage(0); setQuery(""); return; }
     if (!entry.ready) return; pending.current = true; scrollTarget.current=list.current?.scrollTop??0; const current = revision.current; setResolving(entry.id); setError(""); downloads.dismissError();
-    try { const value = await invoke<CloudFileDownload>(jobs&&!folder?`${jobCommand}_download`:"games_cloud_download", { args: { provider, key, parent, file: entry.id } }); if (alive.current && current === revision.current) { setSelected(value); requestAnimationFrame(() => body.current?.querySelector<HTMLElement>(".games-cloud-save")?.focus()); } }
+    try { const value = await invoke<CloudFileDownload>(jobs&&!folder?`${jobCommand}_download`:"games_cloud_download", { args: { provider, key, parent, file: entry.id } }); if (alive.current && current === revision.current) { setSelected(value); setSelectedFileId(entry.id); requestAnimationFrame(() => body.current?.querySelector<HTMLElement>(".games-cloud-save")?.focus()); } }
     catch (reason) { if (alive.current && current === revision.current) setError(cloudError(reason)); }
     finally { if (alive.current && current === revision.current) { setResolving(""); pending.current = false; } }
   };
@@ -71,7 +72,7 @@ export function GameCloudDialog({ downloads, keys, openSettings, onClose, initia
       </>}
       {error && <div className="games-cloud-error" role="alert"><span>{t(error)}</span>{!selected && !resolving && <button className="games-button" onClick={() => setRetry(v => v + 1)}>{t("common.retry")}</button>}</div>}
       {selected && downloads.error && <p className="games-cloud-error" role="alert">{t(downloads.error)}</p>}
-      <footer><span>{t(selected ? "games.cloud.kept" : "games.cloud.pageNote", { page: page + 1 })}</span>{selected ? <button className="games-button games-button-primary games-cloud-save" disabled={saving} onClick={() => { void downloads.start({ url: selected.url, name: selected.name, expectedBytes: selected.expectedBytes ?? undefined }).then(started => { if (started && alive.current) close(); }); }}><ArrowDown size={16} />{t(saving ? "common.loading" : "games.download.chooseDestination")}</button> : <div><button className="games-icon-button" disabled={loading || page === 0 || !!resolving} aria-label={t("games.cloud.previousPage")} onClick={() => { setPage(v => v - 1); setQuery(""); }}><NavChevron dir="left" size={18} /></button><button className="games-icon-button" disabled={loading || result?.next == null || !!resolving} aria-label={t("games.cloud.nextPage")} onClick={() => { if (result?.next != null) { setPage(result.next); setQuery(""); } }}><NavChevron dir="right" size={18} /></button></div>}</footer>
+      <footer><span>{t(selected ? "games.cloud.kept" : "games.cloud.pageNote", { page: page + 1 })}</span>{selected ? <button className="games-button games-button-primary games-cloud-save" disabled={saving} onClick={() => { void downloads.start({ url: selected.url, name: selected.name, expectedBytes: selected.expectedBytes ?? undefined, torboxOrigin: provider==="tb" && !jobs && parent && selectedFileId ? {torrentId:parent,fileId:selectedFileId} : undefined }).then(started => { if (started && alive.current) close(); }); }}><ArrowDown size={16} />{t(saving ? "common.loading" : "games.download.chooseDestination")}</button> : <div><button className="games-icon-button" disabled={loading || page === 0 || !!resolving} aria-label={t("games.cloud.previousPage")} onClick={() => { setPage(v => v - 1); setQuery(""); }}><NavChevron dir="left" size={18} /></button><button className="games-icon-button" disabled={loading || result?.next == null || !!resolving} aria-label={t("games.cloud.nextPage")} onClick={() => { if (result?.next != null) { setPage(result.next); setQuery(""); } }}><NavChevron dir="right" size={18} /></button></div>}</footer>
     </>}
   </div></ModalShell>;
 }

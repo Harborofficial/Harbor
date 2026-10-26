@@ -12,7 +12,8 @@ export function downloadGame(value:DownloadGame|undefined):DownloadGame|undefine
   const contentKind=["game","patch","mod","extra"].includes(value?.contentKind??"")?value!.contentKind:undefined;
   return {id,name,artwork:art(value?.artwork),logo:art(value?.logo),sourceName:text(value?.sourceName,200),...(contentKind?{contentKind}:{})};
 }
-export type GameTransfer={batchId?:string|null;checkingPartial?:number|null;preparation?:import("./download-preparation").PreparationChoice|null;id:string;profile:string;name:string;url:string;sourcePage?:string;sourceLink?:string;destination:string;status:TransferStatus;received:number;total:number|null;expectedBytes:number|null;expectedSha256:string|null;sha256:string|null;validator:string|null;createdAt:number;updatedAt:number;error:string|null;bytesPerSecond:number;diskBytesPerSecond?:number;game?:DownloadGame;queueOrder?:number};
+export type TorboxOrigin={torrentId:string;fileId:string;kind?:"torrent"|"web"};
+export type GameTransfer={torboxOrigin?:TorboxOrigin|null;batchId?:string|null;checkingPartial?:number|null;preparation?:import("./download-preparation").PreparationChoice|null;id:string;profile:string;name:string;url:string;sourcePage?:string;sourceLink?:string;destination:string;status:TransferStatus;received:number;total:number|null;expectedBytes:number|null;expectedSha256:string|null;sha256:string|null;validator:string|null;createdAt:number;updatedAt:number;error:string|null;bytesPerSecond:number;diskBytesPerSecond?:number;game?:DownloadGame;queueOrder?:number};
 export const canOrderTransfer=(status:TransferStatus)=>["queued","paused","failed"].includes(status);
 export function compareTransferQueue(a:GameTransfer,b:GameTransfer){
   const group=(r:GameTransfer)=>canOrderTransfer(r.status)?1:isTransferActive(r.status)?0:2;
@@ -20,7 +21,7 @@ export function compareTransferQueue(a:GameTransfer,b:GameTransfer){
   if(group(a)===2)return b.createdAt-a.createdAt||a.id.localeCompare(b.id);
   return (a.queueOrder??a.createdAt)-(b.queueOrder??b.createdAt)||a.createdAt-b.createdAt||a.id.localeCompare(b.id);
 }
-export type DownloadRequest={url:string;name?:string;expectedBytes?:number;expectedSha256?:string;game?:DownloadGame;browserTicket?:string;sourceLink?:string};
+export type DownloadRequest={url:string;name?:string;expectedBytes?:number;expectedSha256?:string;game?:DownloadGame;browserTicket?:string;sourceLink?:string;torboxOrigin?:TorboxOrigin};
 export type BatchDownloadRequest=DownloadRequest&{filename:string};
 export function validateDownloadBatch(files:BatchDownloadRequest[]){
   if(!files.length||files.length>200)throw new Error('transfer_limit');

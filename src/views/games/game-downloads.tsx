@@ -1,6 +1,8 @@
 import {canOrderDownload,compareDownloadQueue} from "@/lib/games/download-queue";
+import {invoke} from "@tauri-apps/api/core";
+import {GameDownloadGroupDeleteDialog,GameDownloadGroupRelinkPicker} from "./game-download-group-dialogs";
 import {useSourceRelink} from "./game-source-links";
-import {transferStateKey,transferProgressBytes} from "@/lib/games/transfer-relink";
+import {transferStateKey,transferProgressBytes,transferVerificationBytes} from "@/lib/games/transfer-relink";
 import {DownloadQueueActions} from "./game-download-queue";
 import { Play } from "@/components/icons/play-filled";
 import {downloadContentLabel} from "@/lib/games/download-content";
@@ -16,12 +18,18 @@ import {isTransferActive,transferBytes,type GameTransfer} from "@/lib/games/tran
 import type {GameTransfers} from "@/hooks/use-game-transfers";
 import {GameArchiveDialog} from "./game-archive";
 import {GameArchiveCleanup} from "./game-archive-cleanup";
-import {GameTorrentRow,GameTorrentActions} from "./game-torrent";
-import {DownloadActivity,DownloadArtwork,runDownloadAction} from "./game-download-activity";
-import {downloadGame,featuredDownload,type DownloadItem,type DownloadGroup} from "@/lib/games/download-presentation";
+import {GameTorrentRow} from "./game-torrent";
+import {DownloadArtwork,runDownloadAction} from "./game-download-activity";
+import {bundleDownloads, groupDownloadAction, groupSectionStatusKey, type GameDownloadBundle, type GroupDownloadAction} from "@/lib/games/download-game-groups";
+import {GameDownloadGroupCard} from "./game-download-group-card";
+
+import {placeFeaturedDownloads} from "@/lib/games/download-featured";
+import {downloadGame,type DownloadItem,type DownloadGroup} from "@/lib/games/download-presentation";
 import {downloadSetup,downloadSetupGroup,setupIsBusy,type DownloadSetup} from "@/lib/games/download-setup";
 import {DownloadSetupStatus} from "./game-download-setup";
 import type {CloudKeys} from "@/lib/games/cloud-files";
+import type {TorboxRecoveryStatus} from "@/hooks/use-torbox-download-recovery";
+import {torboxFailedLink} from "@/lib/games/torbox-download-recovery";
 import {GameCloudDialog} from "./game-cloud";
 import {GameDownloadSpeed} from "./game-download-speed";
 import {GameDownloadStorage} from "./game-download-storage";
@@ -34,7 +42,7 @@ import {ArchiveJobStatus,GameArchiveJobs} from "./game-download-archive";
 import {GameSetupDialog} from "./game-setup";
 import {DownloadSourceArtworkContext,type DownloadSourceArtwork} from "./game-download-source";
 import {useDownloadHistory} from "@/hooks/use-download-history";
-import {downloadCompletedAt,downloadHistoryHidden} from "@/lib/games/download-history";
+import {downloadHistoryHidden} from "@/lib/games/download-history";
 import {DownloadCompletedDate} from "./game-download-completed";
 import {useGamePreparations} from "@/hooks/use-game-preparations";
 import {downloadPreparation,preparationGroup,preparationOutput} from "@/lib/games/download-preparation";
@@ -42,13 +50,27 @@ import {GamePreparationReview,PreparationStatus} from "./game-preparation-review
 import "./game-downloads.css";
 const EMPTY_SOURCE_ARTWORK:readonly DownloadSourceArtwork[]=[];
 
-export function GameDownloads({downloads,query,manageSources,active,openLibrary,cloudKeys,openSourceSettings,revealId,customLibrary,setupState:providedSetup,archiveState:providedArchives,sourceArtwork=EMPTY_SOURCE_ARTWORK}:{archiveState?:GameArchives;sourceArtwork?:readonly DownloadSourceArtwork[];setupState?:GameSetupState;customLibrary:CustomGameLibrary;downloads:GameTransfers;query:string;manageSources:()=>void;active:boolean;openLibrary:()=>void;cloudKeys:CloudKeys;openSourceSettings?:()=>void;revealId?:string}){
+export function GameDownloads({downloads,query,manageSources,active,openLibrary,cloudKeys,openSourceSettings,revealId,customLibrary,setupState:providedSetup,archiveState:providedArchives,sourceArtwork=EMPTY_SOURCE_ARTWORK,torboxRecovery,featuredKeys}:{featuredKeys:readonly string[];torboxRecovery:TorboxRecoveryStatus;archiveState?:GameArchives;sourceArtwork?:readonly DownloadSourceArtwork[];setupState?:GameSetupState;customLibrary:CustomGameLibrary;downloads:GameTransfers;query:string;manageSources:()=>void;active:boolean;openLibrary:()=>void;cloudKeys:CloudKeys;openSourceSettings?:()=>void;revealId?:string}){
   const t=useT(),[adding,setAdding]=useState(false),[filter,setFilter]=useState("all"),[archive,setArchive]=useState<string|null>(null),[cloud,setCloud]=useState(false);
   const [cleanup,setCleanup]=useState(false);
   useEffect(()=>{setCleanup(false);},[downloads.profile,active]);
   useEffect(()=>{if(!active){setAdding(false);setArchive(null);setCloud(false);}},[active]);
   useEffect(()=>{if(revealId)setFilter("all");},[revealId]);
   const torrents=downloads.torrents;
+  const relinkGroup = useSourceRelink();
+  const [relinkKey,setRelinkKey] = useState<string|null>(null);
+  const [deleteKey,setDeleteKey] = useState<string|null>(null);
+  useEffect(()=>{setRelinkKey(null);setDeleteKey(null);},[downloads.profile,active]);
+  // Preserve the busy state when a whole group moves from Active to Queue.
+  const groupPending = useRef(new Set<string>());
+  const [busyGroups,setBusyGroups] = useState<string[]>([]);
+  const groupProfile = useRef(downloads.profile);
+  groupProfile.current = downloads.profile;
+  useEffect(()=>{
+    groupPending.current.clear();
+    setBusyGroups([]);
+  },[downloads.profile]);
+
   const localArchives=useGameArchives(downloads.profile,!providedArchives&&active),archives=providedArchives??localArchives;
   const [reviewedArchive,setReviewedArchive]=useState<ArchiveJob|null>(null);
   const reviewArchive=(job:ArchiveJob)=>{setReviewedArchive(job);setArchive(job.source);};
@@ -80,22 +102,87 @@ export function GameDownloads({downloads,query,manageSources,active,openLibrary,
     history.setShowHistory(false);
     requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>('.games-download-filters button[aria-pressed="true"]')?.focus({preventScroll:true}));
   };
-  const activeCount=all.filter(item=>["active","queue"].includes(groupFor(item))).length+detached.filter(job=>job.status==="running").length;
+  const activeCount=bundleDownloads(all,groupFor).filter(group=>["active","queue"].includes(group.state)).length+detached.filter(job=>job.status==="running").length;
   const queue=all.filter(canOrderDownload).sort(compareDownloadQueue);
-  const records=all.filter(item=>(history.showHistory||!hidden(item))&&matches(item)&&(filter==="all"||(filter==="complete"?groupFor(item)==="complete":["active","queue"].includes(groupFor(item)))));
-  const featured=records.filter(item=>setupIsBusy(installation(item))||extraction(item)?.status==="running").sort((a,b)=>(installation(b)?.job?.startedAt??extraction(b)?.startedAt??0)-(installation(a)?.job?.startedAt??extraction(a)?.startedAt??0))[0]
-    ??featuredDownload(records.filter(item=>groupFor(item)==="active"))
-    ??records.filter(item=>installation(item)?.phase==="attention").sort((a,b)=>(installation(b)?.job?.updatedAt??0)-(installation(a)?.job?.updatedAt??0))[0]
-    ??records.filter(item=>item.record.status==="queued").sort(compareDownloadQueue)[0]
-    ??featuredDownload(records);
-  const sections=(["active","queue","attention","complete","canceled"] as DownloadGroup[]).map(group=>({group,items:records.filter(item=>groupFor(item)===group&&(group!=="active"||item!==featured)).sort((a,b)=>group==="complete"?(downloadCompletedAt(b)??0)-(downloadCompletedAt(a)??0):compareDownloadQueue(a,b))}));
+  // Filter at the *game* level so the group's progress and bulk actions always
+  // include every file, even when other files have already completed.
+  const allBundles=bundleDownloads(all,groupFor);
+  const bundles=allBundles.filter(group=>(history.showHistory||group.items.some(item=>!hidden(item)))&&
+    group.items.some(matches)&&
+    (filter==="all"||(filter==="complete"?group.state==="complete":["active","queue"].includes(group.state))));
+  // The featured area is two fixed slots, not a live progress-based sort.
+  // Pausing does not evict a game; a newly started game replaces the older
+  // featured slot and the displaced game keeps downloading in the list below.
+  const placed=placeFeaturedDownloads(bundles,featuredKeys);
+  const featuredBundles=placed.featured;
+  const sections=(["active","queue","attention","complete","canceled"] as DownloadGroup[])
+    .map(group=>({group,items:placed.list.filter(item=>item.state===group)}));
+  const renderDownloadItem=(item:DownloadItem)=>
+    item.kind==="torrent"
+      ? <GameTorrentRow key={`torrent:${item.record.id}`} record={item.record} torrents={torrents} queue={queue} onSetup={()=>prepare(item)} installation={installation(item)} extraction={extraction(item)} preparation={preparationStatus(item)} onDismiss={groupFor(item)==="complete"?()=>dismiss([item]):undefined}/>
+      : <TransferRow key={`direct:${item.record.id}`} record={item.record} downloads={downloads} queue={queue} setup={()=>prepare(item)} installation={installation(item)} extraction={extraction(item)} preparation={preparationStatus(item)} onDismiss={groupFor(item)==="complete"?()=>dismiss([item]):undefined}/>;
+  const controlGroup = async (group:GameDownloadBundle, action:GroupDownloadAction) => {
+    const plan=groupDownloadAction(group);
+    if (!plan || plan.action!==action || groupPending.current.has(group.key) || groupProfile.current!==downloads.profile) return;
+    const selected=plan.items.filter(item=>item.record.profile===downloads.profile);
+    if (!selected.length || selected.some(item=>item.kind==="torrent" ? torrents.busy.includes(item.record.id) : downloads.busy.includes(item.record.id))) return;
+    groupPending.current.add(group.key);
+    setBusyGroups([...groupPending.current]);
+    const currentProfile=downloads.profile;
+    try {
+      // Native torrent actions are serial. Await each operation to avoid races,
+      // and skip files that already have the requested state.
+      for (const item of selected) {
+        if (groupProfile.current!==currentProfile) break;
+        if (item.kind==="torrent") await torrents.action(item.record.id, action);
+        else await downloads.action(item.record.id, action);
+      }
+    } finally {
+      groupPending.current.delete(group.key);
+      if (groupProfile.current===currentProfile) setBusyGroups([...groupPending.current]);
+    }
+  };
+  const updateGroupLink=(group:GameDownloadBundle)=>{
+    if(!relinkGroup)return;
+    const eligible=group.items.flatMap(item=>item.kind==="direct"&&["paused","failed"].includes(item.record.status)?[item.record]:[]);
+    if(eligible.length===1)relinkGroup(eligible[0]);
+    else if(eligible.length>1)setRelinkKey(group.key);
+  };
+  const removeGroupFiles=async(key:string)=>{
+    const group=allBundles.find(item=>item.key===key);
+    if(!group||group.items.some(item=>item.record.profile!==downloads.profile))throw Error("games_delete_request");
+    await invoke("games_delete_game_downloads",{args:{
+      profile:downloads.profile,
+      directIds:group.items.filter(item=>item.kind==="direct").map(item=>item.record.id),
+      torrentIds:group.items.filter(item=>item.kind==="torrent").map(item=>item.record.id),
+    }});
+    await Promise.all([downloads.refresh(),torrents.refresh()]);
+  };
+  const renderBundle=(group:GameDownloadBundle,featured:boolean)=><GameDownloadGroupCard key={group.key} group={group} featured={featured}
+    busy={busyGroups.includes(group.key) || group.items.some(item=>item.kind==="torrent" ? torrents.busy.includes(item.record.id) : downloads.busy.includes(item.record.id))}
+    canUseRelink={!!relinkGroup}
+    onGroupAction={action=>{void controlGroup(group,action);}}
+    onUpdateLink={()=>updateGroupLink(group)}
+    onDelete={()=>setDeleteKey(group.key)}>
+    {group.items.map(renderDownloadItem)}
+  </GameDownloadGroupCard>;
   return <DownloadSourceArtworkContext.Provider value={sourceArtwork}><section className="games-downloads games-inset">
     <header className="games-download-heading"><div><h2>{t("games.download.nav")}</h2></div><div className="games-download-heading-actions"><HoverTooltip label={t("games.sources.manage")}><button className="games-icon-button" onClick={manageSources} aria-label={t("games.sources.manage")}><Link2 size={19}/></button></HoverTooltip><HoverTooltip label={t("games.torrent.add")}><button className="games-icon-button" disabled={!torrents.available} onClick={()=>torrents.begin()} aria-label={t("games.torrent.add")}><Network size={19}/></button></HoverTooltip><button className="games-button games-button-primary" disabled={!downloads.available} onClick={()=>setAdding(true)}><Plus size={17}/>{t("games.download.add")}</button></div></header>
     {!downloads.available?<div className="games-retro-desktop"><Monitor size={32}/><h3>{t("games.download.desktopTitle")}</h3><p>{t("games.download.desktopNote")}</p></div>:<>
       <div className="games-download-toolbar"><div className="games-download-filters">{["all","active","complete"].map(value=><button key={value} aria-pressed={filter===value} onClick={()=>setFilter(value)}>{t(`games.download.filter.${value}`)}{value==="active"&&activeCount>0&&<span>{activeCount}</span>}</button>)}</div><div className="games-download-tools"><HoverTooltip label={t("games.cloud.title")}><button className="games-icon-button" onClick={()=>setCloud(true)} aria-label={t("games.cloud.title")}><CloudDownload size={18}/></button></HoverTooltip><GameDownloadSpeed key={downloads.profile} profile={downloads.profile} active={active} available={downloads.available}/><HoverTooltip label={t("games.archive.open")}><button className="games-icon-button" onClick={()=>{setReviewedArchive(null);setArchive("");}} aria-label={t("games.archive.open")}><PackageOpen size={18}/></button></HoverTooltip><HoverTooltip label={t("games.cleanup.title")}><button className="games-icon-button" onClick={()=>setCleanup(true)} aria-label={t("games.cleanup.title")}><Recycle size={18}/></button></HoverTooltip><HoverTooltip label={t("games.library.refresh")}><button className="games-icon-button" onClick={()=>{void downloads.refresh();void torrents.refresh();void preparations.refresh();void archives.refresh();}} disabled={downloads.loading||torrents.loading} aria-label={t("games.library.refresh")}><RefreshCw size={17}/></button></HoverTooltip></div></div>
-      {(downloads.loading||torrents.loading)&&!all.length?<div className="games-download-loading" role="status">{t("common.loading")}</div>:!records.length&&!standalone.length?<div className="games-download-empty"><Download size={36}/><h3>{t(query?"games.noResults":"games.download.empty")}</h3><p>{t(query?"games.trySearch":"games.download.emptyNote")}</p></div>:<>
-        {featured&&<DownloadActivity key={`${downloads.profile}:${featured.kind}:${featured.record.id}`} item={featured} active={active} setup={installation(featured)} extraction={extraction(featured)} preparation={preparationStatus(featured)}>{featured.kind==="torrent"?<GameTorrentActions record={featured.record} torrents={torrents} onSetup={()=>prepare(featured)} installation={installation(featured)} extraction={extraction(featured)} onDismiss={groupFor(featured)==="complete"?()=>dismiss([featured]):undefined}/>:<TransferActions record={featured.record} downloads={downloads} setup={()=>prepare(featured)} installation={installation(featured)} extraction={extraction(featured)} onDismiss={groupFor(featured)==="complete"?()=>dismiss([featured]):undefined}/>}</DownloadActivity>}
-        {sections.map(({group,items})=>items.length>0&&<section className={`games-download-group is-${group}`} key={group} aria-label={t(`games.download.center.${group}`)}><header><h3>{t(`games.download.center.${group}`)} <span>{items.length}</span></h3>{group==="complete"&&<HoverTooltip label={t("games.download.center.keepFiles")}><button className="games-button games-download-clear" onClick={()=>{dismiss(all.filter(item=>groupFor(item)==="complete"));history.setShowHistory(false);}}>{t("games.download.center.clearCompleted")}</button></HoverTooltip>}</header><div className="games-download-list">{items.map(item=>item.kind==="torrent"?<GameTorrentRow key={`torrent:${item.record.id}`} record={item.record} torrents={torrents} queue={queue} onSetup={()=>prepare(item)} installation={installation(item)} extraction={extraction(item)} preparation={preparationStatus(item)} onDismiss={group==="complete"?()=>dismiss([item]):undefined}/>:<TransferRow key={`direct:${item.record.id}`} record={item.record} downloads={downloads} queue={queue} setup={()=>prepare(item)} installation={installation(item)} extraction={extraction(item)} preparation={preparationStatus(item)} onDismiss={group==="complete"?()=>dismiss([item]):undefined}/>)}</div></section>)}
+      {downloads.records.some(torboxFailedLink)&&
+        <div className="games-download-torbox-recovery" role="status">
+          <span>{!cloudKeys.tb? t("games.download.recovery.connect"):
+            torboxRecovery.phase==="running"?t("games.download.recovery.running"):
+            torboxRecovery.phase==="error"?t("games.download.recovery.error"):
+            torboxRecovery.phase==="finished"&&torboxRecovery.recovered>0?t("games.download.recovery.result",{count:torboxRecovery.recovered}):
+            torboxRecovery.phase==="finished"?t("games.download.recovery.unmatched"):t("games.download.recovery.starting")}</span>
+          {torboxRecovery.phase==="error"&&torboxRecovery.error&&<small>{t("games.cloud."+torboxRecovery.error)}</small>}
+          {cloudKeys.tb&&<button className="games-button" disabled={torboxRecovery.phase==="running"} onClick={torboxRecovery.retry}>{t("games.download.recovery.retry")}</button>}
+        </div>}
+      {(downloads.loading||torrents.loading)&&!all.length?<div className="games-download-loading" role="status">{t("common.loading")}</div>:!bundles.length&&!standalone.length?<div className="games-download-empty"><Download size={36}/><h3>{t(query?"games.noResults":"games.download.empty")}</h3><p>{t(query?"games.trySearch":"games.download.emptyNote")}</p></div>:<>
+        {!!featuredBundles.length&&<div className="games-download-feature-grid">{featuredBundles.map(group=>renderBundle(group,true))}</div>}
+        {sections.map(({group,items})=>items.length>0&&<section className={`games-download-group is-${group}`} key={group} aria-label={t(groupSectionStatusKey(group,items))}><header><h3>{t(groupSectionStatusKey(group,items))} <span>{items.length}</span></h3>{group==="complete"&&<HoverTooltip label={t("games.download.center.keepFiles")}><button className="games-button games-download-clear" onClick={()=>{dismiss(all.filter(item=>groupFor(item)==="complete"));history.setShowHistory(false);}}>{t("games.download.center.clearCompleted")}</button></HoverTooltip>}</header><div className="games-download-list">{items.map(item=>renderBundle(item,false))}</div></section>)}
       </>}
       <GameArchiveJobs jobs={standalone} archives={archives} review={reviewArchive} prepare={setSetup}/>
       <div className="games-download-history"><p>{t("games.download.center.retention")}</p>{hiddenCount>0&&<button className="games-text-action" onClick={()=>{if(!history.showHistory)setFilter("complete");history.setShowHistory(value=>!value);}}>{t(history.showHistory?"games.download.center.hideHistory":"games.download.center.showHistory",{count:hiddenCount})}</button>}</div>
@@ -106,6 +193,12 @@ export function GameDownloads({downloads,query,manageSources,active,openLibrary,
     {archives.error&&archive===null&&<div className="games-retro-error" role="alert"><span>{t(archives.error)}</span><button className="games-icon-button" onClick={archives.dismissError} aria-label={t("common.close")}><X size={17}/></button></div>}
     {preparations.error&&!reviewPreparation&&<div className="games-retro-error" role="alert"><span>{t(preparations.error)}</span><button className="games-button" disabled={preparations.loading} onClick={()=>void preparations.refresh()}>{t("common.retry")}</button></div>}
     {reviewedChoice&&active&&<GamePreparationReview key={`${downloads.profile}:${reviewedChoice.target.engine}:${reviewedChoice.target.downloadId}`} choice={reviewedChoice} saved={preparations.choices.some(choice=>choice.id===reviewedChoice.id)} preparations={preparations} onClose={()=>setReviewPreparation(null)}/>}
+    {relinkKey&&relinkGroup&&allBundles.find(group=>group.key===relinkKey)&&
+      <GameDownloadGroupRelinkPicker group={allBundles.find(group=>group.key===relinkKey)!}
+        onChoose={record=>relinkGroup(record)} onClose={()=>setRelinkKey(null)}/>}
+    {deleteKey&&allBundles.find(group=>group.key===deleteKey)&&
+      <GameDownloadGroupDeleteDialog group={allBundles.find(group=>group.key===deleteKey)!}
+        onConfirm={()=>removeGroupFiles(deleteKey)} onClose={()=>setDeleteKey(null)}/>}
     {adding&&<NewDownload downloads={downloads} onClose={()=>setAdding(false)}/>}
     {cloud&&<GameCloudDialog downloads={downloads} keys={cloudKeys} openSettings={openSourceSettings} onClose={()=>setCloud(false)}/>}
     {cleanup&&active&&<GameArchiveCleanup key={downloads.profile} profile={downloads.profile} jobs={archives.jobs} onClose={()=>setCleanup(false)}/>}
@@ -116,14 +209,14 @@ export function GameDownloads({downloads,query,manageSources,active,openLibrary,
 function TransferRow({record,downloads,queue,setup,installation,onDismiss,extraction,preparation}:{preparation?:ReactNode;extraction?:ArchiveJob;onDismiss?:()=>void;record:GameTransfer;downloads:GameTransfers;queue:DownloadItem[];setup:()=>void;installation?:DownloadSetup}){
   const [expanded,setExpanded]=useState(false),detailsId=useId();
   const t=useT(),busy=downloads.busy.length>0,active=isTransferActive(record.status),game=downloadGame(record);
-  const progress=transferProgressBytes(record);
+  const progress=transferProgressBytes(record),verification=transferVerificationBytes(record);
   const percent=record.status==="complete"?100:progress.total?Math.min(100,progress.received/progress.total*100):undefined;
   const host=(()=>{try{return new URL(record.url).hostname;}catch{return "";}})();
   const error=record.error?`games.download.${record.error}`:null;
   return <article data-transfer-id={record.id} data-download-key={`direct:${record.id}`} className={`games-download-row is-${record.status}`}>
     <DownloadArtwork item={{kind:"direct",record}}/>
     <div className="games-download-info"><div className="games-download-name"><h3>{game?.name??record.name}</h3><DownloadContentInfo item={{kind:"direct",record}} details={detailsId} expanded={expanded} toggle={()=>setExpanded(value=>!value)}/>{installation?<DownloadSetupStatus setup={installation}/>:extraction?<ArchiveJobStatus job={extraction}/>:!preparation&&<span>{t(transferStateKey(record))}</span>}</div><span className="games-download-host" title={game?.name&&game.name!==record.name?record.name:undefined}>{game?.sourceName??host}{game?.name&&game.name!==record.name&&<> · {record.name}</>}</span>
-      {record.status!=="canceled"&&<><div className={`games-download-progress${percent===undefined&&active?" is-indeterminate":""}`} role="progressbar" aria-label={t("games.download.progress",{name:record.name})} aria-valuenow={percent===undefined?undefined:Math.round(percent)} aria-valuemin={0} aria-valuemax={100}><i style={{width:`${percent??0}%`}}/></div><div className="games-download-stats"><span dir="ltr">{transferBytes(progress.received)}{progress.total!==null&&<> / {transferBytes(progress.total)}</>}</span>{record.bytesPerSecond>0&&record.status==="downloading"&&<span dir="ltr">{transferBytes(record.bytesPerSecond)}/s</span>}{record.status==="complete"&&record.expectedSha256&&<span><Check size={12}/>{t("games.download.verified")}</span>}</div></>}
+      {record.status!=="canceled"&&<><div className={`games-download-progress${percent===undefined&&active?" is-indeterminate":""}`} role="progressbar" aria-label={t("games.download.progress",{name:record.name})} aria-valuenow={percent===undefined?undefined:Math.round(percent)} aria-valuemin={0} aria-valuemax={100}><i style={{width:`${percent??0}%`}}/></div><div className="games-download-stats"><span dir="ltr">{transferBytes(progress.received)}{progress.total!==null&&<> / {transferBytes(progress.total)}</>}</span>{record.bytesPerSecond>0&&(record.status==="downloading"||verification)&&<span dir="ltr">{transferBytes(record.bytesPerSecond)}/s</span>}{verification&&<span dir="ltr">{t("games.download.relink.verificationProgress",{size:transferBytes(verification.received),total:transferBytes(verification.total)})}</span>}{record.status==="complete"&&record.expectedSha256&&<span><Check size={12}/>{t("games.download.verified")}</span>}</div></>}
       {preparation}
       <DownloadCompletedDate item={{kind:"direct",record}}/>
       {error&&<p className="games-download-error">{t(error)}</p>}

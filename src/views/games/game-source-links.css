@@ -72,3 +72,7 @@
 .games-source-link-copy{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:6px 9px;border-radius:6px;background:var(--color-elevated);color:var(--color-ink-muted);font-size:12px}
 .games-source-link-copy:hover{background:var(--color-raised);color:var(--color-ink)}
 .games-source-copy-fallback{width:100%;margin-top:8px;padding:8px;background:var(--color-elevated);font-size:12px}
+
+.games-source-size-summary{display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;margin:0 0 12px;font-size:12px;color:var(--color-ink-muted)}
+.games-source-size-summary>span{display:inline-flex;align-items:baseline;gap:6px;min-width:0}
+.games-source-size-summary strong{font-weight:600;color:var(--color-ink)}

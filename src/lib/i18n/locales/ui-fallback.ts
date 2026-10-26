@@ -5,6 +5,25 @@ const uiFallback: Record<string, string> = {
   "Checking watched movies...": "Checking watched movies...",
   "No unwatched titles available": "No unwatched titles available",
   "No titles available": "No titles available",
+  "games.magnet.debrid": "Download via Debrid",
+  "games.magnet.choose": "Choose a connected debrid service to prepare this magnet.",
+  "games.magnet.none":
+    "No debrid services connected. Connect one in Settings to download this magnet via debrid.",
+  "games.sources.links.none": "Connect a debrid service in Settings to prepare this download link.",
+  "games.magnet.connect": "Connect debrid service",
+  "games.magnet.prepare": "Submit magnet to {name}",
+  "games.magnet.starting": "Submitting magnet...",
+  "games.magnet.preparing":
+    "The magnet was submitted. Your provider is preparing the files. You can refresh its status.",
+  "games.magnet.failed": "The provider could not prepare this magnet.",
+  "games.magnet.review": "Choose files to download",
+  "games.magnet.select": "Select files",
+  "games.magnet.refresh": "Refresh status",
+  "games.magnet.browse": "Browse cloud files",
+  "games.magnet.download": "Choose download destination",
+  "games.magnet.submitted":
+    "Magnet submitted to the debrid service. The remote job remains in your account.",
+  "games.magnet.remember": "Last-used provider is remembered for this profile.",
   "Season explorer": "Season explorer",
   "Shows a season shelf with posters, names, and synopses above the episode list. Anime uses Harbor's TVDB service without a key. Regular shows use your TVDB key when set, otherwise their TMDB metadata. Turn this off to hide the shelf and stop its metadata requests.":
     "Shows a season shelf with posters, names, and synopses above the episode list. Anime uses Harbor's TVDB service without a key. Regular shows use your TVDB key when set, otherwise their TMDB metadata. Turn this off to hide the shelf and stop its metadata requests.",
