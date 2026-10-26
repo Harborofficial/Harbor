@@ -23,6 +23,13 @@ function harness() {
     const file = name.replace(/^@\/lib\//, "").replace(/^\.\//, "");
     if (cache.has(file)) return cache.get(file);
     if (file === "react") return { useSyncExternalStore() {} };
+    if (file === "nuvio/nuvio-client") return { isNuvioSignedIn: () => false };
+    if (file === "nuvio/nuvio-sync")
+      return {
+        deleteWatchProgressFromNuvio: async () => {},
+        isNuvioProviderActive: () => false,
+        resolveNuvioProfileIndex: () => 1,
+      };
     if (file === "stremio")
       return {
         episodeFromVideoId: (id?: string) => {

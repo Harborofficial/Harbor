@@ -29,6 +29,17 @@ function storageHarness() {
         persistableAddonOrigin: () => undefined,
         persistableVideos: () => undefined,
       },
+      "./active-profile-id": {
+        isNuvioProviderActive: () => false,
+        nuvioWatchedScope: () => "",
+        canPersistWatched: () => true,
+        stremioProfileId: () => "",
+        primaryProfileId: () => "",
+      },
+      "@/lib/nuvio/nuvio-sync": {
+        isNuvioProviderActive: () => false,
+        resolveNuvioProfileIndex: () => 1,
+      },
       ...overrides,
     };
     const output = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"), {

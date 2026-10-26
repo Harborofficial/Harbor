@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 const SEARCH = readFileSync("src/lib/streams/plugins/extension/search.ts", "utf8");
 const BRIDGE = readFileSync("src/lib/streams/plugins/extension/bridge.ts", "utf8");
 const VIEW = readFileSync("src/views/plugins.tsx", "utf8");
-const RUST = readFileSync("src-tauri/src/capstan.rs", "utf8");
+const RUST = readFileSync("src-tauri/extensions-module/src/commands.rs", "utf8");
 const API = readFileSync("android-extension-compat/src/api/MainAPI.kt", "utf8");
 
 /** The body of `searchPluginPage`, which is the walk a plugin's View all drives. */
@@ -17,9 +17,22 @@ const walkBody = (): string => {
 test("the search call carries the page it was asked for", () => {
   // The Rust command has taken a page all along and the extension's own search takes one; only this
   // call never sent it, which made every search page one.
-  assert.match(BRIDGE, /invoke\("capstan_search", \{ providerId, query, quick, page \}\)/);
-  assert.match(RUST, /page: Option<u32>/, "the command already accepts a page");
-  assert.match(RUST, /params\["page"\] = json!\(page\)/, "and forwards it");
+  assert.match(BRIDGE, /command: "capstan_search",\s*args: \{ providerId, query, quick, page \}/);
+  assert.match(
+    RUST,
+    /"capstan_search" => \("search", &\["providerId", "query"\], &\["page", "quick"\], true\)/,
+    "the command accepts a page",
+  );
+  assert.match(
+    RUST,
+    /if \*key == "page"[\s\S]{0,120}?value\.as_u64\(\)/,
+    "and validates it as an unsigned page",
+  );
+  assert.match(
+    RUST,
+    /params\.insert\(\(\*key\)\.into\(\), value\.clone\(\)\)/,
+    "and forwards every optional argument, including the page",
+  );
 });
 
 test("a walk past the shelves is not capped", () => {

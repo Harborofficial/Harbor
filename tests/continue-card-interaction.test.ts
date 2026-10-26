@@ -101,7 +101,12 @@ function harness() {
     "@/lib/logo": { peekCachedLogo: () => null, resolveLogo: async () => null },
     "@/lib/anime-title": { resolvePreferredAnimeTitle: async () => null },
     "@/lib/providers/jikan": { stripFranchiseSuffix: (name: string) => name },
-    "@/lib/anime-cw-ids": { getAnimeCwId: () => null },
+    "@/lib/anime-cw-ids": {
+      getAnimeCwId: () => null,
+      animeCwIdsVersion: () => 0,
+      subscribeAnimeCwIds: () => () => {},
+    },
+    "@/lib/anime-tracker-entry": { resolveTrackerAnimeEntry: async () => null },
     "@/lib/anime-detect": { isDetectedAnime: () => false },
     "@/lib/streams/anime-identity": {
       resolveAnimeIdentity: async () =>
