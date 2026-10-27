@@ -651,6 +651,21 @@ export function readLastActualPlayback(): ActualPlayback | null {
   return last?.actual ?? null;
 }
 
+export function readActualPlaybackForTarget(
+  metaId: string,
+  season?: number,
+  episode?: number,
+): ActualPlayback | null {
+  const entry = readAll()[entryKey(metaId, season, episode)]?.actual;
+  const actor = capturePlaybackActor();
+  return entry &&
+    validActualPlayback(entry) &&
+    entry.actor.storageProfileId === actor.storageProfileId &&
+    entry.actor.accountId === actor.accountId
+    ? entry
+    : null;
+}
+
 export function playbackSourceKey(
   src: Pick<PlayerSrc, "url" | "historyUrl" | "streamRef" | "homeServer">,
 ): string {

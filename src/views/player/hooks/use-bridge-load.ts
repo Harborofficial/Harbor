@@ -10,6 +10,7 @@ import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { releaseStreamProxy, retainStreamProxy } from "@/lib/stream-proxy";
 import { playerLoadIdentity } from "@/lib/player/load-identity";
 import { isPlaybackActorCurrent } from "@/lib/playback-history";
+import { initialTrackSelector } from "@/lib/player/track-preferences";
 
 const RESUME_PROMPT_MIN_SEC = 30;
 const RESTART_THRESHOLD = 0.8;
@@ -29,6 +30,7 @@ export function useBridgeLoad(params: {
   pendingResumeSec: number | null;
   acknowledgeResume: (action: "resume" | "start-over") => void;
   pendingSeekSec: number | null;
+  initialSeek: boolean;
   clearPendingSeek: () => void;
   sourceKey: string;
   resumeReady: boolean;
@@ -56,6 +58,7 @@ export function useBridgeLoad(params: {
   const firstLoadRef = useRef(true);
   const [pendingResumeSec, setPendingResumeSec] = useState<number | null>(null);
   const [pendingSeekSec, setPendingSeekSec] = useState<number | null>(null);
+  const [initialSeek, setInitialSeek] = useState(false);
   const [readyLoadKey, setReadyLoadKey] = useState<string | null>(null);
   const ackRef = useRef<((action: "resume" | "start-over") => void) | null>(null);
   const sourceIdentity = playerLoadIdentity(src, transcodedUrl ?? src.url, season, episode);
@@ -79,6 +82,7 @@ export function useBridgeLoad(params: {
     if (lastLoadedUrlRef.current === loadKey) return;
     setPendingResumeSec(null);
     setPendingSeekSec(null);
+    setInitialSeek(false);
     ackRef.current = null;
     const isFirstLoad = firstLoadRef.current;
     const isAutoRetry = (src.attempt ?? 0) > 0;
@@ -98,7 +102,10 @@ export function useBridgeLoad(params: {
         imdbVerified: src.imdbIdVerified === true,
       };
       const shouldResolveResume =
-        !isLive && !src.startFromZero && (resumePlaybackRef.current || resumePromptRef.current);
+        !isLive &&
+        !src.startFromZero &&
+        src.startPositionMs == null &&
+        (resumePlaybackRef.current || resumePromptRef.current);
       const resumePromise = !shouldResolveResume
         ? Promise.resolve({ ms: 0, fromRemote: false, finished: false })
         : resolveStartMs({
@@ -144,6 +151,7 @@ export function useBridgeLoad(params: {
       try {
         await bridge.load({
           url: playUrl,
+          selectInitialTracks: initialTrackSelector(src, settings),
           traceId: src.playbackTraceId,
           startupProfile: playbackStartupProfile(src.streamRef),
           subtitles: src.subtitles,
@@ -172,6 +180,7 @@ export function useBridgeLoad(params: {
         setPendingResumeSec(startSec);
         ackRef.current = (action) => {
           ackRef.current = null;
+          setInitialSeek(false);
           setPendingResumeSec(null);
           if (!isCurrent()) return;
           if (action === "resume") {
@@ -183,6 +192,9 @@ export function useBridgeLoad(params: {
         return;
       }
       if (!guestInRoom && (hasExplicitStart ? startSec > 0 : startSec > 5)) {
+        // Observe the initial seek before enabling auto-skip; do not issue it twice.
+        const caps = bridge.capabilities();
+        setInitialSeek(caps.engine === "mpv" && !caps.external);
         setPendingSeekSec(startSec);
         return;
       }
@@ -224,6 +236,7 @@ export function useBridgeLoad(params: {
     acknowledgeResume,
     pendingSeekSec: readyLoadKey === sourceKey ? pendingSeekSec : null,
     clearPendingSeek,
+    initialSeek,
     sourceKey,
     resumeReady:
       bridgeReady &&

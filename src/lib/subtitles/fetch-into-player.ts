@@ -275,6 +275,7 @@ export async function fetchSubtitlesIntoPlayer(
           false,
           meta(result),
         );
+        if (!p.isActive()) return;
         if (ok !== true) continue;
         markAddedSub(result.url);
         consumed.add(result);

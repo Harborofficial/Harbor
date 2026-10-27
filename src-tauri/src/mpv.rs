@@ -171,6 +171,7 @@ pub struct MpvState {
 }
 
 struct MpvSession {
+    preload: Arc<crate::mpv_preload::PreloadSelection>,
     mpv: Arc<Mpv>,
     is_live: bool,
     #[cfg(any(windows, target_os = "linux"))]
@@ -1230,6 +1231,11 @@ pub async fn mpv_start(
     }
 
     let mpv_arc = Arc::new(mpv);
+    let preload = Arc::new(crate::mpv_preload::PreloadSelection::default());
+    // on_preloaded runs after demuxing, before track selection and decoding.
+    let _ = unsafe {
+        libmpv2_sys::mpv_hook_add(mpv_arc.ctx.as_ptr(), 0, c"on_preloaded".as_ptr(), 0)
+    };
 
     let event_ctx = EventContext::new(mpv_arc.ctx);
     for (name, id, kind) in OBSERVED_PROPS {
@@ -1241,6 +1247,7 @@ pub async fn mpv_start(
         app.clone(),
         mpv_arc.clone(),
         event_ctx,
+        preload.clone(),
         want_embed,
         args.mac_edr.unwrap_or(false),
         #[cfg(windows)]
@@ -1276,6 +1283,7 @@ pub async fn mpv_start(
     attach_local_sidecars(&mpv_arc, &args.url);
 
     *g = Some(MpvSession {
+        preload,
         mpv: mpv_arc,
         is_live,
         #[cfg(windows)]
@@ -1714,6 +1722,7 @@ fn spawn_event_loop(
     app: AppHandle,
     mpv_keepalive: Arc<Mpv>,
     mut ctx: EventContext,
+    preload: Arc<crate::mpv_preload::PreloadSelection>,
     embedded: bool,
     mac_edr: bool,
     #[cfg(windows)] hdr_monitor: Option<isize>,
@@ -1846,14 +1855,17 @@ fn spawn_event_loop(
                     }
                 }
             }
-            // Only shorten the poll while a bounded resume trace is active.
+            // Shorten polling only for bounded resume/preload work.
             #[cfg(windows)]
             let timeout = if resume_trace.active.is_some() { 0.25 } else { 0.5 };
             #[cfg(not(windows))]
             let timeout = 0.5;
             #[cfg(windows)]
             let poll_started = std::time::Instant::now();
-            let res = ctx.wait_event(timeout);
+            preload.expire(|id| unsafe {
+                libmpv2_sys::mpv_hook_continue(mpv_keepalive.ctx.as_ptr(), id);
+            });
+            let res = ctx.wait_event(preload.poll_timeout(timeout));
             #[cfg(windows)]
             if poll_started.elapsed() >= Duration::from_secs(2) &&
                 resume_trace.last_resumed_at.is_some() &&
@@ -1868,6 +1880,28 @@ fn spawn_event_loop(
             match res {
                 Some(Ok(event)) => {
                     record_event_poll_success(&mut error_backoff);
+                    // libmpv2 exposes newer C events through Deprecated(raw).
+                    if let Event::Deprecated(raw) = &event {
+                        if raw.event_id == libmpv2_sys::mpv_event_id_MPV_EVENT_HOOK
+                            && !raw.data.is_null()
+                        {
+                            let hook = unsafe { &*(raw.data as *const libmpv2_sys::mpv_event_hook) };
+                            let token = preload.begin(hook.id);
+                            let tracks = mpv_keepalive
+                                .get_property::<MpvNode>("track-list")
+                                .map(mpv_node_to_json)
+                                .unwrap_or_else(|_| json!([]));
+                            let path = mpv_keepalive.get_property::<String>("path").ok();
+                            if app.emit("mpv://event", json!({
+                                "event": "preloaded", "token": token, "tracks": tracks, "path": path
+                            })).is_err() {
+                                preload.finish(&token, |id| unsafe {
+                                    libmpv2_sys::mpv_hook_continue(mpv_keepalive.ctx.as_ptr(), id);
+                                });
+                            }
+                            continue;
+                        }
+                    }
                     if let Event::LogMessage {
                         prefix,
                         level,
@@ -2156,6 +2190,42 @@ fn mpv_node_to_json(node: MpvNode) -> Value {
             Value::Object(obj)
         }
     }
+}
+
+#[tauri::command]
+pub async fn mpv_select_preloaded_tracks(
+    state: State<'_, MpvState>,
+    token: String,
+    audio_id: Option<String>,
+    subtitle_id: Option<String>,
+) -> Result<bool, String> {
+    let (mpv, preload) = {
+        let g = state.inner.lock().await;
+        let session = g.as_ref().ok_or("mpv not started")?;
+        (session.mpv.clone(), session.preload.clone())
+    };
+    tauri::async_runtime::spawn_blocking(move || {
+        preload.finish(&token, |id| {
+            if let Some(aid) = audio_id
+                .as_deref()
+                .filter(|s| s.parse::<u32>().is_ok_and(|n| n > 0))
+            {
+                let _ = mpv.set_property("aid", aid);
+            }
+            if let Some(sid) = subtitle_id
+                .as_deref()
+                .filter(|s| *s == "no" || s.parse::<u32>().is_ok_and(|n| n > 0))
+            {
+                let _ = mpv.set_property("sid", sid);
+            }
+            // The session owns the handle and the matching pending hook.
+            unsafe {
+                libmpv2_sys::mpv_hook_continue(mpv.ctx.as_ptr(), id);
+            }
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

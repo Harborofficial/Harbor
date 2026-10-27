@@ -92,6 +92,13 @@ export type PlayerSnapshot = {
 };
 
 export type PlayerSource = {
+  selectInitialTracks?: (
+    audio: TrackInfo[],
+    subtitles: TrackInfo[],
+  ) => {
+    audioId?: string;
+    subtitleId?: string | null;
+  };
   url: string;
   traceId?: string;
   startupProfile?: "standard" | "high-bitrate";

@@ -1158,6 +1158,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     pendingResumeSec,
     acknowledgeResume,
     pendingSeekSec,
+    initialSeek,
     clearPendingSeek,
     sourceKey,
     resumeReady,
@@ -1176,6 +1177,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
 
   usePendingSeekApply({
     pendingSeekSec,
+    initialSeek,
     sourceKey,
     startPaused: src.startPaused,
     preserveExactPosition: src.startPositionMs != null,

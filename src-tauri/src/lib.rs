@@ -106,6 +106,8 @@ mod modal_overlay;
 mod monitors;
 #[cfg(desktop)]
 mod mpv;
+#[cfg(desktop)]
+mod mpv_preload;
 #[cfg(target_os = "linux")]
 mod linux_gamescope;
 #[cfg(target_os = "linux")]
@@ -2085,6 +2087,7 @@ pub fn run() {
             cf_relay::cf_relay_status,
             mpv::mpv_probe,
             mpv::mpv_start,
+            mpv::mpv_select_preloaded_tracks,
             external_player::external_player_start,
             external_player::external_player_command,
             external_player::external_player_stop,
