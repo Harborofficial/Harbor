@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Addon } from "@/lib/addons";
-import { useAuth } from "@/lib/auth";
+import { useAuth, resolveEffectiveStremioAuthKey } from "@/lib/auth";
 import { userAddons } from "@/lib/addons";
 import { fetchInstalledAddons } from "@/lib/addon-store";
 import { listAddons } from "@/lib/providers/stremio-addons";
@@ -61,14 +61,17 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
       const nuvioAddonMode = settings.nuvioAddonMode ?? "separate";
 
       const local = await fetchInstalledAddons().catch(() => [] as Addon[]);
-      const stremio = (!isNuvio || nuvioAddonMode === "combined") && authKey
-        ? await userAddons(authKey).catch(() => [] as Addon[])
+      const stremioKey = resolveEffectiveStremioAuthKey(authKey);
+      const stremio = (!isNuvio || nuvioAddonMode === "combined") && stremioKey
+        ? await userAddons(stremioKey).catch(() => [] as Addon[])
         : [];
       const nuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
         ? await fetchNuvioAddons().catch(() => [] as Addon[])
         : [];
 
-      recordStremioAddons(stremio);
+      if (!isNuvio || nuvioAddonMode === "combined") {
+        recordStremioAddons(stremio);
+      }
       if (nuvio.length > 0) recordNuvioAddons(nuvio);
 
       const installed = new Set<string>([

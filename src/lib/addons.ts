@@ -6,6 +6,7 @@ import type { AddonOrigin, Meta } from "./cinemeta";
 import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
 import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
+import { resolveEffectiveStremioAuthKey } from "@/lib/auth";
 
 const STREMIO_API = "https://api.strem.io/api";
 const MAX_ROWS = 24;
@@ -331,7 +332,8 @@ export async function gatherCatalogAddons(authKey: string | null): Promise<Addon
   const shouldStremio = !isNuvio || nuvioAddonMode === "combined";
   const shouldNuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn();
 
-  const stremioRaw = shouldStremio && authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+  const effectiveAuthKey = resolveEffectiveStremioAuthKey(authKey);
+  const stremioRaw = shouldStremio && effectiveAuthKey ? await userAddons(effectiveAuthKey).catch(() => [] as Addon[]) : [];
   const stremio = filterEnabled(stremioRaw);
   const nuvioRaw = shouldNuvio ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
   const nuvio = filterEnabled(nuvioRaw);

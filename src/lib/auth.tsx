@@ -96,6 +96,11 @@ export function readPrimaryStremioSession(): Session | null {
   }
 }
 
+export function resolveEffectiveStremioAuthKey(authKey?: string | null): string | null {
+  if (authKey) return authKey;
+  return readPrimaryStremioSession()?.authKey ?? null;
+}
+
 export function purgeStremioAccountData(profileId?: string): void {
   const pid = profileId || "default";
   clearWatchedFlags(pid);

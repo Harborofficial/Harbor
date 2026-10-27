@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
 import { userAddons, withDebridKeys, type Addon } from "@/lib/addons";
+import { resolveEffectiveStremioAuthKey } from "@/lib/auth";
 import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 import { recordStremioAddons, recordNuvioAddons } from "@/lib/nuvio/nuvio-addon-registry";
@@ -82,15 +83,18 @@ export function useAddons(
       const isNuvio = isNuvioProviderActive();
       const nuvioAddonMode = settings.nuvioAddonMode ?? "separate";
 
-      const stremioAddons = (!isNuvio || nuvioAddonMode === "combined") && authKey
-        ? filterEnabled(await userAddons(authKey).catch(() => []))
+      const stremioKey = resolveEffectiveStremioAuthKey(authKey);
+      const stremioAddons = (!isNuvio || nuvioAddonMode === "combined") && stremioKey
+        ? filterEnabled(await userAddons(stremioKey).catch(() => []))
         : [];
       const nuvioAddons = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
         ? filterEnabled(await fetchNuvioAddons().catch(() => []))
         : [];
       const installed = filterEnabled(await fetchInstalledAddons().catch(() => []));
       if (cancelled) return;
-      recordStremioAddons(stremioAddons);
+      if (!isNuvio || nuvioAddonMode === "combined") {
+        recordStremioAddons(stremioAddons);
+      }
       if (nuvioAddons.length > 0) recordNuvioAddons(nuvioAddons);
       const merged: Addon[] = [];
       const idxByUrl = new Map<string, number>();

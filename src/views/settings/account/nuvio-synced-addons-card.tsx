@@ -11,7 +11,7 @@ import nuvioIcon from "@/assets/nuvio.png";
 import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { pullAddonsFromNuvio } from "@/lib/nuvio/nuvio-sync";
 import { recordAddonOrigins } from "@/lib/nuvio/nuvio-addon-registry";
-import { useAuth } from "@/lib/auth";
+import { useAuth, resolveEffectiveStremioAuthKey } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { Layers, Network } from "lucide-react";
 import { userAddons } from "@/lib/addons";
@@ -44,7 +44,8 @@ export function NuvioSyncedAddonsCard() {
       setLastSynced(Date.now());
 
       // Update origin registry between Stremio and Nuvio
-      const stremioList = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+      const stremioKey = resolveEffectiveStremioAuthKey(authKey);
+      const stremioList = stremioKey ? await userAddons(stremioKey).catch(() => [] as Addon[]) : [];
       recordAddonOrigins(
         stremioList.map((a) => a.transportUrl),
         nuvioItems.map((a) => a.url),

@@ -326,6 +326,35 @@ export async function pushWatchedItemToNuvio(
   if (!isNuvioSignedIn() || items.length === 0) return false;
   const profileIndex = resolveNuvioProfileIndex(harborProfileId);
 
+  // Update local watched cache immediately for instant snappy responsiveness
+  try {
+    const cachedWatched = readCachedWatchedItems(profileIndex);
+    const updatedWatched = [...cachedWatched];
+    for (const item of items) {
+      const idx = updatedWatched.findIndex(
+        (w) =>
+          w.content_id === item.contentId &&
+          (item.season == null || w.season === item.season) &&
+          (item.episode == null || w.episode === item.episode),
+      );
+      const newEntry: NuvioWatchedItem = {
+        profile_id: profileIndex,
+        content_id: item.contentId,
+        content_type: item.contentType || (item.season != null && item.episode != null ? "series" : "movie"),
+        title: item.title || "",
+        season: item.season ?? null,
+        episode: item.episode ?? null,
+        watched_at: item.watchedAt || Date.now(),
+      };
+      if (idx >= 0) {
+        updatedWatched[idx] = newEntry;
+      } else {
+        updatedWatched.push(newEntry);
+      }
+    }
+    writeCachedWatchedItems(profileIndex, updatedWatched);
+  } catch {}
+
   let rpcSuccess = false;
   // 1. Try official sync_push_watched_items RPC (matching Nuvio Mobile)
   try {
@@ -397,6 +426,21 @@ export async function deleteWatchedItemFromNuvio(
 ): Promise<boolean> {
   if (!isNuvioSignedIn() || keys.length === 0) return false;
   const profileIndex = resolveNuvioProfileIndex(harborProfileId);
+
+  // Update local watched cache immediately
+  try {
+    const cachedWatched = readCachedWatchedItems(profileIndex);
+    const filtered = cachedWatched.filter(
+      (w) =>
+        !keys.some(
+          (k) =>
+            k.contentId === w.content_id &&
+            (k.season == null || k.season === w.season) &&
+            (k.episode == null || k.episode === w.episode),
+        ),
+    );
+    writeCachedWatchedItems(profileIndex, filtered);
+  } catch {}
 
   // 1. Try official sync_delete_watched_items RPC (matching Nuvio Mobile)
   let rpcSuccess = false;
@@ -931,6 +975,16 @@ async function resolveNextEpisodeForSeries(
   return null;
 }
 
+/**
+ * True when the Continue Watching end mode keeps caught-up series visible: the
+ * "Timer" mode retains the finished card so the tray can draw the countdown,
+ * while "Hide" removes the series outright.
+ */
+export function cwKeepsCaughtUpForTimer(): boolean {
+  const settings = loadStoredSettings();
+  return settings.animeCwEnd === "timer";
+}
+
 export async function reconcileNuvioWatched(
   harborProfileId?: string | number,
 ): Promise<void> {
@@ -1035,7 +1089,7 @@ export async function reconcileNuvioWatched(
       // Only un-dismiss shows that gained newly watched episodes from the server (e.g. watched on mobile),
       // preserving local dismissals so titles removed via (X) do not resurrect on every sync tick.
       for (const showId of newlyWatchedShows) {
-        if (serverWatchedIds.has(showId)) continue;
+        if (serverWatchedIds.has(showId) && !cwKeepsCaughtUpForTimer()) continue;
         undismissCw(showId);
         const clean = showId.replace(/^(series|movie|tmdb):/, "").trim();
         for (const k of Array.from(dismissedKeys)) {
@@ -1067,18 +1121,11 @@ export async function reconcileNuvioWatched(
           continue;
         }
 
-        // If whole series is marked watched, remove it from Continue Watching tray immediately
-        if (
+        const isServerWatched =
           serverWatchedIds.has(entry.id) ||
           serverWatchedIds.has(cleanEntryId) ||
           serverWatchedIds.has(`tmdb:${cleanEntryId}`) ||
-          serverWatchedIds.has(`series:${cleanEntryId}`)
-        ) {
-          clearLocalCw(entry.id, `nuvio-${profileIndex}`);
-          clearResume(entry.id, undefined, undefined, `nuvio-${profileIndex}`);
-          clearResume(cleanEntryId, undefined, undefined, `nuvio-${profileIndex}`);
-          continue;
-        }
+          serverWatchedIds.has(`series:${cleanEntryId}`);
 
         const maxInfo =
           showMaxWatched.get(entry.id) ||
@@ -1093,8 +1140,22 @@ export async function reconcileNuvioWatched(
           );
           if (!nextTarget) {
             clearLocalCw(entry.id, `nuvio-${profileIndex}`);
-            clearResume(entry.id, undefined, undefined, `nuvio-${profileIndex}`);
-            clearResume(cleanEntryId, undefined, undefined, `nuvio-${profileIndex}`);
+            if (!cwKeepsCaughtUpForTimer()) {
+              clearResume(entry.id, undefined, undefined, `nuvio-${profileIndex}`);
+              clearResume(cleanEntryId, undefined, undefined, `nuvio-${profileIndex}`);
+            } else {
+              saveLocalCw(
+                {
+                  ...entry,
+                  season: maxInfo.season,
+                  episode: maxInfo.episode,
+                  positionMs: 0,
+                  external: "nuvio" as const,
+                  t: maxInfo.watchedAt || Date.now(),
+                },
+                `nuvio-${profileIndex}`,
+              );
+            }
           } else {
             const nextS = nextTarget.season;
             const nextE = nextTarget.episode;
@@ -1111,6 +1172,12 @@ export async function reconcileNuvioWatched(
                 `nuvio-${profileIndex}`,
               );
             }
+          }
+        } else if (isServerWatched) {
+          if (!cwKeepsCaughtUpForTimer()) {
+            clearLocalCw(entry.id, `nuvio-${profileIndex}`);
+            clearResume(entry.id, undefined, undefined, `nuvio-${profileIndex}`);
+            clearResume(cleanEntryId, undefined, undefined, `nuvio-${profileIndex}`);
           }
         } else {
           const hasProgress = progressItems?.some(
@@ -1154,16 +1221,6 @@ export async function reconcileNuvioWatched(
           continue;
         }
 
-        // Check if fully watched series
-        if (
-          serverWatchedIds.has(item.content_id) ||
-          serverWatchedIds.has(cleanShowId) ||
-          serverWatchedIds.has(`tmdb:${cleanShowId}`) ||
-          serverWatchedIds.has(`series:${cleanShowId}`)
-        ) {
-          continue;
-        }
-
         processedMidwayShows.add(cleanShowId);
         const maxInfo = showMaxWatched.get(item.content_id) || showMaxWatched.get(cleanShowId);
         if (!maxInfo) continue;
@@ -1174,8 +1231,7 @@ export async function reconcileNuvioWatched(
           maxInfo.episode,
         );
         if (!nextTarget) {
-          const curSettings = loadStoredSettings();
-          if (curSettings.animeCwEnd === "timer" || isNuvioProviderActive()) {
+          if (cwKeepsCaughtUpForTimer()) {
             nextTarget = { season: maxInfo.season, episode: maxInfo.episode };
           } else {
             continue;
@@ -1241,7 +1297,13 @@ export async function reconcileNuvioWatched(
         saveLocalCw(midwayEntry, `nuvio-${profileIndex}`);
       }
 
-      const built = buildNuvioPlaybackItems(progressItems ?? [], profileIndex, items, dismissedKeys);
+      const built = buildNuvioPlaybackItems(
+        progressItems ?? [],
+        profileIndex,
+        items,
+        dismissedKeys,
+        cwKeepsCaughtUpForTimer(),
+      );
       writeCachedNuvioPlaybackItems(profileIndex, built);
       window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
     } catch {}
@@ -1479,6 +1541,22 @@ export async function deleteWatchProgressFromNuvio(
   return rpcSuccess;
 }
 
+function purgeDeletedNuvioCwEntry(contentId: string, profileIndex: number): void {
+  const clean = contentId.replace(/^(series|movie|tmdb):/, "").trim();
+  const idVariants = [contentId, clean, `tmdb:${clean}`, `series:${clean}`];
+  for (const vid of idVariants) {
+    clearResume(vid, undefined, undefined, `nuvio-${profileIndex}`);
+    clearResume(vid);
+    clearLocalCw(vid, `nuvio-${profileIndex}`);
+    clearLocalCw(vid);
+  }
+  window.dispatchEvent(
+    new CustomEvent("harbor:nuvio-progress-deleted", {
+      detail: { profileIndex, contentId },
+    }),
+  );
+}
+
 /**
  * Pulls watch progress for the specified profile from Nuvio.
  * Caches records per profile slot and safely falls back to local cache if network drops.
@@ -1512,6 +1590,10 @@ export async function pullWatchProgressFromNuvio(
       if (Array.isArray(data)) {
         if (data.length === 0) {
           if (!isCurrentAccount()) return [];
+          const prevCached = readCachedWatchProgress(profileIndex, startingAccountId);
+          for (const prev of prevCached) {
+            purgeDeletedNuvioCwEntry(prev.content_id, profileIndex);
+          }
           // Cloud has NO watch progress for this profile slot (all items deleted on another device or empty)
           writeCachedWatchProgress(profileIndex, [], startingAccountId);
           const cachedWatched = readCachedWatchedItems(profileIndex, startingAccountId);
@@ -1531,6 +1613,7 @@ export async function pullWatchProgressFromNuvio(
           window.dispatchEvent(
             new CustomEvent("harbor:nuvio-progress-reconciled", { detail: { profileIndex, count: 0 } }),
           );
+          window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
           return [];
         }
 
@@ -1580,11 +1663,15 @@ export async function pullWatchProgressFromNuvio(
         if (!isCurrentAccount()) return [];
 
         // Reconcile: identify any cached items that were deleted on another device!
+        let anyDeleted = false;
         for (const prev of prevCached) {
           if (!serverProgressKeys.has(prev.progress_key) && !serverContentIds.has(prev.content_id)) {
-            clearResume(prev.content_id, undefined, undefined, `nuvio-${profileIndex}`);
-            clearResume(prev.content_id);
+            purgeDeletedNuvioCwEntry(prev.content_id, profileIndex);
+            anyDeleted = true;
           }
+        }
+        if (anyDeleted) {
+          window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
         }
         if (!isCurrentAccount()) return [];
 
@@ -1660,6 +1747,10 @@ export async function pullWatchProgressFromNuvio(
       if (Array.isArray(list)) {
         if (list.length === 0) {
           if (!isCurrentAccount()) return [];
+          const prevCached = readCachedWatchProgress(profileIndex, startingAccountId);
+          for (const prev of prevCached) {
+            purgeDeletedNuvioCwEntry(prev.content_id, profileIndex);
+          }
           writeCachedWatchProgress(profileIndex, [], startingAccountId);
           const cachedWatched = readCachedWatchedItems(profileIndex, startingAccountId);
           if (cachedWatched.length === 0) {
@@ -1674,6 +1765,7 @@ export async function pullWatchProgressFromNuvio(
           window.dispatchEvent(
             new CustomEvent("harbor:nuvio-progress-reconciled", { detail: { profileIndex, count: 0 } }),
           );
+          window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
           return [];
         }
 
@@ -1719,11 +1811,15 @@ export async function pullWatchProgressFromNuvio(
 
         if (!isCurrentAccount()) return [];
 
+        let anyDeletedFallback = false;
         for (const prev of prevCached) {
           if (!serverProgressKeys.has(prev.progress_key) && !serverContentIds.has(prev.content_id)) {
-            clearResume(prev.content_id, undefined, undefined, `nuvio-${profileIndex}`);
-            clearResume(prev.content_id);
+            purgeDeletedNuvioCwEntry(prev.content_id, profileIndex);
+            anyDeletedFallback = true;
           }
+        }
+        if (anyDeletedFallback) {
+          window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
         }
         if (!isCurrentAccount()) return [];
 

@@ -4,10 +4,11 @@ import { isDetectedAnime } from "./anime-detect";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { collectAllNuvioItemIds } from "@/lib/nuvio/nuvio-client";
 import { sanitizeStremioLocalCw } from "@/lib/local-cw";
+import { manualWatchedState } from "@/lib/manual-watched";
 
 const API = "https://api.strem.io/api";
 
-const CW_FINISHED_RATIO = 0.9;
+export const CW_FINISHED_RATIO = 0.9;
 
 export type User = {
   _id: string;
@@ -127,6 +128,16 @@ export function isCwMember(i: LibraryItem): boolean {
   if (i.removed && !i.temp) return false;
   if (i.upNext) return true;
   if (i.waitingForAir) return true;
+  // External trackers (Simkl, Trakt, PublicMetaDB) without upNext must be active in-progress
+  // playback sessions (1% <= progress <= 98%, timeOffset > 0, unflagged).
+  if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
+    if (!i.state) return false;
+    const offset = i.state.timeOffset ?? 0;
+    const duration = i.state.duration ?? 0;
+    if (offset <= 0 || (i.state.flaggedWatched ?? 0) > 0) return false;
+    if (duration > 0 && offset / duration >= CW_FINISHED_RATIO) return false;
+    return true;
+  }
   if (!i.state) {
     const local = resumeForItem(i)?.ms ?? 0;
     return local > 0;
@@ -135,6 +146,13 @@ export function isCwMember(i: LibraryItem): boolean {
   const finishedByRatio = duration > 0 && i.state.timeOffset / duration >= CW_FINISHED_RATIO;
   if (i.type === "movie" && ((i.state.flaggedWatched ?? 0) > 0 || finishedByRatio)) return false;
   if (i.state.timeOffset > 0) return true;
+  if (i.state && i.state.season == null && i.state.video_id) {
+    const se = episodeFromVideoId(i.state.video_id);
+    if (se) {
+      i.state.season = se.season;
+      i.state.episode = se.episode;
+    }
+  }
   if (
     i.type === "series" &&
     i.state.season != null &&
@@ -143,7 +161,25 @@ export function isCwMember(i: LibraryItem): boolean {
   ) {
     return true;
   }
-  if ((i.state.flaggedWatched ?? 0) > 0) return false;
+  if ((i.state.flaggedWatched ?? 0) > 0) {
+    // A watched episode normally retires the card, but a series the viewer just
+    // marked has to stay in the tray so the advancer can roll over to the next
+    // episode or draw the "airing soon" timer card. The advancer removes the row
+    // itself once the series is caught up and the end mode hides it, so keeping
+    // the row here never leaks a finished show back into Continue Watching.
+    if (
+      i.type === "series" &&
+      i.state.season != null &&
+      i.state.episode != null &&
+      (i.manualWatched === true ||
+        i.external === "nuvio" ||
+        (typeof manualWatchedState === "function" &&
+          manualWatchedState(i._id, i.state.season, i.state.episode) === true))
+    ) {
+      return true;
+    }
+    return false;
+  }
   const local = resumeForItem(i)?.ms ?? 0;
   if (local <= 0) return false;
   if (duration > 0 && local / duration >= CW_FINISHED_RATIO) return false;

@@ -38,7 +38,6 @@ import { isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { listLocalCw } from "@/lib/local-cw";
 import { localToLibraryItem } from "@/lib/continue-watching";
-import { isNuvioProviderActive } from "@/lib/active-profile-id";
 
 const FINISHED_RATIO = 0.9;
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -251,6 +250,12 @@ function watchedPredicate(
     if (season === cur.season && episode === cur.episode) return finished;
     if (simklCompleted && (season < cur.season || (season === cur.season && episode < cur.episode)))
       return true;
+    const isShowWatched =
+      finished ||
+      (i.state?.flaggedWatched ?? 0) > 0 ||
+      manualWatchedState(i._id, cur.season, cur.episode, altIds) === true;
+    if (isShowWatched && (season < cur.season || (season === cur.season && episode <= cur.episode)))
+      return true;
     return false;
   };
 }
@@ -420,19 +425,22 @@ export function useCwAdvance(
           )(cur.season, cur.episode)
         );
       };
-      const candidates = items.filter(
-        (i) =>
-          currentEpisode(i) != null &&
-          (isFinishedSeries(i) ||
-            completedRemotely(i) ||
-            (i.upNext === true && (i.state?.timeOffset ?? 0) === 0)),
-      );
+      const candidates = items.filter((i) => {
+        const cur = currentEpisode(i);
+        if (!cur) return false;
+        return (
+          isFinishedSeries(i) ||
+          completedRemotely(i) ||
+          (i.upNext === true && (i.state?.timeOffset ?? 0) === 0) ||
+          (i.state?.flaggedWatched ?? 0) > 0 ||
+          manualWatchedState(i._id, cur.season, cur.episode) === true
+        );
+      });
       const next = new Map<string, LibraryItem>();
       const remove = new Set<string>();
       for (const i of candidates) {
         const cur = currentEpisode(i)!;
         const isAnime = isAnimeCwItem(i) || ANIME_ID.test(i._id);
-        const isNuvioItem = isNuvioProviderActive() || i.external === "nuvio";
         let list = listCacheRef.current.get(i._id);
         let fetchOk = list !== undefined;
         if (list === undefined) {
@@ -520,8 +528,8 @@ export function useCwAdvance(
                   });
                   continue;
                 } else {
-                  // Entire series is completed; keep if timer enabled or nuvio
-                  if ((animeCwEnd === "timer" || isNuvioItem) && !hideCaughtUp) {
+                  // Entire series is completed; keep if timer enabled
+                  if (animeCwEnd === "timer") {
                     next.set(i._id, {
                       ...i,
                       waitingForAir: true as const,
@@ -557,7 +565,7 @@ export function useCwAdvance(
                 if (followUp) {
                   nextEp = followUp;
                   unplacedCur = false;
-                } else if ((animeCwEnd === "timer" || isNuvioItem) && !hideCaughtUp) {
+                } else if (animeCwEnd === "timer") {
                   unplacedCur = true;
                   next.set(i._id, {
                     ...i,
@@ -595,8 +603,8 @@ export function useCwAdvance(
           }
         }
         const curEpInList = list.find((e) => e.season === effCur.season && e.episode === effCur.episode);
-        if (i.upNext && curEpInList && !nextEpAired(list, curEpInList, isAnime)) {
-          if (isNuvioItem || animeCwEnd === "timer") {
+        if (curEpInList && !nextEpAired(list, curEpInList, isAnime)) {
+          if (animeCwEnd === "timer") {
             next.set(i._id, {
               ...i,
               waitingForAir: true as const,
@@ -621,7 +629,9 @@ export function useCwAdvance(
         const aliasCur = scoped ? providerAliasCoords(list, effCur.season, effCur.episode) : [];
         const watchedCur =
           checkWatched(effCur.season, effCur.episode) ||
-          aliasCur.some((a) => checkWatched(a.season, a.episode));
+          aliasCur.some((a) => checkWatched(a.season, a.episode)) ||
+          ((i as Record<string, unknown>).waitingForAir === true) ||
+          (i.external === "nuvio" && (i as Record<string, unknown>).keptForTimer === true);
         if (!watchedCur) continue;
         const nextSkip = episodeHiding
           ? (s: number, e: number) => isEpisodeHidden(i._id, s, e)
@@ -690,13 +700,12 @@ export function useCwAdvance(
           } as LibraryItem);
           continue;
         }
-        if (nextEp && (isNuvioItem || animeCwEnd === "timer" || nextEpAired(list, nextEp, isAnime))) {
+        if (nextEp && nextEpAired(list, nextEp, isAnime)) {
           const displaySeason = remappedMixed
             ? nextEp.season
             : origCur.season !== effCur.season
               ? origCur.season
               : nextEp.season;
-          const aired = nextEpAired(list, nextEp, isAnime);
           next.set(i._id, {
             ...i,
             state: {
@@ -708,18 +717,20 @@ export function useCwAdvance(
               flaggedWatched: 0,
             },
             upNext: true,
-            ...(!aired
-              ? { waitingForAir: true as const, nextAirDate: nextEp.airDate }
-              : {}),
           });
-        } else if ((animeCwEnd === "timer" || isNuvioItem) && nextEp) {
+        } else if (animeCwEnd === "timer" && nextEp) {
+          const displaySeason = remappedMixed
+            ? nextEp.season
+            : origCur.season !== effCur.season
+              ? origCur.season
+              : nextEp.season;
           next.set(i._id, {
             ...i,
             state: {
               ...i.state!,
-              season: nextEp.season,
+              season: displaySeason,
               episode: nextEp.episode,
-              video_id: `${i._id}:${nextEp.season}:${nextEp.episode}`,
+              video_id: `${i._id}:${displaySeason}:${nextEp.episode}`,
               timeOffset: 0,
               flaggedWatched: 0,
             },
@@ -727,7 +738,12 @@ export function useCwAdvance(
             waitingForAir: true as const,
             nextAirDate: nextEp.airDate,
           } as LibraryItem);
-        } else if ((animeCwEnd === "timer" || isNuvioItem) && !hideCaughtUp) {
+        } else if (animeCwEnd === "timer" && unplacedCur && tryAnimeEntry) {
+          next.set(i._id, {
+            ...i,
+            waitingForAir: true as const,
+          } as LibraryItem);
+        } else if (animeCwEnd === "timer" && !nextEp && !hideCaughtUp) {
           next.set(i._id, {
             ...i,
             waitingForAir: true as const,
@@ -741,7 +757,8 @@ export function useCwAdvance(
             effCur,
             nextEp,
             hideCaughtUp,
-          )
+          ) ||
+          (animeCwEnd === "hide" && (!nextEp || !nextEpAired(list, nextEp, isAnime)))
         ) {
           remove.add(i._id);
         }
@@ -833,7 +850,7 @@ export function useCwAdvance(
         if (airTimerRef.current !== null) window.clearTimeout(airTimerRef.current);
         airTimerRef.current = null;
         if (soonest !== Infinity) {
-          const delay = Math.min(Math.max(soonest - Date.now() + 30000, 30000), 21600000);
+          const delay = Math.max(1000, Math.min(soonest - Date.now() + 1000, 21600000));
           airTimerRef.current = window.setTimeout(() => setAirTick((n) => n + 1), delay);
         }
       }

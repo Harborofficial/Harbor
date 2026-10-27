@@ -110,10 +110,23 @@ function mergeItem(existing: LibraryItem, incoming: LibraryItem): LibraryItem {
   return activityOf(incoming) > activityOf(existing) ? incoming : existing;
 }
 
+function isEligibleTrackerPlayback(i: LibraryItem): boolean {
+  if (i.external !== "simkl" && i.external !== "trakt" && i.external !== "publicmetadb") {
+    return true;
+  }
+  if (i.upNext || i.waitingForAir) return true;
+  const offset = i.state?.timeOffset ?? 0;
+  const dur = i.state?.duration ?? 0;
+  if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
+  if (dur > 0 && offset / dur >= 0.9) return false;
+  return true;
+}
+
 function merge(lists: LibraryItem[][]): LibraryItem[] {
   const byId = new Map<string, LibraryItem>();
   for (const list of lists) {
     for (const i of list) {
+      if (!isEligibleTrackerPlayback(i)) continue;
       const held = byId.get(i._id);
       if (!held) byId.set(i._id, i);
       else byId.set(i._id, mergeItem(held, i));
@@ -354,17 +367,24 @@ export function refreshExternalCw(force = false): Promise<void> {
   return startRefresh(++refreshGen);
 }
 
+function matchesContentId(a: string, b: string): boolean {
+  if (a === b) return true;
+  const ca = a.replace(/^(series|movie|tmdb):/, "").trim();
+  const cb = b.replace(/^(series|movie|tmdb):/, "").trim();
+  return !!ca && ca === cb;
+}
+
 export function removeExternalCwItem(item: LibraryItem): void {
-  items = items.filter((i) => i._id !== item._id);
+  items = items.filter((i) => !matchesContentId(i._id, item._id));
   emit();
 
   if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
     try {
       const slot = resolveNuvioProfileIndex();
       const cur = slotCwMemoryCache.get(slot) || [];
-      slotCwMemoryCache.set(slot, cur.filter((i) => i._id !== item._id));
+      slotCwMemoryCache.set(slot, cur.filter((i) => !matchesContentId(i._id, item._id)));
       const disk = readCachedNuvioPlaybackItems(slot);
-      const filteredDisk = disk.filter((i) => i._id !== item._id);
+      const filteredDisk = disk.filter((i) => !matchesContentId(i._id, item._id));
       writeCachedNuvioPlaybackItems(slot, filteredDisk);
     } catch {}
   }
@@ -497,17 +517,17 @@ if (typeof window !== "undefined") {
       if (slot === current) {
         const contentId = detail?.contentId;
         if (contentId) {
-          items = items.filter((i) => i._id !== contentId);
+          items = items.filter((i) => !matchesContentId(i._id, contentId));
           const curMem = slotCwMemoryCache.get(slot) || [];
-          slotCwMemoryCache.set(slot, curMem.filter((i) => i._id !== contentId));
+          slotCwMemoryCache.set(slot, curMem.filter((i) => !matchesContentId(i._id, contentId)));
           emit();
         }
         const fresh = readCachedNuvioPlaybackItems(slot).filter(
-          (i) => !contentId || i._id !== contentId,
+          (i) => !contentId || !matchesContentId(i._id, contentId),
         );
         slotCwMemoryCache.set(slot, fresh);
         const nonNuvio = items.filter(
-          (i) => i.external !== "nuvio" && (!contentId || i._id !== contentId),
+          (i) => i.external !== "nuvio" && (!contentId || !matchesContentId(i._id, contentId)),
         );
         setItems(merge([fresh, nonNuvio]));
       }
@@ -579,7 +599,7 @@ export function useExternalCw(enabled = true): LibraryItem[] {
     };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisible);
-    const pollMs = isNuvioSignedIn() && isNuvioProviderActive() ? 5_000 : STALE_MS;
+    const pollMs = isNuvioSignedIn() && isNuvioProviderActive() ? 30_000 : STALE_MS;
     const timer = window.setInterval(onVisible, pollMs);
     return () => {
       window.removeEventListener("focus", onFocus);

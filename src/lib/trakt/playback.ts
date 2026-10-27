@@ -98,9 +98,19 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
 export const TRAKT_PLAYBACK_CACHE_KEY = "harbor.trakt.playback_items";
 let memoryTraktPlaybackCache: LibraryItem[] | null = null;
 
+function isValidTraktPlaybackItem(item: LibraryItem): boolean {
+  if (!item || item.external !== "trakt" || !item.state) return false;
+  if (item.upNext) return false;
+  const offset = item.state.timeOffset ?? 0;
+  const dur = item.state.duration ?? 0;
+  if (offset <= 0 || (item.state.flaggedWatched ?? 0) > 0) return false;
+  if (dur > 0 && offset / dur >= 0.9) return false;
+  return true;
+}
+
 export function readCachedTraktPlaybackItems(): LibraryItem[] {
   if (memoryTraktPlaybackCache && memoryTraktPlaybackCache.length > 0) {
-    return memoryTraktPlaybackCache;
+    return memoryTraktPlaybackCache.filter(isValidTraktPlaybackItem);
   }
   if (typeof window === "undefined") return [];
   try {
@@ -108,8 +118,14 @@ export function readCachedTraktPlaybackItems(): LibraryItem[] {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        memoryTraktPlaybackCache = parsed;
-        return parsed;
+        const valid = parsed.filter(isValidTraktPlaybackItem);
+        memoryTraktPlaybackCache = valid;
+        if (valid.length !== parsed.length) {
+          try {
+            localStorage.setItem(TRAKT_PLAYBACK_CACHE_KEY, JSON.stringify(valid));
+          } catch {}
+        }
+        return valid;
       }
     }
   } catch {}

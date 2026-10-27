@@ -18,10 +18,9 @@ export function HarborAvatarSync() {
     : (activeProfile?.avatar ?? settings.harborAvatar ?? null);
 
   useEffect(() => {
-    if (!author) return;
-    if (isNuvio && !activeProfile?.isPrimary) return;
+    if (!author || isNuvio) return;
     void pushAvatarToEcosystem(value);
-  }, [author?.id, value, isNuvio, activeProfile?.isPrimary]);
+  }, [author?.id, value, isNuvio]);
 
   return null;
 }

@@ -129,3 +129,28 @@ test("Nuvio profile sorting: profiles are strictly sorted by profile_index ascen
   assert.equal(sorted[2].profile_index, 3);
   assert.equal(sorted[2].name, "Profile C");
 });
+
+test("ProfileIdentitySync: prevents Nuvio profile names from leaking into together name or Stremio profile", async () => {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const syncFile = fs.readFileSync(path.resolve("src/lib/profile-identity-sync.tsx"), "utf8");
+  assert.match(
+    syncFile,
+    /useEffect\(\(\)\s*=>\s*\{\s*if\s*\(isNuvio\)\s*return;[\s\S]*?setDisplayName\(activeProfile\.name\);/,
+    "ProfileIdentitySync must guard name sync with if (isNuvio) return",
+  );
+
+  const avatarSyncFile = fs.readFileSync(path.resolve("src/components/harbor-avatar-sync.tsx"), "utf8");
+  assert.match(
+    avatarSyncFile,
+    /if\s*\(!author\s*\|\|\s*isNuvio\)\s*return;/,
+    "HarborAvatarSync must never push Nuvio profile avatars to Harbor author ecosystem",
+  );
+
+  const profilesFile = fs.readFileSync(path.resolve("src/lib/profiles.tsx"), "utf8");
+  assert.match(
+    profilesFile,
+    /const matchesNuvio = nuvio\.profiles\.some\(/,
+    "profiles.tsx must verify default primary name against Nuvio profile names",
+  );
+});

@@ -221,3 +221,73 @@ test("resurfaceCandidates isolates cache between timer and hide modes", async ()
   assert.equal(hideRes.get("tt_cache_test"), undefined);
 });
 
+test("resurfaceCandidates recognizes non-anime TV series with manualWatched or watchedFor when flaggedWatched is 0", async () => {
+  const futureAir = new Date(Date.now() + 86400000).toISOString();
+  const h = harness({ nextEp: { season: 4, episode: 3, airDate: futureAir } });
+  const resurface = h.load("src/lib/cw-resurface.ts");
+
+  const nuvioItem = {
+    _id: "tt16358384",
+    type: "series",
+    name: "Tulsa King",
+    external: "nuvio",
+    state: {
+      season: 4,
+      episode: 2,
+      timeOffset: 0,
+      duration: 3600000,
+      flaggedWatched: 0,
+      lastWatched: new Date().toISOString(),
+    },
+  };
+
+  const timerResult = await resurface.resurfaceCandidates(
+    [nuvioItem],
+    new Set(),
+    { tmdbKey: "", animeMode: "all", animeCwEnd: "timer" },
+    () => (s: number, e: number) => s === 4 && e === 2,
+  );
+
+  const candidate = timerResult.get("tt16358384");
+  assert.ok(candidate, "Tulsa King should be recognized and retained with timer");
+  assert.equal(candidate.season, 4);
+  assert.equal(candidate.episode, 3);
+  assert.equal(candidate.waitingForAir, true);
+  assert.equal(candidate.airDate, futureAir);
+});
+
+test("resurfaceCandidates resurfaces newly aired episode when airDate has passed in hide mode", async () => {
+  const pastAir = new Date(Date.now() - 3600000).toISOString(); // Aired 1 hour ago
+  const h = harness({ nextEp: { season: 4, episode: 3, airDate: pastAir } });
+  const resurface = h.load("src/lib/cw-resurface.ts");
+
+  const item = {
+    _id: "tt16358384_aired",
+    type: "series",
+    name: "Tulsa King",
+    external: "nuvio",
+    state: {
+      season: 4,
+      episode: 2,
+      timeOffset: 0,
+      duration: 3600000,
+      flaggedWatched: 0,
+      lastWatched: new Date().toISOString(),
+    },
+  };
+
+  const hideResult = await resurface.resurfaceCandidates(
+    [item],
+    new Set(),
+    { tmdbKey: "", animeMode: "all", animeCwEnd: "hide" },
+    () => (s: number, e: number) => s === 4 && e === 2,
+  );
+
+  const candidate = hideResult.get("tt16358384_aired");
+  assert.ok(candidate, "Should resurface aired episode in hide mode");
+  assert.equal(candidate.season, 4);
+  assert.equal(candidate.episode, 3);
+  assert.equal(candidate.waitingForAir, false);
+});
+
+

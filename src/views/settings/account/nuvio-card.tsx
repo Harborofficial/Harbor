@@ -86,11 +86,11 @@ export function NuvioCard() {
 
       <SettingRow
         icon={<LogOut size={18} strokeWidth={2} />}
-        label={t("Disconnect Nuvio")}
+        label={t("Sign out of Nuvio")}
         desc={t("Stops syncing with your Nuvio account on this device.")}
       >
         <SButton variant="danger" onClick={signOutNuvio}>
-          {t("Disconnect")}
+          {t("Sign out")}
         </SButton>
       </SettingRow>
 

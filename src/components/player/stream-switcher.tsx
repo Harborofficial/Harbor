@@ -7,7 +7,7 @@ import { fetchInstalledAddons } from "@/lib/addon-store";
 import { userAddons, type Addon } from "@/lib/addons";
 import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
-import { useAuth } from "@/lib/auth";
+import { useAuth, resolveEffectiveStremioAuthKey } from "@/lib/auth";
 import { peekPickerCache, subscribePickerCache } from "@/lib/picker-cache";
 import { useSettings } from "@/lib/settings";
 import type { ScoredStream } from "@/lib/streams/types";
@@ -132,7 +132,8 @@ export function StreamSwitcher({
       const shouldNuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn();
 
       const installed = await fetchInstalledAddons().catch(() => [] as Addon[]);
-      const stremio = shouldStremio && authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+      const effectiveAuthKey = resolveEffectiveStremioAuthKey(authKey);
+      const stremio = shouldStremio && effectiveAuthKey ? await userAddons(effectiveAuthKey).catch(() => [] as Addon[]) : [];
       const nuvio = shouldNuvio ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
       if (cancelled) return;
       setAddonLogos(addonLogoMap([...installed, ...stremio, ...nuvio]));

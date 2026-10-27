@@ -15,7 +15,7 @@ import { HarborAccountPanel } from "@/views/account/harbor-account-panel";
 
 import { NuvioCard } from "./account/nuvio-card";
 import { NuvioSyncedAddonsCard } from "./account/nuvio-synced-addons-card";
-import { NuvioProfileMappingCard } from "./account/nuvio-profile-card";
+
 
 import { AccountProviderPanel } from "./account/account-provider-panel";
 import { NuvioProfilesTab } from "./account/nuvio-profiles-tab";
@@ -225,12 +225,6 @@ function NuvioTab() {
         subtitle={t("Connect your Nuvio account to sync watch progress, profile slots, and addons.")}
       >
         <NuvioCard />
-      </Section>
-      <Section
-        title={t("Profile mapping")}
-        subtitle={t("Choose which Nuvio profile slot (1–6) syncs with this Harbor profile.")}
-      >
-        <NuvioProfileMappingCard />
       </Section>
       <Section
         title={t("Synced addons")}

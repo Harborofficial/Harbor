@@ -8,6 +8,7 @@ import { StatusDot, StatusPicker } from "@/chrome/sidebar/status-control";
 import { AccountMenuPanel } from "./account-menu-panel";
 import { ProfileAvatar, SubtitleText } from "./account-menu-parts";
 import { useAccountMenu } from "./use-account-menu";
+import { isPlaceholderName } from "@/lib/profiles";
 
 type TriggerKind = "row" | "pill" | "avatar";
 
@@ -54,9 +55,12 @@ export function AccountMenu({
   const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
     ? null
     : settings.harborAvatar;
+  const isPlaceholder = isPlaceholderName(activeProfile?.name);
   const name = isNuvio
     ? (activeProfile?.name || t("profile.fallback"))
-    : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback"));
+    : (isPlaceholder
+        ? (user?.fullname ?? user?.email?.split("@")[0] ?? activeProfile?.name ?? t("profile.fallback"))
+        : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback")));
   const showStatus = !!author && !kid;
 
   const vpos = placement === "up" ? "bottom-full mb-1.5" : "top-full mt-2";

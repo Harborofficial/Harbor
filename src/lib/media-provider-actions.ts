@@ -46,7 +46,10 @@ import {
   deleteWatchProgressFromNuvio,
   deleteEpisodeWatchProgressFromNuvio,
   undismissNextUpInNuvioCloud,
+  readCachedWatchProgress,
+  readCachedWatchedItems,
 } from "./nuvio/nuvio-sync";
+import { buildNuvioPlaybackItems, writeCachedNuvioPlaybackItems } from "./nuvio/nuvio-playback";
 import { addNuvioLibraryItem, removeNuvioLibraryItem } from "./nuvio/nuvio-library";
 import { saveLocalCw, clearLocalCw } from "./local-cw";
 import { saveResumeMs } from "./resume";
@@ -799,11 +802,16 @@ export function watchedProviderWrites(
             );
             const lastEp = sorted[sorted.length - 1];
             if (lastEp) {
-              let nextSeason: number | null = lastEp.season;
-              let nextEpisode: number | null = lastEp.episode + 1;
+              let nextSeason: number | null = null;
+              let nextEpisode: number | null = null;
               let hasNext = false;
               let videosToScan = options.videos;
-              if (!videosToScan?.length) {
+              const hasCandidateInScan = videosToScan?.some(
+                (v) =>
+                  (v.season ?? 0) > lastEp.season ||
+                  ((v.season ?? 0) === lastEp.season && ((v.episode ?? v.number ?? 0) > lastEp.episode)),
+              );
+              if (!hasCandidateInScan) {
                 const fetchedMeta = await fetchMeta("series", primaryId).catch(() => null);
                 if (fetchedMeta?.videos?.length) {
                   videosToScan = fetchedMeta.videos;
@@ -903,7 +911,7 @@ export function watchedProviderWrites(
                 );
               } else {
                 const settings = loadStoredSettings();
-                const keepForTimer = settings.animeCwEnd === "timer" && !settings.cwHideCaughtUp;
+                const keepForTimer = settings.animeCwEnd === "timer";
                 if (keepForTimer) {
                   const nextCw = {
                     id: meta.id,
@@ -933,6 +941,14 @@ export function watchedProviderWrites(
                   clearLocalCw(meta.id, `nuvio-${slot}`);
                 }
               }
+              try {
+                const settings = loadStoredSettings();
+                const keepCaughtUp = settings.animeCwEnd === "timer";
+                const cachedProgress = readCachedWatchProgress(slot);
+                const cachedWatched = readCachedWatchedItems(slot);
+                const built = buildNuvioPlaybackItems(cachedProgress, slot, cachedWatched, undefined, keepCaughtUp);
+                writeCachedNuvioPlaybackItems(slot, built);
+              } catch {}
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
             }
           } else {

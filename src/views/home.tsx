@@ -70,6 +70,7 @@ import { franchiseRoot, franchiseRootSync } from "@/lib/providers/anime-franchis
 import { franchiseDedupKey } from "@/lib/providers/jikan";
 import {
   ANIME_CLOUD_ID,
+  CW_FINISHED_RATIO,
   cwSortKey,
   episodeFromVideoId,
   isAnimeCwItem,
@@ -725,6 +726,13 @@ export function Home({
       if (i.external === "nuvio") return true;
       if (disabledSources.has(i.external)) return false;
       if (hideSharedCw) return false;
+      if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
+        if (i.upNext || i.waitingForAir) return true;
+        const offset = i.state?.timeOffset ?? 0;
+        const dur = i.state?.duration ?? 0;
+        if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
+        if (dur > 0 && offset / dur >= CW_FINISHED_RATIO) return false;
+      }
       return true;
     });
 
@@ -759,6 +767,22 @@ export function Home({
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);
+
+    const manual = manualWatchedLibraryItems();
+    const candidateEligible =
+      manual.length > 0
+        ? [
+            ...eligible,
+            ...manual.filter(
+              (m) =>
+                !eligible.some((e) => e._id === m._id) &&
+                isCwMember(m) &&
+                !isCwDismissed(m) &&
+                (!isNuvioProvider ? m.external !== "nuvio" : true) &&
+                !((settings.animeOnlyInAnimeRoom || settings.hideContent.anime) && isAnimeCwItem(m)),
+            ),
+          ]
+        : eligible;
     const norm = (s: string) => franchiseDedupKey(s);
     const lastWatchedOf = (i: LibraryItem) => {
       const lw = Date.parse(i.state?.lastWatched ?? "");
@@ -783,41 +807,9 @@ export function Home({
           return lastWatchedOf(incoming) > lastWatchedOf(held) ? incoming : held;
         }
         if (heldIsNuvio && !incIsNuvio) {
-          if (lastWatchedOf(incoming) > lastWatchedOf(held)) {
-            return {
-              ...held,
-              state: {
-                ...held.state,
-                ...incoming.state,
-                video_id: incoming.state?.video_id ?? held.state?.video_id,
-                season: incoming.state?.season ?? held.state?.season,
-                episode: incoming.state?.episode ?? held.state?.episode,
-                timeOffset: incoming.state?.timeOffset ?? held.state?.timeOffset ?? 0,
-                duration: incoming.state?.duration ?? held.state?.duration ?? 0,
-                lastWatched: incoming.state?.lastWatched ?? held.state?.lastWatched,
-              },
-              _mtime: incoming._mtime ?? held._mtime,
-            };
-          }
           return held;
         }
         if (!heldIsNuvio && incIsNuvio) {
-          if (lastWatchedOf(held) > lastWatchedOf(incoming)) {
-            return {
-              ...incoming,
-              state: {
-                ...incoming.state,
-                ...held.state,
-                video_id: held.state?.video_id ?? incoming.state?.video_id,
-                season: held.state?.season ?? incoming.state?.season,
-                episode: held.state?.episode ?? incoming.state?.episode,
-                timeOffset: held.state?.timeOffset ?? incoming.state?.timeOffset ?? 0,
-                duration: held.state?.duration ?? incoming.state?.duration ?? 0,
-                lastWatched: held.state?.lastWatched ?? incoming.state?.lastWatched,
-              },
-              _mtime: held._mtime ?? incoming._mtime,
-            };
-          }
           return incoming;
         }
       }
@@ -833,7 +825,7 @@ export function Home({
 
     const byId = new Map<string, LibraryItem>();
     const byName = new Map<string, LibraryItem>();
-    for (const i of eligible) {
+    for (const i of candidateEligible) {
       const nm = norm(i.name ?? "");
       const key = `${i.type}:${nm}`;
 
@@ -848,29 +840,21 @@ export function Home({
       if (nm) {
         const held = byName.get(key);
         if (held) {
-          if (lastWatchedOf(i) > lastWatchedOf(held)) {
-            if (isNuvioProvider && held.external === "nuvio" && i.external !== "nuvio") {
-              const updated: LibraryItem = {
-                ...held,
-                state: {
-                  ...held.state,
-                  ...i.state,
-                  video_id: i.state?.video_id ?? held.state?.video_id,
-                  season: i.state?.season ?? held.state?.season,
-                  episode: i.state?.episode ?? held.state?.episode,
-                  timeOffset: i.state?.timeOffset ?? held.state?.timeOffset ?? 0,
-                  duration: i.state?.duration ?? held.state?.duration ?? 0,
-                  lastWatched: i.state?.lastWatched ?? held.state?.lastWatched,
-                },
-                _mtime: i._mtime ?? held._mtime,
-              };
-              byId.set(held._id, updated);
-              byName.set(key, updated);
-            } else {
+          if (isNuvioProvider) {
+            if (held.external === "nuvio" && i.external !== "nuvio") {
+              continue;
+            }
+            if (held.external !== "nuvio" && i.external === "nuvio") {
               byId.delete(held._id);
               byName.set(key, i);
               byId.set(i._id, i);
+              continue;
             }
+          }
+          if (lastWatchedOf(i) > lastWatchedOf(held)) {
+            byId.delete(held._id);
+            byName.set(key, i);
+            byId.set(i._id, i);
           }
           continue;
         }
@@ -899,6 +883,7 @@ export function Home({
     settings.cwSources.publicmetadb,
     hideSharedCw,
     animeDetectVer,
+    manualWatchedVer,
     isNuvioProvider,
   ]);
   useEffect(() => {
@@ -916,20 +901,35 @@ export function Home({
     };
   }, [localCwItems, externalCw]);
   const resurfaceLibrary = useMemo(() => {
-    if (isNuvioProvider) {
-      return [
-        ...externalCw.filter(
-          (i) =>
-            (i.external === "nuvio" || i.external === "trakt" || i.external === "simkl") &&
-            i.type === "series",
-        ),
-        ...localCwItems.filter((i) => i.type === "series"),
-      ];
-    }
     const disabledSources = new Set<string>();
     if (!settings.cwSources.simkl) disabledSources.add("simkl");
     if (!settings.cwSources.trakt) disabledSources.add("trakt");
     if (!settings.cwSources.publicmetadb) disabledSources.add("publicmetadb");
+
+    const manual = manualWatchedLibraryItems();
+    if (isNuvioProvider) {
+      const nuvioPool = [
+        ...externalCw.filter((i) => {
+          if (!i.external || i.type !== "series") return false;
+          if (disabledSources.has(i.external)) return false;
+          if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
+            if (i.upNext || i.waitingForAir) return true;
+            const offset = i.state?.timeOffset ?? 0;
+            const dur = i.state?.duration ?? 0;
+            if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
+            if (dur > 0 && offset / dur >= CW_FINISHED_RATIO) return false;
+          }
+          return i.external === "nuvio" || i.external === "trakt" || i.external === "simkl";
+        }),
+        ...localCwItems.filter((i) => i.type === "series"),
+      ];
+      if (manual.length === 0) return nuvioPool;
+      const cwMemberIds = new Set(nuvioPool.filter(isCwMember).map((i) => i._id));
+      const usable = manual.filter((i) => !cwMemberIds.has(i._id));
+      if (usable.length === 0) return nuvioPool;
+      const overrideIds = new Set(usable.map((i) => i._id));
+      return [...nuvioPool.filter((i) => !overrideIds.has(i._id)), ...usable];
+    }
     const externalForStremio = hideSharedCw
       ? []
       : externalCw.filter((i) => {
@@ -941,7 +941,6 @@ export function Home({
       ...localCwItems.filter((i) => i.type === "series" && i.external !== "nuvio"),
       ...externalForStremio,
     ];
-    const manual = manualWatchedLibraryItems();
     if (manual.length === 0) return pool;
     const cwMemberIds = new Set(pool.filter(isCwMember).map((i) => i._id));
     const usable = manual.filter((i) => !cwMemberIds.has(i._id));

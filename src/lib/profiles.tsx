@@ -293,7 +293,17 @@ export function isPlaceholderName(name: string | null | undefined): boolean {
 function defaultPrimaryName(): string {
   try {
     const existing = localStorage.getItem(TOGETHER_NAME_KEY)?.trim();
-    if (existing && !isPlaceholderName(existing)) return existing;
+    if (existing && !isPlaceholderName(existing)) {
+      try {
+        const nuvio = loadNuvioState();
+        const matchesNuvio = nuvio.profiles.some(
+          (p) => p.name && p.name.trim().toLowerCase() === existing.toLowerCase(),
+        );
+        if (!matchesNuvio) return existing;
+      } catch {
+        return existing;
+      }
+    }
   } catch {
     return generateGuestName();
   }
@@ -498,7 +508,26 @@ function readState(): ProfilesState {
         };
       }
       if (isThisPrimary) {
-        if (isPlaceholderName(p.name)) next.name = fallbackName;
+        if (isPlaceholderName(p.name)) {
+          next.name = fallbackName;
+        } else {
+          try {
+            const nuvio = loadNuvioState();
+            const matchesNuvio = nuvio.profiles.some(
+              (np) => np.name && np.name.trim().toLowerCase() === p.name.trim().toLowerCase(),
+            );
+            if (matchesNuvio) {
+              const existingTogether = localStorage.getItem(TOGETHER_NAME_KEY)?.trim();
+              if (
+                !existingTogether ||
+                existingTogether.toLowerCase() === p.name.trim().toLowerCase()
+              ) {
+                localStorage.removeItem(TOGETHER_NAME_KEY);
+                next.name = fallbackName;
+              }
+            }
+          } catch {}
+        }
         if (identity.color) next.color = identity.color;
         if (
           p.avatar == null &&

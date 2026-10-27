@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { resolveAddonOrigin, type AddonOriginTag } from "@/lib/nuvio/nuvio-addon-registry";
+import { useSettings } from "@/lib/settings";
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 
 export function AccountOriginBadge({
   addonUrl,
@@ -8,6 +10,7 @@ export function AccountOriginBadge({
   addonUrl?: string | null;
   size?: "sm" | "md";
 }) {
+  const { settings } = useSettings();
   const [origin, setOrigin] = useState<AddonOriginTag>(() => resolveAddonOrigin(addonUrl));
 
   useEffect(() => {
@@ -18,6 +21,12 @@ export function AccountOriginBadge({
     window.addEventListener("harbor:addon-origins-updated", handleUpdate);
     return () => window.removeEventListener("harbor:addon-origins-updated", handleUpdate);
   }, [addonUrl]);
+
+  const isNuvio = isNuvioProviderActive();
+  const addonMode = settings.nuvioAddonMode ?? "separate";
+
+  // In separate mode in nuvio mode, origin tags should not be visible
+  if (isNuvio && addonMode === "separate") return null;
 
   if (origin === "custom") return null;
 

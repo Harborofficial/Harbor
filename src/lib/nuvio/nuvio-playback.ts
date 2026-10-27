@@ -7,6 +7,7 @@ import {
   pullDismissedNextUpKeysFromNuvio,
   readCachedDismissedNextUpKeys,
   isDismissedNextUp,
+  cwKeepsCaughtUpForTimer,
 } from "./nuvio-sync";
 import { getNuvioAccountId, isNuvioSignedIn } from "./nuvio-client";
 import type { LibraryItem } from "@/lib/stremio";
@@ -47,7 +48,13 @@ export function readCachedNuvioPlaybackItems(slot?: number, accountId?: string):
     }
   } catch {}
 
-  const built = buildNuvioPlaybackItems(records, profileIndex, watched);
+  const built = buildNuvioPlaybackItems(
+    records,
+    profileIndex,
+    watched,
+    undefined,
+    cwKeepsCaughtUpForTimer(),
+  );
   writeCachedNuvioPlaybackItems(profileIndex, built, accountId);
   return built;
 }
@@ -94,6 +101,7 @@ export function buildNuvioPlaybackItems(
   profileIndex: number,
   watchedItems?: NuvioWatchedItem[],
   dismissedKeys?: Set<string>,
+  keepCaughtUpForTimer = false,
 ): LibraryItem[] {
   const safeRecords = Array.isArray(records) ? records : [];
   const ownerId = `nuvio-${profileIndex}`;
@@ -405,9 +413,7 @@ export function buildNuvioPlaybackItems(
       activeSeriesIds.has(seriesId) ||
       activeSeriesIds.has(cleanSeriesId) ||
       activeSeriesIds.has(`tmdb:${cleanSeriesId}`) ||
-      activeSeriesIds.has(`series:${cleanSeriesId}`) ||
-      fullyWatchedSeriesIds.has(seriesId) ||
-      fullyWatchedSeriesIds.has(cleanSeriesId)
+      activeSeriesIds.has(`series:${cleanSeriesId}`)
     ) {
       continue;
     }
@@ -421,10 +427,29 @@ export function buildNuvioPlaybackItems(
     // Resolve next episode:
     // Check if local CW has a newer or advanced target episode
     const localMatch = localCwEntry(seriesId, true, ownerId) || localCwEntry(seriesId, false, ownerId);
+    const isFullyWatched = fullyWatchedSeriesIds.has(seriesId) || fullyWatchedSeriesIds.has(cleanSeriesId);
+    // A series kept for the "airing soon" timer stays on the episode that was just
+    // watched, so it never advances past the seed. Those rows survive the
+    // fully-watched guard; everything else stays suppressed so a completed show
+    // cannot reappear in the tray.
+    let keptForTimer = false;
+    if (isFullyWatched) {
+      if (!localMatch || localMatch.season == null || localMatch.episode == null) {
+        if (!keepCaughtUpForTimer) continue;
+        keptForTimer = true;
+      } else {
+        const order = (s: number, e: number) => s * 100000 + e;
+        if (order(localMatch.season, localMatch.episode) <= order(seed.season, seed.episode)) {
+          if (!keepCaughtUpForTimer) continue;
+          keptForTimer = true;
+        }
+      }
+    }
     let nextSeason = seed.season;
     let nextEpisode = seed.episode + 1;
 
     if (
+      !keptForTimer &&
       localMatch &&
       localMatch.season != null &&
       localMatch.episode != null &&
@@ -432,6 +457,14 @@ export function buildNuvioPlaybackItems(
     ) {
       nextSeason = localMatch.season;
       nextEpisode = localMatch.episode;
+    }
+
+    // The timer card keeps the last watched episode: the tray's advancer resolves
+    // the real next episode from the episode list, so an unaired follow-up shows
+    // its countdown instead of a fabricated "next" number.
+    if (keptForTimer) {
+      nextSeason = seed.season;
+      nextEpisode = seed.episode;
     }
 
     // Skip if target episode is dismissed
@@ -461,12 +494,16 @@ export function buildNuvioPlaybackItems(
         lastWatched: when,
       },
       upNext: true,
+      waitingForAir: keptForTimer ? true : undefined,
       removed: false,
       temp: false,
       _ctime: when,
       _mtime: when,
       external: "nuvio",
     };
+    if (keptForTimer) {
+      (nextUpItem as Record<string, unknown>).keptForTimer = true;
+    }
 
     if (isCwDismissed(nextUpItem)) continue;
     items.push(nextUpItem);
@@ -601,7 +638,13 @@ export async function fetchNuvioPlaybackItems(targetSlot?: number): Promise<Libr
     dismissedKeys = readCachedDismissedNextUpKeys(profileIndex);
   }
 
-  const items = buildNuvioPlaybackItems(records, profileIndex, watched, dismissedKeys);
+  const items = buildNuvioPlaybackItems(
+    records,
+    profileIndex,
+    watched,
+    dismissedKeys,
+    cwKeepsCaughtUpForTimer(),
+  );
   writeCachedNuvioPlaybackItems(profileIndex, items, safeAccountId);
   return items;
 }

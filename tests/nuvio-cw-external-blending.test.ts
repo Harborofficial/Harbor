@@ -256,3 +256,40 @@ test("Toggling Trakt progress OFF immediately drops cards synchronously", () => 
   assert.equal(cw.length, 1, "Trakt card must vanish immediately");
   assert.equal(cw[0]._id, "tt0903747", "Nuvio card must be preserved");
 });
+
+test("Simkl and Trakt in Nuvio mode exclude finished items while supporting in-progress and next up", async () => {
+  const h = fixture(true, true);
+  // Stale unstarted Simkl show without upNext (timeOffset: 0, upNext: false)
+  const unstartedSimkl = {
+    ...makeItem("simkl", "tt001", "Unstarted Simkl", 1, 1, "2026-10-22T12:00:00Z", 0, 1000),
+    upNext: false,
+  };
+  // Finished Simkl show (timeOffset: 950 / 1000 = 95%)
+  const finishedSimkl = makeItem("simkl", "tt002", "Finished Simkl", 1, 1, "2026-10-22T12:00:00Z", 950, 1000);
+  // Valid in-progress Simkl show (timeOffset: 400 / 1000 = 40%)
+  const inProgressSimkl = makeItem("simkl", "tt003", "In-Progress Simkl", 1, 1, "2026-10-22T12:00:00Z", 400, 1000);
+  // Simkl Next Up ongoing series (timeOffset: 0, upNext: true)
+  const simklNextUp = {
+    ...makeItem("simkl", "tt005", "Simkl Next Up", 2, 1, "2026-10-22T12:00:00Z", 0, 1000),
+    upNext: true,
+  };
+  // Nuvio native Next Up show (timeOffset: 0, upNext: true)
+  const nuvioNextUp = {
+    ...makeItem("nuvio", "tt004", "Nuvio Next Up", 1, 2, "2026-10-22T12:00:00Z", 0, 1000),
+    upNext: true,
+  };
+
+  h.providers.simkl = async () => [unstartedSimkl, finishedSimkl, inProgressSimkl, simklNextUp];
+  h.setNuvioItems([nuvioNextUp]);
+
+  h.api.setExternalCwSources({ trakt: false, simkl: true, nuvio: true });
+  await h.api.refreshExternalCw(true);
+
+  const cw = h.api.listExternalCw();
+  const ids = new Set(cw.map((i) => i._id));
+  assert.ok(ids.has("tt004"), "Nuvio native next up card must be preserved");
+  assert.ok(ids.has("tt003"), "In-progress Simkl card must be present");
+  assert.ok(ids.has("tt005"), "Simkl next up card must be present");
+  assert.ok(!ids.has("tt001"), "Unstarted non-upNext Simkl item must NOT enter Continue Watching");
+  assert.ok(!ids.has("tt002"), "Finished Simkl item must NOT enter Continue Watching");
+});

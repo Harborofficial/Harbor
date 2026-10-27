@@ -21,7 +21,8 @@ import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { signOutNuvio } from "@/lib/nuvio/nuvio-auth";
 import { resolveNuvioAvatar } from "@/lib/nuvio/nuvio-profiles";
 import type { NuvioProfile } from "@/lib/nuvio/nuvio-types";
-import { isStremioActivePrimary, activeProfileIsPrimary } from "@/lib/active-profile-id";
+import { isStremioActivePrimary, activeProfileIsPrimary, isNuvioProviderActive } from "@/lib/active-profile-id";
+import { isPlaceholderName } from "@/lib/profiles";
 
 const ITEM =
   "flex items-center gap-2.5 px-4 py-2.5 text-start text-[13.5px] text-ink-muted transition-colors duration-150 ease-[var(--ease-out)] hover:bg-raised hover:text-ink active:scale-[0.98]";
@@ -46,7 +47,7 @@ export function AccountMenuPanel({
   const t = useT();
   const { signOut } = useAuth();
   const { settings } = useSettings();
-  const isNuvio = settings.accountProvider === "nuvio";
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
 
   const {
     user,
@@ -104,9 +105,12 @@ export function AccountMenuPanel({
     ? profiles.filter((p) => p.id !== activeProfile?.id)
     : [];
 
+  const isPlaceholder = isPlaceholderName(activeProfile?.name);
   const name = isNuvio
     ? (activeNuvioProfile?.name ?? nuvioEmail?.split("@")[0] ?? t("profile.fallback"))
-    : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback"));
+    : (isPlaceholder
+        ? (user?.fullname ?? user?.email?.split("@")[0] ?? activeProfile?.name ?? t("profile.fallback"))
+        : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback")));
 
   const isPrimary = activeProfileIsPrimary() || (isNuvio
     ? activeNuvioProfile?.profile_index === 1
@@ -225,7 +229,7 @@ export function AccountMenuPanel({
 
         {!kid && (
           <div className="flex flex-col">
-            {isPrimary && (author || (isNuvio && nuvioState.session)) && (
+            {isPrimary && author && (
               <button onClick={viewMyProfile} className={ITEM}>
                 <UserRound size={14} strokeWidth={2.2} />
                 {t("View my profile")}
@@ -239,7 +243,7 @@ export function AccountMenuPanel({
             )}
             <button
               onClick={() => setManageOpen((o) => !o)}
-              className={`${ITEM} ${(isPrimary && (author || (isNuvio && nuvioState.session))) || author ? "border-t border-edge-soft" : ""}`}
+              className={`${ITEM} ${author ? "border-t border-edge-soft" : ""}`}
             >
               <Users size={14} strokeWidth={2.2} />
               {t("Manage profiles")}

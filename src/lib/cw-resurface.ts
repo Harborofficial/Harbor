@@ -91,9 +91,14 @@ export async function resurfaceCandidates(
     if (!Number.isFinite(lw) || now - lw > RECENT_MS) return false;
     const cur = currentEpisode(i);
     if (cur == null) return false;
-    if ((i.state.flaggedWatched ?? 0) > 0)
-      return !watchedFor || watchedFor(i, cur)(cur.season, cur.episode);
-    return anime && !!watchedFor && watchedFor(i, cur)(cur.season, cur.episode);
+    const isWatched =
+      (i.state.flaggedWatched ?? 0) > 0 ||
+      (i as Record<string, unknown>).manualWatched === true ||
+      (i as Record<string, unknown>).external === "nuvio" ||
+      (!!watchedFor && watchedFor(i, cur)(cur.season, cur.episode));
+    if (!isWatched && !anime) return false;
+    if (watchedFor && !watchedFor(i, cur)(cur.season, cur.episode)) return false;
+    return true;
   });
   for (const i of candidates) {
     const cur = currentEpisode(i)!;
@@ -121,7 +126,7 @@ export async function resurfaceCandidates(
               waitingForAir: false,
               airDate: adj.next.airDate,
             };
-          } else if (endMode === "timer" && !opts.hideCaughtUp) {
+          } else if (endMode === "timer") {
             nx = {
               season: adj.next.season,
               episode: adj.next.episode,
@@ -131,12 +136,16 @@ export async function resurfaceCandidates(
           } else {
             nx = null;
           }
-        } else if (endMode === "timer" && !opts.hideCaughtUp) {
+        } else if (endMode === "timer" && !opts.hideCaughtUp && i.external !== "simkl" && i.external !== "trakt") {
           nx = { season: cur.season, episode: cur.episode, waitingForAir: true };
         } else {
           nx = null;
         }
-        cache.set(key, { next: nx, t: now });
+        const airTime = adj.next?.airDate ? Date.parse(adj.next.airDate) : NaN;
+        const cacheTtl = Number.isFinite(airTime) && airTime > now
+          ? Math.max(1000, Math.min(RESURFACE_TTL, airTime - now + 1000))
+          : RESURFACE_TTL;
+        cache.set(key, { next: nx, t: now - (RESURFACE_TTL - cacheTtl) });
       } catch {
         // A failed lookup must remain retryable on the next refresh.
         continue;
@@ -147,7 +156,7 @@ export async function resurfaceCandidates(
         .then((list) => {
           const target = nextUnwatchedAfter(list, cur, watchedFor(i, cur));
           if (!target) {
-            return endMode === "timer" && !opts.hideCaughtUp
+            return i.external !== "simkl" && i.external !== "trakt" && endMode === "timer" && !opts.hideCaughtUp
               ? { season: cur.season, episode: cur.episode, waitingForAir: true }
               : null;
           }
@@ -160,7 +169,7 @@ export async function resurfaceCandidates(
               airDate: entry.airDate,
             };
           }
-          if (endMode === "timer" && !opts.hideCaughtUp) {
+          if (endMode === "timer") {
             return {
               season: target.season,
               episode: target.episode,

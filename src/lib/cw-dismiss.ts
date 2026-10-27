@@ -343,10 +343,17 @@ export function dismissCw(
     try {
       for (const vid of idVariants) {
         clearLocalCw(vid, `nuvio-${slot}`);
+        clearLocalCw(vid);
       }
       removeExternalCwItem(item);
       void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
       void dismissNextUpInNuvioCloud(slot, id, season, episode);
+      window.dispatchEvent(
+        new CustomEvent("harbor:nuvio-progress-deleted", {
+          detail: { profileIndex: slot, contentId: id },
+        }),
+      );
+      window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
     } catch {}
     return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;
   }

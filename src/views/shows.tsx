@@ -212,6 +212,13 @@ export function Shows({ active = true }: { active?: boolean }) {
     resurfaceLibrary,
     "exclude",
     manualWatchedVer,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    0,
+    settings.episodeHiding,
+    settings.animeCwEnd,
   );
 
   useEffect(() => {
