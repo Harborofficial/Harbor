@@ -252,6 +252,8 @@ test("strict PMDB history reads reject a failed later page while display reads r
       },
       "./mappings": {},
       "./session": { isAuthenticated: () => true },
+      "./ids": { isTmdbSingleSeasonShowCached: () => undefined },
+      "./watched-order": { scopePmdbWatchedOrder: () => {} },
     },
   );
   const target: PmdbTarget = { tmdb_id: 456, media_type: "tv" };
@@ -280,6 +282,8 @@ test("PMDB mutation guards run after mapping or list preparation and before the 
         },
       },
       "./session": { isAuthenticated: () => true },
+      "./ids": { isTmdbSingleSeasonShowCached: () => undefined },
+      "./watched-order": { scopePmdbWatchedOrder: () => {} },
     },
   );
   await assert.rejects(
