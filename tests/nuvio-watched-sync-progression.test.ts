@@ -31,7 +31,10 @@ test("watchedProviderWrites connects Nuvio cloud sync for both movies and series
 
 test("mark-watched functions sync to Nuvio for movies and shows", () => {
   assert.match(markWatched, /if \(isNuvioSignedIn\(\)\)/);
-  assert.match(markWatched, /pushWatchedItemToNuvio\(slot, \[\s*\{\s*contentId: primaryId,\s*contentType: "movie"/);
+  assert.match(
+    markWatched,
+    /pushWatchedItemToNuvio\(slot, \[\s*\{\s*contentId: primaryId,\s*contentType: "movie"/,
+  );
   assert.match(markWatched, /deleteWatchedItemFromNuvio\(slot, \[\s*\{\s*contentId: primaryId/);
 });
 
@@ -42,7 +45,10 @@ test("EpisodeWatchedMenu filters out specials (Season 0) from upTo count when on
 
 test("manualWatched reconcile does not delete local watched episodes when server has 0 items", () => {
   assert.match(manualWatched, /if \(serverEpisodeKeys\.size > 0\)/);
-  assert.match(manualWatched, /serverShowsWithEpisodes\.has\(showId\) && !serverEpisodeKeys\.has\(lKey\)/);
+  assert.match(
+    manualWatched,
+    /serverShowsWithEpisodes\.has\(showId\) && !serverEpisodeKeys\.has\(lKey\)/,
+  );
 });
 
 test("manualEpisodeKeys supports altIds to prevent vanishing marked episodes across IMDB and TMDB", () => {
@@ -52,26 +58,44 @@ test("manualEpisodeKeys supports altIds to prevent vanishing marked episodes acr
 
 test("detail page loads Nuvio watched items and progress into stremioWatched state", () => {
   assert.match(detail, /pullWatchedItemsFromNuvio\(\)/);
-  assert.match(detail, /setStremioWatched\(\(prev\) => new Set\(\[\.\.\.prev, \.\.\.watchedKeys\]\)\)/);
+  assert.match(
+    detail,
+    /setStremioWatched\(\(prev\) => new Set\(\[\.\.\.prev, \.\.\.watchedKeys\]\)\)/,
+  );
 });
 
 test("isCwMember keeps series items when offset is 0 for Next Up or unwatched progression", () => {
   assert.match(stremio, /if \(i\.upNext\) return true;/);
-  assert.match(stremio, /i\.type === "series" &&\s*i\.state\.season != null &&\s*i\.state\.episode != null &&\s*\(i\.state\.flaggedWatched \?\? 0\) === 0/);
+  assert.match(
+    stremio,
+    /i\.type === "series" &&\s*i\.state\.season != null &&\s*i\.state\.episode != null &&\s*\(i\.state\.flaggedWatched \?\? 0\) === 0/,
+  );
   assert.match(continueWatching, /upNext: e\.type === "series" && e\.positionMs === 0/);
 });
 
 test("marking episode unwatched in series updates CW and Nuvio progress instead of vanishing", () => {
   assert.match(mediaProviderActions, /const firstEp = sorted\[0\];/);
-  assert.match(mediaProviderActions, /await pushWatchProgressToNuvio\(\s*slot,\s*primaryId,\s*0,\s*2640,\s*firstEp\.season,\s*firstEp\.episode/);
+  assert.match(
+    mediaProviderActions,
+    /await pushWatchProgressToNuvio\(\s*slot,\s*primaryId,\s*0,\s*2640,\s*firstEp\.season,\s*firstEp\.episode/,
+  );
   assert.match(mediaProviderActions, /saveLocalCw\(unwatchedCw/);
 });
 
 test("detail and episode lists infer prior episodes as watched up to current progression", () => {
-  assert.match(detail, /for \(let ep = 1; ep < m\.episode; ep\+\+\) \{\s*watchedKeys\.add\(`\$\{m\.season\}:\$\{ep\}`\);/);
-  assert.match(seriesEpisodes, /if \(season\.seasonNumber >= 1 && season\.seasonNumber < resumeSeason\)/);
+  assert.match(
+    detail,
+    /for \(let ep = 1; ep < m\.episode; ep\+\+\) \{\s*watchedKeys\.add\(`\$\{m\.season\}:\$\{ep\}`\);/,
+  );
+  assert.match(
+    seriesEpisodes,
+    /if \(season\.seasonNumber >= 1 && season\.seasonNumber < resumeSeason\)/,
+  );
   assert.match(seriesEpisodes, /stremioWatched: combinedWatched/);
-  assert.match(cinemetaEpisodes, /s < resumeSeason \|\| \(s === resumeSeason && e < resumeEpisode\)/);
+  assert.match(
+    cinemetaEpisodes,
+    /s < resumeSeason \|\| \(s === resumeSeason && e < resumeEpisode\)/,
+  );
   assert.match(cinemetaEpisodes, /combinedWatched\.has\(`\$\{season\}:\$\{number\}`\)/);
 });
 
@@ -84,13 +108,22 @@ test("Nuvio authentication automatically activates account provider and populate
 test("Continue Watching recency preserves remote watched timestamps rather than Date.now()", () => {
   assert.match(resume, /atTimestamp\?: number/);
   assert.match(resume, /t: atTimestamp && atTimestamp > 0 \? atTimestamp : Date\.now\(\)/);
-  assert.match(nuvioPlayback, /saveResumeMs\(item\._id, offsetMs, undefined, undefined, undefined, pct01, "nuvio", ownerId, remoteT\)/);
-  assert.match(nuvioPlayback, /saveResumeMs\(\s*item\._id,\s*targetOffsetMs,\s*targetSeason,\s*targetEpisode,\s*undefined,\s*pct01,\s*"nuvio",\s*ownerId,\s*remoteT,?\s*\)/);
+  assert.match(
+    nuvioPlayback,
+    /saveResumeMs\(\s*item\._id,\s*offsetMs,\s*undefined,\s*undefined,\s*undefined,\s*pct01,\s*"nuvio",\s*ownerId,\s*remoteT,?\s*\)/,
+  );
+  assert.match(
+    nuvioPlayback,
+    /saveResumeMs\(\s*item\._id,\s*targetOffsetMs,\s*targetSeason,\s*targetEpisode,\s*undefined,\s*pct01,\s*"nuvio",\s*ownerId,\s*remoteT,?\s*\)/,
+  );
   assert.match(externalCw, /void refreshExternalCw\(true\)/);
 });
 
 test("Nuvio core avatars are preloaded and picker handles missing/failed images gracefully", () => {
-  assert.match(nuvioProfiles, /import DEFAULT_AVATAR_CATALOG from "\.\/nuvio-avatar-catalog-data\.json"/);
+  assert.match(
+    nuvioProfiles,
+    /import DEFAULT_AVATAR_CATALOG from "\.\/nuvio-avatar-catalog-data\.json"/,
+  );
   assert.match(nuvioProfiles, /localStorage\.getItem\(AVATAR_CATALOG_STORAGE_KEY\)/);
   assert.match(pickerModal, /NuvioAvatarDisplay/);
   assert.match(pickerModal, /onError=\{\(\) => setError\(true\)\}/);
@@ -103,8 +136,14 @@ const profilesModule = read("../src/lib/profiles.tsx");
 const accountMenuParts = read("../src/chrome/account-menu/account-menu-parts.tsx");
 
 test("isStremioActivePrimary and activeProfileIsPrimary evaluate primary status accurately", () => {
-  assert.match(activeProfileId, /activeProfile\.id === primary\.id \|\| activeProfile\.isPrimary === true/);
-  assert.match(activeProfileId, /if \(isNuvioProviderActive\(\)\) \{\s*return getNuvioActiveSlot\(\) === 1;\s*\}/);
+  assert.match(
+    activeProfileId,
+    /activeProfile\.id === primary\.id \|\| activeProfile\.isPrimary === true/,
+  );
+  assert.match(
+    activeProfileId,
+    /if \(isNuvioProviderActive\(\)\) \{\s*return getNuvioActiveSlot\(\) === 1;\s*\}/,
+  );
 });
 
 test("secondary privileges inherit shared settings configured by primary profile", () => {
@@ -113,7 +152,10 @@ test("secondary privileges inherit shared settings configured by primary profile
 
 test("SignedOutHero adapts to active provider with Nuvio branding and link", () => {
   assert.match(signedOutHero, /isNuvio \? nuvioLogo : stremioLogo/);
-  assert.match(signedOutHero, /isNuvio \? t\("Bringing your Nuvio library\?"\) : t\("Bringing your Stremio library\?"\)/);
+  assert.match(
+    signedOutHero,
+    /isNuvio \? t\("Bringing your Nuvio library\?"\) : t\("Bringing your Stremio library\?"\)/,
+  );
   assert.match(signedOutHero, /settingsAnchor\(isNuvio \? "Nuvio" : "Stremio"\)/);
 });
 

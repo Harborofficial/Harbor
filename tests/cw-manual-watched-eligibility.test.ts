@@ -121,5 +121,8 @@ test("stremio keeps the series progression branch the tray tests pin", () => {
     source,
     /i\.type === "series" &&\s*i\.state\.season != null &&\s*i\.state\.episode != null &&\s*\(i\.state\.flaggedWatched \?\? 0\) === 0/,
   );
-  assert.match(source, /manualWatchedState\(i\._id, i\.state\.season, i\.state\.episode\) === true/);
+  assert.match(
+    source,
+    /manualWatchedState\(i\._id, i\.state\.season, i\.state\.episode\) === true/,
+  );
 });

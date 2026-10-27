@@ -51,7 +51,12 @@ export function NuvioCard() {
             {t("Connect Nuvio")}
           </SButton>
         </SettingRow>
-        {showAuth && <NuvioAuthModal onClose={() => setShowAuth(false)} onSuccess={activateNuvioAccountProvider} />}
+        {showAuth && (
+          <NuvioAuthModal
+            onClose={() => setShowAuth(false)}
+            onSuccess={activateNuvioAccountProvider}
+          />
+        )}
       </>
     );
   }
@@ -63,7 +68,7 @@ export function NuvioCard() {
         label={t("Connected to Nuvio")}
         desc={
           <span className="font-mono text-ink" dir="ltr">
-            {reveal ? (user?.email || session.user.id) : maskedEmail}
+            {reveal ? user?.email || session.user.id : maskedEmail}
           </span>
         }
       >
@@ -94,7 +99,12 @@ export function NuvioCard() {
         </SButton>
       </SettingRow>
 
-      {showAuth && <NuvioAuthModal onClose={() => setShowAuth(false)} onSuccess={activateNuvioAccountProvider} />}
+      {showAuth && (
+        <NuvioAuthModal
+          onClose={() => setShowAuth(false)}
+          onSuccess={activateNuvioAccountProvider}
+        />
+      )}
     </>
   );
 }

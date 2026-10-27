@@ -54,14 +54,9 @@ if (typeof window === "undefined") {
   };
 }
 
-const {
-  resolveNuvioAvatar,
-  updateNuvioProfile,
-} = await import("../src/lib/nuvio/nuvio-profiles.ts");
-const {
-  saveNuvioState,
-  loadNuvioState,
-} = await import("../src/lib/nuvio/nuvio-client.ts");
+const { resolveNuvioAvatar, updateNuvioProfile } =
+  await import("../src/lib/nuvio/nuvio-profiles.ts");
+const { saveNuvioState, loadNuvioState } = await import("../src/lib/nuvio/nuvio-client.ts");
 import type { NuvioProfile } from "../src/lib/nuvio/nuvio-types.ts";
 
 test("Nuvio profile avatar resolution and persistence", async (t) => {
@@ -79,54 +74,60 @@ test("Nuvio profile avatar resolution and persistence", async (t) => {
     assert.equal(resolveNuvioAvatar(profile), "https://files.catbox.moe/abc123.png");
   });
 
-  await t.test("resolveNuvioAvatar falls back to local-avatar when cloud avatar_url is missing", () => {
-    localStorage.setItem("harbor.nuvio.local-avatar.2", "data:image/webp;base64,AAAA");
-    const profile: NuvioProfile = {
-      id: "test-2",
-      user_id: "u1",
-      profile_index: 2,
-      name: "Profile 2",
-      avatar_url: null,
-      avatar_id: null,
-      created_at: new Date().toISOString(),
-    };
-    assert.equal(resolveNuvioAvatar(profile), "data:image/webp;base64,AAAA");
-  });
-
-  await t.test("updateNuvioProfile optimistically saves avatar and updates local state", async () => {
-    const initialProfiles: NuvioProfile[] = [
-      {
-        id: "p1",
+  await t.test(
+    "resolveNuvioAvatar falls back to local-avatar when cloud avatar_url is missing",
+    () => {
+      localStorage.setItem("harbor.nuvio.local-avatar.2", "data:image/webp;base64,AAAA");
+      const profile: NuvioProfile = {
+        id: "test-2",
         user_id: "u1",
-        profile_index: 1,
-        name: "Alpha",
-        avatar_color_hex: "#1E88E5",
+        profile_index: 2,
+        name: "Profile 2",
         avatar_url: null,
+        avatar_id: null,
         created_at: new Date().toISOString(),
-      },
-    ];
-    saveNuvioState({
-      session: {
-        access_token: "mock-token",
-        refresh_token: "mock-refresh",
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        token_type: "bearer",
-        user: { id: "u1" },
-      },
-      profiles: initialProfiles,
-      activeProfileIndex: 1,
-      lastSyncedAt: Date.now(),
-    });
+      };
+      assert.equal(resolveNuvioAvatar(profile), "data:image/webp;base64,AAAA");
+    },
+  );
 
-    // Update avatar with an HTTP CDN URL
-    const newAvatar = "https://example.com/avatar.png";
-    await updateNuvioProfile(1, { avatar_url: newAvatar });
+  await t.test(
+    "updateNuvioProfile optimistically saves avatar and updates local state",
+    async () => {
+      const initialProfiles: NuvioProfile[] = [
+        {
+          id: "p1",
+          user_id: "u1",
+          profile_index: 1,
+          name: "Alpha",
+          avatar_color_hex: "#1E88E5",
+          avatar_url: null,
+          created_at: new Date().toISOString(),
+        },
+      ];
+      saveNuvioState({
+        session: {
+          access_token: "mock-token",
+          refresh_token: "mock-refresh",
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+          token_type: "bearer",
+          user: { id: "u1" },
+        },
+        profiles: initialProfiles,
+        activeProfileIndex: 1,
+        lastSyncedAt: Date.now(),
+      });
 
-    const updated = loadNuvioState().profiles.find((p) => p.profile_index === 1);
-    assert.equal(updated?.avatar_url, newAvatar);
-    assert.equal(localStorage.getItem("harbor.nuvio.local-avatar.1"), newAvatar);
-    assert.equal(resolveNuvioAvatar(updated), newAvatar);
-  });
+      // Update avatar with an HTTP CDN URL
+      const newAvatar = "https://example.com/avatar.png";
+      await updateNuvioProfile(1, { avatar_url: newAvatar });
+
+      const updated = loadNuvioState().profiles.find((p) => p.profile_index === 1);
+      assert.equal(updated?.avatar_url, newAvatar);
+      assert.equal(localStorage.getItem("harbor.nuvio.local-avatar.1"), newAvatar);
+      assert.equal(resolveNuvioAvatar(updated), newAvatar);
+    },
+  );
 
   await t.test("Clearing avatar removes it from state and clears local fallback", async () => {
     await updateNuvioProfile(1, { avatar_url: null });
@@ -139,7 +140,10 @@ test("Nuvio profile avatar resolution and persistence", async (t) => {
 
 test("Stremio primary profile avatar sync with settings", async () => {
   localStorage.clear();
-  localStorage.setItem("harbor.settings", JSON.stringify({ harborAvatar: "https://old.avatar.png" }));
+  localStorage.setItem(
+    "harbor.settings",
+    JSON.stringify({ harborAvatar: "https://old.avatar.png" }),
+  );
 
   // Simulate updateProfile logic in Stremio mode
   const raw = localStorage.getItem("harbor.settings");
@@ -149,6 +153,6 @@ test("Stremio primary profile avatar sync with settings", async () => {
 
   assert.equal(
     JSON.parse(localStorage.getItem("harbor.settings")!).harborAvatar,
-    "https://new.stremio.avatar.png"
+    "https://new.stremio.avatar.png",
   );
 });

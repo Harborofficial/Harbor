@@ -59,7 +59,8 @@ if (typeof window === "undefined") {
 
 test("Player Nuvio Enhancements", async (t) => {
   const { isNuvioProviderActive } = await import("../src/lib/nuvio/nuvio-client");
-  const { readCachedWatchProgress, writeCachedWatchProgress } = await import("../src/lib/nuvio/nuvio-sync");
+  const { readCachedWatchProgress, writeCachedWatchProgress } =
+    await import("../src/lib/nuvio/nuvio-sync");
   const { gatherSubtitleAddons } = await import("../src/lib/subtitles/addon-source");
 
   await t.test("Scrobbler isolation: isNuvioProviderActive suppresses stremio cloud writes", () => {
@@ -96,9 +97,8 @@ test("Player Nuvio Enhancements", async (t) => {
     const set = new Set<string>();
     for (const r of records) {
       if (r.content_id === "tt1234567" && r.season != null && r.episode != null) {
-        const ratio = (r.progress_seconds && r.duration_seconds)
-          ? r.progress_seconds / r.duration_seconds
-          : 0;
+        const ratio =
+          r.progress_seconds && r.duration_seconds ? r.progress_seconds / r.duration_seconds : 0;
         if (ratio >= 0.85) {
           set.add(`${r.season}:${r.episode}`);
         }
@@ -109,12 +109,15 @@ test("Player Nuvio Enhancements", async (t) => {
     assert.strictEqual(set.has("1:2"), false);
   });
 
-  await t.test("Subtitle Addons isolation: gatherSubtitleAddons separates nuvio and stremio cache keys", async () => {
-    localStorage.setItem("harbor.account-provider", "nuvio");
-    mockStorage.set("harbor.settings", JSON.stringify({ nuvioAddonMode: "separate" }));
+  await t.test(
+    "Subtitle Addons isolation: gatherSubtitleAddons separates nuvio and stremio cache keys",
+    async () => {
+      localStorage.setItem("harbor.account-provider", "nuvio");
+      mockStorage.set("harbor.settings", JSON.stringify({ nuvioAddonMode: "separate" }));
 
-    // Test that gatherSubtitleAddons handles nuvio mode gracefully
-    const addons = await gatherSubtitleAddons("stremio-key");
-    assert.ok(Array.isArray(addons));
-  });
+      // Test that gatherSubtitleAddons handles nuvio mode gracefully
+      const addons = await gatherSubtitleAddons("stremio-key");
+      assert.ok(Array.isArray(addons));
+    },
+  );
 });

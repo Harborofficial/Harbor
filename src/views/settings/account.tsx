@@ -16,7 +16,6 @@ import { HarborAccountPanel } from "@/views/account/harbor-account-panel";
 import { NuvioCard } from "./account/nuvio-card";
 import { NuvioSyncedAddonsCard } from "./account/nuvio-synced-addons-card";
 
-
 import { AccountProviderPanel } from "./account/account-provider-panel";
 import { NuvioProfilesTab } from "./account/nuvio-profiles-tab";
 
@@ -71,9 +70,11 @@ export function AccountStub() {
     };
   }, []);
 
-  const isPrimary = activeProfileIsPrimary() || (isNuvio
-    ? Number(nuvioState.activeProfileIndex ?? 1) === 1
-    : isStremioActivePrimary(activeProfile, profiles));
+  const isPrimary =
+    activeProfileIsPrimary() ||
+    (isNuvio
+      ? Number(nuvioState.activeProfileIndex ?? 1) === 1
+      : isStremioActivePrimary(activeProfile, profiles));
   const tabs = [
     { id: "you" as const, label: t("Your profile") },
     { id: "profiles" as const, label: t("Profiles") },
@@ -87,20 +88,25 @@ export function AccountStub() {
   const [tab, setTab] = useState<Tab>("you");
 
   useEffect(() => {
-    const liveIsPrimary = activeProfileIsPrimary() || (isNuvio
-      ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
-      : isStremioActivePrimary(activeProfile, profiles));
+    const liveIsPrimary =
+      activeProfileIsPrimary() ||
+      (isNuvio
+        ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
+        : isStremioActivePrimary(activeProfile, profiles));
     if (liveIsPrimary) return;
     const currentPrivs = getSecondaryPrivileges(settings, isNuvio);
     if (tab === "provider" && !currentPrivs.canViewAccountProvider) setTab("you");
     if (tab === "harbor" && !currentPrivs.canViewHarborAccount) setTab("you");
-    if ((tab === "stremio" || tab === "nuvio") && !currentPrivs.canViewProviderAccount) setTab("you");
+    if ((tab === "stremio" || tab === "nuvio") && !currentPrivs.canViewProviderAccount)
+      setTab("you");
   }, [tab, isPrimary, isNuvio, forceTick]);
 
   const handleTabSelect = (next: Tab) => {
-    const liveIsPrimary = activeProfileIsPrimary() || (isNuvio
-      ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
-      : isStremioActivePrimary(activeProfile, profiles));
+    const liveIsPrimary =
+      activeProfileIsPrimary() ||
+      (isNuvio
+        ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
+        : isStremioActivePrimary(activeProfile, profiles));
 
     if (liveIsPrimary) {
       setTab(next);

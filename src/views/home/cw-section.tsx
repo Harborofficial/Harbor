@@ -38,10 +38,7 @@ export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss, loa
 
   const authModal = showAuth ? (
     isNuvio ? (
-      <NuvioAuthModal
-        onClose={() => setShowAuth(false)}
-        onSuccess={activateNuvioAccountProvider}
-      />
+      <NuvioAuthModal onClose={() => setShowAuth(false)} onSuccess={activateNuvioAccountProvider} />
     ) : (
       <AuthModal onClose={() => setShowAuth(false)} />
     )
@@ -50,13 +47,12 @@ export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss, loa
   if (loading && items.length === 0) {
     return (
       <div className="flex flex-col gap-4 animate-in fade-in duration-200">
-        <h3 className="text-[17px] font-medium tracking-tight text-ink">{t("Continue Watching")}</h3>
+        <h3 className="text-[17px] font-medium tracking-tight text-ink">
+          {t("Continue Watching")}
+        </h3>
         <div className="flex gap-4 overflow-hidden py-1">
           {Array.from({ length: 4 }).map((_, idx) => (
-            <div
-              key={idx}
-              className="flex w-[260px] shrink-0 flex-col gap-2.5 animate-pulse"
-            >
+            <div key={idx} className="flex w-[260px] shrink-0 flex-col gap-2.5 animate-pulse">
               <div className="aspect-[16/9] w-full rounded-xl bg-elevated/40" />
               <div className="h-4 w-3/4 rounded bg-elevated/30" />
               <div className="h-3 w-1/2 rounded bg-elevated/20" />

@@ -157,15 +157,27 @@ test("dismissing a mapped entry also covers its alias", () => {
   };
   const restored = harness(h.data.get("harbor.cw.dismissed.v1"));
   assert.equal(restored.api.isCwDismissed(alias), true);
-  assert.equal(restored.api.isCwDismissed({
-    ...alias, state: { ...alias.state!, timeOffset: 205 },
-  }), true);
-  assert.equal(restored.api.isCwDismissed({
-    ...alias, state: { ...alias.state!, timeOffset: 300 },
-  }), false);
-  assert.equal(restored.api.isCwDismissed({
-    ...alias, state: { ...alias.state!, episode: 3, video_id: "tmdb:tv:1396:1:3" },
-  }), false);
+  assert.equal(
+    restored.api.isCwDismissed({
+      ...alias,
+      state: { ...alias.state!, timeOffset: 205 },
+    }),
+    true,
+  );
+  assert.equal(
+    restored.api.isCwDismissed({
+      ...alias,
+      state: { ...alias.state!, timeOffset: 300 },
+    }),
+    false,
+  );
+  assert.equal(
+    restored.api.isCwDismissed({
+      ...alias,
+      state: { ...alias.state!, episode: 3, video_id: "tmdb:tv:1396:1:3" },
+    }),
+    false,
+  );
 });
 
 test("a mapped movie dismissal also lifts when its alias gains progress", () => {
@@ -180,9 +192,13 @@ test("a mapped movie dismissal also lifts when its alias gains progress", () => 
   h.api.dismissCw(mapped, null);
   const alias: LibraryItem = { ...mapped, _id: "tmdb:movie:603", altIds: undefined };
   assert.equal(h.api.isCwDismissed(alias), true);
-  assert.equal(h.api.isCwDismissed({
-    ...alias, state: { ...alias.state!, timeOffset: 300 },
-  }), false);
+  assert.equal(
+    h.api.isCwDismissed({
+      ...alias,
+      state: { ...alias.state!, timeOffset: 300 },
+    }),
+    false,
+  );
 });
 
 test("fresh local resume overrides stale cloud recency for the same episode", () => {

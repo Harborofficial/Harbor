@@ -293,12 +293,7 @@ export function collectAllNuvioItemIds(): Set<string> {
               const val = parsed[k];
               if (val && typeof val === "object") {
                 const id =
-                  val._id ||
-                  val.id ||
-                  val.contentId ||
-                  val.imdb_id ||
-                  val.imdbId ||
-                  val.content_id;
+                  val._id || val.id || val.contentId || val.imdb_id || val.imdbId || val.content_id;
                 if (typeof id === "string" && id.length > 0) ids.add(id);
               }
             }

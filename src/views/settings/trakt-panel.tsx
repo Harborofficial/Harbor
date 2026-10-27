@@ -9,11 +9,7 @@ import { useTrakt } from "@/lib/trakt/provider";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import traktLogo from "@/assets/trakt.svg";
-import {
-  ModalButton,
-  ROW_ACTION_DANGER,
-  SettingsModal,
-} from "./kit";
+import { ModalButton, ROW_ACTION_DANGER, SettingsModal } from "./kit";
 import { TrackerIdentity } from "./tracker-identity";
 import { WatchlistSync } from "./trakt-panel/watchlist-sync";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
@@ -76,7 +72,9 @@ export function TraktPanel() {
           <TrackerConnect
             service="Trakt"
             logo={traktLogo}
-            description={t("Track what you watch, bring in your watchlist, and see recommendations on Home. Connect with a short code at trakt.tv.")}
+            description={t(
+              "Track what you watch, bring in your watchlist, and see recommendations on Home. Connect with a short code at trakt.tv.",
+            )}
             onConnect={() => setModalOpen(true)}
             website="https://trakt.tv"
           />
@@ -142,7 +140,9 @@ export function TraktPanel() {
       {isConnected && (
         <Section
           title={t("Move your watchlist")}
-          subtitle={t("Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor.")}
+          subtitle={t(
+            "Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor.",
+          )}
         >
           <WatchlistSync />
         </Section>
@@ -154,7 +154,9 @@ export function TraktPanel() {
       >
         <ToggleRow
           label={t("Show comments on detail pages")}
-          sub={t("Adds a comments section to movie, show, and episode pages. No Trakt account needed to read them.")}
+          sub={t(
+            "Adds a comments section to movie, show, and episode pages. No Trakt account needed to read them.",
+          )}
           value={settings.showTraktComments === true}
           onChange={(on) => update({ showTraktComments: on })}
         />
@@ -173,7 +175,10 @@ export function TraktPanel() {
   );
 }
 
-function sessionAge(t: (key: string, vars?: Record<string, string | number>) => string, createdAt?: number): string {
+function sessionAge(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  createdAt?: number,
+): string {
   if (!createdAt) return "";
   const days = Math.floor((Date.now() / 1000 - createdAt) / 86400);
   if (days < 1) return t("today");

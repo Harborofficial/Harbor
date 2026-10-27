@@ -190,9 +190,7 @@ export function CinemetaEpisodes({
 
   const watchedAt = (season: number, number: number): boolean => {
     const st = manualWatchedState(meta.id, season, number);
-    return (
-      st === true || (st === undefined && combinedWatched.has(`${season}:${number}`))
-    );
+    return st === true || (st === undefined && combinedWatched.has(`${season}:${number}`));
   };
 
   const progressFor = (g: GridEpisode): Progress => ({

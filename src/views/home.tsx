@@ -42,10 +42,7 @@ import { isAnimeRow } from "@/views/anime";
 import { buildArabicHomeRows } from "@/lib/arabic/home-rows";
 import { buildRussianHomeRows } from "@/lib/russian/home-rows";
 import { resolveAddonOrigin } from "@/lib/nuvio/nuvio-addon-registry";
-import {
-  isNuvioProviderActive,
-  reconcileNuvioWatched,
-} from "@/lib/nuvio/nuvio-sync";
+import { isNuvioProviderActive, reconcileNuvioWatched } from "@/lib/nuvio/nuvio-sync";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { useAuth } from "@/lib/auth";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
@@ -145,7 +142,9 @@ export function Home({
   const { settings, update } = useSettings();
   const isNuvioProvider = settings.accountProvider === "nuvio";
   const hideSharedCw =
-    !isNuvioProvider && settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+    !isNuvioProvider &&
+    settings.cwPerProfile &&
+    anyProfileSharesStremioWith(activeProfile, profiles);
   const heroFull = settings.heroFull;
   const contentDrag = useContentDrag();
   const t = useT();
@@ -325,14 +324,14 @@ export function Home({
         classicSource === "all"
           ? addons
           : classicSource === "nuvio"
-          ? addons.filter((a) => {
-              const o = resolveAddonOrigin(a.more?.base || a.key);
-              return o === "nuvio" || o === "both";
-            })
-          : addons.filter((a) => {
-              const o = resolveAddonOrigin(a.more?.base || a.key);
-              return o === "stremio" || o === "both";
-            });
+            ? addons.filter((a) => {
+                const o = resolveAddonOrigin(a.more?.base || a.key);
+                return o === "nuvio" || o === "both";
+              })
+            : addons.filter((a) => {
+                const o = resolveAddonOrigin(a.more?.base || a.key);
+                return o === "stremio" || o === "both";
+              });
       const usable = isClassic
         ? classicFiltered
         : addons.filter((a) => !isAnimeRow(a) && !isStreamingServiceRow(a.name));
@@ -755,14 +754,8 @@ export function Home({
           ];
     const eligible = (
       isNuvioProvider
-        ? [
-            ...cwBase,
-            ...localCwItems.map((i) => ({ ...i, external: "nuvio" as const })),
-          ]
-        : [
-            ...cwBase,
-            ...localCwItems.filter((i) => i.external !== "nuvio"),
-          ]
+        ? [...cwBase, ...localCwItems.map((i) => ({ ...i, external: "nuvio" as const }))]
+        : [...cwBase, ...localCwItems.filter((i) => i.external !== "nuvio")]
     )
       .filter(
         (i) =>
@@ -788,7 +781,10 @@ export function Home({
                 isCwMember(m) &&
                 !isCwDismissed(m) &&
                 (!isNuvioProvider ? m.external !== "nuvio" : true) &&
-                !((settings.animeOnlyInAnimeRoom || settings.hideContent.anime) && isAnimeCwItem(m)),
+                !(
+                  (settings.animeOnlyInAnimeRoom || settings.hideContent.anime) &&
+                  isAnimeCwItem(m)
+                ),
             ),
           ]
         : eligible;
@@ -956,7 +952,15 @@ export function Home({
     if (usable.length === 0) return pool;
     const overrideIds = new Set(usable.map((i) => i._id));
     return [...pool.filter((i) => !overrideIds.has(i._id)), ...usable];
-  }, [items, localCwItems, manualWatchedVer, isNuvioProvider, externalCw, settings.cwSources, hideSharedCw]);
+  }, [
+    items,
+    localCwItems,
+    manualWatchedVer,
+    isNuvioProvider,
+    externalCw,
+    settings.cwSources,
+    hideSharedCw,
+  ]);
   useEffect(() => {
     if (!anilistConnected) {
       setAnilistWatchedMap((prev) => (prev.size ? new Map() : prev));
@@ -1479,7 +1483,7 @@ export function Home({
         {!cwHidden && (
           <Profiled id="home.continue-watching">
             <CWSection
-              signedIn={isNuvioProvider ? (isNuvioProviderActive() && isNuvioSignedIn()) : !!authKey}
+              signedIn={isNuvioProvider ? isNuvioProviderActive() && isNuvioSignedIn() : !!authKey}
               isNuvio={isNuvioProvider}
               items={cwItems}
               watchedSet={traktWatched}

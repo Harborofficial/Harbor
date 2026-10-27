@@ -125,7 +125,7 @@ export function EditorView({
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const [nuvioState] = useState(() => loadNuvioState());
   const editing = mode.kind === "edit" ? mode.profile : null;
-  const nuvioSlot = editing ? (parseInt(editing.id.replace(/\D/g, ""), 10) || null) : null;
+  const nuvioSlot = editing ? parseInt(editing.id.replace(/\D/g, ""), 10) || null : null;
   const activeNuvioSlot = nuvioState.activeProfileIndex || 1;
   const primary = profiles.find((p) => p.isPrimary);
   const transferTargets = profiles.filter((p) => !p.isPrimary && !p.kid);
@@ -133,10 +133,16 @@ export function EditorView({
     const slot = parseInt(p.id.replace(/\D/g, ""), 10);
     return slot !== 1 && !p.kid;
   });
-  const activeIsPrimary = isNuvio ? activeNuvioSlot === 1 : isStremioActivePrimary(activeProfile, profiles);
-  const isOwnProfile = isNuvio ? (nuvioSlot !== null && nuvioSlot === activeNuvioSlot) : (editing?.id === activeProfile?.id);
+  const activeIsPrimary = isNuvio
+    ? activeNuvioSlot === 1
+    : isStremioActivePrimary(activeProfile, profiles);
+  const isOwnProfile = isNuvio
+    ? nuvioSlot !== null && nuvioSlot === activeNuvioSlot
+    : editing?.id === activeProfile?.id;
   const canEditAdvanced = activeIsPrimary;
-  const canCreate = isNuvio ? (activeIsPrimary || getSecondaryPrivileges(settings, true).canAddProfiles) : (activeIsPrimary || getSecondaryPrivileges(settings, false).canAddProfiles);
+  const canCreate = isNuvio
+    ? activeIsPrimary || getSecondaryPrivileges(settings, true).canAddProfiles
+    : activeIsPrimary || getSecondaryPrivileges(settings, false).canAddProfiles;
   const [, setPrivVersion] = useState(0);
   useEffect(() => {
     const onSync = () => setPrivVersion((v) => v + 1);
@@ -208,18 +214,24 @@ export function EditorView({
     const onBack = (e: KeyboardEvent) => {
       if (e.defaultPrevented || !isBackKey(e)) return;
       const target = e.target as HTMLElement | null;
-      if (!target?.closest('[data-profile-picker]') || target.closest('[data-search-editing]')) return;
+      if (!target?.closest("[data-profile-picker]") || target.closest("[data-search-editing]"))
+        return;
       e.preventDefault();
       e.stopPropagation();
-      setSubView({ kind: subView.kind === "security" || subView.kind === "pin-delete" ? "main" : "security" });
+      setSubView({
+        kind: subView.kind === "security" || subView.kind === "pin-delete" ? "main" : "security",
+      });
     };
     document.addEventListener("keydown", onBack);
     return () => document.removeEventListener("keydown", onBack);
   }, [subView.kind]);
 
   const trimmed = name.trim();
-  const canSave = trimmed.length > 0 && (!draftKid || !draftParentPin || draftParentPin.length === 4);
-  const isPrimary = isNuvio ? (nuvioSlot === 1 || (!editing && nuvioState.profiles.length === 0)) : (editing?.isPrimary === true);
+  const canSave =
+    trimmed.length > 0 && (!draftKid || !draftParentPin || draftParentPin.length === 4);
+  const isPrimary = isNuvio
+    ? nuvioSlot === 1 || (!editing && nuvioState.profiles.length === 0)
+    : editing?.isPrimary === true;
   const canShare = !isPrimary && !!primary && primary.id !== editing?.id;
   const locked = editing ? !!editing.passwordHash : draftPin != null;
   const isCreate = mode.kind === "create";
@@ -407,12 +419,14 @@ export function EditorView({
       }
       if (isNuvio) {
         let finalAvatarUrl = avatar;
-        const targetSlot = nuvioSlot ?? (() => {
-          const existingIndices = new Set(loadNuvioState().profiles.map((p) => p.profile_index));
-          let next = 1;
-          while (next <= 6 && existingIndices.has(next)) next++;
-          return next;
-        })();
+        const targetSlot =
+          nuvioSlot ??
+          (() => {
+            const existingIndices = new Set(loadNuvioState().profiles.map((p) => p.profile_index));
+            let next = 1;
+            while (next <= 6 && existingIndices.has(next)) next++;
+            return next;
+          })();
 
         if (avatar === null) {
           finalAvatarUrl = null;
@@ -426,7 +440,10 @@ export function EditorView({
           } catch (err) {
             console.warn("[nuvio] avatar upload failed", err);
           }
-        } else if (finalAvatarUrl && (finalAvatarUrl.startsWith("data:") || finalAvatarUrl.startsWith("/"))) {
+        } else if (
+          finalAvatarUrl &&
+          (finalAvatarUrl.startsWith("data:") || finalAvatarUrl.startsWith("/"))
+        ) {
           try {
             const uploaded = await uploadNuvioCustomAvatar(finalAvatarUrl, targetSlot);
             if (uploaded) finalAvatarUrl = uploaded;
@@ -450,7 +467,10 @@ export function EditorView({
             await setNuvioPin(targetSlot, draftPin);
           }
           if (anyTabLocked(draftLockedTabs)) {
-            localStorage.setItem(`harbor.nuvio.locked-tabs.${targetSlot}`, JSON.stringify(draftLockedTabs));
+            localStorage.setItem(
+              `harbor.nuvio.locked-tabs.${targetSlot}`,
+              JSON.stringify(draftLockedTabs),
+            );
           }
           if (kidToSave) {
             localStorage.setItem(`harbor.nuvio.kid.${targetSlot}`, JSON.stringify(kidToSave));
@@ -467,7 +487,10 @@ export function EditorView({
             void pushAvatarToEcosystem(finalAvatarUrl);
           }
           if (anyTabLocked(draftLockedTabs)) {
-            localStorage.setItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`, JSON.stringify(draftLockedTabs));
+            localStorage.setItem(
+              `harbor.nuvio.locked-tabs.${nuvioSlot}`,
+              JSON.stringify(draftLockedTabs),
+            );
           } else {
             localStorage.removeItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`);
           }
@@ -490,45 +513,45 @@ export function EditorView({
         return;
       }
 
-    if (editing) {
-      updateProfile(editing.id, {
-        name: trimmed,
-        avatar,
-        color,
-        kid: kidToSave,
-        ...(canShare ? { shareStremioWith: shareWith } : {}),
-      });
-    } else {
-      const p = createProfile({ name: trimmed, avatar, color, kid: kidToSave });
-      const patch: Parameters<typeof updateProfile>[1] = {};
-      if (canShare && shareWith !== p.shareStremioWith) patch.shareStremioWith = shareWith;
-      if (draftPin) patch.passwordHash = await hashProfilePassword(draftPin);
-      if (anyTabLocked(draftLockedTabs)) patch.lockedTabs = draftLockedTabs;
-      const importList =
-        shareWith === null && primary
-          ? (Object.keys(importSelection) as ImportDomain[]).filter((d) => importSelection[d])
-          : [];
-      if (importList.length > 0 && primary) {
-        importDomains(primary.id, p.id, importList, {
-          addonTransportUrls: importList.includes("addons") ? [...selectedAddons] : null,
-          choices: domainChoices,
+      if (editing) {
+        updateProfile(editing.id, {
+          name: trimmed,
+          avatar,
+          color,
+          kid: kidToSave,
+          ...(canShare ? { shareStremioWith: shareWith } : {}),
         });
-        if (importList.includes("settings")) patch.settingsLinked = false;
-        emitListToast(t("Data copied from {name}", { name: primary.name }));
+      } else {
+        const p = createProfile({ name: trimmed, avatar, color, kid: kidToSave });
+        const patch: Parameters<typeof updateProfile>[1] = {};
+        if (canShare && shareWith !== p.shareStremioWith) patch.shareStremioWith = shareWith;
+        if (draftPin) patch.passwordHash = await hashProfilePassword(draftPin);
+        if (anyTabLocked(draftLockedTabs)) patch.lockedTabs = draftLockedTabs;
+        const importList =
+          shareWith === null && primary
+            ? (Object.keys(importSelection) as ImportDomain[]).filter((d) => importSelection[d])
+            : [];
+        if (importList.length > 0 && primary) {
+          importDomains(primary.id, p.id, importList, {
+            addonTransportUrls: importList.includes("addons") ? [...selectedAddons] : null,
+            choices: domainChoices,
+          });
+          if (importList.includes("settings")) patch.settingsLinked = false;
+          emitListToast(t("Data copied from {name}", { name: primary.name }));
+        }
+        if (Object.keys(patch).length > 0) updateProfile(p.id, patch);
+        // unlocked: the user set this PIN seconds ago in this very form. Without the flag
+        // selectProfile refuses the profile they just created and Save appears to fail.
+        selectProfile(p.id, { unlocked: true });
       }
-      if (Object.keys(patch).length > 0) updateProfile(p.id, patch);
-      // unlocked: the user set this PIN seconds ago in this very form. Without the flag
-      // selectProfile refuses the profile they just created and Save appears to fail.
-      selectProfile(p.id, { unlocked: true });
-    }
-    if (avatarSource && (isOwnProfile || mode.kind === "create")) {
-      update({
-        useAnilistAvatar: avatarSource === "anilist",
-        useTraktAvatar: avatarSource === "trakt",
-        useSimklAvatar: avatarSource === "simkl",
-      });
-    }
-    onDone();
+      if (avatarSource && (isOwnProfile || mode.kind === "create")) {
+        update({
+          useAnilistAvatar: avatarSource === "anilist",
+          useTraktAvatar: avatarSource === "trakt",
+          useSimklAvatar: avatarSource === "simkl",
+        });
+      }
+      onDone();
     } finally {
       setSaving(false);
     }
@@ -614,7 +637,11 @@ export function EditorView({
     );
   }
 
-  if (subView.kind === "pin-delete" && editing && (editing.passwordHash || editing.kid?.parentPinHash)) {
+  if (
+    subView.kind === "pin-delete" &&
+    editing &&
+    (editing.passwordHash || editing.kid?.parentPinHash)
+  ) {
     const targetHash = (editing.passwordHash || editing.kid?.parentPinHash)!;
     return (
       <PinEntry
@@ -637,7 +664,8 @@ export function EditorView({
             return { ok: res.unlocked, message: res.message };
           }
           if (editing.passwordHash) return verifyProfilePassword(pin, targetHash);
-          if (editing.kid?.parentPinHash) return verifyProfilePassword(pin, editing.kid.parentPinHash);
+          if (editing.kid?.parentPinHash)
+            return verifyProfilePassword(pin, editing.kid.parentPinHash);
           return false;
         }}
         onComplete={async () => {
@@ -706,7 +734,10 @@ export function EditorView({
   const showAdvanced = canEditAdvanced || mode.kind === "create";
 
   return (
-    <div data-profile-editor="" className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div
+      data-profile-editor=""
+      className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300"
+    >
       <div className="flex flex-col items-center gap-1">
         <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-ink">
           {editing ? t("Edit {name}", { name: editing.name }) : t("profile.new")}
@@ -726,21 +757,26 @@ export function EditorView({
           <div className="hset-profile-editor-fields flex min-w-0 flex-1 flex-col gap-2.5">
             <label className="flex flex-col gap-2 text-[14px] text-ink-muted">
               {t("Display name")}
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key !== "Enter" || navOwnsFocus(e.currentTarget) || e.currentTarget.hasAttribute("data-search-editing")) return;
-                e.preventDefault();
-                e.stopPropagation();
-                void submit();
-              }}
-              aria-label={t("Display name")}
-              placeholder={t("Display name")}
-              maxLength={32}
-              className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[15.5px] font-medium text-ink outline-none transition-colors focus:border-ink-subtle"
-            />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key !== "Enter" ||
+                    navOwnsFocus(e.currentTarget) ||
+                    e.currentTarget.hasAttribute("data-search-editing")
+                  )
+                    return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  void submit();
+                }}
+                aria-label={t("Display name")}
+                placeholder={t("Display name")}
+                maxLength={32}
+                className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[15.5px] font-medium text-ink outline-none transition-colors focus:border-ink-subtle"
+              />
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -1382,16 +1418,16 @@ function SecurityRow({
               : "bg-canvas/60 text-ink-muted ring-edge-soft"
           }`}
         >
-          {locked ? (
-            <Lock size={14} strokeWidth={2.4} />
-          ) : (
-            <Unlock size={14} strokeWidth={2.2} />
-          )}
+          {locked ? <Lock size={14} strokeWidth={2.4} /> : <Unlock size={14} strokeWidth={2.2} />}
         </span>
         <div className="flex flex-col gap-0.5">
           <span className="text-[16px] font-semibold text-ink">{t("Security")}</span>
           <span className="text-[14px] text-ink-subtle">
-            {canLockTabs ? `${pinLabel} · ${tabsLabel}` : (locked ? t("4-digit PIN is set.") : t("No PIN set."))}
+            {canLockTabs
+              ? `${pinLabel} · ${tabsLabel}`
+              : locked
+                ? t("4-digit PIN is set.")
+                : t("No PIN set.")}
           </span>
         </div>
       </div>

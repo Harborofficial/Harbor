@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  dismissEpisodes,
-  isDismissed,
-  newEpisodesFor,
-  type NewEpisode,
-} from "@/lib/new-episodes";
+import { dismissEpisodes, isDismissed, newEpisodesFor, type NewEpisode } from "@/lib/new-episodes";
 import { useSettings } from "@/lib/settings";
 import { useProfiles } from "@/lib/profiles";
 import { resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
@@ -25,10 +20,7 @@ export function useNewEpisodes(items: LibraryItem[], enabled: boolean) {
   const [dismissedVer, setDismissedVer] = useState(0);
 
   const series = useMemo(
-    () =>
-      items
-        .filter((i) => i.type === "series" && i._id.startsWith("tt"))
-        .slice(0, MAX_SERIES),
+    () => items.filter((i) => i.type === "series" && i._id.startsWith("tt")).slice(0, MAX_SERIES),
     [items],
   );
 
@@ -72,14 +64,20 @@ export function useNewEpisodes(items: LibraryItem[], enabled: boolean) {
     return found.filter((ep) => !isDismissed(ep.key, scopeKey));
   }, [found, dismissedVer, scopeKey]);
 
-  const dismissOne = useCallback((key: string) => {
-    dismissEpisodes([key], scopeKey);
-    setDismissedVer((v) => v + 1);
-  }, [scopeKey]);
+  const dismissOne = useCallback(
+    (key: string) => {
+      dismissEpisodes([key], scopeKey);
+      setDismissedVer((v) => v + 1);
+    },
+    [scopeKey],
+  );
 
   const dismissAll = useCallback(() => {
     setFound((current) => {
-      dismissEpisodes(current.map((ep) => ep.key), scopeKey);
+      dismissEpisodes(
+        current.map((ep) => ep.key),
+        scopeKey,
+      );
       return current;
     });
     setDismissedVer((v) => v + 1);

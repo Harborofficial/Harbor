@@ -207,7 +207,12 @@ export function usePageContextTarget({ includePlayer = false } = {}): ContextMen
     const isNuvioActive = isNuvioProviderActive();
     const isPrimary = activeProfileIsPrimary();
     const canOpen = isNuvioActive ? isNuvioSignedIn() : !!author;
-    if (isPrimary && !kid && !locked && (isNuvioActive || !author?.handle || canOpenProfile(author.handle))) {
+    if (
+      isPrimary &&
+      !kid &&
+      !locked &&
+      (isNuvioActive || !author?.handle || canOpenProfile(author.handle))
+    ) {
       const actor = captureSocialActor();
       rows.push({
         id: "page:my-profile",

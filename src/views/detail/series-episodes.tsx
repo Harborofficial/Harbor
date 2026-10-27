@@ -177,7 +177,18 @@ export function SeriesEpisodes({
     for (const k of manual.watched) s.add(k);
     for (const k of manual.unwatched) s.delete(k);
     return s;
-  }, [stremioWatched, simklWatched, traktWatched, pmdbWatched, meta.id, imdbId, mwVersion, resumeSeason, resumeEpisode, seasons]);
+  }, [
+    stremioWatched,
+    simklWatched,
+    traktWatched,
+    pmdbWatched,
+    meta.id,
+    imdbId,
+    mwVersion,
+    resumeSeason,
+    resumeEpisode,
+    seasons,
+  ]);
   const cache = useRef<Map<string, Episode[]>>(new Map());
 
   const traktKey = imdbId ?? meta.id;

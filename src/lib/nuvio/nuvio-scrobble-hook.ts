@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
 import { isNuvioSignedIn, loadNuvioState } from "./nuvio-client";
-import { isNuvioProviderActive, markWatchedInNuvio, pushWatchProgressToNuvio, resolveNuvioProfileIndex } from "./nuvio-sync";
+import {
+  isNuvioProviderActive,
+  markWatchedInNuvio,
+  pushWatchProgressToNuvio,
+  resolveNuvioProfileIndex,
+} from "./nuvio-sync";
 import { readActiveProfileIdentity } from "@/lib/profiles";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { PlayerSrc } from "@/lib/view";
@@ -43,7 +48,9 @@ export function useNuvioScrobble({
   const getProfileTarget = () => {
     if (isNuvioSignedIn()) {
       const state = loadNuvioState();
-      return typeof state.activeProfileIndex === "number" && state.activeProfileIndex >= 1 && state.activeProfileIndex <= 6
+      return typeof state.activeProfileIndex === "number" &&
+        state.activeProfileIndex >= 1 &&
+        state.activeProfileIndex <= 6
         ? state.activeProfileIndex
         : 1;
     }
@@ -55,7 +62,8 @@ export function useNuvioScrobble({
     if (!isNuvioSignedIn() || !isNuvioProviderActive() || isPushingRef.current) return;
     const currentSnap = snapRef.current;
     const clockPos = getPlaybackPosition();
-    const effectivePos = Number.isFinite(clockPos) && clockPos > 0 ? clockPos : currentSnap.positionSec;
+    const effectivePos =
+      Number.isFinite(clockPos) && clockPos > 0 ? clockPos : currentSnap.positionSec;
     if (currentSnap.durationSec <= 0 || effectivePos < MIN_POSITION_SEC) return;
 
     const currentSrc = srcRef.current;
@@ -117,13 +125,8 @@ export function useNuvioScrobble({
         void markWatchedInNuvio(profileTarget, metaId, effSeason, effEpisode);
       }
 
-
-
-
-
       if (Math.abs(clockPos - lastPushedPosRef.current) >= 2) {
-        void doPush("30s-interval");
-
+        void doPush("30s-interval");
       }
     }, TICK_MS);
 

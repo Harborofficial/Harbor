@@ -50,7 +50,11 @@ function storeKey(kind: keyof typeof PREFIXES): string {
     const scope = nuvioWatchedScope();
     const scopedKey = `${PREFIXES[kind]}${scope}`;
     const slotKey = `${PREFIXES[kind]}nuvio.${getNuvioActiveSlot()}`;
-    if (typeof localStorage !== "undefined" && !localStorage.getItem(scopedKey) && localStorage.getItem(slotKey)) {
+    if (
+      typeof localStorage !== "undefined" &&
+      !localStorage.getItem(scopedKey) &&
+      localStorage.getItem(slotKey)
+    ) {
       return slotKey;
     }
     return scopedKey;
@@ -262,7 +266,12 @@ function stateInSets(
   altIds?: Array<string | null | undefined>,
 ): boolean | undefined {
   const cleanId = metaId.replace(/^(series|movie|tmdb):/, "");
-  const allCandidateIds = new Set<string>([metaId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]);
+  const allCandidateIds = new Set<string>([
+    metaId,
+    cleanId,
+    `tmdb:${cleanId}`,
+    `series:${cleanId}`,
+  ]);
   if (altIds && altIds.length > 0) {
     for (const alt of altIds) {
       if (!alt) continue;
@@ -326,7 +335,11 @@ export function reconcileNuvioWatchedEpisodes(
   let scope = nuvioWatchedScope(slot, accountId);
   let sk = `${PREFIXES.watched}${scope}`;
   let unsk = `${PREFIXES.unwatched}${scope}`;
-  if (scope === "nuvio.v2.unowned" && !localStorage.getItem(sk) && localStorage.getItem(`${PREFIXES.watched}nuvio.${slot}`)) {
+  if (
+    scope === "nuvio.v2.unowned" &&
+    !localStorage.getItem(sk) &&
+    localStorage.getItem(`${PREFIXES.watched}nuvio.${slot}`)
+  ) {
     sk = `${PREFIXES.watched}nuvio.${slot}`;
     unsk = `${PREFIXES.unwatched}nuvio.${slot}`;
   }
@@ -399,7 +412,11 @@ export function reconcileNuvioWatchedEpisodes(
         currentLocalWatched.delete(lKey);
         currentLocalUnwatched.add(lKey);
         changed = true;
-      } else if (cleanShowId && serverShowsWithEpisodes.has(cleanShowId) && !serverEpisodeKeys.has(lKey)) {
+      } else if (
+        cleanShowId &&
+        serverShowsWithEpisodes.has(cleanShowId) &&
+        !serverEpisodeKeys.has(lKey)
+      ) {
         currentLocalWatched.delete(lKey);
         currentLocalUnwatched.add(lKey);
         changed = true;

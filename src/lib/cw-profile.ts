@@ -40,8 +40,10 @@ export function cwProfileScope(ownerId?: string): {
     const shares = profiles.some((p) => p.id !== profileId && source(p) === sharedId);
     const settingsKey =
       active?.settingsLinked === false ? `harbor.settings.${profileId}` : "harbor.settings.shared";
-    const rawSettings = localStorage.getItem(settingsKey) ??
-      localStorage.getItem("harbor.settings.shared") ?? localStorage.getItem("harbor.settings");
+    const rawSettings =
+      localStorage.getItem(settingsKey) ??
+      localStorage.getItem("harbor.settings.shared") ??
+      localStorage.getItem("harbor.settings");
     // Every CW card reads this scope; only parse the settings/roster blobs when changed.
     if (rawSettings !== settingsRaw) {
       privateEnabled = !!JSON.parse(rawSettings ?? "null")?.cwPerProfile;

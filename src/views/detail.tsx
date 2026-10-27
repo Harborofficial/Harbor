@@ -853,13 +853,11 @@ export function DetailView({
       setNuvioEpisodeProgress(null);
     }
     noteLocalImdbId(meta.id, detail?.imdbId);
-    const isNuvioActiveMode = (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
+    const isNuvioActiveMode =
+      (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
     if (isNuvioActiveMode) {
       let cancelled = false;
-      Promise.all([
-        pullWatchProgressFromNuvio(),
-        pullWatchedItemsFromNuvio(),
-      ])
+      Promise.all([pullWatchProgressFromNuvio(), pullWatchedItemsFromNuvio()])
         .then(([progressItems, watchedItems]) => {
           if (cancelled) return;
           const safeWatchedItems = watchedItems || [];
@@ -881,17 +879,11 @@ export function DetailView({
 
           const watchedKeys = new Set<string>();
           for (const w of safeWatchedItems) {
-            if (
-              targetIds.has(w.content_id) &&
-              w.season != null &&
-              w.episode != null
-            ) {
+            if (targetIds.has(w.content_id) && w.season != null && w.episode != null) {
               watchedKeys.add(`${w.season}:${w.episode}`);
             }
           }
-          const matches = progressItems.filter(
-            (p) => targetIds.has(p.content_id),
-          );
+          const matches = progressItems.filter((p) => targetIds.has(p.content_id));
           for (const m of matches) {
             if (m.season != null && m.episode != null && m.season >= 1 && m.episode >= 1) {
               const dur = m.duration_seconds || 1;
@@ -947,12 +939,21 @@ export function DetailView({
               const isFinished = latest.progress_seconds > dur * 0.9;
               if (isFinished) {
                 const curSeasonObj = detail?.seasons?.find((s) => s.seasonNumber === latest.season);
-                const hasSeasonBoundary = curSeasonObj && typeof curSeasonObj.episodeCount === "number" && curSeasonObj.episodeCount > 0;
+                const hasSeasonBoundary =
+                  curSeasonObj &&
+                  typeof curSeasonObj.episodeCount === "number" &&
+                  curSeasonObj.episodeCount > 0;
                 let nextSeason = latest.season;
                 let nextEpisode = latest.episode + 1;
 
-                if (hasSeasonBoundary && latest.season != null && latest.episode >= curSeasonObj.episodeCount) {
-                  const nextSeasonObj = detail?.seasons?.find((s) => s.seasonNumber === latest.season! + 1);
+                if (
+                  hasSeasonBoundary &&
+                  latest.season != null &&
+                  latest.episode >= curSeasonObj.episodeCount
+                ) {
+                  const nextSeasonObj = detail?.seasons?.find(
+                    (s) => s.seasonNumber === latest.season! + 1,
+                  );
                   if (nextSeasonObj) {
                     nextSeason = nextSeasonObj.seasonNumber;
                     nextEpisode = 1;
@@ -964,7 +965,8 @@ export function DetailView({
                 );
                 if (
                   immediateInProgress &&
-                  (immediateInProgress.progress_seconds || 0) < (immediateInProgress.duration_seconds || 1) * 0.9
+                  (immediateInProgress.progress_seconds || 0) <
+                    (immediateInProgress.duration_seconds || 1) * 0.9
                 ) {
                   latest = immediateInProgress;
                 } else {
@@ -1019,11 +1021,20 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [authKey, meta.id, detail?.imdbId, detail?.id, settings.accountProvider, profileTick, nuvioWatchedTick]);
+  }, [
+    authKey,
+    meta.id,
+    detail?.imdbId,
+    detail?.id,
+    settings.accountProvider,
+    profileTick,
+    nuvioWatchedTick,
+  ]);
 
   useEffect(() => {
     let cancelled = false;
-    const isNuvioActiveMode = (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
+    const isNuvioActiveMode =
+      (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
     if (isNuvioActiveMode) return;
     decodeWatchedEpisodes(libraryItem?.state?.watched, cinemetaFull?.videos)
       .then((keys) => {
@@ -1033,7 +1044,14 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [libraryItem?.state?.watched, cinemetaFull?.videos, settings.accountProvider, nuvioWatchedTick, profileTick, meta.id]);
+  }, [
+    libraryItem?.state?.watched,
+    cinemetaFull?.videos,
+    settings.accountProvider,
+    nuvioWatchedTick,
+    profileTick,
+    meta.id,
+  ]);
 
   useEffect(() => {
     if (!libraryItem?.state) return;
@@ -1555,7 +1573,8 @@ export function DetailView({
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const watchedMark =
     meta.type === "movie" &&
-    (isMovieWatchedLocal(meta.id, [detail?.imdbId]) || (!isNuvio && stremioMovieWatched(libraryItem)));
+    (isMovieWatchedLocal(meta.id, [detail?.imdbId]) ||
+      (!isNuvio && stremioMovieWatched(libraryItem)));
   const markThisMovieWatched = () => {
     const tmdb = meta.id.startsWith("tmdb:") ? meta.id.split(":")[2] : null;
     if (watchedMark) {
@@ -1573,11 +1592,7 @@ export function DetailView({
     manualWatchedVersion,
     manualWatchedVersion,
   );
-  const localCwVer = useSyncExternalStore(
-    subscribeLocalCw,
-    localCwVersion,
-    localCwVersion,
-  );
+  const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion, localCwVersion);
   const prevSeriesWatchedVerRef = useRef(seriesWatchedVer);
   const stremioVideosRef = useRef<{ imdb: string; videos: NonNullable<Meta["videos"]> } | null>(
     null,
@@ -1751,8 +1766,8 @@ export function DetailView({
       }
     }
 
-    const eligible = candidates.filter(
-      (c) => ids.every((id) => manualWatchedState(id, c.season, c.episode, ids) !== false),
+    const eligible = candidates.filter((c) =>
+      ids.every((id) => manualWatchedState(id, c.season, c.episode, ids) !== false),
     );
 
     if (eligible.length > 0) {

@@ -37,10 +37,14 @@ export function CustomizePreview({
 
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const ownerAvatar = isNuvio
-    ? (activeProfile?.avatar || undefined)
-    : (activeProfile?.avatar || settings.harborAvatar || user?.avatar || currentAuthor()?.avatar || undefined);
-  const heroAvatar = isNuvio ? (ownerAvatar || undefined) : (ownerAvatar || summary.avatarUrl);
-  const heroAvatarFallback = isNuvio ? undefined : (summary.avatarUrl || undefined);
+    ? activeProfile?.avatar || undefined
+    : activeProfile?.avatar ||
+      settings.harborAvatar ||
+      user?.avatar ||
+      currentAuthor()?.avatar ||
+      undefined;
+  const heroAvatar = isNuvio ? ownerAvatar || undefined : ownerAvatar || summary.avatarUrl;
+  const heroAvatarFallback = isNuvio ? undefined : summary.avatarUrl || undefined;
 
   return (
     <div className="min-h-full" style={c.background ? { background: c.background } : undefined}>
@@ -55,7 +59,12 @@ export function CustomizePreview({
       <div className="mx-auto w-full max-w-6xl space-y-6 px-6 pb-28 lg:px-10">
         <AboutCard description={preview.description} isOwner userFont={c.font} />
         {c.hasCanvas && (
-          <CanvasCard html={c.html} css={c.css} height={c.height} hiddenFromVisitors={c.hiddenFromVisitors} />
+          <CanvasCard
+            html={c.html}
+            css={c.css}
+            height={c.height}
+            hiddenFromVisitors={c.hiddenFromVisitors}
+          />
         )}
       </div>
     </div>

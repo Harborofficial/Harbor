@@ -225,14 +225,25 @@ export function buildNuvioPlaybackItems(
         external: "nuvio",
       };
 
-      if (isCwDismissed(item) || isDismissedNextUp(contentId, undefined, undefined, dismissed)) continue;
+      if (isCwDismissed(item) || isDismissedNextUp(contentId, undefined, undefined, dismissed))
+        continue;
 
       const shouldWrite =
         !existing || remoteT >= existing.t || (!existing.t && offsetMs > existing.ms);
 
       if (shouldWrite) {
         const pct01 = durMs > 0 ? Math.min(1, offsetMs / durMs) : undefined;
-        saveResumeMs(item._id, offsetMs, undefined, undefined, undefined, pct01, "nuvio", ownerId, remoteT);
+        saveResumeMs(
+          item._id,
+          offsetMs,
+          undefined,
+          undefined,
+          undefined,
+          pct01,
+          "nuvio",
+          ownerId,
+          remoteT,
+        );
       }
 
       items.push(item);
@@ -252,14 +263,20 @@ export function buildNuvioPlaybackItems(
           ? localMatch.durationMs
           : DURATION_MS.series;
     const latestOffsetMs = latestProgressSec * 1000;
-    const isLatestFinished = (latestDurMs > 0 && latestOffsetMs / latestDurMs >= 0.90) || (latest as Record<string, unknown>).watched === true;
+    const isLatestFinished =
+      (latestDurMs > 0 && latestOffsetMs / latestDurMs >= 0.9) ||
+      (latest as Record<string, unknown>).watched === true;
 
     // If the latest episode is unfinished, it is actively in progress
     if (!isLatestFinished && latestOffsetMs >= 5000) {
       let targetOffsetMs = latestOffsetMs;
       const targetSeason = latestSeason;
       const targetEpisode = latestEpisode;
-      const when = latest.updated_at || (latest.last_watched ? new Date(latest.last_watched).toISOString() : new Date().toISOString());
+      const when =
+        latest.updated_at ||
+        (latest.last_watched
+          ? new Date(latest.last_watched).toISOString()
+          : new Date().toISOString());
       const remoteT = latest.last_watched || Date.parse(when) || 0;
 
       const existing = readResumeEntry(contentId, targetSeason, targetEpisode, ownerId);
@@ -290,7 +307,10 @@ export function buildNuvioPlaybackItems(
         external: "nuvio",
       };
 
-      if (!isCwDismissed(item) && !isDismissedNextUp(contentId, targetSeason, targetEpisode, dismissed)) {
+      if (
+        !isCwDismissed(item) &&
+        !isDismissedNextUp(contentId, targetSeason, targetEpisode, dismissed)
+      ) {
         const pct01 = latestDurMs > 0 ? Math.min(1, targetOffsetMs / latestDurMs) : undefined;
         saveResumeMs(
           item._id,
@@ -318,8 +338,11 @@ export function buildNuvioPlaybackItems(
         if (r.season == null || r.episode == null) return false;
         const dur = (r.duration_seconds || 0) * 1000 || DURATION_MS.series;
         const pos = (r.progress_seconds || 0) * 1000;
-        const finished = dur > 0 && pos / dur >= 0.90;
-        return !finished && (r.season > latestSeason || (r.season === latestSeason && r.episode > latestEpisode));
+        const finished = dur > 0 && pos / dur >= 0.9;
+        return (
+          !finished &&
+          (r.season > latestSeason || (r.season === latestSeason && r.episode > latestEpisode))
+        );
       });
 
       if (subsequent) {
@@ -327,7 +350,11 @@ export function buildNuvioPlaybackItems(
         const subEpisode = subsequent.episode!;
         const subDur = (subsequent.duration_seconds || 0) * 1000 || DURATION_MS.series;
         const subOffset = (subsequent.progress_seconds || 0) * 1000;
-        const when = subsequent.updated_at || (subsequent.last_watched ? new Date(subsequent.last_watched).toISOString() : new Date().toISOString());
+        const when =
+          subsequent.updated_at ||
+          (subsequent.last_watched
+            ? new Date(subsequent.last_watched).toISOString()
+            : new Date().toISOString());
 
         const item: LibraryItem = {
           _id: contentId,
@@ -352,7 +379,10 @@ export function buildNuvioPlaybackItems(
           external: "nuvio",
         };
 
-        if (!isCwDismissed(item) && !isDismissedNextUp(contentId, subSeason, subEpisode, dismissed)) {
+        if (
+          !isCwDismissed(item) &&
+          !isDismissedNextUp(contentId, subSeason, subEpisode, dismissed)
+        ) {
           items.push(item);
           activeSeriesIds.add(contentId);
           activeSeriesIds.add(cleanId);
@@ -399,7 +429,8 @@ export function buildNuvioPlaybackItems(
     if (!r.content_id || r.season == null || r.episode == null) continue;
     const dur = (r.duration_seconds || 0) * 1000 || DURATION_MS.series;
     const pos = (r.progress_seconds || 0) * 1000;
-    const isFinished = (dur > 0 && pos / dur >= 0.90) || (r as Record<string, unknown>).watched === true;
+    const isFinished =
+      (dur > 0 && pos / dur >= 0.9) || (r as Record<string, unknown>).watched === true;
     if (!isFinished) continue;
     const t = r.last_watched || (r.updated_at ? Date.parse(r.updated_at) : 0);
     registerSeed(r.content_id, r.season, r.episode, t, r.name || r.title || undefined);
@@ -429,8 +460,10 @@ export function buildNuvioPlaybackItems(
 
     // Resolve next episode:
     // Check if local CW has a newer or advanced target episode
-    const localMatch = localCwEntry(seriesId, true, ownerId) || localCwEntry(seriesId, false, ownerId);
-    const isFullyWatched = fullyWatchedSeriesIds.has(seriesId) || fullyWatchedSeriesIds.has(cleanSeriesId);
+    const localMatch =
+      localCwEntry(seriesId, true, ownerId) || localCwEntry(seriesId, false, ownerId);
+    const isFullyWatched =
+      fullyWatchedSeriesIds.has(seriesId) || fullyWatchedSeriesIds.has(cleanSeriesId);
     let keptForTimer = false;
     if (isFullyWatched) {
       if (!localMatch || localMatch.season == null || localMatch.episode == null) {
@@ -452,7 +485,8 @@ export function buildNuvioPlaybackItems(
       localMatch &&
       localMatch.season != null &&
       localMatch.episode != null &&
-      (localMatch.season > seed.season || (localMatch.season === seed.season && localMatch.episode > seed.episode))
+      (localMatch.season > seed.season ||
+        (localMatch.season === seed.season && localMatch.episode > seed.episode))
     ) {
       nextSeason = localMatch.season;
       nextEpisode = localMatch.episode;
@@ -515,7 +549,8 @@ export function buildNuvioPlaybackItems(
       const existingItem = items.find(
         (it) =>
           it._id === loc.id ||
-          it._id.replace(/^(series|movie|tmdb):/, "") === loc.id.replace(/^(series|movie|tmdb):/, ""),
+          it._id.replace(/^(series|movie|tmdb):/, "") ===
+            loc.id.replace(/^(series|movie|tmdb):/, ""),
       );
       if (existingItem) {
         // If local record has advanced to a higher episode or is newer, reconcile it
@@ -568,7 +603,11 @@ export function buildNuvioPlaybackItems(
           duration: dur,
           season: loc.season,
           episode: loc.episode,
-          video_id: loc.videoId ?? (loc.season != null && loc.episode != null ? `${loc.id}:${loc.season}:${loc.episode}` : undefined),
+          video_id:
+            loc.videoId ??
+            (loc.season != null && loc.episode != null
+              ? `${loc.id}:${loc.season}:${loc.episode}`
+              : undefined),
           lastWatched: when,
         },
         upNext: loc.type === "series" && loc.positionMs === 0,

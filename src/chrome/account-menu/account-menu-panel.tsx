@@ -21,7 +21,11 @@ import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { signOutNuvio } from "@/lib/nuvio/nuvio-auth";
 import { resolveNuvioAvatar } from "@/lib/nuvio/nuvio-profiles";
 import type { NuvioProfile } from "@/lib/nuvio/nuvio-types";
-import { isStremioActivePrimary, activeProfileIsPrimary, isNuvioProviderActive } from "@/lib/active-profile-id";
+import {
+  isStremioActivePrimary,
+  activeProfileIsPrimary,
+  isNuvioProviderActive,
+} from "@/lib/active-profile-id";
 import { isPlaceholderName } from "@/lib/profiles";
 
 const ITEM =
@@ -101,20 +105,26 @@ export function AccountMenuPanel({
   const otherNuvioProfiles = isNuvio
     ? nuvioState.profiles.filter((p) => p.profile_index !== nuvioState.activeProfileIndex)
     : [];
-  const otherStremioProfiles = !isNuvio
-    ? profiles.filter((p) => p.id !== activeProfile?.id)
-    : [];
+  const otherStremioProfiles = !isNuvio ? profiles.filter((p) => p.id !== activeProfile?.id) : [];
 
   const isPlaceholder = isPlaceholderName(activeProfile?.name);
   const name = isNuvio
     ? (activeNuvioProfile?.name ?? nuvioEmail?.split("@")[0] ?? t("profile.fallback"))
-    : (isPlaceholder
-        ? (user?.fullname ?? user?.email?.split("@")[0] ?? activeProfile?.name ?? t("profile.fallback"))
-        : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback")));
+    : isPlaceholder
+      ? (user?.fullname ??
+        user?.email?.split("@")[0] ??
+        activeProfile?.name ??
+        t("profile.fallback"))
+      : (activeProfile?.name ??
+        user?.fullname ??
+        user?.email?.split("@")[0] ??
+        t("profile.fallback"));
 
-  const isPrimary = activeProfileIsPrimary() || (isNuvio
-    ? activeNuvioProfile?.profile_index === 1
-    : isStremioActivePrimary(activeProfile, profiles));
+  const isPrimary =
+    activeProfileIsPrimary() ||
+    (isNuvio
+      ? activeNuvioProfile?.profile_index === 1
+      : isStremioActivePrimary(activeProfile, profiles));
 
   const privs = getSecondaryPrivileges(settings, isNuvio);
   const canAddProfiles = isPrimary || privs.canAddProfiles;
@@ -269,7 +279,10 @@ export function AccountMenuPanel({
                 <button
                   onClick={() => {
                     if (isNuvio) {
-                      openPicker({ kind: "edit", profileId: String(activeNuvioProfile?.profile_index ?? 1) });
+                      openPicker({
+                        kind: "edit",
+                        profileId: String(activeNuvioProfile?.profile_index ?? 1),
+                      });
                     } else if (activeProfile) {
                       openPicker({ kind: "edit", profileId: activeProfile.id });
                     }

@@ -128,11 +128,7 @@ test("Nuvio Next Up: fully watched series does not generate Next Up cards", () =
 
 test("Nuvio Next Up: wildcard |-1|-1 dismissals and TMDB ID variants match", () => {
   // Mobile app pushes whole-series dismissal as "${contentId}|-1|-1"
-  const dismissedKeys = new Set<string>([
-    "tt9999999|-1|-1",
-    "213375|-1|-1",
-    "tt8888888|2|-1",
-  ]);
+  const dismissedKeys = new Set<string>(["tt9999999|-1|-1", "213375|-1|-1", "tt8888888|2|-1"]);
 
   // Whole series dismissal matches any episode
   assert.equal(isDismissedNextUp("tt9999999", 1, 1, dismissedKeys), true);

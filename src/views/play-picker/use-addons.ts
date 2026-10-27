@@ -84,12 +84,14 @@ export function useAddons(
       const nuvioAddonMode = settings.nuvioAddonMode ?? "separate";
 
       const stremioKey = resolveEffectiveStremioAuthKey(authKey);
-      const stremioAddons = (!isNuvio || nuvioAddonMode === "combined") && stremioKey
-        ? filterEnabled(await userAddons(stremioKey).catch(() => []))
-        : [];
-      const nuvioAddons = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
-        ? filterEnabled(await fetchNuvioAddons().catch(() => []))
-        : [];
+      const stremioAddons =
+        (!isNuvio || nuvioAddonMode === "combined") && stremioKey
+          ? filterEnabled(await userAddons(stremioKey).catch(() => []))
+          : [];
+      const nuvioAddons =
+        (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
+          ? filterEnabled(await fetchNuvioAddons().catch(() => []))
+          : [];
       const installed = filterEnabled(await fetchInstalledAddons().catch(() => []));
       if (cancelled) return;
       if (!isNuvio || nuvioAddonMode === "combined") {
@@ -98,11 +100,12 @@ export function useAddons(
       if (nuvioAddons.length > 0) recordNuvioAddons(nuvioAddons);
       const merged: Addon[] = [];
       const idxByUrl = new Map<string, number>();
-      const candidateAddons = isNuvio && nuvioAddonMode === "separate"
-        ? [...nuvioAddons, ...installed]
-        : !isNuvio
-          ? [...stremioAddons, ...installed]
-          : [...stremioAddons, ...nuvioAddons, ...installed];
+      const candidateAddons =
+        isNuvio && nuvioAddonMode === "separate"
+          ? [...nuvioAddons, ...installed]
+          : !isNuvio
+            ? [...stremioAddons, ...installed]
+            : [...stremioAddons, ...nuvioAddons, ...installed];
       for (const a of candidateAddons) {
         const existingIdx = idxByUrl.get(a.transportUrl);
         if (existingIdx === undefined) {

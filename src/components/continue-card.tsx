@@ -164,8 +164,7 @@ export const ContinueCard = memo(function ContinueCard({
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
-    if (days > 0)
-      return t("in {days}d {hours}h", { days: String(days), hours: String(hours) });
+    if (days > 0) return t("in {days}d {hours}h", { days: String(days), hours: String(hours) });
     if (hours > 0)
       return t("in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
     return t("in {minutes}m", { minutes: String(Math.max(1, minutes)) });
@@ -707,7 +706,10 @@ export const ContinueCard = memo(function ContinueCard({
     });
 
   return (
-    <div className="group relative w-full min-w-0 animate-in fade-in-50 zoom-in-[0.98] duration-300 ease-out" onContextMenu={onCardContext}>
+    <div
+      className="group relative w-full min-w-0 animate-in fade-in-50 zoom-in-[0.98] duration-300 ease-out"
+      onContextMenu={onCardContext}
+    >
       <button
         ref={cardRef}
         type="button"

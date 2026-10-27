@@ -130,9 +130,8 @@ function RailAccount() {
   useEffect(() => subscribeAuthor(() => setAuthor(currentAuthor())), []);
   const { settings, update } = useSettings();
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
-  const harborAvatar = isNuvio || settings.harborAvatar?.startsWith("/kids/avatars/")
-    ? null
-    : settings.harborAvatar;
+  const harborAvatar =
+    isNuvio || settings.harborAvatar?.startsWith("/kids/avatars/") ? null : settings.harborAvatar;
   const onPickAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -152,8 +151,11 @@ function RailAccount() {
     }
   };
   const name = isNuvio
-    ? (activeProfile?.name || t("profile.fallback"))
-    : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback"));
+    ? activeProfile?.name || t("profile.fallback")
+    : (activeProfile?.name ??
+      user?.fullname ??
+      user?.email?.split("@")[0] ??
+      t("profile.fallback"));
 
   return (
     <div data-tv-nav-cell className="hset-rail-me">
@@ -401,7 +403,10 @@ export function SettingsSidebar({
                       ? []
                       : tabsFor(id).filter((tab) => {
                           if (id === "account") {
-                            return tab.id !== (settings.accountProvider === "nuvio" ? "stremio" : "nuvio");
+                            return (
+                              tab.id !==
+                              (settings.accountProvider === "nuvio" ? "stremio" : "nuvio")
+                            );
                           }
                           return native || id !== "theme" || tab.id !== "window";
                         });

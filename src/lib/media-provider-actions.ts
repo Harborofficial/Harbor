@@ -431,7 +431,11 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
         if (!!pmdbWatchlistContains(items, target) === on) return;
         const saved = on
           ? await addToPmdbWatchlist(target, { listId, strict: true, assertCurrent: validate })
-          : await removeFromPmdbWatchlist(target, { listId, strict: true, assertCurrent: validate });
+          : await removeFromPmdbWatchlist(target, {
+              listId,
+              strict: true,
+              assertCurrent: validate,
+            });
         validate();
         if (!saved) throw new Error("PublicMetaDB did not confirm this watchlist change.");
       },
@@ -809,7 +813,8 @@ export function watchedProviderWrites(
               const hasCandidateInScan = videosToScan?.some(
                 (v) =>
                   (v.season ?? 0) > lastEp.season ||
-                  ((v.season ?? 0) === lastEp.season && ((v.episode ?? v.number ?? 0) > lastEp.episode)),
+                  ((v.season ?? 0) === lastEp.season &&
+                    (v.episode ?? v.number ?? 0) > lastEp.episode),
               );
               if (!hasCandidateInScan) {
                 const fetchedMeta = await fetchMeta("series", primaryId).catch(() => null);
@@ -844,7 +849,8 @@ export function watchedProviderWrites(
                 // advances cleanly without wiping the entire series from CW!
                 for (const ep of options.episodes) {
                   await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.season, ep.episode);
-                  if (altId) await deleteEpisodeWatchProgressFromNuvio(slot, altId, ep.season, ep.episode);
+                  if (altId)
+                    await deleteEpisodeWatchProgressFromNuvio(slot, altId, ep.season, ep.episode);
                 }
 
                 const metaInfo = {
@@ -946,7 +952,13 @@ export function watchedProviderWrites(
                 const keepCaughtUp = settings.animeCwEnd === "timer";
                 const cachedProgress = readCachedWatchProgress(slot);
                 const cachedWatched = readCachedWatchedItems(slot);
-                const built = buildNuvioPlaybackItems(cachedProgress, slot, cachedWatched, undefined, keepCaughtUp);
+                const built = buildNuvioPlaybackItems(
+                  cachedProgress,
+                  slot,
+                  cachedWatched,
+                  undefined,
+                  keepCaughtUp,
+                );
                 writeCachedNuvioPlaybackItems(slot, built);
               } catch {}
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));

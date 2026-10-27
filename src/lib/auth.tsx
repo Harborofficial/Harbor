@@ -79,7 +79,11 @@ export function readPrimaryStremioSession(): Session | null {
     if (raw) {
       const state = JSON.parse(raw) as { profiles?: Profile[]; activeId?: string | null };
       const profiles = Array.isArray(state.profiles) ? state.profiles : [];
-      const active = profiles.find((p) => p.id === state.activeId) ?? profiles.find((p) => p.isPrimary) ?? profiles[0] ?? null;
+      const active =
+        profiles.find((p) => p.id === state.activeId) ??
+        profiles.find((p) => p.isPrimary) ??
+        profiles[0] ??
+        null;
       const sourceId = stremioSourceProfileId(active, profiles);
       if (sourceId) {
         const sess = readProfileSession(sourceId);
@@ -191,7 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   const [provider, setProvider] = useState<string>(() =>
     typeof localStorage !== "undefined"
-      ? (localStorage.getItem("harbor.account-provider") || "stremio")
+      ? localStorage.getItem("harbor.account-provider") || "stremio"
       : "stremio",
   );
 
@@ -199,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const handler = () => {
       setProvider(
         typeof localStorage !== "undefined"
-          ? (localStorage.getItem("harbor.account-provider") || "stremio")
+          ? localStorage.getItem("harbor.account-provider") || "stremio"
           : "stremio",
       );
     };

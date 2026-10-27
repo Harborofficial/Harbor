@@ -73,9 +73,12 @@ test("Nuvio profile avatar isolation and updating", async (t) => {
           isPrimary: true,
         },
       ],
-    })
+    }),
   );
-  localStorage.setItem("harbor.settings", JSON.stringify({ harborAvatar: "https://example.com/stremio-pfp.png" }));
+  localStorage.setItem(
+    "harbor.settings",
+    JSON.stringify({ harborAvatar: "https://example.com/stremio-pfp.png" }),
+  );
 
   // Switch to Nuvio mode
   localStorage.setItem("harbor.account-provider", "nuvio");
@@ -94,13 +97,16 @@ test("Nuvio profile avatar isolation and updating", async (t) => {
     ],
   });
 
-  await t.test("readActiveProfileIdentity returns Nuvio profile and never leaks Stremio avatar", () => {
-    const active = readActiveProfileIdentity();
-    assert.ok(active);
-    assert.equal(active.name, "Nuvio User");
-    assert.equal(active.avatar, null, "Should not leak Stremio avatar");
-    assert.notEqual(active.avatar, "https://example.com/stremio-pfp.png");
-  });
+  await t.test(
+    "readActiveProfileIdentity returns Nuvio profile and never leaks Stremio avatar",
+    () => {
+      const active = readActiveProfileIdentity();
+      assert.ok(active);
+      assert.equal(active.name, "Nuvio User");
+      assert.equal(active.avatar, null, "Should not leak Stremio avatar");
+      assert.notEqual(active.avatar, "https://example.com/stremio-pfp.png");
+    },
+  );
 
   await t.test("readAllProfilesIdentity returns Nuvio profiles only", () => {
     const list = readAllProfilesIdentity();

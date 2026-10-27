@@ -10,6 +10,8 @@ export function useSelfAvatar(): { handle: string | null; avatar: string | undef
   const author = currentAuthor();
   return {
     handle: author?.handle ?? null,
-    avatar: activeProfile?.avatar ?? (isNuvio ? undefined : settings.harborAvatar ?? author?.avatar ?? undefined),
+    avatar:
+      activeProfile?.avatar ??
+      (isNuvio ? undefined : (settings.harborAvatar ?? author?.avatar ?? undefined)),
   };
 }

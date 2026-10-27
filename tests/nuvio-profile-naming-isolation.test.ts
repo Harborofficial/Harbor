@@ -58,10 +58,26 @@ test("HarborNameSync save: never pushes secondary profile or Nuvio profile names
     return true;
   };
 
-  assert.equal(shouldSaveToHarborAlias(true, { isPrimary: true }), false, "Nuvio mode must not push alias to Harbor");
-  assert.equal(shouldSaveToHarborAlias(true, { isPrimary: false }), false, "Nuvio secondary must not push alias to Harbor");
-  assert.equal(shouldSaveToHarborAlias(false, { isPrimary: false }), false, "Stremio secondary must not push alias to Harbor");
-  assert.equal(shouldSaveToHarborAlias(false, { isPrimary: true }), true, "Stremio primary should push alias to Harbor");
+  assert.equal(
+    shouldSaveToHarborAlias(true, { isPrimary: true }),
+    false,
+    "Nuvio mode must not push alias to Harbor",
+  );
+  assert.equal(
+    shouldSaveToHarborAlias(true, { isPrimary: false }),
+    false,
+    "Nuvio secondary must not push alias to Harbor",
+  );
+  assert.equal(
+    shouldSaveToHarborAlias(false, { isPrimary: false }),
+    false,
+    "Stremio secondary must not push alias to Harbor",
+  );
+  assert.equal(
+    shouldSaveToHarborAlias(false, { isPrimary: true }),
+    true,
+    "Stremio primary should push alias to Harbor",
+  );
 });
 
 test("transferPrimaryNuvioProfile: preserves all profiles (e.g. Profile C) without dropping non-swapped slots", () => {
@@ -110,7 +126,11 @@ test("transferPrimaryNuvioProfile: preserves all profiles (e.g. Profile C) witho
   assert.equal(payloads.length, 3, "All 3 profiles must be present in payloads");
   assert.equal(payloads.find((p) => p.profile_index === 1)?.name, "Profile B");
   assert.equal(payloads.find((p) => p.profile_index === 2)?.name, "Profile A");
-  assert.equal(payloads.find((p) => p.profile_index === 3)?.name, "Profile C", "Profile C must remain untouched");
+  assert.equal(
+    payloads.find((p) => p.profile_index === 3)?.name,
+    "Profile C",
+    "Profile C must remain untouched",
+  );
 });
 
 test("Nuvio profile sorting: profiles are strictly sorted by profile_index ascending", () => {
@@ -140,7 +160,10 @@ test("ProfileIdentitySync: prevents Nuvio profile names from leaking into togeth
     "ProfileIdentitySync must guard name sync with if (isNuvio) return",
   );
 
-  const avatarSyncFile = fs.readFileSync(path.resolve("src/components/harbor-avatar-sync.tsx"), "utf8");
+  const avatarSyncFile = fs.readFileSync(
+    path.resolve("src/components/harbor-avatar-sync.tsx"),
+    "utf8",
+  );
   assert.match(
     avatarSyncFile,
     /if\s*\(!author\s*\|\|\s*isNuvio\)\s*return;/,

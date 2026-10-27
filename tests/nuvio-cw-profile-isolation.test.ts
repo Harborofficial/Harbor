@@ -146,7 +146,10 @@ test("signOutNuvio purges all nuvio cache, resets provider to stremio, and dispa
 
   // Must reset accountProvider to stremio
   assert.equal(localStorage.getItem("harbor.account-provider"), "stremio");
-  assert.equal(JSON.parse(localStorage.getItem("harbor.settings") || "{}").accountProvider, "stremio");
+  assert.equal(
+    JSON.parse(localStorage.getItem("harbor.settings") || "{}").accountProvider,
+    "stremio",
+  );
   assert.equal(providerChanged, "stremio");
 
   // Nuvio cache keys must be purged
@@ -170,7 +173,8 @@ test("Trakt watchlist export and import work with Nuvio library in Nuvio mode", 
     lastSyncedAt: Date.now(),
   });
 
-  const { addNuvioLibraryItem, readCachedNuvioLibrary } = await import("../src/lib/nuvio/nuvio-library.ts");
+  const { addNuvioLibraryItem, readCachedNuvioLibrary } =
+    await import("../src/lib/nuvio/nuvio-library.ts");
   const { planExport, traktItemToStremioId } = await import("../src/lib/trakt/watchlist-sync.ts");
 
   // Add items to Nuvio library
@@ -212,7 +216,8 @@ test("Trakt watchlist export and import work with Nuvio library in Nuvio mode", 
 });
 
 test("View my profile is restricted to primary profile in Stremio and Nuvio", async () => {
-  const { activeProfileIsPrimary, isStremioActivePrimary } = await import("../src/lib/active-profile-id.ts");
+  const { activeProfileIsPrimary, isStremioActivePrimary } =
+    await import("../src/lib/active-profile-id.ts");
 
   // Nuvio mode: slot 1 is primary, slot 2 is secondary
   localStorage.setItem("harbor.account-provider", "nuvio");

@@ -1,14 +1,8 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { noteNotify } from "@/lib/render-cause";
 import { detectAnimeForCw } from "@/lib/anime-detect";
-import {
-  fetchSimklPlaybackItems,
-  readCachedSimklPlaybackItems,
-} from "@/lib/simkl/playback";
-import {
-  fetchTraktPlaybackItems,
-  readCachedTraktPlaybackItems,
-} from "@/lib/trakt/playback";
+import { fetchSimklPlaybackItems, readCachedSimklPlaybackItems } from "@/lib/simkl/playback";
+import { fetchTraktPlaybackItems, readCachedTraktPlaybackItems } from "@/lib/trakt/playback";
 import {
   fetchNuvioPlaybackItems,
   readCachedNuvioPlaybackItems,
@@ -232,13 +226,23 @@ export function setExternalCwSources(mask: {
   const hasNuvioInItems = nextItems.some((i) => i.external === "nuvio");
 
   const toAdd: LibraryItem[][] = [];
-  if (sourceMask.trakt && !hasTraktInItems && typeof readCachedTraktPlaybackItems === "function" && getTraktSession()) {
+  if (
+    sourceMask.trakt &&
+    !hasTraktInItems &&
+    typeof readCachedTraktPlaybackItems === "function" &&
+    getTraktSession()
+  ) {
     try {
       const c = readCachedTraktPlaybackItems();
       if (c && c.length > 0) toAdd.push(c);
     } catch {}
   }
-  if (sourceMask.simkl && !hasSimklInItems && typeof readCachedSimklPlaybackItems === "function" && getSimklSession()) {
+  if (
+    sourceMask.simkl &&
+    !hasSimklInItems &&
+    typeof readCachedSimklPlaybackItems === "function" &&
+    getSimklSession()
+  ) {
     try {
       const c = readCachedSimklPlaybackItems();
       if (c && c.length > 0) toAdd.push(c);
@@ -310,7 +314,8 @@ async function runRefresh(gen: number): Promise<boolean> {
     if (i.external === "trakt") return sourceMask.trakt && !!getTraktSession();
     if (i.external === "simkl") return sourceMask.simkl && !!getSimklSession();
     if (i.external === "publicmetadb") return sourceMask.publicmetadb && !!getPmdbSession();
-    if (i.external === "nuvio") return sourceMask.nuvio && isNuvioSignedIn() && isNuvioProviderActive();
+    if (i.external === "nuvio")
+      return sourceMask.nuvio && isNuvioSignedIn() && isNuvioProviderActive();
     return true;
   });
   setItems(merge([activeItems]));
@@ -382,7 +387,10 @@ export function removeExternalCwItem(item: LibraryItem): void {
     try {
       const slot = resolveNuvioProfileIndex();
       const cur = slotCwMemoryCache.get(slot) || [];
-      slotCwMemoryCache.set(slot, cur.filter((i) => !matchesContentId(i._id, item._id)));
+      slotCwMemoryCache.set(
+        slot,
+        cur.filter((i) => !matchesContentId(i._id, item._id)),
+      );
       const disk = readCachedNuvioPlaybackItems(slot);
       const filteredDisk = disk.filter((i) => !matchesContentId(i._id, item._id));
       writeCachedNuvioPlaybackItems(slot, filteredDisk);
@@ -413,7 +421,8 @@ function onSessionChange(): void {
   const trakt = getTraktSession();
   const pmdb = getPmdbSession();
   const nuvio = isNuvioSignedIn() && isNuvioProviderActive();
-  if (simkl === lastSimkl && trakt === lastTrakt && pmdb === lastPmdb && nuvio === lastNuvio) return;
+  if (simkl === lastSimkl && trakt === lastTrakt && pmdb === lastPmdb && nuvio === lastNuvio)
+    return;
   setItems(
     items.filter(
       (i) =>
@@ -519,7 +528,10 @@ if (typeof window !== "undefined") {
         if (contentId) {
           items = items.filter((i) => !matchesContentId(i._id, contentId));
           const curMem = slotCwMemoryCache.get(slot) || [];
-          slotCwMemoryCache.set(slot, curMem.filter((i) => !matchesContentId(i._id, contentId)));
+          slotCwMemoryCache.set(
+            slot,
+            curMem.filter((i) => !matchesContentId(i._id, contentId)),
+          );
           emit();
         }
         const fresh = readCachedNuvioPlaybackItems(slot).filter(

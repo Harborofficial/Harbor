@@ -51,7 +51,9 @@ export function useMarkSeason({
       if (isNuvioSignedIn() && isNuvioProviderActive()) {
         const slot = resolveNuvioProfileIndex();
         const clean = meta.id.replace(/^(series|movie|tmdb):/, "");
-        const idVariants = Array.from(new Set([meta.id, clean, `tmdb:${clean}`, `series:${clean}`]));
+        const idVariants = Array.from(
+          new Set([meta.id, clean, `tmdb:${clean}`, `series:${clean}`]),
+        );
         const primaryId = meta.id;
         if (watched) {
           const items = airedEpisodes.flatMap((e) =>
@@ -67,7 +69,12 @@ export function useMarkSeason({
           void pushWatchedItemToNuvio(slot, items);
           void (async () => {
             for (const ep of airedEpisodes) {
-              await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.seasonNumber, ep.episodeNumber);
+              await deleteEpisodeWatchProgressFromNuvio(
+                slot,
+                primaryId,
+                ep.seasonNumber,
+                ep.episodeNumber,
+              );
             }
             const nextSeason = active + 1;
             const nextCw = {

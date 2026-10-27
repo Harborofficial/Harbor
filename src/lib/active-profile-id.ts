@@ -62,7 +62,8 @@ const cachedSettings = new Map<string, { raw: string; provider: unknown }>();
 
 export function isNuvioProviderActive(): boolean {
   try {
-    const explicit = typeof localStorage !== "undefined" ? localStorage.getItem("harbor.account-provider") : null;
+    const explicit =
+      typeof localStorage !== "undefined" ? localStorage.getItem("harbor.account-provider") : null;
     if (explicit === "nuvio") return true;
     if (explicit === "stremio") return false;
     for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {

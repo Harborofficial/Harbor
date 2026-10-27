@@ -61,8 +61,7 @@ export function createContinueCardActions(options: {
     if (pending) throw new Error(options.t("This action is already running."));
     if (kind !== "dismiss") {
       assertCurrent();
-      if (waitingForAir())
-        throw new Error(options.t("This episode has not aired yet."));
+      if (waitingForAir()) throw new Error(options.t("This episode has not aired yet."));
     } else {
       if (removed || !options.isCurrent())
         throw new Error(options.t("This Continue Watching entry is no longer available."));

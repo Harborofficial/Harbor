@@ -43,9 +43,12 @@ export type BpAnimeCwBase = {
   ready: boolean;
 };
 
-function localItems(privateOnly: boolean, sources: { library: boolean; local: boolean }): LibraryItem[] {
+function localItems(
+  privateOnly: boolean,
+  sources: { library: boolean; local: boolean },
+): LibraryItem[] {
   return listLocalCw(privateOnly)
-    .filter((e) => e.source === "library" ? sources.library : sources.local)
+    .filter((e) => (e.source === "library" ? sources.library : sources.local))
     .filter((e) => ANIME_CLOUD_ID.test(e.id) || e.isAnime)
     .map((e) => ({
       _id: e.id,

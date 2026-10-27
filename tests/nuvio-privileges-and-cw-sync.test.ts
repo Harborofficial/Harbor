@@ -58,7 +58,8 @@ if (typeof window === "undefined") {
 }
 
 test("Secondary profile privileges and primary profile authority", async (t) => {
-  const { isStremioActivePrimary, activeProfileIsPrimary } = await import("../src/lib/active-profile-id");
+  const { isStremioActivePrimary, activeProfileIsPrimary } =
+    await import("../src/lib/active-profile-id");
   const { getSecondaryPrivileges } = await import("../src/lib/settings/defaults");
 
   await t.test("Primary profile is boss and never denied", () => {
@@ -80,8 +81,14 @@ test("Secondary profile privileges and primary profile authority", async (t) => 
       { id: "p1", isPrimary: false },
       { id: "p2", isPrimary: true },
     ];
-    assert.strictEqual(isStremioActivePrimary({ id: "p2", isPrimary: true }, updatedProfiles), true);
-    assert.strictEqual(isStremioActivePrimary({ id: "p1", isPrimary: false }, updatedProfiles), false);
+    assert.strictEqual(
+      isStremioActivePrimary({ id: "p2", isPrimary: true }, updatedProfiles),
+      true,
+    );
+    assert.strictEqual(
+      isStremioActivePrimary({ id: "p1", isPrimary: false }, updatedProfiles),
+      false,
+    );
   });
 
   await t.test("Secondary privileges defaults and overrides for Stremio and Nuvio", () => {
@@ -97,7 +104,7 @@ test("Secondary profile privileges and primary profile authority", async (t) => 
       JSON.stringify({
         secondaryPrivileges: { canAddProfiles: true, canViewAccountProvider: true },
         nuvioSecondaryPrivileges: { canAddProfiles: true, canViewAccountProvider: false },
-      })
+      }),
     );
 
     const updatedStremio = getSecondaryPrivileges(null, false);
@@ -123,6 +130,9 @@ test("CW tray instant reactivity and removal", async (t) => {
 
     removeExternalCwItem(item as any);
     const remaining = listExternalCw();
-    assert.strictEqual(remaining.some((i) => i._id === "tt9999999"), false);
+    assert.strictEqual(
+      remaining.some((i) => i._id === "tt9999999"),
+      false,
+    );
   });
 });

@@ -16,10 +16,10 @@ const subs = new Set<() => void>();
 let version = 0;
 let cache: Set<string> | null = null;
 
-
 export function movieWatchedStoreKey(slotOrProfile?: string | number): string {
   if (isNuvioProviderActive()) {
-    const slot = slotOrProfile != null ? Number(slotOrProfile) || getNuvioActiveSlot() : getNuvioActiveSlot();
+    const slot =
+      slotOrProfile != null ? Number(slotOrProfile) || getNuvioActiveSlot() : getNuvioActiveSlot();
     return `harbor.moviewatched.nuvio.v1.${slot}`;
   }
   const id = slotOrProfile ? String(slotOrProfile) : activeProfileId();
@@ -101,7 +101,10 @@ export function reconcileNuvioMovieWatched(
   for (const fn of subs) fn();
 }
 
-export function isMovieWatchedLocal(metaId: string, altIds?: Array<string | null | undefined>): boolean {
+export function isMovieWatchedLocal(
+  metaId: string,
+  altIds?: Array<string | null | undefined>,
+): boolean {
   const set = load();
   if (set.has(metaId)) return true;
   if (altIds) {
@@ -122,7 +125,11 @@ export function useMovieWatchedIds(): Set<string> {
   return useSyncExternalStore(subscribeMovieWatched, load, () => EMPTY_MOVIE_WATCHED_IDS);
 }
 
-export function setMovieWatchedLocal(metaId: string, watched: boolean, profileOrSlot?: string | number): void {
+export function setMovieWatchedLocal(
+  metaId: string,
+  watched: boolean,
+  profileOrSlot?: string | number,
+): void {
   const sk = movieWatchedStoreKey(profileOrSlot);
   let s: Set<string>;
   if (sk === storeKey() && cache) {
@@ -142,7 +149,11 @@ export function setMovieWatchedLocal(metaId: string, watched: boolean, profileOr
   persist(next, sk);
 }
 
-export function setMovieWatchedLocalAcknowledged(metaId: string, watched: boolean, profileOrSlot?: string | number): void {
+export function setMovieWatchedLocalAcknowledged(
+  metaId: string,
+  watched: boolean,
+  profileOrSlot?: string | number,
+): void {
   if (!canPersistWatched()) return;
   const sk = movieWatchedStoreKey(profileOrSlot);
   let s: Set<string>;
@@ -198,7 +209,11 @@ export function clearAllNuvioMovieWatched(): void {
     const toRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k && (k.startsWith("harbor.moviewatched.nuvio.v1.") || k.startsWith("harbor.moviewatched.nuvio."))) {
+      if (
+        k &&
+        (k.startsWith("harbor.moviewatched.nuvio.v1.") ||
+          k.startsWith("harbor.moviewatched.nuvio."))
+      ) {
         toRemove.push(k);
       }
     }

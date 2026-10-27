@@ -88,9 +88,8 @@ export function usePlayerWatched(params: {
       for (const r of records) {
         const matches = r.content_id === meta.id || (imdbId && r.content_id === imdbId);
         if (matches && r.season != null && r.episode != null) {
-          const ratio = (r.progress_seconds && r.duration_seconds)
-            ? r.progress_seconds / r.duration_seconds
-            : 0;
+          const ratio =
+            r.progress_seconds && r.duration_seconds ? r.progress_seconds / r.duration_seconds : 0;
           if (ratio >= 0.85) {
             set.add(`${r.season}:${r.episode}`);
           }

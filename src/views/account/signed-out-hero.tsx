@@ -32,11 +32,7 @@ export function SignedOutHero({ onSignIn }: { onSignIn: (mode: "register" | "sig
             >
               {t("Create your account")}
             </button>
-            <button
-              type="button"
-              onClick={() => onSignIn("signin")}
-              className={ROW_ACTION}
-            >
+            <button type="button" onClick={() => onSignIn("signin")} className={ROW_ACTION}>
               {t("Sign in")}
             </button>
           </div>

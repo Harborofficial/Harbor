@@ -54,7 +54,9 @@ export function ProfilesStrip() {
                 active ? openPicker({ kind: "edit", profileId: p.id }) : switchTo(p.id, locked)
               }
               aria-label={
-                active ? t("Edit {name}", { name: p.name }) : t("Switch to {name}", { name: p.name })
+                active
+                  ? t("Edit {name}", { name: p.name })
+                  : t("Switch to {name}", { name: p.name })
               }
               className="flex w-full flex-col items-center gap-3 rounded-[10px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
@@ -83,9 +85,7 @@ export function ProfilesStrip() {
                 )}
               </span>
               <span className="flex w-full flex-col items-center gap-2">
-                <span className={`max-w-full text-center ${ROW_TITLE}`}>
-                  {p.name}
-                </span>
+                <span className={`max-w-full text-center ${ROW_TITLE}`}>{p.name}</span>
                 <span className="flex min-h-[22px] items-center">
                   {active ? (
                     <span className={`${QUAL} bg-accent-soft text-accent`}>

@@ -398,13 +398,16 @@ export function readActiveProfileIdentity(): {
     if (isNuvioProviderActive()) {
       const nuvioState = loadNuvioState();
       const slot = nuvioState.activeProfileIndex || 1;
-      const active = nuvioState.profiles.find((p) => p.profile_index === slot) || nuvioState.profiles[0];
+      const active =
+        nuvioState.profiles.find((p) => p.profile_index === slot) || nuvioState.profiles[0];
       if (active) {
         return {
           id: `nuvio-${active.profile_index}`,
           name: active.name || `Profile ${active.profile_index}`,
           avatar: resolveNuvioAvatar(active),
-          color: active.avatar_color_hex || PROFILE_COLORS[(active.profile_index - 1) % PROFILE_COLORS.length],
+          color:
+            active.avatar_color_hex ||
+            PROFILE_COLORS[(active.profile_index - 1) % PROFILE_COLORS.length],
         };
       }
       return {
@@ -440,15 +443,18 @@ export function readAllProfilesIdentity(): Array<{
           id: `nuvio-${p.profile_index}`,
           name: p.name || `Profile ${p.profile_index}`,
           avatar: resolveNuvioAvatar(p),
-          color: p.avatar_color_hex || PROFILE_COLORS[(p.profile_index - 1) % PROFILE_COLORS.length],
+          color:
+            p.avatar_color_hex || PROFILE_COLORS[(p.profile_index - 1) % PROFILE_COLORS.length],
         }));
       }
-      return [{
-        id: "nuvio-1",
-        name: "Primary",
-        avatar: null,
-        color: PROFILE_COLORS[0],
-      }];
+      return [
+        {
+          id: "nuvio-1",
+          name: "Primary",
+          avatar: null,
+          color: PROFILE_COLORS[0],
+        },
+      ];
     }
     return readState().profiles.map((p) => ({
       id: p.id,
@@ -624,18 +630,26 @@ export function CompanionProfilesProvider({ children }: { children: ReactNode })
     const isNuvio = isNuvioProviderActive();
     const nuvioState = isNuvio ? loadNuvioState() : null;
     const activeNuvio = nuvioState
-      ? (nuvioState.profiles.find((p) => p.profile_index === (nuvioState.activeProfileIndex || 1)) || nuvioState.profiles[0] || null)
+      ? nuvioState.profiles.find((p) => p.profile_index === (nuvioState.activeProfileIndex || 1)) ||
+        nuvioState.profiles[0] ||
+        null
       : null;
     const effectiveActiveProfile = isNuvio
-      ? (activeNuvio ? nuvioProfileToHarborProfile(activeNuvio) : defaultNuvioHarborProfile(1))
+      ? activeNuvio
+        ? nuvioProfileToHarborProfile(activeNuvio)
+        : defaultNuvioHarborProfile(1)
       : (state.profiles.find((p) => p.id === state.activeId) ?? null);
     const effectiveProfiles = isNuvio
-      ? (nuvioState && nuvioState.profiles.length > 0
-          ? [...nuvioState.profiles].sort((a, b) => a.profile_index - b.profile_index).map(nuvioProfileToHarborProfile)
-          : [defaultNuvioHarborProfile(1)])
+      ? nuvioState && nuvioState.profiles.length > 0
+        ? [...nuvioState.profiles]
+            .sort((a, b) => a.profile_index - b.profile_index)
+            .map(nuvioProfileToHarborProfile)
+        : [defaultNuvioHarborProfile(1)]
       : state.profiles;
     const effectiveActiveId = isNuvio
-      ? (activeNuvio ? `nuvio-${activeNuvio.profile_index}` : "nuvio-1")
+      ? activeNuvio
+        ? `nuvio-${activeNuvio.profile_index}`
+        : "nuvio-1"
       : state.activeId;
 
     return {
@@ -791,7 +805,9 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
   const activeNuvio = useMemo(() => {
     if (!isNuvio) return null;
     const slot = nuvioState.activeProfileIndex || 1;
-    return nuvioState.profiles.find((p) => p.profile_index === slot) || nuvioState.profiles[0] || null;
+    return (
+      nuvioState.profiles.find((p) => p.profile_index === slot) || nuvioState.profiles[0] || null
+    );
   }, [isNuvio, nuvioState.profiles, nuvioState.activeProfileIndex]);
 
   const effectiveActiveProfile = useMemo(() => {
@@ -978,7 +994,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
   const updateProfile = useCallback<ProfilesValue["updateProfile"]>((id, patch) => {
     if (isNuvioProviderActive() || id.startsWith("nuvio-")) {
       const match = id.match(/\d+/);
-      const slot = match ? parseInt(match[0], 10) : (loadNuvioState().activeProfileIndex || 1);
+      const slot = match ? parseInt(match[0], 10) : loadNuvioState().activeProfileIndex || 1;
       const nuvioPatch: any = {};
       if (patch.name !== undefined) nuvioPatch.name = patch.name;
       if (patch.color !== undefined) nuvioPatch.avatarColorHex = patch.color;
@@ -986,7 +1002,10 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       if (patch.kid !== undefined) nuvioPatch.is_kids = Boolean(patch.kid);
       if (patch.lockedTabs !== undefined) {
         if (patch.lockedTabs && anyTabLocked(patch.lockedTabs)) {
-          localStorage.setItem(`harbor.nuvio.locked-tabs.${slot}`, JSON.stringify(patch.lockedTabs));
+          localStorage.setItem(
+            `harbor.nuvio.locked-tabs.${slot}`,
+            JSON.stringify(patch.lockedTabs),
+          );
         } else {
           localStorage.removeItem(`harbor.nuvio.locked-tabs.${slot}`);
         }
@@ -1005,7 +1024,6 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
               const parsed = JSON.parse(raw);
               parsed.harborAvatar = patch.avatar;
               localStorage.setItem(key, JSON.stringify(parsed));
-
             }
           }
         } catch {}
@@ -1017,7 +1035,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
             ? {
                 ...p,
                 ...patch,
-                kid: p.isPrimary ? null : (patch.kid !== undefined ? patch.kid : p.kid),
+                kid: p.isPrimary ? null : patch.kid !== undefined ? patch.kid : p.kid,
                 name: patch.name != null ? patch.name.trim().slice(0, 32) || p.name : p.name,
               }
             : p,

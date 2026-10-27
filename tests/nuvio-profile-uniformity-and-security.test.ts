@@ -46,9 +46,15 @@ test("Security tab locks are supported and persisted for Nuvio profiles with spo
   // EditorView saves locked tabs for Nuvio slots
   assert.match(editorView, /harbor\.nuvio\.locked-tabs\./);
   // profiles.tsx nuvioProfileToHarborProfile loads lockedTabs
-  assert.match(profilesModule, /localStorage\.getItem\(`harbor\.nuvio\.locked-tabs\.\$\{p\.profile_index\}`\)/);
+  assert.match(
+    profilesModule,
+    /localStorage\.getItem\(`harbor\.nuvio\.locked-tabs\.\$\{p\.profile_index\}`\)/,
+  );
   // updateProfile in profiles.tsx persists lockedTabs for Nuvio profiles
-  assert.match(profilesModule, /localStorage\.setItem\(`harbor\.nuvio\.locked-tabs\.\$\{slot\}`/);
+  assert.match(
+    profilesModule,
+    /localStorage\.setItem\(\s*`harbor\.nuvio\.locked-tabs\.\$\{slot\}`/,
+  );
 });
 
 test("PIN deletion removes PIN locally, clears session unlock, and synchronizes to cloud", () => {
@@ -66,10 +72,16 @@ test("PIN switch security strictly prevents bypassing PIN when changing profiles
   assert.match(nuvioProfiles, /nuvioSessionUnlockedIndices\.clear\(\)/);
   // picker-modal proceeds to unlock prompt when pin is enabled
   assert.match(pickerModal, /if \(p\.pin_enabled\)/);
-  assert.match(pickerModal, /setPickerView\(\{\s*kind:\s*"unlock",\s*profileId:\s*String\(p\.profile_index\)\s*\}\)/);
+  assert.match(
+    pickerModal,
+    /setPickerView\(\{\s*kind:\s*"unlock",\s*profileId:\s*String\(p\.profile_index\)\s*\}\)/,
+  );
   // account-menu triggers unlock picker for PIN-protected Nuvio profiles
   assert.match(accountMenu, /if \(p\.pin_enabled\)/);
-  assert.match(accountMenu, /openPicker\(\{\s*kind:\s*"unlock",\s*profileId:\s*String\(p\.profile_index\)\s*\}\)/);
+  assert.match(
+    accountMenu,
+    /openPicker\(\{\s*kind:\s*"unlock",\s*profileId:\s*String\(p\.profile_index\)\s*\}\)/,
+  );
 });
 
 test("Smooth profile save with optimistic local state updates and loading spinner", () => {

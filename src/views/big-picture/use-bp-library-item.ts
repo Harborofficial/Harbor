@@ -45,8 +45,12 @@ export function useBpLibraryItem(metaId: string, imdbId: string | null): Library
             },
             removed: false,
             temp: false,
-            _ctime: matchLib.added_at ? new Date(matchLib.added_at).toISOString() : new Date().toISOString(),
-            _mtime: matchLib.added_at ? new Date(matchLib.added_at).toISOString() : new Date().toISOString(),
+            _ctime: matchLib.added_at
+              ? new Date(matchLib.added_at).toISOString()
+              : new Date().toISOString(),
+            _mtime: matchLib.added_at
+              ? new Date(matchLib.added_at).toISOString()
+              : new Date().toISOString(),
             external: "nuvio",
           });
           return;

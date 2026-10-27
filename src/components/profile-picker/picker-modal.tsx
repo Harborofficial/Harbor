@@ -196,7 +196,6 @@ export function ProfilePickerModal() {
     proceedSelectNuvio(p);
   };
 
-
   return createPortal(
     <div
       data-tauri-drag-region
@@ -290,8 +289,8 @@ export function ProfilePickerModal() {
           ref={scrollRef}
           className="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto overscroll-contain px-4 py-8 sm:px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {pickerView.kind === "list" && (
-            isNuvio ? (
+          {pickerView.kind === "list" &&
+            (isNuvio ? (
               <NuvioListView
                 selectingId={selectingId}
                 nuvioProfiles={nuvioState.profiles}
@@ -330,10 +329,13 @@ export function ProfilePickerModal() {
                 }}
                 onSelect={handleSelect}
               />
-            )
-          )}
+            ))}
           {pickerView.kind === "create" && (
-            <EditorView mode={{ kind: "create" }} onCancel={finishEditor} onDone={() => closePicker()} />
+            <EditorView
+              mode={{ kind: "create" }}
+              onCancel={finishEditor}
+              onDone={() => closePicker()}
+            />
           )}
           {pickerView.kind === "edit" &&
             (() => {
@@ -352,79 +354,79 @@ export function ProfilePickerModal() {
               );
             })()}
           {pickerView.kind === "unlock" &&
-            (isNuvio ? (
-              (() => {
-                const target = nuvioState.profiles.find(
-                  (p) => String(p.profile_index) === pickerView.profileId || `nuvio-${p.profile_index}` === pickerView.profileId,
-                );
-                if (!target || !target.pin_enabled) {
-                  return <NotFoundFallback onBack={goList} />;
-                }
-                return (
-                  <NuvioPasswordPrompt
-                    profile={target}
-                    onSuccess={() => {
-                      setActiveNuvioProfile(target.profile_index, { unlocked: true });
-                      closePicker();
-                    }}
-                    onCancel={goList}
-                  />
-                );
-              })()
-            ) : (
-              (() => {
-                const target = profiles.find((p) => p.id === pickerView.profileId);
-                if (!target || !target.passwordHash) {
-                  return <NotFoundFallback onBack={goList} />;
-                }
-                return (
-                  <PasswordPrompt
-                    profile={target}
-                    onSuccess={() => selectProfile(target.id, { unlocked: true })}
-                    onCancel={goList}
-                  />
-                );
-              })()
-            ))}
+            (isNuvio
+              ? (() => {
+                  const target = nuvioState.profiles.find(
+                    (p) =>
+                      String(p.profile_index) === pickerView.profileId ||
+                      `nuvio-${p.profile_index}` === pickerView.profileId,
+                  );
+                  if (!target || !target.pin_enabled) {
+                    return <NotFoundFallback onBack={goList} />;
+                  }
+                  return (
+                    <NuvioPasswordPrompt
+                      profile={target}
+                      onSuccess={() => {
+                        setActiveNuvioProfile(target.profile_index, { unlocked: true });
+                        closePicker();
+                      }}
+                      onCancel={goList}
+                    />
+                  );
+                })()
+              : (() => {
+                  const target = profiles.find((p) => p.id === pickerView.profileId);
+                  if (!target || !target.passwordHash) {
+                    return <NotFoundFallback onBack={goList} />;
+                  }
+                  return (
+                    <PasswordPrompt
+                      profile={target}
+                      onSuccess={() => selectProfile(target.id, { unlocked: true })}
+                      onCancel={goList}
+                    />
+                  );
+                })())}
           {pickerView.kind === "unlock-for-edit" &&
-            (isNuvio ? (
-              (() => {
-                const target = nuvioState.profiles.find(
-                  (p) => String(p.profile_index) === pickerView.profileId || `nuvio-${p.profile_index}` === pickerView.profileId,
-                );
-                if (!target || !target.pin_enabled) {
-                  return <NotFoundFallback onBack={goList} />;
-                }
-                return (
-                  <NuvioPasswordPrompt
-                    profile={target}
-                    subtitle={t("Enter the 4-digit PIN to edit this profile.")}
-                    onSuccess={() => {
-                      markNuvioProfileUnlocked(target.profile_index);
-                      setPickerView({ kind: "edit", profileId: String(target.profile_index) });
-                    }}
-                    onCancel={goList}
-                  />
-                );
-              })()
-            ) : (
-              (() => {
-                const target = profiles.find((p) => p.id === pickerView.profileId);
-                if (!target || !target.passwordHash) {
-                  return <NotFoundFallback onBack={goList} />;
-                }
-                return (
-                  <PasswordPrompt
-                    profile={target}
-                    onSuccess={() => {
-                      selectProfile(target.id, { unlocked: true });
-                      setPickerView({ kind: "edit", profileId: target.id });
-                    }}
-                    onCancel={goList}
-                  />
-                );
-              })()
-            ))}
+            (isNuvio
+              ? (() => {
+                  const target = nuvioState.profiles.find(
+                    (p) =>
+                      String(p.profile_index) === pickerView.profileId ||
+                      `nuvio-${p.profile_index}` === pickerView.profileId,
+                  );
+                  if (!target || !target.pin_enabled) {
+                    return <NotFoundFallback onBack={goList} />;
+                  }
+                  return (
+                    <NuvioPasswordPrompt
+                      profile={target}
+                      subtitle={t("Enter the 4-digit PIN to edit this profile.")}
+                      onSuccess={() => {
+                        markNuvioProfileUnlocked(target.profile_index);
+                        setPickerView({ kind: "edit", profileId: String(target.profile_index) });
+                      }}
+                      onCancel={goList}
+                    />
+                  );
+                })()
+              : (() => {
+                  const target = profiles.find((p) => p.id === pickerView.profileId);
+                  if (!target || !target.passwordHash) {
+                    return <NotFoundFallback onBack={goList} />;
+                  }
+                  return (
+                    <PasswordPrompt
+                      profile={target}
+                      onSuccess={() => {
+                        selectProfile(target.id, { unlocked: true });
+                        setPickerView({ kind: "edit", profileId: target.id });
+                      }}
+                      onCancel={goList}
+                    />
+                  );
+                })())}
         </div>
         {moreBelow && (
           <>
@@ -474,7 +476,6 @@ export function ProfilePickerModal() {
             kids
           />
         )}
-
       </div>
     </div>,
     document.body,
@@ -498,7 +499,8 @@ function ListView({
   const t = useT();
   const { settings } = useSettings();
   const isPrimary = isStremioActivePrimary(activeProfile, profiles);
-  const canAdd = !activeKid && (isPrimary || getSecondaryPrivileges(settings, false).canAddProfiles);
+  const canAdd =
+    !activeKid && (isPrimary || getSecondaryPrivileges(settings, false).canAddProfiles);
   const selecting = selectingId != null;
   return (
     <div className="flex flex-col items-center gap-10">
@@ -693,7 +695,6 @@ function NuvioListView({
   );
 }
 
-
 function NuvioAvatarDisplay({
   url,
   color,
@@ -722,12 +723,7 @@ function NuvioAvatarDisplay({
   }
 
   return (
-    <img
-      src={url}
-      alt=""
-      className="h-full w-full object-cover"
-      onError={() => setError(true)}
-    />
+    <img src={url} alt="" className="h-full w-full object-cover" onError={() => setError(true)} />
   );
 }
 
@@ -793,8 +789,7 @@ function NuvioProfileTile({
   const t = useT();
   const dim = size === "lg" ? "h-24 w-24" : size === "md" ? "h-16 w-16" : "h-12 w-12";
   const ring = size === "lg" ? "ring-[3px]" : "ring-2";
-  const fontName =
-    size === "lg" ? "text-[14px]" : size === "md" ? "text-[12.5px]" : "text-[11px]";
+  const fontName = size === "lg" ? "text-[14px]" : size === "md" ? "text-[12.5px]" : "text-[11px]";
   const avatarUrl = resolveNuvioAvatar(profile);
   const color = profile.avatar_color_hex || "#1E88E5";
   const isPrimary = profile.profile_index === 1;
@@ -816,7 +811,9 @@ function NuvioProfileTile({
               url={avatarUrl}
               color={color}
               name={profile.name}
-              fontSizeClass={size === "lg" ? "text-[26px]" : size === "md" ? "text-[18px]" : "text-[14px]"}
+              fontSizeClass={
+                size === "lg" ? "text-[26px]" : size === "md" ? "text-[18px]" : "text-[14px]"
+              }
             />
           </span>
         </button>
@@ -842,10 +839,7 @@ function NuvioProfileTile({
       <div className="flex flex-col items-center gap-0.5">
         <span className={`font-medium text-ink ${fontName}`}>{profile.name}</span>
         {isPrimary && size !== "sm" && (
-          <span
-            className="text-[9.5px] font-bold uppercase tracking-[0.18em]"
-            style={{ color }}
-          >
+          <span className="text-[9.5px] font-bold uppercase tracking-[0.18em]" style={{ color }}>
             {t("profile.primary")}
           </span>
         )}

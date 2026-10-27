@@ -22,7 +22,10 @@ test("AuthProvider hides Stremio user and authKey when Nuvio provider is active"
 });
 
 test("stremio module completely guards libraryPut, bookmarks, and provides comprehensive expunge", () => {
-  assert.match(stremio, /export async function libraryPut\(\s*authKey: string,\s*item: LibraryItem,\s*forceAllow = false/);
+  assert.match(
+    stremio,
+    /export async function libraryPut\(\s*authKey: string,\s*item: LibraryItem,\s*forceAllow = false/,
+  );
   assert.match(stremio, /if \(isNuvioProviderActive\(\) && !forceAllow\) return;/);
   assert.match(stremio, /export async function saveStremioBookmark\(/);
   assert.match(stremio, /if \(isNuvioProviderActive\(\)\) return;/);
@@ -39,7 +42,10 @@ test("stremio write queue and flusher strictly refuse execution in Nuvio mode", 
   assert.match(stremioWriteQueue, /export async function cloudLibraryPut/);
   assert.match(stremioWriteQueue, /if \(isNuvioProviderActive\(\)\) return true;/);
   assert.match(stremioWriteQueue, /export async function flushWriteQueue/);
-  assert.match(stremioWriteQueue, /if \(isNuvioProviderActive\(\)\) \{\s*load\(\);\s*if \(queue\.size > 0\) \{\s*queue\.clear\(\);\s*persist\(\);\s*\}\s*return;\s*\}/);
+  assert.match(
+    stremioWriteQueue,
+    /if \(isNuvioProviderActive\(\)\) \{\s*load\(\);\s*if \(queue\.size > 0\) \{\s*queue\.clear\(\);\s*persist\(\);\s*\}\s*return;\s*\}/,
+  );
   assert.match(stremioWriteQueue, /export function startWriteQueueFlusher/);
   assert.match(stremioWriteQueue, /isNuvioProviderActive\(\)/);
 });
@@ -48,7 +54,10 @@ test("stremio watched sync modules never write to cloud in Nuvio mode", () => {
   assert.match(stremioWatchedSync, /async function putWithState/);
   assert.match(stremioWatchedSync, /if \(isNuvioProviderActive\(\)\) return true;/);
   assert.match(stremioWatchedSync, /export function markMovieWatchedStremio/);
-  assert.match(stremioWatchedSync, /if \(isNuvioProviderActive\(\)\) return Promise\.resolve\(true\);/);
+  assert.match(
+    stremioWatchedSync,
+    /if \(isNuvioProviderActive\(\)\) return Promise\.resolve\(true\);/,
+  );
   assert.match(stremioWatchedSync, /export async function setEpisodesWatchedStremio/);
   assert.match(stremioWatchedSync, /if \(isNuvioProviderActive\(\)\) return false;/);
 });

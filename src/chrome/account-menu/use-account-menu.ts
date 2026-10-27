@@ -44,8 +44,8 @@ export function useAccountMenu() {
       const target = e.target as HTMLElement | null;
       if (
         target?.closest('[role="dialog"]') ||
-        target?.closest('[data-portal]') ||
-        target?.closest('.harbor-portal')
+        target?.closest("[data-portal]") ||
+        target?.closest(".harbor-portal")
       ) {
         return;
       }

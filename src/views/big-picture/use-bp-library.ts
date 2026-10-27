@@ -5,7 +5,11 @@ import { useSettings } from "@/lib/settings";
 import { useHideAnime } from "@/lib/anime-hide";
 import { isAnimeCwItem, library, type LibraryItem } from "@/lib/stremio";
 import { isNuvioProviderActive, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
-import { readCachedNuvioLibrary, pullNuvioLibrarySnapshot, type NuvioLibraryItem } from "@/lib/nuvio/nuvio-library";
+import {
+  readCachedNuvioLibrary,
+  pullNuvioLibrarySnapshot,
+  type NuvioLibraryItem,
+} from "@/lib/nuvio/nuvio-library";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { useTrakt } from "@/lib/trakt/provider";
 import { fetchWatchlist } from "@/lib/trakt/watchlist";

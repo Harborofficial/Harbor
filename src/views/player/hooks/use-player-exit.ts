@@ -66,8 +66,14 @@ export function usePlayerExit(params: {
     const pos = getPlaybackPosition();
     if (Number.isFinite(pos) && pos > 0) {
       saveResumeMs(
-        src.meta.id, pos * 1000, season, episode,
-        undefined, undefined, undefined, activeProfile?.id,
+        src.meta.id,
+        pos * 1000,
+        season,
+        episode,
+        undefined,
+        undefined,
+        undefined,
+        activeProfile?.id,
       );
       if (liveStreamRef && pos >= REMEMBER_MIN_SEC) {
         const rememberedUrl = (src.historyUrl ?? liveUrl) || src.url;

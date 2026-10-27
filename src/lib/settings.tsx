@@ -614,7 +614,9 @@ export function SettingsProvider({
     const onProviderChange = (e: Event) => {
       const provider = (e as CustomEvent)?.detail?.provider as "stremio" | "nuvio" | undefined;
       if (provider) {
-        setSettings((s) => (s.accountProvider === provider ? s : { ...s, accountProvider: provider }));
+        setSettings((s) =>
+          s.accountProvider === provider ? s : { ...s, accountProvider: provider },
+        );
       }
     };
     window.addEventListener("harbor:account-provider-changed", onProviderChange);

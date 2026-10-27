@@ -7,9 +7,18 @@ import { useAuth } from "@/lib/auth";
 import { useActiveKid, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
-import { anchorFromElement, openAccountMenu, type AccountMenuAnchor } from "@/lib/social/account-menu-open";
+import {
+  anchorFromElement,
+  openAccountMenu,
+  type AccountMenuAnchor,
+} from "@/lib/social/account-menu-open";
 import { openNotificationCenter } from "@/lib/social/notification-open";
-import { currentStatus, setStatus, subscribeStatus, type PresenceStatus } from "@/lib/social/presence";
+import {
+  currentStatus,
+  setStatus,
+  subscribeStatus,
+  type PresenceStatus,
+} from "@/lib/social/presence";
 import { getUnreadCount, subscribeUnread } from "@/lib/social/unread-bridge";
 import { activeLayout } from "@/lib/theme";
 import { useBigPictureEntry } from "@/chrome/use-big-picture-entry";
@@ -150,7 +159,9 @@ export function ThemeChromeBridge() {
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const harborAvatar = isNuvio
     ? null
-    : (settings.harborAvatar?.startsWith("/kids/avatars/") ? null : settings.harborAvatar);
+    : settings.harborAvatar?.startsWith("/kids/avatars/")
+      ? null
+      : settings.harborAvatar;
   const avatarUrl = isNuvio
     ? (activeProfile?.avatar ?? null)
     : (activeProfile?.avatar ?? harborAvatar ?? user?.avatar ?? null);

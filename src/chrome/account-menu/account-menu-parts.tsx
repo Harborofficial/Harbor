@@ -21,7 +21,11 @@ export function ProfileAvatar({
 
   if (!src && profile?.name && profile?.color) {
     const textDim =
-      size === "lg" ? "text-base font-bold" : size === "sm" ? "text-[10px] font-bold" : "text-xs font-semibold";
+      size === "lg"
+        ? "text-base font-bold"
+        : size === "sm"
+          ? "text-[10px] font-bold"
+          : "text-xs font-semibold";
     return (
       <div
         className={`${dim} shrink-0 overflow-hidden rounded-full flex items-center justify-center text-white shadow-sm ring-1 ring-edge`}

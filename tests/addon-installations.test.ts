@@ -6,7 +6,17 @@ import { isAdultText } from "../src/lib/addons-store/adult-filter.ts";
 import type { Addon } from "../src/lib/addons.ts";
 
 function addon(transportUrl: string, id = "test.streams", adult = false): Addon {
-  return { transportUrl, manifest: { id, name: id, version: "1", types: ["movie"], resources: ["stream"], behaviorHints: { adult } } } as Addon;
+  return {
+    transportUrl,
+    manifest: {
+      id,
+      name: id,
+      version: "1",
+      types: ["movie"],
+      resources: ["stream"],
+      behaviorHints: { adult },
+    },
+  } as Addon;
 }
 
 async function catalog(local: Addon[], account: Addon[], adultsAllowed = false) {
@@ -19,9 +29,16 @@ async function catalog(local: Addon[], account: Addon[], adultsAllowed = false) 
       useState: (initial: unknown) => {
         const index = cursor++;
         if (!initialized) states[index] = initial;
-        return [states[index], (value: unknown) => { states[index] = typeof value === "function" ? value(states[index]) : value; }];
+        return [
+          states[index],
+          (value: unknown) => {
+            states[index] = typeof value === "function" ? value(states[index]) : value;
+          },
+        ];
       },
-      useEffect: (fn: () => unknown) => { if (!initialized) effects.push(fn); },
+      useEffect: (fn: () => unknown) => {
+        if (!initialized) effects.push(fn);
+      },
     },
     "@/lib/auth": { useAuth: () => ({ authKey: "fixture" }) },
     "@/lib/addons": { userAddons: async () => account },
@@ -32,20 +49,30 @@ async function catalog(local: Addon[], account: Addon[], adultsAllowed = false) 
     "./curated": { CURATED_ADDONS: [] },
     "@/lib/nuvio/nuvio-client": { isNuvioSignedIn: () => false },
     "@/lib/nuvio/nuvio-sync": { fetchNuvioAddons: async () => [] },
-    "@/lib/nuvio/nuvio-addon-registry": { recordStremioAddons: () => {}, recordNuvioAddons: () => {} },
+    "@/lib/nuvio/nuvio-addon-registry": {
+      recordStremioAddons: () => {},
+      recordNuvioAddons: () => {},
+    },
   };
   const exports = {} as typeof import("../src/lib/addons-store/store.ts");
-  const compiled = ts.transpileModule(readFileSync(new URL("../src/lib/addons-store/store.ts", import.meta.url), "utf8"), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
+  const compiled = ts.transpileModule(
+    readFileSync(new URL("../src/lib/addons-store/store.ts", import.meta.url), "utf8"),
+    {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    },
+  ).outputText;
   new Function("require", "exports", "window", compiled)(
-    (id: string) => { assert.ok(id in mocks, id); return mocks[id]; }, exports,
+    (id: string) => {
+      assert.ok(id in mocks, id);
+      return mocks[id];
+    },
+    exports,
     { addEventListener() {}, removeEventListener() {} },
   );
   exports.useAddonsCatalog(adultsAllowed);
   initialized = true;
-  const cleanup = effects.map(fn => fn());
-  await new Promise(resolve => setImmediate(resolve));
+  const cleanup = effects.map((fn) => fn());
+  await new Promise((resolve) => setImmediate(resolve));
   cursor = 0;
   const result = exports.useAddonsCatalog(adultsAllowed);
   for (const stop of cleanup) if (typeof stop === "function") stop();
@@ -58,20 +85,30 @@ test("same manifest with different configurations remains individually removable
   const two = addon("https://addon.invalid/config-two/manifest.json");
   const result = await catalog([one, two], [one]);
   assert.equal(result.byId.size, 1, "discovery still groups by manifest");
-  assert.deepEqual(result.installedAddons.map(a => a.transportUrl), [one.transportUrl, two.transportUrl]);
+  assert.deepEqual(
+    result.installedAddons.map((a) => a.transportUrl),
+    [one.transportUrl, two.transportUrl],
+  );
   assert.equal(result.installedAddons[0].source, "stremio-user");
 });
 
 test("case-sensitive configuration paths remain distinct while host case is normalized", async () => {
-  const result = await catalog([
-    addon("https://ADDON.invalid/TokenA/manifest.json"),
-    addon("https://addon.invalid/tokena/manifest.json"),
-  ], [addon("https://addon.invalid/TokenA/manifest.json")]);
+  const result = await catalog(
+    [
+      addon("https://ADDON.invalid/TokenA/manifest.json"),
+      addon("https://addon.invalid/tokena/manifest.json"),
+    ],
+    [addon("https://addon.invalid/TokenA/manifest.json")],
+  );
   assert.equal(result.installedAddons.length, 2);
 });
 
 test("installed rows retain hidden-provider and adult filtering", async () => {
-  const items = [addon("https://a.invalid/manifest.json"), addon("https://b.invalid/manifest.json", "private.streams", true), addon("https://c.invalid/manifest.json", "com.opensubtitles.v3")];
+  const items = [
+    addon("https://a.invalid/manifest.json"),
+    addon("https://b.invalid/manifest.json", "private.streams", true),
+    addon("https://c.invalid/manifest.json", "com.opensubtitles.v3"),
+  ];
   assert.equal((await catalog(items, [])).installedAddons.length, 1);
   assert.equal((await catalog(items, [], true)).installedAddons.length, 2);
 });

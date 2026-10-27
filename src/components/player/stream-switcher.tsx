@@ -95,7 +95,9 @@ export function StreamSwitcher({
     }
     return out;
   }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest]);
-  const [cache, setCache] = useState(() => peekPickerCache(meta, episode, settings.animePreferImdbStreams));
+  const [cache, setCache] = useState(() =>
+    peekPickerCache(meta, episode, settings.animePreferImdbStreams),
+  );
   const [addonLogos, setAddonLogos] = useState<Map<string, string | null>>(new Map());
   const [addonNames, setAddonNames] = useState<Map<string, string>>(new Map());
   const [filterToPreferred, setFilterToPreferred] = useState(
@@ -103,7 +105,8 @@ export function StreamSwitcher({
   );
 
   useEffect(() => {
-    const updateCache = () => setCache(peekPickerCache(meta, episode, settings.animePreferImdbStreams));
+    const updateCache = () =>
+      setCache(peekPickerCache(meta, episode, settings.animePreferImdbStreams));
     updateCache();
     return subscribePickerCache(updateCache);
   }, [meta, episode, settings.animePreferImdbStreams]);
@@ -123,9 +126,11 @@ export function StreamSwitcher({
       const isNuvio = isNuvioProviderActive();
       let nuvioAddonMode = "separate";
       try {
-        const raw = typeof localStorage !== "undefined"
-          ? (localStorage.getItem("harbor.settings") || localStorage.getItem("harbor.settings.shared"))
-          : null;
+        const raw =
+          typeof localStorage !== "undefined"
+            ? localStorage.getItem("harbor.settings") ||
+              localStorage.getItem("harbor.settings.shared")
+            : null;
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed.nuvioAddonMode) nuvioAddonMode = parsed.nuvioAddonMode;
@@ -136,20 +141,23 @@ export function StreamSwitcher({
 
       const installed = await fetchInstalledAddons().catch(() => [] as Addon[]);
       const effectiveAuthKey = resolveEffectiveStremioAuthKey(authKey);
-      const stremio = shouldStremio && effectiveAuthKey ? await userAddons(effectiveAuthKey).catch(() => [] as Addon[]) : [];
+      const stremio =
+        shouldStremio && effectiveAuthKey
+          ? await userAddons(effectiveAuthKey).catch(() => [] as Addon[])
+          : [];
       const nuvio = shouldNuvio ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
       const plugins = runnableStreamPlugins();
       if (cancelled) return;
       const list = [...installed, ...stremio, ...nuvio];
       const logoMap = addonLogoMap(list);
-      plugins.forEach(
-        ({ id, icon }) => icon && logoMap.set(`${PLUGIN_ADDON_PREFIX}${id}`, icon),
-      );
+      plugins.forEach(({ id, icon }) => icon && logoMap.set(`${PLUGIN_ADDON_PREFIX}${id}`, icon));
       setAddonLogos(logoMap);
-      setAddonNames(new Map([
-        ...list.map((a) => [a.manifest.id, a.manifest.name] as const),
-        ...plugins.map(({ id, name }) => [id, name] as const),
-      ]));
+      setAddonNames(
+        new Map([
+          ...list.map((a) => [a.manifest.id, a.manifest.name] as const),
+          ...plugins.map(({ id, name }) => [id, name] as const),
+        ]),
+      );
     })();
     return () => {
       cancelled = true;

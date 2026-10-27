@@ -9,7 +9,8 @@ export function useSelfIdentity(): { avatar: string | null; color: string | null
   const { activeProfile } = useProfiles();
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   return {
-    avatar: activeProfile?.avatar ?? (isNuvio ? null : (settings.harborAvatar ?? user?.avatar ?? null)),
-    color: (isNuvio ? activeProfile?.color : (settings.harborColor || activeProfile?.color)) || null,
+    avatar:
+      activeProfile?.avatar ?? (isNuvio ? null : (settings.harborAvatar ?? user?.avatar ?? null)),
+    color: (isNuvio ? activeProfile?.color : settings.harborColor || activeProfile?.color) || null,
   };
 }

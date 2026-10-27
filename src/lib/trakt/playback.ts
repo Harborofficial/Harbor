@@ -81,16 +81,7 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
     if (!id) return null;
     const season = raw.episode?.season;
     const episode = raw.episode?.number ?? (raw.episode as any)?.episode;
-    return buildItem(
-      id,
-      "series",
-      raw.show,
-      pct,
-      DURATION_MS.series,
-      when,
-      season,
-      episode,
-    );
+    return buildItem(id, "series", raw.show, pct, DURATION_MS.series, when, season, episode);
   }
   return null;
 }

@@ -36,10 +36,7 @@ if (typeof globalThis.window === "undefined") {
   };
 }
 
-import {
-  reconcileNuvioWatchedEpisodes,
-  manualEpisodeKeys,
-} from "../src/lib/manual-watched";
+import { reconcileNuvioWatchedEpisodes, manualEpisodeKeys } from "../src/lib/manual-watched";
 
 test("reconcileNuvioWatchedEpisodes removes unflagged episodes and adds them to unwatched", () => {
   mockStorage.clear();
@@ -48,13 +45,7 @@ test("reconcileNuvioWatchedEpisodes removes unflagged episodes and adds them to 
   const unwatchedKey = `harbor.manualunwatched.v1.nuvio.${slot}`;
 
   // Initially, user watched S1E1, S1E2, S1E3, S1E4, S1E5 of show tt100
-  const initialWatched = [
-    "tt100|1|1",
-    "tt100|1|2",
-    "tt100|1|3",
-    "tt100|1|4",
-    "tt100|1|5",
-  ];
+  const initialWatched = ["tt100|1|1", "tt100|1|2", "tt100|1|3", "tt100|1|4", "tt100|1|5"];
   mockStorage.set(watchedKey, JSON.stringify(initialWatched));
 
   // User on mobile unmarks S1E4 and S1E5 (server only has 1, 2, 3)

@@ -84,7 +84,9 @@ export function NuvioProfilesTab() {
     return (
       <Section
         title={t("Profiles")}
-        subtitle={t("Create profiles for the people who use Harbor. Each can have its own appearance, settings, and PIN.")}
+        subtitle={t(
+          "Create profiles for the people who use Harbor. Each can have its own appearance, settings, and PIN.",
+        )}
       >
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-edge-soft p-12 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent">
@@ -104,7 +106,12 @@ export function NuvioProfilesTab() {
             {t("Connect Nuvio account")}
           </button>
         </div>
-        {showAuthModal && <NuvioAuthModal onClose={() => setShowAuthModal(false)} onSuccess={activateNuvioAccountProvider} />}
+        {showAuthModal && (
+          <NuvioAuthModal
+            onClose={() => setShowAuthModal(false)}
+            onSuccess={activateNuvioAccountProvider}
+          />
+        )}
       </Section>
     );
   }
@@ -113,22 +120,26 @@ export function NuvioProfilesTab() {
   const profiles = nuvioState.profiles;
   const isPrimary = Number(nuvioState.activeProfileIndex) === 1;
   const nuvioPrivs = getSecondaryPrivileges(settings, true);
-  const canAdd =
-    (isPrimary || nuvioPrivs.canAddProfiles) &&
-    profiles.length < MAX_NUVIO_PROFILES;
+  const canAdd = (isPrimary || nuvioPrivs.canAddProfiles) && profiles.length < MAX_NUVIO_PROFILES;
   const canManageStartup = isPrimary || nuvioPrivs.canManageStartup;
 
   return (
     <Section
       title={t("Profiles")}
-      subtitle={t("Create profiles for the people who use Harbor. Each can have its own appearance, settings, and PIN.")}
+      subtitle={t(
+        "Create profiles for the people who use Harbor. Each can have its own appearance, settings, and PIN.",
+      )}
     >
       <SettingGroup label={t("Everyone on this Harbor")}>
         <div className="flex items-center justify-between">
           <p className={`max-w-[70ch] ${ROW_DESC}`}>
             {isPrimary
-              ? t("Choose a profile to switch. Use the pencil to edit its details and access settings.")
-              : t("Choose a profile to switch. You can edit your own profile's details and settings.")}
+              ? t(
+                  "Choose a profile to switch. Use the pencil to edit its details and access settings.",
+                )
+              : t(
+                  "Choose a profile to switch. You can edit your own profile's details and settings.",
+                )}
           </p>
           <button
             type="button"
@@ -194,9 +205,7 @@ export function NuvioProfilesTab() {
                     )}
                   </span>
                   <span className="flex w-full flex-col items-center gap-2">
-                    <span className={`max-w-full truncate text-center ${ROW_TITLE}`}>
-                      {p.name}
-                    </span>
+                    <span className={`max-w-full truncate text-center ${ROW_TITLE}`}>{p.name}</span>
                     <span className="flex min-h-[22px] items-center">
                       {active ? (
                         <span className={`${QUAL} bg-accent-soft text-accent`}>

@@ -136,15 +136,21 @@ export async function resurfaceCandidates(
           } else {
             nx = null;
           }
-        } else if (endMode === "timer" && !opts.hideCaughtUp && i.external !== "simkl" && i.external !== "trakt") {
+        } else if (
+          endMode === "timer" &&
+          !opts.hideCaughtUp &&
+          i.external !== "simkl" &&
+          i.external !== "trakt"
+        ) {
           nx = { season: cur.season, episode: cur.episode, waitingForAir: true };
         } else {
           nx = null;
         }
         const airTime = adj.next?.airDate ? Date.parse(adj.next.airDate) : NaN;
-        const cacheTtl = Number.isFinite(airTime) && airTime > now
-          ? Math.max(1000, Math.min(RESURFACE_TTL, airTime - now + 1000))
-          : RESURFACE_TTL;
+        const cacheTtl =
+          Number.isFinite(airTime) && airTime > now
+            ? Math.max(1000, Math.min(RESURFACE_TTL, airTime - now + 1000))
+            : RESURFACE_TTL;
         cache.set(key, { next: nx, t: now - (RESURFACE_TTL - cacheTtl) });
       } catch {
         // A failed lookup must remain retryable on the next refresh.
@@ -156,11 +162,16 @@ export async function resurfaceCandidates(
         .then((list) => {
           const target = nextUnwatchedAfter(list, cur, watchedFor(i, cur));
           if (!target) {
-            return i.external !== "simkl" && i.external !== "trakt" && endMode === "timer" && !opts.hideCaughtUp
+            return i.external !== "simkl" &&
+              i.external !== "trakt" &&
+              endMode === "timer" &&
+              !opts.hideCaughtUp
               ? { season: cur.season, episode: cur.episode, waitingForAir: true }
               : null;
           }
-          const entry = list.find((e) => e.season === target.season && e.episode === target.episode);
+          const entry = list.find(
+            (e) => e.season === target.season && e.episode === target.episode,
+          );
           if (entry && resurfaceAired(entry.airDate)) {
             return {
               season: target.season,

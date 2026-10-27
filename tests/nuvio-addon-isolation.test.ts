@@ -76,7 +76,7 @@ if (typeof window === "undefined") {
   return {
     ok: true,
     status: 200,
-    json: async () => ([]),
+    json: async () => [],
     text: async () => "ok",
   };
 };
@@ -133,18 +133,39 @@ test("Nuvio multi-profile addon isolation and syncing", async (t) => {
     lastSyncedAt: Date.now(),
   });
 
-  await t.test("resolveEffectiveNuvioAddonSlot correctly isolates separate vs inherited profiles", () => {
-    assert.equal(resolveEffectiveNuvioAddonSlot(1), 1, "Slot 1 always resolves to 1");
-    assert.equal(resolveEffectiveNuvioAddonSlot(2), 2, "Profile 2 with uses_primary_addons: false resolves to 2");
-    assert.equal(resolveEffectiveNuvioAddonSlot(3), 1, "Profile 3 with uses_primary_addons: true resolves to 1");
-  });
+  await t.test(
+    "resolveEffectiveNuvioAddonSlot correctly isolates separate vs inherited profiles",
+    () => {
+      assert.equal(resolveEffectiveNuvioAddonSlot(1), 1, "Slot 1 always resolves to 1");
+      assert.equal(
+        resolveEffectiveNuvioAddonSlot(2),
+        2,
+        "Profile 2 with uses_primary_addons: false resolves to 2",
+      );
+      assert.equal(
+        resolveEffectiveNuvioAddonSlot(3),
+        1,
+        "Profile 3 with uses_primary_addons: true resolves to 1",
+      );
+    },
+  );
 
   await t.test("Adding addon to profile 2 does not pollute profile 1", async () => {
     writeCachedNuvioAddons(1, [
-      { url: "https://addon.primary.com/manifest.json", name: "Primary Addon", enabled: true, sort_order: 0 },
+      {
+        url: "https://addon.primary.com/manifest.json",
+        name: "Primary Addon",
+        enabled: true,
+        sort_order: 0,
+      },
     ]);
     writeCachedNuvioAddons(2, [
-      { url: "https://addon.secondary.com/manifest.json", name: "Secondary Addon", enabled: true, sort_order: 0 },
+      {
+        url: "https://addon.secondary.com/manifest.json",
+        name: "Secondary Addon",
+        enabled: true,
+        sort_order: 0,
+      },
     ]);
 
     // Check slot 1 cached addons
@@ -183,25 +204,35 @@ test("Nuvio multi-profile addon isolation and syncing", async (t) => {
     assert.equal(p1StillSafe.length, 1);
   });
 
-  await t.test("installAddon in Nuvio mode saves to nuvio profile slot and syncs to nuvio cloud", async () => {
-    const installed = await installAddon("com.test.nuvioaddon", "https://addon3.nuvio.tv/manifest.json");
-    assert.ok(installed);
-    assert.equal(installed.manifest.name, "Test Nuvio Addon");
+  await t.test(
+    "installAddon in Nuvio mode saves to nuvio profile slot and syncs to nuvio cloud",
+    async () => {
+      const installed = await installAddon(
+        "com.test.nuvioaddon",
+        "https://addon3.nuvio.tv/manifest.json",
+      );
+      assert.ok(installed);
+      assert.equal(installed.manifest.name, "Test Nuvio Addon");
 
-    // Check that loadInstalled returned the addon for nuvio-2
-    const installedList = loadInstalled();
-    assert.ok(installedList.some((a) => a.transportUrl === "https://addon3.nuvio.tv/manifest.json"));
+      // Check that loadInstalled returned the addon for nuvio-2
+      const installedList = loadInstalled();
+      assert.ok(
+        installedList.some((a) => a.transportUrl === "https://addon3.nuvio.tv/manifest.json"),
+      );
 
-    // Check that Nuvio cache for slot 2 contains this addon
-    const slot2Cache = readCachedNuvioAddons(2);
-    assert.ok(slot2Cache.some((a) => a.url === "https://addon3.nuvio.tv/manifest.json"));
+      // Check that Nuvio cache for slot 2 contains this addon
+      const slot2Cache = readCachedNuvioAddons(2);
+      assert.ok(slot2Cache.some((a) => a.url === "https://addon3.nuvio.tv/manifest.json"));
 
-    // Stremio storage must not have this installed addon
-    assert.equal(localStorage.getItem("harbor.installed-addons.default"), null);
+      // Stremio storage must not have this installed addon
+      assert.equal(localStorage.getItem("harbor.installed-addons.default"), null);
 
-    // Now uninstall it
-    await uninstallAddon("com.test.nuvioaddon", "https://addon3.nuvio.tv/manifest.json");
-    const installedAfter = loadInstalled();
-    assert.ok(!installedAfter.some((a) => a.transportUrl === "https://addon3.nuvio.tv/manifest.json"));
-  });
+      // Now uninstall it
+      await uninstallAddon("com.test.nuvioaddon", "https://addon3.nuvio.tv/manifest.json");
+      const installedAfter = loadInstalled();
+      assert.ok(
+        !installedAfter.some((a) => a.transportUrl === "https://addon3.nuvio.tv/manifest.json"),
+      );
+    },
+  );
 });

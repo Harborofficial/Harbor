@@ -22,17 +22,22 @@ test("normalizeAddonUrl standardizes protocol, host and manifest.json suffixes",
     normalizeAddonUrl("https://torrentio.strem.fun/sort=quality/manifest.json"),
     "https://torrentio.strem.fun/sort=quality",
   );
-  assert.equal(
-    normalizeAddonUrl("https://cyberflix.me/"),
-    "https://cyberflix.me",
-  );
+  assert.equal(normalizeAddonUrl("https://cyberflix.me/"), "https://cyberflix.me");
 });
 
 test("recordAddonOrigins marks stremio, nuvio, and both correctly", () => {
-  const stremio = ["https://torrentio.strem.fun/manifest.json", "https://opensubtitles.org/manifest.json"];
+  const stremio = [
+    "https://torrentio.strem.fun/manifest.json",
+    "https://opensubtitles.org/manifest.json",
+  ];
   const nuvio = ["https://cyberflix.me/manifest.json", "https://opensubtitles.org/manifest.json"];
 
-  recordAddonOrigins(stremio, nuvio, ["com.stremio.torrentio", "org.opensubtitles"], ["com.cyberflix", "org.opensubtitles"]);
+  recordAddonOrigins(
+    stremio,
+    nuvio,
+    ["com.stremio.torrentio", "org.opensubtitles"],
+    ["com.cyberflix", "org.opensubtitles"],
+  );
 
   assert.equal(resolveAddonOrigin("https://torrentio.strem.fun/manifest.json"), "stremio");
   assert.equal(resolveAddonOrigin("com.stremio.torrentio"), "stremio");
@@ -50,12 +55,18 @@ test("recordAddonOrigins marks stremio, nuvio, and both correctly", () => {
 test("recordStremioAddons and recordNuvioAddons incrementally update and merge registry", () => {
   recordStremioAddons([
     { transportUrl: "https://addon-a.strem.fun/manifest.json", manifest: { id: "addon.a" } },
-    { transportUrl: "https://addon-shared.strem.fun/manifest.json", manifest: { id: "addon.shared" } },
+    {
+      transportUrl: "https://addon-shared.strem.fun/manifest.json",
+      manifest: { id: "addon.shared" },
+    },
   ]);
 
   recordNuvioAddons([
     { transportUrl: "https://addon-b.nuvio.app/manifest.json", manifest: { id: "addon.b" } },
-    { transportUrl: "https://addon-shared.strem.fun/manifest.json", manifest: { id: "addon.shared" } },
+    {
+      transportUrl: "https://addon-shared.strem.fun/manifest.json",
+      manifest: { id: "addon.shared" },
+    },
   ]);
 
   assert.equal(resolveAddonOrigin("addon.a"), "stremio");
@@ -69,8 +80,12 @@ test("recordStremioAddons and recordNuvioAddons incrementally update and merge r
 });
 
 test("Nuvio addons cache isolates profile slots and roundtrips items", () => {
-  const p1Addons = [{ url: "https://p1.addon/manifest.json", name: "P1 Addon", enabled: true, sort_order: 1 }];
-  const p2Addons = [{ url: "https://p2.addon/manifest.json", name: "P2 Addon", enabled: true, sort_order: 1 }];
+  const p1Addons = [
+    { url: "https://p1.addon/manifest.json", name: "P1 Addon", enabled: true, sort_order: 1 },
+  ];
+  const p2Addons = [
+    { url: "https://p2.addon/manifest.json", name: "P2 Addon", enabled: true, sort_order: 1 },
+  ];
 
   writeCachedNuvioAddons(1, p1Addons, "acc-test");
   writeCachedNuvioAddons(2, p2Addons, "acc-test");

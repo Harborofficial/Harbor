@@ -20,7 +20,12 @@ import {
   type LibraryItem,
 } from "@/lib/stremio";
 import { isEpisodeHidden } from "@/lib/hidden-episodes";
-import { isNextAired, resurfaceCandidates, type AnimeMode, type ResurfaceTarget } from "@/lib/cw-resurface";
+import {
+  isNextAired,
+  resurfaceCandidates,
+  type AnimeMode,
+  type ResurfaceTarget,
+} from "@/lib/cw-resurface";
 import { lastPlayedEpisode, readResumeEntry } from "@/lib/resume";
 import { getViewedSeason } from "@/lib/season-view-pref";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
@@ -99,10 +104,9 @@ async function animeEntryFollowUp(
     if (cached !== undefined) return cached;
     let fetched: PlayEpisode[] = [];
     try {
-      fetched = await fetchEpisodeList(
-        { id, type: "series", name: item.name } as Meta,
-        { tmdbKey },
-      );
+      fetched = await fetchEpisodeList({ id, type: "series", name: item.name } as Meta, {
+        tmdbKey,
+      });
     } catch {
       // A transient failure must stay retryable: caching the empty result would
       // disable the sequel fallback for this entry for the whole session.
@@ -490,9 +494,7 @@ export function useCwAdvance(
               effCur = { season: abs.season, episode: abs.episode };
             }
           }
-          if (
-            !list.some((e) => e.season === effCur.season && e.episode === effCur.episode)
-          ) {
+          if (!list.some((e) => e.season === effCur.season && e.episode === effCur.episode)) {
             const seasonEps = list.filter((e) => e.season === effCur.season);
             const maxSeasonEp = seasonEps.reduce((max, e) => Math.max(max, e.episode), 0);
             if (seasonEps.length > 0 && effCur.episode > maxSeasonEp) {
@@ -510,9 +512,7 @@ export function useCwAdvance(
                   effectiveSimklStatus,
                   !!privacyOwner,
                 );
-                const nextUnwatched = nextSeasonEps.find(
-                  (e) => !checkWatched(e.season, e.episode),
-                );
+                const nextUnwatched = nextSeasonEps.find((e) => !checkWatched(e.season, e.episode));
                 if (nextUnwatched) {
                   next.set(i._id, {
                     ...i,
@@ -542,7 +542,8 @@ export function useCwAdvance(
               } else {
                 // No next season in provider list: check if an anime sequel cour exists
                 let followUp: PlayEpisode | null = null;
-                const tryAnimeEntry = isAnime || i._id.startsWith("tt") || i._id.startsWith("tmdb:");
+                const tryAnimeEntry =
+                  isAnime || i._id.startsWith("tt") || i._id.startsWith("tmdb:");
                 if (tryAnimeEntry && !privacyOwner) {
                   const checkWatched = watchedPredicate(
                     i,
@@ -602,7 +603,9 @@ export function useCwAdvance(
             }
           }
         }
-        const curEpInList = list.find((e) => e.season === effCur.season && e.episode === effCur.episode);
+        const curEpInList = list.find(
+          (e) => e.season === effCur.season && e.episode === effCur.episode,
+        );
         if (curEpInList && !nextEpAired(list, curEpInList, isAnime)) {
           if (animeCwEnd === "timer") {
             next.set(i._id, {
@@ -630,13 +633,15 @@ export function useCwAdvance(
         const watchedCur =
           checkWatched(effCur.season, effCur.episode) ||
           aliasCur.some((a) => checkWatched(a.season, a.episode)) ||
-          ((i as Record<string, unknown>).waitingForAir === true) ||
+          (i as Record<string, unknown>).waitingForAir === true ||
           (i.external === "nuvio" && (i as Record<string, unknown>).keptForTimer === true);
         if (!watchedCur) continue;
         const nextSkip = episodeHiding
           ? (s: number, e: number) => isEpisodeHidden(i._id, s, e)
           : undefined;
-        const curIdx = list.findIndex((e) => e.season === effCur.season && e.episode === effCur.episode);
+        const curIdx = list.findIndex(
+          (e) => e.season === effCur.season && e.episode === effCur.episode,
+        );
         let immediateNext: PlayEpisode | null = null;
         if (curIdx >= 0) {
           for (let k = curIdx + 1; k < list.length; k++) {
@@ -649,19 +654,19 @@ export function useCwAdvance(
           nextEp = unplacedCur
             ? null
             : nextUnwatchedAfter(
-              list,
-              effCur,
-              (s: number, e: number): boolean => {
-                if (s === effCur.season && e === effCur.episode) return true;
-                if (privacyOwner) return false;
-                if (checkWatched(s, e)) return true;
-                if (!scoped) return false;
-                return providerAliasCoords(list, s, e).some(
-                  (a) => checkWatched(a.season, a.episode),
-                );
-              },
-              nextSkip,
-            );
+                list,
+                effCur,
+                (s: number, e: number): boolean => {
+                  if (s === effCur.season && e === effCur.episode) return true;
+                  if (privacyOwner) return false;
+                  if (checkWatched(s, e)) return true;
+                  if (!scoped) return false;
+                  return providerAliasCoords(list, s, e).some((a) =>
+                    checkWatched(a.season, a.episode),
+                  );
+                },
+                nextSkip,
+              );
         }
         if (immediateNext && nextEp && nextEp.season > immediateNext.season) {
           nextEp = immediateNext;

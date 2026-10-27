@@ -392,7 +392,11 @@ test("series with completed season advances to season 2 episode 1 when season 1 
   const h = harness();
   h.setRemote(progress([10], "ttMobland"));
   h.setEpisodes([
-    ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ep) => ({ season: 1, episode: ep, airDate: "2020-01-01" })),
+    ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ep) => ({
+      season: 1,
+      episode: ep,
+      airDate: "2020-01-01",
+    })),
     { season: 2, episode: 1, airDate: "2021-01-01" },
   ]);
   const mobland = {
@@ -412,12 +416,21 @@ test("series with completed season is removed when no subsequent seasons exist",
   const h = harness();
   h.setRemote(progress([10], "ttMoblandSingleSeason"));
   h.setEpisodes(
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ep) => ({ season: 1, episode: ep, airDate: "2020-01-01" })),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ep) => ({
+      season: 1,
+      episode: ep,
+      airDate: "2020-01-01",
+    })),
   );
   const mobland = {
     ...item(11, iso(), "ttMoblandSingleSeason"),
     upNext: true,
-    state: { ...item(11, iso(), "ttMoblandSingleSeason").state, season: 1, episode: 11, timeOffset: 0 },
+    state: {
+      ...item(11, iso(), "ttMoblandSingleSeason").state,
+      season: 1,
+      episode: 11,
+      timeOffset: 0,
+    },
   };
   h.render([mobland], "", true);
   const out = await h.flush();

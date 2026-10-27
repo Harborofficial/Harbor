@@ -4,9 +4,11 @@ import { resolve } from "node:path";
 import test from "node:test";
 import ts from "typescript";
 
-function harness(opts: {
-  nextEp?: { season: number; episode: number; airDate?: string } | null;
-} = {}) {
+function harness(
+  opts: {
+    nextEp?: { season: number; episode: number; airDate?: string } | null;
+  } = {},
+) {
   const data = new Map<string, string>();
   const storage = {
     getItem: (k: string) => data.get(k) ?? null,
@@ -39,7 +41,10 @@ function harness(opts: {
         if (name.endsWith("/series-episodes")) {
           return {
             fetchAdjacentEpisodes: async () => ({
-              next: opts.nextEp !== undefined ? opts.nextEp : { season: 1, episode: 5, airDate: "2099-01-01" },
+              next:
+                opts.nextEp !== undefined
+                  ? opts.nextEp
+                  : { season: 1, episode: 5, airDate: "2099-01-01" },
             }),
             fetchEpisodeList: async () => [],
             nextUnwatchedAfter: () => null,
@@ -84,11 +89,11 @@ test("resurfaceCandidates keeps unaired episode with waitingForAir and airDate w
     },
   };
 
-  const timerResult = await resurface.resurfaceCandidates(
-    [item],
-    new Set(),
-    { tmdbKey: "", animeMode: "all", animeCwEnd: "timer" },
-  );
+  const timerResult = await resurface.resurfaceCandidates([item], new Set(), {
+    tmdbKey: "",
+    animeMode: "all",
+    animeCwEnd: "timer",
+  });
 
   const candidate = timerResult.get("tt_vision_quest");
   assert.ok(candidate, "Candidate should resurface when timer mode is enabled");
@@ -117,13 +122,17 @@ test("resurfaceCandidates drops unaired episode when animeCwEnd is hide", async 
     },
   };
 
-  const hideResult = await resurface.resurfaceCandidates(
-    [item],
-    new Set(),
-    { tmdbKey: "", animeMode: "all", animeCwEnd: "hide" },
-  );
+  const hideResult = await resurface.resurfaceCandidates([item], new Set(), {
+    tmdbKey: "",
+    animeMode: "all",
+    animeCwEnd: "hide",
+  });
 
-  assert.equal(hideResult.get("tt_vision_quest_hide"), undefined, "Should not resurface when set to hide");
+  assert.equal(
+    hideResult.get("tt_vision_quest_hide"),
+    undefined,
+    "Should not resurface when set to hide",
+  );
 });
 
 test("resurfaceCandidates retains caught-up series with waitingForAir when no subsequent episode exists and animeCwEnd is timer", async () => {
@@ -144,11 +153,11 @@ test("resurfaceCandidates retains caught-up series with waitingForAir when no su
     },
   };
 
-  const timerResult = await resurface.resurfaceCandidates(
-    [item],
-    new Set(),
-    { tmdbKey: "", animeMode: "all", animeCwEnd: "timer" },
-  );
+  const timerResult = await resurface.resurfaceCandidates([item], new Set(), {
+    tmdbKey: "",
+    animeMode: "all",
+    animeCwEnd: "timer",
+  });
 
   const candidate = timerResult.get("tt_tulsa_king");
   assert.ok(candidate, "Caught up series should be retained with timer");
@@ -175,13 +184,18 @@ test("resurfaceCandidates drops caught-up series when hideCaughtUp is true", asy
     },
   };
 
-  const result = await resurface.resurfaceCandidates(
-    [item],
-    new Set(),
-    { tmdbKey: "", animeMode: "all", animeCwEnd: "timer", hideCaughtUp: true },
-  );
+  const result = await resurface.resurfaceCandidates([item], new Set(), {
+    tmdbKey: "",
+    animeMode: "all",
+    animeCwEnd: "timer",
+    hideCaughtUp: true,
+  });
 
-  assert.equal(result.get("tt_tulsa_king_hide"), undefined, "Should drop caught up series when hideCaughtUp is true");
+  assert.equal(
+    result.get("tt_tulsa_king_hide"),
+    undefined,
+    "Should drop caught up series when hideCaughtUp is true",
+  );
 });
 
 test("resurfaceCandidates isolates cache between timer and hide modes", async () => {
@@ -289,5 +303,3 @@ test("resurfaceCandidates resurfaces newly aired episode when airDate has passed
   assert.equal(candidate.episode, 3);
   assert.equal(candidate.waitingForAir, false);
 });
-
-

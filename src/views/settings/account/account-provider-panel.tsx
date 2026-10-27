@@ -53,12 +53,18 @@ export function AccountProviderPanel() {
       const raw = localStorage.getItem("harbor.settings");
       if (raw) {
         const p = JSON.parse(raw);
-        localStorage.setItem("harbor.settings", JSON.stringify({ ...p, accountProvider: provider }));
+        localStorage.setItem(
+          "harbor.settings",
+          JSON.stringify({ ...p, accountProvider: provider }),
+        );
       }
       const sharedRaw = localStorage.getItem("harbor.settings.shared");
       if (sharedRaw) {
         const p = JSON.parse(sharedRaw);
-        localStorage.setItem("harbor.settings.shared", JSON.stringify({ ...p, accountProvider: provider }));
+        localStorage.setItem(
+          "harbor.settings.shared",
+          JSON.stringify({ ...p, accountProvider: provider }),
+        );
       }
     } catch {}
     update({ accountProvider: provider });
@@ -116,7 +122,9 @@ export function AccountProviderPanel() {
                       }`}
                     />
                     <span>
-                      {stremioUser ? t("Connected as {email}", { email: stremioUser.email }) : t("Not connected")}
+                      {stremioUser
+                        ? t("Connected as {email}", { email: stremioUser.email })
+                        : t("Not connected")}
                     </span>
                   </div>
                 </div>

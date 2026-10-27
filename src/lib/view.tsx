@@ -1114,7 +1114,9 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           primary?.name?.toLowerCase().replace(/\s+/g, "") ||
           ns.session?.user?.email?.split("@")[0] ||
           "nuvio"
-        ).trim().toLowerCase();
+        )
+          .trim()
+          .toLowerCase();
       } else {
         nextHandle = (currentAuthor()?.handle || "").trim().toLowerCase();
       }

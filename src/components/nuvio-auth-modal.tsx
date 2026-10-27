@@ -3,7 +3,11 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
-import { activateNuvioAccountProvider, signInWithEmailPassword, startNuvioWebAuth } from "@/lib/nuvio/nuvio-auth";
+import {
+  activateNuvioAccountProvider,
+  signInWithEmailPassword,
+  startNuvioWebAuth,
+} from "@/lib/nuvio/nuvio-auth";
 import { NUVIO_OFFICIAL_WEB_URL } from "@/lib/nuvio/nuvio-client";
 
 export function NuvioAuthModal({
@@ -103,7 +107,9 @@ export function NuvioAuthModal({
             {webBusy ? (
               <>
                 <Loader2 size={15} className="animate-spin" />
-                {webCode ? `${t("Waiting in browser...")} (${webCode})` : t("Continue in your browser...")}
+                {webCode
+                  ? `${t("Waiting in browser...")} (${webCode})`
+                  : t("Continue in your browser...")}
               </>
             ) : (
               <>

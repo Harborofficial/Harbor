@@ -98,9 +98,11 @@ test("Nuvio playback forwards the end mode to the fully-watched guard", () => {
   );
   assert.match(playback, /keepCaughtUpForTimer = false,/);
   assert.match(playback, /if \(!keepCaughtUpForTimer\) continue;/);
-  assert.match(playback, /if \(keptForTimer\) \{\s*nextSeason = seed\.season;\s*nextEpisode = seed\.episode;/);
+  assert.match(
+    playback,
+    /if \(keptForTimer\) \{\s*nextSeason = seed\.season;\s*nextEpisode = seed\.episode;/,
+  );
 });
-
 
 test("Nuvio playback tags kept-for-timer item with waitingForAir", () => {
   undismissCw(SERIES);

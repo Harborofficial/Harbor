@@ -79,7 +79,10 @@ test("Big Picture CW: keeps Nuvio sync progress when Nuvio provider is active", 
   assert.equal(stremioResults.length, 2);
   assert.ok(stremioResults.some((x) => x._id === "tt12345"));
   assert.ok(stremioResults.some((x) => x._id === "tt11111"));
-  assert.ok(!stremioResults.some((x) => x._id === "tt98765"), "Nuvio items must not bleed into Stremio mode");
+  assert.ok(
+    !stremioResults.some((x) => x._id === "tt98765"),
+    "Nuvio items must not bleed into Stremio mode",
+  );
 });
 
 test("Big Picture CW card: remainingLabel displays remaining time for Nuvio items but suppresses for external trackers", () => {
@@ -98,7 +101,11 @@ test("Big Picture CW card: remainingLabel displays remaining time for Nuvio item
   const traktItem = makeItem("trakt", "tt3", "Trakt Show", 1200, 3600);
 
   assert.equal(remainingLabel(localItem), "30m left");
-  assert.equal(remainingLabel(nuvioItem), "40m left", "Nuvio items in Big Picture should show remaining time");
+  assert.equal(
+    remainingLabel(nuvioItem),
+    "40m left",
+    "Nuvio items in Big Picture should show remaining time",
+  );
   assert.equal(remainingLabel(traktItem), "", "External tracker items suppress remaining duration");
 });
 
@@ -106,7 +113,11 @@ test("Big Picture CW card meta: BpCwCardPill treats Nuvio items as native playba
   const isTrackerPill = (external?: string) => !!external && external !== "nuvio";
 
   assert.equal(isTrackerPill(undefined), false);
-  assert.equal(isTrackerPill("nuvio"), false, "Nuvio must not be rendered as a third-party tracker pill");
+  assert.equal(
+    isTrackerPill("nuvio"),
+    false,
+    "Nuvio must not be rendered as a third-party tracker pill",
+  );
   assert.equal(isTrackerPill("simkl"), true);
   assert.equal(isTrackerPill("trakt"), true);
 });

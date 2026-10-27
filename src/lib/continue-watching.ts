@@ -128,8 +128,7 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const externalCw = useExternalCw(
     Boolean(
       isNuvioProvider ||
-        (!hideSharedCw &&
-          (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb)),
+      (!hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb)),
     ),
   );
   const [items, setItems] = useState<LibraryItem[]>([]);
@@ -241,5 +240,14 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, externalCw, localVersion, excludeId, limit, hideSharedCw, cwSources, activeProfile?.id]);
+  }, [
+    items,
+    externalCw,
+    localVersion,
+    excludeId,
+    limit,
+    hideSharedCw,
+    cwSources,
+    activeProfile?.id,
+  ]);
 }

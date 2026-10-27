@@ -134,7 +134,9 @@ export function NuvioSyncedAddonsCard() {
       <SettingRow
         wide
         label={t("Addon collection mode")}
-        desc={t("Choose whether Nuvio operates with its own isolated addons or merges with your Stremio library.")}
+        desc={t(
+          "Choose whether Nuvio operates with its own isolated addons or merges with your Stremio library.",
+        )}
       >
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <button
@@ -158,9 +160,7 @@ export function NuvioSyncedAddonsCard() {
               </div>
               <span
                 className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                  addonMode === "separate"
-                    ? "bg-accent text-canvas"
-                    : "bg-elevated text-ink-subtle"
+                  addonMode === "separate" ? "bg-accent text-canvas" : "bg-elevated text-ink-subtle"
                 }`}
               >
                 {t("Isolated")}
@@ -194,9 +194,7 @@ export function NuvioSyncedAddonsCard() {
               </div>
               <span
                 className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                  addonMode === "combined"
-                    ? "bg-accent text-canvas"
-                    : "bg-elevated text-ink-subtle"
+                  addonMode === "combined" ? "bg-accent text-canvas" : "bg-elevated text-ink-subtle"
                 }`}
               >
                 {t("With tags")}

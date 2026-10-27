@@ -405,7 +405,14 @@ export function dismissCw(
 export function undismissCw(id: string): void {
   loadDismissed();
   const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
-  const variants = [id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`, `nuvio|${id}`, `nuvio|${cleanId}`];
+  const variants = [
+    id,
+    cleanId,
+    `tmdb:${cleanId}`,
+    `series:${cleanId}`,
+    `nuvio|${id}`,
+    `nuvio|${cleanId}`,
+  ];
   let changed = false;
   for (const v of variants) {
     if (dismissed.delete(v)) changed = true;

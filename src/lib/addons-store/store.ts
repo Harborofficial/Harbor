@@ -62,12 +62,14 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
 
       const local = await fetchInstalledAddons().catch(() => [] as Addon[]);
       const stremioKey = resolveEffectiveStremioAuthKey(authKey);
-      const stremio = (!isNuvio || nuvioAddonMode === "combined") && stremioKey
-        ? await userAddons(stremioKey).catch(() => [] as Addon[])
-        : [];
-      const nuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
-        ? await fetchNuvioAddons().catch(() => [] as Addon[])
-        : [];
+      const stremio =
+        (!isNuvio || nuvioAddonMode === "combined") && stremioKey
+          ? await userAddons(stremioKey).catch(() => [] as Addon[])
+          : [];
+      const nuvio =
+        (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
+          ? await fetchNuvioAddons().catch(() => [] as Addon[])
+          : [];
 
       if (!isNuvio || nuvioAddonMode === "combined") {
         recordStremioAddons(stremio);
@@ -89,7 +91,11 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
         const id = a.manifest?.id;
         // Only the host is case-insensitive; configured paths and tokens are not.
         let url = a.transportUrl.trim();
-        try { url = new URL(url).href; } catch { /* Keep nonstandard transports distinct. */ }
+        try {
+          url = new URL(url).href;
+        } catch {
+          /* Keep nonstandard transports distinct. */
+        }
         if (!id || seenUrls.has(url)) return;
         seenUrls.add(url);
         const curated = CURATED_BY_ID.get(id);

@@ -41,7 +41,9 @@ export function SecondaryPrivilegesCard() {
         localStorage.setItem(storageKey, JSON.stringify(parsed));
       }
       window.dispatchEvent(new CustomEvent("harbor:settings-changed"));
-      window.dispatchEvent(new CustomEvent("harbor:secondary-privileges-changed", { detail: nextPrivs }));
+      window.dispatchEvent(
+        new CustomEvent("harbor:secondary-privileges-changed", { detail: nextPrivs }),
+      );
     } catch {}
   };
 

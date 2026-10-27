@@ -49,12 +49,7 @@ import { clearCwCache } from "@/lib/continue-watching";
 import { clearWatchlistCache } from "@/lib/watchlist";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
 
-import type {
-
-  NuvioDeviceCodeSession,
-  NuvioProfile,
-  NuvioSession,
-} from "./nuvio-types";
+import type { NuvioDeviceCodeSession, NuvioProfile, NuvioSession } from "./nuvio-types";
 
 /**
  * Sign in using email and password
@@ -84,8 +79,8 @@ export async function signInWithEmailPassword(
         typeof err.error_description === "string"
           ? err.error_description
           : typeof err.msg === "string"
-          ? err.msg
-          : `Authentication failed (HTTP ${res.status})`;
+            ? err.msg
+            : `Authentication failed (HTTP ${res.status})`;
       return { ok: false, error: msg };
     }
 
@@ -202,7 +197,9 @@ export async function pollDeviceCodeSession(
 
     const raw = await res.json();
     const data = (Array.isArray(raw) ? raw[0] : raw) as Record<string, unknown>;
-    const status = String(data.status || "").toLowerCase().trim();
+    const status = String(data.status || "")
+      .toLowerCase()
+      .trim();
 
     if (status === "approved" || data.access_token) {
       let tokenData = data;
@@ -243,7 +240,8 @@ export async function pollDeviceCodeSession(
         const session: NuvioSession = {
           access_token: String(tokenData.access_token),
           refresh_token: String(tokenData.refresh_token || ""),
-          expires_at: nowSec + (typeof tokenData.expires_in === "number" ? tokenData.expires_in : 3600),
+          expires_at:
+            nowSec + (typeof tokenData.expires_in === "number" ? tokenData.expires_in : 3600),
           token_type: "bearer",
           user,
         };
@@ -336,7 +334,7 @@ export async function fetchNuvioProfiles(): Promise<NuvioProfile[]> {
     const res = await nuvioFetch("/rest/v1/profiles?order=profile_index.asc");
     if (!res.ok) return [];
 
-    const list = await res.json() as NuvioProfile[];
+    const list = (await res.json()) as NuvioProfile[];
     if (Array.isArray(list)) {
       const state = loadNuvioState();
       saveNuvioState({ ...state, profiles: list });
@@ -399,19 +397,26 @@ export async function signOutNuvio(): Promise<void> {
     }
   } catch {}
 
-  const wasNuvio = isNuvioProviderActive() || localStorage.getItem("harbor.account-provider") === "nuvio";
+  const wasNuvio =
+    isNuvioProviderActive() || localStorage.getItem("harbor.account-provider") === "nuvio";
   if (wasNuvio) {
     try {
       localStorage.setItem("harbor.account-provider", "stremio");
       const raw = localStorage.getItem("harbor.settings");
       if (raw) {
         const p = JSON.parse(raw);
-        localStorage.setItem("harbor.settings", JSON.stringify({ ...p, accountProvider: "stremio" }));
+        localStorage.setItem(
+          "harbor.settings",
+          JSON.stringify({ ...p, accountProvider: "stremio" }),
+        );
       }
       const sharedRaw = localStorage.getItem("harbor.settings.shared");
       if (sharedRaw) {
         const p = JSON.parse(sharedRaw);
-        localStorage.setItem("harbor.settings.shared", JSON.stringify({ ...p, accountProvider: "stremio" }));
+        localStorage.setItem(
+          "harbor.settings.shared",
+          JSON.stringify({ ...p, accountProvider: "stremio" }),
+        );
       }
     } catch {}
   }
@@ -426,7 +431,9 @@ export async function signOutNuvio(): Promise<void> {
 
   if (wasNuvio) {
     window.dispatchEvent(
-      new CustomEvent("harbor:account-provider-changed", { detail: { provider: "stremio", skipPicker: true } }),
+      new CustomEvent("harbor:account-provider-changed", {
+        detail: { provider: "stremio", skipPicker: true },
+      }),
     );
   }
   window.dispatchEvent(new CustomEvent("harbor:nuvio-state-changed"));
@@ -453,4 +460,3 @@ export async function signOutNuvio(): Promise<void> {
     }
   }
 }
-

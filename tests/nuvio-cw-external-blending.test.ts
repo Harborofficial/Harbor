@@ -166,8 +166,24 @@ function fixture(initialNuvioActive = true, nuvioSignedIn = true) {
 
 test("Nuvio native CW items preserve 'nuvio' identity and blend newer Trakt watch progression", async () => {
   const h = fixture(true, true);
-  const nuvioItem = makeItem("nuvio", "tt0903747", "Breaking Bad", 1, 2, "2026-10-22T10:00:00Z", 200);
-  const traktItem = makeItem("trakt", "tt0903747", "Breaking Bad", 1, 4, "2026-10-22T11:00:00Z", 800);
+  const nuvioItem = makeItem(
+    "nuvio",
+    "tt0903747",
+    "Breaking Bad",
+    1,
+    2,
+    "2026-10-22T10:00:00Z",
+    200,
+  );
+  const traktItem = makeItem(
+    "trakt",
+    "tt0903747",
+    "Breaking Bad",
+    1,
+    4,
+    "2026-10-22T11:00:00Z",
+    800,
+  );
 
   h.setNuvioItems([nuvioItem]);
   h.providers.trakt = async () => [traktItem];
@@ -177,8 +193,16 @@ test("Nuvio native CW items preserve 'nuvio' identity and blend newer Trakt watc
   const cw = h.api.listExternalCw();
   assert.equal(cw.length, 1, "Must collapse into exactly one card for the show");
   assert.equal(cw[0].external, "nuvio", "Native Nuvio item must retain 'nuvio' card identity");
-  assert.equal(cw[0].state?.episode, 4, "Newer episode progress from Trakt must blend into Nuvio card");
-  assert.equal(cw[0].state?.timeOffset, 800, "Newer timeOffset from Trakt must blend into Nuvio card");
+  assert.equal(
+    cw[0].state?.episode,
+    4,
+    "Newer episode progress from Trakt must blend into Nuvio card",
+  );
+  assert.equal(
+    cw[0].state?.timeOffset,
+    800,
+    "Newer timeOffset from Trakt must blend into Nuvio card",
+  );
 });
 
 test("Nuvio progress push does not wipe Trakt and Simkl items from externalCw", async () => {
@@ -234,7 +258,11 @@ test("Toggling Trakt progress ON restores cached cards synchronously and instant
   // Now enable trakt - should be synchronous and instant from cache
   h.api.setExternalCwSources({ trakt: true, simkl: false, nuvio: true });
   const cw = h.api.listExternalCw();
-  assert.equal(cw.length, 1, "Cached Trakt card must appear synchronously without waiting for network");
+  assert.equal(
+    cw.length,
+    1,
+    "Cached Trakt card must appear synchronously without waiting for network",
+  );
   assert.equal(cw[0]._id, "tt11280740");
   assert.equal(cw[0].external, "trakt");
 });
@@ -265,9 +293,27 @@ test("Simkl and Trakt in Nuvio mode exclude finished items while supporting in-p
     upNext: false,
   };
   // Finished Simkl show (timeOffset: 950 / 1000 = 95%)
-  const finishedSimkl = makeItem("simkl", "tt002", "Finished Simkl", 1, 1, "2026-10-22T12:00:00Z", 950, 1000);
+  const finishedSimkl = makeItem(
+    "simkl",
+    "tt002",
+    "Finished Simkl",
+    1,
+    1,
+    "2026-10-22T12:00:00Z",
+    950,
+    1000,
+  );
   // Valid in-progress Simkl show (timeOffset: 400 / 1000 = 40%)
-  const inProgressSimkl = makeItem("simkl", "tt003", "In-Progress Simkl", 1, 1, "2026-10-22T12:00:00Z", 400, 1000);
+  const inProgressSimkl = makeItem(
+    "simkl",
+    "tt003",
+    "In-Progress Simkl",
+    1,
+    1,
+    "2026-10-22T12:00:00Z",
+    400,
+    1000,
+  );
   // Simkl Next Up ongoing series (timeOffset: 0, upNext: true)
   const simklNextUp = {
     ...makeItem("simkl", "tt005", "Simkl Next Up", 2, 1, "2026-10-22T12:00:00Z", 0, 1000),

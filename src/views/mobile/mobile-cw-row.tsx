@@ -113,8 +113,8 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   const externalCw = useExternalCw(
     Boolean(
       isNuvioProvider ||
-        (!hideSharedCw &&
-          (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb)),
+      (!hideSharedCw &&
+        (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb)),
     ),
   );
   const [items, setItems] = useState<LibraryItem[]>(() =>
@@ -203,7 +203,9 @@ export function useMobileCw(limit = 14): LibraryItem[] {
     const merged = [
       ...base,
       ...listLocalCw(isNuvioProvider ? false : hideSharedCw).map((e) =>
-        isNuvioProvider ? { ...localToLibraryItem(e), external: "nuvio" as const } : localToLibraryItem(e),
+        isNuvioProvider
+          ? { ...localToLibraryItem(e), external: "nuvio" as const }
+          : localToLibraryItem(e),
       ),
     ]
       .filter(
@@ -387,7 +389,9 @@ export function MobileCwRow({
   const handleDismiss = useCallback(
     (item: LibraryItem) => {
       const isNuvio =
-        isNuvioProvider || item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive());
+        isNuvioProvider ||
+        item.external === "nuvio" ||
+        (isNuvioSignedIn() && isNuvioProviderActive());
       if (isNuvio) {
         const slot = resolveNuvioProfileIndex();
         removeExternalCwItem(item);
@@ -399,13 +403,7 @@ export function MobileCwRow({
         clearResume(item._id, undefined, undefined, `nuvio-${slot}`);
         clearResume(item._id);
         dismissCw(item, authKey);
-        void deleteWatchProgressFromNuvio(
-          slot,
-          item._id,
-          undefined,
-          season,
-          episode,
-        );
+        void deleteWatchProgressFromNuvio(slot, item._id, undefined, season, episode);
         return;
       }
       if (item.local) {

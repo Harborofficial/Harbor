@@ -3,7 +3,13 @@
  * Matches the canonical Supabase PostgREST RPC architecture in NuvioMobile.
  */
 
-import { nuvioFetch, loadNuvioState, saveNuvioState, isNuvioSignedIn, getNuvioAccountId } from "./nuvio-client";
+import {
+  nuvioFetch,
+  loadNuvioState,
+  saveNuvioState,
+  isNuvioSignedIn,
+  getNuvioAccountId,
+} from "./nuvio-client";
 import { safeFetch } from "@/lib/safe-fetch";
 import { uploadAvatar } from "@/lib/social/avatar";
 import { authToken } from "@/lib/theme-auth";
@@ -22,10 +28,22 @@ export const MAX_NUVIO_PROFILES = 6;
 import DEFAULT_AVATAR_CATALOG from "./nuvio-avatar-catalog-data.json";
 
 export const NUVIO_PROFILE_COLORS = [
-  "#1E88E5", "#E53935", "#43A047", "#FB8C00",
-  "#8E24AA", "#00ACC1", "#F4511E", "#3949AB",
-  "#C0CA33", "#D81B60", "#00897B", "#5E35B1",
-  "#7CB342", "#039BE5", "#FFB300", "#6D4C41",
+  "#1E88E5",
+  "#E53935",
+  "#43A047",
+  "#FB8C00",
+  "#8E24AA",
+  "#00ACC1",
+  "#F4511E",
+  "#3949AB",
+  "#C0CA33",
+  "#D81B60",
+  "#00897B",
+  "#5E35B1",
+  "#7CB342",
+  "#039BE5",
+  "#FFB300",
+  "#6D4C41",
 ];
 
 const AVATAR_CATALOG_STORAGE_KEY = "harbor.nuvio.avatar_catalog";
@@ -81,7 +99,13 @@ export function resolveNuvioAvatar(
     }
   } catch {}
   const url = profile.avatar_url?.trim();
-  if (url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/") || url.startsWith("data:"))) {
+  if (
+    url &&
+    (url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("/") ||
+      url.startsWith("data:"))
+  ) {
     return url;
   }
   const avatarId = profile.avatar_id?.trim();
@@ -134,7 +158,10 @@ export async function pullNuvioProfiles(): Promise<NuvioProfile[]> {
           } catch {}
         } else if (p.avatar_url?.trim()) {
           try {
-            localStorage.setItem(`harbor.nuvio.local-avatar.${p.profile_index}`, p.avatar_url.trim());
+            localStorage.setItem(
+              `harbor.nuvio.local-avatar.${p.profile_index}`,
+              p.avatar_url.trim(),
+            );
           } catch {}
         }
         return p;
@@ -176,7 +203,10 @@ export async function pushNuvioProfiles(payloads: ProfilePushPayload[]): Promise
 
   const cleanPayloads = payloads.map((p) => {
     let avatarUrl = (p.avatar_url ?? p.avatarUrl)?.trim() || null;
-    if (avatarUrl && (avatarUrl.startsWith("data:") || avatarUrl.length > 2048 || !avatarUrl.startsWith("http"))) {
+    if (
+      avatarUrl &&
+      (avatarUrl.startsWith("data:") || avatarUrl.length > 2048 || !avatarUrl.startsWith("http"))
+    ) {
       avatarUrl = null;
     }
     let avatarId = (p.avatar_id ?? p.avatarId)?.trim() || null;
@@ -214,7 +244,11 @@ export async function pushNuvioProfiles(payloads: ProfilePushPayload[]): Promise
 
     // 2. If 404 or 400 (function not found with p_origin_client_id in PostgREST), try without origin client id
     if (!res.ok && (res.status === 404 || res.status === 400)) {
-      console.warn("[nuvio] sync_push_profiles returned status", res.status, ", retrying without p_origin_client_id...");
+      console.warn(
+        "[nuvio] sync_push_profiles returned status",
+        res.status,
+        ", retrying without p_origin_client_id...",
+      );
       res = await nuvioFetch("/rest/v1/rpc/sync_push_profiles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -231,8 +265,15 @@ export async function pushNuvioProfiles(payloads: ProfilePushPayload[]): Promise
     }
 
     const errJson = await res.json().catch(() => null);
-    const errText = errJson?.message || errJson?.hint || errJson?.details || (await res.text().catch(() => ""));
-    console.error("[nuvio] sync_push_profiles failed:", res.status, errText, "Payload sent:", cleanPayloads);
+    const errText =
+      errJson?.message || errJson?.hint || errJson?.details || (await res.text().catch(() => ""));
+    console.error(
+      "[nuvio] sync_push_profiles failed:",
+      res.status,
+      errText,
+      "Payload sent:",
+      cleanPayloads,
+    );
     return false;
   } catch (err) {
     console.error("[nuvio] failed to push profiles", err);
@@ -250,7 +291,10 @@ export async function uploadNuvioCustomAvatar(
 ): Promise<string | null> {
   if (typeof input === "string") {
     const trimmed = input.trim();
-    if ((trimmed.startsWith("http://") || trimmed.startsWith("https://")) && trimmed.length <= 2048) {
+    if (
+      (trimmed.startsWith("http://") || trimmed.startsWith("https://")) &&
+      trimmed.length <= 2048
+    ) {
       return trimmed;
     }
   }
@@ -285,7 +329,10 @@ export async function uploadNuvioCustomAvatar(
       const parts = input.split("/");
       payloadFilename = parts[parts.length - 1] || payloadFilename;
       try {
-        const fullUrl = typeof window !== "undefined" && window.location?.origin ? `${window.location.origin}${input}` : input;
+        const fullUrl =
+          typeof window !== "undefined" && window.location?.origin
+            ? `${window.location.origin}${input}`
+            : input;
         const res = await fetch(fullUrl);
         blob = await res.blob();
       } catch {
@@ -308,7 +355,10 @@ export async function uploadNuvioCustomAvatar(
   if (token && blob) {
     try {
       const summary = await uploadAvatar(blob);
-      if (summary?.avatarUrl && (summary.avatarUrl.startsWith("http://") || summary.avatarUrl.startsWith("https://"))) {
+      if (
+        summary?.avatarUrl &&
+        (summary.avatarUrl.startsWith("http://") || summary.avatarUrl.startsWith("https://"))
+      ) {
         console.log("[nuvio] Avatar uploaded via Harbor social storage:", summary.avatarUrl);
         return summary.avatarUrl;
       }
@@ -378,7 +428,10 @@ export async function uploadNuvioCustomAvatar(
       if (res2.ok) {
         const data = (await res2.json()) as { status_code?: number; image?: { url?: string } };
         const uploadedUrl = data?.image?.url;
-        if (uploadedUrl && (uploadedUrl.startsWith("http://") || uploadedUrl.startsWith("https://"))) {
+        if (
+          uploadedUrl &&
+          (uploadedUrl.startsWith("http://") || uploadedUrl.startsWith("https://"))
+        ) {
           console.log("[nuvio] Avatar uploaded via safeFetch (Freeimage):", uploadedUrl);
           return uploadedUrl;
         }
@@ -461,7 +514,8 @@ export async function createNuvioProfile(opts: {
   payloads.push({
     profile_index: nextIndex,
     name: opts.name.trim() || `Profile ${nextIndex}`,
-    avatar_color_hex: opts.avatarColorHex || NUVIO_PROFILE_COLORS[(nextIndex - 1) % NUVIO_PROFILE_COLORS.length],
+    avatar_color_hex:
+      opts.avatarColorHex || NUVIO_PROFILE_COLORS[(nextIndex - 1) % NUVIO_PROFILE_COLORS.length],
     uses_primary_addons: Boolean(opts.usesPrimaryAddons),
     uses_primary_plugins: false,
     avatar_id: avatarId,
@@ -474,7 +528,8 @@ export async function createNuvioProfile(opts: {
     user_id: state.session?.user?.id || existing[0]?.user_id || "",
     profile_index: nextIndex,
     name: opts.name.trim() || `Profile ${nextIndex}`,
-    avatar_color_hex: opts.avatarColorHex || NUVIO_PROFILE_COLORS[(nextIndex - 1) % NUVIO_PROFILE_COLORS.length],
+    avatar_color_hex:
+      opts.avatarColorHex || NUVIO_PROFILE_COLORS[(nextIndex - 1) % NUVIO_PROFILE_COLORS.length],
     uses_primary_addons: Boolean(opts.usesPrimaryAddons),
     uses_primary_plugins: false,
     avatar_id: avatarId,
@@ -486,7 +541,9 @@ export async function createNuvioProfile(opts: {
   const updatedProfiles = [...existing.filter((p) => p.profile_index !== nextIndex), newProfile];
   updatedProfiles.sort((a, b) => a.profile_index - b.profile_index);
   saveNuvioState({ ...state, profiles: updatedProfiles });
-  window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }));
+  window.dispatchEvent(
+    new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }),
+  );
   window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
 
   return pushNuvioProfiles(payloads);
@@ -518,12 +575,12 @@ export async function updateNuvioProfile(
         localStorage.removeItem(`harbor.nuvio.local-avatar.${profileIndex}`);
       } catch {}
       const optimisticProfiles = existing.map((p) =>
-        p.profile_index === profileIndex
-          ? { ...p, avatar_url: null, avatar_id: null }
-          : p,
+        p.profile_index === profileIndex ? { ...p, avatar_url: null, avatar_id: null } : p,
       );
       saveNuvioState({ ...state, profiles: optimisticProfiles });
-      window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+      window.dispatchEvent(
+        new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }),
+      );
       window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
     } else if (typeof rawAvatarUrl === "string") {
       const trimmed = rawAvatarUrl.trim();
@@ -534,12 +591,12 @@ export async function updateNuvioProfile(
           localStorage.setItem(`harbor.nuvio.local-avatar.${profileIndex}`, trimmed);
         } catch {}
         const optimisticProfiles = existing.map((p) =>
-          p.profile_index === profileIndex
-            ? { ...p, avatar_url: trimmed, avatar_id: null }
-            : p,
+          p.profile_index === profileIndex ? { ...p, avatar_url: trimmed, avatar_id: null } : p,
         );
         saveNuvioState({ ...state, profiles: optimisticProfiles });
-        window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+        window.dispatchEvent(
+          new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }),
+        );
         window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
       } else if (trimmed.startsWith("/kids/avatars/")) {
         resolvedAvatarUrl = trimmed;
@@ -548,12 +605,12 @@ export async function updateNuvioProfile(
           localStorage.setItem(`harbor.nuvio.local-avatar.${profileIndex}`, trimmed);
         } catch {}
         const optimisticProfiles = existing.map((p) =>
-          p.profile_index === profileIndex
-            ? { ...p, avatar_url: trimmed, avatar_id: null }
-            : p,
+          p.profile_index === profileIndex ? { ...p, avatar_url: trimmed, avatar_id: null } : p,
         );
         saveNuvioState({ ...state, profiles: optimisticProfiles });
-        window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+        window.dispatchEvent(
+          new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }),
+        );
         window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
         // Attempt upload in background to get permanent HTTPS URL for cloud
         void uploadNuvioCustomAvatar(trimmed, profileIndex).then((uploadedUrl) => {
@@ -585,12 +642,12 @@ export async function updateNuvioProfile(
           localStorage.setItem(`harbor.nuvio.local-avatar.${profileIndex}`, trimmed);
         } catch {}
         const optimisticProfiles = existing.map((p) =>
-          p.profile_index === profileIndex
-            ? { ...p, avatar_url: trimmed, avatar_id: null }
-            : p,
+          p.profile_index === profileIndex ? { ...p, avatar_url: trimmed, avatar_id: null } : p,
         );
         saveNuvioState({ ...state, profiles: optimisticProfiles });
-        window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+        window.dispatchEvent(
+          new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }),
+        );
         window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
 
         // If primary profile (slot 1), also push to Harbor ecosystem pfp
@@ -612,7 +669,9 @@ export async function updateNuvioProfile(
               : p,
           );
           saveNuvioState({ ...loadNuvioState(), profiles: updatedWithRemoteUrl });
-          window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedWithRemoteUrl }));
+          window.dispatchEvent(
+            new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedWithRemoteUrl }),
+          );
           window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
           if (profileIndex === 1) {
             void pushAvatarToEcosystem(uploadedUrl);
@@ -627,19 +686,33 @@ export async function updateNuvioProfile(
 
   const payloads: ProfilePushPayload[] = existing.map((p) => {
     if (p.profile_index === profileIndex) {
-      const finalAvatarUrl = resolvedAvatarUrl !== undefined
-        ? resolvedAvatarUrl
-        : (updates.avatar_url !== undefined ? updates.avatar_url : (updates.avatarUrl !== undefined ? updates.avatarUrl : (p.avatar_url ?? null)));
+      const finalAvatarUrl =
+        resolvedAvatarUrl !== undefined
+          ? resolvedAvatarUrl
+          : updates.avatar_url !== undefined
+            ? updates.avatar_url
+            : updates.avatarUrl !== undefined
+              ? updates.avatarUrl
+              : (p.avatar_url ?? null);
 
-      const finalAvatarId = resolvedAvatarId !== undefined
-        ? resolvedAvatarId
-        : (updates.avatar_id !== undefined ? updates.avatar_id : (updates.avatarId !== undefined ? updates.avatarId : (p.avatar_id ?? null)));
+      const finalAvatarId =
+        resolvedAvatarId !== undefined
+          ? resolvedAvatarId
+          : updates.avatar_id !== undefined
+            ? updates.avatar_id
+            : updates.avatarId !== undefined
+              ? updates.avatarId
+              : (p.avatar_id ?? null);
 
       return {
         profile_index: profileIndex,
         name: updates.name !== undefined ? updates.name.trim() : p.name,
-        avatar_color_hex: updates.avatar_color_hex ?? updates.avatarColorHex ?? p.avatar_color_hex ?? "#1E88E5",
-        uses_primary_addons: updates.uses_primary_addons !== undefined ? updates.uses_primary_addons : Boolean(p.uses_primary_addons),
+        avatar_color_hex:
+          updates.avatar_color_hex ?? updates.avatarColorHex ?? p.avatar_color_hex ?? "#1E88E5",
+        uses_primary_addons:
+          updates.uses_primary_addons !== undefined
+            ? updates.uses_primary_addons
+            : Boolean(p.uses_primary_addons),
         uses_primary_plugins: Boolean(p.uses_primary_plugins),
         avatar_id: finalAvatarUrl ? null : finalAvatarId,
         avatar_url: finalAvatarUrl,
@@ -663,9 +736,11 @@ export async function updateNuvioProfile(
   const chosenAvatarUrl =
     resolvedAvatarUrl !== undefined
       ? resolvedAvatarUrl
-      : (updates.avatar_url !== undefined
-          ? updates.avatar_url
-          : (updates.avatarUrl !== undefined ? updates.avatarUrl : undefined));
+      : updates.avatar_url !== undefined
+        ? updates.avatar_url
+        : updates.avatarUrl !== undefined
+          ? updates.avatarUrl
+          : undefined;
 
   // OPTIMISTIC LOCAL UPDATE: Apply updates immediately to local state for 0ms lag
   const optimisticProfiles: NuvioProfile[] = existing.map((p) => {
@@ -673,15 +748,21 @@ export async function updateNuvioProfile(
       return {
         ...p,
         name: updates.name !== undefined ? updates.name.trim() : p.name,
-        avatar_color_hex: updates.avatar_color_hex ?? updates.avatarColorHex ?? p.avatar_color_hex ?? "#1E88E5",
-        uses_primary_addons: updates.uses_primary_addons !== undefined ? updates.uses_primary_addons : Boolean(p.uses_primary_addons),
+        avatar_color_hex:
+          updates.avatar_color_hex ?? updates.avatarColorHex ?? p.avatar_color_hex ?? "#1E88E5",
+        uses_primary_addons:
+          updates.uses_primary_addons !== undefined
+            ? updates.uses_primary_addons
+            : Boolean(p.uses_primary_addons),
         avatar_url: chosenAvatarUrl !== undefined ? chosenAvatarUrl : p.avatar_url,
       };
     }
     return p;
   });
   saveNuvioState({ ...state, profiles: optimisticProfiles });
-  window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }));
+  window.dispatchEvent(
+    new CustomEvent("harbor:nuvio-profiles-updated", { detail: optimisticProfiles }),
+  );
   window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
 
   const ok = await pushNuvioProfiles(payloads);
@@ -754,7 +835,9 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
   } catch {}
 
   // Instant UI dispatch
-  window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }));
+  window.dispatchEvent(
+    new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }),
+  );
   window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
   window.dispatchEvent(new CustomEvent("harbor:active-profile-changed"));
   window.dispatchEvent(new CustomEvent("harbor:secondary-privileges-changed"));
@@ -870,7 +953,10 @@ export async function deleteNuvioProfile(profileIndex: number): Promise<boolean>
   // 1. OPTIMISTIC LOCAL UPDATE: Disappear immediately from UI and state!
   const state = loadNuvioState();
   const remaining = state.profiles.filter((p) => p.profile_index !== profileIndex);
-  const active = state.activeProfileIndex === profileIndex ? (remaining[0]?.profile_index ?? 1) : state.activeProfileIndex;
+  const active =
+    state.activeProfileIndex === profileIndex
+      ? (remaining[0]?.profile_index ?? 1)
+      : state.activeProfileIndex;
 
   saveNuvioState({ ...state, profiles: remaining, activeProfileIndex: active });
   forgetNuvioPin(profileIndex);
@@ -936,10 +1022,7 @@ export async function deleteNuvioProfile(profileIndex: number): Promise<boolean>
 /**
  * Verifies a Nuvio profile's PIN via local cache first, then Supabase `verify_profile_pin`.
  */
-export async function verifyNuvioPin(
-  profileIndex: number,
-  pin: string,
-): Promise<PinVerifyResult> {
+export async function verifyNuvioPin(profileIndex: number, pin: string): Promise<PinVerifyResult> {
   // 1. Fast local verification (0ms unlock without network roundtrip)
   const isMatchLocally = await verifyNuvioPinLocally(profileIndex, pin);
   if (isMatchLocally) {
@@ -967,9 +1050,7 @@ export async function verifyNuvioPin(
 
     const raw = await res.json();
     const data = Array.isArray(raw) ? raw[0] : raw;
-    const unlocked = Boolean(
-      data?.unlocked ?? (typeof raw === "boolean" ? raw : false),
-    );
+    const unlocked = Boolean(data?.unlocked ?? (typeof raw === "boolean" ? raw : false));
 
     if (unlocked) {
       void rememberNuvioPin(profileIndex, pin);
@@ -1064,7 +1145,7 @@ export async function clearNuvioPin(
     // Update local state directly so UI updates instantly without waiting
     const state = loadNuvioState();
     const updatedProfiles = state.profiles.map((p) =>
-      p.profile_index === profileIndex ? { ...p, pin_enabled: false } : p
+      p.profile_index === profileIndex ? { ...p, pin_enabled: false } : p,
     );
     saveNuvioState({ ...state, profiles: updatedProfiles });
 
@@ -1145,7 +1226,9 @@ export function setActiveNuvioProfile(
   const target = state.profiles.find((p) => p.profile_index === bounded);
 
   if (refuseNuvioProfileSelect(target, nuvioSessionUnlockedIndices, opts)) {
-    console.warn(`[nuvio] Refusing switch to locked profile slot ${bounded} without PIN verification`);
+    console.warn(
+      `[nuvio] Refusing switch to locked profile slot ${bounded} without PIN verification`,
+    );
     return false;
   }
 
@@ -1172,6 +1255,9 @@ export function setActiveNuvioProfile(
  */
 export function getActiveNuvioProfile(): NuvioProfile | null {
   const state = loadNuvioState();
-  return state.profiles.find((p) => p.profile_index === state.activeProfileIndex) || state.profiles[0] || null;
+  return (
+    state.profiles.find((p) => p.profile_index === state.activeProfileIndex) ||
+    state.profiles[0] ||
+    null
+  );
 }
-

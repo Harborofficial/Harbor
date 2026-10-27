@@ -218,7 +218,9 @@ export function listLocalCw(
   const isNuvio = isNuvioMode() || (ownerId != null && ownerId.startsWith("nuvio-"));
   const entries = Object.values(readAll(storeKey(privateOnly, ownerId)));
   if (!isNuvio) {
-    return entries.filter((e) => !(e.id && (e as any).external === "nuvio")).sort((a, b) => b.t - a.t);
+    return entries
+      .filter((e) => !(e.id && (e as any).external === "nuvio"))
+      .sort((a, b) => b.t - a.t);
   }
   return entries.sort((a, b) => b.t - a.t);
 }

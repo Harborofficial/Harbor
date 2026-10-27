@@ -76,7 +76,7 @@ export function ProfileView({
   const isNuvio = settings.accountProvider === "nuvio";
   const nuvioState = loadNuvioState();
   const primaryNuvioProfile = isNuvio
-    ? (nuvioState.profiles.find((p) => p.profile_index === 1) || nuvioState.profiles[0] || null)
+    ? nuvioState.profiles.find((p) => p.profile_index === 1) || nuvioState.profiles[0] || null
     : null;
 
   const nuvioEmail = nuvioState.session?.user?.email;
@@ -84,7 +84,9 @@ export function ProfileView({
   const primaryHandle = (
     author?.handle ||
     (primaryNuvioProfile
-      ? (primaryNuvioProfile.name?.toLowerCase().replace(/\s+/g, "") || nuvioEmail?.split("@")[0] || "nuvio")
+      ? primaryNuvioProfile.name?.toLowerCase().replace(/\s+/g, "") ||
+        nuvioEmail?.split("@")[0] ||
+        "nuvio"
       : "nuvio")
   ).toLowerCase();
   const isNuvioPrimaryMatch =
@@ -92,7 +94,6 @@ export function ProfileView({
     (handle.toLowerCase() === primaryHandle ||
       (author?.handle && handle.toLowerCase() === author.handle.toLowerCase()) ||
       handle.toLowerCase() === "me");
-
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -211,22 +212,29 @@ export function ProfileView({
 
   const locked = summary.private && !summary.isOwner;
 
-  const ownerAvatar = (summary.isOwner || isNuvioPrimaryMatch)
-    ? (isNuvio
-        ? (resolveNuvioAvatar(primaryNuvioProfile) || undefined)
+  const ownerAvatar =
+    summary.isOwner || isNuvioPrimaryMatch
+      ? isNuvio
+        ? resolveNuvioAvatar(primaryNuvioProfile) || undefined
         : activeProfile?.avatar ||
           settings.harborAvatar ||
           user?.avatar ||
           currentAuthor()?.avatar ||
-          undefined)
-    : undefined;
-  const heroAvatar = (summary.isOwner || isNuvioPrimaryMatch)
-    ? (isNuvio ? (ownerAvatar || undefined) : (ownerAvatar || summary.avatarUrl))
-    : summary.avatarUrl || undefined;
-  const heroAvatarFallback = (summary.isOwner || isNuvioPrimaryMatch)
-    ? (isNuvio ? (resolveNuvioAvatar(primaryNuvioProfile) || undefined) : summary.avatarUrl || undefined)
-    : undefined;
-  const mangaReadCount = isNuvio ? 0 : (summary.isOwner ? mangaProgress.length : undefined);
+          undefined
+      : undefined;
+  const heroAvatar =
+    summary.isOwner || isNuvioPrimaryMatch
+      ? isNuvio
+        ? ownerAvatar || undefined
+        : ownerAvatar || summary.avatarUrl
+      : summary.avatarUrl || undefined;
+  const heroAvatarFallback =
+    summary.isOwner || isNuvioPrimaryMatch
+      ? isNuvio
+        ? resolveNuvioAvatar(primaryNuvioProfile) || undefined
+        : summary.avatarUrl || undefined
+      : undefined;
+  const mangaReadCount = isNuvio ? 0 : summary.isOwner ? mangaProgress.length : undefined;
 
   if (editing && summary.isOwner) {
     return (

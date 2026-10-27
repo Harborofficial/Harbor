@@ -32,7 +32,12 @@ import { AvatarRing } from "./avatar-ring";
 import { resizeAvatar } from "./avatar-utils";
 import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 
-import { updateNuvioProfile, resolveNuvioAvatar, pullNuvioProfiles, NUVIO_PROFILE_COLORS } from "@/lib/nuvio/nuvio-profiles";
+import {
+  updateNuvioProfile,
+  resolveNuvioAvatar,
+  pullNuvioProfiles,
+  NUVIO_PROFILE_COLORS,
+} from "@/lib/nuvio/nuvio-profiles";
 
 export function IdentityTab() {
   const t = useT();
@@ -64,7 +69,9 @@ export function IdentityTab() {
   }, [isNuvio]);
 
   const activeNuvioProfile = isNuvio
-    ? nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) || nuvioState.profiles[0] || null
+    ? nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) ||
+      nuvioState.profiles[0] ||
+      null
     : null;
 
   const currentDisplayName = isNuvio && activeNuvioProfile ? activeNuvioProfile.name : displayName;
@@ -131,19 +138,23 @@ export function IdentityTab() {
   const nuvioSlot = activeProfile ? getNuvioProfileIndexForHarborProfile(activeProfile.id) : 1;
   const nuvioProfileLegacy = nuvioState.profiles.find((p) => p.profile_index === nuvioSlot);
   const customAvatar = isNuvio
-    ? (activeNuvioProfile?.avatar_url || activeNuvioProfile?.avatar_id || null)
+    ? activeNuvioProfile?.avatar_url || activeNuvioProfile?.avatar_id || null
     : (activeProfile?.avatar ?? settings.harborAvatar ?? null);
 
-  const effectiveAvatar = isNuvio && activeNuvioProfile
-    ? (resolveNuvioAvatar(activeNuvioProfile) || null)
-    : (customAvatar ?? stremioAvatar ?? (nuvioProfileLegacy ? resolveNuvioAvatar(nuvioProfileLegacy) : null));
+  const effectiveAvatar =
+    isNuvio && activeNuvioProfile
+      ? resolveNuvioAvatar(activeNuvioProfile) || null
+      : (customAvatar ??
+        stremioAvatar ??
+        (nuvioProfileLegacy ? resolveNuvioAvatar(nuvioProfileLegacy) : null));
 
   const nameDirty = !nameEquals(nameDraft.trim(), currentDisplayName);
   const commitName = () => pushDisplayName(draftRef.current.trim() || currentDisplayName);
 
-  const color = isNuvio && activeNuvioProfile?.avatar_color_hex
-    ? activeNuvioProfile.avatar_color_hex
-    : settings.harborColor;
+  const color =
+    isNuvio && activeNuvioProfile?.avatar_color_hex
+      ? activeNuvioProfile.avatar_color_hex
+      : settings.harborColor;
   const isPresetColor = HARBOR_COLOR_SWATCHES.includes(color.toLowerCase());
 
   const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,16 +220,19 @@ export function IdentityTab() {
                     }}
                     className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-[17px] font-medium text-ink outline-none"
                   />
-                  {harborAuthor?.handle && (isNuvio ? activeNuvioProfile?.profile_index === 1 : isStremioActivePrimary(activeProfile, profiles)) && (
-                    <span
-                      id="hset-profile-handle"
-                      dir="ltr"
-                      title={`@${harborAuthor.handle}`}
-                      className="max-w-[45%] shrink-0 truncate text-[14px] leading-5 text-ink-muted"
-                    >
-                      @{harborAuthor.handle}
-                    </span>
-                  )}
+                  {harborAuthor?.handle &&
+                    (isNuvio
+                      ? activeNuvioProfile?.profile_index === 1
+                      : isStremioActivePrimary(activeProfile, profiles)) && (
+                      <span
+                        id="hset-profile-handle"
+                        dir="ltr"
+                        title={`@${harborAuthor.handle}`}
+                        className="max-w-[45%] shrink-0 truncate text-[14px] leading-5 text-ink-muted"
+                      >
+                        @{harborAuthor.handle}
+                      </span>
+                    )}
                 </span>
               </label>
               {(nameDirty || syncPhase === "error") && (
@@ -267,14 +281,17 @@ export function IdentityTab() {
               onClick={() => setAvatarPickerOpen(true)}
               onRandomize={(value) => pushIdentity({ harborAvatar: value })}
             />
-            {(customAvatar || (isNuvio && (activeNuvioProfile?.avatar_url || activeNuvioProfile?.avatar_id))) && (
+            {(customAvatar ||
+              (isNuvio && (activeNuvioProfile?.avatar_url || activeNuvioProfile?.avatar_id))) && (
               <button
                 type="button"
                 onClick={() => pushIdentity({ harborAvatar: null })}
                 className={ROW_ACTION_DANGER}
               >
                 {isNuvio
-                  ? (activeNuvioProfile?.avatar_url || nuvioProfileLegacy?.avatar_url || activeNuvioProfile?.avatar_id)
+                  ? activeNuvioProfile?.avatar_url ||
+                    nuvioProfileLegacy?.avatar_url ||
+                    activeNuvioProfile?.avatar_id
                     ? t("Reset to Nuvio avatar")
                     : t("Reset to default")
                   : stremioAvatar

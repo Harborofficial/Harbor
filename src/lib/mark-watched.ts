@@ -45,7 +45,8 @@ export async function markMovieWatched(
   const authKey = readActiveStremioAuthKey();
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
   const writes: Promise<unknown>[] = [];
-  if (authKey && cid && !isNuvioProviderActive()) writes.push(markMovieWatchedStremio(authKey, meta, cid, true));
+  if (authKey && cid && !isNuvioProviderActive())
+    writes.push(markMovieWatchedStremio(authKey, meta, cid, true));
   if (imdb || tmdb) {
     const ids = { ...(imdb ? { imdb } : {}), ...(tmdb ? { tmdb } : {}) };
     writes.push(pushWatched({ kind: "movie", ids }), simklAddToHistory({ kind: "movie", ids }));
@@ -92,7 +93,8 @@ export async function unmarkMovieWatched(meta: Meta, imdbId?: string | null): Pr
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
   const pmdbTarget = stremioIdToPmdbTarget(meta.id, undefined, "movie");
   const writes: Promise<unknown>[] = [];
-  if (authKey && cid && !isNuvioProviderActive()) writes.push(markMovieWatchedStremio(authKey, meta, cid, false));
+  if (authKey && cid && !isNuvioProviderActive())
+    writes.push(markMovieWatchedStremio(authKey, meta, cid, false));
   if (pmdbTarget) writes.push(unmarkPmdbWatched(pmdbTarget));
   if (isNuvioSignedIn()) {
     if (isNuvioProviderActive()) {

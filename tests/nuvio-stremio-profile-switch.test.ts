@@ -81,7 +81,7 @@ test("Profile navigation and handle update on account provider change", async ()
     JSON.stringify({
       token: "tok_nuvio_harbor",
       user: { id: "u_nuvio_harbor", username: "NuvioHarbor", handle: "nuvio_harbor_handle" },
-    })
+    }),
   );
 
   reloadSession(true);
@@ -108,14 +108,14 @@ test("Profile navigation and handle update on account provider change", async ()
         { id: "p_stremio_1", isPrimary: true, name: "Stremio Captain" },
         { id: "p_stremio_2", isPrimary: false, name: "Stremio Secondary" },
       ],
-    })
+    }),
   );
   localStorage.setItem(
     "harbor.theme-session.p_stremio_1",
     JSON.stringify({
       token: "tok_stremio_harbor",
       user: { id: "u_stremio_harbor", username: "StremioHarbor", handle: "stremio_harbor_handle" },
-    })
+    }),
   );
 
   reloadSession(true);

@@ -20,7 +20,8 @@ let currentScope = "";
 
 export function watchedFlagStoreKey(slotOrProfile?: string | number): string {
   if (isNuvioProviderActive()) {
-    const slot = slotOrProfile != null ? Number(slotOrProfile) || getNuvioActiveSlot() : getNuvioActiveSlot();
+    const slot =
+      slotOrProfile != null ? Number(slotOrProfile) || getNuvioActiveSlot() : getNuvioActiveSlot();
     return `harbor.watchedFlag.nuvio.v1.${slot}`;
   }
   const id = slotOrProfile ? String(slotOrProfile) : activeProfileId();
@@ -114,7 +115,11 @@ export function useWatchedFlagIds(): Set<string> {
   return useSyncExternalStore(subscribe, load, () => EMPTY_FLAG_IDS);
 }
 
-export function setWatchedFlag(metaId: string, watched: boolean, profileOrSlot?: string | number): void {
+export function setWatchedFlag(
+  metaId: string,
+  watched: boolean,
+  profileOrSlot?: string | number,
+): void {
   const sk = watchedFlagStoreKey(profileOrSlot);
   let s: Set<string>;
   if (sk === storeKey() && cache) {
@@ -134,7 +139,11 @@ export function setWatchedFlag(metaId: string, watched: boolean, profileOrSlot?:
   persist(next, sk);
 }
 
-export function setWatchedFlagAcknowledged(metaId: string, watched: boolean, profileOrSlot?: string | number): void {
+export function setWatchedFlagAcknowledged(
+  metaId: string,
+  watched: boolean,
+  profileOrSlot?: string | number,
+): void {
   if (!canPersistWatched()) return;
   const sk = watchedFlagStoreKey(profileOrSlot);
   let s: Set<string>;
@@ -209,7 +218,10 @@ export function clearAllNuvioWatchedFlags(): void {
     const toRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k && (k.startsWith("harbor.watchedFlag.nuvio.v1.") || k.startsWith("harbor.watchedFlag.nuvio."))) {
+      if (
+        k &&
+        (k.startsWith("harbor.watchedFlag.nuvio.v1.") || k.startsWith("harbor.watchedFlag.nuvio."))
+      ) {
         toRemove.push(k);
       }
     }

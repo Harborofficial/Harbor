@@ -52,7 +52,11 @@ export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[], 
       const primaryS = animeSeasonKey(ep);
       const primaryE = ep.number;
       list.push({ season: primaryS, episode: primaryE });
-      if (ep.imdbSeason != null && ep.imdbEpisode != null && (ep.imdbSeason !== primaryS || ep.imdbEpisode !== primaryE)) {
+      if (
+        ep.imdbSeason != null &&
+        ep.imdbEpisode != null &&
+        (ep.imdbSeason !== primaryS || ep.imdbEpisode !== primaryE)
+      ) {
         list.push({ season: ep.imdbSeason, episode: ep.imdbEpisode });
       }
       if (primaryS !== 1 && ep.number > 0) {
@@ -80,13 +84,7 @@ export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[], 
               settings.anilistCountRewatches,
             );
           if (settings.malAutoSync)
-            void syncMalProgress(
-              syncId,
-              highest,
-              title,
-              undefined,
-              settings.malCountRewatches,
-            );
+            void syncMalProgress(syncId, highest, title, undefined, settings.malCountRewatches);
         }
       }
       if (isNuvioSignedIn() && isNuvioProviderActive() && eps.length > 0) {
