@@ -50,12 +50,15 @@ export function AccountMenu({
     selectProfile,
   } = ctrl;
 
-  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const isNuvio =
+    settings.accountProvider === "nuvio" ||
+    (typeof isNuvioProviderActive === "function" ? isNuvioProviderActive() : false);
   const kid = !!activeProfile?.kid;
   const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
     ? null
     : settings.harborAvatar;
-  const isPlaceholder = isPlaceholderName(activeProfile?.name);
+  const isPlaceholder =
+    typeof isPlaceholderName === "function" ? isPlaceholderName(activeProfile?.name) : false;
   const name = isNuvio
     ? activeProfile?.name || t("profile.fallback")
     : isPlaceholder

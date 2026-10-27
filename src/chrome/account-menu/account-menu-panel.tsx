@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth";
 import {
   Bell,
   ChevronDown,
@@ -49,9 +48,10 @@ export function AccountMenuPanel({
   settingsActive?: boolean;
 }) {
   const t = useT();
-  const { signOut } = useAuth();
   const { settings } = useSettings();
-  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const isNuvio =
+    settings.accountProvider === "nuvio" ||
+    (typeof isNuvioProviderActive === "function" ? isNuvioProviderActive() : false);
 
   const {
     user,
@@ -107,7 +107,8 @@ export function AccountMenuPanel({
     : [];
   const otherStremioProfiles = !isNuvio ? profiles.filter((p) => p.id !== activeProfile?.id) : [];
 
-  const isPlaceholder = isPlaceholderName(activeProfile?.name);
+  const isPlaceholder =
+    typeof isPlaceholderName === "function" ? isPlaceholderName(activeProfile?.name) : false;
   const name = isNuvio
     ? (activeNuvioProfile?.name ?? nuvioEmail?.split("@")[0] ?? t("profile.fallback"))
     : isPlaceholder
@@ -121,7 +122,7 @@ export function AccountMenuPanel({
         t("profile.fallback"));
 
   const isPrimary =
-    activeProfileIsPrimary() ||
+    (typeof activeProfileIsPrimary === "function" ? activeProfileIsPrimary() : false) ||
     (isNuvio
       ? activeNuvioProfile?.profile_index === 1
       : isStremioActivePrimary(activeProfile, profiles));
@@ -345,20 +346,6 @@ export function AccountMenuPanel({
               >
                 <LogIn size={14} strokeWidth={2.2} />
                 {t("Sign in to Nuvio")}
-              </button>
-            )}
-
-            {/* STREMIO SIGN OUT */}
-            {!isNuvio && user && canSignOutRoot && (
-              <button
-                onClick={() => {
-                  signOut();
-                  setMenuOpen(false);
-                }}
-                className={`${ITEM} border-t border-edge-soft`}
-              >
-                <LogOut size={14} strokeWidth={2.2} />
-                {t("Sign out of Stremio")}
               </button>
             )}
 
