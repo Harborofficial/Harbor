@@ -365,11 +365,12 @@ export function BpCwCardPill({
     : upNext
       ? t("Up Next")
       : meta.episodeTitle || remaining;
-  if (!sub && !trailing && !external) return null;
+  const isTracker = !!external && external !== "nuvio";
+  if (!sub && !trailing && !isTracker) return null;
 
   return (
     <span data-bp-cw-pill className={PILL}>
-      {external ? (
+      {isTracker ? (
         <img
           src={
             external === "trakt"
@@ -393,7 +394,7 @@ export function BpCwCardPill({
         </span>
       )}
       {trailing && (
-        <span className={`min-w-0 truncate ${upNext ? "text-[var(--bp-touch)]" : ""}`}>
+        <span className={`min-w-0 truncate ${meta.waitingForAir ? "text-amber-500 font-semibold" : upNext ? "text-[var(--bp-touch)]" : ""}`}>
           {trailing}
         </span>
       )}

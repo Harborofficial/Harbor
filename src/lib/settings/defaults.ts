@@ -478,6 +478,7 @@ export const DEFAULT: Settings = {
   musicSpeedPresets: [],
   homeMode: "harbor",
   classicCatalogSource: "all",
+  nuvioAddonMode: "separate",
   homeShowAllAddonRows: false,
   homeNewEpisodes: false,
   libraryBookmarkedOnly: true,
@@ -669,17 +670,10 @@ export function getSecondaryPrivileges(
       isNuvio = settings.accountProvider === "nuvio";
     } else {
       try {
-        isNuvio = localStorage.getItem("harbor.account-provider") === "nuvio";
+        const explicit = localStorage.getItem("harbor.account-provider");
+        isNuvio = explicit === "nuvio" || Boolean(!explicit && localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"'));
       } catch {}
     }
-  }
-
-  const directSource = isNuvio ? settings?.nuvioSecondaryPrivileges : settings?.secondaryPrivileges;
-  if (directSource) {
-    return {
-      ...DEFAULT_SECONDARY_PRIVILEGES,
-      ...directSource,
-    };
   }
 
   let sharedBlob: {
@@ -692,12 +686,15 @@ export function getSecondaryPrivileges(
     if (raw) sharedBlob = JSON.parse(raw);
   } catch {}
 
-  const fallbackSource = isNuvio
+  const sharedSource = isNuvio
     ? sharedBlob?.nuvioSecondaryPrivileges
     : sharedBlob?.secondaryPrivileges;
 
+  const directSource = isNuvio ? settings?.nuvioSecondaryPrivileges : settings?.secondaryPrivileges;
+
   return {
     ...DEFAULT_SECONDARY_PRIVILEGES,
-    ...(fallbackSource ?? {}),
+    ...(directSource ?? {}),
+    ...(sharedSource ?? {}),
   };
 }

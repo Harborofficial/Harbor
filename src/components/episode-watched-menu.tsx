@@ -47,6 +47,7 @@ function airedByNow(released?: string | null): boolean {
 export function EpisodeWatchedMenu({
   metaId,
   syncMetaId,
+  imdbId: propImdbId,
   meta,
   target,
   allEpisodes,
@@ -55,6 +56,7 @@ export function EpisodeWatchedMenu({
 }: {
   metaId: string;
   syncMetaId?: string;
+  imdbId?: string | null;
   meta: ManualWatchedMeta;
   target: WatchedMenuTarget;
   allEpisodes?: Array<WatchedEpisode & { released?: string | null }>;
@@ -71,7 +73,8 @@ export function EpisodeWatchedMenu({
     target.origin ??
       (document.activeElement instanceof HTMLElement ? document.activeElement : null),
   );
-  const imdbId = useTmdbImdbId(metaId);
+  const resolvedImdb = useTmdbImdbId(metaId);
+  const imdbId = propImdbId ?? resolvedImdb;
   const originSession = useRef(presence.session);
   if (presence.enabled && originSession.current !== presence.session) {
     originSession.current = presence.session;
@@ -90,19 +93,33 @@ export function EpisodeWatchedMenu({
     }
   }, [activeId, onClose]);
   const runWatched = async (watched: boolean, episodes?: WatchedEpisode[]) => {
-    const result = await setContextWatched({ id: metaId, ...meta, type: "series" }, watched, {
-      imdbId,
-      syncMetaId,
-      ...(episodes
-        ? { episodes }
-        : {
-            episode: {
-              season: target.season,
-              episode: target.episode,
-              absoluteNumber: target.absoluteNumber,
-            },
-          }),
-    });
+    const result = await setContextWatched(
+      {
+        id: metaId,
+        ...meta,
+        type: "series",
+        videos: allEpisodes?.map((e) => ({
+          season: e.season,
+          episode: e.episode,
+          number: e.episode,
+          released: e.released ?? undefined,
+        })),
+      },
+      watched,
+      {
+        imdbId,
+        syncMetaId,
+        ...(episodes
+          ? { episodes }
+          : {
+              episode: {
+                season: target.season,
+                episode: target.episode,
+                absoluteNumber: target.absoluteNumber,
+              },
+            }),
+      },
+    );
     if (
       !watched &&
       result.outcomes.some(
@@ -113,19 +130,27 @@ export function EpisodeWatchedMenu({
     requireMediaActionSuccess(result);
   };
   const actions = (): ContextAction[] => {
-    const watched = manualWatchedState(metaId, target.season, target.episode) ?? target.watched;
+    const watched =
+      manualWatchedState(metaId, target.season, target.episode, [imdbId, syncMetaId]) ??
+      target.watched;
     const started = !watched && readResumeEntry(metaId, target.season, target.episode) != null;
+    const targetSeason = target.season;
+    const targetEpisode = target.episode;
     const upTo = upToScope
       ? []
       : [
           ...new Map(
             (allEpisodes ?? [])
-              .filter(
-                (episode) =>
-                  airedByNow(episode.released) &&
-                  (episode.season < target.season ||
-                    (episode.season === target.season && episode.episode <= target.episode)),
-              )
+              .filter((episode) => {
+                if (!airedByNow(episode.released)) return false;
+                if (targetSeason > 0 && episode.season <= 0) return false;
+                if (targetSeason === 0 && episode.season !== 0) return false;
+                return (
+                  episode.season < targetSeason ||
+                  (episode.season === targetSeason && episode.episode <= targetEpisode)
+                );
+              })
+              .sort((a, b) => a.season - b.season || a.episode - b.episode)
               .map((episode) => [
                 episode.season + ":" + episode.episode,
                 {

@@ -52,10 +52,14 @@ function setup(mode: "rest" | "graphql", options: { failCategories?: boolean; fa
     "@/lib/manga/types": { mangaThrottle: () => (fn: () => unknown) => fn() },
     "./base-url": { normalizeSuwayomiBase: (base: string) => base },
     "./auth-registry": { registerSuwayomiAuth: () => {}, suwayomiAuthFor: () => undefined },
+    "./server-message": { suwayomiServerMessage: () => null },
   });
   model.makeClient = () => client;
   const rest = load("sources/suwayomi/rest", { "./model": model });
-  const graphql = load("sources/suwayomi/graphql", { "./model": model });
+  const graphql = load("sources/suwayomi/graphql", {
+    "./model": model,
+    "./server-message": { cleanServerMessage: (m: string) => m },
+  });
   const transport = load("sources/suwayomi/transport", {
     "./model": model, "./rest": rest, "./graphql": graphql,
     "./auth-registry": { registerSuwayomiSourceBase: () => {} },

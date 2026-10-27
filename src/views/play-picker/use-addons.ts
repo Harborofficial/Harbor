@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
 import { userAddons, withDebridKeys, type Addon } from "@/lib/addons";
+import { resolveEffectiveStremioAuthKey } from "@/lib/auth";
+import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
+import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
+import { recordStremioAddons, recordNuvioAddons } from "@/lib/nuvio/nuvio-addon-registry";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
 import type { useSettings } from "@/lib/settings";
 import {
@@ -43,6 +47,20 @@ export function useAddons(
   const [addons, setAddons] = useState<Addon[] | null>(null);
   const [userHasStreamAddons, setUserHasStreamAddons] = useState(false);
   const [pluginTick, setPluginTick] = useState(0);
+  const [nuvioTick, setNuvioTick] = useState(0);
+  useEffect(() => {
+    const onNuvioChange = () => setNuvioTick((n) => n + 1);
+    window.addEventListener("harbor:nuvio-profile-changed", onNuvioChange);
+    window.addEventListener("harbor:nuvio-state-changed", onNuvioChange);
+    window.addEventListener("harbor:nuvio-addons-changed", onNuvioChange);
+    window.addEventListener("harbor:account-provider-changed", onNuvioChange);
+    return () => {
+      window.removeEventListener("harbor:nuvio-profile-changed", onNuvioChange);
+      window.removeEventListener("harbor:nuvio-state-changed", onNuvioChange);
+      window.removeEventListener("harbor:nuvio-addons-changed", onNuvioChange);
+      window.removeEventListener("harbor:account-provider-changed", onNuvioChange);
+    };
+  }, []);
   useEffect(() => {
     let last = pluginListKey();
     return subscribeStreamPluginList(() => {
@@ -62,12 +80,30 @@ export function useAddons(
       dlKey: settings.dlKey,
     };
     (async () => {
-      const stremioAddons = filterEnabled(authKey ? await userAddons(authKey).catch(() => []) : []);
+      const isNuvio = isNuvioProviderActive();
+      const nuvioAddonMode = settings.nuvioAddonMode ?? "separate";
+
+      const stremioKey = resolveEffectiveStremioAuthKey(authKey);
+      const stremioAddons = (!isNuvio || nuvioAddonMode === "combined") && stremioKey
+        ? filterEnabled(await userAddons(stremioKey).catch(() => []))
+        : [];
+      const nuvioAddons = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
+        ? filterEnabled(await fetchNuvioAddons().catch(() => []))
+        : [];
       const installed = filterEnabled(await fetchInstalledAddons().catch(() => []));
       if (cancelled) return;
+      if (!isNuvio || nuvioAddonMode === "combined") {
+        recordStremioAddons(stremioAddons);
+      }
+      if (nuvioAddons.length > 0) recordNuvioAddons(nuvioAddons);
       const merged: Addon[] = [];
       const idxByUrl = new Map<string, number>();
-      for (const a of [...stremioAddons, ...installed]) {
+      const candidateAddons = isNuvio && nuvioAddonMode === "separate"
+        ? [...nuvioAddons, ...installed]
+        : !isNuvio
+          ? [...stremioAddons, ...installed]
+          : [...stremioAddons, ...nuvioAddons, ...installed];
+      for (const a of candidateAddons) {
         const existingIdx = idxByUrl.get(a.transportUrl);
         if (existingIdx === undefined) {
           idxByUrl.set(a.transportUrl, merged.length);
@@ -133,6 +169,9 @@ export function useAddons(
     settings.pluginsOutsideTab,
     settings.pluginsGroupByRepo,
     pluginTick,
+    nuvioTick,
+    settings.nuvioAddonMode,
+    settings.accountProvider,
   ]);
 
   return { addons, userHasStreamAddons };

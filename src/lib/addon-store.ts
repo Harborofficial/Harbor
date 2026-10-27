@@ -1,6 +1,16 @@
 import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
 import { isLocalNetworkUrl } from "@/lib/local-network";
 import { readActiveStremioAuthKey } from "./auth";
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
+import {
+  resolveEffectiveNuvioAddonSlot,
+  addAddonToNuvio,
+  deleteAddonFromNuvio,
+  pushAddonsToNuvio,
+  readCachedNuvioAddons,
+  writeCachedNuvioAddons,
+  fetchNuvioAddons,
+} from "@/lib/nuvio/nuvio-sync";
 import { setUserAddons, userAddons, type Addon } from "./addons";
 import {
   applyOrderToItems,
@@ -20,6 +30,10 @@ const LEGACY_DISABLED_KEY = "harbor.addons.disabled";
 const DEFAULT_ADDONS: Array<{ id: string; transportUrl: string }> = [];
 
 function activeProfileId(): string {
+  if (isNuvioProviderActive()) {
+    const slot = resolveEffectiveNuvioAddonSlot();
+    return `nuvio-${slot}`;
+  }
   try {
     const raw = localStorage.getItem(PROFILES_KEY);
     if (!raw) return "";
@@ -296,6 +310,14 @@ export function setAddonEnabled(transportUrl: string, enabled: boolean): void {
   if (enabled) set.delete(transportUrl);
   else set.add(transportUrl);
   saveDisabledAddons(set);
+
+  if (isNuvioProviderActive()) {
+    const slot = resolveEffectiveNuvioAddonSlot();
+    const current = readCachedNuvioAddons(slot);
+    const updated = current.map((a) => (a.url === transportUrl ? { ...a, enabled } : a));
+    writeCachedNuvioAddons(slot, updated);
+    void pushAddonsToNuvio(slot, updated);
+  }
 }
 
 export function filterEnabled<T extends { transportUrl: string }>(items: T[]): T[] {
@@ -407,7 +429,13 @@ export async function installAddon(id: string, transportUrl: string): Promise<Ad
   next.push({ id: canonicalId, transportUrl, installedAt: Date.now(), manifest });
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl };
-  await pushToStremio(addon, "install", replacedUrls);
+  if (isNuvioProviderActive()) {
+    const slot = resolveEffectiveNuvioAddonSlot();
+    await addAddonToNuvio(slot, { url: transportUrl, name: manifest.name || canonicalId });
+    window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+  } else {
+    await pushToStremio(addon, "install", replacedUrls);
+  }
   return addon;
 }
 
@@ -438,8 +466,15 @@ export async function installFromUrl(
   next.push({ id, transportUrl: parsed.url, installedAt: Date.now(), manifest });
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl: parsed.url };
-  const syncedToStremio = await pushToStremio(addon, "install", replacedUrls);
-  return { addon, syncedToStremio, replaced: replacedById || replacedByOld };
+  let synced = false;
+  if (isNuvioProviderActive()) {
+    const slot = resolveEffectiveNuvioAddonSlot();
+    synced = await addAddonToNuvio(slot, { url: parsed.url, name: manifest.name || id });
+    window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+  } else {
+    synced = await pushToStremio(addon, "install", replacedUrls);
+  }
+  return { addon, syncedToStremio: synced, replaced: replacedById || replacedByOld };
 }
 
 export async function uninstallAddon(id: string, transportUrl?: string): Promise<void> {
@@ -456,18 +491,31 @@ export async function uninstallAddon(id: string, transportUrl?: string): Promise
     for (const a of removed) if (disabled.delete(a.transportUrl)) touched = true;
     if (touched) saveDisabledAddons(disabled);
   }
-  const authKey = readAuthKey();
-  if (!authKey) return;
-  const current = await userAddons(authKey).catch(() => [] as Addon[]);
-  const filtered = transportUrl
-    ? current.filter((a) => a.transportUrl !== transportUrl)
-    : current.filter((a) => a.manifest.id !== id);
-  if (filtered.length !== current.length) {
-    await setUserAddons(authKey, filtered).catch(() => {});
+  const targetUrl = transportUrl || (removed[0]?.transportUrl ?? null);
+  if (isNuvioProviderActive()) {
+    if (targetUrl) {
+      const slot = resolveEffectiveNuvioAddonSlot();
+      await deleteAddonFromNuvio(slot, targetUrl);
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
+    }
+  } else {
+    const authKey = readAuthKey();
+    if (!authKey) return;
+    const current = await userAddons(authKey).catch(() => [] as Addon[]);
+    const filtered = transportUrl
+      ? current.filter((a) => a.transportUrl !== transportUrl)
+      : current.filter((a) => a.manifest.id !== id);
+    if (filtered.length !== current.length) {
+      await setUserAddons(authKey, filtered).catch(() => {});
+    }
   }
 }
 
 export async function fetchInstalledAddons(): Promise<Addon[]> {
+  if (isNuvioProviderActive()) {
+    const nuvioList = await fetchNuvioAddons().catch(() => [] as Addon[]);
+    if (nuvioList.length > 0) return nuvioList;
+  }
   const list = loadInstalled();
   if (list.length === 0) return [];
   const tasks = list.map(async (entry): Promise<Addon | null> => {

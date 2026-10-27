@@ -65,6 +65,7 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
     recordWatchedBy: noop, recordAnimeCwId: noop,
     resumeLibraryGetOne: async () => libraryItem, libraryGetOne: () => cloudRead(),
     libraryGetOneStrict: async () => libraryItem,
+    isNuvioProviderActive: () => false,
   };
   const mockWindow = {
     setInterval: (fn: () => void) => { intervals.set(++timerId, fn); return timerId; },

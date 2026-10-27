@@ -4,6 +4,7 @@ import {
   canPersistWatched,
   stremioProfileId as activeProfileId,
   primaryProfileId,
+  getNuvioActiveSlot,
 } from "./active-profile-id";
 import type { LibraryItem } from "@/lib/stremio";
 import { noteNotify } from "@/lib/render-cause";
@@ -46,7 +47,13 @@ let remoteCache: Set<string> | null = null;
 
 function storeKey(kind: keyof typeof PREFIXES): string {
   if (isNuvioProviderActive()) {
-    return `${PREFIXES[kind]}${nuvioWatchedScope()}`;
+    const scope = nuvioWatchedScope();
+    const scopedKey = `${PREFIXES[kind]}${scope}`;
+    const slotKey = `${PREFIXES[kind]}nuvio.${getNuvioActiveSlot()}`;
+    if (typeof localStorage !== "undefined" && !localStorage.getItem(scopedKey) && localStorage.getItem(slotKey)) {
+      return slotKey;
+    }
+    return scopedKey;
   }
   const id = activeProfileId();
   return id ? PREFIXES[kind] + id : LEGACY_KEYS[kind];
@@ -254,29 +261,49 @@ function stateInSets(
   episode: number,
   altIds?: Array<string | null | undefined>,
 ): boolean | undefined {
-  const k = key(metaId, season, episode);
-  if (watched.has(k)) return true;
-  if (unwatched.has(k)) return false;
+  const cleanId = metaId.replace(/^(series|movie|tmdb):/, "");
+  const allCandidateIds = new Set<string>([metaId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]);
   if (altIds && altIds.length > 0) {
     for (const alt of altIds) {
-      if (!alt || alt === metaId) continue;
-      const altK = key(alt, season, episode);
-      if (watched.has(altK)) return true;
-      if (unwatched.has(altK)) return false;
+      if (!alt) continue;
+      const cleanAlt = alt.replace(/^(series|movie|tmdb):/, "");
+      allCandidateIds.add(alt);
+      allCandidateIds.add(cleanAlt);
+      allCandidateIds.add(`tmdb:${cleanAlt}`);
+      allCandidateIds.add(`series:${cleanAlt}`);
     }
+  }
+
+  for (const id of allCandidateIds) {
+    const k = key(id, season, episode);
+    if (watched.has(k)) return true;
+    if (unwatched.has(k)) return false;
   }
   return undefined;
 }
 
-export function manualEpisodeKeys(metaId: string): {
+export function manualEpisodeKeys(
+  metaId: string,
+  altIds?: Array<string | null | undefined>,
+): {
   watched: Set<string>;
   unwatched: Set<string>;
 } {
-  const prefix = `${metaId}|`;
+  const ids = [metaId, ...(altIds ?? [])].filter(
+    (id): id is string => typeof id === "string" && id.trim().length > 0,
+  );
+  const allIds = new Set<string>(ids);
+  for (const id of ids) {
+    const clean = id.replace(/^(series|movie|tmdb):/, "");
+    allIds.add(clean);
+    allIds.add(`tmdb:${clean}`);
+    allIds.add(`series:${clean}`);
+  }
+  const prefixes = Array.from(allIds).map((id) => `${id}|`);
   const collect = (src: Set<string>): Set<string> => {
     const out = new Set<string>();
     for (const k of src) {
-      if (!k.startsWith(prefix)) continue;
+      if (!prefixes.some((p) => k.startsWith(p))) continue;
       const parts = k.split("|");
       if (parts.length === 3) out.add(`${parts[1]}:${parts[2]}`);
     }
@@ -288,29 +315,114 @@ export function manualEpisodeKeys(metaId: string): {
 export function reconcileNuvioWatchedEpisodes(
   slot: number,
   serverEpisodeKeys: Set<string>,
-  accountId: string,
-): void {
-  if (!accountId) return;
-  const sk = `${PREFIXES.watched}${nuvioWatchedScope(slot, accountId)}`;
-  const unsk = `${PREFIXES.unwatched}${nuvioWatchedScope(slot, accountId)}`;
+  targetSeriesIdsOrAccountId?: Set<string> | string,
+  maybeAccountId?: string,
+): { changed: boolean; newlyWatchedShows: Set<string> } {
+  const targetSeriesIds =
+    targetSeriesIdsOrAccountId instanceof Set ? targetSeriesIdsOrAccountId : undefined;
+  const accountId =
+    typeof targetSeriesIdsOrAccountId === "string" ? targetSeriesIdsOrAccountId : maybeAccountId;
+
+  let scope = nuvioWatchedScope(slot, accountId);
+  let sk = `${PREFIXES.watched}${scope}`;
+  let unsk = `${PREFIXES.unwatched}${scope}`;
+  if (scope === "nuvio.v2.unowned" && !localStorage.getItem(sk) && localStorage.getItem(`${PREFIXES.watched}nuvio.${slot}`)) {
+    sk = `${PREFIXES.watched}nuvio.${slot}`;
+    unsk = `${PREFIXES.unwatched}nuvio.${slot}`;
+  }
 
   const currentLocalWatched = loadSet(sk);
   const currentLocalUnwatched = loadSet(unsk);
 
   let changed = false;
+  const newlyWatchedShows = new Set<string>();
+
+  for (const sKey of Array.from(serverEpisodeKeys)) {
+    const parts = sKey.split("|");
+    if (parts.length === 3) {
+      const showId = parts[0];
+      const s = parts[1];
+      const e = parts[2];
+      const clean = showId.replace(/^(series|movie|tmdb):/, "");
+      serverEpisodeKeys.add(`${clean}|${s}|${e}`);
+      serverEpisodeKeys.add(`tmdb:${clean}|${s}|${e}`);
+      serverEpisodeKeys.add(`series:${clean}|${s}|${e}`);
+    }
+  }
 
   for (const sKey of serverEpisodeKeys) {
     if (!currentLocalWatched.has(sKey)) {
       currentLocalWatched.add(sKey);
       currentLocalUnwatched.delete(sKey);
       changed = true;
+      const sid = sKey.split("|")[0];
+      if (sid) {
+        newlyWatchedShows.add(sid);
+        const clean = sid.replace(/^(series|movie|tmdb):/, "");
+        newlyWatchedShows.add(clean);
+        newlyWatchedShows.add(`tmdb:${clean}`);
+        newlyWatchedShows.add(`series:${clean}`);
+      }
     }
   }
 
-  for (const lKey of currentLocalWatched) {
-    if (!serverEpisodeKeys.has(lKey)) {
-      currentLocalWatched.delete(lKey);
-      changed = true;
+  // Only prune local episodes if server actually returned watched items,
+  // and only for shows the server returned records for!
+  if (serverEpisodeKeys.size > 0) {
+    const serverShowsWithEpisodes = new Set<string>();
+    for (const sKey of serverEpisodeKeys) {
+      const parts = sKey.split("|");
+      if (parts[0]) {
+        const sid = parts[0];
+        const clean = sid.replace(/^(series|movie|tmdb):/, "");
+        serverShowsWithEpisodes.add(sid);
+        serverShowsWithEpisodes.add(clean);
+        serverShowsWithEpisodes.add(`tmdb:${clean}`);
+        serverShowsWithEpisodes.add(`series:${clean}`);
+      }
+    }
+    if (targetSeriesIds) {
+      for (const tid of targetSeriesIds) {
+        const clean = tid.replace(/^(series|movie|tmdb):/, "");
+        serverShowsWithEpisodes.add(tid);
+        serverShowsWithEpisodes.add(clean);
+        serverShowsWithEpisodes.add(`tmdb:${clean}`);
+        serverShowsWithEpisodes.add(`series:${clean}`);
+      }
+    }
+
+    for (const lKey of Array.from(currentLocalWatched)) {
+      const parts = lKey.split("|");
+      const showId = parts[0];
+      const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
+      if (serverShowsWithEpisodes.has(showId) && !serverEpisodeKeys.has(lKey)) {
+        currentLocalWatched.delete(lKey);
+        currentLocalUnwatched.add(lKey);
+        changed = true;
+      } else if (cleanShowId && serverShowsWithEpisodes.has(cleanShowId) && !serverEpisodeKeys.has(lKey)) {
+        currentLocalWatched.delete(lKey);
+        currentLocalUnwatched.add(lKey);
+        changed = true;
+      }
+    }
+  } else if (targetSeriesIds && targetSeriesIds.size > 0) {
+    const targetShowsClean = new Set<string>();
+    for (const tid of targetSeriesIds) {
+      const clean = tid.replace(/^(series|movie|tmdb):/, "");
+      targetShowsClean.add(tid);
+      targetShowsClean.add(clean);
+      targetShowsClean.add(`tmdb:${clean}`);
+      targetShowsClean.add(`series:${clean}`);
+    }
+    for (const lKey of Array.from(currentLocalWatched)) {
+      const parts = lKey.split("|");
+      const showId = parts[0];
+      const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
+      if (targetShowsClean.has(showId) || (cleanShowId && targetShowsClean.has(cleanShowId))) {
+        currentLocalWatched.delete(lKey);
+        currentLocalUnwatched.add(lKey);
+        changed = true;
+      }
     }
   }
 
@@ -320,10 +432,15 @@ export function reconcileNuvioWatchedEpisodes(
     if (currentScope === sk) {
       watchedCache = currentLocalWatched;
       unwatchedCache = currentLocalUnwatched;
+    } else {
+      watchedCache = null;
+      unwatchedCache = null;
+      currentScope = "";
     }
     version += 1;
     notifySubs();
   }
+  return { changed, newlyWatchedShows };
 }
 
 export function manualWatchedRawKeys(): string[] {
@@ -599,12 +716,62 @@ export function manualWatchedVersion(): number {
   return version;
 }
 
+export function resetManualWatchedCache(): void {
+  currentScope = "";
+  watchedCache = null;
+  unwatchedCache = null;
+  metaCache = null;
+  dismissedCache = null;
+  unwatchedAtCache = null;
+  remoteCache = null;
+  version += 1;
+  notifySubs();
+}
+
+export function clearManualWatched(profileOrSlot?: string | number): void {
+  try {
+    for (const kind of Object.keys(PREFIXES) as Array<keyof typeof PREFIXES>) {
+      if (profileOrSlot != null) {
+        const slotKey =
+          typeof profileOrSlot === "number" || /^\d+$/.test(String(profileOrSlot))
+            ? `nuvio.${profileOrSlot}`
+            : String(profileOrSlot);
+        localStorage.removeItem(`${PREFIXES[kind]}${slotKey}`);
+      } else {
+        localStorage.removeItem(LEGACY_KEYS[kind]);
+        const id = activeProfileId();
+        if (id) localStorage.removeItem(`${PREFIXES[kind]}${id}`);
+      }
+    }
+  } catch {}
+  resetManualWatchedCache();
+}
+
+export function clearAllNuvioManualWatched(): void {
+  try {
+    const toRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (
+        k &&
+        (k.startsWith("harbor.manualwatched.v1.nuvio.") ||
+          k.startsWith("harbor.manualunwatched.v1.nuvio.") ||
+          k.startsWith("harbor.manualwatched.meta.v1.nuvio.") ||
+          k.startsWith("harbor.manualwatched.dismissed.v1.nuvio.") ||
+          k.startsWith("harbor.manualunwatched.at.v1.nuvio.") ||
+          k.startsWith("harbor.manualwatched.fromremote.v1.nuvio.") ||
+          k.includes(".nuvio."))
+      ) {
+        toRemove.push(k);
+      }
+    }
+    for (const k of toRemove) localStorage.removeItem(k);
+  } catch {}
+  resetManualWatchedCache();
+}
+
 if (typeof window !== "undefined") {
-  let lastScope = storeKey("watched");
-  const onScopeChange = () => {
-    const nextScope = storeKey("watched");
-    if (nextScope === lastScope) return;
-    lastScope = nextScope;
+  const onReset = () => {
     currentScope = "";
     watchedCache = null;
     unwatchedCache = null;
@@ -615,9 +782,10 @@ if (typeof window !== "undefined") {
     version += 1;
     notifySubs();
   };
-  window.addEventListener("harbor:active-profile-changed", onScopeChange);
-  window.addEventListener("harbor:profiles-updated", onScopeChange);
-  window.addEventListener("harbor:account-provider-changed", onScopeChange);
-  window.addEventListener("harbor:nuvio-profile-changed", onScopeChange);
-  window.addEventListener("harbor:nuvio-state-changed", onScopeChange);
+  window.addEventListener("harbor:active-profile-changed", onReset);
+  window.addEventListener("harbor:profiles-updated", onReset);
+  window.addEventListener("harbor:account-provider-changed", onReset);
+  window.addEventListener("harbor:nuvio-profile-changed", onReset);
+  window.addEventListener("harbor:nuvio-state-changed", onReset);
+  window.addEventListener("harbor:watched-changed", onReset);
 }

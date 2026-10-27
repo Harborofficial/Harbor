@@ -15,7 +15,7 @@ import { HarborAccountPanel } from "@/views/account/harbor-account-panel";
 
 import { NuvioCard } from "./account/nuvio-card";
 import { NuvioSyncedAddonsCard } from "./account/nuvio-synced-addons-card";
-import { NuvioProfileMappingCard } from "./account/nuvio-profile-card";
+
 
 import { AccountProviderPanel } from "./account/account-provider-panel";
 import { NuvioProfilesTab } from "./account/nuvio-profiles-tab";
@@ -27,7 +27,7 @@ import { SecondaryPrivilegesCard } from "./account/secondary-privileges-card";
 import { SettingsModal, ModalButton } from "./kit";
 import { ShieldAlert } from "lucide-react";
 import { getSecondaryPrivileges } from "@/lib/settings/defaults";
-import { isStremioActivePrimary } from "@/lib/active-profile-id";
+import { isStremioActivePrimary, activeProfileIsPrimary } from "@/lib/active-profile-id";
 
 type Tab = "provider" | "you" | "profiles" | "harbor" | "stremio" | "nuvio";
 
@@ -36,7 +36,7 @@ export function AccountStub() {
   const { profiles, activeProfile, openPicker } = useProfiles();
   const { settings } = useSettings();
   const isNuvio = settings.accountProvider === "nuvio";
-  const [, setNuvioState] = useState(() => loadNuvioState());
+  const [nuvioState, setNuvioState] = useState(() => loadNuvioState());
   const [forceTick, setForceTick] = useState(0);
   void forceTick;
   const [restrictedModal, setRestrictedModal] = useState<{
@@ -47,12 +47,22 @@ export function AccountStub() {
   useEffect(() => {
     const onSync = () => setNuvioState(loadNuvioState());
     const onProfileSync = () => setForceTick((t) => t + 1);
+    const onProviderChanged = () => {
+      setTab("provider");
+      setForceTick((t) => t + 1);
+    };
+    window.addEventListener("harbor:account-provider-changed", onProviderChanged);
     window.addEventListener("harbor:nuvio-state-changed", onSync);
     window.addEventListener("harbor:nuvio-profile-changed", onSync);
     window.addEventListener("harbor:nuvio-profiles-updated", onSync);
     window.addEventListener("harbor:active-profile-changed", onProfileSync);
     window.addEventListener("harbor:profiles-updated", onProfileSync);
+    window.addEventListener("harbor:secondary-privileges-changed", onProfileSync);
+    window.addEventListener("harbor:settings-changed", onProfileSync);
     return () => {
+      window.removeEventListener("harbor:account-provider-changed", onProviderChanged);
+      window.removeEventListener("harbor:secondary-privileges-changed", onProfileSync);
+      window.removeEventListener("harbor:settings-changed", onProfileSync);
       window.removeEventListener("harbor:nuvio-state-changed", onSync);
       window.removeEventListener("harbor:nuvio-profile-changed", onSync);
       window.removeEventListener("harbor:nuvio-profiles-updated", onSync);
@@ -61,6 +71,9 @@ export function AccountStub() {
     };
   }, []);
 
+  const isPrimary = activeProfileIsPrimary() || (isNuvio
+    ? Number(nuvioState.activeProfileIndex ?? 1) === 1
+    : isStremioActivePrimary(activeProfile, profiles));
   const tabs = [
     { id: "you" as const, label: t("Your profile") },
     { id: "profiles" as const, label: t("Profiles") },
@@ -73,10 +86,21 @@ export function AccountStub() {
 
   const [tab, setTab] = useState<Tab>("you");
 
+  useEffect(() => {
+    const liveIsPrimary = activeProfileIsPrimary() || (isNuvio
+      ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
+      : isStremioActivePrimary(activeProfile, profiles));
+    if (liveIsPrimary) return;
+    const currentPrivs = getSecondaryPrivileges(settings, isNuvio);
+    if (tab === "provider" && !currentPrivs.canViewAccountProvider) setTab("you");
+    if (tab === "harbor" && !currentPrivs.canViewHarborAccount) setTab("you");
+    if ((tab === "stremio" || tab === "nuvio") && !currentPrivs.canViewProviderAccount) setTab("you");
+  }, [tab, isPrimary, isNuvio, forceTick]);
+
   const handleTabSelect = (next: Tab) => {
-    const liveIsPrimary = isNuvio
-      ? Number(loadNuvioState().activeProfileIndex) === 1
-      : isStremioActivePrimary(activeProfile, profiles);
+    const liveIsPrimary = activeProfileIsPrimary() || (isNuvio
+      ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
+      : isStremioActivePrimary(activeProfile, profiles));
 
     if (liveIsPrimary) {
       setTab(next);
@@ -202,12 +226,6 @@ function NuvioTab() {
         <NuvioCard />
       </Section>
       <Section
-        title={t("Profile mapping")}
-        subtitle={t("Choose which Nuvio profile slot (1–6) syncs with this Harbor profile.")}
-      >
-        <NuvioProfileMappingCard />
-      </Section>
-      <Section
         title={t("Synced addons")}
         subtitle={t("Harbor pulls addons configured in your Nuvio profile.")}
       >
@@ -223,14 +241,14 @@ function ProfilesTab() {
   const { profiles, activeProfile } = useProfiles();
   const isNuvio = settings.accountProvider === "nuvio";
   const isPrimary = isNuvio
-    ? loadNuvioState().activeProfileIndex === 1
+    ? Number(loadNuvioState().activeProfileIndex ?? 1) === 1
     : isStremioActivePrimary(activeProfile, profiles);
 
   if (isNuvio) {
     return <NuvioProfilesTab />;
   }
 
-  const canManageStartup = isPrimary || getSecondaryPrivileges(settings, false).canManageStartup;
+  const canManageStartup = isPrimary || getSecondaryPrivileges(settings, isNuvio).canManageStartup;
 
   return (
     <Section

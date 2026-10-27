@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import type { Addon } from "@/lib/addons";
-import { useAuth } from "@/lib/auth";
+import { useAuth, resolveEffectiveStremioAuthKey } from "@/lib/auth";
 import { userAddons } from "@/lib/addons";
 import { fetchInstalledAddons } from "@/lib/addon-store";
 import { listAddons } from "@/lib/providers/stremio-addons";
 import { isAdultText } from "./adult-filter";
 import { fetchCommunityAddons, fetchManifest } from "./community";
 import { CURATED_ADDONS, type CuratedEntry } from "./curated";
+import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
+import { useSettings } from "@/lib/settings";
+import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
+import { recordStremioAddons, recordNuvioAddons } from "@/lib/nuvio/nuvio-addon-registry";
 
 const ALWAYS_HIDDEN_IDS = new Set<string>(["org.stremio.opensubtitles", "com.opensubtitles.v3"]);
 
@@ -30,7 +34,7 @@ export type ResolvedAddon = {
   curated?: CuratedEntry;
   manifest: Addon["manifest"] | null;
   transportUrl: string;
-  source: "curated" | "community" | "stremio-user" | "harbor-local";
+  source: "curated" | "community" | "stremio-user" | "harbor-local" | "nuvio-user";
   installed: boolean;
 };
 
@@ -42,6 +46,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
   refetch: () => void;
 } {
   const { authKey } = useAuth();
+  const { settings } = useSettings();
   const [byId, setById] = useState<Map<string, ResolvedAddon>>(new Map());
   const [loading, setLoading] = useState(true);
   const [installedIds, setInstalledIds] = useState<Set<string>>(new Set());
@@ -52,11 +57,27 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
     let cancelled = false;
     setLoading(true);
     (async () => {
+      const isNuvio = isNuvioProviderActive();
+      const nuvioAddonMode = settings.nuvioAddonMode ?? "separate";
+
       const local = await fetchInstalledAddons().catch(() => [] as Addon[]);
-      const stremio = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+      const stremioKey = resolveEffectiveStremioAuthKey(authKey);
+      const stremio = (!isNuvio || nuvioAddonMode === "combined") && stremioKey
+        ? await userAddons(stremioKey).catch(() => [] as Addon[])
+        : [];
+      const nuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn()
+        ? await fetchNuvioAddons().catch(() => [] as Addon[])
+        : [];
+
+      if (!isNuvio || nuvioAddonMode === "combined") {
+        recordStremioAddons(stremio);
+      }
+      if (nuvio.length > 0) recordNuvioAddons(nuvio);
+
       const installed = new Set<string>([
         ...local.map((a) => a.manifest.id),
         ...stremio.map((a) => a.manifest.id),
+        ...nuvio.map((a) => a.manifest.id),
       ]);
       // One row per installation. The catalog map below is keyed by manifest id, so an
       // addon installed twice (Torrentio with two debrid configs, say) would collapse into
@@ -81,6 +102,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
         });
       };
       for (const a of stremio) addRow(a, "stremio-user");
+      for (const a of nuvio) addRow(a, "nuvio-user");
       for (const a of local) addRow(a, "harbor-local");
       const installedRows = rows
         .filter((r) => !ALWAYS_HIDDEN_IDS.has(r.manifest?.id ?? ""))
@@ -260,7 +282,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
     return () => {
       cancelled = true;
     };
-  }, [authKey, adultsAllowed, tick]);
+  }, [authKey, adultsAllowed, tick, settings.nuvioAddonMode, settings.accountProvider]);
 
   useEffect(() => {
     const onChange = (e: Event) => {
@@ -292,7 +314,17 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
   useEffect(() => {
     const onProfileChanged = () => setTick((t) => t + 1);
     window.addEventListener("harbor:active-profile-changed", onProfileChanged);
-    return () => window.removeEventListener("harbor:active-profile-changed", onProfileChanged);
+    window.addEventListener("harbor:nuvio-profile-changed", onProfileChanged);
+    window.addEventListener("harbor:nuvio-state-changed", onProfileChanged);
+    window.addEventListener("harbor:nuvio-addons-changed", onProfileChanged);
+    window.addEventListener("harbor:account-provider-changed", onProfileChanged);
+    return () => {
+      window.removeEventListener("harbor:active-profile-changed", onProfileChanged);
+      window.removeEventListener("harbor:nuvio-profile-changed", onProfileChanged);
+      window.removeEventListener("harbor:nuvio-state-changed", onProfileChanged);
+      window.removeEventListener("harbor:nuvio-addons-changed", onProfileChanged);
+      window.removeEventListener("harbor:account-provider-changed", onProfileChanged);
+    };
   }, []);
 
   return { loading, byId, installedIds, installedAddons, refetch: () => setTick((t) => t + 1) };

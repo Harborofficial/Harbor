@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
@@ -12,8 +12,16 @@ import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { useHideAnime } from "@/lib/anime-hide";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
-import { listLocalCw, subscribeLocalCw, type LocalCwEntry } from "@/lib/local-cw";
-import { useExternalCw } from "@/lib/feed/external-cw";
+import { clearLocalCw, listLocalCw, subscribeLocalCw, type LocalCwEntry } from "@/lib/local-cw";
+import { removeExternalCwItem, useExternalCw } from "@/lib/feed/external-cw";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import {
+  deleteWatchProgressFromNuvio,
+  isNuvioProviderActive,
+  resolveNuvioProfileIndex,
+} from "@/lib/nuvio/nuvio-sync";
+import { clearResume } from "@/lib/resume";
+import { franchiseDedupKey } from "@/lib/providers/jikan";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
@@ -96,11 +104,18 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { activeProfile, profiles } = useProfiles();
+  const isNuvioProvider = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const hideSharedCw =
-    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+    !isNuvioProvider &&
+    settings.cwPerProfile &&
+    anyProfileSharesStremioWith(activeProfile, profiles);
   const hideAnime = useHideAnime();
   const externalCw = useExternalCw(
-    !hideSharedCw && (settings.cwSources.trakt || settings.cwSources.simkl),
+    Boolean(
+      isNuvioProvider ||
+        (!hideSharedCw &&
+          (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb)),
+    ),
   );
   const [items, setItems] = useState<LibraryItem[]>(() =>
     authKey && cloudKey === authKey ? cloudCache : [],
@@ -109,6 +124,10 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   const dismissVersion = useCwDismissVersion();
 
   useEffect(() => {
+    if (isNuvioProvider) {
+      markCwReady();
+      return;
+    }
     if (!authKey) {
       cloudKey = null;
       cloudCache = [];
@@ -130,17 +149,63 @@ export function useMobileCw(limit = 14): LibraryItem[] {
     return () => {
       cancelled = true;
     };
-  }, [authKey]);
+  }, [authKey, isNuvioProvider]);
 
-  useEffect(() => subscribeLocalCw(() => setLocalVersion((v) => v + 1)), []);
+  useEffect(() => {
+    const bump = () => setLocalVersion((v) => v + 1);
+    const unsub = subscribeLocalCw(bump);
+    window.addEventListener("harbor:account-provider-changed", bump);
+    window.addEventListener("harbor:nuvio-progress-pushed", bump);
+    window.addEventListener("harbor:nuvio-progress-deleted", bump);
+    window.addEventListener("harbor:nuvio-playback-synced", bump);
+    window.addEventListener("harbor:nuvio-profile-changed", bump);
+    return () => {
+      unsub();
+      window.removeEventListener("harbor:account-provider-changed", bump);
+      window.removeEventListener("harbor:nuvio-progress-pushed", bump);
+      window.removeEventListener("harbor:nuvio-progress-deleted", bump);
+      window.removeEventListener("harbor:nuvio-playback-synced", bump);
+      window.removeEventListener("harbor:nuvio-profile-changed", bump);
+    };
+  }, []);
 
   return useMemo(() => {
     void localVersion;
     void dismissVersion;
-    const base = hideSharedCw
-      ? []
-      : [...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)), ...externalCw];
-    const merged = [...base, ...listLocalCw(hideSharedCw).map(localToLibraryItem)]
+    const disabledSources = new Set<string>();
+    if (!settings.cwSources.simkl) disabledSources.add("simkl");
+    if (!settings.cwSources.trakt) disabledSources.add("trakt");
+    if (!settings.cwSources.publicmetadb) disabledSources.add("publicmetadb");
+
+    const externalAllowed = externalCw.filter((i) => {
+      if (!i.external) return false;
+      if (i.external === "nuvio") return true;
+      if (disabledSources.has(i.external)) return false;
+      if (hideSharedCw) return false;
+      if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
+        if (i.upNext || i.waitingForAir) return true;
+        const offset = i.state?.timeOffset ?? 0;
+        const dur = i.state?.duration ?? 0;
+        if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
+        if (dur > 0 && offset / dur >= 0.9) return false;
+      }
+      return true;
+    });
+
+    const base = isNuvioProvider
+      ? externalAllowed
+      : hideSharedCw
+        ? []
+        : [
+            ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
+            ...externalAllowed.filter((i) => i.external !== "nuvio"),
+          ];
+    const merged = [
+      ...base,
+      ...listLocalCw(isNuvioProvider ? false : hideSharedCw).map((e) =>
+        isNuvioProvider ? { ...localToLibraryItem(e), external: "nuvio" as const } : localToLibraryItem(e),
+      ),
+    ]
       .filter(
         (i) =>
           (i.type as string) !== "other" &&
@@ -152,15 +217,99 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);
-    const seen = new Set<string>();
-    const out: LibraryItem[] = [];
+
+    const norm = (s: string) => franchiseDedupKey(s);
+    const lastWatchedOf = (i: LibraryItem) => {
+      const lw = Date.parse(i.state?.lastWatched ?? "");
+      if (Number.isFinite(lw) && lw > 0) return lw;
+      const m = i._mtime as unknown;
+      const mt = typeof m === "number" ? m : Date.parse(String(m ?? ""));
+      return Number.isFinite(mt) ? mt : 0;
+    };
+
+    const resolveCollision = (held: LibraryItem, incoming: LibraryItem): LibraryItem => {
+      const heldIsNuvio = held.external === "nuvio";
+      const incIsNuvio = incoming.external === "nuvio";
+
+      if (isNuvioProvider) {
+        if (heldIsNuvio && !incIsNuvio) {
+          if (lastWatchedOf(incoming) > lastWatchedOf(held)) {
+            return {
+              ...held,
+              state: {
+                ...held.state,
+                ...incoming.state,
+                video_id: incoming.state?.video_id ?? held.state?.video_id,
+                season: incoming.state?.season ?? held.state?.season,
+                episode: incoming.state?.episode ?? held.state?.episode,
+                timeOffset: incoming.state?.timeOffset ?? held.state?.timeOffset ?? 0,
+                duration: incoming.state?.duration ?? held.state?.duration ?? 0,
+                lastWatched: incoming.state?.lastWatched ?? held.state?.lastWatched,
+              },
+              _mtime: incoming._mtime ?? held._mtime,
+            };
+          }
+          return held;
+        }
+        if (!heldIsNuvio && incIsNuvio) {
+          if (lastWatchedOf(held) > lastWatchedOf(incoming)) {
+            return {
+              ...incoming,
+              state: {
+                ...incoming.state,
+                ...held.state,
+                video_id: held.state?.video_id ?? incoming.state?.video_id,
+                season: held.state?.season ?? incoming.state?.season,
+                episode: held.state?.episode ?? incoming.state?.episode,
+                timeOffset: held.state?.timeOffset ?? incoming.state?.timeOffset ?? 0,
+                duration: held.state?.duration ?? incoming.state?.duration ?? 0,
+                lastWatched: held.state?.lastWatched ?? incoming.state?.lastWatched,
+              },
+              _mtime: held._mtime ?? incoming._mtime,
+            };
+          }
+          return incoming;
+        }
+      }
+
+      const heldIsNativeStremio = !held.external && !isNuvioProvider;
+      const incIsNativeStremio = !incoming.external && !isNuvioProvider;
+      if (heldIsNativeStremio && !incIsNativeStremio) return held;
+      if (!heldIsNativeStremio && incIsNativeStremio) return incoming;
+
+      return lastWatchedOf(incoming) > lastWatchedOf(held) ? incoming : held;
+    };
+
+    const byId = new Map<string, LibraryItem>();
+    const byName = new Map<string, LibraryItem>();
     for (const i of merged) {
-      if (seen.has(i._id)) continue;
-      seen.add(i._id);
-      out.push(i);
-      if (out.length >= limit) break;
+      const nm = norm(i.name ?? "");
+      const key = `${i.type}:${nm}`;
+
+      const heldById = byId.get(i._id);
+      if (heldById) {
+        const resolved = resolveCollision(heldById, i);
+        byId.set(resolved._id, resolved);
+        if (nm) byName.set(key, resolved);
+        continue;
+      }
+
+      if (nm) {
+        const heldByName = byName.get(key);
+        if (heldByName) {
+          const resolved = resolveCollision(heldByName, i);
+          if (resolved._id !== heldByName._id) byId.delete(heldByName._id);
+          if (resolved._id !== i._id) byId.delete(i._id);
+          byId.set(resolved._id, resolved);
+          byName.set(key, resolved);
+          continue;
+        }
+        byName.set(key, i);
+      }
+      byId.set(i._id, i);
+      if (byId.size >= limit) break;
     }
-    return out;
+    return [...byId.values()].sort((a, b) => cwSortKey(b) - cwSortKey(a));
   }, [
     items,
     externalCw,
@@ -170,6 +319,10 @@ export function useMobileCw(limit = 14): LibraryItem[] {
     hideAnime,
     hideSharedCw,
     activeProfile?.id,
+    isNuvioProvider,
+    settings.cwSources.trakt,
+    settings.cwSources.simkl,
+    settings.cwSources.publicmetadb,
   ]);
 }
 
@@ -229,6 +382,41 @@ export function MobileCwRow({
   useSnapshotVersion();
   const metas = useMemo(() => items.map(toMeta), [items]);
   const logos = useHeroLogos(metas, settings);
+  const isNuvioProvider = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+
+  const handleDismiss = useCallback(
+    (item: LibraryItem) => {
+      const isNuvio =
+        isNuvioProvider || item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive());
+      if (isNuvio) {
+        const slot = resolveNuvioProfileIndex();
+        removeExternalCwItem(item);
+        clearLocalCw(item._id, `nuvio-${slot}`);
+        clearLocalCw(item._id);
+        const se = episodeFromVideoId(item.state?.video_id);
+        const season = item.state?.season ?? se?.season;
+        const episode = item.state?.episode ?? se?.episode;
+        clearResume(item._id, undefined, undefined, `nuvio-${slot}`);
+        clearResume(item._id);
+        dismissCw(item, authKey);
+        void deleteWatchProgressFromNuvio(
+          slot,
+          item._id,
+          undefined,
+          season,
+          episode,
+        );
+        return;
+      }
+      if (item.local) {
+        clearLocalCw(item._id);
+        dismissCw(item, authKey);
+        return;
+      }
+      dismissCw(item, authKey);
+    },
+    [isNuvioProvider, authKey],
+  );
 
   if (items.length === 0) return null;
 
@@ -244,7 +432,7 @@ export function MobileCwRow({
             item={item}
             logo={logos[item._id]}
             onOpenDetail={onOpenDetail}
-            onDismiss={() => dismissCw(item, authKey)}
+            onDismiss={() => handleDismiss(item)}
           />
         ))}
       </div>
@@ -268,8 +456,8 @@ function MobileCwCard({
   const dur = item.state?.duration ?? 0;
   const off = item.state?.timeOffset ?? 0;
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;
-  const external = !!item.external;
-  const remaining = dur > 0 && !external ? formatRemaining(dur - off, t) : "";
+  const isExternal = !!item.external && item.external !== "nuvio";
+  const remaining = dur > 0 && !isExternal ? formatRemaining(dur - off, t) : "";
   const cardRef = useRef<HTMLButtonElement>(null);
   const inView = useInViewport(cardRef);
   const ep = episodeInfo(item);
@@ -316,7 +504,7 @@ function MobileCwCard({
             </div>
           )}
           <span className="absolute bottom-2.5 start-2.5 flex max-w-[calc(100%-20px)] items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-            {item.external ? (
+            {item.external && item.external !== "nuvio" ? (
               <img
                 src={item.external === "trakt" ? traktLogo : simklLogo}
                 alt=""

@@ -64,6 +64,7 @@ import { capturePlaybackActor, isPlaybackActorCurrent } from "@/lib/playback-his
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { localCwEntry } from "@/lib/local-cw";
 import { isManualWatchedDismissed } from "@/lib/manual-watched";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 
 // Bleach: Thousand-Year Blood War is split across four cours that carry their
 // own arc name appended to the base title (e.g. "... - The Separation"). The
@@ -126,7 +127,7 @@ export const ContinueCard = memo(function ContinueCard({
   useSnapshotVersion();
   const newEpisode = useHasNewEpisode(item);
   const snapshot = readSnapshot(item._id);
-  const isExternal = !!item.external;
+  const isExternal = !!item.external && item.external !== "nuvio";
   const externalLogo =
     item.external === "trakt"
       ? traktLogo
@@ -155,18 +156,20 @@ export const ContinueCard = memo(function ContinueCard({
     return () => window.clearInterval(id);
   }, [waitingForAir, nextAirDate]);
   const countdown = useMemo(() => {
-    if (!nextAirDate) return "";
+    if (!nextAirDate) {
+      return waitingForAir ? t("Airing soon") : "";
+    }
     const diff = Date.parse(nextAirDate) - now;
     if (diff <= 0) return t("Airing now");
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
     if (days > 0)
-      return t("Next in {days}d {hours}h", { days: String(days), hours: String(hours) });
+      return t("in {days}d {hours}h", { days: String(days), hours: String(hours) });
     if (hours > 0)
-      return t("Next in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
-    return t("Next in {minutes}m", { minutes: String(Math.max(1, minutes)) });
-  }, [nextAirDate, now, t]);
+      return t("in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
+    return t("in {minutes}m", { minutes: String(Math.max(1, minutes)) });
+  }, [nextAirDate, now, t, waitingForAir]);
   const kitsuThreeSeg =
     /^(kitsu|mal|anilist|anidb):/.test(item._id) &&
     (item.state?.video_id ?? "").split(":").length === 3;
@@ -640,6 +643,9 @@ export const ContinueCard = memo(function ContinueCard({
         const current = latest.current.item;
         if (current.manualWatched) return !isManualWatchedDismissed(current._id);
         if (isCwDismissed(current)) return false;
+        if (isNuvioProviderActive() || current.external === "nuvio") {
+          return true;
+        }
         return !current.local || !!localCwEntry(current._id);
       },
       t,
@@ -701,7 +707,7 @@ export const ContinueCard = memo(function ContinueCard({
     });
 
   return (
-    <div className="group relative w-full min-w-0" onContextMenu={onCardContext}>
+    <div className="group relative w-full min-w-0 animate-in fade-in-50 zoom-in-[0.98] duration-300 ease-out" onContextMenu={onCardContext}>
       <button
         ref={cardRef}
         type="button"
@@ -775,7 +781,10 @@ export const ContinueCard = memo(function ContinueCard({
               )}
               {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
               {waitingForAir && countdown ? (
-                <span className="shrink-0 font-medium text-amber">{countdown}</span>
+                <>
+                  {sub && <span className="shrink-0 text-ink-subtle">·</span>}
+                  <span className="shrink-0 font-medium text-amber-500">{countdown}</span>
+                </>
               ) : upNext ? (
                 <>
                   {sub && <span className="shrink-0 text-ink-subtle">·</span>}
@@ -819,7 +828,10 @@ export const ContinueCard = memo(function ContinueCard({
             </div>
           )}
           <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
-            <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
+            <div
+              className={`h-full ${waitingForAir ? "bg-amber-500" : "bg-accent"}`}
+              style={{ width: `${waitingForAir ? 100 : progress * 100}%` }}
+            />
           </div>
         </div>
       </button>

@@ -1,6 +1,7 @@
 import { Check, Download, Info, Loader2, Upload } from "../icons";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
+import { useSettings } from "@/lib/settings";
 import { library } from "@/lib/stremio";
 import { readLocalEntries } from "@/lib/watchlist";
 import { useT } from "@/lib/i18n";
@@ -10,10 +11,20 @@ import {
   planExport,
   runExport,
   runImport,
+  traktItemToStremioId,
   type ExportPlan,
+  type WatchlistSource,
 } from "@/lib/trakt/watchlist-sync";
 import { TraktApiError } from "@/lib/trakt/client";
 import type { TraktItem } from "@/lib/trakt/types";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import {
+  readCachedNuvioLibrary,
+  addNuvioLibraryItem,
+  flushNuvioLibraryMutations,
+} from "@/lib/nuvio/nuvio-library";
+import { resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
 
 function traktErrorMessage(t: ReturnType<typeof useT>, err: unknown): string {
   if (err instanceof TraktApiError) {
@@ -48,21 +59,37 @@ function Callout({ glyph, children }: { glyph: ReactNode; children: ReactNode })
 export function WatchlistSync() {
   const t = useT();
   const { authKey } = useAuth();
+  const { settings } = useSettings();
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const nuvioSlot = resolveNuvioProfileIndex();
+  const isNuvioConnected = isNuvio && isNuvioSignedIn();
+
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
-  const signIn = t("Sign in to Stremio first so Harbor knows which watchlist to sync.");
-  const locked = !authKey;
+  const signIn = isNuvio
+    ? t("Sign in to Nuvio first so Harbor knows which watchlist to sync.")
+    : t("Sign in to Stremio first so Harbor knows which watchlist to sync.");
+  const locked = isNuvio ? !isNuvioConnected : !authKey;
   const busy = phase.kind !== "idle" && phase.kind !== "result";
 
   const startExport = async () => {
-    if (!authKey) return;
+    if (locked) return;
     setPhase({ kind: "loading", dir: "export" });
     try {
-      const lib = await library(authKey);
-      const sources = [
-        ...lib.map((i) => ({ id: i._id, type: i.type, removed: i.removed, temp: i.temp })),
-        ...readLocalEntries().map((e) => ({ id: e.id, type: e.type })),
-      ];
+      let sources: WatchlistSource[] = [];
+      if (isNuvio) {
+        const nuvioLib = readCachedNuvioLibrary(nuvioSlot);
+        sources = [
+          ...nuvioLib.map((i) => ({ id: i.content_id, type: i.content_type })),
+          ...readLocalEntries().map((e) => ({ id: e.id, type: e.type })),
+        ];
+      } else if (authKey) {
+        const lib = await library(authKey);
+        sources = [
+          ...lib.map((i) => ({ id: i._id, type: i.type, removed: i.removed, temp: i.temp })),
+          ...readLocalEntries().map((e) => ({ id: e.id, type: e.type })),
+        ];
+      }
       const plan = planExport(sources);
       if (plan.movies.length + plan.shows.length === 0) {
         setPhase({
@@ -97,7 +124,7 @@ export function WatchlistSync() {
   };
 
   const startImport = async () => {
-    if (!authKey) return;
+    if (locked) return;
     setPhase({ kind: "loading", dir: "import" });
     try {
       const items = await fetchTraktWatchlist();
@@ -113,13 +140,38 @@ export function WatchlistSync() {
   };
 
   const confirmImport = async (items: TraktItem[]) => {
-    if (!authKey) return;
+    if (locked) return;
     setPhase({ kind: "running", label: t("Importing {done} / {total}", { done: 0, total: items.length }) });
     try {
-      const r = await runImport(authKey, items, (done, total) =>
-        setPhase({ kind: "running", label: t("Importing {done} / {total}", { done, total }) }),
-      );
-      setPhase({ kind: "result", tone: "ok", message: t("Added {n} to your Harbor watchlist", { n: r.added }) });
+      if (isNuvio) {
+        let added = 0;
+        let done = 0;
+        for (const it of items) {
+          const id = traktItemToStremioId(it);
+          if (id) {
+            try {
+              addNuvioLibraryItem(nuvioSlot, {
+                content_id: id,
+                content_type: it.type === "show" ? "series" : "movie",
+                name: it.title,
+                added_at: Date.now(),
+              });
+              added++;
+            } catch {}
+          }
+          done++;
+          setPhase({ kind: "running", label: t("Importing {done} / {total}", { done, total: items.length }) });
+        }
+        void flushNuvioLibraryMutations(nuvioSlot);
+        window.dispatchEvent(new CustomEvent("harbor:watchlist-updated"));
+        setPhase({ kind: "result", tone: "ok", message: t("Added {n} to your Harbor watchlist", { n: added }) });
+      } else if (authKey) {
+        const r = await runImport(authKey, items, (done, total) =>
+          setPhase({ kind: "running", label: t("Importing {done} / {total}", { done, total }) }),
+        );
+        window.dispatchEvent(new CustomEvent("harbor:watchlist-updated"));
+        setPhase({ kind: "result", tone: "ok", message: t("Added {n} to your Harbor watchlist", { n: r.added }) });
+      }
     } catch (err) {
       console.error("[trakt] import failed", err);
       setPhase({ kind: "result", tone: "warn", message: traktErrorMessage(t, err) });

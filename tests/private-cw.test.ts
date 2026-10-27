@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import test from "node:test";
 import ts from "typescript";
@@ -29,7 +29,8 @@ function harness() {
     const compiled = ts.transpileModule(readFileSync(full, "utf8"), {
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     }).outputText;
-    new Function("require", "exports", "localStorage", "window", compiled)((name: string) => {
+    try {
+      new Function("require", "exports", "localStorage", "window", compiled)((name: string) => {
       if (name === "react") return { useSyncExternalStore: () => 0 };
       if (name.endsWith("/stremio")) return {
         isCwMember: (i: any) => i.state?.timeOffset > 0,
@@ -47,9 +48,30 @@ function harness() {
       };
       if (name.endsWith("/providers/anime-mapping")) return { relatedLibraryIds: async () => [] };
       if (name.endsWith("/stremio-write-queue")) return { cloudLibraryPut: async () => { cloudWrites++; } };
+      if (name.endsWith("/i18n") || name.endsWith("/i18n/index")) {
+        const t = (key: string) => key;
+        return { t, useT: () => t, getLanguage: () => "en", setLanguage: () => {} };
+      }
+      if (name.endsWith("/addon-store")) return { fetchManifestAt: async () => null };
+      if (name === "@/lib/feed/external-cw") return { removeExternalCwItem: () => {} };
       if (name.startsWith("@tauri-apps/")) return { invoke: async () => {}, isTauri: () => false };
-      return load(name.startsWith("@/") ? `src/${name.slice(2)}.ts` : resolve(dirname(full), `${name}.ts`));
+      if (name.startsWith("@noble/hashes/"))
+        return name.endsWith("/sha256")
+          ? { sha256: (input: Uint8Array) => input }
+          : {
+              bytesToHex: (bytes: Uint8Array) =>
+                Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(""),
+            };
+      if (/\.(png|jpe?g|svg|webp|gif|avif|mp3|mp4|webm|woff2?|ttf|otf|css)$/i.test(name))
+        return { __esModule: true, default: name };
+      const base = name.startsWith("@/") ? resolve(`src/${name.slice(2)}`) : resolve(dirname(full), name);
+      const target = [`${base}.ts`, `${base}.tsx`, `${base}.js`, `${base}/index.ts`, `${base}/index.tsx`]
+        .find(existsSync);
+      return load(target ?? `${base}.ts`);
     }, exports, storage, window);
+    } catch (error) {
+      throw new Error(`[${path}] ${(error as Error).message}`);
+    }
     return exports;
   };
   return { data, select, load, get remoteReads() { return remoteReads; }, get cloudWrites() { return cloudWrites; } };

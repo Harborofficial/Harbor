@@ -31,6 +31,7 @@ import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/an
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
 import { foreignAnimeProviderSeasons } from "./streams/anime-identity";
+import { tmdbImdbCached } from "./providers/tmdb/tmdb-imdb-resolve";
 
 async function filterForeignAnimeSeasons(
   metaId: string,
@@ -249,6 +250,22 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
   return eps;
 }
 
+export function parseTmdbTvId(id: string): number | null {
+  if (id.startsWith("tmdb:tv:")) {
+    const n = parseInt(id.split(":")[2] ?? "", 10);
+    return Number.isFinite(n) ? n : null;
+  }
+  if (id.startsWith("tmdb:")) {
+    const n = parseInt(id.split(":")[1] ?? "", 10);
+    return Number.isFinite(n) ? n : null;
+  }
+  if (/^\d+$/.test(id)) {
+    const n = parseInt(id, 10);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
 export async function fetchAdjacentEpisodes(
   meta: Meta,
   current: { season: number; episode: number },
@@ -289,10 +306,9 @@ export async function fetchAdjacentEpisodes(
     return result;
   }
 
-  if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
-    const tvId = parseInt(meta.id.split(":")[2] ?? "", 10);
-    if (!Number.isFinite(tvId)) return { prev: null, next: null };
-    return tmdbAdjacent(opts.tmdbKey, tvId, current, opts.skip);
+  const tmdbTvId = parseTmdbTvId(meta.id);
+  if (tmdbTvId != null && opts.tmdbKey) {
+    return tmdbAdjacent(opts.tmdbKey, tmdbTvId, current, opts.skip);
   }
 
   const eps = await getNonStandardEpisodes(meta);
@@ -315,9 +331,9 @@ export async function fetchUpcomingEpisodes(
     if (idx === -1) return eps.slice(0, count);
     return eps.slice(idx + 1, idx + 1 + count);
   }
-  if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
-    const tvId = parseInt(meta.id.split(":")[2] ?? "", 10);
-    if (!Number.isFinite(tvId)) return [];
+  const upcomingTmdbTvId = parseTmdbTvId(meta.id);
+  if (upcomingTmdbTvId != null && opts.tmdbKey) {
+    const tvId = upcomingTmdbTvId;
     const out: PlayEpisode[] = [];
     let season = current.season;
     let cursor = current.episode;
@@ -464,7 +480,7 @@ export async function fetchSeasonList(meta: Meta, opts: { tmdbKey: string }): Pr
     const nums = uniqueSeasons(await loadCinemetaEpisodes(meta.id, opts.tmdbKey));
     return filterForeignAnimeSeasons(meta.id, meta.id, nums);
   }
-  if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
+  if (parseTmdbTvId(meta.id) != null && opts.tmdbKey) {
     const detail = await tmdbDetails(opts.tmdbKey, meta).catch(() => null);
     const nums = (detail?.seasons ?? []).map((s) => s.seasonNumber).filter((n) => n >= 1);
     const deduped = [...new Set(nums)].sort((a, b) => a - b);
@@ -483,10 +499,9 @@ export async function fetchSeasonEpisodes(
     const eps = await loadCinemetaEpisodes(meta.id, opts.tmdbKey);
     return (eps ?? []).filter((e) => e.season === season);
   }
-  if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
-    const tvId = parseInt(meta.id.split(":")[2] ?? "", 10);
-    if (!Number.isFinite(tvId)) return [];
-    return tmdbSeason(opts.tmdbKey, tvId, season);
+  const seasonTmdbTvId = parseTmdbTvId(meta.id);
+  if (seasonTmdbTvId != null && opts.tmdbKey) {
+    return tmdbSeason(opts.tmdbKey, seasonTmdbTvId, season);
   }
   const eps = await getNonStandardEpisodes(meta);
   return (eps ?? []).filter((e) => animeSeasonKey(e) === season);
@@ -498,11 +513,34 @@ export async function fetchEpisodeList(
 ): Promise<PlayEpisode[]> {
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) return (await loadCinemetaEpisodes(meta.id, opts.tmdbKey)) ?? [];
-  if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
+  if (parseTmdbTvId(meta.id) != null && opts.tmdbKey) {
     const seasons = await fetchSeasonList(meta, opts);
     const all: PlayEpisode[] = [];
     for (const s of seasons) all.push(...(await fetchSeasonEpisodes(meta, s, opts)));
     return all;
+  }
+  const cleanId = meta.id.replace(/^(series|movie|tmdb):/, "").trim();
+  const cachedImdb = tmdbImdbCached(meta.id) || tmdbImdbCached(`tmdb:${cleanId}`);
+  if (cachedImdb?.startsWith("tt")) {
+    const res = await loadCinemetaEpisodes(cachedImdb, opts.tmdbKey);
+    if (res && res.length > 0) return res;
+  }
+  if (meta.name && meta.name !== cleanId) {
+    try {
+      const searchRes = await fetch(
+        `https://v3-cinemeta.strem.io/catalog/series/top/search=${encodeURIComponent(
+          meta.name,
+        )}.json`,
+      ).catch(() => null);
+      if (searchRes?.ok) {
+        const data = await searchRes.json().catch(() => null);
+        const hit = data?.metas?.[0];
+        if (hit?.id && hit.id.startsWith("tt")) {
+          const res = await loadCinemetaEpisodes(hit.id, opts.tmdbKey);
+          if (res && res.length > 0) return res;
+        }
+      }
+    } catch {}
   }
   return (await getNonStandardEpisodes(meta)) ?? [];
 }

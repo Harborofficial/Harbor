@@ -127,6 +127,7 @@ function harness() {
     },
     "@/lib/local-cw": { localCwEntry: () => ({}) },
     "@/lib/manual-watched": { isManualWatchedDismissed: () => false },
+    "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
   };
   const load = (path: string) => {
     const mod = { exports: {} as any };

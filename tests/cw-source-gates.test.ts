@@ -33,6 +33,7 @@ function harness(bigPicture: boolean, sources: any, privateProfile = false) {
     "@/lib/hover-preview/store": { publishResumeStates: noop },
     "@/lib/run-lanes": {},
     "@/lib/manual-watched": { manualWatchedLibraryItems: () => [], subscribeManualWatched: () => noop, manualWatchedVersion: () => 0 },
+    "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
   };
   const h = hookHarness(bigPicture ? "src/views/big-picture/use-bp-anime-cw.ts" : "src/lib/continue-watching.ts",
     bigPicture ? "useBpAnimeCwBase" : "useContinueWatching", mocks,

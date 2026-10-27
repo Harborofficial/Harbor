@@ -53,6 +53,9 @@ function playback(sessions: unknown[], existing?: { ms: number; t: number }) {
       readResumeEntry: () => existing,
       saveResumeBatch: (entries: unknown[]) => writes.push(entries),
     },
+    "./list-status": {
+      loadSimklProgress: async () => ({ completedSeries: [] }),
+    },
   };
   const module = { exports: {} };
   const output = ts.transpileModule(source, {

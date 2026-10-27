@@ -12,6 +12,7 @@ import {
   manualWatchedVersion,
   subscribeManualWatched,
 } from "@/lib/manual-watched";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { useHiddenEpisodes } from "@/lib/hidden-episodes";
 import type { Meta } from "@/lib/cinemeta";
 import { episodeSearchVideos } from "@/lib/episode-search";
@@ -129,6 +130,22 @@ export function SeriesEpisodes({
   });
   const combinedWatched = useMemo(() => {
     const s = new Set<string>(stremioWatched ?? []);
+    if (resumeSeason != null && resumeEpisode != null && (resumeSeason > 1 || resumeEpisode > 1)) {
+      if (!isNuvioProviderActive()) {
+        for (const season of seasons) {
+          if (season.seasonNumber >= 1 && season.seasonNumber < resumeSeason) {
+            const count = season.episodeCount || 50;
+            for (let ep = 1; ep <= count; ep++) {
+              s.add(`${season.seasonNumber}:${ep}`);
+            }
+          } else if (season.seasonNumber === resumeSeason) {
+            for (let ep = 1; ep < resumeEpisode; ep++) {
+              s.add(`${resumeSeason}:${ep}`);
+            }
+          }
+        }
+      }
+    }
     for (const k of simklWatched) s.add(k);
     for (const k of pmdbWatched) {
       if (!k.includes(":")) {
@@ -156,11 +173,11 @@ export function SeriesEpisodes({
         }
       }
     }
-    const manual = manualEpisodeKeys(meta.id);
+    const manual = manualEpisodeKeys(meta.id, [imdbId]);
     for (const k of manual.watched) s.add(k);
     for (const k of manual.unwatched) s.delete(k);
     return s;
-  }, [stremioWatched, simklWatched, traktWatched, pmdbWatched, meta.id, imdbId, mwVersion]);
+  }, [stremioWatched, simklWatched, traktWatched, pmdbWatched, meta.id, imdbId, mwVersion, resumeSeason, resumeEpisode, seasons]);
   const cache = useRef<Map<string, Episode[]>>(new Map());
 
   const traktKey = imdbId ?? meta.id;
@@ -502,7 +519,7 @@ export function SeriesEpisodes({
     metaId: meta.id,
     traktKey,
     traktWatched,
-    stremioWatched,
+    stremioWatched: combinedWatched,
     simklWatched,
     pmdbWatched,
     mwVersion,
@@ -762,11 +779,22 @@ export function SeriesEpisodes({
             background: meta.background,
           }}
           target={watchedMenu}
-          allEpisodes={enrichedEpisodes.map((ep) => ({
-            season: ep.seasonNumber,
-            episode: ep.episodeNumber,
-            released: ep.airDate ?? null,
-          }))}
+          imdbId={imdbId}
+          allEpisodes={
+            cinemetaVideos?.length
+              ? cinemetaVideos
+                  .map((v) => ({
+                    season: v.season ?? 0,
+                    episode: v.episode ?? v.number ?? 1,
+                    released: v.released ?? null,
+                  }))
+                  .filter((e) => e.season > 0 && e.episode > 0)
+              : enrichedEpisodes.map((ep) => ({
+                  season: ep.seasonNumber,
+                  episode: ep.episodeNumber,
+                  released: ep.airDate ?? null,
+                }))
+          }
           onClose={() => setWatchedMenu(null)}
         />
       )}

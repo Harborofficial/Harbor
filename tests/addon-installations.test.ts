@@ -30,6 +30,9 @@ async function catalog(local: Addon[], account: Addon[], adultsAllowed = false) 
     "./adult-filter": { isAdultText },
     "./community": { fetchCommunityAddons: async () => [], fetchManifest: async () => null },
     "./curated": { CURATED_ADDONS: [] },
+    "@/lib/nuvio/nuvio-client": { isNuvioSignedIn: () => false },
+    "@/lib/nuvio/nuvio-sync": { fetchNuvioAddons: async () => [] },
+    "@/lib/nuvio/nuvio-addon-registry": { recordStremioAddons: () => {}, recordNuvioAddons: () => {} },
   };
   const exports = {} as typeof import("../src/lib/addons-store/store.ts");
   const compiled = ts.transpileModule(readFileSync(new URL("../src/lib/addons-store/store.ts", import.meta.url), "utf8"), {

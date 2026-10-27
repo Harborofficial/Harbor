@@ -1,3 +1,4 @@
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { useCallback, type RefObject } from "react";
 import { clearOnePickerCache } from "@/lib/picker-cache";
 import {
@@ -94,6 +95,9 @@ export function usePlayerExit(params: {
       clearInvite();
     }
     exitPlayback();
+    if (isNuvioProviderActive()) {
+      window.dispatchEvent(new CustomEvent("harbor:playback-session-ended"));
+    }
   }, [
     captureExitSnapshot,
     exitPlayback,

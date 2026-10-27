@@ -68,6 +68,7 @@ function harness(seed?: string, onChange = () => {}) {
       deleteWatchProgressFromNuvio: () => Promise.resolve(),
     },
     "./local-cw": { clearLocalCw: () => {} },
+    "@/lib/feed/external-cw": { removeExternalCwItem: () => {} },
   };
   const output = ts.transpileModule(read("src/lib/cw-dismiss.ts"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
@@ -341,6 +342,9 @@ test("external backfills preserve dismissals and save true remote progress only 
         aniZipByKitsu: async () => null,
         aniZipByAnilist: async () => null,
         aniZipByAnidb: async () => null,
+      },
+      "./list-status": {
+        loadSimklProgress: async () => ({ completedSeries: [] }),
       },
     };
     const module = { exports: {} as Record<string, () => Promise<LibraryItem[]>> };

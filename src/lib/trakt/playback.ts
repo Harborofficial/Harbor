@@ -20,14 +20,16 @@ const DURATION_MS = { movie: 6_300_000, series: 2_640_000 };
 
 function movieMetaId(ids?: TraktIds): string | null {
   if (!ids) return null;
-  if (ids.imdb && /^tt\d+$/.test(ids.imdb)) return ids.imdb;
+  const imdb = ids.imdb ? String(ids.imdb).trim().toLowerCase() : null;
+  if (imdb && /^tt\d+$/.test(imdb)) return imdb;
   if (ids.tmdb) return `tmdb:movie:${ids.tmdb}`;
   return null;
 }
 
 function seriesMetaId(ids?: TraktIds): string | null {
   if (!ids) return null;
-  if (ids.imdb && /^tt\d+$/.test(ids.imdb)) return ids.imdb;
+  const imdb = ids.imdb ? String(ids.imdb).trim().toLowerCase() : null;
+  if (imdb && /^tt\d+$/.test(imdb)) return imdb;
   if (ids.tmdb) return `tmdb:tv:${ids.tmdb}`;
   return null;
 }
@@ -43,7 +45,7 @@ function buildItem(
   episode?: number,
 ): LibraryItem {
   const hasEpisode =
-    type === "series" && season != null && season > 0 && episode != null && episode > 0;
+    type === "series" && season != null && season >= 0 && episode != null && episode >= 0;
   return {
     _id: id,
     type,
@@ -66,7 +68,7 @@ function buildItem(
 
 function toLibraryItem(raw: RawPlayback): LibraryItem | null {
   const pct = Math.min(100, Math.max(0, raw.progress ?? 0));
-  if (pct < 1 || pct > 98) return null;
+  if (pct <= 0 || pct > 99.9) return null;
   const when = raw.paused_at ?? new Date(0).toISOString();
 
   if (raw.movie && !raw.episode) {
@@ -77,6 +79,8 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
   if (raw.show) {
     const id = seriesMetaId(raw.show.ids);
     if (!id) return null;
+    const season = raw.episode?.season;
+    const episode = raw.episode?.number ?? (raw.episode as any)?.episode;
     return buildItem(
       id,
       "series",
@@ -84,11 +88,64 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
       pct,
       DURATION_MS.series,
       when,
-      raw.episode?.season,
-      raw.episode?.number,
+      season,
+      episode,
     );
   }
   return null;
+}
+
+export const TRAKT_PLAYBACK_CACHE_KEY = "harbor.trakt.playback_items";
+let memoryTraktPlaybackCache: LibraryItem[] | null = null;
+
+function isValidTraktPlaybackItem(item: LibraryItem): boolean {
+  if (!item || item.external !== "trakt" || !item.state) return false;
+  if (item.upNext) return false;
+  const offset = item.state.timeOffset ?? 0;
+  const dur = item.state.duration ?? 0;
+  if (offset <= 0 || (item.state.flaggedWatched ?? 0) > 0) return false;
+  if (dur > 0 && offset / dur >= 0.9) return false;
+  return true;
+}
+
+export function readCachedTraktPlaybackItems(): LibraryItem[] {
+  if (memoryTraktPlaybackCache && memoryTraktPlaybackCache.length > 0) {
+    return memoryTraktPlaybackCache.filter(isValidTraktPlaybackItem);
+  }
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(TRAKT_PLAYBACK_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        const valid = parsed.filter(isValidTraktPlaybackItem);
+        memoryTraktPlaybackCache = valid;
+        if (valid.length !== parsed.length) {
+          try {
+            localStorage.setItem(TRAKT_PLAYBACK_CACHE_KEY, JSON.stringify(valid));
+          } catch {}
+        }
+        return valid;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function writeCachedTraktPlaybackItems(items: LibraryItem[]): void {
+  memoryTraktPlaybackCache = items;
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(TRAKT_PLAYBACK_CACHE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
+export function clearCachedTraktPlaybackItems(): void {
+  memoryTraktPlaybackCache = null;
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(TRAKT_PLAYBACK_CACHE_KEY);
+  } catch {}
 }
 
 export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
@@ -97,7 +154,12 @@ export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
   try {
     raw = await traktRequest<RawPlayback[]>("/sync/playback?limit=40");
   } catch (e) {
-    if (e instanceof TraktApiError && e.status === 404) return [];
+    if (e instanceof TraktApiError && e.status === 404) {
+      writeCachedTraktPlaybackItems([]);
+      return [];
+    }
+    const cached = readCachedTraktPlaybackItems();
+    if (cached.length > 0) return cached;
     throw e;
   }
   if (!Array.isArray(raw)) return [];
@@ -139,5 +201,6 @@ export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
       );
     }
   }
+  writeCachedTraktPlaybackItems(items);
   return items;
 }

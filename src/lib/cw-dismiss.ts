@@ -6,8 +6,10 @@ import { episodeFromVideoId, type LibraryItem } from "./stremio";
 import { cloudLibraryPut } from "./stremio-write-queue";
 import { privateCwProfileId } from "./cw-profile";
 import { isNuvioSignedIn } from "./nuvio/nuvio-client";
+import { removeExternalCwItem } from "@/lib/feed/external-cw";
 import {
   deleteWatchProgressFromNuvio,
+  dismissNextUpInNuvioCloud,
   isNuvioProviderActive,
   resolveNuvioProfileIndex,
 } from "./nuvio/nuvio-sync";
@@ -323,17 +325,35 @@ export function dismissCw(
   emit();
   if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
     const { season, episode } = resolveEpisode(item);
+    const slot = resolveNuvioProfileIndex();
+    const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
+    const idVariants = [id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`];
     try {
-      clearResume(id, season, episode, options);
+      for (const vid of idVariants) {
+        clearResume(vid, undefined, undefined, { ...options, ownerId: `nuvio-${slot}` });
+        if (season != null && episode != null) {
+          clearResume(vid, season, episode, { ...options, ownerId: `nuvio-${slot}` });
+        }
+      }
     } catch {
       throw new Error(
         "Removed from Continue Watching, but the saved position could not be cleared.",
       );
     }
     try {
-      const slot = resolveNuvioProfileIndex();
-      clearLocalCw(id, `nuvio-${slot}`);
+      for (const vid of idVariants) {
+        clearLocalCw(vid, `nuvio-${slot}`);
+        clearLocalCw(vid);
+      }
+      removeExternalCwItem(item);
       void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
+      void dismissNextUpInNuvioCloud(slot, id, season, episode);
+      window.dispatchEvent(
+        new CustomEvent("harbor:nuvio-progress-deleted", {
+          detail: { profileIndex: slot, contentId: id },
+        }),
+      );
+      window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
     } catch {}
     return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;
   }
@@ -380,6 +400,22 @@ export function dismissCw(
       );
     },
   );
+}
+
+export function undismissCw(id: string): void {
+  loadDismissed();
+  const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = [id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`, `nuvio|${id}`, `nuvio|${cleanId}`];
+  let changed = false;
+  for (const v of variants) {
+    if (dismissed.delete(v)) changed = true;
+    if (dismissedVid.delete(v)) changed = true;
+    if (dismissedPos.delete(v)) changed = true;
+  }
+  if (changed) {
+    persistDismissed(dismissed, dismissedVid, false, dismissedPos);
+    emit();
+  }
 }
 
 function subscribe(cb: () => void): () => void {

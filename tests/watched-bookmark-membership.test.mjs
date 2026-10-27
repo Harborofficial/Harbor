@@ -21,6 +21,7 @@ for (const base of [
         },
       },
       "@/lib/stremio-item-lock": { withItemLock: (_id, work) => work() },
+      "./active-profile-id": { isNuvioProviderActive: () => false },
     };
     const code = ts.transpileModule(
       readFileSync(new URL("../src/lib/stremio-watched-sync.ts", import.meta.url), "utf8"),

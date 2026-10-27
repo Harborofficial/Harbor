@@ -30,6 +30,7 @@ import { Section } from "../shared";
 import { ProfileAudioSetting } from "../profile-audio-setting";
 import { AvatarRing } from "./avatar-ring";
 import { resizeAvatar } from "./avatar-utils";
+import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 
 import { updateNuvioProfile, resolveNuvioAvatar, pullNuvioProfiles, NUVIO_PROFILE_COLORS } from "@/lib/nuvio/nuvio-profiles";
 
@@ -97,17 +98,17 @@ export function IdentityTab() {
   }, [currentDisplayName, harborAuthor?.id, activeProfile?.id]);
 
   const pushIdentity = (patch: { harborColor?: string; harborAvatar?: string | null }) => {
-    update(patch);
-    if (activeProfile && patch.harborAvatar !== undefined) {
-      updateProfile(activeProfile.id, { avatar: patch.harborAvatar });
+    if (patch.harborAvatar !== undefined) {
+      void pushAvatarToEcosystem(patch.harborAvatar);
     }
     if (isNuvio && activeNuvioProfile) {
       const nuvioPatch: { avatarColorHex?: string; avatarUrl?: string | null } = {};
       if (patch.harborColor !== undefined) nuvioPatch.avatarColorHex = patch.harborColor;
       if (patch.harborAvatar !== undefined) nuvioPatch.avatarUrl = patch.harborAvatar;
-      updateNuvioProfile(activeNuvioProfile.profile_index, nuvioPatch);
+      void updateNuvioProfile(activeNuvioProfile.profile_index, nuvioPatch);
       return;
     }
+    update(patch);
     if (!activeProfile) return;
     const profilePatch: { color?: string; avatar?: string | null } = {};
     if (patch.harborColor !== undefined) profilePatch.color = patch.harborColor;
@@ -134,7 +135,7 @@ export function IdentityTab() {
     : (activeProfile?.avatar ?? settings.harborAvatar ?? null);
 
   const effectiveAvatar = isNuvio && activeNuvioProfile
-    ? (resolveNuvioAvatar(activeNuvioProfile) || settings.harborAvatar || null)
+    ? (resolveNuvioAvatar(activeNuvioProfile) || null)
     : (customAvatar ?? stremioAvatar ?? (nuvioProfileLegacy ? resolveNuvioAvatar(nuvioProfileLegacy) : null));
 
   const nameDirty = !nameEquals(nameDraft.trim(), currentDisplayName);

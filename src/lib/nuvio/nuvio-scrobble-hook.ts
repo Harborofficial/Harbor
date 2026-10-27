@@ -5,6 +5,9 @@ import { readActiveProfileIdentity } from "@/lib/profiles";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { PlayerSrc } from "@/lib/view";
 
+const MIN_POSITION_SEC = 6;
+const TICK_MS = 30_000;
+
 type Snap = {
   status: string;
   positionSec: number;
@@ -53,7 +56,7 @@ export function useNuvioScrobble({
     const currentSnap = snapRef.current;
     const clockPos = getPlaybackPosition();
     const effectivePos = Number.isFinite(clockPos) && clockPos > 0 ? clockPos : currentSnap.positionSec;
-    if (currentSnap.durationSec <= 0 || effectivePos < 3) return;
+    if (currentSnap.durationSec <= 0 || effectivePos < MIN_POSITION_SEC) return;
 
     const currentSrc = srcRef.current;
     const profileTarget = getProfileTarget();
@@ -102,7 +105,7 @@ export function useNuvioScrobble({
 
     const id = window.setInterval(() => {
       const clockPos = getPlaybackPosition();
-      if (!Number.isFinite(clockPos) || clockPos < 4) return;
+      if (!Number.isFinite(clockPos) || clockPos < MIN_POSITION_SEC) return;
       const curSnap = snapRef.current;
       if (curSnap.durationSec <= 0) return;
 
@@ -114,16 +117,15 @@ export function useNuvioScrobble({
         void markWatchedInNuvio(profileTarget, metaId, effSeason, effEpisode);
       }
 
-      const now = Date.now();
-      const timeDiff = now - lastPushedTimeRef.current;
-      const isFirstPush = lastPushedTimeRef.current === 0;
 
-      if (isFirstPush) {
-        void doPush("initial-4s");
-      } else if (timeDiff >= 10_000 && Math.abs(clockPos - lastPushedPosRef.current) >= 2) {
-        void doPush("10s-interval");
+
+
+
+      if (Math.abs(clockPos - lastPushedPosRef.current) >= 2) {
+        void doPush("30s-interval");
+
       }
-    }, 1000);
+    }, TICK_MS);
 
     return () => window.clearInterval(id);
   }, [snap.status, metaId, effSeason, effEpisode]);
@@ -133,7 +135,7 @@ export function useNuvioScrobble({
     if (!isNuvioSignedIn() || !isNuvioProviderActive()) return;
     if (snap.status === "paused") {
       const clockPos = getPlaybackPosition();
-      if (clockPos >= 3 && Math.abs(clockPos - lastPushedPosRef.current) >= 1) {
+      if (clockPos >= MIN_POSITION_SEC && Math.abs(clockPos - lastPushedPosRef.current) >= 1) {
         void doPush("pause");
       }
     }
@@ -141,6 +143,7 @@ export function useNuvioScrobble({
 
   // Flush on unmount, pagehide, and beforeunload
   useEffect(() => {
+    if (!isNuvioSignedIn() || !isNuvioProviderActive()) return;
     const handleUnload = () => {
       void doPush("unload");
     };
@@ -151,7 +154,9 @@ export function useNuvioScrobble({
     return () => {
       window.removeEventListener("pagehide", handleUnload);
       window.removeEventListener("beforeunload", handleUnload);
-      void doPush("unmount");
+      void doPush("unmount").finally(() => {
+        window.dispatchEvent(new CustomEvent("harbor:playback-session-ended"));
+      });
     };
   }, [metaId, effSeason, effEpisode]);
 }

@@ -80,7 +80,7 @@ export async function runExport(plan: ExportPlan): Promise<ExportResult> {
   return { exportable, synced, skippedAnime: plan.skippedAnime, unmatched: Math.max(0, exportable - synced) };
 }
 
-function traktItemToStremioId(it: TraktItem): string | null {
+export function traktItemToStremioId(it: TraktItem): string | null {
   if (it.ids.imdb && /^tt\d+$/.test(it.ids.imdb)) return it.ids.imdb;
   if (it.ids.tmdb != null) return `tmdb:${it.type === "show" ? "tv" : "movie"}:${it.ids.tmdb}`;
   return null;

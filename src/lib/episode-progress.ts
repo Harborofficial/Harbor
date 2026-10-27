@@ -91,8 +91,8 @@ export function getEpisodeProgress(
   const canonS = traktSeason ?? season;
   const canonE = traktEpisode ?? episode;
   const canonDiffers = canonS !== season || canonE !== episode;
-  const manualSelf = readManual(resumeId, season, episode);
-  const manualCanon = canonDiffers ? readManual(resumeId, canonS, canonE) : undefined;
+  const manualSelf = readManual(resumeId, season, episode, resumeIds);
+  const manualCanon = canonDiffers ? readManual(resumeId, canonS, canonE, resumeIds) : undefined;
   const manual = manualSelf !== undefined ? manualSelf : manualCanon;
   if (manual === false) return { ratio: 0, watched: false, startedAt };
 

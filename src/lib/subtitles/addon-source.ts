@@ -1,5 +1,7 @@
 import { userAddons, type Addon } from "@/lib/addons";
 import { fetchManifestAt, loadInstalled, type InstalledAddon } from "@/lib/addon-store";
+import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
+import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 import { dlog } from "@/lib/debug";
 import { SUBTITLE_PROVIDER_TIMEOUT_MS, withSubtitleTimeout } from "./autoload";
 
@@ -22,15 +24,25 @@ const ADDON_CACHE_TTL_MS = 60_000;
 let cachedSubtitleAddons: CachedSubtitleAddons | null = null;
 
 export function gatherSubtitleAddons(authKey: string | null): Promise<Addon[]> {
+  const isNuvio = isNuvioProviderActive();
+  let nuvioMode = "separate";
+  try {
+    const raw = localStorage.getItem("harbor.settings") || localStorage.getItem("harbor.settings.shared");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.nuvioAddonMode) nuvioMode = parsed.nuvioAddonMode;
+    }
+  } catch {}
+
   const localInstalled = loadInstalled();
-  const key = `${authKey ?? ""}|${localInstalled
+  const key = `${isNuvio ? "nuvio-" + nuvioMode : "stremio"}|${authKey ?? ""}|${localInstalled
     .map((l) => l.transportUrl)
     .sort()
     .join("|")}`;
   const now = Date.now();
   const hit = cachedSubtitleAddons;
   if (hit && hit.key === key && now - hit.at < ADDON_CACHE_TTL_MS) return hit.promise;
-  const promise = collectSubtitleAddons(authKey, localInstalled);
+  const promise = collectSubtitleAddons(authKey, localInstalled, isNuvio, nuvioMode);
   cachedSubtitleAddons = { key, at: now, promise };
   void promise.catch(() => {
     if (cachedSubtitleAddons?.promise === promise) cachedSubtitleAddons = null;
@@ -41,16 +53,31 @@ export function gatherSubtitleAddons(authKey: string | null): Promise<Addon[]> {
 async function collectSubtitleAddons(
   authKey: string | null,
   localInstalled: InstalledAddon[],
+  isNuvio = false,
+  nuvioMode = "separate",
 ): Promise<Addon[]> {
   dlog(`[addon-source] === GATHERING SUBTITLE ADDONS ===`);
-  dlog(`[addon-source] Auth key present: ${!!authKey}`);
+  dlog(`[addon-source] isNuvio: ${isNuvio}, nuvioMode: ${nuvioMode}, Auth key present: ${!!authKey}`);
   
-  const cloud = authKey
-    ? await withSubtitleTimeout(userAddons(authKey), SUBTITLE_PROVIDER_TIMEOUT_MS, []).catch((e) => {
-        dlog(`[addon-source] Failed to fetch cloud addons: ${e}`);
-        return [] as Addon[];
-      })
-    : [];
+  let cloud: Addon[] = [];
+  if (isNuvio) {
+    const nuvioCloud = isNuvioSignedIn()
+      ? await withSubtitleTimeout(fetchNuvioAddons(), SUBTITLE_PROVIDER_TIMEOUT_MS, []).catch(() => [] as Addon[])
+      : [];
+    if (nuvioMode === "combined" && authKey) {
+      const stremioCloud = await withSubtitleTimeout(userAddons(authKey), SUBTITLE_PROVIDER_TIMEOUT_MS, []).catch(() => [] as Addon[]);
+      cloud = [...nuvioCloud, ...stremioCloud];
+    } else {
+      cloud = nuvioCloud;
+    }
+  } else {
+    cloud = authKey
+      ? await withSubtitleTimeout(userAddons(authKey), SUBTITLE_PROVIDER_TIMEOUT_MS, []).catch((e) => {
+          dlog(`[addon-source] Failed to fetch cloud addons: ${e}`);
+          return [] as Addon[];
+        })
+      : [];
+  }
   dlog(`[addon-source] Cloud addons: ${cloud.length}`);
   if (cloud.length > 0) {
     dlog(`[addon-source] Cloud addon names: ${cloud.map(a => a.manifest.name).join(', ')}`);

@@ -70,6 +70,22 @@ function harness() {
     "./publicmetadb/history": {},
     "./publicmetadb/watchlist": {},
     "./publicmetadb/lists": {},
+    "./nuvio/nuvio-client": { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false },
+    "./nuvio/nuvio-sync": {
+      resolveNuvioProfileIndex: () => 0,
+      pushWatchedItemToNuvio: async () => {},
+      deleteWatchedItemFromNuvio: async () => {},
+      pushWatchProgressToNuvio: async () => {},
+      deleteWatchProgressFromNuvio: async () => {},
+      deleteEpisodeWatchProgressFromNuvio: async () => {},
+      undismissNextUpInNuvioCloud: async () => {},
+    },
+    "./nuvio/nuvio-library": {
+      addNuvioLibraryItem: async () => {},
+      removeNuvioLibraryItem: async () => {},
+    },
+    "./local-cw": { saveLocalCw: () => {}, clearLocalCw: () => {} },
+    "./resume": { saveResumeMs: () => {} },
   };
   const output = ts.transpileModule(
     readFileSync(new URL("../src/lib/media-provider-actions.ts", import.meta.url), "utf8"),

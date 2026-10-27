@@ -62,15 +62,25 @@ const cachedSettings = new Map<string, { raw: string; provider: unknown }>();
 
 export function isNuvioProviderActive(): boolean {
   try {
-    const explicit = localStorage.getItem("harbor.account-provider");
+    const explicit = typeof localStorage !== "undefined" ? localStorage.getItem("harbor.account-provider") : null;
     if (explicit === "nuvio") return true;
     if (explicit === "stremio") return false;
     for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {
-      const raw = localStorage.getItem(key);
+      const raw = typeof localStorage !== "undefined" ? localStorage.getItem(key) : null;
       if (raw) {
         let cached = cachedSettings.get(key);
         if (cached?.raw !== raw) {
-          cached = { raw, provider: JSON.parse(raw).accountProvider };
+          let provider: unknown;
+          try {
+            provider = JSON.parse(raw).accountProvider;
+          } catch {
+            provider = /"accountProvider"\s*:\s*"nuvio"/.test(raw)
+              ? "nuvio"
+              : /"accountProvider"\s*:\s*"stremio"/.test(raw)
+                ? "stremio"
+                : undefined;
+          }
+          cached = { raw, provider };
           cachedSettings.set(key, cached);
         }
         if (cached.provider === "nuvio") return true;
@@ -134,10 +144,16 @@ export function isStremioActivePrimary(
 ): boolean {
   if (profilesList && profilesList.length > 0) {
     if (profilesList.length === 1) return true;
-    if (!activeProfile) return false;
     const primary = profilesList.find((p) => p.isPrimary) ?? profilesList[0];
-    return activeProfile.id === primary.id && activeProfile.isPrimary === true;
+    if (activeProfile) {
+      return activeProfile.id === primary.id || activeProfile.isPrimary === true;
+    }
+    const s = readState();
+    const diskPrimary = s?.profiles?.find((p) => p.isPrimary) ?? s?.profiles?.[0];
+    const activeId = s?.activeId || diskPrimary?.id;
+    return activeId === diskPrimary?.id;
   }
+  if (activeProfile?.isPrimary === true) return true;
   const s = readState();
   if (!s || !Array.isArray(s.profiles) || s.profiles.length === 0) return true;
   if (s.profiles.length === 1) return true;
@@ -147,6 +163,9 @@ export function isStremioActivePrimary(
 }
 
 export function activeProfileIsPrimary(): boolean {
+  if (isNuvioProviderActive()) {
+    return getNuvioActiveSlot() === 1;
+  }
   return isStremioActivePrimary();
 }
 

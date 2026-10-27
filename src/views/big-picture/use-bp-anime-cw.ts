@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/lib/auth";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import type { AddonRow } from "@/lib/addons";
 import { loadAnimeAddonRows } from "@/lib/addons-anime-filter";
 import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
@@ -74,15 +75,27 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { activeProfile, profiles } = useProfiles();
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const hideSharedCw =
-    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+    !isNuvio && settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const cwVersion = useCwDismissVersion();
   const animeDetectVer = useDetectedAnimeVersion();
   const { cwSources } = settings;
   useEffect(() => {
-    setExternalCwSources({ trakt: cwSources.trakt, simkl: cwSources.simkl });
-  }, [cwSources.trakt, cwSources.simkl]);
-  const trackerCw = useExternalCw(!hideSharedCw && (cwSources.trakt || cwSources.simkl));
+    // Only the sources this row actually gates on may be published: writing an
+    // explicit `nuvio: false` / `publicmetadb: undefined` would clobber the mask
+    // the home feed installed and drop publicmetadb CW for every other row.
+    const mask: { trakt: boolean; simkl: boolean; publicmetadb?: boolean; nuvio?: boolean } = {
+      trakt: !!cwSources.trakt,
+      simkl: !!cwSources.simkl,
+    };
+    if (cwSources.publicmetadb !== undefined) mask.publicmetadb = !!cwSources.publicmetadb;
+    if (isNuvio) mask.nuvio = true;
+    setExternalCwSources(mask);
+  }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb, isNuvio]);
+  const trackerCw = useExternalCw(
+    isNuvio || (!hideSharedCw && (cwSources.trakt || cwSources.simkl)),
+  );
   const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const [libItems, setLibItems] = useState<LibraryItem[]>([]);
@@ -135,10 +148,16 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
       ...(hideSharedCw
         ? []
         : trackerCw.filter((i) =>
-            i.external === "trakt" ? cwSources.trakt : i.external === "simkl" && cwSources.simkl,
+            i.external === "trakt"
+              ? cwSources.trakt
+              : i.external === "simkl"
+                ? cwSources.simkl
+                : i.external === "nuvio"
+                  ? isNuvio
+                  : true,
           )),
     ],
-    [localAnimeCw, libItems, trackerCw, hideSharedCw, cwSources],
+    [localAnimeCw, libItems, trackerCw, hideSharedCw, cwSources, isNuvio],
   );
 
   const raw = useMemo(() => {
