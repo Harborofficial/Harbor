@@ -12,6 +12,7 @@ import {
 } from "@/lib/theme";
 import { useT } from "@/lib/i18n";
 import { CustomEditor } from "./custom-editor";
+import { consumeThemeEditorRequest, subscribeThemeEditorRequest } from "./theme-editor-store";
 
 const LAYOUT_PRESET_IDS = new Set(["crunch"]);
 
@@ -45,20 +46,21 @@ export function ColorThemeBody({
 
   useLayoutEffect(() => {
     if (!ringRef.current) return;
-    const el = editing
-      ? editorRef.current?.querySelector<HTMLElement>("button")
-      : tileRef.current;
+    const el = editing ? editorRef.current?.querySelector<HTMLElement>("button") : tileRef.current;
     if (el) tvFocus(el);
   }, [editing]);
 
   useEffect(() => {
-    const handler = () => {
+    const open = () => {
       showEditor(true);
       const el = document.getElementById("harbor-theme-editor-anchor");
       el?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
-    window.addEventListener("harbor:open-theme-editor", handler);
-    return () => window.removeEventListener("harbor:open-theme-editor", handler);
+    if (consumeThemeEditorRequest()) open();
+    return subscribeThemeEditorRequest(() => {
+      consumeThemeEditorRequest();
+      open();
+    });
   }, []);
 
   if (editing) {
@@ -84,44 +86,52 @@ export function ColorThemeBody({
   }
 
   return (
-    <div id="harbor-theme-editor-anchor" className="animate-fade-in grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-      {Object.values(THEME_PRESETS).filter((p) => !LAYOUT_PRESET_IDS.has(p.id)).map((p) => {
-        const active = activePreset === p.id;
-        return (
-          <button
-            key={p.id}
-            onClick={() => onSelect(p.id)}
-            className={`group relative flex min-h-[168px] flex-col justify-end overflow-hidden rounded-[10px] border p-4 text-start transition ${
-              active ? "border-ink" : "border-edge-soft hover:border-edge"
-            }`}
-            style={{ background: p.swatch[0] }}
-          >
-            <div
-              className="absolute inset-x-0 top-0 h-2/5"
-              style={{
-                background: `linear-gradient(180deg, ${p.swatch[1]}, ${p.swatch[0]})`,
-              }}
-            />
-            <div
-              className="absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full"
-              style={{ background: p.swatch[2] }}
+    <div
+      id="harbor-theme-editor-anchor"
+      className="animate-fade-in grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4"
+    >
+      {Object.values(THEME_PRESETS)
+        .filter((p) => !LAYOUT_PRESET_IDS.has(p.id))
+        .map((p) => {
+          const active = activePreset === p.id;
+          return (
+            <button
+              key={p.id}
+              onClick={() => onSelect(p.id)}
+              className={`group relative flex min-h-[168px] flex-col justify-end overflow-hidden rounded-[10px] border p-4 text-start transition ${
+                active ? "border-ink" : "border-edge-soft hover:border-edge"
+              }`}
+              style={{ background: p.swatch[0] }}
             >
-              {active && <Check size={14} strokeWidth={3} style={{ color: p.swatch[0] }} />}
-            </div>
-            <div className="relative">
-              <p className="text-[16.5px] font-semibold leading-[24px]" style={{ color: p.swatch[2] }}>
-                {p.name}
-              </p>
-              <p
-                className="mt-0.5 text-[15.5px] leading-[22px]"
-                style={{ color: p.swatch[2], opacity: 0.7 }}
+              <div
+                className="absolute inset-x-0 top-0 h-2/5"
+                style={{
+                  background: `linear-gradient(180deg, ${p.swatch[1]}, ${p.swatch[0]})`,
+                }}
+              />
+              <div
+                className="absolute end-3 top-3 flex h-7 w-7 items-center justify-center rounded-full"
+                style={{ background: p.swatch[2] }}
               >
-                {p.blurb}
-              </p>
-            </div>
-          </button>
-        );
-      })}
+                {active && <Check size={14} strokeWidth={3} style={{ color: p.swatch[0] }} />}
+              </div>
+              <div className="relative">
+                <p
+                  className="text-[16.5px] font-semibold leading-[24px]"
+                  style={{ color: p.swatch[2] }}
+                >
+                  {p.name}
+                </p>
+                <p
+                  className="mt-0.5 text-[15.5px] leading-[22px]"
+                  style={{ color: p.swatch[2], opacity: 0.7 }}
+                >
+                  {p.blurb}
+                </p>
+              </div>
+            </button>
+          );
+        })}
       <CustomTile
         active={activePreset === "custom"}
         custom={customColors}
@@ -161,7 +171,9 @@ function CustomTile({
           <Plus size={20} strokeWidth={2.2} />
         </span>
         <p className="text-[16.5px] font-semibold leading-[24px]">{t("Custom")}</p>
-        <p className="text-[15.5px] leading-[22px] text-ink-subtle">{t("Build your own palette")}</p>
+        <p className="text-[15.5px] leading-[22px] text-ink-subtle">
+          {t("Build your own palette")}
+        </p>
       </button>
     );
   }
