@@ -830,7 +830,13 @@ export function PlayPicker({
     expectHostSource,
     hostSource: hostSourceForMedia,
     preferredSourceEntry: lastSeriesSource,
-    preferredSourceMatched: sameSourceMatch != null || previousMatch != null,
+    preferredSourceMatched:
+      !!lastSeriesSource &&
+      !!autoCandidates[0] &&
+      (lastSeriesSourceIsLineage ? streamMatchesPreferredSource : streamMatchesSource)(
+        autoCandidates[0],
+        lastSeriesSource,
+      ),
     season: !isAnimeMetaId ? (episode?.season ?? null) : null,
     episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
     addonQuorum,

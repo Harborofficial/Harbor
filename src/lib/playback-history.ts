@@ -1000,19 +1000,39 @@ export function streamMatchesReleaseLineage(
   return e.resolution === s.resolution && e.source === s.source;
 }
 
-/**
- * Keep-same-source is more forgiving than the season lock: a per-episode addon
- * often drops the release-group suffix on later episodes, and an aggregator may
- * deliver the same torrent under a different contributor. In that case the
- * addon, resolution, and source still identify the same source.
- */
+/** A confirmed next-episode release match, not an addon/quality fallback. */
 export function streamMatchesPreferredSource(
   s: Parameters<typeof streamMatchesReleaseLineage>[0] & {
     audioLanguages?: string[] | null;
   },
   e: PlaybackEntry,
 ): boolean {
-  if (streamMatchesReleaseLineage(s, e)) return true;
+  if (e.resolution && s.resolution && e.resolution !== s.resolution) return false;
+  const rememberedLangs = (e.audioLanguages ?? []).filter((l) => l !== "Multi");
+  const candidateLangs = (s.audioLanguages ?? []).filter((l) => l !== "Multi");
+  if (
+    rememberedLangs.length > 0 &&
+    candidateLangs.length > 0 &&
+    !rememberedLangs.some((l) => candidateLangs.includes(l))
+  )
+    return false;
+  if (e.infoHash && s.infoHash && e.infoHash.toLowerCase() === s.infoHash.toLowerCase())
+    return true;
+  if (e.bingeGroup && s.behaviorHints?.bingeGroup === e.bingeGroup) return true;
+  // Aggregators share one addon ID across unrelated releases. Only the release
+  // identity can confirm a match; generic quality fallback is handled by the picker.
+  return (
+    !!e.releaseGroup && !!s.releaseGroupNormalized && e.releaseGroup === s.releaseGroupNormalized
+  );
+}
+
+export function streamMatchesPreferredSourceFallback(
+  s: Parameters<typeof streamMatchesReleaseLineage>[0] & {
+    audioLanguages?: string[] | null;
+  },
+  e: PlaybackEntry,
+): boolean {
+  if (streamMatchesPreferredSource(s, e)) return true;
   if (!e.addonId || !offeredBy(s, e.addonId)) return false;
   // A dub is part of the source identity. Only reject when both sides name a
   // concrete language and they have none in common; an unlabelled release must
