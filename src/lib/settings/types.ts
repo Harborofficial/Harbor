@@ -358,6 +358,9 @@ export type Settings = {
   playerAnime4kFolder: string;
   playerAnime4kOverride: string;
   playerShaders: Record<string, { enabled: boolean; variant?: string; dir?: string }>;
+  mangaUpscaleEnabled: boolean;
+  mangaUpscaleQuality: "fast" | "best";
+  mangaUpscaleAutoDownload: boolean;
   preferredSubLangs: string[];
   preferredAudioLangs: string[];
   subFontSize: number;

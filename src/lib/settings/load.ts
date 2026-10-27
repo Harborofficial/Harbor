@@ -203,6 +203,8 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
       _streamCacheCapV1?: boolean;
       _playbackSourcePreferenceV1?: boolean;
       _playbackSourcePreferenceV2?: boolean;
+      /** Legacy: the high-quality toggle was split into a quality choice. */
+      mangaBestEnabled?: boolean;
     };
     // Legacy defaults and playlist adoption depend on other stores. Re-read them
     // until a self-contained settings blob has been persisted by the normal flow.
@@ -411,6 +413,8 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
       };
     }
     const posterCards = normalizePosterCardSettings(parsed);
+    if (parsed.mangaBestEnabled === true) parsed.mangaUpscaleQuality = "best";
+    delete parsed.mangaBestEnabled;
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
@@ -513,6 +517,8 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
         languageName,
       ),
       castAlwaysTranscode: parsed.castAlwaysTranscode ?? DEFAULT.castAlwaysTranscode,
+      mangaUpscaleQuality: parsed.mangaUpscaleQuality === "best" ? "best" : "fast",
+      mangaUpscaleAutoDownload: parsed.mangaUpscaleAutoDownload !== false,
       showMalBadge: parsed.showMalBadge ?? DEFAULT.showMalBadge,
       badgePlacement:
         parsed.badgePlacement === "top" || parsed.badgePlacement === "bottom"

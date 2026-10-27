@@ -2601,6 +2601,22 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
 
   {
+    label: "Manga upscaling",
+    section: "shaders",
+    tab: "manga",
+    anchorTitle: "Manga upscaling",
+    keywords: [
+      "manga",
+      "upscale",
+      "upscaling",
+      "waifu2x",
+      "line art",
+      "screentone",
+      "manga shaders",
+      "download model",
+    ],
+  },
+  {
     label: "Anime4K upscaling",
     section: "shaders",
     tab: "anime4k",
