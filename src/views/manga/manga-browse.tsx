@@ -102,9 +102,13 @@ export function MangaBrowse({
 
   const reload = useCallback(() => setReloadTick((n) => n + 1), []);
 
-  useEffect(() => subscribeMangaLibraryChanged(() => {
-    if (/(?:^|::)category:\d+$/.test(tagRef.current)) reload();
-  }), [reload]);
+  useEffect(
+    () =>
+      subscribeMangaLibraryChanged(() => {
+        if (/(?:^|::)category:\d+$/.test(tagRef.current)) reload();
+      }),
+    [reload],
+  );
 
   const sourceRef = useRef(activeMangaSourceId());
   const activeSource = activeMangaSource();
@@ -325,18 +329,25 @@ export function MangaBrowse({
   }, [loadingMore, status, hasMore, fetchPage]);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef(loadMore);
+  loadMoreRef.current = loadMore;
+  // Recreate the observer only when the sentinel appears. Recreating it on every
+  // loadingMore/items change makes it fire again while the sentinel is still in
+  // view, which walks the whole source catalog without a scroll.
+  const showSentinel = status === "ready" && displayItems.length > 0;
   useEffect(() => {
+    if (!showSentinel) return;
     const el = sentinelRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) loadMore();
+        if (entries[0]?.isIntersecting) loadMoreRef.current();
       },
       { root: null, rootMargin: "800px 0px" },
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [loadMore]);
+  }, [showSentinel]);
 
   const emptyKind = tagId === FAVORITES ? "favorites" : query.trim() || tagId ? "search" : "source";
 
