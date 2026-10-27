@@ -506,9 +506,6 @@ export function buildNuvioPlaybackItems(
 
     if (isCwDismissed(nextUpItem)) continue;
     items.push(nextUpItem);
-
-    if (isCwDismissed(nextUpItem)) continue;
-    items.push(nextUpItem);
   }
 
   // 3. Seamlessly merge recent local continue watching items for this slot
