@@ -228,7 +228,8 @@ export function MangaDetail({
   }, [downloadRequest, detailPending, detail, chapters.length, mangaId]);
 
   const favorites = useMangaFavorites();
-  const isFavorite = useIsMangaFavorite(mangaId);
+  const favoriteSourceId = useMemo(() => decodeMangaId(mangaId)?.sourceId, [mangaId]);
+  const isFavorite = useIsMangaFavorite(mangaId, favoriteSourceId);
   const progress = useMangaProgressEntry(mangaId, detail?.title);
 
   useEffect(() => {
@@ -572,6 +573,7 @@ export function MangaDetail({
                       title: detail.title,
                       altTitle: detail.altTitle,
                       cover: detail.cover,
+                      sourceId: favoriteSourceId,
                     })
                   }
                   className={`group flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.94] ${

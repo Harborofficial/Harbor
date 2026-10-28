@@ -11,6 +11,7 @@ import * as menu from "../src/lib/context-menu.tsx";
 import { executeContextAction } from "../src/lib/context-actions.ts";
 import * as domain from "../src/lib/manga-context-actions.ts";
 import * as chapterIdentity from "../src/lib/manga/chapter-identity.ts";
+import * as favoritesCleanup from "../src/lib/manga/favorites-cleanup.ts";
 
 function load(file: string, dependencies: Record<string, unknown>): any {
   const code = ts.transpileModule(readFileSync(new URL(`../${file}`, import.meta.url), "utf8"), {
@@ -146,6 +147,7 @@ async function fixture() {
     },
     "./manga/library-events": { notifyMangaLibraryChanged: () => {} },
     "./manga/sources": sourceModule,
+    "./manga/favorites-cleanup": favoritesCleanup,
   });
   const resumed: any[] = [];
   const downloads: string[] = [];

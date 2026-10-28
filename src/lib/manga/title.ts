@@ -67,3 +67,21 @@ export function stripColorTag(title: string): string {
     .trim();
   return stripped || title;
 }
+
+/** Script-agnostic title key: color tag removed, case-folded, punctuation and
+ *  spacing dropped while keeping every letter/number (any alphabet). */
+export function mangaTitleKey(title: string): string {
+  return stripColorTag(title)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+export function mangaTitlesMatch(
+  query: string,
+  candidate: string | null | undefined,
+  altTitle?: string | null,
+): boolean {
+  const key = mangaTitleKey(query);
+  if (!key) return false;
+  return [candidate, altTitle].some((v) => !!v && mangaTitleKey(v) === key);
+}

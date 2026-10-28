@@ -9,19 +9,24 @@ import { useMangaContext } from "@/lib/use-manga-context";
 export function MangaCard({
   manga,
   onOpen,
+  resolveOpen,
+  missing = false,
 }: {
-  manga: MangaSummary;
+  manga: MangaSummary & { sourceId?: string };
   onOpen: (id: string) => void;
+  resolveOpen?: (manga: MangaSummary & { sourceId?: string }) => void;
+  missing?: boolean;
 }) {
   const t = useT();
   const fav = useMangaFavorites();
-  const isFav = useIsMangaFavorite(manga.id);
-  const context = useMangaContext(manga, { open: () => onOpen(manga.id) });
+  const isFav = useIsMangaFavorite(manga.id, manga.sourceId);
+  const open = () => (resolveOpen ? resolveOpen(manga) : onOpen(manga.id));
+  const context = useMangaContext(manga, { open });
   return (
     <button
       ref={context.ref}
       type="button"
-      onClick={() => onOpen(manga.id)}
+      onClick={open}
       className="group flex w-full min-w-0 flex-col gap-2.5 text-start"
     >
       <div className="relative w-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] group-hover:will-change-transform group-hover:[transform:translate3d(0,-0.5rem,0)] motion-reduce:transition-none motion-reduce:group-hover:[transform:none]">
@@ -43,6 +48,7 @@ export function MangaCard({
               title: manga.title,
               altTitle: manga.altTitle,
               cover: manga.cover,
+              sourceId: manga.sourceId,
             });
           }}
           className="absolute start-1.5 top-1.5 rounded-full bg-canvas/70 p-1.5 backdrop-blur-sm transition-transform hover:scale-110 motion-reduce:transition-none motion-reduce:hover:scale-100"
@@ -67,6 +73,11 @@ export function MangaCard({
           {manga.title}
         </p>
         {manga.year != null && <p className="text-[12px] text-ink-subtle">{manga.year}</p>}
+        {missing && (
+          <p className="text-[11.5px] leading-snug text-ink-subtle">
+            {t("This title would not open")}
+          </p>
+        )}
       </div>
     </button>
   );

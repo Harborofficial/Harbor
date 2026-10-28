@@ -40,6 +40,7 @@ import {
   subscribeMangaLangFilter,
 } from "./manga-browse/langs";
 import { MangaCard } from "./manga-browse/manga-card";
+import { useOpenTitle } from "./use-open-title";
 
 type Status = "loading" | "ready" | "error";
 type SortMode = "latest" | "new" | "chapters";
@@ -65,6 +66,7 @@ export function MangaBrowse({
   const [sortMode, setSortMode] = useSessionState<SortMode>("manga.sort", "latest");
   const [statusFilter, setStatusFilter] = useSessionState<StatusFilter>("manga.status", "all");
   const { items: favItems } = useMangaFavorites();
+  const { open: openTitle, missing } = useOpenTitle();
   const [items, setItems] = useState<MangaSummary[]>([]);
   const [searchGroups, setSearchGroups] = useState<SearchResultGroup[]>([]);
   const [status, setStatus] = useState<Status>("loading");
@@ -267,13 +269,19 @@ export function MangaBrowse({
     return () => window.clearTimeout(timer);
   }, [status, hasMore, items.length, fetchPage]);
 
-  const displayItems = useMemo(() => {
-    let list: MangaSummary[];
+  const displayItems = useMemo<(MangaSummary & { sourceId?: string })[]>(() => {
+    let list: (MangaSummary & { sourceId?: string })[];
     if (tagId === FAVORITES) {
       const qf = query.trim().toLowerCase();
       const favs = [...favItems.values()]
         .sort((a, b) => b.addedAt - a.addedAt)
-        .map((e) => ({ id: e.id, title: e.title, cover: e.cover }));
+        .map((e) => ({
+          id: e.id,
+          title: e.title,
+          altTitle: e.altTitle,
+          cover: e.cover,
+          sourceId: e.sourceId,
+        }));
       list = qf ? favs.filter((m) => m.title.toLowerCase().includes(qf)) : favs;
     } else {
       const favs: MangaSummary[] = [];
@@ -453,7 +461,17 @@ export function MangaBrowse({
         <>
           <div className="grid gap-x-4 gap-y-7" style={{ gridTemplateColumns: GRID }}>
             {displayItems.map((m) => (
-              <MangaCard key={m.id} manga={m} onOpen={onOpen} />
+              <MangaCard
+                key={m.id}
+                manga={m}
+                onOpen={onOpen}
+                resolveOpen={
+                  tagId === FAVORITES
+                    ? (entry) => void openTitle(entry.id, entry.title, entry.altTitle, entry.sourceId)
+                    : undefined
+                }
+                missing={tagId === FAVORITES && missing.has(m.id)}
+              />
             ))}
           </div>
           <div ref={sentinelRef} className="h-4" />

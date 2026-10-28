@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from
 import { useProfiles } from "./profiles";
 import { setItemWithRecovery } from "./storage-recovery";
 import { setMangaInLibrary } from "./manga/api";
+import { dedupeMangaFavorites } from "./manga/favorites-cleanup";
 import { notifyMangaLibraryChanged } from "./manga/library-events";
 import { activeMangaSourceId, listMangaSources } from "./manga/sources";
 import { MangaFavoritesContext as Ctx } from "./manga-favorites-context";
@@ -67,6 +68,19 @@ function writeMap(key: string, map: Map<string, MangaFavEntry>): boolean {
   return setItemWithRecovery(key, JSON.stringify([...map.values()]));
 }
 
+// Favorites can accumulate the same work under several source-scoped ids (one
+// per source, plus legacy raw ids). Collapse them on load so old duplicate
+// libraries clean themselves up, preferring an entry whose source still exists.
+function loadItems(pid: string): { items: Map<string, MangaFavEntry>; cleaned: boolean } {
+  const items = readMap(keyFor(pid));
+  const entries = [...items.values()];
+  if (entries.length < 2) return { items, cleaned: false };
+  const live = new Set(listMangaSources().map((source) => source.id));
+  const deduped = dedupeMangaFavorites(entries, live);
+  if (deduped.length === entries.length) return { items, cleaned: false };
+  return { items: new Map(deduped.map((entry) => [entry.id, entry])), cleaned: true };
+}
+
 function qualifiedFavoriteId(id: string, sourceId: string): string {
   return id.includes("::") || !sourceId || sourceId === "all" ? id : `${sourceId}::${id}`;
 }
@@ -108,15 +122,20 @@ export type MangaFavoritesStore = {
 export function MangaFavoritesProvider({ children }: { children: ReactNode }) {
   const { activeId } = useProfiles();
   const pid = activeId ?? "default";
-  const [stored, setStored] = useState(() => ({ pid, items: readMap(keyFor(pid)) }));
+  const [stored, setStored] = useState(() => {
+    const { items } = loadItems(pid);
+    return { pid, items };
+  });
   const items = useMemo(
-    () => (stored.pid === pid ? stored.items : readMap(keyFor(pid))),
+    () => (stored.pid === pid ? stored.items : loadItems(pid).items),
     [stored, pid],
   );
   const current = useRef({ pid, items });
   current.current = { pid, items };
   useEffect(() => {
-    setStored({ pid, items: readMap(keyFor(pid)) });
+    const { items, cleaned } = loadItems(pid);
+    if (cleaned) writeMap(keyFor(pid), items);
+    setStored({ pid, items });
   }, [pid]);
 
   const value = useMemo<MangaFavoritesStore>(
@@ -199,9 +218,9 @@ export function useMangaFavorites(): MangaFavoritesStore {
   return v;
 }
 
-export function useIsMangaFavorite(id?: string): boolean {
+export function useIsMangaFavorite(id?: string, sourceId?: string): boolean {
   const { has } = useMangaFavorites();
-  return !!id && has(id);
+  return !!id && has(id, sourceId);
 }
 
 export function removeMangaFavorites(pid: string): void {
