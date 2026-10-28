@@ -597,6 +597,12 @@ export function useAutoRetry(params: {
       noVideoSinceRef.current = null;
       return;
     }
+    // A missing frame before first-frame readiness is a slow start, not a
+    // black screen; mpv can already report a playing clock while it decodes.
+    if (!snap.firstFrameReady) {
+      noVideoSinceRef.current = null;
+      return;
+    }
     if (videoSeenRef.current) return;
     if (noVideoSinceRef.current == null) {
       noVideoSinceRef.current = Date.now();
@@ -612,6 +618,7 @@ export function useAutoRetry(params: {
     }
   }, [
     snap.status,
+    snap.firstFrameReady,
     snap.videoWidth,
     snap.videoHeight,
     triggerAutoRetry,
@@ -663,8 +670,12 @@ export function useAutoRetry(params: {
   }, [openingKey, directContinuation, isLive, isLocal, inRoom, isP2pEngine, setSourceError]);
 
   useEffect(() => {
-    if (startedPlaying) setSourceError(null);
-  }, [startedPlaying]);
+    if (!sourceError) return;
+    // Startup heuristics can fire while the stream is already coming up (mpv
+    // reports a live clock before the first frame). Never leave that card on
+    // top of playback that is actually running.
+    if (snap.firstFrameReady || startedPlaying) setSourceError(null);
+  }, [sourceError, snap.firstFrameReady, startedPlaying]);
 
   useEffect(() => {
     if (!inRoom || isLocal || isLive) return;
