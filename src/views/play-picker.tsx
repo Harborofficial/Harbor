@@ -105,6 +105,16 @@ const TIER_ORDER: Tier[] = ["4K_DV", "4K_HDR", "4K", "1080p_HDR", "1080p", "720p
 
 const RESOLVE_TIMEOUT_MS = 150_000;
 
+const TORRENTS_BANNER_DISMISS_KEY = "harbor.stream-picker.torrents-disabled.dismissed.v1";
+
+function torrentsBannerDismissed(): boolean {
+  try {
+    return localStorage.getItem(TORRENTS_BANNER_DISMISS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 type PerEpisodeStatus =
   | { code: "checking"; total: number }
   | { code: "checked"; done: number; total: number }
@@ -264,6 +274,7 @@ export function PlayPicker({
   const closeDrawerWithScrollRef = useRef<(() => void) | null>(null);
   const [strictMode, setStrictMode] = useState(settings.streamFilterLevel === "strict");
   const [forceShowAll, setForceShowAll] = useState(false);
+  const [hideTorrentsBanner, setHideTorrentsBanner] = useState(torrentsBannerDismissed);
   const filterDisabled = settings.streamFilterLevel === "off" || forceShowAll || isDownload;
   const animeTitles = useAnimeAltTitles(meta, episode?.sourceMetaId);
   const {
@@ -1126,19 +1137,36 @@ export function PlayPicker({
           </div>
         )}
 
-        {torrentsDisabled() && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-400/10 px-5 py-3.5 text-[13px] text-amber-100">
-            <span>
+        {torrentsDisabled() && !hideTorrentsBanner && (
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-400/10 px-5 py-3.5 text-[13px] text-amber-100">
+            <span className="min-w-0 flex-1">
               Torrents are disabled in settings. Uncached streams will not play unless they come
               from a debrid service or a direct link.
             </span>
-            <button
-              type="button"
-              onClick={() => openSettings("player")}
-              className="rounded-md border border-amber-300/40 px-3 py-1 text-[12px] font-semibold text-amber-100 transition-colors hover:bg-amber-300/10"
-            >
-              Open Settings
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => openSettings("player")}
+                className="rounded-md border border-amber-300/40 px-3 py-1 text-[12px] font-semibold text-amber-100 transition-colors hover:bg-amber-300/10"
+              >
+                Open Settings
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    localStorage.setItem(TORRENTS_BANNER_DISMISS_KEY, "1");
+                  } catch {
+                    /* noop */
+                  }
+                  setHideTorrentsBanner(true);
+                }}
+                aria-label={t("Dismiss")}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-amber-100/80 transition-colors hover:bg-amber-300/10 hover:text-amber-100"
+              >
+                <X size={14} strokeWidth={2.2} />
+              </button>
+            </div>
           </div>
         )}
 
