@@ -1,4 +1,4 @@
-import { Ban, Check, Eye, EyeOff } from "lucide-react";
+import { Ban, Check, Eye, EyeOff, ListPlus } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { useT } from "@/lib/i18n";
 import {
@@ -20,6 +20,10 @@ import type { ContextAction } from "@/lib/context-actions";
 import { MenuSurface } from "./context-menu/menu-surface";
 import { ActionItems } from "./context-menu/action-items";
 import { useLocalMenuPresence } from "./context-menu/use-local-menu-presence";
+import type { Meta } from "@/lib/cinemeta";
+import type { PlayEpisode } from "@/lib/view";
+import { queueAdd, queueIndexOf, useQueue } from "@/lib/queue";
+import { useQueueSurface } from "@/hooks/use-queue-surface";
 
 export type WatchedMenuTarget = {
   x: number;
@@ -30,6 +34,10 @@ export type WatchedMenuTarget = {
   metaId?: string;
   absoluteNumber?: number;
   origin?: HTMLElement | null;
+  queueTarget?: {
+    meta: Meta;
+    episode: PlayEpisode;
+  };
 };
 
 function airedByNow(released?: string | null): boolean {
@@ -54,6 +62,8 @@ export function EpisodeWatchedMenu({
   onClose: () => void;
 }) {
   const t = useT();
+  const queueSurface = useQueueSurface();
+  useQueue();
   const { settings } = useSettings();
   const { activeId } = useProfiles();
   const identity = useMemo(() => ({ metaId, target }), [metaId, target]);
@@ -127,6 +137,20 @@ export function EpisodeWatchedMenu({
       ).values(),
     ];
     const result: ContextAction[] = [];
+    const selected = target.queueTarget;
+    if (queueSurface && selected) {
+      const queued = queueIndexOf(selected.meta, selected.episode) >= 0;
+      result.push({
+        id: "episode:add-to-queue",
+        icon: queued ? <Check size={14} /> : <ListPlus size={14} />,
+        label: queued ? t("In your queue") : t("Add to queue"),
+        disabled: queued,
+        group: "queue",
+        run: () => {
+          queueAdd(selected.meta, selected.episode);
+        },
+      });
+    }
     if (!watched) {
       result.push({
         id: "episode:watched",

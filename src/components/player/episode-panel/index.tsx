@@ -103,7 +103,7 @@ export function EpisodePanel({
   const [showEpsOpen, setShowEpsOpen] = useState(false);
   const hasQueue = queue.length > 0;
   const isSeries = meta.type === "series";
-  const followQueue = settings.queueDrivesNav && hasQueue && isSeries;
+  const followQueue = settings.queueDrivesNav && isSeries;
   const showQueueList = hasQueue && (followQueue || !isSeries);
   useEffect(() => {
     if (!open) {
@@ -299,7 +299,7 @@ export function EpisodePanel({
                   </h2>
                 </div>
                 <div className="flex shrink-0 items-center gap-2.5">
-                  {hasQueue && isSeries && (
+                  {isSeries && (hasQueue || settings.queueDrivesNav) && (
                     <div
                       role="group"
                       aria-label={t("Next and Previous behavior")}
@@ -352,6 +352,11 @@ export function EpisodePanel({
                 )}
               </div>
               <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-8 pt-2">
+                {followQueue && !hasQueue && (
+                  <p role="status" className="px-1 py-5 text-sm text-ink-subtle">
+                    {t("Your queue is empty. Add an item or switch to This show.")}
+                  </p>
+                )}
                 {showQueueList && (
                   <QueueUpNext
                     meta={meta}

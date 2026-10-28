@@ -118,6 +118,7 @@ import coverage from "./de/coverage";
 import plugins from "./de/plugins";
 import brands from "./de/brands";
 import bpSports from "./de/bp-sports";
+import queueBasket from "./de/queue-basket";
 
 import nytTv from "./de/nyt-tv";
 
@@ -413,6 +414,7 @@ const de: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...queueBasket,
 };
 
 export default de;

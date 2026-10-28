@@ -97,6 +97,7 @@ import coverage from "./tr/coverage";
 import plugins from "./tr/plugins";
 import brands from "./tr/brands";
 import bpSports from "./tr/bp-sports";
+import queueBasket from "./tr/queue-basket";
 
 import nytTv from "./tr/nyt-tv";
 
@@ -368,6 +369,7 @@ const tr: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...queueBasket,
 };
 
 export default tr;

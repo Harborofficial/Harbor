@@ -99,6 +99,7 @@ import system from "./zh/system";
 import plugins from "./zh/plugins";
 import brands from "./zh/brands";
 import bpSports from "./zh/bp-sports";
+import queueBasket from "./zh/queue-basket";
 
 import nytTv from "./zh/nyt-tv";
 
@@ -361,6 +362,7 @@ const zh: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...queueBasket,
 };
 
 export default zh;

@@ -98,6 +98,7 @@ import identityAudit from "./id/identity-audit";
 import plugins from "./id/plugins";
 import brands from "./id/brands";
 import bpSports from "./id/bp-sports";
+import queueBasket from "./id/queue-basket";
 
 import nytTv from "./id/nyt-tv";
 
@@ -371,6 +372,7 @@ const id: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...queueBasket,
 };
 
 export default id;

@@ -201,6 +201,7 @@ import { SFX } from "@/lib/sfx";
 import { startMusicTaskbarButtons, syncMusicTaskbarArtwork } from "@/lib/music/taskbar-buttons";
 import { resetMusicForProfile } from "@/lib/music/player";
 import { startMediaSessionWindowTracking } from "@/lib/media-session";
+import { QueueBasket } from "@/components/queue-basket/queue-basket";
 
 const importAnime = () => import("@/views/anime");
 const importCalendar = () => import("@/views/calendar");
@@ -1720,6 +1721,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
           {installFeatures.music && <MusicDock />}
           <MusicSurprisePrompt />
           {!playerActive && <WindowResizeEdges />}
+          {!playerActive && !pickerTop && !immersive && !chromeHidden && <QueueBasket />}
           <HybridTitleBar suppressed={playerActive || immersive || chromeHidden} />
           <div
             className={`relative flex min-h-0 min-w-0 flex-1 flex-col ${playerActive ? "invisible" : ""}`}

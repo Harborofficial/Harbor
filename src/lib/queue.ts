@@ -2,8 +2,6 @@ import { useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode } from "@/lib/view";
 import { persistCritical } from "@/lib/storage-recovery";
-import { isManuallyWatched, subscribeManualWatched } from "@/lib/manual-watched";
-import { isMovieWatchedLocal } from "@/lib/movie-watched";
 
 export type QueueItem = {
   id: string;
@@ -14,8 +12,19 @@ export type QueueItem = {
 
 const KEY = "harbor.queue.v1";
 const SLEEP_KEY = "harbor.queue.sleepAtEnd.v1";
+const RESUME_KEY = "harbor.queue.resumeItem.v1";
 
 let items: QueueItem[] = load();
+let resumeItemId: string | null = loadResumeItemId();
+
+function loadResumeItemId(): string | null {
+  try {
+    return localStorage.getItem(RESUME_KEY);
+  } catch {
+    return null;
+  }
+}
+
 const listeners = new Set<() => void>();
 
 function load(): QueueItem[] {
@@ -30,7 +39,33 @@ function load(): QueueItem[] {
 
 function persist(): void {
   persistCritical(KEY, JSON.stringify(items));
+  persistCritical(RESUME_KEY, resumeItemId ?? "");
   listeners.forEach((l) => l());
+}
+
+function replaceQueueItems(next: QueueItem[]): void {
+  if (resumeItemId && !next.some((item) => item.id === resumeItemId)) {
+    const previousIndex = items.findIndex((item) => item.id === resumeItemId);
+    const remainingIds = new Set(next.map((item) => item.id));
+    const successor =
+      previousIndex >= 0
+        ? items.slice(previousIndex + 1).find((item) => remainingIds.has(item.id))
+        : undefined;
+
+    resumeItemId = successor?.id ?? next[0]?.id ?? null;
+  }
+
+  items = next;
+  persist();
+}
+
+export function getQueueStartItem(resume = false): QueueItem | null {
+  if (resume && resumeItemId) {
+    const saved = items.find((item) => item.id === resumeItemId);
+    if (saved) return saved;
+  }
+
+  return items[0] ?? null;
 }
 
 function rid(): string {
@@ -50,8 +85,8 @@ export function queueAdd(meta: Meta, episode?: PlayEpisode): void {
 }
 
 export function queueRemove(id: string): void {
-  items = items.filter((i) => i.id !== id);
-  persist();
+  if (!items.some((item) => item.id === id)) return;
+  replaceQueueItems(items.filter((item) => item.id !== id));
 }
 
 export function queueToggle(meta: Meta, episode?: PlayEpisode): void {
@@ -62,7 +97,8 @@ export function queueToggle(meta: Meta, episode?: PlayEpisode): void {
 }
 
 export function queueClear(): void {
-  if (items.length === 0) return;
+  if (items.length === 0 && !resumeItemId) return;
+  resumeItemId = null;
   items = [];
   persist();
 }
@@ -137,20 +173,19 @@ export function setQueuePlaying(meta: Meta | null, episode?: PlayEpisode): void 
   const next = meta ? keyOf(meta, episode) : null;
   if (next === playingKey) return;
   playingKey = next;
-  queuePruneWatched();
+
+  const current = next ? items.find((item) => keyOf(item.meta, item.episode) === next) : undefined;
+
+  if (current && resumeItemId !== current.id) {
+    resumeItemId = current.id;
+    persist();
+  }
 }
 
-export function queuePruneWatched(): void {
-  const next = items.filter((i) => {
-    if (playingKey && keyOf(i.meta, i.episode) === playingKey) return true;
-    return i.episode
-      ? !isManuallyWatched(i.meta.id, i.episode.season ?? 0, i.episode.episode ?? 0)
-      : !isMovieWatchedLocal(i.meta.id);
-  });
-  if (next.length === items.length) return;
-  items = next;
-  persist();
+export function useQueueResumeItem(): QueueItem | null {
+  return useSyncExternalStore(
+    subscribe,
+    () => items.find((item) => item.id === resumeItemId) ?? null,
+    () => null,
+  );
 }
-
-queueMicrotask(() => queuePruneWatched());
-subscribeManualWatched(() => queuePruneWatched());

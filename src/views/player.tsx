@@ -16,7 +16,7 @@ import { nameColor } from "@/lib/together/colors";
 import { useTogether } from "@/lib/together/provider";
 import { buildPlayInvite } from "@/lib/together/build-invite";
 import { useView, type PlayerSrc, type PlayEpisode } from "@/lib/view";
-import { useQueue, useSleepAtEnd, queueIndexOf, setQueuePlaying } from "@/lib/queue";
+import { useQueue, useSleepAtEnd, setQueuePlaying } from "@/lib/queue";
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
 import { isLocalUrl } from "@/lib/player/local-url";
@@ -137,7 +137,6 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     openPicker,
     exitPlayback,
     replacePlayerSrc,
-    exitPlayer,
     setPipDocked,
     picker,
   } = useView();
@@ -404,13 +403,12 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
 
   const queue = useQueue();
   const sleepAtEndArmed = useSleepAtEnd();
-  const queueOwnsCurrent = queueIndexOf(src.meta, src.episode) >= 0;
 
   useEffect(() => {
     setQueuePlaying(src.meta, src.episode ?? undefined);
     return () => setQueuePlaying(null);
   }, [src.meta, src.episode]);
-  const queueOrSleepArmed = queueOwnsCurrent || sleepAtEndArmed;
+  const queueOrSleepArmed = settings.queueDrivesNav || sleepAtEndArmed;
 
   const closePlayerRef = useRef<() => void>(() => {});
   const {
@@ -1239,9 +1237,12 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     snap,
     queue,
     isLive: isLiveLike,
+    roomGuest,
+    queueDrivesNav: settings.queueDrivesNav,
+    instantPlay: settings.instantPlay,
     startedNearEndRef,
     openPicker,
-    exitPlayer,
+    closePlayer,
   });
 
   const cancelToPicker = useCallback(() => {
