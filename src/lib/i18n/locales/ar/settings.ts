@@ -258,8 +258,8 @@ const settings: Record<string, string> = {
   "Could not send: {error}": "تعذّر الإرسال: {error}",
   "Couldn't reach Trakt. Check your connection and try again.":
     "تعذّر الوصول إلى Trakt. تحقق من اتصالك وحاول مرة أخرى.",
-  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
-    "تعذّر الوصول إلى harborcommunity.site لتحميل الإصدارات السابقة. تحقق من اتصالك وحاول مرة أخرى.",
+  "Couldn't reach GitHub to load earlier builds. Check your connection and try again.":
+    "تعذّر الوصول إلى GitHub لتحميل الإصدارات السابقة. تحقق من اتصالك وحاول مرة أخرى.",
   "Couldn't reach that pack": "تعذّر الوصول إلى تلك الحزمة",
   "Couldn't reach that pack (HTTP {n})": "تعذّر الوصول إلى تلك الحزمة (HTTP {n})",
   "Couldn't read your watchlist. Try again.": "تعذّرت قراءة قائمة مشاهدتك. حاول مرة أخرى.",

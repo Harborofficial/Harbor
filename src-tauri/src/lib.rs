@@ -1806,6 +1806,7 @@ pub fn run() {
             desktop_notify::send_clickable_notification,
             installer_handoff::handoff_probe,
             installer_handoff::handoff_stage,
+            installer_handoff::handoff_probe_staged,
             installer_handoff::handoff_launch,
             installer_handoff::handoff_confirm,
             installer_handoff::handoff_save_backup,

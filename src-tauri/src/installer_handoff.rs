@@ -425,9 +425,9 @@ pub struct ModifyProbe {
     path: String,
 }
 
-/// The newest staged setup whose .sig verifies. Copies without a signature are not offered:
-/// only something that passed verification may be run.
-fn find_staged_setup(app: &tauri::AppHandle) -> Option<(PathBuf, String)> {
+/// The newest staged setup whose .sig verifies, optionally limited to one version. Copies
+/// without a signature are not offered: only something that passed verification may be run.
+fn find_staged_setup(app: &tauri::AppHandle, wanted: Option<&str>) -> Option<(PathBuf, String)> {
     let pubkey = updater_pubkey(app).ok()?;
     let root = std::env::temp_dir();
     let mut best: Option<(std::time::SystemTime, PathBuf, String)> = None;
@@ -435,6 +435,11 @@ fn find_staged_setup(app: &tauri::AppHandle) -> Option<(PathBuf, String)> {
         let name = entry.file_name().to_string_lossy().to_string();
         if !name.starts_with(STAGE_PREFIX) || !entry.path().is_dir() {
             continue;
+        }
+        if let Some(wanted) = wanted {
+            if staged_version(&name).as_deref() != Some(wanted) {
+                continue;
+            }
         }
         let path = entry.path().join(SETUP_NAME);
         let sig_path = entry.path().join(format!("{SETUP_NAME}.sig"));
@@ -457,6 +462,87 @@ fn find_staged_setup(app: &tauri::AppHandle) -> Option<(PathBuf, String)> {
         }
     }
     best.map(|(_, path, version)| (path, version))
+}
+
+/// The newest staged setup for one version. The signature sidecar is written only after the
+/// download verified, so probing can stay fast even for a large installer; handoff_launch
+/// verifies the bytes again before running it.
+fn find_staged_setup_for(version: &str) -> Option<(PathBuf, String, String)> {
+    let wanted = safe_version(version);
+    let root = std::env::temp_dir();
+    let mut best: Option<(std::time::SystemTime, PathBuf, String, String)> = None;
+    for entry in std::fs::read_dir(&root).ok()?.flatten() {
+        let name = entry.file_name().to_string_lossy().to_string();
+        if !name.starts_with(STAGE_PREFIX) || !entry.path().is_dir() {
+            continue;
+        }
+        if staged_version(&name).as_deref() != Some(wanted.as_str()) {
+            continue;
+        }
+        let path = entry.path().join(SETUP_NAME);
+        let sig_path = entry.path().join(format!("{SETUP_NAME}.sig"));
+        if !path.is_file() || !sig_path.is_file() {
+            continue;
+        }
+        let Ok(signature) = std::fs::read_to_string(&sig_path) else {
+            continue;
+        };
+        let signature = signature.trim().to_string();
+        if signature.is_empty() {
+            continue;
+        }
+        let modified = entry
+            .metadata()
+            .and_then(|m| m.modified())
+            .unwrap_or(std::time::SystemTime::UNIX_EPOCH);
+        if best
+            .as_ref()
+            .map(|(when, ..)| modified > *when)
+            .unwrap_or(true)
+        {
+            best = Some((modified, path, wanted.clone(), signature));
+        }
+    }
+    best.map(|(_, path, version, signature)| (path, version, signature))
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StagedProbe {
+    found: bool,
+    version: String,
+    path: String,
+}
+
+/// Reports a previously staged installer for this version so a reload after downloading can
+/// still offer to install it without downloading again. Launch verifies and stages it.
+#[tauri::command]
+pub async fn handoff_probe_staged(version: String) -> Result<StagedProbe, String> {
+    if !cfg!(target_os = "windows") {
+        return Ok(StagedProbe {
+            found: false,
+            version,
+            path: String::new(),
+        });
+    }
+    let found = tauri::async_runtime::spawn_blocking({
+        let version = version.clone();
+        move || find_staged_setup_for(&version)
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+    Ok(match found {
+        Some((path, version, _signature)) => StagedProbe {
+            found: true,
+            version,
+            path: path.to_string_lossy().into_owned(),
+        },
+        None => StagedProbe {
+            found: false,
+            version,
+            path: String::new(),
+        },
+    })
 }
 
 /// A path the modify flow is allowed to run: inside the staged update folders under the temp
@@ -484,9 +570,19 @@ fn verified_staged_setup(app: &tauri::AppHandle, requested: Option<&str>) -> Res
                 .file_name()
                 .and_then(|n| staged_version(&n.to_string_lossy()))
                 .unwrap_or_default();
+            let installed = app.package_info().version.to_string();
+            if version != installed {
+                return Err(
+                    "That Harbor Setup is for a different version than the one installed.".into(),
+                );
+            }
             Ok((path, version))
         }
-        _ => find_staged_setup(app).ok_or_else(|| "no verified Harbor Setup was found on this PC".to_string()),
+        _ => {
+            let installed = app.package_info().version.to_string();
+            find_staged_setup(app, Some(&installed))
+                .ok_or_else(|| "no verified Harbor Setup was found on this PC".to_string())
+        }
     }
 }
 
@@ -518,7 +614,10 @@ pub async fn modify_probe(app: tauri::AppHandle) -> Result<ModifyProbe, String> 
     }
     let found = tauri::async_runtime::spawn_blocking({
         let app = app.clone();
-        move || find_staged_setup(&app)
+        move || {
+            let installed = app.package_info().version.to_string();
+            find_staged_setup(&app, Some(&installed))
+        }
     })
     .await
     .map_err(|e| e.to_string())?;
@@ -571,17 +670,27 @@ fn quit_for_handoff(app: tauri::AppHandle) {
 }
 
 #[tauri::command]
-pub async fn handoff_launch(app: tauri::AppHandle) -> Result<(), String> {
-    let staged = STAGED.lock().ok().and_then(|slot| {
-        slot.as_ref().map(|s| {
-            (
-                s.path.clone(),
-                s.version.clone(),
-                s.signature.clone(),
-                s.recoverable,
-            )
+pub async fn handoff_launch(app: tauri::AppHandle, version: Option<String>) -> Result<(), String> {
+    let staged = {
+        let requested = version.as_deref();
+        let current = STAGED.lock().ok().and_then(|slot| {
+            slot.as_ref()
+                .filter(|s| requested.map(|v| s.version.as_str() == v).unwrap_or(true))
+                .map(|s| {
+                    (
+                        s.path.clone(),
+                        s.version.clone(),
+                        s.signature.clone(),
+                        s.recoverable,
+                    )
+                })
+        });
+        current.or_else(|| {
+            requested
+                .and_then(find_staged_setup_for)
+                .map(|(path, version, signature)| (path, version, signature, false))
         })
-    });
+    };
     let (setup, version, signature, recoverable) =
         staged.ok_or_else(|| "no verified installer is staged".to_string())?;
     if !setup.is_file() {

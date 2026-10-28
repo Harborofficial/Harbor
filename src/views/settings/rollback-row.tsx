@@ -101,9 +101,7 @@ function HistoryError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-start gap-3 px-4 py-4">
       <p className={`max-w-[66ch] ${ROW_DESC}`}>
-        {t(
-          "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.",
-        )}
+        {t("Couldn't reach GitHub to load earlier builds. Check your connection and try again.")}
       </p>
       <div className="flex flex-wrap items-center gap-2.5">
         <SButton onClick={onRetry}>{t("Try again")}</SButton>

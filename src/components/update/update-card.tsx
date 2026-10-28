@@ -43,7 +43,7 @@ export function UpdateCard() {
       setRich(experimentalReleaseNote(u.version));
     } else if (u.version) {
       setRich(null);
-      releaseNote(u.version).then((n) => ok && setRich(n));
+      releaseNote(u.version, u.channel).then((n) => ok && setRich(n));
     } else {
       setRich(null);
     }

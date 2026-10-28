@@ -2103,8 +2103,8 @@ const catalogAC: Record<string, string> = {
   "Couldn't reach Trakt. Check your connection and try again.":
     "Trakt से संपर्क नहीं हो सका। अपना कनेक्शन जाँचें और फिर कोशिश करें।",
   "Couldn't reach Trakt. Try refreshing.": "Trakt से संपर्क नहीं हो सका। रीफ़्रेश करके देखें।",
-  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
-    "पहले के बिल्ड लोड करने के लिए harborcommunity.site से कनेक्ट नहीं हो सका। अपना कनेक्शन जाँचें और फिर कोशिश करें।",
+  "Couldn't reach GitHub to load earlier builds. Check your connection and try again.":
+    "पहले के बिल्ड लोड करने के लिए GitHub से कनेक्ट नहीं हो सका। अपना कनेक्शन जाँचें और फिर कोशिश करें।",
   "Couldn't reach that pack": "उस पैक तक पहुँचा नहीं जा सका",
   "Couldn't reach that pack (HTTP {n})": "उस पैक से कनेक्ट नहीं हो सका (HTTP {n})",
   "Couldn't reach the update server. Try again in a moment.":

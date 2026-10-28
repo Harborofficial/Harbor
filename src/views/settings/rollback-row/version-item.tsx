@@ -1,4 +1,4 @@
-import { ArrowDownToLine, Check } from "../icons";
+import { Check } from "../icons";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { RELEASES_URL } from "@/lib/updater/release-links";
@@ -6,6 +6,7 @@ import { installerUrl, type VersionEntry } from "@/lib/updater/versions";
 import { openUrl } from "@/lib/window";
 import { SButton } from "../ui";
 import { VERSION_BADGE } from "./badge";
+import { VersionDownloadButton } from "./version-download-button";
 import { VersionNotesModal } from "./version-notes-modal";
 
 export function VersionItem({ entry, isCurrent }: { entry: VersionEntry; isCurrent: boolean }) {
@@ -48,13 +49,11 @@ export function VersionItem({ entry, isCurrent }: { entry: VersionEntry; isCurre
           {t("Current")}
         </span>
       ) : url ? (
-        <SButton
+        <VersionDownloadButton
+          entry={entry}
+          label={t("Download")}
           title={t("Download this build's installer, then run it over your current copy")}
-          onClick={() => openUrl(url)}
-        >
-          <ArrowDownToLine size={16} strokeWidth={2.4} />
-          {t("Download")}
-        </SButton>
+        />
       ) : (
         <SButton onClick={() => openUrl(RELEASES_URL)}>{t("Releases")}</SButton>
       )}
