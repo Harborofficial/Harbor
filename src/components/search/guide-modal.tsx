@@ -130,6 +130,7 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
             nowMs={nowMs}
             onPlay={onPlay}
             resetKey={source.id}
+            scrollKey={source.id}
           />
         )}
       </div>

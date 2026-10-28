@@ -25,6 +25,12 @@ import {
 import { useMiddleDragPan } from "../hooks/use-middle-drag-pan";
 import { BackToTop } from "@/components/back-to-top";
 import { ProgramBlocksRow } from "../skeletons";
+import {
+  guideScrollLeftFor,
+  guideScrollTime,
+  recallGuideScroll,
+  rememberGuideScroll,
+} from "./guide-scroll-memory";
 
 const PREVIEW_DWELL_MS = 2000;
 const COL_MIN = 140;
@@ -51,6 +57,7 @@ export function GuideView({
   epgLoading = false,
   epgConfigured = true,
   epgError = null,
+  scrollKey,
 }: {
   channels: IptvChannel[];
   epg: EpgIndex | null;
@@ -61,10 +68,12 @@ export function GuideView({
   onPlay: (ch: IptvChannel) => void;
   onPlayCatchup?: (ch: IptvChannel, program: EpgProgram) => void;
   resetKey: string;
+  scrollKey?: string;
   showPrograms?: boolean;
   currentChannelId?: string | null;
 }) {
   const t = useT();
+  const memoryKey = scrollKey ?? resetKey;
   const scrollRef = useRef<HTMLDivElement>(null);
   useMiddleDragPan(scrollRef);
   const { visible: channels, sentinelRef, hasMore, loadMore } = useLazyVisible(
@@ -92,6 +101,7 @@ export function GuideView({
     setAwayFromNow(nowX < from + 40 || nowX > to - 40);
   };
   const scrolledRef = useRef(false);
+  const lastScrollRef = useRef<{ atMs: number; top: number } | null>(null);
   const tvgIdCounts = useMemo(() => computeTvgIdCounts(allChannels), [allChannels]);
   const epgMapVersion = useEpgMapVersion();
   const [matchTarget, setMatchTarget] = useState<IptvChannel | null>(null);
@@ -169,11 +179,57 @@ export function GuideView({
     if (channels.length === 0) return;
     const el = scrollRef.current;
     if (!el) return;
-    const nowLeftInGrid = (nowMs - windowStart) * PX_PER_MS;
-    const viewport = el.clientWidth - colPx;
-    el.scrollLeft = Math.max(0, nowLeftInGrid - viewport / 3);
+    const viewport = Math.max(0, el.clientWidth - colPx);
+    const saved = recallGuideScroll(memoryKey);
+    const restoredLeft = saved ? guideScrollLeftFor(saved, windowStart, viewport) : null;
+    if (saved && restoredLeft != null) {
+      el.scrollLeft = restoredLeft;
+      el.scrollTop = saved.top;
+      lastScrollRef.current = { atMs: saved.atMs, top: saved.top };
+    } else {
+      const nowLeftInGrid = (nowMs - windowStart) * PX_PER_MS;
+      el.scrollLeft = Math.max(0, nowLeftInGrid - viewport / 3);
+      lastScrollRef.current = {
+        atMs: guideScrollTime(windowStart, el.scrollLeft),
+        top: el.scrollTop,
+      };
+    }
     scrolledRef.current = true;
-  }, [channels.length, windowStart, nowMs]);
+  }, [channels.length, windowStart, nowMs, memoryKey, colPx]);
+
+  // The Live layer is evicted a few seconds after the player opens, so the
+  // guide is remounted on return. Keep its time and channel position here.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const capture = () => {
+      const snapshot = {
+        atMs: guideScrollTime(windowStart, el.scrollLeft),
+        top: el.scrollTop,
+      };
+      lastScrollRef.current = snapshot;
+      return snapshot;
+    };
+    capture();
+    let timer: number | null = null;
+    const remember = () => {
+      timer = null;
+      rememberGuideScroll(memoryKey, lastScrollRef.current ?? capture());
+    };
+    const onScroll = () => {
+      capture();
+      if (timer != null) clearTimeout(timer);
+      timer = window.setTimeout(remember, 200);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      if (timer != null) clearTimeout(timer);
+      // The layer is already hidden when this runs; use the position captured
+      // while it was still laid out.
+      rememberGuideScroll(memoryKey, lastScrollRef.current ?? capture());
+    };
+  }, [memoryKey, windowStart]);
 
   const nowOffsetPx = (nowMs - windowStart) * PX_PER_MS;
   const showNowLine = nowMs >= windowStart && nowMs < windowEnd;

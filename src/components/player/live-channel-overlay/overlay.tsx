@@ -279,6 +279,7 @@ export function LiveChannelOverlay({
               nowMs={nowMs}
               currentChannelId={currentChannelId}
               showPrograms={guideStyle === "timeline"}
+              scrollKey={source.id}
               onPlay={(channel) => {
                 const programs = epgProgramsForChannel(channel, epg, tvgIdCounts);
                 onSwitch(channel, findCurrent(programs, nowMs).current?.title);

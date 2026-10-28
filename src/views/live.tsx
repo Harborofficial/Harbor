@@ -460,6 +460,7 @@ export function LiveView({ active }: { active: boolean }) {
                     onPlay={handlePlay}
                     onPlayCatchup={handlePlayCatchup}
                     resetKey={`${activeId}|${group ?? ""}|${query}`}
+                    scrollKey={activeId ?? ""}
                   />
                 )}
               </>
