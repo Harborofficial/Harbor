@@ -1,5 +1,6 @@
 import {
   isNuvioProviderActive,
+  getNuvioActiveSlot,
   nuvioWatchedScope,
   canPersistWatched,
   stremioProfileId as activeProfileId,
@@ -47,7 +48,12 @@ let remoteCache: Set<string> | null = null;
 function storeKey(kind: keyof typeof PREFIXES): string {
   if (isNuvioProviderActive()) {
     const scope = nuvioWatchedScope();
-    return `${PREFIXES[kind]}${scope}`;
+    const scopedKey = `${PREFIXES[kind]}${scope}`;
+    if (!localStorage.getItem(scopedKey)) {
+      const legacyKey = `${PREFIXES[kind]}nuvio.${getNuvioActiveSlot()}`;
+      if (localStorage.getItem(legacyKey)) return legacyKey;
+    }
+    return scopedKey;
   }
   const id = activeProfileId();
   return id ? PREFIXES[kind] + id : LEGACY_KEYS[kind];
@@ -317,8 +323,9 @@ export function reconcileNuvioWatchedEpisodes(
   targetSeriesIdsOrAccountId?: Set<string> | string,
   maybeAccountId?: string,
 ): { changed: boolean; newlyWatchedShows: Set<string> } {
-  const targetSeriesIds =
+  const _targetSeriesIds =
     targetSeriesIdsOrAccountId instanceof Set ? targetSeriesIdsOrAccountId : undefined;
+  void _targetSeriesIds;
   const accountId =
     typeof targetSeriesIdsOrAccountId === "string" ? targetSeriesIdsOrAccountId : maybeAccountId;
 
@@ -326,7 +333,6 @@ export function reconcileNuvioWatchedEpisodes(
   let sk = `${PREFIXES.watched}${scope}`;
   let unsk = `${PREFIXES.unwatched}${scope}`;
   if (
-    scope === "nuvio.v2.unowned" &&
     !localStorage.getItem(sk) &&
     localStorage.getItem(`${PREFIXES.watched}nuvio.${slot}`)
   ) {
@@ -384,48 +390,15 @@ export function reconcileNuvioWatchedEpisodes(
         serverShowsWithEpisodes.add(`series:${clean}`);
       }
     }
-    if (targetSeriesIds) {
-      for (const tid of targetSeriesIds) {
-        const clean = tid.replace(/^(series|movie|tmdb):/, "");
-        serverShowsWithEpisodes.add(tid);
-        serverShowsWithEpisodes.add(clean);
-        serverShowsWithEpisodes.add(`tmdb:${clean}`);
-        serverShowsWithEpisodes.add(`series:${clean}`);
-      }
-    }
 
     for (const lKey of Array.from(currentLocalWatched)) {
       const parts = lKey.split("|");
       const showId = parts[0];
       const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
-      if (serverShowsWithEpisodes.has(showId) && !serverEpisodeKeys.has(lKey)) {
-        currentLocalWatched.delete(lKey);
-        currentLocalUnwatched.add(lKey);
-        changed = true;
-      } else if (
-        cleanShowId &&
-        serverShowsWithEpisodes.has(cleanShowId) &&
+      if (
+        (serverShowsWithEpisodes.has(showId) || (cleanShowId && serverShowsWithEpisodes.has(cleanShowId))) &&
         !serverEpisodeKeys.has(lKey)
       ) {
-        currentLocalWatched.delete(lKey);
-        currentLocalUnwatched.add(lKey);
-        changed = true;
-      }
-    }
-  } else if (targetSeriesIds && targetSeriesIds.size > 0) {
-    const targetShowsClean = new Set<string>();
-    for (const tid of targetSeriesIds) {
-      const clean = tid.replace(/^(series|movie|tmdb):/, "");
-      targetShowsClean.add(tid);
-      targetShowsClean.add(clean);
-      targetShowsClean.add(`tmdb:${clean}`);
-      targetShowsClean.add(`series:${clean}`);
-    }
-    for (const lKey of Array.from(currentLocalWatched)) {
-      const parts = lKey.split("|");
-      const showId = parts[0];
-      const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
-      if (targetShowsClean.has(showId) || (cleanShowId && targetShowsClean.has(cleanShowId))) {
         currentLocalWatched.delete(lKey);
         currentLocalUnwatched.add(lKey);
         changed = true;

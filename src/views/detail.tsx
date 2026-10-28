@@ -1599,10 +1599,10 @@ export function DetailView({
   );
   useEffect(() => {
     if (!isNuvio) return;
-    void reconcileNuvioWatched();
+    void reconcileNuvioWatched(undefined, { force: true });
     const onFocus = () => {
       if (document.visibilityState === "visible") {
-        void reconcileNuvioWatched();
+        void reconcileNuvioWatched(undefined, { force: true });
       }
     };
     window.addEventListener("focus", onFocus);

@@ -182,8 +182,10 @@ export async function meta(
   force = false,
 ): Promise<Meta | null> {
   if (!force && !cinemetaEnabled()) return null;
-  return withMetaCache(type, id, async () => {
-    const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);
+  const cleanId = id.replace(/^(series|movie):/, "");
+  if (!cleanId.startsWith("tt")) return null;
+  return withMetaCache(type, cleanId, async () => {
+    const res = await fetch(`${CINEMETA}/meta/${type}/${cleanId}.json`);
     if (!res.ok) {
       const definitive = res.status >= 400 && res.status < 500 && res.status !== 429;
       return { value: null, cacheable: definitive };

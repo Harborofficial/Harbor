@@ -408,11 +408,13 @@ async function overlayTmdbEpisodeNames(
 }
 
 async function loadCinemetaEpisodes(id: string, tmdbKey?: string): Promise<PlayEpisode[] | null> {
+  const cleanId = id.replace(/^(series|movie):/, "");
+  if (!cleanId.startsWith("tt")) return null;
   const generation = mediaCacheGeneration();
   const prefer = preferCustomMeta();
-  const cacheKey = JSON.stringify([id, prefer, tmdbKey, effectiveTmdbLanguage(), readAuthKey()]);
+  const cacheKey = JSON.stringify([cleanId, prefer, tmdbKey, effectiveTmdbLanguage(), readAuthKey()]);
   if (cinemetaListCache.has(cacheKey)) return cinemetaListCache.get(cacheKey)!;
-  const res = await fetch(`https://v3-cinemeta.strem.io/meta/series/${id}.json`);
+  const res = await fetch(`https://v3-cinemeta.strem.io/meta/series/${cleanId}.json`);
   if (!res.ok) return null;
   const json = await res.json();
   const raw = (json?.meta?.videos ?? []) as Array<{

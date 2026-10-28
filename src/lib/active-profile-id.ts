@@ -192,16 +192,33 @@ export function profilesForSessionAdoption(): string[] {
 let cachedWatchedOwnerRaw: string | null = null;
 let cachedWatchedOwner: string | undefined;
 
+function resetWatchedOwnerCache(): void {
+  cachedWatchedOwnerRaw = null;
+  cachedWatchedOwner = undefined;
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("harbor:nuvio-state-changed", resetWatchedOwnerCache);
+  window.addEventListener("harbor:account-provider-changed", resetWatchedOwnerCache);
+}
+
 /** Watched history belongs to a Nuvio account and slot, including while offline. */
 export function nuvioWatchedScope(slot = getNuvioActiveSlot(), accountId?: string): string {
   let id = accountId;
   if (id === undefined) {
     try {
-      const raw = localStorage.getItem("harbor.nuvio.state.v1");
+      const raw =
+        localStorage.getItem("harbor.nuvio.state.v1") || localStorage.getItem("harbor.nuvio.state");
       if (raw !== cachedWatchedOwnerRaw) {
         cachedWatchedOwnerRaw = raw;
         cachedWatchedOwner = undefined;
-        cachedWatchedOwner = raw ? JSON.parse(raw).session?.user?.id : undefined;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          cachedWatchedOwner =
+            parsed.session?.user?.id ||
+            (Array.isArray(parsed.profiles) && parsed.profiles[0]?.user_id) ||
+            undefined;
+        }
       }
       id = cachedWatchedOwner;
     } catch {

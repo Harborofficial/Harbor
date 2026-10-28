@@ -57,16 +57,14 @@ export function useMarkSeason({
         );
         const primaryId = meta.id;
         if (watched) {
-          const items = airedEpisodes.flatMap((e) =>
-            idVariants.map((cid) => ({
-              contentId: cid,
-              contentType: "series" as const,
-              title: meta.name,
-              season: e.seasonNumber,
-              episode: e.episodeNumber,
-              watchedAt: Date.now(),
-            })),
-          );
+          const items = airedEpisodes.map((e) => ({
+            contentId: clean,
+            contentType: "series" as const,
+            title: meta.name,
+            season: e.seasonNumber,
+            episode: e.episodeNumber,
+            watchedAt: Date.now(),
+          }));
           void pushWatchedItemToNuvio(slot, items);
           void (async () => {
             for (const ep of airedEpisodes) {

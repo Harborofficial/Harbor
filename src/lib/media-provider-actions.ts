@@ -767,15 +767,16 @@ export function watchedProviderWrites(
           }
         }
         const allIds = Array.from(idVariants);
+        const canonicalId = (options.imdbId || meta.id).replace(/^(series|movie|tmdb):/, "");
 
         if (movie) {
           if (watched) {
-            const items = allIds.map((cid) => ({
-              contentId: cid,
+            const items = [{
+              contentId: canonicalId,
               contentType: "movie" as const,
               title: meta.name,
               watchedAt: Date.now(),
-            }));
+            }];
             await pushWatchedItemToNuvio(slot, items);
             for (const cid of allIds) {
               await deleteWatchProgressFromNuvio(slot, cid);
@@ -788,16 +789,14 @@ export function watchedProviderWrites(
           }
         } else {
           if (watched) {
-            const itemsToPush = options.episodes.flatMap((ep) =>
-              allIds.map((cid) => ({
-                contentId: cid,
-                contentType: "series" as const,
-                title: meta.name,
-                season: ep.season,
-                episode: ep.episode,
-                watchedAt: Date.now(),
-              })),
-            );
+            const itemsToPush = options.episodes.map((ep) => ({
+              contentId: canonicalId,
+              contentType: "series" as const,
+              title: meta.name,
+              season: ep.season,
+              episode: ep.episode,
+              watchedAt: Date.now(),
+            }));
             await pushWatchedItemToNuvio(slot, itemsToPush);
 
             // Compute next episode to advance Continue Watching instantly
