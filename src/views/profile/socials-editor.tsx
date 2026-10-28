@@ -15,6 +15,7 @@ import {
 import { useT } from "@/lib/i18n";
 import { saveSocials } from "./profile-api";
 import type { ProfileSummary, SocialEntry } from "./profile-types";
+import { useProfileThemeSurfaceStyle } from "./profile-theme-context";
 
 function ServiceTile({
   service,
@@ -60,7 +61,10 @@ function AddedRow({ entry, onRemove }: { entry: SocialEntry; onRemove: () => voi
   const url = resolveUrl(entry.service, entry.value);
   return (
     <div className="flex items-center gap-3 rounded-md bg-surface px-3 py-2 ring-1 ring-edge-soft">
-      <span className={color ? "shrink-0" : "shrink-0 text-ink-muted"} style={color ? { color } : undefined}>
+      <span
+        className={color ? "shrink-0" : "shrink-0 text-ink-muted"}
+        style={color ? { color } : undefined}
+      >
         <SocialIcon service={entry.service} size={18} />
       </span>
       <div className="min-w-0 flex-1">
@@ -91,6 +95,7 @@ export function SocialsEditor({
   onSaved: (summary: ProfileSummary) => void;
 }) {
   const t = useT();
+  const surfaceStyle = useProfileThemeSurfaceStyle();
   const [list, setList] = useState<SocialEntry[]>(() => initial.slice(0, MAX_SOCIALS));
   const [active, setActive] = useState<SocialKey>(SERVICES[0].key);
   const [value, setValue] = useState("");
@@ -117,7 +122,10 @@ export function SocialsEditor({
 
   const add = () => {
     if (!canAdd) return;
-    setList((prev) => [...prev.filter((e) => e.service !== active), { service: active, value: cleaned }]);
+    setList((prev) => [
+      ...prev.filter((e) => e.service !== active),
+      { service: active, value: cleaned },
+    ]);
     setValue("");
   };
 
@@ -147,6 +155,7 @@ export function SocialsEditor({
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        style={surfaceStyle}
         className="animate-modal-in flex w-[min(94vw,480px)] flex-col rounded-2xl border border-edge-soft bg-elevated shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
       >
         <div className="flex items-center justify-between px-5 pt-5">
@@ -160,7 +169,9 @@ export function SocialsEditor({
           </button>
         </div>
         <p className="px-5 pt-1 text-[12.5px] text-ink-muted">
-          {t("Add up to {max} profiles. Enter your handle only, not the full link.", { max: MAX_SOCIALS })}
+          {t("Add up to {max} profiles. Enter your handle only, not the full link.", {
+            max: MAX_SOCIALS,
+          })}
         </p>
 
         <div className="flex flex-col gap-3 px-5 pb-2 pt-4">
@@ -178,7 +189,10 @@ export function SocialsEditor({
 
           <div className="flex items-center gap-2">
             <div className="flex h-11 flex-1 items-center gap-2 rounded-md bg-surface px-3 ring-1 ring-edge-soft focus-within:ring-edge">
-              <span className={activeColor ? "shrink-0" : "shrink-0 text-ink-subtle"} style={activeColor ? { color: activeColor } : undefined}>
+              <span
+                className={activeColor ? "shrink-0" : "shrink-0 text-ink-subtle"}
+                style={activeColor ? { color: activeColor } : undefined}
+              >
                 <SocialIcon service={active} size={16} />
               </span>
               <input
@@ -209,26 +223,40 @@ export function SocialsEditor({
             </button>
           </div>
           <div className="flex items-center justify-between px-1 text-[11px] text-ink-subtle">
-            <span>{atCap ? t("You have reached the {max} link limit", { max: MAX_SOCIALS }) : t("{label} handle", { label: activeSvc?.label ?? "" })}</span>
+            <span>
+              {atCap
+                ? t("You have reached the {max} link limit", { max: MAX_SOCIALS })
+                : t("{label} handle", { label: activeSvc?.label ?? "" })}
+            </span>
             <span className="tabular-nums">
               {value.length}/{HANDLE_MAX}
             </span>
           </div>
 
-          {error && <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
+          {error && (
+            <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>
+          )}
 
           <div className="mt-1 flex items-center justify-between">
-            <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-ink-subtle">{t("Your links")}</span>
+            <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-ink-subtle">
+              {t("Your links")}
+            </span>
             <span className="text-[12px] tabular-nums text-ink-subtle">
               {list.length}/{MAX_SOCIALS}
             </span>
           </div>
           <div className="flex max-h-[34vh] flex-col gap-1.5 overflow-y-auto">
             {list.length === 0 ? (
-              <p className="py-6 text-center text-[13px] text-ink-subtle">{t("No links added yet.")}</p>
+              <p className="py-6 text-center text-[13px] text-ink-subtle">
+                {t("No links added yet.")}
+              </p>
             ) : (
               list.map((entry) => (
-                <AddedRow key={entry.service} entry={entry} onRemove={() => remove(entry.service)} />
+                <AddedRow
+                  key={entry.service}
+                  entry={entry}
+                  onRemove={() => remove(entry.service)}
+                />
               ))
             )}
           </div>

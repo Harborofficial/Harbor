@@ -37,6 +37,7 @@ import { ProfileCardsPicker } from "./profile-cards-picker";
 import { ProfileMedia } from "./profile-media";
 import { LocationSelect } from "./location-select";
 import { CustomizationPanel } from "./customization/customization-panel";
+import { ProfileThemePicker } from "./profile-theme-picker";
 import { AboutEditor } from "./customization/about-editor";
 import { useCustomUrlAvailability, type UrlStatus } from "./use-customurl-availability";
 import type {
@@ -588,6 +589,8 @@ export function ProfileSettings({
                     />
 
                     <ProfileMedia summary={summary} onSaved={onSaved} />
+
+                    <ProfileThemePicker summary={summary} onSaved={onSaved} />
 
                     <ActionRow
                       title={t("Customize profile")}

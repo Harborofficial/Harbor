@@ -8,6 +8,7 @@ import * as icons from "lucide-react";
 import { JSDOM } from "jsdom";
 import { ConfirmableAction } from "../src/components/context-menu/action-items.tsx";
 import { executeContextAction } from "../src/lib/context-actions.ts";
+import { parseQuotedBody } from "../src/lib/ratings/quote.ts";
 
 test("profile comment button and menu share contextual confirmation tied to the author and comment", async () => {
   const dom = new JSDOM("<!doctype html><div id='root'></div>", { url: "https://fixture.invalid" });
@@ -38,9 +39,11 @@ test("profile comment button and menu share contextual confirmation tied to the 
         key.replace(/\{(\w+)\}/g, (_, name) => String(values?.[name] ?? name)),
     },
     "@/lib/social/mentions": { segmentMentions: (text) => [{ text }] },
+    "@/lib/ratings/quote": { parseQuotedBody },
     "./profile-bits": { Avatar: empty, timeAgo: () => "just now" },
     "./comment-compose": { CommentCompose: empty },
     "./mention-link": { MentionLink: empty },
+    "./quoted-rating": { QuotedRating: empty },
     "./text-safety": { segmentProfanity: (text) => [{ text }] },
     "./user-hover-card": { UserHoverCard: ({ children }) => children },
     "./use-self-avatar": { useSelfAvatar: () => ({ handle: "owner" }) },

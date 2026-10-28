@@ -3,6 +3,7 @@ import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { currentAuthor } from "@/lib/theme-auth";
+import { parseProfileTheme, profileThemeBackground, withProfileTheme } from "@/lib/profile-theme";
 import type { CustomizationInput, ProfileSummary } from "../profile-types";
 import { AboutCard } from "../about-card";
 import { ProfileHero } from "../profile-hero";
@@ -27,13 +28,14 @@ export function CustomizePreview({
     pageBgColor: form.pageBgColor,
     pageBgImage: form.pageBgImage,
     customHtml: form.customHtml,
-    customCss: form.customCss,
+    customCss: withProfileTheme(form.customCss, parseProfileTheme(summary.customCss)),
     canvasHeight: form.canvasHeight,
     customEnabled: form.customEnabled,
     hideTopBanner: form.hideTopBanner,
   };
   const c = resolveCustomization(preview);
   useFontLink(c.fontHref);
+  const theme = c.themeScope;
 
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const ownerAvatar = isNuvio
@@ -47,7 +49,15 @@ export function CustomizePreview({
   const heroAvatarFallback = isNuvio ? undefined : summary.avatarUrl || undefined;
 
   return (
-    <div className="min-h-full" style={c.background ? { background: c.background } : undefined}>
+    <div
+      className="min-h-full"
+      data-profile-ui={theme.ui || undefined}
+      style={{
+        ...theme.vars,
+        ...profileThemeBackground(theme, c.background),
+        ...(theme.colorScheme ? { colorScheme: theme.colorScheme } : {}),
+      }}
+    >
       <ProfileHero
         p={preview}
         avatar={heroAvatar}
