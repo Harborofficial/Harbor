@@ -507,23 +507,45 @@ async fn harbor_fetch_inner(
     let original_host = current_url.host_str().map(|s| s.to_string());
     let cf = current_url.host_str().and_then(crate::cf_solver::cf_cached);
     let had_clearance = cf.is_some();
-    // Once a site has proved usable in the WebView, prefer that browser for
-    // subsequent safe text reads. Avoid repeatedly hitting Cloudflare with a
-    // native request that cannot replay its browser-only verification.
-    if !had_clearance
-        && !retried
-        && original_host
+    // Browser-only sessions and verified hosts that reqwest has rechallenged
+    // should use the matching WebView directly. Never trust the browser-session
+    // map unless the shared WebView is still on the requested hostname.
+    let verified_browser = original_host
+        .as_deref()
+        .is_some_and(|host| crate::cf_solver::cf_browser_ready_for(&app, host));
+    let browser_eligible = can_browser_fallback(&retry_args);
+    let prefer_browser = !had_clearance
+        || original_host
             .as_deref()
-            .is_some_and(crate::cf_solver::cf_browser_ready)
-        && can_browser_fallback(&retry_args)
-    {
+            .is_some_and(crate::cf_solver::cf_prefer_browser);
+    if should_use_verified_browser(
+        had_clearance,
+        verified_browser,
+        browser_eligible,
+        prefer_browser,
+    ) {
+        let host = original_host.as_deref().unwrap_or("");
+        if crate::cf_solver::cf_browser_cooling_down(host) {
+            return Err(format!(
+                "Cloudflare browser verification for {host} is cooling down after a failed request"
+            ));
+        }
         match crate::cf_solver::cf_browser_fetch(&app, &retry_args.url, browser_accept(&retry_args))
             .await
         {
-            Ok(Some(browser)) => return Ok(browser_text_response(browser, retry_args.url)),
-            Err(error) => eprintln!("[cf] verified browser fetch failed: {error}"),
+            Ok(Some(browser)) => {
+                crate::cf_solver::cf_clear_browser_failure(host);
+                return Ok(browser_text_response(browser, retry_args.url));
+            }
+            Err(error) => {
+                eprintln!("[cf] verified browser fetch failed for {host}: {error}");
+            }
             Ok(None) => {}
         }
+        crate::cf_solver::cf_note_browser_failure(host);
+        return Err(format!(
+            "Cloudflare verification for {host} did not return usable content"
+        ));
     }
 
     let mut headers: Vec<(String, String)> = Vec::new();
@@ -924,31 +946,44 @@ async fn harbor_fetch_inner(
         res.text().await.unwrap_or_default()
     };
 
+    if (200..300).contains(&status)
+        && content_type
+            .as_deref()
+            .is_some_and(|kind| kind.contains("text/html"))
+    {
+        if let Some(reason) = crate::cf_solver::cf_security_page_reason(&body) {
+            eprintln!("[cf] response rejected because it contains a protection page: {reason}");
+            return Err(format!("source returned a protection page: {reason}"));
+        }
+    }
+
     if is_cloudflare_challenge(status, cf_mitigated.as_deref(), &body) {
-        // A native reqwest request may be rechallenged despite a valid browser
-        // clearance because its TLS/client-hint fingerprint differs from WebView.
-        // Retry safe, read-only text in the already verified browser context.
-        if (had_clearance
-            || original_host
-                .as_deref()
-                .is_some_and(crate::cf_solver::cf_browser_ready))
-            && can_browser_fallback(&retry_args)
-        {
-            match crate::cf_solver::cf_browser_fetch(
-                &app,
-                &retry_args.url,
-                browser_accept(&retry_args),
-            )
-            .await
-            {
-                Ok(Some(browser)) => {
-                    return Ok(browser_text_response(browser, retry_args.url));
+        // Once a verified browser is accepted but the native TLS fingerprint is
+        // challenged, prefer browser requests for this host in future.
+        if verified_browser && browser_eligible {
+            let host = original_host.as_deref().unwrap_or("");
+            if had_clearance {
+                crate::cf_solver::cf_note_native_rechallenge(host);
+            }
+            if !crate::cf_solver::cf_browser_cooling_down(host) {
+                match crate::cf_solver::cf_browser_fetch(
+                    &app,
+                    &retry_args.url,
+                    browser_accept(&retry_args),
+                )
+                .await
+                {
+                    Ok(Some(browser)) => {
+                        crate::cf_solver::cf_clear_browser_failure(host);
+                        return Ok(browser_text_response(browser, retry_args.url));
+                    }
+                    Err(error) => eprintln!("[cf] browser fallback failed for {host}: {error}"),
+                    Ok(None) => {}
                 }
-                Err(error) => eprintln!("[cf] browser fallback failed: {error}"),
-                Ok(None) => {}
+                crate::cf_solver::cf_note_browser_failure(host);
             }
         }
-        if had_clearance {
+        if had_clearance && !verified_browser {
             if let Some(h) = original_host.as_deref() {
                 crate::cf_solver::cf_invalidate(h);
             }
@@ -957,8 +992,8 @@ async fn harbor_fetch_inner(
         // not opt into a response-size contract. Binary/capped callers keep the
         // original bounded response.
         if solver_ok {
-            if retried {
-                eprintln!("[cf] retry still challenged for {}", args.url);
+            if retried || (verified_browser && browser_eligible) {
+                eprintln!("[cf] verified request still challenged for {}", args.url);
             } else {
                 eprintln!("[cf] challenge detected ({}) for {}", status, args.url);
                 match crate::cf_solver::cf_fetch(app.clone(), args.url.clone()).await {
@@ -1003,6 +1038,15 @@ const BACKGROUND_PROVIDER_HOSTS: &[&str] = &[
 fn solver_host_allowed(host: &str) -> bool {
     let host = host.trim_end_matches('.').to_ascii_lowercase();
     !BACKGROUND_PROVIDER_HOSTS.contains(&host.as_str())
+}
+
+fn should_use_verified_browser(
+    had_clearance: bool,
+    verified_browser: bool,
+    browser_eligible: bool,
+    prefer_browser: bool,
+) -> bool {
+    verified_browser && browser_eligible && (!had_clearance || prefer_browser)
 }
 
 fn browser_accept(args: &HarborFetchArgs) -> Option<&str> {
@@ -1295,6 +1339,21 @@ mod tests {
             merge_cookie_headers("", "session=solver; cf_clearance=new"),
             "session=solver; cf_clearance=new"
         );
+    }
+
+    #[test]
+    fn verified_browser_preference_suppresses_native_retries_only_for_supported_requests() {
+        // A browser-only session should bypass a second native 403 immediately
+        // after verification, even on the recursive retry path.
+        assert!(super::should_use_verified_browser(false, true, true, true));
+        assert!(super::should_use_verified_browser(true, true, true, true));
+        assert!(!super::should_use_verified_browser(true, true, true, false));
+        assert!(!super::should_use_verified_browser(
+            false, false, true, true
+        ));
+        assert!(!super::should_use_verified_browser(
+            false, true, false, true
+        ));
     }
 
     #[test]

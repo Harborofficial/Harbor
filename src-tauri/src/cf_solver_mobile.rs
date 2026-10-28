@@ -20,6 +20,22 @@ pub fn cf_browser_ready(_host: &str) -> bool {
     false
 }
 
+pub fn cf_browser_ready_for(_app: &AppHandle, _host: &str) -> bool {
+    false
+}
+pub fn cf_prefer_browser(_host: &str) -> bool {
+    false
+}
+pub fn cf_note_native_rechallenge(_host: &str) {}
+pub fn cf_browser_cooling_down(_host: &str) -> bool {
+    false
+}
+pub fn cf_note_browser_failure(_host: &str) {}
+pub fn cf_clear_browser_failure(_host: &str) {}
+pub fn cf_security_page_reason(_body: &str) -> Option<&'static str> {
+    None
+}
+
 pub async fn cf_fetch(_app: AppHandle, url: String) -> Result<(), String> {
     Err(format!(
         "cloudflare challenge for {} cannot be solved on Android: the solver needs a second webview window",

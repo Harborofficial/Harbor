@@ -31,6 +31,97 @@ struct BrowserSession {
     at: Instant,
 }
 
+// Remember hosts whose verified clearance did not work with reqwest. This
+// preference is temporary, and is only usable while the WebView is on that
+// host. A failed browser read gets a short cooldown to prevent request storms.
+const BROWSER_PREFERENCE_TTL: Duration = Duration::from_secs(5 * 60);
+const BROWSER_FAILURE_COOLDOWN: Duration = Duration::from_secs(20);
+
+fn native_rechallenges() -> &'static Mutex<HashMap<String, Instant>> {
+    static S: OnceLock<Mutex<HashMap<String, Instant>>> = OnceLock::new();
+    S.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn failed_browser_reads() -> &'static Mutex<HashMap<String, Instant>> {
+    static S: OnceLock<Mutex<HashMap<String, Instant>>> = OnceLock::new();
+    S.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+pub fn cf_prefer_browser(host: &str) -> bool {
+    let mut hosts = native_rechallenges().lock().unwrap();
+    hosts.retain(|_, at| at.elapsed() < BROWSER_PREFERENCE_TTL);
+    hosts.contains_key(host)
+}
+
+pub fn cf_note_native_rechallenge(host: &str) {
+    native_rechallenges()
+        .lock()
+        .unwrap()
+        .insert(host.to_string(), Instant::now());
+}
+
+pub fn cf_browser_cooling_down(host: &str) -> bool {
+    let mut hosts = failed_browser_reads().lock().unwrap();
+    hosts.retain(|_, at| at.elapsed() < BROWSER_FAILURE_COOLDOWN);
+    hosts.contains_key(host)
+}
+
+pub fn cf_note_browser_failure(host: &str) {
+    failed_browser_reads()
+        .lock()
+        .unwrap()
+        .insert(host.to_string(), Instant::now());
+}
+
+pub fn cf_clear_browser_failure(host: &str) {
+    failed_browser_reads().lock().unwrap().remove(host);
+}
+
+pub fn cf_security_page_reason(body: &str) -> Option<&'static str> {
+    // Security-page signatures belong near the document start. Limit scanning
+    // to avoid misclassifying ordinary articles *mentioning* these challenges.
+    let prefix = &body[..body
+        .char_indices()
+        .nth(24_000)
+        .map_or(body.len(), |(i, _)| i)];
+    let lower = prefix.to_ascii_lowercase();
+    if (lower.contains("protected by anubis") && lower.contains("access denied"))
+        || (lower.contains("oh noes!") && lower.contains("access denied: error code"))
+        || (lower.contains("anubis") && lower.contains("access denied: error code"))
+    {
+        return Some("Anubis access denied");
+    }
+    if (lower.contains("protected by anubis") || lower.contains("/.within.website/x/cmd/anubis/"))
+        && (lower.contains("making sure you're not a bot")
+            || lower.contains("proof-of-work")
+            || lower.contains("proof of work"))
+    {
+        return Some("Anubis verification");
+    }
+    if lower.contains("cf_chl_opt")
+        || (lower.contains("/cdn-cgi/challenge-platform/")
+            && (lower.contains("<title>just a moment")
+                || lower.contains("<title>attention required")))
+        || lower.contains("sorry, you have been blocked")
+        || lower.contains("error code: 1020")
+    {
+        return Some("Cloudflare challenge or access denied");
+    }
+    None
+}
+
+fn window_is_on_host(url: &Url, host: &str) -> bool {
+    url.scheme() == "https" && url.host_str() == Some(host)
+}
+
+pub fn cf_browser_ready_for(app: &AppHandle, host: &str) -> bool {
+    cf_browser_ready(host)
+        && app
+            .get_webview_window(SOLVER_LABEL)
+            .and_then(|window| window.url().ok())
+            .is_some_and(|url| window_is_on_host(&url, host))
+}
+
 fn browser_sessions() -> &'static Mutex<HashMap<String, BrowserSession>> {
     static S: OnceLock<Mutex<HashMap<String, BrowserSession>>> = OnceLock::new();
     S.get_or_init(|| Mutex::new(HashMap::new()))
@@ -49,6 +140,7 @@ fn cf_browser_mark_ready(host: &str) {
         .lock()
         .unwrap()
         .insert(host.to_string(), BrowserSession { at: Instant::now() });
+    cf_clear_browser_failure(host);
 }
 
 fn cf_cache() -> &'static Mutex<HashMap<String, CfEntry>> {
@@ -171,8 +263,19 @@ const PROBE_SCRIPT: &str = r#"(() => {
     const el = document.querySelector(selector);
     return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
   };
-  const sample = (document.body?.innerText || '').slice(0, 1200).toLowerCase();
+  const sample = (document.body?.innerText || '').slice(0, 1800).toLowerCase();
+  const markup = (document.documentElement?.outerHTML || '').slice(0, 16000).toLowerCase();
+  const anubis = (markup.includes('protected by anubis') ||
+                  markup.includes('/.within.website/x/cmd/anubis/'));
+  const denied = (anubis && sample.includes('access denied')) ||
+    (title.includes('oh noes') && sample.includes('access denied')) ||
+    (sample.includes('sorry, you have been blocked') &&
+     title.includes('access denied'));
+  const securityPage =
+    denied || (anubis && (sample.includes('making sure you') ||
+                          sample.includes('proof of work')));
   const challenged =
+    securityPage ||
     title.includes('just a moment') || title.includes('attention required') ||
     title.includes('access denied') || title.includes('403 forbidden') ||
     sample.includes('sorry, you have been blocked') ||
@@ -187,6 +290,7 @@ const PROBE_SCRIPT: &str = r#"(() => {
     protocol: location.protocol || '',
     ready: document.readyState || '',
     challenged: !!challenged,
+    denied: !!denied,
     usable,
     user_agent: navigator.userAgent || ''
   };
@@ -198,6 +302,7 @@ struct PageProbe {
     protocol: String,
     ready: String,
     challenged: bool,
+    denied: bool,
     usable: bool,
     user_agent: String,
 }
@@ -336,6 +441,10 @@ async fn browser_navigation_fetch(
         })) = serde_json::from_str::<Option<BrowserRead>>(&raw)
         {
             if status == 200 && body.len() <= MAX_BROWSER_TEXT_BYTES {
+                if let Some(reason) = cf_security_page_reason(&body) {
+                    eprintln!("[cf] navigation produced another protection page: {reason}");
+                    return Ok(None);
+                }
                 eprintln!(
                     "[cf] browser navigation returned verified HTML ({} bytes)",
                     body.len()
@@ -361,7 +470,7 @@ pub async fn cf_browser_fetch(
         return Ok(None);
     }
     let host = target.host_str().ok_or("browser fallback has no host")?;
-    if cf_cached(host).is_none() && !cf_browser_ready(host) {
+    if cf_cached(host).is_none() && !cf_browser_ready_for(app, host) {
         return Ok(None);
     }
     let _browser_guard = browser_request_lock().lock().await;
@@ -428,18 +537,33 @@ pub async fn cf_browser_fetch(
               }}
               body += decoder.decode();
             }} finally {{ reader.cancel().catch(() => {{}}); reader.releaseLock(); }}
-            if (/<title[^>]*>\s*(just a moment|attention required)|cf_chl_opt|\/cdn-cgi\/challenge-platform\//i.test(body))
-              throw Error('challenged');
+            const start = body.slice(0, 48000).toLowerCase();
+            if (contentType.includes('html') &&
+                (/<title[^>]*>\s*(just a moment|attention required)|cf_chl_opt/i.test(start) ||
+                 ((start.includes('protected by anubis') ||
+                   start.includes('/.within.website/x/cmd/anubis/')) &&
+                  (start.includes('access denied') || start.includes('making sure you') ||
+                   start.includes('proof of work'))) ||
+                 (start.includes('oh noes!') && start.includes('access denied: error code'))))
+              throw Error('protected-page');
             results[key] = {{state: 'ready', status: response.status, content_type: contentType, body}};
           }} catch (error) {{
             // A completed interstitial can provide the requested HTML document even
             // if its JS-fetches are challenged again. Only use the exact loaded URL.
             const title = (document.title || '').toLowerCase();
-            const pageReady = document.readyState === 'complete' &&
-              !title.includes('just a moment') && !title.includes('attention required') &&
-              !document.querySelector('#challenge-form, #challenge-running, #cf-please-wait');
             const html = document.documentElement?.outerHTML || '';
-            if (pageReady && location.href === address && html.length > 0 && html.length <= cap)
+            const start = html.slice(0, 48000).toLowerCase();
+            const protectedPage = title.includes('just a moment') ||
+              title.includes('attention required') || title.includes('access denied') ||
+              (start.includes('oh noes!') && start.includes('access denied')) ||
+              start.includes('cf_chl_opt') ||
+              ((start.includes('protected by anubis') ||
+                start.includes('/.within.website/x/cmd/anubis/')) &&
+               (start.includes('access denied') || start.includes('making sure you') ||
+                start.includes('proof of work')));
+            const pageReady = document.readyState === 'complete' && !protectedPage &&
+              !document.querySelector('#challenge-form, #challenge-running, #cf-please-wait');
+            if (pageReady && location.href === address && html.length > 200 && html.length <= cap)
               results[key] = {{state: 'ready', status: 200, content_type: 'text/html; charset=utf-8', body: html}};
             else results[key] = {{state: 'error', reason: String(error?.message || 'browser fetch failed').slice(0, 48)}};
           }} finally {{ clearTimeout(timer); }}
@@ -487,6 +611,12 @@ pub async fn cf_browser_fetch(
                 body,
                 content_type,
             })) if (200..300).contains(&status) && body.len() <= MAX_BROWSER_TEXT_BYTES => {
+                if content_type.contains("html") {
+                    if let Some(reason) = cf_security_page_reason(&body) {
+                        eprintln!("[cf] browser fetch produced another protection page: {reason}");
+                        return Ok(None);
+                    }
+                }
                 eprintln!(
                     "[cf] browser fallback returned verified text ({} bytes)",
                     body.len()
@@ -503,7 +633,9 @@ pub async fn cf_browser_fetch(
                 // the destination. Never turn a JSON/API request into HTML.
                 let html =
                     accept.is_none_or(|value| value.contains("text/html") || value.contains("*/*"));
-                if html && reason != "origin" && reason != "too-large" && reason != "non-text" {
+                if html
+                    && (reason == "challenged" || reason == "protected-page" || reason == "empty")
+                {
                     return browser_navigation_fetch(&window, &target).await;
                 }
                 return Ok(None);
@@ -584,6 +716,9 @@ fn open_solver(app: &AppHandle, url: &str) -> Result<(), String> {
 
 pub async fn cf_fetch(app: AppHandle, url: String) -> Result<(), String> {
     let _guard = request_lock().lock().await;
+    // A single WebView is shared by every verified source. A challenge
+    // navigation must not interrupt a pending same-origin browser fetch.
+    let _browser_guard = browser_request_lock().lock().await;
     let host = Url::parse(&url)
         .ok()
         .and_then(|parsed| parsed.host_str().map(|h| h.to_string()));
@@ -592,7 +727,7 @@ pub async fn cf_fetch(app: AppHandle, url: String) -> Result<(), String> {
             eprintln!("[cf] clearance already cached for {host}");
             return Ok(());
         }
-        if cf_browser_ready(host) && app.get_webview_window(SOLVER_LABEL).is_some() {
+        if cf_browser_ready_for(&app, host) {
             eprintln!("[cf] verified browser session already available for {host}");
             return Ok(());
         }
@@ -644,6 +779,12 @@ pub async fn cf_fetch(app: AppHandle, url: String) -> Result<(), String> {
         }
         match probe_page(&window).await {
             Ok(Some(probe)) => {
+                if probe.denied {
+                    PENDING.lock().unwrap().take();
+                    note_solver_cooldown(host.as_deref().unwrap_or(""));
+                    eprintln!("[cf] verification stopped: source returned an access-denied page");
+                    return Err("source returned an access-denied page".into());
+                }
                 let stage = if probe.challenged {
                     "challenge"
                 } else if probe.ready != "complete" {
@@ -707,6 +848,58 @@ mod tests {
     use super::*;
 
     #[test]
+    fn browser_session_only_matches_its_current_origin() {
+        let page = Url::parse("https://www.royalroad.com/fictions/best-rated").unwrap();
+        assert!(window_is_on_host(&page, "www.royalroad.com"));
+        assert!(!window_is_on_host(&page, "batcave.biz"));
+        assert!(!window_is_on_host(&page, "royalroad.com"));
+        assert!(!window_is_on_host(
+            &Url::parse("http://www.royalroad.com/").unwrap(),
+            "www.royalroad.com"
+        ));
+    }
+
+    #[test]
+    fn secondary_challenges_are_not_accepted_as_content() {
+        assert_eq!(
+            cf_security_page_reason("<html><title>Oh noes!</title><body>Access Denied: error code abc. Protected by Anubis From Techaro.</body></html>"),
+            Some("Anubis access denied")
+        );
+        assert_eq!(
+            cf_security_page_reason(
+                "<html><body>Making sure you're not a bot! Protected by Anubis</body></html>"
+            ),
+            Some("Anubis verification")
+        );
+        assert_eq!(
+            cf_security_page_reason(
+                "<html><title>Just a moment...</title><script>window.cf_chl_opt={}</script></html>"
+            ),
+            Some("Cloudflare challenge or access denied")
+        );
+        assert_eq!(
+            cf_security_page_reason(
+                "<html><title>Best rated</title><p>A book about Anubis and Cloudflare</p></html>"
+            ),
+            None
+        );
+    }
+
+    #[test]
+    fn native_rechallenge_and_browser_failure_are_host_scoped() {
+        let host = "cf-guard-test-a.invalid";
+        let other = "cf-guard-test-b.invalid";
+        cf_note_native_rechallenge(host);
+        assert!(cf_prefer_browser(host));
+        assert!(!cf_prefer_browser(other));
+        cf_note_browser_failure(host);
+        assert!(cf_browser_cooling_down(host));
+        assert!(!cf_browser_cooling_down(other));
+        cf_clear_browser_failure(host);
+        assert!(!cf_browser_cooling_down(host));
+    }
+
+    #[test]
     fn bot_management_cookie_alone_is_not_clearance() {
         assert!(is_clearance_cookie("cf_clearance"));
         assert!(!is_clearance_cookie("__cf_bm"));
@@ -739,6 +932,7 @@ mod tests {
             protocol: "https:".into(),
             ready: "complete".into(),
             challenged: false,
+            denied: false,
             usable: true,
             user_agent: "Example browser".into(),
         };
