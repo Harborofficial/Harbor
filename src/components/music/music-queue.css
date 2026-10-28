@@ -123,12 +123,20 @@
 .music-queue-order svg:not(:only-child) {
   display: none;
 }
-.music-queue-track[draggable="true"]:hover .music-queue-order > span {
+.music-queue-track[data-draggable="true"] .music-queue-order {
+  cursor: grab;
+  touch-action: none;
+}
+.music-queue-track[data-draggable="true"]:hover .music-queue-order > span {
   display: none;
 }
-.music-queue-track[draggable="true"]:hover .music-queue-order svg {
+.music-queue-track[data-draggable="true"]:hover .music-queue-order svg {
   display: block;
   cursor: grab;
+}
+.music-queue-track[data-drop-target] {
+  outline: 1px solid var(--color-accent);
+  outline-offset: -1px;
 }
 .music-queue-play {
   display: flex;

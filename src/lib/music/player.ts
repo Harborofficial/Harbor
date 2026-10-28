@@ -16,7 +16,7 @@ import {
 } from "./deck-sync";
 import { createDeckAdoption, nativePlaybackAdoption } from "./deck-primary";
 import { engineSnapshot } from "./decks";
-import { insertIntoQueue, markManuallyQueued, queueInsertIndex } from "./queue-insert";
+import { markManuallyQueued, queueInsertAfterManualBlock, withTrackNext } from "./queue-insert";
 import { queueTrackKey } from "./queue-order";
 import { adoptRequestedIdentity } from "./queue-source";
 import { explicitnessOf, rankByExplicitness } from "./explicit-preference";
@@ -26,7 +26,7 @@ import {
   pinSourceFor,
   unpinSourceFor,
 } from "./pinned-sources";
-import { musicAdvance, musicPrevious, musicWarmTargets, resetMusicOrder } from "./transport";
+import { musicAdvance, musicPrevious, musicWarmTargets, resetMusicOrder, setMusicPriorityNext } from "./transport";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useSyncExternalStore } from "react";
@@ -1230,13 +1230,30 @@ export function seekMusic(position: number): void {
 export function enqueueMusic(track: MusicTrack): void {
   const automated = cancelMusicQueueAutomation();
   const queue = automated ? state.queue.slice(0, state.queueIndex + 1) : state.queue;
-  if (queue.some((item) => queueTrackKey(item) === queueTrackKey(track))) {
+  const next = queueInsertAfterManualBlock(queue, track, state.queueIndex);
+  if (next === queue) {
     if (automated) setMusicQueue(queue);
     return;
   }
-  const at = queueInsertIndex(queue, state.queueIndex);
   markManuallyQueued(track);
-  setMusicQueue(insertIntoQueue(queue, track, at));
+  setMusicQueue(next);
+}
+
+/** Plays next, ahead of songs queued earlier, and keeps the transport pointed at it. */
+export function playNextMusic(track: MusicTrack): void {
+  if (!state.current) {
+    void playMusic(track, state.queue.length ? state.queue : [track]).catch(() => {});
+    return;
+  }
+  if (queueTrackKey(state.current) === queueTrackKey(track)) return;
+  if (filterBlockedTracks([track], "play").length === 0) return;
+  const automated = cancelMusicQueueAutomation();
+  const queue = automated ? state.queue.slice(0, state.queueIndex + 1) : state.queue;
+  const next = withTrackNext(queue, track, state.queueIndex);
+  if (next === queue) return;
+  markManuallyQueued(track);
+  setMusicPriorityNext(track);
+  setMusicQueue(next);
 }
 
 /**

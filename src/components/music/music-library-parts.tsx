@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { MusicVirtualTrackList } from "./music-virtual-track-list";
 import {
   FileDown,
+  ListPlus,
   PlaylistVariation,
   PlaylistRename,
   Trash2,
@@ -143,7 +144,7 @@ export function LibraryTrackList({
         ))}
       </div>}
       {view && tracks.length > 0 && <div className="music-playlist-columns" aria-hidden="true">
-        <span>#</span><span>{t("music.playlistTools.title")}</span><span className="music-playlist-album">{t("music.playlistTools.album")}</span><span /><span>{t("music.sort.duration")}</span><span />
+        <span>#</span><span>{t("music.playlistTools.title")}</span><span className="music-playlist-album">{t("music.playlistTools.album")}</span><span /><span /><span>{t("music.sort.duration")}</span><span />
       </div>}
       <div ref={resultsRef} style={{ position: "relative" }}>
       <div inert={filtering} style={{ visibility: slowFilter && filtering ? "hidden" : undefined }}>
@@ -330,6 +331,19 @@ function LibraryTrack({
       {showAlbum && <span className="music-playlist-album" title={track.album}>{track.album || "—"}</span>}
       <button
         type="button"
+        className="music-library-track-queue"
+        data-music-queue-action
+        aria-label={t("music.card.addToQueue")}
+        title={t("music.card.addToQueue")}
+        onClick={(event) => {
+          event.stopPropagation();
+          enqueueMusic(track);
+        }}
+      >
+        <ListPlus size={17} />
+      </button>
+      <button
+        type="button"
         className="music-library-track-save"
         data-like-burst
         data-burst={burst || undefined}
@@ -416,6 +430,11 @@ function LibraryTrack({
               type="button"
               role="menuitem"
               tabIndex={-1}
+              data-music-queue-action={
+                "id" in action && (action.id === "queue" || action.id === "next")
+                  ? "true"
+                  : undefined
+              }
               disabled={"disabled" in action && action.disabled}
               onClick={() => {
                 close();

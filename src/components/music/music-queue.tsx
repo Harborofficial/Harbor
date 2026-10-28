@@ -1,7 +1,7 @@
 import { getMusicSourceCandidates, musicPlaybackSource } from "@/lib/music/sources";
 import { replaceQueueTrack, selectableSources } from "@/lib/music/queue-source";
 import { MusicTrackLabels } from "./music-track-labels";
-import { useEffect, useRef, useState, type DragEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown,
@@ -41,6 +41,7 @@ export {
 function QueueTrack({
   track,
   index,
+  queueIndex,
   current,
   playing,
   draggable,
@@ -52,13 +53,13 @@ function QueueTrack({
   onSource,
   canUp,
   canDown,
-  onDragStart,
-  onDrop,
-  onDragEnd,
+  onGrab,
   dragging,
+  dropTarget,
 }: {
   track: MusicTrack;
   index: number;
+  queueIndex: number;
   current?: boolean;
   playing?: boolean;
   draggable?: boolean;
@@ -70,10 +71,9 @@ function QueueTrack({
   onSource: (candidate: MusicSourceCandidate) => void;
   canUp: boolean;
   canDown: boolean;
-  onDragStart: (event: DragEvent<HTMLLIElement>) => void;
-  onDrop: (event: DragEvent<HTMLLIElement>) => void;
-  onDragEnd: () => void;
+  onGrab: (event: ReactPointerEvent<HTMLElement>) => void;
   dragging: boolean;
+  dropTarget: boolean;
 }) {
   const t = useT();
   const [actions, setActions] = useState(false);
@@ -103,23 +103,17 @@ function QueueTrack({
   return (
     <li
       className="music-queue-track"
+      data-queue-index={queueIndex}
+      data-draggable={draggable || undefined}
       data-dragging={dragging || undefined}
+      data-drop-target={dropTarget || undefined}
       aria-current={current || undefined}
-      draggable={draggable}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={(event) => {
-        if (draggable) {
-          event.preventDefault();
-          event.dataTransfer.dropEffect = "move";
-        }
-      }}
-      onDrop={onDrop}
     >
       <div className="music-queue-track-main">
         <span
           className="music-queue-order"
           title={draggable ? t("music.queue.reorder", { title: track.title }) : undefined}
+          onPointerDown={draggable ? onGrab : undefined}
         >
           {current ? (
             <Volume2 size={16} aria-hidden />
@@ -282,6 +276,7 @@ export function MusicQueue({
   const player = useMusicPlayer();
   const { shuffle } = useMusicTransport();
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
   const panel = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const closeRef = useRef(onClose);
@@ -297,6 +292,7 @@ export function MusicQueue({
       if (
         !target?.isConnected ||
         target.closest("[data-music-queue]") ||
+        target.closest("[data-music-queue-action]") ||
         target.closest("[data-music-dock]")
       )
         return;
@@ -334,6 +330,36 @@ export function MusicQueue({
     next.splice(to, 0, track);
     setMusicQueue(next);
   };
+  const beginDrag = (event: ReactPointerEvent<HTMLElement>, from: number) => {
+    if (event.button !== 0 || from < firstUpcoming) return;
+    event.preventDefault();
+    const handle = event.currentTarget;
+    handle.setPointerCapture?.(event.pointerId);
+    setDragIndex(from);
+    setDropIndex(from);
+    const targetAt = (clientX: number, clientY: number) => {
+      const row = document
+        .elementFromPoint(clientX, clientY)
+        ?.closest<HTMLElement>("[data-queue-index]");
+      const index = row?.dataset.queueIndex ? Number(row.dataset.queueIndex) : NaN;
+      return Number.isFinite(index) ? index : null;
+    };
+    const onMove = (event: PointerEvent) => setDropIndex(targetAt(event.clientX, event.clientY));
+    const finish = (event: PointerEvent) => {
+      handle.removeEventListener("pointermove", onMove);
+      handle.removeEventListener("pointerup", finish);
+      handle.removeEventListener("pointercancel", finish);
+      if (event.type === "pointerup") {
+        const to = targetAt(event.clientX, event.clientY);
+        if (to !== null) move(from, to);
+      }
+      setDragIndex(null);
+      setDropIndex(null);
+    };
+    handle.addEventListener("pointermove", onMove);
+    handle.addEventListener("pointerup", finish);
+    handle.addEventListener("pointercancel", finish);
+  };
   const playNext = (index: number) => {
     if (index === playingAt) return;
     const track = queue[index];
@@ -353,10 +379,13 @@ export function MusicQueue({
       key={`${track.connectorId ?? ""}:${track.id}`}
       track={track}
       index={index >= firstUpcoming ? index - firstUpcoming : index}
+      queueIndex={index}
       current={current}
       playing={current && player.phase === "playing"}
       draggable={!current && index >= firstUpcoming}
       dragging={dragIndex === index}
+      dropTarget={dropIndex === index && dragIndex !== index}
+      onGrab={(event) => beginDrag(event, index)}
       onPlay={
         current
           ? toggleMusicPlayback
@@ -372,17 +401,6 @@ export function MusicQueue({
       onSource={(candidate) => setMusicQueue(replaceQueueTrack(queue, index, candidate.track))}
       canUp={index > firstUpcoming}
       canDown={index >= firstUpcoming && index < queue.length - 1}
-      onDragStart={(event) => {
-        setDragIndex(index);
-        event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData("text/plain", String(index));
-      }}
-      onDrop={(event) => {
-        event.preventDefault();
-        if (dragIndex !== null) move(dragIndex, index);
-        setDragIndex(null);
-      }}
-      onDragEnd={() => setDragIndex(null)}
     />
   );
 
