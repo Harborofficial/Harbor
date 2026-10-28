@@ -52,12 +52,16 @@ export function UserRatings({
   isOwner = false,
   onOpenMeta,
   onClose,
+  onComment,
+  commentDisabled = false,
 }: {
   handle: string;
   alias: string;
   isOwner?: boolean;
   onOpenMeta?: (metaId: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
   onClose: () => void;
+  onComment?: (rating: PublicRating) => void;
+  commentDisabled?: boolean;
 }) {
   const t = useT();
   const surfaceStyle = useProfileThemeSurfaceStyle();
@@ -435,6 +439,8 @@ export function UserRatings({
                   key={`${r.mediaType}:${r.itemKey}`}
                   r={r}
                   onOpenMeta={onOpenMeta}
+                  onComment={onComment}
+                  commentDisabled={commentDisabled}
                   onRate={isOwner ? changeRating : undefined}
                   pendingSave={savingKeys.has(`${r.mediaType}:${r.itemKey}`)}
                 />
@@ -483,11 +489,15 @@ export function UserRatings({
 function RatingRow({
   r,
   onOpenMeta,
+  onComment,
+  commentDisabled,
   onRate,
   pendingSave = false,
 }: {
   r: PublicRating;
   onOpenMeta?: (metaId: string, kind?: string, hint?: { name?: string; poster?: string }) => void;
+  onComment?: (rating: PublicRating) => void;
+  commentDisabled: boolean;
   onRate?: (r: PublicRating, score: number, review?: string) => Promise<boolean> | void;
   pendingSave?: boolean;
 }) {
@@ -654,6 +664,26 @@ function RatingRow({
                 <Eye size={14} />
                 {t("Show spoiler")}
               </button>
+            )}
+          </div>
+        )}
+        {onComment && (
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <button
+              type="button"
+              onClick={() => onComment(r)}
+              disabled={commentDisabled}
+              title={commentDisabled ? t("Comments are hidden") : undefined}
+              className={`inline-flex items-center gap-1.5 rounded-full border border-edge px-3 py-1.5 text-[12.5px] font-medium text-ink-muted ${
+                commentDisabled
+                  ? "cursor-not-allowed opacity-50"
+                  : "transition-colors hover:bg-elevated hover:text-ink"
+              }`}
+            >
+              <MessageSquare size={14} /> {t("Comment on it")}
+            </button>
+            {commentDisabled && (
+              <span className="text-[11.5px] text-ink-subtle">{t("Comments are hidden")}</span>
             )}
           </div>
         )}

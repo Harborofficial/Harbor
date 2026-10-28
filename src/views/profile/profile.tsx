@@ -4,7 +4,9 @@ import { useAuth } from "@/lib/auth";
 import { socialPatch } from "@/lib/social/client";
 import {
   CARD_ORDER_DEFAULT,
+  canCommentOnRating,
   effectiveOrder,
+  isCardShown,
   moveCard,
   sanitizeLayout,
   type CardKey,
@@ -37,6 +39,8 @@ import { AboutCard } from "./about-card";
 import { FavoritesCard } from "./favorites-card";
 import { FavoritesPicker } from "./favorites-picker";
 import type { FavoriteKind } from "./use-favorites";
+import type { PublicRating } from "@/lib/ratings/types";
+import { ratingQuoteFrom, type RatingQuote } from "@/lib/ratings/quote";
 import { RatingsCard } from "./ratings-card";
 import { UserRatings } from "@/views/ratings/user-ratings";
 import { ImportModal } from "@/views/ratings/import/import-modal";
@@ -88,6 +92,8 @@ export function ProfileView({
   const [pickingFav, setPickingFav] = useState<FavoriteKind | null>(null);
   const [expanded, setExpanded] = useState<null | "lists" | "badges" | "activity">(null);
   const [showRatings, setShowRatings] = useState(false);
+  const [quoteSeed, setQuoteSeed] = useState<{ quote: RatingQuote; nonce: number } | null>(null);
+  const commentsRef = useRef<HTMLDivElement>(null);
   const [importingRatings, setImportingRatings] = useState(false);
   const [arranging, setArranging] = useState(false);
   const [nuvioStats, setNuvioStats] = useState({ episodes: 0, movies: 0, minutes: 0 });
@@ -166,6 +172,15 @@ export function ProfileView({
     if (isOwner && consumeProfileEditIntent(handle)) setEditing(true);
   }, [isOwner, handle]);
 
+  // Scroll only after the quote seed has reached the visible Comments composer.
+  useEffect(() => {
+    if (!quoteSeed) return;
+    const frame = requestAnimationFrame(() => {
+      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [quoteSeed]);
+
   useEffect(() => {
     if (!editing && !arranging && !pickingLists && !pickingFav && expanded == null) return;
     return pushBackHandler(() => {
@@ -230,6 +245,16 @@ export function ProfileView({
     const next = { order, hidden };
     patchSummary({ ...summary, cardLayout: next });
     void socialPatch("/social/me/profile", { cardLayout: next }).catch(() => {});
+  };
+  // Quoting a rating closes the ratings view, hands the rating to the comments composer and takes
+  // the viewer there, so the next thing they type replies to that review.
+  const commentOnRating = (rating: PublicRating) => {
+    if (!canCommentOnRating(layout)) return;
+    setShowRatings(false);
+    setQuoteSeed((prev) => ({
+      quote: ratingQuoteFrom(rating, handle),
+      nonce: (prev?.nonce ?? 0) + 1,
+    }));
   };
   const cardNodes: Partial<Record<CardKey, ReactNode>> = {
     about: (
@@ -325,6 +350,9 @@ export function ProfileView({
         isOwner={summary.isOwner}
         signedIn={viewerSignedIn}
         onOpenAuthor={onOpenProfile}
+        onOpenMeta={onOpenMeta}
+        seedQuote={quoteSeed}
+        ownerAvatar={summary.avatarUrl}
       />
     ),
   };
@@ -389,13 +417,16 @@ export function ProfileView({
 
         <div className="mx-auto w-full max-w-6xl px-6 pb-16 lg:px-10">
           {locked ? (
-            <div className="space-y-6">
+            <div className="space-y-6" ref={commentsRef}>
               <ProfilePrivate alias={summary.alias} />
               <CommentsSection
                 handle={handle}
                 isOwner={summary.isOwner}
                 signedIn={!!authKey}
                 onOpenAuthor={onOpenProfile}
+                onOpenMeta={onOpenMeta}
+                seedQuote={quoteSeed}
+                ownerAvatar={summary.avatarUrl}
               />
             </div>
           ) : (
@@ -403,9 +434,9 @@ export function ProfileView({
               <div className="min-w-0 space-y-6">
                 {orderedCards.map((k, i) => {
                   const isHidden = hiddenSet.has(k);
-                  if (isHidden && !arranging) return null;
+                  if (!isCardShown(layout, k, { arranging })) return null;
                   return (
-                    <div key={k}>
+                    <div key={k} ref={k === "comments" ? commentsRef : undefined}>
                       {arranging && summary.isOwner && (
                         <ProfileCardControls
                           cardKey={k}
@@ -516,6 +547,8 @@ export function ProfileView({
               isOwner={summary.isOwner}
               onOpenMeta={onOpenMeta}
               onClose={() => setShowRatings(false)}
+              onComment={viewerSignedIn ? commentOnRating : undefined}
+              commentDisabled={!canCommentOnRating(layout)}
             />
           )}
           {importingRatings && (
