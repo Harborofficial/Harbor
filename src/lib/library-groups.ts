@@ -1,5 +1,10 @@
 export type GroupList = { id: string; name: string; url: string };
-export type LibraryGroup = {
+export type LibraryGroupSection = { id: string; name: string };
+export type GroupPresentation = {
+  hideHomeTitle?: boolean;
+  homeSectionId?: string;
+};
+export type LibraryGroup = GroupPresentation & {
   id: string;
   name: string;
   image?: string;
@@ -115,9 +120,47 @@ export function normalizeLibraryGroups(value: unknown): LibraryGroup[] {
           typeof entry.image === "string" && validGroupImage(entry.image) ? entry.image : undefined,
         lists,
         pinnedToHome: entry.pinnedToHome === true,
+        hideHomeTitle: entry.hideHomeTitle === true,
+        homeSectionId: typeof entry.homeSectionId === "string" ? entry.homeSectionId : undefined,
       },
     ];
   });
+}
+
+export function normalizeLibraryGroupSections(value: unknown): LibraryGroupSection[] {
+  if (!Array.isArray(value)) return [];
+  const ids = new Set<string>();
+  return value.flatMap((entry) => {
+    if (
+      !entry ||
+      typeof entry.id !== "string" ||
+      !entry.id ||
+      ids.has(entry.id) ||
+      typeof entry.name !== "string" ||
+      !entry.name.trim()
+    )
+      return [];
+    ids.add(entry.id);
+    return [{ id: entry.id, name: entry.name.trim().slice(0, 100) }];
+  });
+}
+
+export function libraryGroupHomeRows(groups: LibraryGroup[], sections: LibraryGroupSection[]) {
+  const known = new Set(sections.map((section) => section.id));
+  return [
+    {
+      key: "library-groups",
+      name: "My Groups",
+      groups: groups.filter(
+        (group) => group.pinnedToHome && (!group.homeSectionId || !known.has(group.homeSectionId)),
+      ),
+    },
+    ...sections.map((section) => ({
+      key: `library-groups:${section.id}`,
+      name: section.name,
+      groups: groups.filter((group) => group.pinnedToHome && group.homeSectionId === section.id),
+    })),
+  ].filter((row) => row.groups.length > 0);
 }
 
 export function moveGroupItem<T extends { id: string }>(

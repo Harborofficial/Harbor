@@ -2,11 +2,105 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   moveGroupItem,
+  libraryGroupHomeRows,
+  normalizeLibraryGroupSections,
   normalizeLibraryGroups,
   parseGroupListUrl,
   validGroupImage,
 } from "../src/lib/library-groups.ts";
 import { parseMdblistPage } from "../src/lib/providers/mdblist-lists.ts";
+import { applyHomeRowCustomization, resetHomeRows } from "../src/lib/home-customization.ts";
+
+test("Home sections and title preferences survive persistence without changing old groups", () => {
+  const groups = normalizeLibraryGroups(
+    JSON.parse(
+      JSON.stringify([
+        { id: "legacy", name: "Legacy", pinnedToHome: true },
+        {
+          id: "netflix",
+          name: "Netflix",
+          pinnedToHome: true,
+          homeSectionId: "platforms",
+          hideHomeTitle: true,
+        },
+        { id: "private", name: "Private", homeSectionId: "platforms" },
+        { id: "orphan", name: "Orphan", pinnedToHome: true, homeSectionId: "removed" },
+      ]),
+    ),
+  );
+  const sections = normalizeLibraryGroupSections([
+    { id: "platforms", name: " Streaming Platforms " },
+    { id: "platforms", name: "Duplicate" },
+    { id: "empty", name: "Empty" },
+    null,
+    { id: "bad", name: " " },
+  ]);
+  assert.equal(groups[0].hideHomeTitle, false);
+  assert.equal(groups[1].hideHomeTitle, true);
+  assert.equal(groups[1].homeSectionId, "platforms");
+  assert.equal(sections.length, 2);
+  assert.deepEqual(
+    libraryGroupHomeRows(groups, sections).map((row) => [
+      row.key,
+      row.name,
+      row.groups.map((group) => group.id),
+    ]),
+    [
+      ["library-groups", "My Groups", ["legacy", "orphan"]],
+      ["library-groups:platforms", "Streaming Platforms", ["netflix"]],
+    ],
+  );
+  assert.deepEqual(
+    libraryGroupHomeRows(groups, []).flatMap((row) => row.groups.map((group) => group.id)),
+    ["legacy", "netflix", "orphan"],
+  );
+  assert.deepEqual(normalizeLibraryGroupSections(undefined), []);
+});
+
+test("folders can move between independent rows with stable customization keys", () => {
+  const sections = [
+    { id: "a", name: "Platforms" },
+    { id: "b", name: "Weekend" },
+  ];
+  const groups = normalizeLibraryGroups([
+    { id: "one", name: "One", pinnedToHome: true, homeSectionId: "a" },
+    { id: "two", name: "Two", pinnedToHome: true, homeSectionId: "b" },
+  ]);
+  const rows = libraryGroupHomeRows(groups, sections).map((row) => ({
+    ...row,
+    type: "movie" as const,
+    metas: [],
+    page: 1,
+    hasMore: false,
+    libraryGroups: row.groups,
+  }));
+  const custom = {
+    ...resetHomeRows(),
+    order: ["library-groups:b", "catalog", "library-groups:a"],
+    renamed: { "library-groups:a": "Services" },
+  };
+  const catalog = {
+    key: "catalog",
+    name: "Movies",
+    type: "movie" as const,
+    metas: [],
+    page: 1,
+    hasMore: false,
+  };
+  assert.deepEqual(
+    applyHomeRowCustomization([...rows, catalog], custom).map((row) => row.name),
+    ["Weekend", "Movies", "Services"],
+  );
+  const moved = groups.map((group) => ({ ...group, homeSectionId: "b" }));
+  assert.deepEqual(
+    libraryGroupHomeRows(moved, sections).map((row) => row.groups.map((group) => group.id)),
+    [["one", "two"]],
+  );
+  assert.equal(
+    libraryGroupHomeRows(groups, [{ ...sections[0], name: "Renamed" }, sections[1]])[0].key,
+    rows[0].key,
+  );
+});
 
 test("group list URLs normalize supported providers without retaining query credentials", () => {
   assert.deepEqual(

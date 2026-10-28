@@ -793,6 +793,7 @@ export type Settings = {
   cropMode: string;
   customLists: CustomList[];
   libraryGroups: import("@/lib/library-groups").LibraryGroup[];
+  libraryGroupSections: import("@/lib/library-groups").LibraryGroupSection[];
   pauseListStatusOnPause: boolean;
   translateTitles: boolean;
   translateDescriptions: boolean;

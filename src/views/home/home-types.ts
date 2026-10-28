@@ -10,7 +10,7 @@ export type HomeRow = {
   noDedup?: boolean;
   fetcher?: (page: number) => Promise<Meta[]>;
   sourceRow?: import("@/lib/custom-sources").SourceRow;
-  libraryGroups?: boolean;
+  libraryGroups?: import("@/lib/library-groups").LibraryGroup[];
 };
 
 export type RowSpec = {

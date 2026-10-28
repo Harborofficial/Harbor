@@ -632,6 +632,7 @@ export const DEFAULT: Settings = {
   cropMode: "fit",
   customLists: [],
   libraryGroups: [],
+  libraryGroupSections: [],
   pauseListStatusOnPause: false,
   translateTitles: true,
   translateDescriptions: true,
