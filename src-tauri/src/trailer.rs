@@ -474,6 +474,100 @@ pub struct TrailerInfo {
     pub size_bytes: u64,
 }
 
+#[derive(Serialize)]
+pub struct YoutubeStream {
+    url: String,
+    headers: std::collections::BTreeMap<String, String>,
+    transcode: bool,
+}
+
+#[tauri::command]
+pub async fn resolve_youtube_stream(
+    video_id: String,
+    quality: Option<String>,
+    app: tauri::AppHandle,
+) -> Result<YoutubeStream, String> {
+    let id = sanitize_id(&video_id)?;
+    // A muxed rendition lets every player backend consume one seekable URL.
+    let args = vec![
+        "--no-warnings".to_string(),
+        "--no-playlist".to_string(),
+        "--skip-download".to_string(),
+        "-f".to_string(),
+        "bestvideo[protocol=m3u8_native][vcodec^=avc1]/best".to_string(),
+        "--dump-single-json".to_string(),
+        format!("https://www.youtube.com/watch?v={id}"),
+    ];
+    let output = crate::ytdlp_update::run(&app, args, Duration::from_secs(45), "YouTube stream").await?;
+    let metadata: serde_json::Value = serde_json::from_slice(&output.stdout)
+        .map_err(|_| "YouTube did not return stream metadata".to_string())?;
+    // YouTube can reject progressive URLs while its HLS delivery remains usable.
+    // Select H.264 and use the master manifest so FFmpeg also receives the audio.
+    let height = match quality.as_deref() {
+        Some("360p") => 360,
+        Some("720p") => 720,
+        _ => 1080,
+    };
+    let formats = metadata.get("formats").and_then(serde_json::Value::as_array);
+    let hls = formats.and_then(|formats| formats.iter().filter(|format| {
+        format["protocol"] == "m3u8_native"
+            && format["vcodec"].as_str().is_some_and(|codec| codec.starts_with("avc1"))
+            && format["height"].as_u64().is_some_and(|value| value <= height)
+    }).max_by_key(|format| format["height"].as_u64().unwrap_or(0)));
+    let Some(hls) = hls else {
+        let stream = parse_youtube_stream(&output.stdout)?;
+        verify_youtube_stream(&stream).await?;
+        return Ok(stream);
+    };
+    let mut payload = hls.clone();
+    payload["url"] = payload.get("manifest_url").cloned()
+        .ok_or_else(|| "YouTube did not return an HLS master manifest".to_string())?;
+    let mut stream = parse_youtube_stream(&serde_json::to_vec(&payload).map_err(|e| e.to_string())?)?;
+    stream.transcode = true;
+    verify_youtube_stream(&stream).await?;
+    Ok(stream)
+}
+
+async fn verify_youtube_stream(stream: &YoutubeStream) -> Result<(), String> {
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(10))
+        .build()
+        .map_err(|_| "Could not verify YouTube playback".to_string())?;
+    let mut request = client.get(&stream.url);
+    for (name, value) in &stream.headers {
+        request = request.header(name, value);
+    }
+    // Extraction can succeed while the CDN refuses the URL. Test an actual
+    // media GET, not HEAD, before publishing a source to the video element.
+    let mut response = request.header(reqwest::header::RANGE, "bytes=0-")
+        .send().await.map_err(|_| "YouTube playback verification failed".to_string())?;
+    if !response.status().is_success() {
+        return Err(format!("YouTube rejected playback: {}", response.status()));
+    }
+    if response.headers().get(reqwest::header::CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .is_some_and(|value| value.starts_with("text/") || value.contains("json"))
+    {
+        return Err("YouTube returned a non-media response".to_string());
+    }
+    match response.chunk().await {
+        Ok(Some(bytes)) if !bytes.is_empty() => Ok(()),
+        _ => Err("YouTube returned no video bytes".to_string()),
+    }
+}
+
+fn parse_youtube_stream(bytes: &[u8]) -> Result<YoutubeStream, String> {
+    let payload: serde_json::Value = serde_json::from_slice(bytes)
+        .map_err(|_| "YouTube did not return stream metadata".to_string())?;
+    let url = payload.get("url").and_then(serde_json::Value::as_str)
+        .filter(|url| url.starts_with("https://"))
+        .ok_or_else(|| "YouTube did not return a playable stream".to_string())?;
+    let headers = serde_json::from_value(
+        payload.get("http_headers").cloned().unwrap_or_else(|| serde_json::json!({})),
+    ).map_err(|_| "YouTube returned invalid request headers".to_string())?;
+    Ok(YoutubeStream { url: url.to_string(), headers, transcode: false })
+}
+
 #[tauri::command]
 pub async fn fetch_trailer(
     video_id: String,
@@ -513,7 +607,7 @@ pub async fn fetch_trailer(
         DOWNLOAD_TIMEOUT
     };
     let primary = completed_download(
-        run_yt_dlp(&app, dl_args, dl_timeout, "download").await,
+        crate::ytdlp_update::run(&app, dl_args, dl_timeout, "download").await,
         "download",
     );
 
@@ -548,7 +642,7 @@ pub async fn fetch_trailer(
                 DOWNLOAD_TIMEOUT
             };
             let output = completed_download(
-            run_yt_dlp(&app, fallback_args, fallback_timeout, fallback_label).await,
+            crate::ytdlp_update::run(&app, fallback_args, fallback_timeout, fallback_label).await,
             fallback_label,
         )
         .map_err(|fallback_error| {

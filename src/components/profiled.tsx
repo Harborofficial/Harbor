@@ -1,4 +1,10 @@
-import { Profiler, type ReactNode } from "react";
+import {
+  Profiler,
+  useEffect,
+  type ReactNode,
+  type DependencyList,
+  type EffectCallback,
+} from "react";
 import { isProfilerRunning, recordRender } from "@/lib/memory-profiler";
 
 /**
@@ -19,4 +25,22 @@ export function Profiled({ id, children }: { id: string; children: ReactNode }) 
       {children}
     </Profiler>
   );
+}
+
+/** Measures synchronous effect setup, not the lifetime of requests it starts. */
+export function useProfiledEffect(
+  id: string,
+  effect: EffectCallback,
+  dependencies: DependencyList,
+) {
+  useEffect(() => {
+    const started = isProfilerRunning() ? performance.now() : null;
+    try {
+      return effect();
+    } finally {
+      if (started !== null) recordRender(`effect-setup.${id}`, performance.now() - started);
+    }
+    // The caller supplies the same dependencies as useEffect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, dependencies);
 }

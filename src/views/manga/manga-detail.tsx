@@ -196,6 +196,8 @@ export function MangaDetail({
   const [detailPending, setDetailPending] = useState(true);
   const [chaptersPending, setChaptersPending] = useState(true);
   const [retryTick, setRetryTick] = useState(0);
+  const [chapterRefreshTick, setChapterRefreshTick] = useState(0);
+  const chaptersMangaId = useRef<string | null>(null);
   const langInitRef = useRef(false);
   const [selectedLang, setSelectedLang] = useState("en");
   const [backdrop, setBackdrop] = useState<string | null>(null);
@@ -251,9 +253,7 @@ export function MangaDetail({
   useEffect(() => {
     let cancelled = false;
     setDetail(null);
-    setChapters([]);
     setDetailPending(true);
-    setChaptersPending(true);
     setBackdrop(null);
     setExpanded(false);
     langInitRef.current = false;
@@ -267,15 +267,34 @@ export function MangaDetail({
         if (!cancelled) setDetailPending(false);
       });
 
-    streamChapters(mangaId, (chunk) => {
-      if (cancelled || chunk.length === 0) return;
-      setChapters((prev) => [...prev, ...chunk]);
-      if (!langInitRef.current) {
-        langInitRef.current = true;
-        const ls = chapterLanguages(chunk);
-        setSelectedLang(ls.find((l) => l.code === "en")?.code ?? ls[0]?.code ?? "en");
-      }
-    })
+    return () => {
+      cancelled = true;
+    };
+  }, [mangaId, retryTick]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let received = false;
+    if (chaptersMangaId.current !== mangaId) {
+      chaptersMangaId.current = mangaId;
+      setChapters([]);
+    }
+    setChaptersPending(true);
+    streamChapters(
+      mangaId,
+      (chunk) => {
+        if (cancelled || chunk.length === 0) return;
+        const first = !received;
+        received = true;
+        setChapters((prev) => (first ? chunk : [...prev, ...chunk]));
+        if (!langInitRef.current) {
+          langInitRef.current = true;
+          const ls = chapterLanguages(chunk);
+          setSelectedLang(ls.find((l) => l.code === "en")?.code ?? ls[0]?.code ?? "en");
+        }
+      },
+      { refresh: true },
+    )
       .catch(() => {})
       .finally(() => {
         if (!cancelled) setChaptersPending(false);
@@ -284,7 +303,7 @@ export function MangaDetail({
     return () => {
       cancelled = true;
     };
-  }, [mangaId, retryTick]);
+  }, [mangaId, retryTick, chapterRefreshTick]);
 
   useEffect(() => {
     if (!detail?.title) return;
@@ -656,6 +675,7 @@ export function MangaDetail({
           mangaCover={detail?.cover}
           animeEndChapter={coverage?.endChapter}
           pending={chaptersPending}
+          onRefresh={() => setChapterRefreshTick((n) => n + 1)}
           scrollRoot={scrollRoot}
         />
       </div>

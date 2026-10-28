@@ -86,10 +86,85 @@ html[data-mpv-embed="1"] #root {
   background: transparent;
 }
 
+/* macOS keeps the NSWindow non-opaque so its corners can be clipped, and the
+   webview background is disabled by the window's configured background colour.
+   Without a painted canvas the transparent root lets the desktop show through
+   whenever macOS recomposites the window, such as after a focus change. */
 html[data-os="linux"]:not([data-mpv-embed="1"]),
 html[data-os="linux"]:not([data-mpv-embed="1"]) body,
-html[data-os="linux"]:not([data-mpv-embed="1"]) #root {
+html[data-os="linux"]:not([data-mpv-embed="1"]) #root,
+html[data-os="macos"]:not([data-mpv-embed="1"]),
+html[data-os="macos"]:not([data-mpv-embed="1"]) body,
+html[data-os="macos"]:not([data-mpv-embed="1"]) #root {
   background: var(--color-canvas);
+}
+
+/* The mpv surface is a native sibling under the transparent webview, so a
+   backdrop-filter inside the player can only sample the webview's own pixels:
+   over the video it blurs nothing. It still recomposites the page every frame,
+   and on WebKitGTK that path keeps allocating GPU buffers while anything under
+   the overlay animates. Opening the source list over a live decode took a
+   Steam Deck from 1.1 GB of GTT to a full lockup in seconds, with or without
+   WEBKIT_DMABUF_RENDERER_FORCE_SHM. Big Picture already dropped the effect over
+   playback for the same cost (bp-player-controls.tsx); keep it for the desktop
+   player only where the video is not embedded. The translucent fills carry the
+   contrast on their own. */
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-player],
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-player] * {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Steam Deck diagnostic: render the source selector as an opaque, static layer
+   while Linux is displaying the embedded native mpv surface. The general player
+   blur mitigation above is not enough on every WebKitGTK build; transitions,
+   animated descendants, translucent panels and compositor hints can still cause
+   repeated layer allocation. Leave other platforms and external mpv unchanged. */
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] {
+  background: #080808 !important;
+  background-image: none !important;
+  opacity: 1 !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  will-change: auto !important;
+}
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] *,
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher]::before,
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher]::after,
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] *::before,
+html[data-os="linux"][data-mpv-embed="1"] [data-harbor-stream-switcher] *::after {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  will-change: auto !important;
+}
+html[data-os="linux"][data-mpv-embed="1"]
+  [data-harbor-stream-switcher]
+  > div:not(.pointer-events-none) {
+  background: #222228 !important;
+  background-image: none !important;
+}
+
+/* #31: avoid Library backdrop-filter layers on WebKitGTK. The captured
+   WebProcess stack waits on the compositor, which repeatedly traverses its
+   layer tree. Keep accelerated compositing enabled for the native player;
+   removing backdrop sampling here is a scoped mitigation pending Linux retest.
+   Include pseudo-elements used by themes and badges. */
+html[data-os="linux"] [data-harbor-library],
+html[data-os="linux"] [data-harbor-library] *,
+html[data-os="linux"] [data-harbor-library]::before,
+html[data-os="linux"] [data-harbor-library]::after,
+html[data-os="linux"] [data-harbor-library] *::before,
+html[data-os="linux"] [data-harbor-library] *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 body {
@@ -4163,13 +4238,20 @@ html[data-theme-layout="minui"] .anime-award-banner-logo {
   }
 }
 
+/* The playback stage receives shortcut focus, not control-selection focus. */
+[data-harbor-player][tabindex="-1"]:focus {
+  outline: none !important;
+}
+
 html:not([data-input-modality="pointer"])
   :is(button, a, select, summary, input, textarea, [tabindex]):focus-visible:not(
     :where(
       [data-profile-picker][role="dialog"][tabindex="-1"],
+      [data-harbor-player][tabindex="-1"],
       .hset-title[tabindex="-1"],
       .music-library-playlist-hero[tabindex="-1"],
       [data-search-overlay] input,
+      [data-settings-search-field] input,
       .music-genre-search input,
       [data-plugins-search] input
     )
@@ -5475,6 +5557,11 @@ textarea.hset-field {
 .harbor-settings-shell [class*="focus-within:bg-raised"]:focus-within {
   outline: none;
   box-shadow: inset 0 0 0 1px var(--color-edge);
+}
+
+html:not([data-input-modality="pointer"]) [data-settings-search-field]:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .hset-ltr {
@@ -7816,4 +7903,52 @@ button.hset-rail-me:hover,
   .context-menu-membership {
     transition: none;
   }
+}
+
+@keyframes harbor-picker-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-picker-in {
+  animation: harbor-picker-in 280ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.animate-picker-scrim {
+  animation: harbor-fade-in 240ms ease-out both;
+}
+
+/* Profile themes: the palette arrives as CSS custom properties on the profile root, so
+   tokens alone cannot express these two looks. Both hooks are scoped to that root, which
+   keeps the profile owner's colours from leaking into the rest of the viewer's app. */
+[data-profile-ui~="glass"]
+  :is([class*="bg-surface"], [class*="bg-elevated"], [class*="bg-raised"], [class*="bg-canvas"]) {
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Automatic has no palette values to mix from, so tint its surfaces here instead. */
+[data-profile-ui~="glass-auto"] :is([class*="bg-surface"], [class*="bg-elevated"]) {
+  background-color: color-mix(in oklab, var(--color-surface) 62%, transparent);
+}
+
+[data-profile-ui~="gradient"] :is(.bg-surface, .bg-elevated) {
+  box-shadow: 0 24px 48px -34px color-mix(in oklab, var(--color-accent) 80%, transparent);
+}
+
+/* Surfaces that stay readable even with the transparent look: quoted reviews and the like. */
+[data-profile-ui~="glass"] [data-profile-solid] {
+  background-color: var(--profile-surface-solid, var(--color-surface));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+[data-profile-ui~="glass"] [data-profile-solid="elevated"] {
+  background-color: var(--profile-elevated-solid, var(--color-elevated));
 }

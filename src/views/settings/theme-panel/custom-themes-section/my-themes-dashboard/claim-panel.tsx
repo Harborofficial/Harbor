@@ -89,7 +89,7 @@ export function ClaimPanel({
             label={t("Theme link or ID")}
             value={themeId}
             onChange={setThemeId}
-            placeholder="harbor.site/themes/api/t/..."
+            placeholder="harborcommunity.site/themes/api/t/..."
           />
           <TextField
             label={t("Owner token")}

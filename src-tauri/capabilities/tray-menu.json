@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "tray-menu",
+  "description": "Windows tray menu: receive theme and preference state. Native commands validate the calling window.",
+  "windows": ["harbor-tray-menu"],
+  "permissions": ["core:event:allow-listen", "core:event:allow-unlisten"]
+}

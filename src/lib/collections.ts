@@ -16,7 +16,7 @@ import {
 } from "@/lib/membership-operations";
 
 // Server image URLs are root-relative (/themes/api/images/...); make them absolute so they
-// resolve against harbor.site in Tauri instead of the app origin. data:/blob:/http stay as-is.
+// resolve against harborcommunity.site in Tauri instead of the app origin. data:/blob:/http stay as-is.
 export function absCollectionImage(u: string | undefined): string | undefined {
   if (typeof u !== "string" || !u) return undefined;
   if (/^(https?:|data:|blob:)/.test(u)) return u;

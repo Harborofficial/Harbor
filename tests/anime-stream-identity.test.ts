@@ -10,8 +10,10 @@ import {
   isScopedSplitFranchiseRoot,
   partitionByExactAnimeEpisode,
   selectSiblingWindows,
+  splitAnimeStreamCoordinates,
 } from "../src/lib/streams/anime-identity-core.ts";
 import { buildStreamIds, unverifiedAnimeSeasonId } from "../src/lib/streams/stream-ids.ts";
+import { enhanceAnimeStreams } from "../src/lib/streams/anitomy.ts";
 
 const ONE_PIECE = {
   mappings: { kitsu_id: 11243 },
@@ -21,6 +23,73 @@ const ONE_PIECE = {
     "1169": { seasonNumber: 23, episodeNumber: 14, absoluteEpisodeNumber: 1169 },
   },
 };
+
+test("TYBW S4E9 rejects earlier seasons even when the episode number matches", () => {
+  const target = splitAnimeStreamCoordinates("kitsu:49444:9")!;
+  assert.deepEqual(target.absoluteNumbers, [49, 415]);
+  const stream = (season: number | null, episode: number | null, seasonPack = false) => ({ season, episode, seasonPack });
+  const good = [stream(4, 9), stream(17, 49), stream(null, 49), stream(null, 415)];
+  const bad = [stream(1, 9), stream(2, 9), stream(3, 9), stream(1, null, true), stream(17, 9), stream(null, 48)];
+  const result = partitionByExactAnimeEpisode([...good, ...bad], new Set([9, 49, 415]), target.coordinates);
+  assert.deepEqual(result.keep, good);
+  assert.deepEqual(result.drop, bad);
+});
+
+test("TYBW never queries the original Bleach catalog id through its S17 mapping", () => {
+  assert.deepEqual(buildStreamIds("kitsu:49444", {
+    season: 1, episode: 9, kitsuStreamId: "kitsu:49444:9",
+    imdbId: "tt0434665", imdbSeason: 17, imdbEpisode: 49,
+  }, "tt0434665"), ["kitsu:49444:9"]);
+});
+
+test("bare TYBW episode 09 does not prove part 4 ownership", () => {
+  const make = (filename: string, episode = 9) => ({
+    season: null, episode, seasonPack: false, behaviorHints: { filename },
+  });
+  const bad = [
+    make("Bleach_-_Thousand_Year_Blood_War_[09]_[BDRip_1080p_AV1].mkv"),
+    make("[Lazy] Bleach Thousand-Year Blood War - 09 [074C8B77].mkv"),
+  ];
+  const good = [
+    make("[Erai-raws] Bleach - Sennen Kessen Hen - Kashin Tan - 09 [1080p].mkv"),
+    make("Bleach Thousand-Year Blood War - The Calamity - 09.mkv"),
+    make("Bleach Thousand-Year Blood War - 49.mkv", 49),
+    make("Bleach - 415.mkv", 415),
+  ];
+  const result = partitionByExactAnimeEpisode([...bad, ...good], new Set([9, 49, 415]), [[4, 9], [17, 49]], 4);
+  assert.deepEqual(result.keep, good);
+  assert.deepEqual(result.drop, bad);
+});
+
+test("JoJo S6E5 rejects Comet's earlier seasons and Stardust Crusaders entry", () => {
+  const make = (filename: string, season: number | null) => ({
+    episode: 5, season, seasonPack: false, behaviorHints: { filename },
+  });
+  const bad = [
+    make("JoJo's Bizarre Adventure (2012) S03E05 The Nijimura Brothers (3).mkv", 3),
+    make("JoJo's Bizarre Adventure (2012) S02E05 Silver Chariot.mkv", 2),
+    make("[Erai-raws] JoJo no Kimyou na Bouken - Stardust Crusaders - 05 [1080p].mkv", null),
+  ];
+  const good = [
+    make("[Xspitfire91] Jojo No Kimyou Na Bouken S06E05 BDRIP.mkv", 6),
+    make("JoJos.Bizarre.Adventure.S06E05.The.Terrorist.from.a.Faraway.Country.mkv", 6),
+    make("[Erai-raws] JoJo no Kimyou na Bouken: Steel Ball Run - 05.mkv", null),
+  ];
+  const result = partitionByExactAnimeEpisode([...bad, ...good], new Set([5]), [[6, 5]], undefined,
+    ["JoJo's Bizarre Adventure: Steel Ball Run"]);
+  assert.deepEqual(result.keep, good);
+  assert.deepEqual(result.drop, bad);
+});
+
+test("bracketed Comet episode survives parsing as a number so it can be rejected", async () => {
+  const streams = [{
+    season: null, episode: null, seasonPack: false,
+    behaviorHints: { filename: "Bleach_-_Thousand_Year_Blood_War_[09]_[BDRip_1080p_AV1].mkv" },
+  }];
+  await enhanceAnimeStreams(streams as never);
+  assert.equal(streams[0].episode, 9);
+  assert.equal(partitionByExactAnimeEpisode(streams, new Set([9, 49, 415]), [[4, 9], [17, 49]], 4).keep.length, 0);
+});
 
 test("long-running anime resolves provider season coordinates to the absolute episode", () => {
   const n = findAnimeEntryNumber(ONE_PIECE, [[23, 14]]);

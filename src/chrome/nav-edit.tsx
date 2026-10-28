@@ -3,6 +3,7 @@ import { Eye, Plus, RotateCcw, X } from "lucide-react";
 import { TvModalClose } from "@/components/tv-modal-close";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { useInstallFeatures } from "@/lib/features/install";
 import {
   NAV_ITEMS,
   effectiveNavOrder,
@@ -373,9 +374,12 @@ export function NavHiddenTray({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [editing]);
+  const gamesEnabled = useInstallFeatures().games;
   if (!editing) return null;
   const byId = new Map(NAV_ITEMS.map((it) => [it.id, it]));
-  const hidden = cfg.hidden.map((id) => byId.get(id as NavItemId)).filter((it) => it != null);
+  const hidden = cfg.hidden
+    .map((id) => byId.get(id as NavItemId))
+    .filter((it) => it != null && (it.id !== "games" || gamesEnabled));
   if (compact) {
     return (
       <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-xl border border-dashed border-edge-soft bg-canvas/40 p-1.5">

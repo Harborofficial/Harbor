@@ -344,7 +344,6 @@ export function PlayerLayoutPanel() {
             dismiss(CONTENT_ADVISORY_NUDGE);
             update({ contentAdvisoryToast: v });
           }}
-          preview={<AdvisoryPreview />}
         />
         {settings.contentAdvisoryToast && (
           <Segmented
@@ -375,6 +374,7 @@ export function PlayerLayoutPanel() {
             featureOn={settings.contentAdvisoryToast && settings.contentAdvisoryShowIgnore}
           />
         )}
+        <AdvisoryPreview />
       </Section>
 
       <Section

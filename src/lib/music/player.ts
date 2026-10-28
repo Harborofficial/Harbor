@@ -77,6 +77,7 @@ const LIKED_KEY = "harbor.music.liked.v1";
 const RECENTS_KEY = "harbor.music.recents.v1";
 const QUEUE_KEY = "harbor.music.queue.v1";
 const SESSION_KEY = "harbor.music.session.v1";
+const PLAYER_CLOSED_KEY = "harbor.music.player.closed.v1";
 let lastSessionWrite = 0;
 const VOLUME_KEY = "harbor.music.volume.v1";
 const listeners = new Set<() => void>();
@@ -244,6 +245,19 @@ function readVolume(): number {
   return Number.isFinite(parsed) ? Math.max(0, Math.min(1, parsed)) : 0.82;
 }
 
+/**
+ * Closing the player is a decision about the session, not just the current track. Without a
+ * persisted flag the saved checkpoint (and the recents fallback) brought the dock back on the
+ * next start, so the close button never survived a restart.
+ */
+function musicPlayerWasClosed(): boolean {
+  return readStoredMusicPreference(PLAYER_CLOSED_KEY) === "1";
+}
+
+function setMusicPlayerClosed(closed: boolean): void {
+  writeMusicPreference(PLAYER_CLOSED_KEY, closed ? "1" : "0");
+}
+
 let state: MusicPlayerState = {
   phase: "idle",
   current: null,
@@ -394,6 +408,7 @@ export function initializeMusic(): Promise<void> {
   ])
     .then(([bootstrap, stored]) => {
       clearLegacyMigration(migration);
+      const closedByUser = musicPlayerWasClosed();
       let mirrored: MusicCheckpoint | null = null;
       try {
         // Direct storage read: the preference cache can outlive a hot update and would then
@@ -402,7 +417,7 @@ export function initializeMusic(): Promise<void> {
       } catch {
         /* A corrupt checkpoint does not block the library. */
       }
-      const saved = newerCheckpoint(stored, mirrored);
+      const saved = closedByUser ? null : newerCheckpoint(stored, mirrored);
       if (saved?.origin) restoreMusicPlaybackOrigin(saved.origin);
       const restoredIndex = saved?.key
         ? bootstrap.queue.findIndex(
@@ -415,18 +430,21 @@ export function initializeMusic(): Promise<void> {
       // the checkpoint itself carries the track. With no usable checkpoint at all, the most
       // recent track is the honest fallback: the queue top is arbitrary and would resume a song
       // the listener did not choose, which is how one miss became a permanent wrong resume.
+      // A listener who closed the player gets neither path: the dock stays closed.
       const recovered =
-        restoredIndex < 0 ? (saved?.track ?? bootstrap.recents[0] ?? null) : null;
-      const queue = recovered
-        ? [
-            recovered,
-            ...bootstrap.queue.filter(
-              (track) => queueTrackKey(track) !== queueTrackKey(recovered),
-            ),
-          ]
-        : bootstrap.queue;
-      const index = restoredIndex >= 0 ? restoredIndex : 0;
-      const current = restoredIndex >= 0 ? (queue[index] ?? null) : recovered;
+        closedByUser || restoredIndex >= 0 ? null : (saved?.track ?? bootstrap.recents[0] ?? null);
+      const queue = closedByUser
+        ? []
+        : recovered
+          ? [
+              recovered,
+              ...bootstrap.queue.filter(
+                (track) => queueTrackKey(track) !== queueTrackKey(recovered),
+              ),
+            ]
+          : bootstrap.queue;
+      const index = closedByUser ? -1 : restoredIndex >= 0 ? restoredIndex : 0;
+      const current = closedByUser ? null : restoredIndex >= 0 ? (queue[index] ?? null) : recovered;
       const position =
         current && (restoredIndex >= 0 || recovered === saved?.track)
           ? usableCheckpointPosition(saved?.position, current.durationSeconds)
@@ -831,6 +849,8 @@ export async function playMusic(
   if (!continuing && !failedAttempts.size && !automationOwner) cancelMusicQueueAutomation();
   await initializeMusic();
   if (automationOwner && !ownsMusicQueueAutomation(automationOwner)) return;
+  // Playing something reopens the player the listener closed last time.
+  if (musicPlayerWasClosed()) setMusicPlayerClosed(false);
   if (automationOwner) markMusicQueueAutomationStarted(automationOwner);
   if (!continuing) explicitSource = explicit ? (track.connectorId ?? null) : null;
   if (explicit) pinSourceFor(track);
@@ -1336,6 +1356,11 @@ export async function closeMusicPlayer(): Promise<void> {
       duration: 0,
       error: null,
     });
+    // Remember the close and drop the resume point, so neither the checkpoint nor the recents
+    // fallback can reopen the dock on the next start.
+    setMusicPlayerClosed(true);
+    writeCheckpointToDb(null);
+    writeMusicPreference(SESSION_KEY, "null");
     if (typeof window !== "undefined")
       window.dispatchEvent(new Event("harbor:music-player-closed"));
   } catch (error) {

@@ -14,6 +14,7 @@ import { useSimklScrobble } from "@/lib/simkl/scrobble-hook";
 import { useTraktScrobble } from "@/lib/trakt/scrobble-hook";
 import { usePublicMetaDbScrobble } from "@/lib/publicmetadb/scrobble-hook";
 import { useMediaServerProgress } from "@/lib/media-server/progress-sync";
+import { useNuvioScrobble } from "@/lib/nuvio/nuvio-scrobble-hook";
 import {
   claimTorrentPlaybackHandoff,
   confirmTorrentUsage,
@@ -36,7 +37,6 @@ import { useSubDrop } from "./use-sub-drop";
 import { useSubStyleApply } from "./use-sub-style-apply";
 import { useAssNormalize } from "./use-ass-normalize";
 import { useTrackAutoload } from "./use-track-autoload";
-import { useTranslationAutoSelect } from "./use-translation-auto-select";
 import { useSecondarySub } from "./use-secondary-sub";
 import { useAutoSync } from "./use-auto-sync";
 import { publishAutoSync } from "@/components/player/autosync/autosync-store";
@@ -170,8 +170,6 @@ export function usePlayerMedia(params: {
     authKey,
   });
 
-  useTranslationAutoSelect({ bridgeRef, mediaUrl: src.url });
-
   const autoSync = useAutoSync({
     bridgeRef,
     src,
@@ -230,8 +228,9 @@ export function usePlayerMedia(params: {
   const subAssOverridden = settings.subAssOverride !== "no" && settings.subAssOverride !== "scale";
   const selectedAssSub = isAssTrack(selectedSubTrack);
   const selectedImageSub = isImageSubTrack(selectedSubTrack);
-  const subAssNative =
-    subEmbed && selectedAssSub && (!subAssOverridden || !selectedSubTrack?.external);
+  // Addon ASS subtitles render in mpv like embedded ones, so "Use my style" keeps signs in place.
+  // Harbor's HTML overlay only has their plain text and would move every sign to the bottom.
+  const subAssNative = subEmbed && selectedAssSub;
   const subNativeRender =
     hdrNativeSurface || subAssNative || mpvNativeWindow || (subEmbed && selectedImageSub);
   const assNativeActive = selectedAssSub && (subNativeRender || !subEmbed);
@@ -323,6 +322,7 @@ export function usePlayerMedia(params: {
   useSimklScrobble({ src, snap });
   usePublicMetaDbScrobble({ src, snap });
   useMediaServerProgress({ src, snap });
+  useNuvioScrobble({ src, snap, season, episode });
   const download = useVideoDownload({
     url: src.url,
     meta: src.meta,

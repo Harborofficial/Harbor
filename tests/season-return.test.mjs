@@ -38,6 +38,7 @@ test("returning to Ozark restores season 3 and validates the available seasons",
 
 test("Cinemeta episode grids restore the saved season after recreation", () => {
   const EpisodeGrid = () => null;
+  const explorerInputs = [];
   const { CinemetaEpisodes } = load("src/views/detail/cinemeta-episodes.tsx", {
     react: {
       useState: (initial) => [typeof initial === "function" ? initial() : initial, () => {}],
@@ -62,6 +63,17 @@ test("Cinemeta episode grids restore the saved season after recreation", () => {
     "./episode-groups": { groupEpisodes, episodeNumber, episodeSeason },
     "./helpers": { isUpcomingDate: () => false },
     "./episode-grid": { EpisodeGrid },
+    "@/lib/providers/tmdb/tmdb-client": {
+      tmdbLanguageIso: () => "en",
+      effectiveTmdbLanguage: () => "en",
+    },
+    "@/lib/providers/tvdb": { tvdbLangFromIso1: () => "eng" },
+    "./use-season-explorer": {
+      useSeasonExplorerView: (options) => {
+        explorerInputs.push(options);
+        return { items: options.items };
+      },
+    },
     "./use-episode-imdb-ratings": { useEpisodeImdbRatings: () => new Map([["3:1", 8.3]]) },
   });
   setViewedSeason("tt5071412", 3);
@@ -83,6 +95,14 @@ test("Cinemeta episode grids restore the saved season after recreation", () => {
   const cards = find(tree).props.episodes;
   assert.equal(cards.length, 1);
   assert.equal(cards[0].season, 3);
+  CinemetaEpisodes({
+    meta: { id: "addon:show" },
+    imdbId: "tt5071412",
+    videos: [{ season: 1, episode: 1 }],
+  });
+  assert.equal(explorerInputs.at(-1).metaId, "addon:show");
+  assert.equal(explorerInputs.at(-1).imdbId, "tt5071412");
+  assert.equal(explorerInputs.at(-1).enabled, false);
 });
 
 test("TMDB season picker restores and persists selections across detail recreation", () => {
@@ -135,7 +155,12 @@ test("TMDB season picker restores and persists selections across detail recreati
       tvdbPanelEnabled: () => false,
     },
     "@/lib/providers/tmdb": { tmdbSeasonEpisodes: async () => [] },
-    "@/lib/providers/tmdb/tmdb-client": { tmdbLanguageIso: () => "en" },
+    "@/lib/providers/tvdb": { tvdbLangFromIso1: () => "eng" },
+    "./use-season-explorer": { useSeasonExplorerView: (options) => ({ items: options.items }) },
+    "@/lib/providers/tmdb/tmdb-client": {
+      tmdbLanguageIso: () => "en",
+      effectiveTmdbLanguage: () => "en",
+    },
     "@/lib/localized-text": {
       pickLocalizedText: () => null,
       pickPreferredEpisodeTitle: () => null,
@@ -153,7 +178,11 @@ test("TMDB season picker restores and persists selections across detail recreati
       },
     },
     "./series-episodes/use-episode-enrich": {
-      useEpisodeEnrich: () => ({ episodes: [], imdbRatings: new Map(), preferredVideos: new Map() }),
+      useEpisodeEnrich: () => ({
+        episodes: [],
+        imdbRatings: new Map(),
+        preferredVideos: new Map(),
+      }),
     },
     "./series-episodes/use-series-tvdb-stills": { useSeriesTvdbStills: () => ({}) },
     "./series-episodes/use-arc-groups": {

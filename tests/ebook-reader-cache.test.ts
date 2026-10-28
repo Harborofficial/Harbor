@@ -152,6 +152,25 @@ test("Book Mode double-buffers the WebGL book until replacement pages are ready"
   assert.match(bookView, /d\.name !== instanceName/);
 });
 
+test("Book Mode cannot stay stuck on the preparing screen", async () => {
+  const reader = await readFile(
+    new URL("../src/views/ebook/harbor-reader.tsx", import.meta.url),
+    "utf8",
+  );
+  const bookView = await readFile(
+    new URL("../src/views/manga/manga-reader/book-view.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(bookView, /ASPECT_TIMEOUT_MS/);
+  assert.match(bookView, /sampleAspect\(srcs\[i\]\)/);
+  assert.match(bookView, /onError\?:/);
+  assert.match(bookView, /failed\.current\?\.\(error\)/);
+  assert.match(reader, /onError=\{/);
+  assert.match(reader, /flipFailed/);
+  assert.match(reader, /This chapter could not be loaded\./);
+});
+
 test("returning from Book Mode remounts and restores the Harbor line tracker", async () => {
   const reader = await readFile(
     new URL("../src/views/ebook/harbor-reader.tsx", import.meta.url),

@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { shouldIgnoreSourceDrawerKey } from "@/views/play-picker/keyboard";
 import { resolveAddonLogo } from "@/components/addon-logo";
 import { torrentEngineStatus } from "@/lib/torrent/local-engine";
 import { directTorrentEnabled, torrentsDisabled } from "@/lib/torrent/stremio-stream";
@@ -33,8 +34,10 @@ import {
   isPlaybackActorCurrent,
   readLastSeriesPlayback,
   streamMatchesEntry,
-  streamMatchesReleaseLineage,
+  streamMatchesPreferredSource,
   streamMatchesSource,
+  findPreferredSourceMatch,
+  preferredSourceAddonPending,
 } from "@/lib/playback-history";
 import { readSeasonLock } from "@/lib/season-lock";
 import { continuationStream } from "@/lib/player/continue-playback";
@@ -231,14 +234,36 @@ export function PlayPicker({
     () => (seasonLogo ? { ...meta, logo: seasonLogo } : meta),
     [meta, seasonLogo],
   );
+  const isAnimeMetaId = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
+  const seasonLock = settings.seasonSourceLock && (meta.type === "series" || isAnimeMetaId);
+  const seasonLockEntry = useMemo(
+    () =>
+      seasonLock ? readSeasonLock(meta.id, isAnimeMetaId ? null : (episode?.season ?? null)) : null,
+    [seasonLock, meta.id, episode?.season, isAnimeMetaId],
+  );
+  const lastSeriesSource = useMemo(
+    () =>
+      seasonLockEntry ??
+      (settings.keepSourceNextEpisode && !!autoPlay && (meta.type === "series" || isAnimeMetaId)
+        ? readLastSeriesPlayback(meta.id)
+        : null),
+    [seasonLockEntry, meta.id, meta.type, isAnimeMetaId, settings.keepSourceNextEpisode, autoPlay],
+  );
+  const lastSeriesSourceIsLineage = seasonLockEntry == null;
   const [resolving, setResolving] = useState<ResolvingSelection | null>(null);
   const [failedStreams, setFailedStreams] = useState<Set<ScoredStream>>(new Set());
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerOpenRef = useRef(drawerOpen);
+  drawerOpenRef.current = drawerOpen;
+  const mainRef = useRef<HTMLElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const openDrawerWithScrollRef = useRef<(() => void) | null>(null);
+  const closeDrawerWithScrollRef = useRef<(() => void) | null>(null);
   const [strictMode, setStrictMode] = useState(settings.streamFilterLevel === "strict");
   const [forceShowAll, setForceShowAll] = useState(false);
   const filterDisabled = settings.streamFilterLevel === "off" || forceShowAll || isDownload;
-  const animeTitles = useAnimeAltTitles(meta);
+  const animeTitles = useAnimeAltTitles(meta, episode?.sourceMetaId);
   const {
     result,
     loading,
@@ -263,6 +288,7 @@ export function PlayPicker({
     strictMode,
     filterDisabled,
     animeTitles,
+    preferredAddonId: lastSeriesSource?.addonId ?? null,
   });
   const baseLangs = settings.preferredLanguages ?? [];
   const isAnimeRequest = useMemo(
@@ -457,7 +483,6 @@ export function PlayPicker({
     setSelectedTier((s) => s ?? filteredPicker.primary!.tier);
   }, [filteredPicker]);
 
-  const isAnimeMetaId = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
   const previousPlayback = useMemo(
     () =>
       continuation?.source ??
@@ -467,22 +492,6 @@ export function PlayPicker({
     [meta.id, episode?.season, episode?.episode, settings.rememberLastStream, continuation],
   );
 
-  const seasonLock = settings.seasonSourceLock && (meta.type === "series" || isAnimeMetaId);
-  const seasonLockEntry = useMemo(
-    () =>
-      seasonLock ? readSeasonLock(meta.id, isAnimeMetaId ? null : (episode?.season ?? null)) : null,
-    [seasonLock, meta.id, episode?.season, isAnimeMetaId],
-  );
-  const lastSeriesSource = useMemo(
-    () =>
-      seasonLockEntry ??
-      (settings.keepSourceNextEpisode && !!autoPlay && (meta.type === "series" || isAnimeMetaId)
-        ? readLastSeriesPlayback(meta.id)
-        : null),
-    [seasonLockEntry, meta.id, meta.type, isAnimeMetaId, settings.keepSourceNextEpisode, autoPlay],
-  );
-  const lastSeriesSourceIsLineage = seasonLockEntry == null;
-
   const kidProfile = useActiveKid();
   const p2pAutoConsent = settings.p2pAutoConsent || !!kidProfile;
   const autoCandidates = useAutoCandidates({
@@ -490,6 +499,7 @@ export function PlayPicker({
     previousPlayback,
     sourceEntry: lastSeriesSource,
     sourceEntryLineage: lastSeriesSourceIsLineage,
+    sourceEntryBestEffort: lastSeriesSourceIsLineage,
     isCached,
     addons,
     hasStrongAddon,
@@ -507,7 +517,6 @@ export function PlayPicker({
   });
 
   const autoFiredRef = useRef(false);
-  const mainRef = useRef<HTMLElement>(null);
   const [autoAttemptIdx, setAutoAttemptIdx] = useState(0);
   const [autoExhausted, setAutoExhausted] = useState(false);
   const [autoCancelled, setAutoCancelled] = useState(false);
@@ -520,9 +529,99 @@ export function PlayPicker({
     !roomGuestPick;
   useEffect(() => {
     if (!autoActive) return;
+    if (preferredSourceAddonPending(lastSeriesSource, false, pipelineDone, addonQuorum)) return;
     const t = window.setTimeout(() => setAutoCancelled(true), 45_000);
     return () => window.clearTimeout(t);
-  }, [autoActive]);
+  }, [autoActive, lastSeriesSource, pipelineDone, addonQuorum]);
+
+  const setMainRef = useCallback(
+    (node: HTMLElement | null) => {
+      mainRef.current = node;
+
+      if (settings.pickerLayout !== "condensed" || !node) return;
+
+      let scrollFrame = 0;
+      let measureFrame = 0;
+      let scrollPending = false;
+      const scrollToSourceDrawer = (gap = 20) => {
+        if (drawerOpenRef.current || scrollPending) return;
+        scrollPending = true;
+        setDrawerOpen(true);
+        scrollFrame = requestAnimationFrame(() => {
+          scrollFrame = 0;
+          measureFrame = requestAnimationFrame(() => {
+            measureFrame = 0;
+            scrollPending = false;
+            if (!node.isConnected || !drawerOpenRef.current) return;
+            const drawerEl = drawerRef.current;
+            if (!drawerEl) return;
+            const maxScroll = Math.max(0, node.scrollHeight - node.clientHeight);
+            const drawerTop = drawerEl.offsetTop;
+            const targetScroll = Math.max(0, Math.min(drawerTop - gap, maxScroll));
+            const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+              ? "auto"
+              : "smooth";
+            node.scrollTo({ top: targetScroll, behavior });
+          });
+        });
+      };
+      const scrollToTop = () => {
+        if (scrollFrame) cancelAnimationFrame(scrollFrame);
+        if (measureFrame) cancelAnimationFrame(measureFrame);
+        scrollFrame = 0;
+        measureFrame = 0;
+        scrollPending = false;
+        const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth";
+        node.scrollTo({ top: 0, behavior });
+      };
+      openDrawerWithScrollRef.current = scrollToSourceDrawer;
+      closeDrawerWithScrollRef.current = scrollToTop;
+
+      const onWheel = (e: WheelEvent) => {
+        if (e.deltaY <= 0) return;
+        const atBottom = node.scrollHeight - node.scrollTop - node.clientHeight <= 20;
+        if (atBottom) scrollToSourceDrawer();
+      };
+
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (shouldIgnoreSourceDrawerKey(e.target, node)) return;
+
+        if (e.key === " " && drawerOpenRef.current) {
+          e.preventDefault();
+          setDrawerOpen(false);
+          scrollToTop();
+          return;
+        }
+
+        if (drawerOpenRef.current) return;
+
+        if (["ArrowDown", "PageDown", " ", "Down"].includes(e.key)) {
+          e.preventDefault();
+          scrollToSourceDrawer();
+        }
+      };
+
+      node.addEventListener("wheel", onWheel, { passive: true });
+      window.addEventListener("keydown", onKeyDown);
+
+      return () => {
+        if (scrollFrame) cancelAnimationFrame(scrollFrame);
+        if (measureFrame) cancelAnimationFrame(measureFrame);
+        scrollPending = false;
+        if (openDrawerWithScrollRef.current === scrollToSourceDrawer) {
+          openDrawerWithScrollRef.current = null;
+        }
+        if (closeDrawerWithScrollRef.current === scrollToTop) {
+          closeDrawerWithScrollRef.current = null;
+        }
+        node.removeEventListener("wheel", onWheel);
+        window.removeEventListener("keydown", onKeyDown);
+      };
+    },
+    [settings.pickerLayout],
+  );
 
   const previousMatch: ScoredStream | null = useMemo(() => {
     if (!filteredPicker || !previousPlayback) return null;
@@ -549,8 +648,8 @@ export function PlayPicker({
 
   const sameSourceMatch: ScoredStream | null = useMemo(() => {
     if (!filteredPicker || !lastSeriesSource || previousMatch) return null;
-    const matches = lastSeriesSourceIsLineage ? streamMatchesReleaseLineage : streamMatchesSource;
-    return filteredPicker.allRaw.find((s) => matches(s, lastSeriesSource)) ?? null;
+    const matches = lastSeriesSourceIsLineage ? streamMatchesPreferredSource : streamMatchesSource;
+    return findPreferredSourceMatch(filteredPicker.allRaw, lastSeriesSource, matches);
   }, [filteredPicker, lastSeriesSource, lastSeriesSourceIsLineage, previousMatch]);
 
   const currentPick: ScoredStream | null = useMemo(() => {
@@ -699,7 +798,7 @@ export function PlayPicker({
     openPlayerGated,
   ]);
 
-  useAutoFire({
+  const { waitingForPreferredSource } = useAutoFire({
     autoActive,
     rememberedHandledFirst: rememberedHandledFirst && autoAttemptIdx === 0,
     attempt,
@@ -727,6 +826,12 @@ export function PlayPicker({
     setAutoCancelled,
     onPlay,
   });
+  const preferredAddonName = useMemo(() => {
+    if (!waitingForPreferredSource) return null;
+    const id = lastSeriesSource?.addonId;
+    if (!id) return null;
+    return addons?.find((a) => a.manifest.id === id)?.manifest.name ?? id;
+  }, [waitingForPreferredSource, lastSeriesSource, addons]);
 
   const allCount = filteredPicker?.all.length ?? 0;
   const rawCount = (result?.raw.addon.length ?? 0) + (result?.raw.library.length ?? 0);
@@ -916,6 +1021,7 @@ export function PlayPicker({
         p2p={resolving?.p2p === true}
         attemptIdx={autoAttemptIdx}
         download={isDownload}
+        waitingFor={preferredAddonName}
         onCancel={() => {
           abortResolve();
           setResolving(null);
@@ -947,7 +1053,7 @@ export function PlayPicker({
   }
 
   return (
-    <main ref={mainRef} className="absolute inset-0 z-50 overflow-y-auto bg-canvas">
+    <main ref={setMainRef} className="absolute inset-0 z-60 overflow-y-auto bg-canvas">
       <BackdropLayer src={backdropSrc} />
 
       <div
@@ -956,7 +1062,7 @@ export function PlayPicker({
         className="absolute start-0 end-6 top-0 z-10 h-20"
       />
 
-      <div className="relative mx-auto flex min-h-full w-full max-w-5xl flex-col gap-12 px-12 pb-32 pt-32">
+      <div className="relative z-20 mx-auto flex min-h-full w-full max-w-5xl flex-col gap-5 px-12 pb-32 pt-6">
         <PickerNav onBack={backToDetail} onRefresh={refresh} refreshing={loading} />
         <PickerHeader
           meta={metaForDisplay}
@@ -1198,22 +1304,33 @@ export function PlayPicker({
             )}
 
             {!loading && allCount > 0 && filteredPicker && (
-              <SourceDrawer
-                open={drawerOpen}
-                onToggle={() => setDrawerOpen((o) => !o)}
-                count={allCount}
-                addonCount={addonCount}
-                usedAddons={usedAddons}
-                streams={displayStreams}
-                debrids={debrids}
-                getAddonLogo={lookupLogo}
-                matchFor={hostMatch ? matchFor : undefined}
-                onPlay={playManually}
-                resolvingId={resolving?.stream.infoHash ?? null}
-                showName={meta.name}
-                episode={episode}
-                absoluteEpisode={animeAbsoluteEpisode}
-              />
+                <div ref={drawerRef}>
+                  <SourceDrawer
+                    open={drawerOpen}
+                    onToggle={() => {
+                      if (drawerOpenRef.current) {
+                        setDrawerOpen(false);
+                        closeDrawerWithScrollRef.current?.();
+                      } else if (openDrawerWithScrollRef.current) {
+                        openDrawerWithScrollRef.current();
+                      } else {
+                        setDrawerOpen(true);
+                      }
+                    }}
+                    count={allCount}
+                    addonCount={addonCount}
+                    usedAddons={usedAddons}
+                    streams={displayStreams}
+                    debrids={debrids}
+                    getAddonLogo={lookupLogo}
+                    matchFor={hostMatch ? matchFor : undefined}
+                    onPlay={playManually}
+                    resolvingId={resolving?.stream.infoHash ?? null}
+                    showName={meta.name}
+                    episode={episode}
+                    absoluteEpisode={animeAbsoluteEpisode}
+                  />
+                </div>
             )}
           </>
         )}
@@ -1418,7 +1535,7 @@ function PickerScrollTop({
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const onScroll = () => setShow(el.scrollTop > 600);
+    const onScroll = () => setShow(el.scrollTop > 400);
     el.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => el.removeEventListener("scroll", onScroll);

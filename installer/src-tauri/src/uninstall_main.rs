@@ -1,6 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod install;
+#[cfg(feature = "payload")]
+#[allow(dead_code)] // Shared install.rs references these helpers in payload builds.
+mod clean_install;
 mod shell;
 
 fn main() {

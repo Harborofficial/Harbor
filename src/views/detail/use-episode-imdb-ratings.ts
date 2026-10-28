@@ -1,6 +1,47 @@
-import { useEffect, useMemo, useState } from "react";
-import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  harborImdbEpisodes,
+  harborImdbEpisodesCached,
+  subscribeHarborImdbEpisodes,
+} from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
+
+const NO_RATINGS = new Map<string, number>();
+
+export function useHarborEpisodeRatings(imdbId: string | null): ReadonlyMap<string, number> {
+  const id = imdbId && /^tt\d+$/.test(imdbId) ? imdbId : null;
+  const subscribe = useCallback(
+    (listener: () => void) => (id ? subscribeHarborImdbEpisodes(id, listener) : () => {}),
+    [id],
+  );
+  const snapshot = useCallback(
+    () => (id ? harborImdbEpisodesCached(id) : undefined) ?? NO_RATINGS,
+    [id],
+  );
+  const ratings = useSyncExternalStore(subscribe, snapshot, () => NO_RATINGS);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    let retry: ReturnType<typeof setTimeout> | undefined;
+    void harborImdbEpisodes(id)
+      .then((map) => {
+        if (cancelled || map.size > 0) return;
+        // Retry once after the negative cache expires; unmounting or changing
+        // titles cancels the retry rather than polling in the background.
+        retry = setTimeout(() => {
+          if (!cancelled) void harborImdbEpisodes(id).catch(() => {});
+        }, 60_000);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      clearTimeout(retry);
+    };
+  }, [id]);
+
+  return ratings;
+}
 
 export function useEpisodeImdbRatings(imdbId: string | null, season: number, omdbKey: string) {
   const key = JSON.stringify([imdbId, season, omdbKey]);

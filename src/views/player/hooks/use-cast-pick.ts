@@ -241,7 +241,7 @@ export function useCastPick(params: {
           subtitle: burnSub,
           subStyle: burnSub ? buildCastSubStyle(settings) : null,
         },
-        () => bridgeRef.current?.pause(),
+        () => bridgeRef.current?.pause("cast"),
       );
     },
     [

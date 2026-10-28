@@ -60,6 +60,7 @@ function harness() {
     "./publicmetadb/mappings": {},
     "./publicmetadb/history": {},
     "./publicmetadb/watchlist": {},
+    "./publicmetadb/lists": {},
   };
   const providers = loadModule<Providers>("../src/lib/media-provider-actions.ts", {
     ...shared,

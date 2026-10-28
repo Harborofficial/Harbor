@@ -47,6 +47,8 @@ function Equalizer() {
 export function SwitcherRow({
   stream,
   addonLogo,
+  currentAddon,
+  currentName,
   onPick,
   resolving,
   isCurrent,
@@ -54,6 +56,8 @@ export function SwitcherRow({
 }: {
   stream: ScoredStream;
   addonLogo: string | null;
+  currentAddon?: { id: string; name: string } | null;
+  currentName?: string | null;
   onPick: () => void;
   resolving: boolean;
   isCurrent: boolean;
@@ -64,8 +68,12 @@ export function SwitcherRow({
   const [overflows, setOverflows] = useState(false);
   const descRef = useRef<HTMLParagraphElement>(null);
 
-  const addonName = stream.addonName ?? t("Source");
-  const headline = stripFlagEmoji(stream.name?.trim() || addonName) || addonName;
+  const addonId = isCurrent && currentAddon ? currentAddon.id : stream.addonId;
+  const addonName =
+    isCurrent && currentAddon ? currentAddon.name : (stream.addonName ?? t("Source"));
+  const headlineSource =
+    isCurrent && currentName ? currentName : (stream.name?.trim() || addonName);
+  const headline = stripFlagEmoji(headlineSource) || addonName;
   const description = stripFlagEmoji(stream.title?.trim() || stream.description?.trim() || "");
   const badges = streamBadges(stream);
   const anchor = badges[0];
@@ -104,7 +112,7 @@ export function SwitcherRow({
         }`}
       >
         {isCurrent && <span className="absolute inset-y-2 start-0 w-[3px] rounded-e-full bg-accent" />}
-        <AddonLogo addonId={stream.addonId} addonName={addonName} manifestLogo={addonLogo} size="xl" />
+        <AddonLogo addonId={addonId} addonName={addonName} manifestLogo={addonLogo} size="xl" />
 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <p className="truncate text-[14px] font-semibold leading-snug text-ink">{headline}</p>

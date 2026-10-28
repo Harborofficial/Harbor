@@ -22,7 +22,7 @@ export type MangaProvider = {
   popular(offset: number, tagId?: string): Promise<MangaSummary[]>;
   search(query: string, offset: number, tagId?: string): Promise<MangaSummary[]>;
   detail(id: string): Promise<MangaSummary | null>;
-  chapters(id: string): Promise<MangaChapter[]>;
+  chapters(id: string, opts?: { refresh?: boolean }): Promise<MangaChapter[]>;
   pageUrls(chapterId: string): Promise<string[]>;
   tags?(): Promise<MangaTag[]>;
   searchAll?(query: string, opts?: SearchAllOpts): Promise<MangaSummary[]>;

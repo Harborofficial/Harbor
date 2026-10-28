@@ -20,6 +20,7 @@ export function AutoPlayTransition({
   attemptIdx,
   onCancel,
   download = false,
+  waitingFor = null,
 }: {
   meta: Meta;
   episode?: PlayEpisode;
@@ -28,6 +29,7 @@ export function AutoPlayTransition({
   attemptIdx?: number;
   onCancel: () => void;
   download?: boolean;
+  waitingFor?: string | null;
 }) {
   const kid = useActiveKid();
   const t = useT();
@@ -54,13 +56,15 @@ export function AutoPlayTransition({
 
   const caption = download
     ? t("Preparing download")
-    : p2pStage === 2
-      ? `P2P · ${t("Stream is taking a while")}`
-      : p2pStage === 1
-        ? `P2P · ${t("Searching sources…")}`
-        : attemptIdx && attemptIdx > 0
-          ? t("Trying source {n}", { n: attemptIdx + 1 })
-          : t("Connecting");
+    : waitingFor
+      ? t("Waiting for {name}…", { name: waitingFor })
+      : p2pStage === 2
+        ? `P2P · ${t("Stream is taking a while")}`
+        : p2pStage === 1
+          ? `P2P · ${t("Searching sources…")}`
+          : attemptIdx && attemptIdx > 0
+            ? t("Trying source {n}", { n: attemptIdx + 1 })
+            : t("Connecting");
   const partSeason =
     episode != null
       ? splitFranchiseDisplaySeason(
@@ -146,6 +150,11 @@ export function AutoPlayTransition({
           </p>
         )}
         <HarborLoader size="md" caption={caption} />
+        {waitingFor && !download && (
+          <p className="max-w-md text-[13px] leading-relaxed text-white/60" role="status">
+            {t("Keeping the source you were watching.")}
+          </p>
+        )}
         {p2pStage === 2 && !download && (
           <p className="max-w-md text-[13px] leading-relaxed text-white/60" role="status">
             {t("This source is slow. Try another.")}

@@ -1,4 +1,5 @@
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
+import { observeWithin } from "@/lib/visibility";
 import {
   useCallback,
   useEffect,
@@ -43,6 +44,13 @@ export function VirtualGrid<T>({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [cols, setCols] = useState(1);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = containerRef.current;
+    const scroller = scrollRef.current;
+    if (!el || !scroller || paused) return;
+    return observeWithin(el, "1200px 0px", (entry) => setNear(entry.isIntersecting), scroller);
+  }, [scrollRef, paused]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -75,14 +83,22 @@ export function VirtualGrid<T>({
 
   const rowCount = Math.max(1, Math.ceil(items.length / cols));
   const rowVirtualizer = useVirtualizer({
+    enabled: !paused,
+    // Several date groups share one scroller. Flushing each grid synchronously
+    // from its scroll listener interleaves React commits with layout reads.
+    useFlushSync: false,
     count: items.length === 0 ? 0 : rowCount,
+    // Each date group has its own virtualizer. A scroller outside a group's bounds
+    // still selects its first/last row plus overscan; do not mount those distant cards.
+    rangeExtractor: near && !paused ? defaultRangeExtractor : () => [],
     getScrollElement: () => scrollRef.current,
     scrollMargin,
     estimateSize: () => estimateRowHeight + gapY,
     // Each virtual item contains exactly one CSS-grid row, so `rowGap` would
     // not create spacing between virtual rows. Include the gap in measurement
     // as well as the estimate, otherwise measured rows stack flush together.
-    measureElement: (element) => element.getBoundingClientRect().height + gapY,
+    measureElement: (element, entry) =>
+      (entry?.borderBoxSize?.[0]?.blockSize ?? element.getBoundingClientRect().height) + gapY,
     overscan,
   });
 

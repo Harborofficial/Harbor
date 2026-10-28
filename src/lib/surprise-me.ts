@@ -1,4 +1,4 @@
-import { get } from "@/lib/providers/tmdb/tmdb-client";
+import { effectiveTmdbLanguage, get } from "@/lib/providers/tmdb/tmdb-client";
 import {
   movieMeta,
   seriesMeta,
@@ -6,6 +6,8 @@ import {
   type RawMovie,
   type RawSeries,
 } from "@/lib/providers/tmdb/tmdb-meta-mappers";
+import { shouldUseEnglishTitle } from "@/lib/providers/tmdb/tmdb-title-fallback";
+import { loadStoredSettings } from "@/lib/settings/load";
 import type { Meta } from "@/lib/cinemeta";
 import { topMovies, topSeries } from "@/lib/cinemeta";
 import { watchlistAllIds } from "@/lib/watchlist";
@@ -171,7 +173,32 @@ export async function surpriseMe(
     if (pool.length > 0) {
       shuffleInPlace(pool);
       const pick = pool[0];
-      const meta = pick.media_type === "tv" ? seriesMeta(pick) : movieMeta(pick as RawMovie);
+      const settings = loadStoredSettings();
+      const localized = pick.media_type === "tv" ? (pick.name ?? "") : (pick.title ?? "");
+      const original =
+        pick.media_type === "tv" ? (pick.original_name ?? "") : (pick.original_title ?? "");
+      let englishName: string | undefined;
+      if (
+        settings.translateTitles &&
+        shouldUseEnglishTitle({
+          localized,
+          original,
+          originalLanguage: pick.original_language,
+          targetLanguage: effectiveTmdbLanguage(),
+          translateTitles: true,
+        })
+      ) {
+        const kind = pick.media_type === "tv" ? "tv" : "movie";
+        const english = await get<RawMovie | RawSeries>(tmdbKey, `${kind}/${pick.id}`, {
+          language: "en-US",
+        });
+        englishName =
+          (english && ("title" in english ? english.title : english.name)) || undefined;
+      }
+      const meta =
+        pick.media_type === "tv"
+          ? seriesMeta(pick, englishName)
+          : movieMeta(pick as RawMovie, englishName);
       if (meta?.id) pushRecent(meta.id);
       return meta;
     }

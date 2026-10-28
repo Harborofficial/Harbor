@@ -54,8 +54,8 @@ const inventory: Record<string, string> = {
   Fight: "Combat",
   "Fill in the details, then Subscribe": "Renseignez les informations, puis sélectionnez S’abonner",
   Film: "Film",
-  "For Application URL anything works, for example https://harbor.site. TMDB never visits it.":
-    "Pour l’URL de l’application, n’importe quelle adresse convient, par exemple https://harbor.site. TMDB ne la consultera jamais.",
+  "For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it.":
+    "Pour l’URL de l’application, n’importe quelle adresse convient, par exemple https://harborcommunity.site. TMDB ne la consultera jamais.",
   "Free forever for personal use. No payment, ever.":
     "Gratuit à vie pour un usage personnel. Aucun paiement, jamais.",
   Fri: "Ven.",

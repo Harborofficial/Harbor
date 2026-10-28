@@ -150,6 +150,8 @@ export function useBridgeLoad(params: {
           notWebReady: src.notWebReady,
           isLive,
           headers: src.headers,
+          title: [src.title, src.subtitle].filter(Boolean).join(" - "),
+          startPaused: eligibleForPrompt || src.startPaused === true || guestInRoom,
           // Supply resume to the initial load so mpv/HTML5 never start at zero
           // while a later seek races automatic intro skipping.
           startAtSec:
@@ -166,7 +168,7 @@ export function useBridgeLoad(params: {
       firstLoadRef.current = false;
       setReadyLoadKey(loadKey);
       if (eligibleForPrompt) {
-        bridge.pause();
+        bridge.pause("resume-prompt");
         setPendingResumeSec(startSec);
         ackRef.current = (action) => {
           ackRef.current = null;
@@ -185,9 +187,9 @@ export function useBridgeLoad(params: {
         return;
       }
       if (!inRoomRef.current && !src.startPaused) {
-        bridge.play().catch(() => {});
+        bridge.play({ reason: "load" }).catch(() => {});
       } else if (src.startPaused) {
-        bridge.pause();
+        bridge.pause("start-paused");
       }
     })();
     return () => {

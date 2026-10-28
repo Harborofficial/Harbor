@@ -1,4 +1,6 @@
 import { getViewedSeason, setViewedSeason } from "@/lib/season-view-pref";
+import type { Season } from "@/lib/providers/tmdb";
+import { EpisodeReleaseCountdown } from "@/components/episode-release-countdown";
 import { Check, ChevronDown } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -16,11 +18,16 @@ import { useSettings } from "@/lib/settings";
 import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
 import { useT } from "@/lib/i18n";
 import { EpisodeDownloadButton } from "./episode-download-button";
+import { EpisodeReviewsButton } from "./episode-reviews-dialog";
 import { resumeDefaultSeason } from "@/lib/episode-progress";
 import { DragStrip } from "@/components/drag-strip";
 import { EpisodeGrid } from "./episode-grid";
 import { EpisodeGridCard } from "./episode-grid-card";
 import type { GridEpisode, Progress } from "./episode-grid-types";
+import { SeasonExplorer } from "./season-explorer";
+import { useSeasonExplorerView } from "./use-season-explorer";
+import { effectiveTmdbLanguage } from "@/lib/providers/tmdb/tmdb-client";
+import { seasonPill } from "@/lib/season-name";
 import { EpisodeLayoutToggle } from "./episode-layout-toggle";
 import { isUpcomingDate } from "./helpers";
 import { EpisodeRatingBadge } from "./episode-rating-badge";
@@ -41,12 +48,18 @@ export function CinemetaEpisodes({
   stremioWatched,
   resumeSeason,
   imdbId,
+  tmdbTvId,
+  seasonPosters,
+  seasons,
 }: {
   meta: Meta;
   videos: NonNullable<Meta["videos"]>;
   stremioWatched?: Set<string>;
   resumeSeason?: number;
   imdbId?: string | null;
+  tmdbTvId?: number;
+  seasonPosters?: Record<number, string>;
+  seasons?: Season[];
 }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -142,11 +155,43 @@ export function CinemetaEpisodes({
     );
   }, [meta.id, seasonStats, combinedWatched, resumeSeason]);
 
+  const reviewsImdbId = imdbId ?? (/^tt\d+$/.test(meta.id) ? meta.id : null);
   const imdbRatings = useEpisodeImdbRatings(
-    settings.showEpisodeRating ? (imdbId ?? (/^tt\d+$/.test(meta.id) ? meta.id : null)) : null,
+    settings.showEpisodeRating ? reviewsImdbId : null,
     active,
     settings.omdbKey,
   );
+
+  const selectSeason = (season: number) => {
+    userPickedRef.current = true;
+    setViewedSeason(meta.id, season);
+    setActive(season);
+  };
+  const explorerItems = useMemo(() => {
+    const tmdbByNumber = new Map((seasons ?? []).map((season) => [season.seasonNumber, season]));
+    return grouped.map((group) => {
+      const tmdb = tmdbByNumber.get(group.seasonNumber);
+      const name =
+        tmdb?.name ??
+        (group.seasonNumber === NO_SEASON
+          ? t("No Season")
+          : group.seasonNumber === 0
+            ? t("Specials")
+            : t("Season {n}", { n: group.seasonNumber }));
+      return {
+        key: String(group.seasonNumber),
+        seasonNumber: group.seasonNumber >= 0 ? group.seasonNumber : undefined,
+        name,
+        nameLanguage: tmdb?.nameLanguage,
+        isGenericName: tmdb?.isGenericName,
+        overview: tmdb?.overview,
+        overviewLanguage: tmdb?.overviewLanguage,
+        poster: seasonPosters?.[group.seasonNumber],
+        count: group.episodes.length,
+        year: group.episodes[0]?.released?.slice(0, 4),
+      };
+    });
+  }, [grouped, seasons, seasonPosters, t]);
 
   const activeEps = grouped.find((g) => g.seasonNumber === active)?.episodes ?? [];
 
@@ -186,6 +231,7 @@ export function CinemetaEpisodes({
           upcoming: isUpcomingDate(airDate),
           rating: imdbRatings.get(`${season}:${number}`),
           ratingIsImdb: true,
+          reviews: reviewsImdbId ? { imdbId: reviewsImdbId, season, episode: number } : undefined,
           play: (opts) =>
             playLocalAware({
               meta,
@@ -208,6 +254,7 @@ export function CinemetaEpisodes({
     [
       activeEps,
       imdbRatings,
+      reviewsImdbId,
       meta,
       t,
       playLocalAware,
@@ -216,22 +263,53 @@ export function CinemetaEpisodes({
     ],
   );
 
+  // Without any metadata source the shelf can only render placeholders.
+  const hasSeasonMetadata =
+    !!settings.tvdbKey ||
+    !!settings.tmdbKey ||
+    !!seasons?.length ||
+    !!Object.keys(seasonPosters ?? {}).length;
+  const showExplorer =
+    settings.tvdbSeasonExplorer !== false &&
+    hasSeasonMetadata &&
+    grouped.some((group) => group.seasonNumber >= 1);
+  const explorer = useSeasonExplorerView({
+    metaId: meta.id,
+    imdbId,
+    tvdbKey: settings.tvdbKey,
+    tmdbKey: settings.tmdbKey,
+    tmdbTvId,
+    seasonPosters,
+    titlePoster: meta.poster,
+    seasonType: "official",
+    lang: effectiveTmdbLanguage(),
+    items: explorerItems,
+    activeKey: String(active),
+    enabled: showExplorer,
+    allowProxy: false,
+  });
   if (grouped.length === 0) return null;
 
   return (
     <div data-episodes className="flex scroll-mt-24 flex-col gap-6">
+      {showExplorer && (
+        <SeasonExplorer
+          key={meta.id}
+          data={explorer}
+          background={meta.background}
+          activeKey={String(active)}
+          onSelect={(key) => selectSeason(Number(key))}
+        />
+      )}
       <div className="flex items-end justify-between gap-6">
         <h3 className="text-[22px] font-medium tracking-tight text-ink">{t("Episodes")}</h3>
         <div className="flex items-center gap-3">
           {grouped.length > 1 && (
             <SeasonDropdown
               seasons={grouped.map((g) => g.seasonNumber)}
+              items={explorer.items}
               active={active}
-              onChange={(n) => {
-                userPickedRef.current = true;
-                setViewedSeason(meta.id, n);
-                setActive(n);
-              }}
+              onChange={selectSeason}
             />
           )}
           <EpisodeLayoutToggle
@@ -281,6 +359,7 @@ export function CinemetaEpisodes({
                   meta={meta}
                   ep={ep}
                   imdbRating={imdbRatings.get(`${season}:${epNumber}`)}
+                  reviewsImdbId={reviewsImdbId}
                   flatIndex={ep.season == null ? i + 1 : undefined}
                   watched={watchedAt(season, epNumber)}
                   onContextMenu={openWatchedMenu}
@@ -313,6 +392,7 @@ export function CinemetaEpisodeRow({
   ep,
   flatIndex,
   imdbRating,
+  reviewsImdbId,
   watched = false,
   onContextMenu,
 }: {
@@ -320,6 +400,7 @@ export function CinemetaEpisodeRow({
   ep: CinemetaVideo;
   flatIndex?: number;
   imdbRating?: number;
+  reviewsImdbId?: string | null;
   watched?: boolean;
   onContextMenu?: (e: React.MouseEvent, season: number, episode: number, watched: boolean) => void;
 }) {
@@ -396,6 +477,7 @@ export function CinemetaEpisodeRow({
               .filter(Boolean)
               .join("  ·  ")}
           </p>
+          <EpisodeReleaseCountdown date={aired} />
           {(ep.overview ?? ep.description) && (
             <p className="line-clamp-2 text-[13.5px] leading-relaxed text-ink-muted">
               {ep.overview ?? ep.description}
@@ -403,6 +485,15 @@ export function CinemetaEpisodeRow({
           )}
         </div>
       </button>
+      {ep.season != null && reviewsImdbId && (
+        <EpisodeReviewsButton
+          meta={meta}
+          seriesImdbId={reviewsImdbId}
+          season={season}
+          episode={epNumber}
+          episodeTitle={ep.name || ep.title || undefined}
+        />
+      )}
       <EpisodeDownloadButton meta={meta} episode={playEpisode} />
     </div>
   );
@@ -410,10 +501,12 @@ export function CinemetaEpisodeRow({
 
 function SeasonDropdown({
   seasons,
+  items,
   active,
   onChange,
 }: {
   seasons: number[];
+  items: { key: string; name: string; seasonNumber?: number; isGenericName?: boolean }[];
   active: number;
   onChange: (n: number) => void;
 }) {
@@ -466,6 +559,9 @@ function SeasonDropdown({
     );
   };
 
+  const activeItem = items.find((item) => item.key === String(active));
+  const activePill = activeItem ? seasonPill(activeItem, t) : null;
+
   return (
     <>
       <button
@@ -474,7 +570,12 @@ function SeasonDropdown({
         onClick={() => (menu ? setMenu(null) : openMenu())}
         className="flex h-10 items-center gap-2 rounded-full bg-white/[0.06] ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-white/[0.10]"
       >
-        <span>{seasonLabel(t, active)}</span>
+        <span className="max-w-[220px] truncate">{activeItem?.name ?? seasonLabel(t, active)}</span>
+        {activePill && (
+          <span className="shrink-0 rounded bg-ink/10 px-1.5 py-px text-[10.5px] font-semibold text-ink-muted">
+            {activePill}
+          </span>
+        )}
         <ChevronDown
           size={15}
           className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
@@ -486,11 +587,13 @@ function SeasonDropdown({
             ref={menuRef}
             onMouseDown={(e) => e.stopPropagation()}
             style={{ right: menu.right, top: menu.top, bottom: menu.bottom }}
-            className="animate-fade-in fixed z-[200] w-44 overflow-hidden rounded-lg border border-edge bg-elevated py-1.5 shadow-[0_18px_44px_-12px_rgba(0,0,0,0.6)]"
+            className="animate-fade-in fixed z-[200] w-72 overflow-hidden rounded-lg border border-edge bg-elevated py-1.5 shadow-[0_18px_44px_-12px_rgba(0,0,0,0.6)]"
           >
             <div className="overflow-y-auto" style={{ maxHeight: menu.maxH }}>
               {seasons.map((s) => {
                 const isActive = s === active;
+                const item = items.find((entry) => entry.key === String(s));
+                const pill = item ? seasonPill(item, t) : null;
                 return (
                   <button
                     key={s}
@@ -504,7 +607,14 @@ function SeasonDropdown({
                         : "text-ink-muted hover:bg-raised hover:text-ink"
                     }`}
                   >
-                    {seasonLabel(t, s)}
+                    <span className="flex min-w-0 flex-col gap-1">
+                      <span className="truncate">{item?.name ?? seasonLabel(t, s)}</span>
+                      {pill && (
+                        <span className="w-fit rounded bg-ink/10 px-1.5 py-px text-[10.5px] font-semibold text-ink-muted">
+                          {pill}
+                        </span>
+                      )}
+                    </span>
                   </button>
                 );
               })}

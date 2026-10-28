@@ -10,6 +10,7 @@ import {
 } from "@/lib/manual-watched";
 import { tmdbSeasonEpisodes, type Episode, type Season } from "@/lib/providers/tmdb";
 import { fetchSeasonEpisodes, fetchSeasonList, isAnimeId } from "@/lib/series-episodes";
+import { isAnimeMeta } from "@/lib/anime-id";
 import { useSettings } from "@/lib/settings";
 import { effectiveOrderProvider } from "@/lib/settings/episode-order";
 import { episodeSpoilerMasks } from "@/lib/spoilers";
@@ -38,6 +39,7 @@ export function useDownloadEpisodes(
   const guard = useRef(isCurrent);
   guard.current = isCurrent;
   const anime = isAnimeId(title.meta.id);
+  const allowProxy = isAnimeMeta(title.meta);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [season, setSeason] = useState<number>(
     (anime ? requested?.imdbSeason : undefined) ?? requested?.season ?? 1,
@@ -61,6 +63,7 @@ export function useDownloadEpisodes(
     settings.tvdbSeasonType,
     settings.tvdbKey,
     series && !title.pending && !anime,
+    allowProxy,
   );
   const availableSeasons = order?.seasons ?? seasons;
   const hidden = useHiddenEpisodes(title.meta.id);
@@ -166,7 +169,13 @@ export function useDownloadEpisodes(
     preferCustomMeta: settings.preferCustomMetaAddon,
     ratings: false,
   });
-  const tvdbStills = useSeriesTvdbStills(title.imdbId, enriched.length, settings.tvdbSeasonType);
+  const tvdbStills = useSeriesTvdbStills(
+    title.imdbId,
+    enriched.length,
+    settings.tvdbSeasonType,
+    allowProxy,
+    !!settings.tvdbKey,
+  );
   const allEpisodes = useMemo<PlayEpisode[]>(() => {
     if (loaded?.season !== season) return [];
     const values = enriched.length

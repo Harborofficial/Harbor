@@ -1,5 +1,6 @@
 import { createHtml5Bridge } from "@/lib/player/html5";
 import { createMpvBridge, probeMpv, type MpvRect } from "@/lib/player/mpv";
+import { createExternalMpvBridge, type ExternalMpvOptions } from "@/lib/player/external-mpv";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import type { MonitorInfo } from "@/lib/monitors";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
@@ -72,8 +73,13 @@ export async function pickBridge(
     separateCoverTaskbar?: boolean;
     cacheDir?: string;
     getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
+    /** Set when playback runs in the user's own external mpv instead of the one inside Harbor. */
+    external?: ExternalMpvOptions | null;
   },
 ): Promise<{ bridge: PlayerBridge; engine: "html5" | "mpv" }> {
+  // Set html5 so Harbor does not use any of the embedded-mpv window handling.
+  if (mpvOpts.external)
+    return { bridge: createExternalMpvBridge(mpvOpts.external), engine: "html5" };
   if (want === "html5") return { bridge: createHtml5Bridge(), engine: "html5" };
   if (want === "mpv") {
     const probe = await probeMpv();

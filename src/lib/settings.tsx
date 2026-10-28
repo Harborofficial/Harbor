@@ -18,6 +18,7 @@ import { setMdblistBatchKey } from "@/lib/providers/mdblist-batch";
 import { setUiLanguage } from "@/lib/i18n";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { STORAGE_KEY } from "./settings/defaults";
+import { noteNotify } from "./render-cause";
 import { readSettingsFile, writeSettingsFile } from "./settings/file-store";
 import { torrentEngineSetEnabled } from "./torrent/local-engine";
 import { loadFontData, saveFontData } from "./font-storage";
@@ -33,6 +34,7 @@ import type { Settings, StreamingService } from "./settings/types";
 import { markSectionDirty } from "./profile-sync/scheduler";
 import { configureLayoutStore } from "./layout-sync/store";
 import { SYNCED_SETTINGS_FIELDS } from "./layout-sync/sections";
+import { startTrayMenuBridge, type TrayMenuBridge } from "./tray-menu-bridge";
 
 export type {
   ContentCategory,
@@ -97,6 +99,9 @@ export function SettingsProvider({
   const [torrentEnginePolicyPending, setTorrentEnginePolicyPending] = useState(false);
   const [torrentEnginePolicyError, setTorrentEnginePolicyError] = useState(false);
   const settingsRef = useRef(settings);
+  const trayBridgeRef = useRef<TrayMenuBridge | null>(null);
+  const [trayPrefsReady, setTrayPrefsReady] = useState(false);
+  const [trayListenersReady, setTrayListenersReady] = useState(false);
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
@@ -391,8 +396,10 @@ export function SettingsProvider({
   }, [settings.customAppIcon]);
 
   useEffect(() => {
-    if (!("__TAURI_INTERNALS__" in window)) return;
+    if (!settingsReady || !("__TAURI_INTERNALS__" in window)) return;
+    let cancelled = false;
     void import("@tauri-apps/api/core").then(({ invoke }) => {
+      if (cancelled) return;
       void invoke("tray_set_prefs", {
         prefs: {
           closeToTray: settings.closeToTray,
@@ -400,9 +407,17 @@ export function SettingsProvider({
           pauseMinimized: settings.pauseMinimized,
           pauseUnfocused: settings.pauseUnfocused,
         },
-      }).catch((e) => console.warn("[harbor] tray_set_prefs failed", e));
+      })
+        .then(() => {
+          if (!cancelled) setTrayPrefsReady(true);
+        })
+        .catch((e) => console.warn("[harbor] tray_set_prefs failed", e));
     });
+    return () => {
+      cancelled = true;
+    };
   }, [
+    settingsReady,
     settings.closeToTray,
     settings.trayAlwaysOnTop,
     settings.pauseMinimized,
@@ -419,38 +434,63 @@ export function SettingsProvider({
       else unlisteners.push(u);
     };
     void import("@tauri-apps/api/event").then(({ listen }) => {
-      void listen<{
-        closeToTray: boolean;
-        alwaysOnTop: boolean;
-        pauseMinimized: boolean;
-        pauseUnfocused: boolean;
+      const prefs = listen<{
+        closeToTray?: boolean;
+        alwaysOnTop?: boolean;
+        pauseMinimized?: boolean;
+        pauseUnfocused?: boolean;
       }>("harbor://tray-prefs", (e) => {
-        const p = e.payload;
+        // The tray only sends the item that was toggled; absent fields keep
+        // whatever the user has in Settings.
+        const p = e.payload ?? {};
         setSettings((s) => ({
           ...s,
-          closeToTray: p.closeToTray,
-          trayAlwaysOnTop: p.alwaysOnTop,
-          pauseMinimized: p.pauseMinimized,
-          pauseUnfocused: p.pauseUnfocused,
+          closeToTray: p.closeToTray ?? s.closeToTray,
+          trayAlwaysOnTop: p.alwaysOnTop ?? s.trayAlwaysOnTop,
+          pauseMinimized: p.pauseMinimized ?? s.pauseMinimized,
+          pauseUnfocused: p.pauseUnfocused ?? s.pauseUnfocused,
         }));
       }).then(track);
-      void listen("harbor://cycle-theme", () => {
+      const cycle = listen("harbor://cycle-theme", () => {
         setSettings((s) => ({
           ...s,
           theme: { ...s.theme, preset: nextColorTheme(s.theme.preset) },
         }));
       }).then(track);
-      void listen<string>("harbor://set-theme", (e) => {
+      const theme = listen<string>("harbor://set-theme", (e) => {
         const id = e.payload;
-        if (!id || (!isKnownPreset(id) && !id.startsWith("user:"))) return;
+        if (
+          !id ||
+          (!isKnownPreset(id) && !(id === "custom" && settingsRef.current.theme.customColors))
+        )
+          return;
         setSettings((s) => ({ ...s, theme: { ...s.theme, preset: id as typeof s.theme.preset } }));
       }).then(track);
+      void Promise.all([prefs, cycle, theme])
+        .then(() => {
+          if (!cancelled) setTrayListenersReady(true);
+        })
+        .catch((error) => console.warn("[harbor] tray listeners failed", error));
     });
     return () => {
       cancelled = true;
       unlisteners.forEach((u) => u());
     };
   }, []);
+
+  useEffect(() => {
+    if (!settingsReady || !trayPrefsReady || !trayListenersReady) return;
+    const bridge = startTrayMenuBridge(() => settingsRef.current);
+    trayBridgeRef.current = bridge;
+    return () => {
+      bridge?.dispose();
+      trayBridgeRef.current = null;
+    };
+  }, [settingsReady, trayPrefsReady, trayListenersReady]);
+
+  useEffect(() => {
+    trayBridgeRef.current?.refresh();
+  }, [settings.theme, settings.customCss, settings.uiLanguage, settings.region]);
 
   useEffect(() => {
     let unsub: (() => void) | undefined;
@@ -554,6 +594,17 @@ export function SettingsProvider({
     });
   }, []);
 
+  useEffect(() => {
+    const onProviderChange = (e: Event) => {
+      const provider = (e as CustomEvent)?.detail?.provider as "stremio" | "nuvio" | undefined;
+      if (provider) {
+        setSettings((s) => (s.accountProvider === provider ? s : { ...s, accountProvider: provider }));
+      }
+    };
+    window.addEventListener("harbor:account-provider-changed", onProviderChange);
+    return () => window.removeEventListener("harbor:account-provider-changed", onProviderChange);
+  }, []);
+
   const setSettingsLinked = useCallback(
     (linked: boolean) => {
       const cur = sourceRef.current;
@@ -563,6 +614,12 @@ export function SettingsProvider({
     },
     [switchProfile],
   );
+
+  const previousSettings = useRef(settings);
+  useEffect(() => {
+    if (previousSettings.current !== settings) noteNotify("context:settings");
+    previousSettings.current = settings;
+  }, [settings]);
 
   const value = useMemo(
     () => ({

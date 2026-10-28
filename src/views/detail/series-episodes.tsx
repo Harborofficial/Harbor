@@ -19,7 +19,7 @@ import { getEpisodeProgress, resumeDefaultSeason } from "@/lib/episode-progress"
 import { scrollToDataEp } from "@/lib/episode-scroll";
 import { getViewedSeason } from "@/lib/season-view-pref";
 import { tmdbSeasonEpisodes, type Episode, type Season } from "@/lib/providers/tmdb";
-import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
+import { effectiveTmdbLanguage, tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import type { OrderedEpisode } from "@/lib/providers/tvdb-order";
 import { pickPreferredEpisodeOverview, pickPreferredEpisodeTitle } from "@/lib/localized-text";
 import {
@@ -52,12 +52,15 @@ import { useEpisodeProgressMap } from "./series-episodes/use-episode-progress-ma
 import { useTvdbSeasonTypes } from "./series-episodes/use-tvdb-season-types";
 import { useSeriesTvdbStills } from "./series-episodes/use-series-tvdb-stills";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
+import { SeasonExplorer } from "./season-explorer";
+import { useSeasonExplorerView } from "./use-season-explorer";
 
 export function SeriesEpisodes({
   meta,
   tvId,
   imdbId,
   seasons,
+  seasonPosters,
   lastEpisodeAir,
   scrollRef,
   cinemetaVideos,
@@ -69,6 +72,7 @@ export function SeriesEpisodes({
   tvId: number;
   imdbId: string | null;
   seasons: Season[];
+  seasonPosters?: Record<number, string>;
   lastEpisodeAir?: { seasonNumber: number; airDate: string | null };
   scrollRef: React.RefObject<HTMLElement | null>;
   cinemetaVideos?: NonNullable<Meta["videos"]>;
@@ -217,7 +221,13 @@ export function SeriesEpisodes({
     metaId: meta.id,
     preferCustomMeta: settings.preferCustomMetaAddon,
   });
-  const tvdbStills = useSeriesTvdbStills(imdbId, enrichedBase.length, settings.tvdbSeasonType);
+  const tvdbStills = useSeriesTvdbStills(
+    imdbId,
+    enrichedBase.length,
+    settings.tvdbSeasonType,
+    false,
+    !!settings.tvdbKey,
+  );
   const enrichedEpisodes = useMemo(() => {
     if (Object.keys(tvdbStills).length === 0) return enrichedBase;
     return enrichedBase.map((ep) => {
@@ -333,7 +343,7 @@ export function SeriesEpisodes({
     imdbId,
     meta.id,
     settings.tvdbKey,
-    tvdbPanelEnabled(settings),
+    tvdbPanelEnabled(settings) && !!settings.tvdbKey,
   );
   const orderTypesEff =
     settings.tmdbKey && orderTypes.length > 0
@@ -365,6 +375,9 @@ export function SeriesEpisodes({
     setActive,
     setOrderSeason,
     userPickedRef,
+    tmdbSeasonNameFallback:
+      settings.tvdbSeasonType === "aired" || settings.tvdbSeasonType === "official",
+    seasonPosters,
   });
   useEffect(() => {
     let cancelled = false;
@@ -525,8 +538,40 @@ export function SeriesEpisodes({
     [enrichedEpisodes],
   );
 
+  const explorerType = orderActive ? settings.tvdbSeasonType : "aired";
+  const showExplorer =
+    settings.tvdbSeasonExplorer !== false &&
+    !arcActive &&
+    picker.items.length > 0 &&
+    !["absolute", "tvdbabsolute"].includes(explorerType);
+
+  const explorer = useSeasonExplorerView({
+    metaId: meta.id,
+    imdbId,
+    tvdbKey: settings.tvdbKey,
+    tmdbKey: settings.tmdbKey,
+    tmdbTvId: tvId,
+    seasonPosters,
+    titlePoster: meta.poster,
+    seasonType: explorerType === "aired" ? "official" : explorerType,
+    lang: effectiveTmdbLanguage(),
+    items: picker.items,
+    activeKey: picker.activeKey,
+    enabled: showExplorer,
+    allowProxy: false,
+  });
+
   return (
     <div data-episodes className="flex scroll-mt-24 flex-col gap-6">
+      {showExplorer && (
+        <SeasonExplorer
+          key={`${meta.id}:${source}:${settings.tvdbSeasonType}`}
+          data={explorer}
+          background={meta.background}
+          activeKey={picker.activeKey}
+          onSelect={picker.onSelect}
+        />
+      )}
       <div className="flex items-start justify-between gap-4">
         <h3 className="shrink-0 pt-1 text-[22px] font-medium tracking-tight text-ink">
           {t("Episodes")}
@@ -582,7 +627,7 @@ export function SeriesEpisodes({
           />
           {panelActive ? (
             <TvdbOrderPanel
-              items={picker.items}
+              items={explorer.items}
               activeKey={picker.activeKey}
               onSelect={picker.onSelect}
               orderTypes={orderTypesEff}
@@ -592,7 +637,7 @@ export function SeriesEpisodes({
           ) : (
             (picker.items.length > 1 || arcAvailable) && (
               <SeasonArcPicker
-                items={picker.items}
+                items={explorer.items}
                 activeKey={picker.activeKey}
                 onSelect={picker.onSelect}
                 mode={arcAvailable ? mode : undefined}

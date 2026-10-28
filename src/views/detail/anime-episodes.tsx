@@ -1,9 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { scrollToDataEp } from "@/lib/episode-scroll";
 import { type FranchiseEntry } from "@/lib/providers/anime-detail";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { isUpcomingDate } from "@/lib/dates";
+import { airedOnly } from "@/lib/aired";
 import { useSettings } from "@/lib/settings";
 import { effectiveOrderProvider, tvdbPanelEnabled } from "@/lib/settings/episode-order";
 import { useView } from "@/lib/view";
@@ -35,6 +44,7 @@ import { useAnimeAiSearch } from "./anime-episodes/use-anime-ai-search";
 import { useAnimeProgressMap } from "./anime-episodes/use-anime-progress-map";
 import { useAnimePreferredSeason } from "./anime-episodes/use-anime-preferred-season";
 import { useAnimeTvdbPanel } from "./anime-episodes/use-anime-tvdb-panel";
+import { animeUpToEpisodeSlice } from "./anime-episodes/up-to-episodes";
 
 import { useFranchiseEpisodes } from "./anime-episodes/use-franchise-episodes";
 import { isFranchiseExtra } from "@/lib/providers/anime-detail";
@@ -51,13 +61,18 @@ import {
   fillAiredPlaceholderTitles,
   isPlaceholderEpisodeText,
 } from "@/lib/providers/episode-placeholder";
-import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
+import type { Season } from "@/lib/providers/tmdb";
+import { effectiveTmdbLanguage, tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import {
   episodeArtworkFor,
   unairedIndexes,
+  withEpisodeImdbRatings,
   type EpisodeArtwork,
 } from "@/lib/providers/anime-episode-enrich";
+import { useHarborEpisodeRatings } from "./use-episode-imdb-ratings";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
+import { SeasonExplorer } from "./season-explorer";
+import { useSeasonExplorerView } from "./use-season-explorer";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { aiIsGroq, aiKey, providerForModel } from "@/lib/ai-models";
 import { animeSeasonKey } from "./anime-episodes/anime-season-key";
@@ -101,7 +116,7 @@ function useEpisodeArtwork(
   return art;
 }
 
-export function AnimeEpisodes({
+export const AnimeEpisodes = memo(function AnimeEpisodes({
   meta,
   episodes,
   franchise,
@@ -112,6 +127,9 @@ export function AnimeEpisodes({
   episodeHint,
   localizedOverview,
   seasonOverviews,
+  tmdbTvId,
+  tmdbSeasons,
+  seasonPosters,
   onSeasonArt,
 }: {
   meta: Meta;
@@ -124,6 +142,9 @@ export function AnimeEpisodes({
   episodeHint?: { season: number; episode: number };
   localizedOverview?: string;
   seasonOverviews?: Record<number, string>;
+  tmdbTvId?: number;
+  tmdbSeasons?: Season[];
+  seasonPosters?: Record<number, string>;
   onSeasonArt?: (
     sel: {
       background?: string;
@@ -262,19 +283,7 @@ export function AnimeEpisodes({
     return null;
   }, [episodes, episodeHint]);
   const { settings, update } = useSettings();
-  const order = useAnimeOrder(
-    imdbId ?? null,
-    meta.id,
-    episodes,
-    effectiveOrderProvider(settings),
-    settings.tvdbSeasonType,
-    settings.tvdbKey,
-    preferredSeasonKey ?? undefined,
-    intentSeasonKey ?? undefined,
-    soloEntry,
-  );
   const routing = useAnimeWatchedRouting(meta, franchise, trackId);
-  const effectiveOrder = order;
   const { openMeta } = useView();
   const [activeEntryId, setActiveEntryId] = useState(currentId);
   useEffect(() => {
@@ -317,6 +326,19 @@ export function AnimeEpisodes({
     franchise,
     meta.id,
   );
+  const order = useAnimeOrder(
+    imdbId ?? null,
+    meta.id,
+    episodes,
+    effectiveOrderProvider(settings),
+    settings.tvdbSeasonType,
+    settings.tvdbKey,
+    preferredSeasonKey ?? undefined,
+    intentSeasonKey ?? undefined,
+    soloEntry,
+    !tvdbPanel.active,
+  );
+  const effectiveOrder = order;
 
   const onSeasonArtRef = useRef(onSeasonArt);
   onSeasonArtRef.current = onSeasonArt;
@@ -368,13 +390,22 @@ export function AnimeEpisodes({
     episodes.length,
     settings.tvdbSeasonType,
   );
-  const baseDisplay = tvdbPanel.panel
+  const ratings = useHarborEpisodeRatings(imdbId ?? null);
+  const unratedDisplay = tvdbPanel.panel
     ? tvdbPanel.panel.visibleEpisodes
     : !activeIsAnchor
       ? entryEpisodes
       : effectiveOrder
         ? effectiveOrder.visibleEpisodes
         : episodes;
+  const baseDisplay = useMemo(
+    () =>
+      withEpisodeImdbRatings(unratedDisplay, ratings, {
+        seriesMetaId: meta.id,
+        seriesImdbId: imdbId ?? null,
+      }),
+    [unratedDisplay, ratings, meta.id, imdbId],
+  );
   const artworkSeasons = useMemo(
     () => [
       ...new Set(
@@ -480,19 +511,6 @@ export function AnimeEpisodes({
     activeEntryId,
     onSelectEntry,
   );
-  // Track explicit picker selections so renderCount only resets when the user
-  // changes season, not when async ordering resolves to a new activeKey.
-  const pickedKeyRef = useRef<string | null>(null);
-  useEffect(() => {
-    pickedKeyRef.current = null;
-  }, [meta.id]);
-  const onPickerSelect = useCallback(
-    (key: string) => {
-      pickedKeyRef.current = key;
-      selectPickerItem(key);
-    },
-    [selectPickerItem],
-  );
   const [watchedMenu, setWatchedMenu] = useState<WatchedMenuTarget | null>(null);
   const openWatchedMenu = (
     e: React.MouseEvent,
@@ -557,6 +575,11 @@ export function AnimeEpisodes({
     settings,
   });
   const markSeason = (watched: boolean) => routing.markMany(displayEpisodes, watched);
+  // Cours share the season page but not a source entry, so mark the displayed
+  // order through the clicked card and write each entry's own watched keys.
+  const watchedMenuUpTo = watchedMenu
+    ? airedOnly(animeUpToEpisodeSlice(displayEpisodes, meta.id, watchedMenu), (ep) => ep.airdate)
+    : [];
 
   const orderedEpisodes = useMemo(
     () => (settings.episodeSort === "newest" ? displayEpisodes.slice().reverse() : displayEpisodes),
@@ -567,12 +590,20 @@ export function AnimeEpisodes({
   useEffect(() => {
     setRenderCount(WINDOW_STEP);
   }, [meta.id, settings.episodeLayout, settings.episodeSort, activeEntryId]);
-  useEffect(() => {
-    if (pickedKeyRef.current == null) return;
-    if (order?.activeKey !== pickedKeyRef.current) return;
-    pickedKeyRef.current = null;
-    setRenderCount(WINDOW_STEP);
-  }, [order?.activeKey]);
+  const onPickerSelect = useCallback(
+    (key: string) => {
+      setRenderCount(WINDOW_STEP);
+      selectPickerItem(key);
+    },
+    [selectPickerItem],
+  );
+  const onTvdbSelect = useCallback(
+    (key: string) => {
+      setRenderCount(WINDOW_STEP);
+      tvdbPanel.panel?.onSelect(key);
+    },
+    [tvdbPanel.panel?.onSelect],
+  );
   const grow = useCallback(
     () =>
       setRenderCount((c) =>
@@ -663,8 +694,69 @@ export function AnimeEpisodes({
       })),
     [displayEpisodes],
   );
+  const explorerPicker = tvdbPanel.panel ?? (activeIsAnchor ? effectiveOrder : null);
+  const explorerType =
+    tvdbPanel.panel?.activeType ??
+    (effectiveOrderProvider(settings) === "tvdb" ? settings.tvdbSeasonType : "aired");
+
+  const showExplorer =
+    settings.tvdbSeasonExplorer !== false &&
+    !isOneOff &&
+    !soloEntry &&
+    !!explorerPicker &&
+    !["absolute", "tvdbabsolute"].includes(explorerType);
+  const tmdbSeasonByNumber = useMemo(
+    () => new Map((tmdbSeasons ?? []).map((season) => [season.seasonNumber, season])),
+    [tmdbSeasons],
+  );
+  // TMDB numbers seasons differently in DVD/regional orders, so its metadata
+  // is only safe to borrow for aired/official views.
+  const tmdbSeasonFallback = explorerType === "aired" || explorerType === "official";
+  const explorerItems = useMemo(
+    () =>
+      (tvdbPanel.panel?.items ?? pickerItems).map((item) => {
+        if (!tmdbSeasonFallback) return item;
+        const seasonNumber = item.seasonNumber;
+        if (seasonNumber == null) return item;
+        const tmdb = tmdbSeasonByNumber.get(seasonNumber);
+        if (!tmdb) return item;
+        return {
+          ...item,
+          fallbackName: tmdb.nameLanguage === "en" || !tmdb.nameLanguage ? tmdb.name : undefined,
+          overview: item.overview || tmdb.overview,
+          overviewLanguage: item.overview ? item.overviewLanguage : tmdb.overviewLanguage,
+          poster: item.poster || seasonPosters?.[seasonNumber],
+        };
+      }),
+    [tvdbPanel.panel?.items, pickerItems, tmdbSeasonByNumber, tmdbSeasonFallback, seasonPosters],
+  );
+  const explorer = useSeasonExplorerView({
+    metaId: meta.id,
+    imdbId,
+    tvdbKey: settings.tvdbKey,
+    tmdbKey: settings.tmdbKey,
+    tmdbTvId,
+    seasonPosters,
+    titlePoster: meta.poster,
+    seasonType: explorerType === "aired" ? "official" : explorerType,
+    lang: effectiveTmdbLanguage(),
+    items: explorerItems,
+    activeKey: tvdbPanel.panel?.activeKey ?? franchiseActiveKey ?? explorerPicker?.activeKey ?? "",
+    enabled: showExplorer,
+    allowProxy: true,
+  });
+
   return (
     <div data-anime-episodes className="flex flex-col gap-6 scroll-mt-24">
+      {showExplorer && explorerPicker && (
+        <SeasonExplorer
+          key={`${meta.id}:${explorerType}`}
+          data={explorer}
+          background={meta.background}
+          activeKey={tvdbPanel.panel?.activeKey ?? franchiseActiveKey ?? explorerPicker.activeKey}
+          onSelect={tvdbPanel.panel ? onTvdbSelect : onPickerSelect}
+        />
+      )}
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-4">
           <h3 className="shrink-0 pt-1 text-[22px] font-medium tracking-tight text-ink">
@@ -724,9 +816,9 @@ export function AnimeEpisodes({
               ) : null
             ) : tvdbPanel.panel ? (
               <TvdbOrderPanel
-                items={tvdbPanel.panel.items}
+                items={explorer.items}
                 activeKey={tvdbPanel.panel.activeKey}
-                onSelect={tvdbPanel.panel.onSelect}
+                onSelect={onTvdbSelect}
                 orderTypes={tvdbPanel.panel.orderTypes}
                 activeType={tvdbPanel.panel.activeType}
                 onSelectType={(v) =>
@@ -737,7 +829,7 @@ export function AnimeEpisodes({
               <div aria-hidden className="h-10 w-44 animate-pulse rounded-full bg-white/[0.06]" />
             ) : effectiveOrder ? (
               <SeasonArcPicker
-                items={pickerItems}
+                items={explorer.items}
                 activeKey={franchiseActiveKey ?? effectiveOrder.activeKey}
                 onSelect={onPickerSelect}
               />
@@ -840,17 +932,13 @@ export function AnimeEpisodes({
                 }
           }
           target={watchedMenu}
-          allEpisodes={entryEpisodes
-            .filter((ep) => (ep.sourceMetaId ?? meta.id) === (watchedMenu.metaId ?? meta.id))
-            .map((ep) => ({
-              season: ep.seasonNumber ?? 1,
-              episode: ep.number,
-              released: ep.airdate ?? null,
-              absoluteNumber: ep.absoluteNumber,
-            }))}
+          upToScope={{
+            count: watchedMenuUpTo.length,
+            markWatched: () => routing.markMany(watchedMenuUpTo, true),
+          }}
           onClose={() => setWatchedMenu(null)}
         />
       )}
     </div>
   );
-}
+});

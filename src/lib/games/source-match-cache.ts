@@ -3,6 +3,8 @@ import type { StoredMatchPreview } from './source-match-preview';
 
 export type CachedSourceMatch = { release: SourceRelease; match: 'identity' | 'title' };
 export const SOURCE_MATCH_CACHE_BYTES = 16 * 1024 * 1024;
+/** Bump when matching semantics change so a long-running session cannot reuse stale results. */
+export const SOURCE_MATCH_REVISION = 2;
 const MAX_QUERIES = 512, MAX_MATCHES = 8192, PER_OWNER = 12, PER_QUERY = 1000;
 type Owner = { queries: Map<string, object> };
 type Batch = { kind: 'files'; values: readonly CachedSourceMatch[] } | { kind: 'previews'; values: readonly StoredMatchPreview[] };

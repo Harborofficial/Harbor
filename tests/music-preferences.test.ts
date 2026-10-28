@@ -9,7 +9,6 @@ import type { MusicTrack } from "../src/lib/music/types.ts";
 
 type Preferences = typeof import("../src/lib/music/preferences.ts");
 type Player = typeof import("../src/lib/music/player.ts");
-type Transport = typeof import("../src/components/music/music-queue.tsx");
 
 // Exercise the real stores with native and React boundaries stubbed, as in updater tests.
 function load<T>(
@@ -91,6 +90,53 @@ function player(localStorage: unknown) {
       "@tauri-apps/api/event": { listen: async () => () => {} },
       react: {},
       "./catalog": {},
+      "./source-version": {
+        compatibleVocalVersion: () => true,
+        shouldResolvePreferredSource: () => false,
+      },
+      "./queue-automation": {
+        cancelMusicQueueAutomation: () => {},
+        markMusicQueueAutomationStarted: () => {},
+        ownsMusicQueueAutomation: () => true,
+      },
+      "@/lib/active-profile-id": {
+        activeProfileId: () => "default",
+        activeProfileIsPrimary: () => true,
+      },
+      "./listening-affinity": {
+        hydrateListeningAffinity: async () => {},
+        observeMusicListening: () => {},
+      },
+      "./artist-blocks": {
+        filterBlockedTracks: (tracks: unknown) => tracks,
+        hydrateArtistBlockStore: async () => {},
+      },
+      "./liked-artists": { hydrateLikedArtistStore: async () => {} },
+      "./decks": { engineSnapshot: async () => null },
+      "./queue-source": { adoptRequestedIdentity: (identity: unknown) => identity },
+      "./explicit-preference": {
+        explicitnessOf: () => 0,
+        rankByExplicitness: (list: unknown[]) => list,
+      },
+      "./transport": {
+        musicAdvance: () => null,
+        musicPrevious: () => null,
+        musicWarmTargets: () => [],
+        resetMusicOrder: () => {},
+      },
+      "./recent-context": {
+        hydrateMusicContextTracks: async () => {},
+        hydrateMusicRecentContexts: async () => {},
+      },
+      "./recent-destinations": { hydrateMusicDestinations: async () => {} },
+      "./pinned-playlists": { hydratePinnedMusicPlaylists: async () => {} },
+      "./pinned-sources": {
+        loadPinnedSources: () => {},
+        peekPinnedSource: () => null,
+        pinSourceFor: () => {},
+        unpinSourceFor: () => {},
+      },
+      "@/lib/platform": { isWindowsDesktop: () => false },
       "./queue-order": { MusicQueueOrder, queueTrackKey },
       "./track-identity": { dedupeMusicTracks, sameMusicTrack },
       "./deck-sync": {
@@ -101,20 +147,23 @@ function player(localStorage: unknown) {
         sendDeckCommand: () => {},
         serveDeckCommands: () => () => {},
       },
-      "./deck-primary": { createDeckAdoption: () => ({ deck: () => 0, adopt: () => false }) },
+      "./deck-primary": {
+        createDeckAdoption: () => ({ deck: () => 0, adopt: () => false }),
+        nativePlaybackAdoption: () => null,
+      },
       "./liked": {
         isMusicLiked: (ids: readonly string[], t: any) => !!t && ids.includes(t.id),
         likedIdsFor: (t: any) => (t ? [t.id] : []),
         withoutLiked: (ids: readonly string[], t: any) => ids.filter((id: string) => id !== t.id),
       },
       "./source-consent": {
-      musicSourceAllowed: () => true,
-      musicPlaybackSourceAllowed: () => true,
-      filterMusicSourceCandidates: (candidates: unknown[]) => candidates,
-      hydrateMusicSourceConsent: async () => {},
-      subscribeMusicSourceConsent: () => () => {},
-      requestMusicSourceConsent: () => {},
-    },
+        musicSourceAllowed: () => true,
+        musicPlaybackSourceAllowed: () => true,
+        filterMusicSourceCandidates: (candidates: unknown[]) => candidates,
+        hydrateMusicSourceConsent: async () => {},
+        subscribeMusicSourceConsent: () => () => {},
+        requestMusicSourceConsent: () => {},
+      },
       "./queue-insert": {
         insertIntoQueue: (q: unknown[], t: unknown, at: number) => [
           ...q.slice(0, at),
@@ -131,6 +180,7 @@ function player(localStorage: unknown) {
         writeCheckpointToDb: () => {},
       },
       "./playback-origin": {
+        beginMusicQueue: () => {},
         getMusicPlaybackOrigin: () => null,
         restoreMusicPlaybackOrigin: () => {},
       },
@@ -221,7 +271,10 @@ test("denied reads preserve SQLite data and allow playback with the default volu
   const { store, calls } = player(browser);
   assert.equal(store.getMusicState().volume, 0.82);
   await store.initializeMusic();
-  assert.deepEqual(calls[0], { command: "music_db_init", args: { migration: null } });
+  assert.deepEqual(calls[0], {
+    command: "music_db_init",
+    args: { migration: null, profile: null },
+  });
   assert.deepEqual(store.getMusicState().likedIds, [track.id]);
   assert.deepEqual(store.getMusicState().recents, [track]);
   assert.deepEqual(store.getMusicState().queue, [track]);
@@ -229,6 +282,29 @@ test("denied reads preserve SQLite data and allow playback with the default volu
   assert.ok(calls.some(({ command }) => command === "music_play_track"));
   assert.equal(store.getMusicState().error, null);
   assert.deepEqual(browser.removed, []);
+});
+
+test("a player closed from the dock stays closed after a restart", async () => {
+  const browser = storage();
+  const first = player(browser);
+  await first.store.initializeMusic();
+  assert.equal(first.store.getMusicState().current?.id, track.id);
+
+  await first.store.closeMusicPlayer();
+  assert.equal(first.store.getMusicState().current, null);
+  assert.equal(first.prefs.readMusicPreference("harbor.music.player.closed.v1"), "1");
+  assert.equal(browser.values.get("harbor.music.session.v1"), "null");
+
+  // A new module instance is what a reload gives us: same storage, fresh state.
+  const restarted = player(browser);
+  await restarted.store.initializeMusic();
+  assert.equal(restarted.store.getMusicState().current, null);
+  assert.equal(restarted.store.getMusicState().phase, "idle");
+  assert.deepEqual(restarted.store.getMusicState().queue, []);
+
+  // Playing again explicitly reopens the dock and clears the closed flag.
+  await restarted.store.playMusic(track);
+  assert.equal(restarted.prefs.readMusicPreference("harbor.music.player.closed.v1"), "0");
 });
 
 test("quota failure still publishes volume and sends it to the native music engine", () => {
@@ -277,9 +353,8 @@ test("shuffle and repeat notify controls and guide queue advancement when storag
   };
   const prefs = preferences(browser);
   const listeners = new Set<() => void>();
-  let advance: Parameters<Player["setMusicAdvance"]>[0];
-  const transport = load<Transport>(
-    "src/components/music/music-queue.tsx",
+  const transport = load<typeof import("../src/lib/music/transport.ts")>(
+    "src/lib/music/transport.ts",
     {
       react: {
         useSyncExternalStore: (
@@ -292,26 +367,8 @@ test("shuffle and repeat notify controls and guide queue advancement when storag
           return get();
         },
       },
-      "react/jsx-runtime": {},
-      "react-dom": {},
-      "lucide-react": {},
-      "@/components/poster": {},
-      "./music-service-logo": {},
-      "./music-track-labels": {},
-      "./music-queue.css": {},
-      "@/lib/i18n": {},
-      "@/lib/music/player": {
-        setMusicAdvance: (next: typeof advance) => {
-          advance = next;
-        },
-      },
-      "@/lib/music/queue-order": { MusicQueueOrder, queueTrackKey },
-      "@/lib/music/preferences": prefs,
-      "@/lib/music/sources": { getMusicSourceCandidates: () => Promise.resolve([]) },
-      "@/lib/music/queue-source": {
-        replaceQueueTrack: (queue: unknown) => queue,
-        selectableSources: () => [],
-      },
+      "./queue-order": { MusicQueueOrder },
+      "./preferences": prefs,
     },
     {},
   );
@@ -327,8 +384,8 @@ test("shuffle and repeat notify controls and guide queue advancement when storag
   assert.equal(prefs.readMusicPreference("harbor.music.shuffle.v1"), "1");
   assert.equal(prefs.readMusicPreference("harbor.music.repeat.v1"), "all");
   const next = { ...track, id: "next" };
-  assert.equal(advance!([track, next], 0, true), next);
+  assert.equal(transport.musicAdvance([track, next], 0, true), next);
   transport.cycleMusicRepeat();
-  assert.equal(advance!([track, next], 0, true), track);
+  assert.equal(transport.musicAdvance([track, next], 0, true), track);
   assert.deepEqual(browser.removed, []);
 });

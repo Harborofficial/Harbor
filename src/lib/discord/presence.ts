@@ -8,7 +8,7 @@ const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in windo
 // reject the whole activity (presence vanishes), discord.com/invite is dropped
 // silently. A community-invite button needs a redirect on a domain we own.
 const STATIC_BUTTONS = [
-  { label: "Harbor Website", url: "https://github.com/Harborofficial/Harbor" },
+  { label: "Harbor Website", url: "https://harborcommunity.site" },
 ];
 /** How long a paused song keeps its presence before it clears. */
 const MUSIC_PAUSED_HIDE_MS = 3500;

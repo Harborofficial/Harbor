@@ -6,7 +6,8 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const cards=row=>[...row.children];
 const stride=row=>{const c=cards(row);return c[1]?c[1].getBoundingClientRect().left-c[0].getBoundingClientRect().left:row.clientWidth};
 const maxScroll=row=>Math.max(0,row.scrollWidth-row.clientWidth);
-const clamp=(value,row)=>Math.max(0,Math.min(maxScroll(row),value));
+const isRtl=row=>getComputedStyle(row).direction==='rtl';
+const clamp=(value,row)=>isRtl(row)?Math.max(-maxScroll(row),Math.min(0,value)):Math.max(0,Math.min(maxScroll(row),value));
 const enabled=()=>!reduced.matches&&!document.body.classList.contains('motion-off');
 
 // Fit an integer number of cards to the actual rail, including split editorial layouts.
@@ -21,12 +22,12 @@ function fitRail(row) {
  const width=(Math.ceil(((available-(count-1)*gap)/count)*64)+1)/64;
  if(state.width===width&&state.gap===gap)return;
  const index=state.step?Math.round(row.scrollLeft/state.step):0;
- const wasEnd=state.step&&state.max>0&&row.scrollLeft>=state.max-2;
+ const wasEnd=state.step&&state.max>0&&Math.abs(row.scrollLeft)>=state.max-2;
  cancel(row,false);row.style.scrollSnapType='none';row.style.scrollBehavior='auto';
  row.style.setProperty('--rail-card-width',width+'px');
- row.style.scrollPaddingInline=style.paddingLeft+' '+style.paddingRight;
+ row.style.scrollPaddingInline=style.paddingInlineStart+' '+style.paddingInlineEnd;
  row.dataset.fitted='';state.width=width;state.gap=gap;state.count=count;state.step=width+gap;
- state.max=maxScroll(row);row.scrollLeft=wasEnd?state.max:clamp(index*state.step,row);
+ state.max=maxScroll(row);row.scrollLeft=wasEnd?(isRtl(row)?-state.max:state.max):clamp(index*state.step,row);
  row.style.scrollSnapType='';row.style.scrollBehavior='';updateRail(row);
 }
 
@@ -39,10 +40,11 @@ export function railMarkup(content,title,trackClass='media-row',extraClass='') {
 export function updateRail(row) {
  const rail=row.closest('.harbor-rail');if(!rail)return;
  const left=rail.querySelector('.rail-left'),right=rail.querySelector('.rail-right');
- const previous=row.scrollLeft>3,next=row.scrollLeft<maxScroll(row)-3;
+ const rtl=isRtl(row),position=Math.abs(row.scrollLeft);
+ const previous=rtl?position<maxScroll(row)-3:position>3,next=rtl?position>3:position<maxScroll(row)-3;
  left.disabled=!previous;right.disabled=!next;left.tabIndex=previous?0:-1;right.tabIndex=next?0:-1;
- if(!previous&&document.activeElement===left)cards(row)[0]?.focus({preventScroll:true});
- if(!next&&document.activeElement===right)cards(row).at(-1)?.focus({preventScroll:true});
+ if(!previous&&document.activeElement===left)(rtl?cards(row).at(-1):cards(row)[0])?.focus({preventScroll:true});
+ if(!next&&document.activeElement===right)(rtl?cards(row)[0]:cards(row).at(-1))?.focus({preventScroll:true});
  rail.classList.toggle('can-prev',previous);rail.classList.toggle('can-next',next);
  const poster=row.querySelector('.poster-wrap,.director-portrait,.feature-selector');
  if(poster){const art=poster.getBoundingClientRect(),container=rail.getBoundingClientRect();rail.style.setProperty('--rail-art-height',art.height+'px');rail.style.setProperty('--rail-art-top',(art.top-container.top)+'px');}
@@ -60,7 +62,7 @@ function cancel(row,restore=true) {
 function glide(row,rawTarget) {
  cancel(row,false);const state=states.get(row);if(!state)return;
  const start=row.scrollLeft,target=clamp(rawTarget,row),distance=target-start;
- if(!enabled()||Math.abs(distance)<1){row.scrollLeft=target;updateRail(row);return}
+ if(!enabled()||Math.abs(distance)<1){row.scrollLeft=target;cancel(row);updateRail(row);return}
  row.style.scrollSnapType='none';row.style.scrollBehavior='auto';
  const time=performance.now(),duration=Math.max(RAIL.minDuration,Math.min(RAIL.maxDuration,RAIL.baseDuration+Math.abs(distance)*RAIL.distanceTime));
  const frame=now=>{
@@ -72,15 +74,14 @@ function glide(row,rawTarget) {
 }
 
 export function scrollRail(row,direction) {
- const step=stride(row),count=states.get(row)?.count||1;
+ const step=Math.abs(stride(row)),count=states.get(row)?.count||1;
  glide(row,(Math.round(row.scrollLeft/step)+direction*count)*step);
 }
 
 export function revealRailCard(card) {
  const row=card.closest('.rail-track');if(!row)return;
- const left=card.offsetLeft-row.children[0].offsetLeft;
- const padding=(parseFloat(getComputedStyle(row).paddingLeft)||0)*2;
- if(left<row.scrollLeft-1||left+card.offsetWidth>row.scrollLeft+row.clientWidth-padding+1)glide(row,left);
+ const box=row.getBoundingClientRect(),item=card.getBoundingClientRect(),style=getComputedStyle(row);
+ if(item.left<box.left+(parseFloat(style.paddingLeft)||0)-1||item.right>box.right-(parseFloat(style.paddingRight)||0)+1)glide(row,card.offsetLeft-row.children[0].offsetLeft);
 }
 
 export function initRails(root=document) {
@@ -111,7 +112,7 @@ export function initRails(root=document) {
    state.suppressClick=true;setTimeout(()=>state.suppressClick=false,0);
    const velocity=e.type==='pointercancel'||performance.now()-drag.lastTime>100?0:drag.velocity;
    const projection=Math.max(-row.clientWidth,Math.min(row.clientWidth,-velocity*Math.abs(velocity)/(2*RAIL.friction)));
-   glide(row,Math.round((row.scrollLeft+projection)/stride(row))*stride(row));
+    const step=stride(row);glide(row,Math.round((row.scrollLeft+projection)/step)*step);
   };
   row.addEventListener('pointerup',end);row.addEventListener('pointercancel',end);
   row.addEventListener('lostpointercapture',end);
@@ -119,12 +120,11 @@ export function initRails(root=document) {
   row.addEventListener('keydown',e=>{
    if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
    const children=cards(row),current=children.indexOf(e.target.closest('.media-card,.director-button,.feature-selector,.playlist-card'));if(current<0)return;
-   const next=e.key==='Home'?0:e.key==='End'?children.length-1:current+(e.key==='ArrowRight'?1:-1);
+   const next=e.key==='Home'?0:e.key==='End'?children.length-1:current+(e.key==='ArrowRight'?1:-1)*(isRtl(row)?-1:1);
    if(!children[next])return;e.preventDefault();e.stopPropagation();
    children[next].focus({preventScroll:true});
-   const padding=parseFloat(getComputedStyle(row).paddingLeft)||0;
-   const left=children[next].offsetLeft-children[0].offsetLeft;
-   if(e.key==='Home'||e.key==='End'||left<row.scrollLeft||left+children[next].offsetWidth>row.scrollLeft+row.clientWidth-padding)glide(row,left);
+   if(e.key==='Home'||e.key==='End')glide(row,e.key==='Home'?0:(isRtl(row)?-1:1)*maxScroll(row));
+   else revealRailCard(children[next]);
   });
   new ResizeObserver(()=>{fitRail(row);updateRail(row)}).observe(row);
   fitRail(row);updateRail(row);

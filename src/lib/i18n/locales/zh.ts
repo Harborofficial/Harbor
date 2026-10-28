@@ -1,3 +1,4 @@
+import reviews from "./zh/reviews";
 import playOrders from "./zh/play-orders";
 import gameRomLibrary from "./zh/game-rom-library";
 import gameNotes from "./zh/game-notes";
@@ -80,6 +81,7 @@ import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./zh/ebook-sources";
 import settingsRefinements from "./zh/settings-refinements";
 import coverage from "./zh/coverage";
+import subtitles from "./zh/subtitles";
 import sweepA from "./zh/sweep-a";
 import sweepB from "./zh/sweep-b";
 import sweepC from "./zh/sweep-c";
@@ -268,6 +270,7 @@ const zh: Record<string, string> = {
 
   ...ebookSources,
   ...coverage,
+  ...subtitles,
   ...sweepA,
   ...sweepB,
   ...sweepC,
@@ -362,6 +365,7 @@ const zh: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...reviews,
   ...queueBasket,
 };
 

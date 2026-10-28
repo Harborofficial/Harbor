@@ -45,7 +45,7 @@ const settingsFill: Record<string, string> = {
   "Check the shared database first. When this exact subtitle has already been synced by someone else, yours snaps into place with no analysis.":
     "يتحقّق أولًا من قاعدة البيانات المشتركة. وعندما تكون هذه الترجمة بالتحديد قد تمّت مزامنتها من قِبل شخص آخر، تنضبط ترجمتك في مكانها دون أي تحليل.",
   "Community sync server": "خادم مزامنة المجتمع",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.":
     "اتركه فارغًا لاستخدام خادم المجتمع الخاص بـ Harbor. أدخِل عنوان URL للإشارة إلى خادمك الخاص بدلًا من ذلك. ويوقف الوضع الخاص أدناه كل اتصال في كلتا الحالتين.",
   "Private mode": "الوضع الخاص",

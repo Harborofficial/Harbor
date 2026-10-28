@@ -86,9 +86,7 @@ function rssLine(input: DumpInput): string {
   const { harborRss, webviewRss, total } = input.nativeMem;
   if (total <= 0) return "  native rss:    unavailable on this platform build";
   const webview =
-    webviewRss > 0
-      ? `webview ${webviewRss.toFixed(0)}`
-      : "webview not attributed on this platform";
+    webviewRss > 0 ? `webview ${webviewRss.toFixed(0)}` : "webview not attributed on this platform";
   return `  native rss:    ${total.toFixed(0)} MB (app ${harborRss.toFixed(0)}, ${webview}) tier ${input.ramTier}`;
 }
 
@@ -163,9 +161,7 @@ function framesSection(input: DumpInput): string[] {
   lines.push(
     "  high average fps still hides a tail. A long p99 with a low max and no long tasks means fill-rate",
   );
-  lines.push(
-    "  or compositor cost, which scales with the backing pixels above, not JS.",
-  );
+  lines.push("  or compositor cost, which scales with the backing pixels above, not JS.");
   return lines;
 }
 
@@ -416,7 +412,23 @@ export function buildDumpText(input: DumpInput): string {
   lines.push("  time          kind     heap     dom     imgs   label");
   for (const s of input.events) {
     lines.push(
-      `  ${formatTime(s.ts)}  [${s.kind.padEnd(6)}] ${formatMB(s.heapMB)}  ${String(s.domNodes).padStart(5, " ")}  ${String(s.imgs).padStart(4, " ")}   ${s.label}`,
+      `  ${formatTime(s.ts)}  [${s.kind.padEnd(6)}] ${formatMB(s.heapMB)}  ${String(s.domNodes).padStart(5, " ")}  ${String(s.imgs).padStart(4, " ")}   ${s.label}${
+        s.kind === "mark" &&
+        (s.label.startsWith("simkl:") || s.label.startsWith("plugin-store:")) &&
+        s.detail
+          ? ` ${JSON.stringify({
+              path: s.detail.path,
+              durationMs: s.detail.durationMs,
+              statuses: s.detail.statuses,
+              watched: s.detail.watched,
+              store: s.detail.store,
+              collection: s.detail.collection,
+              count: s.detail.count,
+              subscriber: s.detail.subscriber,
+              subscribers: s.detail.subscribers,
+            })}`
+          : ""
+      }`,
     );
   }
 

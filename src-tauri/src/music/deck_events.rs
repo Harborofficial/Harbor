@@ -227,35 +227,47 @@ pub(super) fn audio_quality(mpv: &Mpv, local_path: Option<&Path>) -> AudioQualit
         if let Some(properties) = local_audio_properties(path) {
             // audio-params/format describes decoder packing (e.g. s32 for 24-bit
             // FLAC), so only file properties may supply the source bit depth.
-            quality.bit_depth = properties
-                .bit_depth()
-                .filter(|value| *value > 0 && *value <= 64);
-            quality.sample_rate_hz = quality.sample_rate_hz.or(properties
-                .sample_rate()
+            quality.bit_depth = properties.bit_depth.filter(|value| *value > 0 && *value <= 64);
+            quality.sample_rate_hz = quality.sample_rate_hz.or(properties.sample_rate_hz
                 .filter(|value| *value > 0 && *value <= 3_072_000));
-            quality.bitrate_kbps = quality.bitrate_kbps.or(properties
-                .audio_bitrate()
-                .filter(|value| *value > 0 && *value <= 100_000)
-                .map(f64::from));
+            quality.bitrate_kbps = quality.bitrate_kbps.or(properties.bitrate_kbps
+                .filter(|value| value.is_finite() && *value > 0.0 && *value <= 100_000.0));
         }
     }
     quality
 }
 
-fn local_audio_properties(path: &Path) -> Option<lofty::properties::FileProperties> {
-    use lofty::file::AudioFile;
-    let tagged = lofty::probe::Probe::open(path)
-        .ok()?
-        .guess_file_type()
-        .ok()?
-        .options(
-            lofty::config::ParseOptions::new()
-                .read_tags(false)
-                .read_cover_art(false),
-        )
-        .read()
-        .ok()?;
-    Some(tagged.properties().clone())
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LocalAudioProperties {
+    bit_depth: Option<u8>,
+    sample_rate_hz: Option<u32>,
+    bitrate_kbps: Option<f64>,
+}
+
+fn local_audio_properties(path: &Path) -> Option<LocalAudioProperties> {
+    if let Some(result) = crate::music::m3u::module_request(serde_json::json!({
+        "command": "read_audio_properties",
+        "path": path.to_string_lossy()
+    })) {
+        return serde_json::from_value(result.ok()?).ok();
+    }
+    #[cfg(feature = "music-legacy-metadata")]
+    {
+        use lofty::file::AudioFile;
+        let tagged = lofty::probe::Probe::open(path).ok()?
+            .guess_file_type().ok()?
+            .options(lofty::config::ParseOptions::new()
+                .read_tags(false).read_cover_art(false)).read().ok()?;
+        let p = tagged.properties();
+        return Some(LocalAudioProperties {
+            bit_depth:p.bit_depth(),
+            sample_rate_hz:p.sample_rate(),
+            bitrate_kbps:p.audio_bitrate().map(f64::from),
+        });
+    }
+    #[cfg(not(feature = "music-legacy-metadata"))]
+    None
 }
 
 fn event_payload(event: Event) -> Option<Value> {

@@ -3,17 +3,16 @@ import type { Meta } from "@/lib/cinemeta";
 import { pushBigPicture } from "@/lib/big-picture";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
 import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
-import { episodeFromVideoId, isAnimeCwItem, libraryMetaType, type LibraryItem } from "@/lib/stremio";
+import {
+  episodeFromVideoId,
+  isAnimeCwItem,
+  libraryMetaType,
+  type LibraryItem,
+} from "@/lib/stremio";
 import { forceBpMeta, publishBpMeta, registerBpTarget } from "./bp-focus-meta";
 import { requestBpPlay } from "./bp-play-request";
 import { useBpT } from "./bp-i18n";
-import {
-  BP_FLUID_BOX,
-  bpBoxCss,
-  bpBoxPx,
-  bpHeroArt,
-  type BpArtBox,
-} from "./bp-art";
+import { BP_FLUID_BOX, bpBoxCss, bpBoxPx, bpHeroArt, type BpArtBox } from "./bp-art";
 import { BpArt } from "./bp-art-img";
 import { useBpArt } from "./use-bp-art";
 import {
@@ -43,15 +42,20 @@ export function cwMeta(item: LibraryItem, resolved?: string): Meta {
 
 type T = (key: string, vars?: Record<string, string | number>) => string;
 
-function episodeLabel(i: LibraryItem, t: T): string {
+function episodeLabel(
+  i: LibraryItem,
+  t: T,
+  mapped: { season: number; episode: number } | null,
+): string {
   if (i.type === "movie") return "";
   const s = i.state?.season ?? 0;
   const e = i.state?.episode ?? 0;
   const parsed = e > 0 ? { season: s, episode: e } : episodeFromVideoId(i.state?.video_id ?? "");
   if (!parsed || !parsed.episode) return "";
-  return isAnimeCwItem(i)
-    ? t("Episode {n}", { n: parsed.episode })
-    : t("S{s} E{e}", { s: parsed.season, e: parsed.episode });
+  if (!isAnimeCwItem(i)) return t("S{s} E{e}", { s: parsed.season, e: parsed.episode });
+  if (mapped && (mapped.season !== parsed.season || mapped.episode !== parsed.episode))
+    return t("S{s} E{e}", { s: mapped.season, e: mapped.episode });
+  return t("Episode {n}", { n: parsed.episode });
 }
 
 function remainingLabel(i: LibraryItem, t: T): string {
@@ -124,9 +128,9 @@ export function BpCwCard({
   const meta = useMemo(() => cwMeta(item, art.url), [item, art.url]);
   const [loaded, setLoaded] = useState(false);
   const t = useBpT();
-  const ep = episodeLabel(item, t);
-  const left = remainingLabel(item, t);
   const card = useBpCwCardMeta(item, boxRef);
+  const ep = episodeLabel(item, t, card.mappedEpisode);
+  const left = remainingLabel(item, t);
   const [badLogo, setBadLogo] = useState<string | null>(null);
   // The clear logo takes the title line inside the scrim rather than floating
   // over the middle of the art: the scrim is the only part of the card with
@@ -180,7 +184,10 @@ export function BpCwCard({
         style={{ background: "var(--bp-scrim-up)" }}
       />
       <BpCwCardBadges watched={card.watched} newEpisode={card.newEpisode} />
-      <span data-bp-cw-pad className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-[clamp(11px,1.3vw,20px)]">
+      <span
+        data-bp-cw-pad
+        className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-[clamp(11px,1.3vw,20px)]"
+      >
         <span className="flex items-end justify-between gap-[clamp(8px,0.8vw,14px)]">
           <span className="flex min-w-0 flex-1 flex-col items-start gap-[clamp(4px,0.6vh,8px)]">
             {logo ? (
@@ -194,16 +201,14 @@ export function BpCwCard({
                 className="max-h-[clamp(24px,3.8vh,52px)] w-auto max-w-[76%] object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]"
               />
             ) : (
-              <span data-bp-cw-title className="line-clamp-1 text-[clamp(14px,1.98vh,23px)] font-bold leading-tight text-ink">
+              <span
+                data-bp-cw-title
+                className="line-clamp-1 text-[clamp(14px,1.98vh,23px)] font-bold leading-tight text-ink"
+              >
                 {item.name}
               </span>
             )}
-            <BpCwCardPill
-              sub={ep}
-              external={item.external}
-              meta={card}
-              remaining={left}
-            />
+            <BpCwCardPill sub={ep} external={item.external} meta={card} remaining={left} />
           </span>
           {card.watcher && <BpCwWatcher watcher={card.watcher} />}
         </span>

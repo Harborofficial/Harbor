@@ -7,11 +7,13 @@ export function useSeriesTvdbStills(
   imdbId: string | null,
   seasonEpisodeCount: number,
   type: string,
+  allowProxy = false,
+  hasKey = false,
 ): TvdbImageMap {
   const [map, setMap] = useState<TvdbImageMap>({});
   const isLong = seasonEpisodeCount > LONG_SEASON_MIN;
   useEffect(() => {
-    if (!isLong || !imdbId) {
+    if (!isLong || !imdbId || (!hasKey && !allowProxy)) {
       setMap({});
       return;
     }
@@ -22,6 +24,6 @@ export function useSeriesTvdbStills(
     return () => {
       cancel = true;
     };
-  }, [imdbId, type, isLong]);
+  }, [imdbId, type, isLong, allowProxy, hasKey]);
   return map;
 }

@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
+import {
+  pickTmdbTitle,
+  tmdbEnglishTitle,
+  tmdbLanguageBase,
+} from "../src/lib/providers/tmdb/tmdb-title-fallback.ts";
 
 function load(path: string, mocks: Record<string, unknown>) {
   const output = ts.transpileModule(readFileSync(path, "utf8"), {
@@ -32,6 +37,11 @@ function metadataHarness() {
     },
     "@/lib/providers/tmdb/tmdb-images": {
       tmdbLocalizedPoster: async () => fail ? undefined : `${imageLanguage}.jpg`,
+    },
+    "@/lib/providers/tmdb/tmdb-title-fallback": {
+      pickTmdbTitle,
+      tmdbEnglishTitle,
+      tmdbLanguageBase,
     },
   });
   return { ...api, requests, setImageLanguage: (v: string) => { imageLanguage = v; }, fail: () => { fail = true; } };

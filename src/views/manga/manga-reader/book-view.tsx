@@ -28,6 +28,7 @@ const hostOf = (u: string): string => {
 };
 
 const SNAP_BACK_MS = 220;
+const ASPECT_TIMEOUT_MS = 3000;
 
 function prefersReducedMotion(): boolean {
   return (
@@ -86,6 +87,31 @@ function loadFlipbook(): Promise<void> {
   return loaded;
 }
 
+function sampleAspect(src: string): Promise<number> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const timer = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      resolve(1.4);
+    }, ASPECT_TIMEOUT_MS);
+    void measureAspect(src).then(
+      (aspect) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        resolve(aspect);
+      },
+      () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        resolve(1.4);
+      },
+    );
+  });
+}
+
 function sampledAspect(srcs: string[]): Promise<number> {
   if (srcs.length === 0) return Promise.resolve(1.4);
   const idxs = [
@@ -98,7 +124,7 @@ function sampledAspect(srcs: string[]): Promise<number> {
       ].filter((i) => i < srcs.length),
     ),
   ];
-  return Promise.all(idxs.map((i) => measureAspect(srcs[i]))).then((aspects) => {
+  return Promise.all(idxs.map((i) => sampleAspect(srcs[i]))).then((aspects) => {
     const valid = aspects.filter((a) => a > 0.2 && a < 6).sort((a, b) => a - b);
     if (!valid.length) return 1.4;
     return valid[Math.floor((valid.length - 1) / 2)];
@@ -127,6 +153,7 @@ export function BookFlip({
   instantTurns = false,
   onProgress,
   onReady,
+  onError,
 }: {
   pages: string[];
   rtl: boolean;
@@ -139,12 +166,15 @@ export function BookFlip({
   instantTurns?: boolean;
   onProgress: (page: number, spread: string) => void;
   onReady?: (api: BookApi) => void;
+  onError?: (error: unknown) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const report = useRef(onProgress);
   report.current = onProgress;
   const ready = useRef(onReady);
   ready.current = onReady;
+  const failed = useRef(onError);
+  failed.current = onError;
   const soundOn = useRef(soundEnabled);
   soundOn.current = soundEnabled;
   const headersRef = useRef(pageHeaders);
@@ -281,7 +311,7 @@ export function BookFlip({
       if (cancelled || !ref.current) return;
       guardPageLoaded();
       const Ctor = (window as unknown as { FlipBook?: FlipCtor }).FlipBook;
-      if (!Ctor) return;
+      if (!Ctor) throw new Error("Flipbook constructor is unavailable");
       const FB = (window as unknown as { FLIPBOOK?: Record<string, unknown> }).FLIPBOOK;
       if (FB) {
         FB.threejsSrc = `${BASE}/js/libs/three.min.js`;
@@ -431,7 +461,11 @@ export function BookFlip({
       window.setTimeout(() => {
         if (instRef.current === local) window.dispatchEvent(new Event("resize"));
       }, 250);
-    })();
+    })().catch((error) => {
+      if (cancelled) return;
+      console.warn("[flipbook]", error);
+      failed.current?.(error);
+    });
     return () => {
       cancelled = true;
       instRef.current = null;

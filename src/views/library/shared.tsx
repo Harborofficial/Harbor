@@ -1,5 +1,5 @@
 import { Bookmark, RefreshCw } from "lucide-react";
-import type { RefObject } from "react";
+import { memo, useCallback, type RefObject } from "react";
 import { type Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
@@ -17,6 +17,7 @@ export type Tab =
   | "media-servers"
   | "torbox"
   | "lists"
+  | "groups"
   | "favorites"
   | "trakt"
   | "anilist"
@@ -290,35 +291,29 @@ export function GroupedGrid<
               estimateRowHeight={300}
               getKey={(it) => it.key}
               renderItem={(it) => (
-                <WatchlistCard
+                <GroupedWatchlistCard
                   removeLabel={removeLabel}
                   removeOpensDialog={removeOpensDialog}
                   meta={it.meta}
-                  onRemove={
-                    onRemove && it.stremioId
-                      ? () => onRemove(it.stremioId as string)
-                      : onRemoveLocal && it.localId
-                        ? () => onRemoveLocal(it.localId as string)
-                        : undefined
-                  }
+                  stremioId={it.stremioId}
+                  localId={it.localId}
+                  onRemove={onRemove}
+                  onRemoveLocal={onRemoveLocal}
                 />
               )}
             />
           ) : (
             <Grid>
               {g.items.map((it) => (
-                <WatchlistCard
+                <GroupedWatchlistCard
                   key={it.key}
                   removeLabel={removeLabel}
                   removeOpensDialog={removeOpensDialog}
                   meta={it.meta}
-                  onRemove={
-                    onRemove && it.stremioId
-                      ? () => onRemove(it.stremioId as string)
-                      : onRemoveLocal && it.localId
-                        ? () => onRemoveLocal(it.localId as string)
-                        : undefined
-                  }
+                  stremioId={it.stremioId}
+                  localId={it.localId}
+                  onRemove={onRemove}
+                  onRemoveLocal={onRemoveLocal}
                 />
               ))}
             </Grid>
@@ -328,6 +323,38 @@ export function GroupedGrid<
     </div>
   );
 }
+
+const GroupedWatchlistCard = memo(function GroupedWatchlistCard({
+  meta,
+  stremioId,
+  localId,
+  onRemove,
+  onRemoveLocal,
+  removeLabel,
+  removeOpensDialog,
+}: {
+  meta: Meta;
+  stremioId?: string;
+  localId?: string;
+  onRemove?: (id: string) => void;
+  onRemoveLocal?: (id: string) => void;
+  removeLabel?: string;
+  removeOpensDialog?: boolean;
+}) {
+  const canRemove = !!((onRemove && stremioId) || (onRemoveLocal && localId));
+  const remove = useCallback(() => {
+    if (onRemove && stremioId) onRemove(stremioId);
+    else if (onRemoveLocal && localId) onRemoveLocal(localId);
+  }, [onRemove, onRemoveLocal, stremioId, localId]);
+  return (
+    <WatchlistCard
+      meta={meta}
+      onRemove={canRemove ? remove : undefined}
+      removeLabel={removeLabel}
+      removeOpensDialog={removeOpensDialog}
+    />
+  );
+});
 
 export function EmptyWatchlist({ connected }: { connected: boolean }) {
   const t = useT();

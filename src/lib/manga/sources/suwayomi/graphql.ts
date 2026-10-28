@@ -173,7 +173,11 @@ function mapGqlChapters(chapters: any[]): RestChapter[] {
     });
 }
 
-export async function gqlChapters(client: SuwayomiClient, mangaId: string): Promise<RestChapter[]> {
+export async function gqlChapters(
+  client: SuwayomiClient,
+  mangaId: string,
+  refresh = false,
+): Promise<RestChapter[]> {
   if (!isDigits(mangaId)) return [];
   const q = `query {
     chapters(condition: { mangaId: ${mangaId} }) {
@@ -182,13 +186,17 @@ export async function gqlChapters(client: SuwayomiClient, mangaId: string): Prom
   }`;
   const data = await gql(client, q);
   const cachedNodes = data?.chapters?.nodes;
-  if (Array.isArray(cachedNodes) && cachedNodes.length > 0) return mapGqlChapters(cachedNodes);
+  if (!refresh && Array.isArray(cachedNodes) && cachedNodes.length > 0)
+    return mapGqlChapters(cachedNodes);
   const fq = `mutation {
     fetchChapters(input: { mangaId: ${mangaId} }) {
       chapters { id name chapterNumber scanlator uploadDate pageCount isDownloaded isRead lastPageRead }
     }
   }`;
-  const fdata = await gql(client, fq);
+  const fdata = await gql(client, fq).catch((error: unknown) => {
+    if (Array.isArray(cachedNodes)) return null;
+    throw error;
+  });
   if (data == null && fdata == null) throw new Error("suwayomi_graphql_error");
   const fetched = fdata?.fetchChapters?.chapters;
   if (Array.isArray(fetched)) return mapGqlChapters(fetched);
@@ -228,12 +236,17 @@ export async function gqlCategories(client: SuwayomiClient): Promise<any[]> {
 }
 
 export async function gqlCategoryManga(client: SuwayomiClient, id: string): Promise<any[]> {
-  const data = await gqlData(client, `query($id: Int!) {
+  const data = await gqlData(
+    client,
+    `query($id: Int!) {
     category(id: $id) { mangas { nodes {
       id title thumbnailUrl author artist status description sourceId
     } } }
-  }`, { id: Number(id) });
-  if (!Array.isArray(data?.category?.mangas?.nodes)) throw new Error("suwayomi_category_unavailable");
+  }`,
+    { id: Number(id) },
+  );
+  if (!Array.isArray(data?.category?.mangas?.nodes))
+    throw new Error("suwayomi_category_unavailable");
   return data.category.mangas.nodes;
 }
 

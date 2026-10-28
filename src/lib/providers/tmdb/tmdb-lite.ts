@@ -1,6 +1,13 @@
 import { effectiveTmdbLanguage, get } from "./tmdb-client";
 import { lruSet } from "../../cache";
+import { loadStoredSettings } from "../../settings/load";
 import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
+import {
+  pickTmdbTitle,
+  tmdbEnglishTitle,
+  tmdbLanguageBase,
+  type TmdbTranslations,
+} from "./tmdb-title-fallback";
 
 export type TmdbLiteMeta = {
   name: string | null;
@@ -14,6 +21,10 @@ const inflight = new Map<string, Promise<TmdbLiteMeta | null>>();
 type RawLite = {
   title?: string;
   name?: string;
+  original_title?: string;
+  original_name?: string;
+  original_language?: string;
+  translations?: TmdbTranslations;
   poster_path?: string | null;
   backdrop_path?: string | null;
 };
@@ -50,28 +61,49 @@ export async function tmdbLiteMeta(key: string, metaId: string): Promise<TmdbLit
   if (!key) return null;
   const match = metaId.match(/^tmdb:(movie|tv):(\d+)$/);
   if (!match) return null;
-  const hit = cache.get(metaId);
+  const language = effectiveTmdbLanguage();
+  const translateTitles = loadStoredSettings().translateTitles;
+  const cacheKey = `${metaId}|${language}|${translateTitles}`;
+  const hit = cache.get(cacheKey);
   if (hit !== undefined) return hit;
-  const existing = inflight.get(metaId);
+  const existing = inflight.get(cacheKey);
   if (existing) return existing;
   const p = (async () => {
     try {
-      const raw = await get<RawLite>(key, `${match[1]}/${match[2]}`);
+      const languageBase = tmdbLanguageBase(language);
+      const wantsEnglishFallback = translateTitles && !!languageBase && languageBase !== "en";
+      const raw = await get<RawLite>(
+        key,
+        `${match[1]}/${match[2]}`,
+        wantsEnglishFallback ? { append_to_response: "translations" } : {},
+      );
+      const localized = raw?.title ?? raw?.name ?? "";
+      const original = raw?.original_title ?? raw?.original_name ?? "";
+      const name = raw
+        ? pickTmdbTitle({
+            localized,
+            original,
+            english: tmdbEnglishTitle(raw.translations),
+            originalLanguage: raw.original_language,
+            targetLanguage: language,
+            translateTitles,
+          })
+        : "";
       const out: TmdbLiteMeta | null = raw
         ? {
-            name: (raw.title ?? raw.name ?? "").trim() || null,
+            name: name.trim() || null,
             poster: tmdbPosterUrl(raw.poster_path) ?? null,
             background: tmdbBackdropUrl(raw.backdrop_path) ?? null,
           }
         : null;
-      cache.set(metaId, out);
+      cache.set(cacheKey, out);
       return out;
     } catch {
       return null;
     } finally {
-      inflight.delete(metaId);
+      inflight.delete(cacheKey);
     }
   })();
-  inflight.set(metaId, p);
+  inflight.set(cacheKey, p);
   return p;
 }

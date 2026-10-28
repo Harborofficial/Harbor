@@ -7,6 +7,22 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf
 
 // Execute production functions with isolated storage and no network or React rendering.
 function load(path, mocks = {}, storage = undefined) {
+  const defaultMocks = {
+    "@/lib/nuvio/nuvio-sync": {
+      isNuvioProviderActive: () => false,
+      resolveNuvioProfileIndex: () => 1,
+    },
+    "@/lib/nuvio/nuvio-library": {
+      readCachedNuvioLibrary: () => [],
+      pullNuvioLibraryDelta: async () => [],
+      setCachedNuvioLibraryIfChanged: () => false,
+    },
+    "@/lib/nuvio/nuvio-client": {
+      isNuvioSignedIn: () => false,
+      loadNuvioState: () => ({ session: null, profiles: [], activeProfileIndex: 1 }),
+    },
+  };
+  const merged = { ...defaultMocks, ...mocks };
   const output = ts.transpileModule(read(path), {
     compilerOptions: {
       target: ts.ScriptTarget.ES2022,
@@ -16,7 +32,7 @@ function load(path, mocks = {}, storage = undefined) {
   }).outputText;
   const exports = {};
   new Function("require", "exports", "localStorage", output)(
-    (name) => mocks[name] ?? {},
+    (name) => merged[name] ?? {},
     exports,
     storage,
   );
@@ -35,6 +51,55 @@ const trakt = (tmdb, imdb, year) => ({
   title: "Aladdin",
   year,
   ids: { tmdb, imdb },
+});
+
+test("card watchlist checks reuse parsed entries and observe writes and profile switches", () => {
+  const values = new Map([
+    [
+      "harbor.profiles.v1",
+      JSON.stringify({ activeId: "one", profiles: [{ id: "one" }, { id: "two" }] }),
+    ],
+    ["harbor.watchlist.v1.one", JSON.stringify([local("tt1")])],
+    ["harbor.watchlist.v1.two", JSON.stringify([local("tt2")])],
+  ]);
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  };
+  const watchlist = load(
+    "src/lib/watchlist.ts",
+    {
+      "@/lib/storage-recovery": {
+        setItemWithRecovery: (key, value) => {
+          storage.setItem(key, value);
+          return true;
+        },
+      },
+      "@/lib/cinemeta": { persistableAddonOrigin: (v) => v, persistableVideos: (v) => v },
+    },
+    storage,
+  );
+  const originalParse = JSON.parse;
+  let entryParses = 0;
+  JSON.parse = (raw, ...args) => {
+    if (raw === values.get("harbor.watchlist.v1.one")) entryParses++;
+    return originalParse(raw, ...args);
+  };
+  try {
+    for (let i = 0; i < 200; i++) assert.equal(watchlist.watchlistHas("tt1"), true);
+    assert.equal(entryParses, 1);
+  } finally {
+    JSON.parse = originalParse;
+  }
+  watchlist.addToWatchlist({ id: "tt3", name: "Added", type: "movie" });
+  assert.equal(watchlist.watchlistHas("tt3"), true);
+  assert.equal(watchlist.watchlistHas("tt1"), true);
+  values.set("harbor.watchlist.v1.one", "[]");
+  assert.equal(watchlist.watchlistHas("tt1"), false);
+  values.set("harbor.profiles.v1", JSON.stringify({ activeId: "two", profiles: [{ id: "two" }] }));
+  assert.equal(watchlist.watchlistHas("tt2"), true);
+  assert.equal(watchlist.watchlistHas("tt3"), false);
 });
 
 test("same-name remakes with different years remain separate", () => {
@@ -142,7 +207,8 @@ test("all library groupings retain virtualization and local removal wiring", () 
     assert.match(grid, /scrollRef=\{scrollRef\}/);
   }
   const shared = read("src/views/library/shared.tsx");
-  assert.equal((shared.match(/\(\) => onRemoveLocal\(it.localId as string\)/g) ?? []).length, 2);
+  assert.equal((shared.match(/localId=\{it.localId\}/g) ?? []).length, 2);
+  assert.match(shared, /else if \(onRemoveLocal && localId\) onRemoveLocal\(localId\)/);
 });
 
 test("anime search fallback retains animation, full-name and exact-year guards", () => {
@@ -187,4 +253,69 @@ test("current refreshes combine all connected providers and exclude temporary it
   const items = await api.refreshWatchlistAggregates("test-auth", true, true);
   assert.equal(items.length, 1);
   assert.deepEqual(published, [["tt1", "tt2", "tmdb:movie:2", "tt3", "tmdb:movie:3"]]);
+});
+
+test("a late Nuvio snapshot cannot clear the next account's watchlist membership", async () => {
+  const previousWindow = globalThis.window;
+  const previousDocument = globalThis.document;
+  const listeners = new Map();
+  const cleanups = [];
+  const published = [];
+  let accountId = "user-a";
+  let finishA;
+  let finishB;
+  const pullA = new Promise((resolve) => {
+    finishA = resolve;
+  });
+  const pullB = new Promise((resolve) => {
+    finishB = resolve;
+  });
+
+  globalThis.window = {
+    addEventListener: (name, listener) => listeners.set(name, listener),
+    removeEventListener: (name) => listeners.delete(name),
+  };
+  globalThis.document = {
+    visibilityState: "visible",
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  };
+
+  try {
+    const api = load("src/lib/watchlist-sync.tsx", {
+      react: {
+        useEffect: (effect) => {
+          cleanups.push(effect());
+        },
+      },
+      "@/lib/auth": { useAuth: () => ({ authKey: null }) },
+      "@/lib/settings": { useSettings: () => ({ settings: { accountProvider: "nuvio" } }) },
+      "@/lib/trakt/provider": { useTrakt: () => ({ isConnected: false }) },
+      "@/lib/simkl/provider": { useSimkl: () => ({ isConnected: false }) },
+      "@/lib/nuvio/nuvio-sync": {
+        isNuvioProviderActive: () => true,
+        resolveNuvioProfileIndex: () => 1,
+      },
+      "@/lib/nuvio/nuvio-client": { getNuvioAccountId: () => accountId },
+      "@/lib/nuvio/nuvio-library": {
+        readCachedNuvioLibrary: () => [{ content_id: accountId === "user-a" ? "tt-a" : "tt-b" }],
+        pullNuvioLibrarySnapshot: () => (accountId === "user-a" ? pullA : pullB),
+      },
+      "@/lib/watchlist": { setWatchlistAggregate: (ids) => published.push([...ids]) },
+    });
+
+    api.WatchlistSync();
+    accountId = "user-b";
+    listeners.get("harbor:nuvio-state-changed")();
+    finishB([{ content_id: "tt-b" }]);
+    await pullB;
+    finishA([]);
+    await pullA;
+    await Promise.resolve();
+    assert.deepEqual(published.at(-1), ["tt-b"]);
+  } finally {
+    for (const cleanup of cleanups) cleanup?.();
+    globalThis.window = previousWindow;
+    globalThis.document = previousDocument;
+  }
 });

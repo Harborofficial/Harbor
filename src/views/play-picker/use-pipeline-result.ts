@@ -9,7 +9,7 @@ import {
   setPickerCache,
 } from "@/lib/picker-cache";
 import { useSettings } from "@/lib/settings";
-import type { AddonProgress } from "@/lib/streams/addons";
+import { clearAddonStreamCache, type AddonProgress } from "@/lib/streams/addons";
 import { pluginCacheTokens } from "@/lib/streams/plugins";
 import { runPipeline, type PipelineResult } from "@/lib/streams/pipeline";
 import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input";
@@ -36,6 +36,7 @@ export function usePipelineResult({
   strictMode,
   filterDisabled,
   animeTitles,
+  preferredAddonId = null,
 }: {
   meta: Meta;
   episode: PlayEpisode | undefined;
@@ -48,6 +49,7 @@ export function usePipelineResult({
   strictMode: boolean;
   filterDisabled: boolean;
   animeTitles: string[] | null;
+  preferredAddonId?: string | null;
 }) {
   const [result, setResult] = useState<PipelineResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,8 +79,17 @@ export function usePipelineResult({
         filterMode: filterDisabled ? "off" : strictMode ? "strict" : "balanced",
         animePreferImdbStreams: animePreference,
         preferredAnimeImdbId,
+        preferredAddonId,
       }),
-    [addons, debrids, filterDisabled, strictMode, animePreference, preferredAnimeImdbId],
+    [
+      addons,
+      debrids,
+      filterDisabled,
+      strictMode,
+      animePreference,
+      preferredAnimeImdbId,
+      preferredAddonId,
+    ],
   );
 
   useEffect(() => {
@@ -127,6 +138,7 @@ export function usePipelineResult({
         strictMode,
         filterDisabled,
         animeTitles,
+        preferredAddonId,
       }),
       ac.signal,
       (partial) => {
@@ -178,11 +190,13 @@ export function usePipelineResult({
     settings.requirePreferredLanguage,
     strictMode,
     filterDisabled,
+    preferredAddonId,
     (animeTitles ?? []).join("|"),
     refreshNonce,
   ]);
 
   const refresh = useCallback(() => {
+    clearAddonStreamCache();
     clearOnePickerCache(meta, episode);
     setRefreshNonce((n) => n + 1);
   }, [meta, episode]);

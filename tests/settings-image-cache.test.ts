@@ -102,7 +102,7 @@ test("saved official relay URLs migrate while custom relays and disabled setting
     f.data.set("harbor.settings", f.complete({ togetherRelayUrl: old }));
     assert.equal(f.settings.loadStoredSettings().togetherRelayUrl, relayVersion.HARBOR_PUBLIC_RELAY);
   }
-  for (const relay of ["", "wss://custom.example.test/base", "wss://pub.harbor.site.example.test"]) {
+  for (const relay of ["", "wss://custom.example.test/base", "wss://pub.harborcommunity.site.example.test"]) {
     f.data.set("harbor.settings", f.complete({ togetherRelayUrl: relay }));
     assert.equal(f.settings.loadStoredSettings().togetherRelayUrl, relay);
   }

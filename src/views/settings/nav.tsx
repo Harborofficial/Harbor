@@ -13,6 +13,8 @@ import { TOP_GROUPS } from "./groups";
 import { markSectionSeen, useSettingsNew } from "./settings-new";
 import { useExperimentalAccess } from "@/lib/updater/experimental-access";
 import { useStreamPluginCount } from "@/lib/plugins";
+import { useInstallFeatures } from "@/lib/features/install";
+import { quickLibraryAvailable } from "@/lib/features/quick-library";
 
 type IconProps = { size?: number; strokeWidth?: number };
 
@@ -1117,6 +1119,7 @@ export type SettingsOption = {
   tab?: string;
   anchorTitle?: string;
   keywords?: string[];
+  feature?: "games" | "library";
 };
 
 const NAV_ITEM_BY_ID = new Map(NAV_GROUPS.flatMap((g) => g.items).map((i) => [i.id, i] as const));
@@ -2083,7 +2086,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "player",
     tab: "trailers",
     anchorTitle: "Trailer quality",
-    keywords: ["autoplay quality", "auto play resolution", "hero trailer resolution", "background trailer quality"],
+    keywords: [
+      "autoplay quality",
+      "auto play resolution",
+      "hero trailer resolution",
+      "background trailer quality",
+    ],
   },
   {
     label: "Trailer quality",
@@ -3242,8 +3250,20 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "games.dock.settingTitle",
     section: "theme",
     tab: "interface",
-    anchorTitle: "games.dock.settingTitle",
-    keywords: ["games", "quick game library", "game tab", "edge tab", "game bar", "hover", "half moon", "hide games tab"],
+    anchorTitle: "music.library",
+    keywords: [
+      "quick library",
+      "quick game library",
+      "quick access",
+      "games",
+      "music",
+      "edge tab",
+      "game bar",
+      "hover",
+      "half moon",
+      "hide games tab",
+    ],
+    feature: "library",
   },
   {
     label: "Onboarding & hints",
@@ -3904,6 +3924,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     tab: "providers",
     anchorTitle: "Games",
     keywords: ["IGDB", "artwork", "background", "screenshots", "cover icon", "random"],
+    feature: "games",
   },
   {
     label: "games.artwork.screenshotsSetting",
@@ -3911,6 +3932,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     tab: "providers",
     anchorTitle: "Games",
     keywords: ["IGDB", "artwork", "background", "screenshots", "cover icon", "random"],
+    feature: "games",
   },
   {
     label: "games.artwork.iconSetting",
@@ -3918,6 +3940,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     tab: "providers",
     anchorTitle: "Games",
     keywords: ["IGDB", "artwork", "background", "screenshots", "cover icon", "random"],
+    feature: "games",
   },
   {
     label: "games.details.agePreference",
@@ -3925,13 +3948,22 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     tab: "providers",
     anchorTitle: "Games",
     keywords: ["ESRB", "PEGI", "age ratings", "game metadata", "IGDB"],
+    feature: "games",
   },
   {
     label: "Steam search shortcut",
     section: "library",
     tab: "ai",
     anchorTitle: "Search shortcuts",
-    keywords: ["steam store", "st prefix", "st:", "game search", "disable steam search", "normal search"],
+    keywords: [
+      "steam store",
+      "st prefix",
+      "st:",
+      "game search",
+      "disable steam search",
+      "normal search",
+    ],
+    feature: "games",
   },
   {
     label: "AI Search · natural-language search",
@@ -7118,6 +7150,19 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["row title size", "rail headings", "home titles bigger", "section titles"],
   },
   {
+    label: "Card title size",
+    section: "theme",
+    anchorTitle: "Title text",
+    keywords: [
+      "card titles",
+      "poster title size",
+      "movie titles",
+      "tv show titles",
+      "font size",
+      "text under posters",
+    ],
+  },
+  {
     label: "Player title",
     section: "theme",
     anchorTitle: "Title text",
@@ -9440,7 +9485,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "own server",
       "sync endpoint",
       "point to server",
-      "sync.harbor.site",
+      "sync.harborcommunity.site",
     ],
   },
   {
@@ -9686,7 +9731,15 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "theme",
     tab: "logo",
     anchorTitle: "artwork.title",
-    keywords: ["loading animation", "connecting", "boat", "lottie", "gif", "loader", "custom animation"],
+    keywords: [
+      "loading animation",
+      "connecting",
+      "boat",
+      "lottie",
+      "gif",
+      "loader",
+      "custom animation",
+    ],
   },
   {
     label: "artwork.launch",
@@ -11026,6 +11079,9 @@ setSettingsSearchVocabulary([
 export function useNavSearch(trimmed: string) {
   const t = useT();
   const experimentalAccess = useExperimentalAccess();
+  const features = useInstallFeatures();
+  const gamesEnabled = features.games;
+  const libraryEnabled = quickLibraryAvailable(features.games, features.music);
   const matches = useMemo<NavItem[] | null>(() => {
     if (!trimmed) return null;
     const out: NavItem[] = [];
@@ -11047,6 +11103,8 @@ export function useNavSearch(trimmed: string) {
     if (!trimmed) return null;
     return SETTINGS_OPTIONS.filter(
       (o) =>
+        (o.feature !== "games" || gamesEnabled) &&
+        (o.feature !== "library" || libraryEnabled) &&
         (o.label !== "Experimental builds" || experimentalAccess) &&
         matchesSettingsSearch(
           trimmed,
@@ -11059,7 +11117,7 @@ export function useNavSearch(trimmed: string) {
         rankSettingsSearch(trimmed, a.label, a.keywords ?? []) -
         rankSettingsSearch(trimmed, b.label, b.keywords ?? []),
     );
-  }, [experimentalAccess, t, trimmed]);
+  }, [experimentalAccess, gamesEnabled, libraryEnabled, t, trimmed]);
   return { matches, optionMatches };
 }
 

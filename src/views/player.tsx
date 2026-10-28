@@ -16,7 +16,13 @@ import { nameColor } from "@/lib/together/colors";
 import { useTogether } from "@/lib/together/provider";
 import { buildPlayInvite } from "@/lib/together/build-invite";
 import { useView, type PlayerSrc, type PlayEpisode } from "@/lib/view";
-import { useQueue, useSleepAtEnd, setQueuePlaying } from "@/lib/queue";
+import {
+  useQueue,
+  useSleepAtEnd,
+  queueIndexOf,
+  queueItemAfter,
+  setQueuePlaying,
+} from "@/lib/queue";
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
 import { isLocalUrl } from "@/lib/player/local-url";
@@ -53,6 +59,7 @@ import { isWeb } from "@/lib/platform";
 import { usePauseOnInactive } from "./player/hooks/use-pause-on-inactive";
 import { spoilerMaskFor } from "@/lib/spoilers";
 import { usePlayerWatched } from "./player/hooks/use-player-watched";
+import { EXTERNAL_PLAYER_CLOSED_EVENT } from "@/lib/player/external-mpv";
 import { useRoomSync } from "./player/hooks/use-room-sync";
 import { useHostSource } from "./player/hooks/use-host-source";
 import { useLobbyGate } from "./player/hooks/use-lobby-gate";
@@ -66,6 +73,7 @@ import { useT } from "@/lib/i18n";
 import { useEpisodeNavigation } from "./player/hooks/use-episode-navigation";
 import { useAbLoop } from "./player/hooks/use-ab-loop";
 import { useAutoNextEpisode } from "./player/hooks/use-auto-next-episode";
+import { NextEpisodePrefetch } from "./player/next-episode-prefetch";
 import { useStillWatching } from "./player/hooks/use-still-watching";
 import { useStartedNearEnd } from "./player/hooks/use-started-near-end";
 import { useFrameGrab } from "./player/hooks/use-frame-grab";
@@ -104,6 +112,8 @@ import { useSdrBoostGate } from "./player/hooks/use-sdr-boost-gate";
 import { PlayerOverlayLayers, type PlayerOverlayLayersProps } from "./player/player-overlay-layers";
 import { StillWatchingPrompt } from "./player/still-watching-prompt";
 import { SourceErrorCard } from "./player/source-error-card";
+import { EndScreen } from "./player/end-screen";
+import { useEndScreen } from "./player/hooks/use-end-screen";
 import { LeaveConfirmModal } from "@/components/player/leave-confirm-modal";
 import { HdrStageBridge } from "./player/hdr-stage-bridge";
 import { setSkipSegmentsView } from "@/lib/skip-intro/segment-store";
@@ -135,6 +145,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     setChromeHidden: setAppChromeHidden,
     topPath,
     openPicker,
+    openMeta,
     exitPlayback,
     replacePlayerSrc,
     setPipDocked,
@@ -403,6 +414,8 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
 
   const queue = useQueue();
   const sleepAtEndArmed = useSleepAtEnd();
+  const queueOwnsCurrent = queueIndexOf(src.meta, src.episode) >= 0;
+  const queueNextSameSeries = queueItemAfter(src.meta, src.episode)?.meta.id === src.meta.id;
 
   useEffect(() => {
     setQueuePlaying(src.meta, src.episode ?? undefined);
@@ -601,6 +614,37 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     openPicker,
   });
   closePlayerRef.current = () => void closePlayer();
+  // Leaving for another title must go through the same teardown as exiting
+  // playback: snapshot, resume, cast, PiP, room and fullscreen, then the picker.
+  const playFromEndScreen = useCallback(
+    (meta: Parameters<typeof openPicker>[0]) => {
+      void closePlayer().finally(() => openPicker(meta, undefined, { autoPlay: true }));
+    },
+    [closePlayer, openPicker],
+  );
+  const endScreen = useEndScreen({
+    src,
+    snap,
+    enabled: !docked && !pipMode && !src.pipDocked,
+    leadSec: settings.endScreenLeadSec,
+    countdownSec: settings.endScreenCountdownSec,
+    onZero: settings.endScreenOnZero,
+    tmdbKey: settings.tmdbKey,
+    isLive: isLiveLike,
+    onPlay: playFromEndScreen,
+    onClose: () => void closePlayer(),
+  });
+  const shrinkEndScreen = endScreen.open && endScreen.mode === "shrink";
+  // When the full end screen is up after mpv finished, it closes the player itself.
+  const endScreenFullRef = useRef(false);
+  endScreenFullRef.current = endScreen.open && endScreen.mode === "full";
+  useEffect(() => {
+    const onExternalClosed = () => {
+      if (!endScreenFullRef.current) closePlayerRef.current();
+    };
+    window.addEventListener(EXTERNAL_PLAYER_CLOSED_EVENT, onExternalClosed);
+    return () => window.removeEventListener(EXTERNAL_PLAYER_CLOSED_EVENT, onExternalClosed);
+  }, []);
   const backFromPlayer = useCallback(async () => {
     if (src.sportsDocked === false) {
       // Keep the mounted playback engine and current source; only change its surface.
@@ -733,6 +777,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
   const showHeaderWarning =
     src.notWebReady === true &&
     engine === "html5" &&
+    !settings.playerExternalMpv &&
     (snap.status === "error" || snap.status === "loading");
   const [noAudioDismissed, setNoAudioDismissed] = useState(false);
   useEffect(() => {
@@ -1226,7 +1271,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     canChangeEpisode,
     roomGuest,
     isLive: isLiveLike,
-    suspend: queueOrSleepArmed && !isLiveLike,
+    suspend: (queueOrSleepArmed && !isLiveLike) || endScreen.open,
     startedNearEndRef,
     reloadLive,
     closePlayer,
@@ -1370,6 +1415,23 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     },
     [showVolumeFeedback, isKid, settings.playerVolumeSfx, settings.volumeBoostMax],
   );
+  const onEndScreenVolume = useCallback(
+    (value: number) => {
+      const next = Math.max(0, Math.min(1, value));
+      volumeRef.current = next;
+      bridgeRef.current?.setVolume(next);
+      bridgeRef.current?.setMuted(false);
+      writePlayerVolume({ volume: next, muted: false });
+      showVolumeFeedback(next, false);
+    },
+    [showVolumeFeedback],
+  );
+  const onEndScreenMute = useCallback(() => {
+    const next = !snapRef.current.muted;
+    bridgeRef.current?.setMuted(next);
+    writePlayerVolume({ volume: volumeRef.current, muted: next });
+    showVolumeFeedback(volumeRef.current, next);
+  }, [showVolumeFeedback]);
 
   const onLoaderRetry = useCallback(() => {
     const b = bridgeRef.current;
@@ -1459,7 +1521,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     playPrev,
     hasPrevEpisodeNow,
     setAutoNextCancelled,
-    showChrome,
+    showChrome: endScreen.open ? false : showChrome,
     ab,
     frameGrabToast: frameGrab.toast,
     onScreenshot: () => frameGrab.trigger(),
@@ -1558,6 +1620,29 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     syncToast,
     onSyncPlayPause: playPauseToggle,
   };
+  const prefetchAddonId = liveStreamRef?.addonId ?? src.streamRef?.addonId ?? null;
+  const prefetchNextEpisode =
+    settings.keepSourceNextEpisode &&
+    settings.autoPlayNextEpisode &&
+    !sleepAtEndArmed &&
+    (!queueOwnsCurrent || queueNextSameSeries) &&
+    !isLiveLike &&
+    canChangeEpisode &&
+    !!airedNext &&
+    (src.meta.type === "series" || /^(kitsu|mal|anilist|anidb):/.test(src.meta.id)) &&
+    prefetchAddonId
+      ? airedNext
+      : null;
+  const prefetchTarget = useMemo(
+    () =>
+      prefetchNextEpisode &&
+      src.meta.id.startsWith("tt") &&
+      src.episode?.sourceMetaId &&
+      !prefetchNextEpisode.sourceMetaId
+        ? { ...prefetchNextEpisode, sourceMetaId: src.episode.sourceMetaId }
+        : prefetchNextEpisode,
+    [prefetchNextEpisode, src.meta.id, src.episode?.sourceMetaId],
+  );
   return (
     <main
       ref={stageRef}
@@ -1578,10 +1663,31 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       onMouseMove={wakeChrome}
       onMouseEnter={wakeChrome}
     >
+      {prefetchNextEpisode && prefetchAddonId && (
+        <NextEpisodePrefetch
+          key={`${src.meta.id}:${prefetchNextEpisode.season}:${prefetchNextEpisode.episode}:${prefetchNextEpisode.videoId ?? ""}`}
+          meta={src.meta}
+          nextEpisode={prefetchTarget ?? prefetchNextEpisode}
+          imdbId={resolvedImdbId}
+          imdbVerified={resolvedImdbVerified}
+          addonId={prefetchAddonId}
+          durationSec={snap.durationSec}
+        />
+      )}
       <div
         ref={videoMountRef}
         data-player-video-mount
-        className="absolute inset-0"
+        className="absolute"
+        style={{
+          left: shrinkEndScreen ? 32 : 0,
+          bottom: shrinkEndScreen ? 56 : 0,
+          width: shrinkEndScreen ? "clamp(340px, 18vw, 560px)" : "100%",
+          height: shrinkEndScreen ? "calc(clamp(340px, 18vw, 560px) * 0.5625)" : "100%",
+          borderRadius: shrinkEndScreen ? 14 : 0,
+          overflow: shrinkEndScreen ? "hidden" : undefined,
+          transition:
+            "left 340ms cubic-bezier(0.22,1,0.36,1), bottom 340ms cubic-bezier(0.22,1,0.36,1), width 340ms cubic-bezier(0.22,1,0.36,1), height 340ms cubic-bezier(0.22,1,0.36,1)",
+        }}
         onPointerDown={(e) => {
           if (e.target !== e.currentTarget) return;
           if (
@@ -1670,6 +1776,32 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
         />
       )}
       {!docked && !hdrStageActive && <PlayerOverlayLayers {...overlayProps} />}
+      {endScreen.open && (
+        <EndScreen
+          mode={endScreen.mode}
+          src={src}
+          items={endScreen.items}
+          focused={endScreen.focused}
+          countdown={endScreen.countdown}
+          countdownTotal={endScreen.countdownTotal}
+          tmdbKey={settings.tmdbKey}
+          paused={snap.status !== "playing"}
+          durationSec={snap.durationSec}
+          volume={snap.volume}
+          muted={snap.muted}
+          onTogglePlay={playPauseToggle}
+          onVolume={onEndScreenVolume}
+          onToggleMute={onEndScreenMute}
+          onFocus={endScreen.focus}
+          onPlay={playFromEndScreen}
+          onInfo={(meta) => {
+            void closePlayer().then(() => openMeta(meta));
+          }}
+          onInteract={endScreen.interact}
+          onClose={() => void closePlayer()}
+          onDismiss={endScreen.dismiss}
+        />
+      )}
       {!docked && !hdrStageActive && (
         <PlayerInteractionLockControls
           enabled={screenLockEnabled}

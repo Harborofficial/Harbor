@@ -19,6 +19,8 @@ export type GridEpisode = {
   upcoming?: boolean;
   meta?: Meta;
   sourceMetaId?: string;
+  /** IMDb series id and IMDb numbering of the episode, for its reviews. */
+  reviews?: { imdbId: string; season: number; episode: number };
   play: (opts?: { resume?: boolean }) => void;
   openDetail?: () => void;
 };

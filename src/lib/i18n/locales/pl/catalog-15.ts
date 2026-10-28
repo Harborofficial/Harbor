@@ -710,7 +710,7 @@ const catalog15: Record<string, string> = {
   "https://...manifest.json or stremio://...": "https://...manifest.json lub stremio://...",
   "https://posters.example.com or a pattern with {id}":
     "https://posters.example.com lub wzorzec z {id}",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "huge ({width}×{height}px)": "ogromny ({width}×{height}px)",
   "if the first page is 0. Use this when the URL counts pages.":
     "jeśli pierwsza strona ma numer 0. Użyj tej opcji, gdy adres URL numeruje strony.",

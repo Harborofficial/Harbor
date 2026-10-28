@@ -116,7 +116,8 @@ const catalog12: Record<string, string> = {
     "Pokazuj elementy sterujące odtwarzacza po wstrzymaniu lub wznowieniu za pomocą klawiatury. Wyłącz tę opcję, aby pozostały ukryte i nie zasłaniały napisów.",
   "Show the player controls when you pause or resume using the keyboard. Turn off to keep them hidden so they don't cover subtitles.":
     "Pokazuj elementy sterujące odtwarzaczem, gdy wstrzymujesz lub wznawiasz odtwarzanie za pomocą klawiatury. Wyłącz tę opcję, aby pozostały ukryte i nie zasłaniały napisów.",
-  "Show the report button on every P2P stream, not just likely new releases.": "Pokazuj przycisk zgłaszania przy każdym strumieniu P2P, a nie tylko przy prawdopodobnych nowościach.",
+  "Show the report button on every P2P stream, not just likely new releases.":
+    "Pokazuj przycisk zgłaszania przy każdym strumieniu P2P, a nie tylko przy prawdopodobnych nowościach.",
   "Show them anyway": "Pokaż je mimo to",
   "Show this catalog": "Pokaż ten katalog",
   "Show this control": "Pokaż ten element sterujący",
@@ -250,13 +251,16 @@ const catalog12: Record<string, string> = {
     "Zaloguj się przy użyciu serwera, nazwy użytkownika i hasła",
   "Sign in, or make an account": "Zaloguj się lub utwórz konto",
   "Sign out": "Wyloguj się",
+  "Sign out of Harbor": "Wyloguj się z Harbor",
   "Sign out of Harbor account": "Wyloguj się z konta Harbor",
   "Sign-in failed.": "Logowanie nie powiodło się.",
   "Signed in as {name}": "Zalogowano jako {name}",
   "Signed in as {username}": "Zalogowano jako {username}",
+  "Signed in to Harbor": "Zalogowano do Harbor",
   "Signed in to your Harbor account": "Zalogowano na Twoje konto Harbor",
   "Signed in. Your library is on the TV.":
     "Zalogowano. Twoja biblioteka jest dostępna na telewizorze.",
+  "Signed out of Harbor": "Wylogowano z Harbor",
   "Signing in to your Harbor account. Your profiles will appear in a moment.":
     "Logowanie do konta Harbor. Twoje profile pojawią się za chwilę.",
   "Signing in…": "Logowanie…",

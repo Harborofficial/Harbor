@@ -25,6 +25,7 @@ function harness() {
     HTMLElement: dom.window.HTMLElement,
     CustomEvent: dom.window.CustomEvent,
     localStorage: dom.window.localStorage,
+    getComputedStyle: dom.window.getComputedStyle.bind(dom.window),
     ResizeObserver: class {
       observe() {}
       disconnect() {}
@@ -149,6 +150,46 @@ test("Settings and ordinary routes use the existing view stack without a player 
     await React.act(() => view.openProfile("another-person"));
     assert.equal(view.topKind, "profile");
     assert.equal(leave.getLeaveConfirm().open, false);
+  } finally {
+    await h.dispose();
+  }
+});
+
+test("card and row actions stay stable across navigation while view consumers update", async () => {
+  const h = harness();
+  try {
+    const { ViewProvider, useView, useViewActions } = h.load("src/lib/view.tsx");
+    let view: any;
+    let actions: any;
+    let renders = 0;
+    const RowConsumer = React.memo(function RowConsumer() {
+      actions = useViewActions();
+      renders++;
+      return null;
+    });
+    function ViewConsumer() {
+      view = useView();
+      return null;
+    }
+    await React.act(() =>
+      h.root.render(
+        React.createElement(
+          ViewProvider,
+          null,
+          React.createElement(RowConsumer),
+          React.createElement(ViewConsumer),
+        ),
+      ),
+    );
+    const original = actions;
+    const before = renders;
+    actions.rememberRowScroll("fixture-row", 123);
+    await React.act(() => view.setView("library"));
+    assert.equal(view.topKind, "library");
+    assert.equal(actions, original);
+    assert.equal(renders, before, "navigation must not wake every card and row");
+    actions.rememberRowScroll("fixture-row", 456);
+    assert.equal(actions.recallRowScroll("fixture-row"), 456);
   } finally {
     await h.dispose();
   }

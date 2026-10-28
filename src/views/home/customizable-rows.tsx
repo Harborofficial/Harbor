@@ -1,6 +1,8 @@
 import { ChevronRight } from "lucide-react";
+import { HomeGroups } from "@/components/home-groups";
 import { memo, useMemo } from "react";
 import { LazyMount } from "@/components/lazy-mount";
+import { Profiled } from "@/components/profiled";
 import { releaseYear } from "@/lib/release-info";
 import { PickCard } from "@/components/pick-card";
 import { Row, usePosterRow } from "@/components/row";
@@ -10,7 +12,7 @@ import { LetterboxdRowMenu } from "@/components/letterboxd/letterboxd-row-menu";
 import { useLetterboxd } from "@/lib/stremboxd/provider";
 import { useT } from "@/lib/i18n";
 import type { HomeRowCustomization } from "@/lib/home-customization";
-import { useView } from "@/lib/view";
+import { useViewActions } from "@/lib/view";
 import type { HomeRow } from "./home-types";
 import { RowControls } from "./row-controls";
 import type { WatchedSet } from "@/lib/playback-history";
@@ -20,6 +22,7 @@ import { useSettings } from "@/lib/settings";
 type Translate = (key: string, vars?: Record<string, string | number>) => string;
 
 const BUILT_IN_HOME_ROW_TITLES: Readonly<Record<string, string>> = {
+  "library-groups": "My Groups",
   "tmdb-trending-movies": "Trending This Week",
   "tmdb-now-playing": "In Theaters Now",
   "tmdb-popular-movies": "Popular Movies",
@@ -82,7 +85,7 @@ function isUnreleased(m: { releaseDate?: string; releaseInfo?: string }): boolea
 
 function RowTitle({ row, title }: { row: HomeRow; title: string }) {
   const t = useT();
-  const { openGrid } = useView();
+  const { openGrid } = useViewActions();
   const lb = useLetterboxd();
   const isLetterboxd = row.key.startsWith("letterboxd-");
   const catalogId = isLetterboxd ? row.key.replace("letterboxd-", "") : "";
@@ -153,25 +156,7 @@ function RowTitleExtra({ row }: { row: HomeRow }) {
 // Memoized on purpose: Home re-renders often while its rows load, and without this every one of
 // those re-renders rebuilt the whole row tree and cascaded into the cards (measured as a single
 // 184ms render). Its props are all stable — useCallback handlers, memoized row arrays, primitives.
-export const CustomizableRows = memo(function CustomizableRows({
-  rows,
-  editMode,
-  customization,
-  orderKeys,
-  onMove,
-  onToggleHidden,
-  onRename,
-  onToggleNumerals,
-  onToggleHero,
-  onLoadMore,
-  onDeleteCustomSource,
-  onEditFolderImages,
-  hideWatched,
-  watchedSet,
-  localWatched,
-  stremioWatched,
-  homeLanguages,
-}: {
+type CustomizableRowsProps = {
   rows: HomeRow[];
   editMode: boolean;
   customization: HomeRowCustomization;
@@ -189,8 +174,44 @@ export const CustomizableRows = memo(function CustomizableRows({
   localWatched?: WatchedSet;
   stremioWatched?: Set<string>;
   homeLanguages?: string[];
-}) {
-  const { openGrid } = useView();
+};
+
+export const CustomizableRows = memo(function CustomizableRows({
+  rows,
+  ...props
+}: CustomizableRowsProps) {
+  return (
+    <>
+      {rows.map((row, rowIndex) => (
+        <Profiled key={row.key} id={`home.row-position.${rowIndex}`}>
+          <CustomizableRow {...props} row={row} eager={rowIndex < 2} />
+        </Profiled>
+      ))}
+    </>
+  );
+});
+
+const CustomizableRow = memo(function CustomizableRow({
+  row,
+  eager,
+  editMode,
+  customization,
+  orderKeys,
+  onMove,
+  onToggleHidden,
+  onRename,
+  onToggleNumerals,
+  onToggleHero,
+  onLoadMore,
+  onDeleteCustomSource,
+  onEditFolderImages,
+  hideWatched,
+  watchedSet,
+  localWatched,
+  stremioWatched,
+  homeLanguages,
+}: Omit<CustomizableRowsProps, "rows"> & { row: HomeRow; eager: boolean }) {
+  const { openGrid } = useViewActions();
   const t = useT();
   const posterRow = usePosterRow();
   const { settings } = useSettings();
@@ -201,99 +222,107 @@ export const CustomizableRows = memo(function CustomizableRows({
   );
   const isWatched = (m: { id: string; name?: string }) =>
     isTitleWatched(m, { traktKeys, localWatched, stremioWatched });
+  const hidden = customization.hidden.includes(row.key);
+  if (hidden && !editMode) return null;
+  let metas = row.metas.filter((m) => typeof m.id === "string");
+  if (homeLanguages && homeLanguages.length > 0) {
+    metas = metas.filter((m) => !m.originalLanguage || homeLanguages.includes(m.originalLanguage));
+  }
+  if (hideWatched) metas = metas.filter((m) => !isWatched(m));
+  if (hideUnreleased) metas = metas.filter((m) => !isUnreleased(m));
+  if (
+    (hideWatched || hideUnreleased || (homeLanguages && homeLanguages.length > 0)) &&
+    metas.length === 0 &&
+    !row.sourceRow &&
+    !row.libraryGroups
+  )
+    return null;
+  const idx = orderKeys.indexOf(row.key);
+  const title = displayRowTitle(row, row.key in customization.renamed, t);
+  const viewAll = row.fetcher
+    ? () => openGrid({ title, fetcher: row.fetcher!, initial: row.metas, initialPage: 0 })
+    : undefined;
+  const ranked = (customization.numerals ?? []).includes(row.key) && metas.length >= 10;
+  const renderRow = () => {
+    let rowEl;
+    if (row.libraryGroups) {
+      rowEl = <HomeGroups title={title} />;
+    } else if (row.sourceRow) {
+      rowEl = (
+        <CustomSourcesRow
+          sourceRow={row.sourceRow}
+          editMode={editMode}
+          onEditFolderImages={onEditFolderImages}
+        />
+      );
+    } else if (ranked) {
+      rowEl = (
+        <Row
+          title={<RowTitle row={row} title={title} />}
+          titleExtra={<RowTitleExtra row={row} />}
+          min={180}
+          shape="rank"
+          scrollKey={`home:${row.key}`}
+          onViewAll={viewAll}
+        >
+          {metas.slice(0, 10).map((m, i) => (
+            <TopRankCard key={m.id} meta={m} rank={i + 1} />
+          ))}
+        </Row>
+      );
+    } else {
+      rowEl = (
+        <Row
+          {...posterRow}
+          title={<RowTitle row={row} title={title} />}
+          titleExtra={<RowTitleExtra row={row} />}
+          scrollKey={`home:${row.key}`}
+          onEndReached={row.hasMore ? () => onLoadMore(row.key) : undefined}
+          onViewAll={viewAll}
+        >
+          {metas.map((m, i) => (
+            <PickCard key={`${m.id}-${i}`} meta={m} />
+          ))}
+        </Row>
+      );
+    }
+    return rowEl;
+  };
   return (
-    <>
-      {rows.map((row, rowIndex) => {
-        const hidden = customization.hidden.includes(row.key);
-        if (hidden && !editMode) return null;
-        let metas = row.metas.filter((m) => typeof m.id === "string");
-        if (homeLanguages && homeLanguages.length > 0) {
-          metas = metas.filter(
-            (m) => !m.originalLanguage || homeLanguages.includes(m.originalLanguage),
-          );
-        }
-        if (hideWatched) metas = metas.filter((m) => !isWatched(m));
-        if (hideUnreleased) metas = metas.filter((m) => !isUnreleased(m));
-        if (
-          (hideWatched || hideUnreleased || (homeLanguages && homeLanguages.length > 0)) &&
-          metas.length === 0 &&
-          !row.sourceRow
-        )
-          return null;
-        const idx = orderKeys.indexOf(row.key);
-        const title = displayRowTitle(row, row.key in customization.renamed, t);
-        const eager = rowIndex < 2;
-        const viewAll = row.fetcher
-          ? () => openGrid({ title, fetcher: row.fetcher!, initial: row.metas, initialPage: 0 })
-          : undefined;
-        const ranked = (customization.numerals ?? []).includes(row.key) && metas.length >= 10;
-        let rowEl;
-        if (row.sourceRow) {
-          rowEl = (
-            <CustomSourcesRow
-              sourceRow={row.sourceRow}
-              editMode={editMode}
-              onEditFolderImages={onEditFolderImages}
-            />
-          );
-        } else if (ranked) {
-          rowEl = (
-            <Row
-              title={<RowTitle row={row} title={title} />}
-              titleExtra={<RowTitleExtra row={row} />}
-              min={180}
-              shape="rank"
-              scrollKey={`home:${row.key}`}
-              onViewAll={viewAll}
-            >
-              {metas.slice(0, 10).map((m, i) => (
-                <TopRankCard key={m.id} meta={m} rank={i + 1} />
-              ))}
-            </Row>
-          );
-        } else {
-          rowEl = (
-            <Row
-              {...posterRow}
-              title={<RowTitle row={row} title={title} />}
-              titleExtra={<RowTitleExtra row={row} />}
-              scrollKey={`home:${row.key}`}
-              onEndReached={row.hasMore ? () => onLoadMore(row.key) : undefined}
-              onViewAll={viewAll}
-            >
-              {metas.map((m, i) => (
-                <PickCard key={`${m.id}-${i}`} meta={m} />
-              ))}
-            </Row>
-          );
-        }
-        return (
-          <div key={row.key} data-scroll-anchor={`row:${row.key}`}>
-            {editMode && (
-              <RowControls
-                name={title}
-                hidden={hidden}
-                canMoveUp={idx > 0}
-                canMoveDown={idx >= 0 && idx < orderKeys.length - 1}
-                onMoveUp={() => onMove(row.key, -1)}
-                onMoveDown={() => onMove(row.key, 1)}
-                onToggleHidden={() => onToggleHidden(row.key)}
-                onRename={(label) => onRename(row.key, label)}
-                onResetName={() => onRename(row.key, "")}
-                isRenamed={row.key in customization.renamed}
-                numeralsActive={(customization.numerals ?? []).includes(row.key)}
-                canNumerals={row.metas.length >= 10}
-                onToggleNumerals={() => onToggleNumerals(row.key)}
-                heroActive={customization.heroSource === row.key}
-                canHero={row.metas.some((m) => m.background || m.poster)}
-                onToggleHero={() => onToggleHero?.(row.key)}
-                onDelete={row.sourceRow ? () => onDeleteCustomSource?.(row.key) : undefined}
-              />
-            )}
-            {!hidden && (eager ? rowEl : <LazyMount minHeight={340}>{rowEl}</LazyMount>)}
-          </div>
-        );
-      })}
-    </>
+    <div key={row.key} data-scroll-anchor={`row:${row.key}`}>
+      {editMode && (
+        <RowControls
+          name={title}
+          hidden={hidden}
+          canMoveUp={idx > 0}
+          canMoveDown={idx >= 0 && idx < orderKeys.length - 1}
+          onMoveUp={() => onMove(row.key, -1)}
+          onMoveDown={() => onMove(row.key, 1)}
+          onToggleHidden={() => onToggleHidden(row.key)}
+          onRename={(label) => onRename(row.key, label)}
+          onResetName={() => onRename(row.key, "")}
+          isRenamed={row.key in customization.renamed}
+          numeralsActive={(customization.numerals ?? []).includes(row.key)}
+          canNumerals={row.metas.length >= 10}
+          onToggleNumerals={() => onToggleNumerals(row.key)}
+          heroActive={customization.heroSource === row.key}
+          canHero={row.metas.some((m) => m.background || m.poster)}
+          onToggleHero={() => onToggleHero?.(row.key)}
+          onDelete={row.sourceRow ? () => onDeleteCustomSource?.(row.key) : undefined}
+        />
+      )}
+      {!hidden &&
+        (eager ? (
+          renderRow()
+        ) : (
+          <LazyMount minHeight={340}>
+            <HomeRowContent render={renderRow} />
+          </LazyMount>
+        ))}
+    </div>
   );
 });
+
+function HomeRowContent({ render }: { render: () => React.ReactNode }) {
+  return render();
+}

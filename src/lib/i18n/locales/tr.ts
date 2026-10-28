@@ -1,3 +1,4 @@
+import reviews from "./tr/reviews";
 import playOrders from "./tr/play-orders";
 import gameRomLibrary from "./tr/game-rom-library";
 import gameNotes from "./tr/game-notes";
@@ -94,6 +95,7 @@ import recent from "./tr/recent";
 import residual from "./tr/residual";
 import finalResidual from "./tr/final";
 import coverage from "./tr/coverage";
+import subtitles from "./tr/subtitles";
 import plugins from "./tr/plugins";
 import brands from "./tr/brands";
 import bpSports from "./tr/bp-sports";
@@ -291,6 +293,7 @@ const tr: Record<string, string> = {
   ...residual,
   ...finalResidual,
   ...coverage,
+  ...subtitles,
   ...settingsRefinements,
   ...plugins,
   ...brands,
@@ -369,6 +372,7 @@ const tr: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...reviews,
   ...queueBasket,
 };
 

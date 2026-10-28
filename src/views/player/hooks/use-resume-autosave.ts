@@ -76,11 +76,37 @@ type ResumeSession = {
   lastSaved: number;
 };
 
+function getNuvioOwnerId(): string | undefined {
+  try {
+    const explicit = typeof localStorage !== "undefined" ? localStorage.getItem("harbor.account-provider") : null;
+    let isNuvio = explicit === "nuvio";
+    if (!isNuvio && explicit !== "stremio" && typeof localStorage !== "undefined") {
+      for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          try {
+            if (JSON.parse(raw).accountProvider === "nuvio") {
+              isNuvio = true;
+              break;
+            }
+          } catch {}
+        }
+      }
+    }
+    if (isNuvio && typeof localStorage !== "undefined") {
+      const stateRaw = localStorage.getItem("harbor.nuvio.state.v1") || localStorage.getItem("harbor.nuvio.state");
+      const slot = stateRaw ? (JSON.parse(stateRaw).activeProfileIndex ?? 1) : 1;
+      return `nuvio-${slot}`;
+    }
+  } catch {}
+  return undefined;
+}
+
 export function useResumeAutosave(params: ResumeAutosaveParams) {
   const { src, snap, season, episode } = params;
   const { settings } = useSettings();
   const { activeProfile } = useProfiles();
-  const ownerId = activeProfile?.id;
+  const ownerId = getNuvioOwnerId() ?? activeProfile?.id;
   const taughtRef = useRef<Set<string>>(new Set());
   const anilistAutoSyncRef = useRef(settings.anilistAutoSync);
   anilistAutoSyncRef.current = settings.anilistAutoSync;
@@ -146,7 +172,7 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
     return isForeignSplitSeason(true, se, s.episode?.imdbSeason);
   };
 
-  const record = (current: ResumeSession): void => {
+  const record = (current: ResumeSession, writeSource = true): void => {
     if (!current.ready || !current.latest) return;
     const {
       src: s, snap: sn, season: se, episode: ep,
@@ -195,10 +221,12 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
     }
     if (typeof cs === "number") setViewedSeason(id, cs);
     if (isExternalPlaylistId(id)) return;
-    if (s.streamRef) {
-      savePlayback(id, { ...s.streamRef, url: s.historyUrl ?? s.url, title: s.meta.name }, cs, ep);
-    } else {
-      savePlayback(id, { title: s.meta.name, parsedTitle: s.meta.name }, cs, ep);
+    if (writeSource) {
+      if (s.streamRef) {
+        savePlayback(id, { ...s.streamRef, url: s.historyUrl ?? s.url, title: s.meta.name }, cs, ep);
+      } else {
+        savePlayback(id, { title: s.meta.name, parsedTitle: s.meta.name }, cs, ep);
+      }
     }
     if (
       (s.meta.type === "series" || s.meta.type === "anime" || isAnimeId(id)) &&
@@ -390,7 +418,13 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
   }, [snap.status]);
 
   useEffect(() => {
-    return () => record(session);
+    return () => {
+      // A source switch creates a new session. The outgoing session must still
+      // flush progress, but it must not write its old streamRef over the source
+      // the user just switched to. On unmount this is still the active session,
+      // so the source is written.
+      record(session, activeSessionRef.current === session);
+    };
   }, [session]);
 
   useEffect(() => {

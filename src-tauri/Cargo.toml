@@ -1,6 +1,6 @@
 [package]
 name = "harbor"
-version = "1.0.0"
+version = "1.0.1"
 description = "A Stremio client built for adventure"
 edition = "2021"
 
@@ -12,7 +12,32 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [features]
-default = []
+default = ["games", "plugins", "music", "music-legacy-metadata", "music-legacy-spotify-player"]
+# Native feature boundaries. Default builds keep existing functionality.
+games = [
+  "dep:plist",
+  "dep:sevenz-rust2",
+  "dep:unrar_sys",
+  "dep:hadris-iso",
+  "dep:harbor-udfread",
+  "dep:leveldb-sys",
+  "dep:trash",
+]
+plugins = []
+# Native Music implementation; shared video helpers remain in core.
+music = [
+  "dep:librespot-core",
+  "dep:librespot-metadata",
+  "dep:librespot-oauth",
+  "dep:async-trait",
+  "dep:parking_lot",
+]
+# Legacy Lofty tag reader remains for existing installs until the separate Music
+# runtime is required and shipped by Shipyard.
+music-legacy-metadata = ["music", "dep:lofty"]
+# Experimental build: retain Music commands and databases but use the external MPV runtime.
+music-sidecar = ["music"]
+music-legacy-spotify-player = ["music", "dep:librespot-playback"]
 context-review = []
 silero-vad = ["dep:ort", "dep:ndarray"]
 asr-whisper = ["dep:whisper-rs"]
@@ -46,18 +71,22 @@ reqwest = { version = "0.12", default-features = false, features = [
 ] }
 flate2 = "1"
 tar = "0.4"
-plist = "1.9"
+plist = { version = "1.9", optional = true }
 zip = { version = "4", default-features = false, features = ["deflate-flate2", "aes-crypto"] }
 zeroize = "1"
-sevenz-rust2 = { version = "=0.20.2", default-features = false, features = [
+sevenz-rust2 = { optional = true, version = "=0.20.2", default-features = false, features = [
   "aes256",
   "bzip2",
   "ppmd",
   "deflate",
 ] }
-unrar_sys = { path = "vendor/unrar_sys" }
-hadris-iso = { version = "=2.5.0", default-features = false, features = ["std", "sync", "joliet"] }
-harbor-udfread = { path = "vendor/harbor-udfread" }
+unrar_sys = { optional = true, path = "vendor/unrar_sys" }
+hadris-iso = { optional = true, version = "=2.5.0", default-features = false, features = [
+  "std",
+  "sync",
+  "joliet",
+] }
+harbor-udfread = { optional = true, path = "vendor/harbor-udfread" }
 regex = "1"
 encoding_rs = "0.8"
 quick-xml = { version = "=0.38.4", features = ["serialize"] }
@@ -103,8 +132,8 @@ whisper-rs = { version = "0.14", optional = true }
 #   root: on Android they compile to an empty crate and every path into them is
 #   unresolved. updater and process declare Android support level "none".
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-leveldb-sys = { path = "vendor/leveldb-sys", features = ["snappy"] }
-trash = "=5.2.9"
+leveldb-sys = { optional = true, path = "vendor/leveldb-sys", features = ["snappy"] }
+trash = { version = "=5.2.9", optional = true }
 libmpv2 = "4"
 libmpv2-sys = "4"
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
@@ -118,17 +147,17 @@ notify-rust = "4"
 # both halves or Cargo turns reqwest's defaults back on for every target.
 reqwest = { version = "0.12", default-features = false, features = ["native-tls"] }
 rusqlite = { version = "0.32.0", features = ["bundled"] }
-async-trait = "0.1"
+async-trait = { version = "0.1", optional = true }
 md5 = "0.7"
 sha2 = "0.10"
 futures = "0.3"
-lofty = "0.22"
+lofty = { version = "0.22", optional = true }
 # Spotify Premium playback. Keep librespot component crates in lockstep.
-parking_lot = "0.12"
-librespot-core = "0.8"
-librespot-metadata = "0.8"
-librespot-playback = "0.8"
-librespot-oauth = "0.8"
+parking_lot = { version = "0.12", optional = true }
+librespot-core = { version = "0.8", optional = true }
+librespot-metadata = { version = "0.8", optional = true }
+librespot-playback = { version = "0.8", optional = true }
+librespot-oauth = { version = "0.8", optional = true }
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
@@ -140,6 +169,7 @@ windows = { version = "0.62", features = [
   "Win32_Security_Cryptography",
   "Win32_UI_WindowsAndMessaging",
   "Win32_UI_Shell",
+  "Win32_Graphics_Dwm",
   "Win32_Graphics_Gdi",
   "Win32_Graphics_Dxgi",
   "Win32_Graphics_Dxgi_Common",
@@ -210,6 +240,7 @@ objc2 = "0.6"
 objc2-foundation = { version = "0.3", features = [
   "NSGeometry",
   "NSThread",
+  "NSProcessInfo",
   "NSValue",
   "NSDictionary",
   "NSString",

@@ -181,7 +181,7 @@ const catalog10: Record<string, string> = {
   "https://...manifest.json or stremio://...": "https://...manifest.json o stremio://...",
   "https://posters.example.com or a pattern with {id}":
     "https://posters.example.com o un pattern con {id}",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "huge ({width}×{height}px)": "enorme ({width}×{height}px)",
   "if the first page is 0. Use this when the URL counts pages.":
     "se la prima pagina è 0. Usalo quando l'URL usa i numeri di pagina.",
@@ -323,6 +323,9 @@ const catalog10: Record<string, string> = {
   "profile.signIn": "Accedi a Stremio",
   "profile.signOut": "Esci da Stremio",
   "profile.signedIn": "Accesso a Stremio effettuato",
+  "Signed in to Harbor": "Accesso a Harbor effettuato",
+  "Signed out of Harbor": "Disconnesso da Harbor",
+  "Sign out of Harbor": "Esci da Harbor",
   "profile.switch": "Cambia profilo",
   "profile.whoWatching": "Chi sta guardando?",
   rated: "valutato",

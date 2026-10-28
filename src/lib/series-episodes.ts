@@ -1,4 +1,5 @@
 import { lruSet } from "@/lib/cache";
+import { onMediaCacheClear, mediaCacheGeneration, MEDIA_TTL } from "@/lib/media-cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Meta } from "./cinemeta";
@@ -10,7 +11,7 @@ import {
   tmdbEpisodeNames,
   tmdbSeasonEpisodes,
 } from "./providers/tmdb";
-import { tmdbLanguageIso } from "./providers/tmdb/tmdb-client";
+import { effectiveTmdbLanguage, tmdbLanguageIso } from "./providers/tmdb/tmdb-client";
 import { tmdbStillUrl } from "./providers/tmdb/tmdb-image-rungs";
 import { pickLocalizedText } from "./localized-text";
 import {
@@ -22,8 +23,9 @@ import {
   preferredVideoOverview,
   resolveMeta,
 } from "./meta-resource";
-import { animeKitsuMeta } from "./providers/anime-kitsu-addon";
-import { externalToKitsu, kitsuToAnilist } from "./providers/anime-mapping";
+import { animeKitsuMeta, type AnimeKitsuMeta } from "./providers/anime-kitsu-addon";
+import { kitsuToAnilist } from "./providers/anime-mapping";
+import { nextAnimeEntry, resolveAnimeEntry } from "./providers/anime-entry";
 import { parseKitsuId } from "./providers/kitsu";
 import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/anizip";
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
@@ -60,29 +62,17 @@ export function animeSeriesFromStreamId(streamId: string | undefined): string | 
   return m ? `${m[1]}:${m[2]}` : null;
 }
 
-async function resolveAnimeKitsuId(id: string): Promise<number | null> {
-  const direct = parseKitsuId(id);
-  if (direct != null) return direct;
-  const ext: Array<[string, string]> = [
-    ["mal:", "myanimelist"],
-    ["anilist:", "anilist"],
-    ["anidb:", "anidb"],
-  ];
-  for (const [prefix, source] of ext) {
-    if (id.startsWith(prefix)) {
-      const n = parseInt(id.slice(prefix.length), 10);
-      return Number.isFinite(n) ? externalToKitsu(source, n) : null;
-    }
-  }
-  return null;
-}
-
 async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
+  const generation = mediaCacheGeneration();
   const cacheKey = `anime:${id}`;
   if (addonEpsCache.has(cacheKey)) return addonEpsCache.get(cacheKey)!;
-  const kitsuId = await resolveAnimeKitsuId(id).catch(() => null);
-  if (kitsuId == null) return null;
-  const addonMeta = await animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null);
+  const entry = await resolveAnimeEntry(id).catch(() => null);
+  if (!entry) return null;
+  const { kitsuId } = entry;
+  const addonMeta =
+    entry.meta && entry.meta.videos.length > 0
+      ? entry.meta
+      : await animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null);
   const raw = addonMeta?.videos ?? [];
   const eps: PlayEpisode[] = [];
   for (const v of raw) {
@@ -159,7 +149,7 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
     }
   }
   eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
-  lruSet(addonEpsCache, cacheKey, eps, SEASON_CACHE_MAX);
+  if (generation === mediaCacheGeneration()) lruSet(addonEpsCache, cacheKey, eps, SEASON_CACHE_MAX);
   return eps;
 }
 
@@ -171,14 +161,48 @@ async function getNonStandardEpisodes(meta: Meta): Promise<PlayEpisode[] | null>
   return getAddonEpisodes(meta.id);
 }
 
-type Adjacent = { prev: PlayEpisode | null; next: PlayEpisode | null };
+type Adjacent = {
+  prev: PlayEpisode | null;
+  next: PlayEpisode | null;
+  prevMeta?: Meta;
+  nextMeta?: Meta;
+};
 
 const TT_CACHE_MAX = 800;
 const SEASON_CACHE_MAX = 400;
-const ttCache = new Map<string, Adjacent>();
-const tmdbSeasonCache = new Map<string, PlayEpisode[]>();
-const addonEpsCache = new Map<string, PlayEpisode[]>();
-const cinemetaListCache = new Map<string, PlayEpisode[]>();
+class ProjectionCache<T> extends Map<string, T> {
+  private expires = new Map<string, number>();
+  constructor() {
+    super();
+    onMediaCacheClear(() => this.clear());
+  }
+  override get(key: string) {
+    if ((this.expires.get(key) ?? 0) <= Date.now()) {
+      this.delete(key);
+      return undefined;
+    }
+    return super.get(key);
+  }
+  override has(key: string) {
+    return this.get(key) !== undefined;
+  }
+  override set(key: string, value: T) {
+    this.expires.set(key, Date.now() + MEDIA_TTL.recent);
+    return super.set(key, value);
+  }
+  override delete(key: string) {
+    this.expires.delete(key);
+    return super.delete(key);
+  }
+  override clear() {
+    this.expires.clear();
+    super.clear();
+  }
+}
+const ttCache = new ProjectionCache<Adjacent>();
+const tmdbSeasonCache = new ProjectionCache<PlayEpisode[]>();
+const addonEpsCache = new ProjectionCache<PlayEpisode[]>();
+const cinemetaListCache = new ProjectionCache<PlayEpisode[]>();
 
 registerCache("episodes:tt", () => ttCache.size);
 registerCache("episodes:tmdbSeason", () => tmdbSeasonCache.size);
@@ -195,8 +219,11 @@ function readAuthKey(): string | null {
 }
 
 async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
-  if (addonEpsCache.has(id)) return addonEpsCache.get(id)!;
-  const m = await resolveMeta(readAuthKey(), "series", id).catch(() => null);
+  const generation = mediaCacheGeneration();
+  const authKey = readAuthKey();
+  const cacheKey = JSON.stringify([id, authKey]);
+  if (addonEpsCache.has(cacheKey)) return addonEpsCache.get(cacheKey)!;
+  const m = await resolveMeta(authKey, "series", id).catch(() => null);
   const raw = m?.videos ?? [];
   const eps: PlayEpisode[] = [];
   for (const v of raw) {
@@ -218,7 +245,7 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
   }
   if (eps.length === 0) return null;
   eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
-  lruSet(addonEpsCache, id, eps, SEASON_CACHE_MAX);
+  if (generation === mediaCacheGeneration()) lruSet(addonEpsCache, cacheKey, eps, SEASON_CACHE_MAX);
   return eps;
 }
 
@@ -228,24 +255,37 @@ export async function fetchAdjacentEpisodes(
   opts: {
     tmdbKey: string;
     kitsuStreamId?: string;
-    skip?: (season: number, episode: number) => boolean;
+    imdbSeason?: number;
+    imdbEpisode?: number;
+    episodeEndOffset?: number;
+    skip?: (season: number, episode: number, metaId?: string) => boolean;
   },
 ): Promise<Adjacent> {
+  const generation = mediaCacheGeneration();
   const animeSeries = animeSeriesFromStreamId(opts.kitsuStreamId);
   if (animeSeries) {
     const eps = await getAnimeEpisodes(animeSeries);
-    if (eps) return computeAdjacent(eps, current, opts.skip);
+    if (eps) return animeAdjacent(animeSeries, eps, current, opts);
   }
 
   if (meta.type !== "series" && !isAnimeId(meta.id)) return { prev: null, next: null };
 
   if (meta.id.startsWith("tt")) {
-    const key = `${meta.id}:${current.season}:${current.episode}`;
-    if (ttCache.has(key)) return ttCache.get(key)!;
+    const key = JSON.stringify([
+      meta.id,
+      current.season,
+      current.episode,
+      opts.tmdbKey,
+      effectiveTmdbLanguage(),
+      readAuthKey(),
+      preferCustomMeta(),
+    ]);
+    if (!opts.skip && ttCache.has(key)) return ttCache.get(key)!;
     const eps = await loadCinemetaEpisodes(meta.id, opts.tmdbKey);
     if (!eps) return { prev: null, next: null };
     const result = computeAdjacent(eps, current, opts.skip);
-    lruSet(ttCache, key, result, TT_CACHE_MAX);
+    if (!opts.skip && generation === mediaCacheGeneration())
+      lruSet(ttCache, key, result, TT_CACHE_MAX);
     return result;
   }
 
@@ -257,6 +297,7 @@ export async function fetchAdjacentEpisodes(
 
   const eps = await getNonStandardEpisodes(meta);
   if (!eps) return { prev: null, next: null };
+  if (isAnimeId(meta.id)) return animeAdjacent(meta.id, eps, current, opts);
   return computeAdjacent(eps, current, opts.skip);
 }
 
@@ -306,10 +347,7 @@ async function overlayPreferredEpisodes(id: string, eps: PlayEpisode[]): Promise
     const v = byKey.get(`${ep.season}:${ep.episode}`);
     if (!v) continue;
     const name = pickLocalizedText(
-      [
-        { text: preferredVideoName(v), score: PREFERRED_TEXT_SCORE },
-        { text: ep.name ?? "" },
-      ],
+      [{ text: preferredVideoName(v), score: PREFERRED_TEXT_SCORE }, { text: ep.name ?? "" }],
       { forName: true, lang },
     );
     if (name) ep.name = name;
@@ -355,8 +393,9 @@ async function overlayTmdbEpisodeNames(
 }
 
 async function loadCinemetaEpisodes(id: string, tmdbKey?: string): Promise<PlayEpisode[] | null> {
+  const generation = mediaCacheGeneration();
   const prefer = preferCustomMeta();
-  const cacheKey = `${prefer ? `${id}:prefer` : id}${tmdbKey ? ":tmdb" : ""}`;
+  const cacheKey = JSON.stringify([id, prefer, tmdbKey, effectiveTmdbLanguage(), readAuthKey()]);
   if (cinemetaListCache.has(cacheKey)) return cinemetaListCache.get(cacheKey)!;
   const res = await fetch(`https://v3-cinemeta.strem.io/meta/series/${id}.json`);
   if (!res.ok) return null;
@@ -392,7 +431,8 @@ async function loadCinemetaEpisodes(id: string, tmdbKey?: string): Promise<PlayE
   eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
   if (prefer) await overlayPreferredEpisodes(id, eps);
   const named = tmdbKey ? await overlayTmdbEpisodeNames(id, tmdbKey, eps) : eps;
-  lruSet(cinemetaListCache, cacheKey, named, SEASON_CACHE_MAX);
+  if (generation === mediaCacheGeneration())
+    lruSet(cinemetaListCache, cacheKey, named, SEASON_CACHE_MAX);
   return named;
 }
 
@@ -508,8 +548,82 @@ function computeAdjacent(
   return { prev, next };
 }
 
+function animeCurrentIndex(
+  eps: PlayEpisode[],
+  current: { season: number; episode: number },
+  hint: { kitsuStreamId?: string; imdbSeason?: number; imdbEpisode?: number },
+): number {
+  if (hint.kitsuStreamId) {
+    const exact = eps.findIndex((ep) => ep.kitsuStreamId === hint.kitsuStreamId);
+    if (exact >= 0) return exact;
+  }
+  if (hint.imdbSeason != null && hint.imdbEpisode != null) {
+    const mapped = eps.findIndex(
+      (ep) => ep.imdbSeason === hint.imdbSeason && ep.imdbEpisode === hint.imdbEpisode,
+    );
+    if (mapped >= 0) return mapped;
+  }
+  return eps.findIndex((ep) => ep.season === current.season && ep.episode === current.episode);
+}
+
+function animeMetaForEntry(id: string, meta: AnimeKitsuMeta | null): Meta | undefined {
+  if (!meta) return undefined;
+  return {
+    id,
+    type: "series",
+    name: meta.name,
+    poster: meta.poster,
+    background: meta.background,
+    logo: meta.logo,
+  };
+}
+
+async function animeAdjacent(
+  entryId: string,
+  eps: PlayEpisode[],
+  current: { season: number; episode: number },
+  opts: {
+    kitsuStreamId?: string;
+    imdbSeason?: number;
+    imdbEpisode?: number;
+    episodeEndOffset?: number;
+    skip?: (season: number, episode: number, metaId?: string) => boolean;
+  },
+): Promise<Adjacent> {
+  const offset = opts.episodeEndOffset ?? 0;
+  const idx = animeCurrentIndex(
+    eps,
+    {
+      season: current.season,
+      episode: current.episode - offset,
+    },
+    opts,
+  );
+  if (idx < 0) return { prev: null, next: null };
+  const start = eps[idx];
+  // Identity hints name the file's first episode; spans end relative to that entry.
+  const at =
+    offset > 0
+      ? eps.find((ep) => ep.season === start.season && ep.episode === start.episode + offset)
+      : start;
+  if (!at) return { prev: null, next: null };
+  const result = computeAdjacent(eps, { season: at.season, episode: at.episode }, opts.skip);
+  if (result.next) return result;
+  const sequel = await nextAnimeEntry(entryId);
+  if (!sequel || sequel.id === entryId) return result;
+  const nextEps = await getAnimeEpisodes(sequel.id);
+  const first = nextEps?.find((ep) => !opts.skip?.(ep.season, ep.episode, sequel.id));
+  if (!first) return result;
+  return {
+    ...result,
+    next: { ...first, sourceMetaId: sequel.id },
+    nextMeta: animeMetaForEntry(sequel.id, sequel.meta),
+  };
+}
+
 async function tmdbSeason(key: string, tvId: number, season: number): Promise<PlayEpisode[]> {
-  const cacheKey = `${key}:${tvId}:${season}`;
+  const generation = mediaCacheGeneration();
+  const cacheKey = `${key}:${tvId}:${season}:${effectiveTmdbLanguage()}`;
   if (tmdbSeasonCache.has(cacheKey)) return tmdbSeasonCache.get(cacheKey)!;
   if (season < 1) return [];
   const raw = await tmdbSeasonEpisodes(key, tvId, season);
@@ -525,7 +639,8 @@ async function tmdbSeason(key: string, tvId: number, season: number): Promise<Pl
       runtime: e.runtime && e.runtime > 0 ? e.runtime : undefined,
     }))
     .sort((a, b) => a.episode - b.episode);
-  lruSet(tmdbSeasonCache, cacheKey, eps, SEASON_CACHE_MAX);
+  if (eps.length > 0 && generation === mediaCacheGeneration())
+    lruSet(tmdbSeasonCache, cacheKey, eps, SEASON_CACHE_MAX);
   return eps;
 }
 

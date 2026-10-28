@@ -2,7 +2,7 @@ import { matchingReleases, type GameSource } from './sources';
 import { sourceIndex, sourceIndexCandidates, type SourceIndex } from './source-index';
 import { catalogMatches } from './source-catalog-query';
 import { processSource } from './source-processing';
-import { sourceMatchCache as cache } from './source-match-cache';
+import { sourceMatchCache as cache, SOURCE_MATCH_REVISION } from './source-match-cache';
 
 type Reference = Parameters<typeof matchingReleases>[1];
 type Matches = ReturnType<typeof matchingReleases>;
@@ -22,7 +22,7 @@ export async function matchingReleasesAsync(sources: GameSource[], game: Referen
     if (!source.enabled) continue;
     try {
       if (source.catalogIssue) throw Error('source_storage');
-      const sourceKey = JSON.stringify([source.id, source.url, source.catalog?.profile, source.catalog?.version, key]);
+      const sourceKey = JSON.stringify([SOURCE_MATCH_REVISION, source.id, source.url, source.catalog?.profile, source.catalog?.version, key]);
       const warm = cache.get(source.entries, sourceKey);
       if (warm) { batches[position] = warm.map(match=>({...match,source})); continue; }
       let found: Matches = [];

@@ -1,5 +1,14 @@
 #include "rar.hpp"
 
+#if defined(__APPLE__) && defined(__x86_64__)
+static unsigned long long GetXCR0()
+{
+  unsigned int Low,High;
+  __asm__ volatile("xgetbv" : "=a"(Low), "=d"(High) : "c"(0));
+  return ((unsigned long long)High<<32)|Low;
+}
+#endif
+
 static int SleepTime=0;
 
 void InitSystemOptions(int SleepTime)
@@ -229,6 +238,26 @@ SSE_VERSION GetSSEVersion()
     if ((CPUInfo[3] & 0x2000000)!=0)
       return SSE_SSE;
   }
+#elif defined(__APPLE__) && defined(__x86_64__)
+  // Avoid __builtin_cpu_supports: Apple linking can omit its __cpu_model runtime.
+  unsigned int Eax,Ebx,Ecx,Edx;
+  if (!__get_cpuid(1,&Eax,&Ebx,&Ecx,&Edx))
+    return SSE_NONE;
+  const unsigned int Features=Ecx;
+  const unsigned int LegacyFeatures=Edx;
+  // AVX2 requires both CPU support and OS preservation of the XMM/YMM state.
+  const unsigned int AVXState=(1u<<26)|(1u<<27)|(1u<<28);
+  if ((Features&AVXState)==AVXState && (GetXCR0()&6)==6 &&
+      __get_cpuid_count(7,0,&Eax,&Ebx,&Ecx,&Edx) && (Ebx&(1u<<5))!=0)
+    return SSE_AVX2;
+  if ((Features&(1u<<19))!=0)
+    return SSE_SSE41;
+  if ((Features&(1u<<9))!=0)
+    return SSE_SSSE3;
+  if ((LegacyFeatures&(1u<<26))!=0)
+    return SSE_SSE2;
+  if ((LegacyFeatures&(1u<<25))!=0)
+    return SSE_SSE;
 #elif defined(__GNUC__)
   if (__builtin_cpu_supports("avx2"))
     return SSE_AVX2;

@@ -114,6 +114,17 @@ export function useAutoRetry(params: {
   const resumedAfterTruncatedRef = useRef(false);
   const [transcodedUrl, setTranscodedUrl] = useState<string | null>(null);
   const [sourceError, setSourceError] = useState<SourceError | null>(null);
+  // Latch "this source actually played" instead of reading the live clock in
+  // the error handler: mpv resets time-pos while tearing a failed file down, so
+  // the clock can already read zero when the error arrives and the old guard
+  // would retry a stream the viewer had been watching for minutes.
+  const playedPastStartRef = useRef(false);
+  useEffect(() => {
+    playedPastStartRef.current = false;
+  }, [src.url]);
+  useEffect(() => {
+    if (snap.positionSec > 5 || getPlaybackPosition() > 5) playedPastStartRef.current = true;
+  }, [snap.positionSec, snap.status]);
   useEffect(() => {
     setSourceError(null);
     autoRetriedRef.current = false;
@@ -230,7 +241,7 @@ export function useAutoRetry(params: {
       console.warn(`[player] live channel: ignoring "${snap.errorCode}", mpv handles reconnection`);
       return;
     }
-    if (getPlaybackPosition() > 5) return;
+    if (playedPastStartRef.current || getPlaybackPosition() > 5) return;
     if (
       isP2pEngine &&
       !engineFailure &&
@@ -262,28 +273,30 @@ export function useAutoRetry(params: {
         false,
         {},
         hint,
-      ).then(async (r) => {
-        if (!current()) return;
-        if (r.ok) {
-          let url = r.data.url;
-          if (r.data.headers && Object.keys(r.data.headers).length > 0) {
-            try {
-              url = (await registerStreamProxy(r.data.url, r.data.headers)).url;
-            } catch {
-              /* fall back to the raw debrid url */
-            }
-          }
+      )
+        .then(async (r) => {
           if (!current()) return;
-          console.warn(`[player] debrid failover via ${r.via}`);
-          void recoveryBridge.load({
-            url,
-            subtitles: src.subtitles,
-            notWebReady: r.data.notWebReady ?? src.notWebReady,
-          });
-        } else {
-          retry();
-        }
-      }).catch(retry);
+          if (r.ok) {
+            let url = r.data.url;
+            if (r.data.headers && Object.keys(r.data.headers).length > 0) {
+              try {
+                url = (await registerStreamProxy(r.data.url, r.data.headers)).url;
+              } catch {
+                /* fall back to the raw debrid url */
+              }
+            }
+            if (!current()) return;
+            console.warn(`[player] debrid failover via ${r.via}`);
+            void recoveryBridge.load({
+              url,
+              subtitles: src.subtitles,
+              notWebReady: r.data.notWebReady ?? src.notWebReady,
+            });
+          } else {
+            retry();
+          }
+        })
+        .catch(retry);
       return cancel;
     }
     if (!sameUrlRetriedRef.current) {
@@ -315,7 +328,11 @@ export function useAutoRetry(params: {
         void registerStreamProxy(src.url, src.headers)
           .then((p) => {
             if (current())
-              void recoveryBridge.load({ url: p.url, subtitles: src.subtitles, notWebReady: src.notWebReady });
+              void recoveryBridge.load({
+                url: p.url,
+                subtitles: src.subtitles,
+                notWebReady: src.notWebReady,
+              });
           })
           .catch(retry);
         return cancel;
@@ -349,17 +366,19 @@ export function useAutoRetry(params: {
       transcodedUrl == null
     ) {
       transcodedTriedRef.current = true;
-      void probeStremioServer().then((ok) => {
-        if (!current()) return;
-        if (ok) {
-          console.warn("[player] decode error — retrying via p2p transcoding");
-          recoveryBridge.destroy();
-          bridgeRef.current = null;
-          setTranscodedUrl(buildTranscodedUrl(src.url));
-        } else {
-          retry();
-        }
-      }).catch(retry);
+      void probeStremioServer()
+        .then((ok) => {
+          if (!current()) return;
+          if (ok) {
+            console.warn("[player] decode error — retrying via p2p transcoding");
+            recoveryBridge.destroy();
+            bridgeRef.current = null;
+            setTranscodedUrl(buildTranscodedUrl(src.url));
+          } else {
+            retry();
+          }
+        })
+        .catch(retry);
       return cancel;
     }
     triggerAutoRetry(`playback error "${snap.errorCode}"`);
@@ -406,6 +425,10 @@ export function useAutoRetry(params: {
         notWebReady: src.notWebReady,
         isLive,
         headers: src.headers,
+        // A premature EOF is a truncated stream, not a new play. Re-open the
+        // same URL at the position it died; otherwise the fresh session starts
+        // at zero and the viewer loses their place.
+        startAtSec: pos > 1 ? pos : undefined,
       });
       return;
     }

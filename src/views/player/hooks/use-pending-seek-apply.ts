@@ -50,7 +50,7 @@ export function usePendingSeekApply(params: {
       applied = true;
       notifyMediaSeeked(t);
       onApplied.current();
-      if (!inRoomRef.current && !startPaused) b.play().catch(() => {});
+      if (!inRoomRef.current && !startPaused) b.play({ reason: "pending-seek" }).catch(() => {});
     });
     issued = true;
     b.seek(t);

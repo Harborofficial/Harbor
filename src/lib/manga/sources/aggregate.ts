@@ -110,6 +110,7 @@ export async function streamAggregateChapters(
   id: string,
   onChunk: (chs: MangaChapter[]) => void,
   ownHintId?: string,
+  opts?: { refresh?: boolean },
 ): Promise<void> {
   const subs = aggregateSubProviders();
   const sepIdx = id.indexOf(SEP);
@@ -119,7 +120,7 @@ export async function streamAggregateChapters(
   const orig = sepIdx !== -1 ? id.slice(sepIdx + SEP.length) : id;
   const ownP = subById(source);
   const ownChaptersP = ownP
-    .chapters(orig)
+    .chapters(orig, opts)
     .then((cs) => labelChapters(cs, ownP))
     .catch(() => [] as MangaChapter[]);
   const detail = await ownP.detail(orig).catch(() => null);
@@ -137,7 +138,7 @@ export async function streamAggregateChapters(
             title as string,
           );
           if (!hit) return;
-          const labeled = labelChapters(await p.chapters(hit.id).catch(() => []), p);
+          const labeled = labelChapters(await p.chapters(hit.id, opts).catch(() => []), p);
           if (labeled.length) onChunk(labeled);
         })(),
         undefined,
@@ -207,9 +208,11 @@ async function mergeTags(): Promise<MangaTag[]> {
   const lists = await Promise.all(
     aggregateSubProviders().map((p) =>
       withTimeout(p.tags?.() ?? Promise.resolve([]), [] as MangaTag[]).then((tags) =>
-        tags.map((tag) => tag.group === "Categories" && tag.id.startsWith("category:")
-          ? { ...tag, id: prefixId(p.id, tag.id) }
-          : tag),
+        tags.map((tag) =>
+          tag.group === "Categories" && tag.id.startsWith("category:")
+            ? { ...tag, id: prefixId(p.id, tag.id) }
+            : tag,
+        ),
       ),
     ),
   );
@@ -232,8 +235,10 @@ export function withProviderTag<T>(
 export const aggregateProvider: MangaProvider = {
   id: "all",
   name: "All Sources",
-  popular: (offset, tagId) => mergeLists((p) => withProviderTag(p, tagId, (tag) => p.popular(offset, tag))),
-  search: (query, offset, tagId) => mergeLists((p) => withProviderTag(p, tagId, (tag) => p.search(query, offset, tag))),
+  popular: (offset, tagId) =>
+    mergeLists((p) => withProviderTag(p, tagId, (tag) => p.popular(offset, tag))),
+  search: (query, offset, tagId) =>
+    mergeLists((p) => withProviderTag(p, tagId, (tag) => p.search(query, offset, tag))),
   searchAll: mergeSearchLists,
   detail: async (id) => {
     const { source, orig } = parseId(id);

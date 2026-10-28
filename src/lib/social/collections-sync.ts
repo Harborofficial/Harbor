@@ -408,7 +408,7 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 // The image endpoints are multipart uploads, which harbor_fetch (string body) can't
-// carry. In Tauri a plain fetch to harbor.site is CORS-blocked, so route the bytes
+// carry. In Tauri a plain fetch to harborcommunity.site is CORS-blocked, so route the bytes
 // through a Rust multipart command; on web the browser fetch reaches the origin fine.
 async function postImage(
   path: string,

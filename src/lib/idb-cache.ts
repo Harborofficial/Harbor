@@ -23,7 +23,10 @@ function openDb(): Promise<IDBDatabase | null> {
   return dbPromise;
 }
 
-function run<T>(mode: IDBTransactionMode, work: (store: IDBObjectStore) => IDBRequest): Promise<T | null> {
+function run<T>(
+  mode: IDBTransactionMode,
+  work: (store: IDBObjectStore) => IDBRequest,
+): Promise<T | null> {
   return openDb().then(
     (db) =>
       new Promise<T | null>((resolve) => {
@@ -32,14 +35,17 @@ function run<T>(mode: IDBTransactionMode, work: (store: IDBObjectStore) => IDBRe
           return;
         }
         let request: IDBRequest;
+        let transaction: IDBTransaction;
         try {
-          request = work(db.transaction(STORE, mode).objectStore(STORE));
+          transaction = db.transaction(STORE, mode);
+          request = work(transaction.objectStore(STORE));
         } catch {
           resolve(null);
           return;
         }
-        request.onsuccess = () => resolve(request.result as T);
-        request.onerror = () => resolve(null);
+        transaction.oncomplete = () => resolve(request.result as T);
+        transaction.onabort = () => resolve(null);
+        transaction.onerror = () => {};
       }),
   );
 }

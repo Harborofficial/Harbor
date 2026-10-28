@@ -52,6 +52,9 @@ const chrome: Record<string, string> = {
   "profile.switch": "Alternar perfil",
   "profile.primary": "Principal",
   "profile.signedIn": "Conectado ao Stremio",
+  "Signed in to Harbor": "Conectado ao Harbor",
+  "Signed out of Harbor": "Desconectado do Harbor",
+  "Sign out of Harbor": "Sair do Harbor",
   "profile.fallback": "Perfil",
   "welcome.title": "Bem-vindo ao Harbor",
   "welcome.subtitle":

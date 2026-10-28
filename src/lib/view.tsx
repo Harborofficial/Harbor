@@ -145,12 +145,17 @@ export type PlayerStreamRef = {
   infoHash?: string | null;
   fileIdx?: number | null;
   addonId?: string | null;
+  /** Picker row name, e.g. "[TB+] Comet 1080p". Kept so the switcher can label
+   * the playing row before a refreshed duplicate list settles. */
+  name?: string | null;
+  addonName?: string | null;
   title?: string | null;
   parsedTitle?: string | null;
   resolution?: string | null;
   quality?: string | null;
   releaseGroup?: string | null;
   source?: string | null;
+  audioLanguages?: string[] | null;
   size?: number | null;
   bingeGroup?: string | null;
   cachedSlugs?: string[];
@@ -410,7 +415,10 @@ export function useHomeResetTick(): number {
 // Stable navigation actions for repeated children. A card reads these instead of the whole view
 // context: taking `openMeta` from `Ctx` made every mounted card re-render on any navigation, and
 // that cascaded into every poster (the profiler attributed ~4,800 poster renders to it).
-type ViewActions = Pick<ViewValue, "openMeta" | "openPicker" | "openManga">;
+type ViewActions = Pick<
+  ViewValue,
+  "openMeta" | "openPicker" | "openManga" | "openGrid" | "rememberRowScroll" | "recallRowScroll"
+>;
 
 const ViewActionsContext = createContext<ViewActions | null>(null);
 
@@ -1611,8 +1619,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   );
 
   const actions = useMemo<ViewActions>(
-    () => ({ openMeta, openPicker, openManga }),
-    [openMeta, openPicker, openManga],
+    () => ({ openMeta, openPicker, openManga, openGrid, rememberRowScroll, recallRowScroll }),
+    [openMeta, openPicker, openManga, openGrid, rememberRowScroll, recallRowScroll],
   );
 
   return (
@@ -1655,10 +1663,11 @@ function pickAnchor(el: HTMLElement, scrollTop: number): { key: string; delta: n
   const anchors = el.querySelectorAll<HTMLElement>("[data-scroll-anchor]");
   if (anchors.length === 0) return null;
   let best: { key: string; offset: number } | null = null;
+  const scrollerTop = el.getBoundingClientRect().top;
   for (const a of anchors) {
     const k = a.dataset.scrollAnchor;
     if (!k) continue;
-    const off = anchorOffsetIn(el, a);
+    const off = a.getBoundingClientRect().top - scrollerTop + scrollTop;
     if (off > scrollTop + 1) continue;
     if (!best || off > best.offset) best = { key: k, offset: off };
   }

@@ -10,6 +10,7 @@ import {
   List,
   Loader2,
   Pause,
+  RefreshCw,
   Server,
   Tv,
 } from "lucide-react";
@@ -454,6 +455,7 @@ export function ChapterList({
   mangaCover,
   animeEndChapter,
   pending = false,
+  onRefresh,
   scrollRoot,
 }: {
   chapters: MangaChapter[];
@@ -466,6 +468,7 @@ export function ChapterList({
   mangaCover?: string;
   animeEndChapter?: number;
   pending?: boolean;
+  onRefresh?: () => void;
   scrollRoot?: RefObject<HTMLElement | null>;
 }) {
   const t = useT();
@@ -652,11 +655,28 @@ export function ChapterList({
     onRead(ascending, index >= 0 ? index : 0);
   };
   const showMore = () => setVisibleCount((n) => n + PAGE_SIZE);
+  const refreshButton = onRefresh && (
+    <button
+      type="button"
+      onClick={onRefresh}
+      disabled={pending}
+      className="inline-flex h-11 items-center gap-2 rounded-xl border border-edge-soft bg-surface/60 px-4 text-[14px] text-ink transition-colors hover:border-edge hover:bg-elevated/60 disabled:cursor-default disabled:opacity-50"
+    >
+      <RefreshCw
+        size={16}
+        className={pending ? "animate-spin motion-reduce:animate-none" : undefined}
+      />
+      {t("Refresh")}
+    </button>
+  );
 
   if (chapters.length === 0) {
     return (
       <section className="flex flex-col gap-6">
-        <h2 className="text-[22px] font-medium tracking-tight text-ink">{t("Chapters")}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 className="text-[22px] font-medium tracking-tight text-ink">{t("Chapters")}</h2>
+          {refreshButton}
+        </div>
         <div className="rounded-2xl border border-edge-soft bg-surface/40 px-6 py-14 text-center">
           {pending ? (
             <p className="flex items-center justify-center gap-2 text-[15px] text-ink-muted">
@@ -764,6 +784,7 @@ export function ChapterList({
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          {refreshButton}
           <div className="flex h-11 items-center gap-1 rounded-xl border border-edge-soft bg-surface/60 p-1">
             {(
               [

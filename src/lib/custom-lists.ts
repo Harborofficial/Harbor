@@ -8,6 +8,7 @@ import {
   performMembershipOperation,
   performContainerOperation,
   readMembershipSnapshot,
+  membershipStorageKey,
   type MembershipProfile,
   type MembershipResult,
   type MoveMembershipRequest,
@@ -154,7 +155,7 @@ export function createListStore(storageKey: string): ListStore {
       if (!id) return storageKey;
       const p = s.profiles?.find((x) => x.id === id);
       if (!p || p.settingsLinked !== false) return storageKey;
-      return `${storageKey}.${id}`;
+      return membershipStorageKey(storageKey, { activeId: id, settingsLinked: false });
     } catch {
       return storageKey;
     }

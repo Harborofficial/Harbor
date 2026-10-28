@@ -1,3 +1,4 @@
+import reviews from "./es/reviews";
 import playOrders from "./es/play-orders";
 import gameRomLibrary from "./es/game-rom-library";
 import gameNotes from "./es/game-notes";
@@ -109,6 +110,7 @@ import manga from "./es/manga";
 import controllers from "./es/controllers";
 import bpSources from "./es/bp-sources";
 import coverage from "./es/coverage";
+import subtitles from "./es/subtitles";
 import plugins from "./es/plugins";
 import brands from "./es/brands";
 import bpSports from "./es/bp-sports";
@@ -323,6 +325,7 @@ const es: Record<string, string> = {
   ...controllers,
   ...bpSources,
   ...coverage,
+  ...subtitles,
   ...settingsRefinements,
   ...plugins,
   ...brands,
@@ -403,6 +406,7 @@ const es: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...reviews,
   ...queueBasket,
 };
 

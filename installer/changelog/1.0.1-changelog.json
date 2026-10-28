@@ -1,0 +1,176 @@
+{
+  "channel": "beta",
+  "notes": {
+    "1.0.1": {
+      "title": "Harbor v1.0.1 Beta",
+      "intro": "This release adds a redesigned Season Explorer with TVDB anime support, improved split-cour anime tracking, the \"More Like This\" end-screen player, experimental external mpv playback and Nuvio Cloud integration, custom library groups, episode and movie release countdowns, and improvements to playback reliability, browsing performance, PublicMetaDB, games, and reader views.",
+      "sections": [
+        {
+          "heading": "☁️ Nuvio Cloud & Accounts (Experimental)",
+          "items": [
+            "Nuvio Cloud Integration: Added Nuvio as an account provider for syncing your library, watch progress, profiles, and addons. Connect and switch between Stremio and Nuvio under Settings → Account → Account provider (@glpc-blaze).",
+            "Cloud Profiles & PIN Protection: Added support for up to six Nuvio cloud profiles with server-side PIN protection and per-profile Continue Watching. Manage profiles under Settings → Account → Profiles (@glpc-blaze).",
+            "Profile Mapping & Synced Addons: Choose which Nuvio profile slot syncs with your Harbor profile and view its synced addons under Settings → Account → Nuvio → Profile mapping / Synced addons, available when Nuvio is selected (@glpc-blaze).",
+            "Secondary Profile Permissions: Added controls for allowing secondary profiles to manage accounts, switch providers, add profiles, and configure startup preferences. Configure these from the primary profile under Settings → Account → Profiles → Privileges for secondary profiles (@glpc-blaze).",
+            "Account-Isolated Progress & Libraries: Improved isolation of Continue Watching, resume points, watched status, libraries, and profile PINs across accounts and profiles, while preserving library changes made during synchronization (@glpc-blaze).",
+            "Safer Account Switching: Prevented stale background sync requests from overwriting the active account's watchlist or discarding cached playback progress after switching accounts (@glpc-blaze, @thunderhawkk).",
+            "Account Settings Accessibility: Kept account-provider controls reachable in Settings and clearly marked Nuvio as experimental (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "📺 Season Explorer & TVDB",
+          "items": [
+            "Redesigned Season Explorer: Overhauled Season Explorer with larger, consistently sized posters, centered captions, hover-scrolling for long titles, and hover-only carousel navigation arrows (@comet776).",
+            "TVDB Anime Season Explorer: Added TVDB Season Explorer support to anime overview pages, unifying season browsing across anime and regular TV series (@comet776).",
+            "Season Number Pills & English Names: Added clear season number badges and standardized English season titles while preserving localized synopses (@comet776).",
+            "Multi-Tier Artwork Fallbacks: Season artwork now gracefully falls back from TVDB to TMDB, and finally to the main show poster if season art is missing or fails to load (@comet776).",
+            "Localized Season Synopses: Season descriptions now follow your chosen metadata language, cleanly falling back to English when untranslated (@comet776).",
+            "Performance & Layout Optimization: Reduced layout overhead and eliminated unnecessary re-renders when browsing and switching seasons (@comet776).",
+            "Season Explorer Setting: The season shelf is on by default and can be turned off under Settings → Library → Metadata → Episode order → Season explorer. Anime uses Harbor's TVDB service without a key, while regular shows use your TVDB key or TMDB metadata (@comet776).",
+            "Streaming Links Beside the Overview: Moved watch-provider and streaming links beside the overview and awards on wide detail layouts (@comet776)."
+          ]
+        },
+        {
+          "heading": "🎌 Anime & Split-Cour Tracking",
+          "items": [
+            "Cross-Cour Navigation: Fixed previous and next episode buttons failing to navigate across sequel anime cours (@comet776).",
+            "Multi-Episode ONAs as Seasons: Classified multi-episode ONAs properly as full seasons, fixing incorrect episode titles and broken special thumbnails (@comet776).",
+            "Split-Cour Continue Watching: Preserved direct episode mappings for split-cour anime in Continue Watching so progress transitions smoothly (@comet776).",
+            "Batch Mark Watched Across Cours: Marking an episode as watched now correctly marks all prior episodes up to that point, even across split cours (@comet776).",
+            "AniList Rate-Limit Resilience: Prevented AniList API rate limits from blocking or delaying anime detail pages (@comet776).",
+            "Direct Sequel Mapping: Prioritized direct addon mappings for sequel episodes, with automatic retries for missing Kitsu entries (@comet776).",
+            "More Reliable Anime Resume & Stream Matching: Preserved anime identity when resuming from Continue Watching and improved stream matching to reject releases from the wrong season (@thunderhawkk).",
+            "Verified Continue Watching Episodes: Anime Continue Watching cards retain exact add-on entry IDs and provider episode mappings, showing the correct season and episode across desktop, Big Picture, and mobile (@comet776).",
+            "Scoped Sequel Hiding: Hiding an episode now applies only to the matching sequel entry, so the same episode number in another cour stays visible (@thunderhawkk).",
+            "Multi-Episode & Sequel Navigation: Fixed next-episode navigation for anime files that contain multiple episodes and preserved sequel identity when switching to local or downloaded episodes (@thunderhawkk).",
+            "Simplified Anime Search: Removed the separate \"Sequels & Prequels\" search row so anime results appear without waiting on extra AniList requests (@comet776)."
+          ]
+        },
+        {
+          "heading": "🎬 Video Player & Playback",
+          "items": [
+            "\"More Like This\" End Screen: When you reach the end of a movie or episode—or during a customizable lead time before it finishes—a smart recommendation screen appears with suggested titles based on TMDB and Cinemeta (@thunderhawkk).",
+            "Corner Mini-Player: While browsing suggestions before a title concludes, your current video shrinks into a rounded corner mini-player with compact play, pause, progress, and volume controls so playback is never interrupted.",
+            "Big Picture & Controller Navigation: Full D-pad and keyboard navigation support across cards, preview actions, mini-player controls, and \"Keep Watching / Close\" actions.",
+            "Customizable Countdown & Timing: Configure custom lead times (up to 30 minutes, with convenient presets like 5 minutes), countdown rings, and default countdown actions under Settings → Player & quality → Up next.",
+            "Play in Your Own MPV (Experimental): You can now launch and watch video streams directly inside your system's standalone mpv player (Settings → Player & quality → Engine → External player). Harbor cleanly preserves pause states, track selections, resume checkpoints, and episode titles (@momo-labsz).",
+            "Linux Picture-in-Picture (PiP): Fixed detached Picture-in-Picture window lifecycle and video restoration specifically for Linux desktop environments (@pengunnn).",
+            "Consistent Sources Between Episodes: Improved next-episode playback and queue transitions to retain your selected addon, release group, quality, and dub, including when preferred addons respond late (@thunderhawkk).",
+            "Smoother Stream Recovery: Fixed playback restart loops and improved recovery to preserve your position when a stream unexpectedly stops (@thunderhawkk).",
+            "Audio Recovery: Improved audio-device recovery so it completes before playback resumes (@thunderhawkk).",
+            "Faster Seek-Bar Previews: Reduced thumbnail preview latency, prioritized the latest hover position, and kept nearby cached previews visible while new frames load (@thunderhawkk).",
+            "Smoother Minimize & Restore: Preserved the native video surface while minimized to reduce playback stutters and unnecessary video-output resets (@thunderhawkk).",
+            "Improved End-Screen Recommendations: Added anime recommendations after the last aired episode, preloaded suggestions and artwork before entering the mini-player, and added English fallbacks for missing recommendation descriptions (@thunderhawkk).",
+            "Compact Content Advisories: Restored the compact advisory design with severity bars, badges, and animations, plus a live settings preview under Settings → Player layout → While you watch (@thunderhawkk).",
+            "Player Interface Polish: Fixed scrollbar flicker in the \"About this title\" dialog and removed an unwanted focus outline around the playback stage (@thunderhawkk).",
+            "Lower Anime4K Indicator Overhead: Reduced background polling when the Anime4K badge is hidden (@thunderhawkk).",
+            "Better Intro Detection: Upgraded TheIntroDB integration to its v4 API and now sends episode duration, improving intro and recap matching (@thunderhawkk).",
+            "Chapter Marks Toggle: Added a persistent \"Show chapter marks on seekbar\" toggle to the player's Chapters menu. The Chapters button now starts hidden in both player layouts and can be re-enabled from Settings → Player layout (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "📅 Episodes & Release Dates",
+          "items": [
+            "Episode Release Countdowns: Added live countdowns for upcoming episodes across episode lists, grids, the player, and Big Picture views (@thunderhawkk).",
+            "Cinema & Digital Release Dates: Added separate movie countdowns for theatrical and digital releases, using regional dates with clearly labeled fallback countries (@thunderhawkk).",
+            "Episode Strip Previews: Added hover previews to the episode strip, with consistent air dates, release countdowns, description settings, and visible download controls (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "📂 Library & Custom Groups",
+          "items": [
+            "Custom Library Groups: Create and manage groups with editable names, optional artwork, and linked MDBList or Trakt lists under Library → My Groups (@thunderhawkk).",
+            "Group Browsing & Home Pinning: Added paginated list browsing, refresh and ordering controls, and the ability to pin groups to Home. Manage pinned group names, placement, and visibility through Customize Home (@thunderhawkk).",
+            "Restored Profile Lists: Fixed a storage-key regression that could make existing profile lists disappear (@thunderhawkk).",
+            "Collection Author Credits: Saved community collections now show the original creator's name, handle, and avatar instead of your own (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "🔄 PublicMetaDB (PMDB) & Watchlists",
+          "items": [
+            "Multiple Lists & Profiles: Browse multiple PublicMetaDB lists and set persistent default target lists per user profile (@comet776).",
+            "Auto-Created Watchlists: Adding your first item to a missing PMDB watchlist will now automatically create the list (@comet776).",
+            "Prevent Duplicate Continue Watching Cards: Mapped PublicMetaDB playback items to IMDb IDs, resolving an issue where duplicate Continue Watching cards would appear (@comet776).",
+            "Alternate-ID Dismissal & Progress: Dismissed Continue Watching cards now reliably stay dismissed even when progress updates under an alternate ID (such as IMDb vs TMDB), preventing dismissed titles from reappearing (@thunderhawkk).",
+            "List Button Flicker: Fixed button flicker and state sync when adding or removing titles from PMDB lists (@comet776)."
+          ]
+        },
+        {
+          "heading": "🌐 Metadata & Localization",
+          "items": [
+            "English Fallback for Untranslated Titles: When movie or series titles lack a translation in your preferred interface language, Harbor smoothly falls back to English rather than displaying empty labels or raw IDs (@comet776).",
+            "Preserved Japanese Anime Titles: Addressed an issue where anime titles were overridden with English translations when Japanese was selected as the metadata language (@thunderhawkk).",
+            "Custom Poster Service Compatibility: Added support for Pictorium's combined ID templates, corrected series poster requests, and ensured artwork updates when the custom poster-service URL changes (@thunderhawkk).",
+            "Arabic & RTL Layout Fixes: Corrected ordering for ranking numbers, episode metadata, awards, and stream labels in Arabic and right-to-left layouts (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "🪟 Windows System Tray & Accounts",
+          "items": [
+            "Theme-Aware Tray Menu: Added a custom, theme-aware system tray menu on Windows with smooth outside-click dismissal, native menu behavior, and localized preference labels (@OwaisByte).",
+            "Primary Harbor Account: Made the Harbor profile account the primary account across the app (@thunderhawkk).",
+            "Reliable Tray Preferences: Fixed unrelated tray-menu toggles unexpectedly re-enabling Pause When Minimized (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "🖥️ Interface & Navigation",
+          "items": [
+            "Account Settings Landing Tab: Settings → Account now opens on Your profile, with Account provider moved after the profile tabs (@thunderhawkk).",
+            "Settings Search Focus: Settings search now draws its focus ring around the rounded field, and focus styling follows mouse, keyboard, and remote input even when TV navigation is turned off (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "🎮 Games & Launchers",
+          "items": [
+            "Brand, Launcher & Platform Icons: Restored missing high-quality icons and brand marks for Steam, IGDB, Metacritic, Steam Deck, PlayStation, Xbox, Epic Games, GOG, Battle.net, EA, Ubisoft, Riot, Itch.io, and Linux platforms (@thunderhawkk).",
+            "Smart Game Matching: Improved library release matching by sanitizing source titles, accurately handling roman numerals, and recognizing special edition tags (@thunderhawkk).",
+            "Shared Sidebar Animation: The Games sidebar navigation icon now uses the shared, lightweight Lottie animation system (NavLottie), adhering to your global motion preferences (@OwaisByte).",
+            "Decoupled Quick Library: Decoupled the Quick library feature to optimize gating and reduce the overall installation footprint (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "📚 eBooks & Reading",
+          "items": [
+            "Inline EPUB Images: Chapter illustrations, diagrams, and figures in EPUB books now load and render properly inside Harbor Reader (@thunderhawkk).",
+            "Book Mode Performance: Fixed a freeze where dual-page Book View could hang while preparing pages for display (@thunderhawkk).",
+            "Reader Window Controls: Fixed reader controls overlapping the application's window chrome (@thunderhawkk).",
+            "Fresh Suwayomi Chapters: Manga chapters now refresh from Suwayomi when opening a title, with a manual refresh option that keeps existing chapters visible while checking for updates (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "💬 Subtitles & Translations",
+          "items": [
+            "Translating Addon Stability: Fixed translation workflows for translating subtitle addons (such as SubMaker), ensuring translated subtitle tracks complete reliably and load into the player without dropping out (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "🏠 Home & Music",
+          "items": [
+            "Localized Hero Banners: Featured hero descriptions and overview text on the Home screen now accurately follow your localized hero feed (@thunderhawkk).",
+            "Persistent Music Dock: The mini music player dock now remembers its closed state across application restarts (@thunderhawkk).",
+            "Spooktober Banner Controls: Choose whether to hide the banner, keep it compact in the top-right corner, or place it below the hero under Settings → Theme & appearance → Interface → Spooktober. This setting appears during Spooktober (@thunderhawkk).",
+            "RTL Spooktober Navigation: Fixed carousel positioning, dragging, arrow controls, and keyboard navigation in right-to-left layouts (@thunderhawkk).",
+            "Independent Card Title Size: Added a separate size control for titles beneath poster cards under Settings → Theme & appearance → Interface → Title text → Card title size (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "⚡ Performance & Desktop Stability",
+          "items": [
+            "Faster Startup & Browsing: Staggered background preloading, deferred synchronization, and reduced unnecessary rendering across Home, Discover, and Library (@thunderhawkk).",
+            "More Efficient Metadata & Artwork Loading: Reduced duplicate metadata requests, improved poster loading and transitions, and optimized watchlist caching and large SIMKL history processing (@thunderhawkk).",
+            "Linux Rendering Stability: Removed problematic backdrop filters over video and Library surfaces to mitigate WebKit compositor hangs (@thunderhawkk).",
+            "macOS Window Rendering: Fixed the windowed application showing through the video when regaining focus (@thunderhawkk)."
+          ]
+        },
+        {
+          "heading": "🌐 Platform & Shipyard",
+          "items": [
+            "New Community Domain: Migrated all community endpoints, updater references, Shipyard installer screens, Flatpak metadata, and Winget manifests to the new official domain at harborcommunity.site (@thunderhawkk).",
+            "Clean Install Option: Added Clean install to Shipyard's installation options, with explicit confirmation before removing existing application data (@thunderhawkk).",
+            "Scaled Display Support: Improved installer layout so controls remain visible on scaled displays (@thunderhawkk)."
+          ]
+        }
+      ]
+    }
+  }
+}

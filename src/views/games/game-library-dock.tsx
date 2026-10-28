@@ -8,6 +8,12 @@ import { MusicGlyph } from "@/components/icons/music-glyph";
 import { useT } from "@/lib/i18n";
 import { pushBackHandler } from "@/lib/back-intercept";
 import { useSettings } from "@/lib/settings";
+import { useInstallFeatures } from "@/lib/features/install";
+import {
+  quickLibraryAvailable,
+  quickLibraryMode,
+  type QuickLibraryMode,
+} from "@/lib/features/quick-library";
 import { useQuickLibraryArtwork } from "@/hooks/use-quick-library-artwork";
 import { Dropdown } from "@/components/dropdown";
 import { HoverTooltip } from "@/components/hover-tooltip";
@@ -24,18 +30,24 @@ import { customLaunchHealth } from "@/lib/games/custom-launch-health";
 import "./game-library-dock.css";
 
 const defaults: QuickFilters = { query: "", group: "all", source: "all", ready: false, sort: "recent" };
-type DockMode = "games" | "music";
 /** The chosen strip outlives a close, so reopening lands where the listener left it. */
-let heldDockMode: DockMode = "games";
+let heldDockMode: QuickLibraryMode = "games";
 export function GameLibraryDock({ visible: pageVisible }: { visible: boolean }) {
   const access = useGameAccess(), t = useT();
   const { setView } = useView();
-  const [mode, setDockMode] = useState<DockMode>(heldDockMode);
+  const features = useInstallFeatures();
+  const gamesEnabled = features.games;
+  const musicEnabled = features.music;
+  const [requestedMode, setDockMode] = useState<QuickLibraryMode>(heldDockMode);
+  const mode = quickLibraryMode(gamesEnabled, musicEnabled, requestedMode);
   const music = mode === "music";
-  const setMode = (next: DockMode) => { heldDockMode = next; setDockMode(next); };
+  const setMode = (next: QuickLibraryMode) => { heldDockMode = next; setDockMode(next); };
   const toMusic = (run: () => void) => { close(false); setView("music"); run(); };
   const { settings } = useSettings();
-  const visible = pageVisible && settings.showQuickGameLibrary;
+  const visible =
+    pageVisible &&
+    settings.showQuickGameLibrary &&
+    quickLibraryAvailable(gamesEnabled, musicEnabled);
   const { library, shortcuts, launchers, libraryPreferences: prefs, customLibrary: custom, emulation, dockOpen, setDockOpen } = access;
   const [filters, setFilters] = useState(defaults), [options, setOptions] = useState(false);
   const [confirmed, setConfirmed] = useState<string|null>(null), [retained, setRetained] = useState(false);
@@ -89,14 +101,14 @@ export function GameLibraryDock({ visible: pageVisible }: { visible: boolean }) 
   const error = prefs.error || shortcuts.error || custom.error || emulation.error || (library.launchError ? "games.library.launchError" : launchers.launchError ? "games.dock.launchError" : "");
   const displayed = dockOpen || retained ? shown : [];
   if (!visible) return null;
-  return <aside className={`game-library-dock${dockOpen ? " is-open" : retained ? " is-closing" : ""}`} aria-label={t("games.dock.title")}
+  return <aside className={`game-library-dock${dockOpen ? " is-open" : retained ? " is-closing" : ""}`} aria-label={t("games.dock.quick")}
     onPointerEnter={event => { if (event.pointerType !== "mouse") return; pointerInside.current = true; cancelHover(); if (!dockOpen) hoverTimer.current = window.setTimeout(() => show(toggle.current!, true), 150); }}
     onPointerLeave={() => { pointerInside.current = false; cancelHover(); if (!options && !panel.current?.contains(document.activeElement)) hoverTimer.current = window.setTimeout(() => close(false), 420); }}
     onFocus={cancelHover} onBlur={event => { if (!pointerInside.current && !event.currentTarget.contains(event.relatedTarget as Node) && !options) { cancelHover(); hoverTimer.current = window.setTimeout(() => close(false), 420); } }}>
     <button ref={toggle} className="game-dock-edge" aria-label={t("games.dock.quick")} aria-expanded={dockOpen} aria-controls="game-quick-library" tabIndex={dockOpen ? -1 : 0} onFocus={() => { if (!dockOpen && !restoringFocus.current) show(toggle.current!); }} onClick={() => { if (!dockOpen) show(toggle.current!); }} />
-    <section ref={panel} id="game-quick-library" className="game-quick-library" aria-label={t("games.dock.title")} hidden={!dockOpen && !retained} inert={!dockOpen}>
+    <section ref={panel} id="game-quick-library" className="game-quick-library" aria-label={t("games.dock.quick")} hidden={!dockOpen && !retained} inert={!dockOpen}>
       <div className="game-dock-tools">
-        <HoverTooltip label={t(music ? "music.quick.toGames" : "music.quick.toMusic")} align="end"><button className="game-dock-library" data-dock-mode={mode} aria-label={t(music ? "music.quick.toGames" : "music.quick.toMusic")} onClick={() => setMode(music ? "games" : "music")}><span key={mode} className="game-dock-mode-icon">{music ? <NavGlyph name="music" className="h-[25px] w-[25px]"/> : <GamesIcon size={24}/>}</span></button></HoverTooltip>
+        {gamesEnabled && musicEnabled && <HoverTooltip label={t(music ? "music.quick.toGames" : "music.quick.toMusic")} align="end"><button className="game-dock-library" data-dock-mode={mode} aria-label={t(music ? "music.quick.toGames" : "music.quick.toMusic")} onClick={() => setMode(music ? "games" : "music")}><span key={mode} className="game-dock-mode-icon">{music ? <NavGlyph name="music" className="h-[25px] w-[25px]"/> : <GamesIcon size={24}/>}</span></button></HoverTooltip>}
         <div>{music
           ? <><HoverTooltip label={t("music.quick.search")} align="end"><button aria-label={t("music.quick.search")} onClick={() => toMusic(() => requestMusicSearch(""))}><Search size={17}/></button></HoverTooltip><HoverTooltip label={t("music.quick.saved")} align="end"><button aria-label={t("music.quick.saved")} onClick={() => toMusic(() => requestMusicLibrary({ view: "liked" }))}><MusicGlyph name="heart" size={16}/></button></HoverTooltip></>
           : <><HoverTooltip label={t("games.dock.search")} align="end"><button aria-label={t("games.dock.search")} aria-expanded={options} onClick={() => { setOptions(!options); requestAnimationFrame(() => search.current?.focus()); }}><Search size={17}/></button></HoverTooltip><HoverTooltip label={t(filters.group === "favorites" ? "games.dock.all" : "games.dock.favorites")} align="end"><button aria-label={t("games.dock.favorites")} aria-pressed={filters.group === "favorites"} onClick={() => setFilters({ ...filters, group: filters.group === "favorites" ? "all" : "favorites" })}><MusicGlyph name={filters.group === "favorites" ? "heart-filled" : "heart"} size={16}/></button></HoverTooltip></>
@@ -124,7 +136,7 @@ export function GameLibraryDock({ visible: pageVisible }: { visible: boolean }) 
         <button className="game-dock-ready" aria-pressed={filters.ready} onClick={() => setFilters({ ...filters, ready: !filters.ready })}><span>{t("games.dock.readyOnly")}</span><span className="game-dock-check">{filters.ready && <Check size={16}/>}</span></button>
         <div className="game-dock-count" role="status">{t("games.dock.count", { count: shown.length })}<button onClick={() => setFilters(defaults)}>{t("games.catalog.reset")}</button></div>
       </div>}
-      {error && <div className="game-dock-error" role="alert">{t(error)}<button aria-label={t("common.close")} onClick={() => { prefs.dismissError(); custom.dismissError(); emulation.dismissError(); library.dismissLaunchError(); launchers.dismissLaunchError(); }}><X size={16}/></button></div>}
+      {!music && error && <div className="game-dock-error" role="alert">{t(error)}<button aria-label={t("common.close")} onClick={() => { prefs.dismissError(); custom.dismissError(); emulation.dismissError(); library.dismissLaunchError(); launchers.dismissLaunchError(); }}><X size={16}/></button></div>}
     </section>
   </aside>;
 }

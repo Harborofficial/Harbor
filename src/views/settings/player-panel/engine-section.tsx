@@ -12,6 +12,7 @@ import { DesktopOnlyBlock, isTauri } from "./internals";
 import { HdrModePicker } from "./hdr-mode";
 import { DisplayPanelSelector } from "./display-panel-selector";
 import { DisplayPickerRow } from "./display-picker";
+import { ExternalPlayerSection } from "./external-player-section";
 
 export function PlayerEnginePanel() {
   const { settings, update } = useSettings();
@@ -73,43 +74,6 @@ export function PlayerEnginePanel() {
               tags={c.recommended ? <Tag accent text={t("Recommended")} /> : undefined}
             />
           ))}
-          <ToggleRow
-            label={t("Embed mpv inside Harbor window")}
-            sub={t(
-              "Renders mpv inline so playback lives in Harbor itself. Turn off to open it in a separate window instead.",
-            )}
-            value={settings.playerMpvEmbed}
-            onChange={(v) => update({ playerMpvEmbed: v })}
-            lockReason={
-              settings.playerHdrOpaqueWindow
-                ? t(
-                    "True HDR, separate window is selected. That mode always plays in its own window, so mpv cannot be embedded. Choose a different HDR mode to change this.",
-                  )
-                : undefined
-            }
-          />
-          {(!settings.playerMpvEmbed || settings.playerHdrOpaqueWindow) && (
-            <>
-              <DisplayPickerRow
-                label={t("Separate window display")}
-                desc={t(
-                  "Which monitor the separate mpv window opens on. Harbor's own window stays where it is.",
-                )}
-                newId="player:separate-display"
-                value={settings.playerSeparateDisplay}
-                onChange={(playerSeparateDisplay) => update({ playerSeparateDisplay })}
-              />
-              <ToggleRow
-                label={t("Cover the taskbar")}
-                sub={t(
-                  "Span the whole screen including the taskbar. Turn off to keep the taskbar visible on that monitor.",
-                )}
-                value={settings.playerSeparateCoverTaskbar}
-                onChange={(v) => update({ playerSeparateCoverTaskbar: v })}
-                newId="player:cover-taskbar"
-              />
-            </>
-          )}
           {mpvProbe && !mpvProbe.available && (
             <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
               <AlertTriangle
@@ -132,6 +96,51 @@ export function PlayerEnginePanel() {
             </div>
           )}
         </SettingGroup>
+
+        <ExternalPlayerSection />
+
+        {/* These only change Harbor's built-in mpv, so they are hidden when the user's own mpv is on. */}
+        {!settings.playerExternalMpv && (
+          <SettingGroup label={t("mpv window")}>
+            <ToggleRow
+              label={t("Embed mpv inside Harbor window")}
+              sub={t(
+                "Renders mpv inline so playback lives in Harbor itself. Turn off to open it in a separate window instead.",
+              )}
+              value={settings.playerMpvEmbed}
+              onChange={(v) => update({ playerMpvEmbed: v })}
+              lockReason={
+                settings.playerHdrOpaqueWindow
+                  ? t(
+                      "True HDR, separate window is selected. That mode always plays in its own window, so mpv cannot be embedded. Choose a different HDR mode to change this.",
+                    )
+                  : undefined
+              }
+            />
+            {(!settings.playerMpvEmbed || settings.playerHdrOpaqueWindow) && (
+              <>
+                <DisplayPickerRow
+                  label={t("Separate window display")}
+                  desc={t(
+                    "Which monitor the separate mpv window opens on. Harbor's own window stays where it is.",
+                  )}
+                  newId="player:separate-display"
+                  value={settings.playerSeparateDisplay}
+                  onChange={(playerSeparateDisplay) => update({ playerSeparateDisplay })}
+                />
+                <ToggleRow
+                  label={t("Cover the taskbar")}
+                  sub={t(
+                    "Span the whole screen including the taskbar. Turn off to keep the taskbar visible on that monitor.",
+                  )}
+                  value={settings.playerSeparateCoverTaskbar}
+                  onChange={(v) => update({ playerSeparateCoverTaskbar: v })}
+                  newId="player:cover-taskbar"
+                />
+              </>
+            )}
+          </SettingGroup>
+        )}
 
         {isWindowsDesktop() ? (
           <HdrModePicker />

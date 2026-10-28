@@ -4,6 +4,10 @@ import { createPortal } from "react-dom";
 import { useSettings, type Settings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { noteOverlayDismiss } from "@/lib/player/overlay-dismiss";
+import { flipAssOverride, isAssLookMode, type AssLookMode } from "@/lib/player/sub-style";
+
+// The ASS mode from before "Override embedded styles" was switched on, to go back to it.
+let assModeBeforeOverride: AssLookMode = "no";
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
@@ -51,7 +55,7 @@ export function AdvancedMenu() {
     };
   }, [open]);
 
-  const overrideOn = settings.subAssOverride !== "no" && settings.subAssOverride !== "scale";
+  const overrideOn = !isAssLookMode(settings.subAssOverride);
 
   return (
     <>
@@ -94,17 +98,25 @@ export function AdvancedMenu() {
                 <Row label={t("Thickness")}>
                   <Stepper
                     value={settings.subBorderSize}
-                    onDec={() => update({ subBorderSize: stepBorder(settings.subBorderSize, -0.5) })}
+                    onDec={() =>
+                      update({ subBorderSize: stepBorder(settings.subBorderSize, -0.5) })
+                    }
                     onInc={() => update({ subBorderSize: stepBorder(settings.subBorderSize, 0.5) })}
                   />
                 </Row>
               )}
               <Row label={t("Position")}>
                 <div className="flex items-center gap-1">
-                  <IconBtn label={t("Raise subtitles")} onClick={() => update({ subMarginY: clamp(settings.subMarginY + 2, 0, 100) })}>
+                  <IconBtn
+                    label={t("Raise subtitles")}
+                    onClick={() => update({ subMarginY: clamp(settings.subMarginY + 2, 0, 100) })}
+                  >
                     <ChevronDown size={15} className="rotate-180" />
                   </IconBtn>
-                  <IconBtn label={t("Lower subtitles")} onClick={() => update({ subMarginY: clamp(settings.subMarginY - 2, 0, 100) })}>
+                  <IconBtn
+                    label={t("Lower subtitles")}
+                    onClick={() => update({ subMarginY: clamp(settings.subMarginY - 2, 0, 100) })}
+                  >
                     <ChevronDown size={15} />
                   </IconBtn>
                 </div>
@@ -119,17 +131,27 @@ export function AdvancedMenu() {
               <Row label={t("Line spacing")}>
                 <Stepper
                   value={settings.subLineSpacing ?? 0}
-                  onDec={() => update({ subLineSpacing: clamp((settings.subLineSpacing ?? 0) - 1, 0, 12) })}
-                  onInc={() => update({ subLineSpacing: clamp((settings.subLineSpacing ?? 0) + 1, 0, 12) })}
+                  onDec={() =>
+                    update({ subLineSpacing: clamp((settings.subLineSpacing ?? 0) - 1, 0, 12) })
+                  }
+                  onInc={() =>
+                    update({ subLineSpacing: clamp((settings.subLineSpacing ?? 0) + 1, 0, 12) })
+                  }
                 />
               </Row>
               <div className="my-1.5 h-px bg-edge-soft" />
               <button
-                onClick={() => update({ subAssOverride: overrideOn ? "no" : "force" })}
+                onClick={() => {
+                  const next = flipAssOverride(settings.subAssOverride, assModeBeforeOverride);
+                  assModeBeforeOverride = next.before;
+                  update({ subAssOverride: next.mode });
+                }}
                 className="flex w-full items-start gap-3 rounded-md p-2 text-start transition-colors hover:bg-raised"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[13.5px] font-semibold text-ink">{t("Override embedded styles")}</span>
+                  <span className="block text-[13.5px] font-semibold text-ink">
+                    {t("Override embedded styles")}
+                  </span>
                   <span className="mt-0.5 block text-[11.5px] leading-snug text-ink-subtle">
                     {t("Force your look onto subtitles that carry their own styling.")}
                   </span>
@@ -140,7 +162,9 @@ export function AdvancedMenu() {
                     overrideOn ? "bg-accent" : "bg-edge"
                   }`}
                 >
-                  <span className={`h-4 w-4 rounded-full bg-white transition-transform ${overrideOn ? "translate-x-4" : ""}`} />
+                  <span
+                    className={`h-4 w-4 rounded-full bg-white transition-transform ${overrideOn ? "translate-x-4" : ""}`}
+                  />
                 </span>
               </button>
             </div>
@@ -198,7 +222,9 @@ function Stepper({ value, onDec, onInc }: { value: number; onDec: () => void; on
       <IconBtn label="−" onClick={onDec}>
         <Minus size={14} />
       </IconBtn>
-      <span className="min-w-[34px] text-center font-mono text-[13px] tabular-nums text-ink">{shown}</span>
+      <span className="min-w-[34px] text-center font-mono text-[13px] tabular-nums text-ink">
+        {shown}
+      </span>
       <IconBtn label="+" onClick={onInc}>
         <Plus size={14} />
       </IconBtn>
@@ -206,7 +232,15 @@ function Stepper({ value, onDec, onInc }: { value: number; onDec: () => void; on
   );
 }
 
-function IconBtn({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
+function IconBtn({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       aria-label={label}

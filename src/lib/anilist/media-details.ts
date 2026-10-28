@@ -181,9 +181,9 @@ function toRelated(relationType: string | null, node: RawRelationNode): AnilistR
   return {
     anilistId: node.id,
     title,
-    relation: relationType ? RELATION_LABELS[relationType] ?? "Related" : "Related",
+    relation: relationType ? (RELATION_LABELS[relationType] ?? "Related") : "Related",
     mediaType: node.type === "MANGA" ? "manga" : "anime",
-    format: node.format ? FORMAT_LABELS[node.format] ?? node.format : undefined,
+    format: node.format ? (FORMAT_LABELS[node.format] ?? node.format) : undefined,
     poster: node.coverImage?.large ?? undefined,
     year: node.seasonYear ?? node.startDate?.year ?? undefined,
     rating:
@@ -235,8 +235,9 @@ function shape(raw: NonNullable<RawResponse["Media"]>): AnilistMediaDetails {
     romajiTitle: raw.title.romaji ?? undefined,
     englishTitle: raw.title.english ?? undefined,
     synonyms: (raw.synonyms ?? []).map((s) => s.trim()).filter(Boolean),
-    source: raw.source ? SOURCE_LABELS[raw.source] ?? undefined : undefined,
-    favourites: typeof raw.favourites === "number" && raw.favourites > 0 ? raw.favourites : undefined,
+    source: raw.source ? (SOURCE_LABELS[raw.source] ?? undefined) : undefined,
+    favourites:
+      typeof raw.favourites === "number" && raw.favourites > 0 ? raw.favourites : undefined,
     episodes: typeof raw.episodes === "number" && raw.episodes > 0 ? raw.episodes : undefined,
     nextAiring: raw.nextAiringEpisode
       ? { airingAt: raw.nextAiringEpisode.airingAt, episode: raw.nextAiringEpisode.episode }
@@ -251,30 +252,53 @@ function shape(raw: NonNullable<RawResponse["Media"]>): AnilistMediaDetails {
 }
 
 const cache = new Map<number, AnilistMediaDetails | null>();
+const expires = new Map<number, number>();
+const inflight = new Map<number, Promise<AnilistMediaDetails | null>>();
 const CACHE_MAX = 250;
 registerEvictable("anilist-media-details", (aggressive) => {
-  if (aggressive) cache.clear();
+  if (aggressive) {
+    cache.clear();
+    expires.clear();
+  }
 });
 
 export async function fetchAnilistMediaDetails(
   anilistId: number,
 ): Promise<AnilistMediaDetails | null> {
-  if (cache.has(anilistId)) return cache.get(anilistId) ?? null;
-  try {
-    const data = await anilistRequest<RawResponse>(
-      MEDIA_DETAILS_QUERY,
-      { id: anilistId },
-      undefined,
-      true,
-    );
-    const media = data?.Media;
-    const result = media ? shape(media) : null;
-    lruSet(cache, anilistId, result, CACHE_MAX);
-    return result;
-  } catch {
-    lruSet(cache, anilistId, null, CACHE_MAX);
-    return null;
-  }
+  if (cache.has(anilistId) && (expires.get(anilistId) ?? 0) > Date.now())
+    return cache.get(anilistId) ?? null;
+  const shared = inflight.get(anilistId);
+  if (shared) return shared;
+  const request = (async () => {
+    try {
+      const data = await anilistRequest<RawResponse>(
+        MEDIA_DETAILS_QUERY,
+        { id: anilistId },
+        undefined,
+        true,
+      );
+      const media = data?.Media;
+      // A missing entry is an answer; a failed request is not. Leave failures
+      // uncached so a later pass can retry after a transient 429 or timeout.
+      if (!media) {
+        lruSet(cache, anilistId, null, CACHE_MAX);
+        expires.set(anilistId, Date.now() + 60_000);
+        for (const id of expires.keys()) if (!cache.has(id)) expires.delete(id);
+        return null;
+      }
+      const result = shape(media);
+      lruSet(cache, anilistId, result, CACHE_MAX);
+      expires.set(anilistId, Date.now() + 30 * 60_000);
+      for (const id of expires.keys()) if (!cache.has(id)) expires.delete(id);
+      return result;
+    } catch {
+      return null;
+    } finally {
+      inflight.delete(anilistId);
+    }
+  })();
+  inflight.set(anilistId, request);
+  return request;
 }
 
 export async function fetchAnilistMediaDetailsByKitsu(

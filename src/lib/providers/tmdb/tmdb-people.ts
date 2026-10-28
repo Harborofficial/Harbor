@@ -1,7 +1,9 @@
 import type { Meta } from "../../cinemeta";
 import { lruSet } from "../../cache";
+import { loadStoredSettings } from "../../settings/load";
 import { effectiveTmdbLanguage, get } from "./tmdb-client";
 import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
+import { pickTmdbTitle, shouldUseEnglishTitle } from "./tmdb-title-fallback";
 
 const PERSON_NAME_CACHE_MAX = 3000;
 const PERSON_CACHE_MAX = 10;
@@ -160,6 +162,7 @@ export async function tmdbPerson(key: string, personId: number): Promise<PersonD
 }
 
 async function fetchPerson(key: string, personId: number): Promise<PersonDetail | null> {
+  const settings = loadStoredSettings();
   const lang = effectiveTmdbLanguage();
   const langBase = lang.split("-")[0]?.toLowerCase() ?? "";
   const raw = await get<any>(key, `person/${personId}`, {
@@ -173,15 +176,50 @@ async function fetchPerson(key: string, personId: number): Promise<PersonDetail 
   const localized = typeof raw.name === "string" ? raw.name : "";
   const original = typeof raw.original_name === "string" ? raw.original_name : "";
   let name = localized;
-  if (langBase && langBase !== "en" && original && localized === original) {
-    const enRaw = await get<any>(key, `person/${personId}`, { language: "en-US" });
-    if (typeof enRaw?.name === "string" && enRaw.name) name = enRaw.name;
+  const rawCast: any[] = raw.combined_credits?.cast ?? [];
+  const rawCrew: any[] = raw.combined_credits?.crew ?? [];
+  const needsEnglishName =
+    !!langBase && langBase !== "en" && !!original && localized === original;
+  const needsEnglishCredits =
+    settings.translateTitles &&
+    [...rawCast, ...rawCrew].some((credit) =>
+      shouldUseEnglishTitle({
+        localized: credit.title ?? credit.name ?? "",
+        original: credit.original_title ?? credit.original_name ?? "",
+        originalLanguage: credit.original_language,
+        targetLanguage: lang,
+        translateTitles: true,
+      }),
+    );
+  let enRaw: any = null;
+  if (needsEnglishName || needsEnglishCredits) {
+    enRaw = await get<any>(key, `person/${personId}`, {
+      ...(needsEnglishCredits ? { append_to_response: "combined_credits" } : {}),
+      language: "en-US",
+    });
+    if (needsEnglishName && typeof enRaw?.name === "string" && enRaw.name) name = enRaw.name;
+  }
+  const englishCreditNames = new Map<string, string>();
+  for (const list of [enRaw?.combined_credits?.cast, enRaw?.combined_credits?.crew]) {
+    for (const credit of list ?? []) {
+      const title = credit?.title ?? credit?.name;
+      if (credit?.id != null && credit?.media_type && typeof title === "string" && title.trim()) {
+        englishCreditNames.set(`${credit.media_type}:${credit.id}`, title.trim());
+      }
+    }
   }
 
   const toCredit = (c: any): PersonCredit => ({
     id: c.id,
     mediaType: c.media_type,
-    title: c.title ?? c.name ?? "",
+    title: pickTmdbTitle({
+      localized: c.title ?? c.name ?? "",
+      original: c.original_title ?? c.original_name ?? "",
+      english: englishCreditNames.get(`${c.media_type}:${c.id}`),
+      originalLanguage: c.original_language,
+      targetLanguage: lang,
+      translateTitles: settings.translateTitles,
+    }),
     poster: tmdbPosterUrl(c.poster_path),
     background: tmdbBackdropUrl(c.backdrop_path),
     releaseInfo: (c.release_date ?? c.first_air_date)?.slice(0, 4),
@@ -210,8 +248,8 @@ async function fetchPerson(key: string, personId: number): Promise<PersonDetail 
     profilePath: raw.profile_path ?? null,
     imdbId: raw.external_ids?.imdb_id ?? null,
     homepage: raw.homepage ?? null,
-    cast: (raw.combined_credits?.cast ?? []).map(toCredit),
-    crew: (raw.combined_credits?.crew ?? []).map(toCredit),
+    cast: rawCast.map(toCredit),
+    crew: rawCrew.map(toCredit),
   };
   lruSet(personCache, personId, detail, PERSON_CACHE_MAX);
   return detail;

@@ -154,8 +154,13 @@ export async function restMangaFull(client: SuwayomiClient, mangaId: string): Pr
 export async function restChapters(
   client: SuwayomiClient,
   mangaId: string,
+  refresh = false,
 ): Promise<RestChapter[]> {
-  const list = await client.getJson(`/api/v1/manga/${mangaId}/chapters`);
+  const path = `/api/v1/manga/${mangaId}/chapters`;
+  const list = refresh
+    ? ((await client.getJson(`${path}?onlineFetch=true`).catch(() => null)) ??
+      (await client.getJson(path)))
+    : await client.getJson(path);
   if (list == null) throw new Error("suwayomi_rest_error");
   if (!Array.isArray(list)) return [];
   return list

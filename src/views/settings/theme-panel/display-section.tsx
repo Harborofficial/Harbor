@@ -5,6 +5,7 @@ import { GamesIcon } from "@/components/icons/games-icon";
 import {
   Droplet,
   Hourglass,
+  Library,
   MousePointer2,
   Moon,
   Palette,
@@ -21,6 +22,8 @@ import {
 } from "../icons";
 import type { ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
+import { useInstallFeatures } from "@/lib/features/install";
+import { quickLibraryAvailable } from "@/lib/features/quick-library";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "../shared";
 import { ROW_ACTION, SettingGroup, SettingRow, Nested } from "../kit";
@@ -28,6 +31,7 @@ import { previewScreensaver } from "@/lib/screensaver/media";
 import { PosterCardSection } from "./display/poster-card-section";
 import { ScreensaverMediaManager } from "./screensaver-media";
 import { SFX } from "@/lib/sfx";
+import { isSpooktoberSeason } from "@/lib/spooktober-season";
 
 export function AmbienceSection() {
   const t = useT();
@@ -178,11 +182,12 @@ export function AmbienceSection() {
   );
 }
 
-const GAMES_SETTINGS_VISIBLE = true;
-
 export function DisplaySection() {
   const t = useT();
   const { settings, update } = useSettings();
+  const features = useInstallFeatures();
+  const gamesEnabled = features.games;
+  const libraryAvailable = quickLibraryAvailable(features.games, features.music);
   const glassBlur = Number.isFinite(settings.defaultLiquidGlassBlur)
     ? settings.defaultLiquidGlassBlur
     : 8;
@@ -194,16 +199,49 @@ export function DisplaySection() {
     : 25;
   return (
     <>
-      {GAMES_SETTINGS_VISIBLE && (
-        <Section title={t("Games")}>
+      {isSpooktoberSeason() && (
+        <Section title="Spooktober" subtitle={t("Temporary seasonal settings for Spooktober.")}>
+          <SettingGroup>
+            <SettingRow
+              label={t("Spooktober banner")}
+              desc={t(
+                "Hide the banner, keep it small in the top-right corner of the hero, or show the full banner below the hero.",
+              )}
+              icon={<Moon size={18} />}
+            >
+              <Dropdown
+                value={settings.spooktoberBanner ?? "small"}
+                options={[
+                  { value: "disabled", label: t("Disabled") },
+                  { value: "small", label: t("Small - Top Right") },
+                  { value: "below-hero", label: t("Below hero") },
+                ]}
+                onChange={(value) =>
+                  update({
+                    spooktoberBanner: value as NonNullable<typeof settings.spooktoberBanner>,
+                  })
+                }
+              />
+            </SettingRow>
+          </SettingGroup>
+        </Section>
+      )}
+      {libraryAvailable && (
+        <Section title={t("music.library")}>
           <SettingGroup>
             <ToggleRow
               label={t("games.dock.settingTitle")}
               sub={t("games.dock.settingNote")}
               value={settings.showQuickGameLibrary}
               onChange={(value) => update({ showQuickGameLibrary: value })}
-              leading={<GamesIcon size={18} />}
+              leading={<Library size={18} />}
             />
+          </SettingGroup>
+        </Section>
+      )}
+      {gamesEnabled && (
+        <Section title={t("Games")}>
+          <SettingGroup>
             <ToggleRow
               label={t("games.home.libraryFirstTitle")}
               sub={t("games.home.libraryFirstNote")}
@@ -218,7 +256,7 @@ export function DisplaySection() {
       <Section
         title={t("Title text")}
         subtitle={t(
-          "Resize the row titles on Home and the title shown in the player, without scaling the rest of the interface. You can also lead the player title with the series name instead of the episode.",
+          "Resize row headings, titles under poster cards, and the player title independently. You can also lead the player title with the series name instead of the episode.",
         )}
       >
         <SettingGroup>
@@ -229,6 +267,23 @@ export function DisplaySection() {
             value={settings.rowTitleScale}
             onChange={(v) => update({ rowTitleScale: v })}
           />
+          <SizeSlider
+            label={t("Card title size")}
+            desc={t("Movie and TV show titles beneath poster cards.")}
+            icon={<Type size={18} strokeWidth={2} />}
+            value={settings.cardTitleScale}
+            onChange={(v) => update({ cardTitleScale: v })}
+          />
+          <div className="px-5 pb-4" aria-label={t("Card title preview")}>
+            <div className="max-w-[180px] rounded-lg border border-edge bg-canvas p-3">
+              <p
+                className="line-clamp-2 font-medium leading-snug text-ink"
+                style={{ fontSize: `${13 * settings.cardTitleScale}px` }}
+              >
+                {t("The Lord of the Rings: The Fellowship of the Ring")}
+              </p>
+            </div>
+          </div>
           <SizeSlider
             label={t("Player title")}
             desc={t("The title shown at the top of the player.")}

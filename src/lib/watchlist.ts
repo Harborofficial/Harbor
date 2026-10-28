@@ -20,6 +20,14 @@ import {
 import { readActiveStremioAuthKey } from "@/lib/auth";
 import { cloudReachOf, watchlistImdbId } from "@/lib/watchlist-cloud-id";
 import { persistableAddonOrigin, persistableVideos, type Meta } from "@/lib/cinemeta";
+import { isNuvioProviderActive, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
+import {
+  addNuvioLibraryItem,
+  removeNuvioLibraryItem,
+  flushNuvioLibraryMutations,
+  readCachedNuvioLibrary,
+  isNuvioItemInLibrary,
+} from "@/lib/nuvio/nuvio-library";
 
 const KEY_PREFIX = "harbor.watchlist.v1.";
 const LEGACY_KEY = "harbor.watchlist.v1";
@@ -45,11 +53,21 @@ export type WatchlistInput = {
   name?: string;
   poster?: string;
   imdbId?: string | null;
+  background?: string | null;
+  logo?: string | null;
+  description?: string | null;
+  releaseInfo?: string | null;
+  imdbRating?: number | string | null;
+  genres?: string[];
+  posterShape?: "POSTER" | "SQUARE" | "LANDSCAPE";
   addonOrigin?: Meta["addonOrigin"];
   videos?: Meta["videos"];
 };
 
 let memoryFallback: Map<string, LocalEntry> | null = null;
+let cachedLocalKey: string | undefined;
+let cachedLocalRaw: string | null | undefined;
+let cachedLocalEntries = new Map<string, LocalEntry>();
 
 function activeProfileId(): string {
   try {
@@ -87,16 +105,25 @@ function primaryProfileId(): string {
 }
 
 function storeKey(): string {
+  if (isNuvioProviderActive()) {
+    const slot = resolveNuvioProfileIndex();
+    return `${KEY_PREFIX}nuvio.slot.${slot}`;
+  }
   const id = activeProfileId();
   return id ? KEY_PREFIX + id : LEGACY_KEY;
 }
 
 function aggStoreKey(): string {
+  if (isNuvioProviderActive()) {
+    const slot = resolveNuvioProfileIndex();
+    return `${AGG_KEY_PREFIX}nuvio.slot.${slot}`;
+  }
   const id = activeProfileId();
   return id ? AGG_KEY_PREFIX + id : LEGACY_AGG_KEY;
 }
 
 function migrateLegacy(): void {
+  if (isNuvioProviderActive()) return;
   try {
     const pid = primaryProfileId();
     if (!pid) return;
@@ -147,14 +174,33 @@ function toEntry(input: string | WatchlistInput): LocalEntry {
   };
 }
 
-function read(): Map<string, LocalEntry> {
-  if (memoryFallback) return new Map(memoryFallback);
+function readSnapshot(): Map<string, LocalEntry> {
+  if (isNuvioProviderActive()) {
+    const slot = resolveNuvioProfileIndex();
+    const nuvio = readCachedNuvioLibrary(slot);
+    const map = new Map<string, LocalEntry>();
+    for (const item of nuvio) {
+      if (item && item.content_id) {
+        map.set(item.content_id, {
+          id: item.content_id,
+          type: item.content_type === "series" ? "series" : "movie",
+          name: item.name,
+          poster: item.poster || undefined,
+          addedAt: item.added_at,
+          imdbId: validTt(item.content_id),
+        });
+      }
+    }
+    return map;
+  }
+  if (memoryFallback) return memoryFallback;
   migrateLegacy();
   const map = new Map<string, LocalEntry>();
   try {
-    const raw = localStorage.getItem(storeKey());
-    if (!raw) return map;
-    const arr = JSON.parse(raw) as unknown;
+    const key = storeKey();
+    const raw = localStorage.getItem(key);
+    if (key === cachedLocalKey && raw === cachedLocalRaw) return cachedLocalEntries;
+    const arr = raw ? (JSON.parse(raw) as unknown) : [];
     if (!Array.isArray(arr)) return map;
     for (const el of arr) {
       if (typeof el === "string") {
@@ -182,13 +228,28 @@ function read(): Map<string, LocalEntry> {
         });
       }
     }
+    cachedLocalKey = key;
+    cachedLocalRaw = raw;
+    cachedLocalEntries = map;
   } catch {
     return new Map();
   }
   return map;
 }
 
+// Writers own a mutable copy; badge checks share the parsed snapshot across all cards.
+function read(): Map<string, LocalEntry> {
+  return new Map(readSnapshot());
+}
+
 function write(map: Map<string, LocalEntry>) {
+  if (isNuvioProviderActive()) {
+    try {
+      localStorage.setItem(storeKey(), JSON.stringify(Array.from(map.values())));
+    } catch {}
+    for (const s of subs) s();
+    return;
+  }
   const payload = JSON.stringify(Array.from(map.values()));
   const ok = setItemWithRecovery(storeKey(), payload);
   if (!ok) {
@@ -207,6 +268,18 @@ function write(map: Map<string, LocalEntry>) {
 }
 
 export function readLocalEntries(): LocalEntry[] {
+  if (isNuvioProviderActive()) {
+    const slot = resolveNuvioProfileIndex();
+    const nuvio = readCachedNuvioLibrary(slot);
+    return nuvio.map((item) => ({
+      id: item.content_id,
+      type: item.content_type === "series" ? "series" : "movie",
+      name: item.name,
+      poster: item.poster || undefined,
+      addedAt: item.added_at,
+      imdbId: validTt(item.content_id),
+    }));
+  }
   return Array.from(read().values());
 }
 
@@ -223,11 +296,21 @@ function readAggregateCache(): Set<string> {
   migrateLegacy();
   try {
     const raw = localStorage.getItem(aggStoreKey());
-    if (!raw) return new Set();
-    const arr = JSON.parse(raw) as unknown;
-    return new Set(
-      Array.isArray(arr) ? (arr as string[]).filter((v) => typeof v === "string") : [],
-    );
+    const baseSet = new Set<string>();
+    if (raw) {
+      const arr = JSON.parse(raw) as unknown;
+      if (Array.isArray(arr)) {
+        for (const v of arr) if (typeof v === "string") baseSet.add(v);
+      }
+    }
+    if (isNuvioProviderActive()) {
+      const slot = resolveNuvioProfileIndex();
+      const nuvioItems = readCachedNuvioLibrary(slot);
+      for (const it of nuvioItems) {
+        if (it.content_id) baseSet.add(it.content_id);
+      }
+    }
+    return baseSet;
   } catch {
     return new Set();
   }
@@ -252,7 +335,11 @@ export function setWatchlistAggregate(ids: Iterable<string>): void {
 }
 
 export function watchlistHas(id: string): boolean {
-  return read().has(id) || aggregateIds.has(id);
+  if (isNuvioProviderActive()) {
+    const slot = resolveNuvioProfileIndex();
+    return isNuvioItemInLibrary(slot, id);
+  }
+  return readSnapshot().has(id) || aggregateIds.has(id);
 }
 
 export function watchlistAllIds(): string[] {
@@ -329,6 +416,29 @@ export function clearWatchlistAggregate(input: WatchlistInput): void {
   for (const listener of subs) listener();
 }
 
+export function removeFromWatchlistEntry(input: string | WatchlistInput): void {
+  const map = read();
+  const rawId = typeof input === "string" ? input : input.id;
+  const rawImdb = typeof input === "string" ? null : (input.imdbId ?? null);
+  const id = typeof rawId === "string" ? rawId.trim() : "";
+  const imdb = typeof rawImdb === "string" ? rawImdb.trim() : null;
+  if (!id) return;
+  const targets = new Set<string>();
+  targets.add(id);
+  if (imdb) targets.add(imdb);
+  for (const t of targets) map.delete(t);
+  write(map);
+  for (const t of targets) aggregateIds.delete(t);
+  writeAggregateCache(aggregateIds);
+  void syncWithTrakt(id, false);
+  void syncWithSimkl(id, false);
+  if (isNuvioProviderActive()) {
+    void syncWithNuvio(input, false);
+  } else {
+    void syncWithStremio(input, false);
+  }
+}
+
 export function toggleWatchlist(input: string | WatchlistInput): boolean {
   const map = read();
   const id = typeof input === "string" ? input : input.id;
@@ -366,7 +476,11 @@ export function toggleWatchlist(input: string | WatchlistInput): boolean {
   write(map);
   void syncWithTrakt(id, !has);
   void syncWithSimkl(id, !has);
-  void syncWithStremio(input, !has);
+  if (isNuvioProviderActive()) {
+    void syncWithNuvio(input, !has);
+  } else {
+    void syncWithStremio(input, !has);
+  }
   return !has;
 }
 
@@ -436,6 +550,67 @@ async function syncWithStremio(input: string | WatchlistInput, added: boolean): 
   }
 }
 
+async function syncWithNuvio(input: string | WatchlistInput, added: boolean): Promise<void> {
+  const slot = resolveNuvioProfileIndex();
+  const rawId = typeof input === "string" ? input : input.id;
+  const id = typeof rawId === "string" ? rawId.trim() : "";
+  if (!id) return;
+
+  const rawImdb = typeof input === "string" ? null : (input.imdbId ?? null);
+  const imdb = typeof rawImdb === "string" && rawImdb.trim().length > 0 ? rawImdb.trim() : null;
+  const type = typeof input === "string" ? inferType(input) : normalizeType(input.type, input.id);
+  const name = typeof input === "string" ? "" : (input.name ?? "");
+  const poster = typeof input === "string" ? null : (input.poster ?? null);
+  const background = typeof input === "string" ? null : (input.background ?? null);
+  const logo = typeof input === "string" ? null : (input.logo ?? null);
+  const description = typeof input === "string" ? null : (input.description ?? null);
+  const releaseInfo = typeof input === "string" ? null : (input.releaseInfo ?? null);
+  const imdbRating =
+    typeof input === "string"
+      ? null
+      : input.imdbRating != null
+        ? parseFloat(String(input.imdbRating)) || null
+        : null;
+  const genres = typeof input !== "string" && Array.isArray(input.genres) ? input.genres : [];
+  const posterShape = typeof input !== "string" && input.posterShape ? input.posterShape : "POSTER";
+
+  try {
+    if (added) {
+      addNuvioLibraryItem(slot, {
+        content_id: id,
+        content_type: type,
+        name,
+        poster,
+        poster_shape: posterShape,
+        background,
+        logo,
+        description,
+        release_info: releaseInfo,
+        imdb_rating: imdbRating,
+        genres,
+        added_at: Date.now(),
+      });
+      aggregateIds.add(id);
+      if (imdb) aggregateIds.add(imdb);
+      writeAggregateCache(aggregateIds);
+      for (const s of subs) s();
+      void flushNuvioLibraryMutations(slot);
+    } else {
+      removeNuvioLibraryItem(slot, id, type);
+      if (imdb && imdb !== id) {
+        removeNuvioLibraryItem(slot, imdb, type);
+      }
+      aggregateIds.delete(id);
+      if (imdb) aggregateIds.delete(imdb);
+      writeAggregateCache(aggregateIds);
+      for (const s of subs) s();
+      void flushNuvioLibraryMutations(slot);
+    }
+  } catch (e) {
+    console.warn("[watchlist] nuvio sync failed", e);
+  }
+}
+
 export function useInWatchlist(
   id: string | undefined,
   altIds?: Array<string | null | undefined>,
@@ -449,7 +624,7 @@ export function useInWatchlist(
 
   const check = () => {
     if (candidates.length === 0) return false;
-    const local = read();
+    const local = readSnapshot();
     return candidates.some((c) => local.has(c) || aggregateIds.has(c));
   };
 
@@ -467,9 +642,12 @@ export function useInWatchlist(
 }
 
 if (typeof window !== "undefined") {
-  let lastProfile = activeProfileId();
+  const currentToken = () =>
+    isNuvioProviderActive() ? `nuvio-${resolveNuvioProfileIndex()}` : activeProfileId();
+
+  let lastProfile = currentToken();
   const onProfileChange = () => {
-    const p = activeProfileId();
+    const p = currentToken();
     if (p === lastProfile) return;
     lastProfile = p;
     memoryFallback = null;
@@ -478,4 +656,10 @@ if (typeof window !== "undefined") {
   };
   window.addEventListener("harbor:active-profile-changed", onProfileChange);
   window.addEventListener("harbor:profiles-updated", onProfileChange);
+  window.addEventListener("harbor:nuvio-profile-changed", onProfileChange);
+  window.addEventListener("harbor:nuvio-state-changed", onProfileChange);
+  window.addEventListener("harbor:nuvio-library-changed", () => {
+    aggregateIds = readAggregateCache();
+    for (const s of subs) s();
+  });
 }

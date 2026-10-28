@@ -16,7 +16,7 @@ import {
   togglePageRowHidden,
   type PageRowCustomization,
 } from "@/lib/page-rows";
-import { useView } from "@/lib/view";
+import { useViewActions } from "@/lib/view";
 
 export type CatalogRow = {
   key: string;
@@ -94,7 +94,7 @@ function RowTitle({
   kids?: boolean;
 }) {
   const t = useT();
-  const { openGrid } = useView();
+  const { openGrid } = useViewActions();
   if (!row.fetcher) return <>{title}</>;
   return (
     <button
@@ -143,7 +143,7 @@ export const CatalogRows = memo(function CatalogRows({
   injectNode2?: React.ReactNode;
 }) {
   const t = useT();
-  const { openGrid } = useView();
+  const { openGrid } = useViewActions();
   const shown = useHideAnimeRows(rows);
   const posterRow = usePosterRow(148, kids);
   const allKeys = useMemo(() => shown.map((r) => r.key), [shown]);

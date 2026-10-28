@@ -17,6 +17,9 @@ finish-args:
   - --device=dri
   - --talk-name=org.freedesktop.Notifications
   - --talk-name=org.kde.StatusNotifierWatcher
+  - --talk-name=org.mpris.MediaPlayer2.*
+  - --own-name=org.mpris.MediaPlayer2.harbor
+  - --own-name=org.mpris.MediaPlayer2.harbor.*
   - --filesystem=xdg-run/discord-ipc-0
 
 build-options:

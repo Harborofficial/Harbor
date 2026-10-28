@@ -1,4 +1,5 @@
 import { artworkImportPolicy } from "@/lib/games/imported-artwork";
+import { useInstallFeatures } from "@/lib/features/install";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { Section, Segmented, ToggleRow } from "./shared";
@@ -6,6 +7,8 @@ import { SettingRow } from "./kit";
 
 export function GameMetadataSetting() {
   const { settings, update } = useSettings(), t = useT();
+  const gamesEnabled = useInstallFeatures().games;
+  if (!gamesEnabled) return null;
   const policy=artworkImportPolicy(settings);
   return <Section title={t("Games")}>
     <SettingRow label={t("games.details.agePreference")} desc={t("games.details.agePreferenceNote")}>

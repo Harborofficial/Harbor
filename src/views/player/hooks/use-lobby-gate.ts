@@ -43,7 +43,7 @@ export function useLobbyGate(params: {
     setHasStarted(true);
     startRoom();
     suppressOutgoingFor(0);
-    bridgeRef.current?.play().catch(() => {});
+    bridgeRef.current?.play({ reason: "together" }).catch(() => {});
   }, [setHasStarted, startRoom, suppressOutgoingFor, bridgeRef]);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function useLobbyGate(params: {
   const playWithoutSync = useCallback(() => {
     initialSyncDoneRef.current = true;
     setHasStarted(true);
-    bridgeRef.current?.play().catch(() => {});
+    bridgeRef.current?.play({ reason: "together" }).catch(() => {});
   }, [initialSyncDoneRef, setHasStarted, bridgeRef]);
 
   const [guestEscapeReady, setGuestEscapeReady] = useState(false);

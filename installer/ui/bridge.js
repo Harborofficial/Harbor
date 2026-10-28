@@ -51,6 +51,7 @@ export async function install(options) {
       dest: dest,
       desktopShortcut: desktopShortcut,
       disabledFeatures: disabledFeatures,
+      cleanInstall: options.cleanInstall === true,
     });
     taskbarProgress(null);
   } catch (e) {

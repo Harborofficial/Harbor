@@ -43,7 +43,7 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 > <br/>
 
 > [!NOTE]
-> Unofficial Linux `.deb`, `.rpm`, and Flatpak packages are maintained at [AdityaHebballe/harbor-linux-builds](https://github.com/AdityaHebballe/harbor-linux-builds). Official Linux packages are coming soon.
+> Unofficial Linux `.deb`, `.rpm`, and Flatpak packages are maintained at [Thunderhawkk/harbor-linux](https://github.com/Thunderhawkk/harbor-linux). Official Linux packages are coming soon.
 
 ATTENTION: HARBOR DOES NOT AND WILL NOT ASK YOU FOR DONATIONS! If someone claims to be us and asks you for donations, IT IS NOT US. Have an issue? Open it on GitHub so everyone can see the report and follow its resolution. Want to donate to a good cause? Consider the National Pediatric Cancer Foundation (https://nationalpcf.org/), Electronic Frontier Foundation (https://www.eff.org/), or St. Jude's (https://www.stjude.org/). You can also find a charity at https://www.charitynavigator.org/.
 <br/>
@@ -403,14 +403,14 @@ Harbor is built to keep your data on your machine.
 
 ## Install
 
-Download the latest build for macOS or Windows from the [Releases page][releases], use the [unofficial Linux packages](https://github.com/AdityaHebballe/harbor-linux-builds), or open Harbor in your browser.
+Download the latest build for macOS or Windows from the [Releases page](https://github.com/Harborofficial/Harbor/releases), use the [unofficial Linux packages](https://github.com/Thunderhawkk/harbor-linux), or open Harbor in your browser.
 
 | Platform    | Format                                                                                                   |
 | ----------- | -------------------------------------------------------------------------------------------------------- |
 | **macOS**   | `.dmg` (macOS 15.0 or newer, Apple silicon)                                                              |
 | **Windows** | Harbor Shipyard installer (current user install), or `winget install HarborStremio.Harbor`               |
 | **Web**     | Open in any modern browser, nothing to install                                                           |
-| **Linux**   | [Unofficial `.deb`, `.rpm`, and Flatpak packages](https://github.com/AdityaHebballe/harbor-linux-builds) |
+| **Linux**   | [Unofficial `.deb`, `.rpm`, and Flatpak packages](https://github.com/Thunderhawkk/harbor-linux) |
 
 > [!NOTE]
 > Linux packages above are community-maintained. Official Harbor Linux packages are coming soon.

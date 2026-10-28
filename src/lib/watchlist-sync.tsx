@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
+import { useSettings } from "@/lib/settings";
 import { library } from "@/lib/stremio";
 import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import type { TraktItem } from "@/lib/trakt/types";
@@ -7,19 +8,31 @@ import { useTrakt } from "@/lib/trakt/provider";
 import { fetchWatchlist as fetchSimklWatchlist } from "@/lib/simkl/watchlist";
 import { useSimkl } from "@/lib/simkl/provider";
 import { setWatchlistAggregate } from "@/lib/watchlist";
+import { isNuvioProviderActive, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
+import { getNuvioAccountId } from "@/lib/nuvio/nuvio-client";
+import {
+  readCachedNuvioLibrary,
+  pullNuvioLibrarySnapshot,
+} from "@/lib/nuvio/nuvio-library";
 
-const STORE: { stremio: string[]; trakt: string[]; simkl: string[] } = {
+const STORE: { stremio: string[]; nuvio: string[]; trakt: string[]; simkl: string[] } = {
   stremio: [],
+  nuvio: [],
   trakt: [],
   simkl: [],
 };
 
 function pushAggregate() {
-  setWatchlistAggregate([...STORE.stremio, ...STORE.trakt, ...STORE.simkl]);
+  setWatchlistAggregate([...STORE.stremio, ...STORE.nuvio, ...STORE.trakt, ...STORE.simkl]);
 }
 
 export function setStremioAggregate(ids: string[]): void {
   STORE.stremio = ids;
+  pushAggregate();
+}
+
+export function setNuvioAggregate(ids: string[]): void {
+  STORE.nuvio = ids;
   pushAggregate();
 }
 
@@ -31,7 +44,13 @@ export async function refreshWatchlistAggregates(
 ): Promise<TraktItem[]> {
   const jobs: Array<Promise<void>> = [];
   const nextStore = { ...STORE };
-  if (authKey) {
+  if (isNuvioProviderActive()) {
+    nextStore.stremio = [];
+    const slot = resolveNuvioProfileIndex();
+    const cached = readCachedNuvioLibrary(slot);
+    nextStore.nuvio = cached.map((i) => i.content_id).filter(Boolean);
+  } else if (authKey) {
+    nextStore.nuvio = [];
     jobs.push(
       library(authKey)
         .then((items) => {
@@ -42,6 +61,7 @@ export async function refreshWatchlistAggregates(
     );
   } else {
     nextStore.stremio = [];
+    nextStore.nuvio = [];
   }
   let traktItems: TraktItem[] = [];
   if (traktConnected) {
@@ -95,11 +115,13 @@ export async function refreshWatchlistAggregates(
 
 export function WatchlistSync() {
   const { authKey } = useAuth();
+  const { settings } = useSettings();
+  const isNuvio = settings.accountProvider === "nuvio";
   const { isConnected: traktConnected } = useTrakt();
   const { isConnected: simklConnected } = useSimkl();
 
   useEffect(() => {
-    if (!authKey) {
+    if (isNuvio || !authKey) {
       STORE.stremio = [];
       pushAggregate();
       return;
@@ -120,7 +142,7 @@ export function WatchlistSync() {
     return () => {
       cancelled = true;
     };
-  }, [authKey]);
+  }, [authKey, isNuvio]);
 
   useEffect(() => {
     if (!traktConnected) {
@@ -173,6 +195,62 @@ export function WatchlistSync() {
       cancelled = true;
     };
   }, [simklConnected]);
+
+  useEffect(() => {
+    if (!isNuvio) {
+      STORE.nuvio = [];
+      pushAggregate();
+      return;
+    }
+    let cancelled = false;
+    let requestSeq = 0;
+    const updateNuvio = (pullRemote = false) => {
+      const seq = ++requestSeq;
+      const accountId = getNuvioAccountId();
+      const slot = resolveNuvioProfileIndex();
+      const items = readCachedNuvioLibrary(slot);
+      STORE.nuvio = items.map((i) => i.content_id).filter(Boolean);
+      pushAggregate();
+      if (pullRemote) {
+        void pullNuvioLibrarySnapshot(slot).then((fresh) => {
+          if (
+            cancelled ||
+            seq !== requestSeq ||
+            getNuvioAccountId() !== accountId ||
+            resolveNuvioProfileIndex() !== slot
+          ) return;
+          STORE.nuvio = fresh.map((i) => i.content_id).filter(Boolean);
+          pushAggregate();
+        });
+      }
+    };
+    updateNuvio(true);
+    const onProfileOrState = () => updateNuvio(true);
+    const onLibraryChange = () => updateNuvio(false);
+    const onFocus = () => {
+      if (document.visibilityState === "visible") updateNuvio(true);
+    };
+
+    window.addEventListener("harbor:nuvio-profile-changed", onProfileOrState);
+    window.addEventListener("harbor:nuvio-state-changed", onProfileOrState);
+    window.addEventListener("harbor:nuvio-library-changed", onLibraryChange);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") updateNuvio(true);
+    }, 8000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      window.removeEventListener("harbor:nuvio-profile-changed", onProfileOrState);
+      window.removeEventListener("harbor:nuvio-state-changed", onProfileOrState);
+      window.removeEventListener("harbor:nuvio-library-changed", onLibraryChange);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [isNuvio]);
 
   return null;
 }

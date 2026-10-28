@@ -5,6 +5,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { Poster } from "@/components/poster";
 import { daysFromTodayLocal, formatAirDate } from "@/lib/dates";
 import { tmdbSeasonEpisodes, type Episode, type TmdbDetail } from "@/lib/providers/tmdb";
+import { isAnimeMeta } from "@/lib/anime-id";
 import { useEpisodeOrder } from "@/views/detail/series-episodes/use-episode-order";
 import { useTvdbSeasonTypes } from "@/views/detail/series-episodes/use-tvdb-season-types";
 import { useSettings } from "@/lib/settings";
@@ -79,9 +80,24 @@ export function EpisodeSection({
   const effProvider = override?.provider ?? settingsProvider;
   const effSeasonType = override?.seasonType ?? settings.tvdbSeasonType;
 
-  const ordering = useEpisodeOrder(imdbId, meta.id, effProvider, effSeasonType, tvdbKey);
+  const allowProxy = isAnimeMeta(meta);
+  const ordering = useEpisodeOrder(
+    imdbId,
+    meta.id,
+    effProvider,
+    effSeasonType,
+    tvdbKey,
+    true,
+    allowProxy,
+  );
 
-  const orderTypes = useTvdbSeasonTypes(imdbId, meta.id, tvdbKey, !!tvdbKey);
+  const orderTypes = useTvdbSeasonTypes(
+    imdbId,
+    meta.id,
+    tvdbKey,
+    !!tvdbKey || allowProxy,
+    allowProxy,
+  );
   const orderOptions = useMemo<OrderOption[]>(() => {
     if (orderTypes.length === 0) return [];
     const base: OrderOption[] = orderTypes.map((o) => ({ value: o.value, label: o.label }));

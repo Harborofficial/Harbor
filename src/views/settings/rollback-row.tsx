@@ -3,14 +3,13 @@ import { IS_BETA_BUILD } from "@/lib/build-info";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { currentVersion, type VersionEntry } from "@/lib/updater/versions";
+import { RELEASES_URL } from "@/lib/updater/release-links";
 import { openUrl } from "@/lib/window";
 import { ROW_DESC, SettingRow } from "./kit";
 import { SButton } from "./ui";
 import { useVersionHistory } from "./rollback-row/use-version-history";
 import { VERSION_BADGE } from "./rollback-row/badge";
 import { VersionItem } from "./rollback-row/version-item";
-
-const RELEASES_URL = "https://github.com/harborstremio/harbor/releases";
 
 export function RollbackRow() {
   const t = useT();
@@ -102,7 +101,9 @@ function HistoryError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-start gap-3 px-4 py-4">
       <p className={`max-w-[66ch] ${ROW_DESC}`}>
-        {t("Couldn't reach harbor.site to load earlier builds. Check your connection and try again.")}
+        {t(
+          "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.",
+        )}
       </p>
       <div className="flex flex-wrap items-center gap-2.5">
         <SButton onClick={onRetry}>{t("Try again")}</SButton>

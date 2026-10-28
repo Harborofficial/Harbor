@@ -1,8 +1,11 @@
-import { useRef } from "react";
+import { useRef, type RefObject } from "react";
 import { horizontalScrollState } from "./horizontal-scroll";
 
-export function useDragScroll<T extends HTMLElement>(opts: { stride?: number } = {}) {
-  const ref = useRef<T | null>(null);
+export function useDragScroll<T extends HTMLElement>(
+  opts: { stride?: number; elementRef?: RefObject<T | null> } = {},
+) {
+  const ownRef = useRef<T | null>(null);
+  const ref = opts.elementRef ?? ownRef;
   const drag = useRef({
     active: false,
     moved: false,
@@ -87,11 +90,9 @@ export function useDragScroll<T extends HTMLElement>(opts: { stride?: number } =
     const { max, rtl } = horizontalScrollState(el);
     const projected = el.scrollLeft + projection;
     const logical = rtl ? -projected : projected;
-    const snapped = opts.stride && opts.stride > 0
-      ? Math.round(logical / opts.stride) * opts.stride
-      : logical;
-    const target =
-      (rtl ? -1 : 1) * Math.max(0, Math.min(snapped, max));
+    const snapped =
+      opts.stride && opts.stride > 0 ? Math.round(logical / opts.stride) * opts.stride : logical;
+    const target = (rtl ? -1 : 1) * Math.max(0, Math.min(snapped, max));
     const start = el.scrollLeft;
     const distance = target - start;
     const startTime = performance.now();
@@ -121,6 +122,12 @@ export function useDragScroll<T extends HTMLElement>(opts: { stride?: number } =
     }
   };
 
+  const onPointerLeave = () => {
+    // Before the drag threshold there is no pointer capture, so releasing
+    // outside the rail must not leave a stale active gesture behind.
+    if (drag.current.active && !drag.current.moved) drag.current.active = false;
+  };
+
   return {
     ref,
     handlers: {
@@ -128,6 +135,7 @@ export function useDragScroll<T extends HTMLElement>(opts: { stride?: number } =
       onPointerMove,
       onPointerUp: endDrag,
       onPointerCancel: endDrag,
+      onPointerLeave,
       onClickCapture,
       onDragStart: (e: React.DragEvent) => e.preventDefault(),
     },

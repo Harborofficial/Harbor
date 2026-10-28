@@ -1,4 +1,9 @@
 const settingsRefinements: Record<string, string> = {
+  "Temporary seasonal settings for Spooktober.": "Temporary seasonal settings for Spooktober.",
+  "Spooktober banner": "Spooktober banner",
+  "Hide the banner, keep it small in the top-right corner of the hero, or show the full banner below the hero.": "Hide the banner, keep it small in the top-right corner of the hero, or show the full banner below the hero.",
+  "Small - Top Right": "Small - Top Right",
+  "Below hero": "Below hero",
   "Prefer IMDb IDs for anime": "Prefer IMDb IDs for anime",
   "Use IMDb IDs for anime stream searches when a verified mapping is available. Otherwise, use the usual anime IDs.": "Use IMDb IDs for anime stream searches when a verified mapping is available. Otherwise, use the usual anime IDs.",
   "Playback cache folder": "Playback cache folder",

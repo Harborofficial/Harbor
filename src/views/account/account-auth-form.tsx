@@ -21,6 +21,7 @@ const USERNAME_RE = /^[a-zA-Z0-9_]{3,24}$/;
 
 function Shell({
   inline,
+  embedded = false,
   closing,
   onDismiss,
   children,
@@ -29,6 +30,7 @@ function Shell({
   dismissible = false,
 }: {
   inline: boolean;
+  embedded?: boolean;
   closing: boolean;
   onDismiss: () => void;
   children: React.ReactNode;
@@ -37,6 +39,7 @@ function Shell({
   dismissible?: boolean;
 }) {
   const t = useT();
+  if (embedded) return <>{children}</>;
   if (!inline) {
     return (
       <ModalShell closing={closing} onDismiss={onDismiss}>
@@ -80,11 +83,17 @@ export function AccountAuthForm({
   onClose,
   inline = false,
   initialMode = "register",
+  embedded = false,
+  onSignIn,
+  onBusyChange,
 }: {
   onRecovery?: (code: string) => void;
   onClose?: () => void;
   inline?: boolean;
   initialMode?: Mode;
+  embedded?: boolean;
+  onSignIn?: () => void;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const t = useT();
   const { closing, close } = useModalExit(() => onClose?.());
@@ -111,6 +120,7 @@ export function AccountAuthForm({
   const submit = async () => {
     if (!ready || busy) return;
     setBusy(true);
+    onBusyChange?.(true);
     setError(null);
     try {
       if (mode === "register") {
@@ -118,11 +128,13 @@ export function AccountAuthForm({
         onRecovery?.(recoveryCode);
       } else {
         await loginIdentity(trimmed, password);
+        onSignIn?.();
       }
     } catch (err) {
       setError(accountErrorMessage(err));
     } finally {
       setBusy(false);
+      onBusyChange?.(false);
     }
   };
 
@@ -136,31 +148,44 @@ export function AccountAuthForm({
     if (!thumb || !to) return;
     const from = prevMode.current >= 0 ? modeRefs.current[prevMode.current] : null;
     prevMode.current = modeIndex;
-    thumb.style.left = `${to.offsetLeft}px`;
-    thumb.style.top = `${to.offsetTop}px`;
-    thumb.style.width = `${to.offsetWidth}px`;
-    thumb.style.height = `${to.offsetHeight}px`;
-    thumb.style.opacity = "1";
-    if (!from || from === to) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const edge = Math.min(from.offsetLeft, to.offsetLeft);
-    const far = Math.max(from.offsetLeft + from.offsetWidth, to.offsetLeft + to.offsetWidth);
-    thumb.animate(
-      [
-        { left: `${from.offsetLeft}px`, width: `${from.offsetWidth}px` },
-        { left: `${edge}px`, width: `${far - edge}px`, offset: 0.48 },
-        { left: `${to.offsetLeft}px`, width: `${to.offsetWidth}px` },
-      ],
-      { duration: 440, easing: "ease-in-out" },
-    );
+    const measure = () => {
+      thumb.style.left = `${to.offsetLeft}px`;
+      thumb.style.top = `${to.offsetTop}px`;
+      thumb.style.width = `${to.offsetWidth}px`;
+      thumb.style.height = `${to.offsetHeight}px`;
+      thumb.style.opacity = "1";
+    };
+    measure();
+    const switcher = switchRef.current;
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    if (observer && switcher) observer.observe(switcher);
+    else window.addEventListener("resize", measure);
+
+    if (from && from !== to && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      const edge = Math.min(from.offsetLeft, to.offsetLeft);
+      const far = Math.max(from.offsetLeft + from.offsetWidth, to.offsetLeft + to.offsetWidth);
+      thumb.animate(
+        [
+          { left: `${from.offsetLeft}px`, width: `${from.offsetWidth}px` },
+          { left: `${edge}px`, width: `${far - edge}px`, offset: 0.48 },
+          { left: `${to.offsetLeft}px`, width: `${to.offsetWidth}px` },
+        ],
+        { duration: 440, easing: "ease-in-out" },
+      );
+    }
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, [modeIndex, view]);
 
   if (view === "recover") {
     return (
-      <Shell inline={inline} closing={closing} onDismiss={close}>
+      <Shell inline={inline} embedded={embedded} closing={closing} onDismiss={close}>
         <div className="overflow-y-auto">
           <AccountRecoverForm
             inline={inline}
+            onBusyChange={onBusyChange}
             onBack={() => setView("auth")}
             onReset={(code) => {
               setView("auth");
@@ -181,6 +206,7 @@ export function AccountAuthForm({
   return (
     <Shell
       inline={inline}
+      embedded={embedded}
       closing={closing}
       onDismiss={close}
       heading={heading}
@@ -215,7 +241,7 @@ export function AccountAuthForm({
             : "flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6"
         }
       >
-        {!inline && mode === "register" && <AccountValueProps />}
+        {!inline && !embedded && mode === "register" && <AccountValueProps />}
 
         <div ref={switchRef} className="relative flex items-center gap-1 rounded-md bg-canvas p-1">
           <span
@@ -227,6 +253,7 @@ export function AccountAuthForm({
             <button
               key={m.id}
               type="button"
+              disabled={!!onBusyChange && busy}
               aria-pressed={mode === m.id}
               ref={(el) => {
                 modeRefs.current[i] = el;
@@ -272,6 +299,7 @@ export function AccountAuthForm({
           {mode === "signin" && (
             <button
               type="button"
+              disabled={!!onBusyChange && busy}
               onClick={() => {
                 setView("recover");
                 setError(null);

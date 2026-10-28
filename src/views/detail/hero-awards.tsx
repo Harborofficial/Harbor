@@ -5,6 +5,7 @@ import { AWARD_CATALOG } from "@/lib/awards-catalog";
 import { scrollToDetailSection } from "@/lib/section-scroll";
 import type { AwardType } from "@/lib/providers/wikidata";
 import { useT } from "@/lib/i18n";
+import { bidiIsolate } from "@/lib/bidi";
 
 type HeroTier = "full" | "compact" | "hidden";
 
@@ -37,20 +38,21 @@ export function HeroAwardsCorner({
   const top = summary[0];
   if (!top || tier === "hidden") return null;
   const compact = tier === "compact";
-  const nominationsLabel = (n: number) =>
-    n === 1 ? t("nomination") : t("nominations");
+  const nominationsLabel = (n: number) => (n === 1 ? t("nomination") : t("nominations"));
   const lines: string[] = [];
   for (const item of summary) {
     if (item.wins > 0) {
-      const winPart = `${item.wins} ${awardNoun(item.type, item.wins)}`;
+      const winPart = bidiIsolate(`${item.wins} ${awardNoun(item.type, item.wins)}`);
       lines.push(
         item.nominations > 0
-          ? `${winPart} · ${item.nominations} ${nominationsLabel(item.nominations)}`
+          ? `${winPart} · ${bidiIsolate(`${item.nominations} ${nominationsLabel(item.nominations)}`)}`
           : winPart,
       );
     } else if (item.nominations > 0) {
       lines.push(
-        `${item.nominations} ${awardNoun(item.type, item.nominations)} ${nominationsLabel(item.nominations)}`,
+        bidiIsolate(
+          `${item.nominations} ${awardNoun(item.type, item.nominations)} ${nominationsLabel(item.nominations)}`,
+        ),
       );
     }
   }
@@ -58,7 +60,7 @@ export function HeroAwardsCorner({
   const won = top.wins > 0;
   const detailed = inline || !compact;
   const headline = detailed
-    ? `${headlineFor(top.type)} ${won ? t("Winner") : t("Nominee")}`
+    ? t(won ? "{award} Winner" : "{award} Nominee", { award: bidiIsolate(headlineFor(top.type)) })
     : won
       ? t("Award Winner")
       : t("Award Nominee");

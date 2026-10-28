@@ -103,6 +103,8 @@ pub async fn run(
         .stderr(Stdio::piped())
         .kill_on_drop(true);
     preserve_runtime_environment(&mut command);
+    #[cfg(windows)]
+    command.creation_flags(0x0800_0000); // CREATE_NO_WINDOW for the helper subprocess
     let mut child = command.spawn().map_err(|error| error.to_string())?;
     let payload = serde_json::to_vec(&request).map_err(|error| error.to_string())?;
     let mut stdin = child

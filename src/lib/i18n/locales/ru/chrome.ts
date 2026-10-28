@@ -52,6 +52,9 @@ const chrome: Record<string, string> = {
   "profile.switch": "Сменить профиль",
   "profile.primary": "Основной",
   "profile.signedIn": "Вход в Stremio выполнен",
+  "Signed in to Harbor": "Вход в Harbor выполнен",
+  "Signed out of Harbor": "Вы вышли из Harbor",
+  "Sign out of Harbor": "Выйти из Harbor",
   "profile.fallback": "Профиль",
   "welcome.title": "Добро пожаловать в Harbor",
   "welcome.subtitle":

@@ -243,6 +243,17 @@ export function performMembershipOperation(
   return persistMembershipSnapshot(key, containers, operation.mode === "move" ? "moved" : "added");
 }
 
+export function membershipStorageKey(baseKey: string, profile: MembershipProfile): string {
+  if (!profile.activeId || profile.settingsLinked) return baseKey;
+  // Before the list-store factory, custom lists used an unversioned profile key.
+  // Prefer that snapshot over the shared fallback or a later, separate snapshot.
+  if (baseKey === "harbor.customlists.v1") {
+    const legacyKey = `harbor.customlists.${profile.activeId}`;
+    if (localStorage.getItem(legacyKey) !== null) return legacyKey;
+  }
+  return `${baseKey === "harbor.collections.v1" ? "harbor.collections" : baseKey}.${profile.activeId}`;
+}
+
 export function readMembershipSnapshot(
   baseKey: string,
   expected?: MembershipProfile,
@@ -256,13 +267,10 @@ export function readMembershipSnapshot(
   ) {
     return { status: "error", reason: "profile-changed" };
   }
-  // Collections retain their legacy key; list stores append the profile to the full key.
-  const key =
-    current.profile.activeId && !current.profile.settingsLinked
-      ? `${baseKey === "harbor.collections.v1" ? "harbor.collections" : baseKey}.${current.profile.activeId}`
-      : baseKey;
+  let key: string;
   let raw: string | null;
   try {
+    key = membershipStorageKey(baseKey, current.profile);
     raw = localStorage.getItem(key) ?? (key !== baseKey ? localStorage.getItem(baseKey) : null);
   } catch {
     return { status: "error", reason: "storage-failed" };

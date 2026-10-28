@@ -7,6 +7,7 @@ import { FormatBadge, RuleBadges, streamBadges } from "@/components/format-badge
 import { HostMatchChip } from "@/components/host-match-chip";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { bidiLines } from "@/lib/bidi";
 import type { ScoredStream } from "@/lib/streams/types";
 import { EditionChip } from "./edition-chip";
 
@@ -62,11 +63,11 @@ export function StremioRow({
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
         <p className="whitespace-pre-line text-[16px] font-semibold leading-snug text-ink [overflow-wrap:anywhere]">
-          {headline}
+          {bidiLines(headline)}
         </p>
         {description && (
           <p className="whitespace-pre-line text-[14px] leading-snug text-ink-muted [overflow-wrap:anywhere]">
-            {description}
+            {bidiLines(description)}
           </p>
         )}
         {(badges.length > 0 || match || stream.edition || dubSub) && (

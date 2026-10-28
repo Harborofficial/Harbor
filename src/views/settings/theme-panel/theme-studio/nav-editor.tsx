@@ -10,6 +10,7 @@ import {
   type NavItem,
   type NavCustomization,
 } from "@/chrome/nav-items";
+import { useInstallFeatures } from "@/lib/features/install";
 import { useT } from "@/lib/i18n";
 import type { ThemeLayout } from "@/lib/theme";
 import { NavRow } from "./nav-editor/nav-row";
@@ -22,11 +23,15 @@ export function NavEditor({ layout, value: cfg, onChange }: {
   onChange: (value: NavCustomization) => void;
 }) {
   const t = useT();
+  const gamesEnabled = useInstallFeatures().games;
   const [dragId, setDragId] = useState<string | null>(null);
   const [drop, setDrop] = useState<{ id: string; pos: "before" | "after" } | null>(null);
 
   const byId = new Map<string, NavItem>(NAV_ITEMS.map((it) => [it.id, it]));
-  const rows = effectiveNavOrder(cfg).map((id) => byId.get(id)!);
+  const rows = effectiveNavOrder(cfg).flatMap((id) => {
+    const item = byId.get(id);
+    return item && (item.id !== "games" || gamesEnabled) ? [item] : [];
+  });
   const renamable = !ICON_ONLY.has(layout);
   const hasChanges =
     cfg.order.length > 0 || cfg.hidden.length > 0 || Object.keys(cfg.renamed).length > 0;

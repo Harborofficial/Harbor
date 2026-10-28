@@ -101,6 +101,11 @@ function parseAnimeFilename(raw: string): AnitomyFields {
     .trim();
 
   if (out.episodeNumber == null) {
+    const bracketEpisode = working.match(/\[(\d{1,3})(?:v\d)?\]/i);
+    if (bracketEpisode) out.episodeNumber = Number(bracketEpisode[1]);
+  }
+
+  if (out.episodeNumber == null) {
     const dash = stripped.match(/\s-\s(\d{1,4})(?:v\d)?(?:\s|$)/);
     if (dash) {
       out.episodeNumber = parseInt(dash[1], 10);

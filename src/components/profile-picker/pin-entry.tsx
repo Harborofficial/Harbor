@@ -17,7 +17,7 @@ export function PinEntry({
   mode: "set" | "verify";
   onComplete: (pin: string) => Promise<boolean | void> | boolean | void;
   onBack: () => void;
-  verify?: (pin: string) => Promise<boolean>;
+  verify?: (pin: string) => Promise<boolean | { ok: boolean; message?: string }>;
 }) {
   const t = useT();
   const [stage, setStage] = useState<Stage>("enter");
@@ -28,7 +28,11 @@ export function PinEntry({
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const focus = () => inputRef.current?.focus();
+  const focus = () => {
+    try {
+      inputRef.current?.focus();
+    } catch {}
+  };
 
   useEffect(() => {
     const id = setTimeout(focus, 40);
@@ -40,6 +44,36 @@ export function PinEntry({
     setTimeout(() => setShake(false), 360);
   };
 
+  // Robust global keydown listener so typing digits on physical keyboard or numpad
+  // works reliably regardless of focus, without dropping or duplicating characters.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (busy) return;
+      if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        setError(null);
+        setPin((p) => {
+          if (p.length >= 4) return p;
+          const next = p + e.key;
+          if (inputRef.current) inputRef.current.value = next;
+          return next;
+        });
+      } else if (e.key === "Backspace") {
+        e.preventDefault();
+        e.stopPropagation();
+        setError(null);
+        setPin((p) => {
+          const next = p.slice(0, -1);
+          if (inputRef.current) inputRef.current.value = next;
+          return next;
+        });
+      }
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [busy]);
+
   useEffect(() => {
     if (pin.length !== 4) return;
     let cancelled = false;
@@ -48,13 +82,16 @@ export function PinEntry({
       if (mode === "verify") {
         if (!verify) return;
         setBusy(true);
-        const ok = await verify(pin);
+        const result = await verify(pin);
         if (cancelled) return;
         setBusy(false);
-        if (ok) {
+        const isOk = typeof result === "boolean" ? result : Boolean(result?.ok);
+        if (isOk) {
           await onComplete(pin);
         } else {
-          setError(t("Wrong PIN"));
+          const errMessage = (typeof result === "object" && result?.message) ? result.message : t("Wrong PIN");
+          setError(errMessage);
+          if (inputRef.current) inputRef.current.value = "";
           setPin("");
           triggerShake();
           focus();
@@ -63,6 +100,7 @@ export function PinEntry({
       }
       if (stage === "enter") {
         setFirst(pin);
+        if (inputRef.current) inputRef.current.value = "";
         setPin("");
         setStage("confirm");
         setError(null);
@@ -71,6 +109,7 @@ export function PinEntry({
       if (pin !== first) {
         setError(t("PINs didn't match. Start over."));
         setFirst("");
+        if (inputRef.current) inputRef.current.value = "";
         setPin("");
         setStage("enter");
         triggerShake();
@@ -90,12 +129,22 @@ export function PinEntry({
   const tap = (digit: string) => {
     if (busy) return;
     setError(null);
-    setPin((p) => (p.length >= 4 ? p : p + digit));
+    setPin((p) => {
+      if (p.length >= 4) return p;
+      const next = p + digit;
+      if (inputRef.current) inputRef.current.value = next;
+      return next;
+    });
     focus();
   };
+
   const backspace = () => {
     setError(null);
-    setPin((p) => p.slice(0, -1));
+    setPin((p) => {
+      const next = p.slice(0, -1);
+      if (inputRef.current) inputRef.current.value = next;
+      return next;
+    });
     focus();
   };
 
@@ -105,7 +154,10 @@ export function PinEntry({
     mode === "set" && stage === "confirm" ? t("Type the same 4-digit PIN again.") : subtitle;
 
   return (
-    <div className="flex w-full max-w-[420px] flex-col gap-7 animate-in fade-in slide-in-from-bottom-2 duration-200">
+    <div
+      onClick={focus}
+      className="flex w-full max-w-[420px] mx-auto flex-col gap-7 animate-in fade-in slide-in-from-bottom-2 duration-200"
+    >
       <div className="flex items-center justify-between gap-3">
         <button
           type="button"

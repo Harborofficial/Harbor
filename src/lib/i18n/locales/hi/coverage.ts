@@ -1,4 +1,6 @@
 const coverage: Record<string, string> = {
+  "Waiting for {name}…": "{name} की प्रतीक्षा की जा रही है…",
+  "Keeping the source you were watching.": "वही स्रोत रखा जा रहा है जो आप देख रहे थे।",
   "Sound descriptions": "ध्वनि विवरण",
   "Hide sound effects and speaker names": "ध्वनि प्रभाव और वक्ताओं के नाम छिपाएँ",
   "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.":

@@ -8,6 +8,7 @@ pub const PIP_LABEL: &str = "harbor-video-pip";
 #[derive(Default)]
 pub struct PipWindowState {
     pub active: AtomicBool,
+    transition: tokio::sync::Mutex<()>,
 }
 
 #[cfg(windows)]
@@ -95,6 +96,10 @@ async fn retarget_render(app: &AppHandle, label: &str) -> Result<(), String> {
         .ctx_addr()
         .await
         .ok_or_else(|| "no running mpv session".to_string())?;
+
+    #[cfg(target_os = "linux")]
+    let selected_video_track = mpv_state.selected_video_track().await?;
+
     let window = app
         .get_webview_window(label)
         .ok_or_else(|| format!("{label} window missing"))?;
@@ -141,10 +146,16 @@ async fn retarget_render(app: &AppHandle, label: &str) -> Result<(), String> {
             })();
             let _ = tx.send(res);
         });
-        return match rx.recv_timeout(std::time::Duration::from_millis(3000)) {
-            Ok(result) => result,
-            Err(e) => Err(format!("linux render retarget timeout: {e:?}")),
-        };
+        match rx.recv_timeout(std::time::Duration::from_millis(3000)) {
+            Ok(result) => result?,
+            Err(e) => return Err(format!("linux render retarget timeout: {e:?}")),
+        }
+
+        if let Some(vid) = selected_video_track.as_deref() {
+            mpv_state.restore_video_track(vid).await?;
+        }
+
+        return Ok(());
     }
 }
 
@@ -210,6 +221,8 @@ pub async fn pip_window_enter(
     app: AppHandle,
     state: tauri::State<'_, PipWindowState>,
 ) -> Result<(), String> {
+    let _transition_guard = state.transition.lock().await;
+
     if state.active.load(Ordering::SeqCst) {
         return Ok(());
     }
@@ -260,6 +273,8 @@ pub async fn pip_window_exit(
     app: AppHandle,
     state: tauri::State<'_, PipWindowState>,
 ) -> Result<(), String> {
+    let _transition_guard = state.transition.lock().await;
+
     if !state.active.swap(false, Ordering::SeqCst) {
         return Ok(());
     }
@@ -279,7 +294,10 @@ pub async fn pip_window_exit(
         }
     }
     #[cfg(any(target_os = "macos", target_os = "linux"))]
-    retarget_render(&app, "main").await?;
+    if let Err(error) = retarget_render(&app, "main").await {
+        state.active.store(true, Ordering::SeqCst);
+        return Err(error);
+    }
 
     if let Some(pip) = app.get_webview_window(PIP_LABEL) {
         let _ = pip.hide();

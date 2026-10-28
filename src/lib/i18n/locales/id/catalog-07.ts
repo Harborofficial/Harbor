@@ -348,10 +348,10 @@ const catalog: Record<string, string> = {
     "Saat terbuka, Harbor memeriksa beberapa kali sehari dan memberi tahu Anda di sini.",
   "Harbor checks automatically every few hours.":
     "Harbor memeriksa secara otomatis setiap beberapa jam.",
-  "Harbor checks harbor.site for new versions and installs them in place.":
-    "Harbor memeriksa versi baru di harbor.site dan menginstalnya langsung.",
-  "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
-    "Harbor memeriksa versi baru di harbor.site dan menginstalnya langsung. Tidak ada yang diinstal sampai Anda memilihnya, dan pembaruan yang diabaikan tidak akan mengganggu Anda lagi.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place.":
+    "Harbor memeriksa versi baru di harborcommunity.site dan menginstalnya langsung.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
+    "Harbor memeriksa versi baru di harborcommunity.site dan menginstalnya langsung. Tidak ada yang diinstal sampai Anda memilihnya, dan pembaruan yang diabaikan tidak akan mengganggu Anda lagi.",
   "Harbor could not find these": "Harbor tidak dapat menemukan item berikut",
   "Harbor could not open its web server. Try again, or set this up on the TV.":
     "Harbor tidak dapat membuka server webnya. Coba lagi, atau siapkan ini di TV.",

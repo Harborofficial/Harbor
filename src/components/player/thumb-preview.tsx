@@ -8,9 +8,9 @@ const SEG_LABEL = { intro: "OP", outro: "ED", recap: "Recap", ad: "Ad" } as cons
 const BUCKET_SECONDS = 2;
 const CARD_WIDTH = 192;
 const CARD_HEIGHT = 108;
-const MAX_ATTEMPTS = 24;
-const RETRY_MS = 400;
-const SETTLE_MS = 130;
+const MAX_ATTEMPTS = 96;
+const RETRY_MS = 100;
+const SETTLE_MS = 70;
 const NEAREST_WINDOW = 30;
 
 export function ThumbPreview({

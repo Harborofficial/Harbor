@@ -2,6 +2,8 @@ import {
   Children,
   createContext,
   isValidElement,
+  memo,
+  startTransition,
   useCallback,
   useContext,
   useEffect,
@@ -16,7 +18,7 @@ import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { NavChevron } from "./nav-arrow";
 import { useT, useUiLanguage, isRtl as checkRtl } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
+import { useViewActions } from "@/lib/view";
 import { resetPosterDock as resetPosterDockItems, updatePosterDock } from "@/lib/poster-dock";
 import { scrollDeltaToRevealCard } from "@/lib/poster-backdrop-expansion";
 import { RowCardExpansionProvider } from "@/components/row-card-expansion";
@@ -31,14 +33,7 @@ const EAGER_COUNT = 6;
 const NEAR_MARGIN = "300px";
 const FAR_RELEASE_MS = 15000;
 
-export type RowShape =
-  | "portrait"
-  | "landscape"
-  | "service"
-  | "rank"
-  | "tile"
-  | "square"
-  | "cta";
+export type RowShape = "portrait" | "landscape" | "service" | "rank" | "tile" | "square" | "cta";
 
 export const TV_CARD_MIN = 318;
 
@@ -63,12 +58,14 @@ export const ScrollRootContext = createContext<HTMLElement | null>(null);
 function LazyChild({
   children,
   eager,
+  active,
   shape,
   span,
   expansion,
 }: {
   children: ReactNode;
   eager: boolean;
+  active: boolean;
   shape: RowShape;
   span?: string;
   expansion?: {
@@ -81,13 +78,22 @@ function LazyChild({
   };
 }) {
   const root = useContext(RowTrackContext);
-  const [visible, setVisible] = useState(eager);
+  const [visible, setVisible] = useState(eager && active);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!root) return;
     const el = ref.current;
     if (!el) return;
+    // An observer rooted in the horizontal track cannot tell whether the entire row is
+    // off-screen. Gate it with the row's page visibility before mounting card subscriptions.
+    if (!active) {
+      const timer = window.setTimeout(() => {
+        if (!el.contains(document.activeElement)) setVisible(false);
+      }, FAR_RELEASE_MS);
+      return () => window.clearTimeout(timer);
+    }
+    if (eager) startTransition(() => setVisible(true));
     let hideTimer: number | null = null;
     const stopIo = observeWithin(
       el,
@@ -98,11 +104,11 @@ function LazyChild({
             window.clearTimeout(hideTimer);
             hideTimer = null;
           }
-          setVisible(true);
+          startTransition(() => setVisible(true));
         } else if (!eager && hideTimer == null) {
           hideTimer = window.setTimeout(() => {
             hideTimer = null;
-            setVisible(false);
+            if (!el.contains(document.activeElement)) setVisible(false);
           }, FAR_RELEASE_MS);
         }
       },
@@ -118,14 +124,14 @@ function LazyChild({
         rect.left < rr.right + near &&
         rect.bottom > rr.top - near &&
         rect.top < rr.bottom + near;
-      if (within) setVisible(true);
+      if (within) startTransition(() => setVisible(true));
     }, 400);
     return () => {
       stopIo();
       window.clearTimeout(recheck);
       if (hideTimer != null) window.clearTimeout(hideTimer);
     };
-  }, [root, eager]);
+  }, [root, eager, active]);
 
   return (
     <div
@@ -185,7 +191,7 @@ function batchWrite(fn: () => void): void {
   });
 }
 
-function Skeleton({ shape }: { shape: RowShape }) {
+const Skeleton = memo(function Skeleton({ shape }: { shape: RowShape }) {
   const { settings } = useSettings();
   const radius = settings.posterRadius;
   if (shape === "service") {
@@ -216,7 +222,7 @@ function Skeleton({ shape }: { shape: RowShape }) {
       )}
     </div>
   );
-}
+});
 
 export function Row({
   title,
@@ -257,7 +263,8 @@ export function Row({
 }) {
   const { settings } = useSettings();
   const t = useT();
-  const { rememberRowScroll, recallRowScroll } = useView();
+  const { rememberRowScroll, recallRowScroll } = useViewActions();
+  const pageScrollRoot = useContext(ScrollRootContext);
   const lang = useUiLanguage();
   const rtl = checkRtl(lang);
   const tvCards =
@@ -290,8 +297,13 @@ export function Row({
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    return observeWithin(el, "600px", (e) => setNear(e.isIntersecting));
-  }, []);
+    const onNear = (e: IntersectionObserverEntry) => {
+      startTransition(() => setNear(e.isIntersecting));
+    };
+    return pageScrollRoot
+      ? observeWithin(el, "1600px 0px", onNear, pageScrollRoot)
+      : observeWithin(el, "1600px 0px", onNear);
+  }, [pageScrollRoot]);
   const measuredRef = useRef({ width: 0, effMin: 0 });
   // Width reported by the ResizeObserver for this row's container, so the measurement below does
   // not need a forced layout read.
@@ -299,7 +311,7 @@ export function Row({
   const measure = () => {
     const container = containerRef.current;
     if (!container) return;
-    const available = observedWidthRef.current || container.getBoundingClientRect().width;
+    const available = observedWidthRef.current;
     if (available <= 0) return;
     // The ResizeObserver also fires when the track's height changes, which is posters loading, not
     // a width change. Re-deriving the cell width then wrote the same value and re-laid-out the
@@ -317,8 +329,14 @@ export function Row({
     measureRef.current = measure;
   });
 
-  const readPos = (el: HTMLDivElement) => (rtl ? -el.scrollLeft : el.scrollLeft);
+  const lastScrollPosRef = useRef(0);
+  const readPos = (el: HTMLDivElement) => {
+    const pos = rtl ? -el.scrollLeft : el.scrollLeft;
+    lastScrollPosRef.current = pos;
+    return pos;
+  };
   const writePos = (el: HTMLDivElement, pos: number) => {
+    lastScrollPosRef.current = pos;
     el.scrollLeft = rtl ? -pos : pos;
   };
 
@@ -417,21 +435,28 @@ export function Row({
   const childCount = Children.count(children);
   const restoredRef = useRef(false);
   const userInteractedRef = useRef(false);
-  useLayoutEffect(() => {
-    measure();
-    measureScroll();
-  }, [childCount, trackEl, effMin, rtl]);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      measureRef.current();
+      measureScroll();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [childCount, trackEl, cellWidth, effMin, rtl]);
   useLayoutEffect(() => {
     if (!trackEl || cellWidth == null) return;
     if (scrollKey && !restoredRef.current && childCount > 0) {
       const n = recallRowScroll(scrollKey);
-      const max = trackEl.scrollWidth - trackEl.clientWidth;
-      const target = n != null && n > 0 && max > 0 ? Math.min(n, max) : 0;
-      if (readPos(trackEl) !== target) writePos(trackEl, target);
+      // A fresh track is already at zero. Only a saved nonzero position needs
+      // synchronous geometry before paint; reading every new track forces layout.
+      if (n != null && n > 0) {
+        const max = trackEl.scrollWidth - trackEl.clientWidth;
+        const target = max > 0 ? Math.min(n, max) : 0;
+        writePos(trackEl, target);
+      }
       restoredRef.current = true;
       return;
     }
-    if (!userInteractedRef.current && readPos(trackEl) !== 0) {
+    if (!userInteractedRef.current && lastScrollPosRef.current !== 0) {
       writePos(trackEl, 0);
     }
   }, [childCount, cellWidth, trackEl, scrollKey, recallRowScroll]);
@@ -453,17 +478,22 @@ export function Row({
     // each private observer was another object created during the click that switched to it — and
     // the entry already carries the width, so the measurement needs no layout read either.
     const stopContainerResize = observeResize(container, (rect) => {
-      if (container.offsetParent === null) return;
-      if (rect.width > 0) observedWidthRef.current = rect.width;
+      if (rect.width <= 0) return;
+      if (Math.abs(rect.width - observedWidthRef.current) < 0.5) return;
+      observedWidthRef.current = rect.width;
       scheduleMeasure();
     });
-    const stopTrackResize = observeResize(track, () => {
-      if (container.offsetParent === null) return;
+    let trackWidth = 0;
+    const stopTrackResize = observeResize(track, (rect) => {
+      if (rect.width <= 0) return;
+      if (Math.abs(rect.width - trackWidth) < 0.5) return;
+      trackWidth = rect.width;
       scheduleMeasure();
     });
     let saveTimer: number | null = null;
     let scrollRaf: number | null = null;
     const onScroll = () => {
+      readPos(track);
       if (scrollRaf == null) {
         scrollRaf = requestAnimationFrame(() => {
           scrollRaf = null;
@@ -545,8 +575,8 @@ export function Row({
       if (saveTimer != null) window.clearTimeout(saveTimer);
       if (wheelSettle != null) window.clearTimeout(wheelSettle);
       if (rafId.current != null) cancelAnimationFrame(rafId.current);
-      if (scrollKey && readPos(track) > 0) {
-        rememberRowScroll(scrollKey, readPos(track));
+      if (scrollKey && lastScrollPosRef.current > 0) {
+        rememberRowScroll(scrollKey, lastScrollPosRef.current);
       }
     };
   }, [scrollKey, rememberRowScroll]);
@@ -851,7 +881,7 @@ export function Row({
                   : undefined;
               const viewportLimit = Math.max(
                 baseWidth,
-                (trackEl?.clientWidth ?? desiredExpandedWidth ?? baseWidth) - GAP * 2,
+                (observedWidthRef.current || measuredRef.current.width || baseWidth) - GAP * 2,
               );
               const expandedWidth =
                 desiredExpandedWidth === undefined
@@ -860,6 +890,7 @@ export function Row({
               return (
                 <LazyChild
                   eager={alwaysActive || i < EAGER_COUNT}
+                  active={alwaysActive || near}
                   shape={effShape}
                   span={span}
                   expansion={

@@ -585,8 +585,8 @@ const settings: Record<string, string> = {
   "Hero carousel, Top 10, Trending, In Theaters, per-service rails.":
     "Главная карусель, Топ-10, «В тренде», «В кинотеатрах», ряды по сервисам.",
   Updates: "Обновления",
-  "Harbor checks harbor.site for new versions and installs them in place.":
-    "Harbor проверяет новые версии на harbor.site и устанавливает их на месте.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place.":
+    "Harbor проверяет новые версии на harborcommunity.site и устанавливает их на месте.",
   "Backup & restore": "Резервная копия и восстановление",
   "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup.":
     "Экспортируйте все настройки Harbor в один файл, чтобы восстановить их на новом компьютере или сохранить как резервную копию.",
@@ -1455,8 +1455,8 @@ const settings: Record<string, string> = {
   "My library": "Моя библиотека",
   Anticipated: "Ожидаемое",
   "Custom calendar": "Свой календарь",
-  "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
-    "Harbor проверяет harbor.site на наличие новых версий и устанавливает их на месте. Ничего не устанавливается без вашего согласия, а отклонённое обновление больше не напоминает о себе.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
+    "Harbor проверяет harborcommunity.site на наличие новых версий и устанавливает их на месте. Ничего не устанавливается без вашего согласия, а отклонённое обновление больше не напоминает о себе.",
   "Library, watch progress, and addon collection sync from this account.":
     "Библиотека, прогресс просмотра и набор Дополнений синхронизируются с этим аккаунтом.",
   "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your Stremio sign-in.":
@@ -1813,7 +1813,7 @@ const settings: Record<string, string> = {
     "Обратите внимание: если Stremio тоже установлен, Windows может спросить, каким приложением открыть ссылку stremio:// в первый раз. Выберите Harbor, чтобы выбор запомнился.",
   "stremio:// links now open in the Stremio app. Harbor will only install when you trigger it from inside Harbor.":
     "Ссылки stremio:// теперь открываются в приложении Stremio. Harbor устанавливает только то, что запущено изнутри Harbor.",
-  "Checking harbor.site for a newer build.": "Проверка harbor.site на наличие новой сборки.",
+  "Checking harborcommunity.site for a newer build.": "Проверка harborcommunity.site на наличие новой сборки.",
   "Downloading {pct}%": "Загрузка {pct}%",
   "Downloaded. Ready to install and restart.": "Загружено. Готово к установке и перезапуску.",
   "Installing. Harbor will restart.": "Установка. Harbor перезапустится.",

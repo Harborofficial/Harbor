@@ -6,7 +6,7 @@ import { kitsuAnime } from "@/lib/providers/kitsu";
 import type { SimklItem } from "../types";
 import { getLocalCache, type SimklCacheItem } from "../activities";
 import { groupAnimeByFranchise, type AnimeFranchise } from "../anime-grouping";
-import { simklRequest } from "../client";
+import { simklTitleDetail } from "../title-detail";
 
 function toHydratable(items: SimklItem[]): TraktItem[] {
   return items.map((it) => ({
@@ -110,10 +110,7 @@ export async function hydrateSimklItemsFranchise(franchises: AnimeFranchise[]): 
 
       if (!posterUrl) {
         try {
-          const detail = await simklRequest<{ title?: string; poster?: string; year?: number }>(
-            `/anime/${representative.simklId}`,
-            { method: "GET", authed: false },
-          );
+          const detail = await simklTitleDetail(representative.simklId);
           if (detail?.poster) {
             posterUrl = `https://simkl.in/posters/${detail.poster}_m.jpg`;
           }
@@ -122,10 +119,7 @@ export async function hydrateSimklItemsFranchise(franchises: AnimeFranchise[]): 
 
       if (!posterUrl && representative !== f.items[0] && f.items[0]?.simklId) {
         try {
-          const detail = await simklRequest<{ title?: string; poster?: string; year?: number }>(
-            `/anime/${f.items[0].simklId}`,
-            { method: "GET", authed: false },
-          );
+          const detail = await simklTitleDetail(f.items[0].simklId);
           if (detail?.poster) {
             posterUrl = `https://simkl.in/posters/${detail.poster}_m.jpg`;
           }

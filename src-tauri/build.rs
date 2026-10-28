@@ -11,12 +11,18 @@ fn main() {
 
     if target_os == "windows" {
         let libmpv = manifest.join("libmpv");
-        if libmpv.join("mpv.lib").exists() {
+        let import_lib = libmpv.join("mpv.lib");
+        let runtime_dll = libmpv.join("libmpv-2.dll");
+        // Track these unconditionally. `rerun-if-changed` used to be emitted only
+        // when `mpv.lib` already existed, so a build script run with libmpv
+        // missing was cached forever: restoring the files afterwards did not
+        // invalidate it and the link still failed with LNK1181 (no link search
+        // path). Watching the directory also catches a file being added back.
+        println!("cargo:rerun-if-changed={}", libmpv.display());
+        println!("cargo:rerun-if-changed={}", import_lib.display());
+        println!("cargo:rerun-if-changed={}", runtime_dll.display());
+        if import_lib.exists() {
             println!("cargo:rustc-link-search=native={}", libmpv.display());
-            println!(
-                "cargo:rerun-if-changed={}",
-                libmpv.join("mpv.lib").display()
-            );
         }
         if std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default() == "msvc" {
             // Only the app binary gets tauri_build's Common-Controls v6 manifest, so a
@@ -28,8 +34,16 @@ fn main() {
             // overflowed the stack and took the process down with no panic to catch.
             println!("cargo:rustc-link-arg=/STACK:16777216,1048576");
         }
-        if !libmpv.join("libmpv-2.dll").exists() {
-            println!("cargo:warning=libmpv-2.dll not found in src-tauri/libmpv. Run `pnpm run setup:libmpv` to fetch it (needed to run and bundle Harbor on Windows).");
+        if !import_lib.exists() {
+            println!(
+                "cargo:warning=mpv.lib is missing from {}. It is checked in; restore it from git (Harbor cannot link on Windows without it).",
+                libmpv.display()
+            );
+        } else if !runtime_dll.exists() {
+            println!(
+                "cargo:warning=libmpv-2.dll not found in {}. Run `pnpm run setup:libmpv` to fetch it (needed to run and bundle Harbor on Windows).",
+                libmpv.display()
+            );
         }
     }
 

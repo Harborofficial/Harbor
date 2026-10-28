@@ -68,7 +68,7 @@ workflow does the rest.
 ## Known limitations
 
 - **Stable only.** The beta channel (0.9.11x) is distributed through
-  `https://harbor.site/updates/latest.json` and is never published as a GitHub Release, so there is no
+  `https://harborcommunity.site/updates/latest.json` and is never published as a GitHub Release, so there is no
   artifact for a manifest to reference. Publishing beta to WinGet would require cutting beta GitHub
   Releases first.
 - **x64 only.** No ARM64 Windows asset has ever been attached to a release.

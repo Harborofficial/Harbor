@@ -947,8 +947,8 @@ const catalog03: Record<string, string> = {
   "Font name can only use letters, numbers, and spaces.":
     "Il nome del carattere può contenere solo lettere, numeri e spazi.",
   "Font tokens": "Token dei caratteri",
-  "For Application URL anything works, for example https://harbor.site. TMDB never visits it.":
-    "Come URL dell'applicazione va bene qualsiasi indirizzo, ad esempio https://harbor.site. TMDB non lo visiterà mai.",
+  "For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it.":
+    "Come URL dell'applicazione va bene qualsiasi indirizzo, ad esempio https://harborcommunity.site. TMDB non lo visiterà mai.",
   "For Everyone": "Per tutti",
   "For a link or image you usually want an attribute:":
     "Per un link o un'immagine, di solito serve un attributo:",

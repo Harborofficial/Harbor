@@ -291,23 +291,32 @@ export function PmdbMenuItems({
   onAction: () => void;
 }) {
   const t = useT();
-  const { isConnected, target, inList, ready, busy, toggle } = usePmdbWatchlist(harborId, type);
+  const { isConnected, target, inList, ready, busy, toggle, listName, error } = usePmdbWatchlist(
+    harborId,
+    type,
+  );
   if (!isConnected || !target || !ready) return null;
   return (
-    <button
-      role="menuitem"
-      disabled={busy}
-      onClick={() => {
-        void toggle().then(() => onAction());
-      }}
-      className="flex h-9 items-center gap-2.5 rounded-lg px-3 text-start text-[13px] text-ink transition-colors hover:bg-raised disabled:opacity-60"
-    >
-      <img src={publicmetadbLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-contain" />
-      <span className="flex-1 truncate">
-        {inList ? t("In PMDB · remove") : t("Add to PMDB")}
-      </span>
-      {inList && <Check size={13} className="text-ink" />}
-    </button>
+    <>
+      <button
+        role="menuitem"
+        title={error ? t(error) : listName}
+        disabled={busy}
+        onClick={() => {
+          void toggle().then((ok) => { if (ok) onAction(); });
+        }}
+        className="flex h-9 items-center gap-2.5 rounded-lg px-3 text-start text-[13px] text-ink transition-colors hover:bg-raised disabled:opacity-60"
+      >
+        <img src={publicmetadbLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-contain" />
+        <span className="flex-1 truncate">
+          {inList
+            ? t("Remove from {list} on PMDB", { list: listName })
+            : t("Add to {list} on PMDB", { list: listName })}
+        </span>
+        {inList && <Check size={13} className="text-ink" />}
+      </button>
+      {error && <p role="alert" className="max-w-xs px-3 py-1 text-[12px] text-danger">{t(error)}</p>}
+    </>
   );
 }
 

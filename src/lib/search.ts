@@ -298,12 +298,12 @@ export async function searchAll(
     };
   }
   const metaBase = effectiveTmdbLanguage().split("-")[0]?.toLowerCase() ?? "";
+  const metadataLanguage = effectiveTmdbLanguage() || "en";
   let enNameById: Map<number, string> | null = null;
   if (
     loadStoredSettings().translateTitles &&
     metaBase !== "" &&
-    metaBase !== "en" &&
-    metaBase !== "ja"
+    metaBase !== "en"
   ) {
     const en = await get<Page<MultiItem>>(key, "search/multi", {
       query: trimmed,
@@ -337,14 +337,14 @@ export async function searchAll(
 
   for (const r of results) {
     if (r.media_type === "movie" && r.poster_path) {
-      movies.push(movieMeta(r, enNameById?.get(r.id)));
+      movies.push(movieMeta(r, enNameById?.get(r.id), metadataLanguage));
       const pop = r.popularity ?? 0;
       if (pop > topPop) {
         topRaw = r;
         topPop = pop;
       }
     } else if (r.media_type === "tv" && r.poster_path) {
-      series.push(seriesMeta(r, enNameById?.get(r.id)));
+      series.push(seriesMeta(r, enNameById?.get(r.id), metadataLanguage));
       const pop = r.popularity ?? 0;
       if (pop > topPop) {
         topRaw = r;
@@ -382,8 +382,8 @@ export async function searchAll(
     topMatch = {
       kind: isMovie ? "movie" : "series",
       meta: isMovie
-        ? movieMeta(winner as RawMovie, enNameById?.get(winner.id))
-        : seriesMeta(winner as RawSeries, enNameById?.get(winner.id)),
+        ? movieMeta(winner as RawMovie, enNameById?.get(winner.id), metadataLanguage)
+        : seriesMeta(winner as RawSeries, enNameById?.get(winner.id), metadataLanguage),
       popularity: winner.popularity ?? 0,
       backdrop: winner.backdrop_path ? `https://image.tmdb.org/t/p/w1280${winner.backdrop_path}` : undefined,
       overview: winner.overview,

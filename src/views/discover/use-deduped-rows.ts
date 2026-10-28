@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import type { Meta } from "@/lib/cinemeta";
 
 const MIN_ROW = 16;
@@ -10,6 +10,7 @@ export function useDedupedRows(
   criticsPickId?: string,
   priority: string[] = [],
 ): Record<string, Meta[] | null> {
+  const previous = useRef<Record<string, Meta[] | null>>({});
   return useMemo(() => {
     const protectedIds = new Set<string>(featuredIds);
     if (criticsPickId) protectedIds.add(criticsPickId);
@@ -51,8 +52,15 @@ export function useDedupedRows(
           takenIds.add(m.id);
         }
       }
-      out[id] = taken;
+      // A different rail finishing its request must not invalidate this rail's memoized
+      // subtree. Compare object identities too, so refreshed metadata still reaches cards.
+      const before = previous.current[id];
+      out[id] =
+        before && before.length === taken.length && before.every((meta, i) => meta === taken[i])
+          ? before
+          : taken;
     }
+    previous.current = out;
     return out;
   }, [rails, order, featuredIds, criticsPickId, priority]);
 }

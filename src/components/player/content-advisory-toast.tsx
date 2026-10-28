@@ -1,4 +1,14 @@
-import { EyeOff, Ghost, Heart, Info, MessageSquareWarning, Swords, Wine, X } from "lucide-react";
+import {
+  EyeOff,
+  Ghost,
+  Heart,
+  Info,
+  MessageSquareWarning,
+  ShieldAlert,
+  Swords,
+  Wine,
+  X,
+} from "lucide-react";
 import { type FocusEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { ignoreAdvisory } from "@/lib/player/content-advisory-ignore";
@@ -10,20 +20,20 @@ export type ContentAdvisoryPosition = "top-start" | "top-end" | "top-center";
 
 const SEV_RANK: Record<string, number> = { None: 0, Mild: 1, Moderate: 2, Severe: 3 };
 
-type SeverityStyle = { text: string };
+type SeverityStyle = { text: string; bar: string };
 
 const SEV_STYLE_COLORED: Record<string, SeverityStyle> = {
-  Severe: { text: "text-danger" },
-  Moderate: { text: "text-accent" },
-  Mild: { text: "text-white/60" },
-  None: { text: "text-white/50" },
+  Severe: { text: "text-danger", bar: "bg-danger" },
+  Moderate: { text: "text-accent", bar: "bg-accent" },
+  Mild: { text: "text-white/45", bar: "bg-white/45" },
+  None: { text: "text-white/35", bar: "bg-white/30" },
 };
 
 const SEV_STYLE_MONO: Record<string, SeverityStyle> = {
-  Severe: { text: "text-white/85" },
-  Moderate: { text: "text-white/70" },
-  Mild: { text: "text-white/60" },
-  None: { text: "text-white/50" },
+  Severe: { text: "text-white/90 font-bold", bar: "bg-white/90" },
+  Moderate: { text: "text-white/65 font-medium", bar: "bg-white/65" },
+  Mild: { text: "text-white/45 font-medium", bar: "bg-white/45" },
+  None: { text: "text-white/35", bar: "bg-white/30" },
 };
 
 function metaFor(category: string): { Icon: typeof Info; label: string } {
@@ -53,7 +63,8 @@ function metaFor(category: string): { Icon: typeof Info; label: string } {
 const HOLD_MS = 8_000;
 const HOVER_TAIL_MS = 2_500;
 const EXIT_MS = 160;
-const CARD_CLASS = "w-[280px] max-w-[calc(100vw-3rem)] rounded-[4px] bg-black/70 px-3 py-2.5";
+const CARD_CLASS =
+  "w-[238px] max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-white/10 bg-black/70 px-3 py-2.5 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.85)] backdrop-blur-xl";
 
 type Phase = "idle" | "holding" | "collapsing" | "done";
 
@@ -147,7 +158,7 @@ export function ContentAdvisoryToast({
     if (event.currentTarget.contains(event.relatedTarget)) return;
     handleInteractionEnd(event.currentTarget.matches(":hover"));
   };
-  const canIgnore = !preview && !!titleId && settings.contentAdvisoryShowIgnore !== false;
+  const canIgnore = (preview || !!titleId) && settings.contentAdvisoryShowIgnore !== false;
   const handleIgnore = () => {
     if (titleId) ignoreAdvisory(titleId);
     setPhase("collapsing");
@@ -164,15 +175,24 @@ export function ContentAdvisoryToast({
       {!preview && (
         <style>{`
           @keyframes harborAdvisoryIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
+            0% { opacity: 0; transform: translateY(-10px) scale(0.965); }
+            60% { opacity: 1; }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
           }
           @keyframes harborAdvisoryOut {
             from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-2px); }
+            to { opacity: 0; transform: translateY(-8px) scale(0.98); }
+          }
+          @keyframes harborAdvisoryRow {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .harbor-content-advisory-row {
+            animation: harborAdvisoryRow 260ms var(--ease-out) both;
           }
           @media (prefers-reduced-motion: reduce) {
-            .harbor-content-advisory { animation-duration: 1ms !important; }
+            .harbor-content-advisory,
+            .harbor-content-advisory-row { animation-duration: 1ms !important; }
           }
         `}</style>
       )}
@@ -198,7 +218,7 @@ export function ContentAdvisoryToast({
             : {
                 animation: isCardExiting
                   ? `harborAdvisoryOut ${EXIT_MS}ms var(--ease-out) forwards`
-                  : "harborAdvisoryIn 200ms var(--ease-out) both",
+                  : "harborAdvisoryIn 420ms var(--ease-out) both",
               }
         }
       >
@@ -207,12 +227,15 @@ export function ContentAdvisoryToast({
             rated.length > 0 ? "mb-2" : ""
           }`}
         >
-          <span className="min-w-0 text-white/60">
-            <span className="text-[11px] font-medium">{t("Content advisory")}</span>
+          <span className="flex min-w-0 items-center gap-1.5 text-white/50">
+            <ShieldAlert size={11.5} strokeWidth={2.2} aria-hidden="true" className="shrink-0" />
+            <span className="truncate text-[9.5px] font-semibold uppercase tracking-[0.16em] rtl:tracking-normal">
+              {t("Content advisory")}
+            </span>
           </span>
           <span className="flex shrink-0 items-center gap-1">
             {mpaRating && (
-              <span className="text-[11px] font-medium tabular-nums text-white/75">
+              <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-semibold tabular-nums text-white/80">
                 {mpaRating}
               </span>
             )}
@@ -234,25 +257,41 @@ export function ContentAdvisoryToast({
 
         {rated.length > 0 && (
           <ul className="flex flex-col gap-1.5">
-            {rated.map((category) => {
+            {rated.map((category, index) => {
               const { Icon, label } = metaFor(category.category);
               const style = severityStyles[category.severity] ?? severityStyles.Mild;
+              const rank = SEV_RANK[category.severity] ?? 1;
               return (
                 <li
                   key={category.category}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3"
+                  className={`grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 ${
+                    preview ? "" : "harbor-content-advisory-row"
+                  }`}
+                  style={preview ? undefined : { animationDelay: `${110 + index * 50}ms` }}
                 >
-                  <span className="flex min-w-0 items-start gap-2">
+                  <span className="flex min-w-0 items-start gap-1.5">
                     <Icon
                       size={13}
-                      strokeWidth={1.8}
+                      strokeWidth={2}
                       aria-hidden="true"
-                      className="mt-0.5 shrink-0 text-white/55"
+                      className={`mt-0.5 shrink-0 ${style.text}`}
                     />
-                    <span className="text-[12px] leading-[18px] text-white/85">{t(label)}</span>
+                    <span className="text-[11.5px] leading-[18px] text-white/90">{t(label)}</span>
                   </span>
-                  <span className={`text-end text-[11px] leading-[18px] ${style.text}`}>
-                    {t(category.severity)}
+                  <span className="flex min-h-[18px] items-center gap-1.5">
+                    <span className="flex gap-[2.5px]" aria-hidden="true">
+                      {[1, 2, 3].map((level) => (
+                        <span
+                          key={level}
+                          className={`h-2.5 w-1 rounded-full ${level <= rank ? style.bar : "bg-white/10"}`}
+                        />
+                      ))}
+                    </span>
+                    <span
+                      className={`text-end text-[10px] font-semibold leading-[18px] ${style.text}`}
+                    >
+                      {t(category.severity)}
+                    </span>
                   </span>
                 </li>
               );
@@ -261,18 +300,32 @@ export function ContentAdvisoryToast({
         )}
 
         {canIgnore && (
-          <div className="mt-2 text-start">
+          <div
+            className={
+              rated.length > 0
+                ? "mt-2 border-t border-white/10 pt-1.5 text-center"
+                : "mt-1.5 text-center"
+            }
+          >
             <button
               type="button"
+              disabled={preview}
               onClick={(event) => {
                 event.currentTarget.blur();
                 handleIgnore();
               }}
               title={t("Never show the content advisory for this title again")}
-              className="inline-flex min-h-6 items-center gap-1.5 rounded-sm bg-transparent text-[11px] text-white/60 transition-colors duration-150 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+              className="group inline-flex min-h-6 items-center justify-center gap-1.5 rounded-sm bg-transparent text-[10.5px] font-medium text-white/50 transition-colors duration-200 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
             >
-              <EyeOff size={11} strokeWidth={2.2} aria-hidden="true" className="shrink-0" />
-              <span>{t("Ignore this title")}</span>
+              <EyeOff
+                size={11}
+                strokeWidth={2.2}
+                aria-hidden="true"
+                className="shrink-0 transition-[filter] duration-200 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+              />
+              <span className="transition-[filter] duration-200 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.9)]">
+                {t("Ignore this title")}
+              </span>
             </button>
           </div>
         )}

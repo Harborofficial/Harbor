@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "entrypoint": "native-entry.js",
   "fileCount": 131,
-  "totalBytes": 4593083,
+  "totalBytes": 4593823,
   "files": [
     {
       "path": "alt-collections.json",
@@ -541,8 +541,8 @@
     },
     {
       "path": "native-entry.js",
-      "bytes": 2821,
-      "sha256": "2a64a65aa2d4207b1806fd1508d236b0321b99a64c59994dce747932befa5414"
+      "bytes": 2847,
+      "sha256": "7516cb9d6701e873f98ba2e78f5a99f07e0b64ee91c30afbccca141ef23bf50f"
     },
     {
       "path": "native-environment.js",
@@ -561,8 +561,8 @@
     },
     {
       "path": "native-runtime.js",
-      "bytes": 173346,
-      "sha256": "1f87a4b3cd8ab0f0084eb8c0baef4d58757e3c803c9fa175d2e4f338d002df3f"
+      "bytes": 173698,
+      "sha256": "2f875dcab71e355db106c9e09325f3ca3dab12e5b3c0d2cc4dcf3d707083569b"
     },
     {
       "path": "native-styles.css",
@@ -601,8 +601,8 @@
     },
     {
       "path": "rails.js",
-      "bytes": 8374,
-      "sha256": "a56521c2bbd5d3bba2d5855abcca2e958ac71488f8e20adbed4571812a25226d"
+      "bytes": 8736,
+      "sha256": "005d8d8d7d40a1f289bcb9d1413ef42e2b5bfbf4d9e76c0820a3a845f758863d"
     },
     {
       "path": "reading-cozy-expanded.json",

@@ -26,7 +26,7 @@ export function UpdatesPanel() {
         <Section
           title={t("Updates")}
           subtitle={t(
-            "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.",
+            "Harbor checks harborcommunity.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.",
           )}
         >
           <UpdatesRow />

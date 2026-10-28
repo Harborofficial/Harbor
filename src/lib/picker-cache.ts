@@ -160,10 +160,12 @@ export function buildPickerConfigHash(parts: {
   filterMode: string;
   animePreferImdbStreams?: boolean;
   preferredAnimeImdbId?: string;
+  preferredAddonId?: string | null;
 }): string {
   const tokens = [
     TRUST_LOGIC_VERSION,
     `filter:${parts.filterMode}`,
+    `preferred-addon:${parts.preferredAddonId ?? ""}`,
     ...(parts.animePreferImdbStreams != null
       ? [`anime-imdb:${parts.animePreferImdbStreams}:${parts.preferredAnimeImdbId ?? ""}`]
       : []),

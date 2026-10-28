@@ -51,7 +51,7 @@ function addProbe(p: Probe): () => void {
 export function LazyMount({
   children,
   fallback,
-  rootMargin = "1200px",
+  rootMargin = "2000px 0px",
   minHeight = 240,
 }: {
   children: ReactNode;
@@ -77,7 +77,7 @@ export function LazyMount({
     const reveal = () => {
       stopIo();
       stopNear();
-      setShown(true);
+      startTransition(() => setShown(true));
     };
     const stopIo = observeWithin(el, rootMargin, (e) => {
       if (!e.isIntersecting) return;

@@ -4,7 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { verifyApiKey } from "./client";
@@ -14,6 +14,7 @@ import { armOnlineFlush, clearPendingResumes, flushPendingResumes } from "./pend
 import { pmdbSaveResume } from "./scrobble";
 import { getSession, setSession, subscribeSession, updateSessionUsername } from "./session";
 import { clearPmdbWatchlistCache } from "./watchlist";
+import { setPmdbDefaultListId } from "./lists";
 import type { PmdbSession, PmdbTarget } from "./types";
 
 type Value = {
@@ -48,15 +49,7 @@ type Value = {
 const Ctx = createContext<Value | null>(null);
 
 export function PublicMetaDbProvider({ children }: { children: ReactNode }) {
-  const [session, setLocalSession] = useState<PmdbSession | null>(() => getSession());
-
-  useEffect(
-    () =>
-      subscribeSession(() => {
-        setLocalSession(getSession());
-      }),
-    [],
-  );
+  const session = useSyncExternalStore(subscribeSession, getSession);
 
   const connect = useCallback(async (apiKey: string, username?: string): Promise<boolean> => {
     const trimmed = apiKey.trim();
@@ -78,6 +71,7 @@ export function PublicMetaDbProvider({ children }: { children: ReactNode }) {
 
   const disconnect = useCallback(() => {
     setSession(null);
+    try { setPmdbDefaultListId(null); } catch { /* Disconnect even if preferences cannot be saved. */ }
     invalidatePmdbWatchedCache();
     clearPmdbWatchlistCache();
     clearPendingResumes();

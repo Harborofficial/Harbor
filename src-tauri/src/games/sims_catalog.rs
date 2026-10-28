@@ -235,7 +235,7 @@ fn client(download: Option<&str>) -> Result<reqwest::Client> {
         .map(|v| download_id(v).ok_or("sims_creator_format"))
         .transpose()?;
     reqwest::Client::builder()
-        .user_agent("Harbor-Games/0.9 (https://harbor.site)")
+        .user_agent("Harbor-Games/0.9 (https://harborcommunity.site)")
         .connect_timeout(Duration::from_secs(8))
         .timeout(Duration::from_secs(60))
         .redirect(reqwest::redirect::Policy::custom(move |attempt| {

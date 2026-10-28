@@ -250,8 +250,8 @@ const extra: Record<string, string> = {
   "Couldn't connect to MyAnimeList": "No se pudo conectar con MyAnimeList",
   "Couldn't load this list. Check the URL and try again.":
     "No se pudo cargar esta lista. Revisa la URL e inténtalo de nuevo.",
-  "Couldn't reach harbor.site to load earlier builds. Check your connection and try again.":
-    "No se pudo acceder a harbor.site para cargar versiones anteriores. Comprueba tu conexión e inténtalo de nuevo.",
+  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
+    "No se pudo acceder a harborcommunity.site para cargar versiones anteriores. Comprueba tu conexión e inténtalo de nuevo.",
   "Couldn't reach Trakt": "No se pudo acceder a Trakt",
   "Couldn't reach Trakt. Check your connection and try again.":
     "No se pudo acceder a Trakt. Comprueba tu conexión e inténtalo de nuevo.",

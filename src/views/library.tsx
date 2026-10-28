@@ -10,6 +10,7 @@ import {
   Star,
 } from "lucide-react";
 import { UiIcon } from "@/components/ui-icon";
+import { Profiled } from "@/components/profiled";
 import { useEffect, useMemo, useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import anilistLogo from "@/assets/anilist.png";
@@ -33,6 +34,7 @@ import { HistoryTab } from "./library/history-tab";
 import { LocalTab } from "./library/local-tab";
 import { MalTab } from "./library/mal-tab";
 import { MyListsTab } from "./library/my-lists-tab";
+import { MyGroupsTab } from "./library/my-groups-tab";
 import { FavoritesTab } from "./library/favorites-tab";
 import { TabBtn, type Tab } from "./library/shared";
 import { SimklTab } from "./library/simkl-tab";
@@ -69,6 +71,7 @@ function readSavedTab(): Tab {
       v === "media-servers" ||
       v === "torbox" ||
       v === "lists" ||
+      v === "groups" ||
       v === "favorites" ||
       v === "trakt" ||
       v === "anilist" ||
@@ -94,6 +97,11 @@ export function LibraryView({ active }: { active: boolean }) {
   const scrollRef = useRef<HTMLElement>(null);
   useScrollMemory("library", scrollRef, active);
   const contentDrag = useContentDrag();
+  useEffect(() => {
+    const openGroup = () => setTab("groups");
+    window.addEventListener("harbor:open-library-group", openGroup);
+    return () => window.removeEventListener("harbor:open-library-group", openGroup);
+  }, []);
 
   useEffect(() => {
     try {
@@ -149,6 +157,7 @@ export function LibraryView({ active }: { active: boolean }) {
   return (
     <main
       ref={scrollRef}
+      data-harbor-library
       className="flex-1 overflow-y-auto px-5 pt-24 pb-14 sm:px-8 lg:px-12 lg:pt-28"
     >
       <LibraryFeaturedProvider>
@@ -164,13 +173,26 @@ export function LibraryView({ active }: { active: boolean }) {
             pmdbConnected={pmdbConnected}
             lbConnected={lb.isActive}
           />
-          {tab === "library" && <WatchlistTab mode="library" scrollRef={scrollRef} />}
-          {tab === "watchlist" && <WatchlistTab mode="watchlist" scrollRef={scrollRef} />}
-          {tab === "history" && <HistoryTab />}
+          {tab === "library" && (
+            <Profiled id="library.collection">
+              <WatchlistTab mode="library" scrollRef={scrollRef} />
+            </Profiled>
+          )}
+          {tab === "watchlist" && (
+            <Profiled id="library.watchlist">
+              <WatchlistTab mode="watchlist" scrollRef={scrollRef} />
+            </Profiled>
+          )}
+          {tab === "history" && (
+            <Profiled id="library.history">
+              <HistoryTab />
+            </Profiled>
+          )}
           {tab === "local" && <LocalTab scrollRef={scrollRef} />}
           {tab === "media-servers" && <MediaServersTab scrollRef={scrollRef} />}
           {tab === "torbox" && <TorboxTab />}
           {tab === "lists" && <MyListsTab />}
+          {tab === "groups" && <MyGroupsTab />}
           {tab === "favorites" && <FavoritesTab />}
           {tab === "trakt" && traktConnected && <TraktTab />}
           {tab === "anilist" && anilistConnected && <AnilistTab />}
@@ -265,7 +287,7 @@ function Header({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-1 border-b border-edge-soft">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-edge-soft [&>button]:shrink-0">
         <TabBtn active={tab === "library"} onClick={() => onTab("library")}>
           <Library size={14} strokeWidth={2.2} />
           {t("Library")}
@@ -293,6 +315,10 @@ function Header({
         <TabBtn active={tab === "lists"} onClick={() => onTab("lists")}>
           <UiIcon name="list" className="h-3.5 w-3.5" />
           {t("My Lists")}
+        </TabBtn>
+        <TabBtn active={tab === "groups"} onClick={() => onTab("groups")}>
+          <UiIcon name="list" className="h-3.5 w-3.5" />
+          {t("My Groups")}
         </TabBtn>
         <TabBtn active={tab === "favorites"} onClick={() => onTab("favorites")}>
           <Star size={14} strokeWidth={2.2} />

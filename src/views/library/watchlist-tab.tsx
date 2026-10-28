@@ -16,11 +16,21 @@ import {
   evictWatchlistAggregate,
   readLocalEntries,
   removeFromWatchlist,
+  removeFromWatchlistEntry,
   subscribeWatchlist,
-  toggleWatchlist,
   type LocalEntry,
 } from "@/lib/watchlist";
-import { setStremioAggregate, refreshWatchlistAggregates } from "@/lib/watchlist-sync";
+import { setStremioAggregate, setNuvioAggregate, refreshWatchlistAggregates } from "@/lib/watchlist-sync";
+import { resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
+import { getNuvioAccountId } from "@/lib/nuvio/nuvio-client";
+import {
+  readCachedNuvioLibrary,
+  pullNuvioLibrarySnapshot,
+  removeNuvioLibraryItem,
+  flushNuvioLibraryMutations,
+  subscribeNuvioLibrary,
+  type NuvioLibraryItem,
+} from "@/lib/nuvio/nuvio-library";
 import { useT } from "@/lib/i18n";
 import {
   applyFilter,
@@ -48,8 +58,20 @@ export function WatchlistTab({
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { isConnected: traktConnected } = useTrakt();
+  const isNuvio = settings.accountProvider === "nuvio";
   const [stremio, setStremio] = useState<LibraryItem[]>([]);
-  const [rawCount, setRawCount] = useState(0);
+  const [nuvioItems, setNuvioItems] = useState<NuvioLibraryItem[]>(() => {
+    if (settings.accountProvider !== "nuvio") return [];
+    const slot = resolveNuvioProfileIndex();
+    return readCachedNuvioLibrary(slot);
+  });
+  const [rawCount, setRawCount] = useState(() => {
+    if (settings.accountProvider === "nuvio") {
+      const slot = resolveNuvioProfileIndex();
+      return readCachedNuvioLibrary(slot).length;
+    }
+    return 0;
+  });
   const [trakt, setTrakt] = useState<TraktItem[]>([]);
   const [localEntries, setLocalEntries] = useState<LocalEntry[]>(() => readLocalEntries());
   const [traktStatus, setTraktStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
@@ -62,6 +84,56 @@ export function WatchlistTab({
 
   useEffect(() => {
     let cancelled = false;
+    if (isNuvio) {
+      let requestSeq = 0;
+      const loadNuvio = () => {
+        if (cancelled || pendingRemovals.current > 0) return;
+        const seq = ++requestSeq;
+        const mySeq = guardSeq.current;
+        const accountId = getNuvioAccountId();
+        const slot = resolveNuvioProfileIndex();
+        const cached = readCachedNuvioLibrary(slot);
+        setRawCount(cached.length);
+        setNuvioItems(cached);
+        setNuvioAggregate(cached.map((i) => i.content_id).filter(Boolean));
+
+        pullNuvioLibrarySnapshot(slot)
+          .then((fresh) => {
+            if (
+              cancelled ||
+              seq !== requestSeq ||
+              getNuvioAccountId() !== accountId ||
+              resolveNuvioProfileIndex() !== slot
+            ) return;
+            if (guardSeq.current !== mySeq) {
+              loadNuvio();
+              return;
+            }
+            setRawCount(fresh.length);
+            setNuvioItems(fresh);
+            setNuvioAggregate(fresh.map((i) => i.content_id).filter(Boolean));
+          })
+          .catch(() => {});
+      };
+      loadNuvio();
+
+      const onChange = () => {
+        setLocalEntries(readLocalEntries());
+        loadNuvio();
+      };
+      window.addEventListener("harbor:nuvio-profile-changed", onChange);
+      window.addEventListener("harbor:nuvio-state-changed", onChange);
+      const unsub = subscribeNuvioLibrary(onChange);
+      const unsubWatchlist = subscribeWatchlist(onChange);
+      return () => {
+        cancelled = true;
+        window.removeEventListener("harbor:nuvio-profile-changed", onChange);
+        window.removeEventListener("harbor:nuvio-state-changed", onChange);
+        unsub();
+        unsubWatchlist();
+      };
+    }
+
     const loadStremio = () => {
       if (!authKey || cancelled || pendingRemovals.current > 0) return;
       const mySeq = guardSeq.current;
@@ -92,10 +164,66 @@ export function WatchlistTab({
       window.removeEventListener("storage", onChange);
       unsub();
     };
-  }, [authKey, settings.libraryBookmarkedOnly, mode, refreshSeq]);
+  }, [authKey, settings.libraryBookmarkedOnly, mode, refreshSeq, isNuvio]);
 
   const handleRemove = useCallback(
     async (stremioId: string) => {
+      const isNuvioActive = settings?.accountProvider === "nuvio";
+      if (isNuvioActive) {
+        guardSeq.current += 1;
+        const slot = resolveNuvioProfileIndex();
+        const allLocals = readLocalEntries();
+        const cleanId = stremioId.trim();
+
+        // Target ONLY this item and its twin local/IMDb ID
+        const targetIds = new Set<string>([cleanId]);
+        const localMatch = allLocals.find((l) => l.id === cleanId || (l.imdbId && l.imdbId === cleanId));
+        if (localMatch) {
+          if (localMatch.id) targetIds.add(localMatch.id);
+          if (localMatch.imdbId) targetIds.add(localMatch.imdbId);
+        }
+
+        // 1. Optimistic UI removal (0ms instant)
+        evictWatchlistAggregate(targetIds);
+        setNuvioItems((prev) => prev.filter((i) => !targetIds.has(i.content_id)));
+        setLocalEntries((prev) => prev.filter((e) => !targetIds.has(e.id)));
+        setTrakt((prev) =>
+          prev.filter((t) => {
+            const tk = traktTmdbForm(t.type, t.ids.tmdb);
+            return !((t.ids.imdb && targetIds.has(t.ids.imdb)) || (tk && targetIds.has(tk)));
+          }),
+        );
+        setRawCount((c) => Math.max(0, c - 1));
+
+        // 2. Queue exact Nuvio removals
+        const item =
+          nuvioItems.find((x) => targetIds.has(x.content_id)) ||
+          readCachedNuvioLibrary(slot).find((x) => targetIds.has(x.content_id));
+        const contentType = item?.content_type || localMatch?.type || "movie";
+
+        for (const tid of targetIds) {
+          removeNuvioLibraryItem(slot, tid, contentType);
+        }
+        if (localMatch) {
+          removeFromWatchlist(localMatch.id);
+        }
+
+        // 3. Background flush & third-party tracking sync (non-blocking)
+        const tr = stremioIdToTraktTarget(cleanId);
+        const simklTarget = (() => {
+          if (!simklConnected()) return null;
+          const sr = stremioIdToSimklTarget(cleanId);
+          return sr.ok ? sr.target : null;
+        })();
+
+        void Promise.allSettled([
+          flushNuvioLibraryMutations(slot),
+          ...(tr.ok ? [removeTraktWatchlist(tr.target).catch(() => false)] : []),
+          ...(simklTarget ? [removeSimklWatchlist(simklTarget).catch(() => false)] : []),
+        ]);
+        return;
+      }
+
       if (!authKey) return;
       guardSeq.current += 1;
       pendingRemovals.current += 1;
@@ -161,6 +289,32 @@ export function WatchlistTab({
       const e = all.find((x) => x.id === localId);
       if (!e) return;
       guardSeq.current += 1;
+
+      if (isNuvio) {
+        const slot = resolveNuvioProfileIndex();
+        const targetIds = new Set<string>([e.id]);
+        if (e.imdbId) targetIds.add(e.imdbId);
+
+        evictWatchlistAggregate(targetIds);
+        setLocalEntries((prev) => prev.filter((x) => !targetIds.has(x.id)));
+        setNuvioItems((prev) => prev.filter((i) => !targetIds.has(i.content_id)));
+        setRawCount((c) => Math.max(0, c - 1));
+
+        for (const tid of targetIds) {
+          removeNuvioLibraryItem(slot, tid, e.type);
+        }
+        void flushNuvioLibraryMutations(slot);
+
+        removeFromWatchlistEntry({
+          id: e.id,
+          type: e.type,
+          name: e.name,
+          poster: e.poster,
+          imdbId: e.imdbId ?? null,
+        });
+        return;
+      }
+
       const closure = filmClosure(e.imdbId ? [e.id, e.imdbId] : [e.id], all, trakt);
       evictWatchlistAggregate(closure);
       setLocalEntries((prev) => prev.filter((x) => !closure.has(x.id)));
@@ -171,7 +325,7 @@ export function WatchlistTab({
           return !((t.ids.imdb && closure.has(t.ids.imdb)) || (tk && closure.has(tk)));
         }),
       );
-      toggleWatchlist({
+      removeFromWatchlistEntry({
         id: e.id,
         type: e.type,
         name: e.name,
@@ -179,7 +333,7 @@ export function WatchlistTab({
         imdbId: e.imdbId ?? null,
       });
     },
-    [trakt],
+    [trakt, isNuvio],
   );
 
   useEffect(() => {
@@ -214,8 +368,8 @@ export function WatchlistTab({
   }, [traktConnected, refreshSeq]);
 
   const merged = useMemo(
-    () => mergeWatchlist(localEntries, stremio, trakt),
-    [localEntries, stremio, trakt],
+    () => mergeWatchlist(localEntries, stremio, trakt, isNuvio ? nuvioItems : undefined),
+    [localEntries, stremio, trakt, isNuvio, nuvioItems],
   );
 
   const [type, setType] = useState<TypeKey>("all");
@@ -231,6 +385,17 @@ export function WatchlistTab({
   }, []);
   const counts = useMemo(() => countByType(merged), [merged]);
   const visible = useMemo(() => applyFilter(merged, type, query), [merged, type, query]);
+  const groups = useMemo(() => {
+    if (settings.librarySort !== "recent") return sortedGroups(visible, settings.librarySort);
+    if (flat)
+      return [
+        {
+          label: "Everything",
+          items: [...visible].sort((a, b) => (b.date ?? -Infinity) - (a.date ?? -Infinity)),
+        },
+      ];
+    return groupByDate(visible);
+  }, [visible, settings.librarySort, flat]);
   useReportFeatured(useMemo(() => visible.map((v) => v.meta), [visible]));
 
   const subtitle = (() => {
@@ -241,12 +406,16 @@ export function WatchlistTab({
       );
     else parts.push(tr("Connect Trakt in Settings to sync"));
     parts.push(tr("{n} saved on this device", { n: localEntries.length }));
-    if (authKey && rawCount > 0) parts.push(tr("{n} in your Stremio library", { n: rawCount }));
+    if (isNuvio && rawCount > 0) {
+      parts.push(tr("{n} in your Nuvio library", { n: rawCount }));
+    } else if (authKey && rawCount > 0) {
+      parts.push(tr("{n} in your Stremio library", { n: rawCount }));
+    }
     return parts.join(" · ");
   })();
 
   return (
-    <section data-context-page-background className="flex flex-col gap-4">
+    <section className="flex flex-col gap-4">
       {merged.length > 0 && (
         <FilterBar
           type={type}
@@ -275,26 +444,21 @@ export function WatchlistTab({
         </p>
       ) : settings.librarySort !== "recent" ? (
         <GroupedGrid
-          groups={sortedGroups(visible, settings.librarySort)}
+          groups={groups}
           onRemove={handleRemove}
           onRemoveLocal={handleRemoveLocal}
           scrollRef={scrollRef}
         />
       ) : flat ? (
         <GroupedGrid
-          groups={[
-            {
-              label: "Everything",
-              items: [...visible].sort((a, b) => (b.date ?? -Infinity) - (a.date ?? -Infinity)),
-            },
-          ]}
+          groups={groups}
           onRemove={handleRemove}
           onRemoveLocal={handleRemoveLocal}
           scrollRef={scrollRef}
         />
       ) : (
         <GroupedGrid
-          groups={groupByDate(visible)}
+          groups={groups}
           onRemove={handleRemove}
           onRemoveLocal={handleRemoveLocal}
           scrollRef={scrollRef}
@@ -385,6 +549,7 @@ export function mergeWatchlist(
   localEntries: LocalEntry[],
   stremio: LibraryItem[],
   trakt: TraktItem[],
+  nuvioItems?: NuvioLibraryItem[],
 ): WatchlistMerged[] {
   const norm = (s: string) =>
     s
@@ -487,6 +652,34 @@ export function mergeWatchlist(
       item.name ?? "",
     );
   }
+  if (nuvioItems && nuvioItems.length > 0) {
+    for (const item of nuvioItems) {
+      const meta: Meta = {
+        id: item.content_id,
+        type: libraryMetaType(item.content_type),
+        name: item.name,
+        poster: item.poster || undefined,
+        background: item.background || undefined,
+        logo: item.logo || undefined,
+        description: item.description || undefined,
+        releaseInfo: item.release_info || undefined,
+        imdbRating: item.imdb_rating ? String(item.imdb_rating) : undefined,
+        genres: item.genres || [],
+      };
+      place(
+        {
+          key: item.content_id,
+          meta,
+          date: item.added_at,
+          stremioId: item.content_id,
+        },
+        item.release_info || null,
+        item.content_id.startsWith("tt") ? item.content_id : null,
+        item.content_type,
+        item.name ?? "",
+      );
+    }
+  }
   for (const t of trakt) {
     const m = traktItemToMeta(t);
     if (!m) continue;
@@ -499,26 +692,53 @@ export function mergeWatchlist(
       m.name ?? "",
     );
   }
-  for (const e of localEntries) {
-    place(
-      {
-        key: e.id,
-        meta: {
-          id: e.id,
-          type: e.type,
-          name: e.name || e.id,
-          poster: e.poster,
-          addonOrigin: e.addonOrigin,
-          videos: e.videos,
+  if (nuvioItems !== undefined) {
+    const nuvioIdSet = new Set(nuvioItems.map((i) => i.content_id));
+    for (const e of localEntries) {
+      if (nuvioIdSet.has(e.id) || (e.imdbId && nuvioIdSet.has(e.imdbId))) {
+        place(
+          {
+            key: e.id,
+            meta: {
+              id: e.id,
+              type: e.type,
+              name: e.name || e.id,
+              poster: e.poster,
+              addonOrigin: e.addonOrigin,
+              videos: e.videos,
+            },
+            date: e.addedAt || null,
+            localId: e.id,
+          },
+          null,
+          e.imdbId ?? null,
+          e.type,
+          e.name,
+        );
+      }
+    }
+  } else {
+    for (const e of localEntries) {
+      place(
+        {
+          key: e.id,
+          meta: {
+            id: e.id,
+            type: e.type,
+            name: e.name || e.id,
+            poster: e.poster,
+            addonOrigin: e.addonOrigin,
+            videos: e.videos,
+          },
+          date: e.addedAt || null,
+          localId: e.id,
         },
-        date: e.addedAt || null,
-        localId: e.id,
-      },
-      null,
-      e.imdbId ?? null,
-      e.type,
-      e.name,
-    );
+        null,
+        e.imdbId ?? null,
+        e.type,
+        e.name,
+      );
+    }
   }
   return Array.from(byKey.values());
 }

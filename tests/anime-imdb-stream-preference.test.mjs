@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 import { buildStreamIds, preferredAnimeImdbStreamId, unverifiedAnimeSeasonId } from "../src/lib/streams/stream-ids.ts";
-import { animeAbsoluteFromScopedId } from "../src/lib/streams/anime-identity-core.ts";
+import { animeAbsoluteFromScopedId, splitAnimeStreamCoordinates } from "../src/lib/streams/anime-identity-core.ts";
 import { lruSet } from "../src/lib/cache.ts";
 
 function load(path, mocks) {
@@ -31,7 +31,7 @@ const { buildEpisodePipelineInput } = load("../src/lib/streams/episode-pipeline-
   "@/lib/cinemeta": { isAddonNativeMeta: (meta) => meta.id.startsWith("native:") },
   "@/lib/playback-history": { readPlayback: () => null },
   "./addon-priority": { resolveAddonRanks: () => null },
-  "./anime-identity-core": { animeAbsoluteFromScopedId },
+  "./anime-identity-core": { animeAbsoluteFromScopedId, splitAnimeStreamCoordinates },
   "./plugins/addon": pluginMocks,
   "./stream-ids": { preferredAnimeImdbStreamId, unverifiedAnimeSeasonId },
 });
@@ -62,6 +62,7 @@ function transport(empty = false) {
   };
   const api = load("../src/lib/streams/addons.ts", {
     "@/lib/safe-fetch": { safeFetch: fetch, safeFetchLocal: fetch },
+    "./prefetch-request": { clearPrefetchedRequests() {}, prefetchRequest: (_key, signal, _prefetch, run) => run(signal) },
     "@/lib/debug": { dlog() {}, dwarn() {} },
     "@/lib/fetch-fallback-policy": { isHarborFetchPolicyError: () => false },
     "@/lib/local-network": { isLocalNetworkUrl: () => false },
@@ -80,6 +81,20 @@ function transport(empty = false) {
 }
 
 const mapped = { season: 1, episode: 1, imdbId: "tt1234567", imdbSeason: 2, imdbEpisode: 13, kitsuStreamId: "kitsu:123:1" };
+
+test("TYBW plugins receive S4E9 and absolute 49 without the original Bleach IMDb id", () => {
+  const out = input({ id: "kitsu:49444", imdbId: "tt0434665", episode: {
+    season: 1, episode: 9, kitsuStreamId: "kitsu:49444:9",
+    imdbId: "tt0434665", imdbSeason: 17, imdbEpisode: 49,
+  } });
+  assert.deepEqual(out.request.ids, ["kitsu:49444:9"]);
+  assert.equal(out.request.context.season, 4);
+  assert.equal(out.request.context.episode, 9);
+  assert.equal(out.request.context.absoluteEpisode, 49);
+  assert.equal(out.request.context.imdbId, null);
+  assert.equal(out.query.imdbId, "");
+  assert.deepEqual([...out.animeEpisodeAliases], [49, 415]);
+});
 
 test("off keeps Kitsu selection; on sends the mapped IMDb episode to the addon", async () => {
   assert.deepEqual(await transport().run(input({ episode: mapped, enabled: false }).request), ["kitsu:123:1"]);

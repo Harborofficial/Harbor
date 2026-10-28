@@ -56,6 +56,9 @@ const chrome: Record<string, string> = {
   "profile.switch": "تبديل الملف الشخصي",
   "profile.primary": "أساسي",
   "profile.signedIn": "تم تسجيل الدخول إلى Stremio",
+  "Signed in to Harbor": "تم تسجيل الدخول إلى Harbor",
+  "Signed out of Harbor": "تم تسجيل الخروج من Harbor",
+  "Sign out of Harbor": "تسجيل الخروج من Harbor",
   "profile.fallback": "ملف شخصي",
 
   "welcome.title": "مرحبًا بك في Harbor",

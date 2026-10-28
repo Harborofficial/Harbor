@@ -1234,6 +1234,26 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     });
   }, [enabled]);
 
+  // Focus styling needs input modality even when TV navigation is disabled.
+  useEffect(() => {
+    const onPointerDown = () => setPointerModality();
+    const onPointerMove = (e: PointerEvent) => notePointerMove(e.screenX, e.screenY);
+    const onWheel = () => setPointerModality();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Tab") setKeysModality();
+    };
+    window.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("pointermove", onPointerMove, true);
+    window.addEventListener("wheel", onWheel, { capture: true, passive: true });
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("pointermove", onPointerMove, true);
+      window.removeEventListener("wheel", onWheel, true);
+      window.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, []);
+
   // F6 is WebView2 pane-focus: on this frameless window it tears down the
   // renderer instead. Nothing binds F6, so swallow it before default handling.
   useEffect(() => {
@@ -1530,11 +1550,6 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     window.addEventListener("focusout", reflectCardFocus, true);
     window.addEventListener("pointerdown", onPointerDown, true);
 
-    const onPointerMove = (e: PointerEvent) => notePointerMove(e.screenX, e.screenY);
-    const onWheel = () => setPointerModality();
-    window.addEventListener("pointermove", onPointerMove, true);
-    window.addEventListener("wheel", onWheel, { capture: true, passive: true });
-
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("beforeinput", onBeforeInput, true);
@@ -1542,8 +1557,6 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       window.removeEventListener("focusin", reflectCardFocus, true);
       window.removeEventListener("focusout", reflectCardFocus, true);
       window.removeEventListener("pointerdown", onPointerDown, true);
-      window.removeEventListener("pointermove", onPointerMove, true);
-      window.removeEventListener("wheel", onWheel, true);
       if (remoteBackOwner === owner) {
         remoteBackFns = {};
         remoteBackOwner = null;

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EpisodeReleaseCountdown } from "@/components/episode-release-countdown";
 import { Check, ChevronDown, Hourglass, RotateCcw } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
@@ -109,6 +110,7 @@ export function EpisodeRow({
               </span>
             )}
           </div>
+          <EpisodeReleaseCountdown date={episode.airDate} />
           <div className="flex items-center gap-2">
             <button
               onClick={onPlay}

@@ -4,6 +4,10 @@ import { useProfiles } from "@/lib/profiles";
 import { useT } from "@/lib/i18n";
 import { ROW_TITLE } from "../shared";
 
+import { useSettings } from "@/lib/settings";
+import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { isStremioActivePrimary } from "@/lib/active-profile-id";
+
 const QUAL =
   "inline-flex h-[22px] shrink-0 items-center gap-1 rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
@@ -13,6 +17,10 @@ const CELL =
 export function ProfilesStrip() {
   const t = useT();
   const { profiles, activeProfile, openPicker, selectProfile } = useProfiles();
+  const { settings } = useSettings();
+  const isPrimary = isStremioActivePrimary(activeProfile, profiles);
+  const canAdd = isPrimary || getSecondaryPrivileges(settings, false).canAddProfiles;
+
   const switchTo = (id: string, locked: boolean) =>
     locked ? openPicker({ kind: "unlock", profileId: id }) : selectProfile(id);
 
@@ -89,18 +97,20 @@ export function ProfilesStrip() {
           </div>
         );
       })}
-      <button
-        type="button"
-        onClick={() => openPicker({ kind: "create" })}
-        aria-label={t("Add profile")}
-        className={`${CELL} justify-center border-edge-soft text-ink-subtle hover:bg-elevated hover:text-ink`}
-      >
-        <span className="flex h-[78px] w-[78px] items-center justify-center rounded-full bg-elevated">
-          <Plus size={26} strokeWidth={2.2} />
-        </span>
-        <span className={ROW_TITLE}>{t("Add")}</span>
-        <span className="min-h-[22px]" />
-      </button>
+      {canAdd && (
+        <button
+          type="button"
+          onClick={() => openPicker({ kind: "create" })}
+          aria-label={t("Add profile")}
+          className={`${CELL} justify-center border-edge-soft text-ink-subtle hover:bg-elevated hover:text-ink`}
+        >
+          <span className="flex h-[78px] w-[78px] items-center justify-center rounded-full bg-elevated">
+            <Plus size={26} strokeWidth={2.2} />
+          </span>
+          <span className={ROW_TITLE}>{t("Add")}</span>
+          <span className="min-h-[22px]" />
+        </button>
+      )}
     </div>
   );
 }

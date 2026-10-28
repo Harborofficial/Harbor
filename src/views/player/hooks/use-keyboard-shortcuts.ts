@@ -12,6 +12,7 @@ import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
 import { isBigPictureActive } from "@/lib/big-picture";
 import { getLeaveConfirm, openLeaveConfirm } from "@/lib/player/leave-confirm";
 import { isPlayerInteractionLocked } from "@/lib/player/interaction-lock";
+import { tracePlayback } from "@/lib/player/pause-trace";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
 
@@ -164,6 +165,8 @@ export function useKeyboardShortcuts(params: {
 
       const binding = eventToBinding(e);
       const match = (id: HotkeyId): boolean => effectiveBinding(id, overrides) === binding;
+
+      if (e.key.startsWith("Media")) tracePlayback(`media-key-dom ${e.key}`);
 
       if (e.key === "MediaPlayPause") {
         e.preventDefault();
@@ -600,6 +603,7 @@ export function useKeyboardShortcuts(params: {
       const u1 = await listen<string>("harbor://media-key", (e) => {
         const m = mediaRef.current;
         const playing = m.status === "playing";
+        tracePlayback(`media-key ${e.payload} status=${m.status}`);
         switch (e.payload) {
           case "playpause":
             if (mediaKeyGate()) m.playPauseToggle();

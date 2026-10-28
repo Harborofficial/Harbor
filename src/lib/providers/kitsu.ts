@@ -1,9 +1,17 @@
-import { lruSet } from "@/lib/cache";
+import { lruGet, lruSet } from "@/lib/cache";
 import type { Meta } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
 import { safeFetch } from "@/lib/safe-fetch";
 import { adultContentHidden } from "@/lib/addons-store/adult-filter";
 import { episodeTextLanguage } from "@/lib/episode-text-language";
+import { createRequestScheduler } from "@/lib/request-scheduler";
+import {
+  loadMedia,
+  metadataCacheTtl,
+  onMediaCacheClear,
+  mediaCacheGeneration,
+} from "@/lib/media-cache";
+import { sourceFingerprint } from "./source-fingerprint";
 
 const KITSU = "https://kitsu.io/api/edge";
 
@@ -50,31 +58,96 @@ type KitsuCharacterAttrs = {
   description?: string;
 };
 
-type Resource<T> = { id: string; type: string; attributes: T; relationships?: Record<string, { data?: { id: string; type: string } | Array<{ id: string; type: string }> }> };
-type Doc<D, I = unknown> = { data: D; included?: Resource<I>[] };
+type Resource<T> = {
+  id: string;
+  type: string;
+  attributes: T;
+  relationships?: Record<
+    string,
+    { data?: { id: string; type: string } | Array<{ id: string; type: string }> }
+  >;
+};
+type Doc<D, I = unknown> = { data: D; included?: Resource<I>[]; meta?: { count?: number } };
 
-const cache = new Map<string, { v: unknown; t: number }>();
+const cache = new Map<string, { v: unknown; t: number; freshUntil: number; loadedAt: number }>();
+// Source identity outlives the LRU: evicting a value is a memory decision, not
+// a metadata change. Keeping the digest/revision here prevents a detail page
+// from rebuilding just because another title pushed its provider entry out.
+const sourceIdentities = new Map<
+  string,
+  { revision: number; digest: string; freshUntil: number }
+>();
+let revision = 0;
 const TTL = 30 * 60 * 1000;
-
-registerEvictable("kitsu", (aggressive) => {
-  if (aggressive) return cache.clear();
-  const now = Date.now();
-  for (const [k, e] of cache) if (now - e.t > TTL) cache.delete(k);
+const CACHE_MAX = 300;
+const SOURCE_IDENTITY_MAX = 4000;
+const requests = createRequestScheduler({ concurrency: 4 });
+onMediaCacheClear(() => {
+  cache.clear();
+  sourceIdentities.clear();
 });
 
-async function get<T>(path: string): Promise<T | null> {
-  const url = `${KITSU}${path}`;
-  const hit = cache.get(url);
-  if (hit && Date.now() - hit.t < TTL) return hit.v as T;
-  try {
-    const r = await safeFetch(url, { headers: { Accept: "application/vnd.api+json" } });
-    if (!r.ok) return null;
-    const j = (await r.json()) as T;
-    cache.set(url, { v: j, t: Date.now() });
-    return j;
-  } catch {
-    return null;
+registerEvictable("kitsu", (aggressive) => {
+  if (aggressive) {
+    cache.clear();
+    sourceIdentities.clear();
+    return;
   }
+  const now = Date.now();
+  for (const [k, e] of cache) if (now > e.freshUntil) cache.delete(k);
+});
+
+function rememberSource(url: string, value: unknown, freshUntil: number): void {
+  const digest = sourceFingerprint(value);
+  const previous = sourceIdentities.get(url);
+  const sourceRevision = previous?.digest === digest ? previous.revision : ++revision;
+  lruSet(
+    sourceIdentities,
+    url,
+    { revision: sourceRevision, digest, freshUntil },
+    SOURCE_IDENTITY_MAX,
+  );
+}
+
+async function get<T>(path: string, maxAge?: number): Promise<T | null> {
+  const url = `${KITSU}${path}`;
+  const now = Date.now();
+  const hit = lruGet(cache, url);
+  if (
+    hit &&
+    hit.freshUntil > now &&
+    now - hit.loadedAt < TTL &&
+    (maxAge === undefined || now - hit.t < Math.min(TTL, maxAge))
+  )
+    return hit.v as T;
+  const generation = mediaCacheGeneration();
+  return loadMedia<T>(
+    "kitsu-resource",
+    [url],
+    () =>
+      requests.schedule(url, async () => {
+        try {
+          const r = await safeFetch(url, {
+            headers: { Accept: "application/vnd.api+json" },
+            signal: AbortSignal.timeout(15000),
+          });
+          if (r.status === 429) requests.pauseFor(1000);
+          if (!r.ok) return null;
+          return (await r.json()) as T;
+        } catch {
+          return null;
+        }
+      }),
+    { ttl: metadataCacheTtl, maxAge },
+  ).then(({ value, storedAt }) => {
+    if (value && generation === mediaCacheGeneration()) {
+      const t = storedAt ?? Date.now();
+      const freshUntil = t + metadataCacheTtl(value, t);
+      rememberSource(url, value, freshUntil);
+      lruSet(cache, url, { v: value, t, freshUntil, loadedAt: Date.now() }, CACHE_MAX);
+    }
+    return value;
+  });
 }
 
 export type KitsuEpisode = {
@@ -194,9 +267,10 @@ export async function kitsuCoverImage(id: number): Promise<string | null> {
 type GenreAttrs = { name?: string; slug?: string; description?: string };
 type CategoryAttrs = { title?: string; slug?: string; description?: string };
 
-export async function kitsuAnime(id: number): Promise<KitsuAnimeDetail | null> {
+export async function kitsuAnime(id: number, maxAge?: number): Promise<KitsuAnimeDetail | null> {
   const j = await get<Doc<Resource<KitsuAnimeAttrs>, GenreAttrs | CategoryAttrs>>(
     `/anime/${id}?include=genres,categories`,
+    maxAge,
   );
   if (!j?.data) return null;
   const a = j.data.attributes;
@@ -264,7 +338,10 @@ export async function kitsuSimilarByGenres(
   if (genreSlugs.length === 0) return [];
   const slug = genreSlugs[0];
   const ageFilter = adultContentHidden() ? "&filter[ageRating]=G,PG,R" : "";
-  const params = `filter[genres]=${encodeURIComponent(slug)}${ageFilter}&sort=-userCount&page[limit]=${limit + 6}`;
+  // Kitsu rejects page[limit] above 20, so a larger request returned no rows at
+  // all. Twenty is enough to fill the two recommendation rails.
+  const pageLimit = Math.min(limit + 6, 20);
+  const params = `filter[genres]=${encodeURIComponent(slug)}${ageFilter}&sort=-userCount&page[limit]=${pageLimit}`;
   const j = await get<Doc<Resource<KitsuAnimeAttrs>[]>>(`/anime?${params}`);
   if (!j?.data) return [];
   const out: Meta[] = [];
@@ -332,15 +409,53 @@ export async function kitsuStreamingLinks(id: number): Promise<KitsuStreamer[]> 
   return out;
 }
 
-export async function kitsuEpisodes(id: number, limit = 60): Promise<KitsuEpisode[]> {
+export async function kitsuEpisodes(
+  id: number,
+  limit = 60,
+  maxAge?: number,
+): Promise<KitsuEpisode[]> {
   const PAGE = 20;
-  const out: KitsuEpisode[] = [];
-  for (let offset = 0; offset < limit; offset += PAGE) {
-    const size = Math.min(PAGE, limit - offset);
-    const j = await get<Doc<Resource<KitsuEpisodeAttrs>[]>>(
-      `/anime/${id}/episodes?page[limit]=${size}&page[offset]=${offset}&sort=number`,
+  if (!Number.isFinite(limit) || limit <= 0) return [];
+  limit = Math.floor(limit);
+  const page = (offset: number) =>
+    get<Doc<Resource<KitsuEpisodeAttrs>[]>>(
+      `/anime/${id}/episodes?page[limit]=${Math.min(PAGE, limit - offset)}&page[offset]=${offset}&sort=number`,
+      maxAge,
     );
-    if (!j?.data?.length) break;
+  const first = await page(0);
+  if (!first?.data?.length) return [];
+  const pages = [first];
+  const count = first.meta?.count;
+  const total =
+    typeof count === "number" && Number.isFinite(count) && count >= 0
+      ? Math.min(limit, count)
+      : limit;
+  // Fetch later pages in bounded waves. The count avoids probing beyond short
+  // series, while a short or failed page always stops the returned prefix.
+  if (first.data.length === Math.min(PAGE, limit)) {
+    for (let offset = PAGE; offset < total; offset += 3 * PAGE) {
+      const offsets = Array.from({ length: 3 }, (_, i) => offset + i * PAGE).filter(
+        (n) => n < total,
+      );
+      const batch = await Promise.all(offsets.map(page));
+      let complete = true;
+      for (let i = 0; i < batch.length; i++) {
+        const value = batch[i];
+        if (!value?.data) {
+          complete = false;
+          break;
+        }
+        pages.push(value);
+        if (value.data.length < Math.min(PAGE, limit - offsets[i])) {
+          complete = false;
+          break;
+        }
+      }
+      if (!complete) break;
+    }
+  }
+  const out: KitsuEpisode[] = [];
+  for (const j of pages) {
     for (const ep of j.data) {
       const a = ep.attributes;
       out.push({
@@ -356,9 +471,8 @@ export async function kitsuEpisodes(id: number, limit = 60): Promise<KitsuEpisod
         length: a.length ?? null,
       });
     }
-    if (j.data.length < size) break;
   }
-  return out;
+  return out.sort((a, b) => a.number - b.number).slice(0, limit);
 }
 
 type AnimeCharAttrs = { role?: string };
@@ -467,9 +581,9 @@ const mainTvCache = new Map<number, number | null>();
 
 export async function kitsuMainTvSeries(id: number): Promise<number | null> {
   if (mainTvCache.has(id)) return mainTvCache.get(id)!;
-  const j = await get<Doc<Resource<{ role?: string }>[], { subtype?: string; episodeCount?: number }>>(
-    `/anime/${id}/media-relationships?include=destination&page[limit]=20`,
-  );
+  const j = await get<
+    Doc<Resource<{ role?: string }>[], { subtype?: string; episodeCount?: number }>
+  >(`/anime/${id}/media-relationships?include=destination&page[limit]=20`);
   let best: number | null = null;
   let bestEps = -1;
   const animeById = new Map<string, { subtype?: string; episodeCount?: number }>();
@@ -525,4 +639,28 @@ export async function kitsuSearchAnime(query: string, limit = 8): Promise<KitsuS
     });
   }
   return out;
+}
+
+function isDetailEpisodeSource(url: string, id: number): boolean {
+  if (url === `${KITSU}/anime/${id}?include=genres,categories`) return true;
+  if (!url.startsWith(`${KITSU}/anime/${id}/episodes?`)) return false;
+  const page = /page\[limit\]=(\d+)&page\[offset\]=(\d+)/.exec(url);
+  // Other callers may cache shorter prefixes; their unused pages cannot age this snapshot.
+  return !!page && Number(page[1]) === 20 && Number(page[2]) < 100;
+}
+
+export function kitsuEpisodeSourceVersion(id: number): number {
+  let version = 0;
+  for (const [url, entry] of sourceIdentities) {
+    if (isDetailEpisodeSource(url, id)) version = Math.max(version, entry.revision);
+  }
+  return version;
+}
+
+export function kitsuEpisodeSourceFreshUntil(id: number): number | undefined {
+  let oldest = Infinity;
+  for (const [url, entry] of sourceIdentities) {
+    if (isDetailEpisodeSource(url, id)) oldest = Math.min(oldest, entry.freshUntil);
+  }
+  return Number.isFinite(oldest) ? oldest : undefined;
 }

@@ -3,7 +3,7 @@ import { CompanionRequests } from "./companion-request";
 import { retryAfterTime } from "./wow-data";
 import { OSRS_API, osrsItemId, osrsHistoryUrl, parseOsrsItems, parseOsrsLatest, parseOsrsHistory, type OsrsRange } from "./osrs-data";
 
-const identity = "HarborGrandExchange/1.0 (+https://harbor.site)";
+const identity = "HarborGrandExchange/1.0 (+https://harborcommunity.site)";
 let cooldown = 0;
 const requests = new CompanionRequests(async (url, signal) => {
   if (Date.now() < cooldown) throw Error("Price source rate limited");

@@ -19,12 +19,13 @@ test("poster sizing accounts for the height it has to cover, not just width", ()
   );
 });
 
-test("poster sizing sees css transforms so scaled art is not blurry", () => {
+test("poster sizing consumes observer measurements without forcing layout during scrolling", () => {
   assert.match(
     poster,
-    /el\.getBoundingClientRect\(\)/,
-    "clientWidth ignores transforms like scale()",
+    /observeResize\(el, \(box\) =>/,
+    "the shared observer already provides the poster's dimensions",
   );
+  assert.doesNotMatch(poster, /el\.getBoundingClientRect\(\)/);
   assert.match(poster, /\}, \[qMult, ratio\]\);/, "ratio must be a dependency");
 });
 

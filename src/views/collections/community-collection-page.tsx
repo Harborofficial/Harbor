@@ -1,5 +1,5 @@
 import { ArrowLeft, Pencil, Rows3, PanelTopOpen, Share2, UserRound } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { posterPlate } from "@/components/poster";
 import { ResultPoster } from "@/components/search/result-poster";
@@ -17,6 +17,8 @@ import { CommunityShareButton } from "./community-share-button";
 import { AddToPageMenu } from "./add-to-page-menu";
 import { Avatar } from "@/components/together-modal/avatar";
 import { useSelfAvatar } from "@/views/profile/use-self-avatar";
+import { fetchSummary } from "@/views/profile/profile-api";
+import type { ProfileSummary } from "@/views/profile/profile-types";
 import { currentAuthor } from "@/lib/theme-auth";
 import { UserHoverCard } from "@/views/profile/user-hover-card";
 import { canOpenProfile, requestOpenProfile } from "@/lib/social/open-profile";
@@ -49,6 +51,21 @@ export function CommunityCollectionPage({
   const collection = useCollection(id);
   const { openMeta, openManga } = useView();
   const self = useSelfAvatar();
+  const savedCollection = !!(collection?.sourceHandle || collection?.sourceId);
+  const authorHandle = collection
+    ? (collectionAuthorHandle(collection) ?? (savedCollection ? null : self.handle))
+    : null;
+  const [authorProfile, setAuthorProfile] = useState<ProfileSummary | null>(null);
+  useEffect(() => {
+    if (!savedCollection || !authorHandle) return;
+    const controller = new AbortController();
+    void fetchSummary(authorHandle, controller.signal)
+      .then((profile) => {
+        if (!controller.signal.aborted) setAuthorProfile(profile);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [savedCollection, authorHandle]);
   const scrollRef = useRef<HTMLElement>(null);
   const pageBtnRef = useRef<HTMLButtonElement>(null);
   const [pageMenu, setPageMenu] = useState(false);
@@ -141,8 +158,12 @@ export function CommunityCollectionPage({
   const backdropSharp = !!collection.bgImage;
   const count = collection.items.length;
   const numbered = !!collection.numbered;
-  const authorHandle = self.handle;
-  const authorName = currentAuthor()?.username ?? authorHandle ?? "";
+  const originalAuthor =
+    authorProfile?.handle.toLowerCase() === authorHandle ? authorProfile : null;
+  const authorName = savedCollection
+    ? originalAuthor?.alias || authorHandle || ""
+    : (currentAuthor()?.username ?? authorHandle ?? "");
+  const authorAvatar = savedCollection ? originalAuthor?.avatarUrl : self.avatar;
   const typeLabel = (ty: CollectionItemType) =>
     ty === "movie" ? t("Movie") : ty === "series" ? t("Series") : t("Manga");
   const typeFilters: { id: "all" | CollectionItemType; label: string; count: number }[] = [
@@ -242,7 +263,7 @@ export function CommunityCollectionPage({
                   aria-label={t("Open {alias} profile", { alias: authorName })}
                   className="inline-flex items-center gap-2 rounded-full border border-edge-soft bg-elevated/60 py-1 ps-1 pe-3 backdrop-blur-md transition-colors hover:bg-raised"
                 >
-                  <Avatar name={authorName} src={self.avatar} size={24} />
+                  <Avatar name={authorName} src={authorAvatar} size={24} />
                   <span className="text-[13px] font-semibold text-ink">@{authorHandle}</span>
                 </button>
               </UserHoverCard>

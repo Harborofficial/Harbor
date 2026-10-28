@@ -111,7 +111,9 @@ function harness() {
       aniZipLookupKey: () => null,
       applyAniZipEpisode: empty,
       needsAniZipSyncIds: () => false,
+      providerMappedEpisode: () => null,
     },
+    "@/lib/cw-anime-video": { resolveCwAnimeVideo: async () => null },
     "@/components/ThreeLiquidGlassSurface": {
       ThreeLiquidGlassSurface: ({ children }: any) => children,
     },

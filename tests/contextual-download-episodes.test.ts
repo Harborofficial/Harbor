@@ -64,6 +64,7 @@ test("an explicit mapped anime episode opens its displayed season while progress
       manualWatchedVersion: () => 0,
     },
     "@/lib/providers/tmdb": {},
+    "@/lib/anime-id": { isAnimeMeta: () => true },
     "@/lib/series-episodes": {
       isAnimeId: () => true,
       fetchSeasonList: async () => [4],

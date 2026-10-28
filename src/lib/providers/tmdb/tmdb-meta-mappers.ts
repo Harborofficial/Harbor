@@ -1,7 +1,9 @@
 import type { Meta } from "../../cinemeta";
 import { MOVIE_GENRES, TV_GENRES } from "../../feed/tags";
 import { loadStoredSettings } from "../../settings/load";
+import { effectiveTmdbLanguage } from "./tmdb-client";
 import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
+import { shouldUseEnglishTitle } from "./tmdb-title-fallback";
 
 export function isAnimeItem(item: {
   genre_ids?: number[];
@@ -16,8 +18,6 @@ export function isAnimeItem(item: {
     item.original_language === "ja" || (item.origin_country ?? []).includes("JP");
   return hasAnim && isJp;
 }
-
-const JAPANESE_SCRIPT = /[\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]/;
 
 export type RawMovie = {
   id: number;
@@ -72,12 +72,29 @@ function genresFromIds(ids: number[] | undefined, kind: "movie" | "tv"): string[
   return names.length > 0 ? names : undefined;
 }
 
-export const movieMeta = (m: RawMovie, englishName?: string): Meta => {
+export const movieMeta = (m: RawMovie, englishName?: string, language?: string): Meta => {
   const st = loadStoredSettings();
   const translate = st.translateTitles;
   const anime = isAnimeItem(m);
-  let name = translate ? m.title : anime ? m.title : m.original_title || m.title;
-  if (anime && translate && englishName && JAPANESE_SCRIPT.test(name)) name = englishName;
+  let name: string;
+  if (translate) {
+    name = m.title;
+    const english = englishName?.trim();
+    if (
+      english &&
+      shouldUseEnglishTitle({
+        localized: m.title,
+        original: m.original_title ?? "",
+        originalLanguage: m.original_language,
+        targetLanguage: language ?? effectiveTmdbLanguage(),
+        translateTitles: translate,
+      })
+    ) {
+      name = english;
+    }
+  } else {
+    name = anime ? m.title : m.original_title || m.title;
+  }
   return {
     id: `tmdb:movie:${m.id}`,
     type: "movie",
@@ -94,12 +111,29 @@ export const movieMeta = (m: RawMovie, englishName?: string): Meta => {
   };
 };
 
-export const seriesMeta = (s: RawSeries, englishName?: string): Meta => {
+export const seriesMeta = (s: RawSeries, englishName?: string, language?: string): Meta => {
   const st = loadStoredSettings();
   const translate = st.translateTitles;
   const anime = isAnimeItem(s);
-  let name = translate ? s.name : anime ? s.name : s.original_name || s.name;
-  if (anime && translate && englishName && JAPANESE_SCRIPT.test(name)) name = englishName;
+  let name: string;
+  if (translate) {
+    name = s.name;
+    const english = englishName?.trim();
+    if (
+      english &&
+      shouldUseEnglishTitle({
+        localized: s.name,
+        original: s.original_name ?? "",
+        originalLanguage: s.original_language,
+        targetLanguage: language ?? effectiveTmdbLanguage(),
+        translateTitles: translate,
+      })
+    ) {
+      name = english;
+    }
+  } else {
+    name = anime ? s.name : s.original_name || s.name;
+  }
   return {
     id: `tmdb:tv:${s.id}`,
     type: "series",

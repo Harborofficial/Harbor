@@ -1,91 +1,40 @@
-import { pmdbRequest } from "./client";
 import { isAuthenticated } from "./session";
+import {
+  capturePmdbListOwner,
+  changePmdbList,
+  clearPmdbListsCache,
+  fetchPmdbListItems,
+  resolvePmdbList,
+  type PmdbListOptions,
+} from "./lists";
 import type { Meta } from "@/lib/cinemeta";
 import type {
-  PmdbList,
   PmdbListItem,
-  PmdbListItemsResponse,
-  PmdbListsResponse,
   PmdbTarget,
 } from "./types";
 
-let cachedWatchlistId: string | null = null;
-
 export function clearPmdbWatchlistCache(): void {
-  cachedWatchlistId = null;
+  clearPmdbListsCache();
 }
-
-async function getWatchlistId(strict = false): Promise<string | null> {
-  if (cachedWatchlistId && !strict) return cachedWatchlistId;
-  try {
-    const res = await pmdbRequest<PmdbListsResponse>("/api/external/lists", {
-      method: "GET",
-    });
-    if (strict && !Array.isArray(res?.items))
-      throw new Error("PublicMetaDB lists could not be read safely.");
-    const watchlist = res?.items?.find((l: PmdbList) => l.type === "watchlist");
-    if (watchlist?.id) {
-      cachedWatchlistId = watchlist.id;
-      return watchlist.id;
-    }
-    return null;
-  } catch (error) {
-    if (strict) throw error;
-    return null;
-  }
-}
-
-const WATCHLIST_PER_PAGE = 100;
-const WATCHLIST_MAX_PAGES = 10;
 
 export async function fetchPmdbWatchlist(
-  options: { strict?: boolean; assertCurrent?: () => void } = {},
+  options: PmdbListOptions = {},
 ): Promise<PmdbListItem[]> {
   options.assertCurrent?.();
   if (!isAuthenticated()) {
     if (options.strict) throw new Error("PublicMetaDB is disconnected.");
     return [];
   }
-  const listId = await getWatchlistId(options.strict);
-  options.assertCurrent?.();
-  if (!listId) {
-    if (options.strict) throw new Error("A PublicMetaDB watchlist is unavailable.");
+  const guard = capturePmdbListOwner(options.assertCurrent);
+  try {
+    const list = await resolvePmdbList({ ...options, assertCurrent: guard });
+    guard();
+    return list ? await fetchPmdbListItems(list.id, guard) : [];
+  } catch (error) {
+    guard();
+    if (options.strict) throw error;
     return [];
   }
-
-  // List items paginate (page/perPage, max 500). Loop defensively: stop on a
-  // short page so an envelope without page counts still terminates.
-  const out: PmdbListItem[] = [];
-  const pageSignatures = new Set<string>();
-  try {
-    for (let page = 1; page <= WATCHLIST_MAX_PAGES; page++) {
-      options.assertCurrent?.();
-      const res = await pmdbRequest<PmdbListItemsResponse>(
-        `/api/external/lists/${encodeURIComponent(listId)}/items?page=${page}&perPage=${WATCHLIST_PER_PAGE}`,
-        { method: "GET" },
-      );
-      options.assertCurrent?.();
-      if (options.strict && !Array.isArray(res?.items))
-        throw new Error("PublicMetaDB watchlist could not be read safely.");
-      const items = res?.items ?? [];
-      const signature = JSON.stringify(items);
-      if (options.strict && items.length && pageSignatures.has(signature))
-        throw new Error("PublicMetaDB repeated a watchlist page.");
-      pageSignatures.add(signature);
-      out.push(...items);
-      if (items.length < WATCHLIST_PER_PAGE) {
-        if (options.strict && Number.isFinite(res.total) && out.length < res.total)
-          throw new Error("PublicMetaDB returned an incomplete watchlist.");
-        return out;
-      }
-    }
-    if (options.strict)
-      throw new Error("The complete PublicMetaDB watchlist could not be checked.");
-  } catch (error) {
-    if (options.strict) throw error;
-    /* return what we have */
-  }
-  return out;
 }
 
 export function pmdbWatchlistContains(
@@ -124,56 +73,38 @@ export function pmdbWatchlistItemToMeta(item: PmdbListItem): Meta | null {
 
 export async function addToPmdbWatchlist(
   target: PmdbTarget,
-  options: { assertCurrent?: () => void } = {},
+  options: PmdbListOptions = {},
 ): Promise<boolean> {
   options.assertCurrent?.();
   if (!isAuthenticated()) return false;
   // Add-to-list takes tmdb_id + media_type only; resolve first, never send
   // ID-only targets the server must reject.
   if (target.tmdb_id == null) return false;
-  const listId = await getWatchlistId();
-  options.assertCurrent?.();
-  if (!listId) return false;
-
+  const guard = capturePmdbListOwner(options.assertCurrent);
   try {
-    await pmdbRequest(`/api/external/lists/${encodeURIComponent(listId)}/items`, {
-      method: "POST",
-      body: {
-        tmdb_id: target.tmdb_id,
-        media_type: target.media_type,
-      },
-    });
+    await changePmdbList(target, true, { ...options, assertCurrent: guard });
     return true;
-  } catch {
+  } catch (error) {
+    guard();
+    if (options.strict) throw error;
     return false;
   }
 }
 
 export async function removeFromPmdbWatchlist(
   target: PmdbTarget,
-  options: { assertCurrent?: () => void } = {},
+  options: PmdbListOptions = {},
 ): Promise<boolean> {
   options.assertCurrent?.();
   if (!isAuthenticated()) return false;
-  const listId = await getWatchlistId();
-  options.assertCurrent?.();
-  if (!listId) return false;
-
+  if (target.tmdb_id == null) return false;
+  const guard = capturePmdbListOwner(options.assertCurrent);
   try {
-    // Fetch items to find matching itemId
-    const items = await fetchPmdbWatchlist({ assertCurrent: options.assertCurrent });
-    options.assertCurrent?.();
-    const item = pmdbWatchlistContains(items, target);
-    if (!item?.id) return false;
-
-    await pmdbRequest(
-      `/api/external/lists/${encodeURIComponent(listId)}/items/${encodeURIComponent(item.id)}`,
-      {
-        method: "DELETE",
-      },
-    );
+    await changePmdbList(target, false, { ...options, assertCurrent: guard });
     return true;
-  } catch {
+  } catch (error) {
+    guard();
+    if (options.strict) throw error;
     return false;
   }
 }

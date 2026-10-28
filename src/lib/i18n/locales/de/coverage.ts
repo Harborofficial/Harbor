@@ -1,4 +1,6 @@
 const coverage: Record<string, string> = {
+  "Waiting for {name}…": "Warte auf {name}…",
+  "Keeping the source you were watching.": "Die Quelle, die du gerade ansiehst, wird beibehalten.",
   "Sound descriptions": "Geräuschbeschreibungen",
   "Hide sound effects and speaker names": "Geräusche und Sprechernamen ausblenden",
   "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "Entfernt Beschreibungen in eckigen Klammern wie [Tür knarrt] und in Großbuchstaben gesetzte Sprechernamen wie JOHN: während der Wiedergabe, damit eine Veröffentlichung mit reiner SDH-Spur weiterhin als normaler Dialog lesbar bleibt. Liedtexte, gewöhnliche runde Klammern und nicht-lateinische Schriften bleiben unangetastet. Bei erzwungenen und bildbasierten Spuren wird nichts entfernt.",

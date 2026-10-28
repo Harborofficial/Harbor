@@ -18,7 +18,7 @@ export function PokemonMapImage({ src, alt = "" }: { src: string; alt?: string }
     const load = async () => {
       if (!/^https:\/\/archives\.bulbagarden\.net\/media\//.test(src)) return;
       const headers = new Headers({ Accept: "image/png,image/jpeg,image/gif,image/webp" });
-      if ("__TAURI_INTERNALS__" in window) headers.set("User-Agent", `Harbor/${APP_VERSION} (+https://harbor.site)`);
+      if ("__TAURI_INTERNALS__" in window) headers.set("User-Agent", `Harbor/${APP_VERSION} (+https://harborcommunity.site)`);
       const response = await safeFetchBytes(src, { signal: controller.signal, headers, credentials: "omit" }, 15_000, 8_000_000);
       if (!response.ok) throw Error("Map image unavailable");
       const bytes = await response.arrayBuffer(); controller.signal.throwIfAborted();

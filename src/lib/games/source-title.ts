@@ -1,4 +1,18 @@
-export const sourceTitleKey = (title: string) => title.normalize("NFKD").replace(/\p{M}/gu, "").toLocaleLowerCase().replace(/[™®©]/g, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+// Strip compatibility marks before NFKD: ™ and ℠ decompose to "TM"/"SM", which
+// would otherwise leave "simstm" in the key and break exact title matching.
+export const sourceTitleKey = (title: string) => title.replace(/[™℠]/g, "").normalize("NFKD").replace(/\p{M}/gu, "").toLocaleLowerCase().replace(/[®©]/g, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+
+/** Website search engines index the words, not the trademark glyphs in a catalog title. */
+export const sourceSearchTitle = (title: string) => title.replace(/[™℠®©]/g, "").replace(/\s+/g, " ").trim();
+
+/** A trailing edition label still names the same game; sequels, remasters and add-ons do not. */
+export const SOURCE_EDITION_LABELS = ["digital deluxe edition", "deluxe edition", "ultimate edition", "gold edition", "premium edition", "complete edition", "definitive edition"] as const;
+export function sourceEditionKey(key: string): string | undefined {
+  for (const label of SOURCE_EDITION_LABELS) {
+    if (key.endsWith(` ${label}`)) return key.slice(0, -(label.length + 1)).trim() || undefined;
+  }
+  return undefined;
+}
 
 /** Remove distribution metadata, never named editions, sequels, remasters or subtitles. */
 export function sourceDownloadTitle(title: string): string {

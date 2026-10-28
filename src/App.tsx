@@ -1,3 +1,4 @@
+import { startNuvioMutationRetry } from "@/lib/nuvio/nuvio-sync";
 import { GAMES_IN_NAV } from "@/chrome/nav-items";
 import { GameAccessProvider } from "@/views/games/game-access-context";
 import { GameLibraryDock } from "@/views/games/game-library-dock";
@@ -174,9 +175,7 @@ import { SpooktoberHome } from "@/views/spooktober/spooktober-home";
 // Memoizing the view stops that from cascading into a full re-render of the home feed, which the
 // profiler measured rendering ~18 times a second while the user was on other tabs.
 const MemoSpooktoberHome = memo(SpooktoberHome);
-import { MusicDock } from "@/components/music/music-dock";
-import { useInstallFeatures } from "@/lib/features/install";
-import { MusicSurprisePrompt } from "@/components/music/music-surprise-prompt";
+import { useInstallFeatures, useInstallFeaturesReady } from "@/lib/features/install";
 import { ParentalProvider } from "@/lib/parental";
 import { TraktProvider } from "@/lib/trakt/provider";
 import { AnilistProvider } from "@/lib/anilist/provider";
@@ -198,10 +197,19 @@ import { BigPictureEntryButton } from "@/views/big-picture/bp-entry-button";
 import { releaseBigPictureFullscreen } from "@/views/big-picture/use-bp-fullscreen";
 import { getNavFocusTarget } from "@/lib/keyboard-navigation/geometry";
 import { SFX } from "@/lib/sfx";
-import { startMusicTaskbarButtons, syncMusicTaskbarArtwork } from "@/lib/music/taskbar-buttons";
-import { resetMusicForProfile } from "@/lib/music/player";
 import { startMediaSessionWindowTracking } from "@/lib/media-session";
 import { QueueBasket } from "@/components/queue-basket/queue-basket";
+
+// Keep the Music UI outside the core startup graph. These chunks are not loaded
+// at all when the installer reports Music as unavailable.
+const MusicDock = lazy(() =>
+  import("@/components/music/music-dock").then((m) => ({ default: m.MusicDock })),
+);
+const MusicSurprisePrompt = lazy(() =>
+  import("@/components/music/music-surprise-prompt").then((m) => ({
+    default: m.MusicSurprisePrompt,
+  })),
+);
 
 const importAnime = () => import("@/views/anime");
 const importCalendar = () => import("@/views/calendar");
@@ -318,46 +326,64 @@ function useViewPreloader(tmdbKey: string) {
     let cancelled = false;
     const win = window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
     };
-    const schedule = (cb: () => void) =>
-      typeof win.requestIdleCallback === "function"
-        ? win.requestIdleCallback(cb, { timeout: 2500 })
-        : window.setTimeout(cb, 1200);
-    schedule(() => {
-      if (cancelled) return;
-      void importDetail();
-      void importPlayPicker();
-      void importPlayer();
-      void importSettings();
-      void importAddons();
-      void importDiscover();
-      void importPerson();
-      void importPeople();
-      void importFilter();
-      void importCalendar();
-      void importMovies();
-      void importShows();
-      void importLive();
-      void importAnime();
-      void importQueue();
-      void importAward();
-      void importAnimeAward();
-      void importService();
-      void importOnboarding();
-      void importCatalogs();
-      void importPlugins();
-      void importLibrary();
-      void importCommunityCollections();
-      void importDownloads();
-      void importGrid();
-      void importWrapped();
-      void importKids();
-      if (keyRef.current) {
-        void import("@/lib/feed/pool").then((m) => m.getPool(keyRef.current)).catch(() => {});
-      }
-    });
+    let handle = 0;
+    const idle = typeof win.requestIdleCallback === "function";
+    const schedule = (cb: () => void) => {
+      handle = idle ? win.requestIdleCallback!(cb, { timeout: 2500 }) : window.setTimeout(cb, 1200);
+    };
+    const preloaders: Array<() => Promise<unknown>> = [
+      importDetail,
+      importPlayPicker,
+      importPlayer,
+      importSettings,
+      importDiscover,
+      importAddons,
+      importPerson,
+      importPeople,
+      importFilter,
+      importCalendar,
+      importMovies,
+      importShows,
+      importLive,
+      importAnime,
+      importQueue,
+      importAward,
+      importAnimeAward,
+      importService,
+      importOnboarding,
+      importCatalogs,
+      importPlugins,
+      importLibrary,
+      importCommunityCollections,
+      importDownloads,
+      importGrid,
+      importWrapped,
+      importKids,
+      async () => {
+        if (keyRef.current) {
+          const m = await import("@/lib/feed/pool");
+          if (!cancelled) await m.getPool(keyRef.current);
+        }
+      },
+    ];
+    let next = 0;
+    const warmNext = () => {
+      if (cancelled || next >= preloaders.length) return;
+      // One module per idle opportunity: warming every view at once evaluates
+      // unrelated feature modules and starts their storage/network work during Home boot.
+      void preloaders[next++]()
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelled) schedule(warmNext);
+        });
+    };
+    schedule(warmNext);
     return () => {
       cancelled = true;
+      if (idle) win.cancelIdleCallback?.(handle);
+      else window.clearTimeout(handle);
     };
   }, []);
 }
@@ -401,18 +427,23 @@ function useKeepAlive(active: boolean, requested: boolean, pin = false): boolean
  * round at mount; doing that inside the home feed's first commit put a ~630ms React work loop in
  * the boot frame. Two frames of delay lets the shell paint before that work lands.
  */
-function AfterFirstPaint({ children }: { children: ReactNode }) {
+function AfterFirstPaint({ children, delayMs = 0 }: { children: ReactNode; delayMs?: number }) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     let second = 0;
+    let timer = 0;
     const first = requestAnimationFrame(() => {
-      second = requestAnimationFrame(() => setReady(true));
+      second = requestAnimationFrame(() => {
+        if (delayMs > 0) timer = window.setTimeout(() => setReady(true), delayMs);
+        else setReady(true);
+      });
     });
     return () => {
       cancelAnimationFrame(first);
       cancelAnimationFrame(second);
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [delayMs]);
   return ready ? <>{children}</> : null;
 }
 
@@ -468,7 +499,9 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                       <MalAvatarSync />
                                                       <MiddleClickScroll />
                                                       <ThemeBackdrop />
-                                                      <WatchlistSync />
+                                                      <Profiled id="startup.watchlist-sync">
+                                                        <WatchlistSync />
+                                                      </Profiled>
                                                       {isMobileWeb() || isRemoteRoute() ? (
                                                         <>
                                                           <Suspense fallback={null}>
@@ -502,18 +535,23 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                         <TogetherLocationPublisher />
                                                         <IdleAwayRunner />
                                                         <SessionRefreshRunner />
+                                                        <RemoteHostMount />
+                                                        <RemoteOpenBridge />
+                                                      </AfterFirstPaint>
+                                                      <AfterFirstPaint delayMs={1500}>
                                                         <StatsSyncRunner />
                                                         <FeaturedListsSyncRunner />
                                                         <RatingsSyncRunner />
                                                         <ActivitySyncRunner />
+                                                      </AfterFirstPaint>
+                                                      <AfterFirstPaint>
                                                         <MediaServerSyncRunner />
+                                                        <NuvioMutationRetryRunner />
                                                         <AutoDownloadRunner />
                                                         <RemindersRunner />
                                                         <GameDownloadNotificationsRunner />
                                                         <GameSourceAlertsRunner />
                                                         <MangaTrackingRunner />
-                                                        <RemoteHostMount />
-                                                        <RemoteOpenBridge />
                                                       </AfterFirstPaint>
                                                       <PlayOnModal />
                                                       <GamepadRunner />
@@ -522,7 +560,9 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                         <DiscordPresence />
                                                         <WatchPresenceRunner />
                                                       </AfterFirstPaint>
-                                                      <ContextMenu />
+                                                      <Profiled id="startup.context-menu">
+                                                        <ContextMenu />
+                                                      </Profiled>
                                                       <PageContextNavigationDialogs />
                                                       <AnnouncementGlobal />
                                                       <WatchLocalModal />
@@ -1464,7 +1504,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const kidsTop = topKind === "kids";
   const showsTop = topKind === "shows";
   const installFeatures = useInstallFeatures();
-  const musicTop = topKind === "music" && installFeatures.music;
+  const installFeaturesReady = useInstallFeaturesReady();
+  const musicEnabled = installFeaturesReady && installFeatures.music;
+  const musicTop = topKind === "music" && musicEnabled;
   const gamesTop = topKind === "games" && installFeatures.games;
   const [gamesNavigationOpen, setGamesNavigationOpen] = useState(false);
 
@@ -1550,9 +1592,30 @@ function Shell({ onReady }: { onReady?: () => void }) {
   });
 
   useEffect(() => startMediaSessionWindowTracking(), []);
-  useEffect(() => startMusicTaskbarButtons(), []);
-  useEffect(() => syncMusicTaskbarArtwork(), [settings.musicArtworkAppIcon]);
-  useEffect(() => resetMusicForProfile(), [activeProfileForMusic]);
+  useEffect(() => {
+    if (!musicEnabled) return;
+    let disposed = false;
+    let stop: (() => void) | undefined;
+    void import("@/lib/music/taskbar-buttons").then(({ startMusicTaskbarButtons }) => {
+      if (!disposed) stop = startMusicTaskbarButtons();
+    });
+    return () => {
+      disposed = true;
+      stop?.();
+    };
+  }, [musicEnabled]);
+  useEffect(() => {
+    if (musicEnabled) {
+      void import("@/lib/music/taskbar-buttons").then(({ syncMusicTaskbarArtwork }) =>
+        syncMusicTaskbarArtwork(),
+      );
+    }
+  }, [musicEnabled, settings.musicArtworkAppIcon]);
+  useEffect(() => {
+    if (musicEnabled) {
+      void import("@/lib/music/player").then(({ resetMusicForProfile }) => resetMusicForProfile());
+    }
+  }, [musicEnabled, activeProfileForMusic]);
 
   const overlayPinned = useOverlayPinned();
   const homeAlive = useIdleEvict(homeTop);
@@ -1615,12 +1678,12 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const ebookAlive = useIdleEvict(ebookTop);
   const peopleAlive = useIdleEvict(peopleTop);
 
-  const gameDockVisible =
+  const quickLibraryVisible =
     !kid && !kidsTop && !playerActive && !pickerTop && !bigPicture && !immersive && !chromeHidden;
   return (
     <GameAccessProvider
       profile={activeProfile?.id ?? "default"}
-      enabled={!kid && !bigPicture && !playerActive}
+      enabled={installFeatures.games && !kid && !bigPicture && !playerActive}
       gamesActive={gamesTop}
       onNavigate={openGames}
       onLeave={goBack}
@@ -1718,8 +1781,12 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <WindowControls />
             </div>
           )}
-          {installFeatures.music && <MusicDock />}
-          <MusicSurprisePrompt />
+          {musicEnabled && (
+            <Suspense fallback={null}>
+              <MusicDock />
+              <MusicSurprisePrompt />
+            </Suspense>
+          )}
           {!playerActive && <WindowResizeEdges />}
           {!playerActive && !pickerTop && !immersive && !chromeHidden && <QueueBasket />}
           <HybridTitleBar suppressed={playerActive || immersive || chromeHidden} />
@@ -1782,7 +1849,10 @@ function Shell({ onReady }: { onReady?: () => void }) {
             {calendarAlive && (
               <div {...layerProps(calendarTop)}>
                 <Suspense fallback={null}>
-                  <CalendarView active={calendarTop} gamesAllowed={!kid && GAMES_IN_NAV} />
+                  <CalendarView
+                    active={calendarTop}
+                    gamesAllowed={!kid && GAMES_IN_NAV && installFeatures.games}
+                  />
                 </Suspense>
               </div>
             )}
@@ -1834,7 +1904,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
             {gamesAlive && (
               <div {...layerProps(gamesTop)}>
                 <Suspense fallback={<GameRouteLoading />}>
-                  <GameDockWelcome eligible={gamesTop && gameDockVisible && !gamesNavigationOpen} />
+                  <GameDockWelcome
+                    eligible={gamesTop && quickLibraryVisible && !gamesNavigationOpen}
+                  />
                   <GamesView
                     harborNavigationOpen={gamesNavigationOpen}
                     onHarborNavigationChange={setGamesNavigationOpen}
@@ -2203,7 +2275,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
             )}
           </div>
         </div>
-        <GameLibraryDock visible={gameDockVisible && !gamesTop} />
+        <GameLibraryDock visible={quickLibraryVisible && !gamesTop} />
         {player && (
           <Suspense fallback={null}>
             <PlayerView
@@ -2232,3 +2304,8 @@ function Shell({ onReady }: { onReady?: () => void }) {
 }
 
 export type { Frame };
+
+function NuvioMutationRetryRunner() {
+  useEffect(() => startNuvioMutationRetry(), []);
+  return null;
+}

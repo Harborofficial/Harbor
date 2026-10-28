@@ -1,4 +1,5 @@
 import type { SubResult, SubSearchQuery, SubtitleLoadMetadata } from "./types";
+import { isGeneratedLangLabel } from "./language";
 import { subtitleReleaseLabel } from "./release-label.ts";
 
 function meaningfulRelease(value: string | undefined): string | undefined {
@@ -141,6 +142,11 @@ export function subtitleLoadMetadataOf(result: SubResult): SubtitleLoadMetadata 
     ...(result.localTrusted === true ? { providerDerived: false, localTrusted: true } : {}),
     originalUrl: result.url,
     refreshable: result.source === "addon",
+    // A generated offer ("Make Hindi") is an on-demand translation, not a file:
+    // engines must only start one from an explicit pick.
+    ...(result.source === "addon" && isGeneratedLangLabel(result.lang)
+      ? { translation: true }
+      : {}),
     subId: result.id,
   };
 }

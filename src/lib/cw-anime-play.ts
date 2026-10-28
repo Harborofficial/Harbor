@@ -2,12 +2,14 @@ import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import { isDetectedAnime } from "@/lib/anime-detect";
 import { aniZipByKitsu, pickEpisodeTitle } from "@/lib/providers/anizip";
 import { resolveAnimeIdentity } from "@/lib/streams/anime-identity";
+import { resolveTrackerAnimeEntry } from "@/lib/anime-tracker-entry";
 import type { PlayEpisode } from "@/lib/view";
 
 const ANIME_SCHEME = /^(kitsu|mal|anilist|anidb):/;
 
 export type CwAnimeEpisodeQuery = {
   metaId: string;
+  videoId?: string | null;
   season?: number;
   episode?: number;
   name?: string | null;
@@ -15,6 +17,8 @@ export type CwAnimeEpisodeQuery = {
   imdbSeason?: number;
   imdbEpisode?: number;
   absoluteNumber?: number | null;
+  /** Exact addon video id, e.g. kitsu:45619:1. Avoids sibling-entry guessing. */
+  kitsuStreamId?: string;
 };
 
 /**
@@ -40,19 +44,39 @@ function looksAnime(metaId: string): boolean {
 export async function resolveCwAnimePlayEpisode(
   query: CwAnimeEpisodeQuery,
 ): Promise<PlayEpisode | null> {
-  if (!looksAnime(query.metaId)) return null;
-  const identity = await resolveAnimeIdentity(query.metaId, null, {
+  // A saved stream names the played cour, while a catalog id may name the
+  // franchise's first entry. Do not reinterpret entry-relative S1 as provider S1.
+  const saved = /^kitsu:([1-9]\d*):([1-9]\d*)$/.exec(query.videoId ?? "") ??
+    /^kitsu:([1-9]\d*):([1-9]\d*)$/.exec(query.kitsuStreamId ?? "");
+  if (!saved && !looksAnime(query.metaId)) return null;
+  const coords = {
     season: query.season,
     episode: query.episode,
     imdbSeason: query.imdbSeason,
     imdbEpisode: query.imdbEpisode,
-  }).catch(() => null);
+  };
+  let identity = saved
+    ? { kitsuId: Number(saved[1]), number: Number(saved[2]), streamId: saved[0] }
+    : await resolveAnimeIdentity(query.metaId, null, coords).catch(() => null);
+  // New sequels may not have provider mappings yet. Use the same franchise
+  // resolution as tracking and CW advancement rather than stamping the base id.
+  if (!identity) {
+    const entry = await resolveTrackerAnimeEntry(query.metaId, coords).catch(() => null);
+    const kitsu = /^kitsu:(\d+)$/.exec(entry?.id ?? "");
+    if (entry && kitsu) {
+      identity = {
+        kitsuId: Number(kitsu[1]),
+        number: entry.episode,
+        streamId: `${entry.id}:${entry.episode}`,
+      };
+    }
+  }
   if (!identity) return null;
   const az = await aniZipByKitsu(identity.kitsuId).catch(() => null);
   const azEp = az?.episodes?.[String(identity.number)];
   return {
     season: query.season ?? 1,
-    episode: query.episode ?? identity.number,
+    episode: saved ? identity.number : (query.episode ?? identity.number),
     name: pickEpisodeTitle(azEp) ?? query.name ?? undefined,
     still: azEp?.image ?? undefined,
     overview: azEp?.overview || undefined,

@@ -47,6 +47,7 @@ function harness() {
       };
       if (name.endsWith("/providers/anime-mapping")) return { relatedLibraryIds: async () => [] };
       if (name.endsWith("/stremio-write-queue")) return { cloudLibraryPut: async () => { cloudWrites++; } };
+      if (name.startsWith("@tauri-apps/")) return { invoke: async () => {}, isTauri: () => false };
       return load(name.startsWith("@/") ? `src/${name.slice(2)}.ts` : resolve(dirname(full), `${name}.ts`));
     }, exports, storage, window);
     return exports;

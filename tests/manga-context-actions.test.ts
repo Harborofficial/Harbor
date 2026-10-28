@@ -129,6 +129,7 @@ async function fixture() {
   const remoteWrites: unknown[][] = [];
   const favorites = load("src/lib/manga-favorites.tsx", {
     react: React,
+    "./manga-favorites-context": load("src/lib/manga-favorites-context.ts", { react: React }),
     "react/jsx-runtime": jsxRuntime,
     "./profiles": profiles,
     "./storage-recovery": {

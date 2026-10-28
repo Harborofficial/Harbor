@@ -10,4 +10,6 @@ export * from "./pending-sync";
 export * from "./scrobble-hook";
 export * from "./playback";
 export * from "./watchlist";
+export * from "./lists";
+export * from "./list-hooks";
 export * from "./provider";

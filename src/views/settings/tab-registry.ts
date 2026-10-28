@@ -4,6 +4,7 @@ import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
 import publicmetadbLogo from "@/assets/publicmetadb.svg";
+import nuvioLogo from "@/assets/nuvio.png";
 import stremioLogo from "@/assets/stremio.png";
 import type { SectionId } from "./shared";
 
@@ -14,7 +15,9 @@ export const SECTION_TABS: Partial<Record<SectionId, TabEntry[]>> = {
     { id: "you", label: "Your profile", icon: "UserRound" },
     { id: "profiles", label: "Profiles", icon: "Users" },
     { id: "harbor", label: "Harbor account", icon: "Harbor" },
+    { id: "provider", label: "Account provider", icon: "RefreshCw" },
     { id: "stremio", label: "Stremio", icon: "Play", img: stremioLogo },
+    { id: "nuvio", label: "Nuvio", icon: "Play", img: nuvioLogo },
   ],
   player: [
     { id: "play", label: "Play", icon: "PlayStart" },

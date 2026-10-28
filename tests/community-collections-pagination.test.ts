@@ -257,9 +257,9 @@ test("page adapter forwards cursor, abort signal and auth; normalizes artwork an
       },
     },
     "@/lib/theme-auth": { authToken: () => "fixture-token" },
-    "@/lib/config/endpoints": { HARBOR_API_BASE: "https://harbor.site" },
+    "@/lib/config/endpoints": { HARBOR_API_BASE: "https://harborcommunity.site" },
     "@/lib/collections": {
-      absCollectionImage: (path: string) => (path ? `https://harbor.site${path}` : undefined),
+      absCollectionImage: (path: string) => (path ? `https://harborcommunity.site${path}` : undefined),
     },
     "@/lib/membership-operations": {},
     "@/lib/collection-publication-queue": {},
@@ -270,7 +270,7 @@ test("page adapter forwards cursor, abort signal and auth; normalizes artwork an
   assert.equal(new URL(requests[0][0]).searchParams.get("cursor"), "previous");
   assert.equal(requests[0][1].signal, controller.signal);
   assert.equal(requests[0][1].headers.authorization, "Bearer fixture-token");
-  assert.equal(result.collections[0].coverImage, "https://harbor.site/cover.png");
+  assert.equal(result.collections[0].coverImage, "https://harborcommunity.site/cover.png");
   response = { collections: [], nextCursor: "previous" };
   await assert.rejects(api.fetchCommunityCollectionsPage("previous"), /did not advance/);
   response = { error: "unavailable" };

@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { EpisodeReleaseCountdown } from "@/components/episode-release-countdown";
 import { Play } from "@/components/icons/play-filled";
 import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
@@ -15,6 +16,7 @@ import { useT } from "@/lib/i18n";
 import { FillerBadge, UpcomingBadge } from "../badges";
 import { EpisodeRatingBadge } from "../episode-rating-badge";
 import { EpisodeDownloadButton } from "../episode-download-button";
+import { AnimeReviewsButton } from "./anime-reviews-button";
 import { isUpcomingDate } from "../helpers";
 
 function partDisplaySeason(metaId: string, sourceMetaId?: string): number | null {
@@ -73,7 +75,14 @@ export function AnimeEpisodeRow({
       data-no-card-ring
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 160px" }}
       onContextMenu={(e) =>
-        onContextMenu?.(e, animeSeasonKey(ep), ep.number, progress.watched, ep.sourceMetaId, ep.absoluteNumber)
+        onContextMenu?.(
+          e,
+          animeSeasonKey(ep),
+          ep.number,
+          progress.watched,
+          ep.sourceMetaId,
+          ep.absoluteNumber,
+        )
       }
       className="group flex gap-6 rounded-lg px-4 py-5 transition-colors hover:bg-elevated/30"
     >
@@ -160,6 +169,7 @@ export function AnimeEpisodeRow({
               </span>
             )}
           </p>
+          <EpisodeReleaseCountdown date={ep.airdate} />
           {ep.synopsis && (
             <p
               className={`line-clamp-2 text-[13.5px] leading-relaxed text-ink-muted ${
@@ -171,6 +181,7 @@ export function AnimeEpisodeRow({
           )}
         </div>
       </button>
+      <AnimeReviewsButton meta={meta} ep={ep} compact={false} />
       <EpisodeDownloadButton meta={epMeta} episode={playEpisode} />
     </div>
   );

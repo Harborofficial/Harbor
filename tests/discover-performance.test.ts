@@ -59,7 +59,7 @@ test("unmount cancels state updates and avoids starting unneeded enrichment", as
 test("offscreen rails do not fetch until near the scroll viewport", () => {
   const fixture = railFixture(railSource);
   assert.deepEqual(fixture.requests, []);
-  assert.equal(fixture.options().rootMargin, "1000px 0px");
+  assert.equal(fixture.options().rootMargin, "2400px 0px");
   fixture.intersect(true);
   assert.deepEqual(fixture.requests, ["fixture"]);
   fixture.cleanup();

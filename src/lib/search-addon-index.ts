@@ -1,5 +1,6 @@
-import { CURATED_ADDONS } from "./addons-store/curated";
+import { CURATED_ADDONS, curatedById } from "./addons-store/curated";
 import { adultContentHidden } from "./addons-store/adult-filter";
+import { isAdultAddon } from "./addons-store/store";
 import { loadInstalled, isInstalled } from "./addon-store";
 
 export type AddonHit = {
@@ -35,6 +36,17 @@ export function searchAddonIndex(query: string, limit = 6): AddonHit[] {
   const out = new Map<string, AddonHit>();
 
   for (const a of loadInstalled()) {
+    if (
+      !adultsAllowed &&
+      isAdultAddon({
+        curated: curatedById(a.id),
+        manifest: a.manifest ?? null,
+        transportUrl: a.transportUrl,
+        source: "harbor-local",
+        installed: true,
+      })
+    )
+      continue;
     const name = a.manifest?.name ?? prettyHost(a.transportUrl);
     const hay = `${name} ${a.manifest?.description ?? ""} ${a.id} ${a.transportUrl}`.toLowerCase();
     if (!hay.includes(q)) continue;

@@ -45,7 +45,7 @@ const settingsFill: Record<string, string> = {
   "Check the shared database first. When this exact subtitle has already been synced by someone else, yours snaps into place with no analysis.":
     "Сначала проверять общую базу. Если эти же субтитры уже кто-то синхронизировал, ваши встанут на место без анализа.",
   "Community sync server": "Сервер синхронизации сообщества",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.":
     "Оставьте пустым, чтобы использовать сервер сообщества самого Harbor. Укажите URL, чтобы обращаться к своему серверу. Приватный режим ниже в любом случае отключает все обращения.",
   "Private mode": "Приватный режим",

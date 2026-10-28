@@ -270,3 +270,30 @@ test("baseline local menus keep immediate close and existing inner presentation"
     await h.dispose();
   }
 });
+
+test("an explicit up-to scope drives the episode up-to action", async () => {
+  const h = harness("popout");
+  const { EpisodeWatchedMenu } = h.load("src/components/episode-watched-menu.tsx");
+  let marked = 0;
+  try {
+    await React.act(() =>
+      h.root.render(
+        jsx.jsx(EpisodeWatchedMenu, {
+          metaId: "kitsu:first",
+          meta: { name: "Title" },
+          target: { x: 20, y: 20, season: 1, episode: 6, watched: false, origin: h.origin },
+          upToScope: { count: 17, markWatched: () => void (marked += 1) },
+          onClose() {},
+        }),
+      ),
+    );
+    const action = h.source.actions().find((item: any) => item.id === "episode:up-to");
+    assert.ok(action);
+    assert.equal(action.disabled, false);
+    assert.equal(action.label, "Mark {count} episodes up to here");
+    await React.act(() => action.run());
+    assert.equal(marked, 1);
+  } finally {
+    await h.dispose();
+  }
+});

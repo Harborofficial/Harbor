@@ -31,7 +31,7 @@ pub(super) async fn fetch(app: tauri::AppHandle, profile: Option<String>, sessio
             ])), body: None, body_base64: None, timeout_ms: Some(DEADLINE.as_millis() as u64),
             response_type: Some("base64".into()), max_response_bytes: Some(max_bytes as u64),
             credential_handle: None, public_network_only: None, allow_local_network: None,
-            follow_redirects: None, thumb_width_px: None,
+            follow_redirects: None, thumb_width_px: None, cache_image: None,
         }).await.map_err(|error| if error.contains("response size limit exceeded") { "source_limit".into() } else { "source_network".into() })
     }).await
 }

@@ -7,7 +7,13 @@ import {
   aniZipByTmdbTv,
   type AniZipMapping,
 } from "@/lib/providers/anizip";
-import { kitsuAnime, kitsuMainTvSeries, kitsuRelated, parseKitsuId, type KitsuEpisode } from "@/lib/providers/kitsu";
+import {
+  kitsuAnime,
+  kitsuMainTvSeries,
+  kitsuRelated,
+  parseKitsuId,
+  type KitsuEpisode,
+} from "@/lib/providers/kitsu";
 import { selectSiblingWindows, type AnimeListWindow } from "@/lib/streams/anime-identity-core";
 import { mappingStore } from "./mapping-store";
 
@@ -32,6 +38,11 @@ const ANIME_LIST_URL =
 const ARM_KITSU_KEY = "harbor.armkitsucache.v3";
 const ANIDB_TVDB_KEY = "harbor.anidbtvdbcache.v2";
 const ARM_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+// A missing mapping is common right after a new cour is announced: the external
+// id graph catches up days later. Remembering "no Kitsu entry" for a month
+// leaves the show stuck on whichever fallback list the app can find. Keep the
+// miss short so the next lookup can pick up the entry.
+const ARM_NEG_TTL_MS = 6 * 60 * 60 * 1000;
 const XML_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 type ArmKitsuEntry = { mal?: number; anidb?: number; anilist?: number; t: number };
@@ -69,7 +80,9 @@ async function armFromKitsu(kitsuId: number): Promise<ArmKitsuEntry | null> {
   if (existing) return existing;
   const p = (async () => {
     try {
-      const r = await fetch(`${ARM}?source=kitsu&id=${kitsuId}`);
+      const r = await fetch(`${ARM}?source=kitsu&id=${kitsuId}`, {
+        signal: AbortSignal.timeout(8_000),
+      });
       if (!r.ok) return null;
       const j = (await r.json()) as { mal?: number; anidb?: number; anilist?: number };
       const entry: ArmKitsuEntry = {
@@ -97,12 +110,15 @@ const extKitsuCache = mappingStore<{ kitsu: number | null; t: number }>(EXT_KITS
 export async function externalToKitsu(source: string, id: number): Promise<number | null> {
   const key = `${source}:${id}`;
   const hit = extKitsuCache.get(key);
-  if (hit && Date.now() - hit.t < ARM_TTL_MS) return hit.kitsu;
+  const ttl = hit?.kitsu == null ? ARM_NEG_TTL_MS : ARM_TTL_MS;
+  if (hit && Date.now() - hit.t < ttl) return hit.kitsu;
   const existing = inflightExt.get(key);
   if (existing) return existing;
   const p = (async () => {
     try {
-      const r = await fetch(`${ARM}?source=${source}&id=${id}`);
+      const r = await fetch(`${ARM}?source=${source}&id=${id}`, {
+        signal: AbortSignal.timeout(8_000),
+      });
       if (!r.ok) return null;
       const j = (await r.json()) as { kitsu?: number };
       const kitsu = typeof j?.kitsu === "number" ? j.kitsu : null;
@@ -132,7 +148,7 @@ export async function loadAnidbMaps(): Promise<AnidbMapCache> {
   xmlRetryAfter = Date.now() + 60_000;
   xmlInflight = (async () => {
     try {
-      const r = await fetch(ANIME_LIST_URL);
+      const r = await fetch(ANIME_LIST_URL, { signal: AbortSignal.timeout(15_000) });
       if (!r.ok) return cached ?? { tvdb: {}, imdb: {}, t: 0 };
       const text = await r.text();
       const tvdb: Record<string, number> = {};
@@ -245,9 +261,7 @@ export async function applyAnidbSeasonWindow(
   if (!maps) return;
   const tvdbId = maps.tvdb[String(anidb)];
   const win =
-    tvdbId != null
-      ? maps.byTvdb?.[String(tvdbId)]?.find((w) => w.anidbId === anidb)
-      : undefined;
+    tvdbId != null ? maps.byTvdb?.[String(tvdbId)]?.find((w) => w.anidbId === anidb) : undefined;
   if (!win || typeof win.season !== "number") return;
   const imdbId = maps.imdb[String(anidb)] ?? null;
   for (const ep of episodes) {
@@ -292,7 +306,9 @@ async function armSourceToMal(source: "anilist" | "anidb", id: number): Promise<
   if (existing) return existing;
   const p = (async () => {
     try {
-      const r = await fetch(`${ARM}?source=${source}&id=${id}`);
+      const r = await fetch(`${ARM}?source=${source}&id=${id}`, {
+        signal: AbortSignal.timeout(8_000),
+      });
       if (!r.ok) return null;
       const j = (await r.json()) as { mal?: number };
       const mal = j?.mal ?? null;
@@ -392,11 +408,7 @@ export function sharedCourRedirectTarget(
   if (oImdb && rImdb && oImdb === rImdb) return rootKitsuId;
   const oTmdb = original?.themoviedb_id;
   const rTmdb = rootMappings?.themoviedb_id;
-  if (
-    oTmdb != null &&
-    String(oTmdb).trim() !== "" &&
-    String(oTmdb) === String(rTmdb ?? "")
-  ) {
+  if (oTmdb != null && String(oTmdb).trim() !== "" && String(oTmdb) === String(rTmdb ?? "")) {
     return rootKitsuId;
   }
   return null;

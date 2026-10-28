@@ -1,6 +1,6 @@
 import { ContentAdvisoryToast, type Advisory } from "@/components/player/content-advisory-toast";
-import { useT } from "@/lib/i18n";
 import { useSampleArtwork } from "@/lib/sample-artwork";
+import { useSettings } from "@/lib/settings";
 
 const SAMPLE: Advisory[] = [
   { category: "Violence", severity: "Severe" },
@@ -9,12 +9,12 @@ const SAMPLE: Advisory[] = [
 ];
 
 export function AdvisoryPreview() {
-  const t = useT();
   const art = useSampleArtwork(11);
+  const { settings } = useSettings();
 
   return (
-    <div className="flex w-full flex-col gap-2">
-      <div className="relative aspect-video w-full overflow-hidden rounded-md bg-canvas">
+    <div className="hset-row">
+      <div className="relative flex min-h-[192px] w-full max-w-[286px] items-center justify-center overflow-hidden rounded-md bg-canvas p-6">
         {art.background && (
           <img
             src={art.background}
@@ -24,11 +24,17 @@ export function AdvisoryPreview() {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-br from-black/45 via-black/10 to-transparent" />
-        <div className="absolute start-2 top-2 origin-top-left scale-[0.62]">
-          <ContentAdvisoryToast preview categories={SAMPLE} playKey="advisory-preview" />
-        </div>
+        {settings.contentAdvisoryToast && (
+          <div className="relative w-full">
+            <ContentAdvisoryToast
+              preview
+              categories={SAMPLE}
+              playKey="advisory-preview"
+              mpaRating="15+"
+            />
+          </div>
+        )}
       </div>
-      <span className="harbor-settings-label">{t("Live preview")}</span>
     </div>
   );
 }

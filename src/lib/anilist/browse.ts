@@ -142,7 +142,7 @@ async function fetchAnilistBrowse(sort: string, count: number): Promise<Meta[]> 
       ).catch(() => null),
     ),
   );
-  if (responses.every(data => !data?.Page)) throw new Error("AniList discovery unavailable");
+  if (responses.every((data) => !data?.Page)) throw new Error("AniList discovery unavailable");
   const all: AnilistMedia[] = [];
   const seenId = new Set<number>();
   for (const data of responses) {
@@ -170,7 +170,10 @@ export async function anilistArtById(id: number): Promise<{ banner?: string; cov
   if (cached) return cached;
   try {
     const data = await anilistRequest<{
-      Media: { bannerImage: string | null; coverImage: { extraLarge: string | null } | null } | null;
+      Media: {
+        bannerImage: string | null;
+        coverImage: { extraLarge: string | null } | null;
+      } | null;
     }>(ART_BY_ID_QUERY, { id }, undefined, true);
     const art = {
       banner: data?.Media?.bannerImage ?? undefined,
@@ -179,9 +182,9 @@ export async function anilistArtById(id: number): Promise<{ banner?: string; cov
     lruSet(artByIdCache, id, art, 500);
     return art;
   } catch {
-    const empty = {};
-    lruSet(artByIdCache, id, empty, 500);
-    return empty;
+    // A rate-limited or failed request is not an answer: leave the entry
+    // uncached so a later background pass can retry the artwork.
+    return {};
   }
 }
 
@@ -216,9 +219,8 @@ export async function anilistArtByMalId(
     lruSet(artByMalCache, malId, art, 500);
     return art;
   } catch {
-    const empty = {};
-    lruSet(artByMalCache, malId, empty, 500);
-    return empty;
+    // Same rule as artById: a failed lookup must stay retryable.
+    return {};
   }
 }
 
@@ -256,7 +258,9 @@ export async function anilistRecommendations(anilistId: number): Promise<Meta[]>
   if (cached) return cached;
   try {
     const data = await anilistRequest<{
-      Media: { recommendations: { nodes: Array<{ mediaRecommendation: AnilistMedia | null }> } | null } | null;
+      Media: {
+        recommendations: { nodes: Array<{ mediaRecommendation: AnilistMedia | null }> } | null;
+      } | null;
     }>(RECS_QUERY, { id: anilistId }, undefined, true);
     const rawMedia: AnilistMedia[] = [];
     const seenId = new Set<number>();

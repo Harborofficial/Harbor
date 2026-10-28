@@ -148,7 +148,7 @@ export function useStreamSwitcher(params: {
           startAtSec: resumeAt > 5 ? resumeAt : undefined,
           startupProfile: playbackStartupProfile(stream),
         });
-        await b.play().catch(() => {});
+        await b.play({ reason: "stream-switch" }).catch(() => {});
       } catch (e) {
         if (nextProxySessionId) void unregisterStreamProxy(nextProxySessionId).catch(() => {});
         console.warn("[player] stream swap failed", e);
@@ -171,11 +171,14 @@ export function useStreamSwitcher(params: {
         infoHash: stream.infoHash ?? null,
         fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
         addonId: stream.addonId ?? null,
+        name: stream.name ?? null,
+        addonName: stream.addonName ?? null,
         title: stream.title ?? null,
         parsedTitle: stream.parsedTitle ?? null,
         resolution: stream.resolution ?? null,
         releaseGroup: stream.releaseGroupNormalized ?? null,
         source: stream.source ?? null,
+        audioLanguages: stream.audioLanguages ?? null,
         size: stream.size ?? null,
         bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
         cachedSlugs: Object.entries(stream.cached ?? {})
@@ -195,6 +198,7 @@ export function useStreamSwitcher(params: {
             resolution: stream.resolution ?? null,
             releaseGroup: stream.releaseGroupNormalized ?? null,
             source: stream.source ?? null,
+            audioLanguages: stream.audioLanguages ?? null,
             size: stream.size ?? null,
             bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
             cachedSlugs: Object.entries(stream.cached ?? {})

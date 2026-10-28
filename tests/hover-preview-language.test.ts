@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
+import {
+  pickTmdbTitle,
+  tmdbEnglishTitle,
+  tmdbLanguageBase,
+} from "../src/lib/providers/tmdb/tmdb-title-fallback.ts";
 
 function load(path: string, mocks: Record<string, unknown>) {
   const output = ts.transpileModule(readFileSync(path, "utf8"), {
@@ -26,7 +31,9 @@ test("overview requests deduplicate, cache per language and key, and retry faile
         new Promise((resolve) => requests.push({ key, language: params.language, resolve })),
     },
     "../../cache": { lruSet: (cache: Map<string, unknown>, key: string, value: unknown) => cache.set(key, value) },
+    "../../settings/load": { loadStoredSettings: () => ({ translateTitles: true }) },
     "./tmdb-image-rungs": {},
+    "./tmdb-title-fallback": { pickTmdbTitle, tmdbEnglishTitle, tmdbLanguageBase },
   });
   const first = tmdbMetadataOverview("key", "tmdb:movie:1");
   const same = tmdbMetadataOverview("key", "tmdb:movie:1");

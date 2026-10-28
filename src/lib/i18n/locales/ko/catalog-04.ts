@@ -273,8 +273,8 @@ const catalog04: Record<string, string> = {
   "Font name can only use letters, numbers, and spaces.":
     "글꼴 이름에는 문자, 숫자, 공백만 사용할 수 있습니다.",
   "Font tokens": "글꼴 토큰",
-  "For Application URL anything works, for example https://harbor.site. TMDB never visits it.":
-    "Application URL에는 아무 주소나 사용할 수 있습니다. 예: https://harbor.site. TMDB는 이 주소에 접속하지 않습니다.",
+  "For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it.":
+    "Application URL에는 아무 주소나 사용할 수 있습니다. 예: https://harborcommunity.site. TMDB는 이 주소에 접속하지 않습니다.",
   "For Everyone": "모두를 위한 작품",
   "For a link or image you usually want an attribute:":
     "링크나 이미지에는 일반적으로 다음 속성을 사용합니다.",
@@ -648,10 +648,10 @@ const catalog04: Record<string, string> = {
   "Harbor checks a few times a day while it's open and lets you know here.":
     "Harbor가 열려 있는 동안 하루에 몇 차례 확인하여 이곳에서 알려드립니다.",
   "Harbor checks automatically every few hours.": "Harbor는 몇 시간마다 자동으로 확인합니다.",
-  "Harbor checks harbor.site for new versions and installs them in place.":
-    "Harbor가 harbor.site에서 새 버전을 확인하고 현재 위치에 설치합니다.",
-  "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
-    "Harbor는 harbor.site에서 새 버전을 확인하고 현재 위치에 설치합니다. 사용자가 선택하기 전에는 아무것도 설치되지 않으며, 무시한 업데이트는 다시 알리지 않습니다.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place.":
+    "Harbor가 harborcommunity.site에서 새 버전을 확인하고 현재 위치에 설치합니다.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
+    "Harbor는 harborcommunity.site에서 새 버전을 확인하고 현재 위치에 설치합니다. 사용자가 선택하기 전에는 아무것도 설치되지 않으며, 무시한 업데이트는 다시 알리지 않습니다.",
   "Harbor could not find these": "Harbor가 다음 항목을 찾지 못했습니다",
   "Harbor could not open its web server. Try again, or set this up on the TV.":
     "Harbor에서 웹 서버를 열 수 없습니다. 다시 시도하거나 TV에서 설정하세요.",

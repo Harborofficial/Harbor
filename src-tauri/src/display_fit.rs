@@ -1,4 +1,5 @@
 use tauri::{LogicalSize, Manager, PhysicalPosition, WebviewWindow};
+#[cfg(not(target_os = "macos"))]
 use tauri_plugin_window_state::AppHandleExt;
 
 const CONFIG_MIN_W: f64 = 960.0;
@@ -6,6 +7,8 @@ const CONFIG_MIN_H: f64 = 600.0;
 const FLOOR_W: f64 = 480.0;
 const FLOOR_H: f64 = 400.0;
 const MARGIN: f64 = 0.94;
+const DEFAULT_W: f64 = 1280.0;
+const DEFAULT_H: f64 = 800.0;
 
 fn clamp_origin(current: f64, visible_start: f64, visible_len: f64, window_len: f64) -> f64 {
     let max = visible_start + (visible_len - window_len).max(0.0);
@@ -17,6 +20,7 @@ fn clamp_origin(current: f64, visible_start: f64, visible_len: f64, window_len: 
 /// after the maximize guard on Windows, during creation elsewhere) and only
 /// ever persists a state that differs from `WindowState::default()`, so when
 /// this returns true the restore already happened and fitting must not run.
+#[cfg(not(target_os = "macos"))]
 fn has_saved_window_state(app: &tauri::AppHandle) -> bool {
     let Ok(dir) = app.path().app_config_dir() else {
         return false;
@@ -149,14 +153,34 @@ pub fn fit_to_monitor(window: &WebviewWindow) {
         let _ = window.set_min_size(Some(LogicalSize::new(min_w, min_h)));
     }
 
-    let Ok(inner) = window.inner_size() else {
-        return;
+    #[cfg(target_os = "macos")]
+    let want_w = DEFAULT_W.min(usable_w).max(min_w);
+    #[cfg(target_os = "macos")]
+    let want_h = DEFAULT_H.min(usable_h).max(min_h);
+
+    #[cfg(not(target_os = "macos"))]
+    let (want_w, want_h) = {
+        let inner = window.inner_size().ok();
+        let cur_w = inner.map(|i| i.width as f64 / scale).unwrap_or(DEFAULT_W);
+        let cur_h = inner.map(|i| i.height as f64 / scale).unwrap_or(DEFAULT_H);
+        (cur_w.min(usable_w).max(min_w), cur_h.min(usable_h).max(min_h))
     };
-    let cur_w = inner.width as f64 / scale;
-    let cur_h = inner.height as f64 / scale;
-    let want_w = cur_w.min(usable_w).max(min_w);
-    let want_h = cur_h.min(usable_h).max(min_h);
-    let resized = (want_w - cur_w).abs() >= 1.0 || (want_h - cur_h).abs() >= 1.0;
+
+    let resized = {
+        #[cfg(target_os = "macos")]
+        {
+            true
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let Ok(inner) = window.inner_size() else {
+                return;
+            };
+            let cur_w = inner.width as f64 / scale;
+            let cur_h = inner.height as f64 / scale;
+            (want_w - cur_w).abs() >= 1.0 || (want_h - cur_h).abs() >= 1.0
+        }
+    };
     if resized {
         let _ = window.set_size(LogicalSize::new(want_w, want_h));
     }
@@ -196,21 +220,23 @@ pub fn install(app: &tauri::AppHandle) {
     let Some(window) = app.get_webview_window("main") else {
         return;
     };
-    // Only fit on the very first launch, when there is no saved geometry yet.
-    // Once the user has a saved position/size, restoration already ran and
-    // fitting would clobber it.
-    if has_saved_window_state(app) {
-        return;
-    }
     #[cfg(target_os = "macos")]
     {
+        let _ = window.set_fullscreen(false);
         let win = window.clone();
         let _ = app.run_on_main_thread(move || {
+            let _ = win.unmaximize();
             fit_to_monitor(&win);
         });
     }
     #[cfg(not(target_os = "macos"))]
     {
+        // Only fit on the very first launch, when there is no saved geometry yet.
+        // Once the user has a saved position/size, restoration already ran and
+        // fitting would clobber it.
+        if has_saved_window_state(app) {
+            return;
+        }
         fit_to_monitor(&window);
     }
 }

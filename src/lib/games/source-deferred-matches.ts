@@ -1,6 +1,6 @@
 import { catalogMatchRows, storedCatalog } from './source-catalog-query';
 import { sourceIndex } from './source-index';
-import { sourceMatchCache as cache } from './source-match-cache';
+import { sourceMatchCache as cache, SOURCE_MATCH_REVISION } from './source-match-cache';
 import { readCatalogVersions } from './source-store-db';
 import { matchingReleasesAsync } from './source-matches';
 import { processSource } from './source-processing';
@@ -27,7 +27,7 @@ export async function matchingReleasePreviewsAsync(sources: GameSource[], game: 
     signal.throwIfAborted();
     if (!source.enabled) continue;
     const ref = source.catalog;
-    const sourceKey = JSON.stringify(['previews', source.id, source.url, ref?.profile, ref?.version, ref?.parts, ref?.storedEnds, ref?.layout, key]);
+    const sourceKey = JSON.stringify([SOURCE_MATCH_REVISION, 'previews', source.id, source.url, ref?.profile, ref?.version, ref?.parts, ref?.storedEnds, ref?.layout, key]);
     try {
       if (source.catalogIssue) throw Error('source_storage');
       if (!ref) batches[position] = await matchingReleasesAsync([source], game, signal);

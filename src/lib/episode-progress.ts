@@ -1,5 +1,5 @@
-import { manualWatchedState } from "@/lib/manual-watched";
-import { lastPlayedEpisode, readResumeEntry } from "@/lib/resume";
+import { manualWatchedState, createManualWatchedReader } from "@/lib/manual-watched";
+import { lastPlayedEpisode, readResumeEntry, createResumeReader } from "@/lib/resume";
 
 export type EpisodeProgress = {
   ratio: number;
@@ -8,6 +8,10 @@ export type EpisodeProgress = {
 };
 
 const WATCHED_THRESHOLD = 0.85;
+
+export function createEpisodeProgressSnapshot() {
+  return { manualWatchedState: createManualWatchedReader(), readResumeEntry: createResumeReader() };
+}
 
 export function resumeDefaultSeason(
   seriesId: string,
@@ -72,11 +76,14 @@ export function getEpisodeProgress(
   traktEpisode?: number,
   pmdbWatched?: Set<string>,
   absoluteNumber?: number,
+  local?: ReturnType<typeof createEpisodeProgressSnapshot>,
 ): EpisodeProgress {
+  const readResume = local?.readResumeEntry ?? readResumeEntry;
+  const readManual = local?.manualWatchedState ?? manualWatchedState;
   const resumeIds = traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
   let entry: { ms: number; t: number; pct?: number } | null = null;
   for (const id of resumeIds) {
-    const e = readResumeEntry(id, season, episode);
+    const e = readResume(id, season, episode);
     if (e && (!entry || e.t > entry.t)) entry = e;
   }
   const startedAt = entry?.t ?? 0;
@@ -84,8 +91,8 @@ export function getEpisodeProgress(
   const canonS = traktSeason ?? season;
   const canonE = traktEpisode ?? episode;
   const canonDiffers = canonS !== season || canonE !== episode;
-  const manualSelf = manualWatchedState(resumeId, season, episode);
-  const manualCanon = canonDiffers ? manualWatchedState(resumeId, canonS, canonE) : undefined;
+  const manualSelf = readManual(resumeId, season, episode);
+  const manualCanon = canonDiffers ? readManual(resumeId, canonS, canonE) : undefined;
   const manual = manualSelf !== undefined ? manualSelf : manualCanon;
   if (manual === false) return { ratio: 0, watched: false, startedAt };
 
@@ -125,10 +132,11 @@ export function getEpisodeProgress(
     : false;
   const manualDone = resumeIds.some(
     (id) =>
-      manualWatchedState(id, season, episode) === true ||
-      (canonDiffers && manualWatchedState(id, canonS, canonE) === true),
+      readManual(id, season, episode) === true ||
+      (canonDiffers && readManual(id, canonS, canonE) === true),
   );
-  const done = manualDone || traktDone || stremioDone || anilistDone || simklDone || malDone || pmdbDone;
+  const done =
+    manualDone || traktDone || stremioDone || anilistDone || simklDone || malDone || pmdbDone;
 
   return {
     ratio: done ? 1 : ratio,

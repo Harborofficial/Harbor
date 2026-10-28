@@ -115,6 +115,12 @@ export type SubtitleLoadMetadata = {
    * and to replace a previous track for the same source instead of duplicating it.
    */
   refreshable?: boolean;
+  /**
+   * The source is an on-demand translation offer (a generated "Make Hindi" variant
+   * rather than a language code). The same URL is fetched again until the addon
+   * serves the finished file, and only an explicit viewer pick may start that work.
+   */
+  translation?: boolean;
   timingStatus?: SubtitleTimingStatus;
   timingMeasurementStatus?: "measured" | "unknown";
   matchExplanation?: SubtitleMatchExplanation;

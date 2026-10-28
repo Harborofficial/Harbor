@@ -5,7 +5,7 @@ import { readPlayback } from "@/lib/playback-history";
 import type { Settings } from "@/lib/settings";
 import type { PlayEpisode } from "@/lib/view";
 import { resolveAddonRanks } from "./addon-priority";
-import { animeAbsoluteFromScopedId } from "./anime-identity-core";
+import { animeAbsoluteFromScopedId, splitAnimeStreamCoordinates } from "./anime-identity-core";
 import type { PipelineInput } from "./pipeline";
 import { PLUGIN_ADDON_PREFIX, isPluginAddon, pluginAddonById, pluginIdFromCatalogueBase, pluginsForAddon } from "./plugins/addon";
 import { preferredAnimeImdbStreamId, unverifiedAnimeSeasonId } from "./stream-ids";
@@ -60,6 +60,8 @@ export function buildEpisodePipelineInput(params: {
   strictMode: boolean;
   filterDisabled: boolean;
   animeTitles?: string[] | null;
+  /** Prefer this addon's copy when the same stream is offered by several addons. */
+  preferredAddonId?: string | null;
   /** Resolve the item's own plugin when it names one, even where plugins are otherwise kept out.
    * Background work opts out, so the switch keeps plugins out of it entirely. */
   resolvePinnedPlugin?: boolean;
@@ -135,10 +137,11 @@ export function buildEpisodePipelineInput(params: {
   const animeAbsoluteEpisode = animeReq
     ? (streamIds.map(animeAbsoluteFromScopedId).find((n) => n != null) ?? null)
     : null;
+  const split = splitAnimeStreamCoordinates(episode?.kitsuStreamId ?? streamIds.find((id) => id.startsWith("kitsu:")));
   // Split-franchise cours (Bleach TYBW) are numbered entry-relative while addon
   // streams often use provider coords (cour 4 ep 1 = S17E41). Accept both so the
   // episode filter keeps streams in either numbering and drops clear mismatches.
-  const animeEpisodeAliases =
+  const animeEpisodeAliases = split ? new Set(split.absoluteNumbers) :
     animeReq &&
     episode?.imdbEpisode != null &&
     episode?.episode != null &&
@@ -147,30 +150,31 @@ export function buildEpisodePipelineInput(params: {
       : null;
   const imdbEpAligned =
     !animeReq || episode?.imdbEpisode == null || episode.episode === episode.imdbEpisode;
-  const effSeason = imdbEpAligned ? (episode?.imdbSeason ?? episode?.season) : episode?.season;
-  const effEpisode = imdbEpAligned ? (episode?.imdbEpisode ?? episode?.episode) : episode?.episode;
+  const effSeason = split?.coordinates[0][0] ?? (imdbEpAligned ? (episode?.imdbSeason ?? episode?.season) : episode?.season);
+  const effEpisode = split?.coordinates[0][1] ?? (imdbEpAligned ? (episode?.imdbEpisode ?? episode?.episode) : episode?.episode);
   const prevGroup =
     episode && typeof effSeason === "number" && typeof effEpisode === "number" && effEpisode > 1
       ? (readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined)
       : undefined;
   return {
+    preferredAddonId: params.preferredAddonId ?? null,
     request: {
       type: requestType,
       ids: streamIds,
       preferredAnimeImdbId,
       animeIdUnverified,
       context: {
-        imdbId: imdbId ?? null,
+        imdbId: split && (episode?.imdbSeason ?? 0) >= 17 ? null : imdbId ?? null,
         title: meta.name,
         year: parseInt(meta.releaseInfo ?? "", 10) || null,
         season: effSeason ?? null,
         episode: effEpisode ?? null,
-        absoluteEpisode: animeAbsoluteEpisode,
+        absoluteEpisode: split?.absoluteNumbers[0] ?? animeAbsoluteEpisode,
       },
     },
     query: {
       type: episode ? "series" : meta.type === "series" ? "series" : "movie",
-      imdbId: imdbId ?? "",
+      imdbId: split && (episode?.imdbSeason ?? 0) >= 17 ? "" : imdbId ?? "",
       title: meta.name,
       year: parseInt(meta.releaseInfo ?? "", 10) || undefined,
       season: animeReq && episode?.imdbSeason == null ? undefined : effSeason,
@@ -181,6 +185,9 @@ export function buildEpisodePipelineInput(params: {
     isAnime: animeReq,
     animeAbsoluteEpisode,
     animeEpisodeAliases,
+    animeEpisodeCoordinates: split?.coordinates ?? (animeReq && effSeason != null && effEpisode != null
+      ? [[effSeason, effEpisode]] : undefined),
+    animeSplitPart: split?.coordinates[0][0],
     presetStreams: embedded.length > 0 ? embedded : undefined,
     addonTimeoutMs: Math.max(8, Math.min(120, settings.addonTimeoutSec ?? 30)) * 1000,
     addonRanks: resolveAddonRanks(effectiveAddons, settings.streamPriority),

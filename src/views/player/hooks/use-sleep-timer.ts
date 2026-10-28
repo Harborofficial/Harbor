@@ -45,7 +45,7 @@ export function useSleepTimer(params: {
   const lastUrlRef = useRef(srcUrl);
 
   useEffect(() => {
-    registerSleepFireHandler(() => bridgeRef.current?.pause());
+    registerSleepFireHandler(() => bridgeRef.current?.pause("sleep-timer"));
     return () => registerSleepFireHandler(null);
   }, [bridgeRef]);
 
@@ -63,7 +63,7 @@ export function useSleepTimer(params: {
     if (durationSec <= 0) return;
     if (getPlaybackPosition() < durationSec - 2) return;
     if (mode.kind === "end_episode") {
-      bridgeRef.current?.pause();
+      bridgeRef.current?.pause("sleep-timer-end-episode");
       clearSleepMode();
       return;
     }
@@ -73,7 +73,7 @@ export function useSleepTimer(params: {
     } else {
       clearSleepMode();
     }
-    if (mode.remaining <= 1) bridgeRef.current?.pause();
+    if (mode.remaining <= 1) bridgeRef.current?.pause("sleep-timer-end-next-episode");
   }, [status, durationSec, mode, bridgeRef]);
 
   useEffect(() => {

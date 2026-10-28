@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -42,31 +41,14 @@ import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { isMagnetInput, isDirectVideoUrl } from "@/lib/torrent/magnet";
 import { useView, type Frame } from "@/lib/view";
 
-type SearchState = {
-  open: boolean;
-  query: string;
-  results: SearchResults | null;
-  // Deliberately not a field on SearchResults. Every addon is announced as
-  // "pending" before the first fetch leaves the box, and folding that into
-  // `results` flipped it non-null with every list still empty, which unmounted
-  // the desktop overlay's loading skeleton before a single source had answered.
-  // The desktop gate is `!results`, so the slot stream has to live beside it.
-  addonQueries: AddonQuery[];
-  status: "idle" | "typing" | "loading" | "done";
-  recent: string[];
-};
-
-type SearchActions = {
-  setOpen: (open: boolean) => void;
-  setQuery: (q: string) => void;
-  clear: () => void;
-  closeForNavigation: () => void;
-  recordRecent: (q: string) => void;
-  removeRecent: (q: string) => void;
-  clearRecent: () => void;
-  setAiHold: (hold: boolean) => void;
-  retry: () => void;
-};
+import {
+  ActionsCtx,
+  DataCtx,
+  OpenCtx,
+  type SearchActions,
+  type SearchData,
+  type SearchState,
+} from "./search-context-state";
 
 type SearchValue = SearchState & SearchActions;
 
@@ -75,11 +57,7 @@ type SearchValue = SearchState & SearchActions;
 // kept-alive layer — so typing in the search box re-rendered the whole app. Splitting the
 // stable actions from the open flag from the query data lets the chrome subscribe to just the
 // slice it reads: opening the box or typing now leaves `Shell` and the nav alone.
-export type SearchData = Omit<SearchState, "open">;
-
-const DataCtx = createContext<SearchData | null>(null);
-const OpenCtx = createContext<boolean | null>(null);
-const ActionsCtx = createContext<SearchActions | null>(null);
+export type { SearchData } from "./search-context-state";
 const RECENT_KEY = "harbor.search.recent";
 const MAX_RECENT = 8;
 const SOURCE_TIMEOUT_MS = 8000;

@@ -86,7 +86,8 @@ export const Hero = memo(function Hero({
   const { openMeta, meta: activeDetail, player, picker, view } = useView();
   const { pickerOpen: profilePickerOpen } = useProfiles();
   const t = useT();
-  const description = useLocalizedOverview(meta);
+  // Hero-feed items carry IMDb ids, so translateDescriptions has to resolve them to TMDB ids.
+  const description = useLocalizedOverview(meta, true);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const inWatchlist = useInWatchlist(meta.id, [resolvedImdb]);
   const [bgUrl, setBgUrl] = useState<string | undefined>(meta.background);

@@ -428,12 +428,15 @@ export function usePickHandler({
           infoHash: stream.infoHash ?? null,
           fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
           addonId: stream.addonId ?? null,
+          name: stream.name ?? null,
+          addonName: stream.addonName ?? null,
           title: stream.title ?? null,
           parsedTitle: stream.parsedTitle ?? null,
           resolution: stream.resolution ?? null,
           quality: formatStreamQuality(stream),
           releaseGroup: stream.releaseGroupNormalized ?? null,
           source: stream.source ?? null,
+          audioLanguages: stream.audioLanguages ?? null,
           bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
           size: stream.size ?? null,
           cachedSlugs: Object.entries(stream.cached ?? {})
@@ -457,6 +460,7 @@ export function usePickHandler({
           resolution: stream.resolution ?? null,
           releaseGroup: stream.releaseGroupNormalized ?? null,
           source: stream.source ?? null,
+          audioLanguages: stream.audioLanguages ?? null,
           size: stream.size ?? null,
           bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
           cachedSlugs: Object.entries(stream.cached ?? {})

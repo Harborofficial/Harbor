@@ -1,3 +1,4 @@
+import reviews from "./it/reviews";
 import playOrders from "./it/play-orders";
 import gameRomLibrary from "./it/game-rom-library";
 import gameNotes from "./it/game-notes";
@@ -92,6 +93,7 @@ import catalog10 from "./it/catalog-10";
 import catalog11 from "./it/catalog-11";
 import catalog12 from "./it/catalog-12";
 import coverage from "./it/coverage";
+import subtitles from "./it/subtitles";
 import plugins from "./it/plugins";
 import brands from "./it/brands";
 import bpSports from "./it/bp-sports";
@@ -287,6 +289,7 @@ const it: Record<string, string> = {
   ...catalog11,
   ...catalog12,
   ...coverage,
+  ...subtitles,
   ...settingsRefinements,
   ...plugins,
   ...brands,
@@ -366,6 +369,7 @@ const it: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...reviews,
   ...queueBasket,
 };
 

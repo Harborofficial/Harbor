@@ -225,8 +225,8 @@ const sweepC: Record<string, string> = {
   "For a link or image you usually want an attribute:": "对于链接或图片，通常需要使用属性：",
   "For an active ElfHosted subscription.": "保持有效的 ElfHosted 订阅即可获得。",
   "For an AI agent": "供 AI 智能体使用",
-  "For Application URL anything works, for example https://harbor.site. TMDB never visits it.":
-    "Application URL 可随意填写，例如 https://harbor.site。TMDB 不会访问它。",
+  "For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it.":
+    "Application URL 可随意填写，例如 https://harborcommunity.site。TMDB 不会访问它。",
   "For donating to a charity.": "向慈善机构捐款即可获得。",
   "For Everyone": "老少皆宜",
   "For giving more than $100 to charity.": "向慈善机构捐款超过 $100 即可获得。",
@@ -480,8 +480,8 @@ const sweepC: Record<string, string> = {
   "Harbor checks a few times a day while it's open and lets you know here.":
     "Harbor 会在打开期间每天检查数次，并在此通知你。",
   "Harbor checks automatically every few hours.": "Harbor 每隔几小时会自动检查一次。",
-  "Harbor checks harbor.site for new versions and installs them in place.":
-    "Harbor 会在 harbor.site 检查新版本并就地安装。",
+  "Harbor checks harborcommunity.site for new versions and installs them in place.":
+    "Harbor 会在 harborcommunity.site 检查新版本并就地安装。",
   "Harbor could not find these": "Harbor 找不到这些内容",
   "Harbor couldn't play this source": "Harbor 无法播放此播放源",
   "Harbor couldn't start any source": "Harbor 无法启动任何播放源",

@@ -1,6 +1,7 @@
 import {
   memo,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -24,6 +25,7 @@ import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
 import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
 import { observeResize, observeWithin } from "@/lib/visibility";
 import { noteProbe, recordRenderCause } from "@/lib/render-cause";
+import { ScrollRootContext } from "./row";
 
 type Ratio = "portrait" | "landscape" | "wide" | "square";
 
@@ -83,8 +85,8 @@ export function useRpdbAltId(
   type?: "movie" | "series",
 ): { altId: string | undefined; pending: boolean } {
   const { settings } = useSettings();
-  const wantImdb = needsImdbForPoster(rpdbKey, metaId);
-  const wantTmdb = needsTmdbForPoster(rpdbKey, metaId);
+  const wantImdb = needsImdbForPoster(rpdbKey, metaId, settings.posterBaseUrl);
+  const wantTmdb = needsTmdbForPoster(rpdbKey, metaId, settings.posterBaseUrl);
   const imdb = useTmdbImdbId(wantImdb ? metaId : undefined);
   const tmdb = useTmdbIdFromImdb(wantTmdb ? metaId : undefined);
   useEffect(() => {
@@ -148,6 +150,7 @@ export function usePosterChain(
   metaPoster?: string,
   type?: "movie" | "series",
 ) {
+  const { settings } = useSettings();
   const { altId, pending } = useRpdbAltId(rpdbKey, metaId, type);
   const { animeImdb, animeTvdb, animeTmdb } = useAnimeRpdbIds(rpdbKey, metaId);
   const { url: localized, localizing } = useLocalizedPoster(metaId);
@@ -162,9 +165,20 @@ export function usePosterChain(
     const fallbacks = localizing
       ? [pinned]
       : [
-          animeImdb ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb) : undefined,
-          animeTvdb ? rpdbPoster(rpdbKey, `tvdb:${animeTvdb}`, base) : undefined,
-          rpdbPoster(rpdbKey, metaId, base, altId),
+          animeImdb
+            ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb, settings.posterBaseUrl, type)
+            : undefined,
+          animeTvdb
+            ? rpdbPoster(
+                rpdbKey,
+                `tvdb:${animeTvdb}`,
+                base,
+                undefined,
+                settings.posterBaseUrl,
+                type,
+              )
+            : undefined,
+          rpdbPoster(rpdbKey, metaId, base, altId, settings.posterBaseUrl, type),
           localized,
           metaPoster,
         ];
@@ -177,6 +191,8 @@ export function usePosterChain(
     return out;
   }, [
     rpdbKey,
+    settings.posterBaseUrl,
+    type,
     metaId,
     altId,
     metaPoster,
@@ -197,14 +213,15 @@ export function usePosterChain(
     failedRef.current = new Set();
   }
   const src = candidates.find((u) => !failedRef.current.has(u));
+  const onError = useCallback(() => {
+    if (src && !failedRef.current.has(src)) {
+      failedRef.current.add(src);
+      bump();
+    }
+  }, [src]);
   return {
     src,
-    onError: () => {
-      if (src && !failedRef.current.has(src)) {
-        failedRef.current.add(src);
-        bump();
-      }
-    },
+    onError,
   };
 }
 
@@ -257,25 +274,29 @@ function PosterBody({
   } | null>(null);
   const propKey = `${src ?? ""}|${seed}|${ratio}|${className}|${String(lazy)}`;
   const prevRender = renderCauseRef.current;
-  recordRenderCause(
-    "poster",
-    !prevRender
-      ? "mount"
-      : prevRender.key !== propKey
-        ? "props"
-        : prevRender.children !== children
-          ? "children"
-          : prevRender.onError !== onError
-            ? "onError"
-            : prevRender.fallbacks !== fallbacks
-              ? "fallbacks"
-              : "state",
-  );
+  const propCause = !prevRender
+    ? "mount"
+    : prevRender.key !== propKey
+      ? "props"
+      : prevRender.children !== children
+        ? "children"
+        : prevRender.onError !== onError
+          ? "onError"
+          : prevRender.fallbacks !== fallbacks
+            ? "fallbacks"
+            : undefined;
   renderCauseRef.current = { key: propKey, children, onError, fallbacks };
   const effect = settings.posterEffect;
+  const pageScrollRoot = useContext(ScrollRootContext);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const [imageEnabled, setImageEnabled] = useState(!lazy);
   const [targetPx, setTargetPx] = useState(0);
+  const targetPxRef = useRef(0);
+  const measuredPxRef = useRef(0);
   const qMult = qualityMultiplier(settings.posterQuality);
+  const rawCandidates = [src, ...(fallbacks ?? [])].filter((u): u is string => !!u);
+  const rawCandidatesRef = useRef(rawCandidates);
+  rawCandidatesRef.current = rawCandidates;
   // Visibility is a DOM attribute, not React state. `inView`/`eager` used to be state, so every
   // poster that crossed the viewport boundary re-rendered — scrolling up and down made that the
   // largest render source in the profiler (~19 renders per poster). Because the `<img>` also stays
@@ -283,39 +304,65 @@ function PosterBody({
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
-    return observeWithin(el, "1200px", (e) => {
+    const onNear = (e: IntersectionObserverEntry) => {
       const near = e.isIntersecting;
+      if (near) setImageEnabled(true);
       el.toggleAttribute("data-near", near);
       el.toggleAttribute("data-idle", !near);
       const img = el.querySelector<HTMLImageElement>("img.harbor-poster-img");
       if (!img) return;
       if (near) img.fetchPriority = "high";
       else img.removeAttribute("fetchpriority");
-    });
-  }, []);
+    };
+    return pageScrollRoot
+      ? observeWithin(el, "1200px", onNear, pageScrollRoot)
+      : observeWithin(el, "1200px", onNear);
+  }, [pageScrollRoot]);
   useEffect(() => {
     if (qMult === 0) return;
     const el = rootRef.current;
     if (!el) return;
-    return observeResize(el, () => {
-      const box = el.getBoundingClientRect();
+    return observeResize(el, (box) => {
       if (box.width <= 0) return;
       const need = Math.max(box.width, box.height * RATIO_AR[ratio]);
       // Capped at 2. An Android TV WebView reports devicePixelRatio 4 because it is
       // describing the 4K panel, while the window it rasterises is 1920x1080, so the
       // raw value asks for a bucket twice as wide and four times the pixels.
       const t = Math.ceil(need * Math.min(2, window.devicePixelRatio || 1) * qMult);
-      setTargetPx((prev) => (t > prev ? t : prev));
+      measuredPxRef.current = t;
+      const prev = targetPxRef.current;
+      if (t <= prev) return;
+      // Expansion animates the width every frame. Only render when it actually selects
+      // different image bytes, rather than once per pixel within the same CDN size rung.
+      if (
+        prev > 0 &&
+        rawCandidatesRef.current.every((url) => sizeImageUrl(url, prev) === sizeImageUrl(url, t))
+      )
+        return;
+      targetPxRef.current = t;
+      setTargetPx(t);
     });
   }, [qMult, ratio]);
-  const rawCandidates = [src, ...(fallbacks ?? [])].filter((u): u is string => !!u);
+  const rawSig = rawCandidates.join("|");
+  useEffect(() => {
+    // A non-resizable provider can be replaced by a CDN URL without any box resize.
+    // Reuse the latest measurement rather than keeping the old provider's size rung.
+    const measured = measuredPxRef.current;
+    if (qMult === 0 || measured <= targetPxRef.current) return;
+    targetPxRef.current = measured;
+    setTargetPx(measured);
+  }, [rawSig, qMult]);
   const candidates =
     qMult === 0 || targetPx <= 0
       ? rawCandidates
       : rawCandidates.map((u) => sizeImageUrl(u, targetPx));
   const sig = candidates.join("|");
   const [idx, setIdx] = useState(0);
+  const candidatesRef = useRef(candidates);
+  candidatesRef.current = candidates;
   const [displayed, setDisplayed] = useState<string | undefined>(undefined);
+  const displayedRef = useRef(displayed);
+  displayedRef.current = displayed;
   const [retry, setRetry] = useState(0);
   const failedRef = useRef<Set<string>>(new Set());
   const firedRef = useRef(false);
@@ -342,9 +389,16 @@ function PosterBody({
     setRetry(0);
     failedRef.current = new Set();
     firedRef.current = false;
-    rootRef.current?.removeAttribute("data-loaded");
-    // A previous candidate is still on screen; keep it underneath until the new one lands.
-    if (shownRef.current) setDisplayed(shownRef.current);
+    const shown = shownRef.current;
+    const next = candidatesRef.current[0];
+    // Cached images can load before this effect runs. Do not hide that same image
+    // or create a redundant crossfade base that then needs a second cleanup render.
+    if (shown !== next) {
+      rootRef.current?.removeAttribute("data-loaded");
+      if (shown && displayedRef.current !== shown) setDisplayed(shown);
+    } else if (displayedRef.current) {
+      setDisplayed(undefined);
+    }
   }, [sig]);
 
   // `lazy="release"` used to unmount the `<img>` once a poster sat more than 2400px away for 1.5s.
@@ -359,8 +413,52 @@ function PosterBody({
   const exhausted = cursor >= candidates.length;
   // Remote plain-HTTP images (e.g. a Suwayomi server on a VPS) are mixed-content
   // blocked by the WebView; resolve them to a same-origin blob URL.
-  const currentSrc = useProxiedImageSrc(current);
-  const displayedSrc = useProxiedImageSrc(displayed);
+  const currentSrc = useProxiedImageSrc(current, {
+    forceProxy: /^https?:\/\//.test(current ?? ""),
+    persistent: true,
+    enabled: imageEnabled && (qMult === 0 || targetPx > 0),
+    originalSize: true,
+  });
+  const displayedSrc = useProxiedImageSrc(displayed, {
+    forceProxy: /^https?:\/\//.test(displayed ?? ""),
+    persistent: true,
+    enabled: imageEnabled,
+    originalSize: true,
+  });
+  const stateCauseRef = useRef<{
+    targetPx: number;
+    idx: number;
+    displayed: string | undefined;
+    retry: number;
+    currentSrc: string | undefined;
+    displayedSrc: string | undefined;
+    settings: unknown;
+  } | null>(null);
+  const previousState = stateCauseRef.current;
+  const stateChanges: string[] = [];
+  if (previousState) {
+    if (previousState.targetPx !== targetPx) stateChanges.push("size");
+    if (previousState.idx !== idx) stateChanges.push("fallback");
+    if (previousState.displayed !== displayed) stateChanges.push("crossfade");
+    if (previousState.retry !== retry) stateChanges.push("retry");
+    if (previousState.currentSrc !== currentSrc || previousState.displayedSrc !== displayedSrc)
+      stateChanges.push("proxy");
+    if (previousState.settings !== settings) stateChanges.push("settings");
+  }
+  recordRenderCause(
+    "poster",
+    propCause ?? (stateChanges.length ? stateChanges.join("+") : "unchanged-inputs"),
+  );
+  stateCauseRef.current = { targetPx, idx, displayed, retry, currentSrc, displayedSrc, settings };
+  const renderAttemptRef = useRef(0);
+  const committedAttemptRef = useRef(0);
+  renderAttemptRef.current += 1;
+  useLayoutEffect(() => {
+    // Strict Mode replays mount effects; count a committed render only once.
+    if (committedAttemptRef.current === renderAttemptRef.current) return;
+    committedAttemptRef.current = renderAttemptRef.current;
+    noteProbe("poster:committed-render");
+  });
 
   useEffect(() => {
     if (exhausted && !firedRef.current) {
@@ -419,16 +517,28 @@ function PosterBody({
         else if (currentRef.current) fail(currentRef.current);
         return;
       }
-      const target = currentRef.current;
-      el.decode().then(
-        () => {
-          if (imgElRef.current === el && currentRef.current === target) markLoaded(target);
-        },
-        () => {},
-      );
     },
     [fail, markLoaded],
   );
+  useEffect(() => {
+    if (!displayed) return;
+    const el = imgElRef.current;
+    if (!el) return;
+    let timer: number | undefined;
+    const releaseBase = () => {
+      // Keep the old bitmap only through the 300ms reveal. Retaining it indefinitely
+      // doubles the decoded artwork for posters that changed size or provider.
+      timer = window.setTimeout(() => {
+        if (displayedRef.current === displayed) setDisplayed(undefined);
+      }, 350);
+    };
+    if (el.complete && el.naturalWidth > 0) releaseBase();
+    else el.addEventListener("load", releaseBase, { once: true });
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer);
+      el.removeEventListener("load", releaseBase);
+    };
+  }, [displayed, current, currentSrc]);
   useEffect(() => {
     if (!current) return;
     const el = imgElRef.current;
@@ -439,11 +549,13 @@ function PosterBody({
   // which would flash the shimmer even though the bytes are cached.
   useLayoutEffect(() => {
     if (exhausted) return;
-    if (current && decodedPosters.has(current)) {
+    // A decoded URL only skips the wait when this mount already has the blob
+    // src; otherwise the proxy is still loading and there is nothing to show yet.
+    if (current && currentSrc && decodedPosters.has(current)) {
       shownRef.current = current;
       rootRef.current?.setAttribute("data-loaded", "1");
     }
-  }, [current, exhausted]);
+  }, [current, currentSrc, exhausted]);
   const showShimmer = !exhausted;
   const showPlate = exhausted;
   const hue = hash(seed) % 360;
@@ -475,6 +587,9 @@ function PosterBody({
           alt=""
           draggable={false}
           decoding="async"
+          // Rows already gate mounting ahead of the viewport; browser lazy loading
+          // would postpone that prefetch until the user is almost on top of the card.
+          loading="eager"
           onLoad={() => markLoaded(current)}
           onError={() => fail(current)}
           className="harbor-poster-img absolute inset-0 h-full w-full object-cover"

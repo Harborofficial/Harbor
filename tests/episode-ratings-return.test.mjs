@@ -43,7 +43,6 @@ function load(path, mocks) {
   return exports;
 }
 
-
 function ratingsHarness() {
   const slots = [],
     dependencies = [],
@@ -150,6 +149,13 @@ test("Cinemeta episode grids receive genuine episode IMDb badges", () => {
     "./helpers": { isUpcomingDate: () => false },
     "./episode-grid": { EpisodeGrid },
     "./use-episode-imdb-ratings": { useEpisodeImdbRatings: () => new Map([["3:1", 8.3]]) },
+    "./season-explorer": { SeasonExplorer: () => null },
+    "./use-season-explorer": { useSeasonExplorerView: (options) => ({ items: options.items }) },
+    "@/lib/providers/tvdb": { tvdbLangFromIso1: () => "eng" },
+    "@/lib/providers/tmdb/tmdb-client": {
+      tmdbLanguageIso: () => "en",
+      effectiveTmdbLanguage: () => "en",
+    },
   });
   const tree = CinemetaEpisodes({
     meta: { id: "tt5071412" },

@@ -2,11 +2,13 @@ import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
+import { seasonPill } from "@/lib/season-name";
 import { NewBadge } from "../badges";
 
 export type PickerItem = {
   key: string;
   name: string;
+  nameLanguage?: string;
   count: number;
   year?: string;
   from?: string;
@@ -14,6 +16,14 @@ export type PickerItem = {
   isNew?: boolean;
   extra?: boolean;
   badge?: string;
+  /** Season number for the "Season N" pill. Absent for non-season entries. */
+  seasonNumber?: number;
+  isGenericName?: boolean;
+  /** TMDB fallback when no TVDB metadata is available. */
+  fallbackName?: string;
+  overview?: string;
+  overviewLanguage?: string;
+  poster?: string;
 };
 
 type MenuPos = { right: number; top?: number; bottom?: number; maxH: number };
@@ -37,6 +47,7 @@ export function SeasonArcPicker({
   const menuRef = useRef<HTMLDivElement>(null);
   const current = items.find((i) => i.key === activeKey) ?? items[0];
   const open = menu != null;
+  const currentPill = current ? seasonPill(current, t) : null;
   const hasUnseenNew = !open && items.some((i) => i.isNew && i.key !== activeKey);
   const mainItems = items.filter((i) => !i.extra);
   const extraItems = items.filter((i) => i.extra);
@@ -81,6 +92,7 @@ export function SeasonArcPicker({
 
   const renderRow = (item: PickerItem) => {
     const isActive = item.key === activeKey;
+    const pill = seasonPill(item, t);
     return (
       <button
         key={item.key}
@@ -89,7 +101,7 @@ export function SeasonArcPicker({
           setMenu(null);
         }}
         className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-start transition-colors ${
-          isActive ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
+          isActive ? "bg-ink/10 text-ink" : "text-ink hover:bg-raised"
         }`}
       >
         <div className="flex min-w-0 flex-col">
@@ -97,11 +109,18 @@ export function SeasonArcPicker({
             <span className="truncate">{item.name}</span>
             {item.isNew && <NewBadge />}
           </span>
-          <span className="text-[11.5px] text-ink-subtle">
-            {item.count === 1
-              ? t("{n} episode", { n: item.count })
-              : t("{n} episodes", { n: item.count })}
-            {item.year && ` · ${item.year}`}
+          <span className="flex items-center gap-1.5 text-[11.5px] text-ink-muted">
+            {pill && (
+              <span className="shrink-0 rounded bg-ink/10 px-1.5 py-px text-[10.5px] font-semibold text-ink-muted">
+                {pill}
+              </span>
+            )}
+            <span className="truncate">
+              {item.count === 1
+                ? t("{n} episode", { n: item.count })
+                : t("{n} episodes", { n: item.count })}
+              {item.year && ` · ${item.year}`}
+            </span>
           </span>
         </div>
       </button>
@@ -117,6 +136,11 @@ export function SeasonArcPicker({
         className="relative flex h-10 items-center gap-2 rounded-full bg-white/[0.06] ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-white/[0.10]"
       >
         <span className="max-w-[220px] truncate">{current?.name ?? t("Seasons")}</span>
+        {currentPill && (
+          <span className="shrink-0 rounded bg-ink/10 px-1.5 py-px text-[10.5px] font-semibold text-ink-muted">
+            {currentPill}
+          </span>
+        )}
         {current?.isNew && <NewBadge />}
         <ChevronDown
           size={15}

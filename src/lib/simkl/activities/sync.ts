@@ -300,8 +300,13 @@ export function syncWatchlistCache(): Promise<SimklCache> {
       }
 
       const saved = getLocalCache();
-      let cache = saved ? structuredClone(saved) : null;
       const activities = await simklRequest<any>("/sync/activities");
+      if (getSession() !== ownerSession || activeProfileId() !== ownerProfile) {
+        throw new Error("SIMKL session changed");
+      }
+      // An unchanged activity marker requires neither a full library clone nor a disk write.
+      if (saved?.lastSync && activities?.all === saved.lastSync) return saved;
+      let cache = saved ? structuredClone(saved) : null;
       if (!cache || !cache.lastSync) {
         cache = await bootstrapCache(activities);
       } else {
@@ -340,23 +345,20 @@ export async function getCachedSimklData(): Promise<{
   }
 
   const resolved = cache;
+  const keysBySimkl = new Map<number, string[]>();
+  const index = (ids: Record<string, number>, keyFor: (key: string) => string) => {
+    for (const [key, simklId] of Object.entries(ids)) {
+      const keys = keysBySimkl.get(simklId);
+      if (keys) keys.push(keyFor(key));
+      else keysBySimkl.set(simklId, [keyFor(key)]);
+    }
+  };
+  index(resolved.imdbToSimkl, (key) => key);
+  index(resolved.tmdbToSimkl, (key) => `tmdb:${key}`);
+  index(resolved.malToSimkl, (key) => `mal:${key}`);
+  index(resolved.kitsuToSimkl, (key) => `kitsu:${key}`);
   const registerKeys = (item: SimklCacheItem, simklId: number) => {
-    const keys: string[] = [];
-    for (const [imdbId, sId] of Object.entries(resolved.imdbToSimkl)) {
-      if (sId === simklId) keys.push(imdbId);
-    }
-    for (const [tmdbKey, sId] of Object.entries(resolved.tmdbToSimkl)) {
-      if (sId === simklId) {
-        const parts = tmdbKey.split(":");
-        if (parts.length === 2) keys.push(`tmdb:${parts[0]}:${parts[1]}`);
-      }
-    }
-    for (const [malId, sId] of Object.entries(resolved.malToSimkl)) {
-      if (sId === simklId) keys.push(`mal:${malId}`);
-    }
-    for (const [kitsuId, sId] of Object.entries(resolved.kitsuToSimkl)) {
-      if (sId === simklId) keys.push(`kitsu:${kitsuId}`);
-    }
+    const keys = keysBySimkl.get(simklId) ?? [];
 
     for (const k of keys) {
       statuses.set(k, item.status);

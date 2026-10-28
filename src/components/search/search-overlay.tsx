@@ -10,9 +10,8 @@ import type { Meta } from "@/lib/cinemeta";
 import { useSearch } from "@/lib/search-context";
 import { useView } from "@/lib/view";
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
-import { metaLooksAnime, warmAnimeResolution } from "@/lib/anime-detect";
+import { warmAnimeResolution } from "@/lib/anime-detect";
 import { AnimeRow } from "./anime-row";
-import { AnimeRelations } from "./anime-relations";
 import { MangaRow } from "./manga-row";
 import { MusicRow } from "./music-row";
 import { EBookRow } from "./ebook-row";
@@ -44,6 +43,7 @@ import { useExitPresence } from "@/lib/use-exit-presence";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 import { isMagnetInput, isDirectVideoUrl } from "@/lib/torrent/magnet";
 import { useProfiles } from "@/lib/profiles";
+import { useInstallFeatures } from "@/lib/features/install";
 import { steamStoreQuery } from "@/lib/games/steam-store-search";
 const SteamStoreSearch = lazy(() =>
   import("./steam-store-search").then((module) => ({ default: module.SteamStoreSearch })),
@@ -77,9 +77,11 @@ export function SearchOverlay() {
   const [mediaFilter, setMediaFilter] = useState<SearchFilter>("all");
   const { activeProfile } = useProfiles();
   const { settings, update } = useSettings();
-  const storeQuery = activeProfile?.kid
-    ? null
-    : steamStoreQuery(query, settings.steamSearchShortcut);
+  const gamesEnabled = useInstallFeatures().games;
+  const storeQuery =
+    activeProfile?.kid || !gamesEnabled
+      ? null
+      : steamStoreQuery(query, settings.steamSearchShortcut);
   useEffect(() => {
     setMediaFilter("all");
   }, [query]);
@@ -322,12 +324,6 @@ export function SearchOverlay() {
     (group) => !addonFilter || group.id === addonFilter,
   );
   const personMatch = matchPersonForQuery(currentResults?.people, trimmed);
-  const topMatchIsAnime =
-    !personMatch &&
-    !!currentResults?.topMatch &&
-    currentResults.anime.length > 0 &&
-    metaLooksAnime(currentResults.topMatch.meta);
-  const topAnime = topMatchIsAnime && currentResults ? currentResults.anime[0] : null;
   const magnetInput = !!trimmed && isMagnetInput(trimmed);
   const urlInput = !!trimmed && !magnetInput && isDirectVideoUrl(trimmed);
   const directInput = magnetInput || urlInput;
@@ -609,9 +605,6 @@ export function SearchOverlay() {
                             })()}
                           />
                         )
-                      )}
-                      {showKind("anime") && topAnime && (
-                        <AnimeRelations anime={topAnime} onClose={commit} />
                       )}
                       <LiveTvRow
                         items={showKind("live") ? currentResults.liveTv : []}

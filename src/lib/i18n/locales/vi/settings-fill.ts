@@ -40,7 +40,7 @@ const settingsFill: Record<string, string> = {
   "Check the shared database first. When this exact subtitle has already been synced by someone else, yours snaps into place with no analysis.":
     "Kiểm tra cơ sở dữ liệu dùng chung trước. Nếu phụ đề chính xác này đã được người khác đồng bộ, phụ đề của bạn sẽ khớp ngay mà không cần phân tích.",
   "Community sync server": "Máy chủ đồng bộ cộng đồng",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.":
     "Để trống để dùng máy chủ cộng đồng của Harbor. Nhập URL nếu muốn dùng máy chủ riêng. Chế độ riêng tư bên dưới sẽ chặn mọi kết nối trong cả hai trường hợp.",
   "Private mode": "Chế độ riêng tư",

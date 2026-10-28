@@ -14,13 +14,17 @@ const release: SourceRelease = {id:'release-20',title:'The Actual Game / Дру�
 const source: GameSource = {id:'tracker',url:'https://example.org/feed.json',name:'Tracker',enabled:true,checkedAt:1,format:'community',entries:[release],skipped:0};
 
 test('selected translated/edition releases survive catalog enrichment without broadening title matching', () => {
-  for (const title of [release.title,'The Actual Game: Deluxe Edition','[PS3] The Actual Game [USA/FULLRUS]']) {
+  for (const title of [release.title,'[PS3] The Actual Game [USA/FULLRUS]']) {
     const selected={...release,title}, feed={...source,entries:[selected]}, opened=withSourceOrigin(game,feed,selected);
     assert.equal(matchingReleases([feed],game).length,0);
     const enriched=resolveDetailEdition(opened,{...game,name:'Renamed by publisher',features:[]} as any,null).portableGame;
     assert.equal(matchingReleases([feed],enriched)[0]?.release,selected);
     assert.equal(matchingReleases([{...feed,id:'other'}],enriched).length,0);
   }
+  // A named edition is an ordinary base-game match when the game identity is known,
+  // while the origin remains the only way to identify a translated tracker title.
+  const edition={...release,title:'The Actual Game: Deluxe Edition'}, editionFeed={...source,entries:[edition]};
+  assert.equal(matchingReleases([editionFeed],game)[0]?.release,edition);
 });
 
 test('origin candidates work with explicit IDs, raw tracker titles and console editions', () => {
@@ -53,8 +57,12 @@ test('warm async matches invalidate when another release of the same game was se
   const first=withSourceOrigin(game,feed,release), second=withSourceOrigin(game,feed,edition), signal=new AbortController().signal;
   assert.equal((await matchingReleasesAsync([feed],first,signal))[0]?.release.id,release.id);
   assert.equal((await matchingReleasesAsync([feed],second,signal))[0]?.release.id,edition.id);
-  assert.equal((await matchingReleasesAsync([feed],game,signal)).length,0);
-  assert.equal((await matchingReleasesAsync([{...feed,id:'other'}],first,signal)).length,0);
+  const plain=await matchingReleasesAsync([feed],game,signal);
+  assert.equal(plain.length,1);
+  assert.equal(plain[0].release.id,edition.id);
+  const other=await matchingReleasesAsync([{...feed,id:'other'}],first,signal);
+  assert.equal(other.length,1);
+  assert.equal(other[0].release.id,edition.id);
 });
 
 test('Harbor, community and website records retain their original direct, page and magnet choices', () => {

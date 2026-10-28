@@ -69,6 +69,7 @@ function harness() {
     "./publicmetadb/mappings": {},
     "./publicmetadb/history": {},
     "./publicmetadb/watchlist": {},
+    "./publicmetadb/lists": {},
   };
   const output = ts.transpileModule(
     readFileSync(new URL("../src/lib/media-provider-actions.ts", import.meta.url), "utf8"),

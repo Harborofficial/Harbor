@@ -36,6 +36,7 @@ import {
   removeFromPmdbWatchlist,
 } from "./publicmetadb/watchlist";
 import type { PmdbTarget } from "./publicmetadb/types";
+import { getPmdbDefaultListId } from "./publicmetadb/lists";
 
 export type ProviderWrite = {
   provider: string;
@@ -368,6 +369,7 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
     });
   if (pmdbConnected()) {
     const assertPmdb = capturePmdbGuard();
+    const listId = getPmdbDefaultListId();
     let target: PmdbTarget | null | undefined;
     const prepare = async (assertCurrent: () => void) => {
       const validate = () => {
@@ -392,6 +394,7 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
         const target = await prepare(assertCurrent);
         if (!target) return "No verified PublicMetaDB identity is available for this title.";
         await fetchPmdbWatchlist({
+          listId,
           strict: true,
           assertCurrent: () => {
             assertCurrent();
@@ -406,12 +409,12 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
         };
         const target = await prepare(assertCurrent);
         if (!target) return "No verified PublicMetaDB identity is available for this title.";
-        const items = await fetchPmdbWatchlist({ strict: true, assertCurrent: validate });
+        const items = await fetchPmdbWatchlist({ listId, strict: true, assertCurrent: validate });
         validate();
         if (!!pmdbWatchlistContains(items, target) === on) return;
         const saved = on
-          ? await addToPmdbWatchlist(target, { assertCurrent: validate })
-          : await removeFromPmdbWatchlist(target, { assertCurrent: validate });
+          ? await addToPmdbWatchlist(target, { listId, strict: true, assertCurrent: validate })
+          : await removeFromPmdbWatchlist(target, { listId, strict: true, assertCurrent: validate });
         validate();
         if (!saved) throw new Error("PublicMetaDB did not confirm this watchlist change.");
       },

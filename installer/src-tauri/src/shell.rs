@@ -24,6 +24,17 @@ pub fn builder() -> Builder<Wry> {
         .setup(|app| {
             use tauri::Manager;
             if let Some(window) = app.get_webview_window("main") {
+                if let Some(monitor) = window.current_monitor()? {
+                    let work = monitor.work_area();
+                    let dpi = monitor.scale_factor();
+                    let width = 1028.0_f64.min(f64::from(work.size.width) / dpi);
+                    let height = 632.0_f64.min(f64::from(work.size.height) / dpi);
+                    window.set_size(tauri::LogicalSize::new(width, height))?;
+                    window.set_position(tauri::PhysicalPosition::new(
+                        work.position.x + ((f64::from(work.size.width) - width * dpi) / 2.0).round() as i32,
+                        work.position.y + ((f64::from(work.size.height) - height * dpi) / 2.0).round() as i32,
+                    ))?;
+                }
                 lock_window_size(&window);
             }
             Ok(())

@@ -34,13 +34,32 @@ const drain = async () => {
 };
 const stream = (hash) => ({ infoHash: hash, addonId: "fixture", addonName: "Fixture" });
 
-function harness({ anime = false, deferredParse = false } = {}) {
+test("addon settlement cannot overtake asynchronous candidate processing", async () => {
+  const h = harness({ anime: true, deferredParse: true });
+  h.batch(["late-source"]);
+  h.settle();
+  await drain();
+  assert.equal(h.progress.length, 0);
+  for (const parse of h.parses) parse.resolve();
+  await drain();
+  assert.deepEqual(h.progress.at(-1)?.candidates, ["late-source"]);
+  h.controller.abort();
+  h.listings.resolve([]);
+  h.finish(["late-source"]);
+  await drain();
+  for (const parse of h.parses) parse.resolve();
+  await h.result;
+});
+
+function harness({ anime = false, deferredParse = false, preferredAddonId = null } = {}) {
   const addons = deferred(),
     listings = deferred(),
     checks = [],
     parses = [],
-    partials = [];
+    partials = [],
+    progress = [];
   let onBatch,
+    onSettlement,
     now = 10000,
     timerId = 0,
     listingCalls = 0;
@@ -66,8 +85,9 @@ function harness({ anime = false, deferredParse = false } = {}) {
     {
       "@/lib/debug": { dlog() {} },
       "./addons": {
-        fetchAddonStreams: (_a, _r, _s, batch) => {
+        fetchAddonStreams: (_a, _r, _s, batch, settlement) => {
           onBatch = batch;
+          onSettlement = settlement;
           return addons.promise;
         },
       },
@@ -114,9 +134,12 @@ function harness({ anime = false, deferredParse = false } = {}) {
       score: { activeDebrids: ["rd"] },
       isAnime: anime,
       animeAbsoluteEpisode: anime ? 1 : undefined,
+      preferredAddonId,
     },
     controller.signal,
     (p) => partials.push(p),
+    (p) =>
+      progress.push({ ...p, candidates: partials.at(-1)?.picker.all.map((s) => s.infoHash) ?? [] }),
   );
   return {
     addons,
@@ -124,6 +147,14 @@ function harness({ anime = false, deferredParse = false } = {}) {
     checks,
     parses,
     partials,
+    progress,
+    settle: () =>
+      onSettlement({
+        settled: 1,
+        total: 2,
+        queriedAddonIds: ["fixture", "slow"],
+        settledAddonIds: ["fixture"],
+      }),
     timers,
     result,
     controller,
@@ -131,7 +162,9 @@ function harness({ anime = false, deferredParse = false } = {}) {
       return listingCalls;
     },
     batch: (hashes) => onBatch(hashes.map(stream)),
+    batchStreams: (streams) => onBatch(streams),
     finish: (hashes) => addons.resolve(hashes.map(stream)),
+    finishStreams: (streams) => addons.resolve(streams),
     tick: async (ms = 0) => {
       now += ms;
       for (const [id, timer] of timers)
@@ -258,4 +291,68 @@ test("abort cancels queued verification and prevents late partials", async () =>
   for (const p of h.parses) p.resolve();
   await h.result;
   assert.equal(h.partials.length, 0);
+});
+
+test("the remembered addon owns a duplicate stream instead of the fastest addon", async () => {
+  const h = harness({ preferredAddonId: "aiostreams" });
+  h.listings.resolve({ ok: true, data: [] });
+  const streams = [
+    {
+      infoHash: "same",
+      addonId: "torrentio",
+      addonName: "Torrentio",
+      addonPriority: 0,
+      url: "https://torrentio.example/stream",
+    },
+    {
+      infoHash: "same",
+      addonId: "aiostreams",
+      addonName: "AIOStreams",
+      addonPriority: 1,
+      url: "https://aiostreams.example/stream",
+    },
+  ];
+  await h.tick();
+  h.finishStreams(streams);
+  await drain();
+  for (const check of h.checks) check.resolve({ ok: true, data: {} });
+  await drain();
+  const final = await h.result;
+  const merged = final.picker.all.find((s) => s.infoHash === "same");
+  assert.equal(merged.addonId, "aiostreams");
+  assert.equal(merged.url, "https://aiostreams.example/stream");
+  assert.deepEqual(
+    merged.contributors.map((c) => c.id).sort(),
+    ["aiostreams", "torrentio"],
+  );
+});
+
+test("without a remembered addon, the configured addon order owns duplicates", async () => {
+  const h = harness();
+  h.listings.resolve({ ok: true, data: [] });
+  const streams = [
+    {
+      infoHash: "same",
+      addonId: "torrentio",
+      addonName: "Torrentio",
+      addonPriority: 1,
+      url: "https://torrentio.example/stream",
+    },
+    {
+      infoHash: "same",
+      addonId: "aiostreams",
+      addonName: "AIOStreams",
+      addonPriority: 0,
+      url: "https://aiostreams.example/stream",
+    },
+  ];
+  await h.tick();
+  h.finishStreams(streams);
+  await drain();
+  for (const check of h.checks) check.resolve({ ok: true, data: {} });
+  await drain();
+  const final = await h.result;
+  const merged = final.picker.all.find((s) => s.infoHash === "same");
+  assert.equal(merged.addonId, "aiostreams");
+  assert.equal(merged.url, "https://aiostreams.example/stream");
 });

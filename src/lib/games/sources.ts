@@ -3,7 +3,7 @@ import type { GameSummary } from "./types";
 import { normalizeMagnet } from "./magnet";
 import { downloadFilename, downloadName } from "./transfers";
 import { sourcePlatformMatches } from "./source-platform";
-import { sourceDownloadTitle, sourceTitleKey } from "./source-title";
+import { sourceDownloadTitle, sourceEditionKey, sourceTitleKey } from "./source-title";
 import { uniqueSourceFiles } from "./source-files";
 import { sourceByteSize } from './source-byte-size';
 import { validSourceHttpHost } from './source-host';
@@ -135,8 +135,11 @@ export function sourceMatch(release: SourceRelease, game: SourceGameReference): 
   if (name.length < 3) return name === title ? "title" : null;
   if (name === title) return "title";
   // Only release/version suffixes qualify; a sequel or similarly named game does not.
-  const base = sourceDownloadTitle(release.title);
-  return normalizedTitle(base) === name ? "title" : null;
+  const base = normalizedTitle(sourceDownloadTitle(release.title));
+  if (base === name) return "title";
+  // A named edition still belongs to the same game, but only a numeric catalog
+  // identity makes that inference safe enough to show its downloads.
+  return (game.steamId || game.igdbId) && sourceEditionKey(base) === name ? "title" : null;
 }
 export function matchingReleases(sources: GameSource[], game: SourceGameReference) {
   return sources.filter(s => s.enabled).flatMap(source => source.entries.flatMap(release => {

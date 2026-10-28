@@ -521,6 +521,62 @@ for (const store of stores) {
   });
 }
 
+test("pre-factory profile lists take precedence and all edits preserve their snapshot", () => {
+  const key = "harbor.customlists.profile-a";
+  const newerKey = "harbor.customlists.v1.profile-a";
+  const original = [container("source", [savedItem]), container("destination", [])];
+  const fallback = JSON.stringify([container("shared-or-newer", [otherItem])]);
+  storage.values.set(key, JSON.stringify(original));
+  storage.values.set("harbor.customlists.v1", fallback);
+  storage.values.set(newerKey, fallback);
+  storage.values.set("harbor.customlists.profile-b", fallback);
+  const store = lists.createListStore("harbor.customlists.v1");
+  assert.deepEqual(
+    new Set(store.readLists().map((list) => list.id)),
+    new Set(["source", "destination"]),
+  );
+  assert.equal(store.readPersistedListSnapshot(profile).key, key);
+  assert.equal(
+    store.moveBetweenLists({
+      sourceId: "source",
+      destinationId: "destination",
+      itemId: savedItem.id,
+      profile,
+    }).status,
+    "moved",
+  );
+  assert.deepEqual(JSON.parse(storage.values.get(key)!)[1].items, [savedItem]);
+  assert.equal(store.renameListWithResult("destination", "Restored", profile).status, "updated");
+  store.reorderLists(["destination", "source"]);
+  assert.equal(store.readLists()[0].name, "Restored");
+  assert.ok(store.createList("New list"));
+  assert.ok(storage.writes.every((writtenKey) => writtenKey === key));
+  assert.equal(storage.values.get(newerKey), fallback);
+  assert.equal(storage.values.get("harbor.customlists.v1"), fallback);
+  assert.equal(storage.values.get("harbor.customlists.profile-b"), fallback);
+});
+
+test("linked profiles keep shared lists even when a private legacy snapshot exists", () => {
+  storage.values.set(
+    profilesKey,
+    JSON.stringify({
+      activeId: "profile-a",
+      profiles: [{ id: "profile-a", settingsLinked: true }],
+    }),
+  );
+  storage.values.set(
+    "harbor.customlists.profile-a",
+    JSON.stringify([container("private", [savedItem])]),
+  );
+  storage.values.set("harbor.customlists.v1", JSON.stringify([container("shared", [])]));
+  const store = lists.createListStore("harbor.customlists.v1");
+  assert.equal(store.readLists()[0].id, "shared");
+  assert.equal(
+    store.readPersistedListSnapshot({ activeId: "profile-a", settingsLinked: true }).key,
+    "harbor.customlists.v1",
+  );
+});
+
 test("factory list operations use the official profile key and keep manga stores independent", () => {
   const movieStore = lists.createListStore("harbor.customlists.v1");
   const mangaStore = lists.createListStore("harbor.mangalists.v1");

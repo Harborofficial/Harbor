@@ -579,8 +579,8 @@ const settings: Record<string, string> = {
   "Hero carousel, Top 10, Trending, In Theaters, per-service rails.":
     "ヒーローカルーセル、トップ10、トレンド、劇場公開中、サービス別レール。",
   Updates: "アップデート",
-  "Harbor checks harbor.site for new versions and installs them in place.":
-    "Harborはharbor.siteで新しいバージョンを確認し、そのまま上書きインストールします。",
+  "Harbor checks harborcommunity.site for new versions and installs them in place.":
+    "Harborはharborcommunity.siteで新しいバージョンを確認し、そのまま上書きインストールします。",
   "Backup & restore": "バックアップと復元",
   "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup.":
     "Harborの設定一式を1つのファイルにエクスポートし、新しいパソコンで復元したり、バックアップとして保管したりできます。",
@@ -1440,8 +1440,8 @@ const settings: Record<string, string> = {
   "My library": "マイライブラリ",
   Anticipated: "期待作",
   "Custom calendar": "カスタムカレンダー",
-  "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
-    "Harborはharbor.siteで新しいバージョンを確認し、アプリをそのまま更新します。選択するまで何もインストールされず、一度スキップした更新が再び表示されることもありません。",
+  "Harbor checks harborcommunity.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
+    "Harborはharborcommunity.siteで新しいバージョンを確認し、アプリをそのまま更新します。選択するまで何もインストールされず、一度スキップした更新が再び表示されることもありません。",
   "Library, watch progress, and addon collection sync from this account.":
     "ライブラリ、視聴進捗、アドオンコレクションがこのアカウントから同期されます。",
   "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your Stremio sign-in.":
@@ -1795,7 +1795,7 @@ const settings: Record<string, string> = {
     "注意: Stremioもインストールされている場合、stremio://リンクを初めて開く際に、使用するアプリをWindowsが確認することがあります。Harborを選ぶと、以後もHarborで開きます。",
   "stremio:// links now open in the Stremio app. Harbor will only install when you trigger it from inside Harbor.":
     "stremio://リンクはStremioアプリで開くようになりました。Harborでインストールされるのは、Harbor内から実行した場合のみです。",
-  "Checking harbor.site for a newer build.": "harbor.siteで新しいビルドを確認しています。",
+  "Checking harborcommunity.site for a newer build.": "harborcommunity.siteで新しいビルドを確認しています。",
   "Downloading {pct}%": "ダウンロード中 {pct}%",
   "Downloaded. Ready to install and restart.":
     "ダウンロードが完了しました。インストールして再起動できます。",

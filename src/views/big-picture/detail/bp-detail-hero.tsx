@@ -2,6 +2,7 @@ import { Text } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import type { LibraryItem } from "@/lib/stremio";
 import type { TmdbDetail } from "@/lib/providers/tmdb/tmdb-details";
+import { MovieReleaseCountdowns } from "@/views/detail/movie-release-countdowns";
 import type { PlayEpisode } from "@/lib/view";
 import { MetaAwardsCorner } from "@/components/meta-awards-corner";
 import { useSettings } from "@/lib/settings";
@@ -98,6 +99,7 @@ export function BpDetailHero({
         <BpHeroMarks meta={meta} inLibrary={inLibrary} homeServers={homeServers} />
       </div>
 
+      <MovieReleaseCountdowns detail={detail} />
       <div className="mt-[14px]">
         <BpDetailActions
           playLabel={playLabel}

@@ -26,26 +26,37 @@ export function useAnimeOrder(
   preferredSeasonKey?: string,
   intentSeasonKey?: string,
   solo = false,
+  enabled = true,
 ): AnimeOrder | null {
   const t = useT();
   const metadataLanguage = tmdbLanguageIso();
-  const ordering = useEpisodeOrder(imdbId, metaId, provider, seasonType, tvdbKey, !solo);
+  const ordering = useEpisodeOrder(
+    imdbId,
+    metaId,
+    provider,
+    seasonType,
+    tvdbKey,
+    !solo && enabled,
+    true,
+  );
   const partSeason = solo ? splitFranchiseDisplaySeason(parseKitsuId(metaId)) : null;
   const built = useMemo(
     // pickLocalizedText keys its script tests by ISO-1 ("ko"), not TVDB codes ("kor").
     () =>
-      solo
-        ? buildSoloAnimeOrder(episodes, t("Specials"), (s) =>
-            t("Season {n}", { n: partSeason ?? s }),
-          )
-        : buildAnimeOrder(ordering, episodes, t("Specials"), metadataLanguage),
-    [solo, ordering, episodes, t, partSeason, metaId, metadataLanguage],
+      !enabled
+        ? null
+        : solo
+          ? buildSoloAnimeOrder(episodes, t("Specials"), (s) =>
+              t("Season {n}", { n: partSeason ?? s }),
+            )
+          : buildAnimeOrder(ordering, episodes, t("Specials"), metadataLanguage),
+    [enabled, solo, ordering, episodes, t, partSeason, metaId, metadataLanguage],
   );
   const [sel, setSel] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
   const [foreignSeasons, setForeignSeasons] = useState<Set<number> | null>(null);
   useEffect(() => {
-    if (solo) {
+    if (solo || !enabled) {
       setForeignSeasons(null);
       return;
     }
@@ -60,7 +71,7 @@ export function useAnimeOrder(
     return () => {
       cancelled = true;
     };
-  }, [metaId, imdbId, solo]);
+  }, [metaId, imdbId, solo, enabled]);
   const filteredBuilt = useMemo(() => {
     if (!built || !foreignSeasons || foreignSeasons.size === 0) return built;
     const items = built.items.filter(

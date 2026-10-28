@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { load } from "cheerio";
 import { strToU8, zipSync } from "fflate";
-import { legacyEpubChapterTitle, parseEpub, readEpubChapter } from "../src/lib/ebook/epub.ts";
+import {
+  legacyEpubChapterTitle,
+  parseEpub,
+  readEpubChapter,
+  readEpubChapterContent,
+} from "../src/lib/ebook/epub.ts";
 
 type XmlNode = {
   type: string;
@@ -124,12 +129,27 @@ const xhtml = (body: string) =>
 
 function epub(
   files: Array<[string, string]>,
-  options: { nav?: string; ncx?: string; spine?: string[] } = {},
+  options: {
+    nav?: string;
+    ncx?: string;
+    spine?: string[];
+    images?: Record<string, Uint8Array>;
+  } = {},
 ): ArrayBuffer {
   const manifest = files.map(
     ([name], index) =>
       `<item id="f${index}" href="${encodeURI(name)}" media-type="application/xhtml+xml"/>`,
   );
+  for (const [index, name] of Object.keys(options.images ?? {}).entries()) {
+    const mediaType = name.endsWith(".svg")
+      ? "image/svg+xml"
+      : name.endsWith(".png")
+        ? "image/png"
+        : name.endsWith(".gif")
+          ? "image/gif"
+          : "image/jpeg";
+    manifest.push(`<item id="i${index}" href="${encodeURI(name)}" media-type="${mediaType}"/>`);
+  }
   if (options.nav)
     manifest.push(
       '<item id="nav" href="toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>',
@@ -147,6 +167,9 @@ function epub(
       `<package><metadata><title>Fixture book</title></metadata><manifest>${manifest.join("")}</manifest><spine>${spine.join("")}</spine></package>`,
     ),
     ...Object.fromEntries(files.map(([name, body]) => [`OPS/${name}`, strToU8(xhtml(body))])),
+    ...Object.fromEntries(
+      Object.entries(options.images ?? {}).map(([name, bytes]) => [`OPS/${name}`, bytes]),
+    ),
   };
   if (options.nav) entries["OPS/toc.xhtml"] = strToU8(xhtml(options.nav));
   if (options.ncx) entries["OPS/toc.ncx"] = strToU8(options.ncx);
@@ -396,4 +419,69 @@ test("legacy NCX and heading labels remain recoverable after chapter splitting",
   const noToc = await parseEpub(epub(files));
   assert.equal(legacyEpubChapterTitle(noToc, "OPS/book.xhtml"), "A Beginning");
   assert.equal(legacyEpubChapterTitle(noToc, "OPS/missing.xhtml"), undefined);
+});
+
+const pngBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
+const jpegBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 4, 5, 6]);
+const pngUrl = `data:image/png;base64,${Buffer.from(pngBytes).toString("base64")}`;
+const jpegUrl = `data:image/jpeg;base64,${Buffer.from(jpegBytes).toString("base64")}`;
+
+test("EPUB chapters expose packaged inline images as data URLs", async () => {
+  const book = await parseEpub(
+    epub(
+      [
+        [
+          "book.xhtml",
+          '<p>Before.</p><img src="images/plate.png" alt="Plate"/><svg><image xlink:href="images/plate.png"/></svg><p>After.</p>',
+        ],
+      ],
+      { images: { "images/plate.png": pngBytes } },
+    ),
+  );
+  const content = readEpubChapterContent(book, book.chapters[0].path);
+  assert.equal(content.text, "Before.\n\nAfter.");
+  assert.deepEqual(content.images, [pngUrl]);
+});
+
+test("split EPUB chapters keep only the images that belong to their section", async () => {
+  const book = await parseEpub(
+    epub(
+      [
+        [
+          "book.xhtml",
+          '<h2 id="one">One</h2><p>First.</p><img src="images/one.png"/><img src="images/one.png"/><h2 id="two">Two</h2><img src="images/two.jpg"/><p>Second.</p><h2 id="three">Three</h2><p>Third.</p>',
+        ],
+      ],
+      {
+        nav: toc(
+          ["book.xhtml#one", "One"],
+          ["book.xhtml#two", "Two"],
+          ["book.xhtml#three", "Three"],
+        ),
+        images: { "images/one.png": pngBytes, "images/two.jpg": jpegBytes },
+      },
+    ),
+  );
+  const one = book.chapters.find((chapter) => chapter.title === "One");
+  const two = book.chapters.find((chapter) => chapter.title === "Two");
+  const three = book.chapters.find((chapter) => chapter.title === "Three");
+  assert.ok(one && two && three);
+  assert.deepEqual(readEpubChapterContent(book, one.path).images, [pngUrl]);
+  assert.deepEqual(readEpubChapterContent(book, two.path).images, [jpegUrl]);
+  assert.deepEqual(readEpubChapterContent(book, three.path).images, []);
+});
+
+test("EPUB chapter images keep inline data URLs and skip remote sources", async () => {
+  const inline = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
+  const book = await parseEpub(
+    epub([
+      [
+        "book.xhtml",
+        `<p>Text.</p><img src="https://example.com/tracker.png"/><img src="${inline}"/><img src="images/missing.png"/>`,
+      ],
+    ]),
+  );
+  const content = readEpubChapterContent(book, book.chapters[0].path);
+  assert.equal(content.text, "Text.");
+  assert.deepEqual(content.images, [inline]);
 });

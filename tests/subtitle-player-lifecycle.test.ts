@@ -35,10 +35,6 @@ const autoSyncSource = readFileSync(
   new URL("../src/views/player/hooks/use-auto-sync.ts", import.meta.url),
   "utf8",
 );
-const translationAutoSelectSource = readFileSync(
-  new URL("../src/views/player/hooks/use-translation-auto-select.ts", import.meta.url),
-  "utf8",
-);
 const mediaServerPlaybackSource = readFileSync(
   new URL("../src/lib/media-server/playback.ts", import.meta.url),
   "utf8",
@@ -346,10 +342,10 @@ test("mpv autosync reuses retained prepared cues and paths", () => {
 });
 
 test("finished translations stay automatic and cannot take over a manual choice", () => {
-  // The deferred completion of a translating addon must not claim manual
-  // ownership, or it re-selects subtitles the viewer just turned off.
-  assert.match(
-    translationAutoSelectSource,
-    /addSubtitle\(\s*job\.url,[\s\S]{0,160}?["']automatic["'],?\s*\)/,
-  );
+  // The deferred completion of a translating addon must not claim manual ownership,
+  // or it re-selects subtitles the viewer just turned off. Both engines re-add the
+  // finished file from their translation queue as automatic work.
+  for (const source of [mpvSource, html5Source]) {
+    assert.match(source, /attemptPendingTranslation = async[\s\S]{0,260}?["']automatic["']/);
+  }
 });

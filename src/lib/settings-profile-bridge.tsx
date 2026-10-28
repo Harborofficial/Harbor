@@ -4,9 +4,16 @@ import { useSettings } from "./settings";
 
 export function SettingsProfileBridge() {
   const { activeProfile } = useProfiles();
-  const { switchProfile } = useSettings();
+  const { settings, switchProfile } = useSettings();
+  const isNuvio = settings.accountProvider === "nuvio";
+
   useEffect(() => {
-    if (activeProfile) switchProfile(activeProfile.id, activeProfile.settingsLinked !== false);
-  }, [activeProfile?.id, activeProfile?.settingsLinked, switchProfile]);
+    // In Nuvio mode, all profiles share the user's unified Harbor app settings.
+    // In Stremio mode, handle per-profile settings switching if active.
+    if (!isNuvio && activeProfile) {
+      switchProfile(activeProfile.id, activeProfile.settingsLinked !== false);
+    }
+  }, [isNuvio, activeProfile?.id, activeProfile?.settingsLinked, switchProfile]);
+
   return null;
 }

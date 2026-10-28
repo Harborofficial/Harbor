@@ -1905,8 +1905,8 @@ const sweep: Record<string, string> = {
   "Fill in the details, then Subscribe": "Điền thông tin, rồi nhấn Đăng ký",
   "This is the part people get stuck on. None of it is checked and nothing is billed. Give the app any name, any URL, pick a type of use, and write a sentence for the summary. The contact fields can be anything real enough to look sensible. Tick the agreement and press Subscribe.":
     "Đây là phần mọi người thường gặp khó khăn. Không có thông tin nào được kiểm tra và bạn không bị tính phí. Đặt tên bất kỳ cho ứng dụng, nhập URL bất kỳ, chọn loại hình sử dụng và viết một câu tóm tắt. Các trường liên hệ chỉ cần điền thông tin trông hợp lý. Đánh dấu vào thỏa thuận rồi nhấn Đăng ký.",
-  "For Application URL anything works, for example https://harbor.site. TMDB never visits it.":
-    "Bạn có thể nhập bất cứ gì vào URL ứng dụng, chẳng hạn https://harbor.site. TMDB sẽ không bao giờ truy cập URL đó.",
+  "For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it.":
+    "Bạn có thể nhập bất cứ gì vào URL ứng dụng, chẳng hạn https://harborcommunity.site. TMDB sẽ không bao giờ truy cập URL đó.",
   "That was the hard part": "Phần khó nhất đã xong",
   "TMDB confirms the key is created. Follow the link it gives you to see your API key details.":
     "TMDB xác nhận khóa đã được tạo. Mở liên kết được cung cấp để xem thông tin chi tiết về khóa API của bạn.",

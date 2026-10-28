@@ -1,5 +1,5 @@
 import type { SimklCacheItem } from "./activities";
-import { simklRequest } from "./client";
+import { simklTitleDetail } from "./title-detail";
 
 export interface AnimeFranchise {
   key: string;
@@ -13,7 +13,7 @@ export interface AnimeFranchise {
 }
 
 const SEASON_PATTERNS: RegExp[] = [
-  /[.°'`:!?,_\-\(\)\[\]{}#]+$/,
+  /[.°'`:!?,_\-(\)[\]{}#]+$/,
   /\s+season\s*\d+$/i,
   /\s+s\d+$/i,
   /\s+\d+(st|nd|rd|th)\s+season$/i,
@@ -63,22 +63,6 @@ export function normalizeAnimeTitle(title: string): string {
   return normalized.replace(/[^a-z0-9]/g, "");
 }
 
-interface SimklRelation {
-  title?: string;
-  en_title?: string | null;
-  year?: number;
-  anime_type?: string;
-  relation_type?: string;
-  is_direct?: boolean;
-  ids?: {
-    simkl_id?: number;
-  };
-}
-
-interface SimklAnimeDetail {
-  relations?: SimklRelation[];
-}
-
 const relationsCache = new Map<number, Set<number>>();
 const relationsInFlight = new Map<number, Promise<Set<number>>>();
 
@@ -95,11 +79,7 @@ async function fetchRelations(
 
   const promise = (async () => {
     try {
-      const endpoint = type === "movie" ? `/movies/${simklId}` : `/anime/${simklId}`;
-      const detail = await simklRequest<SimklAnimeDetail>(endpoint, {
-        method: "GET",
-        authed: false,
-      });
+      const detail = await simklTitleDetail(simklId, type === "movie" ? "movie" : "anime");
       const related = new Set<number>();
       if (detail.relations && Array.isArray(detail.relations)) {
         for (const rel of detail.relations) {

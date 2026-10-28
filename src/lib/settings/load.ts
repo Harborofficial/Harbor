@@ -14,6 +14,7 @@ import {
   sanitizeFullscreenClockStyle,
 } from "@/lib/local-time";
 import { normalizePosterCardSettings } from "@/lib/poster-backdrop-expansion";
+import { normalizeLibraryGroups } from "@/lib/library-groups";
 import {
   sanitizeSubtitleOffsetPosition,
   sanitizeSubtitleOffsetSize,
@@ -50,6 +51,23 @@ function sanitizePosterDockTransition(value: unknown): number {
     return DEFAULT.posterDockTransitionMs;
   }
   return Math.min(1500, Math.max(250, Math.round(value)));
+}
+
+const MAX_END_SCREEN_LEAD_SEC = 30 * 60;
+
+function sanitizeEndScreenLead(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return DEFAULT.endScreenLeadSec;
+  }
+  if (value < 0) return -1;
+  return Math.min(MAX_END_SCREEN_LEAD_SEC, Math.round(value));
+}
+
+function sanitizeEndScreenCountdown(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return DEFAULT.endScreenCountdownSec;
+  }
+  return Math.min(60, Math.max(0, Math.round(value)));
 }
 
 function sanitizeTopbarAppearance(
@@ -396,8 +414,14 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      libraryGroups: normalizeLibraryGroups(parsed.libraryGroups),
+      spooktoberBanner: ["disabled", "small", "below-hero"].includes(parsed.spooktoberBanner ?? "")
+        ? parsed.spooktoberBanner
+        : undefined,
       togetherRelayUrl: migratePublicRelayUrl(
-        typeof parsed.togetherRelayUrl === "string" ? parsed.togetherRelayUrl : DEFAULT.togetherRelayUrl,
+        typeof parsed.togetherRelayUrl === "string"
+          ? parsed.togetherRelayUrl
+          : DEFAULT.togetherRelayUrl,
       ),
       ...posterCards,
       animePreferImdbStreams: parsed.animePreferImdbStreams === true,
@@ -408,6 +432,9 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
         parsed.topbarGlassControls,
       ),
       posterDockTransitionMs: sanitizePosterDockTransition(parsed.posterDockTransitionMs),
+      endScreenLeadSec: sanitizeEndScreenLead(parsed.endScreenLeadSec),
+      endScreenCountdownSec: sanitizeEndScreenCountdown(parsed.endScreenCountdownSec),
+      endScreenOnZero: parsed.endScreenOnZero === "play" ? "play" : "close",
       bigPictureDisplay: sanitizeDisplaySelection(parsed.bigPictureDisplay),
       playerSeparateDisplay: sanitizeDisplaySelection(parsed.playerSeparateDisplay),
       playerSeparateCoverTaskbar:

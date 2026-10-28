@@ -2,7 +2,7 @@ use super::deck::{DeckPlay, MusicDeck};
 use crate::mpv::AudioDevice;
 use crate::music::audio::MusicAudioSettings;
 use crate::music::{MusicStream, MusicTrack};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -43,7 +43,7 @@ pub struct BroadcastTargets {
     pub install_url: String,
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BroadcastStatus {
     pub active: bool,

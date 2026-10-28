@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod install;
+mod clean_install;
 mod shell;
 mod update;
 

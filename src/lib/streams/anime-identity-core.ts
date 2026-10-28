@@ -99,6 +99,10 @@ export function findAnimeEntryNumber(
 export interface EpisodeBearing {
   episode: number | null;
   seasonPack: boolean;
+  season?: number | null;
+  title?: string | null;
+  description?: string | null;
+  behaviorHints?: { filename?: string; fileName?: string };
 }
 
 /**
@@ -112,11 +116,23 @@ export interface EpisodeBearing {
 export function partitionByExactAnimeEpisode<T extends EpisodeBearing>(
   streams: T[],
   valid: Set<number>,
+  coordinates?: Array<[number, number]>,
+  splitPart?: number,
+  entryTitles?: string[] | null,
 ): { keep: T[]; drop: T[] } {
   const keep: T[] = [];
   const drop: T[] = [];
   for (const s of streams) {
-    if (!s.seasonPack && s.episode != null && !valid.has(s.episode)) drop.push(s);
+    const text = `${s.behaviorHints?.filename ?? s.behaviorHints?.fileName ?? ""} ${s.title ?? ""} ${s.description ?? ""}`;
+    const partEvidence = splitPart == null || splitPart === 1 || matchesSplitAnimePart(text, splitPart);
+    const ambiguousRelative = splitPart != null && splitPart > 1 && s.season == null &&
+      s.episode === coordinates?.[0][1] && !partEvidence;
+    const wrongEntry = conflictingAnimeEntryTitle(text, entryTitles);
+    const wrongSeason = s.season != null && coordinates != null &&
+      !coordinates.some(([season]) => season === s.season);
+    const wrongPair = s.season != null && s.episode != null && coordinates != null &&
+      !coordinates.some(([season, episode]) => season === s.season && episode === s.episode);
+    if (wrongEntry || ambiguousRelative || wrongSeason || wrongPair || (!s.seasonPack && s.episode != null && !valid.has(s.episode))) drop.push(s);
     else keep.push(s);
   }
   return { keep, drop };
@@ -146,6 +162,47 @@ const SPLIT_PART_SEASON: Record<number, number> = {
 export function splitFranchiseDisplaySeason(kitsuId: number | null | undefined): number | null {
   if (kitsuId == null || !Number.isFinite(kitsuId)) return null;
   return SPLIT_PART_SEASON[kitsuId] ?? null;
+}
+
+function conflictingAnimeEntryTitle(text: string, expected: string[] | null | undefined): boolean {
+  const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, " ");
+  const parts = [
+    /\bphantom blood\b/, /\bbattle tendency\b/, /\bstardust crusaders\b/,
+    /\b(?:diamond is unbreakable|diamond wa kudakenai)\b/,
+    /\b(?:golden wind|ougon no kaze|vento aureo)\b/,
+    /\bstone ocean\b/, /\bsteel ball run\b/,
+  ];
+  const wanted = (expected ?? []).map(normalize);
+  const targetParts = parts.filter((part) => wanted.some((title) => part.test(title)));
+  if (targetParts.length === 0) return false;
+  const actual = normalize(text);
+  return parts.some((part) => part.test(actual) && !targetParts.includes(part));
+}
+
+function matchesSplitAnimePart(text: string, part: number): boolean {
+  const normalized = text.toLowerCase().replace(/[^a-z0-9]+/g, " ");
+  const names: Record<number, RegExp> = {
+    2: /\b(?:the separation|ketsubetsu tan)\b/,
+    3: /\b(?:the conflict|soukoku tan)\b/,
+    4: /\b(?:the calamity|kashin tan)\b/,
+  };
+  return names[part]?.test(normalized) === true ||
+    new RegExp(`\\b(?:part|cour|season)\\s*${part}\\b`).test(normalized);
+}
+
+/** TYBW's cour, TYBW-continuous and whole-Bleach numbers are distinct spaces. */
+export function splitAnimeStreamCoordinates(streamId: string | null | undefined): {
+  coordinates: Array<[number, number]>;
+  absoluteNumbers: number[];
+} | null {
+  const match = /^kitsu:(\d+):(\d+)$/.exec(streamId ?? "");
+  if (!match) return null;
+  const season = splitFranchiseDisplaySeason(Number(match[1]));
+  const episode = Number(match[2]);
+  if (season == null || episode < 1) return null;
+  const offset = [0, 13, 26, 40][season - 1];
+  const tybw = offset + episode;
+  return { coordinates: [[season, episode], [17, tybw]], absoluteNumbers: [tybw, 366 + tybw] };
 }
 
 export function isForeignSplitSeason(

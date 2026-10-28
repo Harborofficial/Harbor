@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import type { PickerItem } from "./season-arc-picker";
+import { seasonPill } from "@/lib/season-name";
 
 function shortOrderLabel(label: string): string {
   return label.replace(/\s*Order$/i, "");
@@ -64,6 +65,7 @@ export function TvdbOrderPanel({
   const open = menu != null;
   const current = items.find((i) => i.key === activeKey) ?? items[0];
   const activeIsExtra = current?.extra ?? false;
+  const currentPill = current ? seasonPill(current, t) : null;
   const [showExtras, setShowExtras] = useState(false);
   useEffect(() => {
     if (activeIsExtra) setShowExtras(true);
@@ -123,6 +125,11 @@ export function TvdbOrderPanel({
         className="relative flex h-10 items-center gap-2 rounded-full bg-white/[0.06] ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-white/[0.10]"
       >
         <span className="max-w-[220px] truncate">{current?.name ?? t("Seasons")}</span>
+        {currentPill && (
+          <span className="shrink-0 rounded bg-ink/10 px-1.5 py-px text-[10.5px] font-semibold text-ink-muted">
+            {currentPill}
+          </span>
+        )}
         <ChevronDown
           size={15}
           className={`text-ink-muted transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -133,7 +140,13 @@ export function TvdbOrderPanel({
           <div
             ref={menuRef}
             onMouseDown={(e) => e.stopPropagation()}
-            style={{ left: menu.left, right: menu.right, top: menu.top, bottom: menu.bottom, maxHeight: menu.maxH }}
+            style={{
+              left: menu.left,
+              right: menu.right,
+              top: menu.top,
+              bottom: menu.bottom,
+              maxHeight: menu.maxH,
+            }}
             className="animate-fade-in fixed z-[200] flex w-[340px] flex-col overflow-hidden rounded-lg border border-edge bg-elevated shadow-[0_18px_44px_-12px_rgba(0,0,0,0.6)]"
           >
             {orderTypes.length > 1 && (
@@ -160,21 +173,24 @@ export function TvdbOrderPanel({
               <span>{t("Episodes")}</span>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto pb-1.5">
-              {items.filter((i) => !i.extra).map((item) => {
-                const ongoing = isOngoing(item.to);
-                return (
-                  <OrderRow
-                    key={item.key}
-                    name={item.name}
-                    sub={dateSub(item, ongoing, t("Current"))}
-                    count={item.count}
-                    active={item.key === activeKey}
-                    ongoing={ongoing}
-                    ongoingLabel={t("Ongoing")}
-                    onClick={() => pick(item.key)}
-                  />
-                );
-              })}
+              {items
+                .filter((i) => !i.extra)
+                .map((item) => {
+                  const ongoing = isOngoing(item.to);
+                  return (
+                    <OrderRow
+                      key={item.key}
+                      name={item.name}
+                      pill={seasonPill(item, t)}
+                      sub={dateSub(item, ongoing, t("Current"))}
+                      count={item.count}
+                      active={item.key === activeKey}
+                      ongoing={ongoing}
+                      ongoingLabel={t("Ongoing")}
+                      onClick={() => pick(item.key)}
+                    />
+                  );
+                })}
               {items.some((i) => i.extra) && (
                 <button
                   onClick={() => setShowExtras((v) => !v)}
@@ -188,22 +204,25 @@ export function TvdbOrderPanel({
                 </button>
               )}
               {showExtras &&
-                items.filter((i) => i.extra).map((item) => {
-                  const ongoing = isOngoing(item.to);
-                  return (
-                    <OrderRow
-                      key={item.key}
-                      name={item.name}
-                      sub={dateSub(item, ongoing, t("Current"))}
-                      count={item.count}
-                      active={item.key === activeKey}
-                      ongoing={ongoing}
-                      ongoingLabel={t("Ongoing")}
-                      badge={item.badge}
-                      onClick={() => pick(item.key)}
-                    />
-                  );
-                })}
+                items
+                  .filter((i) => i.extra)
+                  .map((item) => {
+                    const ongoing = isOngoing(item.to);
+                    return (
+                      <OrderRow
+                        key={item.key}
+                        name={item.name}
+                        pill={seasonPill(item, t)}
+                        sub={dateSub(item, ongoing, t("Current"))}
+                        count={item.count}
+                        active={item.key === activeKey}
+                        ongoing={ongoing}
+                        ongoingLabel={t("Ongoing")}
+                        badge={item.badge}
+                        onClick={() => pick(item.key)}
+                      />
+                    );
+                  })}
             </div>
           </div>,
           document.body,
@@ -214,6 +233,7 @@ export function TvdbOrderPanel({
 
 function OrderRow({
   name,
+  pill,
   sub,
   count,
   active,
@@ -223,6 +243,7 @@ function OrderRow({
   onClick,
 }: {
   name: string;
+  pill?: string | null;
   sub: string;
   count: number;
   active: boolean;
@@ -235,7 +256,7 @@ function OrderRow({
     <button
       onClick={onClick}
       className={`grid w-full grid-cols-[1fr_auto] items-center gap-x-3 px-4 py-2.5 text-start transition-colors ${
-        active ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
+        active ? "bg-ink/10 text-ink" : "text-ink hover:bg-raised"
       }`}
     >
       <span className="flex min-w-0 flex-col">
@@ -253,9 +274,18 @@ function OrderRow({
             </span>
           )}
         </span>
-        {sub && <span className="text-[11.5px] text-ink-subtle">{sub}</span>}
+        {(pill || sub) && (
+          <span className="flex items-center gap-1.5 text-[11.5px] text-ink-muted">
+            {pill && (
+              <span className="shrink-0 rounded bg-ink/10 px-1.5 py-px text-[10.5px] font-semibold text-ink-muted">
+                {pill}
+              </span>
+            )}
+            {sub && <span className="truncate">{sub}</span>}
+          </span>
+        )}
       </span>
-      <span className="tabular-nums text-[12.5px] text-ink-subtle">{count}</span>
+      <span className="tabular-nums text-[12.5px] text-ink-muted">{count}</span>
     </button>
   );
 }

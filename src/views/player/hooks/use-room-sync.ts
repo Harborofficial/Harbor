@@ -183,10 +183,10 @@ export function useRoomSync(params: {
       if (!b) return;
       if (command.action === "play") {
         flushPending();
-        b.play().catch(() => {});
+        b.play({ reason: "room" }).catch(() => {});
       } else if (command.action === "pause") {
         flushPending();
-        b.pause();
+        b.pause("room");
       } else if (command.action === "seek") {
         if (typeof command.seq === "number") {
           const last = seekSeqRef.current.get(from);
@@ -232,8 +232,8 @@ export function useRoomSync(params: {
             snap.durationSec > 0 && livePos + buffered >= snap.durationSec - 0.5;
           if (!playing || (buffered < 2.0 && !nearEof)) {
             if (state.playing !== playing) {
-              if (state.playing && !playing) b.play().catch(() => {});
-              if (!state.playing && playing) b.pause();
+              if (state.playing && !playing) b.play({ reason: "room" }).catch(() => {});
+              if (!state.playing && playing) b.pause("room");
             }
             return;
           }
@@ -245,8 +245,8 @@ export function useRoomSync(params: {
         b.seek(target);
         if (driftTooBig) syncCatchUpRef.current = true;
       }
-      if (state.playing && snap.status !== "playing") b.play().catch(() => {});
-      if (!state.playing && snap.status === "playing") b.pause();
+      if (state.playing && snap.status !== "playing") b.play({ reason: "room" }).catch(() => {});
+      if (!state.playing && snap.status === "playing") b.pause("room");
     });
   }, [inRoom, onIncomingState, clientId, mediaKey, suppressOutgoingFor, snap.status, snap.durationSec, cast]);
 
@@ -335,7 +335,7 @@ export function useRoomSync(params: {
     ) {
       bridgeRef.current?.seek(seed.positionSeconds);
     }
-    if (snap.status === "playing") bridgeRef.current?.pause();
+    if (snap.status === "playing") bridgeRef.current?.pause("room");
   }, [inRoom, hasStarted, snap.status, isHost, roomSnapshot.started, roomSnapshot.syncState, roomSnapshot.hostClientId]);
 
   const lobbySeededRef = useRef(false);
@@ -380,8 +380,8 @@ export function useRoomSync(params: {
     suppressOutgoingFor(SYNC_SUPPRESS_MS);
     b.setRate(syncRate(state));
     b.seek(target);
-    if (state.playing) b.play().catch(() => {});
-    else b.pause();
+    if (state.playing) b.play({ reason: "room" }).catch(() => {});
+    else b.pause("room");
   }, [inRoom, isHost, hasStarted, roomSnapshot.syncState, mediaKey, suppressOutgoingFor]);
 
   return { inRoomRef, isHostRef, initialSyncDoneRef };

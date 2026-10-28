@@ -83,15 +83,24 @@ function mapComment(raw: RawComment): TraktComment {
   };
 }
 
-export async function fetchComments(
+export async function fetchCommentsStrict(
   target: TraktTarget,
   sort: string = "likes",
   page = 1,
   limit = 20,
 ): Promise<TraktComment[]> {
   const path = commentsPath(target, sort) + `?extended=images&page=${page}&limit=${limit}`;
-  const raw = await traktRequest<RawComment[]>(path).catch(() => [] as RawComment[]);
+  const raw = await traktRequest<RawComment[]>(path);
   return raw.map(mapComment);
+}
+
+export async function fetchComments(
+  target: TraktTarget,
+  sort: string = "likes",
+  page = 1,
+  limit = 20,
+): Promise<TraktComment[]> {
+  return fetchCommentsStrict(target, sort, page, limit).catch(() => [] as TraktComment[]);
 }
 
 export async function fetchReplies(commentId: number): Promise<TraktComment[]> {

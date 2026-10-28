@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchWebsiteSource } from "@/lib/games/source-fetch";
 import { matchingReleases, type GameSource } from "@/lib/games/sources";
+import { sourceSearchTitle } from "@/lib/games/source-title";
 import type { GameSources } from "./use-game-sources";
 
 type Matches = ReturnType<typeof matchingReleases>;
@@ -10,6 +11,7 @@ type LookupScope = { key: string; controller: AbortController; websites: Website
 /** Each website keeps its own continuation and failed page; successful pages stay usable. */
 export function useWebsiteMatches(sources: GameSources, game: Parameters<typeof matchingReleases>[1]) {
   const websites = sources.sources.filter(source => source.enabled && source.website);
+  const query = sourceSearchTitle(game.name);
   const key = JSON.stringify([sources.profile, game.id, game.name, game.steamId, game.igdbId, game.platforms, game.sourceOrigin, ...websites.map(source => [source.id, source.checkedAt, source.website])]);
   const scope = useRef<LookupScope | null>(null);
   const [state, setState] = useState({ key: "", matches: [] as Matches, loading: false, failed: false, hasMore: false });
@@ -29,7 +31,7 @@ export function useWebsiteMatches(sources: GameSources, game: Parameters<typeof 
     publish(current);
     await Promise.allSettled(selected.map(async website => {
       try {
-        const page = await fetchWebsiteSource(website.source.website!, game.name, website.next!, current.controller.signal, refresh, sources.profile);
+        const page = await fetchWebsiteSource(website.source.website!, query, website.next!, current.controller.signal, refresh, sources.profile);
         if (scope.current !== current || current.controller.signal.aborted) return;
         const matches = matchingReleases([{ ...website.source, entries: page.entries }], game);
         current.matches = [...new Map([...current.matches, ...matches].map(match => [`${match.source.id}:${match.release.id}`, match])).values()];

@@ -352,14 +352,17 @@ export function mangaDetail(id: string) {
   );
 }
 
-export function mangaChapters(id: string, opts?: { tries?: number; timeout?: number }) {
+export function mangaChapters(
+  id: string,
+  opts?: { tries?: number; timeout?: number; refresh?: boolean },
+) {
   return cached(
     "chapters",
     id,
-    20 * MIN,
+    opts?.refresh ? 0 : 20 * MIN,
     (provider) => {
       const routed = routeById(id);
-      return routed ? routed.provider.chapters(routed.orig) : provider.chapters(id);
+      return routed ? routed.provider.chapters(routed.orig, opts) : provider.chapters(id, opts);
     },
     { timeout: 15_000, ...opts },
   );
@@ -406,17 +409,19 @@ export function resumeChapters(id: string): Promise<MangaChapter[]> {
 export async function streamChapters(
   id: string,
   onChunk: (chs: MangaChapter[]) => void,
+  opts?: { refresh?: boolean },
 ): Promise<void> {
   await ensureMangaSources();
+  if (opts?.refresh) cache.delete(`${activeMangaSourceId()}|chapters.own|${id}`);
   const subs = aggregateSubProviders();
   if (subs.length < 2) {
-    const chs = await mangaChapters(id).catch(() => [] as MangaChapter[]);
+    const chs = await mangaChapters(id, opts).catch(() => [] as MangaChapter[]);
     if (chs.length) onChunk(chs);
     return;
   }
   const key = `all|chaptersAll|${id}`;
   const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < 20 * MIN) {
+  if (!opts?.refresh && hit && Date.now() - hit.at < 20 * MIN) {
     onChunk((await hit.p) as MangaChapter[]);
     return;
   }
@@ -428,6 +433,7 @@ export async function streamChapters(
       onChunk(chunk);
     },
     activeMangaProvider().id,
+    opts,
   );
   if (all.length) settle(key, all);
 }

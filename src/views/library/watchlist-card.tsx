@@ -1,16 +1,16 @@
 import { Bookmark, Trash2, ListX } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Poster, usePosterChain } from "@/components/poster";
 import { hasEmbeddedStreams, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
+import { useViewActions } from "@/lib/view";
 import { useInWatchlist } from "@/lib/watchlist";
 import { useT } from "@/lib/i18n";
 import { hydrateLibraryMeta } from "./hydrate-meta";
 import { useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
 import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
 
-export function WatchlistCard({
+export const WatchlistCard = memo(function WatchlistCard({
   meta,
   onRemove,
   removeLabel,
@@ -22,7 +22,7 @@ export function WatchlistCard({
   removeOpensDialog?: boolean;
 }) {
   const t = useT();
-  const { openMeta } = useView();
+  const { openMeta } = useViewActions();
   const { settings } = useSettings();
   const inList = useInWatchlist(meta.id);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -135,6 +135,10 @@ export function WatchlistCard({
     display.poster,
     display.type === "series" ? "series" : "movie",
   );
+  const handlePosterError = useCallback(() => {
+    poster.onError();
+    onPosterError();
+  }, [poster.onError, onPosterError]);
   return (
     <div
       ref={(element) => {
@@ -160,10 +164,7 @@ export function WatchlistCard({
           src={poster.src}
           seed={display.id}
           className="h-full w-full"
-          onError={() => {
-            poster.onError();
-            onPosterError();
-          }}
+          onError={handlePosterError}
         />
         {inList && (
           <span className="absolute start-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-ink/80 text-canvas backdrop-blur-sm">
@@ -206,4 +207,4 @@ export function WatchlistCard({
       </button>
     </div>
   );
-}
+});

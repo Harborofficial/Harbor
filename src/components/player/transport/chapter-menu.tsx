@@ -2,6 +2,7 @@ import { ListTree, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Chapter } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 import { Tooltip } from "./tooltip";
 import { fmtTime } from "./transport-utils";
@@ -20,6 +21,8 @@ export function ChapterMenu({
   iconUrl?: string;
 }) {
   const t = useT();
+  const { settings, update } = useSettings();
+  const showMarkers = settings.seekBarChapters !== false;
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const openRef = useRef(open);
@@ -114,6 +117,23 @@ export function ChapterMenu({
               <X size={13} strokeWidth={2.2} />
             </button>
           </header>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showMarkers}
+            onClick={() => update({ seekBarChapters: !showMarkers })}
+            className="flex w-full shrink-0 items-center justify-between gap-3 border-b border-edge-soft px-4 py-3 text-start text-[12.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+          >
+            <span>{t("Show chapter marks on seekbar")}</span>
+            <span
+              aria-hidden
+              className={`flex h-[18px] w-8 shrink-0 items-center rounded-full px-[3px] transition-colors ${showMarkers ? "bg-accent" : "bg-raised"}`}
+            >
+              <span
+                className={`h-3 w-3 rounded-full bg-canvas shadow-sm transition-transform ${showMarkers ? "translate-x-[14px] rtl:-translate-x-[14px]" : "translate-x-0"}`}
+              />
+            </span>
+          </button>
           <div className="flex flex-col gap-0.5 overflow-y-auto p-2">
             {ordered.map((chapter, index) => {
               const isCurrent = index === activeIndex;

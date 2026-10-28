@@ -1957,6 +1957,18 @@ export function isKnownPreset(id: string): boolean {
   return getThemeById(id) !== null;
 }
 
+export function getTrayThemes(): Array<{ id: string; name: string }> {
+  const themes = [
+    ...Object.values(THEME_PRESETS),
+    ...FEATURED_CUSTOM_THEMES,
+    ...BETA_THEMES,
+    ...PARKED_THEMES,
+    ...TEMPLATE_THEMES,
+    ...getCustomThemes(),
+  ];
+  return Array.from(new Map(themes.map(({ id, name }) => [id, { id, name }])).values());
+}
+
 const CYCLE_THEME_IDS: ThemePresetId[] = (Object.keys(THEME_PRESETS) as ThemePresetId[]).filter(
   (id) => id !== "crunch",
 );
@@ -1966,7 +1978,7 @@ export function nextColorTheme(current: string): ThemePresetId {
   return CYCLE_THEME_IDS[(i + 1) % CYCLE_THEME_IDS.length];
 }
 
-function resolveTokens(theme: ThemeSettings): Record<string, string> {
+export function resolveTokens(theme: ThemeSettings): Record<string, string> {
   if (theme.preset === "custom" && theme.customColors) {
     return customColorsToTokens(theme.customColors);
   }

@@ -25,7 +25,7 @@ pub fn environment(loader: &str, game: &str) -> Result<()> {
 }
 pub fn client() -> Result<reqwest::Client> {
     reqwest::Client::builder()
-        .user_agent("Harbor-Games/0.9 (https://harbor.site)")
+        .user_agent("Harbor-Games/0.9 (https://harborcommunity.site)")
         .timeout(Duration::from_secs(20))
         .redirect(reqwest::redirect::Policy::none())
         .build()

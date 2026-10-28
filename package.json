@@ -1,6 +1,6 @@
 {
   "name": "harbor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -21,6 +21,7 @@
     "tauri": "tauri",
     "tauri:build:linux-system": "tauri build --config src-tauri/tauri.linux-system.conf.json",
     "shipyard": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-shipyard.ps1",
+    "shipyard:modules": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-shipyard-modules.ps1",
     "release:beta": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release-beta.ps1",
     "release:stable": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release-beta.ps1 -Channel stable",
     "build:tv": "tsc -b && vite build --mode android",

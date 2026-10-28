@@ -83,6 +83,20 @@ pub(crate) struct NativeMpvRect {
     pub height: f64,
 }
 
+/// Smallest client extent that can still show a video surface. The main window
+/// is configured with a 960x600 minimum, so anything below this is not a real
+/// resize.
+#[cfg_attr(not(any(windows, test)), allow(dead_code))]
+pub(crate) const MIN_EMBED_CLIENT: i32 = 64;
+
+/// Reject iconic/transient client rectangles, preserving the last video size.
+/// mpv also follows its parent independently; the native child guard below
+/// covers that path before mpv's renderer consumes the size change.
+#[cfg_attr(not(any(windows, test)), allow(dead_code))]
+pub(crate) fn surface_is_hidden(minimized: bool, client_width: i32, client_height: i32) -> bool {
+    minimized || client_width < MIN_EMBED_CLIENT || client_height < MIN_EMBED_CLIENT
+}
+
 #[cfg_attr(not(any(windows, test)), allow(dead_code))]
 pub(crate) fn map_css_geometry(
     css: &MpvGeometry,
@@ -191,6 +205,46 @@ impl MpvState {
     pub(crate) async fn ctx_addr(&self) -> Option<usize> {
         let guard = self.inner.lock().await;
         guard.as_ref().map(|session| session.mpv.ctx.as_ptr() as usize)
+    }
+
+    /// Preserve the exact selected video track while Linux moves the libmpv
+    /// render context between the main and detached PiP windows.
+    #[cfg(target_os = "linux")]
+    pub(crate) async fn selected_video_track(&self) -> Result<Option<String>, String> {
+        let mpv = {
+            let guard = self.inner.lock().await;
+            guard
+                .as_ref()
+                .map(|session| session.mpv.clone())
+                .ok_or_else(|| "mpv not started".to_string())?
+        };
+
+        let vid = mpv
+            .get_property::<String>("vid")
+            .map_err(|error| format!("get vid before render retarget: {error}"))?;
+
+        if vid == "no" {
+            return Ok(None);
+        }
+
+        vid.parse::<u64>()
+            .map_err(|_| format!("unexpected mpv video track id: {vid}"))?;
+
+        Ok(Some(vid))
+    }
+
+    #[cfg(target_os = "linux")]
+    pub(crate) async fn restore_video_track(&self, vid: &str) -> Result<(), String> {
+        let mpv = {
+            let guard = self.inner.lock().await;
+            guard
+                .as_ref()
+                .map(|session| session.mpv.clone())
+                .ok_or_else(|| "mpv not started".to_string())?
+        };
+
+        mpv.set_property("vid", vid)
+            .map_err(|error| format!("restore vid after render retarget: {error}"))
     }
 
     pub(crate) async fn active_file_path(&self) -> Result<Option<String>, String> {
@@ -433,6 +487,16 @@ fn apply_pre_init(
     // hardware frames for mpv's d3d11vpp filter.
     let rtx_video = rtx || rtx_vsr;
     let on_mac_embed = cfg!(target_os = "macos") && embed_hwnd.is_some();
+    #[cfg(target_os = "macos")]
+    let macos_major = objc2_foundation::NSProcessInfo::processInfo()
+        .operatingSystemVersion()
+        .majorVersion;
+    #[cfg(target_os = "macos")]
+    if macos_major == 27 {
+        // macOS 27 can reject planar CoreAudio formats, forcing mpv to fall back
+        // to AVFoundation, which can stall when playback speed changes.
+        set("audio-format", "float");
+    }
     if on_mac_embed {
         set("hwdec", "videotoolbox-copy");
         set("force-window", "no");
@@ -816,6 +880,7 @@ pub async fn mpv_start(
     let separate_screen_for_init = None;
     #[cfg(not(windows))]
     let separate_screen_size_for_init = None;
+    #[cfg(feature = "music")]
     if let Err(error) = crate::music::pause_for_video(&app).await {
         eprintln!("[harbor::music] could not pause for video: {error}");
     }
@@ -1624,6 +1689,10 @@ const MPV_ALLOWED_COMMANDS: &[&str] = &[
     "frame-back-step",
     "loadfile",
     "ao-reload",
+    // Writes a line into mpv's log, which is the only log a release build keeps.
+    // The player uses it to name the control behind each pause/play so a user's
+    // log explains itself.
+    "print-text",
 ];
 
 fn mpv_property_blocked(name: &str) -> bool {
@@ -1699,6 +1768,28 @@ pub async fn mpv_get_property(state: State<'_, MpvState>, name: String) -> Resul
     })
 }
 
+/// Reads a list option such as `sub-ass-style-overrides` item by item. `mpv_get_property`
+/// returns mpv's text form, which doesn't escape commas inside items, so writing that text
+/// back would split an item like `FontName=Comic, Neue` in two.
+#[tauri::command]
+pub async fn mpv_get_property_list(
+    state: State<'_, MpvState>,
+    name: String,
+) -> Result<Vec<String>, String> {
+    let mpv = {
+        let g = state.inner.lock().await;
+        g.as_ref()
+            .map(|s| s.mpv.clone())
+            .ok_or_else(|| "mpv not started".to_string())?
+    };
+    let node: MpvNode = mpv
+        .get_property(&name)
+        .map_err(|e| format!("get {}: {}", name, e))?;
+    node.array()
+        .and_then(|items| items.map(|item| item.str().map(str::to_string)).collect())
+        .ok_or_else(|| format!("{} is not a list of text", name))
+}
+
 /// Descriptions of the passes mpv's video output is currently running, taken
 /// from `vo-passes`. `glsl-shaders` only echoes back what was requested, so a
 /// chain that failed to compile still reads as active there. This is what the
@@ -1761,7 +1852,17 @@ pub async fn mpv_set_geometry(
             g.as_ref().map(|s| s.embedded).unwrap_or(false)
         };
         if embedded {
-            return position_embedded_mpv_child(&app, geom);
+            let result = position_embedded_mpv_child(&app, geom);
+            if let Some(line) = embedded_surface_trace(&app) {
+                let g = _state.inner.lock().await;
+                if let Some(session) = g.as_ref() {
+                    let render_width = session.mpv.get_property::<i64>("osd-width").ok();
+                    let render_height = session.mpv.get_property::<i64>("osd-height").ok();
+                    let line = format!("{line} renderer={render_width:?}x{render_height:?}");
+                    let _ = mpv_argv_command(&session.mpv, &["print-text", &line]);
+                }
+            }
+            return result;
         }
     }
     #[cfg(target_os = "macos")]
@@ -3120,6 +3221,9 @@ pub async fn mpv_stop(app: AppHandle, state: State<'_, MpvState>) -> Result<(), 
             *guard = None;
         }
         MPV_POS_LAST_COUNT.store(usize::MAX, std::sync::atomic::Ordering::Relaxed);
+        if let Ok(mut guard) = MPV_SIZE_GUARD_STATE.lock() {
+            *guard = None;
+        }
     }
     let _ = app;
     Ok(())
@@ -3221,6 +3325,137 @@ fn get_main_hwnd_str(_app: &AppHandle) -> Option<String> {
 
 #[cfg(windows)]
 const HARBOR_MPV_SUBCLASS_ID: usize = 0xA1B2C3D4;
+
+#[cfg(windows)]
+const HARBOR_MPV_SIZE_GUARD_ID: usize = 0xA1B2C3D5;
+#[cfg(windows)]
+const HARBOR_MPV_INSTALL_GUARD: u32 = 0x8000 + 0x374;
+#[cfg(windows)]
+static MPV_BLOCKED_ICONIC_RESIZES: std::sync::atomic::AtomicUsize =
+    std::sync::atomic::AtomicUsize::new(0);
+
+#[cfg(windows)]
+fn embedded_surface_trace(app: &AppHandle) -> Option<String> {
+    use windows::Win32::Foundation::RECT;
+    use windows::Win32::UI::WindowsAndMessaging::{GetClientRect, IsIconic, IsWindowVisible};
+    static LAST: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
+    let parent = app.get_webview_window("main")?.hwnd().ok()?;
+    let child = MPV_POS_LAST_RECT.lock().ok()?.as_ref().map(|r| r.0)?;
+    let child = windows::Win32::Foundation::HWND(child as *mut _);
+    let mut parent_rect = RECT::default();
+    let mut child_rect = RECT::default();
+    unsafe {
+        GetClientRect(parent, &mut parent_rect).ok()?;
+        GetClientRect(child, &mut child_rect).ok()?;
+    }
+    let line = format!(
+        "harbor: native-surface parent={}x{} child={}x{} minimized={} visible={} blocked-resizes={}",
+        parent_rect.right, parent_rect.bottom, child_rect.right, child_rect.bottom,
+        unsafe { IsIconic(parent).as_bool() }, unsafe { IsWindowVisible(parent).as_bool() },
+        MPV_BLOCKED_ICONIC_RESIZES.load(std::sync::atomic::Ordering::Relaxed),
+    );
+    let mut last = LAST.lock().ok()?;
+    if last.as_ref() == Some(&line) { return None; }
+    *last = Some(line.clone());
+    Some(line)
+}
+
+#[cfg(windows)]
+unsafe extern "system" fn mpv_size_guard_proc(
+    hwnd: windows::Win32::Foundation::HWND,
+    msg: u32,
+    wparam: windows::Win32::Foundation::WPARAM,
+    lparam: windows::Win32::Foundation::LPARAM,
+    _id: usize,
+    _data: usize,
+) -> windows::Win32::Foundation::LRESULT {
+    use windows::Win32::Foundation::{LRESULT, RECT};
+    use windows::Win32::UI::Shell::{DefSubclassProc, RemoveWindowSubclass};
+    use windows::Win32::UI::WindowsAndMessaging::{
+        GetClientRect, GetParent, IsIconic, WM_NCDESTROY, WM_SIZE,
+    };
+    if msg == HARBOR_MPV_INSTALL_GUARD {
+        return LRESULT(1);
+    }
+    // mpv's parent hook uses SWP_NOSENDCHANGING, bypassing
+    // WM_WINDOWPOSCHANGING. Let Windows resize the hidden HWND, but do not
+    // deliver its iconic dimensions to mpv's VO. Restore sends a usable size.
+    if msg == WM_SIZE {
+        if let Ok(parent) = GetParent(hwnd) {
+            let mut rc = RECT::default();
+            if GetClientRect(parent, &mut rc).is_ok()
+                && surface_is_hidden(IsIconic(parent).as_bool(), rc.right, rc.bottom)
+            {
+                MPV_BLOCKED_ICONIC_RESIZES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                return LRESULT(0);
+            }
+        }
+    }
+    if msg == WM_NCDESTROY {
+        let _ = RemoveWindowSubclass(hwnd, Some(mpv_size_guard_proc), HARBOR_MPV_SIZE_GUARD_ID);
+    }
+    DefSubclassProc(hwnd, msg, wparam, lparam)
+}
+
+// SetWindowSubclass must run on the child window's owning (mpv) thread.
+// A thread-local call-window hook installs it while SendMessage is dispatched
+// there. The temporary hook is removed before returning; no mpv calls run in
+// either callback, which would deadlock against the video-output thread.
+#[cfg(windows)]
+static MPV_SIZE_GUARD_STATE: std::sync::Mutex<Option<(isize, bool)>> =
+    std::sync::Mutex::new(None);
+
+/// Installs the guard at most once per video window. SendMessage crosses to
+/// mpv's video-output thread, so this must never run on every resize frame.
+#[cfg(windows)]
+fn ensure_mpv_size_guard(hwnd: windows::Win32::Foundation::HWND) {
+    let key = hwnd.0 as isize;
+    if let Ok(state) = MPV_SIZE_GUARD_STATE.lock() {
+        if state.map(|(target, _)| target) == Some(key) {
+            return;
+        }
+    }
+    let installed = install_mpv_size_guard(hwnd);
+    if let Err(error) = &installed {
+        eprintln!("[harbor::mpv] {error}");
+    }
+    if let Ok(mut state) = MPV_SIZE_GUARD_STATE.lock() {
+        *state = Some((key, installed.is_ok()));
+    }
+}
+
+#[cfg(windows)]
+fn install_mpv_size_guard(hwnd: windows::Win32::Foundation::HWND) -> Result<(), String> {
+    use windows::Win32::Foundation::{LPARAM, LRESULT, WPARAM};
+    use windows::Win32::UI::Shell::SetWindowSubclass;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        CallNextHookEx, GetWindowThreadProcessId, SendMessageW, SetWindowsHookExW,
+        UnhookWindowsHookEx, CWPSTRUCT, WH_CALLWNDPROC,
+    };
+    unsafe extern "system" fn install_hook(code: i32, w: WPARAM, l: LPARAM) -> LRESULT {
+        if code >= 0 {
+            let message = &*(l.0 as *const CWPSTRUCT);
+            if message.message == HARBOR_MPV_INSTALL_GUARD {
+                let _ = SetWindowSubclass(message.hwnd, Some(mpv_size_guard_proc), HARBOR_MPV_SIZE_GUARD_ID, 0);
+            }
+        }
+        CallNextHookEx(None, code, w, l)
+    }
+    unsafe {
+        if SendMessageW(hwnd, HARBOR_MPV_INSTALL_GUARD, None, None).0 == 1 {
+            return Ok(());
+        }
+        let thread = GetWindowThreadProcessId(hwnd, None);
+        let hook = SetWindowsHookExW(WH_CALLWNDPROC, Some(install_hook), None, thread)
+            .map_err(|e| format!("mpv size guard hook: {e}"))?;
+        let installed = SendMessageW(hwnd, HARBOR_MPV_INSTALL_GUARD, None, None).0 == 1;
+        let _ = UnhookWindowsHookEx(hook);
+        if !installed {
+            return Err("mpv size guard installation failed".to_string());
+        }
+    }
+    Ok(())
+}
 
 #[cfg(windows)]
 unsafe extern "system" fn mpv_subclass_proc(
@@ -3328,21 +3563,23 @@ fn position_embedded_mpv_child(app: &AppHandle, css: MpvGeometry) -> Result<(), 
 
     let (x, y, w, h) = {
         use windows::Win32::Foundation::RECT;
-        use windows::Win32::UI::WindowsAndMessaging::GetClientRect;
+        use windows::Win32::UI::WindowsAndMessaging::{GetClientRect, IsIconic};
+        let minimized = unsafe { IsIconic(parent_hwnd).as_bool() };
         let mut rc = RECT::default();
         let ok = unsafe { GetClientRect(parent_hwnd, &mut rc).is_ok() };
-        let (cw, ch) = (rc.right, rc.bottom);
-        if !(ok && cw > 0 && ch > 0) {
-            (0i32, 0i32, cw.max(1) as u32, ch.max(1) as u32)
-        } else {
-            let native = map_css_geometry(&css, cw as f64, ch as f64);
-            (
-                native.x.round() as i32,
-                native.y.round() as i32,
-                native.width.round().max(1.0) as u32,
-                native.height.round().max(1.0) as u32,
-            )
+        let (cw, ch) = if ok { (rc.right, rc.bottom) } else { (0, 0) };
+        // Keep iconic/transient dimensions out of Harbor's positioning path.
+        // The child subclass separately guards mpv's own parent-window hook.
+        if surface_is_hidden(minimized, cw, ch) {
+            return Ok(());
         }
+        let native = map_css_geometry(&css, cw as f64, ch as f64);
+        (
+            native.x.round() as i32,
+            native.y.round() as i32,
+            native.width.round().max(1.0) as u32,
+            native.height.round().max(1.0) as u32,
+        )
     };
 
     struct EnumState {
@@ -3436,6 +3673,7 @@ fn position_embedded_mpv_child(app: &AppHandle, css: MpvGeometry) -> Result<(), 
         };
         let first_position = prev_rect.map(|r| r.0) != Some(first);
         let target = HWND(first as *mut _);
+        ensure_mpv_size_guard(target);
         let z = if hdr_stage { HWND_TOP } else { HWND_BOTTOM };
         unsafe {
             if first_position {
@@ -3497,7 +3735,7 @@ fn position_embedded_mpv_child(app: &AppHandle, css: MpvGeometry) -> Result<(), 
 
 #[cfg(test)]
 mod geometry_tests {
-    use super::{map_css_geometry, MpvGeometry, NativeMpvRect};
+    use super::{map_css_geometry, surface_is_hidden, MpvGeometry, NativeMpvRect};
 
     #[test]
     fn mpv_geometry_maps_a_zoomed_full_viewport_to_the_full_native_surface() {
@@ -3563,6 +3801,104 @@ mod geometry_tests {
                 height: 1080.0
             }
         );
+    }
+
+    #[test]
+    fn minimized_and_zero_client_rects_keep_the_last_surface() {
+        // Iconic dimensions differ across Windows configurations.
+        assert!(surface_is_hidden(true, 1920, 1032));
+        assert!(surface_is_hidden(false, 144, 19));
+        assert!(surface_is_hidden(false, 0, 0));
+        assert!(!surface_is_hidden(false, 1920, 1032));
+        assert!(!surface_is_hidden(false, 960, 600));
+    }
+
+    // Requires a Windows desktop and the bundled libmpv. Exercises mpv's own
+    // parent hook, not just Harbor's geometry predicate.
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "opens a native window and plays a generated test pattern"]
+    fn native_mpv_keeps_surface_through_minimize_and_restores() {
+        use windows::core::w;
+        use windows::Win32::Foundation::RECT;
+        use windows::Win32::UI::WindowsAndMessaging::{
+            CreateWindowExW, DestroyWindow, DispatchMessageW, FindWindowExW,
+            GetClientRect, PeekMessageW, ShowWindow, TranslateMessage, MSG,
+            PM_REMOVE, SW_MINIMIZE, SW_RESTORE, SW_SHOW, WS_OVERLAPPEDWINDOW,
+        };
+        fn pump(ms: u64) {
+            let until = std::time::Instant::now() + std::time::Duration::from_millis(ms);
+            while std::time::Instant::now() < until {
+                unsafe {
+                    let mut msg = MSG::default();
+                    while PeekMessageW(&mut msg, None, 0, 0, PM_REMOVE).as_bool() {
+                        let _ = TranslateMessage(&msg);
+                        DispatchMessageW(&msg);
+                    }
+                }
+                std::thread::sleep(std::time::Duration::from_millis(5));
+            }
+        }
+        unsafe {
+            let parent = CreateWindowExW(
+                Default::default(), w!("STATIC"), w!("Harbor mpv minimize regression"),
+                WS_OVERLAPPEDWINDOW, 100, 100, 960, 600,
+                None, None, None, None,
+            ).unwrap();
+            let _ = ShowWindow(parent, SW_SHOW);
+            let mpv = libmpv2::Mpv::with_initializer(|init| {
+                init.set_property("wid", (parent.0 as isize).to_string())?;
+                init.set_property("vo", "gpu-next")?;
+                init.set_property("gpu-api", "d3d11")?;
+                init.set_property("ao", "null")?;
+                init.set_property("idle", "yes")?;
+                init.set_property("force-window", "yes")
+            }).unwrap();
+            let result = (|| -> Result<(), String> {
+                mpv.command("loadfile", &["av://lavfi:testsrc=size=320x180:rate=24"])
+                    .map_err(|e| e.to_string())?;
+                pump(1500);
+                let child = FindWindowExW(Some(parent), None, w!("mpv"), None)
+                    .map_err(|e| e.to_string())?;
+                let size = || -> Result<(i32, i32), String> {
+                    let mut rc = RECT::default();
+                    GetClientRect(child, &mut rc).map_err(|e| e.to_string())?;
+                    Ok((rc.right, rc.bottom))
+                };
+                let full = size()?;
+                // Establish that the bundled mpv really takes the bypass path.
+                let _ = ShowWindow(parent, SW_MINIMIZE);
+                pump(500);
+                let unguarded = size()?;
+                if unguarded == full { return Err("control did not reproduce mpv's parent resize".into()); }
+                let _ = ShowWindow(parent, SW_RESTORE);
+                pump(500);
+                super::install_mpv_size_guard(child)?;
+                let restored = size()?;
+                let render_size = || -> Result<(i64, i64), String> {
+                    Ok((mpv.get_property::<i64>("osd-width").map_err(|e| e.to_string())?,
+                        mpv.get_property::<i64>("osd-height").map_err(|e| e.to_string())?))
+                };
+                let render_restored = render_size()?;
+                let before = mpv.get_property::<f64>("time-pos").map_err(|e| e.to_string())?;
+                for _ in 0..3 {
+                    let _ = ShowWindow(parent, SW_MINIMIZE);
+                    pump(500);
+                    if render_size()? != render_restored { return Err(format!("guarded renderer resize: {:?} != {render_restored:?}", render_size()?)); }
+                    let _ = ShowWindow(parent, SW_RESTORE);
+                    pump(500);
+                    if size()? != restored { return Err("surface did not restore".into()); }
+                }
+                let after = mpv.get_property::<f64>("time-pos").map_err(|e| e.to_string())?;
+                if after <= before + 1.0 { return Err("playback clock stopped".into()); }
+                println!("native mpv: unguarded={unguarded:?}, guarded={restored:?}, playback advanced {:.2}s", after - before);
+                Ok(())
+            })();
+            let _ = mpv.command("quit", &[]);
+            drop(mpv);
+            let _ = DestroyWindow(parent);
+            result.unwrap();
+        }
     }
 }
 

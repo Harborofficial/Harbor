@@ -4,7 +4,15 @@ import { subtitleTrackDownloadHeaders } from "@/lib/subtitles/provider-auth";
 import { takePreparedSubtitle } from "@/lib/subtitles/prepared-registry";
 import { markLimitReached } from "@/lib/subtitles/limit-signal";
 import { clearPendingSub, markPendingSub } from "@/lib/subtitles/pending-subs";
-import { registerTranslationJob } from "@/lib/subtitles/translation-jobs";
+import {
+  clearTranslationJobs,
+  createSubtitleTranslationQueue,
+  isTranslationPendingError,
+  registerTranslationJob,
+  type PendingSubtitleTranslation,
+} from "@/lib/subtitles/translation-jobs";
+import { markAddedSub } from "@/lib/subtitles/added-subs";
+import { generatedOfferLanguageCode } from "@/lib/subtitles/language";
 import { mpvFailureSnapshot } from "./mpv-failure";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import type { MonitorInfo } from "@/lib/monitors";
@@ -20,9 +28,10 @@ import {
 import { SUBTITLE_FPS_TRANSITION_FAILED_EVENT } from "./subtitle-fps";
 import { finishPlaybackTrace, markPlaybackTrace } from "@/lib/perf/playback-trace";
 import { PreparedSubtitleCleanupRegistry } from "./prepared-subtitle-cleanups";
-import { SubtitleSelectionCoordinator } from "./subtitle-selection";
+import { SubtitleSelectionCoordinator, type SubtitleSelectionOrigin } from "./subtitle-selection";
 import { PreparedSubtitleSeedBatch } from "@/lib/subtitles/seed-batch";
 import { isSafeProviderSubtitleUrl } from "@/lib/subtitles/provider-url";
+import { traceFrameDrops, tracePlayback } from "./pause-trace";
 import {
   initialPlayerSnapshot,
   type PlayerBridge,
@@ -230,6 +239,14 @@ async function applyAudioDevice(want: string, canApply = () => true): Promise<vo
   }
   if (!canApply()) return;
   try {
+    // Re-writing the value mpv already holds still tears down and reopens the
+    // audio output, which can underrun the stream that is playing. Only write
+    // when the requested endpoint actually differs.
+    const current = await invoke<string | null>("mpv_get_property", {
+      name: "audio-device",
+    }).catch(() => null);
+    if (!canApply()) return;
+    if (current === target) return;
     await invoke("mpv_set_property", { name: "audio-device", value: target });
   } catch (e) {
     if (!canApply()) return;
@@ -452,6 +469,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     if (!opts.embed || !opts.getEmbedRect || geomKickHandler != null || isLinuxDesktop()) return;
 
     let lastRect: MpvRect | null = null;
+    let lastCollapsed: boolean | null = null;
     let frame: number | null = null;
     let active = true;
     let inFlight = false;
@@ -469,7 +487,10 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     };
     const tick = async () => {
       if (!active) return;
-      if (inFlight) { queued = true; return; }
+      if (inFlight) {
+        queued = true;
+        return;
+      }
       inFlight = true;
       queued = false;
       const forced = force;
@@ -477,7 +498,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       const move = pendingMove;
       pendingMove = null;
       try {
-        const r = move?.rect ?? await opts.getEmbedRect!();
+        const r = move?.rect ?? (await opts.getEmbedRect!());
         if (!active || !r) return;
         if (
           !forced &&
@@ -491,6 +512,15 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         ) {
           move?.commit();
           return;
+        }
+        // CSS geometry is separate from the native parent/renderer dimensions
+        // recorded by Rust; a native resize can bypass this path entirely.
+        const collapsed = r.cssWidth < 64 || r.cssHeight < 64;
+        if (collapsed !== lastCollapsed) {
+          lastCollapsed = collapsed;
+          tracePlayback(
+            `geom ${Math.round(r.cssWidth)}x${Math.round(r.cssHeight)} collapsed=${collapsed}`,
+          );
         }
         await invoke("mpv_set_geometry", { geom: r });
         if (active) {
@@ -509,7 +539,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     // with one native write in flight and the latest bounds queued behind it.
     // Dock movement is already batched by useDockDrag. Send its new bounds in
     // that same frame instead of making native video trail the chrome by a frame.
-    geomKickHandler = () => { void tick(); };
+    geomKickHandler = () => {
+      void tick();
+    };
     moveEmbeddedSurface = (rect, commit) => {
       if (!active) return false;
       pendingMove = { rect, commit };
@@ -544,7 +576,11 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       const win = getCurrentWindow();
       const unResized = await win.onResized(() => geomForceHandler?.());
       const unMoved = await win.onMoved(() => geomForceHandler?.());
-      if (!active) { unResized(); unMoved(); return; }
+      if (!active) {
+        unResized();
+        unMoved();
+        return;
+      }
       geomTauriUnlisten.push(makeSafeTauriUnlisten(unResized), makeSafeTauriUnlisten(unMoved));
     } catch {
       /* noop */
@@ -599,107 +635,147 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       .sort();
     return names.join("\n");
   };
-  // A device change is deferred while paused (re-armed on resume), and a forced
-  // request (wake from sleep, screensaver dismissal) reloads even when the
-  // endpoint set did not change. The generation invalidates both when the media
-  // or session ends.
+  // A real endpoint change survives a pause and is applied from play() before
+  // audio starts. A speculative wake reset is only useful while audio is
+  // already running, so a pause cancels it. Applying either one from play()
+  // keeps the output re-init off the first audio callback, which is where it
+  // used to underrun and desynchronise.
+  let pendingAudioDeviceChange = false;
   let pendingAudioDeviceReload = false;
   let forceAudioDeviceReload = false;
   let audioDeviceReloadGeneration = 0;
   const clearAudioDeviceReload = () => {
     if (audioDeviceReloadTimer != null) window.clearTimeout(audioDeviceReloadTimer);
     audioDeviceReloadTimer = null;
+    pendingAudioDeviceChange = false;
     pendingAudioDeviceReload = false;
     forceAudioDeviceReload = false;
     audioDeviceReloadGeneration += 1;
   };
+
+  const performAudioDeviceReload = async (allowPaused: boolean): Promise<boolean> => {
+    // The reload outlives its media: playback can move to another episode (or
+    // fail) while an await is in flight, so the continuation bails unless the
+    // same load is still current.
+    const reloadLoadId = mediaLoadId;
+    const reloadRevision = mediaRevision;
+    const reloadBeganAt = Date.now();
+    const generation = audioDeviceReloadGeneration;
+    const stillCurrent = () =>
+      mpvStarted &&
+      generation === audioDeviceReloadGeneration &&
+      reloadLoadId === mediaLoadId &&
+      reloadRevision === mediaRevision;
+    const canReload = () =>
+      stillCurrent() &&
+      (allowPaused
+        ? snap.status === "playing" || snap.status === "paused"
+        : observedPaused !== true && snap.status === "playing");
+    if (!canReload()) return false;
+
+    // Remember the selected audio track so we can restore it after the
+    // output reload deselects it (mpv drops the track on ao init failure).
+    const prevAid = snap.audioTracks.find((t) => t.selected)?.id ?? null;
+    await applyAudioDevice(appliedAudioDevice ?? "auto", () => stillCurrent() && canReload()).catch(
+      () => {},
+    );
+    if (!stillCurrent() || !canReload()) return false;
+    await invoke("mpv_command", { cmd: ["ao-reload"] }).catch(() => {});
+    if (!stillCurrent() || !canReload()) return false;
+    if (prevAid) {
+      await invoke("mpv_set_property", { name: "aid", value: prevAid }).catch(() => {});
+    }
+    // dynaudnorm keeps ~15s of audio buffered in its analysis window, and
+    // an output reload re-anchors playback to the head of that buffer —
+    // that far ahead of video — so mpv holds audio ("delaying audio start")
+    // while video plays on silently. A same-position exact seek restarts
+    // A/V in sync immediately. Skip it when the viewer seeks during the
+    // reload, or when the reload runs before resume and there is no audio
+    // buffer to re-anchor yet.
+    if (
+      !allowPaused &&
+      stillCurrent() &&
+      snap.audioNormalize &&
+      !currentIsLive &&
+      lastUserSeekAt <= reloadBeganAt &&
+      (snap.status === "playing" || snap.status === "paused")
+    ) {
+      const pos = await invoke<number | null>("mpv_get_property", {
+        name: "time-pos",
+      }).catch(() => null);
+      if (typeof pos === "number" && Number.isFinite(pos) && lastUserSeekAt <= reloadBeganAt) {
+        invoke("mpv_command", { cmd: ["seek", pos, "absolute+exact"] }).catch(() => {});
+      }
+    }
+    return true;
+  };
+
   const scheduleAudioDeviceReload = (forced = false, deviceChanged = true) => {
     if (!isWindowsDesktop()) return;
     if (!mpvStarted) return;
     if (snap.status !== "playing" && snap.status !== "paused") return;
     if (forced) forceAudioDeviceReload = true;
-    pendingAudioDeviceReload ||= deviceChanged || forced;
-    if (observedPaused === true || snap.status === "paused") return;
+    if (deviceChanged) pendingAudioDeviceChange = true;
+    pendingAudioDeviceReload = pendingAudioDeviceChange || forceAudioDeviceReload;
+    if (!pendingAudioDeviceReload) return;
+    if (observedPaused === true || snap.status === "paused") {
+      // A speculative wake reset must not survive a pause; a real endpoint
+      // change does, and play() applies it before audio starts.
+      if (!pendingAudioDeviceChange) {
+        forceAudioDeviceReload = false;
+        pendingAudioDeviceReload = false;
+      }
+      return;
+    }
     if (audioDeviceReloadTimer != null) window.clearTimeout(audioDeviceReloadTimer);
     const generation = audioDeviceReloadGeneration;
     const isCurrentMedia = () => mpvStarted && generation === audioDeviceReloadGeneration;
-    const canReload = () => isCurrentMedia() && observedPaused !== true && snap.status === "playing";
+    const canSchedule = () =>
+      isCurrentMedia() && observedPaused !== true && snap.status === "playing";
     audioDeviceReloadTimer = window.setTimeout(() => {
       audioDeviceReloadTimer = null;
-      if (!canReload()) return;
+      if (!canSchedule()) {
+        // Paused before the timer fired: keep a real endpoint change for the
+        // next play, but drop a speculative wake reset.
+        forceAudioDeviceReload = false;
+        pendingAudioDeviceReload = pendingAudioDeviceChange;
+        return;
+      }
       const mustReload = forceAudioDeviceReload;
+      const deviceRequest = pendingAudioDeviceChange;
       forceAudioDeviceReload = false;
-      const deviceRequest = pendingAudioDeviceReload;
-      pendingAudioDeviceReload = false;
-      const deferDeviceRequest = () => {
-        if (deviceRequest && isCurrentMedia()) pendingAudioDeviceReload = true;
-      };
+      if (!mustReload && !deviceRequest) {
+        pendingAudioDeviceReload = false;
+        return;
+      }
       // A list change that has settled back to the signature we last acted on
       // is churn, not a device change, and must not force the output reload.
-      if (!mustReload && observedAudioDeviceListSig === lastAudioDeviceListSig) return;
+      if (!mustReload && observedAudioDeviceListSig === lastAudioDeviceListSig) {
+        pendingAudioDeviceChange = false;
+        pendingAudioDeviceReload = false;
+        return;
+      }
       lastAudioDeviceListSig = observedAudioDeviceListSig;
-      // The reload outlives its media: playback can move to another episode (or
-      // fail) while an await is in flight, so the continuation bails unless the
-      // same load is still playing.
-      const reloadLoadId = mediaLoadId;
-      const reloadRevision = mediaRevision;
-      const reloadBeganAt = Date.now();
-      const stillCurrent = () =>
-        mpvStarted && reloadLoadId === mediaLoadId && reloadRevision === mediaRevision;
-      void (async () => {
-        // Remember the selected audio track so we can restore it after the
-        // output reload deselects it (mpv drops the track on ao init failure).
-        const prevAid = snap.audioTracks.find((t) => t.selected)?.id ?? null;
-        await applyAudioDevice(
-          appliedAudioDevice ?? "auto",
-          () => stillCurrent() && canReload(),
-        ).catch(() => {});
-        if (!stillCurrent() || !canReload()) {
-          deferDeviceRequest();
-          return;
-        }
-        await invoke("mpv_command", { cmd: ["ao-reload"] }).catch(() => {});
-        if (!stillCurrent() || !canReload()) {
-          deferDeviceRequest();
-          return;
-        }
-        if (prevAid) {
-          await invoke("mpv_set_property", { name: "aid", value: prevAid }).catch(() => {});
-        }
-        // dynaudnorm keeps ~15s of audio buffered in its analysis window, and
-        // an output reload re-anchors playback to the head of that buffer —
-        // that far ahead of video — so mpv holds audio ("delaying audio start")
-        // while video plays on silently. A same-position exact seek restarts
-        // A/V in sync immediately. Skip it when the viewer seeks during the
-        // reload, or the resync would rewind the seek already in flight.
-        if (
-          stillCurrent() &&
-          snap.audioNormalize &&
-          !currentIsLive &&
-          lastUserSeekAt <= reloadBeganAt &&
-          (snap.status === "playing" || snap.status === "paused")
-        ) {
-          const pos = await invoke<number | null>("mpv_get_property", {
-            name: "time-pos",
-          }).catch(() => null);
-          if (
-            typeof pos === "number" &&
-            Number.isFinite(pos) &&
-            lastUserSeekAt <= reloadBeganAt
-          ) {
-            invoke("mpv_command", { cmd: ["seek", pos, "absolute+exact"] }).catch(() => {});
+      pendingAudioDeviceChange = false;
+      pendingAudioDeviceReload = false;
+      void performAudioDeviceReload(false)
+        .then((reloaded) => {
+          if (!reloaded && isCurrentMedia() && deviceRequest) {
+            pendingAudioDeviceChange = true;
+            pendingAudioDeviceReload = true;
           }
-        }
-      })();
+        })
+        .catch(() => {});
     }, 300);
   };
 
   // Windows may silently release the audio endpoint after sleep. Avoid a
   // speculative output reset while paused; real device changes still recover
-  // through audio-device-list and are deferred until resume during a pause.
+  // through audio-device-list and are applied by play() before audio starts.
   const onVisibilityRestore = () => {
     if (document.visibilityState !== "visible") return;
-    scheduleAudioDeviceReload(true);
+    if (snap.status !== "playing") return;
+    scheduleAudioDeviceReload(true, false);
   };
   if (typeof document !== "undefined") {
     document.addEventListener("visibilitychange", onVisibilityRestore);
@@ -711,8 +787,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     lastWindowBlur = Date.now();
   };
   const onWindowFocusRestore = () => {
+    if (snap.status !== "playing") return;
     if (Date.now() - lastWindowBlur < FOCUS_RELOAD_MIN_ABSENT_MS) return;
-    scheduleAudioDeviceReload(true);
+    scheduleAudioDeviceReload(true, false);
   };
   if (typeof window !== "undefined") {
     window.addEventListener("blur", onWindowBlur);
@@ -734,11 +811,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       // Shader load and compile problems are reported by mpv's video output at
       // warn/error, not by the property setter, so they are the only signal
       // that a chain did not take effect.
-      if (
-        level !== "fatal" &&
-        level !== "error" &&
-        !/shader|glsl/i.test(prefix)
-      ) {
+      if (level !== "fatal" && level !== "error" && !/shader|glsl/i.test(prefix)) {
         return;
       }
       if (/fail|error|cannot|unable|no such file|not found|unsupported/i.test(text)) {
@@ -752,6 +825,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap = mpvFailureSnapshot(snap, reason);
       mediaRevision += 1;
       invalidateSubtitleSelections();
+      cancelPendingTranslations();
       clearPreparedSubtitles();
       mpvStarted = false;
       finishPlaybackTrace(activeTraceId, "failed");
@@ -767,11 +841,14 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       if (name === "pause" && typeof data === "boolean") {
         observedPaused = data;
         snap.status = data ? "paused" : "playing";
-        if (!data && pendingAudioDeviceReload) scheduleAudioDeviceReload();
+        // A pending recovery is applied by play() before it unpauses. A bare
+        // pause=false (external IPC, a forwarded command) must not re-arm it
+        // here, or the output reload lands on top of the resumed audio.
       }
       if (name === "eof-reached" && data === true) {
         clearAudioDeviceReload();
         snap.status = "ended";
+        traceFrameDrops("eof");
       }
       if (name === "volume" && typeof data === "number") snap.volume = data / 100;
       if (name === "mute" && typeof data === "boolean") snap.muted = data;
@@ -971,7 +1048,64 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     }
   };
 
-  return {
+  // A translating addon accepts a subtitle URL before the finished file exists. The
+  // queue re-checks that exact URL until the addon serves the finished subtitle; a
+  // viewer pick or a media change drops anything still waiting.
+  const translationQueue = createSubtitleTranslationQueue();
+  let pendingTranslations: PendingSubtitleTranslation[] = [];
+
+  const dropPendingTranslation = (job: PendingSubtitleTranslation) => {
+    job.active = false;
+    pendingTranslations = pendingTranslations.filter((entry) => entry !== job);
+  };
+
+  const cancelPendingTranslations = () => {
+    translationQueue.clear();
+    if (pendingTranslations.length === 0) return;
+    for (const job of pendingTranslations) job.active = false;
+    pendingTranslations = [];
+    clearTranslationJobs();
+  };
+
+  const attemptPendingTranslation = async (job: PendingSubtitleTranslation): Promise<boolean> => {
+    const added = await addSubtitleInternal(
+      job.url,
+      job.lang,
+      job.title,
+      true,
+      job.metadata,
+      "automatic",
+      job,
+    ).catch((error: unknown) => {
+      if (!isTranslationPendingError(error)) dropPendingTranslation(job);
+      throw error;
+    });
+    if (added) markAddedSub(job.url);
+    dropPendingTranslation(job);
+    return added;
+  };
+
+  const startPendingTranslation = (
+    job: Omit<PendingSubtitleTranslation, "mediaRevision" | "active">,
+  ) => {
+    // One job per URL: concurrent failures for the same addon offer join the first.
+    if (pendingTranslations.some((entry) => entry.url === job.url)) return;
+    const pending: PendingSubtitleTranslation = { ...job, mediaRevision, active: true };
+    pendingTranslations = [...pendingTranslations, pending];
+    registerTranslationJob({
+      url: pending.url,
+      lang: pending.lang,
+      title: pending.title,
+      metadata: pending.metadata,
+    });
+    void translationQueue.run(
+      pending.url,
+      () => pending.active && pending.mediaRevision === mediaRevision,
+      () => attemptPendingTranslation(pending),
+    );
+  };
+
+  const bridge: PlayerBridge = {
     moveEmbeddedSurface: (rect, commit) => moveEmbeddedSurface?.(rect, commit) ?? false,
     attach(h) {
       host = h;
@@ -994,6 +1128,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       h.appendChild(placeholder);
     },
     detach() {
+      cancelPendingTranslations();
       if (host) {
         while (host.firstChild) host.removeChild(host.firstChild);
       }
@@ -1030,6 +1165,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       expectedMediaPath = src.url;
       mediaRevision += 1;
       invalidateSubtitleSelections();
+      cancelPendingTranslations();
       svpFilterFailed = false;
       snap.status = "loading";
       snap.errorCode = null;
@@ -1154,10 +1290,34 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         emit();
       }
     },
-    async play() {
+    async play(options?: { preserveMuted?: boolean; reason?: string }) {
+      tracePlayback(`play source=${options?.reason ?? "unspecified"}`);
+      // mpv has not started the audio callback yet, so reinitialising a device
+      // that changed while paused cannot underrun the stream. Do it before
+      // unpausing; doing it after resume is what produced the A/V desync.
+      // Only do this while mpv is still paused. If it is already playing, the
+      // scheduled reload owns the change and running it here would interrupt
+      // the audio that is currently flowing.
+      if (pendingAudioDeviceReload && mpvStarted && snap.status === "paused") {
+        const deviceRequest = pendingAudioDeviceChange;
+        pendingAudioDeviceChange = false;
+        pendingAudioDeviceReload = false;
+        forceAudioDeviceReload = false;
+        if (audioDeviceReloadTimer != null) {
+          window.clearTimeout(audioDeviceReloadTimer);
+          audioDeviceReloadTimer = null;
+        }
+        const reloaded = await performAudioDeviceReload(true).catch(() => false);
+        if (!reloaded && deviceRequest) {
+          pendingAudioDeviceChange = true;
+          pendingAudioDeviceReload = true;
+        }
+      }
       await invoke("mpv_set_property", { name: "pause", value: false }).catch(() => {});
     },
-    pause() {
+    pause(reason = "unspecified") {
+      tracePlayback(`pause source=${reason}`);
+      traceFrameDrops(reason);
       invoke("mpv_set_property", { name: "pause", value: true }).catch(() => {});
     },
     seek(sec, precision: PlayerSeekPrecision = "exact") {
@@ -1194,6 +1354,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     canAutoSelectSubtitle: () => mainSubtitleSelection.canAutoSelect(mediaRevision),
     setSubtitleTrack(id, origin = "manual") {
       if (!mainSubtitleSelection.claim(mediaRevision, origin)) return;
+      // The viewer picked (or turned subtitles off) themselves: a translation
+      // still being fetched is no longer wanted.
+      if (origin === "manual") cancelPendingTranslations();
       const requestMediaRevision = mediaRevision;
       mainSubtitleSelection.begin(
         requestMediaRevision,
@@ -1320,186 +1483,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
     },
     async addSubtitle(url, lang, title, select, metadata, origin = "manual"): Promise<boolean> {
-      const requestMediaRevision = mediaRevision;
-      const requestLoadId = mediaLoadId;
-      const wantsSelection = (select ?? true) && mainSubtitleSelection.claim(mediaRevision, origin);
-      const selectionRequest = wantsSelection
-        ? mainSubtitleSelection.begin(
-            mediaRevision,
-            `__harbor-added-subtitle-${++subtitleAddSelectionId}__`,
-            snap.subtitleTracks.find((track) => track.selected)?.id ?? null,
-          )
-        : null;
-      let mpvUrl = url;
-      const transferredPrepared = takePreparedSubtitle(url);
-      const providerDerived = metadata?.providerDerived ?? Boolean(metadata?.provider);
-      if (!transferredPrepared && providerDerived && !isSafeProviderSubtitleUrl(url)) {
-        return false;
-      }
-      // A provider subtitle can be re-fetched (e.g. a translating addon that only serves
-      // the finished file later). Replace the previous track for the same source rather
-      // than stacking a duplicate. mpv's sub-remove only touches external subtitle files,
-      // which is the only case that can match here.
-      const sourceUrl = metadata?.originalUrl ?? url;
-      const prior = transferredPrepared
-        ? undefined
-        : snap.subtitleTracks.find(
-            (track) =>
-              track.kind === "subtitle" &&
-              track.external === true &&
-              (track.originalUrl === sourceUrl || track.url === sourceUrl),
-          );
-      if (prior) {
-        try {
-          await invoke("mpv_sub_remove", { id: prior.id });
-        } catch {
-          // Track already gone; adding the refreshed file below still works.
-        }
-        const priorFile = prior.externalFilename?.replace(/\\/g, "/");
-        if (priorFile) urlByExternalFilename.delete(priorFile);
-      }
-      let preparedCleanup: (() => void) | null = transferredPrepared?.cleanup ?? null;
-      let preparedCues: SubCue[] | undefined = transferredPrepared?.cues;
-      let registeredMetadata: ExternalSubtitleMetadata | null = null;
-      if (/^https?:/i.test(url) && !transferredPrepared) {
-        try {
-          const prepared = await prepareSubtitle({
-            url,
-            language: lang,
-            format: metadata?.format,
-            encoding: metadata?.encoding,
-            release: metadata?.release,
-            filename: metadata?.rawFilename,
-            allowLocalNetwork: metadata?.localTrusted === true,
-            requestHeaders: subtitleTrackDownloadHeaders(
-              metadata?.downloadAuth,
-              url,
-              providerDerived,
-            ),
-          });
-          mpvUrl = prepared.playableUrl;
-          preparedCleanup = prepared.cleanup;
-          preparedCues = prepared.cues;
-          metadata = {
-            ...metadata,
-            format: prepared.format,
-            encoding: prepared.encoding,
-            rawFilename: prepared.rawFilename,
-            archive: prepared.archive,
-            prepared: true,
-          };
-          clearPendingSub(url);
-        } catch (e) {
-          const message = e instanceof Error ? e.message : String(e);
-          console.warn("[mpv] subtitle preparation failed", {
-            error: e instanceof Error ? e.name : "unknown",
-          });
-          preparedCleanup?.();
-          if (/status 429/.test(message)) {
-            markLimitReached(url);
-          }
-          if (
-            metadata?.refreshable === true &&
-            e instanceof SubtitlePreparationError &&
-            (e.reason === "invalid-cues" || e.reason === "unsupported-format")
-          ) {
-            // The addon answered before the subtitle was ready. Treat it as a pending
-            // job so the UI says "try again shortly", and never surface the placeholder.
-            markPendingSub(url);
-            registerTranslationJob({ url, lang, title, metadata });
-          }
-          return false;
-        }
-      }
-      if (requestMediaRevision !== mediaRevision) {
-        preparedCleanup?.();
-        return false;
-      }
-      mpvUrl = mpvUrl.replace(/\\/g, "/");
-      try {
-        const externalMetadata: ExternalSubtitleMetadata = {
-          url: metadata?.originalUrl ?? url,
-          lang,
-          title,
-          cues: preparedCues,
-          originalUrl: metadata?.originalUrl ?? url,
-          downloadAuth: metadata?.downloadAuth,
-          format: metadata?.format,
-          release: metadata?.release,
-          provider: metadata?.provider,
-          providerDerived: metadata?.providerDerived,
-          localTrusted: metadata?.localTrusted,
-          fps: metadata?.fps,
-          downloads: metadata?.downloads,
-          author: metadata?.author,
-          uploadedAt: metadata?.uploadedAt,
-          rating: metadata?.rating,
-          productionType: metadata?.productionType,
-          releaseType: metadata?.releaseType,
-          hearingImpaired: metadata?.hearingImpaired,
-          forced: metadata?.forced,
-          foreignOnly: metadata?.foreignOnly,
-          machineTranslated: metadata?.machineTranslated,
-          fromTrusted: metadata?.fromTrusted,
-          providerMatch: metadata?.providerMatch,
-          timingStatus: metadata?.timingStatus,
-          timingMeasurementStatus: metadata?.timingMeasurementStatus,
-          matchExplanation: metadata?.matchExplanation,
-          prepared: metadata?.prepared,
-          autoSelectionEligible: metadata?.autoSelectionEligible,
-          matchScore: metadata?.matchScore,
-          matchConfidence: metadata?.matchConfidence,
-          matchReasons: metadata?.matchReasons,
-          subId: metadata?.subId,
-        };
-        urlByExternalFilename.set(mpvUrl, externalMetadata);
-        registeredMetadata = externalMetadata;
-        const addToMpv = async (): Promise<boolean> => {
-          if (requestMediaRevision !== mediaRevision) return false;
-          let selectAtCommit = false;
-          if (
-            selectionRequest &&
-            mainSubtitleSelection.isCurrent(selectionRequest, mediaRevision)
-          ) {
-            await resetSubtitleFpsBeforeMpvTransition();
-            if (requestMediaRevision !== mediaRevision) return false;
-            selectAtCommit = mainSubtitleSelection.isCurrent(selectionRequest, mediaRevision);
-          }
-          await invoke("mpv_sub_add", {
-            url: mpvUrl,
-            lang: lang ?? null,
-            title: title ?? null,
-            select: selectAtCommit,
-          });
-          return true;
-        };
-        const added = selectionRequest
-          ? await enqueueSubtitleTransition(addToMpv)
-          : await addToMpv();
-        if (!added) {
-          if (urlByExternalFilename.get(mpvUrl) === externalMetadata) {
-            urlByExternalFilename.delete(mpvUrl);
-          }
-          preparedCleanup?.();
-          return false;
-        }
-        if (requestMediaRevision !== mediaRevision) {
-          if (urlByExternalFilename.get(mpvUrl) === externalMetadata) {
-            urlByExternalFilename.delete(mpvUrl);
-          }
-          preparedCleanup?.();
-          return false;
-        }
-        if (preparedCleanup) preparedSubtitleCleanups.register(preparedCleanup, requestLoadId);
-        return true;
-      } catch (e) {
-        if (registeredMetadata && urlByExternalFilename.get(mpvUrl) === registeredMetadata) {
-          urlByExternalFilename.delete(mpvUrl);
-        }
-        preparedCleanup?.();
-        console.warn("[mpv] sub-add failed", e);
-        return false;
-      }
+      return await addSubtitleInternal(url, lang, title, select, metadata, origin);
     },
     getSelectedTrackCues() {
       const selected = snap.subtitleTracks.find((track) => track.selected);
@@ -1609,6 +1593,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       stopGeometryTracking = null;
       mediaRevision += 1;
       invalidateSubtitleSelections();
+      cancelPendingTranslations();
       clearPreparedSubtitles();
       finishPlaybackTrace(activeTraceId, "aborted");
       activeTraceId = null;
@@ -1691,4 +1676,221 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       listeners.clear();
     },
   };
+  const addSubtitleInternal = async (
+    url: string,
+    lang: string | undefined,
+    title: string | undefined,
+    select: boolean | undefined,
+    metadata: SubtitleLoadMetadata | undefined,
+    origin: SubtitleSelectionOrigin,
+    pending: PendingSubtitleTranslation | null = null,
+  ): Promise<boolean> => {
+    const requestMediaRevision = mediaRevision;
+    const requestLoadId = mediaLoadId;
+    const translation = metadata?.translation === true;
+    // Asking a translating addon to produce a file is the viewer's decision:
+    // automatic discovery and preloads only ever see translations that are ready.
+    if (
+      pending === null &&
+      translation &&
+      /^https?:/i.test(url) &&
+      (select !== true || origin !== "manual")
+    ) {
+      return false;
+    }
+    const addLang = translation ? generatedOfferLanguageCode(lang) || lang : lang;
+    // A finished translation is deferred automatic work. The viewer asked for it,
+    // so it selects unless a later pick or a media change dropped the request.
+    const wantsSelection =
+      pending !== null && translation
+        ? true
+        : (select ?? true) && mainSubtitleSelection.claim(mediaRevision, origin);
+    const selectionRequest = wantsSelection
+      ? mainSubtitleSelection.begin(
+          mediaRevision,
+          `__harbor-added-subtitle-${++subtitleAddSelectionId}__`,
+          snap.subtitleTracks.find((track) => track.selected)?.id ?? null,
+        )
+      : null;
+    let mpvUrl = url;
+    const transferredPrepared = takePreparedSubtitle(url);
+    const providerDerived = metadata?.providerDerived ?? Boolean(metadata?.provider);
+    if (!transferredPrepared && providerDerived && !isSafeProviderSubtitleUrl(url)) {
+      return false;
+    }
+    // A provider subtitle can be re-fetched (e.g. a translating addon that only serves
+    // the finished file later). Replace the previous track for the same source rather
+    // than stacking a duplicate. mpv's sub-remove only touches external subtitle files,
+    // which is the only case that can match here.
+    const sourceUrl = metadata?.originalUrl ?? url;
+    const prior = transferredPrepared
+      ? undefined
+      : snap.subtitleTracks.find(
+          (track) =>
+            track.kind === "subtitle" &&
+            track.external === true &&
+            (track.originalUrl === sourceUrl || track.url === sourceUrl),
+        );
+    if (prior) {
+      try {
+        await invoke("mpv_sub_remove", { id: prior.id });
+      } catch {
+        // Track already gone; adding the refreshed file below still works.
+      }
+      const priorFile = prior.externalFilename?.replace(/\\/g, "/");
+      if (priorFile) urlByExternalFilename.delete(priorFile);
+    }
+    let preparedCleanup: (() => void) | null = transferredPrepared?.cleanup ?? null;
+    let preparedCues: SubCue[] | undefined = transferredPrepared?.cues;
+    let registeredMetadata: ExternalSubtitleMetadata | null = null;
+    if (/^https?:/i.test(url) && !transferredPrepared) {
+      try {
+        const prepared = await prepareSubtitle({
+          url,
+          language: addLang,
+          format: metadata?.format,
+          encoding: metadata?.encoding,
+          release: metadata?.release,
+          filename: metadata?.rawFilename,
+          allowLocalNetwork: metadata?.localTrusted === true,
+          translation,
+          requestHeaders: subtitleTrackDownloadHeaders(
+            metadata?.downloadAuth,
+            url,
+            providerDerived,
+          ),
+        });
+        mpvUrl = prepared.playableUrl;
+        preparedCleanup = prepared.cleanup;
+        preparedCues = prepared.cues;
+        metadata = {
+          ...metadata,
+          format: prepared.format,
+          encoding: prepared.encoding,
+          rawFilename: prepared.rawFilename,
+          archive: prepared.archive,
+          prepared: true,
+        };
+        clearPendingSub(url);
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        console.warn("[mpv] subtitle preparation failed", {
+          error: e instanceof Error ? e.name : "unknown",
+        });
+        preparedCleanup?.();
+        if (/status 429/.test(message)) {
+          markLimitReached(url);
+        }
+        if (pending !== null) {
+          // The queue owns the retry and failure bookkeeping for deferred work.
+          throw e;
+        }
+        const pendingFailure =
+          e instanceof SubtitlePreparationError &&
+          (e.reason === "translation-pending" ||
+            (!translation &&
+              metadata?.refreshable === true &&
+              (e.reason === "invalid-cues" || e.reason === "unsupported-format")));
+        if (pendingFailure) {
+          // The addon answered before the subtitle was ready. Keep re-checking the same
+          // URL until it serves the finished file, and never surface the placeholder.
+          markPendingSub(url);
+          startPendingTranslation({ url, lang: addLang, title, metadata });
+        }
+        return false;
+      }
+    }
+    if (requestMediaRevision !== mediaRevision) {
+      preparedCleanup?.();
+      return false;
+    }
+    if (pending !== null && (!pending.active || pending.mediaRevision !== mediaRevision)) {
+      // The viewer picked something else, turned subtitles off, or the media changed.
+      preparedCleanup?.();
+      return false;
+    }
+    mpvUrl = mpvUrl.replace(/\\/g, "/");
+    try {
+      const externalMetadata: ExternalSubtitleMetadata = {
+        url: metadata?.originalUrl ?? url,
+        lang: addLang,
+        title,
+        cues: preparedCues,
+        originalUrl: metadata?.originalUrl ?? url,
+        downloadAuth: metadata?.downloadAuth,
+        format: metadata?.format,
+        release: metadata?.release,
+        provider: metadata?.provider,
+        providerDerived: metadata?.providerDerived,
+        localTrusted: metadata?.localTrusted,
+        fps: metadata?.fps,
+        downloads: metadata?.downloads,
+        author: metadata?.author,
+        uploadedAt: metadata?.uploadedAt,
+        rating: metadata?.rating,
+        productionType: metadata?.productionType,
+        releaseType: metadata?.releaseType,
+        hearingImpaired: metadata?.hearingImpaired,
+        forced: metadata?.forced,
+        foreignOnly: metadata?.foreignOnly,
+        machineTranslated: metadata?.machineTranslated,
+        fromTrusted: metadata?.fromTrusted,
+        providerMatch: metadata?.providerMatch,
+        timingStatus: metadata?.timingStatus,
+        timingMeasurementStatus: metadata?.timingMeasurementStatus,
+        matchExplanation: metadata?.matchExplanation,
+        prepared: metadata?.prepared,
+        autoSelectionEligible: metadata?.autoSelectionEligible,
+        matchScore: metadata?.matchScore,
+        matchConfidence: metadata?.matchConfidence,
+        matchReasons: metadata?.matchReasons,
+        subId: metadata?.subId,
+      };
+      urlByExternalFilename.set(mpvUrl, externalMetadata);
+      registeredMetadata = externalMetadata;
+      const addToMpv = async (): Promise<boolean> => {
+        if (requestMediaRevision !== mediaRevision) return false;
+        if (pending !== null && !pending.active) return false;
+        let selectAtCommit = false;
+        if (selectionRequest && mainSubtitleSelection.isCurrent(selectionRequest, mediaRevision)) {
+          await resetSubtitleFpsBeforeMpvTransition();
+          if (requestMediaRevision !== mediaRevision) return false;
+          selectAtCommit = mainSubtitleSelection.isCurrent(selectionRequest, mediaRevision);
+        }
+        await invoke("mpv_sub_add", {
+          url: mpvUrl,
+          lang: addLang ?? null,
+          title: title ?? null,
+          select: selectAtCommit,
+        });
+        return true;
+      };
+      const added = selectionRequest ? await enqueueSubtitleTransition(addToMpv) : await addToMpv();
+      if (!added) {
+        if (urlByExternalFilename.get(mpvUrl) === externalMetadata) {
+          urlByExternalFilename.delete(mpvUrl);
+        }
+        preparedCleanup?.();
+        return false;
+      }
+      if (requestMediaRevision !== mediaRevision) {
+        if (urlByExternalFilename.get(mpvUrl) === externalMetadata) {
+          urlByExternalFilename.delete(mpvUrl);
+        }
+        preparedCleanup?.();
+        return false;
+      }
+      if (preparedCleanup) preparedSubtitleCleanups.register(preparedCleanup, requestLoadId);
+      return true;
+    } catch (e) {
+      if (registeredMetadata && urlByExternalFilename.get(mpvUrl) === registeredMetadata) {
+        urlByExternalFilename.delete(mpvUrl);
+      }
+      preparedCleanup?.();
+      console.warn("[mpv] sub-add failed", e);
+      return false;
+    }
+  };
+
+  return bridge;
 }

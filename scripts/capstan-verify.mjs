@@ -1,3 +1,4 @@
+import { extensionsModuleName, extensionsModuleProblems } from "./build-extensions-module.mjs";
 /*
  * capstan-verify.mjs
  *
@@ -31,7 +32,6 @@ import { hostTriple } from "./capstan-jdk.mjs";
 // The classes src/host/DexConverter.kt and src-tauri/src/capstan.rs load by name. A jar set
 // missing one of them links and then throws on the first install a user attempts.
 const BRIDGE_CLASS = "com/harbor/capstan/bridge/Bridge.class";
-const ENTRY_CLASS = "com.harbor.capstan.bridge.Bridge";
 const DEX_CLASSES = [
   "com/googlecode/d2j/dex/Dex2jar.class",
   "com/googlecode/d2j/reader/BaseDexFileReader.class",
@@ -51,7 +51,6 @@ const stagedTarget = () => readStagePlan()?.target ?? hostTriple();
 export const stagedJava = () =>
   join(dest, "runtime", "bin", stagedTarget().includes("windows") ? "java.exe" : "java");
 
-const classpathSeparator = process.platform === "win32" ? ";" : ":";
 const mb = (n) => `${(n / 1048576).toFixed(2)} MB`;
 
 const jarsIn = (dir) =>
@@ -93,7 +92,7 @@ export function readStagePlan() {
 
 /** Every problem found, as lines a human can act on. Empty means the stage is whole. */
 export function structureProblems() {
-  const bad = [];
+  const bad = extensionsModuleProblems(dest, stagedTarget());
   const manifest = readManifest();
   if (!manifest || !manifest.length) return ["no MANIFEST.txt, so nothing is staged"];
   for (const file of manifest) {
@@ -117,7 +116,8 @@ export function structureProblems() {
 
   const release = join(dest, "runtime", "release");
   const wanted = readStagePlan()?.modules ?? [];
-  if (!existsSync(stagedJava())) bad.push(`runtime has no ${stagedTarget().includes("windows") ? "bin/java.exe" : "bin/java"}`);
+  if (!existsSync(stagedJava()))
+    bad.push(`runtime has no ${stagedTarget().includes("windows") ? "bin/java.exe" : "bin/java"}`);
   else if (!existsSync(release)) bad.push("runtime has no release file");
   else if (!wanted.length) bad.push("STAGE.json does not say which modules were asked for");
   else {
@@ -135,19 +135,14 @@ export function structureProblems() {
  * This is the only check that proves the parts work together rather than merely being present.
  */
 export function pingStaged(onLog) {
-  const java = stagedJava();
-  const classpath = [
-    join(dest, "capstan.jar"),
-    ...jarsIn(join(dest, "libs")).map((n) => join(dest, "libs", n)),
-  ].join(classpathSeparator);
   const data = mkdtempSync(join(tmpdir(), "capstan-verify-"));
   const child = spawn(
-    java,
+    join(dest, extensionsModuleName(stagedTarget())),
     [
-      `-Dharbor.capstan.dexTools=${join(dest, "dex-tools")}`,
-      "-cp",
-      classpath,
-      ENTRY_CLASS,
+      "--abi",
+      "2",
+      "--host-version",
+      JSON.parse(readFileSync(join(dest, "extensions-module.json"), "utf8")).version,
       "--data-dir",
       data,
     ],
@@ -164,7 +159,6 @@ export function pingStaged(onLog) {
       settled = true;
       clearTimeout(timer);
       try {
-        child.stdin.write('{"id":"v2","method":"shutdown"}\n');
         child.stdin.end();
       } catch {
         // already gone, which is what problem already says
@@ -195,7 +189,7 @@ export function pingStaged(onLog) {
         return;
       }
       if (frame.id !== "v1") return;
-      if (frame.ok === true && frame.result?.pong === true) {
+      if (frame.result?.pong === true) {
         onLog?.(`bridge answered ping, protocol ${frame.result.protocol}`);
         finish(null);
       } else {
@@ -215,8 +209,10 @@ export function pingStaged(onLog) {
       }
     });
     child.on("error", (error) => finish(`could not start the staged runtime: ${error.message}`));
-    child.on("exit", (code) => finish(`the staged runtime exited with ${code} before answering ping`));
-    child.stdin.write('{"id":"v1","method":"ping"}\n');
+    child.on("exit", (code) =>
+      finish(`the staged runtime exited with ${code} before answering ping`),
+    );
+    child.stdin.write('start\n{"id":"v1","command":"capstan_ping","args":{}}\n');
   });
 }
 
@@ -227,7 +223,9 @@ export async function verifyStage(onLog) {
   const target = stagedTarget();
   if (target !== hostTriple()) {
     onLog?.(`staged for ${target}, so the bridge was not started: this machine cannot run it`);
-    onLog?.("that runtime is verified for shape only, and must be started on the platform it is for");
+    onLog?.(
+      "that runtime is verified for shape only, and must be started on the platform it is for",
+    );
     return [];
   }
   return pingStaged(onLog);
@@ -251,7 +249,10 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const say = (line) => console.log(`[capstan] ${line}`);
   const bad = await verifyStage(say);
   if (bad.length) {
-    for (const line of ["the staged extension runtime is not usable:", ...bad.map((b) => `  ${b}`)]) {
+    for (const line of [
+      "the staged extension runtime is not usable:",
+      ...bad.map((b) => `  ${b}`),
+    ]) {
       console.error(`[capstan] ${line}`);
     }
     console.error("[capstan] Run: pnpm run setup:capstan");

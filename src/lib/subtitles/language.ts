@@ -304,15 +304,41 @@ export function isKnownLanguage(code?: string | null): boolean {
   return !!code && Object.hasOwn(NAMES, normalizeLang(code));
 }
 
+// A translating addon's generated offer is a display label ("Make Spanish (Latin
+// America) (SPN)"), not a language code, so it legitimately outgrows the plausible cap.
+const GENERATED_OFFER_LABEL_PATTERN = /^make\s+[\p{L}\p{N}][\p{L}\p{N}\s().,'&+\/-]*$/iu;
+const MAX_GENERATED_OFFER_LABEL = 64;
+
 /**
- * True when a "language" value is really a generated display label — a translating
- * addon's on-demand variant such as "Make Hindi" — rather than a language code or name.
- * Real codes and names never contain whitespace, and unknown single tokens (e.g. "spl")
- * are excluded.
+ * True when a "language" value is really a translating addon's on-demand offer label
+ * such as "Make Hindi" rather than a language code or name. Real codes and names never
+ * start with the offer verb, so a notice or provider title ("SubMaker Notice") is not
+ * mistaken for an offer.
  */
 export function isGeneratedLangLabel(raw?: string | null): boolean {
-  const lang = raw?.trim() ?? "";
-  return lang.length > 0 && !isKnownLanguage(lang) && /\s/.test(lang);
+  const label = raw?.trim() ?? "";
+  return label.length > 0 && !isKnownLanguage(label) && GENERATED_OFFER_LABEL_PATTERN.test(label);
+}
+
+/**
+ * Resolves a generated translation offer ("Make Hindi", "Make Portuguese (Brazil)")
+ * to the code the finished subtitle is in, or "" when the label says nothing
+ * recognizable (callers keep the original label then).
+ */
+export function generatedOfferLanguageCode(raw?: string | null): string {
+  const label = raw?.trim() ?? "";
+  if (!label) return "";
+  for (const base of [label.replace(/^make\s+/i, ""), label]) {
+    let candidate = base;
+    while (candidate) {
+      const code = normalizeLang(candidate);
+      if (isKnownLanguage(code)) return code;
+      const shorter = candidate.replace(/\s*\([^()]*\)\s*$/, "").trim();
+      if (shorter === candidate) break;
+      candidate = shorter;
+    }
+  }
+  return "";
 }
 
 export function trackLanguageName(lang?: string | null, title?: string | null): string {
@@ -334,11 +360,6 @@ const IMPLAUSIBLE_LANG_PATTERN =
   /[=<>{}[\]|\\]|\berror\b|\binvalid\b|\btimed?\s*out\b|\bfailed\b|\brequest\b/i;
 
 const MAX_PLAUSIBLE_LANG = 24;
-
-// A translating addon's generated offer is a display label ("Make Spanish (Latin
-// America) (SPN)"), not a language code, so it legitimately outgrows the cap above.
-const GENERATED_OFFER_LABEL_PATTERN = /^make\s+[\p{L}\p{N}][\p{L}\p{N}\s().,'&+\/-]*$/iu;
-const MAX_GENERATED_OFFER_LABEL = 64;
 
 export function isPlausibleLang(raw: string | undefined | null): boolean {
   if (!raw) return false;

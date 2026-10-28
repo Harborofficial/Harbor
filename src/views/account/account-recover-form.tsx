@@ -16,10 +16,12 @@ export function AccountRecoverForm({
   onBack,
   onReset,
   inline = false,
+  onBusyChange,
 }: {
   onBack: () => void;
   onReset: (newCode: string) => void;
   inline?: boolean;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const t = useT();
   const [mode, setMode] = useState<Mode>("key");
@@ -35,6 +37,7 @@ export function AccountRecoverForm({
   const submitKey = async () => {
     if (!keyReady || busy) return;
     setBusy(true);
+    onBusyChange?.(true);
     setError(null);
     try {
       const { recoveryCode } = await recoverIdentity(username.trim(), key, password);
@@ -43,6 +46,7 @@ export function AccountRecoverForm({
       setError(accountErrorMessage(err));
     } finally {
       setBusy(false);
+      onBusyChange?.(false);
     }
   };
 
@@ -77,6 +81,7 @@ export function AccountRecoverForm({
         <div className="flex items-start gap-3">
           <button
             type="button"
+            disabled={!!onBusyChange && busy}
             onClick={() => (mode === "key" ? onBack() : switchMode("key"))}
             aria-label={t("Back")}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
@@ -155,6 +160,7 @@ export function AccountRecoverForm({
       </Section>
       <button
         type="button"
+        disabled={!!onBusyChange && busy}
         onClick={() => (mode === "key" ? onBack() : switchMode("key"))}
         aria-label={t("Back")}
         className="absolute end-0 top-0 grid h-11 w-11 place-items-center rounded-md text-ink-muted transition-colors hover:bg-elevated hover:text-ink"

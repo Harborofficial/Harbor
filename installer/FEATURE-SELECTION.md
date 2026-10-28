@@ -177,9 +177,14 @@ silently re-add removed components.
   soundtrack rows, Spooktober playlist links, the anime hero's "Read the
   Manga/eBook" button, and the search overlay's Music row/filter
   (`search-overlay.tsx`, `search-filter-bar.tsx`).
-- Settings: the navigation customization lists derive from the available nav
-  items, so disabled features simply never appear there. No settings changes
-  in v1 — see open decisions for the "change later" story.
+- Settings: Quick library remains available under Theme & Appearance → Interface
+  while either Games or Music is installed. Its dock runs in Music-only mode
+  when Games is disabled and hides the Games/Music switch; with both installed,
+  the switch returns. Game-only settings stay hidden: Open Games in your
+  library, game metadata under Library → Providers, the Steam search shortcut,
+  the Calendar Games source, and Games in navigation editing. Stored values are
+  left in place and return when Games is enabled again. Plugin settings are not
+  affected.
 
 ## Compatibility and edge cases
 

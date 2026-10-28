@@ -1,14 +1,11 @@
 import { Check } from "lucide-react";
+import { EpisodeReleaseCountdown } from "@/components/episode-release-countdown";
 import { Play } from "@/components/icons/play-filled";
 import { pickEpisodeName } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { SFX } from "@/lib/sfx";
 import { useBpT } from "../bp-i18n";
-import {
-  BP_EPISODE_CARD_W,
-  BpEpisodeRating,
-  BpEpisodeStill,
-} from "../bp-episode-still";
+import { BP_EPISODE_CARD_W, BpEpisodeRating, BpEpisodeStill } from "../bp-episode-still";
 import { bpShortDate } from "./bp-detail-chrome";
 import type { BpEpisodeFact } from "./use-bp-episode-facts";
 import type { BpEp } from "./use-bp-episode-strip";
@@ -101,6 +98,10 @@ export function BpEpisodeCard({
             {overview}
           </span>
         )}
+        <EpisodeReleaseCountdown
+          date={ep.airDate ?? fact?.airDate}
+          className="text-[clamp(10.5px,1.35vh,15px)]"
+        />
       </span>
     </button>
   );

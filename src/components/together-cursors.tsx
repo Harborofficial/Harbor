@@ -62,7 +62,11 @@ export function TogetherCursors() {
   const lastSentRef = useRef(0);
   const lastMoveRef = useRef(0);
   const idleSentRef = useRef(false);
-  const lastPosRef = useRef<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
+  const lastPosRef = useRef<{ x: number; y: number; visible: boolean }>({
+    x: 0,
+    y: 0,
+    visible: false,
+  });
   const lastClientRef = useRef<{ cx: number; cy: number } | null>(null);
   const pathRef = useRef(topPath);
   pathRef.current = topPath;
@@ -75,12 +79,14 @@ export function TogetherCursors() {
     const onMove = (e: MouseEvent) => {
       const now = performance.now();
       lastClientRef.current = { cx: e.clientX, cy: e.clientY };
+      lastMoveRef.current = now;
+      idleSentRef.current = false;
+      if (now - lastSentRef.current < SEND_INTERVAL_MS) return;
       const norm = normFromClient(e.clientX, e.clientY);
       if (!norm) return;
       lastPosRef.current = { x: norm.x, y: norm.y, visible: true };
       lastMoveRef.current = now;
       idleSentRef.current = false;
-      if (now - lastSentRef.current < SEND_INTERVAL_MS) return;
       lastSentRef.current = now;
       sendCursor(norm.x, norm.y, true, pathRef.current);
     };
@@ -95,7 +101,10 @@ export function TogetherCursors() {
     const onLeave = () => hideCursor();
 
     const onMouseOut = (e: MouseEvent) => {
-      if (e.relatedTarget == null && (e as MouseEvent & { toElement?: Element | null }).toElement == null) {
+      if (
+        e.relatedTarget == null &&
+        (e as MouseEvent & { toElement?: Element | null }).toElement == null
+      ) {
         hideCursor();
       }
     };
@@ -149,23 +158,31 @@ export function TogetherCursors() {
 
   const [scrollTick, setScrollTick] = useState(0);
   useEffect(() => {
+    if (!live) return;
     const main = findActiveMain();
     if (!main) return;
-    const onScroll = () => {
+    let frame = 0;
+    const updateScroll = () => {
+      frame = 0;
       setScrollTick((t) => t + 1);
-      if (!live) return;
       const last = lastClientRef.current;
       if (!last) return;
+      const now = performance.now();
+      if (now - lastSentRef.current < SEND_INTERVAL_MS) return;
       const norm = normFromClient(last.cx, last.cy);
       if (!norm) return;
-      const now = performance.now();
       lastPosRef.current = { x: norm.x, y: norm.y, visible: true };
-      if (now - lastSentRef.current < SEND_INTERVAL_MS) return;
       lastSentRef.current = now;
       sendCursor(norm.x, norm.y, true, pathRef.current);
     };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(updateScroll);
+    };
     main.addEventListener("scroll", onScroll, { passive: true });
-    return () => main.removeEventListener("scroll", onScroll);
+    return () => {
+      main.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [topPath, live, sendCursor]);
 
   if (snapshot.state !== "joined") return null;
@@ -183,7 +200,9 @@ export function TogetherCursors() {
     <div className="pointer-events-none fixed inset-0 z-[150]">
       {visibleCursors.map((c) => {
         const peer = snapshot.participants.find((p) => p.id === c.from);
-        return <RemotePointer key={c.from} cursor={c} main={main} peerColor={peer?.color ?? null} />;
+        return (
+          <RemotePointer key={c.from} cursor={c} main={main} peerColor={peer?.color ?? null} />
+        );
       })}
     </div>
   );

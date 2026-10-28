@@ -1,6 +1,8 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { createRequestScheduler } from "@/lib/request-scheduler";
 import { createCatalogCache, isCatalogPath } from "./tmdb-catalog-cache";
+import { lruSet } from "@/lib/cache";
+import { cachedMedia, metadataCacheTtl, MEDIA_TTL } from "@/lib/media-cache";
 
 export const TMDB = "https://api.themoviedb.org/3";
 export const IMG = "https://image.tmdb.org/t/p";
@@ -9,6 +11,7 @@ const tmdbRequests = createRequestScheduler({ concurrency: 6 });
 
 const tmdbInflight = new Map<string, Promise<unknown>>();
 const catalogCache = createCatalogCache();
+const missingResources = new Map<string, number>();
 
 let tmdbLanguage = "";
 
@@ -121,6 +124,7 @@ export async function get<T>(
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   url.searchParams.sort();
   const target = url.toString();
+  if ((missingResources.get(target) ?? 0) > Date.now()) return null;
   // The full URL scopes raw pages by API key, language, region, filters and page.
   // User-specific ranking and watched filtering still run afresh after retrieval.
   const cacheable = isCatalogPath(path);
@@ -131,7 +135,25 @@ export async function get<T>(
     const data = await (shared as Promise<T | null>);
     return cacheable ? structuredClone(data) : data;
   }
-  const run = fetchWithRetry<T>(target, path);
+  // Only public title/season metadata belongs in the durable cache.
+  const metadata =
+    /^(?:tv|movie)\/\d+(?:\/(?:season\/\d+(?:\/episode\/\d+)?(?:\/images)?|images|external_ids|translations))?$/.test(
+      path,
+    );
+  const run = metadata
+    ? cachedMedia<T>("tmdb-resource", [target], () => fetchWithRetry<T>(target, path), {
+        ttl: (value) => {
+          if (
+            path.endsWith("/images") &&
+            !Object.values(value as Record<string, unknown>).some(
+              (field) => Array.isArray(field) && field.length > 0,
+            )
+          )
+            return MEDIA_TTL.recent;
+          return metadataCacheTtl(value);
+        },
+      })
+    : fetchWithRetry<T>(target, path);
   tmdbInflight.set(target, run);
   try {
     const data = await run;
@@ -156,6 +178,9 @@ async function fetchWithRetry<T>(target: string, path: string): Promise<T | null
         await new Promise((r) => setTimeout(r, backoffMs));
         continue;
       }
+      // A missing season/image is a normal fallback. Remember it briefly so
+      // repeated mounts do not issue the same failing request and warning.
+      if (status === 404) lruSet(missingResources, target, Date.now() + 60_000, 200);
       return data;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

@@ -25,22 +25,38 @@ export function useFranchiseEpisodes(
   }, [enabled, franchise, currentId]);
 
   const sig = otherIds.join(",");
-  const [extra, setExtra] = useState<KitsuEpisode[]>([]);
+  const scope = JSON.stringify([
+    currentId,
+    sig,
+    settings.tmdbLanguage,
+    settings.uiLanguage,
+    settings.tmdbKey,
+    settings.tvdbKey,
+  ]);
+  const [loaded, setLoaded] = useState<{ scope: string; episodes: KitsuEpisode[] } | null>(null);
+  const extra = loaded?.scope === scope ? loaded.episodes : [];
   useEffect(() => {
     if (otherIds.length === 0) {
-      setExtra([]);
       return;
     }
     let cancelled = false;
-    void Promise.all(otherIds.map((id) => fetchEntryEpisodes(id, settings).catch(() => [] as KitsuEpisode[]))).then(
-      (lists) => {
-        if (!cancelled) setExtra(lists.flat());
-      },
-    );
+    const lists: KitsuEpisode[][] = Array.from({ length: otherIds.length }, () => []);
+    let next = 0;
+    const worker = async () => {
+      while (!cancelled && next < otherIds.length) {
+        const index = next++;
+        lists[index] = await fetchEntryEpisodes(otherIds[index], settings).catch(
+          () => [] as KitsuEpisode[],
+        );
+      }
+    };
+    void Promise.all(Array.from({ length: Math.min(3, otherIds.length) }, worker)).then(() => {
+      if (!cancelled) setLoaded({ scope, episodes: lists.flat() });
+    });
     return () => {
       cancelled = true;
     };
-  }, [sig, settings.tmdbLanguage, settings.uiLanguage]);
+  }, [scope]);
 
   return useMemo(() => {
     if (!enabled || otherIds.length === 0 || extra.length === 0) return currentEpisodes;

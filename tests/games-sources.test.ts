@@ -11,7 +11,7 @@ test('catalog transport failures distinguish missing, blocked and legally unavai
  assert.equal(sourceResponseError(451),'source_restricted');
  assert.equal(sourceResponseError(503),'source_network');
 });
-import { sourceDownloadTitle } from '../src/lib/games/source-title.ts';
+import { sourceDownloadTitle, sourceSearchTitle, sourceTitleKey } from '../src/lib/games/source-title.ts';
 
 const file={name:'Expansion.zip',kind:'direct',url:'https://example.org/expansion.zip',sizeBytes:2048,sha256:'A'.repeat(64)};
 const release={id:'expansion-1',title:'Hades II',game:{steamId:1145350,igdbId:228742},version:'1.2',files:[file]};
@@ -27,6 +27,48 @@ test('recent release titles round trip into details without losing a known catal
    assert.equal(sourceMatch({...catalog.entries[0],title:`Sengoku Rance${suffix} Free Download [Build-123]`},{name:'Sengoku Rance'}),null);
  }
  assert.equal(sourceMatch({...catalog.entries[0],steamId:99},{name:'Sengoku Rance',steamId:100}),null);
+});
+
+test('trademark marks in catalog titles do not prevent exact source matches', () => {
+  assert.equal(sourceSearchTitle('The Sims™ 4'), 'The Sims 4');
+  assert.equal(sourceSearchTitle('The Sims® 4'), 'The Sims 4');
+  assert.equal(sourceTitleKey('The Sims™ 4'), 'the sims 4');
+  assert.equal(sourceTitleKey('The Sims® 4'), 'the sims 4');
+  assert.equal(sourceTitleKey('The Sims© 4'), 'the sims 4');
+  assert.equal(sourceTitleKey('The Sims℠ 4'), 'the sims 4');
+  assert.equal(
+    sourceMatch(
+      { id: 'steamrip', title: 'The Sims 4 Free Download (v1.126.78.1020)', kind: 'game', files: [] },
+      { name: 'The Sims™ 4', steamId: 1222670, igdbId: undefined },
+    ),
+    'title',
+  );
+});
+
+test('a named edition still matches the base game only when a numeric identity is known', () => {
+  const game = { name: 'The Sims™ 4', steamId: 1222670, igdbId: undefined };
+  assert.equal(
+    sourceMatch(
+      { id: 'edition', title: 'The Sims 4: Deluxe Edition – v1.121.361.1020 + All DLCs', kind: 'game', files: [] },
+      game,
+    ),
+    'title',
+  );
+  for (const title of [
+    'The Sims 4 Deluxe Edition 2',
+    'The Sims 4 Deluxe Edition Remastered',
+    'The Sims 4 Deluxe Edition Soundtrack',
+    'The Sims 4 For Rent Expansion',
+  ]) {
+    assert.equal(sourceMatch({ id: 'bad', title, kind: 'game', files: [] }, game), null);
+  }
+  assert.equal(
+    sourceMatch(
+      { id: 'title-only', title: 'The Sims 4: Deluxe Edition', kind: 'game', files: [] },
+      { name: 'The Sims 4' },
+    ),
+    null,
+  );
 });
 
 test('equivalent magnets merge tracker hints while distinct torrents, mirrors and keyed URLs survive', () => {

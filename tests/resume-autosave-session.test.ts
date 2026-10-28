@@ -23,6 +23,43 @@ test("seeking backwards saves the actual new position instead of the furthest po
   assert.equal(h.writes.at(-1)?.[1], 120000);
 });
 
+test("switching streams does not let the outgoing session overwrite the new source", () => {
+  const h = resumeAutosaveHarness();
+  let first = playbackParams();
+  first.src.streamRef = { infoHash: "yameii", addonId: "aiostreams", releaseGroup: "YAMEII" };
+  h.render(first);
+  first = { ...first, snap: { ...first.snap, status: "playing", positionSec: 300, durationSec: 3600 } };
+  h.render(first);
+  h.clock(300);
+  h.tick();
+  assert.equal(h.history.at(-1)?.[1]?.infoHash, "yameii");
+
+  const switched = {
+    ...first,
+    src: {
+      ...first.src,
+      url: "https://media.test/switched.mkv",
+      streamRef: { infoHash: "varyg", addonId: "aiostreams", releaseGroup: "VARYG" },
+    },
+    snap: { ...first.snap, status: "loading", positionSec: 0, durationSec: 0 },
+  };
+  h.render(switched);
+  assert.equal(
+    h.history.at(-1)?.[1]?.infoHash,
+    "yameii",
+    "the outgoing session must not write its old source over the switch",
+  );
+  const switchedPlaying = {
+    ...switched,
+    snap: { ...switched.snap, status: "playing", positionSec: 300, durationSec: 3600 },
+  };
+  h.render(switchedPlaying);
+  h.clock(300);
+  h.tick();
+  assert.equal(h.history.at(-1)?.[1]?.infoHash, "varyg");
+  h.unmount();
+});
+
 test("episode transition cleanup saves the old source with its old season and duration", () => {
   const h = resumeAutosaveHarness();
   let first = playbackParams(); h.render(first);

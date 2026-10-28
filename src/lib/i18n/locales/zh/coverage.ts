@@ -1,4 +1,6 @@
 const coverage: Record<string, string> = {
+  "Waiting for {name}…": "正在等待 {name}…",
+  "Keeping the source you were watching.": "保留你正在观看的来源。",
   "Sound descriptions": "声音描述",
   "Hide sound effects and speaker names": "隐藏音效和说话人姓名",
   "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "在字幕播放时移除 [门吱呀作响] 这类方括号描述，以及 JOHN: 这类全大写的说话人姓名，让只提供 SDH 字幕的片源也能当作普通对白来读。歌词、普通圆括号和非拉丁文字保持原样。强制字幕和图形字幕不受影响。",

@@ -187,7 +187,8 @@ export function SeekBar({
           hovered={hover != null}
           segments={segmentSpans}
         />
-        {durationSec > 0 &&
+        {settings.seekBarChapters !== false &&
+          durationSec > 0 &&
           chapters
             .filter((chapter) => chapter.startSec > 0 && chapter.startSec < durationSec)
             .map((chapter, index) => (

@@ -6,7 +6,13 @@ import {
   mergeEBookMetadata,
   type EBook,
 } from "./api";
-import { legacyEpubChapterTitle, parseEpub, readEpubChapter, type EpubBook } from "./epub";
+import {
+  legacyEpubChapterTitle,
+  parseEpub,
+  readEpubChapter,
+  readEpubChapterContent,
+  type EpubBook,
+} from "./epub";
 import {
   gutendexDetail,
   gutendexEpub,
@@ -418,7 +424,8 @@ function gutendexProvider(source: EBookSource): Provider {
   provider.content = async (id) => {
     const [bookId, chapter] = JSON.parse(id) as [string, string];
     const { epub } = await resolve(bookId);
-    return { text: cleanSourceText(readEpubChapter(epub, chapter)) };
+    const content = readEpubChapterContent(epub, chapter);
+    return { text: cleanSourceText(content.text), images: content.images };
   };
   provider.chapterLocations = async (id, chapters) => {
     const { epub } = await resolve(id);
@@ -496,7 +503,8 @@ function localProvider(source: EBookSource): Provider {
   };
   provider.content = async (id) => {
     const [path, chapter] = JSON.parse(id) as [string, string];
-    return { text: cleanSourceText(readEpubChapter(await localPackage(path), chapter)) };
+    const content = readEpubChapterContent(await localPackage(path), chapter);
+    return { text: cleanSourceText(content.text), images: content.images };
   };
   provider.chapterLocations = async (id, chapters) => {
     const book = await find(id);

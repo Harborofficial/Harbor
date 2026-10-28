@@ -1,6 +1,15 @@
 import { ScoreStack, type CardBadge } from "./card-score-stack";
 import { Bookmark, Check, RefreshCcw } from "lucide-react";
-import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  memo,
+  useCallback,
+  startTransition,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   animeHasDub,
   dubSetReady,
@@ -45,7 +54,7 @@ import {
 } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useSimklCardScores, useSimklCardScoresByAnimeId } from "@/lib/simkl/ratings";
-import { simklRequest } from "@/lib/simkl/client";
+import { simklTitleDetail } from "@/lib/simkl/title-detail";
 import { getLocalCache } from "@/lib/simkl/activities";
 import { aniZipByKitsu, aniZipByMal } from "@/lib/providers/anizip";
 import { useViewActions } from "@/lib/view";
@@ -58,6 +67,7 @@ import { useInLocalLibrary } from "@/lib/local-library";
 import { LocalDot } from "@/components/local-badge";
 import { ClapperMini } from "./icons/clapper-mini";
 import { Poster, useLocalizedPoster } from "./poster";
+import { useProfiledEffect } from "./profiled";
 import { ListingBadgeStrip } from "./listing-badge-strip";
 import {
   CardHoverOverlay,
@@ -178,19 +188,32 @@ const PosterCard = memo(function PosterCard({
   const animeWantsImdb = isAnimeCardId && settings.animeCardRating === "imdb";
   const ratingTt = isAnimeCardId ? (animeWantsImdb ? animeImdb : undefined) : imdbId;
   const [harborRating, setHarborRating] = useState<string | undefined>();
-  useEffect(() => {
-    setHarborRating(undefined);
-    if (!ratingTt || !ratingTt.startsWith("tt")) return;
-    let cancelled = false;
-    harborImdbTitle(ratingTt)
-      .then((r) => {
-        if (!cancelled && r != null) setHarborRating(r.toFixed(1));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [ratingTt]);
+  useProfiledEffect(
+    "card.rating",
+    () => {
+      setHarborRating(undefined);
+      if (!ratingTt || !ratingTt.startsWith("tt")) return;
+      if (isAnimeCardId ? !settings.showMalBadge : !settings.showImdbBadge) return;
+      const el = ref.current;
+      if (!el) return;
+      let cancelled = false;
+      let started = false;
+      const off = observe(el, (visible) => {
+        if (!visible || started) return;
+        started = true;
+        harborImdbTitle(ratingTt)
+          .then((r) => {
+            if (!cancelled && r != null) startTransition(() => setHarborRating(r.toFixed(1)));
+          })
+          .catch(() => {});
+      });
+      return () => {
+        cancelled = true;
+        off();
+      };
+    },
+    [ratingTt, isAnimeCardId, settings.showImdbBadge, settings.showMalBadge],
+  );
   const mediaKind = meta.type === "series" ? "show" : "movie";
   const wantMdblist =
     settings.showPopcornBadge ||
@@ -274,12 +297,13 @@ const PosterCard = memo(function PosterCard({
       : `end-1.5 ${circleTop((ribbonRight ? 1 : 0) + (bookmarkTopEnd ? 1 : 0))}`;
 
   const [imgIdx, setImgIdx] = useState(0);
+  const advancePoster = useCallback(() => setImgIdx((i) => i + 1), []);
   const [hydratedPoster, setHydratedPoster] = useState<string | undefined>();
   const { url: localizedPoster, localizing: posterLocalizing } = useLocalizedPoster(meta.id);
-  const wantTmdbPoster = needsTmdbForPoster(settings.rpdbKey, meta.id);
+  const wantTmdbPoster = needsTmdbForPoster(settings.rpdbKey, meta.id, settings.posterBaseUrl);
   const resolvedTmdb = useTmdbIdFromImdb(wantTmdbPoster ? meta.id : undefined);
   const animeTmdb = useTmdbIdFromImdb(animeImdb) ?? undefined;
-  const posterNeedsImdb = needsImdbForPoster(settings.rpdbKey, meta.id);
+  const posterNeedsImdb = needsImdbForPoster(settings.rpdbKey, meta.id, settings.posterBaseUrl);
   const posterAltId = posterNeedsImdb
     ? imdbId
     : wantTmdbPoster
@@ -298,9 +322,34 @@ const PosterCard = memo(function PosterCard({
     const out: string[] = [];
     for (const u of [
       pinnedPoster,
-      animeImdb ? rpdbPoster(settings.rpdbKey, animeImdb, base, animeTmdb) : undefined,
-      animeTvdb ? rpdbPoster(settings.rpdbKey, `tvdb:${animeTvdb}`, base) : undefined,
-      rpdbPoster(settings.rpdbKey, meta.id, base, posterAltId),
+      animeImdb
+        ? rpdbPoster(
+            settings.rpdbKey,
+            animeImdb,
+            base,
+            animeTmdb,
+            settings.posterBaseUrl,
+            meta.type === "series" ? "series" : "movie",
+          )
+        : undefined,
+      animeTvdb
+        ? rpdbPoster(
+            settings.rpdbKey,
+            `tvdb:${animeTvdb}`,
+            base,
+            undefined,
+            settings.posterBaseUrl,
+            "series",
+          )
+        : undefined,
+      rpdbPoster(
+        settings.rpdbKey,
+        meta.id,
+        base,
+        posterAltId,
+        settings.posterBaseUrl,
+        meta.type === "series" ? "series" : "movie",
+      ),
       localizedPoster,
       meta.poster,
       hydratedPoster,
@@ -312,6 +361,8 @@ const PosterCard = memo(function PosterCard({
     return out;
   }, [
     settings.rpdbKey,
+    settings.posterBaseUrl,
+    meta.type,
     meta.id,
     posterAltId,
     meta.poster,
@@ -337,207 +388,221 @@ const PosterCard = memo(function PosterCard({
     setAnimeTvdb(undefined);
   }, [meta.id]);
 
-  useEffect(() => {
-    if (!isAnimeCardId || (!settings.rpdbKey && !settings.posterBaseUrl && !animeWantsImdb)) return;
-    const m = meta.id.match(/^(kitsu|mal|anilist|anidb):(\d+)/);
-    if (!m) return;
-    const source = m[1];
-    const idNum = Number(m[2]);
-    if (!Number.isFinite(idNum)) return;
-    let cancelled = false;
-    (async () => {
-      let kitsuId: number | null = source === "kitsu" ? idNum : null;
-      if (kitsuId == null) {
-        const armSource = source === "mal" ? "myanimelist" : source;
-        kitsuId = await externalToKitsu(armSource, idNum).catch(() => null);
-      }
-      if (cancelled || kitsuId == null) return;
-      const [tt, tv] = await Promise.all([
-        kitsuToImdb(kitsuId).catch(() => null),
-        kitsuToTvdb(kitsuId).catch(() => null),
-      ]);
-      if (cancelled) return;
-      if (tt) setAnimeImdb(tt);
-      if (tv) setAnimeTvdb(String(tv));
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [meta.id, isAnimeCardId, settings.rpdbKey, settings.posterBaseUrl, animeWantsImdb]);
+  useProfiledEffect(
+    "card.anime-poster-ids",
+    () => {
+      if (!isAnimeCardId || (!settings.rpdbKey && !settings.posterBaseUrl && !animeWantsImdb))
+        return;
+      const m = meta.id.match(/^(kitsu|mal|anilist|anidb):(\d+)/);
+      if (!m) return;
+      const source = m[1];
+      const idNum = Number(m[2]);
+      if (!Number.isFinite(idNum)) return;
+      let cancelled = false;
+      (async () => {
+        let kitsuId: number | null = source === "kitsu" ? idNum : null;
+        if (kitsuId == null) {
+          const armSource = source === "mal" ? "myanimelist" : source;
+          kitsuId = await externalToKitsu(armSource, idNum).catch(() => null);
+        }
+        if (cancelled || kitsuId == null) return;
+        const [tt, tv] = await Promise.all([
+          kitsuToImdb(kitsuId).catch(() => null),
+          kitsuToTvdb(kitsuId).catch(() => null),
+        ]);
+        if (cancelled) return;
+        if (tt) setAnimeImdb(tt);
+        if (tv) setAnimeTvdb(String(tv));
+      })();
+      return () => {
+        cancelled = true;
+      };
+    },
+    [meta.id, isAnimeCardId, settings.rpdbKey, settings.posterBaseUrl, animeWantsImdb],
+  );
 
-  useEffect(() => {
-    if (posterSrc !== undefined || hydratedPoster || posterPending) return;
-    let cancelled = false;
-    const isAnimeId =
-      meta.id.startsWith("kitsu:") ||
-      meta.id.startsWith("mal:") ||
-      meta.id.startsWith("anilist:") ||
-      meta.id.startsWith("anidb:");
-    const isSimklId = meta.id.startsWith("simkl:");
-    const hydrator = isSimklId
-      ? (async () => {
-          const simklId = meta.id.slice(5);
-          const detail = await simklRequest<{ poster?: string }>(`/anime/${simklId}`, {
-            method: "GET",
-            authed: false,
-          }).catch(() => null);
-          return detail?.poster
-            ? { poster: `https://simkl.in/posters/${detail.poster}_m.jpg` }
-            : null;
-        })()
-      : isAnimeId
-        ? animeKitsuMeta(meta.id).then((m) => (m ? { poster: m.poster } : null))
-        : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) =>
-            full ? { poster: full.poster } : null,
-          );
-    hydrator
-      .then((res) => {
-        if (cancelled || !res?.poster) return;
-        setHydratedPoster(res.poster);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [posterSrc, hydratedPoster, meta.type, meta.id, posterPending]);
+  useProfiledEffect(
+    "card.poster-hydration",
+    () => {
+      if (posterSrc !== undefined || hydratedPoster || posterPending) return;
+      let cancelled = false;
+      const isAnimeId =
+        meta.id.startsWith("kitsu:") ||
+        meta.id.startsWith("mal:") ||
+        meta.id.startsWith("anilist:") ||
+        meta.id.startsWith("anidb:");
+      const isSimklId = meta.id.startsWith("simkl:");
+      const hydrator = isSimklId
+        ? (async () => {
+            const simklId = meta.id.slice(5);
+            const detail = await simklTitleDetail(simklId).catch(() => null);
+            return detail?.poster
+              ? { poster: `https://simkl.in/posters/${detail.poster}_m.jpg` }
+              : null;
+          })()
+        : isAnimeId
+          ? animeKitsuMeta(meta.id).then((m) => (m ? { poster: m.poster } : null))
+          : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) =>
+              full ? { poster: full.poster } : null,
+            );
+      hydrator
+        .then((res) => {
+          if (cancelled || !res?.poster) return;
+          setHydratedPoster(res.poster);
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    },
+    [posterSrc, hydratedPoster, meta.type, meta.id, posterPending],
+  );
 
   const [preferredTitle, setPreferredTitle] = useState<string | null>(null);
 
-  useEffect(() => {
-    setPreferredTitle(null);
-    if (!settings.preferCustomMetaAddon || isAnimeCardId) return;
-    if (meta.type !== "movie" && meta.type !== "series") return;
-    const el = ref.current;
-    if (!el) return;
-    let cancelled = false;
-    let off: (() => void) | null = null;
-    off = observe(el, (visible) => {
-      if (!visible) return;
-      off?.();
-      off = null;
-      void preferredMeta(narrowMediaType(meta.type), meta.id).then((full) => {
-        if (cancelled || !full?.name) return;
-        setPreferredTitle(full.name);
+  useProfiledEffect(
+    "card.preferred-title",
+    () => {
+      setPreferredTitle(null);
+      if (!settings.preferCustomMetaAddon || isAnimeCardId) return;
+      if (meta.type !== "movie" && meta.type !== "series") return;
+      const el = ref.current;
+      if (!el) return;
+      let cancelled = false;
+      let off: (() => void) | null = null;
+      off = observe(el, (visible) => {
+        if (!visible) return;
+        off?.();
+        off = null;
+        void preferredMeta(narrowMediaType(meta.type), meta.id).then((full) => {
+          if (cancelled || !full?.name) return;
+          setPreferredTitle(full.name);
+        });
       });
-    });
-    return () => {
-      cancelled = true;
-      off?.();
-    };
-  }, [meta.id, meta.type, isAnimeCardId, settings.preferCustomMetaAddon]);
+      return () => {
+        cancelled = true;
+        off?.();
+      };
+    },
+    [meta.id, meta.type, isAnimeCardId, settings.preferCustomMetaAddon],
+  );
 
   const [translatedTitle, setTranslatedTitle] = useState<string | null>(null);
 
-  useEffect(() => {
-    setTranslatedTitle(null);
-    if (!isAnimeCardId) return;
-    const el = ref.current;
-    if (!el) return;
+  useProfiledEffect(
+    "card.anime-title",
+    () => {
+      setTranslatedTitle(null);
+      if (!isAnimeCardId) return;
+      const el = ref.current;
+      if (!el) return;
 
-    let cancelled = false;
-    const cache = getLocalCache();
-    let kitsuId: number | null = null;
-    let malId: number | null = null;
+      let cancelled = false;
+      const cache = getLocalCache();
+      let kitsuId: number | null = null;
+      let malId: number | null = null;
 
-    if (cache) {
-      const parts = meta.id.split(":");
-      const type = parts[0];
-      const idVal = parts[1];
+      if (cache) {
+        const parts = meta.id.split(":");
+        const type = parts[0];
+        const idVal = parts[1];
 
-      if (type === "kitsu") {
-        kitsuId = Number(idVal);
-      } else if (type === "mal") {
-        malId = Number(idVal);
-      }
-
-      let simklId: number | null = null;
-      if (type === "simkl") {
-        simklId = Number(idVal);
-      } else if (type === "kitsu" && kitsuId) {
-        simklId = cache.kitsuToSimkl[String(kitsuId)] ?? null;
-      } else if (type === "mal" && malId) {
-        simklId = cache.malToSimkl[String(malId)] ?? null;
-      }
-
-      if (simklId) {
-        if (!kitsuId) {
-          const kStr = Object.keys(cache.kitsuToSimkl).find(
-            (k) => cache.kitsuToSimkl[k] === simklId,
-          );
-          if (kStr) kitsuId = Number(kStr);
+        if (type === "kitsu") {
+          kitsuId = Number(idVal);
+        } else if (type === "mal") {
+          malId = Number(idVal);
         }
-        if (!malId) {
-          const mStr = Object.keys(cache.malToSimkl).find((k) => cache.malToSimkl[k] === simklId);
-          if (mStr) malId = Number(mStr);
+
+        let simklId: number | null = null;
+        if (type === "simkl") {
+          simklId = Number(idVal);
+        } else if (type === "kitsu" && kitsuId) {
+          simklId = cache.kitsuToSimkl[String(kitsuId)] ?? null;
+        } else if (type === "mal" && malId) {
+          simklId = cache.malToSimkl[String(malId)] ?? null;
         }
-      }
-    }
 
-    const preferred = settings.animeTitleLanguage;
-
-    const fetchTitles = async () => {
-      // Romaji series titles only exist in Kitsu's own map; AniZip carries an
-      // abbreviated AniDB short title in `x-jat` instead.
-      if (preferred !== "romaji" && malId) {
-        const map = await aniZipByMal(malId).catch(() => null);
-        if (cancelled) return;
-        if (map?.titles) {
-          const title = getTitleFromAniZip(map.titles, preferred);
-          if (title) {
-            setTranslatedTitle(title);
-            return;
+        if (simklId) {
+          if (!kitsuId) {
+            const kStr = Object.keys(cache.kitsuToSimkl).find(
+              (k) => cache.kitsuToSimkl[k] === simklId,
+            );
+            if (kStr) kitsuId = Number(kStr);
+          }
+          if (!malId) {
+            const mStr = Object.keys(cache.malToSimkl).find((k) => cache.malToSimkl[k] === simklId);
+            if (mStr) malId = Number(mStr);
           }
         }
       }
 
-      if (preferred !== "romaji" && kitsuId) {
-        const map = await aniZipByKitsu(kitsuId).catch(() => null);
-        if (cancelled) return;
-        if (map?.titles) {
-          const title = getTitleFromAniZip(map.titles, preferred);
-          if (title) {
-            setTranslatedTitle(title);
-            return;
-          }
-        }
-      }
+      const preferred = settings.animeTitleLanguage;
 
-      if (kitsuId) {
-        try {
-          const res = await fetch(`https://kitsu.io/api/edge/anime/${kitsuId}`, {
-            headers: { Accept: "application/vnd.api+json" },
-          });
-          if (res.ok) {
-            const j = await res.json();
-            const attr = j?.data?.attributes;
-            if (attr?.titles) {
-              const title = getTitleFromKitsu(attr.titles, preferred) || attr.canonicalTitle;
-              if (cancelled) return;
-              if (title) {
-                setTranslatedTitle(title);
-                return;
-              }
+      const fetchTitles = async () => {
+        // Romaji series titles only exist in Kitsu's own map; AniZip carries an
+        // abbreviated AniDB short title in `x-jat` instead.
+        if (preferred !== "romaji" && malId) {
+          const map = await aniZipByMal(malId).catch(() => null);
+          if (cancelled) return;
+          if (map?.titles) {
+            const title = getTitleFromAniZip(map.titles, preferred);
+            if (title) {
+              setTranslatedTitle(title);
+              return;
             }
           }
-        } catch {
-          /* ignore */
         }
-      }
-    };
 
-    let started = false;
-    const off = observe(el, (visible) => {
-      if (visible && !started && !cancelled) {
-        started = true;
-        fetchTitles().catch(() => {});
-      }
-    });
+        if (preferred !== "romaji" && kitsuId) {
+          const map = await aniZipByKitsu(kitsuId).catch(() => null);
+          if (cancelled) return;
+          if (map?.titles) {
+            const title = getTitleFromAniZip(map.titles, preferred);
+            if (title) {
+              setTranslatedTitle(title);
+              return;
+            }
+          }
+        }
 
-    return () => {
-      cancelled = true;
-      off?.();
-    };
-  }, [meta.id, isAnimeCardId, settings.animeTitleLanguage]);
+        if (kitsuId) {
+          try {
+            const res = await fetch(`https://kitsu.io/api/edge/anime/${kitsuId}`, {
+              headers: { Accept: "application/vnd.api+json" },
+            });
+            if (res.ok) {
+              const j = await res.json();
+              const attr = j?.data?.attributes;
+              if (attr?.titles) {
+                const title = getTitleFromKitsu(attr.titles, preferred) || attr.canonicalTitle;
+                if (cancelled) return;
+                if (title) {
+                  setTranslatedTitle(title);
+                  return;
+                }
+              }
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+      };
+
+      let started = false;
+      const off = observe(el, (visible) => {
+        if (visible && !started && !cancelled) {
+          started = true;
+          fetchTitles().catch(() => {});
+        }
+      });
+
+      return () => {
+        cancelled = true;
+        off?.();
+      };
+    },
+    [meta.id, isAnimeCardId, settings.animeTitleLanguage],
+  );
 
   useEffect(() => {
     if (
@@ -607,6 +672,20 @@ const PosterCard = memo(function PosterCard({
         ? `start-1.5 ${circleTop(topLeftBadges + (leftAwardBadge ? 1 : 0) + (ribbonLeft ? 1 : 0))}`
         : WATCHLIST_POS[settings.watchlistBadge];
 
+  const posterOverlays = useMemo(
+    () => (
+      <>
+        <ExpandingCardArtwork
+          src={expandingCard.artwork}
+          onReady={expandingCard.onArtworkReady}
+          onError={expandingCard.onArtworkError}
+        />
+        <ListingBadgeStrip meta={meta} />
+      </>
+    ),
+    [meta, expandingCard.artwork, expandingCard.onArtworkReady, expandingCard.onArtworkError],
+  );
+
   return (
     <button
       ref={ref}
@@ -660,19 +739,12 @@ const PosterCard = memo(function PosterCard({
           lowResImdb={imdbId}
           ratio="portrait"
           lazy="release"
-          onError={() => setImgIdx((i) => i + 1)}
+          onError={advancePoster}
           className={`harbor-card-ring rounded-[var(--poster-radius,12px)] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[box-shadow] duration-300 group-hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)] ${
             customProps ? customProps.className : cardHoverPosterClass(inCardHover)
           }`}
         >
-          <ExpandingCardArtwork
-            src={expandingCard.artwork}
-            onReady={expandingCard.onArtworkReady}
-            onError={expandingCard.onArtworkError}
-          />
-          {/* A plugin's own line, read back and badged. Only a listing that carried extras has
-              anything here, so every other surface draws exactly what it drew before. */}
-          <ListingBadgeStrip meta={meta} />
+          {posterOverlays}
         </Poster>
         {settings.cardHoverShine && (
           <div
@@ -803,6 +875,7 @@ const PosterCard = memo(function PosterCard({
       {!settings.hidePosterTitles && (
         <div className="min-h-9">
           <p
+            style={{ fontSize: `${(kids ? 15 : 13) * settings.cardTitleScale}px` }}
             className={
               kids
                 ? "line-clamp-2 text-[15px] font-bold leading-snug text-[#0e3a43]"

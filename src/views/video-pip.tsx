@@ -5,6 +5,7 @@ import { Maximize, Maximize2, Pause, Play, Settings2, Volume2, VolumeX, X } from
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useFloatingMedia, VideoPipSettings } from "./video-pip-settings";
 import { floatingSeek } from "@/lib/player/floating-controls";
+import { tracePlayback } from "@/lib/player/pause-trace";
 import { useT } from "@/lib/i18n";
 import "./video-pip.css";
 
@@ -110,6 +111,7 @@ export function VideoPipApp() {
 
   const toggle = useCallback(() => {
     const next = !paused;
+    tracePlayback(`${next ? "pause" : "play"} source=video-pip`);
     void invoke("mpv_set_property", { name: "pause", value: next }).catch(() => media.setError(true));
   }, [paused, media.setError]);
 

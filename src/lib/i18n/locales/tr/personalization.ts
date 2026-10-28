@@ -1729,7 +1729,7 @@ const personalization: Record<string, string> = {
   "https:// API or site URL": "https:// API veya site URL'si",
   "https://posters.example.com or a pattern with {id}":
     "https://posters.example.com veya {id} içeren bir desen",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "in Harbor settings.": "alanına yazılır.",
   "in {time}": "{time} sonra",
   "jina_...": "jina_...",

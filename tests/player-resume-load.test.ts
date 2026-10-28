@@ -110,6 +110,7 @@ test("resume prompt waits for the user's choice", async () => {
   h.render();
   await flushPromises();
   assert.equal(h.loads[0].startAtSec, undefined);
+  assert.equal(h.loads[0].startPaused, true);
   const state = h.render();
   assert.equal(state.pendingResumeSec, 600);
   assert.equal(state.resumeReady, false);
@@ -129,7 +130,10 @@ test("live, start-over, disabled resume and room guests do not load at saved pro
     await flushPromises();
     assert.equal(h.loads[0].startAtSec, undefined, mode);
     assert.equal(h.render().pendingSeekSec, null, mode);
-    if (mode === "guest") assert.equal(h.plays, 0);
+    if (mode === "guest") {
+      assert.equal(h.plays, 0);
+      assert.equal(h.loads[0].startPaused, true);
+    }
   }
 });
 
@@ -141,7 +145,25 @@ test("explicit paused source replacement retains its position with auto-resume d
   h.render();
   await flushPromises();
   assert.equal(h.loads[0].startAtSec, 900);
+  assert.equal(h.loads[0].startPaused, true);
   assert.equal(h.plays, 0);
+});
+
+test("a replacement episode passes its current title to the reused bridge", async () => {
+  const h = harness();
+  h.args.src = { ...h.args.src, title: "Show", subtitle: "Episode 1" };
+  h.render();
+  await flushPromises();
+  assert.equal(h.loads[0].title, "Show - Episode 1");
+
+  h.args.src = {
+    ...h.args.src,
+    url: "https://fixture.test/episode-2.mkv",
+    subtitle: "Episode 2",
+  };
+  h.render();
+  await flushPromises();
+  assert.equal(h.loads[1].title, "Show - Episode 2");
 });
 
 test("unmount before resume resolution prevents any playback side effects", async () => {

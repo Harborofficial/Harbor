@@ -281,7 +281,7 @@ pub fn parse_detail(project: Project, html: &str) -> Result<Detail> {
 }
 fn client() -> Result<reqwest::Client> {
     reqwest::Client::builder()
-        .user_agent("Harbor-Games/0.9 (https://harbor.site)")
+        .user_agent("Harbor-Games/0.9 (https://harborcommunity.site)")
         .connect_timeout(Duration::from_secs(8))
         .timeout(Duration::from_secs(60))
         .redirect(reqwest::redirect::Policy::none())

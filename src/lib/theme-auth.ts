@@ -8,6 +8,23 @@ const SESSION_PREFIX = "harbor.theme-session.";
 const PROFILES_KEY = "harbor.profiles.v1";
 const REPAIR_FLAG = "harbor.theme-session.repaired.v2";
 
+function isNuvioMode(): boolean {
+  try {
+    const explicit = localStorage.getItem("harbor.account-provider");
+    if (explicit === "nuvio") return true;
+    if (explicit === "stremio") return false;
+    for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.accountProvider === "nuvio") return true;
+        if (parsed.accountProvider === "stremio") return false;
+      }
+    }
+  } catch {}
+  return false;
+}
+
 function readProfilesRaw(): {
   profiles?: Array<{ id?: string; isPrimary?: boolean }>;
   activeId?: string;
@@ -20,12 +37,25 @@ function readProfilesRaw(): {
   }
 }
 function activeProfileId(): string {
+  if (isNuvioMode()) {
+    try {
+      const shared = localStorage.getItem(SESSION_PREFIX + "nuvio");
+      if (!shared) {
+        const slot1 = localStorage.getItem(SESSION_PREFIX + "nuvio-1");
+        if (slot1) localStorage.setItem(SESSION_PREFIX + "nuvio", slot1);
+      }
+    } catch {}
+    return "nuvio";
+  }
   const s = readProfilesRaw();
   if (s && typeof s.activeId === "string" && s.activeId) return s.activeId;
   const primary = s?.profiles?.find((p) => p?.isPrimary);
   return (primary && typeof primary.id === "string" && primary.id) || "";
 }
 function primaryProfileId(): string {
+  if (isNuvioMode()) {
+    return "nuvio-1";
+  }
   const s = readProfilesRaw();
   const primary = s?.profiles?.find((p) => p?.isPrimary);
   return (primary && typeof primary.id === "string" && primary.id) || activeProfileId();
@@ -170,9 +200,9 @@ function setSession(next: Session | null): void {
   for (const fn of subs) fn();
 }
 
-function reloadSession(): void {
+function reloadSession(force = false): void {
   const id = activeProfileId();
-  if (id === loadedProfile) return;
+  if (!force && id === loadedProfile) return;
   sessionGeneration += 1;
   loadedProfile = id;
   migrateLegacyGlobal();
@@ -181,8 +211,19 @@ function reloadSession(): void {
 }
 
 if (typeof window !== "undefined") {
-  window.addEventListener("harbor:active-profile-changed", reloadSession);
-  window.addEventListener("harbor:profiles-updated", reloadSession);
+  window.addEventListener("harbor:active-profile-changed", () => reloadSession(true));
+  window.addEventListener("harbor:profiles-updated", () => reloadSession(false));
+  window.addEventListener("harbor:account-provider-changed", (e: Event) => {
+    const detail = (e as CustomEvent<{ provider?: string }>).detail;
+    if (detail?.provider) {
+      try {
+        localStorage.setItem("harbor.account-provider", detail.provider);
+      } catch {}
+    }
+    reloadSession(true);
+  });
+  window.addEventListener("harbor:nuvio-profile-changed", () => reloadSession(true));
+  window.addEventListener("harbor:nuvio-state-changed", () => reloadSession(true));
 }
 
 export function currentAuthor(): Author | null {

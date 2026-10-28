@@ -4,8 +4,11 @@ import { engineP2pEligible } from "@/lib/torrent/stremio-stream";
 import type { ScoredStream } from "@/lib/streams/types";
 import {
   streamMatchesEntry,
+  streamMatchesPreferredSource,
   streamMatchesReleaseLineage,
   streamMatchesSource,
+  findPreferredSourceMatch,
+  streamOfferedByAddon,
   type PlaybackEntry,
 } from "@/lib/playback-history";
 import type { SourceDescriptor } from "@/lib/together/protocol";
@@ -27,6 +30,7 @@ export function useAutoCandidates(args: {
   previousPlayback: PlaybackEntry | null;
   sourceEntry: PlaybackEntry | null;
   sourceEntryLineage?: boolean;
+  sourceEntryBestEffort?: boolean;
   isCached: (s: ScoredStream) => boolean;
   addons: Array<{ manifest?: { id?: string } }> | null;
   hasStrongAddon: boolean;
@@ -47,6 +51,7 @@ export function useAutoCandidates(args: {
     previousPlayback,
     sourceEntry,
     sourceEntryLineage,
+    sourceEntryBestEffort,
     isCached,
     addons,
     hasStrongAddon,
@@ -172,13 +177,30 @@ export function useAutoCandidates(args: {
       seen.add(k);
       out.push(s);
     };
-    const matchSource = sourceEntryLineage ? streamMatchesReleaseLineage : streamMatchesSource;
+    const matchSource = sourceEntryBestEffort
+      ? streamMatchesPreferredSource
+      : sourceEntryLineage
+        ? streamMatchesReleaseLineage
+        : streamMatchesSource;
     const sourceMatch = sourceEntry
-      ? (filteredPicker.allRaw.find((s) => matchSource(s, sourceEntry)) ?? null)
+      ? findPreferredSourceMatch(filteredPicker.allRaw, sourceEntry, matchSource)
+      : null;
+    // When the exact source is unavailable at the remembered quality, prefer
+    // another stream at that quality over a same-group release at a different
+    // resolution. The remembered addon still wins ties.
+    const preferredQuality = sourceEntry?.resolution
+      ? (filteredPicker.all.find(
+          (s) =>
+            s.resolution === sourceEntry.resolution &&
+            (!sourceEntry.addonId || streamOfferedByAddon(s, sourceEntry.addonId)),
+        ) ??
+        filteredPicker.all.find((s) => s.resolution === sourceEntry.resolution) ??
+        null)
       : null;
     const instantPlayable = (s: ScoredStream | null) => !!s && (isCached(s) || !!s.url);
     if (!matchScores) {
       if (instantPlayable(sourceMatch)) push(sourceMatch);
+      if (instantPlayable(preferredQuality)) push(preferredQuality);
       if (instantPlayable(previousMatch)) push(previousMatch);
     }
     for (const s of sorted) push(s);
@@ -195,6 +217,7 @@ export function useAutoCandidates(args: {
     previousPlayback,
     sourceEntry,
     sourceEntryLineage,
+    sourceEntryBestEffort,
     isCached,
     addons,
     hasStrongAddon,

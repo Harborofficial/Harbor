@@ -87,7 +87,7 @@ function applyAnimeEpisodeFilter(
   for (const a of input.animeEpisodeAliases ?? []) {
     if (Number.isFinite(a) && a >= 1) validNums.add(a);
   }
-  const { keep, drop } = partitionByExactAnimeEpisode(parsed, validNums);
+  const { keep, drop } = partitionByExactAnimeEpisode(parsed, validNums, input.animeEpisodeCoordinates, input.animeSplitPart, input.trust?.expectedTitles);
   return {
     kept: keep,
     extraRejected: drop.map((stream) => ({
@@ -107,10 +107,16 @@ export type PipelineInput = {
   isAnime?: boolean;
   animeAbsoluteEpisode?: number | null;
   animeEpisodeAliases?: Set<number> | null;
+  animeEpisodeCoordinates?: Array<[number, number]>;
+  animeSplitPart?: number;
   presetStreams?: Stream[];
   addonTimeoutMs?: number;
   addonRanks?: AddonRankFn | null;
   forcedAddonBases?: Array<{ base: string; id: string }>;
+  /** When a duplicate arrives from this addon, make its URL/metadata the primary
+   * copy so "keep same source" plays the remembered addon, not whichever addon
+   * happened to answer first. */
+  preferredAddonId?: string | null;
 };
 
 export type DebridError = { slug: string; name: string; code: string };
@@ -139,6 +145,7 @@ export async function runPipeline(
   let latestAddonStreams: Stream[] = [];
   const debridErrors: DebridError[] = [];
   let addonErrors: AddonFailure[] = [];
+  let latestAddonProgress: AddonProgress | null = null;
   const priorityActive = input.addonRanks != null;
 
   // Debrid verification runs alongside the addon fetch instead of after it, so
@@ -218,7 +225,7 @@ export async function runPipeline(
   };
 
   const buildPartial = async (addonStreams: Stream[]): Promise<PipelineResult> => {
-    const merged = mergeAndDedupe(library, addonStreams);
+    const merged = mergeAndDedupe(library, addonStreams, input.preferredAddonId);
     const pre = merged.map(parseStream);
     if (input.isAnime && input.animeAbsoluteEpisode != null) {
       await enhanceAnimeStreams(pre);
@@ -247,10 +254,12 @@ export async function runPipeline(
   const emitPartialNow = (): void => {
     if (!onProgress || signal.aborted || !acceptPartials) return;
     const revision = ++partialRevision;
+    const progress = latestAddonProgress;
     void buildPartial(latestAddonStreams)
       .then((result) => {
         if (signal.aborted || !acceptPartials || revision !== partialRevision) return;
         onProgress(result);
+        if (progress) onAddonProgress?.(progress);
       })
       .catch(() => {
         /* swallow */
@@ -292,7 +301,11 @@ export async function runPipeline(
   const handleAddonProgress = (progress: AddonProgress): void => {
     if (signal.aborted || !acceptPartials) return;
     addonErrors = progress.failures ?? [];
-    onAddonProgress?.(progress);
+    latestAddonProgress = progress;
+    // Pending requests are visible immediately. Settlement must travel with a
+    // processed candidate snapshot, never ahead of asynchronous parsing.
+    if (progress.settledAddonIds.length === 0) onAddonProgress?.(progress);
+    else emitPartialNow();
   };
 
   // Library listings do not depend on the addon responses, so start them with the
@@ -350,7 +363,7 @@ export async function runPipeline(
   signal.removeEventListener("abort", stopPartials);
   if (librarySettled.status === "fulfilled") library = librarySettled.value;
   const addonStreams = addonSettled.status === "fulfilled" ? addonSettled.value : [];
-  const merged = mergeAndDedupe(library, addonStreams);
+  const merged = mergeAndDedupe(library, addonStreams, input.preferredAddonId);
   await cacheCheckInFlight;
   await runCacheCheck(merged);
 
@@ -469,10 +482,16 @@ async function runCorePipeline(
   }
 }
 
-function mergeAndDedupe(library: Stream[], addons: Stream[]): Stream[] {
+function mergeAndDedupe(
+  library: Stream[],
+  addons: Stream[],
+  preferredAddonId?: string | null,
+): Stream[] {
   const seen = new Map<string, Stream>();
+  const contributorsOf = (s: Stream) =>
+    s.contributors ?? [{ id: s.addonId, name: s.addonName }];
   const addContributor = (target: Stream, id: string, name: string) => {
-    const list = target.contributors ?? [{ id: target.addonId, name: target.addonName }];
+    const list = contributorsOf(target);
     if (!list.some((c) => c.id === id)) list.push({ id, name });
     target.contributors = list;
   };
@@ -484,6 +503,33 @@ function mergeAndDedupe(library: Stream[], addons: Stream[]): Stream[] {
     const prior = seen.get(key);
     if (!prior) {
       seen.set(key, { ...s, contributors: [{ id: s.addonId, name: s.addonName }] });
+      continue;
+    }
+    // The user's remembered addon may be a duplicate of a faster addon's copy.
+    // Keep the union of contributors but let the remembered addon own the URL and
+    // metadata, otherwise "keep same source" silently plays the faster addon.
+    // Without a remembered addon, the user's addon order decides which duplicate
+    // owns the row instead of whichever addon happened to answer first.
+    const priorRank = prior.addonPriority;
+    const nextRank = s.addonPriority;
+    const preferred =
+      (preferredAddonId != null &&
+        s.addonId === preferredAddonId &&
+        prior.addonId !== preferredAddonId) ||
+      (prior.addonId !== preferredAddonId &&
+        nextRank != null &&
+        priorRank != null &&
+        nextRank < priorRank);
+    if (preferred) {
+      const contributors = [...contributorsOf(prior)];
+      for (const c of contributorsOf(s)) {
+        if (!contributors.some((x) => x.id === c.id)) contributors.push(c);
+      }
+      const sources =
+        (prior.sources?.length ?? 0) > 0 || (s.sources?.length ?? 0) > 0
+          ? [...new Set([...(prior.sources ?? []), ...(s.sources ?? [])])]
+          : s.sources;
+      seen.set(key, { ...s, url: s.url ?? prior.url, sources, contributors });
       continue;
     }
     addContributor(prior, s.addonId, s.addonName);

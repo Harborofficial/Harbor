@@ -1,4 +1,5 @@
 import { activeProfileId } from "@/lib/active-profile-id";
+import { yieldToBrowser } from "@/lib/yield-to-browser";
 import { currentActivitiesAll } from "./activities/gate";
 import { simklRequest } from "./client";
 import { simklEntryIdKeys, simklEpisodeWatchKeys, simklLookupIds, simklTargetIds } from "./ids";
@@ -87,12 +88,20 @@ async function pull(): Promise<SimklProgress> {
   const data = await simklRequest<RawAllItems | null>(
     "/sync/all-items/all/all?extended=full_anime_seasons&episode_watched_at=yes",
   );
+  const processingStarted = performance.now();
   const statuses = new Map<string, WatchlistStatus>();
   const watched = new Map<string, Set<string>>();
   const watchedAt = new Map<string, Map<string, number>>();
   const completedSeries: LibraryItem[] = [];
-  const add = (entries: RawEntry[] | undefined, kind: "movie" | "show", isAnime = false) => {
+  const add = async (entries: RawEntry[] | undefined, kind: "movie" | "show", isAnime = false) => {
+    let sliceStarted = performance.now();
     for (const e of entries ?? []) {
+      // Large watch histories arrive during browsing. Split the response processing
+      // into short tasks so input and scroll frames can run between library entries.
+      if (performance.now() - sliceStarted >= 4) {
+        await yieldToBrowser();
+        sliceStarted = performance.now();
+      }
       const node = kind === "movie" ? e.movie : (e.show ?? e.anime);
       const keys = idKeys(node?.ids, kind);
       if (keys.length === 0) continue;
@@ -100,13 +109,36 @@ async function pull(): Promise<SimklProgress> {
       if (kind === "show" && e.seasons) {
         const eps = new Set<string>();
         const times = new Map<string, number>();
+        const mappedEps = new Set<string>();
+        const mappedTimes = new Map<string, number>();
+        let latest: [string, number] | undefined;
         for (const s of e.seasons) {
           for (const ep of s.episodes ?? []) {
+            if (performance.now() - sliceStarted >= 4) {
+              await yieldToBrowser();
+              sliceStarted = performance.now();
+            }
             if (ep.watched_at && s.number != null && ep.number != null) {
               const key = `${s.number}:${ep.number}`;
               eps.add(key);
               const at = Date.parse(ep.watched_at);
-              if (Number.isFinite(at) && at > 0) times.set(key, at);
+              if (Number.isFinite(at) && at > 0) {
+                times.set(key, at);
+                if (
+                  s.number > 0 &&
+                  ep.number > 0 &&
+                  Number.isInteger(s.number) &&
+                  Number.isInteger(ep.number) &&
+                  (!latest || at > latest[1])
+                )
+                  latest = [key, at];
+              }
+            }
+            if (isAnime && ep.watched_at && ep.tvdb?.season != null && ep.tvdb.episode != null) {
+              const key = `${ep.tvdb.season}:${ep.tvdb.episode}`;
+              mappedEps.add(key);
+              const at = Date.parse(ep.watched_at);
+              if (Number.isFinite(at) && at > 0) mappedTimes.set(key, at);
             }
           }
         }
@@ -114,17 +146,8 @@ async function pull(): Promise<SimklProgress> {
           // Anime provider IDs address a season; IMDb/TMDB address the franchise.
           // Only the explicit TVDB mapping can translate between those coordinates.
           const mapped = isAnime && !/^(mal|kitsu|anilist|anidb):/.test(k);
-          const keyEps = mapped ? new Set<string>() : eps;
-          const keyTimes = mapped ? new Map<string, number>() : times;
-          if (mapped)
-            for (const s of e.seasons)
-              for (const ep of s.episodes ?? []) {
-                if (!ep.watched_at || ep.tvdb?.season == null || ep.tvdb.episode == null) continue;
-                const key = `${ep.tvdb.season}:${ep.tvdb.episode}`;
-                keyEps.add(key);
-                const at = Date.parse(ep.watched_at);
-                if (Number.isFinite(at) && at > 0) keyTimes.set(key, at);
-              }
+          const keyEps = mapped ? mappedEps : eps;
+          const keyTimes = mapped ? mappedTimes : times;
           if (keyEps.size)
             watched.set(k, watched.has(k) ? new Set([...watched.get(k)!, ...keyEps]) : keyEps);
           if (keyTimes.size) {
@@ -134,11 +157,6 @@ async function pull(): Promise<SimklProgress> {
             watchedAt.set(k, merged);
           }
         }
-        const latest = [...times]
-          .filter(([key]) =>
-            key.split(":").every((n) => Number.isInteger(Number(n)) && Number(n) > 0),
-          )
-          .sort((a, b) => b[1] - a[1])[0];
         const anchorId = isAnime ? keys.find((k) => /^(kitsu|mal|anilist):/.test(k)) : keys[0];
         if (
           anchorId &&
@@ -174,9 +192,16 @@ async function pull(): Promise<SimklProgress> {
       }
     }
   };
-  add(data?.movies, "movie");
-  add(data?.shows, "show");
-  add(data?.anime, "show", true);
+  await add(data?.movies, "movie");
+  await add(data?.shows, "show");
+  await add(data?.anime, "show", true);
+  if (typeof window !== "undefined") {
+    window.__harborProfiler?.mark("simkl:progress-processed", {
+      durationMs: Math.round(performance.now() - processingStarted),
+      statuses: statuses.size,
+      watched: watched.size,
+    });
+  }
   return { statuses, watched, watchedAt, completedSeries };
 }
 
@@ -186,9 +211,10 @@ async function loadData(): Promise<SimklProgress> {
   if (generation !== sessionGeneration) throw new Error("SIMKL session changed");
   if (!cache || (all !== null && all !== cacheMarker)) {
     const request = pull()
-      .then((data) => {
+      .then(async (data) => {
         if (generation !== sessionGeneration) throw new Error("SIMKL session changed");
-        rememberSimklWatched(data.watched);
+        await rememberSimklWatched(data.watched, generation);
+        if (generation !== sessionGeneration) throw new Error("SIMKL session changed");
         return data;
       })
       .catch((error: unknown) => {
@@ -250,11 +276,30 @@ export function peekSimklWatchedMap(): Map<string, Set<string>> {
   }
 }
 
-function rememberSimklWatched(watched: Map<string, Set<string>>): void {
+async function rememberSimklWatched(
+  watched: Map<string, Set<string>>,
+  generation: number,
+): Promise<void> {
   if (typeof localStorage === "undefined") return;
   try {
     const flat: Record<string, string[]> = {};
-    for (const [key, episodes] of watched) flat[key] = [...episodes];
+    const serialized = new Map<Set<string>, string[]>();
+    let sliceStarted = performance.now();
+    for (const [key, episodes] of watched) {
+      if (performance.now() - sliceStarted >= 4) {
+        await yieldToBrowser();
+        if (generation !== sessionGeneration) return;
+        sliceStarted = performance.now();
+      }
+      let list = serialized.get(episodes);
+      if (!list) {
+        list = [...episodes];
+        serialized.set(episodes, list);
+      }
+      flat[key] = list;
+    }
+    await yieldToBrowser();
+    if (generation !== sessionGeneration) return;
     localStorage.setItem(
       simklWatchedKey(),
       JSON.stringify({ account: getSession()?.username, at: Date.now(), watched: flat }),

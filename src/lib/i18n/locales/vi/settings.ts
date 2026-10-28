@@ -572,8 +572,8 @@ const settings: Record<string, string> = {
   "Hero carousel, Top 10, Trending, In Theaters, per-service rails.":
     "Băng chuyền nổi bật, Top 10, Thịnh hành, Đang chiếu tại rạp, các hàng theo từng dịch vụ.",
   Updates: "Cập nhật",
-  "Harbor checks harbor.site for new versions and installs them in place.":
-    "Harbor kiểm tra phiên bản mới trên harbor.site và cài đặt trực tiếp.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place.":
+    "Harbor kiểm tra phiên bản mới trên harborcommunity.site và cài đặt trực tiếp.",
   "Backup & restore": "Sao lưu và khôi phục",
   "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup.":
     "Xuất toàn bộ thiết lập Harbor thành một tệp duy nhất, sau đó khôi phục trên máy tính mới hoặc lưu làm bản sao lưu.",
@@ -1379,8 +1379,8 @@ const settings: Record<string, string> = {
   "My library": "Thư viện của tôi",
   Anticipated: "Được mong đợi",
   "Custom calendar": "Lịch tùy chỉnh",
-  "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
-    "Harbor kiểm tra phiên bản mới trên harbor.site và cài đặt trực tiếp. Không có gì được cài đặt cho đến khi bạn chọn, và bản cập nhật đã bỏ qua sẽ không nhắc lại.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
+    "Harbor kiểm tra phiên bản mới trên harborcommunity.site và cài đặt trực tiếp. Không có gì được cài đặt cho đến khi bạn chọn, và bản cập nhật đã bỏ qua sẽ không nhắc lại.",
   "Library, watch progress, and addon collection sync from this account.":
     "Thư viện, tiến độ xem và bộ sưu tập tiện ích bổ sung được đồng bộ từ tài khoản này.",
   "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your Stremio sign-in.":
@@ -1710,7 +1710,7 @@ const settings: Record<string, string> = {
     "Lưu ý: nếu Stremio cũng được cài đặt, Windows có thể hỏi ứng dụng cần dùng trong lần đầu mở liên kết stremio://. Chọn Harbor để đặt làm mặc định.",
   "stremio:// links now open in the Stremio app. Harbor will only install when you trigger it from inside Harbor.":
     "Liên kết stremio:// hiện sẽ mở trong ứng dụng Stremio. Harbor chỉ cài đặt khi bạn kích hoạt từ trong Harbor.",
-  "Checking harbor.site for a newer build.": "Đang kiểm tra bản dựng mới hơn trên harbor.site.",
+  "Checking harborcommunity.site for a newer build.": "Đang kiểm tra bản dựng mới hơn trên harborcommunity.site.",
   "Downloading {pct}%": "Đang tải xuống {pct}%",
   "Downloaded. Ready to install and restart.": "Đã tải xuống. Sẵn sàng cài đặt và khởi động lại.",
   "Installing. Harbor will restart.": "Đang cài đặt. Harbor sẽ khởi động lại.",

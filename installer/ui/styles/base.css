@@ -10,8 +10,6 @@ body {
   padding: 0;
   width: 100vw;
   height: 100vh;
-  display: grid;
-  place-items: center;
   overflow: hidden;
   background: var(--canvas);
 }
@@ -163,7 +161,10 @@ svg {
 }
 
 .hb-window {
-  position: relative;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
   width: var(--win-w);
   height: var(--win-h);
   background: var(--canvas);
@@ -171,7 +172,7 @@ svg {
   display: grid;
   /* The body takes every pixel the fixed header and footer leave, so the 632px window has no
      dead band and a taller list gets the room instead of a scrollbar. */
-  grid-template-rows: var(--band-header) 1px 1fr var(--band-footer);
+  grid-template-rows: var(--band-header) 1px minmax(0, 1fr) var(--band-footer);
 }
 
 .hb-header {
@@ -262,7 +263,9 @@ svg {
   place-items: center;
   color: var(--ink-muted);
   background: transparent;
-  transition: background-color var(--t-hover) var(--ease), color var(--t-hover) var(--ease);
+  transition:
+    background-color var(--t-hover) var(--ease),
+    color var(--t-hover) var(--ease);
 }
 
 .hb-winbtn:hover {
@@ -301,7 +304,9 @@ svg {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hb-boot { transition: none; }
+  .hb-boot {
+    transition: none;
+  }
 }
 
 .hb-rule {
@@ -346,7 +351,9 @@ svg {
   color: var(--ink-muted);
   display: inline-flex;
   align-items: center;
-  transition: background-color var(--t-hover) var(--ease), color var(--t-hover) var(--ease),
+  transition:
+    background-color var(--t-hover) var(--ease),
+    color var(--t-hover) var(--ease),
     transform var(--t-press) var(--ease);
 }
 
@@ -370,8 +377,11 @@ svg {
   align-items: center;
   gap: 10px;
   text-align: start;
-  transition: background-color var(--t-hover) var(--ease), color var(--t-hover) var(--ease),
-    box-shadow var(--t-hover) var(--ease), transform var(--t-press) var(--ease);
+  transition:
+    background-color var(--t-hover) var(--ease),
+    color var(--t-hover) var(--ease),
+    box-shadow var(--t-hover) var(--ease),
+    transform var(--t-press) var(--ease);
 }
 
 .hb-tile:hover {
@@ -441,7 +451,9 @@ svg {
   box-shadow: inset 0 0 0 1px var(--edge);
   display: grid;
   place-items: center;
-  transition: background-color var(--t-hover) var(--ease), box-shadow var(--t-hover) var(--ease),
+  transition:
+    background-color var(--t-hover) var(--ease),
+    box-shadow var(--t-hover) var(--ease),
     opacity var(--t-hover) var(--ease);
 }
 
@@ -554,7 +566,9 @@ svg {
   padding: 14px;
   border-radius: var(--r-md);
   background: var(--elevated);
-  box-shadow: inset 0 0 0 1px var(--edge-soft), var(--shadow-float);
+  box-shadow:
+    inset 0 0 0 1px var(--edge-soft),
+    var(--shadow-float);
   display: flex;
   flex-direction: column;
   gap: 4px;

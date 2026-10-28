@@ -1,0 +1,117 @@
+/* Edge controls stay available without turning the whole edge into a click target. */
+.season-explorer-rail {
+  scrollbar-width: none;
+}
+.season-explorer-rail::-webkit-scrollbar {
+  display: none;
+}
+.season-explorer-card img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.season-explorer-edge {
+  position: absolute;
+  top: 0;
+  bottom: 76px;
+  z-index: 10;
+  width: 56px;
+  pointer-events: none;
+}
+.season-explorer-edge-left {
+  left: 0;
+}
+.season-explorer-edge-right {
+  right: 0;
+}
+.season-explorer-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.season-explorer-edge-left::before {
+  background: linear-gradient(90deg, var(--color-canvas), transparent);
+}
+.season-explorer-edge-right::before {
+  background: linear-gradient(-90deg, var(--color-canvas), transparent);
+}
+.season-explorer-arrow {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  pointer-events: auto;
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-edge);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-canvas) 85%, transparent);
+  color: var(--color-ink);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 25%);
+  backdrop-filter: blur(12px);
+  opacity: 0.72;
+  transform: translateY(-50%) scale(1);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+.season-explorer-arrow:hover,
+.season-explorer-arrow:focus-visible {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.04);
+}
+.season-explorer-transition {
+  animation: season-explorer-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --season-slide: 18px;
+}
+.season-explorer-transition[data-direction="-1"] {
+  --season-slide: -18px;
+}
+@keyframes season-explorer-enter {
+  from {
+    opacity: 0;
+    transform: translateX(var(--season-slide));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@media (hover: none) {
+  .season-explorer-arrow {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .season-explorer-transition {
+    animation: none;
+  }
+  .season-explorer-arrow,
+  .season-explorer-edge::before {
+    transition: none;
+  }
+}
+
+.season-explorer-title-line {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.season-explorer-title-line:not([data-overflow]) {
+  text-align: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .season-explorer-title:hover .season-explorer-title-line[data-overflow],
+  .season-explorer-card:focus-visible .season-explorer-title-line[data-overflow] {
+    width: max-content;
+    overflow: visible;
+    text-overflow: clip;
+    animation: harbor-marquee var(--season-title-duration) linear infinite;
+  }
+}

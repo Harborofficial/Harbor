@@ -17,7 +17,17 @@ export function Anime4kIndicator({
   suppressed?: boolean;
 }) {
   const { settings } = useSettings();
-  const enabled = settings.playerAnime4kIndicator && engine === "mpv" && isTauri;
+  // `vo-passes` is a large node map. Reading it every two seconds on an idle
+  // badge competes with playback on slow GPUs, so poll only when Anime4K can
+  // actually be running and the badge is on screen. The badge is hidden with
+  // the rest of the chrome, so there is nothing to probe until it is shown.
+  const enabled =
+    settings.playerAnime4kIndicator &&
+    settings.playerAnime4k === true &&
+    !!settings.playerAnime4kFolder &&
+    chromeVisible &&
+    engine === "mpv" &&
+    isTauri;
   const [active, setActive] = useState(false);
 
   useEffect(() => {

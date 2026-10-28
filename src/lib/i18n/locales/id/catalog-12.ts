@@ -351,7 +351,7 @@ const catalog: Record<string, string> = {
   "https://...manifest.json or stremio://...": "https://...manifest.json atau stremio://...",
   "https://posters.example.com or a pattern with {id}":
     "https://posters.example.com atau pola dengan {id}",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "huge ({width}×{height}px)": "sangat besar ({width}×{height}px)",
   "if the first page is 0. Use this when the URL counts pages.":
     "jika halaman pertama adalah 0. Gunakan ini saat URL menghitung halaman.",
@@ -501,6 +501,9 @@ const catalog: Record<string, string> = {
   "profile.signIn": "Masuk ke Stremio",
   "profile.signOut": "Keluar dari Stremio",
   "profile.signedIn": "Sudah masuk ke Stremio",
+  "Signed in to Harbor": "Sudah masuk ke Harbor",
+  "Signed out of Harbor": "Sudah keluar dari Harbor",
+  "Sign out of Harbor": "Keluar dari Harbor",
   "profile.switch": "Ganti profil",
   "profile.whoWatching": "Siapa yang menonton",
   rated: "dinilai",

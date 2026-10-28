@@ -1,4 +1,4 @@
-import { sourceDownloadTitle, sourceTitleKey } from './source-title';
+import { SOURCE_EDITION_LABELS, sourceDownloadTitle, sourceTitleKey } from './source-title';
 import type { SourceOrigin } from './source-origin';
 import type { SourceRelease } from './sources';
 import { createSourceIndexCache } from './source-index-cache';
@@ -52,9 +52,12 @@ export function sourceIndexBuilder() {
 }
 
 export function sourceIndexCandidates(index: SourceIndex, game: { name: string; steamId?: number; igdbId?: number; sourceOrigin?: SourceOrigin }) {
-  const keys = [hash('t:' + sourceTitleKey(game.name))];
+  const gameTitle = sourceTitleKey(game.name), keys = [hash('t:' + gameTitle)];
   if (game.steamId) keys.push(hash('s:' + game.steamId));
   if (game.igdbId) keys.push(hash('i:' + game.igdbId));
+  // An edition release is indexed under its full base title, not the bare game
+  // title. Query those exact base titles only when an identity makes the match safe.
+  if (game.steamId || game.igdbId) for (const label of SOURCE_EDITION_LABELS) keys.push(hash('t:' + `${gameTitle} ${label}`));
   if (game.sourceOrigin) {
     keys.push(hash('t:' + sourceTitleKey(game.sourceOrigin.title)));
     if (game.sourceOrigin.steamId) keys.push(hash('s:' + game.sourceOrigin.steamId));

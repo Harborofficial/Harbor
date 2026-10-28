@@ -38,20 +38,20 @@ const LINKS = [
   {
     icon: "branch",
     lead: "Source",
-    value: "github.com/harborstremio/harbor",
-    url: "https://github.com/harborstremio/harbor",
+    value: "github.com/Harborofficial/Harbor",
+    url: "https://github.com/Harborofficial/Harbor",
   },
   {
     icon: "branch",
     lead: "Bugs",
     value: "GitHub Issues",
-    url: "https://github.com/harborstremio/harbor/issues",
+    url: "https://github.com/Harborofficial/Harbor/issues",
   },
   {
     icon: "chat",
     lead: "Community",
-    value: "discord.gg/harbor",
-    url: "https://discord.gg/harbor",
+    value: "discord.gg/EgdAV5yd88",
+    url: "https://discord.gg/EgdAV5yd88",
   },
 ];
 

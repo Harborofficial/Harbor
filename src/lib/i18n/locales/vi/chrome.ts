@@ -52,6 +52,9 @@ const chrome: Record<string, string> = {
   "profile.switch": "Chuyển hồ sơ",
   "profile.primary": "Chính",
   "profile.signedIn": "Đã đăng nhập vào Stremio",
+  "Signed in to Harbor": "Đã đăng nhập vào Harbor",
+  "Signed out of Harbor": "Đã đăng xuất khỏi Harbor",
+  "Sign out of Harbor": "Đăng xuất khỏi Harbor",
   "profile.fallback": "Hồ sơ",
   "welcome.title": "Chào mừng đến với Harbor",
   "welcome.subtitle":

@@ -1,4 +1,5 @@
 import type { PlayEpisode } from "@/lib/view";
+import { splitAnimeStreamCoordinates } from "./anime-identity-core";
 
 const ANIME_SCHEME_RX = /^(kitsu|mal|anilist|anidb):/;
 
@@ -163,5 +164,10 @@ export function buildStreamIds(
 
   if (unverifiedAnimeId) push(unverifiedAnimeId);
 
+  // The shared provider's S17 belongs to Bleach (2004), not TYBW's own
+  // catalog entry. Keep its numbering as a result alias, never a show query.
+  if (splitAnimeStreamCoordinates(episode?.kitsuStreamId) && (episode?.imdbSeason ?? 0) >= 17) {
+    return out.filter((id) => !id.startsWith("tt") && !id.startsWith("tmdb:"));
+  }
   return out;
 }

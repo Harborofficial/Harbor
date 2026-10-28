@@ -361,8 +361,14 @@ pub fn install_window_rounding(ns_window_ptr: i64) -> Result<(), String> {
             if let Some(layer) = content_view.layer() {
                 let _: () = msg_send![&*layer, setCornerRadius: WINDOW_CORNER_RADIUS];
                 let _: () = msg_send![&*layer, setMasksToBounds: true];
-                let cg_clear: *mut AnyObject = msg_send![&*clear, CGColor];
-                let _: () = msg_send![&*layer, setBackgroundColor: cg_clear];
+                // The window stays clear so the rounded corners show the desktop.
+                // The content layer must still be opaque: the webview draws no
+                // background and the page root is transparent while mpv is
+                // embedded, so a clear layer here leaves the whole window
+                // see-through after macOS recomposites it (e.g. on focus).
+                let black: *mut AnyObject = msg_send![class!(NSColor), blackColor];
+                let cg_black: *mut AnyObject = msg_send![&*black, CGColor];
+                let _: () = msg_send![&*layer, setBackgroundColor: cg_black];
             }
         }
     }

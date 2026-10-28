@@ -1,6 +1,7 @@
 import { unzip } from "@/lib/unzip";
 
 export type EpubChapter = { path: string; title: string };
+export type EpubChapterContent = { text: string; images: string[] };
 export type EpubBook = {
   title: string;
   authors: string[];
@@ -12,6 +13,7 @@ export type EpubBook = {
   chapters: EpubChapter[];
   entries: Map<string, Uint8Array>;
   chapterContents?: Map<string, string>;
+  chapterImages?: Map<string, string[]>;
 };
 
 const decoder = new TextDecoder();
@@ -71,6 +73,70 @@ function dataUrl(bytes: Uint8Array, mediaType: string): string {
   for (let offset = 0; offset < bytes.length; offset += 0x8000)
     binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
   return `data:${mediaType};base64,${btoa(binary)}`;
+}
+
+const MAX_CHAPTER_IMAGES = 40;
+const MAX_CHAPTER_IMAGE_BYTES = 12 * 1024 * 1024;
+
+function imageMediaType(path: string, bytes: Uint8Array): string {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) return "image/jpeg";
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47)
+    return "image/png";
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) return "image/gif";
+  if (
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50
+  )
+    return "image/webp";
+  if (bytes[0] === 0x42 && bytes[1] === 0x4d) return "image/bmp";
+  const head = new TextDecoder().decode(bytes.subarray(0, 512)).trimStart().toLowerCase();
+  if (head.startsWith("<") && head.includes("<svg")) return "image/svg+xml";
+  const extension = path.split(".").pop()?.toLowerCase() ?? "";
+  if (extension === "svg") return "image/svg+xml";
+  if (extension === "jpg" || extension === "jpeg") return "image/jpeg";
+  if (extension === "png") return "image/png";
+  if (extension === "gif") return "image/gif";
+  if (extension === "webp") return "image/webp";
+  if (extension === "bmp") return "image/bmp";
+  return "image/jpeg";
+}
+
+function imageRef(base: string, src: string | null | undefined): string | undefined {
+  const value = src?.trim();
+  if (!value || value.length > 16 * 1024 * 1024) return;
+  if (/^data:image\//i.test(value)) return value;
+  // Chapter images are packaged with the book; remote resources stay unfetched.
+  if (/^[a-z][a-z\d+.-]*:/i.test(value) || value.startsWith("//")) return;
+  return archivePath(base, value) || undefined;
+}
+
+function imageSource(item: Element): string | undefined {
+  return (
+    item.getAttribute("src") ??
+    item.getAttribute("href") ??
+    item.getAttribute("xlink:href") ??
+    item.getAttributeNS("http://www.w3.org/1999/xlink", "href") ??
+    undefined
+  );
+}
+
+function imageRefs(item: Element, base: string): string[] {
+  const sources =
+    item.localName.toLowerCase() === "svg"
+      ? Array.from(item.getElementsByTagName("*"))
+          .filter((child) => child.localName.toLowerCase() === "image")
+          .map(imageSource)
+      : [imageSource(item)];
+  return sources.flatMap((src) => {
+    const ref = imageRef(base, src);
+    return ref ? [ref] : [];
+  });
 }
 
 type NavigationLink = { path: string; fragment: string; title: string };
@@ -175,13 +241,16 @@ function targetNode(document: Document, fragment: string): Element | undefined {
 function documentSections(
   document: Document,
   targets: Map<Element, ChapterTarget> = new Map(),
-): Array<{ target?: ChapterTarget; text: string }> {
-  const sections: Array<{ target?: ChapterTarget; text: string }> = [];
+  imageBase?: string,
+): Array<{ target?: ChapterTarget; text: string; images: string[] }> {
+  const sections: Array<{ target?: ChapterTarget; text: string; images: string[] }> = [];
   let target: ChapterTarget | undefined;
   let chunks: string[] = [];
+  let images: string[] = [];
   const flush = () => {
     sections.push({
       target,
+      images: [...new Set(images)],
       text: chunks
         .join("")
         .replace(/[\t ]+/g, " ")
@@ -190,6 +259,7 @@ function documentSections(
         .trim(),
     });
     chunks = [];
+    images = [];
   };
   const visit = (node: Node, preserve = false): void => {
     if (node.nodeType === 3 || node.nodeType === 4) {
@@ -201,6 +271,10 @@ function documentSections(
     if (node.nodeType !== 1) return;
     const item = node as Element;
     const name = item.localName.toLowerCase();
+    if (name === "svg" || name === "img" || name === "image") {
+      if (imageBase) images.push(...imageRefs(item, imageBase));
+      return;
+    }
     if (ignoredNames.has(name)) return;
     const next = targets.get(item);
     if (next) {
@@ -216,6 +290,23 @@ function documentSections(
   visit(chapterRoot(document));
   flush();
   return sections;
+}
+
+function documentImages(document: Document, base: string): string[] {
+  const refs: string[] = [];
+  const visit = (node: Node): void => {
+    if (node.nodeType !== 1) return;
+    const item = node as Element;
+    const name = item.localName.toLowerCase();
+    if (name === "svg" || name === "img" || name === "image") {
+      refs.push(...imageRefs(item, base));
+      return;
+    }
+    if (ignoredNames.has(name)) return;
+    for (const child of Array.from(node.childNodes)) visit(child);
+  };
+  visit(chapterRoot(document));
+  return [...new Set(refs)];
 }
 
 export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
@@ -299,33 +390,39 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
     title,
   }));
   const chapterContents = new Map<string, string>();
+  const chapterImages = new Map<string, string[]>();
   if (targets.length) {
     const boundaries = new Map(targets.map((target) => [target.node, target]));
-    const drafts: Array<EpubChapter & { parts: string[] }> = [];
+    const drafts: Array<EpubChapter & { parts: string[]; images: string[] }> = [];
     let active: (typeof drafts)[number] | undefined;
     for (const item of scanned) {
       if (!item.document) continue;
-      for (const section of documentSections(item.document, boundaries)) {
+      for (const section of documentSections(item.document, boundaries, item.path)) {
         if (section.target) {
           active = {
             path: `${section.target.path}#${encodeURIComponent(section.target.fragment)}`,
             title: section.target.title,
             parts: [],
+            images: [],
           };
           drafts.push(active);
         }
-        if (!section.text) continue;
+        if (!section.text && !section.images.length) continue;
         if (!active) {
-          active = { path: `${item.path}#`, title: item.title, parts: [] };
+          active = { path: `${item.path}#`, title: item.title, parts: [], images: [] };
           drafts.push(active);
         }
-        active.parts.push(section.text);
+        if (section.text) active.parts.push(section.text);
+        if (section.images.length) active.images.push(...section.images);
       }
     }
-    chapters = drafts.filter((item) => item.parts.length).map(({ path, title, parts }) => {
-      chapterContents.set(path, parts.join("\n\n"));
-      return { path, title };
-    });
+    chapters = drafts
+      .filter((item) => item.parts.length || item.images.length)
+      .map(({ path, title, parts, images }) => {
+        chapterContents.set(path, parts.join("\n\n"));
+        chapterImages.set(path, [...new Set(images)]);
+        return { path, title };
+      });
   }
   const coverId = elements(packageDocument, "meta")
     .find((item) => item.getAttribute("name")?.toLowerCase() === "cover")
@@ -351,6 +448,7 @@ export async function parseEpub(buffer: ArrayBuffer): Promise<EpubBook> {
     chapters,
     entries,
     chapterContents,
+    chapterImages,
   };
 }
 
@@ -461,4 +559,26 @@ export function readEpubChapter(book: EpubBook, path: string): string {
     )
     .filter((value): value is string => !!value);
   return (blocks.length ? blocks.join("\n\n") : (root.textContent ?? "")).trim();
+}
+
+export function readEpubChapterContent(book: EpubBook, path: string): EpubChapterContent {
+  const file = path.split("#")[0];
+  const document = book.chapterImages?.has(path)
+    ? undefined
+    : contentDocument(entry(book.entries, file));
+  const refs = book.chapterImages?.get(path) ?? (document ? documentImages(document, file) : []);
+  const images: string[] = [];
+  const seen = new Set<string>();
+  for (const ref of refs) {
+    if (images.length >= MAX_CHAPTER_IMAGES || seen.has(ref)) continue;
+    seen.add(ref);
+    if (ref.startsWith("data:image/")) {
+      images.push(ref);
+      continue;
+    }
+    const bytes = entry(book.entries, ref);
+    if (!bytes?.length || bytes.length > MAX_CHAPTER_IMAGE_BYTES) continue;
+    images.push(dataUrl(bytes, imageMediaType(ref, bytes)));
+  }
+  return { text: readEpubChapter(book, path), images };
 }

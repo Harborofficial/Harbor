@@ -1,5 +1,6 @@
 import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
+import { clearPrefetchedRequests, prefetchRequest } from "./prefetch-request";
 import { dlog, dwarn } from "@/lib/debug";
 import { isHarborFetchPolicyError } from "@/lib/fetch-fallback-policy";
 import { isLocalNetworkUrl } from "@/lib/local-network";
@@ -23,6 +24,10 @@ import type { Stream } from "./types";
 
 const TIMEOUT_MS_FAST = 8000;
 const TIMEOUT_MS_SLOW = 22000;
+export function clearAddonStreamCache(): void {
+  clearPrefetchedRequests();
+}
+
 const SLOW_ADDON_PATTERNS = [
   /mediafusion/i,
   /comet/i,
@@ -119,6 +124,7 @@ export async function fetchAddonStreams(
   timeoutMs = TIMEOUT_MS_SLOW,
   ranks?: AddonRankFn | null,
   forced?: Array<{ base: string; id: string }>,
+  prefetch = false,
 ): Promise<Stream[]> {
   const forcedBases = new Map((forced ?? []).map((f) => [f.base, f.id]));
   // A request that names a plugin is that plugin's to answer, the way CloudStream asks only the
@@ -152,7 +158,11 @@ export async function fetchAddonStreams(
         addonId: addon.manifest.id,
         name: addon.manifest.name,
         plugin: true,
-        p: runPluginAddon(addon, req, pluginId, signal, timeoutMs).then((ss) =>
+        p: prefetchRequest(
+          JSON.stringify([addon.transportUrl, req, pluginId, timeoutMs]), signal, prefetch,
+          (sharedSignal) => runPluginAddon(addon, req, pluginId, sharedSignal, timeoutMs),
+          (streams) => streams.length > 0,
+        ).then((ss) =>
           ss.map((s, idx) => ({ ...s, addonPriority: priority, addonReturnIdx: idx })),
         ),
       });
@@ -189,7 +199,7 @@ export async function fetchAddonStreams(
         namedTasks.push({
           addonId: addon.manifest.id,
           name,
-          p: fetchOne(addon, req.type, id, signal, timeoutMs, altTypes).then((r) => {
+          p: fetchOne(addon, req.type, id, signal, timeoutMs, altTypes, prefetch).then((r) => {
             if (r.failure) noteFailure(addon.manifest.id, name, r.failure);
             return r.streams.map((s, idx) => ({
               ...s,
@@ -213,7 +223,7 @@ export async function fetchAddonStreams(
     namedTasks.push({
       addonId: addon.manifest.id,
       name: `${addon.manifest.name}[${idScheme(id)}]`,
-      p: fetchOne(addon, types[0], id, signal, timeoutMs, types.slice(1)).then((r) => {
+      p: fetchOne(addon, types[0], id, signal, timeoutMs, types.slice(1), prefetch).then((r) => {
         if (r.failure)
           noteFailure(addon.manifest.id, `${addon.manifest.name}[${idScheme(id)}]`, r.failure);
         return r.streams.map((s, idx) => ({
@@ -416,6 +426,23 @@ function alternateStreamTypes(addon: Addon, type: string, id: string): string[] 
 }
 
 async function fetchOne(
+  addon: Addon,
+  type: string,
+  id: string,
+  signal: AbortSignal,
+  timeoutMs: number,
+  altTypes: string[] = [],
+  prefetch = false,
+): Promise<{ streams: Stream[]; failure?: AddonFailureCode }> {
+  return prefetchRequest(
+    JSON.stringify([addon.transportUrl, addon.manifest.id, type, id, altTypes, timeoutMs]),
+    signal, prefetch,
+    (sharedSignal) => fetchOneUncached(addon, type, id, sharedSignal, timeoutMs, altTypes),
+    (result) => !result.failure && result.streams.length > 0,
+  );
+}
+
+async function fetchOneUncached(
   addon: Addon,
   type: string,
   id: string,

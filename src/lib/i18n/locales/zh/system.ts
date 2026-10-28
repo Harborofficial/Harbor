@@ -86,8 +86,8 @@ const system: Record<string, string> = {
   "Token name can be anything. The permission row must be exactly {b1} + {b2} + {b3}.":
     "令牌名称可随意填写。权限行必须严格设置为 {b1} + {b2} + {b3}。",
   Failed: "失败",
-  "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
-    "Harbor 会在 harbor.site 上检查新版本并就地安装更新。只有在你选择后才会安装，忽略的更新也不会再次提醒。",
+  "Harbor checks harborcommunity.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
+    "Harbor 会在 harborcommunity.site 上检查新版本并就地安装更新。只有在你选择后才会安装，忽略的更新也不会再次提醒。",
   "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your Stremio sign-in.":
     "将完整的 Harbor 配置导出为单个文件，以便在新电脑上恢复或留作备份。除 Stremio 登录信息外，其他内容均会包含。",
   "Server address": "服务器地址",
@@ -267,8 +267,8 @@ const system: Record<string, string> = {
     "限制缓存可占用的磁盘空间。超出限制时，Harbor 会优先删除最旧的文件。该限制会在启动时及播放任务结束时执行。",
   "Clear cache now": "立即清除缓存",
   "Could not send: {error}": "无法发送：{error}",
-  "Couldn't reach harbor.site to load earlier builds. Check your connection and try again.":
-    "无法连接到 harbor.site 以加载较早版本。请检查网络连接后重试。",
+  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
+    "无法连接到 harborcommunity.site 以加载较早版本。请检查网络连接后重试。",
   "Default app cache folder": "默认应用缓存文件夹",
   "Export failed: {reason}": "导出失败：{reason}",
   "Exported {ok}, {fail} failed": "已导出 {ok} 个，{fail} 个失败",

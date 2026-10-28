@@ -48,6 +48,7 @@ pub fn secrets_write(app: tauri::AppHandle, content: String) -> Result<(), Strin
     std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
 }
 
+#[cfg(all(desktop, feature = "music"))]
 pub(crate) fn secret_value(app: &tauri::AppHandle, key: &str) -> Result<Option<String>, String> {
     let Some(content) = secrets_read(app.clone())? else {
         return Ok(None);

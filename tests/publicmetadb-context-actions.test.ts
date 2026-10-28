@@ -95,6 +95,7 @@ function harness() {
         },
       },
       "./publicmetadb/history": history,
+      "./publicmetadb/lists": { getPmdbDefaultListId: () => "chosen-list" },
       "./publicmetadb/watchlist": {
         fetchPmdbWatchlist: async (options: any) => {
           assert.equal(options.strict, true);
@@ -105,11 +106,13 @@ function harness() {
         pmdbWatchlistContains: () => (existing ? { id: "existing" } : null),
         addToPmdbWatchlist: async (target: PmdbTarget, options: any) => {
           options.assertCurrent();
+          assert.equal(options.listId, "chosen-list");
           calls.push({ kind: "add", target });
           return writeSucceeds;
         },
         removeFromPmdbWatchlist: async (target: PmdbTarget, options: any) => {
           options.assertCurrent();
+          assert.equal(options.listId, "chosen-list");
           calls.push({ kind: "remove", target });
           return writeSucceeds;
         },
@@ -287,9 +290,12 @@ test("PMDB mutation guards run after mapping or list preparation and before the 
   );
   assert.deepEqual(writes, []);
   current = true;
-  const lists = load<typeof import("../src/lib/publicmetadb/watchlist")>(
-    "src/lib/publicmetadb/watchlist.ts",
+  const listSession = { apiKey: "fixture" };
+  const listApi = load<typeof import("../src/lib/publicmetadb/lists")>(
+    "src/lib/publicmetadb/lists.ts",
     {
+      "@/lib/active-profile-id": { activeProfileId: () => "fixture" },
+      "./session": { getSession: () => listSession, subscribeSession: () => () => {} },
       "./client": {
         pmdbRequest: async (path: string, options: any) => {
           if (options.method !== "GET") writes.push(path);
@@ -297,6 +303,12 @@ test("PMDB mutation guards run after mapping or list preparation and before the 
           return { items: [{ id: "fixture-list", type: "watchlist" }] };
         },
       },
+    },
+  );
+  const lists = load<typeof import("../src/lib/publicmetadb/watchlist")>(
+    "src/lib/publicmetadb/watchlist.ts",
+    {
+      "./lists": listApi,
       "./session": { isAuthenticated: () => true },
     },
   );

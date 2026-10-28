@@ -1,131 +1,93 @@
 import type { Meta } from "@/lib/cinemeta";
+import {
+  loadMedia,
+  readMedia,
+  saveMedia,
+  episodeCacheTtl,
+  MEDIA_TTL,
+  onMediaCacheClear,
+  mediaCacheGeneration,
+} from "./media-cache";
 
-const DISK_KEY = "harbor.cinemeta.meta.v1";
-const MOVIE_TTL_MS = 24 * 60 * 60 * 1000;
-const SERIES_TTL_MS = 3 * 60 * 60 * 1000;
-const NEGATIVE_TTL_MS = 30 * 60 * 1000;
-const MEM_MAX_ENTRIES = 80;
-const DISK_MAX_ENTRIES = 64;
-const DISK_MAX_ENTRY_CHARS = 20000;
-const DISK_MAX_TOTAL_CHARS = 400000;
-const FLUSH_DELAY_MS = 4000;
-
-type Entry = { t: number; m: Meta | null };
-
+const LEGACY_KEY = "harbor.cinemeta.meta.v1";
 export type MetaLoad = { value: Meta | null; cacheable: boolean };
 
-const mem = new Map<string, Entry>();
-const inflight = new Map<string, Promise<Meta | null>>();
-
-let diskLoaded = false;
-let diskDisabled = false;
-let dirty = false;
-let flushTimer: ReturnType<typeof setTimeout> | null = null;
-
-function ttlFor(key: string, m: Meta | null): number {
-  if (!m) return NEGATIVE_TTL_MS;
-  return key.startsWith("movie:") ? MOVIE_TTL_MS : SERIES_TTL_MS;
-}
-
-function isFresh(key: string, e: Entry): boolean {
-  return Date.now() - e.t < ttlFor(key, e.m);
-}
-
-function loadDisk(): void {
-  if (diskLoaded) return;
-  diskLoaded = true;
+onMediaCacheClear(() => {
   try {
-    const raw = localStorage.getItem(DISK_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw) as Record<string, Entry>;
-    if (!parsed || typeof parsed !== "object") return;
-    for (const [k, e] of Object.entries(parsed)) {
-      if (!e || typeof e.t !== "number" || !("m" in e)) continue;
-      if (!isFresh(k, e)) continue;
-      mem.set(k, e);
-    }
+    localStorage.removeItem(LEGACY_KEY);
   } catch {
-    /* ignore */
+    /* Storage may be unavailable. */
   }
-}
+});
 
-function flushDisk(): void {
-  if (!dirty || diskDisabled) return;
-  dirty = false;
-  const ordered = [...mem.entries()].filter(([k, e]) => isFresh(k, e)).sort((a, b) => b[1].t - a[1].t);
-  const out: Record<string, Entry> = {};
-  let chars = 0;
-  let kept = 0;
-  for (const [k, e] of ordered) {
-    if (kept >= DISK_MAX_ENTRIES) break;
-    let s = "";
-    try {
-      s = JSON.stringify(e);
-    } catch {
-      continue;
-    }
-    if (s.length > DISK_MAX_ENTRY_CHARS) continue;
-    if (chars + s.length > DISK_MAX_TOTAL_CHARS) break;
-    out[k] = e;
-    chars += s.length;
-    kept += 1;
-  }
-  try {
-    localStorage.setItem(DISK_KEY, JSON.stringify(out));
-  } catch {
-    diskDisabled = true;
-    try {
-      localStorage.removeItem(DISK_KEY);
-    } catch {
-      /* ignore */
-    }
-  }
-}
-
-function scheduleFlush(): void {
-  dirty = true;
-  if (diskDisabled || flushTimer != null) return;
-  flushTimer = setTimeout(() => {
-    flushTimer = null;
-    flushDisk();
-  }, FLUSH_DELAY_MS);
-}
-
-function put(key: string, m: Meta | null): void {
-  mem.delete(key);
-  mem.set(key, { t: Date.now(), m });
-  for (const oldest of mem.keys()) {
-    if (mem.size <= MEM_MAX_ENTRIES) break;
-    mem.delete(oldest);
-  }
-  scheduleFlush();
-}
-
-// Entries are stored whole. Trimming fields to save quota silently breaks every caller
-// that reads meta.videos (episode lists, calendar, mark-watched); the size cap drops an
-// oversized entry instead. Growth is bounded by MEM/DISK caps, not by field selection.
-export function withMetaCache(
+export async function withMetaCache(
   type: "movie" | "series",
   id: string,
-  load: () => Promise<MetaLoad>,
+  loader: () => Promise<MetaLoad>,
 ): Promise<Meta | null> {
-  const key = `${type}:${id}`;
-  loadDisk();
-  const hit = mem.get(key);
-  if (hit) {
-    if (isFresh(key, hit)) return Promise.resolve(hit.m);
-    mem.delete(key);
+  const scope = [type, id];
+  const generation = mediaCacheGeneration();
+  const policy = {
+    ttl: (entry: MetaLoad) =>
+      !entry.value
+        ? 60_000
+        : type === "movie"
+          ? MEDIA_TTL.settled
+          : episodeCacheTtl(entry.value.videos ?? []),
+    valid: (entry: MetaLoad) =>
+      entry?.cacheable === true &&
+      (entry.value === null ||
+        (typeof entry.value === "object" &&
+          entry.value.id === id &&
+          (entry.value.videos === undefined || Array.isArray(entry.value.videos)))),
+  };
+  if (!(await readMedia("cinemeta-meta", scope))) {
+    try {
+      const entries = JSON.parse(localStorage.getItem(LEGACY_KEY) ?? "{}") as Record<
+        string,
+        { t: number; m: Meta | null }
+      >;
+      const key = `${type}:${id}`;
+      const old = entries[key];
+      if (
+        old &&
+        Number.isFinite(old.t) &&
+        old.t <= Date.now() &&
+        Date.now() - old.t < MEDIA_TTL.stale &&
+        old.m?.id === id
+      ) {
+        if (
+          await saveMedia(
+            "cinemeta-meta",
+            scope,
+            { value: old.m, cacheable: true },
+            policy,
+            old.t,
+            generation,
+          )
+        ) {
+          // Re-read after the committed write so concurrent migrations retain each other.
+          const latest = JSON.parse(localStorage.getItem(LEGACY_KEY) ?? "{}");
+          delete latest[key];
+          if (Object.keys(latest).length) localStorage.setItem(LEGACY_KEY, JSON.stringify(latest));
+          else localStorage.removeItem(LEGACY_KEY);
+        }
+      }
+    } catch {
+      /* A legacy cache cannot prevent a provider request. */
+    }
   }
-  const pending = inflight.get(key);
-  if (pending) return pending;
-  const p = load()
-    .then((r) => {
-      if (r.cacheable) put(key, r.value);
-      return r.value;
-    })
-    .finally(() => {
-      inflight.delete(key);
-    });
-  inflight.set(key, p);
-  return p;
+  if (generation !== mediaCacheGeneration()) return null;
+  let uncached: Meta | null = null;
+  const result = await loadMedia(
+    "cinemeta-meta",
+    scope,
+    async () => {
+      const entry = await loader();
+      uncached = entry.value;
+      return entry;
+    },
+    policy,
+  );
+  return result.value?.value ?? uncached;
 }

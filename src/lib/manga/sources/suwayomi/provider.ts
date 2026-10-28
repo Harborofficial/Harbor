@@ -277,17 +277,28 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
     return raw ? mapManga(server, parsed.sourceId, raw) : null;
   }
 
-  async function chapters(id: string): Promise<MangaChapter[]> {
+  const chapterRefreshes = new Map<string, Promise<MangaChapter[]>>();
+
+  async function chapters(id: string, opts?: { refresh?: boolean }): Promise<MangaChapter[]> {
     const parsed = decodeMangaId(id);
     if (!parsed) return [];
-    return withTransportFallback(client, async (t) => {
+    const pending = chapterRefreshes.get(id);
+    if (pending) return pending;
+    const request = withTransportFallback(client, async (t) => {
       const raw =
         t === "rest"
-          ? await restChapters(client, parsed.mangaId)
-          : await gqlChapters(client, parsed.mangaId);
+          ? await restChapters(client, parsed.mangaId, opts?.refresh)
+          : await gqlChapters(client, parsed.mangaId, opts?.refresh);
       const lang = await sourceLang(client, t, parsed.sourceId);
       return mapChapters(parsed.sourceId, parsed.mangaId, lang, raw);
     });
+    if (!opts?.refresh) return request;
+    chapterRefreshes.set(id, request);
+    try {
+      return await request;
+    } finally {
+      if (chapterRefreshes.get(id) === request) chapterRefreshes.delete(id);
+    }
   }
 
   function registerPageAuth(urls: string[]): void {

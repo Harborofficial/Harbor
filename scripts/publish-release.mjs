@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync, openSync, readSync, closeSync } fr
 import { join, basename } from 'node:path';
 import { verifyMacAppArchive } from './macos-verify-artifact.mjs';
 
-const BASE = process.env.HARBOR_OPS_BASE || 'https://harbor.elfhosted.com/themes/api';
+const BASE = process.env.HARBOR_OPS_BASE || 'https://harborcommunity.site/themes/api';
 const FNAME = /^Harbor_\d+\.\d+\.\d+_(x64-setup\.exe|x64-installer\.exe|aarch64\.app\.tar\.gz|aarch64\.dmg|aarch64_legacy\.app\.tar\.gz)$/;
 const SEMVER = /^\d+\.\d+\.\d+$/;
 const needsSig = (n) => /\.exe$|\.app\.tar\.gz$/.test(n);

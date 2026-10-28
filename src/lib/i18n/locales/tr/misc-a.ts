@@ -970,8 +970,8 @@ const miscA: Record<string, string> = {
   "Couldn't reach Trakt": "Trakt'a erişilemedi",
   "Couldn't reach Trakt. Check your connection and try again.":
     "Trakt'a erişilemedi. Bağlantınızı kontrol edip tekrar deneyin.",
-  "Couldn't reach harbor.site to load earlier builds. Check your connection and try again.":
-    "Önceki derlemeleri yüklemek için harbor.site'a erişilemedi. Bağlantınızı kontrol edip tekrar deneyin.",
+  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
+    "Önceki derlemeleri yüklemek için harborcommunity.site'a erişilemedi. Bağlantınızı kontrol edip tekrar deneyin.",
   "Couldn't reach this Roku": "Bu Roku'ya erişilemedi",
   "Couldn't reach {name}. Try refreshing.": "{name} hizmetine ulaşılamadı. Yenilemeyi deneyin.",
   "Couldn't read that font file.": "Bu yazı tipi dosyası okunamadı.",
@@ -1421,8 +1421,8 @@ const miscA: Record<string, string> = {
   "Follow them out?": "Sen de videodan ayrılmak ister misin?",
   Font: "Yazı tipi",
   "Font tokens": "Yazı tipi tokenları",
-  "For Application URL anything works, for example https://harbor.site. TMDB never visits it.":
-    "Uygulama URL'si için herhangi bir adres kullanabilirsiniz, örneğin https://harbor.site. TMDB bu adresi hiçbir zaman ziyaret etmez.",
+  "For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it.":
+    "Uygulama URL'si için herhangi bir adres kullanabilirsiniz, örneğin https://harborcommunity.site. TMDB bu adresi hiçbir zaman ziyaret etmez.",
   "For now, please open this site on a desktop, or build Harbor from source.":
     "Şimdilik lütfen bu siteyi masaüstünde açın veya Harbor'ı kaynak koddan derleyin.",
   "For series and anime, keep playing the rest of the season from the release you first picked. Applies whether Play is instant or manual.":

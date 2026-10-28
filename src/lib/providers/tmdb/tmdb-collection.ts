@@ -1,6 +1,8 @@
 import type { Meta } from "../../cinemeta";
-import { get, IMG } from "./tmdb-client";
+import { effectiveTmdbLanguage, get, IMG } from "./tmdb-client";
+import { loadStoredSettings } from "../../settings/load";
 import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
+import { pickTmdbTitle, shouldUseEnglishTitle } from "./tmdb-title-fallback";
 
 export type TmdbCollection = {
   id: number;
@@ -38,18 +40,52 @@ export function tmdbCollection(key: string, id: number): Promise<TmdbCollection 
 async function run(key: string, id: number): Promise<TmdbCollection | null> {
   const raw = await get<any>(key, `collection/${id}`);
   if (!raw) return null;
+  const settings = loadStoredSettings();
+  const language = effectiveTmdbLanguage();
+  const rawParts: any[] = raw.parts ?? [];
+  const needsEnglish =
+    settings.translateTitles &&
+    rawParts.some((part) =>
+      shouldUseEnglishTitle({
+        localized: part.title ?? part.name ?? "",
+        original: part.original_title ?? part.original_name ?? "",
+        originalLanguage: part.original_language,
+        targetLanguage: language,
+        translateTitles: true,
+      }),
+    );
+  let englishNames: Map<number, string> | null = null;
+  if (needsEnglish) {
+    const english = await get<any>(key, `collection/${id}`, { language: "en-US" });
+    if (english) {
+      englishNames = new Map();
+      for (const part of english.parts ?? []) {
+        const title = part?.title ?? part?.name;
+        if (typeof part?.id === "number" && typeof title === "string" && title.trim()) {
+          englishNames.set(part.id, title.trim());
+        }
+      }
+    }
+  }
   const genreCounts: Record<number, number> = {};
-  for (const p of raw.parts ?? []) {
+  for (const p of rawParts) {
     for (const g of p.genre_ids ?? []) {
       genreCounts[g] = (genreCounts[g] ?? 0) + 1;
     }
   }
-  const parts: Meta[] = (raw.parts ?? [])
+  const parts: Meta[] = rawParts
     .map(
       (p: any): Meta => ({
         id: `tmdb:movie:${p.id}`,
         type: "movie",
-        name: p.title ?? p.name ?? "",
+        name: pickTmdbTitle({
+          localized: p.title ?? p.name ?? "",
+          original: p.original_title ?? p.original_name ?? "",
+          english: englishNames?.get(p.id),
+          originalLanguage: p.original_language,
+          targetLanguage: language,
+          translateTitles: settings.translateTitles,
+        }),
         poster: tmdbPosterUrl(p.poster_path),
         background: tmdbBackdropUrl(p.backdrop_path),
         description: p.overview,

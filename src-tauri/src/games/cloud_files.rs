@@ -136,7 +136,7 @@ impl Api {
             _ => return Err("cloud_provider"),
         };
         let client = reqwest::Client::builder()
-            .user_agent("Harbor-Games/0.9 (https://harbor.site)")
+            .user_agent("Harbor-Games/0.9 (https://harborcommunity.site)")
             .redirect(reqwest::redirect::Policy::none())
             .timeout(Duration::from_secs(20))
             .build()

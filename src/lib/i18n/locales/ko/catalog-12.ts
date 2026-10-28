@@ -268,7 +268,7 @@ const catalog12: Record<string, string> = {
   "https://...manifest.json or stremio://...": "https://...manifest.json 또는 stremio://...",
   "https://posters.example.com or a pattern with {id}":
     "https://posters.example.com 또는 {id} 포함 패턴",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "huge ({width}×{height}px)": "너무 큼({width}×{height}px)",
   "if the first page is 0. Use this when the URL counts pages.":
     "첫 페이지가 0인 경우입니다. URL에서 페이지 번호를 세는 경우 사용합니다.",

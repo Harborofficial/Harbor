@@ -4,8 +4,7 @@ import "./spooktober-entry.css";
 
 export function SpooktoberInvitation({ onOpen, onDismiss, onPrepare, collapsed = false }: { onOpen: () => void; onDismiss: () => void; onPrepare?: () => void; collapsed?: boolean }) {
   const t = useT();
-  // Dismissing collapses this to a chip rather than removing it: it is the only way into
-  // the festival, so removing it would make the season unreachable.
+  // Dismissal keeps a small entry point; the seasonal setting can hide it entirely.
   if (collapsed)
     return (
       <button type="button" data-spooktober-invitation="collapsed" className="spooktober-invitation-chip" onClick={onOpen} onPointerEnter={onPrepare} onFocus={onPrepare} title={t("spooktober.enter")}>

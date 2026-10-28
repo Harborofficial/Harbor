@@ -191,8 +191,8 @@ export function usePlaybackControls(params: {
     }
     const b = bridgeRef.current;
     if (!b) return;
-    if (snapRef.current.status === "playing") b.pause();
-    else b.play().catch(() => {});
+    if (snapRef.current.status === "playing") b.pause("toggle");
+    else b.play({ reason: "toggle" }).catch(() => {});
   };
 
   const seekAccumRef = useRef<{ target: number; at: number; clock: number } | null>(null);

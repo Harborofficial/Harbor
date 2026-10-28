@@ -147,7 +147,9 @@ export function CastModal({
     const recompute = () => {
       const headerH = headerRef.current?.offsetHeight ?? 56;
       const maxH = window.innerHeight * 0.88;
-      setCardHeight(Math.min(body.scrollHeight + headerH, maxH));
+      // Round up so fractional content heights do not create a one-pixel overflow.
+      const bodyH = Number.parseFloat(getComputedStyle(body).height);
+      setCardHeight(Math.min(Math.ceil(bodyH + headerH), maxH));
     };
     recompute();
     const ro = new ResizeObserver(recompute);
@@ -281,7 +283,7 @@ export function CastModal({
           </div>
         </header>
 
-        <div className="relative z-10 min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="relative z-10 min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-gutter:stable]">
           <div ref={bodyRef}>
             <div
               key={

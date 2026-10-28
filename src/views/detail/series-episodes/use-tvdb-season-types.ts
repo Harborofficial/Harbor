@@ -12,6 +12,7 @@ export function useTvdbSeasonTypes(
   metaId: string,
   tvdbKey: string,
   enabled: boolean,
+  allowProxy = false,
 ): TvdbSeasonTypeOption[] {
   const [types, setTypes] = useState<TvdbSeasonTypeOption[]>([]);
   const remoteId =
@@ -23,7 +24,7 @@ export function useTvdbSeasonTypes(
   const kitsuId = /^(kitsu|mal|anilist|anidb):/.test(metaId) ? parseKitsuId(metaId) : null;
 
   useEffect(() => {
-    if (!enabled || (!remoteId && kitsuId == null)) {
+    if (!enabled || (!tvdbKey.trim() && !allowProxy) || (!remoteId && kitsuId == null)) {
       setTypes([]);
       return;
     }
@@ -40,7 +41,7 @@ export function useTvdbSeasonTypes(
     return () => {
       cancelled = true;
     };
-  }, [enabled, tvdbKey, remoteId, kitsuId]);
+  }, [enabled, tvdbKey, remoteId, kitsuId, allowProxy]);
 
   return types;
 }

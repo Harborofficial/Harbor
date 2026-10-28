@@ -4,7 +4,7 @@ import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { sizeImageUrl } from "@/lib/img-size";
 import { useContextMenu, type MembershipContext } from "@/lib/context-menu";
 import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
+import { useViewActions } from "@/lib/view";
 import { usePosterChain } from "@/components/poster";
 import { ensureStaticHeroArt, peekStaticHeroArt } from "@/lib/providers/anime-hero-art-static";
 import { prepareExpandingCardArtwork } from "@/lib/expanding-card-artwork";
@@ -53,7 +53,7 @@ export const TvCard = memo(function TvCard({
   reason?: string;
   membership?: MembershipContext;
 }) {
-  const { openMeta, openManga } = useView();
+  const { openMeta, openManga } = useViewActions();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
   const logo = useLogo(meta);

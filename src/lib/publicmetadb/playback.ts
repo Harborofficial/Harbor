@@ -1,15 +1,29 @@
+import { tmdbImdbCached } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 import { pmdbRequest } from "./client";
 import { isAuthenticated } from "./session";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { readResumeEntry, saveResumeMs } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
+import { getImdbForTmdb } from "./mappings";
 import type { PmdbResumePoint, PmdbResumeResponse } from "./types";
 
 const DURATION_MS = { movie: 6_300_000, series: 2_640_000 };
 const RESUME_PER_PAGE = 100;
 const RESUME_MAX_PAGES = 10;
+// Keep mapping lookups bounded like watched-key enrichment: the PMDB external
+// API allows 300 requests per 10 seconds.
+const MAP_POOL = 5;
+const MAP_MAX = 100;
 
-function toLibraryItem(raw: PmdbResumePoint): LibraryItem | null {
+function tmdbItemId(raw: PmdbResumePoint): string {
+  return raw.media_type === "movie" ? `tmdb:movie:${raw.tmdb_id}` : `tmdb:tv:${raw.tmdb_id}`;
+}
+
+function mappingKey(raw: PmdbResumePoint): string {
+  return `${raw.media_type}:${raw.tmdb_id}`;
+}
+
+function toLibraryItem(raw: PmdbResumePoint, imdbId?: string): LibraryItem | null {
   const durMs = raw.runtime_ms > 0
     ? raw.runtime_ms
     : raw.media_type === "movie"
@@ -21,7 +35,8 @@ function toLibraryItem(raw: PmdbResumePoint): LibraryItem | null {
   if (ratio < 0.02 || ratio > 0.98) return null;
 
   const isMovie = raw.media_type === "movie";
-  const id = isMovie ? `tmdb:movie:${raw.tmdb_id}` : `tmdb:tv:${raw.tmdb_id}`;
+  const tmdbId = tmdbItemId(raw);
+  const id = imdbId ?? tmdbId;
   const hasEpisode = !isMovie && raw.season != null && raw.season > 0 && raw.episode != null && raw.episode > 0;
   const when = raw.updated || raw.created || new Date().toISOString();
 
@@ -35,7 +50,7 @@ function toLibraryItem(raw: PmdbResumePoint): LibraryItem | null {
       duration: durMs,
       season: hasEpisode ? raw.season! : undefined,
       episode: hasEpisode ? raw.episode! : undefined,
-      video_id: hasEpisode ? `tmdb:tv:${raw.tmdb_id}:${raw.season}:${raw.episode}` : undefined,
+      video_id: hasEpisode ? `${id}:${raw.season}:${raw.episode}` : undefined,
       lastWatched: when,
     },
     removed: false,
@@ -43,7 +58,52 @@ function toLibraryItem(raw: PmdbResumePoint): LibraryItem | null {
     _ctime: raw.created || when,
     _mtime: when,
     external: "publicmetadb",
+    ...(imdbId ? { altIds: [tmdbId] } : {}),
   };
+}
+
+/**
+ * PMDB resume points are TMDB ids while Stremio, Trakt, and Simkl prefer IMDb.
+ * Resolve the shared identity before the Continue Watching merge so a title
+ * cannot appear once for every source. Mapping failures keep the TMDB id.
+ */
+async function resolvePlaybackImdbIds(
+  points: PmdbResumePoint[],
+): Promise<Map<string, string>> {
+  const found = new Map<string, string>();
+  const pending = new Map<string, PmdbResumePoint>();
+
+  for (const raw of points) {
+    if (!Number.isFinite(raw.tmdb_id) || raw.tmdb_id <= 0) continue;
+    const key = mappingKey(raw);
+    if (pending.has(key) || found.has(key)) continue;
+    const known = tmdbImdbCached(tmdbItemId(raw));
+    if (typeof known === "string" && known) {
+      found.set(key, known);
+      continue;
+    }
+    // A cached negative answer is authoritative enough for this refresh.
+    if (known === null) continue;
+    pending.set(key, raw);
+  }
+
+  const queue = [...pending.entries()].slice(0, MAP_MAX);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(MAP_POOL, queue.length) }, async () => {
+    while (cursor < queue.length) {
+      const next = queue[cursor++];
+      if (!next) return;
+      const [key, raw] = next;
+      try {
+        const imdb = await getImdbForTmdb(raw.tmdb_id, raw.media_type);
+        if (imdb && /^tt\d+$/.test(imdb)) found.set(key, imdb);
+      } catch {
+        // Degrade to the TMDB id; the next refresh can retry.
+      }
+    }
+  });
+  await Promise.all(workers);
+  return found;
 }
 
 async function fetchAllResumePoints(): Promise<PmdbResumePoint[]> {
@@ -80,11 +140,15 @@ export async function fetchPublicMetaDbPlaybackItems(): Promise<LibraryItem[]> {
   const all = await fetchAllResumePoints();
   if (all.length === 0) return [];
 
+  const candidates = all.filter((raw) => toLibraryItem(raw) !== null);
+  if (candidates.length === 0) return [];
+
+  const imdbByTmdb = await resolvePlaybackImdbIds(candidates);
   const items: LibraryItem[] = [];
   const seen = new Set<string>();
 
-  for (const r of all) {
-    const item = toLibraryItem(r);
+  for (const raw of candidates) {
+    const item = toLibraryItem(raw, imdbByTmdb.get(mappingKey(raw)));
     if (!item?.state) continue;
 
     const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;

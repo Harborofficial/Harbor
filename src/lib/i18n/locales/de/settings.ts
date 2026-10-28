@@ -356,8 +356,8 @@ const settings: Record<string, string> = {
     "Prüfe die Protokolle im Cloudflare-Dashboard und stelle die Anwendung dann erneut bereit.",
   "Check relay": "Relay prüfen",
   Checking: "Wird geprüft",
-  "Checking harbor.site for a newer build.":
-    "Auf harbor.site wird nach einer neueren Version gesucht.",
+  "Checking harborcommunity.site for a newer build.":
+    "Auf harborcommunity.site wird nach einer neueren Version gesucht.",
   "Checking {n} items…": "{n} Elemente werden geprüft…",
   "Checking…": "Wird geprüft…",
   "Choose a model": "Modell auswählen",
@@ -509,8 +509,8 @@ const settings: Record<string, string> = {
     "Installation fehlgeschlagen. Überprüfe die URL und versuche es erneut.",
   "Couldn't reach Trakt. Check your connection and try again.":
     "Trakt konnte nicht erreicht werden. Prüfe deine Verbindung und versuche es erneut.",
-  "Couldn't reach harbor.site to load earlier builds. Check your connection and try again.":
-    "Frühere Builds konnten nicht von harbor.site geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
+    "Frühere Builds konnten nicht von harborcommunity.site geladen werden. Prüfe deine Verbindung und versuche es erneut.",
   "Couldn't reach that pack": "Dieses Paket war nicht erreichbar",
   "Couldn't reach that pack (HTTP {n})": "Dieses Paket war nicht erreichbar (HTTP {n})",
   "Couldn't reach the update server. Try again in a moment.":
@@ -923,10 +923,10 @@ const settings: Record<string, string> = {
     "Harbor fängt stremio://-Installationslinks ab, damit Konfiguration und Installation innerhalb der App bleiben. Jede Installation wird außerdem mit deinem Stremio-Konto synchronisiert, sodass die offizielle App die maßgebliche Zentrale für deine Mediathek bleibt.",
   "Harbor checks automatically every few hours.":
     "Harbor sucht automatisch alle paar Stunden nach Aktualisierungen.",
-  "Harbor checks harbor.site for new versions and installs them in place.":
-    "Harbor sucht auf harbor.site nach neuen Versionen und installiert sie direkt als Aktualisierung.",
-  "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
-    "Harbor sucht auf harbor.site nach neuen Versionen und installiert sie direkt über die vorhandene Version. Es wird nichts installiert, bevor du dich dafür entscheidest, und ein abgelehntes Update wird dir nie wieder angeboten.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place.":
+    "Harbor sucht auf harborcommunity.site nach neuen Versionen und installiert sie direkt als Aktualisierung.",
+  "Harbor checks harborcommunity.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.":
+    "Harbor sucht auf harborcommunity.site nach neuen Versionen und installiert sie direkt über die vorhandene Version. Es wird nichts installiert, bevor du dich dafür entscheidest, und ein abgelehntes Update wird dir nie wieder angeboten.",
   "Harbor curated": "Von Harbor kuratiert",
   "Harbor finds intro and credits timing from AniSkip, TheIntroDB, and the file's own chapters, then shows a Skip button at the right moment.":
     "Harbor ermittelt die Zeitpunkte von Intro und Abspann aus AniSkip, TheIntroDB und den Kapiteln der Datei und zeigt dann im richtigen Moment eine Schaltfläche zum Überspringen an.",

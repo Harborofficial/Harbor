@@ -558,7 +558,7 @@ export function useCwAdvance(
               ...i.state!,
               season: displaySeason,
               episode: nextEp.episode,
-              video_id: `${i._id}:${displaySeason}:${nextEp.episode}`,
+              video_id: nextEp.kitsuStreamId ?? `${i._id}:${displaySeason}:${nextEp.episode}`,
               timeOffset: 0,
               flaggedWatched: 0,
             },

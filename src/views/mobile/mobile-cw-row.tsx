@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
 import type { Meta } from "@/lib/cinemeta";
 import { useAuth } from "@/lib/auth";
+import { providerMappedEpisode } from "@/lib/cw-anime-episode";
+import { resolveCwAnimeVideo } from "@/lib/cw-anime-video";
+import { useInViewport } from "@/lib/visibility";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { useHideAnime } from "@/lib/anime-hide";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
@@ -158,7 +161,16 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, externalCw, localVersion, dismissVersion, limit, hideAnime, hideSharedCw, activeProfile?.id]);
+  }, [
+    items,
+    externalCw,
+    localVersion,
+    dismissVersion,
+    limit,
+    hideAnime,
+    hideSharedCw,
+    activeProfile?.id,
+  ]);
 }
 
 function toMeta(item: LibraryItem): Meta {
@@ -169,6 +181,39 @@ function toMeta(item: LibraryItem): Meta {
     poster: item.poster,
     background: item.background,
   };
+}
+
+function useMappedCwEpisode(
+  item: LibraryItem,
+  native: { season: number; episode: number } | null,
+  enabled: boolean,
+): { season: number; episode: number } | null {
+  const [mapped, setMapped] = useState<{ season: number; episode: number } | null>(null);
+  const anime = isAnimeCwItem(item);
+  const nativeSeason = native?.season;
+  const nativeEpisode = native?.episode;
+  const itemRef = useRef(item);
+  itemRef.current = item;
+  const key = `${item._id}|${item.state?.video_id ?? ""}|${nativeSeason ?? ""}:${nativeEpisode ?? ""}`;
+  const lastKey = useRef("");
+  useEffect(() => {
+    if (lastKey.current !== key) {
+      lastKey.current = key;
+      setMapped(null);
+    }
+    if (!enabled || !anime || nativeSeason == null || nativeEpisode == null) return;
+    let cancelled = false;
+    void resolveCwAnimeVideo(itemRef.current, { season: nativeSeason, episode: nativeEpisode })
+      .then((video) => {
+        if (!cancelled)
+          setMapped(providerMappedEpisode(video, { season: nativeSeason, episode: nativeEpisode }));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [key, enabled, anime, nativeSeason, nativeEpisode]);
+  return mapped;
 }
 
 export function MobileCwRow({
@@ -225,11 +270,16 @@ function MobileCwCard({
   const progress = dur > 0 ? Math.min(1, off / dur) : 0;
   const external = !!item.external;
   const remaining = dur > 0 && !external ? formatRemaining(dur - off, t) : "";
+  const cardRef = useRef<HTMLButtonElement>(null);
+  const inView = useInViewport(cardRef);
   const ep = episodeInfo(item);
+  const mapped = useMappedCwEpisode(item, ep, inView);
   const sub =
     item.type !== "movie" && ep
       ? isAnimeCwItem(item)
-        ? t("Ep {episode}", { episode: ep.episode })
+        ? mapped && (mapped.season !== ep.season || mapped.episode !== ep.episode)
+          ? t("S{season} · E{episode}", { season: mapped.season, episode: mapped.episode })
+          : t("Ep {episode}", { episode: ep.episode })
         : t("S{season} · E{episode}", { season: ep.season, episode: ep.episode })
       : "";
   const bg = downscaleTmdb(readSnapshot(item._id) ?? item.background ?? item.poster);
@@ -239,6 +289,7 @@ function MobileCwCard({
       <div className="relative">
         <button
           type="button"
+          ref={cardRef}
           onClick={() => onOpenDetail(meta)}
           aria-label={t("View {title}", { title: item.name })}
           className="relative block aspect-[16/9] w-full overflow-hidden rounded-[16px] bg-surface text-start ring-1 ring-edge-soft/50 transition-transform duration-150 active:scale-[0.97]"

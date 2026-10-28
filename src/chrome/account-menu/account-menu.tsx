@@ -1,4 +1,4 @@
-import { AuthModal } from "@/components/auth-modal";
+import { HarborAccountDialog } from "@/views/account/harbor-account-dialog";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
@@ -78,13 +78,15 @@ export function AccountMenu({
         size={size}
       />
       {showStatus && (
-        <StatusDot
-          status={status}
-          onActivate={(e) => {
-            e.stopPropagation();
-            toggleStatus();
-          }}
-        />
+        <span className="pointer-events-auto">
+          <StatusDot
+            status={status}
+            onActivate={(e) => {
+              e.stopPropagation();
+              toggleStatus();
+            }}
+          />
+        </span>
       )}
     </span>
   );
@@ -92,26 +94,54 @@ export function AccountMenu({
   return (
     <div ref={ref} className="relative">
       {trigger === "row" ? (
-        <button
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label={name}
-          className={
+        <div
+          className={`relative ${
             triggerClassName ??
             `flex w-full items-center justify-center gap-3.5 rounded-xl py-2.5 text-start transition-colors hover:bg-elevated/60 ${collapsed ? "" : "lg:justify-start lg:px-3"}`
-          }
+          }`}
         >
-          {avatar("lg")}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={name}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="absolute inset-0 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          />
+          <span className="pointer-events-none relative shrink-0">{avatar("lg")}</span>
           <div
             data-harbor-sidebar-label
             aria-hidden={collapsed || undefined}
-            className={`hidden min-w-0 flex-1 ${collapsed ? "" : "lg:block"}`}
+            className={`pointer-events-none relative hidden min-w-0 flex-1 ${collapsed ? "" : "lg:block"}`}
           >
             <div className="truncate text-[14.5px] font-medium tracking-tight text-ink">{name}</div>
-            <div className="truncate text-[12px] text-ink-subtle">
-              <SubtitleText active={activeProfile} profiles={ctrl.profiles} user={user} />
+            <div className="text-[12px] text-ink-subtle">
+              {!author && !kid && !collapsed ? (
+                <button
+                  type="button"
+                  onClick={ctrl.openHarborAuth}
+                  aria-label={t("Sign in to Harbor")}
+                  className="group/harbor-signin pointer-events-auto grid max-w-full text-start underline underline-offset-2 transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                >
+                  <span
+                    aria-hidden
+                    className="col-start-1 row-start-1 truncate group-hover/harbor-signin:invisible group-focus-visible/harbor-signin:invisible"
+                  >
+                    {t("Signed out of Harbor")}
+                  </span>
+                  <span
+                    aria-hidden
+                    className="invisible col-start-1 row-start-1 truncate group-hover/harbor-signin:visible group-focus-visible/harbor-signin:visible"
+                  >
+                    {t("Sign in to Harbor")}
+                  </span>
+                </button>
+              ) : (
+                <SubtitleText author={author} />
+              )}
             </div>
           </div>
-        </button>
+        </div>
       ) : trigger === "avatar" ? (
         <button
           onClick={() => setMenuOpen((o) => !o)}
@@ -161,7 +191,12 @@ export function AccountMenu({
         />
       )}
 
-      {ctrl.authOpen && <AuthModal onClose={() => ctrl.setAuthOpen(false)} />}
+      {ctrl.authOpen && (
+        <HarborAccountDialog
+          onClose={() => ctrl.setAuthOpen(false)}
+          returnFocus={ctrl.authReturnFocus.current}
+        />
+      )}
       {pendingSwitch && activeProfile?.kid?.parentPinHash && (
         <ParentalPinModal
           mode={{

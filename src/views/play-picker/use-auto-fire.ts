@@ -12,7 +12,6 @@ const AUTO_SETTLE_MS = 1500;
 const AUTO_SETTLE_PACK_MS = 4000;
 const HIGH_CONFIDENCE_GRACE_MS = 350;
 const HOST_SOURCE_WAIT_MS = 12_000;
-const PREFERRED_SOURCE_WAIT_MS = 10_000;
 const QUORUM_RATIO = 0.8;
 const QUORUM_CAP_MS = 10_000;
 
@@ -43,7 +42,7 @@ export function useAutoFire(args: {
   setAutoSettleReady: (v: boolean) => void;
   setAutoCancelled: (v: boolean) => void;
   onPlay: (s: ScoredStream, committed: boolean, skipP2pConfirm?: boolean, auto?: boolean) => void;
-}): void {
+}): { waitingForPreferredSource: boolean } {
   const {
     autoActive,
     rememberedHandledFirst,
@@ -107,18 +106,11 @@ export function useAutoFire(args: {
     pipelineDone,
     addonQuorum,
   );
-  const [preferredWaitElapsed, setPreferredWaitElapsed] = useState(false);
-  useEffect(() => {
-    setPreferredWaitElapsed(false);
-    if (!autoActive || !preferredAddonPending) return;
-    const elapsed = pipelineStartedAt == null ? 0 : performance.now() - pipelineStartedAt;
-    const t = window.setTimeout(
-      () => setPreferredWaitElapsed(true),
-      Math.max(0, PREFERRED_SOURCE_WAIT_MS - elapsed),
-    );
-    return () => window.clearTimeout(t);
-  }, [autoActive, pipelineStartedAt, preferredAddonPending, preferredSourceEntry]);
-  const waitingForPreferredSource = preferredAddonPending && !preferredWaitElapsed;
+  // Wait for the remembered source's own addon to answer instead of giving up
+  // after a fixed budget. A slow aggregator (AIOStreams) is allowed to take its
+  // full request timeout. Settlement is published with processed candidates by
+  // the pipeline; Cancel remains available throughout the wait.
+  const waitingForPreferredSource = preferredAddonPending;
   const protectingPreferredSource = !!preferredSourceEntry && !preferredSourceMatched;
 
   useEffect(() => {
@@ -225,7 +217,7 @@ export function useAutoFire(args: {
       preferredLangs.length === 0 || (top != null && streamMatchesLangs(top, preferredLangs));
     const highConfidenceTop = top != null && isHighConfidence(top, langOk);
     if (isFirstAttempt && !pipelineDone) {
-      if (highConfidenceTop) {
+      if (highConfidenceTop && !autoSettleReady && !protectingPreferredSource) {
         const now = performance.now();
         if (highConfidenceSinceRef.current == null) highConfidenceSinceRef.current = now;
         if (now - highConfidenceSinceRef.current < HIGH_CONFIDENCE_GRACE_MS) return;
@@ -267,5 +259,8 @@ export function useAutoFire(args: {
     highConfidenceTick,
     waitingForHostSource,
     waitingForPreferredSource,
+    protectingPreferredSource,
   ]);
+
+  return { waitingForPreferredSource };
 }

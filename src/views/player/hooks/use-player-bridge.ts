@@ -6,6 +6,7 @@ import {
   type PlayerSnapshot,
 } from "@/lib/player/bridge";
 import { probeMpv } from "@/lib/player/mpv";
+import { externalMpvEnabled } from "@/lib/player/external-mpv";
 import { mergeMpvOptions } from "@/lib/player/mpv-tuning";
 import { anime4kPackComplete, repairAnime4kPack } from "@/lib/anime4k";
 import { metaIsAnime } from "@/lib/player/anime-src";
@@ -137,9 +138,10 @@ export function usePlayerBridge(params: {
     if (svpOn) void svpEnsureRunning().catch(() => {});
   }, [svpOn]);
   const isLiveLike = isLivePlaybackSrc(src);
+  const externalMpv = externalMpvEnabled(settings);
   const chosenEngine =
     isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
-  const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${generalShaderKey(settings)}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;
+  const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${generalShaderKey(settings)}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}|${externalMpv ? `ext:${settings.playerExternalMpvPath}:${settings.playerExternalMpvArgs}` : ""}`;
   const [bridgeReady, setBridgeReady] = useState(false);
   useEffect(() => {
     if (svpPending || anime4kPending) return;
@@ -166,8 +168,7 @@ export function usePlayerBridge(params: {
           src,
           (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
         ),
-        macEdr:
-          isMacDesktop() && embedActive && settings.playerMacEdr && !settings.playerHdrToSdr,
+        macEdr: isMacDesktop() && embedActive && settings.playerMacEdr && !settings.playerHdrToSdr,
         fullDownload: settings.torrentFullDownload,
         separateDisplay:
           settings.playerSeparateDisplay.mode === "explicit"
@@ -175,10 +176,20 @@ export function usePlayerBridge(params: {
             : null,
         separateCoverTaskbar: settings.playerSeparateCoverTaskbar,
         cacheDir: settings.playbackCacheDir,
-        extraOptions: [mergeMpvOptions(settings, svpOn, { anime4k: anime4kOn }), shaderCompanionOptions(settings)]
+        extraOptions: [
+          mergeMpvOptions(settings, svpOn, { anime4k: anime4kOn }),
+          shaderCompanionOptions(settings),
+        ]
           .filter(Boolean)
           .join("\n"),
         getEmbedRect,
+        external: externalMpv
+          ? {
+              binary: settings.playerExternalMpvPath,
+              args: settings.playerExternalMpvArgs,
+              title: [src.title, src.subtitle].filter(Boolean).join(" - "),
+            }
+          : null,
       });
       if (cancelled) return;
       bridge = choose;

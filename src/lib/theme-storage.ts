@@ -132,14 +132,43 @@ function readLegacy(): string | null {
   }
 }
 
-const PICKER_BG_KEY = "bg_picker";
-const PICKER_DIM_KEY = "bg_picker_dim";
+function getEffectivePickerProvider(mode?: "stremio" | "nuvio"): "stremio" | "nuvio" {
+  if (mode === "nuvio" || mode === "stremio") return mode;
+  try {
+    const raw = localStorage.getItem("harbor.account-provider");
+    if (raw === "nuvio") return "nuvio";
+  } catch {}
+  return "stremio";
+}
 
-export async function loadPickerBg(): Promise<{ image: string | null; dim: number }> {
-  const [image, dim] = await Promise.all([
-    themeKvGet(PICKER_BG_KEY).catch(() => null),
-    themeKvGet(PICKER_DIM_KEY).catch(() => null),
+function getPickerKeys(mode?: "stremio" | "nuvio") {
+  const provider = getEffectivePickerProvider(mode);
+  return {
+    provider,
+    bgKey: `bg_picker_${provider}`,
+    dimKey: `bg_picker_dim_${provider}`,
+  };
+}
+
+export async function loadPickerBg(mode?: "stremio" | "nuvio"): Promise<{ image: string | null; dim: number }> {
+  const { provider, bgKey, dimKey } = getPickerKeys(mode);
+  let [image, dim] = await Promise.all([
+    themeKvGet(bgKey).catch(() => null),
+    themeKvGet(dimKey).catch(() => null),
   ]);
+
+  // Backward compatibility: If Stremio mode has no scoped background yet, fall back to legacy global key
+  if (provider === "stremio" && image === null && dim === null) {
+    const [legacyImage, legacyDim] = await Promise.all([
+      themeKvGet("bg_picker").catch(() => null),
+      themeKvGet("bg_picker_dim").catch(() => null),
+    ]);
+    if (legacyImage !== null || legacyDim !== null) {
+      image = legacyImage;
+      dim = legacyDim;
+    }
+  }
+
   const parsed = dim === null ? NaN : Number(dim);
   if (!Number.isFinite(parsed)) return { image, dim: 55 };
   // Current sliders store whole percentages: a saved 1 must remain 1%, not 100%.
@@ -147,11 +176,22 @@ export async function loadPickerBg(): Promise<{ image: string | null; dim: numbe
   return { image, dim: Math.min(100, Math.max(0, Math.round(pct))) };
 }
 
-export async function savePickerBg(data: string | null): Promise<boolean> {
-  if (data == null) return themeKvDelete(PICKER_BG_KEY);
-  return themeKvPut(PICKER_BG_KEY, data);
+export async function savePickerBg(data: string | null, mode?: "stremio" | "nuvio"): Promise<boolean> {
+  const { provider, bgKey } = getPickerKeys(mode);
+  let ok = false;
+  if (data == null) ok = await themeKvDelete(bgKey);
+  else ok = await themeKvPut(bgKey, data);
+  if (ok && typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("harbor:picker-bg-changed", { detail: { mode: provider } }));
+  }
+  return ok;
 }
 
-export async function savePickerBgDim(dim: number): Promise<boolean> {
-  return themeKvPut(PICKER_DIM_KEY, String(dim));
+export async function savePickerBgDim(dim: number, mode?: "stremio" | "nuvio"): Promise<boolean> {
+  const { provider, dimKey } = getPickerKeys(mode);
+  const ok = await themeKvPut(dimKey, String(dim));
+  if (ok && typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("harbor:picker-bg-changed", { detail: { mode: provider } }));
+  }
+  return ok;
 }

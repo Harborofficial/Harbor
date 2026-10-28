@@ -25,6 +25,31 @@ export type ResolvedStoredEpisode = {
   remappedMixed: boolean;
 };
 
+export type ProviderEpisode = {
+  season: number;
+  episode: number;
+};
+
+/**
+ * A split cour can advance inside provider season 1 (Spy x Family Part 2:
+ * entry E1 = TVDB S1E13), so use the video's provider mapping unless it would
+ * move behind the stored position.
+ */
+export function providerMappedEpisode(
+  video: { imdbSeason?: number | null; imdbEpisode?: number | null } | null | undefined,
+  stored: ProviderEpisode | null | undefined,
+  foreignSeason = false,
+): ProviderEpisode | null {
+  if (foreignSeason || !video) return null;
+  const season = video.imdbSeason;
+  const episode = video.imdbEpisode;
+  if (typeof season !== "number" || !Number.isInteger(season) || season < 1) return null;
+  if (typeof episode !== "number" || !Number.isInteger(episode) || episode < 1) return null;
+  if (stored && (season < stored.season || (season === stored.season && episode < stored.episode)))
+    return null;
+  return { season, episode };
+}
+
 export function resolveEffectiveEpisode(
   list: PlayEpisode[],
   season: number,

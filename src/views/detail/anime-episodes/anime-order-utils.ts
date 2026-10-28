@@ -46,19 +46,42 @@ export function buildAnimeOrder(
         byAbs,
         matched,
       );
-      const title = pickPreferredEpisodeTitle([{ text: e.name, language: e.nameLanguage }, { text: e.nameEn, language: e.nameEnLanguage }], [{ text: match?.title, language: match?.titleLanguage }], lang);
+      const title = pickPreferredEpisodeTitle(
+        [
+          { text: e.name, language: e.nameLanguage },
+          { text: e.nameEn, language: e.nameEnLanguage },
+        ],
+        [{ text: match?.title, language: match?.titleLanguage }],
+        lang,
+      );
       const synopsis = pickPreferredEpisodeOverview(
-        [{ text: e.overview, language: e.overviewLanguage }, { text: e.overviewEn, language: e.overviewEnLanguage }], [{ text: match?.synopsis, language: match?.synopsisLanguage }], lang,
+        [
+          { text: e.overview, language: e.overviewLanguage },
+          { text: e.overviewEn, language: e.overviewEnLanguage },
+        ],
+        [{ text: match?.synopsis, language: match?.synopsisLanguage }],
+        lang,
       );
       if (match) {
         matched.add(match.id);
-        if ((!title || title === match.title) && (!synopsis || synopsis === match.synopsis)) return match;
+        if ((!title || title === match.title) && (!synopsis || synopsis === match.synopsis))
+          return match;
         return {
           ...match,
           title: title ?? match.title,
           synopsis: synopsis ?? match.synopsis,
-          titleLanguage: title === match.title ? match.titleLanguage : title === e.name ? e.nameLanguage : e.nameEnLanguage,
-          synopsisLanguage: synopsis === match.synopsis ? match.synopsisLanguage : synopsis === e.overview ? e.overviewLanguage : e.overviewEnLanguage,
+          titleLanguage:
+            title === match.title
+              ? match.titleLanguage
+              : title === e.name
+                ? e.nameLanguage
+                : e.nameEnLanguage,
+          synopsisLanguage:
+            synopsis === match.synopsis
+              ? match.synopsisLanguage
+              : synopsis === e.overview
+                ? e.overviewLanguage
+                : e.overviewEnLanguage,
         };
       }
       const img = abs != null ? ordering.imageByAbs.get(abs) : undefined;
@@ -84,10 +107,15 @@ export function buildAnimeOrder(
     items.push({
       key,
       name: s.name,
+      nameLanguage: s.nameLanguage ?? "en",
+      overview: s.overview,
+      overviewLanguage: s.overviewLanguage,
       count: ordered.length,
       year: s.airDate?.slice(0, 4),
       from,
       to,
+      seasonNumber: s.seasonNumber,
+      isGenericName: s.isGenericName,
     });
     subsetByKey.set(key, ordered);
   }

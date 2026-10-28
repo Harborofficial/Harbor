@@ -38,8 +38,14 @@ import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
-import { aniZipLookupKey, applyAniZipEpisode, needsAniZipSyncIds } from "@/lib/cw-anime-episode";
+import {
+  aniZipLookupKey,
+  applyAniZipEpisode,
+  needsAniZipSyncIds,
+  providerMappedEpisode,
+} from "@/lib/cw-anime-episode";
 import { resolveCwAnimePlayEpisode } from "@/lib/cw-anime-play";
+import { matchCwAnimeVideo, resolveCwAnimeVideo } from "@/lib/cw-anime-video";
 import { isSplitFranchiseKitsu } from "@/lib/providers/anime-franchise-root";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import {
@@ -258,9 +264,10 @@ export const ContinueCard = memo(function ContinueCard({
             const bg = m.background || (item.background ? undefined : m.poster);
             if (bg) setMetaBg(bg);
             if (animeEp != null && Number.isFinite(animeEp)) {
-              const vid =
-                m.videos.find((v) => v.id === item.state?.video_id) ??
-                m.videos.find((v) => v.episode === animeEp);
+              const vid = matchCwAnimeVideo(m.videos, item.state?.video_id, {
+                season: ep?.season ?? 1,
+                episode: ep?.episode ?? animeEp,
+              });
               if (vid) setKitsuVideo(vid);
             }
             const key = aniZipLookupKey(item._id);
@@ -403,14 +410,7 @@ export const ContinueCard = memo(function ContinueCard({
     kitsuVideo?.imdbSeason,
   );
   const partSeasonCard = splitFranchiseDisplaySeason(cardKitsuId);
-  const animeSeasonMapped =
-    !seasonForeignCard &&
-    kitsuVideo &&
-    kitsuVideo.imdbSeason != null &&
-    kitsuVideo.imdbSeason >= 2 &&
-    kitsuVideo.imdbEpisode != null
-      ? { season: kitsuVideo.imdbSeason, episode: kitsuVideo.imdbEpisode }
-      : null;
+  const animeSeasonMapped = providerMappedEpisode(kitsuVideo, ep, seasonForeignCard);
   const sub =
     isAnimeItem && absoluteNumber != null && Number.isFinite(absoluteNumber) && absoluteNumber > 0
       ? `Ep ${absoluteNumber}`
@@ -455,26 +455,36 @@ export const ContinueCard = memo(function ContinueCard({
     // Resolve the anime identity the same way the stream picker does, so a
     // split series (Bleach TYBW, JoJo) lands on the cour that aired the season
     // instead of the row's base entry.
+    // The card's own video is the exact episode; hand it over so a split cour
+    // can never fall back to a sibling entry's season-1 episode.
+    const video = kitsuVideo ?? (ep ? await resolveCwAnimeVideo(item, ep).catch(() => null) : null);
+    const stateStreamId = item.state?.video_id;
+    const directStreamId =
+      video?.id ?? (/^kitsu:\d+:\d+$/.test(stateStreamId ?? "") ? stateStreamId : undefined);
     const animePlay = await resolveCwAnimePlayEpisode({
       metaId: item._id,
+      videoId: item.state?.video_id,
       season: ep?.season,
       episode: ep?.episode,
-      name: episodeTitle,
+      imdbSeason: video?.imdbSeason ?? undefined,
+      imdbEpisode: video?.imdbEpisode ?? undefined,
+      kitsuStreamId: directStreamId,
+      name: episodeTitle ?? video?.title ?? undefined,
     });
     if (animePlay) return animePlay;
     let episode: PlayEpisode | undefined = item.type === "series" && ep ? ep : undefined;
     if (!episode && kitsuThreeSeg) {
-      if (kitsuVideo) {
+      if (video) {
         episode = {
-          season: kitsuVideo.season || 1,
-          episode: kitsuVideo.episode,
-          name: kitsuVideo.title,
-          still: kitsuVideo.thumbnail,
-          overview: kitsuVideo.overview,
-          kitsuStreamId: kitsuVideo.id,
-          imdbId: kitsuVideo.imdb_id,
-          imdbSeason: kitsuVideo.imdbSeason,
-          imdbEpisode: kitsuVideo.imdbEpisode,
+          season: video.season || 1,
+          episode: video.episode,
+          name: video.title,
+          still: video.thumbnail,
+          overview: video.overview,
+          kitsuStreamId: video.id,
+          imdbId: video.imdb_id,
+          imdbSeason: video.imdbSeason,
+          imdbEpisode: video.imdbEpisode,
         };
       } else {
         const epNum = Number((item.state?.video_id ?? "").split(":")[2]);

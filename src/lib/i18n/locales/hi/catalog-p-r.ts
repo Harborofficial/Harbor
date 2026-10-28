@@ -141,7 +141,8 @@ const catalogPR: Record<string, string> = {
   Peacock: "Peacock",
   "Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.":
     "टोरेंट प्लेबैक के दौरान प्लेयर पर पीयर्स, स्पीड और प्रोग्रेस वाली चिप। प्लेयर को साफ़ रखने के लिए इसे बंद करें।",
-  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.": "P2P स्ट्रीम चलते समय प्लेयर पर पीयर्स, स्पीड और प्रगति। यह ऊपर बाईं ओर, बाहर निकलने के बटन से दूर रहता है।",
+  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.":
+    "P2P स्ट्रीम चलते समय प्लेयर पर पीयर्स, स्पीड और प्रगति। यह ऊपर बाईं ओर, बाहर निकलने के बटन से दूर रहता है।",
   "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.":
     "टोरेंट स्ट्रीम होते समय पीयर्स, स्पीड और प्रगति। यह ऊपर बाईं ओर, बाहर निकलने के बटन से दूर रहता है।",
   "Penalty Goals": "पेनल्टी गोल",
@@ -423,7 +424,8 @@ const catalogPR: Record<string, string> = {
   "Pluto TV": "Pluto TV",
   "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.":
     "Harbor में कोई फ़ोल्डर चुनें। हम उसमें फ़िल्में और शो स्कैन करते हैं, फ़ाइल नामों से टाइटल पहचानते हैं और TMDB से उनकी जानकारी जोड़ते हैं, ताकि वे यहाँ बाकी कंटेंट जैसे दिखें। हम केवल पाथ याद रखते हैं; कुछ भी कॉपी या मूव नहीं किया जाता।",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Harbor को किसी दूसरी मशीन पर मौजूद स्ट्रीमिंग सर्वर से कनेक्ट करें, जैसे होम सर्वर पर Stremio सेवा। P2P स्ट्रीम इस मशीन के बजाय उस मशीन पर डाउनलोड और प्ले होती हैं।",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Harbor को किसी दूसरी मशीन पर मौजूद स्ट्रीमिंग सर्वर से कनेक्ट करें, जैसे होम सर्वर पर Stremio सेवा। P2P स्ट्रीम इस मशीन के बजाय उस मशीन पर डाउनलोड और प्ले होती हैं।",
   "Point Harbor at your self-hosted library to browse and install sources":
     "स्रोत ब्राउज़ और इंस्टॉल करने के लिए Harbor को अपनी सेल्फ़-होस्टेड लाइब्रेरी से कनेक्ट करें",
   "Point Harbor's built-in scraper at any HTML site with a config":
@@ -1352,6 +1354,9 @@ const catalogPR: Record<string, string> = {
   "profile.signIn": "Stremio में साइन इन करें",
   "profile.signOut": "Stremio से साइन आउट करें",
   "profile.signedIn": "Stremio में साइन इन हैं",
+  "Signed in to Harbor": "Harbor में साइन इन हैं",
+  "Signed out of Harbor": "Harbor से साइन आउट हैं",
+  "Sign out of Harbor": "Harbor से साइन आउट करें",
   "profile.switch": "प्रोफ़ाइल बदलें",
   "profile.whoWatching": "कौन देख रहा है",
   rated: "रेट किया गया",

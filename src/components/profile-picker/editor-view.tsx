@@ -57,6 +57,8 @@ import { useAnilist } from "@/lib/anilist/provider";
 import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useSettings } from "@/lib/settings";
+import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { isStremioActivePrimary } from "@/lib/active-profile-id";
 import { AvatarRing } from "@/views/settings/account/avatar-ring";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { resizeAvatar } from "@/views/settings/account/avatar-utils";
@@ -74,7 +76,8 @@ type SubView =
   | { kind: "pin-set" }
   | { kind: "pin-change" }
   | { kind: "pin-remove" }
-  | { kind: "tabs" };
+  | { kind: "tabs" }
+  | { kind: "pin-delete" };
 
 export function EditorView({
   mode,
@@ -97,7 +100,7 @@ export function EditorView({
   const { isConnected: traktConnected } = useTrakt();
   const { isConnected: anilistConnected, avatar: anilistAvatar } = useAnilist();
   const { isConnected: simklConnected } = useSimkl();
-  const { update } = useSettings();
+  const { settings, update } = useSettings();
   const t = useT();
   const [loadingTraktAvatar, setLoadingTraktAvatar] = useState(false);
   const [traktAvatarError, setTraktAvatarError] = useState<string | null>(null);
@@ -107,10 +110,11 @@ export function EditorView({
   const [simklAvatarError, setSimklAvatarError] = useState<string | null>(null);
   const editing = mode.kind === "edit" ? mode.profile : null;
   const primary = profiles.find((p) => p.isPrimary);
-  const transferTargets = profiles.filter((p) => !p.isPrimary);
-  const activeIsPrimary = !!activeProfile?.isPrimary;
+  const transferTargets = profiles.filter((p) => !p.isPrimary && !p.kid);
+  const activeIsPrimary = isStremioActivePrimary(activeProfile, profiles);
   const isOwnProfile = editing?.id === activeProfile?.id;
   const canEditAdvanced = activeIsPrimary;
+  const canCreate = activeIsPrimary || getSecondaryPrivileges(settings, false).canAddProfiles;
   const [name, setName] = useState(editing?.name ?? "");
   const [avatar, setAvatar] = useState<string | null>(editing?.avatar ?? null);
   const [avatarSource, setAvatarSource] = useState<
@@ -165,7 +169,7 @@ export function EditorView({
       if (!target?.closest('[data-profile-picker]') || target.closest('[data-search-editing]')) return;
       e.preventDefault();
       e.stopPropagation();
-      setSubView({ kind: subView.kind === "security" ? "main" : "security" });
+      setSubView({ kind: subView.kind === "security" || subView.kind === "pin-delete" ? "main" : "security" });
     };
     document.addEventListener("keydown", onBack);
     return () => document.removeEventListener("keydown", onBack);
@@ -344,8 +348,8 @@ export function EditorView({
 
   const submit = async () => {
     if (!canSave) return;
-    let kidToSave = draftKid;
-    if (draftKid) {
+    let kidToSave = isPrimary ? null : draftKid;
+    if (draftKid && !isPrimary) {
       let parentPinHash = editing?.kid?.parentPinHash ?? null;
       if (draftParentPin && draftParentPin.length === 4) {
         parentPinHash = await hashProfilePassword(draftParentPin);
@@ -455,6 +459,32 @@ export function EditorView({
     );
   }
 
+  if (subView.kind === "pin-delete" && editing && (editing.passwordHash || editing.kid?.parentPinHash)) {
+    const targetHash = (editing.passwordHash || editing.kid?.parentPinHash)!;
+    return (
+      <PinEntry
+        key={subView.kind}
+        title={t("Enter PIN to delete")}
+        subtitle={t(
+          editing.kid?.parentPinHash && !editing.passwordHash
+            ? "Enter the parent PIN to permanently delete this profile."
+            : "Enter the PIN for {name} to permanently delete this profile.",
+          { name: editing.name },
+        )}
+        mode="verify"
+        onBack={() => {
+          setConfirmingDelete(false);
+          setSubView({ kind: "main" });
+        }}
+        verify={(pin) => verifyProfilePassword(pin, targetHash)}
+        onComplete={() => {
+          deleteProfile(editing.id);
+          onDone();
+        }}
+      />
+    );
+  }
+
   if (subView.kind === "tabs") {
     return (
       <TabsView
@@ -489,11 +519,16 @@ export function EditorView({
           }
         }}
         onOpenTabs={() => setSubView({ kind: "tabs" })}
+        canLockTabs={canEditAdvanced}
       />
     );
   }
 
   if (editing && !isOwnProfile && !canEditAdvanced) {
+    return <BlockedView onBack={onCancel} />;
+  }
+
+  if (mode.kind === "create" && !canCreate) {
     return <BlockedView onBack={onCancel} />;
   }
 
@@ -649,11 +684,12 @@ export function EditorView({
         />
       )}
 
-      {showAdvanced && !draftKid && (
+      {(showAdvanced || isOwnProfile) && !draftKid && (
         <SecurityRow
           locked={locked}
           lockedTabs={editing?.lockedTabs ?? draftLockedTabs}
           onOpen={() => setSubView({ kind: "security" })}
+          canLockTabs={canEditAdvanced}
         />
       )}
 
@@ -1045,8 +1081,12 @@ export function EditorView({
                 <button
                   type="button"
                   onClick={() => {
-                    deleteProfile(editing.id);
-                    onDone();
+                    if (editing.passwordHash || editing.kid?.parentPinHash) {
+                      setSubView({ kind: "pin-delete" });
+                    } else {
+                      deleteProfile(editing.id);
+                      onDone();
+                    }
                   }}
                   className="rounded-md bg-red-400/20 px-2 py-0.5 font-semibold text-red-200 hover:bg-red-400/30"
                 >
@@ -1101,20 +1141,23 @@ function SecurityRow({
   locked,
   lockedTabs,
   onOpen,
+  canLockTabs = true,
 }: {
   locked: boolean;
   lockedTabs: HiddenTabs | null;
   onOpen: () => void;
+  canLockTabs?: boolean;
 }) {
   const t = useT();
   const lockedCount = lockedTabs ? Object.values(lockedTabs).filter(Boolean).length : 0;
   const pinLabel = locked ? t("PIN on") : t("PIN off");
-  const tabsLabel =
-    lockedCount === 0
+  const tabsLabel = canLockTabs
+    ? lockedCount === 0
       ? t("no tab locks")
       : locked
         ? t("{n} tabs locked", { n: lockedCount })
-        : t("Locks only activate once a PIN is set.");
+        : t("Locks only activate once a PIN is set.")
+    : "";
   return (
     <button
       type="button"
@@ -1138,7 +1181,7 @@ function SecurityRow({
         <div className="flex flex-col gap-0.5">
           <span className="text-[16px] font-semibold text-ink">{t("Security")}</span>
           <span className="text-[14px] text-ink-subtle">
-            {pinLabel} · {tabsLabel}
+            {canLockTabs ? `${pinLabel} · ${tabsLabel}` : (locked ? t("4-digit PIN is set.") : t("No PIN set."))}
           </span>
         </div>
       </div>
@@ -1160,6 +1203,7 @@ function SecurityView({
   onChangePin,
   onRemovePin,
   onOpenTabs,
+  canLockTabs = true,
 }: {
   locked: boolean;
   editing: boolean;
@@ -1169,6 +1213,7 @@ function SecurityView({
   onChangePin: () => void;
   onRemovePin: () => void;
   onOpenTabs: () => void;
+  canLockTabs?: boolean;
 }) {
   const t = useT();
   const lockedCount = lockedTabs ? Object.values(lockedTabs).filter(Boolean).length : 0;
@@ -1186,10 +1231,12 @@ function SecurityView({
       </div>
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-[28px] font-semibold tracking-tight text-ink">
-          {t("PIN & sidebar locks")}
+          {canLockTabs ? t("PIN & sidebar locks") : t("Profile PIN")}
         </h1>
         <p className="text-center text-[16px] text-ink-muted">
-          {t("Pick a PIN and which sidebar tabs require it.")}
+          {canLockTabs
+            ? t("Pick a PIN and which sidebar tabs require it.")
+            : t("Pick a 4-digit PIN to lock this profile.")}
         </p>
       </div>
 
@@ -1248,38 +1295,40 @@ function SecurityView({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onOpenTabs}
-          className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-4 text-start transition-colors hover:border-edge hover:bg-canvas/60"
-        >
-          <div className="flex items-center gap-3">
-            <span
-              className={`flex h-9 w-9 items-center justify-center rounded-full ring-1 ${
-                locked && lockedCount > 0
-                  ? "bg-amber-300/15 text-amber-200 ring-amber-300/30"
-                  : "bg-canvas/60 text-ink-muted ring-edge-soft"
-              }`}
-            >
-              <ShieldCheck size={14} strokeWidth={2.2} />
-            </span>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[16px] font-semibold text-ink">{t("Sidebar access")}</span>
-              <span className="text-[14px] text-ink-subtle">
-                {lockedCount === 0
-                  ? t("No locks. All sidebar tabs open without a PIN.")
-                  : locked
-                    ? t("{n} tabs require this profile's PIN.", { n: lockedCount })
-                    : t("Locks only activate once a PIN is set.")}
+        {canLockTabs && (
+          <button
+            type="button"
+            onClick={onOpenTabs}
+            className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-4 text-start transition-colors hover:border-edge hover:bg-canvas/60"
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className={`flex h-9 w-9 items-center justify-center rounded-full ring-1 ${
+                  locked && lockedCount > 0
+                    ? "bg-amber-300/15 text-amber-200 ring-amber-300/30"
+                    : "bg-canvas/60 text-ink-muted ring-edge-soft"
+                }`}
+              >
+                <ShieldCheck size={14} strokeWidth={2.2} />
               </span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[16px] font-semibold text-ink">{t("Sidebar access")}</span>
+                <span className="text-[14px] text-ink-subtle">
+                  {lockedCount === 0
+                    ? t("No locks. All sidebar tabs open without a PIN.")
+                    : locked
+                      ? t("{n} tabs require this profile's PIN.", { n: lockedCount })
+                      : t("Locks only activate once a PIN is set.")}
+                </span>
+              </div>
             </div>
-          </div>
-          <ChevronLeft
-            size={14}
-            strokeWidth={2.2}
-            className="rotate-180 rtl:rotate-0 text-ink-subtle"
-          />
-        </button>
+            <ChevronLeft
+              size={14}
+              strokeWidth={2.2}
+              className="rotate-180 rtl:rotate-0 text-ink-subtle"
+            />
+          </button>
+        )}
       </div>
     </div>
   );

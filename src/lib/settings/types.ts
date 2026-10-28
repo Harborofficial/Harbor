@@ -52,6 +52,15 @@ export type WebhookTrigger =
   | { event: "fromTraktWatchlist" }
   | { event: "liveTvEvent"; channelIds?: string[]; favoritesOnly?: boolean; leadMinutes?: number };
 
+export type SecondaryProfilePrivileges = {
+  canAddProfiles: boolean;
+  canManageStartup: boolean;
+  canViewAccountProvider: boolean;
+  canViewHarborAccount: boolean;
+  canViewProviderAccount: boolean;
+  canSignOutRoot: boolean;
+};
+
 export type ContentCategory = "anime" | "sports" | "adult";
 
 export type ContentFilters = Record<ContentCategory, boolean>;
@@ -104,7 +113,11 @@ export type MusicSpeedPreset = {
   keepPitch: boolean;
 };
 
+export type AccountProvider = "stremio" | "nuvio";
+
 export type Settings = {
+  accountProvider: AccountProvider;
+  spooktoberBanner: "disabled" | "small" | "below-hero" | undefined;
   soundTheme: "none" | "glass" | "modern" | "retro" | "cinematic";
   sfxVolume: number;
   playerVolumeSfx: boolean;
@@ -174,6 +187,7 @@ export type Settings = {
   awardTabs: boolean;
   awardTabPosition: "above" | "below" | "top";
   rowTitleScale: number;
+  cardTitleScale: number;
   playerTitleScale: number;
   playerTitleSeriesFirst: boolean;
   uiScale: number;
@@ -245,6 +259,7 @@ export type Settings = {
     | "regional"
     | "tmdb";
   tvdbOrderPanel: boolean;
+  tvdbSeasonExplorer: boolean;
   tvdbPin: string;
   harborAvatar: string | null;
   harborColor: string;
@@ -282,6 +297,12 @@ export type Settings = {
   discordMusicPresence: boolean;
   discordHideMusicWhenPaused: boolean;
   playerEngine: "auto" | "html5" | "mpv";
+  /** Play in the user's own external mpv, with IPC to keep progress synced. */
+  playerExternalMpv: boolean;
+  /** Path to the mpv executable. If left empty then it uses mpv from PATH. */
+  playerExternalMpvPath: string;
+  /** Extra command line options for mpv. */
+  playerExternalMpvArgs: string;
   /** resize shrinks the Harbor window; native floats the video in its own window. */
   pipBehavior: "resize" | "native";
   playerShellId: string;
@@ -344,7 +365,7 @@ export type Settings = {
   subBorderSize: number;
   subMarginY: number;
   subAlignX: "left" | "center" | "right";
-  subAssOverride: "no" | "yes" | "force" | "scale" | "strip";
+  subAssOverride: "no" | "yes" | "force" | "scale" | "strip" | "font";
   subAssNormalizeSize: boolean;
   subStyle: "shadow" | "outline" | "box";
   subFontFamily: string;
@@ -506,6 +527,16 @@ export type Settings = {
   audioDevice: string;
   bandwidthMbps: number;
   nextEpisodeLeadSec: number;
+  /**
+   * When the "More like this" end screen appears. 0 turns it off, -1 shows it
+   * when playback finishes, and a positive number shows it that many seconds
+   * before the end (up to 30 minutes) so the film is still running behind it.
+   */
+  endScreenLeadSec: number;
+  /** Seconds before the end screen closes itself. 0 leaves it open. */
+  endScreenCountdownSec: number;
+  /** What the countdown does when it reaches zero. */
+  endScreenOnZero: "close" | "play";
   autoPlayNextEpisode: boolean;
   stillWatching: boolean;
   stillWatchingAfter: number;
@@ -531,6 +562,7 @@ export type Settings = {
   skipProfileScreen: boolean;
   profilePromptInterval: "launch" | "15m" | "30m" | "never";
   defaultProfileId: string;
+  nuvioDefaultProfileId: string;
   sportsLeagues: string[];
   sportsShowOdds: boolean;
   /** Scores and schedules need no provider; streams do. Off until asked for. */
@@ -555,6 +587,7 @@ export type Settings = {
   musicSeekThumbHover: boolean;
   musicSpeedPresets: MusicSpeedPreset[];
   homeMode: "harbor" | "classic";
+  classicCatalogSource: "all" | "stremio" | "nuvio";
   homeShowAllAddonRows: boolean;
   homeNewEpisodes: boolean;
   libraryBookmarkedOnly: boolean;
@@ -654,6 +687,7 @@ export type Settings = {
   seekBarColor: string;
   seekBarImage: string;
   seekBarFill: boolean;
+  seekBarChapters: boolean;
   seekBarFillOpacity: number;
   seekDotShape: "circle" | "square" | "image" | "hidden";
   seekDotHover: boolean;
@@ -751,6 +785,7 @@ export type Settings = {
   arabicWelcomeSeen: boolean;
   cropMode: string;
   customLists: CustomList[];
+  libraryGroups: import("@/lib/library-groups").LibraryGroup[];
   pauseListStatusOnPause: boolean;
   translateTitles: boolean;
   translateDescriptions: boolean;
@@ -761,4 +796,6 @@ export type Settings = {
   xrayEnabled: boolean;
   xrayLiveScan: boolean;
   auddApiKey: string;
+  secondaryPrivileges: SecondaryProfilePrivileges;
+  nuvioSecondaryPrivileges: SecondaryProfilePrivileges;
 };

@@ -1,17 +1,10 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useProfiles } from "./profiles";
 import { setItemWithRecovery } from "./storage-recovery";
 import { setMangaInLibrary } from "./manga/api";
 import { notifyMangaLibraryChanged } from "./manga/library-events";
 import { activeMangaSourceId, listMangaSources } from "./manga/sources";
+import { MangaFavoritesContext as Ctx } from "./manga-favorites-context";
 
 export type MangaFavEntry = {
   id: string;
@@ -111,8 +104,6 @@ export type MangaFavoritesStore = {
   ) => void;
   count: number;
 };
-
-const Ctx = createContext<MangaFavoritesStore | null>(null);
 
 export function MangaFavoritesProvider({ children }: { children: ReactNode }) {
   const { activeId } = useProfiles();

@@ -1,4 +1,6 @@
 const coverage: Record<string, string> = {
+  "Waiting for {name}…": "{name} bekleniyor…",
+  "Keeping the source you were watching.": "İzlediğiniz kaynak korunuyor.",
   "Sound descriptions": "Ses açıklamaları",
   "Hide sound effects and speaker names": "Ses efektlerini ve konuşan adlarını gizle",
   "Removes bracketed descriptions like [door creaks] and shouted speaker labels like JOHN: while subtitles play, so a release that only ships an SDH track still reads as plain dialogue. Song lyrics, ordinary parentheses and non-Latin scripts are left alone. Skipped on forced and picture-based tracks.": "Altyazılar akarken [kapı gıcırdıyor] gibi köşeli parantez içindeki açıklamaları ve JOHN: gibi büyük harfle yazılmış konuşan adlarını kaldırır; böylece yalnızca SDH altyazısı olan bir sürüm de düz diyalog gibi okunur. Şarkı sözleri, normal parantezler ve Latin dışı yazılar olduğu gibi kalır. Zorunlu ve görüntü tabanlı altyazılarda uygulanmaz.",

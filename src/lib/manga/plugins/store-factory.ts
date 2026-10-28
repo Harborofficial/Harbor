@@ -21,6 +21,8 @@ export function createPluginStore<P extends WithId, R extends WithUrl = WithUrl>
 ): PluginStoreApi<P, R> {
   let dbPromise: Promise<IDBDatabase> | null = null;
   let cache: P[] | null = null;
+  let loading: Promise<P[]> | null = null;
+  let generation = 0;
   const listeners = new Set<() => void>();
 
   function openDb(): Promise<IDBDatabase> {
@@ -43,7 +45,26 @@ export function createPluginStore<P extends WithId, R extends WithUrl = WithUrl>
   }
 
   function notify(): void {
-    for (const l of listeners) l();
+    const profiler = typeof window !== "undefined" ? window.__harborProfiler : undefined;
+    const started = performance.now();
+    let index = 0;
+    for (const l of listeners) {
+      const at = performance.now();
+      l();
+      const durationMs = performance.now() - at;
+      if (durationMs >= 4)
+        profiler?.mark("plugin-store:subscriber", {
+          store: dbName,
+          subscriber: index,
+          durationMs: Math.round(durationMs * 10) / 10,
+        });
+      index++;
+    }
+    profiler?.mark("plugin-store:notify", {
+      store: dbName,
+      subscribers: index,
+      durationMs: Math.round((performance.now() - started) * 10) / 10,
+    });
   }
 
   function pluginsSync(): P[] {
@@ -52,11 +73,23 @@ export function createPluginStore<P extends WithId, R extends WithUrl = WithUrl>
 
   async function readAll<T>(storeName: string): Promise<T[]> {
     const db = await openDb();
-    return new Promise<T[]>((resolve) => {
+    return new Promise<T[]>((resolve, reject) => {
       const tx = db.transaction(storeName, "readonly");
       const req = tx.objectStore(storeName).getAll();
-      req.onsuccess = () => resolve(Array.isArray(req.result) ? (req.result as T[]) : []);
-      req.onerror = () => resolve([]);
+      req.onsuccess = () => {
+        const started = performance.now();
+        const result = req.result;
+        const list = Array.isArray(result) ? (result as T[]) : [];
+        if (typeof window !== "undefined")
+          window.__harborProfiler?.mark("plugin-store:read", {
+            store: dbName,
+            collection: storeName,
+            count: list.length,
+            durationMs: Math.round((performance.now() - started) * 10) / 10,
+          });
+        resolve(list);
+      };
+      req.onerror = () => reject(req.error);
     });
   }
 
@@ -92,24 +125,36 @@ export function createPluginStore<P extends WithId, R extends WithUrl = WithUrl>
       };
     },
     pluginsSync,
-    async loadPlugins() {
-      try {
-        const list = await readAll<P>(PLUGIN_STORE);
-        cache = list;
-        notify();
-        return list;
-      } catch {
-        cache = [];
-        return [];
-      }
+    loadPlugins() {
+      if (loading) return loading;
+      const startedAt = generation;
+      const request = readAll<P>(PLUGIN_STORE)
+        .then((list) => {
+          // An install/uninstall may commit while this read is pending. Its cache is newer.
+          if (generation !== startedAt) return pluginsSync();
+          cache = list;
+          notify();
+          return list;
+        })
+        .catch(() => {
+          // A transient read failure must not erase an already loaded installed set.
+          return pluginsSync();
+        })
+        .finally(() => {
+          if (loading === request) loading = null;
+        });
+      loading = request;
+      return request;
     },
     async savePlugin(p) {
       await put(PLUGIN_STORE, p);
+      generation += 1;
       cache = [...pluginsSync().filter((x) => x.id !== p.id), p];
       notify();
     },
     async deletePlugin(id) {
       await remove(PLUGIN_STORE, id);
+      generation += 1;
       cache = pluginsSync().filter((x) => x.id !== id);
       notify();
     },

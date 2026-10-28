@@ -154,7 +154,7 @@ async function json(url: string, signal: AbortSignal): Promise<Obj> {
         signal: controller.signal,
         headers: {
           Accept: "application/json",
-          ...(musicBrainz ? { "User-Agent": "Harbor/0.9 (https://harbor.site)" } : {}),
+          ...(musicBrainz ? { "User-Agent": "Harbor/0.9 (https://harborcommunity.site)" } : {}),
         },
       });
       if (!response.ok) {

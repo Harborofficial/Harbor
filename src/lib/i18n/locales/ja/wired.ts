@@ -281,8 +281,8 @@ const wired: Record<string, string> = {
   "Folder selection is available in the Harbor app": "フォルダーの選択はHarborアプリで利用できます",
   "Follow them out?": "外部サイトへ移動しますか？",
   "Font tokens": "フォントトークン",
-  "For Application URL anything works, for example https://harbor.site. TMDB never visits it.":
-    "Application URLには、https://harbor.siteなど任意のURLを指定できます。TMDBがアクセスすることはありません。",
+  "For Application URL anything works, for example https://harborcommunity.site. TMDB never visits it.":
+    "Application URLには、https://harborcommunity.siteなど任意のURLを指定できます。TMDBがアクセスすることはありません。",
   "Frame grab failed": "フレームの取得に失敗しました",
   "Free forever for personal use. No payment, ever.":
     "個人利用は永久無料。料金は一切かかりません。",

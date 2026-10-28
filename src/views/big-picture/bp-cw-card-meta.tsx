@@ -6,15 +6,17 @@ import traktLogo from "@/assets/trakt.svg";
 import publicmetadbLogo from "@/assets/publicmetadb.svg";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import type { Meta } from "@/lib/cinemeta";
+import { providerMappedEpisode } from "@/lib/cw-anime-episode";
+import { resolveCwAnimeVideo } from "@/lib/cw-anime-video";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { useHasNewEpisode } from "@/lib/new-episodes";
-import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { useProfiles, type Profile } from "@/lib/profiles";
 import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
 import { fetchSeasonEpisodes } from "@/lib/series-episodes";
 import { useSettings } from "@/lib/settings";
 import {
   episodeFromVideoId,
+  isAnimeCwItem,
   libraryMetaType,
   type ExternalCwSource,
   type LibraryItem,
@@ -85,10 +87,6 @@ function useTraktWatchedKeys(profileId: string | null): Set<string> {
   return isConnected && traktFor === profileId ? keys : NO_KEYS;
 }
 
-function isKitsuThreeSeg(item: LibraryItem): boolean {
-  return ANIME_ID.test(item._id) && (item.state?.video_id ?? "").split(":").length === 3;
-}
-
 function cwEpisode(item: LibraryItem): { season: number; episode: number } | null {
   const s = item.state?.season ?? 0;
   const e = item.state?.episode ?? 0;
@@ -135,30 +133,41 @@ function useAirCountdown(at: string | undefined): string {
   return t("Next in {minutes}m", { minutes: String(Math.max(1, minutes)) });
 }
 
-async function episodeTitleFor(item: LibraryItem, tmdbKey: string): Promise<string> {
-  const videoId = item.state?.video_id ?? "";
-  if (ANIME_ID.test(item._id)) {
-    const num = isKitsuThreeSeg(item)
-      ? Number(videoId.split(":")[2])
-      : (item.state?.episode ?? cwEpisode(item)?.episode ?? 0);
-    const m = await animeKitsuMeta(item._id).catch(() => null);
-    if (!m) return "";
-    const byId = m.videos.find((v) => v.id === videoId);
-    const byNum =
-      Number.isFinite(num) && num > 0 ? m.videos.find((v) => v.episode === num) : undefined;
-    return (byId ?? byNum)?.title ?? "";
+type CwEpisodeTitle = {
+  title: string;
+  mapped: { season: number; episode: number } | null;
+};
+
+async function episodeTitleFor(item: LibraryItem, tmdbKey: string): Promise<CwEpisodeTitle> {
+  const native = cwEpisode(item);
+  if (isAnimeCwItem(item)) {
+    const video = native ? await resolveCwAnimeVideo(item, native).catch(() => null) : null;
+    if (video) {
+      return {
+        title: video.title ?? "",
+        mapped: providerMappedEpisode(video, native, false),
+      };
+    }
+    // Native anime ids have no generic episode list to fall back to.
+    if (ANIME_ID.test(item._id)) return { title: "", mapped: null };
   }
-  const ep = cwEpisode(item);
-  if (!ep || ep.episode <= 0) return "";
+  if (!native || native.episode <= 0) return { title: "", mapped: null };
   const shell: Meta = { id: item._id, type: "series", name: item.name };
-  const eps = await fetchSeasonEpisodes(shell, ep.season, { tmdbKey }).catch(() => []);
-  return eps.find((e) => e.episode === ep.episode)?.name ?? "";
+  const eps = await fetchSeasonEpisodes(shell, native.season, { tmdbKey }).catch(() => []);
+  return {
+    title: eps.find((e) => e.episode === native.episode)?.name ?? "",
+    mapped: null,
+  };
 }
 
 function useCwLogoAndTitle(
   item: LibraryItem,
   ref: RefObject<HTMLElement | null>,
-): { logo: string | undefined; episodeTitle: string } {
+): {
+  logo: string | undefined;
+  episodeTitle: string;
+  mappedEpisode: { season: number; episode: number } | null;
+} {
   const tmdbKey = useSettings().settings.tmdbKey;
   const id = item._id;
   const videoId = item.state?.video_id ?? "";
@@ -174,12 +183,16 @@ function useCwLogoAndTitle(
   );
   const [logo, setLogo] = useState<string | undefined>(() => peekCachedLogo(tmdbKey, shell));
   const [episodeTitle, setEpisodeTitle] = useState("");
+  const [mappedEpisode, setMappedEpisode] = useState<{ season: number; episode: number } | null>(
+    null,
+  );
   const itemRef = useRef(item);
   itemRef.current = item;
 
   useEffect(() => {
     setLogo(peekCachedLogo(tmdbKey, shell));
     setEpisodeTitle("");
+    setMappedEpisode(null);
     const el = ref.current;
     if (!el) return;
     let alive = true;
@@ -208,8 +221,10 @@ function useCwLogoAndTitle(
         })
         .catch(() => {});
       episodeTitleFor(itemRef.current, tmdbKey)
-        .then((title) => {
-          if (alive && title) setEpisodeTitle(title);
+        .then((result) => {
+          if (!alive) return;
+          if (result.title) setEpisodeTitle(result.title);
+          setMappedEpisode(result.mapped);
         })
         .catch(() => {});
     };
@@ -224,7 +239,7 @@ function useCwLogoAndTitle(
     };
   }, [shell, videoId, tmdbKey, ref]);
 
-  return { logo, episodeTitle };
+  return { logo, episodeTitle, mappedEpisode };
 }
 
 export type BpCwCardMeta = {
@@ -234,6 +249,7 @@ export type BpCwCardMeta = {
   waitingForAir: boolean;
   countdown: string;
   episodeTitle: string;
+  mappedEpisode: { season: number; episode: number } | null;
   logo: string | undefined;
   watcher: Profile | null;
 };
@@ -247,7 +263,7 @@ export function useBpCwCardMeta(
   const traktKeySet = useTraktWatchedKeys(activeId ?? null);
   const newEpisode = useHasNewEpisode(item);
   const countdown = useAirCountdown(air.at);
-  const { logo, episodeTitle } = useCwLogoAndTitle(item, ref);
+  const { logo, episodeTitle, mappedEpisode } = useCwLogoAndTitle(item, ref);
   const watcher = useCwWatcher(item._id, activeId);
   return {
     watched: isLibraryItemWatched(item, traktKeySet),
@@ -256,6 +272,7 @@ export function useBpCwCardMeta(
     waitingForAir: air.waiting,
     countdown,
     episodeTitle,
+    mappedEpisode,
     logo,
     watcher,
   };
@@ -354,7 +371,13 @@ export function BpCwCardPill({
     <span data-bp-cw-pill className={PILL}>
       {external ? (
         <img
-          src={external === "trakt" ? traktLogo : external === "publicmetadb" ? publicmetadbLogo : simklLogo}
+          src={
+            external === "trakt"
+              ? traktLogo
+              : external === "publicmetadb"
+                ? publicmetadbLogo
+                : simklLogo
+          }
           alt=""
           className="h-[1.15em] w-[1.15em] shrink-0 rounded-[3px]"
         />

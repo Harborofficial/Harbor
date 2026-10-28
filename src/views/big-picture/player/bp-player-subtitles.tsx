@@ -18,6 +18,7 @@ import { useSubtitleContext } from "@/components/player/subtitle-menu/subtitle-c
 import { useSubtitleSearch } from "@/components/player/subtitle-menu/subtitle-search-store";
 import type { SubtitleMenuProps } from "@/components/player/subtitle-menu/types";
 import { groupByLang, variantTitle } from "@/components/player/subtitle-menu/utils";
+import { externalMpvEnabled } from "@/lib/player/external-mpv";
 import { hasImportedSubTitle, markImportedSub, useImportedSubs } from "@/lib/player/imported-subs";
 import { setSecondarySub } from "@/lib/player/secondary-sub";
 import { useSettings } from "@/lib/settings";
@@ -58,6 +59,8 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
   const t = useBpT();
   const { onClose, tracks, selectedId, onSelect, onDelay, onAddSubtitle, delaySec } = props;
   const { settings } = useSettings();
+  // Harbor can't see which subtitles the user's own mpv has, so this list stays empty then.
+  const externalMpv = externalMpvEnabled(settings);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [lane, setLane] = useState<Lane>("tracks");
   const [activeLang, setActiveLang] = useState(ALL);
@@ -71,11 +74,14 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
   const playCtx = useSubtitleContext();
 
   const preferred =
-    settings.preferredSubLangs.length > 0 ? settings.preferredSubLangs : settings.preferredLanguages;
+    settings.preferredSubLangs.length > 0
+      ? settings.preferredSubLangs
+      : settings.preferredLanguages;
   const langTracks = useMemo(() => {
     const keep = new Set(filterTracksByPreferredLanguage(tracks, preferred));
     for (const track of tracks) {
-      if (hasImportedSubTitle(track.title) || importedTitles.has(track.title ?? "")) keep.add(track);
+      if (hasImportedSubTitle(track.title) || importedTitles.has(track.title ?? ""))
+        keep.add(track);
       if (track.id === selectedId || track.secondary) keep.add(track);
     }
     return tracks.filter((track) => keep.has(track));
@@ -177,7 +183,9 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
             <Captions size={28} strokeWidth={2} />
             {t("Subtitles")}
           </h2>
-          <p className={`line-clamp-1 ${MUTED}`}>{`${context} · ${selected ? variantTitle(selected) : t("Off")} · ${offset}`}</p>
+          <p
+            className={`line-clamp-1 ${MUTED}`}
+          >{`${context} · ${selected ? variantTitle(selected) : t("Off")} · ${offset}`}</p>
         </header>
 
         <Row>
@@ -195,6 +203,13 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
         >
           {lane === "tracks" && (
             <>
+              {externalMpv && (
+                <p className={NOTE}>
+                  {t(
+                    "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.",
+                  )}
+                </p>
+              )}
               <Row>
                 <span className={LABEL}>{t("Languages")}</span>
                 <Chip
@@ -309,15 +324,13 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
                         label={t("2nd")}
                         icon={<Languages size={19} strokeWidth={2.2} />}
                         on={track.id === secondary?.id}
-                        onPress={() =>
-                          pickSecondary(track.id === secondary?.id ? null : track.id)
-                        }
+                        onPress={() => pickSecondary(track.id === secondary?.id ? null : track.id)}
                       />
                     }
                   />
                 );
               })}
-              {visible.length === 0 && (
+              {visible.length === 0 && !externalMpv && (
                 <p className={NOTE}>
                   {t("No tracks match these filters. Try toggling HI/SDH or Forced.")}
                 </p>

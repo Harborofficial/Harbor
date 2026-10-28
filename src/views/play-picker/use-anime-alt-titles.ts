@@ -33,8 +33,8 @@ function dedupeTitles(name: string, extra: string[]): string[] {
  * title union once resolved. The gate itself no-ops on a null/empty list, so
  * this can only ever remove wrong-show results, never legit anime.
  */
-export function useAnimeAltTitles(meta: Meta): string[] | null {
-  const metaId = meta.id;
+export function useAnimeAltTitles(meta: Meta, sourceMetaId?: string): string[] | null {
+  const metaId = sourceMetaId ?? meta.id;
   const metaName = meta.name;
   const [titles, setTitles] = useState<string[] | null>(() =>
     ANIME_ID_RX.test(metaId) ? dedupeTitles(metaName, []) : null,

@@ -1,7 +1,7 @@
 use super::super::connectors::subsonic;
 use super::super::{
     connector, lastfm, spotify, worker, MusicSourceCandidate, MusicState, MusicTrack, ACTIVE_NONE,
-    ACTIVE_SPOTIFY,
+    ACTIVE_SPOTIFY, ACTIVE_MODULE_SPOTIFY, m3u,
 };
 use tauri::Manager;
 
@@ -115,6 +115,12 @@ pub fn music_spotify_device(state: tauri::State<'_, MusicState>) -> Option<Strin
 
 #[tauri::command]
 pub async fn music_spotify_disconnect(state: tauri::State<'_, MusicState>) -> Result<(), String> {
+    if state.active_engine()==ACTIVE_MODULE_SPOTIFY {
+        m3u::module_request_async(serde_json::json!({
+            "command":"spotify_disconnect"
+        })).await?;
+        state.set_active_engine(ACTIVE_NONE);
+    }
     state.spotify.disconnect().await?;
     if state.active_engine() == ACTIVE_SPOTIFY {
         state.set_active_engine(ACTIVE_NONE);

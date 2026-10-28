@@ -4,6 +4,7 @@ import uploadGlyph from "@/assets/nav-icons/download.svg?raw";
 import { resizeAvatar } from "./account/avatar-utils";
 import { ProfileAvatar, SubtitleText } from "@/chrome/account-menu/account-menu-parts";
 import { useAuth } from "@/lib/auth";
+import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
@@ -121,7 +122,9 @@ function RailAccount() {
   const t = useT();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const { user } = useAuth();
-  const { profiles, activeProfile, updateProfile } = useProfiles();
+  const { activeProfile, updateProfile } = useProfiles();
+  const [author, setAuthor] = useState(currentAuthor);
+  useEffect(() => subscribeAuthor(() => setAuthor(currentAuthor())), []);
   const { settings, update } = useSettings();
   const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
     ? null
@@ -172,7 +175,7 @@ function RailAccount() {
       <span className="hset-rail-me-text">
         <span className="hset-rail-me-name">{name}</span>
         <span className="hset-rail-me-sub">
-          <SubtitleText active={activeProfile} profiles={profiles} user={user} />
+          <SubtitleText author={author} />
         </span>
       </span>
     </div>
@@ -386,9 +389,12 @@ export function SettingsSidebar({
                     (!native && (id === "mpv" || id === "shaders" || id === "plugins")) ||
                     (id === "relay" && !settings.togetherRelayUrl)
                       ? []
-                      : tabsFor(id).filter(
-                          (tab) => native || id !== "theme" || tab.id !== "window",
-                        );
+                      : tabsFor(id).filter((tab) => {
+                          if (id === "account") {
+                            return tab.id !== (settings.accountProvider === "nuvio" ? "stremio" : "nuvio");
+                          }
+                          return native || id !== "theme" || tab.id !== "window";
+                        });
                   return (
                     <div key={id} className="hset-rail-page-group">
                       {tabs.length > 0 ? (

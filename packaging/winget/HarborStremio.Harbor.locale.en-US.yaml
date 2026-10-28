@@ -4,10 +4,10 @@ PackageIdentifier: HarborStremio.Harbor
 PackageVersion: 0.9.21
 PackageLocale: en-US
 Publisher: Harbor
-PublisherUrl: https://harbor.site/
+PublisherUrl: https://harborcommunity.site/
 PublisherSupportUrl: https://github.com/harborstremio/harbor/issues
 PackageName: Harbor
-PackageUrl: https://harbor.site/
+PackageUrl: https://harborcommunity.site/
 License: MIT
 LicenseUrl: https://github.com/harborstremio/harbor/blob/main/LICENSE
 Copyright: Copyright (c) Harbor contributors

@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { deferred, flushBridge, mpvBridgeHarness } from "./helpers/mpv-bridge-harness.ts";
 
-const reloads = (h) => h.commands.filter(
-  ({ command, args }) => command === "mpv_command" && args.cmd?.[0] === "ao-reload",
-);
+const reloads = (h) =>
+  h.commands.filter(
+    ({ command, args }) => command === "mpv_command" && args.cmd?.[0] === "ao-reload",
+  );
 
 for (const trigger of ["focus", "visibility"]) {
   test(`${trigger} restoration does not reset paused audio before resume`, async (t) => {
@@ -69,7 +70,7 @@ test("pausing before the wake recovery timer fires cancels the speculative reset
   await h.bridge.destroy();
 });
 
-test("paused device changes defer all audio writes and recover once after mpv confirms resume", async () => {
+test("paused device changes recover during play before mpv resumes", async () => {
   const h = mpvBridgeHarness();
   await h.bridge.load({ url: "https://media.example/current.mkv" });
   h.emit("pause", true);
@@ -82,16 +83,15 @@ test("paused device changes defer all audio writes and recover once after mpv co
   assert.equal(reloads(h).length, 0);
   assert.equal(h.commands.length, beforeResume);
   await h.bridge.play();
-  h.runTimers();
   await flushBridge();
-  assert.equal(reloads(h).length, 0, "the play request alone cannot authorize a reload");
-  h.emit("pause", false);
-  h.emitEvent({ event: "playback-restart" });
-  h.runTimers();
-  await flushBridge();
-  assert.equal(reloads(h).length, 1);
-  const index = h.commands.indexOf(reloads(h)[0]);
-  assert.ok(h.commands.slice(index + 1).some(({ args }) => args.name === "aid" && args.value === "1"));
+  assert.equal(reloads(h).length, 1, "play applies the pending device change");
+  const reload = reloads(h)[0];
+  const index = h.commands.indexOf(reload);
+  const unpause = h.commands.findIndex(({ args }) => args.name === "pause" && args.value === false);
+  assert.ok(index >= 0 && unpause > index, "the reload must precede unpausing mpv");
+  assert.ok(
+    h.commands.slice(index + 1).some(({ args }) => args.name === "aid" && args.value === "1"),
+  );
   h.emit("pause", false);
   h.emitEvent({ event: "playback-restart" });
   h.runTimers();
@@ -116,13 +116,13 @@ test("wake notifications cannot cancel a pending device change recovery", async 
   await h.bridge.load({ url: "https://media.example/current.mkv" });
   h.emit("pause", false);
   h.emit("audio-device-list", [{ name: "auto" }]);
+  h.emit("audio-device-list", [{ name: "auto" }, { name: "wasapi/test" }]);
   h.emitVisibility("visible");
   h.emit("pause", true);
   h.runTimers();
   await flushBridge();
   assert.equal(reloads(h).length, 0);
-  h.emit("pause", false);
-  h.runTimers();
+  await h.bridge.play();
   await flushBridge();
   assert.equal(reloads(h).length, 1);
   await h.bridge.destroy();
@@ -136,7 +136,8 @@ for (const transition of ["load", "destroy", "player-failure", "end-file"]) {
     h.emit("audio-device-list", [{ name: "auto" }]);
     if (transition === "load") await h.bridge.load({ url: "https://media.example/next.mkv" });
     else if (transition === "destroy") await h.bridge.destroy();
-    else h.emitEvent({ event: transition, reason: transition === "end-file" ? "eof" : "unavailable" });
+    else
+      h.emitEvent({ event: transition, reason: transition === "end-file" ? "eof" : "unavailable" });
     h.emit("pause", false);
     h.emitEvent({ event: "playback-restart" });
     h.runTimers();
@@ -151,7 +152,7 @@ test("a stream change invalidates recovery waiting for an audio property write",
   await h.bridge.load({ url: "https://media.example/current.mkv" });
   h.emit("pause", false);
   const write = deferred();
-  h.writeWith((name) => name === "audio-device" ? write.promise : Promise.resolve());
+  h.writeWith((name) => (name === "audio-device" ? write.promise : Promise.resolve()));
   h.emit("audio-device-list", [{ name: "auto" }]);
   h.runTimers();
   await flushBridge();

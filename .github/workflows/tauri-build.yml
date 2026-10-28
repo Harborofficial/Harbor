@@ -1,6 +1,12 @@
 name: tauri-build
 
 on:
+  workflow_call:
+    inputs:
+      intel-only:
+        description: Build only macOS Intel and treat its failure as fatal.
+        type: boolean
+        default: false
   workflow_dispatch:
   push:
     tags:
@@ -12,33 +18,20 @@ permissions:
 
 env:
   NODE_OPTIONS: --max-old-space-size=6144
-  # The extension compat layer is not in this repository, so a runner cannot stage its runtime and
-  # these installers ship without extension support. The build says so on every run. Drop this line
-  # the day the layer ships with the checkout, and the build starts refusing to omit it.
-  HARBOR_CAPSTAN_OPTIONAL: "1"
 
 jobs:
   build:
     name: ${{ matrix.platform.name }} (${{ matrix.platform.target }})
     runs-on: ${{ matrix.platform.runner }}
     timeout-minutes: 120
-    continue-on-error: ${{ matrix.platform.target == 'x86_64-apple-darwin' }}
+    continue-on-error: ${{ !inputs.intel-only && matrix.platform.target == 'x86_64-apple-darwin' }}
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - name: Windows
-            runner: windows-latest
-            target: x86_64-pc-windows-msvc
-            bundle: msi
-          - name: macOS-AppleSilicon
-            runner: macos-15
-            target: aarch64-apple-darwin
-            bundle: dmg
-          - name: macOS-Intel
-            runner: macos-15-intel
-            target: x86_64-apple-darwin
-            bundle: dmg
+        platform: >-
+          ${{ fromJSON(inputs.intel-only &&
+          '[{"name":"macOS-Intel","runner":"macos-15-intel","target":"x86_64-apple-darwin","bundle":"dmg"}]' ||
+          '[{"name":"Windows","runner":"windows-latest","target":"x86_64-pc-windows-msvc","bundle":"msi"},{"name":"macOS-AppleSilicon","runner":"macos-15","target":"aarch64-apple-darwin","bundle":"dmg"},{"name":"macOS-Intel","runner":"macos-15-intel","target":"x86_64-apple-darwin","bundle":"dmg"}]') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -211,6 +204,7 @@ jobs:
           python3 tests/test_macos_signature.py
           python3 tests/test_macos_resign.py
           python3 tests/test_macos_startup.py
+          python3 tests/test_unrar_cpu_detection.py
           python3 scripts/macos-bundle-libmpv.py prepare \
             --frameworks "$FRAMEWORKS_DIR" \
             --config "$CONFIG_PATH" \
@@ -230,11 +224,7 @@ jobs:
           tauriScript: pnpm tauri
           args: --target ${{ matrix.platform.target }} ${{ steps.sign.outputs.config }} ${{ steps.macos-libraries.outputs.config }}
 
-      - name: Build app (Windows, no bundle)
-        if: matrix.platform.target == 'x86_64-pc-windows-msvc'
-        run: pnpm tauri build --no-bundle --target ${{ matrix.platform.target }}
-
-      - name: Build verified Windows managed installer
+      - name: Build modular Windows managed installer
         if: matrix.platform.target == 'x86_64-pc-windows-msvc'
         shell: pwsh
         env:
@@ -243,24 +233,16 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $releaseVersion = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
           $releaseRoot = 'src-tauri/target/x86_64-pc-windows-msvc/release'
-          New-Item -ItemType Directory -Force -Path 'src-tauri/target/release' | Out-Null
-          Copy-Item -LiteralPath "$releaseRoot/harbor.exe" -Destination 'src-tauri/target/release/harbor.exe'
-          cargo build --manifest-path installer/src-tauri/Cargo.toml --release --no-default-features --features tauri/custom-protocol --bin harbor-uninstall --locked
-          if ($LASTEXITCODE -ne 0) { throw 'Uninstaller build failed' }
-          node installer/scripts/make-payload.mjs
-          if ($LASTEXITCODE -ne 0) { throw 'Payload creation failed' }
-          node scripts/verify-managed-payload.mjs
-          if ($LASTEXITCODE -ne 0) { throw 'Payload verification failed' }
-          cargo build --manifest-path installer/src-tauri/Cargo.toml --release --features tauri/custom-protocol --bin harbor-shipyard --locked
-          if ($LASTEXITCODE -ne 0) { throw 'Managed installer build failed' }
-          node scripts/verify-managed-payload.mjs --embedded
-          if ($LASTEXITCODE -ne 0) { throw 'Embedded payload verification failed' }
-          foreach ($releaseExe in @('src-tauri/target/release/harbor.exe', 'installer/src-tauri/target/release/harbor-uninstall.exe', 'installer/src-tauri/target/release/harbor-shipyard.exe')) {
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-shipyard-modules.ps1 -Channel $env:HARBOR_CHANNEL
+          if ($LASTEXITCODE -ne 0) { throw 'Modular Shipyard build failed' }
+          foreach ($releaseExe in @('src-tauri/target/music-sidecar/release/harbor.exe', 'installer/src-tauri/target/release/harbor-uninstall.exe', 'installer/src-tauri/target/release/harbor-shipyard.exe')) {
             if ((Get-Item -LiteralPath $releaseExe).VersionInfo.FileVersion -ne $releaseVersion) { throw "Wrong version: $releaseExe" }
           }
           $channel = if ($env:HARBOR_CHANNEL -eq 'beta') { 'beta' } else { 'stable' }
+          $installer = "installer/src-tauri/target/release/harbor-shipyard-v${releaseVersion}-${channel}.exe"
+          if (-not (Test-Path -LiteralPath $installer)) { throw "Missing modular installer: $installer" }
           New-Item -ItemType Directory -Force -Path "$releaseRoot/bundle/managed" | Out-Null
-          Copy-Item -LiteralPath 'installer/src-tauri/target/release/harbor-shipyard.exe' -Destination "$releaseRoot/bundle/managed/harbor-shipyard-v${releaseVersion}-${channel}.exe"
+          Copy-Item -LiteralPath $installer -Destination "$releaseRoot/bundle/managed/harbor-shipyard-v${releaseVersion}-${channel}.exe"
 
       - name: Sign the Shipyard installer
         if: matrix.platform.target == 'x86_64-pc-windows-msvc' && steps.sign.outputs.config != ''
@@ -334,10 +316,49 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
+  publish-windows:
+    name: Publish the Windows installer
+    needs: build
+    if: ${{ !inputs.intel-only && !cancelled() && startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download the Windows bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: harbor-Windows
+          path: windows-bundles
+
+      - name: Attach the Windows installer to the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          installer="$(find windows-bundles -type f -name 'harbor-shipyard-v*.exe' -print -quit)"
+          if [ -z "$installer" ]; then
+            echo "::error::The Windows leg produced no Shipyard installer, so there is nothing to attach to $TAG."
+            exit 1
+          fi
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::warning::$TAG has no release, so $(basename "$installer") was not attached. Publish the release for $TAG and re-run this job, or attach the installer from this run's harbor-Windows artifact."
+            exit 0
+          fi
+          assets=("$installer")
+          if [ -s "$installer.sig" ]; then
+            assets+=("$installer.sig")
+          fi
+          gh release upload "$TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'
+
   publish-macos:
     name: Publish the Apple silicon installer
     needs: build
-    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') }}
+    if: ${{ !inputs.intel-only && !cancelled() && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:

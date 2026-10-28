@@ -63,7 +63,7 @@ export class VideoAudioCast {
     return result;
   }
   private fail(error: unknown) {
-    this.bridge?.pause();
+    this.bridge?.pause("cast");
     const key = error instanceof Error ? error.message : String(error);
     this.update({
       phase: "error",
@@ -89,8 +89,8 @@ export class VideoAudioCast {
     // In particular HTML5 setVolume also unmutes, so both volume and mute are guarded.
     this.guardedBridge = {
       ...bridge,
-      play: () => (this.state.device ? this.play() : bridge.play()),
-      pause: () => (this.state.device ? this.fire(this.pause()) : bridge.pause()),
+      play: () => (this.state.device ? this.play() : bridge.play({ reason: "cast" })),
+      pause: () => (this.state.device ? this.fire(this.pause()) : bridge.pause("cast")),
       seek: (sec) => (this.state.device ? this.fire(this.seek(sec)) : bridge.seek(sec)),
       setVolume: (value) =>
         this.state.device ? this.update({ error: "video.cast.volume" }) : bridge.setVolume(value),
@@ -112,7 +112,7 @@ export class VideoAudioCast {
       },
     };
     this.bridgeRef.current = this.guardedBridge;
-    bridge.pause();
+    bridge.pause("cast");
   }
 
   private release(resume: boolean) {
@@ -127,7 +127,7 @@ export class VideoAudioCast {
     if (bridge && stillLocal) {
       bridge.setRate(this.originalRate);
       bridge.setMuted(this.originalMuted);
-      if (resume) this.fire(bridge.play({ preserveMuted: true }));
+      if (resume) this.fire(bridge.play({ preserveMuted: true, reason: "cast" }));
     }
     this.update({ device: null, phase: "idle", error: null });
   }
@@ -183,7 +183,7 @@ export class VideoAudioCast {
         this.bridge!.seek(status.position_sec);
         if (this.desiredPlaying) {
           await this.receiver.play();
-          await this.bridge!.play({ preserveMuted: true });
+          await this.bridge!.play({ preserveMuted: true, reason: "cast" });
         }
         this.update({
           phase: this.desiredPlaying ? "playing" : "paused",
@@ -207,7 +207,7 @@ export class VideoAudioCast {
 
   private async stopCurrent(resume: boolean) {
     if (!this.state.device) return;
-    this.bridge?.pause();
+    this.bridge?.pause("cast");
     this.update({ phase: "stopping", error: null });
     try {
       if (this.receiverMayPlay) await this.receiver.stop();
@@ -244,19 +244,19 @@ export class VideoAudioCast {
       this.bridge!.seek(status.position_sec);
       await this.receiver.play();
       this.desiredPlaying = true;
-      await this.bridge!.play({ preserveMuted: true });
+      await this.bridge!.play({ preserveMuted: true, reason: "cast" });
       this.update({ phase: "playing", error: null });
     });
   pause = () =>
     this.control(async () => {
       this.desiredPlaying = false;
-      this.bridge?.pause();
+      this.bridge?.pause("cast");
       await this.receiver.pause();
       this.update({ phase: "paused", error: null });
     });
   seek = (sec: number) =>
     this.control(async () => {
-      this.bridge?.pause();
+      this.bridge?.pause("cast");
       const target = Math.max(0, Number.isFinite(sec) ? sec : 0);
       await this.receiver.pause();
       await this.receiver.seek(target);
@@ -267,7 +267,7 @@ export class VideoAudioCast {
       this.bridge!.seek(status.position_sec);
       if (this.desiredPlaying) {
         await this.receiver.play();
-        await this.bridge!.play({ preserveMuted: true });
+        await this.bridge!.play({ preserveMuted: true, reason: "cast" });
       }
       this.update({
         position: status.position_sec,
@@ -296,14 +296,14 @@ export class VideoAudioCast {
           status.player_state,
         );
         if (paused) {
-          this.bridge?.pause();
+          this.bridge?.pause("cast");
           this.desiredPlaying = false;
         } else if (status.player_state !== "PLAYING") {
-          this.bridge?.pause();
+          this.bridge?.pause("cast");
           return;
         } else if (this.local?.buffering) {
           await this.receiver.pause();
-          this.bridge?.pause();
+          this.bridge?.pause("cast");
           this.desiredPlaying = false;
           this.update({ phase: "paused", error: "video.cast.buffering" });
           return;
@@ -311,7 +311,7 @@ export class VideoAudioCast {
           // Receiver position is coarse; only correct large drift, never claim frame-accurate sync.
           if (Math.abs(status.position_sec - (this.local?.positionSec ?? 0)) > 2)
             this.bridge?.seek(status.position_sec);
-          if (this.local?.status !== "playing") await this.bridge?.play({ preserveMuted: true });
+          if (this.local?.status !== "playing") await this.bridge?.play({ preserveMuted: true, reason: "cast" });
           this.desiredPlaying = true;
         }
         this.update({ position: status.position_sec, phase: paused ? "paused" : "playing" });

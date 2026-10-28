@@ -41,6 +41,7 @@ async function fixture() {
   ).outputText;
   const dependencies: Record<string, unknown> = {
     react: React,
+    "./manga-favorites-context": { MangaFavoritesContext: React.createContext(null) },
     "react/jsx-runtime": jsxRuntime,
     "./profiles": { useProfiles: () => ({ activeId: profile }) },
     "./storage-recovery": {

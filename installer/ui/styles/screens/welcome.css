@@ -8,6 +8,57 @@
   row-gap: 8px;
 }
 
+.hb-welcome-clean {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  width: 100%;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  text-align: start;
+}
+
+.hb-welcome-clean .hb-check {
+  flex-shrink: 0;
+}
+
+.hb-welcome-clean > span:last-child,
+.hb-welcome-clean .t-sub {
+  display: block;
+}
+
+.hb-welcome-clean:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hb-clean-heading {
+  margin: 0 0 16px;
+}
+
+.hb-clean-actions {
+  --hb-pad: 26px;
+  --hb-track: 0.11em;
+  --hb-plate-hover: var(--ink);
+  --hb-plate-press: var(--ink-muted);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.hb-clean-confirm {
+  background: var(--danger);
+}
+
+.hb-clean-confirm::before {
+  content: none;
+}
+
 /* The list outgrew the body band when the optional groups arrived, so it scrolls inside the
    band like the terms prose does. Only the bottom edge fades; there is no scrollbar chrome. */
 .hb-welcome-scroll {

@@ -8,6 +8,12 @@ import { peekAnimeArt } from "@/lib/providers/anime-art-cache";
 import { tmdbIdFromImdb, tmdbImdbId, type Season } from "@/lib/providers/tmdb";
 import { get, effectiveTmdbLanguage } from "@/lib/providers/tmdb/tmdb-client";
 import { tmdbBackdropUrl } from "@/lib/providers/tmdb/tmdb-image-rungs";
+import {
+  pickTmdbTitle,
+  tmdbEnglishTitle,
+  tmdbLanguageBase,
+  type TmdbTranslations,
+} from "@/lib/providers/tmdb/tmdb-title-fallback";
 import { isAnimeId } from "@/lib/series-episodes";
 import { useSettings } from "@/lib/settings";
 import { useTitleBackdrop } from "@/lib/title-backdrop";
@@ -17,7 +23,10 @@ import { useStableAsset } from "@/lib/use-stable-asset";
 type TitleHeader = {
   name?: string;
   title?: string;
+  original_title?: string;
+  original_name?: string;
   original_language?: string;
+  translations?: TmdbTranslations;
   backdrop_path?: string;
   seasons?: Array<{
     id: number;
@@ -72,14 +81,29 @@ export function useDownloadTitle(meta: Meta, isCurrent: () => boolean) {
         if (!valid()) return;
         const match = tmdbId?.match(/^tmdb:(movie|tv):(\d+)$/);
         if (match) {
+          const targetLanguage = effectiveTmdbLanguage();
+          const languageBase = tmdbLanguageBase(targetLanguage);
+          const wantsTranslations = settings.translateTitles && !!languageBase && languageBase !== "en";
           const header = await get<TitleHeader>(settings.tmdbKey, `${match[1]}/${match[2]}`, {
-            language: effectiveTmdbLanguage() || "en",
+            language: targetLanguage || "en",
+            ...(wantsTranslations ? { append_to_response: "translations" } : {}),
           }).catch(() => null);
           if (!valid()) return;
           if (header) {
+            const localized = header.title || header.name || display.name;
+            const original = header.original_title || header.original_name || "";
             display = {
               ...display,
-              name: header.title || header.name || display.name,
+              name: settings.translateTitles
+                ? pickTmdbTitle({
+                    localized,
+                    original,
+                    english: tmdbEnglishTitle(header.translations),
+                    originalLanguage: header.original_language,
+                    targetLanguage,
+                    translateTitles: true,
+                  })
+                : localized,
               originalLanguage: header.original_language || display.originalLanguage,
               background: display.background || tmdbBackdropUrl(header.backdrop_path),
             };

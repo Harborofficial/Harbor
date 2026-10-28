@@ -6,7 +6,7 @@ import { warnProviderFailure } from "./provider-log";
 type RawSpan = { start_ms: number | null; end_ms: number | null };
 
 type RawResponse = {
-  tmdb_id?: number;
+  tvdb_id?: number;
   type?: string;
   intro?: RawSpan[];
   recap?: RawSpan[];
@@ -15,8 +15,6 @@ type RawResponse = {
 };
 
 type TheIntroDbKeyed = { theIntroDbKey?: string };
-
-const API_KEY_HEADER = "X-API-Key";
 
 const cache = new Map<string, RawResponse | null>();
 const inflight = new Map<string, Promise<RawResponse | null>>();
@@ -77,8 +75,8 @@ async function fetchRaw(cacheKey: string): Promise<RawResponse | null> {
   const key = apiKey;
   const p = (async () => {
     const res = await fetch(
-      `https://api.theintrodb.org/v2/media?${cacheKey}`,
-      key ? { headers: { [API_KEY_HEADER]: key } } : undefined,
+      `https://api.theintrodb.org/v4/media?${cacheKey}`,
+      key ? { headers: { Authorization: `Bearer ${key}` } } : undefined,
     );
     if (!res.ok) {
       if (res.status === 404) {
@@ -115,6 +113,9 @@ export async function fetchIntroDbSegments(
   if (episode) {
     params.set("season", String(episode.season));
     params.set("episode", String(episode.episode));
+  }
+  if (Number.isFinite(durationSec) && durationSec > 0) {
+    params.set("duration_ms", String(Math.round(durationSec * 1000)));
   }
 
   const json = await fetchRaw(params.toString());

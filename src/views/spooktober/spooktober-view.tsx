@@ -14,7 +14,7 @@ import nativeTheme from "../../../scripts/spooktober-native/theme.css?raw";
 import playingMarkStyles from "@/components/music/music-now-playing-mark.css?raw";
 import "./spooktober-view.css";
 
-const NATIVE_ENTRY = "/spooktober/native-entry.js?v=20261003-anime-mask-mal";
+const NATIVE_ENTRY = "/spooktober/native-entry.js?v=20261021-rtl-rails";
 type Item = Record<string, unknown>;
 type Intent = { intent: string; item?: Item; id?: string; url?: string };
 type Runtime = { setActive: (active: boolean) => void; forget: () => void; back: () => boolean; dispose: () => void };

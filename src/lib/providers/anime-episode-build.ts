@@ -1,6 +1,16 @@
-import { episodeLanguageBase, episodeTextLanguage, episodeTextRank, isTextInLanguage, isForeignScriptTitle } from "@/lib/episode-text-language";
+import {
+  episodeLanguageBase,
+  episodeTextLanguage,
+  episodeTextRank,
+  isTextInLanguage,
+  isForeignScriptTitle,
+} from "@/lib/episode-text-language";
 import { isPlaceholderEpisodeText } from "@/lib/episode-text-placeholder";
-export { isTextInLanguage, isUsableLocalizedText, isForeignScriptTitle } from "@/lib/episode-text-language";
+export {
+  isTextInLanguage,
+  isUsableLocalizedText,
+  isForeignScriptTitle,
+} from "@/lib/episode-text-language";
 import { pickLocalizedTitle, type AniZipMapping } from "@/lib/providers/anizip";
 import type { AnimeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
@@ -54,28 +64,59 @@ export function isTextInUserLanguage(
 // "Episode N" words in various languages: providers ship such placeholders when a real
 // translated title is missing, and they must not be merged in as if they were titles.
 const EPISODE_NUMBER_WORDS = [
-  "episode", "ep",
-  "الحلقة", "الحلقه", "حلقة", "حلقه",
-  "قسمت", "اپیزود", "اپيسود",
+  "episode",
+  "ep",
+  "الحلقة",
+  "الحلقه",
+  "حلقة",
+  "حلقه",
+  "قسمت",
+  "اپیزود",
+  "اپيسود",
   "قسط",
-  "серия", "эпизод", "серія", "епізод", "епизод", "епизода", "серыя", "эпізод",
+  "серия",
+  "эпизод",
+  "серія",
+  "епізод",
+  "епизод",
+  "епизода",
+  "серыя",
+  "эпізод",
   "επεισόδιο",
-  "एपिसोड", "भाग",
+  "एपिसोड",
+  "भाग",
   "ตอน",
-  "פרק", "פּרק",
+  "פרק",
+  "פּרק",
   "에피소드",
-  "episodio", "capítulo", "capitulo", "cap",
+  "episodio",
+  "capítulo",
+  "capitulo",
+  "cap",
   "épisode",
   "folge",
   "puntata",
-  "bölüm", "bolum",
+  "bölüm",
+  "bolum",
   "odcinek",
   "aflevering",
   "avsnitt",
   "tập",
 ];
 
+const genericNames = new Map<string, boolean>();
+
 export function isGenericEpisodeName(text: string | null | undefined): boolean {
+  if (!text) return true;
+  const cached = genericNames.get(text);
+  if (cached !== undefined) return cached;
+  const result = computeGenericEpisodeName(text);
+  if (genericNames.size >= 4096) genericNames.delete(genericNames.keys().next().value!);
+  genericNames.set(text, result);
+  return result;
+}
+
+function computeGenericEpisodeName(text: string): boolean {
   if (!text) return false;
   const t = text.trim();
   if (!t) return false;
@@ -144,8 +185,10 @@ export function mergeAniZipEpisodes(
   const tvdbOwned = new Map<number, number>();
   const absOwned = new Map<number, number>();
   for (const ep of episodes) {
-    if (ep.tvdbEpisodeId != null) tvdbOwned.set(ep.tvdbEpisodeId, (tvdbOwned.get(ep.tvdbEpisodeId) ?? 0) + 1);
-    if (ep.absoluteNumber != null) absOwned.set(ep.absoluteNumber, (absOwned.get(ep.absoluteNumber) ?? 0) + 1);
+    if (ep.tvdbEpisodeId != null)
+      tvdbOwned.set(ep.tvdbEpisodeId, (tvdbOwned.get(ep.tvdbEpisodeId) ?? 0) + 1);
+    if (ep.absoluteNumber != null)
+      absOwned.set(ep.absoluteNumber, (absOwned.get(ep.absoluteNumber) ?? 0) + 1);
   }
   const hxHGuard = isHunterXHunter2011(aniZip);
   for (const ep of episodes) {
@@ -153,9 +196,17 @@ export function mergeAniZipEpisodes(
     if (!az) continue;
     if (localized) {
       const localizedTitle = pickLocalizedTitle(az, opts?.lang);
-      if (localizedTitle && !isGenericEpisodeName(localizedTitle) && isTextInLanguage(localizedTitle, opts?.lang)) {
+      if (
+        localizedTitle &&
+        !isGenericEpisodeName(localizedTitle) &&
+        isTextInLanguage(localizedTitle, opts?.lang)
+      ) {
         ep.title = localizedTitle;
-        ep.titleLanguage = episodeTextLanguage(localizedTitle, opts?.lang, az.titles?.en ?? az.title?.en);
+        ep.titleLanguage = episodeTextLanguage(
+          localizedTitle,
+          opts?.lang,
+          az.titles?.en ?? az.title?.en,
+        );
       } else {
         const enTitle = az.titles?.en ?? az.title?.en;
         if (enTitle && !isGenericEpisodeName(enTitle)) {
@@ -214,13 +265,18 @@ export function mergeAniZipEpisodes(
         epNum != null &&
         az.episodeNumber !== epNum);
     let applyIds = !shifted;
-    if (applyIds && az.tvdbId && (tvdbOwned.get(az.tvdbId) ?? 0) > (ep.tvdbEpisodeId === az.tvdbId ? 1 : 0)) {
+    if (
+      applyIds &&
+      az.tvdbId &&
+      (tvdbOwned.get(az.tvdbId) ?? 0) > (ep.tvdbEpisodeId === az.tvdbId ? 1 : 0)
+    ) {
       applyIds = false;
     }
     if (
       applyIds &&
       az.absoluteEpisodeNumber &&
-      (absOwned.get(az.absoluteEpisodeNumber) ?? 0) > (ep.absoluteNumber === az.absoluteEpisodeNumber ? 1 : 0)
+      (absOwned.get(az.absoluteEpisodeNumber) ?? 0) >
+        (ep.absoluteNumber === az.absoluteEpisodeNumber ? 1 : 0)
     ) {
       applyIds = false;
     }
@@ -257,7 +313,10 @@ function shouldReplaceEpisodeText(
   preferIncoming: boolean,
   forName = false,
 ): boolean {
-  const missing = !current.trim() || isPlaceholderEpisodeText(current) || (forName && isGenericEpisodeName(current));
+  const missing =
+    !current.trim() ||
+    isPlaceholderEpisodeText(current) ||
+    (forName && isGenericEpisodeName(current));
   if (isPlaceholderEpisodeText(incoming)) return missing;
   if (missing) return true;
   const rank = episodeTextRank(incoming, incomingLanguage, lang);
@@ -271,7 +330,10 @@ function shouldReplaceEpisodeText(
 export function mergeTvdbEpisodes(
   episodes: KitsuEpisode[],
   tvdbEps: TvdbEpisode[] | null,
-  opts?: EpisodeLocalizeOptions & { fallbackOnly?: boolean; englishEpisodes?: TvdbEpisode[] | null },
+  opts?: EpisodeLocalizeOptions & {
+    fallbackOnly?: boolean;
+    englishEpisodes?: TvdbEpisode[] | null;
+  },
 ): void {
   if (!tvdbEps || tvdbEps.length === 0) return;
   const localized = wantsLocalized(opts);
@@ -305,30 +367,71 @@ export function mergeTvdbEpisodes(
     }
 
     if (tvdbEp) {
-      const foreignPoolTitle = !localized && (!opts?.fallbackOnly || opts?.targetLang != null) && !isTextInUserLanguage(ep.title, opts?.targetLang) && isForeignScriptTitle(ep.title);
+      const foreignPoolTitle =
+        !localized &&
+        (!opts?.fallbackOnly || opts?.targetLang != null) &&
+        !isTextInUserLanguage(ep.title, opts?.targetLang) &&
+        isForeignScriptTitle(ep.title);
       const english = englishById.get(tvdbEp.id);
       const titleLanguage = english
-        ? episodeTextLanguage(tvdbEp.name, opts?.lang, english.nameLanguage === "und" ? undefined : english.name, tvdbEp.nameLanguage ? [tvdbEp.nameLanguage] : undefined)
-        : tvdbEp.nameLanguage ?? episodeTextLanguage(tvdbEp.name, opts?.lang);
+        ? episodeTextLanguage(
+            tvdbEp.name,
+            opts?.lang,
+            english.nameLanguage === "und" ? undefined : english.name,
+            tvdbEp.nameLanguage ? [tvdbEp.nameLanguage] : undefined,
+          )
+        : (tvdbEp.nameLanguage ?? episodeTextLanguage(tvdbEp.name, opts?.lang));
       const synopsisLanguage = english
-        ? episodeTextLanguage(tvdbEp.overview, opts?.lang, english.overviewLanguage === "und" ? undefined : english.overview, tvdbEp.overviewLanguage ? [tvdbEp.overviewLanguage] : undefined)
-        : tvdbEp.overviewLanguage ?? episodeTextLanguage(tvdbEp.overview, opts?.lang);
+        ? episodeTextLanguage(
+            tvdbEp.overview,
+            opts?.lang,
+            english.overviewLanguage === "und" ? undefined : english.overview,
+            tvdbEp.overviewLanguage ? [tvdbEp.overviewLanguage] : undefined,
+          )
+        : (tvdbEp.overviewLanguage ?? episodeTextLanguage(tvdbEp.overview, opts?.lang));
       if (
         tvdbEp.name?.trim() &&
         !isGenericEpisodeName(tvdbEp.name) &&
-        (!opts?.fallbackOnly || !ep.title || isGenericEpisodeName(ep.title) || isPlaceholderEpisodeText(ep.title) || foreignPoolTitle)
+        (!opts?.fallbackOnly ||
+          !ep.title ||
+          isGenericEpisodeName(ep.title) ||
+          isPlaceholderEpisodeText(ep.title) ||
+          foreignPoolTitle)
       ) {
-        if ((localized ? isTextInLanguage(tvdbEp.name, opts?.lang) : !isForeignScriptTitle(tvdbEp.name)) &&
-          shouldReplaceEpisodeText(tvdbEp.name, ep.title, titleLanguage, ep.titleLanguage, opts?.targetLang ?? opts?.lang, true, true)) {
+        if (
+          (localized
+            ? isTextInLanguage(tvdbEp.name, opts?.lang)
+            : !isForeignScriptTitle(tvdbEp.name)) &&
+          shouldReplaceEpisodeText(
+            tvdbEp.name,
+            ep.title,
+            titleLanguage,
+            ep.titleLanguage,
+            opts?.targetLang ?? opts?.lang,
+            true,
+            true,
+          )
+        ) {
           ep.title = tvdbEp.name;
           ep.titleLanguage = titleLanguage;
         }
       }
       if (tvdbEp.aired) ep.airdate = tvdbEp.aired;
-      if (tvdbEp.overview?.trim() &&
-        (!opts?.fallbackOnly || !ep.synopsis?.trim() || isPlaceholderEpisodeText(ep.synopsis))) {
-        if ((!localized || isTextInLanguage(tvdbEp.overview, opts?.lang)) &&
-          shouldReplaceEpisodeText(tvdbEp.overview, ep.synopsis, synopsisLanguage, ep.synopsisLanguage, opts?.targetLang ?? opts?.lang, true)) {
+      if (
+        tvdbEp.overview?.trim() &&
+        (!opts?.fallbackOnly || !ep.synopsis?.trim() || isPlaceholderEpisodeText(ep.synopsis))
+      ) {
+        if (
+          (!localized || isTextInLanguage(tvdbEp.overview, opts?.lang)) &&
+          shouldReplaceEpisodeText(
+            tvdbEp.overview,
+            ep.synopsis,
+            synopsisLanguage,
+            ep.synopsisLanguage,
+            opts?.targetLang ?? opts?.lang,
+            true,
+          )
+        ) {
           ep.synopsis = tvdbEp.overview;
           ep.synopsisLanguage = synopsisLanguage;
         }
@@ -351,7 +454,9 @@ export function mergeTmdbEpisodes(
 ): void {
   if (!tmdbEps || tmdbEps.length === 0) return;
   const localized = wantsLocalized(opts);
-  const englishByPair = new Map(opts?.englishEpisodes?.map((ep) => [`${ep.seasonNumber}:${ep.episodeNumber}`, ep]));
+  const englishByPair = new Map(
+    opts?.englishEpisodes?.map((ep) => [`${ep.seasonNumber}:${ep.episodeNumber}`, ep]),
+  );
   const byPair = new Map<string, TmdbEpisode>();
   for (const e of tmdbEps) {
     byPair.set(`${e.seasonNumber}:${e.episodeNumber}`, e);
@@ -370,26 +475,66 @@ export function mergeTmdbEpisodes(
         ? byPair.get(`${ep.seasonNumber}:${ep.number}`)
         : undefined);
     if (!tmdbEp) continue;
-    const foreignPoolTitle = !localized && !isTextInUserLanguage(ep.title, opts?.targetLang) && isForeignScriptTitle(ep.title);
+    const foreignPoolTitle =
+      !localized &&
+      !isTextInUserLanguage(ep.title, opts?.targetLang) &&
+      isForeignScriptTitle(ep.title);
     const english = englishByPair.get(`${tmdbEp.seasonNumber}:${tmdbEp.episodeNumber}`);
     const titleLanguage = english
-      ? episodeTextLanguage(tmdbEp.name, opts?.lang, english.nameLanguage === "und" ? undefined : english.name, tmdbEp.nameLanguage ? [tmdbEp.nameLanguage] : undefined)
-      : tmdbEp.nameLanguage ?? episodeTextLanguage(tmdbEp.name, opts?.lang);
+      ? episodeTextLanguage(
+          tmdbEp.name,
+          opts?.lang,
+          english.nameLanguage === "und" ? undefined : english.name,
+          tmdbEp.nameLanguage ? [tmdbEp.nameLanguage] : undefined,
+        )
+      : (tmdbEp.nameLanguage ?? episodeTextLanguage(tmdbEp.name, opts?.lang));
     const synopsisLanguage = english
-      ? episodeTextLanguage(tmdbEp.overview, opts?.lang, english.overviewLanguage === "und" ? undefined : english.overview, tmdbEp.overviewLanguage ? [tmdbEp.overviewLanguage] : undefined)
-      : tmdbEp.overviewLanguage ?? episodeTextLanguage(tmdbEp.overview, opts?.lang);
-    if (tmdbEp.name && !isGenericEpisodeName(tmdbEp.name) &&
-      (localized || !ep.title || isGenericEpisodeName(ep.title) || isPlaceholderEpisodeText(ep.title) || foreignPoolTitle)) {
-      if ((localized ? isTextInLanguage(tmdbEp.name, opts?.lang) : !isForeignScriptTitle(tmdbEp.name)) &&
-        shouldReplaceEpisodeText(tmdbEp.name, ep.title, titleLanguage, ep.titleLanguage, opts?.targetLang ?? opts?.lang, false, true)) {
+      ? episodeTextLanguage(
+          tmdbEp.overview,
+          opts?.lang,
+          english.overviewLanguage === "und" ? undefined : english.overview,
+          tmdbEp.overviewLanguage ? [tmdbEp.overviewLanguage] : undefined,
+        )
+      : (tmdbEp.overviewLanguage ?? episodeTextLanguage(tmdbEp.overview, opts?.lang));
+    if (
+      tmdbEp.name &&
+      !isGenericEpisodeName(tmdbEp.name) &&
+      (localized ||
+        !ep.title ||
+        isGenericEpisodeName(ep.title) ||
+        isPlaceholderEpisodeText(ep.title) ||
+        foreignPoolTitle)
+    ) {
+      if (
+        (localized
+          ? isTextInLanguage(tmdbEp.name, opts?.lang)
+          : !isForeignScriptTitle(tmdbEp.name)) &&
+        shouldReplaceEpisodeText(
+          tmdbEp.name,
+          ep.title,
+          titleLanguage,
+          ep.titleLanguage,
+          opts?.targetLang ?? opts?.lang,
+          false,
+          true,
+        )
+      ) {
         ep.title = tmdbEp.name;
         ep.titleLanguage = titleLanguage;
       }
     }
-    if (tmdbEp.overview &&
-      (localized || !ep.synopsis || isPlaceholderEpisodeText(ep.synopsis))) {
-      if ((!localized || isTextInLanguage(tmdbEp.overview, opts?.lang)) &&
-        shouldReplaceEpisodeText(tmdbEp.overview, ep.synopsis, synopsisLanguage, ep.synopsisLanguage, opts?.targetLang ?? opts?.lang, false)) {
+    if (tmdbEp.overview && (localized || !ep.synopsis || isPlaceholderEpisodeText(ep.synopsis))) {
+      if (
+        (!localized || isTextInLanguage(tmdbEp.overview, opts?.lang)) &&
+        shouldReplaceEpisodeText(
+          tmdbEp.overview,
+          ep.synopsis,
+          synopsisLanguage,
+          ep.synopsisLanguage,
+          opts?.targetLang ?? opts?.lang,
+          false,
+        )
+      ) {
         ep.synopsis = tmdbEp.overview;
         ep.synopsisLanguage = synopsisLanguage;
       }

@@ -46,7 +46,7 @@ const settingsFill: Record<string, string> = {
   "Check the shared database first. When this exact subtitle has already been synced by someone else, yours snaps into place with no analysis.":
     "Consulta primeiro o banco de dados compartilhado. Quando esta legenda exata já tiver sido sincronizada por outra pessoa, a sua se encaixa no lugar sem nenhuma análise.",
   "Community sync server": "Servidor de sincronização da comunidade",
-  "https://sync.harbor.site": "https://sync.harbor.site",
+  "https://sync.harborcommunity.site": "https://sync.harborcommunity.site",
   "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.":
     "Deixe em branco para usar o próprio servidor da comunidade do Harbor. Insira uma URL para apontar para o seu próprio servidor. O modo privado abaixo interrompe todo contato de qualquer forma.",
   "Private mode": "Modo privado",

@@ -1,0 +1,156 @@
+/* This entry deliberately uses only the main window's resolved theme tokens. */
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+body {
+  font:
+    13px system-ui,
+    sans-serif;
+  color: var(--color-ink);
+  user-select: none;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+.tray-motion {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.tray-motion[inert] {
+  pointer-events: none;
+}
+.tray-envelope {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.tray-panel {
+  position: absolute;
+  padding: 6px;
+  border: 1px solid var(--color-edge);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  overflow: hidden;
+}
+.tray-header {
+  height: 44px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+.tray-brand-mark {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--color-ink);
+}
+.tray-separator {
+  height: 1px;
+  margin: 4px;
+  background: var(--color-edge-soft);
+}
+.tray-row {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 16px;
+  align-items: center;
+  column-gap: 10px;
+  border: 0;
+  border-radius: 5px;
+  outline: none;
+  background: transparent;
+  cursor: default;
+  text-align: start;
+}
+.tray-row:hover {
+  background: var(--tray-row-hover);
+}
+/* The menu takes focus when it opens, so the ring belongs to keyboard users only. */
+.tray-envelope[data-modality="keyboard"] .tray-row:focus-visible {
+  background: var(--tray-row-hover);
+  outline: 1px solid var(--color-accent);
+  outline-offset: -1px;
+}
+.tray-row[aria-disabled="true"] {
+  opacity: 0.6;
+}
+.tray-row-icon,
+.tray-row-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tray-row-icon {
+  color: var(--color-ink-muted);
+}
+.tray-row-state {
+  width: 16px;
+  color: var(--color-accent);
+}
+.tray-row[aria-haspopup] .tray-row-state {
+  color: var(--color-ink-muted);
+}
+.tray-row-label {
+  white-space: nowrap;
+}
+.tray-theme-panel {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-raised) transparent;
+}
+.tray-theme-row {
+  grid-template-columns: minmax(0, 1fr) 16px;
+  height: auto;
+  min-height: 32px;
+  padding-block: 6px;
+}
+.tray-theme-row .tray-row-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.tray-error {
+  position: absolute;
+  inset-inline: 7px;
+  top: 7px;
+  min-height: 42px;
+  padding: 5px 9px;
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  font-size: 12px;
+}
+@media (forced-colors: active) {
+  .tray-panel {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  .tray-row-icon,
+  .tray-row-state {
+    color: ButtonText;
+  }
+  .tray-row:hover,
+  .tray-envelope[data-modality="keyboard"] .tray-row:focus-visible {
+    outline: 1px solid Highlight;
+  }
+}

@@ -1,0 +1,15 @@
+name: macOS Intel build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and verify macOS Intel
+    uses: ./.github/workflows/tauri-build.yml
+    with:
+      intel-only: true
+    secrets: inherit

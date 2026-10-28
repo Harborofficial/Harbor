@@ -246,6 +246,9 @@ export async function fetchSubtitlesIntoPlayer(
   const rankedResults = (results: SubResult[]) =>
     results
       .filter(isAllowedSubtitleUrl)
+      // A generated translation offer ("Make Hindi") is an on-demand action, not a
+      // file: it is listed in the panel but only an explicit pick may start it.
+      .filter((r) => !isGeneratedLangLabel(r.lang))
       .filter((r) => langScore(r.lang ?? "", p.langs) >= 0)
       .sort((a, b) => {
         const language = langScore(b.lang ?? "", p.langs) - langScore(a.lang ?? "", p.langs);

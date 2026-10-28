@@ -103,7 +103,7 @@ export function addonLogoMap(
 ): Map<string, string | null> {
   const out = new Map<string, string | null>();
   for (const a of addons) {
-    const id = a.manifest?.id;
+    const id = a.transportUrl ?? a.manifest?.id;
     if (!id) continue;
     out.set(id, resolveAddonLogo(a.manifest?.logo, a.transportUrl));
   }

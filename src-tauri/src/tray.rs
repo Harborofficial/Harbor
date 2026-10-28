@@ -54,7 +54,7 @@ pub struct CustomThemeEntry {
     pub name: String,
 }
 
-fn current_prefs() -> TrayPrefs {
+pub(crate) fn current_prefs() -> TrayPrefs {
     TrayPrefs {
         close_to_tray: CLOSE_TO_TRAY.load(Ordering::Relaxed),
         always_on_top: ALWAYS_ON_TOP.load(Ordering::Relaxed),
@@ -63,26 +63,35 @@ fn current_prefs() -> TrayPrefs {
     }
 }
 
-fn show_main(app: &AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.show();
-        let _ = window.unminimize();
-        let _ = window.set_focus();
-        #[cfg(windows)]
-        crate::force_show_foreground(&window);
-    }
+fn show_main(app: &AppHandle) -> Result<(), String> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or("main window unavailable")?;
+    window
+        .show()
+        .map_err(|error| format!("show Harbor: {error}"))?;
+    window
+        .unminimize()
+        .map_err(|error| format!("restore Harbor: {error}"))?;
+    window
+        .set_focus()
+        .map_err(|error| format!("focus Harbor: {error}"))?;
+    #[cfg(windows)]
+    crate::force_show_foreground(&window);
+    Ok(())
 }
 
-fn apply_always_on_top(app: &AppHandle, on: bool) {
+fn apply_always_on_top(app: &AppHandle, on: bool) -> Result<(), String> {
     if !on && crate::pip::window_pip_is_active(app) {
-        return;
+        return Ok(());
     }
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.set_always_on_top(on);
-    }
+    app.get_webview_window("main")
+        .ok_or_else(|| "main window unavailable".to_string())?
+        .set_always_on_top(on)
+        .map_err(|error| format!("always on top: {error}"))
 }
 
-fn toggle(app: &AppHandle, pref: Pref) {
+fn toggle(app: &AppHandle, pref: Pref) -> Result<(), String> {
     let flag = match pref {
         Pref::CloseToTray => &CLOSE_TO_TRAY,
         Pref::AlwaysOnTop => &ALWAYS_ON_TOP,
@@ -90,7 +99,6 @@ fn toggle(app: &AppHandle, pref: Pref) {
         Pref::PauseUnfocused => &PAUSE_UNFOCUSED,
     };
     let next = !flag.load(Ordering::Relaxed);
-    flag.store(next, Ordering::Relaxed);
     if let Some(items) = app.try_state::<TrayItems>() {
         let item = match pref {
             Pref::CloseToTray => &items.close_to_tray,
@@ -98,16 +106,39 @@ fn toggle(app: &AppHandle, pref: Pref) {
             Pref::PauseMinimized => &items.pause_minimized,
             Pref::PauseUnfocused => &items.pause_unfocused,
         };
-        let _ = item.set_checked(next);
+        item.set_checked(next).map_err(|error| error.to_string())?;
     }
     if matches!(pref, Pref::AlwaysOnTop) {
-        apply_always_on_top(app, next);
+        if let Err(error) = apply_always_on_top(app, next) {
+            if let Some(items) = app.try_state::<TrayItems>() {
+                if let Err(rollback) = items.always_on_top.set_checked(!next) {
+                    eprintln!("[harbor::tray] restore checkmark: {rollback}");
+                }
+            }
+            return Err(error);
+        }
     }
-    let _ = app.emit("harbor://tray-prefs", current_prefs());
+    flag.store(next, Ordering::Relaxed);
+    // Emit only the value that changed. The frontend owns the other three, and
+    // these statics start at the defaults rather than at the user's saved
+    // values, so echoing the whole set used to be able to turn a setting the
+    // user had switched off back on.
+    let patch = match pref {
+        Pref::CloseToTray => serde_json::json!({ "closeToTray": next }),
+        Pref::AlwaysOnTop => serde_json::json!({ "alwaysOnTop": next }),
+        Pref::PauseMinimized => serde_json::json!({ "pauseMinimized": next }),
+        Pref::PauseUnfocused => serde_json::json!({ "pauseUnfocused": next }),
+    };
+    app.emit("harbor://tray-prefs", patch)
+        .map_err(|error| error.to_string())?;
+    #[cfg(windows)]
+    crate::tray_popup::prefs_changed(app)?;
+    Ok(())
 }
 
 #[tauri::command]
-pub fn tray_set_prefs(app: AppHandle, prefs: TrayPrefs) {
+pub fn tray_set_prefs(app: AppHandle, prefs: TrayPrefs) -> Result<(), String> {
+    apply_always_on_top(&app, prefs.always_on_top)?;
     CLOSE_TO_TRAY.store(prefs.close_to_tray, Ordering::Relaxed);
     ALWAYS_ON_TOP.store(prefs.always_on_top, Ordering::Relaxed);
     PAUSE_MINIMIZED.store(prefs.pause_minimized, Ordering::Relaxed);
@@ -118,7 +149,41 @@ pub fn tray_set_prefs(app: AppHandle, prefs: TrayPrefs) {
         let _ = items.pause_minimized.set_checked(prefs.pause_minimized);
         let _ = items.pause_unfocused.set_checked(prefs.pause_unfocused);
     }
-    apply_always_on_top(&app, prefs.always_on_top);
+    #[cfg(windows)]
+    crate::tray_popup::prefs_changed(&app)?;
+    Ok(())
+}
+
+pub(crate) fn dispatch(app: &AppHandle, id: &str) -> Result<(), String> {
+    match id {
+        "tray_show" => return show_main(app),
+        "tray_aot" => return toggle(app, Pref::AlwaysOnTop),
+        "tray_pmin" => return toggle(app, Pref::PauseMinimized),
+        "tray_punf" => return toggle(app, Pref::PauseUnfocused),
+        "tray_ctt" => return toggle(app, Pref::CloseToTray),
+        _ if id.starts_with("tray_theme_") => {
+            let theme = id.strip_prefix("tray_theme_").unwrap_or_default();
+            app.emit("harbor://set-theme", theme)
+                .map_err(|error| error.to_string())?;
+        }
+        "tray_quit" => {
+            if let Some(w) = app.get_webview_window("main") {
+                crate::CLOSE_FLUSH_DONE.store(false, Ordering::SeqCst);
+                w.emit("harbor://app-closing", ())
+                    .map_err(|error| error.to_string())?;
+                for _ in 0..16 {
+                    if crate::CLOSE_FLUSH_DONE.load(Ordering::SeqCst) {
+                        break;
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                }
+            }
+            crate::shutdown_services(app);
+            app.exit(0);
+        }
+        _ => return Err("unknown tray action".into()),
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -254,38 +319,22 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| {
-            let id = event.id.as_ref();
-            match id {
-                "tray_show" => show_main(app),
-                "tray_aot" => toggle(app, Pref::AlwaysOnTop),
-                "tray_pmin" => toggle(app, Pref::PauseMinimized),
-                "tray_punf" => toggle(app, Pref::PauseUnfocused),
-                "tray_ctt" => toggle(app, Pref::CloseToTray),
-                _ if id.starts_with("tray_theme_") => {
-                    let theme = id
-                        .strip_prefix("tray_theme_")
-                        .unwrap_or_default()
-                        .to_string();
-                    let _ = app.emit("harbor://set-theme", theme);
-                }
-                "tray_quit" => {
-                    if let Some(w) = app.get_webview_window("main") {
-                        crate::CLOSE_FLUSH_DONE.store(false, Ordering::SeqCst);
-                        let _ = w.emit("harbor://app-closing", ());
-                        for _ in 0..16 {
-                            if crate::CLOSE_FLUSH_DONE.load(Ordering::SeqCst) {
-                                break;
-                            }
-                            std::thread::sleep(std::time::Duration::from_millis(50));
-                        }
-                    }
-                    crate::shutdown_services(app);
-                    app.exit(0);
-                }
-                _ => {}
+            if let Err(error) = dispatch(app, event.id.as_ref()) {
+                eprintln!("[harbor::tray] action failed: {error}");
             }
         })
         .on_tray_icon_event(|tray, event| {
+            #[cfg(windows)]
+            if let TrayIconEvent::Click {
+                button: MouseButton::Right,
+                button_state: MouseButtonState::Up,
+                rect,
+                ..
+            } = &event
+            {
+                crate::tray_popup::request_open(tray.app_handle(), *rect);
+                return;
+            }
             let restore = matches!(
                 event,
                 TrayIconEvent::Click {
@@ -298,7 +347,9 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
                 }
             );
             if restore {
-                show_main(tray.app_handle());
+                if let Err(error) = show_main(tray.app_handle()) {
+                    eprintln!("[harbor::tray] restore failed: {error}");
+                }
             }
         });
 
@@ -306,6 +357,12 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         builder = builder.icon(icon);
     }
 
-    builder.build(app)?;
+    let tray = builder.build(app)?;
+    #[cfg(windows)]
+    if let Err(error) = crate::tray_popup::initialize(app, &tray) {
+        eprintln!("[harbor::tray] custom menu unavailable: {error}");
+    }
+    #[cfg(not(windows))]
+    let _ = tray;
     Ok(())
 }

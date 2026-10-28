@@ -5,6 +5,11 @@ import { readLocalEntries } from "@/lib/watchlist";
 import { readActiveStremioAuthKey } from "@/lib/auth";
 import { addonBasesForOrigin, fetchAddonMeta, gatherCatalogAddons } from "@/lib/addons";
 import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
+import {
+  pickTmdbTitle,
+  tmdbEnglishTitle,
+  tmdbLanguageBase,
+} from "@/lib/providers/tmdb/tmdb-title-fallback";
 import { loadStoredSettings } from "@/lib/settings/load";
 
 const metaHydrateCache = new Map<string, Promise<Meta | null>>();
@@ -46,20 +51,31 @@ export async function hydrateLibraryMeta(
       const tmdbType = isTv ? "tv" : "movie";
       const tmdbId = id.replace(/^tmdb:(movie|tv|series):/, "");
       try {
+        const languageBase = tmdbLanguageBase(language);
+        const wantsTranslations = settings.translateTitles && !!languageBase && languageBase !== "en";
         const r = await fetch(
-          `https://api.themoviedb.org/3/${tmdbType}/${tmdbId}?api_key=${tmdbKey}&language=${encodeURIComponent(language)}`,
+          `https://api.themoviedb.org/3/${tmdbType}/${tmdbId}?api_key=${tmdbKey}&language=${encodeURIComponent(language)}${wantsTranslations ? "&append_to_response=translations" : ""}`,
         );
         if (r.ok) {
           const j = await r.json();
           const localizedPoster = await tmdbLocalizedPoster(tmdbKey, id, j.original_language).catch(
             () => undefined,
           );
+          const localized = j.title || j.name || "";
+          const original = j.original_title || j.original_name || "";
           return {
             id,
             type,
             name: settings.translateTitles
-              ? j.title || j.name || ""
-              : j.original_title || j.original_name || j.title || j.name || "",
+              ? pickTmdbTitle({
+                  localized,
+                  original,
+                  english: tmdbEnglishTitle(j.translations),
+                  originalLanguage: j.original_language,
+                  targetLanguage: language,
+                  translateTitles: true,
+                })
+              : original || localized,
             poster:
               localizedPoster ??
               (j.poster_path ? `https://image.tmdb.org/t/p/w342${j.poster_path}` : undefined),

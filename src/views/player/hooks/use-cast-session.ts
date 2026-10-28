@@ -268,7 +268,7 @@ export function useCastSession(
         } else {
           setCastError(err);
           setTimeout(() => setCastError(null), 8000);
-          bridgeRef?.current?.play().catch(() => {});
+          bridgeRef?.current?.play({ reason: "cast" }).catch(() => {});
         }
       }
     },
@@ -341,7 +341,7 @@ export function useCastSession(
 
   useEffect(() => {
     if (!castDevice) return;
-    bridgeRef?.current?.pause();
+    bridgeRef?.current?.pause("cast");
   }, [castDevice, bridgeRef]);
 
   const togglePlayCast = useCallback(async () => {
@@ -449,7 +449,7 @@ export function useCastSession(
   const dismissCastErrorInfo = useCallback(() => {
     setCastErrorInfo(null);
     if (!castDeviceRef.current && !audio.getSnapshot().device)
-      bridgeRef.current?.play().catch(() => {});
+      bridgeRef.current?.play({ reason: "cast" }).catch(() => {});
   }, [audio, bridgeRef]);
 
   return {

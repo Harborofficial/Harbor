@@ -26,7 +26,13 @@ function load(path: string, mocks: Record<string, unknown>, expose = ""): any {
 }
 
 function pureFunction(path: string, name: string): any {
-  const source = ts.createSourceFile(path, read(path), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const source = ts.createSourceFile(
+    path,
+    read(path),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
   const fn = source.statements.find((s) => ts.isFunctionDeclaration(s) && s.name?.text === name);
   assert.ok(fn, `${name} must exist`);
   const compiled = ts.transpileModule(fn!.getText(source), {
@@ -41,7 +47,13 @@ const isNextAired = pureFunction("src/lib/cw-resurface.ts", "isNextAired");
 const isAddonNativeMeta = pureFunction("src/lib/cinemeta.ts", "isAddonNativeMeta");
 
 // Use the player's actual derived value so this also covers its connection to autoplay.
-const playerSource = ts.createSourceFile("player.tsx", read("src/views/player.tsx"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const playerSource = ts.createSourceFile(
+  "player.tsx",
+  read("src/views/player.tsx"),
+  ts.ScriptTarget.Latest,
+  true,
+  ts.ScriptKind.TSX,
+);
 let gate = "";
 function findGate(node: ts.Node) {
   if (ts.isVariableDeclaration(node) && node.name.getText(playerSource) === "airedNext") {
@@ -64,7 +76,9 @@ function autoAdvances(next: PlayEpisode | null): PlayEpisode[] {
     src: { url: "fixture://episode-one" },
     snap: { status: "ended", durationSec: 1800, errorCode: null },
     nextEp: airedNext({ next }, isNextAired),
-    canChangeEpisode: true, cancelled: false, startedNearEndRef: { current: false },
+    canChangeEpisode: true,
+    cancelled: false,
+    startedNearEndRef: { current: false },
     goToEpisode: (ep: PlayEpisode) => played.push(ep),
   });
   return played;
@@ -73,25 +87,68 @@ function autoAdvances(next: PlayEpisode | null): PlayEpisode[] {
 function series(videos: Meta["videos"]) {
   let requests = 0;
   const deps: Record<string, unknown> = {
-    "@/lib/cache": { lruSet: (map: Map<unknown, unknown>, key: unknown, value: unknown) => map.set(key, value) },
+    "@/lib/cache": {
+      lruSet: (map: Map<unknown, unknown>, key: unknown, value: unknown) => map.set(key, value),
+    },
     "@/lib/memory-profiler": { registerCache() {} },
-    "@/lib/safe-fetch": { safeFetch: async () => { requests++; return { ok: true, json: async () => ({ meta: { videos } }) }; } },
-    "./meta-resource": { resolveMeta: async () => { requests++; return { videos }; }, preferCustomMeta: () => false },
-    "./providers/tmdb": {}, "./providers/tmdb/tmdb-client": {}, "./providers/tmdb/tmdb-image-rungs": {},
-    "./localized-text": {}, "./providers/anime-kitsu-addon": {}, "./providers/anime-mapping": {},
-    "./providers/kitsu": {}, "./providers/anizip": {}, "./providers/tvdb-proxy": {},
-    "./providers/anime-franchise-root": {}, "./streams/anime-identity": {},
+    "@/lib/media-cache": {
+      onMediaCacheClear() {},
+      mediaCacheGeneration: () => 0,
+      MEDIA_TTL: {
+        recent: 60 * 60_000,
+        episodes: 12 * 60 * 60_000,
+        settled: 7 * 24 * 60 * 60_000,
+        stale: 30 * 24 * 60 * 60_000,
+      },
+    },
+    "@/lib/safe-fetch": {
+      safeFetch: async () => {
+        requests++;
+        return { ok: true, json: async () => ({ meta: { videos } }) };
+      },
+    },
+    "./meta-resource": {
+      resolveMeta: async () => {
+        requests++;
+        return { videos };
+      },
+      preferCustomMeta: () => false,
+    },
+    "./providers/tmdb": {},
+    "./providers/tmdb/tmdb-client": {
+      effectiveTmdbLanguage: () => "en",
+      tmdbLanguageIso: () => "en",
+    },
+    "./providers/tmdb/tmdb-image-rungs": {},
+    "./localized-text": {},
+    "./providers/anime-kitsu-addon": {},
+    "./providers/anime-mapping": {},
+    "./providers/anime-entry": {},
+    "./providers/kitsu": {},
+    "./providers/anizip": {},
+    "./providers/tvdb-proxy": {},
+    "./providers/anime-franchise-root": {},
+    "./streams/anime-identity": {},
   };
   return { module: load("src/lib/series-episodes.ts", deps), requests: () => requests };
 }
 
 function nativeAdjacent(meta: Meta): { prev: PlayEpisode | null; next: PlayEpisode | null } {
-  const { addonVideoAdjacent } = load("src/views/player/hooks/use-episode-navigation.ts", {
-    react: {}, "@/lib/cinemeta": { isAddonNativeMeta }, "@/lib/series-episodes": {},
-    "@/lib/hidden-episodes": {}, "@/lib/local-library": {}, "@/lib/player/local-url": {},
-    "@/views/library/local-tab/show-group": {}, "@/lib/download/downloads-store": {},
-    "@/lib/download/player-src": {},
-  }, "\nexports.addonVideoAdjacent = addonVideoAdjacent;");
+  const { addonVideoAdjacent } = load(
+    "src/views/player/hooks/use-episode-navigation.ts",
+    {
+      react: {},
+      "@/lib/cinemeta": { isAddonNativeMeta },
+      "@/lib/series-episodes": {},
+      "@/lib/hidden-episodes": {},
+      "@/lib/local-library": {},
+      "@/lib/player/local-url": {},
+      "@/views/library/local-tab/show-group": {},
+      "@/lib/download/downloads-store": {},
+      "@/lib/download/player-src": {},
+    },
+    "\nexports.addonVideoAdjacent = addonVideoAdjacent;",
+  );
   return addonVideoAdjacent(meta, { season: 1, episode: 1, videoId: "addon:one" });
 }
 
@@ -104,7 +161,11 @@ for (const field of ["released", "firstAired"] as const) {
     const videos = [current, { id: "addon:two", season: 1, episode: 2, [field]: future }];
     const h = series(videos);
     const meta = { id: "addon:show", name: "Fixture", type: "series" };
-    const result = await h.module.fetchAdjacentEpisodes(meta, { season: 1, episode: 1 }, { tmdbKey: "" });
+    const result = await h.module.fetchAdjacentEpisodes(
+      meta,
+      { season: 1, episode: 1 },
+      { tmdbKey: "" },
+    );
     assert.equal(result.next.airDate, future);
     assert.deepEqual(autoAdvances(result.next), []);
     const list = await h.module.fetchEpisodeList(meta, { tmdbKey: "" });
@@ -114,7 +175,9 @@ for (const field of ["released", "firstAired"] as const) {
 
   test(`native add-on videos preserve ${field} through player navigation`, () => {
     const result = nativeAdjacent({
-      id: "addon:videos", name: "Fixture", type: "tv",
+      id: "addon:videos",
+      name: "Fixture",
+      type: "tv",
       videos: [current, { id: "addon:two", season: 1, episode: 2, [field]: future }],
     });
     assert.equal(result.next?.airDate, future);
@@ -127,17 +190,29 @@ test("already-aired and undated add-on episodes retain existing autoplay behavio
   for (const dates of [{ released: old }, {}]) {
     const videos = [current, { id: "addon:two", season: 1, episode: 2, ...dates }];
     const result = await series(videos).module.fetchAdjacentEpisodes(
-      { id: "addon:show", name: "Fixture", type: "series" }, { season: 1, episode: 1 }, { tmdbKey: "" },
+      { id: "addon:show", name: "Fixture", type: "series" },
+      { season: 1, episode: 1 },
+      { tmdbKey: "" },
     );
     assert.equal(autoAdvances(result.next)[0]?.episode, 2);
-    assert.equal(autoAdvances(nativeAdjacent({ id: "addon:videos", name: "Fixture", type: "tv", videos }).next)[0]?.episode, 2);
+    assert.equal(
+      autoAdvances(
+        nativeAdjacent({ id: "addon:videos", name: "Fixture", type: "tv", videos }).next,
+      )[0]?.episode,
+      2,
+    );
   }
 });
 
 test("released remains the primary date, with firstAired as its fallback", async () => {
-  const videos = [current, { id: "addon:two", season: 1, episode: 2, released: future, firstAired: old }];
+  const videos = [
+    current,
+    { id: "addon:two", season: 1, episode: 2, released: future, firstAired: old },
+  ];
   const result = await series(videos).module.fetchAdjacentEpisodes(
-    { id: "addon:show", name: "Fixture", type: "series" }, { season: 1, episode: 1 }, { tmdbKey: "" },
+    { id: "addon:show", name: "Fixture", type: "series" },
+    { season: 1, episode: 1 },
+    { tmdbKey: "" },
   );
   assert.equal(result.next.airDate, future);
   assert.deepEqual(autoAdvances(result.next), []);
@@ -146,7 +221,9 @@ test("released remains the primary date, with firstAired as its fallback", async
 test("standard Cinemeta release dates still reach the same autoplay gate", async () => {
   const videos = [current, { season: 1, episode: 2, released: future }];
   const result = await series(videos).module.fetchAdjacentEpisodes(
-    { id: "tt1234567", name: "Fixture", type: "series" }, { season: 1, episode: 1 }, { tmdbKey: "" },
+    { id: "tt1234567", name: "Fixture", type: "series" },
+    { season: 1, episode: 1 },
+    { tmdbKey: "" },
   );
   assert.equal(result.next.airDate, future);
   assert.deepEqual(autoAdvances(result.next), []);

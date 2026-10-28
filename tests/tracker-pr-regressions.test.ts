@@ -278,6 +278,7 @@ test("Simkl preserves cached history on failure, clears it on empty success and 
   const api = load(
     "src/lib/simkl/list-status.ts",
     {
+      "@/lib/yield-to-browser": { yieldToBrowser: () => Promise.resolve() },
       "./session": { getSession: () => session, subscribeSession: (f: any) => (reset = f) },
       "@/lib/active-profile-id": { activeProfileId: () => "a" },
       "./activities/gate": { currentActivitiesAll: async () => marker },

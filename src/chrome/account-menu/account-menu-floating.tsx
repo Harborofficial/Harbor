@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { AuthModal } from "@/components/auth-modal";
+import { HarborAccountDialog } from "@/views/account/harbor-account-dialog";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { verifyProfilePassword } from "@/lib/profile-password";
 import { subscribeAccountMenuOpen, type AccountMenuAnchor } from "@/lib/social/account-menu-open";
@@ -12,16 +12,27 @@ export function AccountMenuFloating() {
   const ctrl = useAccountMenu();
   const { setView } = useView();
   const [anchor, setAnchor] = useState<AccountMenuAnchor>(null);
-  const { menuOpen, setMenuOpen, pendingSwitch, setPendingSwitch, selectProfile, activeProfile } = ctrl;
-  const panelRef = useRef<HTMLDivElement>(null);
+  const {
+    menuOpen,
+    setMenuOpen,
+    pendingSwitch,
+    setPendingSwitch,
+    selectProfile,
+    activeProfile,
+    authReturnFocus,
+  } = ctrl;
+  const panelRef = ctrl.ref;
 
   useEffect(
     () =>
       subscribeAccountMenuOpen((a) => {
+        authReturnFocus.current =
+          a?.opener ??
+          (document.activeElement instanceof HTMLElement ? document.activeElement : null);
         setAnchor(a);
         setMenuOpen(true);
       }),
-    [setMenuOpen],
+    [authReturnFocus, setMenuOpen],
   );
 
   useEffect(() => {
@@ -47,11 +58,7 @@ export function AccountMenuFloating() {
     <>
       {menuOpen &&
         createPortal(
-          <div
-            ref={panelRef}
-            className="fixed z-[160] w-64"
-            style={{ top, insetInlineEnd: end }}
-          >
+          <div ref={panelRef} className="fixed z-[160] w-64" style={{ top, insetInlineEnd: end }}>
             <div className="relative">
               <AccountMenuPanel
                 ctrl={ctrl}
@@ -64,7 +71,12 @@ export function AccountMenuFloating() {
           </div>,
           document.body,
         )}
-      {ctrl.authOpen && <AuthModal onClose={() => ctrl.setAuthOpen(false)} />}
+      {ctrl.authOpen && (
+        <HarborAccountDialog
+          onClose={() => ctrl.setAuthOpen(false)}
+          returnFocus={authReturnFocus.current}
+        />
+      )}
       {pendingSwitch && activeProfile?.kid?.parentPinHash && (
         <ParentalPinModal
           mode={{

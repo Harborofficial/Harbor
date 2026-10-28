@@ -152,6 +152,9 @@
 #ifdef __GNUC__
   #if defined(__i386__) || defined(__x86_64__)
     #include <x86intrin.h>
+    #ifdef __APPLE__
+      #include <cpuid.h>
+    #endif
     
     #define USE_SSE
     #define SSE_ALIGNMENT 16

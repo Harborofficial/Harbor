@@ -71,28 +71,108 @@ export type SubRenderContext = {
   sdhFilterAllowed?: boolean;
 };
 
+/** ASS modes that keep each styled subtitle's own look, so the player's override switch is off. */
+export type AssLookMode = "no" | "scale" | "font";
+
+export function isAssLookMode(mode: Settings["subAssOverride"]): mode is AssLookMode {
+  return mode === "no" || mode === "scale" || mode === "font";
+}
+
+/**
+ * Flips the player's "Override embedded styles" switch. Switching it off goes back to the mode
+ * the user had before, so "Change font only" or the size option isn't lost on the way.
+ */
+export function flipAssOverride(
+  mode: Settings["subAssOverride"],
+  before: AssLookMode,
+): { mode: Settings["subAssOverride"]; before: AssLookMode } {
+  return isAssLookMode(mode) ? { mode: "force", before: mode } : { mode: before, before };
+}
+
+const STYLE_OVERRIDES = "sub-ass-style-overrides";
+
+/** mpv reads a list option as comma-separated items, where "\," is a comma inside an item. */
+function mpvListText(items: string[]): string {
+  return items.map((item) => item.replace(/,/g, "\\,")).join(",");
+}
+
+function sameItems(a: string[] | null, b: string[]): boolean {
+  return a != null && a.length === b.length && a.every((item, i) => item === b[i]);
+}
+
+// Harbor only touches mpv's style overrides while "Change font only" is on. It reads the list mpv
+// has, adds the font to it, and puts that exact list back when the mode is left.
+let ownStyleOverrides: string[] | null = null;
+let harborStyleOverrides: string[] | null = null;
+let styleOverridesQueue: Promise<void> = Promise.resolve();
+
+function setStyleOverrides(items: string[]): Promise<boolean> {
+  return invoke("mpv_set_property", { name: STYLE_OVERRIDES, value: mpvListText(items) }).then(
+    () => true,
+    () => false,
+  );
+}
+
+function applyFontOnlyOverrides(fontOnly: boolean, font: string): Promise<void> {
+  // Each change reads mpv's list first, so the steps must not overlap.
+  styleOverridesQueue = styleOverridesQueue
+    .then(async () => {
+      if (!fontOnly && !harborStyleOverrides) return;
+      const current = await invoke<string[]>("mpv_get_property_list", {
+        name: STYLE_OVERRIDES,
+      }).catch(() => null);
+      if (!current) return;
+      // Any other list means a new mpv started from the user's own options, so there is nothing
+      // of Harbor's to undo and the new list is the one to keep.
+      const harborsList = sameItems(harborStyleOverrides, current);
+      if (!fontOnly) {
+        if (harborsList && ownStyleOverrides) await setStyleOverrides(ownStyleOverrides);
+        ownStyleOverrides = null;
+        harborStyleOverrides = null;
+        return;
+      }
+      if (!harborsList) ownStyleOverrides = current;
+      const next = [...(ownStyleOverrides ?? []).filter(Boolean), `FontName=${font}`];
+      harborStyleOverrides = (await setStyleOverrides(next)) ? next : null;
+    })
+    .catch(() => {});
+  return styleOverridesQueue;
+}
+
 export async function applySubStyle(
   s: Settings,
   context: SubRenderContext = { assNativeActive: false, imageNativeActive: false },
 ): Promise<void> {
   const override = s.subAssOverride;
+  // "Change font only" keeps the ASS look like "no". mpv's "yes" then lets the style override
+  // below swap in the user's font.
+  const fontOnly = override === "font";
+  const keepAssLook = override === "no" || fontOnly;
   const normScale =
-    typeof context.assScale === "number" && Number.isFinite(context.assScale) ? context.assScale : null;
-  const effOverride = normScale != null ? "scale" : override;
-  const assMargins = context.assNativeActive && override !== "no" ? "yes" : "no";
+    typeof context.assScale === "number" && Number.isFinite(context.assScale)
+      ? context.assScale
+      : null;
+  const effOverride = fontOnly ? "yes" : normScale != null ? "scale" : override;
+  const assMargins = context.assNativeActive && !keepAssLook ? "yes" : "no";
   const marginY = clamp(Number(s.subMarginY) || 0, 0, 100);
   const opacity = clamp(Number(s.subOpacity ?? 1), 0.1, 1);
   const boxOpacity = clamp(Number(s.subBoxOpacity ?? 0.6), 0, 1);
   const isBox = s.subStyle === "box";
   const isShadow = s.subStyle === "shadow";
-  const reposition = !context.assNativeActive || override !== "no";
+  const reposition = !context.assNativeActive || !keepAssLook;
   const hideSdh = s.subHideSdh === true && context.sdhFilterAllowed !== false;
+  const font = mpvFontFor(s.subFontFamily, customFontName(s));
   const props: Array<[string, unknown]> = [
     ["sub-filter-sdh", hideSdh],
     ["sub-filter-sdh-harder", false],
     ["sub-font-size", 32],
-    ["sub-font", mpvFontFor(s.subFontFamily, customFontName(s))],
-    ["sub-scale", normScale != null ? clamp(normScale, 0.2, 6) : Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32))],
+    ["sub-font", font],
+    [
+      "sub-scale",
+      normScale != null
+        ? clamp(normScale, 0.2, 6)
+        : Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32)),
+    ],
     ["sub-color", mpvColor(s.subFontColor, opacity)],
     ["sub-border-color", mpvColor(s.subBorderColor, opacity)],
     ["sub-border-size", s.subBorderSize],
@@ -108,9 +188,8 @@ export async function applySubStyle(
     ["sub-bold", s.subBold ? "yes" : "no"],
     ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
   ];
-  await Promise.all(
-    props.map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
-    ),
-  );
+  await Promise.all([
+    ...props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})),
+    applyFontOnlyOverrides(fontOnly, font),
+  ]);
 }

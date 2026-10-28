@@ -132,6 +132,15 @@ export function EpisodeOrderSetting() {
 
       <OrderPreview active={provider} />
 
+      <ToggleRow
+        label={t("Season explorer")}
+        sub={t(
+          "Shows a season shelf with posters, names, and synopses above the episode list. Anime uses Harbor's TVDB service without a key. Regular shows use your TVDB key when set, otherwise their TMDB metadata. Turn this off to hide the shelf and stop its metadata requests.",
+        )}
+        value={settings.tvdbSeasonExplorer !== false}
+        onChange={(v) => update({ tvdbSeasonExplorer: v })}
+      />
+
       {provider === "tvdb" && (
         <>
           <ToggleRow

@@ -4,7 +4,8 @@ import type { RailDef } from "@/lib/feed";
 import { FeedShelf } from "@/components/feed-shelf";
 import { ScrollRootContext } from "@/components/row";
 import { useT } from "@/lib/i18n";
-import { useView } from "@/lib/view";
+import { useViewActions } from "@/lib/view";
+import { observeWithin } from "@/lib/visibility";
 
 // Memoized, and it takes only its own items rather than the whole deduped map. With the map, one
 // rail finishing its load gave every rail a new prop and re-rendered all of them.
@@ -25,7 +26,7 @@ export const Rail = memo(function Rail({
   ensureLoaded?: (id: string) => void;
   titleOverride?: string;
 }) {
-  const { openGrid } = useView();
+  const { openGrid } = useViewActions();
   const t = useT();
   const root = useContext(ScrollRootContext);
   const element = useRef<HTMLDivElement>(null);
@@ -36,12 +37,12 @@ export const Rail = memo(function Rail({
       setNear(true);
       return;
     }
-    const observer = new IntersectionObserver(([entry]) => setNear(entry.isIntersecting), {
+    return observeWithin(
+      element.current,
+      "2400px 0px",
+      (entry) => setNear(entry.isIntersecting),
       root,
-      rootMargin: "1000px 0px",
-    });
-    observer.observe(element.current);
-    return () => observer.disconnect();
+    );
   }, [active, root]);
   useEffect(() => {
     if (!active || !near) return;
