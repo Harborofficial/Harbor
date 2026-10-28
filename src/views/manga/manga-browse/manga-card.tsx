@@ -29,7 +29,7 @@ export function MangaCard({
           src={manga.cover}
           seed={manga.id}
           ratio="portrait"
-          lazy
+          preferDirect
           className="harbor-card-ring rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[box-shadow] duration-300 group-hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]"
         />
         <span

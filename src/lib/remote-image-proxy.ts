@@ -22,6 +22,22 @@ function base64ToBytes(b64: string): Uint8Array {
   return out;
 }
 
+// Some manga image hosts deny cross-site embeds unless the original site is
+// provided as the Referer. These exact hosts must use native HTTP rather than
+// WebView <img>, which sends Harbor\'s origin instead.
+function sourceImageReferer(url: string): string | undefined {
+  try {
+    const target = new URL(url);
+    if (
+      target.protocol === "https:" &&
+      target.hostname.toLowerCase() === "cdn.readdetectiveconan.com"
+    ) {
+      return "https://mangapill.com/";
+    }
+  } catch {}
+  return undefined;
+}
+
 // Remote plain-HTTP images are blocked by the WebView as mixed content: the app
 // page is a secure context, so http://localhost is exempt but http://<remote>
 // is refused (https is fine). Route those through the Rust side and hand back a
@@ -31,6 +47,7 @@ export function needsImageProxy(url: string): boolean {
   // An <img> tag cannot send an Authorization header, so any server behind
   // basic auth must be fetched through Rust regardless of scheme.
   if (suwayomiAuthFor(url)) return true;
+  if (sourceImageReferer(url)) return true;
   if (!url.startsWith("http://")) return false;
   try {
     const host = new URL(url).hostname.toLowerCase();
@@ -122,8 +139,11 @@ function proxyImage(
   const existing = inflight.get(key);
   if (existing) return existing;
   const p = (async () => {
+    let phase = "cache";
+    let responseStatus: number | undefined;
     try {
       const auth = suwayomiAuthFor(url);
+      const siteReferer = sourceImageReferer(url);
       const diskKey = `${POSTER_PREFIX}${thumbWidthPx ?? 0}\n${url}`;
       const persist = persistent && !auth;
       if (persist && !legacyPruned) {
@@ -150,28 +170,56 @@ function proxyImage(
           return created;
         }
       }
-      const resp = await invoke<HarborFetchResponse>("harbor_fetch", {
-        args: {
-          url,
-          method: "GET",
-          responseType: "base64",
-          timeoutMs: 30000,
-          headers: auth ? { authorization: auth } : undefined,
-          allowLocalNetwork: Boolean(auth),
-          thumbWidthPx,
-          cacheImage: persist,
-          maxResponseBytes: 32 * 1024 * 1024,
-        },
-      });
-      if (!resp.ok) throw new Error(`status ${resp.status}`);
+      const fetchCover = (useCache: boolean, acceptImage = false) =>
+        invoke<HarborFetchResponse>("harbor_fetch", {
+          args: {
+            url,
+            method: "GET",
+            responseType: "base64",
+            timeoutMs: 30000,
+            headers: auth
+              ? { authorization: auth }
+              : siteReferer || acceptImage
+                ? {
+                    ...(siteReferer ? { Referer: siteReferer } : {}),
+                    ...(acceptImage ? { Accept: "image/*" } : {}),
+                  }
+                : undefined,
+            allowLocalNetwork: Boolean(auth),
+            thumbWidthPx,
+            cacheImage: useCache,
+            maxResponseBytes: 32 * 1024 * 1024,
+          },
+        });
+      let resp: HarborFetchResponse;
+      phase = "native-fetch";
+      try {
+        resp = await fetchCover(persist);
+      } catch (error) {
+        // A thumbnail cache error should not hide an otherwise reachable cover.
+        // Retry just once without persistent caching or conditional headers.
+        if (auth || !persist) throw error;
+        resp = await fetchCover(false, true);
+      }
+      if (!resp.ok && persist && !auth && resp.status !== 403 && resp.status !== 429) {
+        // Some image CDNs reject conditional cache requests (400) even though
+        // the original cover can be fetched normally.
+        resp = await fetchCover(false, true);
+      }
+      responseStatus = resp.status;
+      if (!resp.ok) throw new Error("status " + resp.status);
       if (generation !== cacheGeneration) return null;
+      phase = "content-type";
       if (persistent && typeof window !== "undefined")
         window.__harborProfiler?.mark("image-cache", {
           result: resp.headers?.["x-harbor-image-cache"] ?? "bypass",
         });
       const type = resp.headers?.["content-type"] || resp.contentType || "image/jpeg";
       if (type && !type.startsWith("image/")) throw new Error(`type ${type}`);
-      const blob = new Blob([base64ToBytes(resp.body)], { type });
+      phase = "base64-decode";
+      const bytes = base64ToBytes(resp.body);
+      phase = "blob";
+      const blob = new Blob([bytes], { type });
       const control = resp.headers?.["cache-control"] ?? "";
       const age =
         resp.headers?.["x-harbor-image-max-age"] ?? /(?:^|,)\s*max-age="?(\d+)/i.exec(control)?.[1];
@@ -182,8 +230,36 @@ function proxyImage(
           : undefined;
       const created = blobCache.set(key, blob, Number.isFinite(ttl) ? ttl : undefined);
       return created;
-    } catch {
+    } catch (error) {
       if (generation !== cacheGeneration) return null;
+      // Avoid exposing signed cover paths or query parameters in diagnostics.
+      let host = "unknown";
+      try {
+        host = new URL(url).hostname;
+      } catch {}
+      const message = error instanceof Error ? error.message : String(error);
+      const reason = /^status \d+$/.test(message)
+        ? message
+        : message.includes("response size limit exceeded")
+          ? "response-too-large"
+          : message.startsWith("send: ")
+            ? "native-send"
+            : message.startsWith("read: ")
+              ? "native-read"
+              : message.includes("base64") || message.includes("InvalidCharacterError")
+                ? "invalid-base64"
+                : phase === "content-type"
+                  ? "unexpected-content-type"
+                  : "native-fetch-or-image-error";
+      console.warn(
+        "[image-proxy] cover failed host=" +
+          host +
+          " phase=" +
+          phase +
+          " reason=" +
+          reason +
+          (responseStatus === undefined ? "" : " status=" + responseStatus),
+      );
       deadUrls.set(key, Date.now() + 60_000);
       while (deadUrls.size > 300) deadUrls.delete(deadUrls.keys().next().value!);
       return null;

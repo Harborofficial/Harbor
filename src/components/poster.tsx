@@ -9,7 +9,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { needsImdbForPoster, needsTmdbForPoster, rpdbBackdrop, rpdbPoster } from "@/lib/providers/rpdb";
+import {
+  needsImdbForPoster,
+  needsTmdbForPoster,
+  rpdbBackdrop,
+  rpdbPoster,
+} from "@/lib/providers/rpdb";
 import { useTitlePoster } from "@/lib/title-poster";
 import {
   tmdbIdFromImdb,
@@ -135,8 +140,7 @@ function useAnimeRpdbIds(
           if (ids.kitsu) kitsuId = ids.kitsu;
           else if (ids.mal)
             kitsuId = await externalToKitsu("myanimelist", ids.mal).catch(() => null);
-          else if (ids.anidb)
-            kitsuId = await externalToKitsu("anidb", ids.anidb).catch(() => null);
+          else if (ids.anidb) kitsuId = await externalToKitsu("anidb", ids.anidb).catch(() => null);
         }
       } else if (kitsuId == null) {
         const armSource = source === "mal" ? "myanimelist" : source;
@@ -301,6 +305,7 @@ function PosterBody({
   children,
   onError,
   lazy = false,
+  preferDirect = false,
   fallbacks,
 }: {
   src?: string;
@@ -311,6 +316,8 @@ function PosterBody({
   children?: React.ReactNode;
   onError?: () => void;
   lazy?: boolean | "release";
+  /** For public browse-grid covers, try HTTPS img loading before the native proxy. */
+  preferDirect?: boolean;
   fallbacks?: Array<string | null | undefined>;
 }) {
   const { settings } = useSettings();
@@ -320,7 +327,7 @@ function PosterBody({
     onError: unknown;
     fallbacks: unknown;
   } | null>(null);
-  const propKey = `${src ?? ""}|${seed}|${ratio}|${className}|${String(lazy)}`;
+  const propKey = `${src ?? ""}|${seed}|${ratio}|${className}|${String(lazy)}|${preferDirect}`;
   const prevRender = renderCauseRef.current;
   const propCause = !prevRender
     ? "mount"
@@ -412,6 +419,7 @@ function PosterBody({
   const displayedRef = useRef(displayed);
   displayedRef.current = displayed;
   const [retry, setRetry] = useState(0);
+  const [nativeRetryUrl, setNativeRetryUrl] = useState<string | undefined>();
   const failedRef = useRef<Set<string>>(new Set());
   const firedRef = useRef(false);
   const failBurstRef = useRef<{ t: number; n: number }>({ t: 0, n: 0 });
@@ -462,7 +470,9 @@ function PosterBody({
   // Remote plain-HTTP images (e.g. a Suwayomi server on a VPS) are mixed-content
   // blocked by the WebView; resolve them to a same-origin blob URL.
   const currentSrc = useProxiedImageSrc(current, {
-    forceProxy: /^https?:\/\//.test(current ?? ""),
+    forceProxy:
+      /^https?:\/\//.test(current ?? "") &&
+      (!preferDirect || nativeRetryUrl === current || !current?.startsWith("https://")),
     persistent: true,
     enabled: imageEnabled && (qMult === 0 || targetPx > 0),
     originalSize: true,
@@ -561,8 +571,9 @@ function PosterBody({
       imgElRef.current = el;
       if (!el) return;
       if (el.complete) {
+        // complete=true with no decoded pixels can mean a deferred or
+        // not-yet-started load. Only the img onError event is a failure.
         if (el.naturalWidth > 0) markLoaded(currentRef.current);
-        else if (currentRef.current) fail(currentRef.current);
         return;
       }
     },
@@ -639,7 +650,18 @@ function PosterBody({
           // would postpone that prefetch until the user is almost on top of the card.
           loading="eager"
           onLoad={() => markLoaded(current)}
-          onError={() => fail(current)}
+          onError={() => {
+            if (
+              preferDirect &&
+              current.startsWith("https://") &&
+              currentSrc === current &&
+              nativeRetryUrl !== current
+            ) {
+              // Retry a rejected public HTTPS cover through native HTTP before showing a plate.
+              rootRef.current?.removeAttribute("data-loaded");
+              setNativeRetryUrl(current);
+            } else fail(current);
+          }}
           className="harbor-poster-img absolute inset-0 h-full w-full object-cover"
         />
       )}
