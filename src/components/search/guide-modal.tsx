@@ -43,7 +43,7 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
 
   const { state } = useIptvPlaylist(source);
   const playlist = state.kind === "ready" ? state.playlist : getCachedPlaylist(source?.id ?? "");
-  const { index: epg } = useEpg(source);
+  const { index: epg, configured: epgConfigured, error: epgError } = useEpg(source);
   const nowMs = useNowTick(30_000);
 
   useEffect(() => {
@@ -125,6 +125,8 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
           <GuideView
             channels={playlist.channels}
             epg={epg}
+            epgConfigured={epgConfigured}
+            epgError={epgError}
             nowMs={nowMs}
             onPlay={onPlay}
             resetKey={source.id}

@@ -2630,6 +2630,10 @@ const uiFallback: Record<string, string> = {
   "games.pokemon.noLocations": "games.pokemon.noLocations",
   "games.pokemon.videos": "games.pokemon.videos",
   "games.pokemon.searchVideos": "games.pokemon.searchVideos",
+  "No guide source for this playlist. Add an EPG URL to see program listings.":
+    "No guide source for this playlist. Add an EPG URL to see program listings.",
+  "Guide unavailable. Check the EPG source or refresh the playlist.":
+    "Guide unavailable. Check the EPG source or refresh the playlist.",
 };
 
 export default uiFallback;

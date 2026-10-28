@@ -1,6 +1,8 @@
 import { filterChannelsForDisplay } from "./divider-filter";
 import { loadFromShape } from "./ingest/load";
 import { detectProviderShape } from "./ingest/detect";
+import { deriveEpgUrls } from "./m3u";
+import { readPlaylists, recordM3uEpgDiscovery } from "./playlists-store";
 import {
   deleteIptvCache,
   iptvSourceSignature,
@@ -80,10 +82,26 @@ export async function loadPlaylist(
   if (existing && !existing.loading) {
     if (!isPersistentCacheFresh(existing.fetchedAt)) {
       void fetchPlaylist(src).catch(() => {});
+    } else {
+      probeEpgHeaderOnce(src);
     }
     return existing;
   }
   return fetchPlaylist(src);
+}
+
+// Playlists cached before header discovery existed are re-fetched once per
+// session so their guide URL can be picked up without waiting for the TTL.
+const epgHeaderProbed = new Set<string>();
+
+function probeEpgHeaderOnce(src: IptvPlaylistSource): void {
+  if (epgHeaderProbed.has(src.id)) return;
+  if ((src.kind ?? "m3u") !== "m3u" || src.epgUrl) return;
+  if (deriveEpgUrls(src.url).length > 0) return;
+  const entry = readPlaylists().find((p) => p.id === src.id);
+  if (!entry || entry.epgUrl || entry.epgHeaderChecked) return;
+  epgHeaderProbed.add(src.id);
+  void fetchPlaylist(src).catch(() => {});
 }
 
 function restorePlaylist(src: IptvPlaylistSource): Promise<IptvPlaylist | null> {
@@ -151,10 +169,11 @@ function fetchPlaylist(src: IptvPlaylistSource, force = false): Promise<IptvPlay
         cache.set(src.id, result);
         notify();
         void writeIptvCache("playlist", src.id, {
-          sourceSignature: iptvSourceSignature(src),
+          sourceSignature: iptvSourceSignature({ ...src, epgUrl: result.epgUrl ?? src.epgUrl }),
           savedAt: result.fetchedAt,
           value: result,
         });
+        if ((src.kind ?? "m3u") === "m3u") recordM3uEpgDiscovery(src.id, result.epgUrl);
       }
       return result;
     })

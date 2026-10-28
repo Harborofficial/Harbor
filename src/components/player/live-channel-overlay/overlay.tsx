@@ -53,7 +53,7 @@ export function LiveChannelOverlay({
   const t = useT();
   const { settings } = useSettings();
   const { state } = useIptvPlaylist(source);
-  const { index: epg } = useEpg(source);
+  const { index: epg, configured: epgConfigured, error: epgError } = useEpg(source);
   const nowMs = useNowTick(30_000);
   const playlist = state.kind === "ready" ? state.playlist : getCachedPlaylist(source.id);
 
@@ -274,6 +274,8 @@ export function LiveChannelOverlay({
             <GuideView
               channels={visible}
               epg={epg}
+              epgConfigured={epgConfigured}
+              epgError={epgError}
               nowMs={nowMs}
               currentChannelId={currentChannelId}
               showPrograms={guideStyle === "timeline"}
