@@ -98,6 +98,7 @@ function harness() {
     },
     "@/lib/series-episodes": { fetchSeasonEpisodes: async () => [] },
     "@/lib/providers/anizip": noopProvider,
+    "@/lib/providers/anime-mapping": { animeMappingByKitsu: async () => null },
     "@/lib/logo": { peekCachedLogo: () => null, resolveLogo: async () => null },
     "@/lib/anime-title": { resolvePreferredAnimeTitle: async () => null },
     "@/lib/providers/jikan": { stripFranchiseSuffix: (name: string) => name },

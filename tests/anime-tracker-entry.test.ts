@@ -35,7 +35,9 @@ function load(mocks: Record<string, unknown>) {
 
 const base = {
   "@/lib/providers/anizip": { aniZipByKitsu: async () => null, aniZipByAnilist: async () => null },
+  "@/lib/providers/anime-entry": { resolveExternalKitsuId: async () => null },
   "@/lib/providers/anime-mapping": {
+    animeMappingByKitsu: async () => null,
     externalToKitsu: async () => null,
     imdbToKitsu: async () => null,
     kitsuToAnilist: async () => null,

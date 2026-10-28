@@ -44,6 +44,7 @@ test.after(() => {
 });
 
 const { applyAnidbSeasonWindow } = load("src/lib/providers/anime-mapping.ts", {
+  "./kitsu-mapping": { kitsuExternalIds: async () => null },
   "@/lib/providers/anizip": {
     aniZipByAnidb: async () => null,
     aniZipByAnilist: async () => null,

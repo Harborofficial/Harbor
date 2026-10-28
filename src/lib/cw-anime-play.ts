@@ -1,6 +1,7 @@
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import { isDetectedAnime } from "@/lib/anime-detect";
-import { aniZipByKitsu, pickEpisodeTitle } from "@/lib/providers/anizip";
+import { pickEpisodeTitle } from "@/lib/providers/anizip";
+import { animeMappingByKitsu } from "@/lib/providers/anime-mapping";
 import { resolveAnimeIdentity } from "@/lib/streams/anime-identity";
 import { resolveTrackerAnimeEntry } from "@/lib/anime-tracker-entry";
 import type { PlayEpisode } from "@/lib/view";
@@ -72,7 +73,7 @@ export async function resolveCwAnimePlayEpisode(
     }
   }
   if (!identity) return null;
-  const az = await aniZipByKitsu(identity.kitsuId).catch(() => null);
+  const az = await animeMappingByKitsu(identity.kitsuId).catch(() => null);
   const azEp = az?.episodes?.[String(identity.number)];
   return {
     season: query.season ?? 1,

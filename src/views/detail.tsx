@@ -14,6 +14,7 @@ import { animePlayEpisode } from "./detail/anime-play-episode";
 import {
   animeDetails,
   animeDetailsNeedRefresh,
+  animeDetailUnavailable,
   type AnimeDetailExtras,
   type FranchiseEntry,
 } from "@/lib/providers/anime-detail";
@@ -21,7 +22,7 @@ import { isTextInLanguage } from "@/lib/providers/anime-episode-build";
 import { peekAnimeArt, saveAnimeArt } from "@/lib/providers/anime-art-cache";
 import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
 import { kitsuAnime, kitsuMainTvSeries, parseKitsuId } from "@/lib/providers/kitsu";
-import { resolveDetailAnimeEntry } from "./detail/resolve-anime-entry";
+import { resolveDetailAnimeEntry, recoverDetailAnimeEntry } from "./detail/resolve-anime-entry";
 import { isOrphanAnimeCandidate } from "@/lib/anime-detect";
 import { getAnimeCanonicalId, recordAnimeCwId } from "@/lib/anime-cw-ids";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
@@ -127,6 +128,7 @@ import { SharedCrewLine } from "./detail/shared-crew-line";
 import { orderByReason, useGraphReasons } from "./detail/use-graph-reasons";
 import { MediaGallery } from "./detail/media-gallery";
 import { useTitleBackdrop } from "@/lib/title-backdrop";
+import { anilistAnimeEntry } from "@/lib/anilist/entry";
 import { useTitleLogo } from "@/lib/title-logo";
 import { useStableAsset, toHiResBackdrop } from "@/lib/use-stable-asset";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
@@ -253,6 +255,16 @@ export function DetailView({
     (TmdbDetail & Pick<AnimeDetailExtras, "seasonOverviews">) | null
   >(null);
   const [animeEpisodes, setAnimeEpisodes] = useState<KitsuEpisode[]>([]);
+  const [animeUnavailable, setAnimeUnavailable] = useState<string | null>(null);
+  const [animeRetry, setAnimeRetry] = useState<{ id: string; attempt: number }>({
+    id: "",
+    attempt: 0,
+  });
+  const [animeCatalog, setAnimeCatalog] = useState<{
+    id: string;
+    description?: string;
+    background?: string;
+  } | null>(null);
   const [franchise, setFranchise] = useState<FranchiseEntry[]>([]);
   const [animeCanonicalId, setAnimeCanonicalId] = useState<string | null>(null);
   const [ownLogo, setOwnLogo] = useState<string | undefined>(() =>
@@ -265,6 +277,7 @@ export function DetailView({
   const [detectedKitsu, setDetectedKitsu] = useState<number | null>(null);
   const [detectingAnime, setDetectingAnime] = useState(false);
   const failedKitsu = useRef<number | null>(null);
+  const retryConsumed = useRef<{ id: string; attempt: number }>({ id: "", attempt: 0 });
   const addonMetaTriedRef = useRef<string | null>(null);
   const [streamers, setStreamers] = useState<KitsuStreamer[]>([]);
   const [backdrops, setBackdrops] = useState<string[]>([]);
@@ -552,6 +565,7 @@ export function DetailView({
     let cancelled = false;
     setDetail(null);
     setAnimeEpisodes([]);
+    setAnimeUnavailable(null);
     setFranchise([]);
     setAnimeCanonicalId(null);
     setDetectedKitsu(null);
@@ -657,7 +671,8 @@ export function DetailView({
           productionCountries: (detail?.productionCountriesRich ?? []).map((c) => c.iso),
         });
         if (animeLike && name && name.trim().length >= 2) {
-          const hits = await searchAnime(name).catch(() => []);
+          k = await recoverDetailAnimeEntry(meta, detail).catch(() => null);
+          const hits = k == null ? await searchAnime(name).catch(() => []) : [];
           const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
           const target = norm(name);
           const yr = parseInt(detail?.year ?? meta.releaseInfo ?? "", 10) || null;
@@ -719,6 +734,7 @@ export function DetailView({
     detail?.productionCountriesRich,
     meta.country,
     meta.releaseInfo,
+    animeRetry,
   ]);
 
   useEffect(() => {
@@ -965,6 +981,17 @@ export function DetailView({
     const load = (refreshing = false) => {
       const request = ++generation;
       if (!refreshing) setLoading(true);
+      setAnimeUnavailable(null);
+      // Consume a user retry once, and only for the anime load it was meant
+      // for. A detected TMDB row first renders as non-anime while detection
+      // settles; the following anime pass must still force the refresh.
+      const retryAttempt = animeRetry.id === meta.id ? animeRetry.attempt : 0;
+      const forceRefresh =
+        isAnime &&
+        retryAttempt > 0 &&
+        (retryConsumed.current.id !== meta.id ||
+          retryAttempt > retryConsumed.current.attempt);
+      if (forceRefresh) retryConsumed.current = { id: meta.id, attempt: retryAttempt };
       // The catalogue types a row from the first type its provider declares, which is wrong for any
       // provider that carries both movies and series. The bridge said which it returned, so the
       // record is asked for as that kind rather than as the guess.
@@ -981,15 +1008,19 @@ export function DetailView({
               setAnimeCanonicalId(`kitsu:${kitsuId}`);
               setAnimeEpisodes(earlyEpisodes);
             },
+            0,
+            forceRefresh ? 0 : undefined,
           ).then((res) => {
             if (cancelled || request !== generation) return null;
             if (!res) {
+              setAnimeUnavailable(meta.id);
               if (detectedKitsu != null) {
                 failedKitsu.current = detectedKitsu;
                 setDetectedKitsu(null);
               }
               return null;
             }
+            if (animeDetailUnavailable(res)) setAnimeUnavailable(meta.id);
             setAnimeEpisodes(res.episodes);
             // Only record identities after this detail request has resolved. The
             // previous page's canonical state must not seed a newly opened title.
@@ -1104,6 +1135,7 @@ export function DetailView({
         .catch(() => {
           if (cancelled || request !== generation) return;
           setLoading(false);
+          if (isAnime) setAnimeUnavailable(meta.id);
         });
     };
     const onWake = () => {
@@ -1133,7 +1165,35 @@ export function DetailView({
     addonNative,
     detectedKitsu,
     capstanCanonicalId,
+    animeRetry,
   ]);
+
+  useEffect(() => {
+    if (!isAnime || animeUnavailable !== meta.id) return;
+    const match = /^(mal|anilist):([1-9]\d*)$/.exec(meta.id);
+    if (!match) return;
+    let cancelled = false;
+    void anilistAnimeEntry(
+      Number(match[2]),
+      match[1] as "mal" | "anilist",
+      animeRetry.id === meta.id ? 0 : undefined,
+    )
+      .then((entry) => {
+        if (!entry || cancelled) return;
+        setAnimeCatalog({
+          id: meta.id,
+          description: entry.description
+            ?.replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim(),
+          background: entry.bannerImage ?? undefined,
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isAnime, meta.id, animeUnavailable, animeRetry]);
 
   useEffect(() => {
     if (!detail) return;
@@ -1231,15 +1291,25 @@ export function DetailView({
   };
   const overview =
     seasonArt?.description ||
-    (detail?.overview ??
-      (meta.id.startsWith("tmdb:") ? "" : (meta.description ?? cinemetaFull?.description)) ??
-      "");
+    (isAnime
+      ? detail?.overview ||
+        meta.description ||
+        cinemetaFull?.description ||
+        (animeCatalog?.id === meta.id ? animeCatalog.description : undefined)
+      : (detail?.overview ??
+        (meta.id.startsWith("tmdb:") ? "" : (meta.description ?? cinemetaFull?.description)))) ||
+    "";
   const tagline = detail?.tagline ?? "";
   const pinnedLogo = useTitleLogo(meta.id);
   const animeArt = isAnime ? peekAnimeArt(meta.id) : undefined;
   const stableBackdrop = useStableAsset(
     isAnime
-      ? [animeArt?.bg, enrichedBg]
+      ? [
+          animeArt?.bg,
+          enrichedBg,
+          meta.background !== meta.poster ? meta.background : undefined,
+          animeCatalog?.id === meta.id ? animeCatalog.background : undefined,
+        ]
       : [animeArt?.bg, meta.background, cinemetaFull?.background, detail?.backdrop],
     meta.id,
   );
@@ -2450,6 +2520,32 @@ export function DetailView({
             />
           </FadeInUp>
         )}
+
+        {!liveContext &&
+          !loading &&
+          animeUnavailable === meta.id &&
+          animeEpisodes.length === 0 &&
+          franchise.length <= 1 &&
+          (isAnime || !tmdbEpisodeList) &&
+          meta.type !== "movie" &&
+          meta.animeFormat?.toLowerCase() !== "movie" && (
+            <div className="flex items-center gap-4 rounded-xl bg-elevated/50 p-5" role="status">
+              <p className="text-sm text-ink-muted">{t("Episode information is unavailable")}</p>
+              <button
+                type="button"
+                className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-canvas"
+                onClick={() => {
+                  failedKitsu.current = null;
+                  setAnimeRetry((prev) => ({
+                    id: meta.id,
+                    attempt: prev.id === meta.id ? prev.attempt + 1 : 1,
+                  }));
+                }}
+              >
+                {t("Retry")}
+              </button>
+            </div>
+          )}
 
         {!liveContext && tmdbEpisodeList && !isAnime && isSeries && (
           <FadeInUp>

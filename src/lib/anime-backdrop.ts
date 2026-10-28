@@ -6,7 +6,8 @@ import { anilistArtById, anilistArtByMalId } from "@/lib/anilist/browse";
 import { anilistFranchise } from "@/lib/anilist/relations";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { isDerivedAnimeFormat } from "@/lib/providers/anime-format";
-import { externalToKitsu, kitsuToAnilist } from "@/lib/providers/anime-mapping";
+import { kitsuToAnilist } from "@/lib/providers/anime-mapping";
+import { resolveExternalKitsuId } from "@/lib/providers/anime-entry";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { kitsuCoverImage, parseKitsuId } from "@/lib/providers/kitsu";
 import { staticHeroArt } from "@/lib/providers/anime-hero-art-static";
@@ -67,7 +68,7 @@ async function computeArt(tmdbKey: string, meta: Meta): Promise<HeroArt> {
   const malId = meta.id.startsWith("mal:") ? Number(meta.id.split(":")[1]) || null : (meta.malId ?? null);
   let kitsuId = parseKitsuId(meta.id);
   if (kitsuId == null && malId != null) {
-    kitsuId = await externalToKitsu("myanimelist", malId).catch(() => null);
+    kitsuId = await resolveExternalKitsuId(`mal:${malId}`);
   }
 
   const derived = isDerivedAnimeFormat(meta.animeFormat);
@@ -113,7 +114,7 @@ async function computeArt(tmdbKey: string, meta: Meta): Promise<HeroArt> {
       const rootBanner = rooted.find((n) => n.banner)?.banner;
       if (rootBanner) return rootBanner;
       for (const n of rooted.slice(0, 2)) {
-        const rootKitsu = await externalToKitsu("anilist", n.id).catch(() => null);
+        const rootKitsu = await resolveExternalKitsuId(`anilist:${n.id}`);
         if (rootKitsu == null) continue;
         const rootMeta = await animeKitsuMeta(`kitsu:${rootKitsu}`).catch(() => null);
         if (rootMeta?.background) return rootMeta.background;

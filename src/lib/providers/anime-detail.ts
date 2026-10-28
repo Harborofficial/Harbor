@@ -1,6 +1,5 @@
 import { onMediaCacheClear, mediaCacheGeneration } from "@/lib/media-cache";
 import type { Meta } from "@/lib/cinemeta";
-import { aniZipByKitsu } from "@/lib/providers/anizip";
 import {
   buildKitsuEpisodes,
   mergeAniZipEpisodes,
@@ -22,6 +21,7 @@ import {
   kitsuToMal,
   externalToKitsu,
   kitsuToAnilist,
+  animeMappingByKitsu,
 } from "@/lib/providers/anime-mapping";
 import { applyMalEpisodeTitles, episodesMissingTitle } from "@/lib/providers/episode-placeholder";
 import { malEpisodeTitles } from "@/lib/providers/mal-episodes";
@@ -81,6 +81,12 @@ export type AnimeDetailResult = {
   /** Entry requested before any single-episode special was redirected to a TV parent. */
   requestedKitsuId: number;
 };
+
+export function animeDetailUnavailable(result: AnimeDetailResult): boolean {
+  // A movie legitimately has no episode rows. For a TV entry, an empty list is
+  // an unavailable episode source even when the Kitsu record itself resolved.
+  return result.detail.kind === "tv" && result.episodes.length === 0;
+}
 
 function emptyDetail(kind: "movie" | "tv"): TmdbDetail {
   return {
@@ -447,6 +453,7 @@ function beginDetailLoad(
   key: string,
   listeners: Set<EpisodeSubscriber>,
   retry: number,
+  maxAge?: number,
 ): Promise<AnimeDetailResult | null> {
   const shared = detailInflight.get(key);
   if (shared) {
@@ -461,11 +468,16 @@ function beginDetailLoad(
     listeners,
     promise: Promise.resolve(null),
   };
-  pending.promise = loadAnimeDetails(settings, meta, (episodes, kitsuId) => {
-    if (generation !== mediaCacheGeneration()) return;
-    pending.early = { episodes, kitsuId };
-    for (const listener of pending.listeners) publish(listener, episodes, kitsuId);
-  })
+  pending.promise = loadAnimeDetails(
+    settings,
+    meta,
+    (episodes, kitsuId) => {
+      if (generation !== mediaCacheGeneration()) return;
+      pending.early = { episodes, kitsuId };
+      for (const listener of pending.listeners) publish(listener, episodes, kitsuId);
+    },
+    maxAge,
+  )
     .then((result) => {
       if (!result || result.episodes.length === 0 || generation !== mediaCacheGeneration())
         return result;
@@ -526,8 +538,10 @@ export function animeDetails(
   meta: Meta,
   onEpisodesReady?: EpisodeSubscriber,
   retry = 0,
+  maxAge?: number,
 ): Promise<AnimeDetailResult | null> {
   const key = detailKey(settings, meta);
+  if (maxAge === 0) detailCache.delete(key);
   const hit = detailCache.get(key);
   if (hit) {
     if (onEpisodesReady) publish(onEpisodesReady, hit.value.episodes, hit.value.kitsuId);
@@ -546,19 +560,20 @@ export function animeDetails(
     }
   }
   const listeners = new Set<EpisodeSubscriber>(onEpisodesReady ? [onEpisodesReady] : []);
-  return beginDetailLoad(settings, meta, key, listeners, retry);
+  return beginDetailLoad(settings, meta, key, listeners, retry, maxAge);
 }
 
 async function loadAnimeDetails(
   settings: Settings,
   meta: Meta,
   onEpisodesReady?: (episodes: KitsuEpisode[], kitsuId: number) => void,
+  maxAge?: number,
 ): Promise<AnimeDetailResult | null> {
   let kitsuId = parseKitsuId(meta.id);
   let directMeta: AnimeKitsuMeta | null = null;
   let originalAddonVersion = animeKitsuMetaVersion?.(meta.id);
   if (kitsuId == null) {
-    const entry = await resolveAnimeEntry(meta.id).catch(() => null);
+    const entry = await resolveAnimeEntry(meta.id, maxAge).catch(() => null);
     if (entry) {
       kitsuId = entry.kitsuId;
       directMeta = entry.meta;
@@ -568,7 +583,7 @@ async function loadAnimeDetails(
   if (kitsuId == null) return null;
   const requestedKitsuId = kitsuId;
 
-  let anime = await kitsuAnime(kitsuId);
+  let anime = await kitsuAnime(kitsuId, maxAge);
   if (
     anime &&
     (anime.episodeCount == null || anime.episodeCount <= 1) &&
@@ -589,7 +604,7 @@ async function loadAnimeDetails(
   const addonMetaPromise = (
     directMeta && parseKitsuId(directMeta.id) === kitsuId && directMeta.videos.length > 0
       ? Promise.resolve(directMeta)
-      : animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null)
+      : animeKitsuMeta(`kitsu:${kitsuId}`, maxAge).catch(() => null)
   ).then((addon) => {
     if (meta.id === `kitsu:${kitsuId}`) originalAddonVersion = animeKitsuMetaVersion?.(meta.id);
     addonVersion = animeKitsuMetaVersion?.(`kitsu:${kitsuId}`);
@@ -608,7 +623,7 @@ async function loadAnimeDetails(
   const localized = iso1.split("-")[0]?.toLowerCase() !== "en";
 
   // Queue the episode work before optional franchise/character requests.
-  const rawEpisodesPromise = kitsuEpisodes(kitsuId, 100).then((rows) => {
+  const rawEpisodesPromise = kitsuEpisodes(kitsuId, 100, maxAge).then((rows) => {
     kitsuVersion = kitsuEpisodeSourceVersion?.(kitsuId);
     return rows;
   });
@@ -622,7 +637,7 @@ async function loadAnimeDetails(
   const charactersPromise = kitsuCharacters(kitsuId, 30).catch(() => []);
   const relatedPromise = kitsuRelated(kitsuId).catch(() => []);
   const studiosPromise = kitsuStudios(kitsuId).catch(() => []);
-  const aniZipPromise = aniZipByKitsu(kitsuId).catch(() => null);
+  const aniZipPromise = animeMappingByKitsu(kitsuId, ["themoviedb_id", "mal_id"]).catch(() => null);
   const tvdbEpisodesPromise = kitsuToTvdb(kitsuId)
     .then((tid) => {
       if (!tid) return null;

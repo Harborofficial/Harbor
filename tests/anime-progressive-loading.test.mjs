@@ -32,6 +32,7 @@ test("playable anime episodes publish before the full metadata batch settles", a
     },
     "@/lib/providers/anizip": { aniZipByKitsu: async () => null },
     "@/lib/providers/anime-mapping": {
+      animeMappingByKitsu: async () => null,
       kitsuToTvdb: async () => null,
     },
     "./anime-recommendations": { animeRecommendations: async () => [] },

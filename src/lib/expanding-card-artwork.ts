@@ -1,6 +1,6 @@
 import { resolveHeroBackdrop } from "@/lib/anime-backdrop";
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
-import { externalToKitsu } from "@/lib/providers/anime-mapping";
+import { resolveExternalKitsuId } from "@/lib/providers/anime-entry";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { tmdbAnimeMatch, tmdbIdFromImdb, tmdbMovieImages } from "@/lib/providers/tmdb";
 import { fetchTvdbArtwork } from "@/lib/providers/tvdb-proxy";
@@ -86,8 +86,7 @@ async function resolveAnimeArtworkIds(meta: Meta): Promise<AnimeArtworkIds> {
     else if (source === "anidb") anidbId = id;
     if (!kitsuId) {
       kitsuId =
-        (await externalToKitsu(source === "mal" ? "myanimelist" : source, id).catch(() => null)) ??
-        undefined;
+        (await resolveExternalKitsuId(`${source}:${id}`).catch(() => null)) ?? undefined;
     }
   }
 
@@ -128,10 +127,10 @@ async function resolveAnimeArtworkIds(meta: Meta): Promise<AnimeArtworkIds> {
   }
 
   if (!kitsuId && malId) {
-    kitsuId = (await externalToKitsu("myanimelist", malId).catch(() => null)) ?? undefined;
+    kitsuId = (await resolveExternalKitsuId(`mal:${malId}`).catch(() => null)) ?? undefined;
   }
   if (!kitsuId && anidbId) {
-    kitsuId = (await externalToKitsu("anidb", anidbId).catch(() => null)) ?? undefined;
+    kitsuId = (await resolveExternalKitsuId(`anidb:${anidbId}`).catch(() => null)) ?? undefined;
   }
 
   return { kitsuId, imdb, tvdb, tmdbMetaId };

@@ -1,5 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
-import { aniZipByKitsu } from "@/lib/providers/anizip";
+import { aniZipByKitsu, aniZipByTmdbTv, aniZipByImdb } from "@/lib/providers/anizip";
 import { kitsuAnime, kitsuRelated, parseKitsuId } from "@/lib/providers/kitsu";
 import type { TmdbDetail } from "@/lib/providers/tmdb";
 
@@ -14,6 +14,48 @@ function year(value: string | undefined): number {
 
 function normalizeTitle(value: string): string {
   return value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+export async function recoverDetailAnimeEntry(
+  meta: Meta,
+  detail: Pick<TmdbDetail, "title" | "year" | "imdbId"> | null,
+): Promise<number | null> {
+  const tmdb = /^tmdb:tv:([1-9]\d*)$/.exec(meta.id);
+  const imdb = /^tt\d+$/.test(meta.id) ? meta.id : null;
+  if (!tmdb && !imdb) return null;
+  const requestedYear = year(meta.releaseInfo) || year(detail?.year);
+  const title = normalizeTitle(meta.name || detail?.title || "");
+  if (!requestedYear || !title) return null;
+  const az = tmdb
+    ? await aniZipByTmdbTv(Number(tmdb[1])).catch(() => null)
+    : await aniZipByImdb(imdb!).catch(() => null);
+  const mappings = az?.mappings;
+  if (
+    !mappings ||
+    (tmdb && String(mappings.themoviedb_id) !== tmdb[1]) ||
+    (imdb && mappings.imdb_id !== imdb)
+  )
+    return null;
+  const id =
+    mappings.anilist_id != null
+      ? `anilist:${mappings.anilist_id}`
+      : mappings.mal_id != null
+        ? `mal:${mappings.mal_id}`
+        : null;
+  if (!id) return null;
+  const { resolveAnimeEntry } = await import("@/lib/providers/anime-entry");
+  const entry = await resolveAnimeEntry(id).catch(() => null);
+  if (!entry || (mappings.kitsu_id != null && mappings.kitsu_id !== entry.kitsuId)) return null;
+  const candidate = await kitsuAnime(entry.kitsuId).catch(() => null);
+  if (
+    !candidate ||
+    year(candidate.year) !== requestedYear ||
+    ![candidate.title, ...candidate.altTitles].some((name) => normalizeTitle(name) === title)
+  )
+    return null;
+  const subtype = candidate.subtype?.toLowerCase();
+  if (subtype !== "tv" && subtype !== "ona") return null;
+  return entry.kitsuId;
 }
 
 export async function resolveDetailAnimeEntry(

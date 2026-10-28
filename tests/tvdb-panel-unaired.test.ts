@@ -208,3 +208,41 @@ test("the season still binds when the anchor rows carry no source of their own",
     assert.equal(ep.ratingIsImdb, undefined, `E${ep.number} must not be marked imdb`);
   }
 });
+
+test("exact TVDB stills replace broken addon URLs while keeping playback identity and future gates", () => {
+  states[1] = {
+    ...ordering,
+    bySeason: new Map([
+      [
+        2,
+        tvdbRows.map((ep, index) => ({
+          ...ep,
+          stillUrl: index === 1 ? "future.jpg" : ep.image,
+        })),
+      ],
+    ]),
+  };
+  call = 0;
+  const rowsWithBrokenArt = pool.map((ep) => ({ ...ep, thumbnail: `broken-${ep.number}.jpg` }));
+  const result = useAnimeTvdbPanel(
+    13209,
+    "tt7441658",
+    [],
+    "default",
+    "",
+    true,
+    rowsWithBrokenArt,
+    undefined,
+    "2",
+    franchise,
+    "kitsu:13209",
+  );
+  const rows = result.panel!.visibleEpisodes;
+  assert.equal(rows[0].thumbnail, "e1.jpg");
+  assert.equal(rows[0].thumbnailFallback, "broken-1.jpg");
+  assert.equal(rows[0].id, rowsWithBrokenArt[0].id);
+  assert.equal(rows[0].sourceMetaId, rowsWithBrokenArt[0].sourceMetaId);
+  assert.equal(rows[0].imdbSeason, 2);
+  assert.equal(rows[0].imdbEpisode, 1);
+  assert.equal(rows[1].thumbnail, "broken-2.jpg", "future episodes retain their existing fallback");
+});

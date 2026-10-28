@@ -58,6 +58,10 @@ const SPY_PART_2 = {
 };
 
 function mocks(overrides: Record<string, unknown> = {}) {
+  const anizip = (overrides["@/lib/providers/anizip"] ?? {
+    aniZipByKitsu: async () => STEEL_BALL_RUN,
+    pickEpisodeTitle,
+  }) as { aniZipByKitsu: (id: number) => Promise<unknown> };
   return {
     "@/lib/anime-cw-ids": { getAnimeCwId: () => "kitsu:7158" },
     "@/lib/anime-detect": { isDetectedAnime: () => true },
@@ -65,9 +69,9 @@ function mocks(overrides: Record<string, unknown> = {}) {
     "@/lib/streams/anime-identity": {
       resolveAnimeIdentity: async () => ({ streamId: "kitsu:49847:2", kitsuId: 49847, number: 2 }),
     },
-    "@/lib/providers/anizip": {
-      aniZipByKitsu: async () => STEEL_BALL_RUN,
-      pickEpisodeTitle,
+    "@/lib/providers/anizip": anizip,
+    "@/lib/providers/anime-mapping": {
+      animeMappingByKitsu: (id: number) => anizip.aniZipByKitsu(id),
     },
     ...overrides,
   };

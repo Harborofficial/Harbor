@@ -203,6 +203,7 @@ test("cold concurrent AniDB XML lookups share hydration and return the fetched m
     "@/lib/providers/anizip": {},
     "@/lib/providers/kitsu": {},
     "@/lib/streams/anime-identity-core": { selectSiblingWindows: () => [] },
+    "./kitsu-mapping": { kitsuExternalIds: async () => null },
     "./mapping-store": {
       mappingStore: () => ({ ready: Promise.resolve(), get: () => undefined, set: () => {} }),
     },
