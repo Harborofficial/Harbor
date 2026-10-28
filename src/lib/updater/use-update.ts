@@ -5,7 +5,6 @@ import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 import { t } from "@/lib/i18n";
 import {
   normalUpdateChannel,
-  readChannelPreference,
   selectedUpdateChannel,
   updateHeaders,
   writeUpdateChannel,
@@ -31,13 +30,7 @@ import {
   returnedToExactVersion,
   saveBetaReturnContext,
 } from "./beta-return";
-import {
-  launchHandoff,
-  probeHandoff,
-  readHandoffPlan,
-  stageHandoff,
-  type HandoffPlan,
-} from "./handoff";
+import { launchHandoff, probeHandoff, stageHandoff, type HandoffPlan } from "./handoff";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 const DISMISS_KEY = "harbor.update.dismissed";
@@ -117,6 +110,7 @@ type DownloadEvent =
   | { event: "Finished" };
 
 let handle: UpdateHandle | null = null;
+let releaseDownloadUrl: string | null = null;
 let experimentalRelease: ExperimentalRelease | null = null;
 let revision = 0;
 let checkedChannel = selectedUpdateChannel();
@@ -146,8 +140,6 @@ export function updateAvailable(s: UpdateState): boolean {
   return s.status === "available" || s.status === "downloading" || s.status === "downloaded";
 }
 
-const BETA_HEADERS = { headers: { "x-harbor-channel": "beta" } };
-
 function currentRequest(request: number, channel: UpdateChannel): boolean {
   return request === revision && channel === selectedUpdateChannel();
 }
@@ -158,6 +150,7 @@ function revokeExperimentalAccess(): void {
     writeUpdateChannel(normalUpdateChannel());
   }
   revision += 1;
+  releaseDownloadUrl = null;
   experimentalRelease = null;
   checkedChannel = selectedUpdateChannel();
   if (handle) {
@@ -217,22 +210,6 @@ export function setUpdateChannel(channel: UpdateChannel): boolean {
 
 export function setExperimentalUpdates(enabled: boolean): boolean {
   return setUpdateChannel(enabled ? "experimental" : normalUpdateChannel());
-}
-
-async function runningPrerelease(): Promise<boolean> {
-  try {
-    const [{ getVersion }, { safeFetch }] = await Promise.all([
-      import("@tauri-apps/api/app"),
-      import("@/lib/safe-fetch"),
-    ]);
-    const res = await safeFetch(`${HARBOR_API_BASE}/updates/latest.json`, { cache: "no-store" });
-    if (!res.ok) return false;
-    const stable = (await res.json()) as { version?: string };
-    if (!stable.version) return false;
-    return cmpVersion(await getVersion(), stable.version) > 0;
-  } catch {
-    return false;
-  }
 }
 
 async function readExperimentalManifest(path = "latest-experimental.json"): Promise<unknown> {
@@ -363,70 +340,24 @@ export async function checkForUpdate(manual = false): Promise<void> {
       });
       return;
     }
-    const wantBeta = selected === "beta";
-    let beta = wantBeta;
-    candidate = (await check(wantBeta ? BETA_HEADERS : undefined)) as UpdateHandle | null;
+    const { discoverGithubUpdate } = await import("./github-update");
+    const { getVersion } = await import("@tauri-apps/api/app");
+    const release = await discoverGithubUpdate(await getVersion(), await probeHandoff(), selected);
     if (!currentRequest(request, selected)) return;
-    if (!candidate && !wantBeta && !readChannelPreference() && (await runningPrerelease())) {
-      if (!currentRequest(request, selected)) return;
-      beta = true;
-      candidate = (await check(BETA_HEADERS)) as UpdateHandle | null;
-    }
-    if (!currentRequest(request, selected)) return;
-    // Beta users also receive stable releases: consider the stable manifest as well and offer
-    // the newer of the two, so a beta install is never left behind a stable release. The
-    // stable check is optional, so a failure there keeps the beta result.
-    if (wantBeta) {
-      const stable = (await check().catch(() => null)) as UpdateHandle | null;
-      if (!currentRequest(request, selected)) {
-        if (stable) void stable.close().catch(() => {});
-        return;
-      }
-      if (stable && (!candidate || cmpVersion(stable.version, candidate.version) > 0)) {
-        if (candidate) void candidate.close().catch(() => {});
-        candidate = stable;
-        beta = false;
-      } else if (stable) {
-        void stable.close().catch(() => {});
-      }
-    }
-    if (!currentRequest(request, selected)) return;
-    const plan = await readHandoffPlan(beta ? BETA_HEADERS : undefined).catch((e) => {
-      console.warn("installer handoff unavailable, falling back to nsis", e);
-      return null;
-    });
-    if (!currentRequest(request, selected)) return;
-    const update = candidate;
-    set({ channel: beta ? "beta" : "stable" });
-    if (plan) {
-      handle = update;
-      candidate = null;
-      const version = plan.version || update?.version || "";
-      const dismissed = readDismissed();
-      set({
-        status: "available",
-        version,
-        notes: plan.notes ?? update?.body ?? null,
-        handoff: plan,
-        dismissed,
-        panelOpen: manual || dismissed !== version,
-      });
-      return;
-    }
-    if (!update) {
+    if (!release) {
       set({ status: "uptodate", version: null, notes: null, handoff: null });
       return;
     }
-    handle = update;
-    candidate = null;
     const dismissed = readDismissed();
+    releaseDownloadUrl = release.url;
     set({
       status: "available",
-      version: update.version,
-      notes: update.body ?? null,
-      handoff: null,
+      version: release.version,
+      channel: release.channel,
+      notes: release.notes,
+      handoff: release.handoff,
       dismissed,
-      panelOpen: manual || dismissed !== update.version,
+      panelOpen: manual || dismissed !== release.version,
     });
   } catch (e) {
     if (currentRequest(request, selected)) {
@@ -577,7 +508,10 @@ export async function downloadUpdate(): Promise<void> {
     }
     return;
   }
-  if (!handle) return;
+  if (!handle) {
+    await openManualDownload();
+    return;
+  }
   set({ status: "downloading", progress: 0, downloadedBytes: 0, totalBytes: 0, error: null });
   try {
     let total = 0;
@@ -729,43 +663,9 @@ export async function openManualDownload(): Promise<void> {
     await checkForUpdate(true);
     return;
   }
+  if (import.meta.env.DEV) return;
   const { openUrl } = await import("@/lib/window");
-  let target = HARBOR_API_BASE;
-  try {
-    const { safeFetch } = await import("@/lib/safe-fetch");
-    type Manifest = { version?: string; platforms?: Record<string, { url?: string }> };
-    const readManifest = async (beta: boolean): Promise<Manifest | null> => {
-      const res = await safeFetch(
-        `${HARBOR_API_BASE}/updates/latest.json`,
-        beta ? BETA_HEADERS : undefined,
-      );
-      return res.ok ? ((await res.json()) as Manifest) : null;
-    };
-    const wantsBeta =
-      selectedUpdateChannel() === "beta" ||
-      (!readChannelPreference() && (await runningPrerelease()));
-    // Beta users also receive stable releases, so their manual download follows the newer
-    // of the two channels instead of a beta build stable left behind.
-    const [primary, probe] = await Promise.all([readManifest(wantsBeta), probeHandoff()]);
-    let manifest = primary;
-    if (wantsBeta) {
-      const stable = await readManifest(false);
-      if (stable && (!manifest || cmpVersion(stable.version ?? "0", manifest.version ?? "0") > 0)) {
-        manifest = stable;
-      }
-    }
-    if (manifest && probe) {
-      // The probe reports OS and architecture even where installer handoff is unsupported.
-      // A missing build must not fall back to a different processor or operating system.
-      const url = manifest.platforms?.[probe.platformKey]?.url;
-      if (typeof url === "string" && url) {
-        target = url.endsWith(".app.tar.gz") ? `${url.slice(0, -".app.tar.gz".length)}.dmg` : url;
-      }
-    }
-  } catch {
-    /* fall back to the site download */
-  }
-  openUrl(target);
+  openUrl(releaseDownloadUrl || "https://github.com/Harborofficial/Harbor/releases");
 }
 
 export async function openHandoffDownload(): Promise<void> {
@@ -827,13 +727,28 @@ async function detectFailedHandoff(pending: {
   }
   clearPending();
   const experimental = pending.channel === "experimental";
-  const planChannel = pending.channel ?? selectedUpdateChannel();
-  const plan = experimental
-    ? null
-    : await readHandoffPlan(planChannel === "beta" ? BETA_HEADERS : undefined).catch((e) => {
-        console.warn("installer handoff unavailable, falling back to nsis", e);
-        return null;
-      });
+  let plan: HandoffPlan | null = null;
+  if (!experimental) {
+    try {
+      const [{ discoverGithubUpdate }, { getVersion }] = await Promise.all([
+        import("./github-update"),
+        import("@tauri-apps/api/app"),
+      ]);
+      const release = await discoverGithubUpdate(
+        await getVersion(),
+        probe,
+        pending.channel === "beta"
+          ? "beta"
+          : pending.channel === "stable"
+            ? "stable"
+            : normalUpdateChannel(),
+      );
+      plan = release?.handoff ?? null;
+      releaseDownloadUrl = release?.url ?? null;
+    } catch {
+      // The error card still offers the GitHub releases page when discovery is offline.
+    }
+  }
   set({
     status: "error",
     installFailed: true,
@@ -918,6 +833,7 @@ export function dismissUpdate(): void {
 export function clearStagedUpdate(): void {
   if (updateChannelLocked()) return;
   revision += 1;
+  releaseDownloadUrl = null;
   experimentalRelease = null;
   checkedChannel = selectedUpdateChannel();
   if (handle) {
@@ -945,7 +861,45 @@ export function clearStagedUpdate(): void {
 }
 
 let started = false;
+export async function simulateUpdate(channel: "stable" | "beta" = "stable"): Promise<void> {
+  if (!import.meta.env.DEV || updateChannelLocked()) return;
+  clearStagedUpdate();
+  const { selectGithubUpdate } = await import("./github-update");
+  const parts = __APP_VERSION__.split(".").map(Number);
+  const version = `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
+  const release = selectGithubUpdate(
+    [
+      {
+        tag_name: `v${version}-${channel}`,
+        body: "Simulated GitHub release. Downloads and installation are disabled in development.",
+      },
+    ],
+    __APP_VERSION__,
+    channel,
+  );
+  if (!release) return;
+  set({
+    status: "available",
+    version: release.version,
+    notes: release.raw.body ?? null,
+    channel: release.channel,
+    dismissed: null,
+    panelOpen: true,
+  });
+}
+
 export function startUpdateWatcher(): void {
+  if (import.meta.env.DEV && new URLSearchParams(window.location.search).has("simulate-update")) {
+    if (!started) {
+      started = true;
+      void simulateUpdate(
+        new URLSearchParams(window.location.search).get("simulate-update") === "beta"
+          ? "beta"
+          : "stable",
+      );
+    }
+    return;
+  }
   if (import.meta.env.DEV || isContextReview()) return;
   if (started || !IS_TAURI) return;
   started = true;
