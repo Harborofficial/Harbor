@@ -12,6 +12,7 @@ import {
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { CatalogBrowser } from "./catalogs/catalog-browser";
 import { CatalogShelf } from "./catalogs/catalog-shelf";
 import { CatalogManageList } from "./catalogs/catalog-manage-list";
 import { AddonFilterSelect } from "./catalogs/addon-filter-select";
@@ -121,6 +122,8 @@ export function Catalogs({ active = true }: { active?: boolean }) {
               </button>
             )}
           </div>
+
+          {!customize && !loading && <CatalogBrowser catalogs={catalogs} />}
 
           {!loading && catalogs.length > 0 && (
             <div className="flex flex-col gap-3">

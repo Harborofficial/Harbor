@@ -117,7 +117,9 @@ export function SurpriseMe({ pool }: { pool: Meta[] }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3">
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <h2 className="text-[15px] font-semibold tracking-tight text-ink">{t("Can't decide?")}</h2>
+        <h2 className="ps-4 text-[15px] font-semibold tracking-tight text-ink">
+          {t("Can't decide?")}
+        </h2>
         <button
           type="button"
           role="switch"
