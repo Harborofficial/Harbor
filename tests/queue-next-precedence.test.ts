@@ -1,16 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { hookHarness } from "./helpers/hook-harness.ts";
+import { queueSessionIndex } from "../src/lib/queue-session.ts";
 
 const queue = [
-  { meta: { id: "queued-before" }, episode: undefined },
-  { meta: { id: "current-show" }, episode: { season: 1, episode: 5 } },
-  { meta: { id: "queued-after" }, episode: undefined },
+  { id: "before", meta: { id: "queued-before" }, episode: undefined },
+  { id: "current", meta: { id: "current-show" }, episode: { season: 1, episode: 5 } },
+  { id: "after", meta: { id: "queued-after" }, episode: undefined },
 ];
 
-function setup(queueDrivesNav: boolean, currentIndex = 1) {
+function setup(queueDrivesNav: boolean, currentIndex = 1, fromQueue = true) {
   const calls: string[] = [];
   const hook = hookHarness("src/views/player/hooks/use-queue-nav.ts", "useQueueNav", {
+    "@/lib/queue-session": { queueSessionIndex },
     "@/lib/queue": {
       useQueue: () => queue,
       queueIndexOf: () => currentIndex,
@@ -19,7 +21,11 @@ function setup(queueDrivesNav: boolean, currentIndex = 1) {
 
   const current = queue[currentIndex];
   const nav = hook.render({
-    src: { meta: current.meta, episode: current.episode },
+    src: {
+      meta: current.meta,
+      episode: current.episode,
+      queueItemId: fromQueue ? current.id : undefined,
+    },
     adjacent: {
       prev: { season: 1, episode: 4 },
       next: { season: 1, episode: 6 },
@@ -30,7 +36,8 @@ function setup(queueDrivesNav: boolean, currentIndex = 1) {
     goToEpisode: (episode: { season: number; episode: number }) => {
       calls.push(`episode:${episode.season}:${episode.episode}`);
     },
-    openPicker: (meta: { id: string }) => {
+    openPicker: (meta: { id: string }, _episode: unknown, options: { queueItemId?: string }) => {
+      assert.equal(options.queueItemId, queue.find((item) => item.meta.id === meta.id)?.id);
       calls.push(`picker:${meta.id}`);
     },
   });
@@ -46,6 +53,17 @@ test("Queue mode navigates to queued items instead of adjacent show episodes", (
     nav.playNext();
     nav.playPrev();
     assert.deepEqual(calls, ["picker:queued-after", "picker:queued-before"]);
+  } finally {
+    hook.unmount();
+  }
+});
+
+test("Manually playing a queued title does not activate queue navigation", () => {
+  const { hook, nav, calls } = setup(true, 1, false);
+  try {
+    nav.playNext();
+    nav.playPrev();
+    assert.deepEqual(calls, ["episode:1:6", "episode:1:4"]);
   } finally {
     hook.unmount();
   }
@@ -81,6 +99,49 @@ test("Queue mode does not fall back to the show at the start of the queue", () =
     assert.equal(nav.hasPrevEpisodeNow, false);
     nav.playPrev();
     assert.deepEqual(calls, []);
+  } finally {
+    hook.unmount();
+  }
+});
+
+test("An empty queue preserves normal episode navigation even when Queue is enabled", () => {
+  const calls: string[] = [];
+  const hook = hookHarness("src/views/player/hooks/use-queue-nav.ts", "useQueueNav", {
+    "@/lib/queue-session": { queueSessionIndex },
+    "@/lib/queue": {
+      useQueue: () => [],
+      queueIndexOf: () => -1,
+    },
+  });
+
+  try {
+    const nav = hook.render({
+      src: {
+        meta: { id: "current-show" },
+        episode: { season: 1, episode: 5 },
+      },
+      adjacent: {
+        prev: { season: 1, episode: 4 },
+        next: { season: 1, episode: 6 },
+      },
+      canChangeEpisode: true,
+      isLiveLike: false,
+      queueDrivesNav: true,
+      goToEpisode: (episode: { season: number; episode: number }) => {
+        calls.push(`episode:${episode.season}:${episode.episode}`);
+      },
+      openPicker: () => {
+        calls.push("picker");
+      },
+    });
+
+    assert.equal(nav.hasNextEpisodeNow, true);
+    assert.equal(nav.hasPrevEpisodeNow, true);
+
+    nav.playNext();
+    nav.playPrev();
+
+    assert.deepEqual(calls, ["episode:1:6", "episode:1:4"]);
   } finally {
     hook.unmount();
   }

@@ -13,7 +13,10 @@ export function useQueueSurface(): boolean {
       return true;
 
     case "meta":
-      return !metaLiveContext && (meta?.type === "series" || meta?.type === "anime");
+      return (
+        !metaLiveContext &&
+        (meta?.type === "movie" || meta?.type === "series" || meta?.type === "anime")
+      );
 
     case "episode-detail":
       return true;

@@ -72,6 +72,7 @@ function playbackSourceClass(
 
 export function usePickHandler({
   meta,
+  queueItemId,
   imdbId,
   imdbIdVerified,
   episode,
@@ -103,6 +104,7 @@ export function usePickHandler({
   setResolving,
 }: {
   meta: Meta;
+  queueItemId?: string;
   imdbId?: string | null;
   imdbIdVerified?: boolean;
   episode?: PlayEpisode;
@@ -413,6 +415,7 @@ export function usePickHandler({
         attempt: attempt ?? 0,
         autoFired: autoPickRef.current,
         resume: !!resume,
+        queueItemId,
         continuation,
         startPositionMs: continuation?.positionMs,
         startFromZero: continuation?.restart,

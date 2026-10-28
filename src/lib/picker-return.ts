@@ -40,6 +40,7 @@ export function samePickerRequest(
     (frame.attempt ?? 0) === (options?.attempt ?? 0) &&
     (frame.intent ?? "play") === (options?.intent ?? "play") &&
     Boolean(frame.seasonEpisodes?.length) === Boolean(options?.seasonEpisodes?.length) &&
+    frame.queueItemId === options?.queueItemId &&
     frame.contextRequestId === options?.contextRequestId &&
     frame.continuation?.id === options?.continuation?.id
   );

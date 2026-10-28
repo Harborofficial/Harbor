@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { queueIndexOf, useQueue } from "@/lib/queue";
-import type { PlayEpisode, PlayerSrc } from "@/lib/view";
+import { useQueue } from "@/lib/queue";
+import { queueSessionIndex } from "@/lib/queue-session";
+import type { PickerOptions, PlayEpisode, PlayerSrc } from "@/lib/view";
 
 export function useQueueNav(params: {
   src: PlayerSrc;
@@ -9,23 +10,24 @@ export function useQueueNav(params: {
   canChangeEpisode: boolean;
   isLiveLike: boolean;
   queueDrivesNav: boolean;
+  instantPlay?: boolean;
   goToEpisode: (ep: PlayEpisode | null) => void;
-  openPicker: (
-    meta: Meta,
-    episode?: PlayEpisode,
-    opts?: { autoPlay?: boolean; attempt?: number; intent?: "play" | "download"; resume?: boolean },
-  ) => void;
+  openPicker: (meta: Meta, episode?: PlayEpisode, opts?: PickerOptions) => void;
 }) {
-  const { src, adjacent, canChangeEpisode, isLiveLike, queueDrivesNav, goToEpisode, openPicker } =
-    params;
+  const {
+    src,
+    adjacent,
+    canChangeEpisode,
+    isLiveLike,
+    queueDrivesNav,
+    instantPlay = false,
+    goToEpisode,
+    openPicker,
+  } = params;
   const queue = useQueue();
-  const queueNav = queueDrivesNav && !isLiveLike;
-  const currentQueueIdx = queueNav ? queueIndexOf(src.meta, src.episode) : -1;
-  const queueNextItem = !queueNav
-    ? null
-    : currentQueueIdx >= 0
-      ? (queue[currentQueueIdx + 1] ?? null)
-      : (queue[0] ?? null);
+  const currentQueueIdx = queueSessionIndex(src, queue);
+  const queueNav = queueDrivesNav && !isLiveLike && currentQueueIdx >= 0;
+  const queueNextItem = queueNav ? (queue[currentQueueIdx + 1] ?? null) : null;
   const queuePrevItem =
     queueNav && currentQueueIdx > 0 ? (queue[currentQueueIdx - 1] ?? null) : null;
 
@@ -35,7 +37,11 @@ export function useQueueNav(params: {
   const playNext = () => {
     if (queueNav) {
       if (queueNextItem) {
-        openPicker(queueNextItem.meta, queueNextItem.episode);
+        openPicker(queueNextItem.meta, queueNextItem.episode, {
+          queueItemId: queueNextItem.id,
+          autoPlay: instantPlay,
+          resume: true,
+        });
       }
       return;
     }
@@ -48,7 +54,11 @@ export function useQueueNav(params: {
   const playPrev = () => {
     if (queueNav) {
       if (queuePrevItem) {
-        openPicker(queuePrevItem.meta, queuePrevItem.episode);
+        openPicker(queuePrevItem.meta, queuePrevItem.episode, {
+          queueItemId: queuePrevItem.id,
+          autoPlay: instantPlay,
+          resume: true,
+        });
       }
       return;
     }

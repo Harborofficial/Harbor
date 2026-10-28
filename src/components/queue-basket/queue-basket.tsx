@@ -1,5 +1,5 @@
 import { ListVideo, Play, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useId, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useStartQueue } from "@/hooks/use-start-queue";
 import { useT } from "@/lib/i18n";
@@ -7,6 +7,7 @@ import { queueClear, queueRemove, queueReorder, useQueue, useQueueResumeItem } f
 import "./queue-basket.css";
 import { useQueueSurface } from "@/hooks/use-queue-surface";
 import { QueueClearConfirm } from "./queue-clear-confirm";
+import { useQueueGesture, type QueueDragPoint } from "./use-queue-gesture";
 
 export function QueueBasket() {
   const visible = useQueueSurface();
@@ -27,6 +28,8 @@ function QueueBasketContent() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const dialogId = useId();
+  const reorderHintId = useId();
+  const [announcement, setAnnouncement] = useState("");
   const hasItems = queue.length > 0;
   const listRef = useRef<HTMLOListElement>(null);
   const rowRefs = useRef(new Map<string, HTMLLIElement>());
@@ -36,7 +39,6 @@ function QueueBasketContent() {
   const [dragId, setDragId] = useState<string | null>(null);
   const dragRef = useRef<{
     id: string;
-    pointerId: number;
     x: number;
     y: number;
     destination: number | null;
@@ -160,18 +162,10 @@ function QueueBasketContent() {
     preview.dataset.outside = outside ? "true" : "false";
   };
 
-  const startDrag = (event: PointerEvent<HTMLLIElement>, id: string) => {
-    if (!event.isPrimary || event.button !== 0) return;
-
-    const target = event.target;
-    if (target instanceof Element && target.closest("button, a, input, textarea, select")) {
-      return;
-    }
-
+  const startDrag = ({ row, id, x, y }: QueueDragPoint) => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
-    event.preventDefault();
     cancelDrag();
 
     const list = listRef.current;
@@ -190,7 +184,6 @@ function QueueBasketContent() {
       };
     });
 
-    const row = event.currentTarget;
     const rect = row.getBoundingClientRect();
     const preview = document.createElement("div");
     preview.className = `${row.className} queue-basket-drag-preview`;
@@ -212,53 +205,48 @@ function QueueBasketContent() {
     preview.style.height = `${rect.height}px`;
 
     dragOffsetRef.current = {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
+      x: x - rect.left,
+      y: y - rect.top,
     };
     dragPreviewRef.current = preview;
 
     // Keep the preview inside the modal's top layer.
     dialog.appendChild(preview);
 
-    row.setPointerCapture(event.pointerId);
     dragRef.current = {
       id,
-      pointerId: event.pointerId,
-      x: event.clientX,
-      y: event.clientY,
+      x,
+      y,
       destination: null,
     };
 
-    movePreview(event.clientX, event.clientY);
+    movePreview(x, y);
     setDragId(id);
     updateDropPosition();
     scrollFrame.current = requestAnimationFrame(scrollWhileDragging);
   };
 
-  const moveDrag = (event: PointerEvent<HTMLLIElement>) => {
+  const moveDrag = ({ x, y }: QueueDragPoint) => {
     const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (!drag) return;
 
-    drag.x = event.clientX;
-    drag.y = event.clientY;
-    movePreview(event.clientX, event.clientY);
+    drag.x = x;
+    drag.y = y;
+    movePreview(x, y);
     updateDropPosition();
   };
 
-  const finishDrag = (event: PointerEvent<HTMLLIElement>) => {
+  const finishDrag = ({ x, y }: QueueDragPoint) => {
     const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (!drag) return;
 
     const bounds = listRef.current?.getBoundingClientRect();
     const outside =
       bounds != null &&
-      (event.clientX < bounds.left ||
-        event.clientX > bounds.right ||
-        event.clientY < bounds.top ||
-        event.clientY > bounds.bottom);
+      (x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom);
 
-    drag.x = event.clientX;
-    drag.y = event.clientY;
+    drag.x = x;
+    drag.y = y;
     updateDropPosition();
 
     const current = queueRef.current;
@@ -267,10 +255,6 @@ function QueueBasketContent() {
     const id = drag.id;
 
     cancelDrag();
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
 
     if (from < 0 || !bounds) return;
 
@@ -288,6 +272,16 @@ function QueueBasketContent() {
     ids.splice(insertAt, 0, id);
     queueReorder(ids);
   };
+
+  const gesture = useQueueGesture({
+    enabled: open && hasItems,
+    version: queue,
+    listRef,
+    start: startDrag,
+    move: moveDrag,
+    finish: finishDrag,
+    cancel: cancelDrag,
+  });
 
   useEffect(() => {
     if (!open || !hasItems) cancelDrag();
@@ -369,7 +363,10 @@ function QueueBasketContent() {
         ref={dialogRef}
         id={dialogId}
         aria-labelledby={titleId}
-        onCancel={() => setOpen(false)}
+        onCancel={() => {
+          gesture.cancel();
+          setOpen(false);
+        }}
         onClose={() => setOpen(false)}
         className="queue-basket-dialog rounded-2xl border border-edge bg-canvas p-0 text-ink shadow-2xl"
       >
@@ -394,21 +391,59 @@ function QueueBasketContent() {
             </button>
           </header>
 
+          <p id={reorderHintId} className="sr-only">
+            {t("Move up")}: Alt + ↑. {t("Move down")}: Alt + ↓.
+          </p>
+          <p aria-live="polite" aria-atomic="true" className="sr-only">
+            {announcement}
+          </p>
           <ol ref={listRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
             {queue.map((item, index) => (
               <li
                 key={item.id}
-                onPointerDown={(event) => startDrag(event, item.id)}
-                onPointerMove={moveDrag}
-                onPointerUp={finishDrag}
-                onPointerCancel={cancelDrag}
-                onLostPointerCapture={cancelDrag}
+                tabIndex={0}
+                aria-describedby={reorderHintId}
+                aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
+                data-queue-item-id={item.id}
+                onPointerDown={(event) => gesture.onPointerDown(event, item.id)}
+                onPointerMove={gesture.onPointerMove}
+                onPointerUp={gesture.onPointerUp}
+                onPointerCancel={gesture.onPointerCancel}
+                onLostPointerCapture={gesture.onPointerCancel}
+                onContextMenu={(event) => event.preventDefault()}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === "Escape" && dragRef.current) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    gesture.cancel();
+                    return;
+                  }
+                  if (
+                    !event.altKey ||
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    event.shiftKey ||
+                    (event.key !== "ArrowUp" && event.key !== "ArrowDown")
+                  )
+                    return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  gesture.cancel();
+                  const target = index + (event.key === "ArrowUp" ? -1 : 1);
+                  if (target < 0 || target >= queue.length) return;
+                  const ids = queue.map((entry) => entry.id);
+                  [ids[index], ids[target]] = [ids[target], ids[index]];
+                  queueReorder(ids);
+                  setAnnouncement(`${item.meta.name}: ${target + 1} / ${queue.length}`);
+                  event.currentTarget.scrollIntoView({ block: "nearest" });
+                }}
                 ref={(node) => {
                   if (node) rowRefs.current.set(item.id, node);
                   else rowRefs.current.delete(item.id);
                 }}
                 data-dragging={dragId === item.id || undefined}
-                className="queue-basket-row relative flex items-center gap-3 rounded-xl bg-raised p-3 cursor-grab select-none touch-none active:cursor-grabbing"
+                className="queue-basket-row relative flex items-center gap-3 rounded-xl bg-raised p-3 cursor-grab select-none touch-pan-y active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
               >
                 <span className="w-5 shrink-0 text-center text-xs text-ink-subtle">
                   {index + 1}
@@ -476,7 +511,7 @@ function QueueBasketContent() {
             <button
               type="button"
               onClick={() => {
-                cancelDrag();
+                gesture.cancel();
                 setConfirmClear(true);
               }}
               className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"

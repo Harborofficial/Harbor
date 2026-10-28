@@ -18,6 +18,7 @@ export function useStartQueue() {
 
       update({ queueDrivesNav: true });
       openPicker(item.meta, item.episode, {
+        queueItemId: item.id,
         autoPlay: settings.instantPlay,
         resume: true,
       });

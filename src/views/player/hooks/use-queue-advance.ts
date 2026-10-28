@@ -3,14 +3,9 @@ import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import { isNaturalEnd } from "@/lib/player/playback-end";
 import type { Meta } from "@/lib/cinemeta";
-import type { PlayEpisode, PlayerSrc } from "@/lib/view";
-import {
-  getSleepAtEnd,
-  queueIndexOf,
-  queueRemove,
-  setSleepAtEnd,
-  type QueueItem,
-} from "@/lib/queue";
+import type { PickerOptions, PlayEpisode, PlayerSrc } from "@/lib/view";
+import { queueSessionIndex } from "@/lib/queue-session";
+import { getSleepAtEnd, queueRemove, setSleepAtEnd, type QueueItem } from "@/lib/queue";
 
 const STUB_MAX_SEC = 150;
 
@@ -23,16 +18,7 @@ export function useQueueAdvance(params: {
   queueDrivesNav: boolean;
   instantPlay: boolean;
   startedNearEndRef: RefObject<boolean>;
-  openPicker: (
-    meta: Meta,
-    episode?: PlayEpisode,
-    opts?: {
-      autoPlay?: boolean;
-      attempt?: number;
-      intent?: "play" | "download";
-      resume?: boolean;
-    },
-  ) => void;
+  openPicker: (meta: Meta, episode?: PlayEpisode, opts?: PickerOptions) => void;
   closePlayer: () => void | Promise<void>;
 }) {
   const {
@@ -56,11 +42,12 @@ export function useQueueAdvance(params: {
   useEffect(() => {
     if (isLive || roomGuest) return;
 
-    const currentIndex = queueIndexOf(src.meta, src.episode);
+    const currentIndex = queueSessionIndex(src, queue);
     const currentItem = currentIndex >= 0 ? queue[currentIndex] : undefined;
     const sleepAtEnd = getSleepAtEnd();
 
-    if (!queueDrivesNav && !sleepAtEnd && !currentItem) return;
+    const queueActive = queueDrivesNav && !!currentItem;
+    if (!queueActive && !sleepAtEnd) return;
     if (snap.durationSec <= STUB_MAX_SEC) return;
     if (startedNearEndRef.current) return;
     if (!isNaturalEnd(snap, getPlaybackPosition())) return;
@@ -69,15 +56,16 @@ export function useQueueAdvance(params: {
     firedForRef.current = src.url;
 
     // Capture the successor before removing the completed item.
-    const nextItem = currentIndex >= 0 ? queue[currentIndex + 1] : queue[0];
+    const nextItem = queueActive ? queue[currentIndex + 1] : undefined;
 
-    if (currentItem) queueRemove(currentItem.id);
+    if (queueActive) queueRemove(currentItem.id);
 
-    if (queueDrivesNav) {
+    if (queueActive) {
       if (nextItem) {
         openPicker(nextItem.meta, nextItem.episode, {
           autoPlay: instantPlay,
           resume: true,
+          queueItemId: nextItem.id,
         });
         return;
       }
