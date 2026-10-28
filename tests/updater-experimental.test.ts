@@ -265,6 +265,23 @@ function harness(
       if (config.launchFailure) throw new Error("Launch failed");
     },
   };
+  const githubPlatform = options.platform ?? "windows-x86_64";
+  const githubAssets = (tag: string, version: string) => {
+    const base = `https://github.com/Harborofficial/Harbor/releases/download/${tag}/`;
+    if (githubPlatform.startsWith("windows")) {
+      const name = `harbor-shipyard-${tag}.exe`;
+      return [
+        { name, browser_download_url: `${base}${name}`, size: 10 },
+        { name: `${name}.sig`, browser_download_url: `${base}${name}.sig` },
+      ];
+    }
+    if (githubPlatform.startsWith("darwin")) {
+      const arch = githubPlatform.endsWith("aarch64") ? "aarch64" : "x64";
+      const name = `Harbor_${version}_${arch}.dmg`;
+      return [{ name, browser_download_url: `${base}${name}` }];
+    }
+    return [];
+  };
   const githubUpdate = load<typeof import("../src/lib/updater/github-update")>(
     "src/lib/updater/github-update.ts",
     {
@@ -276,10 +293,13 @@ function harness(
             options.versions
               ? Object.entries(options.versions)
                   .filter(([, version]) => version)
-                  .map(([channel, version]) => ({ tag_name: `v${version}-${channel}` }))
+                  .map(([channel, version]) => {
+                    const tag = `v${version}-${channel}`;
+                    return { tag_name: tag, assets: githubAssets(tag, version) };
+                  })
               : config.nativeMissing
                 ? []
-                : [{ tag_name: "v0.9.123" }],
+                : [{ tag_name: "v0.9.123", assets: githubAssets("v0.9.123", "0.9.123") }],
         }),
       },
       "./github-release-format": githubFormat,
@@ -841,12 +861,12 @@ test("manual downloads open GitHub without guessing another platform's asset", a
   }
 });
 
-test("a discovered release opens its exact GitHub page", async () => {
+test("a discovered release opens its exact GitHub asset", async () => {
   const h = harness();
   await h.updater.checkForUpdate();
   await h.updater.downloadUpdate();
   assert.deepEqual(h.calls.manualUrls, [
-    "https://github.com/Harborofficial/Harbor/releases/tag/v0.9.123",
+    "https://github.com/Harborofficial/Harbor/releases/download/v0.9.123/harbor-shipyard-v0.9.123.exe",
   ]);
 });
 
@@ -1179,8 +1199,52 @@ test("GitHub uses the exact signed Shipyard asset only on managed Windows x64", 
       null,
     );
     release.assets.pop();
-    assert.equal((await github.discoverGithubUpdate("0.9.999", probe, "beta"))?.handoff, null);
+    assert.equal(await github.discoverGithubUpdate("0.9.999", probe, "beta"), null);
   }
+});
+
+test("GitHub discovery skips releases without usable assets", async () => {
+  const base = "https://github.com/Harborofficial/Harbor/releases/download/";
+  const asset = (tag: string, suffix = ".exe") => {
+    const name = `harbor-shipyard-${tag}${suffix}`;
+    return { name, browser_download_url: `${base}${tag}/${name}`, size: 1 };
+  };
+  const release = (tag: string, assets: unknown[]) => ({ tag_name: tag, assets });
+  let releases = [
+    release("v1.0.3", []),
+    release("v1.0.2", [asset("v1.0.2")]),
+    release("v1.0.1", [asset("v1.0.1"), asset("v1.0.1", ".exe.sig")]),
+  ];
+  const github = load<typeof import("../src/lib/updater/github-update")>(
+    "src/lib/updater/github-update.ts",
+    {
+      "@/lib/safe-fetch": {
+        safeFetch: async () => ({
+          ok: true,
+          json: async () => releases,
+          text: async () => "test-signature",
+        }),
+      },
+      "./github-release-format": githubFormat,
+      "./installer-plan": { payloadVersionFor: () => 1000002 },
+    },
+    {},
+  );
+  const probe = {
+    supported: true,
+    managed: true,
+    platformKey: "windows-x86_64",
+    payloadVersion: 999000,
+    installDir: "test",
+  };
+  const update = await github.discoverGithubUpdate("1.0.0", probe, "stable");
+  assert.equal(update?.version, "1.0.1");
+  assert.equal(update?.handoff?.url, asset("v1.0.1").browser_download_url);
+  const plain = await github.discoverGithubUpdate("1.0.0", { ...probe, managed: false }, "stable");
+  assert.equal(plain?.version, "1.0.2");
+  assert.equal(plain?.handoff, null);
+  releases = [release("v1.0.2", [asset("v1.0.2")])];
+  assert.equal(await github.discoverGithubUpdate("1.0.0", probe, "stable"), null);
 });
 
 test("GitHub downloads match native OS and architecture, independent of asset order", () => {

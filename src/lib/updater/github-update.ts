@@ -47,8 +47,10 @@ export function selectGithubUpdate(
   );
 }
 
-export function githubDownloadAsset(raw: GithubRelease, platformKey: string | undefined) {
-  const assets = (Array.isArray(raw.assets) ? raw.assets : []).filter(
+type Asset = NonNullable<GithubRelease["assets"]>[number];
+
+function usableAssets(raw: GithubRelease): Asset[] {
+  return (Array.isArray(raw.assets) ? raw.assets : []).filter(
     (asset) =>
       typeof asset.name === "string" &&
       typeof asset.browser_download_url === "string" &&
@@ -56,6 +58,24 @@ export function githubDownloadAsset(raw: GithubRelease, platformKey: string | un
       /^harbor[-_]/i.test(asset.name) &&
       !/legacy|uninstall/i.test(asset.name),
   );
+}
+
+const BINARY = /\.(?:exe|dmg|msi|app\.tar\.gz|deb|rpm|appimage)$/i;
+
+export function releaseIsComplete(raw: GithubRelease, probe: HandoffProbe | null): boolean {
+  const assets = usableAssets(raw);
+  if (!assets.some((asset) => BINARY.test(asset.name!) && !/\.sig$/i.test(asset.name!))) {
+    return false;
+  }
+  if (!(probe?.supported && probe.managed && probe.platformKey === "windows-x86_64")) return true;
+  const installer = assets.find((asset) =>
+    /^harbor-shipyard-v\d+\.\d+\.\d+(?:-(?:beta|stable))?\.exe$/i.test(asset.name!),
+  );
+  return !!installer && assets.some((asset) => asset.name === `${installer.name}.sig`);
+}
+
+export function githubDownloadAsset(raw: GithubRelease, platformKey: string | undefined) {
+  const assets = usableAssets(raw);
   if (platformKey === "windows-x86_64") {
     const shipyard = assets.find((asset) =>
       /^harbor-shipyard-v\d+\.\d+\.\d+(?:-(?:beta|stable))?\.exe$/i.test(asset.name!),
@@ -111,7 +131,8 @@ export async function discoverGithubUpdate(
     releases.push(...batch);
     if (batch.length < 100) break;
   }
-  const selected = selectGithubUpdate(releases, installed, preference);
+  const complete = releases.filter((raw) => releaseIsComplete(raw, probe));
+  const selected = selectGithubUpdate(complete, installed, preference);
   if (!selected) return null;
   const { raw, version, channel } = selected;
   const asset = githubDownloadAsset(raw, probe?.platformKey);
