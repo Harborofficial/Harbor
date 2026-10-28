@@ -251,10 +251,15 @@ impl MpvState {
         let Some(session) = session.as_ref() else {
             return Ok(None);
         };
-        let path = session
-            .mpv
-            .get_property::<String>("path")
-            .map_err(|_| "Could not verify the file currently in playback.".to_string())?;
+        let path = match session.mpv.get_property::<String>("path") {
+            Ok(path) => path,
+            // An idle mpv instance has no path, but can outlive the last loaded file.
+            // Only allow deletion when mpv positively confirms that no file is loaded.
+            Err(_) if matches!(session.mpv.get_property::<bool>("idle-active"), Ok(true)) => {
+                return Ok(None);
+            }
+            Err(_) => return Err("Could not verify the file currently in playback.".into()),
+        };
         if let Ok(url) = url::Url::parse(&path) {
             if url.scheme() == "file" {
                 return Ok(url
