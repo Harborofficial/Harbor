@@ -93,6 +93,7 @@ import { hasUsableMusicSource } from "@/lib/music/source-consent";
 import type { MusicCatalogItem, MusicSearchResults, MusicTrack } from "@/lib/music/types";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useScrollMemory } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { resetMusicScroll, useMusicScrollContinuity } from "@/lib/music/scroll-continuity";
 import { useSectionBack } from "@/lib/section-back";
 import { MusicBandStack } from "./music/music-band-stack";
@@ -180,12 +181,12 @@ function MusicViewContent({ active }: { active: boolean }) {
   }, []);
   useScrollMemory("music", scrollRef, active);
 
-  const [genre, setGenre] = useState<MusicGenreEntry | null>(null);
-  const [discoveryPage, setDiscoveryPage] = useState<
+  const [genre, setGenre] = useSessionState<MusicGenreEntry | null>("music.genre", null);
+  const [discoveryPage, setDiscoveryPage] = useSessionState<
     "tastes" | "playlists" | "videos" | "billboard" | "rollingStone" | null
-  >(null);
-  const [billboardChart, setBillboardChart] = useState("hot-100");
-  const [videoQuery, setVideoQuery] = useState("music videos");
+  >("music.discoveryPage", null);
+  const [billboardChart, setBillboardChart] = useSessionState("music.billboardChart", "hot-100");
+  const [videoQuery, setVideoQuery] = useSessionState("music.videoQuery", "music videos");
   const discoveryOrigin = useRef<{ text: string | null } | null>(null);
   const openDiscovery = (
     page: "tastes" | "playlists" | "videos" | "billboard" | "rollingStone",
@@ -237,7 +238,7 @@ function MusicViewContent({ active }: { active: boolean }) {
   }, [connectionsPage]);
   const [quickListen, setQuickListen] = useState<MusicTrack[] | null>(null);
   useEffect(() => { if (!active) setQuickListen(null); }, [active]);
-  const [tab, setTab] = useState<MusicTabId>("forYou");
+  const [tab, setTab] = useSessionState<MusicTabId>("music.tab", "forYou");
   const [search, setSearch] = useState<SearchState | null>(null);
   const [searching, setSearching] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -260,10 +261,10 @@ function MusicViewContent({ active }: { active: boolean }) {
     similarRun.current += 1;
     setSimilar(null);
   }, []);
-  const [collectionPage, setCollectionPage] = useState<{
+  const [collectionPage, setCollectionPage] = useSessionState<{
     kind: "playlist" | "liked" | "recent";
     id: string;
-  } | null>(null);
+  } | null>("music.collectionPage", null);
   const closeCollectionPage = useCallback(() => setCollectionPage(null), []);
   const openCollection = useCallback((entry: MusicCollectionEntry) => {
     if (entry.kind === "playlist" || entry.kind === "liked" || entry.kind === "recent")

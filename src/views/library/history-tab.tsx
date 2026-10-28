@@ -13,6 +13,7 @@ import { fetchWatchedHistory, type HistoryItem } from "@/lib/trakt/history";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSessionState } from "@/lib/session-state";
 import {
   applyFilter,
   countByType,
@@ -129,8 +130,8 @@ export function HistoryTab() {
   }, [traktConnected, reloadKey]);
 
   const merged = useMemo(() => mergeHistory(stremio, trakt), [stremio, trakt]);
-  const [type, setType] = useState<TypeKey>("all");
-  const [query, setQuery] = useState("");
+  const [type, setType] = useSessionState<TypeKey>("library.history.type", "all");
+  const [query, setQuery] = useSessionState<string>("library.history.query", "");
   const [flat, setFlat] = useState(() => localStorage.getItem("harbor.history.flat") === "1");
   useEffect(() => {
     try {
@@ -140,7 +141,7 @@ export function HistoryTab() {
   const toggleFlat = useCallback(() => {
     setFlat((v) => !v);
   }, []);
-  const [view, setView] = useState<HistoryView>(() =>
+  const [view, setView] = useSessionState<HistoryView>("library.history.view", () =>
     localStorage.getItem("harbor.history.view") === "episodes" ? "episodes" : "posters",
   );
   const setViewPersist = useCallback((next: HistoryView) => {

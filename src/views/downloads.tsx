@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { Download as DownloadIcon, ListFilter, ListVideo } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
+import { useSessionState } from "@/lib/session-state";
+import { useScrollMemory } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
 import {
   downloadsSnapshot,
@@ -67,7 +69,9 @@ function buildGroups(items: DownloadItem[]): DownloadGroup[] {
 export function DownloadsView({ active = false }: { active?: boolean }) {
   const t = useT();
   const items = useDownloads();
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useSessionState<Filter>("downloads.filter", "all");
+  const scrollRef = useRef<HTMLElement>(null);
+  useScrollMemory("downloads", scrollRef, active);
 
   const counts = useMemo(
     () => ({
@@ -110,7 +114,10 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
   );
 
   return (
-    <main className="flex-1 overflow-y-auto bg-canvas px-5 pb-24 pt-[max(6rem,var(--harbor-floating-back-space,0px))] sm:px-8 lg:px-12 lg:pt-[max(7rem,var(--harbor-floating-back-space,0px))]">
+    <main
+      ref={scrollRef}
+      className="flex-1 overflow-y-auto bg-canvas px-5 pb-24 pt-[max(6rem,var(--harbor-floating-back-space,0px))] sm:px-8 lg:px-12 lg:pt-[max(7rem,var(--harbor-floating-back-space,0px))]"
+    >
       <div className="mx-auto w-full max-w-4xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
           <div className="min-w-0">

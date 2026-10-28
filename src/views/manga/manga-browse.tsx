@@ -12,6 +12,7 @@ import {
   type MangaSummary,
 } from "@/lib/manga/api";
 import { useMangaFavorites } from "@/lib/manga-favorites";
+import { useSessionState } from "@/lib/session-state";
 import { subscribeMangaLibraryChanged } from "@/lib/manga/library-events";
 import { activeMangaSource, activeMangaSourceId, subscribeMangaSources } from "@/lib/manga/sources";
 import type { SuwayomiSource } from "@/lib/manga/sources/suwayomi/provider";
@@ -59,10 +60,10 @@ export function MangaBrowse({
   onOpenLibrary?: () => void;
 }) {
   const t = useT();
-  const [query, setQuery] = useState("");
-  const [tagId, setTagId] = useState("");
-  const [sortMode, setSortMode] = useState<SortMode>("latest");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [query, setQuery] = useSessionState<string>("manga.query", "");
+  const [tagId, setTagId] = useSessionState<string>("manga.tag", "");
+  const [sortMode, setSortMode] = useSessionState<SortMode>("manga.sort", "latest");
+  const [statusFilter, setStatusFilter] = useSessionState<StatusFilter>("manga.status", "all");
   const { items: favItems } = useMangaFavorites();
   const [items, setItems] = useState<MangaSummary[]>([]);
   const [searchGroups, setSearchGroups] = useState<SearchResultGroup[]>([]);

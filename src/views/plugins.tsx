@@ -8,7 +8,8 @@ import {
 } from "@/lib/catalog-browse";
 import { isExtensionCatalogueBase, subscribeStreamPlugins } from "@/lib/streams/plugins";
 import { searchPlugins, searchPluginPage, type PluginSearchGroup } from "@/lib/streams/plugins/extension/search";
-import { useView } from "@/lib/view";
+import { useScrollMemory, useView } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { useT } from "@/lib/i18n";
 import { useContentDrag } from "@/lib/window-drag";
 import { FeedShelf } from "@/components/feed-shelf";
@@ -34,10 +35,10 @@ export function Plugins({ active = true }: { active?: boolean }) {
   const contentDrag = useContentDrag();
   const [catalogs, setCatalogs] = useState<BrowseCatalog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useSessionState("plugins.query", "");
   // What was asked for, and which ask it was. The box's text is not the same thing: a search runs
   // when it is submitted, so an edited box keeps the last search's results until Enter is pressed.
-  const [asked, setAsked] = useState("");
+  const [asked, setAsked] = useSessionState("plugins.asked", "");
   const [askRun, setAskRun] = useState(0);
   const [pluginFilter, setPluginFilter] = useState(
     () => localStorage.getItem(PLUGIN_FILTER_KEY) ?? ALL_PLUGINS,
@@ -49,7 +50,8 @@ export function Plugins({ active = true }: { active?: boolean }) {
   const [arranging, setArranging] = useState(false);
   const genRef = useRef(0);
   const searchGen = useRef(0);
-  void active;
+  const scrollRef = useRef<HTMLElement>(null);
+  useScrollMemory("plugins", scrollRef, active);
 
   const load = useCallback(() => {
     const gen = ++genRef.current;
@@ -160,7 +162,7 @@ export function Plugins({ active = true }: { active?: boolean }) {
   const searchingShelf = { id: "plugin-search", title: t("Results for {q}", { q: asked }) };
 
   return (
-    <main className="flex-1 overflow-y-auto px-12 pb-24 pt-28">
+    <main ref={scrollRef} className="flex-1 overflow-y-auto px-12 pb-24 pt-28">
       <div {...contentDrag} className="flex flex-col gap-8">
         <header className="flex items-center justify-end gap-6">
           {!loading && catalogs.length > 0 && (

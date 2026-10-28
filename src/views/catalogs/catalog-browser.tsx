@@ -2,6 +2,7 @@ import { ChevronDown } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { browseFetcher, catalogTypeLabelKey, type BrowseCatalog } from "@/lib/catalog-browse";
+import { useSessionState } from "@/lib/session-state";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 
@@ -131,9 +132,9 @@ function PillSelect({
 export function CatalogBrowser({ catalogs }: { catalogs: BrowseCatalog[] }) {
   const t = useT();
   const { openGrid } = useView();
-  const [type, setType] = useState("");
-  const [catKey, setCatKey] = useState("");
-  const [genre, setGenre] = useState<string | null>(null);
+  const [type, setType] = useSessionState("catalogs.browser.type", "");
+  const [catKey, setCatKey] = useSessionState("catalogs.browser.catKey", "");
+  const [genre, setGenre] = useSessionState<string | null>("catalogs.browser.genre", null);
 
   const types = useMemo(() => {
     const seen = new Set<string>();
@@ -147,23 +148,26 @@ export function CatalogBrowser({ catalogs }: { catalogs: BrowseCatalog[] }) {
   }, [catalogs]);
 
   useEffect(() => {
-    if (!types.includes(type)) {
-      setType(types[0] ?? "");
-      setCatKey("");
-      setGenre(null);
-    }
-  }, [types, type]);
+    if (types.length === 0 || types.includes(type)) return;
+    setType(types[0]);
+    setCatKey("");
+    setGenre(null);
+  }, [types, type, setType, setCatKey, setGenre]);
 
   const ofType = useMemo(() => catalogs.filter((c) => c.type === type), [catalogs, type]);
 
   useEffect(() => {
-    if (!ofType.some((c) => c.key === catKey)) {
-      setCatKey(ofType[0]?.key ?? "");
-      setGenre(null);
-    }
-  }, [ofType, catKey]);
+    if (ofType.length === 0 || ofType.some((c) => c.key === catKey)) return;
+    setCatKey(ofType[0]?.key ?? "");
+    setGenre(null);
+  }, [ofType, catKey, setCatKey, setGenre]);
 
   const selected = useMemo(() => ofType.find((c) => c.key === catKey) ?? null, [ofType, catKey]);
+
+  useEffect(() => {
+    if (!selected || genre == null || selected.genres.includes(genre)) return;
+    setGenre(null);
+  }, [selected, genre, setGenre]);
 
   const typeLabel = (value: string) => {
     const key = catalogTypeLabelKey(value);

@@ -9,6 +9,7 @@ import { layoutHasGlobalBack } from "@/lib/theme";
 import { tmdbSearchCollections, type CollectionHit } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { useT } from "@/lib/i18n";
 import { useCategoryFeed } from "./collections/use-category-feed";
 
@@ -25,8 +26,8 @@ export function CollectionsView() {
   const scrollRef = useRef<HTMLElement>(null);
   useScrollMemory("collections", scrollRef);
 
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<string>("All");
+  const [query, setQuery] = useSessionState("collections.query", "");
+  const [category, setCategory] = useSessionState<string>("collections.category", "All");
   const [stuck, setStuck] = useState(false);
   const stickySentinelRef = useRef<HTMLDivElement>(null);
   const searchActive = query.trim().length >= 2;
