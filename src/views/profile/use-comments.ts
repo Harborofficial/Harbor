@@ -7,8 +7,9 @@ import {
   ProfileApiError,
   setCommentLike,
 } from "./profile-api";
+import { composeQuotedBody, ratingQuoteLength, type RatingQuote } from "@/lib/ratings/quote";
 import type { Comment, LoadState } from "./profile-types";
-import { stripUrls, validateComment, type ComposeIssue } from "./text-safety";
+import { COMMENT_MAX, stripUrls, validateComment, type ComposeIssue } from "./text-safety";
 
 export type CommentsController = {
   state: LoadState;
@@ -17,7 +18,7 @@ export type CommentsController = {
   cursor?: string;
   hasMore: boolean;
   loadMore: () => void;
-  submit: (raw: string, parentId?: string) => Promise<ComposeIssue>;
+  submit: (raw: string, parentId?: string, quote?: RatingQuote | null) => Promise<ComposeIssue>;
   remove: (id: string) => Promise<void>;
   toggleLike: (id: string) => Promise<void>;
   sending: boolean;
@@ -73,14 +74,16 @@ export function useComments(handle: string): CommentsController {
   }, [handle, cursor, authKey]);
 
   const submit = useCallback(
-    async (raw: string, parentId?: string): Promise<ComposeIssue> => {
-      const issue = validateComment(raw, lastSentAt.current, Date.now());
+    async (raw: string, parentId?: string, quote?: RatingQuote | null): Promise<ComposeIssue> => {
+      const budget = quote ? COMMENT_MAX - ratingQuoteLength(quote) : COMMENT_MAX;
+      const issue = validateComment(raw, lastSentAt.current, Date.now(), budget);
       if (issue) return issue;
       if (!authKey) return "signin";
       const clean = stripUrls(raw.trim());
+      const body = quote ? composeQuotedBody(quote, clean) : clean;
       setSending(true);
       try {
-        const created = await postComment(handle, clean, parentId);
+        const created = await postComment(handle, body, parentId);
         if (identityRef.current !== identity || currentAuthor()?.handle !== authKey) return null;
         lastSentAt.current = Date.now();
         setComments((cur) => [{ ...created, parentId: created.parentId ?? parentId }, ...cur]);

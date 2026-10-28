@@ -4,7 +4,9 @@ import { useAuth } from "@/lib/auth";
 import { socialPatch } from "@/lib/social/client";
 import {
   CARD_ORDER_DEFAULT,
+  canCommentOnRating,
   effectiveOrder,
+  isCardShown,
   moveCard,
   sanitizeLayout,
   type CardKey,
@@ -37,6 +39,8 @@ import { AboutCard } from "./about-card";
 import { FavoritesCard } from "./favorites-card";
 import { FavoritesPicker } from "./favorites-picker";
 import type { FavoriteKind } from "./use-favorites";
+import type { PublicRating } from "@/lib/ratings/types";
+import { ratingQuoteFrom, type RatingQuote } from "@/lib/ratings/quote";
 import { RatingsCard } from "./ratings-card";
 import { UserRatings } from "@/views/ratings/user-ratings";
 import { ImportModal } from "@/views/ratings/import/import-modal";
@@ -58,6 +62,8 @@ import { Showcase } from "./showcase";
 import { useProfile } from "./use-profile";
 import { CanvasCard } from "./customization/canvas-frame";
 import { resolveCustomization, useFontLink } from "./customization/apply";
+import { profileThemeBackground } from "@/lib/profile-theme";
+import { ProfileThemeProvider } from "./profile-theme-context";
 
 export function ProfileView({
   handle,
@@ -76,7 +82,9 @@ export function ProfileView({
   const isNuvio = settings.accountProvider === "nuvio";
   const nuvioState = loadNuvioState();
   const activeNuvioProfile = isNuvio
-    ? (nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) || nuvioState.profiles[0] || null)
+    ? nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) ||
+      nuvioState.profiles[0] ||
+      null
     : null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -84,6 +92,8 @@ export function ProfileView({
   const [pickingFav, setPickingFav] = useState<FavoriteKind | null>(null);
   const [expanded, setExpanded] = useState<null | "lists" | "badges" | "activity">(null);
   const [showRatings, setShowRatings] = useState(false);
+  const [quoteSeed, setQuoteSeed] = useState<{ quote: RatingQuote; nonce: number } | null>(null);
+  const commentsRef = useRef<HTMLDivElement>(null);
   const [importingRatings, setImportingRatings] = useState(false);
   const [arranging, setArranging] = useState(false);
   const [nuvioStats, setNuvioStats] = useState({ episodes: 0, movies: 0, minutes: 0 });
@@ -162,6 +172,15 @@ export function ProfileView({
     if (isOwner && consumeProfileEditIntent(handle)) setEditing(true);
   }, [isOwner, handle]);
 
+  // Scroll only after the quote seed has reached the visible Comments composer.
+  useEffect(() => {
+    if (!quoteSeed) return;
+    const frame = requestAnimationFrame(() => {
+      commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [quoteSeed]);
+
   useEffect(() => {
     if (!editing && !arranging && !pickingLists && !pickingFav && expanded == null) return;
     return pushBackHandler(() => {
@@ -181,13 +200,13 @@ export function ProfileView({
   const locked = summary.private && !summary.isOwner;
 
   const ownerAvatar = summary.isOwner
-    ? (isNuvio && activeNuvioProfile
-        ? (resolveNuvioAvatar(activeNuvioProfile) || currentAuthor()?.avatar || undefined)
-        : activeProfile?.avatar ||
-          settings.harborAvatar ||
-          user?.avatar ||
-          currentAuthor()?.avatar ||
-          undefined)
+    ? isNuvio && activeNuvioProfile
+      ? resolveNuvioAvatar(activeNuvioProfile) || currentAuthor()?.avatar || undefined
+      : activeProfile?.avatar ||
+        settings.harborAvatar ||
+        user?.avatar ||
+        currentAuthor()?.avatar ||
+        undefined
     : undefined;
   const heroAvatar = summary.isOwner
     ? ownerAvatar || summary.avatarUrl
@@ -211,6 +230,7 @@ export function ProfileView({
   }
 
   const c = resolveCustomization(summary);
+  const theme = c.themeScope;
   const featuredLists = summary.featuredLists?.map((featured) => {
     if (!summary.isOwner || featured.description) return featured;
     const local = localLists.find(
@@ -225,6 +245,16 @@ export function ProfileView({
     const next = { order, hidden };
     patchSummary({ ...summary, cardLayout: next });
     void socialPatch("/social/me/profile", { cardLayout: next }).catch(() => {});
+  };
+  // Quoting a rating closes the ratings view, hands the rating to the comments composer and takes
+  // the viewer there, so the next thing they type replies to that review.
+  const commentOnRating = (rating: PublicRating) => {
+    if (!canCommentOnRating(layout)) return;
+    setShowRatings(false);
+    setQuoteSeed((prev) => ({
+      quote: ratingQuoteFrom(rating, handle),
+      nonce: (prev?.nonce ?? 0) + 1,
+    }));
   };
   const cardNodes: Partial<Record<CardKey, ReactNode>> = {
     about: (
@@ -320,6 +350,9 @@ export function ProfileView({
         isOwner={summary.isOwner}
         signedIn={viewerSignedIn}
         onOpenAuthor={onOpenProfile}
+        onOpenMeta={onOpenMeta}
+        seedQuote={quoteSeed}
+        ownerAvatar={summary.avatarUrl}
       />
     ),
   };
@@ -337,7 +370,9 @@ export function ProfileView({
             moviesWatched: Math.max(summary.counts.moviesWatched ?? 0, nuvioStats.movies),
             episodesWatched: Math.max(summary.counts.episodesWatched ?? 0, nuvioStats.episodes),
             minutesWatched: Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes),
-            hoursWatched: Math.floor(Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes) / 60),
+            hoursWatched: Math.floor(
+              Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes) / 60,
+            ),
           },
         }
       : summary.isOwner && watchedBreakdown.ready
@@ -355,175 +390,194 @@ export function ProfileView({
         : summary;
 
   return (
-    <div
-      ref={scrollRef}
-      data-harbor-no-context-menu
-      className="h-full overflow-y-auto"
-      style={c.background ? { background: c.background } : undefined}
-    >
-      <ProfileHero
-        p={heroSummary}
-        avatar={heroAvatar}
-        avatarFallback={heroAvatarFallback}
-        mangaReadOverride={mangaReadCount}
-        badges={badges}
-        userFont={c.font}
-        hideBanner={c.hideTopBanner}
-        onEdit={() => setEditing(true)}
-        onPatch={patchSummary}
-      />
-      <ScrollToTop targetRef={scrollRef} />
+    <ProfileThemeProvider theme={c.theme}>
+      <div
+        ref={scrollRef}
+        data-harbor-no-context-menu
+        data-profile-ui={theme.ui || undefined}
+        className="h-full overflow-y-auto"
+        style={{
+          ...theme.vars,
+          ...profileThemeBackground(theme, c.background),
+          ...(theme.colorScheme ? { colorScheme: theme.colorScheme } : {}),
+        }}
+      >
+        <ProfileHero
+          p={heroSummary}
+          avatar={heroAvatar}
+          avatarFallback={heroAvatarFallback}
+          mangaReadOverride={mangaReadCount}
+          badges={badges}
+          userFont={c.font}
+          hideBanner={c.hideTopBanner}
+          onEdit={() => setEditing(true)}
+          onPatch={patchSummary}
+        />
+        <ScrollToTop targetRef={scrollRef} />
 
-      <div className="mx-auto w-full max-w-6xl px-6 pb-16 lg:px-10">
-        {locked ? (
-          <div className="space-y-6">
-            <ProfilePrivate alias={summary.alias} />
-            <CommentsSection
-              handle={handle}
-              isOwner={summary.isOwner}
-              signedIn={!!authKey}
-              onOpenAuthor={onOpenProfile}
-            />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
-            <div className="min-w-0 space-y-6">
-              {orderedCards.map((k, i) => {
-                const isHidden = hiddenSet.has(k);
-                if (isHidden && !arranging) return null;
-                return (
-                  <div key={k}>
-                    {arranging && summary.isOwner && (
-                      <ProfileCardControls
-                        cardKey={k}
-                        index={i}
-                        total={orderedCards.length}
-                        hidden={isHidden}
-                        onMove={(dir) =>
-                          applyLayout(moveCard(orderedCards, k, dir), [...hiddenSet])
-                        }
-                        onToggleHide={() => {
-                          const h = new Set(hiddenSet);
-                          if (h.has(k)) h.delete(k);
-                          else h.add(k);
-                          applyLayout(orderedCards, [...h]);
-                        }}
-                      />
-                    )}
-                    <div className={isHidden && arranging ? "opacity-40" : ""}>{cardNodes[k]}</div>
-                  </div>
-                );
-              })}
+        <div className="mx-auto w-full max-w-6xl px-6 pb-16 lg:px-10">
+          {locked ? (
+            <div className="space-y-6" ref={commentsRef}>
+              <ProfilePrivate alias={summary.alias} />
+              <CommentsSection
+                handle={handle}
+                isOwner={summary.isOwner}
+                signedIn={!!authKey}
+                onOpenAuthor={onOpenProfile}
+                onOpenMeta={onOpenMeta}
+                seedQuote={quoteSeed}
+                ownerAvatar={summary.avatarUrl}
+              />
             </div>
-            <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-              <ProfileAudioCard audioUrl={summary.audioUrl} />
-              <MinecraftCard
-                name={summary.minecraftName}
-                background={summary.minecraftBg}
-                hideTitle={c.hideCardTitles}
-              />
-              <WatchNowCard watching={summary.watching} />
-              {summary.isOwner && settings.showSimklCard ? (
-                <SimklCard isOwner hideTitle={c.hideCardTitles} published={summary.simkl} />
-              ) : !summary.isOwner && summary.simkl ? (
-                <SimklCard isOwner={false} hideTitle={c.hideCardTitles} published={summary.simkl} />
-              ) : null}
-              {summary.isOwner && settings.showLetterboxdCard ? (
-                <LetterboxdCard
-                  isOwner
+          ) : (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
+              <div className="min-w-0 space-y-6">
+                {orderedCards.map((k, i) => {
+                  const isHidden = hiddenSet.has(k);
+                  if (!isCardShown(layout, k, { arranging })) return null;
+                  return (
+                    <div key={k} ref={k === "comments" ? commentsRef : undefined}>
+                      {arranging && summary.isOwner && (
+                        <ProfileCardControls
+                          cardKey={k}
+                          index={i}
+                          total={orderedCards.length}
+                          hidden={isHidden}
+                          onMove={(dir) =>
+                            applyLayout(moveCard(orderedCards, k, dir), [...hiddenSet])
+                          }
+                          onToggleHide={() => {
+                            const h = new Set(hiddenSet);
+                            if (h.has(k)) h.delete(k);
+                            else h.add(k);
+                            applyLayout(orderedCards, [...h]);
+                          }}
+                        />
+                      )}
+                      <div className={isHidden && arranging ? "opacity-40" : ""}>
+                        {cardNodes[k]}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+                <ProfileAudioCard audioUrl={summary.audioUrl} />
+                <MinecraftCard
+                  name={summary.minecraftName}
+                  background={summary.minecraftBg}
                   hideTitle={c.hideCardTitles}
-                  published={summary.letterboxd}
                 />
-              ) : !summary.isOwner && summary.letterboxd ? (
-                <LetterboxdCard
-                  isOwner={false}
-                  hideTitle={c.hideCardTitles}
-                  published={summary.letterboxd}
+                <WatchNowCard watching={summary.watching} />
+                {summary.isOwner && settings.showSimklCard ? (
+                  <SimklCard isOwner hideTitle={c.hideCardTitles} published={summary.simkl} />
+                ) : !summary.isOwner && summary.simkl ? (
+                  <SimklCard
+                    isOwner={false}
+                    hideTitle={c.hideCardTitles}
+                    published={summary.simkl}
+                  />
+                ) : null}
+                {summary.isOwner && settings.showLetterboxdCard ? (
+                  <LetterboxdCard
+                    isOwner
+                    hideTitle={c.hideCardTitles}
+                    published={summary.letterboxd}
+                  />
+                ) : !summary.isOwner && summary.letterboxd ? (
+                  <LetterboxdCard
+                    isOwner={false}
+                    hideTitle={c.hideCardTitles}
+                    published={summary.letterboxd}
+                  />
+                ) : null}
+                <FriendsPanel
+                  friends={summary.isOwner || summary.friendsPublic ? friends : []}
+                  onOpen={onOpenProfile}
+                  isOwner={summary.isOwner}
+                  total={summary.counts.friends}
+                  visibilityPrivate={!summary.isOwner && !summary.friendsPublic}
                 />
-              ) : null}
-              <FriendsPanel
-                friends={summary.isOwner || summary.friendsPublic ? friends : []}
-                onOpen={onOpenProfile}
-                isOwner={summary.isOwner}
-                total={summary.counts.friends}
-                visibilityPrivate={!summary.isOwner && !summary.friendsPublic}
-              />
-              <GroupsPanel isOwner={summary.isOwner} handle={handle} />
-              <SocialsPanel
-                socials={summary.socials}
-                isOwner={summary.isOwner}
-                onSaved={patchSummary}
-              />
-            </aside>
+                <GroupsPanel isOwner={summary.isOwner} handle={handle} />
+                <SocialsPanel
+                  socials={summary.socials}
+                  isOwner={summary.isOwner}
+                  onSaved={patchSummary}
+                />
+              </aside>
+            </div>
+          )}
+          {expanded && (
+            <ProfileViewAll
+              section={expanded}
+              lists={featuredLists ?? []}
+              badges={badges}
+              activity={activity}
+              signedIn={viewerSignedIn}
+              isOwner={summary.isOwner}
+              handle={handle}
+              onOpenMeta={onOpenMeta}
+              onClose={() => setExpanded(null)}
+            />
+          )}
+          {pickingLists && (
+            <MyListsPicker
+              onClose={() => {
+                setPickingLists(false);
+                reload();
+              }}
+            />
+          )}
+          {pickingFav && (
+            <FavoritesPicker
+              kind={pickingFav}
+              initial={{
+                game: summary.favorites?.game ?? [],
+                book: summary.favorites?.book ?? [],
+                music: summary.favorites?.music ?? [],
+              }}
+              onClose={() => setPickingFav(null)}
+              onSaved={patchSummary}
+            />
+          )}
+          {showRatings && (
+            <UserRatings
+              handle={handle}
+              alias={summary.alias}
+              isOwner={summary.isOwner}
+              onOpenMeta={onOpenMeta}
+              onClose={() => setShowRatings(false)}
+              onComment={viewerSignedIn ? commentOnRating : undefined}
+              commentDisabled={!canCommentOnRating(layout)}
+            />
+          )}
+          {importingRatings && (
+            <ImportModal
+              onClose={() => {
+                setImportingRatings(false);
+                reload();
+              }}
+            />
+          )}
+        </div>
+
+        {arranging && summary.isOwner && (
+          <div className="pointer-events-none fixed inset-x-0 bottom-7 z-[130] flex justify-center px-6">
+            <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-elevated/95 py-2 pe-2 ps-4 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ring-1 ring-edge-soft backdrop-blur-md">
+              <span className="text-[13px] text-ink-muted">{t("Move or hide your cards")}</span>
+              <button
+                onClick={() => {
+                  setArranging(false);
+                  setEditing(true);
+                }}
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90"
+              >
+                <Check size={15} strokeWidth={2.6} /> {t("Save")}
+              </button>
+            </div>
           </div>
-        )}
-        {expanded && (
-          <ProfileViewAll
-            section={expanded}
-            lists={featuredLists ?? []}
-            badges={badges}
-            activity={activity}
-            signedIn={viewerSignedIn}
-            isOwner={summary.isOwner}
-            handle={handle}
-            onOpenMeta={onOpenMeta}
-            onClose={() => setExpanded(null)}
-          />
-        )}
-        {pickingLists && (
-          <MyListsPicker
-            onClose={() => {
-              setPickingLists(false);
-              reload();
-            }}
-          />
-        )}
-        {pickingFav && (
-          <FavoritesPicker
-            kind={pickingFav}
-            initial={{
-              game: summary.favorites?.game ?? [],
-              book: summary.favorites?.book ?? [],
-              music: summary.favorites?.music ?? [],
-            }}
-            onClose={() => setPickingFav(null)}
-            onSaved={patchSummary}
-          />
-        )}
-        {showRatings && (
-          <UserRatings
-            handle={handle}
-            alias={summary.alias}
-            onOpenMeta={onOpenMeta}
-            onClose={() => setShowRatings(false)}
-          />
-        )}
-        {importingRatings && (
-          <ImportModal
-            onClose={() => {
-              setImportingRatings(false);
-              reload();
-            }}
-          />
         )}
       </div>
-
-      {arranging && summary.isOwner && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-7 z-[130] flex justify-center px-6">
-          <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-elevated/95 py-2 pe-2 ps-4 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] ring-1 ring-edge-soft backdrop-blur-md">
-            <span className="text-[13px] text-ink-muted">{t("Move or hide your cards")}</span>
-            <button
-              onClick={() => {
-                setArranging(false);
-                setEditing(true);
-              }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90"
-            >
-              <Check size={15} strokeWidth={2.6} /> {t("Save")}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    </ProfileThemeProvider>
   );
 }

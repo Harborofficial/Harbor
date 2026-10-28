@@ -8,6 +8,7 @@ import * as icons from "lucide-react";
 import { JSDOM } from "jsdom";
 import { ConfirmableAction } from "../src/components/context-menu/action-items.tsx";
 import { executeContextAction } from "../src/lib/context-actions.ts";
+import { composeQuotedBody, parseQuotedBody } from "../src/lib/ratings/quote.ts";
 
 for (const kind of ["group", "theme"] as const) {
   test(`${kind} comment confirmation rejects an actor change even when the displayed handle is unchanged`, async () => {
@@ -42,6 +43,8 @@ for (const kind of ["group", "theme"] as const) {
           key.replace(/\{(\w+)\}/g, (_, name) => String(values?.[name] ?? name)),
       },
       "@/lib/use-autosize": { useAutosize: noop },
+      "@/lib/ratings/quote": { composeQuotedBody, parseQuotedBody },
+      "@/views/profile/rating-picker": { QuoteChip: noop },
       "./post-body": { PostBody: ({ body }) => body },
       "@/lib/social/group-posts": {
         deleteGroupPost: async () => {

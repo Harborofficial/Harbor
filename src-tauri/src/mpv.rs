@@ -485,6 +485,16 @@ fn apply_pre_init(
     // hardware frames for mpv's d3d11vpp filter.
     let rtx_video = rtx || rtx_vsr;
     let on_mac_embed = cfg!(target_os = "macos") && embed_hwnd.is_some();
+    #[cfg(target_os = "macos")]
+    let macos_major = objc2_foundation::NSProcessInfo::processInfo()
+        .operatingSystemVersion()
+        .majorVersion;
+    #[cfg(target_os = "macos")]
+    if macos_major == 27 {
+        // macOS 27 can reject planar CoreAudio formats, forcing mpv to fall back
+        // to AVFoundation, which can stall when playback speed changes.
+        set("audio-format", "float");
+    }
     if on_mac_embed {
         set("hwdec", "videotoolbox-copy");
         set("force-window", "no");
