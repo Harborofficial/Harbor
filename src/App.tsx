@@ -224,6 +224,7 @@ const importCuratedList = () => import("@/views/curated-list");
 const importFilter = () => import("@/views/filter");
 const importBrands = () => import("@/views/brands");
 const importGrid = () => import("@/views/grid");
+const importFolderHub = () => import("@/views/folder-hub");
 const importPerson = () => import("@/views/person");
 const importPeople = () => import("@/views/people");
 const importCollection = () => import("@/views/collection");
@@ -263,6 +264,7 @@ const CuratedListView = lazy(() =>
 const FilterView = lazy(() => importFilter().then((m) => ({ default: m.FilterView })));
 const BrandsView = lazy(() => importBrands().then((m) => ({ default: m.BrandsView })));
 const GridView = lazy(() => importGrid().then((m) => ({ default: m.GridView })));
+const FolderHubView = lazy(() => importFolderHub().then((m) => ({ default: m.FolderHubView })));
 const PersonView = lazy(() => importPerson().then((m) => ({ default: m.PersonView })));
 const PeopleView = lazy(() => importPeople().then((m) => ({ default: m.PeopleView })));
 const ProfileView = lazy(() =>
@@ -900,6 +902,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
     filter,
     brands,
     grid,
+    folderHub,
     awardType,
     animeAwardSource,
     curatedListId,
@@ -1448,6 +1451,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
       topKind === "meta" ||
       topKind === "picker" ||
       topKind === "grid" ||
+      topKind === "folder-hub" ||
       topKind === "collection";
     if (!allowed) setView("kids");
   }, [kid, player, topKind, setView]);
@@ -1486,6 +1490,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const filterTop = topKind === "filter";
   const brandsTop = topKind === "brands";
   const gridTop = topKind === "grid";
+  const folderHubTop = topKind === "folder-hub";
   const awardTop = topKind === "award";
   const animeAwardTop = topKind === "anime-award";
   const curatedListTop = topKind === "curated-list";
@@ -1660,6 +1665,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const filterAlive = useKeepAlive(filterTop, !!filter);
   const brandsAlive = useKeepAlive(brandsTop, !!brands);
   const gridAlive = useKeepAlive(gridTop, !!grid, stackKinds.includes("grid"));
+  const folderHubAlive = useKeepAlive(folderHubTop, !!folderHub, stackKinds.includes("folder-hub"));
   const awardAlive = useKeepAlive(awardTop, awardTop);
   const animeAwardAlive = useKeepAlive(animeAwardTop, animeAwardTop && !!animeAwardSource);
   const curatedListAlive = useKeepAlive(curatedListTop, curatedListTop && !!curatedListId);
@@ -2188,6 +2194,18 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <div {...layerProps(gridTop)}>
                 <Suspense fallback={null}>
                   <GridView key={`grid-${grid.title}`} grid={grid} />
+                </Suspense>
+              </div>
+            )}
+            {folderHubAlive && folderHub && (
+              <div {...layerProps(folderHubTop)}>
+                <Suspense fallback={null}>
+                  <FolderHubView
+                    key={`folder-hub-${folderHub.sourceId}-${folderHub.folder.id}`}
+                    folder={folderHub.folder}
+                    sourceId={folderHub.sourceId}
+                    active={folderHubTop}
+                  />
                 </Suspense>
               </div>
             )}

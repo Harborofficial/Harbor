@@ -22,6 +22,7 @@ export type SourceFolder = {
   focusGifUrl: string | null;
   coverEmoji?: string | null;
   tileShape: "LANDSCAPE" | "POSTER";
+  layout?: "CLASSIC" | "GRID";
   hideTitle?: boolean;
   catalogSources?: CatalogSource[];
   sources?: NativeSource[];
@@ -74,6 +75,56 @@ export function isValidSourceRow(data: any): data is SourceRow {
   }
 
   return true;
+}
+
+export function folderLayout(
+  customSources: SourceRow[],
+  sourceId: string,
+  folderId: string,
+): SourceFolder["layout"] {
+  return customSources
+    .find((row) => row.id === sourceId)
+    ?.folders.find((f) => f.id === folderId)?.layout;
+}
+
+export function updateSourceFolder(
+  customSources: SourceRow[],
+  sourceId: string,
+  folderId: string,
+  updates: Partial<SourceFolder>,
+): SourceRow[] {
+  return customSources.map((sr) =>
+    sr.id === sourceId && sr.folders.some((f) => f.id === folderId)
+      ? {
+          ...sr,
+          folders: sr.folders.map((f) => (f.id === folderId ? { ...f, ...updates } : f)),
+        }
+      : sr,
+  );
+}
+
+export function tmdbSourceParams(
+  source: Pick<NativeSource, "sortBy" | "filters" | "mediaType" | "tmdbSourceType" | "tmdbId">,
+  page: number,
+): Record<string, string> {
+  const params: Record<string, string> = { page: String(page) };
+  if (source.sortBy) params["sort_by"] = source.sortBy;
+  for (const [k, v] of Object.entries(source.filters ?? {})) {
+    if (k === "year") {
+      params[source.mediaType === "TV" ? "first_air_date_year" : "primary_release_year"] =
+        String(v);
+    } else if (k === "voteCountGte") {
+      params["vote_count.gte"] = String(v);
+    } else if (k === "voteAverageGte") {
+      params["vote_average.gte"] = String(v);
+    } else {
+      params[k.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)] = String(v);
+    }
+  }
+  if (source.tmdbSourceType === "COMPANY" && source.tmdbId) {
+    params["with_companies"] = String(source.tmdbId);
+  }
+  return params;
 }
 
 export function parseSourceRows(jsonString: string): SourceRow[] {
