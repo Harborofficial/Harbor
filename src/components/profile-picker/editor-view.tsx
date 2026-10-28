@@ -571,7 +571,8 @@ export function EditorView({
           if (isNuvio && editing && nuvioSlot) {
             await setNuvioPin(nuvioSlot, pin, tempOldPin || undefined);
             setTempOldPin(null);
-            updateProfile(editing.id, { passwordHash: "pin-protected" });
+            const hash = await hashProfilePassword(pin);
+            updateProfile(editing.id, { passwordHash: hash });
           } else if (editing) {
             const hash = await hashProfilePassword(pin);
             updateProfile(editing.id, { passwordHash: hash });

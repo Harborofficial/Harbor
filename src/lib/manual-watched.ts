@@ -4,7 +4,6 @@ import {
   canPersistWatched,
   stremioProfileId as activeProfileId,
   primaryProfileId,
-  getNuvioActiveSlot,
 } from "./active-profile-id";
 import type { LibraryItem } from "@/lib/stremio";
 import { noteNotify } from "@/lib/render-cause";
@@ -48,16 +47,7 @@ let remoteCache: Set<string> | null = null;
 function storeKey(kind: keyof typeof PREFIXES): string {
   if (isNuvioProviderActive()) {
     const scope = nuvioWatchedScope();
-    const scopedKey = `${PREFIXES[kind]}${scope}`;
-    const slotKey = `${PREFIXES[kind]}nuvio.${getNuvioActiveSlot()}`;
-    if (
-      typeof localStorage !== "undefined" &&
-      !localStorage.getItem(scopedKey) &&
-      localStorage.getItem(slotKey)
-    ) {
-      return slotKey;
-    }
-    return scopedKey;
+    return `${PREFIXES[kind]}${scope}`;
   }
   const id = activeProfileId();
   return id ? PREFIXES[kind] + id : LEGACY_KEYS[kind];

@@ -379,8 +379,9 @@ export async function removeStremioLibraryItem(
 
 export async function expungeLeachedNuvioItemsFromStremio(
   authKey?: string | null,
-  leachedIds: string[] = ["tt0944947", "tt21868350"],
+  leachedIds: string[] = [],
 ): Promise<void> {
+  if (!isNuvioProviderActive()) return;
   const ak = authKey || readPrimaryStremioAuthKey();
   if (!ak) return;
   const targetIds = new Set<string>(leachedIds);
@@ -390,9 +391,11 @@ export async function expungeLeachedNuvioItemsFromStremio(
     }
   } catch {}
 
+  if (targetIds.size === 0) return;
+
   for (const id of targetIds) {
     try {
-      await removeStremioLibraryItem(ak, id, true);
+      await removeStremioLibraryItem(ak, id, false);
     } catch {}
   }
 

@@ -73,6 +73,12 @@ export function useNuvioScrobble({
     lastPushedPosRef.current = effectivePos;
     lastPushedTimeRef.current = Date.now();
 
+    const progressPct = effectivePos / currentSnap.durationSec;
+    if (progressPct >= 0.9 && !watchedReportedRef.current) {
+      watchedReportedRef.current = true;
+      void markWatchedInNuvio(profileTarget, metaId, effSeason, effEpisode);
+    }
+
     try {
       await pushWatchProgressToNuvio(
         profileTarget,
@@ -125,10 +131,14 @@ export function useNuvioScrobble({
         void markWatchedInNuvio(profileTarget, metaId, effSeason, effEpisode);
       }
 
-      if (Math.abs(clockPos - lastPushedPosRef.current) >= 2) {
+      const now = Date.now();
+      if (
+        now - lastPushedTimeRef.current >= TICK_MS &&
+        Math.abs(clockPos - lastPushedPosRef.current) >= 2
+      ) {
         void doPush("30s-interval");
       }
-    }, TICK_MS);
+    }, 1_000);
 
     return () => window.clearInterval(id);
   }, [snap.status, metaId, effSeason, effEpisode]);

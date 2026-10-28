@@ -94,7 +94,7 @@ export default defineConfig(({ mode }) => {
           },
         }),
     server: {
-      host: devHost || "0.0.0.0",
+      host: devHost || "127.0.0.1",
       port: 1420,
       strictPort: true,
       ...(devHost ? { hmr: { protocol: "ws", host: devHost, port: 1421 } } : {}),

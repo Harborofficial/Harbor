@@ -21,8 +21,7 @@ import {
 import { registerProfileDestination, subscribeOpenProfile } from "@/lib/social/open-profile";
 import { subscribeOpenGroup } from "@/lib/social/open-group";
 import { currentAuthor } from "@/lib/theme-auth";
-import { isNuvioProviderActive } from "@/lib/active-profile-id";
-import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
+import { isNuvioProviderActive, loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { useBigPicture } from "@/lib/big-picture";
 import type { Meta } from "./cinemeta";
 import type { PeopleDept, RankSource } from "./harbor-rank";

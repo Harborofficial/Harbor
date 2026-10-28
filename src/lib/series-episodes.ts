@@ -31,7 +31,6 @@ import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/an
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
 import { foreignAnimeProviderSeasons } from "./streams/anime-identity";
-import { tmdbImdbCached } from "./providers/tmdb/tmdb-imdb-resolve";
 
 async function filterForeignAnimeSeasons(
   metaId: string,
@@ -518,29 +517,6 @@ export async function fetchEpisodeList(
     const all: PlayEpisode[] = [];
     for (const s of seasons) all.push(...(await fetchSeasonEpisodes(meta, s, opts)));
     return all;
-  }
-  const cleanId = meta.id.replace(/^(series|movie|tmdb):/, "").trim();
-  const cachedImdb = tmdbImdbCached(meta.id) || tmdbImdbCached(`tmdb:${cleanId}`);
-  if (cachedImdb?.startsWith("tt")) {
-    const res = await loadCinemetaEpisodes(cachedImdb, opts.tmdbKey);
-    if (res && res.length > 0) return res;
-  }
-  if (meta.name && meta.name !== cleanId) {
-    try {
-      const searchRes = await fetch(
-        `https://v3-cinemeta.strem.io/catalog/series/top/search=${encodeURIComponent(
-          meta.name,
-        )}.json`,
-      ).catch(() => null);
-      if (searchRes?.ok) {
-        const data = await searchRes.json().catch(() => null);
-        const hit = data?.metas?.[0];
-        if (hit?.id && hit.id.startsWith("tt")) {
-          const res = await loadCinemetaEpisodes(hit.id, opts.tmdbKey);
-          if (res && res.length > 0) return res;
-        }
-      }
-    } catch {}
   }
   return (await getNonStandardEpisodes(meta)) ?? [];
 }

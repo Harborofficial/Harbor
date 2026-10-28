@@ -20,7 +20,7 @@ export function movieWatchedStoreKey(slotOrProfile?: string | number): string {
   if (isNuvioProviderActive()) {
     const slot =
       slotOrProfile != null ? Number(slotOrProfile) || getNuvioActiveSlot() : getNuvioActiveSlot();
-    return `harbor.moviewatched.nuvio.v1.${slot}`;
+    return `harbor.moviewatched.${nuvioWatchedScope(slot)}`;
   }
   const id = slotOrProfile ? String(slotOrProfile) : activeProfileId();
   return id ? KEY_PREFIX + id : LEGACY_KEY;

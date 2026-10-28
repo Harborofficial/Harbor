@@ -80,6 +80,13 @@ function harness() {
       exitWindowFullscreenOnPlayerClose: async () => calls.push("fullscreen"),
     },
     "../player-utils": { MAX_AUTORETRY_ATTEMPTS: 3 },
+    "@/lib/theme-auth": { authToken: () => null, currentAuthor: () => null },
+    "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
+    "@/lib/nuvio/nuvio-client": {
+      isNuvioSignedIn: () => false,
+      isNuvioProviderActive: () => false,
+      loadNuvioState: () => ({ profiles: [], activeProfileIndex: 1 }),
+    },
   };
   const load = (path: string): any => {
     const module = { exports: {} };

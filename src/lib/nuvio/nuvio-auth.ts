@@ -432,7 +432,7 @@ export async function signOutNuvio(): Promise<void> {
   if (wasNuvio) {
     window.dispatchEvent(
       new CustomEvent("harbor:account-provider-changed", {
-        detail: { provider: "stremio", skipPicker: true },
+        detail: { provider: "stremio" },
       }),
     );
   }

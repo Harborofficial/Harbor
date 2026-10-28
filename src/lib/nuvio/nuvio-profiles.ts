@@ -11,8 +11,6 @@ import {
   getNuvioAccountId,
 } from "./nuvio-client";
 import { safeFetch } from "@/lib/safe-fetch";
-import { uploadAvatar } from "@/lib/social/avatar";
-import { authToken } from "@/lib/theme-auth";
 import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 import { fetchNuvioAddons } from "./nuvio-sync";
 import { hashProfilePassword } from "@/lib/profile-password";
@@ -349,25 +347,7 @@ export async function uploadNuvioCustomAvatar(
     payloadFilename = `avatar_p${profileIndex}_${timestamp}.${ext}`;
   }
 
-  // 1. Primary Strategy: If signed into Harbor, upload via Harbor's social avatar storage
-  // This directly updates Harbor author's pfp and yields an official public HTTPS URL
-  const token = authToken();
-  if (token && blob) {
-    try {
-      const summary = await uploadAvatar(blob);
-      if (
-        summary?.avatarUrl &&
-        (summary.avatarUrl.startsWith("http://") || summary.avatarUrl.startsWith("https://"))
-      ) {
-        console.log("[nuvio] Avatar uploaded via Harbor social storage:", summary.avatarUrl);
-        return summary.avatarUrl;
-      }
-    } catch (harborErr) {
-      console.warn("[nuvio] Harbor avatar upload failed, falling back to public hosts:", harborErr);
-    }
-  }
-
-  // 2. Secondary Strategy: Upload via public image hosts (Catbox -> Tmpfiles -> Freeimage)
+  // Upload via public image hosts (Catbox -> Tmpfiles -> Freeimage)
   if (blob) {
     // 2a. Catbox
     try {
@@ -823,12 +803,14 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
 
   // Swap PIN cache between slot 1 and targetSlotIndex if any
   try {
-    const pin1 = localStorage.getItem("harbor.nuvio.pin_cache.1");
-    const pinTarget = localStorage.getItem(`harbor.nuvio.pin_cache.${targetSlotIndex}`);
-    if (pinTarget) localStorage.setItem("harbor.nuvio.pin_cache.1", pinTarget);
-    else localStorage.removeItem("harbor.nuvio.pin_cache.1");
-    if (pin1) localStorage.setItem(`harbor.nuvio.pin_cache.${targetSlotIndex}`, pin1);
-    else localStorage.removeItem(`harbor.nuvio.pin_cache.${targetSlotIndex}`);
+    const key1 = getPinCacheKey(1);
+    const keyTarget = getPinCacheKey(targetSlotIndex);
+    const pin1 = localStorage.getItem(key1);
+    const pinTarget = localStorage.getItem(keyTarget);
+    if (pinTarget) localStorage.setItem(key1, pinTarget);
+    else localStorage.removeItem(key1);
+    if (pin1) localStorage.setItem(keyTarget, pin1);
+    else localStorage.removeItem(keyTarget);
 
     localStorage.removeItem("harbor.nuvio.kid.1");
     localStorage.removeItem(`harbor.nuvio.kid.${targetSlotIndex}`);
@@ -856,6 +838,7 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
             avatar_url: targetSlot.avatar_url,
             avatar_color_hex: targetSlot.avatar_color_hex || "#1E88E5",
             uses_primary_addons: false,
+            pin_enabled: Boolean(targetSlot.pin_enabled),
           };
         }
         if (p.profile_index === targetSlotIndex) {
@@ -866,6 +849,7 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
             avatar_url: slot1.avatar_url,
             avatar_color_hex: slot1.avatar_color_hex || "#1E88E5",
             uses_primary_addons: slot1.uses_primary_addons ?? true,
+            pin_enabled: Boolean(slot1.pin_enabled),
           };
         }
         return {
@@ -895,6 +879,14 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
 function getPinCacheKey(profileIndex: number): string {
   const accountId = getNuvioAccountId() || "anon";
   return `harbor.nuvio.pin_cache.${accountId}.${profileIndex}`;
+}
+
+export function getCachedNuvioPinHash(profileIndex: number): string | null {
+  try {
+    return localStorage.getItem(getPinCacheKey(profileIndex));
+  } catch {
+    return null;
+  }
 }
 
 export function clearAllNuvioPinCaches(): void {
@@ -1136,7 +1128,8 @@ export async function clearNuvioPin(
 
     if (!res.ok) {
       const errJson = (await res.json().catch(() => ({}))) as { message?: string };
-      console.warn("[nuvio] clear_profile_pin RPC notice:", errJson);
+      console.warn("[nuvio] clear_profile_pin RPC failure:", errJson);
+      return { unlocked: false, message: errJson.message || "Failed to clear PIN on server" };
     }
 
     forgetNuvioPin(profileIndex);

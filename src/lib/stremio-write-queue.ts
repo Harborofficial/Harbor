@@ -146,10 +146,20 @@ export async function flushWriteQueue(): Promise<void> {
 }
 
 export function startWriteQueueFlusher(): void {
-  if (started || typeof window === "undefined" || isNuvioProviderActive()) return;
+  if (started || typeof window === "undefined") return;
   started = true;
   load();
-  window.addEventListener("online", () => void flushWriteQueue());
-  window.setInterval(() => void flushWriteQueue(), 60000);
-  if (queue.size > 0) void flushWriteQueue();
+  window.addEventListener("online", () => {
+    if (!isNuvioProviderActive()) void flushWriteQueue();
+  });
+  window.setInterval(() => {
+    if (!isNuvioProviderActive()) void flushWriteQueue();
+  }, 60000);
+  window.addEventListener("harbor:account-provider-changed", (e) => {
+    const detail = (e as CustomEvent)?.detail;
+    if (detail?.provider === "stremio" || !isNuvioProviderActive()) {
+      void flushWriteQueue();
+    }
+  });
+  if (!isNuvioProviderActive() && queue.size > 0) void flushWriteQueue();
 }

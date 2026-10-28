@@ -79,6 +79,12 @@ function harness() {
       deleteWatchProgressFromNuvio: async () => {},
       deleteEpisodeWatchProgressFromNuvio: async () => {},
       undismissNextUpInNuvioCloud: async () => {},
+      readCachedWatchProgress: () => null,
+      readCachedWatchedItems: () => [],
+    },
+    "./nuvio/nuvio-playback": {
+      buildNuvioPlaybackItems: () => [],
+      writeCachedNuvioPlaybackItems: () => {},
     },
     "./nuvio/nuvio-library": {
       addNuvioLibraryItem: async () => {},
@@ -86,6 +92,7 @@ function harness() {
     },
     "./local-cw": { saveLocalCw: () => {}, clearLocalCw: () => {} },
     "./resume": { saveResumeMs: () => {} },
+    "./settings/load": { loadStoredSettings: () => ({}) },
   };
   const output = ts.transpileModule(
     readFileSync(new URL("../src/lib/media-provider-actions.ts", import.meta.url), "utf8"),

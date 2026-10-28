@@ -1,5 +1,3 @@
-import { isNuvioProviderActive, getNuvioActiveSlot } from "./active-profile-id";
-
 type CwProfile = {
   id: string;
   isPrimary?: boolean;
@@ -19,8 +17,19 @@ export function cwProfileScope(ownerId?: string): {
   private: boolean;
 } {
   try {
-    if (isNuvioProviderActive()) {
-      const slot = getNuvioActiveSlot();
+    const isNuvio =
+      typeof localStorage !== "undefined" &&
+      (localStorage.getItem("harbor.account-provider") === "nuvio" ||
+        localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"') === true);
+    if (isNuvio) {
+      let slot = 1;
+      try {
+        const raw = localStorage.getItem("harbor.nuvio.state.v1");
+        if (raw) {
+          const idx = JSON.parse(raw)?.activeProfileIndex;
+          if (typeof idx === "number" && idx >= 1 && idx <= 6) slot = idx;
+        }
+      } catch {}
       const pid = ownerId ?? `nuvio-${slot}`;
       return { profileId: pid, sharedId: pid, private: true };
     }

@@ -247,7 +247,7 @@ export function getOrCreateSyncClientId(): string {
  * and library slots to collect every item ID associated with Nuvio.
  */
 export function collectAllNuvioItemIds(): Set<string> {
-  const ids = new Set<string>(["tt0944947", "tt21868350"]);
+  const ids = new Set<string>();
   if (typeof window === "undefined" || !window.localStorage) return ids;
 
   try {

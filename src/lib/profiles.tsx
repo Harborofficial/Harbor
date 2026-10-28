@@ -30,6 +30,7 @@ import {
   updateNuvioProfile,
   deleteNuvioProfile,
   transferPrimaryNuvioProfile,
+  getCachedNuvioPinHash,
 } from "./nuvio/nuvio-profiles";
 
 export const PROFILE_COLORS = [
@@ -78,7 +79,9 @@ function nuvioProfileToHarborProfile(p: NuvioProfile): Profile {
     color: p.avatar_color_hex || PROFILE_COLORS[(p.profile_index - 1) % PROFILE_COLORS.length],
     isPrimary: p.profile_index === 1,
     shareStremioWith: null,
-    passwordHash: p.pin_enabled ? "pin-protected" : null,
+    passwordHash: p.pin_enabled
+      ? getCachedNuvioPinHash(p.profile_index) || "pin-protected"
+      : null,
     hideContent: null,
     lockedTabs,
     kid: p.is_kids ? { age: 7, curfewMinutes: null, parentPinHash: null } : null,
@@ -733,7 +736,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         return true;
       }
     } else {
-      const target = state.profiles.find((p) => p.id === state.activeId);
+      const target = state.profiles.find((p) => p.id === state.activeId) || state.profiles[0];
       if (target?.passwordHash) {
         return true;
       }
@@ -867,7 +870,10 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       clearSessionUnlocks();
       setPickerViewState({ kind: "list" });
       const detail = (e as CustomEvent)?.detail;
-      if (detail?.skipPicker) return;
+      if (detail?.skipPicker) {
+        const target = state.profiles.find((p) => p.id === state.activeId) || state.profiles[0];
+        if (!target?.passwordHash) return;
+      }
       // Slight delay for smooth visual transition so UI switch settles first
       timer = window.setTimeout(() => {
         setPickerOpen(true);

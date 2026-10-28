@@ -22,7 +22,7 @@ export function watchedFlagStoreKey(slotOrProfile?: string | number): string {
   if (isNuvioProviderActive()) {
     const slot =
       slotOrProfile != null ? Number(slotOrProfile) || getNuvioActiveSlot() : getNuvioActiveSlot();
-    return `harbor.watchedFlag.nuvio.v1.${slot}`;
+    return `harbor.watchedFlag.${nuvioWatchedScope(slot)}`;
   }
   const id = slotOrProfile ? String(slotOrProfile) : activeProfileId();
   return id ? KEY_PREFIX + id : LEGACY_KEY;

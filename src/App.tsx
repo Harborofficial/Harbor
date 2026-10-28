@@ -48,6 +48,7 @@ import { exitWindowFullscreenOnPlayerClose, toggleWindowFullscreen } from "@/lib
 import { flushCloudSync } from "@/views/player/hooks/use-stremio-sync";
 import { startWriteQueueFlusher } from "@/lib/stremio-write-queue";
 import { expungeLeachedNuvioItemsFromStremio } from "@/lib/stremio";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import {
   mediaServerConnections,
   mediaServerRefreshIntervalMs,
@@ -730,6 +731,7 @@ function SessionRefreshRunner() {
 
 function StremioLeachedExpungeRunner() {
   useEffect(() => {
+    if (!isNuvioProviderActive()) return;
     void expungeLeachedNuvioItemsFromStremio().catch(() => {});
   }, []);
   return null;

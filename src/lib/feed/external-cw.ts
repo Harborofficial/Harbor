@@ -365,7 +365,7 @@ export function refreshExternalCw(force = false): Promise<void> {
   if (inflight) {
     if (!force) return inflight;
     // Don't kill the active in-flight request: let it deliver, then run another if needed
-    return inflight.then(() => refreshExternalCw(false));
+    return inflight.then(() => refreshExternalCw(true));
   }
   if (!force && fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS) return Promise.resolve();
   cancelRetry();

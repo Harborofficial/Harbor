@@ -1,6 +1,5 @@
 import { cwProfileScope, privateCwProfileId } from "./cw-profile";
 import { isNuvioProviderActive, getNuvioActiveSlot } from "./active-profile-id";
-import { collectAllNuvioItemIds } from "./nuvio/nuvio-client";
 
 const KEY_PREFIX = "harbor.localcw.v1.";
 const PRIVATE_PREFIX = "harbor.localcw.private.v1.";
@@ -279,24 +278,41 @@ export function clearLocalCw(
 
 /** Clear many continue-watching rows with one write per store and one notification. */
 export function clearLocalCwBatch(ids: string[], ownerId?: string): void {
-  const valid = new Set(ids.filter((id) => !!id));
-  if (valid.size === 0) return;
+  const isNuvio = isNuvioProviderActive() || (ownerId != null && ownerId.startsWith("nuvio-"));
   const targetKeys = new Set<string>();
-  if (ownerId) {
-    targetKeys.add(storeKey(true, ownerId));
-    targetKeys.add(storeKey(false, ownerId));
+  if (isNuvio) {
+    const eff = effectiveOwner(ownerId) || `nuvio-${getNuvioActiveSlot()}`;
+    targetKeys.add(storeKey(false, eff));
+    targetKeys.add(storeKey(true, eff));
   } else {
-    targetKeys.add(storeKey(!!privateCwProfileId()));
+    if (ownerId) {
+      targetKeys.add(storeKey(true, ownerId));
+      targetKeys.add(storeKey(false, ownerId));
+    } else {
+      targetKeys.add(storeKey(!!privateCwProfileId()));
+    }
+    targetKeys.add(LEGACY_KEY);
   }
-  targetKeys.add(LEGACY_KEY);
+
+  const validVariants = new Set<string>();
+  for (const id of ids) {
+    if (!id) continue;
+    validVariants.add(id);
+    const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
+    validVariants.add(cleanId);
+    validVariants.add(`tmdb:${cleanId}`);
+    validVariants.add(`series:${cleanId}`);
+  }
+  if (validVariants.size === 0) return;
+
   let changed = false;
   for (const key of targetKeys) {
     const all = readAll(key);
     const next = { ...all };
     let touched = false;
-    for (const id of valid) {
-      if (!(id in next)) continue;
-      delete next[id];
+    for (const vid of validVariants) {
+      if (!(vid in next)) continue;
+      delete next[vid];
       touched = true;
     }
     if (!touched) continue;
@@ -309,11 +325,6 @@ export function clearLocalCwBatch(ids: string[], ownerId?: string): void {
 export function sanitizeStremioLocalCw(extraPurgeIds?: string[]): void {
   try {
     const purgeSet = new Set(extraPurgeIds ?? []);
-    try {
-      for (const id of collectAllNuvioItemIds()) {
-        purgeSet.add(id);
-      }
-    } catch {}
     let changed = false;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);

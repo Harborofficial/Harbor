@@ -4,8 +4,7 @@ import { addonConfigurationKey } from "@/lib/addon-configuration-key";
 import { allowDirectHost, safeFetch as fetch } from "@/lib/safe-fetch";
 import type { AddonOrigin, Meta } from "./cinemeta";
 import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
-import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
-import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { resolveEffectiveStremioAuthKey } from "@/lib/auth";
 
 const STREMIO_API = "https://api.strem.io/api";
@@ -338,7 +337,16 @@ export async function gatherCatalogAddons(authKey: string | null): Promise<Addon
   } catch {}
 
   const shouldStremio = !isNuvio || nuvioAddonMode === "combined";
-  const shouldNuvio = (isNuvio || nuvioAddonMode === "combined") && isNuvioSignedIn();
+  let nuvioRaw: Addon[] = [];
+  if (isNuvio || nuvioAddonMode === "combined") {
+    try {
+      const { isNuvioSignedIn: checkSignedIn } = await import("@/lib/nuvio/nuvio-client");
+      const { fetchNuvioAddons: getNuvioAddons } = await import("@/lib/nuvio/nuvio-sync");
+      if (checkSignedIn()) {
+        nuvioRaw = await getNuvioAddons().catch(() => [] as Addon[]);
+      }
+    } catch {}
+  }
 
   const effectiveAuthKey = resolveEffectiveStremioAuthKey(authKey);
   const stremioRaw =
@@ -346,7 +354,6 @@ export async function gatherCatalogAddons(authKey: string | null): Promise<Addon
       ? await userAddons(effectiveAuthKey).catch(() => [] as Addon[])
       : [];
   const stremio = filterEnabled(stremioRaw);
-  const nuvioRaw = shouldNuvio ? await fetchNuvioAddons().catch(() => [] as Addon[]) : [];
   const nuvio = filterEnabled(nuvioRaw);
   const seen = new Set([...stremio, ...nuvio].map((a) => a.transportUrl));
   const localOnly = filterEnabled(loadInstalled()).filter((l) => !seen.has(l.transportUrl));
