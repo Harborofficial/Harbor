@@ -11,8 +11,11 @@ export type PluginHttpPolicy = {
 };
 
 const MAX_BYTES = 8 * 1024 * 1024;
-const MAX_TIMEOUT = 45_000;
 const DEFAULT_TIMEOUT = 20_000;
+const MAX_TIMEOUT = 120_000;
+// A Cloudflare solve is user-interactive. Text calls must outlive the solver window
+// so the retried request can reach the same source call instead of being aborted.
+const TEXT_CHALLENGE_TIMEOUT = 120_000;
 
 const PLUGIN_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
@@ -51,6 +54,8 @@ const ALLOW_RESPONSE_HEADERS = new Set([
   "grpc-message",
   "grpc-encoding",
   "grpc-accept-encoding",
+  "x-harbor-challenge",
+  "x-harbor-challenge-url",
 ]);
 
 function isPrivateV4(h: string): boolean {
@@ -247,7 +252,9 @@ export async function runPluginHttp(
 ): Promise<PluginHttpResult> {
   const target = assertSafeUrl(url);
   const method = (opts.method || "GET").toUpperCase();
-  const timeout = Math.min(Math.max(opts.timeoutMs || DEFAULT_TIMEOUT, 1_000), MAX_TIMEOUT);
+  const requested = Math.min(Math.max(opts.timeoutMs || DEFAULT_TIMEOUT, 1_000), MAX_TIMEOUT);
+  const timeout =
+    opts.responseType === "base64" ? requested : Math.max(requested, TEXT_CHALLENGE_TIMEOUT);
   const headers = filterHeaders(
     opts.headers,
     {

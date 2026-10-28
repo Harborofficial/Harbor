@@ -2191,7 +2191,6 @@ pub fn run() {
             http_fetch::cached_thumb_path,
             subtitle_credentials::subtitle_credential_bind,
             subtitle_credentials::subtitle_credentials_clear,
-            cf_solver::cf_report,
             discord_rp::discord_set_presence,
             discord_rp::discord_clear,
             media_controls::media_controls_update,

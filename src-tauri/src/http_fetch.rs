@@ -14,6 +14,7 @@ const BROWSER_UA: &str =
 
 const MAX_CONCURRENT_FETCHES: usize = 48;
 const DEFAULT_TIMEOUT_MS: u64 = 30_000;
+const SOLVER_WAIT: Duration = Duration::from_secs(105);
 const MAX_REDIRECTS: usize = 10;
 
 fn fetch_semaphore() -> &'static Semaphore {
@@ -140,11 +141,7 @@ pub struct ThumbCacheSize {
 }
 
 #[tauri::command]
-pub async fn cached_thumb_path(
-    app: tauri::AppHandle,
-    url: String,
-    width: u32,
-) -> Option<String> {
+pub async fn cached_thumb_path(app: tauri::AppHandle, url: String, width: u32) -> Option<String> {
     let app = app.clone();
     tokio::task::spawn_blocking(move || crate::thumb_cache::cached_path(&app, &url, width))
         .await
@@ -397,7 +394,7 @@ pub(crate) async fn public_http_client(url: &reqwest::Url) -> Result<reqwest::Cl
         .map_err(|error| format!("public client: {error}"))
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HarborFetchArgs {
     pub url: String,
@@ -465,17 +462,29 @@ pub async fn harbor_fetch(
     args: HarborFetchArgs,
 ) -> Result<HarborFetchResponse, String> {
     let timeout = Duration::from_millis(args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS));
+    let solver_wait = if can_open_solver(&args) {
+        SOLVER_WAIT
+    } else {
+        Duration::ZERO
+    };
     let image_generation = crate::thumb_cache::generation();
     let _permit = acquire_fetch_permit().await?;
-    run_with_deadline(timeout, harbor_fetch_inner(app, args, image_generation)).await
+    run_with_deadline(
+        timeout + solver_wait,
+        harbor_fetch_inner(app, args, image_generation, false),
+    )
+    .await
 }
 
 async fn harbor_fetch_inner(
     app: tauri::AppHandle,
     args: HarborFetchArgs,
     image_generation: u64,
+    retried: bool,
 ) -> Result<HarborFetchResponse, String> {
     let timeout = Duration::from_millis(args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS));
+    let solver_ok = can_open_solver(&args);
+    let retry_args = args.clone();
     let public_network_only = args.public_network_only.unwrap_or(false);
     let allow_local_network = args.allow_local_network.unwrap_or(false);
     let follow_redirects = args.follow_redirects.unwrap_or(true);
@@ -497,8 +506,28 @@ async fn harbor_fetch_inner(
 
     let original_host = current_url.host_str().map(|s| s.to_string());
     let cf = current_url.host_str().and_then(crate::cf_solver::cf_cached);
+    let had_clearance = cf.is_some();
+    // Once a site has proved usable in the WebView, prefer that browser for
+    // subsequent safe text reads. Avoid repeatedly hitting Cloudflare with a
+    // native request that cannot replay its browser-only verification.
+    if !had_clearance
+        && !retried
+        && original_host
+            .as_deref()
+            .is_some_and(crate::cf_solver::cf_browser_ready)
+        && can_browser_fallback(&retry_args)
+    {
+        match crate::cf_solver::cf_browser_fetch(&app, &retry_args.url, browser_accept(&retry_args))
+            .await
+        {
+            Ok(Some(browser)) => return Ok(browser_text_response(browser, retry_args.url)),
+            Err(error) => eprintln!("[cf] verified browser fetch failed: {error}"),
+            Ok(None) => {}
+        }
+    }
 
     let mut headers: Vec<(String, String)> = Vec::new();
+    let mut caller_cookie: Option<String> = None;
     let mut has_user_agent = false;
     let mut has_accept = false;
     let mut has_accept_language = false;
@@ -518,6 +547,10 @@ async fn harbor_fetch_inner(
                 has_user_agent = true;
             }
             if low == "cookie" && cf.is_some() {
+                caller_cookie = Some(match caller_cookie {
+                    Some(previous) if !previous.is_empty() => format!("{previous}; {v}"),
+                    _ => v,
+                });
                 continue;
             }
             if low == "accept" {
@@ -530,6 +563,10 @@ async fn harbor_fetch_inner(
         }
     }
     if let Some((cookie, ua)) = cf {
+        let cookie = match caller_cookie {
+            Some(caller) if !caller.trim().is_empty() => merge_cookie_headers(&caller, &cookie),
+            _ => cookie,
+        };
         headers.push(("Cookie".to_string(), cookie));
         headers.push(("User-Agent".to_string(), ua));
         has_user_agent = true;
@@ -753,9 +790,8 @@ async fn harbor_fetch_inner(
                 .cloned()
                 .or(hit.modified);
             let content_type = hit.content_type.clone();
-            let freshness = hit.revalidated_lifetime(
-                response_headers.get("cache-control").map(String::as_str),
-            );
+            let freshness =
+                hit.revalidated_lifetime(response_headers.get("cache-control").map(String::as_str));
             if let Some(lifetime) = freshness {
                 let app = app.clone();
                 let url = args.url.clone();
@@ -777,7 +813,8 @@ async fn harbor_fetch_inner(
                 let width = args.thumb_width_px.unwrap_or(0);
                 let _ = tokio::task::spawn_blocking(move || {
                     crate::thumb_cache::remove_thumb(&app, &url, width, image_generation)
-                }).await;
+                })
+                .await;
             }
             return Ok(HarborFetchResponse {
                 status: 200,
@@ -842,7 +879,11 @@ async fn harbor_fetch_inner(
                     if (bytes.len() as u64).saturating_add(chunk.len() as u64) > max_bytes {
                         if let Some(hit) = cached_image.as_ref() {
                             if !hit.fresh {
-                                return stale_image_response(&args.url, args.max_response_bytes, hit);
+                                return stale_image_response(
+                                    &args.url,
+                                    args.max_response_bytes,
+                                    hit,
+                                );
                             }
                         }
                         return Err("response size limit exceeded".to_string());
@@ -884,31 +925,58 @@ async fn harbor_fetch_inner(
     };
 
     if is_cloudflare_challenge(status, cf_mitigated.as_deref(), &body) {
-        if let Some(h) = original_host.as_deref() {
-            crate::cf_solver::cf_invalidate(h);
-        }
-        let solver_ok = original_host
-            .as_deref()
-            .map(solver_host_allowed)
-            .unwrap_or(false);
-        // The solver returns text, not a byte-preserving/base64 response, and does not
-        // participate in the caller's response-size contract. Binary/capped callers
-        // must receive the original bounded response instead of bypassing those rules.
-        if solver_ok
-            && args.response_type.as_deref() != Some("base64")
-            && args.max_response_bytes.is_none()
+        // A native reqwest request may be rechallenged despite a valid browser
+        // clearance because its TLS/client-hint fingerprint differs from WebView.
+        // Retry safe, read-only text in the already verified browser context.
+        if (had_clearance
+            || original_host
+                .as_deref()
+                .is_some_and(crate::cf_solver::cf_browser_ready))
+            && can_browser_fallback(&retry_args)
         {
-            eprintln!("[cf] challenge detected ({}) for {}", status, args.url);
-            if let Ok(solved) = crate::cf_solver::cf_fetch(app, args.url.clone()).await {
-                return Ok(HarborFetchResponse {
-                    status: 200,
-                    ok: true,
-                    body: solved,
-                    content_type: None,
-                    headers: HashMap::new(),
-                    url: None,
-                });
+            match crate::cf_solver::cf_browser_fetch(
+                &app,
+                &retry_args.url,
+                browser_accept(&retry_args),
+            )
+            .await
+            {
+                Ok(Some(browser)) => {
+                    return Ok(browser_text_response(browser, retry_args.url));
+                }
+                Err(error) => eprintln!("[cf] browser fallback failed: {error}"),
+                Ok(None) => {}
             }
+        }
+        if had_clearance {
+            if let Some(h) = original_host.as_deref() {
+                crate::cf_solver::cf_invalidate(h);
+            }
+        }
+        // The solver is user-interactive, so it only runs for text requests that did
+        // not opt into a response-size contract. Binary/capped callers keep the
+        // original bounded response.
+        if solver_ok {
+            if retried {
+                eprintln!("[cf] retry still challenged for {}", args.url);
+            } else {
+                eprintln!("[cf] challenge detected ({}) for {}", status, args.url);
+                match crate::cf_solver::cf_fetch(app.clone(), args.url.clone()).await {
+                    Ok(()) => {
+                        eprintln!("[cf] retrying {} with clearance", args.url);
+                        return Box::pin(harbor_fetch_inner(
+                            app,
+                            retry_args,
+                            image_generation,
+                            true,
+                        ))
+                        .await;
+                    }
+                    Err(error) => eprintln!("[cf] solve failed for {}: {error}", args.url),
+                }
+            }
+            response_headers.insert("x-harbor-challenge".to_string(), "1".to_string());
+            response_headers.insert("x-harbor-challenge-url".to_string(), args.url.clone());
         }
     }
 
@@ -937,6 +1005,109 @@ fn solver_host_allowed(host: &str) -> bool {
     !BACKGROUND_PROVIDER_HOSTS.contains(&host.as_str())
 }
 
+fn browser_accept(args: &HarborFetchArgs) -> Option<&str> {
+    args.headers.as_ref().and_then(|headers| {
+        headers
+            .iter()
+            .find(|(name, _)| name.eq_ignore_ascii_case("accept"))
+            .map(|(_, value)| value.as_str())
+    })
+}
+
+fn browser_text_response(
+    browser: crate::cf_solver::BrowserTextResponse,
+    url: String,
+) -> HarborFetchResponse {
+    let mut headers = HashMap::new();
+    if let Some(content_type) = browser.content_type.as_deref() {
+        headers.insert("content-type".to_string(), content_type.to_string());
+    }
+    HarborFetchResponse {
+        status: browser.status,
+        ok: (200..300).contains(&browser.status),
+        body: browser.body,
+        content_type: browser.content_type,
+        headers,
+        url: Some(url),
+    }
+}
+
+fn can_browser_fallback(args: &HarborFetchArgs) -> bool {
+    args.method
+        .as_deref()
+        .unwrap_or("GET")
+        .eq_ignore_ascii_case("GET")
+        && args.body.is_none()
+        && args.body_base64.is_none()
+        && args.credential_handle.is_none()
+        && args.response_type.as_deref() != Some("base64")
+        && args.max_response_bytes.is_none()
+        && args.headers.as_ref().is_none_or(|headers| {
+            let target = reqwest::Url::parse(&args.url).ok();
+            headers.iter().all(|(name, value)| {
+                name.eq_ignore_ascii_case("accept")
+                    || name.eq_ignore_ascii_case("accept-language")
+                    // Manga plugin requests add a default User-Agent. The verified
+                    // WebView retains its own UA; no custom UA is injected into it.
+                    || name.eq_ignore_ascii_case("user-agent")
+                    || (name.eq_ignore_ascii_case("referer")
+                        && target.as_ref().is_some_and(|url| {
+                            reqwest::Url::parse(value).ok().is_some_and(|referer| {
+                                referer.origin() == url.origin()
+                            })
+                        }))
+            })
+        })
+}
+
+fn can_open_solver(args: &HarborFetchArgs) -> bool {
+    args.response_type.as_deref() != Some("base64")
+        && args.max_response_bytes.is_none()
+        && reqwest::Url::parse(&args.url)
+            .ok()
+            .and_then(|url| url.host_str().map(solver_host_allowed))
+            .unwrap_or(false)
+}
+
+fn is_clearance_cookie(name: &str) -> bool {
+    name == "cf_clearance" || name == "__cf_bm" || name.starts_with("cf_chl")
+}
+
+fn merge_cookie_headers(caller: &str, solver: &str) -> String {
+    let mut cookies: Vec<(String, String)> = Vec::new();
+    for pair in caller.split(';') {
+        let pair = pair.trim();
+        if pair.is_empty() {
+            continue;
+        }
+        let (name, value) = pair.split_once('=').unwrap_or((pair, ""));
+        if let Some((_, current)) = cookies.iter_mut().find(|(existing, _)| existing == name) {
+            *current = value.to_string();
+        } else {
+            cookies.push((name.to_string(), value.to_string()));
+        }
+    }
+    for pair in solver.split(';') {
+        let pair = pair.trim();
+        if pair.is_empty() {
+            continue;
+        }
+        let (name, value) = pair.split_once('=').unwrap_or((pair, ""));
+        if let Some((_, current)) = cookies.iter_mut().find(|(existing, _)| existing == name) {
+            if is_clearance_cookie(name) {
+                *current = value.to_string();
+            }
+        } else {
+            cookies.push((name.to_string(), value.to_string()));
+        }
+    }
+    cookies
+        .into_iter()
+        .map(|(name, value)| format!("{name}={value}"))
+        .collect::<Vec<_>>()
+        .join("; ")
+}
+
 fn is_cloudflare_hard_block(body: &str) -> bool {
     body.contains("Sorry, you have been blocked")
         || body.contains("error code: 1020")
@@ -958,6 +1129,8 @@ fn is_cloudflare_challenge(status: u16, cf_mitigated: Option<&str>, body: &str) 
         || body.contains("cf_chl_opt")
         || body.contains("challenge-form")
         || body.contains("cf-please-wait")
+        || body.contains("challenge-platform")
+        || body.contains("Enable JavaScript and cookies to continue")
 }
 
 #[derive(Debug, Deserialize)]
@@ -1040,12 +1213,14 @@ fn cross_origin_redirect_forwards_body(cross_origin: bool, body: &Option<Vec<u8>
 
 #[cfg(test)]
 mod tests {
+    use super::HarborFetchArgs;
     use super::{
         apply_redirect_method, cached_image_response, cross_origin_redirect_forwards_body,
-        host_is_blocked_literal, is_https_downgrade, is_public_network_ip, same_origin,
-        solver_host_allowed, validate_target,
+        host_is_blocked_literal, is_cloudflare_challenge, is_https_downgrade, is_public_network_ip,
+        merge_cookie_headers, same_origin, solver_host_allowed, validate_target,
     };
     use crate::thumb_cache::CachedImage;
+    use std::collections::HashMap;
 
     #[test]
     fn stale_cached_image_response_honors_the_size_limit() {
@@ -1064,11 +1239,16 @@ mod tests {
         assert_eq!(response.status, 200);
         assert_eq!(response.body, "YWJj");
         assert_eq!(
-            response.headers.get("x-harbor-image-cache").map(String::as_str),
+            response
+                .headers
+                .get("x-harbor-image-cache")
+                .map(String::as_str),
             Some("stale")
         );
-        assert!(cached_image_response("https://example.com/a.png", Some(2), &image, "stale", 300)
-            .is_err());
+        assert!(
+            cached_image_response("https://example.com/a.png", Some(2), &image, "stale", 300)
+                .is_err()
+        );
     }
 
     #[test]
@@ -1100,6 +1280,82 @@ mod tests {
             ));
             assert!(!solver_host_allowed(url.host_str().unwrap()));
         }
+    }
+
+    #[test]
+    fn solver_clearance_replaces_stale_cf_cookies_and_keeps_the_session() {
+        assert_eq!(
+            merge_cookie_headers(
+                "session=abc; cf_clearance=stale",
+                "session=solver; __cf_bm=fresh; cf_clearance=new"
+            ),
+            "session=abc; cf_clearance=new; __cf_bm=fresh"
+        );
+        assert_eq!(
+            merge_cookie_headers("", "session=solver; cf_clearance=new"),
+            "session=solver; cf_clearance=new"
+        );
+    }
+
+    #[test]
+    fn browser_fallback_only_handles_simple_text_gets() {
+        let mut request = HarborFetchArgs {
+            url: "https://example.org/catalog".into(),
+            method: Some("GET".into()),
+            headers: None,
+            body: None,
+            body_base64: None,
+            timeout_ms: None,
+            response_type: None,
+            max_response_bytes: None,
+            credential_handle: None,
+            public_network_only: None,
+            allow_local_network: None,
+            follow_redirects: None,
+            thumb_width_px: None,
+            cache_image: None,
+        };
+        assert!(super::can_browser_fallback(&request));
+        request.headers = Some(HashMap::from([("Accept".into(), "text/html".into())]));
+        assert!(super::can_browser_fallback(&request));
+        request.headers = Some(HashMap::from([(
+            "User-Agent".into(),
+            "Plugin browser UA".into(),
+        )]));
+        assert!(super::can_browser_fallback(&request));
+        request.headers = Some(HashMap::from([(
+            "Referer".into(),
+            "https://example.org/".into(),
+        )]));
+        assert!(super::can_browser_fallback(&request));
+        request.headers = Some(HashMap::from([(
+            "Referer".into(),
+            "https://other.example/".into(),
+        )]));
+        assert!(!super::can_browser_fallback(&request));
+        request.headers = Some(HashMap::from([("Authorization".into(), "secret".into())]));
+        assert!(!super::can_browser_fallback(&request));
+        request.headers = None;
+        request.method = Some("POST".into());
+        assert!(!super::can_browser_fallback(&request));
+        request.method = Some("GET".into());
+        request.max_response_bytes = Some(2048);
+        assert!(!super::can_browser_fallback(&request));
+    }
+
+    #[test]
+    fn detects_managed_and_localized_cloudflare_challenges() {
+        assert!(is_cloudflare_challenge(200, Some("challenge"), ""));
+        assert!(is_cloudflare_challenge(
+            403,
+            None,
+            "Enable JavaScript and cookies to continue",
+        ));
+        assert!(is_cloudflare_challenge(
+            503,
+            None,
+            r#"<script src="/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1"></script>"#,
+        ));
     }
 
     #[test]
