@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n";
 import { downloadCapabilities, type DownloadItem } from "@/lib/download/downloads-store";
 import { fmtBytes, fmtEta, fmtSpeed } from "./downloads-format";
 import { useDownloadItemActions } from "./download-actions";
-import { ConfirmableAction } from "@/components/context-menu/action-items";
+import { DownloadDeleteButton } from "@/components/download-delete-button";
 import type { ActionSource } from "@/lib/context-actions";
 
 export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolean }) {
@@ -211,14 +211,14 @@ function DeleteButton({
 }) {
   const t = useT();
   return (
-    <ConfirmableAction
+    <DownloadDeleteButton
       source={source}
       actionId={actionId}
       className="download-delete-trigger flex h-9 items-center justify-center gap-2.5 rounded-full border border-danger/10 bg-danger/5 px-4 text-[13px] font-medium tracking-tight text-danger transition-[transform,background-color] duration-150 ease-out hover:scale-[1.02] hover:bg-danger/10 active:scale-[0.96] motion-reduce:transition-none"
     >
       <Trash2 size={16} strokeWidth={2} className="download-delete-icon shrink-0" />
       <span>{recordOnly ? t("Remove") : t("Delete")}</span>
-    </ConfirmableAction>
+    </DownloadDeleteButton>
   );
 }
 

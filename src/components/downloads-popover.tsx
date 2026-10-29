@@ -2,6 +2,7 @@ import { Download, Ellipsis, FolderOpen, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { DownloadCancelIcon, DownloadPauseResumeIcon } from "@/components/download-action-icons";
 import { HarborLoader } from "@/components/harbor-loader";
+import { DownloadDeleteButton } from "@/components/download-delete-button";
 import type { Meta } from "@/lib/cinemeta";
 import {
   downloadCapabilities,
@@ -230,16 +231,13 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
                 <FolderOpen size={14} strokeWidth={2} />
               </RowBtn>
             )}
-            <RowBtn
-              label={
-                caps?.printReceipt ? t("Remove from downloads") : t("Delete download and file")
-              }
-              onClick={() => run("delete")}
-              disabled={pending || !caps?.delete}
-              danger
+            <DownloadDeleteButton
+              source={source}
+              actionId={`download:${d.id}:delete`}
+              className="download-delete-trigger flex h-7 w-7 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-danger/10 hover:text-danger"
             >
               <Trash2 size={14} strokeWidth={2} className="download-delete-icon" />
-            </RowBtn>
+            </DownloadDeleteButton>
           </>
         )}
         <button
