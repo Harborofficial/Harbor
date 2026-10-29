@@ -171,26 +171,24 @@ test("detail only treats an actual Kitsu redirect as a side entry", () => {
   assert.doesNotMatch(detail, /requestedKitsuId !== res\.kitsuId \|\|/);
 });
 
-test("grouped dismissals bypass source cleanup while single-item behavior remains intact", () => {
+test("grouped dismissals delegate to per-source cleanup while single-item behavior remains intact", () => {
+  const dismiss = read("src/lib/cw-dismiss.ts");
+  assert.match(
+    dismiss,
+    /cleanupGroupedSource\(member, authKey, options, now, cloudIds\)/,
+    "grouped rows must clean up each source",
+  );
+  assert.match(dismiss, /clearResumeForItem\(item, options\)/);
+  assert.match(dismiss, /cloudLibraryPut\(/);
+  assert.match(dismiss, /clearLocalCw\(id, options\)/);
+
   const homeDismiss = home.match(
     /const onDismissCw = useCallback\([\s\S]*?const \{ items: favItems \}/,
   )?.[0];
   assert.ok(homeDismiss, "home onDismissCw must exist");
   const homeGroupGuard = homeDismiss.indexOf("item.cwMembers?.length");
-  assert.ok(homeGroupGuard >= 0, "grouped home rows must delegate before source cleanup");
-  for (const operation of [
-    "removeExternalCwItem(item)",
-    "clearLocalCw(item._id",
-    "clearResume(item._id",
-    "deleteWatchProgressFromNuvio(",
-  ]) {
-    const at = homeDismiss.indexOf(operation);
-    assert.ok(at < 0 || at > homeGroupGuard, `${operation} must follow the grouped-row guard`);
-  }
-  assert.match(
-    homeDismiss,
-    /if \(item\.local\) \{\s*clearLocalCw\(item\._id\);\s*dismissCw\(item, authKey\);\s*return;/,
-  );
+  assert.ok(homeGroupGuard >= 0, "grouped home rows must delegate before local cleanup");
+
   const animeDismiss = anime.match(/onDismiss=\{\(it\) => \{[\s\S]*?\}\}/)?.[0];
   assert.ok(animeDismiss, "anime room onDismiss must exist");
   const animeGroupGuard = animeDismiss.indexOf("it.cwMembers?.length");

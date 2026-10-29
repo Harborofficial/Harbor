@@ -173,6 +173,7 @@ function harness() {
       dedupeAnimeCw: (items: any[]) => items,
       warmCwAnimeIdentities: async () => {},
     },
+    "@/lib/anime-tracker-entry": { resolveTrackerAnimeEntry: async () => null },
     "@/lib/providers/anime-franchise-root": { isSplitFranchiseKitsu: () => false },
     "@/lib/providers/kitsu": { parseKitsuId: () => null },
     "@/lib/providers/jikan": { franchiseDedupKey: (name: string) => name.toLowerCase() },

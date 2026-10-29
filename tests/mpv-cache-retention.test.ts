@@ -26,17 +26,21 @@ test("the player bridge no longer carries a disk cache folder or preload flag", 
   assert.doesNotMatch(bridge, /fullDownload/);
 });
 
-test("leftover mpv cache files are removed at startup after a short grace", () => {
+test("leftover mpv cache files are removed at startup after a conservative grace", () => {
   assert.match(prune, /pub fn sweep_mpv_cache\(dir: PathBuf\) -> u64/);
-  assert.match(prune, /const MPV_CACHE_RECENT_GRACE: Duration/);
+  assert.match(
+    prune,
+    /const MPV_CACHE_RECENT_GRACE: Duration = Duration::from_secs\(6 \* 60 \* 60\)/,
+  );
   assert.doesNotMatch(prune, /MPV_CACHE_MAX_AGE/);
   assert.match(prune, /if age < MPV_CACHE_RECENT_GRACE/);
   assert.match(lib, /temp_prune::sweep_mpv_cache\(base\.join\("mpv-cache"\)\)/);
 });
 
-test("advanced mpv options cannot re-enable disk caching", () => {
+test("advanced mpv options cannot re-enable disk caching or suppress RAM buffering", () => {
   assert.match(mpv, /fn is_disk_cache_option/);
   assert.match(mpv, /extra option \{\} skipped \(disk caching is disabled\)/);
+  assert.match(bridge, /isBlockedDiskCacheOptionLine\(line\)/);
 });
 
 test("the torrent cache keeps its own cap and retention", () => {

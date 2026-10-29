@@ -270,9 +270,11 @@ mod tests {
 
 /// Removes leftover mpv demuxer-cache files. Harbor no longer writes its
 /// demuxer cache to disk, so anything in this directory is from an older
-/// version or a crashed session. A short grace keeps an active cache file safe
-/// while an older build is still shutting down.
-const MPV_CACHE_RECENT_GRACE: Duration = Duration::from_secs(10 * 60);
+/// version or a crashed session. Keep a conservative grace: an older build may
+/// still be running (for example a debug instance, where single-instance is
+/// disabled) and a paused playback can leave its cache file untouched for a
+/// long time.
+const MPV_CACHE_RECENT_GRACE: Duration = Duration::from_secs(6 * 60 * 60);
 
 fn sweep_mpv_cache_at(dir: PathBuf, now: SystemTime) -> u64 {
     let entries = match std::fs::read_dir(&dir) {

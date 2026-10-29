@@ -213,22 +213,32 @@ test("an unresolvable row falls through to legacy resolution", async () => {
 });
 
 test("a saved Bleach TYBW stream is not reinterpreted as the base show's season 1", async () => {
-  const { resolveCwAnimePlayEpisode } = load(mocks({
-    "@/lib/streams/anime-identity": {
-      resolveAnimeIdentity: async () => { throw new Error("must preserve saved cour"); },
-    },
-    "@/lib/providers/anizip": {
-      aniZipByKitsu: async (id: number) => {
-        assert.equal(id, 43078);
-        return { mappings: { imdb_id: "tt009270" }, episodes: {
-          "3": { seasonNumber: 17, episodeNumber: 3 },
-        } };
+  const { resolveCwAnimePlayEpisode } = load(
+    mocks({
+      "@/lib/streams/anime-identity": {
+        resolveAnimeIdentity: async () => {
+          throw new Error("must preserve saved cour");
+        },
       },
-      pickEpisodeTitle,
-    },
-  }));
+      "@/lib/providers/anizip": {
+        aniZipByKitsu: async (id: number) => {
+          assert.equal(id, 43078);
+          return {
+            mappings: { imdb_id: "tt009270" },
+            episodes: {
+              "3": { seasonNumber: 17, episodeNumber: 3 },
+            },
+          };
+        },
+        pickEpisodeTitle,
+      },
+    }),
+  );
   const out = await resolveCwAnimePlayEpisode({
-    metaId: "tt009270", season: 1, episode: 3, videoId: "kitsu:43078:3",
+    metaId: "tt009270",
+    season: 1,
+    episode: 3,
+    videoId: "kitsu:43078:3",
   });
   assert.equal(out.kitsuStreamId, "kitsu:43078:3");
   assert.equal(out.imdbSeason, 17);
@@ -236,13 +246,19 @@ test("a saved Bleach TYBW stream is not reinterpreted as the base show's season 
 });
 
 test("a sequel without provider mappings uses the tracker franchise resolution", async () => {
-  const { resolveCwAnimePlayEpisode } = load(mocks({
-    "@/lib/streams/anime-identity": { resolveAnimeIdentity: async () => null },
-    "@/lib/anime-tracker-entry": {
-      resolveTrackerAnimeEntry: async () => ({ id: "kitsu:99999", episode: 4, baseId: "kitsu:1" }),
-    },
-    "@/lib/providers/anizip": { aniZipByKitsu: async () => null, pickEpisodeTitle },
-  }));
+  const { resolveCwAnimePlayEpisode } = load(
+    mocks({
+      "@/lib/streams/anime-identity": { resolveAnimeIdentity: async () => null },
+      "@/lib/anime-tracker-entry": {
+        resolveTrackerAnimeEntry: async () => ({
+          id: "kitsu:99999",
+          episode: 4,
+          baseId: "kitsu:1",
+        }),
+      },
+      "@/lib/providers/anizip": { aniZipByKitsu: async () => null, pickEpisodeTitle },
+    }),
+  );
   const out = await resolveCwAnimePlayEpisode({ metaId: "tt100", season: 2, episode: 4 });
   assert.equal(out.kitsuStreamId, "kitsu:99999:4");
   assert.deepEqual(animeTrackerTarget("tt100", out, 4), { id: "kitsu:99999", episode: 4 });

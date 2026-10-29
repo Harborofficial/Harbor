@@ -69,12 +69,14 @@ const cwNextDisplayCoords = (() => {
 })();
 
 // Run the real dismissal module with isolated storage and no cloud/network writes.
-function harness(seed?: string, onChange = () => {}) {
+function harness(seed?: string, onChange = () => {}, options: { nuvio?: boolean } = {}) {
   let privateProfile: string | null = null;
   const data = new Map<string, string>();
   if (seed) data.set("harbor.cw.dismissed.v1", seed);
   const resume = new Map<string, { ms: number; t: number }>();
   const cloudWrites: unknown[][] = [];
+  const localClears: unknown[][] = [];
+  const nuvioDeletes: unknown[][] = [];
   const key = (id: string, s?: number, e?: number) => `${id}|${s}|${e}`;
   const mocks: Record<string, unknown> = {
     "./cw-profile": { privateCwProfileId: () => privateProfile },
@@ -103,17 +105,24 @@ function harness(seed?: string, onChange = () => {}) {
     "./stremio-write-queue": {
       cloudLibraryPut: (...args: unknown[]) => {
         cloudWrites.push(args);
-        return Promise.resolve();
+        return Promise.resolve(true);
       },
     },
     "./render-cause": { noteNotify: () => {} },
-    "./nuvio/nuvio-client": { isNuvioSignedIn: () => false },
+    "./nuvio/nuvio-client": { isNuvioSignedIn: () => options.nuvio === true },
     "./nuvio/nuvio-sync": {
-      isNuvioProviderActive: () => false,
+      isNuvioProviderActive: () => options.nuvio === true,
       resolveNuvioProfileIndex: () => 0,
-      deleteWatchProgressFromNuvio: () => Promise.resolve(),
+      deleteWatchProgressFromNuvio: (...args: unknown[]) => {
+        nuvioDeletes.push(args);
+        return Promise.resolve();
+      },
     },
-    "./local-cw": { clearLocalCw: () => {} },
+    "./local-cw": {
+      clearLocalCw: (...args: unknown[]) => {
+        localClears.push(args);
+      },
+    },
   };
   const output = ts.transpileModule(read("src/lib/cw-dismiss.ts"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
@@ -138,6 +147,8 @@ function harness(seed?: string, onChange = () => {}) {
       resume.set(key(item._id, item.state?.season, item.state?.episode), { ms, t }),
     resume,
     cloudWrites,
+    localClears,
+    nuvioDeletes,
   };
 }
 
@@ -345,7 +356,7 @@ function advanceHarness(
   };
 }
 
-test("dismissing a deduped anime card suppresses each source checkpoint locally", () => {
+test("dismissing a deduped anime card hides every source and clears its progress", () => {
   const h = harness();
   const mal: LibraryItem = {
     ...item("simkl"),
@@ -375,8 +386,12 @@ test("dismissing a deduped anime card suppresses each source checkpoint locally"
     true,
     "the visible up-next checkpoint is suppressed immediately",
   );
-  assert.equal(h.resume.size, 2, "grouped local dismissal preserves both saved positions");
-  assert.equal(h.cloudWrites.length, 0, "grouped dismissal never writes the shared cloud record");
+  assert.equal(h.resume.size, 0, "grouped dismissal clears each source's saved position");
+  assert.equal(
+    h.cloudWrites.length,
+    0,
+    "tracker-only groups do not write the Stremio cloud record",
+  );
   const records = JSON.parse(h.data.get("harbor.cw.dismissed.v1")!);
   assert.equal(records["group|simkl|mal%3A101|mal%3A101%3A1%3A2|1|2"].e, 2);
   assert.equal(records["group|trakt|mal%3A101|mal%3A101%3A1%3A4|1|4"].e, 4);
@@ -395,6 +410,74 @@ test("dismissing a deduped anime card suppresses each source checkpoint locally"
     false,
     "fresh activity on the dismissed checkpoint resurfaces it",
   );
+});
+
+test("a grouped dismissal writes the Stremio library checkpoint once for a mixed group", () => {
+  const h = harness();
+  const library: LibraryItem = {
+    ...item(),
+    _id: "tt100",
+    external: undefined,
+    state: { ...item().state!, season: 1, episode: 3, video_id: "tt100:1:3" },
+  };
+  const tracker: LibraryItem = {
+    ...item("simkl"),
+    _id: "mal:101",
+    state: { ...item().state!, season: 1, episode: 3, video_id: "mal:101:1:3" },
+  };
+  const grouped = {
+    ...library,
+    cwMembers: [library, tracker],
+  } as LibraryItem & { cwMembers: LibraryItem[] };
+  h.setResume(library, 900, Date.now());
+  h.setResume(tracker, 900, Date.now());
+
+  h.api.dismissCw(grouped, "auth");
+
+  assert.equal(h.resume.size, 0);
+  assert.equal(h.cloudWrites.length, 1);
+  const [, written] = h.cloudWrites[0] as [string, LibraryItem];
+  assert.equal(written.state?.timeOffset, 0);
+  assert.equal(written.state?.video_id, "tt100:1:3");
+});
+
+test("a grouped dismissal clears local Continue Watching for local members", () => {
+  const h = harness();
+  const local: LibraryItem = {
+    ...item(),
+    _id: "download:1",
+    local: true,
+    external: undefined,
+  };
+  const grouped = { ...local, cwMembers: [local] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+
+  h.api.dismissCw(grouped, null);
+
+  assert.deepEqual(
+    h.localClears.map(([id]) => id),
+    ["download:1"],
+  );
+});
+
+test("a grouped dismissal removes Nuvio progress and local rows for Nuvio members", () => {
+  const h = harness(undefined, undefined, { nuvio: true });
+  const nuvio: LibraryItem = {
+    ...item(),
+    _id: "tt100",
+    external: "nuvio",
+    state: { ...item().state!, season: 1, episode: 3, video_id: "tt100:1:3" },
+  };
+  const grouped = { ...nuvio, cwMembers: [nuvio] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+
+  h.api.dismissCw(grouped, "auth");
+
+  assert.equal(h.nuvioDeletes.length, 1);
+  assert.deepEqual(h.nuvioDeletes[0].slice(0, 2), [0, "tt100"]);
+  assert.equal(h.localClears.length, 2, "owner-scoped and current local rows are cleared");
 });
 
 test("a grouped dismissal keeps an earlier stale checkpoint hidden", () => {

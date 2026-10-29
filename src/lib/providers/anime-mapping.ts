@@ -66,7 +66,6 @@ function readJson<T>(key: string, fallback: T): T {
   }
 }
 
-
 const inflightArm = new Map<number, Promise<ArmKitsuEntry | null>>();
 const armKitsuCache = mappingStore<ArmKitsuEntry>(ARM_KITSU_KEY);
 
@@ -175,7 +174,7 @@ function loadStoredXml(): Promise<AnidbMapCache | null> {
 export async function loadAnidbMaps(): Promise<AnidbMapCache> {
   if (xmlInflight) return xmlInflight;
   const task = (async () => {
-    const cached = xmlMemory ?? await loadStoredXml();
+    const cached = xmlMemory ?? (await loadStoredXml());
     xmlMemory = cached;
     if (cached && cached.byTvdb && Date.now() - cached.t < XML_TTL_MS) return cached;
     if (Date.now() < xmlRetryAfter) return cached ?? { tvdb: {}, imdb: {}, t: 0 };
@@ -273,8 +272,11 @@ type AniZipField =
   | "themoviedb_id"
   | "imdb_id";
 
-async function validatedKitsuAniZip(kitsuId: number): Promise<AniZipMapping | null> {
-  const mapping = await aniZipByKitsu(kitsuId).catch(() => null);
+async function validatedKitsuAniZip(
+  kitsuId: number,
+  maxAge?: number,
+): Promise<AniZipMapping | null> {
+  const mapping = await aniZipByKitsu(kitsuId, maxAge).catch(() => null);
   if (mapping?.mappings?.kitsu_id != null && mapping.mappings.kitsu_id !== kitsuId) return null;
   return mapping;
 }
@@ -307,14 +309,17 @@ function mergeAniZipMappings(primary: AniZipMapping, alternate: AniZipMapping): 
   };
 }
 
-async function alternateKitsuAniZip(kitsuId: number): Promise<AniZipMapping | null> {
-  const ids = await kitsuExternalIds(kitsuId).catch(() => null);
+async function alternateKitsuAniZip(
+  kitsuId: number,
+  maxAge?: number,
+): Promise<AniZipMapping | null> {
+  const ids = await kitsuExternalIds(kitsuId, maxAge).catch(() => null);
   if (!ids) return null;
   const alternate =
     ids.anilist != null
-      ? await aniZipByAnilist(ids.anilist).catch(() => null)
+      ? await aniZipByAnilist(ids.anilist, maxAge).catch(() => null)
       : ids.mal != null
-        ? await aniZipByMal(ids.mal).catch(() => null)
+        ? await aniZipByMal(ids.mal, maxAge).catch(() => null)
         : null;
   const mapping = alternate?.mappings;
   if (
@@ -328,8 +333,8 @@ async function alternateKitsuAniZip(kitsuId: number): Promise<AniZipMapping | nu
   return alternate;
 }
 
-export async function kitsuToTvdb(kitsuId: number): Promise<number | null> {
-  const az = await validatedKitsuAniZip(kitsuId);
+export async function kitsuToTvdb(kitsuId: number, maxAge?: number): Promise<number | null> {
+  const az = await validatedKitsuAniZip(kitsuId, maxAge);
   if (az?.mappings?.thetvdb_id) return az.mappings.thetvdb_id;
   const arm = await armFromKitsu(kitsuId);
   if (arm?.anidb) {
@@ -337,11 +342,11 @@ export async function kitsuToTvdb(kitsuId: number): Promise<number | null> {
     const mapped = maps.tvdb[String(arm.anidb)];
     if (mapped) return mapped;
   }
-  return (await animeMappingByKitsu(kitsuId, ["thetvdb_id"]))?.mappings?.thetvdb_id ?? null;
+  return (await animeMappingByKitsu(kitsuId, ["thetvdb_id"], maxAge))?.mappings?.thetvdb_id ?? null;
 }
 
-export async function kitsuToImdb(kitsuId: number): Promise<string | null> {
-  const az = await validatedKitsuAniZip(kitsuId);
+export async function kitsuToImdb(kitsuId: number, maxAge?: number): Promise<string | null> {
+  const az = await validatedKitsuAniZip(kitsuId, maxAge);
   if (az?.mappings?.imdb_id) return az.mappings.imdb_id;
   const arm = await armFromKitsu(kitsuId);
   if (arm?.anidb) {
@@ -349,7 +354,7 @@ export async function kitsuToImdb(kitsuId: number): Promise<string | null> {
     const mapped = maps.imdb[String(arm.anidb)];
     if (mapped) return mapped;
   }
-  return (await animeMappingByKitsu(kitsuId, ["imdb_id"]))?.mappings?.imdb_id ?? null;
+  return (await animeMappingByKitsu(kitsuId, ["imdb_id"], maxAge))?.mappings?.imdb_id ?? null;
 }
 
 /**
@@ -384,42 +389,43 @@ export async function applyAnidbSeasonWindow(
   }
 }
 
-export async function kitsuToAnidb(kitsuId: number): Promise<number | null> {
+export async function kitsuToAnidb(kitsuId: number, maxAge?: number): Promise<number | null> {
   const arm = await armFromKitsu(kitsuId);
   if (arm?.anidb != null) return arm.anidb;
-  return (await animeMappingByKitsu(kitsuId, ["anidb_id"]))?.mappings?.anidb_id ?? null;
+  return (await animeMappingByKitsu(kitsuId, ["anidb_id"], maxAge))?.mappings?.anidb_id ?? null;
 }
 
-export async function kitsuToAnilist(kitsuId: number): Promise<number | null> {
+export async function kitsuToAnilist(kitsuId: number, maxAge?: number): Promise<number | null> {
   const arm = await armFromKitsu(kitsuId);
   if (arm?.anilist != null) return arm.anilist;
-  const az = await validatedKitsuAniZip(kitsuId);
-  return az?.mappings?.anilist_id ?? (await kitsuExternalIds(kitsuId))?.anilist ?? null;
+  const az = await validatedKitsuAniZip(kitsuId, maxAge);
+  return az?.mappings?.anilist_id ?? (await kitsuExternalIds(kitsuId, maxAge))?.anilist ?? null;
 }
 
 export async function animeMappingByKitsu(
   kitsuId: number,
   required: readonly AniZipField[] = [],
+  maxAge?: number,
 ): Promise<AniZipMapping | null> {
-  const primary = await validatedKitsuAniZip(kitsuId);
+  const primary = await validatedKitsuAniZip(kitsuId, maxAge);
   if (
     primary &&
     (required.length === 0 ? hasAniZipEnrichment(primary) : hasAniZipFields(primary, required))
   )
     return primary;
-  const alternate = await alternateKitsuAniZip(kitsuId);
+  const alternate = await alternateKitsuAniZip(kitsuId, maxAge);
   if (!alternate) return primary;
   return primary ? mergeAniZipMappings(primary, alternate) : alternate;
 }
 
-export async function kitsuToMal(kitsuId: number): Promise<number | null> {
+export async function kitsuToMal(kitsuId: number, maxAge?: number): Promise<number | null> {
   const arm = await armFromKitsu(kitsuId);
   if (arm?.mal != null) return arm.mal;
-  const az = await validatedKitsuAniZip(kitsuId);
+  const az = await validatedKitsuAniZip(kitsuId, maxAge);
   if (az?.mappings?.mal_id != null) return az.mappings.mal_id;
-  const native = await kitsuExternalIds(kitsuId).catch(() => null);
+  const native = await kitsuExternalIds(kitsuId, maxAge).catch(() => null);
   if (native?.mal != null) return native.mal;
-  const anilistId = await kitsuToAnilist(kitsuId).catch(() => null);
+  const anilistId = await kitsuToAnilist(kitsuId, maxAge).catch(() => null);
   if (anilistId == null) return null;
   return anilistToMal(anilistId).catch(() => null);
 }

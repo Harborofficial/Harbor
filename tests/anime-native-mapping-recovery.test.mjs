@@ -383,10 +383,11 @@ test("tracker and stream identity recover an AniZip entry that only exists by An
     "@/lib/providers/kitsu": h.kitsu,
     "@/lib/streams/anime-identity-core": identityCore,
   });
-  assert.deepEqual(
-    await tracker.resolveTrackerAnimeEntry("mal:63509", { season: 1, episode: 1 }),
-    { id: "kitsu:50990", episode: 1, baseId: "kitsu:50990" },
-  );
+  assert.deepEqual(await tracker.resolveTrackerAnimeEntry("mal:63509", { season: 1, episode: 1 }), {
+    id: "kitsu:50990",
+    episode: 1,
+    baseId: "kitsu:50990",
+  });
 
   const identity = load("src/lib/streams/anime-identity.ts", {
     "@/lib/providers/anizip": h.az,

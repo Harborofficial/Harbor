@@ -66,9 +66,19 @@ const { applyAnidbSeasonWindow } = load("src/lib/providers/anime-mapping.ts", {
 
 function episode(partial: Record<string, unknown>): any {
   return {
-    id: 0, number: 1, seasonNumber: 1, title: "", synopsis: "", thumbnail: null,
-    airdate: null, length: null, imdbSeason: undefined, imdbEpisode: undefined,
-    tvdbEpisodeId: undefined, absoluteNumber: undefined, ...partial,
+    id: 0,
+    number: 1,
+    seasonNumber: 1,
+    title: "",
+    synopsis: "",
+    thumbnail: null,
+    airdate: null,
+    length: null,
+    imdbSeason: undefined,
+    imdbEpisode: undefined,
+    tvdbEpisodeId: undefined,
+    absoluteNumber: undefined,
+    ...partial,
   };
 }
 

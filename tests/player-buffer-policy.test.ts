@@ -12,6 +12,7 @@ import {
   effectiveBufferProfile,
   bufferTotalBytes,
   bufferMpvLines,
+  isBlockedDiskCacheOptionLine,
   RAM_CACHE_FALLBACK_BYTES,
 } from "../src/lib/player/buffer-profile.ts";
 import { resolvePlaybackDownloadedFraction } from "../src/lib/player/playback-clock.ts";
@@ -116,6 +117,20 @@ test("automatic buffer scales from physical memory within 256 MiB..1 GiB, 75/25 
   assert.equal(p32.maxBytes, 768 * MIB);
   assert.equal(p32.maxBackBytes, 256 * MIB);
   assert.deepEqual(bufferMpvLines("auto", 32 * GIB), []);
+});
+
+test("blocked disk-cache options do not suppress automatic buffering", () => {
+  for (const line of [
+    "cache-on-disk=yes",
+    "--cache-on-disk=yes",
+    "  Cache-Dir = W:/cache",
+    "demuxer-cache-dir=W:/cache",
+  ]) {
+    assert.equal(isBlockedDiskCacheOptionLine(line), true, line);
+  }
+  for (const line of ["cache=yes", "cache-secs=45", "demuxer-max-bytes=128MiB"]) {
+    assert.equal(isBlockedDiskCacheOptionLine(line), false, line);
+  }
 });
 
 test("manual buffer choices are capped by physical memory", () => {

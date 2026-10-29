@@ -637,8 +637,10 @@ async function loadAnimeDetails(
   const charactersPromise = kitsuCharacters(kitsuId, 30).catch(() => []);
   const relatedPromise = kitsuRelated(kitsuId).catch(() => []);
   const studiosPromise = kitsuStudios(kitsuId).catch(() => []);
-  const aniZipPromise = animeMappingByKitsu(kitsuId, ["themoviedb_id", "mal_id"]).catch(() => null);
-  const tvdbEpisodesPromise = kitsuToTvdb(kitsuId)
+  const aniZipPromise = animeMappingByKitsu(kitsuId, ["themoviedb_id", "mal_id"], maxAge).catch(
+    () => null,
+  );
+  const tvdbEpisodesPromise = kitsuToTvdb(kitsuId, maxAge)
     .then((tid) => {
       if (!tid) return null;
       const lang = tvdbLangFromIso1(settings.tmdbLanguage || settings.uiLanguage);

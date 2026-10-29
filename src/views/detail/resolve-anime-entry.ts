@@ -69,7 +69,8 @@ export async function resolveDetailAnimeEntry(
     (meta.type !== "series" && meta.type !== "tv") ||
     (!tmdb && !/^tt\d+$/.test(meta.id)) ||
     (meta.animeFormat && meta.animeFormat.toLowerCase() !== "tv")
-  ) return kitsuId;
+  )
+    return kitsuId;
 
   const requestedYear = year(meta.releaseInfo) || year(detail?.year);
   const title = normalizeTitle(meta.name || detail?.title || "");
@@ -82,31 +83,39 @@ export async function resolveDetailAnimeEntry(
     mapped.episodeCount !== 1 ||
     !year(mapped.year) ||
     year(mapped.year) === requestedYear
-  ) return kitsuId;
+  )
+    return kitsuId;
 
   // A special can share the TV series' external IDs. An "other" relation is
   // only a candidate: require the requested title/year and its own ID mapping.
   const related = await kitsuRelated(kitsuId).catch(() => []);
-  const candidateIds = [...new Set(related
-    .filter((entry) => CANDIDATE_ROLES.has(entry.role.toLowerCase()))
-    .map((entry) => parseKitsuId(entry.meta.id))
-    .filter((id): id is number => id != null && id !== kitsuId))];
+  const candidateIds = [
+    ...new Set(
+      related
+        .filter((entry) => CANDIDATE_ROLES.has(entry.role.toLowerCase()))
+        .map((entry) => parseKitsuId(entry.meta.id))
+        .filter((id): id is number => id != null && id !== kitsuId),
+    ),
+  ];
   if (candidateIds.length > MAX_CANDIDATES) return null;
 
-  const matches = await Promise.all(candidateIds.map(async (id) => {
-    const candidate = await kitsuAnime(id).catch(() => null);
-    if (
-      candidate?.subtype?.toLowerCase() !== "tv" ||
-      year(candidate.year) !== requestedYear ||
-      ![candidate.title, ...candidate.altTitles].some((name) => normalizeTitle(name) === title)
-    ) return null;
+  const matches = await Promise.all(
+    candidateIds.map(async (id) => {
+      const candidate = await kitsuAnime(id).catch(() => null);
+      if (
+        candidate?.subtype?.toLowerCase() !== "tv" ||
+        year(candidate.year) !== requestedYear ||
+        ![candidate.title, ...candidate.altTitles].some((name) => normalizeTitle(name) === title)
+      )
+        return null;
 
-    const mappings = (await aniZipByKitsu(id).catch(() => null))?.mappings;
-    if (!mappings || mappings.kitsu_id !== id) return null;
-    if (tmdb && String(mappings.themoviedb_id) !== tmdb[1]) return null;
-    if (imdb && mappings.imdb_id !== imdb) return null;
-    return id;
-  }));
+      const mappings = (await aniZipByKitsu(id).catch(() => null))?.mappings;
+      if (!mappings || mappings.kitsu_id !== id) return null;
+      if (tmdb && String(mappings.themoviedb_id) !== tmdb[1]) return null;
+      if (imdb && mappings.imdb_id !== imdb) return null;
+      return id;
+    }),
+  );
   const verified = matches.filter((id): id is number => id != null);
   return verified.length === 1 ? verified[0] : null;
 }

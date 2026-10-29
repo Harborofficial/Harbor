@@ -85,8 +85,7 @@ async function resolveAnimeArtworkIds(meta: Meta): Promise<AnimeArtworkIds> {
     if (source === "mal") malId = id;
     else if (source === "anidb") anidbId = id;
     if (!kitsuId) {
-      kitsuId =
-        (await resolveExternalKitsuId(`${source}:${id}`).catch(() => null)) ?? undefined;
+      kitsuId = (await resolveExternalKitsuId(`${source}:${id}`).catch(() => null)) ?? undefined;
     }
   }
 

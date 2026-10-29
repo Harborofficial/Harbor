@@ -112,7 +112,9 @@ test("a mal row with no mapping falls back to the Kitsu entry for its title", as
 test("an ambiguous title is never routed to an unrelated entry", async () => {
   const api = load({
     "@/lib/providers/kitsu": {
-      kitsuSearchAnime: async () => [{ id: 999, title: "Some Other Show", year: 2026, subtype: "TV" }],
+      kitsuSearchAnime: async () => [
+        { id: 999, title: "Some Other Show", year: 2026, subtype: "TV" },
+      ],
     },
   });
   const ids = await api.buildStreamIdsWithIdentity(

@@ -125,6 +125,80 @@ test("AniZip incomplete memory entries expire and persisted complete hits retain
   }
 });
 
+test("an explicit refresh bypasses a persisted AniZip 404", async () => {
+  let storedReads = 0;
+  const { api, fetches } = mockAniZip({
+    read: async () => {
+      storedReads++;
+      return {
+        value: null,
+        expiresAt: Date.now() + 6 * 60 * 60 * 1000,
+        fetchedAt: Date.now(),
+      };
+    },
+    fetch: async () => ({
+      ok: true,
+      json: async () => ({ mappings: { kitsu_id: 42 } }),
+    }),
+  });
+
+  assert.equal(await api.aniZipByKitsu(42), null);
+  assert.equal(fetches(), 0, "the persisted 404 is served without a request");
+  assert.equal(storedReads, 1);
+
+  const refreshed = await api.aniZipByKitsu(42, 0);
+  assert.equal(refreshed?.mappings?.kitsu_id, 42);
+  assert.equal(fetches(), 1, "an explicit refresh forces the provider request");
+});
+
+test("animeMappingByKitsu forwards an explicit refresh to its mapping lookups", async () => {
+  const calls: Array<[string, number | undefined]> = [];
+  const api = load("src/lib/providers/anime-mapping.ts", {
+    "@/lib/providers/anizip": {
+      aniZipByAnidb: async () => null,
+      aniZipByAnilist: async (_id: number, maxAge?: number) => {
+        calls.push(["anilist", maxAge]);
+        return null;
+      },
+      aniZipByImdb: async () => null,
+      aniZipByKitsu: async (_id: number, maxAge?: number) => {
+        calls.push(["kitsu", maxAge]);
+        return null;
+      },
+      aniZipByMal: async () => null,
+      aniZipByTmdbTv: async () => null,
+    },
+    "@/lib/providers/kitsu": {
+      kitsuAnime: async () => null,
+      kitsuMainTvSeries: async () => null,
+      kitsuRelated: async () => [],
+      parseKitsuId: () => null,
+    },
+    "@/lib/streams/anime-identity-core": { selectSiblingWindows: () => [] },
+    "./mapping-store": {
+      mappingStore: () => ({ ready: Promise.resolve(), get: () => undefined, set: () => {} }),
+    },
+    "@/lib/anime-identity-db": {
+      animeDbReadProvider: async () => null,
+      animeDbWriteProvider: async () => true,
+    },
+    "./kitsu-mapping": {
+      kitsuExternalIds: async (_id: number, maxAge?: number) => {
+        calls.push(["external", maxAge]);
+        return null;
+      },
+      kitsuFromExternal: async () => null,
+    },
+  });
+
+  await api.animeMappingByKitsu(42, [], 0);
+
+  assert.deepEqual(calls, [
+    ["kitsu", 0],
+    ["external", 0],
+  ]);
+});
+
 test("an expired positive AniZip mapping survives a failed refresh", async () => {
   const realNow = Date.now;
   const now = 1_800_000_000_000;

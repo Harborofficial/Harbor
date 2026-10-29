@@ -18,7 +18,7 @@ import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import type { MonitorInfo } from "@/lib/monitors";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { autoBufferProfile, formatMpvBytes } from "./buffer-profile";
+import { autoBufferProfile, formatMpvBytes, isBlockedDiskCacheOptionLine } from "./buffer-profile";
 import { getTotalPhysBytes } from "@/lib/native-memory";
 import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
 import type { SubCue } from "@/lib/subtitles/parser";
@@ -186,8 +186,14 @@ const DEFAULT_UA = "VLC/3.0.20 LibVLC/3.0.20";
 type BufferPhase = "startup" | "steady";
 
 function hasCustomBufferPolicy(extraOptions: string | undefined): boolean {
+  // The native player rejects disk-cache options, so they must not suppress the
+  // automatic RAM buffer transition merely by appearing in the advanced options.
+  const filtered = (extraOptions ?? "")
+    .split("\n")
+    .filter((line) => !isBlockedDiskCacheOptionLine(line))
+    .join("\n");
   return /(?:^|\n)\s*(?:cache(?:-[\w-]+)?|demuxer-(?:max|readahead)[\w-]*|stream-buffer-size)\s*=/im.test(
-    extraOptions ?? "",
+    filtered,
   );
 }
 

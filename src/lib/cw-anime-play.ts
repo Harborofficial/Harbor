@@ -47,7 +47,8 @@ export async function resolveCwAnimePlayEpisode(
 ): Promise<PlayEpisode | null> {
   // A saved stream names the played cour, while a catalog id may name the
   // franchise's first entry. Do not reinterpret entry-relative S1 as provider S1.
-  const saved = /^kitsu:([1-9]\d*):([1-9]\d*)$/.exec(query.videoId ?? "") ??
+  const saved =
+    /^kitsu:([1-9]\d*):([1-9]\d*)$/.exec(query.videoId ?? "") ??
     /^kitsu:([1-9]\d*):([1-9]\d*)$/.exec(query.kitsuStreamId ?? "");
   if (!saved && !looksAnime(query.metaId)) return null;
   const coords = {

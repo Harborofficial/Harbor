@@ -97,6 +97,11 @@ export function bufferTotalBytes(profile: BufferProfile): number {
   return profile.maxBytes + profile.maxBackBytes;
 }
 
+/** Options that would request mpv's append-only disk cache; native playback rejects them. */
+export function isBlockedDiskCacheOptionLine(line: string): boolean {
+  return /^\s*(?:--)?(?:cache-on-disk|cache-dir|demuxer-cache-dir)\s*=/i.test(line);
+}
+
 /** The effective Automatic profile: 75% ahead, 25% behind. */
 export function autoBufferProfile(totalPhysBytes?: number): BufferProfile {
   const total = autoCacheBytes(totalPhysBytes);

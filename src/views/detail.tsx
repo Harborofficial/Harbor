@@ -991,8 +991,7 @@ export function DetailView({
       const forceRefresh =
         isAnime &&
         retryAttempt > 0 &&
-        (retryConsumed.current.id !== meta.id ||
-          retryAttempt > retryConsumed.current.attempt);
+        (retryConsumed.current.id !== meta.id || retryAttempt > retryConsumed.current.attempt);
       if (forceRefresh) retryConsumed.current = { id: meta.id, attempt: retryAttempt };
       // The catalogue types a row from the first type its provider declares, which is wrong for any
       // provider that carries both movies and series. The bridge said which it returned, so the

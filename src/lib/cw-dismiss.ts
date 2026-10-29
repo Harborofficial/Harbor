@@ -343,6 +343,61 @@ export function isCwDismissed(item: LibraryItem): boolean {
   );
 }
 
+type CleanupOptions = { acknowledged?: boolean };
+
+function clearResumeForItem(item: LibraryItem, options: CleanupOptions): void {
+  const { season, episode } = resolveEpisode(item);
+  clearResume(item._id, season, episode, options);
+}
+
+/**
+ * Clean up one source represented by a deduped card. The grouped dismissal
+ * checkpoints hide the card locally; this keeps the same source records that a
+ * single-card dismissal clears from lingering on the Stremio cloud, Nuvio, or
+ * local stores.
+ */
+function cleanupGroupedSource(
+  item: LibraryItem,
+  authKey: string | null,
+  options: CleanupOptions,
+  now: string,
+  cloudIds: Set<string>,
+): Promise<boolean> | null {
+  const id = item._id;
+  if (!id) return null;
+  const nuvio =
+    item.external === "nuvio" ||
+    (!item.local && !item.external && isNuvioSignedIn() && isNuvioProviderActive());
+  if (nuvio) {
+    clearResumeForItem(item, options);
+    try {
+      const slot = resolveNuvioProfileIndex();
+      clearLocalCw(id, `nuvio-${slot}`, options);
+      clearLocalCw(id, options);
+      const { season, episode } = resolveEpisode(item);
+      void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
+    } catch {}
+    return null;
+  }
+  if (item.local) {
+    clearLocalCw(id, options);
+    return null;
+  }
+  if (item.external) {
+    clearResumeForItem(item, options);
+    return null;
+  }
+  if (!authKey || !item.state || privateCwProfileId()) return null;
+  clearResumeForItem(item, options);
+  if (cloudIds.has(id)) return null;
+  cloudIds.add(id);
+  return cloudLibraryPut(
+    authKey,
+    { ...item, state: { ...item.state, timeOffset: 0 }, _mtime: now },
+    options,
+  );
+}
+
 export type CwDismissResult = { sync: "not-required" | "synced" | "queued" };
 
 export function dismissCw(item: LibraryItem, authKey: string | null): void;
@@ -360,6 +415,7 @@ export function dismissCw(
   const members = (item as LibraryItem & { cwMembers?: LibraryItem[] }).cwMembers;
   if (members?.length) {
     const nowMs = Date.now();
+    const now = new Date(nowMs).toISOString();
     const times = new Map(dismissed);
     const videos = new Map(dismissedVid);
     const positions = new Map(dismissedPos);
@@ -423,7 +479,47 @@ export function dismissCw(
     for (const [key, value] of videos) dismissedVid.set(key, value);
     for (const [key, value] of positions) dismissedPos.set(key, value);
     emit();
-    return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;
+
+    const cleanupSeen = new Set<string>();
+    const cloudIds = new Set<string>();
+    const cloudWrites: Promise<boolean>[] = [];
+    let cleanupError: unknown;
+    for (const member of [item, ...members]) {
+      const id = member._id;
+      if (!id) continue;
+      const { season, episode } = resolveEpisode(member);
+      const cleanupKey = `${dismissalSource(member)}|${id}|${season ?? ""}|${episode ?? ""}`;
+      if (cleanupSeen.has(cleanupKey)) continue;
+      cleanupSeen.add(cleanupKey);
+      try {
+        const write = cleanupGroupedSource(member, authKey, options, now, cloudIds);
+        if (write) cloudWrites.push(write);
+      } catch (error) {
+        cleanupError ??= error;
+      }
+    }
+    if (cleanupError) {
+      void Promise.allSettled(cloudWrites);
+      throw new Error(
+        "Removed from Continue Watching, but the saved position could not be cleared.",
+        {
+          cause: cleanupError,
+        },
+      );
+    }
+    if (!options.acknowledged) {
+      void Promise.allSettled(cloudWrites);
+      return;
+    }
+    if (cloudWrites.length === 0) return Promise.resolve({ sync: "not-required" });
+    return Promise.all(cloudWrites).then(
+      (results) => ({ sync: results.every(Boolean) ? "synced" : "queued" }),
+      () => {
+        throw new Error(
+          "Removed from Continue Watching on this device, but synchronization could not be saved.",
+        );
+      },
+    );
   }
   const id = item._id;
   const now = new Date().toISOString();

@@ -89,28 +89,40 @@ export type AniZipMapping = {
   };
 };
 
-export async function aniZipByKitsu(kitsuId: number): Promise<AniZipMapping | null> {
-  return get(`kitsu_id=${kitsuId}`);
+export async function aniZipByKitsu(
+  kitsuId: number,
+  maxAge?: number,
+): Promise<AniZipMapping | null> {
+  return get(`kitsu_id=${kitsuId}`, maxAge);
 }
 
-export async function aniZipByAnilist(anilistId: number): Promise<AniZipMapping | null> {
-  return get(`anilist_id=${anilistId}`);
+export async function aniZipByAnilist(
+  anilistId: number,
+  maxAge?: number,
+): Promise<AniZipMapping | null> {
+  return get(`anilist_id=${anilistId}`, maxAge);
 }
 
-export async function aniZipByMal(malId: number): Promise<AniZipMapping | null> {
-  return get(`mal_id=${malId}`);
+export async function aniZipByMal(malId: number, maxAge?: number): Promise<AniZipMapping | null> {
+  return get(`mal_id=${malId}`, maxAge);
 }
 
-export async function aniZipByAnidb(anidbId: number): Promise<AniZipMapping | null> {
-  return get(`anidb_id=${anidbId}`);
+export async function aniZipByAnidb(
+  anidbId: number,
+  maxAge?: number,
+): Promise<AniZipMapping | null> {
+  return get(`anidb_id=${anidbId}`, maxAge);
 }
 
-export async function aniZipByImdb(imdbId: string): Promise<AniZipMapping | null> {
-  return get(`imdb_id=${imdbId}`);
+export async function aniZipByImdb(imdbId: string, maxAge?: number): Promise<AniZipMapping | null> {
+  return get(`imdb_id=${imdbId}`, maxAge);
 }
 
-export async function aniZipByTmdbTv(tmdbId: number): Promise<AniZipMapping | null> {
-  return get(`themoviedb_id=${tmdbId}`);
+export async function aniZipByTmdbTv(
+  tmdbId: number,
+  maxAge?: number,
+): Promise<AniZipMapping | null> {
+  return get(`themoviedb_id=${tmdbId}`, maxAge);
 }
 
 const TIMEOUT_MS = 4000;
@@ -193,19 +205,26 @@ function captureExactAliases(query: string, value: AniZipMapping): void {
   }
 }
 
-async function get(query: string): Promise<AniZipMapping | null> {
+async function get(query: string, maxAge?: number): Promise<AniZipMapping | null> {
+  const forceRefresh = maxAge === 0;
   const memory = cache.get(query);
-  if (memory && memory.expiresAt > Date.now()) return memory.value;
+  if (!forceRefresh && memory && memory.expiresAt > Date.now()) return memory.value;
   if (memory) cache.delete(query);
-  const negAt = negCache.get(query);
-  if (negAt != null && Date.now() - negAt < NEG_TTL_MS) return null;
+  if (!forceRefresh) {
+    const negAt = negCache.get(query);
+    if (negAt != null && Date.now() - negAt < NEG_TTL_MS) return null;
+  }
   const existing = inflight.get(query);
   if (existing) return existing;
   const p = (async () => {
     let stored: AnimeProviderRecord<AniZipMapping | null> | null = null;
     try {
       stored = await animeDbReadProvider<AniZipMapping | null>(`anizip:${query}`);
-      if (stored && stored.expiresAt > Date.now()) {
+      const storedFresh =
+        stored != null &&
+        stored.expiresAt > Date.now() &&
+        (maxAge == null || Date.now() - stored.fetchedAt <= maxAge);
+      if (!forceRefresh && stored && storedFresh) {
         remember(query, stored.value, stored.expiresAt);
         if (stored.value) captureExactAliases(query, stored.value);
         return stored.value;

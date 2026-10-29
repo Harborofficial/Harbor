@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import "./_localstorage-stub.ts";
-import { recordAnimeCwId, recordAnimePlayId, recordAnilistMalAlias } from "../src/lib/anime-cw-ids.ts";
+import {
+  recordAnimeCwId,
+  recordAnimePlayId,
+  recordAnilistMalAlias,
+} from "../src/lib/anime-cw-ids.ts";
 import { cwAnimeIdentityKey, dedupeAnimeCw } from "../src/lib/cw-anime-identity.ts";
 
 test("native MAL aliases share an entry while catalog mappings need checkpoint proof", () => {
@@ -22,11 +26,9 @@ test("distinct anime entries and the music special are never merged by shared IM
   recordAnimeCwId("mal:35180", "kitsu:13401");
   recordAnimeCwId("mal:28789", "kitsu:10063");
   assert.deepEqual(
-    dedupeAnimeCw([
-      { _id: "kitsu:11380" },
-      { _id: "mal:35180" },
-      { _id: "mal:28789" },
-    ]).map((row) => row._id),
+    dedupeAnimeCw([{ _id: "kitsu:11380" }, { _id: "mal:35180" }, { _id: "mal:28789" }]).map(
+      (row) => row._id,
+    ),
     ["kitsu:11380", "mal:35180", "mal:28789"],
   );
 });
