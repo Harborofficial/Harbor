@@ -81,6 +81,7 @@ import { SourceDrawer } from "./play-picker/source-drawer";
 import { TierStrip } from "./play-picker/tier-strip";
 import { usePickHandler, type ResolvingSelection } from "./play-picker/use-pick-handler";
 import { useActiveKid } from "@/lib/profiles";
+import { expandOriginalAudioLang } from "@/lib/player/audio-language";
 import { useAutoCandidates } from "./play-picker/use-auto-candidates";
 import { useAutoFire } from "./play-picker/use-auto-fire";
 import { useRoomInvite } from "./play-picker/use-room-invite";
@@ -321,8 +322,8 @@ export function PlayPicker({
       seen.add(code);
       out.push(lang);
     }
-    return out;
-  }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest]);
+    return expandOriginalAudioLang(out, meta.originalLanguage, isAnimeRequest);
+  }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest, meta.originalLanguage]);
   const [langFilter, setLangFilter] = useState(
     settings.requirePreferredLanguage === true && baseLangs.length > 0,
   );

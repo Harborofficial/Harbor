@@ -15,6 +15,7 @@ import {
 } from "@/lib/subtitles/subtitle-memory";
 import { playbackSourceKey, readActualPlaybackFor } from "@/lib/playback-history";
 import { selectPlaybackAudio } from "./audio-choice";
+import { expandOriginalAudioLang } from "./audio-language";
 
 function blockWords(s: Settings): string[] {
   return (s.trackBlockWords ?? []).map((w) => w.trim().toLowerCase()).filter(Boolean);
@@ -60,9 +61,16 @@ export function trackPreferences(src: PlayerSrc, settings: Settings, prefs: PerS
     const kept = langs.filter((l) => !isJapanese(l));
     return kept.length > 0 ? kept : langs;
   };
-  const baseAudio = stripJaForNonAnime(
+  const resolvedAudio = stripJaForNonAnime(
     resolveLangPreference(settings.preferredAudioLangs, settings.preferredLanguages),
   );
+  const expandedAudio = expandOriginalAudioLang(resolvedAudio, src.meta.originalLanguage, isAnime);
+  // An unknown original language must not leave the list empty; the locale preference is
+  // still a better answer than picking whichever track the release happens to list first.
+  const baseAudio =
+    expandedAudio.length > 0
+      ? expandedAudio
+      : stripJaForNonAnime(resolveLangPreference(undefined, settings.preferredLanguages));
   const baseSub = stripJaForNonAnime(
     resolveLangPreference(settings.preferredSubLangs, settings.preferredLanguages),
   );

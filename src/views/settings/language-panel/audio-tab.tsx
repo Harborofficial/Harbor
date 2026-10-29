@@ -5,6 +5,10 @@ import { useT } from "@/lib/i18n";
 import { Section } from "../shared";
 import { SettingRow } from "../kit";
 import { LanguagesPicker } from "../streaming-panel";
+import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
+import { ORIGINAL_AUDIO_LANG } from "@/lib/player/audio-language";
+
+const AUDIO_LANGUAGE_OPTIONS = [ORIGINAL_AUDIO_LANG, ...ALL_LANGUAGE_NAMES];
 
 export function AudioLanguageTab() {
   const { settings, update } = useSettings();
@@ -14,24 +18,31 @@ export function AudioLanguageTab() {
     <>
       <Section
         title={t("Audio languages")}
-        subtitle={t("When a release ships multiple audio tracks, Harbor selects the first match from this list.")}
+        subtitle={t(
+          "When a release ships multiple audio tracks, Harbor selects the first match from this list.",
+        )}
       >
         <LanguagesPicker
           value={settings.preferredAudioLangs}
           onChange={(langs) => update({ preferredAudioLangs: langs })}
+          options={AUDIO_LANGUAGE_OPTIONS}
         />
       </Section>
 
       <Section
         title={t("Skip these tracks")}
-        subtitle={t("Applies to both audio and subtitle tracks. You can still pick a skipped track by hand in the player.")}
+        subtitle={t(
+          "Applies to both audio and subtitle tracks. You can still pick a skipped track by hand in the player.",
+        )}
       >
         <SettingRow
           wide
           icon={<Ban size={18} strokeWidth={2} />}
           label={t("Never auto-select tracks containing")}
           desc={t("Tracks whose name contains one of these words are skipped.")}
-          tip={t("Comma-separated words. Audio or subtitle tracks whose name matches any of these are skipped during automatic selection. You can still pick them by hand in the player.")}
+          tip={t(
+            "Comma-separated words. Audio or subtitle tracks whose name matches any of these are skipped during automatic selection. You can still pick them by hand in the player.",
+          )}
         >
           <div className="flex w-full flex-col gap-2.5">
             <input
@@ -41,10 +52,14 @@ export function AudioLanguageTab() {
               onChange={(e) => {
                 setBlockDraft(e.target.value);
                 update({
-                  trackBlockWords: [...new Set(e.target.value
-                    .split(",")
-                    .map((w) => w.trim())
-                    .filter(Boolean))],
+                  trackBlockWords: [
+                    ...new Set(
+                      e.target.value
+                        .split(",")
+                        .map((w) => w.trim())
+                        .filter(Boolean),
+                    ),
+                  ],
                 });
               }}
               placeholder={t("commentary, descriptive")}

@@ -6,6 +6,7 @@ import {
   type ThemeSettings,
 } from "@/lib/theme";
 import { languageName } from "@/lib/subtitles/language";
+import { ORIGINAL_AUDIO_LANG } from "@/lib/player/audio-language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId, providerTabFor } from "@/lib/ai-models";
 import {
@@ -515,7 +516,7 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
       },
       preferredSubLangs: (parsed.preferredSubLangs ?? DEFAULT.preferredSubLangs).map(languageName),
       preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map(
-        languageName,
+        (lang) => (lang === ORIGINAL_AUDIO_LANG ? lang : languageName(lang)),
       ),
       castAlwaysTranscode: parsed.castAlwaysTranscode ?? DEFAULT.castAlwaysTranscode,
       mangaUpscaleQuality: parsed.mangaUpscaleQuality === "best" ? "best" : "fast",
