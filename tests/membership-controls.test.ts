@@ -135,6 +135,7 @@ test("membership creation cancels and saves back into the same stable destinatio
     });
   try {
     await React.act(() => root.render(render()));
+    assert.equal(action("membership:add").textContent?.trim(), "Add to list");
     await click(action("membership:add"));
     const chooser = document.querySelector("[data-context-submenu]");
     const initial = localStorage.getItem(key);

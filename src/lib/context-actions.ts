@@ -28,7 +28,6 @@ export type ContextAction = {
   checked?: boolean;
   dismiss?: "on-success" | "keep-open";
   confirmation?: ActionConfirmation;
-  quickCopy?: boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
   submenuVariant?: "navigation";

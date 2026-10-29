@@ -97,7 +97,7 @@ export function ActionCommand({
     >
       <HoverTooltip
         label={action.reason ?? action.label}
-        disabled={!(quick || action.reason) || unavailable || !!confirmation}
+        disabled={!action.reason || unavailable || !!confirmation}
         contextMenu={inMenu}
         intentional={action.tooltipIntent === "deliberate"}
         side="top"

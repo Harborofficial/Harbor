@@ -10,7 +10,6 @@ import {
   Copy,
   Disc3,
   Heart,
-  ImageDown,
   ListMusic,
   ListPlus,
   Play,
@@ -20,7 +19,6 @@ import {
 import { MoreLikeThisIcon } from "@/components/icons/more-like-this-icon";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { useT } from "@/lib/i18n";
-import { saveArtwork } from "@/lib/music/artwork-save";
 import {
   requestMusicExplore,
   requestMusicLibrary,
@@ -82,16 +80,6 @@ export function useMusicTrackMenuItems(
       label: t(liked ? "music.unsaveTrack" : "music.saveTrack"),
       icon: <Heart size={14} fill={liked ? "currentColor" : "none"} />,
       run: onToggleLike,
-    });
-  }
-  if (track.artwork) {
-    items.push({
-      id: "artwork",
-      label: t("music.artwork.save"),
-      icon: <ImageDown size={14} />,
-      run: async () => {
-        await saveArtwork(track.artwork, track.album || track.title, track.artist);
-      },
     });
   }
   if (onAddToQueue) {

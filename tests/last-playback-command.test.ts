@@ -158,11 +158,27 @@ async function fixture(target: ActualPlayback | null = last) {
   return { dom, state, calls, render, action, click, dispose };
 }
 
-test("empty actual history renders no last-playback command or separator", async () => {
+test("empty actual history keeps a disabled last-playback command without a hide control", async () => {
   const f = await fixture(null);
   try {
-    assert.equal(document.querySelector("[data-context-action]"), null);
+    assert.equal(f.action()?.textContent?.trim(), "Resume last watched");
+    assert.equal(f.action().disabled, true);
+    assert.equal(f.action().getAttribute("aria-disabled"), "true");
+    assert.ok(f.action().querySelector("svg"));
+    assert.equal(f.action().querySelector("img"), null);
+    assert.equal(document.querySelector("[data-context-hide-playback]") === null, true);
     assert.equal(document.querySelector("[role='separator']"), null);
+    await f.click(f.action());
+    assert.deepEqual(f.calls, []);
+    assert.deepEqual(f.state.closes, []);
+    f.state.target = last;
+    await f.render();
+    assert.equal(f.action().disabled, false);
+    assert.equal(document.querySelector("[data-context-hide-playback]") === null, true);
+    f.state.target = null;
+    f.state.enabled = false;
+    await f.render();
+    assert.equal(document.querySelector("[data-context-action]"), null);
   } finally {
     await f.dispose();
   }
@@ -173,7 +189,7 @@ test("a menu on B continues the actual A target and preserves its payload across
   try {
     f.state.clicked = "Different B";
     await f.render();
-    assert.equal(f.action().textContent?.trim(), "Continue last watched");
+    assert.equal(f.action().textContent?.trim(), "Resume last watched");
     await f.click(f.action());
     assert.equal(f.calls.length, 1);
     assert.equal(f.calls[0].target, last);
@@ -234,6 +250,24 @@ test("pending state disables activation and the shared runner rejects duplicate 
   }
 });
 
+test("losing the target clears restart confirmation and leaves only the disabled command", async () => {
+  const f = await fixture({ ...last, completed: true });
+  try {
+    await f.click(f.action());
+    assert.ok(document.querySelector("[data-context-confirm]"));
+    f.state.target = null;
+    await f.render();
+    assert.equal(f.action()?.textContent?.trim(), "Resume last watched");
+    assert.equal(f.action().disabled, true);
+    assert.equal(document.querySelectorAll("[data-context-action]").length, 1);
+    assert.equal(document.querySelector("[data-context-confirm]"), null);
+    assert.equal(document.querySelector("[data-context-hide-playback]") === null, true);
+    assert.deepEqual(f.calls, []);
+  } finally {
+    await f.dispose();
+  }
+});
+
 test("missing, loading and broken artwork retain the real SVG fallback without changing the command", async () => {
   const f = await fixture({
     ...last,
@@ -254,7 +288,7 @@ test("missing, loading and broken artwork retain the real SVG fallback without c
     await React.act(async () => image.dispatchEvent(new f.dom.window.Event("error")));
     assert.equal(f.action().querySelector("img"), null);
     assert.ok(f.action().querySelector(".context-menu-icon svg"));
-    assert.equal(f.action().textContent?.trim(), "Continue last watched");
+    assert.equal(f.action().textContent?.trim(), "Resume last watched");
   } finally {
     await f.dispose();
   }
@@ -296,7 +330,7 @@ test("standalone last-playback row preserves A and explicit EOF restart without 
   const f = await fixture({ ...last, completed: true });
   try {
     await f.render();
-    assert.equal(f.action().textContent?.trim(), "Continue last watched");
+    assert.equal(f.action().textContent?.trim(), "Resume last watched");
     assert.equal(document.querySelectorAll("[data-context-action]").length, 1);
     assert.equal(document.querySelectorAll("[role=separator]").length, 0);
     assert.equal(f.action().closest("[data-context-quick]"), null);
@@ -311,6 +345,22 @@ test("standalone last-playback row preserves A and explicit EOF restart without 
     f.state.enabled = false;
     await f.render();
     assert.equal(document.querySelectorAll("[data-context-action]").length, 0);
+  } finally {
+    await f.dispose();
+  }
+});
+
+test("a valid last-playback target has no dismissal command", async () => {
+  const f = await fixture();
+  try {
+    assert.equal(document.querySelector("[data-context-hide-playback]") === null, true);
+    assert.equal(document.querySelectorAll("[role='menuitem']").length, 1);
+    assert.equal(f.action().textContent?.trim(), "Resume last watched");
+    assert.equal(f.action().disabled, false);
+    await f.click(f.action());
+    assert.equal(f.calls.length, 1);
+    assert.equal(f.calls[0].target, last);
+    assert.deepEqual(f.state.closes, [false]);
   } finally {
     await f.dispose();
   }

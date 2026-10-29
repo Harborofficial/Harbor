@@ -6,6 +6,9 @@ const OWNED_CONTENT = [
   "select",
   "option",
   "iframe",
+  "img",
+  "picture",
+  "svg",
   "canvas",
   "video",
   "audio",
@@ -16,6 +19,8 @@ const OWNED_CONTENT = [
   "[role='textbox']",
   "[data-harbor-context-layer]",
   "[data-harbor-player]",
+  "[data-harbor-image-viewer]",
+  "[data-title-backdrop]",
   "[data-ebook-page]",
   "[data-bp-root]",
   "[data-bp-focusable]",
@@ -31,5 +36,31 @@ export function isPageContextBackground(target: Element | null): boolean {
     target.matches(
       "main,[data-context-page-background],[data-tauri-drag-region]:not([data-tauri-drag-region='false'])",
     )
+  );
+}
+
+/** A generic action target is not page space. Only the trusted page binding can
+ * opt in, and content under the pointer always keeps its own context. */
+export function isBackgroundMenuTarget(
+  target:
+    | {
+        kind: string;
+        scope?: "page-background";
+        navigation?: boolean;
+        image?: unknown;
+        link?: string;
+        selection?: string;
+      }
+    | null
+    | undefined,
+): boolean {
+  return (
+    !!target &&
+    target.kind === "actions" &&
+    target.scope === "page-background" &&
+    target.navigation !== false &&
+    !target.image &&
+    !target.link &&
+    !target.selection
   );
 }

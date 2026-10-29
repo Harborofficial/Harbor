@@ -32,11 +32,11 @@ function PlaybackArtwork({ src }: { src?: string }) {
 type LastPlaybackCommandProps = {
   onClose: (restoreFocus?: boolean) => void;
   enabled?: boolean;
-  children?: (action: ContextAction | null) => ReactNode;
+  children?: (action: ContextAction | null, row: ReactNode | null) => ReactNode;
 };
 
 export function LastPlaybackCommand({ enabled = true, ...props }: LastPlaybackCommandProps) {
-  return enabled ? <ResolvedLastPlaybackCommand {...props} /> : props.children?.(null);
+  return enabled ? <ResolvedLastPlaybackCommand {...props} /> : props.children?.(null, null);
 }
 
 function ResolvedLastPlaybackCommand({ onClose, children }: LastPlaybackCommandProps) {
@@ -54,14 +54,25 @@ function ResolvedLastPlaybackCommand({ onClose, children }: LastPlaybackCommandP
         }
       : null,
   );
-  if (!target) return children?.(null) ?? null;
+  if (!target) {
+    const action: ContextAction = {
+      id: "playback:last:unavailable",
+      label: t("Resume last watched"),
+      icon: <PlaybackArtwork />,
+      disabled: true,
+    };
+    const row = (
+      <ActionItems key={action.id} source={{ actions: () => [action] }} onClose={onClose} />
+    );
+    return children ? children(action, row) : row;
+  }
   const presentation = lastPlaybackPresentation(target, settings, summary?.status === "watched");
   const tooltip = [presentation.title ?? t("Local video"), presentation.episode]
     .filter(Boolean)
     .join(" · ");
   const action: ContextAction = {
     id: `playback:last:${target.id}`,
-    label: t("Continue last watched"),
+    label: t("Resume last watched"),
     icon: <PlaybackArtwork key={presentation.artwork ?? "fallback"} src={presentation.artwork} />,
     reason: tooltip,
     tooltipIntent: "deliberate",
@@ -83,10 +94,8 @@ function ResolvedLastPlaybackCommand({ onClose, children }: LastPlaybackCommandP
       await continuation.continuePlayback(target, { restart: target.completed });
     },
   };
-  if (children) return children(action);
-  return (
-    <>
-      <ActionItems source={{ actions: () => [action] }} onClose={onClose} />
-    </>
+  const row = (
+    <ActionItems key={action.id} source={{ actions: () => [action] }} onClose={onClose} />
   );
+  return children ? children(action, row) : row;
 }

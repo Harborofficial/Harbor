@@ -32,6 +32,8 @@ function harness(presentation: "baseline" | "popout") {
     "react/jsx-runtime": jsx,
     "lucide-react": icons,
     "@/lib/i18n": { useT: () => (key: string) => key },
+    "@/lib/queue": { queueAdd() {}, queueIndexOf: () => -1, useQueue: () => [] },
+    "@/hooks/use-queue-surface": { useQueueSurface: () => true },
     "@/lib/manual-watched": {
       manualWatchedState: () => false,
       subscribeManualWatched: () => () => {},

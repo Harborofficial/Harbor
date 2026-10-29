@@ -221,7 +221,7 @@ export function buildMembershipActionSource(options: Options): ActionSource {
       const actions: ContextAction[] = [
         {
           id: "membership:add",
-          label: t("Add to"),
+          label: t("Add to list"),
           icon: options.commandIcon?.("add"),
           group: "membership",
           disabled: !available,
