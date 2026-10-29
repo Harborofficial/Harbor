@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { DownloadCancelIcon, DownloadPauseResumeIcon } from "@/components/download-action-icons";
 import { HarborLoader } from "@/components/harbor-loader";
 import { DownloadDeleteButton } from "@/components/download-delete-button";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import {
   downloadCapabilities,
@@ -226,6 +227,15 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
         )}
         {d.status !== "downloading" && d.status !== "paused" && (
           <>
+            {d.status === "done" && d.kind !== "ebook" && (
+              <RowBtn
+                label={t("Play")}
+                onClick={() => run("play")}
+                disabled={pending || !caps?.play}
+              >
+                <Play size={14} strokeWidth={2.2} fill="currentColor" />
+              </RowBtn>
+            )}
             {caps?.reveal && (
               <RowBtn label={t("Show in folder")} onClick={() => run("reveal")} disabled={pending}>
                 <FolderOpen size={14} strokeWidth={2} />
