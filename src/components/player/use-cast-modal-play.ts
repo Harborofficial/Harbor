@@ -6,14 +6,15 @@ import { usePlayerNavigation, type PlayEpisode } from "@/lib/view";
 
 export function useCastModalPlay() {
   const { exitPlayer, openPicker } = usePlayerNavigation();
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
   const { snapshot, claimHost } = useTogether();
   return useCallback(
-    (m: Meta, ep?: PlayEpisode) => {
+    (m: Meta, ep?: PlayEpisode, queueItemId?: string) => {
       const inSession = snapshot.state === "joined" && snapshot.participants.length >= 2;
       if (inSession) claimHost(true);
       exitPlayer();
-      openPicker(m, ep, { autoPlay: settings.instantPlay, resume: true });
+      if (queueItemId) update({ queueDrivesNav: true });
+      openPicker(m, ep, { autoPlay: settings.instantPlay, resume: true, queueItemId });
     },
     [
       exitPlayer,
@@ -22,6 +23,7 @@ export function useCastModalPlay() {
       snapshot.state,
       snapshot.participants.length,
       claimHost,
+      update,
     ],
   );
 }

@@ -62,6 +62,7 @@ import { cinemetaDetails } from "@/lib/providers/cinemeta-details";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { useContentDrag } from "@/lib/window-drag";
+import { useContextTarget } from "@/lib/context-menu";
 import {
   CLOUD_OK,
   cloudWriteId,
@@ -247,6 +248,7 @@ export function DetailView({
   const t = useT();
   const { settings } = useSettings();
   const contentDrag = useContentDrag();
+  const movieContextRef = useContextTarget<HTMLDivElement>(() => ({ kind: "meta", meta }));
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const [detail, setDetail] = useState<
@@ -2076,7 +2078,10 @@ export function DetailView({
           <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-canvas/85 via-canvas/35 to-transparent" />
 
           <div className="absolute inset-x-0 bottom-0 px-12 pb-14">
-            <div className={awardsInDescription ? "max-w-3xl" : undefined}>
+            <div
+              ref={meta.type === "movie" && !liveContext ? movieContextRef : undefined}
+              className={awardsInDescription ? "max-w-3xl" : undefined}
+            >
               {tagline && !loading && !detectingAnime && (
                 <p
                   className={`mb-4 text-[14px] font-medium uppercase tracking-[0.2em] ${

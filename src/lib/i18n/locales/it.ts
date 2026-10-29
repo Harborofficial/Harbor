@@ -97,6 +97,7 @@ import subtitles from "./it/subtitles";
 import plugins from "./it/plugins";
 import brands from "./it/brands";
 import bpSports from "./it/bp-sports";
+import queueBasket from "./it/queue-basket";
 
 import nytTv from "./it/nyt-tv";
 
@@ -369,6 +370,7 @@ const it: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...reviews,
+  ...queueBasket,
 };
 
 export default it;

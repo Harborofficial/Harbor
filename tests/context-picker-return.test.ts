@@ -10,6 +10,13 @@ const ep = { season: 2, episode: 3, videoId: "controlled:2:3" };
 const home: Frame = { kind: "home" };
 const detail: Frame = { kind: "meta", meta };
 
+test("queue picker requests are distinct from manual requests for the same episode", () => {
+  const picker: Frame = { kind: "picker", meta, episode: ep, queueItemId: "entry" };
+  assert.equal(samePickerRequest(picker, meta, ep), false);
+  assert.equal(samePickerRequest(picker, meta, ep, { queueItemId: "entry" }), true);
+  assert.equal(samePickerRequest(picker, meta, ep, { queueItemId: "other" }), false);
+});
+
 test("ordinary picker cancellation retains the existing Details destination", () => {
   const picker: Frame = { kind: "picker", meta, episode: ep, intent: "download" };
   assert.deepEqual(pickerExitStack([home, picker], meta), [home, detail]);

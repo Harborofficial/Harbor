@@ -91,6 +91,8 @@ export type PlayerSrc = {
   officialBroadcast?: import("./sports/esports-streams").EsportsStream;
   continuation?: import("./playback-history").PlaybackContinuation;
   meta: Meta;
+  /** Queue entry that explicitly initiated this playback. */
+  queueItemId?: string;
   playbackTraceId?: string;
   proxySessionId?: string;
   historyUrl?: string;
@@ -171,6 +173,7 @@ export type PickerOptions = {
   returnTo?: "previous";
   contextRequestId?: string;
   continuation?: import("./playback-history").PlaybackContinuation;
+  queueItemId?: string;
 };
 
 export type GridSpec = {
@@ -252,6 +255,7 @@ export type Frame =
   | {
       kind: "picker";
       meta: Meta;
+      queueItemId?: string;
       episode?: PlayEpisode;
       autoPlay?: boolean;
       attempt?: number;
@@ -369,6 +373,7 @@ type ViewValue = {
   openCuratedList: (id: string) => void;
   picker: {
     meta: Meta;
+    queueItemId?: string;
     episode?: PlayEpisode;
     autoPlay?: boolean;
     attempt?: number;
@@ -733,6 +738,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     top.kind === "picker"
       ? {
           meta: top.meta,
+          queueItemId: top.queueItemId,
           episode: top.episode,
           autoPlay: top.autoPlay,
           attempt: top.attempt,
@@ -1389,6 +1395,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         return pushFrame(cur, {
           kind: "picker",
           meta: m,
+          queueItemId: opts?.queueItemId,
           episode: ep,
           autoPlay: opts?.autoPlay,
           attempt: opts?.attempt,

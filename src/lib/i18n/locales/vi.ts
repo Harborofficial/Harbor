@@ -119,6 +119,7 @@ import ageGate from "./vi/age-gate";
 import plugins from "./vi/plugins";
 import brands from "./vi/brands";
 import bpSports from "./vi/bp-sports";
+import queueBasket from "./vi/queue-basket";
 
 import nytTv from "./vi/nyt-tv";
 
@@ -412,6 +413,7 @@ const vi: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...reviews,
+  ...queueBasket,
 };
 
 export default vi;

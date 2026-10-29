@@ -99,6 +99,7 @@ import currentTail from "./ko/current-tail";
 import plugins from "./ko/plugins";
 import brands from "./ko/brands";
 import bpSports from "./ko/bp-sports";
+import queueBasket from "./ko/queue-basket";
 
 import nytTv from "./ko/nyt-tv";
 
@@ -371,6 +372,7 @@ const ko: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...reviews,
+  ...queueBasket,
 };
 
 export default ko;

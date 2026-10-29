@@ -73,12 +73,35 @@ export function CinemetaEpisodes({
     watched: boolean,
   ) => {
     e.preventDefault();
+    const selected = grouped
+      .flatMap((group) =>
+        group.episodes.map((entry, index) => ({
+          entry,
+          season: episodeSeason(entry),
+          episode: episodeNumber(entry, index),
+        })),
+      )
+      .find((entry) => entry.season === season && entry.episode === episode)?.entry;
     setWatchedMenu({
       x: e.clientX,
       y: e.clientY,
       season,
       episode,
       watched,
+      queueTarget: selected
+        ? {
+            meta,
+            episode: {
+              season,
+              episode,
+              name: selected.name || selected.title || undefined,
+              runtime: selected.runtime ?? undefined,
+              videoId: selected.id || undefined,
+              still: selected.thumbnail || undefined,
+              overview: selected.overview ?? selected.description,
+            },
+          }
+        : undefined,
       origin: e.currentTarget instanceof HTMLElement ? e.currentTarget : null,
     });
   };

@@ -358,9 +358,9 @@ export function TransportStremio(p: TransportStremioProps) {
             exitPlayer();
             openMeta(m);
           }}
-          onPlay={(m, ep) => {
+          onPlay={(m, ep, queueItemId) => {
             setCastModalOpen(false);
-            castModalPlay(m, ep);
+            castModalPlay(m, ep, queueItemId);
           }}
           currentEpisode={season != null && episode != null ? { season, episode } : null}
         />

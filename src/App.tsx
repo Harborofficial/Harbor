@@ -198,6 +198,7 @@ import { releaseBigPictureFullscreen } from "@/views/big-picture/use-bp-fullscre
 import { getNavFocusTarget } from "@/lib/keyboard-navigation/geometry";
 import { SFX } from "@/lib/sfx";
 import { startMediaSessionWindowTracking } from "@/lib/media-session";
+import { QueueBasket } from "@/components/queue-basket/queue-basket";
 
 // Keep the Music UI outside the core startup graph. These chunks are not loaded
 // at all when the installer reports Music as unavailable.
@@ -1793,6 +1794,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
             </Suspense>
           )}
           {!playerActive && <WindowResizeEdges />}
+          {!playerActive && !pickerTop && !immersive && !chromeHidden && <QueueBasket />}
           <HybridTitleBar suppressed={playerActive || immersive || chromeHidden} />
           <div
             className={`relative flex min-h-0 min-w-0 flex-1 flex-col ${playerActive ? "invisible" : ""}`}
@@ -2244,8 +2246,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <div {...layerProps(pickerTop)}>
                 <Suspense fallback={null}>
                   <PlayPicker
-                    key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}-${picker.contextRequestId ?? ""}-${picker.continuation?.id ?? ""}`}
+                    key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}-${picker.contextRequestId ?? ""}-${picker.continuation?.id ?? ""}-${picker.queueItemId ?? ""}`}
                     meta={picker.meta}
+                    queueItemId={picker.queueItemId}
                     episode={picker.episode}
                     autoPlay={picker.intent === "download" ? false : picker.autoPlay}
                     attempt={picker.attempt}
