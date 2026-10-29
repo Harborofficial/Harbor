@@ -14,6 +14,12 @@ import { hasImportedSubTitle } from "@/lib/player/imported-subs";
 import type { RoomCommand } from "@/lib/together/protocol";
 import { cacheSelectedSubtitle } from "@/lib/subtitles/selected-subtitle-cache";
 import { notifyMediaSeeked } from "@/lib/media-session";
+import {
+  capturePlaybackActor,
+  isPlaybackActorCurrent,
+  readActualPlaybackForSubtitle,
+  cacheActualPlaybackSubtitle,
+} from "@/lib/playback-history";
 
 const SEEK_ACCUM_WINDOW_MS = 700;
 
@@ -58,7 +64,12 @@ export function usePlaybackControls(params: {
   } = params;
 
   const pendingSubtitleCacheRef = useRef<(() => void) | null>(null);
-  const subtitleCacheContextRef = useRef({ mediaKey, subtitleStreamKey, revision: 0 });
+  const subtitleCacheContextRef = useRef({
+    mediaKey,
+    subtitleStreamKey,
+    revision: 0,
+    startedAt: Date.now(),
+  });
   if (
     subtitleCacheContextRef.current.mediaKey !== mediaKey ||
     subtitleCacheContextRef.current.subtitleStreamKey !== subtitleStreamKey
@@ -68,6 +79,7 @@ export function usePlaybackControls(params: {
       mediaKey,
       subtitleStreamKey,
       revision: subtitleCacheContextRef.current.revision + 1,
+      startedAt: Date.now(),
     };
   }
   useEffect(() => () => pendingSubtitleCacheRef.current?.(), []);
@@ -76,6 +88,7 @@ export function usePlaybackControls(params: {
     (choice: SubChoiceInput | null | undefined) => {
       pendingSubtitleCacheRef.current?.();
       const revision = ++subtitleCacheContextRef.current.revision;
+      const actor = capturePlaybackActor();
       if (choice) {
         writePlayerPrefs(
           metaId,
@@ -127,6 +140,11 @@ export function usePlaybackControls(params: {
           // still be displaying the preceding selection when this arrives.
           const playableUrl = bridge.getSelectedTrackUrl();
           const cues = bridge.getSelectedTrackCues();
+          const actual = readActualPlaybackForSubtitle(
+            mediaKey,
+            subtitleStreamKey,
+            subtitleCacheContextRef.current.startedAt,
+          );
           stopWaiting();
           void cacheSelectedSubtitle({
             mediaKey,
@@ -137,11 +155,18 @@ export function usePlaybackControls(params: {
           })
             .then((cached) => {
               // The copy may finish after the player was closed and reopened.
-              if (!cached || readRememberedSub(mediaKey) !== remembered) return;
-              writeRememberedSub(
+              if (
+                !cached ||
+                !isPlaybackActorCurrent(actor) ||
+                readRememberedSub(mediaKey) !== remembered
+              )
+                return;
+              const saved = writeRememberedSub(
                 mediaKey,
                 rememberedFromChoice({ ...cached, streamKey: subtitleStreamKey }),
               );
+              if (actual && saved)
+                cacheActualPlaybackSubtitle(actual, remembered, { ...saved, external: true });
             })
             .catch(() => {});
         });

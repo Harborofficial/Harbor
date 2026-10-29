@@ -29,8 +29,10 @@ test("page markers cannot override editor, reader, player, or modal ownership", 
     <div data-ebook-page><main id="reader"></main></div>
     <div data-context-page-exclude><div id="custom" data-context-page-background></div></div>
     <iframe id="frame" data-context-page-background></iframe>
+    <img id="image" data-context-page-background data-tauri-drag-region src="fixture.png">
+    <div data-title-backdrop="fixture.png" id="backdrop" data-context-page-background></div>
   </main>`);
-  for (const id of ["dialog", "editor", "player", "reader", "custom", "frame"])
+  for (const id of ["dialog", "editor", "player", "reader", "custom", "frame", "image", "backdrop"])
     assert.equal(isPageContextBackground(dom.window.document.getElementById(id)), false, id);
   assert.equal(isPageContextBackground(null), false);
   dom.window.close();

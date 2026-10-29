@@ -1,12 +1,4 @@
-import {
-  AudioLines,
-  Download,
-  ExternalLink,
-  Link2,
-  Magnet,
-  Maximize,
-  Settings,
-} from "lucide-react";
+import { AudioLines, Download, ExternalLink, Link2, Magnet, Maximize } from "lucide-react";
 import type { ActionSource, ContextAction } from "@/lib/context-actions";
 import type { PlayerActions } from "@/lib/player-actions";
 import { t } from "@/lib/i18n";
@@ -14,37 +6,11 @@ import { openLinkOut } from "@/lib/social/link-out";
 import { copyContextText } from "./content-actions";
 
 /** Reads the active session again at invocation; source changes never reuse an old URL. */
-export function playerContextSources(
-  readCurrent: () => PlayerActions | null,
-  readSettings: () => ContextAction | undefined,
-): { quick: ActionSource; rows: ActionSource } {
+export function playerContextSources(readCurrent: () => PlayerActions | null): {
+  rows: ActionSource;
+} {
   const isValid = () => readCurrent() != null;
   return {
-    quick: {
-      isValid,
-      actions: () => {
-        const player = readCurrent();
-        if (!player) return [];
-        const actions: ContextAction[] = [];
-        if (player.magnetUrl)
-          actions.push({
-            id: "player:copy-magnet",
-            label: t("Copy magnet"),
-            icon: <Magnet size={16} strokeWidth={2} />,
-            run: () => copyContextText(player.magnetUrl!),
-          });
-        const settings = readSettings();
-        if (settings)
-          actions.push({
-            ...settings,
-            id: "player:settings",
-            label: t("Settings"),
-            icon: settings.icon ?? <Settings size={16} strokeWidth={2} />,
-            restoreFocus: false,
-          });
-        return actions;
-      },
-    },
     rows: {
       isValid,
       actions: () => {
@@ -106,6 +72,14 @@ export function playerContextSources(
               group: "links",
             },
           );
+        if (player.magnetUrl)
+          actions.push({
+            id: "player:copy-magnet",
+            label: t("Copy magnet"),
+            icon: <Magnet size={16} strokeWidth={2} />,
+            run: () => copyContextText(player.magnetUrl!),
+            group: "links",
+          });
         return actions;
       },
     },

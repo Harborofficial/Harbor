@@ -148,7 +148,6 @@ export function CommentItem({
         id: "comment:copy",
         label: t("Copy Text"),
         icon: <Copy size={16} />,
-        quickCopy: true,
         run: () => copyContextText(text.trim()),
       },
       ...(signedIn && onToggleLike

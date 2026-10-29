@@ -4,6 +4,12 @@ import type { PlayerSnapshot } from "./bridge";
 import { isLivePlaybackSrc } from "./live-src";
 import { isNaturalEnd } from "./playback-end";
 import { playbackAudioChoice } from "./audio-choice";
+import { playbackSubtitleChoice, type PlaybackSubtitleChoice } from "./subtitle-choice";
+import {
+  subtitleMediaKey,
+  subtitleStreamKey,
+  type RememberedSub,
+} from "../subtitles/subtitle-memory";
 
 export function actualPlaybackSnapshot(
   src: PlayerSrc,
@@ -11,6 +17,7 @@ export function actualPlaybackSnapshot(
   positionSec: number,
   session: { id: string; actor: PlaybackActor },
   at = Date.now(),
+  rememberedSubtitle?: RememberedSub | null,
 ): ActualPlayback | null {
   if (
     isLivePlaybackSrc(src) ||
@@ -33,10 +40,32 @@ export function actualPlaybackSnapshot(
     startPositionMs: _start,
     startPaused: _paused,
     startFromZero: _zero,
+    subtitlePreselect: _initialSubtitle,
     ...saved
   } = src;
   const { videos: _videos, description: _description, ...meta } = src.meta;
   const selectedAudio = snapshot.audioTracks.find((track) => track.selected);
+  const selectedSubtitle = snapshot.subtitleTracks.find((track) => track.selected);
+  const tracksClearedAtEnd =
+    snapshot.status === "ended" &&
+    snapshot.audioTracks.length === 0 &&
+    snapshot.subtitleTracks.length === 0;
+  const subtitle: PlaybackSubtitleChoice | undefined = selectedSubtitle
+    ? playbackSubtitleChoice(selectedSubtitle, rememberedSubtitle, {
+        mediaKey: subtitleMediaKey(src.meta.id, src.episode?.season, src.episode?.episode),
+        streamKey: subtitleStreamKey(src.streamRef),
+      })
+    : snapshot.status === "ended" && snapshot.subtitleTracks.length === 0
+      ? undefined
+      : { off: true };
+  if (subtitle?.source) subtitle.streamKey = subtitleStreamKey(src.streamRef);
+  if (
+    subtitle &&
+    selectedSubtitle &&
+    Number.isFinite(snapshot.subtitleFps) &&
+    (snapshot.subtitleFps === 0 || (snapshot.subtitleFps! >= 1 && snapshot.subtitleFps! <= 240))
+  )
+    subtitle.fpsOverride = snapshot.subtitleFps;
   return {
     ...session,
     playedAt: at,
@@ -48,5 +77,14 @@ export function actualPlaybackSnapshot(
     src: { ...saved, meta, url: src.historyUrl ?? src.url },
     requiresSourceRefresh: !!proxySessionId || !!src.streamRef?.infoHash || !!src.homeServer,
     audioTrack: selectedAudio ? playbackAudioChoice(selectedAudio) : undefined,
+    subtitle,
+    subDelaySec:
+      !tracksClearedAtEnd && Number.isFinite(snapshot.subDelaySec)
+        ? snapshot.subDelaySec
+        : undefined,
+    audioDelaySec:
+      !tracksClearedAtEnd && Number.isFinite(snapshot.audioDelaySec)
+        ? snapshot.audioDelaySec
+        : undefined,
   };
 }

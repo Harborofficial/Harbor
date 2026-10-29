@@ -13,6 +13,7 @@ import * as actions from "../src/lib/context-actions.ts";
 import * as content from "../src/lib/context-content.ts";
 import * as background from "../src/lib/context-page-background.ts";
 import * as navigationPolicy from "../src/chrome/navigation-policy.ts";
+import { contentActions } from "../src/components/context-menu/content-actions.tsx";
 import * as back from "../src/lib/app-back.ts";
 import * as backHandlers from "../src/lib/back-intercept.ts";
 
@@ -55,7 +56,7 @@ async function fixture({
     toggleFullscreen() {},
     liveSync() {},
   };
-  const last = { id: "playback:last:a", label: "Continue last watched", run() {} };
+  const last = { id: "playback:last:a", label: "Resume last watched", run() {} };
   const navigation = [
     { id: "page:back", label: "Back", run() {} },
     { id: "page:my-profile", label: "Open my profile", run() {} },
@@ -97,6 +98,11 @@ async function fixture({
     "@/components/player/copy-link-button": { copyText: async () => true },
     "@/components/lists/list-toast": { emitListToast: empty },
     "@/lib/deep-link": { shareDeepLink: empty },
+    "@/lib/queue": { queueAdd: empty, queueIndexOf: () => -1 },
+    "@/lib/membership-operations": {},
+    "@/lib/stremio": {},
+    "@/lib/queue-resolve-episode": {},
+    "@/hooks/use-queue-surface": { useQueueSurface: () => !pageShare && !ebookDetails },
     "@/lib/settings": {
       useSettings: () => ({ settings: { navCustomization: {} }, update: empty }),
     },
@@ -177,18 +183,14 @@ async function fixture({
       LastPlaybackCommand: ({
         children,
         enabled,
-        variant,
       }: {
-        children: (action: actions.ContextAction | null) => React.ReactNode;
+        children: (action: actions.ContextAction | null, row: React.ReactNode) => React.ReactNode;
         enabled: boolean;
-        variant?: string;
       }) =>
         children(
+          presentation && enabled ? last : null,
           presentation && enabled
-            ? {
-                ...last,
-                label: variant === "quick" ? "Resume last" : last.label,
-              }
+            ? React.createElement(rows, { source: { actions: () => [last] } })
             : null,
         ),
     },
@@ -215,7 +217,8 @@ async function fixture({
             React.createElement(
               "section",
               { "data-test-menu": true },
-              React.createElement("header", { "data-test-quick": true }, quickActions),
+              quickActions &&
+                React.createElement("header", { "data-test-quick": true }, quickActions),
               React.createElement("main", { "data-test-rows": true }, children),
             )
         : childrenOnly,
@@ -227,7 +230,7 @@ async function fixture({
       QuickActions: presentation ? rows : empty,
       MenuIcon: empty,
     },
-    "./context-menu/content-actions": { contentActions: () => [] },
+    "./context-menu/content-actions": { contentActions },
     "./context-image-viewer": { ContextImageViewer: empty },
     "@/lib/social/external-link-policy": {},
     "@/chrome/context-page-navigation": {
@@ -466,9 +469,16 @@ test("changing the Stremio account invalidates a still-open menu in the same loc
   }
 });
 
-test("non-player root menus place global last playback once above contextual rows, outside the strip", async () => {
+test("only the background root places last playback and global navigation above its footer", async () => {
   const h = await fixture({ presentation: true });
   try {
+    const pageTarget: menu.ContextMenuTarget = {
+      kind: "actions",
+      id: "page:profile",
+      scope: "page-background",
+      label: "Profile background",
+      actions: () => h.navigation,
+    };
     const targets: menu.ContextMenuTarget[] = [
       { kind: "meta", meta: { id: "b", name: "Poster B", type: "movie" } },
       {
@@ -477,19 +487,13 @@ test("non-player root menus place global last playback once above contextual row
         label: "Comment B",
         actions: () => [{ id: "comment:reply", label: "Reply", run() {} }],
       },
-      {
-        kind: "actions",
-        id: "page:profile",
-        scope: "page-background",
-        label: "Profile background",
-        actions: () => h.navigation,
-      },
+      pageTarget,
       {
         kind: "meta",
         meta: { id: "b", name: "Continue B", type: "series" },
         primary: {
           actions: () => [
-            { id: "continue:b", label: "Continue watching", run() {} },
+            { id: "sources:b", label: "Choose another source", run() {} },
             { id: "remove:b", label: "Remove from Continue Watching", run() {} },
           ],
         },
@@ -498,16 +502,22 @@ test("non-player root menus place global last playback once above contextual row
     for (const target of targets) {
       await h.openTarget(target);
       const last = document.querySelectorAll('[data-context-action="playback:last:a"]');
-      assert.equal(last.length, 1);
-      assert.equal(last[0].textContent, "Continue last watched");
-      assert.ok(last[0].closest("[data-test-rows]"));
-      assert.equal(last[0].closest("[data-test-quick]"), null);
-      assert.equal(document.querySelector("[data-test-rows] [data-context-action]"), last[0]);
-      assert.equal(document.querySelectorAll('[data-context-action="page:my-profile"]').length, 1);
-      assert.equal(document.querySelectorAll('[data-context-action="page:go-to"]').length, 1);
-      assert.equal(document.querySelectorAll('[data-context-action="page:refresh"]').length, 1);
+      const background = target === pageTarget;
+      assert.equal(last.length, background ? 1 : 0);
+      if (background) {
+        assert.equal(last[0].textContent, "Resume last watched");
+        assert.ok(last[0].closest("[data-test-rows]"));
+        assert.equal(last[0].closest("[data-test-quick]"), null);
+        assert.equal(document.querySelector("[data-test-rows] [data-context-action]"), last[0]);
+      }
+      for (const id of ["page:my-profile", "page:go-to", "page:refresh"])
+        assert.equal(
+          document.querySelectorAll(`[data-context-action='${id}']`).length,
+          background ? 1 : 0,
+        );
+      assert.equal(!!document.querySelector("[data-test-quick]"), background);
     }
-    assert.ok(document.querySelector('[data-context-action="continue:b"]'));
+    assert.ok(document.querySelector('[data-context-action="sources:b"]'));
     assert.ok(document.querySelector('[data-context-action="remove:b"]'));
   } finally {
     await h.close();
@@ -526,16 +536,18 @@ test("player menu excludes browsing navigation and global last playback while re
         "page:go-to",
         "page:refresh",
         "page:back",
+        "player:settings",
         "playback:last:a",
       ])
         assert.equal(!!document.querySelector(`[data-context-action='${id}']`), false, id);
       const quick = [...document.querySelectorAll("[data-test-quick] [data-context-action]")].map(
         (node) => node.getAttribute("data-context-action"),
       );
-      assert.deepEqual(
-        quick,
-        magnet ? ["player:copy-magnet", "player:settings"] : ["player:settings"],
-      );
+      assert.deepEqual(quick, []);
+      assert.equal(document.querySelector("[data-test-quick]"), null);
+      const magnetRow = document.querySelector('[data-context-action="player:copy-magnet"]');
+      assert.equal(!!magnetRow, !!magnet);
+      if (magnetRow) assert.ok(magnetRow.closest("[data-test-rows]"));
       for (const id of [
         "player:fullscreen",
         "player:download-video",
@@ -550,7 +562,32 @@ test("player menu excludes browsing navigation and global last playback while re
   }
 });
 
-test("page sharing stays behind native editing, registered cards and clicked content", async () => {
+test("non-film entity sharing remains separate from the exclusive background menu", async () => {
+  const h = await fixture({ presentation: true, pageShare: true });
+  try {
+    for (const target of [
+      { kind: "person", id: 12 },
+      { kind: "ebook", id: "book-12" },
+      { kind: "manga", id: "manga-12", title: "Manga" },
+      { kind: "meta", meta: { id: "anime-12", name: "Anime", type: "anime" } },
+    ] satisfies menu.ContextMenuTarget[]) {
+      await h.openTarget(target);
+      assert.equal(
+        [...document.querySelectorAll("button")].filter(
+          (button) => button.textContent === "Share as link",
+        ).length,
+        1,
+        `${target.kind} retains its own sharing command`,
+      );
+      assert.equal(document.querySelector("[data-test-quick]"), null);
+      assert.equal(document.querySelector('[data-context-action="page:go-to"]'), null);
+    }
+  } finally {
+    await h.close();
+  }
+});
+
+test("person background stays exclusive while editing, registered cards and clicked content keep ownership", async () => {
   const h = await fixture({ presentation: true, pageShare: true });
   const main = document.createElement("main");
   main.innerHTML = `<input id="field"><button id="card"><span>Registered card</span></button>
@@ -571,17 +608,26 @@ test("page sharing stays behind native editing, registered cards and clicked con
   try {
     await summon(main);
     assert.equal(h.state?.target.kind, "actions");
-    assert.ok(document.querySelector('[data-context-action="page:share:person:12"]'));
+    assert.equal(document.querySelector('[data-context-action="page:share:person:12"]'), null);
+    assert.ok(document.querySelector('[data-context-action="page:go-to"]'));
+    assert.ok(document.querySelector('[data-context-action="page:refresh"]'));
     for (const [selector, kind] of [
       ["#card span", "actions"],
-      ["#image", "content"],
+      ["#image", null],
       ["#link", "content"],
-    ]) {
-      await summon(main.querySelector(selector)!);
-      assert.equal(h.state?.target.kind, kind);
+    ] as const) {
+      const event = await summon(main.querySelector(selector)!);
+      assert.equal(event.defaultPrevented, true, selector);
+      if (kind) assert.equal(h.state?.target.kind, kind);
+      else assert.equal(h.state, null, "an image without commands releases its menu state");
+      if (selector === "#link") {
+        assert.ok(document.querySelector('[data-context-action="link:open"]'));
+        assert.ok(document.querySelector('[data-context-action="link:copy"]'));
+      }
       assert.equal(document.querySelector('[data-context-action="page:share:person:12"]'), null);
-      assert.ok(document.querySelector('[data-context-action="page:go-to"]'));
-      assert.ok(document.querySelector('[data-context-action="page:refresh"]'));
+      assert.equal(document.querySelector('[data-context-action="page:go-to"]'), null);
+      assert.equal(document.querySelector('[data-context-action="page:refresh"]'), null);
+      assert.equal(document.querySelector("[data-test-quick]"), null);
     }
     const fieldEvent = await summon(main.querySelector("#field")!);
     assert.equal(fieldEvent.defaultPrevented, false, "editing keeps its native context menu");
@@ -596,7 +642,7 @@ test("page sharing stays behind native editing, registered cards and clicked con
   }
 });
 
-test("the explicit eBook details background shares without changing reader or descendant menus", async () => {
+test("the explicit eBook background stays exclusive without changing reader or descendant ownership", async () => {
   const h = await fixture({ presentation: true, ebookDetails: true });
   const main = document.getElementById("ebook-details")!;
   main.innerHTML = `<input id="field"><button id="card"><span>Registered card</span></button>
@@ -618,16 +664,25 @@ test("the explicit eBook details background shares without changing reader or de
   try {
     await summon(main);
     assert.equal(h.state?.target.kind, "actions");
-    assert.ok(document.querySelector(shareSelector));
+    assert.equal(document.querySelector(shareSelector), null);
     assert.ok(document.querySelector('[data-context-action="page:go-to"]'));
+    assert.ok(document.querySelector('[data-context-action="page:refresh"]'));
     for (const [selector, kind] of [
       ["#card span", "actions"],
-      ["#image", "content"],
+      ["#image", null],
       ["#link", "content"],
-    ]) {
-      await summon(main.querySelector(selector)!);
-      assert.equal(h.state?.target.kind, kind);
+    ] as const) {
+      const event = await summon(main.querySelector(selector)!);
+      assert.equal(event.defaultPrevented, true, selector);
+      if (kind) assert.equal(h.state?.target.kind, kind);
+      else assert.equal(h.state, null, "an image without commands releases its menu state");
+      if (selector === "#link") {
+        assert.ok(document.querySelector('[data-context-action="link:open"]'));
+        assert.ok(document.querySelector('[data-context-action="link:copy"]'));
+      }
       assert.equal(document.querySelector(shareSelector), null);
+      assert.equal(document.querySelector('[data-context-action="page:go-to"]'), null);
+      assert.equal(document.querySelector('[data-context-action="page:refresh"]'), null);
     }
     const fieldEvent = await summon(main.querySelector("#field")!);
     assert.equal(fieldEvent.defaultPrevented, false);

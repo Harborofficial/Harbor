@@ -4,7 +4,62 @@ import { JSDOM } from "jsdom";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { MenuSurface } from "../src/components/context-menu/menu-surface.tsx";
-import { ActionItems } from "../src/components/context-menu/action-items.tsx";
+import { ActionItems, QuickActions } from "../src/components/context-menu/action-items.tsx";
+
+test("labeled navigation quick actions omit tooltips and remain actionable", async () => {
+  const dom = new JSDOM("<div id='root'></div>", { url: "https://fixture.invalid" });
+  Object.assign(globalThis, {
+    window: dom.window,
+    document: dom.window.document,
+    Element: dom.window.Element,
+    HTMLElement: dom.window.HTMLElement,
+    KeyboardEvent: dom.window.KeyboardEvent,
+    MutationObserver: dom.window.MutationObserver,
+    getComputedStyle: dom.window.getComputedStyle.bind(dom.window),
+    IS_REACT_ACT_ENVIRONMENT: true,
+  });
+  const calls: string[] = [];
+  const root = createRoot(document.querySelector("#root")!);
+  const wait = () =>
+    act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 290));
+    });
+  try {
+    await act(() =>
+      root.render(
+        createElement(QuickActions, {
+          source: {
+            actions: () => [
+              { id: "page:back", label: "Back", run: () => void calls.push("back") },
+              { id: "page:go:settings", label: "Settings", run: () => void calls.push("settings") },
+            ],
+          },
+          onClose() {},
+        }),
+      ),
+    );
+    for (const [id, label] of [
+      ["page:back", "Back"],
+      ["page:go:settings", "Settings"],
+    ]) {
+      const button = document.querySelector<HTMLButtonElement>(`[data-context-action='${id}']`)!;
+      assert.equal(button.getAttribute("aria-label"), label);
+      await act(() =>
+        button.dispatchEvent(new dom.window.MouseEvent("mouseover", { bubbles: true })),
+      );
+      await wait();
+      assert.equal(document.querySelector("[role='tooltip']")?.textContent ?? null, null, label);
+      await act(() => button.focus());
+      await wait();
+      assert.equal(document.querySelector("[role='tooltip']")?.textContent ?? null, null, label);
+      await act(async () => button.click());
+    }
+    assert.deepEqual(calls, ["back", "settings"]);
+  } finally {
+    await act(() => root.unmount());
+    dom.window.close();
+  }
+});
 
 test("initial focus and a stationary pointer do not reveal last-playback details; exploration does", async () => {
   const dom = new JSDOM("<div id='root'></div>", { url: "https://fixture.invalid" });

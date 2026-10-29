@@ -7,8 +7,21 @@ import { subtitleStreamDescriptor } from "@/lib/subtitles/provider-label";
 import { publishSubtitleSearch } from "@/components/player/subtitle-menu/subtitle-search-store";
 import { publishSubtitleContext } from "@/components/player/subtitle-menu/subtitle-context-store";
 import { readPlayerPrefs, type PerShowPrefs } from "@/lib/player-prefs";
-import { playbackSourceKey, readActualPlaybackFor } from "@/lib/playback-history";
+import {
+  capturePlaybackActor,
+  isPlaybackActorCurrent,
+  playbackSourceKey,
+  readActualPlaybackFor,
+} from "@/lib/playback-history";
 import { playbackAudioChoice, selectPlaybackAudio } from "@/lib/player/audio-choice";
+import { continuationAppliesToSource } from "@/lib/player/continue-playback";
+import {
+  restorablePlaybackSubtitleChoice,
+  selectPlaybackSubtitle,
+} from "@/lib/player/subtitle-choice";
+import { emitListToast } from "@/components/lists/list-toast";
+import { t } from "@/lib/i18n";
+import { getMpvSubtitleFpsGeneration, writeMpvSubtitleFps } from "@/lib/player/mpv-properties";
 import { tmdbImdbId } from "@/lib/providers/tmdb";
 import type { Addon } from "@/lib/addons";
 import type { GeneratedSubtitleGroup } from "@/lib/subtitles/types";
@@ -38,6 +51,7 @@ import {
   rememberedSubtitleLoadMetadata,
   rememberedSubtitleIsLocal,
   subtitleMediaKey,
+  subtitleStreamKey,
 } from "@/lib/subtitles/subtitle-memory";
 
 export function useTrackAutoload(params: {
@@ -49,14 +63,28 @@ export function useTrackAutoload(params: {
   authKey: string | null;
 }) {
   const { bridgeRef, src, snap, engine, settings, authKey } = params;
+  const playbackActor = capturePlaybackActor();
+  const actorKey = JSON.stringify(playbackActor);
   const sourceKey = playbackSourceKey(src);
-  const rememberedAudio = useMemo(
-    () =>
-      src.continuation?.sourceKey === sourceKey
-        ? src.continuation.audioTrack
-        : readActualPlaybackFor(src)?.audioTrack,
-    [sourceKey, src.meta.id, src.episode?.season, src.episode?.episode, src.continuation],
-  );
+  const rememberedSession = useMemo(() => {
+    const session =
+      src.continuation && continuationAppliesToSource(src, src.continuation)
+        ? isPlaybackActorCurrent(src.continuation.actor)
+          ? src.continuation
+          : null
+        : readActualPlaybackFor(src);
+    // A new picker choice replaces recalled subtitle intent, while audio and timing remain valid.
+    return src.subtitlePreselect && session ? { ...session, subtitle: undefined } : session;
+  }, [
+    sourceKey,
+    src.meta.id,
+    src.episode?.season,
+    src.episode?.episode,
+    src.continuation,
+    src.subtitlePreselect,
+    actorKey,
+  ]);
+  const rememberedAudio = rememberedSession?.audioTrack;
   const snapRef = useRef(snap);
   snapRef.current = snap;
   const selectedSubtitleId = snap.subtitleTracks.find((track) => track.selected)?.id ?? null;
@@ -262,7 +290,9 @@ export function useTrackAutoload(params: {
     autoSubStagesRef.current.add(stageKey);
     const runLease = autoSubRunRef.current.begin(key);
     const isActive = () =>
-      autoSubLoadKeyRef.current === key && autoSubRunRef.current.isCurrent(runLease, key);
+      isPlaybackActorCurrent(playbackActor) &&
+      autoSubLoadKeyRef.current === key &&
+      autoSubRunRef.current.isCurrent(runLease, key);
     setInitialPreflight({ mediaUrl: src.url, settled: false });
     void (async () => {
       const coords = await resolveAnimeSearchCoords({
@@ -369,6 +399,7 @@ export function useTrackAutoload(params: {
           isActive() &&
           !keepEmbedded &&
           !src.subtitlePreselect &&
+          !rememberedSession?.subtitle &&
           !subsOffFor(prefs, settings) &&
           !rememberedSubAppliesToStream(
             readRememberedSub(
@@ -499,7 +530,7 @@ export function useTrackAutoload(params: {
   const preselectAppliedRef = useRef<string | null>(null);
   useEffect(() => {
     const choice = src.subtitlePreselect;
-    if (!choice) return;
+    if (!choice || rememberedSession?.subtitle) return;
     if (snap.audioTracks.length === 0 && snap.subtitleTracks.length === 0 && snap.durationSec === 0)
       return;
     if (preselectAppliedRef.current === src.url) return;
@@ -523,6 +554,7 @@ export function useTrackAutoload(params: {
     snap.subtitleTracks,
     snap.durationSec,
     bridgeRef,
+    rememberedSession,
   ]);
   const subRestoreWaitRef = useRef<{ key: string; startedAt: number } | null>(null);
   const subRestoreLogRef = useRef<string | null>(null);
@@ -551,16 +583,26 @@ export function useTrackAutoload(params: {
         subRestoreTimerRef.current = null;
       }
     };
-  }, [src.url]);
+  }, [src.url, actorKey]);
   useEffect(() => {
-    if (src.subtitlePreselect) return;
-    const remembered = readRememberedSub(
-      subtitleMediaKey(src.meta.id, src.episode?.season, src.episode?.episode),
-    );
+    if (!isPlaybackActorCurrent(playbackActor)) return;
+    if (src.continuation && !isPlaybackActorCurrent(src.continuation.actor)) return;
+    if (src.subtitlePreselect && !rememberedSession?.subtitle) return;
+    const mediaKey = subtitleMediaKey(src.meta.id, src.episode?.season, src.episode?.episode);
+    const memory = readRememberedSub(mediaKey);
+    const remembered = rememberedSession?.subtitle
+      ? restorablePlaybackSubtitleChoice(rememberedSession.subtitle, memory, {
+          mediaKey,
+          streamKey: subtitleStreamKey(src.streamRef),
+        })
+      : memory;
     if (!remembered) return;
     if (!rememberedSubAppliesToStream(remembered, src.streamRef)) return;
     const mediaReady =
-      snap.audioTracks.length > 0 || snap.subtitleTracks.length > 0 || snap.durationSec > 0;
+      snap.firstFrameReady ||
+      snap.audioTracks.length > 0 ||
+      snap.subtitleTracks.length > 0 ||
+      snap.durationSec > 0;
     if (!mediaReady) return;
     const bridge = bridgeRef.current;
     if (!bridge) return;
@@ -571,6 +613,18 @@ export function useTrackAutoload(params: {
     if (remembered.off) {
       if (snap.subtitleTracks.some((t) => t.selected)) bridge.setSubtitleTrack(null, "restore");
       autoSubIdRef.current = null;
+      return;
+    }
+
+    if (rememberedSession?.subtitle?.external && !remembered.source) {
+      const track = selectPlaybackSubtitle(snap.subtitleTracks, rememberedSession.subtitle);
+      if (track) {
+        if (!track.selected) bridge.setSubtitleTrack(track.id, "restore");
+        autoSubIdRef.current = track.id;
+      } else if (snap.firstFrameReady && subRestoreLogRef.current !== "unavailable-subtitle") {
+        subRestoreLogRef.current = "unavailable-subtitle";
+        emitListToast(t("The saved subtitle could not be restored. Choose a subtitle."), "error");
+      }
       return;
     }
 
@@ -705,7 +759,12 @@ export function useTrackAutoload(params: {
           remembered.downloadAuthKind,
           rememberedApiKey,
         );
-        if (subRestoreAddRef.current?.key !== restoreKey) return false;
+        if (
+          !isPlaybackActorCurrent(playbackActor) ||
+          bridgeRef.current !== bridge ||
+          subRestoreAddRef.current?.key !== restoreKey
+        )
+          return false;
         return bridge.addSubtitle(
           source,
           remembered.lang,
@@ -714,37 +773,74 @@ export function useTrackAutoload(params: {
           rememberedSubtitleLoadMetadata(remembered, downloadAuth),
           "restore",
         );
-      })().then((ok) => {
-        if (subRestoreAddRef.current?.key !== restoreKey) return;
-        subRestoreAddRef.current = { key: restoreKey, pending: false };
-        if (!ok) return;
-        if (remembered.imported && remembered.title) markImportedSub(remembered.title);
-        else markAddedSub(source);
-        setSubRestoreTick((tick) => tick + 1);
-      });
+      })()
+        .then((ok) => {
+          if (
+            !isPlaybackActorCurrent(playbackActor) ||
+            bridgeRef.current !== bridge ||
+            subRestoreAddRef.current?.key !== restoreKey
+          )
+            return;
+          subRestoreAddRef.current = { key: restoreKey, pending: false };
+          if (!ok) {
+            if (rememberedSession?.subtitle)
+              emitListToast(
+                t("The saved subtitle could not be restored. Choose a subtitle."),
+                "error",
+              );
+            return;
+          }
+          if (remembered.imported && remembered.title) markImportedSub(remembered.title);
+          else markAddedSub(source);
+          setSubRestoreTick((tick) => tick + 1);
+        })
+        .catch(() => {
+          if (
+            !isPlaybackActorCurrent(playbackActor) ||
+            bridgeRef.current !== bridge ||
+            subRestoreAddRef.current?.key !== restoreKey
+          )
+            return;
+          subRestoreAddRef.current = { key: restoreKey, pending: false };
+          if (rememberedSession?.subtitle)
+            emitListToast(
+              t("The saved subtitle could not be restored. Choose a subtitle."),
+              "error",
+            );
+        });
       return;
     }
 
-    if (snap.subtitleTracks.length === 0) return;
+    if (snap.subtitleTracks.length === 0 && !snap.firstFrameReady) return;
     if (embeddedRestoreRef.current === src.url) return;
-    embeddedRestoreRef.current = src.url;
     const byTrackId = remembered.trackId
       ? snap.subtitleTracks.find(
           (t) => !t.external && t.id === remembered.trackId && sameLang(t.lang, remembered.lang),
         )
       : undefined;
-    const want =
-      byTrackId ??
-      snap.subtitleTracks.find(
-        (t) =>
-          !t.external &&
-          sameLang(t.lang, remembered.lang) &&
-          (!remembered.title || t.title === remembered.title),
-      ) ??
-      snap.subtitleTracks.find((t) => !t.external && sameLang(t.lang, remembered.lang));
+    const want = rememberedSession?.subtitle
+      ? selectPlaybackSubtitle(snap.subtitleTracks, rememberedSession.subtitle)
+      : (byTrackId ??
+        snap.subtitleTracks.find(
+          (t) =>
+            !t.external &&
+            sameLang(t.lang, remembered.lang) &&
+            (!remembered.title || t.title === remembered.title),
+        ) ??
+        snap.subtitleTracks.find((t) => !t.external && sameLang(t.lang, remembered.lang)));
     if (want) {
+      embeddedRestoreRef.current = src.url;
       if (!want.selected) bridge.setSubtitleTrack(want.id, "restore");
       autoSubIdRef.current = want.id;
+    } else if (
+      rememberedSession?.subtitle &&
+      snap.firstFrameReady &&
+      subRestoreLogRef.current !== "unavailable-embedded-subtitle"
+    ) {
+      subRestoreLogRef.current = "unavailable-embedded-subtitle";
+      if (snap.subtitleTracks.some((track) => track.selected))
+        bridge.setSubtitleTrack(null, "restore");
+      emitListToast(t("The saved subtitle could not be restored. Choose a subtitle."), "error");
     }
   }, [
     src.url,
@@ -756,8 +852,11 @@ export function useTrackAutoload(params: {
     snap.durationSec,
     bridgeRef,
     subRestoreTick,
+    snap.firstFrameReady,
     settings.subsourceApiKey,
     settings.subdlApiKey,
+    rememberedSession,
+    actorKey,
   ]);
   useEffect(() => {
     if (engine !== "mpv") return;
@@ -835,7 +934,9 @@ export function useTrackAutoload(params: {
         }
       }
     }
-    const subsOff = subsOffFor(prefs, settings);
+    const subsOff = rememberedSession?.subtitle
+      ? rememberedSession.subtitle.off === true
+      : subsOffFor(prefs, settings);
     if (subsOff) {
       if (snap.subtitleTracks.some((t) => t.selected))
         bridgeRef.current?.setSubtitleTrack(null, "automatic");
@@ -846,6 +947,7 @@ export function useTrackAutoload(params: {
         src.streamRef,
       ) &&
       !src.subtitlePreselect &&
+      !rememberedSession?.subtitle &&
       snap.subtitleTracks.length > 0 &&
       subLangs.length > 0
     ) {
@@ -894,17 +996,115 @@ export function useTrackAutoload(params: {
     snap.rate,
     settings,
     rememberedAudio,
+    rememberedSession,
   ]);
 
+  const audioRestoreWarningRef = useRef<string | null>(null);
   useEffect(() => {
-    bridgeRef.current?.setSubDelay(readPlayerPrefs(src.meta.id)?.subDelaySec ?? 0);
-  }, [src.url, src.meta.id]);
+    if (!rememberedAudio || !snap.firstFrameReady) return;
+    const current = snap.audioTracks.find((track) => track.selected);
+    if (current && autoAudioIdRef.current && current.id !== autoAudioIdRef.current) return;
+    if (selectPlaybackAudio(snap.audioTracks, rememberedAudio)) return;
+    if (audioRestoreWarningRef.current === src.url) return;
+    audioRestoreWarningRef.current = src.url;
+    emitListToast(
+      t("The saved audio track could not be restored. Choose an audio track."),
+      "error",
+    );
+  }, [src.url, snap.firstFrameReady, snap.audioTracks, rememberedAudio]);
+
+  const delaysAppliedRef = useRef<{ url: string; bridge: PlayerBridge } | null>(null);
+  useEffect(() => {
+    if (snap.status === "idle" || snap.status === "loading") {
+      delaysAppliedRef.current = null;
+      return;
+    }
+    if (src.continuation && !isPlaybackActorCurrent(src.continuation.actor)) return;
+    if (snap.durationSec === 0 && snap.audioTracks.length === 0 && snap.subtitleTracks.length === 0)
+      return;
+    const bridge = bridgeRef.current;
+    if (
+      !bridge ||
+      (delaysAppliedRef.current?.url === src.url && delaysAppliedRef.current.bridge === bridge)
+    )
+      return;
+    delaysAppliedRef.current = { url: src.url, bridge };
+    bridge.setSubDelay(
+      rememberedSession?.subDelaySec ?? readPlayerPrefs(src.meta.id)?.subDelaySec ?? 0,
+    );
+    if (rememberedSession?.audioDelaySec != null)
+      bridge.setAudioDelay(rememberedSession.audioDelaySec);
+  }, [
+    src.url,
+    src.meta.id,
+    src.continuation,
+    snap.status,
+    snap.durationSec,
+    snap.audioTracks.length,
+    snap.subtitleTracks.length,
+    rememberedSession,
+    bridgeRef,
+  ]);
+
+  const subtitleFpsAppliedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (snap.status === "loading" || snap.status === "idle") {
+      subtitleFpsAppliedRef.current = null;
+      return;
+    }
+    const saved = rememberedSession?.subtitle;
+    const mediaKey = subtitleMediaKey(src.meta.id, src.episode?.season, src.episode?.episode);
+    const choice =
+      saved &&
+      restorablePlaybackSubtitleChoice(saved, readRememberedSub(mediaKey), {
+        mediaKey,
+        streamKey: subtitleStreamKey(src.streamRef),
+      });
+    if (engine !== "mpv" || choice?.fpsOverride == null || choice.off) return;
+    if (
+      !Number.isFinite(choice.fpsOverride) ||
+      (choice.fpsOverride !== 0 && (choice.fpsOverride < 1 || choice.fpsOverride > 240))
+    )
+      return;
+    const selected = snap.subtitleTracks.find((track) => track.selected);
+    if (!selected || selectPlaybackSubtitle(snap.subtitleTracks, choice)?.id !== selected.id)
+      return;
+    const bridge = bridgeRef.current;
+    if (!bridge || bridge.canAutoSelectSubtitle?.() === false) return;
+    const key = `${src.url}|${selected.id}|${choice.fpsOverride}`;
+    if (subtitleFpsAppliedRef.current === key) return;
+    subtitleFpsAppliedRef.current = key;
+    const isCurrent = () => {
+      const currentSelected = snapRef.current.subtitleTracks.find((track) => track.selected);
+      return (
+        !!currentSelected &&
+        isPlaybackActorCurrent(playbackActor) &&
+        bridgeRef.current === bridge &&
+        bridge.canAutoSelectSubtitle?.() !== false &&
+        selectPlaybackSubtitle(snapRef.current.subtitleTracks, choice)?.id === currentSelected.id
+      );
+    };
+    if (!isCurrent()) return;
+    void writeMpvSubtitleFps(
+      choice.fpsOverride === 0 ? "default" : choice.fpsOverride,
+      getMpvSubtitleFpsGeneration(),
+      isCurrent,
+    ).catch(() => {
+      if (isCurrent())
+        emitListToast(t("The saved subtitle timing could not be restored."), "error");
+    });
+  }, [engine, src.url, snap.status, snap.subtitleTracks, rememberedSession, actorKey, bridgeRef]);
 
   useEffect(() => {
-    if (!subsOffFor(readPlayerPrefs(src.meta.id), settings)) return;
+    if (
+      !(rememberedSession?.subtitle
+        ? rememberedSession.subtitle.off === true
+        : subsOffFor(readPlayerPrefs(src.meta.id), settings))
+    )
+      return;
     const selected = snap.subtitleTracks.find((t) => t.selected);
     if (selected) bridgeRef.current?.setSubtitleTrack(null, "automatic");
-  }, [src.meta.id, snap.subtitleTracks, settings]);
+  }, [src.meta.id, snap.subtitleTracks, settings, rememberedSession]);
 
   return {
     resolvedImdbId,

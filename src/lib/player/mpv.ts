@@ -970,6 +970,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       if (name === "sub-delay" && typeof data === "number") snap.subDelaySec = data;
       if (name === "audio-delay" && typeof data === "number") snap.audioDelaySec = data;
+      if (name === "sub-fps" && typeof data === "number" && Number.isFinite(data))
+        snap.subtitleFps = data;
       if (name === "sub-text") {
         snap.subText = !primarySubtitleOff && typeof data === "string" ? data : "";
       }
@@ -1172,6 +1174,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap.errorMessage = null;
       snap.audioTracks = [];
       snap.subtitleTracks = [];
+      snap.subtitleFps = undefined;
       primarySubtitleOff = false;
       snap.subText = "";
       snap.subStartSec = 0;

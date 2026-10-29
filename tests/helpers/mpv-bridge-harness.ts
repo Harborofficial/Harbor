@@ -9,6 +9,7 @@ import * as failures from "../../src/lib/player/mpv-failure.ts";
 import * as translationJobs from "../../src/lib/subtitles/translation-jobs.ts";
 import * as addedSubs from "../../src/lib/subtitles/added-subs.ts";
 import * as language from "../../src/lib/subtitles/language.ts";
+import * as pauseTrace from "../../src/lib/player/pause-trace.ts";
 import { SubtitlePreparationError as RealSubtitlePreparationError } from "../../src/lib/subtitles/prepare.ts";
 import type { PlayerBridge, PlayerSnapshot } from "../../src/lib/player/bridge.ts";
 import type { MpvOptions } from "../../src/lib/player/mpv.ts";
@@ -102,6 +103,7 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     "@/lib/subtitles/added-subs": addedSubs,
     "@/lib/subtitles/language": language,
     "./mpv-failure": failures,
+    "./pause-trace": pauseTrace,
     "@/lib/platform": {
       isWindowsDesktop: () => true,
       isLinuxDesktop: () => false,
@@ -159,7 +161,9 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     },
     { warn() {}, info() {} },
     {
-      get visibilityState() { return visibilityState; },
+      get visibilityState() {
+        return visibilityState;
+      },
       addEventListener: documentEvents.addEventListener.bind(documentEvents),
       removeEventListener: documentEvents.removeEventListener.bind(documentEvents),
     },
@@ -173,7 +177,9 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     bridge,
     commands,
     errors,
-    emitWindow(name: string) { windowEvents.dispatchEvent(new Event(name)); },
+    emitWindow(name: string) {
+      windowEvents.dispatchEvent(new Event(name));
+    },
     emitVisibility(state: DocumentVisibilityState) {
       visibilityState = state;
       documentEvents.dispatchEvent(new Event("visibilitychange"));

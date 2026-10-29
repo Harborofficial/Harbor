@@ -37,6 +37,37 @@ export function continuationStream<T extends Parameters<typeof streamMatchesEntr
   return stream;
 }
 
+/** A renewed URL is not itself proof that the same physical release was recovered. */
+export function continuationAppliesToSource(
+  src: PlayerSrc,
+  context: PlaybackContinuation,
+): boolean {
+  const target = context.target;
+  if (
+    target &&
+    (target.metaId !== src.meta.id ||
+      target.season !== src.episode?.season ||
+      target.episode !== src.episode?.episode)
+  )
+    return false;
+  if (context.sourceKey === playbackSourceKey(src)) return true;
+  if (!target || !src.streamRef) return false;
+  const source = { ...src.streamRef, url: src.historyUrl ?? src.url };
+  const saved = context.source;
+  if (saved.fileIdx != null && source.fileIdx !== saved.fileIdx) return false;
+  if (!streamMatchesEntry(source, saved)) return false;
+  if (saved.infoHash && source.infoHash) return true;
+  // Direct addon URLs have no content hash. Require the known release and its
+  // exact byte size; matching an addon or title alone is not a file identity.
+  return (
+    !!saved.parsedTitle &&
+    source.parsedTitle === saved.parsedTitle &&
+    !!saved.size &&
+    saved.size > 0 &&
+    source.size === saved.size
+  );
+}
+
 export function continuationFor(
   target: ActualPlayback,
   actor: PlaybackActor,
@@ -48,7 +79,15 @@ export function continuationFor(
     restart,
     positionMs: restart ? 0 : target.positionMs,
     sourceKey: playbackSourceKey(target.src),
+    target: {
+      metaId: target.src.meta.id,
+      season: target.src.episode?.season,
+      episode: target.src.episode?.episode,
+    },
     audioTrack: target.audioTrack,
+    subtitle: target.subtitle,
+    subDelaySec: target.subDelaySec,
+    audioDelaySec: target.audioDelaySec,
     source: {
       ...target.src.streamRef,
       url: target.src.historyUrl ?? target.src.url,

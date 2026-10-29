@@ -6,6 +6,9 @@ import { JSDOM } from "jsdom";
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import * as audioChoice from "../src/lib/player/audio-choice";
+import * as playbackHistory from "../src/lib/playback-history";
+import * as continuation from "../src/lib/player/continue-playback";
+import * as subtitleChoice from "../src/lib/player/subtitle-choice";
 import * as language from "../src/lib/subtitles/language";
 import { initialPlayerSnapshot, type TrackInfo } from "../src/lib/player/bridge";
 
@@ -43,6 +46,7 @@ async function fixture(remembered = true) {
     IS_REACT_ACT_ENVIRONMENT: true,
   });
   const calls: string[] = [];
+  const errors: string[] = [];
   const bridgeRef = {
     current: {
       setAudioTrack: (id: string) => {
@@ -69,10 +73,17 @@ async function fixture(remembered = true) {
     "@/components/player/subtitle-menu/subtitle-context-store": { publishSubtitleContext() {} },
     "@/lib/player-prefs": { readPlayerPrefs: () => ({ audioLang: "eng", subsOff: true }) },
     "@/lib/playback-history": {
-      playbackSourceKey: (src: { url: string }) => src.url,
+      ...playbackHistory,
       readActualPlaybackFor: () => null,
     },
     "@/lib/player/audio-choice": audioChoice,
+    "@/lib/player/continue-playback": continuation,
+    "@/lib/player/subtitle-choice": subtitleChoice,
+    "@/components/lists/list-toast": {
+      emitListToast: (message: string) => errors.push(message),
+    },
+    "@/lib/i18n": { t: (message: string) => message },
+    "@/lib/player/mpv-properties": {},
     "@/lib/providers/tmdb": {},
     "@/lib/subtitles/addon-source": { gatherSubtitleAddons: async () => [] },
     "@/lib/streams/stream-ids": { buildStreamIds: () => [] },
@@ -112,7 +123,11 @@ async function fixture(remembered = true) {
     url: "C:/synthetic/audio.mkv",
     meta: { id: "local:fixture", type: "movie", name: "Fixture" },
     continuation: remembered
-      ? { sourceKey: "C:/synthetic/audio.mkv", audioTrack: saved }
+      ? {
+          sourceKey: "C:/synthetic/audio.mkv",
+          actor: playbackHistory.capturePlaybackActor(),
+          audioTrack: saved,
+        }
       : undefined,
   };
   const settings = {
@@ -123,25 +138,33 @@ async function fixture(remembered = true) {
     audioNormalize: false,
     audioProfile: "off",
   };
-  function Fixture({ audioTracks }: { audioTracks: TrackInfo[] }) {
+  function Fixture({
+    audioTracks,
+    firstFrameReady,
+  }: {
+    audioTracks: TrackInfo[];
+    firstFrameReady: boolean;
+  }) {
     exports.useTrackAutoload({
       bridgeRef,
       src,
       settings,
       engine: "mpv",
       authKey: null,
-      snap: { ...initialPlayerSnapshot(), durationSec: 360, audioTracks },
+      snap: { ...initialPlayerSnapshot(), durationSec: 360, audioTracks, firstFrameReady },
     });
     return null;
   }
   const root = createRoot(document.getElementById("root")!);
-  const render = async (audioTracks: TrackInfo[]) =>
-    React.act(async () => root.render(React.createElement(Fixture, { audioTracks })));
+  const render = async (audioTracks: TrackInfo[], firstFrameReady = false) =>
+    React.act(async () =>
+      root.render(React.createElement(Fixture, { audioTracks, firstFrameReady })),
+    );
   const dispose = async () => {
     await React.act(async () => root.unmount());
     dom.window.close();
   };
-  return { render, dispose, calls };
+  return { render, dispose, calls, errors };
 }
 
 test("an exact remembered Commentary choice overrides automatic block words", async () => {
@@ -210,6 +233,33 @@ test("late metadata cannot overwrite a newer manual audio selection", async () =
     assert.deepEqual(f.calls, []);
     await f.render([...tracks, third].map((track) => ({ ...track, selected: track.id === "3" })));
     assert.deepEqual(f.calls, []);
+  } finally {
+    await f.dispose();
+  }
+});
+
+test("reordered numeric IDs restore the remembered semantic audio track", async () => {
+  const f = await fixture();
+  try {
+    await f.render(tracks.map((track) => ({ ...track, id: track.id === "1" ? "2" : "1" })));
+    assert.deepEqual(f.calls, ["1"]);
+    assert.deepEqual(f.errors, []);
+  } finally {
+    await f.dispose();
+  }
+});
+
+test("unavailable remembered audio reports once after decoding, without claiming restoration", async () => {
+  const f = await fixture();
+  try {
+    await f.render([tracks[0]]);
+    assert.deepEqual(f.errors, []);
+    await f.render([tracks[0]], true);
+    await f.render([tracks[0]], true);
+    assert.deepEqual(f.calls, []);
+    assert.deepEqual(f.errors, [
+      "The saved audio track could not be restored. Choose an audio track.",
+    ]);
   } finally {
     await f.dispose();
   }

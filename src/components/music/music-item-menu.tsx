@@ -1,5 +1,5 @@
 import { useRef, useState, type MouseEvent } from "react";
-import { ChevronRight, ImageDown, Play, UserRound } from "@/components/icons/music-icons";
+import { ChevronRight, Play, UserRound } from "@/components/icons/music-icons";
 import { coverCardTitle } from "@/components/music/music-cover-card";
 import { useMusicNavigate } from "@/components/music/music-navigate";
 import { useMusicPlaylistPicker } from "@/components/music/music-playlist-picker";
@@ -10,7 +10,6 @@ import {
 } from "@/components/music/music-track-menu";
 import { useT } from "@/lib/i18n";
 import { enqueueMusic, toggleMusicLiked } from "@/lib/music/player";
-import { saveArtwork } from "@/lib/music/artwork-save";
 import {
   pinMusicPlaylist,
   unpinMusicPlaylist,
@@ -71,19 +70,6 @@ export function musicItemMenuItems({
       icon: <UserRound size={14} />,
       run: onGoToArtist,
     });
-  if (item.artwork) {
-    const art = Array.isArray(item.artwork) ? item.artwork[0] : item.artwork;
-    const name = coverCardTitle(item);
-    const by = "artist" in item ? (item.artist ?? "") : "";
-    items.push({
-      id: "artwork",
-      label: t("music.artwork.save"),
-      icon: <ImageDown size={14} />,
-      run: async () => {
-        await saveArtwork(art, name, by);
-      },
-    });
-  }
   return items;
 }
 
@@ -128,8 +114,7 @@ export function useMusicItemMenu(handlers: Handlers) {
   const track = item?.kind === "track" ? item : null;
   // Only Harbor's own playlists have a playlist page to pin; catalog playlists
   // live in whichever service they came from.
-  const localPlaylist =
-    item?.kind === "playlist" && item.connectorId === "local" ? item : null;
+  const localPlaylist = item?.kind === "playlist" && item.connectorId === "local" ? item : null;
   const pinned = useMusicPlaylistPinned(localPlaylist?.id ?? "");
   const trackItems = useMusicTrackMenuItems(track, {
     onPlay: handlers.onPlay && track ? () => handlers.onPlay?.(track, index) : undefined,
@@ -169,9 +154,10 @@ export function useMusicItemMenu(handlers: Handlers) {
   const open = (item: MusicCatalogItem, index: number, event: MouseEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    const target = event.target instanceof Element
-      ? event.target.closest<HTMLElement>("button, [href], [tabindex]:not([tabindex='-1'])")
-      : null;
+    const target =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>("button, [href], [tabindex]:not([tabindex='-1'])")
+        : null;
     anchor.current = target && event.currentTarget.contains(target) ? target : event.currentTarget;
     setTarget({
       item,
@@ -187,8 +173,10 @@ export function useMusicItemMenu(handlers: Handlers) {
   return {
     open,
     close,
-    openFor: (item: MusicCatalogItem, index = 0) => (event: MouseEvent<HTMLElement>) =>
-      open(item, index, event),
+    openFor:
+      (item: MusicCatalogItem, index = 0) =>
+      (event: MouseEvent<HTMLElement>) =>
+        open(item, index, event),
     isOpen: target !== null,
     menu: (
       <MusicTrackMenu

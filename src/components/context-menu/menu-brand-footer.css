@@ -6,7 +6,7 @@
   gap: 3px;
   min-height: 16px;
   padding: 3px 8px 1px;
-  color: var(--color-ink);
+  color: #eba018;
   opacity: 0.68;
   pointer-events: none;
   user-select: none;
@@ -25,11 +25,14 @@
   object-fit: contain;
 }
 
-/* Follow the actual chrome's monochrome mark; img assets retain their colors. */
-html:is([data-theme-layout="dracula"], [data-theme-layout="rail"]) .context-menu-brand-footer {
-  color: var(--color-accent);
+.context-menu-brand-filter {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
 
-html[data-theme-layout="stremio"] .context-menu-brand-footer {
-  color: rgb(255 255 255 / 90%);
+/* Keep the menu's mark monochrome even when the kid theme colors its sails. */
+.context-menu-brand-footer > svg.context-menu-brand-mark path {
+  fill: currentColor;
 }

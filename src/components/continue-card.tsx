@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { Check, X, Play as ContextPlay, ListVideo } from "lucide-react";
+import { Check, X, ListVideo } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
@@ -666,7 +666,6 @@ export const ContinueCard = memo(function ContinueCard({
       },
       onError: reportActionError,
       icons: {
-        play: <ContextPlay size={16} />,
         sources: <ListVideo size={16} />,
         dismiss: <X size={16} />,
       },
@@ -697,7 +696,6 @@ export const ContinueCard = memo(function ContinueCard({
           }
         : (ep ?? undefined),
       primary: commands.primary,
-      extra: commands.extra,
     });
 
   return (

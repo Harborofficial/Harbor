@@ -107,6 +107,10 @@ function harness() {
       resolveAnimeIdentity: async () =>
         assert.fail("ordinary series must not resolve anime identity"),
     },
+    "@/lib/anime-tracker-entry": {
+      resolveTrackerAnimeEntry: async () =>
+        assert.fail("ordinary series must not resolve anime tracker identity"),
+    },
     "@/lib/cw-anime-episode": {
       aniZipLookupKey: () => null,
       applyAniZipEpisode: empty,
@@ -207,7 +211,7 @@ function harness() {
   };
 }
 
-test("real ContinueCard poster, title and play controls resolve the older entry and reuse primary continuation instead of the body source picker", async () => {
+test("real ContinueCard keeps original playback while its menu groups sources and removal for the clicked entry", async () => {
   const h = harness();
   try {
     await h.render();
@@ -220,16 +224,20 @@ test("real ContinueCard poster, title and play controls resolve the older entry 
     ]) {
       await h.context(selector);
       assert.equal(h.target.meta.id, "older-b");
-      assert.equal(h.target.primary.actions()[0].label, "Continue watching");
+      assert.deepEqual(
+        h.target.primary.actions().map((action: any) => action.label),
+        ["Choose another source", "Remove from Continue Watching"],
+      );
+      assert.equal(h.target.extra, undefined, "removal is not duplicated below the title actions");
       await React.act(() => h.target.primary.actions()[0].run());
       const request = h.starts.at(-1);
       assert.equal(request.meta.id, "older-b");
       assert.deepEqual(request.episode, { season: 2, episode: 3 });
-      assert.deepEqual(request.mode, { autoPlay: true, resume: true });
+      assert.deepEqual(request.mode, { autoPlay: false, resume: false });
     }
     await h.click("button[title='Play']");
     assert.deepEqual(h.starts.at(-1).mode, { autoPlay: true, resume: true });
-    await React.act(() => h.target.extra.actions()[0].run());
+    await React.act(() => h.target.primary.actions()[1].run());
     assert.equal(h.removed[0], h.item);
     assert.equal(h.target.isValid(), false);
   } finally {
@@ -247,7 +255,7 @@ test("an open older-card menu cannot execute after a profile change", async () =
     await h.render();
     assert.equal(target.isValid(), false);
     await assert.rejects(target.primary.actions()[0].run(), /no longer available/);
-    await assert.rejects(target.extra.actions()[0].run(), /no longer available/);
+    await assert.rejects(target.primary.actions()[1].run(), /no longer available/);
     assert.equal(h.starts.length, 0);
     assert.equal(h.removed.length, 0);
   } finally {
@@ -266,7 +274,7 @@ test("original removal invalidates an already-open card menu and matches removal
     directItem = original.removed[0];
     assert.equal(openMenu.isValid(), false);
     await assert.rejects(openMenu.primary.actions()[0].run(), /no longer available/);
-    await assert.rejects(openMenu.extra.actions()[0].run(), /no longer available/);
+    await assert.rejects(openMenu.primary.actions()[1].run(), /no longer available/);
     assert.equal(original.removed.length, 1);
     assert.equal(original.starts.length, 0);
   } finally {
@@ -276,7 +284,7 @@ test("original removal invalidates an already-open card menu and matches removal
   try {
     await contextual.render();
     await contextual.context("button[title='Play']");
-    await React.act(() => contextual.target.extra.actions()[0].run());
+    await React.act(() => contextual.target.primary.actions()[1].run());
     assert.deepEqual(contextual.removed, [directItem]);
   } finally {
     await contextual.dispose();
