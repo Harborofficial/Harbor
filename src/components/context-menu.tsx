@@ -65,7 +65,11 @@ import {
   toggleNavHidden,
 } from "@/chrome/nav-items";
 import { setNavEditMode, useNavEditMode } from "@/chrome/nav-edit-mode";
-import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
+import {
+  mangaFavoriteFailureMessage,
+  useIsMangaFavorite,
+  useMangaFavorites,
+} from "@/lib/manga-favorites";
 import {
   recordMangaChapterRead,
   removeMangaChapterRead,
@@ -1010,7 +1014,13 @@ export function ContextMenu() {
         icon={<Heart size={14} strokeWidth={2} fill={isMangaFav ? "currentColor" : "none"} />}
         label={isMangaFav ? t("Favorited") : t("Favorite")}
         onClick={() => {
-          toggleMangaFav({ id: target.id, title: target.title, cover: target.cover });
+          const result = toggleMangaFav({
+            id: target.id,
+            title: target.title,
+            cover: target.cover,
+          });
+          const message = mangaFavoriteFailureMessage(result, t);
+          if (message) emitListToast(message, "error");
           close();
         }}
         accent={isMangaFav}

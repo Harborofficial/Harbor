@@ -4,7 +4,7 @@ import { UiIcon } from "@/components/ui-icon";
 import { useContextTarget, type ContextMenuTarget } from "./context-menu";
 import { useT } from "./i18n";
 import { useProfiles } from "./profiles";
-import { useMangaFavorites } from "./manga-favorites";
+import { mangaFavoriteFailureMessage, useMangaFavorites } from "./manga-favorites";
 import { listMangaProgress, type MangaProgressEntry } from "./manga-progress";
 import { activeMangaSourceId, listMangaSources, setActiveMangaSource } from "./manga/sources";
 import {
@@ -107,15 +107,12 @@ export function useMangaContext<T extends HTMLElement = HTMLButtonElement>(
           favorite,
           open: latest.options.open ?? (() => latest.openManga(id)),
           toggleFavorite: () => {
-            if (
-              !latest.favorites.toggle({
-                ...latest.manga,
-                sourceId: source?.id ?? latest.manga.sourceId,
-              })
-            )
-              throw new Error(
-                t("Could not save the change. Check available storage and try again."),
-              );
+            const result = latest.favorites.toggle({
+              ...latest.manga,
+              sourceId: source?.id ?? latest.manga.sourceId,
+            });
+            const message = mangaFavoriteFailureMessage(result, t);
+            if (message) throw new Error(message);
           },
           resume:
             progress && available

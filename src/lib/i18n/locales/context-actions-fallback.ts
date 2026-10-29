@@ -298,6 +298,12 @@ const contextActionsFallback: Record<string, string> = {
   "Could not save image.": "Could not save image.",
   "Could not save the change. Check available storage and try again.":
     "Could not save the change. Check available storage and try again.",
+  "Could not save this favorite. Check available storage and try again.":
+    "Could not save this favorite. Check available storage and try again.",
+  "Could not save this favorite. Please try again.":
+    "Could not save this favorite. Please try again.",
+  "Your profile changed. Open the menu again and retry.":
+    "Your profile changed. Open the menu again and retry.",
   "Could not save the collection deletion. Your local collection was preserved.":
     "Could not save the collection deletion. Your local collection was preserved.",
   "Create another destination first.": "Create another destination first.",

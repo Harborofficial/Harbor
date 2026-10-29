@@ -2,7 +2,12 @@ import { Star } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Poster } from "@/components/poster";
 import type { MangaSummary } from "@/lib/manga/api";
-import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
+import {
+  mangaFavoriteFailureMessage,
+  useIsMangaFavorite,
+  useMangaFavorites,
+} from "@/lib/manga-favorites";
+import { emitListToast } from "@/components/lists/list-toast";
 import { CollectionBadges } from "../collection-badge";
 import { useMangaContext } from "@/lib/use-manga-context";
 
@@ -43,13 +48,15 @@ export function MangaCard({
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            fav.toggle({
+            const result = fav.toggle({
               id: manga.id,
               title: manga.title,
               altTitle: manga.altTitle,
               cover: manga.cover,
               sourceId: manga.sourceId,
             });
+            const message = mangaFavoriteFailureMessage(result, t);
+            if (message) emitListToast(message, "error");
           }}
           className="absolute start-1.5 top-1.5 rounded-full bg-canvas/70 p-1.5 backdrop-blur-sm transition-transform hover:scale-110 motion-reduce:transition-none motion-reduce:hover:scale-100"
         >

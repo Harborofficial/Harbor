@@ -50,6 +50,18 @@ async function fixture() {
         if (storageOk) localStorage.setItem(name, value);
         return storageOk;
       },
+      setItemWithRecoveryDetailed(name: string, value: string) {
+        if (storageOk) {
+          localStorage.setItem(name, value);
+          return { ok: true, quota: false, recovered: false };
+        }
+        return {
+          ok: false,
+          quota: true,
+          recovered: false,
+          errorName: "QuotaExceededError",
+        };
+      },
     },
     "./manga/api": {
       setMangaInLibrary: async (...args: unknown[]) => {

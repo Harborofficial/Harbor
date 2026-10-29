@@ -49,6 +49,10 @@ const PRUNABLE_PREFIXES = [
   "harbor.mdblist.cards",
   "harbor.manga.popular.v",
   "harbor.manga.cache.v",
+  // Rebuildable manga discovery caches can be evicted, never user favorites or progress.
+  "harbor.manga.catalog.v1",
+  "harbor.manga.collections.v1",
+  "harbor.manga.mangaupdates.v1",
   "harbor.manga.art.",
   "harbor.ebook.metadata.v",
   "harbor.ebook.nyt.v",
@@ -113,12 +117,24 @@ function snapshotFrames(): Array<{ key: string; size: number }> {
   return out;
 }
 
-export function setItemWithRecovery(key: string, value: string): boolean {
+export type StorageWriteResult = {
+  ok: boolean;
+  quota: boolean;
+  /** True only when the first write failed and pruning a cache made the retry succeed. */
+  recovered: boolean;
+  errorName?: string;
+};
+
+function writeWithRecovery(key: string, value: string, throwNonQuota: boolean): StorageWriteResult {
+  const errorName = (error: unknown) => (error instanceof Error ? error.name : typeof error);
   try {
     localStorage.setItem(key, value);
-    return true;
-  } catch (e) {
-    if (!isQuotaError(e)) throw e;
+    return { ok: true, quota: false, recovered: false };
+  } catch (error) {
+    if (!isQuotaError(error)) {
+      if (throwNonQuota) throw error;
+      return { ok: false, quota: false, recovered: false, errorName: errorName(error) };
+    }
   }
   const evictable = [...prunableEntries(), ...snapshotFrames()];
   for (const { key: candidate } of evictable) {
@@ -126,36 +142,28 @@ export function setItemWithRecovery(key: string, value: string): boolean {
     pruneOne(candidate);
     try {
       localStorage.setItem(key, value);
-      return true;
-    } catch (e) {
-      if (!isQuotaError(e)) throw e;
-    }
-  }
-  // Replacing a value can still fail at the quota boundary because WebView storage
-  // reserves the new value before releasing the old one. Retry non-destructively by
-  // temporarily removing the previous value, and restore it if the replacement fails.
-  let previous: string | null = null;
-  try {
-    previous = localStorage.getItem(key);
-    if (previous != null) {
-      localStorage.removeItem(key);
-      try {
-        localStorage.setItem(key, value);
-        return true;
-      } catch (e) {
-        try {
-          localStorage.setItem(key, previous);
-        } catch {
-          console.error(`[storage] could not restore "${key}" after replacement failed`);
-        }
-        if (!isQuotaError(e)) throw e;
+      return { ok: true, quota: false, recovered: true };
+    } catch (error) {
+      if (!isQuotaError(error)) {
+        if (throwNonQuota) throw error;
+        return { ok: false, quota: false, recovered: false, errorName: errorName(error) };
       }
     }
-  } catch (e) {
-    if (!isQuotaError(e)) throw e;
   }
-  console.warn(`[storage] giving up on "${key}" after pruning every cache`);
-  return false;
+  // Never remove the previous value to make room here. If the replacement and its
+  // restoration both fail, the user's saved data is gone. A failed write must leave
+  // the old value intact.
+  console.warn("[storage] giving up after pruning every cache");
+  return { ok: false, quota: true, recovered: false, errorName: "QuotaExceededError" };
+}
+
+export function setItemWithRecovery(key: string, value: string): boolean {
+  return writeWithRecovery(key, value, true).ok;
+}
+
+/** Same write path as setItemWithRecovery, with a safe reason instead of an exception. */
+export function setItemWithRecoveryDetailed(key: string, value: string): StorageWriteResult {
+  return writeWithRecovery(key, value, false);
 }
 
 export function freeStorageSpace(): { freedBytes: number; pruned: string[] } {
