@@ -22,6 +22,7 @@ import { parseKitsuId } from "@/lib/providers/kitsu";
 import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
 import { useQueue } from "@/lib/queue";
 import { QueueUpNext } from "./queue-up-next";
+import { episodePanelQueueMode } from "./queue-mode";
 import { playLocalAware } from "@/lib/local-library/playback";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { useT } from "@/lib/i18n";
@@ -52,6 +53,8 @@ export function EpisodePanel({
   open,
   onClose,
   meta,
+  queueSessionAvailable,
+  queuePlaybackEnabled,
   currentEpisode,
   corner = "top-right",
   roomGuest = false,
@@ -64,6 +67,8 @@ export function EpisodePanel({
   open: boolean;
   onClose: () => void;
   meta: Meta;
+  queueSessionAvailable: boolean;
+  queuePlaybackEnabled: boolean;
   currentEpisode: PlayEpisode | undefined;
   corner?: PanelCorner;
   roomGuest?: boolean;
@@ -103,7 +108,11 @@ export function EpisodePanel({
   const [showEpsOpen, setShowEpsOpen] = useState(false);
   const hasQueue = queue.length > 0;
   const isSeries = meta.type === "series";
-  const followQueue = settings.queueDrivesNav && isSeries;
+  const { followQueue, canChooseQueue } = episodePanelQueueMode({
+    isSeries,
+    queueSessionAvailable,
+    queuePlaybackEnabled,
+  });
   const showQueueList = hasQueue && (followQueue || !isSeries);
   useEffect(() => {
     if (!open) {
@@ -299,7 +308,7 @@ export function EpisodePanel({
                   </h2>
                 </div>
                 <div className="flex shrink-0 items-center gap-2.5">
-                  {isSeries && (hasQueue || settings.queueDrivesNav) && (
+                  {canChooseQueue && (
                     <div
                       role="group"
                       aria-label={t("Next and Previous behavior")}
@@ -308,18 +317,18 @@ export function EpisodePanel({
                       <button
                         type="button"
                         onClick={() => update({ queueDrivesNav: true })}
-                        aria-pressed={settings.queueDrivesNav}
+                        aria-pressed={followQueue}
                         title={t("Next and Previous follow your queue")}
-                        className={`rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${settings.queueDrivesNav ? "bg-accent text-canvas" : "text-ink-muted hover:text-ink"}`}
+                        className={`rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${followQueue ? "bg-accent text-canvas" : "text-ink-muted hover:text-ink"}`}
                       >
                         {t("Queue")}
                       </button>
                       <button
                         type="button"
                         onClick={() => update({ queueDrivesNav: false })}
-                        aria-pressed={!settings.queueDrivesNav}
+                        aria-pressed={!followQueue}
                         title={t("Next and Previous follow this show")}
-                        className={`rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${!settings.queueDrivesNav ? "bg-accent text-canvas" : "text-ink-muted hover:text-ink"}`}
+                        className={`rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${!followQueue ? "bg-accent text-canvas" : "text-ink-muted hover:text-ink"}`}
                       >
                         {t("This show")}
                       </button>

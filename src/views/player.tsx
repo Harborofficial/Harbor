@@ -409,13 +409,14 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
   const startedNearEndRef = useStartedNearEnd(src.url, snap.status, snap.durationSec);
 
   const queue = useQueue();
+  const queueSessionAvailable = queueSessionIndex(src, queue) >= 0;
   const sleepAtEndArmed = useSleepAtEnd();
   const queueNextSameSeries = queueItemAfter(src.meta, src.episode)?.meta.id === src.meta.id;
 
   useEffect(() => {
-    setQueuePlaying(queueSessionIndex(src, queue) >= 0 ? src.meta : null, src.episode ?? undefined);
+    setQueuePlaying(queueSessionAvailable ? src.meta : null, src.episode ?? undefined);
     return () => setQueuePlaying(null);
-  }, [src, queue]);
+  }, [src, queue, queueSessionAvailable]);
   const queuePlaybackEnabled = useQueuePlayback({
     src,
     queue,
@@ -1596,6 +1597,8 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     onSwitchStream,
     debridSlugs: debrids.map((d) => d.slug),
     isSeriesPlayback: showEpisodePanel,
+    queueSessionAvailable,
+    queuePlaybackEnabled,
     episodePanelOpen,
     setEpisodePanelOpen,
     upNextButtonVisible:
