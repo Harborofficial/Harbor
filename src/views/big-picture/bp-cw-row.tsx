@@ -72,9 +72,10 @@ function remainingLabel(i: LibraryItem, t: T): string {
 type BpCwResume = { resumeAt: { season: number; episode: number } | null };
 
 // One-press resume needs POSITIVE evidence that this card can name what it would
-// play. The previous gate excluded upNext and waitingForAir, but useMobileCw
-// (bp-home and bp-shows) never sets either field, so on those two surfaces the
-// gate was always false and every series card took the play path. Losing the
+// play. A card advanced to a later episode or waiting on an airdate names
+// something it must not auto-play, so both fall through to the detail page.
+// The previous gate also relied on useMobileCw never setting either field,
+// which stopped being true once the row ran the advance pipeline. Losing the
 // resulting race in BpDetail autoplays the premiere and writes it over the real
 // resume point in Stremio cloud. Absence of a warning flag is not evidence, so
 // this asks what the item positively knows instead.

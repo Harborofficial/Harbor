@@ -7,6 +7,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { useAuth } from "@/lib/auth";
 import { providerMappedEpisode } from "@/lib/cw-anime-episode";
 import { resolveCwAnimeVideo } from "@/lib/cw-anime-video";
+import { dedupeCwItems } from "@/lib/cw-dedupe";
 import { useInViewport } from "@/lib/visibility";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { useHideAnime } from "@/lib/anime-hide";
@@ -230,8 +231,7 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);
-
-    return dedupeAnimeCw(merged).slice(0, limit);
+    return dedupeCwItems(dedupeAnimeCw(merged), limit);
   }, [
     items,
     externalCw,
