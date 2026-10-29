@@ -1684,7 +1684,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const wrappedAlive = useIdleEvict(wrappedTop);
   const queueAlive = useKeepAlive(queueTop, queueTop);
   const serviceAlive = useKeepAlive(serviceTop, serviceTop && !!service);
-  const detailAlive = useKeepAlive(detailTop, !!meta);
+  // Keep a detail page mounted while Settings is open. Otherwise the keep-alive timer
+  // drops it after 1.5s, and returning refetches the whole title from its addons.
+  const detailAlive = useKeepAlive(detailTop, !!meta, topKind === "settings");
   const personAlive = useKeepAlive(personTop, personId !== null);
   const profileAlive = useKeepAlive(profileTop, profileHandle !== null);
   const feedAlive = useKeepAlive(feedTop, feedOpen, stackKinds.includes("feed"));

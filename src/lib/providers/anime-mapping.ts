@@ -23,11 +23,11 @@ const SIDE_ENTRY_TYPES = new Set(["ova", "ona", "special", "music"]);
 
 async function preferMainTv(kitsuId: number, type?: string): Promise<number> {
   if (type && SIDE_ENTRY_TYPES.has(type.toLowerCase())) {
-    const anime = await kitsuAnime(kitsuId).catch(() => null);
+    const anime = await kitsuAnime(kitsuId, undefined, true).catch(() => null);
     if (anime && anime.episodeCount != null && anime.episodeCount > 1) {
       return kitsuId;
     }
-    const main = await kitsuMainTvSeries(kitsuId).catch(() => null);
+    const main = await kitsuMainTvSeries(kitsuId, true).catch(() => null);
     if (main != null) return main;
   }
   return kitsuId;
@@ -629,7 +629,7 @@ async function nativeKitsuFromAniZip(az: AniZipMapping | null): Promise<number |
 
 export async function imdbToKitsu(imdbId: string): Promise<number | null> {
   if (!imdbId.startsWith("tt")) return null;
-  const az = await aniZipByImdb(imdbId).catch(() => null);
+  const az = await aniZipByImdb(imdbId, true).catch(() => null);
   if (typeof az?.mappings?.kitsu_id === "number") {
     return preferMainTv(az.mappings.kitsu_id, (az.mappings as { type?: string }).type);
   }
@@ -658,7 +658,7 @@ export async function imdbToKitsu(imdbId: string): Promise<number | null> {
 }
 
 export async function tmdbTvToKitsu(tmdbId: number): Promise<number | null> {
-  const az = await aniZipByTmdbTv(tmdbId).catch(() => null);
+  const az = await aniZipByTmdbTv(tmdbId, true).catch(() => null);
   if (typeof az?.mappings?.kitsu_id === "number") {
     return preferMainTv(az.mappings.kitsu_id, (az.mappings as { type?: string }).type);
   }

@@ -24,6 +24,7 @@ function metaMappers(language: string) {
   };
   new Function("require", "module", "exports", output)(
     (name: string) => {
+      if (name === "@/lib/metadata-policy") return { addonOnlyMetadata: () => false };
       assert.ok(name in mocks, `unexpected import ${name}`);
       return mocks[name];
     },
@@ -65,6 +66,7 @@ function detailMapper(language: string, translateTitles = true) {
   let raw: Record<string, unknown>;
   new Function("require", "module", "exports", output)(
     (name: string) => {
+      if (name === "@/lib/metadata-policy") return { addonOnlyMetadata: () => false };
       assert.ok(name in mocks, `unexpected import ${name}`);
       return mocks[name];
     },

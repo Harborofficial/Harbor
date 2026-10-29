@@ -1,6 +1,51 @@
 // Newly introduced UI copy remains usable until each locale provides an override.
 const uiFallback: Record<string, string> = {
   "Episode information is unavailable": "Episode information is unavailable",
+  "Use installed addons for movie and series metadata, artwork, and episodes. Missing addon metadata stays unavailable. TMDB Top Match is controlled separately below. Restart Harbor after changing this option.":
+    "Use installed addons for movie and series metadata, artwork, and episodes. Missing addon metadata stays unavailable. TMDB Top Match is controlled separately below. Restart Harbor after changing this option.",
+  "Metadata addon priority": "Metadata addon priority",
+  "Metadata addons start in your addon-list order. The first supplies metadata; later addons only fill missing data or replace failed responses. Reordering enables addon preference.":
+    "Metadata addons start in your addon-list order. The first supplies metadata; later addons only fill missing data or replace failed responses. Reordering enables addon preference.",
+  "Loading metadata addons...": "Loading metadata addons...",
+  "Could not load metadata addons": "Could not load metadata addons",
+  "No metadata addons installed": "No metadata addons installed",
+  "Move {name} up": "Move {name} up",
+  "Move {name} down": "Move {name} down",
+  "Use addon-list order": "Use addon-list order",
+  "Use TMDB for Top Match in search": "Use TMDB for Top Match in search",
+  "Use your saved TMDB key for Top Match, even in addon-only mode. If unavailable or turned off, use your highest-priority metadata addon's search results.":
+    "Use your saved TMDB key for Top Match, even in addon-only mode. If unavailable or turned off, use your highest-priority metadata addon's search results.",
+  "Use only addon metadata": "Use only addon metadata",
+  "Disable built-in metadata": "Disable built-in metadata",
+  "Use installed addons and providers you configured. Disable Harbor's keyless built-in metadata and fallbacks. Restart Harbor after changing this option.":
+    "Use installed addons and providers you configured. Disable Harbor's keyless built-in metadata and fallbacks. Restart Harbor after changing this option.",
+  "Metadata source priority": "Metadata source priority",
+  "Choose which addons and configured providers supply each section. The first source with a value wins.":
+    "Choose which addons and configured providers supply each section. The first source with a value wins.",
+  Configure: "Configure",
+  "Configure metadata sources": "Configure metadata sources",
+  "Each section falls through in order until a source provides a value.":
+    "Each section falls through in order until a source provides a value.",
+  "Each section falls through in order until a source provides a value. Drag a source or use the arrows to reorder.":
+    "Each section falls through in order until a source provides a value. Drag a source or use the arrows to reorder.",
+  "fallback order": "fallback order",
+  "No sources are available for this section.": "No sources are available for this section.",
+  "Only configured providers appear here. Episode and season numbering is kept from one source at a time.":
+    "Only configured providers appear here. Episode and season numbering is kept from one source at a time.",
+  "Reset section": "Reset section",
+  Backdrop: "Backdrop",
+  "Episode and Seasons": "Episode and Seasons",
+  "Show source labels on the detail page": "Show source labels on the detail page",
+  "Useful for checking which addon or provider supplied each part.":
+    "Useful for checking which addon or provider supplied each part.",
+  Addon: "Addon",
+  Key: "Key",
+  Transform: "Transform",
+  "Controlled by disabled built-in metadata": "Controlled by disabled built-in metadata",
+  "Controlled by addon-only metadata": "Controlled by addon-only metadata",
+  "Use installed addons for movie and series metadata, artwork, and episodes. Disable Harbor's built-in providers and fallbacks. Missing addon metadata stays unavailable. Restart Harbor after changing this option.":
+    "Use installed addons for movie and series metadata, artwork, and episodes. Disable Harbor's built-in providers and fallbacks. Missing addon metadata stays unavailable. Restart Harbor after changing this option.",
+  Original: "Original",
   "Hide watched movies": "Hide watched movies",
   "Checking watched movies...": "Checking watched movies...",
   "No unwatched titles available": "No unwatched titles available",

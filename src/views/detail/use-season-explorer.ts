@@ -46,6 +46,12 @@ export type SeasonExplorerOptions = {
   lang: string;
   activeSeason?: number;
   fallbackSynopsis?: SeasonSynopsis;
+  /** Addon metadata already supplied this season's synopsis; do not replace it with a provider one. */
+  preferFallbackSynopsis?: boolean;
+  /** Configured order: addon sources, tmdb, tvdb. Empty means the legacy order. */
+  synopsisOrder?: string[];
+  /** Manifest name for the addon fallback source shown in attribution labels. */
+  fallbackSourceName?: string;
   enabled?: boolean;
   /** Harbor's proxy is only allowed for anime. Regular titles need their own key. */
   allowProxy?: boolean;
@@ -71,11 +77,20 @@ export function useSeasonExplorer({
   lang,
   activeSeason,
   fallbackSynopsis,
+  preferFallbackSynopsis = false,
+  synopsisOrder,
+  fallbackSourceName = "Addon",
   enabled = true,
   allowProxy = false,
 }: SeasonExplorerOptions) {
   const scope = JSON.stringify([metaId, imdbId, tvdbKey, seasonType, lang, enabled, allowProxy]);
-  const textScope = JSON.stringify([scope, tmdbKey, tmdbTvId]);
+  const textScope = JSON.stringify([
+    scope,
+    tmdbKey,
+    tmdbTvId,
+    synopsisOrder?.join(","),
+    fallbackSourceName,
+  ]);
   const fallbackKey = JSON.stringify([
     fallbackSynopsis?.overview,
     fallbackSynopsis?.overviewLanguage,
@@ -163,7 +178,37 @@ export function useSeasonExplorer({
       return;
     let cancelled = false;
     const number = activeSeason;
-    const tmdbAllowed = !!tmdbKey.trim() && (seasonType === "official" || seasonType === "aired");
+    const fallbackOverview = preferFallbackSynopsis ? fallbackSynopsis?.overview?.trim() : "";
+    if (fallbackOverview) {
+      const current = details.get(number);
+      if (
+        current?.overview === fallbackOverview &&
+        current.overviewLanguage === fallbackSynopsis?.overviewLanguage
+      ) {
+        setPending(null);
+        return;
+      }
+      setEnriched((previous) => {
+        const next = new Map(previous?.scope === textScope ? previous.details : EMPTY_DETAILS);
+        const expires = new Map(previous?.scope === textScope ? previous.expires : []);
+        const inputs = new Map(previous?.scope === textScope ? previous.inputs : []);
+        next.set(number, {
+          overview: fallbackOverview,
+          overviewLanguage: fallbackSynopsis?.overviewLanguage,
+          source: fallbackSourceName,
+        });
+        inputs.set(number, fallbackKey);
+        expires.set(number, Date.now() + 10 * 60_000);
+        return { scope: textScope, details: next, expires, inputs };
+      });
+      setPending(null);
+      return;
+    }
+    const order = synopsisOrder?.length ? synopsisOrder : undefined;
+    const tmdbAllowed =
+      !!tmdbKey.trim() &&
+      (seasonType === "official" || seasonType === "aired") &&
+      (!order || order.includes("tmdb"));
     if (!season && !tmdbAllowed && !fallbackSynopsis?.overview) return;
     setPending({ scope: textScope, season: number });
     void (async () => {
@@ -173,15 +218,41 @@ export function useSeasonExplorer({
           : undefined;
       if (cancelled) return;
       let tmdb: SeasonSynopsis | null | undefined;
-      if (tmdbAllowed && !(tvdb?.overview && tvdb.overviewLanguage === episodeLanguageBase(lang))) {
+      const needsTmdb =
+        tmdbAllowed &&
+        (!!order?.includes("tmdb") ||
+          !(tvdb?.overview && tvdb.overviewLanguage === episodeLanguageBase(lang)));
+      if (needsTmdb) {
         const id = await resolveTmdbId();
         if (cancelled) return;
         tmdb = id == null ? null : await fetchTmdbSeasonSynopsis(tmdbKey, id, number, lang);
       }
-      const synopsis = selectSeasonSynopsis(lang, tvdb, tmdb, fallbackSynopsis);
+      const candidates: Array<SeasonSynopsis | null | undefined> = [];
+      if (order) {
+        for (const source of order) {
+          if (source === "tmdb") candidates.push(tmdb);
+          else if (source === "tvdb") candidates.push(tvdb);
+          else if (source.startsWith("addon:")) candidates.push(fallbackSynopsis);
+        }
+      } else {
+        candidates.push(tvdb, tmdb, fallbackSynopsis);
+      }
+      const synopsis = selectSeasonSynopsis(lang, ...candidates);
+      const selected = synopsis.overview?.trim();
+      const source = !selected
+        ? undefined
+        : selected === tvdb?.overview?.trim()
+          ? "TheTVDB"
+          : selected === tmdb?.overview?.trim()
+            ? "TMDB"
+            : selected === fallbackSynopsis?.overview?.trim()
+              ? fallbackSourceName
+              : undefined;
       const failed = tvdb === null || tmdb === null;
       const detail =
-        failed && !synopsis.overview && !tvdb?.name ? null : { name: tvdb?.name, ...synopsis };
+        failed && !synopsis.overview && !tvdb?.name
+          ? null
+          : { name: tvdb?.name, ...synopsis, source };
       return { detail, failed };
     })()
       .catch(() => ({ detail: null, failed: true }))
@@ -222,6 +293,9 @@ export function useSeasonExplorer({
     enriched,
     resolveTmdbId,
     fallbackKey,
+    preferFallbackSynopsis,
+    synopsisOrder,
+    fallbackSourceName,
   ]);
 
   const artworkConfig = useMemo<SeasonExplorerArtworkConfig>(

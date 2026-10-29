@@ -5,6 +5,7 @@ import { useSettings } from "@/lib/settings";
 import { peekBpEnrich } from "./use-bp-enrich";
 import { resolveMeta } from "@/lib/meta-resource";
 import { tmdbDetails, type TmdbDetail } from "@/lib/providers/tmdb/tmdb-details";
+import { cinemetaDetails } from "@/lib/providers/cinemeta-details";
 import { tmdbCollection } from "@/lib/providers/tmdb/tmdb-collection";
 import { tmdbWatchProviders, type WatchProvider } from "@/lib/providers/tmdb/tmdb-watch";
 import { readBpMeta } from "./bp-focus-meta";
@@ -25,6 +26,7 @@ export type BpDetailData = {
 export function useBpDetail(metaId: string): BpDetailData {
   const { authKey } = useAuth();
   const { settings } = useSettings();
+  const prioritizeAddons = settings.addonOnlyMetadata || settings.preferCustomMetaAddon;
   const { type, id } = parseId(metaId);
   const seed = readBpMeta();
   const [meta, setMeta] = useState<Meta | null>(seed?.id === id ? seed : null);
@@ -32,7 +34,9 @@ export function useBpDetail(metaId: string): BpDetailData {
   // the page opens with its cast, ratings and tagline on it rather than filling
   // them in once the duplicate request comes back. A miss is null, which is
   // exactly what this used to start as.
-  const [detail, setDetail] = useState<TmdbDetail | null>(() => peekBpEnrich(id));
+  const [detail, setDetail] = useState<TmdbDetail | null>(() =>
+    prioritizeAddons ? null : peekBpEnrich(id),
+  );
   const [collection, setCollection] = useState<{ name: string; parts: Meta[] } | null>(null);
   const [providers, setProviders] = useState<WatchProvider[]>(NO_PROVIDERS);
   const [loading, setLoading] = useState(true);
@@ -40,7 +44,7 @@ export function useBpDetail(metaId: string): BpDetailData {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    setDetail(peekBpEnrich(id));
+    setDetail(prioritizeAddons ? null : peekBpEnrich(id));
     setCollection(null);
     setProviders(NO_PROVIDERS);
 
@@ -49,8 +53,13 @@ export function useBpDetail(metaId: string): BpDetailData {
     if (base?.id === id) setMeta(base);
 
     (async () => {
-      const fullP = resolveMeta(authKey, type, id).catch(() => null);
-      const richP = tmdbDetails(settings.tmdbKey, start).catch(() => null);
+      const fullP = resolveMeta(authKey, type, id, {
+        preferAddons: prioritizeAddons,
+        requireVideos: type === "series",
+      }).catch(() => null);
+      const richP = (
+        prioritizeAddons ? cinemetaDetails(start) : tmdbDetails(settings.tmdbKey, start)
+      ).catch(() => null);
       void fullP.then((m) => {
         if (alive && m) setMeta((prev) => ({ ...(prev ?? start), ...m }));
       });
@@ -64,7 +73,7 @@ export function useBpDetail(metaId: string): BpDetailData {
       // Availability needs the TMDB numeric id, so it cannot join the pair
       // above. It is never awaited either: art beats text on arrival and a
       // provider list must not sit in front of the episode backfill.
-      if (rich) {
+      if (rich && !prioritizeAddons) {
         void tmdbWatchProviders(settings.tmdbKey, rich.kind, rich.id, settings.region)
           .then((list) => {
             if (alive && list.length > 0) setProviders(list);
@@ -92,7 +101,14 @@ export function useBpDetail(metaId: string): BpDetailData {
     return () => {
       alive = false;
     };
-  }, [metaId, authKey, settings.tmdbKey, settings.region]);
+  }, [
+    metaId,
+    authKey,
+    settings.tmdbKey,
+    settings.region,
+    prioritizeAddons,
+    settings.metadataAddonOrder,
+  ]);
 
   return { meta, detail, collection, providers, loading };
 }

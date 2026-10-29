@@ -150,11 +150,12 @@ const addon = (id, resources = ["meta"]) => ({
 });
 function metadataFixture(remote = async () => [], local = []) {
   return load("src/lib/meta-resource.ts", {
+    "./metadata-addons": { providesMetadata: (a) => a.manifest.resources.includes("meta") },
     "./addons": {
       userAddons: remote,
       addonAccepts: (a, resource) => a.manifest.resources.includes(resource),
     },
-    "./addon-store": { loadInstalled: () => local },
+    "./addon-store": { loadInstalled: () => local, filterEnabled: (items) => items },
   });
 }
 
@@ -196,8 +197,12 @@ test("provider warning does not retain a previous account result during a switch
   });
   const warning = () => {
     const tree = h.render(ProvidersTab, {});
-    const titlesSection = tree.props.children[3];
-    return titlesSection.props.children.props.children[0].props.warn;
+    const titlesSection = tree.props.children.find(
+      (child) => child?.props?.title === "Titles and descriptions",
+    );
+    return titlesSection.props.children.props.children.find(
+      (row) => row?.props?.label === "Use Cinemeta for title metadata",
+    ).props.warn;
   };
   assert.ok(warning());
   h.flush();

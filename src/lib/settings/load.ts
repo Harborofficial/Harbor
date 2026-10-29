@@ -419,6 +419,16 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      searchTmdbTopMatch: parsed.searchTmdbTopMatch !== false,
+      metadataAddonOrder: Array.isArray(parsed.metadataAddonOrder)
+        ? [
+            ...new Set(
+              parsed.metadataAddonOrder.filter(
+                (key): key is string => typeof key === "string" && key.length <= 256,
+              ),
+            ),
+          ]
+        : [],
       libraryGroups: normalizeLibraryGroups(parsed.libraryGroups),
       libraryGroupSections: normalizeLibraryGroupSections(parsed.libraryGroupSections),
       spooktoberBanner: ["disabled", "small", "below-hero"].includes(parsed.spooktoberBanner ?? "")

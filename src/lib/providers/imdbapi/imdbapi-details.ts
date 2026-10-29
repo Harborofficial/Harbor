@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { safeFetch } from "@/lib/safe-fetch";
 import type { TmdbDetail } from "../tmdb/tmdb-details";
 
@@ -140,7 +141,7 @@ export async function imdbapiDetails(
   season?: number,
   episode?: number,
 ): Promise<TmdbDetail | null> {
-  if (!metaId.startsWith("tt")) return null;
+  if (addonOnlyMetadata() || !metaId.startsWith("tt")) return null;
 
   const cacheKey =
     season !== undefined && episode !== undefined ? `${metaId}:s${season}e${episode}` : metaId;

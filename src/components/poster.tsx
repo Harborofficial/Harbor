@@ -23,6 +23,7 @@ import {
   useTmdbImdbId,
 } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 import { useSettings } from "@/lib/settings";
+import { posterTransformEnabled } from "@/lib/metadata-sources";
 import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime-mapping";
 import { simklAnimeArtworkIds } from "@/lib/simkl/anime-artwork-ids";
 import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
@@ -173,6 +174,7 @@ export function usePosterChain(
   type?: "movie" | "series",
 ) {
   const { settings } = useSettings();
+  const transformPoster = posterTransformEnabled(settings);
   const { altId, pending } = useRpdbAltId(rpdbKey, metaId, type);
   const { animeImdb, animeTvdb, animeTmdb } = useAnimeRpdbIds(rpdbKey, metaId);
   const { url: localized, localizing } = useLocalizedPoster(metaId);
@@ -187,10 +189,10 @@ export function usePosterChain(
     const fallbacks = localizing
       ? [pinned]
       : [
-          animeImdb
+          transformPoster && animeImdb
             ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb, settings.posterBaseUrl, type)
             : undefined,
-          animeTvdb
+          transformPoster && animeTvdb
             ? rpdbPoster(
                 rpdbKey,
                 `tvdb:${animeTvdb}`,
@@ -200,7 +202,9 @@ export function usePosterChain(
                 type,
               )
             : undefined,
-          rpdbPoster(rpdbKey, metaId, base, altId, settings.posterBaseUrl, type),
+          transformPoster
+            ? rpdbPoster(rpdbKey, metaId, base, altId, settings.posterBaseUrl, type)
+            : undefined,
           localized,
           metaPoster,
         ];
@@ -225,10 +229,11 @@ export function usePosterChain(
     localizing,
     pending,
     pinned,
+    transformPoster,
   ]);
   const sig = candidates.join("|");
   const backdrop = useMemo(() => {
-    if (pending) return undefined;
+    if (pending || !transformPoster) return undefined;
     return (
       (animeImdb
         ? rpdbBackdrop(rpdbKey, animeImdb, undefined, animeTmdb, settings.posterBaseUrl, type)
@@ -255,6 +260,7 @@ export function usePosterChain(
     animeTvdb,
     animeTmdb,
     pending,
+    transformPoster,
   ]);
   const failedRef = useRef<Set<string>>(new Set());
   const sigRef = useRef(sig);

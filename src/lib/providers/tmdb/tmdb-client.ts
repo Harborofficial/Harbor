@@ -115,6 +115,7 @@ export async function get<T>(
   key: string,
   path: string,
   params: Record<string, string> = {},
+  _options: { searchTopMatch?: boolean } = {},
 ): Promise<T | null> {
   if (!key) return null;
   const url = new URL(`${TMDB}/${path}`);

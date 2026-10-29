@@ -13,6 +13,8 @@ export type TvdbSeasonDetails = {
   name?: string;
   overview?: string;
   overviewLanguage?: string;
+  /** Which source supplied the selected synopsis. */
+  source?: string;
 };
 
 export type TvdbSeasonArtwork = {

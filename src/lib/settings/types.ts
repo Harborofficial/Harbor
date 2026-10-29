@@ -601,6 +601,27 @@ export type Settings = {
   libraryBookmarkedOnly: boolean;
   librarySort: "recent" | "title" | "year";
   preferCustomMetaAddon: boolean;
+  addonOnlyMetadata: boolean;
+  metadataAddonOrder: string[];
+  /** Per-section metadata source chains. Empty sections use the legacy fallback order. */
+  metadataSources?: Partial<
+    Record<
+      | "title"
+      | "description"
+      | "seasonSynopsis"
+      | "poster"
+      | "seasonPoster"
+      | "backdrop"
+      | "logo"
+      | "episodes"
+      | "ratings"
+      | "cast"
+      | "trailers",
+      string[]
+    >
+  >;
+  metadataSourceLabels?: boolean;
+  searchTmdbTopMatch: boolean;
   cinemetaEnabled: boolean;
   animeOnlyInAnimeRoom: boolean;
   animeCwEnd: "hide" | "timer";

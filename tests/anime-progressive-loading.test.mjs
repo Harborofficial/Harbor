@@ -14,6 +14,7 @@ test("playable anime episodes publish before the full metadata batch settles", a
     { id: 2, number: 2, streamId: "kitsu:12:2" },
   ];
   const mocks = {
+    "@/lib/metadata-policy": { addonOnlyMetadata: () => false },
     "@/lib/media-cache": { onMediaCacheClear() {}, mediaCacheGeneration: () => 0 },
     "@/lib/providers/kitsu": {
       parseKitsuId: (id) => Number(id.split(":")[1]),

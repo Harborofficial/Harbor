@@ -54,7 +54,13 @@ const budgetSubs = new Set<(b: OmdbBudget) => void>();
 
 let loaded = false;
 let saveTimer: number | null = null;
-let budget: OmdbBudget = { used: 0, limit: DEFAULT_LIMIT, resetAt: 0, exhausted: false, keyInvalid: false };
+let budget: OmdbBudget = {
+  used: 0,
+  limit: DEFAULT_LIMIT,
+  resetAt: 0,
+  exhausted: false,
+  keyInvalid: false,
+};
 
 function nextUtcMidnight(): number {
   const d = new Date();
@@ -306,7 +312,11 @@ export function useOmdbBudget(): OmdbBudget {
   return b;
 }
 
-async function performFetch(key: string, imdbId: string, type?: string): Promise<OmdbScores | null> {
+async function performFetch(
+  key: string,
+  imdbId: string,
+  type?: string,
+): Promise<OmdbScores | null> {
   try {
     let url = `https://www.omdbapi.com/?i=${encodeURIComponent(imdbId)}&apikey=${encodeURIComponent(key)}`;
     if (type) url += `&type=${encodeURIComponent(type)}`;
@@ -377,7 +387,11 @@ function recentMiss(imdbId: string): boolean {
   return ts != null && Date.now() - ts < MISS_TTL_MS;
 }
 
-export async function omdbScores(key: string, imdbId?: string, type?: string): Promise<OmdbScores | null> {
+export async function omdbScores(
+  key: string,
+  imdbId?: string,
+  type?: string,
+): Promise<OmdbScores | null> {
   if (!key || !imdbId || !imdbId.startsWith("tt")) return null;
   load();
   const fresh = shouldServeFromCache(imdbId);
@@ -442,8 +456,7 @@ async function performSeasonFetch(
     const eps: Array<{ Episode?: string; imdbRating?: string }> = j.Episodes ?? [];
     for (const e of eps) {
       const num = parseInt(String(e.Episode ?? ""), 10);
-      const rating =
-        e.imdbRating && e.imdbRating !== "N/A" ? parseFloat(e.imdbRating) : NaN;
+      const rating = e.imdbRating && e.imdbRating !== "N/A" ? parseFloat(e.imdbRating) : NaN;
       if (Number.isFinite(num) && Number.isFinite(rating) && rating > 0) {
         out.set(num, rating);
       }

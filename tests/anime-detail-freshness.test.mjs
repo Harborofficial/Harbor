@@ -55,6 +55,7 @@ function fixture({
       clearTimeout,
       URLSearchParams,
       require: (name) => {
+        if (name === "@/lib/metadata-policy") return { addonOnlyMetadata: () => false };
         assert.ok(name in dependencies, `Missing dependency: ${name}`);
         return dependencies[name];
       },
@@ -163,6 +164,12 @@ function fixture({
       "@/lib/anilist/relations": { anilistFranchise: async () => [] },
       "@/lib/anilist/browse": {},
       "./anime-recommendations": { animeRecommendations: async () => [] },
+      "./anime-art-quality": {
+        pickAnimeHeroBackdrop: (sources) =>
+          sources.curated ?? sources.tmdb ?? sources.tvdb ?? sources.kitsu ?? sources.banner,
+        reusableAnimeBackdrop: (url) => url,
+      },
+      "./anime-hero-art-static": { staticHeroArt: async () => undefined },
       "@/lib/providers/anime-episode-enrich": { enrichEpisodes: async () => {} },
       "@/lib/providers/harbor-imdb": { harborImdbEpisodes: async () => new Map() },
       "@/lib/providers/fanart": {},

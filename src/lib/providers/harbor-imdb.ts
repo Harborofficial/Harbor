@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { lruSet } from "@/lib/cache";
 import { registerEvictable } from "@/lib/maintenance";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
@@ -41,7 +42,7 @@ registerEvictable("harbor-imdb-parental", (aggressive) => {
 });
 
 export async function harborImdbEpisodes(seriesTt: string): Promise<Map<string, number>> {
-  if (!seriesTt.startsWith("tt")) return new Map();
+  if (addonOnlyMetadata() || !seriesTt.startsWith("tt")) return new Map();
   const cached = harborImdbEpisodesCached(seriesTt);
   if (cached) return cached;
   const pending = episodeInflight.get(seriesTt);
@@ -92,7 +93,7 @@ export function harborImdbEpisodesCached(seriesTt: string): Map<string, number> 
 }
 
 export async function harborImdbTitle(tt: string): Promise<number | null> {
-  if (!tt.startsWith("tt")) return null;
+  if (addonOnlyMetadata() || !tt.startsWith("tt")) return null;
   if (titleCache.has(tt)) return titleCache.get(tt) ?? null;
   const pending = titleInflight.get(tt);
   if (pending) return pending;
@@ -156,7 +157,7 @@ export function harborImdbMpaRating(rawTt: string): string | null {
 export async function harborImdbParental(rawTt: string): Promise<ParentalCategory[]> {
   const match = rawTt.match(/tt\d+/);
   const tt = match ? match[0] : rawTt;
-  if (!tt.startsWith("tt")) return [];
+  if (addonOnlyMetadata() || !tt.startsWith("tt")) return [];
   const cached = parentalCache.get(tt);
   if (cached) return cached;
   const pending = parentalInflight.get(tt);

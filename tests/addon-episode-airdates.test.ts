@@ -19,6 +19,9 @@ function load(path: string, mocks: Record<string, unknown>, expose = ""): any {
   }).outputText;
   const exports = {};
   new Function("require", "exports", compiled + expose)((id: string) => {
+    if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+      return { addonOnlyMetadata: () => false };
+    if (id === "./metadata-addons") return { readMetadataAddonOrder: () => [] };
     assert.ok(Object.hasOwn(mocks, id), `Unexpected dependency: ${id}`);
     return mocks[id];
   }, exports);

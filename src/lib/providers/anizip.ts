@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { safeFetch } from "@/lib/safe-fetch";
 import { recordAnimeCwId, recordAnilistMalAlias } from "@/lib/anime-cw-ids";
 import {
@@ -91,9 +92,10 @@ export type AniZipMapping = {
 
 export async function aniZipByKitsu(
   kitsuId: number,
+  identity = false,
   maxAge?: number,
 ): Promise<AniZipMapping | null> {
-  return get(`kitsu_id=${kitsuId}`, maxAge);
+  return get(`kitsu_id=${kitsuId}`, maxAge, identity);
 }
 
 export async function aniZipByAnilist(
@@ -114,15 +116,20 @@ export async function aniZipByAnidb(
   return get(`anidb_id=${anidbId}`, maxAge);
 }
 
-export async function aniZipByImdb(imdbId: string, maxAge?: number): Promise<AniZipMapping | null> {
-  return get(`imdb_id=${imdbId}`, maxAge);
+export async function aniZipByImdb(
+  imdbId: string,
+  identity = false,
+  maxAge?: number,
+): Promise<AniZipMapping | null> {
+  return get(`imdb_id=${imdbId}`, maxAge, identity);
 }
 
 export async function aniZipByTmdbTv(
   tmdbId: number,
+  identity = false,
   maxAge?: number,
 ): Promise<AniZipMapping | null> {
-  return get(`themoviedb_id=${tmdbId}`, maxAge);
+  return get(`themoviedb_id=${tmdbId}`, maxAge, identity);
 }
 
 const TIMEOUT_MS = 4000;
@@ -205,7 +212,8 @@ function captureExactAliases(query: string, value: AniZipMapping): void {
   }
 }
 
-async function get(query: string, maxAge?: number): Promise<AniZipMapping | null> {
+async function get(query: string, maxAge?: number, identity = false): Promise<AniZipMapping | null> {
+  if (addonOnlyMetadata() && !identity) return null;
   const forceRefresh = maxAge === 0;
   const memory = cache.get(query);
   if (!forceRefresh && memory && memory.expiresAt > Date.now()) return memory.value;

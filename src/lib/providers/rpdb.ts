@@ -1,3 +1,5 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
+import { posterTransformEnabledFromStorage } from "@/lib/metadata-sources";
 import { normalizeLang } from "@/lib/subtitles/language";
 
 let posterBase = "";
@@ -27,8 +29,7 @@ export function setPosterLanguage(
     }
   }
   posterLang =
-    (metadataLanguage ?? "").split("-")[0]?.toLowerCase() ||
-    (uiLanguage ?? "").toLowerCase();
+    (metadataLanguage ?? "").split("-")[0]?.toLowerCase() || (uiLanguage ?? "").toLowerCase();
 }
 
 type ParsedId = {
@@ -196,6 +197,9 @@ function posterServiceArt(
   base: string,
   mediaType: "movie" | "series" | undefined,
 ): string | undefined {
+  if (addonOnlyMetadata() && (!posterTransformEnabledFromStorage() || (!key && !base))) {
+    return fallback;
+  }
   const parsed = parseMetaId(metaId);
   if (!parsed) return fallback;
   const id = mergeAlt(parsed, altId);

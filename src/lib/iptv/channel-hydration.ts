@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { lruSet } from "@/lib/cache";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Meta } from "@/lib/cinemeta";
@@ -64,6 +65,7 @@ function queryForChannel(channelName: string): { query: string | null; preferTyp
 }
 
 export function getCachedHydration(channelName: string): Meta | null | undefined {
+  if (addonOnlyMetadata()) return undefined;
   loadCache();
   const { query } = queryForChannel(channelName);
   if (!query) return null;
@@ -73,6 +75,7 @@ export function getCachedHydration(channelName: string): Meta | null | undefined
 }
 
 export function hydrateChannel(channelName: string): Promise<Meta | null> {
+  if (addonOnlyMetadata()) return Promise.resolve(null);
   loadCache();
   const { query, preferType } = queryForChannel(channelName);
   if (!query) return Promise.resolve(null);

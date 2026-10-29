@@ -48,6 +48,8 @@ function load(file, dependencies, globals = {}) {
     },
     ...globals,
     require: (name) => {
+      if (name === "@/lib/metadata-policy" || name === "./metadata-policy")
+        return { addonOnlyMetadata: () => false };
       assert.ok(name in dependencies, "unmocked dependency " + name);
       return dependencies[name];
     },
@@ -675,6 +677,25 @@ test("preferred TVDB synopsis wins without requesting TMDB season text", async (
   });
   assert.equal(data.details.get(1).overview, "TVDB Türkçe özet");
   assert.equal(data.details.get(1).name, "English Saga");
+  assert.equal(f.synopsisCalls.length, 0);
+  f.unmount();
+});
+
+test("an addon-provided season synopsis wins before any provider fallback request", async () => {
+  const f = hookFixture({
+    synopsisGet: async () => {
+      throw new Error("TMDB synopsis must not be requested");
+    },
+  });
+  const data = await settleExplorer(f, {
+    ...props,
+    tvdbKey: "",
+    tmdbKey: "key",
+    tmdbTvId: 42,
+    preferFallbackSynopsis: true,
+    fallbackSynopsis: { overview: "Addon season synopsis" },
+  });
+  assert.equal(data.details.get(1).overview, "Addon season synopsis");
   assert.equal(f.synopsisCalls.length, 0);
   f.unmount();
 });

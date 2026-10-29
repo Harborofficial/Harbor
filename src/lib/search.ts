@@ -1,3 +1,4 @@
+import { addonOnlyMetadata, useTmdbTopMatch } from "@/lib/metadata-policy";
 import { animeCatalogRequest } from "./providers/anime-catalog-client";
 import { effectiveTmdbLanguage, get } from "@/lib/providers/tmdb/tmdb-client";
 import { movieMeta, seriesMeta, type Page, type RawMovie, type RawSeries } from "@/lib/providers/tmdb/tmdb-meta-mappers";
@@ -208,6 +209,7 @@ function withSearchTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T
 }
 
 export async function searchAnime(query: string, limit = 8): Promise<AnimeHit[]> {
+  if (addonOnlyMetadata()) return [];
   const q = query.trim();
   if (q.length < 2) return [];
   const [anilist, jikan, kitsu] = await Promise.all([
@@ -246,6 +248,7 @@ export async function searchAnime(query: string, limit = 8): Promise<AnimeHit[]>
 }
 
 export async function searchCinemeta(query: string): Promise<{ movies: Meta[]; series: Meta[] }> {
+  if (addonOnlyMetadata()) return { movies: [], series: [] };
   const q = query.trim();
   if (q.length < 2) return { movies: [], series: [] };
   const fetchKind = async (type: "movie" | "series"): Promise<Meta[]> => {
@@ -262,13 +265,14 @@ export async function searchCinemeta(query: string): Promise<{ movies: Meta[]; s
 export async function searchAll(
   key: string,
   query: string,
-  opts: { excludeGenres?: number[] } = {},
+  opts: { excludeGenres?: number[]; topMatchOnly?: boolean } = {},
 ): Promise<SearchResults> {
   const trimmed = query.trim();
   if (!trimmed) {
     return { query: "", topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], manga: [], music: [], ebooks: [], sports: [], characters: [], addonGroups: [], addons: [], intent: null };
   }
-  if (!key) {
+  const topMatchOnly = opts.topMatchOnly === true && useTmdbTopMatch();
+  if (!key || (addonOnlyMetadata() && !topMatchOnly)) {
     return { query: trimmed, topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], manga: [], music: [], ebooks: [], sports: [], characters: [], addonGroups: [], addons: [], intent: detectIntent(trimmed) };
   }
 
@@ -276,7 +280,7 @@ export async function searchAll(
     query: trimmed,
     include_adult: "false",
     ...(loadStoredSettings().translateTitles ? {} : { language: "en-US" }),
-  });
+  }, { searchTopMatch: topMatchOnly });
   if (!data) {
     return {
       query: trimmed,
@@ -294,7 +298,7 @@ export async function searchAll(
       addonGroups: [],
       addons: [],
       intent: detectIntent(trimmed),
-      tmdbUnavailable: true,
+      tmdbUnavailable: !topMatchOnly,
     };
   }
   const metaBase = effectiveTmdbLanguage().split("-")[0]?.toLowerCase() ?? "";
@@ -309,7 +313,7 @@ export async function searchAll(
       query: trimmed,
       include_adult: "false",
       language: "en-US",
-    });
+    }, { searchTopMatch: topMatchOnly });
     if (en?.results) {
       enNameById = new Map();
       for (const r of en.results) {
@@ -367,7 +371,7 @@ export async function searchAll(
   }
 
   if (
-    trimmed.split(/\s+/).length >= 2 &&
+    !topMatchOnly && trimmed.split(/\s+/).length >= 2 &&
     (people.length >= 1 || (movies.length === 0 && series.length === 0))
   ) {
     await fuzzyPeopleFallback(key, trimmed, people);
@@ -394,9 +398,9 @@ export async function searchAll(
   return {
     query: trimmed,
     topMatch,
-    people: people.slice(0, 10),
-    movies: movies.slice(0, 12),
-    series: series.slice(0, 12),
+    people: topMatchOnly ? [] : people.slice(0, 10),
+    movies: topMatchOnly ? [] : movies.slice(0, 12),
+    series: topMatchOnly ? [] : series.slice(0, 12),
     liveTv: [],
     anime: [],
     manga: [],

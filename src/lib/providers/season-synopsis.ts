@@ -28,7 +28,15 @@ export function selectSeasonSynopsis(
     );
     if (candidate) return { overview: candidate.overview!.trim(), overviewLanguage: language };
   }
-  return {};
+  // Addon seasons often carry no language evidence. Use that text only after
+  // every explicitly labelled candidate has been considered.
+  const unlabelled = candidates.find(
+    (value) =>
+      typeof value?.overview === "string" &&
+      value.overview.trim() &&
+      value.overviewLanguage == null,
+  );
+  return unlabelled ? { overview: unlabelled.overview!.trim() } : {};
 }
 
 /** Explicit translation records avoid mistaking an original-language fallback for a translation. */
