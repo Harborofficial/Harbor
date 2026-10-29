@@ -182,6 +182,17 @@ export type GridSpec = {
   initial?: Meta[];
   /** Last complete page in initial; use 0 for a capped/filtered row preview. */
   initialPage?: number;
+  filter?: {
+    label: string;
+    initialValue?: string;
+    options: Array<{
+      value: string;
+      label: string;
+      fetcher: (page: number, loaded?: number) => Promise<Meta[]>;
+      initial?: Meta[];
+      initialPage?: number;
+    }>;
+  };
   kidsHero?: { grad: string; art: string; name: string };
 };
 
