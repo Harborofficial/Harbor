@@ -20,6 +20,7 @@ import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { readEmbedRect } from "@/lib/player/embed-rect";
 import { svpEnsureRunning, svpStatus } from "@/lib/svp";
 import { isSvpActiveForMedia } from "@/lib/player/svp-policy";
+import { ensureNativeMemory } from "@/lib/native-memory";
 import { pickBridge } from "../player-utils";
 
 function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean {
@@ -154,6 +155,8 @@ export function usePlayerBridge(params: {
     (async () => {
       const want = chosenEngine;
       const getEmbedRect = () => readEmbedRect(videoMountRef.current);
+      // Size manual buffer modes from the real machine, not the fallback.
+      await ensureNativeMemory();
       const { bridge: choose, engine: chosen } = await pickBridge(want, src.notWebReady === true, {
         anime4k: anime4kOn,
         hdrToSdr: settings.playerHdrToSdr,
@@ -169,13 +172,11 @@ export function usePlayerBridge(params: {
           (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
         ),
         macEdr: isMacDesktop() && embedActive && settings.playerMacEdr && !settings.playerHdrToSdr,
-        fullDownload: settings.torrentFullDownload,
         separateDisplay:
           settings.playerSeparateDisplay.mode === "explicit"
             ? settings.playerSeparateDisplay.monitor
             : null,
         separateCoverTaskbar: settings.playerSeparateCoverTaskbar,
-        cacheDir: settings.playbackCacheDir,
         extraOptions: [
           mergeMpvOptions(settings, svpOn, { anime4k: anime4kOn }),
           shaderCompanionOptions(settings),

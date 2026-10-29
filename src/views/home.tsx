@@ -60,7 +60,13 @@ import { trackEvent } from "@/lib/discover";
 import { publishResumeStates } from "@/lib/hover-preview/store";
 import { readResumeEntry, saveResumeBatch } from "@/lib/resume";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
-import { clearLocalCw, listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import {
+  clearLocalCw,
+  listLocalCw,
+  localCwSourceEnabled,
+  localCwVersion,
+  subscribeLocalCw,
+} from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -71,8 +77,8 @@ import { repairLibraryNames } from "@/lib/stremio-repair";
 import { reconcileRemoteWatched } from "@/lib/stremio-watched-pull";
 import { isCorruptAnimeEntry } from "@/lib/anime-cw-repair";
 import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
-import { franchiseRoot, franchiseRootSync } from "@/lib/providers/anime-franchise-root";
-import { franchiseDedupKey } from "@/lib/providers/jikan";
+import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
+import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import {
   ANIME_CLOUD_ID,
   cwSortKey,
@@ -162,7 +168,9 @@ export function Home({
   const [letterboxdRows, setLetterboxdRows] = useState<HomeRow[]>([]);
   const isNuvioProvider = settings.accountProvider === "nuvio";
   const externalCw = useExternalCw(
-    isNuvioProvider || (!hideSharedCw && (settings.cwSources.trakt || settings.cwSources.simkl)),
+    isNuvioProvider ||
+      (!hideSharedCw &&
+        (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb)),
   );
   const [traktWatched, setTraktWatched] = useState<Set<string>>(() => peekTraktWatched());
   const [simklWatchedMap, setSimklWatchedMap] = useState<Map<string, Set<string>>>(() =>
@@ -185,7 +193,7 @@ export function Home({
   }, [active, heroReady, onReady]);
   const [items, setItems] = useState<LibraryItem[]>([]);
   const cwVersion = useCwDismissVersion();
-  const [cwRootVersion, setCwRootVersion] = useState(0);
+  const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
   const [tmdbProvidedByAddon, setTmdbProvidedByAddon] = useState(false);
   const [addonsTick, setAddonsTick] = useState(0);
   const [buildTick, setBuildTick] = useState(0);
@@ -312,14 +320,14 @@ export function Home({
         classicSource === "all"
           ? addons
           : classicSource === "nuvio"
-          ? addons.filter((a) => {
-              const o = resolveAddonOrigin(a.more?.base || a.key);
-              return o === "nuvio" || o === "both";
-            })
-          : addons.filter((a) => {
-              const o = resolveAddonOrigin(a.more?.base || a.key);
-              return o === "stremio" || o === "both";
-            });
+            ? addons.filter((a) => {
+                const o = resolveAddonOrigin(a.more?.base || a.key);
+                return o === "nuvio" || o === "both";
+              })
+            : addons.filter((a) => {
+                const o = resolveAddonOrigin(a.more?.base || a.key);
+                return o === "stremio" || o === "both";
+              });
       const usable = isClassic
         ? classicFiltered
         : addons.filter((a) => !isAnimeRow(a) && !isStreamingServiceRow(a.name));
@@ -664,49 +672,56 @@ export function Home({
   }, [items]);
   const localCwItems = useMemo<LibraryItem[]>(() => {
     void localCwVer;
-    return listLocalCw(isNuvioProvider ? false : hideSharedCw).map((e) => ({
-      _id: e.id,
-      type: e.type,
-      name: e.name,
-      poster: e.poster,
-      background: e.background,
-      isAnime: e.isAnime,
-      state: {
-        timeOffset: e.positionMs,
-        duration: e.durationMs,
-        season: e.season,
-        episode: e.episode,
-        video_id:
-          e.videoId ??
-          (e.season != null && e.episode != null ? `${e.id}:${e.season}:${e.episode}` : undefined),
-        flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
-        lastWatched: new Date(e.t).toISOString(),
-      },
-      removed: false,
-      temp: false,
-      _ctime: new Date(e.t).toISOString(),
-      _mtime: new Date(e.t).toISOString(),
-      local: true,
-    }));
-  }, [localCwVer, hideSharedCw, activeProfile?.id, isNuvioProvider]);
+    return listLocalCw(isNuvioProvider ? false : hideSharedCw)
+      .filter((e) => isNuvioProvider || localCwSourceEnabled(e, settings.cwSources))
+      .map((e) => ({
+        _id: e.id,
+        type: e.type,
+        name: e.name,
+        poster: e.poster,
+        background: e.background,
+        isAnime: e.isAnime,
+        state: {
+          timeOffset: e.positionMs,
+          duration: e.durationMs,
+          season: e.season,
+          episode: e.episode,
+          video_id:
+            e.videoId ??
+            (e.season != null && e.episode != null
+              ? `${e.id}:${e.season}:${e.episode}`
+              : undefined),
+          flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
+          lastWatched: new Date(e.t).toISOString(),
+        },
+        removed: false,
+        temp: false,
+        _ctime: new Date(e.t).toISOString(),
+        _mtime: new Date(e.t).toISOString(),
+        local: true,
+      }));
+  }, [localCwVer, hideSharedCw, activeProfile?.id, isNuvioProvider, settings.cwSources]);
   const continueWatching = useMemo(() => {
     const cwBase = isNuvioProvider
       ? externalCw.filter((i) => i.external === "nuvio")
       : hideSharedCw
         ? []
         : [
-            ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
-            ...externalCw.filter((i) => i.external !== "nuvio"),
+            ...(settings.cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
+            ...externalCw.filter(
+              (i) =>
+                i.external !== "nuvio" &&
+                (i.external !== "simkl" || settings.cwSources.simkl) &&
+                (i.external !== "trakt" || settings.cwSources.trakt) &&
+                (i.external !== "publicmetadb" || settings.cwSources.publicmetadb),
+            ),
           ];
     const eligible = (
       isNuvioProvider
-        ? (cwBase.length > 0
-            ? cwBase
-            : localCwItems.map((i) => ({ ...i, external: "nuvio" as const })))
-        : [
-            ...cwBase,
-            ...localCwItems,
-          ]
+        ? cwBase.length > 0
+          ? cwBase
+          : localCwItems.map((i) => ({ ...i, external: "nuvio" as const }))
+        : [...cwBase, ...localCwItems]
     )
       .filter(
         (i) =>
@@ -719,74 +734,31 @@ export function Home({
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);
-    const norm = (s: string) => franchiseDedupKey(s);
-    const lastWatchedOf = (i: LibraryItem) => {
-      const lw = Date.parse(i.state?.lastWatched ?? "");
-      if (Number.isFinite(lw) && lw > 0) return lw;
-      const m = i._mtime as unknown;
-      const mt = typeof m === "number" ? m : Date.parse(String(m ?? ""));
-      return Number.isFinite(mt) ? mt : 0;
-    };
-    const byId = new Map<string, LibraryItem>();
-    const byName = new Map<string, LibraryItem>();
-    for (const i of eligible) {
-      if (byId.has(i._id)) continue;
-      const nm = norm(i.name ?? "");
-      const key = `${i.type}:${nm}`;
-      if (nm) {
-        const held = byName.get(key);
-        if (held) {
-          if (lastWatchedOf(i) > lastWatchedOf(held)) {
-            byId.delete(held._id);
-            byName.set(key, i);
-            byId.set(i._id, i);
-          }
-          continue;
-        }
-        byName.set(key, i);
-      }
-      byId.set(i._id, i);
-      if (byId.size >= 100) break;
-    }
-    const seenRoot = new Set<string>();
-    for (const i of [...byId.values()].sort((a, b) => lastWatchedOf(b) - lastWatchedOf(a))) {
-      const root = franchiseRootSync(i._id);
-      if (root && seenRoot.has(root)) byId.delete(i._id);
-      if (root) seenRoot.add(root);
-    }
-    return [...byId.values()].sort((a, b) => cwSortKey(b) - cwSortKey(a));
+    return dedupeAnimeCw(eligible).slice(0, 100);
   }, [
     items,
     externalCw,
     localCwItems,
     cwVersion,
-    cwRootVersion,
+    animeIdsVersion,
     settings.animeOnlyInAnimeRoom,
     settings.hideContent.anime,
     hideSharedCw,
     animeDetectVer,
     isNuvioProvider,
+    settings.cwSources,
   ]);
   useEffect(() => {
-    let cancelled = false;
-    const ids = [...localCwItems, ...externalCw].filter((i) => isCwMember(i)).map((i) => i._id);
-    if (ids.length === 0) return;
-    if (ids.every((id) => franchiseRootSync(id))) return;
-    const load = async () => {
-      await Promise.allSettled(ids.map((id) => franchiseRoot(id)));
-      if (!cancelled) setCwRootVersion((v) => v + 1);
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [localCwItems, externalCw]);
+    void warmCwAnimeIdentities(continueWatching, { tmdbKey: settings.tmdbKey });
+  }, [continueWatching, settings.tmdbKey]);
   const resurfaceLibrary = useMemo(() => {
     if (isNuvioProvider) {
       return externalCw.filter((i) => i.external === "nuvio" && i.type === "series");
     }
     const pool = [
-      ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
+      ...(hideSharedCw || !settings.cwSources.library
+        ? []
+        : items.filter((i) => !ANIME_CLOUD_ID.test(i._id))),
       ...localCwItems.filter((i) => i.type === "series"),
     ];
     const manual = manualWatchedLibraryItems();
@@ -796,7 +768,15 @@ export function Home({
     if (usable.length === 0) return pool;
     const overrideIds = new Set(usable.map((i) => i._id));
     return [...pool.filter((i) => !overrideIds.has(i._id)), ...usable];
-  }, [items, localCwItems, manualWatchedVer, isNuvioProvider, externalCw]);
+  }, [
+    items,
+    localCwItems,
+    manualWatchedVer,
+    isNuvioProvider,
+    externalCw,
+    hideSharedCw,
+    settings.cwSources.library,
+  ]);
   useEffect(() => {
     if (!anilistConnected) {
       setAnilistWatchedMap((prev) => (prev.size ? new Map() : prev));
@@ -842,11 +822,16 @@ export function Home({
 
   const onDismissCw = useCallback(
     (item: LibraryItem) => {
+      if (item.cwMembers?.length) return dismissCw(item, authKey);
       if (item.manualWatched) {
         dismissManualWatched(item._id);
         return;
       }
-      if (isNuvioProvider || item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
+      if (
+        isNuvioProvider ||
+        item.external === "nuvio" ||
+        (isNuvioSignedIn() && isNuvioProviderActive())
+      ) {
         const slot = resolveNuvioProfileIndex();
         removeExternalCwItem(item);
         clearLocalCw(item._id, `nuvio-${slot}`);
@@ -857,13 +842,7 @@ export function Home({
         clearResume(item._id, undefined, undefined, `nuvio-${slot}`);
         clearResume(item._id);
         dismissCw(item, authKey);
-        void deleteWatchProgressFromNuvio(
-          slot,
-          item._id,
-          undefined,
-          season,
-          episode,
-        );
+        void deleteWatchProgressFromNuvio(slot, item._id, undefined, season, episode);
         return;
       }
       if (item.local) {

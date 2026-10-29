@@ -1,6 +1,5 @@
 import { Timer } from "../icons";
 import { useSettings } from "@/lib/settings";
-import { isAndroid } from "@/lib/platform";
 import { useT } from "@/lib/i18n";
 import { STALL_WAIT_OPTIONS, stallWaitSec } from "@/lib/player/stall-wait";
 import { SettingGroup, SettingRow } from "../kit";
@@ -9,7 +8,6 @@ import { Dropdown } from "@/components/dropdown";
 import { mediaServerConnections } from "@/lib/media-server/connections";
 import { Anchored, Nested } from "./choice";
 import { PressPlayPreview } from "./press-play-preview";
-import { PlaybackCacheFolder } from "./playback-cache-folder";
 import {
   RememberStreamArt,
   ResumeArt,
@@ -27,7 +25,11 @@ export function PlayModeChoice() {
       <div className="flex min-w-0 flex-col items-start gap-3">
         <div className="flex flex-col gap-1">
           <RowTitle>{t("When you press Play")}</RowTitle>
-          <RowDesc>{t("Instant starts the best-ranked stream straight away. Pick a source opens the stream list every time, so you choose the release, quality and provider yourself.")}</RowDesc>
+          <RowDesc>
+            {t(
+              "Instant starts the best-ranked stream straight away. Pick a source opens the stream list every time, so you choose the release, quality and provider yourself.",
+            )}
+          </RowDesc>
         </div>
         <Segmented<"instant" | "manual">
           value={settings.instantPlay ? "instant" : "manual"}
@@ -209,15 +211,12 @@ export function PlayModePanel() {
         <ToggleRow
           label={t("Download the whole file while streaming")}
           sub={t(
-            "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.",
+            "Downloads the whole torrent into Harbor's stream cache in the background as you watch, even while paused, so big remuxes pre-load. P2P only: debrid and other HTTPS streams stay in memory and are never written to disk. Uses more disk and bandwidth; cleared when you switch or close.",
           )}
           value={settings.torrentFullDownload}
           onChange={(v) => update({ torrentFullDownload: v })}
         />
-        {!isAndroid() && <PlaybackCacheFolder />}
       </SettingGroup>
-
-
     </div>
   );
 }

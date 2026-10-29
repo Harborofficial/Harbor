@@ -40,6 +40,8 @@ export type LibraryItem = {
   external?: ExternalCwSource;
   /** Other canonical ids for the same title, used to merge and dismiss CW entries. */
   altIds?: string[];
+  /** Original source checkpoints represented by a verified anime CW group. */
+  cwMembers?: LibraryItem[];
   isAnime?: boolean;
   upNext?: boolean;
   local?: boolean;

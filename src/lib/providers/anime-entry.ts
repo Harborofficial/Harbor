@@ -21,6 +21,41 @@ const EXTERNAL: Array<[prefix: string, source: string]> = [
 ];
 
 /**
+ * Resolve an external anime id to Kitsu through ARM, the Kitsu native mapping
+ * API, and (for MAL) the exact AniList bridge. The addon itself is asked
+ * separately by `resolveAnimeEntry` so its fresher sequel records keep
+ * precedence.
+ */
+export async function resolveExternalKitsuId(id: string, maxAge?: number): Promise<number | null> {
+  for (const [prefix, source] of EXTERNAL) {
+    if (!id.startsWith(prefix)) continue;
+    const n = Number(id.slice(prefix.length));
+    if (!Number.isSafeInteger(n) || n <= 0) return null;
+    let kitsuId = await externalToKitsu(source, n, maxAge).catch(() => null);
+    if (kitsuId == null && (source === "myanimelist" || source === "anilist")) {
+      try {
+        const { kitsuFromExternal } = await import("./kitsu-mapping");
+        kitsuId = await kitsuFromExternal(
+          source === "myanimelist" ? "myanimelist/anime" : "anilist/anime",
+          n,
+          maxAge,
+        ).catch(() => null);
+        if (kitsuId == null && source === "myanimelist") {
+          const { anilistAnimeEntry } = await import("@/lib/anilist/entry");
+          const entry = await anilistAnimeEntry(n, "mal", maxAge).catch(() => null);
+          if (entry)
+            kitsuId = await kitsuFromExternal("anilist/anime", entry.id, maxAge).catch(() => null);
+        }
+      } catch {
+        return null;
+      }
+    }
+    return kitsuId;
+  }
+  return null;
+}
+
+/**
  * Resolve an anime meta id to the Kitsu entry Harbor should use.
  *
  * The addon is asked with the original id first. It is the same source the
@@ -33,14 +68,8 @@ export async function resolveAnimeEntry(id: string, maxAge?: number): Promise<An
   const meta = await animeKitsuMeta(id, maxAge).catch(() => null);
   const direct = parseKitsuId(meta?.id ?? "");
   if (direct != null) return { kitsuId: direct, meta };
-  for (const [prefix, source] of EXTERNAL) {
-    if (!id.startsWith(prefix)) continue;
-    const n = Number(id.slice(prefix.length));
-    if (!Number.isFinite(n)) return null;
-    const kitsuId = await externalToKitsu(source, n).catch(() => null);
-    return kitsuId != null ? { kitsuId, meta: null } : null;
-  }
-  return null;
+  const kitsuId = await resolveExternalKitsuId(id, maxAge);
+  return kitsuId != null ? { kitsuId, meta: null } : null;
 }
 
 /**

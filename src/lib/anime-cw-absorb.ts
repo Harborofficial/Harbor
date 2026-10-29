@@ -43,6 +43,8 @@ export function absorbCloudAnimeCw(items: LibraryItem[]): void {
       name: i.name,
       poster: i.poster,
       background: i.background,
+      isAnime: true,
+      source: "library",
       season: ep.season,
       episode: ep.episode,
       videoId: i.state?.video_id ?? undefined,

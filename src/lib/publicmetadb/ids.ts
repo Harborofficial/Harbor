@@ -34,11 +34,11 @@ export const KNOWN_TMDB_SINGLE_SEASON_ANIME = new Set<number>([
   46298, // Hunter x Hunter (2011) (148 episodes in S1 on TMDb, 6 seasons in TVDB/Harbor)
   57243, // Gintama (201 episodes in S1 on TMDb, 8 seasons in TVDB/Harbor)
   46261, // Fairy Tail (175 episodes in S1 on TMDb, 9 seasons in TVDB/Harbor)
-  2362,  // Detective Conan (1000+ episodes in S1 on TMDb)
+  2362, // Detective Conan (1000+ episodes in S1 on TMDb)
   70881, // Boruto: Naruto Next Generations (293 episodes in S1 on TMDb, 6 seasons in TVDB/Harbor)
-  1434,  // Yu-Gi-Oh! (224 episodes in S1 on TMDb, 5 seasons in TVDB/Harbor)
+  1434, // Yu-Gi-Oh! (224 episodes in S1 on TMDb, 5 seasons in TVDB/Harbor)
   46262, // Inuyasha (167 episodes in S1 on TMDb, 7 seasons in TVDB/Harbor)
-  1433,  // Sailor Moon (200 episodes in S1 on TMDb, 5 seasons in TVDB/Harbor)
+  1433, // Sailor Moon (200 episodes in S1 on TMDb, 5 seasons in TVDB/Harbor)
   45790, // JoJo's Bizarre Adventure (152 episodes in S1 on TMDb, 5 seasons in TVDB/Harbor)
   60572, // Haikyu!! (85 episodes in S1 on TMDb, 4 seasons in TVDB/Harbor)
   67075, // Food Wars! Shokugeki no Soma (86 episodes in S1 on TMDb, 5 seasons in TVDB/Harbor)
@@ -65,6 +65,10 @@ function getStoredTmdbKey(): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+export function isTmdbSingleSeasonShowCached(tmdbId: number): boolean | undefined {
+  return KNOWN_TMDB_SINGLE_SEASON_ANIME.has(tmdbId) ? true : singleSeasonCache.get(tmdbId);
 }
 
 export async function isTmdbSingleSeasonShow(tmdbId: number, tmdbKey?: string): Promise<boolean> {
@@ -240,10 +244,14 @@ export async function resolvePmdbEpisodeTarget(
     episode.absoluteNumber > 0;
 
   if (!isAnime && !hasAbsNumber) {
-    const direct = stremioIdToPmdbTarget(harborId, {
-      season: episode.imdbSeason ?? episode.season,
-      episode: episode.imdbEpisode ?? episode.episode,
-    }, "series");
+    const direct = stremioIdToPmdbTarget(
+      harborId,
+      {
+        season: episode.imdbSeason ?? episode.season,
+        episode: episode.imdbEpisode ?? episode.episode,
+      },
+      "series",
+    );
     if (direct && (direct.season != null || direct.episode != null)) {
       return direct;
     }
@@ -255,7 +263,8 @@ export async function resolvePmdbEpisodeTarget(
     : harborId.startsWith("tmdb:tv:")
       ? Number(harborId.split(":")[2])
       : undefined;
-  const imdbId = az?.mappings?.imdb_id ||
+  const imdbId =
+    az?.mappings?.imdb_id ||
     (/^tt\d+$/.test(harborId) ? harborId : undefined) ||
     (fallbackImdb && /^tt\d+$/.test(fallbackImdb) ? fallbackImdb : undefined);
 
@@ -263,9 +272,10 @@ export async function resolvePmdbEpisodeTarget(
   // match season too, or S2E1 would pick the mapping for S1E1.
   const epData = isAnime
     ? az?.episodes?.[String(episode.episode)]
-    : Object.values(az?.episodes ?? {}).find((ep) =>
-        ep.seasonNumber === (episode.imdbSeason ?? episode.season) &&
-        ep.episodeNumber === (episode.imdbEpisode ?? episode.episode),
+    : Object.values(az?.episodes ?? {}).find(
+        (ep) =>
+          ep.seasonNumber === (episode.imdbSeason ?? episode.season) &&
+          ep.episodeNumber === (episode.imdbEpisode ?? episode.episode),
       );
 
   let season = episode.imdbSeason ?? epData?.seasonNumber ?? episode.season;

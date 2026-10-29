@@ -231,8 +231,98 @@ function itemIds(item: LibraryItem): string[] {
   return ids;
 }
 
+function groupedDismissalKey(
+  source: string,
+  id: string,
+  videoId: string | undefined,
+  season?: number,
+  episode?: number,
+): string {
+  return `group|${encodeURIComponent(source)}|${encodeURIComponent(id)}|${encodeURIComponent(videoId ?? "")}|${season ?? "?"}|${episode ?? "?"}`;
+}
+
+function dismissalSource(item: LibraryItem): string {
+  return item.external ?? (item.local ? "local" : "library");
+}
+
+/**
+ * Source-scoped checkpoint for a deduped card. Unlike the exact grouped key,
+ * this survives a provider changing its video id for the same episode and lets
+ * an older episode stay hidden after the card was dismissed at a later one.
+ */
+function groupedSourceDismissalKey(source: string, id: string): string {
+  return `group-source|${encodeURIComponent(source)}|${encodeURIComponent(id)}`;
+}
+
+function isDismissedCheckpoint(
+  item: LibraryItem,
+  dismissedAt: number,
+  dismissedVid: string | undefined,
+  pos: { s?: number; e?: number; p: number } | undefined,
+): boolean {
+  // Newer progress from any source (Harbor resume, Stremio cloud _mtime/lastWatched,
+  // Trakt paused_at, Simkl watched_at) un-dismisses even when the video_id is unchanged.
+  const activity = itemActivity(item);
+  if (activity > dismissedAt) return false;
+  const curVid = item.state?.video_id;
+  // Further-ahead position on the same episode un-dismisses even when its timestamp
+  // predates the dismissal (e.g. dismissed after watching elsewhere).
+  if (pos != null && progressRatio(item) > pos.p + 0.01) {
+    const { season, episode } = resolveEpisode(item);
+    if (season === pos.s && episode === pos.e) return false;
+  }
+  if (dismissedVid && typeof curVid === "string" && curVid) {
+    if (dismissedVid !== curVid) {
+      const ahead = isEpisodeAhead(
+        episodeFromVideoId(curVid) ?? {},
+        episodeFromVideoId(dismissedVid) ?? {},
+      );
+      if (ahead === null || ahead) return false;
+    }
+  } else if (pos != null) {
+    const { season, episode } = resolveEpisode(item);
+    if (season !== pos.s || episode !== pos.e) {
+      const ahead = isEpisodeAhead({ season, episode }, { season: pos.s, episode: pos.e });
+      if (ahead === null || ahead) return false;
+    }
+  }
+  return true;
+}
+
+function isGroupedCheckpointDismissed(item: LibraryItem): boolean {
+  const { season, episode } = resolveEpisode(item);
+  const ids = itemIds(item);
+  const videoId = item.state?.video_id;
+  const source = dismissalSource(item);
+  const exactKeys = [
+    groupedDismissalKey(source, ids[0], videoId, season, episode),
+    ...ids.slice(1).map((id) => groupedDismissalKey(source, id, videoId, season, episode)),
+  ];
+  const sourceKeys = ids.map((id) => groupedSourceDismissalKey(source, id));
+  let dismissedAt = -1;
+  let dismissedVideo: string | undefined;
+  let pos: { s?: number; e?: number; p: number } | undefined;
+  for (const key of [...exactKeys, ...sourceKeys]) {
+    const at = dismissed.get(key);
+    if (at == null || at < dismissedAt) continue;
+    if (at > dismissedAt) {
+      dismissedAt = at;
+      dismissedVideo = dismissedVid.get(key);
+      pos = dismissedPos.get(key);
+    } else {
+      // Exact and source keys are written together; prefer whichever carries
+      // the richer checkpoint when they share the dismissal timestamp.
+      dismissedVideo ??= dismissedVid.get(key);
+      pos ??= dismissedPos.get(key);
+    }
+  }
+  if (dismissedAt < 0) return false;
+  return isDismissedCheckpoint(item, dismissedAt, dismissedVideo, pos);
+}
+
 export function isCwDismissed(item: LibraryItem): boolean {
   loadDismissed();
+  if (isGroupedCheckpointDismissed(item)) return true;
   let dismissedAt = -1;
   let dismissedId = item._id;
   for (const id of itemIds(item)) {
@@ -245,33 +335,67 @@ export function isCwDismissed(item: LibraryItem): boolean {
     }
   }
   if (dismissedAt < 0) return false;
-  // Newer progress from any source (Harbor resume, Stremio cloud _mtime/lastWatched,
-  // Trakt paused_at, Simkl watched_at) un-dismisses even when the video_id is unchanged.
-  const activity = itemActivity(item);
-  if (activity > dismissedAt) return false;
-  const vid = dismissedVid.get(dismissedId);
-  const curVid = item.state?.video_id;
-  const pos = dismissedPos.get(dismissedId);
-  // Further-ahead position on the same episode un-dismisses even when its timestamp
-  // predates the dismissal (e.g. dismissed after watching elsewhere).
-  if (pos != null && progressRatio(item) > pos.p + 0.01) {
-    const { season, episode } = resolveEpisode(item);
-    if (season === pos.s && episode === pos.e) return false;
+  return isDismissedCheckpoint(
+    item,
+    dismissedAt,
+    dismissedVid.get(dismissedId),
+    dismissedPos.get(dismissedId),
+  );
+}
+
+type CleanupOptions = { acknowledged?: boolean };
+
+function clearResumeForItem(item: LibraryItem, options: CleanupOptions): void {
+  const { season, episode } = resolveEpisode(item);
+  clearResume(item._id, season, episode, options);
+}
+
+/**
+ * Clean up one source represented by a deduped card. The grouped dismissal
+ * checkpoints hide the card locally; this keeps the same source records that a
+ * single-card dismissal clears from lingering on the Stremio cloud, Nuvio, or
+ * local stores.
+ */
+function cleanupGroupedSource(
+  item: LibraryItem,
+  authKey: string | null,
+  options: CleanupOptions,
+  now: string,
+  cloudIds: Set<string>,
+): Promise<boolean> | null {
+  const id = item._id;
+  if (!id) return null;
+  const nuvio =
+    item.external === "nuvio" ||
+    (!item.local && !item.external && isNuvioSignedIn() && isNuvioProviderActive());
+  if (nuvio) {
+    clearResumeForItem(item, options);
+    try {
+      const slot = resolveNuvioProfileIndex();
+      clearLocalCw(id, `nuvio-${slot}`, options);
+      clearLocalCw(id, options);
+      const { season, episode } = resolveEpisode(item);
+      void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
+    } catch {}
+    return null;
   }
-  if (vid && typeof curVid === "string" && curVid) {
-    if (vid !== curVid) {
-      const ahead = isEpisodeAhead(episodeFromVideoId(curVid) ?? {}, episodeFromVideoId(vid) ?? {});
-      if (ahead === null || ahead) return false;
-    }
-  } else if (pos != null) {
-    const { season, episode } = resolveEpisode(item);
-    if (season !== pos.s || episode !== pos.e) {
-      const ahead = isEpisodeAhead({ season, episode }, { season: pos.s, episode: pos.e });
-      if (ahead === null || ahead) return false;
-    }
+  if (item.local) {
+    clearLocalCw(id, options);
+    return null;
   }
-  if (activity > 0) return activity <= dismissedAt;
-  return true;
+  if (item.external) {
+    clearResumeForItem(item, options);
+    return null;
+  }
+  if (!authKey || !item.state || privateCwProfileId()) return null;
+  clearResumeForItem(item, options);
+  if (cloudIds.has(id)) return null;
+  cloudIds.add(id);
+  return cloudLibraryPut(
+    authKey,
+    { ...item, state: { ...item.state, timeOffset: 0 }, _mtime: now },
+    options,
+  );
 }
 
 export type CwDismissResult = { sync: "not-required" | "synced" | "queued" };
@@ -288,6 +412,115 @@ export function dismissCw(
   options: { acknowledged?: boolean } = {},
 ): void | Promise<CwDismissResult> {
   loadDismissed();
+  const members = (item as LibraryItem & { cwMembers?: LibraryItem[] }).cwMembers;
+  if (members?.length) {
+    const nowMs = Date.now();
+    const now = new Date(nowMs).toISOString();
+    const times = new Map(dismissed);
+    const videos = new Map(dismissedVid);
+    const positions = new Map(dismissedPos);
+    // A deduped card represents several independent library records. Store each
+    // observed checkpoint locally so a provider-specific survivor cannot resurface.
+    // Include the visible survivor's current state: up-next may have advanced it
+    // beyond every source member retained by deduplication.
+    //
+    // The exact keys are checkpoint-scoped. The source keys are needed so a
+    // provider that later changes its video id, or a stale source copy reporting
+    // an earlier episode, is still compared against the dismissed checkpoint
+    // rather than resurfacing just because the exact key is missing.
+    type SourceCheckpoint = {
+      rank: number;
+      p: number;
+      checkpoint?: { s?: number; e?: number; p: number };
+      video?: string;
+    };
+    const sourceCheckpoints = new Map<string, SourceCheckpoint>();
+    for (const member of [...members, item]) {
+      const ids = itemIds(member);
+      const { season, episode } = resolveEpisode(member);
+      const source = dismissalSource(member);
+      const vid = member.state?.video_id;
+      const keys = ids.map((entryId) => groupedDismissalKey(source, entryId, vid, season, episode));
+      for (const key of keys) times.set(key, nowMs);
+      for (const key of keys) {
+        if (typeof vid === "string" && vid) videos.set(key, vid);
+        else videos.delete(key);
+      }
+      const checkpoint = member.state
+        ? { s: season, e: episode, p: progressRatio(member) }
+        : undefined;
+      if (checkpoint) for (const key of keys) positions.set(key, checkpoint);
+
+      const rank = season == null || episode == null ? -1 : season * 100_000 + episode;
+      for (const entryId of ids) {
+        const key = groupedSourceDismissalKey(source, entryId);
+        const held = sourceCheckpoints.get(key);
+        if (!held || rank > held.rank || (rank === held.rank && (checkpoint?.p ?? 0) >= held.p)) {
+          sourceCheckpoints.set(key, {
+            rank,
+            p: checkpoint?.p ?? 0,
+            checkpoint,
+            video: typeof vid === "string" && vid ? vid : undefined,
+          });
+        }
+      }
+    }
+    for (const [key, value] of sourceCheckpoints) {
+      times.set(key, nowMs);
+      if (value.video) videos.set(key, value.video);
+      else videos.delete(key);
+      if (value.checkpoint) positions.set(key, value.checkpoint);
+    }
+    persistDismissed(times, videos, options.acknowledged, positions);
+    dismissed.clear();
+    dismissedVid.clear();
+    dismissedPos.clear();
+    for (const [key, value] of times) dismissed.set(key, value);
+    for (const [key, value] of videos) dismissedVid.set(key, value);
+    for (const [key, value] of positions) dismissedPos.set(key, value);
+    emit();
+
+    const cleanupSeen = new Set<string>();
+    const cloudIds = new Set<string>();
+    const cloudWrites: Promise<boolean>[] = [];
+    let cleanupError: unknown;
+    for (const member of [item, ...members]) {
+      const id = member._id;
+      if (!id) continue;
+      const { season, episode } = resolveEpisode(member);
+      const cleanupKey = `${dismissalSource(member)}|${id}|${season ?? ""}|${episode ?? ""}`;
+      if (cleanupSeen.has(cleanupKey)) continue;
+      cleanupSeen.add(cleanupKey);
+      try {
+        const write = cleanupGroupedSource(member, authKey, options, now, cloudIds);
+        if (write) cloudWrites.push(write);
+      } catch (error) {
+        cleanupError ??= error;
+      }
+    }
+    if (cleanupError) {
+      void Promise.allSettled(cloudWrites);
+      throw new Error(
+        "Removed from Continue Watching, but the saved position could not be cleared.",
+        {
+          cause: cleanupError,
+        },
+      );
+    }
+    if (!options.acknowledged) {
+      void Promise.allSettled(cloudWrites);
+      return;
+    }
+    if (cloudWrites.length === 0) return Promise.resolve({ sync: "not-required" });
+    return Promise.all(cloudWrites).then(
+      (results) => ({ sync: results.every(Boolean) ? "synced" : "queued" }),
+      () => {
+        throw new Error(
+          "Removed from Continue Watching on this device, but synchronization could not be saved.",
+        );
+      },
+    );
+  }
   const id = item._id;
   const now = new Date().toISOString();
   const nowMs = Date.parse(now);

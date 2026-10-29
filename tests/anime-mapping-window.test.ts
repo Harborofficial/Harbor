@@ -44,6 +44,7 @@ test.after(() => {
 });
 
 const { applyAnidbSeasonWindow } = load("src/lib/providers/anime-mapping.ts", {
+  "./kitsu-mapping": { kitsuExternalIds: async () => null },
   "@/lib/providers/anizip": {
     aniZipByAnidb: async () => null,
     aniZipByAnilist: async () => null,
@@ -55,15 +56,29 @@ const { applyAnidbSeasonWindow } = load("src/lib/providers/anime-mapping.ts", {
   "@/lib/providers/kitsu": { kitsuMainTvSeries: async () => null },
   "@/lib/streams/anime-identity-core": { selectSiblingWindows: () => [] },
   "./mapping-store": {
-    mappingStore: () => ({ get: () => undefined, set: () => {} }),
+    mappingStore: () => ({ ready: Promise.resolve(), get: () => undefined, set: () => {} }),
+  },
+  "@/lib/anime-identity-db": {
+    animeDbReadProvider: async () => null,
+    animeDbWriteProvider: async () => true,
   },
 });
 
 function episode(partial: Record<string, unknown>): any {
   return {
-    id: 0, number: 1, seasonNumber: 1, title: "", synopsis: "", thumbnail: null,
-    airdate: null, length: null, imdbSeason: undefined, imdbEpisode: undefined,
-    tvdbEpisodeId: undefined, absoluteNumber: undefined, ...partial,
+    id: 0,
+    number: 1,
+    seasonNumber: 1,
+    title: "",
+    synopsis: "",
+    thumbnail: null,
+    airdate: null,
+    length: null,
+    imdbSeason: undefined,
+    imdbEpisode: undefined,
+    tvdbEpisodeId: undefined,
+    absoluteNumber: undefined,
+    ...partial,
   };
 }
 

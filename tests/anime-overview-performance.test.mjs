@@ -218,6 +218,7 @@ function detailFixture() {
     "@/lib/providers/anime-kitsu-addon": { animeKitsuMeta: async () => ({ videos: episodes }) },
     "@/lib/providers/anime-entry": {},
     "@/lib/providers/anime-mapping": {
+      animeMappingByKitsu: async () => ({ mappings: { imdb_id: "tt1" } }),
       kitsuToTvdb: async () => 100,
       kitsuToAnilist: no,
       applyAnidbSeasonWindow: async () => {},

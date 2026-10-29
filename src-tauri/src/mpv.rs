@@ -51,8 +51,6 @@ pub struct MpvStartArgs {
     pub d3d11_flip: Option<bool>,
     pub mac_edr: Option<bool>,
     pub is_live: Option<bool>,
-    pub full_download: Option<bool>,
-    pub cache_dir: Option<String>,
     pub startup_profile: Option<String>,
     pub headers: Option<HashMap<String, String>>,
     pub extra_options: Option<String>,
@@ -742,10 +740,24 @@ fn join_init_only_pairs(pairs: &[(String, String)]) -> Vec<(String, String)> {
     out
 }
 
+fn is_disk_cache_option(key: &str) -> bool {
+    matches!(
+        key.to_ascii_lowercase().as_str(),
+        "cache-on-disk" | "cache-dir" | "demuxer-cache-dir"
+    )
+}
+
 fn apply_extra_mpv_options(mpv: &Mpv, raw: &str) {
     for (key, value) in parse_extra_option_lines(raw) {
         if is_init_only_key(&key) {
             eprintln!("[harbor::mpv] extra option {} skipped (init-only)", key);
+            continue;
+        }
+        if is_disk_cache_option(&key) {
+            eprintln!(
+                "[harbor::mpv] extra option {} skipped (disk caching is disabled)",
+                key
+            );
             continue;
         }
         match mpv.set_property(&key, value.as_str()) {
@@ -825,14 +837,6 @@ pub async fn mpv_start(
                 .and_then(|w| w.hwnd().ok())
                 .and_then(|h| crate::monitors::resolve_for_hwnd(h.0 as isize))
         })
-    };
-    let playback_cache = if args.is_live.unwrap_or(false) {
-        None
-    } else {
-        let base = app.path().app_cache_dir().map_err(|e| e.to_string())?;
-        let dir = crate::playback_cache::cache_dir(&base, args.cache_dir.as_deref())?;
-        crate::playback_cache::prepare_dir(&dir)?;
-        Some(dir)
     };
     // OS-level HDR state before this transition begins. Compared at teardown
     // against the script-reported state: only off->on waits for restore.
@@ -932,12 +936,6 @@ pub async fn mpv_start(
     #[cfg(windows)]
     let mut g = state.inner.lock().await;
 
-    if let Some(dir) = &playback_cache {
-        if args.cache_dir.as_deref().is_some_and(|s| !s.trim().is_empty()) {
-            let _ = crate::temp_prune::sweep_mpv_cache(dir.clone());
-        }
-    }
-
     let embed_hwnd = if want_embed {
         get_main_hwnd_str(&app)
     } else {
@@ -981,13 +979,10 @@ pub async fn mpv_start(
         msg
     })?;
 
-    if let Some(dir) = &playback_cache {
-        let path = dir.to_str().ok_or("Playback cache folder is not valid UTF-8")?;
-        // The option was renamed in mpv 0.41. Support both installed versions.
-        mpv.set_property("demuxer-cache-dir", path)
-            .or_else(|_| mpv.set_property("cache-dir", path))
-            .map_err(|e| format!("Cannot configure playback cache folder: {e}"))?;
-    }
+    // Never write the demuxer cache to disk. Debrid and HTTPS streams stay in
+    // RAM (bounded by demuxer-max-bytes); mpv's disk cache is append-only and
+    // would grow to the size of everything played during the session.
+    let _ = mpv.set_property("cache-on-disk", "no");
 
     unsafe {
         let level = std::ffi::CString::new("v").unwrap();
@@ -1118,62 +1113,24 @@ pub async fn mpv_start(
         let _ = mpv.set_property("demuxer-lavf-o", "http_seekable=0,http_persistent=0");
         let _ = mpv.set_property("stream-buffer-size", "16MiB");
     } else {
-        let full_dl = args.full_download.unwrap_or(false);
         let high_bitrate = args.startup_profile.as_deref() == Some("high-bitrate");
         let _ = mpv.set_property("cache", "yes");
-        let _ = mpv.set_property(
-            "cache-secs",
-            if full_dl {
-                "100000"
-            } else if high_bitrate {
-                "45"
-            } else {
-                "30"
-            },
-        );
+        let _ = mpv.set_property("cache-secs", if high_bitrate { "45" } else { "30" });
         let _ = mpv.set_property("cache-pause", "yes");
         let _ = mpv.set_property("cache-pause-initial", "no");
-        let _ = mpv.set_property(
-            "cache-pause-wait",
-            if full_dl {
-                "10"
-            } else if high_bitrate {
-                "2"
-            } else {
-                "1"
-            },
-        );
+        let _ = mpv.set_property("cache-pause-wait", if high_bitrate { "2" } else { "1" });
         let _ = mpv.set_property(
             "demuxer-max-bytes",
-            if full_dl {
-                "48GiB"
-            } else if high_bitrate {
-                "256MiB"
-            } else {
-                "128MiB"
-            },
+            if high_bitrate { "256MiB" } else { "128MiB" },
         );
         let _ = mpv.set_property(
             "demuxer-max-back-bytes",
-            if full_dl {
-                "48GiB"
-            } else if high_bitrate {
-                "64MiB"
-            } else {
-                "32MiB"
-            },
+            if high_bitrate { "64MiB" } else { "32MiB" },
         );
         let _ = mpv.set_property(
             "demuxer-readahead-secs",
-            if full_dl {
-                "100000"
-            } else if high_bitrate {
-                "45"
-            } else {
-                "30"
-            },
+            if high_bitrate { "45" } else { "30" },
         );
-        let _ = mpv.set_property("cache-on-disk", "yes");
         let _ = mpv.set_property("network-timeout", network_timeout_for(&args.url));
         // No reconnect_streamed: on AES-128 HLS every segment ends in a normal
         // EOF that ffmpeg then retries from offset 0, gets an empty body, and
@@ -1214,6 +1171,9 @@ pub async fn mpv_start(
     if let Some(extra) = args.extra_options.as_deref() {
         apply_extra_mpv_options(&mpv, extra);
     }
+    // Keep network playback RAM-only even if an advanced option tried to
+    // re-enable mpv's disk cache above.
+    let _ = mpv.set_property("cache-on-disk", "no");
 
     if is_live {
         for (k, v) in [
@@ -3942,6 +3902,16 @@ mod event_backoff_tests {
 #[cfg(test)]
 mod extra_option_parser_tests {
     use super::parse_extra_option_lines;
+
+    #[test]
+    fn blocks_disk_cache_overrides_case_insensitively() {
+        use super::is_disk_cache_option;
+        assert!(is_disk_cache_option("cache-on-disk"));
+        assert!(is_disk_cache_option("Cache-Dir"));
+        assert!(is_disk_cache_option("demuxer-cache-dir"));
+        assert!(!is_disk_cache_option("cache"));
+        assert!(!is_disk_cache_option("cache-secs"));
+    }
 
     #[test]
     fn parses_key_equals_value() {

@@ -11,6 +11,11 @@ export const MEDIA_TTL = {
 
 export type MediaCachePolicy<T> = {
   ttl?: number | ((value: T) => number);
+  /**
+   * A maximum accepted age. `0` is an explicit caller refresh: it bypasses both
+   * the fresh window and the short failure backoff so a user retry can re-run
+   * the loader.
+   */
   maxAge?: number;
   stale?: number;
   staleWhileRevalidate?: boolean;
@@ -260,7 +265,9 @@ export function createMediaCache(
       return { value: copy(record.value as T), storedAt: record.storedAt };
     }
     const stale = record;
-    if ((retryAt.get(key) ?? 0) > now()) {
+    // An explicit refresh (maxAge 0) must not be swallowed by the negative
+    // retry window that protects ordinary background lookups from storms.
+    if (policy.maxAge !== 0 && (retryAt.get(key) ?? 0) > now()) {
       return {
         value: policy.fallbackOnError !== false && stale ? copy(stale.value as T) : null,
         storedAt: stale?.storedAt,

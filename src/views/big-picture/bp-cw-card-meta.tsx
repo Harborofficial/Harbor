@@ -4,7 +4,7 @@ import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
 import publicmetadbLogo from "@/assets/publicmetadb.svg";
-import { getAnimeCwId } from "@/lib/anime-cw-ids";
+import { animeCwIdsVersion, getAnimeCwId, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
 import type { Meta } from "@/lib/cinemeta";
 import { providerMappedEpisode } from "@/lib/cw-anime-episode";
 import { resolveCwAnimeVideo } from "@/lib/cw-anime-video";
@@ -108,9 +108,10 @@ function airFields(item: LibraryItem): { waiting: boolean; at: string | undefine
 // that anime-cw-ids already records.
 function useCwWatcher(mediaId: string, activeId: string | undefined): Profile | null {
   const { profiles } = useProfiles();
-  // getAnimeCwId is its own localStorage read and parse, so it is memoised on
-  // the id rather than run on every render of every visible card.
-  const animeId = useMemo(() => getAnimeCwId(mediaId), [mediaId]);
+  // The mapping is hydrated asynchronously from IndexedDB. A late hydration
+  // must refresh the watched-by badge even when the media id is unchanged.
+  const idVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
+  const animeId = useMemo(() => getAnimeCwId(mediaId), [mediaId, idVersion]);
   const watcherId = useWatchedBy(mediaId, animeId);
   // Never the active profile's own face. That rule is the whole reason the
   // badge carries meaning.

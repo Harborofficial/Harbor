@@ -5,7 +5,10 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are outside the browser tsconfig.
 import test from "node:test";
 import ts from "typescript";
-import { pickPreferredEpisodeOverview, pickPreferredEpisodeTitle } from "../src/lib/localized-text.ts";
+import {
+  pickPreferredEpisodeOverview,
+  pickPreferredEpisodeTitle,
+} from "../src/lib/localized-text.ts";
 
 // Runs the real useAnimeTvdbPanel builder against a Black Clover S2 replica:
 // a currently-airing sequel cour whose TVDB rows carry dates only for the
@@ -30,8 +33,16 @@ const day = (offset: number) => new Date(Date.now() + offset * DAY).toISOString(
 
 function row(partial: any, sourceMetaId = "kitsu:50024"): any {
   return {
-    id: 0, number: 0, seasonNumber: 1, title: "", synopsis: "", thumbnail: null,
-    airdate: null, length: null, ...partial, sourceMetaId,
+    id: 0,
+    number: 0,
+    seasonNumber: 1,
+    title: "",
+    synopsis: "",
+    thumbnail: null,
+    airdate: null,
+    length: null,
+    ...partial,
+    sourceMetaId,
   };
 }
 
@@ -47,33 +58,83 @@ const aniZipMeta: Record<number, { tvdbId: number; air: string; abs: number }> =
 };
 for (let n = 1; n <= 13; n++) {
   const az = aniZipMeta[n];
-  pool.push(row({
-    id: n, number: n,
-    title: n === 1 ? "The Battle Begins" : `Episode ${n}`,
-    airdate: az ? az.air : null,
-    imdbSeason: az ? 2 : undefined,
-    imdbEpisode: az ? n : undefined,
-    absoluteNumber: az ? az.abs : undefined,
-    tvdbEpisodeId: az ? az.tvdbId : undefined,
-    rating: undefined,
-  }));
+  pool.push(
+    row({
+      id: n,
+      number: n,
+      title: n === 1 ? "The Battle Begins" : `Episode ${n}`,
+      airdate: az ? az.air : null,
+      imdbSeason: az ? 2 : undefined,
+      imdbEpisode: az ? n : undefined,
+      absoluteNumber: az ? az.abs : undefined,
+      tvdbEpisodeId: az ? az.tvdbId : undefined,
+      rating: undefined,
+    }),
+  );
 }
 // A couple of season 1 rows so the pool looks like a franchise pool.
-pool.push(row({ id: 101, number: 170, imdbSeason: 1, imdbEpisode: 170, absoluteNumber: 170 }, "kitsu:13209"));
+pool.push(
+  row(
+    { id: 101, number: 170, imdbSeason: 1, imdbEpisode: 170, absoluteNumber: 170 },
+    "kitsu:13209",
+  ),
+);
 
 const franchise = [
-  { meta: { id: "kitsu:13209", type: "series", name: "Black Clover" }, year: 2017, startDate: "2017-10-03", isCurrent: false, isUpcoming: false },
-  { meta: { id: "kitsu:50024", type: "series", name: "Black Clover 2nd Season" }, year: 2026, startDate: day(-1), isCurrent: true, isUpcoming: false },
+  {
+    meta: { id: "kitsu:13209", type: "series", name: "Black Clover" },
+    year: 2017,
+    startDate: "2017-10-03",
+    isCurrent: false,
+    isUpcoming: false,
+  },
+  {
+    meta: { id: "kitsu:50024", type: "series", name: "Black Clover 2nd Season" },
+    year: 2026,
+    startDate: day(-1),
+    isCurrent: true,
+    isUpcoming: false,
+  },
 ];
 
 // Real TVDB rows for 331753 season 2 (fetched from the harbor proxy): dates
 // exist only for the first episodes; the rest are undated.
 const tvdbRows = [
-  { id: 11965847, seasonNumber: 2, episodeNumber: 1, name: "開戦", airDate: day(-1), image: "e1.jpg", overview: "real" },
-  { id: 11975216, seasonNumber: 2, episodeNumber: 2, name: "TBA", airDate: day(6), image: null, overview: "TBA" },
-  { id: 12006277, seasonNumber: 2, episodeNumber: 3, name: "TBA", airDate: day(13), image: null, overview: "TBA" },
+  {
+    id: 11965847,
+    seasonNumber: 2,
+    episodeNumber: 1,
+    name: "開戦",
+    airDate: day(-1),
+    image: "e1.jpg",
+    overview: "real",
+  },
+  {
+    id: 11975216,
+    seasonNumber: 2,
+    episodeNumber: 2,
+    name: "TBA",
+    airDate: day(6),
+    image: null,
+    overview: "TBA",
+  },
+  {
+    id: 12006277,
+    seasonNumber: 2,
+    episodeNumber: 3,
+    name: "TBA",
+    airDate: day(13),
+    image: null,
+    overview: "TBA",
+  },
   ...Array.from({ length: 10 }, (_, i) => ({
-    id: 12006278 + i, seasonNumber: 2, episodeNumber: 4 + i, name: "TBA", airDate: null, image: null, overview: "TBA",
+    id: 12006278 + i,
+    seasonNumber: 2,
+    episodeNumber: 4 + i,
+    name: "TBA",
+    airDate: null,
+    image: null,
+    overview: "TBA",
   })),
 ];
 const ordering = {
@@ -88,28 +149,47 @@ const ordering = {
 const anchorPool: any[] = [];
 for (let n = 1; n <= 13; n++) {
   const az = aniZipMeta[n];
-  anchorPool.push(row({
-    id: n, number: n,
-    title: n === 1 ? "The Battle Begins" : `Episode ${n}`,
-    airdate: az ? az.air : null,
-    imdbSeason: az ? 2 : undefined,
-    imdbEpisode: az ? n : undefined,
-    absoluteNumber: az ? az.abs : undefined,
-    tvdbEpisodeId: az ? az.tvdbId : undefined,
-    rating: undefined,
-  }, null));
+  anchorPool.push(
+    row(
+      {
+        id: n,
+        number: n,
+        title: n === 1 ? "The Battle Begins" : `Episode ${n}`,
+        airdate: az ? az.air : null,
+        imdbSeason: az ? 2 : undefined,
+        imdbEpisode: az ? n : undefined,
+        absoluteNumber: az ? az.abs : undefined,
+        tvdbEpisodeId: az ? az.tvdbId : undefined,
+        rating: undefined,
+      },
+      null,
+    ),
+  );
 }
-anchorPool.push(row({ id: 101, number: 170, imdbSeason: 1, imdbEpisode: 170, absoluteNumber: 170 }, "kitsu:13209"));
+anchorPool.push(
+  row(
+    { id: 101, number: 170, imdbSeason: 1, imdbEpisode: 170, absoluteNumber: 170 },
+    "kitsu:13209",
+  ),
+);
 const anchorOrdering = {
   ...ordering,
-  bySeason: new Map([[2, tvdbRows.map((e) => (e.episodeNumber === 1 ? e : { ...e, airDate: null }))]]),
+  bySeason: new Map([
+    [2, tvdbRows.map((e) => (e.episodeNumber === 1 ? e : { ...e, airDate: null }))],
+  ]),
 };
 
 // Pre-seed useState in call order: seriesId, ordering, orderTypes, activeType,
 // sel, touched, resolved, foreignSeasons.
 const states: any[] = [
-  331753, ordering, [{ value: "aired", label: "Aired Order" }], "aired",
-  null, false, "has", new Set(),
+  331753,
+  ordering,
+  [{ value: "aired", label: "Aired Order" }],
+  "aired",
+  null,
+  false,
+  "has",
+  new Set(),
 ];
 let call = 0;
 const react = {
@@ -152,9 +232,21 @@ const { useAnimeTvdbPanel } = load("src/views/detail/anime-episodes/use-anime-tv
     // The backend grid for tt7441658 carries a rating for every "2:N" key,
     // unaired episodes included.
     harborImdbEpisodesCached: () =>
-      new Map([["2:1", 7.8], ["2:2", 8], ["2:3", 8.2], ["2:4", 6.7],
-        ["2:5", 8], ["2:6", 7.8], ["2:7", 7.5], ["2:8", 6.8], ["2:9", 7.6],
-        ["2:10", 7.8], ["2:11", 6.9], ["2:12", 7.2], ["2:13", 7.3]]),
+      new Map([
+        ["2:1", 7.8],
+        ["2:2", 8],
+        ["2:3", 8.2],
+        ["2:4", 6.7],
+        ["2:5", 8],
+        ["2:6", 7.8],
+        ["2:7", 7.5],
+        ["2:8", 6.8],
+        ["2:9", 7.6],
+        ["2:10", 7.8],
+        ["2:11", 6.9],
+        ["2:12", 7.2],
+        ["2:13", 7.3],
+      ]),
   },
   "@/lib/providers/tvdb-order": {
     seasonDateRange: (eps: any[]) => {
@@ -175,7 +267,17 @@ const { useAnimeTvdbPanel } = load("src/views/detail/anime-episodes/use-anime-tv
 
 test("an ongoing TVDB season rates only its aired episodes", () => {
   const result = useAnimeTvdbPanel(
-    13209, "tt7441658", [], "default", "", true, pool, undefined, "2", franchise, "kitsu:13209",
+    13209,
+    "tt7441658",
+    [],
+    "default",
+    "",
+    true,
+    pool,
+    undefined,
+    "2",
+    franchise,
+    "kitsu:13209",
   );
   assert.ok(result.panel, "panel should resolve");
   const rows = result.panel.visibleEpisodes;
@@ -195,7 +297,17 @@ test("the season still binds when the anchor rows carry no source of their own",
   states[1] = anchorOrdering;
   call = 0;
   const result = useAnimeTvdbPanel(
-    50024, "tt7441658", [], "default", "", true, anchorPool, undefined, "2", franchise, "kitsu:50024",
+    50024,
+    "tt7441658",
+    [],
+    "default",
+    "",
+    true,
+    anchorPool,
+    undefined,
+    "2",
+    franchise,
+    "kitsu:50024",
   );
   assert.ok(result.panel, "panel should resolve");
   const rows = result.panel.visibleEpisodes;
@@ -207,4 +319,42 @@ test("the season still binds when the anchor rows carry no source of their own",
     assert.equal(ep.rating, undefined, `E${ep.number} must have no rating`);
     assert.equal(ep.ratingIsImdb, undefined, `E${ep.number} must not be marked imdb`);
   }
+});
+
+test("exact TVDB stills replace broken addon URLs while keeping playback identity and future gates", () => {
+  states[1] = {
+    ...ordering,
+    bySeason: new Map([
+      [
+        2,
+        tvdbRows.map((ep, index) => ({
+          ...ep,
+          stillUrl: index === 1 ? "future.jpg" : ep.image,
+        })),
+      ],
+    ]),
+  };
+  call = 0;
+  const rowsWithBrokenArt = pool.map((ep) => ({ ...ep, thumbnail: `broken-${ep.number}.jpg` }));
+  const result = useAnimeTvdbPanel(
+    13209,
+    "tt7441658",
+    [],
+    "default",
+    "",
+    true,
+    rowsWithBrokenArt,
+    undefined,
+    "2",
+    franchise,
+    "kitsu:13209",
+  );
+  const rows = result.panel!.visibleEpisodes;
+  assert.equal(rows[0].thumbnail, "e1.jpg");
+  assert.equal(rows[0].thumbnailFallback, "broken-1.jpg");
+  assert.equal(rows[0].id, rowsWithBrokenArt[0].id);
+  assert.equal(rows[0].sourceMetaId, rowsWithBrokenArt[0].sourceMetaId);
+  assert.equal(rows[0].imdbSeason, 2);
+  assert.equal(rows[0].imdbEpisode, 1);
+  assert.equal(rows[1].thumbnail, "broken-2.jpg", "future episodes retain their existing fallback");
 });

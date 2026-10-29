@@ -104,7 +104,10 @@ function seriesModule() {
     "./providers/anime-kitsu-addon": {
       animeKitsuMeta: async (id: string) => METAS[id] ?? null,
     },
-    "./providers/anime-mapping": { kitsuToAnilist: async () => null },
+    "./providers/anime-mapping": {
+      kitsuToAnilist: async () => null,
+      animeMappingByKitsu: async () => null,
+    },
     "./providers/anime-entry": {
       resolveAnimeEntry: async (id: string) => {
         const meta = METAS[id];

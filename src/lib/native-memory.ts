@@ -17,6 +17,7 @@ let tier: RamTier = "high";
 let tierResolved = false;
 let timer: number | null = null;
 let intervalMs = 8000;
+let sampling: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 
 function classifyTier(totalPhysBytes: number): RamTier {
@@ -58,9 +59,23 @@ async function sample(): Promise<void> {
   } catch {}
 }
 
+function startSample(): Promise<void> {
+  if (!sampling)
+    sampling = sample().finally(() => {
+      sampling = null;
+    });
+  return sampling;
+}
+
+/** Forces a first native memory sample before playback sizes its buffer. */
+export function ensureNativeMemory(): Promise<void> {
+  if (!isTauri || latest.totalPhys > 0) return Promise.resolve();
+  return startSample();
+}
+
 export function startNativeMemory(): () => void {
   if (!isTauri || timer != null) return () => {};
-  void sample();
+  void ensureNativeMemory();
   const tick = () => {
     void sample();
     timer = window.setTimeout(tick, intervalMs);
@@ -78,6 +93,15 @@ export function setNativeMemoryActive(active: boolean): void {
 
 export function getNativeMem(): NativeMem {
   return latest;
+}
+
+/** Total physical memory in bytes, preferring the native reading. Falls back to the
+ * browser's coarse deviceMemory estimate (GiB) when native sampling has not landed yet. */
+export function getTotalPhysBytes(): number {
+  if (latest.totalPhys > 0) return latest.totalPhys;
+  if (typeof navigator === "undefined") return 0;
+  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+  return typeof deviceMemory === "number" && deviceMemory > 0 ? deviceMemory * 1024 ** 3 : 0;
 }
 
 export function getNativeRssMB(): number {
