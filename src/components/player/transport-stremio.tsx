@@ -23,6 +23,7 @@ import {
 } from "./transport/control-renderer-stremio";
 import { usePlayerNavigation } from "@/lib/view";
 import { useCastModalPlay } from "./use-cast-modal-play";
+import { useReportPlayerControlsInset } from "@/lib/player/controls-inset";
 
 export type TransportStremioProps = {
   snap: PlayerSnapshot;
@@ -170,6 +171,7 @@ export function TransportStremio(p: TransportStremioProps) {
   const { openMeta, exitPlayer } = usePlayerNavigation();
   const castModalPlay = useCastModalPlay();
   const controlsRef = useRef<HTMLDivElement>(null);
+  useReportPlayerControlsInset(controlsRef, visible);
 
   useEffect(() => {
     onMenuOpenChange?.(

@@ -321,6 +321,7 @@ export const DEFAULT: Settings = {
   subOffsetIndicatorPosition: "bottom",
   subOffsetIndicatorSize: "medium",
   subShowInPip: true,
+  subLiftAboveControls: true,
   subHideSdh: false,
   secondarySubLang: "",
   subSecondaryPlacement: "top",

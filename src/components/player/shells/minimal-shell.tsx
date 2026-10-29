@@ -6,6 +6,7 @@ import { useT } from "@/lib/i18n";
 import { FullscreenClock } from "@/components/player/fullscreen-clock";
 import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { LiveBadge, GoToLive, LiveSeekBar } from "../transport/live-controls";
+import { useReportPlayerControlsInset } from "@/lib/player/controls-inset";
 
 export function MinimalShell({
   snap,
@@ -21,6 +22,8 @@ export function MinimalShell({
   title,
 }: PlayerShellProps) {
   const t = useT();
+  const controlsRef = useRef<HTMLDivElement>(null);
+  useReportPlayerControlsInset(controlsRef, visible && !pipMode);
   if (pipMode) return null;
 
   const playing = snap.status === "playing";
@@ -42,6 +45,7 @@ export function MinimalShell({
         </div>
       )}
       <div
+        ref={controlsRef}
         className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2 bg-gradient-to-t from-black/70 to-transparent px-8 pb-5 pt-12 transition-opacity duration-300 ${
           visible ? "opacity-100" : "opacity-0"
         }`}

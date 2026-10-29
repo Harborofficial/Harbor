@@ -2679,6 +2679,9 @@ const uiFallback: Record<string, string> = {
     "No guide source for this playlist. Add an EPG URL to see program listings.",
   "Guide unavailable. Check the EPG source or refresh the playlist.":
     "Guide unavailable. Check the EPG source or refresh the playlist.",
+  "Move subtitles above player controls": "Move subtitles above player controls",
+  "Lifts subtitles while the player controls are showing so the controls never cover them. Subtitles you have already placed higher stay where they are.":
+    "Lifts subtitles while the player controls are showing so the controls never cover them. Subtitles you have already placed higher stay where they are.",
 };
 
 export default uiFallback;

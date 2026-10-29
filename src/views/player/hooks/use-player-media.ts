@@ -36,6 +36,7 @@ import { useActualPlayback } from "./use-actual-playback";
 import { useStremioSync } from "./use-stremio-sync";
 import { useSubDrop } from "./use-sub-drop";
 import { useSubStyleApply } from "./use-sub-style-apply";
+import { useSubtitleLiftCover } from "@/lib/player/controls-inset";
 import { useAssNormalize } from "./use-ass-normalize";
 import { useTrackAutoload } from "./use-track-autoload";
 import { useSecondarySub } from "./use-secondary-sub";
@@ -265,11 +266,14 @@ export function usePlayerMedia(params: {
     !selectedSubTrack?.foreignOnly &&
     sdhSafeForLanguage(selectedSubTrack?.lang);
   const hideSdh = settings.subHideSdh && sdhFilterAllowed;
-  useSubStyleApply({
+  const controlsInset = useSubtitleLiftCover(settings.subLiftAboveControls, settings.subMarginY);
+  const subLiftPct = useSubStyleApply({
     engine,
     settings,
     assNativeActive,
     imageNativeActive,
+    subNativeRender,
+    controlsInset,
     bridgeReady,
     mediaReady: mpvMediaReadyForStyle,
     sourceGamma: snap.hdrGamma,
@@ -309,6 +313,7 @@ export function usePlayerMedia(params: {
     bridgeKey,
     placement: settings.subSecondaryPlacement,
     marginY: settings.subMarginY,
+    liftPct: subLiftPct,
   });
   useEffect(() => {
     clearImportedSubs();

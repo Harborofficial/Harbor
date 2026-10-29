@@ -39,22 +39,112 @@ function customFontName(s: Settings): string | undefined {
   return f?.family || f?.name;
 }
 
+const POS_GLIDE_MS = 260;
+const POS_STEP_MS = 16;
+
+function reducedMotion(): boolean {
+  return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/** Writes one mpv position property, skipping stale values and gliding between targets. */
+function positionWriter(name: string) {
+  let shown: number | null = null;
+  let pending: number | null = null;
+  let drain: Promise<void> | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let finish: (() => void) | null = null;
+
+  const write = (value: number): Promise<void> => {
+    shown = value;
+    pending = value;
+    drain ??= (async () => {
+      while (pending != null) {
+        const next = pending;
+        pending = null;
+        await invoke("mpv_set_property", { name, value: next }).catch(() => {});
+      }
+      drain = null;
+    })();
+    return drain;
+  };
+  const stop = () => {
+    clearTimeout(timer);
+    timer = undefined;
+    finish?.();
+    finish = null;
+  };
+
+  return {
+    set(value: number): Promise<void> {
+      stop();
+      return write(value);
+    },
+    glide(target: number): Promise<void> {
+      stop();
+      const from = shown;
+      if (from == null || from === target || reducedMotion()) return write(target);
+      const start = Date.now();
+      return new Promise((resolve) => {
+        finish = resolve;
+        const tick = () => {
+          const t = Math.min(1, (Date.now() - start) / POS_GLIDE_MS);
+          const eased = 1 - (1 - t) ** 3;
+          const done = write(Math.round((from + (target - from) * eased) * 100) / 100);
+          if (t < 1) {
+            timer = setTimeout(tick, POS_STEP_MS);
+            return;
+          }
+          timer = undefined;
+          finish = null;
+          void done.then(resolve);
+        };
+        tick();
+      });
+    },
+  };
+}
+
+const subPos = positionWriter("sub-pos");
+const secondaryPos = positionWriter("secondary-sub-pos");
+
+/**
+ * The sub-pos that keeps a subtitle's lower edge `clearPct` percent up the subtitle area.
+ * mpv also leaves sub-margin-y (in 720-line scaled pixels) below that line, so the lift
+ * only has to cover what the margin doesn't.
+ */
+function liftedSubPos(clearPct: number, marginY: number): number {
+  if (!(clearPct > 0)) return 100;
+  const margin = clamp((Number(marginY) || 0) / 720, 0, 0.9);
+  const raise = (clearPct / 100 - margin) / (1 - margin);
+  return clamp(100 - raise * 100, 0, 100);
+}
+
 let secondaryStyleRevision = 0;
 let secondaryStyleQueue: Promise<void> = Promise.resolve();
+
+function secondarySubPos(
+  placement: Settings["subSecondaryPlacement"],
+  marginY: number,
+  liftPct: number,
+): number {
+  if (placement === "top") return 0;
+  const base = 100 - (Number(marginY) || 0);
+  return clamp((liftPct > 0 ? Math.min(base, liftedSubPos(liftPct, marginY)) : base) - 8, 0, 100);
+}
 
 /** HDR surfaces need mpv to draw the second subtitle instead of the HTML overlay. */
 export function applySecondarySubNative(
   on: boolean,
   placement: Settings["subSecondaryPlacement"],
   marginY: number,
+  liftPct = 0,
 ): Promise<void> {
   const revision = ++secondaryStyleRevision;
   // Serialize native writes so a delayed enable cannot overtake a later disable.
   secondaryStyleQueue = secondaryStyleQueue.then(async () => {
     if (revision !== secondaryStyleRevision) return;
     if (on) {
-      const pos = placement === "top" ? 0 : clamp(100 - (Number(marginY) || 0) - 8, 0, 100);
-      await invoke("mpv_set_property", { name: "secondary-sub-pos", value: pos }).catch(() => {});
+      await secondaryPos.set(secondarySubPos(placement, marginY, liftPct));
       if (revision !== secondaryStyleRevision) return;
     }
     await invoke("mpv_set_property", {
@@ -65,12 +155,58 @@ export function applySecondarySubNative(
   return secondaryStyleQueue;
 }
 
+/** Glides a natively drawn second subtitle to its place without toggling its visibility. */
+export function applySecondarySubPos(
+  placement: Settings["subSecondaryPlacement"],
+  marginY: number,
+  liftPct: number,
+): Promise<void> {
+  return secondaryPos.glide(secondarySubPos(placement, marginY, liftPct));
+}
+
 export type SubRenderContext = {
   assNativeActive: boolean;
   imageNativeActive: boolean;
   assScale?: number;
   sdhFilterAllowed?: boolean;
+  /** Percent of the subtitle area, from the bottom, a subtitle's lower edge must stay above. */
+  liftPct?: number;
 };
+
+export type OsdBox = { h: number; mt: number; mb: number };
+
+const LIFT_GAP_PCT = 1;
+
+/**
+ * Converts the share of the window the controls cover into the subtitle area a subtitle
+ * must clear. Without sub-use-margins mpv places subtitles inside the video, so letterbox
+ * bars already under the controls need no lift.
+ */
+export function subPosLiftPercent(
+  coverShare: number,
+  osd: OsdBox | null,
+  useMargins: boolean,
+): number {
+  if (!(coverShare > 0)) return 0;
+  if (!osd || !(osd.h > 0)) return clamp(coverShare * 100 + LIFT_GAP_PCT, 0, 100);
+  const mt = useMargins ? 0 : Math.max(0, osd.mt);
+  const mb = useMargins ? 0 : Math.max(0, osd.mb);
+  const area = osd.h - mt - mb;
+  if (area <= 0) return 0;
+  const clear = coverShare * osd.h - mb;
+  if (clear <= 0) return 0;
+  return clamp((clear / area) * 100 + LIFT_GAP_PCT, 0, 100);
+}
+
+export async function readOsdBox(): Promise<OsdBox | null> {
+  const [h, mt, mb] = await Promise.all(
+    ["h", "mt", "mb"].map((key) =>
+      invoke<unknown>("mpv_get_property", { name: `osd-dimensions/${key}` }).catch(() => null),
+    ),
+  );
+  if (typeof h !== "number") return null;
+  return { h, mt: Number(mt) || 0, mb: Number(mb) || 0 };
+}
 
 /** ASS modes that keep each styled subtitle's own look, so the player's override switch is off. */
 export type AssLookMode = "no" | "scale" | "font";
@@ -175,8 +311,9 @@ export function subStyleProperties(
       ? context.assScale
       : null;
   const effOverride = fontOnly ? "yes" : normScale != null ? "scale" : override;
-  const assMargins = context.assNativeActive && !keepAssLook ? "yes" : "no";
+  const assMargins = subUsesMargins(s, context) ? "yes" : "no";
   const marginY = clamp(Number(s.subMarginY) || 0, 0, 100);
+  const liftPct = clamp(Number(context.liftPct) || 0, 0, 100);
   const opacity = clamp(Number(s.subOpacity ?? 1), 0.1, 1);
   const boxOpacity = clamp(Number(s.subBoxOpacity ?? 0.6), 0, 1);
   const isBox = s.subStyle === "box";
@@ -208,10 +345,26 @@ export function subStyleProperties(
     ["sub-use-margins", assMargins],
     ["sub-spacing", s.subLineSpacing],
     ["sub-bold", s.subBold ? "yes" : "no"],
-    ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
+    [
+      "sub-pos",
+      Math.min(reposition ? clamp(100 - marginY, 0, 100) : 100, liftedSubPos(liftPct, marginY)),
+    ],
   ];
   const overridden = new Set([...mpvExtraOptionKeys(s.mpvExtraOptions)].map(canonicalSubProperty));
   return props.filter(([name]) => !overridden.has(canonicalSubProperty(name)));
+}
+
+/** With margins on, mpv may place subtitles in the letterbox bars instead of inside the video. */
+export function subUsesMargins(s: Settings, context: SubRenderContext): boolean {
+  const keepAssLook = s.subAssOverride === "no" || s.subAssOverride === "font";
+  return context.assNativeActive && !keepAssLook;
+}
+
+/** Glides only sub-pos, so showing or hiding the controls doesn't resend every style. */
+export function applySubPos(s: Settings, context: SubRenderContext): Promise<void> {
+  const entry = subStyleProperties(s, context).find(([name]) => name === "sub-pos");
+  if (!entry) return Promise.resolve();
+  return subPos.glide(Number(entry[1]));
 }
 
 export async function applySubStyle(
@@ -220,7 +373,9 @@ export async function applySubStyle(
 ): Promise<void> {
   await Promise.all([
     ...subStyleProperties(s, context).map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
+      name === "sub-pos"
+        ? subPos.set(Number(value))
+        : invoke("mpv_set_property", { name, value }).catch(() => {}),
     ),
     applyFontOnlyOverrides(s.subAssOverride === "font", mpvFontFor(s.subFontFamily, customFontName(s))),
   ]);

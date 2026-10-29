@@ -398,6 +398,7 @@ export type Settings = {
   subOffsetIndicatorPosition: SubtitleOffsetPosition;
   subOffsetIndicatorSize: SubtitleOffsetSize;
   subShowInPip: boolean;
+  subLiftAboveControls: boolean;
   subHideSdh: boolean;
   secondarySubLang: string;
   subSecondaryPlacement: "top" | "bottom";

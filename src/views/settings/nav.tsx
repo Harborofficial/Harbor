@@ -5388,6 +5388,18 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Move subtitles above player controls",
+    section: "subtitles",
+    tab: "look",
+    anchorTitle: "Elsewhere",
+    keywords: [
+      "subtitles behind controls",
+      "lift subtitles",
+      "subtitles covered by seek bar",
+      "raise captions",
+    ],
+  },
+  {
     label: "Subtitle size",
     section: "subtitles",
     tab: "look",

@@ -446,6 +446,14 @@ export function SubtitleStylePanel() {
           value={settings.subShowInPip}
           onChange={(v) => update({ subShowInPip: v })}
         />
+        <ToggleRow
+          label={t("Move subtitles above player controls")}
+          sub={t(
+            "Lifts subtitles while the player controls are showing so the controls never cover them. Subtitles you have already placed higher stay where they are.",
+          )}
+          value={settings.subLiftAboveControls}
+          onChange={(v) => update({ subLiftAboveControls: v })}
+        />
       </SettingGroup>
     </SettingsWorkbench>
   );

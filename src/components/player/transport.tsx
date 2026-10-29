@@ -30,6 +30,7 @@ import { renderControl, type ControlContext } from "./transport/control-renderer
 import { SongIdToast } from "@/components/song-id-toast";
 import { useCastModalPlay } from "./use-cast-modal-play";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
+import { useReportPlayerControlsInset } from "@/lib/player/controls-inset";
 
 // This is the mouse-era transport. Big Picture suppresses it outright and
 // renders views/big-picture/player instead, so nothing here scales for ten feet.
@@ -241,6 +242,7 @@ export function Transport({
     ro.observe(el);
     return () => ro.disconnect();
   }, [pipMode]);
+  useReportPlayerControlsInset(controlsRef, visible && !pipMode && !isStremioLayout && !kid);
   if (isStremioLayout && !pipMode) {
     return (
       <TransportStremio
