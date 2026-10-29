@@ -11,7 +11,9 @@ export type ReviewTranslationAi = { key: string; model: string; groq: boolean };
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GOOGLE_URL = "https://translate.googleapis.com/translate_a/single";
+// Chrome's extension endpoint tolerates far more requests than translate_a/single, which starts
+// returning 429 after a handful of parallel calls and is what made "Translate all" fail.
+const GOOGLE_URL = "https://clients5.google.com/translate_a/t";
 // Google takes the text in the query string, so a chunk is limited by its percent-encoded length:
 // an Arabic letter is 6 bytes there and a CJK character 9. This budget is for `q` alone and keeps
 // the whole URL well under the ~2K that the endpoint accepts.
@@ -48,6 +50,12 @@ async function withGoogleSlot<T>(task: () => Promise<T>): Promise<T> {
   }
 }
 const cacheKey = (text: string, to: UiLanguage) => `${to}\u0000${text}`;
+
+// Review APIs occasionally return unpaired UTF-16 surrogates. encodeURIComponent throws on
+// them, which used to reject the whole translation batch instead of one review.
+const wellFormed = (text: string): string =>
+  (text as string & { toWellFormed?: () => string }).toWellFormed?.() ??
+  text.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "\uFFFD");
 
 export function cachedReviewTranslation(text: string, to: UiLanguage): string | null {
   const key = cacheKey(text, to);
@@ -156,13 +164,29 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 type GoogleResult = { ok: true; text: string } | { ok: false; tooLong: boolean };
 
 async function googleRequest(text: string, target: string): Promise<GoogleResult> {
-  const params = new URLSearchParams({ client: "gtx", sl: "auto", tl: target, dt: "t", q: text });
+  const params = new URLSearchParams({
+    client: "dict-chrome-ex",
+    sl: "auto",
+    tl: target,
+    q: text,
+  });
   for (let attempt = 0; ; attempt++) {
     const res = await withGoogleSlot(() => safeFetch(`${GOOGLE_URL}?${params}`)).catch(() => null);
     if (res?.ok) {
-      const data = (await res.json().catch(() => null)) as [Array<[string]>] | null;
-      if (!Array.isArray(data?.[0])) return { ok: false, tooLong: false };
-      return { ok: true, text: data[0].map((segment) => segment[0]).join("") };
+      const data = (await res.json().catch(() => null)) as unknown;
+      const first = Array.isArray(data) ? data[0] : null;
+      if (!Array.isArray(first)) return { ok: false, tooLong: false };
+      // [ "translated", "detected" ] from translate_a/t; older translate_a/single replies with
+      // an array of [translated, original, ...] segments.
+      if (typeof first[0] === "string") return { ok: true, text: first[0] };
+      if (Array.isArray(first[0]))
+        return {
+          ok: true,
+          text: first
+            .map((segment) => (Array.isArray(segment) ? String(segment[0] ?? "") : ""))
+            .join(""),
+        };
+      return { ok: false, tooLong: false };
     }
     const status = res?.status ?? 0;
     if (status === 400 || status === 413 || status === 414) return { ok: false, tooLong: true };
@@ -176,6 +200,7 @@ async function googleRequest(text: string, target: string): Promise<GoogleResult
 async function googleTranslate(text: string, to: UiLanguage): Promise<string | null> {
   // Google names Simplified Chinese "zh-CN".
   const target = to === "zh" ? "zh-CN" : to;
+  const source = wellFormed(text);
   const translateChunk = async (
     chunk: string,
     budget: number,
@@ -194,7 +219,7 @@ async function googleTranslate(text: string, to: UiLanguage): Promise<string | n
     return joined;
   };
   let result = "";
-  for (const chunk of translationChunks(text)) {
+  for (const chunk of translationChunks(source)) {
     const translated = await translateChunk(chunk.text, GOOGLE_QUERY_BUDGET, 0);
     if (translated == null) return null;
     result += chunk.glue + translated;
@@ -265,13 +290,16 @@ async function translateUncached(
   const result: (string | null)[] = texts.map(() => null);
   if (ai?.key.trim()) {
     for (let start = 0; start < texts.length; start += AI_BATCH) {
-      const translated = await aiTranslate(texts.slice(start, start + AI_BATCH), to, ai);
+      const translated = await aiTranslate(texts.slice(start, start + AI_BATCH), to, ai).catch(
+        () => [],
+      );
       translated.forEach((text, i) => (result[start + i] = text));
     }
   }
   const left = texts.map((_, i) => i).filter((i) => result[i] == null);
   await pool(left, GOOGLE_CONCURRENCY, async (i) => {
-    result[i] = await googleTranslate(texts[i]!, to);
+    // One malformed review must not take the rest of the batch down with it.
+    result[i] = await googleTranslate(texts[i]!, to).catch(() => null);
   });
   return result;
 }
