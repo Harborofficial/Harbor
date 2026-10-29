@@ -236,13 +236,13 @@ async function pool<T>(items: T[], limit: number, task: (item: T) => Promise<voi
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
 }
 
-async function aiTranslate(
+/** Translates tagged texts with the AI provider; `instructions` must describe the <rN> tags. */
+export async function translateWithAi(
   texts: string[],
-  to: UiLanguage,
   ai: ReviewTranslationAi,
+  instructions: string,
 ): Promise<(string | null)[]> {
   const model = migrateModelId(ai.model.trim()) || DEFAULT_AI_MODEL;
-  const language = languageName[to];
   const headers: Record<string, string> = {
     Authorization: `Bearer ${ai.key.trim()}`,
     "Content-Type": "application/json",
@@ -261,7 +261,7 @@ async function aiTranslate(
       messages: [
         {
           role: "system",
-          content: `You translate film and TV reviews into ${language}. Write natural, fluent ${language} the way a native critic would, keeping names, paragraph breaks, tone and meaning. Each review is wrapped in <rN>…</rN>; answer with every review translated inside the same tags and nothing else.`,
+          content: instructions,
         },
         {
           role: "user",
@@ -280,6 +280,19 @@ async function aiTranslate(
     const match = content.match(new RegExp(`<r${i + 1}>([\\s\\S]*?)</r${i + 1}>`));
     return match?.[1]?.trim() || null;
   });
+}
+
+async function aiTranslate(
+  texts: string[],
+  to: UiLanguage,
+  ai: ReviewTranslationAi,
+): Promise<(string | null)[]> {
+  const language = languageName[to];
+  return translateWithAi(
+    texts,
+    ai,
+    `You translate film and TV reviews into ${language}. Write natural, fluent ${language} the way a native critic would, keeping names, paragraph breaks, tone and meaning. Each review is wrapped in <rN>…</rN>; answer with every review translated inside the same tags and nothing else.`,
+  );
 }
 
 async function translateUncached(

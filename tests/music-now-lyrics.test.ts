@@ -105,12 +105,34 @@ test("the panel covers loading, empty and ready without stranding the user", () 
   assert.match(TSX, /setLyricsState\("loading"\)/);
   assert.match(
     TSX,
-    /t\(\s*lyricsState === "loading" \? "Finding lyrics" : "No lyrics for this track",?\s*\)/,
+    /t\(\s*lyricsState === "loading"\s*\?\s*"Finding lyrics"\s*:\s*"No lyrics for this track",?\s*\)/,
   );
   assert.ok(
     /setTimeout\([\s\S]{0,160}?setLyricsState/.test(TSX),
     "the wait must be bounded so a hung request still resolves the panel",
   );
+});
+
+test("the lyrics panel translates into the selected app language", () => {
+  assert.match(TSX, /translateLyrics/);
+  assert.match(TSX, /toggleLyricTranslation/);
+  assert.match(TSX, /aria-pressed=\{lyricTranslationOn\}/);
+  assert.match(TSX, /lyricTranslation\?\.language === lyricTarget/);
+});
+
+test("the lyrics language is selectable and remembered", () => {
+  assert.match(TSX, /const LYRIC_TARGET_KEY = "harbor\.lyrics\.translate-to\.v1"/);
+  assert.match(TSX, /<Dropdown/);
+  assert.match(TSX, /LANGUAGES\.map/);
+  assert.match(TSX, /localStorage\.setItem\(LYRIC_TARGET_KEY, next\)/);
+});
+
+test("a translation sits under its original line and hides when it is identical", () => {
+  assert.match(TSX, /className="music-now-lyric-text"/);
+  assert.match(TSX, /className="music-now-lyric-translation"/);
+  assert.match(TSX, /translated\.trim\(\) !== line\.text\.trim\(\)/);
+  assert.match(rule(".music-now-lyric-translation"), /display:\s*block/);
+  assert.match(CSS, /\.music-now-lyric-tools\s*\{[^}]*display:\s*flex/);
 });
 
 test("clicking a line seeks the player", () => {
