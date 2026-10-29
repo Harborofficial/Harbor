@@ -42,6 +42,32 @@ export function loadNuvioState(): NuvioAccountState {
 export function saveNuvioState(state: NuvioAccountState, options?: { silent?: boolean }): void {
   try {
     if (typeof localStorage !== "undefined") {
+      const prevRaw = localStorage.getItem(NUVIO_STATE_KEY);
+      if (prevRaw) {
+        try {
+          const prevState = JSON.parse(prevRaw) as NuvioAccountState;
+          const prevUser = prevState.session?.user?.id;
+          const nextUser = state.session?.user?.id;
+          if (prevUser && nextUser && prevUser !== nextUser) {
+            const keysToRemove: string[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (
+                k &&
+                (k.startsWith("harbor.installed-addons.nuvio-") ||
+                  k.startsWith("harbor.cw.dismissed.private.v1.nuvio-"))
+              ) {
+                keysToRemove.push(k);
+              }
+            }
+            for (const k of keysToRemove) {
+              localStorage.removeItem(k);
+            }
+          }
+        } catch {
+          // ignore parse error
+        }
+      }
       localStorage.setItem(NUVIO_STATE_KEY, JSON.stringify(state));
     }
     if (!options?.silent && typeof window !== "undefined") {

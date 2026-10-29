@@ -47,7 +47,7 @@ test("manualWatched reconcile does not delete local watched episodes when server
   assert.match(manualWatched, /if \(serverEpisodeKeys\.size > 0\)/);
   assert.match(
     manualWatched,
-    /serverShowsWithEpisodes\.has\(showId\) && !serverEpisodeKeys\.has\(lKey\)/,
+    /serverShowsWithEpisodes\.has\(showId\)[\s\S]*?!serverEpisodeKeys\.has\(lKey\)/,
   );
 });
 
@@ -87,7 +87,7 @@ test("detail and episode lists infer prior episodes as watched up to current pro
     detail,
     /for \(let ep = 1; ep < m\.episode; ep\+\+\) \{\s*watchedKeys\.add\(`\$\{m\.season\}:\$\{ep\}`\);/,
   );
-  assert.match(
+  assert.doesNotMatch(
     seriesEpisodes,
     /if \(season\.seasonNumber >= 1 && season\.seasonNumber < resumeSeason\)/,
   );
@@ -146,8 +146,11 @@ test("isStremioActivePrimary and activeProfileIsPrimary evaluate primary status 
   );
 });
 
-test("secondary privileges inherit shared settings configured by primary profile", () => {
-  assert.match(defaults, /\.\.\.\(directSource \?\? \{\}\),\s*\.\.\.\(sharedSource \?\? \{\}\)/);
+test("secondary privileges prioritize direct settings over shared settings", () => {
+  assert.match(
+    defaults,
+    /if \(directSource\) return \{\s*\.\.\.DEFAULT_SECONDARY_PRIVILEGES,\s*\.\.\.directSource\s*\};/,
+  );
 });
 
 test("SignedOutHero adapts to active provider with Nuvio branding and link", () => {

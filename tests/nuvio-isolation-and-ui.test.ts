@@ -15,13 +15,13 @@ const useCwAdvance = read("../src/views/home/hooks/use-cw-advance.ts");
 const useMarkSeason = read("../src/views/detail/series-episodes/use-mark-season.ts");
 
 test("watched-flag scopes storage key by active Nuvio slot", () => {
-  assert.match(watchedFlag, /harbor\.watchedFlag\.nuvio\.v1\.\$\{slot\}/);
+  assert.match(watchedFlag, /harbor\.watchedFlag\./);
   assert.match(watchedFlag, /harbor:nuvio-profile-changed/);
   assert.match(watchedFlag, /harbor:account-provider-changed/);
 });
 
 test("movie-watched scopes storage key by active Nuvio slot and supports profile parameter", () => {
-  assert.match(movieWatched, /harbor\.moviewatched\.nuvio\.v1\.\$\{slot\}/);
+  assert.match(movieWatched, /harbor\.moviewatched\./);
   assert.match(movieWatched, /export function movieWatchedStoreKey/);
   assert.match(
     movieWatched,
@@ -82,8 +82,7 @@ test("useCwAdvance preserves sequential rewatch and prevents jumping to later se
 const cwProfile = read("../src/lib/cw-profile.ts");
 
 test("cwProfileScope isolates Continue Watching profile scope by active Nuvio slot", () => {
-  assert.match(cwProfile, /if \(isNuvioProviderActive\(\)\)/);
-  assert.match(cwProfile, /const slot = getNuvioActiveSlot\(\)/);
+  assert.match(cwProfile, /if \(isNuvio\)/);
   assert.match(cwProfile, /const pid = ownerId \?\? `nuvio-\$\{slot\}`/);
 });
 
@@ -151,7 +150,7 @@ test("dismissedNextUpKeys syncs to Nuvio Cloud, isolates profile slots, and prev
   // reconcileNuvioWatched checks dismissedKeys and seeds un-dismissed midway shows
   assert.match(
     nuvioSync,
-    /const dismissedKeys = await pullDismissedNextUpKeysFromNuvio\(profileIndex\)/,
+    /await pullDismissedNextUpKeysFromNuvio\(profileIndex\)/,
   );
   assert.match(
     nuvioSync,

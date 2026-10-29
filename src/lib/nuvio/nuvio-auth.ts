@@ -378,8 +378,10 @@ export async function signOutNuvio(): Promise<void> {
       if (
         k.startsWith("harbor.nuvio.") ||
         k.startsWith("harbor.newEpisodes.dismissed.nuvio.") ||
-        k.startsWith("harbor.manualwatched.") ||
-        k.startsWith("harbor.manualunwatched.") ||
+        k.startsWith("harbor.manualwatched.v1.nuvio.") ||
+        k.startsWith("harbor.manualwatched.v1.nuvio.v2.") ||
+        k.startsWith("harbor.manualunwatched.v1.nuvio.") ||
+        k.startsWith("harbor.manualunwatched.v1.nuvio.v2.") ||
         k.startsWith("harbor.moviewatched.nuvio.") ||
         k.startsWith("harbor.watchedFlag.nuvio.") ||
         k.startsWith("harbor.watchlist.v1.nuvio.") ||
@@ -387,6 +389,8 @@ export async function signOutNuvio(): Promise<void> {
         k.startsWith("harbor.localcw.v1.nuvio-") ||
         k.startsWith("harbor.localcw.private.v1.nuvio-") ||
         k.startsWith("harbor.resume.private.v1.nuvio-") ||
+        k.startsWith("harbor.installed-addons.nuvio-") ||
+        k.startsWith("harbor.cw.dismissed.private.v1.nuvio-") ||
         k.startsWith("harbor.theme-session.nuvio")
       ) {
         keysToRemove.push(k);

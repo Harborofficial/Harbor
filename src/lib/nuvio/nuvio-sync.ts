@@ -1696,7 +1696,7 @@ async function reconcileNuvioWatchedOnce(
           maxInfo.season,
           maxInfo.episode,
         );
-        if (!nextTarget) {
+        if (nextTarget === null) {
           clearLocalCw(entry.id, `nuvio-${profileIndex}`);
           if (!cwKeepsCaughtUpForTimer()) {
             clearResume(entry.id, undefined, undefined, `nuvio-${profileIndex}`);
@@ -1714,7 +1714,7 @@ async function reconcileNuvioWatchedOnce(
               `nuvio-${profileIndex}`,
             );
           }
-        } else if (nextTarget !== undefined) {
+        } else if (nextTarget) {
           const nextS = nextTarget.season;
           const nextE = nextTarget.episode;
           const localIsAhead =
@@ -1796,12 +1796,15 @@ async function reconcileNuvioWatchedOnce(
         maxInfo.season,
         maxInfo.episode,
       );
-      if (!nextTarget) {
+      if (nextTarget === null) {
         if (cwKeepsCaughtUpForTimer()) {
           nextTarget = { season: maxInfo.season, episode: maxInfo.episode };
         } else {
           continue;
         }
+      } else if (nextTarget === undefined) {
+        // Metadata unavailable: keep current max watched episode rather than discarding
+        nextTarget = { season: maxInfo.season, episode: maxInfo.episode };
       }
       const nextS = nextTarget.season;
       const nextE = nextTarget.episode;
@@ -1945,7 +1948,6 @@ export async function deleteEpisodeWatchProgressFromNuvio(
   // 2. Clear local resume for this specific episode across all alias IDs
   for (const id of idVariants) {
     clearResume(id, season, episode, `nuvio-${profileIndex}`);
-    clearResume(id, season, episode);
   }
   const local = localCwEntry(normalizedContentId, false, `nuvio-${profileIndex}`);
   if (local?.season === season && local.episode === episode) {
@@ -2356,7 +2358,7 @@ async function pullWatchProgressOnce(
   }
   saveLatestNuvioLocalProgress(items, slot);
   const state = loadNuvioState();
-  if (state.session?.user?.id === accountId) saveNuvioState({ ...state, lastSyncedAt: Date.now() });
+  if (state.session?.user?.id === accountId) saveNuvioState({ ...state, lastSyncedAt: Date.now() }, { silent: true });
   window.dispatchEvent(
     new CustomEvent("harbor:nuvio-progress-reconciled", {
       detail: { profileIndex: slot, count: items.length },

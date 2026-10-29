@@ -71,7 +71,7 @@ test("PIN switch security strictly prevents bypassing PIN when changing profiles
   // setActiveNuvioProfile clears previous profile session unlocks
   assert.match(nuvioProfiles, /nuvioSessionUnlockedIndices\.clear\(\)/);
   // picker-modal proceeds to unlock prompt when pin is enabled
-  assert.match(pickerModal, /if \(p\.pin_enabled\)/);
+  assert.match(pickerModal, /if \(p\.pin_enabled/);
   assert.match(
     pickerModal,
     /setPickerView\(\{\s*kind:\s*"unlock",\s*profileId:\s*String\(p\.profile_index\)\s*\}\)/,

@@ -108,11 +108,11 @@ test("detail page reloads on nuvioWatchedTick and reconciles targetSeriesIds", (
   );
 });
 
-test("cinemeta and series episode components guard sequential inferring against Nuvio mode", () => {
-  assert.match(
+test("cinemeta episodes component guards sequential inferring against Nuvio mode and series episodes does not synthesize skipped episodes", () => {
+  assert.doesNotMatch(
     seriesEpisodesSrc,
-    /if \(!isNuvioProviderActive\(\)\) \{\s*for \(const season of seasons\)/,
-    "series episodes must guard resumeSeason inference against Nuvio mode",
+    /for \(let ep = 1; ep <= count; ep\+\+\) \{\s*s\.add\(`\$\{season\.seasonNumber\}:\$\{ep\}`\);/,
+    "series episodes must not synthesize watched state for skipped episodes before resume point",
   );
   assert.match(
     cinemetaEpisodesSrc,
@@ -134,8 +134,8 @@ test("nuvio-sync uses resolveNextEpisodeForSeries to prevent synthetic S1E11 ove
   );
   assert.match(
     nuvioSyncSrc,
-    /if \(!nextTarget\) \{\s*clearLocalCw\(entry\.id, `nuvio-\$\{profileIndex\}`\);/,
-    "reconcileNuvioWatched must clear completed series when no next episode exists instead of creating S1E11",
+    /if \(nextTarget === null\) \{\s*clearLocalCw\(entry\.id, `nuvio-\$\{profileIndex\}`\);/,
+    "reconcileNuvioWatched must clear completed series when series is genuinely finished, preserving CW on undefined metadata",
   );
   assert.match(
     nuvioSyncSrc,

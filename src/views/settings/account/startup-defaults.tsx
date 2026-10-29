@@ -66,13 +66,12 @@ export function StartupDefaults() {
 
   const handleDefaultChange = (v: string) => {
     if (isNuvio) {
-      update({ nuvioDefaultProfileId: v, defaultProfileId: v });
+      update({ nuvioDefaultProfileId: v });
       try {
         for (const storageKey of ["harbor.settings.shared", "harbor.settings"]) {
           const raw = localStorage.getItem(storageKey);
           const parsed = raw ? JSON.parse(raw) : {};
           parsed.nuvioDefaultProfileId = v;
-          parsed.defaultProfileId = v;
           localStorage.setItem(storageKey, JSON.stringify(parsed));
         }
       } catch {}

@@ -691,15 +691,13 @@ export function getSecondaryPrivileges(
     if (raw) sharedBlob = JSON.parse(raw);
   } catch {}
 
+  const directSource = isNuvio ? settings?.nuvioSecondaryPrivileges : settings?.secondaryPrivileges;
+  if (directSource) return { ...DEFAULT_SECONDARY_PRIVILEGES, ...directSource };
+
   const sharedSource = isNuvio
     ? sharedBlob?.nuvioSecondaryPrivileges
     : sharedBlob?.secondaryPrivileges;
+  if (sharedSource) return { ...DEFAULT_SECONDARY_PRIVILEGES, ...sharedSource };
 
-  const directSource = isNuvio ? settings?.nuvioSecondaryPrivileges : settings?.secondaryPrivileges;
-
-  return {
-    ...DEFAULT_SECONDARY_PRIVILEGES,
-    ...(directSource ?? {}),
-    ...(sharedSource ?? {}),
-  };
+  return { ...DEFAULT_SECONDARY_PRIVILEGES };
 }

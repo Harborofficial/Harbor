@@ -819,12 +819,6 @@ export function Home({
         }
       }
 
-      // In Stremio mode: native Stremio item (no external property) has precedence
-      const heldIsNativeStremio = !held.external && !isNuvioProvider;
-      const incIsNativeStremio = !incoming.external && !isNuvioProvider;
-      if (heldIsNativeStremio && !incIsNativeStremio) return held;
-      if (!heldIsNativeStremio && incIsNativeStremio) return incoming;
-
       return lastWatchedOf(incoming) > lastWatchedOf(held) ? incoming : held;
     };
 

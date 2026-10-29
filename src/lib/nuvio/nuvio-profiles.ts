@@ -223,6 +223,7 @@ export async function pushNuvioProfiles(payloads: ProfilePushPayload[]): Promise
       avatar_url: avatarUrl,
       profile_background_id: p.profile_background_id || null,
       profile_background_url: p.profile_background_url || null,
+      pin_enabled: Boolean(p.pin_enabled),
     };
   });
 
@@ -770,6 +771,11 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
   const targetSlot = state.profiles.find((p) => p.profile_index === targetSlotIndex);
   if (!slot1 || !targetSlot) return false;
 
+  // If target profile is PIN protected, verify it has been unlocked before allowing transfer
+  if (targetSlot.pin_enabled && !isNuvioProfileUnlocked(targetSlotIndex)) {
+    return false;
+  }
+
   // 1. OPTIMISTIC LOCAL UPDATE: Swap slot 1 and targetSlot in 0ms!
   const newSlot1: NuvioProfile = {
     ...targetSlot,
@@ -801,7 +807,7 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
     activeProfileIndex: nextActive,
   });
 
-  // Swap PIN cache between slot 1 and targetSlotIndex if any
+  // Swap PIN cache and slot-keyed storage between slot 1 and targetSlotIndex
   try {
     const key1 = getPinCacheKey(1);
     const keyTarget = getPinCacheKey(targetSlotIndex);
@@ -814,6 +820,34 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
 
     localStorage.removeItem("harbor.nuvio.kid.1");
     localStorage.removeItem(`harbor.nuvio.kid.${targetSlotIndex}`);
+
+    const slotKeyPrefixes = [
+      "harbor.localcw.v1.nuvio-",
+      "harbor.localcw.private.v1.nuvio-",
+      "harbor.resume.private.v1.nuvio-",
+      "harbor.manualwatched.v1.nuvio.",
+      "harbor.manualwatched.v1.nuvio.v2.",
+      "harbor.manualunwatched.v1.nuvio.",
+      "harbor.manualunwatched.v1.nuvio.v2.",
+      "harbor.watchlist.v1.nuvio.",
+      "harbor.cw.dismissed.private.v1.nuvio-",
+      "harbor.installed-addons.nuvio-",
+      "harbor.nuvio.playback_items.slot.",
+      "harbor.nuvio.local_progress.",
+      "harbor.moviewatched.nuvio.",
+      "harbor.watchedFlag.nuvio.",
+    ];
+
+    for (const prefix of slotKeyPrefixes) {
+      const k1 = `${prefix}1`;
+      const kTarget = `${prefix}${targetSlotIndex}`;
+      const v1 = localStorage.getItem(k1);
+      const vTarget = localStorage.getItem(kTarget);
+      if (vTarget !== null) localStorage.setItem(k1, vTarget);
+      else localStorage.removeItem(k1);
+      if (v1 !== null) localStorage.setItem(kTarget, v1);
+      else localStorage.removeItem(kTarget);
+    }
   } catch {}
 
   // Instant UI dispatch

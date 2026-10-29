@@ -82,7 +82,11 @@ function resolveDismissKey(scopeKey?: string): string {
 
 function readDismissed(scopeKey?: string): Set<string> {
   try {
-    const raw = localStorage.getItem(resolveDismissKey(scopeKey));
+    const key = resolveDismissKey(scopeKey);
+    let raw = localStorage.getItem(key);
+    if (!raw && scopeKey && !scopeKey.startsWith("nuvio.")) {
+      raw = localStorage.getItem(DEFAULT_DISMISS_KEY);
+    }
     const arr = raw ? (JSON.parse(raw) as unknown) : [];
     return new Set(Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : []);
   } catch {

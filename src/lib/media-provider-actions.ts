@@ -867,17 +867,6 @@ export function watchedProviderWrites(
                   nextEpisode,
                   metaInfo,
                 );
-                if (altId) {
-                  await pushWatchProgressToNuvio(
-                    slot,
-                    altId,
-                    0,
-                    2640,
-                    nextSeason,
-                    nextEpisode,
-                    metaInfo,
-                  );
-                }
 
                 const nextCw = {
                   id: meta.id,
@@ -903,9 +892,6 @@ export function watchedProviderWrites(
                   "nuvio",
                   `nuvio-${slot}`,
                 );
-                if (altId) {
-                  saveLocalCw({ ...nextCw, id: altId, external: "nuvio" }, `nuvio-${slot}`);
-                }
                 window.dispatchEvent(
                   new CustomEvent("harbor:nuvio-progress-pushed", {
                     detail: {
@@ -914,7 +900,7 @@ export function watchedProviderWrites(
                     },
                   }),
                 );
-              } else {
+              } else if (videosToScan && videosToScan.length > 0) {
                 const settings = loadStoredSettings();
                 const keepForTimer = settings.animeCwEnd === "timer";
                 if (keepForTimer) {
@@ -973,6 +959,13 @@ export function watchedProviderWrites(
             );
             const firstEp = sorted[0];
             if (firstEp) {
+              for (const ep of sorted.slice(1)) {
+                await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.season, ep.episode);
+                if (altId) {
+                  await deleteEpisodeWatchProgressFromNuvio(slot, altId, ep.season, ep.episode);
+                }
+              }
+
               const metaInfo = {
                 title: meta.name,
                 name: meta.name,
@@ -988,17 +981,6 @@ export function watchedProviderWrites(
                 firstEp.episode,
                 metaInfo,
               );
-              if (altId) {
-                await pushWatchProgressToNuvio(
-                  slot,
-                  altId,
-                  0,
-                  2640,
-                  firstEp.season,
-                  firstEp.episode,
-                  metaInfo,
-                );
-              }
 
               const unwatchedCw = {
                 id: meta.id,
@@ -1014,9 +996,6 @@ export function watchedProviderWrites(
                 t: Date.now(),
               };
               saveLocalCw(unwatchedCw, `nuvio-${slot}`);
-              if (altId) {
-                saveLocalCw({ ...unwatchedCw, id: altId }, `nuvio-${slot}`);
-              }
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
               window.dispatchEvent(
                 new CustomEvent("harbor:nuvio-progress-pushed", {

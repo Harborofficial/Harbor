@@ -169,7 +169,7 @@ export function ProfilePickerModal() {
   };
 
   const proceedSelectNuvio = (p: NuvioProfile) => {
-    if (p.pin_enabled) {
+    if (p.pin_enabled && !isNuvioProfileUnlocked(p.profile_index)) {
       setPickerView({ kind: "unlock", profileId: String(p.profile_index) });
       return;
     }
