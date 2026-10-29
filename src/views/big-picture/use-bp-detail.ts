@@ -19,6 +19,54 @@ export { parseBpMetaId } from "./bp-logic";
 
 const NO_PROVIDERS: WatchProvider[] = [];
 
+function sourceOnlyDetail(meta: Meta): TmdbDetail {
+  const imdbId = meta.id.startsWith("tt") ? meta.id.split(":")[0] : null;
+  return {
+    kind: meta.type === "series" || meta.type === "anime" ? "tv" : "movie",
+    id: 0,
+    imdbId,
+    title: meta.name,
+    originalTitle: meta.name,
+    tagline: "",
+    overview: meta.description ?? "",
+    poster: meta.poster,
+    backdrop: meta.background,
+    logo: meta.logo,
+    year: meta.releaseInfo,
+    voteCount: 0,
+    status: "",
+    genres: meta.genres ?? [],
+    originalLanguage: meta.originalLanguage ?? "",
+    spokenLanguages: [],
+    productionCountries: [],
+    productionCompanies: [],
+    networks: [],
+    productionCompaniesRich: [],
+    productionCountriesRich: [],
+    spokenLanguagesRich: [],
+    networksRich: [],
+    trailerYtId: null,
+    trailerCandidates: [],
+    extraVideos: [],
+    gallery: { backdrops: [], posters: [], logos: [] },
+    cast: [],
+    crew: [],
+    directors: [],
+    writers: [],
+    creators: [],
+    producers: [],
+    composer: [],
+    cinematography: [],
+    editor: [],
+    recommendations: [],
+    similar: [],
+    seasons: [],
+    numberOfSeasons: 0,
+    numberOfEpisodes: 0,
+    keywords: [],
+  };
+}
+
 export type BpDetailData = {
   meta: Meta | null;
   detail: TmdbDetail | null;
@@ -53,23 +101,49 @@ export function useBpDetail(metaId: string): BpDetailData {
     detail,
     settings,
   });
-  const displayDetail = useMemo(
+  const displayDetail = useMemo(() => {
+    const hasSource =
+      !!sourceValues.title ||
+      !!sourceValues.description ||
+      !!sourceValues.poster ||
+      !!sourceValues.backdrop ||
+      !!sourceValues.logo ||
+      !!sourceValues.cast?.length ||
+      !!sourceValues.trailerCandidates?.length ||
+      !!sourceValues.seasonPosters;
+    if (!detail && !hasSource) return null;
+    const base = detail ?? sourceOnlyDetail(sourceMeta);
+    return {
+      ...base,
+      title: sourceValues.title ?? base.title,
+      overview: sourceValues.description ?? base.overview,
+      poster: sourceValues.poster ?? base.poster,
+      backdrop: sourceValues.backdrop ?? base.backdrop,
+      logo: sourceValues.logo ?? base.logo,
+      seasonPosters: sourceValues.seasonPosters ?? base.seasonPosters,
+      cast: sourceValues.cast ?? base.cast,
+      trailerCandidates: sourceValues.trailerCandidates ?? base.trailerCandidates,
+      trailerYtId: sourceValues.trailerCandidates?.[0] ?? base.trailerYtId,
+    };
+  }, [detail, sourceMeta, sourceValues]);
+  const displayMeta = useMemo(
     () =>
-      detail
+      meta ??
+      (displayDetail
         ? {
-            ...detail,
-            title: sourceValues.title ?? detail.title,
-            overview: sourceValues.description ?? detail.overview,
-            poster: sourceValues.poster ?? detail.poster,
-            backdrop: sourceValues.backdrop ?? detail.backdrop,
-            logo: sourceValues.logo ?? detail.logo,
-            seasonPosters: sourceValues.seasonPosters ?? detail.seasonPosters,
-            cast: sourceValues.cast ?? detail.cast,
-            trailerCandidates: sourceValues.trailerCandidates ?? detail.trailerCandidates,
-            trailerYtId: sourceValues.trailerCandidates?.[0] ?? detail.trailerYtId,
+            id: displayDetail.imdbId ?? id,
+            type,
+            name: displayDetail.title,
+            description: displayDetail.overview,
+            poster: displayDetail.poster,
+            background: displayDetail.backdrop,
+            logo: displayDetail.logo,
+            releaseInfo: displayDetail.year,
+            imdbRating: displayDetail.rating,
+            genres: displayDetail.genres,
           }
-        : detail,
-    [detail, sourceValues],
+        : null),
+    [meta, displayDetail, id, type],
   );
 
   useEffect(() => {
@@ -143,7 +217,7 @@ export function useBpDetail(metaId: string): BpDetailData {
   ]);
 
   return {
-    meta,
+    meta: displayMeta,
     detail: displayDetail,
     collection,
     providers,

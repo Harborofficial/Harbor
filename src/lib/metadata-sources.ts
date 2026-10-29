@@ -41,6 +41,18 @@ export function posterTransformEnabledFromStorage(): boolean {
   }
 }
 
+export function firstPosterTransform(
+  chain: string[] | undefined,
+  settings: { rpdbKey: string; posterBaseUrl: string },
+): { id: "rpdb" | "posterService"; index: number } | undefined {
+  for (let index = 0; index < (chain?.length ?? 0); index += 1) {
+    const id = chain![index];
+    if (id === "rpdb" && settings.rpdbKey.trim()) return { id, index };
+    if (id === "posterService" && settings.posterBaseUrl.trim()) return { id, index };
+  }
+  return undefined;
+}
+
 export type MetadataSourceSettings = {
   tmdbKey: string;
   tvdbKey: string;

@@ -380,6 +380,26 @@ test("addon Top Match follows metadata priority and matches the configured insta
     }),
     addonTop,
   );
+  assert.equal(
+    prioritizedTopMatch({
+      chain: ["__default_search_addons__", "tmdb"],
+      tmdbTop,
+      addonTop,
+      earlyAddonTop: addonTop,
+      tmdbEnabled: true,
+    }),
+    addonTop,
+  );
+  assert.equal(
+    prioritizedTopMatch({
+      chain: ["__default_search_addons__", "tmdb"],
+      tmdbTop,
+      addonTop,
+      earlyAddonTop: null,
+      tmdbEnabled: true,
+    }),
+    tmdbTop,
+  );
 });
 
 test("a configured TMDB key reaches the network in addon-only mode", async () => {

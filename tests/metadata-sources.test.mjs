@@ -105,6 +105,27 @@ test("labels resolve addons and configured providers", () => {
   assert.equal(sources.metadataSourceKind("posterService", addons, settings), null);
 });
 
+test("the first available poster transform owns the artwork", () => {
+  const both = { rpdbKey: "rpdb-key", posterBaseUrl: "https://posters.invalid/{imdb}" };
+  assert.deepEqual(plain(sources.firstPosterTransform(["rpdb", "posterService"], both)), {
+    id: "rpdb",
+    index: 0,
+  });
+  assert.deepEqual(plain(sources.firstPosterTransform(["posterService", "rpdb"], both)), {
+    id: "posterService",
+    index: 0,
+  });
+  assert.deepEqual(
+    plain(
+      sources.firstPosterTransform(["rpdb", "posterService"], {
+        rpdbKey: "",
+        posterBaseUrl: both.posterBaseUrl,
+      }),
+    ),
+    { id: "posterService", index: 1 },
+  );
+});
+
 test("poster transforms only apply when they come before the supplied poster", () => {
   const build = (poster) => ({
     addonOnlyMetadata: true,

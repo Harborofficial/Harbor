@@ -3,6 +3,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { metadataAddons, resolveAddonMetaSource } from "@/lib/meta-resource";
 import {
   addonKeyFromSource,
+  firstPosterTransform,
   normalizeMetadataSourceChain,
   type MetadataSourceSection,
 } from "@/lib/metadata-sources";
@@ -150,7 +151,11 @@ export function useMetadataSourceValues({
     settings.omdbKey,
     settings.posterBaseUrl,
     settings.rpdbKey,
+    settings.tmdbImageLangs,
     settings.tmdbKey,
+    settings.tmdbLanguage,
+    settings.translateDescriptions,
+    settings.translateTitles,
     settings.tvdbKey,
   ]);
   const [state, setState] = useState<ScopedValues>({ key: "", values: {} });
@@ -311,19 +316,19 @@ export function useMetadataSourceValues({
       const altId = detail?.id
         ? `tmdb:${detail.kind === "tv" ? "tv:" : "movie:"}${detail.id}`
         : undefined;
-      const firstTransform = (sourceChain: string[]) =>
-        sourceChain.findIndex((id) => id === "rpdb" || id === "posterService");
+      const transformBase = (transform: { id: string }) =>
+        transform.id === "posterService" ? settings.posterBaseUrl : "";
 
       const posterEntry = await firstEntry(posterChain, "poster");
       let poster = posterEntry?.value;
-      const posterTransform = firstTransform(posterChain);
-      if (poster && posterEntry && posterTransform >= 0 && posterTransform < posterEntry.index) {
+      const posterTransform = firstPosterTransform(posterChain, settings);
+      if (poster && posterEntry && posterTransform && posterTransform.index < posterEntry.index) {
         poster = rpdbPoster(
           settings.rpdbKey,
           meta.id,
           poster,
           altId,
-          settings.posterBaseUrl,
+          transformBase(posterTransform),
           mediaType,
         );
       }
@@ -334,19 +339,19 @@ export function useMetadataSourceValues({
 
       const backdropEntry = await firstEntry(backdropChain, "backdrop");
       let backdrop = backdropEntry?.value;
-      const backdropTransform = firstTransform(backdropChain);
+      const backdropTransform = firstPosterTransform(backdropChain, settings);
       if (
         backdrop &&
         backdropEntry &&
-        backdropTransform >= 0 &&
-        backdropTransform < backdropEntry.index
+        backdropTransform &&
+        backdropTransform.index < backdropEntry.index
       ) {
         backdrop = rpdbBackdrop(
           settings.rpdbKey,
           meta.id,
           backdrop,
           altId,
-          settings.posterBaseUrl,
+          transformBase(backdropTransform),
           mediaType,
         );
       }
@@ -460,7 +465,11 @@ export function useMetadataSourceValues({
     settings.omdbKey,
     settings.posterBaseUrl,
     settings.rpdbKey,
+    settings.tmdbImageLangs,
     settings.tmdbKey,
+    settings.tmdbLanguage,
+    settings.translateDescriptions,
+    settings.translateTitles,
     settings.tvdbKey,
   ]);
 

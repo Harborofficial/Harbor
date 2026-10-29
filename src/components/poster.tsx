@@ -23,7 +23,7 @@ import {
   useTmdbImdbId,
 } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 import { useSettings } from "@/lib/settings";
-import { posterTransformEnabled } from "@/lib/metadata-sources";
+import { firstPosterTransform, posterTransformEnabled } from "@/lib/metadata-sources";
 import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime-mapping";
 import { simklAnimeArtworkIds } from "@/lib/simkl/anime-artwork-ids";
 import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
@@ -92,8 +92,13 @@ export function useRpdbAltId(
   type?: "movie" | "series",
 ): { altId: string | undefined; pending: boolean } {
   const { settings } = useSettings();
-  const wantImdb = needsImdbForPoster(rpdbKey, metaId, settings.posterBaseUrl);
-  const wantTmdb = needsTmdbForPoster(rpdbKey, metaId, settings.posterBaseUrl);
+  const chain = settings.metadataSources?.poster?.length
+    ? settings.metadataSources.poster
+    : ["rpdb", "posterService"];
+  const transform = firstPosterTransform(chain, settings);
+  const transformBase = transform?.id === "posterService" ? settings.posterBaseUrl : "";
+  const wantImdb = needsImdbForPoster(rpdbKey, metaId, transformBase);
+  const wantTmdb = needsTmdbForPoster(rpdbKey, metaId, transformBase);
   const imdb = useTmdbImdbId(wantImdb ? metaId : undefined);
   const tmdb = useTmdbIdFromImdb(wantTmdb ? metaId : undefined);
   useEffect(() => {
@@ -175,6 +180,11 @@ export function usePosterChain(
 ) {
   const { settings } = useSettings();
   const transformPoster = posterTransformEnabled(settings);
+  const transformChain = settings.metadataSources?.poster?.length
+    ? settings.metadataSources.poster
+    : ["rpdb", "posterService"];
+  const transform = firstPosterTransform(transformChain, settings);
+  const transformBase = transform?.id === "posterService" ? settings.posterBaseUrl : "";
   const { altId, pending } = useRpdbAltId(rpdbKey, metaId, type);
   const { animeImdb, animeTvdb, animeTmdb } = useAnimeRpdbIds(rpdbKey, metaId);
   const { url: localized, localizing } = useLocalizedPoster(metaId);
@@ -190,20 +200,13 @@ export function usePosterChain(
       ? [pinned]
       : [
           transformPoster && animeImdb
-            ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb, settings.posterBaseUrl, type)
+            ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb, transformBase, type)
             : undefined,
           transformPoster && animeTvdb
-            ? rpdbPoster(
-                rpdbKey,
-                `tvdb:${animeTvdb}`,
-                base,
-                undefined,
-                settings.posterBaseUrl,
-                type,
-              )
+            ? rpdbPoster(rpdbKey, `tvdb:${animeTvdb}`, base, undefined, transformBase, type)
             : undefined,
           transformPoster
-            ? rpdbPoster(rpdbKey, metaId, base, altId, settings.posterBaseUrl, type)
+            ? rpdbPoster(rpdbKey, metaId, base, altId, transformBase, type)
             : undefined,
           localized,
           metaPoster,
@@ -218,6 +221,7 @@ export function usePosterChain(
   }, [
     rpdbKey,
     settings.posterBaseUrl,
+    transformBase,
     type,
     metaId,
     altId,
@@ -236,23 +240,17 @@ export function usePosterChain(
     if (pending || !transformPoster) return undefined;
     return (
       (animeImdb
-        ? rpdbBackdrop(rpdbKey, animeImdb, undefined, animeTmdb, settings.posterBaseUrl, type)
+        ? rpdbBackdrop(rpdbKey, animeImdb, undefined, animeTmdb, transformBase, type)
         : undefined) ??
       (animeTvdb
-        ? rpdbBackdrop(
-            rpdbKey,
-            `tvdb:${animeTvdb}`,
-            undefined,
-            undefined,
-            settings.posterBaseUrl,
-            type,
-          )
+        ? rpdbBackdrop(rpdbKey, `tvdb:${animeTvdb}`, undefined, undefined, transformBase, type)
         : undefined) ??
-      rpdbBackdrop(rpdbKey, metaId, undefined, altId, settings.posterBaseUrl, type)
+      rpdbBackdrop(rpdbKey, metaId, undefined, altId, transformBase, type)
     );
   }, [
     rpdbKey,
     settings.posterBaseUrl,
+    transformBase,
     type,
     metaId,
     altId,

@@ -115,7 +115,19 @@ function series(videos: Meta["videos"]) {
         requests++;
         return { videos };
       },
+      metadataAddons: async () => [],
+      resolveAddonMetaSource: async () => null,
       preferCustomMeta: () => false,
+    },
+    "./metadata-sources": {
+      addonKeyFromSource: () => null,
+      normalizeMetadataSourceChain: (_section: string, chain: string[] = []) => chain,
+    },
+    "./providers/tvdb-order": {
+      fetchTvdbOrder: async () => null,
+    },
+    "./providers/tvdb": {
+      tvdbLangFromIso1: () => "eng",
     },
     "./providers/tmdb": {},
     "./providers/tmdb/tmdb-client": {

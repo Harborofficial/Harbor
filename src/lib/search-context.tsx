@@ -265,15 +265,20 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         excludeGenres.join(","),
         normalizedQuery,
       ].join("\0");
-      const searchChain = settings.metadataSources?.search ?? [];
+      const explicitSearchChain = settings.metadataSources?.search ?? [];
       const configuredAddonOrder = (
-        searchChain.length ? searchChain : (settings.metadataSources?.title ?? [])
+        explicitSearchChain.length ? explicitSearchChain : (settings.metadataSources?.title ?? [])
       )
         .map(addonKeyFromSource)
         .filter((key): key is string => !!key);
       const metadataOrder = configuredAddonOrder.length
         ? configuredAddonOrder
         : settings.metadataAddonOrder;
+      // Until the user saves the dialog's default order, addons remain ahead of
+      // TMDB. An empty array must not mean "TMDB first".
+      const searchChain = explicitSearchChain.length
+        ? explicitSearchChain
+        : ["__default_search_addons__", "tmdb"];
       let searchAddons: Addon[] = [];
       const addonsP = ensureAddons().then((addons) => {
         const metadata = orderedMetadataAddons(addons, metadataOrder);
@@ -420,12 +425,17 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           ...acc.groups.flatMap((group) => group.metas),
         ]);
         const addonTop = addonTopMatch(searchAddons, topMatchCandidates, trimmed, metadataOrder);
+        const defaultSearchChain = searchChain[0] === "__default_search_addons__";
         const tmdbAt = searchChain.indexOf("tmdb");
-        const beforeTmdb = searchChain
-          .slice(0, Math.max(0, tmdbAt))
-          .map(addonKeyFromSource)
-          .filter((key): key is string => !!key);
-        const earlyAddons = addonsBeforeTmdb(searchAddons, searchChain);
+        const beforeTmdb = defaultSearchChain
+          ? metadataOrder
+          : searchChain
+              .slice(0, Math.max(0, tmdbAt))
+              .map(addonKeyFromSource)
+              .filter((key): key is string => !!key);
+        const earlyAddons = defaultSearchChain
+          ? searchAddons
+          : addonsBeforeTmdb(searchAddons, searchChain);
         const earlyAddonTop =
           earlyAddons.length > 0
             ? addonTopMatch(earlyAddons, topMatchCandidates, trimmed, beforeTmdb)
