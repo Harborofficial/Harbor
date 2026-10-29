@@ -4,6 +4,7 @@ import {
   continueActualPlayback,
   continuationFor,
   continuationStream,
+  continuationAppliesToSource,
   type ContinuationServices,
 } from "../src/lib/player/continue-playback";
 import type { ActualPlayback } from "../src/lib/playback-history";
@@ -137,4 +138,64 @@ test("home-server preparation receives actual position and explicit restart zero
   await continueActualPlayback(target, {}, api);
   await continueActualPlayback(target, { restart: true }, api);
   assert.deepEqual(positions, [45000, 0]);
+});
+
+test("continuation carries scoped subtitle choice and delays through source preparation", async () => {
+  const target: ActualPlayback = {
+    ...fixture(),
+    subtitle: { off: true },
+    subDelaySec: 1.5,
+    audioDelaySec: -0.25,
+  };
+  const { api, calls } = services(target);
+  await continueActualPlayback(target, {}, api);
+  const continued = (calls[0] as [string, { continuation: ReturnType<typeof continuationFor> }])[1]
+    .continuation;
+  assert.deepEqual(continued.subtitle, { off: true });
+  assert.equal(continued.subDelaySec, 1.5);
+  assert.equal(continued.audioDelaySec, -0.25);
+});
+
+test("refreshed URLs restore exact session state only for the same title, episode, and verified file metadata", () => {
+  const target = fixture();
+  target.src.url = "https://fixture.invalid/old-token";
+  target.src.meta.type = "series";
+  target.src.episode = { season: 2, episode: 3 };
+  target.src.streamRef = {
+    addonId: "fixture-addon",
+    parsedTitle: "Series.S02E03.1080p.RELEASE",
+    size: 1234567,
+    resolution: "1080p",
+    source: "WEB",
+    fileIdx: 2,
+  };
+  const context = continuationFor(target, target.actor);
+  const renewed = { ...target.src, url: "https://fixture.invalid/new-token" };
+  assert.equal(continuationAppliesToSource(renewed, context), true);
+  assert.equal(
+    continuationAppliesToSource({ ...renewed, meta: { ...renewed.meta, id: "other" } }, context),
+    false,
+  );
+  assert.equal(
+    continuationAppliesToSource({ ...renewed, episode: { season: 2, episode: 4 } }, context),
+    false,
+  );
+  assert.equal(
+    continuationAppliesToSource(
+      { ...renewed, streamRef: { ...renewed.streamRef, fileIdx: 4 } },
+      context,
+    ),
+    false,
+  );
+  assert.equal(
+    continuationAppliesToSource(
+      { ...renewed, streamRef: { ...renewed.streamRef, size: undefined } },
+      context,
+    ),
+    false,
+  );
+  assert.equal(
+    continuationAppliesToSource({ ...renewed, streamRef: { addonId: "fixture-addon" } }, context),
+    false,
+  );
 });

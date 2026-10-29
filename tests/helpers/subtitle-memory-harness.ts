@@ -4,6 +4,10 @@ import ts from "typescript";
 import * as memory from "../../src/lib/subtitles/subtitle-memory.ts";
 import { normalizeLang } from "../../src/lib/subtitles/language.ts";
 import { emptySnapshot, type PlayerSnapshot, type TrackInfo } from "../../src/lib/player/bridge.ts";
+import {
+  restorablePlaybackSubtitleChoice,
+  selectPlaybackSubtitle,
+} from "../../src/lib/player/subtitle-choice";
 
 export function subtitleTrack(id: string): TrackInfo {
   return {
@@ -47,6 +51,14 @@ export function restoreHarness(remembered: memory.RememberedSub, tracks: TrackIn
   const scope = {
     ...memory,
     normalizeLang,
+    selectPlaybackSubtitle,
+    restorablePlaybackSubtitleChoice,
+    rememberedSession: null,
+    playbackActor: {},
+    isPlaybackActorCurrent: () => true,
+    embeddedRestoreRef: { current: null },
+    emitListToast() {},
+    t: (key: string) => key,
     src: {
       url: "fixture.mkv",
       meta: { id: "fixture" },
@@ -90,6 +102,8 @@ export function restoreHarness(remembered: memory.RememberedSub, tracks: TrackIn
 }
 
 export function memoryControlsHarness() {
+  let actual: unknown = null;
+  const actualCachePatches: unknown[][] = [];
   const source = readFileSync(
     new URL("../../src/views/player/hooks/use-playback-controls.ts", import.meta.url),
     "utf8",
@@ -133,6 +147,15 @@ export function memoryControlsHarness() {
     },
     "@/lib/player/playback-clock": {},
     "@/lib/media-session": { notifyMediaSeeked() {} },
+    "@/lib/playback-history": {
+      capturePlaybackActor: () => ({}),
+      isPlaybackActorCurrent: () => true,
+      readActualPlaybackForSubtitle: () => actual,
+      cacheActualPlaybackSubtitle(...args: unknown[]) {
+        actualCachePatches.push(args);
+        return true;
+      },
+    },
     "@/lib/player-prefs": { writePlayerPrefs() {} },
     "@/lib/subtitles/subtitle-memory": {
       ...memory,
@@ -208,6 +231,10 @@ export function memoryControlsHarness() {
     };
   }
   return {
+    actualCachePatches,
+    actualPlayback(value: unknown) {
+      actual = value;
+    },
     mount,
     saved,
     cacheRequests,

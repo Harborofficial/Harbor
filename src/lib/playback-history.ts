@@ -2,7 +2,17 @@ import { useSyncExternalStore } from "react";
 import type { AddonProgress } from "./streams/addons";
 import type { PlayerSrc } from "./view";
 import type { PlaybackAudioChoice } from "./player/audio-choice";
+import type { PlaybackSubtitleChoice } from "./player/subtitle-choice";
 import { noteNotify } from "./render-cause";
+import { subtitleMediaKey, subtitleStreamKey } from "./subtitles/subtitle-memory";
+import {
+  activeScopedProfileId,
+  isNuvioProviderActive,
+  stremioProfileId,
+} from "./active-profile-id";
+import { cwProfileScope } from "./cw-profile";
+
+type ActualPlaybackState = { actual?: ActualPlayback };
 
 export type PlaybackEntry = {
   infoHash?: string | null;
@@ -21,12 +31,16 @@ export type PlaybackEntry = {
   savedAt: number;
   /** Written by observed player activity, never by source selection or watched edits. */
   actual?: ActualPlayback;
+  /** Same history, with observed ownership retained when private CW is enabled. */
+  actualByProfile?: Record<string, ActualPlaybackState>;
 };
 
 export type PlaybackActor = {
   profileId: string;
   storageProfileId: string;
   accountId: string | null;
+  provider?: "nuvio";
+  privateCw?: boolean;
 };
 
 export type ActualPlayback = {
@@ -39,6 +53,9 @@ export type ActualPlayback = {
   src: Omit<PlayerSrc, "continuation">;
   requiresSourceRefresh?: boolean;
   audioTrack?: PlaybackAudioChoice;
+  subtitle?: PlaybackSubtitleChoice;
+  subDelaySec?: number;
+  audioDelaySec?: number;
 };
 
 export type PlaybackContinuation = {
@@ -46,9 +63,13 @@ export type PlaybackContinuation = {
   positionMs: number;
   source: Omit<PlaybackEntry, "actual">;
   sourceKey: string;
+  target?: { metaId: string; season?: number; episode?: number };
   actor: PlaybackActor;
   restart?: boolean;
   audioTrack?: PlaybackAudioChoice;
+  subtitle?: PlaybackSubtitleChoice;
+  subDelaySec?: number;
+  audioDelaySec?: number;
 };
 
 const STORAGE_KEY_PREFIX = "harbor.playback-history.v1.";
@@ -58,8 +79,39 @@ const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
 
 const listeners = new Set<() => void>();
+let playbackRevision = 0;
+
+export function getPlaybackRevision(): number {
+  return playbackRevision;
+}
+
+function notifyPlayback(): void {
+  playbackRevision += 1;
+  noteNotify("store:playback");
+  listeners.forEach((listener) => listener());
+}
+
+function nuvioAccountId(): string | null {
+  try {
+    const raw =
+      localStorage.getItem("harbor.nuvio.state.v1") ?? localStorage.getItem("harbor.nuvio.state");
+    const userId = JSON.parse(raw ?? "null")?.session?.user?.id;
+    return typeof userId === "string" && userId ? userId : null;
+  } catch {
+    return null;
+  }
+}
 
 export function capturePlaybackActor(): PlaybackActor {
+  if (isNuvioProviderActive()) {
+    const profileId = activeScopedProfileId();
+    return {
+      profileId,
+      storageProfileId: profileId,
+      accountId: nuvioAccountId(),
+      provider: "nuvio",
+    };
+  }
   const storageProfileId = activeProfileId();
   try {
     const state = JSON.parse(localStorage.getItem(PROFILES_KEY) ?? "null") as {
@@ -74,6 +126,7 @@ export function capturePlaybackActor(): PlaybackActor {
       profileId: state?.activeId ?? storageProfileId,
       storageProfileId,
       accountId: session?.user?._id ?? null,
+      ...(cwProfileScope().private ? { privateCw: true } : {}),
     };
   } catch {
     return { profileId: storageProfileId, storageProfileId, accountId: null };
@@ -85,30 +138,14 @@ export function isPlaybackActorCurrent(actor: PlaybackActor): boolean {
   return (
     current.profileId === actor.profileId &&
     current.storageProfileId === actor.storageProfileId &&
-    current.accountId === actor.accountId
+    current.accountId === actor.accountId &&
+    current.provider === actor.provider &&
+    !!current.privateCw === !!actor.privateCw
   );
 }
 
 function activeProfileId(): string {
-  try {
-    const raw = localStorage.getItem(PROFILES_KEY);
-    if (!raw) return "";
-    const s = JSON.parse(raw) as {
-      activeId?: string;
-      profiles?: Array<{ id?: string; isPrimary?: boolean; shareStremioWith?: string | null }>;
-    };
-    const profiles = Array.isArray(s.profiles) ? s.profiles : [];
-    const active = profiles.find((p) => p.id === s.activeId) ?? null;
-    const own = active?.id ?? profiles.find((p) => p?.isPrimary)?.id ?? "";
-    if (!own) return "";
-    if (active && typeof active.shareStremioWith === "string" && active.shareStremioWith) {
-      const shared = profiles.find((p) => p.id === active.shareStremioWith);
-      if (shared?.id) return shared.id;
-    }
-    return own;
-  } catch {
-    return "";
-  }
+  return stremioProfileId();
 }
 
 function primaryProfileId(): string {
@@ -125,11 +162,15 @@ function primaryProfileId(): string {
 }
 
 function storeKey(): string {
+  if (isNuvioProviderActive()) {
+    return `${STORAGE_KEY_PREFIX}nuvio.${encodeURIComponent(nuvioAccountId() ?? "anon")}.${activeScopedProfileId()}`;
+  }
   const id = activeProfileId();
   return id ? STORAGE_KEY_PREFIX + id : LEGACY_STORAGE_KEY;
 }
 
 function migrateLegacy(): void {
+  if (isNuvioProviderActive()) return;
   try {
     const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!legacy) return;
@@ -143,11 +184,107 @@ function migrateLegacy(): void {
   }
 }
 
+const scopeEvents = [
+  "storage",
+  "harbor:active-profile-changed",
+  "harbor:profiles-updated",
+  "harbor:settings-changed",
+  "harbor:nuvio-profile-changed",
+  "harbor:nuvio-state-changed",
+  "harbor:account-provider-changed",
+];
+let stopScopeEvents: (() => void) | null = null;
+
 export function subscribePlayback(fn: () => void): () => void {
+  if (!stopScopeEvents && typeof window !== "undefined") {
+    const target = window;
+    let actorKey = JSON.stringify(capturePlaybackActor());
+    const onScopeChange = () => {
+      const next = JSON.stringify(capturePlaybackActor());
+      if (next === actorKey) return;
+      actorKey = next;
+      notifyPlayback();
+    };
+    for (const event of scopeEvents) target.addEventListener(event, onScopeChange);
+    stopScopeEvents = () => {
+      for (const event of scopeEvents) target.removeEventListener(event, onScopeChange);
+    };
+  }
   listeners.add(fn);
   return () => {
     listeners.delete(fn);
+    if (listeners.size === 0) {
+      stopScopeEvents?.();
+      stopScopeEvents = null;
+    }
   };
+}
+
+function samePlaybackOwner(actual: ActualPlayback, actor: PlaybackActor): boolean {
+  return (
+    validActualPlayback(actual) &&
+    Date.now() - actual.playedAt <= TTL_MS &&
+    actual.actor.provider === actor.provider &&
+    actual.actor.storageProfileId === actor.storageProfileId &&
+    actual.actor.accountId === actor.accountId
+  );
+}
+
+function retainedActualProfiles(
+  entry: PlaybackEntry | undefined,
+  actor: PlaybackActor,
+): Record<string, ActualPlaybackState> {
+  let profileIds = new Set([actor.profileId]);
+  if (!actor.provider) {
+    try {
+      const roster = JSON.parse(localStorage.getItem(PROFILES_KEY) ?? "null") as {
+        profiles?: Array<{ id: string }>;
+      } | null;
+      profileIds = new Set([
+        actor.profileId,
+        ...(roster?.profiles ?? []).map((profile) => profile.id),
+      ]);
+    } catch {
+      // Keep existing slots if the roster is temporarily unavailable.
+      profileIds = new Set([actor.profileId, ...Object.keys(entry?.actualByProfile ?? {})]);
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(entry?.actualByProfile ?? {}).filter(
+      ([profileId, state]) =>
+        profileIds.has(profileId) &&
+        !!state?.actual &&
+        validActualPlayback(state.actual) &&
+        state.actual.actor.profileId === profileId &&
+        Date.now() - state.actual.playedAt <= TTL_MS,
+    ),
+  );
+}
+
+function ownActualState(
+  entry: PlaybackEntry | undefined,
+  actor: PlaybackActor,
+): ActualPlaybackState {
+  const own = entry?.actualByProfile?.[actor.profileId];
+  if (
+    own?.actual &&
+    own.actual.actor?.profileId === actor.profileId &&
+    samePlaybackOwner(own.actual, actor)
+  )
+    return { actual: own.actual };
+  // Old shared entries establish private ownership only through the observed actor.
+  return entry?.actual?.actor?.profileId === actor.profileId &&
+    samePlaybackOwner(entry.actual, actor)
+    ? { actual: entry.actual }
+    : {};
+}
+
+function selectedActualState(
+  entry: PlaybackEntry | undefined,
+  actor: PlaybackActor,
+): ActualPlaybackState {
+  const state = actor.privateCw ? ownActualState(entry, actor) : entry;
+  return state?.actual && samePlaybackOwner(state.actual, actor) ? { actual: state.actual } : {};
 }
 
 function entryKey(metaId: string, season?: number, episode?: number): string {
@@ -188,8 +325,7 @@ function writeAll(map: Record<string, PlaybackEntry>): void {
     // A failed replacement must leave the last persisted source/session intact.
     return;
   }
-  noteNotify("store:playback");
-  listeners.forEach((l) => l());
+  notifyPlayback();
 }
 
 export function playbackHistoryRawKeys(): string[] {
@@ -222,7 +358,12 @@ export function savePlayback(
           parsedTitle: entry.parsedTitle ?? prev.parsedTitle,
           savedAt: Date.now(),
         }
-      : { ...entry, actual: prev?.actual, savedAt: Date.now() };
+      : {
+          ...entry,
+          actual: prev?.actual,
+          actualByProfile: prev?.actualByProfile,
+          savedAt: Date.now(),
+        };
   writeAll(all);
 }
 
@@ -235,26 +376,46 @@ export function recordActualPlayback(playback: ActualPlayback): boolean {
     playback.src.episode?.episode,
   );
   const previous = all[key];
-  const previousActual = previous?.actual;
+  const previousOwn = ownActualState(previous, playback.actor);
+  const previousActual = previousOwn.actual;
   // mpv can clear its track list at natural EOF. That is not a new audio
   // choice; keep only the last observed choice from this exact session.
-  const actual =
+  const sameEndedSession =
     playback.completed &&
-    !playback.audioTrack &&
-    previousActual?.audioTrack &&
+    previousActual &&
     validActualPlayback(previousActual) &&
     previousActual.id === playback.id &&
-    isPlaybackActorCurrent(previousActual.actor) &&
-    playbackSourceKey(previousActual.src) === playbackSourceKey(playback.src)
-      ? { ...playback, audioTrack: previousActual.audioTrack }
-      : playback;
+    playbackSourceKey(previousActual.src) === playbackSourceKey(playback.src);
+  const actual = sameEndedSession
+    ? {
+        ...playback,
+        audioTrack: playback.audioTrack ?? previousActual.audioTrack,
+        subtitle: playback.subtitle ?? previousActual.subtitle,
+        subDelaySec: playback.subDelaySec ?? previousActual.subDelaySec,
+        audioDelaySec: playback.audioDelaySec ?? previousActual.audioDelaySec,
+      }
+    : playback;
+  const shared = previous?.actual;
+  const updateShared =
+    !shared || !samePlaybackOwner(shared, playback.actor) || shared.playedAt <= actual.playedAt;
+  const updateOwn = !previousActual || previousActual.playedAt <= actual.playedAt;
   const next = {
     ...all,
     [key]: {
       ...previous,
       title: previous?.title ?? playback.src.meta.name,
       savedAt: Math.max(previous?.savedAt ?? 0, playback.playedAt),
-      actual,
+      actual: updateShared ? actual : shared,
+      actualByProfile: {
+        ...retainedActualProfiles(previous, playback.actor),
+        ...(updateOwn
+          ? {
+              [playback.actor.profileId]: {
+                actual,
+              },
+            }
+          : {}),
+      },
     },
   };
   const entries = Object.entries(next).sort((a, b) => b[1].savedAt - a[1].savedAt);
@@ -266,8 +427,7 @@ export function recordActualPlayback(playback: ActualPlayback): boolean {
   } catch {
     return false;
   }
-  noteNotify("store:playback");
-  listeners.forEach((listener) => listener());
+  notifyPlayback();
   return true;
 }
 
@@ -293,19 +453,14 @@ function validActualPlayback(value: ActualPlayback): boolean {
 
 export function readLastActualPlayback(): ActualPlayback | null {
   const actor = capturePlaybackActor();
-  let last: ActualPlayback | null = null;
+  let last: ActualPlaybackState | null = null;
   for (const entry of Object.values(readAll())) {
-    const actual = entry.actual;
-    if (
-      !actual ||
-      !validActualPlayback(actual) ||
-      actual.actor.storageProfileId !== actor.storageProfileId ||
-      actual.actor.accountId !== actor.accountId
-    )
-      continue;
-    if (!last || actual.playedAt > last.playedAt) last = actual;
+    const state = selectedActualState(entry, actor);
+    const actual = state.actual;
+    if (!actual || Date.now() - actual.playedAt > TTL_MS) continue;
+    if (!last || actual.playedAt > last.actual!.playedAt) last = state;
   }
-  return last;
+  return last?.actual ?? null;
 }
 
 export function playbackSourceKey(
@@ -319,15 +474,93 @@ export function playbackSourceKey(
 }
 
 export function readActualPlaybackFor(src: PlayerSrc): ActualPlayback | null {
-  const entry = readAll()[entryKey(src.meta.id, src.episode?.season, src.episode?.episode)]?.actual;
   const actor = capturePlaybackActor();
-  return entry &&
-    validActualPlayback(entry) &&
-    entry.actor.storageProfileId === actor.storageProfileId &&
-    entry.actor.accountId === actor.accountId &&
-    playbackSourceKey(entry.src) === playbackSourceKey(src)
-    ? entry
-    : null;
+  const entry = selectedActualState(
+    readAll()[entryKey(src.meta.id, src.episode?.season, src.episode?.episode)],
+    actor,
+  ).actual;
+  return entry && playbackSourceKey(entry.src) === playbackSourceKey(src) ? entry : null;
+}
+
+/** Capture the observed session before an asynchronous subtitle cache write starts. */
+export function readActualPlaybackForSubtitle(
+  mediaKey: string,
+  streamKey: string | undefined,
+  notBefore: number,
+): ActualPlayback | null {
+  const actor = capturePlaybackActor();
+  return (
+    Object.values(readAll())
+      .map((entry) => ownActualState(entry, actor).actual)
+      .find(
+        (actual) =>
+          actual &&
+          validActualPlayback(actual) &&
+          actual.actor.profileId === actor.profileId &&
+          actual.actor.storageProfileId === actor.storageProfileId &&
+          actual.actor.accountId === actor.accountId &&
+          actual.playedAt >= notBefore &&
+          subtitleMediaKey(
+            actual.src.meta.id,
+            actual.src.episode?.season,
+            actual.src.episode?.episode,
+          ) === mediaKey &&
+          subtitleStreamKey(actual.src.streamRef) === streamKey,
+      ) ?? null
+  );
+}
+
+/** Cache completion may improve a source pointer, never playback recency or a newer session. */
+export function cacheActualPlaybackSubtitle(
+  target: ActualPlayback,
+  original: PlaybackSubtitleChoice,
+  cached: PlaybackSubtitleChoice,
+): boolean {
+  if (
+    !isPlaybackActorCurrent(target.actor) ||
+    !cached.imported ||
+    !cached.source ||
+    /^(https?|blob|data|memory):/i.test(cached.source)
+  )
+    return false;
+  const all = readAll();
+  const key = entryKey(target.src.meta.id, target.src.episode?.season, target.src.episode?.episode);
+  const entry = all[key];
+  const own = ownActualState(entry, target.actor);
+  const actual = own.actual;
+  if (
+    !entry ||
+    !actual ||
+    !validActualPlayback(actual) ||
+    actual.id !== target.id ||
+    playbackSourceKey(actual.src) !== playbackSourceKey(target.src) ||
+    !actual.subtitle ||
+    actual.subtitle.off ||
+    actual.subtitle.source !== original.source ||
+    actual.subtitle.streamKey !== original.streamKey ||
+    actual.subtitle.subId !== original.subId ||
+    actual.subtitle.provider !== original.provider
+  )
+    return false;
+  const patched = {
+    ...actual,
+    subtitle: { ...actual.subtitle, ...cached, fpsOverride: actual.subtitle.fpsOverride },
+  };
+  all[key] = {
+    ...entry,
+    ...(entry.actual?.id === actual.id ? { actual: patched } : {}),
+    actualByProfile: {
+      ...entry.actualByProfile,
+      [target.actor.profileId]: { ...own, actual: patched },
+    },
+  };
+  try {
+    localStorage.setItem(storeKey(), JSON.stringify(all));
+  } catch {
+    return false;
+  }
+  notifyPlayback();
+  return true;
 }
 
 export function readPlayback(
@@ -343,7 +576,13 @@ export function clearPlayback(metaId: string, season?: number, episode?: number)
   const all = readAll();
   const key = entryKey(metaId, season, episode);
   const actual = all[key]?.actual;
-  if (actual) all[key] = { savedAt: actual.playedAt, title: actual.src.meta.name, actual };
+  if (actual || all[key]?.actualByProfile)
+    all[key] = {
+      savedAt: all[key].savedAt,
+      title: actual?.src.meta.name ?? all[key].title,
+      actual,
+      actualByProfile: all[key].actualByProfile,
+    };
   else delete all[key];
   writeAll(all);
 }
@@ -368,13 +607,15 @@ export function streamOfferedByAddon(
  * addon. Debrid library copies and aggregator duplicates share the torrent hash,
  * so a plain hash match would otherwise select whichever row came first.
  */
-export function findPreferredSourceMatch<T extends {
-  addonId?: string | null;
-  contributors?: Array<{ id: string }>;
-  resolution?: string | null;
-  releaseGroupNormalized?: string | null;
-  audioLanguages?: string[] | null;
-}>(
+export function findPreferredSourceMatch<
+  T extends {
+    addonId?: string | null;
+    contributors?: Array<{ id: string }>;
+    resolution?: string | null;
+    releaseGroupNormalized?: string | null;
+    audioLanguages?: string[] | null;
+  },
+>(
   streams: T[],
   entry: PlaybackEntry,
   match: (stream: T, entry: PlaybackEntry) => boolean,

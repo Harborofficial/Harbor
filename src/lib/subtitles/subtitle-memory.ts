@@ -89,7 +89,7 @@ export function subtitleStreamKey(
 }
 
 export function rememberedSubAppliesToStream(
-  remembered: RememberedSub | null | undefined,
+  remembered: Omit<RememberedSub, "updatedAt"> | null | undefined,
   streamRef: PlayerStreamRef | null | undefined,
 ): boolean {
   if (!remembered) return false;
@@ -202,8 +202,8 @@ export function rememberedChoiceFromLoad(
 }
 
 export function rememberedSubtitleIsLocal(
-  remembered: RememberedSub | null | undefined,
-): remembered is RememberedSub & { source: string } {
+  remembered: Omit<RememberedSub, "updatedAt"> | null | undefined,
+): remembered is Omit<RememberedSub, "updatedAt"> & { source: string } {
   if (remembered?.imported !== true || !remembered.source) return false;
   return !/^(https?|blob|data):/i.test(remembered.source);
 }
@@ -213,7 +213,7 @@ export function subtitleSourceIsLocal(source: string | null | undefined): boolea
 }
 
 export function rememberedSubtitleLoadMetadata(
-  remembered: RememberedSub,
+  remembered: Omit<RememberedSub, "updatedAt">,
   downloadAuth?: SubtitleLoadMetadata["downloadAuth"],
 ): SubtitleLoadMetadata {
   return {
@@ -227,8 +227,8 @@ export function rememberedSubtitleLoadMetadata(
     providerDerived:
       remembered.localTrusted === true
         ? false
-        : remembered.providerDerived ??
-          (rememberedSubtitleIsLocal(remembered) ? false : Boolean(remembered.provider)),
+        : (remembered.providerDerived ??
+          (rememberedSubtitleIsLocal(remembered) ? false : Boolean(remembered.provider))),
     subId: remembered.subId,
     matchScore: remembered.matchScore,
     matchConfidence: remembered.matchConfidence,

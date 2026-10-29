@@ -17,6 +17,12 @@ const contextActions: Record<string, string> = {
   "Play this same video from the beginning?": "تشغيل الفيديو نفسه من البداية؟",
   "Opening playback…": "جارٍ فتح التشغيل…",
   "Continue last watched": "متابعة آخر مشاهدة",
+  "Resume last watched": "استكمال آخر مشاهدة",
+  "The saved audio track could not be restored. Choose an audio track.":
+    "تعذّر استعادة مسار الصوت المحفوظ. اختر مسار صوت.",
+  "The saved subtitle could not be restored. Choose a subtitle.":
+    "تعذّر استعادة الترجمة المحفوظة. اختر ترجمة.",
+  "The saved subtitle timing could not be restored.": "تعذّر استعادة توقيت الترجمة المحفوظ.",
   "Local video": "فيديو محلي",
   "Open my profile": "فتح ملفي الشخصي",
   "Add to page": "إضافة إلى صفحة",

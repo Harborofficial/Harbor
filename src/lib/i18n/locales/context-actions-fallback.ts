@@ -19,6 +19,13 @@ const contextActionsFallback: Record<string, string> = {
   "Play this same video from the beginning?": "Play this same video from the beginning?",
   "Opening playback…": "Opening playback…",
   "Continue last watched": "Continue last watched",
+  "Resume last watched": "Resume last watched",
+  "The saved audio track could not be restored. Choose an audio track.":
+    "The saved audio track could not be restored. Choose an audio track.",
+  "The saved subtitle could not be restored. Choose a subtitle.":
+    "The saved subtitle could not be restored. Choose a subtitle.",
+  "The saved subtitle timing could not be restored.":
+    "The saved subtitle timing could not be restored.",
   "Local video": "Local video",
   "Open my profile": "Open my profile",
   "Add to page": "Add to page",
