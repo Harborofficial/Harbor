@@ -134,6 +134,54 @@ pub async fn music_catalog_playlist_tracks(
 }
 
 #[tauri::command]
+pub async fn music_import_linked_playlist(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, MusicState>,
+    connector_id: String,
+    source_id: String,
+) -> Result<super::library::MusicPlaylist, String> {
+    let generation = state.db.generation()?;
+    let connector = pick(state.inner(), &connector_id)?;
+    let imported = connector.import_playlist(&app, &source_id).await?;
+    super::library::import_linked_playlist(
+        &state.db,
+        generation,
+        &connector_id,
+        &source_id,
+        &imported,
+    )
+}
+
+#[tauri::command]
+pub async fn music_sync_linked_playlist(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, MusicState>,
+    playlist_id: String,
+) -> Result<super::library::MusicPlaylist, String> {
+    let generation = state.db.generation()?;
+    let playlist = super::library::linked_playlist(&state.db, &playlist_id)?;
+    let source = playlist.source.ok_or("This playlist is not linked")?;
+    let connector = pick(state.inner(), &source.connector_id)?;
+    let imported = connector.import_playlist(&app, &source.source_id).await?;
+    super::library::sync_linked_playlist(
+        &state.db,
+        generation,
+        &playlist_id,
+        &source,
+        &playlist.updated_at,
+        &imported,
+    )
+}
+
+#[tauri::command]
+pub fn music_unlink_playlist(
+    state: tauri::State<'_, MusicState>,
+    playlist_id: String,
+) -> Result<super::library::MusicPlaylist, String> {
+    super::library::unlink_playlist(&state.db, &playlist_id)
+}
+
+#[tauri::command]
 pub async fn music_station_tracks(
     app: tauri::AppHandle,
     state: tauri::State<'_, MusicState>,

@@ -2057,6 +2057,12 @@ pub fn run() {
             #[cfg(feature = "music")]
             music::music_catalog_playlist_tracks,
             #[cfg(feature = "music")]
+            music::music_import_linked_playlist,
+            #[cfg(feature = "music")]
+            music::music_sync_linked_playlist,
+            #[cfg(feature = "music")]
+            music::music_unlink_playlist,
+            #[cfg(feature = "music")]
             music::music_station_tracks,
             #[cfg(feature = "music")]
             music::music_search_typed,

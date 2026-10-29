@@ -130,6 +130,7 @@ import { HarborNameSync } from "@/components/harbor-name-sync";
 import { SettingsProfileBridge } from "@/lib/settings-profile-bridge";
 import { TrackerProfileBridge } from "@/lib/tracker-profile-bridge";
 import { ProfilePickerModal } from "@/components/profile-picker/picker-modal";
+import { ConfirmActionModal } from "@/components/confirm-action-modal";
 import { WatchlistSync } from "@/lib/watchlist-sync";
 import { ContextMenuProvider } from "@/lib/context-menu";
 import { PageContextNavigationDialogs } from "@/chrome/context-page-navigation";
@@ -606,6 +607,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                       <CustomHoverCssMount />
                                                       <TopRankModal />
                                                       <ProfilePickerModal />
+                                                      <ConfirmActionModal />
                                                       <CurfewGuard />
                                                       <Profiled id="search.overlay">
                                                         <SearchOverlay />

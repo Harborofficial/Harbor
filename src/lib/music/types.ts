@@ -81,11 +81,18 @@ export type MusicArtist = {
   albumCount: number;
 };
 
+export type MusicPlaylistSource = {
+  connectorId: string;
+  sourceId: string;
+  syncedAt: string;
+};
+
 export type MusicPlaylist = {
   id: string;
   name: string;
   createdAt: string;
   updatedAt: string;
+  source?: MusicPlaylistSource;
   /** Collection-specific timestamps; older entries may have no recorded date. */
   trackAddedAt?: Record<string, string>;
   tracks: MusicTrack[];

@@ -14,6 +14,34 @@ import musicPlaylists from "./music-playlists";
 import musicPossible from "./music-possible";
 import musicLegal from "./music-legal";
 const music: Record<string, string> = {
+  "music.linked.import": "Import from link",
+  "music.linked.linkLabel": "YouTube Music playlist link or ID",
+  "music.linked.importHelp":
+    "Link a public or unlisted YouTube playlist or a generated Mix watch link. Harbor saves a local copy for manual sync. Mixes save only the current queue, not an endless radio playlist. Signing in is not supported.",
+  "music.linked.loading": "Loading tracks from YouTube Music…",
+  "music.linked.mixHelp":
+    "This generated Mix saves the current queue as a snapshot. Sync refreshes that snapshot; the lineup may change and does not include endless radio continuations. Local edits are overwritten. Unlink to keep them permanently.",
+  "music.linked.mixSyncConfirm":
+    "Replace this playlist with the Mix's current queue snapshot? The lineup may change. Local additions, removals, reordering and title edits will be overwritten.",
+  "music.linked.source": "Linked to YouTube Music",
+  "music.linked.lastSynced": "Last synced: {date}",
+  "music.linked.mirrorHelp":
+    "Sync replaces local edits with YouTube's tracks, order and title. Unlink to keep your changes permanently.",
+  "music.linked.sync": "Sync now",
+  "music.linked.syncTitle": "Sync with YouTube Music?",
+  "music.linked.mixSyncTitle": "Refresh this Mix snapshot?",
+  "music.linked.syncConfirm":
+    "Replace this playlist with YouTube's current tracks, order and title? Local additions, removals and reordering will be overwritten.",
+  "music.linked.syncedNotice": "Synced {count} tracks from YouTube Music.",
+  "music.linked.importedNotice": "Linked {name} with {count} tracks from YouTube Music.",
+  "music.linked.unlink": "Unlink",
+  "music.linked.unlinkTitle": "Unlink this playlist?",
+  "music.linked.unlinkConfirm":
+    "Stop syncing with YouTube Music? The current tracks will stay as a local playlist.",
+  "music.linked.editTitle": "Edit linked playlist?",
+  "music.linked.editContinue": "Continue editing",
+  "music.linked.editConfirm":
+    "This playlist is linked to YouTube Music. Local changes will be overwritten on sync. Continue editing? You can unlink it from the playlist page to keep your changes permanently.",
   "music.xxl.newer": "Newer class",
   "music.xxl.older": "Older class",
   ...musicMiku,
@@ -292,6 +320,7 @@ const music: Record<string, string> = {
   "music.playlist.likeThisFresh": "Only music new to me",
   "music.playlist.likeThisHeard": "Include songs I've heard",
   "music.playlist.delete": "Delete playlist",
+  "music.playlist.deleteTitle": "Delete playlist?",
   "music.playlist.deleteConfirm": "Delete this playlist? The songs stay in your library.",
   "music.watch.back": "Back to music",
   "music.watch.similar": "Similar songs",

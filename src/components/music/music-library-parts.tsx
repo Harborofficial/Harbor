@@ -23,6 +23,7 @@ import {
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { Spinner } from "@/components/spinner";
 import { useSectionBack } from "@/lib/section-back";
+import { confirmAction } from "@/lib/confirm-action";
 import { MusicPlaylistCover } from "./music-playlist-cover";
 import { MusicCollectionControls } from "./music-collection-controls";
 import { MusicArtistLink } from "./music-artist-link";
@@ -41,7 +42,7 @@ const ROW_LIKE_SPOKES = [0, 45, 90, 135, 180, 225, 270, 315];
 import { addTracksToMusicPlaylist, createMusicPlaylist } from "@/lib/music/library";
 import { recordMusicPlaylistPlayback } from "@/lib/music/playback-origin";
 import { useMusicNowPlaying } from "@/lib/music/use-now-playing";
-import { deleteMusicPlaylist, renameMusicPlaylist } from "@/lib/music/library";
+import { confirmLinkedMusicPlaylistEdit, deleteMusicPlaylist, renameMusicPlaylist } from "@/lib/music/library";
 import { getMusicState, enqueueMusic, toggleMusicLiked } from "@/lib/music/player";
 import type { MusicPlaylist, MusicTrack } from "@/lib/music/types";
 
@@ -532,6 +533,7 @@ export function PlaylistHeader({
       setRenaming(false);
       return;
     }
+    if (!(await confirmLinkedMusicPlaylistEdit(playlist))) return;
     setBusy(true);
     onError(null);
     try {
@@ -546,7 +548,15 @@ export function PlaylistHeader({
   };
 
   const remove = async () => {
-    if (!window.confirm(t("music.playlist.deleteConfirm"))) return;
+    if (
+      !(await confirmAction({
+        title: t("music.playlist.deleteTitle"),
+        message: t("music.playlist.deleteConfirm"),
+        confirmLabel: t("common.delete"),
+        destructive: true,
+      }))
+    )
+      return;
     setBusy(true);
     onError(null);
     try {

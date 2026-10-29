@@ -4,6 +4,7 @@ use super::migrations;
 use super::{duration_label, MusicStream, MusicTrack};
 use rusqlite::{params, Connection, OptionalExtension, Transaction};
 use std::path::Path;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use stream_cache::{is_fresh, stream_ttl};
@@ -11,6 +12,7 @@ use stream_cache::{is_fresh, stream_ttl};
 pub struct MusicDb {
     connection: Mutex<Option<Connection>>,
     opened: Mutex<Option<std::path::PathBuf>>,
+    generation: AtomicU64,
 }
 
 impl MusicDb {
@@ -18,6 +20,7 @@ impl MusicDb {
         Self {
             connection: Mutex::new(None),
             opened: Mutex::new(None),
+            generation: AtomicU64::new(0),
         }
     }
 
@@ -33,6 +36,11 @@ impl MusicDb {
         if slot.is_some() && opened.as_deref() == Some(path) {
             return Ok(());
         }
+        let generation = self
+            .generation
+            .load(Ordering::Relaxed)
+            .checked_add(1)
+            .ok_or_else(|| "Music database generation cannot advance".to_string())?;
         if slot.is_some() {
             *slot = None;
         }
@@ -43,6 +51,7 @@ impl MusicDb {
         Self::configure(&mut connection)?;
         *slot = Some(connection);
         *opened = Some(path.to_path_buf());
+        self.generation.store(generation, Ordering::Relaxed);
         Ok(())
     }
 
@@ -70,6 +79,26 @@ impl MusicDb {
             .as_mut()
             .ok_or_else(|| "Music database is not initialized".to_string())?;
         operation(connection)
+    }
+
+    pub fn generation(&self) -> Result<u64, String> {
+        self.with_connection(|_| Ok(self.generation.load(Ordering::Relaxed)))
+    }
+
+    pub(super) fn with_connection_at_generation<T>(
+        &self,
+        expected_generation: u64,
+        operation: impl FnOnce(&mut Connection) -> Result<T, String>,
+    ) -> Result<T, String> {
+        self.with_connection(|connection| {
+            if self.generation.load(Ordering::Relaxed) != expected_generation {
+                return Err(
+                    "Music database changed while fetching playlist; retry in the current profile"
+                        .to_string(),
+                );
+            }
+            operation(connection)
+        })
     }
 
     pub fn upsert_track(&self, track: &MusicTrack) -> Result<(), String> {
@@ -173,6 +202,7 @@ impl MusicDb {
         Self {
             connection: Mutex::new(Some(connection)),
             opened: Mutex::new(None),
+            generation: AtomicU64::new(1),
         }
     }
 }
