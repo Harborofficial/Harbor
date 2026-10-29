@@ -1,4 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { isPlayableVideoPath } from "@/lib/media-file";
 import { dlog, dwarn } from "@/lib/debug";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
 import {
@@ -13,7 +14,6 @@ import {
 } from "./types";
 
 const BASE = "https://www.premiumize.me/api";
-const VIDEO_EXTS = [".mkv", ".mp4", ".avi", ".m4v", ".webm", ".ts", ".mov", ".wmv"];
 const LIBRARY_TTL_MS = 5 * 60_000;
 const LIBRARY_CACHE = new Map<string, { at: number; data: LibraryEntry[] }>();
 
@@ -195,7 +195,7 @@ function pickPmFile(content: PmFile[], fileIdx: number | undefined, hint?: Episo
   if (content.length === 0) return null;
   if (fileIdx != null && content[fileIdx]) return content[fileIdx];
   const videos = content.filter((f) =>
-    VIDEO_EXTS.some((ext) => (f.path ?? "").toLowerCase().endsWith(ext)),
+    isPlayableVideoPath((f.path ?? "")),
   );
   const pool = videos.length > 0 ? videos : content;
   const mi = matchEpisodeFileIndex(pool.map((f) => f.path ?? ""), hint);

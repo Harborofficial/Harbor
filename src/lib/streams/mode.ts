@@ -1,4 +1,5 @@
 import { isP2pStream } from "./cached";
+import { isPlayableVideoPath } from "@/lib/media-file";
 
 export type StreamMode = "both" | "addons" | "p2p";
 
@@ -27,12 +28,10 @@ type StreamModeCandidate = {
   } | null;
 };
 
-const VIDEO_FILE_EXTENSION_RX =
-  /\.(?:mkv|mp4|avi|mov|m4v|webm|ts|m3u8|mpd|flv|wmv|m2ts|mpg|mpeg|ogv|3gp)(?:[?#]|$)/i;
 const HTTP_URL_RX = /^(?:https?:)?\/\//i;
 
 export function hasVideoFileExtension(value: string | null | undefined): boolean {
-  return VIDEO_FILE_EXTENSION_RX.test(value?.trim() ?? "");
+  return isPlayableVideoPath(value?.trim() ?? "");
 }
 
 function hasProxyHeaders(value: StreamProxyHeaders | null | undefined): boolean {

@@ -1,7 +1,6 @@
 export type EpisodeHint = { season: number | null; episode: number | null };
 import { episodeSpanContains, parseEpisodeSpan } from "@/lib/episode-span";
-
-const VIDEO_EXT_RE = /\.(mkv|mp4|avi|mov|m4v|webm|ts|flv|wmv|m2ts|mpg|mpeg|ogv|3gp)(\?|#|$)/i;
+import { isPlayableVideoPath } from "@/lib/media-file";
 
 export function episodeFileRegex(season: number, episode: number): RegExp {
   const s = String(season).padStart(2, "0");
@@ -36,7 +35,7 @@ export function matchEpisodeFileIndex(names: string[], hint: EpisodeHint | undef
     const name = names[i] ?? "";
     const span = parseEpisodeSpan(name);
     if (!(span ? episodeSpanContains(span, hint.season, hint.episode) : re.test(name))) continue;
-    if (VIDEO_EXT_RE.test(name)) return i;
+    if (isPlayableVideoPath(name)) return i;
     if (anyMatch < 0) anyMatch = i;
   }
   return anyMatch;

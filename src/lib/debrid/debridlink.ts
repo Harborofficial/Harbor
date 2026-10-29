@@ -1,4 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { isPlayableVideoPath } from "@/lib/media-file";
 import { dlog, dwarn } from "@/lib/debug";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
 import {
@@ -13,7 +14,6 @@ import {
 } from "./types";
 
 const BASE = "https://debrid-link.com/api/v2";
-const VIDEO_EXTS = [".mkv", ".mp4", ".avi", ".m4v", ".webm", ".ts", ".mov", ".wmv"];
 const POLL_DELAY_MS = 800;
 const POLL_MAX_ATTEMPTS = 24;
 const LIBRARY_TTL_MS = 5 * 60_000;
@@ -259,7 +259,7 @@ function pickDlFile(files: DlFile[], fileIdx: number | undefined, hint?: Episode
   if (files.length === 0) return null;
   if (fileIdx != null && files[fileIdx]) return files[fileIdx];
   const videos = files.filter((f) =>
-    VIDEO_EXTS.some((ext) => (f.name ?? "").toLowerCase().endsWith(ext)),
+    isPlayableVideoPath((f.name ?? "")),
   );
   const pool = videos.length > 0 ? videos : files;
   const mi = matchEpisodeFileIndex(pool.map((f) => f.name ?? ""), hint);
