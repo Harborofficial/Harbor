@@ -720,11 +720,23 @@ export function reportMusicVideoPlayback(report: MusicVideoReport): void {
   if (Object.keys(patch).length > 0) publish(patch);
 }
 
+/** The native engine already holds this track, so a video may take over without a new load. */
+export function isMusicTrackPrimed(track: MusicTrack): boolean {
+  return (
+    enginePrimed &&
+    state.current?.id === track.id &&
+    state.current.connectorId === track.connectorId
+  );
+}
+
 /** Wait for the matching native audio load before a video can take ownership. */
 export async function waitForMusicAudioReady(track: MusicTrack): Promise<boolean> {
   const loading = audioReady;
-  if (!loading || loading.id !== track.id || loading.connectorId !== track.connectorId)
-    return false;
+  if (!loading || loading.id !== track.id || loading.connectorId !== track.connectorId) {
+    // A reload adopts the still-live native engine without creating a new load promise.
+    // Treat that primed track as ready instead of failing the video that opens next.
+    return isMusicTrackPrimed(track) && (state.phase === "playing" || state.phase === "paused");
+  }
   return (
     (await loading.done) &&
     loading.request === playRequest &&

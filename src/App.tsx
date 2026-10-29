@@ -214,6 +214,9 @@ const MusicSurprisePrompt = lazy(() =>
     default: m.MusicSurprisePrompt,
   })),
 );
+const MusicVideoMini = lazy(() =>
+  import("@/components/music/music-video-mini").then((m) => ({ default: m.MusicVideoMini })),
+);
 
 class ThemeErrorBoundary extends Component<
   { fallback: ReactNode; children: ReactNode; onError?: () => void },
@@ -1848,6 +1851,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
           {musicEnabled && (
             <Suspense fallback={null}>
               <MusicDock />
+              <MusicVideoMini />
               <MusicSurprisePrompt />
             </Suspense>
           )}

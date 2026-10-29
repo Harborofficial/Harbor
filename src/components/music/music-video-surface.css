@@ -277,3 +277,28 @@
     transition: none;
   }
 }
+
+/* The fullscreen stage is a non-interactive media frame; browser focus rings on it and on the
+   media nodes show up as stray blue lines along the viewport edge. Controls keep their rings. */
+[data-music-video-fullscreen-stage],
+[data-music-video-fullscreen-stage]:focus,
+[data-music-video-fullscreen-stage]:focus-visible,
+[data-music-video-fullscreen-stage]:fullscreen,
+[data-music-video-fullscreen-stage] .music-video-surface:focus,
+[data-music-video-fullscreen-stage] .music-video-surface:focus-visible,
+[data-music-video-fullscreen-stage] video:focus,
+[data-music-video-fullscreen-stage] video:focus-visible,
+[data-music-video-fullscreen-stage] audio:focus,
+[data-music-video-fullscreen-stage] audio:focus-visible {
+  outline: none !important;
+  border: 0;
+}
+[data-music-video-fullscreen-stage] {
+  overflow: hidden;
+}
+[data-music-video-fullscreen-stage] input[type="range"]:focus-visible {
+  outline: none !important;
+}
+[data-music-video-fullscreen-stage] .group:has(input[type="range"]:focus-visible) > span:nth-child(2) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}

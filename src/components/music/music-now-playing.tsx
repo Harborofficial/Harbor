@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
   AudioLines,
   BarChart3,
+  ChevronUp,
   Globe2,
   Heart,
   Loader2,
@@ -39,6 +40,7 @@ import { MusicNowTitle } from "./music-now-title";
 import { MusicUpNextRow } from "./music-up-next-row";
 import { MusicVideoSurface } from "./music-video-surface";
 import { MusicVideoFullscreen } from "./music-video-fullscreen";
+import { MusicVideoMiniToggle } from "./music-video-mini-toggle";
 import {
   exitMusicVideoFullscreen,
   getMusicVideoFullscreen,
@@ -190,6 +192,7 @@ export function MusicNowPlaying({
   });
   const video = current?.mediaKind === "video";
   const immersive = video && appearance.immersive;
+  const theatre = video && appearance.theatre && !immersive;
   // Immersive swaps position, inset, aspect-ratio and radius at once, and none of those can be
   // transitioned, so the frame snaps. A veil rises over the swap and clears once it has landed,
   // which reads as a deliberate cut and works the same going in as coming out.
@@ -436,6 +439,7 @@ export function MusicNowPlaying({
         data-now-playing
         data-closing={closing ? "1" : undefined}
         data-immersive={immersive ? "1" : undefined}
+        data-theatre={theatre ? "1" : undefined}
         style={{ insetInlineStart: inset } as CSSProperties}
         aria-label={t("music.now.title")}
       >
@@ -483,11 +487,24 @@ export function MusicNowPlaying({
               <button
                 type="button"
                 aria-pressed={appearance.immersive}
-                onClick={() => setMusicAppearance({ immersive: !appearance.immersive })}
+                onClick={() =>
+                  setMusicAppearance({ immersive: !appearance.immersive, theatre: false })
+                }
                 title={t("Immersive")}
               >
                 <Wallpaper size={17} aria-hidden="true" />
                 <span>{t("Immersive")}</span>
+              </button>
+            )}
+            {video && (
+              <button
+                type="button"
+                aria-pressed={theatre}
+                onClick={() => setMusicAppearance({ theatre: !theatre, immersive: false })}
+                title={t("Theatre mode")}
+              >
+                <ChevronUp size={17} aria-hidden="true" />
+                <span>{t("Theatre mode")}</span>
               </button>
             )}
             <button
@@ -505,7 +522,7 @@ export function MusicNowPlaying({
         <div className="music-now-scroll">
         <div className="music-now-layout">
           {artMenu.menu}
-          <div className="music-now-art-column">
+          <div className="music-now-art-column" data-video={video ? "1" : undefined}>
             <div
               ref={artwork}
               className="music-now-artwork"
@@ -524,6 +541,7 @@ export function MusicNowPlaying({
               )}
             </div>
             {video && <MusicVideoFullscreen track={current} />}
+            {video && <MusicVideoMiniToggle className="music-now-mini-toggle" />}
             {appearance.levels && current.mediaKind !== "video" && (
               <div className="music-now-levels" data-now-levels>
                 <MusicLevelMeter meter={meter} />

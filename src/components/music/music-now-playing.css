@@ -818,7 +818,8 @@
   align-self: start;
 }
 @container (min-width:781px) {
-  .music-now-playing:not([data-immersive="1"]) .music-now-content:has(> .music-now-panel[data-panel="queue"]) {
+  .music-now-playing:not([data-immersive="1"]):not([data-theatre="1"])
+    .music-now-content:has(> .music-now-panel[data-panel="queue"]) {
     height: 100%;
   }
   .music-now-playing:not([data-immersive="1"]) .music-now-content > .music-now-panel[data-panel="queue"] {
@@ -1119,5 +1120,76 @@
   .music-now-veil {
     animation: none;
     opacity: 0;
+  }
+}
+
+.music-now-mini-toggle {
+  margin-top: 14px;
+}
+.music-now-playing[data-immersive="1"] .music-now-mini-toggle {
+  display: none;
+}
+
+/* A video is the subject here, so give it the larger column and line its edge up with
+   the "Now playing" heading instead of centering it inside the old artwork width. */
+@container (min-width: 781px) {
+  .music-now-playing:not([data-immersive="1"]):not([data-theatre="1"])
+    .music-now-layout:has(.music-now-art-column[data-video]) {
+    max-width: 1380px;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr);
+  }
+  .music-now-playing:not([data-immersive="1"]):not([data-theatre="1"])
+    .music-now-art-column[data-video] {
+    max-width: none;
+    justify-self: start;
+  }
+}
+@container (max-width: 780px) {
+  .music-now-playing:not([data-immersive="1"]):not([data-theatre="1"])
+    .music-now-art-column[data-video] {
+    max-width: min(100%, 620px);
+    justify-self: start;
+  }
+  .music-now-playing:not([data-immersive="1"]):not([data-theatre="1"])
+    .music-now-art-column[data-video]
+    .music-now-artwork {
+    max-width: none;
+    max-height: none;
+    margin-inline: 0;
+  }
+}
+
+/* Theatre keeps the video as one large block and lets the rest of Now playing follow below. */
+.music-now-playing[data-theatre="1"] .music-now-layout {
+  height: auto;
+  max-width: 1380px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
+  gap: 24px;
+  align-items: start;
+}
+.music-now-playing[data-theatre="1"] .music-now-art-column {
+  position: static;
+  width: 100%;
+  max-width: none;
+  justify-self: stretch;
+}
+.music-now-playing[data-theatre="1"] .music-now-artwork {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  margin-inline: 0;
+}
+.music-now-playing[data-theatre="1"] .music-now-content {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  padding-inline: 0;
+  margin-inline-start: 0;
+}
+@container (max-width: 780px) {
+  .music-now-playing[data-theatre="1"] .music-now-art-column[data-video] {
+    max-width: 100%;
   }
 }

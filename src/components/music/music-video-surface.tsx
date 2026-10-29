@@ -15,6 +15,7 @@ import { musicVideoSurfaces } from "@/lib/music/video-session";
 import { musicVideoStream, musicVideoStreamKey, type MusicVideoStream } from "@/lib/music/video";
 import {
   adoptMusicVideoHost,
+  musicVideoElementVolume,
   musicVideoHost,
   musicVideoHostLive,
   musicVideoHostSource,
@@ -84,11 +85,13 @@ export function MusicVideoSurface({
   onShowing,
   error = false,
   onRetry,
+  mini = false,
 }: {
   track: MusicTrack;
   active?: boolean;
   expanded?: boolean;
   onShowing?: (showing: boolean) => void;
+  mini?: boolean;
   error?: boolean;
   onRetry?: () => void;
 }) {
@@ -244,8 +247,9 @@ export function MusicVideoSurface({
   const paused = player.phase === "paused";
   useEffect(() => {
     if (!stream || !picture) return;
-    if (sound) sound.volume = volume;
-    else picture.volume = volume;
+    const elementVolume = musicVideoElementVolume(volume);
+    if (sound) sound.volume = elementVolume;
+    else picture.volume = elementVolume;
     if (paused) {
       sound?.pause();
       picture.pause();
@@ -360,9 +364,10 @@ export function MusicVideoSurface({
       ref={shell}
       className="music-video-surface"
       data-music-video-surface={expanded ? "expanded" : "watch"}
+      data-mini={mini ? "1" : undefined}
       data-video-state={showing ? "playing" : unavailable ? "unavailable" : "loading"}
       data-idle={fullscreen && idle ? "1" : undefined}
-      onDoubleClick={toggleMusicVideoFullscreen}
+      onDoubleClick={mini ? undefined : toggleMusicVideoFullscreen}
     >
       {!showing && (
         <div className="music-video-placeholder" role="status">
@@ -382,7 +387,7 @@ export function MusicVideoSurface({
           )}
         </div>
       )}
-      {showing && (
+      {showing && !mini && (
         <MusicVideoControls
           lyrics={lyrics}
           lyricsState={lyricsState}
@@ -393,7 +398,7 @@ export function MusicVideoSurface({
           expanded={expanded}
         />
       )}
-      {interrupted && (
+      {interrupted && !mini && (
         <div className="music-video-badge">
           {halted ? (
             <button

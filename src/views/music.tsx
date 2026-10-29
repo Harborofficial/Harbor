@@ -35,6 +35,10 @@ import { MusicYouTube } from "@/components/music/music-youtube";
 import { MusicPlaylistPickerProvider } from "@/components/music/music-playlist-picker";
 import { MusicWatch } from "@/components/music/music-watch";
 import { MusicVideoDiscovery } from "@/components/music/music-video-discovery";
+import {
+  takePendingMusicWatch,
+  type MusicWatchRequest,
+} from "@/lib/music/video-mini";
 import { MusicSimilarPage } from "./music/music-similar-page";
 import { MusicRollingStoneRow } from "@/components/music/music-rolling-stone-row";
 import { MusicRollingStonePage } from "@/components/music/music-rolling-stone-page";
@@ -342,6 +346,12 @@ function MusicViewContent({ active }: { active: boolean }) {
   }, [active, t]);
 
   const runSearch = useCallback((query: string, connector: string | null) => {
+    if (watch) {
+      setVideoQuery(query.trim() || "music videos");
+      setWatch(null);
+      setDiscoveryPage("videos");
+      return;
+    }
     const generation = ++searchGeneration.current;
     if (detailRef.current) searchOrigin.current = detailRef.current;
     setDetail(null);
@@ -363,7 +373,7 @@ function MusicViewContent({ active }: { active: boolean }) {
       .finally(() => {
         if (searchGeneration.current === generation) setSearching(false);
       });
-  }, []);
+  }, [watch]);
 
   const openLabel = useCallback((id: string, name: string) => {
     const generation = ++searchGeneration.current;
@@ -442,6 +452,32 @@ function MusicViewContent({ active }: { active: boolean }) {
     };
     window.addEventListener("harbor:music-player-closed", closed);
     return () => window.removeEventListener("harbor:music-player-closed", closed);
+  }, []);
+  useEffect(() => {
+    const apply = (request: MusicWatchRequest | null) => {
+      if (!request) return;
+      watchFromVideos.current = false;
+      setDiscoveryPage(null);
+      setYtm(false);
+      setSimilar(null);
+      setSearch(null);
+      const nextTrack = { ...request.track, mediaKind: "video" as const };
+      setWatch({
+        track: nextTrack,
+        queue: request.queue.length
+          ? request.queue.map((item) => ({ ...item, mediaKind: "video" as const }))
+          : [nextTrack],
+      });
+    };
+    const open = (event: Event) => {
+      apply(
+        takePendingMusicWatch() ??
+          ((event as CustomEvent<MusicWatchRequest>).detail ?? null),
+      );
+    };
+    window.addEventListener("harbor:music-watch", open);
+    apply(takePendingMusicWatch());
+    return () => window.removeEventListener("harbor:music-watch", open);
   }, []);
   useMusicPageEscape(closeConnections, active && connectionsPage !== null);
   useMusicPageEscape(
@@ -1201,6 +1237,7 @@ function MusicViewContent({ active }: { active: boolean }) {
             <section data-scroll-anchor="mast">
               <MusicMast
                 initialQuery={search && search.mode !== "genre" ? search.query : ""}
+                videoSearch={watch !== null}
                 onSubmit={runSearch}
                 onClear={clearSearch}
                 onPick={(item) => openItem(item, [item])}
