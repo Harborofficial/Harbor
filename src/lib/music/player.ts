@@ -1,5 +1,9 @@
 import { compatibleVocalVersion, shouldResolvePreferredSource } from "./source-version";
-import { cancelMusicQueueAutomation, markMusicQueueAutomationStarted, ownsMusicQueueAutomation } from "./queue-automation";
+import {
+  cancelMusicQueueAutomation,
+  markMusicQueueAutomationStarted,
+  ownsMusicQueueAutomation,
+} from "./queue-automation";
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
 import { hydrateListeningAffinity, observeMusicListening } from "./listening-affinity";
 import { filterBlockedTracks, hydrateArtistBlockStore } from "./artist-blocks";
@@ -26,11 +30,22 @@ import {
   pinSourceFor,
   unpinSourceFor,
 } from "./pinned-sources";
-import { musicAdvance, musicPrevious, musicWarmTargets, resetMusicOrder, setMusicPriorityNext } from "./transport";
+import {
+  getMusicTransport,
+  musicAdvance,
+  musicPrevious,
+  musicWarmTargets,
+  resetMusicOrder,
+  setMusicPriorityNext,
+} from "./transport";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useSyncExternalStore } from "react";
-import { readMusicPreference, readStoredMusicPreference, writeMusicPreference } from "./preferences";
+import {
+  readMusicPreference,
+  readStoredMusicPreference,
+  writeMusicPreference,
+} from "./preferences";
 import {
   clampMusicVolume,
   initializeMusicAudioSettings,
@@ -43,7 +58,11 @@ import {
   writeCheckpointToDb,
   type MusicCheckpoint,
 } from "./session-checkpoint";
-import { beginMusicQueue, getMusicPlaybackOrigin, restoreMusicPlaybackOrigin } from "./playback-origin";
+import {
+  beginMusicQueue,
+  getMusicPlaybackOrigin,
+  restoreMusicPlaybackOrigin,
+} from "./playback-origin";
 import { hydrateMusicContextTracks, hydrateMusicRecentContexts } from "./recent-context";
 import { hydrateMusicDestinations } from "./recent-destinations";
 import { hydratePinnedMusicPlaylists } from "./pinned-playlists";
@@ -187,7 +206,11 @@ function warmBeforeEnd(): void {
   if (state.current.connectorId === "spotify") {
     // librespot plays a preloaded track without a load gap; stream URLs are warmed below.
     const next = musicWarmTargets(state.queue, state.queueIndex, 1)[0];
-    if (next && musicPlaybackSourceAllowed(next) && queueTrackKey(next) !== queueTrackKey(state.current))
+    if (
+      next &&
+      musicPlaybackSourceAllowed(next) &&
+      queueTrackKey(next) !== queueTrackKey(state.current)
+    )
       void invoke("music_spotify_preload", { track: next }).catch(() => {});
   }
   warmNeighbours();
@@ -886,7 +909,12 @@ export async function playMusic(
     (track.connectorId === "catalog" && !track.playbackUrl) ||
     (sourceBlocked && track.mediaKind !== "video");
   const preferredSource = readMusicPreference("harbor.music.preferred-source.v1");
-  const resolvePreferred = shouldResolvePreferredSource(track, preferredSource, explicitSource !== null, failedAttempts.size > 0);
+  const resolvePreferred = shouldResolvePreferredSource(
+    track,
+    preferredSource,
+    explicitSource !== null,
+    failedAttempts.size > 0,
+  );
   const workingSource = state.current?.connectorId;
   let alternatives: MusicTrack[] = [];
   let searchedAlternatives = catalog || resolvePreferred;
@@ -914,9 +942,16 @@ export async function playMusic(
   });
   try {
     if (catalog || resolvePreferred) {
-      const candidates = await sourcesFor(track).catch(error => {
+      const candidates = await sourcesFor(track).catch((error) => {
         if (catalog) throw error;
-        return [{ connectorId: track.connectorId ?? "", connectorName: "", health: "healthy" as const, track }];
+        return [
+          {
+            connectorId: track.connectorId ?? "",
+            connectorName: "",
+            health: "healthy" as const,
+            track,
+          },
+        ];
       });
       if (!ownsRequest()) return;
       const playable = candidates.filter(
@@ -925,8 +960,19 @@ export async function playMusic(
           candidate.track.connectorId !== "catalog" &&
           !failedAttempts.has(`${candidate.track.connectorId}:${candidate.track.id}`),
       );
-      if (!catalog && !playable.some(candidate => candidate.track.connectorId === track.connectorId && candidate.track.id === track.id)) {
-        playable.push({ connectorId: track.connectorId ?? "", connectorName: "", health: "healthy", track });
+      if (
+        !catalog &&
+        !playable.some(
+          (candidate) =>
+            candidate.track.connectorId === track.connectorId && candidate.track.id === track.id,
+        )
+      ) {
+        playable.push({
+          connectorId: track.connectorId ?? "",
+          connectorName: "",
+          health: "healthy",
+          track,
+        });
       }
       const preferred = readMusicPreference("harbor.music.preferred-source.v1");
       const ranked = rankByExplicitness(playable, explicitnessOf(track));
@@ -1044,7 +1090,13 @@ export async function playMusic(
       };
       try {
         if (target && !returningToComputer) await loadMusicOnSpeaker(track, target);
-        else await invoke("music_play_track", { track, volume: state.volume });
+        else {
+          await invoke("music_play_track", { track, volume: state.volume });
+          // The music-video host owns the audible track once its surface takes over.
+          // Pause the native engine immediately so a video loop cannot play both.
+          if (track.mediaKind === "video")
+            await invoke("music_engine_pause", { paused: true }).catch(() => {});
+        }
         break;
       } catch (error) {
         if (!ownsRequest()) return;
@@ -1298,6 +1350,14 @@ export function setMusicVolume(volume: number): void {
 export function nextMusic(auto = false): void {
   if (!state.current) return;
   if (!auto) autoSkipped.clear();
+  if (auto && ownsMusicVideo() && getMusicTransport().repeat === "one" && videoController) {
+    // Restart the video host itself. Reloading the native track would leave the
+    // picture's audio running beside a second audio engine.
+    videoController.seek(0);
+    videoController.setPaused(false);
+    publish({ phase: "playing", currentTime: 0 });
+    return;
+  }
   const next = musicAdvance(state.queue, state.queueIndex, auto);
   if (next) void playMusic(next, state.queue, new Set(), true, auto).catch(() => {});
   else {
