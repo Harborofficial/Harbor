@@ -16,13 +16,7 @@ import { nameColor } from "@/lib/together/colors";
 import { useTogether } from "@/lib/together/provider";
 import { buildPlayInvite } from "@/lib/together/build-invite";
 import { useView, type PlayerSrc, type PlayEpisode } from "@/lib/view";
-import {
-  useQueue,
-  useSleepAtEnd,
-  queueIndexOf,
-  queueItemAfter,
-  setQueuePlaying,
-} from "@/lib/queue";
+import { useQueue, useSleepAtEnd, queueItemAfter, setQueuePlaying } from "@/lib/queue";
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
 import { isLocalUrl } from "@/lib/player/local-url";
@@ -84,6 +78,8 @@ import { useSleepTimer } from "./player/hooks/use-sleep-timer";
 import { useAutoEndExit } from "./player/hooks/use-auto-end-exit";
 import { useQueueAdvance } from "./player/hooks/use-queue-advance";
 import { useQueueNav } from "./player/hooks/use-queue-nav";
+import { useQueuePlayback } from "./player/hooks/use-queue-playback";
+import { queueSessionIndex } from "@/lib/queue-session";
 import { usePipMode } from "./player/hooks/use-pip-mode";
 import { usePlaybackControls } from "./player/hooks/use-playback-controls";
 import { returnToActivePlayback, type PlayerReturnOptions } from "@/lib/player/return-to-playback";
@@ -148,7 +144,6 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     openMeta,
     exitPlayback,
     replacePlayerSrc,
-    exitPlayer,
     setPipDocked,
     picker,
   } = useView();
@@ -414,15 +409,21 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
   const startedNearEndRef = useStartedNearEnd(src.url, snap.status, snap.durationSec);
 
   const queue = useQueue();
+  const queueSessionAvailable = queueSessionIndex(src, queue) >= 0;
   const sleepAtEndArmed = useSleepAtEnd();
-  const queueOwnsCurrent = queueIndexOf(src.meta, src.episode) >= 0;
   const queueNextSameSeries = queueItemAfter(src.meta, src.episode)?.meta.id === src.meta.id;
 
   useEffect(() => {
-    setQueuePlaying(src.meta, src.episode ?? undefined);
+    setQueuePlaying(queueSessionAvailable ? src.meta : null, src.episode ?? undefined);
     return () => setQueuePlaying(null);
-  }, [src.meta, src.episode]);
-  const queueOrSleepArmed = queueOwnsCurrent || sleepAtEndArmed;
+  }, [src, queue, queueSessionAvailable]);
+  const queuePlaybackEnabled = useQueuePlayback({
+    src,
+    queue,
+    enabled: settings.queueDrivesNav && !isLivePlaybackSrc(src),
+    status: snap.status,
+  });
+  const queueOrSleepArmed = queuePlaybackEnabled || sleepAtEndArmed;
 
   const closePlayerRef = useRef<() => void>(() => {});
   const {
@@ -577,7 +578,8 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       adjacent,
       canChangeEpisode,
       isLiveLike,
-      queueDrivesNav: settings.queueDrivesNav,
+      queueDrivesNav: queuePlaybackEnabled,
+      instantPlay: settings.instantPlay,
       goToEpisode,
       openPicker,
     });
@@ -705,6 +707,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
       autoPlay: true,
       attempt: (src.attempt ?? 0) + 1,
       resume: src.resume,
+      queueItemId: src.queueItemId,
     });
   }, [snap.status, src, inRoom, exitPlayback, openPicker]);
 
@@ -737,6 +740,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
         autoPlay: true,
         attempt: (s.attempt ?? 0) + 1,
         resume: s.resume,
+        queueItemId: s.queueItemId,
       });
     }, stallWaitMs(settings.autoNextStreamOnStallSec));
     return () => window.clearTimeout(timer);
@@ -1283,9 +1287,12 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     snap,
     queue,
     isLive: isLiveLike,
+    roomGuest,
+    queueDrivesNav: queuePlaybackEnabled,
+    instantPlay: settings.instantPlay,
     startedNearEndRef,
     openPicker,
-    exitPlayer,
+    closePlayer,
   });
 
   const cancelToPicker = useCallback(() => {
@@ -1295,8 +1302,8 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     }
     bridgeRef.current?.destroy();
     bridgeRef.current = null;
-    openPicker(src.meta, src.episode, { autoPlay: false });
-  }, [bridgeRef, closePlayer, isLocalSrc, openPicker, src.episode, src.meta]);
+    openPicker(src.meta, src.episode, { autoPlay: false, queueItemId: src.queueItemId });
+  }, [bridgeRef, closePlayer, isLocalSrc, openPicker, src.episode, src.meta, src.queueItemId]);
   const { variant: streamPillVariant, dismiss: dismissStreamPill } = useStreamPill({
     srcUrl: src.url,
     snap,
@@ -1590,6 +1597,8 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     onSwitchStream,
     debridSlugs: debrids.map((d) => d.slug),
     isSeriesPlayback: showEpisodePanel,
+    queueSessionAvailable,
+    queuePlaybackEnabled,
     episodePanelOpen,
     setEpisodePanelOpen,
     upNextButtonVisible:
@@ -1623,7 +1632,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     settings.keepSourceNextEpisode &&
     settings.autoPlayNextEpisode &&
     !sleepAtEndArmed &&
-    (!queueOwnsCurrent || queueNextSameSeries) &&
+    (!queuePlaybackEnabled || queueNextSameSeries) &&
     !isLiveLike &&
     canChangeEpisode &&
     !!airedNext &&
@@ -1827,11 +1836,11 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
           error={sourceError}
           onChoose={() => {
             clearSourceError();
-            openPicker(src.meta, src.episode, { autoPlay: false });
+            openPicker(src.meta, src.episode, { autoPlay: false, queueItemId: src.queueItemId });
           }}
           onRetry={() => {
             clearSourceError();
-            openPicker(src.meta, src.episode, { autoPlay: true });
+            openPicker(src.meta, src.episode, { autoPlay: true, queueItemId: src.queueItemId });
           }}
         />
       )}

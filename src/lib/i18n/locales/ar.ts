@@ -127,6 +127,8 @@ import nytTv from "./ar/nyt-tv";
 
 import gameAchievements from "./ar/game-achievements";
 
+import queueBasket from "./ar/queue-basket";
+
 const ar: Record<string, string> = {
   "collections.feed.more": "تحميل المزيد من المجموعات",
   "collections.feed.error": "تعذر تحميل المجموعات. حاول مرة أخرى.",
@@ -415,6 +417,7 @@ const ar: Record<string, string> = {
   ...playOrders,
   ...contextActions,
   ...reviews,
+  ...queueBasket,
 };
 
 export default ar;

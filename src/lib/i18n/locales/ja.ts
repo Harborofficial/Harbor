@@ -118,6 +118,7 @@ import wired from "./ja/wired";
 import plugins from "./ja/plugins";
 import brands from "./ja/brands";
 import bpSports from "./ja/bp-sports";
+import queueBasket from "./ja/queue-basket";
 
 import nytTv from "./ja/nyt-tv";
 
@@ -412,6 +413,7 @@ const ja: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...reviews,
+  ...queueBasket,
 };
 
 export default ja;

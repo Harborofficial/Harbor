@@ -75,6 +75,7 @@ import { SeasonExplorer } from "./season-explorer";
 import { useSeasonExplorerView } from "./use-season-explorer";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { aiIsGroq, aiKey, providerForModel } from "@/lib/ai-models";
+import { animeSeasonKey } from "./anime-episodes/anime-season-key";
 
 const WINDOW_STEP = 60;
 
@@ -525,12 +526,38 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
     absoluteNumber?: number,
   ) => {
     e.preventDefault();
+    const selected = displayEpisodes.find(
+      (ep) =>
+        animeSeasonKey(ep) === season &&
+        ep.number === episode &&
+        (ep.sourceMetaId ?? meta.id) === (sourceMetaId ?? meta.id) &&
+        (absoluteNumber === undefined || ep.absoluteNumber === absoluteNumber),
+    );
     setWatchedMenu({
       x: e.clientX,
       y: e.clientY,
       season,
       episode,
       watched,
+      queueTarget: selected
+        ? {
+            meta: routing.metaForEp(selected),
+            episode: {
+              season: animeSeasonKey(selected),
+              episode: selected.number,
+              name: selected.title,
+              still: selected.thumbnail ?? undefined,
+              overview: selected.synopsis || undefined,
+              kitsuStreamId: selected.streamId,
+              imdbId: selected.imdbId,
+              imdbSeason: selected.imdbSeason,
+              imdbEpisode: selected.imdbEpisode,
+              absoluteNumber: selected.absoluteNumber ?? selected.number,
+              tvdbEpisodeId: selected.tvdbEpisodeId,
+              sourceMetaId: selected.sourceMetaId,
+            },
+          }
+        : undefined,
       metaId: sourceMetaId,
       absoluteNumber,
       origin: e.currentTarget instanceof HTMLElement ? e.currentTarget : null,

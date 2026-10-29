@@ -99,6 +99,7 @@ import subtitles from "./tr/subtitles";
 import plugins from "./tr/plugins";
 import brands from "./tr/brands";
 import bpSports from "./tr/bp-sports";
+import queueBasket from "./tr/queue-basket";
 
 import nytTv from "./tr/nyt-tv";
 
@@ -372,6 +373,7 @@ const tr: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...reviews,
+  ...queueBasket,
 };
 
 export default tr;

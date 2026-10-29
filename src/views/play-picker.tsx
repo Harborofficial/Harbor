@@ -115,6 +115,7 @@ type PerEpisodeStatus =
 
 export function PlayPicker({
   meta,
+  queueItemId,
   episode,
   autoPlay,
   attempt,
@@ -125,6 +126,7 @@ export function PlayPicker({
   playerActive,
 }: {
   meta: Meta;
+  queueItemId?: string;
   episode?: PlayEpisode;
   autoPlay?: boolean;
   attempt?: number;
@@ -665,6 +667,9 @@ export function PlayPicker({
   const [pendingPreselect, setPendingPreselect] = useState<PlayerSrc | null>(null);
   const openPlayerGated = useCallback(
     (s: PlayerSrc) => {
+      const source = queueItemId
+        ? { ...s, meta: metaForDisplay, episode, queueItemId }
+        : { ...s, queueItemId: undefined };
       const applicable =
         settings.subtitlePreselect &&
         !isDownload &&
@@ -674,13 +679,21 @@ export function PlayPicker({
         !s.meta.id?.startsWith("iptv:") &&
         (s.meta.type === "movie" || s.meta.type === "series" || s.meta.type === "anime");
       if (!applicable) {
-        openPlayer(s);
+        openPlayer(source);
         return;
       }
       setResolving(null);
-      setPendingPreselect(s);
+      setPendingPreselect(source);
     },
-    [settings.subtitlePreselect, isDownload, inSession, openPlayer],
+    [
+      settings.subtitlePreselect,
+      isDownload,
+      inSession,
+      openPlayer,
+      queueItemId,
+      metaForDisplay,
+      episode,
+    ],
   );
 
   const {
@@ -696,6 +709,7 @@ export function PlayPicker({
     cancelP2p,
   } = usePickHandler({
     meta: metaForDisplay,
+    queueItemId,
     imdbId,
     imdbIdVerified: resolvedImdb.verified,
     episode,
@@ -1304,33 +1318,33 @@ export function PlayPicker({
             )}
 
             {!loading && allCount > 0 && filteredPicker && (
-                <div ref={drawerRef}>
-                  <SourceDrawer
-                    open={drawerOpen}
-                    onToggle={() => {
-                      if (drawerOpenRef.current) {
-                        setDrawerOpen(false);
-                        closeDrawerWithScrollRef.current?.();
-                      } else if (openDrawerWithScrollRef.current) {
-                        openDrawerWithScrollRef.current();
-                      } else {
-                        setDrawerOpen(true);
-                      }
-                    }}
-                    count={allCount}
-                    addonCount={addonCount}
-                    usedAddons={usedAddons}
-                    streams={displayStreams}
-                    debrids={debrids}
-                    getAddonLogo={lookupLogo}
-                    matchFor={hostMatch ? matchFor : undefined}
-                    onPlay={playManually}
-                    resolvingId={resolving?.stream.infoHash ?? null}
-                    showName={meta.name}
-                    episode={episode}
-                    absoluteEpisode={animeAbsoluteEpisode}
-                  />
-                </div>
+              <div ref={drawerRef}>
+                <SourceDrawer
+                  open={drawerOpen}
+                  onToggle={() => {
+                    if (drawerOpenRef.current) {
+                      setDrawerOpen(false);
+                      closeDrawerWithScrollRef.current?.();
+                    } else if (openDrawerWithScrollRef.current) {
+                      openDrawerWithScrollRef.current();
+                    } else {
+                      setDrawerOpen(true);
+                    }
+                  }}
+                  count={allCount}
+                  addonCount={addonCount}
+                  usedAddons={usedAddons}
+                  streams={displayStreams}
+                  debrids={debrids}
+                  getAddonLogo={lookupLogo}
+                  matchFor={hostMatch ? matchFor : undefined}
+                  onPlay={playManually}
+                  resolvingId={resolving?.stream.infoHash ?? null}
+                  showName={meta.name}
+                  episode={episode}
+                  absoluteEpisode={animeAbsoluteEpisode}
+                />
+              </div>
             )}
           </>
         )}

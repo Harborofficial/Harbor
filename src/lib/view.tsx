@@ -32,6 +32,7 @@ import { beginMarathonAdvance } from "./fullscreen-state";
 import { consumeBack } from "./back-intercept";
 import { useSectionBackActive } from "./section-back";
 import type { SubtitleLoadMetadata } from "./subtitles/types";
+import type { SourceFolder } from "./custom-sources";
 import { pickerExitStack, samePickerRequest } from "./picker-return";
 
 export type View =
@@ -90,6 +91,8 @@ export type PlayerSrc = {
   officialBroadcast?: import("./sports/esports-streams").EsportsStream;
   continuation?: import("./playback-history").PlaybackContinuation;
   meta: Meta;
+  /** Queue entry that explicitly initiated this playback. */
+  queueItemId?: string;
   playbackTraceId?: string;
   proxySessionId?: string;
   historyUrl?: string;
@@ -170,6 +173,7 @@ export type PickerOptions = {
   returnTo?: "previous";
   contextRequestId?: string;
   continuation?: import("./playback-history").PlaybackContinuation;
+  queueItemId?: string;
 };
 
 export type GridSpec = {
@@ -244,12 +248,14 @@ export type Frame =
   | { kind: "filter"; filter: MetaFilter }
   | { kind: "brands"; brand: "studio" | "network" }
   | { kind: "grid"; grid: GridSpec }
+  | { kind: "folder-hub"; folder: SourceFolder; sourceId: string }
   | { kind: "award"; awardType: import("./providers/wikidata").AwardType }
   | { kind: "anime-award"; sourceId: import("./anime-awards").AwardSourceId }
   | { kind: "curated-list"; listId: string }
   | {
       kind: "picker";
       meta: Meta;
+      queueItemId?: string;
       episode?: PlayEpisode;
       autoPlay?: boolean;
       attempt?: number;
@@ -355,6 +361,8 @@ type ViewValue = {
   openBrands: (brand: "studio" | "network") => void;
   grid: GridSpec | null;
   openGrid: (g: GridSpec) => void;
+  folderHub: { folder: SourceFolder; sourceId: string } | null;
+  openFolderHub: (folder: SourceFolder, sourceId: string) => void;
   openCollections: () => void;
   stackKinds: Frame["kind"][];
   awardType: import("./providers/wikidata").AwardType | null;
@@ -365,6 +373,7 @@ type ViewValue = {
   openCuratedList: (id: string) => void;
   picker: {
     meta: Meta;
+    queueItemId?: string;
     episode?: PlayEpisode;
     autoPlay?: boolean;
     attempt?: number;
@@ -521,6 +530,8 @@ function frameKey(f: Frame): string {
       return `brands:${f.brand}`;
     case "grid":
       return `grid:${f.grid.title}`;
+    case "folder-hub":
+      return `folder-hub:${f.sourceId}:${f.folder.id}`;
     case "award":
       return `award:${f.awardType}`;
     case "anime-award":
@@ -718,11 +729,16 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const brands = brandsFrame ? brandsFrame.brand : null;
   const gridFrame = lastOfKind(stack, "grid");
   const grid = gridFrame ? gridFrame.grid : null;
+  const folderHubFrame = lastOfKind(stack, "folder-hub");
+  const folderHub = folderHubFrame
+    ? { folder: folderHubFrame.folder, sourceId: folderHubFrame.sourceId }
+    : null;
   const awardType = top.kind === "award" ? top.awardType : null;
   const picker =
     top.kind === "picker"
       ? {
           meta: top.meta,
+          queueItemId: top.queueItemId,
           episode: top.episode,
           autoPlay: top.autoPlay,
           attempt: top.attempt,
@@ -1339,6 +1355,19 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     [setNavStack],
   );
 
+  const openFolderHub = useCallback(
+    (folder: SourceFolder, sourceId: string) => {
+      setNavStack((cur) => {
+        const t = cur[cur.length - 1];
+        if (t.kind === "folder-hub" && t.folder.id === folder.id && t.sourceId === sourceId) {
+          return cur;
+        }
+        return pushFrame(cur, { kind: "folder-hub", folder, sourceId });
+      });
+    },
+    [setNavStack],
+  );
+
   const openCollections = useCallback(() => {
     setNavStack((cur) => {
       const t = cur[cur.length - 1];
@@ -1366,6 +1395,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         return pushFrame(cur, {
           kind: "picker",
           meta: m,
+          queueItemId: opts?.queueItemId,
           episode: ep,
           autoPlay: opts?.autoPlay,
           attempt: opts?.attempt,
@@ -1500,6 +1530,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       openBrands,
       grid,
       openGrid,
+      folderHub,
+      openFolderHub,
       openCollections,
       stackKinds,
       awardType,
@@ -1594,6 +1626,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       openBrands,
       grid,
       openGrid,
+      folderHub,
+      openFolderHub,
       openCollections,
       openAward,
       openAnimeAward,
