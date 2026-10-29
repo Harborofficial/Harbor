@@ -7170,6 +7170,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["player title size", "title in player", "bigger player title", "scale title"],
   },
   {
+    label: "Use title artwork in the player",
+    section: "theme",
+    anchorTitle: "Title text",
+    keywords: ["player logo", "title logo", "movie logo", "show logo", "banner title", "artwork"],
+  },
+  {
     label: "Show series name first in the player",
     section: "theme",
     anchorTitle: "Title text",

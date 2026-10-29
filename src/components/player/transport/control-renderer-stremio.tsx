@@ -51,6 +51,7 @@ import { renderCustomIconControlStremio } from "./custom-icon-renderer";
 import { WindowControlButtons } from "./window-control-buttons";
 import { IdentifySongButton } from "@/components/identify-song-button";
 import { FullscreenClock } from "@/components/player/fullscreen-clock";
+import { TitleWordmark } from "./title-wordmark";
 
 function qualityInfoOn(): boolean {
   try {
@@ -93,6 +94,7 @@ export type StremioRenderCtx = {
   quality?: string | null;
   releaseName?: string | null;
   titleClickable?: boolean;
+  titleLogo?: string;
   onBack?: () => void;
   onFullscreen?: () => void;
   onTitleClick?: () => void;
@@ -204,7 +206,21 @@ export function RenderedStremioControl({
           >
             <span className="flex min-w-0 flex-col">
               <span className="flex min-w-0 items-center gap-2 truncate">
-                <h1 className="truncate text-[19px] font-medium leading-tight">{ctx.title}</h1>
+                {ctx.titleLogo ? (
+                  <TitleWordmark
+                    key={ctx.titleLogo}
+                    src={ctx.titleLogo}
+                    alt={ctx.title}
+                    maxHeight={32}
+                    fallback={
+                      <h1 className="truncate text-[19px] font-medium leading-tight">
+                        {ctx.title}
+                      </h1>
+                    }
+                  />
+                ) : (
+                  <h1 className="truncate text-[19px] font-medium leading-tight">{ctx.title}</h1>
+                )}
                 {ctx.subtitle && (
                   <span className="shrink-0 text-[13px] font-normal text-white/55">
                     {ctx.subtitle}
@@ -228,7 +244,19 @@ export function RenderedStremioControl({
       }
       return (
         <div className="pointer-events-none min-w-0 truncate text-white/90">
-          <h1 className="truncate text-[19px] font-medium leading-tight">{ctx.title}</h1>
+          {ctx.titleLogo ? (
+            <TitleWordmark
+              key={ctx.titleLogo}
+              src={ctx.titleLogo}
+              alt={ctx.title}
+              maxHeight={32}
+              fallback={
+                <h1 className="truncate text-[19px] font-medium leading-tight">{ctx.title}</h1>
+              }
+            />
+          ) : (
+            <h1 className="truncate text-[19px] font-medium leading-tight">{ctx.title}</h1>
+          )}
           {showQuality ? (
             <>
               {ctx.subtitle && <p className="truncate text-[13px] text-white/55">{ctx.subtitle}</p>}

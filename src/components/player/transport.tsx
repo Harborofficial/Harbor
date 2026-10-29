@@ -1,6 +1,6 @@
 import { Settings2 } from "lucide-react";
 import { isLivePlaybackSrc } from "@/lib/player/live-src";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
@@ -29,6 +29,7 @@ import {
 import { renderControl, type ControlContext } from "./transport/control-renderer";
 import { SongIdToast } from "@/components/song-id-toast";
 import { useCastModalPlay } from "./use-cast-modal-play";
+import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 
 // This is the mouse-era transport. Big Picture suppresses it outright and
 // renders views/big-picture/player instead, so nothing here scales for ten feet.
@@ -182,6 +183,13 @@ export function Transport({
   );
   const isLiveChannel = isLivePlaybackSrc({ meta: meta ?? {}, isLive });
   const titleClickable = !!meta && !isLiveChannel;
+  const titleLogoSlides = useMemo(
+    () => (settings.playerTitleLogo && meta && !isLiveChannel ? [meta] : []),
+    [settings.playerTitleLogo, meta, isLiveChannel],
+  );
+  const titleLogos = useHeroLogos(titleLogoSlides, settings);
+  const titleLogo =
+    meta && titleLogoSlides.length > 0 ? (titleLogos[meta.id] ?? meta.logo) : undefined;
   const { openMeta, exitPlayer } = usePlayerNavigation();
   const castModalPlay = useCastModalPlay();
   const controlsRef = useRef<HTMLDivElement>(null);
@@ -272,6 +280,7 @@ export function Transport({
         canPickAnother={canPickAnother}
         title={title}
         subtitle={subtitle}
+        titleLogo={titleLogo}
         resolution={resolution}
         quality={quality}
         hasPrevEp={hasPrevEp}
@@ -382,6 +391,7 @@ export function Transport({
     title,
     subtitle,
     titleClickable,
+    titleLogo,
     titleScale: settings.playerTitleScale,
     titleSeriesFirst: settings.playerTitleSeriesFirst,
     onBack,

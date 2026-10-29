@@ -105,6 +105,7 @@ export const DEFAULT: Settings = {
   cardTitleScale: 1,
   playerTitleScale: 1,
   playerTitleSeriesFirst: false,
+  playerTitleLogo: false,
   uiScale: 1,
   serveWebUi: false,
   remoteControlEnabled: false,

@@ -61,6 +61,7 @@ export type TransportStremioProps = {
   canPickAnother: boolean;
   title: string;
   subtitle?: string;
+  titleLogo?: string;
   resolution?: string | null;
   quality?: string | null;
   releaseName?: string | null;
@@ -125,6 +126,7 @@ export function TransportStremio(p: TransportStremioProps) {
     canPickAnother,
     title,
     subtitle,
+    titleLogo,
     resolution,
     quality,
     releaseName,
@@ -232,6 +234,7 @@ export function TransportStremio(p: TransportStremioProps) {
     fullscreen,
     title,
     subtitle,
+    titleLogo,
     resolution,
     quality,
     releaseName,

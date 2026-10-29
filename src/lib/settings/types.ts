@@ -190,6 +190,7 @@ export type Settings = {
   cardTitleScale: number;
   playerTitleScale: number;
   playerTitleSeriesFirst: boolean;
+  playerTitleLogo: boolean;
   uiScale: number;
   serveWebUi: boolean;
   remoteControlEnabled: boolean;
