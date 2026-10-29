@@ -18,7 +18,10 @@ const SEPARATOR: &str = "|||";
 
 pub async fn stream(app: &tauri::AppHandle, video_id: &str) -> Result<MusicStream, String> {
     let args = vec![
-        "--no-warnings".to_string(),
+        "--js-runtimes".to_string(),
+        "node".to_string(),
+        "--extractor-args".to_string(),
+        "youtube:player_client=tv_embedded".to_string(),
         "--no-playlist".to_string(),
         "-f".to_string(),
         FORMAT.to_string(),
@@ -36,7 +39,10 @@ pub async fn video_stream(
     video_id: &str,
 ) -> Result<MusicVideoStream, String> {
     let args = vec![
-        "--no-warnings".to_string(),
+        "--js-runtimes".to_string(),
+        "node".to_string(),
+        "--extractor-args".to_string(),
+        "youtube:player_client=tv_embedded".to_string(),
         "--no-playlist".to_string(),
         "-f".to_string(),
         VIDEO_FORMAT.to_string(),

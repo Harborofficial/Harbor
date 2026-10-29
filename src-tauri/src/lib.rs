@@ -1124,6 +1124,12 @@ pub fn run() {
             if install_features::music_enabled() {
                 music::initialize(app.handle()).map_err(std::io::Error::other)?;
             }
+            {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    crate::ytdlp_update::warm(&handle).await;
+                });
+            }
             #[cfg(windows)]
             if !cfg!(feature = "context-review") {
                 use tauri_plugin_deep_link::DeepLinkExt;

@@ -32,7 +32,7 @@ import "./music-video-surface.css";
 /** How long a spinner may stand before it offers a way out, and before it stops claiming to work. */
 const SLOW_MS = 12_000;
 const STUCK_MS = 45_000;
-const RESOLVE_MS = 30_000;
+const RESOLVE_MS = 35_000;
 
 /** Survives the handoff the way the picture does: a choice made on the watch page holds in the pop-out. */
 let lyricsPreferred = false;
