@@ -146,7 +146,7 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 import type { DetailSection } from "./detail/content-rails";
 import { DetailLayoutEditor } from "./detail/layout-editor";
 import { EpisodeDownloadButton } from "./detail/episode-download-button";
-import { HeroBackdrop } from "./detail/hero-backdrop";
+import { HeroBackdrop } from "@/components/hero-backdrop";
 import { isTitleUpcoming } from "./detail/helpers";
 import { AccoladeBadges } from "./detail/accolade-badges";
 import { HeroAwardsCorner } from "./detail/hero-awards";
@@ -2451,7 +2451,7 @@ export function DetailView({
               />
             ))
           ) : backdrop ? (
-            <HeroBackdrop url={backdrop} fullQuality={settings.heroFullQuality} />
+            <HeroBackdrop url={backdrop} fallbacks={backdropPool} fullQuality={settings.heroFullQuality} />
           ) : (
             <div className="absolute inset-0 animate-pulse bg-white/[0.02]" />
           )}
