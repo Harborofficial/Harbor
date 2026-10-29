@@ -19,7 +19,6 @@ import { BpBandIdentity } from "./bp-section";
 import { BpCollectionsRow } from "./bp-collections-row";
 import { BpLiveRow } from "./bp-live-row";
 import { BpServiceRow } from "./bp-service-row";
-import { BpAddonRow } from "./addons/bp-addon-row";
 import { useBpCatalog } from "./use-bp-catalog";
 import {
   bpHomeSignature,
@@ -187,8 +186,6 @@ export function BpHome({ onSelect }: { onSelect: (m: Meta) => void }) {
       />
     ) : null,
   });
-
-  entries.push({ key: "addons", band: "addons", node: <BpAddonRow /> });
 
   // Pushed unconditionally: BpLiveRow renders nothing without playlists, and the
   // empty wrapper collapses via empty:hidden, so rail indices stay contiguous

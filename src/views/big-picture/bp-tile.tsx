@@ -85,7 +85,7 @@ function BpTileBody({
   const boxRef = useRef<HTMLButtonElement | null>(null);
   const { settings } = useSettings();
   const ranked = shape === "rank";
-  const override = useBpPosterChain(meta, shape, boxRef);
+  const { src: override, custom } = useBpPosterChain(meta, shape, boxRef);
   const art = useBpArt({
     ref: boxRef,
     id: meta.id,
@@ -141,7 +141,7 @@ function BpTileBody({
   // Home, Search, Discover, Library and More Like This, and it is keyed on the
   // cell drawing a numeral rather than on any setting.
   const state = ranked ? { ...cardState, top10: false } : cardState;
-  const showTitle = !settings.hidePosterTitles;
+  const showTitle = !settings.hidePosterTitles && !custom;
   const lift: BpCardLift = !showTitle ? "none" : art.url ? "focus" : "always";
 
   // No z-index on the ranked poster below, however much desktop's z-10 invites
