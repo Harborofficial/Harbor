@@ -6,6 +6,7 @@ import { episodeLanguageBase } from "@/lib/episode-text-language";
 import {
   fetchTmdbSeasonSynopsis,
   selectSeasonSynopsis,
+  selectSeasonSynopsisInOrder,
   type SeasonSynopsis,
 } from "@/lib/providers/season-synopsis";
 import {
@@ -52,6 +53,8 @@ export type SeasonExplorerOptions = {
   synopsisOrder?: string[];
   /** Manifest name for the addon fallback source shown in attribution labels. */
   fallbackSourceName?: string;
+  /** Per-addon season synopsis maps, keyed by source id. */
+  addonSeasonOverviews?: Record<string, { sourceName?: string; overviews: Record<number, string> }>;
   enabled?: boolean;
   /** Harbor's proxy is only allowed for anime. Regular titles need their own key. */
   allowProxy?: boolean;
@@ -80,6 +83,7 @@ export function useSeasonExplorer({
   preferFallbackSynopsis = false,
   synopsisOrder,
   fallbackSourceName = "Addon",
+  addonSeasonOverviews,
   enabled = true,
   allowProxy = false,
 }: SeasonExplorerOptions) {
@@ -90,6 +94,7 @@ export function useSeasonExplorer({
     tmdbTvId,
     synopsisOrder?.join(","),
     fallbackSourceName,
+    JSON.stringify(addonSeasonOverviews ?? {}),
   ]);
   const fallbackKey = JSON.stringify([
     fallbackSynopsis?.overview,
@@ -178,11 +183,18 @@ export function useSeasonExplorer({
       return;
     let cancelled = false;
     const number = activeSeason;
-    const fallbackOverview = preferFallbackSynopsis ? fallbackSynopsis?.overview?.trim() : "";
-    if (fallbackOverview) {
+    const preferredAddonId = synopsisOrder?.find((id) => id.startsWith("addon:"));
+    const preferredAddon = preferredAddonId ? addonSeasonOverviews?.[preferredAddonId] : undefined;
+    const configuredAddonOrder = synopsisOrder?.some((id) => id.startsWith("addon:"));
+    const preferredAddonOverview = preferredAddon?.overviews[number]?.trim();
+    const preferredOverview = preferFallbackSynopsis
+      ? preferredAddonOverview ||
+        (configuredAddonOrder ? undefined : fallbackSynopsis?.overview?.trim())
+      : "";
+    if (preferredOverview) {
       const current = details.get(number);
       if (
-        current?.overview === fallbackOverview &&
+        current?.overview === preferredOverview &&
         current.overviewLanguage === fallbackSynopsis?.overviewLanguage
       ) {
         setPending(null);
@@ -193,9 +205,9 @@ export function useSeasonExplorer({
         const expires = new Map(previous?.scope === textScope ? previous.expires : []);
         const inputs = new Map(previous?.scope === textScope ? previous.inputs : []);
         next.set(number, {
-          overview: fallbackOverview,
+          overview: preferredOverview,
           overviewLanguage: fallbackSynopsis?.overviewLanguage,
-          source: fallbackSourceName,
+          source: preferredAddon?.sourceName ?? fallbackSourceName,
         });
         inputs.set(number, fallbackKey);
         expires.set(number, Date.now() + 10 * 60_000);
@@ -232,22 +244,37 @@ export function useSeasonExplorer({
         for (const source of order) {
           if (source === "tmdb") candidates.push(tmdb);
           else if (source === "tvdb") candidates.push(tvdb);
-          else if (source.startsWith("addon:")) candidates.push(fallbackSynopsis);
+          else if (source.startsWith("addon:")) {
+            const overview = addonSeasonOverviews?.[source]?.overviews[number];
+            if (overview?.trim()) candidates.push({ overview });
+          }
         }
       } else {
-        candidates.push(tvdb, tmdb, fallbackSynopsis);
+        candidates.push(tvdb, tmdb);
       }
-      const synopsis = selectSeasonSynopsis(lang, ...candidates);
+      candidates.push(fallbackSynopsis);
+      const synopsis = order
+        ? selectSeasonSynopsisInOrder(...candidates)
+        : selectSeasonSynopsis(lang, ...candidates);
       const selected = synopsis.overview?.trim();
+      const addonSource = selected
+        ? synopsisOrder?.find(
+            (id) =>
+              id.startsWith("addon:") &&
+              addonSeasonOverviews?.[id]?.overviews[number]?.trim() === selected,
+          )
+        : undefined;
       const source = !selected
         ? undefined
         : selected === tvdb?.overview?.trim()
           ? "TheTVDB"
           : selected === tmdb?.overview?.trim()
             ? "TMDB"
-            : selected === fallbackSynopsis?.overview?.trim()
-              ? fallbackSourceName
-              : undefined;
+            : addonSource
+              ? (addonSeasonOverviews?.[addonSource]?.sourceName ?? fallbackSourceName)
+              : selected === fallbackSynopsis?.overview?.trim()
+                ? fallbackSourceName
+                : undefined;
       const failed = tvdb === null || tmdb === null;
       const detail =
         failed && !synopsis.overview && !tvdb?.name
@@ -296,6 +323,7 @@ export function useSeasonExplorer({
     preferFallbackSynopsis,
     synopsisOrder,
     fallbackSourceName,
+    addonSeasonOverviews,
   ]);
 
   const artworkConfig = useMemo<SeasonExplorerArtworkConfig>(

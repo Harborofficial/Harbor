@@ -35,6 +35,9 @@ const uiFallback: Record<string, string> = {
   "Reset section": "Reset section",
   Backdrop: "Backdrop",
   "Episode and Seasons": "Episode and Seasons",
+  "Search / Top Match": "Search / Top Match",
+  "Addon and TMDB order used by search results and Top Match.":
+    "Addon and TMDB order used by search results and Top Match.",
   "Show source labels on the detail page": "Show source labels on the detail page",
   "Useful for checking which addon or provider supplied each part.":
     "Useful for checking which addon or provider supplied each part.",

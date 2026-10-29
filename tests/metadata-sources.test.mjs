@@ -78,6 +78,26 @@ test("saved order survives while removed sources are dropped and new defaults ap
   );
 });
 
+test("search and episode reorders keep the moved provider position", () => {
+  assert.deepEqual(
+    plain(
+      sources.normalizeMetadataSourceChain("search", ["tmdb", "addon:other"], addons, settings),
+    ),
+    ["tmdb", "addon:other", "addon:aiometadata"],
+  );
+  assert.deepEqual(
+    plain(
+      sources.normalizeMetadataSourceChain(
+        "episodes",
+        ["tmdb", "addon:aiometadata"],
+        addons,
+        settings,
+      ),
+    ),
+    ["tmdb", "addon:aiometadata", "addon:other", "tvdb"],
+  );
+});
+
 test("labels resolve addons and configured providers", () => {
   assert.equal(sources.metadataSourceName("addon:aiometadata", addons, settings), "AIOMetadata");
   assert.equal(sources.metadataSourceName("tmdb", addons, settings), "TMDB");

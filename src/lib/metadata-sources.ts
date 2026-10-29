@@ -12,7 +12,8 @@ export type MetadataSourceSection =
   | "episodes"
   | "ratings"
   | "cast"
-  | "trailers";
+  | "trailers"
+  | "search";
 
 export type MetadataSourceChain = Partial<Record<MetadataSourceSection, string[]>>;
 
@@ -82,8 +83,13 @@ export const METADATA_SOURCE_SECTIONS: Array<{
     label: "Episode and Seasons",
     description: "One source owns episode and season numbering.",
   },
-  { id: "cast", label: "Cast & Crew", description: "Credits shown in the About panel." },
+  { id: "cast", label: "Cast", description: "Cast shown in the About panel." },
   { id: "trailers", label: "Trailers", description: "Trailer videos shown on the details page." },
+  {
+    id: "search",
+    label: "Search / Top Match",
+    description: "Addon and TMDB order used by search results and Top Match.",
+  },
 ];
 
 const ADDON_SOURCE_PREFIX = "addon:";
@@ -129,6 +135,7 @@ const SECTION_PROVIDERS: Record<MetadataSourceSection, string[]> = {
   ratings: ["omdb", "mdblist", "tmdb"],
   cast: ["tmdb"],
   trailers: ["tmdb"],
+  search: ["tmdb"],
 };
 
 export function metadataSourceOptions(

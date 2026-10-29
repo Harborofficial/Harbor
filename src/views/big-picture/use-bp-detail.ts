@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
+import {
+  useMetadataSourceValues,
+  type MetadataSourceValues,
+} from "@/hooks/use-metadata-source-values";
 import { peekBpEnrich } from "./use-bp-enrich";
 import { resolveMeta } from "@/lib/meta-resource";
 import { tmdbDetails, type TmdbDetail } from "@/lib/providers/tmdb/tmdb-details";
@@ -21,6 +25,8 @@ export type BpDetailData = {
   collection: { name: string; parts: Meta[] } | null;
   providers: WatchProvider[];
   loading: boolean;
+  chains?: MetadataSourceValues["chains"];
+  sourceRatings?: MetadataSourceValues["sourceRatings"];
 };
 
 export function useBpDetail(metaId: string): BpDetailData {
@@ -40,6 +46,31 @@ export function useBpDetail(metaId: string): BpDetailData {
   const [collection, setCollection] = useState<{ name: string; parts: Meta[] } | null>(null);
   const [providers, setProviders] = useState<WatchProvider[]>(NO_PROVIDERS);
   const [loading, setLoading] = useState(true);
+  const sourceMeta = meta ?? { id, type, name: "" };
+  const sourceValues = useMetadataSourceValues({
+    authKey,
+    meta: sourceMeta,
+    detail,
+    settings,
+  });
+  const displayDetail = useMemo(
+    () =>
+      detail
+        ? {
+            ...detail,
+            title: sourceValues.title ?? detail.title,
+            overview: sourceValues.description ?? detail.overview,
+            poster: sourceValues.poster ?? detail.poster,
+            backdrop: sourceValues.backdrop ?? detail.backdrop,
+            logo: sourceValues.logo ?? detail.logo,
+            seasonPosters: sourceValues.seasonPosters ?? detail.seasonPosters,
+            cast: sourceValues.cast ?? detail.cast,
+            trailerCandidates: sourceValues.trailerCandidates ?? detail.trailerCandidates,
+            trailerYtId: sourceValues.trailerCandidates?.[0] ?? detail.trailerYtId,
+          }
+        : detail,
+    [detail, sourceValues],
+  );
 
   useEffect(() => {
     let alive = true;
@@ -108,7 +139,16 @@ export function useBpDetail(metaId: string): BpDetailData {
     settings.region,
     prioritizeAddons,
     settings.metadataAddonOrder,
+    settings.metadataSources,
   ]);
 
-  return { meta, detail, collection, providers, loading };
+  return {
+    meta,
+    detail: displayDetail,
+    collection,
+    providers,
+    loading,
+    chains: sourceValues.chains,
+    sourceRatings: sourceValues.sourceRatings,
+  };
 }

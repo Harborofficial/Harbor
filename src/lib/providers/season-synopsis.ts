@@ -14,6 +14,21 @@ const inflight = new Map<string, Promise<Translation[] | null>>();
 registerCache("tmdb:seasonSynopsis", () => cache.size);
 
 /** Provider order breaks ties only after the requested language and English. */
+/**
+ * Explicit source order owns the choice: the first configured source with text
+ * wins, even when a lower source has a more specific language.
+ */
+export function selectSeasonSynopsisInOrder(
+  ...candidates: (SeasonSynopsis | null | undefined)[]
+): SeasonSynopsis {
+  const candidate = candidates.find(
+    (value) => typeof value?.overview === "string" && value.overview.trim(),
+  );
+  return candidate
+    ? { overview: candidate.overview!.trim(), overviewLanguage: candidate.overviewLanguage }
+    : {};
+}
+
 export function selectSeasonSynopsis(
   lang: string,
   ...candidates: (SeasonSynopsis | null | undefined)[]

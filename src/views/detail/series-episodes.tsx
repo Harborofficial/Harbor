@@ -69,6 +69,9 @@ export function SeriesEpisodes({
   stremioWatched,
   resumeSeason,
   resumeEpisode,
+  orderProviderOverride,
+  seasonOverviewsBySource,
+  synopsisOrder,
 }: {
   meta: Meta;
   tvId: number;
@@ -81,6 +84,12 @@ export function SeriesEpisodes({
   stremioWatched?: Set<string>;
   resumeSeason?: number;
   resumeEpisode?: number;
+  orderProviderOverride?: "tmdb" | "tvdb";
+  seasonOverviewsBySource?: Record<
+    string,
+    { sourceName?: string; overviews: Record<number, string> }
+  >;
+  synopsisOrder?: string[];
 }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -344,7 +353,7 @@ export function SeriesEpisodes({
   const [mode, setMode] = useState<"seasons" | "arcs">("seasons");
   const arc = useArcGroups({ tvId, tmdbKey: settings.tmdbKey, enabled: settings.episodeArcGroups });
   const arcActive = settings.episodeArcGroups && arc.hasArcs && mode === "arcs";
-  const orderProvider = effectiveOrderProvider(settings);
+  const orderProvider = orderProviderOverride ?? effectiveOrderProvider(settings);
   const ordering = useEpisodeOrder(
     imdbId,
     meta.id,
@@ -609,6 +618,10 @@ export function SeriesEpisodes({
     seasonType: explorerType === "aired" ? "official" : explorerType,
     lang: effectiveTmdbLanguage(),
     items: picker.items,
+    preferFallbackSynopsis: !synopsisOrder?.[0] || synopsisOrder[0].startsWith("addon:"),
+    synopsisOrder,
+    addonSeasonOverviews: seasonOverviewsBySource,
+    fallbackSourceName: meta.addonOrigin?.name ?? "Addon",
     activeKey: picker.activeKey,
     enabled: showExplorer,
     allowProxy: false,

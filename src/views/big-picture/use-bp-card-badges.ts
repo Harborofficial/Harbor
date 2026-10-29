@@ -6,6 +6,7 @@ import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
 import { mdblistCardPrefetch, useMdblistCardScores } from "@/lib/providers/mdblist-batch";
 import { omdbPrefetch, useOmdbScores } from "@/lib/providers/omdb";
 import { tmdbImdbId, useTmdbImdbId, useTmdbVote } from "@/lib/providers/tmdb";
+import { chainedPrimaryRating } from "@/lib/detail-imdb-rating";
 import { useSettings } from "@/lib/settings";
 import type { Settings } from "@/lib/settings/types";
 import { useSimklCardScores, useSimklCardScoresByAnimeId } from "@/lib/simkl/ratings";
@@ -140,15 +141,26 @@ export function useBpCardBadges(
   ref?: RefObject<HTMLElement | null>,
   imdbHint?: string | null,
   surface: BpBadgeSurface = "card",
+  ratingChain?: string[],
+  sourceRatings?: Record<string, string>,
 ): BpCardBadges {
   const { settings } = useSettings();
   const gate = badgeGates(settings, surface);
+  const chain =
+    ratingChain ?? (settings.addonOnlyMetadata ? settings.metadataSources?.ratings : undefined);
+  const chainAllows = (id: string) => !chain || chain.includes(id);
   const isAnime = BP_ANIME_ID.test(meta.id);
   const mediaKind = meta.type === "series" ? "show" : "movie";
   const cinemetaKind = meta.type === "series" ? "series" : "movie";
 
   const wantMdblist =
-    gate.audience || gate.metacritic || gate.letterboxd || gate.mdblist || gate.trakt || gate.simkl;
+    (gate.audience ||
+      gate.metacritic ||
+      gate.letterboxd ||
+      gate.mdblist ||
+      gate.trakt ||
+      gate.simkl) &&
+    chainAllows("mdblist");
   // One boolean before any subscription. On a default install with no keys the
   // MDBList branch alone is off for six of the ten providers.
   const want = gate.imdb || gate.tmdb || gate.mal || gate.rt || wantMdblist;
@@ -156,7 +168,7 @@ export function useBpCardBadges(
   // Resolved even when no badge wants it: the watchlist, watched and local
   // library marks all match on the alternate id too.
   const resolved = useTmdbImdbId(meta.id);
-  const imdbId = (imdbHint ?? resolved) ?? undefined;
+  const imdbId = imdbHint ?? resolved ?? undefined;
   const scoreId = want ? imdbId : undefined;
 
   const visible = useBpCardVisible(ref);
@@ -207,7 +219,7 @@ export function useBpCardBadges(
   const hasInlineImdb = meta.id.startsWith("tt") && !!meta.imdbRating;
   const wantCinemetaRating = gate.imdb && !isAnime && !hasInlineImdb;
 
-  const wantOmdb = gate.imdb || gate.rt;
+  const wantOmdb = (gate.imdb || gate.rt) && chainAllows("omdb");
 
   useEffect(() => {
     if (!visible || !want) return;
@@ -260,6 +272,16 @@ export function useBpCardBadges(
       omdb?.imdbRating ??
       cinemetaRating ??
       (meta.id.startsWith("tt") ? meta.imdbRating : undefined));
+  const primary = isAnime
+    ? null
+    : chainedPrimaryRating({
+        chain: ratingChain,
+        sourceRatings,
+        omdb: omdb?.imdbRating,
+        fallback: imdbValue,
+      });
+  const primaryImdb = primary?.source === "imdb" ? primary.value : undefined;
+  const primaryTmdb = primary?.source === "tmdb" ? primary.value : undefined;
   // For a kitsu/mal/anilist meta, meta.imdbRating carries the anime score, not
   // an IMDb one. Drawing it beside the IMDb mark is what BP did before.
   const animeValue =
@@ -273,6 +295,13 @@ export function useBpCardBadges(
   const animeImdbValue = isAnime && gate.pairAnimeImdb && gate.imdb ? harborRating : undefined;
 
   const rtCritics = omdb?.rtCritics ?? null;
+  const omdbFirst =
+    !!chain &&
+    chain.includes("omdb") &&
+    (!chain.includes("mdblist") || chain.indexOf("omdb") < chain.indexOf("mdblist"));
+  const metacritic = omdbFirst
+    ? (omdb?.metascore ?? cardScores?.metacritic ?? null)
+    : (cardScores?.metacritic ?? omdb?.metascore ?? null);
   const badges = useMemo<readonly BpCardBadge[]>(() => {
     if (!want) return NO_BADGES;
     const out: BpCardBadge[] = [];
@@ -280,20 +309,25 @@ export function useBpCardBadges(
       if (animeValue) out.push({ kind: "rating", source: animeSource, value: animeValue });
       if (animeImdbValue) out.push({ kind: "rating", source: "imdb", value: animeImdbValue });
     } else {
-      if (gate.imdb && imdbValue) out.push({ kind: "rating", source: "imdb", value: imdbValue });
-      if (gate.tmdb && tmdbVote) out.push({ kind: "rating", source: "tmdb", value: tmdbVote });
+      if (gate.imdb && primaryImdb) {
+        out.push({ kind: "rating", source: "imdb", value: primaryImdb });
+      }
+      const tmdbBadge = primaryTmdb ?? tmdbVote;
+      if (gate.tmdb && tmdbBadge) {
+        out.push({ kind: "rating", source: "tmdb", value: tmdbBadge });
+      }
     }
     if (gate.simkl && simklValue != null) out.push({ kind: "simkl", value: simklValue });
     if (gate.rt && rtCritics != null) out.push({ kind: "rt", value: rtCritics });
     if (gate.audience && cardScores?.rtAudience != null)
       out.push({ kind: "audience", value: cardScores.rtAudience });
-    if (gate.metacritic && cardScores?.metacritic != null)
-      out.push({ kind: "metacritic", value: cardScores.metacritic });
+    if (gate.metacritic && metacritic != null) out.push({ kind: "metacritic", value: metacritic });
     if (gate.letterboxd && cardScores?.letterboxd != null)
       out.push({ kind: "letterboxd", value: cardScores.letterboxd });
     if (gate.mdblist && cardScores?.score != null)
       out.push({ kind: "mdblist", value: cardScores.score });
-    if (gate.trakt && cardScores?.trakt != null) out.push({ kind: "trakt", value: cardScores.trakt });
+    if (gate.trakt && cardScores?.trakt != null)
+      out.push({ kind: "trakt", value: cardScores.trakt });
     return out.length > 0 ? out : NO_BADGES;
   }, [
     want,
@@ -302,10 +336,13 @@ export function useBpCardBadges(
     animeSource,
     animeImdbValue,
     imdbValue,
+    primaryImdb,
+    primaryTmdb,
     tmdbVote,
     simklValue,
     rtCritics,
     cardScores,
+    metacritic,
     gate.imdb,
     gate.tmdb,
     gate.simkl,

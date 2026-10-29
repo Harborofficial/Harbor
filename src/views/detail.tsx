@@ -43,15 +43,10 @@ import {
 import { addonBasesForOrigin, fetchAddonMeta, gatherCatalogAddons } from "@/lib/addons";
 import { useCapstanDetail } from "@/lib/streams/plugins/extension/detail-hook";
 import { isCapstanId, titlesAgree } from "@/lib/streams/plugins/extension/detail";
-import { metadataAddons, resolveAddonMetaSource, resolveMeta } from "@/lib/meta-resource";
-import {
-  addonKeyFromSource,
-  normalizeMetadataSourceChain,
-  type MetadataSourceSection,
-} from "@/lib/metadata-sources";
+import { resolveMeta } from "@/lib/meta-resource";
+import { useMetadataSourceValues } from "@/hooks/use-metadata-source-values";
+import { useEpisodeSource } from "@/hooks/use-episode-source";
 import { useMdblistScores } from "@/lib/providers/mdblist";
-import { fanartMovie, fanartTv } from "@/lib/providers/fanart";
-import { rpdbBackdrop, rpdbPoster } from "@/lib/providers/rpdb";
 import { lastPlayedEpisode, readResumeEntry, saveResumeMs } from "@/lib/resume";
 import { advancePastFinished } from "@/lib/detail-resume-advance";
 import { localCwEntry, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
@@ -210,7 +205,11 @@ import { useAnimeCharacters } from "./detail/use-anime-characters";
 import { TraktComments } from "./detail/trakt-comments";
 import { LetterboxdPanel } from "./detail/letterboxd-panel";
 import { RateButton } from "@/components/ratings/rate-button";
-import { detailImdbRating, fetchDetailImdbRating } from "@/lib/detail-imdb-rating";
+import {
+  chainedPrimaryRating,
+  detailImdbRating,
+  fetchDetailImdbRating,
+} from "@/lib/detail-imdb-rating";
 import { ratingTarget } from "@/lib/ratings/types";
 import { LetterboxdReviews } from "./detail/letterboxd-reviews";
 import { AnilistComments } from "./detail/anilist-comments";
@@ -256,29 +255,6 @@ function FadeInUp({ children }: { children: ReactNode }) {
   return <div className="harbor-fade-in-up">{children}</div>;
 }
 
-function addonSeasonPosters(meta: Meta | null): Record<number, string> | undefined {
-  if (!meta) return undefined;
-  const out: Record<number, string> = {};
-  const addMap = (map: Record<string | number, string> | undefined) => {
-    for (const [key, value] of Object.entries(map ?? {})) {
-      const number = Number(key);
-      if (Number.isInteger(number) && number >= 0 && value.trim() && out[number] == null) {
-        out[number] = value;
-      }
-    }
-  };
-  addMap(meta.seasonPosters);
-  addMap(meta.app_extras?.seasonPosters);
-  for (const season of meta.seasons ?? []) {
-    const number = season.season ?? season.number ?? season.seasonNumber;
-    const poster = season.poster ?? season.image;
-    if (typeof number === "number" && Number.isInteger(number) && number >= 0 && poster?.trim()) {
-      if (out[number] == null) out[number] = poster;
-    }
-  }
-  return Object.keys(out).length > 0 ? out : undefined;
-}
-
 export function DetailView({
   meta,
   liveContext = false,
@@ -297,17 +273,6 @@ export function DetailView({
   const [detail, setDetail] = useState<
     (TmdbDetail & Pick<AnimeDetailExtras, "seasonOverviews">) | null
   >(null);
-  const [sourceText, setSourceText] = useState<{
-    title?: string;
-    description?: string;
-    poster?: string;
-    backdrop?: string;
-    logo?: string;
-    seasonPosters?: Record<number, string>;
-    sourceNames?: Partial<
-      Record<"title" | "description" | "poster" | "backdrop" | "logo" | "seasonPosters", string>
-    >;
-  }>({});
   const [seasonSynopsisSource, setSeasonSynopsisSource] = useState<string | undefined>();
   const [animeEpisodes, setAnimeEpisodes] = useState<KitsuEpisode[]>([]);
   const [animeUnavailable, setAnimeUnavailable] = useState<string | null>(null);
@@ -428,16 +393,19 @@ export function DetailView({
     t: number;
   } | null>(null);
   const { authKey } = useAuth();
+  const sourceText = useMetadataSourceValues({ authKey, meta, detail, settings });
+  const episodeSource = useEpisodeSource({ authKey, meta, detail, settings });
   const [loading, setLoading] = useState(true);
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [scores, setScores] = useState<OmdbScores | null>(null);
   const [cinemetaRating, setCinemetaRating] = useState<string | null>(null);
   const [harborImdbRating, setHarborImdbRating] = useState<string | null>(null);
   const [watchProviders, setWatchProviders] = useState<WatchProvider[]>([]);
-  const ratingChain = settings.addonOnlyMetadata ? settings.metadataSources?.ratings : undefined;
-  const ratingSource = ratingChain?.[0];
+  const ratingChain = settings.addonOnlyMetadata
+    ? (sourceText.chains?.ratings ?? settings.metadataSources?.ratings)
+    : undefined;
   const mdblist = useMdblistScores(
-    ratingSource ? (ratingSource === "mdblist" ? settings.mdblistKey : "") : settings.mdblistKey,
+    !ratingChain || ratingChain.includes("mdblist") ? settings.mdblistKey : "",
     detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null),
     meta.type === "movie" ? "movie" : "show",
   );
@@ -602,13 +570,14 @@ export function DetailView({
       Array.from(
         new Set(
           [
+            ...(sourceText.trailerCandidates ?? []),
             ...(detail?.trailerCandidates ?? []),
             ...(meta.trailerStreams?.map((trailer) => trailer.ytId) ?? []),
             ...(meta.trailers?.map((trailer) => trailer.source) ?? []),
           ].filter((id): id is string => !!id),
         ),
       ),
-    [detail?.trailerCandidates, meta.trailerStreams, meta.trailers],
+    [sourceText.trailerCandidates, detail?.trailerCandidates, meta.trailerStreams, meta.trailers],
   );
   const trailerCandidate = trailerCandidates[0] ?? null;
 
@@ -654,7 +623,6 @@ export function DetailView({
   useEffect(() => {
     let cancelled = false;
     setDetail(null);
-    setSourceText({});
     setSeasonSynopsisSource(undefined);
     setAnimeEpisodes([]);
     setAnimeUnavailable(null);
@@ -1503,9 +1471,7 @@ export function DetailView({
     if (
       !imdbId ||
       !settings.omdbKey ||
-      (settings.addonOnlyMetadata &&
-        settings.metadataSources?.ratings?.[0] &&
-        settings.metadataSources.ratings[0] !== "omdb")
+      (settings.addonOnlyMetadata && ratingChain && !ratingChain.includes("omdb"))
     )
       return;
     let cancelled = false;
@@ -1515,13 +1481,7 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [
-    detail?.imdbId,
-    meta.id,
-    settings.omdbKey,
-    settings.addonOnlyMetadata,
-    settings.metadataSources,
-  ]);
+  }, [detail?.imdbId, meta.id, settings.omdbKey, settings.addonOnlyMetadata, ratingChain]);
 
   useEffect(() => {
     setCinemetaRating(null);
@@ -1588,221 +1548,6 @@ export function DetailView({
     };
   }, [detail, isAnime, settings.tmdbKey, settings.region]);
 
-  useEffect(() => {
-    if (!settings.addonOnlyMetadata) {
-      setSourceText({});
-      return;
-    }
-    let cancelled = false;
-    const baseMeta = { id: meta.id, type: meta.type, name: meta.name };
-    const tmdbLookup =
-      detail?.kind === "tv" && detail.tmdbTvId
-        ? { ...baseMeta, id: `tmdb:tv:${detail.tmdbTvId}` }
-        : baseMeta;
-    type Loaded = {
-      title?: string;
-      description?: string;
-      poster?: string;
-      backdrop?: string;
-      logo?: string;
-      seasonPosters?: Record<number, string>;
-      sourceName?: string;
-    };
-    const load = async (id: string): Promise<Loaded> => {
-      const addonKey = addonKeyFromSource(id);
-      if (addonKey) {
-        const found = await resolveAddonMetaSource(
-          authKey,
-          meta.type === "movie" ? "movie" : "series",
-          meta.id,
-          addonKey,
-        ).catch(() => null);
-        return {
-          title: found?.name,
-          description: found?.description,
-          poster: found?.poster,
-          backdrop: found?.background,
-          logo: found?.logo,
-          seasonPosters: addonSeasonPosters(found),
-          sourceName: found?.addonOrigin?.name ?? "Addon",
-        };
-      }
-      if (id === "tmdb" && settings.tmdbKey) {
-        const found = await tmdbDetails(settings.tmdbKey, tmdbLookup).catch(() => null);
-        return {
-          title: found?.title,
-          description: found?.overview,
-          poster: found?.poster,
-          backdrop: found?.backdrop,
-          logo: found?.logo,
-          seasonPosters: found?.seasonPosters,
-          sourceName: "TMDB",
-        };
-      }
-      if (id === "fanart" && settings.fanartKey) {
-        const art =
-          detail?.kind === "movie" && detail.id > 0
-            ? await fanartMovie(settings.fanartKey, detail.id).catch(() => null)
-            : detail?.tvdbTvId
-              ? await fanartTv(settings.fanartKey, detail.tvdbTvId).catch(() => null)
-              : null;
-        return {
-          poster: art?.poster,
-          backdrop: art?.backdrop,
-          logo: art?.logo,
-          seasonPosters: art?.seasonPosters,
-          sourceName: "Fanart.tv",
-        };
-      }
-      return {};
-    };
-    void (async () => {
-      const addonList = await metadataAddons(authKey, []).catch(() => []);
-      const chain = (section: MetadataSourceSection) =>
-        normalizeMetadataSourceChain(
-          section,
-          settings.metadataSources?.[section],
-          addonList,
-          settings,
-        );
-      const titleChain = chain("title");
-      const descriptionChain = chain("description");
-      const posterChain = chain("poster");
-      const seasonPosterChain = chain("seasonPoster");
-      const backdropChain = chain("backdrop");
-      const logoChain = chain("logo");
-      const ids = [
-        ...new Set([
-          ...titleChain,
-          ...descriptionChain,
-          ...posterChain,
-          ...seasonPosterChain,
-          ...backdropChain,
-          ...logoChain,
-        ]),
-      ];
-      if (cancelled) return;
-      if (ids.length === 0) {
-        setSourceText({});
-        return;
-      }
-      const byId = new Map<string, Loaded>();
-      const loadOnce = async (id: string): Promise<Loaded> => {
-        const hit = byId.get(id);
-        if (hit) return hit;
-        const value = await load(id);
-        if (cancelled) return {};
-        byId.set(id, value);
-        return value;
-      };
-      const firstEntry = async (chain: string[], field: keyof Loaded) => {
-        for (let index = 0; index < chain.length; index += 1) {
-          const source = await loadOnce(chain[index]);
-          if (cancelled) return undefined;
-          const value = source[field];
-          if (typeof value === "string" && value.trim()) {
-            return { value, index, sourceName: source.sourceName };
-          }
-        }
-        return undefined;
-      };
-      const mediaType = meta.type === "movie" ? "movie" : "series";
-      const altId = detail?.id
-        ? `tmdb:${detail.kind === "tv" ? "tv:" : "movie:"}${detail.id}`
-        : undefined;
-      const firstSeasonPosters = async () => {
-        const merged: Record<number, string> = {};
-        const sourceNames = new Set<string>();
-        for (const id of seasonPosterChain) {
-          const source = await loadOnce(id);
-          if (cancelled) return undefined;
-          for (const [season, url] of Object.entries(source.seasonPosters ?? {})) {
-            const number = Number(season);
-            if (Number.isInteger(number) && merged[number] == null) {
-              merged[number] = url;
-              if (source.sourceName) sourceNames.add(source.sourceName);
-            }
-          }
-        }
-        return Object.keys(merged).length > 0
-          ? { value: merged, sourceName: [...sourceNames].join(" + ") }
-          : undefined;
-      };
-      const firstTransform = (chain: string[]) =>
-        chain.findIndex((id) => id === "rpdb" || id === "posterService");
-      const posterEntry = await firstEntry(posterChain, "poster");
-      let poster = posterEntry?.value;
-      const posterTransform = firstTransform(posterChain);
-      if (poster && posterEntry && posterTransform >= 0 && posterTransform < posterEntry.index) {
-        poster = rpdbPoster(
-          settings.rpdbKey,
-          meta.id,
-          poster,
-          altId,
-          settings.posterBaseUrl,
-          mediaType,
-        );
-      }
-      const backdropEntry = await firstEntry(backdropChain, "backdrop");
-      let backdrop = backdropEntry?.value;
-      const backdropTransform = firstTransform(backdropChain);
-      if (
-        backdrop &&
-        backdropEntry &&
-        backdropTransform >= 0 &&
-        backdropTransform < backdropEntry.index
-      ) {
-        backdrop = rpdbBackdrop(
-          settings.rpdbKey,
-          meta.id,
-          backdrop,
-          altId,
-          settings.posterBaseUrl,
-          mediaType,
-        );
-      }
-      const titleEntry = await firstEntry(titleChain, "title");
-      const descriptionEntry = await firstEntry(descriptionChain, "description");
-      const logoEntry = await firstEntry(logoChain, "logo");
-      const seasonPosterEntry = await firstSeasonPosters();
-      if (cancelled) return;
-      setSourceText({
-        title: titleEntry?.value,
-        description: descriptionEntry?.value,
-        poster,
-        backdrop,
-        logo: logoEntry?.value,
-        seasonPosters: seasonPosterEntry?.value,
-        sourceNames: {
-          title: titleEntry?.sourceName,
-          description: descriptionEntry?.sourceName,
-          poster: posterEntry?.sourceName,
-          backdrop: backdropEntry?.sourceName,
-          logo: logoEntry?.sourceName,
-          seasonPosters: seasonPosterEntry?.sourceName,
-        },
-      });
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    authKey,
-    detail?.id,
-    detail?.kind,
-    detail?.tmdbTvId,
-    detail?.tvdbTvId,
-    meta.id,
-    meta.name,
-    meta.type,
-    settings.addonOnlyMetadata,
-    settings.fanartKey,
-    settings.metadataSources,
-    settings.posterBaseUrl,
-    settings.rpdbKey,
-    settings.tmdbKey,
-  ]);
-
   const rawTitle = sourceText.title ?? detail?.title ?? meta.name;
   const title = isAnime ? stripFranchiseSuffix(rawTitle) : rawTitle;
   const poster =
@@ -1828,6 +1573,7 @@ export function DetailView({
         (meta.id.startsWith("tmdb:") ? "" : (meta.description ?? cinemetaFull?.description)))) ||
     "";
   const tagline = detail?.tagline ?? "";
+  const detailCast = sourceText.cast ?? detail?.cast ?? [];
   const pinnedLogo = useTitleLogo(meta.id);
   const animeArt = isAnime ? peekAnimeArt(meta.id) : undefined;
   const stableBackdrop = useStableAsset(
@@ -1916,7 +1662,16 @@ export function DetailView({
       ? { ...meta, id: animeCanonicalId ?? meta.id, imdbRating: detail?.rating ?? meta.imdbRating }
       : undefined,
   );
-  const rating = isAnime ? malRating : (imdbRatingValue ?? detail?.rating ?? meta.imdbRating);
+  const primaryRating = isAnime
+    ? { value: malRating, source: "imdb" as const }
+    : chainedPrimaryRating({
+        chain: ratingChain,
+        sourceRatings: sourceText.sourceRatings,
+        omdb: scores?.imdbRating,
+        detail: detail?.rating,
+        fallback: imdbRatingValue ?? meta.imdbRating,
+      });
+  const rating = primaryRating.value;
   const runtime = detail?.runtime ?? capstanMeta?.meta.runtime;
   const genres = detail?.genres ?? meta.genres ?? cinemetaFull?.genres ?? [];
   const tmdbRecommendations = detail?.recommendations ?? NO_METAS;
@@ -2000,9 +1755,22 @@ export function DetailView({
   // the title but must not take the list away from the player. It only supplies the list when the
   // provider offered none.
   const providerEpisodeList = addonNative && (capstanMeta?.meta.videos?.length ?? 0) > 0;
-  // Addon seasons describe the addon's own `videos`; TMDB episodes cannot supply them.
+  const episodeFromProvider = episodeSource?.kind === "tmdb" || episodeSource?.kind === "tvdb";
+  const episodeListDetail = episodeFromProvider ? episodeSource?.detail : detail;
+  const episodeSeasons = episodeSource?.seasons ?? episodeListDetail?.seasons ?? [];
+  const episodeListImdbId =
+    episodeSource?.imdbId ??
+    episodeListDetail?.imdbId ??
+    (meta.id.startsWith("tt") ? meta.id : null);
+  const episodeListTvId = episodeListDetail?.id ?? 0;
+  const episodeVideos =
+    episodeSource?.kind === "addon" ? episodeSource.videos : cinemetaFull?.videos;
+  // Addon seasons describe the addon's own `videos`; a configured TMDB/TVDB
+  // episode source uses the provider's own season list instead.
   const tmdbEpisodeList =
-    !prioritizeMetadataAddons && !providerEpisodeList && !!detail && detail.seasons.length > 0;
+    (episodeFromProvider || !prioritizeMetadataAddons) &&
+    !providerEpisodeList &&
+    episodeSeasons.length > 0;
   const traktResolution = useMemo((): IdResolution => {
     if (isAnime) return { ok: false, reason: "anime" };
     const imdbId = detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null);
@@ -2050,7 +1818,7 @@ export function DetailView({
       releaseDate: detail?.releaseDate ?? meta.releaseDate,
       releaseInfo: detail?.year ?? meta.releaseInfo ?? cinemetaFull?.releaseInfo,
       behaviorHints: meta.behaviorHints ?? cinemetaFull?.behaviorHints,
-      videos: meta.videos ?? cinemetaFull?.videos,
+      videos: episodeVideos ?? meta.videos,
     }),
     [
       meta,
@@ -2065,7 +1833,7 @@ export function DetailView({
       cinemetaFull?.name,
       cinemetaFull?.releaseInfo,
       cinemetaFull?.behaviorHints,
-      cinemetaFull?.videos,
+      episodeVideos,
     ],
   );
 
@@ -2737,7 +2505,8 @@ export function DetailView({
         mdblist={mdblist}
         imdbId={detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null)}
         mediaType={meta.type === "movie" ? "movie" : "show"}
-        ratingSource={imdbRatingValue != null ? "imdb" : "tmdb"}
+        ratingChain={ratingChain}
+        ratingSource={primaryRating.source}
         animeImdbRating={harborImdbRating}
         onOpenUrl={openUrl}
       />
@@ -2879,6 +2648,9 @@ export function DetailView({
                       ["Logo", sourceText.sourceNames?.logo],
                       ["Season posters", sourceText.sourceNames?.seasonPosters],
                       ["Season synopsis", seasonSynopsisSource],
+                      ["Episodes", episodeSource?.sourceName],
+                      ["Cast", sourceText.sourceNames?.cast],
+                      ["Trailers", sourceText.sourceNames?.trailers],
                     ] as Array<[string, string | undefined]>
                   ).flatMap(([label, source]) =>
                     source ? (
@@ -3292,16 +3064,25 @@ export function DetailView({
           <FadeInUp>
             <SeriesEpisodes
               meta={playMeta}
-              tvId={detail.id}
-              imdbId={detail.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null)}
-              seasons={detail.seasons}
-              seasonPosters={sourceText.seasonPosters ?? detail.seasonPosters}
-              lastEpisodeAir={detail.lastEpisodeAir}
+              tvId={episodeListTvId}
+              imdbId={episodeListImdbId}
+              seasons={episodeSeasons}
+              seasonPosters={sourceText.seasonPosters ?? episodeListDetail?.seasonPosters}
+              lastEpisodeAir={episodeListDetail?.lastEpisodeAir}
               scrollRef={scrollRef}
-              cinemetaVideos={cinemetaFull?.videos}
+              cinemetaVideos={episodeVideos}
               stremioWatched={stremioWatched}
               resumeSeason={lastPlay?.season}
               resumeEpisode={lastPlay?.episode}
+              seasonOverviewsBySource={sourceText.seasonOverviewsBySource}
+              synopsisOrder={sourceText.chains?.seasonSynopsis}
+              orderProviderOverride={
+                episodeSource?.kind === "tvdb"
+                  ? "tvdb"
+                  : episodeSource?.kind === "tmdb"
+                    ? "tmdb"
+                    : undefined
+              }
             />
           </FadeInUp>
         )}
@@ -3313,12 +3094,10 @@ export function DetailView({
           (isSeries ||
             (addonNative &&
               (meta.type === "channel" || meta.type === "tv" || meta.type === "other"))) &&
-          cinemetaFull?.videos &&
+          episodeVideos &&
           (addonNative
-            ? cinemetaFull.videos.length > 0
-            : cinemetaFull.videos.some(
-                (v) => v.season != null && v.season > 0 && v.episode != null,
-              )) && (
+            ? episodeVideos.length > 0
+            : episodeVideos.some((v) => v.season != null && v.season > 0 && v.episode != null)) && (
             <FadeInUp>
               <CinemetaEpisodes
                 meta={playMeta}
@@ -3329,9 +3108,11 @@ export function DetailView({
                 seasonPosters={sourceText.seasonPosters ?? detail?.seasonPosters}
                 seasonBackdrops={detail?.seasonBackdrops}
                 seasons={detail?.seasons}
+                seasonOverviewsBySource={sourceText.seasonOverviewsBySource}
+                synopsisOrder={sourceText.chains?.seasonSynopsis}
                 onSeasonSynopsisSource={setSeasonSynopsisSource}
                 imdbId={detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null)}
-                videos={cinemetaFull.videos}
+                videos={episodeVideos}
                 stremioWatched={stremioWatched}
                 resumeSeason={lastPlay?.season}
                 resumeEpisode={lastPlay?.episode}
@@ -3406,15 +3187,15 @@ export function DetailView({
               ),
             });
           }
-          if (detail && detail.cast.length > 0) {
+          if (detailCast.length > 0) {
             railSections.push({
               key: "cast",
               label: t("Cast"),
               minHeight: 240,
-              node: <DetailCastRail cast={detail.cast} />,
+              node: <DetailCastRail cast={detailCast} />,
             });
           }
-          if (capstanMeta && capstanMeta.cast.length > 0 && !(detail && detail.cast.length > 0)) {
+          if (capstanMeta && capstanMeta.cast.length > 0 && detailCast.length === 0) {
             railSections.push({
               key: "cast",
               label: t("Cast"),

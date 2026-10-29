@@ -58,7 +58,12 @@ export function useSeasonBrowser(
   useEffect(() => {
     if (!open || (effMeta.type !== "series" && !isAnimeId(effMeta.id))) return;
     let cancelled = false;
-    fetchSeasonList(effMeta, { tmdbKey: settings.tmdbKey })
+    fetchSeasonList(effMeta, {
+      tmdbKey: settings.tmdbKey,
+      episodeSources: settings.metadataSources?.episodes,
+      tvdbKey: settings.tvdbKey,
+      tvdbSeasonType: settings.tvdbSeasonType,
+    })
       .then((s) => {
         if (!cancelled) setSeasons(s);
       })
@@ -68,7 +73,14 @@ export function useSeasonBrowser(
     return () => {
       cancelled = true;
     };
-  }, [open, effMeta, settings.tmdbKey]);
+  }, [
+    open,
+    effMeta,
+    settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    settings.metadataSources?.episodes,
+  ]);
 
   useEffect(() => {
     if (!open || (effMeta.type !== "series" && !isAnimeId(effMeta.id))) {
@@ -87,7 +99,12 @@ export function useSeasonBrowser(
         })
         .catch(() => {});
     };
-    fetchSeasonEpisodes(effMeta, season, { tmdbKey: settings.tmdbKey })
+    fetchSeasonEpisodes(effMeta, season, {
+      tmdbKey: settings.tmdbKey,
+      episodeSources: settings.metadataSources?.episodes,
+      tvdbKey: settings.tvdbKey,
+      tvdbSeasonType: settings.tvdbSeasonType,
+    })
       .then((eps) => {
         if (cancelled) return;
         setEpisodes(eps);
@@ -102,7 +119,15 @@ export function useSeasonBrowser(
     return () => {
       cancelled = true;
     };
-  }, [open, effMeta, season, settings.tmdbKey]);
+  }, [
+    open,
+    effMeta,
+    season,
+    settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    settings.metadataSources?.episodes,
+  ]);
 
   return { seasons, season, setSeason, episodes, loading, imdbRatings };
 }

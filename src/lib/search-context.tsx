@@ -28,7 +28,7 @@ import { createSearchRequestGuard } from "@/lib/search-request-guard";
 import { normalizeSearchQuery } from "@/lib/search-query";
 import { orderedMetadataAddons } from "@/lib/metadata-addons";
 import { addonKeyFromSource } from "@/lib/metadata-sources";
-import { addonTopMatch } from "@/lib/search-top-match";
+import { addonsBeforeTmdb, addonTopMatch, prioritizedTopMatch } from "@/lib/search-top-match";
 import { searchManga } from "@/lib/manga/api";
 import type { MangaSummary } from "@/lib/manga/model";
 import { searchEBooks, type EBook } from "@/lib/ebook/api";
@@ -265,7 +265,10 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         excludeGenres.join(","),
         normalizedQuery,
       ].join("\0");
-      const configuredAddonOrder = (settings.metadataSources?.title ?? [])
+      const searchChain = settings.metadataSources?.search ?? [];
+      const configuredAddonOrder = (
+        searchChain.length ? searchChain : (settings.metadataSources?.title ?? [])
+      )
         .map(addonKeyFromSource)
         .filter((key): key is string => !!key);
       const metadataOrder = configuredAddonOrder.length
@@ -411,18 +414,29 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         const dedupedGroups = acc.groups
           .map((g) => ({ ...g, metas: dropAnime(g.metas.filter((m) => !shown.has(m.id))) }))
           .filter((g) => g.metas.length > 0);
-        const topMatch =
-          (settings.searchTmdbTopMatch ? base.topMatch : null) ??
-          addonTopMatch(
-            searchAddons,
-            dropAnime([
-              ...acc.addon.movies,
-              ...acc.addon.series,
-              ...acc.groups.flatMap((group) => group.metas),
-            ]),
-            trimmed,
-            metadataOrder,
-          );
+        const topMatchCandidates = dropAnime([
+          ...acc.addon.movies,
+          ...acc.addon.series,
+          ...acc.groups.flatMap((group) => group.metas),
+        ]);
+        const addonTop = addonTopMatch(searchAddons, topMatchCandidates, trimmed, metadataOrder);
+        const tmdbAt = searchChain.indexOf("tmdb");
+        const beforeTmdb = searchChain
+          .slice(0, Math.max(0, tmdbAt))
+          .map(addonKeyFromSource)
+          .filter((key): key is string => !!key);
+        const earlyAddons = addonsBeforeTmdb(searchAddons, searchChain);
+        const earlyAddonTop =
+          earlyAddons.length > 0
+            ? addonTopMatch(earlyAddons, topMatchCandidates, trimmed, beforeTmdb)
+            : null;
+        const topMatch = prioritizedTopMatch({
+          chain: searchChain,
+          tmdbTop: settings.searchTmdbTopMatch ? base.topMatch : null,
+          addonTop,
+          earlyAddonTop,
+          tmdbEnabled: settings.searchTmdbTopMatch,
+        });
         setResults({
           ...base,
           topMatch:

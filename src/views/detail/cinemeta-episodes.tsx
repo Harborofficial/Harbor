@@ -54,7 +54,9 @@ export function CinemetaEpisodes({
   seasonPosters,
   seasonBackdrops,
   seasons,
+  seasonOverviewsBySource,
   onSeasonSynopsisSource,
+  synopsisOrder: synopsisOrderProp,
 }: {
   meta: Meta;
   videos: NonNullable<Meta["videos"]>;
@@ -66,7 +68,12 @@ export function CinemetaEpisodes({
   seasonPosters?: Record<number, string>;
   seasonBackdrops?: Record<number, string>;
   seasons?: Season[];
+  seasonOverviewsBySource?: Record<
+    string,
+    { sourceName?: string; overviews: Record<number, string> }
+  >;
   onSeasonSynopsisSource?: (source: string | undefined) => void;
+  synopsisOrder?: string[];
 }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -291,7 +298,7 @@ export function CinemetaEpisodes({
     settings.tvdbSeasonExplorer !== false &&
     hasSeasonMetadata &&
     grouped.some((group) => group.seasonNumber >= 1);
-  const synopsisOrder = settings.metadataSources?.seasonSynopsis;
+  const synopsisOrder = synopsisOrderProp ?? settings.metadataSources?.seasonSynopsis;
   const firstSynopsisSource = synopsisOrder?.[0];
   const explorer = useSeasonExplorerView({
     metaId: meta.id,
@@ -305,6 +312,7 @@ export function CinemetaEpisodes({
     lang: effectiveTmdbLanguage(),
     preferFallbackSynopsis: !firstSynopsisSource || firstSynopsisSource.startsWith("addon:"),
     synopsisOrder,
+    addonSeasonOverviews: seasonOverviewsBySource,
     fallbackSourceName: meta.addonOrigin?.name ?? "Addon",
     items: explorerItems,
     activeKey: String(active),

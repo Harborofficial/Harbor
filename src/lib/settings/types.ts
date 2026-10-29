@@ -617,7 +617,8 @@ export type Settings = {
       | "episodes"
       | "ratings"
       | "cast"
-      | "trailers",
+      | "trailers"
+      | "search",
       string[]
     >
   >;

@@ -85,6 +85,7 @@ export type Meta = {
   listingYear?: number;
   runtime?: string;
   genres?: string[];
+  cast?: string[];
   trailers?: Array<{ source: string; type?: string }>;
   trailerStreams?: Array<{ ytId?: string; title?: string }>;
   links?: Array<{ name: string; category: string; url: string }>;

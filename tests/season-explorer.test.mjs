@@ -700,6 +700,29 @@ test("an addon-provided season synopsis wins before any provider fallback reques
   f.unmount();
 });
 
+test("explicit synopsis order beats a lower source with a preferred language", async () => {
+  const f = hookFixture({
+    synopsisGet: async () => seasonTranslations(["tr", "TMDB Turkish"]),
+  });
+  const data = await settleExplorer(f, {
+    ...props,
+    tvdbKey: "",
+    lang: "tr-TR",
+    tmdbKey: "key",
+    tmdbTvId: 42,
+    preferFallbackSynopsis: true,
+    synopsisOrder: ["addon:a", "addon:b", "tmdb"],
+    addonSeasonOverviews: {
+      "addon:a": { overviews: {} },
+      "addon:b": { sourceName: "Addon B", overviews: { 1: "Addon B text" } },
+    },
+    fallbackSynopsis: { overview: "Fallback text" },
+  });
+  assert.equal(data.details.get(1).overview, "Addon B text");
+  assert.equal(data.details.get(1).source, "Addon B");
+  f.unmount();
+});
+
 test("season synopsis fallback prefers TVDB English then TMDB English and rejects blanks", async () => {
   for (const [englishOverview, tmdbOverview, expected] of [
     ["TVDB English", "TMDB English", "TVDB English"],

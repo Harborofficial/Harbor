@@ -109,6 +109,9 @@ export function useEpisodeNavigation(params: {
     const cur = { season: src.episode.season, episode: src.episodeEnd ?? src.episode.episode };
     fetchAdjacentEpisodes(src.meta, cur, {
       tmdbKey: settings.tmdbKey,
+      episodeSources: settings.metadataSources?.episodes,
+      tvdbKey: settings.tvdbKey,
+      tvdbSeasonType: settings.tvdbSeasonType,
       kitsuStreamId: src.episode.kitsuStreamId,
       imdbSeason: src.episode.imdbSeason,
       imdbEpisode: src.episode.imdbEpisode,
@@ -152,6 +155,9 @@ export function useEpisodeNavigation(params: {
     src.episodeEnd,
     src.url,
     settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    settings.metadataSources?.episodes,
     settings.episodeHiding,
   ]);
 

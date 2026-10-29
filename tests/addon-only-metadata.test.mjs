@@ -303,7 +303,7 @@ test("addon Top Match follows metadata priority and matches the configured insta
       loadDisplayOrder: () => [],
     },
   });
-  const { addonTopMatch } = load("search-top-match.ts", {
+  const { addonsBeforeTmdb, addonTopMatch, prioritizedTopMatch } = load("search-top-match.ts", {
     "./addon-configuration-key": { addonConfigurationKey: key },
     "./metadata-addons": metadata,
     "./search-query": { normalizeSearchQuery: (q) => q.trim().toLowerCase() },
@@ -321,6 +321,65 @@ test("addon Top Match follows metadata priority and matches the configured insta
     "Batman",
   );
   assert.equal(addonTopMatch([first, second], metas.slice(1), "Batman", []).meta.name, "Batman");
+  const firstKey = key(first.transportUrl);
+  const secondKey = key(second.transportUrl);
+  assert.deepEqual(
+    addonsBeforeTmdb([first, second], [`addon:${firstKey}`, "tmdb", `addon:${secondKey}`]).map(
+      (addon) => addon.manifest.id,
+    ),
+    ["first"],
+  );
+  assert.equal(addonsBeforeTmdb([first, second], ["tmdb", `addon:${firstKey}`]).length, 0);
+  const earlyBoth = addonsBeforeTmdb(
+    [first, second],
+    [`addon:${firstKey}`, `addon:${secondKey}`, "tmdb"],
+  );
+  assert.equal(earlyBoth.length, 2);
+  assert.equal(earlyBoth[0], first);
+  assert.equal(earlyBoth[1], second);
+
+  const tmdbTop = { kind: "movie", meta: { id: "tmdb:movie:1", type: "movie", name: "Batman" } };
+  const addonTop = { kind: "series", meta: { id: "tt1", type: "series", name: "Batman" } };
+  assert.equal(
+    prioritizedTopMatch({
+      chain: ["tmdb", `addon:${key(first.transportUrl)}`],
+      tmdbTop,
+      addonTop,
+      earlyAddonTop: null,
+      tmdbEnabled: true,
+    }),
+    tmdbTop,
+  );
+  assert.equal(
+    prioritizedTopMatch({
+      chain: [`addon:${key(first.transportUrl)}`, "tmdb"],
+      tmdbTop,
+      addonTop,
+      earlyAddonTop: addonTop,
+      tmdbEnabled: true,
+    }),
+    addonTop,
+  );
+  assert.equal(
+    prioritizedTopMatch({
+      chain: [`addon:${key(first.transportUrl)}`],
+      tmdbTop,
+      addonTop,
+      earlyAddonTop: null,
+      tmdbEnabled: true,
+    }),
+    addonTop,
+  );
+  assert.equal(
+    prioritizedTopMatch({
+      chain: [],
+      tmdbTop,
+      addonTop,
+      earlyAddonTop: null,
+      tmdbEnabled: false,
+    }),
+    addonTop,
+  );
 });
 
 test("a configured TMDB key reaches the network in addon-only mode", async () => {
