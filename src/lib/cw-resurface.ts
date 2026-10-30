@@ -41,7 +41,21 @@ function currentEpisode(i: LibraryItem): { season: number; episode: number } | n
 const RESURFACE_TTL = 6 * 3600 * 1000;
 const RECENT_MS = 45 * 864e5;
 
-type CacheVal = { next: { season: number; episode: number } | null; t: number };
+export type ResurfaceOptions = {
+  tmdbKey: string;
+  animeMode: AnimeMode;
+  animeCwEnd?: "hide" | "timer";
+  hideCaughtUp?: boolean;
+};
+
+export type ResurfaceTarget = {
+  season: number;
+  episode: number;
+  waitingForAir?: boolean;
+  airDate?: string;
+};
+
+type CacheVal = { next: ResurfaceTarget | null; t: number };
 const cache = new Map<string, CacheVal>();
 
 export function clearResurfaceCache(): void {
@@ -56,12 +70,13 @@ type WatchedFor = (
 export async function resurfaceCandidates(
   library: LibraryItem[],
   inCw: Set<string>,
-  opts: { tmdbKey: string; animeMode: AnimeMode },
+  opts: ResurfaceOptions,
   watchedFor?: WatchedFor,
-): Promise<Map<string, { season: number; episode: number }>> {
+): Promise<Map<string, ResurfaceTarget>> {
   const now = Date.now();
   const profileScope = privateCwProfileId() ?? "shared";
-  const out = new Map<string, { season: number; episode: number }>();
+  const endMode = opts.animeCwEnd ?? "hide";
+  const out = new Map<string, ResurfaceTarget>();
   const candidates = library.filter((i) => {
     if (i.type !== "series" && !ANIME_ID.test(i._id)) return false;
     if (!i.state || (i.removed && !i.temp)) return false;
@@ -69,19 +84,27 @@ export async function resurfaceCandidates(
     const anime = isAnimeCwItem(i);
     if (opts.animeMode === "exclude" && anime) return false;
     if (opts.animeMode === "only" && !anime) return false;
-    const lw = Date.parse(i.state.lastWatched ?? "");
+    const m = (i as Record<string, unknown>)._mtime;
+    const mt = typeof m === "number" ? m : Date.parse(String(m ?? ""));
+    const rawLw = Date.parse(i.state.lastWatched ?? "");
+    const lw = Number.isFinite(rawLw) ? rawLw : Number.isFinite(mt) ? mt : NaN;
     if (!Number.isFinite(lw) || now - lw > RECENT_MS) return false;
     const cur = currentEpisode(i);
     if (cur == null) return false;
-    if ((i.state.flaggedWatched ?? 0) > 0)
-      return !watchedFor || watchedFor(i, cur)(cur.season, cur.episode);
-    return anime && !!watchedFor && watchedFor(i, cur)(cur.season, cur.episode);
+    const isWatched =
+      (i.state.flaggedWatched ?? 0) > 0 ||
+      (i as Record<string, unknown>).manualWatched === true ||
+      (i as Record<string, unknown>).external === "nuvio" ||
+      (!!watchedFor && watchedFor(i, cur)(cur.season, cur.episode));
+    if (!isWatched && !anime) return false;
+    if (watchedFor && !watchedFor(i, cur)(cur.season, cur.episode)) return false;
+    return true;
   });
   for (const i of candidates) {
     const cur = currentEpisode(i)!;
-    const key = `${profileScope}|${i._id}:${cur.season}:${cur.episode}`;
+    const key = `${profileScope}|${endMode}|${i._id}:${cur.season}:${cur.episode}`;
     const cached = cache.get(key);
-    let nx: { season: number; episode: number } | null;
+    let nx: ResurfaceTarget | null;
     const meta: Meta = {
       id: i._id,
       type: libraryMetaType(i.type),
@@ -94,24 +117,78 @@ export async function resurfaceCandidates(
     } else {
       try {
         const adj = await fetchAdjacentEpisodes(meta, cur, { tmdbKey: opts.tmdbKey });
-        nx = adj.next && resurfaceAired(adj.next.airDate)
-          ? { season: adj.next.season, episode: adj.next.episode }
-          : null;
-        cache.set(key, { next: nx, t: now });
+        if (adj.next) {
+          const aired = resurfaceAired(adj.next.airDate);
+          if (aired) {
+            nx = {
+              season: adj.next.season,
+              episode: adj.next.episode,
+              waitingForAir: false,
+              airDate: adj.next.airDate,
+            };
+          } else if (endMode === "timer") {
+            nx = {
+              season: adj.next.season,
+              episode: adj.next.episode,
+              waitingForAir: true,
+              airDate: adj.next.airDate,
+            };
+          } else {
+            nx = null;
+          }
+        } else if (
+          endMode === "timer" &&
+          !opts.hideCaughtUp &&
+          i.external !== "simkl" &&
+          i.external !== "trakt"
+        ) {
+          nx = { season: cur.season, episode: cur.episode, waitingForAir: true };
+        } else {
+          nx = null;
+        }
+        const airTime = adj.next?.airDate ? Date.parse(adj.next.airDate) : NaN;
+        const cacheTtl =
+          Number.isFinite(airTime) && airTime > now
+            ? Math.max(1000, Math.min(RESURFACE_TTL, airTime - now + 1000))
+            : RESURFACE_TTL;
+        cache.set(key, { next: nx, t: now - (RESURFACE_TTL - cacheTtl) });
       } catch {
         // A failed lookup must remain retryable on the next refresh.
         continue;
       }
     }
-    if (nx && watchedFor && watchedFor(i, cur)(nx.season, nx.episode)) {
+    if (nx && !nx.waitingForAir && watchedFor && watchedFor(i, cur)(nx.season, nx.episode)) {
       nx = await fetchEpisodeList(meta, { tmdbKey: opts.tmdbKey })
         .then((list) => {
           const target = nextUnwatchedAfter(list, cur, watchedFor(i, cur));
-          if (!target) return null;
-          const entry = list.find((e) => e.season === target.season && e.episode === target.episode);
-          return entry && resurfaceAired(entry.airDate)
-            ? { season: target.season, episode: target.episode }
-            : null;
+          if (!target) {
+            return i.external !== "simkl" &&
+              i.external !== "trakt" &&
+              endMode === "timer" &&
+              !opts.hideCaughtUp
+              ? { season: cur.season, episode: cur.episode, waitingForAir: true }
+              : null;
+          }
+          const entry = list.find(
+            (e) => e.season === target.season && e.episode === target.episode,
+          );
+          if (entry && resurfaceAired(entry.airDate)) {
+            return {
+              season: target.season,
+              episode: target.episode,
+              waitingForAir: false,
+              airDate: entry.airDate,
+            };
+          }
+          if (endMode === "timer") {
+            return {
+              season: target.season,
+              episode: target.episode,
+              waitingForAir: true,
+              airDate: entry?.airDate,
+            };
+          }
+          return null;
         })
         .catch(() => null);
       // Cache episode availability only. Watched history can change independently

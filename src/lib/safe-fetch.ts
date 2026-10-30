@@ -238,12 +238,25 @@ async function invokeHarborFetch(
       headers[k] = v;
     });
   }
-  const binaryBody =
+  let binaryBody =
     init?.body instanceof ArrayBuffer
       ? new Uint8Array(init.body)
       : ArrayBuffer.isView(init?.body)
         ? new Uint8Array(init.body.buffer, init.body.byteOffset, init.body.byteLength)
         : undefined;
+  if (!binaryBody && typeof FormData !== "undefined" && init?.body instanceof FormData) {
+    try {
+      const dummy = new Response(init.body);
+      const ct = dummy.headers.get("content-type");
+      if (ct && !headers["content-type"] && !headers["Content-Type"]) {
+        headers["content-type"] = ct;
+      }
+      const buf = await dummy.arrayBuffer();
+      binaryBody = new Uint8Array(buf);
+    } catch (e) {
+      console.warn("[safeFetch] failed to encode FormData body", e);
+    }
+  }
   const body =
     typeof init?.body === "string"
       ? init.body

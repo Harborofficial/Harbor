@@ -334,6 +334,19 @@ export function setWatchlistAggregate(ids: Iterable<string>): void {
   for (const s of subs) s();
 }
 
+export function clearWatchlistCache(profileOrSlot?: string | number): void {
+  try {
+    if (profileOrSlot != null) {
+      localStorage.removeItem(`${AGG_KEY_PREFIX}${profileOrSlot}`);
+    } else {
+      localStorage.removeItem(LEGACY_AGG_KEY);
+      localStorage.removeItem(aggStoreKey());
+    }
+  } catch {}
+  aggregateIds = new Set();
+  for (const s of subs) s();
+}
+
 export function watchlistHas(id: string): boolean {
   if (isNuvioProviderActive()) {
     const slot = resolveNuvioProfileIndex();
@@ -508,6 +521,7 @@ async function syncWithSimkl(metaId: string, added: boolean): Promise<void> {
 }
 
 async function syncWithStremio(input: string | WatchlistInput, added: boolean): Promise<void> {
+  if (isNuvioProviderActive()) return;
   const authKey = readActiveStremioAuthKey();
   if (!authKey) return;
   const id = typeof input === "string" ? input : input.id;

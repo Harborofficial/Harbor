@@ -6,7 +6,13 @@ import { manualEpisodeKeys } from "@/lib/manual-watched";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
-export async function syncSeriesWatchedToStremio(meta: Meta, imdbId?: string | null): Promise<void> {
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+
+export async function syncSeriesWatchedToStremio(
+  meta: Meta,
+  imdbId?: string | null,
+): Promise<void> {
+  if (isNuvioProviderActive()) return;
   const id = meta.id;
   if (ANIME_ID.test(id) || meta.type === "anime") return;
   const authKey = readActiveStremioAuthKey();

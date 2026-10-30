@@ -2,11 +2,13 @@ import { HarborAccountDialog } from "@/views/account/harbor-account-dialog";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { verifyProfilePassword } from "@/lib/profile-password";
 import { StatusDot, StatusPicker } from "@/chrome/sidebar/status-control";
 import { AccountMenuPanel } from "./account-menu-panel";
 import { ProfileAvatar, SubtitleText } from "./account-menu-parts";
 import { useAccountMenu } from "./use-account-menu";
+import { isPlaceholderName } from "@/lib/profiles";
 
 type TriggerKind = "row" | "pill" | "avatar";
 
@@ -48,12 +50,26 @@ export function AccountMenu({
     selectProfile,
   } = ctrl;
 
+  const isNuvio =
+    settings.accountProvider === "nuvio" ||
+    (typeof isNuvioProviderActive === "function" ? isNuvioProviderActive() : false);
   const kid = !!activeProfile?.kid;
   const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
     ? null
     : settings.harborAvatar;
-  const name =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+  const isPlaceholder =
+    typeof isPlaceholderName === "function" ? isPlaceholderName(activeProfile?.name) : false;
+  const name = isNuvio
+    ? activeProfile?.name || t("profile.fallback")
+    : isPlaceholder
+      ? (user?.fullname ??
+        user?.email?.split("@")[0] ??
+        activeProfile?.name ??
+        t("profile.fallback"))
+      : (activeProfile?.name ??
+        user?.fullname ??
+        user?.email?.split("@")[0] ??
+        t("profile.fallback"));
   const showStatus = !!author && !kid;
 
   const vpos = placement === "up" ? "bottom-full mb-1.5" : "top-full mt-2";
@@ -73,8 +89,8 @@ export function AccountMenu({
     <span className="relative inline-flex shrink-0">
       <ProfileAvatar
         profile={activeProfile}
-        user={user}
-        fallbackAvatar={harborAvatar}
+        user={isNuvio ? null : user}
+        fallbackAvatar={isNuvio ? null : harborAvatar}
         size={size}
       />
       {showStatus && (

@@ -393,6 +393,22 @@ export function SettingsProvider({
   }, [settings.cwSnapshotRetentionDays]);
 
   useEffect(() => {
+    void import("@/lib/feed/external-cw").then(({ setExternalCwSources }) => {
+      setExternalCwSources({
+        trakt: settings.cwSources?.trakt ?? true,
+        simkl: settings.cwSources?.simkl ?? true,
+        publicmetadb: settings.cwSources?.publicmetadb ?? false,
+        nuvio: settings.accountProvider === "nuvio",
+      });
+    });
+  }, [
+    settings.cwSources?.trakt,
+    settings.cwSources?.simkl,
+    settings.cwSources?.publicmetadb,
+    settings.accountProvider,
+  ]);
+
+  useEffect(() => {
     window.__harborStremioDeeplink = settings.stremioDeeplinkInstall;
     if (!("__TAURI_INTERNALS__" in window)) return;
     void import("@tauri-apps/api/core").then(({ invoke }) => {

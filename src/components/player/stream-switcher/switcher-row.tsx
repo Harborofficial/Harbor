@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { AddonLogo } from "@/components/addon-logo";
+import { AccountOriginBadge } from "@/components/account-origin-badge";
 import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { FlagStack } from "@/components/flag";
 import { FormatBadge, RuleBadges, streamBadges } from "@/components/format-badge";
@@ -26,7 +27,10 @@ export function isCurrentStream(
 
 const FLAG_EMOJI_RX = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
 function stripFlagEmoji(s: string): string {
-  return s.replace(FLAG_EMOJI_RX, "").replace(/\s{2,}/g, " ").trim();
+  return s
+    .replace(FLAG_EMOJI_RX, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function Equalizer() {
@@ -71,8 +75,7 @@ export function SwitcherRow({
   const addonId = isCurrent && currentAddon ? currentAddon.id : stream.addonId;
   const addonName =
     isCurrent && currentAddon ? currentAddon.name : (stream.addonName ?? t("Source"));
-  const headlineSource =
-    isCurrent && currentName ? currentName : (stream.name?.trim() || addonName);
+  const headlineSource = isCurrent && currentName ? currentName : stream.name?.trim() || addonName;
   const headline = stripFlagEmoji(headlineSource) || addonName;
   const description = stripFlagEmoji(stream.title?.trim() || stream.description?.trim() || "");
   const badges = streamBadges(stream);
@@ -80,7 +83,9 @@ export function SwitcherRow({
   const secondary = badges.slice(1);
   const langs = stream.audioLanguages ?? [];
   const link = resolveStreamLink(stream);
-  const filterReason = stream.reasons?.find((r) => r.signal.startsWith("filtered:"))?.signal.slice(9);
+  const filterReason = stream.reasons
+    ?.find((r) => r.signal.startsWith("filtered:"))
+    ?.signal.slice(9);
   const interactive = !isCurrent && !resolving;
 
   useLayoutEffect(() => {
@@ -111,11 +116,16 @@ export function SwitcherRow({
               : "cursor-pointer hover:bg-canvas/50 focus-visible:bg-canvas/50"
         }`}
       >
-        {isCurrent && <span className="absolute inset-y-2 start-0 w-[3px] rounded-e-full bg-accent" />}
+        {isCurrent && (
+          <span className="absolute inset-y-2 start-0 w-[3px] rounded-e-full bg-accent" />
+        )}
         <AddonLogo addonId={addonId} addonName={addonName} manifestLogo={addonLogo} size="xl" />
 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="truncate text-[14px] font-semibold leading-snug text-ink">{headline}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate text-[14px] font-semibold leading-snug text-ink">{headline}</p>
+            <AccountOriginBadge addonUrl={stream.addonUrl || stream.addonId} size="sm" />
+          </div>
           {description && (
             <p
               ref={descRef}
@@ -157,7 +167,9 @@ export function SwitcherRow({
           {match && !isCurrent && (
             <span
               className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ring-1 ${
-                match === "same" ? "bg-accent-soft text-accent ring-accent/30" : "bg-raised text-ink-muted ring-edge-soft"
+                match === "same"
+                  ? "bg-accent-soft text-accent ring-accent/30"
+                  : "bg-raised text-ink-muted ring-edge-soft"
               }`}
             >
               {match === "same" ? t("Same file") : t("Close match")}

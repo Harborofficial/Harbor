@@ -7,6 +7,16 @@ import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
 import { markPmdbWatched, unmarkPmdbWatched } from "@/lib/publicmetadb/history";
 import { stremioIdToPmdbTarget } from "@/lib/publicmetadb/ids";
 import { usePublicMetaDb } from "@/lib/publicmetadb/provider";
+import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
+import {
+  resolveNuvioProfileIndex,
+  pushWatchedItemToNuvio,
+  deleteWatchedItemFromNuvio,
+  deleteEpisodeWatchProgressFromNuvio,
+  cwKeepsCaughtUpForTimer,
+} from "@/lib/nuvio/nuvio-sync";
+import { saveLocalCw, clearLocalCw, localCwEntry } from "@/lib/local-cw";
+import { saveResumeMs, readResumeMs } from "@/lib/resume";
 import { airedOnly } from "../helpers";
 
 export function useMarkSeason({
@@ -39,6 +49,153 @@ export function useMarkSeason({
         airedEpisodes.map((ep) => ({ season: ep.seasonNumber, episode: ep.episodeNumber })),
         watched,
       );
+      if (isNuvioSignedIn() && isNuvioProviderActive()) {
+        const slot = resolveNuvioProfileIndex();
+        const clean = meta.id.replace(/^(series|movie|tmdb):/, "");
+        const idVariants = Array.from(
+          new Set([meta.id, clean, `tmdb:${clean}`, `series:${clean}`]),
+        );
+        const primaryId = meta.id;
+        if (watched) {
+          const items = airedEpisodes.map((e) => ({
+            contentId: clean,
+            contentType: "series" as const,
+            title: meta.name,
+            season: e.seasonNumber,
+            episode: e.episodeNumber,
+            watchedAt: Date.now(),
+          }));
+          void pushWatchedItemToNuvio(slot, items);
+          void (async () => {
+            for (const ep of airedEpisodes) {
+              await deleteEpisodeWatchProgressFromNuvio(
+                slot,
+                primaryId,
+                ep.seasonNumber,
+                ep.episodeNumber,
+              );
+            }
+            const futureVideos = (meta.videos || [])
+              .filter((v) => (v.season ?? 0) > active && (v.episode ?? v.number ?? 0) > 0)
+              .sort(
+                (a, b) =>
+                  (a.season ?? 0) - (b.season ?? 0) ||
+                  (a.episode ?? a.number ?? 0) - (b.episode ?? b.number ?? 0),
+              );
+            const nextEp = futureVideos[0];
+            if (nextEp) {
+              const nextSeason = nextEp.season ?? active + 1;
+              const nextEpisode = nextEp.episode ?? nextEp.number ?? 1;
+              const nextCw = {
+                id: meta.id,
+                type: "series" as const,
+                name: meta.name,
+                poster: meta.poster,
+                background: meta.background,
+                season: nextSeason,
+                episode: nextEpisode,
+                positionMs: 0,
+                durationMs: 2640000,
+                isAnime: meta.type === "anime",
+                external: "nuvio" as const,
+                t: Date.now(),
+              };
+              saveLocalCw(nextCw, `nuvio-${slot}`);
+              saveResumeMs(meta.id, 0, nextSeason, nextEpisode, undefined, 0, "nuvio", `nuvio-${slot}`);
+            } else {
+              if (cwKeepsCaughtUpForTimer()) {
+                const lastEp = airedEpisodes[airedEpisodes.length - 1];
+                const lastCw = {
+                  id: meta.id,
+                  type: "series" as const,
+                  name: meta.name,
+                  poster: meta.poster,
+                  background: meta.background,
+                  season: lastEp?.seasonNumber ?? active,
+                  episode: lastEp?.episodeNumber ?? 1,
+                  positionMs: 0,
+                  durationMs: 2640000,
+                  isAnime: meta.type === "anime",
+                  external: "nuvio" as const,
+                  t: Date.now(),
+                };
+                saveLocalCw(lastCw, `nuvio-${slot}`);
+              } else {
+                clearLocalCw(meta.id, `nuvio-${slot}`);
+              }
+            }
+            window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+            window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+            window.dispatchEvent(new CustomEvent("harbor:manual-watched-changed"));
+            window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+          })();
+        } else {
+          const keys = airedEpisodes.flatMap((e) =>
+            idVariants.map((cid) => ({
+              contentId: cid,
+              season: e.seasonNumber,
+              episode: e.episodeNumber,
+            })),
+          );
+          void deleteWatchedItemFromNuvio(slot, keys);
+          void (async () => {
+            for (const ep of airedEpisodes) {
+              await deleteEpisodeWatchProgressFromNuvio(
+                slot,
+                primaryId,
+                ep.seasonNumber,
+                ep.episodeNumber,
+              );
+              if (clean !== primaryId) {
+                await deleteEpisodeWatchProgressFromNuvio(
+                  slot,
+                  clean,
+                  ep.seasonNumber,
+                  ep.episodeNumber,
+                );
+              }
+            }
+            const existingCw = localCwEntry(meta.id, false, `nuvio-${slot}`);
+            const resumePos = readResumeMs(meta.id, active, 1, `nuvio-${slot}`);
+            const targetEpisode =
+              existingCw && existingCw.season === active ? existingCw.episode : 1;
+            const targetPos =
+              existingCw && existingCw.season === active && (existingCw.positionMs ?? 0) > 0
+                ? existingCw.positionMs
+                : resumePos;
+
+            const resetCw = {
+              id: meta.id,
+              type: "series" as const,
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+              season: active,
+              episode: targetEpisode,
+              positionMs: targetPos,
+              durationMs: existingCw?.durationMs ?? 2640000,
+              isAnime: meta.type === "anime",
+              external: "nuvio" as const,
+              t: Date.now(),
+            };
+            saveLocalCw(resetCw, `nuvio-${slot}`);
+            saveResumeMs(
+              meta.id,
+              targetPos,
+              active,
+              targetEpisode,
+              undefined,
+              0,
+              "nuvio",
+              `nuvio-${slot}`,
+            );
+            window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+            window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+            window.dispatchEvent(new CustomEvent("harbor:manual-watched-changed"));
+            window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+          })();
+        }
+      }
       if (!simklConnected) return;
       const r = stremioIdToSimklTarget(meta.id, { season: active, episode: 1 });
       const showIds =

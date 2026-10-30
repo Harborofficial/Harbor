@@ -44,8 +44,8 @@ export function useAccountMenu() {
       const target = e.target as HTMLElement | null;
       if (
         target?.closest('[role="dialog"]') ||
-        target?.closest('[data-portal]') ||
-        target?.closest('.harbor-portal')
+        target?.closest("[data-portal]") ||
+        target?.closest(".harbor-portal")
       ) {
         return;
       }
@@ -79,7 +79,7 @@ export function useAccountMenu() {
       return;
     }
     if (p.pin_enabled) {
-      setNuvioPinTarget(p);
+      openPicker({ kind: "unlock", profileId: String(p.profile_index) });
     } else {
       setActiveNuvioProfile(p.profile_index);
     }

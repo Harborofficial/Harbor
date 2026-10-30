@@ -61,7 +61,8 @@ function episodeLabel(
 function remainingLabel(i: LibraryItem, t: T): string {
   const dur = i.state?.duration ?? 0;
   const off = i.state?.timeOffset ?? 0;
-  if (dur <= 0 || i.external) return "";
+  const isExternal = !!i.external && i.external !== "nuvio";
+  if (dur <= 0 || isExternal) return "";
   const mins = Math.max(0, Math.round((dur - off) / 60000));
   if (mins < 1) return t("Almost done");
   if (mins < 60) return t("{n}m left", { n: mins });

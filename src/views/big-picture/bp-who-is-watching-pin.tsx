@@ -1,6 +1,7 @@
 import { ChevronLeft, Delete } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { verifyProfilePassword } from "@/lib/profile-password";
+import { verifyNuvioPin } from "@/lib/nuvio/nuvio-profiles";
 import { profileInitials, type Profile } from "@/lib/profiles";
 import { useBpT } from "./bp-i18n";
 import { setBpFocus } from "./use-bp-focus";
@@ -102,7 +103,14 @@ export function BpWhoPin({
   const check = useCallback(
     async (candidate: string) => {
       setBusy(true);
-      const ok = await verifyProfilePassword(candidate, hash);
+      let ok = false;
+      if (profile.id.startsWith("nuvio-")) {
+        const slot = parseInt(profile.id.replace("nuvio-", ""), 10);
+        const res = await verifyNuvioPin(slot, candidate);
+        ok = res.unlocked;
+      } else {
+        ok = await verifyProfilePassword(candidate, hash);
+      }
       setBusy(false);
       if (ok) {
         attempts.delete(profile.id);

@@ -1,3 +1,4 @@
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { useCallback, type RefObject } from "react";
 import { clearOnePickerCache } from "@/lib/picker-cache";
 import {
@@ -65,8 +66,14 @@ export function usePlayerExit(params: {
     const pos = getPlaybackPosition();
     if (Number.isFinite(pos) && pos > 0) {
       saveResumeMs(
-        src.meta.id, pos * 1000, season, episode,
-        undefined, undefined, undefined, activeProfile?.id,
+        src.meta.id,
+        pos * 1000,
+        season,
+        episode,
+        undefined,
+        undefined,
+        undefined,
+        activeProfile?.id,
       );
       if (liveStreamRef && pos >= REMEMBER_MIN_SEC) {
         const rememberedUrl = (src.historyUrl ?? liveUrl) || src.url;
@@ -94,6 +101,9 @@ export function usePlayerExit(params: {
       clearInvite();
     }
     exitPlayback();
+    if (isNuvioProviderActive()) {
+      window.dispatchEvent(new CustomEvent("harbor:playback-session-ended"));
+    }
   }, [
     captureExitSnapshot,
     exitPlayback,

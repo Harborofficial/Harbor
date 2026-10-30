@@ -5,6 +5,7 @@ import { SButton } from "../ui";
 import { useT } from "@/lib/i18n";
 import nuvioIcon from "@/assets/nuvio.png";
 import { NuvioAuthModal } from "@/components/nuvio-auth-modal";
+import { activateNuvioAccountProvider } from "@/lib/nuvio/nuvio-auth";
 import { fetchNuvioProfiles, signOutNuvio } from "@/lib/nuvio/nuvio-auth";
 import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import type { NuvioAccountState } from "@/lib/nuvio/nuvio-types";
@@ -50,7 +51,12 @@ export function NuvioCard() {
             {t("Connect Nuvio")}
           </SButton>
         </SettingRow>
-        {showAuth && <NuvioAuthModal onClose={() => setShowAuth(false)} />}
+        {showAuth && (
+          <NuvioAuthModal
+            onClose={() => setShowAuth(false)}
+            onSuccess={activateNuvioAccountProvider}
+          />
+        )}
       </>
     );
   }
@@ -62,7 +68,7 @@ export function NuvioCard() {
         label={t("Connected to Nuvio")}
         desc={
           <span className="font-mono text-ink" dir="ltr">
-            {reveal ? (user?.email || session.user.id) : maskedEmail}
+            {reveal ? user?.email || session.user.id : maskedEmail}
           </span>
         }
       >
@@ -85,15 +91,20 @@ export function NuvioCard() {
 
       <SettingRow
         icon={<LogOut size={18} strokeWidth={2} />}
-        label={t("Disconnect Nuvio")}
+        label={t("Sign out of Nuvio")}
         desc={t("Stops syncing with your Nuvio account on this device.")}
       >
         <SButton variant="danger" onClick={signOutNuvio}>
-          {t("Disconnect")}
+          {t("Sign out")}
         </SButton>
       </SettingRow>
 
-      {showAuth && <NuvioAuthModal onClose={() => setShowAuth(false)} />}
+      {showAuth && (
+        <NuvioAuthModal
+          onClose={() => setShowAuth(false)}
+          onSuccess={activateNuvioAccountProvider}
+        />
+      )}
     </>
   );
 }

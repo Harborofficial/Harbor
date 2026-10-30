@@ -20,6 +20,7 @@ import { DiscoverIcon } from "@/components/icons/discover-icon";
 import { LibraryIcon } from "@/components/icons/library-icon";
 import { LiveTvIcon } from "@/components/icons/live-tv-icon";
 import { MoviesIcon } from "@/components/icons/movies-icon";
+import { SportsIcon } from "@/components/icons/sports-icon";
 import { TvIcon } from "@/components/icons/tv-icon";
 import {
   anyTabLocked,
@@ -58,10 +59,22 @@ import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useSettings } from "@/lib/settings";
 import { getSecondaryPrivileges } from "@/lib/settings/defaults";
-import { isStremioActivePrimary } from "@/lib/active-profile-id";
+import { isStremioActivePrimary, isNuvioProviderActive } from "@/lib/active-profile-id";
+import {
+  uploadNuvioCustomAvatar,
+  createNuvioProfile,
+  updateNuvioProfile,
+  deleteNuvioProfile,
+  transferPrimaryNuvioProfile,
+  setNuvioPin,
+  clearNuvioPin,
+  verifyNuvioPin,
+} from "@/lib/nuvio/nuvio-profiles";
+import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { AvatarRing } from "@/views/settings/account/avatar-ring";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { resizeAvatar } from "@/views/settings/account/avatar-utils";
+import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
 import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
 import { ColorPicker } from "@/views/settings/color-picker";
@@ -108,13 +121,48 @@ export function EditorView({
   const [anilistAvatarError, setAnilistAvatarError] = useState<string | null>(null);
   const [loadingSimklAvatar, setLoadingSimklAvatar] = useState(false);
   const [simklAvatarError, setSimklAvatarError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const [nuvioState] = useState(() => loadNuvioState());
   const editing = mode.kind === "edit" ? mode.profile : null;
+  const nuvioSlot = editing ? parseInt(editing.id.replace(/\D/g, ""), 10) || null : null;
+  const activeNuvioSlot = nuvioState.activeProfileIndex || 1;
   const primary = profiles.find((p) => p.isPrimary);
   const transferTargets = profiles.filter((p) => !p.isPrimary && !p.kid);
-  const activeIsPrimary = isStremioActivePrimary(activeProfile, profiles);
-  const isOwnProfile = editing?.id === activeProfile?.id;
+  const nuvioTransferTargets = profiles.filter((p) => {
+    const slot = parseInt(p.id.replace(/\D/g, ""), 10);
+    return slot !== 1 && !p.kid;
+  });
+  const activeIsPrimary = isNuvio
+    ? activeNuvioSlot === 1
+    : isStremioActivePrimary(activeProfile, profiles);
+  const isOwnProfile = isNuvio
+    ? nuvioSlot !== null && nuvioSlot === activeNuvioSlot
+    : editing?.id === activeProfile?.id;
   const canEditAdvanced = activeIsPrimary;
-  const canCreate = activeIsPrimary || getSecondaryPrivileges(settings, false).canAddProfiles;
+  const canCreate = isNuvio
+    ? activeIsPrimary || getSecondaryPrivileges(settings, true).canAddProfiles
+    : activeIsPrimary || getSecondaryPrivileges(settings, false).canAddProfiles;
+  const [, setPrivVersion] = useState(0);
+  useEffect(() => {
+    const onSync = () => setPrivVersion((v) => v + 1);
+    window.addEventListener("harbor:secondary-privileges-changed", onSync);
+    window.addEventListener("harbor:settings-changed", onSync);
+    return () => {
+      window.removeEventListener("harbor:secondary-privileges-changed", onSync);
+      window.removeEventListener("harbor:settings-changed", onSync);
+    };
+  }, []);
+
+  const [usesPrimaryAddons, setUsesPrimaryAddons] = useState(() => {
+    if (isNuvio && nuvioSlot) {
+      const found = nuvioState.profiles.find((p) => p.profile_index === nuvioSlot);
+      return found?.uses_primary_addons ?? true;
+    }
+    return true;
+  });
+  const [tempOldPin, setTempOldPin] = useState<string | null>(null);
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
   const [name, setName] = useState(editing?.name ?? "");
   const [avatar, setAvatar] = useState<string | null>(editing?.avatar ?? null);
   const [avatarSource, setAvatarSource] = useState<
@@ -166,18 +214,24 @@ export function EditorView({
     const onBack = (e: KeyboardEvent) => {
       if (e.defaultPrevented || !isBackKey(e)) return;
       const target = e.target as HTMLElement | null;
-      if (!target?.closest('[data-profile-picker]') || target.closest('[data-search-editing]')) return;
+      if (!target?.closest("[data-profile-picker]") || target.closest("[data-search-editing]"))
+        return;
       e.preventDefault();
       e.stopPropagation();
-      setSubView({ kind: subView.kind === "security" || subView.kind === "pin-delete" ? "main" : "security" });
+      setSubView({
+        kind: subView.kind === "security" || subView.kind === "pin-delete" ? "main" : "security",
+      });
     };
     document.addEventListener("keydown", onBack);
     return () => document.removeEventListener("keydown", onBack);
   }, [subView.kind]);
 
   const trimmed = name.trim();
-  const canSave = trimmed.length > 0 && (!draftKid || !draftParentPin || draftParentPin.length === 4);
-  const isPrimary = editing?.isPrimary === true;
+  const canSave =
+    trimmed.length > 0 && (!draftKid || !draftParentPin || draftParentPin.length === 4);
+  const isPrimary = isNuvio
+    ? nuvioSlot === 1 || (!editing && nuvioState.profiles.length === 0)
+    : editing?.isPrimary === true;
   const canShare = !isPrimary && !!primary && primary.id !== editing?.id;
   const locked = editing ? !!editing.passwordHash : draftPin != null;
   const isCreate = mode.kind === "create";
@@ -281,6 +335,7 @@ export function EditorView({
       const dataUrl = await resizeAvatar(file, 320);
       setAvatar(dataUrl);
       setAvatarSource("upload");
+      setPendingAvatarFile(file);
     } catch (err) {
       console.warn("[profile] avatar resize failed", err);
     }
@@ -347,58 +402,159 @@ export function EditorView({
   };
 
   const submit = async () => {
-    if (!canSave) return;
-    let kidToSave = isPrimary ? null : draftKid;
-    if (draftKid && !isPrimary) {
-      let parentPinHash = editing?.kid?.parentPinHash ?? null;
-      if (draftParentPin && draftParentPin.length === 4) {
-        parentPinHash = await hashProfilePassword(draftParentPin);
+    if (!canSave || saving) return;
+    setSaving(true);
+    try {
+      let kidToSave = isPrimary ? null : draftKid;
+      if (draftKid && !isPrimary) {
+        let parentPinHash = editing?.kid?.parentPinHash ?? null;
+        if (draftParentPin && draftParentPin.length === 4) {
+          parentPinHash = await hashProfilePassword(draftParentPin);
+        }
+        kidToSave = {
+          age: draftKid.age,
+          curfewMinutes: draftKid.curfewMinutes ?? null,
+          parentPinHash,
+        };
       }
-      kidToSave = {
-        age: draftKid.age,
-        curfewMinutes: draftKid.curfewMinutes ?? null,
-        parentPinHash,
-      };
-    }
-    if (editing) {
-      updateProfile(editing.id, {
-        name: trimmed,
-        avatar,
-        color,
-        kid: kidToSave,
-        ...(canShare ? { shareStremioWith: shareWith } : {}),
-      });
-    } else {
-      const p = createProfile({ name: trimmed, avatar, color, kid: kidToSave });
-      const patch: Parameters<typeof updateProfile>[1] = {};
-      if (canShare && shareWith !== p.shareStremioWith) patch.shareStremioWith = shareWith;
-      if (draftPin) patch.passwordHash = await hashProfilePassword(draftPin);
-      if (anyTabLocked(draftLockedTabs)) patch.lockedTabs = draftLockedTabs;
-      const importList =
-        shareWith === null && primary
-          ? (Object.keys(importSelection) as ImportDomain[]).filter((d) => importSelection[d])
-          : [];
-      if (importList.length > 0 && primary) {
-        importDomains(primary.id, p.id, importList, {
-          addonTransportUrls: importList.includes("addons") ? [...selectedAddons] : null,
-          choices: domainChoices,
+      if (isNuvio) {
+        let finalAvatarUrl = avatar;
+        const targetSlot =
+          nuvioSlot ??
+          (() => {
+            const existingIndices = new Set(loadNuvioState().profiles.map((p) => p.profile_index));
+            let next = 1;
+            while (next <= 6 && existingIndices.has(next)) next++;
+            return next;
+          })();
+
+        if (avatar === null) {
+          finalAvatarUrl = null;
+          try {
+            localStorage.removeItem(`harbor.nuvio.local-avatar.${targetSlot}`);
+          } catch {}
+        } else if (pendingAvatarFile) {
+          try {
+            const uploaded = await uploadNuvioCustomAvatar(pendingAvatarFile, targetSlot);
+            if (uploaded) finalAvatarUrl = uploaded;
+          } catch (err) {
+            console.warn("[nuvio] avatar upload failed", err);
+          }
+        } else if (
+          finalAvatarUrl &&
+          (finalAvatarUrl.startsWith("data:") || finalAvatarUrl.startsWith("/"))
+        ) {
+          try {
+            const uploaded = await uploadNuvioCustomAvatar(finalAvatarUrl, targetSlot);
+            if (uploaded) finalAvatarUrl = uploaded;
+          } catch (err) {
+            console.warn("[nuvio] avatar upload failed", err);
+          }
+        }
+
+        if (mode.kind === "create") {
+          await createNuvioProfile({
+            name: trimmed,
+            avatarColorHex: color,
+            avatarUrl: finalAvatarUrl,
+            usesPrimaryAddons,
+            profileIndex: targetSlot,
+          });
+          if (targetSlot === 1 && finalAvatarUrl) {
+            void pushAvatarToEcosystem(finalAvatarUrl);
+          }
+          if (draftPin) {
+            await setNuvioPin(targetSlot, draftPin);
+          }
+          if (anyTabLocked(draftLockedTabs)) {
+            localStorage.setItem(
+              `harbor.nuvio.locked-tabs.${targetSlot}`,
+              JSON.stringify(draftLockedTabs),
+            );
+          }
+          if (kidToSave) {
+            localStorage.setItem(`harbor.nuvio.kid.${targetSlot}`, JSON.stringify(kidToSave));
+          }
+          selectProfile(`nuvio-${targetSlot}`, { unlocked: true });
+        } else {
+          await updateNuvioProfile(nuvioSlot!, {
+            name: trimmed,
+            avatar_color_hex: color,
+            avatar_url: finalAvatarUrl,
+            uses_primary_addons: isPrimary ? false : usesPrimaryAddons,
+          });
+          if ((isPrimary || nuvioSlot === 1) && finalAvatarUrl) {
+            void pushAvatarToEcosystem(finalAvatarUrl);
+          }
+          if (anyTabLocked(draftLockedTabs)) {
+            localStorage.setItem(
+              `harbor.nuvio.locked-tabs.${nuvioSlot}`,
+              JSON.stringify(draftLockedTabs),
+            );
+          } else {
+            localStorage.removeItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`);
+          }
+          if (kidToSave && !isPrimary) {
+            localStorage.setItem(`harbor.nuvio.kid.${nuvioSlot}`, JSON.stringify(kidToSave));
+          } else {
+            localStorage.removeItem(`harbor.nuvio.kid.${nuvioSlot}`);
+          }
+        }
+        if (avatarSource && (isOwnProfile || mode.kind === "create")) {
+          update({
+            useAnilistAvatar: avatarSource === "anilist",
+            useTraktAvatar: avatarSource === "trakt",
+            useSimklAvatar: avatarSource === "simkl",
+          });
+        }
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+        window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated"));
+        onDone();
+        return;
+      }
+
+      if (editing) {
+        updateProfile(editing.id, {
+          name: trimmed,
+          avatar,
+          color,
+          kid: kidToSave,
+          ...(canShare ? { shareStremioWith: shareWith } : {}),
         });
-        if (importList.includes("settings")) patch.settingsLinked = false;
-        emitListToast(t("Data copied from {name}", { name: primary.name }));
+      } else {
+        const p = createProfile({ name: trimmed, avatar, color, kid: kidToSave });
+        const patch: Parameters<typeof updateProfile>[1] = {};
+        if (canShare && shareWith !== p.shareStremioWith) patch.shareStremioWith = shareWith;
+        if (draftPin) patch.passwordHash = await hashProfilePassword(draftPin);
+        if (anyTabLocked(draftLockedTabs)) patch.lockedTabs = draftLockedTabs;
+        const importList =
+          shareWith === null && primary
+            ? (Object.keys(importSelection) as ImportDomain[]).filter((d) => importSelection[d])
+            : [];
+        if (importList.length > 0 && primary) {
+          importDomains(primary.id, p.id, importList, {
+            addonTransportUrls: importList.includes("addons") ? [...selectedAddons] : null,
+            choices: domainChoices,
+          });
+          if (importList.includes("settings")) patch.settingsLinked = false;
+          emitListToast(t("Data copied from {name}", { name: primary.name }));
+        }
+        if (Object.keys(patch).length > 0) updateProfile(p.id, patch);
+        // unlocked: the user set this PIN seconds ago in this very form. Without the flag
+        // selectProfile refuses the profile they just created and Save appears to fail.
+        selectProfile(p.id, { unlocked: true });
       }
-      if (Object.keys(patch).length > 0) updateProfile(p.id, patch);
-      // unlocked: the user set this PIN seconds ago in this very form. Without the flag
-      // selectProfile refuses the profile they just created and Save appears to fail.
-      selectProfile(p.id, { unlocked: true });
+      if (avatarSource && (isOwnProfile || mode.kind === "create")) {
+        update({
+          useAnilistAvatar: avatarSource === "anilist",
+          useTraktAvatar: avatarSource === "trakt",
+          useSimklAvatar: avatarSource === "simkl",
+        });
+      }
+      onDone();
+    } finally {
+      setSaving(false);
     }
-    if (avatarSource && (isOwnProfile || mode.kind === "create")) {
-      update({
-        useAnilistAvatar: avatarSource === "anilist",
-        useTraktAvatar: avatarSource === "trakt",
-        useSimklAvatar: avatarSource === "simkl",
-      });
-    }
-    onDone();
   };
 
   if (subView.kind === "pin-set") {
@@ -412,7 +568,12 @@ export function EditorView({
         mode="set"
         onBack={() => setSubView({ kind: "security" })}
         onComplete={async (pin) => {
-          if (editing) {
+          if (isNuvio && editing && nuvioSlot) {
+            await setNuvioPin(nuvioSlot, pin, tempOldPin || undefined);
+            setTempOldPin(null);
+            const hash = await hashProfilePassword(pin);
+            updateProfile(editing.id, { passwordHash: hash });
+          } else if (editing) {
             const hash = await hashProfilePassword(pin);
             updateProfile(editing.id, { passwordHash: hash });
           } else {
@@ -424,8 +585,8 @@ export function EditorView({
     );
   }
 
-  if (subView.kind === "pin-change" && editing?.passwordHash) {
-    const targetHash = editing.passwordHash;
+  if (subView.kind === "pin-change" && (editing?.passwordHash || (isNuvio && editing))) {
+    const targetHash = editing?.passwordHash ?? "";
     return (
       <PinEntry
         key={subView.kind}
@@ -433,33 +594,55 @@ export function EditorView({
         subtitle={t("Confirm your current PIN, then pick a new one.")}
         mode="verify"
         onBack={() => setSubView({ kind: "security" })}
-        verify={(pin) => verifyProfilePassword(pin, targetHash)}
-        onComplete={() => {
+        verify={async (pin) => {
+          if (isNuvio && nuvioSlot) {
+            const res = await verifyNuvioPin(nuvioSlot, pin);
+            return { ok: res.unlocked, message: res.message };
+          }
+          return verifyProfilePassword(pin, targetHash);
+        }}
+        onComplete={(oldPin) => {
+          setTempOldPin(oldPin);
           setSubView({ kind: "pin-set" });
         }}
       />
     );
   }
 
-  if (subView.kind === "pin-remove" && editing?.passwordHash) {
-    const targetHash = editing.passwordHash;
+  if (subView.kind === "pin-remove" && (editing?.passwordHash || (isNuvio && editing))) {
+    const targetHash = editing?.passwordHash ?? "";
     return (
       <PinEntry
         key={subView.kind}
-        title={t("Enter current PIN")}
-        subtitle={t("Confirm your current PIN to remove the lock.")}
+        title={t("Remove profile PIN")}
+        subtitle={t("Confirm your current PIN to remove protection.")}
         mode="verify"
         onBack={() => setSubView({ kind: "security" })}
-        verify={(pin) => verifyProfilePassword(pin, targetHash)}
-        onComplete={() => {
-          updateProfile(editing.id, { passwordHash: null });
+        verify={async (pin) => {
+          if (isNuvio && nuvioSlot) {
+            const res = await verifyNuvioPin(nuvioSlot, pin);
+            return { ok: res.unlocked, message: res.message };
+          }
+          return verifyProfilePassword(pin, targetHash);
+        }}
+        onComplete={async (currentPin) => {
+          if (isNuvio && nuvioSlot) {
+            await clearNuvioPin(nuvioSlot, currentPin);
+            updateProfile(editing.id, { passwordHash: null });
+          } else {
+            updateProfile(editing.id, { passwordHash: null });
+          }
           setSubView({ kind: "security" });
         }}
       />
     );
   }
 
-  if (subView.kind === "pin-delete" && editing && (editing.passwordHash || editing.kid?.parentPinHash)) {
+  if (
+    subView.kind === "pin-delete" &&
+    editing &&
+    (editing.passwordHash || editing.kid?.parentPinHash)
+  ) {
     const targetHash = (editing.passwordHash || editing.kid?.parentPinHash)!;
     return (
       <PinEntry
@@ -476,10 +659,27 @@ export function EditorView({
           setConfirmingDelete(false);
           setSubView({ kind: "main" });
         }}
-        verify={(pin) => verifyProfilePassword(pin, targetHash)}
-        onComplete={() => {
-          deleteProfile(editing.id);
-          onDone();
+        verify={async (pin) => {
+          if (isNuvio && nuvioSlot && editing.passwordHash) {
+            const res = await verifyNuvioPin(nuvioSlot, pin);
+            return { ok: res.unlocked, message: res.message };
+          }
+          if (editing.passwordHash) return verifyProfilePassword(pin, targetHash);
+          if (editing.kid?.parentPinHash)
+            return verifyProfilePassword(pin, editing.kid.parentPinHash);
+          return false;
+        }}
+        onComplete={async () => {
+          if (isNuvio && nuvioSlot) {
+            localStorage.removeItem(`harbor.nuvio.kid.${nuvioSlot}`);
+            localStorage.removeItem(`harbor.nuvio.locked-tabs.${nuvioSlot}`);
+            await deleteNuvioProfile(nuvioSlot);
+            window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+            onDone();
+          } else {
+            deleteProfile(editing.id);
+            onDone();
+          }
         }}
       />
     );
@@ -491,10 +691,10 @@ export function EditorView({
         initial={editing?.lockedTabs ?? draftLockedTabs ?? null}
         onBack={() => setSubView({ kind: "security" })}
         onSave={(next) => {
+          const locked = anyTabLocked(next) ? next : null;
+          setDraftLockedTabs(locked);
           if (editing) {
-            updateProfile(editing.id, { lockedTabs: anyTabLocked(next) ? next : null });
-          } else {
-            setDraftLockedTabs(anyTabLocked(next) ? next : null);
+            updateProfile(editing.id, { lockedTabs: locked });
           }
           setSubView({ kind: "security" });
         }}
@@ -535,7 +735,10 @@ export function EditorView({
   const showAdvanced = canEditAdvanced || mode.kind === "create";
 
   return (
-    <div data-profile-editor="" className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div
+      data-profile-editor=""
+      className="flex w-full max-w-[680px] flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-300"
+    >
       <div className="flex flex-col items-center gap-1">
         <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-ink">
           {editing ? t("Edit {name}", { name: editing.name }) : t("profile.new")}
@@ -555,21 +758,26 @@ export function EditorView({
           <div className="hset-profile-editor-fields flex min-w-0 flex-1 flex-col gap-2.5">
             <label className="flex flex-col gap-2 text-[14px] text-ink-muted">
               {t("Display name")}
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key !== "Enter" || navOwnsFocus(e.currentTarget) || e.currentTarget.hasAttribute("data-search-editing")) return;
-                e.preventDefault();
-                e.stopPropagation();
-                void submit();
-              }}
-              aria-label={t("Display name")}
-              placeholder={t("Display name")}
-              maxLength={32}
-              className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[15.5px] font-medium text-ink outline-none transition-colors focus:border-ink-subtle"
-            />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key !== "Enter" ||
+                    navOwnsFocus(e.currentTarget) ||
+                    e.currentTarget.hasAttribute("data-search-editing")
+                  )
+                    return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  void submit();
+                }}
+                aria-label={t("Display name")}
+                placeholder={t("Display name")}
+                maxLength={32}
+                className="h-12 rounded-xl border border-edge bg-canvas px-4 text-[15.5px] font-medium text-ink outline-none transition-colors focus:border-ink-subtle"
+              />
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -693,7 +901,31 @@ export function EditorView({
         />
       )}
 
-      {showAdvanced && !draftKid && canShare && primary && (
+      {showAdvanced && !draftKid && isNuvio && !isPrimary && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+            {t("Nuvio account")}
+          </span>
+          <div className="flex flex-col gap-1.5">
+            <ShareOption
+              active={usesPrimaryAddons}
+              onClick={() => setUsesPrimaryAddons(true)}
+              icon={<Link2 size={14} strokeWidth={2.2} />}
+              title={t("Use primary addons")}
+              sub={t("Inherit installed addons and providers configured by the primary profile.")}
+            />
+            <ShareOption
+              active={!usesPrimaryAddons}
+              onClick={() => setUsesPrimaryAddons(false)}
+              icon={<UserIcon size={14} strokeWidth={2.2} />}
+              title={t("Use separate addons")}
+              sub={t("Install and configure independent addons and providers for this profile.")}
+            />
+          </div>
+        </div>
+      )}
+
+      {showAdvanced && !draftKid && !isNuvio && canShare && primary && (
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {t("Stremio account")}
@@ -980,7 +1212,7 @@ export function EditorView({
               </button>
             ) : (
               <div className="flex flex-col gap-1.5">
-                {transferTargets.map((p) => {
+                {(isNuvio ? nuvioTransferTargets : transferTargets).map((p) => {
                   const sel = transferTarget === p.id;
                   return (
                     <button
@@ -1031,9 +1263,14 @@ export function EditorView({
                   <button
                     type="button"
                     disabled={!transferTarget}
-                    onClick={() => {
+                    onClick={async () => {
                       if (!transferTarget) return;
-                      setPrimary(transferTarget);
+                      if (isNuvio) {
+                        const targetSlot = parseInt(transferTarget.replace(/\D/g, ""), 10);
+                        await transferPrimaryNuvioProfile(targetSlot);
+                      } else {
+                        setPrimary(transferTarget);
+                      }
                       onDone();
                     }}
                     className="rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
@@ -1080,12 +1317,21 @@ export function EditorView({
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (editing.passwordHash || editing.kid?.parentPinHash) {
-                      setSubView({ kind: "pin-delete" });
+                  onClick={async () => {
+                    if (isNuvio) {
+                      if (locked || draftKid?.parentPinHash) {
+                        setSubView({ kind: "pin-delete" });
+                      } else {
+                        await deleteNuvioProfile(nuvioSlot!);
+                        onDone();
+                      }
                     } else {
-                      deleteProfile(editing.id);
-                      onDone();
+                      if (editing.passwordHash || editing.kid?.parentPinHash) {
+                        setSubView({ kind: "pin-delete" });
+                      } else {
+                        deleteProfile(editing.id);
+                        onDone();
+                      }
                     }
                   }}
                   className="rounded-md bg-red-400/20 px-2 py-0.5 font-semibold text-red-200 hover:bg-red-400/30"
@@ -1098,10 +1344,11 @@ export function EditorView({
         <button
           type="button"
           onClick={() => void submit()}
-          disabled={!canSave}
+          disabled={!canSave || saving}
           className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {editing ? t("Save changes") : t("Create profile")}
+          {saving && <Loader2 size={16} className="animate-spin" />}
+          <span>{editing ? t("Save changes") : t("Create profile")}</span>
         </button>
       </div>
       {avatarPickerOpen && (
@@ -1172,16 +1419,16 @@ function SecurityRow({
               : "bg-canvas/60 text-ink-muted ring-edge-soft"
           }`}
         >
-          {locked ? (
-            <Lock size={14} strokeWidth={2.4} />
-          ) : (
-            <Unlock size={14} strokeWidth={2.2} />
-          )}
+          {locked ? <Lock size={14} strokeWidth={2.4} /> : <Unlock size={14} strokeWidth={2.2} />}
         </span>
         <div className="flex flex-col gap-0.5">
           <span className="text-[16px] font-semibold text-ink">{t("Security")}</span>
           <span className="text-[14px] text-ink-subtle">
-            {canLockTabs ? `${pinLabel} · ${tabsLabel}` : (locked ? t("4-digit PIN is set.") : t("No PIN set."))}
+            {canLockTabs
+              ? `${pinLabel} · ${tabsLabel}`
+              : locked
+                ? t("4-digit PIN is set.")
+                : t("No PIN set.")}
           </span>
         </div>
       </div>
@@ -1452,6 +1699,8 @@ function TabIcon({ iconKey }: { iconKey: LockableTabMeta["iconKey"] }) {
       return <MoviesIcon active={false} />;
     case "shows":
       return <TvIcon active={false} />;
+    case "sports":
+      return <SportsIcon active={false} />;
     case "anime":
       return <AnimeIcon active={false} />;
     case "liveTv":

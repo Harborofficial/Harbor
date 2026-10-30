@@ -17,6 +17,22 @@ export function cwProfileScope(ownerId?: string): {
   private: boolean;
 } {
   try {
+    const isNuvio =
+      typeof localStorage !== "undefined" &&
+      (localStorage.getItem("harbor.account-provider") === "nuvio" ||
+        localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"') === true);
+    if (isNuvio) {
+      let slot = 1;
+      try {
+        const raw = localStorage.getItem("harbor.nuvio.state.v1");
+        if (raw) {
+          const idx = JSON.parse(raw)?.activeProfileIndex;
+          if (typeof idx === "number" && idx >= 1 && idx <= 6) slot = idx;
+        }
+      } catch {}
+      const pid = ownerId ?? `nuvio-${slot}`;
+      return { profileId: pid, sharedId: pid, private: true };
+    }
     const rawRoster = localStorage.getItem("harbor.profiles.v1");
     if (rawRoster !== rosterRaw) {
       roster = JSON.parse(rawRoster ?? "null");
@@ -33,8 +49,10 @@ export function cwProfileScope(ownerId?: string): {
     const shares = profiles.some((p) => p.id !== profileId && source(p) === sharedId);
     const settingsKey =
       active?.settingsLinked === false ? `harbor.settings.${profileId}` : "harbor.settings.shared";
-    const rawSettings = localStorage.getItem(settingsKey) ??
-      localStorage.getItem("harbor.settings.shared") ?? localStorage.getItem("harbor.settings");
+    const rawSettings =
+      localStorage.getItem(settingsKey) ??
+      localStorage.getItem("harbor.settings.shared") ??
+      localStorage.getItem("harbor.settings");
     // Every CW card reads this scope; only parse the settings/roster blobs when changed.
     if (rawSettings !== settingsRaw) {
       privateEnabled = !!JSON.parse(rawSettings ?? "null")?.cwPerProfile;

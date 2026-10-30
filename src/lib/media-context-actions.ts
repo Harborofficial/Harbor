@@ -301,6 +301,9 @@ export async function setContextWatched(
         if (watched) savePlayback(meta.id, { title: meta.name, parsedTitle: meta.name });
       } else {
         setManualWatchedManyAcknowledged(meta.id, episodes, watched);
+        if (options.imdbId && options.imdbId !== meta.id && watched) {
+          setManualWatchedManyAcknowledged(options.imdbId, episodes, true);
+        }
         // An individual episode can invalidate an all-watched flag, but cannot establish one.
         if ((!options.episode && !options.episodes) || !watched)
           setWatchedFlagAcknowledged(meta.id, watched && !options.episode && !options.episodes);
@@ -318,7 +321,7 @@ export async function setContextWatched(
           );
           setWatchedFlagAcknowledged(options.imdbId, false);
         }
-        if (watched)
+        if (watched) {
           recordManualWatchedMeta(meta.id, {
             type: "series",
             name: meta.name,
@@ -326,6 +329,16 @@ export async function setContextWatched(
             background: meta.background,
             markedAt: new Date().toISOString(),
           });
+          if (options.imdbId && options.imdbId !== meta.id) {
+            recordManualWatchedMeta(options.imdbId, {
+              type: "series",
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+              markedAt: new Date().toISOString(),
+            });
+          }
+        }
       }
       if (watched)
         recordWatchEvent({

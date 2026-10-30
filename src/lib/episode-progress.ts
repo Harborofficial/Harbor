@@ -104,8 +104,8 @@ export function getEpisodeProgress(
   }
   const startedAt = entry?.t ?? 0;
 
-  const manualSelf = readManual(resumeId, season, episode);
-  const manualCanon = canonDiffers ? readManual(resumeId, canonS, canonE) : undefined;
+  const manualSelf = readManual(resumeId, season, episode, imdbAlias ? [resumeId, imdbAlias] : [resumeId]);
+  const manualCanon = canonDiffers ? readManual(resumeId, canonS, canonE, imdbAlias ? [resumeId, imdbAlias] : [resumeId]) : undefined;
   const manual = manualSelf !== undefined ? manualSelf : manualCanon;
   if (manual === false) return { ratio: 0, watched: false, startedAt };
 

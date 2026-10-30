@@ -5,6 +5,7 @@ import { bindNameSyncState } from "@/lib/account/name-sync-state";
 import { useProfiles } from "@/lib/profiles";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { useTogether } from "@/lib/together/provider";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 
 export function HarborNameSync() {
   const [author, setAuthor] = useState(currentAuthor);
@@ -23,12 +24,22 @@ export function HarborNameSync() {
     const session = createNameSyncSession({
       name: latest.current.displayName,
       load: () => fetchProfileAlias(handle, accountId),
-      save: (name) => pushNameToProfileAlias(name, accountId),
+      save: (name) => {
+        // Never overwrite Harbor author alias with a secondary profile or Nuvio profile name
+        if (isNuvioProviderActive() || !latest.current.activeProfile?.isPrimary) {
+          return Promise.resolve();
+        }
+        return pushNameToProfileAlias(name, accountId);
+      },
       apply: (alias) => {
         const current = latest.current;
         if (!nameEquals(alias, current.displayName)) current.setDisplayName(alias);
+        // Harbor author alias must ONLY ever sync to the primary Stremio/Harbor profile.
+        // It must NEVER rename Nuvio cloud profiles or secondary family profiles.
         if (
+          !isNuvioProviderActive() &&
           current.activeProfile &&
+          current.activeProfile.isPrimary &&
           !current.activeProfile.kid &&
           !nameEquals(alias, current.activeProfile.name)
         ) {
@@ -50,8 +61,9 @@ export function HarborNameSync() {
   }, [author?.id, author?.handle]);
 
   useEffect(() => {
+    if (isNuvioProviderActive() || !activeProfile?.isPrimary) return;
     sessionRef.current?.update(displayName);
-  }, [displayName]);
+  }, [displayName, activeProfile?.isPrimary]);
 
   return null;
 }

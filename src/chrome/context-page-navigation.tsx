@@ -16,6 +16,8 @@ import { useActiveKid, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { openMyProfile } from "@/lib/social/open-my-profile";
 import { canOpenProfile } from "@/lib/social/open-profile";
+import { isNuvioProviderActive, activeProfileIsPrimary } from "@/lib/active-profile-id";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { captureSocialActor, assertSocialActor } from "@/lib/social/action-actor";
 import { activeLayout, getThemeById, type ChromeNavId } from "@/lib/theme";
@@ -202,20 +204,36 @@ export function usePageContextTarget({ includePlayer = false } = {}): ContextMen
         },
       };
     });
-    if (!kid && !locked && (!author?.handle || canOpenProfile(author.handle))) {
+    const isNuvioActive = isNuvioProviderActive();
+    const isPrimary = activeProfileIsPrimary();
+    const canOpen = isNuvioActive ? isNuvioSignedIn() : !!author;
+    if (
+      isPrimary &&
+      !kid &&
+      !locked &&
+      (isNuvioActive || !author?.handle || canOpenProfile(author.handle))
+    ) {
       const actor = captureSocialActor();
       rows.push({
         id: "page:my-profile",
         label: t("Open my profile"),
         icon: <UserRound size={14} />,
-        disabled: !author,
-        reason: !author ? t("Sign in to Harbor to open your profile.") : undefined,
+        disabled: !canOpen,
+        reason: !canOpen
+          ? isNuvioActive
+            ? t("Sign in to Nuvio to open your profile.")
+            : t("Sign in to Harbor to open your profile.")
+          : undefined,
         group: "pages",
         restoreFocus: false,
         run: async () => {
           assertSocialActor(actor);
           if (!(await openMyProfile()))
-            throw new Error(t("Sign in to Harbor to open your profile."));
+            throw new Error(
+              isNuvioActive
+                ? t("Sign in to Nuvio to open your profile.")
+                : t("Sign in to Harbor to open your profile."),
+            );
         },
       });
     }

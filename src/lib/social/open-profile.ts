@@ -1,4 +1,8 @@
-const listeners = new Set<(handle: string) => void>();
+export type OpenProfileOptions = {
+  isMyProfile?: boolean;
+};
+
+const listeners = new Set<(handle: string, options?: OpenProfileOptions) => void>();
 
 let pendingEditHandle: string | null = null;
 let destination: (() => string | null) | null = null;
@@ -18,13 +22,15 @@ export function canOpenProfile(handle: string, options?: { fromOverlay?: boolean
   );
 }
 
-export function requestOpenProfile(handle: string): void {
+export function requestOpenProfile(handle: string, options?: OpenProfileOptions): void {
   const h = handle.trim().toLowerCase();
   if (!h) return;
-  for (const l of listeners) l(h);
+  for (const l of listeners) l(h, options);
 }
 
-export function subscribeOpenProfile(cb: (handle: string) => void): () => void {
+export function subscribeOpenProfile(
+  cb: (handle: string, options?: OpenProfileOptions) => void,
+): () => void {
   listeners.add(cb);
   return () => {
     listeners.delete(cb);
@@ -35,7 +41,7 @@ export function requestEditProfile(handle: string): void {
   const h = handle.trim().toLowerCase();
   if (!h) return;
   pendingEditHandle = h;
-  requestOpenProfile(h);
+  requestOpenProfile(h, { isMyProfile: true });
 }
 
 export function consumeProfileEditIntent(handle: string): boolean {

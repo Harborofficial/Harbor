@@ -81,11 +81,27 @@ export function ProfileView({
   const { settings } = useSettings();
   const isNuvio = settings.accountProvider === "nuvio";
   const nuvioState = loadNuvioState();
-  const activeNuvioProfile = isNuvio
-    ? nuvioState.profiles.find((p) => p.profile_index === nuvioState.activeProfileIndex) ||
-      nuvioState.profiles[0] ||
-      null
+  const primaryNuvioProfile = isNuvio
+    ? nuvioState.profiles.find((p) => p.profile_index === 1) || nuvioState.profiles[0] || null
     : null;
+
+
+  const nuvioEmail = nuvioState.session?.user?.email;
+  const author = currentAuthor();
+  const primaryHandle = (
+    author?.handle ||
+    (primaryNuvioProfile
+      ? primaryNuvioProfile.name?.toLowerCase().replace(/\s+/g, "") ||
+        nuvioEmail?.split("@")[0] ||
+        "nuvio"
+      : "nuvio")
+  ).toLowerCase();
+  const isNuvioPrimaryMatch =
+    isNuvio &&
+    (handle.toLowerCase() === primaryHandle ||
+      (author?.handle && handle.toLowerCase() === author.handle.toLowerCase()) ||
+      handle.toLowerCase() === "me");
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
   const [pickingLists, setPickingLists] = useState(false);
@@ -105,8 +121,8 @@ export function ProfileView({
   const viewerSignedIn = !!currentAuthor();
 
   useEffect(() => {
-    if (!isNuvio || !isOwner) return;
-    pullWatchProgressFromNuvio("active")
+    if (!isNuvio || (!isOwner && !isNuvioPrimaryMatch)) return;
+    pullWatchProgressFromNuvio(1)
       .then((records) => {
         let eps = 0;
         let movs = 0;
@@ -122,7 +138,22 @@ export function ProfileView({
         setNuvioStats({ episodes: eps, movies: movs, minutes: mins });
       })
       .catch(() => {});
-  }, [isNuvio, isOwner, activeNuvioProfile?.profile_index]);
+  }, [isNuvio, isOwner, isNuvioPrimaryMatch]);
+
+  useEffect(() => {
+    const onProviderChange = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      const nextProvider = detail?.provider || (isNuvio ? "nuvio" : "stremio");
+      if (nextProvider === "stremio") {
+        const stremioHandle = currentAuthor()?.handle || "";
+        if (!stremioHandle && isNuvio) {
+          goBack();
+        }
+      }
+    };
+    window.addEventListener("harbor:account-provider-changed", onProviderChange);
+    return () => window.removeEventListener("harbor:account-provider-changed", onProviderChange);
+  }, [goBack, isNuvio]);
 
   const libWatched = useLibraryWatchedCount(authKey, isOwner);
   const watchedBreakdown = useLibraryWatchedBreakdown(authKey, isOwner);
@@ -199,20 +230,29 @@ export function ProfileView({
 
   const locked = summary.private && !summary.isOwner;
 
-  const ownerAvatar = summary.isOwner
-    ? isNuvio && activeNuvioProfile
-      ? resolveNuvioAvatar(activeNuvioProfile) || currentAuthor()?.avatar || undefined
-      : activeProfile?.avatar ||
-        settings.harborAvatar ||
-        user?.avatar ||
-        currentAuthor()?.avatar ||
-        undefined
-    : undefined;
-  const heroAvatar = summary.isOwner
-    ? ownerAvatar || summary.avatarUrl
-    : summary.avatarUrl || undefined;
-  const heroAvatarFallback = summary.isOwner ? summary.avatarUrl || undefined : undefined;
-  const mangaReadCount = summary.isOwner ? mangaProgress.length : undefined;
+  const ownerAvatar =
+    summary.isOwner || isNuvioPrimaryMatch
+      ? isNuvio
+        ? resolveNuvioAvatar(primaryNuvioProfile) || undefined
+        : activeProfile?.avatar ||
+          settings.harborAvatar ||
+          user?.avatar ||
+          currentAuthor()?.avatar ||
+          undefined
+      : undefined;
+  const heroAvatar =
+    summary.isOwner || isNuvioPrimaryMatch
+      ? isNuvio
+        ? ownerAvatar || undefined
+        : ownerAvatar || summary.avatarUrl
+      : summary.avatarUrl || undefined;
+  const heroAvatarFallback =
+    summary.isOwner || isNuvioPrimaryMatch
+      ? isNuvio
+        ? resolveNuvioAvatar(primaryNuvioProfile) || undefined
+        : summary.avatarUrl || undefined
+      : undefined;
+  const mangaReadCount = isNuvio ? 0 : summary.isOwner ? mangaProgress.length : undefined;
 
   if (editing && summary.isOwner) {
     return (
@@ -359,11 +399,17 @@ export function ProfileView({
   const presentCards = CARD_ORDER_DEFAULT.filter((k) => cardNodes[k] != null);
   const orderedCards = effectiveOrder(layout, presentCards);
 
+  const resolvedHandle =
+    (author?.handle && (summary.isOwner || isNuvioPrimaryMatch) ? author.handle : null) ||
+    (summary?.handle && summary.handle !== "me" ? summary.handle : null) ||
+    primaryHandle;
+
   const heroSummary =
-    isNuvio && summary.isOwner
+    isNuvio && (summary.isOwner || isNuvioPrimaryMatch)
       ? {
           ...summary,
-          alias: activeNuvioProfile?.name || summary.alias,
+          alias: primaryNuvioProfile?.name || nuvioEmail?.split("@")[0] || summary.alias,
+          handle: resolvedHandle,
           counts: {
             ...summary.counts,
             watched: Math.max(summary.counts.watched ?? 0, nuvioStats.episodes + nuvioStats.movies),
@@ -373,6 +419,7 @@ export function ProfileView({
             hoursWatched: Math.floor(
               Math.max(summary.counts.minutesWatched ?? 0, nuvioStats.minutes) / 60,
             ),
+            mangaRead: 0,
           },
         }
       : summary.isOwner && watchedBreakdown.ready

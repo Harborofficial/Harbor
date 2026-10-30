@@ -9,9 +9,12 @@ import ts from "typescript";
 // The harness swaps ./client and ./session but keeps the real id helpers, since
 // the session gate matches on their exact key spellings.
 const idsModule = (() => {
-  const code = ts.transpileModule(readFileSync(new URL("../src/lib/simkl/ids.ts", import.meta.url), "utf8"), {
-    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
-  }).outputText;
+  const code = ts.transpileModule(
+    readFileSync(new URL("../src/lib/simkl/ids.ts", import.meta.url), "utf8"),
+    {
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+    },
+  ).outputText;
   const module = { exports: {} as Record<string, unknown> };
   new Function("require", "module", "exports", code)(
     () => ({
@@ -52,6 +55,9 @@ function playback(sessions: unknown[], existing?: { ms: number; t: number }) {
     "@/lib/resume": {
       readResumeEntry: () => existing,
       saveResumeBatch: (entries: unknown[]) => writes.push(entries),
+    },
+    "./list-status": {
+      loadSimklProgress: async () => ({ completedSeries: [] }),
     },
   };
   const module = { exports: {} };
@@ -220,13 +226,21 @@ test("anime sessions match entry-relative or provider episode spellings", async 
   ]);
   assert.equal(await h.api.hasActiveSimklPlayback("mal:51715", { season: 1, episode: 2 }), true);
   assert.equal(
-    await h.api.hasActiveSimklPlayback("mal:51715",
-      { season: 2, episode: 2, imdbSeason: 1, imdbEpisode: 2 }),
+    await h.api.hasActiveSimklPlayback("mal:51715", {
+      season: 2,
+      episode: 2,
+      imdbSeason: 1,
+      imdbEpisode: 2,
+    }),
     true,
   );
   assert.equal(
-    await h.api.hasActiveSimklPlayback("mal:51715",
-      { season: 2, episode: 2, imdbSeason: 2, imdbEpisode: 2 }),
+    await h.api.hasActiveSimklPlayback("mal:51715", {
+      season: 2,
+      episode: 2,
+      imdbSeason: 2,
+      imdbEpisode: 2,
+    }),
     false,
   );
 });

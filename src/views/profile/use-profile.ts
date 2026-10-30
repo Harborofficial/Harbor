@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { authToken, currentAuthor, refreshToken, subscribeAuthor } from "@/lib/theme-auth";
-import { fetchActivity, fetchBadges, fetchFriends, fetchSummary, ProfileNotFound } from "./profile-api";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
+import { resolveNuvioAvatar } from "@/lib/nuvio/nuvio-profiles";
+import {
+  fetchActivity,
+  fetchBadges,
+  fetchFriends,
+  fetchSummary,
+  ProfileNotFound,
+} from "./profile-api";
 import type { ActivityItem, Badge, Friend, LoadState, ProfileSummary } from "./profile-types";
 
 const LIVE_INTERVAL_MS = 25000;
@@ -34,7 +43,6 @@ function mergeLive(prev: ProfileSummary, next: ProfileSummary): ProfileSummary {
   }
   return changed ? out : prev;
 }
-
 
 export type ProfileBundle = {
   state: LoadState;
@@ -76,18 +84,77 @@ export function useProfile(handle: string): ProfileBundle {
         setSummary(s);
         setState("ready");
         const mine = currentAuthor()?.handle;
-        if (mine && s.handle && s.handle.toLowerCase() === mine.toLowerCase() && !s.isOwner && authToken() && healedForRef.current !== handle) {
+        if (
+          mine &&
+          s.handle &&
+          s.handle.toLowerCase() === mine.toLowerCase() &&
+          !s.isOwner &&
+          authToken() &&
+          healedForRef.current !== handle
+        ) {
           healedForRef.current = handle;
           void refreshToken().then((ok) => {
             if (ok && !ac.signal.aborted) reload();
           });
         }
-        void fetchFriends(handle, ac.signal).then((f) => !ac.signal.aborted && setFriends(f)).catch(() => {});
-        void fetchBadges(handle, ac.signal).then((b) => !ac.signal.aborted && setBadges(b)).catch(() => {});
-        void fetchActivity(handle, ac.signal).then((a) => !ac.signal.aborted && setActivity(a)).catch(() => {});
+        void fetchFriends(handle, ac.signal)
+          .then((f) => !ac.signal.aborted && setFriends(f))
+          .catch(() => {});
+        void fetchBadges(handle, ac.signal)
+          .then((b) => !ac.signal.aborted && setBadges(b))
+          .catch(() => {});
+        void fetchActivity(handle, ac.signal)
+          .then((a) => !ac.signal.aborted && setActivity(a))
+          .catch(() => {});
       })
       .catch((e) => {
         if (ac.signal.aborted) return;
+        if (isNuvioProviderActive()) {
+          try {
+            const ns = loadNuvioState();
+            const primary = ns.profiles.find((p) => p.profile_index === 1) || ns.profiles[0];
+            const email = ns.session?.user?.email;
+            const author = currentAuthor();
+            const nuvioHandle = (
+              author?.handle ||
+              primary?.name?.toLowerCase().replace(/\s+/g, "") ||
+              email?.split("@")[0] ||
+              "nuvio"
+            ).toLowerCase();
+            if (
+              handle.toLowerCase() === nuvioHandle ||
+              (author?.handle && handle.toLowerCase() === author.handle.toLowerCase()) ||
+              handle.toLowerCase() === "me"
+            ) {
+              const fallback: ProfileSummary = {
+                handle: author?.handle || nuvioHandle,
+                alias: primary?.name || email?.split("@")[0] || "Nuvio User",
+                avatarUrl: resolveNuvioAvatar(primary) || undefined,
+                verified: false,
+                featured: false,
+                level: 1,
+                xp: 0,
+                xpToNext: 100,
+                online: true,
+                memberSince: new Date().toISOString(),
+                counts: {
+                  watched: 0,
+                  episodesWatched: 0,
+                  moviesWatched: 0,
+                  hoursWatched: 0,
+                  minutesWatched: 0,
+                  friends: 0,
+                  badges: 0,
+                  mangaRead: 0,
+                },
+                isOwner: true,
+              };
+              setSummary(fallback);
+              setState("ready");
+              return;
+            }
+          } catch {}
+        }
         setState(e instanceof ProfileNotFound ? "empty" : "error");
       });
     return () => ac.abort();
@@ -101,8 +168,12 @@ export function useProfile(handle: string): ProfileBundle {
       void fetchSummary(handle, ac.signal)
         .then((s) => !ac.signal.aborted && setSummary((prev) => (prev ? mergeLive(prev, s) : s)))
         .catch(() => {});
-      void fetchFriends(handle, ac.signal).then((f) => !ac.signal.aborted && setFriends(f)).catch(() => {});
-      void fetchBadges(handle, ac.signal).then((b) => !ac.signal.aborted && setBadges(b)).catch(() => {});
+      void fetchFriends(handle, ac.signal)
+        .then((f) => !ac.signal.aborted && setFriends(f))
+        .catch(() => {});
+      void fetchBadges(handle, ac.signal)
+        .then((b) => !ac.signal.aborted && setBadges(b))
+        .catch(() => {});
     };
     const id = window.setInterval(sync, LIVE_INTERVAL_MS);
     const onVisible = () => {

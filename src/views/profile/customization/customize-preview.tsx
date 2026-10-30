@@ -1,6 +1,7 @@
 import { useAuth } from "@/lib/auth";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { currentAuthor } from "@/lib/theme-auth";
 import { parseProfileTheme, profileThemeBackground, withProfileTheme } from "@/lib/profile-theme";
 import type { CustomizationInput, ProfileSummary } from "../profile-types";
@@ -36,14 +37,16 @@ export function CustomizePreview({
   useFontLink(c.fontHref);
   const theme = c.themeScope;
 
-  const ownerAvatar =
-    activeProfile?.avatar ||
-    settings.harborAvatar ||
-    user?.avatar ||
-    currentAuthor()?.avatar ||
-    undefined;
-  const heroAvatar = ownerAvatar || summary.avatarUrl;
-  const heroAvatarFallback = summary.avatarUrl || undefined;
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const ownerAvatar = isNuvio
+    ? activeProfile?.avatar || undefined
+    : activeProfile?.avatar ||
+      settings.harborAvatar ||
+      user?.avatar ||
+      currentAuthor()?.avatar ||
+      undefined;
+  const heroAvatar = isNuvio ? ownerAvatar || undefined : ownerAvatar || summary.avatarUrl;
+  const heroAvatarFallback = isNuvio ? undefined : summary.avatarUrl || undefined;
 
   return (
     <div

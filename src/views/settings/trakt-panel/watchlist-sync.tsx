@@ -1,6 +1,7 @@
 import { Check, Download, Info, Loader2, Upload } from "../icons";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
+import { useSettings } from "@/lib/settings";
 import { library } from "@/lib/stremio";
 import { readLocalEntries } from "@/lib/watchlist";
 import { useT } from "@/lib/i18n";
@@ -10,19 +11,32 @@ import {
   planExport,
   runExport,
   runImport,
+  traktItemToStremioId,
   type ExportPlan,
+  type WatchlistSource,
 } from "@/lib/trakt/watchlist-sync";
 import { TraktApiError } from "@/lib/trakt/client";
 import type { TraktItem } from "@/lib/trakt/types";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
+import {
+  readCachedNuvioLibrary,
+  addNuvioLibraryItem,
+  flushNuvioLibraryMutations,
+} from "@/lib/nuvio/nuvio-library";
+import { resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
 
 function traktErrorMessage(t: ReturnType<typeof useT>, err: unknown): string {
   if (err instanceof TraktApiError) {
-    if (err.status === 401) return t("Trakt sign-in expired. Reconnect Trakt in settings and try again.");
+    if (err.status === 401)
+      return t("Trakt sign-in expired. Reconnect Trakt in settings and try again.");
     if (err.status === 403 || err.status === 423)
       return t("Trakt rejected the request (account locked or permission denied).");
-    if (err.status === 420) return t("Trakt account limit reached. Upgrade to Trakt VIP or trim your watchlist.");
+    if (err.status === 420)
+      return t("Trakt account limit reached. Upgrade to Trakt VIP or trim your watchlist.");
     if (err.status === 429) return t("Trakt is rate-limiting. Wait a minute and try again.");
-    if (err.status >= 500) return t("Trakt is having server trouble (HTTP {n}). Try again shortly.", { n: err.status });
+    if (err.status >= 500)
+      return t("Trakt is having server trouble (HTTP {n}). Try again shortly.", { n: err.status });
     return t("Trakt rejected the request (HTTP {n}).", { n: err.status });
   }
   return t("Couldn't reach Trakt. Check your connection and try again.");
@@ -48,21 +62,37 @@ function Callout({ glyph, children }: { glyph: ReactNode; children: ReactNode })
 export function WatchlistSync() {
   const t = useT();
   const { authKey } = useAuth();
+  const { settings } = useSettings();
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const nuvioSlot = resolveNuvioProfileIndex();
+  const isNuvioConnected = isNuvio && isNuvioSignedIn();
+
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
-  const signIn = t("Sign in to Stremio first so Harbor knows which watchlist to sync.");
-  const locked = !authKey;
+  const signIn = isNuvio
+    ? t("Sign in to Nuvio first so Harbor knows which watchlist to sync.")
+    : t("Sign in to Stremio first so Harbor knows which watchlist to sync.");
+  const locked = isNuvio ? !isNuvioConnected : !authKey;
   const busy = phase.kind !== "idle" && phase.kind !== "result";
 
   const startExport = async () => {
-    if (!authKey) return;
+    if (locked) return;
     setPhase({ kind: "loading", dir: "export" });
     try {
-      const lib = await library(authKey);
-      const sources = [
-        ...lib.map((i) => ({ id: i._id, type: i.type, removed: i.removed, temp: i.temp })),
-        ...readLocalEntries().map((e) => ({ id: e.id, type: e.type })),
-      ];
+      let sources: WatchlistSource[] = [];
+      if (isNuvio) {
+        const nuvioLib = readCachedNuvioLibrary(nuvioSlot);
+        sources = [
+          ...nuvioLib.map((i) => ({ id: i.content_id, type: i.content_type })),
+          ...readLocalEntries().map((e) => ({ id: e.id, type: e.type })),
+        ];
+      } else if (authKey) {
+        const lib = await library(authKey);
+        sources = [
+          ...lib.map((i) => ({ id: i._id, type: i.type, removed: i.removed, temp: i.temp })),
+          ...readLocalEntries().map((e) => ({ id: e.id, type: e.type })),
+        ];
+      }
       const plan = planExport(sources);
       if (plan.movies.length + plan.shows.length === 0) {
         setPhase({
@@ -70,7 +100,9 @@ export function WatchlistSync() {
           tone: "warn",
           message:
             plan.skippedAnime > 0
-              ? t("Nothing to send. All {n} watchlist items are anime, which Trakt can't track.", { n: plan.skippedAnime })
+              ? t("Nothing to send. All {n} watchlist items are anime, which Trakt can't track.", {
+                  n: plan.skippedAnime,
+                })
               : t("Your watchlist is empty, nothing to send."),
         });
         return;
@@ -78,7 +110,11 @@ export function WatchlistSync() {
       setPhase({ kind: "confirm-export", plan });
     } catch (err) {
       console.error("[trakt] read watchlist failed", err);
-      setPhase({ kind: "result", tone: "warn", message: t("Couldn't read your watchlist. Try again.") });
+      setPhase({
+        kind: "result",
+        tone: "warn",
+        message: t("Couldn't read your watchlist. Try again."),
+      });
     }
   };
 
@@ -97,12 +133,16 @@ export function WatchlistSync() {
   };
 
   const startImport = async () => {
-    if (!authKey) return;
+    if (locked) return;
     setPhase({ kind: "loading", dir: "import" });
     try {
       const items = await fetchTraktWatchlist();
       if (items.length === 0) {
-        setPhase({ kind: "result", tone: "warn", message: t("Your Trakt watchlist is empty, nothing to import.") });
+        setPhase({
+          kind: "result",
+          tone: "warn",
+          message: t("Your Trakt watchlist is empty, nothing to import."),
+        });
         return;
       }
       setPhase({ kind: "confirm-import", items });
@@ -113,13 +153,52 @@ export function WatchlistSync() {
   };
 
   const confirmImport = async (items: TraktItem[]) => {
-    if (!authKey) return;
-    setPhase({ kind: "running", label: t("Importing {done} / {total}", { done: 0, total: items.length }) });
+    if (locked) return;
+    setPhase({
+      kind: "running",
+      label: t("Importing {done} / {total}", { done: 0, total: items.length }),
+    });
     try {
-      const r = await runImport(authKey, items, (done, total) =>
-        setPhase({ kind: "running", label: t("Importing {done} / {total}", { done, total }) }),
-      );
-      setPhase({ kind: "result", tone: "ok", message: t("Added {n} to your Harbor watchlist", { n: r.added }) });
+      if (isNuvio) {
+        let added = 0;
+        let done = 0;
+        for (const it of items) {
+          const id = traktItemToStremioId(it);
+          if (id) {
+            try {
+              addNuvioLibraryItem(nuvioSlot, {
+                content_id: id,
+                content_type: it.type === "show" ? "series" : "movie",
+                name: it.title,
+                added_at: Date.now(),
+              });
+              added++;
+            } catch {}
+          }
+          done++;
+          setPhase({
+            kind: "running",
+            label: t("Importing {done} / {total}", { done, total: items.length }),
+          });
+        }
+        void flushNuvioLibraryMutations(nuvioSlot);
+        window.dispatchEvent(new CustomEvent("harbor:watchlist-updated"));
+        setPhase({
+          kind: "result",
+          tone: "ok",
+          message: t("Added {n} to your Harbor watchlist", { n: added }),
+        });
+      } else if (authKey) {
+        const r = await runImport(authKey, items, (done, total) =>
+          setPhase({ kind: "running", label: t("Importing {done} / {total}", { done, total }) }),
+        );
+        window.dispatchEvent(new CustomEvent("harbor:watchlist-updated"));
+        setPhase({
+          kind: "result",
+          tone: "ok",
+          message: t("Added {n} to your Harbor watchlist", { n: r.added }),
+        });
+      }
     } catch (err) {
       console.error("[trakt] import failed", err);
       setPhase({ kind: "result", tone: "warn", message: traktErrorMessage(t, err) });
@@ -149,7 +228,10 @@ export function WatchlistSync() {
         <div className="flex min-w-0 flex-col gap-1.5">
           <p className={`max-w-[66ch] ${ROW_DESC}`}>
             {isExport
-              ? t("Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.", { n: count })
+              ? t(
+                  "Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.",
+                  { n: count },
+                )
               : t("Add {n} titles from your Trakt watchlist to Harbor?", { n: count })}
           </p>
           {skipped > 0 && (
@@ -167,7 +249,11 @@ export function WatchlistSync() {
             }}
             className={ROW_ACTION_PRIMARY}
           >
-            {isExport ? <Upload size={18} strokeWidth={2.2} /> : <Download size={18} strokeWidth={2.2} />}
+            {isExport ? (
+              <Upload size={18} strokeWidth={2.2} />
+            ) : (
+              <Download size={18} strokeWidth={2.2} />
+            )}
             {t("Continue")}
           </button>
           <button type="button" onClick={() => setPhase({ kind: "idle" })} className={ROW_ACTION}>
@@ -207,7 +293,9 @@ export function WatchlistSync() {
     <>
       <SettingRow
         label={t("Export to Trakt")}
-        desc={t("Send every title in your Harbor watchlist up to Trakt. Safe to run again, Trakt skips anything it already has.")}
+        desc={t(
+          "Send every title in your Harbor watchlist up to Trakt. Safe to run again, Trakt skips anything it already has.",
+        )}
         lockReason={locked ? signIn : undefined}
       >
         <button
@@ -227,7 +315,9 @@ export function WatchlistSync() {
 
       <SettingRow
         label={t("Import from Trakt")}
-        desc={t("Pull every title on your Trakt watchlist into Harbor. Anything already saved is left alone.")}
+        desc={t(
+          "Pull every title on your Trakt watchlist into Harbor. Anything already saved is left alone.",
+        )}
         lockReason={locked ? signIn : undefined}
       >
         <button

@@ -10,11 +10,12 @@ export type TraktRequestOptions = {
 };
 
 export class TraktApiError extends Error {
-  constructor(
-    public status: number,
-    public body: string,
-  ) {
+  public status: number;
+  public body: string;
+  constructor(status: number, body: string) {
     super(`Trakt HTTP ${status}: ${body.slice(0, 200)}`);
+    this.status = status;
+    this.body = body;
   }
 }
 

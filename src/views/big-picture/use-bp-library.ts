@@ -4,6 +4,13 @@ import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { useHideAnime } from "@/lib/anime-hide";
 import { isAnimeCwItem, library, type LibraryItem } from "@/lib/stremio";
+import { isNuvioProviderActive, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
+import {
+  readCachedNuvioLibrary,
+  pullNuvioLibrarySnapshot,
+  type NuvioLibraryItem,
+} from "@/lib/nuvio/nuvio-library";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { useTrakt } from "@/lib/trakt/provider";
 import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import { fetchWatchedHistory, type HistoryItem } from "@/lib/trakt/history";
@@ -118,6 +125,45 @@ function useStremioItems(enabled: boolean, reload: number) {
   }, [enabled, authKey, reload]);
 
   return { items, status, signedIn: Boolean(authKey) };
+}
+
+function useNuvioItems(enabled: boolean, reload: number) {
+  const isNuvio = isNuvioProviderActive();
+  const [items, setItems] = useState<NuvioLibraryItem[]>(() => {
+    if (!isNuvio) return [];
+    try {
+      const slot = resolveNuvioProfileIndex();
+      return readCachedNuvioLibrary(slot);
+    } catch {
+      return [];
+    }
+  });
+  const [status, setStatus] = useState<BpLibStatus>("ready");
+
+  useEffect(() => {
+    if (!enabled || !isNuvio) {
+      setItems([]);
+      setStatus("ready");
+      return;
+    }
+    let alive = true;
+    try {
+      const slot = resolveNuvioProfileIndex();
+      const cached = readCachedNuvioLibrary(slot);
+      setItems(cached);
+      pullNuvioLibrarySnapshot(slot)
+        .then((fresh) => {
+          if (!alive) return;
+          setItems(fresh);
+        })
+        .catch(() => {});
+    } catch {}
+    return () => {
+      alive = false;
+    };
+  }, [enabled, isNuvio, reload]);
+
+  return { items, status, signedIn: isNuvioSignedIn() };
 }
 
 function useTraktItems(enabled: boolean, reload: number) {
@@ -265,8 +311,10 @@ export function useBpLibraryFeed(
   const refresh = useCallback(() => setReload((n) => n + 1), []);
   const { settings } = useSettings();
   const hideAnime = useHideAnime();
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const stremioTab = tab === "library" || tab === "watchlist" || tab === "history";
   const stremio = useStremioItems(stremioTab, reload);
+  const nuvio = useNuvioItems(stremioTab, reload);
   const trakt = useTraktItems(stremioTab || tab === "trakt", reload);
   const saved = useSavedEntries();
   const files = useLocalLibrary();
@@ -288,10 +336,11 @@ export function useBpLibraryFeed(
         saved,
         filterLibrary(keep, settings.libraryBookmarkedOnly, tab),
         trakt.watchlist,
+        isNuvio ? nuvio.items : undefined,
       );
       return {
         entries: merged.map((m) => ({ key: m.key, meta: m.meta, date: m.date })),
-        status: worst(stremio.status, trakt.status),
+        status: isNuvio ? worst(nuvio.status, trakt.status) : worst(stremio.status, trakt.status),
         groups: [],
       };
     }
@@ -390,10 +439,14 @@ export function useBpLibraryFeed(
     trakt.history,
     trakt.status,
     stremio.status,
+    nuvio.items,
+    nuvio.status,
+    isNuvio,
     settings.libraryBookmarkedOnly,
   ]);
 
-  return { ...feed, refresh, signedIn: stremio.signedIn || trakt.connected };
+  const signedIn = (isNuvio ? nuvio.signedIn : stremio.signedIn) || trakt.connected;
+  return { ...feed, refresh, signedIn };
 }
 
 export function buildBpSections(

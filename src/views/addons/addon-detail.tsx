@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
+import { AccountOriginBadge } from "@/components/account-origin-badge";
 import addonBg from "@/assets/coastline.svg";
 import { setActiveAddon } from "@/lib/active-addon";
 import { manifestToConfigureUrl, manifestToShareUrl } from "@/lib/addon-store";
@@ -223,9 +224,12 @@ export function AddonDetail({
             {c?.tags.includes("official") ? t("Official") : t("Community")} ·{" "}
             {categoryLabel(c?.category ?? categorizeAddon(resolved)) ?? t("Addon")}
           </span>
-          <h1 className="font-display text-[36px] font-medium leading-tight tracking-tight text-ink">
-            {nameOf(resolved)}
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display text-[36px] font-medium leading-tight tracking-tight text-ink">
+              {nameOf(resolved)}
+            </h1>
+            <AccountOriginBadge addonUrl={resolved.transportUrl} size="md" />
+          </div>
           {risingEntry && (
             <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-rose-500/15 px-2.5 py-1 text-[11px] font-bold text-rose-300 ring-1 ring-rose-500/40">
               <TrendingUp size={12} strokeWidth={2.6} />

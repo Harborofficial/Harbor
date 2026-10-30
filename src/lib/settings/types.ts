@@ -589,6 +589,7 @@ export type Settings = {
   musicSpeedPresets: MusicSpeedPreset[];
   homeMode: "harbor" | "classic";
   classicCatalogSource: "all" | "stremio" | "nuvio";
+  nuvioAddonMode: "separate" | "combined";
   homeShowAllAddonRows: boolean;
   homeNewEpisodes: boolean;
   libraryBookmarkedOnly: boolean;

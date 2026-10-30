@@ -44,6 +44,8 @@ export function localToLibraryItem(e: ReturnType<typeof listLocalCw>[number]): L
     poster: e.poster,
     background: e.background,
     isAnime: e.isAnime,
+    external: (e as any).external,
+    upNext: e.type === "series" && e.positionMs === 0,
     state: {
       timeOffset: e.positionMs,
       duration: e.durationMs,
@@ -108,22 +110,34 @@ const CW_RETRY_DELAYS_MS = [1000, 4000, 10000];
 let cwCacheKey: string | null = null;
 let cwCacheItems: LibraryItem[] = [];
 
+export function clearCwCache(): void {
+  cwCacheKey = null;
+  cwCacheItems = [];
+}
+
 export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { activeProfile, profiles } = useProfiles();
+  const isNuvioProvider = settings.accountProvider === "nuvio";
   const hideSharedCw =
-    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+    !isNuvioProvider &&
+    settings.cwPerProfile &&
+    anyProfileSharesStremioWith(activeProfile, profiles);
   const cwSources = settings.cwSources;
   useEffect(() => {
     setExternalCwSources({
       trakt: cwSources.trakt,
       simkl: cwSources.simkl,
       publicmetadb: cwSources.publicmetadb,
+      ...(isNuvioProvider ? { nuvio: true } : {}),
     });
-  }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb]);
+  }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb, isNuvioProvider]);
   const externalCw = useExternalCw(
-    !hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb),
+    Boolean(
+      isNuvioProvider ||
+      (!hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb)),
+    ),
   );
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);
@@ -183,17 +197,38 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
     void localVersion;
     void animeIdsVersion;
     void dismissVersion;
+    const isNuvio = settings.accountProvider === "nuvio";
     const disabledSources = new Set<ExternalCwSource>();
     if (!cwSources.simkl) disabledSources.add("simkl");
     if (!cwSources.trakt) disabledSources.add("trakt");
     if (!cwSources.publicmetadb) disabledSources.add("publicmetadb");
-    const base = hideSharedCw
-      ? []
-      : [
-          ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
-          ...externalCw.filter((i) => !(i.external && disabledSources.has(i.external))),
-        ];
-    const local = listLocalCw(hideSharedCw).filter((e) => localCwSourceEnabled(e, cwSources));
+
+    const externalAllowed = externalCw.filter((i) => {
+      if (!i.external) return false;
+      if (i.external === "nuvio") return true;
+      if (disabledSources.has(i.external)) return false;
+      if (hideSharedCw) return false;
+      if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
+        if (i.upNext || i.waitingForAir) return true;
+        const offset = i.state?.timeOffset ?? 0;
+        const dur = i.state?.duration ?? 0;
+        if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
+        if (dur > 0 && offset / dur >= 0.9) return false;
+      }
+      return true;
+    });
+
+    const base = isNuvio
+      ? externalAllowed
+      : hideSharedCw
+        ? []
+        : [
+            ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
+            ...externalAllowed.filter((i) => i.external !== "nuvio"),
+          ];
+    const local = listLocalCw(hideSharedCw).filter((e) =>
+      isNuvio ? false : localCwSourceEnabled(e, cwSources),
+    );
     const merged = [...base, ...local.map(localToLibraryItem)]
       .filter((i) => {
         if ((i.type as string) === "other" || i._id.startsWith("iptv:")) return false;

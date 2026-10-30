@@ -4,6 +4,8 @@ import { addonConfigurationKey } from "@/lib/addon-configuration-key";
 import { allowDirectHost, safeFetch as fetch } from "@/lib/safe-fetch";
 import type { AddonOrigin, Meta } from "./cinemeta";
 import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { resolveEffectiveStremioAuthKey } from "@/lib/auth";
 
 const STREMIO_API = "https://api.strem.io/api";
 const MAX_ROWS = 24;
@@ -19,9 +21,7 @@ export type CatalogDef = {
   extraSupported?: string[];
 };
 
-export type AddonResource =
-  | string
-  | { name: string; types?: string[]; idPrefixes?: string[] };
+export type AddonResource = string | { name: string; types?: string[]; idPrefixes?: string[] };
 
 export type Addon = {
   manifest: {
@@ -219,10 +219,16 @@ export function normalizeName(name: string, type: string): string {
 // they actually picked, so the app matches web and honours their choice.
 function addonAcceptLanguage(): string | null {
   try {
-    const raw = typeof localStorage !== "undefined" ? localStorage.getItem("harbor.settings") : null;
+    const raw =
+      typeof localStorage !== "undefined" ? localStorage.getItem("harbor.settings") : null;
     const s = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
-    const region = String(s.region ?? "US").trim().toUpperCase();
-    const lang = String(s.tmdbLanguage || s.uiLanguage || "en").trim().toLowerCase().split("-")[0];
+    const region = String(s.region ?? "US")
+      .trim()
+      .toUpperCase();
+    const lang = String(s.tmdbLanguage || s.uiLanguage || "en")
+      .trim()
+      .toLowerCase()
+      .split("-")[0];
     if (!/^[a-z]{2,3}$/.test(lang)) return null;
     if (!/^[A-Z]{2}$/.test(region)) return `${lang},en;q=0.8`;
     return lang === "en" ? `en-${region},en;q=0.8` : `${lang}-${region},${lang};q=0.9,en;q=0.8`;
@@ -237,7 +243,10 @@ async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response
   try {
     const al = addonAcceptLanguage();
     allowDirectHost(url);
-    return await fetch(url, { signal: ac.signal, headers: al ? { "Accept-Language": al } : undefined });
+    return await fetch(url, {
+      signal: ac.signal,
+      headers: al ? { "Accept-Language": al } : undefined,
+    });
   } catch {
     return null;
   } finally {
@@ -314,18 +323,49 @@ export function withDebridKeys(addons: Addon[], keys: DebridKeySet): Addon[] {
 }
 
 export async function gatherCatalogAddons(authKey: string | null): Promise<Addon[]> {
-  const stremioRaw = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
+  const isNuvio = isNuvioProviderActive();
+  let nuvioAddonMode = "separate";
+  try {
+    const raw =
+      typeof localStorage !== "undefined"
+        ? localStorage.getItem("harbor.settings") || localStorage.getItem("harbor.settings.shared")
+        : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.nuvioAddonMode) nuvioAddonMode = parsed.nuvioAddonMode;
+    }
+  } catch {}
+
+  const shouldStremio = !isNuvio || nuvioAddonMode === "combined";
+  let nuvioRaw: Addon[] = [];
+  if (isNuvio || nuvioAddonMode === "combined") {
+    try {
+      const { isNuvioSignedIn: checkSignedIn } = await import("@/lib/nuvio/nuvio-client");
+      const { fetchNuvioAddons: getNuvioAddons } = await import("@/lib/nuvio/nuvio-sync");
+      if (checkSignedIn()) {
+        nuvioRaw = await getNuvioAddons().catch(() => [] as Addon[]);
+      }
+    } catch {}
+  }
+
+  const effectiveAuthKey = resolveEffectiveStremioAuthKey(authKey);
+  const stremioRaw =
+    shouldStremio && effectiveAuthKey
+      ? await userAddons(effectiveAuthKey).catch(() => [] as Addon[])
+      : [];
   const stremio = filterEnabled(stremioRaw);
-  const seen = new Set(stremio.map((a) => a.transportUrl));
+  const nuvio = filterEnabled(nuvioRaw);
+  const seen = new Set([...stremio, ...nuvio].map((a) => a.transportUrl));
   const localOnly = filterEnabled(loadInstalled()).filter((l) => !seen.has(l.transportUrl));
   const localFull = await Promise.all(
     localOnly.map(async (l): Promise<Addon | null> => {
-      if (l.manifest?.catalogs?.length) return { manifest: l.manifest, transportUrl: l.transportUrl };
+      if (l.manifest?.catalogs?.length)
+        return { manifest: l.manifest, transportUrl: l.transportUrl };
       const manifest = await fetchManifestAt(l.transportUrl).catch(() => l.manifest ?? null);
       return manifest ? { manifest, transportUrl: l.transportUrl } : null;
     }),
   );
-  return [...stremio, ...localFull.filter((a): a is Addon => a != null)];
+  return [...stremio, ...nuvio, ...localFull.filter((a): a is Addon => a != null)];
 }
 
 const NON_CONTENT_TYPES = new Set(["addon_catalog"]);
@@ -429,9 +469,7 @@ export async function loadAddonRows(
   const dedup = opts.dedup ?? true;
   const cap = opts.cap ?? (dedup ? MAX_ROWS : 200);
   const addons = await gatherCatalogAddons(authKey);
-  const tasks = addons.flatMap((addon) =>
-    contentCatalogs(addon).map((cat) => ({ addon, cat })),
-  );
+  const tasks = addons.flatMap((addon) => contentCatalogs(addon).map((cat) => ({ addon, cat })));
   const failure: CatalogLoad<AddonRow | null> = { value: null, ok: false };
   const results = await runLanes(tasks, CATALOG_LANES, (t) =>
     fetchCatalogRow(t.addon, t.cat).catch(() => failure),
@@ -468,7 +506,8 @@ export async function fetchAddonCatalogPage(
   extras?: Array<{ name: string; value: string }>,
 ): Promise<Meta[]> {
   const parts: string[] = [];
-  for (const e of extras ?? []) parts.push(`${encodeURIComponent(e.name)}=${encodeURIComponent(e.value)}`);
+  for (const e of extras ?? [])
+    parts.push(`${encodeURIComponent(e.name)}=${encodeURIComponent(e.value)}`);
   if (skip > 0) parts.push(`skip=${skip}`);
   const seg = parts.length ? `/${parts.join("&")}` : "";
   const res = await fetchWithTimeout(`${base}/catalog/${type}/${id}${seg}.json`);
@@ -491,7 +530,13 @@ export function createAddonCatalogFetcher(
   return async (page: number, loaded?: number): Promise<Meta[]> => {
     const step = pageSize ?? DEFAULT_CATALOG_PAGE_SIZE;
     const skip = loaded != null && loaded > 0 ? loaded : page <= 1 ? 0 : (page - 1) * step;
-    const metas = await fetchAddonCatalogPage(cursor.base, cursor.type, cursor.id, skip, cursor.extras);
+    const metas = await fetchAddonCatalogPage(
+      cursor.base,
+      cursor.type,
+      cursor.id,
+      skip,
+      cursor.extras,
+    );
     if (metas.length > 0 && pageSize == null) pageSize = metas.length;
     return opts.mapMeta ? metas.map(opts.mapMeta) : metas;
   };

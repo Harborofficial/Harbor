@@ -12,6 +12,15 @@ import { detectAnimeForCw, isDetectedAnime } from "@/lib/anime-detect";
 
 const reconciled = new Set<string>();
 const lastPullMtime = new Map<string, number>();
+
+export function resetReconciledStremioWatched(): void {
+  reconciled.clear();
+  lastPullMtime.clear();
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("harbor:watched-changed", resetReconciledStremioWatched);
+}
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
 function isSeries(i: LibraryItem): boolean {
