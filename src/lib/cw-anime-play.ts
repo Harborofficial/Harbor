@@ -1,6 +1,7 @@
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import { isDetectedAnime } from "@/lib/anime-detect";
-import { aniZipByKitsu, pickEpisodeTitle } from "@/lib/providers/anizip";
+import { pickEpisodeTitle } from "@/lib/providers/anizip";
+import { animeMappingByKitsu } from "@/lib/providers/anime-mapping";
 import { resolveAnimeIdentity } from "@/lib/streams/anime-identity";
 import { resolveTrackerAnimeEntry } from "@/lib/anime-tracker-entry";
 import type { PlayEpisode } from "@/lib/view";
@@ -46,7 +47,8 @@ export async function resolveCwAnimePlayEpisode(
 ): Promise<PlayEpisode | null> {
   // A saved stream names the played cour, while a catalog id may name the
   // franchise's first entry. Do not reinterpret entry-relative S1 as provider S1.
-  const saved = /^kitsu:([1-9]\d*):([1-9]\d*)$/.exec(query.videoId ?? "") ??
+  const saved =
+    /^kitsu:([1-9]\d*):([1-9]\d*)$/.exec(query.videoId ?? "") ??
     /^kitsu:([1-9]\d*):([1-9]\d*)$/.exec(query.kitsuStreamId ?? "");
   if (!saved && !looksAnime(query.metaId)) return null;
   const coords = {
@@ -72,7 +74,7 @@ export async function resolveCwAnimePlayEpisode(
     }
   }
   if (!identity) return null;
-  const az = await aniZipByKitsu(identity.kitsuId).catch(() => null);
+  const az = await animeMappingByKitsu(identity.kitsuId).catch(() => null);
   const azEp = az?.episodes?.[String(identity.number)];
   return {
     season: query.season ?? 1,

@@ -12,7 +12,15 @@ import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { useHideAnime } from "@/lib/anime-hide";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
-import { clearLocalCw, listLocalCw, subscribeLocalCw, type LocalCwEntry } from "@/lib/local-cw";
+import {
+  clearLocalCw,
+  listLocalCw,
+  localCwSourceEnabled,
+  subscribeLocalCw,
+  type LocalCwEntry,
+} from "@/lib/local-cw";
+import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
+import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import { removeExternalCwItem, useExternalCw } from "@/lib/feed/external-cw";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import {
@@ -21,7 +29,6 @@ import {
   resolveNuvioProfileIndex,
 } from "@/lib/nuvio/nuvio-sync";
 import { clearResume } from "@/lib/resume";
-import { franchiseDedupKey } from "@/lib/providers/jikan";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
@@ -122,6 +129,7 @@ export function useMobileCw(limit = 14): LibraryItem[] {
   );
   const [localVersion, setLocalVersion] = useState(0);
   const dismissVersion = useCwDismissVersion();
+  const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
 
   useEffect(() => {
     if (isNuvioProvider) {
@@ -169,9 +177,10 @@ export function useMobileCw(limit = 14): LibraryItem[] {
     };
   }, []);
 
-  return useMemo(() => {
+  const cards = useMemo(() => {
     void localVersion;
     void dismissVersion;
+    void animeIdsVersion;
     const disabledSources = new Set<string>();
     if (!settings.cwSources.simkl) disabledSources.add("simkl");
     if (!settings.cwSources.trakt) disabledSources.add("trakt");
@@ -197,16 +206,18 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       : hideSharedCw
         ? []
         : [
-            ...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
+            ...(settings.cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
             ...externalAllowed.filter((i) => i.external !== "nuvio"),
           ];
     const merged = [
       ...base,
-      ...listLocalCw(isNuvioProvider ? false : hideSharedCw).map((e) =>
-        isNuvioProvider
-          ? { ...localToLibraryItem(e), external: "nuvio" as const }
-          : localToLibraryItem(e),
-      ),
+      ...listLocalCw(isNuvioProvider ? false : hideSharedCw)
+        .filter((e) => isNuvioProvider || localCwSourceEnabled(e, settings.cwSources))
+        .map((e) =>
+          isNuvioProvider
+            ? { ...localToLibraryItem(e), external: "nuvio" as const }
+            : localToLibraryItem(e),
+        ),
     ]
       .filter(
         (i) =>
@@ -220,112 +231,24 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);
 
-    const norm = (s: string) => franchiseDedupKey(s);
-    const lastWatchedOf = (i: LibraryItem) => {
-      const lw = Date.parse(i.state?.lastWatched ?? "");
-      if (Number.isFinite(lw) && lw > 0) return lw;
-      const m = i._mtime as unknown;
-      const mt = typeof m === "number" ? m : Date.parse(String(m ?? ""));
-      return Number.isFinite(mt) ? mt : 0;
-    };
-
-    const resolveCollision = (held: LibraryItem, incoming: LibraryItem): LibraryItem => {
-      const heldIsNuvio = held.external === "nuvio";
-      const incIsNuvio = incoming.external === "nuvio";
-
-      if (isNuvioProvider) {
-        if (heldIsNuvio && !incIsNuvio) {
-          if (lastWatchedOf(incoming) > lastWatchedOf(held)) {
-            return {
-              ...held,
-              state: {
-                ...held.state,
-                ...incoming.state,
-                video_id: incoming.state?.video_id ?? held.state?.video_id,
-                season: incoming.state?.season ?? held.state?.season,
-                episode: incoming.state?.episode ?? held.state?.episode,
-                timeOffset: incoming.state?.timeOffset ?? held.state?.timeOffset ?? 0,
-                duration: incoming.state?.duration ?? held.state?.duration ?? 0,
-                lastWatched: incoming.state?.lastWatched ?? held.state?.lastWatched,
-              },
-              _mtime: incoming._mtime ?? held._mtime,
-            };
-          }
-          return held;
-        }
-        if (!heldIsNuvio && incIsNuvio) {
-          if (lastWatchedOf(held) > lastWatchedOf(incoming)) {
-            return {
-              ...incoming,
-              state: {
-                ...incoming.state,
-                ...held.state,
-                video_id: held.state?.video_id ?? incoming.state?.video_id,
-                season: held.state?.season ?? incoming.state?.season,
-                episode: held.state?.episode ?? incoming.state?.episode,
-                timeOffset: held.state?.timeOffset ?? incoming.state?.timeOffset ?? 0,
-                duration: held.state?.duration ?? incoming.state?.duration ?? 0,
-                lastWatched: held.state?.lastWatched ?? incoming.state?.lastWatched,
-              },
-              _mtime: held._mtime ?? incoming._mtime,
-            };
-          }
-          return incoming;
-        }
-      }
-
-      const heldIsNativeStremio = !held.external && !isNuvioProvider;
-      const incIsNativeStremio = !incoming.external && !isNuvioProvider;
-      if (heldIsNativeStremio && !incIsNativeStremio) return held;
-      if (!heldIsNativeStremio && incIsNativeStremio) return incoming;
-
-      return lastWatchedOf(incoming) > lastWatchedOf(held) ? incoming : held;
-    };
-
-    const byId = new Map<string, LibraryItem>();
-    const byName = new Map<string, LibraryItem>();
-    for (const i of merged) {
-      const nm = norm(i.name ?? "");
-      const key = `${i.type}:${nm}`;
-
-      const heldById = byId.get(i._id);
-      if (heldById) {
-        const resolved = resolveCollision(heldById, i);
-        byId.set(resolved._id, resolved);
-        if (nm) byName.set(key, resolved);
-        continue;
-      }
-
-      if (nm) {
-        const heldByName = byName.get(key);
-        if (heldByName) {
-          const resolved = resolveCollision(heldByName, i);
-          if (resolved._id !== heldByName._id) byId.delete(heldByName._id);
-          if (resolved._id !== i._id) byId.delete(i._id);
-          byId.set(resolved._id, resolved);
-          byName.set(key, resolved);
-          continue;
-        }
-        byName.set(key, i);
-      }
-      byId.set(i._id, i);
-      if (byId.size >= limit) break;
-    }
-    return [...byId.values()].sort((a, b) => cwSortKey(b) - cwSortKey(a));
+    return dedupeAnimeCw(merged).slice(0, limit);
   }, [
     items,
     externalCw,
     localVersion,
     dismissVersion,
+    animeIdsVersion,
     limit,
     hideAnime,
     hideSharedCw,
     activeProfile?.id,
     isNuvioProvider,
-    settings.cwSources.trakt,
-    settings.cwSources.simkl,
-    settings.cwSources.publicmetadb,
+    settings.cwSources,
   ]);
+  useEffect(() => {
+    void warmCwAnimeIdentities(cards, { tmdbKey: settings.tmdbKey });
+  }, [cards, settings.tmdbKey]);
+  return cards;
 }
 
 function toMeta(item: LibraryItem): Meta {

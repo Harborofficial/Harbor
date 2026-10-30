@@ -24,10 +24,10 @@ import {
   resolveMeta,
 } from "./meta-resource";
 import { animeKitsuMeta, type AnimeKitsuMeta } from "./providers/anime-kitsu-addon";
-import { kitsuToAnilist } from "./providers/anime-mapping";
+import { kitsuToAnilist, animeMappingByKitsu } from "./providers/anime-mapping";
 import { nextAnimeEntry, resolveAnimeEntry } from "./providers/anime-entry";
 import { parseKitsuId } from "./providers/kitsu";
-import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/anizip";
+import { aniZipByAnilist, pickEpisodeTitle } from "./providers/anizip";
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
 import { foreignAnimeProviderSeasons } from "./streams/anime-identity";
@@ -101,12 +101,17 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
   const seriesImdb = addonMeta?.imdb_id ?? eps.find((e) => e.imdbId)?.imdbId ?? undefined;
   const rootId = await franchiseRoot(id).catch(() => id);
   const rootKitsu = parseKitsuId(rootId) ?? kitsuId;
-  let az = await aniZipByKitsu(kitsuId).catch(() => null);
+  let az = await animeMappingByKitsu(kitsuId, ["thetvdb_id", "imdb_id"]).catch(() => null);
   if (!az?.mappings?.thetvdb_id) {
     const anilistId = await kitsuToAnilist(kitsuId).catch(() => null);
     if (anilistId != null) {
       const alt = await aniZipByAnilist(anilistId).catch(() => null);
-      if (alt?.mappings?.thetvdb_id || (alt?.episodes && !az?.episodes)) az = alt;
+      if (
+        alt?.mappings?.anilist_id === anilistId &&
+        (alt.mappings.kitsu_id == null || alt.mappings.kitsu_id === kitsuId) &&
+        (alt.mappings.thetvdb_id || (alt.episodes && !az?.episodes))
+      )
+        az = alt;
     }
   }
   const tvdbImages = await fetchTvdbProxyImages({
@@ -142,6 +147,7 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
       const img = pickTvdbImage(tvdbImages, {
         number: ep.episode,
         seasonNumber: ep.season,
+        absoluteNumber: ep.absoluteNumber,
         imdbSeason: ep.imdbSeason,
         imdbEpisode: ep.imdbEpisode,
       });

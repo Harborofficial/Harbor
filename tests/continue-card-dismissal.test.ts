@@ -41,7 +41,7 @@ function harness() {
     if (file === "nuvio/nuvio-sync")
       return {
         isNuvioProviderActive: () => false,
-        resolveNuvioProfileIndex: () => 0,
+        resolveNuvioProfileIndex: () => 1,
         deleteWatchProgressFromNuvio: async () => {},
         dismissNextUpInNuvioCloud: async () => {},
       };

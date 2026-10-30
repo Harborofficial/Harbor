@@ -94,6 +94,7 @@ import subtitles from "./hi/subtitles";
 import plugins from "./hi/plugins";
 import brands from "./hi/brands";
 import bpSports from "./hi/bp-sports";
+import queueBasket from "./hi/queue-basket";
 
 import nytTv from "./hi/nyt-tv";
 
@@ -358,6 +359,7 @@ const hi: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...reviews,
+  ...queueBasket,
 };
 
 export default hi;

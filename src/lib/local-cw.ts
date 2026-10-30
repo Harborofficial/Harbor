@@ -25,6 +25,23 @@ export type LocalCwEntry = {
   t: number;
 };
 
+const CLOUD_ID = /^(?:tt\d|kitsu:|mal:|anilist:|anidb:|tmdb:)/;
+
+/**
+ * Entries written before the source field existed are classified the same way
+ * new playback entries are, instead of defaulting every old item to "local".
+ */
+export function localCwSource(entry: Pick<LocalCwEntry, "id" | "source">): "library" | "local" {
+  return entry.source ?? (CLOUD_ID.test(entry.id) ? "library" : "local");
+}
+
+export function localCwSourceEnabled(
+  entry: Pick<LocalCwEntry, "id" | "source">,
+  sources: { library: boolean; local: boolean },
+): boolean {
+  return localCwSource(entry) === "library" ? sources.library : sources.local;
+}
+
 const subs = new Set<() => void>();
 let version = 0;
 const cache = new Map<string, Record<string, LocalCwEntry>>();
@@ -117,16 +134,18 @@ function readAll(key: string): Record<string, LocalCwEntry> {
 }
 
 function writeAll(key: string, all: Record<string, LocalCwEntry>, acknowledged = false): void {
+  const previous = cache.get(key);
   try {
     localStorage.setItem(key, JSON.stringify(all));
   } catch (error) {
-    // The in-memory cache must never claim a write the store refused: drop it so
-    // the next read falls back to what is actually persisted.
-    cache.delete(key);
-    if (acknowledged)
+    if (acknowledged) {
+      if (previous) cache.set(key, previous);
+      else cache.delete(key);
       throw new Error("Could not save the change. Check available storage and try again.", {
         cause: error,
       });
+    }
+    cache.delete(key);
     return;
   }
   cache.set(key, all);

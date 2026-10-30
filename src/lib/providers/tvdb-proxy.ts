@@ -98,7 +98,7 @@ export function pickTvdbImage(
   if ((ep.imdbSeason ?? ep.seasonNumber) === 0) {
     return map[`s0e${ep.imdbEpisode ?? ep.number}`] ?? null;
   }
-  const abs = ep.absoluteNumber ?? ep.number;
+  const abs = ep.absoluteNumber;
   // A sequel cour's entry-local numbers restart at 1 while its IMDb identity
   // points at a later season (Kitsu labels every cour "season 1"), so the
   // seasonNumber:number pair would resolve to the first season's episode.
@@ -107,10 +107,10 @@ export function pickTvdbImage(
     (ep.imdbSeason == null || ep.imdbSeason === ep.seasonNumber) &&
     (ep.imdbEpisode == null || ep.imdbEpisode === ep.number);
   return (
-    (Number.isInteger(abs) && abs > 0 ? map[`abs${abs}`] : undefined) ??
     (ep.imdbSeason != null && ep.imdbEpisode != null
       ? map[`s${ep.imdbSeason}e${ep.imdbEpisode}`]
       : undefined) ??
+    (abs != null && Number.isInteger(abs) && abs > 0 ? map[`abs${abs}`] : undefined) ??
     (localPairUsable ? map[`s${ep.seasonNumber}e${ep.number}`] : undefined) ??
     null
   );

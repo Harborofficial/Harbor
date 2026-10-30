@@ -102,6 +102,7 @@ import plurals from "./pl/plurals";
 import plugins from "./pl/plugins";
 import brands from "./pl/brands";
 import bpSports from "./pl/bp-sports";
+import queueBasket from "./pl/queue-basket";
 
 import nytTv from "./pl/nyt-tv";
 
@@ -379,6 +380,7 @@ const pl: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...reviews,
+  ...queueBasket,
 };
 
 export default pl;

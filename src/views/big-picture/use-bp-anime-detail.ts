@@ -1,3 +1,4 @@
+import { isUpcomingDate } from "@/lib/dates";
 import { useHarborEpisodeRatings } from "@/views/detail/use-episode-imdb-ratings";
 import { withEpisodeImdbRatings } from "@/lib/providers/anime-episode-enrich";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -301,6 +302,9 @@ export function useBpAnimeDetail(meta: Meta | null, opts?: BpAnimeDetailOptions)
     const filled = fillAiredPlaceholderTitles(visible, episodes);
     if (Object.keys(proxyImages).length === 0) return filled;
     return filled.map((ep) => {
+      // A future row has no real still; a proxy hit there would borrow the
+      // artwork of the TVDB slot this entry maps onto.
+      if (ep.airdate && isUpcomingDate(ep.airdate)) return ep;
       const img = pickTvdbImage(proxyImages, ep);
       return img ? { ...ep, thumbnail: img } : ep;
     });

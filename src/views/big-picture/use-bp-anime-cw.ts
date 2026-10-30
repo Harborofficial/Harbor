@@ -8,10 +8,15 @@ import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
 import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
 import { setExternalCwSources, useExternalCw } from "@/lib/feed/external-cw";
 import { isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
-import { franchiseRoot, franchiseRootSync } from "@/lib/providers/anime-franchise-root";
+import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
+import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import { publishResumeStates } from "@/lib/hover-preview/store";
-import { runLanes } from "@/lib/run-lanes";
-import { listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import {
+  listLocalCw,
+  localCwSourceEnabled,
+  localCwVersion,
+  subscribeLocalCw,
+} from "@/lib/local-cw";
 import {
   manualWatchedLibraryItems,
   manualWatchedVersion,
@@ -20,6 +25,7 @@ import {
 import { useSettings } from "@/lib/settings";
 import {
   ANIME_CLOUD_ID,
+  cwSortKey,
   isAnimeCwItem,
   isCwMember,
   library,
@@ -27,9 +33,6 @@ import {
 } from "@/lib/stremio";
 
 const CW_CAP = 20;
-// Each root is a walk of up to eight sequential kitsu calls, and the pool this
-// runs over is the whole anime library, not the capped row.
-const ROOT_LANES = 4;
 const SETTLE_MS = 150;
 const SETTLE_CAP_MS = 650;
 
@@ -48,7 +51,7 @@ function localItems(
   sources: { library: boolean; local: boolean },
 ): LibraryItem[] {
   return listLocalCw(privateOnly)
-    .filter((e) => (e.source === "library" ? sources.library : sources.local))
+    .filter((e) => localCwSourceEnabled(e, sources))
     .filter((e) => ANIME_CLOUD_ID.test(e.id) || e.isAnime)
     .map((e) => ({
       _id: e.id,
@@ -82,28 +85,24 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
   const hideSharedCw =
     !isNuvio && settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const cwVersion = useCwDismissVersion();
+  const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
   const animeDetectVer = useDetectedAnimeVersion();
   const { cwSources } = settings;
   useEffect(() => {
-    // Only the sources this row actually gates on may be published: writing an
-    // explicit `nuvio: false` / `publicmetadb: undefined` would clobber the mask
-    // the home feed installed and drop publicmetadb CW for every other row.
-    const mask: { trakt: boolean; simkl: boolean; publicmetadb?: boolean; nuvio?: boolean } = {
-      trakt: !!cwSources.trakt,
-      simkl: !!cwSources.simkl,
-    };
-    if (cwSources.publicmetadb !== undefined) mask.publicmetadb = !!cwSources.publicmetadb;
-    if (isNuvio) mask.nuvio = true;
-    setExternalCwSources(mask);
+    setExternalCwSources({
+      trakt: cwSources.trakt,
+      simkl: cwSources.simkl,
+      publicmetadb: cwSources.publicmetadb,
+      ...(isNuvio ? { nuvio: true } : {}),
+    });
   }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb, isNuvio]);
   const trackerCw = useExternalCw(
-    isNuvio || (!hideSharedCw && (cwSources.trakt || cwSources.simkl)),
+    isNuvio || (!hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb)),
   );
   const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const [libItems, setLibItems] = useState<LibraryItem[]>([]);
   const [addonRows, setAddonRows] = useState<AddonRow[]>([]);
-  const [rootVersion, setRootVersion] = useState(0);
 
   useEffect(() => {
     if (!authKey) {
@@ -155,9 +154,11 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
               ? cwSources.trakt
               : i.external === "simkl"
                 ? cwSources.simkl
-                : i.external === "nuvio"
-                  ? isNuvio
-                  : true,
+                : i.external === "publicmetadb"
+                  ? cwSources.publicmetadb
+                  : i.external === "nuvio"
+                    ? isNuvio
+                    : true,
           )),
     ],
     [localAnimeCw, libItems, trackerCw, hideSharedCw, cwSources, isNuvio],
@@ -166,49 +167,21 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
   const raw = useMemo(() => {
     void cwVersion;
     void animeDetectVer;
-    void rootVersion;
-    const seen = new Set<string>();
-    const seenRoot = new Set<string>();
-    return pool
+    void animeIdsVersion;
+    const sorted = pool
       .filter((i) => {
         if (!isCwMember(i)) return false;
         if (!i.local && !isAnimeCwItem(i)) return false;
         if (isCwDismissed(i)) return false;
-        if (seen.has(i._id)) return false;
-        seen.add(i._id);
         return true;
       })
-      .sort(
-        (a, b) =>
-          Date.parse(b.state?.lastWatched ?? b._mtime) -
-          Date.parse(a.state?.lastWatched ?? a._mtime),
-      )
-      .filter((i) => {
-        const root = franchiseRootSync(i._id);
-        if (!root) return true;
-        if (seenRoot.has(root)) return false;
-        seenRoot.add(root);
-        return true;
-      })
-      .slice(0, CW_CAP);
-  }, [pool, cwVersion, animeDetectVer, rootVersion, hideSharedCw]);
+      .sort((a, b) => cwSortKey(b) - cwSortKey(a));
+    return dedupeAnimeCw(sorted).slice(0, CW_CAP);
+  }, [pool, cwVersion, animeDetectVer, animeIdsVersion, hideSharedCw]);
 
-  // franchiseRootSync only answers once the walk is warm, so the collapse runs in
-  // two phases or three seasons of one show sit in the row.
   useEffect(() => {
-    const ids = pool
-      .filter((i) => isCwMember(i) && (i.local || isAnimeCwItem(i)))
-      .map((i) => i._id);
-    if (ids.length === 0) return;
-    if (ids.every((id) => franchiseRootSync(id))) return;
-    let cancelled = false;
-    void runLanes(ids, ROOT_LANES, (id) => franchiseRoot(id).catch(() => id)).then(() => {
-      if (!cancelled) setRootVersion((v) => v + 1);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [pool, animeDetectVer]);
+    void warmCwAnimeIdentities(raw);
+  }, [raw]);
 
   useEffect(() => {
     publishResumeStates(raw);
@@ -220,14 +193,15 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
 
   const resurfaceLibrary = useMemo(() => {
     void manualWatchedVer;
+    const library = hideSharedCw || !cwSources.library ? [] : libItems;
     const manual = manualWatchedLibraryItems().filter(isAnimeCwItem);
-    if (manual.length === 0) return libItems;
-    const memberIds = new Set(libItems.filter(isCwMember).map((i) => i._id));
+    if (manual.length === 0) return library;
+    const memberIds = new Set(library.filter(isCwMember).map((i) => i._id));
     const usable = manual.filter((i) => !memberIds.has(i._id));
-    if (usable.length === 0) return libItems;
+    if (usable.length === 0) return library;
     const overrideIds = new Set(usable.map((i) => i._id));
-    return [...libItems.filter((i) => !overrideIds.has(i._id)), ...usable];
-  }, [libItems, manualWatchedVer]);
+    return [...library.filter((i) => !overrideIds.has(i._id)), ...usable];
+  }, [libItems, manualWatchedVer, hideSharedCw, cwSources.library]);
 
   const sig = raw
     .map((i) => `${i._id}:${i.state?.season ?? ""}:${i.state?.episode ?? ""}`)

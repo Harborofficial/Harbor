@@ -71,15 +71,24 @@ function harness() {
   const lastPlayed = new Map<string, any>();
   const dismissed = new Set<string>();
   let settings = { cwSources: { simkl: true }, cwHideCaughtUp: false, cwPerProfile: false };
-  let profile = { id: "a" }, session: object | null = { username: "fixture" };
-  let remote: any = progress(), remoteReads = 0, episodeReads = 0, metadataFails = false;
-  let episodes = [1, 2, 3, 4].map(episode => ({ season: 1, episode, airDate: "2020-01-01" }));
+  let profile = { id: "a" },
+    session: object | null = { username: "fixture" };
+  let remote: any = progress(),
+    remoteReads = 0,
+    episodeReads = 0,
+    metadataFails = false;
+  let episodes = [1, 2, 3, 4].map((episode) => ({ season: 1, episode, airDate: "2020-01-01" }));
   let entryEpisodes: any[] | null = null;
   let animeCwId: string | null = null;
   const entryLists = new Map<string, any[]>();
   let resolvedEntry: any = null;
-  const states: any[] = [], refs: any[] = [], effects: any[] = [];
-  let stateSlot = 0, refSlot = 0, effectSlot = 0, dirty = false;
+  const states: any[] = [],
+    refs: any[] = [],
+    effects: any[] = [];
+  let stateSlot = 0,
+    refSlot = 0,
+    effectSlot = 0,
+    dirty = false;
   const pending: (() => void)[] = [];
   const modules = new Map<string, any>();
   let params: any[] = [[], "", true, []];
@@ -149,11 +158,20 @@ function harness() {
     },
     "@/lib/hidden-episodes": { isEpisodeHidden: () => false },
     "@/lib/season-view-pref": { getViewedSeason: () => undefined },
-    "@/lib/anime-cw-ids": { getAnimeCwId: () => animeCwId },
+    "@/lib/anime-cw-ids": {
+      getAnimeCwId: () => animeCwId,
+      animeCwIdsVersion: () => 0,
+      subscribeAnimeCwIds: () => () => {},
+    },
+    "@/lib/cw-anime-identity": {
+      cwAnimeIdentityKey: () => null,
+      dedupeAnimeCw: (items: any[]) => items,
+      warmCwAnimeIdentities: async () => {},
+    },
     "@/lib/providers/anime-franchise-root": { isSplitFranchiseKitsu: () => false },
     "@/lib/providers/kitsu": { parseKitsuId: () => null },
     "@/lib/providers/jikan": { franchiseDedupKey: (name: string) => name.toLowerCase() },
-    "@/lib/local-cw": { listLocalCw: () => [] },
+    "@/lib/local-cw": { listLocalCw: () => [], localCwSourceEnabled: () => true },
     "@/lib/continue-watching": { localToLibraryItem: (i: any) => i },
     "@/lib/cw-anime-episode": {},
     "@/lib/anime-tracker-entry": { resolveTrackerAnimeEntry: async () => resolvedEntry },
@@ -164,11 +182,19 @@ function harness() {
     (node: any) => ts.isFunctionDeclaration(node) && node.name?.text === "nextUnwatchedAfter",
   )!;
   mocks["@/lib/series-episodes"] = {
-    ...compile("", () => { throw new Error("unexpected dependency"); }, nextFn.getText(parsed)),
+    ...compile(
+      "",
+      () => {
+        throw new Error("unexpected dependency");
+      },
+      nextFn.getText(parsed),
+    ),
     fetchEpisodeList: async (meta: any) => {
-      episodeReads++; if (metadataFails) throw new Error("metadata offline");
+      episodeReads++;
+      if (metadataFails) throw new Error("metadata offline");
       const anime = typeof meta?.id === "string" && /^(kitsu|mal|anilist|anidb):/.test(meta.id);
-      if (anime && typeof meta.id === "string" && entryLists.has(meta.id)) return entryLists.get(meta.id)!;
+      if (anime && typeof meta.id === "string" && entryLists.has(meta.id))
+        return entryLists.get(meta.id)!;
       return anime && entryEpisodes ? entryEpisodes : episodes;
     },
     fetchAdjacentEpisodes: async (_meta: any, cur: any) => {
@@ -194,19 +220,47 @@ function harness() {
     return out;
   };
   return {
-    resumes, manual, dismissed, lastPlayed,
-    setRemote: (value: any) => { remote = value; },
-    setPrivate: (value: boolean) => { settings = { ...settings, cwPerProfile: value }; },
-    setSource: (value: boolean) => { settings = { ...settings, cwSources: { simkl: value } }; },
-    setSession: (value: object | null) => { session = value; },
-    setProfile: (id: string) => { profile = { id }; },
-    setEpisodes: (value: any[]) => { episodes = value; },
-    setEntryEpisodes: (value: any[] | null) => { entryEpisodes = value; },
-    setEntryList: (id: string, value: any[]) => { entryLists.set(id, value); },
-    setResolvedEntry: (value: any) => { resolvedEntry = value; },
-    setAnimeCwId: (value: string | null) => { animeCwId = value; },
-    failMetadata: (value = true) => { metadataFails = value; },
-    render: (...args: any[]) => { if (args.length) params = args; return render(); },
+    resumes,
+    manual,
+    dismissed,
+    lastPlayed,
+    setRemote: (value: any) => {
+      remote = value;
+    },
+    setPrivate: (value: boolean) => {
+      settings = { ...settings, cwPerProfile: value };
+    },
+    setSource: (value: boolean) => {
+      settings = { ...settings, cwSources: { simkl: value } };
+    },
+    setSession: (value: object | null) => {
+      session = value;
+    },
+    setProfile: (id: string) => {
+      profile = { id };
+    },
+    setEpisodes: (value: any[]) => {
+      episodes = value;
+    },
+    setEntryEpisodes: (value: any[] | null) => {
+      entryEpisodes = value;
+    },
+    setEntryList: (id: string, value: any[]) => {
+      entryLists.set(id, value);
+    },
+    setResolvedEntry: (value: any) => {
+      resolvedEntry = value;
+    },
+    setAnimeCwId: (value: string | null) => {
+      animeCwId = value;
+    },
+    failMetadata: (value = true) => {
+      metadataFails = value;
+    },
+    render: (...args: any[]) => {
+      if (args.length) params = args;
+      return render();
+    },
     async flush() {
       let out: any[] = [];
       for (let i = 0; i < 8; i++) {
@@ -355,8 +409,12 @@ test("a sequel episode missing from the provider list waits for air via the reco
   const hadWindow = "window" in g;
   if (!hadWindow) g.window = { setTimeout: () => 0, clearTimeout: () => {} };
   try {
-    const h = harness(); h.setRemote(progress([1], "tt100"));
-    h.setEpisodes([{ season: 1, episode: 1, airDate: "2020-01-01" }, { season: 2, episode: 1 }]);
+    const h = harness();
+    h.setRemote(progress([1], "tt100"));
+    h.setEpisodes([
+      { season: 1, episode: 1, airDate: "2020-01-01" },
+      { season: 2, episode: 1 },
+    ]);
     h.setAnimeCwId("kitsu:9");
     h.setEntryEpisodes([
       { season: 1, episode: 1, airDate: "2020-01-01" },
@@ -366,7 +424,21 @@ test("a sequel episode missing from the provider list waits for air via the reco
     const finished = anchor(2, "tt100");
     finished.isAnime = true;
     finished.state = { ...finished.state, season: 2, episode: 2, video_id: "kitsu:9:2" };
-    h.render([finished], "", true, [], "all", 0, new Set(), new Map(), new Map(), new Map(), 0, false, "timer");
+    h.render(
+      [finished],
+      "",
+      true,
+      [],
+      "all",
+      0,
+      new Set(),
+      new Map(),
+      new Map(),
+      new Map(),
+      0,
+      false,
+      "timer",
+    );
     const out = await h.flush();
     assert.equal(out.length, 1);
     assert.equal(out[0].waitingForAir, true);
@@ -378,8 +450,12 @@ test("a sequel episode missing from the provider list waits for air via the reco
 });
 
 test("an aired sequel episode missing from the provider list advances via the anime entry", async () => {
-  const h = harness(); h.setRemote(progress([1], "tt100"));
-  h.setEpisodes([{ season: 1, episode: 1, airDate: "2020-01-01" }, { season: 2, episode: 1 }]);
+  const h = harness();
+  h.setRemote(progress([1], "tt100"));
+  h.setEpisodes([
+    { season: 1, episode: 1, airDate: "2020-01-01" },
+    { season: 2, episode: 1 },
+  ]);
   h.setAnimeCwId("kitsu:9");
   h.setEntryEpisodes([
     { season: 1, episode: 1, airDate: "2020-01-01" },
@@ -389,7 +465,21 @@ test("an aired sequel episode missing from the provider list advances via the an
   const finished = anchor(2, "tt100");
   finished.isAnime = true;
   finished.state = { ...finished.state, season: 2, episode: 2, video_id: "kitsu:9:2" };
-  h.render([finished], "", true, [], "all", 0, new Set(), new Map(), new Map(), new Map(), 0, false, "hide");
+  h.render(
+    [finished],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "hide",
+  );
   const out = await h.flush();
   assert.equal(out.length, 1);
   assert.equal(out[0].upNext, true);
@@ -403,14 +493,46 @@ test("an aired sequel episode missing from the provider list advances via the an
 // season-2 episode into that list returned a season-1 up-next; the follow-up
 // must walk to the sequel cour that actually aired the season.
 test("a season-1 recorded entry never answers a sequel season as season 1", async () => {
-  const h = harness(); h.setRemote(progress([1], "tt100"));
-  h.setEpisodes([{ season: 1, episode: 1, airDate: "2020-01-01" }, { season: 2, episode: 1 }]);
+  const h = harness();
+  h.setRemote(progress([1], "tt100"));
+  h.setEpisodes([
+    { season: 1, episode: 1, airDate: "2020-01-01" },
+    { season: 2, episode: 1 },
+  ]);
   h.setAnimeCwId("kitsu:9");
   h.setEntryList("kitsu:9", [
-    { season: 1, episode: 1, imdbSeason: 1, imdbEpisode: 1, absoluteNumber: 1, airDate: "2020-01-01" },
-    { season: 1, episode: 2, imdbSeason: 1, imdbEpisode: 2, absoluteNumber: 2, airDate: "2020-01-08" },
-    { season: 1, episode: 3, imdbSeason: 1, imdbEpisode: 3, absoluteNumber: 3, airDate: "2020-01-15" },
-    { season: 1, episode: 4, imdbSeason: 1, imdbEpisode: 4, absoluteNumber: 4, airDate: "2020-01-22" },
+    {
+      season: 1,
+      episode: 1,
+      imdbSeason: 1,
+      imdbEpisode: 1,
+      absoluteNumber: 1,
+      airDate: "2020-01-01",
+    },
+    {
+      season: 1,
+      episode: 2,
+      imdbSeason: 1,
+      imdbEpisode: 2,
+      absoluteNumber: 2,
+      airDate: "2020-01-08",
+    },
+    {
+      season: 1,
+      episode: 3,
+      imdbSeason: 1,
+      imdbEpisode: 3,
+      absoluteNumber: 3,
+      airDate: "2020-01-15",
+    },
+    {
+      season: 1,
+      episode: 4,
+      imdbSeason: 1,
+      imdbEpisode: 4,
+      absoluteNumber: 4,
+      airDate: "2020-01-22",
+    },
   ]);
   h.setEntryList("kitsu:9s2", [
     { season: 1, episode: 1, airDate: "2020-01-01" },
@@ -421,11 +543,29 @@ test("a season-1 recorded entry never answers a sequel season as season 1", asyn
   const finished = anchor(2, "tt100");
   finished.isAnime = true;
   finished.state = { ...finished.state, season: 2, episode: 2, video_id: "tt100:2:2" };
-  h.render([finished], "", true, [], "all", 0, new Set(), new Map(), new Map(), new Map(), 0, false, "hide");
+  h.render(
+    [finished],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "hide",
+  );
   const out = await h.flush();
   assert.equal(out.length, 1);
   assert.equal(out[0].upNext, true);
-  assert.equal(out[0].state.season, 2, "must stay in the provider season, not fall back to season 1");
+  assert.equal(
+    out[0].state.season,
+    2,
+    "must stay in the provider season, not fall back to season 1",
+  );
   assert.equal(out[0].state.episode, 3);
 });
 
@@ -433,8 +573,12 @@ test("a season-1 recorded entry never answers a sequel season as season 1", asyn
 // detection or recorded mapping) still deserves the anime-entry follow-up when
 // the provider list cannot place its finished episode.
 test("an undetected catalog anime row still resolves the sequel cour", async () => {
-  const h = harness(); h.setRemote(progress([1], "tmdb:tv:100"));
-  h.setEpisodes([{ season: 1, episode: 1, airDate: "2020-01-01" }, { season: 2, episode: 1 }]);
+  const h = harness();
+  h.setRemote(progress([1], "tmdb:tv:100"));
+  h.setEpisodes([
+    { season: 1, episode: 1, airDate: "2020-01-01" },
+    { season: 2, episode: 1 },
+  ]);
   h.setAnimeCwId(null);
   h.setEntryList("kitsu:9s2", [
     { season: 1, episode: 1, airDate: "2020-01-01" },
@@ -445,7 +589,21 @@ test("an undetected catalog anime row still resolves the sequel cour", async () 
   const finished = anchor(2, "tmdb:tv:100");
   finished.isAnime = false;
   finished.state = { ...finished.state, season: 2, episode: 2, video_id: "tmdb:tv:100:2:2" };
-  h.render([finished], "", true, [], "all", 0, new Set(), new Map(), new Map(), new Map(), 0, false, "hide");
+  h.render(
+    [finished],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "hide",
+  );
   const out = await h.flush();
   assert.equal(out.length, 1);
   assert.equal(out[0].upNext, true);
@@ -461,12 +619,30 @@ test("an unplaceable anime row with no anime entry waits for air instead of walk
   const hadWindow = "window" in g;
   if (!hadWindow) g.window = { setTimeout: () => 0, clearTimeout: () => {} };
   try {
-    const h = harness(); h.setRemote(progress([1], "tt100"));
-    h.setEpisodes([{ season: 1, episode: 1, airDate: "2020-01-01" }, { season: 2, episode: 1 }]);
+    const h = harness();
+    h.setRemote(progress([1], "tt100"));
+    h.setEpisodes([
+      { season: 1, episode: 1, airDate: "2020-01-01" },
+      { season: 2, episode: 1 },
+    ]);
     const finished = anchor(2, "tt100");
     finished.isAnime = true;
     finished.state = { ...finished.state, season: 2, episode: 2, video_id: "tt100:2:2" };
-    h.render([finished], "", true, [], "all", 0, new Set(), new Map(), new Map(), new Map(), 0, false, "timer");
+    h.render(
+      [finished],
+      "",
+      true,
+      [],
+      "all",
+      0,
+      new Set(),
+      new Map(),
+      new Map(),
+      new Map(),
+      0,
+      false,
+      "timer",
+    );
     const out = await h.flush();
     assert.equal(out.length, 1);
     assert.equal(out[0].upNext, undefined);
@@ -479,12 +655,30 @@ test("an unplaceable anime row with no anime entry waits for air instead of walk
 });
 
 test("an unplaceable anime row with no anime entry still drops in hide mode", async () => {
-  const h = harness(); h.setRemote(progress([1], "tt100"));
-  h.setEpisodes([{ season: 1, episode: 1, airDate: "2020-01-01" }, { season: 2, episode: 1 }]);
+  const h = harness();
+  h.setRemote(progress([1], "tt100"));
+  h.setEpisodes([
+    { season: 1, episode: 1, airDate: "2020-01-01" },
+    { season: 2, episode: 1 },
+  ]);
   const finished = anchor(2, "tt100");
   finished.isAnime = true;
   finished.state = { ...finished.state, season: 2, episode: 2, video_id: "tt100:2:2" };
-  h.render([finished], "", true, [], "all", 0, new Set(), new Map(), new Map(), new Map(), 0, false, "hide");
+  h.render(
+    [finished],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "hide",
+  );
   assert.deepEqual(await h.flush(), []);
 });
 

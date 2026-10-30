@@ -11,6 +11,8 @@ import { useT } from "@/lib/i18n";
 import { type LibraryItem } from "@/lib/stremio";
 import { isLibraryItemWatched } from "@/lib/trakt/library-key";
 import type { ContinueDismiss } from "@/lib/continue-card-actions";
+import { QueueContinueCard } from "@/components/queue-basket/queue-continue-card";
+import { useQueueResumeItem } from "@/lib/queue";
 
 type Props = {
   signedIn: boolean;
@@ -23,6 +25,8 @@ type Props = {
 
 export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss, loading }: Props) {
   const t = useT();
+  const queueResumeItem = useQueueResumeItem();
+  const showQueueCard = queueResumeItem !== null;
   const [showAuth, setShowAuth] = useState(false);
 
   const signInButton = signedIn ? null : (
@@ -63,7 +67,7 @@ export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss, loa
     );
   }
 
-  if (items.length > 0) {
+  if (items.length > 0 || showQueueCard) {
     return (
       <div className="transition-opacity duration-300">
         <Row
@@ -73,15 +77,19 @@ export function CWSection({ signedIn, isNuvio, items, watchedSet, onDismiss, loa
           shape="landscape"
           scrollKey="home:cw"
           headerRight={signInButton}
+          className={showQueueCard ? "home-cw-with-queue" : undefined}
         >
-          {items.map((item) => (
-            <ContinueCard
-              key={item._id}
-              item={item}
-              watched={watchedSet ? isLibraryItemWatched(item, watchedSet) : false}
-              onDismiss={onDismiss}
-            />
-          ))}
+          {[
+            ...(showQueueCard ? [<QueueContinueCard key="continue-queue" />] : []),
+            ...items.map((item) => (
+              <ContinueCard
+                key={item._id}
+                item={item}
+                watched={watchedSet ? isLibraryItemWatched(item, watchedSet) : false}
+                onDismiss={onDismiss}
+              />
+            )),
+          ]}
         </Row>
         {authModal}
       </div>

@@ -126,6 +126,7 @@ import surfaces5 from "./ru/surfaces5";
 import plugins from "./ru/plugins";
 import brands from "./ru/brands";
 import bpSports from "./ru/bp-sports";
+import queueBasket from "./ru/queue-basket";
 
 import nytTv from "./ru/nyt-tv";
 
@@ -426,6 +427,7 @@ const ru: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...reviews,
+  ...queueBasket,
 };
 
 export default ru;

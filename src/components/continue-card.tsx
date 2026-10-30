@@ -37,7 +37,7 @@ import { aniZipByAnidb, aniZipByAnilist, aniZipByKitsu, aniZipByMal } from "@/li
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
-import { getAnimeCwId } from "@/lib/anime-cw-ids";
+import { animeCwIdsVersion, getAnimeCwId, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
 import {
   aniZipLookupKey,
   applyAniZipEpisode,
@@ -360,6 +360,7 @@ export const ContinueCard = memo(function ContinueCard({
     };
   }, [item._id, item.type, item.state?.video_id, authKey]);
 
+  const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
   // The preferred title is a display preference the user can change at any time,
   // so it resolves in its own effect: a language change must not tear down the
   // card's artwork hydration above.
@@ -368,7 +369,14 @@ export const ContinueCard = memo(function ContinueCard({
     // Cinemeta rows whose detail page recorded an anime mapping.
     if (!isAnimeCwItem(item) && getAnimeCwId(item._id) == null) return;
     let cancelled = false;
-    resolvePreferredAnimeTitle(item._id, settings.animeTitleLanguage)
+    resolvePreferredAnimeTitle(item._id, settings.animeTitleLanguage, {
+      videoId: item.state?.video_id,
+      season: item.state?.season,
+      episode: item.state?.episode,
+      imdbId:
+        item.altIds?.find((id) => /^tt\d+$/.test(id)) ??
+        (/^tt\d+$/.test(item._id) ? item._id : undefined),
+    })
       .then((tt) => {
         if (!cancelled) setTranslatedTitle(tt?.trim() || null);
       })
@@ -376,7 +384,14 @@ export const ContinueCard = memo(function ContinueCard({
     return () => {
       cancelled = true;
     };
-  }, [item._id, settings.animeTitleLanguage]);
+  }, [
+    item._id,
+    item.state?.video_id,
+    item.state?.season,
+    item.state?.episode,
+    settings.animeTitleLanguage,
+    animeIdsVersion,
+  ]);
 
   useEffect(() => {
     setEpTitle(null);

@@ -13,10 +13,12 @@ const item = (id: string, external?: string) => ({
   state: { timeOffset: 100000, duration: 1000000, season: 1, episode: 1 },
 });
 function harness(bigPicture: boolean, sources: any, privateProfile = false) {
-  const settings = { cwSources: sources, cwPerProfile: privateProfile };
+  const settings = { cwSources: { publicmetadb: false, ...sources }, cwPerProfile: privateProfile };
   let enabled = false;
   const masks: any[] = [];
   let trackerItems = [item("kitsu:100", "simkl"), item("kitsu:200", "trakt")];
+  const dismissed = new Set<string>();
+  const warmed: any[][] = [];
   const local = ["library", "local"].map((source, n) => ({
     id: `kitsu:${300 + n}`,
     type: "series",
@@ -39,6 +41,8 @@ function harness(bigPicture: boolean, sources: any, privateProfile = false) {
     "@/lib/settings": { useSettings: () => ({ settings }) },
     "@/lib/local-cw": {
       listLocalCw: () => local,
+      localCwSourceEnabled: (entry: any, sources: any) =>
+        entry.source === "library" ? sources.library : sources.local,
       subscribeLocalCw: () => noop,
       localCwVersion: () => 0,
     },
@@ -61,7 +65,24 @@ function harness(bigPicture: boolean, sources: any, privateProfile = false) {
     "@/lib/addons-anime-filter": { loadAnimeAddonRows: () => noop },
     "@/lib/anime-cw-absorb": { absorbCloudAnimeCw: noop },
     "@/lib/anime-detect": { detectAnimeForCw: noop, useDetectedAnimeVersion: () => 0 },
-    "@/lib/cw-dismiss": { isCwDismissed: () => false, useCwDismissVersion: () => 0 },
+    "@/lib/cw-dismiss": {
+      isCwDismissed: (i: any) => dismissed.has(i._id),
+      useCwDismissVersion: () => 0,
+    },
+    "@/lib/anime-cw-ids": { animeCwIdsVersion: () => 0, subscribeAnimeCwIds: () => noop },
+    "@/lib/cw-anime-identity": {
+      dedupeAnimeCw: (items: any[]) =>
+        items.reduce((out: any[], next: any) => {
+          const id = next._id ?? next.id;
+          const at = out.findIndex((i) => (i._id ?? i.id) === id);
+          if (at < 0) out.push(next);
+          else out[at] = { ...out[at], cwMembers: [...(out[at].cwMembers ?? [out[at]]), next] };
+          return out;
+        }, []),
+      warmCwAnimeIdentities: async (items: any[]) => {
+        warmed.push(items);
+      },
+    },
     "@/lib/providers/anime-franchise-root": { franchiseRootSync: (id: string) => id },
     "@/lib/hover-preview/store": { publishResumeStates: noop },
     "@/lib/run-lanes": {},
@@ -89,6 +110,8 @@ function harness(bigPicture: boolean, sources: any, privateProfile = false) {
   return {
     settings,
     masks,
+    warmed,
+    dismissed,
     publishTrackerItems(next: typeof trackerItems) {
       trackerItems = next;
     },
@@ -118,7 +141,7 @@ for (const bigPicture of [false, true]) {
     h.settings.cwSources = { ...h.settings.cwSources, simkl: false };
     assert.deepEqual(h.ids(), []);
     assert.equal(h.enabled, false);
-    assert.deepEqual(h.masks.at(-1), { trakt: false, simkl: false });
+    assert.deepEqual(h.masks.at(-1), { trakt: false, simkl: false, publicmetadb: false });
   });
   test(`${bigPicture ? "Big Picture anime" : "shared CW"}: private profile excludes shared trackers`, () => {
     const h = harness(bigPicture, { library: false, local: true, simkl: true, trakt: true }, true);
@@ -126,3 +149,55 @@ for (const bigPicture of [false, true]) {
     assert.equal(h.enabled, false);
   });
 }
+
+test("PublicMetaDB progress feeds both shared and Big Picture CW", () => {
+  for (const bigPicture of [false, true]) {
+    const h = harness(bigPicture, {
+      library: false,
+      local: false,
+      simkl: false,
+      trakt: false,
+      publicmetadb: true,
+    });
+    h.publishTrackerItems([item("kitsu:400", "publicmetadb")]);
+    assert.deepEqual(h.ids(), ["kitsu:400"]);
+    assert.equal(h.enabled, true);
+    assert.deepEqual(h.masks.at(-1), {
+      trakt: false,
+      simkl: false,
+      publicmetadb: true,
+    });
+  }
+});
+
+test("identity warmer receives only enabled, visible sources and retains merged provenance", async () => {
+  const h = harness(false, { library: true, local: false, simkl: true, trakt: true });
+  h.publishTrackerItems([
+    item("kitsu:100", "simkl"),
+    item("kitsu:100", "trakt"),
+    item("kitsu:200", "trakt"),
+  ]);
+  h.dismissed.add("kitsu:200");
+  h.ids();
+  await Promise.resolve();
+  const warmed = h.warmed.at(-1) ?? [];
+  assert.deepEqual(warmed.map((i) => i._id ?? i.id).sort(), ["kitsu:100", "kitsu:300"].sort());
+  const merged = warmed.find((i) => (i._id ?? i.id) === "kitsu:100");
+  assert.equal(
+    merged.cwMembers.length,
+    2,
+    "the shared card keeps both source checkpoints through toCard",
+  );
+
+  const privateHarness = harness(
+    false,
+    { library: false, local: true, simkl: true, trakt: true },
+    true,
+  );
+  privateHarness.ids();
+  await Promise.resolve();
+  assert.deepEqual(
+    (privateHarness.warmed.at(-1) ?? []).map((i) => i._id ?? i.id),
+    ["kitsu:301"],
+  );
+});

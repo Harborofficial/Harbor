@@ -27,7 +27,10 @@ const QUALITY_LINES: Record<Settings["mpvQuality"], string[]> = {
   ],
 };
 
-export function compileMpvOptions(s: Settings, opts?: { anime4k?: boolean }): string {
+export function compileMpvOptions(
+  s: Settings,
+  opts?: { anime4k?: boolean; totalPhysBytes?: number },
+): string {
   const lines: string[] = [...(QUALITY_LINES[s.mpvQuality] ?? [])];
   if (opts?.anime4k) {
     // mpv runs `scale` after the user shaders, so a bilinear kernel here would
@@ -39,7 +42,7 @@ export function compileMpvOptions(s: Settings, opts?: { anime4k?: boolean }): st
   }
   if (s.mpvHwdec === "on") lines.push("hwdec=yes");
   else if (s.mpvHwdec === "off") lines.push("hwdec=no");
-  lines.push(...bufferMpvLines(bufferSizeFor(s)));
+  lines.push(...bufferMpvLines(bufferSizeFor(s), opts?.totalPhysBytes));
   if (s.mpvDownmixStereo) lines.push("audio-channels=stereo");
   if (s.audioDevice && s.audioDevice !== "auto") lines.push(`audio-device=${s.audioDevice}`);
   if (s.playerDisplayPanel === "oled" && s.playerHdrToSdr) lines.push("target-contrast=inf");
@@ -60,7 +63,7 @@ export function svpMpvLines(s: Settings, svpActive: boolean): string {
 export function mergeMpvOptions(
   s: Settings,
   svpActive: boolean,
-  opts?: { anime4k?: boolean },
+  opts?: { anime4k?: boolean; totalPhysBytes?: number },
 ): string | undefined {
   const merged = [compileMpvOptions(s, opts), svpMpvLines(s, svpActive), s.mpvExtraOptions || ""]
     .filter((p) => p.trim())
@@ -68,7 +71,8 @@ export function mergeMpvOptions(
   return merged.trim() ? merged : undefined;
 }
 
-const RISKY = /^(scripts?|load-script|input-ipc-server|input-conf|input-cmdlist|ytdl-raw-options)$/i;
+const RISKY =
+  /^(scripts?|load-script|input-ipc-server|input-conf|input-cmdlist|ytdl-raw-options)$/i;
 
 export type MpvLineCheck = { valid: number; skipped: number; risky: string[] };
 

@@ -116,7 +116,7 @@ export function QueuePanel({
   currentMeta,
   currentEpisode,
 }: {
-  onPlay: (meta: Meta, episode?: PlayEpisode) => void;
+  onPlay: (meta: Meta, episode?: PlayEpisode, queueItemId?: string) => void;
   currentMeta?: Meta | null;
   currentEpisode?: PlayEpisode | null;
 }) {
@@ -356,8 +356,7 @@ export function QueuePanel({
                 <button
                   type="button"
                   onClick={() => {
-                    queueRemove(item.id);
-                    onPlay(item.meta, item.episode);
+                    onPlay(item.meta, item.episode, item.id);
                   }}
                   aria-label={t("Play")}
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-105"

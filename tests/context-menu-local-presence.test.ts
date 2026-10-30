@@ -50,6 +50,8 @@ function harness(presentation: "baseline" | "popout") {
     },
     "@/lib/membership-operations": { captureMembershipProfile: () => ({ activeId: "fixture" }) },
     "@/lib/membership-actions": { membershipFailureMessage: () => "Error" },
+    "@/lib/queue": { queueAdd() {}, queueIndexOf: () => -1, useQueue: () => [] },
+    "@/hooks/use-queue-surface": { useQueueSurface: () => false },
     "@/components/lists/list-toast": { emitListToast() {} },
     "@/lib/page-collection-rows": {
       COLLECTION_ROW_PAGES: [{ id: "home", label: "Home" }],

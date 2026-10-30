@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import {
   createContext,
   useCallback,
@@ -153,6 +154,25 @@ export function SettingsProvider({
       cancelled = true;
     };
   }, []);
+
+  // Remove the app-owned subfolder from a custom playback cache chosen in an
+  // older version. The path stays until cleanup succeeds, so an offline drive
+  // is retried on the next launch instead of being forgotten.
+  useEffect(() => {
+    const dir = settings.playbackCacheDir;
+    if (!settingsReady || !dir || !("__TAURI_INTERNALS__" in window)) return;
+    let cancelled = false;
+    void invoke("cleanup_legacy_playback_cache", { dir })
+      .then(() => {
+        if (!cancelled) {
+          setSettings((s) => (s.playbackCacheDir ? { ...s, playbackCacheDir: "" } : s));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [settingsReady, settings.playbackCacheDir]);
 
   useEffect(() => {
     setSettings((s) => (isRemovedBuiltinAvatar(s.harborAvatar) ? { ...s, harborAvatar: null } : s));

@@ -24,7 +24,9 @@ function load(overrides: Record<string, unknown> = {}): Api {
   ).outputText;
   const mocks: Record<string, unknown> = {
     "@/lib/providers/anizip": { aniZipByKitsu: async () => null },
+    "@/lib/providers/anime-entry": { resolveExternalKitsuId: async () => null },
     "@/lib/providers/anime-mapping": {
+      animeMappingByKitsu: async () => null,
       externalToKitsu: async () => null,
       findSiblingAnidbEntries: async () => [],
       imdbToKitsu: async () => null,
@@ -54,7 +56,15 @@ function load(overrides: Record<string, unknown> = {}): Api {
 
 function mappingDeps(externalToKitsu: (source: string, id: number) => Promise<number | null>) {
   return {
+    "@/lib/providers/anime-entry": {
+      resolveExternalKitsuId: async (id: string) => {
+        const match = /^(mal|anilist|anidb):(\d+)$/.exec(id);
+        if (!match) return null;
+        return externalToKitsu(match[1] === "mal" ? "myanimelist" : match[1], Number(match[2]));
+      },
+    },
     "@/lib/providers/anime-mapping": {
+      animeMappingByKitsu: async () => null,
       externalToKitsu,
       findSiblingAnidbEntries: async () => [],
       imdbToKitsu: async () => null,
@@ -102,7 +112,9 @@ test("a mal row with no mapping falls back to the Kitsu entry for its title", as
 test("an ambiguous title is never routed to an unrelated entry", async () => {
   const api = load({
     "@/lib/providers/kitsu": {
-      kitsuSearchAnime: async () => [{ id: 999, title: "Some Other Show", year: 2026, subtype: "TV" }],
+      kitsuSearchAnime: async () => [
+        { id: 999, title: "Some Other Show", year: 2026, subtype: "TV" },
+      ],
     },
   });
   const ids = await api.buildStreamIdsWithIdentity(

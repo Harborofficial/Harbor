@@ -294,6 +294,9 @@ export function EpisodePicker({
       undefined,
       undefined,
       simklWatched,
+      undefined,
+      ep.imdbSeason,
+      ep.imdbEpisode,
     );
   const queuedKeys = useMemo(
     () =>

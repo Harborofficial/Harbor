@@ -150,6 +150,8 @@ async function get<T>(path: string, maxAge?: number): Promise<T | null> {
   });
 }
 
+export { get as kitsuMappingRequest };
+
 export type KitsuEpisode = {
   id: number;
   number: number;

@@ -29,6 +29,8 @@ export function AnimeRow({ items, onClose }: { items: AnimeHit[]; onClose: () =>
       description: hit.overview,
       releaseInfo: hit.year ?? undefined,
       imdbRating: hit.score > 0 ? hit.score.toFixed(1) : undefined,
+      malId: hit.malId || undefined,
+      animeFormat: hit.format ?? undefined,
     } as Meta;
     onClose();
     openMeta(meta, { exact: true });

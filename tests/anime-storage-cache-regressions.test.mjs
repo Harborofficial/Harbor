@@ -72,6 +72,7 @@ test("a large episode scan reads storage once and a fresh snapshot follows profi
   const progress = h.load("episode-progress", {
     "@/lib/manual-watched": manual,
     "@/lib/resume": resume,
+    "@/lib/publicmetadb/watched-order": { pmdbUsesAbsoluteOrder: () => false },
   });
   const old = progress.createEpisodeProgressSnapshot();
   const before = h.reads();
