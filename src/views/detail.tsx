@@ -93,6 +93,7 @@ import { noteLocalImdbId, toggleWatchlist, useInWatchlist } from "@/lib/watchlis
 import {
   pullWatchProgressFromNuvio,
   pullWatchedItemsFromNuvio,
+  readCachedWatchedItems,
   reconcileNuvioWatched,
   resolveNuvioProfileIndex,
   isNuvioProviderActive,
@@ -869,7 +870,8 @@ export function DetailView({
       Promise.all([pullWatchProgressFromNuvio(), pullWatchedItemsFromNuvio()])
         .then(([progressItems, watchedItems]) => {
           if (cancelled) return;
-          const safeWatchedItems = watchedItems || [];
+          const profileIndex = resolveNuvioProfileIndex();
+          const safeWatchedItems = watchedItems || readCachedWatchedItems(profileIndex);
           const targetIds = new Set<string>();
           if (meta.id) targetIds.add(meta.id);
           if (detail?.imdbId) targetIds.add(detail.imdbId);
@@ -899,23 +901,24 @@ export function DetailView({
               if (m.progress_seconds > dur * 0.9) {
                 watchedKeys.add(`${m.season}:${m.episode}`);
               }
-              // Prior episodes in the same season
-              for (let ep = 1; ep < m.episode; ep++) {
-                watchedKeys.add(`${m.season}:${ep}`);
-              }
-              // Prior seasons
-              if (m.season > 1 && detail?.seasons) {
-                for (const sn of detail.seasons) {
-                  if (sn.seasonNumber >= 1 && sn.seasonNumber < m.season) {
-                    for (let ep = 1; ep <= (sn.episodeCount || 50); ep++) {
-                      watchedKeys.add(`${sn.seasonNumber}:${ep}`);
+              // Prior episodes in the same season and prior seasons must NEVER be synthesized as watched in Nuvio mode!
+              // In Nuvio mode, watched episodes are tracked granularly in safeWatchedItems.
+              if (!isNuvioActiveMode) {
+                for (let ep = 1; ep < m.episode; ep++) {
+                  watchedKeys.add(`${m.season}:${ep}`);
+                }
+                if (m.season > 1 && detail?.seasons) {
+                  for (const sn of detail.seasons) {
+                    if (sn.seasonNumber >= 1 && sn.seasonNumber < m.season) {
+                      for (let ep = 1; ep <= (sn.episodeCount || 50); ep++) {
+                        watchedKeys.add(`${sn.seasonNumber}:${ep}`);
+                      }
                     }
                   }
                 }
               }
             }
           }
-          const profileIndex = resolveNuvioProfileIndex();
           const serverEpisodeKeys = new Set<string>();
           for (const it of safeWatchedItems) {
             if (typeof it.season === "number" && typeof it.episode === "number" && it.content_id) {

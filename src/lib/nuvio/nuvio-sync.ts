@@ -99,7 +99,7 @@ const WATCH_PROGRESS_CACHE_PREFIX = "harbor.nuvio.watch_progress.";
 // Full-table snapshots are the only way to confirm remote deletions, but they
 // are also the most expensive path. Routine pulls use the RPC batch; a full
 // snapshot is forced by a pending mutation or by this interval.
-const FULL_SYNC_INTERVAL_MS = 2 * 60_000;
+const FULL_SYNC_INTERVAL_MS = 15_000;
 const lastFullSyncAt = new Map<string, number>();
 
 type NuvioCoordinate = { content_id: string; season?: number | null; episode?: number | null };

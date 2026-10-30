@@ -39,11 +39,6 @@ export function readCachedNuvioPlaybackItems(slot?: number, accountId?: string):
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        // If cached watch progress AND watched items are both empty, don't return stale non-empty playback items
-        if (records.length === 0 && watched.length === 0 && parsed.length > 0) {
-          writeCachedNuvioPlaybackItems(profileIndex, [], accountId);
-          return [];
-        }
         return parsed;
       }
     }
@@ -650,7 +645,10 @@ export function buildNuvioPlaybackItems(
  * Fetches Nuvio playback items for a profile slot, pulling latest from cloud
  * and safely falling back to local cache if network is unavailable.
  */
-export async function fetchNuvioPlaybackItems(targetSlot?: number): Promise<LibraryItem[]> {
+export async function fetchNuvioPlaybackItems(
+  targetSlot?: number,
+  force = false,
+): Promise<LibraryItem[]> {
   if (!isNuvioSignedIn()) return [];
 
   const accountId = getNuvioAccountId();
@@ -662,7 +660,7 @@ export async function fetchNuvioPlaybackItems(targetSlot?: number): Promise<Libr
   try {
     const [progRes, watchedRes, dismissedRes] = await Promise.all([
       pullWatchProgressFromNuvio(profileIndex),
-      pullWatchedItemsFromNuvio(profileIndex),
+      pullWatchedItemsFromNuvio(profileIndex, { force }),
       pullDismissedNextUpKeysFromNuvio(profileIndex),
     ]);
     records = progRes;

@@ -323,9 +323,8 @@ export function reconcileNuvioWatchedEpisodes(
   targetSeriesIdsOrAccountId?: Set<string> | string,
   maybeAccountId?: string,
 ): { changed: boolean; newlyWatchedShows: Set<string> } {
-  const _targetSeriesIds =
+  const targetSeriesIds =
     targetSeriesIdsOrAccountId instanceof Set ? targetSeriesIdsOrAccountId : undefined;
-  void _targetSeriesIds;
   const accountId =
     typeof targetSeriesIdsOrAccountId === "string" ? targetSeriesIdsOrAccountId : maybeAccountId;
 
@@ -375,9 +374,24 @@ export function reconcileNuvioWatchedEpisodes(
     }
   }
 
-  // Only prune local episodes if server actually returned watched items,
-  // and only for shows the server returned records for!
-  if (serverEpisodeKeys.size > 0) {
+  // Prune local episodes:
+  // Case A: Targeted reconciliation (e.g. from detail.tsx for a specific series like Tulsa King)
+  if (targetSeriesIds && targetSeriesIds.size > 0) {
+    for (const lKey of Array.from(currentLocalWatched)) {
+      const parts = lKey.split("|");
+      const showId = parts[0];
+      const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
+      const isTargetShow =
+        showId &&
+        (targetSeriesIds.has(showId) || (cleanShowId && targetSeriesIds.has(cleanShowId)));
+      if (isTargetShow && !serverEpisodeKeys.has(lKey)) {
+        currentLocalWatched.delete(lKey);
+        currentLocalUnwatched.add(lKey);
+        changed = true;
+      }
+    }
+  } else if (serverEpisodeKeys.size > 0) {
+    // Case B: General sync - only prune for shows the server returned records for
     const serverShowsWithEpisodes = new Set<string>();
     for (const sKey of serverEpisodeKeys) {
       const parts = sKey.split("|");

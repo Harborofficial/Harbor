@@ -116,8 +116,8 @@ export async function signInWithEmailPassword(
     void fetchNuvioAddons().then(() => {
       window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
     });
-    void reconcileNuvioWatched(undefined, { force: true });
-    void fetchNuvioPlaybackItems().then(() => {
+    await reconcileNuvioWatched(undefined, { force: true });
+    void fetchNuvioPlaybackItems(undefined, true).then(() => {
       window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
     });
 

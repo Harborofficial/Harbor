@@ -307,6 +307,15 @@ test("production bulk watched and unwatch keep the primary IMDb storage coordina
     {
       react: { useMemo: (fn) => fn() },
       "@/lib/manual-watched": h,
+      "@/lib/nuvio/nuvio-client": { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false },
+      "@/lib/nuvio/nuvio-sync": {
+        resolveNuvioProfileIndex: () => 0,
+        pushWatchedItemToNuvio: async () => {},
+        deleteWatchedItemFromNuvio: async () => {},
+        deleteEpisodeWatchProgressFromNuvio: async () => {},
+        undismissNextUpInNuvioCloud: async () => {},
+      },
+      "@/lib/cw-dismiss": { undismissCw: () => {} },
       "@/lib/anilist/sync": {},
       "@/lib/mal/sync": {},
       "@/lib/settings": { useSettings: () => ({ settings: {} }) },

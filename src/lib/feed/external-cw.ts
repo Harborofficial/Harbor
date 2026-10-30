@@ -267,7 +267,7 @@ export function setExternalCwSources(mask: {
   void refreshExternalCw(true);
 }
 
-async function runRefresh(gen: number): Promise<boolean> {
+async function runRefresh(gen: number, force = false): Promise<boolean> {
   const enabled: Array<{
     source: "simkl" | "trakt" | "publicmetadb" | "nuvio";
     fetch: () => Promise<LibraryItem[]>;
@@ -283,7 +283,7 @@ async function runRefresh(gen: number): Promise<boolean> {
       source: "nuvio",
       fetch: async () => {
         const slot = resolveNuvioProfileIndex();
-        return await fetchNuvioPlaybackItems(slot);
+        return await fetchNuvioPlaybackItems(slot, force);
       },
     });
   }
@@ -331,7 +331,7 @@ function cancelRetry(): void {
   retryAttempt = 0;
 }
 
-function scheduleRetry(): void {
+function scheduleRetry(force = false): void {
   if (retryTimer !== null) return;
   if (retryAttempt >= RETRY_DELAYS_MS.length) return;
   const gen = refreshGen;
@@ -339,14 +339,14 @@ function scheduleRetry(): void {
   retryAttempt += 1;
   retryTimer = setTimeout(() => {
     retryTimer = null;
-    if (gen === refreshGen) void startRefresh(gen);
+    if (gen === refreshGen) void startRefresh(gen, force);
   }, delay);
 }
 
-function startRefresh(gen: number): Promise<void> {
-  inflight = runRefresh(gen)
+function startRefresh(gen: number, force = false): Promise<void> {
+  inflight = runRefresh(gen, force)
     .then((ok) => {
-      if (gen === refreshGen && !ok) scheduleRetry();
+      if (gen === refreshGen && !ok) scheduleRetry(force);
     })
     .finally(() => {
       inflight = null;
@@ -369,7 +369,7 @@ export function refreshExternalCw(force = false): Promise<void> {
   }
   if (!force && fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS) return Promise.resolve();
   cancelRetry();
-  return startRefresh(++refreshGen);
+  return startRefresh(++refreshGen, force);
 }
 
 function matchesContentId(a: string, b: string): boolean {

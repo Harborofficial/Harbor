@@ -673,18 +673,18 @@ export function Home({
       timer = setTimeout(() => setNuvioProfileSwitching(false), 300);
     };
     if (isNuvioProvider) {
-      void reconcileNuvioWatched();
+      void reconcileNuvioWatched(undefined, { force: true });
       void refreshExternalCw(true);
     }
     const onFocus = () => {
       if (document.visibilityState === "visible" && isNuvioProvider) {
-        void reconcileNuvioWatched();
+        void reconcileNuvioWatched(undefined, { force: true });
         void refreshExternalCw(true);
       }
     };
     const periodicSync = setInterval(() => {
       if (document.visibilityState === "visible" && isNuvioProvider) {
-        void reconcileNuvioWatched();
+        void reconcileNuvioWatched(undefined, { force: true });
         void refreshExternalCw(true);
       }
     }, 30000);

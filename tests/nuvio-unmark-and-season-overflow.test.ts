@@ -143,3 +143,48 @@ test("nuvio-sync uses resolveNextEpisodeForSeries to prevent synthetic S1E11 ove
     "reconcileNuvioWatched must remove series from CW when all episodes are unmarked and no progress exists",
   );
 });
+
+test("reconcileNuvioWatchedEpisodes unmarks all local episodes when mobile completely unmarks target series (e.g. Tulsa King)", () => {
+  mockStorage.clear();
+  const slot = 1;
+  const watchedKey = `harbor.manualwatched.v1.nuvio.${slot}`;
+  const unwatchedKey = `harbor.manualunwatched.v1.nuvio.${slot}`;
+
+  // Initially user watched Tulsa King (tt16358384) S1E1, S1E2, S2E1, S2E2
+  mockStorage.set(
+    watchedKey,
+    JSON.stringify(["tt16358384|1|1", "tt16358384|1|2", "tt16358384|2|1", "tt16358384|2|2", "other|1|1"]),
+  );
+
+  // User unmarked ALL episodes of Tulsa King on Nuvio mobile:
+  // serverEpisodeKeys has other items, but 0 items for Tulsa King!
+  const serverKeys = new Set(["other|1|1"]);
+  const targetSeriesIds = new Set(["tt16358384", "series:tt16358384"]);
+
+  reconcileNuvioWatchedEpisodes(slot, serverKeys, targetSeriesIds);
+
+  const updatedWatched = JSON.parse(mockStorage.get(watchedKey) || "[]") as string[];
+  const updatedUnwatched = JSON.parse(mockStorage.get(unwatchedKey) || "[]") as string[];
+
+  assert.ok(!updatedWatched.some((k) => k.startsWith("tt16358384")), "All Tulsa King episodes must be removed from watched");
+  assert.ok(updatedUnwatched.includes("tt16358384|1|1"), "Tulsa King S1E1 must be in unwatched");
+  assert.ok(updatedUnwatched.includes("tt16358384|2|2"), "Tulsa King S2E2 must be in unwatched");
+  assert.ok(updatedWatched.includes("other|1|1"), "Other show episodes must remain watched");
+});
+
+test("detail page does not synthesize prior episodes as watched when isNuvioActiveMode is true", () => {
+  assert.match(
+    detailSrc,
+    /if \(!isNuvioActiveMode\) \{\s*for \(let ep = 1; ep < m\.episode; ep\+\+\)/,
+    "detail page must guard prior episode synthesis with if (!isNuvioActiveMode)",
+  );
+});
+
+test("readCachedNuvioPlaybackItems preserves valid parsed items and does not wipe them when records/watched are empty", () => {
+  const nuvioPlaybackSrc = read("../src/lib/nuvio/nuvio-playback.ts");
+  assert.doesNotMatch(
+    nuvioPlaybackSrc,
+    /records\.length === 0 && watched\.length === 0 && parsed\.length > 0/,
+    "readCachedNuvioPlaybackItems must not wipe parsed playback items",
+  );
+});
