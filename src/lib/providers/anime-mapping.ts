@@ -276,7 +276,7 @@ async function validatedKitsuAniZip(
   kitsuId: number,
   maxAge?: number,
 ): Promise<AniZipMapping | null> {
-  const mapping = await aniZipByKitsu(kitsuId, maxAge).catch(() => null);
+  const mapping = await aniZipByKitsu(kitsuId, false, maxAge).catch(() => null);
   if (mapping?.mappings?.kitsu_id != null && mapping.mappings.kitsu_id !== kitsuId) return null;
   return mapping;
 }

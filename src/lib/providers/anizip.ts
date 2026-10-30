@@ -212,7 +212,11 @@ function captureExactAliases(query: string, value: AniZipMapping): void {
   }
 }
 
-async function get(query: string, maxAge?: number, identity = false): Promise<AniZipMapping | null> {
+async function get(
+  query: string,
+  maxAge?: number,
+  identity = false,
+): Promise<AniZipMapping | null> {
   if (addonOnlyMetadata() && !identity) return null;
   const forceRefresh = maxAge === 0;
   const memory = cache.get(query);

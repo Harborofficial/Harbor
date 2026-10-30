@@ -21,7 +21,12 @@ import {
 import { isTextInLanguage } from "@/lib/providers/anime-episode-build";
 import { peekAnimeArt, saveAnimeArt } from "@/lib/providers/anime-art-cache";
 import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
-import { kitsuAnime, kitsuMainTvSeries, kitsuSearchAnime, parseKitsuId } from "@/lib/providers/kitsu";
+import {
+  kitsuAnime,
+  kitsuMainTvSeries,
+  kitsuSearchAnime,
+  parseKitsuId,
+} from "@/lib/providers/kitsu";
 import { resolveDetailAnimeEntry, recoverDetailAnimeEntry } from "./detail/resolve-anime-entry";
 import { isOrphanAnimeCandidate } from "@/lib/anime-detect";
 import { getAnimeCanonicalId, recordAnimeCwId } from "@/lib/anime-cw-ids";
@@ -1259,91 +1264,91 @@ export function DetailView({
         settingsRef.current.addonOnlyMetadata || settingsRef.current.preferCustomMetaAddon
           ? cinemetaDetails(lookup)
           : isAnime
-        ? animeDetails(
-            settingsRef.current,
-            detectedKitsu != null ? { ...meta, id: `kitsu:${detectedKitsu}` } : lookup,
-            (earlyEpisodes, kitsuId) => {
-              if (cancelled || request !== generation) return;
-              setAnimeCanonicalId(`kitsu:${kitsuId}`);
-              setAnimeEpisodes(earlyEpisodes);
-            },
-            0,
-            forceRefresh ? 0 : undefined,
-          ).then((res) => {
-            if (cancelled || request !== generation) return null;
-            if (!res) {
-              setAnimeUnavailable(meta.id);
-              if (detectedKitsu != null) {
-                failedKitsu.current = detectedKitsu;
-                setDetectedKitsu(null);
-              }
-              return null;
-            }
-            if (animeDetailUnavailable(res)) setAnimeUnavailable(meta.id);
-            setAnimeEpisodes(res.episodes);
-            // Only record identities after this detail request has resolved. The
-            // previous page's canonical state must not seed a newly opened title.
-            const canonical = `kitsu:${res.kitsuId}`;
-            // The detail provider may show a parent TV series for a one-episode
-            // special. Never save the parent's identity under that special's ID.
-            // A multi-episode ONA/OVA is its own entry, so format alone must not
-            // disqualify it from recording the canonical mapping.
-            const isSideEntry = res.requestedKitsuId !== res.kitsuId;
-            if (!isSideEntry) recordAnimeCwId(meta.id, canonical);
-            const seriesImdb = res.detail.imdbId;
-            // Standalone specials can share a parent series' IMDb id. Only an
-            // actual multi-episode show (or a movie) can record the shared alias.
-            if (
-              seriesImdb?.startsWith("tt") &&
-              seriesImdb !== meta.id &&
-              !isSideEntry &&
-              (meta.type === "movie" || res.episodes.length > 1)
-            ) {
-              recordAnimeCwId(seriesImdb, canonical);
-            }
-            if (!refreshing) setFranchise([]);
-            void res.franchisePromise
-              .then((fr) => {
-                if (!cancelled && request === generation) setFranchise(fr);
-              })
-              .catch(() => {});
-            void res.enrichPromise
-              .then((eps) => {
-                if (!cancelled && request === generation) setAnimeEpisodes(eps);
-              })
-              .catch(() => {});
-            void res.heroBgPromise
-              .then((bg) => {
-                if (cancelled || request !== generation || !bg) return;
-                setEnrichedBg(bg);
-                saveAnimeArt(meta.id, { bg });
-              })
-              .catch(() => {});
-            // Install the base detail before subscribing: on a warm cache this
-            // promise can settle before the shared work.then below runs.
-            applyAnimeExtras = () => {
-              void res.extrasPromise
-                .then((patch) => {
+            ? animeDetails(
+                settingsRef.current,
+                detectedKitsu != null ? { ...meta, id: `kitsu:${detectedKitsu}` } : lookup,
+                (earlyEpisodes, kitsuId) => {
                   if (cancelled || request !== generation) return;
-                  setDetail((prev) => (prev ? mergeAnimeDetailExtras(prev, patch) : prev));
-                  if (patch.gallery?.backdrops?.length) setBackdrops(patch.gallery.backdrops);
-                  saveAnimeArt(meta.id, {
-                    logo: patch.logo,
-                    backdrops: patch.gallery?.backdrops,
-                  });
-                })
-                .catch(() => {});
-            };
-            setAnimeCanonicalId(`kitsu:${res.kitsuId}`);
-            setStreamers(res.streamers);
-            setBackdrops(res.backdrops);
-            return res.detail;
-          })
-        : settingsRef.current.tmdbKey
-          ? tmdbDetails(settingsRef.current.tmdbKey, lookup).then(
-              (d) => d ?? cinemetaDetails(lookup),
-            )
-          : cinemetaDetails(lookup);
+                  setAnimeCanonicalId(`kitsu:${kitsuId}`);
+                  setAnimeEpisodes(earlyEpisodes);
+                },
+                0,
+                forceRefresh ? 0 : undefined,
+              ).then((res) => {
+                if (cancelled || request !== generation) return null;
+                if (!res) {
+                  setAnimeUnavailable(meta.id);
+                  if (detectedKitsu != null) {
+                    failedKitsu.current = detectedKitsu;
+                    setDetectedKitsu(null);
+                  }
+                  return null;
+                }
+                if (animeDetailUnavailable(res)) setAnimeUnavailable(meta.id);
+                setAnimeEpisodes(res.episodes);
+                // Only record identities after this detail request has resolved. The
+                // previous page's canonical state must not seed a newly opened title.
+                const canonical = `kitsu:${res.kitsuId}`;
+                // The detail provider may show a parent TV series for a one-episode
+                // special. Never save the parent's identity under that special's ID.
+                // A multi-episode ONA/OVA is its own entry, so format alone must not
+                // disqualify it from recording the canonical mapping.
+                const isSideEntry = res.requestedKitsuId !== res.kitsuId;
+                if (!isSideEntry) recordAnimeCwId(meta.id, canonical);
+                const seriesImdb = res.detail.imdbId;
+                // Standalone specials can share a parent series' IMDb id. Only an
+                // actual multi-episode show (or a movie) can record the shared alias.
+                if (
+                  seriesImdb?.startsWith("tt") &&
+                  seriesImdb !== meta.id &&
+                  !isSideEntry &&
+                  (meta.type === "movie" || res.episodes.length > 1)
+                ) {
+                  recordAnimeCwId(seriesImdb, canonical);
+                }
+                if (!refreshing) setFranchise([]);
+                void res.franchisePromise
+                  .then((fr) => {
+                    if (!cancelled && request === generation) setFranchise(fr);
+                  })
+                  .catch(() => {});
+                void res.enrichPromise
+                  .then((eps) => {
+                    if (!cancelled && request === generation) setAnimeEpisodes(eps);
+                  })
+                  .catch(() => {});
+                void res.heroBgPromise
+                  .then((bg) => {
+                    if (cancelled || request !== generation || !bg) return;
+                    setEnrichedBg(bg);
+                    saveAnimeArt(meta.id, { bg });
+                  })
+                  .catch(() => {});
+                // Install the base detail before subscribing: on a warm cache this
+                // promise can settle before the shared work.then below runs.
+                applyAnimeExtras = () => {
+                  void res.extrasPromise
+                    .then((patch) => {
+                      if (cancelled || request !== generation) return;
+                      setDetail((prev) => (prev ? mergeAnimeDetailExtras(prev, patch) : prev));
+                      if (patch.gallery?.backdrops?.length) setBackdrops(patch.gallery.backdrops);
+                      saveAnimeArt(meta.id, {
+                        logo: patch.logo,
+                        backdrops: patch.gallery?.backdrops,
+                      });
+                    })
+                    .catch(() => {});
+                };
+                setAnimeCanonicalId(`kitsu:${res.kitsuId}`);
+                setStreamers(res.streamers);
+                setBackdrops(res.backdrops);
+                return res.detail;
+              })
+            : settingsRef.current.tmdbKey
+              ? tmdbDetails(settingsRef.current.tmdbKey, lookup).then(
+                  (d) => d ?? cinemetaDetails(lookup),
+                )
+              : cinemetaDetails(lookup);
       work
         .then((d) => {
           if (cancelled || request !== generation) return;
