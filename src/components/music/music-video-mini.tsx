@@ -50,11 +50,10 @@ export function MusicVideoMini() {
   const mediaKey = media
     ? `${media.meta.id}:${media.episode?.season ?? ""}:${media.episode?.episode ?? ""}`
     : "";
-  // Starting a movie or series takes the screen; the music picture and sound stop with it.
+  // Starting a movie or series takes the screen; the music picture hides with the sound and
+  // comes back afterwards unless the listener closed it.
   useEffect(() => {
-    if (!mediaKey) return;
-    closeMusicVideoMini();
-    pauseMusicPlayer();
+    if (mediaKey) pauseMusicPlayer();
   }, [mediaKey]);
   const surfaces = useSyncExternalStore(
     musicVideoSurfaces.subscribe,
