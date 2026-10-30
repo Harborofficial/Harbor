@@ -98,7 +98,7 @@ test("the lyrics panel reads the live engine rather than its own copy", () => {
     /import \{ loadTrackLyrics, lyricIndexAt, type LyricLine \} from "@\/lib\/music\/lyrics"/,
   );
   assert.match(TSX, /loadTrackLyrics\(current\)/);
-  assert.match(TSX, /lyricIndexAt\(lyrics, [^)]*player\.currentTime/);
+  assert.match(TSX, /lyricIndexAt\(\s*timedLyrics,\s*[\s\S]*?player\.currentTime/);
 });
 
 test("the panel covers loading, empty and ready without stranding the user", () => {
@@ -127,6 +127,17 @@ test("the lyrics language is selectable and remembered", () => {
   assert.match(TSX, /localStorage\.setItem\(LYRIC_TARGET_KEY, next\)/);
 });
 
+test("live sync aligns a tapped line to the moment it was heard", () => {
+  assert.match(TSX, /useLyricSync\(current\)/);
+  assert.match(TSX, /addLyricSyncPoint\(syncPoints/);
+  assert.match(TSX, /at: player\.currentTime - lyricOffset/);
+  assert.match(TSX, /t\("Align to now"\)/);
+  assert.match(TSX, /t\("Jump here"\)/);
+  assert.match(TSX, /t\("Live sync"\)/);
+  assert.match(TSX, /applyLyricSync\(lyrics, syncPoints\)/);
+  assert.match(TSX, /lyricIndexAt\(\s*timedLyrics,/);
+});
+
 test("a translation sits under its original line and hides when it is identical", () => {
   assert.match(TSX, /className="music-now-lyric-text"/);
   assert.match(TSX, /className="music-now-lyric-translation"/);
@@ -137,7 +148,8 @@ test("a translation sits under its original line and hides when it is identical"
 
 test("clicking a line seeks the player", () => {
   assert.match(TSX, /import \{[^}]*\bseekMusic\b[^}]*\} from "@\/lib\/music\/player"/);
-  assert.match(TSX, /onClick=\{\(\) => seekMusic\(line\.at\)\}/);
+  assert.match(TSX, /const seekLyric = useCallback\(/);
+  assert.match(TSX, /seekMusic\(line\.at \+ lyricOffset\)/);
 });
 
 test("the active line follows playback by scrolling its own list, not the pull-out", () => {

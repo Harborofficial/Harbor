@@ -27,6 +27,8 @@ import {
   toggleMusicVideoFullscreen,
 } from "@/lib/music/video-fullscreen";
 import { loadTrackLyrics, type LyricLine } from "@/lib/music/lyrics";
+import { applyLyricSync } from "@/lib/music/lyric-sync";
+import { useLyricSync } from "@/lib/music/use-lyric-sync";
 import { MusicVideoControls } from "./music-video-controls";
 import "./music-video-surface.css";
 
@@ -110,6 +112,7 @@ export function MusicVideoSurface({
     getMusicVideoFullscreen,
   ).active;
   const player = useMusicPlayer();
+  const [syncPoints] = useLyricSync(track);
   const selected = state.owner === owner;
   const ready = active && selected && state.status === "playing";
   const [stream, setStream] = useState<MusicVideoStream | null>(() =>
@@ -129,6 +132,7 @@ export function MusicVideoSurface({
   const [waited, setWaited] = useState(0);
   const [lyricsOn, setLyricsOn] = useState(() => lyricsPreferred);
   const [lyrics, setLyrics] = useState<LyricLine[] | null>(null);
+  const timedLyrics = lyrics ? applyLyricSync(lyrics, syncPoints) : null;
   const [lyricsBusy, setLyricsBusy] = useState(false);
   const [lyricsMissing, setLyricsMissing] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -165,7 +169,7 @@ export function MusicVideoSurface({
       setDecoded(false);
       return;
     }
-    const held = attempt === 0 ? musicVideoHostSource(key) ?? musicVideoHostLive() : null;
+    const held = attempt === 0 ? (musicVideoHostSource(key) ?? musicVideoHostLive()) : null;
     if (held) {
       setStream(held);
       setDecoded((picture?.readyState ?? 0) >= 2);
@@ -389,7 +393,7 @@ export function MusicVideoSurface({
       )}
       {showing && !mini && (
         <MusicVideoControls
-          lyrics={lyrics}
+          lyrics={timedLyrics}
           lyricsState={lyricsState}
           onToggleLyrics={toggleLyrics}
           currentTime={currentTime}
