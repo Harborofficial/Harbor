@@ -106,10 +106,19 @@ export function isMovieWatchedLocal(
   altIds?: Array<string | null | undefined>,
 ): boolean {
   const set = load();
-  if (set.has(metaId)) return true;
+  const clean = metaId.replace(/^(movie|tmdb|series):/, "").trim();
+  const variants = [metaId, clean, `movie:${clean}`, `tmdb:${clean}`];
+  for (const v of variants) {
+    if (set.has(v)) return true;
+  }
   if (altIds) {
     for (const alt of altIds) {
-      if (alt && set.has(alt)) return true;
+      if (alt) {
+        const altClean = alt.replace(/^(movie|tmdb|series):/, "").trim();
+        for (const av of [alt, altClean, `movie:${altClean}`, `tmdb:${altClean}`]) {
+          if (set.has(av)) return true;
+        }
+      }
     }
   }
   return false;
@@ -142,10 +151,13 @@ export function setMovieWatchedLocal(
       s = new Set();
     }
   }
-  if (s.has(metaId) === watched) return;
+  const clean = metaId.replace(/^(movie|tmdb|series):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `movie:${clean}`, `tmdb:${clean}`]));
   const next = new Set(s);
-  if (watched) next.add(metaId);
-  else next.delete(metaId);
+  for (const v of variants) {
+    if (watched) next.add(v);
+    else next.delete(v);
+  }
   persist(next, sk);
 }
 
@@ -167,9 +179,13 @@ export function setMovieWatchedLocalAcknowledged(
       s = new Set();
     }
   }
+  const clean = metaId.replace(/^(movie|tmdb|series):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `movie:${clean}`, `tmdb:${clean}`]));
   const next = new Set(s);
-  if (watched) next.add(metaId);
-  else next.delete(metaId);
+  for (const v of variants) {
+    if (watched) next.add(v);
+    else next.delete(v);
+  }
   localStorage.setItem(sk, JSON.stringify([...next]));
   if (sk === storeKey()) {
     currentScope = sk;

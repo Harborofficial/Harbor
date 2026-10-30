@@ -47,6 +47,7 @@ import { clearAllNuvioMovieWatched } from "@/lib/movie-watched";
 import { clearAllNuvioManualWatched } from "@/lib/manual-watched";
 import { clearCwCache } from "@/lib/continue-watching";
 import { clearWatchlistCache } from "@/lib/watchlist";
+import { clearNuvioCwMemoryCache } from "@/lib/feed/external-cw";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
 
 import type { NuvioDeviceCodeSession, NuvioProfile, NuvioSession } from "./nuvio-types";
@@ -95,18 +96,17 @@ export async function signInWithEmailPassword(
     };
 
     const state = loadNuvioState();
-    if (state.session?.user?.id && state.session.user.id !== session.user.id) {
-      clearAllNuvioWatchedFlags();
-      clearAllNuvioMovieWatched();
-      clearAllNuvioManualWatched();
-      clearAllNuvioLocalCw();
-      clearAllNuvioResume();
-      clearCachedPlaybackItems();
-      clearCachedWatchProgress();
-      clearNuvioLibraryCache();
-      clearCwCache();
-      clearWatchlistCache();
-    }
+    clearAllNuvioWatchedFlags();
+    clearAllNuvioMovieWatched();
+    clearAllNuvioManualWatched();
+    clearAllNuvioLocalCw();
+    clearAllNuvioResume();
+    clearCachedPlaybackItems();
+    clearCachedWatchProgress();
+    clearNuvioLibraryCache();
+    clearCwCache();
+    clearWatchlistCache();
+    clearNuvioCwMemoryCache();
     saveNuvioState({ ...state, session });
     activateNuvioAccountProvider();
 
@@ -247,18 +247,17 @@ export async function pollDeviceCodeSession(
         };
 
         const state = loadNuvioState();
-        if (state.session?.user?.id && state.session.user.id !== user.id) {
-          clearAllNuvioWatchedFlags();
-          clearAllNuvioMovieWatched();
-          clearAllNuvioManualWatched();
-          clearAllNuvioLocalCw();
-          clearAllNuvioResume();
-          clearCachedPlaybackItems();
-          clearCachedWatchProgress();
-          clearNuvioLibraryCache();
-          clearCwCache();
-          clearWatchlistCache();
-        }
+        clearAllNuvioWatchedFlags();
+        clearAllNuvioMovieWatched();
+        clearAllNuvioManualWatched();
+        clearAllNuvioLocalCw();
+        clearAllNuvioResume();
+        clearCachedPlaybackItems();
+        clearCachedWatchProgress();
+        clearNuvioLibraryCache();
+        clearCwCache();
+        clearWatchlistCache();
+        clearNuvioCwMemoryCache();
         saveNuvioState({ ...state, session });
         activateNuvioAccountProvider();
         await fetchNuvioProfiles();
@@ -369,6 +368,7 @@ export async function signOutNuvio(): Promise<void> {
   clearAllNuvioManualWatched();
   clearCwCache();
   clearWatchlistCache();
+  clearNuvioCwMemoryCache();
 
   try {
     const keysToRemove: string[] = [];

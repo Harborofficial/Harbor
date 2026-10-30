@@ -125,6 +125,9 @@ export function useMarkSeason({
               }
             }
             window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+            window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+            window.dispatchEvent(new CustomEvent("harbor:manual-watched-changed"));
+            window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
           })();
         } else {
           const keys = airedEpisodes.flatMap((e) =>
@@ -136,6 +139,22 @@ export function useMarkSeason({
           );
           void deleteWatchedItemFromNuvio(slot, keys);
           void (async () => {
+            for (const ep of airedEpisodes) {
+              await deleteEpisodeWatchProgressFromNuvio(
+                slot,
+                primaryId,
+                ep.seasonNumber,
+                ep.episodeNumber,
+              );
+              if (clean !== primaryId) {
+                await deleteEpisodeWatchProgressFromNuvio(
+                  slot,
+                  clean,
+                  ep.seasonNumber,
+                  ep.episodeNumber,
+                );
+              }
+            }
             const existingCw = localCwEntry(meta.id, false, `nuvio-${slot}`);
             const resumePos = readResumeMs(meta.id, active, 1, `nuvio-${slot}`);
             const targetEpisode =
@@ -171,6 +190,9 @@ export function useMarkSeason({
               `nuvio-${slot}`,
             );
             window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+            window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+            window.dispatchEvent(new CustomEvent("harbor:manual-watched-changed"));
+            window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
           })();
         }
       }

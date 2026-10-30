@@ -23,10 +23,10 @@ const externalCw = read("../src/lib/feed/external-cw.ts");
 test("watchedProviderWrites connects Nuvio cloud sync for both movies and series", () => {
   assert.match(mediaProviderActions, /if \(isNuvioSignedIn\(\)\)/);
   assert.match(mediaProviderActions, /pushWatchedItemToNuvio\(slot, items\)/);
-  assert.match(mediaProviderActions, /deleteWatchProgressFromNuvio\(slot, primaryId\)/);
-  assert.match(mediaProviderActions, /pushWatchProgressToNuvio\(\s*slot,\s*primaryId,\s*0,/);
+  assert.match(mediaProviderActions, /deleteWatchProgressFromNuvio\(slot, cid\)/);
+  assert.match(mediaProviderActions, /deleteEpisodeWatchProgressFromNuvio\(slot, primaryId, ep\.season, ep\.episode\)/);
   assert.match(mediaProviderActions, /harbor:continue-watching-updated/);
-  assert.match(mediaProviderActions, /harbor:nuvio-progress-pushed/);
+  assert.match(mediaProviderActions, /harbor:watched-changed/);
 });
 
 test("mark-watched functions sync to Nuvio for movies and shows", () => {
@@ -77,9 +77,9 @@ test("marking episode unwatched in series updates CW and Nuvio progress instead 
   assert.match(mediaProviderActions, /const firstEp = sorted\[0\];/);
   assert.match(
     mediaProviderActions,
-    /await pushWatchProgressToNuvio\(\s*slot,\s*primaryId,\s*0,\s*2640,\s*firstEp\.season,\s*firstEp\.episode/,
+    /await deleteEpisodeWatchProgressFromNuvio\(\s*slot,\s*primaryId,\s*ep\.season,\s*ep\.episode/,
   );
-  assert.match(mediaProviderActions, /saveLocalCw\(unwatchedCw/);
+  assert.match(mediaProviderActions, /clearLocalCw\(primaryId/);
 });
 
 test("detail and episode lists infer prior episodes as watched up to current progression", () => {

@@ -381,7 +381,6 @@ function matchesContentId(a: string, b: string): boolean {
 
 export function removeExternalCwItem(item: LibraryItem): void {
   items = items.filter((i) => !matchesContentId(i._id, item._id));
-  emit();
 
   if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
     try {
@@ -396,6 +395,7 @@ export function removeExternalCwItem(item: LibraryItem): void {
       writeCachedNuvioPlaybackItems(slot, filteredDisk);
     } catch {}
   }
+  emit();
 }
 
 export function subscribeExternalCw(fn: () => void): () => void {

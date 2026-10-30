@@ -500,8 +500,11 @@ export function buildNuvioPlaybackItems(
       nextEpisode = seed.episode;
     }
 
-    // Skip if target episode is dismissed
-    if (isDismissedNextUp(seriesId, nextSeason, nextEpisode, dismissed)) {
+    // Skip if target episode or seed episode is dismissed
+    if (
+      isDismissedNextUp(seriesId, nextSeason, nextEpisode, dismissed) ||
+      isDismissedNextUp(seriesId, seed.season, seed.episode, dismissed)
+    ) {
       continue;
     }
 

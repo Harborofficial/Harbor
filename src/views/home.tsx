@@ -754,7 +754,7 @@ export function Home({
           ];
     const eligible = (
       isNuvioProvider
-        ? [...cwBase, ...localCwItems.map((i) => ({ ...i, external: "nuvio" as const }))]
+        ? cwBase
         : [...cwBase, ...localCwItems.filter((i) => i.external !== "nuvio")]
     )
       .filter(
@@ -772,7 +772,7 @@ export function Home({
 
     const manual = manualWatchedLibraryItems();
     const candidateEligible =
-      manual.length > 0
+      manual.length > 0 && !isNuvioProvider
         ? [
             ...eligible,
             ...manual.filter(
@@ -780,7 +780,7 @@ export function Home({
                 !eligible.some((e) => e._id === m._id) &&
                 isCwMember(m) &&
                 !isCwDismissed(m) &&
-                (!isNuvioProvider ? m.external !== "nuvio" : true) &&
+                m.external !== "nuvio" &&
                 !(
                   (settings.animeOnlyInAnimeRoom || settings.hideContent.anime) &&
                   isAnimeCwItem(m)
@@ -827,11 +827,13 @@ export function Home({
     for (const i of candidateEligible) {
       const nm = norm(i.name ?? "");
       const key = `${i.type}:${nm}`;
+      const cleanId = i._id.replace(/^(series|movie|tmdb):/, "");
 
-      const heldById = byId.get(i._id);
+      const heldById = byId.get(i._id) || byId.get(cleanId);
       if (heldById) {
         const resolved = resolveCollision(heldById, i);
         byId.set(resolved._id, resolved);
+        byId.set(cleanId, resolved);
         if (nm) byName.set(key, resolved);
         continue;
       }
@@ -845,25 +847,31 @@ export function Home({
             }
             if (held.external !== "nuvio" && i.external === "nuvio") {
               byId.delete(held._id);
+              byId.delete(held._id.replace(/^(series|movie|tmdb):/, ""));
               byName.set(key, i);
               byId.set(i._id, i);
+              byId.set(cleanId, i);
               continue;
             }
           }
           if (lastWatchedOf(i) > lastWatchedOf(held)) {
             byId.delete(held._id);
+            byId.delete(held._id.replace(/^(series|movie|tmdb):/, ""));
             byName.set(key, i);
             byId.set(i._id, i);
+            byId.set(cleanId, i);
           }
           continue;
         }
         byName.set(key, i);
       }
       byId.set(i._id, i);
+      byId.set(cleanId, i);
       if (byId.size >= 100) break;
     }
+    const dedupedItems = Array.from(new Set(byId.values()));
     const seenRoot = new Set<string>();
-    for (const i of [...byId.values()].sort((a, b) => lastWatchedOf(b) - lastWatchedOf(a))) {
+    for (const i of [...dedupedItems].sort((a, b) => lastWatchedOf(b) - lastWatchedOf(a))) {
       const root = franchiseRootSync(i._id);
       if (root && seenRoot.has(root)) byId.delete(i._id);
       if (root) seenRoot.add(root);

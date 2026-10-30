@@ -1000,9 +1000,9 @@ export function isDismissedNextUp(
   const cleanId = contentId.replace(/^(series|movie|tmdb):/, "").trim();
   const idVariants = [contentId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`];
 
-  // 1. Check whole-show dismissals or wildcard dismissals (-1|-1)
+  // 1. Check whole-show dismissals or wildcard dismissals (-1|-1) or bare ID
   for (const v of idVariants) {
-    if (dismissedKeys.has(`${v}|-1|-1`)) return true;
+    if (dismissedKeys.has(v) || dismissedKeys.has(`${v}|-1|-1`)) return true;
   }
 
   // 2. Check wildcard show-level prefix dismissal
@@ -1199,9 +1199,13 @@ export async function dismissNextUpInNuvioCloud(
 
   const targetKeys: string[] = [];
   for (const v of idVariants) {
+    targetKeys.push(v);
     targetKeys.push(`${v}|-1|-1`);
     if (season != null && season >= 0 && episode != null && episode >= 0) {
       targetKeys.push(`${v}|${season}|${episode}`);
+      if (episode > 1) {
+        targetKeys.push(`${v}|${season}|${episode - 1}`);
+      }
     }
   }
 
@@ -1546,13 +1550,17 @@ async function reconcileNuvioWatchedOnce(
 
   for (const it of items) {
     if (!it.content_id) continue;
+    const cleanId = it.content_id.replace(/^(series|movie|tmdb):/, "").trim();
     if (it.season == null && it.episode == null) {
       serverWatchedIds.add(it.content_id);
+      if (cleanId) serverWatchedIds.add(cleanId);
       if (it.content_type === "movie" || !it.content_type) {
         serverMovieIds.add(it.content_id);
+        if (cleanId) serverMovieIds.add(cleanId);
       }
     } else if (typeof it.season === "number" && typeof it.episode === "number") {
       serverEpisodeKeys.add(`${it.content_id}|${it.season}|${it.episode}`);
+      if (cleanId) serverEpisodeKeys.add(`${cleanId}|${it.season}|${it.episode}`);
     }
   }
 
@@ -1580,7 +1588,12 @@ async function reconcileNuvioWatchedOnce(
         const stored = JSON.parse(raw);
         if (Array.isArray(stored)) {
           for (const localId of stored) {
-            if (!serverWatchedIds.has(localId) && !serverMovieIds.has(localId)) {
+            const cleanLocal = localId.replace(/^(series|movie|tmdb):/, "").trim();
+            const hasWatched =
+              serverWatchedIds.has(localId) || (cleanLocal && serverWatchedIds.has(cleanLocal));
+            const hasMovie =
+              serverMovieIds.has(localId) || (cleanLocal && serverMovieIds.has(cleanLocal));
+            if (!hasWatched && !hasMovie) {
               setWatchedFlag(localId, false, profileIndex);
               setMovieWatchedLocal(localId, false, profileIndex);
             }
@@ -2349,7 +2362,12 @@ async function pullWatchProgressOnce(
     const playback = readCachedNuvioPlaybackItems(slot, accountId);
     writeCachedNuvioPlaybackItems(
       slot,
-      playback.filter((row) => ids.has(row._id)),
+      playback.filter(
+        (row) =>
+          row.upNext === true ||
+          ids.has(row._id) ||
+          ids.has(row._id.replace(/^(series|movie|tmdb):/, "")),
+      ),
       accountId,
     );
     localStorage.removeItem(`harbor.nuvio.playback_items.slot.${slot}`);

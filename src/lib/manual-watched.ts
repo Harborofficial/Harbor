@@ -436,19 +436,25 @@ export function setManualWatched(
   if (!canPersistWatched()) return;
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
-  const k = key(metaId, season, episode);
   const at = unwatchedAtMap();
   const rem = remoteSet();
-  if (watched) {
-    on.add(k);
-    off.delete(k);
-    delete at[k];
-  } else {
-    on.delete(k);
-    off.add(k);
-    at[k] = Date.now();
+  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
+  let remChanged = false;
+  for (const v of variants) {
+    const k = key(v, season, episode);
+    if (watched) {
+      on.add(k);
+      off.delete(k);
+      delete at[k];
+    } else {
+      on.delete(k);
+      off.add(k);
+      at[k] = Date.now();
+    }
+    if (rem.delete(k)) remChanged = true;
   }
-  if (rem.delete(k)) persistRemote();
+  if (remChanged) persistRemote();
   persistUnwatchedAt();
   persist(on, off);
 }
@@ -465,19 +471,23 @@ export function setManualWatchedUpTo(
   const at = unwatchedAtMap();
   const rem = remoteSet();
   const now = Date.now();
+  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   let remChanged = false;
   for (let e = 1; e <= episode; e++) {
-    const k = key(metaId, season, e);
-    if (watched) {
-      on.add(k);
-      off.delete(k);
-      delete at[k];
-    } else {
-      on.delete(k);
-      off.add(k);
-      at[k] = now;
+    for (const v of variants) {
+      const k = key(v, season, e);
+      if (watched) {
+        on.add(k);
+        off.delete(k);
+        delete at[k];
+      } else {
+        on.delete(k);
+        off.add(k);
+        at[k] = now;
+      }
+      if (rem.delete(k)) remChanged = true;
     }
-    if (rem.delete(k)) remChanged = true;
   }
   if (remChanged) persistRemote();
   persistUnwatchedAt();
@@ -495,19 +505,23 @@ export function setManualWatchedMany(
   const at = unwatchedAtMap();
   const rem = remoteSet();
   const now = Date.now();
+  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   let remChanged = false;
   for (const { season, episode } of episodes) {
-    const k = key(metaId, season, episode);
-    if (watched) {
-      on.add(k);
-      off.delete(k);
-      delete at[k];
-    } else {
-      on.delete(k);
-      off.add(k);
-      at[k] = now;
+    for (const v of variants) {
+      const k = key(v, season, episode);
+      if (watched) {
+        on.add(k);
+        off.delete(k);
+        delete at[k];
+      } else {
+        on.delete(k);
+        off.add(k);
+        at[k] = now;
+      }
+      if (rem.delete(k)) remChanged = true;
     }
-    if (rem.delete(k)) remChanged = true;
   }
   if (remChanged) persistRemote();
   persistUnwatchedAt();
@@ -529,18 +543,22 @@ export function setManualWatchedManyAcknowledged(
   const off = new Set(unwatchedSet());
   const at = { ...unwatchedAtMap() };
   const remote = new Set(remoteSet());
+  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   for (const { season, episode } of episodes) {
-    const k = key(metaId, season, episode);
-    if (watched) {
-      on.add(k);
-      off.delete(k);
-      delete at[k];
-    } else {
-      on.delete(k);
-      off.add(k);
-      at[k] = Date.now();
+    for (const v of variants) {
+      const k = key(v, season, episode);
+      if (watched) {
+        on.add(k);
+        off.delete(k);
+        delete at[k];
+      } else {
+        on.delete(k);
+        off.add(k);
+        at[k] = Date.now();
+      }
+      remote.delete(k);
     }
-    remote.delete(k);
   }
   try {
     localStorage.setItem(storeKey("unwatchedAt"), JSON.stringify(at));
@@ -589,19 +607,25 @@ export function applyRemoteWatched(
   const off = new Set(unwatchedSet());
   const at = unwatchedAtMap();
   const rem = remoteSet();
+  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   for (const { season, episode } of add) {
-    const k = key(metaId, season, episode);
-    on.add(k);
-    off.delete(k);
-    delete at[k];
-    rem.add(k);
+    for (const v of variants) {
+      const k = key(v, season, episode);
+      on.add(k);
+      off.delete(k);
+      delete at[k];
+      rem.add(k);
+    }
   }
   for (const { season, episode } of unset) {
-    const k = key(metaId, season, episode);
-    on.delete(k);
-    off.delete(k);
-    delete at[k];
-    rem.delete(k);
+    for (const v of variants) {
+      const k = key(v, season, episode);
+      on.delete(k);
+      off.delete(k);
+      delete at[k];
+      rem.delete(k);
+    }
   }
   persistUnwatchedAt();
   persistRemote();

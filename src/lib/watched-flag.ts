@@ -102,7 +102,11 @@ export function reconcileNuvioWatchedFlags(
 }
 
 export function isWatchedFlagged(metaId: string): boolean {
-  return load().has(metaId);
+  const set = load();
+  if (set.has(metaId)) return true;
+  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
+  if (set.has(clean) || set.has(`series:${clean}`) || set.has(`movie:${clean}`)) return true;
+  return false;
 }
 
 export function watchedFlagIds(): Set<string> {
@@ -132,10 +136,13 @@ export function setWatchedFlag(
       s = new Set();
     }
   }
-  if (s.has(metaId) === watched) return;
+  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `series:${clean}`, `movie:${clean}`]));
   const next = new Set(s);
-  if (watched) next.add(metaId);
-  else next.delete(metaId);
+  for (const v of variants) {
+    if (watched) next.add(v);
+    else next.delete(v);
+  }
   persist(next, sk);
 }
 
@@ -157,9 +164,13 @@ export function setWatchedFlagAcknowledged(
       s = new Set();
     }
   }
+  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
+  const variants = Array.from(new Set([metaId, clean, `series:${clean}`, `movie:${clean}`]));
   const next = new Set(s);
-  if (watched) next.add(metaId);
-  else next.delete(metaId);
+  for (const v of variants) {
+    if (watched) next.add(v);
+    else next.delete(v);
+  }
   localStorage.setItem(sk, JSON.stringify([...next]));
   if (sk === storeKey()) {
     currentScope = sk;

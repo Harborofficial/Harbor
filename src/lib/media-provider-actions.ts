@@ -42,7 +42,6 @@ import {
   resolveNuvioProfileIndex,
   pushWatchedItemToNuvio,
   deleteWatchedItemFromNuvio,
-  pushWatchProgressToNuvio,
   deleteWatchProgressFromNuvio,
   deleteEpisodeWatchProgressFromNuvio,
   undismissNextUpInNuvioCloud,
@@ -786,7 +785,13 @@ export function watchedProviderWrites(
               slot,
               allIds.map((cid) => ({ contentId: cid })),
             );
+            for (const cid of allIds) {
+              await deleteWatchProgressFromNuvio(slot, cid);
+            }
           }
+          window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+          window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+          window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
         } else {
           if (watched) {
             const itemsToPush = options.episodes.map((ep) => ({
@@ -816,7 +821,8 @@ export function watchedProviderWrites(
                     (v.episode ?? v.number ?? 0) > lastEp.episode),
               );
               if (!hasCandidateInScan) {
-                const fetchedMeta = await fetchMeta("series", primaryId).catch(() => null);
+                const lookupId = primaryId.replace(/^(series|movie|tmdb):/, "");
+                const fetchedMeta = await fetchMeta("series", lookupId).catch(() => null);
                 if (fetchedMeta?.videos?.length) {
                   videosToScan = fetchedMeta.videos;
                 }
@@ -844,29 +850,13 @@ export function watchedProviderWrites(
               if (hasNext && nextSeason != null && nextEpisode != null) {
                 void undismissNextUpInNuvioCloud(slot, primaryId);
                 if (altId) void undismissNextUpInNuvioCloud(slot, altId);
-                // Delete watch progress only for the completed episodes so mobile CW
-                // advances cleanly without wiping the entire series from CW!
+                // Delete watch progress for the completed episodes so mobile Next Up
+                // generates cleanly without 0s progress rows poisoning mobile sync!
                 for (const ep of options.episodes) {
                   await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.season, ep.episode);
                   if (altId)
                     await deleteEpisodeWatchProgressFromNuvio(slot, altId, ep.season, ep.episode);
                 }
-
-                const metaInfo = {
-                  title: meta.name,
-                  name: meta.name,
-                  poster: meta.poster,
-                  background: meta.background,
-                };
-                await pushWatchProgressToNuvio(
-                  slot,
-                  primaryId,
-                  0,
-                  2640,
-                  nextSeason,
-                  nextEpisode,
-                  metaInfo,
-                );
 
                 const nextCw = {
                   id: meta.id,
@@ -892,14 +882,9 @@ export function watchedProviderWrites(
                   "nuvio",
                   `nuvio-${slot}`,
                 );
-                window.dispatchEvent(
-                  new CustomEvent("harbor:nuvio-progress-pushed", {
-                    detail: {
-                      profileIndex: slot,
-                      progressKey: `${primaryId}_s${nextSeason}e${nextEpisode}`,
-                    },
-                  }),
-                );
+                window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+                window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+                window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
               } else if (videosToScan && videosToScan.length > 0) {
                 const settings = loadStoredSettings();
                 const keepForTimer = settings.animeCwEnd === "timer";
@@ -959,52 +944,36 @@ export function watchedProviderWrites(
             );
             const firstEp = sorted[0];
             if (firstEp) {
-              for (const ep of sorted.slice(1)) {
+              for (const ep of sorted) {
                 await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.season, ep.episode);
                 if (altId) {
                   await deleteEpisodeWatchProgressFromNuvio(slot, altId, ep.season, ep.episode);
                 }
               }
 
-              const metaInfo = {
-                title: meta.name,
-                name: meta.name,
-                poster: meta.poster,
-                background: meta.background,
-              };
-              await pushWatchProgressToNuvio(
-                slot,
-                primaryId,
-                0,
-                2640,
-                firstEp.season,
-                firstEp.episode,
-                metaInfo,
-              );
+              clearLocalCw(primaryId, `nuvio-${slot}`);
+              if (altId) clearLocalCw(altId, `nuvio-${slot}`);
+              clearLocalCw(meta.id, `nuvio-${slot}`);
 
-              const unwatchedCw = {
-                id: meta.id,
-                type: "series" as const,
-                name: meta.name,
-                poster: meta.poster,
-                background: meta.background,
-                season: firstEp.season,
-                episode: firstEp.episode,
-                positionMs: 0,
-                durationMs: 2640000,
-                external: "nuvio" as const,
-                t: Date.now(),
-              };
-              saveLocalCw(unwatchedCw, `nuvio-${slot}`);
+              try {
+                const settings = loadStoredSettings();
+                const keepCaughtUp = settings.animeCwEnd === "timer";
+                const cachedProgress = readCachedWatchProgress(slot);
+                const cachedWatched = readCachedWatchedItems(slot);
+                const built = buildNuvioPlaybackItems(
+                  cachedProgress,
+                  slot,
+                  cachedWatched,
+                  undefined,
+                  keepCaughtUp,
+                );
+                writeCachedNuvioPlaybackItems(slot, built);
+              } catch {}
+
               window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
-              window.dispatchEvent(
-                new CustomEvent("harbor:nuvio-progress-pushed", {
-                  detail: {
-                    profileIndex: slot,
-                    progressKey: `${primaryId}_s${firstEp.season}e${firstEp.episode}`,
-                  },
-                }),
-              );
+              window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+              window.dispatchEvent(new CustomEvent("harbor:manual-watched-changed"));
+              window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
             }
           }
         }
