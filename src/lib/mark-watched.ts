@@ -32,6 +32,12 @@ export async function markMovieWatched(
   tmdbId?: string | number | null,
 ): Promise<void> {
   setMovieWatchedLocal(meta.id, true);
+  setWatchedFlag(meta.id, true);
+  const imdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined);
+  if (imdb && imdb !== meta.id) {
+    setMovieWatchedLocal(imdb, true);
+    setWatchedFlag(imdb, true);
+  }
   savePlayback(meta.id, { title: meta.name, parsedTitle: meta.name });
   recordWatchEvent({
     id: meta.id,
@@ -40,7 +46,6 @@ export async function markMovieWatched(
     poster: meta.poster,
     at: Date.now(),
   });
-  const imdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined);
   const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : (tmdbId ?? undefined);
   const authKey = readActiveStremioAuthKey();
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
@@ -89,6 +94,10 @@ export async function unmarkMovieWatched(meta: Meta, imdbId?: string | null): Pr
   setMovieWatchedLocal(meta.id, false);
   setWatchedFlag(meta.id, false);
   const imdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined);
+  if (imdb && imdb !== meta.id) {
+    setMovieWatchedLocal(imdb, false);
+    setWatchedFlag(imdb, false);
+  }
   const authKey = readActiveStremioAuthKey();
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
   const pmdbTarget = stremioIdToPmdbTarget(meta.id, undefined, "movie");

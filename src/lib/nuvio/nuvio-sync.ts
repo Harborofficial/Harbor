@@ -297,6 +297,17 @@ function applyPending<T extends NuvioCoordinate>(
   return { items, deleted };
 }
 
+export function applyPendingWatchedItems(
+  items: NuvioWatchedItem[],
+  harborProfileId?: string | number,
+): NuvioWatchedItem[] {
+  const accountId = getNuvioAccountId();
+  if (!accountId) return items;
+  const slot = resolveNuvioProfileIndex(harborProfileId);
+  const pending = readPending(slot, accountId);
+  return applyPending(items, slot, accountId, "watched", false, pending).items;
+}
+
 const mutationLanes = new Map<string, Promise<boolean>>();
 
 function mutationOwnerCurrent(slot: number, accountId: string): boolean {
@@ -869,26 +880,32 @@ export async function pushWatchedItemToNuvio(
     const cachedWatched = readCachedWatchedItems(profileIndex);
     const updatedWatched = [...cachedWatched];
     for (const item of items) {
-      const idx = updatedWatched.findIndex(
-        (w) =>
-          w.content_id === item.contentId &&
-          (item.season == null || w.season === item.season) &&
-          (item.episode == null || w.episode === item.episode),
+      const clean = item.contentId.replace(/^(series|movie|tmdb):/, "");
+      const variants = Array.from(
+        new Set([item.contentId, clean, `series:${clean}`, `tmdb:${clean}`]),
       );
-      const newEntry: NuvioWatchedItem = {
-        profile_id: profileIndex,
-        content_id: item.contentId,
-        content_type:
-          item.contentType || (item.season != null && item.episode != null ? "series" : "movie"),
-        title: item.title || "",
-        season: item.season ?? null,
-        episode: item.episode ?? null,
-        watched_at: item.watchedAt || Date.now(),
-      };
-      if (idx >= 0) {
-        updatedWatched[idx] = newEntry;
-      } else {
-        updatedWatched.push(newEntry);
+      for (const cid of variants) {
+        const idx = updatedWatched.findIndex(
+          (w) =>
+            w.content_id === cid &&
+            (item.season == null || w.season === item.season) &&
+            (item.episode == null || w.episode === item.episode),
+        );
+        const newEntry: NuvioWatchedItem = {
+          profile_id: profileIndex,
+          content_id: cid,
+          content_type:
+            item.contentType || (item.season != null && item.episode != null ? "series" : "movie"),
+          title: item.title || "",
+          season: item.season ?? null,
+          episode: item.episode ?? null,
+          watched_at: item.watchedAt || Date.now(),
+        };
+        if (idx >= 0) {
+          updatedWatched[idx] = newEntry;
+        } else {
+          updatedWatched.push(newEntry);
+        }
       }
     }
     writeCachedWatchedItems(profileIndex, updatedWatched);
@@ -1625,8 +1642,17 @@ async function reconcileNuvioWatchedOnce(
             const hasMovie =
               serverMovieIds.has(localId) || (cleanLocal && serverMovieIds.has(cleanLocal));
             if (!hasWatched && !hasMovie) {
-              setWatchedFlag(localId, false, profileIndex);
-              setMovieWatchedLocal(localId, false, profileIndex);
+              const hasPending = Object.values(pending).some(
+                (p) =>
+                  p.kind === "watched" &&
+                  !p.deleted &&
+                  (p.row.content_id === localId ||
+                    (cleanLocal && p.row.content_id === cleanLocal)),
+              );
+              if (!hasPending) {
+                setWatchedFlag(localId, false, profileIndex);
+                setMovieWatchedLocal(localId, false, profileIndex);
+              }
             }
           }
         }
@@ -1634,10 +1660,21 @@ async function reconcileNuvioWatchedOnce(
     }
   } catch {}
 
+  const pendingMovieIds = new Set<string>();
+  for (const p of Object.values(pending)) {
+    if (p.kind === "watched" && !p.deleted && p.row.content_id) {
+      if (p.row.season == null && p.row.episode == null) {
+        pendingMovieIds.add(p.row.content_id);
+        const clean = p.row.content_id.replace(/^(series|movie|tmdb):/, "").trim();
+        if (clean) pendingMovieIds.add(clean);
+      }
+    }
+  }
+
   // A complete snapshot is authoritative. Commit once, not once per item:
   // repeated writes were O(n^2) on shows with thousands of watched episodes.
   reconcileNuvioWatchedFlags(profileIndex, serverWatchedIds, accountId);
-  reconcileNuvioMovieWatched(profileIndex, serverMovieIds, accountId);
+  reconcileNuvioMovieWatched(profileIndex, serverMovieIds, accountId, pendingMovieIds);
 
   // 4. Update Continue Watching tray and reconcile playback items
   try {

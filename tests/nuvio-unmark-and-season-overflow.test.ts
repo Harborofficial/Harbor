@@ -188,3 +188,50 @@ test("readCachedNuvioPlaybackItems preserves valid parsed items and does not wip
     "readCachedNuvioPlaybackItems must not wipe parsed playback items",
   );
 });
+
+test("detail page applies pending watched items and only reconciles when watchedItems is not null", () => {
+  const freshDetailSrc = read("../src/views/detail.tsx");
+  assert.match(
+    freshDetailSrc,
+    /applyPendingWatchedItems\(baseWatched,\s*profileIndex\)/,
+    "detail page must merge pending watched items into safeWatchedItems",
+  );
+  assert.match(
+    freshDetailSrc,
+    /if \(watchedItems !== null\) \{\s*const serverEpisodeKeys = new Set<string>\(\);[\s\S]*?reconcileNuvioWatchedEpisodes/,
+    "detail page must only reconcile local episodes when server actually returned a response",
+  );
+});
+
+test("useCwAdvance evaluates Nuvio Next-Up cards when animeCwEnd is timer", () => {
+  const useCwAdvanceSrc = read("../src/views/home/hooks/use-cw-advance.ts");
+  assert.match(
+    useCwAdvanceSrc,
+    /if \(i\.external === "nuvio" && i\.upNext === true\) \{[\s\S]*?if \(animeCwEnd === "timer"\) return true;\s*return false;\s*\}/,
+    "useCwAdvance must include Nuvio Next-Up cards as candidates when animeCwEnd is timer",
+  );
+  assert.match(
+    useCwAdvanceSrc,
+    /if \(i\.external === "nuvio" && i\.upNext === true\) \{\s*if \(animeCwEnd === "timer" && \(!curEpInList \|\| !nextEpAired\(list, curEpInList, isAnime\)\)\) \{/,
+    "useCwAdvance must attach waitingForAir when target episode is unaired",
+  );
+});
+
+test("ContinueCard captures episode airDate and displays timer countdown when unaired", () => {
+  const continueCardSrc = read("../src/components/continue-card.tsx");
+  assert.match(
+    continueCardSrc,
+    /if \(found\?\.airDate\) setEpAirDate\(found\.airDate\);/,
+    "ContinueCard must store episode airDate from fetched season episodes",
+  );
+  assert.match(
+    continueCardSrc,
+    /const isUnairedDate = epAirDate \? Date\.parse\(epAirDate\) > now : false;/,
+    "ContinueCard must detect future airDate",
+  );
+  assert.match(
+    continueCardSrc,
+    /const isWaiting =\s*waitingForAir \|\|\s*\(isUnairedDate && \(settings\.animeCwEnd === "timer" \|\| upNext\)\);/,
+    "ContinueCard must switch to waiting timer state when next episode is unaired",
+  );
+});

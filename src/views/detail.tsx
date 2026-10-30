@@ -94,6 +94,7 @@ import {
   pullWatchProgressFromNuvio,
   pullWatchedItemsFromNuvio,
   readCachedWatchedItems,
+  applyPendingWatchedItems,
   reconcileNuvioWatched,
   resolveNuvioProfileIndex,
   isNuvioProviderActive,
@@ -871,7 +872,8 @@ export function DetailView({
         .then(([progressItems, watchedItems]) => {
           if (cancelled) return;
           const profileIndex = resolveNuvioProfileIndex();
-          const safeWatchedItems = watchedItems || readCachedWatchedItems(profileIndex);
+          const baseWatched = watchedItems || readCachedWatchedItems(profileIndex);
+          const safeWatchedItems = applyPendingWatchedItems(baseWatched, profileIndex);
           const targetIds = new Set<string>();
           if (meta.id) targetIds.add(meta.id);
           if (detail?.imdbId) targetIds.add(detail.imdbId);
@@ -919,13 +921,18 @@ export function DetailView({
               }
             }
           }
-          const serverEpisodeKeys = new Set<string>();
-          for (const it of safeWatchedItems) {
-            if (typeof it.season === "number" && typeof it.episode === "number" && it.content_id) {
-              serverEpisodeKeys.add(`${it.content_id}|${it.season}|${it.episode}`);
+          // Only reconcile/prune local watched episodes if we received a fresh, authoritative
+          // server snapshot from Nuvio cloud (watchedItems !== null)! Never prune based on
+          // a stale or throttled local cache fallback!
+          if (watchedItems !== null) {
+            const serverEpisodeKeys = new Set<string>();
+            for (const it of safeWatchedItems) {
+              if (typeof it.season === "number" && typeof it.episode === "number" && it.content_id) {
+                serverEpisodeKeys.add(`${it.content_id}|${it.season}|${it.episode}`);
+              }
             }
+            reconcileNuvioWatchedEpisodes(profileIndex, serverEpisodeKeys, targetIds);
           }
-          reconcileNuvioWatchedEpisodes(profileIndex, serverEpisodeKeys, targetIds);
 
           const localManual = manualEpisodeKeys(meta.id, [
             detail?.imdbId,
@@ -933,12 +940,7 @@ export function DetailView({
           ]);
           for (const k of localManual.watched) watchedKeys.add(k);
           for (const k of localManual.unwatched) watchedKeys.delete(k);
-          if (watchedKeys.size > 0) {
-            setStremioWatched((prev) => new Set([...prev, ...watchedKeys]));
-            setStremioWatched(new Set(watchedKeys));
-          } else {
-            setStremioWatched(new Set());
-          }
+          setStremioWatched(new Set(watchedKeys));
           if (matches.length > 0) {
             matches.sort((a, b) => {
               const ta = a.updated_at ? Date.parse(a.updated_at) : 0;

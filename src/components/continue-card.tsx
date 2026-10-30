@@ -150,16 +150,23 @@ export const ContinueCard = memo(function ContinueCard({
     ? ((item as Record<string, unknown>).nextAirDate as string | undefined)
     : undefined;
   const [now, setNow] = useState(Date.now());
+  const [epAirDate, setEpAirDate] = useState<string | null>(null);
+  const isUnairedDate = epAirDate ? Date.parse(epAirDate) > now : false;
+  const isWaiting =
+    waitingForAir ||
+    (isUnairedDate && (settings.animeCwEnd === "timer" || upNext));
+  const effectiveAirDate = nextAirDate || (isUnairedDate ? epAirDate : undefined);
+
   useEffect(() => {
-    if (!waitingForAir || !nextAirDate) return;
+    if (!isWaiting || !effectiveAirDate) return;
     const id = window.setInterval(() => setNow(Date.now()), 60000);
     return () => window.clearInterval(id);
-  }, [waitingForAir, nextAirDate]);
+  }, [isWaiting, effectiveAirDate]);
   const countdown = useMemo(() => {
-    if (!nextAirDate) {
-      return waitingForAir ? t("Airing soon") : "";
+    if (!effectiveAirDate) {
+      return isWaiting ? t("Airing soon") : "";
     }
-    const diff = Date.parse(nextAirDate) - now;
+    const diff = Date.parse(effectiveAirDate) - now;
     if (diff <= 0) return t("Airing now");
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
@@ -168,7 +175,7 @@ export const ContinueCard = memo(function ContinueCard({
     if (hours > 0)
       return t("in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
     return t("in {minutes}m", { minutes: String(Math.max(1, minutes)) });
-  }, [nextAirDate, now, t, waitingForAir]);
+  }, [effectiveAirDate, now, t, isWaiting]);
   const kitsuThreeSeg =
     /^(kitsu|mal|anilist|anidb):/.test(item._id) &&
     (item.state?.video_id ?? "").split(":").length === 3;
@@ -396,6 +403,7 @@ export const ContinueCard = memo(function ContinueCard({
   useEffect(() => {
     setEpTitle(null);
     setEpStill(null);
+    setEpAirDate(null);
     if (!ep || kitsuThreeSeg) return;
     if (/^(kitsu|mal|anilist|anidb):/.test(item._id)) return;
     let cancelled = false;
@@ -406,6 +414,7 @@ export const ContinueCard = memo(function ContinueCard({
         const found = eps.find((e) => e.episode === ep.episode);
         if (found?.name) setEpTitle(found.name);
         if (found?.still) setEpStill(found.still);
+        if (found?.airDate) setEpAirDate(found.airDate);
       })
       .catch(() => {});
     return () => {
@@ -730,7 +739,7 @@ export const ContinueCard = memo(function ContinueCard({
         type="button"
         data-continue-card-trigger
         onClick={(event) => runControl(event, commands.chooseSource)}
-        disabled={pending || waitingForAir}
+        disabled={pending || isWaiting}
         aria-label={`${t("Choose another source")}: ${displayTitle}`}
         title={t("Choose another source")}
         className="block w-full min-w-0 rounded-xl text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -797,7 +806,7 @@ export const ContinueCard = memo(function ContinueCard({
                 <Play size={11} fill="currentColor" className="shrink-0 text-ink" />
               )}
               {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
-              {waitingForAir && countdown ? (
+              {isWaiting && countdown ? (
                 <>
                   {sub && <span className="shrink-0 text-ink-subtle">·</span>}
                   <span className="shrink-0 font-medium text-amber-500">{countdown}</span>
@@ -846,8 +855,8 @@ export const ContinueCard = memo(function ContinueCard({
           )}
           <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
             <div
-              className={`h-full ${waitingForAir ? "bg-amber-500" : "bg-accent"}`}
-              style={{ width: `${waitingForAir ? 100 : progress * 100}%` }}
+              className={`h-full ${isWaiting ? "bg-amber-500" : "bg-accent"}`}
+              style={{ width: `${isWaiting ? 100 : progress * 100}%` }}
             />
           </div>
         </div>
@@ -869,7 +878,7 @@ export const ContinueCard = memo(function ContinueCard({
               tabIndex={-1}
               data-tv-skip="true"
               onClick={(event) => runControl(event, commands.play)}
-              disabled={pending || waitingForAir}
+              disabled={pending || isWaiting}
               aria-label={t("Play {name}", { name: displayTitle })}
               title={t("Play")}
               className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink outline-none transition-transform duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent"
@@ -885,7 +894,7 @@ export const ContinueCard = memo(function ContinueCard({
             tabIndex={-1}
             data-tv-skip="true"
             onClick={(event) => runControl(event, commands.play)}
-            disabled={pending || waitingForAir}
+            disabled={pending || isWaiting}
             aria-label={t("Play {name}", { name: displayTitle })}
             title={t("Play")}
             className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-canvas ring-1 ring-white/15 shadow-[0_10px_28px_-8px_rgba(0,0,0,0.6)] transition-transform duration-150 hover:scale-[1.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"

@@ -16,6 +16,7 @@ const PREFIXES = {
   meta: "harbor.manualwatched.meta.v1.",
   dismissed: "harbor.manualwatched.dismissed.v1.",
   unwatchedAt: "harbor.manualunwatched.at.v1.",
+  watchedAt: "harbor.manualwatched.at.v1.",
   remote: "harbor.manualwatched.fromremote.v1.",
 } as const;
 
@@ -25,6 +26,7 @@ const LEGACY_KEYS: Record<keyof typeof PREFIXES, string> = {
   meta: "harbor.manualwatched.meta.v1",
   dismissed: "harbor.manualwatched.dismissed.v1",
   unwatchedAt: "harbor.manualunwatched.at.v1",
+  watchedAt: "harbor.manualwatched.at.v1",
   remote: "harbor.manualwatched.fromremote.v1",
 };
 
@@ -43,6 +45,7 @@ let unwatchedCache: Set<string> | null = null;
 let metaCache: Record<string, ManualWatchedMeta> | null = null;
 let dismissedCache: Set<string> | null = null;
 let unwatchedAtCache: Record<string, number> | null = null;
+let watchedAtCache: Record<string, number> | null = null;
 let remoteCache: Set<string> | null = null;
 
 function storeKey(kind: keyof typeof PREFIXES): string {
@@ -87,6 +90,7 @@ function ensureScope(): void {
   metaCache = null;
   dismissedCache = null;
   unwatchedAtCache = null;
+  watchedAtCache = null;
   remoteCache = null;
 }
 
@@ -104,6 +108,20 @@ function unwatchedAtMap(): Record<string, number> {
   return unwatchedAtCache;
 }
 
+function watchedAtMap(): Record<string, number> {
+  ensureScope();
+  if (!watchedAtCache) {
+    migrateLegacy();
+    try {
+      const raw = JSON.parse(localStorage.getItem(storeKey("watchedAt")) ?? "{}");
+      watchedAtCache = raw && typeof raw === "object" ? (raw as Record<string, number>) : {};
+    } catch {
+      watchedAtCache = {};
+    }
+  }
+  return watchedAtCache;
+}
+
 function remoteSet(): Set<string> {
   ensureScope();
   if (!remoteCache) {
@@ -116,6 +134,11 @@ function remoteSet(): Set<string> {
 function persistUnwatchedAt(): void {
   ensureScope();
   persistCritical(storeKey("unwatchedAt"), JSON.stringify(unwatchedAtCache ?? {}));
+}
+
+function persistWatchedAt(): void {
+  ensureScope();
+  persistCritical(storeKey("watchedAt"), JSON.stringify(watchedAtCache ?? {}));
 }
 
 function persistRemote(): void {
@@ -377,6 +400,16 @@ export function reconcileNuvioWatchedEpisodes(
   // Prune local episodes:
   // Case A: Targeted reconciliation (e.g. from detail.tsx for a specific series like Tulsa King)
   if (targetSeriesIds && targetSeriesIds.size > 0) {
+    const serverSeasonEpisodes = new Set<string>();
+    for (const sKey of serverEpisodeKeys) {
+      const parts = sKey.split("|");
+      if (parts.length === 3) {
+        const clean = parts[0]?.replace(/^(series|movie|tmdb):/, "");
+        serverSeasonEpisodes.add(`${clean}|${parts[1]}|${parts[2]}`);
+      }
+    }
+    const watchedTimes = watchedAtMap();
+    const now = Date.now();
     for (const lKey of Array.from(currentLocalWatched)) {
       const parts = lKey.split("|");
       const showId = parts[0];
@@ -384,7 +417,13 @@ export function reconcileNuvioWatchedEpisodes(
       const isTargetShow =
         showId &&
         (targetSeriesIds.has(showId) || (cleanShowId && targetSeriesIds.has(cleanShowId)));
-      if (isTargetShow && !serverEpisodeKeys.has(lKey)) {
+      const hasOnServer =
+        serverEpisodeKeys.has(lKey) ||
+        (cleanShowId &&
+          parts.length === 3 &&
+          serverSeasonEpisodes.has(`${cleanShowId}|${parts[1]}|${parts[2]}`));
+      const locallyMarkedRecent = now - (watchedTimes[lKey] || 0) < 60_000;
+      if (isTargetShow && !hasOnServer && !locallyMarkedRecent) {
         currentLocalWatched.delete(lKey);
         currentLocalUnwatched.add(lKey);
         changed = true;
@@ -517,6 +556,7 @@ export function setManualWatchedMany(
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   const at = unwatchedAtMap();
+  const wat = watchedAtMap();
   const rem = remoteSet();
   const now = Date.now();
   const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
@@ -529,16 +569,19 @@ export function setManualWatchedMany(
         on.add(k);
         off.delete(k);
         delete at[k];
+        wat[k] = now;
       } else {
         on.delete(k);
         off.add(k);
         at[k] = now;
+        delete wat[k];
       }
       if (rem.delete(k)) remChanged = true;
     }
   }
   if (remChanged) persistRemote();
   persistUnwatchedAt();
+  persistWatchedAt();
   persist(on, off);
 }
 
@@ -556,7 +599,9 @@ export function setManualWatchedManyAcknowledged(
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   const at = { ...unwatchedAtMap() };
+  const wat = { ...watchedAtMap() };
   const remote = new Set(remoteSet());
+  const now = Date.now();
   const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
   const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   for (const { season, episode } of episodes) {
@@ -566,15 +611,19 @@ export function setManualWatchedManyAcknowledged(
         on.add(k);
         off.delete(k);
         delete at[k];
+        wat[k] = now;
       } else {
         on.delete(k);
         off.add(k);
-        at[k] = Date.now();
+        at[k] = now;
+        delete wat[k];
       }
       remote.delete(k);
     }
   }
   try {
+    ensureScope();
+    persistCritical(storeKey("watchedAt"), JSON.stringify(wat));
     localStorage.setItem(storeKey("unwatchedAt"), JSON.stringify(at));
     localStorage.setItem(storeKey("remote"), JSON.stringify([...remote]));
     // Clear the opposing override before setting the requested state.
@@ -593,6 +642,7 @@ export function setManualWatchedManyAcknowledged(
     watchedCache = null;
     unwatchedCache = null;
     unwatchedAtCache = null;
+    watchedAtCache = null;
     remoteCache = null;
     version += 1;
     notifySubs();

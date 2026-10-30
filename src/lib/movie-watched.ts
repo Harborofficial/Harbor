@@ -79,6 +79,7 @@ export function reconcileNuvioMovieWatched(
   slot: number,
   serverIds: ReadonlySet<string>,
   accountId: string,
+  preserveIds?: ReadonlySet<string>,
 ): void {
   if (!accountId) return;
   const key = `harbor.moviewatched.${nuvioWatchedScope(slot, accountId)}`;
@@ -91,6 +92,9 @@ export function reconcileNuvioMovieWatched(
     // Replace malformed cache with the verified cloud state.
   }
   const next = new Set(serverIds);
+  if (preserveIds) {
+    for (const id of preserveIds) next.add(id);
+  }
   if (previous.length === next.size && previous.every((id) => next.has(id))) return;
   persistCritical(key, JSON.stringify([...next]));
   if (storeKey() === key) {

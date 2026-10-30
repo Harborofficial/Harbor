@@ -443,6 +443,8 @@ export function useCwAdvance(
         if (i.external === "nuvio" && i.upNext === true) {
           // A Nuvio Next-Up card is ALREADY pointing to the unwatched episode to watch next.
           // It is not a finished episode session to advance past or drop.
+          // If animeCwEnd === "timer", include it so its air date can be evaluated for the countdown timer!
+          if (animeCwEnd === "timer") return true;
           return false;
         }
         const cur = currentEpisode(i);
@@ -633,6 +635,17 @@ export function useCwAdvance(
             remove.add(i._id);
             continue;
           }
+        }
+
+        if (i.external === "nuvio" && i.upNext === true) {
+          if (animeCwEnd === "timer" && (!curEpInList || !nextEpAired(list, curEpInList, isAnime))) {
+            next.set(i._id, {
+              ...i,
+              waitingForAir: true as const,
+              nextAirDate: curEpInList?.airDate,
+            } as LibraryItem);
+          }
+          continue;
         }
 
         const checkWatched = watchedPredicate(
