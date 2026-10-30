@@ -36,7 +36,7 @@ export function activateNuvioAccountProvider(): void {
   );
 }
 import { clearAllNuvioPinCaches, clearNuvioSessionUnlocks } from "./nuvio-profiles";
-import { clearCachedWatchProgress, clearCachedNuvioAddons, fetchNuvioAddons } from "./nuvio-sync";
+import { clearCachedWatchProgress, clearCachedNuvioAddons, fetchNuvioAddons, reconcileNuvioWatched } from "./nuvio-sync";
 import { recordNuvioAddons } from "./nuvio-addon-registry";
 import { clearCachedPlaybackItems } from "./nuvio-playback";
 import { clearAllNuvioLocalCw } from "@/lib/local-cw";
@@ -116,6 +116,7 @@ export async function signInWithEmailPassword(
     void fetchNuvioAddons().then(() => {
       window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
     });
+    void reconcileNuvioWatched(undefined, { force: true });
     void fetchNuvioPlaybackItems().then(() => {
       window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
     });
@@ -265,6 +266,7 @@ export async function pollDeviceCodeSession(
         void fetchNuvioAddons().then(() => {
           window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
         });
+        void reconcileNuvioWatched(undefined, { force: true });
         void fetchNuvioPlaybackItems().then(() => {
           window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
         });

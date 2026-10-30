@@ -440,6 +440,11 @@ export function useCwAdvance(
         );
       };
       const candidates = items.filter((i) => {
+        if (i.external === "nuvio" && i.upNext === true) {
+          // A Nuvio Next-Up card is ALREADY pointing to the unwatched episode to watch next.
+          // It is not a finished episode session to advance past or drop.
+          return false;
+        }
         const cur = currentEpisode(i);
         if (!cur) return false;
         return (
@@ -544,7 +549,7 @@ export function useCwAdvance(
                       ...i,
                       waitingForAir: true as const,
                     } as LibraryItem);
-                  } else {
+                  } else if (i.external !== "nuvio") {
                     remove.add(i._id);
                   }
                   continue;
@@ -583,7 +588,7 @@ export function useCwAdvance(
                     waitingForAir: true as const,
                   } as LibraryItem);
                   continue;
-                } else {
+                } else if (i.external !== "nuvio") {
                   // Entire series is completed; remove from Continue Watching
                   remove.add(i._id);
                   continue;
@@ -624,7 +629,7 @@ export function useCwAdvance(
               nextAirDate: curEpInList.airDate,
             } as LibraryItem);
             continue;
-          } else if (animeCwEnd === "hide" || hideCaughtUp) {
+          } else if (i.external !== "nuvio" && (animeCwEnd === "hide" || hideCaughtUp)) {
             remove.add(i._id);
             continue;
           }
@@ -766,7 +771,8 @@ export function useCwAdvance(
             waitingForAir: true as const,
           } as LibraryItem);
         } else if (
-          shouldDropFinished(
+          i.external !== "nuvio" &&
+          (shouldDropFinished(
             list,
             fetchOk,
             completedRemotely(i) ? undefined : i.state,
@@ -775,7 +781,7 @@ export function useCwAdvance(
             nextEp,
             hideCaughtUp,
           ) ||
-          (animeCwEnd === "hide" && (!nextEp || !nextEpAired(list, nextEp, isAnime)))
+          (animeCwEnd === "hide" && (!nextEp || !nextEpAired(list, nextEp, isAnime))))
         ) {
           remove.add(i._id);
         }

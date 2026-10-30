@@ -1373,24 +1373,55 @@ export async function pullWatchedItemsFromNuvio(
       stillCurrent,
       confirmedEmpty,
     );
-    if (!table) return null;
-    if (table.length === 0 && !confirmedEmpty && !rpcRows) return null;
-    if (rpcRows && rpcRows.length > 0) {
-      // The table and the official RPC must agree on the latest rows before a
-      // snapshot is allowed to remove local watched state.
-      const tableCoordinates = new Set(table.map((row) => coordinate(row)));
-      if (!rpcRows.every((row) => tableCoordinates.has(coordinate(row)))) {
-        console.warn(
-          "[nuvio-sync] watched table does not match the RPC batch; keeping local state",
-        );
-        return null;
+    if (table) {
+      if (rpcRows && rpcRows.length > 0) {
+        // The table and the official RPC must agree on the latest rows before a
+        // snapshot is allowed to remove local watched state.
+        const tableCoordinates = new Set(table.map((row) => coordinate(row)));
+        if (!rpcRows.every((row) => tableCoordinates.has(coordinate(row)))) {
+          console.warn(
+            "[nuvio-sync] watched table does not match the RPC batch; keeping local state",
+          );
+          return null;
+        }
+      }
+      lastFullSyncAt.set(fullSyncKey, Date.now());
+      writeCachedWatchedItems(slot, table, accountId);
+      return table;
+    }
+  } catch {
+    // If readTableSnapshot is unavailable (e.g. Supabase RLS enforces stored procedures),
+    // fall back to official sync_pull_watched_items RPC batch below.
+  }
+
+  if (rpcRows !== null || confirmedEmpty) {
+    const allRpc = [...(rpcRows ?? [])];
+    if (allRpc.length >= 1000) {
+      let page = 2;
+      while (page <= 50) {
+        try {
+          const res = await nuvioFetch("/rest/v1/rpc/sync_pull_watched_items", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ p_profile_id: slot, p_page: page, p_page_size: 1000 }),
+          });
+          if (!stillCurrent() || !res.ok) break;
+          const rows: unknown = await res.json();
+          if (!Array.isArray(rows) || !rows.every((row) => validRow(row, slot, accountId))) break;
+          allRpc.push(...(rows as NuvioWatchedItem[]));
+          if (rows.length < 1000) break;
+          page++;
+        } catch {
+          break;
+        }
       }
     }
+    if (!stillCurrent()) return null;
     lastFullSyncAt.set(fullSyncKey, Date.now());
-    return table;
-  } catch {
-    return null;
+    writeCachedWatchedItems(slot, allRpc, accountId);
+    return allRpc;
   }
+  return null;
 }
 
 /**
@@ -2212,7 +2243,7 @@ async function pullWatchProgressOnce(
     const res = await nuvioFetch("/rest/v1/rpc/sync_pull_watch_progress", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ p_profile_id: slot, p_limit: 50 }),
+      body: JSON.stringify({ p_profile_id: slot }),
     });
     if (!stillCurrent()) return [];
     if (res.ok) {
