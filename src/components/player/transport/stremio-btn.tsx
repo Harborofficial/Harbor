@@ -4,15 +4,18 @@ export function StremioBtn({
   ariaLabel,
   active,
   disabled,
+  glassSurface,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   ariaLabel: string;
   active?: boolean;
   disabled?: boolean;
+  glassSurface?: boolean;
 }) {
   return (
     <button
+      data-mpv-glass={glassSurface ? "" : undefined}
       type="button"
       onClick={onClick}
       disabled={disabled}

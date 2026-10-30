@@ -1,0 +1,23 @@
+[data-native-liquid-glass="on"] [data-mpv-glass-active] {
+  --color-ink: #f5f6fa;
+  --color-ink-muted: #ffffffc4;
+  --color-ink-subtle: #ffffff99;
+  isolation: isolate;
+  background: #00000006 !important;
+  border: 1px solid #ffffff24 !important;
+  box-shadow:
+    0 6px 20px #0002,
+    inset 0 1px 0 #ffffff1c !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  text-shadow: 0 1px 3px #000c;
+}
+
+[data-native-liquid-glass="on"] [data-mpv-glass-active] > [data-mpv-glass-content] {
+  background: transparent;
+}
+
+[data-native-liquid-glass="on"] [data-mpv-glass-active]::before,
+[data-native-liquid-glass="on"] [data-mpv-glass-active]::after {
+  display: none;
+}
