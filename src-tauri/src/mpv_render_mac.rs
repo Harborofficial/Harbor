@@ -569,3 +569,7 @@ fn schedule_redraw() {
         dispatch_async_f(main_queue(), std::ptr::null_mut(), redraw_cb);
     }
 }
+
+pub(crate) fn request_redraw() {
+    schedule_redraw();
+}

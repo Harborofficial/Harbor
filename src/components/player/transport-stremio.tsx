@@ -313,6 +313,7 @@ export function TransportStremio(p: TransportStremioProps) {
 
       <div
         ref={controlsRef}
+        data-mpv-controls
         dir="ltr"
         className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-1 bg-gradient-to-t from-black/35 to-transparent px-8 pb-3 pt-12 transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"

@@ -105,6 +105,8 @@ mod modal_overlay;
 mod monitors;
 #[cfg(desktop)]
 mod mpv;
+#[cfg(desktop)]
+mod mpv_liquid_glass;
 #[cfg(target_os = "linux")]
 mod linux_gamescope;
 #[cfg(target_os = "linux")]
@@ -2076,6 +2078,7 @@ pub fn run() {
             external_player::external_player_stop,
             mpv::mpv_command,
             mpv::mpv_set_property,
+            mpv::mpv_glass_layout,
             mpv::mpv_get_property,
             mpv::mpv_get_property_list,
             mpv::mpv_vo_passes,

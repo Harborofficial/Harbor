@@ -848,6 +848,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     } else if (raw.event === "property-change") {
       const name = raw.name;
       const data = raw.data;
+      if (name === "osd-dimensions") {
+        window.dispatchEvent(new Event("harbor:mpv-output-layout"));
+      }
       if (name === "time-pos" && typeof data === "number") snap.positionSec = data;
       if (name === "path" && typeof data === "string") observedMediaPath = data;
       if (name === "duration" && typeof data === "number") snap.durationSec = data;

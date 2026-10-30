@@ -5,6 +5,7 @@ import {
 import { DEFAULT_THEME } from "@/lib/theme";
 import { DEFAULT_FULLSCREEN_CLOCK_SIZE_PX } from "@/lib/local-time";
 import { AUTO_DISPLAY } from "@/lib/monitors";
+import { GLASS_DEFAULTS } from "@/lib/player/liquid-glass";
 import type { Settings, SecondaryProfilePrivileges } from "./types";
 
 export const STORAGE_KEY = "harbor.settings";
@@ -238,6 +239,8 @@ export const DEFAULT: Settings = {
   playerExternalMpvArgs: "",
   pipBehavior: "resize",
   playerShellId: "default",
+  playerLiquidGlass: true,
+  playerGlassOptics: { ...GLASS_DEFAULTS },
   playerChromeTheme: "auto",
   playerMenuBlack: false,
   playerScreenLockEnabled: false,
@@ -698,6 +701,6 @@ export function getSecondaryPrivileges(
 
   return {
     ...DEFAULT_SECONDARY_PRIVILEGES,
-    ...(fallbackSource ?? {}),
+    ...fallbackSource,
   };
 }

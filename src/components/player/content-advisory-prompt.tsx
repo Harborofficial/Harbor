@@ -68,6 +68,7 @@ export function ContentAdvisoryPrompt({
       `}</style>
       <div
         role="region"
+        data-mpv-glass="panel"
         aria-label={t("Show content ratings?")}
         className={`harbor-advisory-prompt absolute ${positionClass} z-30 w-[280px] max-w-[calc(100vw-3rem)] rounded-[4px] bg-black/80 p-3 text-white ${exiting ? "pointer-events-none" : "pointer-events-auto"}`}
         style={{

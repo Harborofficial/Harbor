@@ -102,7 +102,10 @@ export function ChapterMenu({
         </button>
       </Tooltip>
       {open && (
-        <div className="fixed end-14 bottom-[150px] flex max-h-[calc(100vh-174px)] w-[360px] max-w-[calc(100vw-72px)] flex-col overflow-hidden rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop">
+        <div
+          data-mpv-glass="panel"
+          className="fixed end-14 bottom-[150px] flex max-h-[calc(100vh-174px)] w-[360px] max-w-[calc(100vw-72px)] flex-col overflow-hidden rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop"
+        >
           <header className="flex items-center justify-between border-b border-edge-soft px-4 py-2.5">
             <div className="flex items-center gap-2.5">
               <span className="text-[13.5px] font-semibold text-ink">{t("Chapters")}</span>
