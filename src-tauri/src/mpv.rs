@@ -469,6 +469,24 @@ fn mpv_header_field(name: &str, value: &str) -> String {
     format!("{name}: {value}").replace('\\', "\\\\").replace(',', "\\,")
 }
 
+/// The player's HTTP identity for a stream, shared with the thumbnail pipeline.
+pub(crate) fn stream_http_options(
+    headers: &Option<std::collections::HashMap<String, String>>,
+) -> (String, Vec<String>) {
+    let mut user_agent = "VLC/3.0.20 LibVLC/3.0.20".to_string();
+    let mut header_fields: Vec<String> = Vec::new();
+    if let Some(headers) = headers {
+        for (k, v) in headers {
+            if k.eq_ignore_ascii_case("user-agent") {
+                user_agent = v.clone();
+            } else {
+                header_fields.push(mpv_header_field(k, v));
+            }
+        }
+    }
+    (user_agent, header_fields)
+}
+
 fn apply_pre_init(
     init: &MpvInitializer,
     args: &MpvStartArgs,
@@ -505,17 +523,7 @@ fn apply_pre_init(
     set("msg-level", "all=warn,vo=v,d3d11=v,gpu=v,win32=v");
     let is_live = args.is_live.unwrap_or(false);
     set("ytdl", if is_live { "yes" } else { "no" });
-    let mut user_agent = "VLC/3.0.20 LibVLC/3.0.20".to_string();
-    let mut header_fields: Vec<String> = Vec::new();
-    if let Some(headers) = &args.headers {
-        for (k, v) in headers {
-            if k.eq_ignore_ascii_case("user-agent") {
-                user_agent = v.clone();
-            } else {
-                header_fields.push(mpv_header_field(k, v));
-            }
-        }
-    }
+    let (user_agent, header_fields) = stream_http_options(&args.headers);
     set("user-agent", &user_agent);
     if !header_fields.is_empty() {
         set("http-header-fields", &header_fields.join(","));

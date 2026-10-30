@@ -1,6 +1,14 @@
 import { Spinner } from "@/components/spinner";
 import { useEffect, useRef, useState } from "react";
-import { thumbCacheGet, thumbCacheNearest, thumbCacheSet, trickplayGet } from "@/lib/trickplay";
+import {
+  useThumbnailSession,
+  thumbCacheGet,
+  thumbCacheReceivedAt,
+  thumbCacheNearest,
+  subscribeThumbnails,
+  trickplayGet,
+  trickplayPrefetchHover,
+} from "@/lib/trickplay";
 import { useSkipSegmentsView } from "@/lib/skip-intro/segment-store";
 import { useT } from "@/lib/i18n";
 
@@ -8,10 +16,16 @@ const SEG_LABEL = { intro: "OP", outro: "ED", recap: "Recap", ad: "Ad" } as cons
 const BUCKET_SECONDS = 2;
 const CARD_WIDTH = 192;
 const CARD_HEIGHT = 108;
-const MAX_ATTEMPTS = 96;
-const RETRY_MS = 100;
+const REQUEST_TIMEOUT_MS = 15000;
 const SETTLE_MS = 70;
-const NEAREST_WINDOW = 30;
+// A sparse timeline frame is provisional; the timestamp remains the exact seek target.
+const NEAREST_WINDOW = 15;
+
+function traceThumbnail(stage: string, details: Record<string, number | boolean>): void {
+  if (import.meta.env.DEV) {
+    console.info(`[harbor/thumbs-ui] ${stage} ${JSON.stringify(details)}`);
+  }
+}
 
 export function ThumbPreview({
   time,
@@ -25,48 +39,72 @@ export function ThumbPreview({
   const bucket = Math.round(time / BUCKET_SECONDS);
   const liveBucketRef = useRef(bucket);
   liveBucketRef.current = bucket;
-  const [fetchedSrc, setFetchedSrc] = useState<string | null>(() => thumbCacheGet(bucket) ?? null);
+  const session = useThumbnailSession();
+  const timingRef = useRef({ bucket, session, started: performance.now() });
+  if (timingRef.current.bucket !== bucket || timingRef.current.session !== session) {
+    timingRef.current = { bucket, session, started: performance.now() };
+  }
+  const [, refresh] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const cached = thumbCacheGet(bucket);
     if (cached) {
-      setFetchedSrc(cached);
       setLoading(false);
+      if (canFetch) void trickplayPrefetchHover(bucket * BUCKET_SECONDS);
       return;
     }
-    setFetchedSrc(null);
     if (!canFetch) {
       setLoading(false);
       return;
     }
     setLoading(true);
     let cancelled = false;
-    let attempts = 0;
-    let timer = 0;
-    const attempt = async () => {
+    let timeout = 0;
+    const unsubscribe = subscribeThumbnails((readyBucket) => {
       if (cancelled || liveBucketRef.current !== bucket) return;
-      const url = await trickplayGet(bucket * BUCKET_SECONDS);
-      if (cancelled || liveBucketRef.current !== bucket) return;
-      if (url) {
-        thumbCacheSet(bucket, url);
-        setFetchedSrc(url);
+      if (Math.abs(readyBucket - bucket) <= NEAREST_WINDOW) refresh((value) => value + 1);
+      if (readyBucket === bucket) {
+        if (import.meta.env.DEV)
+          traceThumbnail("received", {
+            targetSec: bucket * BUCKET_SECONDS,
+            ready: !!thumbCacheGet(bucket),
+            elapsedMs: Math.round(performance.now() - timingRef.current.started),
+          });
         setLoading(false);
-        return;
+        window.clearTimeout(timeout);
       }
-      attempts += 1;
-      if (attempts >= MAX_ATTEMPTS) {
+    });
+    const timer = window.setTimeout(() => {
+      if (import.meta.env.DEV)
+        traceThumbnail("request", {
+          targetSec: bucket * BUCKET_SECONDS,
+        });
+      timeout = window.setTimeout(() => {
         setLoading(false);
-        return;
-      }
-      timer = window.setTimeout(attempt, RETRY_MS);
-    };
-    timer = window.setTimeout(attempt, SETTLE_MS);
+        if (import.meta.env.DEV)
+          traceThumbnail("timeout", {
+            targetSec: bucket * BUCKET_SECONDS,
+            elapsedMs: Math.round(performance.now() - timingRef.current.started),
+          });
+      }, REQUEST_TIMEOUT_MS);
+      void trickplayGet(bucket * BUCKET_SECONDS).then((url) => {
+        if (cancelled || liveBucketRef.current !== bucket) return;
+        if (url) {
+          refresh((value) => value + 1);
+          setLoading(false);
+          window.clearTimeout(timeout);
+        }
+        void trickplayPrefetchHover(bucket * BUCKET_SECONDS);
+      });
+    }, SETTLE_MS);
     return () => {
       cancelled = true;
+      unsubscribe();
       window.clearTimeout(timer);
+      window.clearTimeout(timeout);
     };
-  }, [bucket, canFetch]);
+  }, [bucket, canFetch, session]);
 
   const t = useT();
   const segments = useSkipSegmentsView();
@@ -74,9 +112,10 @@ export function ThumbPreview({
   const segLabel = seg ? t(SEG_LABEL[seg.kind]) : null;
   const pct = (time / dur) * 100;
   const label = fmtTime(time);
-  const nearest = fetchedSrc ? null : thumbCacheNearest(bucket, NEAREST_WINDOW);
-  const src = fetchedSrc ?? nearest ?? null;
-  const approx = !fetchedSrc && !!nearest;
+  const exact = thumbCacheGet(bucket);
+  const nearest = exact ? null : thumbCacheNearest(bucket, NEAREST_WINDOW);
+  const src = exact ?? nearest ?? null;
+  const approx = !exact && !!nearest;
 
   if (!src && !loading) {
     return (
@@ -108,6 +147,34 @@ export function ThumbPreview({
             src={src}
             alt=""
             draggable={false}
+            onLoad={() => {
+              if (!import.meta.env.DEV || !exact) return;
+              const timing = timingRef.current;
+              const received = thumbCacheReceivedAt(bucket);
+              if (timing.bucket !== bucket || timing.session !== session || received === undefined)
+                return;
+              const loaded = performance.now();
+              // The second animation frame is a paint opportunity, not proof of
+              // the compositor displaying a pixel. Keep that distinction in logs.
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => {
+                  if (timingRef.current !== timing) return;
+                  traceThumbnail("display", {
+                    targetSec: bucket * BUCKET_SECONDS,
+                    cached: received < timing.started,
+                    requestToReceiptMs: Math.round(Math.max(0, received - timing.started)),
+                    receiptToImageLoadMs: Math.round(loaded - Math.max(received, timing.started)),
+                    requestToPaintOpportunityMs: Math.round(performance.now() - timing.started),
+                  });
+                }),
+              );
+            }}
+            onError={() => {
+              if (import.meta.env.DEV)
+                traceThumbnail("image-load-failed", {
+                  targetSec: bucket * BUCKET_SECONDS,
+                });
+            }}
             className={`h-full w-full object-cover transition-opacity duration-100 ${
               approx ? "opacity-60" : "opacity-100"
             }`}

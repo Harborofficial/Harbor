@@ -1249,8 +1249,12 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
   const playUrl = liveUrl ?? src.url;
   useTrickplay({
     url: playUrl,
+    headers: src.headers,
     enabled: settings.seekPreviewEnabled,
     isLive: isLiveLike,
+    playing: snap.status === "playing",
+    buffering: snap.buffering,
+    durationSec: snap.durationSec,
   });
   const adSegments = useAdSegments(
     src.meta.id,
