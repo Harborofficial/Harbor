@@ -951,9 +951,35 @@ export function watchedProviderWrites(
                 }
               }
 
-              clearLocalCw(primaryId, `nuvio-${slot}`);
-              if (altId) clearLocalCw(altId, `nuvio-${slot}`);
-              clearLocalCw(meta.id, `nuvio-${slot}`);
+              const cachedWatched = readCachedWatchedItems(slot);
+              const remainingWatched = cachedWatched.filter(
+                (w) =>
+                  w.season != null &&
+                  w.episode != null &&
+                  allIds.some((id) => w.content_id === id || w.content_id.includes(id)),
+              );
+              if (remainingWatched.length > 0) {
+                const nextCw = {
+                  id: primaryId,
+                  type: "series" as const,
+                  name: meta.name,
+                  poster: meta.poster,
+                  background: meta.background,
+                  season: firstEp.season,
+                  episode: firstEp.episode,
+                  positionMs: 0,
+                  durationMs: 2640000,
+                  isAnime: meta.type === "anime",
+                  t: Date.now(),
+                  external: "nuvio" as const,
+                };
+                saveLocalCw(nextCw, `nuvio-${slot}`);
+                if (altId) saveLocalCw({ ...nextCw, id: altId }, `nuvio-${slot}`);
+              } else {
+                clearLocalCw(primaryId, `nuvio-${slot}`);
+                if (altId) clearLocalCw(altId, `nuvio-${slot}`);
+                clearLocalCw(meta.id, `nuvio-${slot}`);
+              }
 
               try {
                 const settings = loadStoredSettings();

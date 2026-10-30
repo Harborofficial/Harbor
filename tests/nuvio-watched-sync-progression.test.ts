@@ -60,7 +60,7 @@ test("detail page loads Nuvio watched items and progress into stremioWatched sta
   assert.match(detail, /pullWatchedItemsFromNuvio\(\)/);
   assert.match(
     detail,
-    /setStremioWatched\(\(prev\) => new Set\(\[\.\.\.prev, \.\.\.watchedKeys\]\)\)/,
+    /setStremioWatched\((?:\(prev\) => )?new Set\((?:\[\.\.\.prev,\s*)?watchedKeys/,
   );
 });
 

@@ -235,3 +235,36 @@ test("ContinueCard captures episode airDate and displays timer countdown when un
     "ContinueCard must switch to waiting timer state when next episode is unaired",
   );
 });
+
+test("CW tray and localCw update next up when episodes are marked unwatched or watched", () => {
+  const syncSrc = read("../src/lib/nuvio/nuvio-sync.ts");
+  assert.match(
+    syncSrc,
+    /const localHasProgress =\s*\(entry\.positionMs \?\? 0\) > 0 &&\s*entry\.season === nextS &&\s*entry\.episode === nextE;/,
+    "reconcileNuvioWatchedOnce must only treat active in-progress playback on the same target episode as local progress",
+  );
+  assert.match(
+    syncSrc,
+    /if \(entry\.season !== nextS \|\| entry\.episode !== nextE \|\| entry\.positionMs !== newPos\) \{\s*saveLocalCw\(/,
+    "reconcileNuvioWatchedOnce must update localCw to nextTarget when episode marked unwatched or watched",
+  );
+
+  const playbackSrc = read("../src/lib/nuvio/nuvio-playback.ts");
+  assert.match(
+    playbackSrc,
+    /if \(\s*manualWatchedState\(r\.content_id, r\.season, r\.episode\) === false \|\|\s*manualWatchedState\(clean, r\.season, r\.episode\) === false\s*\) \{\s*continue;\s*\}/,
+    "buildNuvioPlaybackItems must ignore safeRecords for episodes explicitly marked unwatched",
+  );
+  assert.match(
+    playbackSrc,
+    /loc\.positionMs > 0 &&\s*\(loc\.season > curSeason \|\| \(loc\.season === curSeason && loc\.episode > curEpisode\)\)/,
+    "buildNuvioPlaybackItems must only allow local records with active progress (positionMs > 0) to override next up",
+  );
+
+  const detailSrc = read("../src/views/detail.tsx");
+  assert.match(
+    detailSrc,
+    /const \{ changed \} = reconcileNuvioWatchedEpisodes\(profileIndex, serverEpisodeKeys, targetIds\);\s*if \(changed\) \{\s*void reconcileNuvioWatched\(profileIndex, \{ force: true \}\);\s*\}/,
+    "detail view must trigger reconcileNuvioWatched with force: true when episode watched status changes",
+  );
+});

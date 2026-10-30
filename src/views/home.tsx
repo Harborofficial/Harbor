@@ -836,20 +836,30 @@ export function Home({
 
     const manual = manualWatchedLibraryItems();
     if (isNuvioProvider) {
+      const externalSeries = externalCw.filter((i) => {
+        if (!i.external || i.type !== "series") return false;
+        if (disabledSources.has(i.external)) return false;
+        if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
+          if (i.upNext || i.waitingForAir) return true;
+          const offset = i.state?.timeOffset ?? 0;
+          const dur = i.state?.duration ?? 0;
+          if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
+          if (dur > 0 && offset / dur >= CW_FINISHED_RATIO) return false;
+        }
+        return i.external === "nuvio" || i.external === "trakt" || i.external === "simkl";
+      });
+      const externalIds = new Set(externalSeries.map((i) => i._id));
+      const cleanExternalIds = new Set(
+        externalSeries.map((i) => i._id.replace(/^(series|movie|tmdb):/, "")),
+      );
       const nuvioPool = [
-        ...externalCw.filter((i) => {
-          if (!i.external || i.type !== "series") return false;
-          if (disabledSources.has(i.external)) return false;
-          if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
-            if (i.upNext || i.waitingForAir) return true;
-            const offset = i.state?.timeOffset ?? 0;
-            const dur = i.state?.duration ?? 0;
-            if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
-            if (dur > 0 && offset / dur >= CW_FINISHED_RATIO) return false;
-          }
-          return i.external === "nuvio" || i.external === "trakt" || i.external === "simkl";
-        }),
-        ...localCwItems.filter((i) => i.type === "series"),
+        ...externalSeries,
+        ...localCwItems.filter(
+          (i) =>
+            i.type === "series" &&
+            !externalIds.has(i._id) &&
+            !cleanExternalIds.has(i._id.replace(/^(series|movie|tmdb):/, "")),
+        ),
       ];
       if (manual.length === 0) return nuvioPool;
       const cwMemberIds = new Set(nuvioPool.filter(isCwMember).map((i) => i._id));

@@ -1580,7 +1580,7 @@ async function reconcileNuvioWatchedOnce(
     isNuvioProviderActive() &&
     getNuvioAccountId() === accountId &&
     resolveNuvioProfileIndex() === profileIndex &&
-    keys.every((key, i) => localStorage.getItem(key) === before[i])
+    (force || keys.every((key, i) => localStorage.getItem(key) === before[i]))
       ? applyPending(pulled, profileIndex, accountId, "watched", true, pending).items
       : null;
   if (
@@ -1798,26 +1798,23 @@ async function reconcileNuvioWatchedOnce(
         } else if (nextTarget) {
           const nextS = nextTarget.season;
           const nextE = nextTarget.episode;
-          const localIsAhead =
-            (entry.season ?? 0) > nextS ||
-            ((entry.season ?? 0) === nextS && (entry.episode ?? 0) > nextE);
-
-          if (!localIsAhead) {
-            const sameEpisode = entry.season === nextS && entry.episode === nextE;
-            const newPos = sameEpisode && (entry.positionMs ?? 0) > 0 ? entry.positionMs : 0;
-            if (entry.season !== nextS || entry.episode !== nextE || entry.positionMs !== newPos) {
-              saveLocalCw(
-                {
-                  ...entry,
-                  season: nextS,
-                  episode: nextE,
-                  positionMs: newPos,
-                  external: "nuvio" as const,
-                  t: maxInfo.watchedAt || Date.now(),
-                },
-                `nuvio-${profileIndex}`,
-              );
-            }
+          const localHasProgress =
+            (entry.positionMs ?? 0) > 0 &&
+            entry.season === nextS &&
+            entry.episode === nextE;
+          const newPos = localHasProgress ? entry.positionMs : 0;
+          if (entry.season !== nextS || entry.episode !== nextE || entry.positionMs !== newPos) {
+            saveLocalCw(
+              {
+                ...entry,
+                season: nextS,
+                episode: nextE,
+                positionMs: newPos,
+                external: "nuvio" as const,
+                t: maxInfo.watchedAt || Date.now(),
+              },
+              `nuvio-${profileIndex}`,
+            );
           }
         }
       } else if (isServerWatched) {

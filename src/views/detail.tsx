@@ -931,7 +931,10 @@ export function DetailView({
                 serverEpisodeKeys.add(`${it.content_id}|${it.season}|${it.episode}`);
               }
             }
-            reconcileNuvioWatchedEpisodes(profileIndex, serverEpisodeKeys, targetIds);
+            const { changed } = reconcileNuvioWatchedEpisodes(profileIndex, serverEpisodeKeys, targetIds);
+            if (changed) {
+              void reconcileNuvioWatched(profileIndex, { force: true });
+            }
           }
 
           const localManual = manualEpisodeKeys(meta.id, [

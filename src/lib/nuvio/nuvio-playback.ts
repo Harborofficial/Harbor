@@ -17,7 +17,8 @@ import { isCwDismissed } from "@/lib/cw-dismiss";
 import type { NuvioWatchProgress, NuvioWatchedItem } from "./nuvio-types";
 import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { readCachedNuvioLibrary } from "./nuvio-library";
-import { localCwEntry, listLocalCw } from "@/lib/local-cw";
+import { localCwEntry, listLocalCw, saveLocalCw } from "@/lib/local-cw";
+import { manualWatchedState } from "@/lib/manual-watched";
 
 const DURATION_MS = { movie: 6_300_000, series: 2_640_000 };
 const PLAYBACK_ITEMS_CACHE_PREFIX = "harbor.nuvio.playback_items.";
@@ -427,9 +428,15 @@ export function buildNuvioPlaybackItems(
     const isFinished =
       (dur > 0 && pos / dur >= 0.9) || (r as Record<string, unknown>).watched === true;
     if (!isFinished) continue;
+    const clean = r.content_id.replace(/^(series|movie|tmdb):/, "");
+    if (
+      manualWatchedState(r.content_id, r.season, r.episode) === false ||
+      manualWatchedState(clean, r.season, r.episode) === false
+    ) {
+      continue;
+    }
     const t = r.last_watched || (r.updated_at ? Date.parse(r.updated_at) : 0);
     registerSeed(r.content_id, r.season, r.episode, t, r.name || r.title || undefined);
-    const clean = r.content_id.replace(/^(series|movie|tmdb):/, "");
     registerSeed(clean, r.season, r.episode, t, r.name || r.title || undefined);
   }
 
@@ -479,12 +486,19 @@ export function buildNuvioPlaybackItems(
       !keptForTimer &&
       localMatch &&
       localMatch.season != null &&
-      localMatch.episode != null &&
-      (localMatch.season > seed.season ||
-        (localMatch.season === seed.season && localMatch.episode > seed.episode))
+      localMatch.episode != null
     ) {
-      nextSeason = localMatch.season;
-      nextEpisode = localMatch.episode;
+      const order = (s: number, e: number) => s * 100000 + e;
+      const seedNextOrder = seed.season * 100000 + (seed.episode + 1);
+      const localOrder = localMatch.season * 100000 + localMatch.episode;
+      if (
+        (localMatch.positionMs > 0 && localOrder > order(seed.season, seed.episode)) ||
+        localOrder === seedNextOrder ||
+        (localMatch.season > seed.season && localMatch.episode === 1)
+      ) {
+        nextSeason = localMatch.season;
+        nextEpisode = localMatch.episode;
+      }
     }
 
     // The timer card keeps the last watched episode: the tray's advancer resolves
@@ -558,8 +572,8 @@ export function buildNuvioPlaybackItems(
           const curSeason = existingItem.state.season ?? 0;
           const curEpisode = existingItem.state.episode ?? 0;
           if (
-            loc.season > curSeason ||
-            (loc.season === curSeason && loc.episode > curEpisode) ||
+            (loc.positionMs > 0 &&
+              (loc.season > curSeason || (loc.season === curSeason && loc.episode > curEpisode))) ||
             (loc.season === curSeason &&
               loc.episode === curEpisode &&
               locT > itemT &&
@@ -572,7 +586,21 @@ export function buildNuvioPlaybackItems(
             existingItem.state.duration =
               loc.durationMs > 0 ? loc.durationMs : existingItem.state.duration;
             existingItem.state.lastWatched = new Date(locT).toISOString();
-            existingItem.upNext = loc.positionMs === 0;
+            existingItem.upNext = false;
+          } else if (
+            loc.positionMs === 0 &&
+            (loc.season !== curSeason || loc.episode !== curEpisode)
+          ) {
+            saveLocalCw(
+              {
+                ...loc,
+                season: curSeason,
+                episode: curEpisode,
+                positionMs: 0,
+                external: "nuvio" as const,
+              },
+              ownerId,
+            );
           }
         }
         continue;
