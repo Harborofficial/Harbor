@@ -32,6 +32,12 @@ const uiFallback: Record<string, string> = {
   "music.playlist.deleteTitle": "Delete playlist?",
   "Use installed addons for movie and series metadata, artwork, and episodes. Missing addon metadata stays unavailable. TMDB Top Match is controlled separately below. Restart Harbor after changing this option.":
     "Use installed addons for movie and series metadata, artwork, and episodes. Missing addon metadata stays unavailable. TMDB Top Match is controlled separately below. Restart Harbor after changing this option.",
+  "games.collections.open": "Open collection",
+  "games.collections.coverUpload": "Change collection picture",
+  "games.collections.coverRemove": "Remove collection picture",
+  "games.collections.coverFailed": "The collection picture could not be saved.",
+  "games.collections.coverType": "Choose a PNG, JPEG, WebP, GIF, or AVIF image.",
+  "games.collections.coverSize": "That image is too large. Choose one under 24 MB.",
   "Metadata addon priority": "Metadata addon priority",
   "Metadata addons start in your addon-list order. The first supplies metadata; later addons only fill missing data or replace failed responses. Reordering enables addon preference.":
     "Metadata addons start in your addon-list order. The first supplies metadata; later addons only fill missing data or replace failed responses. Reordering enables addon preference.",
