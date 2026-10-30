@@ -1,5 +1,5 @@
 import { ChevronDown, Minimize, X } from "@/components/icons/music-icons";
-import { useMusicPlayer } from "@/lib/music/player";
+import { pauseMusicPlayer, useMusicPlayer } from "@/lib/music/player";
 import { musicVideoSessionKey } from "@/lib/music/video-surfaces";
 import { musicVideoSurfaces } from "@/lib/music/video-session";
 import { MusicVideoSurface } from "./music-video-surface";
@@ -41,12 +41,21 @@ function savedSize(): { width: number; height: number } {
 export function MusicVideoMini() {
   const t = useT();
   const player = useMusicPlayer();
-  const { setView } = useView();
+  const { setView, player: media } = useView();
   const ui = useMusicVideoMini();
   const [size, setSize] = useState(savedSize);
   const drag = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const endDrag = useRef<(() => void) | null>(null);
   useEffect(() => () => endDrag.current?.(), []);
+  const mediaKey = media
+    ? `${media.meta.id}:${media.episode?.season ?? ""}:${media.episode?.episode ?? ""}`
+    : "";
+  // Starting a movie or series takes the screen; the music picture and sound stop with it.
+  useEffect(() => {
+    if (!mediaKey) return;
+    closeMusicVideoMini();
+    pauseMusicPlayer();
+  }, [mediaKey]);
   const surfaces = useSyncExternalStore(
     musicVideoSurfaces.subscribe,
     musicVideoSurfaces.getSnapshot,
@@ -54,6 +63,7 @@ export function MusicVideoMini() {
   );
   const track = player.current;
   if (
+    mediaKey ||
     !ui.enabled ||
     ui.watchOpen ||
     ui.hidden ||

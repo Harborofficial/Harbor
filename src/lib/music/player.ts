@@ -1255,6 +1255,11 @@ export function toggleMusicPlayback(): void {
   void invoke("music_engine_pause", { paused: state.phase === "playing" }).catch(() => {});
 }
 
+/** Pause running music without ever starting it; used when a movie or series takes the screen. */
+export function pauseMusicPlayer(): void {
+  if (state.phase === "playing") toggleMusicPlayback();
+}
+
 export function setMusicQueue(input: MusicTrack[], automationOwner?: symbol): void {
   if (automationOwner && !ownsMusicQueueAutomation(automationOwner)) return;
   if (!automationOwner) cancelMusicQueueAutomation();
