@@ -1,0 +1,2775 @@
+/* Scoped Midnight (دجى) theme stylesheet */
+
+@property --midnight-angle-1 {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: -75deg;
+}
+
+@property --midnight-angle-2 {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: -45deg;
+}
+
+/* Outer Chrome Band: visibility-toggled for chromeHidden without backdrop-root opacity pollution */
+[data-theme-layout="midnight"] .midnight-top-chrome {
+  pointer-events: none;
+}
+
+[data-theme-layout="midnight"] .midnight-top-chrome[data-hidden="true"] {
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 400ms ease;
+}
+
+/* Capsule Container: translate property transitions + island recede geometry */
+[data-theme-layout="midnight"] .midnight-top-capsule {
+  /* The width carries the whole island gesture, so it leaves and lands gently: the
+     front-loaded curve used elsewhere reached most of the distance in the first frames
+     and read as a snap while scrolling. */
+  transition:
+    translate 450ms cubic-bezier(0.16, 1, 0.3, 1),
+    width 560ms cubic-bezier(0.4, 0, 0.2, 1),
+    height 260ms cubic-bezier(0.25, 1, 0.5, 1),
+    padding-inline 260ms cubic-bezier(0.25, 1, 0.5, 1);
+  translate: none;
+}
+
+[data-theme-layout="midnight"] .midnight-top-chrome[data-hidden="true"] .midnight-top-capsule {
+  pointer-events: none;
+  translate: 0 -24px;
+}
+
+/* Sibling A: Dedicated Glass Layer (isolated from opacity/filters on ancestors) */
+[data-theme-layout="midnight"] .midnight-top-capsule-glass {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-color: rgba(7, 9, 12, 0.72);
+  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in srgb, var(--color-edge) 55%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 12px 40px -10px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(14px) saturate(1.35);
+  -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 400ms ease;
+}
+
+/* Sibling C: Capsule Content */
+[data-theme-layout="midnight"] .midnight-top-capsule-content {
+  transition: opacity 400ms ease;
+}
+
+/* Open: the bar comes back only once the glass has made room for every item again. The fold
+   owns the width; the content it carries never has to fit into a pill that is still opening. */
+[data-theme-layout="midnight"]
+  .midnight-top-capsule[data-midnight-island="open"]
+  .midnight-top-capsule-content {
+  visibility: visible;
+  transition:
+    opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 160ms,
+    visibility 0s linear 160ms;
+}
+
+/* Receded: the whole bar leaves before the glass starts to fold. Nothing is laid out inside a
+   pill narrower than the bar it was drawn for, which is what used to press the ends together
+   and push the active item's indicator over the mark. */
+[data-theme-layout="midnight"]
+  .midnight-top-capsule[data-midnight-island="collapsed"]
+  .midnight-top-capsule-content {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* Short, but not a cut: the bar dissolves while the glass is still at full width, and the
+     fold begins on the frame after it is gone. */
+  transition:
+    opacity 160ms cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 160ms;
+}
+
+/* The account trigger closes the glass and wears a profile ring drawn two pixels outside its
+   own box, so the avatar plus ring is a 40px disc. The slot keeps the size Harbor gave it and
+   the disc rides the scale its state asks for, so the ring never touches the glass. */
+[data-theme-layout="midnight"] .midnight-account-slot {
+  display: flex;
+  align-items: center;
+  --midnight-avatar-scale: 1;
+}
+
+[data-theme-layout="midnight"] .midnight-account-slot [data-midnight-account-trigger] {
+  margin-inline-start: 4px;
+  transform: scale(var(--midnight-avatar-scale));
+  transition:
+    color 250ms ease,
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme-layout="midnight"] .midnight-account-slot [data-midnight-account-trigger]:active {
+  transform: scale(calc(var(--midnight-avatar-scale) * 0.96));
+}
+
+[data-theme-layout="midnight"] .midnight-top-chrome[data-hidden="true"] .midnight-top-capsule-glass,
+[data-theme-layout="midnight"]
+  .midnight-top-chrome[data-hidden="true"]
+  .midnight-top-capsule-content {
+  opacity: 0;
+}
+
+/* Tier 0 Fallback for engines without backdrop-filter */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-theme-layout="midnight"] .midnight-top-capsule-glass {
+    background-color: #07090c;
+  }
+  [data-theme-layout="midnight"] .midnight-more-popover {
+    background-color: #07090c;
+  }
+  [data-theme-layout="midnight"] .midnight-account-popover {
+    background-color: #07090c;
+  }
+}
+
+/* Reduced transparency mode */
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme-layout="midnight"] .midnight-top-capsule-glass {
+    background-color: #07090c !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-more-popover {
+    background-color: #07090c !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-account-popover {
+    background-color: #07090c !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Nav Item Button */
+[data-theme-layout="midnight"] .midnight-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  min-width: 40px;
+  /* An item is never asked to give up room it does not have: its icon is 40 wide and the
+     strip's budget is measured from these boxes, so shrinking one would let two icons share
+     the same pixels. */
+  flex-shrink: 0;
+  border-radius: 9999px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--color-ink-muted);
+  transition:
+    color 250ms ease,
+    transform 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  outline: none;
+}
+
+[data-theme-layout="midnight"] .midnight-item:active {
+  transform: scale(0.96);
+}
+
+[data-theme-layout="midnight"] .midnight-item:is(:hover, :focus-visible) {
+  color: var(--color-ink);
+}
+
+[data-theme-layout="midnight"] .midnight-item:focus-visible,
+[data-theme-layout="midnight"] .midnight-more-btn:focus-visible {
+  outline: 2px solid #8fb0cc;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Specular Sheen Sweep on Item (::before) */
+[data-theme-layout="midnight"] .midnight-item::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 9999px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    var(--midnight-angle-2, -45deg),
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.35) 40% 50%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  transition:
+    opacity 300ms ease,
+    background-position 500ms cubic-bezier(0.25, 1, 0.5, 1),
+    --midnight-angle-2 500ms cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 1;
+}
+
+[data-theme-layout="midnight"] .midnight-item:is(:hover, :focus-visible)::before {
+  opacity: 1;
+  background-position: 30% 50%;
+}
+
+[data-theme-layout="midnight"] .midnight-item:active::before {
+  background-position: 50% 20%;
+  --midnight-angle-2: -15deg;
+}
+
+/* Conic Border Sweep & Highlights on Item (::after) */
+[data-theme-layout="midnight"] .midnight-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  padding: 1px;
+  box-sizing: border-box;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    conic-gradient(
+      from var(--midnight-angle-1, -75deg) at 50% 50%,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0.04) 5% 40%,
+      color-mix(in srgb, var(--color-accent) 35%, transparent) 50%,
+      rgba(255, 255, 255, 0.04) 60% 95%,
+      rgba(255, 255, 255, 0.55)
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    opacity 300ms ease,
+    --midnight-angle-1 500ms cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 2;
+}
+
+[data-theme-layout="midnight"] .midnight-item:is(:hover, :focus-visible)::after {
+  opacity: 1;
+  --midnight-angle-1: -125deg;
+}
+
+[data-theme-layout="midnight"] .midnight-item:active::after {
+  --midnight-angle-1: -75deg;
+}
+
+/* Touch devices: static angles */
+@media (hover: none) and (pointer: coarse) {
+  [data-theme-layout="midnight"] .midnight-item::before {
+    --midnight-angle-2: -45deg;
+  }
+  [data-theme-layout="midnight"] .midnight-item::after {
+    --midnight-angle-1: -75deg;
+  }
+}
+
+/* Label Reveal Mechanics: the label belongs to the current item only. Hover uses a
+   floating caption instead, so the strip never reflows on pointer movement. */
+[data-theme-layout="midnight"] .midnight-item-label-wrap {
+  display: inline-flex;
+  align-items: center;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  contain: layout;
+  transition: max-width 460ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme-layout="midnight"] .midnight-item-label {
+  font-size: 13px;
+  font-weight: 500;
+  padding-inline-start: 4px;
+  padding-inline-end: 12px;
+}
+
+/* Island open: the current item carries its name inline. */
+[data-theme-layout="midnight"]
+  .midnight-top-capsule[data-midnight-island="open"]
+  .midnight-item:is([aria-current="page"], [data-midnight-current])
+  .midnight-item-label-wrap {
+  max-width: var(--midnight-label-w, 120px);
+}
+
+/* Hover and keyboard focus reveal the name inline, in the item itself. */
+[data-theme-layout="midnight"]
+  .midnight-top-capsule[data-midnight-island="open"]
+  .midnight-item:is(:hover, :focus-visible)
+  .midnight-item-label-wrap {
+  max-width: var(--midnight-label-w, 120px);
+}
+
+/* Shared Active Sliding Indicator */
+[data-theme-layout="midnight"] .midnight-sliding-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0; /* Physical 0: offsetLeft is physical coordinate in both LTR and RTL */
+  pointer-events: none;
+  border-radius: 9999px;
+  background-color: rgba(150, 180, 210, 0.22);
+  background-color: color-mix(in srgb, var(--color-accent) 18%, rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(170, 195, 220, 0.35);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 35%, rgba(255, 255, 255, 0.2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  z-index: 0;
+  opacity: 0;
+}
+
+/* Transitions enabled only after initial mount/paint */
+[data-theme-layout="midnight"]
+  .midnight-nav-cluster[data-ready="true"]
+  .midnight-sliding-indicator {
+  transition:
+    transform 400ms cubic-bezier(0.25, 1, 0.5, 1),
+    width 400ms cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 300ms ease;
+}
+
+/* Indicator transition disabled during hover expansion tracking */
+[data-theme-layout="midnight"]
+  .midnight-nav-cluster[data-expanding="true"]
+  .midnight-sliding-indicator {
+  transition: none !important;
+}
+
+/* Responsive density: tighter pitch on narrow widths so fewer items spill into More. */
+[data-theme-layout="midnight"] .midnight-nav-cluster {
+  gap: 4px;
+}
+
+/* Coming back from the fold, the strip is the last part of the bar to arrive: it is the only
+   part that needs the full width, so it waits for the glass instead of spilling across its
+   ends. Receded, it is not there at all - not painted, not hovered, not focused. */
+[data-theme-layout="midnight"]
+  .midnight-top-capsule[data-midnight-island="collapsed"]
+  .midnight-nav-cluster {
+  opacity: 0;
+  visibility: hidden;
+  transition: none;
+}
+
+[data-theme-layout="midnight"]
+  .midnight-top-capsule[data-midnight-island="open"]
+  .midnight-nav-cluster {
+  visibility: visible;
+  transition:
+    opacity 160ms cubic-bezier(0.4, 0, 0.2, 1) 340ms,
+    visibility 0s linear 340ms;
+}
+
+@media (min-width: 1100px) {
+  [data-theme-layout="midnight"] .midnight-nav-cluster {
+    gap: 8px;
+  }
+}
+
+/* Island geometry: scrolling down folds the capsule down to its tag. */
+[data-theme-layout="midnight"]
+  .midnight-top-chrome:not([data-hidden="true"])
+  .midnight-top-capsule[data-midnight-island="collapsed"] {
+  height: 44px;
+  /* The tag carries its own padding, so the pill is exactly as wide as it is. */
+  padding-inline: 0;
+  translate: 0 -4px;
+  /* The bar has already left by the time the glass starts to fold, and it comes back only
+     after the glass has landed: the width never travels with content inside it. The fold is
+     long and eased at both ends on purpose. It crosses more than a thousand pixels, so the
+     distance has to be spent over time: measured frame by frame, this curve keeps every frame
+     under 50px of travel, while the shorter front-loaded one it replaced jumped 155px in a
+     single frame. */
+  transition:
+    translate 450ms cubic-bezier(0.16, 1, 0.3, 1),
+    width 720ms ease-in-out 160ms,
+    height 560ms ease-in-out 160ms,
+    padding-inline 560ms ease-in-out 160ms;
+}
+
+/* The tag: the mark and where the app is, and nothing else. It is laid out at its own width, so
+   no part of the fold can move an icon into its neighbour, and it arrives as a material rather
+   than a fade: scale and opacity travel together, which reads as the surface resolving instead
+   of a label being switched on. */
+[data-theme-layout="midnight"] .midnight-top-capsule-tag {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  inline-size: max-content;
+  margin-inline: auto;
+  padding-inline: 10px;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  scale: 0.94;
+  translate: 0 6px;
+  transition:
+    opacity 140ms cubic-bezier(0.4, 0, 0.2, 1),
+    scale 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    translate 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 140ms;
+}
+
+[data-theme-layout="midnight"]
+  .midnight-top-capsule[data-midnight-island="collapsed"]
+  .midnight-top-capsule-tag {
+  visibility: visible;
+  opacity: 1;
+  scale: 1;
+  translate: none;
+  /* It starts while the glass is still wide and only reaches full strength as the fold lands, so
+     the in-between frames already name the destination instead of showing an empty slab that
+     resolves at the end. The tag is never wider than the pill it sits in. */
+  transition:
+    opacity 340ms cubic-bezier(0.4, 0, 0.2, 1) 300ms,
+    scale 420ms cubic-bezier(0.16, 1, 0.3, 1) 300ms,
+    translate 460ms cubic-bezier(0.16, 1, 0.3, 1) 300ms,
+    visibility 0s linear 300ms;
+}
+
+[data-theme-layout="midnight"] .midnight-top-capsule-tag-rule {
+  inline-size: 1px;
+  block-size: 15px;
+  background-color: color-mix(in srgb, var(--color-edge) 90%, transparent);
+}
+
+[data-theme-layout="midnight"] .midnight-top-capsule-tag-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+[data-theme-layout="midnight"] .midnight-top-capsule-tag-current > * {
+  flex-shrink: 0;
+}
+
+[data-theme-layout="midnight"] .midnight-top-capsule-tag-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+/* Hidden chrome takes the tag with it, whichever state the island was in. */
+[data-theme-layout="midnight"] .midnight-top-chrome[data-hidden="true"] .midnight-top-capsule-tag {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Overflow Glass Popover */
+[data-theme-layout="midnight"] .midnight-more-popover {
+  position: absolute;
+  background-color: rgba(7, 9, 12, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid color-mix(in srgb, var(--color-edge) 65%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 20px 60px -15px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 70;
+}
+
+/* Account Glass Popover */
+[data-theme-layout="midnight"] .midnight-account-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-end: 0;
+  width: 20rem; /* 320px */
+  border-radius: 1rem;
+  background-color: rgba(7, 9, 12, 0.72);
+  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid color-mix(in srgb, var(--color-edge) 65%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 24px 60px -15px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 140;
+  /* The theme controls live in this menu, so it can outgrow a short window. It scrolls rather
+     than being cut off at the bottom edge. */
+  max-height: calc(100dvh - 120px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  transform-origin: top right;
+  transition:
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme-layout="midnight"] .midnight-account-popover:where(:dir(rtl), [dir="rtl"] *) {
+  transform-origin: top left;
+}
+
+/* Quick Entries Social Tiles */
+[data-theme-layout="midnight"] .midnight-account-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  font-weight: 500;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    transform 100ms ease;
+  user-select: none;
+  cursor: pointer;
+}
+
+[data-theme-layout="midnight"] .midnight-account-tile:hover,
+[data-theme-layout="midnight"] .midnight-account-tile:focus-visible {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--color-ink);
+  outline: none;
+}
+
+[data-theme-layout="midnight"] .midnight-account-tile:active {
+  transform: scale(0.96);
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme-layout="midnight"] .midnight-top-capsule {
+    translate: none !important;
+    transition: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-top-capsule-glass,
+  [data-theme-layout="midnight"] .midnight-top-capsule-content {
+    transition: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-item,
+  [data-theme-layout="midnight"] .midnight-item::before,
+  [data-theme-layout="midnight"] .midnight-item::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-account-slot [data-midnight-account-trigger] {
+    transition: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-item-label-wrap {
+    transition: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-item-label {
+    transition: opacity 120ms ease !important;
+    transform: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-preview,
+  [data-theme-layout="midnight"] .midnight-preview .midnight-preview-body,
+  [data-theme-layout="midnight"] .midnight-preview .midnight-preview-chips {
+    transition: none !important;
+    transform: none !important;
+    translate: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-top-capsule-tag {
+    transition: none !important;
+    translate: none !important;
+    scale: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-preview-img,
+  [data-theme-layout="midnight"] .midnight-preview::after {
+    animation: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-sliding-indicator {
+    transition: none !important;
+  }
+  [data-theme-layout="midnight"] .midnight-account-popover {
+    translate: none !important;
+    transition: opacity 120ms ease !important;
+  }
+}
+
+/* ==========================================================================
+   Games View Integration & Systematic Overlap Prevention
+   ========================================================================== */
+
+/* 1. Keep top capsule visible in Games view (overrides generic [data-games-library] hiding rule) */
+[data-games-layout="midnight"][data-games-library]:not([data-games-navigation])
+  .midnight-top-chrome,
+[data-theme-layout="midnight"]
+  [data-games-library]:not([data-games-navigation])
+  .midnight-top-chrome {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: none;
+  translate: none;
+  transition-delay: 0s;
+}
+
+/* 2. Games library sidebar offset below the 80px Midnight top-dock band */
+[data-games-layout="midnight"] .games-library-sidebar {
+  margin-block-start: 80px;
+  height: calc(100% - 80px - var(--harbor-dock-gap, 0px));
+}
+
+/* ==========================================================================
+   Hover Preview Island
+   Portaled to <body>, so it is scoped by the document-level theme attribute.
+   ========================================================================== */
+
+/* The island is the artwork: one wide frame carrying the title's own landscape image, with
+   the writing set over it instead of beside it or under it. Its width and height are laid out
+   by the component, which sizes the frame from the poster it grew out of. */
+[data-theme-layout="midnight"] .midnight-preview {
+  position: fixed;
+  z-index: 120;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 30px;
+  background-color: rgba(6, 8, 11, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 30px 70px -24px rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(26px) saturate(1.5);
+  -webkit-backdrop-filter: blur(26px) saturate(1.5);
+  opacity: 0;
+  transform: scale(0.965) translateY(8px);
+  transition:
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 460ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+/* Leaving is a settle, not a cut: the frame shrinks back toward the poster it grew out of on a
+   curve that starts gently and lands slowly, instead of dumping most of its fade in the first
+   few frames. The component holds it mounted for the length of this transition. */
+[data-theme-layout="midnight"] .midnight-preview[data-open="false"] {
+  transition:
+    opacity 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 380ms cubic-bezier(0.3, 0.1, 0.24, 1);
+}
+
+[data-theme-layout="midnight"] .midnight-preview[data-open="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-pane {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* One specular pass on open, the same gesture the nav pill makes. */
+[data-theme-layout="midnight"] .midnight-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 34%,
+    rgba(255, 255, 255, 0.1) 46%,
+    transparent 58%
+  );
+  opacity: 0;
+}
+
+[data-theme-layout="midnight"] .midnight-preview[data-open="true"]::after {
+  animation: midnight-preview-sheen 820ms cubic-bezier(0.16, 1, 0.3, 1) 90ms 1;
+}
+
+@keyframes midnight-preview-sheen {
+  0% {
+    opacity: 0;
+    translate: -55% 0;
+  }
+  20% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    translate: 55% 0;
+  }
+}
+
+[data-theme-layout="midnight"] .midnight-preview-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: #0b0e12;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: midnight-preview-art-in 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes midnight-preview-art-in {
+  from {
+    opacity: 0;
+    scale: 1.03;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+[data-theme-layout="midnight"] .midnight-preview-plate {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      120% 120% at 20% 0%,
+      color-mix(in srgb, var(--color-accent) 28%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(160deg, #10151b, #05070a);
+}
+
+[data-theme-layout="midnight"] .midnight-preview-veil {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* A floor under the writing, measured instead of guessed: the component reports how tall the
+     writing is and which edge it sits on, the scrim holds at full strength under exactly that
+     block and hands the frame back to the artwork over a short tail and across the far side. A
+     gradient tied to a fraction of the frame put the synopsis in the thin end of the fade, so a
+     bright frame - an island at sunset, a neon poster - out-shone the words along their length. */
+  background: linear-gradient(
+    var(--midnight-veil-dir, to top),
+    rgba(6, 8, 11, 0.94) 0%,
+    rgba(6, 8, 11, 0.94) 78%,
+    rgba(6, 8, 11, 0) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 var(--midnight-veil-h, 160px),
+    transparent calc(var(--midnight-veil-h, 160px) + 60px)
+  );
+  mask-image: linear-gradient(
+    to top,
+    #000 var(--midnight-veil-h, 160px),
+    transparent calc(var(--midnight-veil-h, 160px) + 60px)
+  );
+  pointer-events: none;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-title {
+  margin: 0;
+  min-width: 0;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-ink);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  /* Two lines of a long name break evenly instead of leaving one orphaned word, and a Latin
+     name keeps its own direction so the clamp's ellipsis lands at the end of it. */
+  text-wrap: balance;
+  unicode-bidi: plaintext;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-chip {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0a0d10;
+  background-color: color-mix(in srgb, var(--color-accent) 82%, white);
+}
+
+[data-theme-layout="midnight"] .midnight-preview-progress {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+[data-theme-layout="midnight"] .midnight-preview-progress > span {
+  display: block;
+  height: 100%;
+  background-color: var(--color-accent);
+}
+
+[data-theme-layout="midnight"] .midnight-preview-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: min(66%, 420px);
+  min-width: 0;
+  padding: 0 22px 20px;
+  /* The writing trails the glass on the way in and lets go first on the way out: the card
+     closes over its artwork rather than dropping a full block of text with the frame. */
+  opacity: 0;
+  translate: 0 10px;
+  transition:
+    opacity 220ms cubic-bezier(0.4, 0, 0.2, 1),
+    translate 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme-layout="midnight"] .midnight-preview[data-open="true"] .midnight-preview-body {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: 90ms;
+}
+
+[data-theme-layout="midnight"] .midnight-preview[data-open="false"] .midnight-preview-body {
+  transition:
+    opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    translate 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme-layout="midnight"] .midnight-preview-chips {
+  display: block;
+  min-width: 0;
+  /* One line: a wrapped meta line would take the synopsis's room and shift the whole block
+     whenever a fact grew a word. A fact longer than the line ends in an ellipsis instead of
+     being sliced through its last glyph, and the ellipsis lands on the reading end by itself. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* A meta line, not a row of buttons: dots between the facts, as on a detail sheet. The dot
+   rides on the leading edge of the fact that follows it, so it always falls between two facts
+   and never outside the line, in either writing direction. */
+[data-theme-layout="midnight"] .midnight-preview-chips > * + *::before {
+  content: "·";
+  padding-inline: 6px;
+  opacity: 0.55;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-pill {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  background: none;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-synopsis {
+  margin: 0;
+  /* The writing is what the card is opened for, so the rest of it is read in place: the paragraph
+     keeps its line budget but scrolls behind it, by wheel or by the reading keys, while the frame
+     the pointer is on stays exactly where it is. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Reaching either end hands nothing back to the board: the card would close on the page's own
+     scroll, right in the middle of a sentence. */
+  overscroll-behavior: contain;
+  /* No track and no thumb: the fade on the cut line is the only mark, so the card keeps its
+     surface and the words keep their room. */
+  scrollbar-width: none;
+  /* A line budget instead of a line clamp: the clamp puts its ellipsis on the line's own end,
+     which in an RTL line is the left side, and it slices the last word to make the room. Ending
+     on a whole line keeps every word whole; four lines still leave 97 pixels of artwork above. */
+  max-height: calc(4 * 1.6em);
+  /* Each synopsis picks its own direction, so a Latin one keeps its full stop at the end of the
+     sentence instead of throwing it to the start of the line. */
+  unicode-bidi: plaintext;
+  text-align: start;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-ink-muted);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  /* Even line lengths, and no single word dangling on the last line. */
+  text-wrap: pretty;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-synopsis::-webkit-scrollbar {
+  display: none;
+}
+
+/* An Arabic interface still reads from the right, so the writing keeps that edge even when the
+   synopsis itself is Latin: the paragraph direction above only decides where the sentence and
+   its stops end. */
+[data-theme-layout="midnight"][dir="rtl"] .midnight-preview-synopsis {
+  text-align: right;
+}
+
+/* The last line is cut at the budget, so it settles into the artwork instead of stopping short
+   as if the sentence had ended there. Only a synopsis that was actually cut wears the fade. */
+[data-theme-layout="midnight"] .midnight-preview-synopsis[data-midnight-clipped="true"] {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 0.8em), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 0.8em), transparent 100%);
+}
+
+/* Walked down, the top line is the cut one, so the fade turns to face the other way. */
+[data-theme-layout="midnight"] .midnight-preview-synopsis[data-midnight-above="true"] {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 0.8em);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 0.8em);
+}
+
+/* Mid-text both edges are cut at once, and both fade. */
+[data-theme-layout="midnight"]
+  .midnight-preview-synopsis[data-midnight-above="true"][data-midnight-clipped="true"] {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 0.8em,
+    #000 calc(100% - 0.8em),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 0.8em,
+    #000 calc(100% - 0.8em),
+    transparent 100%
+  );
+}
+
+[data-theme-layout="midnight"] .midnight-preview-actions {
+  display: flex;
+  gap: 8px;
+  margin-block-start: 2px;
+}
+
+/* The wide card keeps the poster's row, so its type is a size down and the rhythm is tighter:
+   a landscape tile, not a small page. */
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] {
+  border-radius: 26px;
+  /* How much of the frame the artwork keeps. The rest carries the writing. */
+  --midnight-art-w: 45%;
+  /* The writing's floor. Midnight's own surfaces sit near black, and a card whose writing
+     side is black reads as a hole cut next to the artwork rather than a place for the words. */
+  --midnight-card-ink: #1c2027;
+  /* Where that floor settles at the bottom of the side, so the panel is lit rather than flat. */
+  --midnight-card-floor: #13161c;
+}
+
+/* The card splits instead of shading. The artwork keeps the whole side it grew out of at full
+   strength, with nothing laid over it, and the writing takes the other side on a surface of its
+   own: a wash heavy enough to carry a synopsis over any poster is a wash heavy enough to hide
+   the poster, and that frame is the reason the card is worth opening. */
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-pane {
+  display: block;
+}
+
+/* Nothing sits over the artwork, so the measured scrim has nothing left to protect here. */
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-veil {
+  display: none;
+}
+
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-art {
+  inset: 0 auto 0 0;
+  width: var(--midnight-art-w);
+}
+
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-look="card"][data-midnight-preview-art-side="right"]
+  .midnight-preview-art {
+  inset: 0 0 0 auto;
+}
+
+/* The artwork hands the seam over to the writing instead of ending on a hard line. */
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-look="card"]
+  .midnight-preview-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--midnight-card-ink), transparent 34%);
+}
+
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-look="card"][data-midnight-preview-art-side="right"]
+  .midnight-preview-art::after {
+  background: linear-gradient(to right, var(--midnight-card-ink), transparent 34%);
+}
+
+/* The writing's own side: a surface of its own, held in the middle so a one-line title does not
+   hang at the bottom of a tall panel. */
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-body {
+  position: absolute;
+  inset-block: 0;
+  left: var(--midnight-art-w);
+  right: 0;
+  width: auto;
+  justify-content: center;
+  gap: 7px;
+  padding: 15px 17px;
+  background: linear-gradient(180deg, var(--midnight-card-ink), var(--midnight-card-floor));
+}
+
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-look="card"][data-midnight-preview-art-side="right"]
+  .midnight-preview-body {
+  left: 0;
+  right: var(--midnight-art-w);
+}
+
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-look="card"]
+  .midnight-preview-title {
+  font-size: 19px;
+  line-height: 1.16;
+  letter-spacing: -0.015em;
+}
+
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-pill {
+  font-size: 11.5px;
+}
+
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-look="card"]
+  .midnight-preview-synopsis {
+  /* Four lines: a two-line title still leaves the frame a strip of artwork above the writing at
+     the smallest card height, and the synopsis ends on a line of its own rather than in the
+     middle of a sentence much earlier than the frame has room for. */
+  max-height: calc(4 * 1.5em);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-look="card"]
+  .midnight-preview-actions {
+  margin-block-start: 1px;
+}
+
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-open {
+  height: 30px;
+  padding-inline: 17px;
+  font-size: 12px;
+}
+
+/* The front card is drawn exactly as the wide card is - artwork on the side it shares with the
+   poster, writing on its own surface - and differs only in where it stands: over the row instead
+   of inside it. The closed frame is a little smaller and lower, so the growth reads as the tile
+   enlarging in front of the row rather than a layer fading in on it. */
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-preview-shape="front"][data-open="false"] {
+  transform: scale(0.94) translateY(6px);
+}
+
+[data-theme-layout="midnight"] .midnight-preview-open {
+  flex: 0 0 auto;
+  height: 32px;
+  padding-inline: 20px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #07090c;
+  background-color: var(--color-ink);
+  cursor: pointer;
+  transition:
+    transform 150ms cubic-bezier(0.25, 1, 0.5, 1),
+    filter 150ms ease;
+}
+
+[data-theme-layout="midnight"] .midnight-preview-open:hover {
+  filter: brightness(1.06);
+}
+
+[data-theme-layout="midnight"] .midnight-preview-open:active {
+  transform: scale(0.97);
+}
+
+[data-theme-layout="midnight"] .midnight-preview-open:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Home hero
+   Harbour draws the hero as one flat card: a backdrop, two scrims, and the writing laid over
+   them. The theme offers six compositions of that same card and four knobs that tune any of them,
+   all of it from this stylesheet - nothing here adds, moves, or hides a Harbour element, so the
+   card keeps its own markup and its own behaviour.
+
+   Every choice is keyed on a document attribute the shell paints and removes with itself, and
+   every knob's "default" value is the absence of a rule: a card nobody tuned is drawn exactly as
+   Harbour draws it. The scope is the home hero's own anchor; the anime and music heroes carry the
+   same anchor but not the stage, so they are out of reach.
+   ========================================================================== */
+
+/* The frame and the distance its artwork keeps from it. Each composition sets them, and the knobs
+   at the end of this section read the same two values, so one radius choice moves the frame and
+   the artwork inside it together. `:where()` keeps this block at the specificity of a bare class,
+   so every composition below can set its own values on top of it instead of losing to it. */
+[data-theme-layout="midnight"]:where(
+    [data-midnight-hero="refined"],
+    [data-midnight-hero="split"],
+    [data-midnight-hero="cinema"],
+    [data-midnight-hero="island"],
+    [data-midnight-hero="billboard"]
+  )
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage {
+  --midnight-hero-inset: 2px;
+  border-radius: var(--midnight-hero-r);
+}
+
+/* --- Refined: the stock card, held by a hairline instead of a hard edge ---------------------- */
+[data-midnight-hero="refined"] [data-scroll-anchor="hero"] .harbor-hero-stage {
+  --midnight-hero-r: 1.15rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 34px 90px -46px rgba(0, 0, 0, 0.95);
+}
+
+/* The artwork keeps a hair inside the frame, so the hairline reads as an edge and not a border. */
+[data-midnight-hero="refined"] [data-scroll-anchor="hero"] .harbor-hero-stage > img.object-cover,
+[data-midnight-hero="refined"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > .pointer-events-none.overflow-hidden {
+  border-radius: calc(var(--midnight-hero-r) - var(--midnight-hero-inset));
+}
+
+/* A floor that climbs higher than Harbour's own, so the buttons never stand on raw artwork. */
+[data-midnight-hero="refined"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-t"] {
+  height: 54%;
+  opacity: 0.94;
+}
+
+/* --- Split: the artwork becomes a panel, the writing gets a surface -------------------------- */
+[data-midnight-hero="split"] [data-scroll-anchor="hero"] .harbor-hero-stage {
+  --midnight-hero-r: 1.4rem;
+  --midnight-hero-inset: 14px;
+  --midnight-hero-split: 54%;
+  background-color: var(--color-surface);
+}
+
+[data-midnight-hero="split"] [data-scroll-anchor="hero"] .harbor-hero-stage > img.object-cover,
+[data-midnight-hero="split"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > .pointer-events-none.overflow-hidden {
+  inset-block: var(--midnight-hero-inset);
+  inset-inline-start: var(--midnight-hero-inset);
+  inset-inline-end: auto;
+  width: calc(var(--midnight-hero-split) - var(--midnight-hero-inset));
+  height: calc(100% - (var(--midnight-hero-inset) * 2));
+  border-radius: calc(var(--midnight-hero-r) - var(--midnight-hero-inset));
+}
+
+/* No scrim runs over a panel of its own, and the writing no longer stands on the artwork. */
+[data-midnight-hero="split"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-r"],
+[data-midnight-hero="split"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-t"] {
+  display: none;
+}
+
+[data-midnight-hero="split"] [data-scroll-anchor="hero"] .harbor-hero-content {
+  justify-content: center;
+  padding-block: 2.2rem;
+  padding-inline-start: calc(var(--midnight-hero-split) + 1.5rem);
+  padding-inline-end: 2.4rem;
+}
+
+[data-midnight-hero="split"] [data-scroll-anchor="hero"] .harbor-hero-content > div {
+  max-width: 30rem;
+}
+
+[data-midnight-hero="split"] [data-scroll-anchor="hero"] .harbor-hero-content h2 {
+  font-size: clamp(2rem, 3vw, 2.9rem);
+}
+
+/* A wordmark that fits the column instead of the old card's whole width. */
+[data-midnight-hero="split"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  img[class*="object-contain"] {
+  max-height: 92px;
+}
+
+/* Narrow boards cannot hold two columns, so the split folds back into the card it came from. */
+@media (max-width: 900px) {
+  [data-midnight-hero="split"] [data-scroll-anchor="hero"] .harbor-hero-stage > img.object-cover,
+  [data-midnight-hero="split"]
+    [data-scroll-anchor="hero"]
+    .harbor-hero-stage
+    > .pointer-events-none.overflow-hidden {
+    inset: var(--midnight-hero-inset);
+    width: calc(100% - (var(--midnight-hero-inset) * 2));
+    height: calc(100% - (var(--midnight-hero-inset) * 2));
+  }
+  [data-midnight-hero="split"]
+    [data-scroll-anchor="hero"]
+    .harbor-hero-stage
+    > [class*="bg-gradient-to-r"],
+  [data-midnight-hero="split"]
+    [data-scroll-anchor="hero"]
+    .harbor-hero-stage
+    > [class*="bg-gradient-to-t"] {
+    display: block;
+  }
+  [data-midnight-hero="split"] [data-scroll-anchor="hero"] .harbor-hero-content {
+    padding-inline: 2rem;
+  }
+}
+
+/* --- Cinema: the frame centres itself and the writing sits at its feet ---------------------- */
+[data-midnight-hero="cinema"] [data-scroll-anchor="hero"] .harbor-hero-stage {
+  --midnight-hero-r: 1.1rem;
+}
+
+/* A centred frame has no side to darken, so the side scrim leaves and the floor takes over. */
+[data-midnight-hero="cinema"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-r"] {
+  display: none;
+}
+
+[data-midnight-hero="cinema"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-t"] {
+  height: 68%;
+  background-image: linear-gradient(
+    to top,
+    var(--color-canvas) 2%,
+    color-mix(in srgb, var(--color-canvas) 74%, transparent) 44%,
+    transparent 100%
+  );
+}
+
+[data-midnight-hero="cinema"] [data-scroll-anchor="hero"] .harbor-hero-content {
+  align-items: center;
+  justify-content: flex-end;
+  text-align: center;
+  padding-bottom: 4.4rem;
+}
+
+[data-midnight-hero="cinema"] [data-scroll-anchor="hero"] .harbor-hero-content > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+[data-midnight-hero="cinema"] [data-scroll-anchor="hero"] .harbor-hero-content > div > div {
+  justify-content: center;
+}
+
+/* The trending pill carries its own self-start; in a centred frame it belongs in the middle. */
+[data-midnight-hero="cinema"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div
+  > div[class*="group/rank"] {
+  align-self: center;
+}
+
+[data-midnight-hero="cinema"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  img[class*="object-contain"] {
+  object-position: center;
+}
+
+[data-midnight-hero="cinema"] [data-scroll-anchor="hero"] .harbor-hero-content > div > p {
+  margin-inline: auto;
+}
+
+/* --- Island: the card floats, and the writing rides a plate of the nav's own glass ---------- */
+/* Harbour asks for full-bleed with negative margins; an island is the opposite gesture, so the
+   board's own margins are put back and the card is drawn inside them. */
+[data-midnight-hero="island"] [data-scroll-anchor="hero"].harbor-hero-full {
+  margin: 0;
+}
+
+[data-midnight-hero="island"] [data-scroll-anchor="hero"] .harbor-hero-stage {
+  --midnight-hero-r: 1.75rem;
+  --midnight-hero-inset: 10px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 40px 100px -50px rgba(0, 0, 0, 0.95);
+}
+
+[data-midnight-hero="island"] [data-scroll-anchor="hero"] .harbor-hero-stage > img.object-cover,
+[data-midnight-hero="island"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > .pointer-events-none.overflow-hidden {
+  inset: var(--midnight-hero-inset);
+  width: calc(100% - (var(--midnight-hero-inset) * 2));
+  height: calc(100% - (var(--midnight-hero-inset) * 2));
+  border-radius: calc(var(--midnight-hero-r) - var(--midnight-hero-inset));
+}
+
+[data-midnight-hero="island"] [data-scroll-anchor="hero"] .harbor-hero-content > div {
+  max-width: 34rem;
+  padding: 1.45rem 1.6rem 1.7rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background-color: rgba(7, 9, 12, 0.5);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+}
+
+/* --- Billboard: the card leaves the page's margins and only the floor is left ---------------- */
+/* The numbers mirror the board's own padding (px-5 / sm:px-8 / lg:px-12) and the full-bleed
+   wrapper Harbour draws: the hero reaches the screen edge instead of sitting in the gutter. Every
+   rule here asks for the stage inside the anchor, because the music and anime heroes carry the same
+   anchor around a hero of their own and must keep the page's margins. */
+[data-midnight-hero="billboard"] [data-scroll-anchor="hero"]:has(.harbor-hero-stage) {
+  margin-inline: -1.25rem;
+  margin-block-end: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  [data-midnight-hero="billboard"] [data-scroll-anchor="hero"]:has(.harbor-hero-stage) {
+    margin-inline: -2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-midnight-hero="billboard"] [data-scroll-anchor="hero"]:has(.harbor-hero-stage) {
+    margin-inline: -3rem;
+  }
+  /* Only a board that already asked for a bleeding hero is pulled up under the nav: with the
+     continue-watching block above it, the hero starts where its row starts. */
+  [data-midnight-hero="billboard"] [data-scroll-anchor="hero"].harbor-hero-full {
+    margin-top: -7rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  [data-midnight-hero="billboard"] [data-scroll-anchor="hero"].harbor-hero-full {
+    margin-top: -6rem;
+  }
+}
+
+[data-midnight-hero="billboard"] [data-scroll-anchor="hero"] .harbor-hero-stage {
+  --midnight-hero-r: 0px;
+  --midnight-hero-inset: 0px;
+}
+
+[data-midnight-hero="billboard"] [data-scroll-anchor="hero"] .harbor-hero-stage > img.object-cover,
+[data-midnight-hero="billboard"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > .pointer-events-none.overflow-hidden {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+[data-midnight-hero="billboard"] [data-scroll-anchor="hero"] .harbor-hero-content {
+  padding-inline: clamp(1.5rem, 4vw, 4rem);
+  padding-bottom: 3.2rem;
+}
+
+[data-midnight-hero="billboard"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-t"] {
+  height: 62%;
+}
+
+/* --- Knob: where the writing sits ------------------------------------------------------------ */
+[data-theme-layout="midnight"][data-midnight-hero-text="center"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content {
+  align-items: center;
+  text-align: center;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="center"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div {
+  margin-inline: auto;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="center"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div
+  > div {
+  justify-content: center;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="center"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div
+  > div[class*="group/rank"] {
+  align-self: center;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="center"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  img[class*="object-contain"] {
+  object-position: center;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="center"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div
+  > p {
+  margin-inline: auto;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="end"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content {
+  align-items: flex-end;
+  text-align: end;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="end"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div {
+  margin-inline-start: auto;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="end"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div
+  > div {
+  justify-content: flex-end;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="end"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div
+  > div[class*="group/rank"] {
+  align-self: flex-end;
+}
+
+/* The wordmark follows the writing to the other edge. object-position is physical, so the two
+   directions are named one by one. */
+[data-theme-layout="midnight"][data-midnight-hero-text="end"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  img[class*="object-contain"] {
+  object-position: right center;
+}
+
+[data-theme-layout="midnight"][dir="rtl"][data-midnight-hero-text="end"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  img[class*="object-contain"] {
+  object-position: left center;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-text="end"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div
+  > p {
+  margin-inline-start: auto;
+}
+
+/* The visible scrim has to sit under the writing, so it turns to face the other edge with it. */
+[data-theme-layout="midnight"][data-midnight-hero-text="end"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-r"] {
+  transform: scaleX(-1);
+}
+
+/* --- Knob: height ---------------------------------------------------------------------------- */
+[data-theme-layout="midnight"][data-midnight-hero-height="short"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage {
+  height: 460px;
+  min-height: 460px;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-height="tall"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage {
+  height: 84vh;
+  min-height: 640px;
+}
+
+/* --- Knob: how dark the artwork is held ------------------------------------------------------ */
+/* Soft lifts the artwork instead of flattening the scrims: the words keep the floor Harbour
+   paints for them, and the picture simply steps forward. */
+[data-theme-layout="midnight"][data-midnight-hero-scrim="soft"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > img.object-cover {
+  filter: brightness(1.12) saturate(1.04);
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-scrim="soft"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-t"] {
+  opacity: 0.7;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-scrim="deep"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > img.object-cover {
+  filter: brightness(0.66) saturate(0.96);
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-scrim="deep"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > [class*="bg-gradient-to-t"] {
+  height: 66%;
+}
+
+/* --- Knob: the frame's corners ----------------------------------------------------------------- */
+/* Last, so a chosen corner is the one that lands whatever composition is drawing the card. */
+[data-theme-layout="midnight"][data-midnight-hero-radius="sharp"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage {
+  --midnight-hero-r: 0px;
+  border-radius: 0;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-radius="round"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage {
+  --midnight-hero-r: 30px;
+  border-radius: 30px;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-radius="sharp"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > img.object-cover,
+[data-theme-layout="midnight"][data-midnight-hero-radius="sharp"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > .pointer-events-none.overflow-hidden {
+  border-radius: 0;
+}
+
+[data-theme-layout="midnight"][data-midnight-hero-radius="round"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > img.object-cover,
+[data-theme-layout="midnight"][data-midnight-hero-radius="round"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-stage
+  > .pointer-events-none.overflow-hidden {
+  border-radius: calc(var(--midnight-hero-r) - var(--midnight-hero-inset, 2px));
+}
+
+/* ==========================================================================
+   Appearance: palette, OLED, and the theme's own floor
+   Harbour writes its tokens as inline styles on the document, which no stylesheet can outrank
+   without !important. Every override below is therefore scoped to the two attributes the shell
+   writes and removes with itself, and only accent and surface tokens are touched: the ink tokens
+   are left exactly as Harbour resolved them, so no choice here can make a word harder to read.
+   ========================================================================== */
+
+[data-theme-layout="midnight"][data-midnight-palette="frost"] {
+  --color-accent: #8fb0cc !important;
+  --color-accent-soft: rgba(143, 176, 204, 0.14) !important;
+}
+
+[data-theme-layout="midnight"][data-midnight-palette="amber"] {
+  --color-accent: #e2b779 !important;
+  --color-accent-soft: rgba(226, 183, 121, 0.14) !important;
+}
+
+[data-theme-layout="midnight"][data-midnight-palette="mint"] {
+  --color-accent: #7fd6bd !important;
+  --color-accent-soft: rgba(127, 214, 189, 0.14) !important;
+}
+
+[data-theme-layout="midnight"][data-midnight-palette="lilac"] {
+  --color-accent: #b4a6e8 !important;
+  --color-accent-soft: rgba(180, 166, 232, 0.14) !important;
+}
+
+[data-theme-layout="midnight"][data-midnight-palette="rose"] {
+  --color-accent: #e6a2b0 !important;
+  --color-accent-soft: rgba(230, 162, 176, 0.14) !important;
+}
+
+/* OLED: every surface Harbour paints collapses to black, glass included - on true black a panel
+   is read by its edge and its highlight, not by a lighter fill. */
+[data-theme-layout="midnight"][data-midnight-oled="on"] {
+  --color-surface: #000000 !important;
+  --color-elevated: #040507 !important;
+  --color-raised: #090b0f !important;
+  --color-edge: rgba(255, 255, 255, 0.1) !important;
+  --color-edge-soft: rgba(255, 255, 255, 0.055) !important;
+}
+
+/* The wide card's writing side is the one surface the theme lifts on purpose. In OLED there is
+   nothing to lift from, and the words only gain contrast by going down with it. */
+[data-theme-layout="midnight"][data-midnight-oled="on"]
+  .midnight-preview[data-midnight-look="card"] {
+  --midnight-card-ink: #0a0d12;
+  --midnight-card-floor: #000000;
+}
+
+/* Harbour paints the preset's glow in a fixed layer at z-index -30. A tinted palette or OLED
+   replaces it with this floor, drawn in the same three shapes: above that layer, below the
+   canvas at -10, and behind every in-flow element. */
+[data-theme-layout="midnight"] .midnight-floor {
+  position: fixed;
+  inset: 0;
+  z-index: -25;
+  pointer-events: none;
+  background-color: #000;
+  background-image:
+    radial-gradient(
+      ellipse 680px 240px at 50% 0%,
+      color-mix(in srgb, var(--color-accent) 14%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 420px 480px at 0% 0%,
+      color-mix(in srgb, var(--color-accent) 10%, transparent) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 420px 480px at 100% 0%,
+      color-mix(in srgb, var(--color-accent) 10%, transparent) 0%,
+      transparent 65%
+    );
+}
+
+/* OLED is about black, so the floor keeps nothing but the black. */
+[data-theme-layout="midnight"] .midnight-floor[data-oled="on"] {
+  background-image: none;
+}
+
+/* ==========================================================================
+   Your Streaming
+   The rail of service marks is the one strip Harbour draws as flat plates. It takes the same
+   material as the popovers, so the row belongs to the board instead of sitting on it. Nothing is
+   written inside a tile, so the glow is free to carry the brand mark.
+   ========================================================================== */
+
+[data-theme-layout="midnight"] .harbor-service-tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--color-edge) 90%, transparent);
+  background-color: rgba(255, 255, 255, 0.02);
+  background-image:
+    radial-gradient(
+      120% 150% at 50% -10%,
+      color-mix(in srgb, var(--color-accent) 14%, transparent),
+      transparent 68%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  /* The mark is white by default. A touch off pure white keeps it from burning a hole through the
+     glass, and the shadow lets it sit on the plate rather than float above it. */
+  --service-logo-filter: brightness(0) invert(0.93) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+  transition:
+    border-color 260ms ease,
+    box-shadow 260ms ease,
+    background-color 260ms ease;
+}
+
+[data-theme-layout="midnight"] .harbor-service-tile img {
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* A specular pass across the plate, the same gesture the nav pill makes when it is picked. */
+[data-theme-layout="midnight"] .harbor-service-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 45%,
+    rgba(255, 255, 255, 0.085) 50%,
+    transparent 55%
+  );
+  opacity: 0;
+  translate: -40% 0;
+  transition:
+    opacity 260ms ease,
+    translate 560ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* No lift: the row clips its own vertical overflow, so a tile that rose would lose its top edge.
+   The plate lights up instead - edge, glow, and the mark growing a hair in its seat. */
+[data-theme-layout="midnight"] .harbor-service-tile:is(:hover, :focus-visible) {
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-edge));
+  background-color: rgba(255, 255, 255, 0.035);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 18px 30px -22px color-mix(in srgb, var(--color-accent) 75%, transparent);
+}
+
+[data-theme-layout="midnight"] .harbor-service-tile:is(:hover, :focus-visible) img {
+  transform: scale(1.05);
+}
+
+[data-theme-layout="midnight"] .harbor-service-tile:is(:hover, :focus-visible)::after {
+  opacity: 1;
+  translate: 40% 0;
+}
+
+[data-theme-layout="midnight"] .harbor-service-tile:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Theme controls in the account menu
+   ========================================================================== */
+
+[data-theme-layout="midnight"] .midnight-toggle-row {
+  padding-inline: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+[data-theme-layout="midnight"] .midnight-toggle-row:hover {
+  opacity: 0.88;
+}
+
+[data-theme-layout="midnight"] .midnight-toggle-row:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* The knob travels on a margin, which follows the writing direction on its own: the same rule
+   puts it at the far end in Arabic and in English. */
+[data-theme-layout="midnight"] .midnight-switch {
+  display: inline-flex;
+  align-items: center;
+  width: 34px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: rgba(255, 255, 255, 0.12);
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease;
+}
+
+[data-theme-layout="midnight"] .midnight-switch[data-on="true"] {
+  border-color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+  background-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+[data-theme-layout="midnight"] .midnight-switch-knob {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background-color: #eef2f6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  margin-inline-start: 0;
+  transition: margin-inline-start 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme-layout="midnight"] .midnight-switch[data-on="true"] .midnight-switch-knob {
+  margin-inline-start: 14px;
+}
+
+[data-theme-layout="midnight"] .midnight-swatch {
+  border: none;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  transition:
+    scale 160ms cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 160ms ease;
+}
+
+[data-theme-layout="midnight"] .midnight-swatch:hover {
+  scale: 1.08;
+}
+
+/* The ring stays neutral: a ring in the chosen colour would disappear into the swatch it marks. */
+[data-theme-layout="midnight"] .midnight-swatch[data-selected="true"] {
+  box-shadow:
+    0 0 0 2px rgba(9, 11, 15, 0.95),
+    0 0 0 3px rgba(255, 255, 255, 0.6);
+}
+
+[data-theme-layout="midnight"] .midnight-swatch:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* The hero picker: six compositions in a three-wide grid, each drawn as itself rather than named
+   only, so the choice is made by looking at it. The wireframe is the tile's own markup - an
+   outlined card, its artwork, and the block the writing would occupy. */
+[data-theme-layout="midnight"] .midnight-hero-tile {
+  border: none;
+  cursor: pointer;
+  color: var(--color-ink-muted);
+  background-color: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+}
+
+[data-theme-layout="midnight"] .midnight-hero-tile:hover {
+  color: var(--color-ink);
+  background-color: rgba(255, 255, 255, 0.09);
+}
+
+[data-theme-layout="midnight"] .midnight-hero-tile[data-selected="true"] {
+  color: var(--color-ink);
+  background-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+[data-theme-layout="midnight"] .midnight-hero-tile:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 30px;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+/* The artwork, then the writing as two bars: the only two things every composition shares. */
+[data-theme-layout="midnight"] .midnight-hero-glyph > span:first-child {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.26),
+    rgba(255, 255, 255, 0.05) 72%
+  );
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph > span:last-child {
+  position: absolute;
+  inset-block-end: 5px;
+  inset-inline-start: 5px;
+  width: 46%;
+  height: 9px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.85) 0 2px,
+    transparent 2px 5px
+  );
+}
+
+/* Split: the artwork steps onto its own panel and the writing takes the other half. */
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="split"] > span:first-child {
+  inset-block: 3px;
+  inset-inline-start: 3px;
+  inset-inline-end: 50%;
+  border-radius: 3px;
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="split"] > span:last-child {
+  inset-inline-start: auto;
+  inset-inline-end: 6px;
+  inset-block-end: 11px;
+  width: 38%;
+}
+
+/* Refined: the same card set inside a mount. At thirty pixels tall a hairline alone reads as the
+   stock card, so the mount - a gap and a ring around the artwork - is what tells them apart. */
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="refined"] {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="refined"] > span:first-child {
+  inset: 2px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="refined"] > span:last-child {
+  inset-inline-start: 7px;
+  inset-block-end: 7px;
+}
+
+/* Cinema: one wide scrim under writing that is centred at the feet of the frame. */
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="cinema"] > span:first-child::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 64%;
+  background-image: linear-gradient(to top, rgba(7, 9, 12, 0.95), rgba(7, 9, 12, 0));
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="cinema"] > span:last-child {
+  inset-inline: 0;
+  inset-block-end: 6px;
+  width: 42%;
+  margin-inline: auto;
+}
+
+/* Island: the artwork floats inside the frame and the writing rides a plate over it. */
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="island"] > span:first-child {
+  inset: 3px;
+  border-radius: 4px;
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="island"] > span:last-child {
+  inset-inline-start: 8px;
+  width: 44%;
+  padding: 3px 2px;
+  border-radius: 3px;
+  background-color: rgba(7, 9, 12, 0.78);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+/* Billboard: the artwork breaks out of the tile's padding, so the glyph is the tile's own edges. */
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="billboard"] {
+  width: calc(100% + 8px);
+  margin-inline: -4px;
+  border-radius: 0;
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-shape="billboard"] > span:last-child {
+  inset-inline-start: 8px;
+  width: 58%;
+}
+
+/* Title-page tiles reuse the hero's glyph: artwork over a bottom edge of writing. What changes is
+   the surface that writing sits on, which is the whole difference between the compositions. */
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-detail-glyph="glass"] > span:last-child {
+  inset-inline-start: 5px;
+  inset-block-end: 5px;
+  width: 50%;
+  height: 9px;
+  padding: 2px;
+  border-radius: 3px;
+  background-color: rgba(7, 9, 12, 0.72);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.85) 0 2px,
+    transparent 2px 5px
+  );
+  background-size: 62% 5px;
+  background-position: 3px 2px;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+/* Shelf: the writing is a band that runs the full width of the frame's bottom edge. */
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-detail-glyph="shelf"] > span:last-child {
+  inset-inline: 0;
+  inset-block-end: 0;
+  width: 100%;
+  height: 11px;
+  background-color: rgba(255, 255, 255, 0.1);
+  background-image: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+[data-theme-layout="midnight"]
+  .midnight-hero-glyph[data-detail-glyph="shelf"]
+  > span:last-child::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-start: 6px;
+  width: 46%;
+  height: 4px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.85) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+/* Cinema: one scrim and the writing centred at the feet of the frame. */
+[data-theme-layout="midnight"]
+  .midnight-hero-glyph[data-detail-glyph="cinema"]
+  > span:first-child::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 68%;
+  background-image: linear-gradient(to top, rgba(7, 9, 12, 0.95), rgba(7, 9, 12, 0));
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-detail-glyph="cinema"] > span:last-child {
+  inset-inline: 0;
+  inset-block-end: 6px;
+  width: 44%;
+  margin-inline: auto;
+}
+
+/* Frame: the artwork steps inside the tile and the writing rides a plate inside it. */
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-detail-glyph="frame"] > span:first-child {
+  inset: 4px;
+  border-radius: 5px;
+}
+
+[data-theme-layout="midnight"] .midnight-hero-glyph[data-detail-glyph="frame"] > span:last-child {
+  inset-inline-start: 9px;
+  inset-block-end: 9px;
+  width: 44%;
+}
+
+/* ==========================================================================
+   Title page
+   Harbour lays a title page as one tall backdrop with the writing pinned to its bottom edge: the
+   words stand on raw artwork, two scrims carry all of the contrast, and the metadata sits in the
+   same grey as the floor. Midnight offers four ways to lift that writing, and one way to leave the
+   page alone.
+
+   The choice is a single attribute on the document (`data-midnight-detail`), and `default` removes
+   it instead of naming a composition. Every rule below is therefore gated on its presence: with
+   the attribute gone the page, its episodes and its motion are Harbour's again, and this whole
+   block matches nothing. Nothing here adds, moves, or hides a Harbour element: the bar is the
+   writing's existing container, given a surface. Everything is also scoped to the page root
+   Harbour writes (`main.harbor-detail-enter`), and the sections below the fold are addressed by the
+   keys the layout editor already orders them by, so a rearranged page keeps the same styling.
+   ========================================================================== */
+
+/* --- The frame ------------------------------------------------------------- */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  > section
+  > div.harbor-bleed-stremio {
+  height: clamp(600px, 78vh, 880px);
+}
+
+/* The side scrim existed to keep words legible on raw artwork. The words have a surface of their
+   own now, so it steps back to the frame's inner corner and the artwork keeps its colour. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div[class*="bg-gradient-to-r"] {
+  opacity: 0.5;
+}
+
+/* --- The bar --------------------------------------------------------------- */
+/* Glass is the base composition, and the two compositions below that keep a surface are built on
+   it. It is the writing's own container, so it inherits every behaviour Harbour gave it: it still
+   holds the tagline, the plate, the pills and the actions, in that order. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0 {
+  inset-inline: clamp(0.75rem, 2.4vw, 2.25rem);
+  inset-block-end: clamp(0.75rem, 1.6vh, 1.35rem);
+  width: fit-content;
+  max-width: min(100%, 860px);
+  margin-inline-start: 0;
+  margin-inline-end: auto;
+  padding: clamp(0.9rem, 1.2vw, 1.15rem) clamp(1rem, 1.6vw, 1.5rem);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.6rem;
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-surface) 70%, transparent),
+    color-mix(in srgb, var(--color-canvas) 86%, transparent)
+  );
+  box-shadow:
+    0 44px 96px -52px rgba(0, 0, 0, 0.95),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(26px) saturate(1.45);
+  -webkit-backdrop-filter: blur(26px) saturate(1.45);
+}
+
+/* Without a blur there is nothing holding the artwork back, so the bar turns solid instead of
+   letting the image read through it. */
+@supports not (backdrop-filter: blur(2px)) {
+  [data-theme-layout="midnight"][data-midnight-detail]
+    main.harbor-detail-enter
+    .harbor-bleed-stremio
+    > div.absolute.bottom-0 {
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-surface) 90%, transparent),
+      color-mix(in srgb, var(--color-canvas) 96%, transparent)
+    );
+  }
+}
+
+/* --- The writing inside it ------------------------------------------------- */
+/* The tagline is a line of type on a surface now, not a shadowed caption on a photograph. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  p {
+  margin-bottom: 0.4rem;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-subtle);
+}
+
+/* The plate was sized to stand alone against a tall backdrop; inside the bar it only needs to hold
+   its own wordmark. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div
+  > div:first-of-type {
+  min-height: 5.4rem;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  h1 {
+  font-size: clamp(2.05rem, 3.4vw, 3.05rem);
+}
+
+/* The wordmark is the loudest thing on the page, so it takes the plate rather than floating in
+   its corner. A title without a logo falls back to Harbour's own heading, sized to match. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  img[class*="object-contain"] {
+  max-width: min(380px, 54vw);
+  max-height: 5.3rem;
+}
+
+/* Harbour spaces the rows for a page that has no surface between them: six and nine steps read as
+   a wide gulf once they sit on one card. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div
+  > div[class*="mt-6"] {
+  margin-top: 1.05rem;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div
+  > div[class*="mt-9"] {
+  margin-top: 1.4rem;
+}
+
+/* --- Chips and round buttons on glass -------------------------------------- */
+/* Harbour draws the metadata chips as solid canvas pills and the action buttons as canvas circles,
+   which is what keeps them legible on raw artwork. On the bar they would read as holes punched in
+   the surface, so both take a hairline and the bar's own tint instead. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  span[class*="bg-canvas/85"],
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  button[class*="bg-canvas/85"] {
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  button[class*="rounded-full"][class*="bg-canvas/80"] {
+  background-color: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  button[class*="rounded-full"][class*="bg-canvas/80"]:hover {
+  background-color: rgba(255, 255, 255, 0.13);
+}
+
+/* --- Composition: shelf ---------------------------------------------------- */
+/* The same glass, docked to the frame's own edge and running its full width: the page reads as a
+   poster standing on a shelf rather than a card floating over artwork. */
+[data-theme-layout="midnight"][data-midnight-detail="shelf"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0 {
+  inset-inline: 0;
+  inset-block-end: 0;
+  width: auto;
+  max-width: none;
+  padding: clamp(1.05rem, 1.5vw, 1.5rem) clamp(1.25rem, 3vw, 3rem) clamp(1.15rem, 1.7vw, 1.6rem);
+  border: 0;
+  border-block-start: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0;
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-surface) 64%, transparent),
+    color-mix(in srgb, var(--color-canvas) 90%, transparent)
+  );
+  box-shadow: 0 -36px 84px -58px rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(30px) saturate(1.4);
+  -webkit-backdrop-filter: blur(30px) saturate(1.4);
+}
+
+/* --- Composition: cinema --------------------------------------------------- */
+/* No surface at all: the writing is centred over a scrim of its own, so the artwork stays whole and
+   the title reads the way a poster does. */
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  > section
+  > div.harbor-bleed-stremio {
+  height: clamp(620px, 84vh, 920px);
+}
+
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0 {
+  inset-inline: 0;
+  inset-block-end: 0;
+  width: auto;
+  max-width: none;
+  padding: clamp(3rem, 7vh, 5rem) clamp(1.5rem, 5vw, 5rem) clamp(2rem, 6vh, 4rem);
+  border: 0;
+  border-radius: 0;
+  background-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.72),
+    rgba(0, 0, 0, 0.3) 46%,
+    rgba(0, 0, 0, 0)
+  );
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  text-align: center;
+}
+
+/* The scrim has to reach the frame's own edges: a centred block carrying the background would paint
+   two vertical seams where its box ends. The writing keeps a reading width inside it instead. */
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div {
+  max-width: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+/* Centring the composition means centring each of its rows: the plate, the metadata and the
+   actions are the three flex contexts the writing sits in. */
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div
+  > div:first-of-type {
+  /* The plate keeps the height of its own wordmark. Harbour draws the logo on the plate's bottom
+     edge as an absolute layer, so a plate that shrinks to the hidden heading lets the logo climb
+     out of it, over the tagline line above. The ceiling is the wordmark's own max-height below. */
+  min-height: 6.4rem;
+  align-items: center;
+}
+
+/* A row of writing that is centred has to centre every line of it: the tagline is a block capped
+   for reading, and left to itself it stands at the inline-start edge, beside the wordmark instead
+   of above it. Only the writing wrapper's own tagline is addressed, never the hints nested below. */
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div
+  > p {
+  margin-inline: auto;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div
+  > div[class*="mt-6"]
+  > div,
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div
+  > div[class*="mt-6"] {
+  justify-content: center;
+  margin-inline: auto;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  > div
+  > div[class*="mt-9"] {
+  margin-inline: auto;
+  justify-content: center;
+}
+
+/* A centred composition carries a centred wordmark: the logo is Harbour's absolutely positioned
+   corner mark, so it is re-anchored to the middle of the plate instead. */
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  img[class*="object-contain"] {
+  inset-inline: 0;
+  margin-inline: auto;
+  max-width: min(560px, 68vw);
+  max-height: 6.4rem;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail="cinema"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0
+  h1 {
+  font-size: clamp(2.35rem, 4.4vw, 3.9rem);
+}
+
+/* --- Composition: frame ---------------------------------------------------- */
+/* The artwork becomes an object on the page: it steps inside the gutters, rounds its corners and
+   keeps the same glass bar, so the title page reads like a framed still rather than a wall. */
+[data-theme-layout="midnight"][data-midnight-detail="frame"] main.harbor-detail-enter > section {
+  padding: clamp(5rem, 9vh, 6.25rem) clamp(0.75rem, 2vw, 1.75rem) 0;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail="frame"]
+  main.harbor-detail-enter
+  > section
+  > div.harbor-bleed-stremio {
+  height: clamp(520px, 70vh, 800px);
+  border-radius: clamp(1rem, 1.6vw, 1.75rem);
+  box-shadow: 0 40px 90px -60px rgba(0, 0, 0, 0.9);
+  outline: 1px solid rgba(255, 255, 255, 0.08);
+  outline-offset: -1px;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail="frame"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0 {
+  inset-inline: clamp(0.6rem, 1.3vw, 1.05rem);
+  inset-block-end: clamp(0.6rem, 1.4vh, 1rem);
+}
+
+/* --- The chapters under the frame ------------------------------------------ */
+/* Harbour stacks everything below the fold on one gap and one grey. Midnight keeps the order,
+   the elements and the empty rails exactly as they are and gives the page a single voice: one
+   accent rule on every section title, a rule of its own for the synopsis, and the seasons and
+   episodes drawn on the same surface as the bar above them. */
+
+/* The paragraph was measured for a full page; it shares one with a rule now. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  > section
+  + div
+  > div.grid
+  > div.max-w-3xl:has(> p[data-tauri-drag-region="false"]) {
+  padding-inline-start: clamp(0.9rem, 1.5vw, 1.25rem);
+  border-inline-start: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  > section
+  + div
+  > div.grid
+  > div.max-w-3xl
+  p[data-tauri-drag-region="false"] {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+
+/* Every rail Harbour titles carries the same mark, so a rearranged page still reads in chapters.
+   The titles are `tracking-tight` headings throughout, which is what the mark hangs off. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  h3[class*="tracking-tight"]::before {
+  content: "";
+  display: inline-block;
+  inline-size: 0.85rem;
+  block-size: 2px;
+  margin-inline-end: 0.6rem;
+  vertical-align: 0.22em;
+  border-radius: 1px;
+  background-color: var(--color-accent);
+}
+
+/* A rail Harbour rendered nothing into keeps its zero height and stays invisible; only a rail that
+   actually has a title draws the hairline over it. It sits inside half of the stack's gap, so the
+   sections keep Harbour's rhythm and gain a seam. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-detail-section]:has(h3) {
+  position: relative;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-detail-section]:has(h3)::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: -1rem;
+  block-size: 1px;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.1) 18%,
+    rgba(255, 255, 255, 0.1) 82%,
+    transparent
+  );
+}
+
+/* --- Seasons --------------------------------------------------------------- */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .season-explorer-card {
+  border-radius: 1rem;
+  transition:
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+/* A season nobody picked is a frame around its poster, not a hole in the page. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .season-explorer-card[aria-pressed="false"] {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* The chosen one keeps Harbour's accent ring and gains the light that the ring implies. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .season-explorer-card[aria-pressed="true"] {
+  box-shadow:
+    0 18px 44px -26px color-mix(in srgb, var(--color-accent) 75%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+
+/* The selected season's panel is the second piece of glass on the page, so it is built like the
+   first: the same tint, the same hairline, the same inner highlight. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  div:has(> .season-explorer-transition) {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-surface) 82%, transparent),
+    color-mix(in srgb, var(--color-canvas) 92%, transparent)
+  );
+  box-shadow:
+    0 30px 70px -46px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* --- Episodes -------------------------------------------------------------- */
+/* Harbour rings episode stills on hover alone. A hairline at rest lines them up with the seasons
+   and the cards above; the accent takes over when the card is live.
+
+   The page can draw an episode three ways and the theme has to find all three: a card in a grid, a
+   card in a strip (the button itself carries `data-ep`), and a list row (the row carries either
+   `data-ep` or only Harbour's ring opt-out). Two attributes therefore name one row. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-episodes]
+  :is([data-ep], [data-no-card-ring])
+  > div:first-child::after,
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-episodes]
+  :is([data-ep], [data-no-card-ring])
+  > button:first-child
+  > div:first-child::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+  pointer-events: none;
+  transition: box-shadow 200ms ease;
+}
+
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-episodes]
+  :is([data-ep], [data-no-card-ring]):hover
+  > div:first-child::after,
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-episodes]
+  :is([data-ep], [data-no-card-ring]):hover
+  > button:first-child
+  > div:first-child::after,
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-episodes]
+  :is([data-ep], [data-no-card-ring]):focus-within
+  > div:first-child::after,
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-episodes]
+  :is([data-ep], [data-no-card-ring]):focus-within
+  > button:first-child
+  > div:first-child::after {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 65%, transparent);
+}
+
+/* The list layouts let a two-line summary run the full width of a wide page, which reads as one
+   long line rather than a sentence pair. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-episodes]
+  p.line-clamp-2 {
+  max-width: 76ch;
+}
+
+/* Rows of a list are a list: the seam belongs between them, not around each one. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  [data-episodes]
+  :is([data-ep], [data-no-card-ring])
+  + :is([data-ep], [data-no-card-ring]) {
+  border-block-start: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- Motion ---------------------------------------------------------------- */
+/* Both of these are scroll-driven and progressive: the page is complete without them, so a web
+   view that cannot run them simply shows the finished page. */
+@keyframes midnight-detail-chapter {
+  from {
+    opacity: 0;
+    translate: 0 26px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes midnight-detail-drift {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.045;
+  }
+}
+
+/* The artwork keeps moving after it has loaded, slowly enough that it reads as film rather than
+   as animation. */
+[data-theme-layout="midnight"][data-midnight-detail]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > img {
+  animation: midnight-detail-drift 32s ease-out both;
+}
+
+@supports (animation-timeline: view()) {
+  [data-theme-layout="midnight"][data-midnight-detail]
+    main.harbor-detail-enter
+    [data-detail-section],
+  [data-theme-layout="midnight"][data-midnight-detail] main.harbor-detail-enter [data-episodes],
+  [data-theme-layout="midnight"][data-midnight-detail]
+    main.harbor-detail-enter
+    > section
+    + div
+    > div.grid {
+    animation: midnight-detail-chapter linear both;
+    animation-timeline: view();
+    animation-range: entry 4% cover 32%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme-layout="midnight"] .harbor-service-tile,
+  [data-theme-layout="midnight"] .harbor-service-tile::after,
+  [data-theme-layout="midnight"] .harbor-service-tile img,
+  [data-theme-layout="midnight"] .midnight-switch,
+  [data-theme-layout="midnight"] .midnight-switch-knob,
+  [data-theme-layout="midnight"] .midnight-swatch,
+  [data-theme-layout="midnight"] .midnight-hero-tile {
+    transition: none !important;
+    translate: none !important;
+    transform: none !important;
+  }
+
+  [data-theme-layout="midnight"][data-midnight-detail]
+    main.harbor-detail-enter
+    .harbor-bleed-stremio
+    > img,
+  [data-theme-layout="midnight"][data-midnight-detail]
+    main.harbor-detail-enter
+    [data-detail-section],
+  [data-theme-layout="midnight"][data-midnight-detail] main.harbor-detail-enter [data-episodes],
+  [data-theme-layout="midnight"][data-midnight-detail]
+    main.harbor-detail-enter
+    > section
+    + div
+    > div.grid {
+    animation: none !important;
+    translate: none !important;
+    scale: none !important;
+  }
+}
+
+/* ==========================================================================
+   Low consumption
+   ========================================================================== */
+/* The switch in the account menu trades the theme's two recurring costs for a plainer surface.
+
+   The first is the glass. A blurred layer is recomposited together with whatever moves behind it,
+   and the capsule is blurred across the window for as long as the board is on screen. Without a
+   blur there is nothing holding the artwork back, so every surface that wore glass turns solid
+   instead - the treatment an engine that cannot blur at all already gets.
+
+   The second is motion that never settles: the title page's artwork drifts for thirty-two seconds,
+   and its sections ride a scroll timeline that asks for work on every frame the page moves.
+
+   Only the theme's own surfaces are addressed here. The player is Harbour's page, drawn while this
+   shell is unmounted. */
+[data-theme-layout="midnight"][data-midnight-lite="on"] .midnight-top-capsule-glass,
+[data-theme-layout="midnight"][data-midnight-lite="on"] .midnight-more-popover,
+[data-theme-layout="midnight"][data-midnight-lite="on"] .midnight-account-popover {
+  background-color: #07090c;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* The preview is the largest frame the theme draws, and it opens on every card the pointer rests
+   on. Its blur goes with the rest, and the layer it used to keep pinned for its own transition is
+   handed back: a composited surface that is never released costs a copy of the frame. */
+[data-theme-layout="midnight"][data-midnight-lite="on"] .midnight-preview {
+  background-color: #06080b;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  will-change: auto;
+}
+
+/* The specular pass and the artwork's own fade are one-shot, but each one is a full-frame composite
+   over that same surface. */
+[data-theme-layout="midnight"][data-midnight-lite="on"] .midnight-preview::after,
+[data-theme-layout="midnight"][data-midnight-lite="on"] .midnight-preview-img {
+  animation: none !important;
+}
+
+/* The island hero's writing stands on its own plate rather than on the artwork. */
+[data-theme-layout="midnight"][data-midnight-lite="on"]
+  [data-midnight-hero="island"]
+  [data-scroll-anchor="hero"]
+  .harbor-hero-content
+  > div {
+  background-color: rgba(7, 9, 12, 0.72);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* The title page's bar, in every composition that glasses it. Cinema is left alone: it carries a
+   directional scrim of its own instead of a surface, and there is no blur to take away. */
+[data-theme-layout="midnight"][data-midnight-lite="on"][data-midnight-detail]:not(
+    [data-midnight-detail="cinema"]
+  )
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > div.absolute.bottom-0 {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-surface) 92%, transparent),
+    color-mix(in srgb, var(--color-canvas) 97%, transparent)
+  );
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-theme-layout="midnight"][data-midnight-lite="on"]
+  main.harbor-detail-enter
+  .harbor-bleed-stremio
+  > img,
+[data-theme-layout="midnight"][data-midnight-lite="on"]
+  main.harbor-detail-enter
+  [data-detail-section],
+[data-theme-layout="midnight"][data-midnight-lite="on"] main.harbor-detail-enter [data-episodes],
+[data-theme-layout="midnight"][data-midnight-lite="on"]
+  main.harbor-detail-enter
+  > section
+  + div
+  > div.grid {
+  animation: none !important;
+  translate: none !important;
+}

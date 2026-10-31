@@ -14,6 +14,7 @@ import stremioPreview from "@/assets/theme-previews/stremio.png";
 import velvetPreview from "@/assets/theme-previews/velvet.png";
 import { getCustomThemes } from "./custom-themes";
 import { t } from "./i18n";
+import { MIDNIGHT_PRESET } from "@/themes/midnight/midnight-preset";
 
 function escapeGeneratedHtml(value: string): string {
   return value
@@ -44,11 +45,12 @@ export type ThemeLayout =
   | "forest"
   | "royal"
   | "cinematic"
-  | "custom";
+  | "custom"
+  | "midnight";
 export type ThemeCardStyle = "flat" | "glass" | "stremio" | "minui" | "crunch" | "noir" | "custom";
 export type ThemeButtonStyle = "flat" | "glossy" | "minui" | "crunch" | "noir" | "custom";
 
-export type ActiveThemeId = ThemePresetId | "custom" | `user:${string}`;
+export type ActiveThemeId = ThemePresetId | "midnight" | "custom" | `user:${string}`;
 
 export type FontPairId =
   | "sentient-switzer"
@@ -88,10 +90,19 @@ export type ChromeConfig = {
   icons?: Partial<Record<ChromeNavId, string>>;
 };
 
+export type ThemeCredit = {
+  name: string;
+  /** GitHub handle, without the owner segment. */
+  github?: string;
+  /** Harbor community handle, used against the configured base URL. */
+  harbor?: string;
+};
+
 export type ThemePreset = {
   id: ThemePresetId;
   name: string;
   blurb: string;
+  credit?: ThemeCredit;
   swatch: [string, string, string];
   tokens: Record<string, string>;
   background?: ThemeBackground;
@@ -1602,6 +1613,7 @@ function buildFeishinJs(): string {
 }
 
 export const BETA_THEMES: ThemePreset[] = [
+  MIDNIGHT_PRESET,
   {
     id: "elegantfin" as ThemePresetId,
     name: "ElegantFin",
