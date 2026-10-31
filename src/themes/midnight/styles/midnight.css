@@ -956,7 +956,7 @@
 
 /* The wide card keeps the poster's row, so its type is a size down and the rhythm is tighter:
    a landscape tile, not a small page. */
-[data-theme-layout="midnight"] .midnight-preview[data-midnight-preview-shape="card"] {
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] {
   border-radius: 26px;
   /* How much of the frame the artwork keeps. The rest carries the writing. */
   --midnight-art-w: 45%;
@@ -972,34 +972,34 @@
    own: a wash heavy enough to carry a synopsis over any poster is a wash heavy enough to hide
    the poster, and that frame is the reason the card is worth opening. */
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-pane {
   display: block;
 }
 
 /* Nothing sits over the artwork, so the measured scrim has nothing left to protect here. */
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-veil {
   display: none;
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-art {
   inset: 0 auto 0 0;
   width: var(--midnight-art-w);
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"][data-midnight-preview-art-side="right"]
+  .midnight-preview[data-midnight-look="card"][data-midnight-preview-art-side="right"]
   .midnight-preview-art {
   inset: 0 0 0 auto;
 }
 
 /* The artwork hands the seam over to the writing instead of ending on a hard line. */
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-art::after {
   content: "";
   position: absolute;
@@ -1009,7 +1009,7 @@
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"][data-midnight-preview-art-side="right"]
+  .midnight-preview[data-midnight-look="card"][data-midnight-preview-art-side="right"]
   .midnight-preview-art::after {
   background: linear-gradient(to right, var(--midnight-card-ink), transparent 34%);
 }
@@ -1017,7 +1017,7 @@
 /* The writing's own side: a surface of its own, held in the middle so a one-line title does not
    hang at the bottom of a tall panel. */
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-body {
   position: absolute;
   inset-block: 0;
@@ -1031,14 +1031,14 @@
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"][data-midnight-preview-art-side="right"]
+  .midnight-preview[data-midnight-look="card"][data-midnight-preview-art-side="right"]
   .midnight-preview-body {
   left: 0;
   right: var(--midnight-art-w);
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-title {
   font-size: 19px;
   line-height: 1.16;
@@ -1046,13 +1046,13 @@
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-pill {
   font-size: 11.5px;
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-synopsis {
   /* Four lines: a two-line title still leaves the frame a strip of artwork above the writing at
      the smallest card height, and the synopsis ends on a line of its own rather than in the
@@ -1063,17 +1063,26 @@
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-actions {
   margin-block-start: 1px;
 }
 
 [data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-preview-shape="card"]
+  .midnight-preview[data-midnight-look="card"]
   .midnight-preview-open {
   height: 30px;
   padding-inline: 17px;
   font-size: 12px;
+}
+
+/* The front card is drawn exactly as the wide card is - artwork on the side it shares with the
+   poster, writing on its own surface - and differs only in where it stands: over the row instead
+   of inside it. The closed frame is a little smaller and lower, so the growth reads as the tile
+   enlarging in front of the row rather than a layer fading in on it. */
+[data-theme-layout="midnight"]
+  .midnight-preview[data-midnight-preview-shape="front"][data-open="false"] {
+  transform: scale(0.94) translateY(6px);
 }
 
 [data-theme-layout="midnight"] .midnight-preview-open {
@@ -1643,7 +1652,7 @@
 /* The wide card's writing side is the one surface the theme lifts on purpose. In OLED there is
    nothing to lift from, and the words only gain contrast by going down with it. */
 [data-theme-layout="midnight"][data-midnight-oled="on"]
-  .midnight-preview[data-midnight-preview-shape="card"] {
+  .midnight-preview[data-midnight-look="card"] {
   --midnight-card-ink: #0a0d12;
   --midnight-card-floor: #000000;
 }

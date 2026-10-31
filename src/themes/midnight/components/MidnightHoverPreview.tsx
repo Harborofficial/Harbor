@@ -175,6 +175,54 @@ function placeCard(rect: DOMRect): CardPlacement {
   };
 }
 
+/**
+ * The front card: the wide card's frame, laid over the tile it belongs to instead of inside the row.
+ *
+ * It keeps the card's width, height, split artwork and scale of type, and it keeps the poster's own
+ * bottom edge, so the tile turns into the frame where it stands rather than a layer surfacing above
+ * it. What it does not do is ask the row to make room: no neighbour is pushed, no caption is hidden
+ * and no tile can slide under a motionless hand, which is what used to drop a frame that was still
+ * being read on a dense grid. The frame simply stands in front of the row, wide enough to carry its
+ * writing over the tiles beside it.
+ */
+function placeFront(rect: DOMRect): Placement {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const height = Math.round(Math.min(Math.max(rect.height, CARD_MIN_H), CARD_MAX_H));
+  const width = Math.round(
+    Math.min(Math.max(rect.width * CARD_GROW, CARD_MIN_W), CARD_MAX_W),
+  );
+
+  const centre = rect.left + rect.width / 2;
+  // The same side rule as the wide card: a poster in the leading half opens toward the middle of
+  // the page, so the frame keeps its own outer edge in place and grows inward over its neighbours.
+  const growsRight = centre < vw / 2;
+  let left = growsRight ? rect.left : rect.right - width;
+  left = Math.min(Math.max(GUTTER, left), Math.max(GUTTER, vw - width - GUTTER));
+
+  // The frame hangs on the tile's bottom edge, so the row keeps its own baseline and any height the
+  // frame has beyond the poster it takes upward, over the row above.
+  let top = Math.round(rect.bottom - height);
+  top = Math.min(Math.max(TOP_INSET, top), Math.max(TOP_INSET, vh - height - GUTTER));
+
+  // The origin sits on the poster itself - the edge the frame shares with it, at its middle - so
+  // the frame opens out of the tile rather than fading in over it.
+  const originX = Math.round((growsRight ? rect.left : rect.right) - left);
+  const originY = Math.round(rect.top + rect.height / 2 - top);
+
+  // The artwork keeps the edge the card shares with the poster, which a clamp near a screen edge
+  // can flip; the writing takes the other side so the tile carries on into the frame.
+  const sharesLeft = Math.abs(left - rect.left) <= Math.abs(rect.right - (left + width));
+  return {
+    left,
+    top,
+    width,
+    height,
+    origin: `${originX}px ${originY}px`,
+    artSide: sharesLeft ? "left" : "right",
+  };
+}
+
 type RowTweak = { el: HTMLElement; transform: string; transition: string; opacity: string };
 
 let rowTweaks: RowTweak[] = [];
@@ -740,6 +788,13 @@ export function MidnightHoverPreview() {
         // A magnifying dock owns the tiles' transforms; the preview leaves the row to it.
         if (dockMagnify) restoreRow();
         else arrangeRow(session.cell, session.card, next.delta, next.growsRight);
+      } else if (shape === "front") {
+        // Nothing in the row moves: the frame stands over the tile on its own.
+        restoreRow();
+        const next = placeFront(rect);
+        panel.style.width = `${next.width}px`;
+        panel.style.height = `${next.height}px`;
+        setPlacement(next);
       } else {
         restoreRow();
         const centre = rect.left + rect.width / 2;
@@ -860,6 +915,9 @@ export function MidnightHoverPreview() {
       data-midnight-preview="true"
       data-midnight-preview-shape={shape}
       data-midnight-preview-art-side={placement?.artSide}
+      // The front card is the wide card's look over the row; the shapes differ in where they
+      // stand, not in how they are drawn.
+      data-midnight-look={shape === "front" ? "card" : shape}
       data-open={shown ? "true" : "false"}
       className="midnight-preview"
       style={

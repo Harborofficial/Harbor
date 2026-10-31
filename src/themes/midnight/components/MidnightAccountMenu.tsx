@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Activity,
   Bell,
+  BringToFront,
   Check,
   ChevronDown,
   Leaf,
@@ -64,6 +65,15 @@ import {
   writePalette,
 } from "../appearance";
 import { useRuntime, writeLite, writeNavShrink } from "../runtime";
+
+// The three shapes the hover preview can open in, in the order they are offered. The icons are the
+// shapes themselves: a landscape frame, an island, and the same frame brought in front of the row.
+const PREVIEW_SHAPES = ["card", "panel", "front"] as const;
+const PREVIEW_SHAPE_ICON = {
+  card: RectangleHorizontal,
+  panel: PanelTop,
+  front: BringToFront,
+} as const;
 
 export function MidnightAccountMenu({
   onOpenSettings,
@@ -258,6 +268,7 @@ function MidnightAccountPanel({
           preview: "معاينة بطاقة العمل",
           card: "كرت أفقي",
           panel: "لوحة عائمة",
+          front: "كرت أمامي",
           hero: "الواجهة الرئيسية",
           detail: "صفحة العمل",
           heroHeight: "الارتفاع",
@@ -278,6 +289,7 @@ function MidnightAccountPanel({
           preview: "Title preview",
           card: "Wide card",
           panel: "Floating panel",
+          front: "In front",
           hero: "Home hero",
           detail: "Title page",
           heroHeight: "Height",
@@ -516,8 +528,8 @@ function MidnightAccountPanel({
                 aria-label={copy.preview}
                 className="flex gap-1 rounded-xl bg-white/5 p-0.5"
               >
-                {(["card", "panel"] as const).map((option) => {
-                  const Icon = option === "card" ? RectangleHorizontal : PanelTop;
+                {PREVIEW_SHAPES.map((option) => {
+                  const Icon = PREVIEW_SHAPE_ICON[option];
                   const selected = previewShape === option;
                   return (
                     <button
@@ -525,15 +537,16 @@ function MidnightAccountPanel({
                       type="button"
                       role="menuitemradio"
                       aria-checked={selected}
+                      data-midnight-preview-shape-option={option}
                       onClick={() => writePreviewShape(option)}
-                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-[10px] px-2 py-1.5 text-[12px] font-medium transition-colors duration-150 ${
+                      className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-[10px] px-1.5 py-1.5 text-[11.5px] font-medium transition-colors duration-150 ${
                         selected
                           ? "bg-white/15 text-ink ring-1 ring-white/20"
                           : "text-ink-muted hover:bg-white/10 hover:text-ink"
                       }`}
                     >
-                      <Icon size={13} strokeWidth={2.2} />
-                      <span className="truncate">{option === "card" ? copy.card : copy.panel}</span>
+                      <Icon size={12} strokeWidth={2.2} className="shrink-0" />
+                      <span className="truncate">{copy[option]}</span>
                     </button>
                   );
                 })}
