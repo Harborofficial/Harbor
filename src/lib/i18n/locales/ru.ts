@@ -127,6 +127,7 @@ import plugins from "./ru/plugins";
 import brands from "./ru/brands";
 import bpSports from "./ru/bp-sports";
 import queueBasket from "./ru/queue-basket";
+import liveWeb from "./ru/live-web";
 
 import nytTv from "./ru/nyt-tv";
 
@@ -428,6 +429,7 @@ const ru: Record<string, string> = {
   ...playOrders,
   ...reviews,
   ...queueBasket,
+  ...liveWeb,
 };
 
 export default ru;

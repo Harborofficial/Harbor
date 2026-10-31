@@ -120,6 +120,7 @@ import plugins from "./vi/plugins";
 import brands from "./vi/brands";
 import bpSports from "./vi/bp-sports";
 import queueBasket from "./vi/queue-basket";
+import liveWeb from "./vi/live-web";
 
 import nytTv from "./vi/nyt-tv";
 
@@ -414,6 +415,7 @@ const vi: Record<string, string> = {
   ...playOrders,
   ...reviews,
   ...queueBasket,
+  ...liveWeb,
 };
 
 export default vi;

@@ -12,6 +12,7 @@ import { pruneToCatalog, useGroqCatalog, useOpenRouterCatalog } from "@/lib/ai-l
 import openrouterLogo from "@/assets/ai-logos/openrouter.png";
 import groqLogo from "@/assets/ai-logos/groq.png";
 import jinaLogo from "@/assets/ai-logos/jina.png";
+import keenableLogo from "@/assets/ai-logos/keenable.png";
 import { AiModelSelect } from "./ai-model-select";
 import { Globe, Sparkles } from "./icons";
 import { ExtLink, KeyField, Section, Segmented, ToggleRow } from "./shared";
@@ -40,6 +41,8 @@ export function AiSearchSection() {
   const [openrouterKey, setOpenrouterKey] = keyDrafts.openrouter;
   const [groqKey, setGroqKey] = keyDrafts.groq;
   const [jinaDraft, setJinaDraft] = useState(settings.jinaKey);
+  const [keenableDraft, setKeenableDraft] = useState(settings.keenableKey);
+  const keenable = settings.aiWebSource === "keenable";
   const [customDraft, setCustomDraft] = useState("");
   const orCatalog = useOpenRouterCatalog();
   const groqCatalog = useGroqCatalog(settings.aiGroqKey);
@@ -189,39 +192,91 @@ export function AiSearchSection() {
       </Section>
 
       <Section title={t("Live web")}>
-        <SettingRow
-          wide
-          icon={<Globe size={18} strokeWidth={2} />}
-          label={t("Jina Reader")}
-          desc={
-            <>
-              {t("Augments AI picks with current web results before asking the model. Powered by")}{" "}
-              <ExtLink href="https://jina.ai/reader">Jina Reader</ExtLink>.{" "}
-              {t("Works without a key at low volume; add a key for higher quotas.")}
-            </>
-          }
-        />
+        {keenable ? (
+          <SettingRow
+            wide
+            icon={<Globe size={18} strokeWidth={2} />}
+            label="Keenable"
+            desc={
+              <>
+                {t(
+                  "Augments AI picks with current web results before asking the model. Powered by",
+                )}{" "}
+                <ExtLink href="https://keenable.ai">Keenable</ExtLink>.{" "}
+                {t("Works without a key at low volume; add a key for higher quotas.")}
+              </>
+            }
+          />
+        ) : (
+          <SettingRow
+            wide
+            icon={<Globe size={18} strokeWidth={2} />}
+            label={t("Jina Reader")}
+            desc={
+              <>
+                {t(
+                  "Augments AI picks with current web results before asking the model. Powered by",
+                )}{" "}
+                <ExtLink href="https://jina.ai/reader">Jina Reader</ExtLink>.{" "}
+                {t("Works without a key at low volume; add a key for higher quotas.")}
+              </>
+            }
+          />
+        )}
         <ToggleRow
           label={t("Use live web context")}
-          sub={t("Fetches DuckDuckGo results and feeds top hits into the model prompt.")}
+          sub={
+            keenable
+              ? t("Searches the web with Keenable and feeds top results into the model prompt.")
+              : t("Fetches DuckDuckGo results and feeds top hits into the model prompt.")
+          }
           value={settings.aiWebSearch}
           onChange={(v) => update({ aiWebSearch: v })}
         />
-        <KeyField
-          label={t("Jina API key (optional)")}
-          placeholder={t("jina_...")}
-          iconSrc={jinaLogo}
-          value={jinaDraft}
-          onChange={setJinaDraft}
-          onSave={() => update({ jinaKey: jinaDraft.trim() })}
-          saved={false}
-          help={
-            <>
-              {t("Get a key at")} <ExtLink href="https://jina.ai/reader">jina.ai/reader</ExtLink>{" "}
-              {t("for higher rate limits; leave blank for the free anonymous tier.")}
-            </>
-          }
-        />
+        <SettingRow label={t("Search source")}>
+          <Segmented
+            value={settings.aiWebSource}
+            onChange={(v) => update({ aiWebSource: v })}
+            options={[
+              { value: "jina", label: "Jina Reader" },
+              { value: "keenable", label: "Keenable" },
+            ]}
+          />
+        </SettingRow>
+        {keenable ? (
+          <KeyField
+            label={t("Keenable API key (optional)")}
+            placeholder={t("API key")}
+            iconSrc={keenableLogo}
+            value={keenableDraft}
+            onChange={setKeenableDraft}
+            onSave={() => update({ keenableKey: keenableDraft.trim() })}
+            saved={false}
+            help={
+              <>
+                {t("Get a key at")}{" "}
+                <ExtLink href="https://keenable.ai/console">keenable.ai/console</ExtLink>{" "}
+                {t("for higher rate limits; leave blank for the free anonymous tier.")}
+              </>
+            }
+          />
+        ) : (
+          <KeyField
+            label={t("Jina API key (optional)")}
+            placeholder={t("jina_...")}
+            iconSrc={jinaLogo}
+            value={jinaDraft}
+            onChange={setJinaDraft}
+            onSave={() => update({ jinaKey: jinaDraft.trim() })}
+            saved={false}
+            help={
+              <>
+                {t("Get a key at")} <ExtLink href="https://jina.ai/reader">jina.ai/reader</ExtLink>{" "}
+                {t("for higher rate limits; leave blank for the free anonymous tier.")}
+              </>
+            }
+          />
+        )}
       </Section>
     </>
   );

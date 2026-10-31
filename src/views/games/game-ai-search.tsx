@@ -42,7 +42,7 @@ export function GameAiSearch({ query, filters, active, runSignal, open, onResult
   const orCatalog = useOpenRouterCatalog(), groqCatalog = useGroqCatalog(settings.aiGroqKey);
   const models = [...(settings.aiGroqKey.trim() ? pruneToCatalog(GROQ_MODELS, groqCatalog) : []), ...pruneToCatalog(AI_MODELS, orCatalog)];
   if (!models.some(item => item.id === model)) models.push({ id: model, label: modelLabelFor(model) || model, provider: groq ? "groq" : "openai" });
-  const fingerprint = JSON.stringify([query, filters, model, key, settings.aiWebSearch, language]);
+  const fingerprint = JSON.stringify([query, filters, model, key, settings.aiWebSearch, settings.aiWebSource, language]);
   useEffect(() => { request.current?.abort(); request.current = null; setStatus("idle"); setResults([]); setError(null); }, [fingerprint]);
   useEffect(() => { if (!active) { request.current?.abort(); request.current = null; setSettingsOpen(false); setStatus(value => value === "loading" ? "idle" : value); } }, [active]);
   useEffect(() => () => { request.current?.abort(); request.current = null; }, []);
@@ -54,7 +54,7 @@ export function GameAiSearch({ query, filters, active, runSignal, open, onResult
     try {
       let context: string | undefined;
       if (settings.aiWebSearch) {
-        try { const { enrichWithContent } = await import("@/lib/jina-search"); context = (await enrichWithContent(`${query.trim()} video games Steam`, settings.jinaKey)).context; } catch { /* The configured model can still search without web context. */ }
+        try { const { liveWebContext } = await import("@/lib/live-web"); context = (await liveWebContext(`${query.trim()} video games Steam`, settings)).context; } catch { /* The configured model can still search without web context. */ }
       }
       controller.signal.throwIfAborted();
       const matches = await findGamesWithAi({ key, model, groq, query, filters, language, context, signal: controller.signal });
