@@ -36,7 +36,11 @@
       "dangerousDisableAssetCspModification": ["style-src"],
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": {
+          "allow": ["**"],
+          "deny": ["$HOME/.ssh/**", "$HOME/.aws/**", "$HOME/.gnupg/**"],
+          "requireLiteralLeadingDot": false
+        }
       }
     }
   },

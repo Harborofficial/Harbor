@@ -139,6 +139,9 @@ fn image_path(dir: &Path, file: &str) -> Option<PathBuf> {
 /// Fresh cached file that can be served directly through the asset protocol.
 /// `.img` was the first-generation extension whose MIME type is unknown to the
 /// WebView, so those entries keep using the base64 path until revalidated.
+/// This directory sits under a dot folder on Linux (~/.cache), so the asset
+/// scope in tauri.conf.json must keep `requireLiteralLeadingDot: false` —
+/// otherwise every path returned here is refused and the image never renders.
 pub fn cached_path(app: &tauri::AppHandle, url: &str, width: u32) -> Option<String> {
     let _lock = IO.lock().ok()?;
     cleanup_legacy(app);
