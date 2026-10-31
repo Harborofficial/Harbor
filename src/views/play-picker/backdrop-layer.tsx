@@ -4,7 +4,7 @@ import { useSettings } from "@/lib/settings";
 function BlurUpBackdrop({ src, forceBlur }: { src: string; forceBlur: boolean }) {
   const [loaded, setLoaded] = useState(false);
   const lowSrc = src.replace(/\/t\/p\/(w\d+|h\d+)\//, "/t/p/w300/");
-  const hiSrc = src.replace(/\/t\/p\/(w\d+|h\d+)\//, "/t/p/original/");
+  const hiSrc = src.replace(/\/t\/p\/(w\d+|h\d+|original)\//, "/t/p/w780/");
   return (
     <>
       <img
@@ -32,7 +32,10 @@ function BlurUpBackdrop({ src, forceBlur }: { src: string; forceBlur: boolean })
 export function BackdropLayer({ src }: { src?: string }) {
   const { settings } = useSettings();
   return (
-    <div aria-hidden className="harbor-picker-backdrop pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    <div
+      aria-hidden
+      className="harbor-picker-backdrop pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+    >
       {src && <BlurUpBackdrop key={src} src={src} forceBlur={settings.streamBackdropBlur} />}
       <div className="absolute inset-0 bg-gradient-to-b from-canvas/30 via-canvas/85 to-canvas" />
       <div className="absolute inset-0 bg-gradient-to-r from-canvas/55 via-transparent to-canvas/55" />

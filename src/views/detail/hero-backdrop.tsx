@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 function Layer({ url, first, onReady }: { url: string; first: boolean; onReady: () => void }) {
   const lowUrl = url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w300/");
-  const highUrl = url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/original/");
+  const highUrl = url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w1280/");
   const canBlurUp = first && lowUrl !== highUrl;
   const [ready, setReady] = useState(false);
   const done = () => {
@@ -40,9 +40,7 @@ export function HeroBackdrop({ url }: { url: string }) {
   const nextId = useRef(1);
   useEffect(() => {
     const id = nextId.current++;
-    setLayers((prev) =>
-      prev[prev.length - 1]?.url === url ? prev : [...prev, { id, url }],
-    );
+    setLayers((prev) => (prev[prev.length - 1]?.url === url ? prev : [...prev, { id, url }]));
   }, [url]);
   const settle = (id: number) =>
     setLayers((prev) => {

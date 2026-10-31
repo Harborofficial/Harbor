@@ -338,7 +338,7 @@ export function DetailView({
   }, [settings.tmdbLanguage, settings.uiLanguage, detail?.overview]);
   const pinnedBackdrop = useTitleBackdrop(meta.id);
   const pinnedBackdropHi = pinnedBackdrop
-    ? pinnedBackdrop.replace(/\/t\/p\/w\d+\//, "/t/p/original/")
+    ? pinnedBackdrop.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w1280/")
     : undefined;
   const [cinemetaFull, setCinemetaFull] = useState<Meta | null>(
     meta.videos && meta.videos.length > 0 ? meta : null,
