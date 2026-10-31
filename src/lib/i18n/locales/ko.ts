@@ -100,6 +100,7 @@ import plugins from "./ko/plugins";
 import brands from "./ko/brands";
 import bpSports from "./ko/bp-sports";
 import queueBasket from "./ko/queue-basket";
+import liveWeb from "./ko/live-web";
 
 import nytTv from "./ko/nyt-tv";
 
@@ -373,6 +374,7 @@ const ko: Record<string, string> = {
   ...playOrders,
   ...reviews,
   ...queueBasket,
+  ...liveWeb,
 };
 
 export default ko;

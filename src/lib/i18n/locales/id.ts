@@ -101,6 +101,7 @@ import plugins from "./id/plugins";
 import brands from "./id/brands";
 import bpSports from "./id/bp-sports";
 import queueBasket from "./id/queue-basket";
+import liveWeb from "./id/live-web";
 
 import nytTv from "./id/nyt-tv";
 
@@ -377,6 +378,7 @@ const id: Record<string, string> = {
   ...playOrders,
   ...reviews,
   ...queueBasket,
+  ...liveWeb,
 };
 
 export default id;
