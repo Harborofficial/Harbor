@@ -90,7 +90,10 @@ jobs:
   native:
     name: Native
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # A cold cache spends ~8m on cargo check and ~19m more building the test
+    # profile, which cargo check never produces. Running the suite needs room
+    # after that.
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v6
