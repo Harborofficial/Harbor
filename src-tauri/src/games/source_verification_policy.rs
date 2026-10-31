@@ -38,6 +38,19 @@ pub fn same_origin(expected: &Url, actual: &Url) -> bool {
     source(actual.as_str()).is_ok() && expected.origin() == actual.origin()
 }
 
+/// Cloudflare's managed challenge renders Turnstile in a cross-origin frame, which in turn
+/// hosts its widget in an `about:srcdoc` frame. wry reports frame navigations through the
+/// same handler as the main frame, so refusing those targets leaves the challenge spinning
+/// forever. Neither `about:srcdoc` nor a blob can be a top-level target, and the challenge
+/// origin is fixed, so the main frame still cannot wander off the catalog's own site.
+pub fn navigable(expected: &Url, actual: &str) -> bool {
+    let target = actual.strip_prefix("blob:").unwrap_or(actual);
+    target == "about:blank"
+        || target == "about:srcdoc"
+        || target.starts_with("https://challenges.cloudflare.com/")
+        || Url::parse(target).is_ok_and(|url| same_origin(expected, &url))
+}
+
 #[derive(Clone)]
 pub struct Grant {
     pub cookie: Zeroizing<String>,
@@ -81,6 +94,19 @@ mod tests {
         assert!(same_origin(&url, &source("https://hydralinks.cloud/cdn-cgi/challenge-platform/test").unwrap()));
         assert!(!same_origin(&url, &source("https://sub.hydralinks.cloud/feed").unwrap()));
         assert!(!same_origin(&url, &source("https://hydralinks.cloud.evil.example/feed").unwrap()));
+    }
+    #[test]
+    fn challenge_frames_are_navigable_but_other_origins_are_not() {
+        let url = source("https://hydralinks.cloud/sources/fitgirl.json").unwrap();
+        for input in ["about:blank", "https://hydralinks.cloud/cdn-cgi/challenge-platform/h/g/jsd/r/0.1",
+            "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/if/ov2/av0/0/x/light/normal/auto/",
+            "about:srcdoc", "blob:https://challenges.cloudflare.com/8f3b", "blob:https://hydralinks.cloud/8f3b"] {
+            assert!(navigable(&url, input), "{input}");
+        }
+        for input in ["https://challenges.cloudflare.com.evil.example/turnstile", "https://sub.hydralinks.cloud/feed",
+            "http://hydralinks.cloud/sources/fitgirl.json", "about:settings", "javascript:alert(1)", "data:text/html,x"] {
+            assert!(!navigable(&url, input), "{input}");
+        }
     }
     #[test]
     fn headers_cannot_inject_other_cookies_or_requests() {
