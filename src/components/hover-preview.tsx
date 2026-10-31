@@ -108,7 +108,10 @@ export function HoverPreview() {
           seq: snap.openSeq,
           width,
           crownH: crownHeightFor(width),
-          topInset: layout === "topdock" || layout === "royal" ? TOPBAR_INSET_PX : GUTTER_PX,
+          topInset:
+            layout === "topdock" || layout === "royal" || layout === "midnight"
+              ? TOPBAR_INSET_PX
+              : GUTTER_PX,
           pos: null,
           height: 0,
           nextHeight: 0,
