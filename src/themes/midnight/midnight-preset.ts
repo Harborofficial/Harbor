@@ -25,6 +25,7 @@ export const MIDNIGHT_PRESET: ThemePreset = {
       ? "يلمع السوادُ زجاجًا، وتنساب الحركةُ على مهل، ولا يَثقل الضوءُ العين."
       : "Lightness, beauty, and graceful motion in deep dark glass.";
   },
+  credit: { name: "yasser", github: "3-pr", harbor: "iii" },
   swatch: ["#000000", "#0d1117", "#8fb0cc"],
   tokens: {
     "--color-canvas": "#000000",

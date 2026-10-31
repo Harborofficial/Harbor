@@ -1,10 +1,16 @@
 import { ArrowLeft, Check, FlaskConical, X } from "../../icons";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useEscape, useModalExit } from "@/components/modal-shell";
-import { BETA_THEMES, type ThemePreset } from "@/lib/theme";
+import { BETA_THEMES, type ThemeCredit, type ThemePreset } from "@/lib/theme";
 import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
+import { openUrl } from "@/lib/window";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { requestOpenProfile } from "@/lib/social/open-profile";
+import { fetchSummary } from "@/views/profile/profile-api";
+import { Avatar, VerifiedCheck } from "@/views/profile/profile-bits";
+import type { ProfileSummary } from "@/views/profile/profile-types";
 import { ROW_TITLE } from "../../shared";
 
 const BADGE =
@@ -126,6 +132,10 @@ export function BetaThemesModal({
               blurb={theme.blurb ? t(theme.blurb) : undefined}
               active={activeId === theme.id}
               onActivate={() => onActivate(theme.id)}
+              onOpenProfile={(handle) => {
+                onClose();
+                requestOpenProfile(handle);
+              }}
             />
           ))}
         </div>
@@ -140,11 +150,13 @@ function BetaCard({
   blurb,
   active,
   onActivate,
+  onOpenProfile,
 }: {
   theme: ThemePreset;
   blurb?: string;
   active: boolean;
   onActivate: () => void;
+  onOpenProfile: (handle: string) => void;
 }) {
   const t = useT();
   const hasImage = !!theme.previewImage;
@@ -191,6 +203,9 @@ function BetaCard({
               {blurb}
             </span>
           )}
+          {theme.credit && (
+            <ThemeCredit credit={theme.credit} onOpenProfile={onOpenProfile} />
+          )}
         </div>
         <button
           type="button"
@@ -204,5 +219,86 @@ function BetaCard({
         </button>
       </div>
     </div>
+  );
+}
+
+// The author comes first: the community identity is what a credit is for. Avatar and display name
+// come from the same public summary the profile screen reads, so the line matches that screen; a
+// handle that cannot be read falls back to the stored name and the initial `Avatar` draws.
+const profileCache = new Map<string, ProfileSummary | null>();
+
+function useCreditProfile(handle: string | undefined) {
+  const [profile, setProfile] = useState<ProfileSummary | null>(() =>
+    handle ? (profileCache.get(handle) ?? null) : null,
+  );
+  useEffect(() => {
+    if (!handle) return;
+    const cached = profileCache.get(handle);
+    if (cached !== undefined) {
+      setProfile(cached);
+      return;
+    }
+    const controller = new AbortController();
+    fetchSummary(handle, controller.signal)
+      .then((summary) => {
+        profileCache.set(handle, summary);
+        setProfile(summary);
+      })
+      .catch(() => {
+        // Unknown or unreachable handle: the stored name is enough, so it is not retried this run.
+        if (!controller.signal.aborted) profileCache.set(handle, null);
+      });
+    return () => controller.abort();
+  }, [handle]);
+  return profile;
+}
+
+function ThemeCredit({
+  credit,
+  onOpenProfile,
+}: {
+  credit: ThemeCredit;
+  onOpenProfile: (handle: string) => void;
+}) {
+  const harbor = credit.harbor;
+  const profile = useCreditProfile(harbor);
+  const name = profile?.alias?.trim() || credit.name;
+  return (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13.5px] leading-[18px] text-ink-subtle">
+      {harbor ? (
+        <button
+          type="button"
+          onClick={() => onOpenProfile(harbor)}
+          title={`${HARBOR_API_BASE}/u/${harbor}`}
+          className="flex items-center gap-1.5 rounded-full text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <Avatar src={profile?.avatarUrl} size={22} alias={name} />
+          <span className="underline decoration-ink-subtle decoration-1 underline-offset-[3px]">
+            {name}
+          </span>
+          {profile?.verified && <VerifiedCheck size={13} />}
+        </button>
+      ) : (
+        <span className="text-ink-muted">{name}</span>
+      )}
+      {credit.github && (
+        <CreditLink label="GitHub" href={`https://github.com/${credit.github}`} />
+      )}
+    </span>
+  );
+}
+
+// GitHub is outside the app, so it goes through `openUrl` like every other outbound link in
+// settings. Buttons, not anchors: the webview has no navigation of its own.
+function CreditLink({ href, label }: { href: string; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={() => openUrl(href)}
+      title={href}
+      className="rounded-sm text-ink-muted underline decoration-ink-subtle decoration-1 underline-offset-[3px] transition-colors hover:text-ink hover:decoration-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+    >
+      {label}
+    </button>
   );
 }

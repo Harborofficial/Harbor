@@ -90,10 +90,19 @@ export type ChromeConfig = {
   icons?: Partial<Record<ChromeNavId, string>>;
 };
 
+export type ThemeCredit = {
+  name: string;
+  /** GitHub handle, without the owner segment. */
+  github?: string;
+  /** Harbor community handle, used against the configured base URL. */
+  harbor?: string;
+};
+
 export type ThemePreset = {
   id: ThemePresetId;
   name: string;
   blurb: string;
+  credit?: ThemeCredit;
   swatch: [string, string, string];
   tokens: Record<string, string>;
   background?: ThemeBackground;
