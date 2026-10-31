@@ -164,7 +164,9 @@ export function MidnightAccountMenu({
         aria-label={name}
         data-midnight-account-trigger="true"
         className={`midnight-item group/account relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full p-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 ${
-          menuOpen ? "midnight-item-active text-ink ring-1 ring-white/25" : "text-ink-muted hover:text-ink"
+          menuOpen
+            ? "midnight-item-active text-ink ring-1 ring-white/25"
+            : "text-ink-muted hover:text-ink"
         }`}
       >
         <ProfileAvatar
@@ -188,12 +190,7 @@ export function MidnightAccountMenu({
 
       {/* Status Picker popover */}
       {statusOpen && showStatus && (
-        <StatusPicker
-          current={status}
-          placement="down"
-          align="end"
-          onPick={pickStatus}
-        />
+        <StatusPicker current={status} placement="down" align="end" onPick={pickStatus} />
       )}
 
       {/* Glass Popover Menu */}
@@ -356,13 +353,14 @@ function MidnightAccountPanel({
   const otherNuvioProfiles = isNuvio
     ? nuvioState.profiles.filter((p) => p.profile_index !== nuvioState.activeProfileIndex)
     : [];
-  const otherStremioProfiles = !isNuvio
-    ? profiles.filter((p) => p.id !== activeProfile?.id)
-    : [];
+  const otherStremioProfiles = !isNuvio ? profiles.filter((p) => p.id !== activeProfile?.id) : [];
 
   const name = isNuvio
     ? (activeNuvioProfile?.name ?? nuvioEmail?.split("@")[0] ?? t("profile.fallback"))
-    : (activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback"));
+    : (activeProfile?.name ??
+      user?.fullname ??
+      user?.email?.split("@")[0] ??
+      t("profile.fallback"));
 
   const isPrimary = isNuvio
     ? activeNuvioProfile?.profile_index === 1
@@ -383,7 +381,9 @@ function MidnightAccountPanel({
       aria-label={t("Account")}
       data-harbor-context-layer="true"
       className={`midnight-account-popover absolute end-0 top-[calc(100%+8px)] z-[140] w-80 flex flex-col overflow-hidden rounded-2xl p-2.5 transition-[opacity,translate] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:duration-120 motion-reduce:transition-opacity ${
-        entered ? "opacity-100 [translate:none]" : "opacity-0 [translate:0_-8px] motion-reduce:[translate:none]"
+        entered
+          ? "opacity-100 [translate:none]"
+          : "opacity-0 [translate:0_-8px] motion-reduce:[translate:none]"
       }`}
     >
       {/* 1. Header: Avatar, Display Name, Presence Status */}
@@ -403,7 +403,9 @@ function MidnightAccountPanel({
               className="flex items-center gap-1.5 text-start text-[11.5px] text-ink-subtle hover:text-ink transition-colors"
               title={t("Set status")}
             >
-              <span className={`inline-block h-2 w-2 rounded-full ${PRESENCE_META[ctrl.status].dot}`} />
+              <span
+                className={`inline-block h-2 w-2 rounded-full ${PRESENCE_META[ctrl.status].dot}`}
+              />
               <span className="truncate">{t(PRESENCE_META[ctrl.status].label)}</span>
             </button>
           ) : isNuvio && nuvioEmail ? (
@@ -758,7 +760,9 @@ function MidnightAccountPanel({
                     </span>
                   )}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{p.name}</span>
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
+                  {p.name}
+                </span>
               </button>
             );
           })}
@@ -788,7 +792,9 @@ function MidnightAccountPanel({
                   </span>
                 )}
               </span>
-              <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{p.name}</span>
+              <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
+                {p.name}
+              </span>
             </button>
           ))}
         </div>
@@ -835,7 +841,10 @@ function MidnightAccountPanel({
                 role="menuitem"
                 onClick={() => {
                   if (isNuvio) {
-                    openPicker({ kind: "edit", profileId: String(activeNuvioProfile?.profile_index ?? 1) });
+                    openPicker({
+                      kind: "edit",
+                      profileId: String(activeNuvioProfile?.profile_index ?? 1),
+                    });
                   } else if (activeProfile) {
                     openPicker({ kind: "edit", profileId: activeProfile.id });
                   }
@@ -897,29 +906,30 @@ function MidnightAccountPanel({
             </button>
           )}
 
-          {!isNuvio && (author ? (
-            <button
-              type="button"
-              tabIndex={0}
-              role="menuitem"
-              onClick={signOutHarbor}
-              className={`${ITEM} border-t border-white/10`}
-            >
-              <LogOut size={14} strokeWidth={2.2} />
-              <span>{t("Sign out of Harbor")}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              tabIndex={0}
-              role="menuitem"
-              onClick={openHarborAuth}
-              className={`${ITEM} border-t border-white/10`}
-            >
-              <LogIn size={14} strokeWidth={2.2} />
-              <span>{t("Sign in to Harbor")}</span>
-            </button>
-          ))}
+          {!isNuvio &&
+            (author ? (
+              <button
+                type="button"
+                tabIndex={0}
+                role="menuitem"
+                onClick={signOutHarbor}
+                className={`${ITEM} border-t border-white/10`}
+              >
+                <LogOut size={14} strokeWidth={2.2} />
+                <span>{t("Sign out of Harbor")}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                tabIndex={0}
+                role="menuitem"
+                onClick={openHarborAuth}
+                className={`${ITEM} border-t border-white/10`}
+              >
+                <LogIn size={14} strokeWidth={2.2} />
+                <span>{t("Sign in to Harbor")}</span>
+              </button>
+            ))}
         </div>
       )}
     </div>
@@ -986,7 +996,11 @@ function HeroKnob<T extends string>({
   return (
     <div className="flex items-center gap-2">
       <span className="w-[54px] shrink-0 text-[10.5px] font-medium text-ink-subtle">{label}</span>
-      <div role="group" aria-label={label} className="flex flex-1 gap-0.5 rounded-lg bg-white/5 p-0.5">
+      <div
+        role="group"
+        aria-label={label}
+        className="flex flex-1 gap-0.5 rounded-lg bg-white/5 p-0.5"
+      >
         {options.map((option) => {
           const selected = option === value;
           return (

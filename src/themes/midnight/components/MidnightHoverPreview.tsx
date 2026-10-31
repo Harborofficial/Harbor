@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
 import {
@@ -94,12 +88,7 @@ type Placement = {
   artSide: "left" | "right";
 };
 
-function placePanel(
-  rect: DOMRect,
-  width: number,
-  height: number,
-  side: boolean,
-): Placement {
+function placePanel(rect: DOMRect, width: number, height: number, side: boolean): Placement {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   let left = rect.left + rect.width / 2 - width / 2;
@@ -140,9 +129,7 @@ function placeCard(rect: DOMRect): CardPlacement {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const height = Math.round(Math.min(Math.max(rect.height, CARD_MIN_H), CARD_MAX_H));
-  const width = Math.round(
-    Math.min(Math.max(rect.width * CARD_GROW, CARD_MIN_W), CARD_MAX_W),
-  );
+  const width = Math.round(Math.min(Math.max(rect.width * CARD_GROW, CARD_MIN_W), CARD_MAX_W));
 
   const centre = rect.left + rect.width / 2;
   // A poster in the leading half opens rightwards, one in the trailing half leftwards: the
@@ -189,9 +176,7 @@ function placeFront(rect: DOMRect): Placement {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const height = Math.round(Math.min(Math.max(rect.height, CARD_MIN_H), CARD_MAX_H));
-  const width = Math.round(
-    Math.min(Math.max(rect.width * CARD_GROW, CARD_MIN_W), CARD_MAX_W),
-  );
+  const width = Math.round(Math.min(Math.max(rect.width * CARD_GROW, CARD_MIN_W), CARD_MAX_W));
 
   const centre = rect.left + rect.width / 2;
   // The same side rule as the wide card: a poster in the leading half opens toward the middle of
@@ -262,10 +247,7 @@ function releaseRow(): void {
   }
 }
 
-function tweakRow(
-  el: HTMLElement,
-  next: { transform?: string; opacity?: string },
-): void {
+function tweakRow(el: HTMLElement, next: { transform?: string; opacity?: string }): void {
   rowTweaks.push({
     el,
     transform: el.style.transform,
@@ -532,7 +514,10 @@ export function MidnightHoverPreview() {
       setArt(null);
       setPlacement(null);
       setShown(false);
-      const card = anchor.closest<HTMLElement>("[data-media-card]") ?? anchor.closest<HTMLElement>("button") ?? anchor;
+      const card =
+        anchor.closest<HTMLElement>("[data-media-card]") ??
+        anchor.closest<HTMLElement>("button") ??
+        anchor;
       setSession({
         anchor,
         card,
@@ -611,9 +596,12 @@ export function MidnightHoverPreview() {
       if (quiet > 0) {
         clearTimers();
         pendingRef.current = anchor;
-        dwellTimer.current = window.setTimeout(() => {
-          openRested(anchor);
-        }, Math.round(quiet) + DWELL_MS);
+        dwellTimer.current = window.setTimeout(
+          () => {
+            openRested(anchor);
+          },
+          Math.round(quiet) + DWELL_MS,
+        );
         return;
       }
       clearTimers();
@@ -668,9 +656,7 @@ export function MidnightHoverPreview() {
       e.stopPropagation();
       synopsis.scrollTo({
         top,
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       });
       markSynopsis(panel);
     };
@@ -894,9 +880,7 @@ export function MidnightHoverPreview() {
     // keys for both shapes, so they follow the interface language.
     data.length ? localizeFact(data.length, t) : null,
     data.genre ? t(data.genre) : null,
-    data.rating
-      ? `${data.rating.kind === "mal" ? "MAL" : "IMDb"} ${data.rating.value}`
-      : null,
+    data.rating ? `${data.rating.kind === "mal" ? "MAL" : "IMDb"} ${data.rating.value}` : null,
     data.contentRating,
   ].filter((value): value is string => !!value);
 

@@ -114,7 +114,9 @@
 }
 
 [data-theme-layout="midnight"] .midnight-top-chrome[data-hidden="true"] .midnight-top-capsule-glass,
-[data-theme-layout="midnight"] .midnight-top-chrome[data-hidden="true"] .midnight-top-capsule-content {
+[data-theme-layout="midnight"]
+  .midnight-top-chrome[data-hidden="true"]
+  .midnight-top-capsule-content {
   opacity: 0;
 }
 
@@ -165,7 +167,9 @@
   cursor: pointer;
   user-select: none;
   color: var(--color-ink-muted);
-  transition: color 250ms ease, transform 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  transition:
+    color 250ms ease,
+    transform 150ms cubic-bezier(0.25, 1, 0.5, 1);
   outline: none;
 }
 
@@ -238,8 +242,12 @@
       rgba(255, 255, 255, 0.55)
     ),
     linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   box-shadow:
@@ -323,7 +331,9 @@
 }
 
 /* Transitions enabled only after initial mount/paint */
-[data-theme-layout="midnight"] .midnight-nav-cluster[data-ready="true"] .midnight-sliding-indicator {
+[data-theme-layout="midnight"]
+  .midnight-nav-cluster[data-ready="true"]
+  .midnight-sliding-indicator {
   transition:
     transform 400ms cubic-bezier(0.25, 1, 0.5, 1),
     width 400ms cubic-bezier(0.25, 1, 0.5, 1),
@@ -331,7 +341,9 @@
 }
 
 /* Indicator transition disabled during hover expansion tracking */
-[data-theme-layout="midnight"] .midnight-nav-cluster[data-expanding="true"] .midnight-sliding-indicator {
+[data-theme-layout="midnight"]
+  .midnight-nav-cluster[data-expanding="true"]
+  .midnight-sliding-indicator {
   transition: none !important;
 }
 
@@ -466,7 +478,7 @@
 /* Overflow Glass Popover */
 [data-theme-layout="midnight"] .midnight-more-popover {
   position: absolute;
-  background-color: rgba(7, 9, 12, 0.70);
+  background-color: rgba(7, 9, 12, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border: 1px solid color-mix(in srgb, var(--color-edge) 65%, transparent);
   box-shadow:
@@ -501,7 +513,9 @@
   overscroll-behavior: contain;
   scrollbar-width: thin;
   transform-origin: top right;
-  transition: opacity 200ms cubic-bezier(0.16, 1, 0.3, 1), translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    translate 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme-layout="midnight"] .midnight-account-popover:where(:dir(rtl), [dir="rtl"] *) {
@@ -522,14 +536,18 @@
   color: var(--color-ink-muted);
   font-size: 11px;
   font-weight: 500;
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, transform 100ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    transform 100ms ease;
   user-select: none;
   cursor: pointer;
 }
 
 [data-theme-layout="midnight"] .midnight-account-tile:hover,
 [data-theme-layout="midnight"] .midnight-account-tile:focus-visible {
-  background-color: rgba(255, 255, 255, 0.10);
+  background-color: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.12);
   color: var(--color-ink);
   outline: none;
@@ -595,8 +613,11 @@
    ========================================================================== */
 
 /* 1. Keep top capsule visible in Games view (overrides generic [data-games-library] hiding rule) */
-[data-games-layout="midnight"][data-games-library]:not([data-games-navigation]) .midnight-top-chrome,
-[data-theme-layout="midnight"] [data-games-library]:not([data-games-navigation]) .midnight-top-chrome {
+[data-games-layout="midnight"][data-games-library]:not([data-games-navigation])
+  .midnight-top-chrome,
+[data-theme-layout="midnight"]
+  [data-games-library]:not([data-games-navigation])
+  .midnight-top-chrome {
   visibility: visible;
   opacity: 1;
   pointer-events: none;
@@ -727,7 +748,11 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 120% at 20% 0%, color-mix(in srgb, var(--color-accent) 28%, transparent), transparent 60%),
+    radial-gradient(
+      120% 120% at 20% 0%,
+      color-mix(in srgb, var(--color-accent) 28%, transparent),
+      transparent 60%
+    ),
     linear-gradient(160deg, #10151b, #05070a);
 }
 
@@ -916,15 +941,13 @@
 
 /* The last line is cut at the budget, so it settles into the artwork instead of stopping short
    as if the sentence had ended there. Only a synopsis that was actually cut wears the fade. */
-[data-theme-layout="midnight"]
-  .midnight-preview-synopsis[data-midnight-clipped="true"] {
+[data-theme-layout="midnight"] .midnight-preview-synopsis[data-midnight-clipped="true"] {
   -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 0.8em), transparent 100%);
   mask-image: linear-gradient(to bottom, #000 calc(100% - 0.8em), transparent 100%);
 }
 
 /* Walked down, the top line is the cut one, so the fade turns to face the other way. */
-[data-theme-layout="midnight"]
-  .midnight-preview-synopsis[data-midnight-above="true"] {
+[data-theme-layout="midnight"] .midnight-preview-synopsis[data-midnight-above="true"] {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 0.8em);
   mask-image: linear-gradient(to bottom, transparent 0, #000 0.8em);
 }
@@ -971,22 +994,16 @@
    strength, with nothing laid over it, and the writing takes the other side on a surface of its
    own: a wash heavy enough to carry a synopsis over any poster is a wash heavy enough to hide
    the poster, and that frame is the reason the card is worth opening. */
-[data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-look="card"]
-  .midnight-preview-pane {
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-pane {
   display: block;
 }
 
 /* Nothing sits over the artwork, so the measured scrim has nothing left to protect here. */
-[data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-look="card"]
-  .midnight-preview-veil {
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-veil {
   display: none;
 }
 
-[data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-look="card"]
-  .midnight-preview-art {
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-art {
   inset: 0 auto 0 0;
   width: var(--midnight-art-w);
 }
@@ -1016,9 +1033,7 @@
 
 /* The writing's own side: a surface of its own, held in the middle so a one-line title does not
    hang at the bottom of a tall panel. */
-[data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-look="card"]
-  .midnight-preview-body {
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-body {
   position: absolute;
   inset-block: 0;
   left: var(--midnight-art-w);
@@ -1045,9 +1060,7 @@
   letter-spacing: -0.015em;
 }
 
-[data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-look="card"]
-  .midnight-preview-pill {
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-pill {
   font-size: 11.5px;
 }
 
@@ -1068,9 +1081,7 @@
   margin-block-start: 1px;
 }
 
-[data-theme-layout="midnight"]
-  .midnight-preview[data-midnight-look="card"]
-  .midnight-preview-open {
+[data-theme-layout="midnight"] .midnight-preview[data-midnight-look="card"] .midnight-preview-open {
   height: 30px;
   padding-inline: 17px;
   font-size: 12px;
@@ -2394,9 +2405,7 @@
 /* --- Composition: frame ---------------------------------------------------- */
 /* The artwork becomes an object on the page: it steps inside the gutters, rounds its corners and
    keeps the same glass bar, so the title page reads like a framed still rather than a wall. */
-[data-theme-layout="midnight"][data-midnight-detail="frame"]
-  main.harbor-detail-enter
-  > section {
+[data-theme-layout="midnight"][data-midnight-detail="frame"] main.harbor-detail-enter > section {
   padding: clamp(5rem, 9vh, 6.25rem) clamp(0.75rem, 2vw, 1.75rem) 0;
 }
 
@@ -2428,7 +2437,8 @@
 /* The paragraph was measured for a full page; it shares one with a rule now. */
 [data-theme-layout="midnight"][data-midnight-detail]
   main.harbor-detail-enter
-  > section + div
+  > section
+  + div
   > div.grid
   > div.max-w-3xl:has(> p[data-tauri-drag-region="false"]) {
   padding-inline-start: clamp(0.9rem, 1.5vw, 1.25rem);
@@ -2437,7 +2447,8 @@
 
 [data-theme-layout="midnight"][data-midnight-detail]
   main.harbor-detail-enter
-  > section + div
+  > section
+  + div
   > div.grid
   > div.max-w-3xl
   p[data-tauri-drag-region="false"] {
@@ -2631,11 +2642,14 @@
 }
 
 @supports (animation-timeline: view()) {
-  [data-theme-layout="midnight"][data-midnight-detail] main.harbor-detail-enter [data-detail-section],
+  [data-theme-layout="midnight"][data-midnight-detail]
+    main.harbor-detail-enter
+    [data-detail-section],
   [data-theme-layout="midnight"][data-midnight-detail] main.harbor-detail-enter [data-episodes],
   [data-theme-layout="midnight"][data-midnight-detail]
     main.harbor-detail-enter
-    > section + div
+    > section
+    + div
     > div.grid {
     animation: midnight-detail-chapter linear both;
     animation-timeline: view();
@@ -2660,11 +2674,14 @@
     main.harbor-detail-enter
     .harbor-bleed-stremio
     > img,
-  [data-theme-layout="midnight"][data-midnight-detail] main.harbor-detail-enter [data-detail-section],
+  [data-theme-layout="midnight"][data-midnight-detail]
+    main.harbor-detail-enter
+    [data-detail-section],
   [data-theme-layout="midnight"][data-midnight-detail] main.harbor-detail-enter [data-episodes],
   [data-theme-layout="midnight"][data-midnight-detail]
     main.harbor-detail-enter
-    > section + div
+    > section
+    + div
     > div.grid {
     animation: none !important;
     translate: none !important;
@@ -2725,7 +2742,9 @@
 
 /* The title page's bar, in every composition that glasses it. Cinema is left alone: it carries a
    directional scrim of its own instead of a surface, and there is no blur to take away. */
-[data-theme-layout="midnight"][data-midnight-lite="on"][data-midnight-detail]:not([data-midnight-detail="cinema"])
+[data-theme-layout="midnight"][data-midnight-lite="on"][data-midnight-detail]:not(
+    [data-midnight-detail="cinema"]
+  )
   main.harbor-detail-enter
   .harbor-bleed-stremio
   > div.absolute.bottom-0 {
@@ -2748,7 +2767,8 @@
 [data-theme-layout="midnight"][data-midnight-lite="on"] main.harbor-detail-enter [data-episodes],
 [data-theme-layout="midnight"][data-midnight-lite="on"]
   main.harbor-detail-enter
-  > section + div
+  > section
+  + div
   > div.grid {
   animation: none !important;
   translate: none !important;

@@ -13,13 +13,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
  * settings store lives outside this theme, and the theme must stay removable without a trace, so
  * the choices are kept locally and painted as document attributes the stylesheet keys on.
  */
-export type MidnightHeroStyle =
-  | "classic"
-  | "refined"
-  | "split"
-  | "cinema"
-  | "island"
-  | "billboard";
+export type MidnightHeroStyle = "classic" | "refined" | "split" | "cinema" | "island" | "billboard";
 export type MidnightHeroHeight = "auto" | "short" | "tall";
 export type MidnightHeroText = "start" | "center" | "end";
 export type MidnightHeroScrim = "auto" | "soft" | "deep";

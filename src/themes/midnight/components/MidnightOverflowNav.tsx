@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { NavItem } from "@/chrome/nav-items";
@@ -121,17 +115,28 @@ export function MidnightOverflowNav({
     const curActiveKey = activeKeyRef.current;
 
     // Check if active item is visible in primary strip or tucked inside More
-    const activeShown = curShown.find((e) => e.item.id === curActiveKey || e.item.view === curActiveKey || e.active);
-    const activeOverflow = curOverflow.find((e) => e.item.id === curActiveKey || e.item.view === curActiveKey || e.active);
+    const activeShown = curShown.find(
+      (e) => e.item.id === curActiveKey || e.item.view === curActiveKey || e.active,
+    );
+    const activeOverflow = curOverflow.find(
+      (e) => e.item.id === curActiveKey || e.item.view === curActiveKey || e.active,
+    );
 
     let activeEl: HTMLElement | null = null;
     if (activeShown) {
-      activeEl = container.querySelector<HTMLElement>(`[data-midnight-item="${activeShown.item.id}"]`);
+      activeEl = container.querySelector<HTMLElement>(
+        `[data-midnight-item="${activeShown.item.id}"]`,
+      );
     } else if (activeOverflow) {
       activeEl = container.querySelector<HTMLElement>('[data-midnight-more="true"]');
     }
 
-    if (!activeEl || !activeEl.isConnected || activeEl.offsetWidth <= 0 || activeEl.offsetHeight <= 0) {
+    if (
+      !activeEl ||
+      !activeEl.isConnected ||
+      activeEl.offsetWidth <= 0 ||
+      activeEl.offsetHeight <= 0
+    ) {
       setIndicatorStyle((prev) => (prev.opacity === 0 ? prev : { ...prev, opacity: 0 }));
       return;
     }
@@ -378,8 +383,12 @@ export function MidnightOverflowNav({
     const curOverflow = overflowRef.current;
     const curActiveKey = activeKeyRef.current;
 
-    const activeShown = curShown.find((e) => e.item.id === curActiveKey || e.item.view === curActiveKey || e.active);
-    const activeOverflow = curOverflow.find((e) => e.item.id === curActiveKey || e.item.view === curActiveKey || e.active);
+    const activeShown = curShown.find(
+      (e) => e.item.id === curActiveKey || e.item.view === curActiveKey || e.active,
+    );
+    const activeOverflow = curOverflow.find(
+      (e) => e.item.id === curActiveKey || e.item.view === curActiveKey || e.active,
+    );
 
     const activeEl = activeShown
       ? container.querySelector<HTMLElement>(`[data-midnight-item="${activeShown.item.id}"]`)
@@ -594,8 +603,7 @@ function MidnightNavItemButton({
         style={
           {
             "--midnight-label-w": `${labelWidth}px`,
-            transitionDelay:
-              staggerIndex !== undefined ? `${staggerIndex * 25}ms` : undefined,
+            transitionDelay: staggerIndex !== undefined ? `${staggerIndex * 25}ms` : undefined,
           } as React.CSSProperties
         }
       >
@@ -618,7 +626,6 @@ function MidnightNavItemButton({
             {entry.label}
           </span>
         </span>
-
       </button>
     </NavEditableItem>
   );
@@ -709,7 +716,6 @@ function MidnightMoreMenu({
             {t("common.more")}
           </span>
         </span>
-
       </button>
 
       {/* Overflow Glass Popover */}

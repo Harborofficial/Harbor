@@ -25,10 +25,7 @@ import {
   type NavItem,
   type NavItemId,
 } from "@/chrome/nav-items";
-import {
-  MidnightOverflowNav,
-  type NavOverflowEntry,
-} from "./MidnightOverflowNav";
+import { MidnightOverflowNav, type NavOverflowEntry } from "./MidnightOverflowNav";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -169,9 +166,7 @@ export function MidnightTopNav() {
   }, [view]);
 
   // Entrance state: active only during initial session entrance
-  const [entranceActive, setEntranceActive] = useState(
-    () => !hasEnteredOnce && !reducedMotion,
-  );
+  const [entranceActive, setEntranceActive] = useState(() => !hasEnteredOnce && !reducedMotion);
   const [entered, setEntered] = useState(() => hasEnteredOnce || reducedMotion);
 
   useLayoutEffect(() => {
@@ -202,7 +197,6 @@ export function MidnightTopNav() {
   const themePreset =
     settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
-
 
   // Resolve navigation items
   const rawItems = useAvailableNavItems();
@@ -254,14 +248,7 @@ export function MidnightTopNav() {
       if (locked && item.parentalKey && hiddenTabs[item.parentalKey]) return false;
       return true;
     });
-  }, [
-    orderedCustomized,
-    kid,
-    settings.showPlaylistsTab,
-    settings.hideContent,
-    locked,
-    hiddenTabs,
-  ]);
+  }, [orderedCustomized, kid, settings.showPlaylistsTab, settings.hideContent, locked, hiddenTabs]);
 
   const navigate = (item: NavItem) => {
     if (item.pinGated && locked) {
@@ -410,9 +397,7 @@ export function MidnightTopNav() {
           {/* Sibling A: Dedicated Glass Layer (isolated from opacity/filters on ancestors) */}
           <div
             aria-hidden="true"
-            className={`midnight-top-capsule-glass ${
-              !entered ? "opacity-0" : "opacity-100"
-            }`}
+            className={`midnight-top-capsule-glass ${!entered ? "opacity-0" : "opacity-100"}`}
           />
 
           {/* Sibling C: Capsule Content */}
@@ -431,12 +416,7 @@ export function MidnightTopNav() {
               aria-label={t("chrome.harborHome")}
             >
               {customMark ? (
-                <img
-                  src={customMark}
-                  alt=""
-                  draggable={false}
-                  className="h-7 w-7 object-contain"
-                />
+                <img src={customMark} alt="" draggable={false} className="h-7 w-7 object-contain" />
               ) : (
                 <HarborMark className="h-7 w-7" />
               )}
@@ -461,11 +441,7 @@ export function MidnightTopNav() {
               <NotificationCenter />
               {view !== "live" && <TogetherButton variant="ghost" connectStyle="tab" />}
               {bigPicture.offer && (
-                <IconBtn
-                  onClick={bigPicture.open}
-                  label={bigPicture.label}
-                  active={false}
-                >
+                <IconBtn onClick={bigPicture.open} label={bigPicture.label} active={false}>
                   <Monitor size={16} strokeWidth={2.2} />
                 </IconBtn>
               )}
@@ -550,12 +526,7 @@ export function MidnightTopNav() {
               the moment the pointer or the keyboard returns. */}
           <div ref={tagRef} aria-hidden="true" className="midnight-top-capsule-tag">
             {customMark ? (
-              <img
-                src={customMark}
-                alt=""
-                draggable={false}
-                className="h-6 w-6 object-contain"
-              />
+              <img src={customMark} alt="" draggable={false} className="h-6 w-6 object-contain" />
             ) : (
               <HarborMark className="h-6 w-6" />
             )}

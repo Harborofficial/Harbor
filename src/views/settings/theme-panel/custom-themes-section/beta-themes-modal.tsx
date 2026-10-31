@@ -104,9 +104,7 @@ export function BetaThemesModal({
           <div data-tauri-drag-region className="flex flex-col">
             <h1 className="pointer-events-none flex items-center gap-2 text-[24px] font-semibold tracking-tight text-ink">
               {t("Beta themes")}
-              <span className={`bg-accent-soft text-accent ${BADGE}`}>
-                {t("Beta")}
-              </span>
+              <span className={`bg-accent-soft text-accent ${BADGE}`}>{t("Beta")}</span>
             </h1>
             <p className="pointer-events-none max-w-[70ch] text-[15.5px] leading-[22px] text-ink-subtle">
               {t("Experimental 1:1 ports of other apps. Rough edges expected.")}
@@ -203,9 +201,7 @@ function BetaCard({
               {blurb}
             </span>
           )}
-          {theme.credit && (
-            <ThemeCredit credit={theme.credit} onOpenProfile={onOpenProfile} />
-          )}
+          {theme.credit && <ThemeCredit credit={theme.credit} onOpenProfile={onOpenProfile} />}
         </div>
         <button
           type="button"
@@ -281,9 +277,7 @@ function ThemeCredit({
       ) : (
         <span className="text-ink-muted">{name}</span>
       )}
-      {credit.github && (
-        <CreditLink label="GitHub" href={`https://github.com/${credit.github}`} />
-      )}
+      {credit.github && <CreditLink label="GitHub" href={`https://github.com/${credit.github}`} />}
     </span>
   );
 }

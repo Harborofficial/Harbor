@@ -222,7 +222,11 @@ class ThemeErrorBoundary extends Component<
     return { error: true };
   }
   componentDidCatch(err: unknown, info: ErrorInfo) {
-    console.error("[Harbor] Theme render failed, falling back to default chrome", err, info.componentStack);
+    console.error(
+      "[Harbor] Theme render failed, falling back to default chrome",
+      err,
+      info.componentStack,
+    );
     this.props.onError?.();
   }
   render() {
@@ -1765,23 +1769,19 @@ function Shell({ onReady }: { onReady?: () => void }) {
             !standaloneLive &&
             !pickerTop &&
             layout === "stremio" && <StremioRail />}
-          {!settingsTop &&
-            !playerActive &&
-            !pickerTop &&
-            layout === "midnight" &&
-            !immersive && (
-              <ThemeErrorBoundary
-                key={settings.theme.preset}
-                fallback={<TopDock />}
-                onError={() => {
-                  MidnightShellLazy = lazy(importMidnightShell);
-                }}
-              >
-                <Suspense fallback={null}>
-                  <MidnightShellLazy />
-                </Suspense>
-              </ThemeErrorBoundary>
-            )}
+          {!settingsTop && !playerActive && !pickerTop && layout === "midnight" && !immersive && (
+            <ThemeErrorBoundary
+              key={settings.theme.preset}
+              fallback={<TopDock />}
+              onError={() => {
+                MidnightShellLazy = lazy(importMidnightShell);
+              }}
+            >
+              <Suspense fallback={null}>
+                <MidnightShellLazy />
+              </Suspense>
+            </ThemeErrorBoundary>
+          )}
           {!settingsTop && !playerActive && !pickerTop && layout === "topdock" && !immersive && (
             <TopDock />
           )}
@@ -1962,9 +1962,15 @@ function Shell({ onReady }: { onReady?: () => void }) {
                       !chromeHidden &&
                       !immersive &&
                       (themeHasTopbar ||
-                        ["minui", "topdock", "midnight", "cinematic", "royal", "rail", "custom"].includes(
-                          layout,
-                        ))
+                        [
+                          "minui",
+                          "topdock",
+                          "midnight",
+                          "cinematic",
+                          "royal",
+                          "rail",
+                          "custom",
+                        ].includes(layout))
                     }
                     cloudKeys={{
                       rd: settings.rdKey,

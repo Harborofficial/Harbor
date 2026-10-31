@@ -32,10 +32,7 @@ export function MidnightShell({ children }: MidnightShellProps) {
   const floor = appearance.oled || (!keepsOwnBackdrop && appearance.palette !== "frost");
 
   return (
-    <div
-      className="midnight-shell contents"
-      data-theme-shell="midnight"
-    >
+    <div className="midnight-shell contents" data-theme-shell="midnight">
       {floor && (
         <div
           className="midnight-floor"
