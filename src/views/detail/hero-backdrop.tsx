@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 function Layer({ url, first, onReady }: { url: string; first: boolean; onReady: () => void }) {
   const lowUrl = url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w300/");
-  const highUrl = url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/original/");
+  const highUrl = url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w1280/");
   const canBlurUp = first && lowUrl !== highUrl;
   const [ready, setReady] = useState(false);
   const done = () => {

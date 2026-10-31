@@ -19,5 +19,5 @@ export function useStableAsset(
 
 export function toHiResBackdrop(url: string | undefined): string | undefined {
   if (!url) return url;
-  return url.replace(/\/t\/p\/w\d+\//, "/t/p/original/");
+  return url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w1280/");
 }

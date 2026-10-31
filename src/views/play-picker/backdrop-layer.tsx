@@ -4,7 +4,7 @@ import { useSettings } from "@/lib/settings";
 function BlurUpBackdrop({ src, forceBlur }: { src: string; forceBlur: boolean }) {
   const [loaded, setLoaded] = useState(false);
   const lowSrc = src.replace(/\/t\/p\/(w\d+|h\d+)\//, "/t/p/w300/");
-  const hiSrc = src.replace(/\/t\/p\/(w\d+|h\d+)\//, "/t/p/original/");
+  const hiSrc = src.replace(/\/t\/p\/(w\d+|h\d+|original)\//, "/t/p/w780/");
   return (
     <>
       <img
