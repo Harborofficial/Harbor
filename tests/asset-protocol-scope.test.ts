@@ -2,20 +2,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// Tauri defaults requireLiteralLeadingDot to true on unix, which makes the `**`
-// scope refuse every path holding a dot directory. The thumbnail cache lives in
-// ~/.cache/app.harbor, so with the default every cached image is refused by the
-// asset protocol and the poster falls through to its gradient plate.
-test("the asset protocol scope reaches the dot directories the caches live in", () => {
-  const config = JSON.parse(
-    readFileSync(new URL("../src-tauri/tauri.conf.json", import.meta.url), "utf8"),
+const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+
+// Tauri turns requireLiteralLeadingDot on by default on unix, so the `**` scope
+// never reaches the thumbnail cache under ~/.cache. Turning the flag off would
+// fix the images and hand the WebView ~/.ssh with them, so the one directory is
+// granted at runtime instead.
+test("the thumbnail cache reaches the asset protocol without widening the scope", () => {
+  const config = JSON.parse(read("src-tauri/tauri.conf.json"));
+  assert.deepEqual(config.app.security.assetProtocol.scope, ["**"]);
+  assert.match(read("src-tauri/src/lib.rs"), /thumb_cache::allow_asset_access\(app\.handle\(\)\)/);
+  assert.match(
+    read("src-tauri/src/thumb_cache.rs"),
+    /asset_protocol_scope\(\)\s*\.allow_directory\(&dir, false\)/,
   );
-  const scope = config.app.security.assetProtocol.scope;
-  assert.deepEqual(scope.allow, ["**"]);
-  assert.equal(scope.requireLiteralLeadingDot, false);
-  // Turning the flag off also exposes the dot directories that hold credentials,
-  // which nothing in the app ever serves through the asset protocol.
-  for (const dir of [".ssh", ".aws", ".gnupg"]) {
-    assert.ok(scope.deny.includes(`$HOME/${dir}/**`), `${dir} must stay denied`);
-  }
 });
