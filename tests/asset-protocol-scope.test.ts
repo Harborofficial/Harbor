@@ -8,7 +8,10 @@ const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.ur
 // never reaches the thumbnail cache under ~/.cache. Turning the flag off would
 // fix the images and hand the WebView ~/.ssh with them, so the one directory is
 // granted at runtime instead. The flag is left alone, which means it stays off
-// on Windows, where the denylist is what keeps those directories out.
+// on Windows, where the denylist is what keeps those directories out: Tauri
+// registers each deny pattern canonicalized too, so the \\?\ form is covered.
+// Reaching the same file through a different UNC alias is not, and denying UNC
+// wholesale would cut off media libraries that live on a network share.
 test("the thumbnail cache reaches the asset protocol without widening the scope", () => {
   const scope = JSON.parse(read("src-tauri/tauri.conf.json")).app.security.assetProtocol.scope;
   assert.deepEqual(scope.allow, ["**"]);
