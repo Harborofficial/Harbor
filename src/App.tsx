@@ -11,6 +11,7 @@ import { SportsAccessGate } from "@/views/sports/access-gate";
 import { SportsEventSkeleton } from "@/views/sports/sports-skeletons";
 import { SportsReminderLoop } from "@/components/sports-reminder-loop";
 import {
+  Component,
   memo,
   Suspense,
   useCallback,
@@ -18,6 +19,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ErrorInfo,
   type ReactNode,
 } from "react";
 import { lazyView as lazy } from "@/lib/lazy-view";
@@ -211,6 +213,27 @@ const MusicSurprisePrompt = lazy(() =>
   })),
 );
 
+class ThemeErrorBoundary extends Component<
+  { fallback: ReactNode; children: ReactNode; onError?: () => void },
+  { error: boolean }
+> {
+  state = { error: false };
+  static getDerivedStateFromError() {
+    return { error: true };
+  }
+  componentDidCatch(err: unknown, info: ErrorInfo) {
+    console.error(
+      "[Harbor] Theme render failed, falling back to default chrome",
+      err,
+      info.componentStack,
+    );
+    this.props.onError?.();
+  }
+  render() {
+    return this.state.error ? this.props.fallback : this.props.children;
+  }
+}
+
 const importAnime = () => import("@/views/anime");
 const importCalendar = () => import("@/views/calendar");
 const importWrapped = () => import("@/views/wrapped");
@@ -319,6 +342,8 @@ const OnboardingModal = lazy(() =>
 const BigPictureShell = lazy(() =>
   import("@/views/big-picture/bp-shell").then((m) => ({ default: m.BigPictureShell })),
 );
+const importMidnightShell = () => import("@/themes/midnight/MidnightShell");
+let MidnightShellLazy = lazy(importMidnightShell);
 
 function useViewPreloader(tmdbKey: string) {
   const keyRef = useRef(tmdbKey);
@@ -1744,6 +1769,19 @@ function Shell({ onReady }: { onReady?: () => void }) {
             !standaloneLive &&
             !pickerTop &&
             layout === "stremio" && <StremioRail />}
+          {!settingsTop && !playerActive && !pickerTop && layout === "midnight" && !immersive && (
+            <ThemeErrorBoundary
+              key={settings.theme.preset}
+              fallback={<TopDock />}
+              onError={() => {
+                MidnightShellLazy = lazy(importMidnightShell);
+              }}
+            >
+              <Suspense fallback={null}>
+                <MidnightShellLazy />
+              </Suspense>
+            </ThemeErrorBoundary>
+          )}
           {!settingsTop && !playerActive && !pickerTop && layout === "topdock" && !immersive && (
             <TopDock />
           )}
@@ -1757,11 +1795,14 @@ function Shell({ onReady }: { onReady?: () => void }) {
             <SideRail />
           )}
           {!playerActive && !pickerTop && layout === "minui" && !immersive && <MinUIDock />}
-          {!playerActive && !pickerTop && layout === "topdock" && !immersive && (
-            <div className={gamesTop ? "games-library-back" : "contents"}>
-              <FloatingBack offsetTop={92} />
-            </div>
-          )}
+          {!playerActive &&
+            !pickerTop &&
+            (layout === "topdock" || layout === "midnight") &&
+            !immersive && (
+              <div className={gamesTop ? "games-library-back" : "contents"}>
+                <FloatingBack offsetTop={92} />
+              </div>
+            )}
           {!playerActive && !pickerTop && layout === "cinematic" && !immersive && (
             <div className={gamesTop ? "games-library-back" : "contents"}>
               <FloatingBack offsetTop={92} />
@@ -1921,9 +1962,15 @@ function Shell({ onReady }: { onReady?: () => void }) {
                       !chromeHidden &&
                       !immersive &&
                       (themeHasTopbar ||
-                        ["minui", "topdock", "cinematic", "royal", "rail", "custom"].includes(
-                          layout,
-                        ))
+                        [
+                          "minui",
+                          "topdock",
+                          "midnight",
+                          "cinematic",
+                          "royal",
+                          "rail",
+                          "custom",
+                        ].includes(layout))
                     }
                     cloudKeys={{
                       rd: settings.rdKey,
