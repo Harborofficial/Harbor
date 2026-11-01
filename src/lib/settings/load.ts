@@ -53,6 +53,16 @@ function sanitizePosterDockTransition(value: unknown): number {
   return Math.min(1500, Math.max(250, Math.round(value)));
 }
 
+function sanitizeCardAwardDisplay(
+  value: unknown,
+  legacyAwardTabs: unknown,
+  legacyCardBadges: unknown,
+): Settings["cardAwardDisplay"] {
+  if (value === "tabs" || value === "badge" || value === "none") return value;
+  if (legacyAwardTabs === true) return "tabs";
+  return legacyCardBadges === false ? "none" : "badge";
+}
+
 const MAX_END_SCREEN_LEAD_SEC = 30 * 60;
 
 function sanitizeEndScreenLead(value: unknown): number {
@@ -414,6 +424,15 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      cardAwardDisplay: sanitizeCardAwardDisplay(
+        parsed.cardAwardDisplay,
+        parsed.awardTabs,
+        parsed.showCardBadges,
+      ),
+      tvCardOptions: {
+        ...DEFAULT.tvCardOptions,
+        ...parsed.tvCardOptions,
+      },
       libraryGroups: normalizeLibraryGroups(parsed.libraryGroups),
       spooktoberBanner: ["disabled", "small", "below-hero"].includes(parsed.spooktoberBanner ?? "")
         ? parsed.spooktoberBanner

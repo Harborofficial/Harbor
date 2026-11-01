@@ -3,7 +3,7 @@ import { CuratedCardBadge } from "@/components/curated-card-badge";
 import { PickCard } from "@/components/pick-card";
 import type { RowShape } from "@/components/row";
 import { useT } from "@/lib/i18n";
-import { itemMeta } from "@/lib/curated/registry";
+import { cardBadge, itemMeta } from "@/lib/curated/registry";
 import { useSettings } from "@/lib/settings";
 import type { CuratedList, CuratedListItem, ListOrdering } from "@/lib/curated/types";
 
@@ -77,7 +77,10 @@ export function ListGrid({
       >
         {visible.map((item) => (
           <span key={item.imdb} className="relative block min-w-0">
-            <PickCard meta={itemMeta(list, item)} />
+            <PickCard
+              meta={itemMeta(list, item)}
+              curatedBadgeAtTopStart={sizing.shape === "landscape" && cardBadge(list, item) != null}
+            />
             <CuratedCardBadge list={list} item={item} shape={sizing.shape} />
           </span>
         ))}

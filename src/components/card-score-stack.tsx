@@ -95,11 +95,13 @@ export function ScoreStack({
   limit = 3,
   placement = "bottom",
   raised = false,
+  shiftedFromEnd = false,
 }: {
   badges: readonly CardBadge[];
   limit?: number;
   placement?: "top" | "bottom";
   raised?: boolean;
+  shiftedFromEnd?: boolean;
 }) {
   const shown = badges.slice(0, Math.max(1, limit));
   if (shown.length === 0) return null;
@@ -107,7 +109,7 @@ export function ScoreStack({
   return (
     <div
       style={scale < 1 ? { transform: `scale(${scale})`, transformOrigin: "right" } : undefined}
-      className={`absolute end-1.5 flex items-center gap-1 whitespace-nowrap rounded-md bg-canvas/95 px-1.5 py-0.5 text-[10px] font-semibold text-ink ${
+      className={`absolute ${shiftedFromEnd ? "end-8" : "end-1.5"} flex items-center gap-1 whitespace-nowrap rounded-md bg-canvas/95 px-1.5 py-0.5 text-[10px] font-semibold text-ink ${
         placement === "top" ? "top-1.5" : raised ? "bottom-9" : "bottom-1.5"
       }`}
     >

@@ -4097,11 +4097,11 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Show tags on cards (New, In Cinema, Rerun, Awards)",
+    label: "Show tags on cards (New, In Cinema, Rerun)",
     section: "library",
     tab: "providers",
     anchorTitle: "Metadata providers",
-    keywords: ["card tags", "new badge", "in cinema", "rerun", "awards", "chips", "overlays"],
+    keywords: ["card tags", "new badge", "in cinema", "rerun", "chips", "overlays"],
   },
   {
     label: "Show ratings on detail pages",
@@ -8339,17 +8339,20 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Award tab on cards",
+    label: "Award display on cards",
     section: "library",
     tab: "cards",
     anchorTitle: "On the poster",
     keywords: [
+      "award display",
       "award tab",
+      "award badge",
+      "no award",
       "laurel",
       "netflix award",
       "award banner",
       "winner tab",
-      "awards bottom",
+      "awards top",
     ],
   },
   {
@@ -8364,7 +8367,6 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "top of card",
       "award on top",
       "award placement",
-      "laurel position",
     ],
   },
   {

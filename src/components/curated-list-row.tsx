@@ -3,7 +3,7 @@ import nytLogo from "@/assets/awards/nyt-logo.svg";
 import { CuratedCardBadge } from "@/components/curated-card-badge";
 import { PickCard } from "@/components/pick-card";
 import { useT } from "@/lib/i18n";
-import { curatedList, itemMeta } from "@/lib/curated/registry";
+import { cardBadge, curatedList, itemMeta } from "@/lib/curated/registry";
 import type { CuratedList, ListBrand } from "@/lib/curated/types";
 import { useView } from "@/lib/view";
 import { Row, usePosterRow } from "./row";
@@ -50,7 +50,10 @@ export function CuratedListRow({ listId, title }: { listId: string; title?: stri
     >
       {cards.map(({ item, meta }) => (
         <span key={meta.id} className="relative block min-w-0">
-          <PickCard meta={meta} />
+          <PickCard
+            meta={meta}
+            curatedBadgeAtTopStart={sizing.shape === "landscape" && cardBadge(list, item) != null}
+          />
           <CuratedCardBadge list={list} item={item} shape={sizing.shape} />
         </span>
       ))}

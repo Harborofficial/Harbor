@@ -7184,6 +7184,9 @@ button.hset-rail-me:hover,
   .hset-workbench-compact {
     grid-template-columns: minmax(0, 1fr) 224px;
   }
+  .hset-workbench-compact.hset-workbench-wide-preview {
+    grid-template-columns: minmax(0, 1fr) var(--hset-workbench-preview-width, 380px);
+  }
   .hset-workbench-controls {
     grid-column: 1;
     grid-row: 1;

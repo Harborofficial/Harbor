@@ -19,6 +19,14 @@ export const DEFAULT_SECONDARY_PRIVILEGES: SecondaryProfilePrivileges = {
 };
 
 export const DEFAULT: Settings = {
+  tvCardOptions: {
+    showImdbBadge: true, showTmdbBadge: false, showRtBadge: true, showPopcornBadge: false, showMalBadge: true,
+    animeCardRating: "mal", showMetacriticBadge: false, showLetterboxdBadge: false,
+    showMdblistBadge: false, showTraktBadge: false, showSimklBadge: true, showDubBadge: true,
+    cardBadgeLimit: 3, showCardBadges: true, cardAwardDisplay: "badge", top10Ribbon: false, top10RibbonSide: "right",
+    badgePlacement: "bottom", watchlistBadge: "topEnd",
+    showLocalLibraryBadge: true, showWatchedBadge: true,
+  },
   accountProvider: "stremio",
   spooktoberBanner: undefined,
   soundTheme: "none",
@@ -100,6 +108,7 @@ export const DEFAULT: Settings = {
   top10Ribbon: false,
   top10RibbonSide: "right",
   awardTabs: false,
+  cardAwardDisplay: "badge",
   awardTabPosition: "above",
   rowTitleScale: 1,
   cardTitleScale: 1,

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Award, Captions, Check, Eye, HardDrive, Sparkles, Tag, Trophy, Type } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
@@ -9,9 +9,29 @@ import { HoverStyleGallery } from "../hover-style-preview";
 import { CardOverlayPreview } from "../card-overlay-preview";
 import { RatingsMatrix } from "../ratings-matrix";
 import { CardBadgesPanel, CardScoresPreview, WatchlistControl, type PreviewFlags } from "../card-badges-panel";
+import { TV_CARD_MIN } from "@/components/row";
 
 export function CardsTab() {
-  const { settings, update } = useSettings();
+  const { settings: baseSettings, update } = useSettings();
+  const [layout, setLayout] = useState<"poster" | "tv">(baseSettings.rowCardStyle);
+  const settings = layout === "tv" ? { ...baseSettings, ...baseSettings.tvCardOptions } : baseSettings;
+  const tvPreviewCardWidth = Math.max(72, Math.round(TV_CARD_MIN * settings.posterScale));
+  const updateCard = (patch: Partial<typeof settings>) => {
+    if (layout === "poster") {
+      update(patch);
+      return;
+    }
+    const tvOptions = { ...baseSettings.tvCardOptions };
+    const sharedPatch: Partial<typeof baseSettings> = {};
+    for (const [key, value] of Object.entries(patch)) {
+      if (key in tvOptions) {
+        Object.assign(tvOptions, { [key]: value });
+      } else {
+        Object.assign(sharedPatch, { [key]: value });
+      }
+    }
+    update({ ...sharedPatch, tvCardOptions: tvOptions });
+  };
   const t = useT();
 
   const badgeFlags: PreviewFlags = {
@@ -41,35 +61,61 @@ export function CardsTab() {
     const prev = prevBadgeCountRef.current;
     prevBadgeCountRef.current = enabledBadgeCount;
     if (enabledBadgeCount > prev && enabledBadgeCount > settings.cardBadgeLimit) {
-      update({ cardBadgeLimit: Math.min(6, enabledBadgeCount) });
+      updateCard({ cardBadgeLimit: Math.min(6, enabledBadgeCount) });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabledBadgeCount]);
 
   return (
     <>
-      <Section title={t("On the poster")}>
+      <Segmented
+        value={layout}
+        options={[{ value: "poster", label: t("Poster") }, { value: "tv", label: t("TV") }]}
+        onChange={(v) => setLayout(v as "poster" | "tv")}
+      />
+      <Section title={layout === "poster" ? t("On the poster") : t("On the TV")}>
         <ToggleRow
           label={t("Show tags on cards")}
           leading={<Tag size={18} strokeWidth={2} />}
           sub={t(
-            "The New, In Cinema, Rerun, and Awards chips. Turn off for a cleaner grid. Score chips are separate, below.",
+            "The New, In Cinema, Rerun. Turn off for a cleaner grid. Score chips are separate, below.",
           )}
           value={settings.showCardBadges}
-          onChange={(v) => update({ showCardBadges: v })}
+          onChange={(v) => updateCard({ showCardBadges: v })}
         />
-        <SettingsWorkbench compact preview={<CardOverlayPreview />}>
-          <ToggleRow
-            label={t("Award tab on cards")}
-            newId="library:award-tab"
-            leading={<Award size={18} strokeWidth={2} />}
-            sub={t(
-              "Show a laurel tab on award-winning titles. Choose its position below.",
+        <SettingsWorkbench
+          compact
+          widePreview={layout === "tv"}
+          widePreviewWidth={tvPreviewCardWidth + 40}
+          preview={<CardOverlayPreview layout={layout} settings={settings} cardWidth={tvPreviewCardWidth} />}
+        >
+          <SettingRow
+            wide
+            label={t("Award display mode")}
+            desc={t(
+              layout === "tv"
+                ? t("Choose how award wins appear on cards. TV award tabs are always shown at the top.")
+                : t("Choose how award wins appear on cards. You can position award tabs below."),
             )}
-            value={settings.awardTabs}
-            onChange={(v) => update({ awardTabs: v })}
-          />
-          {settings.awardTabs && (
+            icon={<Award size={18} strokeWidth={2} />}
+          >
+            <Segmented
+              value={settings.cardAwardDisplay}
+              options={[
+                { value: "tabs", label: t("Award tabs") },
+                { value: "badge", label: t("Award badge") },
+                { value: "none", label: t("No award") },
+              ]}
+              onChange={(v) => {
+                const display = v as "tabs" | "badge" | "none";
+                updateCard({
+                  cardAwardDisplay: display,
+                  awardTabs: display === "tabs",
+                });
+              }}
+            />
+          </SettingRow>
+          {layout === "poster" && settings.cardAwardDisplay === "tabs" && (
             <Nested>
               <SettingRow
                 wide
@@ -83,7 +129,7 @@ export function CardsTab() {
                     { value: "below", label: t("Below ratings") },
                     { value: "top", label: t("Top of card") },
                   ]}
-                  onChange={(v) => update({ awardTabPosition: v as "above" | "below" | "top" })}
+                  onChange={(v) => updateCard({ awardTabPosition: v as "above" | "below" | "top" })}
                 />
               </SettingRow>
             </Nested>
@@ -96,7 +142,7 @@ export function CardsTab() {
               "Mark Top 10 titles with a corner ribbon. Bookmarks move down when they share its corner.",
             )}
             value={settings.top10Ribbon}
-            onChange={(v) => update({ top10Ribbon: v })}
+            onChange={(v) => updateCard({ top10Ribbon: v })}
           />
           {settings.top10Ribbon && (
             <Nested>
@@ -111,14 +157,14 @@ export function CardsTab() {
                     { value: "left", label: t("Top left") },
                     { value: "right", label: t("Top right") },
                   ]}
-                  onChange={(v) => update({ top10RibbonSide: v as "left" | "right" })}
+                  onChange={(v) => updateCard({ top10RibbonSide: v as "left" | "right" })}
                 />
               </SettingRow>
             </Nested>
           )}
           <WatchlistControl
             value={settings.watchlistBadge}
-            onChange={(v) => update({ watchlistBadge: v })}
+            onChange={(v) => updateCard({ watchlistBadge: v })}
           />
         </SettingsWorkbench>
         <ToggleRow
@@ -126,7 +172,7 @@ export function CardsTab() {
           sub={t("Puts a check on titles you have already finished.")}
           leading={<Check size={18} strokeWidth={2.4} />}
           value={settings.showWatchedBadge}
-          onChange={(v) => update({ showWatchedBadge: v })}
+          onChange={(v) => updateCard({ showWatchedBadge: v })}
         />
         <ToggleRow
           label={t("Show an “on disk” badge on cards")}
@@ -135,23 +181,36 @@ export function CardsTab() {
             "Marks movies and shows across Home, the catalogs, and detail pages when a matching file already exists in your local library.",
           )}
           value={settings.showLocalLibraryBadge}
-          onChange={(v) => update({ showLocalLibraryBadge: v })}
+          onChange={(v) => updateCard({ showLocalLibraryBadge: v })}
         />
         <ToggleRow
           label={t("Show DUB badge on anime cards")}
           leading={<Captions size={18} strokeWidth={2} />}
           sub={t("Flags anime with an English dub. Also tags dub / sub / dual on stream sources.")}
           value={settings.showDubBadge}
-          onChange={(v) => update({ showDubBadge: v })}
+          onChange={(v) => updateCard({ showDubBadge: v })}
         />
       </Section>
 
       <Section title={t("Scores")}>
-        <SettingsWorkbench compact preview={<CardScoresPreview settings={settings} flags={badgeFlags} enabledBadgeCount={enabledBadgeCount} />}>
-        <RatingsMatrix settings={settings} update={update} />
+        <SettingsWorkbench
+          compact
+          widePreview={layout === "tv"}
+          widePreviewWidth={tvPreviewCardWidth + 40}
+          preview={
+            <CardScoresPreview
+              settings={settings}
+              flags={badgeFlags}
+              enabledBadgeCount={enabledBadgeCount}
+              layout={layout}
+              cardWidth={tvPreviewCardWidth}
+            />
+          }
+        >
+          <RatingsMatrix settings={settings} update={updateCard} />
         <CardBadgesPanel
           settings={settings}
-          update={update}
+            update={updateCard}
           enabledBadgeCount={enabledBadgeCount}
         />
         {settings.showMalBadge && (
@@ -167,7 +226,7 @@ export function CardsTab() {
                 { value: "mal", label: t("MAL") },
                 { value: "imdb", label: t("IMDb") },
               ]}
-              onChange={(v) => update({ animeCardRating: v as "mal" | "imdb" })}
+                onChange={(v) => updateCard({ animeCardRating: v as "mal" | "imdb" })}
             />
           </SettingRow>
         )}
