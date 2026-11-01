@@ -354,10 +354,7 @@ export function reconcileNuvioWatchedEpisodes(
   let scope = nuvioWatchedScope(slot, accountId);
   let sk = `${PREFIXES.watched}${scope}`;
   let unsk = `${PREFIXES.unwatched}${scope}`;
-  if (
-    !localStorage.getItem(sk) &&
-    localStorage.getItem(`${PREFIXES.watched}nuvio.${slot}`)
-  ) {
+  if (!localStorage.getItem(sk) && localStorage.getItem(`${PREFIXES.watched}nuvio.${slot}`)) {
     sk = `${PREFIXES.watched}nuvio.${slot}`;
     unsk = `${PREFIXES.unwatched}nuvio.${slot}`;
   }
@@ -449,7 +446,8 @@ export function reconcileNuvioWatchedEpisodes(
       const showId = parts[0];
       const cleanShowId = showId?.replace(/^(series|movie|tmdb):/, "");
       if (
-        (serverShowsWithEpisodes.has(showId) || (cleanShowId && serverShowsWithEpisodes.has(cleanShowId))) &&
+        (serverShowsWithEpisodes.has(showId) ||
+          (cleanShowId && serverShowsWithEpisodes.has(cleanShowId))) &&
         !serverEpisodeKeys.has(lKey)
       ) {
         currentLocalWatched.delete(lKey);

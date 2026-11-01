@@ -20,7 +20,8 @@ export function cwProfileScope(ownerId?: string): {
     const isNuvio =
       typeof localStorage !== "undefined" &&
       (localStorage.getItem("harbor.account-provider") === "nuvio" ||
-        localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"') === true);
+        localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"') ===
+          true);
     if (isNuvio) {
       let slot = 1;
       try {

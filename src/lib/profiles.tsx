@@ -79,9 +79,7 @@ function nuvioProfileToHarborProfile(p: NuvioProfile): Profile {
     color: p.avatar_color_hex || PROFILE_COLORS[(p.profile_index - 1) % PROFILE_COLORS.length],
     isPrimary: p.profile_index === 1,
     shareStremioWith: null,
-    passwordHash: p.pin_enabled
-      ? getCachedNuvioPinHash(p.profile_index) || "pin-protected"
-      : null,
+    passwordHash: p.pin_enabled ? getCachedNuvioPinHash(p.profile_index) || "pin-protected" : null,
     hideContent: null,
     lockedTabs,
     kid: p.is_kids ? { age: 7, curfewMinutes: null, parentPinHash: null } : null,

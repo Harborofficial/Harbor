@@ -40,14 +40,25 @@ async function catalog(local: Addon[], account: Addon[], adultsAllowed = false) 
         if (!initialized) effects.push(fn);
       },
     },
-    "@/lib/auth": { useAuth: () => ({ authKey: "fixture" }) },
+    "@/lib/auth": {
+      useAuth: () => ({ authKey: "fixture" }),
+      resolveEffectiveStremioAuthKey: () => "fixture",
+    },
     "@/lib/addons": { userAddons: async () => account },
     "@/lib/addon-store": { fetchInstalledAddons: async () => local },
     "@/lib/providers/stremio-addons": { listAddons: async () => ({ addons: [] }) },
     "./adult-filter": { isAdultText },
     "./community": { fetchCommunityAddons: async () => [], fetchManifest: async () => null },
     "./curated": { CURATED_ADDONS: [] },
-    "@/lib/nuvio/nuvio-client": { isNuvioSignedIn: () => false },
+    "@/lib/settings": {
+      useSettings: () => ({
+        settings: { nuvioAddonMode: "separate", accountProvider: "stremio" },
+      }),
+    },
+    "@/lib/nuvio/nuvio-client": {
+      isNuvioSignedIn: () => false,
+      isNuvioProviderActive: () => false,
+    },
     "@/lib/nuvio/nuvio-sync": { fetchNuvioAddons: async () => [] },
     "@/lib/nuvio/nuvio-addon-registry": {
       recordStremioAddons: () => {},

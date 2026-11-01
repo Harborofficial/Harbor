@@ -85,7 +85,6 @@ export function ProfileView({
     ? nuvioState.profiles.find((p) => p.profile_index === 1) || nuvioState.profiles[0] || null
     : null;
 
-
   const nuvioEmail = nuvioState.session?.user?.email;
   const author = currentAuthor();
   const primaryHandle = (

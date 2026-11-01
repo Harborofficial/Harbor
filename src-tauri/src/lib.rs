@@ -1108,6 +1108,7 @@ pub fn run() {
             if let Err(error) = crash_report::initialize(app.handle()) {
                 eprintln!("[harbor::crash-report] initialization failed: {error}");
             }
+            thumb_cache::allow_asset_access(app.handle());
             proc_guard::init();
             if !cfg!(feature = "context-review") {
                 proc_guard::reap_orphans();

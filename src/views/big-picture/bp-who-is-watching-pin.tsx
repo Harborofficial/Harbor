@@ -160,7 +160,12 @@ export function BpWhoPin({
         }}
       >
         {profile.avatar ? (
-          <img src={profile.avatar} alt="" draggable={false} className="h-full w-full object-cover" />
+          <img
+            src={profile.avatar}
+            alt=""
+            draggable={false}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span
             aria-hidden

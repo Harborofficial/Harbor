@@ -45,6 +45,7 @@ import { undismissCw } from "@/lib/cw-dismiss";
 import { loadStoredSettings } from "@/lib/settings/load";
 import { tmdbDetails } from "@/lib/providers/tmdb/tmdb-details";
 import { parseTmdbTvId, fetchSeasonEpisodes } from "@/lib/series-episodes";
+import { tmdbImdbCached, tmdbFromImdbCached } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 
 export { isNuvioProviderActive };
 
@@ -205,9 +206,96 @@ function recordPending(
   return Object.fromEntries(Object.entries(changes).filter(([, change]) => change.token === token));
 }
 
+/**
+ * Extracts the clean numeric TMDB ID from any variant (e.g. "tmdb:tv:96677", "tmdb:movie:123", "tmdb:96677", "series:96677", "96677").
+ */
+export function extractCleanNumericTmdbId(rawId?: string | null): string | null {
+  if (!rawId) return null;
+  const trimmed = rawId.trim();
+  const directMatch = /^tmdb:(?:tv:|movie:)?(\d+)$/.exec(trimmed);
+  if (directMatch) return directMatch[1];
+  const stripped = trimmed.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
+  return /^\d+$/.test(stripped) ? stripped : null;
+}
+
+/**
+ * Normalizes content IDs before pushing to Nuvio Cloud.
+ *
+ * Nuvio Mobile relies on client-side metadata hydration from content_id:
+ * 1. If an IMDb ID (tt...) is known, it is prioritized because Cinemeta / Stremio add-ons index by tt...
+ * 2. If it is a TMDB ID, Nuvio Mobile's parser requires `tmdb:<number>` (e.g. `tmdb:96677`).
+ *    Subpaths like `tmdb:tv:96677` or `tmdb:movie:...` fail Nuvio Mobile's `.substringAfter(':').substringBefore(':').toIntOrNull()`.
+ */
+export function normalizeNuvioContentId(rawId: string): string {
+  if (!rawId) return "";
+  const trimmed = rawId.trim();
+  if (trimmed.startsWith("tt")) return trimmed;
+
+  const numId = extractCleanNumericTmdbId(trimmed);
+  if (numId) {
+    const cachedImdb =
+      tmdbImdbCached(trimmed) ||
+      tmdbImdbCached(`tmdb:${numId}`) ||
+      tmdbImdbCached(`tmdb:tv:${numId}`) ||
+      tmdbImdbCached(`tmdb:movie:${numId}`);
+    if (cachedImdb && cachedImdb.startsWith("tt")) {
+      return cachedImdb;
+    }
+    return `tmdb:${numId}`;
+  }
+
+  return trimmed;
+}
+
+/**
+ * Returns all recognized alias and identifier variants for a given content ID,
+ * ensuring deletions, dismissals, and lookups match across tt..., tmdb:..., tmdb:tv:..., etc.
+ */
+export function getNuvioContentIdVariants(rawId?: string | null): string[] {
+  if (!rawId) return [];
+  const trimmed = rawId.trim();
+  if (!trimmed) return [];
+  const variants = new Set<string>([trimmed]);
+
+  const numId = extractCleanNumericTmdbId(trimmed);
+  if (numId) {
+    variants.add(numId);
+    variants.add(`tmdb:${numId}`);
+    variants.add(`tmdb:tv:${numId}`);
+    variants.add(`tmdb:movie:${numId}`);
+    variants.add(`series:${numId}`);
+    variants.add(`movie:${numId}`);
+    const cachedImdb =
+      tmdbImdbCached(trimmed) ||
+      tmdbImdbCached(`tmdb:${numId}`) ||
+      tmdbImdbCached(`tmdb:tv:${numId}`) ||
+      tmdbImdbCached(`tmdb:movie:${numId}`);
+    if (cachedImdb && cachedImdb.startsWith("tt")) {
+      variants.add(cachedImdb);
+    }
+  } else if (trimmed.startsWith("tt")) {
+    const cachedTmdb = tmdbFromImdbCached(trimmed);
+    if (cachedTmdb) {
+      const match = /^tmdb:(?:tv:|movie:)?(\d+)$/.exec(cachedTmdb);
+      if (match) {
+        const id = match[1];
+        variants.add(id);
+        variants.add(`tmdb:${id}`);
+        variants.add(`tmdb:tv:${id}`);
+        variants.add(`tmdb:movie:${id}`);
+      }
+    }
+  }
+
+  return Array.from(variants);
+}
+
 function matchesChange(row: NuvioCoordinate, change: PendingChange): boolean {
+  const contentMatch =
+    row.content_id === change.row.content_id ||
+    normalizeNuvioContentId(row.content_id) === normalizeNuvioContentId(change.row.content_id);
   return (
-    row.content_id === change.row.content_id &&
+    contentMatch &&
     !change.except?.includes(coordinate(row)) &&
     ((change.deleted && change.row.season == null && change.row.episode == null) ||
       coordinate(row) === coordinate(change.row))
@@ -380,21 +468,24 @@ async function sendPendingChange(
   if (!change.deleted) {
     const progress = row as NuvioWatchProgress;
     const watched = row as NuvioWatchedItem;
+    const normContentId = normalizeNuvioContentId(row.content_id);
     const payload =
       change.kind === "progress"
         ? {
-            content_id: row.content_id,
+            content_id: normContentId,
             content_type: episode ? "series" : "movie",
-            video_id: episode ? `${row.content_id}:${row.season}:${row.episode}` : row.content_id,
+            video_id: episode ? `${normContentId}:${row.season}:${row.episode}` : normContentId,
             season: row.season ?? null,
             episode: row.episode ?? null,
-            progress_key: progress.progress_key,
+            progress_key: episode
+              ? `${normContentId}_s${row.season}e${row.episode}`
+              : normContentId,
             position: progress.progress_seconds * 1000,
             duration: progress.duration_seconds * 1000,
             last_watched: progress.last_watched,
           }
         : {
-            content_id: row.content_id,
+            content_id: normContentId,
             content_type: watched.content_type || (episode ? "series" : "movie"),
             title: watched.title || "",
             season: row.season ?? null,
@@ -785,7 +876,10 @@ export async function pushWatchProgressToNuvio(
     return true;
   }
 
+  const normContentId = normalizeNuvioContentId(contentId);
   const progressKey =
+    season != null && episode != null ? `${normContentId}_s${season}e${episode}` : normContentId;
+  const legacyProgressKey =
     season != null && episode != null ? `${contentId}_s${season}e${episode}` : contentId;
 
   const nowEpoch = Date.now();
@@ -795,7 +889,7 @@ export async function pushWatchProgressToNuvio(
 
   const payload: NuvioWatchProgress = {
     profile_id: profileIndex,
-    content_id: contentId,
+    content_id: normContentId,
     progress_key: progressKey,
     progress_seconds: progSec,
     duration_seconds: durSec,
@@ -814,7 +908,9 @@ export async function pushWatchProgressToNuvio(
   // Update local slot cache immediately for instant snappy responsiveness
   try {
     const cached = readCachedWatchProgress(profileIndex);
-    const existingIndex = cached.findIndex((p) => p.progress_key === progressKey);
+    const existingIndex = cached.findIndex(
+      (p) => p.progress_key === progressKey || p.progress_key === legacyProgressKey,
+    );
     const existing = existingIndex >= 0 ? cached[existingIndex] : null;
     const mergedPayload: NuvioWatchProgress = {
       ...payload,
@@ -823,7 +919,9 @@ export async function pushWatchProgressToNuvio(
       poster: poster || existing?.poster,
       background: background || existing?.background,
     };
-    const filtered = cached.filter((p) => p.progress_key !== progressKey);
+    const filtered = cached.filter(
+      (p) => p.progress_key !== progressKey && p.progress_key !== legacyProgressKey,
+    );
     filtered.unshift(mergedPayload);
     writeCachedWatchProgress(profileIndex, filtered);
     try {
@@ -880,10 +978,7 @@ export async function pushWatchedItemToNuvio(
     const cachedWatched = readCachedWatchedItems(profileIndex);
     const updatedWatched = [...cachedWatched];
     for (const item of items) {
-      const clean = item.contentId.replace(/^(series|movie|tmdb):/, "");
-      const variants = Array.from(
-        new Set([item.contentId, clean, `series:${clean}`, `tmdb:${clean}`]),
-      );
+      const variants = getNuvioContentIdVariants(item.contentId);
       for (const cid of variants) {
         const idx = updatedWatched.findIndex(
           (w) =>
@@ -916,7 +1011,7 @@ export async function pushWatchedItemToNuvio(
     accountId,
     "watched",
     items.map((item) => ({
-      content_id: item.contentId,
+      content_id: normalizeNuvioContentId(item.contentId),
       content_type: item.contentType,
       title: item.title,
       profile_id: profileIndex,
@@ -945,12 +1040,29 @@ export async function deleteWatchedItemFromNuvio(
   if (!accountId) return false;
   const profileIndex = resolveNuvioProfileIndex(harborProfileId);
 
+  const seenKey = new Set<string>();
+  const expandedKeys: Array<{
+    contentId: string;
+    season?: number | null;
+    episode?: number | null;
+  }> = [];
+  for (const key of keys) {
+    const variants = getNuvioContentIdVariants(key.contentId);
+    for (const v of variants) {
+      const coord = `${v}:${key.season ?? "null"}:${key.episode ?? "null"}`;
+      if (!seenKey.has(coord)) {
+        seenKey.add(coord);
+        expandedKeys.push({ contentId: v, season: key.season, episode: key.episode });
+      }
+    }
+  }
+
   // Update local watched cache immediately
   try {
     const cachedWatched = readCachedWatchedItems(profileIndex);
     const filtered = cachedWatched.filter(
       (w) =>
-        !keys.some(
+        !expandedKeys.some(
           (k) =>
             k.contentId === w.content_id &&
             (k.season == null || k.season === w.season) &&
@@ -964,7 +1076,7 @@ export async function deleteWatchedItemFromNuvio(
     profileIndex,
     accountId,
     "watched",
-    keys.map((key) => ({
+    expandedKeys.map((key) => ({
       content_id: key.contentId,
       profile_id: profileIndex,
       season: key.season ?? null,
@@ -1035,8 +1147,7 @@ export function isDismissedNextUp(
   dismissedKeys: Set<string>,
 ): boolean {
   if (!contentId || dismissedKeys.size === 0) return false;
-  const cleanId = contentId.replace(/^(series|movie|tmdb):/, "").trim();
-  const idVariants = [contentId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`];
+  const idVariants = getNuvioContentIdVariants(contentId);
 
   // 1. Check whole-show dismissals or wildcard dismissals (-1|-1) or bare ID
   for (const v of idVariants) {
@@ -1138,15 +1249,10 @@ export async function undismissNextUpInNuvioCloud(
   if (!normalizedContentId) return false;
 
   const cached = readCachedDismissedNextUpKeys(profileIndex, accountId);
-  const cleanId = normalizedContentId.replace(/^(series|movie|tmdb):/, "");
+  const idVariants = getNuvioContentIdVariants(normalizedContentId);
   let localChanged = false;
   for (const k of Array.from(cached)) {
-    if (
-      k.startsWith(`${normalizedContentId}|`) ||
-      k.startsWith(`${cleanId}|`) ||
-      k.startsWith(`tmdb:${cleanId}|`) ||
-      k.startsWith(`series:${cleanId}|`)
-    ) {
+    if (idVariants.some((v) => k === v || k.startsWith(`${v}|`))) {
       cached.delete(k);
       localChanged = true;
     }
@@ -1185,15 +1291,7 @@ export async function undismissNextUpInNuvioCloud(
       : [];
 
     const filtered = dismissed.filter(
-      (k) =>
-        k !== normalizedContentId &&
-        k !== cleanId &&
-        k !== `tmdb:${cleanId}` &&
-        k !== `series:${cleanId}` &&
-        !k.startsWith(`${normalizedContentId}|`) &&
-        !k.startsWith(`${cleanId}|`) &&
-        !k.startsWith(`tmdb:${cleanId}|`) &&
-        !k.startsWith(`series:${cleanId}|`),
+      (k) => !idVariants.some((v) => k === v || k.startsWith(`${v}|`)),
     );
 
     if (filtered.length !== dismissed.length) {
@@ -1239,10 +1337,7 @@ export async function dismissNextUpInNuvioCloud(
   const normalizedContentId = contentId.trim();
   if (!normalizedContentId) return false;
 
-  const cleanId = normalizedContentId.replace(/^(series|movie|tmdb):/, "").trim();
-  const idVariants = Array.from(
-    new Set([normalizedContentId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]),
-  );
+  const idVariants = getNuvioContentIdVariants(normalizedContentId);
 
   const targetKeys: string[] = [];
   for (const v of idVariants) {
@@ -2025,10 +2120,7 @@ export async function deleteEpisodeWatchProgressFromNuvio(
     true,
   );
 
-  const cleanId = normalizedContentId.replace(/^(series|movie|tmdb):/, "");
-  const idVariants = Array.from(
-    new Set([normalizedContentId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]),
-  );
+  const idVariants = getNuvioContentIdVariants(normalizedContentId);
   const keysToDelete: string[] = [];
   for (const id of idVariants) {
     keysToDelete.push(`${id}_s${season}e${episode}`);
@@ -2091,10 +2183,7 @@ export async function deleteWatchProgressFromNuvio(
   const normalizedContentId = contentId.trim();
   if (!normalizedContentId) return false;
 
-  const cleanId = normalizedContentId.replace(/^(series|movie|tmdb):/, "").trim();
-  const idVariants = Array.from(
-    new Set([normalizedContentId, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]),
-  );
+  const idVariants = getNuvioContentIdVariants(normalizedContentId);
 
   // 1. Immediately harvest known keys and prune local caches for 0ms snappy UI
   const keysToDelete = new Set<string>();

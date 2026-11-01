@@ -78,7 +78,7 @@ test("one slow addon manifest cannot drop every other local addon", () => {
 });
 
 test("a cached manifest resolves without any network wait", () => {
-  assert.match(source, /if \(l\.manifest\) return Promise\.resolve\(/);
+  assert.match(source, /if \(l\.manifest\)\s*return Promise\.resolve\(/);
 });
 
 const search = readFileSync(new URL("../src/lib/subtitles/search.ts", import.meta.url), "utf8");

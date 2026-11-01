@@ -16,8 +16,6 @@ import { useActiveKid, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { openMyProfile } from "@/lib/social/open-my-profile";
 import { canOpenProfile } from "@/lib/social/open-profile";
-import { isNuvioProviderActive, activeProfileIsPrimary } from "@/lib/active-profile-id";
-import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { captureSocialActor, assertSocialActor } from "@/lib/social/action-actor";
 import { activeLayout, getThemeById, type ChromeNavId } from "@/lib/theme";
@@ -204,9 +202,12 @@ export function usePageContextTarget({ includePlayer = false } = {}): ContextMen
         },
       };
     });
-    const isNuvioActive = isNuvioProviderActive();
-    const isPrimary = activeProfileIsPrimary();
-    const canOpen = isNuvioActive ? isNuvioSignedIn() : !!author;
+    const isNuvioActive = settings?.accountProvider === "nuvio";
+    const isPrimary = activeProfile ? activeProfile.isPrimary !== false : true;
+    const canOpen = isNuvioActive
+      ? typeof localStorage !== "undefined" &&
+        Boolean(localStorage.getItem("harbor.nuvio.state.v1")?.includes('"access_token"'))
+      : !!author;
     if (
       isPrimary &&
       !kid &&

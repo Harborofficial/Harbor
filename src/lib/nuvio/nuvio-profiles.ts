@@ -763,7 +763,7 @@ const sessionPlaintextPins = new Map<number, string>();
  * and history, swaps server-side PIN credentials, and rolls back local state upon failure.
  */
 export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Promise<boolean> {
-  if (!isNuvioSignedIn() || targetSlotIndex === 1 || targetSlotIndex < 1 || targetSlotIndex > 6) {
+  if (!isNuvioSignedIn() || targetSlotIndex <= 1 || targetSlotIndex > 6) {
     return false;
   }
   // A child profile cannot become the primary profile

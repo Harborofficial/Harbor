@@ -175,6 +175,7 @@ test("video speaker handoff pauses picture, waits readiness, confirms mute and a
   assert.equal(f.route.getSnapshot().phase, "playing");
   assert.deepEqual(f.calls.find((call) => call.name === "local.play")!.value, {
     preserveMuted: true,
+    reason: "cast",
   });
   await f.route.stop();
 });

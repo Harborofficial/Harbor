@@ -4,7 +4,7 @@ import test from "node:test";
 import ts from "typescript";
 import type { LibraryItem } from "../src/lib/stremio";
 
-const settle = () => new Promise<void>((resolve) => setImmediate(resolve));
+const _settle = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 const makeItem = (
   source: "simkl" | "trakt" | "publicmetadb" | "nuvio",

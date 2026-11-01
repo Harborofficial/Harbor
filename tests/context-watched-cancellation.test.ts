@@ -74,6 +74,8 @@ function harness() {
     "./nuvio/nuvio-client": { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false },
     "./nuvio/nuvio-sync": {},
     "./nuvio/nuvio-library": {},
+    "./nuvio/nuvio-playback": {},
+    "./settings/load": { loadStoredSettings: () => ({}) },
     "./local-cw": { saveLocalCw: () => {}, clearLocalCw: () => {} },
     "./resume": { saveResumeMs: () => {} },
     "./trakt/client": {

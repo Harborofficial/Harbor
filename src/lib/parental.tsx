@@ -7,12 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  anyTabLocked,
-  DEFAULT_HIDDEN,
-  type HiddenTabs,
-  type LockableTab,
-} from "./lockable-tabs";
+import { anyTabLocked, DEFAULT_HIDDEN, type HiddenTabs, type LockableTab } from "./lockable-tabs";
 import { hashProfilePassword, verifyProfilePassword } from "./profile-password";
 import { verifyNuvioPin } from "./nuvio/nuvio-profiles";
 import { useProfiles } from "./profiles";
@@ -36,7 +31,7 @@ export function ParentalProvider({ children }: { children: ReactNode }) {
   const { activeProfile, updateProfile, sessionUnlockedIds } = useProfiles();
 
   const hiddenTabs: HiddenTabs = useMemo(
-    () => ({ ...DEFAULT_HIDDEN, ...(activeProfile?.lockedTabs ?? {}) }),
+    () => ({ ...DEFAULT_HIDDEN, ...activeProfile?.lockedTabs }),
     [activeProfile?.id, activeProfile?.lockedTabs],
   );
   const hasPin = !!activeProfile?.passwordHash;

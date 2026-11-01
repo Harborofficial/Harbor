@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildNuvioPlaybackItems } from "../src/lib/nuvio/nuvio-playback";
-import { isDismissedNextUp } from "../src/lib/nuvio/nuvio-sync";
+import {
+  isDismissedNextUp,
+  normalizeNuvioContentId,
+  getNuvioContentIdVariants,
+  extractCleanNumericTmdbId,
+} from "../src/lib/nuvio/nuvio-sync";
 import { undismissCw, isCwDismissed } from "../src/lib/cw-dismiss";
 import type { NuvioWatchProgress, NuvioWatchedItem } from "../src/lib/nuvio/nuvio-types";
 
@@ -334,4 +339,51 @@ test("Nuvio Next Up: dismissing via TMDB identity dismisses the candidate even w
     0,
     "Dismissing via TMDB alias must suppress Next-Up card for IMDb record",
   );
+});
+
+test("Nuvio ID normalization: extracts numeric TMDB ID and prevents tmdb:tv: from leaking to Nuvio Cloud", () => {
+  // 1. extractCleanNumericTmdbId
+  assert.equal(extractCleanNumericTmdbId("tmdb:tv:96677"), "96677");
+  assert.equal(extractCleanNumericTmdbId("tmdb:movie:12345"), "12345");
+  assert.equal(extractCleanNumericTmdbId("tmdb:96677"), "96677");
+  assert.equal(extractCleanNumericTmdbId("series:96677"), "96677");
+  assert.equal(extractCleanNumericTmdbId("96677"), "96677");
+  assert.equal(extractCleanNumericTmdbId("tt2531336"), null);
+
+  // 2. normalizeNuvioContentId
+  // tmdb:tv:96677 must be normalized to tmdb:96677 so Nuvio Mobile's substringAfter(':').substringBefore(':').toIntOrNull() succeeds
+  const normTv = normalizeNuvioContentId("tmdb:tv:96677");
+  assert.ok(
+    normTv === "tmdb:96677" || normTv.startsWith("tt"),
+    `Expected tmdb:96677 or tt..., got ${normTv}`,
+  );
+  assert.equal(normTv.includes(":tv:"), false, "Must never contain :tv: in Nuvio Cloud payload");
+
+  // tmdb:movie:12345 must not leak :movie:
+  const normMovie = normalizeNuvioContentId("tmdb:movie:12345");
+  assert.ok(
+    normMovie === "tmdb:12345" || normMovie.startsWith("tt"),
+    `Expected tmdb:12345 or tt..., got ${normMovie}`,
+  );
+  assert.equal(
+    normMovie.includes(":movie:"),
+    false,
+    "Must never contain :movie: in Nuvio Cloud payload",
+  );
+
+  // IMDb IDs remain untouched
+  assert.equal(normalizeNuvioContentId("tt2531336"), "tt2531336");
+});
+
+test("Nuvio ID normalization: getNuvioContentIdVariants includes all alias variants for deletion and dismissal", () => {
+  const variants = getNuvioContentIdVariants("tmdb:tv:96677");
+  assert.ok(variants.includes("tmdb:tv:96677"));
+  assert.ok(variants.includes("tmdb:96677"));
+  assert.ok(variants.includes("96677"));
+  assert.ok(variants.includes("series:96677"));
+
+  // Dismissal check handles cross-variant matching seamlessly
+  const dismissedKeys = new Set<string>(["tmdb:96677|-1|-1"]);
+  assert.equal(isDismissedNextUp("tmdb:tv:96677", 1, 1, dismissedKeys), true);
+  assert.equal(isDismissedNextUp("96677", 1, 1, dismissedKeys), true);
 });

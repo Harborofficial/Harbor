@@ -56,13 +56,15 @@ function buildSeriesAliasResolver(
 
   const registerVariants = (rawId: string) => {
     if (!rawId) return;
-    const clean = rawId.replace(/^(series|movie|tmdb):/, "").trim();
+    const clean = rawId.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
     if (!clean) return;
     union(rawId, clean);
     union(rawId, `series:${clean}`);
+    union(rawId, `movie:${clean}`);
     if (/^\d+$/.test(clean)) {
       union(rawId, `tmdb:${clean}`);
       union(rawId, `tmdb:tv:${clean}`);
+      union(rawId, `tmdb:movie:${clean}`);
     }
   };
 
@@ -180,15 +182,32 @@ function buildSeriesAliasResolver(
 
   return {
     getCanonicalId: (id: string): string => {
-      const clean = id.replace(/^(series|movie|tmdb):/, "").trim();
-      return canonicalMap.get(id) ?? canonicalMap.get(clean) ?? id;
+      const clean = id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
+      return (
+        canonicalMap.get(id) ??
+        canonicalMap.get(clean) ??
+        canonicalMap.get(`tmdb:${clean}`) ??
+        canonicalMap.get(`tmdb:tv:${clean}`) ??
+        id
+      );
     },
     getAliases: (id: string): Set<string> => {
-      const clean = id.replace(/^(series|movie|tmdb):/, "").trim();
-      const s = aliasSets.get(id) ?? aliasSets.get(clean);
+      const clean = id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
+      const s =
+        aliasSets.get(id) ??
+        aliasSets.get(clean) ??
+        aliasSets.get(`tmdb:${clean}`) ??
+        aliasSets.get(`tmdb:tv:${clean}`);
       if (s) return s;
-      const cleanId = id.replace(/^(series|movie|tmdb):/, "");
-      return new Set([id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]);
+      const cleanId = clean;
+      return new Set([
+        id,
+        cleanId,
+        `tmdb:${cleanId}`,
+        `tmdb:tv:${cleanId}`,
+        `tmdb:movie:${cleanId}`,
+        `series:${cleanId}`,
+      ]);
     },
   };
 }
@@ -274,9 +293,10 @@ export function buildNuvioPlaybackItems(
   const libMap = new Map<string, (typeof libraryItems)[0]>();
   for (const lib of libraryItems) {
     libMap.set(lib.content_id, lib);
-    const clean = lib.content_id.replace(/^(series|movie|tmdb):/, "");
+    const clean = lib.content_id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "");
     libMap.set(clean, lib);
     libMap.set(`tmdb:${clean}`, lib);
+    libMap.set(`tmdb:tv:${clean}`, lib);
     libMap.set(`series:${clean}`, lib);
   }
 
@@ -302,9 +322,10 @@ export function buildNuvioPlaybackItems(
     if (!w.content_id) continue;
     if (w.season == null && w.episode == null) {
       fullyWatchedSeriesIds.add(w.content_id);
-      const clean = w.content_id.replace(/^(series|movie|tmdb):/, "");
+      const clean = w.content_id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "");
       fullyWatchedSeriesIds.add(clean);
       fullyWatchedSeriesIds.add(`tmdb:${clean}`);
+      fullyWatchedSeriesIds.add(`tmdb:tv:${clean}`);
       fullyWatchedSeriesIds.add(`series:${clean}`);
     }
   }
@@ -324,8 +345,12 @@ export function buildNuvioPlaybackItems(
       return (b.progress_seconds || 0) - (a.progress_seconds || 0);
     });
 
-    const cleanId = contentId.replace(/^(series|movie|tmdb):/, "");
-    const libMatch = libMap.get(contentId) || libMap.get(cleanId);
+    const cleanId = contentId.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "");
+    const libMatch =
+      libMap.get(contentId) ||
+      libMap.get(cleanId) ||
+      libMap.get(`tmdb:${cleanId}`) ||
+      libMap.get(`tmdb:tv:${cleanId}`);
     const isSeries =
       libMatch?.content_type === "series" ||
       list.some(
@@ -598,7 +623,7 @@ export function buildNuvioPlaybackItems(
     const isFinished =
       (dur > 0 && pos / dur >= 0.9) || (r as Record<string, unknown>).watched === true;
     if (!isFinished) continue;
-    const clean = r.content_id.replace(/^(series|movie|tmdb):/, "");
+    const clean = r.content_id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "");
     if (
       manualWatchedState(r.content_id, r.season, r.episode) === false ||
       manualWatchedState(clean, r.season, r.episode) === false
@@ -739,8 +764,8 @@ export function buildNuvioPlaybackItems(
       const existingItem = items.find(
         (it) =>
           it._id === loc.id ||
-          it._id.replace(/^(series|movie|tmdb):/, "") ===
-            loc.id.replace(/^(series|movie|tmdb):/, "") ||
+          it._id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "") ===
+            loc.id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "") ||
           it.altIds?.includes(loc.id) ||
           aliasResolver.getCanonicalId(it._id) === aliasResolver.getCanonicalId(loc.id),
       );
@@ -833,10 +858,18 @@ export function buildNuvioPlaybackItems(
   const seenIds = new Set<string>();
   const deduped: LibraryItem[] = [];
   for (const it of items) {
-    const clean = it._id.replace(/^(series|movie|tmdb):/, "");
-    if (seenIds.has(it._id) || seenIds.has(clean)) continue;
+    const clean = it._id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "");
+    if (
+      seenIds.has(it._id) ||
+      seenIds.has(clean) ||
+      (it.altIds && it.altIds.some((a) => seenIds.has(a)))
+    )
+      continue;
     seenIds.add(it._id);
     seenIds.add(clean);
+    seenIds.add(`tmdb:${clean}`);
+    seenIds.add(`tmdb:tv:${clean}`);
+    if (it.altIds) for (const a of it.altIds) seenIds.add(a);
     deduped.push(it);
   }
 

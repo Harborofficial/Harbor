@@ -58,8 +58,7 @@ if (typeof window === "undefined") {
 }
 
 test("Secondary profile privileges and primary profile authority", async (t) => {
-  const { isStremioActivePrimary, activeProfileIsPrimary } =
-    await import("../src/lib/active-profile-id");
+  const { isStremioActivePrimary } = await import("../src/lib/active-profile-id");
   const { getSecondaryPrivileges } = await import("../src/lib/settings/defaults");
 
   await t.test("Primary profile is boss and never denied", () => {

@@ -638,7 +638,10 @@ export function useCwAdvance(
         }
 
         if (i.external === "nuvio" && i.upNext === true) {
-          if (animeCwEnd === "timer" && (!curEpInList || !nextEpAired(list, curEpInList, isAnime))) {
+          if (
+            animeCwEnd === "timer" &&
+            (!curEpInList || !nextEpAired(list, curEpInList, isAnime))
+          ) {
             next.set(i._id, {
               ...i,
               waitingForAir: true as const,
@@ -794,7 +797,7 @@ export function useCwAdvance(
             nextEp,
             hideCaughtUp,
           ) ||
-          (animeCwEnd === "hide" && (!nextEp || !nextEpAired(list, nextEp, isAnime))))
+            (animeCwEnd === "hide" && (!nextEp || !nextEpAired(list, nextEp, isAnime))))
         ) {
           remove.add(i._id);
         }

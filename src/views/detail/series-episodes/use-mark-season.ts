@@ -101,7 +101,16 @@ export function useMarkSeason({
                 t: Date.now(),
               };
               saveLocalCw(nextCw, `nuvio-${slot}`);
-              saveResumeMs(meta.id, 0, nextSeason, nextEpisode, undefined, 0, "nuvio", `nuvio-${slot}`);
+              saveResumeMs(
+                meta.id,
+                0,
+                nextSeason,
+                nextEpisode,
+                undefined,
+                0,
+                "nuvio",
+                `nuvio-${slot}`,
+              );
             } else {
               if (cwKeepsCaughtUpForTimer()) {
                 const lastEp = airedEpisodes[airedEpisodes.length - 1];

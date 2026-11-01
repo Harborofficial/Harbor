@@ -24,7 +24,8 @@ function isNuvioProviderActive(): boolean {
     return (
       typeof localStorage !== "undefined" &&
       (localStorage.getItem("harbor.account-provider") === "nuvio" ||
-        localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"') === true)
+        localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"') ===
+          true)
     );
   } catch {
     return false;
@@ -325,13 +326,22 @@ export function setAddonEnabled(transportUrl: string, enabled: boolean): void {
   saveDisabledAddons(set);
 
   if (isNuvioProviderActive()) {
-    import("@/lib/nuvio/nuvio-sync").then(({ resolveEffectiveNuvioAddonSlot, readCachedNuvioAddons, writeCachedNuvioAddons, pushAddonsToNuvio }) => {
-      const slot = resolveEffectiveNuvioAddonSlot();
-      const current = readCachedNuvioAddons(slot);
-      const updated = current.map((a) => (a.url === transportUrl ? { ...a, enabled } : a));
-      writeCachedNuvioAddons(slot, updated);
-      void pushAddonsToNuvio(slot, updated);
-    }).catch(() => {});
+    import("@/lib/nuvio/nuvio-sync")
+      .then(
+        ({
+          resolveEffectiveNuvioAddonSlot,
+          readCachedNuvioAddons,
+          writeCachedNuvioAddons,
+          pushAddonsToNuvio,
+        }) => {
+          const slot = resolveEffectiveNuvioAddonSlot();
+          const current = readCachedNuvioAddons(slot);
+          const updated = current.map((a) => (a.url === transportUrl ? { ...a, enabled } : a));
+          writeCachedNuvioAddons(slot, updated);
+          void pushAddonsToNuvio(slot, updated);
+        },
+      )
+      .catch(() => {});
   }
 }
 
@@ -445,7 +455,8 @@ export async function installAddon(id: string, transportUrl: string): Promise<Ad
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl };
   if (isNuvioProviderActive()) {
-    const { resolveEffectiveNuvioAddonSlot, addAddonToNuvio } = await import("@/lib/nuvio/nuvio-sync");
+    const { resolveEffectiveNuvioAddonSlot, addAddonToNuvio } =
+      await import("@/lib/nuvio/nuvio-sync");
     const slot = resolveEffectiveNuvioAddonSlot();
     await addAddonToNuvio(slot, { url: transportUrl, name: manifest.name || canonicalId });
     window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
@@ -484,7 +495,8 @@ export async function installFromUrl(
   const addon: Addon = { manifest, transportUrl: parsed.url };
   let synced = false;
   if (isNuvioProviderActive()) {
-    const { resolveEffectiveNuvioAddonSlot, addAddonToNuvio } = await import("@/lib/nuvio/nuvio-sync");
+    const { resolveEffectiveNuvioAddonSlot, addAddonToNuvio } =
+      await import("@/lib/nuvio/nuvio-sync");
     const slot = resolveEffectiveNuvioAddonSlot();
     synced = await addAddonToNuvio(slot, { url: parsed.url, name: manifest.name || id });
     window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));
@@ -511,7 +523,8 @@ export async function uninstallAddon(id: string, transportUrl?: string): Promise
   const targetUrl = transportUrl || (removed[0]?.transportUrl ?? null);
   if (isNuvioProviderActive()) {
     if (targetUrl) {
-      const { resolveEffectiveNuvioAddonSlot, deleteAddonFromNuvio } = await import("@/lib/nuvio/nuvio-sync");
+      const { resolveEffectiveNuvioAddonSlot, deleteAddonFromNuvio } =
+        await import("@/lib/nuvio/nuvio-sync");
       const slot = resolveEffectiveNuvioAddonSlot();
       await deleteAddonFromNuvio(slot, targetUrl);
       window.dispatchEvent(new CustomEvent("harbor:nuvio-addons-changed"));

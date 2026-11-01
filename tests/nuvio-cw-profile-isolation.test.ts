@@ -349,7 +349,7 @@ test("transferPrimaryNuvioProfile rolls back and leaves data intact if backend r
 
   // Mock global fetch to reject sync_push_profiles
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (url: any, opts: any) => {
+  globalThis.fetch = async (url: any, _opts?: any) => {
     if (String(url).includes("sync_push_profiles")) {
       return {
         ok: false,

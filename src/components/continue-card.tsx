@@ -152,9 +152,7 @@ export const ContinueCard = memo(function ContinueCard({
   const [now, setNow] = useState(Date.now());
   const [epAirDate, setEpAirDate] = useState<string | null>(null);
   const isUnairedDate = epAirDate ? Date.parse(epAirDate) > now : false;
-  const isWaiting =
-    waitingForAir ||
-    (isUnairedDate && (settings.animeCwEnd === "timer" || upNext));
+  const isWaiting = waitingForAir || (isUnairedDate && (settings.animeCwEnd === "timer" || upNext));
   const effectiveAirDate = nextAirDate || (isUnairedDate ? epAirDate : undefined);
 
   useEffect(() => {

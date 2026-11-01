@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const read = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
-const manualWatchedSrc = read("../src/lib/manual-watched.ts");
+const _manualWatchedSrc = read("../src/lib/manual-watched.ts");
 const nuvioSyncSrc = read("../src/lib/nuvio/nuvio-sync.ts");
 const detailSrc = read("../src/views/detail.tsx");
 const seriesEpisodesSrc = read("../src/views/detail/series-episodes.tsx");
@@ -98,7 +98,7 @@ test("detail page reloads on nuvioWatchedTick and reconciles targetSeriesIds", (
   );
   assert.match(
     detailSrc,
-    /reconcileNuvioWatchedEpisodes\(profileIndex,\s*serverEpisodeKeys,\s*targetIds\)/,
+    /reconcileNuvioWatchedEpisodes\(\s*profileIndex,\s*serverEpisodeKeys,\s*targetIds,?\s*\)/,
     "detail must reconcile manual watched storage for target series",
   );
   assert.match(
@@ -221,7 +221,7 @@ test("useCwAdvance evaluates Nuvio Next-Up cards when animeCwEnd is timer", () =
   );
   assert.match(
     useCwAdvanceSrc,
-    /if \(i\.external === "nuvio" && i\.upNext === true\) \{\s*if \(animeCwEnd === "timer" && \(!curEpInList \|\| !nextEpAired\(list, curEpInList, isAnime\)\)\) \{/,
+    /if \(i\.external === "nuvio" && i\.upNext === true\) \{\s*if \(\s*animeCwEnd === "timer" &&\s*\(!curEpInList \|\| !nextEpAired\(list, curEpInList, isAnime\)\)\s*\) \{/,
     "useCwAdvance must attach waitingForAir when target episode is unaired",
   );
 });
@@ -273,7 +273,7 @@ test("CW tray and localCw update next up when episodes are marked unwatched or w
   const detailSrc = read("../src/views/detail.tsx");
   assert.match(
     detailSrc,
-    /const \{ changed \} = reconcileNuvioWatchedEpisodes\(profileIndex, serverEpisodeKeys, targetIds\);\s*if \(changed\) \{\s*void reconcileNuvioWatched\(profileIndex, \{ force: true \}\);\s*\}/,
+    /const \{ changed \} = reconcileNuvioWatchedEpisodes\(\s*profileIndex,\s*serverEpisodeKeys,\s*targetIds,?\s*\);\s*if \(changed\) \{\s*void reconcileNuvioWatched\(profileIndex, \{ force: true \}\);\s*\}/,
     "detail view must trigger reconcileNuvioWatched with force: true when episode watched status changes",
   );
 });

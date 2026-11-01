@@ -21,8 +21,12 @@ test("anime detection keys on the PRIMARY country, not any country in the list",
   );
 });
 
-test("the Kitsu fallback only runs when the show's origin is unknown", () => {
+test("the Kitsu fallback stays gated and never runs for every title", () => {
   assert.match(animeDetect, /const originUnknown = !m \|\| !primaryCountry\(m\)/);
+  assert.match(
+    animeDetect,
+    /const needsMapping =[^;]*originUnknown && \(m\.genres \?\? \[\]\)\.length === 0/,
+  );
   assert.match(animeDetect, /if \(!anime && needsMapping\)/);
 });
 

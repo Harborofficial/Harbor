@@ -770,12 +770,14 @@ export function watchedProviderWrites(
 
         if (movie) {
           if (watched) {
-            const items = [{
-              contentId: canonicalId,
-              contentType: "movie" as const,
-              title: meta.name,
-              watchedAt: Date.now(),
-            }];
+            const items = [
+              {
+                contentId: canonicalId,
+                contentType: "movie" as const,
+                title: meta.name,
+                watchedAt: Date.now(),
+              },
+            ];
             await pushWatchedItemToNuvio(slot, items);
             for (const cid of allIds) {
               await deleteWatchProgressFromNuvio(slot, cid);

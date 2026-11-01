@@ -36,7 +36,20 @@
       "dangerousDisableAssetCspModification": ["style-src"],
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": {
+          "allow": ["**"],
+          "deny": [
+            "$HOME/.ssh/**",
+            "$HOME/.aws/**",
+            "$HOME/.gnupg/**",
+            "$HOME/.docker/**",
+            "$HOME/.kube/**",
+            "$HOME/.mozilla/**",
+            "$HOME/.config/**",
+            "$HOME/.netrc",
+            "$HOME/.git-credentials"
+          ]
+        }
       }
     }
   },

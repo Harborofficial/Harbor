@@ -44,7 +44,10 @@ function addonsHarness(response) {
     "src/lib/streams/addons.ts",
     {
       ...shared,
-      "./prefetch-request": { clearPrefetchedRequests() {}, prefetchRequest: (_key, signal, _prefetch, run) => run(signal) },
+      "./prefetch-request": {
+        clearPrefetchedRequests() {},
+        prefetchRequest: (_key, signal, _prefetch, run) => run(signal),
+      },
       "@/lib/debug": { dlog() {}, dwarn() {} },
       "@/lib/fetch-fallback-policy": { isHarborFetchPolicyError: () => false },
       "./addon-detect": { ...detect, isAddonRanked: () => false, isStatusOnlyAddon: () => false },

@@ -57,7 +57,7 @@ if (typeof window === "undefined") {
   };
 }
 
-(globalThis as any).fetch = async (url: string, opts?: any) => {
+(globalThis as any).fetch = async (url: string, _opts?: any) => {
   if (url.includes("/manifest.json")) {
     return {
       ok: true,

@@ -369,7 +369,7 @@ export async function removeStremioLibraryItem(
       _mtime: new Date().toISOString(),
       state: {
         duration: item.state?.duration ?? 0,
-        ...(item.state || {}),
+        ...item.state,
         timeOffset: 0,
         video_id: undefined,
         flaggedWatched: 0,

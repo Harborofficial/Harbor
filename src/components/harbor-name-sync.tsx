@@ -5,7 +5,15 @@ import { bindNameSyncState } from "@/lib/account/name-sync-state";
 import { useProfiles } from "@/lib/profiles";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { useTogether } from "@/lib/together/provider";
-import { isNuvioProviderActive } from "@/lib/active-profile-id";
+
+function isNuvioActive(activeProfileId?: string): boolean {
+  if (activeProfileId?.startsWith("nuvio-")) return true;
+  if (typeof localStorage === "undefined") return false;
+  return (
+    localStorage.getItem("harbor.account-provider") === "nuvio" ||
+    Boolean(localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"'))
+  );
+}
 
 export function HarborNameSync() {
   const [author, setAuthor] = useState(currentAuthor);
@@ -26,7 +34,8 @@ export function HarborNameSync() {
       load: () => fetchProfileAlias(handle, accountId),
       save: (name) => {
         // Never overwrite Harbor author alias with a secondary profile or Nuvio profile name
-        if (isNuvioProviderActive() || !latest.current.activeProfile?.isPrimary) {
+        const isNuvio = isNuvioActive(latest.current.activeProfile?.id);
+        if (isNuvio || latest.current.activeProfile?.isPrimary === false) {
           return Promise.resolve();
         }
         return pushNameToProfileAlias(name, accountId);
@@ -36,10 +45,11 @@ export function HarborNameSync() {
         if (!nameEquals(alias, current.displayName)) current.setDisplayName(alias);
         // Harbor author alias must ONLY ever sync to the primary Stremio/Harbor profile.
         // It must NEVER rename Nuvio cloud profiles or secondary family profiles.
+        const isNuvio = isNuvioActive(current.activeProfile?.id);
         if (
-          !isNuvioProviderActive() &&
+          !isNuvio &&
           current.activeProfile &&
-          current.activeProfile.isPrimary &&
+          current.activeProfile.isPrimary !== false &&
           !current.activeProfile.kid &&
           !nameEquals(alias, current.activeProfile.name)
         ) {
@@ -61,7 +71,7 @@ export function HarborNameSync() {
   }, [author?.id, author?.handle]);
 
   useEffect(() => {
-    if (isNuvioProviderActive() || !activeProfile?.isPrimary) return;
+    if (isNuvioActive(activeProfile?.id) || activeProfile?.isPrimary === false) return;
     sessionRef.current?.update(displayName);
   }, [displayName, activeProfile?.isPrimary]);
 

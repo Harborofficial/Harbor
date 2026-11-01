@@ -728,7 +728,9 @@ export function Home({
           episode: e.episode,
           video_id:
             e.videoId ??
-            (e.season != null && e.episode != null ? `${e.id}:${e.season}:${e.episode}` : undefined),
+            (e.season != null && e.episode != null
+              ? `${e.id}:${e.season}:${e.episode}`
+              : undefined),
           flaggedWatched: e.durationMs > 0 && e.positionMs / e.durationMs >= 0.9 ? 1 : 0,
           lastWatched: new Date(e.t).toISOString(),
         },
@@ -771,9 +773,7 @@ export function Home({
             ...externalAllowed.filter((i) => i.external !== "nuvio"),
           ];
     const eligible = (
-      isNuvioProvider
-        ? cwBase
-        : [...cwBase, ...localCwItems.filter((i) => i.external !== "nuvio")]
+      isNuvioProvider ? cwBase : [...cwBase, ...localCwItems.filter((i) => i.external !== "nuvio")]
     )
       .filter(
         (i) =>
