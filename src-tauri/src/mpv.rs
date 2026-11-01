@@ -312,6 +312,42 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     ("sub-fps", 24, PropertyKind::Double),
 ];
 
+// Display-info publishes this user-data property after the video window opens.
+// Observe its changes instead of polling mpv synchronously every event-loop tick.
+#[cfg(windows)]
+const HDR_STATUS_OBSERVED_PROP: (&str, u64, PropertyKind) =
+    ("user-data/display-info/hdr-status", 30, PropertyKind::String);
+
+// Observed by libmpv itself, without synchronous property queries in the event
+// dispatcher. Do not forward these diagnostic-only changes to the frontend.
+#[cfg(windows)]
+const RESUME_DIAG_PROPS: &[(&str, u64, PropertyKind)] = &[
+    ("avsync", 100, PropertyKind::Double),
+    ("total-avsync-change", 101, PropertyKind::Double),
+    ("audio-pts", 102, PropertyKind::Double),
+    ("demuxer-cache-time", 103, PropertyKind::Double),
+    ("cache-speed", 104, PropertyKind::Int64),
+    ("cache-buffering-state", 105, PropertyKind::Int64),
+    ("demuxer-cache-idle", 106, PropertyKind::Flag),
+    ("core-idle", 107, PropertyKind::Flag),
+    ("seeking", 108, PropertyKind::Flag),
+    ("audio-buffer", 109, PropertyKind::Double),
+    ("current-ao", 110, PropertyKind::String),
+    ("audio-params/samplerate", 111, PropertyKind::Int64),
+    ("audio-out-params/samplerate", 112, PropertyKind::Int64),
+    ("speed", 113, PropertyKind::Double),
+    ("estimated-vf-fps", 114, PropertyKind::Double),
+    ("display-fps", 115, PropertyKind::Double),
+    ("hwdec-current", 116, PropertyKind::String),
+    ("display-sync-active", 117, PropertyKind::Flag),
+    ("frame-drop-count", 118, PropertyKind::Int64),
+    ("decoder-frame-drop-count", 119, PropertyKind::Int64),
+    ("vo-delayed-frame-count", 120, PropertyKind::Int64),
+    ("demuxer-cache-state/fw-bytes", 121, PropertyKind::Int64),
+    ("vsync-ratio", 122, PropertyKind::Double),
+    ("mistimed-frame-count", 123, PropertyKind::Int64),
+];
+
 #[derive(Clone, Copy)]
 enum PropertyKind {
     Double,
@@ -1256,6 +1292,19 @@ pub async fn mpv_start(
             eprintln!("[mpv] observe {} failed: {}", name, e);
         }
     }
+    #[cfg(windows)]
+    {
+        let (name, id, kind) = HDR_STATUS_OBSERVED_PROP;
+        if let Err(e) = event_ctx.observe_property(name, kind.fmt(), id) {
+            eprintln!("[mpv] HDR status observe {} failed: {}", name, e);
+        }
+    }
+    #[cfg(windows)]
+    for (name, id, kind) in RESUME_DIAG_PROPS {
+        if let Err(e) = event_ctx.observe_property(name, kind.fmt(), *id) {
+            eprintln!("[mpv] diagnostic observe {} failed: {}", name, e);
+        }
+    }
     spawn_event_loop(
         app.clone(),
         mpv_arc.clone(),
@@ -1577,132 +1626,264 @@ fn resume_wall_ms() -> u128 {
         .as_millis()
 }
 
-// The high-frequency stream stays deliberately small. Querying dozens of
-// potentially contended mpv properties 4x/second could perturb the freeze.
+// All resume diagnostics are event-fed. A synchronous mpv_get_property call
+// inside the event dispatcher blocked for 14.2 seconds in Static's log. Reading
+// cached event data avoids introducing another synchronous read during freezes.
 #[cfg(windows)]
-fn trace_resume_fast_sample(mpv: &Mpv, log: &std::sync::mpsc::SyncSender<String>, age: Duration) {
-    let began = std::time::Instant::now();
-    fn number(mpv: &Mpv, name: &str) -> String {
-        mpv.get_property::<f64>(name)
-            .ok()
-            .filter(|n| n.is_finite())
-            .map(|n| format!("{n:.4}"))
-            .unwrap_or_else(|| "?".into())
+#[derive(Default)]
+struct ResumeObserved {
+    values: HashMap<&'static str, String>,
+    time_pos: Option<f64>,
+    last_time_pos_change: Option<std::time::Instant>,
+    audio_pts: Option<f64>,
+    last_audio_pts_change: Option<std::time::Instant>,
+}
+
+#[cfg(windows)]
+impl ResumeObserved {
+    fn update(&mut self, name: &str, change: &PropertyData<'_>, now: std::time::Instant) {
+        let observed_name = OBSERVED_PROPS
+            .iter()
+            .chain(RESUME_DIAG_PROPS.iter())
+            .find(|(known, _, _)| *known == name)
+            .map(|(known, _, kind)| (*known, *kind));
+        let Some((name, kind)) = observed_name else { return };
+        let value = match (kind, change) {
+            (PropertyKind::Double, PropertyData::Double(n)) if n.is_finite() => {
+                if name == "time-pos" {
+                    if self.time_pos.is_none_or(|prev| (prev - n).abs() > 0.01) {
+                        self.last_time_pos_change = Some(now);
+                    }
+                    self.time_pos = Some(*n);
+                } else if name == "audio-pts" {
+                    if self.audio_pts.is_none_or(|prev| (prev - n).abs() > 0.01) {
+                        self.last_audio_pts_change = Some(now);
+                    }
+                    self.audio_pts = Some(*n);
+                }
+                format!("{n:.4}")
+            }
+            (PropertyKind::Int64, PropertyData::Int64(n)) => n.to_string(),
+            (PropertyKind::Flag, PropertyData::Flag(value)) => u8::from(*value).to_string(),
+            (PropertyKind::String, PropertyData::Str(s)) if name == "current-ao" => match *s {
+                "wasapi" => "wasapi",
+                "" | "null" => "none",
+                _ => "other",
+            }.to_string(),
+            (PropertyKind::String, PropertyData::Str(s)) if name == "hwdec-current" => match *s {
+                "no" | "" => "0",
+                _ => "1",
+            }.to_string(),
+            _ => {
+                self.values.remove(name);
+                if name == "time-pos" {
+                    self.time_pos = None;
+                    self.last_time_pos_change = None;
+                } else if name == "audio-pts" {
+                    self.audio_pts = None;
+                    self.last_audio_pts_change = None;
+                }
+                return;
+            }
+        };
+        self.values.insert(name, value);
     }
-    fn rate(mpv: &Mpv) -> String {
-        mpv.get_property::<i64>("cache-speed")
-            .map(|n| n.to_string())
-            .unwrap_or_else(|_| "?".into())
+
+    fn value(&self, name: &str) -> &str {
+        self.values.get(name).map(String::as_str).unwrap_or("?")
     }
+
+    fn flag(&self, name: &str) -> Option<bool> {
+        match self.value(name) {
+            "0" => Some(false),
+            "1" => Some(true),
+            _ => None,
+        }
+    }
+
+    fn position_age_ms(&self, now: std::time::Instant) -> String {
+        self.last_time_pos_change
+            .map(|last| now.saturating_duration_since(last).as_millis().to_string())
+            .unwrap_or_else(|| "na".into())
+    }
+
+    fn audio_position_age_ms(&self, now: std::time::Instant) -> String {
+        self.last_audio_pts_change
+            .map(|last| now.saturating_duration_since(last).as_millis().to_string())
+            .unwrap_or_else(|| "na".into())
+    }
+
+    fn counter(&self, name: &str) -> Option<i64> {
+        self.value(name).parse::<i64>().ok()
+    }
+}
+
+// These counters are mpv's *observed* playback/output values, not direct
+// measurements from WASAPI or the GPU driver threads.
+#[cfg(windows)]
+#[derive(Clone, Copy)]
+struct ResumeProgressSample {
+    when: std::time::Instant,
+    media: f64,
+    audio: f64,
+    vo_drops: Option<i64>,
+    decoder_drops: Option<i64>,
+}
+
+#[cfg(windows)]
+#[derive(Default)]
+struct ResumeProgress {
+    last: Option<ResumeProgressSample>,
+}
+
+#[cfg(windows)]
+impl ResumeProgress {
+    fn clear(&mut self) {
+        self.last = None;
+    }
+
+    fn sample(&mut self, snapshot: &ResumeObserved, now: std::time::Instant) -> Option<String> {
+        let (Some(media), Some(audio)) = (snapshot.time_pos, snapshot.audio_pts) else {
+            self.clear();
+            return None;
+        };
+        if !media.is_finite() || !audio.is_finite() {
+            self.clear();
+            return None;
+        }
+        let current = ResumeProgressSample {
+            when: now,
+            media,
+            audio,
+            vo_drops: snapshot.counter("frame-drop-count"),
+            decoder_drops: snapshot.counter("decoder-frame-drop-count"),
+        };
+        let previous = self.last.replace(current)?;
+        let elapsed = now.saturating_duration_since(previous.when).as_secs_f64();
+        if elapsed < 0.25 {
+            return None;
+        }
+        let media_delta = current.media - previous.media;
+        let audio_delta = current.audio - previous.audio;
+        // A seek or stream switch invalidates the clock comparison.
+        if media_delta < -0.5 || audio_delta < -0.5
+            || media_delta > elapsed + 4.0 || audio_delta > elapsed + 4.0
+        {
+            return None;
+        }
+        let drop_delta = |old: Option<i64>, new: Option<i64>| match (old, new) {
+            (Some(a), Some(b)) if b >= a => (b - a).to_string(),
+            _ => "na".to_string(),
+        };
+        let state = if media_delta < elapsed * 0.2 && audio_delta > elapsed * 0.5 {
+            "media-lagging-audio-clock"
+        } else if media_delta < elapsed * 0.2 && audio_delta < elapsed * 0.2 {
+            "both-clocks-slow"
+        } else if media_delta > elapsed * 0.6 && audio_delta > elapsed * 0.6 {
+            "clocks-advancing"
+        } else {
+            "partial-progress"
+        };
+        Some(format!(
+            "[harbor/resume] info: progress wall_ms={} elapsed_ms={} media_delta_s={media_delta:.3} \
+             audio_delta_s={audio_delta:.3} vo_drop_delta={} decoder_drop_delta={} \
+             avsync={} cache_sec={} cache_pause={} seeking={} state={state} source=observed",
+            resume_wall_ms(), (elapsed * 1000.0).round() as u64,
+            drop_delta(previous.vo_drops, current.vo_drops),
+            drop_delta(previous.decoder_drops, current.decoder_drops),
+            snapshot.value("avsync"),
+            snapshot.value("demuxer-cache-duration"),
+            snapshot.value("paused-for-cache"),
+            snapshot.value("seeking"),
+        ))
+    }
+}
+
+#[cfg(windows)]
+fn trace_resume_fast_sample(
+    snapshot: &ResumeObserved,
+    log: &std::sync::mpsc::SyncSender<String>,
+    age: Duration,
+) {
     let _ = log.try_send(format!(
         "[harbor/resume] info: tick wall_ms={} t_ms={} avsync={} audio_pts={} \
-         time_pos={} cache_sec={} cache_rate={} probe_ms={}",
+         time_pos={} cache_sec={} cache_rate={} position_age_ms={} audio_position_age_ms={} source=observed",
         resume_wall_ms(),
         age.as_millis(),
-        number(mpv, "avsync"),
-        number(mpv, "audio-pts"),
-        number(mpv, "time-pos"),
-        number(mpv, "demuxer-cache-duration"),
-        rate(mpv),
-        began.elapsed().as_millis(),
+        snapshot.value("avsync"),
+        snapshot.value("audio-pts"),
+        snapshot.value("time-pos"),
+        snapshot.value("demuxer-cache-duration"),
+        snapshot.value("cache-speed"),
+        snapshot.position_age_ms(std::time::Instant::now()),
+        snapshot.audio_position_age_ms(std::time::Instant::now()),
     ));
 }
 
 #[cfg(windows)]
 fn trace_resume_sample(
-    mpv: &Mpv,
+    snapshot: &ResumeObserved,
     log: &std::sync::mpsc::SyncSender<String>,
     age: Option<Duration>,
     phase: &str,
     embedded: bool,
 ) {
-    let probe_started = std::time::Instant::now();
-    fn number(mpv: &Mpv, name: &str) -> String {
-        mpv.get_property::<f64>(name)
-            .ok()
-            .filter(|value| value.is_finite())
-            .map(|value| format!("{value:.4}"))
-            .unwrap_or_else(|| "?".into())
-    }
-    fn count(mpv: &Mpv, name: &str) -> String {
-        mpv.get_property::<i64>(name)
-            .map(|value| value.to_string())
-            .unwrap_or_else(|_| "?".into())
-    }
-    fn flag(mpv: &Mpv, name: &str) -> &'static str {
-        match mpv.get_property::<bool>(name) {
-            Ok(true) => "1",
-            Ok(false) => "0",
-            Err(_) => "?",
-        }
-    }
-    let display_sync = mpv
-        .get_property::<bool>("display-sync-active")
-        .unwrap_or(false);
-    let audio_output = match mpv.get_property::<String>("current-ao").as_deref() {
-        Ok("wasapi") => "wasapi",
-        Ok("") | Ok("null") => "none",
-        Ok(_) => "other",
-        Err(_) => "?",
-    };
-    // This counter is unavailable by design unless display-sync is enabled.
-    let mistimed = if display_sync {
-        count(mpv, "mistimed-frame-count")
-    } else {
-        "na".into()
-    };
-    let vsync_ratio = if display_sync {
-        number(mpv, "vsync-ratio")
-    } else {
-        "na".into()
-    };
-    let hwdec = match mpv.get_property::<String>("hwdec-current").as_deref() {
-        Ok("no") | Ok("") => "0",
-        Ok(_) => "1",
-        Err(_) => "?",
-    };
-    let line = format!(
+    let _ = log.try_send(format!(
         "[harbor/resume] info: {phase} wall_ms={} t_ms={} embedded={} \
          avsync={} avsync_total={} audio_pts={} time_pos={} \
          cache_sec={} cache_end={} cache_rate={} cache_fw_bytes={} buffering_pct={} \
          cache_pause={} cache_idle={} core_idle={} seeking={} \
          audio_buffer_cfg={} ao={} audio_hz={} output_hz={} \
          speed={} vf_fps={} display_fps={} hwdec={} display_sync={} vsync_ratio={} \
-         vo_drops={} decoder_drops={} mistimed={} delayed={}",
+         vo_drops={} decoder_drops={} mistimed={} delayed={} \
+         position_age_ms={} audio_position_age_ms={} source=observed",
         resume_wall_ms(),
-        age.map(|age| age.as_millis().to_string())
-            .unwrap_or_else(|| "na".into()),
+        age.map(|age| age.as_millis().to_string()).unwrap_or_else(|| "na".into()),
         u8::from(embedded),
-        number(mpv, "avsync"),
-        number(mpv, "total-avsync-change"),
-        number(mpv, "audio-pts"),
-        number(mpv, "time-pos"),
-        number(mpv, "demuxer-cache-duration"),
-        number(mpv, "demuxer-cache-time"),
-        count(mpv, "cache-speed"),
-        count(mpv, "demuxer-cache-state/fw-bytes"),
-        count(mpv, "cache-buffering-state"),
-        flag(mpv, "paused-for-cache"),
-        flag(mpv, "demuxer-cache-idle"),
-        flag(mpv, "core-idle"),
-        flag(mpv, "seeking"),
-        number(mpv, "audio-buffer"),
-        audio_output,
-        count(mpv, "audio-params/samplerate"),
-        count(mpv, "audio-out-params/samplerate"),
-        number(mpv, "speed"),
-        number(mpv, "estimated-vf-fps"),
-        number(mpv, "display-fps"),
-        hwdec,
-        u8::from(display_sync),
-        vsync_ratio,
-        count(mpv, "frame-drop-count"),
-        count(mpv, "decoder-frame-drop-count"),
-        mistimed,
-        count(mpv, "vo-delayed-frame-count"),
-    );
-    let probe_ms = probe_started.elapsed().as_millis();
-    let _ = log.try_send(format!("{line} probe_ms={probe_ms}"));
+        snapshot.value("avsync"),
+        snapshot.value("total-avsync-change"),
+        snapshot.value("audio-pts"),
+        snapshot.value("time-pos"),
+        snapshot.value("demuxer-cache-duration"),
+        snapshot.value("demuxer-cache-time"),
+        snapshot.value("cache-speed"),
+        snapshot.value("demuxer-cache-state/fw-bytes"),
+        snapshot.value("cache-buffering-state"),
+        snapshot.value("paused-for-cache"),
+        snapshot.value("demuxer-cache-idle"),
+        snapshot.value("core-idle"),
+        snapshot.value("seeking"),
+        snapshot.value("audio-buffer"),
+        snapshot.value("current-ao"),
+        snapshot.value("audio-params/samplerate"),
+        snapshot.value("audio-out-params/samplerate"),
+        snapshot.value("speed"),
+        snapshot.value("estimated-vf-fps"),
+        snapshot.value("display-fps"),
+        snapshot.value("hwdec-current"),
+        snapshot.value("display-sync-active"),
+        snapshot.value("vsync-ratio"),
+        snapshot.value("frame-drop-count"),
+        snapshot.value("decoder-frame-drop-count"),
+        snapshot.value("mistimed-frame-count"),
+        snapshot.value("vo-delayed-frame-count"),
+        snapshot.position_age_ms(std::time::Instant::now()),
+        snapshot.audio_position_age_ms(std::time::Instant::now()),
+    ));
+}
+
+#[cfg(windows)]
+fn resume_event_loop_phase(code: u8) -> &'static str {
+    match code {
+        1 => "loop-start",
+        2 => "diagnostics",
+        3 => "preload-expire",
+        4 => "wait-event",
+        5 => "handle-event",
+        6 => "emit-event",
+        7 => "hdr-observed-event",
+        _ => "loop-start",
+    }
 }
 
 const MPV_EVENT_MAX_CONSECUTIVE_ERRORS: u32 = 12;
@@ -1749,6 +1930,12 @@ fn spawn_event_loop(
         #[cfg(windows)]
         let mut resume_trace = ResumeTraceState::default();
         #[cfg(windows)]
+        let mut resume_observed = ResumeObserved::default();
+        #[cfg(windows)]
+        let mut resume_progress = ResumeProgress::default();
+        #[cfg(windows)]
+        let phase = Arc::new(std::sync::atomic::AtomicU8::new(0));
+        #[cfg(windows)]
         let clock_start = std::time::Instant::now();
         #[cfg(windows)]
         let heartbeat_ms = Arc::new(std::sync::atomic::AtomicU64::new(0));
@@ -1763,6 +1950,7 @@ fn spawn_event_loop(
             // Separate from mpv's event thread. A deadlocked mpv property
             // query or event dispatcher cannot report its own timeout.
             let beat = heartbeat_ms.clone();
+            let phase = phase.clone();
             let running = watch_running.clone();
             let playing = watch_playing.clone();
             let resumed = last_resume_ms.clone();
@@ -1790,8 +1978,9 @@ fn spawn_event_loop(
                                 .as_millis()
                                 .saturating_sub(resumed.load(std::sync::atomic::Ordering::Relaxed) as u128);
                             let _ = log.try_send(format!(
-                                "[harbor/resume] warn: event-loop-stall wall_ms={} no_poll_ms={lag_ms} since_resume_ms={since_resume_ms}",
-                                resume_wall_ms()
+                                "[harbor/resume] warn: event-loop-stall wall_ms={} no_poll_ms={lag_ms} since_resume_ms={since_resume_ms} phase={}",
+                                resume_wall_ms(),
+                                resume_event_loop_phase(phase.load(std::sync::atomic::Ordering::Relaxed))
                             ));
                             last_report = Some(now);
                         }
@@ -1811,51 +2000,42 @@ fn spawn_event_loop(
         let mut last_hdr_status: Option<String> = None;
         loop {
             #[cfg(windows)]
+            phase.store(1, std::sync::atomic::Ordering::Relaxed);
+            #[cfg(windows)]
             heartbeat_ms.store(
                 clock_start.elapsed().as_millis().min(u64::MAX as u128) as u64,
                 std::sync::atomic::Ordering::Relaxed,
             );
-            // display-info publishes user-data/display-info/hdr-status only
-            // after the vo window exists, so observing it at init misses the
-            // value; poll it and surface changes so the frontend can react to
-            // the script's display flips.
+            // HDR status changes arrive as observed events below.
             #[cfg(windows)]
             {
-                let status = mpv_keepalive
-                    .get_property::<String>("user-data/display-info/hdr-status")
-                    .ok();
-                if status != last_hdr_status {
-                    last_hdr_status = status.clone();
-                    if let Some(s) = &status {
-                        let _ = app.emit("hdr-stage://display-status", s.as_str());
-                    }
-                }
-            }
-            #[cfg(windows)]
-            {
+                phase.store(2, std::sync::atomic::Ordering::Relaxed);
                 let now = std::time::Instant::now();
                 if let Some(age) = resume_trace.sample_age(now) {
                     let detail = resume_trace.detail_due(now);
                     if let Some(log) = &log {
                         if detail {
-                            trace_resume_sample(&mpv_keepalive, log, Some(age), "sample", embedded);
+                            trace_resume_sample(&resume_observed, log, Some(age), "sample", embedded);
                         } else {
-                            trace_resume_fast_sample(&mpv_keepalive, log, age);
+                            trace_resume_fast_sample(&resume_observed, log, age);
                         }
                     }
                 } else if resume_trace.health_due(now) {
                     if let Some(log) = &log {
-                        trace_resume_sample(&mpv_keepalive, log, None, "health", embedded);
+                        trace_resume_sample(&resume_observed, log, None, "health", embedded);
+                        if let Some(progress) = resume_progress.sample(&resume_observed, now) {
+                            let _ = log.try_send(progress);
+                        }
                     }
                 }
                 if now.saturating_duration_since(last_clock_check) >= Duration::from_secs(1) {
                     last_clock_check = now;
                     let playing = resume_trace.last_resumed_at.is_some()
                         && resume_trace.paused_at.is_none()
-                        && !mpv_keepalive.get_property::<bool>("paused-for-cache").unwrap_or(false)
-                        && !mpv_keepalive.get_property::<bool>("seeking").unwrap_or(false)
-                        && !mpv_keepalive.get_property::<bool>("core-idle").unwrap_or(true);
-                    let position = mpv_keepalive.get_property::<f64>("time-pos").ok();
+                        && resume_observed.flag("paused-for-cache") == Some(false)
+                        && resume_observed.flag("seeking") == Some(false)
+                        && resume_observed.flag("core-idle") == Some(false);
+                    let position = resume_observed.time_pos;
                     if let Some(stalled_for) = resume_trace.position.observe(now, position, playing) {
                         if let Some(log) = &log {
                             let _ = log.try_send(format!(
@@ -1863,7 +2043,10 @@ fn spawn_event_loop(
                                 resume_wall_ms(),
                                 stalled_for.as_millis(),
                             ));
-                            trace_resume_sample(&mpv_keepalive, log, None, "stall", embedded);
+                            trace_resume_sample(&resume_observed, log, None, "stall", embedded);
+                            if let Some(progress) = resume_progress.sample(&resume_observed, now) {
+                                let _ = log.try_send(progress);
+                            }
                         }
                     }
                 }
@@ -1875,10 +2058,16 @@ fn spawn_event_loop(
             let timeout = 0.5;
             #[cfg(windows)]
             let poll_started = std::time::Instant::now();
+            #[cfg(windows)]
+            phase.store(3, std::sync::atomic::Ordering::Relaxed);
             preload.expire(|id| unsafe {
                 libmpv2_sys::mpv_hook_continue(mpv_keepalive.ctx.as_ptr(), id);
             });
+            #[cfg(windows)]
+            phase.store(4, std::sync::atomic::Ordering::Relaxed);
             let res = ctx.wait_event(preload.poll_timeout(timeout));
+            #[cfg(windows)]
+            phase.store(5, std::sync::atomic::Ordering::Relaxed);
             #[cfg(windows)]
             if poll_started.elapsed() >= Duration::from_secs(2) &&
                 resume_trace.last_resumed_at.is_some() &&
@@ -1939,7 +2128,43 @@ fn spawn_event_loop(
                                     now.saturating_duration_since(resumed_at).as_millis(),
                                     resume_trace.paused_at.is_some(),
                                 ));
+                                if matches!(kind, "audio-underrun" | "wasapi-underrun" | "av-desync") {
+                                    let _ = log.try_send(format!(
+                                        "[harbor/resume] info: warning-clocks wall_ms={wall_ms} kind={kind} \
+                                         media={} audio={} avsync={} media_age_ms={} audio_age_ms={} \
+                                         vo_drops={} decoder_drops={} cache_sec={} hwdec={} ao={} source=observed",
+                                        resume_observed.value("time-pos"),
+                                        resume_observed.value("audio-pts"),
+                                        resume_observed.value("avsync"),
+                                        resume_observed.position_age_ms(now),
+                                        resume_observed.audio_position_age_ms(now),
+                                        resume_observed.value("frame-drop-count"),
+                                        resume_observed.value("decoder-frame-drop-count"),
+                                        resume_observed.value("demuxer-cache-duration"),
+                                        resume_observed.value("hwdec-current"),
+                                        resume_observed.value("current-ao"),
+                                    ));
+                                }
                             }
+                        }
+                    }
+                    #[cfg(windows)]
+                    if let Event::PropertyChange { name, change, .. } = &event {
+                        resume_observed.update(name, change, std::time::Instant::now());
+                        if *name == HDR_STATUS_OBSERVED_PROP.0 {
+                            phase.store(7, std::sync::atomic::Ordering::Relaxed);
+                            let status = match change {
+                                PropertyData::Str(value) if !value.is_empty() => Some(*value),
+                                _ => None,
+                            };
+                            if status != last_hdr_status.as_deref() {
+                                last_hdr_status = status.map(str::to_owned);
+                                if let Some(status) = status {
+                                    let _ = app.emit("hdr-stage://display-status", status);
+                                }
+                            }
+                            // Internal observation only, not an mpv frontend event.
+                            continue;
                         }
                     }
                     let mut shutdown = false;
@@ -1967,6 +2192,7 @@ fn spawn_event_loop(
                                 ));
                             }
                             resume_trace.position.clear();
+                            resume_progress.clear();
                         }
                         if matches!(event, Event::EndFile(_) | Event::FileLoaded | Event::Shutdown) {
                             resume_trace.clear();
@@ -1997,6 +2223,8 @@ fn spawn_event_loop(
                                 }
                             }
                             if paused_for.is_some() {
+                                resume_progress.clear();
+                                let _ = resume_progress.sample(&resume_observed, now);
                                 last_resume_ms.store(
                                     clock_start.elapsed().as_millis().min(u64::MAX as u128) as u64,
                                     std::sync::atomic::Ordering::Relaxed,
@@ -2009,7 +2237,10 @@ fn spawn_event_loop(
                             ..
                         } = &event
                         {
-                            if *paused_for_cache { resume_trace.position.clear(); }
+                            if *paused_for_cache {
+                                resume_trace.position.clear();
+                                resume_progress.clear();
+                            }
                             if let Some(log) = &log {
                                 let _ = log.try_send(format!(
                                     "[harbor/resume] info: cache-pause-change wall_ms={} paused={}",
@@ -2089,6 +2320,14 @@ fn spawn_event_loop(
                             let _ = app.emit_to("harbor-captions", "captions://text", text);
                         }
                     }
+                    #[cfg(windows)]
+                    if matches!(&event, Event::PropertyChange { name, .. }
+                        if RESUME_DIAG_PROPS.iter().any(|(known, _, _)| known == name))
+                    {
+                        continue;
+                    }
+                    #[cfg(windows)]
+                    phase.store(6, std::sync::atomic::Ordering::Relaxed);
                     let payload = event_to_payload(event);
                     if let Some(p) = payload {
                         let _ = app.emit("mpv://event", p);
@@ -4744,10 +4983,94 @@ mod audio_device_fallback_tests {
 #[cfg(all(test, windows))]
 mod resume_trace_tests {
     use super::{
-        resume_warning_kind, ResumePosition, ResumeTraceState, RESUME_HEALTH_INTERVAL,
-        RESUME_POSITION_STALL, RESUME_TRACE_WINDOW,
+        resume_event_loop_phase, resume_warning_kind, ResumeObserved, ResumePosition,
+        ResumeProgress, ResumeTraceState, HDR_STATUS_OBSERVED_PROP, OBSERVED_PROPS, RESUME_DIAG_PROPS,
+        RESUME_HEALTH_INTERVAL, RESUME_POSITION_STALL, RESUME_TRACE_WINDOW,
     };
+    use libmpv2::events::PropertyData;
     use std::time::{Duration, Instant};
+
+    #[test]
+    fn resume_diagnostics_are_observed_without_property_reads() {
+        let now = Instant::now();
+        let mut snapshot = ResumeObserved::default();
+        assert_eq!(snapshot.value("time-pos"), "?");
+        assert_eq!(snapshot.flag("core-idle"), None);
+        snapshot.update("time-pos", &PropertyData::Double(90.25), now);
+        snapshot.update("avsync", &PropertyData::Double(0.0625), now);
+        snapshot.update("core-idle", &PropertyData::Flag(false), now);
+        snapshot.update("current-ao", &PropertyData::Str("wasapi"), now);
+        snapshot.update("hwdec-current", &PropertyData::Str("d3d11va"), now);
+        assert_eq!(snapshot.time_pos, Some(90.25));
+        assert_eq!(snapshot.value("avsync"), "0.0625");
+        assert_eq!(snapshot.flag("core-idle"), Some(false));
+        assert_eq!(snapshot.value("current-ao"), "wasapi");
+        assert_eq!(snapshot.value("hwdec-current"), "1");
+        assert_eq!(snapshot.position_age_ms(now + Duration::from_millis(300)), "300");
+        snapshot.update("audio-pts", &PropertyData::Double(90.23), now);
+        assert_eq!(snapshot.audio_position_age_ms(now + Duration::from_millis(300)), "300");
+        snapshot.update("time-pos", &PropertyData::Double(90.5), now + Duration::from_millis(300));
+        assert_eq!(snapshot.position_age_ms(now + Duration::from_millis(400)), "100");
+        snapshot.update("time-pos", &PropertyData::Flag(false), now);
+        assert_eq!(snapshot.time_pos, None);
+        snapshot.update("path", &PropertyData::Str("some-sensitive-url"), now);
+        assert_eq!(snapshot.value("path"), "?");
+        snapshot.update("unexpected-field", &PropertyData::Str("bad"), now);
+        assert_eq!(snapshot.value("unexpected-field"), "?");
+    }
+
+    #[test]
+    fn diagnostic_subscriptions_have_disjoint_ids_and_watchdog_phases() {
+        use std::collections::HashSet;
+        let ids = OBSERVED_PROPS.iter().chain(RESUME_DIAG_PROPS.iter())
+            .map(|(_, id, _)| *id).chain(std::iter::once(HDR_STATUS_OBSERVED_PROP.1));
+        assert_eq!(ids.clone().count(), ids.collect::<HashSet<_>>().len());
+        assert_eq!(resume_event_loop_phase(1), "loop-start");
+        assert_eq!(resume_event_loop_phase(7), "hdr-observed-event");
+        assert_eq!(resume_event_loop_phase(4), "wait-event");
+        assert_eq!(resume_event_loop_phase(5), "handle-event");
+    }
+
+    #[test]
+    fn observed_progress_identifies_media_lag_and_clocks_stalling() {
+        let mut progress = ResumeProgress::default();
+        let mut snapshot = ResumeObserved::default();
+        let start = Instant::now();
+        snapshot.update("time-pos", &PropertyData::Double(100.0), start);
+        snapshot.update("audio-pts", &PropertyData::Double(100.0), start);
+        snapshot.update("frame-drop-count", &PropertyData::Int64(0), start);
+        snapshot.update("decoder-frame-drop-count", &PropertyData::Int64(0), start);
+        assert!(progress.sample(&snapshot, start).is_none());
+        let later = start + Duration::from_secs(5);
+        snapshot.update("time-pos", &PropertyData::Double(100.3), later);
+        snapshot.update("audio-pts", &PropertyData::Double(104.0), later);
+        snapshot.update("frame-drop-count", &PropertyData::Int64(7), later);
+        let line = progress.sample(&snapshot, later).unwrap();
+        assert!(line.contains("state=media-lagging-audio-clock"));
+        assert!(line.contains("vo_drop_delta=7"));
+        assert!(line.contains("decoder_drop_delta=0"));
+        progress.clear();
+        assert!(progress.sample(&snapshot, later).is_none());
+        let later = later + Duration::from_secs(5);
+        snapshot.update("time-pos", &PropertyData::Double(100.4), later);
+        snapshot.update("audio-pts", &PropertyData::Double(104.1), later);
+        assert!(progress.sample(&snapshot, later).unwrap().contains("state=both-clocks-slow"));
+    }
+
+    #[test]
+    fn observed_progress_ignores_missing_clocks_and_seeks() {
+        let mut progress = ResumeProgress::default();
+        let mut snapshot = ResumeObserved::default();
+        let start = Instant::now();
+        snapshot.update("time-pos", &PropertyData::Double(100.0), start);
+        assert!(progress.sample(&snapshot, start).is_none());
+        snapshot.update("audio-pts", &PropertyData::Double(100.0), start);
+        assert!(progress.sample(&snapshot, start).is_none());
+        let later = start + Duration::from_secs(2);
+        snapshot.update("time-pos", &PropertyData::Double(200.0), later);
+        snapshot.update("audio-pts", &PropertyData::Double(200.0), later);
+        assert!(progress.sample(&snapshot, later).is_none());
+    }
 
     #[test]
     fn only_samples_after_a_real_pause_resume_transition() {
