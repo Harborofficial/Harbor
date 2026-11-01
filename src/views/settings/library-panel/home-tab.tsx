@@ -68,7 +68,7 @@ export function HomeTab() {
           <ToggleRow
             label={t("Full quality hero image")}
             sub={t(
-              "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.",
+              "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.",
             )}
             value={settings.heroFullQuality}
             onChange={(v) => update({ heroFullQuality: v })}
