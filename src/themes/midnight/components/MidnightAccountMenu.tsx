@@ -29,6 +29,7 @@ import { StatusDot, StatusPicker } from "@/chrome/sidebar/status-control";
 import { PRESENCE_META } from "@/lib/social/presence";
 import { ProfileAvatar, SubtitleText } from "@/chrome/account-menu/account-menu-parts";
 import { useAccountMenu } from "@/chrome/account-menu/use-account-menu";
+import { getUnreadCount, subscribeUnread } from "@/lib/social/unread-bridge";
 import { HarborAccountDialog } from "@/views/account/harbor-account-dialog";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { loadNuvioState } from "@/lib/nuvio/nuvio-client";
@@ -111,6 +112,8 @@ export function MidnightAccountMenu({
   const name =
     activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
   const showStatus = !!author && !kid;
+  // The one place an unread notification is announced while the menu is shut: the trigger itself.
+  const unreadCount = useUnreadCount();
 
   // Close menu on route change and return focus to trigger
   useEffect(() => {
@@ -188,6 +191,17 @@ export function MidnightAccountMenu({
         />
       )}
 
+      {/* The count waits on the corner away from the presence dot, and steps aside once the menu is
+          open: from there the notifications tile carries it, so it is never said twice. */}
+      {unreadCount > 0 && !menuOpen && (
+        <span
+          key={unreadCount}
+          className="midnight-unread-badge midnight-account-unread animate-badge-pop"
+        >
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      )}
+
       {/* Status Picker popover */}
       {statusOpen && showStatus && (
         <StatusPicker current={status} placement="down" align="end" onPick={pickStatus} />
@@ -232,6 +246,20 @@ export function MidnightAccountMenu({
   );
 }
 
+/**
+ * The unread count Harbor keeps in its chrome bridge.
+ *
+ * The notification bell already polls the feed and publishes the number here, so the theme reads
+ * the same figure instead of asking for it a second time: the trigger, the tile, and anywhere else
+ * Harbor surfaces the count can never disagree. The bridge answers a new subscriber right away,
+ * which is what lets a badge show up the moment the menu opens rather than on the next tick.
+ */
+function useUnreadCount(): number {
+  const [count, setCount] = useState(getUnreadCount);
+  useEffect(() => subscribeUnread(setCount), []);
+  return count;
+}
+
 function MidnightAccountPanel({
   ctrl,
   showSettings,
@@ -251,6 +279,7 @@ function MidnightAccountPanel({
   const { settings } = useSettings();
   const isNuvio = settings.accountProvider === "nuvio";
   const previewShape = usePreviewShape();
+  const unreadCount = useUnreadCount();
   const appearance = useAppearance();
   const runtime = useRuntime();
   const hero = useHero();
@@ -470,7 +499,20 @@ function MidnightAccountPanel({
             }}
             className="midnight-account-tile"
           >
-            <Bell size={16} strokeWidth={2.2} />
+            <span className="midnight-account-tile-icon">
+              <Bell size={16} strokeWidth={2.2} />
+              {/* The tile carries the count once the menu is open, which is where the trigger's mark hands
+                  it over. Keyed by the number so a fresh notification pops the way the rest of Harbor's
+                  badges do. */}
+              {unreadCount > 0 && (
+                <span
+                  key={unreadCount}
+                  className="midnight-unread-badge midnight-account-tile-badge animate-badge-pop"
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </span>
             <span className="truncate">{t("Notifications")}</span>
           </button>
         </div>

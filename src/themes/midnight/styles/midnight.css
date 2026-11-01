@@ -557,6 +557,52 @@
   transform: scale(0.96);
 }
 
+/* An unread notification is announced in one place at a time, both on the account menu: the count
+   rides the trigger while it is shut, and the bell tile inside carries it once the menu is open.
+   Same pill either way. */
+[data-theme-layout="midnight"] .midnight-unread-badge {
+  border-radius: 9999px;
+  background-color: var(--color-accent);
+  color: var(--color-canvas);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* On the tile the icon is the anchor: the badge hangs off its outer top corner. */
+[data-theme-layout="midnight"] .midnight-account-tile-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+[data-theme-layout="midnight"] .midnight-account-tile-badge {
+  position: absolute;
+  inset-block-start: -7px;
+  inset-inline-end: -11px;
+  min-width: 15px;
+  height: 15px;
+  padding-inline: 3px;
+  font-size: 9.5px;
+  line-height: 15px;
+}
+
+/* On the trigger the count takes the top corner diagonally opposite the presence dot, ringed in
+   canvas so it reads as a badge over the avatar rather than part of the artwork. */
+[data-theme-layout="midnight"] .midnight-account-unread {
+  position: absolute;
+  inset-block-start: -3px;
+  inset-inline-start: -4px;
+  z-index: 1;
+  min-width: 16px;
+  height: 16px;
+  padding-inline: 3px;
+  font-size: 10px;
+  line-height: 16px;
+  box-shadow: 0 0 0 2px var(--color-canvas);
+}
+
 /* Reduced Motion Mode */
 @media (prefers-reduced-motion: reduce) {
   [data-theme-layout="midnight"] .midnight-top-capsule {

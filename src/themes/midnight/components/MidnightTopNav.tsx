@@ -438,7 +438,10 @@ export function MidnightTopNav() {
             {/* Action Cluster */}
             <div className="ms-1 flex shrink-0 items-center gap-1">
               <RecordingPill />
-              <NotificationCenter />
+              {/* The panel, without Harbor's bell: on this theme notifications are reached from the
+                  account menu, and the unread mark rides that trigger. Mounted here because the panel
+                  and the feed polling live inside the component. */}
+              <NotificationCenter trigger={false} />
               {view !== "live" && <TogetherButton variant="ghost" connectStyle="tab" />}
               {bigPicture.offer && (
                 <IconBtn onClick={bigPicture.open} label={bigPicture.label} active={false}>
