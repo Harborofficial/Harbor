@@ -16,6 +16,7 @@ import { NotificationCenter } from "@/components/notification-center/notificatio
 import { RecordingPill } from "@/chrome/recording-pill";
 import { TogetherButton } from "@/chrome/topbar";
 import { useRuntime } from "../runtime";
+import { isPageScroller, pageScrollTop } from "../nav-scroll";
 import { MidnightAccountMenu } from "./MidnightAccountMenu";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
@@ -113,19 +114,13 @@ export function MidnightTopNav() {
     const onScroll = (event: Event) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
-      // Only the view's own scroller is the page moving. A sheet, a dialog, a rail with a scrollbar
-      // of its own or a pane of text scrolls itself, and the capsule has no business reacting to
-      // that: it would slide away while the user reads what is inside it.
-      const page = document.querySelector("main");
-      const pageScrolled =
-        target === (document.documentElement as unknown as HTMLElement) ||
-        target === page ||
-        (page !== null && target.contains(page));
-      if (!pageScrolled) return;
-      const top =
-        target === (document.documentElement as unknown as HTMLElement)
-          ? window.scrollY
-          : target.scrollTop;
+      // Only the view's own scroller is the page moving. What counts as one is a structural question -
+      // views hand their scrolling to containers of their own - so nav-scroll.ts answers it rather
+      // than a list of pages being named here. A sheet, a dialog, a rail with a scrollbar of its own
+      // or a pane of text scrolls itself, and the capsule has no business reacting to that: it would
+      // slide away while the user reads what is inside it.
+      if (!isPageScroller(target, document.querySelector("main"))) return;
+      const top = pageScrollTop(target);
       // A container's first observed event carries no baseline. Views mount at the top,
       // so assume 0: the user's opening scroll-down is the gesture that must recede.
       const previous = tops.get(target) ?? 0;

@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useContextMenu } from "@/lib/context-menu";
 import { setPreviewTmdbKey } from "@/lib/hover-preview/preview-data";
+import { hoverPeekOwner } from "@/lib/hover-preview/ownership";
 import {
   closeHoverPreview,
   getHoverPreviewSnapshot,
@@ -54,6 +55,9 @@ export function HoverPreview() {
   const menu = useContextMenu();
   const finePointer = useMedia("(hover: hover) and (pointer: fine)");
   const reduced = useMedia("(prefers-reduced-motion: reduce)");
+  // Who draws the peek is decided once, in lib/hover-preview/ownership.ts, and read the same way by
+  // the layouts that replace this panel - so the setting is honoured and two cards never stack.
+  const layout = activeLayout(settings.theme);
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -69,8 +73,11 @@ export function HoverPreview() {
   useEffect(() => {
     setHoverPreviewGates({
       enabled:
-        settings.hoverPreviewEnabled &&
-        (settings.cardHoverStyle === "default" || settings.cardHoverStyle === "marquee"),
+        hoverPeekOwner({
+          hoverPreviewEnabled: settings.hoverPreviewEnabled,
+          cardHoverStyle: settings.cardHoverStyle,
+          layout,
+        }) === "harbor",
       finePointer,
       viewClear: view.player === null && view.picker === null && !view.chromeHidden,
       searchClosed: !searchOpen,
@@ -79,6 +86,7 @@ export function HoverPreview() {
   }, [
     settings.hoverPreviewEnabled,
     settings.cardHoverStyle,
+    layout,
     finePointer,
     view.player,
     view.picker,

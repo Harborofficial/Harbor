@@ -9,10 +9,12 @@ import {
   type PreviewData,
 } from "@/lib/hover-preview/preview-data";
 import { useSettings } from "@/lib/settings";
+import { activeLayout } from "@/lib/theme";
 import { useView } from "@/lib/view";
 import { useSearchOpen } from "@/lib/search-context";
 import { useContextMenu } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
+import { midnightPreviewEnabled } from "../preview-gate";
 import { usePreviewShape } from "../preview-style";
 import { localizeFact, usePreviewLanguage } from "../preview-language";
 
@@ -398,14 +400,19 @@ export function MidnightHoverPreview() {
   const closeTimer = useRef<number | null>(null);
   const exitTimer = useRef<number | null>(null);
 
-  const enabled =
-    finePointer &&
-    !settings.hoverPreviewEnabled &&
-    viewState.player === null &&
-    viewState.picker === null &&
-    !viewState.chromeHidden &&
-    !searchOpen &&
-    menu.state === null;
+  // Harbor's "Peek at a title on hover" owns this feature, so the theme reads it as the user's
+  // answer rather than as something to work around: see ../preview-gate.ts.
+  const enabled = midnightPreviewEnabled({
+    finePointer,
+    hoverPreviewEnabled: settings.hoverPreviewEnabled,
+    cardHoverStyle: settings.cardHoverStyle,
+    layout: activeLayout(settings.theme),
+    playing: viewState.player !== null,
+    pickerOpen: viewState.picker !== null,
+    chromeHidden: viewState.chromeHidden,
+    searchOpen,
+    menuOpen: menu.state !== null,
+  });
 
   // Reading state. While the pointer rests on the frame and there is more writing than the frame
   // shows, the frame owns the keyboard: the board's arrows would otherwise pull focus out of the
