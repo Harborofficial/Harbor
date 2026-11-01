@@ -19,9 +19,179 @@ import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { readCachedNuvioLibrary } from "./nuvio-library";
 import { localCwEntry, listLocalCw, saveLocalCw } from "@/lib/local-cw";
 import { manualWatchedState } from "@/lib/manual-watched";
+import { tmdbImdbCached, tmdbFromImdbCached } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 
 const DURATION_MS = { movie: 6_300_000, series: 2_640_000 };
 const PLAYBACK_ITEMS_CACHE_PREFIX = "harbor.nuvio.playback_items.";
+
+type AliasResolver = {
+  getCanonicalId: (id: string) => string;
+  getAliases: (id: string) => Set<string>;
+};
+
+function buildSeriesAliasResolver(
+  records: NuvioWatchProgress[],
+  watched: NuvioWatchedItem[],
+  libMap: Map<string, any>,
+  customAliasMap?: Map<string, string> | Record<string, string>,
+): AliasResolver {
+  const parent = new Map<string, string>();
+  const find = (i: string): string => {
+    if (!parent.has(i)) parent.set(i, i);
+    let p = parent.get(i)!;
+    if (p !== i) {
+      p = find(p);
+      parent.set(i, p);
+    }
+    return p;
+  };
+  const union = (a: string, b: string) => {
+    if (!a || !b) return;
+    const rootA = find(a);
+    const rootB = find(b);
+    if (rootA !== rootB) {
+      parent.set(rootA, rootB);
+    }
+  };
+
+  const registerVariants = (rawId: string) => {
+    if (!rawId) return;
+    const clean = rawId.replace(/^(series|movie|tmdb):/, "").trim();
+    if (!clean) return;
+    union(rawId, clean);
+    union(rawId, `series:${clean}`);
+    if (/^\d+$/.test(clean)) {
+      union(rawId, `tmdb:${clean}`);
+      union(rawId, `tmdb:tv:${clean}`);
+    }
+  };
+
+  // 1. Explicit / custom aliases
+  if (customAliasMap) {
+    const entries =
+      customAliasMap instanceof Map ? customAliasMap.entries() : Object.entries(customAliasMap);
+    for (const [k, v] of entries) {
+      registerVariants(k);
+      registerVariants(v);
+      union(k, v);
+    }
+  }
+
+  // 2. Register all IDs from records and watched
+  for (const r of records) {
+    if (r.content_id) registerVariants(r.content_id);
+  }
+  for (const w of watched) {
+    if (w.content_id) registerVariants(w.content_id);
+  }
+  for (const [k] of libMap) {
+    registerVariants(k);
+  }
+
+  // 3. Cached TMDB <-> IMDb lookups
+  const allIds = Array.from(parent.keys());
+  for (const id of allIds) {
+    if (id.startsWith("tt")) {
+      const tmdb = tmdbFromImdbCached(id);
+      if (tmdb) {
+        registerVariants(tmdb);
+        union(id, tmdb);
+      }
+    } else if (id.startsWith("tmdb:") || /^\d+$/.test(id)) {
+      const clean = id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "");
+      const imdb =
+        tmdbImdbCached(`tmdb:${clean}`) || tmdbImdbCached(`tmdb:tv:${clean}`) || tmdbImdbCached(id);
+      if (imdb && imdb.startsWith("tt")) {
+        registerVariants(imdb);
+        union(id, imdb);
+      }
+    }
+  }
+
+  // 4. Correlate by matching non-empty series titles in historical records
+  const byTitle = new Map<string, Set<string>>();
+  const addTitleId = (title: string | undefined | null, id: string | undefined | null) => {
+    if (!title || !id) return;
+    const t = title.trim().toLowerCase();
+    if (t.length < 3) return;
+    let s = byTitle.get(t);
+    if (!s) {
+      s = new Set();
+      byTitle.set(t, s);
+    }
+    s.add(id);
+  };
+  for (const r of records) {
+    addTitleId(r.name || (r as any).title, r.content_id);
+  }
+  for (const w of watched) {
+    addTitleId(w.title, w.content_id);
+  }
+  for (const [, item] of libMap) {
+    if (item && item.content_id) {
+      addTitleId(item.name, item.content_id);
+    }
+  }
+  for (const [, idSet] of byTitle) {
+    if (idSet.size > 1) {
+      const list = Array.from(idSet);
+      const hasImdb = list.some((x) => x.includes("tt"));
+      const hasTmdb = list.some(
+        (x) => x.includes("tmdb") || /^\d+$/.test(x.replace(/^(series|movie):/, "")),
+      );
+      if (hasImdb && hasTmdb) {
+        for (let i = 1; i < list.length; i++) {
+          registerVariants(list[0]);
+          registerVariants(list[i]);
+          union(list[0], list[i]);
+        }
+      }
+    }
+  }
+
+  // 5. Build component sets and select canonical ID per group
+  const components = new Map<string, Set<string>>();
+  for (const key of parent.keys()) {
+    const root = find(key);
+    let set = components.get(root);
+    if (!set) {
+      set = new Set();
+      components.set(root, set);
+    }
+    set.add(key);
+  }
+
+  const canonicalMap = new Map<string, string>();
+  const aliasSets = new Map<string, Set<string>>();
+
+  for (const [, set] of components) {
+    const items = Array.from(set);
+    // Prefer IMDb ID (tt...) as canonical
+    const imdb = items.find((x) => /^tt\d+$/.test(x));
+    // Otherwise prefer clean tmdb (tmdb:digits) or clean ID
+    const tmdb = items.find((x) => /^tmdb:\d+$/.test(x));
+    const canonical = imdb || tmdb || items[0];
+
+    for (const item of items) {
+      canonicalMap.set(item, canonical);
+      aliasSets.set(item, set);
+    }
+  }
+
+  return {
+    getCanonicalId: (id: string): string => {
+      const clean = id.replace(/^(series|movie|tmdb):/, "").trim();
+      return canonicalMap.get(id) ?? canonicalMap.get(clean) ?? id;
+    },
+    getAliases: (id: string): Set<string> => {
+      const clean = id.replace(/^(series|movie|tmdb):/, "").trim();
+      const s = aliasSets.get(id) ?? aliasSets.get(clean);
+      if (s) return s;
+      const cleanId = id.replace(/^(series|movie|tmdb):/, "");
+      return new Set([id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]);
+    },
+  };
+}
 
 function getPlaybackItemsKey(slot: number, accountId?: string): string {
   const acc = accountId || getNuvioAccountId() || "anon";
@@ -96,6 +266,7 @@ export function buildNuvioPlaybackItems(
   watchedItems?: NuvioWatchedItem[],
   dismissedKeys?: Set<string>,
   keepCaughtUpForTimer = false,
+  customAliasMap?: Map<string, string> | Record<string, string>,
 ): LibraryItem[] {
   const safeRecords = Array.isArray(records) ? records : [];
   const ownerId = `nuvio-${profileIndex}`;
@@ -111,6 +282,7 @@ export function buildNuvioPlaybackItems(
 
   const dismissed = dismissedKeys ?? readCachedDismissedNextUpKeys(profileIndex);
   const watched = watchedItems ?? readCachedWatchedItems(profileIndex);
+  const aliasResolver = buildSeriesAliasResolver(safeRecords, watched, libMap, customAliasMap);
 
   // Group records by content_id so each series/movie has a single consolidated Continue Watching card
   const byContent = new Map<string, NuvioWatchProgress[]>();
@@ -380,10 +552,9 @@ export function buildNuvioPlaybackItems(
           !isDismissedNextUp(contentId, subSeason, subEpisode, dismissed)
         ) {
           items.push(item);
-          activeSeriesIds.add(contentId);
-          activeSeriesIds.add(cleanId);
-          activeSeriesIds.add(`tmdb:${cleanId}`);
-          activeSeriesIds.add(`series:${cleanId}`);
+          for (const alias of aliasResolver.getAliases(contentId)) {
+            activeSeriesIds.add(alias);
+          }
         }
       }
     }
@@ -416,9 +587,8 @@ export function buildNuvioPlaybackItems(
         ? w.watched_at
         : Date.parse(w.watched_at)
       : 0;
-    registerSeed(w.content_id, w.season, w.episode, t, w.title);
-    const clean = w.content_id.replace(/^(series|movie|tmdb):/, "");
-    registerSeed(clean, w.season, w.episode, t, w.title);
+    const canonical = aliasResolver.getCanonicalId(w.content_id);
+    registerSeed(canonical, w.season, w.episode, t, w.title);
   }
 
   for (const r of safeRecords) {
@@ -436,36 +606,42 @@ export function buildNuvioPlaybackItems(
       continue;
     }
     const t = r.last_watched || (r.updated_at ? Date.parse(r.updated_at) : 0);
-    registerSeed(r.content_id, r.season, r.episode, t, r.name || r.title || undefined);
-    registerSeed(clean, r.season, r.episode, t, r.name || r.title || undefined);
+    const canonical = aliasResolver.getCanonicalId(r.content_id);
+    registerSeed(canonical, r.season, r.episode, t, r.name || r.title || undefined);
   }
 
   const processedNextUpSeries = new Set<string>();
 
   for (const [seriesId, seed] of completedSeedsBySeries) {
-    const cleanSeriesId = seriesId.replace(/^(series|movie|tmdb):/, "");
+    const canonical = aliasResolver.getCanonicalId(seriesId);
+    const aliases = aliasResolver.getAliases(seriesId);
     if (
-      processedNextUpSeries.has(cleanSeriesId) ||
-      activeSeriesIds.has(seriesId) ||
-      activeSeriesIds.has(cleanSeriesId) ||
-      activeSeriesIds.has(`tmdb:${cleanSeriesId}`) ||
-      activeSeriesIds.has(`series:${cleanSeriesId}`)
+      processedNextUpSeries.has(canonical) ||
+      Array.from(aliases).some((a) => processedNextUpSeries.has(a) || activeSeriesIds.has(a))
     ) {
       continue;
     }
-    processedNextUpSeries.add(cleanSeriesId);
+    processedNextUpSeries.add(canonical);
+    for (const a of aliases) processedNextUpSeries.add(a);
 
-    // Skip if seed is dismissed
-    if (isDismissedNextUp(seriesId, seed.season, seed.episode, dismissed)) {
+    // Skip if seed is dismissed on any alias
+    if (
+      Array.from(aliases).some((a) => isDismissedNextUp(a, seed.season, seed.episode, dismissed))
+    ) {
       continue;
     }
 
     // Resolve next episode:
     // Check if local CW has a newer or advanced target episode
-    const localMatch =
-      localCwEntry(seriesId, true, ownerId) || localCwEntry(seriesId, false, ownerId);
-    const isFullyWatched =
-      fullyWatchedSeriesIds.has(seriesId) || fullyWatchedSeriesIds.has(cleanSeriesId);
+    let localMatch: any = null;
+    for (const a of aliases) {
+      const m = localCwEntry(a, true, ownerId) || localCwEntry(a, false, ownerId);
+      if (m) {
+        localMatch = m;
+        break;
+      }
+    }
+    const isFullyWatched = Array.from(aliases).some((a) => fullyWatchedSeriesIds.has(a));
     let keptForTimer = false;
     if (isFullyWatched) {
       if (!localMatch || localMatch.season == null || localMatch.episode == null) {
@@ -482,12 +658,7 @@ export function buildNuvioPlaybackItems(
     let nextSeason = seed.season;
     let nextEpisode = seed.episode + 1;
 
-    if (
-      !keptForTimer &&
-      localMatch &&
-      localMatch.season != null &&
-      localMatch.episode != null
-    ) {
+    if (!keptForTimer && localMatch && localMatch.season != null && localMatch.episode != null) {
       const order = (s: number, e: number) => s * 100000 + e;
       const seedNextOrder = seed.season * 100000 + (seed.episode + 1);
       const localOrder = localMatch.season * 100000 + localMatch.episode;
@@ -509,22 +680,29 @@ export function buildNuvioPlaybackItems(
       nextEpisode = seed.episode;
     }
 
-    // Skip if target episode or seed episode is dismissed
+    // Skip if target episode or seed episode is dismissed on any alias
     if (
-      isDismissedNextUp(seriesId, nextSeason, nextEpisode, dismissed) ||
-      isDismissedNextUp(seriesId, seed.season, seed.episode, dismissed)
+      Array.from(aliases).some(
+        (a) =>
+          isDismissedNextUp(a, nextSeason, nextEpisode, dismissed) ||
+          isDismissedNextUp(a, seed.season, seed.episode, dismissed),
+      )
     ) {
       continue;
     }
 
-    const libMatch = libMap.get(seriesId) || libMap.get(cleanSeriesId);
-    const title = seed.title || libMatch?.name || localMatch?.name || cleanSeriesId;
+    const libMatch =
+      Array.from(aliases)
+        .map((a) => libMap.get(a))
+        .find(Boolean) || null;
+    const title = seed.title || libMatch?.name || localMatch?.name || canonical;
     const poster = libMatch?.poster || localMatch?.poster || undefined;
     const background = libMatch?.background || localMatch?.background || undefined;
     const when = new Date(seed.markedAt || Date.now()).toISOString();
 
     const nextUpItem: LibraryItem = {
-      _id: seriesId,
+      _id: canonical,
+      altIds: Array.from(aliases).filter((a) => a !== canonical),
       type: "series",
       name: title,
       poster,
@@ -534,7 +712,7 @@ export function buildNuvioPlaybackItems(
         duration: DURATION_MS.series,
         season: nextSeason,
         episode: nextEpisode,
-        video_id: `${seriesId}:${nextSeason}:${nextEpisode}`,
+        video_id: `${canonical}:${nextSeason}:${nextEpisode}`,
         flaggedWatched: 0,
         lastWatched: when,
       },
@@ -562,7 +740,9 @@ export function buildNuvioPlaybackItems(
         (it) =>
           it._id === loc.id ||
           it._id.replace(/^(series|movie|tmdb):/, "") ===
-            loc.id.replace(/^(series|movie|tmdb):/, ""),
+            loc.id.replace(/^(series|movie|tmdb):/, "") ||
+          it.altIds?.includes(loc.id) ||
+          aliasResolver.getCanonicalId(it._id) === aliasResolver.getCanonicalId(loc.id),
       );
       if (existingItem) {
         // If local record has advanced to a higher episode or is newer, reconcile it

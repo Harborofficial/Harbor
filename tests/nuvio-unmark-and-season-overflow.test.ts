@@ -153,7 +153,13 @@ test("reconcileNuvioWatchedEpisodes unmarks all local episodes when mobile compl
   // Initially user watched Tulsa King (tt16358384) S1E1, S1E2, S2E1, S2E2
   mockStorage.set(
     watchedKey,
-    JSON.stringify(["tt16358384|1|1", "tt16358384|1|2", "tt16358384|2|1", "tt16358384|2|2", "other|1|1"]),
+    JSON.stringify([
+      "tt16358384|1|1",
+      "tt16358384|1|2",
+      "tt16358384|2|1",
+      "tt16358384|2|2",
+      "other|1|1",
+    ]),
   );
 
   // User unmarked ALL episodes of Tulsa King on Nuvio mobile:
@@ -166,7 +172,10 @@ test("reconcileNuvioWatchedEpisodes unmarks all local episodes when mobile compl
   const updatedWatched = JSON.parse(mockStorage.get(watchedKey) || "[]") as string[];
   const updatedUnwatched = JSON.parse(mockStorage.get(unwatchedKey) || "[]") as string[];
 
-  assert.ok(!updatedWatched.some((k) => k.startsWith("tt16358384")), "All Tulsa King episodes must be removed from watched");
+  assert.ok(
+    !updatedWatched.some((k) => k.startsWith("tt16358384")),
+    "All Tulsa King episodes must be removed from watched",
+  );
   assert.ok(updatedUnwatched.includes("tt16358384|1|1"), "Tulsa King S1E1 must be in unwatched");
   assert.ok(updatedUnwatched.includes("tt16358384|2|2"), "Tulsa King S2E2 must be in unwatched");
   assert.ok(updatedWatched.includes("other|1|1"), "Other show episodes must remain watched");

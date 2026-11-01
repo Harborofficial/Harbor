@@ -301,3 +301,77 @@ test("openMyProfile prioritizes Harbor-authorized handle over profile name in Nu
   assert.equal(openedHandle, "heisenberg");
   assert.equal(isMyProfileOpt, true);
 });
+
+test("Dismissed Next-Up cache is strictly isolated by account ID", async () => {
+  const { readCachedDismissedNextUpKeys, writeCachedDismissedNextUpKeys } =
+    await import("../src/lib/nuvio/nuvio-sync.ts");
+
+  // Write dismissed keys under Account A
+  writeCachedDismissedNextUpKeys(1, new Set(["tt1111111|1|1"]), "account_A");
+
+  // Write different dismissed keys under Account B
+  writeCachedDismissedNextUpKeys(1, new Set(["tt2222222|1|1"]), "account_B");
+
+  // Read back and verify strict isolation
+  const keysA = readCachedDismissedNextUpKeys(1, "account_A");
+  const keysB = readCachedDismissedNextUpKeys(1, "account_B");
+
+  assert.equal(keysA.has("tt1111111|1|1"), true);
+  assert.equal(keysA.has("tt2222222|1|1"), false, "Account A must not see Account B keys");
+
+  assert.equal(keysB.has("tt2222222|1|1"), true);
+  assert.equal(keysB.has("tt1111111|1|1"), false, "Account B must not see Account A keys");
+});
+
+test("transferPrimaryNuvioProfile rolls back and leaves data intact if backend rejects profile push", async () => {
+  const { transferPrimaryNuvioProfile } = await import("../src/lib/nuvio/nuvio-profiles.ts");
+
+  // Set up signed in Nuvio state with 2 profiles
+  saveNuvioState({
+    session: {
+      access_token: "tok",
+      refresh_token: "ref",
+      expires_at: Date.now() + 3600,
+      token_type: "bearer",
+      user: { id: "u_test", email: "test@harbor.local" },
+    },
+    profiles: [
+      { profile_index: 1, name: "Profile 1 Original" },
+      { profile_index: 2, name: "Profile 2 Original" },
+    ],
+    activeProfileIndex: 1,
+    lastSyncedAt: Date.now(),
+  });
+
+  // Store slot-specific data for slot 1 and slot 2
+  localStorage.setItem("harbor.localcw.v1.nuvio-1", JSON.stringify([{ id: "item1" }]));
+  localStorage.setItem("harbor.localcw.v1.nuvio-2", JSON.stringify([{ id: "item2" }]));
+
+  // Mock global fetch to reject sync_push_profiles
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url: any, opts: any) => {
+    if (String(url).includes("sync_push_profiles")) {
+      return {
+        ok: false,
+        status: 500,
+        json: async () => ({ message: "Internal server error" }),
+        text: async () => "Internal server error",
+      } as any;
+    }
+    return { ok: true, json: async () => [] } as any;
+  };
+
+  try {
+    const success = await transferPrimaryNuvioProfile(2);
+    // Push rejected -> operation must return false
+    assert.equal(success, false, "Transfer must fail when backend rejects push");
+
+    // Local data must NOT be swapped!
+    const cw1 = localStorage.getItem("harbor.localcw.v1.nuvio-1");
+    const cw2 = localStorage.getItem("harbor.localcw.v1.nuvio-2");
+    assert.match(cw1 ?? "", /item1/, "Slot 1 data must remain intact and not swapped on failure");
+    assert.match(cw2 ?? "", /item2/, "Slot 2 data must remain intact and not swapped on failure");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

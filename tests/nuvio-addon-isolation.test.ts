@@ -244,10 +244,7 @@ test("Nuvio multi-profile addon isolation and syncing", async (t) => {
         "harbor.installed-addons.nuvio-1",
         JSON.stringify([{ transportUrl: "secret-a" }]),
       );
-      localStorage.setItem(
-        "harbor.cw.dismissed.private.v1.nuvio-1",
-        JSON.stringify(["tt12345"]),
-      );
+      localStorage.setItem("harbor.cw.dismissed.private.v1.nuvio-1", JSON.stringify(["tt12345"]));
       localStorage.setItem(
         "harbor.installed-addons.default",
         JSON.stringify([{ transportUrl: "stremio-addon" }]),
@@ -288,10 +285,7 @@ test("Nuvio multi-profile addon isolation and syncing", async (t) => {
         "harbor.installed-addons.nuvio-1",
         JSON.stringify([{ transportUrl: "debrid-key" }]),
       );
-      localStorage.setItem(
-        "harbor.cw.dismissed.private.v1.nuvio-1",
-        JSON.stringify(["tt999"]),
-      );
+      localStorage.setItem("harbor.cw.dismissed.private.v1.nuvio-1", JSON.stringify(["tt999"]));
 
       await signOutNuvio();
 
@@ -301,10 +295,7 @@ test("Nuvio multi-profile addon isolation and syncing", async (t) => {
       assert.equal(localStorage.getItem("harbor.cw.dismissed.private.v1.nuvio-1"), null);
 
       // Stremio manual watched key MUST be intact
-      assert.notEqual(
-        localStorage.getItem("harbor.manualwatched.v1.stremio-profile-xyz"),
-        null,
-      );
+      assert.notEqual(localStorage.getItem("harbor.manualwatched.v1.stremio-profile-xyz"), null);
     },
   );
 });

@@ -377,9 +377,14 @@ function cleanupGroupedSource(
       clearLocalCw(id, `nuvio-${slot}`, options);
       clearLocalCw(id, options);
       const { season, episode } = resolveEpisode(item);
-      void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
-    } catch {}
-    return null;
+      const write = deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
+      if (write && typeof write.then === "function") {
+        return write.then((ok) => ok !== false);
+      }
+      return null;
+    } catch {
+      return null;
+    }
   }
   if (item.local) {
     clearLocalCw(id, options);
@@ -579,7 +584,7 @@ export function dismissCw(
         clearLocalCw(vid);
       }
       removeExternalCwItem(item);
-      void deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
+      const write = deleteWatchProgressFromNuvio(slot, id, undefined, season, episode);
       void dismissNextUpInNuvioCloud(slot, id, season, episode);
       window.dispatchEvent(
         new CustomEvent("harbor:nuvio-progress-deleted", {
@@ -587,8 +592,29 @@ export function dismissCw(
         }),
       );
       window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
-    } catch {}
-    return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;
+      if (options.acknowledged) {
+        if (write && typeof write.then === "function") {
+          return write.then(
+            (ok) => ({ sync: ok !== false ? "synced" : "queued" }),
+            () => {
+              throw new Error(
+                "Removed from Continue Watching on this device, but synchronization could not be saved.",
+              );
+            },
+          );
+        }
+        return Promise.resolve({ sync: "synced" });
+      }
+      return undefined;
+    } catch (err) {
+      if (options.acknowledged) {
+        throw new Error(
+          "Removed from Continue Watching on this device, but synchronization could not be saved.",
+          { cause: err },
+        );
+      }
+    }
+    return undefined;
   }
   if (item.external) {
     const { season, episode } = resolveEpisode(item);

@@ -36,7 +36,12 @@ export function activateNuvioAccountProvider(): void {
   );
 }
 import { clearAllNuvioPinCaches, clearNuvioSessionUnlocks } from "./nuvio-profiles";
-import { clearCachedWatchProgress, clearCachedNuvioAddons, fetchNuvioAddons, reconcileNuvioWatched } from "./nuvio-sync";
+import {
+  clearCachedWatchProgress,
+  clearCachedNuvioAddons,
+  fetchNuvioAddons,
+  reconcileNuvioWatched,
+} from "./nuvio-sync";
 import { recordNuvioAddons } from "./nuvio-addon-registry";
 import { clearCachedPlaybackItems } from "./nuvio-playback";
 import { clearAllNuvioLocalCw } from "@/lib/local-cw";

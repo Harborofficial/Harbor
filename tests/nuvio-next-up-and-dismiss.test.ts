@@ -197,3 +197,141 @@ test("Nuvio Next Up: undismissCw removes dismissal so newly watched episode surf
   assert.equal(items[0]._id, "tmdb:213375");
   assert.equal(isCwDismissed(items[0]), false);
 });
+
+test("Nuvio Next Up: mixed IMDb and TMDB records for the same series produce exactly one deduplicated card", () => {
+  const records: NuvioWatchProgress[] = [];
+  // Cloud records contain both IMDb (tt0944947) and TMDB (tmdb:1399) representations
+  const watchedItems: NuvioWatchedItem[] = [
+    {
+      profile_id: 0,
+      content_id: "tt0944947",
+      content_type: "series",
+      title: "Game of Thrones",
+      season: 1,
+      episode: 1,
+      watched_at: Date.now() - 50000,
+    },
+    {
+      profile_id: 0,
+      content_id: "tmdb:1399",
+      content_type: "series",
+      title: "Game of Thrones",
+      season: 1,
+      episode: 2,
+      watched_at: Date.now() - 10000,
+    },
+  ];
+
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems);
+  // Must NOT produce 2 cards! Exactly 1 consolidated Next Up card!
+  assert.equal(
+    items.length,
+    1,
+    "Should produce exactly 1 Next Up card for mixed IMDb/TMDB records",
+  );
+  assert.equal(items[0]._id, "tt0944947", "Canonical ID should prefer IMDb ID");
+  assert.ok(items[0].altIds?.includes("tmdb:1399"), "Should preserve TMDB alias in altIds");
+  assert.equal(items[0].state?.season, 1);
+  assert.equal(
+    items[0].state?.episode,
+    3,
+    "Should advance from the highest watched episode across both aliases (S1E2 -> S1E3)",
+  );
+});
+
+test("Nuvio Next Up: in-progress episode on TMDB identity suppresses Next-Up generation for IMDb identity", () => {
+  // In-progress watch progress on TMDB ID (tmdb:1399 S1E2 at 50%)
+  const records: NuvioWatchProgress[] = [
+    {
+      profile_id: 0,
+      content_id: "tmdb:1399",
+      progress_key: "tmdb:1399_s1e2",
+      season: 1,
+      episode: 2,
+      progress_seconds: 1500,
+      duration_seconds: 3000,
+      last_watched: Date.now(),
+      name: "Game of Thrones",
+    },
+  ];
+
+  // Watched item on IMDb ID (tt0944947 S1E1 completed)
+  const watchedItems: NuvioWatchedItem[] = [
+    {
+      profile_id: 0,
+      content_id: "tt0944947",
+      content_type: "series",
+      title: "Game of Thrones",
+      season: 1,
+      episode: 1,
+      watched_at: Date.now() - 100000,
+    },
+  ];
+
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems);
+  // Exactly 1 item should be returned (the active in-progress card), with no duplicate Next-Up card generated!
+  assert.equal(items.length, 1);
+  assert.equal(items[0].upNext, false, "In-progress item should not be upNext");
+  assert.equal(items[0].state?.episode, 2);
+});
+
+test("Nuvio Next Up: in-progress episode on IMDb identity suppresses Next-Up generation for TMDB identity", () => {
+  // In-progress watch progress on IMDb ID (tt0944947 S1E3 at 30%)
+  const records: NuvioWatchProgress[] = [
+    {
+      profile_id: 0,
+      content_id: "tt0944947",
+      progress_key: "tt0944947_s1e3",
+      season: 1,
+      episode: 3,
+      progress_seconds: 900,
+      duration_seconds: 3000,
+      last_watched: Date.now(),
+      name: "Game of Thrones",
+    },
+  ];
+
+  // Watched item on TMDB ID (tmdb:1399 S1E2 completed)
+  const watchedItems: NuvioWatchedItem[] = [
+    {
+      profile_id: 0,
+      content_id: "tmdb:1399",
+      content_type: "series",
+      title: "Game of Thrones",
+      season: 1,
+      episode: 2,
+      watched_at: Date.now() - 50000,
+    },
+  ];
+
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems);
+  assert.equal(items.length, 1);
+  assert.equal(items[0].upNext, false);
+  assert.equal(items[0].state?.episode, 3);
+});
+
+test("Nuvio Next Up: dismissing via TMDB identity dismisses the candidate even when watched via IMDb", () => {
+  const records: NuvioWatchProgress[] = [];
+  const watchedItems: NuvioWatchedItem[] = [
+    {
+      profile_id: 0,
+      content_id: "tt0944947",
+      content_type: "series",
+      title: "Game of Thrones",
+      season: 1,
+      episode: 1,
+      watched_at: Date.now(),
+    },
+  ];
+
+  // Dismissed via TMDB key
+  const dismissedKeys = new Set<string>(["tmdb:1399|1|1"]);
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems, dismissedKeys, false, {
+    tt0944947: "tmdb:1399",
+  });
+  assert.equal(
+    items.length,
+    0,
+    "Dismissing via TMDB alias must suppress Next-Up card for IMDb record",
+  );
+});

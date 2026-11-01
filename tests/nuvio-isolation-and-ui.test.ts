@@ -148,10 +148,7 @@ test("dismissedNextUpKeys syncs to Nuvio Cloud, isolates profile slots, and prev
   assert.match(nuvioSync, /harbor\.nuvio\.dismissedNextUp\.v1\.\$\{profileIndex\}/);
 
   // reconcileNuvioWatched checks dismissedKeys and seeds un-dismissed midway shows
-  assert.match(
-    nuvioSync,
-    /await pullDismissedNextUpKeysFromNuvio\(profileIndex\)/,
-  );
+  assert.match(nuvioSync, /await pullDismissedNextUpKeysFromNuvio\(profileIndex\)/);
   assert.match(
     nuvioSync,
     /if \(isDismissedNextUp\(entry\.id, entry\.season, entry\.episode, dismissedKeys\)\)/,

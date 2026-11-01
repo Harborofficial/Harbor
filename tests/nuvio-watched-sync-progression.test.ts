@@ -24,7 +24,10 @@ test("watchedProviderWrites connects Nuvio cloud sync for both movies and series
   assert.match(mediaProviderActions, /if \(isNuvioSignedIn\(\)\)/);
   assert.match(mediaProviderActions, /pushWatchedItemToNuvio\(slot, items\)/);
   assert.match(mediaProviderActions, /deleteWatchProgressFromNuvio\(slot, cid\)/);
-  assert.match(mediaProviderActions, /deleteEpisodeWatchProgressFromNuvio\(slot, primaryId, ep\.season, ep\.episode\)/);
+  assert.match(
+    mediaProviderActions,
+    /deleteEpisodeWatchProgressFromNuvio\(slot, primaryId, ep\.season, ep\.episode\)/,
+  );
   assert.match(mediaProviderActions, /harbor:continue-watching-updated/);
   assert.match(mediaProviderActions, /harbor:watched-changed/);
 });
