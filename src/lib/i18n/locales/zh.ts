@@ -102,6 +102,7 @@ import plugins from "./zh/plugins";
 import brands from "./zh/brands";
 import bpSports from "./zh/bp-sports";
 import queueBasket from "./zh/queue-basket";
+import liveWeb from "./zh/live-web";
 
 import nytTv from "./zh/nyt-tv";
 
@@ -367,6 +368,7 @@ const zh: Record<string, string> = {
   ...playOrders,
   ...reviews,
   ...queueBasket,
+  ...liveWeb,
 };
 
 export default zh;

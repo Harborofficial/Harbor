@@ -383,6 +383,8 @@ export const DEFAULT: Settings = {
   aiGroqKey: "",
   jinaKey: "",
   aiWebSearch: false,
+  aiWebSource: "jina",
+  keenableKey: "",
   playerD3d11Flip: true,
   mpvExtraOptions: "",
   mpvQuality: "balanced",

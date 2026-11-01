@@ -128,6 +128,7 @@ import nytTv from "./ar/nyt-tv";
 import gameAchievements from "./ar/game-achievements";
 
 import queueBasket from "./ar/queue-basket";
+import liveWeb from "./ar/live-web";
 
 const ar: Record<string, string> = {
   "collections.feed.more": "تحميل المزيد من المجموعات",
@@ -418,6 +419,7 @@ const ar: Record<string, string> = {
   ...contextActions,
   ...reviews,
   ...queueBasket,
+  ...liveWeb,
 };
 
 export default ar;

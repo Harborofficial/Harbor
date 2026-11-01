@@ -8288,6 +8288,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["jina key", "jina api", "reader key", "web quota", "jina token"],
   },
   {
+    label: "Search source",
+    section: "library",
+    tab: "ai",
+    anchorTitle: "Live web",
+    keywords: ["keenable", "keenable key", "keenable api", "web search source", "search api"],
+  },
+  {
     label: "Use free IMDb data without a TMDB key",
     section: "library",
     tab: "providers",

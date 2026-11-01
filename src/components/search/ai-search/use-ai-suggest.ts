@@ -8,7 +8,7 @@ import {
 } from "@/lib/ai-search";
 import { useSettings } from "@/lib/settings";
 import { aiIsGroq, aiKey } from "@/lib/ai-models";
-import { enrichWithContent } from "@/lib/jina-search";
+import { liveWebContext } from "@/lib/live-web";
 
 export type AiStatus = "idle" | "loading" | "done" | "error";
 
@@ -44,7 +44,7 @@ export function useAiSuggest(query: string, runSignal = 0) {
       let webContext: string | undefined;
       if (settings.aiWebSearch) {
         try {
-          const { context } = await enrichWithContent(query, settings.jinaKey);
+          const { context } = await liveWebContext(query, settings);
           webContext = context || undefined;
         } catch {
           webContext = undefined;
