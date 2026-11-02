@@ -1,5 +1,6 @@
 import {
   playbackSourceKey,
+  actualPlaybackSourceKey,
   streamMatchesEntry,
   type ActualPlayback,
   type PlaybackActor,
@@ -50,7 +51,7 @@ export function continuationAppliesToSource(
       target.episode !== src.episode?.episode)
   )
     return false;
-  if (context.sourceKey === playbackSourceKey(src)) return true;
+  if (context.sourceKey && context.sourceKey === playbackSourceKey(src)) return true;
   if (!target || !src.streamRef) return false;
   const source = { ...src.streamRef, url: src.historyUrl ?? src.url };
   const saved = context.source;
@@ -78,7 +79,7 @@ export function continuationFor(
     actor,
     restart,
     positionMs: restart ? 0 : target.positionMs,
-    sourceKey: playbackSourceKey(target.src),
+    sourceKey: actualPlaybackSourceKey(target),
     target: {
       metaId: target.src.meta.id,
       season: target.src.episode?.season,
@@ -115,7 +116,8 @@ export async function continueActualPlayback(
   const active = services.active();
   if (active) {
     if (
-      playbackSourceKey(active.src) !== playbackSourceKey(target.src) ||
+      !playbackSourceKey(active.src) ||
+      playbackSourceKey(active.src) !== actualPlaybackSourceKey(target) ||
       active.src.meta.id !== target.src.meta.id ||
       active.src.episode?.season !== target.src.episode?.season ||
       active.src.episode?.episode !== target.src.episode?.episode
@@ -126,14 +128,29 @@ export async function continueActualPlayback(
     return "returned";
   }
   const continuation = continuationFor(target, actor, options.restart);
-  const prepared = (src: PlayerSrc): PlayerSrc => ({
-    ...src,
-    continuation,
-    resume: true,
-    startPositionMs: continuation.positionMs,
-    startFromZero: options.restart === true,
-    startPaused: false,
-  });
+  const prepared = (src: PlayerSrc): PlayerSrc => {
+    const subtitle = continuation.subtitle;
+    const restored =
+      src.homeServer && subtitle?.homeServerSubtitleId
+        ? {
+            ...continuation,
+            subtitle: {
+              ...subtitle,
+              // Server subtitle URLs are authenticated transport, not saved identity.
+              source: src.subtitles?.find((track) => track.id === subtitle.homeServerSubtitleId)
+                ?.url,
+            },
+          }
+        : continuation;
+    return {
+      ...src,
+      continuation: restored,
+      resume: true,
+      startPositionMs: continuation.positionMs,
+      startFromZero: options.restart === true,
+      startPaused: false,
+    };
+  };
   const pick = () => {
     valid();
     services.openPicker(target.src.meta, target.src.episode, {

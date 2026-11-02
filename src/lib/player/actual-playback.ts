@@ -6,6 +6,11 @@ import { isNaturalEnd } from "./playback-end";
 import { playbackAudioChoice } from "./audio-choice";
 import { playbackSubtitleChoice, type PlaybackSubtitleChoice } from "./subtitle-choice";
 import {
+  persistablePlaybackSource,
+  persistablePlaybackSubtitle,
+  playbackUrlFingerprint,
+} from "./playback-history-source";
+import {
   subtitleMediaKey,
   subtitleStreamKey,
   type RememberedSub,
@@ -29,21 +34,7 @@ export function actualPlaybackSnapshot(
     !src.url
   )
     return null;
-  // Runtime-only handles cannot survive restarting Harbor. Keep the original
-  // source identity and send proxy/torrent sources through normal preparation.
-  const {
-    continuation: _continuation,
-    playbackTraceId: _trace,
-    proxySessionId,
-    attempt: _attempt,
-    autoFired: _auto,
-    startPositionMs: _start,
-    startPaused: _paused,
-    startFromZero: _zero,
-    subtitlePreselect: _initialSubtitle,
-    ...saved
-  } = src;
-  const { videos: _videos, description: _description, ...meta } = src.meta;
+  const saved = persistablePlaybackSource(src);
   const selectedAudio = snapshot.audioTracks.find((track) => track.selected);
   const selectedSubtitle = snapshot.subtitleTracks.find((track) => track.selected);
   const tracksClearedAtEnd =
@@ -74,10 +65,16 @@ export function actualPlaybackSnapshot(
     // Watched/progress thresholds do not mean the player finished. A paused
     // near-end session must still continue from its actual position.
     completed: isNaturalEnd(snapshot, positionSec),
-    src: { ...saved, meta, url: src.historyUrl ?? src.url },
-    requiresSourceRefresh: !!proxySessionId || !!src.streamRef?.infoHash || !!src.homeServer,
+    src: saved,
+    sourceFingerprint: playbackUrlFingerprint(src),
+    requiresSourceRefresh:
+      !!src.proxySessionId ||
+      !!Object.keys(src.headers ?? {}).length ||
+      !!src.streamRef?.infoHash ||
+      !!src.homeServer ||
+      !saved.url,
     audioTrack: selectedAudio ? playbackAudioChoice(selectedAudio) : undefined,
-    subtitle,
+    subtitle: persistablePlaybackSubtitle(subtitle, src),
     subDelaySec:
       !tracksClearedAtEnd && Number.isFinite(snapshot.subDelaySec)
         ? snapshot.subDelaySec

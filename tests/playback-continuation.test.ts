@@ -140,6 +140,60 @@ test("home-server preparation receives actual position and explicit restart zero
   assert.deepEqual(positions, [45000, 0]);
 });
 
+test("home-server continuation rebinds a saved subtitle ID to fresh authenticated transport", async () => {
+  const target = fixture();
+  target.src.url = "";
+  target.src.homeServer = {
+    connectionId: "server",
+    itemId: "item",
+    versionId: "version",
+    quality: "original",
+  };
+  target.subtitle = { external: true, homeServerSubtitleId: "arabic", lang: "ara" };
+  target.audioTrack = { lang: "eng", title: "English" };
+  target.subDelaySec = 1.25;
+  target.audioDelaySec = -0.2;
+  const { api, calls } = services(target);
+  const freshSubtitle = "https://server.test/subtitle.srt?api_key=fixture-fresh-token";
+  api.prepareServer = async (src) => ({
+    ...src,
+    url: "https://server.test/fresh-video",
+    headers: { Authorization: "fixture-fresh-authorization" },
+    subtitles: [{ id: "arabic", lang: "ara", url: freshSubtitle }],
+  });
+  await continueActualPlayback(target, {}, api);
+  const restored = (calls[0] as [string, any])[1];
+  assert.equal(restored.continuation.subtitle.source, freshSubtitle);
+  assert.deepEqual(restored.headers, { Authorization: "fixture-fresh-authorization" });
+  assert.equal(restored.startPositionMs, target.positionMs);
+  assert.deepEqual(restored.continuation.audioTrack, target.audioTrack);
+  assert.equal(restored.continuation.subDelaySec, 1.25);
+  assert.equal(restored.continuation.audioDelaySec, -0.2);
+  assert.equal(target.subtitle.source, undefined, "transport renewal never mutates saved history");
+});
+
+test("a missing saved server subtitle is not replaced with another subtitle URL", async () => {
+  const target = fixture();
+  target.src.url = "";
+  target.src.homeServer = {
+    connectionId: "server",
+    itemId: "item",
+    versionId: "version",
+    quality: "original",
+  };
+  target.subtitle = { external: true, homeServerSubtitleId: "missing", lang: "ara" };
+  const { api, calls } = services(target);
+  api.prepareServer = async (src) => ({
+    ...src,
+    url: "https://server.test/fresh-video",
+    subtitles: [{ id: "different", lang: "ara", url: "https://server.test/another.srt" }],
+  });
+  await continueActualPlayback(target, {}, api);
+  const restored = (calls[0] as [string, any])[1];
+  assert.equal(restored.continuation.subtitle.homeServerSubtitleId, "missing");
+  assert.equal(restored.continuation.subtitle.source, undefined);
+});
+
 test("continuation carries scoped subtitle choice and delays through source preparation", async () => {
   const target: ActualPlayback = {
     ...fixture(),

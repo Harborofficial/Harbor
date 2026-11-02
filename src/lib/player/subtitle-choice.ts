@@ -13,6 +13,7 @@ export type PlaybackSubtitleChoice = Omit<RememberedSub, "updatedAt"> & {
   forced?: boolean;
   hearingImpaired?: boolean;
   fpsOverride?: number;
+  homeServerSubtitleId?: string;
 };
 
 function durableSource(source?: string): string | undefined {

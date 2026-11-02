@@ -3,6 +3,12 @@ import type { AddonProgress } from "./streams/addons";
 import type { PlayerSrc } from "./view";
 import type { PlaybackAudioChoice } from "./player/audio-choice";
 import type { PlaybackSubtitleChoice } from "./player/subtitle-choice";
+import {
+  persistablePlaybackSource,
+  persistablePlaybackSubtitle,
+  persistablePlaybackUrl,
+  playbackUrlFingerprint,
+} from "./player/playback-history-source";
 import { noteNotify } from "./render-cause";
 import { subtitleMediaKey, subtitleStreamKey } from "./subtitles/subtitle-memory";
 import {
@@ -51,6 +57,7 @@ export type ActualPlayback = {
   durationMs: number;
   completed: boolean;
   src: Omit<PlayerSrc, "continuation">;
+  sourceFingerprint?: string;
   requiresSourceRefresh?: boolean;
   audioTrack?: PlaybackAudioChoice;
   subtitle?: PlaybackSubtitleChoice;
@@ -302,10 +309,20 @@ function readAll(): Record<string, PlaybackEntry> {
     const parsed = JSON.parse(raw) as Record<string, PlaybackEntry>;
     const now = Date.now();
     const fresh: Record<string, PlaybackEntry> = {};
+    let scrubbed = false;
     for (const [k, v] of Object.entries(parsed)) {
-      if (!v?.savedAt) continue;
-      if (now - v.savedAt > TTL_MS) continue;
-      fresh[k] = v;
+      if (!v) continue;
+      const safe = persistableEntry(v);
+      scrubbed ||= JSON.stringify(safe) !== JSON.stringify(v);
+      if (!v.savedAt || now - v.savedAt > TTL_MS) continue;
+      fresh[k] = safe;
+    }
+    if (scrubbed) {
+      try {
+        localStorage.setItem(storeKey(), JSON.stringify(fresh));
+      } catch {
+        // Reads remain safe when storage is unavailable; a later read can retry.
+      }
     }
     return fresh;
   } catch {
@@ -320,7 +337,7 @@ function writeAll(map: Record<string, PlaybackEntry>): void {
       const sorted = Object.entries(map).sort((a, b) => b[1].savedAt - a[1].savedAt);
       map = Object.fromEntries(sorted.slice(0, MAX_ENTRIES));
     }
-    localStorage.setItem(storeKey(), JSON.stringify(map));
+    localStorage.setItem(storeKey(), JSON.stringify(persistableEntries(map)));
   } catch {
     // A failed replacement must leave the last persisted source/session intact.
     return;
@@ -368,7 +385,10 @@ export function savePlayback(
 }
 
 export function recordActualPlayback(playback: ActualPlayback): boolean {
-  if (!isPlaybackActorCurrent(playback.actor) || !validActualPlayback(playback)) return false;
+  if (!isPlaybackActorCurrent(playback.actor)) return false;
+  const safe = persistableActualPlayback(playback);
+  if (!safe || !validActualPlayback(safe)) return false;
+  playback = safe;
   const all = readAll();
   const key = entryKey(
     playback.src.meta.id,
@@ -385,7 +405,7 @@ export function recordActualPlayback(playback: ActualPlayback): boolean {
     previousActual &&
     validActualPlayback(previousActual) &&
     previousActual.id === playback.id &&
-    playbackSourceKey(previousActual.src) === playbackSourceKey(playback.src);
+    actualPlaybackSourceKey(previousActual) === actualPlaybackSourceKey(playback);
   const actual = sameEndedSession
     ? {
         ...playback,
@@ -422,7 +442,7 @@ export function recordActualPlayback(playback: ActualPlayback): boolean {
   try {
     localStorage.setItem(
       storeKey(),
-      JSON.stringify(Object.fromEntries(entries.slice(0, MAX_ENTRIES))),
+      JSON.stringify(persistableEntries(Object.fromEntries(entries.slice(0, MAX_ENTRIES)))),
     );
   } catch {
     return false;
@@ -432,6 +452,21 @@ export function recordActualPlayback(playback: ActualPlayback): boolean {
 }
 
 function validActualPlayback(value: ActualPlayback): boolean {
+  const server = value?.src?.homeServer;
+  const stream = value?.src?.streamRef;
+  const refreshable =
+    !!value?.requiresSourceRefresh &&
+    (!!value.sourceFingerprint ||
+      !!stream?.infoHash ||
+      (!!stream?.addonId && !!stream.parsedTitle && !!stream.size && stream.size > 0));
+  const serverIdentity =
+    !!server &&
+    [server.connectionId, server.itemId, server.versionId].every(
+      (id) => typeof id === "string" && !!id,
+    ) &&
+    ["original", "4k-40", "1080p-20", "1080p-12", "720p-4", "480p-2", "360p-0.7"].includes(
+      server.quality,
+    );
   return (
     !!value &&
     typeof value.id === "string" &&
@@ -444,10 +479,68 @@ function validActualPlayback(value: ActualPlayback): boolean {
     !!value.actor &&
     typeof value.actor.storageProfileId === "string" &&
     typeof value.src?.url === "string" &&
-    !!value.src.url &&
+    (server ? serverIdentity : !!value.src.url || refreshable) &&
     typeof value.src?.meta?.id === "string" &&
     !!value.src.meta.id &&
     typeof value.src.meta.name === "string"
+  );
+}
+
+function persistableActualPlayback(value: ActualPlayback): ActualPlayback | undefined {
+  if (!value?.src?.meta) return undefined;
+  const src = persistablePlaybackSource(value.src);
+  return {
+    id: value.id,
+    actor: value.actor,
+    playedAt: value.playedAt,
+    positionMs: value.positionMs,
+    durationMs: value.durationMs,
+    completed: value.completed,
+    src,
+    sourceFingerprint:
+      playbackUrlFingerprint(value.src) ??
+      (typeof value.sourceFingerprint === "string" && /^[a-f0-9]{64}$/.test(value.sourceFingerprint)
+        ? value.sourceFingerprint
+        : undefined),
+    requiresSourceRefresh:
+      value.requiresSourceRefresh ||
+      !!value.src.proxySessionId ||
+      !!Object.keys(value.src.headers ?? {}).length ||
+      !!src.streamRef?.infoHash ||
+      !!src.homeServer ||
+      !src.url ||
+      undefined,
+    audioTrack: value.audioTrack,
+    subtitle: persistablePlaybackSubtitle(value.subtitle, value.src),
+    subDelaySec: value.subDelaySec,
+    audioDelaySec: value.audioDelaySec,
+  };
+}
+
+function persistableEntry(entry: PlaybackEntry): PlaybackEntry {
+  return {
+    ...entry,
+    ...(typeof entry.url === "string" ? { url: persistablePlaybackUrl(entry.url) } : {}),
+    ...(entry.actual ? { actual: persistableActualPlayback(entry.actual) } : {}),
+    ...(entry.actualByProfile
+      ? {
+          actualByProfile: Object.fromEntries(
+            Object.entries(entry.actualByProfile).map(([id, state]) => [
+              id,
+              {
+                ...state,
+                ...(state?.actual ? { actual: persistableActualPlayback(state.actual) } : {}),
+              },
+            ]),
+          ),
+        }
+      : {}),
+  };
+}
+
+function persistableEntries(entries: Record<string, PlaybackEntry>): Record<string, PlaybackEntry> {
+  return Object.fromEntries(
+    Object.entries(entries).map(([key, entry]) => [key, persistableEntry(entry)]),
   );
 }
 
@@ -470,7 +563,21 @@ export function playbackSourceKey(
     return `server:${src.homeServer.connectionId}:${src.homeServer.itemId}:${src.homeServer.versionId}`;
   if (src.streamRef?.infoHash)
     return `torrent:${src.streamRef.infoHash.toLowerCase()}:${src.streamRef.fileIdx ?? ""}`;
-  return src.historyUrl ?? src.url;
+  const url = persistablePlaybackUrl(src.historyUrl ?? src.url);
+  if (url) return url;
+  const fingerprint = playbackUrlFingerprint(src);
+  if (fingerprint) return `private:${fingerprint}`;
+  const stream = src.streamRef;
+  // Older redacted sources may only have their verified release fields.
+  return stream?.addonId && stream.parsedTitle && stream.size && stream.size > 0
+    ? `release:${JSON.stringify([stream.addonId, stream.parsedTitle, stream.size, stream.fileIdx ?? null])}`
+    : "";
+}
+
+export function actualPlaybackSourceKey(playback: ActualPlayback): string {
+  return playback.sourceFingerprint
+    ? `private:${playback.sourceFingerprint}`
+    : playbackSourceKey(playback.src);
 }
 
 export function readActualPlaybackFor(src: PlayerSrc): ActualPlayback | null {
@@ -479,7 +586,8 @@ export function readActualPlaybackFor(src: PlayerSrc): ActualPlayback | null {
     readAll()[entryKey(src.meta.id, src.episode?.season, src.episode?.episode)],
     actor,
   ).actual;
-  return entry && playbackSourceKey(entry.src) === playbackSourceKey(src) ? entry : null;
+  const sourceKey = playbackSourceKey(src);
+  return entry && sourceKey && actualPlaybackSourceKey(entry) === sourceKey ? entry : null;
 }
 
 /** Capture the observed session before an asynchronous subtitle cache write starts. */
@@ -533,7 +641,7 @@ export function cacheActualPlaybackSubtitle(
     !actual ||
     !validActualPlayback(actual) ||
     actual.id !== target.id ||
-    playbackSourceKey(actual.src) !== playbackSourceKey(target.src) ||
+    actualPlaybackSourceKey(actual) !== actualPlaybackSourceKey(target) ||
     !actual.subtitle ||
     actual.subtitle.off ||
     actual.subtitle.source !== original.source ||
@@ -555,7 +663,7 @@ export function cacheActualPlaybackSubtitle(
     },
   };
   try {
-    localStorage.setItem(storeKey(), JSON.stringify(all));
+    localStorage.setItem(storeKey(), JSON.stringify(persistableEntries(all)));
   } catch {
     return false;
   }
