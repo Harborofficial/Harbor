@@ -13,11 +13,29 @@ struct NativeMusicHost {
     replies: std::sync::mpsc::Receiver<Result<Vec<u8>, String>>,
 }
 
+fn prepend_search_path(
+    app_dir: &Path,
+    existing: Option<&std::ffi::OsStr>,
+) -> Option<std::ffi::OsString> {
+    let mut search = vec![app_dir.to_path_buf()];
+    if let Some(existing) = existing {
+        search.extend(std::env::split_paths(existing));
+    }
+    std::env::join_paths(search).ok()
+}
+
 impl NativeMusicHost {
-    fn start(path: &Path) -> Result<Self, String> {
+    fn start(path: &Path, app_dir: &Path) -> Result<Self, String> {
         use std::process::{Command, Stdio};
         let mut command = Command::new(path);
-        command.arg("--serve")
+        // The module lives in components/music, while libmpv-2.dll sits beside
+        // harbor.exe. Put the app directory first on the child's DLL search path.
+        let existing = std::env::var_os("PATH");
+        if let Some(value) = prepend_search_path(app_dir, existing.as_deref()) {
+            command.env("PATH", value);
+        }
+        command
+            .arg("--serve")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
@@ -241,7 +259,7 @@ pub(super) fn module_request(command: serde_json::Value) -> Option<Result<serde_
         Err(_) => return Some(Err("Music host lock poisoned".into())),
     };
     if host.is_none() {
-        match NativeMusicHost::start(&binary) {
+        match NativeMusicHost::start(&binary, &directory) {
             Ok(client) => *host = Some(client),
             Err(error) => return Some(Err(error)),
         }
@@ -508,6 +526,17 @@ mod tests {
         assert!(playback
             .replace('\\', "/")
             .ends_with("Music/tracks/hysteria.flac"));
+    }
+
+    #[test]
+    fn music_host_search_path_starts_with_the_app_directory() {
+        let app = Path::new("C:/Harbor");
+        let value = prepend_search_path(app, Some(std::ffi::OsStr::new("C:/Windows"))).unwrap();
+        let entries: Vec<_> = std::env::split_paths(&value).collect();
+        assert_eq!(entries.first().map(|entry| entry.as_path()), Some(app));
+        assert!(entries
+            .iter()
+            .any(|entry| entry.as_path() == Path::new("C:/Windows")));
     }
 
     #[test]
