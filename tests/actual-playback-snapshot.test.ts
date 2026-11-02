@@ -41,7 +41,8 @@ test("a proxied source retains original identity but cannot replay a stale proxy
     session,
     100,
   );
-  assert.equal(result?.src.url, "https://synthetic.invalid/video");
+  assert.equal(result?.src.url, "");
+  assert.ok(result?.sourceFingerprint, "retain exact identity without the network transport");
   assert.equal(result?.requiresSourceRefresh, true);
   assert.equal(result?.src.proxySessionId, undefined);
   assert.equal(result?.src.playbackTraceId, undefined);
@@ -196,6 +197,6 @@ test("a later seed-track snapshot without provider IDs retains the proven cached
       ...cached,
       source: "C:/fixture/unrelated.srt",
     })?.subtitle?.source,
-    source,
+    undefined,
   );
 });

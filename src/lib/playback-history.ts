@@ -8,6 +8,9 @@ import {
   persistablePlaybackSubtitle,
   persistablePlaybackUrl,
   playbackUrlFingerprint,
+  persistablePlaybackFields,
+  persistablePlaybackIdentity,
+  persistablePlaybackPreference,
 } from "./player/playback-history-source";
 import { noteNotify } from "./render-cause";
 import { subtitleMediaKey, subtitleStreamKey } from "./subtitles/subtitle-memory";
@@ -25,6 +28,7 @@ export type PlaybackEntry = {
   fileIdx?: number | null;
   addonId?: string | null;
   url?: string | null;
+  urlFingerprint?: string;
   title?: string | null;
   parsedTitle?: string | null;
   resolution?: string | null;
@@ -295,27 +299,52 @@ function selectedActualState(
 }
 
 function entryKey(metaId: string, season?: number, episode?: number): string {
+  metaId = persistablePlaybackIdentity(metaId);
   if (typeof season === "number" && typeof episode === "number") {
     return `${metaId}|s${season}e${episode}`;
   }
   return metaId;
 }
 
-function readAll(): Record<string, PlaybackEntry> {
+function legacyEntryKey(key: string, entry: PlaybackEntry): string {
+  const observations = [
+    entry.actual,
+    ...Object.values(entry.actualByProfile ?? {}).map((state) => state?.actual),
+  ];
+  for (const actual of observations) {
+    const id = actual?.src?.meta?.id;
+    if (typeof id !== "string") continue;
+    const episode = actual?.src?.episode;
+    const suffix =
+      typeof episode?.season === "number" && typeof episode?.episode === "number"
+        ? `|s${episode.season}e${episode.episode}`
+        : "";
+    if (key === `${id}${suffix}`) return entryKey(id, episode?.season, episode?.episode);
+  }
+  if (typeof entry.url === "string" && key === `url:${entry.url}`) return entryKey(key);
+  const suffix = /^(.*)(\|s\d+e\d+)$/.exec(key);
+  return suffix
+    ? `${persistablePlaybackIdentity(suffix[1])}${suffix[2]}`
+    : persistablePlaybackIdentity(key);
+}
+
+function readAll(includeExpired = false): Record<string, PlaybackEntry> {
   migrateLegacy();
   try {
     const raw = localStorage.getItem(storeKey());
     if (!raw) return {};
     const parsed = JSON.parse(raw) as Record<string, PlaybackEntry>;
     const now = Date.now();
-    const fresh: Record<string, PlaybackEntry> = {};
+    const fresh: Record<string, PlaybackEntry> = Object.create(null);
     let scrubbed = false;
     for (const [k, v] of Object.entries(parsed)) {
       if (!v) continue;
-      const safe = persistableEntry(v);
-      scrubbed ||= JSON.stringify(safe) !== JSON.stringify(v);
-      if (!v.savedAt || now - v.savedAt > TTL_MS) continue;
-      fresh[k] = safe;
+      const key = legacyEntryKey(k, v);
+      const safe = persistableEntry(v, key);
+      scrubbed ||= key !== k || JSON.stringify(safe) !== JSON.stringify(v);
+      if (!includeExpired && (!v.savedAt || now - v.savedAt > TTL_MS)) continue;
+      const previous = fresh[key];
+      fresh[key] = previous ? mergeHistoryEntries(previous, safe) : safe;
     }
     if (scrubbed) {
       try {
@@ -328,6 +357,33 @@ function readAll(): Record<string, PlaybackEntry> {
   } catch {
     return {};
   }
+}
+
+function newerActual(
+  a: ActualPlayback | undefined,
+  b: ActualPlayback | undefined,
+): ActualPlayback | undefined {
+  if (!a || !validActualPlayback(a)) return b;
+  if (!b || !validActualPlayback(b)) return a;
+  return a.playedAt >= b.playedAt ? a : b;
+}
+
+// A partially migrated key can coexist with its old URL-derived spelling.
+// Preserve each profile's observed session when those keys converge.
+function mergeHistoryEntries(a: PlaybackEntry, b: PlaybackEntry): PlaybackEntry {
+  const profiles: Record<string, ActualPlaybackState> = Object.assign(
+    Object.create(null),
+    a.actualByProfile,
+  );
+  for (const [id, state] of Object.entries(b.actualByProfile ?? {})) {
+    const actual = newerActual(profiles[id]?.actual, state.actual);
+    profiles[id] = { ...state, ...(actual ? { actual } : {}) };
+  }
+  return {
+    ...(a.savedAt >= b.savedAt ? a : b),
+    actual: newerActual(a.actual, b.actual),
+    ...(Object.keys(profiles).length ? { actualByProfile: profiles } : {}),
+  };
 }
 
 function writeAll(map: Record<string, PlaybackEntry>): void {
@@ -346,15 +402,8 @@ function writeAll(map: Record<string, PlaybackEntry>): void {
 }
 
 export function playbackHistoryRawKeys(): string[] {
-  migrateLegacy();
-  try {
-    const raw = localStorage.getItem(storeKey());
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Record<string, PlaybackEntry>;
-    return Object.keys(parsed);
-  } catch {
-    return [];
-  }
+  // Statistics inspect every retained key; only regular history reads apply TTL.
+  return Object.keys(readAll(true));
 }
 
 export function savePlayback(
@@ -471,6 +520,7 @@ function validActualPlayback(value: ActualPlayback): boolean {
     !!value &&
     typeof value.id === "string" &&
     !!value.id &&
+    typeof value.completed === "boolean" &&
     Number.isFinite(value.playedAt) &&
     Number.isFinite(value.positionMs) &&
     value.positionMs >= 0 &&
@@ -487,11 +537,42 @@ function validActualPlayback(value: ActualPlayback): boolean {
 }
 
 function persistableActualPlayback(value: ActualPlayback): ActualPlayback | undefined {
-  if (!value?.src?.meta) return undefined;
+  if (!validActualPlayback(value)) return undefined;
   const src = persistablePlaybackSource(value.src);
+  const actor = persistablePlaybackFields(value.actor, [
+    "profileId",
+    "storageProfileId",
+    "accountId",
+    "provider",
+    "privateCw",
+  ]);
+  if (
+    typeof actor.profileId !== "string" ||
+    typeof actor.storageProfileId !== "string" ||
+    !(actor.accountId === null || typeof actor.accountId === "string") ||
+    (actor.provider !== undefined && actor.provider !== "nuvio")
+  )
+    return undefined;
+  const audio = value.audioTrack
+    ? persistablePlaybackFields(value.audioTrack, [
+        "id",
+        "lang",
+        "title",
+        "codec",
+        "channels",
+        "channelCount",
+      ])
+    : undefined;
+  const audioValid =
+    audio &&
+    typeof audio.id === "string" &&
+    (["lang", "title", "codec", "channels"] as const).every(
+      (key) => audio[key] === undefined || typeof audio[key] === "string",
+    ) &&
+    (audio.channelCount === undefined || typeof audio.channelCount === "number");
   return {
-    id: value.id,
-    actor: value.actor,
+    id: persistablePlaybackIdentity(value.id),
+    actor,
     playedAt: value.playedAt,
     positionMs: value.positionMs,
     durationMs: value.durationMs,
@@ -503,44 +584,58 @@ function persistableActualPlayback(value: ActualPlayback): ActualPlayback | unde
         ? value.sourceFingerprint
         : undefined),
     requiresSourceRefresh:
-      value.requiresSourceRefresh ||
+      value.requiresSourceRefresh === true ||
       !!value.src.proxySessionId ||
       !!Object.keys(value.src.headers ?? {}).length ||
       !!src.streamRef?.infoHash ||
       !!src.homeServer ||
       !src.url ||
       undefined,
-    audioTrack: value.audioTrack,
+    audioTrack: audioValid ? audio : undefined,
     subtitle: persistablePlaybackSubtitle(value.subtitle, value.src),
-    subDelaySec: value.subDelaySec,
-    audioDelaySec: value.audioDelaySec,
+    subDelaySec: Number.isFinite(value.subDelaySec) ? value.subDelaySec : undefined,
+    audioDelaySec: Number.isFinite(value.audioDelaySec) ? value.audioDelaySec : undefined,
   };
 }
 
-function persistableEntry(entry: PlaybackEntry): PlaybackEntry {
+function persistableEntry(entry: PlaybackEntry, key?: string): PlaybackEntry {
+  const preference = persistablePlaybackPreference(entry);
+  const metaId = entry.actual?.src?.meta?.id;
+  const opaque =
+    key?.startsWith("playback-private:") ||
+    (!!metaId && persistablePlaybackIdentity(metaId).startsWith("playback-private:"));
   return {
-    ...entry,
-    ...(typeof entry.url === "string" ? { url: persistablePlaybackUrl(entry.url) } : {}),
+    ...preference,
+    ...(opaque ? { title: "Direct stream", parsedTitle: undefined } : {}),
     ...(entry.actual ? { actual: persistableActualPlayback(entry.actual) } : {}),
     ...(entry.actualByProfile
       ? {
           actualByProfile: Object.fromEntries(
-            Object.entries(entry.actualByProfile).map(([id, state]) => [
-              id,
-              {
-                ...state,
-                ...(state?.actual ? { actual: persistableActualPlayback(state.actual) } : {}),
-              },
-            ]),
+            Object.entries(entry.actualByProfile)
+              .filter(([, state]) => !!state?.actual)
+              .map(([id, state]) => [
+                persistablePlaybackIdentity(id),
+                {
+                  ...(state?.actual ? { actual: persistableActualPlayback(state.actual) } : {}),
+                  ...persistablePlaybackFields(
+                    state as ActualPlaybackState & { dismissedActualId?: string },
+                    ["dismissedActualId"],
+                  ),
+                },
+              ]),
           ),
         }
       : {}),
+    // Old versions wrote this inert field. It never controls visibility here.
+    ...persistablePlaybackFields(entry as PlaybackEntry & { dismissedActualId?: string }, [
+      "dismissedActualId",
+    ]),
   };
 }
 
 function persistableEntries(entries: Record<string, PlaybackEntry>): Record<string, PlaybackEntry> {
   return Object.fromEntries(
-    Object.entries(entries).map(([key, entry]) => [key, persistableEntry(entry)]),
+    Object.entries(entries).map(([key, entry]) => [key, persistableEntry(entry, key)]),
   );
 }
 
@@ -597,6 +692,9 @@ export function readActualPlaybackForSubtitle(
   notBefore: number,
 ): ActualPlayback | null {
   const actor = capturePlaybackActor();
+  const parts = /^(.*)\|([^|]*)\|([^|]*)$/.exec(mediaKey);
+  if (parts) mediaKey = `${persistablePlaybackIdentity(parts[1])}|${parts[2]}|${parts[3]}`;
+  if (streamKey) streamKey = persistablePlaybackIdentity(streamKey);
   return (
     Object.values(readAll())
       .map((entry) => ownActualState(entry, actor).actual)
@@ -613,7 +711,7 @@ export function readActualPlaybackForSubtitle(
             actual.src.episode?.season,
             actual.src.episode?.episode,
           ) === mediaKey &&
-          subtitleStreamKey(actual.src.streamRef) === streamKey,
+          (actual.subtitle?.streamKey ?? subtitleStreamKey(actual.src.streamRef)) === streamKey,
       ) ?? null
   );
 }
@@ -636,6 +734,7 @@ export function cacheActualPlaybackSubtitle(
   const entry = all[key];
   const own = ownActualState(entry, target.actor);
   const actual = own.actual;
+  const savedOriginal = persistablePlaybackSubtitle(original, target.src);
   if (
     !entry ||
     !actual ||
@@ -644,10 +743,14 @@ export function cacheActualPlaybackSubtitle(
     actualPlaybackSourceKey(actual) !== actualPlaybackSourceKey(target) ||
     !actual.subtitle ||
     actual.subtitle.off ||
-    actual.subtitle.source !== original.source ||
-    actual.subtitle.streamKey !== original.streamKey ||
-    actual.subtitle.subId !== original.subId ||
-    actual.subtitle.provider !== original.provider
+    !(
+      (actual.subtitle.source && actual.subtitle.source === savedOriginal?.source) ||
+      (actual.subtitle.sourceFingerprint &&
+        actual.subtitle.sourceFingerprint === savedOriginal?.sourceFingerprint)
+    ) ||
+    actual.subtitle.streamKey !== savedOriginal?.streamKey ||
+    actual.subtitle.subId !== savedOriginal?.subId ||
+    actual.subtitle.provider !== savedOriginal?.provider
   )
     return false;
   const patched = {
@@ -699,7 +802,10 @@ function offeredBy(
   s: { addonId?: string | null; contributors?: Array<{ id: string }> },
   addonId: string,
 ): boolean {
-  return s.addonId === addonId || s.contributors?.some((c) => c.id === addonId) === true;
+  return (
+    (s.addonId && persistablePlaybackIdentity(s.addonId) === addonId) ||
+    s.contributors?.some((c) => persistablePlaybackIdentity(c.id) === addonId) === true
+  );
 }
 
 /** True when the stream came from the given addon or one of its contributors. */
@@ -771,6 +877,7 @@ export function streamMatchesEntry(
     return true;
   }
   if (e.url && s.url) return s.url === e.url;
+  if (e.urlFingerprint && s.url) return playbackUrlFingerprint({ url: s.url }) === e.urlFingerprint;
   return false;
 }
 
@@ -827,6 +934,7 @@ export function playbackEntries(): Array<{
 }
 
 export function readLastSeriesPlayback(metaId: string): PlaybackEntry | null {
+  metaId = persistablePlaybackIdentity(metaId);
   const all = readAll();
   const prefix = `${metaId}|`;
   let best: PlaybackEntry | null = null;

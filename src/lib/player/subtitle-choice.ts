@@ -6,6 +6,7 @@ import {
 } from "../subtitles/subtitle-memory";
 import { normalizeLang } from "../subtitles/language";
 import { selectedSubtitleCacheName } from "../subtitles/selected-subtitle-cache";
+import { playbackTransportFingerprint } from "./playback-history-source";
 
 export type PlaybackSubtitleChoice = Omit<RememberedSub, "updatedAt"> & {
   external?: boolean;
@@ -14,6 +15,7 @@ export type PlaybackSubtitleChoice = Omit<RememberedSub, "updatedAt"> & {
   hearingImpaired?: boolean;
   fpsOverride?: number;
   homeServerSubtitleId?: string;
+  sourceFingerprint?: string;
 };
 
 function durableSource(source?: string): string | undefined {
@@ -131,6 +133,12 @@ export function selectPlaybackSubtitle(
           [track.originalUrl, track.url, track.externalFilename].some((source) =>
             sameSource(source, choice.source!),
           )) ||
+          (!choice.source &&
+            !!choice.sourceFingerprint &&
+            [track.originalUrl, track.url, track.externalFilename].some(
+              (source) =>
+                playbackTransportFingerprint(durableSource(source)) === choice.sourceFingerprint,
+            )) ||
           (!!choice.subId &&
             choice.subId === track.subId &&
             choice.provider === track.provider &&

@@ -207,7 +207,7 @@ function resumedSource(h: ReturnType<typeof recoveryHarness>) {
       id: "saved-session",
       actor: { profileId: "one", storageProfileId: "one", accountId: "fixture-account" },
       positionMs: 45000,
-      sourceKey: src.url,
+      sourceKey: playbackSourceKey(src),
       target: { metaId: src.meta.id },
       source: { url: src.url, savedAt: 1 },
       audioTrack: { lang: "ara", title: "Arabic" },

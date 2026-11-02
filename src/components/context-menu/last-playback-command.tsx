@@ -67,7 +67,12 @@ function ResolvedLastPlaybackCommand({ onClose, children }: LastPlaybackCommandP
     return children ? children(action, row) : row;
   }
   const presentation = lastPlaybackPresentation(target, settings, summary?.status === "watched");
-  const tooltip = [presentation.title ?? t("Local video"), presentation.episode]
+  const tooltip = [
+    target.src.meta.id.startsWith("playback-private:")
+      ? t("Direct stream")
+      : (presentation.title ?? t("Local video")),
+    presentation.episode,
+  ]
     .filter(Boolean)
     .join(" · ");
   const action: ContextAction = {

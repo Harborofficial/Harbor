@@ -9,6 +9,7 @@ import {
 import type { Meta } from "../cinemeta";
 import type { PlayEpisode, PlayerSrc } from "../view";
 import { isLocalUrl } from "./local-url";
+import { persistablePlaybackIdentity } from "./playback-history-source";
 
 export type ContinuationServices = {
   isCurrent: (actor: PlaybackActor) => boolean;
@@ -46,7 +47,7 @@ export function continuationAppliesToSource(
   const target = context.target;
   if (
     target &&
-    (target.metaId !== src.meta.id ||
+    (target.metaId !== persistablePlaybackIdentity(src.meta.id) ||
       target.season !== src.episode?.season ||
       target.episode !== src.episode?.episode)
   )
@@ -118,7 +119,7 @@ export async function continueActualPlayback(
     if (
       !playbackSourceKey(active.src) ||
       playbackSourceKey(active.src) !== actualPlaybackSourceKey(target) ||
-      active.src.meta.id !== target.src.meta.id ||
+      persistablePlaybackIdentity(active.src.meta.id) !== target.src.meta.id ||
       active.src.episode?.season !== target.src.episode?.season ||
       active.src.episode?.episode !== target.src.episode?.episode
     ) {
@@ -176,6 +177,10 @@ export async function continueActualPlayback(
     services.openPlayer(prepared(src));
     return "player-opened";
   }
+  if (target.src.meta.id.startsWith("playback-private:"))
+    throw new Error(
+      "Open this video from its source or enter the link again. Its network address was not saved.",
+    );
   if (target.requiresSourceRefresh || target.src.streamRef?.infoHash) return pick();
   if (!/^https?:\/\//i.test(target.src.url))
     throw new Error("The last playback source is no longer available.");

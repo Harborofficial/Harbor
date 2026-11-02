@@ -548,6 +548,8 @@ const contextActionsFallback: Record<string, string> = {
     "The last video file is missing or unavailable.",
   "The last playback source is no longer available.":
     "The last playback source is no longer available.",
+  "Open this video from its source or enter the link again. Its network address was not saved.":
+    "Open this video from its source or enter the link again. Its network address was not saved.",
   "Playback changed. Open the menu again.": "Playback changed. Open the menu again.",
   "Playback controls are not available in this session.":
     "Playback controls are not available in this session.",

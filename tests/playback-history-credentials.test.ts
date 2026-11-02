@@ -142,7 +142,7 @@ for (const [provider, query] of [
     assert.equal(playback.audioDelaySec, -0.2);
     assert.equal(playback.audioTrack?.lang, "ara");
     assert.equal(playback.src.episode?.sourceMetaId, "tt-source");
-    assert.equal(playback.src.meta.logo, "https://public.invalid/logo.png");
+    assert.equal(playback.src.meta.logo, undefined, "an arbitrary host is not public provenance");
     assert.equal(playback.src.meta.adult, true);
     assert.equal(playback.src.meta.addonOrigin?.id, "synthetic-addon");
     assert.match(playback.src.meta.addonOrigin?.configurationKey ?? "", /^[a-f0-9]{64}$/);
@@ -259,7 +259,7 @@ test("credentialed generic sources refresh through a known release instead of pe
   );
 });
 
-test("public direct and local source identities and durable subtitle choices survive, including off", () => {
+test("unclassified direct sources retain fingerprints while local sources and subtitle choices remain durable", () => {
   for (const url of ["https://public.invalid/movie.mp4?quality=1080", "C:/synthetic/movie.mp4"]) {
     configure();
     const src: PlayerSrc = {
@@ -267,9 +267,10 @@ test("public direct and local source identities and durable subtitle choices sur
       title: "Synthetic",
       url,
     };
-    const playback = actualPlaybackSnapshot(src, snapshot, 20, { id: url, actor })!;
+    const playback = actualPlaybackSnapshot(src, snapshot, 20, { id: "session", actor })!;
     assert.equal(history.recordActualPlayback({ ...playback, subtitle: { off: true } }), true);
-    assert.equal(history.readLastActualPlayback()?.src.url, url);
+    assert.equal(history.readLastActualPlayback()?.src.url, url.startsWith("https:") ? "" : url);
+    assert.equal(history.readActualPlaybackFor(src)?.id, "session");
     assert.deepEqual(history.readLastActualPlayback()?.subtitle, { off: true });
     for (const source of ["C:/synthetic/sub.srt", "https://public.invalid/sub.vtt?lang=en"]) {
       assert.equal(
@@ -279,7 +280,12 @@ test("public direct and local source identities and durable subtitle choices sur
         }),
         true,
       );
-      assert.equal(history.readLastActualPlayback()?.subtitle?.source, source);
+      assert.equal(
+        history.readLastActualPlayback()?.subtitle?.source,
+        source.startsWith("https:") ? undefined : source,
+      );
+      if (source.startsWith("https:"))
+        assert.ok(history.readLastActualPlayback()?.subtitle?.sourceFingerprint);
     }
   }
 });
@@ -391,7 +397,8 @@ test("generic credential query spellings cannot survive in artwork, episode fiel
     assert.equal(history.recordActualPlayback(playback), true);
     assert.doesNotMatch(values.get(storageKey)!, /synthetic-query-credential/);
     assert.equal(history.readLastActualPlayback()?.subtitle?.source, undefined);
-    assert.equal(history.readLastActualPlayback()?.src.url, "https://public.invalid/movie.mp4");
+    assert.equal(history.readLastActualPlayback()?.src.url, "");
+    assert.equal(history.readLastActualPlayback()?.requiresSourceRefresh, true);
   }
 });
 
@@ -420,7 +427,8 @@ test("known credentialed source preference URLs are scrubbed on both saves and e
     values.get(storageKey)!,
     /synthetic-legacy-preference-credential|synthetic-user/,
   );
-  assert.equal(history.readPlayback("tt-public")?.url, "https://public.invalid/video");
+  assert.equal(history.readPlayback("tt-public")?.url, undefined);
+  assert.ok(history.readPlayback("tt-public")?.urlFingerprint);
 });
 
 test("a normal URL requiring runtime headers is refreshed instead of replayed without authentication", () => {
