@@ -2875,6 +2875,224 @@ export async function deleteAddonFromNuvio(
 }
 
 /**
+ * Remaps the embedded profile_id of pending changes when migrating storage between slots.
+ */
+export function remapPendingChangesProfileId(
+  pendingJson: string | null,
+  newSlot: number,
+): string | null {
+  if (!pendingJson) return null;
+  try {
+    const changes = JSON.parse(pendingJson);
+    if (!changes || typeof changes !== "object") return pendingJson;
+
+    const remapItem = (item: any) => {
+      if (!item || typeof item !== "object") return;
+      if (item.row && typeof item.row === "object") {
+        item.row.profile_id = newSlot;
+      } else if ("profile_id" in item) {
+        item.profile_id = newSlot;
+      }
+    };
+
+    if (Array.isArray(changes)) {
+      for (const item of changes) remapItem(item);
+    } else if (Array.isArray(changes.mutations)) {
+      for (const item of changes.mutations) remapItem(item);
+    } else {
+      for (const key of Object.keys(changes)) {
+        remapItem(changes[key]);
+      }
+    }
+    return JSON.stringify(changes);
+  } catch {
+    return pendingJson;
+  }
+}
+
+async function migrateCloudPushWatched(
+  targetSlot: number,
+  items: NuvioWatchedItem[],
+): Promise<boolean> {
+  if (!items.length) return true;
+  const clientId = getOrCreateSyncClientId();
+  const payloads = items.map((w) => {
+    const episode = w.season != null && w.episode != null;
+    const normId = normalizeNuvioContentId(w.content_id);
+    return {
+      content_id: normId,
+      content_type: w.content_type || (episode ? "series" : "movie"),
+      title: w.title || "",
+      season: w.season ?? null,
+      episode: w.episode ?? null,
+      watched_at: typeof w.watched_at === "number" ? w.watched_at : Date.now(),
+    };
+  });
+  try {
+    const rpcRes = await nuvioFetch("/rest/v1/rpc/sync_push_watched_items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p_profile_id: targetSlot,
+        p_items: payloads,
+        p_origin_client_id: clientId,
+      }),
+    });
+    if (rpcRes.ok) return true;
+  } catch {}
+
+  try {
+    const tableRes = await nuvioFetch("/rest/v1/watched_items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify(payloads.map((p) => ({ profile_id: targetSlot, ...p }))),
+    });
+    return tableRes.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function migrateCloudPushProgress(
+  targetSlot: number,
+  items: NuvioWatchProgress[],
+): Promise<boolean> {
+  if (!items.length) return true;
+  const clientId = getOrCreateSyncClientId();
+  const payloads = items.map((p) => {
+    const episode = p.season != null && p.episode != null;
+    const normId = normalizeNuvioContentId(p.content_id);
+    return {
+      content_id: normId,
+      content_type: episode ? "series" : "movie",
+      video_id: episode ? `${normId}:${p.season}:${p.episode}` : normId,
+      season: p.season ?? null,
+      episode: p.episode ?? null,
+      progress_key: p.progress_key || (episode ? `${normId}_s${p.season}e${p.episode}` : normId),
+      position: Math.round(p.progress_seconds * 1000),
+      duration: Math.round(p.duration_seconds * 1000),
+      last_watched: p.last_watched || Date.now(),
+    };
+  });
+  try {
+    const rpcRes = await nuvioFetch("/rest/v1/rpc/sync_push_watch_progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p_profile_id: targetSlot,
+        p_entries: payloads,
+        p_origin_client_id: clientId,
+      }),
+    });
+    if (rpcRes.ok) return true;
+  } catch {}
+
+  try {
+    const tableRes = await nuvioFetch("/rest/v1/watch_progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify(payloads.map((p) => ({ profile_id: targetSlot, ...p }))),
+    });
+    return tableRes.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function migrateCloudDeleteWatched(
+  sourceSlot: number,
+  items: NuvioWatchedItem[],
+): Promise<boolean> {
+  if (!items.length) return true;
+  const clientId = getOrCreateSyncClientId();
+  const targets = items.map((w) => ({
+    content_id: normalizeNuvioContentId(w.content_id),
+    season: w.season ?? null,
+    episode: w.episode ?? null,
+  }));
+  try {
+    const rpcRes = await nuvioFetch("/rest/v1/rpc/sync_delete_watched_items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p_profile_id: sourceSlot,
+        p_keys: targets,
+        p_origin_client_id: clientId,
+      }),
+    });
+    if (rpcRes.ok) return true;
+  } catch {}
+
+  try {
+    let allOk = true;
+    for (const target of targets) {
+      let url = `/rest/v1/watched_items?profile_id=eq.${sourceSlot}&content_id=eq.${encodeURIComponent(target.content_id)}`;
+      if (target.season != null && target.episode != null) {
+        url += `&season=eq.${target.season}&episode=eq.${target.episode}`;
+      } else {
+        url += `&season=is.null&episode=is.null`;
+      }
+      const res = await nuvioFetch(url, { method: "DELETE" });
+      if (!res.ok) allOk = false;
+    }
+    return allOk;
+  } catch {
+    return false;
+  }
+}
+
+async function migrateCloudDeleteProgress(
+  sourceSlot: number,
+  items: NuvioWatchProgress[],
+): Promise<boolean> {
+  if (!items.length) return true;
+  const clientId = getOrCreateSyncClientId();
+  const keys = new Set<string>();
+  for (const item of items) {
+    const normId = normalizeNuvioContentId(item.content_id);
+    const variants = getNuvioContentIdVariants(item.content_id);
+    if (item.progress_key) keys.add(item.progress_key);
+    for (const v of [normId, ...variants]) {
+      if (item.season != null && item.episode != null) {
+        keys.add(`${v}_s${item.season}e${item.episode}`);
+        keys.add(`${v}:${item.season}:${item.episode}`);
+      } else {
+        keys.add(v);
+      }
+    }
+  }
+  try {
+    const rpcRes = await nuvioFetch("/rest/v1/rpc/sync_delete_watch_progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p_profile_id: sourceSlot,
+        p_keys: Array.from(keys),
+        p_origin_client_id: clientId,
+      }),
+    });
+    if (rpcRes.ok) return true;
+  } catch {}
+
+  try {
+    let allOk = true;
+    for (const item of items) {
+      let url = `/rest/v1/watch_progress?profile_id=eq.${sourceSlot}&content_id=eq.${encodeURIComponent(item.content_id)}`;
+      if (item.season != null && item.episode != null) {
+        url += `&season=eq.${item.season}&episode=eq.${item.episode}`;
+      } else {
+        url += `&season=is.null&episode=is.null`;
+      }
+      const res = await nuvioFetch(url, { method: "DELETE" });
+      if (!res.ok) allOk = false;
+    }
+    return allOk;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Migrates and swaps cloud watch progress, watched items, and cached data between two profile slots.
  * Ensures consistent history on the backend during primary profile transfers.
  */
@@ -2894,69 +3112,25 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
     // Track writes to destinations so we can recover / rollback if any write fails
     let pushedWatchedAtoB = false;
     let pushedWatchedBtoA = false;
-    const pushedProgAtoB: NuvioWatchProgress[] = [];
-    const pushedProgBtoA: NuvioWatchProgress[] = [];
+    let pushedProgAtoB = false;
+    let pushedProgBtoA = false;
 
     // Helper for cleaning up destination writes if an error occurs before confirmation
     const rollbackDestinationWrites = async () => {
       try {
-        if (pushedWatchedAtoB && watchedA.length > 0) {
-          await deleteWatchedItemFromNuvio(
-            slotB,
-            watchedA.map((w) => ({
-              contentId: w.content_id,
-              season: w.season,
-              episode: w.episode,
-            })),
-          ).catch(() => {});
-        }
-        if (pushedWatchedBtoA && watchedB.length > 0) {
-          await deleteWatchedItemFromNuvio(
-            slotA,
-            watchedB.map((w) => ({
-              contentId: w.content_id,
-              season: w.season,
-              episode: w.episode,
-            })),
-          ).catch(() => {});
-        }
-        for (const p of pushedProgAtoB) {
-          await deleteWatchProgressFromNuvio(
-            slotB,
-            p.content_id,
-            p.progress_key,
-            p.season,
-            p.episode,
-          ).catch(() => {});
-        }
-        for (const p of pushedProgBtoA) {
-          await deleteWatchProgressFromNuvio(
-            slotA,
-            p.content_id,
-            p.progress_key,
-            p.season,
-            p.episode,
-          ).catch(() => {});
-        }
+        if (pushedWatchedAtoB) await migrateCloudDeleteWatched(slotB, watchedA).catch(() => {});
+        if (pushedWatchedBtoA) await migrateCloudDeleteWatched(slotA, watchedB).catch(() => {});
+        if (pushedProgAtoB) await migrateCloudDeleteProgress(slotB, progressA).catch(() => {});
+        if (pushedProgBtoA) await migrateCloudDeleteProgress(slotA, progressB).catch(() => {});
       } catch (rbErr) {
         console.error("[nuvio-sync] rollbackDestinationWrites error:", rbErr);
       }
     };
 
-    // Phase 1: Write all items to the destination profiles first.
-    // Verify each operation succeeded. Do NOT delete anything from the source profiles yet!
+    // Phase 1: Write all items to destination profiles first via explicit profile migration.
+    // Verify each operation succeeded before deleting anything from source profiles.
     if (watchedA.length > 0) {
-      const ok = await pushWatchedItemToNuvio(
-        slotB,
-        watchedA.map((w) => ({
-          contentId: w.content_id,
-          contentType: w.content_type || "series",
-          title: w.title,
-          season: w.season,
-          episode: w.episode,
-          watchedAt: typeof w.watched_at === "number" ? w.watched_at : Date.now(),
-        })),
-      );
+      const ok = await migrateCloudPushWatched(slotB, watchedA);
       if (!ok) {
         console.error(
           `[nuvio-sync] Failed to push watched items from slot ${slotA} to slot ${slotB}`,
@@ -2968,17 +3142,7 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
     }
 
     if (watchedB.length > 0) {
-      const ok = await pushWatchedItemToNuvio(
-        slotA,
-        watchedB.map((w) => ({
-          contentId: w.content_id,
-          contentType: w.content_type || "series",
-          title: w.title,
-          season: w.season,
-          episode: w.episode,
-          watchedAt: typeof w.watched_at === "number" ? w.watched_at : Date.now(),
-        })),
-      );
+      const ok = await migrateCloudPushWatched(slotA, watchedB);
       if (!ok) {
         console.error(
           `[nuvio-sync] Failed to push watched items from slot ${slotB} to slot ${slotA}`,
@@ -2989,71 +3153,59 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
       pushedWatchedBtoA = true;
     }
 
-    for (const p of progressA) {
-      const ok = await pushWatchProgressToNuvio(
-        slotB,
-        p.content_id,
-        p.progress_seconds,
-        p.duration_seconds,
-        p.season,
-        p.episode,
-      );
+    if (progressA.length > 0) {
+      const ok = await migrateCloudPushProgress(slotB, progressA);
       if (!ok) {
         console.error(
-          `[nuvio-sync] Failed to push watch progress for ${p.content_id} to slot ${slotB}`,
+          `[nuvio-sync] Failed to push watch progress from slot ${slotA} to slot ${slotB}`,
         );
         await rollbackDestinationWrites();
         return false;
       }
-      pushedProgAtoB.push(p);
+      pushedProgAtoB = true;
     }
 
-    for (const p of progressB) {
-      const ok = await pushWatchProgressToNuvio(
-        slotA,
-        p.content_id,
-        p.progress_seconds,
-        p.duration_seconds,
-        p.season,
-        p.episode,
-      );
+    if (progressB.length > 0) {
+      const ok = await migrateCloudPushProgress(slotA, progressB);
       if (!ok) {
         console.error(
-          `[nuvio-sync] Failed to push watch progress for ${p.content_id} to slot ${slotA}`,
+          `[nuvio-sync] Failed to push watch progress from slot ${slotB} to slot ${slotA}`,
         );
         await rollbackDestinationWrites();
         return false;
       }
-      pushedProgBtoA.push(p);
+      pushedProgBtoA = true;
     }
 
-    // Phase 2: All destination writes have been confirmed successful!
-    // Now safely delete the original items from source profiles.
+    // Phase 2: All destination writes confirmed! Now delete exact records from source profiles.
+    // Verify every single deletion result.
     if (watchedA.length > 0) {
-      await deleteWatchedItemFromNuvio(
-        slotA,
-        watchedA.map((w) => ({
-          contentId: w.content_id,
-          season: w.season,
-          episode: w.episode,
-        })),
-      );
+      const delOk = await migrateCloudDeleteWatched(slotA, watchedA);
+      if (!delOk) {
+        console.error(`[nuvio-sync] Failed to delete source watched items from slot ${slotA}`);
+        return false;
+      }
     }
     if (watchedB.length > 0) {
-      await deleteWatchedItemFromNuvio(
-        slotB,
-        watchedB.map((w) => ({
-          contentId: w.content_id,
-          season: w.season,
-          episode: w.episode,
-        })),
-      );
+      const delOk = await migrateCloudDeleteWatched(slotB, watchedB);
+      if (!delOk) {
+        console.error(`[nuvio-sync] Failed to delete source watched items from slot ${slotB}`);
+        return false;
+      }
     }
-    for (const p of progressA) {
-      await deleteWatchProgressFromNuvio(slotA, p.content_id, p.progress_key, p.season, p.episode);
+    if (progressA.length > 0) {
+      const delOk = await migrateCloudDeleteProgress(slotA, progressA);
+      if (!delOk) {
+        console.error(`[nuvio-sync] Failed to delete source watch progress from slot ${slotA}`);
+        return false;
+      }
     }
-    for (const p of progressB) {
-      await deleteWatchProgressFromNuvio(slotB, p.content_id, p.progress_key, p.season, p.episode);
+    if (progressB.length > 0) {
+      const delOk = await migrateCloudDeleteProgress(slotB, progressB);
+      if (!delOk) {
+        console.error(`[nuvio-sync] Failed to delete source watch progress from slot ${slotB}`);
+        return false;
+      }
     }
 
     // Phase 3: Update local caches in nuvio-sync

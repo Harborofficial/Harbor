@@ -193,6 +193,8 @@ export function EditorView({
   const [confirmingPrimary, setConfirmingPrimary] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferTarget, setTransferTarget] = useState<string | null>(null);
+  const [transferBusy, setTransferBusy] = useState(false);
+  const [transferError, setTransferError] = useState<string | null>(null);
   const [draftPin, setDraftPin] = useState<string | null>(null);
   const [draftLockedTabs, setDraftLockedTabs] = useState<HiddenTabs | null>(
     editing?.lockedTabs ?? null,
@@ -1249,33 +1251,54 @@ export function EditorView({
                     </button>
                   );
                 })}
+                {transferError && (
+                  <p className="text-xs font-medium text-red-400">{transferError}</p>
+                )}
                 <div className="flex items-center justify-end gap-2 pt-1 text-[14px]">
                   <button
                     type="button"
+                    disabled={transferBusy}
                     onClick={() => {
                       setTransferOpen(false);
                       setTransferTarget(null);
+                      setTransferError(null);
                     }}
-                    className="text-ink-muted transition-colors hover:text-ink"
+                    className="text-ink-muted transition-colors hover:text-ink disabled:opacity-40"
                   >
                     {t("common.cancel")}
                   </button>
                   <button
                     type="button"
-                    disabled={!transferTarget}
+                    disabled={!transferTarget || transferBusy}
                     onClick={async () => {
-                      if (!transferTarget) return;
-                      if (isNuvio) {
-                        const targetSlot = parseInt(transferTarget.replace(/\D/g, ""), 10);
-                        await transferPrimaryNuvioProfile(targetSlot);
-                      } else {
-                        setPrimary(transferTarget);
+                      if (!transferTarget || transferBusy) return;
+                      setTransferBusy(true);
+                      setTransferError(null);
+                      try {
+                        if (isNuvio) {
+                          const targetSlot = parseInt(transferTarget.replace(/\D/g, ""), 10);
+                          const ok = await transferPrimaryNuvioProfile(targetSlot);
+                          if (!ok) {
+                            setTransferError(
+                              t(
+                                "Failed to transfer primary profile. Please check credentials and try again.",
+                              ),
+                            );
+                            setTransferBusy(false);
+                            return;
+                          }
+                        } else {
+                          setPrimary(transferTarget);
+                        }
+                        onDone();
+                      } catch (err: any) {
+                        setTransferError(err?.message || t("Failed to transfer primary profile."));
+                        setTransferBusy(false);
                       }
-                      onDone();
                     }}
                     className="rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
                   >
-                    {t("Transfer primary")}
+                    {transferBusy ? t("Transferring...") : t("Transfer primary")}
                   </button>
                 </div>
               </div>

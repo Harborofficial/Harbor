@@ -20,6 +20,7 @@ import {
   getDismissedNextUpStorageKey,
   getNuvioAddonsCacheKey,
   getPendingSyncKey,
+  remapPendingChangesProfileId,
 } from "./nuvio-sync";
 import { getPlaybackItemsKey } from "./nuvio-playback";
 import { hashProfilePassword } from "@/lib/profile-password";
@@ -883,6 +884,11 @@ export async function transferPrimaryNuvioProfile(
     "harbor.watchlist.v1.nuvio.",
     "harbor.cw.dismissed.private.v1.nuvio-",
     "harbor.installed-addons.nuvio-",
+    "harbor.nuvio.playback_items.slot.",
+    "harbor.nuvio.watch_progress.slot.",
+    "harbor.nuvio.watched_items.slot.",
+    "harbor.nuvio.addons.v1.slot.",
+    "harbor.nuvio.dismissedNextUp.v1.",
     "harbor.nuvio.local_progress.",
     "harbor.moviewatched.nuvio.",
     "harbor.watchedFlag.nuvio.",
@@ -895,67 +901,37 @@ export async function transferPrimaryNuvioProfile(
     keyPairs.push([`${prefix}1`, `${prefix}${targetSlotIndex}`]);
   }
 
-  // Account-scoped keys via shared helpers
+  // Account-scoped keys strictly for the authenticated account
   keyPairs.push([
     getPlaybackItemsKey(1, accountId),
     getPlaybackItemsKey(targetSlotIndex, accountId),
   ]);
   keyPairs.push([
-    `harbor.nuvio.playback_items.slot.1`,
-    `harbor.nuvio.playback_items.slot.${targetSlotIndex}`,
-  ]);
-  keyPairs.push([
     getWatchProgressKey(1, accountId),
     getWatchProgressKey(targetSlotIndex, accountId),
   ]);
-  keyPairs.push([
-    `harbor.nuvio.watch_progress.slot.1`,
-    `harbor.nuvio.watch_progress.slot.${targetSlotIndex}`,
-  ]);
   keyPairs.push([getWatchedItemsKey(1, accountId), getWatchedItemsKey(targetSlotIndex, accountId)]);
-  keyPairs.push([
-    `harbor.nuvio.watched_items.slot.1`,
-    `harbor.nuvio.watched_items.slot.${targetSlotIndex}`,
-  ]);
   keyPairs.push([
     getDismissedNextUpStorageKey(1, accountId),
     getDismissedNextUpStorageKey(targetSlotIndex, accountId),
   ]);
   keyPairs.push([
-    `harbor.nuvio.dismissedNextUp.v1.1`,
-    `harbor.nuvio.dismissedNextUp.v1.${targetSlotIndex}`,
-  ]);
-  keyPairs.push([
     getNuvioAddonsCacheKey(1, accountId),
     getNuvioAddonsCacheKey(targetSlotIndex, accountId),
   ]);
-  keyPairs.push([
-    `harbor.nuvio.addons.v1.slot.1`,
-    `harbor.nuvio.addons.v1.slot.${targetSlotIndex}`,
-  ]);
-  keyPairs.push([getPendingSyncKey(1, accountId), getPendingSyncKey(targetSlotIndex, accountId)]);
   keyPairs.push([getPinCacheKey(1, accountId), getPinCacheKey(targetSlotIndex, accountId)]);
-
-  // Scan localStorage for any other account-scoped or legacy keys for slot 1 or targetSlotIndex
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k) continue;
-      if (k.endsWith(`.slot.1`)) {
-        const targetK = k.slice(0, -1) + targetSlotIndex;
-        if (!keyPairs.some(([a]) => a === k)) keyPairs.push([k, targetK]);
-      } else if (k.endsWith(`.slot.${targetSlotIndex}`)) {
-        const slot1K = k.slice(0, -String(targetSlotIndex).length) + "1";
-        if (!keyPairs.some(([, b]) => b === k)) keyPairs.push([slot1K, k]);
-      }
-    }
-  } catch {}
 
   const storageBackup = new Map<string, string | null>();
   for (const [k1, kTarget] of keyPairs) {
     storageBackup.set(k1, localStorage.getItem(k1));
     storageBackup.set(kTarget, localStorage.getItem(kTarget));
   }
+
+  // Pending sync mutations for authenticated account
+  const pendingKey1 = getPendingSyncKey(1, accountId);
+  const pendingKeyTarget = getPendingSyncKey(targetSlotIndex, accountId);
+  storageBackup.set(pendingKey1, localStorage.getItem(pendingKey1));
+  storageBackup.set(pendingKeyTarget, localStorage.getItem(pendingKeyTarget));
 
   const key1 = getPinCacheKey(1, accountId);
   const keyTarget = getPinCacheKey(targetSlotIndex, accountId);
@@ -1049,6 +1025,24 @@ export async function transferPrimaryNuvioProfile(
       else localStorage.removeItem(k1);
       if (v1 !== null && v1 !== undefined) localStorage.setItem(kTarget, v1);
       else localStorage.removeItem(kTarget);
+    }
+
+    // Swap and remap pending sync mutations so embedded profile_id matches destination slot
+    const rawPending1 = storageBackup.get(pendingKey1);
+    const rawPendingTarget = storageBackup.get(pendingKeyTarget);
+
+    if (rawPendingTarget !== null && rawPendingTarget !== undefined) {
+      const remapped = remapPendingChangesProfileId(rawPendingTarget, 1);
+      localStorage.setItem(pendingKey1, remapped ?? rawPendingTarget);
+    } else {
+      localStorage.removeItem(pendingKey1);
+    }
+
+    if (rawPending1 !== null && rawPending1 !== undefined) {
+      const remapped = remapPendingChangesProfileId(rawPending1, targetSlotIndex);
+      localStorage.setItem(pendingKeyTarget, remapped ?? rawPending1);
+    } else {
+      localStorage.removeItem(pendingKeyTarget);
     }
 
     // 6. UPDATE LOCAL PROFILE STATE

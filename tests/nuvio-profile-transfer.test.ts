@@ -7,11 +7,18 @@ import {
   markNuvioProfileUnlocked,
   clearNuvioSessionUnlocks,
 } from "../src/lib/nuvio/nuvio-profiles";
+import {
+  swapNuvioProfileCloudData,
+  remapPendingChangesProfileId,
+  writeCachedWatchProgress,
+  writeCachedWatchedItems,
+} from "../src/lib/nuvio/nuvio-sync";
 
 const read = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
 const nuvioProfiles = read("../src/lib/nuvio/nuvio-profiles.ts");
 const nuvioSync = read("../src/lib/nuvio/nuvio-sync.ts");
 const nuvioPlayback = read("../src/lib/nuvio/nuvio-playback.ts");
+const editorView = read("../src/components/profile-picker/editor-view.tsx");
 
 test("nuvio-sync exports shared account-scoped cache key helpers", () => {
   assert.match(
@@ -58,25 +65,25 @@ test("nuvio-profiles exports getPinCacheKey supporting account-scoping", () => {
 });
 
 test("swapNuvioProfileCloudData verifies all destination writes before deleting source data and rolls back on failure", () => {
-  // Phase 1 verification
+  // Phase 1 verification with explicit cloud migration
   assert.match(
     nuvioSync,
-    /const ok =\s*await pushWatchedItemToNuvio\(\s*slotB/,
+    /const ok =\s*await migrateCloudPushWatched\(\s*slotB/,
     "must push watched items to slotB and verify result",
   );
   assert.match(
     nuvioSync,
-    /const ok =\s*await pushWatchedItemToNuvio\(\s*slotA/,
+    /const ok =\s*await migrateCloudPushWatched\(\s*slotA/,
     "must push watched items to slotA and verify result",
   );
   assert.match(
     nuvioSync,
-    /const ok =\s*await pushWatchProgressToNuvio\(\s*slotB/,
+    /const ok =\s*await migrateCloudPushProgress\(\s*slotB/,
     "must push watch progress to slotB and verify result",
   );
   assert.match(
     nuvioSync,
-    /const ok =\s*await pushWatchProgressToNuvio\(\s*slotA/,
+    /const ok =\s*await migrateCloudPushProgress\(\s*slotA/,
     "must push watch progress to slotA and verify result",
   );
 
@@ -87,15 +94,15 @@ test("swapNuvioProfileCloudData verifies all destination writes before deleting 
     "must implement rollback for destination writes on partial failure",
   );
 
-  // Phase 2: deletes source data ONLY after writes succeed
+  // Phase 2: deletes exact source data ONLY after writes succeed
   assert.match(
     nuvioSync,
-    /deleteWatchedItemFromNuvio\(\s*slotA/,
+    /migrateCloudDeleteWatched\(\s*slotA/,
     "must delete source watched items from slotA after confirmation",
   );
   assert.match(
     nuvioSync,
-    /deleteWatchProgressFromNuvio\(slotA/,
+    /migrateCloudDeleteProgress\(\s*slotA/,
     "must delete source watch progress from slotA after confirmation",
   );
 });
@@ -308,4 +315,266 @@ test("transferPrimaryNuvioProfile execution swaps account-scoped and legacy cach
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test("swapNuvioProfileCloudData transfers watch history to inactive profile slot without active profile restrictions", async () => {
+  clearNuvioSessionUnlocks();
+  localStorage.clear();
+
+  const mockState = {
+    session: { access_token: "token-123", user: { id: "acc-active-check" } },
+    profiles: [
+      { profile_index: 1, name: "Profile 1", pin_enabled: false },
+      { profile_index: 2, name: "Profile 2", pin_enabled: false },
+    ],
+    activeProfileIndex: 1, // Slot 1 is active, slot 2 is inactive
+  };
+  localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
+
+  // Seed cached watched items for slot 1
+  writeCachedWatchedItems(
+    1,
+    [
+      {
+        content_id: "tt99999",
+        season: 1,
+        episode: 1,
+        watched_at: "2026-01-01T00:00:00Z",
+      },
+    ],
+    "acc-active-check",
+  );
+
+  const fetchCalls: { url: string; body?: any }[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url: any, opts?: any) => {
+    let body = null;
+    try {
+      if (opts?.body) body = JSON.parse(opts.body);
+    } catch {}
+    fetchCalls.push({ url: String(url), body });
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  };
+
+  try {
+    const ok = await swapNuvioProfileCloudData(1, 2);
+    assert.equal(ok, true, "swapNuvioProfileCloudData must succeed even though slot 2 is inactive");
+
+    // Verify destination push wrote directly to slot 2 without active profile check
+    const pushToSlot2 = fetchCalls.find(
+      (c) =>
+        (c.url.includes("sync_push_watched") && c.body?.p_profile_id === 2) ||
+        (c.url.includes("watched_items") && c.body?.profile_id === 2),
+    );
+    assert.ok(pushToSlot2, "must push watched items directly to target slot 2 in cloud");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("swapNuvioProfileCloudData exact record deletion preserves overlapping series progress", async () => {
+  clearNuvioSessionUnlocks();
+  localStorage.clear();
+
+  const mockState = {
+    session: { access_token: "token-123", user: { id: "acc-overlap" } },
+    profiles: [
+      { profile_index: 1, name: "Profile 1", pin_enabled: false },
+      { profile_index: 2, name: "Profile 2", pin_enabled: false },
+    ],
+    activeProfileIndex: 1,
+  };
+  localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
+
+  // Profile 1 is on S1E1, Profile 2 is on S1E2 of the exact same show "tt-overlap-series"
+  writeCachedWatchProgress(
+    1,
+    [
+      {
+        content_id: "tt-overlap-series",
+        season: 1,
+        episode: 1,
+        progress: 120,
+        duration: 2400,
+        progress_key: "tt-overlap-series:1:1",
+      },
+    ],
+    "acc-overlap",
+  );
+  writeCachedWatchProgress(
+    2,
+    [
+      {
+        content_id: "tt-overlap-series",
+        season: 1,
+        episode: 2,
+        progress: 300,
+        duration: 2400,
+        progress_key: "tt-overlap-series:1:2",
+      },
+    ],
+    "acc-overlap",
+  );
+
+  const deleteCalls: { url: string; body?: any }[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url: any, opts?: any) => {
+    const u = String(url);
+    if (opts?.method === "DELETE" || u.includes("delete")) {
+      let body = null;
+      try {
+        if (opts?.body) body = JSON.parse(opts.body);
+      } catch {}
+      deleteCalls.push({ url: u, body });
+    }
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  };
+
+  try {
+    const ok = await swapNuvioProfileCloudData(1, 2);
+    assert.equal(ok, true, "swap must succeed");
+
+    // Deletion for slot 1 must target exact key or episode=1, NOT wipe all tt-overlap-series episodes
+    const slot1Deletions = deleteCalls.filter(
+      (c) =>
+        (c.body && c.body.p_profile_id === 1) ||
+        (c.url.includes("profile_id=eq.1") && c.url.includes("content_id=eq.tt-overlap-series")),
+    );
+    for (const call of slot1Deletions) {
+      if (call.body?.p_keys) {
+        assert.ok(
+          call.body.p_keys.includes("tt-overlap-series:1:1"),
+          "slot 1 deletion must specify exact key for S1E1",
+        );
+        assert.ok(
+          !call.body.p_keys.includes("tt-overlap-series:1:2"),
+          "slot 1 deletion must NOT delete S1E2",
+        );
+      } else if (call.url.includes("episode=eq.")) {
+        assert.ok(
+          call.url.includes("episode=eq.1"),
+          "slot 1 deletion must target exact episode=eq.1",
+        );
+        assert.ok(!call.url.includes("episode=eq.2"), "slot 1 deletion must NOT target episode 2");
+      }
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("multi-account isolation: transferring Account A leaves Account B caches completely untouched", async () => {
+  clearNuvioSessionUnlocks();
+  localStorage.clear();
+
+  // Active session is Account A
+  const mockState = {
+    session: { access_token: "token-123", user: { id: "account-A" } },
+    profiles: [
+      { profile_index: 1, name: "Profile 1", pin_enabled: false },
+      { profile_index: 2, name: "Profile 2", pin_enabled: false },
+    ],
+    activeProfileIndex: 1,
+  };
+  localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
+
+  // Account A data
+  localStorage.setItem(
+    "harbor.nuvio.playback_items.account-A.slot.1",
+    JSON.stringify([{ _id: "item-A1" }]),
+  );
+  localStorage.setItem(
+    "harbor.nuvio.playback_items.account-A.slot.2",
+    JSON.stringify([{ _id: "item-A2" }]),
+  );
+
+  // Account B data (must never be touched or swapped!)
+  const accountB1 = JSON.stringify([{ _id: "item-B1-untouched" }]);
+  const accountB2 = JSON.stringify([{ _id: "item-B2-untouched" }]);
+  localStorage.setItem("harbor.nuvio.playback_items.account-B.slot.1", accountB1);
+  localStorage.setItem("harbor.nuvio.playback_items.account-B.slot.2", accountB2);
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({ ok: true }), { status: 200 });
+
+  try {
+    const ok = await transferPrimaryNuvioProfile(2);
+    assert.equal(ok, true, "transfer for Account A must succeed");
+
+    // Account A was swapped
+    assert.equal(
+      localStorage.getItem("harbor.nuvio.playback_items.account-A.slot.1"),
+      JSON.stringify([{ _id: "item-A2" }]),
+    );
+
+    // Account B remains strictly UNCHANGED
+    assert.equal(
+      localStorage.getItem("harbor.nuvio.playback_items.account-B.slot.1"),
+      accountB1,
+      "Account B slot 1 data must not be touched by Account A transfer",
+    );
+    assert.equal(
+      localStorage.getItem("harbor.nuvio.playback_items.account-B.slot.2"),
+      accountB2,
+      "Account B slot 2 data must not be touched by Account A transfer",
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("remapPendingChangesProfileId remaps embedded row.profile_id for pending synchronization mutations", () => {
+  const pending = {
+    mutations: [
+      {
+        id: "m-1",
+        table: "watch_progress",
+        op: "upsert",
+        row: {
+          content_id: "tt123",
+          profile_id: 1,
+          season: 1,
+          episode: 1,
+        },
+      },
+      {
+        id: "m-2",
+        table: "watched_items",
+        op: "insert",
+        row: {
+          content_id: "tt456",
+          profile_id: 1,
+        },
+      },
+    ],
+  };
+
+  const remappedJson = remapPendingChangesProfileId(JSON.stringify(pending), 2);
+  const remapped = JSON.parse(remappedJson);
+
+  assert.equal(remapped.mutations[0].row.profile_id, 2, "mutation 1 profile_id must be 2");
+  assert.equal(remapped.mutations[1].row.profile_id, 2, "mutation 2 profile_id must be 2");
+});
+
+test("editor-view surfaces transfer failures without closing editor dialog", () => {
+  assert.match(
+    editorView,
+    /const \[transferError,\s*setTransferError\] = useState<string \| null>\(null\);/,
+    "editor-view must manage transferError state",
+  );
+  assert.match(
+    editorView,
+    /const ok = await transferPrimaryNuvioProfile\(targetSlot\);/,
+    "editor-view must capture boolean return from transferPrimaryNuvioProfile",
+  );
+  assert.match(
+    editorView,
+    /if \(!ok\) \{\s*setTransferError\([\s\S]*?\);\s*setTransferBusy\(false\);\s*return;\s*\}/,
+    "editor-view must set transferError and return early without closing dialog on failure",
+  );
+  assert.match(
+    editorView,
+    /\{transferError && \(\s*<p className="[^"]*text-red-400"[^>]*>\{transferError\}<\/p>\s*\)\}/,
+    "editor-view must render transferError in red",
+  );
 });
