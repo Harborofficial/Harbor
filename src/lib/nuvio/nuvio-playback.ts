@@ -17,7 +17,7 @@ import { isCwDismissed } from "@/lib/cw-dismiss";
 import type { NuvioWatchProgress, NuvioWatchedItem } from "./nuvio-types";
 import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { readCachedNuvioLibrary } from "./nuvio-library";
-import { localCwEntry, listLocalCw, saveLocalCw } from "@/lib/local-cw";
+import { localCwEntry, listLocalCw, saveLocalCw, clearLocalCw } from "@/lib/local-cw";
 import { manualWatchedState } from "@/lib/manual-watched";
 import { tmdbImdbCached, tmdbFromImdbCached } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 
@@ -304,6 +304,20 @@ export function buildNuvioPlaybackItems(
   const watched = watchedItems ?? readCachedWatchedItems(profileIndex);
   const aliasResolver = buildSeriesAliasResolver(safeRecords, watched, libMap, customAliasMap);
 
+  const isCandidateDismissed = (
+    contentId: string,
+    season?: number | null,
+    episode?: number | null,
+  ): boolean => {
+    if (!contentId || dismissed.size === 0) return false;
+    const aliases = aliasResolver.getAliases(contentId);
+    return (
+      Array.from(aliases).some((a) => isDismissedNextUp(a, season, episode, dismissed)) ||
+      Array.from(aliases).some((a) => isDismissedNextUp(a, -1, -1, dismissed)) ||
+      Array.from(aliases).some((a) => dismissed.has(a))
+    );
+  };
+
   // Group records by content_id so each series/movie has a single consolidated Continue Watching card
   const byContent = new Map<string, NuvioWatchProgress[]>();
   for (const r of safeRecords) {
@@ -418,8 +432,7 @@ export function buildNuvioPlaybackItems(
         external: "nuvio",
       };
 
-      if (isCwDismissed(item) || isDismissedNextUp(contentId, undefined, undefined, dismissed))
-        continue;
+      if (isCwDismissed(item) || isCandidateDismissed(contentId, undefined, undefined)) continue;
 
       const shouldWrite =
         !existing || remoteT >= existing.t || (!existing.t && offsetMs > existing.ms);
@@ -500,10 +513,7 @@ export function buildNuvioPlaybackItems(
         external: "nuvio",
       };
 
-      if (
-        !isCwDismissed(item) &&
-        !isDismissedNextUp(contentId, targetSeason, targetEpisode, dismissed)
-      ) {
+      if (!isCwDismissed(item) && !isCandidateDismissed(contentId, targetSeason, targetEpisode)) {
         const pct01 = latestDurMs > 0 ? Math.min(1, targetOffsetMs / latestDurMs) : undefined;
         saveResumeMs(
           item._id,
@@ -572,10 +582,7 @@ export function buildNuvioPlaybackItems(
           external: "nuvio",
         };
 
-        if (
-          !isCwDismissed(item) &&
-          !isDismissedNextUp(contentId, subSeason, subEpisode, dismissed)
-        ) {
+        if (!isCwDismissed(item) && !isCandidateDismissed(contentId, subSeason, subEpisode)) {
           items.push(item);
           for (const alias of aliasResolver.getAliases(contentId)) {
             activeSeriesIds.add(alias);
@@ -650,9 +657,7 @@ export function buildNuvioPlaybackItems(
     for (const a of aliases) processedNextUpSeries.add(a);
 
     // Skip if seed is dismissed on any alias
-    if (
-      Array.from(aliases).some((a) => isDismissedNextUp(a, seed.season, seed.episode, dismissed))
-    ) {
+    if (isCandidateDismissed(canonical, seed.season, seed.episode)) {
       continue;
     }
 
@@ -707,11 +712,8 @@ export function buildNuvioPlaybackItems(
 
     // Skip if target episode or seed episode is dismissed on any alias
     if (
-      Array.from(aliases).some(
-        (a) =>
-          isDismissedNextUp(a, nextSeason, nextEpisode, dismissed) ||
-          isDismissedNextUp(a, seed.season, seed.episode, dismissed),
-      )
+      isCandidateDismissed(canonical, nextSeason, nextEpisode) ||
+      isCandidateDismissed(canonical, seed.season, seed.episode)
     ) {
       continue;
     }
@@ -811,7 +813,34 @@ export function buildNuvioPlaybackItems(
         continue;
       }
 
-      if (isDismissedNextUp(loc.id, loc.season, loc.episode, dismissed)) continue;
+      if (isCandidateDismissed(loc.id, loc.season, loc.episode)) {
+        clearLocalCw(loc.id, ownerId);
+        continue;
+      }
+
+      // If cloud progress has been retrieved and does not contain this content,
+      // and this item has no active presence in watched history, it was removed remotely on mobile.
+      const hasCloudProgress = safeRecords.some((r) => {
+        if (!r.content_id) return false;
+        return (
+          r.content_id === loc.id ||
+          aliasResolver.getCanonicalId(r.content_id) === aliasResolver.getCanonicalId(loc.id) ||
+          aliasResolver.getAliases(loc.id).has(r.content_id)
+        );
+      });
+      const hasWatchedHistory = (watched ?? []).some((w) => {
+        if (!w.content_id) return false;
+        return (
+          w.content_id === loc.id ||
+          aliasResolver.getCanonicalId(w.content_id) === aliasResolver.getCanonicalId(loc.id) ||
+          aliasResolver.getAliases(loc.id).has(w.content_id)
+        );
+      });
+
+      if (!hasCloudProgress && !hasWatchedHistory && safeRecords.length > 0) {
+        clearLocalCw(loc.id, ownerId);
+        continue;
+      }
 
       const dur =
         loc.durationMs > 0
@@ -900,7 +929,7 @@ export async function fetchNuvioPlaybackItems(
   let dismissedKeys: Set<string> | null = null;
   try {
     const [progRes, watchedRes, dismissedRes] = await Promise.all([
-      pullWatchProgressFromNuvio(profileIndex),
+      pullWatchProgressFromNuvio(profileIndex, { force }),
       pullWatchedItemsFromNuvio(profileIndex, { force }),
       pullDismissedNextUpKeysFromNuvio(profileIndex),
     ]);

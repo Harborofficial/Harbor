@@ -9,7 +9,11 @@ import {
   writeCachedNuvioPlaybackItems,
 } from "@/lib/nuvio/nuvio-playback";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
-import { isNuvioProviderActive, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
+import {
+  isNuvioProviderActive,
+  resolveNuvioProfileIndex,
+  getNuvioContentIdVariants,
+} from "@/lib/nuvio/nuvio-sync";
 import {
   getSession as getSimklSession,
   subscribeSession as subscribeSimklSession,
@@ -283,7 +287,9 @@ async function runRefresh(gen: number, force = false): Promise<boolean> {
       source: "nuvio",
       fetch: async () => {
         const slot = resolveNuvioProfileIndex();
-        return await fetchNuvioPlaybackItems(slot, force);
+        const fresh = await fetchNuvioPlaybackItems(slot, force);
+        slotCwMemoryCache.set(slot, fresh);
+        return fresh;
       },
     });
   }
@@ -374,9 +380,11 @@ export function refreshExternalCw(force = false): Promise<void> {
 
 function matchesContentId(a: string, b: string): boolean {
   if (a === b) return true;
-  const ca = a.replace(/^(series|movie|tmdb):/, "").trim();
-  const cb = b.replace(/^(series|movie|tmdb):/, "").trim();
-  return !!ca && ca === cb;
+  const ca = a.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
+  const cb = b.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
+  if (ca && ca === cb) return true;
+  const va = getNuvioContentIdVariants(a);
+  return va.includes(b) || (!!cb && va.includes(cb));
 }
 
 export function removeExternalCwItem(item: LibraryItem): void {

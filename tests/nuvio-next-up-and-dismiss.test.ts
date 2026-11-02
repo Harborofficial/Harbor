@@ -387,3 +387,91 @@ test("Nuvio ID normalization: getNuvioContentIdVariants includes all alias varia
   assert.equal(isDismissedNextUp("tmdb:tv:96677", 1, 1, dismissedKeys), true);
   assert.equal(isDismissedNextUp("96677", 1, 1, dismissedKeys), true);
 });
+
+test("Nuvio Mobile CW removal: removed movie on mobile is not resurrected by localCw in buildNuvioPlaybackItems", async () => {
+  const { saveLocalCw, clearLocalCw } = await import("../src/lib/local-cw");
+  clearLocalCw("tmdb:movie:55555", "nuvio-0");
+  clearLocalCw("55555", "nuvio-0");
+
+  // Suppose localCw had previously stored a movie checkpoint from earlier playback
+  saveLocalCw(
+    {
+      id: "tmdb:movie:55555",
+      type: "movie",
+      name: "Deleted Movie",
+      positionMs: 60000,
+      durationMs: 1200000,
+      t: Date.now() - 50000,
+    },
+    "nuvio-0",
+  );
+
+  // Cloud records contain surviving items, but NOT the deleted movie
+  const survivingCloudRecords: NuvioWatchProgress[] = [
+    {
+      profile_id: 0,
+      content_id: "tt9999999",
+      season: 1,
+      episode: 1,
+      progress_seconds: 50,
+      duration_seconds: 1200,
+      last_watched: Date.now(),
+      name: "Surviving Show",
+    },
+  ];
+
+  const items = buildNuvioPlaybackItems(survivingCloudRecords, 0, []);
+  // The deleted movie must NOT be resurrected into Continue Watching items!
+  assert.equal(
+    items.some((i) => i._id === "tmdb:movie:55555" || i._id === "55555"),
+    false,
+    "Remotely deleted movie must not be resurrected by localCw in Continue Watching",
+  );
+  assert.equal(items.length, 1);
+  assert.equal(items[0]._id, "tt9999999");
+});
+
+test("Nuvio Mobile CW removal: mobile dismissal via bare ID or wildcard suppresses in-progress and next-up cards across aliases", () => {
+  // Mobile app dismisses show via bare numeric ID "1399" (Game of Thrones)
+  const dismissedKeys = new Set<string>(["1399"]);
+
+  const inProgressRecords: NuvioWatchProgress[] = [
+    {
+      profile_id: 0,
+      content_id: "tt0944947",
+      season: 1,
+      episode: 2,
+      progress_seconds: 500,
+      duration_seconds: 3000,
+      last_watched: Date.now(),
+      name: "Game of Thrones",
+    },
+  ];
+
+  const watchedItems: NuvioWatchedItem[] = [
+    {
+      profile_id: 0,
+      content_id: "tt0944947",
+      content_type: "series",
+      title: "Game of Thrones",
+      season: 1,
+      episode: 1,
+      watched_at: Date.now() - 10000,
+    },
+  ];
+
+  const customAliasMap = { tt0944947: "tmdb:1399" };
+  const items = buildNuvioPlaybackItems(
+    inProgressRecords,
+    0,
+    watchedItems,
+    dismissedKeys,
+    false,
+    customAliasMap,
+  );
+  assert.equal(
+    items.length,
+    0,
+    "Dismissing bare TMDB ID on mobile must suppress IMDb in-progress and Next-Up cards in Harbor",
+  );
+});

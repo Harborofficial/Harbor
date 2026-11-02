@@ -1211,7 +1211,11 @@ export async function pullDismissedNextUpKeysFromNuvio(
     if (!isNuvioSignedIn() || getNuvioAccountId() !== originatingAccountId) {
       return readCachedDismissedNextUpKeys(profileIndex, originatingAccountId);
     }
-    const first = Array.isArray(blobList) ? blobList[0] : null;
+    const first = Array.isArray(blobList)
+      ? blobList[0]
+      : blobList && typeof blobList === "object"
+        ? blobList
+        : null;
     const features = first?.settings_json?.features;
     let cwPayload: any = {};
     if (
@@ -1221,10 +1225,25 @@ export async function pullDismissedNextUpKeysFromNuvio(
       try {
         cwPayload = JSON.parse(features.continue_watching_settings_payload);
       } catch {}
+    } else if (
+      features?.continue_watching_settings_payload &&
+      typeof features.continue_watching_settings_payload === "object"
+    ) {
+      cwPayload = features.continue_watching_settings_payload;
     }
-    const dismissed = Array.isArray(cwPayload.dismissedNextUpKeys)
-      ? new Set<string>(cwPayload.dismissedNextUpKeys)
-      : new Set<string>();
+
+    const rawList =
+      cwPayload.dismissedNextUpKeys ??
+      cwPayload.dismissedKeys ??
+      cwPayload.dismissed_next_up_keys ??
+      features?.dismissedNextUpKeys ??
+      [];
+    const dismissed = new Set<string>();
+    if (Array.isArray(rawList)) {
+      for (const k of rawList) {
+        if (typeof k === "string" && k.trim()) dismissed.add(k.trim());
+      }
+    }
     writeCachedDismissedNextUpKeys(profileIndex, dismissed, originatingAccountId);
     return dismissed;
   } catch {
@@ -1804,7 +1823,7 @@ async function reconcileNuvioWatchedOnce(
   try {
     const progressItems = readCachedWatchProgress(profileIndex);
     const dismissedKeys =
-      newlyWatchedShows.size > 0
+      force || newlyWatchedShows.size > 0
         ? await pullDismissedNextUpKeysFromNuvio(profileIndex)
         : readCachedDismissedNextUpKeys(profileIndex, accountId);
     const localEntries = listLocalCw(false);
@@ -2277,6 +2296,7 @@ function reconcileNuvioProgressHistory(
   items: NuvioWatchProgress[],
   profileIndex: number,
   completeSnapshot: boolean,
+  startedAt?: number,
 ): Set<string> {
   const byCoordinate = new Map(items.map((item, i) => [coordinate(item), i]));
   const ownerId = `nuvio-${profileIndex}`;
@@ -2303,11 +2323,13 @@ function reconcileNuvioProgressHistory(
     } else if (!completeSnapshot) {
       items.push(prev);
     } else {
-      staleResume.push({
-        id: prev.content_id,
-        season: prev.season ?? null,
-        episode: prev.episode ?? null,
-      });
+      for (const vid of getNuvioContentIdVariants(prev.content_id)) {
+        staleResume.push({
+          id: vid,
+          season: prev.season ?? null,
+          episode: prev.episode ?? null,
+        });
+      }
     }
   }
   // One map rewrite per storage key instead of one per removed episode/content.
@@ -2316,7 +2338,23 @@ function reconcileNuvioProgressHistory(
   const removedIds = new Set(previous.map((row) => row.content_id));
   const staleContent: string[] = [];
   for (const id of removedIds) {
-    if (!contentIds.has(id)) staleContent.push(id);
+    if (!contentIds.has(id)) {
+      for (const vid of getNuvioContentIdVariants(id)) {
+        staleContent.push(vid);
+      }
+    }
+  }
+  if (completeSnapshot) {
+    const localCwItems = listLocalCw(false, ownerId);
+    for (const loc of localCwItems) {
+      const variants = getNuvioContentIdVariants(loc.id);
+      const isPresent = variants.some((v) => contentIds.has(v));
+      if (!isPresent && (startedAt == null || loc.t <= startedAt)) {
+        for (const vid of variants) {
+          staleContent.push(vid);
+        }
+      }
+    }
   }
   clearLocalCwBatch(staleContent, ownerId);
   return contentIds;
@@ -2356,13 +2394,14 @@ const progressPullInflight = new Map<string, Promise<NuvioWatchProgress[]>>();
 
 export function pullWatchProgressFromNuvio(
   harborProfileId?: string | number,
+  options?: { force?: boolean },
 ): Promise<NuvioWatchProgress[]> {
   if (!isNuvioSignedIn() || !isNuvioProviderActive()) return Promise.resolve([]);
   const accountId = getNuvioAccountId();
   if (!accountId) return Promise.resolve([]);
   const slot = resolveNuvioProfileIndex(harborProfileId);
   const activeSlot = resolveNuvioProfileIndex();
-  const key = `${accountId}:${slot}:${activeSlot}`;
+  const key = `${accountId}:${slot}:${activeSlot}:${options?.force ? "force" : "normal"}`;
   const existing = progressPullInflight.get(key);
   if (existing) return existing;
   const stillCurrent = () =>
@@ -2370,7 +2409,7 @@ export function pullWatchProgressFromNuvio(
     isNuvioProviderActive() &&
     getNuvioAccountId() === accountId &&
     resolveNuvioProfileIndex() === activeSlot;
-  const work = pullWatchProgressOnce(slot, accountId, stillCurrent);
+  const work = pullWatchProgressOnce(slot, accountId, stillCurrent, options?.force);
   progressPullInflight.set(key, work);
   void work
     .finally(() => {
@@ -2384,6 +2423,7 @@ async function pullWatchProgressOnce(
   slot: number,
   accountId: string,
   stillCurrent: () => boolean,
+  force = false,
 ): Promise<NuvioWatchProgress[]> {
   const startedAt = Date.now();
   const pending = readPending(slot, accountId);
@@ -2410,12 +2450,15 @@ async function pullWatchProgressOnce(
     (change) =>
       change.kind === "progress" && (change.deleted || !rpcCoordinates.has(coordinate(change.row))),
   );
+  if (rpcRows && rpcRows.length < 50 && !needsConfirmation) {
+    complete = true;
+  }
   const fullSyncKey = `${accountId}:${slot}`;
   const lastFullSync = lastFullSyncAt.get(fullSyncKey) ?? 0;
-  const fullSyncDue = !lastFullSync || Date.now() - lastFullSync >= FULL_SYNC_INTERVAL_MS;
-  // Routine pulls only merge the latest RPC batch. A full snapshot is needed to
-  // prune remote deletions, so it is throttled and forced by pending mutations.
-  if (!rpcRows || needsConfirmation || fullSyncDue) {
+  const fullSyncDue = force || !lastFullSync || Date.now() - lastFullSync >= FULL_SYNC_INTERVAL_MS;
+  // Routine pulls merge the latest RPC batch. A full table snapshot is fetched
+  // when forced, when confirmations are pending, or when fullSyncDue.
+  if (force || !complete || !rpcRows || needsConfirmation || fullSyncDue) {
     try {
       const table = await readTableSnapshot<NuvioWatchProgress>(
         "watch_progress",
@@ -2535,7 +2578,7 @@ async function pullWatchProgressOnce(
     if (index >= 0) items[index] = localRow;
     else items.push(localRow);
   }
-  const ids = reconcileNuvioProgressHistory(allowedPrevious, items, slot, complete);
+  const ids = reconcileNuvioProgressHistory(allowedPrevious, items, slot, complete, startedAt);
   if (!stillCurrent()) return [];
   items.sort((a, b) => progressTime(b) - progressTime(a));
   writeCachedWatchProgress(slot, items, accountId);
