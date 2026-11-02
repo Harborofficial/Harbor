@@ -185,7 +185,7 @@ export function RenderedStremioControl({
       if (!ctx.onBack) return null;
       return (
         <Tooltip label={tr("Back")} side="bottom">
-          <StremioBtn onClick={ctx.onBack} ariaLabel={tr("Back")}>
+          <StremioBtn onClick={ctx.onBack} ariaLabel={tr("Back")} glassSurface>
             <ChevronLeft size={30} strokeWidth={2} />
           </StremioBtn>
         </Tooltip>

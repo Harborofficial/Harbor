@@ -125,6 +125,8 @@ import { PlayerInteractionLockControls } from "@/components/player/player-intera
 import { usePlayerInteractionLock } from "./player/hooks/use-player-interaction-lock";
 import { isNextAired } from "@/lib/cw-resurface";
 import { exitAnyFullscreen } from "@/lib/fullscreen-state";
+import { useNativeLiquidGlass } from "./player/hooks/use-native-liquid-glass";
+import "./player/native-liquid-glass.css";
 
 let hdrFallbackNoticeShown = false;
 
@@ -1394,6 +1396,21 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
   // television. Big Picture renders its own.
   const showChrome =
     !screenLocked && !loaderActive && !loaderShowing && !tenFoot && (chromeVisible || drawMode);
+  const nativeGlassActive = useNativeLiquidGlass(
+    stageRef,
+    videoMountRef,
+    engine === "mpv" &&
+      bridgeReady &&
+      embedActive &&
+      settings.playerLiquidGlass &&
+      !settings.playerExternalMpv &&
+      !hdrStageActive &&
+      !pipMode &&
+      !src.pipDocked &&
+      !docked,
+    `${bridgeKey}|${playerLoadIdentity(activeMediaSrc, activeMediaSrc.url, season, episode)}`,
+    settings.playerGlassOptics,
+  );
   const liveShellSnap =
     cast.castDevice && !cast.audioRouting
       ? { ...snap, status: (cast.castPlaying ? "playing" : "paused") as typeof snap.status }
@@ -1654,6 +1671,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     <main
       ref={stageRef}
       data-harbor-player
+      data-native-liquid-glass={nativeGlassActive ? "on" : undefined}
       data-detached={src.pipDocked || undefined}
       inert={src.pipDocked || undefined}
       data-docked={docked}

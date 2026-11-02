@@ -467,6 +467,7 @@ export function Transport({
 
       <div
         ref={controlsRef}
+        data-mpv-controls
         dir="ltr"
         className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2.5 ${
           tight ? "px-3 pt-6 pb-3" : "px-7 pt-10 pb-5"

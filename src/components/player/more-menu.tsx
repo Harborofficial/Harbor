@@ -138,7 +138,10 @@ export function MoreMenu({
           </button>
         </Tooltip>
         {open && (
-          <div className="absolute end-0 top-[calc(100%+10px)] w-64 max-w-[calc(100vw-32px)] overflow-hidden rounded-md bg-elevated p-1.5 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]">
+          <div
+            data-mpv-glass="panel"
+            className="absolute end-0 top-[calc(100%+10px)] w-64 max-w-[calc(100vw-32px)] overflow-hidden rounded-md bg-elevated p-1.5 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
+          >
             {rows.map((r) => (
               <MoreRow key={r.key} spec={r} />
             ))}

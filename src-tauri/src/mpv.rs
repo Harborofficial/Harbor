@@ -172,6 +172,7 @@ pub struct MpvState {
 
 struct MpvSession {
     mpv: Arc<Mpv>,
+    glass: Arc<std::sync::Mutex<crate::mpv_liquid_glass::GlassState>>,
     is_live: bool,
     #[cfg(any(windows, target_os = "linux"))]
     embedded: bool,
@@ -303,6 +304,7 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     // so upscaler presets need these to know how much headroom the window has.
     ("width", 22, PropertyKind::Int64),
     ("height", 23, PropertyKind::Int64),
+    ("osd-dimensions", 24, PropertyKind::Node),
 ];
 
 #[derive(Clone, Copy)]
@@ -1240,6 +1242,7 @@ pub async fn mpv_start(
 
     *g = Some(MpvSession {
         mpv: mpv_arc,
+        glass: Arc::new(std::sync::Mutex::new(Default::default())),
         is_live,
         #[cfg(windows)]
         embedded: embed_hwnd.is_some(),
@@ -1697,18 +1700,54 @@ pub async fn mpv_set_property(
     name: String,
     value: Value,
 ) -> Result<(), String> {
-    let mpv = {
+    let (mpv, glass) = {
         let g = state.inner.lock().await;
         g.as_ref()
-            .map(|s| s.mpv.clone())
+            .map(|s| (s.mpv.clone(), s.glass.clone()))
             .ok_or_else(|| "mpv not started".to_string())?
     };
     if mpv_property_blocked(&name) {
         return Err(format!("mpv property not allowed: {}", name));
     }
-    let str_val = value_to_arg(&value);
+    let mut str_val = value_to_arg(&value);
+    let glass_guard = glass.lock().map_err(|_| "Glass state lock unavailable")?;
+    if name == "glsl-shaders" {
+        str_val = glass_guard.preserve_shader(&str_val);
+    }
     mpv.set_property(&name, str_val.as_str())
         .map_err(|e| format!("set {}: {}", name, e))
+}
+
+#[tauri::command]
+pub async fn mpv_glass_layout(
+    app: AppHandle,
+    state: State<'_, MpvState>,
+    owner_id: String,
+    owner_generation: u64,
+    layout: crate::mpv_liquid_glass::GlassLayout,
+) -> Result<(), String> {
+    if owner_id.is_empty() || owner_id.len() > 128 || owner_generation == 0 {
+        return Err("Invalid glass owner".into());
+    }
+    let (mpv, glass) = {
+        let guard = state.inner.lock().await;
+        let session = guard.as_ref().ok_or("mpv not started")?;
+        (session.mpv.clone(), session.glass.clone())
+    };
+    let cache = app.path().app_cache_dir().map_err(|e| e.to_string())?;
+    tokio::task::spawn_blocking(move || {
+        glass
+            .lock()
+            .map_err(|_| "Glass state lock unavailable")?
+            .apply(&mpv, &cache, &owner_id, owner_generation, layout)
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    #[cfg(target_os = "linux")]
+    crate::mpv_render_linux::request_redraw();
+    #[cfg(target_os = "macos")]
+    crate::mpv_render_mac::request_redraw();
+    Ok(())
 }
 
 #[tauri::command]

@@ -101,6 +101,7 @@ export function CastMenu({
   return (
     <div
       ref={wrapRef}
+      data-mpv-glass="panel"
       dir={dir}
       role="dialog"
       aria-label={t("Cast to TV or speaker")}

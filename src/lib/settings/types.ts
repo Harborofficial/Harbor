@@ -10,6 +10,7 @@ import type { SubtitleOffsetPosition, SubtitleOffsetSize } from "@/lib/player/su
 import type { BufferSizeId } from "@/lib/player/buffer-profile";
 import type { UiLanguage } from "@/lib/i18n/languages";
 import type { DisplaySelection } from "@/lib/monitors";
+import type { GlassOptics } from "@/lib/player/liquid-glass";
 
 export type StreamingService =
   | "netflix"
@@ -306,6 +307,8 @@ export type Settings = {
   /** resize shrinks the Harbor window; native floats the video in its own window. */
   pipBehavior: "resize" | "native";
   playerShellId: string;
+  playerLiquidGlass: boolean;
+  playerGlassOptics: GlassOptics;
   playerChromeTheme: "auto" | "default" | "stremio";
   playerMenuBlack: boolean;
   playerScreenLockEnabled: boolean;

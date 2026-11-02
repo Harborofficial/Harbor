@@ -52,21 +52,33 @@ export function Anime4kMenu({
           }}
           aria-label={t("Anime4K upscaling")}
           className={`flex h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 transition-[background-color,color] ${
-            accent ? "bg-white/22 text-white hover:bg-white/30" : "text-white/85 hover:bg-white/10 hover:text-white"
+            accent
+              ? "bg-white/22 text-white hover:bg-white/30"
+              : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
           {iconUrl ? (
-            <img src={iconUrl} alt="" className="h-[22px] w-[22px] shrink-0 select-none object-contain" draggable={false} />
+            <img
+              src={iconUrl}
+              alt=""
+              className="h-[22px] w-[22px] shrink-0 select-none object-contain"
+              draggable={false}
+            />
           ) : (
             <Sparkles size={20} strokeWidth={1.9} />
           )}
           {active && current ? (
-            <span className="text-[11px] font-bold tracking-wider">{current.label.replace("Mode ", "")}</span>
+            <span className="text-[11px] font-bold tracking-wider">
+              {current.label.replace("Mode ", "")}
+            </span>
           ) : null}
         </button>
       </Tooltip>
       {open && (
-        <div className="fixed end-14 bottom-[150px] max-h-[calc(100vh-174px)] w-[320px] max-w-[calc(100vw-72px)] overflow-y-auto rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop">
+        <div
+          data-mpv-glass="panel"
+          className="fixed end-14 bottom-[150px] max-h-[calc(100vh-174px)] w-[320px] max-w-[calc(100vw-72px)] overflow-y-auto rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop"
+        >
           <div className="p-2">
             <div className="px-3 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
               {t("Anime4K")}
@@ -85,7 +97,9 @@ export function Anime4kMenu({
                       setOpen(false);
                     }}
                     className={`flex h-9 w-full items-center justify-between rounded-lg px-3 text-start text-[13.5px] transition-colors ${
-                      sel ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
+                      sel
+                        ? "bg-elevated text-ink ring-1 ring-edge"
+                        : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
                     }`}
                   >
                     <span className={sel ? "font-medium" : ""}>{t(o.label)}</span>

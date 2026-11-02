@@ -544,6 +544,10 @@ fn schedule_redraw() {
     });
 }
 
+pub(crate) fn request_redraw() {
+    schedule_redraw();
+}
+
 fn probe(name: &str) -> bool {
     std::env::var(name).as_deref() == Ok("1")
 }

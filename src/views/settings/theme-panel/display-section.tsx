@@ -32,6 +32,7 @@ import { PosterCardSection } from "./display/poster-card-section";
 import { ScreensaverMediaManager } from "./screensaver-media";
 import { SFX } from "@/lib/sfx";
 import { isSpooktoberSeason } from "@/lib/spooktober-season";
+import { LiquidGlassSection } from "../player-panel/liquid-glass-section";
 
 export function AmbienceSection() {
   const t = useT();
@@ -398,6 +399,9 @@ export function DisplaySection() {
               )}
             </Nested>
           )}
+          <div className="border-t border-ink/10 px-4 py-5">
+            <LiquidGlassSection />
+          </div>
         </SettingGroup>
       </Section>
     </>

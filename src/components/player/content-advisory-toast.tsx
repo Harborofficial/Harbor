@@ -198,6 +198,7 @@ export function ContentAdvisoryToast({
       )}
       <div
         role={preview ? undefined : "status"}
+        data-mpv-glass={preview ? undefined : "panel"}
         aria-label={preview ? undefined : t("Content advisory")}
         onMouseEnter={preview ? undefined : () => setPaused(true)}
         onMouseLeave={

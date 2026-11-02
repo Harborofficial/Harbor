@@ -72,12 +72,15 @@ export const PanelsLayer = memo(function PanelsLayer({
     <>
       {!tenFoot && (
         <button
+          data-mpv-glass="priority"
           onClick={onOpenEpisodePanel}
           aria-label={t("Up next")}
           tabIndex={upNextButtonVisible ? 0 : -1}
           aria-hidden={!upNextButtonVisible}
           className={`group absolute top-1/2 z-20 flex h-32 -translate-y-1/2 flex-col items-center justify-center gap-2.5 bg-elevated/45 text-ink shadow-[0_6px_20px_-10px_rgba(0,0,0,0.5)] backdrop-blur-md transition-[padding,background,opacity] duration-300 hover:bg-elevated/85 ${
-            upNextButtonVisible ? "pointer-events-auto opacity-40 hover:opacity-100" : "pointer-events-none opacity-0"
+            upNextButtonVisible
+              ? "pointer-events-auto opacity-40 hover:opacity-100"
+              : "pointer-events-none opacity-0"
           } ${
             episodesCorner === "top-left" || episodesCorner === "bottom-left"
               ? "left-0 rounded-r-2xl border-y border-r border-edge-soft pl-2 pr-2.5 hover:pr-3"
@@ -131,9 +134,7 @@ export const PanelsLayer = memo(function PanelsLayer({
       )}
 
       {showHeaderWarning && <HeaderWarning onPickAnother={onPickAnother} />}
-      {showNoAudioWarning && (
-        <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />
-      )}
+      {showNoAudioWarning && <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />}
     </>
   );
 });

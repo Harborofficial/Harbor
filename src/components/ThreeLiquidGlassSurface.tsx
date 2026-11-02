@@ -136,15 +136,16 @@ export function ThreeLiquidGlassSurface({
   ...props
 }: LiquidGlassSurfaceProps) {
   const { settings } = useSettings();
+  const surfaceProps = { ...props, "data-native-glass-surface": "" };
 
   if (!settings.liquidGlass) {
-    return <PlainSurface {...props} style={style} />;
+    return <PlainSurface {...surfaceProps} style={style} />;
   }
 
   if (settings.experimentalLiquidGlassEnabled) {
     return (
       <ExperimentalLiquidGlassSurface
-        {...props}
+        {...surfaceProps}
         style={{ ...style, ...experimentalStyle }}
         rendererOpacity={settings.experimentalLiquidGlassOpacity}
       />
@@ -153,7 +154,7 @@ export function ThreeLiquidGlassSurface({
 
   return (
     <LiquidGlassSurface
-      {...props}
+      {...surfaceProps}
       style={{ ...style, ...defaultStyle }}
       blurRadius={settings.defaultLiquidGlassBlur}
       tintOpacity={settings.defaultLiquidGlassTint}

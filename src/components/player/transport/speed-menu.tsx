@@ -156,7 +156,10 @@ export function SpeedMenu({
         </button>
       </Tooltip>
       {open && (
-        <div className="fixed end-14 bottom-[150px] w-[400px] max-w-[calc(100vw-72px)] max-h-[calc(100vh-174px)] overflow-y-auto rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop">
+        <div
+          data-mpv-glass="panel"
+          className="fixed end-14 bottom-[150px] w-[400px] max-w-[calc(100vw-72px)] max-h-[calc(100vh-174px)] overflow-y-auto rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop"
+        >
           <div className={`grid ${sleep ? "grid-cols-2" : "grid-cols-1"}`}>
             <Section title={t("Playback speed")}>
               {speedList.map((s) => {
