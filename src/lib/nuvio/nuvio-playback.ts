@@ -212,7 +212,7 @@ function buildSeriesAliasResolver(
   };
 }
 
-function getPlaybackItemsKey(slot: number, accountId?: string): string {
+export function getPlaybackItemsKey(slot: number, accountId?: string): string {
   const acc = accountId || getNuvioAccountId() || "anon";
   return `${PLAYBACK_ITEMS_CACHE_PREFIX}${acc}.slot.${slot}`;
 }

@@ -12,7 +12,16 @@ import {
 } from "./nuvio-client";
 import { safeFetch } from "@/lib/safe-fetch";
 import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
-import { fetchNuvioAddons, swapNuvioProfileCloudData } from "./nuvio-sync";
+import {
+  fetchNuvioAddons,
+  swapNuvioProfileCloudData,
+  getWatchProgressKey,
+  getWatchedItemsKey,
+  getDismissedNextUpStorageKey,
+  getNuvioAddonsCacheKey,
+  getPendingSyncKey,
+} from "./nuvio-sync";
+import { getPlaybackItemsKey } from "./nuvio-playback";
 import { hashProfilePassword } from "@/lib/profile-password";
 import type {
   NuvioProfile,
@@ -762,7 +771,13 @@ const sessionPlaintextPins = new Map<number, string>();
  * coordinates with the backend to swap identities, migrates cloud watch progress
  * and history, swaps server-side PIN credentials, and rolls back local state upon failure.
  */
-export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Promise<boolean> {
+export async function transferPrimaryNuvioProfile(
+  targetSlotIndex: number,
+  options?: {
+    sourcePin?: string;
+    targetPin?: string;
+  },
+): Promise<boolean> {
   if (!isNuvioSignedIn() || targetSlotIndex <= 1 || targetSlotIndex > 6) {
     return false;
   }
@@ -782,6 +797,25 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
     return false;
   }
   if (slot1.pin_enabled && !isNuvioProfileUnlocked(1)) {
+    return false;
+  }
+
+  // Obtain plaintext PIN credentials
+  const pinPlain1 = options?.sourcePin?.trim() || sessionPlaintextPins.get(1);
+  const pinPlainTarget = options?.targetPin?.trim() || sessionPlaintextPins.get(targetSlotIndex);
+
+  // If a profile has a PIN enabled, we MUST have its credentials to migrate it server-side.
+  // Explicitly handle unavailable credentials before making any cloud or local modifications.
+  if (slot1.pin_enabled && (!pinPlain1 || !pinPlain1.trim())) {
+    console.warn(
+      `[nuvio] Primary profile transfer aborted: Slot 1 has PIN enabled but plaintext credentials are not available in session.`,
+    );
+    return false;
+  }
+  if (targetSlot.pin_enabled && (!pinPlainTarget || !pinPlainTarget.trim())) {
+    console.warn(
+      `[nuvio] Primary profile transfer aborted: Slot ${targetSlotIndex} has PIN enabled but plaintext credentials are not available in session.`,
+    );
     return false;
   }
 
@@ -849,47 +883,140 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
     "harbor.watchlist.v1.nuvio.",
     "harbor.cw.dismissed.private.v1.nuvio-",
     "harbor.installed-addons.nuvio-",
-    "harbor.nuvio.playback_items.slot.",
     "harbor.nuvio.local_progress.",
     "harbor.moviewatched.nuvio.",
     "harbor.watchedFlag.nuvio.",
-    `harbor.nuvio.dismissedNextUp.v1.${accountId}.`,
-    "harbor.nuvio.dismissedNextUp.v1.",
+    "harbor.nuvio.local-avatar.",
+    "harbor.nuvio.locked-tabs.",
   ];
 
-  const storageBackup = new Map<string, string | null>();
+  const keyPairs: Array<[string, string]> = [];
   for (const prefix of slotKeyPrefixes) {
-    storageBackup.set(`${prefix}1`, localStorage.getItem(`${prefix}1`));
-    storageBackup.set(
-      `${prefix}${targetSlotIndex}`,
-      localStorage.getItem(`${prefix}${targetSlotIndex}`),
-    );
+    keyPairs.push([`${prefix}1`, `${prefix}${targetSlotIndex}`]);
   }
-  const key1 = getPinCacheKey(1);
-  const keyTarget = getPinCacheKey(targetSlotIndex);
+
+  // Account-scoped keys via shared helpers
+  keyPairs.push([
+    getPlaybackItemsKey(1, accountId),
+    getPlaybackItemsKey(targetSlotIndex, accountId),
+  ]);
+  keyPairs.push([
+    `harbor.nuvio.playback_items.slot.1`,
+    `harbor.nuvio.playback_items.slot.${targetSlotIndex}`,
+  ]);
+  keyPairs.push([
+    getWatchProgressKey(1, accountId),
+    getWatchProgressKey(targetSlotIndex, accountId),
+  ]);
+  keyPairs.push([
+    `harbor.nuvio.watch_progress.slot.1`,
+    `harbor.nuvio.watch_progress.slot.${targetSlotIndex}`,
+  ]);
+  keyPairs.push([getWatchedItemsKey(1, accountId), getWatchedItemsKey(targetSlotIndex, accountId)]);
+  keyPairs.push([
+    `harbor.nuvio.watched_items.slot.1`,
+    `harbor.nuvio.watched_items.slot.${targetSlotIndex}`,
+  ]);
+  keyPairs.push([
+    getDismissedNextUpStorageKey(1, accountId),
+    getDismissedNextUpStorageKey(targetSlotIndex, accountId),
+  ]);
+  keyPairs.push([
+    `harbor.nuvio.dismissedNextUp.v1.1`,
+    `harbor.nuvio.dismissedNextUp.v1.${targetSlotIndex}`,
+  ]);
+  keyPairs.push([
+    getNuvioAddonsCacheKey(1, accountId),
+    getNuvioAddonsCacheKey(targetSlotIndex, accountId),
+  ]);
+  keyPairs.push([
+    `harbor.nuvio.addons.v1.slot.1`,
+    `harbor.nuvio.addons.v1.slot.${targetSlotIndex}`,
+  ]);
+  keyPairs.push([getPendingSyncKey(1, accountId), getPendingSyncKey(targetSlotIndex, accountId)]);
+  keyPairs.push([getPinCacheKey(1, accountId), getPinCacheKey(targetSlotIndex, accountId)]);
+
+  // Scan localStorage for any other account-scoped or legacy keys for slot 1 or targetSlotIndex
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k) continue;
+      if (k.endsWith(`.slot.1`)) {
+        const targetK = k.slice(0, -1) + targetSlotIndex;
+        if (!keyPairs.some(([a]) => a === k)) keyPairs.push([k, targetK]);
+      } else if (k.endsWith(`.slot.${targetSlotIndex}`)) {
+        const slot1K = k.slice(0, -String(targetSlotIndex).length) + "1";
+        if (!keyPairs.some(([, b]) => b === k)) keyPairs.push([slot1K, k]);
+      }
+    }
+  } catch {}
+
+  const storageBackup = new Map<string, string | null>();
+  for (const [k1, kTarget] of keyPairs) {
+    storageBackup.set(k1, localStorage.getItem(k1));
+    storageBackup.set(kTarget, localStorage.getItem(kTarget));
+  }
+
+  const key1 = getPinCacheKey(1, accountId);
+  const keyTarget = getPinCacheKey(targetSlotIndex, accountId);
   const pin1 = localStorage.getItem(key1);
   const pinTarget = localStorage.getItem(keyTarget);
 
+  let cloudDataSwapped = false;
+  let pinMigratedStage: "none" | "half" | "done" = "none";
+
   try {
     // 3. MIGRATE CLOUD WATCH HISTORY, PROGRESS, AND DATA BETWEEN SLOTS
-    await swapNuvioProfileCloudData(1, targetSlotIndex);
+    const swapCloudOk = await swapNuvioProfileCloudData(1, targetSlotIndex);
+    if (!swapCloudOk) {
+      throw new Error(
+        `swapNuvioProfileCloudData failed to migrate cloud watch progress and history`,
+      );
+    }
+    cloudDataSwapped = true;
 
     // 4. MIGRATE SERVER-SIDE PIN CREDENTIALS
-    const pinPlain1 = sessionPlaintextPins.get(1);
-    const pinPlainTarget = sessionPlaintextPins.get(targetSlotIndex);
+    // We verify each operation succeeded. Both setNuvioPin and clearNuvioPin return { unlocked: boolean, message?: string }.
+    // If backend rejects or fails, abort immediately and rollback to prevent credential mismatch.
     if (slot1.pin_enabled && !targetSlot.pin_enabled) {
-      if (pinPlain1) {
-        await setNuvioPin(targetSlotIndex, pinPlain1).catch(() => {});
+      const setRes = await setNuvioPin(targetSlotIndex, pinPlain1!);
+      if (!setRes.unlocked) {
+        throw new Error(
+          `Failed to set PIN on slot ${targetSlotIndex}: ${setRes.message || "rejected"}`,
+        );
       }
-      await clearNuvioPin(1).catch(() => {});
+      pinMigratedStage = "half";
+      const clearRes = await clearNuvioPin(1, pinPlain1);
+      if (!clearRes.unlocked) {
+        throw new Error(`Failed to clear PIN on slot 1: ${clearRes.message || "rejected"}`);
+      }
+      pinMigratedStage = "done";
     } else if (!slot1.pin_enabled && targetSlot.pin_enabled) {
-      if (pinPlainTarget) {
-        await setNuvioPin(1, pinPlainTarget).catch(() => {});
+      const setRes = await setNuvioPin(1, pinPlainTarget!);
+      if (!setRes.unlocked) {
+        throw new Error(`Failed to set PIN on slot 1: ${setRes.message || "rejected"}`);
       }
-      await clearNuvioPin(targetSlotIndex).catch(() => {});
+      pinMigratedStage = "half";
+      const clearRes = await clearNuvioPin(targetSlotIndex, pinPlainTarget);
+      if (!clearRes.unlocked) {
+        throw new Error(
+          `Failed to clear PIN on slot ${targetSlotIndex}: ${clearRes.message || "rejected"}`,
+        );
+      }
+      pinMigratedStage = "done";
     } else if (slot1.pin_enabled && targetSlot.pin_enabled) {
-      if (pinPlainTarget) await setNuvioPin(1, pinPlainTarget).catch(() => {});
-      if (pinPlain1) await setNuvioPin(targetSlotIndex, pinPlain1).catch(() => {});
+      const set1Res = await setNuvioPin(1, pinPlainTarget!, pinPlain1);
+      if (!set1Res.unlocked) {
+        throw new Error(`Failed to set PIN on slot 1: ${set1Res.message || "rejected"}`);
+      }
+      pinMigratedStage = "half";
+      const setTargetRes = await setNuvioPin(targetSlotIndex, pinPlain1!, pinPlainTarget);
+      if (!setTargetRes.unlocked) {
+        throw new Error(
+          `Failed to set PIN on slot ${targetSlotIndex}: ${setTargetRes.message || "rejected"}`,
+        );
+      }
+      pinMigratedStage = "done";
     }
 
     // 5. SWAP LOCAL STORAGE AND PIN CACHES
@@ -915,9 +1042,7 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
     localStorage.removeItem("harbor.nuvio.kid.1");
     localStorage.removeItem(`harbor.nuvio.kid.${targetSlotIndex}`);
 
-    for (const prefix of slotKeyPrefixes) {
-      const k1 = `${prefix}1`;
-      const kTarget = `${prefix}${targetSlotIndex}`;
+    for (const [k1, kTarget] of keyPairs) {
       const v1 = storageBackup.get(k1);
       const vTarget = storageBackup.get(kTarget);
       if (vTarget !== null && vTarget !== undefined) localStorage.setItem(k1, vTarget);
@@ -959,16 +1084,21 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
     await pullNuvioProfiles();
 
     // 7. DISPATCH SYNC EVENTS
-    window.dispatchEvent(
-      new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }),
-    );
-    window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
-    window.dispatchEvent(new CustomEvent("harbor:active-profile-changed"));
-    window.dispatchEvent(new CustomEvent("harbor:secondary-privileges-changed"));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }),
+      );
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+      window.dispatchEvent(new CustomEvent("harbor:active-profile-changed"));
+      window.dispatchEvent(new CustomEvent("harbor:secondary-privileges-changed"));
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-playback-updated"));
+      window.dispatchEvent(new CustomEvent("harbor:local-cw-changed"));
+    }
 
     return true;
   } catch (err) {
     console.error("[nuvio] Primary profile transfer failed, rolling back:", err);
+
     // ROLLBACK LOCAL STORAGE
     for (const [k, v] of storageBackup) {
       if (v !== null) localStorage.setItem(k, v);
@@ -979,6 +1109,33 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
     if (pinTarget) localStorage.setItem(keyTarget, pinTarget);
     else localStorage.removeItem(keyTarget);
     saveNuvioState(state);
+
+    // Rollback cloud data if it was swapped
+    if (cloudDataSwapped) {
+      try {
+        await swapNuvioProfileCloudData(1, targetSlotIndex);
+      } catch (rbCloudErr) {
+        console.error("[nuvio] Failed to rollback cloud data swap:", rbCloudErr);
+      }
+    }
+
+    // Rollback server-side PINs if partially migrated
+    if (pinMigratedStage === "half" || pinMigratedStage === "done") {
+      try {
+        if (slot1.pin_enabled && pinPlain1) {
+          await setNuvioPin(1, pinPlain1).catch(() => {});
+        } else {
+          await clearNuvioPin(1).catch(() => {});
+        }
+        if (targetSlot.pin_enabled && pinPlainTarget) {
+          await setNuvioPin(targetSlotIndex, pinPlainTarget).catch(() => {});
+        } else {
+          await clearNuvioPin(targetSlotIndex).catch(() => {});
+        }
+      } catch (rbPinErr) {
+        console.error("[nuvio] Failed to rollback server-side PINs:", rbPinErr);
+      }
+    }
 
     // Rollback profiles in cloud
     const rollbackPayloads: ProfilePushPayload[] = state.profiles.map((p) => ({
@@ -994,13 +1151,19 @@ export async function transferPrimaryNuvioProfile(targetSlotIndex: number): Prom
       pin_enabled: Boolean(p.pin_enabled),
     }));
     await pushNuvioProfiles(rollbackPayloads).catch(() => {});
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-playback-updated"));
+      window.dispatchEvent(new CustomEvent("harbor:local-cw-changed"));
+    }
+
     return false;
   }
 }
 
-function getPinCacheKey(profileIndex: number): string {
-  const accountId = getNuvioAccountId() || "anon";
-  return `harbor.nuvio.pin_cache.${accountId}.${profileIndex}`;
+export function getPinCacheKey(profileIndex: number, accountId?: string | null): string {
+  const accountIdVal = accountId || getNuvioAccountId() || "anon";
+  return `harbor.nuvio.pin_cache.${accountIdVal}.${profileIndex}`;
 }
 
 export function getCachedNuvioPinHash(profileIndex: number): string | null {
@@ -1140,6 +1303,8 @@ export async function verifyNuvioPin(profileIndex: number, pin: string): Promise
   // 1. Fast local verification (0ms unlock without network roundtrip)
   const isMatchLocally = await verifyNuvioPinLocally(profileIndex, pin);
   if (isMatchLocally) {
+    nuvioSessionUnlockedIndices.add(profileIndex);
+    sessionPlaintextPins.set(profileIndex, pin);
     return { unlocked: true };
   }
 
@@ -1216,6 +1381,16 @@ export async function setNuvioPin(
       return { unlocked: false, message: errJson.message || "Failed to set PIN" };
     }
 
+    const raw = await res.json().catch(() => null);
+    const data = Array.isArray(raw) ? raw[0] : raw;
+    if (data && typeof data === "object") {
+      if (data.unlocked === false) {
+        return { unlocked: false, message: data.message || "Failed to set PIN" };
+      }
+    } else if (raw === false) {
+      return { unlocked: false, message: "Failed to set PIN" };
+    }
+
     nuvioSessionUnlockedIndices.add(profileIndex);
     sessionPlaintextPins.set(profileIndex, pin);
     void rememberNuvioPin(profileIndex, pin);
@@ -1258,6 +1433,16 @@ export async function clearNuvioPin(
       return { unlocked: false, message: errJson.message || "Failed to clear PIN on server" };
     }
 
+    const raw = await res.json().catch(() => null);
+    const data = Array.isArray(raw) ? raw[0] : raw;
+    if (data && typeof data === "object") {
+      if (data.unlocked === false) {
+        return { unlocked: false, message: data.message || "Failed to clear PIN on server" };
+      }
+    } else if (raw === false) {
+      return { unlocked: false, message: "Failed to clear PIN on server" };
+    }
+
     forgetNuvioPin(profileIndex);
     sessionPlaintextPins.delete(profileIndex);
     nuvioSessionUnlockedIndices.delete(profileIndex);
@@ -1270,8 +1455,10 @@ export async function clearNuvioPin(
     saveNuvioState({ ...state, profiles: updatedProfiles });
 
     await pullNuvioProfiles();
-    window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
-    window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated"));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-profile-changed"));
+      window.dispatchEvent(new CustomEvent("harbor:nuvio-profiles-updated"));
+    }
     return { unlocked: true };
   } catch (err) {
     console.error("[nuvio] failed to clear PIN", err);

@@ -119,9 +119,10 @@ function coordinate(row: NuvioCoordinate): string {
   return JSON.stringify([row.content_id, row.season ?? null, row.episode ?? null]);
 }
 
-function pendingKey(slot: number, accountId: string): string {
+export function getPendingSyncKey(slot: number, accountId: string): string {
   return `harbor.nuvio.pending-sync.v1.${accountId}.slot.${slot}`;
 }
+const pendingKey = getPendingSyncKey;
 
 function readPending(slot: number, accountId: string): PendingChanges {
   try {
@@ -801,7 +802,7 @@ async function readContentRows<T extends NuvioCoordinate>(
   return null;
 }
 
-function getWatchProgressKey(slot: number, accountId?: string): string {
+export function getWatchProgressKey(slot: number, accountId?: string): string {
   const acc = accountId || getNuvioAccountId() || "anon";
   return `${WATCH_PROGRESS_CACHE_PREFIX}${acc}.slot.${slot}`;
 }
@@ -1088,7 +1089,10 @@ export async function deleteWatchedItemFromNuvio(
   return sendRecordedChanges(profileIndex, accountId, recorded);
 }
 
-function getDismissedNextUpStorageKey(profileIndex: number, accountId?: string | null): string {
+export function getDismissedNextUpStorageKey(
+  profileIndex: number,
+  accountId?: string | null,
+): string {
   const acc = accountId || getNuvioAccountId() || "anon";
   return `harbor.nuvio.dismissedNextUp.v1.${acc}.${profileIndex}`;
 }
@@ -1463,11 +1467,16 @@ export async function markWatchedInNuvio(
 
 const WATCHED_ITEMS_CACHE_PREFIX = "harbor.nuvio.watched_items.";
 
+export function getWatchedItemsKey(slot: number, accountId?: string): string {
+  const acc = accountId || getNuvioAccountId() || "anon";
+  return `${WATCHED_ITEMS_CACHE_PREFIX}${acc}.slot.${slot}`;
+}
+
 export function readCachedWatchedItems(slot?: number, accountId?: string): NuvioWatchedItem[] {
   const profileIndex = slot ?? resolveNuvioProfileIndex();
   const acc = accountId || getNuvioAccountId() || "anon";
   try {
-    const raw = localStorage.getItem(`${WATCHED_ITEMS_CACHE_PREFIX}${acc}.slot.${profileIndex}`);
+    const raw = localStorage.getItem(getWatchedItemsKey(profileIndex, acc));
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) return parsed as NuvioWatchedItem[];
@@ -1483,7 +1492,7 @@ export function writeCachedWatchedItems(
 ): void {
   const acc = accountId || getNuvioAccountId() || "anon";
   try {
-    localStorage.setItem(`${WATCHED_ITEMS_CACHE_PREFIX}${acc}.slot.${slot}`, JSON.stringify(items));
+    localStorage.setItem(getWatchedItemsKey(slot, acc), JSON.stringify(items));
   } catch {}
 }
 
@@ -2615,7 +2624,7 @@ async function pullWatchProgressOnce(
  */
 const memoryAddonCache = new Map<string, NuvioAddonItem[]>();
 
-function getNuvioAddonsCacheKey(slot?: number, accountId?: string): string {
+export function getNuvioAddonsCacheKey(slot?: number, accountId?: string): string {
   const acc = accountId || getNuvioAccountId() || "default";
   return `harbor.nuvio.addons.v1.${acc}.slot.${slot ?? 1}`;
 }
@@ -2875,16 +2884,69 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
   if (!accountId) return false;
 
   try {
-    const progressA = readCachedWatchProgress(slotA);
-    const progressB = readCachedWatchProgress(slotB);
-    const watchedA = readCachedWatchedItems(slotA);
-    const watchedB = readCachedWatchedItems(slotB);
+    const progressA = readCachedWatchProgress(slotA, accountId);
+    const progressB = readCachedWatchProgress(slotB, accountId);
+    const watchedA = readCachedWatchedItems(slotA, accountId);
+    const watchedB = readCachedWatchedItems(slotB, accountId);
     const dismissedA = readCachedDismissedNextUpKeys(slotA, accountId);
     const dismissedB = readCachedDismissedNextUpKeys(slotB, accountId);
 
-    // 1. Swap watched items in cloud
+    // Track writes to destinations so we can recover / rollback if any write fails
+    let pushedWatchedAtoB = false;
+    let pushedWatchedBtoA = false;
+    const pushedProgAtoB: NuvioWatchProgress[] = [];
+    const pushedProgBtoA: NuvioWatchProgress[] = [];
+
+    // Helper for cleaning up destination writes if an error occurs before confirmation
+    const rollbackDestinationWrites = async () => {
+      try {
+        if (pushedWatchedAtoB && watchedA.length > 0) {
+          await deleteWatchedItemFromNuvio(
+            slotB,
+            watchedA.map((w) => ({
+              contentId: w.content_id,
+              season: w.season,
+              episode: w.episode,
+            })),
+          ).catch(() => {});
+        }
+        if (pushedWatchedBtoA && watchedB.length > 0) {
+          await deleteWatchedItemFromNuvio(
+            slotA,
+            watchedB.map((w) => ({
+              contentId: w.content_id,
+              season: w.season,
+              episode: w.episode,
+            })),
+          ).catch(() => {});
+        }
+        for (const p of pushedProgAtoB) {
+          await deleteWatchProgressFromNuvio(
+            slotB,
+            p.content_id,
+            p.progress_key,
+            p.season,
+            p.episode,
+          ).catch(() => {});
+        }
+        for (const p of pushedProgBtoA) {
+          await deleteWatchProgressFromNuvio(
+            slotA,
+            p.content_id,
+            p.progress_key,
+            p.season,
+            p.episode,
+          ).catch(() => {});
+        }
+      } catch (rbErr) {
+        console.error("[nuvio-sync] rollbackDestinationWrites error:", rbErr);
+      }
+    };
+
+    // Phase 1: Write all items to the destination profiles first.
+    // Verify each operation succeeded. Do NOT delete anything from the source profiles yet!
     if (watchedA.length > 0) {
-      await pushWatchedItemToNuvio(
+      const ok = await pushWatchedItemToNuvio(
         slotB,
         watchedA.map((w) => ({
           contentId: w.content_id,
@@ -2895,6 +2957,79 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
           watchedAt: typeof w.watched_at === "number" ? w.watched_at : Date.now(),
         })),
       );
+      if (!ok) {
+        console.error(
+          `[nuvio-sync] Failed to push watched items from slot ${slotA} to slot ${slotB}`,
+        );
+        await rollbackDestinationWrites();
+        return false;
+      }
+      pushedWatchedAtoB = true;
+    }
+
+    if (watchedB.length > 0) {
+      const ok = await pushWatchedItemToNuvio(
+        slotA,
+        watchedB.map((w) => ({
+          contentId: w.content_id,
+          contentType: w.content_type || "series",
+          title: w.title,
+          season: w.season,
+          episode: w.episode,
+          watchedAt: typeof w.watched_at === "number" ? w.watched_at : Date.now(),
+        })),
+      );
+      if (!ok) {
+        console.error(
+          `[nuvio-sync] Failed to push watched items from slot ${slotB} to slot ${slotA}`,
+        );
+        await rollbackDestinationWrites();
+        return false;
+      }
+      pushedWatchedBtoA = true;
+    }
+
+    for (const p of progressA) {
+      const ok = await pushWatchProgressToNuvio(
+        slotB,
+        p.content_id,
+        p.progress_seconds,
+        p.duration_seconds,
+        p.season,
+        p.episode,
+      );
+      if (!ok) {
+        console.error(
+          `[nuvio-sync] Failed to push watch progress for ${p.content_id} to slot ${slotB}`,
+        );
+        await rollbackDestinationWrites();
+        return false;
+      }
+      pushedProgAtoB.push(p);
+    }
+
+    for (const p of progressB) {
+      const ok = await pushWatchProgressToNuvio(
+        slotA,
+        p.content_id,
+        p.progress_seconds,
+        p.duration_seconds,
+        p.season,
+        p.episode,
+      );
+      if (!ok) {
+        console.error(
+          `[nuvio-sync] Failed to push watch progress for ${p.content_id} to slot ${slotA}`,
+        );
+        await rollbackDestinationWrites();
+        return false;
+      }
+      pushedProgBtoA.push(p);
+    }
+
+    // Phase 2: All destination writes have been confirmed successful!
+    // Now safely delete the original items from source profiles.
+    if (watchedA.length > 0) {
       await deleteWatchedItemFromNuvio(
         slotA,
         watchedA.map((w) => ({
@@ -2905,17 +3040,6 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
       );
     }
     if (watchedB.length > 0) {
-      await pushWatchedItemToNuvio(
-        slotA,
-        watchedB.map((w) => ({
-          contentId: w.content_id,
-          contentType: w.content_type || "series",
-          title: w.title,
-          season: w.season,
-          episode: w.episode,
-          watchedAt: typeof w.watched_at === "number" ? w.watched_at : Date.now(),
-        })),
-      );
       await deleteWatchedItemFromNuvio(
         slotB,
         watchedB.map((w) => ({
@@ -2925,36 +3049,18 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
         })),
       );
     }
-
-    // 2. Swap watch progress in cloud
     for (const p of progressA) {
-      await pushWatchProgressToNuvio(
-        slotB,
-        p.content_id,
-        p.progress_seconds,
-        p.duration_seconds,
-        p.season,
-        p.episode,
-      );
       await deleteWatchProgressFromNuvio(slotA, p.content_id, p.progress_key, p.season, p.episode);
     }
     for (const p of progressB) {
-      await pushWatchProgressToNuvio(
-        slotA,
-        p.content_id,
-        p.progress_seconds,
-        p.duration_seconds,
-        p.season,
-        p.episode,
-      );
       await deleteWatchProgressFromNuvio(slotB, p.content_id, p.progress_key, p.season, p.episode);
     }
 
-    // 3. Update local caches in nuvio-sync
-    writeCachedWatchProgress(slotA, progressB);
-    writeCachedWatchProgress(slotB, progressA);
-    writeCachedWatchedItems(slotA, watchedB);
-    writeCachedWatchedItems(slotB, watchedA);
+    // Phase 3: Update local caches in nuvio-sync
+    writeCachedWatchProgress(slotA, progressB, accountId);
+    writeCachedWatchProgress(slotB, progressA, accountId);
+    writeCachedWatchedItems(slotA, watchedB, accountId);
+    writeCachedWatchedItems(slotB, watchedA, accountId);
     writeCachedDismissedNextUpKeys(slotA, dismissedB, accountId);
     writeCachedDismissedNextUpKeys(slotB, dismissedA, accountId);
 
