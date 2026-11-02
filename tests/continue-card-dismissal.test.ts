@@ -24,7 +24,6 @@ function harness() {
     const file = name.replace(/^@\/lib\//, "").replace(/^\.\//, "");
     if (cache.has(file)) return cache.get(file);
     if (file === "react") return { useSyncExternalStore() {} };
-    if (file === "player/playback-history-source") return playbackHistorySource;
     if (file === "stremio")
       return {
         episodeFromVideoId: (id?: string) => {
@@ -51,6 +50,7 @@ function harness() {
         },
         persistCritical() {},
       };
+    if (file === "player/playback-history-source") return playbackHistorySource;
     const mod = { exports: {} };
     cache.set(file, mod.exports);
     const output = ts.transpileModule(
