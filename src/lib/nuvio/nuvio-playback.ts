@@ -110,48 +110,9 @@ function buildSeriesAliasResolver(
     }
   }
 
-  // 4. Correlate by matching non-empty series titles in historical records
-  const byTitle = new Map<string, Set<string>>();
-  const addTitleId = (title: string | undefined | null, id: string | undefined | null) => {
-    if (!title || !id) return;
-    const t = title.trim().toLowerCase();
-    if (t.length < 3) return;
-    let s = byTitle.get(t);
-    if (!s) {
-      s = new Set();
-      byTitle.set(t, s);
-    }
-    s.add(id);
-  };
-  for (const r of records) {
-    addTitleId(r.name || (r as any).title, r.content_id);
-  }
-  for (const w of watched) {
-    addTitleId(w.title, w.content_id);
-  }
-  for (const [, item] of libMap) {
-    if (item && item.content_id) {
-      addTitleId(item.name, item.content_id);
-    }
-  }
-  for (const [, idSet] of byTitle) {
-    if (idSet.size > 1) {
-      const list = Array.from(idSet);
-      const hasImdb = list.some((x) => x.includes("tt"));
-      const hasTmdb = list.some(
-        (x) => x.includes("tmdb") || /^\d+$/.test(x.replace(/^(series|movie):/, "")),
-      );
-      if (hasImdb && hasTmdb) {
-        for (let i = 1; i < list.length; i++) {
-          registerVariants(list[0]);
-          registerVariants(list[i]);
-          union(list[0], list[i]);
-        }
-      }
-    }
-  }
-
-  // 5. Build component sets and select canonical ID per group
+  // 4. Build component sets and select canonical ID per group.
+  // Titles alone never union IDs: two distinct shows can share a name, and the
+  // explicit TMDB <-> IMDb cache above is the only safe evidence for a twin.
   const components = new Map<string, Set<string>>();
   for (const key of parent.keys()) {
     const root = find(key);

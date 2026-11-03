@@ -40,7 +40,10 @@ test("stremio module completely guards libraryPut, bookmarks, and provides compr
 
 test("stremio write queue and flusher strictly refuse execution in Nuvio mode", () => {
   assert.match(stremioWriteQueue, /export async function cloudLibraryPut/);
-  assert.match(stremioWriteQueue, /if \(isNuvioProviderActive\(\)\) return true;/);
+  assert.match(
+    stremioWriteQueue,
+    /if \(isNuvioProviderActive\(\)\) return \{ ok: true, sealed: true \};/,
+  );
   assert.match(stremioWriteQueue, /export async function flushWriteQueue/);
   assert.match(
     stremioWriteQueue,

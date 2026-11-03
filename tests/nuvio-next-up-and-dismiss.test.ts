@@ -227,7 +227,9 @@ test("Nuvio Next Up: mixed IMDb and TMDB records for the same series produce exa
     },
   ];
 
-  const items = buildNuvioPlaybackItems(records, 0, watchedItems);
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems, undefined, false, {
+    tt0944947: "tmdb:1399",
+  });
   // Must NOT produce 2 cards! Exactly 1 consolidated Next Up card!
   assert.equal(
     items.length,
@@ -273,7 +275,9 @@ test("Nuvio Next Up: in-progress episode on TMDB identity suppresses Next-Up gen
     },
   ];
 
-  const items = buildNuvioPlaybackItems(records, 0, watchedItems);
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems, undefined, false, {
+    tt0944947: "tmdb:1399",
+  });
   // Exactly 1 item should be returned (the active in-progress card), with no duplicate Next-Up card generated!
   assert.equal(items.length, 1);
   assert.equal(items[0].upNext, false, "In-progress item should not be upNext");
@@ -309,7 +313,9 @@ test("Nuvio Next Up: in-progress episode on IMDb identity suppresses Next-Up gen
     },
   ];
 
-  const items = buildNuvioPlaybackItems(records, 0, watchedItems);
+  const items = buildNuvioPlaybackItems(records, 0, watchedItems, undefined, false, {
+    tt0944947: "tmdb:1399",
+  });
   assert.equal(items.length, 1);
   assert.equal(items[0].upNext, false);
   assert.equal(items[0].state?.episode, 3);
@@ -474,4 +480,32 @@ test("Nuvio Mobile CW removal: mobile dismissal via bare ID or wildcard suppress
     0,
     "Dismissing bare TMDB ID on mobile must suppress IMDb in-progress and Next-Up cards in Harbor",
   );
+});
+
+test("Nuvio Next Up: same-title shows without an explicit alias stay separate", () => {
+  const now = Date.now();
+  const watchedItems: NuvioWatchedItem[] = [
+    {
+      profile_id: 1,
+      content_id: "tt900001",
+      content_type: "series",
+      title: "Twin Show",
+      season: 1,
+      episode: 1,
+      watched_at: now - 10000,
+    },
+    {
+      profile_id: 1,
+      content_id: "tmdb:900002",
+      content_type: "series",
+      title: "Twin Show",
+      season: 1,
+      episode: 3,
+      watched_at: now - 10000,
+    },
+  ];
+
+  const items = buildNuvioPlaybackItems([], 1, watchedItems);
+  assert.equal(items.length, 2, "title matches alone must not union two distinct shows");
+  assert.deepEqual(new Set(items.map((item) => item._id)), new Set(["tt900001", "tmdb:900002"]));
 });

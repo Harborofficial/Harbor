@@ -10,7 +10,6 @@ import {
   isNuvioSignedIn,
   getNuvioAccountId,
 } from "./nuvio-client";
-import { safeFetch } from "@/lib/safe-fetch";
 import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 import {
   fetchNuvioAddons,
@@ -292,9 +291,13 @@ export async function pushNuvioProfiles(payloads: ProfilePushPayload[]): Promise
   }
 }
 
+const NUVIO_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+const NUVIO_AVATAR_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+
 /**
- * Uploads a custom avatar (Base64 data URL, local path, or Blob) to Supabase Storage
- * or a reliable permanent image CDN fallback, returning a public HTTPS URL.
+ * Uploads a custom avatar (Base64 data URL, local path, or Blob) to Nuvio Storage.
+ * External http(s) URLs are passed through unchanged; binary uploads must be a
+ * supported image type and stay within the size limit.
  */
 export async function uploadNuvioCustomAvatar(
   input: string | Blob,
@@ -302,26 +305,27 @@ export async function uploadNuvioCustomAvatar(
 ): Promise<string | null> {
   if (typeof input === "string") {
     const trimmed = input.trim();
-    if (
-      (trimmed.startsWith("http://") || trimmed.startsWith("https://")) &&
-      trimmed.length <= 2048
-    ) {
-      return trimmed;
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      try {
+        const parsed = new URL(trimmed);
+        if (
+          (parsed.protocol === "https:" || parsed.protocol === "http:") &&
+          trimmed.length <= 2048
+        ) {
+          return trimmed;
+        }
+      } catch {}
+      return null;
     }
   }
 
   const timestamp = Date.now();
-  let ext = "webp";
-  let payloadFilename = `avatar_p${profileIndex}_${timestamp}.webp`;
   let blob: Blob | null = null;
 
   if (typeof input === "string") {
+    if (input.startsWith("data:") && !input.startsWith("data:image/")) return null;
     if (input.startsWith("data:")) {
       const match = input.match(/^data:image\/([a-zA-Z0-9+]+);base64,/);
-      if (match && match[1]) {
-        ext = match[1] === "jpeg" ? "jpg" : match[1];
-        payloadFilename = `avatar_p${profileIndex}_${timestamp}.${ext}`;
-      }
       try {
         const res = await fetch(input);
         blob = await res.blob();
@@ -337,8 +341,6 @@ export async function uploadNuvioCustomAvatar(
         } catch {}
       }
     } else if (input.startsWith("/")) {
-      const parts = input.split("/");
-      payloadFilename = parts[parts.length - 1] || payloadFilename;
       try {
         const fullUrl =
           typeof window !== "undefined" && window.location?.origin
@@ -355,86 +357,48 @@ export async function uploadNuvioCustomAvatar(
     }
   } else if (input instanceof Blob) {
     blob = input;
-    if (blob.type.includes("jpeg") || blob.type.includes("jpg")) ext = "jpg";
-    else if (blob.type.includes("png")) ext = "png";
-    payloadFilename = `avatar_p${profileIndex}_${timestamp}.${ext}`;
   }
 
-  // Upload via public image hosts (Catbox -> Tmpfiles -> Freeimage)
-  if (blob) {
-    // 2a. Catbox
-    try {
-      const fd = new FormData();
-      fd.append("reqtype", "fileupload");
-      fd.append("fileToUpload", blob, payloadFilename);
+  if (!blob) return null;
 
-      const res = await safeFetch("https://catbox.moe/user/api.php", {
-        method: "POST",
-        body: fd,
-      });
-
-      if (res.ok) {
-        const text = (await res.text()).trim();
-        if (text.startsWith("http://") || text.startsWith("https://")) {
-          console.log("[nuvio] Avatar uploaded via safeFetch (Catbox):", text);
-          return text;
-        }
-      }
-    } catch (catboxErr) {
-      console.warn("[nuvio] Catbox safeFetch failed, trying tmpfiles:", catboxErr);
-    }
-
-    // 2b. Tmpfiles (returns direct image download link)
-    try {
-      const fdTmp = new FormData();
-      fdTmp.append("file", blob, payloadFilename);
-
-      const resTmp = await safeFetch("https://tmpfiles.org/api/v1/upload", {
-        method: "POST",
-        body: fdTmp,
-      });
-
-      if (resTmp.ok) {
-        const json = (await resTmp.json()) as { status?: string; data?: { url?: string } };
-        if (json?.status === "success" && json.data?.url) {
-          const directUrl = json.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
-          console.log("[nuvio] Avatar uploaded via safeFetch (Tmpfiles):", directUrl);
-          return directUrl;
-        }
-      }
-    } catch (tmpErr) {
-      console.warn("[nuvio] Tmpfiles safeFetch failed, trying freeimage:", tmpErr);
-    }
-
-    // 2c. Freeimage
-    try {
-      const fd2 = new FormData();
-      fd2.append("key", "6d207e02198a847aa98d0a2a901485a5");
-      fd2.append("action", "upload");
-      fd2.append("source", blob, payloadFilename);
-
-      const res2 = await safeFetch("https://freeimage.host/api/1/upload", {
-        method: "POST",
-        body: fd2,
-      });
-
-      if (res2.ok) {
-        const data = (await res2.json()) as { status_code?: number; image?: { url?: string } };
-        const uploadedUrl = data?.image?.url;
-        if (
-          uploadedUrl &&
-          (uploadedUrl.startsWith("http://") || uploadedUrl.startsWith("https://"))
-        ) {
-          console.log("[nuvio] Avatar uploaded via safeFetch (Freeimage):", uploadedUrl);
-          return uploadedUrl;
-        }
-      }
-    } catch (fiErr) {
-      console.warn("[nuvio] Freeimage safeFetch failed:", fiErr);
-    }
+  const contentType = blob.type.toLowerCase().split(";")[0];
+  if (!NUVIO_AVATAR_TYPES.has(contentType)) {
+    console.warn("[nuvio] Avatar rejected: unsupported image type", contentType || "(none)");
+    return null;
+  }
+  if (blob.size <= 0 || blob.size > NUVIO_AVATAR_MAX_BYTES) {
+    console.warn("[nuvio] Avatar rejected: size", blob.size);
+    return null;
   }
 
-  return null;
+  const accountId = getNuvioAccountId();
+  if (!accountId) return null;
+
+  const extension = contentType.includes("png")
+    ? "png"
+    : contentType.includes("jpeg")
+      ? "jpg"
+      : "webp";
+  const storagePath = `custom/${accountId}/p${profileIndex}-${timestamp}.${extension}`;
+  try {
+    const res = await nuvioFetch(`/storage/v1/object/avatars/${storagePath}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": contentType,
+        "cache-control": "3600",
+        "x-upsert": "true",
+      },
+      body: blob,
+    });
+    if (!res.ok) {
+      console.warn("[nuvio] Avatar upload rejected:", res.status);
+      return null;
+    }
+    return `https://api.nuvio.tv/storage/v1/object/public/avatars/${storagePath}`;
+  } catch (err) {
+    console.warn("[nuvio] Avatar upload failed", err);
+    return null;
+  }
 }
 
 /**
@@ -1225,18 +1189,128 @@ export function clearAllNuvioPinCaches(): void {
     for (const key of keysToRemove) {
       localStorage.removeItem(key);
     }
+    nuvioPinAttempts.clear();
   } catch (e) {
     console.warn("[nuvio-profiles] failed to clear pin caches", e);
   }
 }
 
+const NUVIO_PIN_KDF = "pbkdf2";
+const NUVIO_PIN_ITERATIONS = 120_000;
+const NUVIO_PIN_MAX_FAILURES = 5;
+const NUVIO_PIN_BASE_BLOCK_MS = 30_000;
+const nuvioPinAttempts = new Map<string, { failures: number; blockedUntil: number }>();
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
+function base64ToBytes(value: string): Uint8Array {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function deriveNuvioPinHash(
+  pin: string,
+  salt: Uint8Array,
+  iterations: number,
+): Promise<Uint8Array | null> {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) return null;
+  try {
+    const key = await subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, [
+      "deriveBits",
+    ]);
+    const bits = await subtle.deriveBits(
+      { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+      key,
+      256,
+    );
+    return new Uint8Array(bits);
+  } catch {
+    return null;
+  }
+}
+
+async function hashNuvioPin(pin: string): Promise<string> {
+  const salt = globalThis.crypto?.getRandomValues(new Uint8Array(16));
+  const derived = salt ? await deriveNuvioPinHash(pin, salt, NUVIO_PIN_ITERATIONS) : null;
+  if (!salt || !derived) return hashProfilePassword(pin);
+  return `${NUVIO_PIN_KDF}$${NUVIO_PIN_ITERATIONS}$${bytesToBase64(salt)}$${bytesToBase64(derived)}`;
+}
+
+function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
+async function verifyNuvioPinHash(pin: string, storedHash: string): Promise<boolean> {
+  const parts = storedHash.split("$");
+  if (parts.length === 4 && parts[0] === NUVIO_PIN_KDF) {
+    const iterations = Number(parts[1]);
+    if (!Number.isInteger(iterations) || iterations < 10_000 || iterations > 1_000_000) {
+      return false;
+    }
+    try {
+      const salt = base64ToBytes(parts[2]);
+      const expected = base64ToBytes(parts[3]);
+      const actual = await deriveNuvioPinHash(pin, salt, iterations);
+      return Boolean(actual && timingSafeEqualBytes(actual, expected));
+    } catch {
+      return false;
+    }
+  }
+  // Legacy fixed-salt SHA-256 cache from earlier builds.
+  return (await hashProfilePassword(pin)) === storedHash;
+}
+
+function pinAttemptKey(profileIndex: number): string {
+  return `${getNuvioAccountId() || "anon"}:${profileIndex}`;
+}
+
+function pinThrottleResult(profileIndex: number): PinVerifyResult | null {
+  const entry = nuvioPinAttempts.get(pinAttemptKey(profileIndex));
+  if (!entry) return null;
+  const retryAfter = Math.ceil((entry.blockedUntil - Date.now()) / 1000);
+  if (retryAfter <= 0) return null;
+  return {
+    unlocked: false,
+    retry_after_seconds: retryAfter,
+    message: `Too many attempts. Try again in ${retryAfter}s.`,
+  };
+}
+
+function noteNuvioPinFailure(profileIndex: number, retryAfterSeconds = 0): PinVerifyResult | null {
+  const key = pinAttemptKey(profileIndex);
+  const entry = nuvioPinAttempts.get(key) ?? { failures: 0, blockedUntil: 0 };
+  entry.failures += 1;
+  if (retryAfterSeconds > 0) {
+    entry.blockedUntil = Math.max(entry.blockedUntil, Date.now() + retryAfterSeconds * 1000);
+  } else if (entry.failures % NUVIO_PIN_MAX_FAILURES === 0) {
+    const rounds = entry.failures / NUVIO_PIN_MAX_FAILURES;
+    entry.blockedUntil = Date.now() + NUVIO_PIN_BASE_BLOCK_MS * Math.min(8, 2 ** (rounds - 1));
+  }
+  nuvioPinAttempts.set(key, entry);
+  return pinThrottleResult(profileIndex);
+}
+
+function clearNuvioPinFailures(profileIndex: number): void {
+  nuvioPinAttempts.delete(pinAttemptKey(profileIndex));
+}
+
 /**
  * Local PIN cache utilities (matches Nuvio Mobile ProfilePinCacheStorage).
- * Caches verified and set PIN digests for instantaneous 0ms profile unlocks.
+ * Caches salted PBKDF2 digests for instantaneous 0ms profile unlocks.
  */
 export async function rememberNuvioPin(profileIndex: number, pin: string): Promise<void> {
   try {
-    const hash = await hashProfilePassword(pin);
+    const hash = await hashNuvioPin(pin);
     localStorage.setItem(getPinCacheKey(profileIndex), hash);
   } catch {}
 }
@@ -1251,8 +1325,12 @@ export async function verifyNuvioPinLocally(profileIndex: number, pin: string): 
   try {
     const cachedHash = localStorage.getItem(getPinCacheKey(profileIndex));
     if (!cachedHash) return false;
-    const candidate = await hashProfilePassword(pin);
-    return candidate === cachedHash;
+    const matches = await verifyNuvioPinHash(pin, cachedHash);
+    if (matches && !cachedHash.startsWith(`${NUVIO_PIN_KDF}$`)) {
+      // Upgrade the legacy fixed-salt digest in place.
+      void rememberNuvioPin(profileIndex, pin);
+    }
+    return matches;
   } catch {
     return false;
   }
@@ -1343,16 +1421,21 @@ export async function verifyNuvioPin(
   pin: string,
   options?: { skipProfilePull?: boolean },
 ): Promise<PinVerifyResult> {
+  const throttled = pinThrottleResult(profileIndex);
+  if (throttled) return throttled;
+
   // 1. Fast local verification (0ms unlock without network roundtrip)
   const isMatchLocally = await verifyNuvioPinLocally(profileIndex, pin);
   if (isMatchLocally) {
+    clearNuvioPinFailures(profileIndex);
     nuvioSessionUnlockedIndices.add(profileIndex);
     sessionPlaintextPins.set(profileIndex, pin);
     return { unlocked: true };
   }
 
   if (!isNuvioSignedIn()) {
-    return { unlocked: false, message: "Not signed in to Nuvio" };
+    const throttle = noteNuvioPinFailure(profileIndex);
+    return throttle ?? { unlocked: false, message: "Not signed in to Nuvio" };
   }
 
   try {
@@ -1367,7 +1450,8 @@ export async function verifyNuvioPin(
 
     if (!res.ok) {
       const errJson = (await res.json().catch(() => ({}))) as { message?: string };
-      return { unlocked: false, message: errJson.message || "Invalid PIN" };
+      const throttle = noteNuvioPinFailure(profileIndex);
+      return throttle ?? { unlocked: false, message: errJson.message || "Invalid PIN" };
     }
 
     const raw = await res.json();
@@ -1375,10 +1459,15 @@ export async function verifyNuvioPin(
     const unlocked = Boolean(data?.unlocked ?? (typeof raw === "boolean" ? raw : false));
 
     if (unlocked) {
+      clearNuvioPinFailures(profileIndex);
       nuvioSessionUnlockedIndices.add(profileIndex);
       sessionPlaintextPins.set(profileIndex, pin);
       void rememberNuvioPin(profileIndex, pin);
       if (!options?.skipProfilePull) void pullNuvioProfiles();
+    } else {
+      const retryAfter = Math.max(0, Number(data?.retry_after_seconds) || 0);
+      const throttle = noteNuvioPinFailure(profileIndex, retryAfter);
+      if (throttle) return throttle;
     }
 
     return {
@@ -1388,7 +1477,8 @@ export async function verifyNuvioPin(
     };
   } catch (err) {
     console.error("[nuvio] failed to verify PIN", err);
-    return { unlocked: false, message: "Network error verifying PIN" };
+    const throttle = noteNuvioPinFailure(profileIndex);
+    return throttle ?? { unlocked: false, message: "Network error verifying PIN" };
   }
 }
 
