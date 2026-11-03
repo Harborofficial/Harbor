@@ -45,7 +45,6 @@ import { resolveAddonOrigin } from "@/lib/nuvio/nuvio-addon-registry";
 import {
   deleteWatchProgressFromNuvio,
   isNuvioProviderActive,
-  reconcileNuvioWatched,
   resolveNuvioProfileIndex,
 } from "@/lib/nuvio/nuvio-sync";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
@@ -106,12 +105,7 @@ import {
   peekSimklWatchedMap,
   type WatchlistStatus,
 } from "@/lib/simkl/list-status";
-import {
-  refreshExternalCw,
-  removeExternalCwItem,
-  setExternalCwSources,
-  useExternalCw,
-} from "@/lib/feed/external-cw";
+import { removeExternalCwItem, setExternalCwSources, useExternalCw } from "@/lib/feed/external-cw";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useAnilist } from "@/lib/anilist/provider";
 import { loadAnilistWatchedMap } from "@/lib/anilist/watched-map";
@@ -665,42 +659,17 @@ export function Home({
     const onProfile = () => {
       setNuvioProfileSwitching(true);
       setBuildTick((n) => n + 1);
-      if (isNuvioProvider) {
-        void reconcileNuvioWatched();
-        void refreshExternalCw(true);
-      }
       clearTimeout(timer);
       timer = setTimeout(() => setNuvioProfileSwitching(false), 300);
     };
-    if (isNuvioProvider) {
-      void reconcileNuvioWatched(undefined, { force: true });
-      void refreshExternalCw(true);
-    }
-    const onFocus = () => {
-      if (document.visibilityState === "visible" && isNuvioProvider) {
-        void reconcileNuvioWatched(undefined, { force: true });
-        void refreshExternalCw(true);
-      }
-    };
-    const periodicSync = setInterval(() => {
-      if (document.visibilityState === "visible" && isNuvioProvider) {
-        void reconcileNuvioWatched(undefined, { force: true });
-        void refreshExternalCw(true);
-      }
-    }, 30000);
     window.addEventListener("harbor:nuvio-profile-changed", onProfile);
     window.addEventListener("harbor:account-provider-changed", onProfile);
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onFocus);
     return () => {
       clearTimeout(timer);
-      clearInterval(periodicSync);
       window.removeEventListener("harbor:nuvio-profile-changed", onProfile);
       window.removeEventListener("harbor:account-provider-changed", onProfile);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [isNuvioProvider]);
+  }, []);
 
   const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);

@@ -1,4 +1,5 @@
 import { startNuvioMutationRetry } from "@/lib/nuvio/nuvio-sync";
+import { useNuvioSyncLoop } from "@/lib/nuvio/nuvio-sync-runtime";
 import { GAMES_IN_NAV } from "@/chrome/nav-items";
 import { GameAccessProvider } from "@/views/games/game-access-context";
 import { GameLibraryDock } from "@/views/games/game-library-dock";
@@ -565,6 +566,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                         <IdleAwayRunner />
                                                         <SessionRefreshRunner />
                                                         <StremioLeachedExpungeRunner />
+                                                        <NuvioSyncLoopRunner />
                                                         <RemoteHostMount />
                                                         <RemoteOpenBridge />
                                                       </AfterFirstPaint>
@@ -762,6 +764,11 @@ function StremioLeachedExpungeRunner() {
     if (!isNuvioProviderActive()) return;
     void expungeLeachedNuvioItemsFromStremio().catch(() => {});
   }, []);
+  return null;
+}
+
+function NuvioSyncLoopRunner() {
+  useNuvioSyncLoop();
   return null;
 }
 
