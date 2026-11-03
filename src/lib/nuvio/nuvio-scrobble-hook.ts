@@ -34,6 +34,8 @@ export function useNuvioScrobble({
   const lastPushedTimeRef = useRef<number>(0);
   const watchedReportedRef = useRef<boolean>(false);
   const isPushingRef = useRef<boolean>(false);
+  const pinnedProfileTargetRef = useRef<number | null>(null);
+  const pendingPushRef = useRef<string | null>(null);
 
   const snapRef = useRef(snap);
   snapRef.current = snap;
@@ -58,8 +60,22 @@ export function useNuvioScrobble({
     return resolveNuvioProfileIndex(harborProfile);
   };
 
+  // Pin the slot at playback start: switching profiles mid-playback must not
+  // redirect this session's progress to another profile.
+  const resolvePinnedProfileTarget = () => {
+    if (pinnedProfileTargetRef.current == null) {
+      pinnedProfileTargetRef.current = getProfileTarget();
+    }
+    return pinnedProfileTargetRef.current;
+  };
+
   const doPush = async (reason: string) => {
-    if (!isNuvioSignedIn() || !isNuvioProviderActive() || isPushingRef.current) return;
+    if (!isNuvioSignedIn() || !isNuvioProviderActive()) return;
+    if (isPushingRef.current) {
+      // Keep the final flush instead of dropping it behind an in-flight push.
+      pendingPushRef.current = reason;
+      return;
+    }
     const currentSnap = snapRef.current;
     const clockPos = getPlaybackPosition();
     const effectivePos =
@@ -67,7 +83,7 @@ export function useNuvioScrobble({
     if (currentSnap.durationSec <= 0 || effectivePos < MIN_POSITION_SEC) return;
 
     const currentSrc = srcRef.current;
-    const profileTarget = getProfileTarget();
+    const profileTarget = resolvePinnedProfileTarget();
 
     isPushingRef.current = true;
     lastPushedPosRef.current = effectivePos;
@@ -103,6 +119,9 @@ export function useNuvioScrobble({
       console.warn(`[nuvio-scrobble] push failed (${reason})`, err);
     } finally {
       isPushingRef.current = false;
+      const pendingReason = pendingPushRef.current;
+      pendingPushRef.current = null;
+      if (pendingReason) void doPush(pendingReason);
     }
   };
 
@@ -110,6 +129,8 @@ export function useNuvioScrobble({
     lastPushedPosRef.current = 0;
     lastPushedTimeRef.current = 0;
     watchedReportedRef.current = false;
+    pinnedProfileTargetRef.current = null;
+    pendingPushRef.current = null;
   }, [metaId, effSeason, effEpisode]);
 
   // Active playback interval checking clock position directly (since snap.positionSec doesn't rerender every second)
@@ -124,7 +145,7 @@ export function useNuvioScrobble({
       if (curSnap.durationSec <= 0) return;
 
       const progressPct = clockPos / curSnap.durationSec;
-      const profileTarget = getProfileTarget();
+      const profileTarget = resolvePinnedProfileTarget();
 
       if (progressPct >= 0.9 && !watchedReportedRef.current) {
         watchedReportedRef.current = true;

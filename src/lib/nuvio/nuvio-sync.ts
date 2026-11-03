@@ -1141,6 +1141,51 @@ export function writeCachedDismissedNextUpKeys(
   } catch {}
 }
 
+function getPendingDismissedNextUpKey(profileIndex: number, accountId: string): string {
+  return `harbor.nuvio.dismissedNextUp.pending.v1.${accountId}.slot.${profileIndex}`;
+}
+
+function readPendingDismissedNextUpKeys(profileIndex: number, accountId: string): Set<string> {
+  try {
+    const raw = localStorage.getItem(getPendingDismissedNextUpKey(profileIndex, accountId));
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed.filter((k) => typeof k === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function writePendingDismissedNextUpKeys(
+  profileIndex: number,
+  accountId: string,
+  keys: Set<string>,
+): void {
+  try {
+    const storageKey = getPendingDismissedNextUpKey(profileIndex, accountId);
+    if (keys.size === 0) localStorage.removeItem(storageKey);
+    else localStorage.setItem(storageKey, JSON.stringify(Array.from(keys)));
+  } catch {}
+}
+
+function rememberPendingDismissedKeys(
+  profileIndex: number,
+  accountId: string,
+  keys: string[],
+): void {
+  const pending = readPendingDismissedNextUpKeys(profileIndex, accountId);
+  for (const key of keys) pending.add(key);
+  writePendingDismissedNextUpKeys(profileIndex, accountId, pending);
+}
+
+function forgetPendingDismissedKeys(profileIndex: number, accountId: string, keys: string[]): void {
+  const pending = readPendingDismissedNextUpKeys(profileIndex, accountId);
+  let changed = false;
+  for (const key of keys) {
+    if (pending.delete(key)) changed = true;
+  }
+  if (changed) writePendingDismissedNextUpKeys(profileIndex, accountId, pending);
+}
+
 /**
  * Returns true if a content item or episode is in the dismissed next up set
  */
@@ -1248,6 +1293,10 @@ export async function pullDismissedNextUpKeysFromNuvio(
         if (typeof k === "string" && k.trim()) dismissed.add(k.trim());
       }
     }
+    // Keep local dismissals whose cloud push has not been acknowledged yet.
+    for (const k of readPendingDismissedNextUpKeys(profileIndex, originatingAccountId)) {
+      dismissed.add(k);
+    }
     writeCachedDismissedNextUpKeys(profileIndex, dismissed, originatingAccountId);
     return dismissed;
   } catch {
@@ -1282,6 +1331,17 @@ export async function undismissNextUpInNuvioCloud(
   }
   if (localChanged) {
     writeCachedDismissedNextUpKeys(profileIndex, cached, accountId);
+  }
+  const pendingDismissed = readPendingDismissedNextUpKeys(profileIndex, accountId);
+  let pendingChanged = false;
+  for (const k of Array.from(pendingDismissed)) {
+    if (idVariants.some((v) => k === v || k.startsWith(`${v}|`))) {
+      pendingDismissed.delete(k);
+      pendingChanged = true;
+    }
+  }
+  if (pendingChanged) {
+    writePendingDismissedNextUpKeys(profileIndex, accountId, pendingDismissed);
   }
 
   try {
@@ -1379,6 +1439,7 @@ export async function dismissNextUpInNuvioCloud(
     cached.add(k);
   }
   writeCachedDismissedNextUpKeys(profileIndex, cached, accountId);
+  rememberPendingDismissedKeys(profileIndex, accountId, targetKeys);
 
   try {
     const pullRes = await nuvioFetch("/rest/v1/rpc/sync_pull_profile_settings_blob", {
@@ -1434,8 +1495,10 @@ export async function dismissNextUpInNuvioCloud(
           p_origin_client_id: clientId,
         }),
       });
+      if (pushRes.ok) forgetPendingDismissedKeys(profileIndex, accountId, targetKeys);
       return pushRes.ok;
     }
+    forgetPendingDismissedKeys(profileIndex, accountId, targetKeys);
     return true;
   } catch (err) {
     console.warn("[nuvio-sync] failed to dismiss next up in cloud:", err);
@@ -1499,19 +1562,41 @@ export function writeCachedWatchedItems(
 /**
  * Pulls watched items for a specific profile slot from Nuvio
  */
-export async function pullWatchedItemsFromNuvio(
+const watchedPullInflight = new Map<string, Promise<NuvioWatchedItem[] | null>>();
+
+export function pullWatchedItemsFromNuvio(
   harborProfileId?: string | number,
-  options?: { force?: boolean },
+  options?: { force?: boolean; allowInactiveSlot?: boolean },
 ): Promise<NuvioWatchedItem[] | null> {
-  if (!isNuvioSignedIn() || !isNuvioProviderActive()) return null;
+  if (!isNuvioSignedIn() || !isNuvioProviderActive()) return Promise.resolve(null);
   const accountId = getNuvioAccountId();
-  if (!accountId) return null;
+  if (!accountId) return Promise.resolve(null);
   const slot = resolveNuvioProfileIndex(harborProfileId);
+  const key = `${accountId}:${slot}:${options?.force ? "force" : "normal"}:${
+    options?.allowInactiveSlot ? "any" : "active"
+  }`;
+  const existing = watchedPullInflight.get(key);
+  if (existing) return existing;
+  const work = pullWatchedItemsOnce(slot, accountId, options);
+  watchedPullInflight.set(key, work);
+  void work
+    .finally(() => {
+      if (watchedPullInflight.get(key) === work) watchedPullInflight.delete(key);
+    })
+    .catch(() => {});
+  return work;
+}
+
+async function pullWatchedItemsOnce(
+  slot: number,
+  accountId: string,
+  options?: { force?: boolean; allowInactiveSlot?: boolean },
+): Promise<NuvioWatchedItem[] | null> {
   const stillCurrent = () =>
     isNuvioSignedIn() &&
     isNuvioProviderActive() &&
     getNuvioAccountId() === accountId &&
-    resolveNuvioProfileIndex() === slot;
+    (options?.allowInactiveSlot || resolveNuvioProfileIndex() === slot);
   const fullSyncKey = `watched:${accountId}:${slot}`;
   const lastFullSync = lastFullSyncAt.get(fullSyncKey) ?? 0;
   if (!options?.force && lastFullSync && Date.now() - lastFullSync < FULL_SYNC_INTERVAL_MS)
@@ -1566,6 +1651,7 @@ export async function pullWatchedItemsFromNuvio(
 
   if (rpcRows !== null || confirmedEmpty) {
     const allRpc = [...(rpcRows ?? [])];
+    let paginationComplete = true;
     if (allRpc.length >= 1000) {
       let page = 2;
       while (page <= 50) {
@@ -1575,17 +1661,28 @@ export async function pullWatchedItemsFromNuvio(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ p_profile_id: slot, p_page: page, p_page_size: 1000 }),
           });
-          if (!stillCurrent() || !res.ok) break;
+          if (!stillCurrent()) return null;
+          if (!res.ok) {
+            paginationComplete = false;
+            break;
+          }
           const rows: unknown = await res.json();
-          if (!Array.isArray(rows) || !rows.every((row) => validRow(row, slot, accountId))) break;
+          if (!Array.isArray(rows) || !rows.every((row) => validRow(row, slot, accountId))) {
+            paginationComplete = false;
+            break;
+          }
           allRpc.push(...(rows as NuvioWatchedItem[]));
           if (rows.length < 1000) break;
           page++;
         } catch {
+          paginationComplete = false;
           break;
         }
       }
     }
+    // A partial page would later prune local watched state for every row past
+    // the failure, so only a terminal, fully read snapshot is authoritative.
+    if (!paginationComplete) return null;
     if (!stillCurrent()) return null;
     lastFullSyncAt.set(fullSyncKey, Date.now());
     writeCachedWatchedItems(slot, allRpc, accountId);
@@ -2098,8 +2195,10 @@ async function reconcileNuvioWatchedOnce(
       saveLocalCw(midwayEntry, `nuvio-${profileIndex}`);
     }
 
+    // Re-read progress: scrobbles may have landed while this loop awaited
+    // per-entry metadata. Building from the opening snapshot would roll them back.
     const built = buildNuvioPlaybackItems(
-      progressItems ?? [],
+      readCachedWatchProgress(profileIndex),
       profileIndex,
       items,
       dismissedKeys,
@@ -2418,7 +2517,9 @@ export function pullWatchProgressFromNuvio(
     isNuvioProviderActive() &&
     getNuvioAccountId() === accountId &&
     resolveNuvioProfileIndex() === activeSlot;
-  const work = pullWatchProgressOnce(slot, accountId, stillCurrent, options?.force);
+  const work = pullWatchProgressOnce(slot, accountId, stillCurrent, options?.force).then(
+    (rows) => rows ?? [],
+  );
   progressPullInflight.set(key, work);
   void work
     .finally(() => {
@@ -2428,12 +2529,30 @@ export function pullWatchProgressFromNuvio(
   return work;
 }
 
+/**
+ * Strict pull for destructive flows (profile transfer): only returns rows when
+ * the cloud snapshot is provably complete, never the local cache.
+ */
+export function pullWatchProgressSnapshotFromNuvio(
+  harborProfileId: string | number,
+  accountId?: string,
+): Promise<NuvioWatchProgress[] | null> {
+  if (!isNuvioSignedIn() || !isNuvioProviderActive()) return Promise.resolve(null);
+  const resolvedAccountId = accountId || getNuvioAccountId();
+  if (!resolvedAccountId) return Promise.resolve(null);
+  const slot = resolveNuvioProfileIndex(harborProfileId);
+  const stillCurrent = () =>
+    isNuvioSignedIn() && isNuvioProviderActive() && getNuvioAccountId() === resolvedAccountId;
+  return pullWatchProgressOnce(slot, resolvedAccountId, stillCurrent, true, true);
+}
+
 async function pullWatchProgressOnce(
   slot: number,
   accountId: string,
   stillCurrent: () => boolean,
   force = false,
-): Promise<NuvioWatchProgress[]> {
+  strict = false,
+): Promise<NuvioWatchProgress[] | null> {
   const startedAt = Date.now();
   const pending = readPending(slot, accountId);
   let raw: unknown[] | null = null;
@@ -2444,7 +2563,7 @@ async function pullWatchProgressOnce(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ p_profile_id: slot }),
     });
-    if (!stillCurrent()) return [];
+    if (!stillCurrent()) return strict ? null : [];
     if (res.ok) {
       const rows: unknown = await res.json();
       if (Array.isArray(rows) && rows.every((row) => validRow(row, slot, accountId))) raw = rows;
@@ -2452,7 +2571,7 @@ async function pullWatchProgressOnce(
   } catch {
     // The table snapshot can still provide an authoritative response.
   }
-  if (!stillCurrent()) return [];
+  if (!stillCurrent()) return strict ? null : [];
   const rpcRows = raw;
   const rpcCoordinates = new Set((rpcRows ?? []).map((row) => coordinate(row as NuvioCoordinate)));
   const needsConfirmation = Object.values(readPending(slot, accountId)).some(
@@ -2498,8 +2617,11 @@ async function pullWatchProgressOnce(
     }
   }
 
-  if (!stillCurrent()) return [];
-  if (!raw || (raw.length === 0 && !complete)) return readCachedWatchProgress(slot, accountId);
+  if (!stillCurrent()) return strict ? null : [];
+  if (!raw || (raw.length === 0 && !complete)) {
+    return strict ? null : readCachedWatchProgress(slot, accountId);
+  }
+  if (strict && !complete) return null;
 
   const previous = readCachedWatchProgress(slot, accountId);
   const byCoordinate = new Map(previous.map((row) => [coordinate(row), row]));
@@ -2588,24 +2710,28 @@ async function pullWatchProgressOnce(
     else items.push(localRow);
   }
   const ids = reconcileNuvioProgressHistory(allowedPrevious, items, slot, complete, startedAt);
-  if (!stillCurrent()) return [];
+  if (!stillCurrent()) return strict ? null : [];
   items.sort((a, b) => progressTime(b) - progressTime(a));
   writeCachedWatchProgress(slot, items, accountId);
-  try {
-    const playback = readCachedNuvioPlaybackItems(slot, accountId);
-    writeCachedNuvioPlaybackItems(
-      slot,
-      playback.filter(
-        (row) =>
-          row.upNext === true ||
-          ids.has(row._id) ||
-          ids.has(row._id.replace(/^(series|movie|tmdb):/, "")),
-      ),
-      accountId,
-    );
-    localStorage.removeItem(`harbor.nuvio.playback_items.slot.${slot}`);
-  } catch {
-    // A disposable playback cache cannot reject a verified progress snapshot.
+  // Strict pulls hydrate a destructive transfer; they must not prune the
+  // playback cache before the local swap captures it.
+  if (!strict) {
+    try {
+      const playback = readCachedNuvioPlaybackItems(slot, accountId);
+      writeCachedNuvioPlaybackItems(
+        slot,
+        playback.filter(
+          (row) =>
+            row.upNext === true ||
+            ids.has(row._id) ||
+            ids.has(row._id.replace(/^(series|movie|tmdb):/, "")),
+        ),
+        accountId,
+      );
+      localStorage.removeItem(`harbor.nuvio.playback_items.slot.${slot}`);
+    } catch {
+      // A disposable playback cache cannot reject a verified progress snapshot.
+    }
   }
   saveLatestNuvioLocalProgress(items, slot);
   const state = loadNuvioState();
@@ -3127,6 +3253,21 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
       }
     };
 
+    // Once Phase 2 starts deleting source rows, a failure must restore the
+    // originals. Remove destination copies first, then re-push every source row
+    // so overlapping coordinates end up owned by the correct slot again.
+    const restoreOriginalCloudData = async () => {
+      await rollbackDestinationWrites();
+      try {
+        await migrateCloudPushWatched(slotA, watchedA);
+        await migrateCloudPushWatched(slotB, watchedB);
+        await migrateCloudPushProgress(slotA, progressA);
+        await migrateCloudPushProgress(slotB, progressB);
+      } catch (restoreErr) {
+        console.error("[nuvio-sync] restoreOriginalCloudData error:", restoreErr);
+      }
+    };
+
     // Phase 1: Write all items to destination profiles first via explicit profile migration.
     // Verify each operation succeeded before deleting anything from source profiles.
     if (watchedA.length > 0) {
@@ -3178,34 +3319,47 @@ export async function swapNuvioProfileCloudData(slotA: number, slotB: number): P
     }
 
     // Phase 2: All destination writes confirmed! Now delete exact records from source profiles.
-    // Verify every single deletion result.
-    if (watchedA.length > 0) {
-      const delOk = await migrateCloudDeleteWatched(slotA, watchedA);
-      if (!delOk) {
-        console.error(`[nuvio-sync] Failed to delete source watched items from slot ${slotA}`);
-        return false;
+    // Verify every single deletion result and restore the originals on any failure.
+    try {
+      if (watchedA.length > 0) {
+        const delOk = await migrateCloudDeleteWatched(slotA, watchedA);
+        if (!delOk) {
+          console.error(`[nuvio-sync] Failed to delete source watched items from slot ${slotA}`);
+          await restoreOriginalCloudData();
+          return false;
+        }
       }
-    }
-    if (watchedB.length > 0) {
-      const delOk = await migrateCloudDeleteWatched(slotB, watchedB);
-      if (!delOk) {
-        console.error(`[nuvio-sync] Failed to delete source watched items from slot ${slotB}`);
-        return false;
+      if (watchedB.length > 0) {
+        const delOk = await migrateCloudDeleteWatched(slotB, watchedB);
+        if (!delOk) {
+          console.error(`[nuvio-sync] Failed to delete source watched items from slot ${slotB}`);
+          await restoreOriginalCloudData();
+          return false;
+        }
       }
-    }
-    if (progressA.length > 0) {
-      const delOk = await migrateCloudDeleteProgress(slotA, progressA);
-      if (!delOk) {
-        console.error(`[nuvio-sync] Failed to delete source watch progress from slot ${slotA}`);
-        return false;
+      if (progressA.length > 0) {
+        const delOk = await migrateCloudDeleteProgress(slotA, progressA);
+        if (!delOk) {
+          console.error(`[nuvio-sync] Failed to delete source watch progress from slot ${slotA}`);
+          await restoreOriginalCloudData();
+          return false;
+        }
       }
-    }
-    if (progressB.length > 0) {
-      const delOk = await migrateCloudDeleteProgress(slotB, progressB);
-      if (!delOk) {
-        console.error(`[nuvio-sync] Failed to delete source watch progress from slot ${slotB}`);
-        return false;
+      if (progressB.length > 0) {
+        const delOk = await migrateCloudDeleteProgress(slotB, progressB);
+        if (!delOk) {
+          console.error(`[nuvio-sync] Failed to delete source watch progress from slot ${slotB}`);
+          await restoreOriginalCloudData();
+          return false;
+        }
       }
+    } catch (deleteErr) {
+      console.error(
+        "[nuvio-sync] source deletion failed; restoring original cloud data",
+        deleteErr,
+      );
+      await restoreOriginalCloudData();
+      return false;
     }
 
     // Phase 3: Update local caches in nuvio-sync

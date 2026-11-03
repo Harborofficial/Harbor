@@ -13,6 +13,8 @@ import {
   resolveNuvioProfileIndex,
   readCachedWatchProgress,
   writeCachedWatchProgress,
+  readCachedWatchedItems,
+  writeCachedWatchedItems,
   flushPendingNuvioMutations,
   startNuvioMutationRetry,
 } from "../src/lib/nuvio/nuvio-sync";
@@ -1020,5 +1022,42 @@ test("progress delivery never forces a watched-history snapshot", async () => {
     server.online();
     assert.equal(await flushPendingNuvioMutations(), true);
     assert.ok(paths.every((path) => !path.includes("watched_items")));
+  });
+});
+
+test("a failed watched pagination page rejects the whole snapshot", async () => {
+  await customSnapshot("watched-pagination", async (accountId) => {
+    const cached = { profile_id: 1, content_id: "tt-cached", watched_at: NOW };
+    writeCachedWatchedItems(1, [cached as any], accountId);
+    const firstPage = Array.from({ length: 1000 }, (_, index) => ({
+      profile_id: 1,
+      content_id: `tt${10_000 + index}`,
+      season: 1,
+      episode: 1,
+      watched_at: NOW,
+    }));
+
+    globalThis.fetch = (async (url: any, opts?: any) => {
+      const u = String(url);
+      if (u.includes("sync_pull_watched_items")) {
+        const body = JSON.parse(opts?.body ?? "{}");
+        if (body.p_page === 1) {
+          return new Response(JSON.stringify(firstPage), { status: 200 });
+        }
+        return new Response("page unavailable", { status: 500 });
+      }
+      if (u.includes("/rest/v1/watched_items?")) {
+        return new Response("table unavailable", { status: 500 });
+      }
+      return new Response(JSON.stringify({}), { status: 200 });
+    }) as typeof fetch;
+
+    const pulled = await pullWatchedItemsFromNuvio(1, { force: true });
+    assert.equal(pulled, null, "a partial page must not be treated as a full snapshot");
+    assert.deepEqual(
+      readCachedWatchedItems(1, accountId).map((row) => row.content_id),
+      ["tt-cached"],
+      "the existing watched cache must survive a truncated snapshot",
+    );
   });
 });

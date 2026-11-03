@@ -195,6 +195,22 @@ export function EditorView({
   const [transferTarget, setTransferTarget] = useState<string | null>(null);
   const [transferBusy, setTransferBusy] = useState(false);
   const [transferError, setTransferError] = useState<string | null>(null);
+  const [transferSourcePin, setTransferSourcePin] = useState("");
+  const [transferTargetPin, setTransferTargetPin] = useState("");
+  const transferTargetSlot = transferTarget
+    ? parseInt(transferTarget.replace(/\D/g, ""), 10)
+    : null;
+  const transferSourcePinRequired = Boolean(
+    isNuvio && nuvioState.profiles.find((p) => p.profile_index === 1)?.pin_enabled,
+  );
+  const transferTargetPinRequired = Boolean(
+    isNuvio &&
+    transferTargetSlot !== null &&
+    nuvioState.profiles.find((p) => p.profile_index === transferTargetSlot)?.pin_enabled,
+  );
+  const transferPinsReady =
+    (!transferSourcePinRequired || transferSourcePin.length === 4) &&
+    (!transferTargetPinRequired || transferTargetPin.length === 4);
   const [draftPin, setDraftPin] = useState<string | null>(null);
   const [draftLockedTabs, setDraftLockedTabs] = useState<HiddenTabs | null>(
     editing?.lockedTabs ?? null,
@@ -1207,7 +1223,11 @@ export function EditorView({
             {!transferOpen ? (
               <button
                 type="button"
-                onClick={() => setTransferOpen(true)}
+                onClick={() => {
+                  setTransferOpen(true);
+                  setTransferSourcePin("");
+                  setTransferTargetPin("");
+                }}
                 className="h-9 self-start rounded-lg border border-edge-soft px-3 text-[15px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Transfer to another profile")}
@@ -1220,7 +1240,11 @@ export function EditorView({
                     <button
                       key={p.id}
                       type="button"
-                      onClick={() => setTransferTarget(p.id)}
+                      onClick={() => {
+                        setTransferTarget(p.id);
+                        setTransferTargetPin("");
+                        setTransferError(null);
+                      }}
                       className={`flex items-center gap-2.5 rounded-lg border p-2 text-start transition-colors ${
                         sel
                           ? "border-accent bg-accent/10"
@@ -1254,6 +1278,44 @@ export function EditorView({
                 {transferError && (
                   <p className="text-xs font-medium text-red-400">{transferError}</p>
                 )}
+                {(transferSourcePinRequired || transferTargetPinRequired) && (
+                  <div className="flex flex-wrap items-end gap-3 pt-1">
+                    {transferSourcePinRequired && (
+                      <label className="flex flex-col gap-1.5 text-[13px] text-ink-muted">
+                        {t("Primary profile PIN")}
+                        <input
+                          type="password"
+                          inputMode="numeric"
+                          autoComplete="off"
+                          maxLength={4}
+                          value={transferSourcePin}
+                          onChange={(e) =>
+                            setTransferSourcePin(e.target.value.replace(/\D/g, "").slice(0, 4))
+                          }
+                          aria-label={t("Primary profile PIN")}
+                          className="h-10 w-32 rounded-lg border border-edge bg-canvas px-3 text-[15px] tracking-[0.3em] text-ink outline-none transition-colors focus:border-ink-subtle"
+                        />
+                      </label>
+                    )}
+                    {transferTargetPinRequired && (
+                      <label className="flex flex-col gap-1.5 text-[13px] text-ink-muted">
+                        {t("Target profile PIN")}
+                        <input
+                          type="password"
+                          inputMode="numeric"
+                          autoComplete="off"
+                          maxLength={4}
+                          value={transferTargetPin}
+                          onChange={(e) =>
+                            setTransferTargetPin(e.target.value.replace(/\D/g, "").slice(0, 4))
+                          }
+                          aria-label={t("Target profile PIN")}
+                          className="h-10 w-32 rounded-lg border border-edge bg-canvas px-3 text-[15px] tracking-[0.3em] text-ink outline-none transition-colors focus:border-ink-subtle"
+                        />
+                      </label>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center justify-end gap-2 pt-1 text-[14px]">
                   <button
                     type="button"
@@ -1262,6 +1324,8 @@ export function EditorView({
                       setTransferOpen(false);
                       setTransferTarget(null);
                       setTransferError(null);
+                      setTransferSourcePin("");
+                      setTransferTargetPin("");
                     }}
                     className="text-ink-muted transition-colors hover:text-ink disabled:opacity-40"
                   >
@@ -1269,7 +1333,7 @@ export function EditorView({
                   </button>
                   <button
                     type="button"
-                    disabled={!transferTarget || transferBusy}
+                    disabled={!transferTarget || transferBusy || (isNuvio && !transferPinsReady)}
                     onClick={async () => {
                       if (!transferTarget || transferBusy) return;
                       setTransferBusy(true);
@@ -1277,7 +1341,10 @@ export function EditorView({
                       try {
                         if (isNuvio) {
                           const targetSlot = parseInt(transferTarget.replace(/\D/g, ""), 10);
-                          const ok = await transferPrimaryNuvioProfile(targetSlot);
+                          const ok = await transferPrimaryNuvioProfile(targetSlot, {
+                            sourcePin: transferSourcePinRequired ? transferSourcePin : undefined,
+                            targetPin: transferTargetPinRequired ? transferTargetPin : undefined,
+                          });
                           if (!ok) {
                             setTransferError(
                               t(

@@ -15,6 +15,8 @@ import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 import {
   fetchNuvioAddons,
   swapNuvioProfileCloudData,
+  pullWatchedItemsFromNuvio,
+  pullWatchProgressSnapshotFromNuvio,
   getWatchProgressKey,
   getWatchedItemsKey,
   getDismissedNextUpStorageKey,
@@ -793,31 +795,46 @@ export async function transferPrimaryNuvioProfile(
   const targetSlot = state.profiles.find((p) => p.profile_index === targetSlotIndex);
   if (!slot1 || !targetSlot) return false;
 
-  // Verify PIN unlocks for both profiles before allowing transfer
-  if (targetSlot.pin_enabled && !isNuvioProfileUnlocked(targetSlotIndex)) {
-    return false;
-  }
-  if (slot1.pin_enabled && !isNuvioProfileUnlocked(1)) {
-    return false;
-  }
-
-  // Obtain plaintext PIN credentials
+  // Resolve PIN credentials. A supplied PIN is verified here, so the transfer no
+  // longer depends on the target profile having been unlocked earlier this session.
   const pinPlain1 = options?.sourcePin?.trim() || sessionPlaintextPins.get(1);
   const pinPlainTarget = options?.targetPin?.trim() || sessionPlaintextPins.get(targetSlotIndex);
 
   // If a profile has a PIN enabled, we MUST have its credentials to migrate it server-side.
   // Explicitly handle unavailable credentials before making any cloud or local modifications.
-  if (slot1.pin_enabled && (!pinPlain1 || !pinPlain1.trim())) {
-    console.warn(
-      `[nuvio] Primary profile transfer aborted: Slot 1 has PIN enabled but plaintext credentials are not available in session.`,
-    );
-    return false;
+  if (slot1.pin_enabled) {
+    if (!pinPlain1 || !pinPlain1.trim()) {
+      console.warn(
+        `[nuvio] Primary profile transfer aborted: Slot 1 has PIN enabled but plaintext credentials are not available.`,
+      );
+      return false;
+    }
+    if (!isNuvioProfileUnlocked(1)) {
+      const verified = await verifyNuvioPin(1, pinPlain1, { skipProfilePull: true });
+      if (!verified.unlocked) {
+        console.warn("[nuvio] Primary profile transfer aborted: Slot 1 PIN was rejected.");
+        return false;
+      }
+    }
   }
-  if (targetSlot.pin_enabled && (!pinPlainTarget || !pinPlainTarget.trim())) {
-    console.warn(
-      `[nuvio] Primary profile transfer aborted: Slot ${targetSlotIndex} has PIN enabled but plaintext credentials are not available in session.`,
-    );
-    return false;
+  if (targetSlot.pin_enabled) {
+    if (!pinPlainTarget || !pinPlainTarget.trim()) {
+      console.warn(
+        `[nuvio] Primary profile transfer aborted: Slot ${targetSlotIndex} has PIN enabled but plaintext credentials are not available.`,
+      );
+      return false;
+    }
+    if (!isNuvioProfileUnlocked(targetSlotIndex)) {
+      const verified = await verifyNuvioPin(targetSlotIndex, pinPlainTarget, {
+        skipProfilePull: true,
+      });
+      if (!verified.unlocked) {
+        console.warn(
+          `[nuvio] Primary profile transfer aborted: Slot ${targetSlotIndex} PIN was rejected.`,
+        );
+        return false;
+      }
+    }
   }
 
   // Build the push payload for the backend
@@ -864,15 +881,43 @@ export async function transferPrimaryNuvioProfile(
     };
   });
 
-  // 1. COORDINATE WITH BACKEND FIRST: Confirm cloud write succeeds before mutating local data
+  const accountId = getNuvioAccountId();
+  if (!accountId) return false;
+
+  // 1. HYDRATE BOTH SLOTS FROM THE CLOUD BEFORE TOUCHING ANYTHING.
+  // A transfer must never migrate stale local caches: the target slot may
+  // never have been opened on this device, and partial snapshots are rejected.
+  try {
+    const [watched1, watchedTarget, progress1, progressTarget] = await Promise.all([
+      pullWatchedItemsFromNuvio(1, { force: true, allowInactiveSlot: true }),
+      pullWatchedItemsFromNuvio(targetSlotIndex, { force: true, allowInactiveSlot: true }),
+      pullWatchProgressSnapshotFromNuvio(1, accountId),
+      pullWatchProgressSnapshotFromNuvio(targetSlotIndex, accountId),
+    ]);
+    if (
+      watched1 === null ||
+      watchedTarget === null ||
+      progress1 === null ||
+      progressTarget === null
+    ) {
+      console.warn(
+        "[nuvio] Primary profile transfer aborted: could not read a complete cloud snapshot for both profiles",
+      );
+      return false;
+    }
+  } catch (err) {
+    console.warn("[nuvio] Primary profile transfer aborted: cloud hydration failed", err);
+    return false;
+  }
+
+  // 2. COORDINATE WITH BACKEND FIRST: Confirm cloud write succeeds before mutating local data
   const pushOk = await pushNuvioProfiles(payloads);
   if (!pushOk) {
     console.warn("[nuvio] Primary profile transfer aborted: backend rejected sync_push_profiles");
     return false;
   }
 
-  // 2. BACKUP SNAPSHOT FOR ROLLBACK IN CASE CLOUD DATA MIGRATION FAILS
-  const accountId = getNuvioAccountId() || "anon";
+  // 3. BACKUP SNAPSHOT FOR ROLLBACK IN CASE CLOUD DATA MIGRATION FAILS
   const slotKeyPrefixes = [
     "harbor.localcw.v1.nuvio-",
     "harbor.localcw.private.v1.nuvio-",
@@ -942,7 +987,7 @@ export async function transferPrimaryNuvioProfile(
   let pinMigratedStage: "none" | "half" | "done" = "none";
 
   try {
-    // 3. MIGRATE CLOUD WATCH HISTORY, PROGRESS, AND DATA BETWEEN SLOTS
+    // 4. MIGRATE CLOUD WATCH HISTORY, PROGRESS, AND DATA BETWEEN SLOTS
     const swapCloudOk = await swapNuvioProfileCloudData(1, targetSlotIndex);
     if (!swapCloudOk) {
       throw new Error(
@@ -951,7 +996,7 @@ export async function transferPrimaryNuvioProfile(
     }
     cloudDataSwapped = true;
 
-    // 4. MIGRATE SERVER-SIDE PIN CREDENTIALS
+    // 5. MIGRATE SERVER-SIDE PIN CREDENTIALS
     // We verify each operation succeeded. Both setNuvioPin and clearNuvioPin return { unlocked: boolean, message?: string }.
     // If backend rejects or fails, abort immediately and rollback to prevent credential mismatch.
     if (slot1.pin_enabled && !targetSlot.pin_enabled) {
@@ -995,7 +1040,7 @@ export async function transferPrimaryNuvioProfile(
       pinMigratedStage = "done";
     }
 
-    // 5. SWAP LOCAL STORAGE AND PIN CACHES
+    // 6. SWAP LOCAL STORAGE AND PIN CACHES
     if (pinTarget) localStorage.setItem(key1, pinTarget);
     else localStorage.removeItem(key1);
     if (pin1) localStorage.setItem(keyTarget, pin1);
@@ -1045,7 +1090,7 @@ export async function transferPrimaryNuvioProfile(
       localStorage.removeItem(pendingKeyTarget);
     }
 
-    // 6. UPDATE LOCAL PROFILE STATE
+    // 7. UPDATE LOCAL PROFILE STATE
     const newSlot1: NuvioProfile = {
       ...targetSlot,
       profile_index: 1,
@@ -1077,7 +1122,7 @@ export async function transferPrimaryNuvioProfile(
 
     await pullNuvioProfiles();
 
-    // 7. DISPATCH SYNC EVENTS
+    // 8. DISPATCH SYNC EVENTS
     if (typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent("harbor:nuvio-profiles-updated", { detail: updatedProfiles }),
@@ -1293,7 +1338,11 @@ export async function deleteNuvioProfile(profileIndex: number): Promise<boolean>
 /**
  * Verifies a Nuvio profile's PIN via local cache first, then Supabase `verify_profile_pin`.
  */
-export async function verifyNuvioPin(profileIndex: number, pin: string): Promise<PinVerifyResult> {
+export async function verifyNuvioPin(
+  profileIndex: number,
+  pin: string,
+  options?: { skipProfilePull?: boolean },
+): Promise<PinVerifyResult> {
   // 1. Fast local verification (0ms unlock without network roundtrip)
   const isMatchLocally = await verifyNuvioPinLocally(profileIndex, pin);
   if (isMatchLocally) {
@@ -1329,7 +1378,7 @@ export async function verifyNuvioPin(profileIndex: number, pin: string): Promise
       nuvioSessionUnlockedIndices.add(profileIndex);
       sessionPlaintextPins.set(profileIndex, pin);
       void rememberNuvioPin(profileIndex, pin);
-      void pullNuvioProfiles();
+      if (!options?.skipProfilePull) void pullNuvioProfiles();
     }
 
     return {

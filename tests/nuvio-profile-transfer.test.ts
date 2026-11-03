@@ -20,6 +20,26 @@ const nuvioSync = read("../src/lib/nuvio/nuvio-sync.ts");
 const nuvioPlayback = read("../src/lib/nuvio/nuvio-playback.ts");
 const editorView = read("../src/components/profile-picker/editor-view.tsx");
 
+const nuvioSnapshotFetch = (
+  custom?: (url: string, opts?: any) => Response | null,
+): ((url: any, opts?: any) => Promise<Response>) => {
+  return async (url: any, opts?: any) => {
+    const u = String(url);
+    const handled = custom?.(u, opts);
+    if (handled) return handled;
+    if (u.includes("sync_pull_watched_items") || u.includes("sync_pull_watch_progress")) {
+      return new Response("[]", { status: 200 });
+    }
+    if (u.includes("/rest/v1/watched_items?") || u.includes("/rest/v1/watch_progress?")) {
+      return new Response("[]", {
+        status: 200,
+        headers: new Headers({ "Content-Range": "*/0" }),
+      });
+    }
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  };
+};
+
 test("nuvio-sync exports shared account-scoped cache key helpers", () => {
   assert.match(
     nuvioSync,
@@ -110,12 +130,12 @@ test("swapNuvioProfileCloudData verifies all destination writes before deleting 
 test("transferPrimaryNuvioProfile handles unavailable PIN credentials explicitly", () => {
   assert.match(
     nuvioProfiles,
-    /if \(slot1\.pin_enabled && \(!pinPlain1 \|\| !pinPlain1\.trim\(\)\)\)/,
+    /if \(slot1\.pin_enabled\) \{\s*if \(!pinPlain1 \|\| !pinPlain1\.trim\(\)\) \{/,
     "must explicitly reject transfer if slot 1 PIN is enabled but credentials unavailable",
   );
   assert.match(
     nuvioProfiles,
-    /if \(targetSlot\.pin_enabled && \(!pinPlainTarget \|\| !pinPlainTarget\.trim\(\)\)\)/,
+    /if \(targetSlot\.pin_enabled\) \{\s*if \(!pinPlainTarget \|\| !pinPlainTarget\.trim\(\)\) \{/,
     "must explicitly reject transfer if targetSlot PIN is enabled but credentials unavailable",
   );
   assert.match(
@@ -153,6 +173,18 @@ test("transferPrimaryNuvioProfile migrates account-scoped caches and supports ro
   assert.match(nuvioProfiles, /getNuvioAddonsCacheKey\(1,\s*accountId\)/);
   assert.match(nuvioProfiles, /getPendingSyncKey\(1,\s*accountId\)/);
 
+  // Hydrates both slots from the cloud before any mutation
+  assert.match(
+    nuvioProfiles,
+    /pullWatchedItemsFromNuvio\(1, \{ force: true, allowInactiveSlot: true \}\)/,
+    "must pull slot 1 watched items with force",
+  );
+  assert.match(
+    nuvioProfiles,
+    /pullWatchProgressSnapshotFromNuvio\(targetSlotIndex, accountId\)/,
+    "must pull a strict progress snapshot for the target slot",
+  );
+
   // Swaps and rolls back
   assert.match(
     nuvioProfiles,
@@ -188,6 +220,7 @@ test("transferPrimaryNuvioProfile execution rejects if credentials unavailable",
     ],
     activeProfileIndex: 1,
   };
+  localStorage.setItem("harbor.account-provider", "nuvio");
   localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
   markNuvioProfileUnlocked(1);
   markNuvioProfileUnlocked(2);
@@ -212,6 +245,7 @@ test("transferPrimaryNuvioProfile execution rolls back caches on server-side PIN
     ],
     activeProfileIndex: 1,
   };
+  localStorage.setItem("harbor.account-provider", "nuvio");
   localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
   markNuvioProfileUnlocked(1);
   markNuvioProfileUnlocked(2);
@@ -222,19 +256,15 @@ test("transferPrimaryNuvioProfile execution rolls back caches on server-side PIN
   localStorage.setItem("harbor.nuvio.playback_items.acc-test.slot.2", initialItems2);
 
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (_url: any) => {
-    const u = String(_url);
-    if (u.includes("sync_push_profiles")) {
-      return new Response(JSON.stringify({ ok: true }), { status: 200 });
-    }
+  globalThis.fetch = nuvioSnapshotFetch((u) => {
     if (u.includes("set_profile_pin")) {
       // Backend rejects PIN
       return new Response(JSON.stringify({ unlocked: false, message: "PIN rejected by server" }), {
         status: 200,
       });
     }
-    return new Response(JSON.stringify({}), { status: 200 });
-  };
+    return null;
+  });
 
   try {
     const ok = await transferPrimaryNuvioProfile(2, { sourcePin: "1234" });
@@ -268,6 +298,7 @@ test("transferPrimaryNuvioProfile execution swaps account-scoped and legacy cach
     ],
     activeProfileIndex: 1,
   };
+  localStorage.setItem("harbor.account-provider", "nuvio");
   localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
 
   const items1 = JSON.stringify([{ _id: "slot1-cw" }]);
@@ -281,9 +312,7 @@ test("transferPrimaryNuvioProfile execution swaps account-scoped and legacy cach
   localStorage.setItem("harbor.nuvio.playback_items.slot.2", legacy2);
 
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (_url: any) => {
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
-  };
+  globalThis.fetch = nuvioSnapshotFetch();
 
   try {
     const ok = await transferPrimaryNuvioProfile(2);
@@ -476,6 +505,7 @@ test("multi-account isolation: transferring Account A leaves Account B caches co
     ],
     activeProfileIndex: 1,
   };
+  localStorage.setItem("harbor.account-provider", "nuvio");
   localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
 
   // Account A data
@@ -495,7 +525,7 @@ test("multi-account isolation: transferring Account A leaves Account B caches co
   localStorage.setItem("harbor.nuvio.playback_items.account-B.slot.2", accountB2);
 
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response(JSON.stringify({ ok: true }), { status: 200 });
+  globalThis.fetch = nuvioSnapshotFetch();
 
   try {
     const ok = await transferPrimaryNuvioProfile(2);
@@ -556,6 +586,115 @@ test("remapPendingChangesProfileId remaps embedded row.profile_id for pending sy
   assert.equal(remapped.mutations[1].row.profile_id, 2, "mutation 2 profile_id must be 2");
 });
 
+test("transfer aborts before mutating state when a cloud snapshot is incomplete", async () => {
+  clearNuvioSessionUnlocks();
+  localStorage.clear();
+
+  const mockState = {
+    session: { access_token: "token-123", user: { id: "acc-test" } },
+    profiles: [
+      { profile_index: 1, name: "Profile 1", pin_enabled: false },
+      { profile_index: 2, name: "Profile 2", pin_enabled: false },
+    ],
+    activeProfileIndex: 1,
+  };
+  localStorage.setItem("harbor.account-provider", "nuvio");
+  localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
+
+  const items1 = JSON.stringify([{ _id: "slot1-cw" }]);
+  const items2 = JSON.stringify([{ _id: "slot2-cw" }]);
+  localStorage.setItem("harbor.nuvio.playback_items.acc-test.slot.1", items1);
+  localStorage.setItem("harbor.nuvio.playback_items.acc-test.slot.2", items2);
+
+  let profilePushes = 0;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url: any) => {
+    const u = String(url);
+    if (u.includes("sync_pull_watched_items")) return new Response("[]", { status: 200 });
+    if (u.includes("/rest/v1/watched_items?")) {
+      return new Response("[]", {
+        status: 200,
+        headers: new Headers({ "Content-Range": "*/0" }),
+      });
+    }
+    if (u.includes("sync_pull_watch_progress") || u.includes("/rest/v1/watch_progress?")) {
+      return new Response("snapshot unavailable", { status: 500 });
+    }
+    if (u.includes("sync_push_profiles")) profilePushes++;
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  };
+
+  try {
+    const ok = await transferPrimaryNuvioProfile(2);
+    assert.equal(ok, false, "transfer must abort when a snapshot cannot be read completely");
+    assert.equal(profilePushes, 0, "must not mutate cloud profiles before a complete snapshot");
+    assert.equal(
+      localStorage.getItem("harbor.nuvio.playback_items.acc-test.slot.1"),
+      items1,
+      "slot 1 cache must remain untouched after an aborted transfer",
+    );
+    assert.equal(
+      localStorage.getItem("harbor.nuvio.playback_items.acc-test.slot.2"),
+      items2,
+      "slot 2 cache must remain untouched after an aborted transfer",
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("transfer verifies a supplied target PIN without a prior session unlock", async () => {
+  clearNuvioSessionUnlocks();
+  localStorage.clear();
+
+  const mockState = {
+    session: { access_token: "token-123", user: { id: "acc-test" } },
+    profiles: [
+      { profile_index: 1, name: "Profile 1", pin_enabled: false },
+      { profile_index: 2, name: "Profile 2", pin_enabled: true },
+    ],
+    activeProfileIndex: 1,
+  };
+  localStorage.setItem("harbor.account-provider", "nuvio");
+  localStorage.setItem("harbor.nuvio.state.v1", JSON.stringify(mockState));
+
+  const items1 = JSON.stringify([{ _id: "slot1-cw" }]);
+  const items2 = JSON.stringify([{ _id: "slot2-cw" }]);
+  localStorage.setItem("harbor.nuvio.playback_items.acc-test.slot.1", items1);
+  localStorage.setItem("harbor.nuvio.playback_items.acc-test.slot.2", items2);
+
+  let verifyCalls = 0;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = nuvioSnapshotFetch((u) => {
+    if (u.includes("verify_profile_pin")) {
+      verifyCalls++;
+      return new Response(JSON.stringify({ unlocked: true }), { status: 200 });
+    }
+    if (u.includes("set_profile_pin") || u.includes("clear_profile_pin")) {
+      return new Response(JSON.stringify({ unlocked: true }), { status: 200 });
+    }
+    return null;
+  });
+
+  try {
+    const ok = await transferPrimaryNuvioProfile(2, { targetPin: "4321" });
+    assert.equal(ok, true, "a supplied target PIN must unlock the transfer path");
+    assert.equal(verifyCalls, 1, "the supplied target PIN must be verified with the server");
+    assert.equal(
+      localStorage.getItem("harbor.nuvio.playback_items.acc-test.slot.1"),
+      items2,
+      "slot 1 must receive slot 2 items after a PIN-verified transfer",
+    );
+    assert.equal(
+      localStorage.getItem("harbor.nuvio.playback_items.acc-test.slot.2"),
+      items1,
+      "slot 2 must receive slot 1 items after a PIN-verified transfer",
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("editor-view surfaces transfer failures without closing editor dialog", () => {
   assert.match(
     editorView,
@@ -564,7 +703,7 @@ test("editor-view surfaces transfer failures without closing editor dialog", () 
   );
   assert.match(
     editorView,
-    /const ok = await transferPrimaryNuvioProfile\(targetSlot\);/,
+    /const ok = await transferPrimaryNuvioProfile\(targetSlot, \{/,
     "editor-view must capture boolean return from transferPrimaryNuvioProfile",
   );
   assert.match(
