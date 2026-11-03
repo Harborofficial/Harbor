@@ -45,6 +45,7 @@ import { listLocalCw, localCwSourceEnabled } from "@/lib/local-cw";
 import { localToLibraryItem } from "@/lib/continue-watching";
 import { cwAnimeIdentityKey, dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import { cwNextDisplayCoords } from "@/lib/cw-next-display";
+import { seasonIndex } from "@/lib/season-index";
 
 const FINISHED_RATIO = 0.9;
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -196,6 +197,15 @@ export function shouldDropFinished(
     animeMode === "only" && midEpisode && finaleEp != null && effCur.episode < finaleEp.episode;
   if (freshMidResume || midEpisode) return false;
   return hideCaughtUp || !nextEp;
+}
+
+function clearTimerFlags(item: LibraryItem): LibraryItem {
+  return {
+    ...item,
+    waitingForAir: undefined,
+    nextAirDate: undefined,
+    keptForTimer: undefined,
+  } as LibraryItem;
 }
 
 function nextEpAired(list: PlayEpisode[], nextEp: PlayEpisode, isAnime: boolean): boolean {
@@ -491,6 +501,8 @@ export function useCwAdvance(
         // it holds for both season-relative and absolute numbering. Only fires on a clean
         // fetch with a non-empty list, so a transient/partial fetch never clears a good item.
         const orderKey = (s: number, e: number) => s * 100000 + e;
+        const seasonMeta = seasonIndex(list);
+        const base = clearTimerFlags(i);
         const origCur = cur;
         let effCur = cur;
         let remappedMixed = false;
@@ -502,10 +514,10 @@ export function useCwAdvance(
         let nextEp: PlayEpisode | null = null;
         const scoped = scopedSplitItem(i._id);
         if (fetchOk && list.length > 0) {
-          const maxKey = list.reduce((m, e) => Math.max(m, orderKey(e.season, e.episode)), 0);
+          const maxKey = seasonMeta.maxOrderKey;
           if (
             orderKey(effCur.season, effCur.episode) > maxKey &&
-            list.some((e) => e.season === effCur.season)
+            seasonMeta.maxEpisode.has(effCur.season)
           ) {
             const abs = list.find((e) => e.absoluteNumber === effCur.episode);
             if (!abs) {
@@ -515,9 +527,8 @@ export function useCwAdvance(
             }
           }
           if (!list.some((e) => e.season === effCur.season && e.episode === effCur.episode)) {
-            const seasonEps = list.filter((e) => e.season === effCur.season);
-            const maxSeasonEp = seasonEps.reduce((max, e) => Math.max(max, e.episode), 0);
-            if (seasonEps.length > 0 && effCur.episode > maxSeasonEp) {
+            const maxSeasonEp = seasonMeta.maxEpisode.get(effCur.season);
+            if (maxSeasonEp !== undefined && effCur.episode > maxSeasonEp) {
               // Season was completed; advance to first episode of next season
               const nextSeasonEps = list
                 .filter((e) => e.season > effCur.season)
@@ -535,7 +546,7 @@ export function useCwAdvance(
                 const nextUnwatched = nextSeasonEps.find((e) => !checkWatched(e.season, e.episode));
                 if (nextUnwatched) {
                   next.set(i._id, {
-                    ...i,
+                    ...base,
                     state: {
                       ...i.state!,
                       season: nextUnwatched.season,
@@ -551,7 +562,7 @@ export function useCwAdvance(
                   // Entire series is completed; keep if timer enabled
                   if (animeCwEnd === "timer") {
                     next.set(i._id, {
-                      ...i,
+                      ...base,
                       waitingForAir: true as const,
                     } as LibraryItem);
                   } else if (i.external !== "nuvio") {
@@ -589,7 +600,7 @@ export function useCwAdvance(
                 } else if (animeCwEnd === "timer") {
                   unplacedCur = true;
                   next.set(i._id, {
-                    ...i,
+                    ...base,
                     waitingForAir: true as const,
                   } as LibraryItem);
                   continue;
@@ -629,7 +640,7 @@ export function useCwAdvance(
         if (curEpInList && !nextEpAired(list, curEpInList, isAnime)) {
           if (animeCwEnd === "timer") {
             next.set(i._id, {
-              ...i,
+              ...base,
               waitingForAir: true as const,
               nextAirDate: curEpInList.airDate,
             } as LibraryItem);
@@ -646,7 +657,7 @@ export function useCwAdvance(
             (!curEpInList || !nextEpAired(list, curEpInList, isAnime))
           ) {
             next.set(i._id, {
-              ...i,
+              ...base,
               waitingForAir: true as const,
               nextAirDate: curEpInList?.airDate,
             } as LibraryItem);
@@ -655,22 +666,15 @@ export function useCwAdvance(
             nextEpAired(list, curEpInList, isAnime) &&
             (i as Record<string, unknown>).waitingForAir === true
           ) {
-            next.set(i._id, {
-              ...i,
-              waitingForAir: undefined,
-              nextAirDate: undefined,
-            } as LibraryItem);
+            next.set(i._id, base);
           }
           const isKeptWatched =
             (i as Record<string, unknown>).keptForTimer === true ||
             (i as Record<string, unknown>).waitingForAir === true;
           const isSeasonOverflow =
             !curEpInList &&
-            list.some((e) => e.season === effCur.season) &&
-            effCur.episode >
-              list
-                .filter((e) => e.season === effCur.season)
-                .reduce((max, e) => Math.max(max, e.episode), 0);
+            seasonMeta.maxEpisode.has(effCur.season) &&
+            effCur.episode > (seasonMeta.maxEpisode.get(effCur.season) ?? 0);
           if (!isKeptWatched && !isSeasonOverflow) {
             const checkWatched = watchedPredicate(
               i,
@@ -697,19 +701,16 @@ export function useCwAdvance(
           !!privacyOwner,
         );
         const aliasCur = scoped ? providerAliasCoords(list, effCur.season, effCur.episode) : [];
+        const manualUnwatched = manualWatchedState(i._id, effCur.season, effCur.episode) === false;
+        const waiting = (i as Record<string, unknown>).waitingForAir === true;
         const watchedCur =
           checkWatched(effCur.season, effCur.episode) ||
           aliasCur.some((a) => checkWatched(a.season, a.episode)) ||
-          (i as Record<string, unknown>).waitingForAir === true ||
-          (i.external === "nuvio" && (i as Record<string, unknown>).keptForTimer === true);
+          (!manualUnwatched &&
+            (waiting ||
+              (i.external === "nuvio" && (i as Record<string, unknown>).keptForTimer === true)));
         if (!watchedCur) {
-          if ((i as Record<string, unknown>).waitingForAir === true) {
-            next.set(i._id, {
-              ...i,
-              waitingForAir: undefined,
-              nextAirDate: undefined,
-            } as LibraryItem);
-          }
+          if (waiting) next.set(i._id, base);
           continue;
         }
         const nextSkip = episodeHiding
@@ -775,7 +776,7 @@ export function useCwAdvance(
         }
         if (unplacedFollowUp && !nextEpAired(list, unplacedFollowUp, isAnime)) {
           next.set(i._id, {
-            ...i,
+            ...base,
             waitingForAir: true as const,
             nextAirDate: unplacedFollowUp.airDate,
           } as LibraryItem);
@@ -790,7 +791,7 @@ export function useCwAdvance(
             i.state?.season === 0,
           );
           next.set(i._id, {
-            ...i,
+            ...base,
             state: {
               ...i.state!,
               season: display.season,
@@ -808,7 +809,7 @@ export function useCwAdvance(
               ? origCur.season
               : nextEp.season;
           next.set(i._id, {
-            ...i,
+            ...base,
             state: {
               ...i.state!,
               season: displaySeason,
@@ -823,12 +824,12 @@ export function useCwAdvance(
           } as LibraryItem);
         } else if (animeCwEnd === "timer" && unplacedCur && tryAnimeEntry) {
           next.set(i._id, {
-            ...i,
+            ...base,
             waitingForAir: true as const,
           } as LibraryItem);
         } else if (animeCwEnd === "timer" && !nextEp && !hideCaughtUp) {
           next.set(i._id, {
-            ...i,
+            ...base,
             waitingForAir: true as const,
           } as LibraryItem);
         } else if (
