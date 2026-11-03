@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
-import { proactiveStorageCleanup } from "@/lib/storage-recovery";
 import { runWebhookTick } from "@/lib/webhook-engine";
 
 const TICK_INTERVAL_MS = 30 * 60 * 1000;
@@ -16,10 +15,6 @@ export function WebhookLoopMount() {
   const authRef = useRef(authKey);
   authRef.current = authKey;
   const runningRef = useRef(false);
-
-  useEffect(() => {
-    proactiveStorageCleanup();
-  }, []);
 
   useEffect(() => {
     const hasDestination =

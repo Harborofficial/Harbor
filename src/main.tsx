@@ -20,6 +20,7 @@ import "@/index.css";
 import "flag-icons/css/flag-icons.min.css";
 import { startTaskbarProgress } from "@/lib/download/taskbar-progress";
 import { completeBetaReturnPreferences } from "@/lib/updater/beta-return";
+import { proactiveStorageCleanup } from "@/lib/storage-recovery";
 
 // Loaded only when a DJ window is actually opened; not part of the core entry graph.
 const DjDeckApp = lazy(() =>
@@ -221,6 +222,10 @@ function MainRoot() {
 }
 
 async function mount() {
+  // Must run before anything writes: on a full localStorage every setItem throws, and the
+  // first unguarded one during the initial render kills the tree before onReady fires, so
+  // the boot splash never clears. Cleaning up from inside a component is too late.
+  proactiveStorageCleanup();
   await loadInstallFeatures();
   const musicEnabled = getInstallFeatures().music;
   if (

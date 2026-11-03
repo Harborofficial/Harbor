@@ -46,7 +46,11 @@ const PRUNABLE_EXACT = new Set<string>([
   "harbor.streamBadges.v1",
   "harbor.manga.popular.v1",
   "harbor.ebook.metadata.v1",
+  "harbor.ebook.nyt.v1",
   "harbor.heroPool.v1",
+  "harbor.mal.hero.v1",
+  "harbor.anime.art.v2",
+  "harbor.anime.hero.hosted.v5",
 ]);
 
 const PRUNABLE_PREFIXES = [
@@ -56,6 +60,8 @@ const PRUNABLE_PREFIXES = [
   "harbor.manga.cache.v2.",
   "harbor.manga.art.",
   "harbor.ebook.openlibrary.v1.",
+  "harbor.ebook.openlibrary.v2.",
+  "harbor.sports.board.v3:",
   "harbor.tvdbo.",
   "harbor.playback-history.v1.",
 ];
@@ -256,6 +262,23 @@ function purgeOldCacheVersions(): void {
   }
 }
 
+const PROBE_KEY = "harbor.storage.probe";
+
+/**
+ * The size thresholds below only measure what is prunable, so a store filled mostly by
+ * keys we never prune stays under them while every write already throws. Ask the store
+ * itself instead.
+ */
+function storageRejectsWrites(): boolean {
+  try {
+    localStorage.setItem(PROBE_KEY, "1");
+    localStorage.removeItem(PROBE_KEY);
+    return false;
+  } catch (e) {
+    return isQuotaError(e);
+  }
+}
+
 export function proactiveStorageCleanup(): void {
   if (typeof localStorage === "undefined") return;
   purgeDeadCaches();
@@ -267,7 +290,7 @@ export function proactiveStorageCleanup(): void {
     total += size;
     if (size > PROACTIVE_PER_KEY_THRESHOLD) pruneOne(key);
   }
-  if (total > PROACTIVE_TOTAL_THRESHOLD) {
+  if (total > PROACTIVE_TOTAL_THRESHOLD || storageRejectsWrites()) {
     const r = freeStorageSpace();
     console.info(
       `[storage] proactive total cleanup: ${r.pruned.length} caches, ${r.freedBytes} bytes`,
