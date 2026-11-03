@@ -215,7 +215,10 @@ export function writeCachedNuvioPlaybackItems(
   accountId?: string,
 ): void {
   try {
-    localStorage.setItem(getPlaybackItemsKey(slot, accountId), JSON.stringify(items));
+    const key = getPlaybackItemsKey(slot, accountId);
+    const serialized = JSON.stringify(items);
+    if (localStorage.getItem(key) === serialized) return;
+    localStorage.setItem(key, serialized);
   } catch {}
 }
 

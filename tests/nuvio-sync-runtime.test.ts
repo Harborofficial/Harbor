@@ -9,6 +9,8 @@ function loadRuntime() {
   const windowListeners = new Map<string, () => void>();
   const documentListeners = new Map<string, () => void>();
   const effects: Array<{ fn: () => (() => void) | undefined; deps?: unknown[] }> = [];
+  const reconcileCalls: Array<Record<string, unknown>> = [];
+  let coordinatorDeps: Record<string, any> | null = null;
   let nextTimer = 1;
 
   const windowStub = {
@@ -54,13 +56,25 @@ function loadRuntime() {
       case "@/lib/active-profile-id":
         return { isNuvioProviderActive: () => true };
       case "@/lib/feed/external-cw":
-        return { refreshExternalCw: async () => {} };
+        return {
+          refreshExternalCw: async () => {},
+          willRefreshExternalCw: (force = false) => force,
+        };
       case "./nuvio-client":
         return { isNuvioSignedIn: () => true };
       case "./nuvio-sync":
-        return { reconcileNuvioWatched: async () => {} };
+        return {
+          reconcileNuvioWatched: async (_id: unknown, options: Record<string, unknown>) => {
+            reconcileCalls.push(options);
+          },
+        };
       case "./nuvio-sync-coordinator":
-        return { createNuvioSyncCoordinator: () => coordinator };
+        return {
+          createNuvioSyncCoordinator: (deps: Record<string, any>) => {
+            coordinatorDeps = deps;
+            return coordinator;
+          },
+        };
       default:
         throw new Error(`unexpected import ${name}`);
     }
@@ -87,6 +101,8 @@ function loadRuntime() {
     windowListeners,
     documentListeners,
     effects,
+    reconcileCalls,
+    deps: () => coordinatorDeps,
   };
 }
 
@@ -128,6 +144,19 @@ test("requestNuvioSync delegates to the shared coordinator", async () => {
   await runtime.request(true);
   await runtime.request();
   assert.deepEqual(runtime.requests, [true, false]);
+});
+
+test("the coordinator asks reconcile to defer its duplicate rebuild when refresh runs", async () => {
+  const runtime = loadRuntime();
+  const deps = runtime.deps();
+  assert.ok(deps);
+
+  await deps!.reconcile(true);
+  await deps!.reconcile(false);
+  assert.deepEqual(runtime.reconcileCalls, [
+    { force: true, skipPlaybackRebuild: true },
+    { force: false, skipPlaybackRebuild: false },
+  ]);
 });
 
 test("NuvioSyncLoopRunner pauses while a player is mounted", () => {

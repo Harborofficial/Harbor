@@ -83,3 +83,57 @@ test("a failed dismissal push survives the next cloud pull", async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+test("concurrent dismissal pulls share one request and return independent sets", async () => {
+  localStorage.clear();
+  localStorage.setItem("harbor.account-provider", "nuvio");
+  localStorage.setItem(
+    "harbor.nuvio.state.v1",
+    JSON.stringify({
+      session: { access_token: "token", user: { id: "acc-dismiss" } },
+      profiles: [{ profile_index: 1, name: "Profile 1", pin_enabled: false }],
+      activeProfileIndex: 1,
+    }),
+  );
+
+  let pulls = 0;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url: any) => {
+    if (String(url).includes("sync_pull_profile_settings_blob")) {
+      pulls++;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return new Response(
+        JSON.stringify([
+          {
+            settings_json: {
+              version: 4,
+              features: {
+                continue_watching_settings_payload: JSON.stringify({
+                  dismissedNextUpKeys: ["tt123|-1|-1"],
+                }),
+              },
+            },
+          },
+        ]),
+        { status: 200 },
+      );
+    }
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  };
+
+  try {
+    const [left, right] = await Promise.all([
+      pullDismissedNextUpKeysFromNuvio(1),
+      pullDismissedNextUpKeysFromNuvio(1),
+    ]);
+    assert.equal(pulls, 1, "concurrent pulls must share one request");
+    assert.notEqual(left, right, "each caller must receive its own set");
+    left.delete("tt123|-1|-1");
+    assert.equal(right.has("tt123|-1|-1"), true);
+
+    await pullDismissedNextUpKeysFromNuvio(1);
+    assert.equal(pulls, 2, "a later pull must start a new request");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

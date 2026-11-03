@@ -1,13 +1,17 @@
 import { useEffect } from "react";
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
-import { refreshExternalCw } from "@/lib/feed/external-cw";
+import { refreshExternalCw, willRefreshExternalCw } from "@/lib/feed/external-cw";
 import { isNuvioSignedIn } from "./nuvio-client";
 import { reconcileNuvioWatched } from "./nuvio-sync";
 import { createNuvioSyncCoordinator } from "./nuvio-sync-coordinator";
 
 const coordinator = createNuvioSyncCoordinator({
   isActive: () => isNuvioSignedIn() && isNuvioProviderActive(),
-  reconcile: (force) => reconcileNuvioWatched(undefined, { force }),
+  reconcile: (force) =>
+    reconcileNuvioWatched(undefined, {
+      force,
+      skipPlaybackRebuild: willRefreshExternalCw(force),
+    }),
   refresh: (force) => refreshExternalCw(force),
 });
 

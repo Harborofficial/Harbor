@@ -174,9 +174,22 @@ function emit(): void {
 
 function setItems(next: LibraryItem[]): void {
   if (next.length === 0 && items.length === 0) return;
+  if (next === items) return;
+  try {
+    // Conservative content check: false negatives only cost an extra emit.
+    if (JSON.stringify(items) === JSON.stringify(next)) return;
+  } catch {}
   items = next;
   emit();
   void detectAnimeForCw(next.filter((item) => !item.isAnime));
+}
+
+export function willRefreshExternalCw(force = false): boolean {
+  if (!isNuvioSignedIn() || !isNuvioProviderActive() || sourceMask.nuvio === false) return false;
+  if (!externalCwConnected()) return false;
+  if (inflight) return true;
+  if (force) return true;
+  return !(fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS);
 }
 
 export function externalCwConnected(): boolean {
@@ -594,7 +607,8 @@ export function useExternalCw(enabled = true): LibraryItem[] {
     }
     onSessionChange();
     if (isNuvioSignedIn() && isNuvioProviderActive()) {
-      void refreshExternalCw(true);
+      const fresh = fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS;
+      void refreshExternalCw(!fresh);
     } else {
       void refreshExternalCw();
     }
