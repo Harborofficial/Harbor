@@ -1786,6 +1786,20 @@ export function cwKeepsCaughtUpForTimer(): boolean {
 
 const watchedReconcileInflight = new Map<string, Promise<void>>();
 
+/**
+ * A content-level watched row has no episode coordinate, so advancing from the
+ * card itself would walk the series one episode per reconcile. Advance at most
+ * once per server watched event, and never past a locally newer card.
+ */
+export function shouldAdvanceContentWatchedCard(
+  entry: { t: number; serverWatchedAt?: number },
+  watchedAt: number,
+): boolean {
+  if (entry.serverWatchedAt === watchedAt) return false;
+  if (watchedAt > 0 && entry.t > watchedAt) return false;
+  return true;
+}
+
 // export async function reconcileNuvioWatched
 export function reconcileNuvioWatched(
   harborProfileId?: string | number,
@@ -1843,6 +1857,7 @@ async function reconcileNuvioWatchedOnce(
     return;
 
   const serverWatchedIds = new Set<string>();
+  const serverWatchedAt = new Map<string, number>();
   const serverMovieIds = new Set<string>();
   const serverEpisodeKeys = new Set<string>();
 
@@ -1850,6 +1865,18 @@ async function reconcileNuvioWatchedOnce(
     if (!it.content_id) continue;
     const cleanId = it.content_id.replace(/^(series|movie|tmdb):/, "").trim();
     if (it.season == null && it.episode == null) {
+      const rawWatchedAt = it.watched_at;
+      const parsedWatchedAt =
+        typeof rawWatchedAt === "number"
+          ? rawWatchedAt
+          : typeof rawWatchedAt === "string"
+            ? Date.parse(rawWatchedAt)
+            : 0;
+      const watchedAt = Number.isFinite(parsedWatchedAt) ? Math.max(0, parsedWatchedAt) : 0;
+      for (const id of [it.content_id, cleanId, `tmdb:${cleanId}`, `series:${cleanId}`]) {
+        if (!id) continue;
+        serverWatchedAt.set(id, Math.max(serverWatchedAt.get(id) ?? 0, watchedAt));
+      }
       serverWatchedIds.add(it.content_id);
       if (cleanId) serverWatchedIds.add(cleanId);
       if (it.content_type === "movie" || !it.content_type) {
@@ -2065,27 +2092,41 @@ async function reconcileNuvioWatchedOnce(
           }
         }
       } else if (isServerWatched) {
+        const watchedAt =
+          serverWatchedAt.get(entry.id) ??
+          serverWatchedAt.get(cleanEntryId) ??
+          serverWatchedAt.get(`tmdb:${cleanEntryId}`) ??
+          serverWatchedAt.get(`series:${cleanEntryId}`) ??
+          0;
+        if (!shouldAdvanceContentWatchedCard(entry, watchedAt)) continue;
         let nextTarget: { season: number; episode: number } | null | undefined = null;
         if (typeof entry.season === "number" && typeof entry.episode === "number") {
           nextTarget = await resolveNextEpisodeForSeries(entry.id, entry.season, entry.episode);
         }
-        if (nextTarget) {
-          saveLocalCw(
-            {
-              ...entry,
-              season: nextTarget.season,
-              episode: nextTarget.episode,
-              positionMs: 0,
-              external: "nuvio" as const,
-              t: Date.now(),
-            },
-            `nuvio-${profileIndex}`,
-          );
-        } else if (!cwKeepsCaughtUpForTimer()) {
-          clearLocalCw(entry.id, `nuvio-${profileIndex}`);
-          clearResume(entry.id, undefined, undefined, `nuvio-${profileIndex}`);
-          clearResume(cleanEntryId, undefined, undefined, `nuvio-${profileIndex}`);
+        if (nextTarget === undefined) {
+          // Metadata unavailable: keep the card and retry on the next reconcile.
+          continue;
         }
+        if (nextTarget === null) {
+          if (!cwKeepsCaughtUpForTimer()) {
+            clearLocalCw(entry.id, `nuvio-${profileIndex}`);
+            clearResume(entry.id, undefined, undefined, `nuvio-${profileIndex}`);
+            clearResume(cleanEntryId, undefined, undefined, `nuvio-${profileIndex}`);
+          }
+          continue;
+        }
+        saveLocalCw(
+          {
+            ...entry,
+            season: nextTarget.season,
+            episode: nextTarget.episode,
+            positionMs: 0,
+            external: "nuvio" as const,
+            t: watchedAt || entry.t,
+            serverWatchedAt: watchedAt,
+          },
+          `nuvio-${profileIndex}`,
+        );
       } else {
         const hasProgress = progressItems?.some(
           (p) =>

@@ -23,6 +23,8 @@ export type LocalCwEntry = {
   positionMs: number;
   durationMs: number;
   t: number;
+  /** Nuvio content-level watched timestamp this card was advanced for. */
+  serverWatchedAt?: number;
 };
 
 const CLOUD_ID = /^(?:tt\d|kitsu:|mal:|anilist:|anidb:|tmdb:)/;
