@@ -10,6 +10,7 @@ import {
   isNuvioSignedIn,
   getNuvioAccountId,
 } from "./nuvio-client";
+import { safeFetch } from "@/lib/safe-fetch";
 import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
 import {
   fetchNuvioAddons,
@@ -294,10 +295,71 @@ export async function pushNuvioProfiles(payloads: ProfilePushPayload[]): Promise
 const NUVIO_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 const NUVIO_AVATAR_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
+async function uploadAvatarToPublicHost(blob: Blob, filename: string): Promise<string | null> {
+  try {
+    const fd = new FormData();
+    fd.append("reqtype", "fileupload");
+    fd.append("fileToUpload", blob, filename);
+    const res = await safeFetch("https://catbox.moe/user/api.php", {
+      method: "POST",
+      body: fd,
+    });
+    if (res.ok) {
+      const text = (await res.text()).trim();
+      if (text.startsWith("http://") || text.startsWith("https://")) return text;
+    }
+  } catch (err) {
+    console.warn("[nuvio] Catbox avatar upload failed, trying tmpfiles", err);
+  }
+
+  try {
+    const fd = new FormData();
+    fd.append("file", blob, filename);
+    const res = await safeFetch("https://tmpfiles.org/api/v1/upload", {
+      method: "POST",
+      body: fd,
+    });
+    if (res.ok) {
+      const json = (await res.json()) as { status?: string; data?: { url?: string } };
+      if (json?.status === "success" && json.data?.url) {
+        return json.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/");
+      }
+    }
+  } catch (err) {
+    console.warn("[nuvio] Tmpfiles avatar upload failed, trying freeimage", err);
+  }
+
+  try {
+    const fd = new FormData();
+    fd.append("key", "6d207e02198a847aa98d0a2a901485a5");
+    fd.append("action", "upload");
+    fd.append("source", blob, filename);
+    const res = await safeFetch("https://freeimage.host/api/1/upload", {
+      method: "POST",
+      body: fd,
+    });
+    if (res.ok) {
+      const data = (await res.json()) as { image?: { url?: string } };
+      const uploadedUrl = data?.image?.url;
+      if (
+        uploadedUrl &&
+        (uploadedUrl.startsWith("http://") || uploadedUrl.startsWith("https://"))
+      ) {
+        return uploadedUrl;
+      }
+    }
+  } catch (err) {
+    console.warn("[nuvio] Freeimage avatar upload failed", err);
+  }
+
+  return null;
+}
+
 /**
- * Uploads a custom avatar (Base64 data URL, local path, or Blob) to Nuvio Storage.
- * External http(s) URLs are passed through unchanged; binary uploads must be a
- * supported image type and stay within the size limit.
+ * Uploads a custom avatar (Base64 data URL, local path, or Blob) to Nuvio Storage,
+ * falling back to the public image hosts when storage rejects it. External http(s)
+ * URLs are passed through unchanged; binary uploads must be a supported image type
+ * and stay within the size limit.
  */
 export async function uploadNuvioCustomAvatar(
   input: string | Blob,
@@ -371,34 +433,36 @@ export async function uploadNuvioCustomAvatar(
     return null;
   }
 
-  const accountId = getNuvioAccountId();
-  if (!accountId) return null;
-
   const extension = contentType.includes("png")
     ? "png"
     : contentType.includes("jpeg")
       ? "jpg"
       : "webp";
-  const storagePath = `custom/${accountId}/p${profileIndex}-${timestamp}.${extension}`;
-  try {
-    const res = await nuvioFetch(`/storage/v1/object/avatars/${storagePath}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": contentType,
-        "cache-control": "3600",
-        "x-upsert": "true",
-      },
-      body: blob,
-    });
-    if (!res.ok) {
-      console.warn("[nuvio] Avatar upload rejected:", res.status);
-      return null;
+  const filename = `avatar_p${profileIndex}-${timestamp}.${extension}`;
+  const accountId = getNuvioAccountId();
+  if (accountId) {
+    const storagePath = `custom/${accountId}/${filename}`;
+    try {
+      const res = await nuvioFetch(`/storage/v1/object/avatars/${storagePath}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": contentType,
+          "cache-control": "3600",
+          "x-upsert": "true",
+        },
+        body: blob,
+      });
+      if (res.ok) {
+        return `https://api.nuvio.tv/storage/v1/object/public/avatars/${storagePath}`;
+      }
+      console.warn("[nuvio] Nuvio Storage avatar upload rejected:", res.status);
+    } catch (err) {
+      console.warn("[nuvio] Nuvio Storage avatar upload failed", err);
     }
-    return `https://api.nuvio.tv/storage/v1/object/public/avatars/${storagePath}`;
-  } catch (err) {
-    console.warn("[nuvio] Avatar upload failed", err);
-    return null;
   }
+
+  console.warn("[nuvio] Avatar upload fell back to a public image host");
+  return uploadAvatarToPublicHost(blob, filename);
 }
 
 /**
