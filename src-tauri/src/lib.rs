@@ -31,6 +31,7 @@ mod native_context_policy;
 mod playback_redirect;
 mod power;
 mod privacy;
+mod process_output;
 mod proc_guard;
 mod proc_mem;
 mod settings_store;

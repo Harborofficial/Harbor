@@ -3,6 +3,8 @@ use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use serde::Deserialize;
 use std::collections::HashMap;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct TranscodeProfile {
@@ -240,7 +242,7 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
         eprintln!("[harbor::transcode] ffprobe not found, skipping codec probe");
         return ProbedCodecs::default();
     };
-    let mut cmd = tokio::process::Command::new(&ffprobe);
+    let mut cmd = std::process::Command::new(&ffprobe);
     cmd.arg("-v").arg("error");
     let mut has_ua = false;
     if let Some((_, ua)) = headers
@@ -281,7 +283,7 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
     cmd.creation_flags(0x0800_0000);
 
     let fut = async {
-        let output = cmd.output().await.ok()?;
+        let output = crate::process_output::output(cmd).await.ok()?;
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
         if !stderr.trim().is_empty() {
