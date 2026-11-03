@@ -1701,7 +1701,7 @@ async function resolveNextEpisodeForSeries(
   lastEpisode: number,
   seriesTitle?: string,
 ): Promise<{ season: number; episode: number } | null | undefined> {
-  const cleanId = seriesId.replace(/^(series|movie|tmdb):/, "").trim();
+  const cleanId = seriesId.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
   try {
     let lookupId = cleanId;
     if (
@@ -2065,7 +2065,23 @@ async function reconcileNuvioWatchedOnce(
           }
         }
       } else if (isServerWatched) {
-        if (!cwKeepsCaughtUpForTimer()) {
+        let nextTarget: { season: number; episode: number } | null | undefined = null;
+        if (typeof entry.season === "number" && typeof entry.episode === "number") {
+          nextTarget = await resolveNextEpisodeForSeries(entry.id, entry.season, entry.episode);
+        }
+        if (nextTarget) {
+          saveLocalCw(
+            {
+              ...entry,
+              season: nextTarget.season,
+              episode: nextTarget.episode,
+              positionMs: 0,
+              external: "nuvio" as const,
+              t: Date.now(),
+            },
+            `nuvio-${profileIndex}`,
+          );
+        } else if (!cwKeepsCaughtUpForTimer()) {
           clearLocalCw(entry.id, `nuvio-${profileIndex}`);
           clearResume(entry.id, undefined, undefined, `nuvio-${profileIndex}`);
           clearResume(cleanEntryId, undefined, undefined, `nuvio-${profileIndex}`);

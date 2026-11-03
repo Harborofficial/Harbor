@@ -444,6 +444,9 @@ export function useCwAdvance(
           // A Nuvio Next-Up card is ALREADY pointing to the unwatched episode to watch next.
           // It is not a finished episode session to advance past or drop.
           // If animeCwEnd === "timer", include it so its air date can be evaluated for the countdown timer!
+          if ((i as Record<string, unknown>).keptForTimer === true) return true;
+          const cur = currentEpisode(i);
+          if (cur && manualWatchedState(i._id, cur.season, cur.episode) === true) return true;
           if (animeCwEnd === "timer") return true;
           return false;
         }
@@ -647,8 +650,41 @@ export function useCwAdvance(
               waitingForAir: true as const,
               nextAirDate: curEpInList?.airDate,
             } as LibraryItem);
+          } else if (
+            curEpInList &&
+            nextEpAired(list, curEpInList, isAnime) &&
+            (i as Record<string, unknown>).waitingForAir === true
+          ) {
+            next.set(i._id, {
+              ...i,
+              waitingForAir: undefined,
+              nextAirDate: undefined,
+            } as LibraryItem);
           }
-          continue;
+          const isKeptWatched =
+            (i as Record<string, unknown>).keptForTimer === true ||
+            (i as Record<string, unknown>).waitingForAir === true;
+          const isSeasonOverflow =
+            !curEpInList &&
+            list.some((e) => e.season === effCur.season) &&
+            effCur.episode >
+              list
+                .filter((e) => e.season === effCur.season)
+                .reduce((max, e) => Math.max(max, e.episode), 0);
+          if (!isKeptWatched && !isSeasonOverflow) {
+            const checkWatched = watchedPredicate(
+              i,
+              effCur,
+              traktWatched,
+              effectiveSimklWatched,
+              anilistWatched,
+              effectiveSimklStatus,
+              !!privacyOwner,
+            );
+            if (!checkWatched(effCur.season, effCur.episode)) {
+              continue;
+            }
+          }
         }
 
         const checkWatched = watchedPredicate(
@@ -666,7 +702,16 @@ export function useCwAdvance(
           aliasCur.some((a) => checkWatched(a.season, a.episode)) ||
           (i as Record<string, unknown>).waitingForAir === true ||
           (i.external === "nuvio" && (i as Record<string, unknown>).keptForTimer === true);
-        if (!watchedCur) continue;
+        if (!watchedCur) {
+          if ((i as Record<string, unknown>).waitingForAir === true) {
+            next.set(i._id, {
+              ...i,
+              waitingForAir: undefined,
+              nextAirDate: undefined,
+            } as LibraryItem);
+          }
+          continue;
+        }
         const nextSkip = episodeHiding
           ? (s: number, e: number) => isEpisodeHidden(i._id, s, e)
           : undefined;
