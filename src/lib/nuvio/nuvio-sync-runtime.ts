@@ -19,9 +19,9 @@ export function requestNuvioSync(force = false): Promise<void> {
  * App-level owner of the Nuvio 30s sync cadence. It replaces the separate Home
  * interval and the external-CW Nuvio poll/focus listeners.
  */
-export function useNuvioSyncLoop(): void {
+export function useNuvioSyncLoop(enabled = true): void {
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!enabled || typeof window === "undefined") return;
     void requestNuvioSync(true);
 
     const onFocus = () => {
@@ -46,5 +46,5 @@ export function useNuvioSyncLoop(): void {
       window.removeEventListener("harbor:nuvio-state-changed", onNuvioEvent);
       window.removeEventListener("harbor:account-provider-changed", onNuvioEvent);
     };
-  }, []);
+  }, [enabled]);
 }

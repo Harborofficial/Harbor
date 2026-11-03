@@ -768,7 +768,8 @@ function StremioLeachedExpungeRunner() {
 }
 
 function NuvioSyncLoopRunner() {
-  useNuvioSyncLoop();
+  const { player } = useView();
+  useNuvioSyncLoop(!player);
   return null;
 }
 
