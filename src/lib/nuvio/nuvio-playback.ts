@@ -29,6 +29,36 @@ type AliasResolver = {
   getAliases: (id: string) => Set<string>;
 };
 
+type NuvioIdType = "movie" | "series";
+
+function explicitNuvioIdType(rawId: string): NuvioIdType | undefined {
+  if (rawId.startsWith("series:") || rawId.startsWith("tmdb:tv:")) return "series";
+  if (rawId.startsWith("movie:") || rawId.startsWith("tmdb:movie:")) return "movie";
+  return undefined;
+}
+
+/**
+ * Aliases for a Nuvio content ID. Numeric TMDB IDs are shared by the movie and
+ * TV namespaces, so typed aliases are only generated from an explicit prefix
+ * or a type known from the owning record.
+ */
+export function nuvioAliasVariants(rawId: string, type?: "movie" | "series"): string[] {
+  if (!rawId) return [];
+  const clean = rawId.replace(/^(series|movie|tmdb:tv|tmdb:movie|tmdb):/, "").trim();
+  if (!clean) return [];
+  const resolved = explicitNuvioIdType(rawId) ?? type;
+  const variants = new Set<string>([rawId, clean]);
+  if (resolved === "series") {
+    variants.add(`series:${clean}`);
+    if (/^\d+$/.test(clean)) variants.add(`tmdb:tv:${clean}`);
+  } else if (resolved === "movie") {
+    variants.add(`movie:${clean}`);
+    if (/^\d+$/.test(clean)) variants.add(`tmdb:movie:${clean}`);
+  }
+  if (/^\d+$/.test(clean)) variants.add(`tmdb:${clean}`);
+  return [...variants];
+}
+
 function buildSeriesAliasResolver(
   records: NuvioWatchProgress[],
   watched: NuvioWatchedItem[],
@@ -54,18 +84,9 @@ function buildSeriesAliasResolver(
     }
   };
 
-  const registerVariants = (rawId: string) => {
+  const registerVariants = (rawId: string, type?: NuvioIdType) => {
     if (!rawId) return;
-    const clean = rawId.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
-    if (!clean) return;
-    union(rawId, clean);
-    union(rawId, `series:${clean}`);
-    union(rawId, `movie:${clean}`);
-    if (/^\d+$/.test(clean)) {
-      union(rawId, `tmdb:${clean}`);
-      union(rawId, `tmdb:tv:${clean}`);
-      union(rawId, `tmdb:movie:${clean}`);
-    }
+    for (const variant of nuvioAliasVariants(rawId, type)) union(rawId, variant);
   };
 
   // 1. Explicit / custom aliases
@@ -79,15 +100,29 @@ function buildSeriesAliasResolver(
     }
   }
 
-  // 2. Register all IDs from records and watched
+  // 2. Register IDs with the type each owner knows, so numeric movie and TV
+  // namespaces never merge through manufactured aliases.
   for (const r of records) {
-    if (r.content_id) registerVariants(r.content_id);
+    if (r.content_id)
+      registerVariants(r.content_id, r.season != null || r.episode != null ? "series" : undefined);
   }
   for (const w of watched) {
-    if (w.content_id) registerVariants(w.content_id);
+    if (!w.content_id) continue;
+    const type =
+      w.content_type === "movie" || w.content_type === "series"
+        ? w.content_type
+        : w.season != null || w.episode != null
+          ? "series"
+          : undefined;
+    registerVariants(w.content_id, type);
   }
-  for (const [k] of libMap) {
-    registerVariants(k);
+  const registeredLibraryIds = new Set<string>();
+  for (const lib of libMap.values()) {
+    if (registeredLibraryIds.has(lib.content_id)) continue;
+    registeredLibraryIds.add(lib.content_id);
+    const type =
+      lib.content_type === "movie" || lib.content_type === "series" ? lib.content_type : undefined;
+    registerVariants(lib.content_id, type);
   }
 
   // 3. Cached TMDB <-> IMDb lookups
