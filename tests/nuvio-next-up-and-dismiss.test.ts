@@ -1,3 +1,4 @@
+import "./_localstorage-stub.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildNuvioPlaybackItems } from "../src/lib/nuvio/nuvio-playback";
@@ -426,7 +427,9 @@ test("Nuvio Mobile CW removal: removed movie on mobile is not resurrected by loc
     },
   ];
 
-  const items = buildNuvioPlaybackItems(survivingCloudRecords, 0, []);
+  const items = buildNuvioPlaybackItems(survivingCloudRecords, 0, [], undefined, false, undefined, {
+    clearMissingLocal: true,
+  });
   // The deleted movie must NOT be resurrected into Continue Watching items!
   assert.equal(
     items.some((i) => i._id === "tmdb:movie:55555" || i._id === "55555"),
@@ -435,6 +438,49 @@ test("Nuvio Mobile CW removal: removed movie on mobile is not resurrected by loc
   );
   assert.equal(items.length, 1);
   assert.equal(items[0]._id, "tt9999999");
+});
+
+test("a partial Nuvio rebuild keeps local progress the cloud batch did not include", async () => {
+  const { saveLocalCw, clearLocalCw } = await import("../src/lib/local-cw");
+  clearLocalCw("tmdb:movie:55556", "nuvio-0");
+  clearLocalCw("55556", "nuvio-0");
+
+  try {
+    saveLocalCw(
+      {
+        id: "tmdb:movie:55556",
+        type: "movie",
+        name: "Unsynced Movie",
+        positionMs: 60000,
+        durationMs: 1200000,
+        t: Date.now() - 50000,
+      },
+      "nuvio-0",
+    );
+
+    const partialBatch: NuvioWatchProgress[] = [
+      {
+        profile_id: 0,
+        content_id: "tt9999998",
+        season: 1,
+        episode: 1,
+        progress_seconds: 50,
+        duration_seconds: 1200,
+        last_watched: Date.now(),
+        name: "Surviving Show",
+      },
+    ];
+
+    const items = buildNuvioPlaybackItems(partialBatch, 0, []);
+    assert.equal(
+      items.some((i) => i._id === "tmdb:movie:55556" || i._id === "55556"),
+      true,
+      "an incremental batch must not erase local progress that was never uploaded",
+    );
+  } finally {
+    clearLocalCw("tmdb:movie:55556", "nuvio-0");
+    clearLocalCw("55556", "nuvio-0");
+  }
 });
 
 test("Nuvio Mobile CW removal: mobile dismissal via bare ID or wildcard suppresses in-progress and next-up cards across aliases", () => {

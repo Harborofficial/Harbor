@@ -216,7 +216,11 @@ export function getPlaybackItemsKey(slot: number, accountId?: string): string {
 /**
  * Loads cached Nuvio playback LibraryItems for a slot from memory/localStorage.
  */
-export function readCachedNuvioPlaybackItems(slot?: number, accountId?: string): LibraryItem[] {
+export function readCachedNuvioPlaybackItems(
+  slot?: number,
+  accountId?: string,
+  clearMissingLocal = false,
+): LibraryItem[] {
   const profileIndex = slot ?? resolveNuvioProfileIndex();
   const records = readCachedWatchProgress(profileIndex, accountId);
   const watched = readCachedWatchedItems(profileIndex, accountId);
@@ -236,6 +240,8 @@ export function readCachedNuvioPlaybackItems(slot?: number, accountId?: string):
     watched,
     undefined,
     cwKeepsCaughtUpForTimer(),
+    undefined,
+    { clearMissingLocal },
   );
   writeCachedNuvioPlaybackItems(profileIndex, built, accountId);
   return built;
@@ -285,6 +291,7 @@ export function buildNuvioPlaybackItems(
   dismissedKeys?: Set<string>,
   keepCaughtUpForTimer = false,
   customAliasMap?: Map<string, string> | Record<string, string>,
+  options?: { clearMissingLocal?: boolean },
 ): LibraryItem[] {
   const safeRecords = Array.isArray(records) ? records : [];
   const ownerId = `nuvio-${profileIndex}`;
@@ -836,7 +843,12 @@ export function buildNuvioPlaybackItems(
         );
       });
 
-      if (!hasCloudProgress && !hasWatchedHistory && safeRecords.length > 0) {
+      if (
+        options?.clearMissingLocal &&
+        !hasCloudProgress &&
+        !hasWatchedHistory &&
+        safeRecords.length > 0
+      ) {
         clearLocalCw(loc.id, ownerId);
         continue;
       }

@@ -2824,7 +2824,7 @@ async function pullWatchProgressOnce(
   // playback cache before the local swap captures it.
   if (!strict) {
     try {
-      const playback = readCachedNuvioPlaybackItems(slot, accountId);
+      const playback = readCachedNuvioPlaybackItems(slot, accountId, complete);
       writeCachedNuvioPlaybackItems(
         slot,
         playback.filter(
