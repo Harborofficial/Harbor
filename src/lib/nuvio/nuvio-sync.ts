@@ -40,7 +40,6 @@ import { meta as fetchMeta } from "@/lib/cinemeta";
 import type { Addon } from "@/lib/addons";
 import { fetchManifestAt } from "@/lib/addon-store";
 import { recordNuvioAddons } from "./nuvio-addon-registry";
-import { expungeLeachedNuvioItemsFromStremio } from "@/lib/stremio";
 import { undismissCw } from "@/lib/cw-dismiss";
 import { loadStoredSettings } from "@/lib/settings/load";
 import { tmdbDetails } from "@/lib/providers/tmdb/tmdb-details";
@@ -1835,7 +1834,6 @@ export function reconcileNuvioWatched(
   harborProfileId?: string | number,
   options?: { force?: boolean; skipPlaybackRebuild?: boolean },
 ): Promise<void> {
-  void expungeLeachedNuvioItemsFromStremio().catch(() => {});
   if (!isNuvioSignedIn() || !isNuvioProviderActive()) return Promise.resolve();
   const accountId = getNuvioAccountId();
   if (!accountId) return Promise.resolve();
@@ -2323,9 +2321,6 @@ async function reconcileNuvioWatchedOnce(
   window.dispatchEvent(
     new CustomEvent("harbor:nuvio-watched-reconciled", { detail: { profileIndex } }),
   );
-  try {
-    void expungeLeachedNuvioItemsFromStremio().catch(() => {});
-  } catch {}
 }
 
 /**
