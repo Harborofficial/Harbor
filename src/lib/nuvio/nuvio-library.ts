@@ -5,12 +5,13 @@
  */
 
 import { setItemWithRecovery } from "@/lib/storage-recovery";
-import { getNuvioAccountId, getOrCreateSyncClientId, isNuvioSignedIn, nuvioFetch } from "./nuvio-client";
-import type {
-  NuvioLibraryDeltaItem,
-  NuvioLibraryItem,
-  NuvioLibrarySyncKey,
-} from "./nuvio-types";
+import {
+  getNuvioAccountId,
+  getOrCreateSyncClientId,
+  isNuvioSignedIn,
+  nuvioFetch,
+} from "./nuvio-client";
+import type { NuvioLibraryDeltaItem, NuvioLibraryItem, NuvioLibrarySyncKey } from "./nuvio-types";
 
 export type { NuvioLibraryItem };
 
@@ -132,9 +133,7 @@ function notifySubscribers(slot: number): void {
     }
   }
   if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent("harbor:nuvio-library-changed", { detail: { slot } }),
-    );
+    window.dispatchEvent(new CustomEvent("harbor:nuvio-library-changed", { detail: { slot } }));
   }
 }
 
@@ -165,11 +164,7 @@ export function readCachedNuvioLibrary(slot: number, accountId?: string): NuvioL
       if (!item || !item.content_id) continue;
       const id = String(item.content_id).trim();
       const type = String(item.content_type || "movie").trim();
-      if (
-        tombstones.has(id) ||
-        tombstones.has(`${type}:${id}`) ||
-        pendingIds.has(id)
-      ) {
+      if (tombstones.has(id) || tombstones.has(`${type}:${id}`) || pendingIds.has(id)) {
         continue;
       }
       validItems.push(item as NuvioLibraryItem);
@@ -254,7 +249,11 @@ export function readPendingUpserts(slot: number, accountId?: string): NuvioLibra
   }
 }
 
-export function writePendingUpserts(slot: number, items: NuvioLibraryItem[], accountId?: string): void {
+export function writePendingUpserts(
+  slot: number,
+  items: NuvioLibraryItem[],
+  accountId?: string,
+): void {
   try {
     const valid = items.filter((i) => i && i.content_id && String(i.content_id).trim().length > 0);
     if (valid.length === 0) {
@@ -270,13 +269,19 @@ export function readPendingDeletes(slot: number, accountId?: string): NuvioLibra
     const raw = localStorage.getItem(getPendingDeleteKey(slot, accountId));
     if (!raw) return [];
     const list = JSON.parse(raw);
-    return Array.isArray(list) ? list.filter((k) => k && k.content_id && String(k.content_id).trim().length > 0) : [];
+    return Array.isArray(list)
+      ? list.filter((k) => k && k.content_id && String(k.content_id).trim().length > 0)
+      : [];
   } catch {
     return [];
   }
 }
 
-export function writePendingDeletes(slot: number, keys: NuvioLibrarySyncKey[], accountId?: string): void {
+export function writePendingDeletes(
+  slot: number,
+  keys: NuvioLibrarySyncKey[],
+  accountId?: string,
+): void {
   try {
     const valid = keys.filter((k) => k && k.content_id && String(k.content_id).trim().length > 0);
     if (valid.length === 0) {
@@ -308,7 +313,8 @@ function normalizeLibraryRow(row: unknown): NuvioLibraryItem | null {
     release_info: typeof r.release_info === "string" && r.release_info ? r.release_info : null,
     imdb_rating: typeof r.imdb_rating === "number" ? r.imdb_rating : null,
     genres: Array.isArray(r.genres) ? r.genres.map(String).filter(Boolean) : [],
-    addon_base_url: typeof r.addon_base_url === "string" && r.addon_base_url ? r.addon_base_url : null,
+    addon_base_url:
+      typeof r.addon_base_url === "string" && r.addon_base_url ? r.addon_base_url : null,
     added_at: typeof r.added_at === "number" ? r.added_at : Date.now(),
   };
 }
@@ -318,9 +324,7 @@ function normalizeLibraryRow(row: unknown): NuvioLibraryItem | null {
  * with fallback to direct table query on /rest/v1/library_items.
  * Excludes any tombstoned or pending-delete items to avoid resurrecting deletions.
  */
-export async function pullNuvioLibrarySnapshot(
-  slot: number,
-): Promise<NuvioLibraryItem[]> {
+export async function pullNuvioLibrarySnapshot(slot: number): Promise<NuvioLibraryItem[]> {
   if (!isNuvioSignedIn()) return readCachedNuvioLibrary(slot);
   const startingAccountId = getNuvioAccountId();
   if (!startingAccountId) return readCachedNuvioLibrary(slot);
@@ -474,9 +478,7 @@ export async function pullNuvioLibrarySnapshot(
  * Pulls incremental deltas since last cursor via sync_pull_library_delta RPC.
  * Respects local tombstones and pending deletes.
  */
-export async function pullNuvioLibraryDelta(
-  slot: number,
-): Promise<NuvioLibraryItem[]> {
+export async function pullNuvioLibraryDelta(slot: number): Promise<NuvioLibraryItem[]> {
   const startingAccountId = getNuvioAccountId();
   if (!startingAccountId || !isNuvioSignedIn()) return readCachedNuvioLibrary(slot);
 
@@ -826,10 +828,7 @@ function scheduleMutationPush(slot: number): void {
  * Adds an item to the Nuvio library for a profile slot, updating local cache
  * immediately and queueing a cloud push.
  */
-export function addNuvioLibraryItem(
-  slot: number,
-  item: NuvioLibraryItem,
-): void {
+export function addNuvioLibraryItem(slot: number, item: NuvioLibraryItem): void {
   if (!item || !item.content_id || !item.content_id.trim()) return;
   const cleanId = item.content_id.trim();
   const cleanItem = { ...item, content_id: cleanId, added_at: item.added_at ?? Date.now() };
@@ -880,15 +879,11 @@ export function removeNuvioLibraryItem(
   writeCachedNuvioLibrary(slot, updated, true);
 
   // Remove from pending upserts
-  const pendingUpserts = readPendingUpserts(slot).filter(
-    (i) => i.content_id !== cleanId,
-  );
+  const pendingUpserts = readPendingUpserts(slot).filter((i) => i.content_id !== cleanId);
   writePendingUpserts(slot, pendingUpserts);
 
   // Add to pending deletes
-  const pendingDeletes = readPendingDeletes(slot).filter(
-    (k) => k.content_id !== cleanId,
-  );
+  const pendingDeletes = readPendingDeletes(slot).filter((k) => k.content_id !== cleanId);
   pendingDeletes.push({ content_id: cleanId, content_type: type });
   writePendingDeletes(slot, pendingDeletes);
 
@@ -898,11 +893,7 @@ export function removeNuvioLibraryItem(
 /**
  * Checks if an item is bookmarked in the active Nuvio profile's library.
  */
-export function isNuvioItemInLibrary(
-  slot: number,
-  contentId: string,
-  altIds?: string[],
-): boolean {
+export function isNuvioItemInLibrary(slot: number, contentId: string, altIds?: string[]): boolean {
   if (!contentId) return false;
   const cleanId = contentId.trim();
   const items = readCachedNuvioLibrary(slot);

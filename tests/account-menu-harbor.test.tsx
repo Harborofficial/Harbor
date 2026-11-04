@@ -114,6 +114,8 @@ async function fixture(harborSignedIn = false, stremioSignedIn = false, kid = fa
         selectProfile: () => {},
       }),
       useActiveKid: () => (kid ? { age: 7, curfewMinutes: null, parentPinHash: null } : null),
+      isPlaceholderName: (name?: string | null) =>
+        !name || name === "Guest" || name.startsWith("Guest "),
     },
     "@/lib/view": {
       useView: () => ({
@@ -122,7 +124,9 @@ async function fixture(harborSignedIn = false, stremioSignedIn = false, kid = fa
       }),
     },
     "@/lib/settings": {
-      useSettings: () => ({ settings: { harborAvatar: "/fallback-avatar.png", accountProvider: "stremio" } }),
+      useSettings: () => ({
+        settings: { harborAvatar: "/fallback-avatar.png", accountProvider: "stremio" },
+      }),
     },
     "@/lib/settings/defaults": {
       getSecondaryPrivileges: () => ({ canAddProfiles: true, canSignOutRoot: true }),
@@ -130,6 +134,7 @@ async function fixture(harborSignedIn = false, stremioSignedIn = false, kid = fa
     "@/lib/nuvio/nuvio-client": {
       loadNuvioState: () => ({ session: null, profiles: [], activeProfileIndex: 1 }),
       isNuvioSignedIn: () => false,
+      isNuvioProviderActive: () => false,
     },
     "@/lib/nuvio/nuvio-auth": {
       signOutNuvio: async () => {},
@@ -141,6 +146,8 @@ async function fixture(harborSignedIn = false, stremioSignedIn = false, kid = fa
     "@/lib/nuvio/nuvio-types": {},
     "@/lib/active-profile-id": {
       isStremioActivePrimary: (p: any) => !!p?.isPrimary,
+      isNuvioProviderActive: () => false,
+      activeProfileIsPrimary: () => true,
     },
     "@/lib/social/presence": {
       currentStatus: () => "online",
@@ -216,6 +223,7 @@ async function fixture(harborSignedIn = false, stremioSignedIn = false, kid = fa
   const renderSidebar = async () => {
     const { SettingsSidebar } = load("views/settings/settings-sidebar.tsx", {
       ...dependencies,
+      "@/lib/account/avatar-sync": { syncAvatar: () => {} },
       "@/components/icons/harbor-mark": load("components/icons/harbor-mark.tsx", dependencies),
       "@/assets/nav-icons/download.svg?raw": { default: "<svg />" },
       "@/chrome/account-menu/account-menu-parts": dependencies["./account-menu-parts"],

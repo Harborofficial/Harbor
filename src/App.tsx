@@ -1,4 +1,5 @@
 import { startNuvioMutationRetry } from "@/lib/nuvio/nuvio-sync";
+import { useNuvioSyncLoop } from "@/lib/nuvio/nuvio-sync-runtime";
 import { GAMES_IN_NAV } from "@/chrome/nav-items";
 import { GameAccessProvider } from "@/views/games/game-access-context";
 import { GameLibraryDock } from "@/views/games/game-library-dock";
@@ -49,6 +50,7 @@ import { MiddleClickScroll } from "@/lib/use-middle-click-scroll";
 import { exitWindowFullscreenOnPlayerClose, toggleWindowFullscreen } from "@/lib/fullscreen-state";
 import { flushCloudSync } from "@/views/player/hooks/use-stremio-sync";
 import { startWriteQueueFlusher } from "@/lib/stremio-write-queue";
+import { expungeLeachedNuvioItemsFromStremio } from "@/lib/stremio";
 import {
   mediaServerConnections,
   mediaServerRefreshIntervalMs,
@@ -562,6 +564,8 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                         <TogetherLocationPublisher />
                                                         <IdleAwayRunner />
                                                         <SessionRefreshRunner />
+                                                        <StremioLeachedExpungeRunner />
+                                                        <NuvioSyncLoopRunner />
                                                         <RemoteHostMount />
                                                         <RemoteOpenBridge />
                                                       </AfterFirstPaint>
@@ -751,6 +755,19 @@ function MediaServerSyncRunner() {
 
 function SessionRefreshRunner() {
   useEffect(startSessionRefresh, []);
+  return null;
+}
+
+function StremioLeachedExpungeRunner() {
+  useEffect(() => {
+    void expungeLeachedNuvioItemsFromStremio().catch(() => {});
+  }, []);
+  return null;
+}
+
+function NuvioSyncLoopRunner() {
+  const { player } = useView();
+  useNuvioSyncLoop(!player);
   return null;
 }
 
@@ -2106,7 +2123,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <div {...layerProps(profileTop)}>
                 <Suspense fallback={null}>
                   <ProfileView
-                    key={`profile-${profileHandle}`}
+                    key={`profile-${settings.accountProvider}-${profileHandle}`}
                     handle={profileHandle}
                     onOpenProfile={requestOpenProfile}
                     onOpenMeta={(id, kind, hint) => {

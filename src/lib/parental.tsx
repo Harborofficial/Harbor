@@ -7,13 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  anyTabLocked,
-  DEFAULT_HIDDEN,
-  type HiddenTabs,
-  type LockableTab,
-} from "./lockable-tabs";
+import { anyTabLocked, DEFAULT_HIDDEN, type HiddenTabs, type LockableTab } from "./lockable-tabs";
 import { hashProfilePassword, verifyProfilePassword } from "./profile-password";
+import { verifyNuvioPin } from "./nuvio/nuvio-profiles";
 import { useProfiles } from "./profiles";
 
 export { LOCKABLE_TABS, type LockableTab, type HiddenTabs } from "./lockable-tabs";
@@ -35,7 +31,7 @@ export function ParentalProvider({ children }: { children: ReactNode }) {
   const { activeProfile, updateProfile, sessionUnlockedIds } = useProfiles();
 
   const hiddenTabs: HiddenTabs = useMemo(
-    () => ({ ...DEFAULT_HIDDEN, ...(activeProfile?.lockedTabs ?? {}) }),
+    () => ({ ...DEFAULT_HIDDEN, ...activeProfile?.lockedTabs }),
     [activeProfile?.id, activeProfile?.lockedTabs],
   );
   const hasPin = !!activeProfile?.passwordHash;
@@ -87,7 +83,14 @@ export function ParentalProvider({ children }: { children: ReactNode }) {
         setSessionUnlockedFor(activeProfile?.id ?? null);
         return true;
       }
-      const ok = await verifyProfilePassword(pin, activeProfile.passwordHash);
+      let ok = false;
+      if (activeProfile.id.startsWith("nuvio-")) {
+        const slot = parseInt(activeProfile.id.replace("nuvio-", ""), 10);
+        const res = await verifyNuvioPin(slot, pin);
+        ok = res.unlocked;
+      } else {
+        ok = await verifyProfilePassword(pin, activeProfile.passwordHash);
+      }
       if (ok) {
         setSessionUnlockedFor(activeProfile.id);
         return true;

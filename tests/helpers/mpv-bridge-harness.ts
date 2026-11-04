@@ -97,7 +97,11 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
         return () => handlers.delete(name);
       },
     },
-    "./buffer-profile": { autoBufferProfile, formatMpvBytes },
+    "./buffer-profile": {
+      autoBufferProfile,
+      formatMpvBytes,
+      isBlockedDiskCacheOptionLine: () => false,
+    },
     "@/lib/native-memory": { getTotalPhysBytes: () => totalPhysBytes },
     "./pause-trace": { traceFrameDrops() {}, tracePlayback() {} },
     "@/lib/subtitles/prepare": {

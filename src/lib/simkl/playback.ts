@@ -2,6 +2,7 @@ import { simklRequest, SimklApiError } from "./client";
 import { getSession } from "./session";
 import { simklEntryIdKeys, simklEpisodeWatchKeys, simklLookupIds } from "./ids";
 import type { SimklEpisodeCoords } from "./ids";
+import { loadSimklProgress } from "./list-status";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { readResumeEntry, saveResumeBatch } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
@@ -182,6 +183,59 @@ export async function hasActiveSimklPlayback(
   return false;
 }
 
+export const SIMKL_PLAYBACK_CACHE_KEY = "harbor.simkl.playback_items";
+let memorySimklPlaybackCache: LibraryItem[] | null = null;
+
+function isValidSimklPlaybackItem(item: LibraryItem): boolean {
+  if (!item || item.external !== "simkl" || !item.state) return false;
+  if (item.upNext || item.waitingForAir) return true;
+  const offset = item.state.timeOffset ?? 0;
+  const dur = item.state.duration ?? 0;
+  if (offset <= 0 || (item.state.flaggedWatched ?? 0) > 0) return false;
+  if (dur > 0 && offset / dur >= 0.9) return false;
+  return true;
+}
+
+export function readCachedSimklPlaybackItems(): LibraryItem[] {
+  if (memorySimklPlaybackCache && memorySimklPlaybackCache.length > 0) {
+    return memorySimklPlaybackCache.filter(isValidSimklPlaybackItem);
+  }
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(SIMKL_PLAYBACK_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        const valid = parsed.filter(isValidSimklPlaybackItem);
+        memorySimklPlaybackCache = valid;
+        if (valid.length !== parsed.length) {
+          try {
+            localStorage.setItem(SIMKL_PLAYBACK_CACHE_KEY, JSON.stringify(valid));
+          } catch {}
+        }
+        return valid;
+      }
+    }
+  } catch {}
+  return [];
+}
+
+export function writeCachedSimklPlaybackItems(items: LibraryItem[]): void {
+  memorySimklPlaybackCache = items;
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(SIMKL_PLAYBACK_CACHE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
+export function clearCachedSimklPlaybackItems(): void {
+  memorySimklPlaybackCache = null;
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(SIMKL_PLAYBACK_CACHE_KEY);
+  } catch {}
+}
+
 export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
   const owner = getSession();
   if (!owner) return [];
@@ -189,7 +243,12 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
   try {
     raw = await simklRequest<RawSession[]>("/sync/playback?hide_watched=true&limit=40");
   } catch (e) {
-    if (e instanceof SimklApiError && e.status === 404) return [];
+    if (e instanceof SimklApiError && e.status === 404) {
+      writeCachedSimklPlaybackItems([]);
+      return [];
+    }
+    const cached = readCachedSimklPlaybackItems();
+    if (cached.length > 0) return cached;
     throw e;
   }
   if (getSession() !== owner) throw new Error("SIMKL session changed");
@@ -197,12 +256,17 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
 
   const items: LibraryItem[] = [];
   const seen = new Set<string>();
+  const seenSeries = new Set<string>();
   for (const r of raw) {
     const item = await toLibraryItem(r);
     if (!item?.state) continue;
     const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
     if (seen.has(key)) continue;
     seen.add(key);
+    seenSeries.add(item._id);
+    const cleanId = item._id.replace(/^(series|movie|tmdb|tmdb:tv):/, "");
+    seenSeries.add(cleanId);
+    seenSeries.add(`tmdb:tv:${cleanId}`);
     items.push(item);
     // A dismissed card must not be resurrected by this backfill: dismiss clears the
     // resume entry, and rewriting it with t=now would manufacture fresh activity that
@@ -235,5 +299,41 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
       ]);
     }
   }
+
+  try {
+    const progress = await loadSimklProgress();
+    if (progress && Array.isArray(progress.completedSeries)) {
+      const activeSeries = progress.completedSeries
+        .filter((comp) => {
+          if (!comp || !comp._id) return false;
+          const status = progress.statuses.get(comp._id);
+          const mtime = Date.parse(comp._mtime);
+          const isRecent = Number.isFinite(mtime) && Date.now() - mtime < 90 * 86400 * 1000;
+          return status === "watching" || (status === "completed" && isRecent);
+        })
+        .sort((a, b) => Date.parse(b._mtime) - Date.parse(a._mtime))
+        .slice(0, 40);
+
+      for (const comp of activeSeries) {
+        const cleanId = comp._id.replace(/^(series|movie|tmdb|tmdb:tv):/, "");
+        if (
+          seenSeries.has(comp._id) ||
+          seenSeries.has(cleanId) ||
+          seenSeries.has(`tmdb:tv:${cleanId}`)
+        ) {
+          continue;
+        }
+        if (isCwDismissed(comp)) continue;
+        seenSeries.add(comp._id);
+        seenSeries.add(cleanId);
+        items.push({
+          ...comp,
+          upNext: true,
+        });
+      }
+    }
+  } catch {}
+
+  writeCachedSimklPlaybackItems(items);
   return items;
 }

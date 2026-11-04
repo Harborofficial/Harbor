@@ -60,6 +60,7 @@ function detailMapper(language: string, translateTitles = true) {
     "@/lib/storage-recovery": { setItemWithRecovery: () => undefined },
     "@/lib/episode-text-language": { episodeTextLanguage: () => language },
     "@/lib/season-name": { isGenericSeasonName: () => false },
+    "./movie-release-dates": { movieReleaseDates: () => [] },
   };
   let raw: Record<string, unknown>;
   new Function("require", "module", "exports", output)(

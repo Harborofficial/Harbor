@@ -37,6 +37,9 @@ function client(fetcher: (url: string) => Promise<unknown>) {
       artistIdentityKey: (name: string) =>
         name.normalize("NFKC").trim().toLowerCase().replace(/[ ]+/g, " "),
     },
+    // artist-profile remembers fetched genres for the browse cache; the cache
+    // write is irrelevant to the identity/merch assertions under test.
+    "./artist-genre-cache": { rememberArtistGenres: () => {} },
   };
   for (const name of ["release-metadata", "source-link", "artist-profile"]) {
     const input = readFileSync(new URL(`../src/lib/music/${name}.ts`, import.meta.url), "utf8");

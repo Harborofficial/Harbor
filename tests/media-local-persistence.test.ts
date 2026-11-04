@@ -36,6 +36,9 @@ function storageHarness() {
         stremioProfileId: () => "",
         primaryProfileId: () => "",
       },
+      "@/lib/storage-recovery": {
+        persistCritical: (key: string, value: string) => storage.setItem(key, value),
+      },
       "@/lib/nuvio/nuvio-sync": {
         isNuvioProviderActive: () => false,
         resolveNuvioProfileIndex: () => 1,

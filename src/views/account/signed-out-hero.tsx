@@ -1,12 +1,17 @@
 import harborScreenshot from "@/assets/settings-preview/harbor-profile.png";
 import stremioLogo from "@/assets/stremio.png";
+import nuvioLogo from "@/assets/nuvio.png";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { Section, settingsAnchor, useSettingsActiveContext } from "@/views/settings/shared";
 import { ROW_ACTION, ROW_ACTION_PRIMARY } from "@/views/settings/kit";
 
 export function SignedOutHero({ onSignIn }: { onSignIn: (mode: "register" | "signin") => void }) {
   const t = useT();
   const { setActive } = useSettingsActiveContext();
+  const { settings } = useSettings();
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   return (
     <Section title={t("Harbor account")}>
       <div className="hset-account-welcome">
@@ -27,11 +32,7 @@ export function SignedOutHero({ onSignIn }: { onSignIn: (mode: "register" | "sig
             >
               {t("Create your account")}
             </button>
-            <button
-              type="button"
-              onClick={() => onSignIn("signin")}
-              className={ROW_ACTION}
-            >
+            <button type="button" onClick={() => onSignIn("signin")} className={ROW_ACTION}>
               {t("Sign in")}
             </button>
           </div>
@@ -53,19 +54,27 @@ export function SignedOutHero({ onSignIn }: { onSignIn: (mode: "register" | "sig
         </figure>
       </div>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-t border-edge-soft py-6">
-        <img src={stremioLogo} alt="" className="h-8 w-8 shrink-0 object-contain" />
+        <img
+          src={isNuvio ? nuvioLogo : stremioLogo}
+          alt=""
+          className="h-8 w-8 shrink-0 object-contain rounded-md"
+        />
         <div className="min-w-[220px] flex-1">
-          <p className="text-[15.5px] font-medium leading-[23px] text-ink">{t("Bringing your Stremio library?")}</p>
+          <p className="text-[15.5px] font-medium leading-[23px] text-ink">
+            {isNuvio ? t("Bringing your Nuvio library?") : t("Bringing your Stremio library?")}
+          </p>
           <p className="mt-1 text-[15px] leading-[22px] text-ink-muted">
-            {t("Connect Stremio to bring in your library and addons.")}
+            {isNuvio
+              ? t("Connect Nuvio to sync your profiles, watchlist, and addons.")
+              : t("Connect Stremio to bring in your library and addons.")}
           </p>
         </div>
         <button
           type="button"
           className={ROW_ACTION}
-          onClick={() => setActive("account", settingsAnchor("Stremio"))}
+          onClick={() => setActive("account", settingsAnchor(isNuvio ? "Nuvio" : "Stremio"))}
         >
-          {t("Open Stremio settings")}
+          {isNuvio ? t("Open Nuvio settings") : t("Open Stremio settings")}
         </button>
       </div>
     </Section>

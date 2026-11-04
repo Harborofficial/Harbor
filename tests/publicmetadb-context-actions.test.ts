@@ -117,6 +117,29 @@ function harness() {
           return writeSucceeds;
         },
       },
+      "./nuvio/nuvio-client": { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false },
+      "./nuvio/nuvio-sync": {
+        resolveNuvioProfileIndex: () => 0,
+        pushWatchedItemToNuvio: async () => {},
+        deleteWatchedItemFromNuvio: async () => {},
+        pushWatchProgressToNuvio: async () => {},
+        deleteWatchProgressFromNuvio: async () => {},
+        deleteEpisodeWatchProgressFromNuvio: async () => {},
+        undismissNextUpInNuvioCloud: async () => {},
+        readCachedWatchProgress: () => null,
+        readCachedWatchedItems: () => [],
+      },
+      "./nuvio/nuvio-playback": {
+        buildNuvioPlaybackItems: () => [],
+        writeCachedNuvioPlaybackItems: () => {},
+      },
+      "./nuvio/nuvio-library": {
+        addNuvioLibraryItem: async () => {},
+        removeNuvioLibraryItem: async () => {},
+      },
+      "./local-cw": { saveLocalCw: () => {}, clearLocalCw: () => {} },
+      "./resume": { saveResumeMs: () => {} },
+      "./settings/load": { loadStoredSettings: () => ({}) },
     },
   );
   return {

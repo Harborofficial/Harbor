@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import uploadGlyph from "@/assets/nav-icons/download.svg?raw";
 import { resizeAvatar } from "./account/avatar-utils";
+import { pushAvatarToEcosystem } from "@/lib/account/avatar-sync";
+import { updateNuvioProfile } from "@/lib/nuvio/nuvio-profiles";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { ProfileAvatar, SubtitleText } from "@/chrome/account-menu/account-menu-parts";
 import { useAuth } from "@/lib/auth";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
@@ -126,24 +129,33 @@ function RailAccount() {
   const [author, setAuthor] = useState(currentAuthor);
   useEffect(() => subscribeAuthor(() => setAuthor(currentAuthor())), []);
   const { settings, update } = useSettings();
-  const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
-    ? null
-    : settings.harborAvatar;
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
+  const harborAvatar =
+    isNuvio || settings.harborAvatar?.startsWith("/kids/avatars/") ? null : settings.harborAvatar;
   const onPickAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
     try {
       const dataUrl = await resizeAvatar(file, 320);
-      update({ harborAvatar: dataUrl });
-      if (activeProfile) updateProfile(activeProfile.id, { avatar: dataUrl });
+      void pushAvatarToEcosystem(dataUrl);
+      if (isNuvio) {
+        const slot = activeProfile ? parseInt(activeProfile.id.replace(/\D/g, ""), 10) || 1 : 1;
+        void updateNuvioProfile(slot, { avatarUrl: dataUrl });
+      } else {
+        update({ harborAvatar: dataUrl });
+        if (activeProfile) updateProfile(activeProfile.id, { avatar: dataUrl });
+      }
     } catch (err) {
       console.warn("[avatar] resize failed", err);
     }
   };
-
-  const name =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+  const name = isNuvio
+    ? activeProfile?.name || t("profile.fallback")
+    : (activeProfile?.name ??
+      user?.fullname ??
+      user?.email?.split("@")[0] ??
+      t("profile.fallback"));
 
   return (
     <div data-tv-nav-cell className="hset-rail-me">
@@ -155,8 +167,8 @@ function RailAccount() {
       >
         <ProfileAvatar
           profile={activeProfile}
-          user={user}
-          fallbackAvatar={harborAvatar}
+          user={isNuvio ? null : user}
+          fallbackAvatar={isNuvio ? null : harborAvatar}
           size="lg"
         />
         <span
@@ -391,7 +403,10 @@ export function SettingsSidebar({
                       ? []
                       : tabsFor(id).filter((tab) => {
                           if (id === "account") {
-                            return tab.id !== (settings.accountProvider === "nuvio" ? "stremio" : "nuvio");
+                            return (
+                              tab.id !==
+                              (settings.accountProvider === "nuvio" ? "stremio" : "nuvio")
+                            );
                           }
                           return native || id !== "theme" || tab.id !== "window";
                         });

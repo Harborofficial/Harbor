@@ -23,12 +23,27 @@ function harness() {
     const file = name.replace(/^@\/lib\//, "").replace(/^\.\//, "");
     if (cache.has(file)) return cache.get(file);
     if (file === "react") return { useSyncExternalStore() {} };
-    if (file === "nuvio/nuvio-client") return { isNuvioSignedIn: () => false };
+    if (file.startsWith("@tauri-apps/"))
+      return {
+        invoke: async () => {},
+        isTauri: () => false,
+        fetch: async () => {
+          throw new Error(`Unexpected live request: ${file}`);
+        },
+      };
+    if (file.startsWith("@noble/hashes/"))
+      return name.endsWith("/sha256")
+        ? { sha256: (input: Uint8Array) => input }
+        : { bytesToHex: (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16)).join("") };
+    if (file === "feed/external-cw") return { removeExternalCwItem: () => {} };
+    if (file === "nuvio/nuvio-client")
+      return { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false };
     if (file === "nuvio/nuvio-sync")
       return {
-        deleteWatchProgressFromNuvio: async () => {},
         isNuvioProviderActive: () => false,
         resolveNuvioProfileIndex: () => 1,
+        deleteWatchProgressFromNuvio: async () => {},
+        dismissNextUpInNuvioCloud: async () => {},
       };
     if (file === "stremio")
       return {

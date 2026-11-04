@@ -57,6 +57,9 @@ for (const remote of [
             writes.push(item);
           },
         },
+        "./active-profile-id": {
+          isNuvioProviderActive: () => false,
+        },
       },
       { getItem: (k) => data.get(k) ?? null, setItem: (k, v) => data.set(k, v) },
     );

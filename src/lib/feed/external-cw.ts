@@ -1,15 +1,19 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { noteNotify } from "@/lib/render-cause";
 import { detectAnimeForCw } from "@/lib/anime-detect";
-import { fetchSimklPlaybackItems } from "@/lib/simkl/playback";
-import { fetchTraktPlaybackItems } from "@/lib/trakt/playback";
+import { fetchSimklPlaybackItems, readCachedSimklPlaybackItems } from "@/lib/simkl/playback";
+import { fetchTraktPlaybackItems, readCachedTraktPlaybackItems } from "@/lib/trakt/playback";
 import {
   fetchNuvioPlaybackItems,
   readCachedNuvioPlaybackItems,
   writeCachedNuvioPlaybackItems,
 } from "@/lib/nuvio/nuvio-playback";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
-import { isNuvioProviderActive, resolveNuvioProfileIndex } from "@/lib/nuvio/nuvio-sync";
+import {
+  isNuvioProviderActive,
+  resolveNuvioProfileIndex,
+  getNuvioContentIdVariants,
+} from "@/lib/nuvio/nuvio-sync";
 import {
   getSession as getSimklSession,
   subscribeSession as subscribeSimklSession,
@@ -23,7 +27,7 @@ import {
   getSession as getPmdbSession,
   subscribeSession as subscribePmdbSession,
 } from "@/lib/publicmetadb/session";
-import { episodeFromVideoId, type LibraryItem } from "@/lib/stremio";
+import { type LibraryItem } from "@/lib/stremio";
 
 const STALE_MS = 300_000;
 const FOCUS_STALE_MS = 30_000;
@@ -48,16 +52,111 @@ export function getCachedNuvioItemsForSlot(slot: number): LibraryItem[] {
   return [];
 }
 
-// Pre-populate items synchronously on module load from disk cache if in Nuvio mode
+let sourceMask = { trakt: true, simkl: true, publicmetadb: false, nuvio: isNuvioProviderActive() };
+
+function activityOf(i: LibraryItem): number {
+  const lw = Date.parse(i.state?.lastWatched ?? "");
+  if (Number.isFinite(lw)) return lw;
+  const m = Date.parse(i._mtime ?? "");
+  return Number.isFinite(m) ? m : 0;
+}
+
+function mergeItem(existing: LibraryItem, incoming: LibraryItem): LibraryItem {
+  const isExistingNuvio = existing.external === "nuvio";
+  const isIncomingNuvio = incoming.external === "nuvio";
+
+  if (isExistingNuvio && !isIncomingNuvio) {
+    if (activityOf(incoming) > activityOf(existing)) {
+      return {
+        ...existing,
+        state: {
+          ...existing.state,
+          ...incoming.state,
+          video_id: incoming.state?.video_id ?? existing.state?.video_id,
+          season: incoming.state?.season ?? existing.state?.season,
+          episode: incoming.state?.episode ?? existing.state?.episode,
+          timeOffset: incoming.state?.timeOffset ?? existing.state?.timeOffset ?? 0,
+          duration: incoming.state?.duration ?? existing.state?.duration ?? 0,
+          lastWatched: incoming.state?.lastWatched ?? existing.state?.lastWatched,
+        },
+        _mtime: incoming._mtime ?? existing._mtime,
+      };
+    }
+    return existing;
+  }
+
+  if (!isExistingNuvio && isIncomingNuvio) {
+    if (activityOf(existing) > activityOf(incoming)) {
+      return {
+        ...incoming,
+        state: {
+          ...incoming.state,
+          ...existing.state,
+          video_id: existing.state?.video_id ?? incoming.state?.video_id,
+          season: existing.state?.season ?? incoming.state?.season,
+          episode: existing.state?.episode ?? incoming.state?.episode,
+          timeOffset: existing.state?.timeOffset ?? incoming.state?.timeOffset ?? 0,
+          duration: existing.state?.duration ?? incoming.state?.duration ?? 0,
+          lastWatched: existing.state?.lastWatched ?? incoming.state?.lastWatched,
+        },
+        _mtime: existing._mtime ?? incoming._mtime,
+      };
+    }
+    return incoming;
+  }
+
+  return activityOf(incoming) > activityOf(existing) ? incoming : existing;
+}
+
+function isEligibleTrackerPlayback(i: LibraryItem): boolean {
+  if (i.external !== "simkl" && i.external !== "trakt" && i.external !== "publicmetadb") {
+    return true;
+  }
+  if (i.upNext || i.waitingForAir) return true;
+  const offset = i.state?.timeOffset ?? 0;
+  const dur = i.state?.duration ?? 0;
+  if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
+  if (dur > 0 && offset / dur >= 0.9) return false;
+  return true;
+}
+
+function merge(lists: LibraryItem[][]): LibraryItem[] {
+  const byId = new Map<string, LibraryItem>();
+  for (const list of lists) {
+    for (const i of list) {
+      if (!isEligibleTrackerPlayback(i)) continue;
+      const held = byId.get(i._id);
+      if (!held) byId.set(i._id, i);
+      else byId.set(i._id, mergeItem(held, i));
+    }
+  }
+  return [...byId.values()].sort((a, b) => activityOf(b) - activityOf(a));
+}
+
+// Pre-populate items synchronously on module load from disk cache
 let items: LibraryItem[] = (() => {
-  if (typeof window !== "undefined" && isNuvioSignedIn() && isNuvioProviderActive()) {
+  if (typeof window === "undefined") return EMPTY;
+  const initialLists: LibraryItem[][] = [];
+  if (isNuvioSignedIn() && isNuvioProviderActive()) {
     try {
       const slot = resolveNuvioProfileIndex();
       const initial = getCachedNuvioItemsForSlot(slot);
-      if (initial.length > 0) return initial;
+      if (initial.length > 0) initialLists.push(initial);
     } catch {}
   }
-  return EMPTY;
+  if (typeof readCachedTraktPlaybackItems === "function" && getTraktSession() && sourceMask.trakt) {
+    try {
+      const initialTrakt = readCachedTraktPlaybackItems();
+      if (initialTrakt && initialTrakt.length > 0) initialLists.push(initialTrakt);
+    } catch {}
+  }
+  if (typeof readCachedSimklPlaybackItems === "function" && getSimklSession() && sourceMask.simkl) {
+    try {
+      const initialSimkl = readCachedSimklPlaybackItems();
+      if (initialSimkl && initialSimkl.length > 0) initialLists.push(initialSimkl);
+    } catch {}
+  }
+  return initialLists.length > 0 ? merge(initialLists) : EMPTY;
 })();
 
 let fetchedAt = 0;
@@ -65,6 +164,7 @@ let inflight: Promise<void> | null = null;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 let retryAttempt = 0;
 let refreshGen = 0;
+let lastAppliedGen = 0;
 const subs = new Set<() => void>();
 
 function emit(): void {
@@ -74,9 +174,22 @@ function emit(): void {
 
 function setItems(next: LibraryItem[]): void {
   if (next.length === 0 && items.length === 0) return;
+  if (next === items) return;
+  try {
+    // Conservative content check: false negatives only cost an extra emit.
+    if (JSON.stringify(items) === JSON.stringify(next)) return;
+  } catch {}
   items = next;
   emit();
   void detectAnimeForCw(next.filter((item) => !item.isAnime));
+}
+
+export function willRefreshExternalCw(force = false): boolean {
+  if (!isNuvioSignedIn() || !isNuvioProviderActive() || sourceMask.nuvio === false) return false;
+  if (!externalCwConnected()) return false;
+  if (inflight) return true;
+  if (force) return true;
+  return !(fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS);
 }
 
 export function externalCwConnected(): boolean {
@@ -88,34 +201,6 @@ export function externalCwConnected(): boolean {
     nuvioActive
   );
 }
-
-function activityOf(i: LibraryItem): number {
-  const lw = Date.parse(i.state?.lastWatched ?? "");
-  if (Number.isFinite(lw)) return lw;
-  const m = Date.parse(i._mtime ?? "");
-  return Number.isFinite(m) ? m : 0;
-}
-
-function mergeKey(i: LibraryItem): string {
-  const se = episodeFromVideoId(i.state?.video_id);
-  const season = i.state?.season ?? se?.season;
-  const episode = i.state?.episode ?? se?.episode;
-  return `${i._id}|${season ?? ""}|${episode ?? ""}`;
-}
-
-function merge(lists: LibraryItem[][]): LibraryItem[] {
-  const byKey = new Map<string, LibraryItem>();
-  for (const list of lists) {
-    for (const i of list) {
-      const key = mergeKey(i);
-      const held = byKey.get(key);
-      if (!held || activityOf(i) > activityOf(held)) byKey.set(key, i);
-    }
-  }
-  return [...byKey.values()].sort((a, b) => activityOf(b) - activityOf(a));
-}
-
-let sourceMask = { trakt: true, simkl: true, publicmetadb: false, nuvio: isNuvioProviderActive() };
 
 export function setExternalCwSources(mask: {
   trakt: boolean;
@@ -132,10 +217,13 @@ export function setExternalCwSources(mask: {
     nuvio === sourceMask.nuvio
   )
     return;
+
   sourceMask = { trakt: mask.trakt, simkl: mask.simkl, publicmetadb: pm, nuvio };
   fetchedAt = 0;
+
   // Drop items from newly-disabled sources synchronously so their cards vanish
   // immediately instead of lingering until the next successful refresh.
+  let nextItems = items;
   if (items.length > 0) {
     const kept = items.filter(
       (i) =>
@@ -144,13 +232,59 @@ export function setExternalCwSources(mask: {
         (sourceMask.publicmetadb || i.external !== "publicmetadb") &&
         (sourceMask.nuvio || i.external !== "nuvio"),
     );
-    if (kept.length !== items.length) setItems(kept);
+    if (kept.length !== items.length) {
+      nextItems = kept;
+    }
   }
+
+  // Pre-load cached items synchronously from enabled sources if currently missing
+  const hasTraktInItems = nextItems.some((i) => i.external === "trakt");
+  const hasSimklInItems = nextItems.some((i) => i.external === "simkl");
+  const hasNuvioInItems = nextItems.some((i) => i.external === "nuvio");
+
+  const toAdd: LibraryItem[][] = [];
+  if (
+    sourceMask.trakt &&
+    !hasTraktInItems &&
+    typeof readCachedTraktPlaybackItems === "function" &&
+    getTraktSession()
+  ) {
+    try {
+      const c = readCachedTraktPlaybackItems();
+      if (c && c.length > 0) toAdd.push(c);
+    } catch {}
+  }
+  if (
+    sourceMask.simkl &&
+    !hasSimklInItems &&
+    typeof readCachedSimklPlaybackItems === "function" &&
+    getSimklSession()
+  ) {
+    try {
+      const c = readCachedSimklPlaybackItems();
+      if (c && c.length > 0) toAdd.push(c);
+    } catch {}
+  }
+  if (sourceMask.nuvio && !hasNuvioInItems && isNuvioSignedIn() && isNuvioProviderActive()) {
+    try {
+      const slot = resolveNuvioProfileIndex();
+      const c = getCachedNuvioItemsForSlot(slot);
+      if (c && c.length > 0) toAdd.push(c);
+    } catch {}
+  }
+  if (toAdd.length > 0) {
+    nextItems = merge([nextItems, ...toAdd]);
+  }
+
+  if (nextItems !== items) {
+    setItems(nextItems);
+  }
+
   if (!externalCwConnected()) setItems(EMPTY);
   void refreshExternalCw(true);
 }
 
-async function runRefresh(gen: number): Promise<boolean> {
+async function runRefresh(gen: number, force = false): Promise<boolean> {
   const enabled: Array<{
     source: "simkl" | "trakt" | "publicmetadb" | "nuvio";
     fetch: () => Promise<LibraryItem[]>;
@@ -166,10 +300,13 @@ async function runRefresh(gen: number): Promise<boolean> {
       source: "nuvio",
       fetch: async () => {
         const slot = resolveNuvioProfileIndex();
-        return await fetchNuvioPlaybackItems(slot);
+        const fresh = await fetchNuvioPlaybackItems(slot, force);
+        slotCwMemoryCache.set(slot, fresh);
+        return fresh;
       },
     });
   }
+
   const results = await Promise.all(
     enabled.map(async ({ fetch }) => {
       try {
@@ -179,8 +316,11 @@ async function runRefresh(gen: number): Promise<boolean> {
       }
     }),
   );
-  // A disabled source or superseded request must not publish its late response.
-  if (gen !== refreshGen) return true;
+
+  // If a newer generation has already finished and applied, ignore this superseded run
+  if (gen < lastAppliedGen) return true;
+  lastAppliedGen = gen;
+
   const complete = results.every((r) => r !== null);
   fetchedAt = complete ? Date.now() : 0;
   const succeeded = results.filter((r): r is LibraryItem[] => r !== null);
@@ -189,7 +329,15 @@ async function runRefresh(gen: number): Promise<boolean> {
     enabled.filter((_, index) => results[index] === null).map(({ source }) => source),
   );
   const retained = items.filter((i) => i.external && failedSources.has(i.external));
-  setItems(merge([...succeeded, retained]));
+  const activeItems = [...succeeded, retained].flat().filter((i) => {
+    if (i.external === "trakt") return sourceMask.trakt && !!getTraktSession();
+    if (i.external === "simkl") return sourceMask.simkl && !!getSimklSession();
+    if (i.external === "publicmetadb") return sourceMask.publicmetadb && !!getPmdbSession();
+    if (i.external === "nuvio")
+      return sourceMask.nuvio && isNuvioSignedIn() && isNuvioProviderActive();
+    return true;
+  });
+  setItems(merge([activeItems]));
   if (complete) retryAttempt = 0;
   return complete;
 }
@@ -202,7 +350,7 @@ function cancelRetry(): void {
   retryAttempt = 0;
 }
 
-function scheduleRetry(): void {
+function scheduleRetry(force = false): void {
   if (retryTimer !== null) return;
   if (retryAttempt >= RETRY_DELAYS_MS.length) return;
   const gen = refreshGen;
@@ -210,14 +358,14 @@ function scheduleRetry(): void {
   retryAttempt += 1;
   retryTimer = setTimeout(() => {
     retryTimer = null;
-    if (gen === refreshGen) void startRefresh(gen);
+    if (gen === refreshGen) void startRefresh(gen, force);
   }, delay);
 }
 
-function startRefresh(gen: number): Promise<void> {
-  inflight = runRefresh(gen)
+function startRefresh(gen: number, force = false): Promise<void> {
+  inflight = runRefresh(gen, force)
     .then((ok) => {
-      if (gen === refreshGen && !ok) scheduleRetry();
+      if (gen === refreshGen && !ok) scheduleRetry(force);
     })
     .finally(() => {
       inflight = null;
@@ -235,29 +383,40 @@ export function refreshExternalCw(force = false): Promise<void> {
   }
   if (inflight) {
     if (!force) return inflight;
-    refreshGen += 1;
-    cancelRetry();
+    // Don't kill the active in-flight request: let it deliver, then run another if needed
     return inflight.then(() => refreshExternalCw(true));
   }
   if (!force && fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS) return Promise.resolve();
   cancelRetry();
-  return startRefresh(++refreshGen);
+  return startRefresh(++refreshGen, force);
+}
+
+function matchesContentId(a: string, b: string): boolean {
+  if (a === b) return true;
+  const ca = a.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
+  const cb = b.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
+  if (ca && ca === cb) return true;
+  const va = getNuvioContentIdVariants(a);
+  return va.includes(b) || (!!cb && va.includes(cb));
 }
 
 export function removeExternalCwItem(item: LibraryItem): void {
-  items = items.filter((i) => i._id !== item._id);
-  emit();
+  items = items.filter((i) => !matchesContentId(i._id, item._id));
 
   if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
     try {
       const slot = resolveNuvioProfileIndex();
       const cur = slotCwMemoryCache.get(slot) || [];
-      slotCwMemoryCache.set(slot, cur.filter((i) => i._id !== item._id));
+      slotCwMemoryCache.set(
+        slot,
+        cur.filter((i) => !matchesContentId(i._id, item._id)),
+      );
       const disk = readCachedNuvioPlaybackItems(slot);
-      const filteredDisk = disk.filter((i) => i._id !== item._id);
+      const filteredDisk = disk.filter((i) => !matchesContentId(i._id, item._id));
       writeCachedNuvioPlaybackItems(slot, filteredDisk);
     } catch {}
   }
+  emit();
 }
 
 export function subscribeExternalCw(fn: () => void): () => void {
@@ -283,7 +442,8 @@ function onSessionChange(): void {
   const trakt = getTraktSession();
   const pmdb = getPmdbSession();
   const nuvio = isNuvioSignedIn() && isNuvioProviderActive();
-  if (simkl === lastSimkl && trakt === lastTrakt && pmdb === lastPmdb && nuvio === lastNuvio) return;
+  if (simkl === lastSimkl && trakt === lastTrakt && pmdb === lastPmdb && nuvio === lastNuvio)
+    return;
   setItems(
     items.filter(
       (i) =>
@@ -341,56 +501,92 @@ if (typeof window !== "undefined") {
   subscribePmdbSession(onSessionChange);
   window.addEventListener("harbor:active-profile-changed", onProfileChange);
   window.addEventListener("harbor:profiles-updated", onProfileChange);
-  window.addEventListener("harbor:nuvio-state-changed", onSessionChange);
+  window.addEventListener("harbor:nuvio-state-changed", () => {
+    clearNuvioCwMemoryCache();
+    onSessionChange();
+    void refreshExternalCw(true);
+  });
+  window.addEventListener("harbor:account-provider-changed", () => {
+    clearNuvioCwMemoryCache();
+    onSessionChange();
+    void refreshExternalCw(true);
+  });
   window.addEventListener("harbor:nuvio-profile-changed", onProfileChange);
   window.addEventListener("harbor:nuvio-profiles-updated", () => {
     void refreshExternalCw(false);
   });
   window.addEventListener("harbor:account-provider-changed", onProfileChange);
+  window.addEventListener("harbor:playback-session-ended", () => {
+    if (!isNuvioProviderActive()) return;
+    void refreshExternalCw(true);
+  });
   window.addEventListener("harbor:nuvio-progress-pushed", (e) => {
     if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
       const detail = (e as CustomEvent)?.detail;
-      const slot = typeof detail?.profileIndex === "number" ? detail.profileIndex : resolveNuvioProfileIndex();
+      const slot =
+        typeof detail?.profileIndex === "number" ? detail.profileIndex : resolveNuvioProfileIndex();
       const current = resolveNuvioProfileIndex();
       if (slot === current) {
         const fresh = readCachedNuvioPlaybackItems(slot);
         if (fresh.length > 0) {
           slotCwMemoryCache.set(slot, fresh);
-          setItems(fresh);
+          const nonNuvio = items.filter((i) => i.external !== "nuvio");
+          setItems(merge([fresh, nonNuvio]));
         }
       }
     }
-    void refreshExternalCw(true);
+    void refreshExternalCw(false);
   });
   window.addEventListener("harbor:nuvio-progress-deleted", (e) => {
     if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
       const detail = (e as CustomEvent)?.detail;
-      const slot = typeof detail?.profileIndex === "number" ? detail.profileIndex : resolveNuvioProfileIndex();
+      if (detail?.episodeOnly) return;
+      const slot =
+        typeof detail?.profileIndex === "number" ? detail.profileIndex : resolveNuvioProfileIndex();
       const current = resolveNuvioProfileIndex();
       if (slot === current) {
         const contentId = detail?.contentId;
         if (contentId) {
-          items = items.filter((i) => i._id !== contentId);
+          items = items.filter((i) => !matchesContentId(i._id, contentId));
           const curMem = slotCwMemoryCache.get(slot) || [];
-          slotCwMemoryCache.set(slot, curMem.filter((i) => i._id !== contentId));
+          slotCwMemoryCache.set(
+            slot,
+            curMem.filter((i) => !matchesContentId(i._id, contentId)),
+          );
           emit();
         }
-        const fresh = readCachedNuvioPlaybackItems(slot).filter((i) => !contentId || i._id !== contentId);
+        const fresh = readCachedNuvioPlaybackItems(slot).filter(
+          (i) => !contentId || !matchesContentId(i._id, contentId),
+        );
         slotCwMemoryCache.set(slot, fresh);
-        setItems(fresh);
+        const nonNuvio = items.filter(
+          (i) => i.external !== "nuvio" && (!contentId || !matchesContentId(i._id, contentId)),
+        );
+        setItems(merge([fresh, nonNuvio]));
       }
     }
   });
   window.addEventListener("harbor:nuvio-progress-reconciled", (e) => {
     if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
       const detail = (e as CustomEvent)?.detail;
-      const slot = typeof detail?.profileIndex === "number" ? detail.profileIndex : resolveNuvioProfileIndex();
+      const slot =
+        typeof detail?.profileIndex === "number" ? detail.profileIndex : resolveNuvioProfileIndex();
       const current = resolveNuvioProfileIndex();
       if (slot === current) {
         const fresh = readCachedNuvioPlaybackItems(slot);
         slotCwMemoryCache.set(slot, fresh);
-        setItems(fresh);
+        const nonNuvio = items.filter((i) => i.external !== "nuvio");
+        setItems(merge([fresh, nonNuvio]));
       }
+    }
+  });
+  window.addEventListener("harbor:continue-watching-updated", () => {
+    if (isNuvioSignedIn() && sourceMask.nuvio && isNuvioProviderActive()) {
+      const slot = resolveNuvioProfileIndex();
+      const fresh = readCachedNuvioPlaybackItems(slot);
+      slotCwMemoryCache.set(slot, fresh);
+      const nonNuvio = items.filter((i) => i.external !== "nuvio");
+      setItems(merge([fresh, nonNuvio]));
     }
   });
 }
@@ -404,25 +600,34 @@ export function useExternalCw(enabled = true): LibraryItem[] {
         const slot = resolveNuvioProfileIndex();
         const cached = getCachedNuvioItemsForSlot(slot);
         if (cached.length > 0) {
-          setItems(cached);
+          const nonNuvio = items.filter((i) => i.external !== "nuvio");
+          setItems(merge([cached, nonNuvio]));
         }
       } catch {}
     }
     onSessionChange();
-    void refreshExternalCw();
+    if (isNuvioSignedIn() && isNuvioProviderActive()) {
+      const fresh = fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS;
+      void refreshExternalCw(!fresh);
+    } else {
+      void refreshExternalCw();
+    }
+    // Nuvio periodic and focus refreshes are owned by the app-level sync
+    // coordinator so multiple mounted views cannot stack 30s polls.
+    const nuvioMode = () => isNuvioSignedIn() && isNuvioProviderActive();
     const onFocus = (): void => {
+      if (nuvioMode()) return;
       if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
       else void refreshExternalCw();
     };
     const onVisible = (): void => {
-      if (document.visibilityState !== "visible") return;
+      if (document.visibilityState !== "visible" || nuvioMode()) return;
       if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
       else void refreshExternalCw();
     };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisible);
-    const pollMs = isNuvioSignedIn() && isNuvioProviderActive() ? 5_000 : STALE_MS;
-    const timer = window.setInterval(onVisible, pollMs);
+    const timer = window.setInterval(onVisible, STALE_MS);
     return () => {
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisible);

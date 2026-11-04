@@ -398,3 +398,51 @@ test("unowned parent maps cannot skip episodes while the current account is load
   );
   assert.equal((await h.flush())[0].state.episode, 2);
 });
+test("series with completed season advances to season 2 episode 1 when season 1 episode exceeds season max", async () => {
+  const h = harness();
+  h.setRemote(progress([10], "ttMobland"));
+  h.setEpisodes([
+    ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ep) => ({
+      season: 1,
+      episode: ep,
+      airDate: "2020-01-01",
+    })),
+    { season: 2, episode: 1, airDate: "2021-01-01" },
+  ]);
+  const mobland = {
+    ...item(11, iso(), "ttMobland"),
+    upNext: true,
+    state: { ...item(11, iso(), "ttMobland").state, season: 1, episode: 11, timeOffset: 0 },
+  };
+  h.render([mobland], "", true);
+  const out = await h.flush();
+  assert.equal(out.length, 1);
+  assert.equal(out[0].upNext, true);
+  assert.equal(out[0].state.season, 2);
+  assert.equal(out[0].state.episode, 1);
+});
+
+test("series with completed season is removed when no subsequent seasons exist", async () => {
+  const h = harness();
+  h.setRemote(progress([10], "ttMoblandSingleSeason"));
+  h.setEpisodes(
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ep) => ({
+      season: 1,
+      episode: ep,
+      airDate: "2020-01-01",
+    })),
+  );
+  const mobland = {
+    ...item(11, iso(), "ttMoblandSingleSeason"),
+    upNext: true,
+    state: {
+      ...item(11, iso(), "ttMoblandSingleSeason").state,
+      season: 1,
+      episode: 11,
+      timeOffset: 0,
+    },
+  };
+  h.render([mobland], "", true);
+  const out = await h.flush();
+  assert.equal(out.length, 0);
+});
