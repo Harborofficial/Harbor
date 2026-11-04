@@ -413,7 +413,7 @@ export async function expungeLeachedNuvioItemsFromStremio(
   } catch {}
 
   try {
-    sanitizeStremioLocalCw(Array.from(targetIds));
+    sanitizeStremioLocalCw();
   } catch {}
 
   invalidateLibraryCache();

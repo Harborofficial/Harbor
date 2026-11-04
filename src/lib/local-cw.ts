@@ -343,9 +343,8 @@ export function clearLocalCwBatch(ids: string[], ownerId?: string): void {
   if (changed) emit();
 }
 
-export function sanitizeStremioLocalCw(extraPurgeIds?: string[]): void {
+export function sanitizeStremioLocalCw(): void {
   try {
-    const purgeSet = new Set(extraPurgeIds ?? []);
     let changed = false;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -359,7 +358,7 @@ export function sanitizeStremioLocalCw(extraPurgeIds?: string[]): void {
         let keyChanged = false;
         const next: Record<string, LocalCwEntry> = {};
         for (const [id, entry] of Object.entries(all)) {
-          if ((entry as any).external === "nuvio" || purgeSet.has(id)) {
+          if ((entry as any).external === "nuvio") {
             keyChanged = true;
             continue;
           }
