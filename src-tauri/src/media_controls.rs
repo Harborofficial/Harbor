@@ -172,7 +172,12 @@ mod win {
         }
 
         let result = (|| -> windows::core::Result<()> {
-            smtc.SetIsEnabled(true)?;
+            // Enable only when a session is first published (or after clear).
+            // Re-enabling on every timeline refresh can unnecessarily signal
+            // activity while another application's session is current.
+            if guard.is_none() {
+                smtc.SetIsEnabled(true)?;
+            }
             if status_changed {
                 smtc.SetPlaybackStatus(if playing {
                     MediaPlaybackStatus::Playing

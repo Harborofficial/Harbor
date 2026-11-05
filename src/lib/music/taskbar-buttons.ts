@@ -3,7 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { isMusicLiked } from "./liked";
 import { setMusicWindowTitle } from "./window-title";
 import { clearMediaControls, mediaKeyGate, updateMediaControls } from "@/lib/media-session";
-import { videoOwnsMediaKeys } from "@/lib/player/media-key-owner";
+import { subscribeVideoMediaKeyOwner, videoOwnsMediaKeys } from "@/lib/player/media-key-owner";
 import {
   getMusicState,
   nextMusic,
@@ -61,7 +61,7 @@ function run(action: string): void {
 function mediaKey(action: string): void {
   if (videoOwnsMediaKeys()) return;
   const state = getMusicState();
-  if (!state.current || !mediaKeyGate()) return;
+  if (!state.current || !mediaKeyGate("music")) return;
   const playing = state.phase === "playing";
   switch (action) {
     case "playpause":
@@ -175,10 +175,18 @@ export function startMusicTaskbarButtons(): () => void {
     })
     .catch(() => {});
   const unsubscribe = subscribeMusic(push);
+  // Video takes ownership while its player is mounted. Once it closes,
+  // republish any loaded music track after the video cleanup clears SMTC.
+  const unsubscribeOwner = subscribeVideoMediaKeyOwner((owns) => {
+    if (!owns) queueMicrotask(() => {
+      if (live && !videoOwnsMediaKeys()) pushSession();
+    });
+  });
   push();
   return () => {
     live = false;
     unsubscribe();
+    unsubscribeOwner();
     setMusicWindowTitle(null, null);
     pushArtwork(null);
     if (!videoOwnsMediaKeys()) clearMediaControls();
