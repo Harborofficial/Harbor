@@ -559,7 +559,11 @@ test("mpv lifecycle and Auto Sync boundaries reset only subtitle FPS", () => {
   assert.match(autoSync, /type AppliedState = \{[\s\S]*scope: AutoSyncScope \| null/);
   assert.match(
     autoSync,
-    /const canRevert = a\.changed && isCurrentAutoSyncScope\(a\.scope\)[\s\S]*if \(b && canRevert\)/,
+    /const canRevert =[\s\S]*?a\.changed &&[\s\S]*?isAutoSyncScopeCurrent\(a\.scope,[\s\S]*?if \(b && a\.changed && a\.scope\)/,
+  );
+  assert.match(
+    autoSync,
+    /if \(canRevert && a\.originalTrackId\) b\.setSubtitleTrack\(a\.originalTrackId\)/,
   );
   assert.match(autoSync, /changed: boolean/);
   assert.match(autoSync, /a\.changed = true/);
