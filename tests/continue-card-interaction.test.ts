@@ -8,7 +8,7 @@ import * as jsx from "react/jsx-runtime";
 import * as icons from "lucide-react";
 import { createRoot } from "react-dom/client";
 
-function harness() {
+function harness(actual: unknown = null) {
   const dom = new JSDOM("<!doctype html><body><div id='app'></div>", { url: "http://localhost/" });
   Object.assign(globalThis, {
     window: dom.window,
@@ -41,6 +41,15 @@ function harness() {
     "@/components/icons/play-filled": { Play: icons.Play },
     "@/lib/cinemeta": { narrowMediaType: (type: string) => type },
     "@/lib/meta-resource": { resolveMeta: async () => null },
+    "@/lib/streams/playback-redirect": {
+      isPlaybackRedirectCandidate: () => false,
+      resolvePlaybackRedirect: async ({ url }: { url: string }) => url,
+    },
+    "@/lib/player/continue-playback": {
+      continuationFor: (target: { id: string }) => ({ id: target.id }),
+      canReuseRecentRemotePlayback: () => false,
+    },
+    "@/lib/resume": { readResumeEntry: () => null },
     "@/lib/providers/anime-kitsu-addon": { animeKitsuMeta: async () => null },
     "@/lib/providers/anime-franchise-root": { isSplitFranchiseKitsu: () => false },
     "@/lib/providers/kitsu": { parseKitsuId: () => null },
@@ -130,6 +139,7 @@ function harness() {
     "@/lib/playback-history": {
       capturePlaybackActor: () => profile,
       isPlaybackActorCurrent: (actor: string) => profile === actor,
+      readActualPlaybackForTarget: () => actual,
     },
     "@/lib/cw-dismiss": {
       isCwDismissed: (item: any) => removed.some((entry) => entry._id === item._id),
@@ -246,6 +256,21 @@ test("real ContinueCard keeps original playback while its menu groups sources an
     await React.act(() => h.target.primary.actions()[1].run());
     assert.equal(h.removed[0], h.item);
     assert.equal(h.target.isValid(), false);
+  } finally {
+    await h.dispose();
+  }
+});
+
+test("Play refreshes the saved release and Choose another source opens an independent picker", async () => {
+  const h = harness({ id: "saved-aio", src: { streamRef: { infoHash: "saved-hash" } } });
+  try {
+    await h.render();
+    await h.click("button[title='Play']");
+    assert.deepEqual(h.starts.at(-1).mode, {
+      autoPlay: false, resume: true, continuation: { id: "saved-aio" },
+    });
+    await h.click("button[title='Choose another source']");
+    assert.deepEqual(h.starts.at(-1).mode, { autoPlay: false, resume: false });
   } finally {
     await h.dispose();
   }

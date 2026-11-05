@@ -69,7 +69,9 @@ import {
   isPlaybackActorCurrent,
   readActualPlaybackForTarget,
 } from "@/lib/playback-history";
-import { continuationFor } from "@/lib/player/continue-playback";
+import {
+  continuationFor, canReuseRecentRemotePlayback,
+} from "@/lib/player/continue-playback";
 import { readResumeEntry } from "@/lib/resume";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { localCwEntry } from "@/lib/local-cw";
@@ -658,16 +660,18 @@ export const ContinueCard = memo(function ContinueCard({
     if (actual.completed) {
       return false;
     }
-    if (Date.now() - actual.playedAt > 2 * 60 * 60 * 1000) {
-      return false;
-    }
     const src = actual.src;
-    if (src.homeServer) {
-      return false;
+    if (src.homeServer) return false;
+    if (actual.requiresSourceRefresh || src.streamRef?.infoHash) {
+      assertCurrent();
+      openPicker(meta, episode, {
+        autoPlay: false,
+        resume: true,
+        continuation: continuationFor(actual, capturePlaybackActor()),
+      });
+      return true;
     }
-    if (!/^https?:\/\/(?!127\.0\.0\.1|localhost|\[::1\])/i.test(src.url)) {
-      return false;
-    }
+    if (!canReuseRecentRemotePlayback(actual)) return false;
     const resumeMs =
       readResumeEntry(meta.id, episode?.season, episode?.episode)?.ms ?? actual.positionMs;
     const actor = capturePlaybackActor();

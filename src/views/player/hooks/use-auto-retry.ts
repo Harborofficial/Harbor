@@ -364,6 +364,7 @@ export function useAutoRetry(params: {
         false,
         {},
         hint,
+        true, // The original debrid link failed to open; force fresh resolution.
       )
         .then(async (r) => {
           if (!current()) return;

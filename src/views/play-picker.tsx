@@ -776,6 +776,7 @@ export function PlayPicker({
     !!previousMatch && (isCached(previousMatch) || !!previousMatch.url || p2pAutoConsent);
   const rememberedFiredRef = useRef(false);
   const rememberedHandledFirst =
+    !autoCancelled &&
     !!previousMatch &&
     (settings.rememberLastStream || !!continuation) &&
     !!resume &&
@@ -991,11 +992,14 @@ export function PlayPicker({
     };
   }, [engineWarming, setResolveError]);
 
+  // Keep the initial automatic/resume transition mounted while waiting for
+  // the preferred addon's first candidate. The old condition briefly became
+  // false between stream IDs resolving and the first source arriving, exposing
+  // the picker for a frame before switching back to the loading screen.
   const showAutoTransition =
     !pickerErrorText &&
     !isDownload &&
-    ((autoActive && (streamIds === null || loading || autoCandidates.length > 0)) ||
-      resolving != null);
+    (autoActive || resolving != null);
   void terminalEmpty;
 
   const pickerScrollKey = useMemo(() => {
@@ -1096,6 +1100,17 @@ export function PlayPicker({
 
       <div className="relative z-20 mx-auto flex min-h-full w-full max-w-5xl flex-col gap-5 px-12 pb-32 pt-6">
         <PickerNav onBack={backToDetail} onRefresh={refresh} refreshing={loading} />
+        {pickerErrorText && engineWarming && (
+          <div className="flex items-center gap-3 rounded-2xl border border-edge-soft/60 bg-elevated/40 px-5 py-4 text-[13.5px] text-ink-muted">
+            <Loader2 size={16} className="shrink-0 animate-spin text-ink-subtle" />
+            <span>{pickerErrorText}</span>
+          </div>
+        )}
+        {pickerErrorText && !engineWarming && (
+          <div className="rounded-2xl border border-danger/30 bg-danger/15 px-5 py-4 text-[13.5px] text-ink">
+            {pickerErrorText}
+          </div>
+        )}
         <PickerHeader
           meta={metaForDisplay}
           episode={episode}
@@ -1384,17 +1399,6 @@ export function PlayPicker({
           </>
         )}
 
-        {pickerErrorText && engineWarming && (
-          <div className="flex items-center gap-3 rounded-2xl border border-edge-soft/60 bg-elevated/40 px-5 py-4 text-[13.5px] text-ink-muted">
-            <Loader2 size={16} className="shrink-0 animate-spin text-ink-subtle" />
-            <span>{pickerErrorText}</span>
-          </div>
-        )}
-        {pickerErrorText && !engineWarming && (
-          <div className="rounded-2xl border border-danger/30 bg-danger/15 px-5 py-4 text-[13.5px] text-ink">
-            {pickerErrorText}
-          </div>
-        )}
       </div>
       {(settings.pickerLayout === "stremio" || isDownload) &&
         filteredPicker &&

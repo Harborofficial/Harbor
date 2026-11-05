@@ -301,7 +301,9 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     src,
     snap,
     stremioServerTranscode: settings.stremioServerTranscode,
-    instantPlay: settings.instantPlay,
+    // A manually chosen stream must not be treated as an automatic pick
+    // merely because Instant Play is enabled in Settings.
+    instantPlay: src.autoFired === true,
     inRoom: roomSnapshot.state === "joined",
     debrids,
     selfFrameReadyRef,
@@ -606,7 +608,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     liveStreamRef,
     inRoom,
     isHost,
-    instantPlay: settings.instantPlay,
+    instantPlay: src.autoFired === true,
     captureExitSnapshot,
     exitPip,
     castActiveRef: cast.castActiveRef,
@@ -1187,7 +1189,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     inRoomRef,
   });
 
-  useStubDetection({ src, snap, onStub: onStubEject, instantPlay: settings.instantPlay });
+  useStubDetection({ src, snap, onStub: onStubEject, instantPlay: src.autoFired === true });
 
   const reloadLive = useCallback(() => {
     bridgeRef.current?.load({
