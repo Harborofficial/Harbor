@@ -37,14 +37,9 @@ const filler = (n: number) => "x".repeat(n);
 test("a localStorage that rejects every write is pruned back into a writable state", async () => {
   // Full, but the prunable share stays under PROACTIVE_TOTAL_THRESHOLD, which is exactly the
   // shape that used to slip past the size heuristics and leave the store unwritable.
-  // The user's own records are deliberately the biggest things in here: if any of them were
-  // ever treated as a disposable cache, they would be the first to go.
   const store = installQuotaStorage([
     ["harbor.playback-history.v1.p_demo", filler(400_000)],
-    ["harbor.iptv.stats.v1", filler(300_000)],
     ["harbor.settings", filler(200_000)],
-    ["harbor.lastseason.v1", filler(10_000)],
-    ["harbor.parental", filler(400)],
     ["harbor.mal.hero.v1", filler(100_000)],
   ]);
 
@@ -56,15 +51,9 @@ test("a localStorage that rejects every write is pruned back into a writable sta
   localStorage.setItem("harbor.onboarding", "{}");
   assert.equal(store.get("harbor.onboarding"), "{}");
 
-  // Derived caches are refetchable, so the largest goes first.
+  // The cache goes; the 400k of continue watching next to it does not, however full we are.
   assert.equal(store.has("harbor.mal.hero.v1"), false);
-
-  // Nothing the user did is evictable, however big it is or however full the store gets:
-  // continue watching, the last season picked, live-TV watch counts, the legacy parental pin.
   assert.ok(store.has("harbor.playback-history.v1.p_demo"));
-  assert.ok(store.has("harbor.iptv.stats.v1"));
-  assert.ok(store.has("harbor.lastseason.v1"));
-  assert.ok(store.has("harbor.parental"));
   assert.ok(store.has("harbor.settings"));
 });
 
@@ -91,4 +80,61 @@ test("setItemWithRecovery reports failure instead of throwing when nothing is le
   installQuotaStorage([["harbor.settings", filler(900)]]);
   const { setItemWithRecovery } = await import("@/lib/storage-recovery");
   assert.equal(setItemWithRecovery("harbor.onboarding", filler(500)), false);
+});
+
+/**
+ * The ordering in the tests above means a wrongly listed key may simply never be reached, so
+ * guard the list itself with the sweep that spares nothing prunable.
+ */
+test("the full sweep evicts caches and nothing the user did", async () => {
+  const store = installQuotaStorage([
+    ["harbor.playback-history.v1.p_demo", filler(1_000)],
+    ["harbor.iptv.stats.v1", filler(1_000)],
+    ["harbor.iptv.epgmap.v1", filler(1_000)],
+    ["harbor.discover.v1", filler(1_000)],
+    ["harbor.lastseason.v1", filler(1_000)],
+    ["harbor.parental", filler(1_000)],
+    ["harbor.build.rating.v1", filler(1_000)],
+    ["harbor.settings", filler(1_000)],
+    ["harbor.mal.hero.v1", filler(1_000)],
+    ["harbor.tvdbo.tt0903747", filler(1_000)],
+  ]);
+
+  const { freeStorageSpace } = await import("@/lib/storage-recovery");
+  freeStorageSpace();
+
+  assert.deepEqual([...store.keys()].sort(), [
+    "harbor.build.rating.v1",
+    "harbor.discover.v1",
+    "harbor.iptv.epgmap.v1",
+    "harbor.iptv.stats.v1",
+    "harbor.lastseason.v1",
+    "harbor.parental",
+    "harbor.playback-history.v1.p_demo",
+    "harbor.settings",
+  ]);
+});
+
+test("a cache stays prunable after its owner bumps the version", async () => {
+  // Pinning versions in the list is how harbor.jikancatalog2, harbor.armkitsucache.v3 and five
+  // others quietly became unreachable: the list still named the version before.
+  const store = installQuotaStorage([
+    ["harbor.jikancatalog2", filler(1_000)],
+    ["harbor.armkitsucache.v3", filler(1_000)],
+    ["harbor.anidbtvdbcache.v2", filler(1_000)],
+    ["harbor.armsrcmalcache.v2", filler(1_000)],
+    ["harbor.extkitsucache.v2", filler(1_000)],
+    ["harbor.anime_awards.metas.v6", filler(1_000)],
+    ["harbor.anime.toppicks.cache.v2", filler(1_000)],
+    ["harbor.awards.wikidata.v10", filler(1_000)],
+    ["harbor.graph.wikidata.v2", filler(1_000)],
+    // A version nobody has shipped yet: the next bump must not need this list touched again.
+    ["harbor.armkitsucache.v99", filler(1_000)],
+    ["harbor.settings", filler(1_000)],
+  ]);
+
+  const { freeStorageSpace } = await import("@/lib/storage-recovery");
+  freeStorageSpace();
+
+  assert.deepEqual([...store.keys()], ["harbor.settings"]);
 });

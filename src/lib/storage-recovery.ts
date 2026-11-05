@@ -1,46 +1,30 @@
-// Prunable means the network or a recomputation can give it back. Anything the user did —
-// playback history, last season, live-TV watch counts, the legacy parental pin — stays, even
-// when it is the biggest thing in the store. Check backup.ts before adding a key here.
+// Prunable means the network or a recomputation can give it back. Anything the user did stays,
+// even when it is the biggest thing in the store: playback history, last season, live-TV watch
+// counts and manual EPG matches, Discover's learned affinity, the legacy parental pin, the build
+// rating. Open the module that owns a key before adding it here — backup.ts groups by prefix, so
+// its sections mix real records with caches and cannot answer this on their own. Keys of a few KB
+// are not worth the risk either way; this list is for what actually fills the store.
 const PRUNABLE_EXACT = new Set<string>([
   "harbor.omdb.v1",
   "harbor.omdb.misses",
   "harbor.omdb.budget",
   "harbor.iptv.hydration.v2",
-  "harbor.iptv.epgmap.v1",
   "harbor.dead-streams.v1",
-  "harbor.discover.v1",
   "harbor.discover.events.v1",
   "harbor.discover.awards.v1",
   "harbor.discover.rows.v1",
   "harbor.scroll.v1",
   "harbor.webhook.lastTick",
   "harbor.calendar.webhook.last",
-  "harbor.anidbtvdbcache",
-  "harbor.armcache",
-  "harbor.armkitsucache",
-  "harbor.armsrcmalcache",
-  "harbor.extkitsucache",
   "harbor.imdb.tmdb.v1",
   "harbor.tmdb.imdb.v1",
   "harbor.tmdb.personName.v1",
-  "harbor.awards.wikidata.v8",
-  "harbor.awards.wikidata.v9",
-  "harbor.awards.wikidata.v10",
-  "harbor.anime_awards.metas.v2",
   "harbor.animefillercache.v2",
-  "harbor.jikancatalog",
   "harbor.malscorecache",
   "harbor.anime.recs_by_mal.v1",
-  "harbor.anime.toppicks.cache.v1",
-  "harbor.anime.toppicks.shown.v1",
-  "harbor.anime.toppicks.visit.v1",
   "harbor.anime.mal_id_by_franchise.v1",
-  "harbor.picker-cache.v4",
-  "harbor.picker-cache.v5",
   "harbor.shows.hero.pool.v2",
   "harbor.mdblist.cards",
-  "harbor.build.rating.v1",
-  "harbor.surprise.recent.v1",
   "harbor.stremio-addons.velocity.v1",
   "harbor.streamBadges.v1",
   "harbor.manga.popular.v1",
@@ -52,7 +36,20 @@ const PRUNABLE_EXACT = new Set<string>([
   "harbor.anime.hero.hosted.v5",
 ]);
 
+// Prefixes, not exact keys, for every cache whose owner version-stamps it: pinning a version
+// here means the live cache silently stops being prunable the day someone bumps it, which is
+// how seven of these ended up unreachable.
 const PRUNABLE_PREFIXES = [
+  "harbor.anidbtvdbcache",
+  "harbor.armcache",
+  "harbor.armkitsucache",
+  "harbor.armsrcmalcache",
+  "harbor.extkitsucache",
+  "harbor.jikancatalog",
+  "harbor.anime_awards.metas.",
+  "harbor.anime.toppicks.cache.",
+  "harbor.awards.wikidata.v",
+  "harbor.graph.wikidata.",
   "harbor.libraryNameRepair.v1.",
   "harbor.anilist.collection.v1.",
   "harbor.manga.cache.v1.",
