@@ -256,7 +256,7 @@ function key(metaId: string, season: number, episode: number): string {
 }
 
 export function isManuallyWatched(metaId: string, season: number, episode: number): boolean {
-  return watchedSet().has(key(metaId, season, episode));
+  return stateInSets(watchedSet(), unwatchedSet(), metaId, season, episode) === true;
 }
 
 export function manualWatchedState(
@@ -276,6 +276,8 @@ export function createManualWatchedReader(): typeof manualWatchedState {
     stateInSets(watched, unwatched, metaId, season, episode, altIds);
 }
 
+// Writes keep one exact key per recorded id. Variant matching happens here and
+// in manualEpisodeKeys so a single title cannot become several CW cards.
 function stateInSets(
   watched: Set<string>,
   unwatched: Set<string>,
@@ -489,23 +491,17 @@ export function setManualWatched(
   const off = new Set(unwatchedSet());
   const at = unwatchedAtMap();
   const rem = remoteSet();
-  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
-  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
-  let remChanged = false;
-  for (const v of variants) {
-    const k = key(v, season, episode);
-    if (watched) {
-      on.add(k);
-      off.delete(k);
-      delete at[k];
-    } else {
-      on.delete(k);
-      off.add(k);
-      at[k] = Date.now();
-    }
-    if (rem.delete(k)) remChanged = true;
+  const k = key(metaId, season, episode);
+  if (watched) {
+    on.add(k);
+    off.delete(k);
+    delete at[k];
+  } else {
+    on.delete(k);
+    off.add(k);
+    at[k] = Date.now();
   }
-  if (remChanged) persistRemote();
+  if (rem.delete(k)) persistRemote();
   persistUnwatchedAt();
   persist(on, off);
 }
@@ -522,23 +518,19 @@ export function setManualWatchedUpTo(
   const at = unwatchedAtMap();
   const rem = remoteSet();
   const now = Date.now();
-  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
-  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   let remChanged = false;
   for (let e = 1; e <= episode; e++) {
-    for (const v of variants) {
-      const k = key(v, season, e);
-      if (watched) {
-        on.add(k);
-        off.delete(k);
-        delete at[k];
-      } else {
-        on.delete(k);
-        off.add(k);
-        at[k] = now;
-      }
-      if (rem.delete(k)) remChanged = true;
+    const k = key(metaId, season, e);
+    if (watched) {
+      on.add(k);
+      off.delete(k);
+      delete at[k];
+    } else {
+      on.delete(k);
+      off.add(k);
+      at[k] = now;
     }
+    if (rem.delete(k)) remChanged = true;
   }
   if (remChanged) persistRemote();
   persistUnwatchedAt();
@@ -557,25 +549,21 @@ export function setManualWatchedMany(
   const wat = watchedAtMap();
   const rem = remoteSet();
   const now = Date.now();
-  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
-  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   let remChanged = false;
   for (const { season, episode } of episodes) {
-    for (const v of variants) {
-      const k = key(v, season, episode);
-      if (watched) {
-        on.add(k);
-        off.delete(k);
-        delete at[k];
-        wat[k] = now;
-      } else {
-        on.delete(k);
-        off.add(k);
-        at[k] = now;
-        delete wat[k];
-      }
-      if (rem.delete(k)) remChanged = true;
+    const k = key(metaId, season, episode);
+    if (watched) {
+      on.add(k);
+      off.delete(k);
+      delete at[k];
+      wat[k] = now;
+    } else {
+      on.delete(k);
+      off.add(k);
+      at[k] = now;
+      delete wat[k];
     }
+    if (rem.delete(k)) remChanged = true;
   }
   if (remChanged) persistRemote();
   persistUnwatchedAt();
@@ -600,24 +588,20 @@ export function setManualWatchedManyAcknowledged(
   const wat = { ...watchedAtMap() };
   const remote = new Set(remoteSet());
   const now = Date.now();
-  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
-  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   for (const { season, episode } of episodes) {
-    for (const v of variants) {
-      const k = key(v, season, episode);
-      if (watched) {
-        on.add(k);
-        off.delete(k);
-        delete at[k];
-        wat[k] = now;
-      } else {
-        on.delete(k);
-        off.add(k);
-        at[k] = now;
-        delete wat[k];
-      }
-      remote.delete(k);
+    const k = key(metaId, season, episode);
+    if (watched) {
+      on.add(k);
+      off.delete(k);
+      delete at[k];
+      wat[k] = now;
+    } else {
+      on.delete(k);
+      off.add(k);
+      at[k] = now;
+      delete wat[k];
     }
+    remote.delete(k);
   }
   try {
     ensureScope();
@@ -669,25 +653,19 @@ export function applyRemoteWatched(
   const off = new Set(unwatchedSet());
   const at = unwatchedAtMap();
   const rem = remoteSet();
-  const clean = metaId.replace(/^(series|movie|tmdb):/, "").trim();
-  const variants = Array.from(new Set([metaId, clean, `tmdb:${clean}`, `series:${clean}`]));
   for (const { season, episode } of add) {
-    for (const v of variants) {
-      const k = key(v, season, episode);
-      on.add(k);
-      off.delete(k);
-      delete at[k];
-      rem.add(k);
-    }
+    const k = key(metaId, season, episode);
+    on.add(k);
+    off.delete(k);
+    delete at[k];
+    rem.add(k);
   }
   for (const { season, episode } of unset) {
-    for (const v of variants) {
-      const k = key(v, season, episode);
-      on.delete(k);
-      off.delete(k);
-      delete at[k];
-      rem.delete(k);
-    }
+    const k = key(metaId, season, episode);
+    on.delete(k);
+    off.delete(k);
+    delete at[k];
+    rem.delete(k);
   }
   persistUnwatchedAt();
   persistRemote();
@@ -719,8 +697,36 @@ export function recordManualWatchedMeta(metaId: string, meta: ManualWatchedMeta)
   notifySubs();
 }
 
+function metaBaseId(metaId: string): string {
+  return metaId.replace(/^(series|movie|tmdb):/, "").trim();
+}
+
+function metaTitleKey(meta: ManualWatchedMeta): string | null {
+  const name = (meta.name ?? "")
+    .toLowerCase()
+    .replace(/\(\d{4}\)/g, "")
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
+  const poster = (meta.poster ?? "").trim();
+  return name && poster ? `${name}|${poster}` : null;
+}
+
+function bestWatchedFor(
+  metaId: string,
+  best: Map<string, { season: number; episode: number }>,
+): { season: number; episode: number } | null {
+  const base = metaBaseId(metaId);
+  for (const id of new Set([metaId, base, `tmdb:${base}`, `series:${base}`])) {
+    const hit = best.get(id);
+    if (hit) return hit;
+  }
+  return null;
+}
+
 export function manualWatchedLibraryItems(): LibraryItem[] {
   const meta = loadMeta();
+  const entries = Object.entries(meta);
+  if (entries.length === 0) return [];
   const best = new Map<string, { season: number; episode: number }>();
   for (const k of watchedSet()) {
     const parts = k.split("|");
@@ -734,15 +740,91 @@ export function manualWatchedLibraryItems(): LibraryItem[] {
       best.set(metaId, { season, episode });
     }
   }
+
+  // A single title can be recorded under several ids: the playback id
+  // (`tmdb:tv:...`), the library/IMDb id (`tt...`), and the derived
+  // clean/tmdb/series variants. Emit one card per title, not one per id.
+  const parent = new Map<string, string>();
+  const find = (id: string): string => {
+    if (!parent.has(id)) parent.set(id, id);
+    let current = id;
+    while (parent.get(current) !== current) current = parent.get(current)!;
+    while (parent.get(id) !== id) {
+      const next = parent.get(id)!;
+      parent.set(id, current);
+      id = next;
+    }
+    return current;
+  };
+  const union = (a: string, b: string) => {
+    const rootA = find(a);
+    const rootB = find(b);
+    if (rootA !== rootB) parent.set(rootA, rootB);
+  };
+  const byBase = new Map<string, string>();
+  const byTitle = new Map<string, string>();
+  for (const [metaId, m] of entries) {
+    if (!metaId) continue;
+    find(metaId);
+    const base = metaBaseId(metaId);
+    const basePrev = byBase.get(base);
+    if (basePrev) union(basePrev, metaId);
+    else byBase.set(base, metaId);
+    const title = metaTitleKey(m);
+    if (!title) continue;
+    const titlePrev = byTitle.get(title);
+    if (titlePrev) union(titlePrev, metaId);
+    else byTitle.set(title, metaId);
+  }
+
+  const groups = new Map<
+    string,
+    {
+      ids: string[];
+      meta: ManualWatchedMeta;
+      canonicalId: string;
+      stamp: number;
+      best: { season: number; episode: number } | null;
+    }
+  >();
+  for (const [metaId, m] of entries) {
+    if (!metaId) continue;
+    const root = find(metaId);
+    let group = groups.get(root);
+    if (!group) {
+      group = { ids: [], meta: m, canonicalId: metaId, stamp: -Infinity, best: null };
+      groups.set(root, group);
+    }
+    group.ids.push(metaId);
+    const ep = bestWatchedFor(metaId, best);
+    if (
+      ep &&
+      (!group.best ||
+        ep.season > group.best.season ||
+        (ep.season === group.best.season && ep.episode > group.best.episode))
+    ) {
+      group.best = ep;
+    }
+    const stamp = Date.parse(m.markedAt ?? "") || 0;
+    if (stamp >= group.stamp) {
+      group.stamp = stamp;
+      group.meta = m;
+      group.canonicalId = metaId;
+    }
+  }
+
   const out: LibraryItem[] = [];
   const dismissed = dismissedSet();
   const now = new Date().toISOString();
-  for (const [metaId, ep] of best) {
-    const m = meta[metaId];
-    if (!m || dismissed.has(metaId)) continue;
+  for (const group of groups.values()) {
+    const ep = group.best;
+    if (!ep || dismissed.has(group.canonicalId)) continue;
+    const m = group.meta;
     const stamp = m.markedAt ?? now;
+    const altIds = group.ids.filter((id) => id !== group.canonicalId);
     out.push({
-      _id: metaId,
+      _id: group.canonicalId,
+      altIds: altIds.length > 0 ? altIds : undefined,
       type: "series",
       name: m.name,
       poster: m.poster,
@@ -752,7 +834,7 @@ export function manualWatchedLibraryItems(): LibraryItem[] {
         duration: 0,
         season: ep.season,
         episode: ep.episode,
-        video_id: `${metaId}:${ep.season}:${ep.episode}`,
+        video_id: `${group.canonicalId}:${ep.season}:${ep.episode}`,
         flaggedWatched: 1,
         lastWatched: stamp,
       },

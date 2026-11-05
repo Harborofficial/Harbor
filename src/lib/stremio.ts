@@ -130,6 +130,12 @@ export function isCwMember(i: LibraryItem): boolean {
   if (i.removed && !i.temp) return false;
   if (i.upNext) return true;
   if (i.waitingForAir) return true;
+  // A removed item survives only as a temp progress record. Without playback
+  // progress or a resume entry there is nothing to continue, and the placeholder
+  // `season: 0 / episode: 0` state written by watched sync must not become a card.
+  if (i.removed && (i.state?.timeOffset ?? 0) <= 0 && (resumeForItem(i)?.ms ?? 0) <= 0) {
+    return false;
+  }
   // External trackers (Simkl, Trakt, PublicMetaDB) without upNext must be active in-progress
   // playback sessions (1% <= progress <= 98%, timeOffset > 0, unflagged).
   if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
@@ -155,10 +161,14 @@ export function isCwMember(i: LibraryItem): boolean {
       i.state.episode = se.episode;
     }
   }
+  const season = i.state.season;
+  const episode = i.state.episode;
   if (
     i.type === "series" &&
-    i.state.season != null &&
-    i.state.episode != null &&
+    season != null &&
+    season > 0 &&
+    episode != null &&
+    episode > 0 &&
     (i.state.flaggedWatched ?? 0) === 0
   ) {
     return true;
@@ -171,12 +181,14 @@ export function isCwMember(i: LibraryItem): boolean {
     // the row here never leaks a finished show back into Continue Watching.
     if (
       i.type === "series" &&
-      i.state.season != null &&
-      i.state.episode != null &&
+      season != null &&
+      season > 0 &&
+      episode != null &&
+      episode > 0 &&
       (i.manualWatched === true ||
         i.external === "nuvio" ||
         (typeof manualWatchedState === "function" &&
-          manualWatchedState(i._id, i.state.season, i.state.episode) === true))
+          manualWatchedState(i._id, season, episode) === true))
     ) {
       return true;
     }

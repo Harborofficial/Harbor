@@ -76,7 +76,7 @@ import { reconcileRemoteWatched } from "@/lib/stremio-watched-pull";
 import { isCorruptAnimeEntry } from "@/lib/anime-cw-repair";
 import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
 import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
-import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
+import { cwTitleKey, dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import {
   ANIME_CLOUD_ID,
   CW_FINISHED_RATIO,
@@ -134,6 +134,31 @@ import { mergeLoadedHomeRows } from "./home/merge-loaded-rows";
 import { RowSkeleton } from "./home/row-skeleton";
 import { AddSourceModal } from "@/components/add-source-modal";
 import { updateSourceFolder, type SourceRow } from "@/lib/custom-sources";
+
+function baseCwId(id: string): string {
+  return id.replace(/^(series|movie|tmdb):/, "").trim();
+}
+
+/** A manual/local card belongs to the same title as an existing row when any
+ *  canonical id matches or the normalized display title is identical. */
+function sameCwCard(a: LibraryItem, b: LibraryItem): boolean {
+  const aIds = new Set([a._id, ...(a.altIds ?? [])].map((id) => baseCwId(id)).filter(Boolean));
+  for (const id of [b._id, ...(b.altIds ?? [])]) {
+    if (id && aIds.has(baseCwId(id))) return true;
+  }
+  const aTitle = cwTitleKey(a);
+  return !!aTitle && aTitle === cwTitleKey(b);
+}
+
+function unrepresentedCwItems(manual: LibraryItem[], pool: LibraryItem[]): LibraryItem[] {
+  const out: LibraryItem[] = [];
+  for (const item of manual) {
+    if (pool.some((existing) => sameCwCard(existing, item))) continue;
+    if (out.some((existing) => sameCwCard(existing, item))) continue;
+    out.push(item);
+  }
+  return out;
+}
 
 export function Home({
   active = true,
@@ -758,23 +783,20 @@ export function Home({
       .map((e) => e.i);
 
     const manual = manualWatchedLibraryItems();
-    const candidateEligible =
-      manual.length > 0 && !isNuvioProvider
-        ? [
-            ...eligible,
-            ...manual.filter(
-              (m) =>
-                !eligible.some((e) => e._id === m._id) &&
-                isCwMember(m) &&
-                !isCwDismissed(m) &&
-                m.external !== "nuvio" &&
-                !(
-                  (settings.animeOnlyInAnimeRoom || settings.hideContent.anime) &&
-                  isAnimeCwItem(m)
-                ),
-            ),
-          ]
-        : eligible;
+    let candidateEligible = eligible;
+    if (manual.length > 0 && !isNuvioProvider) {
+      const manualToAdd: LibraryItem[] = [];
+      for (const m of manual) {
+        if (!isCwMember(m) || isCwDismissed(m) || m.external === "nuvio") continue;
+        if ((settings.animeOnlyInAnimeRoom || settings.hideContent.anime) && isAnimeCwItem(m)) {
+          continue;
+        }
+        if (eligible.some((e) => sameCwCard(e, m))) continue;
+        if (manualToAdd.some((e) => sameCwCard(e, m))) continue;
+        manualToAdd.push(m);
+      }
+      if (manualToAdd.length > 0) candidateEligible = [...eligible, ...manualToAdd];
+    }
 
     return dedupeAnimeCw(candidateEligible).slice(0, 100);
   }, [
@@ -831,8 +853,7 @@ export function Home({
         ),
       ];
       if (manual.length === 0) return nuvioPool;
-      const cwMemberIds = new Set(nuvioPool.filter(isCwMember).map((i) => i._id));
-      const usable = manual.filter((i) => !cwMemberIds.has(i._id));
+      const usable = unrepresentedCwItems(manual, nuvioPool);
       if (usable.length === 0) return nuvioPool;
       const overrideIds = new Set(usable.map((i) => i._id));
       return [...nuvioPool.filter((i) => !overrideIds.has(i._id)), ...usable];
@@ -851,8 +872,7 @@ export function Home({
       ...externalForStremio,
     ];
     if (manual.length === 0) return pool;
-    const cwMemberIds = new Set(pool.filter(isCwMember).map((i) => i._id));
-    const usable = manual.filter((i) => !cwMemberIds.has(i._id));
+    const usable = unrepresentedCwItems(manual, pool);
     if (usable.length === 0) return pool;
     const overrideIds = new Set(usable.map((i) => i._id));
     return [...pool.filter((i) => !overrideIds.has(i._id)), ...usable];

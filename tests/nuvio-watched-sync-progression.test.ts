@@ -71,7 +71,7 @@ test("isCwMember keeps series items when offset is 0 for Next Up or unwatched pr
   assert.match(stremio, /if \(i\.upNext\) return true;/);
   assert.match(
     stremio,
-    /i\.type === "series" &&\s*i\.state\.season != null &&\s*i\.state\.episode != null &&\s*\(i\.state\.flaggedWatched \?\? 0\) === 0/,
+    /i\.type === "series" &&\s*season != null &&\s*season > 0 &&\s*episode != null &&\s*episode > 0 &&\s*\(i\.state\.flaggedWatched \?\? 0\) === 0/,
   );
   assert.match(continueWatching, /upNext: e\.type === "series" && e\.positionMs === 0/);
 });
