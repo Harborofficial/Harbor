@@ -35,12 +35,13 @@ pub async fn subtitle_extract(
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
-    let output =
-        match tokio::time::timeout(EXTRACT_TIMEOUT, crate::process_output::output(cmd)).await {
-            Ok(Ok(o)) => o,
-            Ok(Err(e)) => return Err(format!("ffmpeg spawn: {}", e)),
-            Err(_) => return Err("subtitle extraction timed out".to_string()),
-        };
+    let output = match crate::process_output::output(cmd, EXTRACT_TIMEOUT).await {
+        Ok(o) => o,
+        Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
+            return Err("subtitle extraction timed out".to_string())
+        }
+        Err(e) => return Err(format!("ffmpeg spawn: {}", e)),
+    };
     if !output.status.success() {
         let err = String::from_utf8_lossy(&output.stderr);
         return Err(format!(
@@ -93,12 +94,13 @@ pub async fn subtitle_extract_ass(
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
-    let output =
-        match tokio::time::timeout(ASS_HEADER_TIMEOUT, crate::process_output::output(cmd)).await {
-            Ok(Ok(o)) => o,
-            Ok(Err(e)) => return Err(format!("ffmpeg spawn: {}", e)),
-            Err(_) => return Err("ass header extraction timed out".to_string()),
-        };
+    let output = match crate::process_output::output(cmd, ASS_HEADER_TIMEOUT).await {
+        Ok(o) => o,
+        Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
+            return Err("ass header extraction timed out".to_string())
+        }
+        Err(e) => return Err(format!("ffmpeg spawn: {}", e)),
+    };
     let mut bytes = output.stdout;
     if bytes.len() > MAX_ASS_BYTES {
         bytes.truncate(MAX_ASS_BYTES);
