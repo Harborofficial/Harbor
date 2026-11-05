@@ -139,43 +139,123 @@ fn ncc_at(a: &[f32], b: &[f32], lag: isize) -> f32 {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct MatchMetrics {
+    pub offset_sec: f32,
+    pub ratio: f32,
+    pub ncc: f32,
+    pub z: f32,
+    pub dominance: f32,
+}
+
+impl MatchMetrics {
+    pub fn is_reliable(&self, min_confidence: f32, total_sec: f32) -> bool {
+        // In a one-minute excerpt, a perfect alignment can have z < 6
+        // because the correlation contains fewer independent lag samples.
+        // Demand stronger correlation and uniqueness in exchange.
+        let short_clip = total_sec <= 90.0;
+        let ncc_min = if short_clip {
+            min_confidence.max(0.65)
+        } else {
+            min_confidence
+        };
+        let z_min = if short_clip { 4.5 } else { Z_MIN };
+        let dominance_min = if short_clip { 1.5 } else { DOMINANCE_MIN };
+        self.ncc >= ncc_min
+            && self.z >= z_min
+            && self.dominance >= dominance_min
+            && self.offset_sec.is_finite()
+    }
+}
+
+/// Preserve the best rejected candidate for diagnostics. The strongest NCC
+/// alone is not necessarily trustworthy: it can be an ambiguous peak while a
+/// slightly weaker peak at another frame ratio passes all reliability gates.
+pub fn solve_with_metrics(
+    audio: &[(f32, f32)],
+    cues: &[(f32, f32)],
+    total_sec: f32,
+    conf_min: f32,
+) -> (Option<SyncResult>, Option<MatchMetrics>) {
+    let len = ((total_sec * GRID_HZ).round() as usize).max(1);
+    if cues.is_empty() || audio.is_empty() || len < 2 || !total_sec.is_finite() {
+        return (None, None);
+    }
+    if total_sec <= 90.0 && (audio.len() < 4 || cues.len() < 4) {
+        return (None, None);
+    }
+    let amask = rasterize(audio, 1.0, len);
+    // A 60s clip cannot reliably support a 59s shift: NCC at that lag is
+    // calculated from only one second of overlapping data. Require at least
+    // 30 seconds' overlap, without reducing the range for normal full films.
+    let max_lag_sec = MAX_LAG_SEC.min((total_sec - 30.0).max(1.0));
+    let max_lag = (max_lag_sec * GRID_HZ) as usize;
+    let mut best_valid: Option<MatchMetrics> = None;
+    let mut best_attempt: Option<MatchMetrics> = None;
+    // A minute can establish a local shift but cannot reliably establish
+    // long-term frame-rate drift. The UI applies delay only for this mode.
+    let candidate_ratios = if total_sec <= 90.0 {
+        vec![1.0]
+    } else {
+        ratios()
+    };
+    for r in candidate_ratios {
+        let bmask = rasterize(cues, r, len);
+        let corr = fft_xcorr(&amask, &bmask, max_lag);
+        let (pidx, z, dominance) = peak_stats(&corr);
+        let lag = pidx as isize - max_lag as isize;
+        let metrics = MatchMetrics {
+            ratio: r,
+            offset_sec: lag as f32 / GRID_HZ,
+            ncc: ncc_at(&amask, &bmask, lag),
+            z,
+            dominance,
+        };
+        if !metrics.ncc.is_finite() {
+            continue;
+        }
+        if best_attempt
+            .map(|existing| metrics.ncc > existing.ncc)
+            .unwrap_or(true)
+        {
+            best_attempt = Some(metrics);
+        }
+        if metrics.is_reliable(conf_min, total_sec)
+            && best_valid
+                .map(|existing| metrics.ncc > existing.ncc)
+                .unwrap_or(true)
+        {
+            best_valid = Some(metrics);
+        }
+    }
+    let reported = best_valid.or(best_attempt);
+    if let Some(metrics) = reported {
+        eprintln!(
+            "[subsync] match ratio={:.4} offset={:.2}s ncc={:.3} z={:.1} dom={:.2} accepted={} (min ncc={:.2} z={:.1} dom={:.1})",
+            metrics.ratio, metrics.offset_sec, metrics.ncc, metrics.z, metrics.dominance,
+            best_valid.is_some(),
+            if total_sec <= 90.0 { conf_min.max(0.65) } else { conf_min },
+            if total_sec <= 90.0 { 4.5 } else { Z_MIN },
+            if total_sec <= 90.0 { 1.5 } else { DOMINANCE_MIN }
+        );
+    }
+    (
+        best_valid.map(|m| SyncResult {
+            offset_sec: m.offset_sec,
+            ratio: m.ratio,
+            confidence: m.ncc,
+        }),
+        reported,
+    )
+}
+
 pub fn solve(
     audio: &[(f32, f32)],
     cues: &[(f32, f32)],
     total_sec: f32,
     conf_min: f32,
 ) -> Option<SyncResult> {
-    let len = ((total_sec * GRID_HZ).round() as usize).max(1);
-    if cues.is_empty() || audio.is_empty() || len < 2 {
-        return None;
-    }
-    let amask = rasterize(audio, 1.0, len);
-    let max_lag = (MAX_LAG_SEC * GRID_HZ) as usize;
-    let mut best: Option<(f32, isize, f32, f32, f32)> = None;
-    for r in ratios() {
-        let bmask = rasterize(cues, r, len);
-        let corr = fft_xcorr(&amask, &bmask, max_lag);
-        let (pidx, z, dom) = peak_stats(&corr);
-        let lag = pidx as isize - max_lag as isize;
-        let ncc = ncc_at(&amask, &bmask, lag);
-        if best.map(|(_, _, c, _, _)| ncc > c).unwrap_or(true) {
-            best = Some((r, lag, ncc, z, dom));
-        }
-    }
-    let (ratio, lag, ncc, z, dom) = best?;
-    let offset_sec = lag as f32 / GRID_HZ;
-    eprintln!(
-        "[subsync] best ratio={:.4} offset={:.2}s ncc={:.3} z={:.1} dom={:.2} (min ncc={:.2} z={:.1} dom={:.1})",
-        ratio, offset_sec, ncc, z, dom, conf_min, Z_MIN, DOMINANCE_MIN
-    );
-    if ncc < conf_min || z < Z_MIN || dom < DOMINANCE_MIN || offset_sec.abs() > MAX_LAG_SEC {
-        return None;
-    }
-    Some(SyncResult {
-        offset_sec,
-        ratio,
-        confidence: ncc,
-    })
+    solve_with_metrics(audio, cues, total_sec, conf_min).0
 }
 
 #[derive(serde::Serialize)]
@@ -260,6 +340,29 @@ mod tests {
             t += dur + gaps[k % gaps.len()];
         }
         cues
+    }
+
+    #[test]
+    fn live_minute_recovers_distinct_dialogue_offset() {
+        let cues = [
+            (4.0, 5.2),
+            (8.5, 10.3),
+            (14.2, 15.8),
+            (21.6, 23.0),
+            (27.1, 28.5),
+            (32.6, 34.1),
+            (40.2, 41.4),
+            (45.9, 47.3),
+        ];
+        let audio: Vec<_> = cues.iter().map(|&(a, b)| (a + 3.2, b + 3.2)).collect();
+        let result = solve(&audio, &cues, 60.0, 0.55).expect("minute should align");
+        assert!((result.offset_sec - 3.2).abs() < 0.1);
+    }
+
+    #[test]
+    fn live_minute_with_unbroken_noise_is_not_trusted() {
+        let cues = [(4.0, 5.0), (12.0, 13.0), (22.0, 23.0), (37.0, 39.0)];
+        assert!(solve(&[(0.0, 60.0)], &cues, 60.0, 0.55).is_none());
     }
 
     #[test]

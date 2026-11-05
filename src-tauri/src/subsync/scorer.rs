@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::Duration;
+use std::sync::OnceLock;
+use std::time::{Duration, Instant};
+
+use sha2::{Digest, Sha256};
 
 use super::analysis_windows::{
     self, AnalysisWindow, RequestedValidationWindow, DIRECT_ANALYSIS_PROVENANCE,
@@ -52,6 +55,12 @@ pub struct ScoredAlignmentQuality {
     windows: Vec<ScoredWindow>,
     provenance: String,
     request_provenance: Option<String>,
+    // Bounded, non-identifying sample quality diagnostics. These let Harbor
+    // tell an unusable speech mask from an actual bad timing candidate.
+    speech_fraction: Option<f32>,
+    subtitle_fraction: Option<f32>,
+    speech_segments: Option<usize>,
+    subtitle_segments: Option<usize>,
 }
 
 #[derive(serde::Deserialize)]
@@ -75,7 +84,21 @@ pub struct PreflightCandidateScore {
 }
 
 static PREFLIGHT_BUSY: AtomicBool = AtomicBool::new(false);
-const NATIVE_SCORING_TIMEOUT_SECS: u64 = 12;
+const NATIVE_SCORING_TIMEOUT_SECS: u64 = 25;
+const SCORE_AUDIO_CACHE_TTL_SECS: u64 = 90;
+const MAX_CACHED_WINDOWS: usize = 32;
+
+// A bounded, in-memory decoded-speech cache shared by candidate preflight
+// and scoring. Key the *media*, headers and selected audio stream separately
+// from the time window, so the narrower held-out windows can reuse an earlier
+// preflight decode without weakening their held-out provenance.
+struct CachedAudioWindow {
+    source_key: [u8; 32],
+    created: Instant,
+    window: AnalysisWindow,
+    intervals: Vec<(f32, f32)>,
+}
+static SCORE_AUDIO_CACHE: OnceLock<tokio::sync::Mutex<Vec<CachedAudioWindow>>> = OnceLock::new();
 
 struct PreflightBusyGuard;
 
@@ -148,14 +171,96 @@ pub(crate) async fn decode_speech(
     url: &str,
     headers: &HashMap<String, String>,
     windows: &[AnalysisWindow],
+    map_spec: &str,
 ) -> Result<(Vec<(f32, f32)>, Vec<AnalysisWindow>), String> {
+    decode_speech_cached(url, headers, windows, map_spec).await
+}
+
+fn score_audio_key(
+    url: &str,
+    headers: &HashMap<String, String>,
+    _windows: &[AnalysisWindow],
+    map_spec: &str,
+) -> [u8; 32] {
+    fn field(hasher: &mut Sha256, value: &[u8]) {
+        hasher.update((value.len() as u64).to_le_bytes());
+        hasher.update(value);
+    }
+    let mut hasher = Sha256::new();
+    field(&mut hasher, url.as_bytes());
+    field(&mut hasher, map_spec.as_bytes());
+    let mut hdrs = headers.iter().collect::<Vec<_>>();
+    hdrs.sort_by(|a, b| a.0.cmp(b.0));
+    for (name, value) in hdrs {
+        field(&mut hasher, name.as_bytes());
+        field(&mut hasher, value.as_bytes());
+    }
+    hasher.finalize().into()
+}
+
+fn covers(cached: &AnalysisWindow, requested: &AnalysisWindow) -> bool {
+    cached.start_sec <= requested.start_sec + 0.001
+        && cached.end_sec() >= requested.end_sec() - 0.001
+}
+
+async fn decode_speech_cached(
+    url: &str,
+    headers: &HashMap<String, String>,
+    windows: &[AnalysisWindow],
+    map_spec: &str,
+) -> Result<(Vec<(f32, f32)>, Vec<AnalysisWindow>), String> {
+    let source_key = score_audio_key(url, headers, &[], map_spec);
+    let cache = SCORE_AUDIO_CACHE.get_or_init(|| tokio::sync::Mutex::new(Vec::new()));
     let mut audio = Vec::new();
     let mut used_windows = Vec::new();
     for window in windows {
-        let intervals =
-            extract::speech_intervals(url, headers, window.start_sec, window.len_sec).await?;
+        // Serialize native decoders against this cache, preventing the preflight
+        // and playback analyzer from competing for remote seek connections.
+        let mut guard = cache.lock().await;
+        guard.retain(|entry| {
+            entry.created.elapsed() < Duration::from_secs(SCORE_AUDIO_CACHE_TTL_SECS)
+        });
+        let intervals = if let Some(cached) = guard
+            .iter()
+            .find(|entry| entry.source_key == source_key && covers(&entry.window, window))
+        {
+            cached
+                .intervals
+                .iter()
+                .filter_map(|&(start, end)| {
+                    let clipped_start = start.max(window.start_sec);
+                    let clipped_end = end.min(window.end_sec());
+                    (clipped_end > clipped_start).then_some((clipped_start, clipped_end))
+                })
+                .collect::<Vec<_>>()
+        } else {
+            // The timing verifier must measure *speech*, not merely
+            // non-silence. SilenceDetect treats music and ambient effects as
+            // dialogue; use the same heuristic VAD as the offset fitter.
+            let decoded = extract::speech_intervals_reference(
+                url,
+                headers,
+                window.start_sec,
+                window.len_sec,
+                map_spec,
+                false,
+            )
+            .await?;
+            if !decoded.is_empty() {
+                if guard.len() >= MAX_CACHED_WINDOWS {
+                    guard.remove(0);
+                }
+                guard.push(CachedAudioWindow {
+                    source_key,
+                    created: Instant::now(),
+                    window: window.clone(),
+                    intervals: decoded.clone(),
+                });
+            }
+            decoded
+        };
         if intervals.is_empty() {
-            return Err(format!("no-audio-in-window: {}", window.id));
+            return Err("audio-window-no-speech".into());
         }
         audio.extend(intervals);
         used_windows.push(window.clone());
@@ -184,22 +289,75 @@ pub(crate) fn scored_quality(
             .collect(),
         provenance: provenance.to_string(),
         request_provenance,
+        speech_fraction: None,
+        subtitle_fraction: None,
+        speech_segments: None,
+        subtitle_segments: None,
     }
+}
+
+/// Coverage of the union of timing intervals. A constantly-on speech mask has
+/// zero statistical variance, so its NCC=0 is not an actual timing measurement.
+fn occupied_fraction(intervals: &[(f32, f32)], duration: f32) -> f32 {
+    if !duration.is_finite() || duration <= 0.0 {
+        return 0.0;
+    }
+    let mut spans = intervals
+        .iter()
+        .filter_map(|&(start, end)| {
+            if !start.is_finite() || !end.is_finite() || end <= start {
+                return None;
+            }
+            let lo = start.max(0.0).min(duration);
+            let hi = end.max(0.0).min(duration);
+            (hi > lo).then_some((lo, hi))
+        })
+        .collect::<Vec<_>>();
+    spans.sort_by(|a, b| a.0.total_cmp(&b.0));
+    let mut total = 0.0_f32;
+    let mut tail = 0.0_f32;
+    for (start, end) in spans {
+        if end <= tail {
+            continue;
+        }
+        total += end - start.max(tail);
+        tail = end;
+    }
+    (total / duration).clamp(0.0, 1.0)
 }
 
 fn direct_excluded_windows(
     duration_sec: f32,
     excluded_window_ids: &[String],
+    cues: &[[f32; 2]],
+    remote: bool,
 ) -> Option<Vec<AnalysisWindow>> {
-    let fit = analysis_windows::fit_windows(duration_sec);
+    let mut fit = analysis_windows::fit_windows(duration_sec);
+    // VAD still uses the original longer fit windows. Include both those and
+    // the new cue-aware fit windows in the held-out exclusion check so audio
+    // evidence can never overlap fitting even if the estimation route changes.
+    if remote {
+        fit.extend(analysis_windows::remote_cue_aware_windows(duration_sec, cues).0);
+    }
     let mut excluded = Vec::new();
     for id in excluded_window_ids {
-        let window = fit.iter().find(|window| &window.id == id)?;
-        if !excluded
+        // The legacy VAD fit and new remote scorer fit share stable IDs but
+        // may use different physical ranges. Exclude *both* geometries.
+        let matched = fit
             .iter()
-            .any(|existing: &AnalysisWindow| existing.id == window.id)
-        {
-            excluded.push(window.clone());
+            .filter(|window| &window.id == id)
+            .collect::<Vec<_>>();
+        if matched.is_empty() {
+            return None;
+        }
+        for window in matched {
+            if !excluded.iter().any(|existing: &AnalysisWindow| {
+                existing.id == window.id
+                    && (existing.start_sec - window.start_sec).abs() < 0.001
+                    && (existing.len_sec - window.len_sec).abs() < 0.001
+            }) {
+                excluded.push(window.clone());
+            }
         }
     }
     Some(excluded)
@@ -227,6 +385,8 @@ pub async fn subsync_score_transform(
     exclude_window_ids: Option<Vec<String>>,
     validation_windows: Option<Vec<RequestedValidationWindow>>,
     validation_provenance: Option<String>,
+    map_spec: Option<String>,
+    session_id: Option<String>,
 ) -> Result<Option<ScoredAlignmentQuality>, String> {
     if !crate::transcode::ffmpeg_present() {
         return Err("ffmpeg-unavailable".into());
@@ -239,8 +399,12 @@ pub async fn subsync_score_transform(
     let requested = validation_windows.unwrap_or_default();
     let held_out = validation.unwrap_or(false) || !requested.is_empty();
     let excluded_ids = exclude_window_ids.unwrap_or_default();
+    let remote = url.starts_with("http://") || url.starts_with("https://");
+    let (remote_fit, remote_held_out) =
+        analysis_windows::remote_cue_aware_windows(duration_sec, &cues);
     let (windows, provenance) = if !requested.is_empty() {
-        let Some(excluded) = direct_excluded_windows(duration_sec, &excluded_ids) else {
+        let Some(excluded) = direct_excluded_windows(duration_sec, &excluded_ids, &cues, remote)
+        else {
             return Ok(None);
         };
         (
@@ -249,12 +413,30 @@ pub async fn subsync_score_transform(
         )
     } else if held_out {
         (
-            analysis_windows::validation_windows(duration_sec, &excluded_ids),
+            if remote {
+                // IDs from either the original VAD fit or the cue-aware fit
+                // must belong to known windows; never relax provenance checks.
+                let Some(excluded) =
+                    direct_excluded_windows(duration_sec, &excluded_ids, &cues, true)
+                else {
+                    return Ok(None);
+                };
+                if !analysis_windows::windows_are_disjoint(&remote_held_out, &excluded) {
+                    return Ok(None);
+                }
+                remote_held_out
+            } else {
+                analysis_windows::validation_windows(duration_sec, &excluded_ids)
+            },
             DIRECT_HELD_OUT_PROVENANCE,
         )
     } else {
         (
-            analysis_windows::fit_windows(duration_sec),
+            if remote {
+                remote_fit
+            } else {
+                analysis_windows::fit_windows(duration_sec)
+            },
             DIRECT_ANALYSIS_PROVENANCE,
         )
     };
@@ -263,26 +445,43 @@ pub async fn subsync_score_transform(
     }
 
     let hdrs = headers.unwrap_or_default();
-    let Ok(Ok((audio, used_windows))) = tokio::time::timeout(
-        Duration::from_secs(NATIVE_SCORING_TIMEOUT_SECS),
-        decode_speech(&url, &hdrs, &windows),
+    let map = url_guard::safe_map_spec(map_spec.as_deref());
+    let (audio, used_windows) = match super::analysis_control::run(
+        session_id.as_deref(),
+        tokio::time::timeout(
+            Duration::from_secs(NATIVE_SCORING_TIMEOUT_SECS),
+            decode_speech_cached(&url, &hdrs, &windows, &map),
+        ),
     )
-    .await
-    else {
-        return Ok(None);
+    .await?
+    {
+        Ok(Ok(value)) => value,
+        Ok(Err(error)) => return Err(format!("audio-decode: {}", error)),
+        Err(_) => return Err("scoring-timeout".into()),
     };
     if audio.is_empty() || used_windows.len() != windows.len() {
-        return Ok(None);
+        return Err("audio-window-unavailable".into());
     }
     let cue_pairs: Vec<(f32, f32)> = cues.iter().map(|cue| (cue[0], cue[1])).collect();
     let corrected = apply_transform(&cue_pairs, &transform);
     let (packed_audio, packed_duration) = pack_intervals(&audio, &used_windows);
     let (packed_cues, _) = pack_intervals(&corrected, &used_windows);
-    if packed_audio.is_empty() || packed_cues.len() < 2 || packed_duration <= 0.0 {
-        return Ok(None);
+    if packed_audio.is_empty() || packed_duration <= 0.0 {
+        return Err("scoring-no-speech-in-sampled-windows".into());
+    }
+    if packed_cues.len() < 2 {
+        return Err("scoring-too-few-cues-in-sampled-windows".into());
+    }
+    let speech_fraction = occupied_fraction(&packed_audio, packed_duration);
+    let subtitle_fraction = occupied_fraction(&packed_cues, packed_duration);
+    if speech_fraction >= 0.995 {
+        return Err("scoring-no-speech-timing-contrast".into());
+    }
+    if subtitle_fraction >= 0.995 {
+        return Err("scoring-no-subtitle-timing-contrast".into());
     }
     let quality = correlate::score_affine(&packed_audio, &packed_cues, packed_duration, 0.0, 1.0);
-    Ok(Some(scored_quality(
+    let mut scored = scored_quality(
         quality,
         &used_windows,
         provenance,
@@ -291,7 +490,12 @@ pub async fn subsync_score_transform(
         } else {
             requested_provenance(validation_provenance)
         },
-    )))
+    );
+    scored.speech_fraction = Some(speech_fraction);
+    scored.subtitle_fraction = Some(subtitle_fraction);
+    scored.speech_segments = Some(packed_audio.len());
+    scored.subtitle_segments = Some(packed_cues.len());
+    Ok(Some(scored))
 }
 
 fn valid_preflight_cues(cues: &[[f32; 2]], duration_sec: f32) -> bool {
@@ -414,6 +618,8 @@ pub async fn subsync_preflight_candidates(
     headers: Option<HashMap<String, String>>,
     duration_sec: f32,
     candidates: Vec<PreflightCandidateInput>,
+    map_spec: Option<String>,
+    session_id: Option<String>,
 ) -> Result<Option<Vec<PreflightCandidateScore>>, String> {
     if !crate::transcode::ffmpeg_present() {
         return Err("ffmpeg-unavailable".into());
@@ -426,12 +632,25 @@ pub async fn subsync_preflight_candidates(
         return Ok(None);
     }
     let _busy_guard = PreflightBusyGuard;
-    let fit_windows = analysis_windows::fit_windows(duration_sec);
+    let remote = url.starts_with("http://") || url.starts_with("https://");
+    let (cue_fit, cue_validation) = analysis_windows::remote_cue_aware_windows(
+        duration_sec,
+        &candidates.first().map(|c| c.cues.as_slice()).unwrap_or(&[]),
+    );
+    let fit_windows = if remote {
+        cue_fit
+    } else {
+        analysis_windows::fit_windows(duration_sec)
+    };
     let fit_ids = fit_windows
         .iter()
         .map(|window| window.id.clone())
         .collect::<Vec<_>>();
-    let validation_windows = analysis_windows::validation_windows(duration_sec, &fit_ids);
+    let validation_windows = if remote {
+        cue_validation
+    } else {
+        analysis_windows::validation_windows(duration_sec, &fit_ids)
+    };
     if fit_windows.is_empty() || validation_windows.is_empty() {
         return Ok(None);
     }
@@ -441,11 +660,15 @@ pub async fn subsync_preflight_candidates(
         .cloned()
         .collect::<Vec<_>>();
     let hdrs = headers.unwrap_or_default();
-    let Ok(Ok((audio, used_windows))) = tokio::time::timeout(
-        Duration::from_secs(NATIVE_SCORING_TIMEOUT_SECS),
-        decode_speech(&url, &hdrs, &all_windows),
+    let map = url_guard::safe_map_spec(map_spec.as_deref());
+    let Ok(Ok((audio, used_windows))) = super::analysis_control::run(
+        session_id.as_deref(),
+        tokio::time::timeout(
+            Duration::from_secs(NATIVE_SCORING_TIMEOUT_SECS),
+            decode_speech(&url, &hdrs, &all_windows, &map),
+        ),
     )
-    .await
+    .await?
     else {
         return Ok(None);
     };
@@ -487,6 +710,65 @@ mod tests {
             time += duration + gaps[index % gaps.len()];
         }
         cues
+    }
+
+    #[test]
+    fn score_cache_key_is_bound_to_media_auth_audio_stream_and_windows() {
+        let windows = vec![AnalysisWindow {
+            id: "validation-middle-a".to_string(),
+            start_sec: 120.0,
+            len_sec: 20.0,
+        }];
+        let mut headers = HashMap::new();
+        headers.insert("Authorization".to_string(), "token-one".to_string());
+        headers.insert("Referer".to_string(), "test-origin".to_string());
+        let key = score_audio_key("https://example.test/movie", &headers, &windows, "0:a:0");
+        let mut shuffled = HashMap::new();
+        shuffled.insert("Referer".to_string(), "test-origin".to_string());
+        shuffled.insert("Authorization".to_string(), "token-one".to_string());
+        assert_eq!(
+            key,
+            score_audio_key("https://example.test/movie", &shuffled, &windows, "0:a:0")
+        );
+        assert_ne!(
+            key,
+            score_audio_key("https://example.test/another", &headers, &windows, "0:a:0")
+        );
+        assert_ne!(
+            key,
+            score_audio_key("https://example.test/movie", &headers, &windows, "0:a:1")
+        );
+        shuffled.insert("Authorization".to_string(), "token-two".to_string());
+        assert_ne!(
+            key,
+            score_audio_key("https://example.test/movie", &shuffled, &windows, "0:a:0")
+        );
+        let moved = vec![AnalysisWindow {
+            start_sec: 121.0,
+            ..windows[0].clone()
+        }];
+        // The source identity is the same; range coverage determines reuse.
+        assert_eq!(
+            key,
+            score_audio_key("https://example.test/movie", &headers, &moved, "0:a:0")
+        );
+        assert!(!covers(&windows[0], &moved[0]));
+        let smaller = AnalysisWindow {
+            start_sec: 123.0,
+            len_sec: 8.0,
+            ..windows[0].clone()
+        };
+        assert!(covers(&windows[0], &smaller));
+    }
+
+    #[test]
+    fn occupied_fraction_does_not_double_count_overlapping_dialogue() {
+        assert!(
+            (occupied_fraction(&[(0.0, 3.0), (2.0, 5.0), (9.0, 12.0)], 10.0) - 0.6).abs() < 0.001
+        );
+        assert_eq!(occupied_fraction(&[(0.0, 10.0)], 10.0), 1.0);
+        assert_eq!(occupied_fraction(&[(1.0, 2.0)], 10.0), 0.1);
+        assert_eq!(occupied_fraction(&[(f32::NAN, 10.0)], 10.0), 0.0);
     }
 
     #[test]

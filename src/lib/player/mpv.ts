@@ -321,6 +321,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   } | null = null;
   let activeTraceId: string | null = null;
   let expectedMediaPath: string | null = null;
+  let loadedMediaHeaders: PlayerSource["headers"];
   let observedMediaPath: string | null = null;
   let mediaRevision = 0;
   let selectInitialTracks: PlayerSource["selectInitialTracks"];
@@ -1255,6 +1256,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         mpvStarted = false;
       }
       expectedMediaPath = src.url;
+      loadedMediaHeaders = src.headers;
       selectInitialTracks = src.selectInitialTracks;
       mediaRevision += 1;
       invalidateSubtitleSelections();
@@ -1266,6 +1268,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap.audioTracks = [];
       snap.subtitleTracks = [];
       snap.subtitleFps = undefined;
+      // mpv sub-delay is global; it must not bleed into another title or subtitle.
+      snap.subDelaySec = 0;
       primarySubtitleOff = false;
       snap.subText = "";
       snap.subStartSec = 0;
@@ -1309,6 +1313,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             await Promise.all([
               invoke("mpv_set_property", { name: "sid", value: "no" }),
               invoke("mpv_set_property", { name: "secondary-sid", value: "no" }),
+              invoke("mpv_set_property", { name: "sub-delay", value: 0 }),
             ]);
             if (!nextIsLive) {
               await applyDefaultVodBufferPhase(nextStartupProfile, "startup");
@@ -1583,6 +1588,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       const selected = snap.subtitleTracks.find((track) => track.selected);
       if (!selected?.externalFilename) return null;
       return urlByExternalFilename.get(selected.externalFilename.replace(/\\/g, "/"))?.cues ?? null;
+    },
+    getLoadedMediaSource() {
+      return expectedMediaPath ? { url: expectedMediaPath, headers: loadedMediaHeaders } : null;
     },
     getSelectedTrackUrl() {
       const sel = snap.subtitleTracks.find((t) => t.selected);

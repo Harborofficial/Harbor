@@ -6,9 +6,135 @@ pub const TORRENT_EXPLICIT_HELD_OUT_PROVENANCE: &str = "torrent-explicit-held-ou
 
 const MIN_DISJOINT_DURATION_SEC: f32 = 300.0;
 const MIN_FIT_WINDOW_SEC: f32 = 60.0;
-const MAX_FIT_WINDOW_SEC: f32 = 600.0;
+// Two minutes of dialogue is plenty to solve the offset, and keeps a 4K remux's
+// high-bitrate audio track (FLAC/TrueHD) from being the slowest part of the check.
+const MAX_FIT_WINDOW_SEC: f32 = 120.0;
 const MIN_VALIDATION_WINDOW_SEC: f32 = 30.0;
-const MAX_VALIDATION_WINDOW_SEC: f32 = 240.0;
+// Long enough for a robust score, short enough to fetch from a slow stream.
+const MAX_VALIDATION_WINDOW_SEC: f32 = 45.0;
+// Remote streams may play normally in mpv while FFmpeg's independent range
+// seeks are slow. Keep two disjoint held-out windows, but request less media.
+const REMOTE_VALIDATION_WINDOW_SEC: f32 = 20.0;
+const REMOTE_FIT_WINDOW_SEC: f32 = 30.0;
+
+/// For long remote media, choose *cue-rich* sections rather than probing
+/// fixed positions that may contain silence, intros or credits. Fit and
+/// held-out verification use four separate timeline regions, so the latter
+/// never reuses the audio used to estimate a correction.
+pub fn remote_cue_aware_windows(
+    duration_sec: f32,
+    cues: &[[f32; 2]],
+) -> (Vec<AnalysisWindow>, Vec<AnalysisWindow>) {
+    if !duration_sec.is_finite() || duration_sec < 300.0 {
+        let fit = remote_fit_windows(duration_sec);
+        let fit_ids = fit.iter().map(|w| w.id.clone()).collect::<Vec<_>>();
+        let verification = remote_validation_windows(duration_sec, &fit_ids);
+        return (fit, verification);
+    }
+    let regions = [
+        (
+            "fit-early",
+            0.025_f32,
+            0.30_f32,
+            REMOTE_FIT_WINDOW_SEC,
+            0.16_f32,
+        ),
+        (
+            "validation-middle-a",
+            0.32,
+            0.48,
+            REMOTE_VALIDATION_WINDOW_SEC,
+            0.40,
+        ),
+        (
+            "validation-middle-b",
+            0.52,
+            0.68,
+            REMOTE_VALIDATION_WINDOW_SEC,
+            0.60,
+        ),
+        ("fit-late", 0.70, 0.975, REMOTE_FIT_WINDOW_SEC, 0.84),
+    ];
+    let mut windows = Vec::with_capacity(regions.len());
+    for (id, low_frac, high_frac, len, default_frac) in regions {
+        let earliest = duration_sec * low_frac;
+        let latest = duration_sec * high_frac - len;
+        if latest <= earliest {
+            return (Vec::new(), Vec::new());
+        }
+        let target = duration_sec * default_frac - len / 2.0;
+        let mut best_start = target.clamp(earliest, latest);
+        let mut best_cues = 0_usize;
+        let mut best_coverage = 0.0_f32;
+        let mut best_distance = f32::INFINITY;
+        for candidate in std::iter::once(best_start).chain(cues.iter().filter_map(|cue| {
+            if !cue[0].is_finite() || !cue[1].is_finite() || cue[1] <= cue[0] {
+                return None;
+            }
+            let midpoint = (cue[0] + cue[1]) / 2.0;
+            Some((midpoint - len / 2.0).clamp(earliest, latest))
+        })) {
+            let finish = candidate + len;
+            let mut hits = 0_usize;
+            let mut coverage = 0.0_f32;
+            for cue in cues {
+                if cue[0].is_finite() && cue[1].is_finite() && cue[1] > cue[0] {
+                    let overlap = (cue[1].min(finish) - cue[0].max(candidate)).max(0.0);
+                    if overlap >= 0.35 {
+                        hits += 1;
+                        coverage += overlap.min(6.0);
+                    }
+                }
+            }
+            let distance = (candidate - target).abs();
+            if hits > best_cues
+                || (hits == best_cues && coverage > best_coverage + 0.01)
+                || (hits == best_cues
+                    && (coverage - best_coverage).abs() <= 0.01
+                    && distance < best_distance)
+            {
+                best_start = candidate;
+                best_cues = hits;
+                best_coverage = coverage;
+                best_distance = distance;
+            }
+        }
+        windows.push(AnalysisWindow {
+            id: id.to_string(),
+            start_sec: best_start,
+            len_sec: len,
+        });
+    }
+    let fit = vec![windows.remove(0), windows.pop().expect("four regions")];
+    let verification = windows;
+    debug_assert!(windows_are_disjoint(&verification, &fit));
+    (fit, verification)
+}
+
+/// Guided playback clips only support a local delay estimate; never
+/// infer a frame-rate ratio or claim full-film held-out verification.
+pub fn playback_clip_fit_windows(duration_sec: f32) -> Vec<AnalysisWindow> {
+    if !duration_sec.is_finite() || duration_sec < 40.0 {
+        return Vec::new();
+    }
+    vec![AnalysisWindow {
+        id: "fit-playback".to_string(),
+        start_sec: 1.0,
+        len_sec: duration_sec - 2.0,
+    }]
+}
+
+pub fn remote_fit_windows(duration_sec: f32) -> Vec<AnalysisWindow> {
+    fit_windows(duration_sec)
+        .into_iter()
+        .map(|mut window| {
+            let midpoint = window.start_sec + window.len_sec / 2.0;
+            window.len_sec = window.len_sec.min(REMOTE_FIT_WINDOW_SEC);
+            window.start_sec = midpoint - window.len_sec / 2.0;
+            window
+        })
+        .collect()
+}
 const MAX_EXPLICIT_WINDOWS: usize = 24;
 const MIN_EXPLICIT_WINDOW_SEC: f32 = 2.0;
 
@@ -125,6 +251,24 @@ pub fn validation_windows(
     candidates
 }
 
+/// Use the same independently selected held-out ranges as local validation,
+/// narrowed to reduce network range requests on high-bitrate remote streams.
+/// Neither the window IDs nor their trusted held-out provenance change.
+pub fn remote_validation_windows(
+    duration_sec: f32,
+    excluded_window_ids: &[String],
+) -> Vec<AnalysisWindow> {
+    validation_windows(duration_sec, excluded_window_ids)
+        .into_iter()
+        .map(|mut window| {
+            let midpoint = window.start_sec + window.len_sec / 2.0;
+            window.len_sec = window.len_sec.min(REMOTE_VALIDATION_WINDOW_SEC);
+            window.start_sec = midpoint - window.len_sec / 2.0;
+            window
+        })
+        .collect()
+}
+
 pub fn explicit_validation_windows(
     duration_sec: f32,
     requested: &[RequestedValidationWindow],
@@ -168,6 +312,49 @@ mod tests {
     }
 
     #[test]
+    fn remote_windows_select_dialogue_rich_positions_and_keep_held_out_independent() {
+        let duration = 3600.0_f32;
+        // Most of the timeline is silent, with isolated dialogue clusters
+        // intentionally away from the old fixed .16/.40/.60/.84 probes.
+        let clusters = [360.0, 1440.0, 2230.0, 2900.0];
+        let mut cues = Vec::new();
+        for cluster in clusters {
+            for i in 0..9 {
+                let t = cluster + i as f32 * 2.0;
+                cues.push([t, t + 1.1]);
+            }
+        }
+        cues.sort_by(|a, b| a[0].total_cmp(&b[0]));
+        let (fit, validation) = remote_cue_aware_windows(duration, &cues);
+        assert_eq!(ids(&fit), vec!["fit-early", "fit-late"]);
+        assert_eq!(
+            ids(&validation),
+            vec!["validation-middle-a", "validation-middle-b"]
+        );
+        assert!(windows_are_disjoint(&validation, &fit));
+        for window in fit.iter().chain(validation.iter()) {
+            let cues_inside = cues
+                .iter()
+                .filter(|cue| cue[0] >= window.start_sec && cue[1] <= window.end_sec())
+                .count();
+            assert!(cues_inside >= 4, "no dialogue selected for {}", window.id);
+        }
+        assert_ne!(fit[0].start_sec, remote_fit_windows(duration)[0].start_sec);
+    }
+
+    #[test]
+    fn remote_cue_windows_ignore_invalid_timing_and_short_videos_keep_legacy_plan() {
+        let cues = vec![[f32::NAN, 24.0], [3.0, 2.0], [400.0, 401.0]];
+        let (fit, validation) = remote_cue_aware_windows(3600.0, &cues);
+        assert_eq!(fit.len(), 2);
+        assert_eq!(validation.len(), 2);
+        assert!(windows_are_disjoint(&validation, &fit));
+        let (short_fit, short_validation) = remote_cue_aware_windows(240.0, &[]);
+        assert_eq!(ids(&short_fit), vec!["fit-whole"]);
+        assert!(short_validation.is_empty());
+    }
+
+    #[test]
     fn ordinary_episode_has_disjoint_fit_and_validation_windows() {
         let fit = fit_windows(1_200.0);
         let excluded = ids(&fit)
@@ -181,6 +368,29 @@ mod tests {
             vec!["validation-middle-a", "validation-middle-b"]
         );
         assert!(windows_are_disjoint(&validation, &fit));
+    }
+
+    #[test]
+    fn remote_validation_stays_disjoint_but_fetches_less_audio() {
+        let duration = 5400.0;
+        let excluded = fit_windows(duration)
+            .iter()
+            .map(|window| window.id.clone())
+            .collect::<Vec<_>>();
+        let local = validation_windows(duration, &excluded);
+        let remote = remote_validation_windows(duration, &excluded);
+        assert_eq!(remote.len(), 2);
+        assert_eq!(
+            remote.iter().map(|w| w.id.as_str()).collect::<Vec<_>>(),
+            vec!["validation-middle-a", "validation-middle-b"],
+        );
+        assert!(windows_are_disjoint(&remote, &fit_windows(duration)));
+        for (small, large) in remote.iter().zip(local.iter()) {
+            assert!(small.len_sec <= REMOTE_VALIDATION_WINDOW_SEC);
+            assert!(small.start_sec >= large.start_sec);
+            assert!(small.end_sec() <= large.end_sec());
+        }
+        assert!(remote_validation_windows(299.0, &[]).is_empty());
     }
 
     #[test]

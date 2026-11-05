@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { HoverTooltip } from "@/components/hover-tooltip";
-import { useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
+import { isAppliedAutoSync, useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
 import { useT } from "@/lib/i18n";
 import type { TrackInfo } from "@/lib/player/bridge";
 import { readMpvSubtitleFps } from "@/lib/player/mpv-properties";
@@ -123,8 +123,7 @@ export function SubtitleFpsControl({
 
   const autoSyncActive =
     autoSync?.status === "analyzing" ||
-    autoSync?.status === "synced" ||
-    autoSync?.status === "best-effort" ||
+    isAppliedAutoSync(autoSync?.status) ||
     autoSync?.status === "offer";
 
   return (

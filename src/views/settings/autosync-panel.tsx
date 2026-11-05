@@ -3,6 +3,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import { ModalButton, ROW_ACTION, SettingGroup, SettingRow, SettingsModal, Nested } from "./kit";
+import { WhisperModelRow } from "./whisper-model-row";
 
 export function AutoSyncPanel() {
   const t = useT();
@@ -95,7 +96,7 @@ export function AutoSyncPanel() {
               <ToggleRow
                 label={t("Smart resync with speech recognition")}
                 sub={t(
-                  "For the hardest files and the Try again button, Harbor transcribes a little speech on your device and lines the subtitle up to the actual words. Needs a build with the asr-whisper feature and downloads a small model the first time you use it.",
+                  "Transcribe brief speech samples on your device to synchronize difficult subtitles. Download the optional Whisper model below before using this feature.",
                 )}
                 value={settings.subtitleAutoSyncAsr}
                 onChange={(v) => update({ subtitleAutoSyncAsr: v })}
@@ -103,7 +104,7 @@ export function AutoSyncPanel() {
               <ToggleRow
                 label={t("Match subtitles across languages (experimental)")}
                 sub={t(
-                  "When the audio and subtitle use different languages, Harbor compares a release-matched subtitle in the audio language. It only offers a fix unless every safety check is measured.",
+                  "When the languages differ, Harbor can use a subtitle from the same release as a timing reference. With speech recognition enabled and its model installed, Auto sync and Sync from playback can also compare speech and pauses to suggest a timing shift for you to review.",
                 )}
                 value={settings.subtitleAutoSyncPivot}
                 onChange={(v) => update({ subtitleAutoSyncPivot: v })}
@@ -111,6 +112,7 @@ export function AutoSyncPanel() {
             </SettingGroup>
           </Nested>
         )}
+        <WhisperModelRow />
       </Section>
 
       <Section

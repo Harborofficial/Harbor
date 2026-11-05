@@ -17,6 +17,7 @@ const CONTEXT: PipelineContext = {
   mediaUrl: "file:///movie.mkv",
   sourceKind: "local",
   durationSec: 5_400,
+  audioMap: "0:a:1",
   cues: [
     [10, 12],
     [20, 22],
@@ -53,6 +54,7 @@ test("direct validation request reaches native with excluded fit-window IDs", ()
   assert.deepEqual(args.excludeWindowIds, ["fit-early", "fit-late"]);
   assert.deepEqual(args.validationWindows, []);
   assert.equal(args.durationSec, 5_400);
+  assert.equal(args.mapSpec, "0:a:1");
 });
 
 test("trusted native middle-window provenance becomes held-out measurement", () => {
@@ -140,6 +142,7 @@ test("torrent held-out measurements are trusted only with torrent provenance", (
   );
   assert.equal(args.validation, true);
   assert.equal(args.infoHash, "abcdef");
+  assert.equal(args.mapSpec, "0:a:1");
   assert.deepEqual(args.validationWindows, EXPLICIT_REQUEST.validationWindows);
   const native = {
     ncc: 0.75,

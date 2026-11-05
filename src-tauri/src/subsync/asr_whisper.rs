@@ -70,7 +70,9 @@ impl AsrEngine for WhisperEngine {
             let t0 = state.full_get_segment_t0(i).unwrap_or(0) as f32 / 100.0;
             let t1 = state.full_get_segment_t1(i).unwrap_or(0) as f32 / 100.0;
             let mut tokens = Vec::new();
-            let no_speech = state.full_get_segment_no_speech_prob(i).unwrap_or(0.0);
+            // whisper-rs 0.14 does not expose a per-segment no-speech score.
+            // Keep the existing neutral fallback rather than calling a missing API.
+            let no_speech = 0.0;
             if let Ok(nt) = state.full_n_tokens(i) {
                 for j in 0..nt {
                     let td = match state.full_get_token_data(i, j) {

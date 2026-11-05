@@ -11,15 +11,30 @@ const MIN_SILENCE: &str = "0.35";
 const SPEECH_FILTER: &str = "aformat=channel_layouts=mono,highpass=f=200,lowpass=f=3000";
 const HARD_TIMEOUT_SECS: u64 = 90;
 
-fn header_blob(headers: &HashMap<String, String>) -> String {
-    let mut blob = String::new();
-    for (k, v) in headers {
-        if k.to_lowercase() == "user-agent" {
-            continue;
-        }
-        blob.push_str(&format!("{}: {}\r\n", k, v));
+fn ffmpeg_failure_bucket(stderr: &str) -> &'static str {
+    let lower = stderr.to_ascii_lowercase();
+    if lower.contains("401")
+        || lower.contains("403")
+        || lower.contains("unauthorized")
+        || lower.contains("forbidden")
+    {
+        "http-auth"
+    } else if lower.contains("does not contain any stream")
+        || lower.contains("matches no streams")
+        || lower.contains("stream map")
+    {
+        "audio-track"
+    } else if lower.contains("seek") || lower.contains("range not satisfiable") {
+        "remote-seek"
+    } else if lower.contains("timed out") || lower.contains("timeout") {
+        "network-timeout"
+    } else if lower.contains("invalid data") || lower.contains("moov atom not found") {
+        "container"
+    } else if lower.contains("decoder") || lower.contains("error while decoding") {
+        "audio-decode"
+    } else {
+        "other"
     }
-    blob
 }
 
 fn parse_after(line: &str, tag: &str) -> Option<f32> {
@@ -49,35 +64,53 @@ pub async fn speech_intervals(
     headers: &HashMap<String, String>,
     start_sec: f32,
     len_sec: f32,
+    map_spec: &str,
+    from_start: bool,
 ) -> Result<Vec<(f32, f32)>, String> {
     let Some(ff) = locate_ffmpeg() else {
         return Err("ffmpeg not found".into());
     };
     let mut cmd = Command::new(&ff);
     cmd.arg("-hide_banner").arg("-nostats");
-    let ua = headers
-        .iter()
-        .find(|(k, _)| k.to_lowercase() == "user-agent")
-        .map(|(_, v)| v.clone());
-    cmd.arg("-user_agent")
-        .arg(ua.unwrap_or_else(|| "Harbor".into()));
-    let blob = header_blob(headers);
-    if !blob.is_empty() {
-        cmd.arg("-headers").arg(blob);
+    let ua = super::url_guard::user_agent(headers);
+    // FFmpeg rejects HTTP-only options when reading a local WAV cache clip.
+    if url.starts_with("http://") || url.starts_with("https://") {
+        cmd.arg("-user_agent")
+            .arg(ua.unwrap_or_else(|| "Harbor".into()));
+        let blob = super::url_guard::safe_header_blob(headers);
+        if !blob.is_empty() {
+            cmd.arg("-headers").arg(blob);
+        }
     }
-    cmd.arg("-ss")
-        .arg(format!("{}", start_sec))
-        .arg("-t")
-        .arg(format!("{}", len_sec))
-        .arg("-i")
-        .arg(url)
-        .arg("-vn")
+    if !from_start {
+        cmd.arg("-ss")
+            .arg(format!("{}", start_sec))
+            .arg("-t")
+            .arg(format!("{}", len_sec));
+    }
+    cmd.arg("-i").arg(url);
+    if from_start {
+        // A dumped cache can start at the movie's timestamp rather than 0; decode
+        // from the beginning and discard until the requested offset instead.
+        cmd.arg("-ss")
+            .arg(format!("{}", start_sec))
+            .arg("-t")
+            .arg(format!("{}", len_sec));
+    }
+    cmd.arg("-vn")
         .arg("-map")
-        .arg("0:a:0")
+        .arg(map_spec)
         .arg("-af")
         .arg(format!(
-            "{},silencedetect=noise={}:d={}",
-            SPEECH_FILTER, NOISE_DB, MIN_SILENCE
+            "{}{},silencedetect=noise={}:d={}",
+            if from_start {
+                "asetpts=PTS-STARTPTS,"
+            } else {
+                ""
+            },
+            SPEECH_FILTER,
+            NOISE_DB,
+            MIN_SILENCE
         ))
         .arg("-f")
         .arg("null")
@@ -93,7 +126,12 @@ pub async fn speech_intervals(
         .map_err(|_| "ffmpeg-timeout".to_string())?
         .map_err(|error| format!("run ffmpeg: {}", error))?;
     if !output.status.success() {
-        return Err(format!("ffmpeg-exit-status: {}", output.status));
+        // Never include stderr itself: authenticated URLs and headers may
+        // appear in FFmpeg logs. Export only a stable diagnostic bucket.
+        return Err(format!(
+            "ffmpeg-failed:{}",
+            ffmpeg_failure_bucket(&String::from_utf8_lossy(&output.stderr))
+        ));
     }
     let mut silences: Vec<(f32, f32)> = Vec::new();
     let mut open_start: Option<f32> = None;
@@ -118,7 +156,12 @@ pub async fn speech_intervals_reference(
     headers: &HashMap<String, String>,
     start_sec: f32,
     len_sec: f32,
+    map_spec: &str,
+    from_start: bool,
 ) -> Result<Vec<(f32, f32)>, String> {
+    if from_start {
+        return speech_intervals(url, headers, start_sec, len_sec, map_spec, true).await;
+    }
     match vad::speech_intervals_ml(
         url,
         headers,
@@ -126,18 +169,39 @@ pub async fn speech_intervals_reference(
         len_sec,
         &vad::VadConfig::default(),
         vad::Backend::Heuristic,
-        "0:a:0",
+        map_spec,
     )
     .await
     {
         Ok(iv) => Ok(iv),
-        Err(_) => speech_intervals(url, headers, start_sec, len_sec).await,
+        Err(_) => speech_intervals(url, headers, start_sec, len_sec, map_spec, false).await,
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ffmpeg_failures_have_sanitized_stage_codes() {
+        assert_eq!(
+            ffmpeg_failure_bucket("HTTP error 403 Forbidden https://token/abc"),
+            "http-auth"
+        );
+        assert_eq!(
+            ffmpeg_failure_bucket("Stream map 0:a:1 matches no streams."),
+            "audio-track"
+        );
+        assert_eq!(
+            ffmpeg_failure_bucket("HTTP Range not satisfiable"),
+            "remote-seek"
+        );
+        assert_eq!(
+            ffmpeg_failure_bucket("Invalid data found when processing input"),
+            "container"
+        );
+        assert_eq!(ffmpeg_failure_bucket("unrecognized private token"), "other");
+    }
 
     #[test]
     fn complement_inverts_silence() {

@@ -1,4 +1,13 @@
-import { Check, ChevronDown, Loader2, RotateCcw, ThumbsDown, ThumbsUp, Wand2, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Loader2,
+  RotateCcw,
+  ThumbsDown,
+  ThumbsUp,
+  Wand2,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { openSyncBar } from "@/lib/player/sub-sync";
@@ -7,7 +16,7 @@ import type { AutoSyncHandle } from "@/views/player/hooks/use-auto-sync";
 import type { PipelineOutcome } from "@/lib/subtitles/autosync/pipeline";
 import type { SyncTransform } from "@/lib/subtitles/autosync/fp-gate";
 
-type Phase = "analyzing" | "synced" | "offer" | "wrong" | "declined" | "error";
+type Phase = "analyzing" | "listening" | "synced" | "offer" | "wrong" | "declined" | "error";
 type Thumb = "up" | "down";
 type Acting = "offer" | "retry" | null;
 
@@ -15,7 +24,10 @@ function phaseOf(h: AutoSyncHandle): Phase | null {
   switch (h.status) {
     case "analyzing":
       return "analyzing";
+    case "listening":
+      return "listening";
     case "synced":
+    case "matched-embedded":
     case "best-effort":
       return "synced";
     case "offer":
@@ -29,7 +41,9 @@ function phaseOf(h: AutoSyncHandle): Phase | null {
   }
 }
 
-function affineOf(t: SyncTransform | null | undefined): { offsetSec: number; ratio: number } | null {
+function affineOf(
+  t: SyncTransform | null | undefined,
+): { offsetSec: number; ratio: number } | null {
   if (!t) return null;
   if (t.kind === "affine") return { offsetSec: t.offsetSec, ratio: t.ratio };
   const s = t.segments[0];
@@ -44,13 +58,25 @@ function formatShift(offsetSec: number): string {
 
 function correctionOf(o: PipelineOutcome | null): string {
   const a = affineOf(o?.candidate);
-  return a ? formatShift(a.offsetSec) : "";
+  if (!a) return "";
+  const shift = formatShift(a.offsetSec);
+  // An affine ratio changes subtitle timing increasingly across the video.
+  // Reporting only its starting offset made a real drift correction look
+  // like a no-op or misleading constant-delay adjustment.
+  if (Math.abs(a.ratio - 1) >= 0.0001) {
+    const drift = (a.ratio - 1) * 100;
+    return `${shift || "0s"} · ${drift >= 0 ? "+" : ""}${drift.toFixed(3)}% drift`;
+  }
+  return shift;
 }
 
 function dwellFor(phase: Phase, thumb: Thumb | null): number | null {
   if (phase === "synced") return thumb === "down" ? null : thumb === "up" ? 1600 : 6000;
-  if (phase === "offer" || phase === "wrong") return 12000;
-  if (phase === "declined" || phase === "error") return 7000;
+  // Offers require explicit user approval, while failures need to remain
+  // readable. Auto-hiding either made an unsuccessful attempt appear to
+  // finish silently without applying a correction.
+  if (phase === "offer" || phase === "wrong" || phase === "declined" || phase === "error")
+    return null;
   return null;
 }
 
@@ -69,7 +95,14 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
     setDismissed(false);
     setThumb(null);
     setActing(null);
-    setOpen(phase === "synced" || phase === "offer" || phase === "wrong");
+    // Open failures too, so the reason is visible without hunting for it.
+    setOpen(
+      phase === "synced" ||
+        phase === "offer" ||
+        phase === "wrong" ||
+        phase === "declined" ||
+        phase === "error",
+    );
   }, [phase]);
 
   useEffect(() => {
@@ -92,7 +125,7 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
   if (phase === null || dismissed) return null;
 
   const correction = correctionRef.current;
-  const hasPanel = phase !== "analyzing";
+  const hasPanel = phase !== "analyzing" && phase !== "listening";
 
   const applyOffer = () => {
     setActing("offer");
@@ -122,19 +155,34 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
       >
         <button
           type="button"
-          onClick={hasPanel ? () => setOpen((v) => !v) : undefined}
+          onClick={
+            phase === "listening" || phase === "analyzing"
+              ? handle.stop
+              : hasPanel ? () => setOpen((v) => !v) : undefined
+          }
           aria-expanded={hasPanel ? open : undefined}
+          title={phase === "listening" || phase === "analyzing" ? t("Cancel sync") : undefined}
           className="flex h-9 items-center gap-2 rounded-full border border-edge bg-elevated/95 pe-2.5 ps-3 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.85)] backdrop-blur-2xl transition-colors hover:bg-elevated aria-disabled:cursor-default motion-reduce:transition-none"
         >
           <Lead phase={phase} />
-          <span role="status" aria-live="polite" className="whitespace-nowrap text-[13px] font-semibold text-ink">
+          <span
+            role="status"
+            aria-live="polite"
+            className="whitespace-nowrap text-[13px] font-semibold text-ink"
+          >
             {phase === "analyzing" && modelDl.active
               ? modelDl.total > 0
                 ? t("Downloading speech model {pct}%", {
                     pct: Math.round((modelDl.received / modelDl.total) * 100),
                   })
                 : t("Downloading speech model")
-              : chipLabel(t, phase)}
+              : phase === "listening" && handle.reason
+                ? t(handle.reason)
+                : handle.status === "matched-embedded"
+                  ? t("Matched embedded subtitles")
+                  : handle.status === "best-effort"
+                    ? t("Estimated timing applied")
+                    : chipLabel(t, phase)}
           </span>
           {hasPanel && (
             <ChevronDown
@@ -159,12 +207,17 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
             <Body
               t={t}
               phase={phase}
+              reason={handle.reason}
+              unverifiedAudio={handle.offer?.decision.bindingRule === "consensus-audio-unverified"}
+              embeddedReferenceOnly={handle.offer?.decision.bindingRule === "embedded-text-reference"}
+              localReferenceOnly={handle.offer?.decision.bindingRule === "embedded-text-reference-local"}
               correction={correction}
               thumb={thumb}
               acting={acting}
               onThumb={onThumb}
               onApplyOffer={applyOffer}
               onRetry={retry}
+              onListen={handle.listen}
               onManual={syncManually}
               onRevert={handle.revert}
               onKeep={() => setDismissed(true)}
@@ -180,6 +233,8 @@ function chipLabel(t: (s: string) => string, phase: Phase): string {
   switch (phase) {
     case "analyzing":
       return t("Checking sources and audio");
+    case "listening":
+      return t("Listening to playback");
     case "synced":
       return t("Subtitles synced");
     case "offer":
@@ -194,8 +249,14 @@ function chipLabel(t: (s: string) => string, phase: Phase): string {
 }
 
 function Lead({ phase }: { phase: Phase }) {
-  if (phase === "analyzing") {
-    return <Loader2 size={15} strokeWidth={2.4} className="shrink-0 animate-spin text-ink-muted motion-reduce:animate-none" />;
+  if (phase === "analyzing" || phase === "listening") {
+    return (
+      <Loader2
+        size={15}
+        strokeWidth={2.4}
+        className="shrink-0 animate-spin text-ink-muted motion-reduce:animate-none"
+      />
+    );
   }
   if (phase === "synced") {
     return (
@@ -208,7 +269,9 @@ function Lead({ phase }: { phase: Phase }) {
     return <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-danger" />;
   }
   if (phase === "offer") {
-    return <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent animate-pulse motion-reduce:animate-none" />;
+    return (
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent animate-pulse motion-reduce:animate-none" />
+    );
   }
   return <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ink-subtle" />;
 }
@@ -216,17 +279,22 @@ function Lead({ phase }: { phase: Phase }) {
 function Body(props: {
   t: (s: string) => string;
   phase: Phase;
+  reason: string | null;
+  unverifiedAudio: boolean;
+  embeddedReferenceOnly: boolean;
+  localReferenceOnly: boolean;
   correction: string;
   thumb: Thumb | null;
   acting: Acting;
   onThumb: (v: Thumb) => void;
   onApplyOffer: () => void;
   onRetry: () => void;
+  onListen: () => void;
   onManual: () => void;
   onRevert: () => void;
   onKeep: () => void;
 }) {
-  const { t, phase, correction, thumb, acting } = props;
+  const { t, phase, reason, correction, thumb, acting } = props;
 
   if (phase === "synced") {
     if (thumb === "up") {
@@ -237,26 +305,38 @@ function Body(props: {
         <div className="flex flex-col gap-2 pe-6">
           <p className="text-[13px] font-semibold text-ink">{t("Not right?")}</p>
           <div className="flex flex-wrap items-center gap-1.5">
-            <PrimaryBtn icon={<Wand2 size={14} strokeWidth={2.2} />} label={t("Try again")} onClick={props.onRetry} busy={acting === "retry"} />
+            <PrimaryBtn
+              icon={<Wand2 size={14} strokeWidth={2.2} />}
+              label={t("Try again")}
+              onClick={props.onRetry}
+              busy={acting === "retry"}
+            />
             <GhostBtn label={t("Sync manually")} onClick={props.onManual} />
-            <GhostBtn label={t("Undo")} icon={<RotateCcw size={13} strokeWidth={2.2} />} onClick={props.onRevert} />
+            <GhostBtn
+              label={t("Undo")}
+              icon={<RotateCcw size={13} strokeWidth={2.2} />}
+              onClick={props.onRevert}
+            />
           </div>
         </div>
       );
     }
     return (
-      <div className="flex items-center justify-between gap-3 pe-6">
-        <p className="text-[13px] text-ink-muted">
-          {correction ? t("Adjusted timing by") + " " : t("Timing looks aligned")}
-          {correction && <span className="font-semibold text-ink tabular-nums">{correction}</span>}
-        </p>
-        <div className="flex shrink-0 items-center gap-1">
-          <IconBtn label={t("Looks right")} onClick={() => props.onThumb("up")}>
-            <ThumbsUp size={15} strokeWidth={2.2} />
-          </IconBtn>
-          <IconBtn label={t("Still off")} danger onClick={() => props.onThumb("down")}>
-            <ThumbsDown size={15} strokeWidth={2.2} />
-          </IconBtn>
+      <div className="flex flex-col gap-2 pe-6">
+        {reason && <p className="text-[12px] leading-snug text-ink-muted">{t(reason)}</p>}
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[13px] text-ink-muted">
+            {correction ? t("Adjusted timing by") + " " : t("Timing looks aligned")}
+            {correction && <span className="font-semibold text-ink tabular-nums">{correction}</span>}
+          </p>
+          <div className="flex shrink-0 items-center gap-1">
+            <IconBtn label={t("Looks right")} onClick={() => props.onThumb("up")}>
+              <ThumbsUp size={15} strokeWidth={2.2} />
+            </IconBtn>
+            <IconBtn label={t("Still off")} danger onClick={() => props.onThumb("down")}>
+              <ThumbsDown size={15} strokeWidth={2.2} />
+            </IconBtn>
+          </div>
         </div>
       </div>
     );
@@ -269,7 +349,12 @@ function Body(props: {
           {t("This subtitle looks like a different version of the video.")}
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
-          <PrimaryBtn icon={<Wand2 size={14} strokeWidth={2.2} />} label={t("Use a better match")} onClick={props.onApplyOffer} busy={acting === "offer"} />
+          <PrimaryBtn
+            icon={<Wand2 size={14} strokeWidth={2.2} />}
+            label={t("Use a better match")}
+            onClick={props.onApplyOffer}
+            busy={acting === "offer"}
+          />
           <GhostBtn label={t("Keep anyway")} onClick={props.onKeep} />
         </div>
       </div>
@@ -279,6 +364,22 @@ function Body(props: {
   if (phase === "offer") {
     return (
       <div className="flex flex-col gap-2 pe-6">
+        {reason && <p className="text-[12px] leading-snug text-ink-muted">{t(reason)}</p>}
+        {props.unverifiedAudio && (
+          <p className="text-[12px] leading-snug text-ink-muted">
+            {t("Reference subtitles suggest a shift, but video audio verification was unavailable. Confirm the timing before keeping it.")}
+          </p>
+        )}
+        {props.embeddedReferenceOnly && (
+          <p className="text-[12px] leading-snug text-ink-muted">
+            {t("This estimate matches subtitles embedded in the video. They may also be mistimed against speech.")}
+          </p>
+        )}
+        {props.localReferenceOnly && (
+          <p className="text-[12px] leading-snug text-ink-muted">
+            {t("This offset was measured against embedded dialogue near your current scene. Applying it shifts the whole subtitle track; other scenes may still need different timing.")}
+          </p>
+        )}
         <p className="text-[13px] leading-snug text-ink-muted">
           {correction ? t("Best guess") + " " : ""}
           {correction && <span className="font-semibold text-ink tabular-nums">{correction}</span>}
@@ -286,7 +387,15 @@ function Body(props: {
           {t("Apply it, then nudge if it's off.")}
         </p>
         <div className="flex flex-wrap items-center gap-1.5">
-          <PrimaryBtn icon={<Wand2 size={14} strokeWidth={2.2} />} label={t("Sync")} onClick={props.onApplyOffer} busy={acting === "offer"} />
+          <PrimaryBtn
+            icon={<Wand2 size={14} strokeWidth={2.2} />}
+            label={t("Sync")}
+            onClick={props.onApplyOffer}
+            busy={acting === "offer"}
+          />
+          {props.unverifiedAudio && (
+            <GhostBtn label={t("Sync from playback")} onClick={props.onListen} />
+          )}
           <GhostBtn label={t("Sync manually")} onClick={props.onManual} />
         </div>
       </div>
@@ -296,10 +405,19 @@ function Body(props: {
   return (
     <div className="flex flex-col gap-2 pe-6">
       <p className="text-[13px] leading-snug text-ink-muted">
-        {phase === "error" ? t("Sync is unavailable right now.") : t("Couldn't line up these subtitles automatically.")}
+        {phase === "error"
+          ? t("Sync is unavailable right now.")
+          : t("Couldn't line up these subtitles automatically.")}
       </p>
+      {reason && <p className="text-[11px] leading-snug text-ink-subtle">{reason}</p>}
       <div className="flex flex-wrap items-center gap-1.5">
-        <PrimaryBtn icon={<Wand2 size={14} strokeWidth={2.2} />} label={t("Try again")} onClick={props.onRetry} busy={acting === "retry"} />
+        <PrimaryBtn
+          icon={<Wand2 size={14} strokeWidth={2.2} />}
+          label={t("Try again")}
+          onClick={props.onRetry}
+          busy={acting === "retry"}
+        />
+        <GhostBtn label={t("Sync from playback")} onClick={props.onListen} />
         <GhostBtn label={t("Sync manually")} onClick={props.onManual} />
       </div>
     </div>
@@ -308,14 +426,28 @@ function Body(props: {
 
 function Ack({ label }: { label: string }) {
   return (
-    <span role="status" aria-live="polite" className="flex items-center gap-1.5 pe-6 text-[13px] font-medium text-ink-muted">
+    <span
+      role="status"
+      aria-live="polite"
+      className="flex items-center gap-1.5 pe-6 text-[13px] font-medium text-ink-muted"
+    >
       <Check size={14} strokeWidth={2.4} className="text-success" />
       {label}
     </span>
   );
 }
 
-function PrimaryBtn({ icon, label, onClick, busy }: { icon: ReactNode; label: string; onClick: () => void; busy?: boolean }) {
+function PrimaryBtn({
+  icon,
+  label,
+  onClick,
+  busy,
+}: {
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
+  busy?: boolean;
+}) {
   return (
     <button
       type="button"
@@ -323,13 +455,25 @@ function PrimaryBtn({ icon, label, onClick, busy }: { icon: ReactNode; label: st
       disabled={busy}
       className="flex h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-accent px-3 text-[13px] font-semibold text-canvas transition-all hover:brightness-110 active:scale-95 disabled:opacity-70 motion-reduce:transition-none motion-reduce:active:scale-100"
     >
-      {busy ? <Loader2 size={14} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" /> : icon}
+      {busy ? (
+        <Loader2 size={14} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" />
+      ) : (
+        icon
+      )}
       {label}
     </button>
   );
 }
 
-function GhostBtn({ icon, label, onClick }: { icon?: ReactNode; label: string; onClick: () => void }) {
+function GhostBtn({
+  icon,
+  label,
+  onClick,
+}: {
+  icon?: ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -342,7 +486,17 @@ function GhostBtn({ icon, label, onClick }: { icon?: ReactNode; label: string; o
   );
 }
 
-function IconBtn({ label, danger, onClick, children }: { label: string; danger?: boolean; onClick: () => void; children: ReactNode }) {
+function IconBtn({
+  label,
+  danger,
+  onClick,
+  children,
+}: {
+  label: string;
+  danger?: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"

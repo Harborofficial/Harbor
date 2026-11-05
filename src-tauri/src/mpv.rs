@@ -203,7 +203,9 @@ impl MpvState {
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     pub(crate) async fn ctx_addr(&self) -> Option<usize> {
         let guard = self.inner.lock().await;
-        guard.as_ref().map(|session| session.mpv.ctx.as_ptr() as usize)
+        guard
+            .as_ref()
+            .map(|session| session.mpv.ctx.as_ptr() as usize)
     }
 
     /// Preserve the exact selected video track while Linux moves the libmpv
@@ -315,8 +317,11 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
 // Display-info publishes this user-data property after the video window opens.
 // Observe its changes instead of polling mpv synchronously every event-loop tick.
 #[cfg(windows)]
-const HDR_STATUS_OBSERVED_PROP: (&str, u64, PropertyKind) =
-    ("user-data/display-info/hdr-status", 30, PropertyKind::String);
+const HDR_STATUS_OBSERVED_PROP: (&str, u64, PropertyKind) = (
+    "user-data/display-info/hdr-status",
+    30,
+    PropertyKind::String,
+);
 
 // Observed by libmpv itself, without synchronous property queries in the event
 // dispatcher. Do not forward these diagnostic-only changes to the frontend.
@@ -502,7 +507,9 @@ fn fallback_missing_audio_device(mpv: &Mpv) {
 fn mpv_header_field(name: &str, value: &str) -> String {
     // mpv parses this option as a comma-separated string list. An unescaped
     // Accept-Language comma creates an invalid second HTTP header (HTTP 400).
-    format!("{name}: {value}").replace('\\', "\\\\").replace(',', "\\,")
+    format!("{name}: {value}")
+        .replace('\\', "\\\\")
+        .replace(',', "\\,")
 }
 
 /// The player's HTTP identity for a stream, shared with the thumbnail pipeline.
@@ -1110,7 +1117,9 @@ pub async fn mpv_start(
                     "[harbor::mpv] separate window sized via SetWindowPos {}x{}+{}+{}",
                     w, h, x, y
                 ),
-                None => eprintln!("[harbor::mpv] separate window VO not found yet; relying on mpv geometry"),
+                None => eprintln!(
+                    "[harbor::mpv] separate window VO not found yet; relying on mpv geometry"
+                ),
             }
         }
     }
@@ -1282,9 +1291,8 @@ pub async fn mpv_start(
     let mpv_arc = Arc::new(mpv);
     let preload = Arc::new(crate::mpv_preload::PreloadSelection::default());
     // on_preloaded runs after demuxing, before track selection and decoding.
-    let _ = unsafe {
-        libmpv2_sys::mpv_hook_add(mpv_arc.ctx.as_ptr(), 0, c"on_preloaded".as_ptr(), 0)
-    };
+    let _ =
+        unsafe { libmpv2_sys::mpv_hook_add(mpv_arc.ctx.as_ptr(), 0, c"on_preloaded".as_ptr(), 0) };
 
     let event_ctx = EventContext::new(mpv_arc.ctx);
     for (name, id, kind) in OBSERVED_PROPS {
@@ -1647,7 +1655,9 @@ impl ResumeObserved {
             .chain(RESUME_DIAG_PROPS.iter())
             .find(|(known, _, _)| *known == name)
             .map(|(known, _, kind)| (*known, *kind));
-        let Some((name, kind)) = observed_name else { return };
+        let Some((name, kind)) = observed_name else {
+            return;
+        };
         let value = match (kind, change) {
             (PropertyKind::Double, PropertyData::Double(n)) if n.is_finite() => {
                 if name == "time-pos" {
@@ -1669,11 +1679,13 @@ impl ResumeObserved {
                 "wasapi" => "wasapi",
                 "" | "null" => "none",
                 _ => "other",
-            }.to_string(),
+            }
+            .to_string(),
             (PropertyKind::String, PropertyData::Str(s)) if name == "hwdec-current" => match *s {
                 "no" | "" => "0",
                 _ => "1",
-            }.to_string(),
+            }
+            .to_string(),
             _ => {
                 self.values.remove(name);
                 if name == "time-pos" {
@@ -1766,8 +1778,10 @@ impl ResumeProgress {
         let media_delta = current.media - previous.media;
         let audio_delta = current.audio - previous.audio;
         // A seek or stream switch invalidates the clock comparison.
-        if media_delta < -0.5 || audio_delta < -0.5
-            || media_delta > elapsed + 4.0 || audio_delta > elapsed + 4.0
+        if media_delta < -0.5
+            || audio_delta < -0.5
+            || media_delta > elapsed + 4.0
+            || audio_delta > elapsed + 4.0
         {
             return None;
         }
@@ -1838,7 +1852,8 @@ fn trace_resume_sample(
          vo_drops={} decoder_drops={} mistimed={} delayed={} \
          position_age_ms={} audio_position_age_ms={} source=observed",
         resume_wall_ms(),
-        age.map(|age| age.as_millis().to_string()).unwrap_or_else(|| "na".into()),
+        age.map(|age| age.as_millis().to_string())
+            .unwrap_or_else(|| "na".into()),
         u8::from(embedded),
         snapshot.value("avsync"),
         snapshot.value("total-avsync-change"),
@@ -2015,7 +2030,13 @@ fn spawn_event_loop(
                     let detail = resume_trace.detail_due(now);
                     if let Some(log) = &log {
                         if detail {
-                            trace_resume_sample(&resume_observed, log, Some(age), "sample", embedded);
+                            trace_resume_sample(
+                                &resume_observed,
+                                log,
+                                Some(age),
+                                "sample",
+                                embedded,
+                            );
                         } else {
                             trace_resume_fast_sample(&resume_observed, log, age);
                         }
@@ -2036,7 +2057,8 @@ fn spawn_event_loop(
                         && resume_observed.flag("seeking") == Some(false)
                         && resume_observed.flag("core-idle") == Some(false);
                     let position = resume_observed.time_pos;
-                    if let Some(stalled_for) = resume_trace.position.observe(now, position, playing) {
+                    if let Some(stalled_for) = resume_trace.position.observe(now, position, playing)
+                    {
                         if let Some(log) = &log {
                             let _ = log.try_send(format!(
                                 "[harbor/resume] warn: clock-stall wall_ms={} stationary_ms={}                                  cache_paused=0 seeking=0 core_idle=0",
@@ -2053,7 +2075,11 @@ fn spawn_event_loop(
             }
             // Shorten polling only for bounded resume/preload work.
             #[cfg(windows)]
-            let timeout = if resume_trace.active.is_some() { 0.25 } else { 0.5 };
+            let timeout = if resume_trace.active.is_some() {
+                0.25
+            } else {
+                0.5
+            };
             #[cfg(not(windows))]
             let timeout = 0.5;
             #[cfg(windows)]
@@ -2069,13 +2095,15 @@ fn spawn_event_loop(
             #[cfg(windows)]
             phase.store(5, std::sync::atomic::Ordering::Relaxed);
             #[cfg(windows)]
-            if poll_started.elapsed() >= Duration::from_secs(2) &&
-                resume_trace.last_resumed_at.is_some() &&
-                resume_trace.paused_at.is_none() {
+            if poll_started.elapsed() >= Duration::from_secs(2)
+                && resume_trace.last_resumed_at.is_some()
+                && resume_trace.paused_at.is_none()
+            {
                 if let Some(log) = &log {
                     let _ = log.try_send(format!(
                         "[harbor/resume] warn: event-poll-delay wall_ms={} wait_ms={}",
-                        resume_wall_ms(), poll_started.elapsed().as_millis(),
+                        resume_wall_ms(),
+                        poll_started.elapsed().as_millis(),
                     ));
                 }
             }
@@ -2087,7 +2115,8 @@ fn spawn_event_loop(
                         if raw.event_id == libmpv2_sys::mpv_event_id_MPV_EVENT_HOOK
                             && !raw.data.is_null()
                         {
-                            let hook = unsafe { &*(raw.data as *const libmpv2_sys::mpv_event_hook) };
+                            let hook =
+                                unsafe { &*(raw.data as *const libmpv2_sys::mpv_event_hook) };
                             let token = preload.begin(hook.id);
                             let tracks = mpv_keepalive
                                 .get_property::<MpvNode>("track-list")
@@ -2128,7 +2157,10 @@ fn spawn_event_loop(
                                     now.saturating_duration_since(resumed_at).as_millis(),
                                     resume_trace.paused_at.is_some(),
                                 ));
-                                if matches!(kind, "audio-underrun" | "wasapi-underrun" | "av-desync") {
+                                if matches!(
+                                    kind,
+                                    "audio-underrun" | "wasapi-underrun" | "av-desync"
+                                ) {
                                     let _ = log.try_send(format!(
                                         "[harbor/resume] info: warning-clocks wall_ms={wall_ms} kind={kind} \
                                          media={} audio={} avsync={} media_age_ms={} audio_age_ms={} \
@@ -2194,7 +2226,10 @@ fn spawn_event_loop(
                             resume_trace.position.clear();
                             resume_progress.clear();
                         }
-                        if matches!(event, Event::EndFile(_) | Event::FileLoaded | Event::Shutdown) {
+                        if matches!(
+                            event,
+                            Event::EndFile(_) | Event::FileLoaded | Event::Shutdown
+                        ) {
                             resume_trace.clear();
                             watch_playing.store(false, std::sync::atomic::Ordering::Relaxed);
                         }
@@ -2213,12 +2248,14 @@ fn spawn_event_loop(
                             if let Some(log) = &log {
                                 let _ = log.try_send(format!(
                                     "[harbor/resume] info: pause-state wall_ms={} paused={}",
-                                    resume_wall_ms(), u8::from(*paused),
+                                    resume_wall_ms(),
+                                    u8::from(*paused),
                                 ));
                                 if let Some(paused_for) = paused_for {
                                     let _ = log.try_send(format!(
                                         "[harbor/resume] info: begin wall_ms={} paused_ms={}",
-                                        resume_wall_ms(), paused_for.as_millis()
+                                        resume_wall_ms(),
+                                        paused_for.as_millis()
                                     ));
                                 }
                             }
@@ -2244,7 +2281,8 @@ fn spawn_event_loop(
                             if let Some(log) = &log {
                                 let _ = log.try_send(format!(
                                     "[harbor/resume] info: cache-pause-change wall_ms={} paused={}",
-                                    resume_wall_ms(), u8::from(*paused_for_cache),
+                                    resume_wall_ms(),
+                                    u8::from(*paused_for_cache),
                                 ));
                             }
                         }
@@ -2540,6 +2578,8 @@ const MPV_ALLOWED_COMMANDS: &[&str] = &[
     "frame-back-step",
     "loadfile",
     "ao-reload",
+    // Auto-sync's live tap writes the buffered minute to a temp file.
+    "dump-cache",
     // Writes a line into mpv's log, which is the only log a release build keeps.
     // The player uses it to name the control behind each pause/play so a user's
     // log explains itself.
@@ -2642,6 +2682,27 @@ pub async fn mpv_get_property(state: State<'_, MpvState>, name: String) -> Resul
     })
 }
 
+/// Read structured seekable cache ranges from mpv as a real node array.
+/// mpv_get_property reads properties as strings and cannot represent arrays.
+#[tauri::command]
+pub async fn mpv_get_seekable_ranges(state: State<'_, MpvState>) -> Result<Value, String> {
+    let mpv = {
+        let g = state.inner.lock().await;
+        g.as_ref()
+            .map(|s| s.mpv.clone())
+            .ok_or_else(|| "mpv not started".to_string())?
+    };
+    // Some mpv builds expose the ranges only as a field of the cache-state node.
+    let node: MpvNode = mpv
+        .get_property("demuxer-cache-state")
+        .map_err(|_| "seekable-ranges-unavailable".to_string())?;
+    let mut state = mpv_node_to_json(node);
+    state.get_mut("seekable-ranges")
+        .filter(|ranges| ranges.is_array())
+        .map(Value::take)
+        .ok_or_else(|| "seekable-ranges-invalid".to_string())
+}
+
 /// Reads a list option such as `sub-ass-style-overrides` item by item. `mpv_get_property`
 /// returns mpv's text form, which doesn't escape commas inside items, so writing that text
 /// back would split an item like `FontName=Comic, Neue` in two.
@@ -2716,7 +2777,11 @@ pub async fn mpv_set_geometry(
 ) -> Result<(), String> {
     // The detached window owns the live surface and resizes it through its own
     // fit command. Late geometry updates from Harbor must not move that surface.
-    if app.state::<crate::pip_window::PipWindowState>().active.load(std::sync::atomic::Ordering::SeqCst) {
+    if app
+        .state::<crate::pip_window::PipWindowState>()
+        .active
+        .load(std::sync::atomic::Ordering::SeqCst)
+    {
         return Ok(());
     }
     #[cfg(windows)]
@@ -2926,12 +2991,12 @@ pub async fn display_hdr_active(_app: AppHandle) -> Result<bool, String> {
 /// yet, so the caller can fall back to mpv's own geometry.
 #[cfg(windows)]
 fn size_separate_mpv_window(x: i32, y: i32, w: i32, h: i32) -> Option<()> {
+    use windows::core::BOOL;
     use windows::Win32::Foundation::{HWND, LPARAM};
     use windows::Win32::UI::WindowsAndMessaging::{
         EnumWindows, GetClassNameW, GetWindowThreadProcessId, SetWindowPos, HWND_TOP,
         SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOZORDER,
     };
-    use windows::core::BOOL;
 
     let own_pid = std::process::id();
 
@@ -2999,8 +3064,8 @@ fn monitor_hdr_active(hmon: windows::Win32::Graphics::Gdi::HMONITOR) -> bool {
     // rectangle instead.
     let mut mi = MONITORINFOEXW::default();
     mi.monitorInfo.cbSize = std::mem::size_of::<MONITORINFOEXW>() as u32;
-    let have_rect = hmon.0 as isize != 0
-        && unsafe { GetMonitorInfoW(hmon, &mut mi.monitorInfo) }.as_bool();
+    let have_rect =
+        hmon.0 as isize != 0 && unsafe { GetMonitorInfoW(hmon, &mut mi.monitorInfo) }.as_bool();
     let mon_rect = mi.monitorInfo.rcMonitor;
 
     let factory: IDXGIFactory1 = match unsafe { CreateDXGIFactory1() } {
@@ -3034,8 +3099,8 @@ fn monitor_hdr_active(hmon: windows::Win32::Graphics::Gdi::HMONITOR) -> bool {
                 Err(_) => continue,
             };
 
-            let monitor_matches = hmon.0 as isize != 0
-                && desc.Monitor.0 as isize == hmon.0 as isize;
+            let monitor_matches =
+                hmon.0 as isize != 0 && desc.Monitor.0 as isize == hmon.0 as isize;
             let rect_matches = have_rect && {
                 let d = desc.DesktopCoordinates;
                 let cx = (mon_rect.left + mon_rect.right) / 2;
@@ -3055,10 +3120,7 @@ fn monitor_hdr_active(hmon: windows::Win32::Graphics::Gdi::HMONITOR) -> bool {
 /// Windows Settings and display-info.dll use; Harbor calls it as an
 /// authoritative restore after mpv teardown.
 #[cfg(windows)]
-fn set_monitor_advanced_color(
-    hmon: windows::Win32::Graphics::Gdi::HMONITOR,
-    enable: bool,
-) -> bool {
+fn set_monitor_advanced_color(hmon: windows::Win32::Graphics::Gdi::HMONITOR, enable: bool) -> bool {
     use windows::Win32::Devices::Display::{
         DisplayConfigGetDeviceInfo, DisplayConfigSetDeviceInfo, GetDisplayConfigBufferSizes,
         QueryDisplayConfig, DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
@@ -4229,7 +4291,9 @@ fn embedded_surface_trace(app: &AppHandle) -> Option<String> {
         MPV_BLOCKED_ICONIC_RESIZES.load(std::sync::atomic::Ordering::Relaxed),
     );
     let mut last = LAST.lock().ok()?;
-    if last.as_ref() == Some(&line) { return None; }
+    if last.as_ref() == Some(&line) {
+        return None;
+    }
     *last = Some(line.clone());
     Some(line)
 }
@@ -4276,8 +4340,7 @@ unsafe extern "system" fn mpv_size_guard_proc(
 // there. The temporary hook is removed before returning; no mpv calls run in
 // either callback, which would deadlock against the video-output thread.
 #[cfg(windows)]
-static MPV_SIZE_GUARD_STATE: std::sync::Mutex<Option<(isize, bool)>> =
-    std::sync::Mutex::new(None);
+static MPV_SIZE_GUARD_STATE: std::sync::Mutex<Option<(isize, bool)>> = std::sync::Mutex::new(None);
 
 /// Installs the guard at most once per video window. SendMessage crosses to
 /// mpv's video-output thread, so this must never run on every resize frame.
@@ -4310,7 +4373,12 @@ fn install_mpv_size_guard(hwnd: windows::Win32::Foundation::HWND) -> Result<(), 
         if code >= 0 {
             let message = &*(l.0 as *const CWPSTRUCT);
             if message.message == HARBOR_MPV_INSTALL_GUARD {
-                let _ = SetWindowSubclass(message.hwnd, Some(mpv_size_guard_proc), HARBOR_MPV_SIZE_GUARD_ID, 0);
+                let _ = SetWindowSubclass(
+                    message.hwnd,
+                    Some(mpv_size_guard_proc),
+                    HARBOR_MPV_SIZE_GUARD_ID,
+                    0,
+                );
             }
         }
         CallNextHookEx(None, code, w, l)
@@ -4696,9 +4764,9 @@ mod geometry_tests {
         use windows::core::w;
         use windows::Win32::Foundation::RECT;
         use windows::Win32::UI::WindowsAndMessaging::{
-            CreateWindowExW, DestroyWindow, DispatchMessageW, FindWindowExW,
-            GetClientRect, PeekMessageW, ShowWindow, TranslateMessage, MSG,
-            PM_REMOVE, SW_MINIMIZE, SW_RESTORE, SW_SHOW, WS_OVERLAPPEDWINDOW,
+            CreateWindowExW, DestroyWindow, DispatchMessageW, FindWindowExW, GetClientRect,
+            PeekMessageW, ShowWindow, TranslateMessage, MSG, PM_REMOVE, SW_MINIMIZE, SW_RESTORE,
+            SW_SHOW, WS_OVERLAPPEDWINDOW,
         };
         fn pump(ms: u64) {
             let until = std::time::Instant::now() + std::time::Duration::from_millis(ms);
@@ -4715,10 +4783,20 @@ mod geometry_tests {
         }
         unsafe {
             let parent = CreateWindowExW(
-                Default::default(), w!("STATIC"), w!("Harbor mpv minimize regression"),
-                WS_OVERLAPPEDWINDOW, 100, 100, 960, 600,
-                None, None, None, None,
-            ).unwrap();
+                Default::default(),
+                w!("STATIC"),
+                w!("Harbor mpv minimize regression"),
+                WS_OVERLAPPEDWINDOW,
+                100,
+                100,
+                960,
+                600,
+                None,
+                None,
+                None,
+                None,
+            )
+            .unwrap();
             let _ = ShowWindow(parent, SW_SHOW);
             let mpv = libmpv2::Mpv::with_initializer(|init| {
                 init.set_property("wid", (parent.0 as isize).to_string())?;
@@ -4727,7 +4805,8 @@ mod geometry_tests {
                 init.set_property("ao", "null")?;
                 init.set_property("idle", "yes")?;
                 init.set_property("force-window", "yes")
-            }).unwrap();
+            })
+            .unwrap();
             let result = (|| -> Result<(), String> {
                 mpv.command("loadfile", &["av://lavfi:testsrc=size=320x180:rate=24"])
                     .map_err(|e| e.to_string())?;
@@ -4744,27 +4823,46 @@ mod geometry_tests {
                 let _ = ShowWindow(parent, SW_MINIMIZE);
                 pump(500);
                 let unguarded = size()?;
-                if unguarded == full { return Err("control did not reproduce mpv's parent resize".into()); }
+                if unguarded == full {
+                    return Err("control did not reproduce mpv's parent resize".into());
+                }
                 let _ = ShowWindow(parent, SW_RESTORE);
                 pump(500);
                 super::install_mpv_size_guard(child)?;
                 let restored = size()?;
                 let render_size = || -> Result<(i64, i64), String> {
-                    Ok((mpv.get_property::<i64>("osd-width").map_err(|e| e.to_string())?,
-                        mpv.get_property::<i64>("osd-height").map_err(|e| e.to_string())?))
+                    Ok((
+                        mpv.get_property::<i64>("osd-width")
+                            .map_err(|e| e.to_string())?,
+                        mpv.get_property::<i64>("osd-height")
+                            .map_err(|e| e.to_string())?,
+                    ))
                 };
                 let render_restored = render_size()?;
-                let before = mpv.get_property::<f64>("time-pos").map_err(|e| e.to_string())?;
+                let before = mpv
+                    .get_property::<f64>("time-pos")
+                    .map_err(|e| e.to_string())?;
                 for _ in 0..3 {
                     let _ = ShowWindow(parent, SW_MINIMIZE);
                     pump(500);
-                    if render_size()? != render_restored { return Err(format!("guarded renderer resize: {:?} != {render_restored:?}", render_size()?)); }
+                    if render_size()? != render_restored {
+                        return Err(format!(
+                            "guarded renderer resize: {:?} != {render_restored:?}",
+                            render_size()?
+                        ));
+                    }
                     let _ = ShowWindow(parent, SW_RESTORE);
                     pump(500);
-                    if size()? != restored { return Err("surface did not restore".into()); }
+                    if size()? != restored {
+                        return Err("surface did not restore".into());
+                    }
                 }
-                let after = mpv.get_property::<f64>("time-pos").map_err(|e| e.to_string())?;
-                if after <= before + 1.0 { return Err("playback clock stopped".into()); }
+                let after = mpv
+                    .get_property::<f64>("time-pos")
+                    .map_err(|e| e.to_string())?;
+                if after <= before + 1.0 {
+                    return Err("playback clock stopped".into());
+                }
                 println!("native mpv: unguarded={unguarded:?}, guarded={restored:?}, playback advanced {:.2}s", after - before);
                 Ok(())
             })();
@@ -4783,8 +4881,14 @@ mod event_backoff_tests {
 
     #[test]
     fn http_headers_preserve_commas_and_backslashes_in_mpv_string_lists() {
-        assert_eq!(super::mpv_header_field("Accept-Language", "en-US,en;q=0.9"), "Accept-Language: en-US\\,en;q=0.9");
-        assert_eq!(super::mpv_header_field("X-Path", r"one\two,three"), r"X-Path: one\\two\,three");
+        assert_eq!(
+            super::mpv_header_field("Accept-Language", "en-US,en;q=0.9"),
+            "Accept-Language: en-US\\,en;q=0.9"
+        );
+        assert_eq!(
+            super::mpv_header_field("X-Path", r"one\two,three"),
+            r"X-Path: one\\two\,three"
+        );
         assert_eq!(super::mpv_header_field("Accept", "*/*"), "Accept: */*");
     }
 
@@ -5007,8 +5111,8 @@ mod audio_device_fallback_tests {
 mod resume_trace_tests {
     use super::{
         resume_event_loop_phase, resume_warning_kind, ResumeObserved, ResumePosition,
-        ResumeProgress, ResumeTraceState, HDR_STATUS_OBSERVED_PROP, OBSERVED_PROPS, RESUME_DIAG_PROPS,
-        RESUME_HEALTH_INTERVAL, RESUME_POSITION_STALL, RESUME_TRACE_WINDOW,
+        ResumeProgress, ResumeTraceState, HDR_STATUS_OBSERVED_PROP, OBSERVED_PROPS,
+        RESUME_DIAG_PROPS, RESUME_HEALTH_INTERVAL, RESUME_POSITION_STALL, RESUME_TRACE_WINDOW,
     };
     use libmpv2::events::PropertyData;
     use std::time::{Duration, Instant};
@@ -5029,11 +5133,24 @@ mod resume_trace_tests {
         assert_eq!(snapshot.flag("core-idle"), Some(false));
         assert_eq!(snapshot.value("current-ao"), "wasapi");
         assert_eq!(snapshot.value("hwdec-current"), "1");
-        assert_eq!(snapshot.position_age_ms(now + Duration::from_millis(300)), "300");
+        assert_eq!(
+            snapshot.position_age_ms(now + Duration::from_millis(300)),
+            "300"
+        );
         snapshot.update("audio-pts", &PropertyData::Double(90.23), now);
-        assert_eq!(snapshot.audio_position_age_ms(now + Duration::from_millis(300)), "300");
-        snapshot.update("time-pos", &PropertyData::Double(90.5), now + Duration::from_millis(300));
-        assert_eq!(snapshot.position_age_ms(now + Duration::from_millis(400)), "100");
+        assert_eq!(
+            snapshot.audio_position_age_ms(now + Duration::from_millis(300)),
+            "300"
+        );
+        snapshot.update(
+            "time-pos",
+            &PropertyData::Double(90.5),
+            now + Duration::from_millis(300),
+        );
+        assert_eq!(
+            snapshot.position_age_ms(now + Duration::from_millis(400)),
+            "100"
+        );
         snapshot.update("time-pos", &PropertyData::Flag(false), now);
         assert_eq!(snapshot.time_pos, None);
         snapshot.update("path", &PropertyData::Str("some-sensitive-url"), now);
@@ -5045,8 +5162,11 @@ mod resume_trace_tests {
     #[test]
     fn diagnostic_subscriptions_have_disjoint_ids_and_watchdog_phases() {
         use std::collections::HashSet;
-        let ids = OBSERVED_PROPS.iter().chain(RESUME_DIAG_PROPS.iter())
-            .map(|(_, id, _)| *id).chain(std::iter::once(HDR_STATUS_OBSERVED_PROP.1));
+        let ids = OBSERVED_PROPS
+            .iter()
+            .chain(RESUME_DIAG_PROPS.iter())
+            .map(|(_, id, _)| *id)
+            .chain(std::iter::once(HDR_STATUS_OBSERVED_PROP.1));
         assert_eq!(ids.clone().count(), ids.collect::<HashSet<_>>().len());
         assert_eq!(resume_event_loop_phase(1), "loop-start");
         assert_eq!(resume_event_loop_phase(7), "hdr-observed-event");
@@ -5077,7 +5197,10 @@ mod resume_trace_tests {
         let later = later + Duration::from_secs(5);
         snapshot.update("time-pos", &PropertyData::Double(100.4), later);
         snapshot.update("audio-pts", &PropertyData::Double(104.1), later);
-        assert!(progress.sample(&snapshot, later).unwrap().contains("state=both-clocks-slow"));
+        assert!(progress
+            .sample(&snapshot, later)
+            .unwrap()
+            .contains("state=both-clocks-slow"));
     }
 
     #[test]

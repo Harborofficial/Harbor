@@ -91,11 +91,14 @@ pub async fn pcm_window(
         .arg("-nostats")
         .arg("-loglevel")
         .arg("error");
-    cmd.arg("-user_agent")
-        .arg(url_guard::user_agent(headers).unwrap_or_else(|| "Harbor".into()));
-    let blob = url_guard::safe_header_blob(headers);
-    if !blob.is_empty() {
-        cmd.arg("-headers").arg(blob);
+    // HTTP protocol options are invalid for local WAV/media paths.
+    if url.starts_with("http://") || url.starts_with("https://") {
+        cmd.arg("-user_agent")
+            .arg(url_guard::user_agent(headers).unwrap_or_else(|| "Harbor".into()));
+        let blob = url_guard::safe_header_blob(headers);
+        if !blob.is_empty() {
+            cmd.arg("-headers").arg(blob);
+        }
     }
     cmd.arg("-ss")
         .arg(start_sec.to_string())
@@ -291,6 +294,7 @@ pub async fn asr_transcribe_windows(
     window_sec: Option<f32>,
     model_path: Option<String>,
     map_spec: Option<String>,
+    session_id: Option<String>,
 ) -> Result<Vec<AsrWindow>, String> {
     #[cfg(not(feature = "asr-whisper"))]
     return {
@@ -303,6 +307,7 @@ pub async fn asr_transcribe_windows(
             window_sec,
             &model_path,
             &map_spec,
+            &session_id,
         );
         Ok(Vec::new())
     };
@@ -322,7 +327,11 @@ pub async fn asr_transcribe_windows(
         let win = window_sec.unwrap_or(30.0).max(5.0);
         let probes = probe_windows(duration_sec, probe_count.unwrap_or(3), win);
         let lang = sub_lang.as_deref().filter(|s| !s.is_empty());
-        Ok(transcribe_windows(engine.as_ref(), &url, &hdrs, &probes, lang, &ms).await)
+        super::analysis_control::run(
+            session_id.as_deref(),
+            transcribe_windows(engine.as_ref(), &url, &hdrs, &probes, lang, &ms),
+        )
+        .await
     }
 }
 

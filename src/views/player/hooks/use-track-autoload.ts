@@ -405,6 +405,10 @@ export function useTrackAutoload(params: {
         season: searchSeason,
         episode: searchEpisode,
         durationSec: snapRef.current.durationSec,
+        getAudioMap: () => {
+          const index = snapRef.current.audioTracks.findIndex((track) => track.selected);
+          return index >= 0 ? `0:a:${index}` : undefined;
+        },
       };
       const selectionLease = {
         revision: subtitleSelectionStateRef.current.revision,

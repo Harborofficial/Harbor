@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { cancelNativeAnalysis, newAnalysisSessionId } from "./autosync/analysis-session";
 import type { PreparedSubtitle, PreparedCandidateResult } from "./prepare";
 
 type TimingQuality = { ncc: number; coverage: number; z: number };
@@ -54,6 +55,7 @@ export type CandidatePreflightContext = {
   mediaUrl: string;
   headers?: Record<string, string>;
   durationSec: number;
+  audioMap?: string;
   timeoutMs?: number;
 };
 
@@ -159,6 +161,7 @@ export async function probePreparedSubtitleBatch(
   }
 
   const timeoutMs = context.timeoutMs ?? 12_000;
+  const sessionId = newAnalysisSessionId();
   let timer: ReturnType<typeof setTimeout> | null = null;
   try {
     const measured = await Promise.race([
@@ -166,6 +169,8 @@ export async function probePreparedSubtitleBatch(
         url: context.mediaUrl,
         headers: context.headers ?? null,
         durationSec: context.durationSec,
+        mapSpec: context.audioMap ?? null,
+        sessionId,
         candidates: prepared.map((item, index) => ({
           id: String(index),
           cues: item.cues.map((cue) => [cue.start, cue.end]),
@@ -175,7 +180,12 @@ export async function probePreparedSubtitleBatch(
         timer = setTimeout(() => resolve("timeout"), timeoutMs);
       }),
     ]);
-    if (measured === "timeout") return unknownMeasurements(prepared.length, "timeout");
+    if (measured === "timeout") {
+      // Promise.race by itself leaves the native FFmpeg worker running.
+      // Cancel that exact native job before the later Auto sync can start.
+      cancelNativeAnalysis(sessionId);
+      return unknownMeasurements(prepared.length, "timeout");
+    }
     if (!Array.isArray(measured)) {
       return unknownMeasurements(prepared.length, "insufficient-data");
     }
@@ -203,6 +213,7 @@ export async function probePreparedSubtitleBatch(
       };
     });
   } catch (error) {
+    cancelNativeAnalysis(sessionId);
     return unknownMeasurements(prepared.length, unknownReason(error));
   } finally {
     if (timer) clearTimeout(timer);

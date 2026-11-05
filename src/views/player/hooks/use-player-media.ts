@@ -185,6 +185,8 @@ export function usePlayerMedia(params: {
   const {
     status: asStatus,
     offer: asOffer,
+    reason: asReason,
+    listen: asListen,
     applyOffer: asApply,
     revert: asRevert,
     retry: asRetry,
@@ -197,6 +199,8 @@ export function usePlayerMedia(params: {
     publishAutoSync({
       status: asStatus,
       offer: asOffer,
+      reason: asReason,
+      listen: asListen,
       applyOffer: asApply,
       revert: asRevert,
       retry: asRetry,
@@ -206,7 +210,19 @@ export function usePlayerMedia(params: {
       feedback: asFeedback,
     });
     return () => publishAutoSync(null);
-  }, [asStatus, asOffer, asApply, asRevert, asRetry, asRun, asStop, asFeedback, prepareLiveSync]);
+  }, [
+    asStatus,
+    asOffer,
+    asReason,
+    asListen,
+    asApply,
+    asRevert,
+    asRetry,
+    asRun,
+    asStop,
+    asFeedback,
+    prepareLiveSync,
+  ]);
 
   // Whether the video actually renders inside Harbor's webview. This mirrors the
   // `embedActive` value the player bridge sends to mpv (use-player-bridge.ts):

@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import { UiIcon } from "@/components/ui-icon";
 import type { TrackInfo } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
-import { useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
+import { isAppliedAutoSync, useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { SubtitleFpsControl } from "./subtitle-fps-control";
 import { SyncControl } from "./sync-control";
@@ -11,6 +11,8 @@ type Props = {
   engine: "html5" | "mpv";
   count: number;
   selectedTrack: TrackInfo | null;
+  hasExternalTrack: boolean;
+  onChooseExternal: () => void;
   hasSecondary: boolean;
   delaySec: number;
   delayNonZero: boolean;
@@ -25,9 +27,13 @@ export function MenuHeader(p: Props) {
 
   const autoSyncOn =
     autoSync?.status === "analyzing" ||
-    autoSync?.status === "synced" ||
-    autoSync?.status === "best-effort";
-  const canAutoSync = p.selectedTrack?.external === true || autoSyncOn;
+    autoSync?.status === "listening" ||
+    isAppliedAutoSync(autoSync?.status);
+  const canAutoSync = p.engine === "mpv" &&
+    (p.selectedTrack?.external === true || autoSyncOn);
+  // Embedded-only or still-loading subtitle lists should guide the viewer
+  // toward an external track instead of displaying a permanently disabled item.
+  const canChooseExternal = p.engine === "mpv" && !canAutoSync;
 
   return (
     <header className="flex items-center justify-between border-b border-edge-soft pe-4 ps-10 py-2.5">
@@ -41,6 +47,9 @@ export function MenuHeader(p: Props) {
       <div className="flex items-center gap-1">
         <SyncControl
           canAutoSync={canAutoSync}
+          canChooseExternal={canChooseExternal}
+          hasExternalTrack={p.hasExternalTrack}
+          onChooseExternal={p.onChooseExternal}
           canLiveSync={p.selectedTrack != null}
           delaySec={p.delaySec}
           delayNonZero={p.delayNonZero}

@@ -175,11 +175,15 @@ async fn decode_pcm(
         .arg("-nostats")
         .arg("-loglevel")
         .arg("error");
-    cmd.arg("-user_agent")
-        .arg(user_agent(headers).unwrap_or_else(|| "Harbor".into()));
-    let blob = safe_header_blob(headers);
-    if !blob.is_empty() {
-        cmd.arg("-headers").arg(blob);
+    // FFmpeg's user_agent/headers are HTTP protocol options and cause
+    // "Option user_agent not found" when decoding a prepared local WAV.
+    if url.starts_with("http://") || url.starts_with("https://") {
+        cmd.arg("-user_agent")
+            .arg(user_agent(headers).unwrap_or_else(|| "Harbor".into()));
+        let blob = safe_header_blob(headers);
+        if !blob.is_empty() {
+            cmd.arg("-headers").arg(blob);
+        }
     }
     cmd.arg("-ss")
         .arg(format!("{}", start_sec))

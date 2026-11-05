@@ -32,6 +32,7 @@ import type {
 import type { PreparedSubtitle } from "../src/lib/subtitles/prepare.ts";
 import type { SubResult, SubSearchQuery } from "../src/lib/subtitles/types.ts";
 import type { PlayerSrc } from "../src/lib/view.tsx";
+import { DEFAULT_DRIFT_CONFIG, localFit } from "../src/lib/subtitles/autosync/drift-dsp.ts";
 import { PIVOT_CUES, TARGET_CUES } from "./fixtures/subtitle-p2-fixtures.ts";
 
 const SETTINGS: PivotRuntimeSettings = {
@@ -201,6 +202,235 @@ function outcome(decision: "refuse" | "offer" | "apply", pCorrect: number): Pipe
     tiersRun: [],
   };
 }
+
+test("Whisper timing offers the same fixed shift in either language direction only after separate audio validation", async () => {
+  const sampledWindows = [60, 250, 445].map((startSec) => ({ startSec, lenSec: 12 }));
+  const spoken = sampledWindows.flatMap(({ startSec }) =>
+    [
+      [0.6, 1.4],
+      [2.7, 4.8],
+      [6.3, 7.2],
+      [9.2, 11.6],
+    ].map(([a, b]) => ({ start: startSec + a, end: startSec + b })),
+  );
+  for (const [audioLanguage, subtitleLanguage] of [
+    ["en", "de"],
+    ["de", "en"],
+    ["he", "el"],
+  ]) {
+    const offset = subtitleLanguage === "en" ? -3.5 : 2.5;
+    const audio: Array<[number, number]> = spoken.map((p) => [p.start, p.end]);
+    for (const center of [125, 275, 375])
+      for (const delta of [-6, -2, 2, 6]) audio.push([center + delta, center + delta + 2]);
+    const cues: Array<[number, number]> = audio
+      .sort((a, b) => a[0] - b[0])
+      .map(([a, b]) => [a - offset, b - offset]);
+    const ctx = {
+      ...CONTEXT,
+      audioLanguage,
+      subtitleLanguage,
+      durationSec: 500,
+      cues,
+      cueText: cues.map((_, i) => `different written dialogue ${i}`),
+    };
+    const args = { ctx, settings: SETTINGS, src: SOURCE };
+    const requests: QualityMeasurementRequest[] = [];
+    const ports: TierPorts = {
+      asrTranscribe: async () => ({
+        phrases: spoken.map((p) => ({ ...p, text: "spoken" })),
+        detectedLanguage: audioLanguage,
+        sampledWindows,
+      }),
+      measureQuality: async (_ctx, t, request) => {
+        assert.ok(request?.validationWindows);
+        requests.push(request!);
+        const windows = request!.validationWindows!;
+        assert.ok(
+          windows.every((w) =>
+            sampledWindows.every(
+              (s) => w.toSec <= s.startSec || w.fromSec >= s.startSec + s.lenSec,
+            ),
+          ),
+        );
+        assert.equal(t.kind, "affine");
+        const subtitles = cues.map(([start, end]) => ({ start, end, text: "caption" }));
+        const fits = windows.map((w) =>
+          localFit(audio, subtitles, t.kind === "affine" ? t.offsetSec : 0, [w.fromSec, w.toSec], {
+            ...DEFAULT_DRIFT_CONFIG,
+            maxLagSec: 0,
+          }),
+        );
+        return measuredQuality(
+          {
+            ncc: Math.min(...fits.map((f) => f.ncc)),
+            coverage: Math.min(...fits.map((f) => f.coverage)),
+            z: 0,
+          },
+          "audio",
+          {
+            kind: "held-out",
+            windows,
+            provenance: DIRECT_EXPLICIT_HELD_OUT_PROVENANCE,
+            windowIds: windows.map((w) => w.id),
+            requestProvenance: request!.validationProvenance,
+          },
+        );
+      },
+    };
+    const deps = { ...dependencies(), searchSubtitles: async () => [] };
+    const out = await runExperimentalPivotAutoSync({ ...args, ports }, deps);
+    assert.equal(out?.decision.decision, "offer");
+    assert.equal(out?.decision.bindingRule, "cross-language-speech-timing");
+    assert.deepEqual(out?.candidate, { kind: "affine", ratio: 1, offsetSec: offset });
+    assert.equal(requests.length, 2);
+    assert.deepEqual(requests[0], requests[1]);
+    assert.equal(
+      await runExperimentalPivotAutoSync(
+        {
+          ...args,
+          ports: {
+            ...ports,
+            measureQuality: async () => unknownQuality("timeout", "audio"),
+          },
+        },
+        deps,
+      ),
+      null,
+    );
+    assert.equal(
+      await runExperimentalPivotAutoSync(
+        {
+          ...args,
+          ports: {
+            ...ports,
+            asrTranscribe: async () => ({
+              detectedLanguage: audioLanguage,
+              sampledWindows,
+              phrases: spoken.slice(0, 4).map((p) => ({ ...p, text: "spoken" })),
+            }),
+          },
+        },
+        deps,
+      ),
+      null,
+    );
+    // A repeated subtitle pattern creates two equally plausible offsets.
+    const repeated = cues.flatMap(([a, b]): Array<[number, number]> => [
+      [a, b],
+      [a + 16, b + 16],
+    ]);
+    assert.equal(
+      await runExperimentalPivotAutoSync(
+        {
+          ...args,
+          ctx: {
+            ...ctx,
+            cues: repeated,
+            cueText: repeated.map((_, i) => `repeated dialogue ${i}`),
+          },
+          ports,
+        },
+        deps,
+      ),
+      null,
+    );
+    assert.equal(
+      requests.length,
+      2,
+      "ambiguous or single-scene matches must not reach verification",
+    );
+  }
+});
+
+test("cross-language drift reaches independent audio validation as a rate change and remains offer-only", async () => {
+  const sampledWindows = [100, 800, 1600, 2400].map((startSec) => ({ startSec, lenSec: 30 }));
+  const phrases = sampledWindows.flatMap(({ startSec }) =>
+    [
+      [1, 3.2],
+      [6.1, 9.4],
+      [13, 15.1],
+      [19.2, 23.8],
+      [26, 28.4],
+    ].map(([a, b]) => ({ start: startSec + a, end: startSec + b, text: "speech" })),
+  );
+  const audio: Array<[number, number]> = phrases.map((p) => [p.start, p.end]);
+  for (const center of [675, 1350, 2025])
+    for (const delta of [-6, -2, 2, 6]) audio.push([center + delta, center + delta + 2]);
+  const cues: Array<[number, number]> = audio
+    .sort((a, b) => a[0] - b[0])
+    .map(([a, b]) => [(a - 0.7) / 1.002, (b - 0.7) / 1.002]);
+  const ctx = {
+    ...CONTEXT,
+    durationSec: 2700,
+    audioLanguage: "en",
+    subtitleLanguage: "el",
+    cues,
+    cueText: cues.map((_, i) => `translated dialogue ${i}`),
+  };
+  let measured = 0;
+  const ports: TierPorts = {
+    asrTranscribe: async (_ctx, requested) => {
+      assert.ok(requested.every((w) => w.lenSec === 30));
+      return { phrases, sampledWindows, detectedLanguage: "en" };
+    },
+    measureQuality: async (_ctx, transform, request) => {
+      assert.equal(transform.kind, "affine");
+      if (transform.kind !== "affine") throw new Error("expected affine");
+      const windows = request!.validationWindows!;
+      assert.ok(
+        windows.every((w) =>
+          sampledWindows.every((s) => w.toSec <= s.startSec || w.fromSec >= s.startSec + s.lenSec),
+        ),
+      );
+      const shifted = cues.map(([a, b]) => ({
+        start: a * transform.ratio + transform.offsetSec,
+        end: b * transform.ratio + transform.offsetSec,
+        text: "translated",
+      }));
+      const fits = windows.map((w) =>
+        localFit(audio, shifted, 0, [w.fromSec, w.toSec], {
+          ...DEFAULT_DRIFT_CONFIG,
+          maxLagSec: 0,
+        }),
+      );
+      measured++;
+      return measuredQuality(
+        {
+          ncc: Math.min(...fits.map((f) => f.ncc)),
+          coverage: Math.min(...fits.map((f) => f.coverage)),
+          z: 0,
+        },
+        "audio",
+        {
+          kind: "held-out",
+          windows,
+          provenance: DIRECT_EXPLICIT_HELD_OUT_PROVENANCE,
+          windowIds: windows.map((w) => w.id),
+          requestProvenance: request!.validationProvenance,
+        },
+      );
+    },
+  };
+  const args = { ctx, ports, settings: SETTINGS, src: SOURCE };
+  const deps = { ...dependencies(), searchSubtitles: async () => [] };
+  const result = await runExperimentalPivotAutoSync(args, deps);
+  assert.equal(result?.decision.decision, "offer");
+  assert.equal(result?.candidate?.kind, "affine");
+  assert.ok(
+    result?.candidate?.kind === "affine" && Math.abs(result.candidate.ratio - 1.002) < 0.0001,
+  );
+  assert.equal(measured, 2);
+  assert.equal(
+    await runExperimentalPivotAutoSync(
+      {
+        ...args,
+        ports: { ...ports, measureQuality: async () => unknownQuality("timeout", "audio") },
+      },
+      deps,
+    ),
+    null,
+  );
+});
 
 test("experimental pivot is off by default and never runs for a same-language track", async () => {
   let searches = 0;
