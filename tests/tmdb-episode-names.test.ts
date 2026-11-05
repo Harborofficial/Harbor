@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   applyTmdbEpisodeNames,
   needsTmdbEpisodeNames,
+  needsTmdbEpisodeDetails,
   pickEpisodeName,
   type TmdbEpisodeText,
 } from "../src/lib/providers/tmdb/tmdb-episode-name-merge.ts";
@@ -73,4 +74,20 @@ test("an addon still is never replaced by the tmdb still", () => {
   const out = applyTmdbEpisodeNames(eps, new Map([[1, tmdb("Pilot", "", "https://img/w300/a.jpg")]]));
   assert.equal(out[0].name, "Pilot");
   assert.equal(out[0].still, "https://addon/still.jpg");
+});
+
+test("missing overviews trigger the Up Next detail fallback despite complete titles", () => {
+  assert.equal(needsTmdbEpisodeDetails([{ episode: 1, name: "Pilot" }]), true);
+  assert.equal(needsTmdbEpisodeDetails([{ episode: 1, name: "Pilot", overview: "  " }]), true);
+  assert.equal(needsTmdbEpisodeDetails([{ episode: 1, name: "Pilot", overview: "A synopsis." }]), false);
+  assert.equal(needsTmdbEpisodeDetails([{ episode: 1, name: "Pilot", overview: "A synopsis." }, { episode: 2, name: "Second" }]), true);
+  // Other components using title-only enrichment keep their prior behavior.
+  assert.equal(needsTmdbEpisodeNames([{ episode: 1, name: "Pilot" }]), false);
+});
+
+test("TMDB fills a missing overview without replacing an existing episode title", () => {
+  const eps = [{ episode: 1, name: "Original title", overview: " " }];
+  const filled = applyTmdbEpisodeNames(eps, new Map([[1, tmdb("Different title", "Episode details are here.")]]));
+  assert.equal(filled[0].name, "Original title");
+  assert.equal(filled[0].overview, "Episode details are here.");
 });

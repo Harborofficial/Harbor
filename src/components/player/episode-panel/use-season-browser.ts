@@ -10,7 +10,7 @@ import { useSettings } from "@/lib/settings";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import {
   applyTmdbEpisodeNames,
-  needsTmdbEpisodeNames,
+  needsTmdbEpisodeDetails,
   tmdbEpisodeNames,
 } from "@/lib/providers/tmdb";
 import type { PlayEpisode } from "@/lib/view";
@@ -91,7 +91,7 @@ export function useSeasonBrowser(
     setLoading(true);
     const overlayTmdbNames = (eps: PlayEpisode[]) => {
       if (!settings.tmdbKey || effMeta.id.startsWith("tmdb:tv:")) return;
-      if (!needsTmdbEpisodeNames(eps)) return;
+      if (!needsTmdbEpisodeDetails(eps)) return;
       void tmdbEpisodeNames(settings.tmdbKey, effMeta.id, season)
         .then((names) => {
           if (cancelled || names.size === 0) return;

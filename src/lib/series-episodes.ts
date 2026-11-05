@@ -8,7 +8,7 @@ import type { Meta } from "./cinemeta";
 import type { PlayEpisode } from "./view";
 import {
   applyTmdbEpisodeNames,
-  needsTmdbEpisodeNames,
+  needsTmdbEpisodeDetails,
   tmdbDetails,
   tmdbEpisodeNames,
   tmdbSeasonEpisodes,
@@ -577,7 +577,7 @@ async function overlayTmdbEpisodeNames(
     if (group) group.push(e);
     else bySeason.set(e.season, [e]);
   }
-  const wanted = [...bySeason].filter(([s, g]) => s >= 1 && needsTmdbEpisodeNames(g));
+  const wanted = [...bySeason].filter(([s, g]) => s >= 1 && needsTmdbEpisodeDetails(g));
   if (wanted.length === 0) return eps;
   const patched = new Map<PlayEpisode, PlayEpisode>();
   await Promise.all(

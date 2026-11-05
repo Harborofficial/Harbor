@@ -609,10 +609,21 @@ export function EpisodePanel({
                           const key = `${ep.season}:${ep.episode}`;
                           const isCurrent = !!currentEpisode && sameEpisode(ep, currentEpisode);
                           const isNextUp = !!nextEp && sameEpisode(ep, nextEp);
+                          // Navigation may already carry a synopsis even when the season
+                          // provider omits it. Use that description until enrichment finishes.
+                          const playbackOverview = [currentEpisode, nextEp].find((candidate) =>
+                            candidate &&
+                            (!candidate.sourceMetaId || candidate.sourceMetaId === meta.id) &&
+                            sameEpisode(ep, candidate) &&
+                            candidate.overview?.trim(),
+                          )?.overview;
+                          const rowEpisode = !ep.overview?.trim() && playbackOverview
+                            ? { ...ep, overview: playbackOverview }
+                            : ep;
                           return (
                             <EpisodeRow
                               key={key}
-                              episode={ep}
+                              episode={rowEpisode}
                               metaId={meta.id}
                               imdbRating={imdbRatings.get(`${ep.season}:${ep.episode}`)}
                               expanded={expandedEp === key}
