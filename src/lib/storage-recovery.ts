@@ -1,10 +1,12 @@
+// Prunable means the network or a recomputation can give it back. Anything the user did —
+// playback history, last season, live-TV watch counts, the legacy parental pin — stays, even
+// when it is the biggest thing in the store. Check backup.ts before adding a key here.
 const PRUNABLE_EXACT = new Set<string>([
   "harbor.omdb.v1",
   "harbor.omdb.misses",
   "harbor.omdb.budget",
   "harbor.iptv.hydration.v2",
   "harbor.iptv.epgmap.v1",
-  "harbor.iptv.stats.v1",
   "harbor.dead-streams.v1",
   "harbor.discover.v1",
   "harbor.discover.events.v1",
@@ -38,11 +40,8 @@ const PRUNABLE_EXACT = new Set<string>([
   "harbor.shows.hero.pool.v2",
   "harbor.mdblist.cards",
   "harbor.build.rating.v1",
-  "harbor.parental",
-  "harbor.lastseason.v1",
   "harbor.surprise.recent.v1",
   "harbor.stremio-addons.velocity.v1",
-  "harbor.playback-history.v1",
   "harbor.streamBadges.v1",
   "harbor.manga.popular.v1",
   "harbor.ebook.metadata.v1",
@@ -63,7 +62,6 @@ const PRUNABLE_PREFIXES = [
   "harbor.ebook.openlibrary.v2.",
   "harbor.sports.board.v3:",
   "harbor.tvdbo.",
-  "harbor.playback-history.v1.",
 ];
 
 function isPrunable(key: string): boolean {
@@ -279,6 +277,18 @@ function storageRejectsWrites(): boolean {
   }
 }
 
+/**
+ * Boot only: the store already rejects every write, so free just enough to get going again.
+ * Dropping every cache instead would cost the user a full refetch of the home feed to buy
+ * headroom nothing is asking for.
+ */
+function freeUntilWritable(): void {
+  for (const { key } of prunableEntries()) {
+    pruneOne(key);
+    if (!storageRejectsWrites()) return;
+  }
+}
+
 export function proactiveStorageCleanup(): void {
   if (typeof localStorage === "undefined") return;
   purgeDeadCaches();
@@ -290,10 +300,12 @@ export function proactiveStorageCleanup(): void {
     total += size;
     if (size > PROACTIVE_PER_KEY_THRESHOLD) pruneOne(key);
   }
-  if (total > PROACTIVE_TOTAL_THRESHOLD || storageRejectsWrites()) {
+  if (total > PROACTIVE_TOTAL_THRESHOLD) {
     const r = freeStorageSpace();
     console.info(
       `[storage] proactive total cleanup: ${r.pruned.length} caches, ${r.freedBytes} bytes`,
     );
+  } else if (storageRejectsWrites()) {
+    freeUntilWritable();
   }
 }
