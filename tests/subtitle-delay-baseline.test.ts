@@ -27,7 +27,7 @@ test("new track and Auto sync exits apply a track-specific baseline", () => {
     new URL("../src/views/player/hooks/use-auto-sync.ts", import.meta.url), "utf8");
   assert.match(autoload, /currentSubtitle\?\.id, currentSubtitle\?\.external/);
   assert.match(autoload, /initialDelayForSelectedTrack\(/);
-  assert.match(autosync, /initialDelayForSelectedTrack\(\s*selected, baseline,/);
-  assert.match(autosync, /initialDelayForSelectedTrack\(\s*selectedTrack, baseline,/);
+  assert.match(autosync, /initialDelayForSelectedTrack\(\s*selected,\s*baseline,/);
+  assert.match(autosync, /initialDelayForSelectedTrack\(\s*selectedTrack,\s*baseline,/);
   assert.match(autosync, /bridgeRef\.current\?\.setSubDelay\(0\)/);
 });
