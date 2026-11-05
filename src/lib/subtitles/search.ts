@@ -16,6 +16,7 @@ import type { StreamHints } from "./stream-hints";
 import { SUBTITLE_PROVIDER_TIMEOUT_MS, withSubtitleTimeout } from "./autoload";
 import { bindSubtitleDownloadAuth, browserSubtitleCredentialKey } from "./provider-auth";
 import { isSafeProviderSubtitleUrl } from "./provider-url";
+import { normalizeSubtitleSearchQuery, subtitleProviderQuery } from "./search-query";
 
 export { streamTagsOf } from "./stream-hints";
 export type { StreamHints } from "./stream-hints";
@@ -41,6 +42,8 @@ export async function searchSubtitles(
   q: SubSearchQuery,
   opts: SearchOptions,
 ): Promise<SubResult[]> {
+  q = normalizeSubtitleSearchQuery(q);
+  const providerQuery = subtitleProviderQuery(q);
   let extraCtx: ProviderCtx | undefined;
   if (opts.extra) {
     const [subdl, subsource] = await Promise.all([
@@ -73,12 +76,12 @@ export async function searchSubtitles(
   if (osOn)
     tasks.push({
       name: "opensubtitles-v3",
-      p: withSubtitleTimeout(searchOpenSubtitlesV3(q), tmo, []),
+      p: withSubtitleTimeout(searchOpenSubtitlesV3(providerQuery), tmo, []),
     });
   if (wyzieOn)
     tasks.push({
       name: "wyzie",
-      p: withSubtitleTimeout(searchWyzie(q), tmo, []),
+      p: withSubtitleTimeout(searchWyzie(providerQuery), tmo, []),
     });
   if (addonsOn && opts.addons && opts.addons.length > 0) {
     for (const addon of opts.addons) {
@@ -90,11 +93,11 @@ export async function searchSubtitles(
   }
   if (extraCtx) {
     const extraTimeout = extraCtx.timeoutMs ?? tmo;
-    for (const source of pickSources(q, extraCtx)) {
+    for (const source of pickSources(providerQuery, extraCtx)) {
       tasks.push({
         name: `extra:${source.id}`,
         p: withSubtitleTimeout(
-          searchExtraSubSources(q, extraCtx, [source]).then((aggregate) => {
+          searchExtraSubSources(providerQuery, extraCtx, [source]).then((aggregate) => {
             return aggregate.all.map((candidate) =>
               toSubResult(
                 candidate,

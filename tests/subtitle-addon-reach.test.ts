@@ -102,9 +102,11 @@ const subtitlePanelSize = readFileSync(
 test("one slow subtitle addon cannot discard faster addon results", () => {
   assert.match(
     src,
-    /callOne\(addon, type, id, extra, timeoutMs\)/,
+    /callOne\(addon, type, candidate, extra, remaining\)/,
     "each addon request needs its own timeout",
   );
+  assert.match(src, /const deadline = Date\.now\(\) \+ timeoutMs/);
+  assert.match(src, /if \(remaining <= 0\) break/);
   assert.doesNotMatch(
     search,
     /withSubtitleTimeout\(searchAddons\(/,

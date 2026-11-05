@@ -166,7 +166,7 @@ export async function searchAddons(
     return [];
   }
 
-  const type = q.type ?? (q.season != null && q.episode != null ? "series" : "movie");
+  const type = q.episode != null ? "series" : (q.type ?? "movie");
   dlog(
     `[addons] Candidate IDs: ${(q.candidateIds ?? []).join(", ") || "(none)"}, fallback: ${fallbackId}, Type: ${type}`,
   );
@@ -193,8 +193,29 @@ export async function searchAddons(
   const extra = extraSegment(q);
   const settled = await Promise.all(
     targets.map(async ({ addon, id }) => {
+      // Broad manifests often accept Kitsu even though the server only indexes
+      // IMDb. An empty first response must not hide the mapped episode fallback.
+      const alternatives = [...new Set([id, ...(q.candidateIds ?? [])])]
+        .filter(
+          (candidate) => candidate === id || addonAccepts(addon, "subtitles", type, candidate),
+        )
+        .sort(
+          (a, b) =>
+            (a === id ? -1 : a.startsWith("tt") ? 0 : 1) -
+            (b === id ? -1 : b.startsWith("tt") ? 0 : 1),
+        )
+        .slice(0, 3);
+      const deadline = Date.now() + timeoutMs;
       const result = await withSubtitleTimeout(
-        callOne(addon, type, id, extra, timeoutMs),
+        (async () => {
+          for (const candidate of alternatives) {
+            const remaining = deadline - Date.now();
+            if (remaining <= 0) break;
+            const subtitles = await callOne(addon, type, candidate, extra, remaining);
+            if (subtitles.length > 0) return subtitles;
+          }
+          return [];
+        })(),
         timeoutMs,
         [],
       );

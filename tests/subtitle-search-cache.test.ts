@@ -40,6 +40,20 @@ const result: SubResult = {
   source: "opensubtitles",
 };
 
+test("resolved anime episode IDs invalidate an earlier empty search cache entry", () => {
+  const original = subtitleSearchCacheKey({
+    ...target,
+    scope: baseScope,
+    contentIds: ["kitsu:21:1100"],
+  });
+  const resolved = subtitleSearchCacheKey({
+    ...target,
+    scope: baseScope,
+    contentIds: ["kitsu:21:1100", "tt0388629:21:3"],
+  });
+  assert.notEqual(original, resolved);
+});
+
 test("manual subtitle cache identity covers language, providers, and addon configuration", () => {
   const key = subtitleSearchCacheKey({ ...target, scope: baseScope });
   assert.notEqual(
