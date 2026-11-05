@@ -30,6 +30,9 @@ import {
 import { emitListToast } from "@/components/lists/list-toast";
 import { t } from "@/lib/i18n";
 import { getMpvSubtitleFpsGeneration, writeMpvSubtitleFps } from "@/lib/player/mpv-properties";
+import { initialDelayForSelectedTrack } from "@/lib/player/subtitle-delay-scope";
+import { ORIGINAL_AUDIO_LANG } from "@/lib/player/audio-language";
+import { resolveOriginalLanguage } from "@/lib/providers/original-language";
 import { tmdbImdbId } from "@/lib/providers/tmdb";
 import type { Addon } from "@/lib/addons";
 import type { GeneratedSubtitleGroup } from "@/lib/subtitles/types";
@@ -149,6 +152,40 @@ export function useTrackAutoload(params: {
       cancelled = true;
     };
   }, [src.imdbId, src.imdbIdVerified, src.meta.id, settings.tmdbKey]);
+
+  // "Original" needs the title's language, which Cinemeta omits. Resolve it from
+  // IMDb's keyless spoken-language list once, then let the track effect re-run.
+  const wantsOriginalAudio = (settings.preferredAudioLangs ?? []).includes(ORIGINAL_AUDIO_LANG);
+  const [resolvedOriginal, setResolvedOriginal] = useState<string | null>(null);
+  useEffect(() => {
+    setResolvedOriginal(null);
+    if (src.meta.originalLanguage || !wantsOriginalAudio) return;
+    let cancelled = false;
+    void resolveOriginalLanguage({
+      meta: src.meta,
+      imdbId: resolvedImdbId,
+      tmdbKey: settings.tmdbKey,
+    }).then((lang) => {
+      if (!cancelled && lang) setResolvedOriginal(lang);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    src.meta.id,
+    src.meta.type,
+    src.meta.originalLanguage,
+    resolvedImdbId,
+    wantsOriginalAudio,
+    settings.tmdbKey,
+  ]);
+  const playbackSrc = useMemo(
+    () =>
+      resolvedOriginal && !src.meta.originalLanguage
+        ? { ...src, meta: { ...src.meta, originalLanguage: resolvedOriginal } }
+        : src,
+    [src, resolvedOriginal],
+  );
 
   const [userAddonsState, setUserAddonsState] = useState<{
     authKey: string | null;
@@ -886,7 +923,7 @@ export function useTrackAutoload(params: {
       settings.subtitlesOffByDefault,
       settings.trackBlockWords,
     ]);
-    const key = `${src.url}|${audioIdSig}|${subIdSig}|${preferenceSig}|${snap.firstFrameReady ? 1 : 0}`;
+    const key = `${src.url}|${audioIdSig}|${subIdSig}|${preferenceSig}|${playbackSrc.meta.originalLanguage ?? ""}|${snap.firstFrameReady ? 1 : 0}`;
     if (autoTrackKeyRef.current === key) return;
     if (snap.audioTracks.length === 0 && snap.subtitleTracks.length === 0) return;
     autoTrackKeyRef.current = key;
@@ -894,7 +931,7 @@ export function useTrackAutoload(params: {
     bridgeRef.current?.setAudioProfile?.(settings.audioProfile);
 
     const prefs = readPlayerPrefs(src.meta.id);
-    const { audioLangs, subLangs, allow } = trackPreferences(src, settings, prefs);
+    const { audioLangs, subLangs, allow } = trackPreferences(playbackSrc, settings, prefs);
 
     let effAudio: (typeof snap.audioTracks)[number] | null = null;
     if (snap.audioTracks.length > 0) {
@@ -975,6 +1012,7 @@ export function useTrackAutoload(params: {
     settings,
     rememberedAudio,
     rememberedSession,
+    playbackSrc.meta.originalLanguage,
   ]);
 
   const audioRestoreWarningRef = useRef<string | null>(null);
@@ -1007,9 +1045,6 @@ export function useTrackAutoload(params: {
     )
       return;
     delaysAppliedRef.current = { url: src.url, bridge };
-    bridge.setSubDelay(
-      rememberedSession?.subDelaySec ?? readPlayerPrefs(src.meta.id)?.subDelaySec ?? 0,
-    );
     if (rememberedSession?.audioDelaySec != null)
       bridge.setAudioDelay(rememberedSession.audioDelaySec);
   }, [
@@ -1072,6 +1107,25 @@ export function useTrackAutoload(params: {
         emitListToast(t("The saved subtitle timing could not be restored."), "error");
     });
   }, [engine, src.url, snap.status, snap.subtitleTracks, rememberedSession, actorKey, bridgeRef]);
+
+  const currentSubtitle = snap.subtitleTracks.find((track) => track.selected) ?? null;
+  useEffect(() => {
+    // A manual offset may belong to an external subtitle; never leak it to
+    // another track after an automatic subtitle switch.
+    if (!snap.firstFrameReady) return;
+    const prefs = readPlayerPrefs(src.meta.id);
+    const manualDelay = rememberedSession?.subDelaySec ?? prefs?.subDelaySec;
+    const savedKind = rememberedSession?.subtitle
+      ? (rememberedSession.subtitle.external ? "external" : "embedded")
+      : prefs?.subDelayTrackKind;
+    bridgeRef.current?.setSubDelay(
+      initialDelayForSelectedTrack(currentSubtitle, manualDelay, savedKind),
+    );
+  }, [
+    src.url, src.meta.id, src.episode?.season, src.episode?.episode,
+    src.playbackTraceId, src.attempt, snap.firstFrameReady,
+    currentSubtitle?.id, currentSubtitle?.external, rememberedSession, bridgeRef,
+  ]);
 
   useEffect(() => {
     if (

@@ -2588,18 +2588,41 @@ pub async fn mpv_set_property(
     name: String,
     value: Value,
 ) -> Result<(), String> {
-    let mpv = {
+    let (mpv, is_live) = {
         let g = state.inner.lock().await;
-        g.as_ref()
-            .map(|s| s.mpv.clone())
-            .ok_or_else(|| "mpv not started".to_string())?
+        let session = g.as_ref().ok_or_else(|| "mpv not started".to_string())?;
+        (session.mpv.clone(), session.is_live)
     };
     if mpv_property_blocked(&name) {
         return Err(format!("mpv property not allowed: {}", name));
     }
     let str_val = value_to_arg(&value);
+    let audio_switch = name == "aid"
+        && str_val != "no"
+        && !is_live
+        && mpv.get_property::<String>("aid").ok().as_deref() != Some(str_val.as_str());
     mpv.set_property(&name, str_val.as_str())
-        .map_err(|e| format!("set {}: {}", name, e))
+        .map_err(|e| format!("set {}: {}", name, e))?;
+    // With a large demuxer readahead (Harbor's steady-state buffer), mpv holds
+    // the newly selected audio until the cache drains when its refresh seek
+    // cannot be issued (mpv-player/mpv#18371), leaving minutes of silence. The
+    // same-position seek a viewer uses to recover restarts the demuxer at the
+    // current frame and starts the new track immediately.
+    if audio_switch {
+        resync_audio_after_switch(&mpv);
+    }
+    Ok(())
+}
+
+fn resync_audio_after_switch(mpv: &Mpv) {
+    let Ok(pos) = mpv.get_property::<f64>("time-pos") else {
+        return;
+    };
+    if !pos.is_finite() || pos <= 0.0 {
+        return;
+    }
+    let pos = pos.to_string();
+    let _ = mpv_argv_command(mpv, &["seek", &pos, "absolute+exact"]);
 }
 
 #[tauri::command]

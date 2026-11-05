@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { useAuth } from "@/lib/auth";
 import { downloadText } from "@/lib/download-text";
-import { getCuesAnySource } from "@/lib/subtitles/extract";
+import { getCuesAnySource, subtitleDownloadError } from "@/lib/subtitles/extract";
+import { invoke } from "@tauri-apps/api/core";
 import { toSrt } from "@/lib/subtitles/serialize";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isAssTrack, isImageSubTrack } from "@/lib/player/sub-format";
@@ -350,14 +351,19 @@ export function usePlayerMedia(params: {
       : (src.meta.name ?? "Subtitle");
     const fileName = `${base.replace(/[\\/:*?"<>|]+/g, " ").trim() || "Subtitle"}.srt`;
     const res = await getCuesAnySource(b, src.url, src.headers);
-    if (!res.ok || res.source.cues.length === 0)
-      throw new Error(
-        "Could not read this subtitle track. Pick a different subtitle, then try again.",
-      );
+    if (!res.ok) {
+      const message = subtitleDownloadError(res.reason);
+      if (engine === "mpv") {
+        void invoke("mpv_command", {
+          cmd: ["print-text", `[harbor/subtitle-export] ${message}`],
+        }).catch(() => {});
+      }
+      throw new Error(message);
+    }
     await downloadText(fileName, toSrt(res.source.cues), ["srt"], "Subtitle", {
       nativeFailure: "throw",
     });
-  }, [bridgeRef, src.meta.name, src.episode, src.url, src.headers]);
+  }, [bridgeRef, engine, src.meta.name, src.episode, src.url, src.headers]);
   const canDownloadSub = snap.subtitleTracks.some((trk) => trk.selected);
 
   useEffect(() => {

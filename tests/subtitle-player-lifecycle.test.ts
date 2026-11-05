@@ -271,18 +271,21 @@ test("delayed candidate preflight blocks structural autosync and an aligned resu
     lang: "ar",
     prepared: true,
     timingStatus: "fixed-offset" as const,
+    selected: true,
   };
   const aligned = {
     external: true,
     lang: "ar",
     prepared: true,
     timingStatus: "aligned" as const,
+    selected: false,
   };
   const alignedEnglish = {
     external: true,
     lang: "en",
     prepared: true,
     timingStatus: "aligned" as const,
+    selected: false,
   };
 
   assert.equal(
@@ -307,7 +310,7 @@ test("delayed candidate preflight blocks structural autosync and an aligned resu
       tracks: [inferior, aligned],
       selectedLanguage: "ar",
     }),
-    false,
+    true,
   );
   assert.equal(
     automaticAutoSyncMayStart({
@@ -324,6 +327,15 @@ test("delayed candidate preflight blocks structural autosync and an aligned resu
       selectedLanguage: "ar",
     }),
     true,
+  );
+
+  assert.equal(
+    automaticAutoSyncMayStart({
+      preflightSettled: true,
+      tracks: [{ ...aligned, selected: true }],
+      selectedLanguage: "ar",
+    }),
+    false,
   );
 
   assert.match(autoloadSource, /subtitlePreflightSettled:/);

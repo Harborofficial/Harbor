@@ -4,6 +4,7 @@ const MAX_ENTRIES = 200;
 export type PerShowPrefs = {
   rate?: number;
   subDelaySec?: number;
+  subDelayTrackKind?: "embedded" | "external";
   audioLang?: string;
   subLang?: string;
   subsOff?: boolean;
@@ -13,6 +14,28 @@ export type PerShowPrefs = {
 type Store = Record<string, PerShowPrefs>;
 
 let cache: Store | null = null;
+
+// During playback, an Auto sync shift is composed on top of the viewer's
+// manual baseline. Do not accidentally persist that composite as the baseline,
+// or reopening the episode would add the saved Auto sync shift twice.
+let subDelayMapper: ((metaId: string, sec: number) => number) | null = null;
+let subDelayTrackKindResolver: ((metaId: string) => "embedded" | "external" | null) | null = null;
+export function registerPlayerSubDelayTrackKindResolver(
+  resolver: (metaId: string) => "embedded" | "external" | null,
+): () => void {
+  const previous = subDelayTrackKindResolver;
+  subDelayTrackKindResolver = resolver;
+  return () => {
+    if (subDelayTrackKindResolver === resolver) subDelayTrackKindResolver = previous;
+  };
+}
+export function registerPlayerSubDelayMapper(mapper: (metaId: string, sec: number) => number): () => void {
+  const previous = subDelayMapper;
+  subDelayMapper = mapper;
+  return () => {
+    if (subDelayMapper === mapper) subDelayMapper = previous;
+  };
+}
 
 function loadStore(): Store {
   if (cache) return cache;
@@ -49,7 +72,16 @@ export function writePlayerPrefs(metaId: string, patch: Partial<PerShowPrefs>): 
   if (!metaId) return;
   const store = loadStore();
   const prev = store[metaId] ?? { updatedAt: 0 };
-  store[metaId] = { ...prev, ...patch, updatedAt: Date.now() };
+  const mapped = typeof patch.subDelaySec === "number" && subDelayMapper
+    ? { ...patch, subDelaySec: subDelayMapper(metaId, patch.subDelaySec) }
+    : patch;
+  const trackKind = typeof patch.subDelaySec === "number"
+    ? subDelayTrackKindResolver?.(metaId) : null;
+  store[metaId] = {
+    ...prev, ...mapped,
+    ...(trackKind ? { subDelayTrackKind: trackKind } : {}),
+    updatedAt: Date.now(),
+  };
   persistStore();
 }
 

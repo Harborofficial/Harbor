@@ -132,6 +132,8 @@ mod song_id;
 #[cfg(desktop)]
 mod song_id_gemini;
 #[cfg(desktop)]
+mod indexed_mkv_subtitles;
+#[cfg(desktop)]
 mod sub_extract;
 #[cfg(desktop)]
 mod subsync;
