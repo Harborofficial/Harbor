@@ -154,7 +154,7 @@ export default {
   "games.details.showLess": "Show less",
   "games.details.controllerUnknown": "The publisher hasn't listed controller support.",
   "games.details.completionTimes": "Completion times",
-  "games.details.howLongToBeat": "How long to beat",
+  "games.details.howLongToBeat": "How Long To Beat",
   "games.details.hltbSource": "View on HowLongToBeat",
   "games.details.completion.main": "Main story",
   "games.details.completion.extras": "Story + extras",
