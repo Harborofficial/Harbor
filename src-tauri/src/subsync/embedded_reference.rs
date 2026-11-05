@@ -12,7 +12,20 @@ const MAX_WINDOWS: usize = 3;
 const MAX_STREAM_INDEX: u32 = 31;
 const MAX_WINDOW_SECONDS: f64 = 120.0;
 const MAX_SRT_BYTES: usize = 384 * 1024;
-const WINDOW_DEADLINE: Duration = Duration::from_secs(10);
+const WINDOW_DEADLINE: Duration = Duration::from_secs(30);
+
+fn extraction_failure(stderr: &[u8]) -> &'static str {
+    let text = String::from_utf8_lossy(stderr).to_ascii_lowercase();
+    if text.contains("403 forbidden") || text.contains("401 unauthorized") {
+        "reference-access-denied"
+    } else if text.contains("matches no streams") {
+        "reference-track-missing"
+    } else if text.contains("timed out") {
+        "reference-read-timeout"
+    } else {
+        "reference-decode-failed"
+    }
+}
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -26,6 +39,7 @@ pub struct ReferenceWindow {
 pub struct ReferenceExcerpt {
     start_sec: f64,
     len_sec: f64,
+    timestamps_absolute: bool,
     srt: String,
 }
 
@@ -55,6 +69,7 @@ pub async fn subsync_embedded_reference(
         return Err("reference-invalid-request".into());
     }
     let ffmpeg = crate::transcode::locate_ffmpeg().ok_or("ffmpeg-unavailable")?;
+    let (user_agent, _) = crate::mpv::stream_http_options(&headers);
     let hdrs = headers.unwrap_or_default();
     let remote = source.starts_with("http://") || source.starts_with("https://");
     let map_spec = format!("0:s:{stream_index}");
@@ -94,66 +109,95 @@ pub async fn subsync_embedded_reference(
                 (!srt.trim().is_empty() && srt.len() <= MAX_SRT_BYTES).then_some(ReferenceExcerpt {
                     start_sec: w.start_sec,
                     len_sec: w.len_sec,
+                    timestamps_absolute: false,
                     srt,
                 })
             })
             .collect();
-        if !excerpts.is_empty() {
+        // One indexed excerpt cannot establish an independent timing match.
+        // Sparse subtitle indexes must not prevent the FFmpeg fallback from
+        // reading the other requested scenes.
+        if excerpts.len() >= 2 {
             return Ok(excerpts);
         }
     }
 
-    let mut excerpts = Vec::with_capacity(windows.len());
-    for window in windows {
-        let mut cmd = Command::new(&ffmpeg);
-        cmd.args(["-nostdin", "-hide_banner", "-loglevel", "error"]);
-        if remote {
-            cmd.arg("-user_agent")
-                .arg(super::url_guard::user_agent(&hdrs).unwrap_or_else(|| "Harbor".into()));
-            let blob = super::url_guard::safe_header_blob(&hdrs);
-            if !blob.is_empty() {
-                cmd.arg("-headers").arg(blob);
+    // Run bounded remote seeks concurrently: 18s index + 30s fallback.
+    let reads = windows.into_iter().map(|window| {
+        let ffmpeg = &ffmpeg;
+        let user_agent = &user_agent;
+        let hdrs = &hdrs;
+        let source = &source;
+        let map_spec = &map_spec;
+        let session_id = &session_id;
+        async move {
+            let mut cmd = Command::new(&ffmpeg);
+            cmd.args(["-nostdin", "-hide_banner", "-loglevel", "error"]);
+            if remote {
+                cmd.arg("-user_agent").arg(user_agent);
+                let blob = super::url_guard::safe_header_blob(&hdrs);
+                if !blob.is_empty() {
+                    cmd.arg("-headers").arg(blob);
+                }
             }
+            // Preserve the media clock. Default SRT muxing may shift the first
+            // returned cue to zero, which is not the requested seek position.
+            cmd.arg("-copyts")
+                .arg("-ss")
+                .arg(format!("{:.3}", window.start_sec))
+                .arg("-i")
+                .arg(&source)
+                .arg("-to")
+                .arg(format!("{:.3}", window.start_sec + window.len_sec))
+                .args(["-avoid_negative_ts", "disabled"])
+                .arg("-map")
+                .arg(&map_spec)
+                .args(["-an", "-vn", "-dn", "-c:s", "srt", "-f", "srt", "-"]);
+            cmd.kill_on_drop(true);
+            #[cfg(windows)]
+            cmd.creation_flags(0x0800_0000 | 0x0000_4000);
+            let output = super::analysis_control::run(
+                session_id.as_deref(),
+                tokio::time::timeout(WINDOW_DEADLINE, cmd.output()),
+            )
+            .await?;
+            // An optional reference must not poison Auto sync if a remote range
+            // cannot be read. Check the remaining independent windows.
+            let output = output
+                .map_err(|_| "reference-read-timeout".to_string())?
+                .map_err(|_| "reference-spawn-failed".to_string())?;
+            if !output.status.success() {
+                return Err(extraction_failure(&output.stderr).to_string());
+            }
+            if output.stdout.len() > MAX_SRT_BYTES {
+                return Err("reference-output-too-large".to_string());
+            }
+            let srt = String::from_utf8(output.stdout)
+                .map_err(|_| "reference-invalid-text".to_string())?;
+            if srt.trim().is_empty() {
+                return Ok(None);
+            }
+            Ok(Some(ReferenceExcerpt {
+                start_sec: window.start_sec,
+                len_sec: window.len_sec,
+                timestamps_absolute: true,
+                srt,
+            }))
         }
-        // Use short independently sought excerpts rather than reading the
-        // entire source. FFmpeg rebases SRT timestamps to the input seek;
-        // the frontend adds the requested start offset back.
-        cmd.arg("-ss")
-            .arg(format!("{:.3}", window.start_sec))
-            .arg("-i")
-            .arg(&source)
-            .arg("-t")
-            .arg(format!("{:.3}", window.len_sec))
-            .arg("-map")
-            .arg(&map_spec)
-            .args(["-an", "-vn", "-dn", "-c:s", "srt", "-f", "srt", "-"]);
-        cmd.kill_on_drop(true);
-        #[cfg(windows)]
-        cmd.creation_flags(0x0800_0000 | 0x0000_4000);
-        let output = super::analysis_control::run(
-            session_id.as_deref(),
-            tokio::time::timeout(WINDOW_DEADLINE, cmd.output()),
-        )
-        .await?;
-        // An optional reference must not poison Auto sync if a remote range
-        // cannot be read. Check the remaining independent windows.
-        let Ok(Ok(output)) = output else {
-            continue;
-        };
-        if !output.status.success() || output.stdout.len() > MAX_SRT_BYTES {
-            continue;
+    });
+    let mut excerpts = Vec::new();
+    let mut failure = None;
+    for result in futures_util::future::join_all(reads).await {
+        match result {
+            Ok(Some(excerpt)) => excerpts.push(excerpt),
+            Ok(None) => {}
+            Err(error) => failure = Some(error),
         }
-        let Ok(srt) = String::from_utf8(output.stdout) else {
-            continue;
-        };
-        if srt.trim().is_empty() {
-            continue;
+    }
+    if excerpts.is_empty() {
+        if let Some(error) = failure {
+            return Err(error);
         }
-        excerpts.push(ReferenceExcerpt {
-            start_sec: window.start_sec,
-            len_sec: window.len_sec,
-            srt,
-        });
     }
     Ok(excerpts)
 }
@@ -161,6 +205,25 @@ pub async fn subsync_embedded_reference(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn classifies_errors_without_exporting_private_details() {
+        assert_eq!(
+            extraction_failure(b"https://private: 403 Forbidden"),
+            "reference-access-denied"
+        );
+        assert_eq!(
+            extraction_failure(b"Stream map matches no streams"),
+            "reference-track-missing"
+        );
+        assert_eq!(
+            extraction_failure(b"Connection timed out"),
+            "reference-read-timeout"
+        );
+        assert_eq!(
+            extraction_failure(b"private decoder details"),
+            "reference-decode-failed"
+        );
+    }
 
     #[test]
     fn rejects_unbounded_reference_windows() {

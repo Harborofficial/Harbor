@@ -5,6 +5,7 @@ import type { SyncTransform } from "./fp-gate";
 // subtitles, signed media URLs, headers, or generated temporary file paths.
 const STORAGE_KEY = "harbor.subtitle.autosync.v1";
 const MAX_ENTRIES = 200;
+const EMBEDDED_TIMING_VERSION = 2;
 export type AutoSyncCorrectionScope = "episode" | "scene";
 export type SavedAutoSyncCorrection = {
   id: string;
@@ -16,6 +17,7 @@ export type SavedAutoSyncCorrection = {
   focusSec: number | null;
   verified: boolean;
   embeddedReference?: boolean;
+  embeddedTimingVersion?: number;
   updatedAt: number;
 };
 type Store = SavedAutoSyncCorrection[];
@@ -60,16 +62,31 @@ function validTransform(t: unknown): t is SyncTransform {
   const v = t as Partial<SyncTransform>;
   const validNumber = (n: unknown) => typeof n === "number" && Number.isFinite(n);
   if (v.kind === "affine") {
-    return validNumber(v.offsetSec) && Math.abs(v.offsetSec!) <= 600 &&
-      validNumber(v.ratio) && v.ratio! >= 0.5 && v.ratio! <= 1.5;
+    return (
+      validNumber(v.offsetSec) &&
+      Math.abs(v.offsetSec!) <= 600 &&
+      validNumber(v.ratio) &&
+      v.ratio! >= 0.5 &&
+      v.ratio! <= 1.5
+    );
   }
-  if (v.kind === "piecewise" && Array.isArray(v.segments) &&
-      v.segments.length > 0 && v.segments.length <= 100) {
-    return v.segments.every((s) =>
-      validNumber(s.fromSec) && (validNumber(s.toSec) || s.toSec === Infinity) &&
-      s.toSec > s.fromSec &&
-      validNumber(s.offsetSec) && Math.abs(s.offsetSec) <= 600 &&
-      validNumber(s.ratio) && s.ratio >= 0.5 && s.ratio <= 1.5);
+  if (
+    v.kind === "piecewise" &&
+    Array.isArray(v.segments) &&
+    v.segments.length > 0 &&
+    v.segments.length <= 100
+  ) {
+    return v.segments.every(
+      (s) =>
+        validNumber(s.fromSec) &&
+        (validNumber(s.toSec) || s.toSec === Infinity) &&
+        s.toSec > s.fromSec &&
+        validNumber(s.offsetSec) &&
+        Math.abs(s.offsetSec) <= 600 &&
+        validNumber(s.ratio) &&
+        s.ratio >= 0.5 &&
+        s.ratio <= 1.5,
+    );
   }
   return false;
 }
@@ -78,18 +95,26 @@ function readStore(): Store {
   try {
     const parsed: unknown = JSON.parse(
       localStorage.getItem(STORAGE_KEY) ?? "[]",
-      (key, value: unknown) => key === "toSec" && value === "+Infinity" ? Infinity : value,
+      (key, value: unknown) => (key === "toSec" && value === "+Infinity" ? Infinity : value),
     );
     if (!Array.isArray(parsed)) return [];
     return parsed.filter((v): v is SavedAutoSyncCorrection => {
       if (!v || typeof v !== "object") return false;
       const e = v as Partial<SavedAutoSyncCorrection>;
-      return typeof e.id === "string" && typeof e.mediaHash === "string" &&
-        typeof e.audioHash === "string" && typeof e.subtitleHash === "string" &&
-        validTransform(e.transform) && (e.scope === "episode" || e.scope === "scene") &&
+      return (
+        typeof e.id === "string" &&
+        typeof e.mediaHash === "string" &&
+        typeof e.audioHash === "string" &&
+        typeof e.subtitleHash === "string" &&
+        validTransform(e.transform) &&
+        (e.scope === "episode" || e.scope === "scene") &&
         (e.scope === "episode" ||
           (typeof e.focusSec === "number" && Number.isFinite(e.focusSec) && e.focusSec >= 0)) &&
-        typeof e.verified === "boolean" && typeof e.updatedAt === "number";
+        typeof e.verified === "boolean" &&
+        typeof e.updatedAt === "number" &&
+        // Older embedded estimates used FFmpeg's independently rebased excerpts.
+        (e.embeddedReference !== true || e.embeddedTimingVersion === EMBEDDED_TIMING_VERSION)
+      );
     });
   } catch {
     return [];
@@ -99,10 +124,12 @@ function readStore(): Store {
 function writeStore(entries: Store): boolean {
   try {
     const sorted = entries.sort((a, b) => b.updatedAt - a.updatedAt);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(
-      sorted.slice(0, MAX_ENTRIES),
-      (key, value: unknown) => key === "toSec" && value === Infinity ? "+Infinity" : value,
-    ));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(sorted.slice(0, MAX_ENTRIES), (key, value: unknown) =>
+        key === "toSec" && value === Infinity ? "+Infinity" : value,
+      ),
+    );
     return true;
   } catch {
     // Storage may be disabled or full. Playback must still succeed.
@@ -125,17 +152,21 @@ export function readSavedAutoSyncCorrection(
   const m = hash(mediaKey);
   const a = hash(audioKey);
   const s = subtitleCueFingerprint(cues);
-  return readStore().find((v) =>
-    v.mediaHash === m && v.audioHash === a && v.subtitleHash === s) ?? null;
+  return (
+    readStore().find((v) => v.mediaHash === m && v.audioHash === a && v.subtitleHash === s) ?? null
+  );
 }
 
 export function shouldRestoreAutoSyncCorrection(
   correction: SavedAutoSyncCorrection,
   positionSec: number,
 ): boolean {
-  return correction.scope === "episode" ||
-    (Number.isFinite(positionSec) && correction.focusSec !== null &&
-      Math.abs(positionSec - correction.focusSec) <= 90);
+  return (
+    correction.scope === "episode" ||
+    (Number.isFinite(positionSec) &&
+      correction.focusSec !== null &&
+      Math.abs(positionSec - correction.focusSec) <= 90)
+  );
 }
 
 export function saveAutoSyncCorrection(input: {
@@ -149,8 +180,11 @@ export function saveAutoSyncCorrection(input: {
   embeddedReference?: boolean;
 }): string | null {
   if (input.cues.length < 4 || !validTransform(input.transform)) return null;
-  const focusSec = input.scope === "scene" ? input.focusSec ?? null : null;
-  if (input.scope === "scene" && (focusSec === null || !Number.isFinite(focusSec) || focusSec < 0)) {
+  const focusSec = input.scope === "scene" ? (input.focusSec ?? null) : null;
+  if (
+    input.scope === "scene" &&
+    (focusSec === null || !Number.isFinite(focusSec) || focusSec < 0)
+  ) {
     return null;
   }
   const mediaHash = hash(input.mediaKey);
@@ -158,11 +192,24 @@ export function saveAutoSyncCorrection(input: {
   const subtitleHash = subtitleCueFingerprint(input.cues);
   const id = `${mediaHash}:${audioHash}:${subtitleHash}`;
   const existing = readStore().filter((v) => v.id !== id);
-  return writeStore([...existing, {
-    id, mediaHash, audioHash, subtitleHash, transform: input.transform,
-    scope: input.scope, focusSec, verified: input.verified, embeddedReference: input.embeddedReference,
-    updatedAt: Date.now(),
-  }]) ? id : null;
+  return writeStore([
+    ...existing,
+    {
+      id,
+      mediaHash,
+      audioHash,
+      subtitleHash,
+      transform: input.transform,
+      scope: input.scope,
+      focusSec,
+      verified: input.verified,
+      embeddedReference: input.embeddedReference,
+      embeddedTimingVersion: input.embeddedReference ? EMBEDDED_TIMING_VERSION : undefined,
+      updatedAt: Date.now(),
+    },
+  ])
+    ? id
+    : null;
 }
 
 export function clearSavedAutoSyncCorrection(id: string | null): void {

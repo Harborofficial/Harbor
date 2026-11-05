@@ -1,7 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { TrackInfo } from "@/lib/player/bridge";
-import { parseSubtitle, type SubCue } from "@/lib/subtitles/parser";
-import { summarizeEmbeddedExtraction, type EmbeddedExtractionStatus } from "./embedded-extraction";
+import { type SubCue } from "@/lib/subtitles/parser";
+import {
+  embeddedExcerptCues,
+  summarizeEmbeddedExtraction,
+  type EmbeddedExtractionStatus,
+} from "./embedded-extraction";
+import { fitEmbeddedTimingReference } from "./embedded-timing-reference";
+import { normalizeLang } from "../language";
 import {
   chooseEmbeddedReferenceTrack,
   embeddedReferenceWindows,
@@ -15,6 +21,7 @@ import {
 } from "./embedded-reference";
 
 export type EmbeddedReferenceRead = {
+  timingOnly?: boolean;
   checked: boolean;
   extraction: EmbeddedExtractionStatus;
   requestedWindows: number;
@@ -36,14 +43,26 @@ export async function readEmbeddedReference(input: {
   durationSec: number;
   focusSec: number;
   sessionId: string;
+  allowCrossLanguage?: boolean;
 }): Promise<EmbeddedReferenceRead> {
-  const referenceTrack = chooseEmbeddedReferenceTrack(input.tracks, input.selected);
+  const referenceTrack = chooseEmbeddedReferenceTrack(
+    input.tracks,
+    input.selected,
+    input.allowCrossLanguage,
+  );
   const windows = embeddedReferenceWindows(input.durationSec, input.focusSec);
   if (!referenceTrack || windows.length < 2) {
     return {
-      checked: false, extraction: "not-applicable", requestedWindows: windows.length,
-      windows: 0, rawCueCount: 0, dialogueCueCount: 0, usableWindows: 0,
-      fit: null, diagnostics: null, fitTrace: null,
+      checked: false,
+      extraction: "not-applicable",
+      requestedWindows: windows.length,
+      windows: 0,
+      rawCueCount: 0,
+      dialogueCueCount: 0,
+      usableWindows: 0,
+      fit: null,
+      diagnostics: null,
+      fitTrace: null,
     };
   }
   const excerpts = await invoke<ReferenceExcerpt[]>("subsync_embedded_reference", {
@@ -53,30 +72,29 @@ export async function readEmbeddedReference(input: {
     windows,
     sessionId: input.sessionId,
   });
-  const regions = excerpts.map(excerpt => ({
+  const regions = excerpts.map((excerpt) => ({
     startSec: excerpt.startSec,
-    cues: parseSubtitle(excerpt.srt, "srt")
-      .filter(cue => Number.isFinite(cue.start) && Number.isFinite(cue.end) &&
-        cue.start >= 0 && cue.end > cue.start && cue.start < excerpt.lenSec + 1)
-      .map(cue => ({ ...cue,
-        start: cue.start + excerpt.startSec,
-        end: cue.end + excerpt.startSec,
-      })),
+    lenSec: excerpt.lenSec,
+    cues: embeddedExcerptCues(excerpt),
   }));
+  const timingOnly =
+    normalizeLang(referenceTrack.track.lang) !== normalizeLang(input.selected.lang);
   const extraction = summarizeEmbeddedExtraction(regions, input.selected.lang ?? "");
   // If FFmpeg returned no usable dialogue, no text comparison was possible.
   if (extraction.status !== "usable") {
     return {
-      checked: false, extraction: extraction.status, requestedWindows: windows.length,
-      windows: excerpts.length, rawCueCount: extraction.rawCues,
+      checked: false,
+      extraction: extraction.status,
+      requestedWindows: windows.length,
+      windows: excerpts.length,
+      rawCueCount: extraction.rawCues,
       dialogueCueCount: extraction.dialogueCues,
       usableWindows: extraction.usableWindows,
-      fit: null, diagnostics: null, fitTrace: null,
+      fit: null,
+      diagnostics: null,
+      fitTrace: null,
     };
   }
-  const diagnostics = inspectEmbeddedReference(
-    input.selectedCues, regions, input.selected.lang ?? "",
-  ).diagnostics;
   const fitTrace: EmbeddedFitTrace = {
     reason: "bad-input",
     anchorCount: 0,
@@ -86,22 +104,51 @@ export async function readEmbeddedReference(input: {
     candidateOffsetSec: null,
     candidateRatio: null,
   };
+  if (timingOnly) {
+    return {
+      checked: true,
+      timingOnly: true,
+      extraction: extraction.status,
+      requestedWindows: windows.length,
+      windows: excerpts.length,
+      rawCueCount: extraction.rawCues,
+      dialogueCueCount: extraction.dialogueCues,
+      usableWindows: extraction.usableWindows,
+      fit: fitEmbeddedTimingReference(input.selectedCues, regions, input.durationSec, fitTrace),
+      diagnostics: null,
+      fitTrace,
+    };
+  }
+  const diagnostics = inspectEmbeddedReference(
+    input.selectedCues,
+    regions,
+    input.selected.lang ?? "",
+  ).diagnostics;
   const globalFit = fitEmbeddedReference(
-    input.selectedCues, regions, input.selected.lang ?? "", input.durationSec,
+    input.selectedCues,
+    regions,
+    input.selected.lang ?? "",
+    input.durationSec,
     fitTrace,
   );
   const localFit = fitFocusedEmbeddedReference(
-    input.selectedCues, regions, input.selected.lang ?? "", input.focusSec,
+    input.selectedCues,
+    regions,
+    input.selected.lang ?? "",
+    input.focusSec,
   );
   // A globally fitted drift can pass held-out checks in two distant samples
   // while predicting essentially no correction in an unmeasured scene.
   // Prefer independently verified local evidence if the two disagree.
-  const localDisagrees = Boolean(localFit && globalFit &&
+  const localDisagrees = Boolean(
+    localFit &&
+    globalFit &&
     Math.abs(
       globalFit.transform.offsetSec +
-      (globalFit.transform.ratio - 1) * input.focusSec -
-      localFit.transform.offsetSec,
-    ) > 0.75);
+        (globalFit.transform.ratio - 1) * input.focusSec -
+        localFit.transform.offsetSec,
+    ) > 0.75,
+  );
   const fit = localFit && (!globalFit || localDisagrees) ? localFit : globalFit;
   if (fit?.localOnly) {
     fitTrace.reason = "verified";

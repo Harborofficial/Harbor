@@ -139,7 +139,9 @@ const MIN_CUES = 4;
 const OFFSET_EPS = 0.25;
 const DRIFT_TICK_MS = 4000;
 const ANALYSIS_DEADLINE_MS = 90_000;
-const EMBEDDED_REFERENCE_DEADLINE_MS = 25_000;
+// Native extraction allows 18s for the MKV index and 30s for concurrent
+// FFmpeg excerpts. Let that fallback finish before cancelling its session.
+const EMBEDDED_REFERENCE_DEADLINE_MS = 55_000;
 // A remote source that cannot be independently decoded should not keep
 // its "Checking sources and audio" spinner up for the full torrent budget.
 const REMOTE_ANALYSIS_DEADLINE_MS = 55_000;
@@ -776,8 +778,7 @@ export function useAutoSync(params: {
       const armDeadline = (phase: "prepare" | "embedded" | "audio") => {
         clearDeadline();
         const budget = activeAnalysisDeadlineRef.current;
-        const timeoutMs =
-          phase === "embedded" ? Math.min(EMBEDDED_REFERENCE_DEADLINE_MS, budget / 2) : budget;
+        const timeoutMs = phase === "embedded" ? EMBEDDED_REFERENCE_DEADLINE_MS : budget;
         deadlineRef.current = window.setTimeout(() => {
           if (cancelled.current || !isCurrentAutoSyncScope(statusScope)) return;
           deadlineRef.current = null;
@@ -807,7 +808,7 @@ export function useAutoSync(params: {
                     : embeddedReferenceFailure === "text-mismatch"
                       ? "The embedded subtitle did not share matching dialogue with this subtitle. "
                       : embeddedReferenceFailure === "incomplete"
-                        ? "The embedded reference had too few independent matching lines. "
+                        ? "The embedded reference did not provide enough independent, confident matches. "
                         : embeddedReferenceFailure === "timing-inconsistent"
                           ? "The matching dialogue has inconsistent timestamps across the sampled scenes. "
                           : embeddedReferenceFailure === "transform-out-of-bounds"
@@ -867,6 +868,7 @@ export function useAutoSync(params: {
                   durationSec: activeSnap.durationSec,
                   focusSec: getPlaybackPosition(),
                   sessionId: nativeSessionId,
+                  allowCrossLanguage: settingsRef.current.subtitleAutoSyncPivot === true,
                 });
                 if (cancelled.current || !isCurrentAutoSyncScope(statusScope)) return;
                 const fit = reference.fit;
@@ -884,22 +886,26 @@ export function useAutoSync(params: {
                       ? null
                       : diagnostic?.repeatedWindows
                         ? "repeated-seek"
-                        : overlap === 0
-                          ? "text-mismatch"
-                          : reject === "heldout-inconsistent" ||
-                              reject === "region-inconsistent" ||
-                              reject === "model-unavailable"
+                        : reference.timingOnly
+                          ? reject === "region-inconsistent"
                             ? "timing-inconsistent"
-                            : reject === "transform-out-of-bounds"
-                              ? "transform-out-of-bounds"
-                              : "incomplete";
+                            : "incomplete"
+                          : overlap === 0
+                            ? "text-mismatch"
+                            : reject === "heldout-inconsistent" ||
+                                reject === "region-inconsistent" ||
+                                reject === "model-unavailable"
+                              ? "timing-inconsistent"
+                              : reject === "transform-out-of-bounds"
+                                ? "transform-out-of-bounds"
+                                : "incomplete";
                   const values = (xs: Array<number | null> | undefined) =>
                     xs?.map((x) => (x === null ? "na" : x.toFixed(2))).join(",") ?? "na";
                   const trace = reference.fitTrace;
                   void invoke("mpv_command", {
                     cmd: [
                       "print-text",
-                      `[harbor/autosync] embedded-ref=${fit ? "verified" : "unverified"} extraction=${reference.extraction} requested-windows=${reference.requestedWindows} windows=${reference.windows} raw-cues=${reference.rawCueCount} dialogue-cues=${reference.dialogueCueCount} usable-windows=${reference.usableWindows} matches=${fit?.matchCount ?? 0} regions=${fit?.regionCount ?? 0} local-only=${fit?.localOnly === true} cues=${diagnostic?.cueCounts.join(",") ?? "none"} usable-dialogue=${diagnostic?.usableDialogueCounts.join(",") ?? "none"} text-overlap=${diagnostic?.textMatches.join(",") ?? "none"} grouped-matches=${diagnostic?.groupedMatches.join(",") ?? "none"} plausible=${diagnostic?.plausibleMatches.join(",") ?? "none"} repeated-seeks=${diagnostic?.repeatedWindows ?? 0} unique-anchors=${trace?.anchorCount ?? 0} region-anchors=${trace?.regionAnchorCounts.join(",") ?? "none"} rejection=${trace?.reason ?? "unknown"} median-deltas=${values(diagnostic?.windowMedianOffsets)} delta-mad=${values(diagnostic?.windowOffsetMad)} heldout-med=${trace?.heldOutMedianSec?.toFixed(2) ?? "na"} heldout-p90=${trace?.heldOutP90Sec?.toFixed(2) ?? "na"} offset=${fit?.transform.offsetSec.toFixed(3) ?? trace?.candidateOffsetSec?.toFixed(3) ?? "na"} ratio=${fit?.transform.ratio.toFixed(6) ?? trace?.candidateRatio?.toFixed(6) ?? "na"} max-shift=${fit?.maximumChangeSec.toFixed(3) ?? "na"} playhead-shift=${fit ? (fit.transform.offsetSec + (fit.transform.ratio - 1) * activeSnap.positionSec).toFixed(3) : "na"} run=${runLabel}`,
+                      `[harbor/autosync] embedded-ref=${fit ? "verified" : "unverified"} extraction=${reference.extraction} requested-windows=${reference.requestedWindows} windows=${reference.windows} raw-cues=${reference.rawCueCount} dialogue-cues=${reference.dialogueCueCount} usable-windows=${reference.usableWindows} matches=${fit?.matchCount ?? 0} regions=${fit?.regionCount ?? 0} local-only=${fit?.localOnly === true} cues=${diagnostic?.cueCounts.join(",") ?? "none"} usable-dialogue=${diagnostic?.usableDialogueCounts.join(",") ?? "none"} text-overlap=${diagnostic?.textMatches.join(",") ?? "none"} grouped-matches=${diagnostic?.groupedMatches.join(",") ?? "none"} plausible=${diagnostic?.plausibleMatches.join(",") ?? "none"} repeated-seeks=${diagnostic?.repeatedWindows ?? 0} unique-anchors=${trace?.anchorCount ?? 0} region-anchors=${trace?.regionAnchorCounts.join(",") ?? "none"} timing-windows=${JSON.stringify(trace?.timingWindows ?? [])} rejection=${trace?.reason ?? "unknown"} median-deltas=${values(diagnostic?.windowMedianOffsets)} delta-mad=${values(diagnostic?.windowOffsetMad)} heldout-med=${trace?.heldOutMedianSec?.toFixed(2) ?? "na"} heldout-p90=${trace?.heldOutP90Sec?.toFixed(2) ?? "na"} offset=${fit?.transform.offsetSec.toFixed(3) ?? trace?.candidateOffsetSec?.toFixed(3) ?? "na"} ratio=${fit?.transform.ratio.toFixed(6) ?? trace?.candidateRatio?.toFixed(6) ?? "na"} max-shift=${fit?.maximumChangeSec.toFixed(3) ?? "na"} playhead-shift=${fit ? (fit.transform.offsetSec + (fit.transform.ratio - 1) * activeSnap.positionSec).toFixed(3) : "na"} run=${runLabel}`,
                     ],
                   }).catch(() => {});
                 }
@@ -926,7 +932,7 @@ export function useAutoSync(params: {
                         : fit.localOnly
                           ? "embedded-text-reference-local"
                           : "embedded-text-reference",
-                      pCorrect: fit.strongOffset ? 0.99 : 0.92,
+                      pCorrect: reference.timingOnly ? 0.65 : fit.strongOffset ? 0.99 : 0.92,
                       transform: fit.transform,
                     },
                     candidate: fit.transform,

@@ -200,7 +200,7 @@ function speechTimingAnchors(
       !Number.isFinite(startSec) ||
       !Number.isFinite(lenSec) ||
       lenSec < 5 ||
-      lenSec > 60 ||
+      lenSec > 120 ||
       startSec < previousEnd
     )
       continue;
