@@ -3,7 +3,7 @@ import { EpisodePanel } from "@/components/player/episode-panel";
 import { ResumePrompt } from "@/components/player/resume-prompt";
 import type { Meta } from "@/lib/cinemeta";
 import type { PanelCorner } from "@/lib/player-chrome";
-import type { PlayEpisode } from "@/lib/view";
+import type { PlayEpisode, PlayerStreamRef } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { HeaderWarning, NoAudioWarning } from "./header-warning";
 
@@ -16,6 +16,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   meta,
   currentEpisode,
   currentStreamUrl,
+  currentStreamRef,
   currentImdbId,
   currentIsAnime,
   episodePanelOpen,
@@ -50,6 +51,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   meta: Meta;
   currentEpisode: PlayEpisode | undefined;
   currentStreamUrl?: string;
+  currentStreamRef?: PlayerStreamRef | null;
   currentImdbId?: string;
   currentIsAnime?: boolean;
   episodePanelOpen: boolean;
@@ -120,6 +122,7 @@ export const PanelsLayer = memo(function PanelsLayer({
           queuePlaybackEnabled={queuePlaybackEnabled}
           currentEpisode={currentEpisode}
           currentStreamUrl={currentStreamUrl}
+          currentStreamRef={currentStreamRef}
           currentImdbId={currentImdbId}
           currentIsAnime={currentIsAnime}
           corner={episodesCorner}

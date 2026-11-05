@@ -18,22 +18,20 @@ import { DownloadRow } from "./downloads/download-row";
 import { SaveLocationChip } from "./downloads/save-location";
 import { AutoDownloadButton, AutoDownloadModal } from "./downloads/auto-download-modal";
 import { fmtBytes, fmtSpeed } from "./downloads/downloads-format";
+import { matchesDownloadFilter, type DownloadsFilter } from "./downloads/downloads-visibility";
 
 type DownloadGroup =
   | { kind: "movie"; item: DownloadItem }
   | { kind: "show"; metaId: string; title: string; poster: string | null; items: DownloadItem[] };
 
-type Filter = "all" | "active" | "saved" | "issues";
+type Filter = DownloadsFilter;
 
 function statusRank(s: DownloadItem["status"]): number {
   return s === "downloading" || s === "paused" ? 0 : s === "error" ? 1 : s === "done" ? 2 : 3;
 }
 
 function matchesFilter(d: DownloadItem, f: Filter): boolean {
-  if (f === "active") return d.status === "downloading" || d.status === "paused";
-  if (f === "saved") return d.status === "done";
-  if (f === "issues") return d.status === "error" || d.status === "interrupted";
-  return true;
+  return matchesDownloadFilter(d, f);
 }
 
 function buildGroups(items: DownloadItem[]): DownloadGroup[] {
@@ -73,14 +71,16 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
   const scrollRef = useRef<HTMLElement>(null);
   useScrollMemory("downloads", scrollRef, active);
 
+  const visibleItems = useMemo(() => items.filter((d) => matchesFilter(d, "all")), [items]);
   const counts = useMemo(
     () => ({
-      all: items.length,
+      all: visibleItems.length,
       active: items.filter((d) => matchesFilter(d, "active")).length,
       saved: items.filter((d) => matchesFilter(d, "saved")).length,
       issues: items.filter((d) => matchesFilter(d, "issues")).length,
+      canceled: items.filter((d) => matchesFilter(d, "canceled")).length,
     }),
-    [items],
+    [items, visibleItems],
   );
   const effective: Filter = filter !== "all" && counts[filter] === 0 ? "all" : filter;
 
@@ -94,10 +94,10 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
     0,
   );
   const subtitle =
-    items.length === 0
+    visibleItems.length === 0
       ? t("Saved movies, episodes, and eBooks for offline use")
       : [
-          items.length === 1 ? t("1 item") : t("{count} items", { count: items.length }),
+          visibleItems.length === 1 ? t("1 item") : t("{count} items", { count: visibleItems.length }),
           counts.active - paused > 0
             ? t("{count} downloading", { count: counts.active - paused })
             : null,
@@ -163,10 +163,18 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
                 onClick={() => setFilter("issues")}
               />
             )}
+            {counts.canceled > 0 && (
+              <FilterTab
+                label={t("Canceled")}
+                count={counts.canceled}
+                active={effective === "canceled"}
+                onClick={() => setFilter("canceled")}
+              />
+            )}
           </div>
         )}
 
-        {items.length === 0 ? (
+        {groups.length === 0 ? (
           <EmptyState />
         ) : (
           <div key={effective} className="animate-fade-in flex flex-col gap-2.5">
@@ -258,7 +266,13 @@ function ShowGroup({
   const latest = useRef({ batchActions, filter });
   latest.current = { batchActions, filter };
   const allDownloads = () =>
-    downloadsSnapshot().filter((item) => item.metaId === group.metaId && item.season != null);
+    downloadsSnapshot().filter((item) =>
+      item.metaId === group.metaId &&
+      item.season != null &&
+      (latest.current.filter === "canceled"
+        ? item.status === "canceled"
+        : item.status !== "canceled"),
+    );
   const source = {
     kind: "actions" as const,
     id: `download-group:${group.metaId}`,

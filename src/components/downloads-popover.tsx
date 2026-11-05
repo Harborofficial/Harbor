@@ -14,11 +14,13 @@ import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 import { useContextMenu } from "@/lib/context-menu";
 import { useDownloadItemActions } from "@/views/downloads/download-actions";
+import { matchesDownloadFilter } from "@/views/downloads/downloads-visibility";
 
 type T = (key: string) => string;
 
 export function DownloadsButton() {
   const downloads = useDownloads();
+  const visibleDownloads = downloads.filter((item) => matchesDownloadFilter(item, "all"));
   const t = useT();
   const { openMeta, setView } = useView();
   const [open, setOpen] = useState(false);
@@ -49,7 +51,7 @@ export function DownloadsButton() {
     };
   }, [open]);
 
-  if (downloads.length === 0) return null;
+  if (visibleDownloads.length === 0) return null;
 
   const goToShow = (d: DownloadItem) => {
     setOpen(false);
@@ -112,7 +114,7 @@ export function DownloadsButton() {
             </button>
           </div>
           <div className="flex max-h-[min(60vh,420px)] flex-col gap-0.5 overflow-y-auto px-2 pb-2">
-            {downloads.slice(0, 8).map((d) => (
+            {visibleDownloads.slice(0, 8).map((d) => (
               <DownloadRow key={d.id} d={d} t={t} onOpen={() => goToShow(d)} />
             ))}
           </div>

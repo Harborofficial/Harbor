@@ -319,6 +319,12 @@ export type Settings = {
   seasonSourceLock: boolean;
   rememberLastStream: boolean;
   keepSourceNextEpisode: boolean;
+  /** Automatically download the upcoming episode without affecting active playback. */
+  autoPreDownloadNextEpisode: boolean;
+  /** Show the compact Up Next pre-download event icons. */
+  autoPreDownloadNotifications: boolean;
+  /** Last explicit switch-on time; allows retrying a manually canceled episode. */
+  autoPreDownloadNextEpisodeEnabledAt: number;
   playerHdrToSdr: boolean;
   playerRtxHdr: boolean;
   playerRtxVsr: boolean;
