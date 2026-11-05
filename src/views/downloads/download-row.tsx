@@ -9,10 +9,18 @@ import { useT } from "@/lib/i18n";
 import { downloadCapabilities, type DownloadItem } from "@/lib/download/downloads-store";
 import { fmtBytes, fmtEta, fmtSpeed } from "./downloads-format";
 import { useDownloadItemActions } from "./download-actions";
+import { DownloadSelectionCheck } from "./selection-check";
 import { DownloadDeleteButton } from "@/components/download-delete-button";
 import type { ActionSource } from "@/lib/context-actions";
 
-export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolean }) {
+export function DownloadRow({
+  d, compact = false, selected = false, onToggleSelection,
+}: {
+  d: DownloadItem;
+  compact?: boolean;
+  selected?: boolean;
+  onToggleSelection?: () => void;
+}) {
   const t = useT();
   const contextMenu = useContextMenu();
   const { source, run, pending } = useDownloadItemActions(d.id, d.title);
@@ -32,9 +40,20 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
     <li
       tabIndex={0}
       aria-label={compact ? `${d.title} ${d.subtitle ?? ""}` : d.title}
-      onContextMenu={(event) => contextMenu.open(event, source)}
+      role={onToggleSelection ? "checkbox" : undefined}
+      aria-checked={onToggleSelection ? selected : undefined}
+      onClick={onToggleSelection}
+      onContextMenu={(event) => {
+        if (onToggleSelection) event.preventDefault();
+        else contextMenu.open(event, source);
+      }}
       onKeyDown={(event) => {
-        if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
+        if (onToggleSelection && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          onToggleSelection();
+          return;
+        }
+        if (onToggleSelection || (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10"))) return;
         event.preventDefault();
         event.stopPropagation();
         const rect = event.currentTarget.getBoundingClientRect();
@@ -43,7 +62,7 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
           source,
         );
       }}
-      className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-3 transition-colors hover:bg-elevated/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+      className={`harbor-download-select-row group flex items-center gap-4 rounded-2xl border bg-elevated/40 p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${onToggleSelection ? "cursor-pointer " : ""}${selected ? "border-accent bg-accent/10 hover:bg-accent/15" : "border-edge-soft hover:bg-elevated/70"}`}
     >
       <div
         className={`${compact ? "h-[44px] w-[30px]" : "h-[68px] w-[46px]"} shrink-0 overflow-hidden rounded-lg`}
@@ -108,7 +127,9 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
           </span>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-1">
+      <div className="harbor-download-row-trailing flex shrink-0 items-center">
+        <div className={`harbor-download-row-actions ${onToggleSelection ? "is-collapsed" : ""}`} aria-hidden={!!onToggleSelection} inert={!!onToggleSelection}>
+          <div className="flex w-max items-center gap-1">
         {active && (
           <>
             {(caps?.pause || caps?.resume) && (
@@ -195,6 +216,13 @@ export function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?:
         >
           <Ellipsis size={16} />
         </button>
+          </div>
+        </div>
+        <div className={`harbor-download-selection-slot ${onToggleSelection ? "is-visible" : ""}`} aria-hidden={!onToggleSelection}>
+          <div className="harbor-download-selection-slot-inner">
+            {onToggleSelection && <DownloadSelectionCheck checked={selected} delayMs={compact ? 70 : 25} />}
+          </div>
+        </div>
       </div>
     </li>
   );

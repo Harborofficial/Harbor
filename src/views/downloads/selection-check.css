@@ -1,0 +1,96 @@
+/* Downloads multi-select motion; keep the card content in place while
+ * moving actions out and checkboxes into the trailing edge. */
+.harbor-download-select-row,
+.harbor-download-select-group {
+  transition: background-color 240ms ease, border-color 240ms ease;
+}
+
+.harbor-download-row-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  opacity: 1;
+  transition:
+    grid-template-columns 320ms cubic-bezier(.22, 1, .36, 1),
+    opacity 180ms ease;
+}
+.harbor-download-row-actions > div {
+  min-width: 0;
+  overflow: hidden;
+}
+.harbor-download-row-actions.is-collapsed {
+  grid-template-columns: minmax(0, 0fr);
+  opacity: 0;
+  pointer-events: none;
+}
+.harbor-download-selection-slot {
+  width: 0;
+  min-width: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    width 320ms cubic-bezier(.22, 1, .36, 1),
+    opacity 200ms ease;
+}
+.harbor-download-selection-slot.is-visible {
+  width: 32px;
+  opacity: 1;
+}
+.harbor-download-selection-slot-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 36px;
+}
+.harbor-download-select-group .harbor-download-selection-slot {
+  margin-inline-start: auto;
+}
+.harbor-download-selection-check {
+  animation: harbor-download-selection-enter 260ms cubic-bezier(.2,1.3,.3,1) both;
+  transform-origin: center;
+}
+.harbor-download-selection-check svg {
+  animation: harbor-download-selection-mark 190ms cubic-bezier(.2,1.4,.3,1) both;
+}
+
+/* Unlike a fade-only toast, expanding this panel's actual grid track
+ * smoothly moves the downloads below it instead of jumping immediately. */
+.harbor-download-selection-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-bottom: 0;
+  pointer-events: none;
+  transition:
+    grid-template-rows 320ms cubic-bezier(.22, 1, .36, 1),
+    margin-bottom 320ms cubic-bezier(.22, 1, .36, 1),
+    opacity 200ms ease;
+}
+.harbor-download-selection-panel.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-bottom: 16px;
+  pointer-events: auto;
+}
+@keyframes harbor-download-selection-enter {
+  from { opacity: 0; transform: translateX(9px) scale(.7); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes harbor-download-selection-mark {
+  from { opacity: 0; transform: scale(.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .harbor-download-select-row,
+  .harbor-download-select-group,
+  .harbor-download-row-actions,
+  .harbor-download-selection-slot,
+  .harbor-download-selection-panel {
+    transition: none;
+  }
+  .harbor-download-selection-check,
+  .harbor-download-selection-check svg {
+    animation: none;
+  }
+}
