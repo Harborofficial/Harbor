@@ -209,6 +209,38 @@ test("metadata/clock deduplication and media-key debounce survive focus handling
   assert.equal(h.calls.length, 2, "a seek still updates the native position");
 });
 
+test("music metadata and periodic Windows timeline updates reach native controls", async () => {
+  const h = fixture();
+  const art = "https://example.com/album.jpg";
+  h.updateMediaControls(true, "Track", "Artist", art, 200, 10, .5, "music", "Album");
+  await settle();
+  assert.equal(h.calls[0].args?.mediaType, "music");
+  assert.equal(h.calls[0].args?.album, "Album");
+  assert.equal(h.calls[0].args?.artUrl, art);
+  assert.equal(h.calls[0].args?.durationSec, 200);
+  assert.equal(h.calls[0].args?.positionSec, 10);
+
+  h.advance(4_000);
+  h.updateMediaControls(true, "Track", "Artist", art, 200, 14, .5, "music", "Album");
+  await settle();
+  assert.equal(h.calls.length, 1, "ordinary clock ticks are deduplicated");
+
+  h.advance(1_100);
+  h.updateMediaControls(true, "Track", "Artist", art, 200, 15.1, .5, "music", "Album");
+  await settle();
+  assert.equal(h.calls.length, 2, "Windows position refreshes during continuous playback");
+  assert.equal(h.calls[1].args?.positionSec, 15.1);
+
+  h.updateMediaControls(true, "Track", "Artist", art, 200, 15.1, .5, "music", "New Album");
+  await settle();
+  assert.equal(h.calls[2].args?.album, "New Album");
+
+  h.updateMediaControls(true, "Film", "Episode", null, 200, 15.1, .5);
+  await settle();
+  assert.equal(h.calls[3].args?.mediaType, "video", "video retains its own media type");
+  assert.equal(h.calls[3].args?.album, null);
+});
+
 test("terminal video snapshots clear the session and late clock ticks cannot reopen it", () => {
   const source = readFileSync(new URL("../src/views/player.tsx", import.meta.url), "utf8");
   const tree = ts.createSourceFile("player.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);

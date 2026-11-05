@@ -3,11 +3,13 @@ mod win {
     use std::sync::{Mutex, OnceLock};
     use tauri::{AppHandle, Emitter, Manager};
     use windows::core::HSTRING;
-    use windows::Foundation::TypedEventHandler;
+    use windows::Foundation::{TimeSpan, TypedEventHandler, Uri};
     use windows::Media::{
         MediaPlaybackStatus, MediaPlaybackType, SystemMediaTransportControls,
         SystemMediaTransportControlsButton, SystemMediaTransportControlsButtonPressedEventArgs,
+        SystemMediaTransportControlsTimelineProperties,
     };
+    use windows::Storage::Streams::RandomAccessStreamReference;
     use windows::Win32::Foundation::HWND;
     use windows::Win32::System::WinRT::ISystemMediaTransportControlsInterop;
 
@@ -16,7 +18,20 @@ mod win {
     unsafe impl Sync for Holder {}
 
     static SMTC: OnceLock<Option<Holder>> = OnceLock::new();
-    static LAST_PUSHED: OnceLock<Mutex<Option<(bool, String, String)>>> = OnceLock::new();
+
+    #[derive(PartialEq)]
+    struct Published {
+        playing: bool,
+        music: bool,
+        title: String,
+        subtitle: String,
+        album: String,
+        art_url: Option<String>,
+        duration_ticks: i64,
+        position_ticks: i64,
+    }
+
+    static LAST_PUSHED: OnceLock<Mutex<Option<Published>>> = OnceLock::new();
 
     fn controls() -> Option<&'static SystemMediaTransportControls> {
         SMTC.get().and_then(|h| h.as_ref()).map(|h| &h.0)
@@ -84,34 +99,136 @@ mod win {
             .collect()
     }
 
-    pub fn update(playing: bool, title: &str, subtitle: &str) {
-        let title = sanitize(title);
-        let subtitle = sanitize(subtitle);
+    fn ticks(seconds: Option<f64>) -> i64 {
+        seconds
+            .filter(|value| value.is_finite() && *value >= 0.0)
+            .map(|value| (value * 10_000_000.0).min(i64::MAX as f64) as i64)
+            .unwrap_or(0)
+    }
 
+    fn update_timeline(
+        smtc: &SystemMediaTransportControls,
+        duration_ticks: i64,
+        position_ticks: i64,
+    ) -> windows::core::Result<()> {
+        let duration = duration_ticks.max(0);
+        let position = position_ticks.max(0);
+        let timeline = SystemMediaTransportControlsTimelineProperties::new()?;
+        timeline.SetStartTime(TimeSpan { Duration: 0 })?;
+        timeline.SetMinSeekTime(TimeSpan { Duration: 0 })?;
+        timeline.SetEndTime(TimeSpan { Duration: duration })?;
+        timeline.SetMaxSeekTime(TimeSpan { Duration: duration })?;
+        timeline.SetPosition(TimeSpan {
+            Duration: if duration > 0 {
+                position.min(duration)
+            } else {
+                0
+            },
+        })?;
+        smtc.UpdateTimelineProperties(&timeline)
+    }
+
+    pub fn update(
+        playing: bool,
+        title: &str,
+        subtitle: &str,
+        media_type: &str,
+        album: Option<&str>,
+        art_url: Option<&str>,
+        duration_sec: Option<f64>,
+        position_sec: Option<f64>,
+    ) {
         let Some(smtc) = controls() else { return };
+        let next = Published {
+            playing,
+            music: media_type == "music",
+            title: sanitize(title),
+            subtitle: sanitize(subtitle),
+            album: sanitize(album.unwrap_or("")),
+            art_url: art_url
+                .filter(|url| url.starts_with("https://") && url.len() <= 2048)
+                .map(str::to_owned),
+            duration_ticks: ticks(duration_sec),
+            position_ticks: ticks(position_sec),
+        };
 
         let last = LAST_PUSHED.get_or_init(|| Mutex::new(None));
         let mut guard = last.lock().unwrap_or_else(|error| error.into_inner());
-        let next = (playing, title, subtitle);
-        if guard.as_ref() == Some(&next) {
+        let metadata_changed = guard.as_ref().is_none_or(|old| {
+            old.music != next.music
+                || old.title != next.title
+                || old.subtitle != next.subtitle
+                || old.album != next.album
+                || old.art_url != next.art_url
+        });
+        let status_changed = guard.as_ref().is_none_or(|old| old.playing != next.playing);
+        let timeline_changed = metadata_changed
+            || guard.as_ref().is_none_or(|old| {
+                old.duration_ticks != next.duration_ticks
+                    || old.position_ticks != next.position_ticks
+            });
+        if !metadata_changed && !status_changed && !timeline_changed {
             return;
         }
+
         let result = (|| -> windows::core::Result<()> {
             smtc.SetIsEnabled(true)?;
-            smtc.SetPlaybackStatus(if playing {
-                MediaPlaybackStatus::Playing
-            } else {
-                MediaPlaybackStatus::Paused
-            })?;
-            let du = smtc.DisplayUpdater()?;
-            du.SetType(MediaPlaybackType::Video)?;
-            let vp = du.VideoProperties()?;
-            vp.SetTitle(&HSTRING::from(next.1.as_str()))?;
-            vp.SetSubtitle(&HSTRING::from(next.2.as_str()))?;
-            du.Update()
+            if status_changed {
+                smtc.SetPlaybackStatus(if playing {
+                    MediaPlaybackStatus::Playing
+                } else {
+                    MediaPlaybackStatus::Paused
+                })?;
+            }
+            if metadata_changed {
+                let du = smtc.DisplayUpdater()?;
+                // Clear previous music/video fields and thumbnail on track changes.
+                du.ClearAll()?;
+                du.SetType(if next.music {
+                    MediaPlaybackType::Music
+                } else {
+                    MediaPlaybackType::Video
+                })?;
+                if next.music {
+                    let music = du.MusicProperties()?;
+                    music.SetTitle(&HSTRING::from(next.title.as_str()))?;
+                    music.SetArtist(&HSTRING::from(next.subtitle.as_str()))?;
+                    music.SetAlbumTitle(&HSTRING::from(next.album.as_str()))?;
+                } else {
+                    let video = du.VideoProperties()?;
+                    video.SetTitle(&HSTRING::from(next.title.as_str()))?;
+                    video.SetSubtitle(&HSTRING::from(next.subtitle.as_str()))?;
+                }
+                if let Some(url) = next.art_url.as_deref() {
+                    if let Ok(uri) = Uri::CreateUri(&HSTRING::from(url)) {
+                        if let Ok(stream) = RandomAccessStreamReference::CreateFromUri(&uri) {
+                            let _ = du.SetThumbnail(&stream);
+                        }
+                    }
+                }
+                du.Update()?;
+            }
+            if timeline_changed {
+                update_timeline(smtc, next.duration_ticks, next.position_ticks)?;
+            }
+            Ok(())
         })();
-        // Failed pushes must remain retryable on the next update.
+        if let Err(error) = &result {
+            eprintln!("[harbor::media] SMTC update failed: {error}");
+        }
+        // Failed pushes remain retryable.
         *guard = result.ok().map(|_| next);
+    }
+
+    pub fn seeked(position_sec: f64) {
+        let Some(smtc) = controls() else { return };
+        let last = LAST_PUSHED.get_or_init(|| Mutex::new(None));
+        let mut guard = last.lock().unwrap_or_else(|error| error.into_inner());
+        let Some(state) = guard.as_mut() else { return };
+        let position = ticks(Some(position_sec));
+        if update_timeline(smtc, state.duration_ticks, position).is_ok() {
+            state.position_ticks = position;
+        }
     }
 
     pub fn clear() {
@@ -125,6 +242,7 @@ mod win {
             let _ = du.ClearAll();
             let _ = du.Update();
         }
+        let _ = update_timeline(smtc, 0, 0);
         let _ = smtc.SetIsEnabled(false);
     }
 }
@@ -704,13 +822,24 @@ pub fn media_controls_update(
     duration_sec: Option<f64>,
     position_sec: Option<f64>,
     volume: Option<f64>,
+    media_type: String,
+    album: Option<String>,
 ) {
     #[cfg(windows)]
-    win::update(playing, &title, &subtitle);
+    win::update(
+        playing,
+        &title,
+        &subtitle,
+        &media_type,
+        album.as_deref(),
+        art_url.as_deref(),
+        duration_sec,
+        position_sec,
+    );
     #[cfg(windows)]
     crate::taskbar::set_playing(playing);
     #[cfg(windows)]
-    let _ = (art_url, duration_sec, position_sec, volume);
+    let _ = volume;
     #[cfg(target_os = "linux")]
     linux::update(
         playing,
@@ -721,6 +850,8 @@ pub fn media_controls_update(
         position_sec,
         volume,
     );
+    #[cfg(target_os = "linux")]
+    let _ = (media_type, album);
     #[cfg(not(any(windows, target_os = "linux")))]
     let _ = (
         playing,
@@ -730,6 +861,8 @@ pub fn media_controls_update(
         duration_sec,
         position_sec,
         volume,
+        media_type,
+        album,
     );
 }
 
@@ -751,9 +884,11 @@ pub fn media_controls_music_art(art_url: Option<String>, app_icon: bool) {
 
 #[tauri::command]
 pub fn media_controls_seeked(position_sec: f64) {
+    #[cfg(windows)]
+    win::seeked(position_sec);
     #[cfg(target_os = "linux")]
     linux::seeked(position_sec);
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(any(windows, target_os = "linux")))]
     let _ = position_sec;
 }
 

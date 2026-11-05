@@ -76,9 +76,11 @@ export function updateMediaControls(
   durationSec?: number | null,
   positionSec?: number | null,
   volume?: number | null,
+  mediaType: "music" | "video" = "video",
+  album?: string | null,
 ): void {
   if (!isTauri()) return;
-  requestedSession = [playing, title, subtitle, artUrl, durationSec, positionSec, volume];
+  requestedSession = [playing, title, subtitle, artUrl, durationSec, positionSec, volume, mediaType, album];
   if (isWindowsDesktop() && !windowFocused && !playing) {
     withdrawSession();
     return;
@@ -97,7 +99,7 @@ export function updateMediaControls(
       : null;
 
   const now = Date.now();
-  const state = `${playing ? 1 : 0}|${title}|${subtitle}|${art ?? ""}|${dur ?? 0}|${volKey}`;
+  const state = `${playing ? 1 : 0}|${mediaType}|${title}|${subtitle}|${album ?? ""}|${art ?? ""}|${dur ?? 0}|${volKey}`;
   const metadataChanged = state !== lastState;
 
   let positionDrift = false;
@@ -107,7 +109,7 @@ export function updateMediaControls(
     } else if (playing) {
       const elapsed = (now - lastPositionAt) / 1000;
       const expected = lastPositionSec + elapsed;
-      if (Math.abs(pos - expected) > 1.2) {
+      if (Math.abs(pos - expected) > 1.2 || (isWindowsDesktop() && now - lastPositionAt >= 5_000)) {
         positionDrift = true;
       }
     } else {
@@ -134,6 +136,8 @@ export function updateMediaControls(
     durationSec: dur,
     positionSec: pos,
     volume: vol,
+    mediaType,
+    album: album ?? null,
   });
 }
 

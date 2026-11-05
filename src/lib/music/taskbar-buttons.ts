@@ -102,6 +102,8 @@ function pushSession(): void {
     state.duration || null,
     state.currentTime,
     state.volume,
+    "music",
+    track.album ?? null,
   );
 }
 
