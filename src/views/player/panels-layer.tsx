@@ -15,6 +15,9 @@ export const PanelsLayer = memo(function PanelsLayer({
   queuePlaybackEnabled,
   meta,
   currentEpisode,
+  currentStreamUrl,
+  currentImdbId,
+  currentIsAnime,
   episodePanelOpen,
   onOpenEpisodePanel,
   onCloseEpisodePanel,
@@ -22,6 +25,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   episodesCorner,
   episodesHidden,
   roomGuest,
+  inRoom,
   onHostAdvance,
   watchedFor,
   nextEp,
@@ -45,6 +49,9 @@ export const PanelsLayer = memo(function PanelsLayer({
   queuePlaybackEnabled: boolean;
   meta: Meta;
   currentEpisode: PlayEpisode | undefined;
+  currentStreamUrl?: string;
+  currentImdbId?: string;
+  currentIsAnime?: boolean;
   episodePanelOpen: boolean;
   onOpenEpisodePanel: () => void;
   onCloseEpisodePanel: () => void;
@@ -52,6 +59,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   episodesCorner: PanelCorner;
   episodesHidden: boolean;
   roomGuest: boolean;
+  inRoom: boolean;
   onHostAdvance: (ep: PlayEpisode) => void;
   watchedFor: (ep: PlayEpisode) => boolean;
   nextEp: PlayEpisode | null;
@@ -111,8 +119,12 @@ export const PanelsLayer = memo(function PanelsLayer({
           queueSessionAvailable={queueSessionAvailable}
           queuePlaybackEnabled={queuePlaybackEnabled}
           currentEpisode={currentEpisode}
+          currentStreamUrl={currentStreamUrl}
+          currentImdbId={currentImdbId}
+          currentIsAnime={currentIsAnime}
           corner={episodesCorner}
           roomGuest={roomGuest}
+          inRoom={inRoom}
           onHostAdvance={onHostAdvance}
           watchedFor={watchedFor}
           nextEp={nextEp}

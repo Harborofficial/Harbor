@@ -523,6 +523,9 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         queuePlaybackEnabled={p.queuePlaybackEnabled}
         meta={p.src.meta}
         currentEpisode={p.src.episode}
+        currentStreamUrl={p.src.url}
+        currentImdbId={p.src.imdbId}
+        currentIsAnime={p.src.isAnime}
         episodePanelOpen={p.episodePanelOpen}
         onOpenEpisodePanel={() => p.setEpisodePanelOpen(true)}
         onCloseEpisodePanel={() => p.setEpisodePanelOpen(false)}
@@ -530,6 +533,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         episodesCorner={p.episodesCorner}
         episodesHidden={p.episodesHidden}
         roomGuest={p.roomGuest}
+        inRoom={p.inRoom}
         onHostAdvance={p.onHostAdvance}
         watchedFor={p.watchedFor}
         nextEp={p.adjacentNext}

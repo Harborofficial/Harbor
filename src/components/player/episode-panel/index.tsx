@@ -10,19 +10,26 @@ import { spoilerMaskFor } from "@/lib/spoilers";
 import { registerStreamProxy } from "@/lib/stream-proxy";
 import { unregisterStreamProxy } from "@/lib/stream-proxy";
 import { preflightCheck } from "@/lib/streams/preflight";
-import { resolveStream } from "@/lib/streams/resolve";
+import { resolveStream, shouldPreferP2pDownload } from "@/lib/streams/resolve";
+import { isHostedTorrentServerUrl } from "@/lib/torrent/stremio-stream";
+import { localEngineStreamRef } from "@/lib/torrent/local-engine";
 import {
   beginPlaybackTrace,
   finishPlaybackTrace,
   markPlaybackTrace,
 } from "@/lib/perf/playback-trace";
 import type { ScoredStream } from "@/lib/streams/types";
+import { cancelDownload, downloadsSnapshot, enqueueDownload } from "@/lib/download/downloads-store";
+import { contextDownloadTask } from "@/lib/download/contextual-preparation";
+import { completedEpisodeSource } from "@/lib/download/completed-episode-source";
+import { savePlayback } from "@/lib/playback-history";
 import { usePlayerNavigation, type PlayEpisode } from "@/lib/view";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
 import { useQueue } from "@/lib/queue";
 import { QueueUpNext } from "./queue-up-next";
 import { episodePanelQueueMode } from "./queue-mode";
+import { episodeDownloadAction, sharedPlaybackTorrentRisk } from "./download-action";
 import { playLocalAware } from "@/lib/local-library/playback";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { useT } from "@/lib/i18n";
@@ -56,8 +63,12 @@ export function EpisodePanel({
   queueSessionAvailable,
   queuePlaybackEnabled,
   currentEpisode,
+  currentStreamUrl,
+  currentImdbId,
+  currentIsAnime,
   corner = "top-right",
   roomGuest = false,
+  inRoom = false,
   onHostAdvance,
   watchedFor,
   nextEp,
@@ -70,8 +81,12 @@ export function EpisodePanel({
   queueSessionAvailable: boolean;
   queuePlaybackEnabled: boolean;
   currentEpisode: PlayEpisode | undefined;
+  currentStreamUrl?: string;
+  currentImdbId?: string;
+  currentIsAnime?: boolean;
   corner?: PanelCorner;
   roomGuest?: boolean;
+  inRoom?: boolean;
   onHostAdvance?: (ep: PlayEpisode) => void;
   watchedFor?: (ep: PlayEpisode) => boolean;
   nextEp?: PlayEpisode | null;
@@ -94,16 +109,29 @@ export function EpisodePanel({
   }, [season]);
   const [expandedEp, setExpandedEp] = useState<string | null>(null);
   const [pickingFor, setPickingFor] = useState<PlayEpisode | null>(null);
+  const [downloadFor, setDownloadFor] = useState<PlayEpisode | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloadNotice, setDownloadNotice] = useState<string | null>(null);
   const [resolvingFor, setResolvingFor] = useState<PlayEpisode | null>(null);
+  const [resolvingIntent, setResolvingIntent] = useState<"play" | "download" | null>(null);
   const resolveAcRef = useRef<AbortController | null>(null);
+  const manualPlayRevisionRef = useRef(0);
+  const panelOpenRef = useRef(open);
+  panelOpenRef.current = open;
+  const activePlaybackKey = `${meta.id}|${currentStreamUrl ?? ""}|${currentEpisode?.season ?? ""}:${currentEpisode?.episode ?? ""}`;
+  const activePlaybackKeyRef = useRef(activePlaybackKey);
+  activePlaybackKeyRef.current = activePlaybackKey;
+  useEffect(() => () => { manualPlayRevisionRef.current += 1; }, []);
   useEffect(() => {
     if (!resolvingFor) return;
-    const t = window.setTimeout(() => {
+    const timeout = window.setTimeout(() => {
       resolveAcRef.current?.abort();
+      if (resolvingIntent === "download") setDownloadError(t("Download preparation timed out. Choose another source."));
       setResolvingFor(null);
+      setResolvingIntent(null);
     }, RESOLVE_TIMEOUT_MS);
-    return () => window.clearTimeout(t);
-  }, [resolvingFor]);
+    return () => window.clearTimeout(timeout);
+  }, [resolvingFor, resolvingIntent]);
   useEffect(() => () => resolveAcRef.current?.abort(), []);
   const [showEpsOpen, setShowEpsOpen] = useState(false);
   const hasQueue = queue.length > 0;
@@ -116,35 +144,74 @@ export function EpisodePanel({
   const showQueueList = hasQueue && (followQueue || !isSeries);
   useEffect(() => {
     if (!open) {
+      manualPlayRevisionRef.current += 1;
       setExpandedEp(null);
       setPickingFor(null);
+      setDownloadFor(null);
+      setDownloadError(null);
+      setDownloadNotice(null);
       resolveAcRef.current?.abort();
       setResolvingFor(null);
+      setResolvingIntent(null);
     }
   }, [open]);
   const manualMode = !settings.instantPlay;
-  const handlePlay = (ep: PlayEpisode) => {
+  const handlePlay = (ep: PlayEpisode, restartCurrent = false) => {
     if (roomGuest) return;
-    const streamFlow = () => {
-      if (manualMode) {
-        setPickingFor(ep);
-      } else {
+    const request = ++manualPlayRevisionRef.current;
+    const initialPlaybackKey = activePlaybackKeyRef.current;
+    const stillCurrent = () => manualPlayRevisionRef.current === request && panelOpenRef.current &&
+      activePlaybackKeyRef.current === initialPlaybackKey;
+    const playNormally = () => {
+      if (!stillCurrent()) return;
+      if (restartCurrent) {
+        onRestart?.();
         onClose();
-        openPicker(meta, ep, { autoPlay: true });
+        return;
       }
+      const streamFlow = () => {
+        if (manualMode) {
+          setPickingFor(ep);
+        } else {
+          onClose();
+          openPicker(meta, ep, { autoPlay: true });
+        }
+      };
+      playLocalAware({
+        meta,
+        episode: ep,
+        mode: settings.localPlaybackMode,
+        source: "manual",
+        playLocal: (e, o) => {
+          onClose();
+          replacePlayerSrc({ ...localPlayerSrc(e, currentIsAnime, ep), startFromZero: o?.fromStart });
+        },
+        playStream: streamFlow,
+        setMode: (m) => update({ localPlaybackMode: m }),
+      });
     };
-    playLocalAware({
-      meta,
-      episode: ep,
-      mode: settings.localPlaybackMode,
-      source: "manual",
-      playLocal: (e, o) => {
-        onClose();
-        replacePlayerSrc({ ...localPlayerSrc(e, undefined, ep), startFromZero: o?.fromStart });
-      },
-      playStream: streamFlow,
-      setMode: (m) => update({ localPlaybackMode: m }),
-    });
+    // Only pay for a file-existence check when an episode has a completed download.
+    const hasFinishedDownload = downloadsSnapshot().some((d) =>
+      d.status === "done" && d.metaId === meta.id && d.season === ep.season && d.episode === ep.episode,
+    );
+    // Private local files must not be substituted for a Watch Together stream.
+    if (inRoom || !hasFinishedDownload) {
+      playNormally();
+      return;
+    }
+    void completedEpisodeSource(meta, ep, {
+      imdbId: currentImdbId ?? ep.imdbId,
+      isAnime: currentIsAnime,
+      startFromZero: restartCurrent,
+    }).then((download) => {
+      if (!stillCurrent()) return;
+      if (!download) {
+        playNormally();
+        return;
+      }
+      onClose();
+      replacePlayerSrc(download);
+    }, playNormally);
   };
   const handlePickStream = async (stream: ScoredStream) => {
     if (!pickingFor || roomGuest) return;
@@ -161,6 +228,7 @@ export function EpisodePanel({
     const ac = new AbortController();
     resolveAcRef.current = ac;
     setResolvingFor(ep);
+    setResolvingIntent("play");
     try {
       const hint = { season: ep.season ?? null, episode: ep.episode ?? null };
       const r = await resolveStream(stream, debrids, ac.signal, true, false, hint);
@@ -199,6 +267,21 @@ export function EpisodePanel({
         return;
       }
       onHostAdvance?.(ep);
+      const streamRef = {
+        resolvedFilename: r.data.filename ?? stream.behaviorHints?.filename ?? stream.behaviorHints?.fileName ?? null,
+        infoHash: stream.infoHash ?? null,
+        fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
+        addonId: stream.addonId ?? null,
+        title: stream.title ?? null,
+        parsedTitle: stream.parsedTitle ?? null,
+        resolution: stream.resolution ?? null,
+        releaseGroup: stream.releaseGroupNormalized ?? null,
+        source: stream.source ?? null,
+        audioLanguages: stream.audioLanguages ?? null,
+        bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
+        size: stream.size ?? null,
+        cachedSlugs: Object.entries(stream.cached ?? {}).filter(([, v]) => v === true).map(([k]) => k),
+      };
       replacePlayerSrc({
         meta,
         episode: ep,
@@ -209,22 +292,11 @@ export function EpisodePanel({
         proxySessionId,
         historyUrl: r.data.url,
         subtitles: [],
-        streamRef: {
-          resolvedFilename:
-            r.data.filename ??
-            stream.behaviorHints?.filename ??
-            stream.behaviorHints?.fileName ??
-            null,
-          infoHash: stream.infoHash ?? null,
-          fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
-          addonId: stream.addonId ?? null,
-          title: stream.title ?? null,
-          parsedTitle: stream.parsedTitle ?? null,
-          resolution: stream.resolution ?? null,
-          source: stream.source ?? null,
-          size: stream.size ?? null,
-        },
+        streamRef,
       });
+      // Record the exact release immediately so an intervening offline episode
+      // cannot obscure the previous online source before the next auto-advance.
+      savePlayback(meta.id, { ...streamRef, url: r.data.url, title: meta.name }, ep.season, ep.episode);
       markPlaybackTrace(playbackTraceId, "player-opened");
       traceTransferred = true;
       proxyTransferred = true;
@@ -238,6 +310,77 @@ export function EpisodePanel({
       if (!traceTransferred) finishPlaybackTrace(playbackTraceId, "failed");
     }
   };
+  const beginEpisodeDownload = (ep: PlayEpisode) => {
+    manualPlayRevisionRef.current += 1;
+    const existing = contextDownloadTask(downloadsSnapshot(), meta.id, ep);
+    const action = episodeDownloadAction(existing?.status);
+    if (action === "saved") return;
+    if (action === "cancel" && existing) {
+      cancelDownload(existing.id);
+      return;
+    }
+    setPickingFor(null);
+    setDownloadFor(ep);
+    setDownloadError(null);
+    setDownloadNotice(null);
+  };
+  const handleDownloadStream = async (stream: ScoredStream) => {
+    const ep = downloadFor;
+    if (!ep || resolvingFor) return;
+    if (!stream.url && stream.externalUrl) {
+      setDownloadError(t("This source opens a website and cannot be downloaded. Choose another source."));
+      return;
+    }
+    const activeTorrent = localEngineStreamRef(currentStreamUrl ?? "");
+    const usesTorrentEngine = shouldPreferP2pDownload(stream) || !stream.url || isHostedTorrentServerUrl(stream.url);
+    if (sharedPlaybackTorrentRisk(activeTorrent?.infoHash ?? null, stream.infoHash, usesTorrentEngine)) {
+      setDownloadError(t("This torrent is already playing. Choose another source to avoid interrupting playback."));
+      return;
+    }
+    const existing = contextDownloadTask(downloadsSnapshot(), meta.id, ep);
+    if (episodeDownloadAction(existing?.status) !== "choose") {
+      setDownloadFor(null);
+      return;
+    }
+    const ac = new AbortController();
+    resolveAcRef.current?.abort();
+    resolveAcRef.current = ac;
+    setResolvingFor(ep);
+    setResolvingIntent("download");
+    setDownloadError(null);
+    try {
+      const result = await resolveStream(
+        stream, debrids, ac.signal, true, shouldPreferP2pDownload(stream),
+        { season: ep.season, episode: ep.episode }, true, false,
+      );
+      if (ac.signal.aborted) return;
+      if (!result.ok) {
+        setDownloadError(t("Couldn't prepare this download. Try another source."));
+        return;
+      }
+      // Another source may have been queued while this one was resolving.
+      const current = contextDownloadTask(downloadsSnapshot(), meta.id, ep);
+      if (episodeDownloadAction(current?.status) !== "choose") {
+        setDownloadFor(null);
+        return;
+      }
+      const label = [stream.resolution, stream.source].filter(Boolean).join(" ") ||
+        stream.parsedTitle || stream.title || stream.name || stream.addonName || null;
+      await enqueueDownload({ meta, episode: ep, streamLabel: label, url: result.data.url, headers: result.data.headers });
+      if (!ac.signal.aborted) {
+        setDownloadNotice(`${t("Added to downloads")} · ${displayEpLabel(ep, meta.id)}`);
+        setDownloadFor(null);
+      }
+    } catch {
+      if (!ac.signal.aborted) setDownloadError(t("Couldn't start this download. Try another source."));
+    } finally {
+      if (resolveAcRef.current === ac) {
+        resolveAcRef.current = null;
+        setResolvingFor(null);
+        setResolvingIntent(null);
+      }
+    }
+  };
   return (
     <div
       aria-hidden={!open}
@@ -245,7 +388,7 @@ export function EpisodePanel({
     >
       {resolvingFor && (
         <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/82 backdrop-blur-md animate-in fade-in duration-150">
-          <HarborLoader size="md" caption={t("Connecting")} />
+          <HarborLoader size="md" caption={t(resolvingIntent === "download" ? "Preparing download" : "Connecting")} />
           <p className="text-[13px] text-white/75">
             {t("Loading {label}", {
               label: `${displayEpLabel(resolvingFor, meta.id)}${
@@ -257,6 +400,7 @@ export function EpisodePanel({
             onClick={() => {
               resolveAcRef.current?.abort();
               setResolvingFor(null);
+              setResolvingIntent(null);
             }}
             className="mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-[13px] font-semibold text-white transition-colors duration-150 ease-in-out hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
           >
@@ -288,7 +432,17 @@ export function EpisodePanel({
         }`}
       >
         <div className="relative flex h-full w-full flex-col overflow-hidden bg-canvas">
-          {pickingFor ? (
+          {downloadFor ? (
+            <StreamsView
+              meta={meta}
+              episode={downloadFor}
+              intent="download"
+              error={downloadError}
+              onBack={() => { setDownloadFor(null); setDownloadError(null); }}
+              onClose={onClose}
+              onPick={handleDownloadStream}
+            />
+          ) : pickingFor ? (
             <StreamsView
               meta={meta}
               episode={pickingFor}
@@ -361,6 +515,7 @@ export function EpisodePanel({
                 )}
               </div>
               <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-8 pt-2">
+                {downloadNotice && <p role="status" className="mx-1 mb-3 rounded-xl bg-accent/10 px-3 py-2 text-[12px] text-accent">{downloadNotice}</p>}
                 {followQueue && !hasQueue && (
                   <p role="status" className="px-1 py-5 text-sm text-ink-subtle">
                     {t("Your queue is empty. Add an item or switch to This show.")}
@@ -417,13 +572,21 @@ export function EpisodePanel({
                               onPlay={() => {
                                 if (isCurrent) {
                                   if (roomGuest) return;
-                                  onRestart?.();
-                                  onClose();
+                                  const saved = downloadsSnapshot().some((d) =>
+                                    d.status === "done" && d.metaId === meta.id &&
+                                    d.season === ep.season && d.episode === ep.episode,
+                                  );
+                                  if (saved) handlePlay(ep, true);
+                                  else {
+                                    onRestart?.();
+                                    onClose();
+                                  }
                                 } else {
                                   handlePlay(ep);
                                 }
                               }}
                               isCurrent={isCurrent}
+                              onDownload={() => beginEpisodeDownload(ep)}
                               watched={watchedFor?.(ep) ?? false}
                               spoiler={spoilerMaskFor(settings, {
                                 watched: isCurrent || (watchedFor?.(ep) ?? false),

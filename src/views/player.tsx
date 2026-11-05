@@ -1220,10 +1220,12 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     queue,
     isLive: isLiveLike,
     roomGuest,
+    inRoom,
     queueDrivesNav: queuePlaybackEnabled,
     instantPlay: settings.instantPlay,
     startedNearEndRef,
     openPicker,
+    replacePlayerSrc,
     closePlayer,
   });
 
