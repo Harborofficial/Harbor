@@ -334,6 +334,13 @@ Promise.all([isUninstallMode(), installedHarborLanguage()]).then(function ([yes,
     mount(0);
     return;
   }
+  // Browser-only shortcut for reviewing the components layout without walking
+  // through the start, language and terms screens. Never active in native Shipyard.
+  if (!isNative() && new URLSearchParams(window.location.search).get("preview") === "components") {
+    if (bootLayer) bootLayer.remove();
+    mount(INSTALL_SCREENS.findIndex((screen) => screen.id === "welcome"));
+    return;
+  }
   startInstallFlow();
   mount(0);
 });
