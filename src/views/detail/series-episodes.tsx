@@ -47,6 +47,7 @@ import { useArcGroups } from "./series-episodes/use-arc-groups";
 import { OrderedEpisodes } from "./series-episodes/ordered-episodes";
 import { useEpisodeOrder } from "./series-episodes/use-episode-order";
 import { useEpisodeEnrich } from "./series-episodes/use-episode-enrich";
+import { useEpisodeImdbRatings } from "./use-episode-imdb-ratings";
 import { useWatchedSets } from "./series-episodes/use-watched-sets";
 import { useEpisodeProgressMap } from "./series-episodes/use-episode-progress-map";
 import { useTvdbSeasonTypes } from "./series-episodes/use-tvdb-season-types";
@@ -354,6 +355,14 @@ export function SeriesEpisodes({
     setOrderSeason(-1);
   }, [meta.id]);
   const orderActive = !arcActive && ordering != null;
+  useEffect(() => {
+    if (orderActive || seasons.some((s) => s.seasonNumber === active)) return;
+    userPickedRef.current = false;
+    setActive(
+      getViewedSeason(meta.id, seasons) ??
+        resumeDefaultSeason(meta.id, seasons, combinedWatched, resumeSeason),
+    );
+  }, [orderActive, active, meta.id, seasons, combinedWatched, resumeSeason]);
   const panelActive = tvdbPanelEnabled(settings) && (orderActive || orderTypes.length > 0);
   const altActive = arcActive || orderActive;
   const orderSeasonEff =
@@ -422,6 +431,13 @@ export function SeriesEpisodes({
     : ordering
       ? (ordering.bySeason.get(orderSeasonEff) ?? [])
       : [];
+  const orderedImdbRatings = useEpisodeImdbRatings(
+    imdbId,
+    orderActive
+      ? [...new Set(orderedEpsRaw.map((episode) => episode.seasonNumber))]
+      : [active],
+    settings.omdbKey,
+  );
   const orderedEps = useMemo(() => {
     // pickLocalizedText keys script tests by ISO-1 ("ko"), not TVDB codes ("kor").
     const lang = metadataLanguage;
@@ -481,7 +497,8 @@ export function SeriesEpisodes({
                 : "und",
       };
       if (ep.imdbRating == null) {
-        const r = imdbRatings.get(`${ep.seasonNumber}:${ep.episodeNumber}`);
+        const r = orderedImdbRatings.get(`${ep.seasonNumber}:${ep.episodeNumber}`) ??
+          imdbRatings.get(`${ep.seasonNumber}:${ep.episodeNumber}`);
         if (r != null && r > 0) next = { ...next, imdbRating: r };
       }
       return next;
@@ -489,6 +506,7 @@ export function SeriesEpisodes({
   }, [
     orderedEpsRaw,
     imdbRatings,
+    orderedImdbRatings,
     orderActive,
     orderSeasonEff,
     settings.tvdbSeasonType,
