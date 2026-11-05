@@ -11,6 +11,7 @@ type Props = {
   hasExternalTrack: boolean;
   onChooseExternal: () => void;
   canLiveSync: boolean;
+  canSyncFromPlayback: boolean;
   delaySec: number;
   delayNonZero: boolean;
   onLiveSync?: () => void | Promise<void>;
@@ -23,6 +24,7 @@ export function SyncControl({
   hasExternalTrack,
   onChooseExternal,
   canLiveSync,
+  canSyncFromPlayback,
   delaySec,
   delayNonZero,
   onLiveSync,
@@ -134,6 +136,20 @@ export function SyncControl({
                   ? tr("Choose external subtitle for Auto sync")
                   : tr("Find external subtitles for Auto sync")
                 : tr("Auto sync")}
+          </button>
+          <button
+            type="button"
+            disabled={!canSyncFromPlayback || busy || !autoSync}
+            onClick={() => {
+              if (!canSyncFromPlayback || busy || !autoSync) return;
+              setOpen(false);
+              autoSync.listen();
+              onClose();
+            }}
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] text-ink transition-colors hover:bg-raised disabled:cursor-not-allowed disabled:text-ink-subtle/50"
+          >
+            <AudioLines size={14} strokeWidth={2.2} />
+            <span className="flex-1">{tr("Sync from playback")}</span>
           </button>
           <button
             type="button"

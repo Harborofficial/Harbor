@@ -51,6 +51,7 @@ export function MenuHeader(p: Props) {
           hasExternalTrack={p.hasExternalTrack}
           onChooseExternal={p.onChooseExternal}
           canLiveSync={p.selectedTrack != null}
+          canSyncFromPlayback={p.engine === "mpv" && p.selectedTrack?.external === true}
           delaySec={p.delaySec}
           delayNonZero={p.delayNonZero}
           onLiveSync={p.onEnterSync}
