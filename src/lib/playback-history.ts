@@ -218,22 +218,9 @@ function saveOnlineSource(metaId: string, entry: PlaybackEntry): void {
     const all = readOnlineSources();
     // The preference must contain source identity only, never the large
     // episode-specific ActualPlayback/resume snapshot from playback history.
-    all[metaId] = {
-      infoHash: entry.infoHash,
-      fileIdx: entry.fileIdx,
-      addonId: entry.addonId,
-      url: entry.url,
-      title: entry.title,
-      parsedTitle: entry.parsedTitle,
-      resolution: entry.resolution,
-      releaseGroup: entry.releaseGroup,
-      source: entry.source,
-      audioLanguages: entry.audioLanguages,
-      size: entry.size,
-      bingeGroup: entry.bingeGroup,
-      cachedSlugs: entry.cachedSlugs,
-      savedAt: entry.savedAt,
-    };
+    // Apply the same privacy/redaction policy as the main playback history.
+    // A standalone source preference must never preserve an online transport URL.
+    all[metaId] = persistablePlaybackPreference(entry);
     const sorted = Object.entries(all).sort((a, b) => b[1].savedAt - a[1].savedAt);
     localStorage.setItem(onlineSourceStoreKey(), JSON.stringify(Object.fromEntries(sorted.slice(0, MAX_ENTRIES))));
   } catch { /* Keep the existing online preference if storage is unavailable. */ }
