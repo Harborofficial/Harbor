@@ -1,6 +1,7 @@
 import { setMusicPresence } from "@/lib/discord/presence";
 import { getMusicState, subscribeMusic } from "./player";
 import { musicAlbumPath, musicArtistPath, musicBounceUrl, musicTrackPath } from "./deep-link";
+import { shouldPublishMusicPresence } from "./presence-gate";
 import type { MusicPlayerState, MusicTrack } from "./types";
 
 const SEEK_TOLERANCE_SEC = 5;
@@ -8,6 +9,7 @@ const SEEK_TOLERANCE_SEC = 5;
 let lastIdentity = "";
 let lastPhase = "";
 let lastAnchor = 0;
+let startedThisSession = false;
 
 function identityOf(track: MusicTrack): string {
   return `${track.connectorId ?? ""}|${track.id}`;
@@ -22,9 +24,11 @@ function reset(): void {
   lastIdentity = "";
   lastPhase = "";
   lastAnchor = 0;
+  startedThisSession = false;
 }
 
 function publish(state: MusicPlayerState): void {
+  if (state.phase === "playing") startedThisSession = true;
   const track = state.current;
   if (!track || state.phase === "idle" || state.phase === "error") {
     if (lastIdentity === "") return;
@@ -32,7 +36,7 @@ function publish(state: MusicPlayerState): void {
     setMusicPresence(null);
     return;
   }
-  if (state.phase === "resolving") return;
+  if (!shouldPublishMusicPresence(state, startedThisSession)) return;
   const identity = identityOf(track);
   const playing = state.phase === "playing";
   const anchor = Math.floor(Date.now() / 1000 - state.currentTime);
