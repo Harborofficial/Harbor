@@ -5019,7 +5019,7 @@
   "Load more": "Tải thêm",
   "Load more comments": "Tải thêm bình luận",
   "Load more threads": "Tải thêm chủ đề",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.": "Tải hình ảnh có độ phân giải cao nhất cho banner nổi bật. Tốn nhiều băng thông hơn.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.": "Tải hình ảnh có độ phân giải cao nhất cho banner nổi bật, ảnh bìa trang chi tiết và nền không làm mờ của bộ chọn nguồn. Tốn nhiều băng thông và bộ nhớ video hơn.",
   "Loaded {loaded} of {total} movies...": "Đã tải {loaded}/{total} phim...",
   "Loaded {loaded} of {total} shows...": "Đã tải {loaded}/{total} phim bộ...",
   "Loaded {name}": "Đã tải {name}",

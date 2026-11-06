@@ -385,8 +385,8 @@ const settings: Record<string, string> = {
   "Stretch the featured hero edge to edge and taller, across every layout.":
     "Растянуть баннер от края до края и сделать выше во всех раскладках.",
   "Full quality hero image": "Баннер в полном качестве",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Загружать изображение баннера в максимальном разрешении. Расходует больше трафика.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Загружать изображения в максимальном разрешении для баннера, баннера страницы с описанием и фонов выбора источников без размытия. Расходует больше трафика и видеопамяти.",
   "Display language": "Язык интерфейса",
   "Interface language": "Язык интерфейса",
   "Metadata language": "Язык метаданных",

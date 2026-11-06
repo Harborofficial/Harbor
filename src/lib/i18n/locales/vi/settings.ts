@@ -381,8 +381,8 @@ const settings: Record<string, string> = {
   "Stretch the featured hero edge to edge and taller, across every layout.":
     "Kéo giãn banner nổi bật sát hai cạnh và tăng chiều cao trong mọi bố cục.",
   "Full quality hero image": "Ảnh nổi bật chất lượng đầy đủ",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Tải hình ảnh có độ phân giải cao nhất cho banner nổi bật. Tốn nhiều băng thông hơn.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Tải hình ảnh có độ phân giải cao nhất cho banner nổi bật, ảnh bìa trang chi tiết và nền không làm mờ của bộ chọn nguồn. Tốn nhiều băng thông và bộ nhớ video hơn.",
   "Display language": "Ngôn ngữ hiển thị",
   "Interface language": "Ngôn ngữ giao diện",
   "Metadata language": "Ngôn ngữ siêu dữ liệu",
