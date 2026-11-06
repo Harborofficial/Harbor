@@ -530,6 +530,23 @@ pub(crate) fn stream_http_options(
     (user_agent, header_fields)
 }
 
+// The PulseAudio client name is also how song_id identifies our playback on
+// Linux. Flatpak instances can share a sandbox PID, so PID alone cannot
+// distinguish their streams. A stable, per-process UUID avoids that collision.
+#[cfg(target_os = "linux")]
+pub(crate) fn audio_client_name() -> &'static str {
+    use std::sync::OnceLock;
+
+    static NAME: OnceLock<String> = OnceLock::new();
+    NAME.get_or_init(|| format!("Harbor {}", uuid::Uuid::new_v4().simple()))
+        .as_str()
+}
+
+#[cfg(not(target_os = "linux"))]
+pub(crate) fn audio_client_name() -> &'static str {
+    "Harbor"
+}
+
 fn apply_pre_init(
     init: &MpvInitializer,
     args: &MpvStartArgs,
@@ -560,7 +577,7 @@ fn apply_pre_init(
         .unwrap_or_default();
     let joined_init_only = join_init_only_pairs(&init_only_pairs);
     set("title", "Harbor");
-    set("audio-client-name", "Harbor");
+    set("audio-client-name", audio_client_name());
     set("terminal", "no");
     set("log-file", "");
     set("msg-level", "all=warn,vo=v,d3d11=v,gpu=v,win32=v");

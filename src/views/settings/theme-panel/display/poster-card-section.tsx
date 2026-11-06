@@ -10,6 +10,17 @@ import { SettingRow } from "../../kit";
 import { SButton } from "../../ui";
 import { POSTER_RADII, POSTER_SIZES, posterSizeKey, radiusKey } from "./poster-options";
 import { PreviewImage } from "../../preview-image";
+import { CardSharedState } from "@/components/use-card-shared-state";
+const EMPTY_CARD_SHARED_STATE: CardSharedState = {
+  showTop10: false,
+  inCinema: false,
+  rerun: false,
+  newBadge: null,
+  hasDub: false,
+  watched: false,
+  inWatchlist: false,
+  inLocalLibrary: false,
+};
 
 function sizeIndex(scale: number): number {
   const key = posterSizeKey(scale);
@@ -98,6 +109,7 @@ export function PosterCardSection() {
                   meta={sample}
                   logo={art.logo ?? undefined}
                   posterSrc={art.poster}
+                  sharedState={EMPTY_CARD_SHARED_STATE}
                 />
               </div>
             ) : (
