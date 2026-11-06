@@ -14,7 +14,7 @@ import { fetchSubtitlesIntoPlayer, streamHintsOf } from "@/lib/subtitles/fetch-i
 import { subtitleStreamDescriptor } from "@/lib/subtitles/provider-label";
 import { publishSubtitleSearch } from "@/components/player/subtitle-menu/subtitle-search-store";
 import { publishSubtitleContext } from "@/components/player/subtitle-menu/subtitle-context-store";
-import { readPlayerPrefs, type PerShowPrefs } from "@/lib/player-prefs";
+import { readPlayerPrefs } from "@/lib/player-prefs";
 import {
   capturePlaybackActor,
   isPlaybackActorCurrent,
@@ -876,7 +876,7 @@ export function useTrackAutoload(params: {
     if (embeddedRestoreRef.current === src.url) return;
     const want = rememberedSession?.subtitle
       ? selectPlaybackSubtitle(snap.subtitleTracks, rememberedSession.subtitle)
-      : pickRememberedEmbedded(snap.subtitleTracks, remembered);
+      : memory ? pickRememberedEmbedded(snap.subtitleTracks, memory) : undefined;
     if (want) {
       embeddedRestoreRef.current = src.url;
       if (!want.selected) bridge.setSubtitleTrack(want.id, "restore");
