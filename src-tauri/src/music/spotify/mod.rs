@@ -103,7 +103,8 @@ pub struct SpotifyStatus {
     pub own_app_browsing: bool,
     /// Stable Spotify account identifier for internal correlation, not a UI label.
     pub username: Option<String>,
-
+    /// Human-facing name from Spotify /me. May be absent if the profile is unavailable.
+    pub display_name: Option<String>,
     pub country: Option<String>,
     pub premium: bool,
     pub account_type: Option<String>,
@@ -126,7 +127,7 @@ pub struct SpotifyState {
     app: RwLock<Option<AppHandle>>,
     http: reqwest::Client,
     web_token: RwLock<Option<keystore::WebToken>>,
-
+    profile_display_name: RwLock<Option<String>>,
     last_error: RwLock<Option<String>>,
     linked: AtomicBool,
     remote: RwLock<Option<String>>,
@@ -145,7 +146,7 @@ impl SpotifyState {
             app: RwLock::new(None),
             http: http_client(),
             web_token: RwLock::new(None),
-
+            profile_display_name: RwLock::new(None),
             last_error: RwLock::new(None),
             linked: AtomicBool::new(false),
             remote: RwLock::new(None),
@@ -176,6 +177,8 @@ impl SpotifyState {
         tauri::async_runtime::spawn(async move {
             if let Err(error) = state.connect_with(app, cache, credentials).await {
                 state.record_failure(error);
+            } else {
+                state.refresh_profile_display_name().await;
             }
         });
     }
@@ -261,7 +264,7 @@ impl SpotifyState {
             session: spotify_session.clone(),
             audio,
         });
-
+        *self.profile_display_name.write() = None;
         *self.account.write() = Account {
             session: Some(spotify_session),
             username,
@@ -292,7 +295,7 @@ impl SpotifyState {
         drop(slot);
         *self.account.write() = Account::empty();
         *self.web_token.write() = None;
-
+        *self.profile_display_name.write() = None;
         *self.last_error.write() = None;
         self.linked.store(false, Ordering::SeqCst);
         *self.remote.write() = None;
@@ -309,8 +312,45 @@ impl SpotifyState {
         keystore::forget(&app, &cache_dir)
     }
 
-    pub async fn status(&self) -> Result<SpotifyStatus, String> {
+    /// Resolve Spotify's chosen display name from /me, not librespot's opaque username.
+    /// This is best-effort and capped so a rate limit cannot block the Connections screen.
+    pub(super) async fn refresh_profile_display_name(&self) {
+        if self.profile_display_name.read().is_some() || !self.connected() {
+            return;
+        }
+        let profile = tokio::time::timeout(std::time::Duration::from_secs(3), async {
+            let paired = self.account.read().session.clone()
+                .filter(|session| !session.is_invalid());
+            let token = if let Some(session) = paired.as_ref() {
+                session.login5().auth_token().await.ok()?.access_token
+            } else {
+                // Wait until a saved playback session finishes reconnecting. A separate
+                // browsing account must not be mislabeled as the paired playback account.
+                if self.linked.load(Ordering::SeqCst) {
+                    return None;
+                }
+                self.web_token().await.ok()?
+            };
+            let body = api::me(&self.http, &token).await.ok()?;
+            let name = library::profile_display_name(&body)?;
+            if paired.is_some() {
+                let account = self.account.read();
+                let id = body.get("id").and_then(serde_json::Value::as_str)?;
+                if id != account.username {
+                    return None;
+                }
+            }
+            Some(name)
+        }).await;
+        if let Ok(Some(name)) = profile {
+            if self.connected() && self.profile_display_name.read().is_none() {
+                *self.profile_display_name.write() = Some(name);
+            }
+        }
+    }
 
+    pub async fn status(&self) -> Result<SpotifyStatus, String> {
+        self.refresh_profile_display_name().await;
         Ok(self.snapshot())
     }
 
@@ -411,7 +451,8 @@ impl SpotifyState {
             state,
             capabilities,
         );
-        connection.account = status.username;
+        // The librespot username is an opaque account ID, not Spotify's chosen display name.
+        connection.account = status.display_name;
         connection.error = status.error;
         // Spotify only issues tokens to a registered app, and a new app may add at most a
         // handful of listeners. Harbor ships no client id: each listener brings their own.
@@ -504,7 +545,7 @@ impl SpotifyState {
             browsing_ready,
             own_app_browsing,
             username: playback_linked.then(|| text(&account.username)).flatten(),
-
+            display_name: connected.then(|| self.profile_display_name.read().clone()).flatten(),
             country: playback_linked.then(|| text(&account.country)).flatten(),
             premium: playback_ready && account.tier.premium(),
             account_type: playback_ready
@@ -572,6 +613,21 @@ mod tests {
         assert!(!status.premium);
         assert!(status.account_type.is_none());
         assert!(!state.connected());
+    }
+
+    #[test]
+    fn display_name_is_used_for_ui_but_internal_account_id_is_preserved() {
+        let state = SpotifyState::new();
+        state.linked.store(true, Ordering::SeqCst);
+        state.account.write().username = "internal_opaque_spotify_id".into();
+        *state.profile_display_name.write() = Some("My Spotify Name".into());
+        let status = state.snapshot();
+        assert_eq!(status.username.as_deref(), Some("internal_opaque_spotify_id"));
+        assert_eq!(status.display_name.as_deref(), Some("My Spotify Name"));
+        assert_eq!(state.connection().account.as_deref(), Some("My Spotify Name"));
+
+        *state.profile_display_name.write() = None;
+        assert!(state.connection().account.is_none(), "never fall back to the internal account ID");
     }
 
     #[test]

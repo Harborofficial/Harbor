@@ -123,7 +123,9 @@ impl SpotifyState {
         let access = token.access_token.clone();
         let _ = keystore::store_web_token(app, &token);
         *self.web_token.write() = Some(token);
-
+        if !self.account.read().connected() {
+            *self.profile_display_name.write() = None;
+        }
         access
     }
 

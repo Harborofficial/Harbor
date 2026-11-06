@@ -125,6 +125,7 @@ export function MusicSpotifyLibrary({
           append && previous
             ? {
                 ...next,
+                accountDisplayName: next.accountDisplayName ?? previous.accountDisplayName,
                 tracks: [...previous.tracks, ...next.tracks],
                 trackAddedAt: { ...previous.trackAddedAt, ...next.trackAddedAt },
                 playlists: [...previous.playlists, ...next.playlists],
@@ -410,9 +411,7 @@ export function MusicSpotifyLibrary({
           <p className="mt-1 text-sm text-ink-muted">
             {selected
               ? selected.subtitle
-              : connected
-                ? account?.account
-                : t("music.spotifyLibrary.body")}
+              : page?.accountDisplayName ?? t("music.spotifyLibrary.body")}
           </p>
         </div>
         {connected && (

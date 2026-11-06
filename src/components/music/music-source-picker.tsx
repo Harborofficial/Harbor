@@ -403,7 +403,7 @@ export function MusicSourcePicker({
           <div className="mx-2 flex items-center justify-between border-b border-edge-soft py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-ink-subtle">
             <span className="inline-flex items-center gap-2">
               <MusicServiceLogo source="spotify" size={13} fallback={<Check size={12} />} />{" "}
-              {t("music.spotify.connectedAs", { username: spotify.username ?? "Spotify" })}
+              {t("music.spotify.connectedAs", { username: spotify.displayName ?? "Spotify" })}
             </span>
             <span>
               {t(

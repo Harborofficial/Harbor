@@ -278,8 +278,10 @@ pub async fn music_video_stream(
 }
 
 #[tauri::command]
-pub fn music_connections(state: tauri::State<'_, MusicState>) -> Vec<MusicConnection> {
-    state.registry.connections()
+pub async fn music_connections(state: tauri::State<'_, MusicState>) -> Result<Vec<MusicConnection>, String> {
+    // Avoid exposing librespot's immutable account ID in the Connections list.
+    state.spotify.refresh_profile_display_name().await;
+    Ok(state.registry.connections())
 }
 
 #[tauri::command]
