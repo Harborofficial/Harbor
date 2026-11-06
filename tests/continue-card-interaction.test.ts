@@ -107,7 +107,6 @@ function harness() {
       animeCwIdsVersion: () => 0,
       subscribeAnimeCwIds: () => () => {},
     },
-    "@/lib/anime-tracker-entry": { resolveTrackerAnimeEntry: async () => null },
     "@/lib/anime-detect": { isDetectedAnime: () => false },
     "@/lib/streams/anime-identity": {
       resolveAnimeIdentity: async () =>

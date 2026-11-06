@@ -104,7 +104,6 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
       isBlockedDiskCacheOptionLine: () => false,
     },
     "@/lib/native-memory": { getTotalPhysBytes: () => totalPhysBytes },
-    "./pause-trace": { traceFrameDrops() {}, tracePlayback() {} },
     "@/lib/subtitles/prepare": {
       prepareSubtitle: (input: { url: string }) => prepare(input),
       SubtitlePreparationError: RealSubtitlePreparationError,

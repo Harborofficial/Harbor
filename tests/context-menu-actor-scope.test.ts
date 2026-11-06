@@ -98,11 +98,6 @@ async function fixture({
     "@/components/player/copy-link-button": { copyText: async () => true },
     "@/components/lists/list-toast": { emitListToast: empty },
     "@/lib/deep-link": { shareDeepLink: empty },
-    "@/lib/queue": { queueAdd: empty, queueIndexOf: () => -1 },
-    "@/lib/membership-operations": {},
-    "@/lib/stremio": {},
-    "@/lib/queue-resolve-episode": {},
-    "@/hooks/use-queue-surface": { useQueueSurface: () => !pageShare && !ebookDetails },
     "@/lib/settings": {
       useSettings: () => ({ settings: { navCustomization: {} }, update: empty }),
     },
