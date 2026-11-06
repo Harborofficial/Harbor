@@ -698,7 +698,7 @@ dependencies = [
 
 [[package]]
 name = "harbor-music-module"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "libmpv2",
  "libmpv2-sys",
