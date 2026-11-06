@@ -262,12 +262,23 @@ export function TvCardArtwork({
   const topLeftSlots = curatedBadgeAtTopStart
     ? 1
     : (ribbonLeft ? 1 : 0) + (hasDub ? 1 : 0) + (hasStatusBadge ? 1 : 0) + (hasAwardBadge ? 1 : 0);
-  const topRightSlots =
-    (ribbonRight ? 1 : 0) +
-    (card.badgePlacement === "top" && scoreBadges.length > 0 ? 1 : 0) +
-    (curatedBadgeAtTopStart
-      ? (hasDub ? 1 : 0) + (hasStatusBadge ? 1 : 0) + (hasAwardBadge ? 1 : 0)
-      : 0);
+  const rightBadgeSlots = curatedBadgeAtTopStart
+    ? (hasDub ? 1 : 0) + (hasStatusBadge ? 1 : 0) + (hasAwardBadge ? 1 : 0)
+    : 0;
+  const awardTabTop = hasAwardWin && card.cardAwardDisplay === "tabs";
+  const scoreStackAtTop = !kids && scoreBadges.length > 0 && card.badgePlacement === "top";
+  // Curated TV badges move to the right to leave the ranking number visible.
+  // Scores must follow those badges (and any right-side ribbon) rather than
+  // sharing their first slot. Top-centered award tabs also need some space.
+  const scoreTopClass =
+    scoreStackAtTop && (rightBadgeSlots > 0 || ribbonRight || awardTabTop)
+      ? stackTop(
+          rightBadgeSlots + (rightBadgeSlots === 0 && !ribbonRight && awardTabTop ? 1 : 0),
+          ribbonRight,
+          "tv",
+        )
+      : undefined;
+  const topRightSlots = (ribbonRight ? 1 : 0) + rightBadgeSlots + (scoreStackAtTop ? 1 : 0);
   const watchlistPosition =
     card.watchlistBadge === "topStart" && topLeftSlots > 0
       ? `start-2 ${stackTop(topLeftSlots, false, "tv", true)}`
@@ -276,7 +287,6 @@ export function TvCardArtwork({
         : WATCHLIST_POS[card.watchlistBadge];
   const scoreStackAtBottom = !kids && scoreBadges.length > 0 && card.badgePlacement !== "top";
   const watchedPosition = `${scoreStackAtBottom ? "bottom-9" : "bottom-2"} end-2`;
-  const awardTabTop = hasAwardWin && card.cardAwardDisplay === "tabs";
 
   return (
     <>
@@ -353,6 +363,7 @@ export function TvCardArtwork({
           badges={scoreBadges}
           limit={scoreBadges.length}
           placement={card.badgePlacement}
+          topClass={scoreTopClass}
           shiftedFromEnd={inWatchlist && scoreStackAtBottom && card.watchlistBadge === "bottomEnd"}
         />
       )}
