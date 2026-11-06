@@ -267,7 +267,9 @@ test("Play refreshes the saved release and Choose another source opens an indepe
     await h.render();
     await h.click("button[title='Play']");
     assert.deepEqual(h.starts.at(-1).mode, {
-      autoPlay: false, resume: true, continuation: { id: "saved-aio" },
+      autoPlay: true,
+      resume: true,
+      continuation: { id: "saved-aio" },
     });
     await h.click("button[title='Choose another source']");
     assert.deepEqual(h.starts.at(-1).mode, { autoPlay: false, resume: false });

@@ -3,7 +3,7 @@ import {
   isPlaybackRedirectCandidate,
   resolvePlaybackRedirect,
 } from "@/lib/streams/playback-redirect";
-import { Check, X, Play as ContextPlay, ListVideo } from "lucide-react";
+import { Check, X, ListVideo } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
@@ -69,9 +69,7 @@ import {
   isPlaybackActorCurrent,
   readActualPlaybackForTarget,
 } from "@/lib/playback-history";
-import {
-  continuationFor, canReuseRecentRemotePlayback,
-} from "@/lib/player/continue-playback";
+import { continuationFor, canReuseRecentRemotePlayback } from "@/lib/player/continue-playback";
 import { readResumeEntry } from "@/lib/resume";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { localCwEntry } from "@/lib/local-cw";
@@ -665,7 +663,7 @@ export const ContinueCard = memo(function ContinueCard({
     if (actual.requiresSourceRefresh || src.streamRef?.infoHash) {
       assertCurrent();
       openPicker(meta, episode, {
-        autoPlay: false,
+        autoPlay: true,
         resume: true,
         continuation: continuationFor(actual, capturePlaybackActor()),
       });
