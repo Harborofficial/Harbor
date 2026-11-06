@@ -130,7 +130,6 @@ export type TvCardOptions = {
   showTraktBadge: boolean;
   showSimklBadge: boolean;
   showDubBadge: boolean;
-  cardBadgeLimit: number;
   showCardBadges: boolean;
   top10Ribbon: boolean;
   top10RibbonSide: "left" | "right";

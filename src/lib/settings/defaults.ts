@@ -23,7 +23,7 @@ export const DEFAULT: Settings = {
     showImdbBadge: true, showTmdbBadge: false, showRtBadge: true, showPopcornBadge: false, showMalBadge: true,
     animeCardRating: "mal", showMetacriticBadge: false, showLetterboxdBadge: false,
     showMdblistBadge: false, showTraktBadge: false, showSimklBadge: true, showDubBadge: true,
-    cardBadgeLimit: 3, showCardBadges: true, cardAwardDisplay: "badge", top10Ribbon: false, top10RibbonSide: "right",
+    showCardBadges: true, cardAwardDisplay: "badge", top10Ribbon: false, top10RibbonSide: "right",
     badgePlacement: "bottom", watchlistBadge: "topEnd",
     showLocalLibraryBadge: true, showWatchedBadge: true,
   },

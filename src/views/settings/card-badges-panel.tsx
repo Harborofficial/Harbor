@@ -340,7 +340,11 @@ export function CardScoresPreview({
           phase={phase}
           flags={flags}
           watchlistBadge={settings.watchlistBadge}
-          limit={Math.min(settings.cardBadgeLimit, Math.max(2, enabledBadgeCount))}
+          limit={
+            layout === "tv"
+              ? enabledBadgeCount
+              : Math.min(settings.cardBadgeLimit, Math.max(2, enabledBadgeCount))
+          }
           layout={layout}
         />
       </div>
@@ -353,10 +357,12 @@ export function CardBadgesPanel({
   settings,
   update,
   enabledBadgeCount,
+  layout = "poster",
 }: {
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
   enabledBadgeCount: number;
+  layout?: "poster" | "tv";
 }) {
   const t = useT();
   const placement: "top" | "bottom" = settings.badgePlacement === "top" ? "top" : "bottom";
@@ -380,16 +386,18 @@ export function CardBadgesPanel({
         />
       </SettingRow>
 
-      <SettingRow
-        icon={<Hash size={18} strokeWidth={2.2} />}
-        label={t("Max scores per card")}
-        desc={t(
-          "Caps how many score chips a poster shows. Extras drop off the end of the chip. You have {n} turned on.",
-          { n: enabledBadgeCount },
-        )}
-      >
-        <LimitScale value={effLimit} max={maxN} onChange={(n) => update({ cardBadgeLimit: n })} />
-      </SettingRow>
+      {layout === "poster" && (
+        <SettingRow
+          icon={<Hash size={18} strokeWidth={2.2} />}
+          label={t("Max scores per card")}
+          desc={t(
+            "Caps how many score chips a poster shows. Extras drop off the end of the chip. You have {n} turned on.",
+            { n: enabledBadgeCount },
+          )}
+        >
+          <LimitScale value={effLimit} max={maxN} onChange={(n) => update({ cardBadgeLimit: n })} />
+        </SettingRow>
+      )}
     </>
   );
 }

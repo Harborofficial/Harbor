@@ -343,7 +343,7 @@ export function TvCardArtwork({
       {!kids && scoreBadges.length > 0 &&(
         <ScoreStack
           badges={scoreBadges}
-          limit={card.cardBadgeLimit}
+          limit={scoreBadges.length}
           placement={card.badgePlacement}
           shiftedFromEnd={inWatchlist && scoreStackAtBottom && card.watchlistBadge === "bottomEnd"}
         />

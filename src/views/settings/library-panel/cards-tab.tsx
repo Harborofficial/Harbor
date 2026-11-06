@@ -58,6 +58,7 @@ export function CardsTab() {
 
   const prevBadgeCountRef = useRef(enabledBadgeCount);
   useEffect(() => {
+    if (layout !== "poster") return;
     const prev = prevBadgeCountRef.current;
     prevBadgeCountRef.current = enabledBadgeCount;
     if (enabledBadgeCount > prev && enabledBadgeCount > settings.cardBadgeLimit) {
@@ -213,8 +214,9 @@ export function CardsTab() {
           <RatingsMatrix settings={settings} update={updateCard} />
         <CardBadgesPanel
           settings={settings}
-            update={updateCard}
+          update={updateCard}
           enabledBadgeCount={enabledBadgeCount}
+          layout={layout}
         />
         {settings.showMalBadge && (
           <SettingRow
