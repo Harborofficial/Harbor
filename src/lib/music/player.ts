@@ -23,6 +23,11 @@ import { engineSnapshot } from "./decks";
 import { markManuallyQueued, queueInsertAfterManualBlock, withTrackNext } from "./queue-insert";
 import { queueTrackKey } from "./queue-order";
 import { adoptRequestedIdentity } from "./queue-source";
+import {
+  shouldReportSpotifyStartupTimeout,
+  SPOTIFY_STARTUP_TIMEOUT_MESSAGE,
+  SPOTIFY_STARTUP_TIMEOUT_MS,
+} from "./spotify-startup";
 import { explicitnessOf, rankByExplicitness } from "./explicit-preference";
 import {
   loadPinnedSources,
@@ -106,6 +111,7 @@ let endHandledAt = 0;
 let enginePrimed = false;
 const autoSkipped = new Set<string>();
 let recoverPlayback: ((message?: string) => void) | null = null;
+let spotifyStartupTimer: ReturnType<typeof setTimeout> | null = null;
 let activeProfile = "";
 let audioReady: {
   request: number;
@@ -392,6 +398,7 @@ export function resetMusicForProfile(): void {
   enginePrimed = false;
   audioReady = null;
   recoverPlayback = null;
+  clearSpotifyStartupWatchdog();
   publish({
     current: null,
     queue: [],
@@ -562,6 +569,38 @@ async function adoptNativePlayback(): Promise<void> {
   updateMediaSession(adopted.track);
 }
 
+function clearSpotifyStartupWatchdog(): void {
+  if (spotifyStartupTimer !== null) {
+    clearTimeout(spotifyStartupTimer);
+    spotifyStartupTimer = null;
+  }
+}
+
+function armSpotifyStartupWatchdog(request: number, track: MusicTrack): void {
+  clearSpotifyStartupWatchdog();
+  if (track.connectorId !== "spotify" || state.phase !== "resolving") return;
+  spotifyStartupTimer = setTimeout(() => {
+    spotifyStartupTimer = null;
+    if (
+      !shouldReportSpotifyStartupTimeout({
+        request,
+        currentRequest: playRequest,
+        expected: track,
+        current: state.current,
+        phase: state.phase,
+        casting: getMusicSpeakerState().active,
+        videoOwned: ownsMusicVideo(),
+      })
+    ) return;
+    console.warn("[music/spotify] accepted play request did not reach file-loaded");
+    if (recoverPlayback) recoverPlayback(SPOTIFY_STARTUP_TIMEOUT_MESSAGE);
+    else {
+      enginePrimed = false;
+      publish({ phase: "error", error: SPOTIFY_STARTUP_TIMEOUT_MESSAGE });
+    }
+  }, SPOTIFY_STARTUP_TIMEOUT_MS);
+}
+
 function handlePlaybackEvent(payload: MpvEvent): void {
   if (
     "trackId" in payload &&
@@ -618,6 +657,7 @@ function handlePlaybackEvent(payload: MpvEvent): void {
     return;
   }
   if (payload.event === "file-loaded") {
+    clearSpotifyStartupWatchdog();
     publish({ phase: observedPause ? "paused" : "playing", error: null });
     if (resumeAt && state.current && resumeAt.key === queueTrackKey(state.current)) {
       const position = resumeAt.position;
@@ -627,6 +667,7 @@ function handlePlaybackEvent(payload: MpvEvent): void {
     return;
   }
   if (payload.event === "player-failure") {
+    clearSpotifyStartupWatchdog();
     if (!ownsMusicVideo() && recoverPlayback) {
       recoverPlayback(typeof payload.reason === "string" ? payload.reason : undefined);
       return;
@@ -640,6 +681,7 @@ function handlePlaybackEvent(payload: MpvEvent): void {
     return;
   }
   if (payload.event === "end-file" && payload.reason === "error") {
+    clearSpotifyStartupWatchdog();
     if (!ownsMusicVideo() && recoverPlayback) recoverPlayback();
     else publish({ phase: "error", error: "Music playback could not start." });
     return;
@@ -891,6 +933,7 @@ export async function playMusic(
   if (explicit) pinSourceFor(track);
   const chosenByHand = explicitSource !== null && track.connectorId === explicitSource;
   const request = ++playRequest;
+  clearSpotifyStartupWatchdog();
   // Once admitted, this is the current song. Stopping recommendations leaves it playing;
   // starting a different song still supersedes every asynchronous step via playRequest.
   const ownsRequest = () => request === playRequest;
@@ -1159,6 +1202,7 @@ export async function playMusic(
     }
     if (!ownsRequest()) return;
     enginePrimed = true;
+    armSpotifyStartupWatchdog(request, track);
     if (deckAdoption.deck() !== 0 && !getMusicSpeakerState().active)
       publish({ phase: "playing", error: null });
     const upcoming = queue[queueIndex + 1];
@@ -1424,6 +1468,7 @@ export async function closeMusicPlayer(): Promise<void> {
   cancelMusicQueueAutomation();
   const request = ++playRequest;
   recoverPlayback = null;
+  clearSpotifyStartupWatchdog();
   speakerTransfer = true;
   try {
     if (getMusicSpeakerState().active) await stopMusicSpeaker();
