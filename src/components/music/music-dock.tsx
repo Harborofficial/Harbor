@@ -1,4 +1,5 @@
 import { trackViewportBottom } from "@/lib/viewport-bottom";
+import { musicDockCanAutoHide, MUSIC_DOCK_AUTO_HIDE_MS, MUSIC_DOCK_REVEAL_ZONE_PX, useMusicDockAutoHide } from "@/lib/music/dock-auto-hide";
 import { isMusicLiked } from "@/lib/music/liked";
 import { pushBackHandler } from "@/lib/back-intercept";
 import { useModalExit } from "@/components/modal-shell";
@@ -159,6 +160,9 @@ export function MusicDock() {
   const [queueOpen, setQueueOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [autoHidden, setAutoHidden] = useState(false);
+  const autoHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pointerOnDock = useRef(false);
   const [sourceOpen, setSourceOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const closeSource = useCallback(() => setSourceOpen(false), []);
@@ -206,6 +210,7 @@ export function MusicDock() {
   const { settings: dockSettings } = useSettings();
   const appearance = useMusicAppearance();
   const dockParts = useMusicDockLayout();
+  const autoHideEnabled = useMusicDockAutoHide();
   const { profile: recording, display } = useRecordingProfile(player.current);
   const artworkColor = useMusicArtworkColor(display?.artwork, appearance.artworkColors);
   const [scrub, setScrub] = useState<number | null>(null);
@@ -288,6 +293,47 @@ export function MusicDock() {
   const stuckError = player.error && !player.error.startsWith("music.cast.") ? player.error : null;
   const stuckKey = `${player.current?.connectorId ?? ""}:${player.current?.id ?? ""}`;
   const hasNext = player.queueIndex >= 0 && player.queueIndex < player.queue.length - 1;
+  const autoHideAllowed = musicDockCanAutoHide({
+    enabled: autoHideEnabled,
+    visible,
+    collapsed,
+    expanded,
+    queueOpen,
+    sourceOpen,
+    dragging,
+    closing,
+    error: Boolean(player.error),
+  });
+  const cancelAutoHide = useCallback(() => {
+    if (autoHideTimer.current !== null) {
+      window.clearTimeout(autoHideTimer.current);
+      autoHideTimer.current = null;
+    }
+  }, []);
+  const showAutoHiddenDock = useCallback(() => {
+    cancelAutoHide();
+    setAutoHidden(false);
+  }, [cancelAutoHide]);
+  const scheduleAutoHide = useCallback(() => {
+    cancelAutoHide();
+    if (!autoHideAllowed || pointerOnDock.current || dockRef.current?.contains(document.activeElement)) return;
+    autoHideTimer.current = window.setTimeout(() => {
+      autoHideTimer.current = null;
+      if (!pointerOnDock.current && !dockRef.current?.contains(document.activeElement)) {
+        setAutoHidden(true);
+      }
+    }, MUSIC_DOCK_AUTO_HIDE_MS);
+  }, [autoHideAllowed, cancelAutoHide]);
+  useEffect(() => {
+    if (!autoHideAllowed) {
+      cancelAutoHide();
+      setAutoHidden(false);
+      return;
+    }
+    if (!autoHidden) scheduleAutoHide();
+    return cancelAutoHide;
+  }, [autoHideAllowed, autoHidden, scheduleAutoHide, cancelAutoHide]);
+  useEffect(() => () => cancelAutoHide(), [cancelAutoHide]);
   useEffect(() => {
     if (!stuckError || !hasNext || stayed === stuckKey) {
       setSkipIn(null);
@@ -328,11 +374,11 @@ export function MusicDock() {
       root.dataset.musicDockActive = "on";
       const fallback = collapsed ? TAB_HEIGHT : DOCK_HEIGHT;
       const publish = (height: number) => {
-        root.style.setProperty("--harbor-music-dock", `${Math.max(0, Math.round(height))}px`);
+        root.style.setProperty("--harbor-music-dock", `${autoHidden ? 0 : Math.max(0, Math.round(height))}px`);
         // Minimised, the tab floats over the page instead of shortening it.
         root.style.setProperty(
           "--harbor-dock-gap",
-          collapsed
+          collapsed || autoHidden
             ? "var(--harbor-viewport-bottom, 0px)"
             : `calc(var(--harbor-music-dock, 0px) + var(--harbor-viewport-bottom, 0px))`,
         );
@@ -367,7 +413,7 @@ export function MusicDock() {
       root.style.removeProperty("--harbor-music-dock");
       root.style.removeProperty("--harbor-dock-gap");
     };
-  }, [visible, collapsed]);
+  }, [visible, collapsed, autoHidden]);
 
   useEffect(() => {
     if (scrub === null || dragging) return;
@@ -540,12 +586,41 @@ export function MusicDock() {
   }
 
   return (
-    <aside
+    <>
+      {autoHidden && (
+        <div
+          aria-hidden="true"
+          data-music-dock-reveal
+          className="music-dock-reveal-zone"
+          style={{
+            insetInlineStart: inset,
+            insetInlineEnd: 0,
+            height: MUSIC_DOCK_REVEAL_ZONE_PX,
+            bottom: "var(--harbor-viewport-bottom, 0px)",
+          }}
+          onPointerEnter={showAutoHiddenDock}
+          onPointerMove={showAutoHiddenDock}
+        />
+      )}
+      <aside
       key="music-dock-bar"
       ref={dockRef}
       data-music-dock
+      data-auto-hidden={autoHidden || undefined}
       data-closing={collapseExit.closing || undefined}
       data-art-colors={artworkColor ? "on" : undefined}
+      onPointerEnter={() => {
+        pointerOnDock.current = true;
+        showAutoHiddenDock();
+      }}
+      onPointerLeave={() => {
+        pointerOnDock.current = false;
+        scheduleAutoHide();
+      }}
+      onFocusCapture={showAutoHiddenDock}
+      onBlurCapture={() => {
+        window.setTimeout(scheduleAutoHide, 0);
+      }}
       role={expanded ? "dialog" : undefined}
 
       aria-label={t(expanded ? "music.now.title" : "music.player")}
@@ -560,7 +635,7 @@ export function MusicDock() {
             : {}),
         } as CSSProperties
       }
-      className="@container fixed bottom-0 z-[120] border-t border-edge bg-canvas text-ink"
+      className="music-dock-auto-hide @container fixed bottom-0 z-[120] border-t border-edge bg-canvas text-ink"
     >
       {appearance.gifVisualizer && appearance.gifId ? (
         !expanded && <MusicGifVisualizer track={current} playing={player.phase === "playing"} />
@@ -1087,6 +1162,7 @@ export function MusicDock() {
           }}
         />
       )}
-    </aside>
+      </aside>
+    </>
   );
 }
