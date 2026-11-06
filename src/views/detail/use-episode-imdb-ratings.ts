@@ -5,6 +5,7 @@ import {
   subscribeHarborImdbEpisodes,
 } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
+import { loadOmdbSeasonsBounded } from "@/lib/omdb-season-queue";
 
 const NO_RATINGS = new Map<string, number>();
 
@@ -43,9 +44,15 @@ export function useHarborEpisodeRatings(imdbId: string | null): ReadonlyMap<stri
   return ratings;
 }
 
-export function useEpisodeImdbRatings( imdbId: string | null, seasons: number | readonly number[], omdbKey: string, ) {
+export function useEpisodeImdbRatings(
+  imdbId: string | null,
+  seasons: number | readonly number[],
+  omdbKey: string,
+) {
   const requestedSeasons = [...new Set(typeof seasons === "number" ? [seasons] : seasons)];
-  const key = JSON.stringify([imdbId, requestedSeasons, omdbKey]);
+  const seasonsKey = JSON.stringify(requestedSeasons);
+  // Keep already loaded seasons visible as a user scrolls through an all-episode order.
+  const key = JSON.stringify([imdbId, omdbKey]);
   const [result, setResult] = useState({
     key: "",
     harbor: new Map<string, number>(),
@@ -80,23 +87,22 @@ export function useEpisodeImdbRatings( imdbId: string | null, seasons: number | 
         .then((ratings) => publish("harbor", ratings))
         .catch(() => {});
       if (omdbKey) {
-        for (const season of requestedSeasons) {
-          if (season < 1) continue;
-          void omdbSeasonRatings(omdbKey, imdbId, season)
-            .then((ratings) =>
-              publish(
-                "omdb",
-                new Map([...ratings].map(([ep, rating]) => [`${season}:${ep}`, rating])),
-              ),
-            )
-            .catch(() => {});
-        }
+        void loadOmdbSeasonsBounded(
+          requestedSeasons,
+          (season) => omdbSeasonRatings(omdbKey, imdbId, season),
+          (season, ratings) =>
+            publish(
+              "omdb",
+              new Map([...ratings].map(([ep, rating]) => [`${season}:${ep}`, rating])),
+            ),
+          () => cancelled,
+        );
       }
     }
     return () => {
       cancelled = true;
     };
-  }, [key, imdbId, omdbKey]);
+  }, [key, seasonsKey, imdbId, omdbKey]);
   return useMemo(() => {
     if (result.key !== key) return new Map<string, number>();
     return new Map([...result.omdb, ...result.harbor]);

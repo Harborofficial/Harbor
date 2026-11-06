@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { EpisodeJumper } from "@/components/episode-jumper";
 import { providerForModel } from "@/lib/ai-models";
@@ -48,6 +48,7 @@ import { OrderedEpisodes } from "./series-episodes/ordered-episodes";
 import { useEpisodeOrder } from "./series-episodes/use-episode-order";
 import { useEpisodeEnrich } from "./series-episodes/use-episode-enrich";
 import { useEpisodeImdbRatings } from "./use-episode-imdb-ratings";
+import { selectOmdbSeasonsForOrder } from "@/lib/omdb-season-queue";
 import { useWatchedSets } from "./series-episodes/use-watched-sets";
 import { useEpisodeProgressMap } from "./series-episodes/use-episode-progress-map";
 import { useTvdbSeasonTypes } from "./series-episodes/use-tvdb-season-types";
@@ -431,11 +432,33 @@ export function SeriesEpisodes({
     : ordering
       ? (ordering.bySeason.get(orderSeasonEff) ?? [])
       : [];
+  const ratingScope = JSON.stringify([meta.id, settings.tvdbSeasonType, orderSeasonEff]);
+  const [visibleRatingSeasons, setVisibleRatingSeasons] = useState<{
+    scope: string;
+    seasons: number[];
+  }>({ scope: "", seasons: [] });
+  const onRatingSeasonVisible = useCallback(
+    (season: number) => {
+      setVisibleRatingSeasons((previous) => {
+        const current = previous.scope === ratingScope ? previous.seasons : [];
+        return current.includes(season)
+          ? previous
+          : { scope: ratingScope, seasons: [...current, season] };
+      });
+    },
+    [ratingScope],
+  );
+  const canonicalRatingSeasons = orderActive
+    ? orderedEpsRaw.map((episode) => episode.seasonNumber)
+    : [active];
+  const selectedRatingSeasons = selectOmdbSeasonsForOrder(
+    canonicalRatingSeasons,
+    visibleRatingSeasons.scope === ratingScope ? visibleRatingSeasons.seasons : [],
+    resumeSeason,
+  );
   const orderedImdbRatings = useEpisodeImdbRatings(
     imdbId,
-    orderActive
-      ? [...new Set(orderedEpsRaw.map((episode) => episode.seasonNumber))]
-      : [active],
+    selectedRatingSeasons.seasons,
     settings.omdbKey,
   );
   const orderedEps = useMemo(() => {
@@ -497,7 +520,8 @@ export function SeriesEpisodes({
                 : "und",
       };
       if (ep.imdbRating == null) {
-        const r = orderedImdbRatings.get(`${ep.seasonNumber}:${ep.episodeNumber}`) ??
+        const r =
+          orderedImdbRatings.get(`${ep.seasonNumber}:${ep.episodeNumber}`) ??
           imdbRatings.get(`${ep.seasonNumber}:${ep.episodeNumber}`);
         if (r != null && r > 0) next = { ...next, imdbRating: r };
       }
@@ -690,6 +714,7 @@ export function SeriesEpisodes({
         <>
           {altActive && (
             <OrderedEpisodes
+              key={`${ratingScope}:${source}`}
               meta={meta}
               episodes={visibleOrderedEps}
               loading={orderedLoading}
@@ -701,6 +726,9 @@ export function SeriesEpisodes({
               cinemetaVideos={cinemetaVideos}
               seriesImdbId={imdbId}
               onContextMenu={openWatchedMenu}
+              onSeasonVisible={
+                orderActive && selectedRatingSeasons.lazy ? onRatingSeasonVisible : undefined
+              }
             />
           )}
 
