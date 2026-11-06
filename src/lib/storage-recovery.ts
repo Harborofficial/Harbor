@@ -1,7 +1,8 @@
 // What may be evicted when the store is full. Prunable means the network or a recomputation can
 // give it back; anything the user made or did stays, however big it is: playback history, last
 // season, live-TV watch counts and manual EPG matches, Discover's learned affinity, uploaded
-// stream badges and their rules, the legacy parental pin, the build rating. Open the module that
+// stream badges and their rules, the legacy parental pin, the build rating, completed library
+// repairs, and OMDb's daily request budget. Open the module that
 // owns a key before adding it here - backup.ts groups by prefix, so its sections mix real records
 // with caches and cannot answer this on their own. Keys of a few KB are not worth the risk either
 // way; this list is for what actually fills the store.
@@ -10,7 +11,10 @@
 // live cache silently stops being prunable the day its owner bumps it, which is how seven of
 // these were unreachable until now.
 const PRUNABLE_PREFIXES = [
-  "harbor.omdb.",
+  // Only OMDb's rating and negative-result caches are rebuildable. The daily
+  // request budget and key-validity state must survive recovery.
+  "harbor.omdb.v",
+  "harbor.omdb.misses",
   "harbor.iptv.hydration.v",
   "harbor.dead-streams.v",
   "harbor.discover.events.v",
@@ -51,7 +55,6 @@ const PRUNABLE_PREFIXES = [
   "harbor.ebook.nyt.v",
   "harbor.ebook.openlibrary.v",
   "harbor.sports.board.v",
-  "harbor.libraryNameRepair.v",
   "harbor.tvdbo.",
 ];
 

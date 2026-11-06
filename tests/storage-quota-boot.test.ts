@@ -40,6 +40,17 @@ test("a localStorage that rejects every write is pruned back into a writable sta
   const store = installQuotaStorage([
     ["harbor.playback-history.v1.p_demo", filler(400_000)],
     ["harbor.streamBadges.v1", filler(250_000)],
+    ["harbor.libraryNameRepair.v1.p_demo", "1699999999999"],
+    [
+      "harbor.omdb.budget",
+      JSON.stringify({
+        used: 920,
+        limit: 1000,
+        resetAt: 2000000000000,
+        exhausted: false,
+        keyInvalid: false,
+      }),
+    ],
     ["harbor.settings", filler(200_000)],
     ["harbor.mal.hero.v1", filler(100_000)],
   ]);
@@ -56,6 +67,8 @@ test("a localStorage that rejects every write is pruned back into a writable sta
   assert.equal(store.has("harbor.mal.hero.v1"), false);
   assert.ok(store.has("harbor.playback-history.v1.p_demo"));
   assert.ok(store.has("harbor.streamBadges.v1"));
+  assert.equal(store.get("harbor.libraryNameRepair.v1.p_demo"), "1699999999999");
+  assert.equal(JSON.parse(store.get("harbor.omdb.budget")!).used, 920);
   assert.ok(store.has("harbor.settings"));
 });
 
@@ -98,7 +111,21 @@ test("the full sweep evicts caches and nothing the user did", async () => {
     ["harbor.parental", filler(1_000)],
     ["harbor.build.rating.v1", filler(1_000)],
     ["harbor.streamBadges.v1", filler(1_000)],
+    ["harbor.libraryNameRepair.v1.p_demo", "1699999999999"],
+    ["harbor.libraryNameRepair.v99.p_demo", "1699999999999"],
+    [
+      "harbor.omdb.budget",
+      JSON.stringify({
+        used: 920,
+        limit: 1000,
+        resetAt: 2000000000000,
+        exhausted: false,
+        keyInvalid: false,
+      }),
+    ],
     ["harbor.settings", filler(1_000)],
+    ["harbor.omdb.v1", filler(1_000)],
+    ["harbor.omdb.misses", filler(1_000)],
     ["harbor.mal.hero.v1", filler(1_000)],
     ["harbor.tvdbo.tt0903747", filler(1_000)],
   ]);
@@ -112,6 +139,9 @@ test("the full sweep evicts caches and nothing the user did", async () => {
     "harbor.iptv.epgmap.v1",
     "harbor.iptv.stats.v1",
     "harbor.lastseason.v1",
+    "harbor.libraryNameRepair.v1.p_demo",
+    "harbor.libraryNameRepair.v99.p_demo",
+    "harbor.omdb.budget",
     "harbor.parental",
     "harbor.playback-history.v1.p_demo",
     "harbor.settings",
