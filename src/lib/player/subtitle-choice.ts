@@ -30,27 +30,42 @@ function sameSource(source: string | undefined, saved: string): boolean {
 type SubtitleCacheContext = { mediaKey: string; streamKey?: string };
 
 function matchesCachedSubtitleOrigin(
-  choice: Pick<TrackInfo, "subId" | "provider">,
+  choice: Pick<PlaybackSubtitleChoice, "subId" | "provider" | "sourceFingerprint">,
   source: string | undefined,
   remembered?: RememberedSub | null,
   context?: SubtitleCacheContext,
 ): boolean {
-  const format = /\.(srt|vtt|ass|ssa)$/i.exec(remembered?.source ?? "")?.[1]?.toLowerCase() as
+  const file = remembered?.source?.split(/[\\/]/).pop() ?? "";
+  const format = /^selected-[a-f0-9]{8}\.(srt|vtt|ass|ssa)$/i.exec(file)?.[1]?.toLowerCase() as
     | "srt"
     | "vtt"
     | "ass"
     | "ssa"
     | undefined;
-  return (
-    !!context &&
-    !!remembered?.imported &&
-    !remembered.off &&
-    !!source &&
-    !!format &&
-    !/^(https?|blob|data|memory|asset):/i.test(remembered.source ?? "") &&
-    remembered.streamKey === context.streamKey &&
-    remembered.source?.split(/[\\/]/).pop() ===
+  if (
+    !context ||
+    !remembered?.imported ||
+    remembered.off ||
+    !format ||
+    !/^(?:[a-z]:[\\/]|[\\/]|file:\/\/)/i.test(remembered.source ?? "") ||
+    remembered.streamKey !== context.streamKey ||
+    remembered.subId !== choice.subId ||
+    remembered.provider !== choice.provider
+  )
+    return false;
+
+  // An exact origin URL can verify the managed cache filename. Redacted
+  // histories instead prove the same origin using its SHA-256 fingerprint,
+  // captured when the remote subtitle was copied into the local cache.
+  if (source)
+    return (
+      file ===
       selectedSubtitleCacheName(context.mediaKey, context.streamKey, { ...choice, source }, format)
+    );
+  return (
+    !!choice.sourceFingerprint &&
+    /^[a-f0-9]{64}$/.test(choice.sourceFingerprint) &&
+    remembered.sourceFingerprint === choice.sourceFingerprint
   );
 }
 

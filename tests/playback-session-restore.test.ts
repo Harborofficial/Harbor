@@ -6,7 +6,12 @@ import type { TrackInfo } from "../src/lib/player/bridge";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
 import { selectPlaybackAudio } from "../src/lib/player/audio-choice";
-import { selectedSubtitleCacheName } from "../src/lib/subtitles/selected-subtitle-cache";
+import {
+  selectedSubtitleCacheName,
+  subtitleCacheOriginFingerprint,
+} from "../src/lib/subtitles/selected-subtitle-cache";
+import { persistablePlaybackSubtitle } from "../src/lib/player/playback-history-source";
+import type { PlayerSrc } from "../src/lib/view";
 import { rememberedFromChoice } from "../src/lib/subtitles/subtitle-memory";
 
 const embedded = (id: string, title: string): TrackInfo => ({
@@ -219,10 +224,13 @@ function latePreplayCacheFixture() {
     "srt",
   );
   const cached = {
-    ...saved,
-    source: `C:/fixture/selected/${filename}`,
-    format: "srt" as const,
-    imported: true,
+    ...rememberedFromChoice({
+      ...saved,
+      source: `C:/fixture/selected/${filename}`,
+      format: "srt",
+      imported: true,
+      sourceFingerprint: subtitleCacheOriginFingerprint({ source: saved.source }),
+    }),
     updatedAt: Date.now(),
   };
   return { saved, cached };
@@ -236,6 +244,36 @@ test("reopening uses a proven late pre-play cache even when the scoped actual sn
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(h.adds, [cached.source]);
   assert.deepEqual(h.timers, []);
+});
+
+test("redacted playback history restores its exact cached remote subtitle", async () => {
+  const { saved, cached } = latePreplayCacheFixture();
+  const sanitized = persistablePlaybackSubtitle(saved, {
+    url: "https://fixture.invalid/video.mp4",
+    meta: { id: "fixture", name: "Fixture", type: "movie" },
+  } as PlayerSrc)!;
+  assert.equal(sanitized.source, undefined, "the remote subtitle URL must not be persisted");
+  assert.ok(sanitized.sourceFingerprint);
+  assert.equal(sanitized.sourceFingerprint, cached.sourceFingerprint);
+
+  const h = restoreHarness(cached, []);
+  Object.assign(h.scope, { rememberedSession: { subtitle: sanitized } });
+  h.run();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(h.adds, [cached.source]);
+
+  for (const bad of [
+    { ...cached, sourceFingerprint: "a".repeat(64) },
+    { ...cached, subId: "another-subtitle" },
+    { ...cached, provider: "another-provider" },
+    { ...cached, source: "C:/fixture/unrelated.srt" },
+  ]) {
+    const wrong = restoreHarness(bad, []);
+    Object.assign(wrong.scope, { rememberedSession: { subtitle: sanitized } });
+    wrong.run();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.deepEqual(wrong.adds, [], "an unverified subtitle must not be restored");
+  }
 });
 
 test("late cache preference does not cross a different stream, unrelated cached file, or stale actor", async () => {

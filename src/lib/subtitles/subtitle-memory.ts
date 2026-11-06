@@ -26,6 +26,8 @@ export type RememberedSub = {
   matchConfidence?: SubtitleMatchConfidence;
   streamKey?: string;
   imported?: boolean;
+  /** Exact SHA-256 of the original remote source; never the URL itself. */
+  sourceFingerprint?: string;
   updatedAt: number;
 };
 
@@ -50,6 +52,7 @@ export type SubChoiceInput = {
   streamKey?: string;
   imported?: boolean;
   source?: string;
+  sourceFingerprint?: string;
 };
 
 type Store = Record<string, RememberedSub>;
@@ -172,6 +175,11 @@ export function rememberedFromChoice(choice: SubChoiceInput): Omit<RememberedSub
     matchConfidence: choice.matchConfidence,
     streamKey: choice.streamKey,
     imported: choice.imported === true || undefined,
+    sourceFingerprint:
+      typeof choice.sourceFingerprint === "string" &&
+      /^[a-f0-9]{64}$/.test(choice.sourceFingerprint)
+        ? choice.sourceFingerprint
+        : undefined,
   };
 }
 
