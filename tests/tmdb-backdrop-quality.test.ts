@@ -63,6 +63,12 @@ test("TMDB size conversion handles original, width, and height URLs without chan
     tmdbBackdropAtSize("https://other.example/backdrop.jpg", "w300"),
     "https://other.example/backdrop.jpg",
   );
+  // another host can serve a /t/p/<size>/ path of its own
+  assert.equal(
+    tmdbBackdropAtSize("https://cdn.example/t/p/w500/image.jpg", "original"),
+    "https://cdn.example/t/p/w500/image.jpg",
+  );
+  assert.equal(tmdbBackdropAtSize("/t/p/w500/image.jpg", "original"), "/t/p/w500/image.jpg");
 });
 
 test("detail backdrop URL selection respects the full-quality setting", () => {
