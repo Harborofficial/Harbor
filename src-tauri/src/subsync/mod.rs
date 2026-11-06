@@ -1,6 +1,8 @@
 pub mod analysis_control;
 mod analysis_windows;
 pub mod cache_audio;
+mod cache_subtitles;
+pub mod playback_vad;
 pub mod embedded_reference;
 pub(crate) mod correlate;
 mod extract;

@@ -1843,6 +1843,7 @@ pub fn run() {
             subsync::audio_tracks::audio_probe_tracks,
             subsync::fingerprint::compute_chromaprint,
             subsync::asr::asr_transcribe_windows,
+            subsync::playback_vad::subsync_playback_speech,
             subsync::asr::asr_verify,
             sub_extract::subtitle_extract,
             sub_extract::subtitle_extract_ass,
