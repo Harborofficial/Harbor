@@ -10,7 +10,7 @@ function fixture(grid: any) {
   const slots: any[] = [], effects: (() => void)[] = [];
   let slot = 0, tree: any, observer: any;
   const jsx = (type: any, props: any) => {
-    if (props?.ref) props.ref.current = {};
+    if (props?.ref) props.ref.current = { scrollTo() {} };
     return { type, props };
   };
   const same = (a?: any[], b?: any[]) => a && b && a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
@@ -37,7 +37,7 @@ function fixture(grid: any) {
       },
     },
     "react/jsx-runtime": { jsx, jsxs: jsx, Fragment: "fragment" },
-    "lucide-react": { ArrowLeft: "arrow" },
+    "lucide-react": { ArrowLeft: "arrow", ChevronDown: "chevron", ListFilter: "filter" },
     "@/components/back-to-top": { BackToTop: "back-top" },
     "@/components/pick-card": { PickCard: "card" },
     "@/components/row": { TV_CARD_MIN: 250 },
@@ -69,7 +69,21 @@ function fixture(grid: any) {
     visit(tree); return ids;
   };
   render();
-  return { render, cards, active: () => observer?.active ?? false,
+  const changeFilter = (value: string) => {
+    let select: any;
+    const visit = (node: any) => {
+      if (Array.isArray(node)) node.forEach(visit);
+      else if (node?.props) {
+        if (node.type === "select") select = node;
+        visit(node.props.children);
+      }
+    };
+    visit(tree);
+    assert.ok(select, "genre selector is rendered");
+    select.props.onChange({ target: { value } });
+    render();
+  };
+  return { render, cards, changeFilter, active: () => observer?.active ?? false,
     intersect: () => { if (observer?.active) observer.callback([{ isIntersecting: true }]); },
     async next() { this.intersect(); await settle(); render(); },
   };
@@ -156,3 +170,42 @@ for (const path of ["src/views/home/customizable-rows.tsx", "src/components/cata
     }
   });
 }
+
+test("changing genre resets pagination and ignores the previous genre's late page", async () => {
+  let release!: (value: any[]) => void;
+  const calls: number[][] = [];
+  const h = fixture({ title: "Catalog", initial: [meta(1)],
+    fetcher: () => new Promise(resolve => { release = resolve; }),
+    filter: { label: "Genre", options: [
+      { value: "", label: "All" },
+      { value: "drama", label: "Drama", fetcher: async (page: number, loaded: number) => {
+        calls.push([page, loaded]); return page === 1 ? [meta(2)] : [];
+      } },
+    ] },
+  });
+  h.intersect();
+  h.changeFilter("drama");
+  release([meta(99)]); await settle(); h.render();
+  assert.deepEqual(h.cards(), []);
+  await h.next();
+  assert.deepEqual(calls, [[1, 0]]);
+  assert.deepEqual(h.cards(), ["2"]);
+});
+
+test("changing to a preview-seeded genre refills its first complete page", async () => {
+  const calls: number[][] = [];
+  const h = fixture({ title: "Catalog", initial: [meta(1)], fetcher: async () => [],
+    filter: { label: "Genre", options: [
+      { value: "", label: "All" },
+      { value: "drama", label: "Drama", initial: [meta(3)], initialPage: 0,
+        fetcher: async (page: number, loaded: number) => {
+          calls.push([page, loaded]); return [meta(2), meta(3)];
+        } },
+    ] },
+  });
+  h.changeFilter("drama");
+  assert.deepEqual(h.cards(), ["3"]);
+  await h.next();
+  assert.deepEqual(calls, [[1, 0]]);
+  assert.deepEqual(h.cards(), ["3", "2"]);
+});

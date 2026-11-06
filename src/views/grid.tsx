@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ListFilter } from "lucide-react";
 import { BackToTop } from "@/components/back-to-top";
 import { PickCard } from "@/components/pick-card";
 import { TV_CARD_MIN } from "@/components/row";
@@ -18,27 +18,56 @@ export function GridView({ grid }: { grid: GridSpec }) {
   const scrollRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [metas, setMetas] = useState<Meta[]>(grid.initial ?? []);
-  const initialPage = grid.initialPage ?? (grid.initial?.length ? 1 : 0);
+  const [filterValue, setFilterValue] = useState(grid.filter?.initialValue ?? "");
+
+  const filterOption = grid.filter?.options.find((option) => option.value === filterValue);
+  const fetcher = filterOption?.fetcher ?? grid.fetcher;
+
+  const initialPage =
+    filterOption?.initialPage ??
+    grid.initialPage ??
+    ((filterOption?.initial ?? grid.initial)?.length ? 1 : 0);
+
   const [page, setPage] = useState(initialPage);
   const [done, setDone] = useState(initialPage >= PAGE_CAP);
+
   // Preview seeds are not complete pages. Provider offsets count raw results,
   // including duplicates, rather than the number of visible cards.
-  const loadedRef = useRef(initialPage === 0 ? 0 : (grid.initial?.length ?? 0));
+  const loadedRef = useRef(
+    initialPage === 0 ? 0 : ((filterOption?.initial ?? grid.initial)?.length ?? 0),
+  );
   const loadingRef = useRef(false);
+
+  const changeFilter = (value: string) => {
+    const option = grid.filter?.options.find((candidate) => candidate.value === value);
+    const initial = option?.initial ?? [];
+    const nextInitialPage = option?.initialPage ?? (initial.length > 0 ? 1 : 0);
+
+    loadingRef.current = false;
+    loadedRef.current = nextInitialPage === 0 ? 0 : initial.length;
+
+    setFilterValue(value);
+    setMetas(initial);
+    setPage(nextInitialPage);
+    setDone(nextInitialPage >= PAGE_CAP);
+
+    scrollRef.current?.scrollTo({ top: 0 });
+  };
   useScrollMemory(`grid:${grid.title}`, scrollRef);
 
   useEffect(() => {
     if (done) return;
     const el = sentinelRef.current;
     if (!el) return;
+    let cancelled = false;
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries[0]?.isIntersecting || loadingRef.current) return;
         loadingRef.current = true;
         const next = page + 1;
-        grid
-          .fetcher(next, loadedRef.current)
+        fetcher(next, loadedRef.current)
           .then((batch) => {
+            if (cancelled) return;
             setPage(next);
             loadedRef.current += batch.length;
             if (batch.length === 0 || next >= PAGE_CAP) setDone(true);
@@ -50,16 +79,21 @@ export function GridView({ grid }: { grid: GridSpec }) {
             });
             if (fresh.length > 0) setMetas((prev) => [...prev, ...fresh]);
           })
-          .catch(() => setDone(true))
+          .catch(() => {
+            if (!cancelled) setDone(true);
+          })
           .finally(() => {
-            loadingRef.current = false;
+            if (!cancelled) loadingRef.current = false;
           });
       },
       { rootMargin: "900px 0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
-  }, [grid, page, done, metas]);
+    return () => {
+      cancelled = true;
+      io.disconnect();
+    };
+  }, [fetcher, page, done, metas]);
 
   const hero = grid.kidsHero;
   const bgArt = metas.find((m) => m.background)?.background?.replace("/t/p/w780/", "/t/p/w1280/");
@@ -154,6 +188,28 @@ export function GridView({ grid }: { grid: GridSpec }) {
             <span className="text-[14px] text-ink-subtle">
               {metas.length} {metas.length === 1 ? t("title") : t("titles")}
             </span>
+            {grid.filter && grid.filter.options.length > 1 && (
+              <label className="relative ms-auto flex h-10 items-center gap-2 rounded-full border border-edge-soft bg-elevated/40 ps-3.5 pe-9 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:bg-elevated hover:text-ink">
+                <ListFilter size={15} className="text-ink-subtle" />
+                <span className="sr-only">{grid.filter.label}</span>
+                <select
+                  aria-label={grid.filter.label}
+                  value={filterValue}
+                  onChange={(event) => changeFilter(event.target.value)}
+                  className="appearance-none bg-transparent pe-1 text-inherit outline-none"
+                >
+                  {grid.filter.options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={15}
+                  className="pointer-events-none absolute end-3.5 text-ink-subtle"
+                />
+              </label>
+            )}
           </div>
           {body}
         </div>

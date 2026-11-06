@@ -197,8 +197,23 @@ export function CatalogBrowser() {
   const browse = () => {
     if (!selected) return;
     openGrid({
-      title: genre ? `${selected.name} · ${genre}` : selected.name,
+      title: selected.name,
       fetcher: browseFetcher(selected, genre),
+      filter:
+        selected.genres.length > 0
+          ? {
+              label: t("Filter"),
+              initialValue: genre ?? "",
+              options: [
+                { value: "", label: t("All genres"), fetcher: browseFetcher(selected, null) },
+                ...selected.genres.map((value) => ({
+                  value,
+                  label: value,
+                  fetcher: browseFetcher(selected, value),
+                })),
+              ],
+            }
+          : undefined,
     });
   };
 
