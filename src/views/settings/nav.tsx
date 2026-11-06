@@ -8342,7 +8342,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Award display on cards",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: [
       "award display",
       "award tab",
@@ -8359,7 +8359,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Award tab position",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: [
       "award tab position",
       "above ratings",
@@ -8373,21 +8373,21 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Top 10 ribbon",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["top 10 ribbon", "top ten", "corner ribbon", "top10", "ribbon badge", "rank ribbon"],
   },
   {
     label: "Ribbon corner",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["ribbon corner", "top left", "top right", "ribbon side", "ribbon placement"],
   },
   {
     label: "Show DUB badge on anime cards",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: [
       "dub badge",
       "anime dub",
@@ -8409,7 +8409,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Watched badge",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: [
       "watched badge",
       "seen badge",
@@ -10127,7 +10127,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Watchlist bookmark",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["bookmark", "watchlist marker", "saved marker", "corner bookmark"],
   },
   {
@@ -10209,7 +10209,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Show an on disk badge on cards",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["on disk", "local file badge", "downloaded badge", "have it locally"],
   },
   {
@@ -10333,7 +10333,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Bookmark corner",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["bookmark corner", "marker position", "watchlist corner", "which corner"],
   },
   {

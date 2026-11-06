@@ -73,7 +73,10 @@ export function CardsTab() {
         options={[{ value: "poster", label: t("Poster") }, { value: "tv", label: t("TV") }]}
         onChange={(v) => setLayout(v as "poster" | "tv")}
       />
-      <Section title={layout === "poster" ? t("On the poster") : t("On the TV")}>
+      <Section
+        title={layout === "poster" ? t("On the poster") : t("On the TV")}
+        anchorTitle="Card overlays"
+      >
         <ToggleRow
           label={t("Show tags on cards")}
           leading={<Tag size={18} strokeWidth={2} />}
