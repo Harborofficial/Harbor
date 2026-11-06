@@ -679,6 +679,10 @@ test("franchise loading reuses the existing localized and English requests and r
     "@/lib/providers/anime-kitsu-addon": { animeKitsuMeta: async () => null },
     "@/lib/providers/kitsu": { kitsuEpisodes: async () => [episode()] },
     "@/lib/providers/anime-mapping": {
+      animeMappingByKitsu: async () => ({
+        mappings: { themoviedb_id: 123 },
+        episodes: { 13: { seasonNumber: 2, episodeNumber: 13 } },
+      }),
       kitsuToTvdb: async () => 42,
       applyAnidbSeasonWindow: async () => {},
     },

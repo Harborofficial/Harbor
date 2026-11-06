@@ -347,6 +347,7 @@ export type Settings = {
   streamCacheMaxGb: number;
   deleteWatchedDownloads: boolean;
   streamCacheDir: string;
+  /** Legacy custom mpv cache folder; only used to clean up old leftovers. */
   playbackCacheDir: string;
   remoteStreamServerUrl: string;
   remoteStreamServerStrict: boolean;
@@ -470,6 +471,8 @@ export type Settings = {
   aiGroqKey: string;
   jinaKey: string;
   aiWebSearch: boolean;
+  aiWebSource: "jina" | "keenable";
+  keenableKey: string;
   playerD3d11Flip: boolean;
   mpvExtraOptions: string;
   mpvQuality: "balanced" | "performance" | "quality";
@@ -588,6 +591,7 @@ export type Settings = {
   musicSpeedPresets: MusicSpeedPreset[];
   homeMode: "harbor" | "classic";
   classicCatalogSource: "all" | "stremio" | "nuvio";
+  nuvioAddonMode: "separate" | "combined";
   homeShowAllAddonRows: boolean;
   homeNewEpisodes: boolean;
   libraryBookmarkedOnly: boolean;

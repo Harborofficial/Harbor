@@ -55,6 +55,17 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
   const handlers = new Map<string, (event: { payload: unknown }) => void>();
   const commands: Array<{ command: string; args: Record<string, unknown> }> = [];
   const errors: string[] = [];
+  // Fixed RAM and buffer values keep playback tests independent of the test machine.
+  const totalPhysBytes = 16 * 1024 ** 3;
+  const autoBufferProfile = () => ({
+    cacheSecs: 300,
+    readaheadSecs: 300,
+    maxBytes: 768 * 1024 ** 2,
+    maxBackBytes: 256 * 1024 ** 2,
+    pauseWaitSecs: 1,
+  });
+  const formatMpvBytes = (bytes: number) =>
+    bytes % 1024 ** 3 === 0 ? `${bytes / 1024 ** 3}GiB` : `${Math.round(bytes / 1024 ** 2)}MiB`;
   const properties = new Map<string, unknown>([
     ["sid", "no"],
     ["secondary-sid", "no"],
@@ -87,6 +98,13 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
         return () => handlers.delete(name);
       },
     },
+    "./buffer-profile": {
+      autoBufferProfile,
+      formatMpvBytes,
+      isBlockedDiskCacheOptionLine: () => false,
+    },
+    "@/lib/native-memory": { getTotalPhysBytes: () => totalPhysBytes },
+    "./pause-trace": { traceFrameDrops() {}, tracePlayback() {} },
     "@/lib/subtitles/prepare": {
       prepareSubtitle: (input: { url: string }) => prepare(input),
       SubtitlePreparationError: RealSubtitlePreparationError,

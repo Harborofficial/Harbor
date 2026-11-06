@@ -1,10 +1,14 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { readResumeEntry, readResumeSource } from "@/lib/resume";
 import { isDetectedAnime } from "./anime-detect";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { collectAllNuvioItemIds } from "@/lib/nuvio/nuvio-client";
+import { sanitizeStremioLocalCw } from "@/lib/local-cw";
+import { manualWatchedState } from "@/lib/manual-watched";
 
 const API = "https://api.strem.io/api";
 
-const CW_FINISHED_RATIO = 0.9;
+export const CW_FINISHED_RATIO = 0.9;
 
 export type User = {
   _id: string;
@@ -40,8 +44,12 @@ export type LibraryItem = {
   external?: ExternalCwSource;
   /** Other canonical ids for the same title, used to merge and dismiss CW entries. */
   altIds?: string[];
+  /** Original source checkpoints represented by a verified anime CW group. */
+  cwMembers?: LibraryItem[];
   isAnime?: boolean;
   upNext?: boolean;
+  waitingForAir?: boolean;
+  nextAirDate?: string;
   local?: boolean;
   manualWatched?: boolean;
 };
@@ -120,6 +128,24 @@ export function cwSortKey(i: LibraryItem): number {
 
 export function isCwMember(i: LibraryItem): boolean {
   if (i.removed && !i.temp) return false;
+  if (i.upNext) return true;
+  if (i.waitingForAir) return true;
+  // A removed item survives only as a temp progress record. Without playback
+  // progress or a resume entry there is nothing to continue, and the placeholder
+  // `season: 0 / episode: 0` state written by watched sync must not become a card.
+  if (i.removed && (i.state?.timeOffset ?? 0) <= 0 && (resumeForItem(i)?.ms ?? 0) <= 0) {
+    return false;
+  }
+  // External trackers (Simkl, Trakt, PublicMetaDB) without upNext must be active in-progress
+  // playback sessions (1% <= progress <= 98%, timeOffset > 0, unflagged).
+  if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
+    if (!i.state) return false;
+    const offset = i.state.timeOffset ?? 0;
+    const duration = i.state.duration ?? 0;
+    if (offset <= 0 || (i.state.flaggedWatched ?? 0) > 0) return false;
+    if (duration > 0 && offset / duration >= CW_FINISHED_RATIO) return false;
+    return true;
+  }
   if (!i.state) {
     const local = resumeForItem(i)?.ms ?? 0;
     return local > 0;
@@ -128,7 +154,46 @@ export function isCwMember(i: LibraryItem): boolean {
   const finishedByRatio = duration > 0 && i.state.timeOffset / duration >= CW_FINISHED_RATIO;
   if (i.type === "movie" && ((i.state.flaggedWatched ?? 0) > 0 || finishedByRatio)) return false;
   if (i.state.timeOffset > 0) return true;
-  if ((i.state.flaggedWatched ?? 0) > 0) return false;
+  if (i.state && i.state.season == null && i.state.video_id) {
+    const se = episodeFromVideoId(i.state.video_id);
+    if (se) {
+      i.state.season = se.season;
+      i.state.episode = se.episode;
+    }
+  }
+  const season = i.state.season;
+  const episode = i.state.episode;
+  if (
+    i.type === "series" &&
+    season != null &&
+    season > 0 &&
+    episode != null &&
+    episode > 0 &&
+    (i.state.flaggedWatched ?? 0) === 0
+  ) {
+    return true;
+  }
+  if ((i.state.flaggedWatched ?? 0) > 0) {
+    // A watched episode normally retires the card, but a series the viewer just
+    // marked has to stay in the tray so the advancer can roll over to the next
+    // episode or draw the "airing soon" timer card. The advancer removes the row
+    // itself once the series is caught up and the end mode hides it, so keeping
+    // the row here never leaks a finished show back into Continue Watching.
+    if (
+      i.type === "series" &&
+      season != null &&
+      season > 0 &&
+      episode != null &&
+      episode > 0 &&
+      (i.manualWatched === true ||
+        i.external === "nuvio" ||
+        (typeof manualWatchedState === "function" &&
+          manualWatchedState(i._id, season, episode) === true))
+    ) {
+      return true;
+    }
+    return false;
+  }
   const local = resumeForItem(i)?.ms ?? 0;
   if (local <= 0) return false;
   if (duration > 0 && local / duration >= CW_FINISHED_RATIO) return false;
@@ -242,7 +307,50 @@ export async function libraryGetOneStrict(
   return items?.find((it) => it._id === id) ?? null;
 }
 
-export async function libraryPut(authKey: string, item: LibraryItem): Promise<void> {
+function readPrimaryStremioAuthKey(): string | null {
+  try {
+    const raw = localStorage.getItem("harbor.profiles.v1");
+    if (raw) {
+      const state = JSON.parse(raw) as { profiles?: any[]; activeId?: string | null };
+      const profiles = Array.isArray(state.profiles) ? state.profiles : [];
+      const active =
+        profiles.find((p) => p.id === state.activeId) ??
+        profiles.find((p) => p.isPrimary) ??
+        profiles[0] ??
+        null;
+      const sourceId = active?.shareStremioWith || active?.id || "default";
+      const sessRaw =
+        localStorage.getItem(`harbor.auth.${sourceId}`) ||
+        localStorage.getItem("harbor.auth.default");
+      if (sessRaw) {
+        const sess = JSON.parse(sessRaw);
+        if (sess?.authKey) return sess.authKey;
+      }
+      for (const p of profiles) {
+        const pSessRaw = localStorage.getItem(`harbor.auth.${p.id}`);
+        if (pSessRaw) {
+          const sess = JSON.parse(pSessRaw);
+          if (sess?.authKey) return sess.authKey;
+        }
+      }
+    }
+    const def = localStorage.getItem("harbor.auth.default");
+    if (def) {
+      const sess = JSON.parse(def);
+      if (sess?.authKey) return sess.authKey;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function libraryPut(
+  authKey: string,
+  item: LibraryItem,
+  forceAllow = false,
+): Promise<void> {
+  if (isNuvioProviderActive() && !forceAllow) return;
   if (ANIME_CLOUD_ID.test(item._id) && item.removed !== true) return;
   await call<unknown>("datastorePut", {
     authKey,
@@ -251,7 +359,11 @@ export async function libraryPut(authKey: string, item: LibraryItem): Promise<vo
   });
 }
 
-export async function removeStremioLibraryItem(authKey: string, id: string): Promise<void> {
+export async function removeStremioLibraryItem(
+  authKey: string,
+  id: string,
+  forceAllow = false,
+): Promise<void> {
   const items = await call<LibraryItem[]>("datastoreGet", {
     authKey,
     collection: "libraryItem",
@@ -260,12 +372,122 @@ export async function removeStremioLibraryItem(authKey: string, id: string): Pro
   });
   const item = items?.find((it) => it._id === id);
   if (!item) return;
-  await libraryPut(authKey, {
-    ...item,
-    removed: true,
-    temp: false,
-    _mtime: new Date().toISOString(),
-  });
+  await libraryPut(
+    authKey,
+    {
+      ...item,
+      removed: true,
+      temp: false,
+      _mtime: new Date().toISOString(),
+      state: {
+        duration: item.state?.duration ?? 0,
+        ...item.state,
+        timeOffset: 0,
+        video_id: undefined,
+        flaggedWatched: 0,
+      },
+    },
+    forceAllow,
+  );
+}
+
+const EXPUNGE_TARGETS_KEY = "harbor.stremio.expunge-targets.v1";
+
+function readExpungeTargets(): Set<string> {
+  try {
+    const raw = JSON.parse(localStorage.getItem(EXPUNGE_TARGETS_KEY) ?? "[]");
+    return new Set(
+      Array.isArray(raw) ? raw.filter((id): id is string => typeof id === "string") : [],
+    );
+  } catch {
+    return new Set();
+  }
+}
+
+function writeExpungeTargets(ids: Set<string>): void {
+  try {
+    if (ids.size === 0) localStorage.removeItem(EXPUNGE_TARGETS_KEY);
+    else localStorage.setItem(EXPUNGE_TARGETS_KEY, JSON.stringify([...ids]));
+  } catch {}
+}
+
+function purgeQueuedWritesFor(targetIds: Set<string>): void {
+  if (targetIds.size === 0) return;
+  try {
+    const rawQ = localStorage.getItem("harbor.stremio.write-queue.v1");
+    if (!rawQ) return;
+    const q = JSON.parse(rawQ);
+    if (!Array.isArray(q)) return;
+    const filtered = q.filter((entry: any) => !targetIds.has(entry?.item?._id));
+    localStorage.setItem("harbor.stremio.write-queue.v1", JSON.stringify(filtered));
+  } catch {}
+}
+
+export async function expungeLeachedNuvioItemsFromStremio(
+  authKey?: string | null,
+  leachedIds: string[] = [],
+): Promise<void> {
+  const nuvioActive = isNuvioProviderActive();
+  const targetIds = new Set<string>(leachedIds);
+
+  if (nuvioActive) {
+    try {
+      for (const id of collectAllNuvioItemIds()) {
+        targetIds.add(id);
+      }
+    } catch {}
+  }
+
+  try {
+    sanitizeStremioLocalCw();
+  } catch {}
+
+  if (nuvioActive) {
+    // Stremio cloud writes are sealed during a Nuvio session, so record the
+    // targets and delete them once the Stremio provider is active again.
+    if (targetIds.size > 0) {
+      const queued = readExpungeTargets();
+      let changed = false;
+      for (const id of targetIds) {
+        if (queued.has(id)) continue;
+        queued.add(id);
+        changed = true;
+      }
+      if (changed) writeExpungeTargets(queued);
+    }
+    purgeQueuedWritesFor(targetIds);
+    invalidateLibraryCache();
+    return;
+  }
+
+  const queued = readExpungeTargets();
+  for (const id of targetIds) queued.add(id);
+  if (queued.size === 0) {
+    invalidateLibraryCache();
+    return;
+  }
+
+  const ak = authKey || readPrimaryStremioAuthKey();
+  if (!ak) {
+    writeExpungeTargets(queued);
+    invalidateLibraryCache();
+    return;
+  }
+
+  const failed = new Set<string>();
+  for (const id of queued) {
+    if (isNuvioProviderActive()) {
+      failed.add(id);
+      continue;
+    }
+    try {
+      await removeStremioLibraryItem(ak, id, false);
+    } catch {
+      failed.add(id);
+    }
+  }
+  writeExpungeTargets(failed);
+  invalidateLibraryCache();
 }
 
 export const CLOUD_OK = /^(tt\d|kitsu:|mal:|anilist:|anidb:|tmdb:)/;
@@ -288,6 +510,7 @@ export async function saveStremioBookmark(
   input: { type?: string; name?: string; poster?: string },
   strict = false,
 ): Promise<void> {
+  if (isNuvioProviderActive()) return;
   const now = new Date().toISOString();
   let existing: LibraryItem | null;
   try {
@@ -335,6 +558,7 @@ export async function removeStremioBookmark(
   id: string,
   _strict = true,
 ): Promise<void> {
+  if (isNuvioProviderActive()) return;
   const existing = await libraryGetOneStrict(authKey, id);
   if (!existing || existing.removed) return;
   await libraryPut(authKey, {

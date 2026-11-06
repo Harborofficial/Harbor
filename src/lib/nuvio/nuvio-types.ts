@@ -47,6 +47,7 @@ export type ProfilePushPayload = {
   avatarUrl?: string | null;
   profile_background_id?: string | null;
   profile_background_url?: string | null;
+  pin_enabled?: boolean;
 };
 
 export type PinVerifyResult = {

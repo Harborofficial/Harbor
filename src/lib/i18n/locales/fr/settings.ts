@@ -992,8 +992,8 @@ const settings: Record<string, string> = {
     "Injecté en direct dans le document. Utilisez-le pour modifier le thème des boutons, ajuster l’espacement ou changer n’importe quelle couleur.",
   "Living-room focus, floating glass chrome.":
     "Pensé pour le salon, avec un habillage vitré flottant.",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Charger l’illustration dans la plus haute résolution disponible pour le contenu à la une. Consomme davantage de bande passante.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Charger l’illustration dans la plus haute résolution disponible pour le contenu à la une, l’image de la page de détails et les arrière-plans non floutés du sélecteur de sources. Consomme davantage de bande passante et de mémoire vidéo.",
   "Loading environment details…": "Chargement des informations sur l’environnement…",
   "Loading...": "Chargement...",
   "Loads a backup file and replaces your current setup with it. Perfect for a new computer. Your Stremio sign-in on this device stays as is.":

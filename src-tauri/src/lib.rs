@@ -31,6 +31,7 @@ mod native_context_policy;
 mod playback_redirect;
 mod power;
 mod privacy;
+mod process_output;
 mod proc_guard;
 mod proc_mem;
 mod settings_store;
@@ -120,8 +121,6 @@ mod pip;
 #[cfg(target_os = "macos")]
 mod pip_mac;
 mod pip_window;
-#[cfg(desktop)]
-mod playback_cache;
 #[cfg(desktop)]
 mod roku;
 #[cfg(desktop)]
@@ -1110,6 +1109,7 @@ pub fn run() {
             if let Err(error) = crash_report::initialize(app.handle()) {
                 eprintln!("[harbor::crash-report] initialization failed: {error}");
             }
+            thumb_cache::allow_asset_access(app.handle());
             proc_guard::init();
             if !cfg!(feature = "context-review") {
                 proc_guard::reap_orphans();
@@ -2057,6 +2057,7 @@ pub fn run() {
             music::music_local_collection,
             temp_prune::temp_usage_bytes,
             temp_prune::temp_clear,
+            temp_prune::cleanup_legacy_playback_cache,
             download::download_start,
             download::download_cancel,
             download_files::download_file_info,

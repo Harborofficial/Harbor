@@ -48,6 +48,7 @@ function fixture() {
         return adoptionWorks;
       },
     },
+    "@/lib/library-groups": { normalizeLibraryGroups: identity },
   };
   function load(path: string): any {
     const compiled = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"), {
@@ -100,9 +101,16 @@ test("saved official relay URLs migrate while custom relays and disabled setting
   const f = fixture();
   for (const old of ["wss://pub.harbor.site", "https://pub.harbor.site/", "pub.harbor.site"]) {
     f.data.set("harbor.settings", f.complete({ togetherRelayUrl: old }));
-    assert.equal(f.settings.loadStoredSettings().togetherRelayUrl, relayVersion.HARBOR_PUBLIC_RELAY);
+    assert.equal(
+      f.settings.loadStoredSettings().togetherRelayUrl,
+      relayVersion.HARBOR_PUBLIC_RELAY,
+    );
   }
-  for (const relay of ["", "wss://custom.example.test/base", "wss://pub.harborcommunity.site.example.test"]) {
+  for (const relay of [
+    "",
+    "wss://custom.example.test/base",
+    "wss://pub.harborcommunity.site.example.test",
+  ]) {
     f.data.set("harbor.settings", f.complete({ togetherRelayUrl: relay }));
     assert.equal(f.settings.loadStoredSettings().togetherRelayUrl, relay);
   }

@@ -47,10 +47,20 @@ test("HDR shell mounts with the actual profile, auth and navigation contexts", (
     "src/lib/profiles.tsx",
     {
       "./avatars/catalog": { isRemovedBuiltinAvatar: () => false },
+      "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
+      "./active-profile-id": { isNuvioProviderActive: () => false },
     },
     { localStorage },
   );
-  const auth = load("src/lib/auth.tsx", { "./profiles": profiles }, { localStorage });
+  const auth = load(
+    "src/lib/auth.tsx",
+    {
+      "./profiles": profiles,
+      "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
+      "./active-profile-id": { isNuvioProviderActive: () => false },
+    },
+    { localStorage },
+  );
   const view = load("src/lib/view.tsx");
   const forwarded = [];
   const payload = {

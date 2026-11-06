@@ -683,8 +683,8 @@ const audit: Record<string, string> = {
   "Live web (Jina Reader)": "Web real-time (Jina Reader)",
   "Living-room focus, floating glass chrome.":
     "Fokus untuk ruang keluarga, elemen antarmuka kaca mengambang.",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Muat gambar beresolusi tertinggi untuk banner unggulan. Menggunakan lebih banyak bandwidth.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Muat gambar beresolusi tertinggi untuk banner unggulan, hero halaman detail, dan latar pemilih stream yang tidak diburamkan. Menggunakan lebih banyak bandwidth dan memori video.",
   "Loading channels…": "Memuat saluran…",
   "Loading more channels ({n1} of {n2})": "Memuat lebih banyak saluran ({n1} dari {n2})",
   "Loading more channels ({shown} of {total})":

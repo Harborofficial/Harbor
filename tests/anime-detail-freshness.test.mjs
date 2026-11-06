@@ -8,16 +8,25 @@ import { memoryMediaCache } from "./helpers/media-cache.mjs";
 import { createRequestScheduler } from "../src/lib/request-scheduler.ts";
 
 const tick = () => new Promise((resolve) => setImmediate(resolve));
-function fixture({ placeholder = false, upcoming = false, absent = false } = {}) {
+function fixture({
+  placeholder = false,
+  upcoming = false,
+  absent = false,
+  empty = false,
+  movie = false,
+} = {}) {
   let now = Date.now();
   let offline = false;
   let fetches = 0;
   let rawGate;
   const requests = [];
-  let videos = [{ id: "kitsu:12:1", season: 1, episode: 1, title: "Old", released: "2020-01-01" }];
-  if (placeholder)
+  let videos = empty
+    ? []
+    : [{ id: "kitsu:12:1", season: 1, episode: 1, title: "Old", released: "2020-01-01" }];
+  if (placeholder && videos[0])
     videos[0] = { ...videos[0], title: "TBA", released: new Date(now - 1000).toISOString() };
-  if (upcoming) videos[0] = { ...videos[0], released: new Date(now + 10 * 60_000).toISOString() };
+  if (upcoming && videos[0])
+    videos[0] = { ...videos[0], released: new Date(now + 10 * 60_000).toISOString() };
   const store = memoryMediaCache({ now: () => now, memoryBytes: 0 });
   const media = {
     ...store,
@@ -81,7 +90,7 @@ function fixture({ placeholder = false, upcoming = false, absent = false } = {})
                 id: "12",
                 attributes: {
                   canonicalTitle: "Example",
-                  subtype: "TV",
+                  subtype: movie ? "movie" : "TV",
                   status: placeholder || upcoming ? "current" : "finished",
                   episodeCount: videos.length,
                 },
@@ -143,6 +152,7 @@ function fixture({ placeholder = false, upcoming = false, absent = false } = {})
         mergeTmdbEpisodes() {},
       },
       "@/lib/providers/anime-mapping": {
+        animeMappingByKitsu: no,
         kitsuToTvdb: no,
         kitsuToImdb: no,
         kitsuToAnilist: no,
@@ -163,17 +173,22 @@ function fixture({ placeholder = false, upcoming = false, absent = false } = {})
     return { addon, kitsu, detail };
   };
   let modules = mount();
-  const loadDetail = async () => {
+  const loadDetail = async (maxAge) => {
     const result = await modules.detail.animeDetails(
       { uiLanguage: "en" },
       { id: "kitsu:12", name: "Example" },
+      undefined,
+      0,
+      maxAge,
     );
+    if (!result) return result;
     await result.enrichPromise;
     await tick();
     return result;
   };
   return {
     loadDetail,
+    unavailable: (result) => modules.detail.animeDetailUnavailable(result),
     get addon() {
       return modules.addon;
     },
@@ -259,6 +274,36 @@ test("offline stale detail remains playable and can refresh promptly when connec
   assert.equal((await f.loadDetail()).episodes.length, 2);
 });
 
+test("an explicit retry refreshes a failed provider load without waiting out the backoff", async () => {
+  const f = fixture();
+  f.offline(true);
+  assert.equal(await f.loadDetail(), null);
+  f.offline(false);
+  const refreshed = await f.loadDetail(0);
+  assert.ok(refreshed);
+  assert.equal(refreshed.episodes[0].streamId, "kitsu:12:1");
+});
+
+test("a TV entry with no episode rows is unavailable", async () => {
+  const f = fixture({ empty: true });
+  const result = await f.loadDetail();
+  assert.ok(result);
+  assert.equal(result.episodes.length, 0);
+  assert.equal(f.unavailable(result), true);
+});
+
+test("a movie with no episode rows is not an episode failure", async () => {
+  const f = fixture({ empty: true, movie: true });
+  const result = await f.loadDetail();
+  assert.ok(result);
+  assert.equal(f.unavailable(result), false);
+});
+
+test("the detail view marks empty TV results unavailable", () => {
+  const source = readFileSync(new URL("../src/views/detail.tsx", import.meta.url), "utf8");
+  assert.match(source, /if \(animeDetailUnavailable\(res\)\) setAnimeUnavailable/);
+});
+
 function deferred() {
   let resolve;
   const promise = new Promise((done) => {
@@ -321,6 +366,9 @@ for (const surface of ["desktop", "big-picture"]) {
       failedKitsu: { current: null },
       setDetectedKitsu() {},
       setLoading() {},
+      setAnimeUnavailable() {},
+      animeDetailUnavailable: (res) => res.detail?.numberOfSeasons > 0 && res.episodes.length === 0,
+      animeRetry: { id: "", attempt: 0 },
       setSettled() {},
       animeDetailsNeedRefresh: () => needsRefresh,
       animeDetails: () =>

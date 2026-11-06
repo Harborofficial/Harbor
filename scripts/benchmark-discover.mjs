@@ -48,6 +48,12 @@ export function clientFixture({ baseline = false, latency = 0, fetch } = {}) {
       },
     },
     "@/lib/request-scheduler": loadModule(readSource("src/lib/request-scheduler.ts")),
+    "@/lib/cache": loadModule(readSource("src/lib/cache.ts")),
+    "@/lib/media-cache": {
+      cachedMedia: async (_namespace, _scope, loader) => loader(),
+      metadataCacheTtl: () => 0,
+      MEDIA_TTL: { recent: 0 },
+    },
     "./tmdb-catalog-cache": catalogModule(),
   });
   return { client, requests: () => requests };

@@ -34,6 +34,7 @@ export function EpisodeStrip({
   layout = "strip",
   seriesImdbId,
   cinemetaVideos,
+  markRatingSeasons = false,
 }: {
   meta: Meta;
   episodes: Episode[];
@@ -44,6 +45,7 @@ export function EpisodeStrip({
   layout?: "strip" | "grid";
   seriesImdbId?: string | null;
   cinemetaVideos?: Meta["videos"];
+  markRatingSeasons?: boolean;
 }) {
   const { settings } = useSettings();
   const playLocalAware = useLocalAwareSeriesPlay();
@@ -120,6 +122,7 @@ export function EpisodeStrip({
         progressFor={(g) => progressFor(epByNumber.get(g.number)!)}
         spoilerFor={spoilerFor ? (g) => spoilerFor(epByNumber.get(g.number)!) : undefined}
         onContextMenu={onContextMenu}
+        markRatingSeasons={markRatingSeasons}
       />
     );
   }
@@ -128,6 +131,7 @@ export function EpisodeStrip({
       {episodes.map((ep) => (
         <div
           key={ep.id}
+          data-omdb-season={markRatingSeasons ? ep.seasonNumber : undefined}
           className="shrink-0"
           style={{ width: Math.round(244 * (settings.episodeCardScale || 1)) }}
         >

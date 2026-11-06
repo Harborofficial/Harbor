@@ -5020,7 +5020,7 @@
   "Load more": "تحميل المزيد",
   "Load more comments": "تحميل المزيد من التعليقات",
   "Load more threads": "تحميل المزيد من المواضيع",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.": "تحميل صورة البطل المميّز بأعلى دقة. يستهلك بيانات أكثر.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.": "تحميل الصورة بأعلى دقة للبطل المميّز، ولصورة صفحة التفاصيل، ولخلفيات منتقي المصادر غير المشوّشة. يستهلك بيانات وذاكرة فيديو أكثر.",
   "Loaded {loaded} of {total} movies...": "تم تحميل {loaded} من أصل {total} فيلم...",
   "Loaded {loaded} of {total} shows...": "تم تحميل {loaded} من أصل {total} مسلسل...",
   "Loaded {name}": "تم تحميل {name}",

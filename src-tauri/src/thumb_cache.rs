@@ -34,6 +34,22 @@ fn dir(app: &tauri::AppHandle) -> Option<PathBuf> {
         .ok()
         .map(|p| p.join("media-images-v1"))
 }
+/// Let the WebView load cached images through the asset protocol. The configured
+/// `**` scope never reaches this directory on unix: it sits under ~/.cache, and
+/// Tauri leaves `require_literal_leading_dot` on there, so a glob refuses every
+/// path crossing a dot folder. Granting this one directory keeps the rest of the
+/// dot folders (~/.ssh and friends) out, which a wider scope would expose.
+pub fn allow_asset_access(app: &tauri::AppHandle) {
+    let Some(dir) = dir(app) else { return };
+    let _ = std::fs::create_dir_all(&dir);
+    // The scope canonicalizes what it checks, so a symlinked $HOME would not
+    // match a pattern built from the uncanonicalized path.
+    let dir = std::fs::canonicalize(&dir).unwrap_or(dir);
+    if let Err(error) = app.asset_protocol_scope().allow_directory(&dir, false) {
+        eprintln!("[harbor::thumb-cache] asset scope grant failed: {error}");
+    }
+}
+
 /// The pre-DB cache lived in a different directory and was capped at 256 MB.
 /// Remove it once after an upgrade instead of waiting for a manual clear.
 fn cleanup_legacy(app: &tauri::AppHandle) {
@@ -139,6 +155,7 @@ fn image_path(dir: &Path, file: &str) -> Option<PathBuf> {
 /// Fresh cached file that can be served directly through the asset protocol.
 /// `.img` was the first-generation extension whose MIME type is unknown to the
 /// WebView, so those entries keep using the base64 path until revalidated.
+/// Paths returned here are only loadable because `allow_asset_access` ran.
 pub fn cached_path(app: &tauri::AppHandle, url: &str, width: u32) -> Option<String> {
     let _lock = IO.lock().ok()?;
     cleanup_legacy(app);

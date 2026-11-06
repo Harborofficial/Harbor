@@ -42,6 +42,7 @@ function seriesModule(overrides: Record<string, unknown> = {}) {
     animeKitsuMeta: async (id: string) => (id === "mal:63181" ? directMeta : null),
   };
   const mapping = {
+    animeMappingByKitsu: async () => null,
     externalToKitsu: async () => {
       externalCalls += 1;
       return null;
@@ -153,7 +154,7 @@ test("the anime overview resolves the addon entry before the external graph", ()
     new URL("../src/lib/providers/anime-detail.ts", import.meta.url),
     "utf8",
   );
-  assert.match(src, /const entry = await resolveAnimeEntry\(meta\.id\)/);
+  assert.match(src, /const entry = await resolveAnimeEntry\(meta\.id, maxAge\)/);
   assert.doesNotMatch(src, /kitsuId = await externalToKitsu\(source, n\)/);
   assert.match(src, /directMeta &&[\s\S]*?parseKitsuId\(directMeta\.id\) === kitsuId/);
 });
@@ -171,6 +172,7 @@ test("a cached miss is retried after the short negative TTL", async () => {
   }) as typeof fetch;
   try {
     const module = load("src/lib/providers/anime-mapping.ts", {
+      "./kitsu-mapping": { kitsuExternalIds: async () => null },
       "@/lib/providers/anizip": {
         aniZipByAnidb: async () => null,
         aniZipByAnilist: async () => null,
@@ -188,11 +190,16 @@ test("a cached miss is retried after the short negative TTL", async () => {
       "@/lib/streams/anime-identity-core": { selectSiblingWindows: () => [] },
       "./mapping-store": {
         mappingStore: (key: string) => ({
+          ready: Promise.resolve(),
           get: () => (key === "harbor.extkitsucache.v2" ? stored : undefined),
           set: (_key: string, value: { kitsu: number | null; t: number }) => {
             stored = value;
           },
         }),
+      },
+      "@/lib/anime-identity-db": {
+        animeDbReadProvider: async () => null,
+        animeDbWriteProvider: async () => true,
       },
     });
     assert.equal(await module.externalToKitsu("myanimelist", 63181), 51018);

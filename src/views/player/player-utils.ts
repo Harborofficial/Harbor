@@ -68,10 +68,8 @@ export async function pickBridge(
     renderer?: "gpu-next" | "gpu";
     forceYuv420p?: boolean;
     extraOptions?: string;
-    fullDownload?: boolean;
     separateDisplay?: MonitorInfo | null;
     separateCoverTaskbar?: boolean;
-    cacheDir?: string;
     getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
     /** Set when playback runs in the user's own external mpv instead of the one inside Harbor. */
     external?: ExternalMpvOptions | null;

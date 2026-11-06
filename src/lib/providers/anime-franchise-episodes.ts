@@ -1,4 +1,3 @@
-import { aniZipByKitsu } from "@/lib/providers/anizip";
 import {
   buildKitsuEpisodes,
   mergeAniZipEpisodes,
@@ -8,7 +7,12 @@ import {
 import { enrichEpisodes } from "@/lib/providers/anime-episode-enrich";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { kitsuEpisodes, type KitsuEpisode } from "@/lib/providers/kitsu";
-import { applyAnidbSeasonWindow, kitsuToTvdb, kitsuToMal } from "@/lib/providers/anime-mapping";
+import {
+  applyAnidbSeasonWindow,
+  kitsuToTvdb,
+  kitsuToMal,
+  animeMappingByKitsu,
+} from "@/lib/providers/anime-mapping";
 import { applyMalEpisodeTitles, episodesMissingTitle } from "@/lib/providers/episode-placeholder";
 import { malEpisodeTitles } from "@/lib/providers/mal-episodes";
 import { tvdbEpisodesByType, tvdbEpisodesAbsolute, tvdbLangFromIso1 } from "@/lib/providers/tvdb";
@@ -41,7 +45,7 @@ export function fetchEntryEpisodes(kitsuId: number, settings: Settings): Promise
     const [addonMeta, raw, aniZip, tvdbRaw] = await Promise.all([
       animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null),
       kitsuEpisodes(kitsuId, 100).catch(() => [] as KitsuEpisode[]),
-      aniZipByKitsu(kitsuId).catch(() => null),
+      animeMappingByKitsu(kitsuId, ["themoviedb_id", "mal_id", "imdb_id"]).catch(() => null),
       kitsuToTvdb(kitsuId)
         .then((tid) => {
           if (!tid) return null;

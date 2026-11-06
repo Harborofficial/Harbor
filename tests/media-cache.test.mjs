@@ -191,6 +191,28 @@ test("failed background refreshes return no replacement and retry after a short 
   assert.equal(calls, 2);
 });
 
+test("an explicit maxAge 0 refresh bypasses the failure backoff", async () => {
+  const f = fixture();
+  let calls = 0;
+  const failing = async () => {
+    calls++;
+    throw Error("offline");
+  };
+  assert.equal((await f.cache.load("show", failing)).value, null);
+  assert.equal((await f.cache.load("show", failing)).value, null);
+  assert.equal(calls, 1, "the ordinary retry window still suppresses duplicate requests");
+  const refreshed = await f.cache.load(
+    "show",
+    async () => {
+      calls++;
+      return [2];
+    },
+    { maxAge: 0 },
+  );
+  assert.deepEqual(refreshed.value, [2]);
+  assert.equal(calls, 2, "an explicit refresh must run the loader");
+});
+
 test("clearing invalidates unfinished loaders and commits", async () => {
   const f = fixture();
   const gate = deferred();

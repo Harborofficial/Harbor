@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
   harborImdbEpisodes,
   harborImdbEpisodesCached,
   subscribeHarborImdbEpisodes,
 } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
+import { createOmdbSeasonQueue } from "@/lib/omdb-season-queue";
 
 const NO_RATINGS = new Map<string, number>();
 
@@ -43,13 +44,25 @@ export function useHarborEpisodeRatings(imdbId: string | null): ReadonlyMap<stri
   return ratings;
 }
 
-export function useEpisodeImdbRatings(imdbId: string | null, season: number, omdbKey: string) {
-  const key = JSON.stringify([imdbId, season, omdbKey]);
+export function useEpisodeImdbRatings(
+  imdbId: string | null,
+  seasons: number | readonly number[],
+  omdbKey: string,
+) {
+  const requestedSeasons = [...new Set(typeof seasons === "number" ? [seasons] : seasons)];
+  const seasonsKey = JSON.stringify(requestedSeasons);
+  // Keep already loaded seasons visible as a user scrolls through an all-episode order.
+  const key = JSON.stringify([imdbId, omdbKey]);
   const [result, setResult] = useState({
     key: "",
     harbor: new Map<string, number>(),
     omdb: new Map<string, number>(),
   });
+  const queueRef = useRef<{
+    key: string;
+    enqueue: (seasons: readonly number[]) => void;
+  } | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     // The two sources answer in whatever order the network gives them, so keep them apart and rank
@@ -66,7 +79,10 @@ export function useEpisodeImdbRatings(imdbId: string | null, season: number, omd
         return {
           key,
           harbor: source === "harbor" ? valid : (held?.harbor ?? new Map<string, number>()),
-          omdb: source === "omdb" ? valid : (held?.omdb ?? new Map<string, number>()),
+          omdb:
+            source === "omdb"
+              ? new Map([...(held?.omdb ?? new Map<string, number>()), ...valid])
+              : (held?.omdb ?? new Map<string, number>()),
         };
       });
     };
@@ -75,21 +91,34 @@ export function useEpisodeImdbRatings(imdbId: string | null, season: number, omd
       void harborImdbEpisodes(imdbId)
         .then((ratings) => publish("harbor", ratings))
         .catch(() => {});
-      if (omdbKey && season >= 1) {
-        void omdbSeasonRatings(omdbKey, imdbId, season)
-          .then((ratings) =>
+      if (omdbKey) {
+        const queue = createOmdbSeasonQueue(
+          (season: number) => omdbSeasonRatings(omdbKey, imdbId, season),
+          (season, ratings) =>
             publish(
               "omdb",
               new Map([...ratings].map(([ep, rating]) => [`${season}:${ep}`, rating])),
             ),
-          )
-          .catch(() => {});
+        );
+        queueRef.current = { key, enqueue: queue.enqueue };
+        return () => {
+          cancelled = true;
+          queue.dispose();
+          if (queueRef.current?.key === key) queueRef.current = null;
+        };
       }
     }
     return () => {
       cancelled = true;
+      queueRef.current = null;
     };
-  }, [key, imdbId, season, omdbKey]);
+  }, [key, imdbId, omdbKey]);
+
+  useEffect(() => {
+    // Do not restart existing requests when scrolling exposes another season.
+    // The queue retains attempted seasons until this title/API-key scope ends.
+    if (queueRef.current?.key === key) queueRef.current.enqueue(requestedSeasons);
+  }, [key, seasonsKey]);
   return useMemo(() => {
     if (result.key !== key) return new Map<string, number>();
     return new Map([...result.omdb, ...result.harbor]);

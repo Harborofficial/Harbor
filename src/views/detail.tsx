@@ -14,6 +14,7 @@ import { animePlayEpisode } from "./detail/anime-play-episode";
 import {
   animeDetails,
   animeDetailsNeedRefresh,
+  animeDetailUnavailable,
   type AnimeDetailExtras,
   type FranchiseEntry,
 } from "@/lib/providers/anime-detail";
@@ -21,7 +22,7 @@ import { isTextInLanguage } from "@/lib/providers/anime-episode-build";
 import { peekAnimeArt, saveAnimeArt } from "@/lib/providers/anime-art-cache";
 import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
 import { kitsuAnime, kitsuMainTvSeries, parseKitsuId } from "@/lib/providers/kitsu";
-import { resolveDetailAnimeEntry } from "./detail/resolve-anime-entry";
+import { resolveDetailAnimeEntry, recoverDetailAnimeEntry } from "./detail/resolve-anime-entry";
 import { isOrphanAnimeCandidate } from "@/lib/anime-detect";
 import { getAnimeCanonicalId, recordAnimeCwId } from "@/lib/anime-cw-ids";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
@@ -46,7 +47,7 @@ import { resolveMeta } from "@/lib/meta-resource";
 import { useMdblistScores } from "@/lib/providers/mdblist";
 import { lastPlayedEpisode, readResumeEntry, saveResumeMs } from "@/lib/resume";
 import { advancePastFinished } from "@/lib/detail-resume-advance";
-import { localCwEntry } from "@/lib/local-cw";
+import { localCwEntry, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import { omdbPrefetch, omdbScores, type OmdbScores } from "@/lib/providers/omdb";
 import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
 import { awardSummary, pickHeroAwards, useAwards } from "@/lib/providers/wikidata";
@@ -83,6 +84,7 @@ import {
   manualEpisodeKeys,
   manualWatchedState,
   manualWatchedVersion,
+  reconcileNuvioWatchedEpisodes,
   subscribeManualWatched,
 } from "@/lib/manual-watched";
 import { useTogether } from "@/lib/together/provider";
@@ -90,9 +92,14 @@ import { useTrakt } from "@/lib/trakt/provider";
 import { noteLocalImdbId, toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
 import {
   pullWatchProgressFromNuvio,
+  pullWatchedItemsFromNuvio,
+  readCachedWatchedItems,
+  applyPendingWatchedItems,
   reconcileNuvioWatched,
+  resolveNuvioProfileIndex,
   isNuvioProviderActive,
 } from "@/lib/nuvio/nuvio-sync";
+import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
 import { PopIcon } from "@/components/pop-icon";
 import { useInLocalLibrary } from "@/lib/local-library";
 import { LocalLibraryBrand } from "@/components/local-library-brand";
@@ -128,6 +135,7 @@ import { SharedCrewLine } from "./detail/shared-crew-line";
 import { orderByReason, useGraphReasons } from "./detail/use-graph-reasons";
 import { MediaGallery } from "./detail/media-gallery";
 import { useTitleBackdrop } from "@/lib/title-backdrop";
+import { anilistAnimeEntry } from "@/lib/anilist/entry";
 import { useTitleLogo } from "@/lib/title-logo";
 import { useStableAsset, toHiResBackdrop } from "@/lib/use-stable-asset";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
@@ -255,6 +263,16 @@ export function DetailView({
     (TmdbDetail & Pick<AnimeDetailExtras, "seasonOverviews">) | null
   >(null);
   const [animeEpisodes, setAnimeEpisodes] = useState<KitsuEpisode[]>([]);
+  const [animeUnavailable, setAnimeUnavailable] = useState<string | null>(null);
+  const [animeRetry, setAnimeRetry] = useState<{ id: string; attempt: number }>({
+    id: "",
+    attempt: 0,
+  });
+  const [animeCatalog, setAnimeCatalog] = useState<{
+    id: string;
+    description?: string;
+    background?: string;
+  } | null>(null);
   const [franchise, setFranchise] = useState<FranchiseEntry[]>([]);
   const [animeCanonicalId, setAnimeCanonicalId] = useState<string | null>(null);
   const [ownLogo, setOwnLogo] = useState<string | undefined>(() =>
@@ -267,6 +285,7 @@ export function DetailView({
   const [detectedKitsu, setDetectedKitsu] = useState<number | null>(null);
   const [detectingAnime, setDetectingAnime] = useState(false);
   const failedKitsu = useRef<number | null>(null);
+  const retryConsumed = useRef<{ id: string; attempt: number }>({ id: "", attempt: 0 });
   const addonMetaTriedRef = useRef<string | null>(null);
   const [streamers, setStreamers] = useState<KitsuStreamer[]>([]);
   const [backdrops, setBackdrops] = useState<string[]>([]);
@@ -324,13 +343,36 @@ export function DetailView({
     return isTextInLanguage(detail.overview, iso1) ? detail.overview : undefined;
   }, [settings.tmdbLanguage, settings.uiLanguage, detail?.overview]);
   const pinnedBackdrop = useTitleBackdrop(meta.id);
-  const pinnedBackdropHi = pinnedBackdrop
-    ? pinnedBackdrop.replace(/\/t\/p\/w\d+\//, "/t/p/original/")
-    : undefined;
+  const pinnedBackdropHi = toHiResBackdrop(pinnedBackdrop, settings.heroFullQuality);
   const [cinemetaFull, setCinemetaFull] = useState<Meta | null>(
     meta.videos && meta.videos.length > 0 ? meta : null,
   );
   const [libraryItem, setLibraryItem] = useState<LibraryItem | null>(null);
+  const [stremioWatched, setStremioWatched] = useState<Set<string>>(new Set());
+  const [profileTick, setProfileTick] = useState(0);
+  useEffect(() => {
+    const onProfile = () => setProfileTick((t) => t + 1);
+    window.addEventListener("harbor:active-profile-changed", onProfile);
+    window.addEventListener("harbor:nuvio-profile-changed", onProfile);
+    return () => {
+      window.removeEventListener("harbor:active-profile-changed", onProfile);
+      window.removeEventListener("harbor:nuvio-profile-changed", onProfile);
+    };
+  }, []);
+  const [nuvioWatchedTick, setNuvioWatchedTick] = useState(0);
+  useEffect(() => {
+    const onWatchedUpdated = () => setNuvioWatchedTick((t) => t + 1);
+    window.addEventListener("harbor:nuvio-watched-reconciled", onWatchedUpdated);
+    window.addEventListener("harbor:series-watched-changed", onWatchedUpdated);
+    window.addEventListener("harbor:manual-watched-changed", onWatchedUpdated);
+    window.addEventListener("harbor:continue-watching-updated", onWatchedUpdated);
+    return () => {
+      window.removeEventListener("harbor:nuvio-watched-reconciled", onWatchedUpdated);
+      window.removeEventListener("harbor:series-watched-changed", onWatchedUpdated);
+      window.removeEventListener("harbor:manual-watched-changed", onWatchedUpdated);
+      window.removeEventListener("harbor:continue-watching-updated", onWatchedUpdated);
+    };
+  }, []);
   const [nuvioEpisodeProgress, setNuvioEpisodeProgress] = useState<{
     season: number;
     episode: number;
@@ -554,6 +596,7 @@ export function DetailView({
     let cancelled = false;
     setDetail(null);
     setAnimeEpisodes([]);
+    setAnimeUnavailable(null);
     setFranchise([]);
     setAnimeCanonicalId(null);
     setDetectedKitsu(null);
@@ -659,7 +702,8 @@ export function DetailView({
           productionCountries: (detail?.productionCountriesRich ?? []).map((c) => c.iso),
         });
         if (animeLike && name && name.trim().length >= 2) {
-          const hits = await searchAnime(name).catch(() => []);
+          k = await recoverDetailAnimeEntry(meta, detail).catch(() => null);
+          const hits = k == null ? await searchAnime(name).catch(() => []) : [];
           const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
           const target = norm(name);
           const yr = parseInt(detail?.year ?? meta.releaseInfo ?? "", 10) || null;
@@ -721,16 +765,8 @@ export function DetailView({
     detail?.productionCountriesRich,
     meta.country,
     meta.releaseInfo,
+    animeRetry,
   ]);
-
-  useEffect(() => {
-    if (!animeCanonicalId) return;
-    if (meta.id.startsWith("tt") || meta.id.startsWith("tmdb:tv:")) {
-      recordAnimeCwId(meta.id, animeCanonicalId);
-    }
-    const imdb = detail?.imdbId;
-    if (imdb?.startsWith("tt") && imdb !== meta.id) recordAnimeCwId(imdb, animeCanonicalId);
-  }, [animeCanonicalId, meta.id, detail?.imdbId]);
 
   useEffect(() => {
     if (meta.type !== "series") return;
@@ -815,59 +851,153 @@ export function DetailView({
     };
   }, [meta.id, meta.type, meta.addonOrigin?.base, authKey, cinemetaFull?.videos?.length]);
 
+  const prevDetailMetaIdRef = useRef<string>(meta.id);
   useEffect(() => {
-    setLibraryItem(null);
+    const metaChanged = prevDetailMetaIdRef.current !== meta.id;
+    prevDetailMetaIdRef.current = meta.id;
+
+    if (metaChanged) {
+      setLibraryItem(null);
+      setStremioWatched(new Set());
+      setNuvioEpisodeProgress(null);
+    }
     noteLocalImdbId(meta.id, detail?.imdbId);
-    if (settings.accountProvider === "nuvio") {
+    const isNuvioActiveMode =
+      (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
+    if (isNuvioActiveMode) {
       let cancelled = false;
-      pullWatchProgressFromNuvio()
-        .then((progressItems) => {
+      Promise.all([pullWatchProgressFromNuvio(), pullWatchedItemsFromNuvio()])
+        .then(([progressItems, watchedItems]) => {
           if (cancelled) return;
-          const matches = progressItems.filter(
-            (p) => p.content_id === meta.id || (detail?.imdbId && p.content_id === detail.imdbId),
-          );
+          const profileIndex = resolveNuvioProfileIndex();
+          const baseWatched = watchedItems || readCachedWatchedItems(profileIndex);
+          const safeWatchedItems = applyPendingWatchedItems(baseWatched, profileIndex);
+          const targetIds = new Set<string>();
+          if (meta.id) targetIds.add(meta.id);
+          if (detail?.imdbId) targetIds.add(detail.imdbId);
+          if (detail?.id != null) {
+            const tid = String(detail.id);
+            targetIds.add(tid);
+            targetIds.add(`series:${tid}`);
+            targetIds.add(`tmdb:${tid}`);
+          }
+          const initialTargetIds = Array.from(targetIds);
+          for (const id of initialTargetIds) {
+            const clean = id.replace(/^(series|movie|tmdb):/, "");
+            targetIds.add(clean);
+            targetIds.add(`series:${clean}`);
+            targetIds.add(`tmdb:${clean}`);
+          }
+
+          const watchedKeys = new Set<string>();
+          for (const w of safeWatchedItems) {
+            if (targetIds.has(w.content_id) && w.season != null && w.episode != null) {
+              watchedKeys.add(`${w.season}:${w.episode}`);
+            }
+          }
+          const matches = progressItems.filter((p) => targetIds.has(p.content_id));
+          for (const m of matches) {
+            if (m.season != null && m.episode != null && m.season >= 1 && m.episode >= 1) {
+              const dur = m.duration_seconds || 1;
+              if (m.progress_seconds > dur * 0.9) {
+                watchedKeys.add(`${m.season}:${m.episode}`);
+              }
+              // Prior episodes in the same season and prior seasons must NEVER be synthesized as watched in Nuvio mode!
+              // In Nuvio mode, watched episodes are tracked granularly in safeWatchedItems.
+              if (!isNuvioActiveMode) {
+                for (let ep = 1; ep < m.episode; ep++) {
+                  watchedKeys.add(`${m.season}:${ep}`);
+                }
+                if (m.season > 1 && detail?.seasons) {
+                  for (const sn of detail.seasons) {
+                    if (sn.seasonNumber >= 1 && sn.seasonNumber < m.season) {
+                      for (let ep = 1; ep <= (sn.episodeCount || 50); ep++) {
+                        watchedKeys.add(`${sn.seasonNumber}:${ep}`);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          // Only reconcile/prune local watched episodes if we received a fresh, authoritative
+          // server snapshot from Nuvio cloud (watchedItems !== null)! Never prune based on
+          // a stale or throttled local cache fallback!
+          if (watchedItems !== null) {
+            const serverEpisodeKeys = new Set<string>();
+            for (const it of safeWatchedItems) {
+              if (
+                typeof it.season === "number" &&
+                typeof it.episode === "number" &&
+                it.content_id
+              ) {
+                serverEpisodeKeys.add(`${it.content_id}|${it.season}|${it.episode}`);
+              }
+            }
+            const { changed } = reconcileNuvioWatchedEpisodes(
+              profileIndex,
+              serverEpisodeKeys,
+              targetIds,
+            );
+            if (changed) {
+              void reconcileNuvioWatched(profileIndex, { force: true });
+            }
+          }
+
+          const localManual = manualEpisodeKeys(meta.id, [
+            detail?.imdbId,
+            detail?.id != null ? String(detail.id) : null,
+          ]);
+          for (const k of localManual.watched) watchedKeys.add(k);
+          for (const k of localManual.unwatched) watchedKeys.delete(k);
+          setStremioWatched(new Set(watchedKeys));
           if (matches.length > 0) {
             matches.sort((a, b) => {
               const ta = a.updated_at ? Date.parse(a.updated_at) : 0;
               const tb = b.updated_at ? Date.parse(b.updated_at) : 0;
               return tb - ta;
             });
-            const watchedKeys = new Set<string>();
-            for (const m of matches) {
-              if (m.season != null && m.episode != null) {
-                const dur = m.duration_seconds || 1;
-                if (m.progress_seconds > dur * 0.9) {
-                  watchedKeys.add(`${m.season}:${m.episode}`);
-                }
-              }
-            }
-            if (watchedKeys.size > 0) {
-              setStremioWatched(watchedKeys);
-            }
             let latest = matches[0];
             if (latest.season != null && latest.episode != null) {
               const dur = latest.duration_seconds || 1;
               const isFinished = latest.progress_seconds > dur * 0.9;
               if (isFinished) {
-                const subsequent = matches.find((m) => {
-                  if (
-                    m.season == null ||
-                    m.episode == null ||
-                    latest.season == null ||
-                    latest.episode == null
-                  )
-                    return false;
-                  return (
-                    m.season > latest.season ||
-                    (m.season === latest.season && m.episode > latest.episode)
+                const curSeasonObj = detail?.seasons?.find((s) => s.seasonNumber === latest.season);
+                const hasSeasonBoundary =
+                  curSeasonObj &&
+                  typeof curSeasonObj.episodeCount === "number" &&
+                  curSeasonObj.episodeCount > 0;
+                let nextSeason = latest.season;
+                let nextEpisode = latest.episode + 1;
+
+                if (
+                  hasSeasonBoundary &&
+                  latest.season != null &&
+                  latest.episode >= curSeasonObj.episodeCount
+                ) {
+                  const nextSeasonObj = detail?.seasons?.find(
+                    (s) => s.seasonNumber === latest.season! + 1,
                   );
-                });
-                if (subsequent) {
-                  latest = subsequent;
+                  if (nextSeasonObj) {
+                    nextSeason = nextSeasonObj.seasonNumber;
+                    nextEpisode = 1;
+                  }
+                }
+
+                const immediateInProgress = matches.find(
+                  (m) => m.season === nextSeason && m.episode === nextEpisode,
+                );
+                if (
+                  immediateInProgress &&
+                  (immediateInProgress.progress_seconds || 0) <
+                    (immediateInProgress.duration_seconds || 1) * 0.9
+                ) {
+                  latest = immediateInProgress;
                 } else {
                   latest = {
                     ...latest,
-                    episode: latest.episode + 1,
+                    season: nextSeason,
+                    episode: nextEpisode,
                     progress_seconds: 0,
                   };
                 }
@@ -915,11 +1045,21 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [authKey, meta.id, detail?.imdbId, settings.accountProvider]);
+  }, [
+    authKey,
+    meta.id,
+    detail?.imdbId,
+    detail?.id,
+    settings.accountProvider,
+    profileTick,
+    nuvioWatchedTick,
+  ]);
 
-  const [stremioWatched, setStremioWatched] = useState<Set<string>>(new Set());
   useEffect(() => {
     let cancelled = false;
+    const isNuvioActiveMode =
+      (settings.accountProvider === "nuvio" || isNuvioProviderActive()) && isNuvioSignedIn();
+    if (isNuvioActiveMode) return;
     decodeWatchedEpisodes(libraryItem?.state?.watched, cinemetaFull?.videos)
       .then((keys) => {
         if (!cancelled) setStremioWatched(keys);
@@ -928,7 +1068,14 @@ export function DetailView({
     return () => {
       cancelled = true;
     };
-  }, [libraryItem?.state?.watched, cinemetaFull?.videos]);
+  }, [
+    libraryItem?.state?.watched,
+    cinemetaFull?.videos,
+    settings.accountProvider,
+    nuvioWatchedTick,
+    profileTick,
+    meta.id,
+  ]);
 
   useEffect(() => {
     if (!libraryItem?.state) return;
@@ -976,6 +1123,16 @@ export function DetailView({
     const load = (refreshing = false) => {
       const request = ++generation;
       if (!refreshing) setLoading(true);
+      setAnimeUnavailable(null);
+      // Consume a user retry once, and only for the anime load it was meant
+      // for. A detected TMDB row first renders as non-anime while detection
+      // settles; the following anime pass must still force the refresh.
+      const retryAttempt = animeRetry.id === meta.id ? animeRetry.attempt : 0;
+      const forceRefresh =
+        isAnime &&
+        retryAttempt > 0 &&
+        (retryConsumed.current.id !== meta.id || retryAttempt > retryConsumed.current.attempt);
+      if (forceRefresh) retryConsumed.current = { id: meta.id, attempt: retryAttempt };
       // The catalogue types a row from the first type its provider declares, which is wrong for any
       // provider that carries both movies and series. The bridge said which it returned, so the
       // record is asked for as that kind rather than as the guess.
@@ -992,16 +1149,40 @@ export function DetailView({
               setAnimeCanonicalId(`kitsu:${kitsuId}`);
               setAnimeEpisodes(earlyEpisodes);
             },
+            0,
+            forceRefresh ? 0 : undefined,
           ).then((res) => {
             if (cancelled || request !== generation) return null;
             if (!res) {
+              setAnimeUnavailable(meta.id);
               if (detectedKitsu != null) {
                 failedKitsu.current = detectedKitsu;
                 setDetectedKitsu(null);
               }
               return null;
             }
+            if (animeDetailUnavailable(res)) setAnimeUnavailable(meta.id);
             setAnimeEpisodes(res.episodes);
+            // Only record identities after this detail request has resolved. The
+            // previous page's canonical state must not seed a newly opened title.
+            const canonical = `kitsu:${res.kitsuId}`;
+            // The detail provider may show a parent TV series for a one-episode
+            // special. Never save the parent's identity under that special's ID.
+            // A multi-episode ONA/OVA is its own entry, so format alone must not
+            // disqualify it from recording the canonical mapping.
+            const isSideEntry = res.requestedKitsuId !== res.kitsuId;
+            if (!isSideEntry) recordAnimeCwId(meta.id, canonical);
+            const seriesImdb = res.detail.imdbId;
+            // Standalone specials can share a parent series' IMDb id. Only an
+            // actual multi-episode show (or a movie) can record the shared alias.
+            if (
+              seriesImdb?.startsWith("tt") &&
+              seriesImdb !== meta.id &&
+              !isSideEntry &&
+              (meta.type === "movie" || res.episodes.length > 1)
+            ) {
+              recordAnimeCwId(seriesImdb, canonical);
+            }
             if (!refreshing) setFranchise([]);
             void res.franchisePromise
               .then((fr) => {
@@ -1095,6 +1276,7 @@ export function DetailView({
         .catch(() => {
           if (cancelled || request !== generation) return;
           setLoading(false);
+          if (isAnime) setAnimeUnavailable(meta.id);
         });
     };
     const onWake = () => {
@@ -1124,7 +1306,35 @@ export function DetailView({
     addonNative,
     detectedKitsu,
     capstanCanonicalId,
+    animeRetry,
   ]);
+
+  useEffect(() => {
+    if (!isAnime || animeUnavailable !== meta.id) return;
+    const match = /^(mal|anilist):([1-9]\d*)$/.exec(meta.id);
+    if (!match) return;
+    let cancelled = false;
+    void anilistAnimeEntry(
+      Number(match[2]),
+      match[1] as "mal" | "anilist",
+      animeRetry.id === meta.id ? 0 : undefined,
+    )
+      .then((entry) => {
+        if (!entry || cancelled) return;
+        setAnimeCatalog({
+          id: meta.id,
+          description: entry.description
+            ?.replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim(),
+          background: entry.bannerImage ?? undefined,
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isAnime, meta.id, animeUnavailable, animeRetry]);
 
   useEffect(() => {
     if (!detail) return;
@@ -1222,15 +1432,25 @@ export function DetailView({
   };
   const overview =
     seasonArt?.description ||
-    (detail?.overview ??
-      (meta.id.startsWith("tmdb:") ? "" : (meta.description ?? cinemetaFull?.description)) ??
-      "");
+    (isAnime
+      ? detail?.overview ||
+        meta.description ||
+        cinemetaFull?.description ||
+        (animeCatalog?.id === meta.id ? animeCatalog.description : undefined)
+      : (detail?.overview ??
+        (meta.id.startsWith("tmdb:") ? "" : (meta.description ?? cinemetaFull?.description)))) ||
+    "";
   const tagline = detail?.tagline ?? "";
   const pinnedLogo = useTitleLogo(meta.id);
   const animeArt = isAnime ? peekAnimeArt(meta.id) : undefined;
   const stableBackdrop = useStableAsset(
     isAnime
-      ? [animeArt?.bg, enrichedBg]
+      ? [
+          animeArt?.bg,
+          enrichedBg,
+          meta.background !== meta.poster ? meta.background : undefined,
+          animeCatalog?.id === meta.id ? animeCatalog.background : undefined,
+        ]
       : [animeArt?.bg, meta.background, cinemetaFull?.background, detail?.backdrop],
     meta.id,
   );
@@ -1243,13 +1463,13 @@ export function DetailView({
     const seen = new Set<string>();
     const pool: string[] = [];
     for (const b of [primaryBackdrop, ...backdrops]) {
-      const hi = toHiResBackdrop(b ?? undefined);
+      const hi = toHiResBackdrop(b ?? undefined, settings.heroFullQuality);
       if (!hi || seen.has(hi)) continue;
       seen.add(hi);
       pool.push(hi);
     }
     return pool;
-  }, [primaryBackdrop, backdrops]);
+  }, [primaryBackdrop, backdrops, settings.heroFullQuality]);
   const reducedMotion = useReducedMotion();
   const carouselOn =
     settings.heroBackdropCarousel && !pinnedBackdrop && backdropPool.length >= 2 && !reducedMotion;
@@ -1450,7 +1670,8 @@ export function DetailView({
   const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const watchedMark =
     meta.type === "movie" &&
-    (isMovieWatchedLocal(meta.id) || (!isNuvio && stremioMovieWatched(libraryItem)));
+    (isMovieWatchedLocal(meta.id, [detail?.imdbId]) ||
+      (!isNuvio && stremioMovieWatched(libraryItem)));
   const markThisMovieWatched = () => {
     const tmdb = meta.id.startsWith("tmdb:") ? meta.id.split(":")[2] : null;
     if (watchedMark) {
@@ -1468,16 +1689,17 @@ export function DetailView({
     manualWatchedVersion,
     manualWatchedVersion,
   );
+  const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion, localCwVersion);
   const prevSeriesWatchedVerRef = useRef(seriesWatchedVer);
   const stremioVideosRef = useRef<{ imdb: string; videos: NonNullable<Meta["videos"]> } | null>(
     null,
   );
   useEffect(() => {
     if (!isNuvio) return;
-    void reconcileNuvioWatched();
+    void reconcileNuvioWatched(undefined, { force: true });
     const onFocus = () => {
       if (document.visibilityState === "visible") {
-        void reconcileNuvioWatched();
+        void reconcileNuvioWatched(undefined, { force: true });
       }
     };
     window.addEventListener("focus", onFocus);
@@ -1486,7 +1708,7 @@ export function DetailView({
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [isNuvio]);
+  }, [isNuvio, profileTick]);
 
   useEffect(() => {
     if (seriesWatchedVer === prevSeriesWatchedVerRef.current) return;
@@ -1548,15 +1770,24 @@ export function DetailView({
     if (episodeHint) return episodeHint;
     if (isAnime) return lastPlayedEpisode(meta.id);
     const candidates: Array<{ season: number; episode: number; t: number }> = [];
-    const ids = Array.from(
-      new Set(
-        [
-          meta.id,
-          detail?.imdbId ?? null,
-          detail?.id != null ? `tmdb:tv:${detail.id}` : null,
-        ].filter((x): x is string => !!x),
-      ),
-    );
+    const rawIds = [
+      meta.id,
+      detail?.imdbId ?? null,
+      detail?.id != null ? String(detail.id) : null,
+      detail?.id != null ? `tmdb:tv:${detail.id}` : null,
+      detail?.id != null ? `tmdb:${detail.id}` : null,
+    ].filter((x): x is string => !!x);
+    const expandedIds = new Set<string>();
+    for (const rid of rawIds) {
+      expandedIds.add(rid);
+      const clean = rid.replace(/^(series|movie|tmdb):/, "").replace(/^tv:/, "");
+      if (clean) {
+        expandedIds.add(clean);
+        expandedIds.add(`tmdb:${clean}`);
+        expandedIds.add(`series:${clean}`);
+      }
+    }
+    const ids = Array.from(expandedIds);
     for (const id of ids) {
       const lc = localCwEntry(id);
       if (
@@ -1597,25 +1828,113 @@ export function DetailView({
     ) {
       candidates.push(nuvioEpisodeProgress);
     }
-    const eligible = candidates.filter(
-      (c) => manualWatchedState(meta.id, c.season, c.episode) !== false,
+
+    const orderedVideos = (cinemetaFull?.videos ?? [])
+      .map((v) => ({ season: v.season ?? 1, episode: v.episode ?? v.number ?? 0 }))
+      .filter((v) => v.season >= 1 && v.episode >= 1)
+      .sort((a, b) => a.season - b.season || a.episode - b.episode);
+    const orderedFromDetail: Array<{ season: number; episode: number }> = [];
+    if (orderedVideos.length === 0 && detail?.seasons) {
+      for (const s of detail.seasons) {
+        if (s.seasonNumber >= 1 && s.episodeCount) {
+          for (let ep = 1; ep <= s.episodeCount; ep++) {
+            orderedFromDetail.push({ season: s.seasonNumber, episode: ep });
+          }
+        }
+      }
+    }
+    const allOrdered = orderedVideos.length > 0 ? orderedVideos : orderedFromDetail;
+
+    const isWatched = (s: number, e: number): boolean => {
+      const man = manualWatchedState(meta.id, s, e, ids);
+      if (man !== undefined) return man;
+      if (stremioWatched.has(`${s}:${e}`)) return true;
+      for (const id of ids) {
+        const entry = readResumeEntry(id, s, e);
+        if (entry && entry.ms > 0 && typeof entry.pct === "number" && entry.pct >= 0.9) return true;
+      }
+      return false;
+    };
+
+    let highestWatchedIdx = -1;
+    for (let i = 0; i < allOrdered.length; i++) {
+      if (isWatched(allOrdered[i].season, allOrdered[i].episode)) {
+        highestWatchedIdx = i;
+      }
+    }
+
+    const eligible = candidates.filter((c) =>
+      ids.every((id) => manualWatchedState(id, c.season, c.episode, ids) !== false),
     );
-    if (eligible.length === 0) return null;
-    eligible.sort((a, b) => b.t - a.t);
-    return advancePastFinished(
-      meta.id,
-      { season: eligible[0].season, episode: eligible[0].episode },
-      cinemetaFull?.videos,
-    );
+
+    if (eligible.length > 0) {
+      eligible.sort((a, b) => b.t - a.t);
+      const top = eligible[0];
+      const topWatched = isWatched(top.season, top.episode);
+      const topIdx = allOrdered.findIndex(
+        (v) => v.season === top.season && v.episode === top.episode,
+      );
+
+      if (topWatched) {
+        if (topIdx >= 0) {
+          for (let i = topIdx + 1; i < allOrdered.length; i++) {
+            if (!isWatched(allOrdered[i].season, allOrdered[i].episode)) {
+              return allOrdered[i];
+            }
+          }
+          return null;
+        }
+        return advancePastFinished(
+          meta.id,
+          { season: top.season, episode: top.episode },
+          allOrdered,
+          stremioWatched,
+        );
+      }
+
+      if (!topWatched) {
+        if (topIdx >= 0) {
+          return { season: top.season, episode: top.episode };
+        }
+        // If top does not exist in allOrdered, it could be an overflow episode (e.g. S1E8 when S1 only has 7 eps)
+        const seasonEps = allOrdered.filter((v) => v.season === top.season);
+        const maxEpInSeason = seasonEps.reduce((m, v) => Math.max(m, v.episode), 0);
+        if (seasonEps.length > 0 && top.episode > maxEpInSeason) {
+          const nextSeasonEp = allOrdered.find(
+            (v) => v.season > top.season && !isWatched(v.season, v.episode),
+          );
+          if (nextSeasonEp) return nextSeasonEp;
+          return null; // Series fully finished!
+        }
+        if (highestWatchedIdx >= 0 && highestWatchedIdx + 1 < allOrdered.length) {
+          return allOrdered[highestWatchedIdx + 1];
+        }
+        return { season: top.season, episode: top.episode };
+      }
+    }
+
+    if (highestWatchedIdx >= 0) {
+      for (let i = highestWatchedIdx + 1; i < allOrdered.length; i++) {
+        if (!isWatched(allOrdered[i].season, allOrdered[i].episode)) {
+          return allOrdered[i];
+        }
+      }
+      return null;
+    }
+
+    return null;
   }, [
     meta.id,
     detail?.imdbId,
     detail?.id,
+    detail?.seasons,
     libraryItem,
     nuvioEpisodeProgress,
     isAnime,
     episodeHint,
     seriesWatchedVer,
+    localCwVer,
+    stremioWatched,
     cinemetaFull?.videos,
   ]);
 
@@ -1752,7 +2071,7 @@ export function DetailView({
         });
         return;
       }
-      if (settings.accountProvider === "nuvio") {
+      if (isNuvio) {
         const progressItems = await pullWatchProgressFromNuvio().catch(() => []);
         const matches = progressItems.filter(
           (p) => p.content_id === meta.id || (detail?.imdbId && p.content_id === detail.imdbId),
@@ -2067,7 +2386,7 @@ export function DetailView({
               />
             ))
           ) : backdrop ? (
-            <HeroBackdrop url={backdrop} />
+            <HeroBackdrop url={backdrop} fullQuality={settings.heroFullQuality} />
           ) : (
             <div className="absolute inset-0 animate-pulse bg-white/[0.02]" />
           )}
@@ -2132,10 +2451,15 @@ export function DetailView({
                         e.preventDefault();
                         void smartPlay(true);
                       }}
-                      className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                      className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
                     >
                       <Play size={18} fill="currentColor" />
-                      {smartPlayLabel}
+                      <span
+                        key={smartPlayLabel}
+                        className="inline-block transition-all duration-200 animate-in fade-in slide-in-from-bottom-1"
+                      >
+                        {smartPlayLabel}
+                      </span>
                     </button>
                   </PlayModeHint>
                 )}
@@ -2445,6 +2769,32 @@ export function DetailView({
           </FadeInUp>
         )}
 
+        {!liveContext &&
+          !loading &&
+          animeUnavailable === meta.id &&
+          animeEpisodes.length === 0 &&
+          franchise.length <= 1 &&
+          (isAnime || !tmdbEpisodeList) &&
+          meta.type !== "movie" &&
+          meta.animeFormat?.toLowerCase() !== "movie" && (
+            <div className="flex items-center gap-4 rounded-xl bg-elevated/50 p-5" role="status">
+              <p className="text-sm text-ink-muted">{t("Episode information is unavailable")}</p>
+              <button
+                type="button"
+                className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-canvas"
+                onClick={() => {
+                  failedKitsu.current = null;
+                  setAnimeRetry((prev) => ({
+                    id: meta.id,
+                    attempt: prev.id === meta.id ? prev.attempt + 1 : 1,
+                  }));
+                }}
+              >
+                {t("Retry")}
+              </button>
+            </div>
+          )}
+
         {!liveContext && tmdbEpisodeList && !isAnime && isSeries && (
           <FadeInUp>
             <SeriesEpisodes
@@ -2486,6 +2836,7 @@ export function DetailView({
                 videos={cinemetaFull.videos}
                 stremioWatched={stremioWatched}
                 resumeSeason={lastPlay?.season}
+                resumeEpisode={lastPlay?.episode}
               />
             </FadeInUp>
           )}

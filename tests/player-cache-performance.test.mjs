@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 
-function load(file, storage, fetcher) {
+function load(file, storage, fetcher, idb = {}) {
   const code = ts.transpileModule(readFileSync(new URL(file, import.meta.url), "utf8"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
@@ -22,6 +22,8 @@ function load(file, storage, fetcher) {
       privateCwProfileId: () => "",
       isNuvioProviderActive: () => false,
       getNuvioActiveSlot: () => 1,
+      animeDbReadProvider: idb.read ?? (async () => null),
+      animeDbWriteProvider: idb.write ?? (async () => false),
     }),
     api,
     storage,
@@ -33,13 +35,12 @@ function load(file, storage, fetcher) {
 
 test("anime mappings remain cached when persistent storage rejects the write", async () => {
   let downloads = 0;
-  let writes = 0;
+  let persistentWrites = 0;
   const h = load(
     "../src/lib/providers/anime-mapping.ts",
     {
       getItem: () => null,
       setItem: () => {
-        writes++;
         throw new Error("quota");
       },
     },
@@ -47,12 +48,18 @@ test("anime mappings remain cached when persistent storage rejects the write", a
       downloads++;
       return { ok: true, text: async () => '<anime anidbid="1" tvdbid="2" defaulttvdbseason="1">' };
     },
+    {
+      write: async () => {
+        persistentWrites++;
+        return false;
+      },
+    },
   );
   const first = await h.api.loadAnidbMaps();
   for (let i = 0; i < 100; i++) assert.equal(await h.api.loadAnidbMaps(), first);
   assert.equal(first.tvdb["1"], 2);
   assert.equal(downloads, 1);
-  assert.equal(writes, 1);
+  assert.equal(persistentWrites, 1);
 });
 
 test("failed anime requests share an inflight request and back off", async () => {

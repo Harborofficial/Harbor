@@ -22,14 +22,18 @@ const ANIZIP: Record<string, Record<string, string>> = {
     en: "Bleach: Thousand-Year Blood War - The Separation",
     ja: "BLEACH 千年血戦篇-訣別譚-",
   },
+  "kitsu:11380": { en: "March Comes In Like a Lion", ja: "3-gatsu no Lion" },
+  tt6074794: { en: "3-gatsu no Lion meets BUMP OF CHICKEN" },
+  "anilist:77": { en: "Native Owner Title", ja: "ネイティブ作品" },
 };
 
 type Overrides = {
   cwId?: string | null;
   imdbKitsu?: number | null;
+  checkpointKitsu?: number | null;
 };
 
-function load({ cwId = null, imdbKitsu = null }: Overrides = {}) {
+function load({ cwId = null, imdbKitsu = null, checkpointKitsu = null }: Overrides = {}) {
   const anizip = (key: string) => async () => ({
     titles: ANIZIP[key] ?? null,
   });
@@ -41,7 +45,12 @@ function load({ cwId = null, imdbKitsu = null }: Overrides = {}) {
       aniZipByAnidb: (id: number) => anizip(`anidb:${id}`)(),
       aniZipByImdb: (id: string) => anizip(id)(),
     },
-    "@/lib/anime-cw-ids": { getAnimeCwId: () => cwId },
+    "@/lib/anime-cw-ids": { getAnimeCanonicalId: () => cwId, getAnimeCwId: () => cwId },
+    "@/lib/cw-anime-identity": {
+      cwAnimeIdentityKey: (_id: string, videoId?: string | null) =>
+        videoId ? (checkpointKitsu == null ? null : `kitsu:${checkpointKitsu}`) : cwId,
+      getCachedCatalogImdb: () => null,
+    },
     "@/lib/providers/anime-mapping": {
       externalToKitsu: async () => null,
       imdbToKitsu: async () => imdbKitsu,
@@ -72,7 +81,16 @@ function load({ cwId = null, imdbKitsu = null }: Overrides = {}) {
     fetchStub,
   );
   return exports as unknown as {
-    resolvePreferredAnimeTitle: (id: string, lang: string) => Promise<string | null>;
+    resolvePreferredAnimeTitle: (
+      id: string,
+      lang: string,
+      checkpoint?: {
+        videoId?: string | null;
+        season?: number;
+        episode?: number;
+        imdbId?: string | null;
+      },
+    ) => Promise<string | null>;
   };
 }
 
@@ -102,11 +120,51 @@ test("a Cinemeta row resolves through the anime mapping its detail page recorded
   assert.equal(await api.resolvePreferredAnimeTitle("tt0388629", "romaji"), "One Piece");
 });
 
-test("a Cinemeta row with no recorded mapping falls back to the IMDb bridge", async () => {
+test("an unknown IMDb identity does not trust an ambiguous reverse lookup", async () => {
   const api = load({ imdbKitsu: 46903 });
+  assert.equal(await api.resolvePreferredAnimeTitle("tt14986406", "romaji"), null);
+});
+
+test("a recorded TV anime identity takes priority over the shared IMDb special", async () => {
+  const api = load({ cwId: "kitsu:11380" });
   assert.equal(
-    await api.resolvePreferredAnimeTitle("tt14986406", "romaji"),
+    await api.resolvePreferredAnimeTitle("tt6074794", "english"),
+    "March Comes In Like a Lion",
+  );
+  assert.equal(await api.resolvePreferredAnimeTitle("tt6074794", "native"), "3-gatsu no Lion");
+});
+
+test("a Continue Watching checkpoint uses one owning entry for every title source", async () => {
+  const api = load({ cwId: "kitsu:12", checkpointKitsu: 46903 });
+  const checkpoint = { videoId: "mal:123:2:1", season: 2, episode: 1 };
+  assert.equal(
+    await api.resolvePreferredAnimeTitle("mal:123", "english", checkpoint),
+    "Bleach: Thousand-Year Blood War - The Separation",
+  );
+  assert.equal(
+    await api.resolvePreferredAnimeTitle("mal:123", "romaji", checkpoint),
     "BLEACH: Sennen Kessen-hen - Ketsubetsu-tan",
+  );
+});
+
+test("an unmapped native checkpoint uses the exact native owner while unknown catalog identity fails closed", async () => {
+  const api = load();
+  const checkpoint = { videoId: "anilist:77:2:1", season: 2, episode: 1 };
+  assert.equal(
+    await api.resolvePreferredAnimeTitle("anilist:77", "english", checkpoint),
+    "Native Owner Title",
+  );
+  assert.equal(await api.resolvePreferredAnimeTitle("tt14986406", "english", checkpoint), null);
+});
+
+test("a movie checkpoint falls back to its recorded catalog identity", async () => {
+  const api = load({ cwId: "kitsu:11380" });
+  assert.equal(
+    await api.resolvePreferredAnimeTitle("tt6074794", "english", {
+      videoId: "tt6074794",
+      imdbId: "tt6074794",
+    }),
+    "March Comes In Like a Lion",
   );
 });
 

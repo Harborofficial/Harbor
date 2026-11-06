@@ -4946,21 +4946,6 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["p2p chip", "peers", "speed", "progress overlay", "status chip", "player overlay"],
   },
   {
-    label: "Playback cache folder",
-    section: "player",
-    tab: "play",
-    anchorTitle: "Streams",
-    keywords: [
-      "debrid cache",
-      "video cache",
-      "buffer folder",
-      "system drive full",
-      "cache location",
-      "remux",
-      "mpv cache",
-    ],
-  },
-  {
     label: "Download the whole file while streaming",
     section: "player",
     tab: "play",
@@ -8301,6 +8286,13 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     tab: "ai",
     anchorTitle: "Live web",
     keywords: ["jina key", "jina api", "reader key", "web quota", "jina token"],
+  },
+  {
+    label: "Search source",
+    section: "library",
+    tab: "ai",
+    anchorTitle: "Live web",
+    keywords: ["keenable", "keenable key", "keenable api", "web search source", "search api"],
   },
   {
     label: "Use free IMDb data without a TMDB key",

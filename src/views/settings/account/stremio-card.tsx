@@ -3,7 +3,7 @@ import { SButton } from "../ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Fingerprint, LogIn, LogOut, UserRound } from "../icons";
 import { AuthModal } from "@/components/auth-modal";
-import { useAuth } from "@/lib/auth";
+import { useAuth, readPrimaryStremioSession } from "@/lib/auth";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
@@ -11,16 +11,17 @@ import { useT } from "@/lib/i18n";
 export function StremioCard() {
   const t = useT();
   const { user, signOut } = useAuth();
+  const stremioUser = user ?? readPrimaryStremioSession()?.user ?? null;
   const [reveal, setReveal] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const signInRef = useRef<HTMLButtonElement>(null);
   const returnRing = useRef(false);
 
   useEffect(() => {
-    if (user || !returnRing.current) return;
+    if (stremioUser || !returnRing.current) return;
     returnRing.current = false;
     if (signInRef.current) tvFocus(signInRef.current);
-  }, [user]);
+  }, [stremioUser]);
 
   const onSignOut = () => {
     const active = document.activeElement;
@@ -29,13 +30,13 @@ export function StremioCard() {
   };
 
   const maskedEmail = useMemo(() => {
-    if (!user?.email) return "";
-    const [local, domain] = user.email.split("@");
+    if (!stremioUser?.email) return "";
+    const [local, domain] = stremioUser.email.split("@");
     if (!domain) return "*****";
     return `${local.slice(0, 1)}${"*".repeat(Math.max(local.length - 1, 4))}@${domain}`;
-  }, [user]);
+  }, [stremioUser]);
 
-  if (!user) {
+  if (!stremioUser) {
     return (
       <>
         <SettingRow
@@ -64,7 +65,7 @@ export function StremioCard() {
         label={t("Signed in")}
         desc={
           <span className="font-mono text-ink" dir="ltr">
-            {reveal ? user.email : maskedEmail}
+            {reveal ? stremioUser.email : maskedEmail}
           </span>
         }
       >
@@ -78,7 +79,7 @@ export function StremioCard() {
         desc={t("The account identifier Stremio uses for your library and addon collection.")}
       >
         <span className={`break-all font-mono ${ROW_DESC}`} dir="ltr">
-          {user._id}
+          {stremioUser._id}
         </span>
       </SettingRow>
 

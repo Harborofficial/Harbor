@@ -14,9 +14,11 @@ function sortHarness(resumeTimes: Map<string, number>) {
   assert.ok(helper, "shared CW sort helper must exist");
   const anime = read("src/views/anime.tsx");
   const rail = anime.slice(anime.indexOf("const continueWatching = useMemo"));
-  const comparator = rail.match(/\.sort\(([\s\S]*?)\)\s*\.filter\(/)?.[1];
-  assert.ok(comparator, "Anime CW sorts before franchise deduplication");
-  // Execute the actual helper and rail comparator without mounting the app or using account data.
+  const comparator = rail.match(
+    /\.sort\(((?:\(a,\s*b\)|\(a, b\))\s*=>\s*cwSortKey\(b\)\s*-\s*cwSortKey\(a\))\)/,
+  )?.[1];
+  assert.ok(comparator, "Anime CW uses the shared sort key comparator");
+  // Execute the actual helper and comparator without mounting the app or using account data.
   const code = ts.transpileModule(
     `${helper}\nexport const compare = (${comparator.trim().replace(/,$/, "")});`,
     {

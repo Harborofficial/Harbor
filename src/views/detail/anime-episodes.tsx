@@ -388,7 +388,7 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
     parseKitsuId(meta.id),
     imdbId ?? null,
     episodes.length,
-    settings.tvdbSeasonType,
+    "aired",
   );
   const ratings = useHarborEpisodeRatings(imdbId ?? null);
   const unratedDisplay = tvdbPanel.panel
@@ -461,7 +461,12 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
       const img = pickTvdbImage(proxyImages, ep);
       if (img) {
         changed = true;
-        return { ...ep, thumbnail: img };
+        return {
+          ...ep,
+          thumbnail: img,
+          thumbnailFallback:
+            img !== ep.thumbnail ? (ep.thumbnail ?? ep.thumbnailFallback) : ep.thumbnailFallback,
+        };
       }
       const pair =
         ep.imdbSeason != null && ep.imdbEpisode != null

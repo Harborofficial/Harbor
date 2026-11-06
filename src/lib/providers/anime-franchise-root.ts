@@ -18,6 +18,7 @@ const ROOT_FLUSH_MS = 800;
 let rootFlushTimer = 0;
 
 (() => {
+  if (typeof window === "undefined" || typeof localStorage === "undefined") return;
   try {
     const raw = JSON.parse(localStorage.getItem(ROOT_KEY) ?? "null") as {
       t?: number;

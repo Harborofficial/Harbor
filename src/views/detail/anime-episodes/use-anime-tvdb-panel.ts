@@ -404,7 +404,10 @@ export function useAnimeTvdbPanel(
         const ep: KitsuEpisode = match
           ? {
               ...match,
-              thumbnail: !match.thumbnail && img ? img : match.thumbnail,
+              thumbnail: !rowUnaired(bi) && img ? img : match.thumbnail,
+              ...(!rowUnaired(bi) && img && img !== match.thumbnail && match.thumbnail
+                ? { thumbnailFallback: match.thumbnail }
+                : {}),
               ...(title != null ? { title } : {}),
               ...(synopsis != null ? { synopsis } : {}),
               titleLanguage:

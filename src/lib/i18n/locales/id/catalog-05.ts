@@ -488,8 +488,8 @@ const catalog: Record<string, string> = {
   "Load more": "Muat lebih banyak",
   "Load more comments": "Muat lebih banyak komentar",
   "Load more threads": "Muat lebih banyak utas",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Muat artwork beresolusi tertinggi untuk hero unggulan. Menggunakan lebih banyak bandwidth.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Muat artwork beresolusi tertinggi untuk hero unggulan, hero halaman detail, dan latar pemilih stream yang tidak diburamkan. Menggunakan lebih banyak bandwidth dan memori video.",
   "Loaded {loaded} of {total} movies...": "Telah memuat {loaded} dari {total} film...",
   "Loaded {loaded} of {total} shows...": "Telah memuat {loaded} dari {total} acara...",
   "Loaded {name}": "{name} dimuat",

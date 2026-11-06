@@ -1,6 +1,8 @@
 import { pmdbRequest } from "./client";
 import { getTmdbForExternal } from "./mappings";
 import { isAuthenticated } from "./session";
+import { isTmdbSingleSeasonShowCached } from "./ids";
+import { scopePmdbWatchedOrder } from "./watched-order";
 import type { PmdbTarget, PmdbWatchedItem, PmdbWatchedResponse } from "./types";
 
 let cachedWatchedSet: Set<string> | null = null;
@@ -81,6 +83,9 @@ export async function fetchPmdbWatchedKeySet(
     if (options.strict) throw new Error("No verified PublicMetaDB identity is available.");
     return set;
   }
+
+  if (effective?.tmdb_id != null)
+    scopePmdbWatchedOrder(set, effective, isTmdbSingleSeasonShowCached(effective.tmdb_id) === true);
 
   try {
     const first = await fetchWatchedPage(target, 1);

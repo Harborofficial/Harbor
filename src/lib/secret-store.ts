@@ -146,8 +146,11 @@ export const SECRETS_READY = "harbor:secrets-ready";
 
 export function subscribeSecretsReady(fn: () => void): () => void {
   if (loaded && rustAvailable) fn();
-  window.addEventListener(SECRETS_READY, fn);
-  return () => window.removeEventListener(SECRETS_READY, fn);
+  if (typeof window !== "undefined") {
+    window.addEventListener(SECRETS_READY, fn);
+    return () => window.removeEventListener(SECRETS_READY, fn);
+  }
+  return () => {};
 }
 
 export function getSecret(key: string): string | null {

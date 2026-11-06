@@ -11,4 +11,17 @@ const store = new Map<string, string>();
   },
 };
 
+(globalThis as any).window ??= globalThis;
+(globalThis as any).addEventListener ??= () => {};
+(globalThis as any).removeEventListener ??= () => {};
+(globalThis as any).CustomEvent ??= class CustomEvent {
+  type: string;
+  detail: any;
+  constructor(type: string, init?: any) {
+    this.type = type;
+    this.detail = init?.detail;
+  }
+};
+(globalThis as any).dispatchEvent ??= () => true;
+
 export {};
