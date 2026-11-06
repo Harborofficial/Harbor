@@ -352,8 +352,8 @@ const catalogJL: Record<string, string> = {
   "Load more": "और लोड करें",
   "Load more comments": "और टिप्पणियाँ लोड करें",
   "Load more threads": "और थ्रेड लोड करें",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "फ़ीचर्ड हीरो के लिए सबसे हाई-रिज़ॉल्यूशन आर्टवर्क लोड करें। इससे ज़्यादा बैंडविड्थ इस्तेमाल होती है।",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "फ़ीचर्ड हीरो, डिटेल पेज के हीरो और सोर्स पिकर के बिना-ब्लर बैकग्राउंड के लिए सबसे हाई-रिज़ॉल्यूशन आर्टवर्क लोड करें। इससे ज़्यादा बैंडविड्थ और वीडियो मेमोरी इस्तेमाल होती है।",
   "Loaded {loaded} of {total} movies...": "{total} में से {loaded} फ़िल्में लोड हुईं...",
   "Loaded {loaded} of {total} shows...": "{total} में से {loaded} शो लोड हुए...",
   "Loaded {name}": "{name} लोड हुआ",

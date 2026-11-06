@@ -5019,7 +5019,7 @@
   "Load more": "Charger plus",
   "Load more comments": "Charger plus de commentaires",
   "Load more threads": "Charger plus de fils de discussion",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.": "Charger l’illustration dans la plus haute résolution disponible pour le contenu à la une. Consomme davantage de bande passante.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.": "Charger l’illustration dans la plus haute résolution disponible pour le contenu à la une, l’image de la page de détails et les arrière-plans non floutés du sélecteur de sources. Consomme davantage de bande passante et de mémoire vidéo.",
   "Loaded {loaded} of {total} movies...": "{loaded} films sur {total} chargés...",
   "Loaded {loaded} of {total} shows...": "{loaded} séries chargées sur {total}...",
   "Loaded {name}": "{name} chargé",

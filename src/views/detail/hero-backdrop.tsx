@@ -1,8 +1,19 @@
 import { useEffect, useRef, useState } from "react";
+import { tmdbBackdropAtSize } from "@/lib/tmdb-backdrop-size";
 
-function Layer({ url, first, onReady }: { url: string; first: boolean; onReady: () => void }) {
-  const lowUrl = url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w300/");
-  const highUrl = url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/original/");
+function Layer({
+  url,
+  first,
+  fullQuality,
+  onReady,
+}: {
+  url: string;
+  first: boolean;
+  fullQuality: boolean;
+  onReady: () => void;
+}) {
+  const lowUrl = tmdbBackdropAtSize(url, "w300");
+  const highUrl = tmdbBackdropAtSize(url, fullQuality ? "original" : "w1280");
   const canBlurUp = first && lowUrl !== highUrl;
   const [ready, setReady] = useState(false);
   const done = () => {
@@ -35,14 +46,12 @@ function Layer({ url, first, onReady }: { url: string; first: boolean; onReady: 
   );
 }
 
-export function HeroBackdrop({ url }: { url: string }) {
+export function HeroBackdrop({ url, fullQuality = false }: { url: string; fullQuality?: boolean }) {
   const [layers, setLayers] = useState<{ id: number; url: string }[]>([{ id: 0, url }]);
   const nextId = useRef(1);
   useEffect(() => {
     const id = nextId.current++;
-    setLayers((prev) =>
-      prev[prev.length - 1]?.url === url ? prev : [...prev, { id, url }],
-    );
+    setLayers((prev) => (prev[prev.length - 1]?.url === url ? prev : [...prev, { id, url }]));
   }, [url]);
   const settle = (id: number) =>
     setLayers((prev) => {
@@ -52,7 +61,13 @@ export function HeroBackdrop({ url }: { url: string }) {
   return (
     <>
       {layers.map((l) => (
-        <Layer key={l.id} url={l.url} first={l.id === 0} onReady={() => settle(l.id)} />
+        <Layer
+          key={`${l.id}:${fullQuality}`}
+          url={l.url}
+          first={l.id === 0}
+          fullQuality={fullQuality}
+          onReady={() => settle(l.id)}
+        />
       ))}
     </>
   );

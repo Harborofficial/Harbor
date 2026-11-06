@@ -379,8 +379,8 @@ const settings: Record<string, string> = {
   "Stretch the featured hero edge to edge and taller, across every layout.":
     "すべてのレイアウトで、注目ヒーローを画面の端から端まで広げて高く表示します。",
   "Full quality hero image": "最高画質のヒーロー画像",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "注目ヒーローの画像を最高解像度で読み込みます。通信量が増加します。",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "注目ヒーロー、詳細ページのヒーロー、ぼかしなしのストリーム選択画面の背景を最高解像度で読み込みます。通信量とビデオメモリの使用量が増加します。",
   "Display language": "表示言語",
   "Interface language": "インターフェースの言語",
   "Metadata language": "メタデータの言語",

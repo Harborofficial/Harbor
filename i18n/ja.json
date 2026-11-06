@@ -5019,7 +5019,7 @@
   "Load more": "さらに読み込む",
   "Load more comments": "コメントをさらに読み込む",
   "Load more threads": "さらにスレッドを読み込む",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.": "注目ヒーローの画像を最高解像度で読み込みます。通信量が増加します。",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.": "注目ヒーロー、詳細ページのヒーロー、ぼかしなしのストリーム選択画面の背景を最高解像度で読み込みます。通信量とビデオメモリの使用量が増加します。",
   "Loaded {loaded} of {total} movies...": "映画{total}本中{loaded}本を読み込みました...",
   "Loaded {loaded} of {total} shows...": "シリーズ{total}本中{loaded}本を読み込みました...",
   "Loaded {name}": "{name}を読み込みました",

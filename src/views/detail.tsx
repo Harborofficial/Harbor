@@ -343,9 +343,7 @@ export function DetailView({
     return isTextInLanguage(detail.overview, iso1) ? detail.overview : undefined;
   }, [settings.tmdbLanguage, settings.uiLanguage, detail?.overview]);
   const pinnedBackdrop = useTitleBackdrop(meta.id);
-  const pinnedBackdropHi = pinnedBackdrop
-    ? pinnedBackdrop.replace(/\/t\/p\/w\d+\//, "/t/p/original/")
-    : undefined;
+  const pinnedBackdropHi = toHiResBackdrop(pinnedBackdrop, settings.heroFullQuality);
   const [cinemetaFull, setCinemetaFull] = useState<Meta | null>(
     meta.videos && meta.videos.length > 0 ? meta : null,
   );
@@ -1465,13 +1463,13 @@ export function DetailView({
     const seen = new Set<string>();
     const pool: string[] = [];
     for (const b of [primaryBackdrop, ...backdrops]) {
-      const hi = toHiResBackdrop(b ?? undefined);
+      const hi = toHiResBackdrop(b ?? undefined, settings.heroFullQuality);
       if (!hi || seen.has(hi)) continue;
       seen.add(hi);
       pool.push(hi);
     }
     return pool;
-  }, [primaryBackdrop, backdrops]);
+  }, [primaryBackdrop, backdrops, settings.heroFullQuality]);
   const reducedMotion = useReducedMotion();
   const carouselOn =
     settings.heroBackdropCarousel && !pinnedBackdrop && backdropPool.length >= 2 && !reducedMotion;
@@ -2388,7 +2386,7 @@ export function DetailView({
               />
             ))
           ) : backdrop ? (
-            <HeroBackdrop url={backdrop} />
+            <HeroBackdrop url={backdrop} fullQuality={settings.heroFullQuality} />
           ) : (
             <div className="absolute inset-0 animate-pulse bg-white/[0.02]" />
           )}

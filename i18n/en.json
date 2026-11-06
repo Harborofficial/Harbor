@@ -5022,7 +5022,7 @@
   "Load more": "Load more",
   "Load more comments": "Load more comments",
   "Load more threads": "Load more threads",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.": "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.": "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.",
   "Loaded {loaded} of {total} movies...": "Loaded {loaded} of {total} movies...",
   "Loaded {loaded} of {total} shows...": "Loaded {loaded} of {total} shows...",
   "Loaded {name}": "Loaded {name}",

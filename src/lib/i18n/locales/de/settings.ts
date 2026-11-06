@@ -1245,8 +1245,8 @@ const settings: Record<string, string> = {
     "Wird live in das Dokument eingefügt. Verwende dies, um Schaltflächen neu zu gestalten, Abstände zu ändern oder beliebige Elemente umzufärben.",
   "Living-room focus, floating glass chrome.": "Wohnzimmerfokus, schwebende Glasoptik.",
   "Load effect": "Ladeeffekt",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Lädt das Bildmaterial des hervorgehobenen Titels in höchster Auflösung. Verbraucht mehr Bandbreite.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Lädt das Bildmaterial in höchster Auflösung für den hervorgehobenen Titel, das Titelbild der Detailseite und nicht weichgezeichnete Hintergründe der Stream-Auswahl. Verbraucht mehr Bandbreite und Videospeicher.",
   "Loading environment details…": "Umgebungsdetails werden geladen…",
   "Loading...": "Wird geladen...",
   "Loads a backup file and replaces your current setup with it. Perfect for a new computer. Your Stremio sign-in on this device stays as is.":
