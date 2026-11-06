@@ -3,7 +3,9 @@
 
 # whisper-rs-sys bundled bindings were generated for a different target.
 # Always generate correct Windows bindings rather than using those layouts.
-[Environment]::SetEnvironmentVariable('WHISPER_DONT_GENERATE_BINDINGS', $null, 'Process')
+# PowerShell/.NET can retain this as an empty environment entry. The crate
+# checks for presence, not its value, so remove the entry through the provider.
+Remove-Item Env:WHISPER_DONT_GENERATE_BINDINGS -ErrorAction SilentlyContinue
 
 $vswhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
 $vs = $null
