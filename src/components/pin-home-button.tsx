@@ -1,4 +1,5 @@
 import { NavGlyph } from "@/components/icons/nav-glyph";
+import { CatalogSectionPicker } from "@/components/catalog-section-picker";
 import {
   pinnedBuiltinTitle,
   togglePinnedCatalog,
@@ -20,6 +21,7 @@ export function PinHomeButton({
 }) {
   const t = useT();
   const pinned = useIsPinned(id);
+  if (source === "catalog") return <CatalogSectionPicker catalog={{ id, source, name, params }} />;
   return (
     <button
       type="button"

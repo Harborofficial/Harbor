@@ -1,8 +1,7 @@
 import { useMemo, type ReactNode } from "react";
 import { ChevronDown, ChevronUp, Eye, EyeOff, Pin, PinOff } from "lucide-react";
-import { NavGlyph } from "@/components/icons/nav-glyph";
+import { CatalogSectionPicker } from "@/components/catalog-section-picker";
 import { catalogTypeLabelKey, type BrowseCatalog } from "@/lib/catalog-browse";
-import { togglePinnedCatalog, useIsPinned } from "@/lib/pinned-catalogs";
 import { useT } from "@/lib/i18n";
 import type { AddonGroup } from "./use-catalog-list";
 
@@ -118,15 +117,7 @@ function ManageRow({
   moveDown?: () => void;
 }) {
   const t = useT();
-  const pinnedHome = useIsPinned(catalog.key);
   const typeLabelKey = catalogTypeLabelKey(catalog.type);
-  const toggleHome = () =>
-    togglePinnedCatalog({
-      id: catalog.key,
-      source: "catalog",
-      name: catalog.name,
-      params: { base: catalog.base, type: catalog.type, id: catalog.id },
-    });
   return (
     <div
       className={`flex items-center gap-3 rounded-xl border border-edge-soft bg-elevated/25 py-2.5 pe-2.5 ps-3.5 transition-opacity ${
@@ -163,13 +154,14 @@ function ManageRow({
         </div>
       )}
 
-      <IconBtn
-        label={pinnedHome ? t("Remove from Home") : t("Add to Home Screen")}
-        onClick={toggleHome}
-        active={pinnedHome}
-      >
-        <NavGlyph name="home" className="h-[17px] w-[17px]" />
-      </IconBtn>
+      <CatalogSectionPicker
+        catalog={{
+          id: catalog.key,
+          source: "catalog",
+          name: catalog.name,
+          params: { base: catalog.base, type: catalog.type, id: catalog.id },
+        }}
+      />
       <IconBtn
         label={hidden ? t("Show this catalog") : t("Hide this catalog")}
         onClick={onToggleHide}

@@ -5,7 +5,12 @@ import { advanceFocus } from "@/lib/keyboard-navigation";
 import { pushBackHandler } from "@/lib/back-intercept";
 import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";
 
-export type DropdownOption = { value: string; label: string; left?: ReactNode; dir?: "ltr" | "rtl" | "auto" };
+export type DropdownOption = {
+  value: string;
+  label: string;
+  left?: ReactNode;
+  dir?: "ltr" | "rtl" | "auto";
+};
 
 const MENU_MAX = 320;
 const GAP = 6;
@@ -22,6 +27,8 @@ type MenuBox = {
 
 export function Dropdown({
   value,
+  selectedValues,
+  selectionLabel,
   options,
   onChange,
   placeholder,
@@ -31,6 +38,8 @@ export function Dropdown({
   size = "md",
 }: {
   value: string;
+  selectedValues?: string[];
+  selectionLabel?: string;
   options: DropdownOption[];
   onChange: (value: string) => void;
   placeholder?: string;
@@ -59,7 +68,10 @@ export function Dropdown({
     if (!open) return;
     // The shell handles Back before window key listeners. Give this open menu
     // priority so keyboard/controller Back cannot also leave the current page.
-    const removeBack = pushBackHandler(() => { close(true); return true; });
+    const removeBack = pushBackHandler(() => {
+      close(true);
+      return true;
+    });
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node;
       if (ref.current?.contains(t) || listRef.current?.contains(t)) return;
@@ -185,7 +197,11 @@ export function Dropdown({
           if (open) close(holdsFocus());
           else setOpen(true);
         }}
-        aria-label={ariaLabel ? `${ariaLabel}: ${selected?.label ?? placeholder ?? ""}` : undefined}
+        aria-label={
+          ariaLabel
+            ? `${ariaLabel}: ${selectionLabel ?? selected?.label ?? placeholder ?? ""}`
+            : undefined
+        }
         aria-haspopup="listbox"
         aria-expanded={open}
         className={`flex w-full items-center justify-between gap-3 rounded-md outline-none transition-colors ${
@@ -196,7 +212,13 @@ export function Dropdown({
           className={`flex min-w-0 items-center gap-2 ${selected ? "text-ink" : "text-ink-subtle"}`}
         >
           {selected?.left}
-          <span className="truncate" dir={selected?.dir} title={selected?.dir ? selected.label : undefined}>{selected?.label ?? placeholder ?? ""}</span>
+          <span
+            className="truncate"
+            dir={selected?.dir}
+            title={selected?.dir ? selected.label : undefined}
+          >
+            {selectionLabel ?? selected?.label ?? placeholder ?? ""}
+          </span>
         </span>
         <span
           ref={chevRef}
@@ -212,6 +234,7 @@ export function Dropdown({
           <div
             ref={listRef}
             role="listbox"
+            aria-multiselectable={selectedValues ? true : undefined}
             aria-label={ariaLabel}
             data-dropdown-menu
             data-settings-menu={btnRef.current?.closest(".harbor-settings-shell") ? "" : undefined}
@@ -230,7 +253,7 @@ export function Dropdown({
             }`}
           >
             {options.map((o, i) => {
-              const active = o.value === value;
+              const active = selectedValues ? selectedValues.includes(o.value) : o.value === value;
               return (
                 <button
                   key={o.value}
@@ -243,7 +266,7 @@ export function Dropdown({
                   data-selected={active}
                   onClick={() => {
                     onChange(o.value);
-                    close(true);
+                    if (!selectedValues) close(true);
                   }}
                   style={{ animationDelay: `${Math.min(i, 8) * 22}ms` }}
                   className={`animate-item-in flex w-full items-center justify-between gap-3 rounded-[4px] px-3 text-start outline-none transition-colors ${
@@ -256,7 +279,9 @@ export function Dropdown({
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     {o.left}
-                    <span className="truncate" dir={o.dir} title={o.dir ? o.label : undefined}>{o.label}</span>
+                    <span className="truncate" dir={o.dir} title={o.dir ? o.label : undefined}>
+                      {o.label}
+                    </span>
                   </span>
                   {active && (
                     <Check size={15} strokeWidth={2.4} className="animate-badge-pop shrink-0" />

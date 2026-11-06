@@ -1,3 +1,4 @@
+import { usePinnedCatalogRows } from "./home/hooks/use-pinned-rows";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CatalogRows } from "@/components/catalog/catalog-rows";
@@ -277,7 +278,15 @@ export function Movies({ active = true }: { active?: boolean }) {
         })),
     [movieCollections],
   );
-  const allRestRows = useMemo(() => [...collectionRows, ...restRows], [collectionRows, restRows]);
+  const pinnedRows = usePinnedCatalogRows("movies");
+  const allRestRows = useMemo(
+    () => [
+      ...pinnedRows.map((row) => ({ ...row, title: row.name })),
+      ...collectionRows,
+      ...restRows,
+    ],
+    [pinnedRows, collectionRows, restRows],
+  );
   const catalogRows = useMemo<MovieRow[]>(() => {
     if (top10.length < 10) return allRestRows;
     const trending = rows.find((r) => r.key === "trending");
