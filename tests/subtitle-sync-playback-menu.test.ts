@@ -2,8 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 
-const read = (file: string) =>
-  readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+const read = (file: string) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 
 test("subtitle sync dropdown puts Sync from playback between Auto sync and Manual offset", () => {
   const control = read("src/components/player/subtitle-menu/sync-control.tsx");
@@ -17,9 +16,9 @@ test("subtitle sync dropdown puts Sync from playback between Auto sync and Manua
   assert.match(control, /disabled=\{!canSyncFromPlayback \|\| busy \|\| !autoSync\}/);
 });
 
-test("Sync from playback appears only for an embedded-mpv player with external subtitles selected", () => {
+test("Sync from playback appears for an embedded-mpv player with any subtitle track selected", () => {
   const header = read("src/components/player/subtitle-menu/menu-header.tsx");
-  assert.match(header, /canSyncFromPlayback=\{p\.engine === "mpv" && p\.selectedTrack\?\.external === true\}/);
+  assert.match(header, /canSyncFromPlayback=\{p\.engine === "mpv" && p\.selectedTrack != null\}/);
 });
 
 test("the existing Sync from playback fallback after unsuccessful dialogue matching is unchanged", () => {

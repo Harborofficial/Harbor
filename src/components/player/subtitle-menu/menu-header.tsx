@@ -29,8 +29,7 @@ export function MenuHeader(p: Props) {
     autoSync?.status === "analyzing" ||
     autoSync?.status === "listening" ||
     isAppliedAutoSync(autoSync?.status);
-  const canAutoSync = p.engine === "mpv" &&
-    (p.selectedTrack?.external === true || autoSyncOn);
+  const canAutoSync = p.engine === "mpv" && (p.selectedTrack?.external === true || autoSyncOn);
   // Embedded-only or still-loading subtitle lists should guide the viewer
   // toward an external track instead of displaying a permanently disabled item.
   const canChooseExternal = p.engine === "mpv" && !canAutoSync;
@@ -51,7 +50,7 @@ export function MenuHeader(p: Props) {
           hasExternalTrack={p.hasExternalTrack}
           onChooseExternal={p.onChooseExternal}
           canLiveSync={p.selectedTrack != null}
-          canSyncFromPlayback={p.engine === "mpv" && p.selectedTrack?.external === true}
+          canSyncFromPlayback={p.engine === "mpv" && p.selectedTrack != null}
           delaySec={p.delaySec}
           delayNonZero={p.delayNonZero}
           onLiveSync={p.onEnterSync}

@@ -93,9 +93,11 @@ test("an already-aligned refusal is shown as aligned and a refusal reason is vis
   const hook = read("src/views/player/hooks/use-auto-sync.ts");
   assert.match(hook, /o\.decision\.bindingRule === "already-good"/);
   assert.match(hook, /setReason\(refusalReason\(o\)\)/);
+  assert.match(hook, /setStatus\("aligned"\)/);
   const popover = read("src/components/player/autosync/autosync-popover.tsx");
   assert.match(popover, /\{reason &&/);
   assert.match(popover, /phase === "declined" \|\|\s*phase === "error"/);
+  assert.match(popover, /phase === "aligned"\) return 2000/);
   assert.match(hook, /The selected subtitle could not be read\./);
   assert.match(hook, /readNonNetworkSubtitleBytes\(/);
   assert.doesNotMatch(hook, /convertFileSrc/);
@@ -154,8 +156,8 @@ test("cache sync verifies decoded audio while remote sources use a bounded curre
   assert.match(hook, /url: active\.url,/);
   assert.match(hook, /windowStartSec: startAt/);
   assert.match(hook, /boundedNativeProbe\(/);
-  assert.match(hook, /const shifted = scene\.intervals;/);
-  assert.match(hook, /cues: shifted,\s*durationSec: clipSec,/);
+  assert.match(hook, /startAt = prepared\.startSec;/);
+  assert.match(hook, /cue\.start - startAt, cue\.end - startAt/);
   assert.match(
     hook,
     /liveSyncFailureReason\(\{\s*cacheAudioReady,\s*cacheError,\s*directAttempted,\s*directError,?\s*\}\)/,

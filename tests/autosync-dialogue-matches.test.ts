@@ -10,6 +10,7 @@ import {
 } from "../src/lib/subtitles/autosync/dialogue-matches.ts";
 import { summarizeEmbeddedExtraction } from "../src/lib/subtitles/autosync/embedded-extraction.ts";
 import { rankDialogueScenes } from "../src/lib/subtitles/autosync/scene-window.ts";
+import { crossLanguagePlaybackOffset } from "../src/lib/subtitles/autosync/drift-dsp.ts";
 import {
   fitEmbeddedReference,
   fitFocusedEmbeddedReference,
@@ -17,6 +18,57 @@ import {
 } from "../src/lib/subtitles/autosync/embedded-reference.ts";
 
 const cue = (start: number, text: string, len = 1.2) => ({ start, end: start + len, text });
+
+test("production credits are not treated as spoken dialogue", () => {
+  for (const text of [
+    "LINE PRODUCER: Example Name",
+    "Written and Directed by Example Name",
+    "<i>Director of Photography: Example Name</i>",
+  ])
+    assert.equal(isLikelyDialogueCue(text), false, text);
+  for (const text of [
+    "The director is waiting.",
+    "I was directed by the officer to stop.",
+    "Listen to the music.",
+  ]) {
+    assert.equal(isLikelyDialogueCue(text), true, text);
+  }
+});
+
+test("measured speech timings recover the embedded-reference offset after removing credits", () => {
+  // Numeric timings only; the reference offset was independently checked against
+  // matching embedded PGS captions. This tests alignment, not model inference.
+  const fixture = JSON.parse(
+    readFileSync(new URL("./fixtures/wailing-speech-timing.json", import.meta.url), "utf8"),
+  ) as {
+    window: { startSec: number; lenSec: number };
+    expectedOffsetSec: number;
+    speech: Array<[number, number]>;
+    cues: Array<{ start: number; end: number; credit: boolean }>;
+  };
+  const cues = fixture.cues.map((c) => ({
+    ...c,
+    text: c.credit ? "LINE PRODUCER: Example Name" : "Example dialogue.",
+  }));
+  const intervals = (items: typeof cues): Array<[number, number]> =>
+    items.map((c) => [c.start, c.end]);
+  assert.equal(
+    crossLanguagePlaybackOffset(fixture.speech, intervals(cues), [fixture.window], 30),
+    null,
+  );
+  const result = crossLanguagePlaybackOffset(
+    fixture.speech,
+    intervals(cues.filter((c) => isLikelyDialogueCue(c.text))),
+    [fixture.window],
+    30,
+  );
+  assert.notEqual(result, null);
+  assert.ok(Math.abs(result! - fixture.expectedOffsetSec) < 0.2);
+  assert.equal(
+    crossLanguagePlaybackOffset(fixture.speech, [[245, 395]], [fixture.window], 30),
+    null,
+  );
+});
 
 function splitMergedFixture(offset: number, reverse = false) {
   const source = [];

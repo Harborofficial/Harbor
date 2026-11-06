@@ -180,6 +180,17 @@ function phraseIntervals(intervals: Interval[]): Interval[] {
   return merged;
 }
 
+export type SpeechTimingDiagnostic = {
+  startSec: number;
+  lenSec: number;
+  onsets: number;
+  ncc?: number;
+  coverage?: number;
+  competingNcc?: number;
+  lagSec?: number;
+  accepted: boolean;
+};
+
 type SpeechTimingAnchor = { sourceSec: number; lagSec: number };
 
 /** Compare phrase occupancy, not the translated words or individual cue boundaries. */
@@ -188,6 +199,7 @@ function speechTimingAnchors(
   cues: Interval[],
   windows: Array<{ startSec: number; lenSec: number }>,
   maxLagSec: number,
+  diagnose?: (value: SpeechTimingDiagnostic) => void,
 ): SpeechTimingAnchor[] {
   const hz = 10;
   const pad = Math.floor(maxLagSec * hz);
@@ -209,7 +221,10 @@ function speechTimingAnchors(
     const spoken = maskSpeech(spokenPhrases, startSec, n, hz);
     let onsets = 0;
     for (let i = 1; i < n; i++) if (spoken[i] && !spoken[i - 1]) onsets++;
-    if (onsets < 2) continue;
+    if (onsets < 2) {
+      diagnose?.({ startSec, lenSec, onsets, accepted: false });
+      continue;
+    }
     const subtitles = maskSpeech(subtitlePhrases, startSec - pad / hz, n + 2 * pad, hz);
     // Every candidate uses the same audio interval, including at large lags.
     const fits = Array.from({ length: 2 * pad + 1 }, (_, index) => ({
@@ -218,12 +233,22 @@ function speechTimingAnchors(
     })).sort((a, b) => b.ncc - a.ncc);
     const best = fits[0];
     const competing = fits.find((fit) => Math.abs(fit.lag - best.lag) >= 2);
-    if (
+    const accepted =
       best.ncc >= DEFAULT_DRIFT_CONFIG.minNcc &&
       best.coverage >= DEFAULT_DRIFT_CONFIG.minCoverage &&
-      competing &&
-      best.ncc > DEFAULT_DRIFT_CONFIG.minDominance * competing.ncc
-    ) {
+      !!competing &&
+      best.ncc > DEFAULT_DRIFT_CONFIG.minDominance * competing.ncc;
+    diagnose?.({
+      startSec,
+      lenSec,
+      onsets,
+      ncc: best.ncc,
+      coverage: best.coverage,
+      competingNcc: competing?.ncc,
+      lagSec: best.lag,
+      accepted,
+    });
+    if (accepted) {
       // The lag is audio time minus subtitle time, so the regression's x axis
       // must be subtitle time, not the audio-window center.
       anchors.push({ sourceSec: startSec + lenSec / 2 - best.lag, lagSec: best.lag });
@@ -254,8 +279,9 @@ export function crossLanguagePlaybackOffset(
   cues: Interval[],
   windows: Array<{ startSec: number; lenSec: number }>,
   maxLagSec: number,
+  diagnose?: (value: SpeechTimingDiagnostic) => void,
 ): number | null {
-  const anchors = speechTimingAnchors(speech, cues, windows, maxLagSec);
+  const anchors = speechTimingAnchors(speech, cues, windows, maxLagSec, diagnose);
   const matchedDuration = anchors.reduce((sum, anchor) => {
     const center = anchor.sourceSec + anchor.lagSec;
     return (

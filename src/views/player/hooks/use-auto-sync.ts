@@ -70,8 +70,15 @@ import {
   shouldReadIndependentSceneAudio,
 } from "@/lib/subtitles/autosync/current-scene";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
-import { rankDialogueScenes, SCENE_CLIP_SEC } from "@/lib/subtitles/autosync/scene-window";
+import {
+  rankDialogueScenes,
+  SCENE_CLIP_SEC,
+  selectPlaybackRetryScene,
+} from "@/lib/subtitles/autosync/scene-window";
 import { matchPlaybackSpeech } from "@/lib/subtitles/autosync/playback-asr";
+import { playbackTimelineFailure } from "@/lib/subtitles/autosync/playback-timeline-error";
+import { matchPlaybackVad } from "@/lib/subtitles/autosync/playback-vad";
+import { isLikelyDialogueCue } from "@/lib/subtitles/autosync/dialogue-matches";
 import {
   hasSavedAutoSyncCorrection,
   readSavedAutoSyncCorrection,
@@ -96,6 +103,7 @@ export type AutoSyncStatus =
   | "idle"
   | "analyzing"
   | "listening"
+  | "aligned"
   | "synced"
   | "matched-embedded"
   | "best-effort"
@@ -237,6 +245,7 @@ export function useAutoSync(params: {
   const [offer, setOffer] = useState<PipelineOutcome | null>(null);
   const [reason, setReason] = useState<string | null>(null);
   const [analysisRevision, setAnalysisRevision] = useState(0);
+  const playbackStageRef = useRef<"capture" | "verify" | "compare" | "whisper">("capture");
   const statusRef = useRef(status);
   statusRef.current = status;
   const activeAnalysisDeadlineRef = useRef(ANALYSIS_DEADLINE_MS);
@@ -271,6 +280,7 @@ export function useAutoSync(params: {
   const statusScopeRef = useRef<AutoSyncScope | null>(null);
   const manualTimingMediaRef = useRef<string | null>(null);
   const localReferenceFocusRef = useRef<{ scope: AutoSyncScope; positionSec: number } | null>(null);
+  const embeddedPlaybackCuesRef = useRef<{ scope: AutoSyncScope; cues: SubCue[] } | null>(null);
   const liveSnapRef = useRef(snap);
   const srcRef = useRef(src);
   const settingsRef = useRef(settings);
@@ -418,7 +428,13 @@ export function useAutoSync(params: {
       setReason(
         phase === "analyzing"
           ? "Subtitle analysis stopped responding. The audio check has been cancelled; try Sync from playback or Manual offset."
-          : "Buffered playback audio wasn't available in time. Try a dialogue-heavy scene or Manual offset.",
+          : playbackStageRef.current === "verify"
+            ? "Verifying the buffered audio's movie timestamps took too long. No correction was applied."
+            : playbackStageRef.current === "compare"
+              ? "Buffered audio was decoded, but comparing it with subtitle timing took too long. No correction was applied."
+              : playbackStageRef.current === "whisper"
+                ? "Whisper recognition of the buffered audio took too long. No correction was applied."
+                : "Buffered playback audio wasn't available in time. Try a dialogue-heavy scene or Manual offset.",
       );
       setStatus("error");
     }, limitMs);
@@ -599,9 +615,10 @@ export function useAutoSync(params: {
       if (dec === "refuse") {
         if (appliedRef.current.transform) return;
         // "Already aligned" is a successful outcome, not a failure to line up.
+        // It is not a correction, so it stays out of the applied/synced state.
         if (o.decision.bindingRule === "already-good") {
           setReason(null);
-          setStatus("synced");
+          setStatus("aligned");
           return;
         }
         setReason(refusalReason(o));
@@ -1523,7 +1540,10 @@ export function useAutoSync(params: {
           return;
         }
         const t = o.candidate;
-        const cues = await loadCues(b);
+        const embeddedPlayback =
+          o.decision.bindingRule === "live-tap" &&
+          embeddedPlaybackCuesRef.current?.scope === statusScope;
+        const cues = embeddedPlayback ? embeddedPlaybackCuesRef.current!.cues : await loadCues(b);
         if (!t || !cues) return;
         const selectedTrack =
           liveSnapRef.current.subtitleTracks.find((track) => track.selected) ?? null;
@@ -1578,7 +1598,7 @@ export function useAutoSync(params: {
               ? "Timing was adjusted to match the embedded subtitle, not verified against spoken dialogue."
               : null,
         );
-        persistAppliedCorrection(cues, t, o.decision.bindingRule);
+        if (!embeddedPlayback) persistAppliedCorrection(cues, t, o.decision.bindingRule);
         setStatus(
           referenceOnly
             ? "matched-embedded"
@@ -1593,6 +1613,7 @@ export function useAutoSync(params: {
         if (
           o.decision.bindingRule !== "consensus-audio-unverified" &&
           o.decision.bindingRule !== "embedded-text-reference" &&
+          !embeddedPlayback &&
           o.decision.bindingRule !== "embedded-text-reference-local" &&
           o.decision.bindingRule !== "cross-language-speech-timing"
         ) {
@@ -1636,7 +1657,7 @@ export function useAutoSync(params: {
         const snap = liveSnapRef.current;
         const selectedTrack = snap.subtitleTracks.find((track) => track.selected) ?? null;
         if (snap.durationSec < MIN_DURATION_SEC) return;
-        if (!selectedTrack || selectedTrack.external !== true || isSyncedTrack(selectedTrack)) {
+        if (!selectedTrack || isSyncedTrack(selectedTrack)) {
           return;
         }
         scope = {
@@ -1677,7 +1698,9 @@ export function useAutoSync(params: {
         if (activeSceneSessionId) cancelNativeAnalysis(activeSceneSessionId);
       };
       liveTapCancelRef.current = cancelTap;
+      playbackStageRef.current = "capture";
       setOffer(null);
+      embeddedPlaybackCuesRef.current = null;
       setReason(null);
       setAnalysisRevision((revision) => revision + 1);
       setStatus("listening");
@@ -1694,6 +1717,8 @@ export function useAutoSync(params: {
           await fs.mkdir(dir, { recursive: true, mode: 0o700 });
           recordPath = await join(dir, `tap-${Date.now()}.mkv`);
           cleanupFiles.push(() => fs.remove(recordPath as string));
+          const anchorPath = recordPath.replace(/\.mkv$/, "-anchor.mkv");
+          cleanupFiles.push(() => fs.remove(anchorPath));
           const snap = liveSnapRef.current;
           const duration = snap.durationSec;
           const focusSec = getPlaybackPosition();
@@ -1705,14 +1730,28 @@ export function useAutoSync(params: {
               "Playback sync needs an audio track from the video to capture the dialogue.",
             );
           }
-          const sourceCues = await loadCues(b);
+          const embeddedPlayback =
+            snap.subtitleTracks.find((track) => track.selected)?.external !== true;
+          if (embeddedPlayback && snap.subtitleTracks.some((track) => track.secondary)) {
+            throw new Error(
+              "Turn off the secondary subtitle before syncing an embedded track from playback.",
+            );
+          }
+          let sourceCues: SubCue[] = embeddedPlayback ? [] : ((await loadCues(b)) ?? []);
           if (aborted || !isCurrentAutoSyncScope(scope)) return;
-          if (!sourceCues || sourceCues.length < MIN_CUES) {
+          if (!embeddedPlayback && sourceCues.length < MIN_CUES) {
             throw new Error("The selected subtitle could not be read or has too few cues.");
           }
           // Look both behind and ahead of the playhead for enough *distinct,
           // spoken* cues, without relaxing the native audio-confidence gates.
-          const nearbyScenes = rankDialogueScenes(sourceCues, focusSec, duration, clipSec);
+          const nearbyScenes = rankDialogueScenes(
+            sourceCues,
+            focusSec,
+            duration,
+            clipSec,
+            undefined,
+            embeddedPlayback ? 0 : MIN_CUES,
+          );
           let scene = nearbyScenes[0];
           let startAt = scene?.startSec ?? focusSec;
           let endAt = scene?.endSec ?? focusSec + clipSec;
@@ -1867,7 +1906,9 @@ export function useAutoSync(params: {
           let cacheAudioReady = false;
           let whisperFailure: string | null = null;
           let usedWhisper = false;
+          let usedSilero = false;
           let needsFreshAudio = false;
+          let retryAfterStartSec: number | null = null;
           let lastPosition = getPlaybackPosition();
           let playedFrom = lastPosition;
           while (!aborted && isCurrentAutoSyncScope(scope)) {
@@ -1878,18 +1919,28 @@ export function useAutoSync(params: {
             const cached = await readBufferedRanges();
             if (aborted || !isCurrentAutoSyncScope(scope)) return;
             const ranges = cached ?? [{ start: playedFrom, end: position }];
-            const bufferedScene = rankDialogueScenes(
+            const bufferedScenes = rankDialogueScenes(
               sourceCues,
-              position,
+              focusSec,
               duration,
               clipSec,
               ranges,
-            ).find(
-              (candidate) =>
-                !needsFreshAudio ||
-                (candidate.startSec >= playedFrom && candidate.endSec <= position),
+              embeddedPlayback ? 0 : MIN_CUES,
             );
+            const bufferedScene =
+              retryAfterStartSec !== null
+                ? selectPlaybackRetryScene(bufferedScenes, focusSec, retryAfterStartSec)
+                : bufferedScenes.find(
+                    (candidate) =>
+                      !needsFreshAudio ||
+                      (candidate.startSec >= playedFrom && candidate.endSec <= position),
+                  );
             if (!bufferedScene) {
+              if (retryAfterStartSec !== null) {
+                throw new Error(
+                  "The next dialogue excerpt is no longer buffered. Try Sync from playback again.",
+                );
+              }
               const paused = liveSnapRef.current.status === "paused";
               setReason(
                 paused ? "Resume playback to buffer audio" : "Waiting for buffered dialogue audio",
@@ -1908,9 +1959,10 @@ export function useAutoSync(params: {
             scene = bufferedScene;
             startAt = scene.startSec;
             endAt = scene.endSec;
-            const shifted = scene.intervals;
             try {
-              setReason("Reading buffered playback audio");
+              playbackStageRef.current = "verify";
+              setAnalysisRevision((revision) => revision + 1);
+              setReason("Reading buffered audio and checking its timestamps");
               await invoke("mpv_command", {
                 cmd: [
                   "dump-cache",
@@ -1922,40 +1974,147 @@ export function useAutoSync(params: {
                 throw new Error("cache-audio-dump-command-failed");
               });
               if (aborted || !isCurrentAutoSyncScope(scope)) return;
+              // A second, earlier cut establishes the cache's movie-time origin
+              // without reopening the remote source. Both cuts must agree.
+              const anchorEndSec = endAt - 2;
+              await invoke("mpv_command", {
+                cmd: [
+                  "dump-cache",
+                  (anchorEndSec - 3).toFixed(3),
+                  anchorEndSec.toFixed(3),
+                  anchorPath.replace(/\\/g, "/"),
+                ],
+              });
+              if (aborted || !isCurrentAutoSyncScope(scope)) return;
               // dump-cache has completed. Validate actual decoded samples; the
               // container byte count cannot tell us how much audio it contains.
               // mpv remuxes selected tracks only, so the selected audio is 0:a:0
               // in this clip even when it was a later stream in the movie.
-              const prepared = await invoke<{ path: string; durationSec: number }>(
-                "subsync_prepare_cache_audio",
-                { input: recordPath.replace(/\\/g, "/"), mapSpec: "0:a:0", sessionId: nativeTapId },
-              );
+              const prepared = await invoke<{
+                path: string;
+                durationSec: number;
+                startSec: number;
+                subtitleIntervals?: Array<[number, number]>;
+              }>("subsync_prepare_cache_audio", {
+                input: recordPath.replace(/\\/g, "/"),
+                mapSpec: "0:a:0",
+                sessionId: nativeTapId,
+                anchorInput: anchorPath.replace(/\\/g, "/"),
+                requestedEndSec: Number(endAt.toFixed(3)),
+                anchorEndSec: Number(anchorEndSec.toFixed(3)),
+                embeddedSubtitles: embeddedPlayback,
+              });
               cleanupFiles.push(() => fs.remove(prepared.path));
+              const requestedStartSec = startAt;
+              startAt = prepared.startSec;
+              if (embeddedPlayback) {
+                sourceCues = (prepared.subtitleIntervals ?? []).map(([start, end], index) => ({
+                  start,
+                  end,
+                  text: `Embedded cue ${index + 1}`,
+                }));
+                if (sourceCues.length < MIN_CUES) {
+                  throw new Error("cache-subtitle-insufficient");
+                }
+                embeddedPlaybackCuesRef.current = { scope, cues: sourceCues };
+              }
+              if (!Number.isFinite(startAt) || startAt < 0)
+                throw new Error("cache-audio-timeline-invalid");
+              void invoke("mpv_command", {
+                cmd: [
+                  "print-text",
+                  `[harbor/subsync] playback-origin requested=${requestedStartSec.toFixed(3)} verified=${startAt.toFixed(3)} duration=${prepared.durationSec.toFixed(3)}`,
+                ],
+              }).catch(() => {});
               cacheAudioReady = true;
               if (aborted || !isCurrentAutoSyncScope(scope)) return;
               setReason("Comparing buffered speech with subtitle timing");
+              playbackStageRef.current = "compare";
+              setAnalysisRevision((revision) => revision + 1);
+              const comparisonSessionId = newAnalysisSessionId();
+              activeSceneSessionId = comparisonSessionId;
               try {
-                result = await invoke<{ offsetSec: number; confidence: number } | null>(
-                  "sync_subtitle",
-                  {
-                    url: prepared.path.replace(/\\/g, "/"),
-                    headers: null,
-                    cues: shifted,
-                    durationSec: clipSec,
-                    infoHash: null,
-                    confMin: null,
-                    mapSpec: "0:a:0",
-                    sessionId: nativeTapId,
-                    playbackClip: true,
-                    // The prepared WAV starts at zero; use Harbor's speech VAD.
-                    fromStart: false,
-                    reportFailures: true,
+                result = await boundedNativeProbe(
+                  async () => {
+                    setReason("Detecting buffered dialogue with Silero");
+                    const detected = await matchPlaybackVad(
+                      {
+                        path: prepared.path.replace(/\\/g, "/"),
+                        cues: sourceCues
+                          .filter((cue) => isLikelyDialogueCue(cue.text))
+                          .map((cue) => [cue.start - startAt, cue.end - startAt]),
+                        sessionId: comparisonSessionId,
+                      },
+                      invoke,
+                      () => !aborted && isCurrentAutoSyncScope(scope),
+                      (diagnostic) => {
+                        void invoke("mpv_command", {
+                          cmd: [
+                            "print-text",
+                            `[harbor/subsync] silero-fit ${JSON.stringify({
+                              ...diagnostic,
+                              requestedStartSec: startAt,
+                              playbackSec: position,
+                              cueCount: sourceCues.length,
+                              currentDelaySec: snap.subDelaySec,
+                            })}`,
+                          ],
+                        }).catch(() => {});
+                      },
+                    );
+                    void invoke("mpv_command", {
+                      cmd: [
+                        "print-text",
+                        `[harbor/subsync] playback-silero=${detected === undefined ? "unsupported" : detected === null ? "no-match" : "matched"}`,
+                      ],
+                    }).catch(() => {});
+                    if (detected !== undefined) {
+                      usedSilero = detected !== null;
+                      return detected;
+                    }
+                    setReason("Comparing buffered speech with subtitle timing");
+                    return invoke<{ offsetSec: number; confidence: number } | null>(
+                      "sync_subtitle",
+                      {
+                        url: prepared.path.replace(/\\/g, "/"),
+                        headers: null,
+                        cues: sourceCues
+                          .filter((cue) => isLikelyDialogueCue(cue.text))
+                          .map((cue) => [cue.start - startAt, cue.end - startAt]),
+                        durationSec: clipSec,
+                        infoHash: null,
+                        confMin: null,
+                        mapSpec: "0:a:0",
+                        sessionId: comparisonSessionId,
+                        playbackClip: true,
+                        // The prepared WAV starts at zero; use Harbor's speech VAD.
+                        fromStart: false,
+                        reportFailures: true,
+                      },
+                    );
                   },
+                  () => cancelNativeAnalysis(comparisonSessionId),
+                  30_000,
                 );
               } catch (error) {
                 cacheError = error;
+              } finally {
+                cancelNativeAnalysis(comparisonSessionId);
+                activeSceneSessionId = null;
               }
               if (aborted || !isCurrentAutoSyncScope(scope)) return;
+              if (
+                !result &&
+                retryAfterStartSec === null &&
+                selectPlaybackRetryScene(bufferedScenes, focusSec, startAt)
+              ) {
+                retryAfterStartSec = startAt;
+                setReason("Checking another buffered dialogue excerpt");
+                void invoke("mpv_command", {
+                  cmd: ["print-text", "[harbor/subsync] playback-silero=retry-nearby-excerpt"],
+                }).catch(() => {});
+                continue;
+              }
               if (!result) {
                 setAnalysisRevision((revision) => revision + 1);
                 const asrSessionId = newAnalysisSessionId();
@@ -1968,7 +2127,9 @@ export function useAutoSync(params: {
                           path: prepared.path.replace(/\\/g, "/"),
                           durationSec: Math.min(prepared.durationSec, clipSec),
                           // Preserve cues outside the excerpt for lag searches at its edges.
-                          cues: sourceCues.map((cue) => [cue.start - startAt, cue.end - startAt]),
+                          cues: sourceCues
+                            .filter((cue) => isLikelyDialogueCue(cue.text))
+                            .map((cue) => [cue.start - startAt, cue.end - startAt]),
                           audioLanguage: snap.audioTracks.find((track) => track.selected)?.lang,
                           subtitleLanguage: snap.subtitleTracks.find((track) => track.selected)
                             ?.lang,
@@ -1978,7 +2139,9 @@ export function useAutoSync(params: {
                         },
                         invoke,
                         (message) => {
-                          if (!aborted && isCurrentAutoSyncScope(scope)) setReason(message);
+                          if (aborted || !isCurrentAutoSyncScope(scope)) return;
+                          playbackStageRef.current = "whisper";
+                          setReason(message);
                           void invoke("mpv_command", {
                             cmd: [
                               "print-text",
@@ -2008,6 +2171,13 @@ export function useAutoSync(params: {
               break;
             } catch (error) {
               cacheError = error;
+              const timelineFailure = playbackTimelineFailure(error);
+              if (timelineFailure) {
+                void invoke("mpv_command", {
+                  cmd: ["print-text", `[harbor/subsync] playback-timeline=${timelineFailure.code}`],
+                }).catch(() => {});
+                throw new Error(timelineFailure.message);
+              }
               if (cacheAudioReady || needsFreshAudio) break;
               needsFreshAudio = true;
               playedFrom = getPlaybackPosition();
@@ -2082,7 +2252,9 @@ export function useAutoSync(params: {
           setReason(
             usedWhisper
               ? "Whisper speech timing suggests this shift for the current scene. Confirm it before keeping it; other scenes are not verified."
-              : null,
+              : usedSilero
+                ? "Silero speech timing suggests this shift for the current scene. Confirm it before keeping it; other scenes are not verified."
+                : null,
           );
           setStatus("offer");
         } catch (e) {
@@ -2119,7 +2291,7 @@ export function useAutoSync(params: {
   }, [beginRun, listen]);
 
   // Retry follows the same source-aware path as the menu's Auto sync action.
-  const retry = run;
+  const retry = selected && !selected.external ? () => listen(true) : run;
 
   const scopeCurrent = isAutoSyncScopeCurrent(statusScopeRef.current, {
     mediaKey,

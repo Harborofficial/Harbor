@@ -99,7 +99,7 @@ test("playback fallback validates cached ranges and bounds source-local reads", 
   assert.match(mpv, /get_mut\("seekable-ranges"\)/);
   assert.match(mpv, /mpv_node_to_json\(node\)/);
   assert.match(hook, /const clipSec = SCENE_CLIP_SEC/);
-  assert.match(hook, /rankDialogueScenes\(sourceCues, focusSec, duration, clipSec\)/);
+  assert.match(hook, /rankDialogueScenes\(\s*sourceCues,\s*focusSec,\s*duration,\s*clipSec,/);
   assert.match(hook, /playbackClip: true/);
   assert.match(hook, /cancelNativeAnalysis\(nativeTapId\)/);
   assert.doesNotMatch(hook, /checking the current minute directly/);

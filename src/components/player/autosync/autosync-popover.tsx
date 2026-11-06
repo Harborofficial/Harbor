@@ -16,7 +16,15 @@ import type { AutoSyncHandle } from "@/views/player/hooks/use-auto-sync";
 import type { PipelineOutcome } from "@/lib/subtitles/autosync/pipeline";
 import type { SyncTransform } from "@/lib/subtitles/autosync/fp-gate";
 
-type Phase = "analyzing" | "listening" | "synced" | "offer" | "wrong" | "declined" | "error";
+type Phase =
+  | "analyzing"
+  | "listening"
+  | "aligned"
+  | "synced"
+  | "offer"
+  | "wrong"
+  | "declined"
+  | "error";
 type Thumb = "up" | "down";
 type Acting = "offer" | "retry" | null;
 
@@ -26,6 +34,8 @@ function phaseOf(h: AutoSyncHandle): Phase | null {
       return "analyzing";
     case "listening":
       return "listening";
+    case "aligned":
+      return "aligned";
     case "synced":
     case "matched-embedded":
     case "best-effort":
@@ -71,6 +81,8 @@ function correctionOf(o: PipelineOutcome | null): string {
 }
 
 function dwellFor(phase: Phase, thumb: Thumb | null): number | null {
+  // Nothing was changed, so a brief confirmation is enough.
+  if (phase === "aligned") return 2000;
   if (phase === "synced") return thumb === "down" ? null : thumb === "up" ? 1600 : 6000;
   // Offers require explicit user approval, while failures need to remain
   // readable. Auto-hiding either made an unsuccessful attempt appear to
@@ -125,7 +137,7 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
   if (phase === null || dismissed) return null;
 
   const correction = correctionRef.current;
-  const hasPanel = phase !== "analyzing" && phase !== "listening";
+  const hasPanel = phase !== "analyzing" && phase !== "listening" && phase !== "aligned";
 
   const applyOffer = () => {
     setActing("offer");
@@ -158,7 +170,9 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
           onClick={
             phase === "listening" || phase === "analyzing"
               ? handle.stop
-              : hasPanel ? () => setOpen((v) => !v) : undefined
+              : hasPanel
+                ? () => setOpen((v) => !v)
+                : undefined
           }
           aria-expanded={hasPanel ? open : undefined}
           title={phase === "listening" || phase === "analyzing" ? t("Cancel sync") : undefined}
@@ -209,8 +223,12 @@ export function AutosyncPopover({ handle }: { handle: AutoSyncHandle }) {
               phase={phase}
               reason={handle.reason}
               unverifiedAudio={handle.offer?.decision.bindingRule === "consensus-audio-unverified"}
-              embeddedReferenceOnly={handle.offer?.decision.bindingRule === "embedded-text-reference"}
-              localReferenceOnly={handle.offer?.decision.bindingRule === "embedded-text-reference-local"}
+              embeddedReferenceOnly={
+                handle.offer?.decision.bindingRule === "embedded-text-reference"
+              }
+              localReferenceOnly={
+                handle.offer?.decision.bindingRule === "embedded-text-reference-local"
+              }
               correction={correction}
               thumb={thumb}
               acting={acting}
@@ -235,6 +253,8 @@ function chipLabel(t: (s: string) => string, phase: Phase): string {
       return t("Checking sources and audio");
     case "listening":
       return t("Listening to playback");
+    case "aligned":
+      return t("Subtitles already aligned");
     case "synced":
       return t("Subtitles synced");
     case "offer":
@@ -258,7 +278,7 @@ function Lead({ phase }: { phase: Phase }) {
       />
     );
   }
-  if (phase === "synced") {
+  if (phase === "synced" || phase === "aligned") {
     return (
       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success/15 animate-in zoom-in duration-200 motion-reduce:animate-none">
         <Check size={14} strokeWidth={2.6} className="text-success" />
@@ -327,7 +347,9 @@ function Body(props: {
         <div className="flex items-center justify-between gap-3">
           <p className="text-[13px] text-ink-muted">
             {correction ? t("Adjusted timing by") + " " : t("Timing looks aligned")}
-            {correction && <span className="font-semibold text-ink tabular-nums">{correction}</span>}
+            {correction && (
+              <span className="font-semibold text-ink tabular-nums">{correction}</span>
+            )}
           </p>
           <div className="flex shrink-0 items-center gap-1">
             <IconBtn label={t("Looks right")} onClick={() => props.onThumb("up")}>
@@ -367,17 +389,23 @@ function Body(props: {
         {reason && <p className="text-[12px] leading-snug text-ink-muted">{t(reason)}</p>}
         {props.unverifiedAudio && (
           <p className="text-[12px] leading-snug text-ink-muted">
-            {t("Reference subtitles suggest a shift, but video audio verification was unavailable. Confirm the timing before keeping it.")}
+            {t(
+              "Reference subtitles suggest a shift, but video audio verification was unavailable. Confirm the timing before keeping it.",
+            )}
           </p>
         )}
         {props.embeddedReferenceOnly && (
           <p className="text-[12px] leading-snug text-ink-muted">
-            {t("This estimate matches subtitles embedded in the video. They may also be mistimed against speech.")}
+            {t(
+              "This estimate matches subtitles embedded in the video. They may also be mistimed against speech.",
+            )}
           </p>
         )}
         {props.localReferenceOnly && (
           <p className="text-[12px] leading-snug text-ink-muted">
-            {t("This offset was measured against embedded dialogue near your current scene. Applying it shifts the whole subtitle track; other scenes may still need different timing.")}
+            {t(
+              "This offset was measured against embedded dialogue near your current scene. Applying it shifts the whole subtitle track; other scenes may still need different timing.",
+            )}
           </p>
         )}
         <p className="text-[13px] leading-snug text-ink-muted">

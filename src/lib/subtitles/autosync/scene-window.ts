@@ -15,17 +15,41 @@ export type DialogueScene = {
   distanceFromPlaybackSec: number;
 };
 
+/** Choose a different, already-buffered excerpt before retrying speech recognition.
+ * Selection uses proximity and dialogue availability, never a candidate offset.
+ */
+export function selectPlaybackRetryScene(
+  scenes: DialogueScene[],
+  playbackSec: number,
+  failedStartSec: number,
+): DialogueScene | undefined {
+  return scenes
+    .filter(
+      (scene) =>
+        scene.startSec >= playbackSec &&
+        scene.startSec - failedStartSec >= (scene.endSec - scene.startSec) / 3,
+    )
+    .sort((a, b) => a.startSec - b.startSec)[0];
+}
+
 function normalizedDialogue(raw: string): string | null {
   return normalizedDialogueCue(raw, "");
 }
 
 function seekableRanges(value: unknown): Array<{ start: number; end: number }> {
   if (!Array.isArray(value)) return [];
-  const ranges = value.filter((item): item is { start: number; end: number } =>
-    item != null && typeof item === "object" &&
-    typeof item.start === "number" && Number.isFinite(item.start) &&
-    typeof item.end === "number" && Number.isFinite(item.end) &&
-    item.end > item.start).sort((a, b) => a.start - b.start);
+  const ranges = value
+    .filter(
+      (item): item is { start: number; end: number } =>
+        item != null &&
+        typeof item === "object" &&
+        typeof item.start === "number" &&
+        Number.isFinite(item.start) &&
+        typeof item.end === "number" &&
+        Number.isFinite(item.end) &&
+        item.end > item.start,
+    )
+    .sort((a, b) => a.start - b.start);
   const merged: Array<{ start: number; end: number }> = [];
   for (const range of ranges) {
     const last = merged[merged.length - 1];
@@ -53,17 +77,26 @@ export function rankDialogueScenes(
   durationSec: number,
   clipSec = SCENE_CLIP_SEC,
   bufferedRanges?: unknown,
+  minimumDialogueCues = MIN_SCENE_DIALOGUE_CUES,
 ): DialogueScene[] {
-  if (!Number.isFinite(playbackSec) || !Number.isFinite(durationSec) ||
-    !Number.isFinite(clipSec) || durationSec < clipSec || clipSec <= 0) return [];
+  if (
+    !Number.isFinite(playbackSec) ||
+    !Number.isFinite(durationSec) ||
+    !Number.isFinite(clipSec) ||
+    durationSec < clipSec ||
+    clipSec <= 0
+  )
+    return [];
   const focus = Math.max(0, Math.min(durationSec, playbackSec));
   const maxStart = durationSec - clipSec;
   const ranges = bufferedRanges === undefined ? null : seekableRanges(bufferedRanges);
   const candidates: DialogueScene[] = [];
   const seen = new Set<number>();
   const starts = [
-    focus, focus - clipSec / 2, focus - clipSec,
-    ...(ranges ?? []).flatMap(range => [range.start, range.end - clipSec]),
+    focus,
+    focus - clipSec / 2,
+    focus - clipSec,
+    ...(ranges ?? []).flatMap((range) => [range.start, range.end - clipSec]),
     ...Array.from(
       { length: Math.ceil((clipSec + SCENE_SEARCH_RADIUS_SEC * 2) / 5) + 1 },
       (_, i) => focus - clipSec - SCENE_SEARCH_RADIUS_SEC + i * 5,
@@ -77,19 +110,25 @@ export function rankDialogueScenes(
     const end = start + clipSec;
     const outside = focus < start ? start - focus : focus > end ? focus - end : 0;
     if (outside > SCENE_SEARCH_RADIUS_SEC) continue;
-    if (ranges && !ranges.some((range) =>
-      range.start <= start + 0.05 && range.end >= end - 0.05)) continue;
+    if (ranges && !ranges.some((range) => range.start <= start + 0.05 && range.end >= end - 0.05))
+      continue;
     const normalized = new Set<string>();
     const intervals: Array<[number, number]> = [];
     for (const cue of cues) {
-      if (!Number.isFinite(cue.start) || !Number.isFinite(cue.end) ||
-        cue.end <= cue.start || cue.end <= start + 0.5 || cue.start >= end) continue;
+      if (
+        !Number.isFinite(cue.start) ||
+        !Number.isFinite(cue.end) ||
+        cue.end <= cue.start ||
+        cue.end <= start + 0.5 ||
+        cue.start >= end
+      )
+        continue;
       const line = normalizedDialogue(cue.text);
       if (!line || normalized.has(line)) continue;
       normalized.add(line);
       intervals.push([Math.max(0, cue.start - start), Math.min(clipSec, cue.end - start)]);
     }
-    if (intervals.length < MIN_SCENE_DIALOGUE_CUES) continue;
+    if (intervals.length < minimumDialogueCues) continue;
     candidates.push({
       startSec: start,
       endSec: end,
@@ -105,10 +144,11 @@ export function rankDialogueScenes(
       Math.min(12, scene.dialogueCount) * 2.5 -
       scene.distanceFromPlaybackSec * 0.35 -
       Math.abs(scene.startSec + clipSec / 2 - focus) * 0.06;
-    return score(b) - score(a) ||
+    return (
+      score(b) - score(a) ||
       a.distanceFromPlaybackSec - b.distanceFromPlaybackSec ||
-      Math.abs(a.startSec + clipSec / 2 - focus) -
-        Math.abs(b.startSec + clipSec / 2 - focus);
+      Math.abs(a.startSec + clipSec / 2 - focus) - Math.abs(b.startSec + clipSec / 2 - focus)
+    );
   });
   return candidates;
 }

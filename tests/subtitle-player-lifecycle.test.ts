@@ -343,6 +343,20 @@ test("delayed candidate preflight blocks structural autosync and an aligned resu
   assert.match(autoSyncSource, /automaticAutoSyncMayStart\(\{/);
 });
 
+test("Auto sync never starts from playback for embedded subtitles", () => {
+  // The automatic analyzer only considers external subtitle tracks.
+  assert.match(autoSyncSource, /selected\?\.external === true &&\s*!selectedSynced/);
+  assert.match(
+    autoSyncSource,
+    /if \(!activeSelected \|\| activeSelected\.external !== true \|\| isSyncedTrack\(activeSelected\)\)[\s\S]*?return null;/,
+  );
+  // Embedded tracks reach the playback tap only through a user action.
+  assert.match(
+    autoSyncSource,
+    /const retry = selected && !selected\.external \? \(\) => listen\(true\) : run;/,
+  );
+});
+
 test("mpv autosync reuses retained prepared cues and paths", () => {
   assert.match(mpvSource, /const transferredPrepared = takePreparedSubtitle\(url\)/);
   assert.match(mpvSource, /cues: preparedCues/);

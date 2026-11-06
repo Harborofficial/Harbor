@@ -19,6 +19,20 @@ test("analyzing UI gets an independent, short watchdog", () => {
   assert.equal(autoSyncUiWatchdogMs("analyzing", 500_000), 115_000);
 });
 
+test("decoded playback comparison has a separate deadline before Whisper fallback", () => {
+  const start = hook.indexOf('setReason("Comparing buffered speech with subtitle timing")');
+  const end = hook.indexOf("const asrSessionId = newAnalysisSessionId()", start);
+  const comparison = hook.slice(start, end);
+  assert.match(comparison, /setAnalysisRevision/);
+  assert.match(comparison, /boundedNativeProbe/);
+  assert.match(comparison, /sessionId: comparisonSessionId/);
+  assert.match(comparison, /cancelNativeAnalysis\(comparisonSessionId\),\s*30_000/);
+  assert.match(
+    hook,
+    /Buffered audio was decoded, but comparing it with subtitle timing took too long/,
+  );
+});
+
 test("visible analysis watchdog is not cleared by the native deadline controller", () => {
   assert.match(hook, /UI safety watchdog, independent of the analysis promise's clearDeadline/);
   assert.match(hook, /if \(status !== "analyzing" && status !== "listening"\) return;/);

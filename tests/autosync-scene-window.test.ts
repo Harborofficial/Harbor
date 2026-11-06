@@ -4,9 +4,34 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser tsconfig.
 import test from "node:test";
-import { rankDialogueScenes } from "../src/lib/subtitles/autosync/scene-window.ts";
+import {
+  rankDialogueScenes,
+  selectPlaybackRetryScene,
+} from "../src/lib/subtitles/autosync/scene-window.ts";
 
 const cue = (start: number, end: number, text: string) => ({ start, end, text });
+
+test("embedded playback can select a cached scene before its subtitle packets are decoded", () => {
+  const ranges = [{ start: 250, end: 340 }];
+  assert.equal(rankDialogueScenes([], 290, 3600, 45, ranges).length, 0);
+  const scenes = rankDialogueScenes([], 290, 3600, 45, ranges, 0);
+  assert.ok(scenes.length > 0);
+  assert.ok(scenes.every((s) => s.startSec >= 250 && s.endSec <= 340));
+  assert.equal(scenes[0].intervals.length, 0, "selection does not invent subtitle timings");
+  assert.equal(rankDialogueScenes([], 290, 3600, 45, [], 0).length, 0);
+});
+
+test("playback retry chooses a different available excerpt near the playhead", () => {
+  const cues = Array.from({ length: 65 }, (_, i) => cue(220 + i * 2, 221 + i * 2, `Dialogue ${i}`));
+  for (const focus of [280.25, 290.25]) {
+    const scenes = rankDialogueScenes(cues, focus, 3600, 45, [{ start: 240, end: 350 }]);
+    const retry = selectPlaybackRetryScene(scenes, focus, focus - 26);
+    assert.equal(retry?.startSec, focus);
+    assert.equal(retry?.endSec, focus + 45);
+  }
+  const narrow = rankDialogueScenes(cues, 280, 3600, 45, [{ start: 253, end: 299 }]);
+  assert.equal(selectPlaybackRetryScene(narrow, 280, 253), undefined);
+});
 const michaelLike = [
   cue(353.84, 354.98, "Like this, alright?"),
   cue(355.5, 356.1, "Come on."),
@@ -103,11 +128,11 @@ test("the selected audio start and cue offsets are bound to the same scene", () 
   );
   assert.match(hook, /windowStartSec: startAt/);
   assert.match(hook, /const sceneCues = scene\.intervals/);
-  assert.match(hook, /const shifted = scene\.intervals/);
+  assert.match(hook, /startAt = prepared\.startSec/);
   assert.match(hook, /cmd: \[\s*"dump-cache",\s*startAt\.toFixed\(3\),\s*endAt\.toFixed\(3\)/);
   assert.match(
     hook,
-    /const bufferedScene = rankDialogueScenes\(\s*sourceCues,\s*position,\s*duration,\s*clipSec,\s*ranges,?\s*\)/,
+    /const bufferedScenes = rankDialogueScenes\(\s*sourceCues,\s*focusSec,\s*duration,\s*clipSec,\s*ranges,\s*embeddedPlayback \? 0 : MIN_CUES,?\s*\)/,
   );
   assert.match(hook, /const probeScenes = alternate \? \[scene, alternate\] : \[scene\]/);
   assert.match(hook, /const deadlineAt = Date\.now\(\) \+ 25_000/);
