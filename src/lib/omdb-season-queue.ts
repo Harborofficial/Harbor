@@ -22,30 +22,57 @@ export function selectOmdbSeasonsForOrder(
 }
 
 /**
- * Work through requested canonical seasons without firing every request at once.
- * If the view changes or unmounts, do not start more requests for the old view.
+ * A stable queue for one IMDb ID/API-key scope. Visibility updates only enqueue
+ * seasons that have never been attempted, including seasons that returned no
+ * ratings. A transient failure can be retried when the user reopens the view.
  */
-export async function loadOmdbSeasonsBounded<T>(
-  seasons: readonly number[],
+export function createOmdbSeasonQueue<T>(
   fetchSeason: (season: number) => Promise<T>,
   publish: (season: number, result: T) => void,
-  isCancelled: () => boolean,
-): Promise<void> {
-  const queue = [...new Set(seasons)].filter((season) => Number.isInteger(season) && season >= 1);
-  let next = 0;
-  const worker = async () => {
-    while (!isCancelled() && next < queue.length) {
-      const season = queue[next++];
+): { enqueue: (seasons: readonly number[]) => void; dispose: () => void } {
+  const attempted = new Set<number>();
+  const pending: number[] = [];
+  let active = 0;
+  let disposed = false;
+
+  const pump = () => {
+    while (!disposed && active < MAX_CONCURRENT_OMDB_SEASONS && pending.length > 0) {
+      const season = pending.shift()!;
+      active++;
+      let request: Promise<T>;
       try {
-        const result = await fetchSeason(season);
-        if (isCancelled()) return;
-        publish(season, result);
+        request = Promise.resolve(fetchSeason(season));
       } catch {
-        // One failed season must not block the remaining ratings.
+        active--;
+        continue;
       }
+      void request
+        .then((result) => {
+          if (!disposed) publish(season, result);
+        })
+        .catch(() => {
+          // A failed season must not prevent other seasons from loading.
+        })
+        .finally(() => {
+          active--;
+          pump();
+        });
     }
   };
-  await Promise.all(
-    Array.from({ length: Math.min(MAX_CONCURRENT_OMDB_SEASONS, queue.length) }, worker),
-  );
+
+  return {
+    enqueue(seasons) {
+      if (disposed) return;
+      for (const season of seasons) {
+        if (!Number.isInteger(season) || season < 1 || attempted.has(season)) continue;
+        attempted.add(season);
+        pending.push(season);
+      }
+      pump();
+    },
+    dispose() {
+      disposed = true;
+      pending.length = 0;
+    },
+  };
 }
