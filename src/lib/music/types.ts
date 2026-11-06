@@ -59,7 +59,15 @@ export type MusicSourceCandidate = {
 };
 
 export type SpotifyStatus = {
+  /** An authorization for browsing or playback exists. */
   connected: boolean;
+
+  /** A local librespot session is currently connected (audio can still fail separately). */
+  playbackReady: boolean;
+  playbackLinked: boolean;
+  browsingReady: boolean;
+  /** A Web API token issued to the user's own Spotify developer app. */
+  ownAppBrowsing: boolean;
   username?: string;
   country?: string;
   premium: boolean;

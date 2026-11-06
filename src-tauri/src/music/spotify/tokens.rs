@@ -92,7 +92,7 @@ impl SpotifyState {
         let granted = auth::authorize(&app).await?;
         let client = auth::client_id(&app).ok();
         self.adopt_web_token(&app, granted, None, client);
-        Ok(self.snapshot())
+        self.status().await
     }
 
     /// True when a stored or cached web token can still serve browsing, either directly or
@@ -123,6 +123,7 @@ impl SpotifyState {
         let access = token.access_token.clone();
         let _ = keystore::store_web_token(app, &token);
         *self.web_token.write() = Some(token);
+
         access
     }
 

@@ -379,6 +379,10 @@ const music: Record<string, string> = {
   "music.spotify.connectAction": "Connect",
   "music.spotify.connectedAs": "Connected as {username}",
   "music.spotify.premium": "Premium",
+  "music.spotify.playbackReady": "Playback ready",
+  "music.spotify.playbackUnavailable": "Local playback unavailable",
+  "music.spotify.playbackUnavailableHint":
+    "Your account is linked, but Harbor's local player is not ready. Pair Spotify again in Music connections.",
   "music.playlist.alreadyAdded": "Already in playlist",
   "music.playlist.add": "Add to selected playlist",
   "music.playlist.duplicateWarning": "{title} is already in {name}. Add another copy?",
@@ -674,7 +678,7 @@ const music: Record<string, string> = {
     "No other Spotify devices are awake. Open Spotify on a phone, speaker or desktop and refresh.",
   "music.spotifySetup.createTitle": "Create a Spotify app",
   "music.spotifySetup.createBody":
-    "Use a Spotify Premium account to create an app in the developer dashboard.",
+    "Create a Spotify Developer app for a separate browsing quota. Premium is only required for local playback.",
   "music.spotifySetup.dashboard": "Open Spotify dashboard",
   "music.spotifySetup.redirectTitle": "Add Harbor’s redirect URI",
   "music.spotifySetup.redirectBody":
@@ -695,9 +699,18 @@ const music: Record<string, string> = {
     "No Client ID is saved on this device. Follow the setup steps and paste your Client ID.",
   "music.spotifySetup.rejected":
     "Check the Client ID and redirect URI in your Spotify app settings, then try again.",
-  "music.spotifySetup.pairTitle": "1 · Pair this device for playback",
-  "music.spotifySetup.pairBody":
-    "No Spotify app setup needed. Harbor shows a code — enter it at spotify.com/pair from a phone or browser, then approve.",
+  "music.spotifySetup.pairTitle": "Pair your Spotify account",
+  "music.spotifySetup.pairBody": "Play Spotify directly in Harbor with Premium. Enter the pairing code at spotify.com/pair and approve it. No Developer app or Client ID is required.",
+  "music.spotifySetup.intro": "Pair Spotify to stream music in Harbor. Spotify Premium is required. Browsing with your own Developer app is optional.",
+  "music.spotifySetup.browseOptional": "Optional",
+  "music.spotify.browsingLabel": "Browsing",
+  "music.spotify.browsingOwnApp": "Own app authorized",
+  "music.spotify.browsingShared": "Available through Spotify pairing",
+  "music.spotify.browsingNotConnected": "Not connected",
+  "music.spotify.playbackConnected": "Local playback connected",
+  "music.spotify.playbackNotConnected": "Local playback not connected",
+  "music.spotify.playbackChecking": "Checking playback connection",
+  "music.spotifySetup.repair": "Re-pair this device",
   "music.spotifySetup.pairAction": "Pair with Spotify",
   "music.spotifySetup.pairCodeLabel": "Pairing code",
   "music.spotifySetup.pairWaiting": "Waiting for approval at spotify.com/pair…",
@@ -705,10 +718,9 @@ const music: Record<string, string> = {
   "music.spotifySetup.pairCopy": "Copy code",
   "music.spotifySetup.pairCopied": "Copied",
   "music.spotifySetup.pairCopyFailed": "Select the code and copy it manually.",
-  "music.spotifySetup.pairManual": "2 · Browse with your own Spotify app",
+  "music.spotifySetup.pairManual": "Advanced Spotify browsing",
   "music.spotifySetup.browseRecommended": "Recommended",
-  "music.spotifySetup.browseBody":
-    "Browsing on Spotify's shared limit saturates often. Your own app gives browsing a private quota — playback stays paired.",
+  "music.spotifySetup.browseBody": "Optional: authorize your own Spotify Developer app for a separate browsing quota. This does not enable local playback.",
   "music.spotifyBrowse.title": "Browsing shares Spotify's rate limit",
   "music.spotifyBrowse.body":
     "Playback is paired and working. Browsing currently shares librespot's Spotify quota, which saturates often — sign in with your own Spotify app to give browsing its own quota. Playback stays paired.",
@@ -728,7 +740,7 @@ const music: Record<string, string> = {
   "music.recovery.network":
     "Check your connection, then retry. You can also choose another source below.",
   "music.recovery.open": "Open {source}",
-  "music.recovery.spotifySetup": "Set up your Spotify app, then sign in with Premium.",
+  "music.recovery.spotifySetup": "Pair your Spotify Premium account with Harbor to enable playback.",
   "music.recovery.setupAction": "Set up",
   "music.recovery.search": "Sources could not be checked. Check your connection and try again.",
   "music.recovery.retrySource": "Couldn’t load · Retry this source",
