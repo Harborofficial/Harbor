@@ -171,14 +171,36 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
         }
     }
 
+    // libmpv plays from inside this process, so its Pulse client carries our own
+    // pid. Two Harbor instances therefore never match each other's streams.
+    let our_pid = std::process::id().to_string();
+    let our_clients = Rc::new(RefCell::new(Vec::<u32>::new()));
+    {
+        let found = Rc::clone(&our_clients);
+        let op = context.introspect().get_client_info_list(move |item| {
+            let ListResult::Item(info) = item else { return };
+            if info.proplist.get_str("application.process.id").as_deref() == Some(our_pid.as_str())
+            {
+                found.borrow_mut().push(info.index);
+            }
+        });
+        drain(&mut mainloop, &op, "list clients", &timed_out)?;
+    }
+
     let picked = Rc::new(Cell::new(None::<(u32, u32)>));
     {
+        let clients = Rc::clone(&our_clients);
         let found = Rc::clone(&picked);
         let op = context.introspect().get_sink_input_info_list(move |item| {
             let ListResult::Item(info) = item else { return };
-            let ours = info.proplist.get_str("application.name").as_deref()
-                == Some(crate::mpv::AUDIO_CLIENT_NAME);
-            if ours && !info.corked && found.get().is_none() {
+            if found.get().is_none()
+                && is_our_stream(
+                    info.proplist.get_str("application.name").as_deref(),
+                    info.client,
+                    info.corked,
+                    &clients.borrow(),
+                )
+            {
                 found.set(Some((info.index, info.sink)));
             }
         });
@@ -268,6 +290,21 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
     }
     pcm.truncate(target_bytes);
     Ok((pcm, sample_rate, channels, bits))
+}
+
+// mpv announces AUDIO_CLIENT_NAME on its sink input, but a second Harbor would
+// announce the same thing, so the stream also has to belong to a Pulse client of
+// this process. A corked input is paused and carries no audio worth recording.
+#[cfg(target_os = "linux")]
+fn is_our_stream(
+    app_name: Option<&str>,
+    client: Option<u32>,
+    corked: bool,
+    our_clients: &[u32],
+) -> bool {
+    !corked
+        && app_name == Some(crate::mpv::AUDIO_CLIENT_NAME)
+        && client.is_some_and(|c| our_clients.contains(&c))
 }
 
 // Introspection answers arrive on the mainloop, so every query needs pumping
@@ -404,4 +441,41 @@ async fn audd_recognize(wav: Vec<u8>, api_token: String) -> Result<Option<SongRe
         artwork,
         link,
     }))
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod tests {
+    use super::is_our_stream;
+    use crate::mpv::AUDIO_CLIENT_NAME;
+
+    const OURS: &[u32] = &[7, 9];
+
+    #[test]
+    fn picks_our_own_playing_stream() {
+        assert!(is_our_stream(Some(AUDIO_CLIENT_NAME), Some(7), false, OURS));
+    }
+
+    #[test]
+    fn skips_a_paused_stream() {
+        assert!(!is_our_stream(Some(AUDIO_CLIENT_NAME), Some(7), true, OURS));
+    }
+
+    #[test]
+    fn skips_another_harbor_instance() {
+        // Same client name, different process, so a different Pulse client.
+        assert!(!is_our_stream(Some(AUDIO_CLIENT_NAME), Some(42), false, OURS));
+    }
+
+    #[test]
+    fn skips_other_applications_and_our_own_webview() {
+        // The WebView registers as "harbor", lowercase, from a child process.
+        assert!(!is_our_stream(Some("harbor"), Some(7), false, OURS));
+        assert!(!is_our_stream(Some("Spotify"), Some(7), false, OURS));
+        assert!(!is_our_stream(None, Some(7), false, OURS));
+    }
+
+    #[test]
+    fn skips_a_stream_with_no_client() {
+        assert!(!is_our_stream(Some(AUDIO_CLIENT_NAME), None, false, OURS));
+    }
 }
