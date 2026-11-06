@@ -2,7 +2,8 @@
 // give it back; anything the user made or did stays, however big it is: playback history, last
 // season, live-TV watch counts and manual EPG matches, Discover's learned affinity, uploaded
 // stream badges and their rules, the legacy parental pin, the build rating, completed library
-// repairs, and OMDb's daily request budget. Open the module that
+// repairs, webhook delivery history, addon velocity history, and OMDb's daily request
+// budget. Open the module that
 // owns a key before adding it here - backup.ts groups by prefix, so its sections mix real records
 // with caches and cannot answer this on their own. Keys of a few KB are not worth the risk either
 // way; this list is for what actually fills the store.
@@ -22,7 +23,6 @@ const PRUNABLE_PREFIXES = [
   "harbor.discover.rows.v",
   "harbor.scroll.v",
   "harbor.webhook.lastTick",
-  "harbor.calendar.webhook.last",
   "harbor.anidbtvdbcache",
   "harbor.armcache",
   "harbor.armkitsucache",
@@ -47,7 +47,6 @@ const PRUNABLE_PREFIXES = [
   "harbor.heroPool.v",
   "harbor.mal.hero.v",
   "harbor.mdblist.cards",
-  "harbor.stremio-addons.velocity.v",
   "harbor.manga.popular.v",
   "harbor.manga.cache.v",
   "harbor.manga.art.",

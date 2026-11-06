@@ -72,6 +72,32 @@ test("a localStorage that rejects every write is pruned back into a writable sta
   assert.ok(store.has("harbor.settings"));
 });
 
+test("boot cleanup preserves large user histories instead of treating them as caches", async () => {
+  // A >256 KB snapshot record used to be pruned before checking whether storage was full.
+  // Its historical stars cannot be reconstructed from today's community-addon index.
+  const velocity = JSON.stringify({
+    snapshots: [{ fetchedAt: 1, stars: { addon: filler(280_000) } }],
+  });
+  const ledger = JSON.stringify({
+    "__baseline__:all:discord": "2026-11-05",
+    "all:discord:tt123": "2026-11-05",
+  });
+  const store = installQuotaStorage([
+    ["harbor.settings", filler(300_000)],
+    ["harbor.stremio-addons.velocity.v1", velocity],
+    ["harbor.calendar.webhook.last", ledger],
+    ["harbor.mal.hero.v1", filler(100_000)],
+  ]);
+
+  const { proactiveStorageCleanup } = await import("@/lib/storage-recovery");
+  proactiveStorageCleanup();
+
+  assert.equal(store.get("harbor.stremio-addons.velocity.v1"), velocity);
+  assert.equal(store.get("harbor.calendar.webhook.last"), ledger);
+  assert.equal(store.has("harbor.mal.hero.v1"), false);
+  localStorage.setItem("harbor.onboarding", "{}");
+});
+
 test("boot cleanup stops as soon as the store takes writes again", async () => {
   // Freeing the one biggest cache is enough here, so the rest must still be there: buying
   // headroom nobody asked for costs the user a refetch of everything it dropped.
@@ -111,6 +137,22 @@ test("the full sweep evicts caches and nothing the user did", async () => {
     ["harbor.parental", filler(1_000)],
     ["harbor.build.rating.v1", filler(1_000)],
     ["harbor.streamBadges.v1", filler(1_000)],
+    [
+      "harbor.calendar.webhook.last",
+      JSON.stringify({
+        "__baseline__:all:discord": "2026-11-05",
+        "all:discord:tt123": "2026-11-05",
+      }),
+    ],
+    [
+      "harbor.stremio-addons.velocity.v1",
+      JSON.stringify({
+        snapshots: [
+          { fetchedAt: 1, stars: { addon: 3 } },
+          { fetchedAt: 2, stars: { addon: 20 } },
+        ],
+      }),
+    ],
     ["harbor.libraryNameRepair.v1.p_demo", "1699999999999"],
     ["harbor.libraryNameRepair.v99.p_demo", "1699999999999"],
     [
@@ -135,6 +177,7 @@ test("the full sweep evicts caches and nothing the user did", async () => {
 
   assert.deepEqual([...store.keys()].sort(), [
     "harbor.build.rating.v1",
+    "harbor.calendar.webhook.last",
     "harbor.discover.v1",
     "harbor.iptv.epgmap.v1",
     "harbor.iptv.stats.v1",
@@ -146,6 +189,7 @@ test("the full sweep evicts caches and nothing the user did", async () => {
     "harbor.playback-history.v1.p_demo",
     "harbor.settings",
     "harbor.streamBadges.v1",
+    "harbor.stremio-addons.velocity.v1",
   ]);
 });
 
