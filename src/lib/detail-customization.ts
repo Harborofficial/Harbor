@@ -38,6 +38,20 @@ export function orderedSectionKeys(available: string[], c: DetailCustomization):
   for (const k of available) {
     if (!seen.has(k)) out.push(k);
   }
+  const pgIdx =
+    out.indexOf("parentsGuide") >= 0 ? out.indexOf("parentsGuide") : out.indexOf("contentAdvisory");
+  const castIdx = Math.max(out.indexOf("cast"), out.indexOf("animeCharacters"));
+  if (
+    pgIdx >= 0 &&
+    castIdx >= 0 &&
+    pgIdx > castIdx + 1 &&
+    (out.includes("moreLikeThis") || out.includes("collection") || out.includes("letterboxdPanel"))
+  ) {
+    const key = out[pgIdx];
+    out.splice(pgIdx, 1);
+    const newCastIdx = Math.max(out.indexOf("cast"), out.indexOf("animeCharacters"));
+    out.splice(newCastIdx + 1, 0, key);
+  }
   return out;
 }
 

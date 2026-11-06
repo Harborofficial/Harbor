@@ -198,6 +198,8 @@ import { useAnimeAnilistDetails } from "./detail/use-anime-anilist-details";
 import { useAnimeCharacters } from "./detail/use-anime-characters";
 import { TraktComments } from "./detail/trakt-comments";
 import { LetterboxdPanel } from "./detail/letterboxd-panel";
+import { ParentsGuidePanel } from "./detail/parents-guide-panel";
+import { useImdbId } from "./play-picker/use-imdb-id";
 import { RateButton } from "@/components/ratings/rate-button";
 import { detailImdbRating, fetchDetailImdbRating } from "@/lib/detail-imdb-rating";
 import { ratingTarget } from "@/lib/ratings/types";
@@ -409,6 +411,7 @@ export function DetailView({
   const titleHomeServers = useTitleMediaServers(meta.id, detail?.imdbId);
   const { toggle: toggleFavorite } = useMediaFavorites();
   const isFav = useIsFavorite(meta.id, [detail?.imdbId]);
+  const inferredImdb = useImdbId(meta, settings.tmdbKey);
   const inSession = roomSnapshot.state === "joined" && roomSnapshot.participants.length >= 2;
   useScrollMemory(`meta:${meta.id}`, scrollRef, settings.resumeDetailScroll, true);
 
@@ -2932,6 +2935,19 @@ export function DetailView({
               node: <DetailCharacterRail characters={animeCharacters} />,
             });
           }
+
+          const resolvedParentsGuideImdb =
+            detail?.imdbId ??
+            animeEpisodes.find((e) => e.imdbId)?.imdbId ??
+            (meta.id.startsWith("tt") ? meta.id : null) ??
+            inferredImdb.id;
+
+          railSections.push({
+            key: "parentsGuide",
+            label: t("Content Advisory"),
+            minHeight: 120,
+            node: <ParentsGuidePanel imdbId={resolvedParentsGuideImdb} />,
+          });
           if (detail?.collection) {
             railSections.push({
               key: "collection",
@@ -3133,6 +3149,7 @@ export function DetailView({
               ),
             });
           }
+
           if (railSections.length === 0) return null;
           return <DetailLayoutEditor sections={railSections} />;
         })()}
