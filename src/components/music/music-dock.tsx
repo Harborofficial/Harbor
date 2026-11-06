@@ -161,7 +161,7 @@ export function MusicDock() {
   const [expanded, setExpanded] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [autoHidden, setAutoHidden] = useState(false);
-  const autoHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoHideTimer = useRef<number | null>(null);
   const pointerOnDock = useRef(false);
   const [sourceOpen, setSourceOpen] = useState(false);
   const [closing, setClosing] = useState(false);
