@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 import { useSampleArtwork } from "@/lib/sample-artwork";
 import { AwardTab } from "@/components/award-tab";
 import { ClassicAwardBadge } from "@/components/card-award";
+import { stackTop } from "@/components/card-status-badges";
 import { TopTenRibbon } from "@/components/top-ten-ribbon";
 import type { Settings } from "@/lib/settings";
 
@@ -25,12 +26,18 @@ export function CardOverlayPreview({
   const sharesRibbonCorner = layout === "poster" && settings.top10Ribbon &&
     ((watchlist === "topStart" && ribbonSide === "left") ||
       (watchlist === "topEnd" && ribbonSide === "right"));
+  const tvRibbonLeft = layout === "tv" && settings.top10Ribbon && ribbonSide === "left";
+  const tvRibbonRight = layout === "tv" && settings.top10Ribbon && ribbonSide === "right";
+  const tvLeftSlots = (tvRibbonLeft ? 1 : 0) +
+    (layout === "tv" && settings.cardAwardDisplay === "badge" ? 1 : 0);
+  const tvStartTop = tvLeftSlots > 0 ? stackTop(tvLeftSlots, false, "tv", true) : "top-2";
+  const tvEndTop = tvRibbonRight ? stackTop(1, false, "tv", true) : "top-2";
   const start = layout === "tv" ? "start-2" : "start-1.5";
   const end = layout === "tv" ? "end-2" : "end-1.5";
   const markCorner = {
     off: "",
-    topStart: `${sharesRibbonCorner ? "top-[34px]" : layout === "tv" ? "top-[48px]" : "top-1.5"} ${start}`,
-    topEnd: `${sharesRibbonCorner ? "top-[34px]" : layout === "tv" ? "top-[48px]" : "top-1.5"} ${end}`,
+    topStart: `${layout === "tv" ? tvStartTop : sharesRibbonCorner ? "top-[34px]" : "top-1.5"} ${start}`,
+    topEnd: `${layout === "tv" ? tvEndTop : sharesRibbonCorner ? "top-[34px]" : "top-1.5"} ${end}`,
     bottomStart: `${layout === "tv" ? "bottom-2" : "bottom-1.5"} ${start}`,
     bottomEnd: `${layout === "tv" ? "bottom-2" : "bottom-1.5"} ${end}`,
   }[watchlist];
@@ -87,7 +94,10 @@ export function CardOverlayPreview({
           </span>
         )}
         {settings.cardAwardDisplay === "badge" && (
-          <ClassicAwardBadge win={{ type: "oscar", wins: 1 }} topClass="top-2" />
+          <ClassicAwardBadge
+            win={{ type: "oscar", wins: 1 }}
+            topClass={layout === "tv" ? stackTop(0, tvRibbonLeft, "tv") : "top-2"}
+          />
         )}
       </div>
       <span className="text-center text-[14px] leading-5 text-ink-muted">{t("Ribbon, award and bookmark preview")}</span>

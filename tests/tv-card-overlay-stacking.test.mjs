@@ -103,7 +103,12 @@ function renderCard({
   );
   const score = nodes.find((n) => n.type === ScoreStack);
   const dub = nodes.find((n) => n.props?.children === "DUB");
-  const bookmark = nodes.find((n) => n.props?.children?.type?.name === "Bookmark");
+  const bookmark = nodes.find(
+    (n) =>
+      typeof n.props?.className === "string" &&
+      n.props.className.includes("z-20 grid h-6 w-6") &&
+      n.props.className.includes("text-ink"),
+  );
   return { nodes, score, dub, bookmark };
 }
 
@@ -122,7 +127,7 @@ test("top-right ribbon pushes scores down even on ordinary TV cards", () => {
 });
 
 test("curated TV ribbon, DUB, status and award each reserve a score slot", () => {
-  const { score, dub } = renderCard({
+  const { score, dub, bookmark } = renderCard({
     curated: true,
     award: true,
     settings: {
@@ -140,6 +145,9 @@ test("curated TV ribbon, DUB, status and award each reserve a score slot", () =>
   });
   assert.match(dub.props.className, /end-2 top-\[48px\]/);
   assert.equal(score.props.topClass, "top-[132px]");
+  assert.match(bookmark.props.className, /top-\[152px\]/);
+  // The densest bookmark stack must still fit within a standard 318px TV card.
+  assert.ok(152 + 24 <= (318 * 9) / 16);
 });
 
 test("unoccupied TV top-right corner keeps the default score position", () => {
@@ -173,4 +181,72 @@ test("ScoreStack honors the TV top-offset override", () => {
   });
   assert.match(node.props.className, /top-\[76px\]/);
   assert.doesNotMatch(node.props.className, /top-1\.5/);
+});
+
+function renderOverlayPreview(settings, layout = "tv") {
+  function ClassicAwardBadge() {}
+  const { stackTop } = load("src/components/card-status-badges.tsx", {
+    "react/jsx-runtime": runtime,
+  });
+  const { CardOverlayPreview } = load("src/views/settings/card-overlay-preview.tsx", {
+    "react/jsx-runtime": runtime,
+    "@/lib/settings": { useSettings: () => ({ settings: {} }) },
+    "@/lib/i18n": { useT: () => (message) => message },
+    "@/lib/sample-artwork": {
+      useSampleArtwork: () => ({ poster: "poster", background: "backdrop", name: "Example" }),
+    },
+    "@/components/card-award": { ClassicAwardBadge },
+    "@/components/card-status-badges": { stackTop },
+  });
+  const nodes = walk(CardOverlayPreview({ layout, settings, cardWidth: 318 }));
+  const bookmark = nodes.find(
+    (n) =>
+      typeof n.props?.className === "string" && n.props.className.includes("bg-canvas/85 text-ink"),
+  );
+  const awardBadge = nodes.find((n) => n.type === ClassicAwardBadge);
+  return { bookmark, awardBadge };
+}
+
+test("TV preview keeps a top-right bookmark in the first slot without a ribbon", () => {
+  const { bookmark } = renderOverlayPreview({
+    top10Ribbon: false,
+    top10RibbonSide: "left",
+    cardAwardDisplay: "none",
+    watchlistBadge: "topEnd",
+  });
+  assert.match(bookmark.props.className, /top-2 end-2/);
+});
+
+test("TV preview moves the bookmark below a right-side ribbon", () => {
+  const { bookmark } = renderOverlayPreview({
+    top10Ribbon: true,
+    top10RibbonSide: "right",
+    cardAwardDisplay: "none",
+    watchlistBadge: "topEnd",
+  });
+  assert.match(bookmark.props.className, /top-\[48px\] end-2/);
+});
+
+test("TV preview stacks left-side ribbon, award badge and bookmark", () => {
+  const { bookmark, awardBadge } = renderOverlayPreview({
+    top10Ribbon: true,
+    top10RibbonSide: "left",
+    cardAwardDisplay: "badge",
+    watchlistBadge: "topStart",
+  });
+  assert.equal(awardBadge.props.topClass, "top-[48px]");
+  assert.match(bookmark.props.className, /top-\[76px\] start-2/);
+});
+
+test("poster settings preview retains its original bookmark placement", () => {
+  const { bookmark } = renderOverlayPreview(
+    {
+      top10Ribbon: false,
+      top10RibbonSide: "left",
+      cardAwardDisplay: "none",
+      watchlistBadge: "topEnd",
+    },
+    "poster",
+  );
+  assert.match(bookmark.props.className, /top-1\.5 end-1\.5/);
 });
