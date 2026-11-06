@@ -139,7 +139,9 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
     use libpulse_binding::def::BufferAttr;
     use libpulse_binding::mainloop::standard::Mainloop;
     use libpulse_binding::sample::{Format, Spec};
-    use libpulse_binding::stream::{FlagSet as StreamFlags, PeekResult, State as StreamState, Stream};
+    use libpulse_binding::stream::{
+        FlagSet as StreamFlags, PeekResult, State as StreamState, Stream,
+    };
     use std::cell::{Cell, RefCell};
     use std::rc::Rc;
     use std::time::{Duration, Instant};
@@ -171,8 +173,9 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
         }
     }
 
-    // libmpv plays from inside this process, so its Pulse client carries our own
-    // pid. Two Harbor instances therefore never match each other's streams.
+    // libmpv plays from inside this process, so its Pulse client normally
+    // carries our PID. Flatpak PID namespaces can reuse the same number, so
+    // we also require our per-process audio-client name below.
     let our_pid = std::process::id().to_string();
     let our_clients = Rc::new(RefCell::new(Vec::<u32>::new()));
     {
@@ -292,9 +295,9 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
     Ok((pcm, sample_rate, channels, bits))
 }
 
-// mpv announces AUDIO_CLIENT_NAME on its sink input, but a second Harbor would
-// announce the same thing, so the stream also has to belong to a Pulse client of
-// this process. A corked input is paused and carries no audio worth recording.
+// The mpv PulseAudio name contains a per-process UUID, so two Flatpak
+// instances cannot be confused even if their sandbox PIDs coincide. We also
+// validate the Pulse client PID as a second check. A corked input is paused.
 #[cfg(target_os = "linux")]
 fn is_our_stream(
     app_name: Option<&str>,
@@ -303,7 +306,7 @@ fn is_our_stream(
     our_clients: &[u32],
 ) -> bool {
     !corked
-        && app_name == Some(crate::mpv::AUDIO_CLIENT_NAME)
+        && app_name == Some(crate::mpv::audio_client_name())
         && client.is_some_and(|c| our_clients.contains(&c))
 }
 
@@ -446,24 +449,62 @@ async fn audd_recognize(wav: Vec<u8>, api_token: String) -> Result<Option<SongRe
 #[cfg(all(test, target_os = "linux"))]
 mod tests {
     use super::is_our_stream;
-    use crate::mpv::AUDIO_CLIENT_NAME;
+    use crate::mpv::audio_client_name;
 
     const OURS: &[u32] = &[7, 9];
 
     #[test]
     fn picks_our_own_playing_stream() {
-        assert!(is_our_stream(Some(AUDIO_CLIENT_NAME), Some(7), false, OURS));
+        assert!(is_our_stream(
+            Some(audio_client_name()),
+            Some(7),
+            false,
+            OURS
+        ));
     }
 
     #[test]
     fn skips_a_paused_stream() {
-        assert!(!is_our_stream(Some(AUDIO_CLIENT_NAME), Some(7), true, OURS));
+        assert!(!is_our_stream(
+            Some(audio_client_name()),
+            Some(7),
+            true,
+            OURS
+        ));
     }
 
     #[test]
     fn skips_another_harbor_instance() {
-        // Same client name, different process, so a different Pulse client.
-        assert!(!is_our_stream(Some(AUDIO_CLIENT_NAME), Some(42), false, OURS));
+        // The same audio name alone isn't sufficient without a matching client.
+        assert!(!is_our_stream(
+            Some(audio_client_name()),
+            Some(42),
+            false,
+            OURS,
+        ));
+    }
+
+    #[test]
+    fn rejects_other_flatpak_with_the_same_sandbox_pid() {
+        // The two Pulse clients may have the same application.process.id and
+        // therefore both appear in OURS. Their mpv names must still differ.
+        let foreign_name = format!("{}-other", audio_client_name());
+        assert!(!is_our_stream(Some(&foreign_name), Some(9), false, OURS));
+        assert!(is_our_stream(
+            Some(audio_client_name()),
+            Some(7),
+            false,
+            OURS
+        ));
+    }
+
+    #[test]
+    fn playback_name_is_a_stable_process_uuid() {
+        let label = audio_client_name();
+        assert_eq!(label, audio_client_name());
+        let uuid = label.strip_prefix("Harbor ").expect("Harbor label");
+        let parsed = uuid::Uuid::parse_str(uuid).expect("UUID in audio client name");
+        assert_eq!(parsed.get_version_num(), 4);
     }
 
     #[test]
@@ -476,6 +517,6 @@ mod tests {
 
     #[test]
     fn skips_a_stream_with_no_client() {
-        assert!(!is_our_stream(Some(AUDIO_CLIENT_NAME), None, false, OURS));
+        assert!(!is_our_stream(Some(audio_client_name()), None, false, OURS));
     }
 }
