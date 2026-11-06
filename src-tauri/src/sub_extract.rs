@@ -42,8 +42,7 @@ pub async fn subtitle_extract(
     {
         cmd.creation_flags(0x0800_0000);
     }
-    cmd.kill_on_drop(true)
-        .stdin(std::process::Stdio::null())
+    cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
     // Full remote track extraction can run longer than an individual network read.
