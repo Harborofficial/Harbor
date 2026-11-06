@@ -249,17 +249,25 @@ export function TvCardArtwork({
   const hasStatusBadge = card.showCardBadges && (rerun || showCinema || !!newBadge);
   const hasAwardBadge =
     card.cardAwardDisplay === "badge" && (isAnime ? !!animeAward : !!classicWin);
-  const ribbonLeft = showTop10 && card.top10RibbonSide === "left";
-  const ribbonRight = showTop10 && card.top10RibbonSide === "right";
+  const curatedPosition = curatedBadgeAtTopStart ? "end" : "start";
+  const ribbonSide =
+    curatedBadgeAtTopStart && card.top10RibbonSide === "left" ? "right" : card.top10RibbonSide;
+  const ribbonLeft = showTop10 && ribbonSide === "left";
+  const ribbonRight = showTop10 && ribbonSide === "right";
+  const overlayRibbonShift = curatedBadgeAtTopStart ? ribbonRight : ribbonLeft;
   const backdrop =
     meta.background && meta.background !== meta.poster ? meta.background : animeBackdrop;
   const wide = backdrop && backdrop !== failedBackdrop ? backdrop : undefined;
   const pos = POS[settings.tvCardLogoPos] ?? POS.bottomStart;
-  const topLeftSlots =
-    (ribbonLeft ? 1 : 0) + (hasDub ? 1 : 0) + (hasStatusBadge ? 1 : 0) + (hasAwardBadge ? 1 : 0);
+  const topLeftSlots = curatedBadgeAtTopStart
+    ? 1
+    : (ribbonLeft ? 1 : 0) + (hasDub ? 1 : 0) + (hasStatusBadge ? 1 : 0) + (hasAwardBadge ? 1 : 0);
   const topRightSlots =
     (ribbonRight ? 1 : 0) +
-    (card.badgePlacement === "top" && scoreBadges.length > 0 ? 1 : 0);
+    (card.badgePlacement === "top" && scoreBadges.length > 0 ? 1 : 0) +
+    (curatedBadgeAtTopStart
+      ? (hasDub ? 1 : 0) + (hasStatusBadge ? 1 : 0) + (hasAwardBadge ? 1 : 0)
+      : 0);
   const watchlistPosition =
     card.watchlistBadge === "topStart" && topLeftSlots > 0
       ? `start-2 ${stackTop(topLeftSlots, false, "tv", true)}`
@@ -348,20 +356,20 @@ export function TvCardArtwork({
           shiftedFromEnd={inWatchlist && scoreStackAtBottom && card.watchlistBadge === "bottomEnd"}
         />
       )}
-      {showTop10 && <TopTenRibbon side={card.top10RibbonSide} />}
+      {showTop10 && <TopTenRibbon side={ribbonSide} />}
       {hasDub && (
-        <span className={`pointer-events-none absolute start-2 ${stackTop(0, ribbonLeft, "tv")} z-10 rounded-md bg-accent/90 px-2 py-1 text-[10px] font-extrabold text-canvas`}>
+        <span className={`pointer-events-none absolute ${curatedPosition === "end" ? "end-2" : "start-2"} ${stackTop(0, overlayRibbonShift, "tv")} z-10 rounded-md bg-accent/90 px-2 py-1 text-[10px] font-extrabold text-canvas`}>
           DUB
         </span>
       )}
       {card.showCardBadges && (
         <>
           {rerun && (
-            <RerunBadge year={meta.releaseInfo} dubShift={hasDub} ribbonShift={ribbonLeft} layout="tv" />
+            <RerunBadge year={meta.releaseInfo} dubShift={hasDub} ribbonShift={overlayRibbonShift} side={curatedPosition} layout="tv" />
           )}
-          {showCinema && ( <CinemaBadge dubShift={hasDub} ribbonShift={ribbonLeft} layout="tv" /> )}
+          {showCinema && ( <CinemaBadge dubShift={hasDub} ribbonShift={overlayRibbonShift} side={curatedPosition} layout="tv" /> )}
           {newBadge && (
-            <StatusBadge label={t(newBadge.label)} tone={newBadge.tone} kids={kids} dubShift={hasDub} ribbonShift={ribbonLeft} layout="tv" />
+            <StatusBadge label={t(newBadge.label)} tone={newBadge.tone} kids={kids} dubShift={hasDub} ribbonShift={overlayRibbonShift} side={curatedPosition} layout="tv" />
           )}
         </>
       )}
@@ -372,18 +380,18 @@ export function TvCardArtwork({
             win={animeAward!}
             stacked={hasStatusBadge}
             dubShift={hasDub}
-            ribbonShift={ribbonLeft}
+            ribbonShift={overlayRibbonShift}
             layout="tv"
-            centered={curatedBadgeAtTopStart}
+            side={curatedPosition}
           />
         ) : (
           <ClassicAwardBadge
             win={classicWin}
             stacked={hasStatusBadge}
             dubShift={hasDub}
-            ribbonShift={ribbonLeft}
+            ribbonShift={overlayRibbonShift}
             layout="tv"
-            centered={curatedBadgeAtTopStart}
+            side={curatedPosition}
           />
         ))}
       {card.cardAwardDisplay === "tabs" && isAnime && (

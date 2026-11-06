@@ -80,7 +80,7 @@ export function ClassicAwardBadge({
   ribbonShift = false,
   layout = "poster",
   topClass: topClassOverride,
-  centered = false,
+  side = "start",
 }: {
   win: ClassicWin | null;
   stacked?: boolean;
@@ -88,12 +88,12 @@ export function ClassicAwardBadge({
   ribbonShift?: boolean;
   layout?: CardLayout;
   topClass?: string;
-  centered?: boolean;
+  side?: "start" | "end";
 }) {
   if (!win) return null;
   const above = (dubShift ? 1 : 0) + (stacked ? 1 : 0);
   const topClass = topClassOverride ?? stackTop(above, ribbonShift, layout);
-  const horizontalClass = centered ? "left-1/2 -translate-x-1/2" : "start-2";
+  const horizontalClass = side === "end" ? "end-2" : "start-2";
   return (
     <span
       className={`pointer-events-none absolute ${horizontalClass} inline-flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.1em] text-ink ring-1 ring-edge-soft/60 ${topClass}`}
@@ -156,14 +156,14 @@ export function AnimeAwardBadge({
   dubShift = false,
   ribbonShift = false,
   layout = "poster",
-  centered = false,
+  side = "start",
 }: {
   win: AwardWin;
   stacked: boolean;
   dubShift?: boolean;
   ribbonShift?: boolean;
   layout?: CardLayout;
-  centered?: boolean;
+  side?: "start" | "end";
 }) {
   const t = useT();
   const src = awardSourceMeta(win.source);
@@ -172,7 +172,7 @@ export function AnimeAwardBadge({
   const above = (dubShift ? 1 : 0) + (stacked ? 1 : 0);
   const label = above > 0 ? `${win.year}` : `${win.year} ${t(short)}`;
   const topClass = stackTop(above, ribbonShift, layout);
-  const horizontalClass = centered ? "left-1/2 -translate-x-1/2" : "start-2";
+  const horizontalClass = side === "end" ? "end-2" : "start-2";
   return (
     <span
       className={`pointer-events-none absolute ${horizontalClass} inline-flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink ring-1 ring-edge-soft/60 ${topClass}`}

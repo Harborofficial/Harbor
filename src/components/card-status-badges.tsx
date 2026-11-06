@@ -34,6 +34,7 @@ export function StatusBadge({
   kids = false,
   dubShift = false,
   ribbonShift = false,
+  side = "start",
   layout = "poster",
 }: {
   label: string;
@@ -41,6 +42,7 @@ export function StatusBadge({
   kids?: boolean;
   dubShift?: boolean;
   ribbonShift?: boolean;
+  side?: "start" | "end";
   layout?: CardLayout;
 }) {
   const styles = kids
@@ -50,18 +52,18 @@ export function StatusBadge({
       : "border border-edge-soft bg-canvas/95 text-ink";
   return (
     <span
-      className={`absolute start-2 ${stackTop(dubShift ? 1 : 0, ribbonShift, layout)} rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${styles}`}
+      className={`absolute ${side === "end" ? "end-2" : "start-2"} ${stackTop(dubShift ? 1 : 0, ribbonShift, layout)} rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${styles}`}
     >
       {label}
     </span>
   );
 }
 
-export function CinemaBadge({ dubShift = false, ribbonShift = false, layout = "poster" }: { dubShift?: boolean; ribbonShift?: boolean; layout?: CardLayout; className?: string }) {
+export function CinemaBadge({ dubShift = false, ribbonShift = false, side = "start", layout = "poster" }: { dubShift?: boolean; ribbonShift?: boolean; side?: "start" | "end"; layout?: CardLayout; className?: string }) {
   const t = useT();
   return (
     <span
-      className={`harbor-cinema-badge absolute start-2 ${stackTop(dubShift ? 1 : 0, ribbonShift, layout)} flex items-center gap-1 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em]`}
+      className={`harbor-cinema-badge absolute ${side === "end" ? "end-2" : "start-2"} ${stackTop(dubShift ? 1 : 0, ribbonShift, layout)} flex items-center gap-1 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em]`}
     >
       <ClapperMini size={10} />
       <span>{t("In Cinema")}</span>
@@ -73,17 +75,19 @@ export function RerunBadge({
   year,
   dubShift = false,
   ribbonShift = false,
+  side = "start",
   layout = "poster",
 }: {
   year?: string;
   dubShift?: boolean;
   ribbonShift?: boolean;
+  side?: "start" | "end";
   layout?: CardLayout;
 }) {
   const t = useT();
   return (
     <span
-      className={`absolute start-2 ${stackTop(dubShift ? 1 : 0, ribbonShift, layout)} flex items-center gap-1 rounded-md border border-edge-soft bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink-muted`}
+      className={`absolute ${side === "end" ? "end-2" : "start-2"} ${stackTop(dubShift ? 1 : 0, ribbonShift, layout)} flex items-center gap-1 rounded-md border border-edge-soft bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink-muted`}
     >
       <RefreshCcw size={9} strokeWidth={2.4} />
       <span>
