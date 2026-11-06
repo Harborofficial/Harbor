@@ -6,7 +6,7 @@ import { SeekBarVisual } from "@/components/player/transport/seek-bar-visual";
 import { useSettings, type Settings } from "@/lib/settings";
 import { ColorPopoverTrigger } from "../color-picker";
 import { ROW_ACTION, SettingGroup, SettingRow } from "../kit";
-import { ToggleRow } from "../shared";
+import { ToggleRow, ExtLink, KeyField } from "../shared";
 import { ChoiceBlock } from "./choice";
 import { SeekImageUpload, openSeekImageDialog } from "./seek-image-upload";
 import { useT } from "@/lib/i18n";
@@ -45,6 +45,7 @@ const SLIDER_VALUE = "w-[64px] shrink-0 text-end text-[15.5px] tabular-nums text
 export function SeekBarPanel() {
   const t = useT();
   const { settings, update } = useSettings();
+  const [seekrDraft, setSeekrDraft] = useState(settings.seekrApiKey);
 
   const heightVal = settings.seekBarHeight ?? 6;
   const dotVal = settings.seekDotSize ?? 16;
@@ -62,6 +63,23 @@ export function SeekBarPanel() {
         )}
         value={settings.seekPreviewEnabled}
         onChange={(v) => update({ seekPreviewEnabled: v })}
+      />
+
+      <KeyField
+        label={t("Seekr · preview thumbnails")}
+        placeholder={t("sk_live_…")}
+        value={seekrDraft}
+        onChange={setSeekrDraft}
+        onSave={() => update({ seekrApiKey: seekrDraft.trim() })}
+        saved={Boolean(settings.seekrApiKey)}
+        help={
+          <>
+            {t(
+              "Optional. Paste your own free Seekr API key to show Seekr's preview thumbnails first and fall back to local FFmpeg trickplay when Seekr has no match. Leave it blank to use local previews only.",
+            )}{" "}
+            <ExtLink href="https://seekr.tv/join">{t("Get a key at seekr.tv")}</ExtLink>.
+          </>
+        }
       />
 
       <Preview settings={settings} />

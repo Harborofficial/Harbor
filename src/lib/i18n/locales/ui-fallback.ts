@@ -116,6 +116,10 @@ const uiFallback: Record<string, string> = {
   "Show Harbor": "Show Harbor",
   "Could not apply this change. Try again.": "Could not apply this change. Try again.",
   "Hide watched titles in the featured hero": "Hide watched titles in the featured hero",
+  "Hide watched titles": "Hide watched titles",
+  "Skip recommendations you've already watched. Uses the same watch history as Hide watched titles in the featured hero.":
+    "Skip recommendations you've already watched. Uses the same watch history as Hide watched titles in the featured hero.",
+  "Hide watched titles in More like this": "Hide watched titles in More like this",
   "Watched movies and shows you've made progress on are skipped in the featured hero and replaced with the next unwatched pick from the same row. Uses your local watch history, Trakt, and Simkl.":
     "Watched movies and shows you've made progress on are skipped in the featured hero and replaced with the next unwatched pick from the same row. Uses your local watch history, Trakt, and Simkl.",
   "Rewatching on AniList": "Rewatching on AniList",
@@ -2720,6 +2724,12 @@ const uiFallback: Record<string, string> = {
   "Move subtitles above player controls": "Move subtitles above player controls",
   "Lifts subtitles while the player controls are showing so the controls never cover them. Subtitles you have already placed higher stay where they are.":
     "Lifts subtitles while the player controls are showing so the controls never cover them. Subtitles you have already placed higher stay where they are.",
+  "Seekr · preview thumbnails": "Seekr · preview thumbnails",
+  "sk_live_…": "sk_live_…",
+  "Optional. Paste your own free Seekr API key to show Seekr's preview thumbnails first and fall back to local FFmpeg trickplay when Seekr has no match. Leave it blank to use local previews only.":
+    "Optional. Paste your own free Seekr API key to show Seekr's preview thumbnails first and fall back to local FFmpeg trickplay when Seekr has no match. Leave it blank to use local previews only.",
+  "Get a key at seekr.tv": "Get a key at seekr.tv",
+  "Seekr preview thumbnails": "Seekr preview thumbnails",
 };
 
 export default uiFallback;

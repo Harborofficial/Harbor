@@ -311,6 +311,7 @@ export type Settings = {
   playerMenuBlack: boolean;
   playerScreenLockEnabled: boolean;
   seekPreviewEnabled: boolean;
+  seekrApiKey: string;
   instantPlay: boolean;
   instantPlaybackPreparation: boolean;
   autoNextStreamOnStall: boolean;
@@ -557,6 +558,7 @@ export type Settings = {
   keyboardPauseShowsControls: boolean;
   hideWatchedInCatalogs: boolean;
   hideWatchedInHero: boolean;
+  hideWatchedInMoreLikeThis: boolean;
   hideUnreleased: boolean;
   localEpisodeSortDesc: boolean;
   /** Review count when the banner was last dismissed; it returns only if more turn up. */

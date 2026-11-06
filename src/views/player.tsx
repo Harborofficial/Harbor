@@ -97,6 +97,7 @@ import { usePlayerHotkeys } from "./player/hooks/use-player-hotkeys";
 import { clearMediaControls, updateMediaControls } from "@/lib/media-session";
 import { usePlayerMedia } from "./player/hooks/use-player-media";
 import { useTrickplay } from "./player/hooks/use-trickplay";
+import { useSeekr } from "./player/hooks/use-seekr";
 import { useStreamPill } from "./player/hooks/use-stream-pill";
 import { useStubDetection } from "./player/hooks/use-stub-detection";
 import { useBridgeLoad } from "./player/hooks/use-bridge-load";
@@ -637,6 +638,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     onZero: settings.endScreenOnZero,
     tmdbKey: settings.tmdbKey,
     isLive: isLiveLike,
+    hideWatched: settings.hideWatchedInMoreLikeThis,
     onPlay: playFromEndScreen,
     onClose: () => void closePlayer(),
   });
@@ -1251,6 +1253,17 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
 
   const playStreamRef = liveStreamRef ?? src.streamRef;
   const playUrl = liveUrl ?? src.url;
+  useSeekr({
+    apiKey: settings.seekrApiKey,
+    metaId: src.meta.id,
+    imdbId: resolvedImdbId ?? src.imdbId ?? null,
+    type: src.meta.type,
+    season: src.episode?.season ?? null,
+    episode: src.episode?.episode ?? null,
+    durationSec: snap.durationSec,
+    enabled: settings.seekPreviewEnabled,
+    isLive: isLiveLike,
+  });
   useTrickplay({
     url: playUrl,
     headers: src.headers,

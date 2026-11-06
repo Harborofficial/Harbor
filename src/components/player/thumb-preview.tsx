@@ -9,6 +9,7 @@ import {
   trickplayGet,
   trickplayPrefetchHover,
 } from "@/lib/trickplay";
+import { seekrRefresh, seekrTileAt, useSeekrState, type SeekrTile } from "@/lib/seekr";
 import { useSkipSegmentsView } from "@/lib/skip-intro/segment-store";
 import { useT } from "@/lib/i18n";
 
@@ -40,6 +41,8 @@ export function ThumbPreview({
   const liveBucketRef = useRef(bucket);
   liveBucketRef.current = bucket;
   const session = useThumbnailSession();
+  const seekr = useSeekrState();
+  const seekrTile = seekr.status === "active" ? seekrTileAt(time) : null;
   const timingRef = useRef({ bucket, session, started: performance.now() });
   if (timingRef.current.bucket !== bucket || timingRef.current.session !== session) {
     timingRef.current = { bucket, session, started: performance.now() };
@@ -117,7 +120,7 @@ export function ThumbPreview({
   const src = exact ?? nearest ?? null;
   const approx = !exact && !!nearest;
 
-  if (!src && !loading) {
+  if (!seekrTile && !src && !loading) {
     return (
       <div
         className="pointer-events-none absolute -top-9 flex -translate-x-1/2 items-center gap-1 rounded-md border border-white/10 bg-black/90 px-2 py-1 font-mono text-[12px] font-semibold tabular-nums text-white shadow-lg backdrop-blur-md"
@@ -142,7 +145,9 @@ export function ThumbPreview({
         className="relative overflow-hidden rounded-lg border border-white/10 bg-black/85 shadow-[0_18px_40px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md"
         style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
       >
-        {src ? (
+        {seekrTile ? (
+          <SeekrSprite tile={seekrTile} width={CARD_WIDTH} height={CARD_HEIGHT} />
+        ) : src ? (
           <img
             src={src}
             alt=""
@@ -184,7 +189,7 @@ export function ThumbPreview({
         )}
         <div
           className={`absolute inset-0 flex items-center justify-center transition-opacity duration-150 ${
-            loading && !src ? "opacity-100" : "opacity-0"
+            loading && !seekrTile && !src ? "opacity-100" : "opacity-0"
           }`}
         >
           <Spinner size={20} className="text-white/70" />
@@ -200,6 +205,32 @@ export function ThumbPreview({
           {label}
         </span>
       </div>
+    </div>
+  );
+}
+
+function SeekrSprite({ tile, width, height }: { tile: SeekrTile; width: number; height: number }) {
+  const scale = width / tile.w;
+  return (
+    <div className="relative overflow-hidden" style={{ width, height }}>
+      <img
+        src={tile.url}
+        alt=""
+        draggable={false}
+        decoding="async"
+        onError={() => seekrRefresh()}
+        style={{
+          position: "absolute",
+          left: -tile.x * scale,
+          top: -tile.y * scale,
+          width: "auto",
+          height: "auto",
+          maxWidth: "none",
+          maxHeight: "none",
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      />
     </div>
   );
 }

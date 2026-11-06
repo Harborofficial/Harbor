@@ -7302,6 +7302,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Seekr preview thumbnails",
+    section: "playerLayout",
+    anchorTitle: "Seek bar",
+    keywords: ["seekr", "seekr api key", "preview api", "thumbnail provider"],
+  },
+  {
     label: "Bar style",
     section: "playerLayout",
     anchorTitle: "Bar style",
@@ -8962,6 +8968,18 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "queue",
       "next previous",
       "playlist order",
+    ],
+  },
+  {
+    label: "Hide watched titles in More like this",
+    section: "player",
+    tab: "upnext",
+    anchorTitle: "More like this at the end",
+    keywords: [
+      "hide watched recommendations",
+      "skip watched more like this",
+      "end screen watched",
+      "recommendations watched",
     ],
   },
   {
