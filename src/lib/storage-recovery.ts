@@ -1,68 +1,61 @@
-// Prunable means the network or a recomputation can give it back. Anything the user did stays,
-// even when it is the biggest thing in the store: playback history, last season, live-TV watch
-// counts and manual EPG matches, Discover's learned affinity, the legacy parental pin, the build
-// rating. Open the module that owns a key before adding it here — backup.ts groups by prefix, so
-// its sections mix real records with caches and cannot answer this on their own. Keys of a few KB
-// are not worth the risk either way; this list is for what actually fills the store.
-const PRUNABLE_EXACT = new Set<string>([
-  "harbor.omdb.v1",
-  "harbor.omdb.misses",
-  "harbor.omdb.budget",
-  "harbor.iptv.hydration.v2",
-  "harbor.dead-streams.v1",
-  "harbor.discover.events.v1",
-  "harbor.discover.awards.v1",
-  "harbor.discover.rows.v1",
-  "harbor.scroll.v1",
+// What may be evicted when the store is full. Prunable means the network or a recomputation can
+// give it back; anything the user made or did stays, however big it is: playback history, last
+// season, live-TV watch counts and manual EPG matches, Discover's learned affinity, uploaded
+// stream badges and their rules, the legacy parental pin, the build rating. Open the module that
+// owns a key before adding it here - backup.ts groups by prefix, so its sections mix real records
+// with caches and cannot answer this on their own. Keys of a few KB are not worth the risk either
+// way; this list is for what actually fills the store.
+//
+// These are prefixes, and stop before any version stamp on purpose. Pinning a version means the
+// live cache silently stops being prunable the day its owner bumps it, which is how seven of
+// these were unreachable until now.
+const PRUNABLE_PREFIXES = [
+  "harbor.omdb.",
+  "harbor.iptv.hydration.v",
+  "harbor.dead-streams.v",
+  "harbor.discover.events.v",
+  "harbor.discover.awards.v",
+  "harbor.discover.rows.v",
+  "harbor.scroll.v",
   "harbor.webhook.lastTick",
   "harbor.calendar.webhook.last",
-  "harbor.imdb.tmdb.v1",
-  "harbor.tmdb.imdb.v1",
-  "harbor.tmdb.personName.v1",
-  "harbor.animefillercache.v2",
-  "harbor.malscorecache",
-  "harbor.anime.recs_by_mal.v1",
-  "harbor.anime.mal_id_by_franchise.v1",
-  "harbor.shows.hero.pool.v2",
-  "harbor.mdblist.cards",
-  "harbor.stremio-addons.velocity.v1",
-  "harbor.streamBadges.v1",
-  "harbor.manga.popular.v1",
-  "harbor.ebook.metadata.v1",
-  "harbor.ebook.nyt.v1",
-  "harbor.heroPool.v1",
-  "harbor.mal.hero.v1",
-  "harbor.anime.art.v2",
-  "harbor.anime.hero.hosted.v5",
-]);
-
-// Prefixes, not exact keys, for every cache whose owner version-stamps it: pinning a version
-// here means the live cache silently stops being prunable the day someone bumps it, which is
-// how seven of these ended up unreachable.
-const PRUNABLE_PREFIXES = [
   "harbor.anidbtvdbcache",
   "harbor.armcache",
   "harbor.armkitsucache",
   "harbor.armsrcmalcache",
   "harbor.extkitsucache",
   "harbor.jikancatalog",
-  "harbor.anime_awards.metas.",
-  "harbor.anime.toppicks.cache.",
+  "harbor.imdb.tmdb.v",
+  "harbor.tmdb.imdb.v",
+  "harbor.tmdb.personName.v",
   "harbor.awards.wikidata.v",
   "harbor.graph.wikidata.",
-  "harbor.libraryNameRepair.v1.",
-  "harbor.anilist.collection.v1.",
-  "harbor.manga.cache.v1.",
-  "harbor.manga.cache.v2.",
+  "harbor.anime_awards.metas.",
+  "harbor.animefillercache.v",
+  "harbor.malscorecache",
+  "harbor.anime.recs_by_mal.v",
+  "harbor.anime.toppicks.cache.",
+  "harbor.anime.mal_id_by_franchise.v",
+  "harbor.anime.art.v",
+  "harbor.anime.hero.hosted.v",
+  "harbor.anilist.collection.v",
+  "harbor.shows.hero.pool.v",
+  "harbor.heroPool.v",
+  "harbor.mal.hero.v",
+  "harbor.mdblist.cards",
+  "harbor.stremio-addons.velocity.v",
+  "harbor.manga.popular.v",
+  "harbor.manga.cache.v",
   "harbor.manga.art.",
-  "harbor.ebook.openlibrary.v1.",
-  "harbor.ebook.openlibrary.v2.",
-  "harbor.sports.board.v3:",
+  "harbor.ebook.metadata.v",
+  "harbor.ebook.nyt.v",
+  "harbor.ebook.openlibrary.v",
+  "harbor.sports.board.v",
+  "harbor.libraryNameRepair.v",
   "harbor.tvdbo.",
 ];
 
 function isPrunable(key: string): boolean {
-  if (PRUNABLE_EXACT.has(key)) return true;
   return PRUNABLE_PREFIXES.some((p) => key.startsWith(p));
 }
 
@@ -258,6 +251,9 @@ function purgeOldCacheVersions(): void {
 }
 
 const PROBE_KEY = "harbor.storage.probe";
+/** Room for one more character proves nothing: the next boot write is a settings or profile
+ *  blob, so ask for enough space to land one of those. */
+const PROBE_CHARS = 32 * 1024;
 
 /**
  * The size thresholds below only measure what is prunable, so a store filled mostly by
@@ -266,16 +262,17 @@ const PROBE_KEY = "harbor.storage.probe";
  */
 function storageRejectsWrites(): boolean {
   try {
-    localStorage.setItem(PROBE_KEY, "1");
+    localStorage.setItem(PROBE_KEY, "x".repeat(PROBE_CHARS));
     localStorage.removeItem(PROBE_KEY);
     return false;
   } catch (e) {
+    localStorage.removeItem(PROBE_KEY);
     return isQuotaError(e);
   }
 }
 
 /**
- * Boot only: the store already rejects every write, so free just enough to get going again.
+ * Boot only: the store cannot take a realistic write, so free until it can and stop there.
  * Dropping every cache instead would cost the user a full refetch of the home feed to buy
  * headroom nothing is asking for.
  */
@@ -288,6 +285,16 @@ function freeUntilWritable(): void {
 
 export function proactiveStorageCleanup(): void {
   if (typeof localStorage === "undefined") return;
+  // Runs before createRoot, so a storage that is blocked or corrupt rather than merely full
+  // must not reject mount() - that leaves the boot splash up with nothing behind it.
+  try {
+    pruneUntilUsable();
+  } catch (e) {
+    console.warn("[storage] proactive cleanup skipped", e);
+  }
+}
+
+function pruneUntilUsable(): void {
   purgeDeadCaches();
   purgeOldCacheVersions();
   capLruPrefixes();

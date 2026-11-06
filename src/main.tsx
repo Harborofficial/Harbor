@@ -221,11 +221,16 @@ function MainRoot() {
   return <App onReady={markAppReady} />;
 }
 
+/** PIP, modal, captions, HDR overlay, DJ deck and the detached player all load this same
+ *  index.html and share its localStorage. Opening one must not evict caches the main window
+ *  is in the middle of using. */
+const isAuxWindow = isPip || isVideoPip || isModal || isHdrOverlay || isCaptions || isDjDeck;
+
 async function mount() {
   // Must run before anything writes: on a full localStorage every setItem throws, and the
   // first unguarded one during the initial render kills the tree before onReady fires, so
   // the boot splash never clears. Cleaning up from inside a component is too late.
-  proactiveStorageCleanup();
+  if (!isAuxWindow) proactiveStorageCleanup();
   await loadInstallFeatures();
   const musicEnabled = getInstallFeatures().music;
   if (

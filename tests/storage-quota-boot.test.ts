@@ -39,6 +39,7 @@ test("a localStorage that rejects every write is pruned back into a writable sta
   // shape that used to slip past the size heuristics and leave the store unwritable.
   const store = installQuotaStorage([
     ["harbor.playback-history.v1.p_demo", filler(400_000)],
+    ["harbor.streamBadges.v1", filler(250_000)],
     ["harbor.settings", filler(200_000)],
     ["harbor.mal.hero.v1", filler(100_000)],
   ]);
@@ -54,6 +55,7 @@ test("a localStorage that rejects every write is pruned back into a writable sta
   // The cache goes; the 400k of continue watching next to it does not, however full we are.
   assert.equal(store.has("harbor.mal.hero.v1"), false);
   assert.ok(store.has("harbor.playback-history.v1.p_demo"));
+  assert.ok(store.has("harbor.streamBadges.v1"));
   assert.ok(store.has("harbor.settings"));
 });
 
@@ -95,6 +97,7 @@ test("the full sweep evicts caches and nothing the user did", async () => {
     ["harbor.lastseason.v1", filler(1_000)],
     ["harbor.parental", filler(1_000)],
     ["harbor.build.rating.v1", filler(1_000)],
+    ["harbor.streamBadges.v1", filler(1_000)],
     ["harbor.settings", filler(1_000)],
     ["harbor.mal.hero.v1", filler(1_000)],
     ["harbor.tvdbo.tt0903747", filler(1_000)],
@@ -112,6 +115,7 @@ test("the full sweep evicts caches and nothing the user did", async () => {
     "harbor.parental",
     "harbor.playback-history.v1.p_demo",
     "harbor.settings",
+    "harbor.streamBadges.v1",
   ]);
 });
 
@@ -128,8 +132,18 @@ test("a cache stays prunable after its owner bumps the version", async () => {
     ["harbor.anime.toppicks.cache.v2", filler(1_000)],
     ["harbor.awards.wikidata.v10", filler(1_000)],
     ["harbor.graph.wikidata.v2", filler(1_000)],
-    // A version nobody has shipped yet: the next bump must not need this list touched again.
+    ["harbor.mal.hero.v1", filler(1_000)],
+    ["harbor.ebook.nyt.v1", filler(1_000)],
+    ["harbor.anime.art.v2", filler(1_000)],
+    ["harbor.anime.hero.hosted.v5", filler(1_000)],
+    ["harbor.sports.board.v3:SOCCER@20261031@day", filler(1_000)],
+    ["harbor.ebook.openlibrary.v2.anonymous.abc", filler(1_000)],
+    ["harbor.manga.cache.v2.one-piece", filler(1_000)],
+    // Versions nobody has shipped yet: the next bump must not need this list touched again.
     ["harbor.armkitsucache.v99", filler(1_000)],
+    ["harbor.mal.hero.v9", filler(1_000)],
+    ["harbor.sports.board.v9:SOCCER@20261031@day", filler(1_000)],
+    ["harbor.manga.cache.v9.one-piece", filler(1_000)],
     ["harbor.settings", filler(1_000)],
   ]);
 
@@ -137,4 +151,18 @@ test("a cache stays prunable after its owner bumps the version", async () => {
   freeStorageSpace();
 
   assert.deepEqual([...store.keys()], ["harbor.settings"]);
+});
+
+test("boot recovery frees room for a real write, not for one character", async () => {
+  // Many small caches behind a big record: a one-character probe is satisfied by the first
+  // prune, and the settings or profile blob that follows still throws.
+  const seed: Array<[string, string]> = [["harbor.settings", filler(500_000)]];
+  for (let i = 0; i < 10; i++) seed.push([`harbor.tvdbo.tt${i}`, filler(5_000)]);
+  installQuotaStorage(seed);
+
+  const { proactiveStorageCleanup } = await import("@/lib/storage-recovery");
+  proactiveStorageCleanup();
+
+  // Four times the largest prunable entry, so only a real headroom target can cover it.
+  localStorage.setItem("harbor.profiles.v1", filler(20_000));
 });
