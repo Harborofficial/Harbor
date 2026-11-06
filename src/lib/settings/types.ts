@@ -93,6 +93,8 @@ export interface SimklGranularFilters {
 
 export type ProfileAudioMode = "auto" | "click" | "off";
 
+export type CardAwardDisplay = "tabs" | "badge" | "none";
+
 export type StreamPriorityEntry = { key: string; name: string };
 
 export type ScreensaverMediaKind = "image" | "gif" | "video";
@@ -115,7 +117,31 @@ export type MusicSpeedPreset = {
 
 export type AccountProvider = "stremio" | "nuvio";
 
+export type TvCardOptions = {
+  showImdbBadge: boolean;
+  showTmdbBadge: boolean;
+  showRtBadge: boolean;
+  showPopcornBadge: boolean;
+  showMalBadge: boolean;
+  animeCardRating: "mal" | "imdb";
+  showMetacriticBadge: boolean;
+  showLetterboxdBadge: boolean;
+  showMdblistBadge: boolean;
+  showTraktBadge: boolean;
+  showSimklBadge: boolean;
+  showDubBadge: boolean;
+  showCardBadges: boolean;
+  top10Ribbon: boolean;
+  top10RibbonSide: "left" | "right";
+  badgePlacement: "top" | "bottom";
+  cardAwardDisplay: CardAwardDisplay;
+  watchlistBadge: "off" | "topStart" | "topEnd" | "bottomStart" | "bottomEnd";
+  showLocalLibraryBadge: boolean;
+  showWatchedBadge: boolean;
+};
+
 export type Settings = {
+  tvCardOptions: TvCardOptions;
   accountProvider: AccountProvider;
   spooktoberBanner: "disabled" | "small" | "below-hero" | undefined;
   soundTheme: "none" | "glass" | "modern" | "retro" | "cinematic";
@@ -184,7 +210,8 @@ export type Settings = {
   posterDockTransitionMs: number;
   top10Ribbon: boolean;
   top10RibbonSide: "left" | "right";
-  awardTabs: boolean;
+  awardTabs: boolean; // Deprecated: Retained strictly for sanitizeCardAwardDisplay parsing
+  cardAwardDisplay: CardAwardDisplay;
   awardTabPosition: "above" | "below" | "top";
   rowTitleScale: number;
   cardTitleScale: number;
@@ -451,7 +478,7 @@ export type Settings = {
     | "spotlight"
     | "custom";
   rowCardStyle: "poster" | "tv";
-  tvCardLogoPos: "center" | "bottomStart" | "bottomEnd";
+  tvCardLogoPos: "center" | "bottomStart";
   scrollUpTrailer: boolean;
   cardHoverShine: boolean;
   customHoverId: string;

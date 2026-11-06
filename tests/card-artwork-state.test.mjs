@@ -72,6 +72,11 @@ function artworkFixture() {
     react: h.react,
     "react/jsx-runtime": runtime,
     "@/lib/settings": { useSettings: () => ({ settings: {} }) },
+    "@/lib/i18n": { useT: () => (text) => text },
+    "@/lib/card-anime": { isCardAnimeId: (id) => /^(kitsu|mal|anilist|anidb|simkl):/.test(id) },
+    "@/lib/anime-awards": { parseAwardYear: () => undefined, findTopAward: () => null },
+    "@/components/card-award": { useClassicAwardWin: () => null },
+    "@/components/card-status-badges": { stackTop: () => "top-2" },
     "@/lib/img-size": { sizeImageUrl: (url) => url },
     "@/lib/providers/anime-hero-art-static": {
       peekStaticHeroArt: (id) => cached.get(id),
@@ -86,7 +91,20 @@ function artworkFixture() {
     cached,
     pending,
     image(m) {
-      return h.render(TvCardArtwork, { meta: m, posterSrc: m.poster }).props.children[0].props;
+      return h.render(TvCardArtwork, {
+        meta: m,
+        posterSrc: m.poster,
+        sharedState: {
+          showTop10: false,
+          inCinema: false,
+          rerun: false,
+          newBadge: null,
+          hasDub: false,
+          watched: false,
+          inWatchlist: false,
+          inLocalLibrary: false,
+        },
+      }).props.children[0].props;
     },
   };
 }

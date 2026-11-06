@@ -186,7 +186,7 @@ const settings: Record<string, string> = {
     "تتبّع ما تشاهده تلقائيًا وحفظ تقدّم المشاهدة في الوقت الفعلي.",
   "Auto-play trailer on detail pages": "تشغيل المقطع الدعائي تلقائيًا في صفحات التفاصيل",
   "Award Icons": "أيقونات الجوائز",
-  "Award tab on cards": "علامة تبويب الجوائز على البطاقات",
+  "Award display mode": "وضع الجوائز",
   "Award tab position": "موضع علامة تبويب الجوائز",
   Backdrop: "الخلفية",
   "Badge art": "صور الشارات",

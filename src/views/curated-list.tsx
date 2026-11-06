@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 import { loadListItems } from "@/lib/curated/items";
 import { curatedList } from "@/lib/curated/registry";
 import type { CuratedListItem } from "@/lib/curated/types";
+import { usePosterRow } from "@/components/row";
 import { useScrollMemory } from "@/lib/view";
 import { ListGrid } from "./curated-list/list-grid";
 import { ListHeader } from "./curated-list/list-header";
@@ -12,6 +13,7 @@ import { RegistryEntries } from "./curated-list/registry-entries";
 export function CuratedListView({ listId }: { listId: string }) {
   const t = useT();
   const list = curatedList(listId);
+  const sizing = usePosterRow(180);
   const scrollRef = useRef<HTMLElement>(null);
   const [items, setItems] = useState<readonly CuratedListItem[]>(list?.head ?? []);
   const [settled, setSettled] = useState(false);
@@ -37,11 +39,15 @@ export function CuratedListView({ listId }: { listId: string }) {
   return (
     <main ref={scrollRef} className="relative h-full overflow-y-auto bg-canvas">
       <ListHeader list={list} />
-      <div className="relative mx-auto flex max-w-[1180px] flex-col gap-10 px-12 pb-32 pt-14">
+      <div
+        className={`relative mx-auto flex w-full flex-col gap-10 pb-32 pt-14 ${
+          list.prose ? "max-w-[1180px] px-12" : "max-w-none px-8 sm:px-10 xl:px-12"
+        }`}
+      >
         {list.prose ? (
           <RegistryEntries list={list} items={items} scrollRoot={scrollRef} />
         ) : (
-          <ListGrid list={list} items={items} scrollRoot={scrollRef} />
+          <ListGrid list={list} items={items} scrollRoot={scrollRef} sizing={sizing} />
         )}
         {settled && items.length < list.count && (
           <p className="text-[13px] text-ink-subtle">
