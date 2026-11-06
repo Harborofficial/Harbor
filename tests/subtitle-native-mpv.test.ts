@@ -151,6 +151,9 @@ test(
         "sub-start",
         "time-pos",
         "pause",
+        "sub-fps",
+        "sub-delay",
+        "audio-delay",
       ].entries()) {
         await command(["observe_property", i + 1, property]);
       }
@@ -171,6 +174,27 @@ test(
       );
       assert.equal(String(await command(["get_property", "sid"])), english);
       assert.equal(await command(["get_property", "sub-visibility"]), false);
+
+      // Verify real property events reach the persisted-session snapshot. This
+      // exercises native mpv + the bridge, not a full Tauri restart.
+      await command(["set_property", "sub-fps", 25]);
+      h.bridge.setSubDelay(0.35);
+      h.bridge.setAudioDelay(-0.2);
+      await eventually(
+        () =>
+          h.snapshot().subtitleFps === 25 &&
+          h.snapshot().subDelaySec === 0.35 &&
+          h.snapshot().audioDelaySec === -0.2,
+      );
+      await command(["set_property", "sub-fps", 0]);
+      h.bridge.setSubDelay(0);
+      h.bridge.setAudioDelay(0);
+      await eventually(
+        () =>
+          h.snapshot().subtitleFps === 0 &&
+          h.snapshot().subDelaySec === 0 &&
+          h.snapshot().audioDelaySec === 0,
+      );
 
       // Run the real style writer against this isolated native player's IPC.
       const styleSource = readFileSync(

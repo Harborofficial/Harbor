@@ -160,7 +160,7 @@ test("creating a list belongs to Add and opening creation does not change existi
     false,
   );
   const add = findAction(actions, "membership:add");
-  assert.equal(add.label, "Add to");
+  assert.equal(add.label, "Add to list");
   const createIndex = add.children.findIndex((action) => action.id === "membership:create-list");
   assert.equal(add.children[createIndex].sectionLabel, "Lists");
   assert.equal(add.children[createIndex].group, "create");

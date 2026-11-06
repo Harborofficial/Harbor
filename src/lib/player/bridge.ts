@@ -74,6 +74,8 @@ export type PlayerSnapshot = {
   chapters: Chapter[];
   subDelaySec: number;
   audioDelaySec: number;
+  /** Observed native correction; undefined when the engine does not expose it. Zero means no correction. */
+  subtitleFps?: number;
   subText: string;
   subStartSec: number;
   secondarySubText: string;

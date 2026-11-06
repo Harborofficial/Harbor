@@ -88,7 +88,6 @@ export function CommentItem({
           id: `theme-comment:copy:${comment.id}`,
           label: t("Copy Text"),
           icon: <Copy size={16} />,
-          quickCopy: true,
           run: async () => {
             if (!(await copyText(comment.body))) throw new Error(t("Could not copy comment text."));
           },

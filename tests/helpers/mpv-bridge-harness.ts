@@ -9,6 +9,7 @@ import * as failures from "../../src/lib/player/mpv-failure.ts";
 import * as translationJobs from "../../src/lib/subtitles/translation-jobs.ts";
 import * as addedSubs from "../../src/lib/subtitles/added-subs.ts";
 import * as language from "../../src/lib/subtitles/language.ts";
+import * as pauseTrace from "../../src/lib/player/pause-trace.ts";
 import { SubtitlePreparationError as RealSubtitlePreparationError } from "../../src/lib/subtitles/prepare.ts";
 import type { PlayerBridge, PlayerSnapshot } from "../../src/lib/player/bridge.ts";
 import type { MpvOptions } from "../../src/lib/player/mpv.ts";
@@ -103,7 +104,6 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
       isBlockedDiskCacheOptionLine: () => false,
     },
     "@/lib/native-memory": { getTotalPhysBytes: () => totalPhysBytes },
-    "./pause-trace": { traceFrameDrops() {}, tracePlayback() {} },
     "@/lib/subtitles/prepare": {
       prepareSubtitle: (input: { url: string }) => prepare(input),
       SubtitlePreparationError: RealSubtitlePreparationError,
@@ -120,6 +120,7 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     "@/lib/subtitles/added-subs": addedSubs,
     "@/lib/subtitles/language": language,
     "./mpv-failure": failures,
+    "./pause-trace": pauseTrace,
     "@/lib/platform": {
       isWindowsDesktop: () => true,
       isLinuxDesktop: () => false,
