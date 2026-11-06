@@ -138,10 +138,9 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
     use libpulse_binding::context::{Context, FlagSet as ContextFlags, State as ContextState};
     use libpulse_binding::def::BufferAttr;
     use libpulse_binding::mainloop::standard::Mainloop;
-    use libpulse_binding::operation::State as OperationState;
     use libpulse_binding::sample::{Format, Spec};
     use libpulse_binding::stream::{FlagSet as StreamFlags, PeekResult, State as StreamState, Stream};
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
     use std::rc::Rc;
     use std::time::{Duration, Instant};
 
@@ -172,27 +171,41 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
         }
     }
 
-    let found = Rc::new(Cell::new(None::<u32>));
-    let seen = Rc::clone(&found);
-    let listing = context
-        .introspect()
-        .get_sink_input_info_list(move |item| {
+    let picked = Rc::new(Cell::new(None::<(u32, u32)>));
+    {
+        let found = Rc::clone(&picked);
+        let op = context.introspect().get_sink_input_info_list(move |item| {
             let ListResult::Item(info) = item else { return };
             let ours = info.proplist.get_str("application.name").as_deref()
                 == Some(crate::mpv::AUDIO_CLIENT_NAME);
-            if ours && !info.corked && seen.get().is_none() {
-                seen.set(Some(info.index));
+            if ours && !info.corked && found.get().is_none() {
+                found.set(Some((info.index, info.sink)));
             }
         });
-    while listing.get_state() == OperationState::Running {
-        if timed_out() {
-            return Err("PulseAudio took too long to list playback streams".into());
-        }
-        pump(&mut mainloop)?;
+        drain(&mut mainloop, &op, "list playback streams", &timed_out)?;
     }
-    let index = found.get().ok_or(
+    let (index, sink_index) = picked.get().ok_or(
         "Harbor isn't playing anything right now. Start the scene with sound, then try again.",
     )?;
+
+    // set_monitor_stream only isolates the sink input once the recording stream
+    // is on the monitor source of that input's own sink, so resolve it by hand:
+    // the default source is usually a microphone, not a monitor at all.
+    let monitor = Rc::new(RefCell::new(None::<String>));
+    {
+        let found = Rc::clone(&monitor);
+        let op = context
+            .introspect()
+            .get_sink_info_by_index(sink_index, move |item| {
+                let ListResult::Item(info) = item else { return };
+                *found.borrow_mut() = info.monitor_source_name.as_deref().map(str::to_owned);
+            });
+        drain(&mut mainloop, &op, "resolve the output sink", &timed_out)?;
+    }
+    let monitor = monitor
+        .borrow_mut()
+        .take()
+        .ok_or("Harbor's audio output has no monitor source to record from")?;
 
     let spec = Spec {
         format: Format::S16le,
@@ -214,7 +227,7 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
         fragsize: (bytes_per_sec / 10) as u32,
     };
     stream
-        .connect_record(None, Some(&attr), StreamFlags::ADJUST_LATENCY)
+        .connect_record(Some(&monitor), Some(&attr), StreamFlags::ADJUST_LATENCY)
         .map_err(|e| format!("Couldn't start recording Harbor's audio: {e}"))?;
     loop {
         match stream.get_state() {
@@ -255,6 +268,25 @@ fn capture_loopback(seconds: u32) -> Result<(Vec<u8>, u32, u16, u16), String> {
     }
     pcm.truncate(target_bytes);
     Ok((pcm, sample_rate, channels, bits))
+}
+
+// Introspection answers arrive on the mainloop, so every query needs pumping
+// until it settles; the deadline keeps a wedged server from hanging the capture.
+#[cfg(target_os = "linux")]
+fn drain<T: ?Sized>(
+    mainloop: &mut libpulse_binding::mainloop::standard::Mainloop,
+    op: &libpulse_binding::operation::Operation<T>,
+    what: &str,
+    timed_out: &impl Fn() -> bool,
+) -> Result<(), String> {
+    use libpulse_binding::operation::State;
+    while op.get_state() == State::Running {
+        if timed_out() {
+            return Err(format!("PulseAudio took too long to {what}"));
+        }
+        pump(mainloop)?;
+    }
+    Ok(())
 }
 
 // Never blocks, so a stalled server can't hold the capture past its deadline.
