@@ -1,7 +1,7 @@
 /**
  * Nuvio & Stremio Addon Origin Registry
  * Tracks whether an addon URL or ID originates from Stremio, Nuvio, or Both.
- * Persists to localStorage so origin badges display immediately without network latency.
+ * Persists to localStorage so catalog source filtering can resolve origins before sync.
  */
 
 export type AddonOriginTag = "stremio" | "nuvio" | "both" | "custom";

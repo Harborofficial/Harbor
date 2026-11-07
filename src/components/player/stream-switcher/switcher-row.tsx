@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { AddonLogo } from "@/components/addon-logo";
-import { AccountOriginBadge } from "@/components/account-origin-badge";
 import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { FlagStack } from "@/components/flag";
 import { FormatBadge, RuleBadges, streamBadges } from "@/components/format-badge";
@@ -122,10 +121,7 @@ export function SwitcherRow({
         <AddonLogo addonId={addonId} addonName={addonName} manifestLogo={addonLogo} size="xl" />
 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-[14px] font-semibold leading-snug text-ink">{headline}</p>
-            <AccountOriginBadge addonUrl={stream.addonUrl || stream.addonId} size="sm" />
-          </div>
+          <p className="truncate text-[14px] font-semibold leading-snug text-ink">{headline}</p>
           {description && (
             <p
               ref={descRef}
