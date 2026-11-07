@@ -119,6 +119,15 @@ test("Change font only adds the font to the overrides mpv already has", async ()
   assert.deepEqual(h.list(), ["ScaledBorderAndShadow=yes", "FontName=Times New Roman"]);
 });
 
+test("Strip all styling forces Harbor's style over tags hardcoded in the subtitle", async () => {
+  const h = styleHarness();
+  const props = await h.apply({ subAssOverride: "strip" });
+  // force and yes both let an inline \fn or \c tag win; only strip removes it.
+  assert.equal(props.get("sub-ass-override"), "strip");
+  assert.equal(props.get("sub-font"), "Times New Roman");
+  assert.equal(props.get("sub-color"), "#FFFFFFFF");
+});
+
 test("leaving Change font only puts mpv's own overrides back exactly", async () => {
   const own = ["Default.FontName=Comic, Neue", "Default.Bold=1"];
   const h = styleHarness(own);
@@ -196,6 +205,7 @@ test("the player's override switch goes back to the mode from before", () => {
   // "Change font only" keeps each subtitle's look, so the switch shows off.
   assert.equal(isAssLookMode("font"), true);
   assert.equal(isAssLookMode("force"), false);
+  assert.equal(isAssLookMode("strip"), false);
   const on = flipAssOverride("font", "no");
   assert.deepEqual(on, { mode: "force", before: "font" });
   assert.deepEqual(flipAssOverride(on.mode, on.before), { mode: "font", before: "font" });
