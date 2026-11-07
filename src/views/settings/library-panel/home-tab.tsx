@@ -13,6 +13,7 @@ import {
   LayoutTemplate,
   Maximize,
   Play,
+  Timer,
   Volume2,
 } from "../icons";
 import { useSettings } from "@/lib/settings";
@@ -102,6 +103,18 @@ export function HomeTab() {
           {settings.heroTrailers && (
             <Nested>
               <AutoplayTrailerQuality />
+              <SliderRow
+                label={t("Trailer start time")}
+                desc={t("How long to wait on a slide before the trailer starts playing.")}
+                icon={<Timer size={18} strokeWidth={2} />}
+                value={settings.heroTrailerStartTime}
+                min={0}
+                max={30}
+                step={1}
+                readout={`${settings.heroTrailerStartTime}s`}
+                resetTo={1}
+                onChange={(heroTrailerStartTime) => update({ heroTrailerStartTime })}
+              />
               <ToggleRow
                 label={t("Home hero audio")}
                 sub={t(

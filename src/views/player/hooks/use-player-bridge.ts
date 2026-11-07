@@ -53,7 +53,9 @@ function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean
     a.videoSourceHeight !== b.videoSourceHeight ||
     a.hdrGamma !== b.hdrGamma ||
     a.errorMessage !== b.errorMessage ||
-    a.errorCode !== b.errorCode
+    a.errorCode !== b.errorCode ||
+    a.osdText !== b.osdText ||
+    a.osdSeq !== b.osdSeq
   );
 }
 
@@ -147,7 +149,11 @@ export function usePlayerBridge(params: {
   const externalMpv = externalMpvEnabled(settings);
   const chosenEngine =
     isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
-  const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${generalShaderKey(settings)}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}|${externalMpv ? `ext:${settings.playerExternalMpvPath}:${settings.playerExternalMpvArgs}` : ""}`;
+  const customShaderKey = (settings.customGlslShaders || [])
+    .filter((s) => s.enabled && s.path?.trim())
+    .map((s) => s.path)
+    .join(";");
+  const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${generalShaderKey(settings)}|${customShaderKey}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}|${externalMpv ? `ext:${settings.playerExternalMpvPath}:${settings.playerExternalMpvArgs}` : ""}`;
   const [bridgeReady, setBridgeReady] = useState(false);
   useEffect(() => {
     if (svpPending || anime4kPending) return;
@@ -162,6 +168,16 @@ export function usePlayerBridge(params: {
       const getEmbedRect = () => readEmbedRect(videoMountRef.current);
       // Size manual buffer modes from the real machine, not the fallback.
       await ensureNativeMemory();
+      let inputConfLine = "";
+      if (settings.mpvInputConf?.trim() && typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+        try {
+          const { invoke } = await import("@tauri-apps/api/core");
+          const confPath = await invoke<string>("mpv_write_input_conf", { content: settings.mpvInputConf });
+          inputConfLine = `input-conf=${confPath}`;
+        } catch (e) {
+          console.warn("[mpv] write input.conf failed", e);
+        }
+      }
       const { bridge: choose, engine: chosen } = await pickBridge(want, src.notWebReady === true, {
         anime4k: anime4kOn,
         hdrToSdr: settings.playerHdrToSdr,
@@ -185,6 +201,7 @@ export function usePlayerBridge(params: {
         extraOptions: [
           mergeMpvOptions(settings, svpOn, { anime4k: anime4kOn }),
           shaderCompanionOptions(settings),
+          inputConfLine,
         ]
           .filter(Boolean)
           .join("\n"),
@@ -242,6 +259,23 @@ export function usePlayerBridge(params: {
       settings.playerDisplayPanel === "oled",
     );
   }, [bridgeReady, engine, settings.playerHdrToSdr, settings.playerDisplayPanel, bridgeRef]);
+
+  // Load custom Lua / JS scripts dynamically into mpv on startup and settings update
+  useEffect(() => {
+    if (!bridgeReady || engine !== "mpv") return;
+    const scripts = (settings.customMpvScripts || []).filter((s) => s.enabled && s.path?.trim());
+    if (scripts.length === 0) return;
+    if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+      import("@tauri-apps/api/core").then(({ invoke }) => {
+        for (const sc of scripts) {
+          const cleaned = sc.path.replace(/\\/g, "/");
+          invoke("mpv_command", { cmd: ["load-script", cleaned] }).catch((e) => {
+            console.warn("[mpv] runtime load-script failed", cleaned, e);
+          });
+        }
+      });
+    }
+  }, [bridgeReady, engine, settings.customMpvScripts]);
 
   return { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive: svpOn };
 }

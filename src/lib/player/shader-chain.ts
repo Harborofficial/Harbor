@@ -14,7 +14,6 @@ function normDir(dir: string): string {
 function conflictBlocked(entry: ShaderCatalogEntry, settings: Settings): boolean {
   if (!entry.conflictsWith) return false;
   return entry.conflictsWith.some((c) => {
-    if (c === "hdrToSdr") return settings.playerHdrToSdr;
     if (c === "rtxHdr") return settings.playerRtxHdr;
     return false;
   });

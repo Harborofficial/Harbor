@@ -86,7 +86,10 @@ export function fullShaderChain(
   dims?: Anime4kDims,
 ): string[] {
   const { before, after } = splitShaderChainAroundUpscaler(settings);
-  return [...before, ...anime4kShadersFor(settings, src, choice, dims), ...after];
+  const custom = (settings.customGlslShaders || [])
+    .filter((s) => s.enabled && s.path?.trim())
+    .map((s) => s.path.replace(/\\/g, "/"));
+  return [...before, ...anime4kShadersFor(settings, src, choice, dims), ...after, ...custom];
 }
 
 export function useAnime4k(

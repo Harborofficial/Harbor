@@ -1,7 +1,9 @@
 import { memo } from "react";
 import { Anime4kIndicator } from "@/components/player/anime4k-indicator";
 import { SvpIndicator } from "@/components/player/svp-indicator";
-import { StatsOverlay } from "@/components/player/stats-overlay";
+import { KeybindStatsOverlay } from "@/components/player/keybind-stats-overlay";
+import { ConsoleOverlay } from "@/components/player/console-overlay";
+import { OsdBanner } from "@/components/player/osd-banner";
 import { SubtitleOffsetIndicator } from "@/components/player/subtitle-offset-indicator";
 import { SubStyleBar } from "@/components/player/sub-style-bar";
 import { PictureBar } from "@/components/player/picture-bar";
@@ -21,6 +23,7 @@ import {
 import { useT } from "@/lib/i18n";
 import { useCaptionsPopoutOpen } from "@/lib/player/captions-popout-state";
 import { ContentAdvisoryPrompt } from "@/components/player/content-advisory-prompt";
+import type { EngineStats } from "@/lib/torrent/engine-stats";
 
 export const StageOverlays = memo(function StageOverlays({
   snap,
@@ -29,6 +32,12 @@ export const StageOverlays = memo(function StageOverlays({
   subShowInPip,
   subAssNative,
   showStats,
+  statsPage,
+  onStatsPageChange,
+  onCloseStats,
+  showConsole,
+  onCloseConsole,
+  engineStats: _engineStats,
   subtitleOffsetSec,
   holdSpeedActive,
   volumeIndicator,
@@ -47,6 +56,12 @@ export const StageOverlays = memo(function StageOverlays({
   subShowInPip: boolean;
   subAssNative: boolean;
   showStats: boolean;
+  statsPage?: 0 | 1 | 2 | 3 | 4 | 5;
+  onStatsPageChange?: (page: 0 | 1 | 2 | 3 | 4 | 5) => void;
+  onCloseStats?: () => void;
+  showConsole?: boolean;
+  onCloseConsole?: () => void;
+  engineStats?: EngineStats | null;
   subtitleOffsetSec: number | null;
   holdSpeedActive: boolean;
   volumeIndicator: VolumeIndicatorState;
@@ -82,7 +97,20 @@ export const StageOverlays = memo(function StageOverlays({
             secondaryText={snap.secondarySubText}
           />
         )}
-      {showStats && !pipMode && <StatsOverlay snap={snap} engine={engine} />}
+      {!pipMode && (
+        <KeybindStatsOverlay
+          snap={snap}
+          engine={engine}
+          showStats={showStats}
+          page={statsPage}
+          onPageChange={onStatsPageChange}
+          onClose={onCloseStats}
+        />
+      )}
+      {showConsole && !pipMode && engine === "mpv" && (
+        <ConsoleOverlay onClose={onCloseConsole ?? (() => {})} />
+      )}
+      {!pipMode && <OsdBanner text={snap.osdText} seq={snap.osdSeq} />}
       {!pipMode && <SubtitleOffsetIndicator delaySec={subtitleOffsetSec} />}
       {!pipMode && (
         <Anime4kIndicator

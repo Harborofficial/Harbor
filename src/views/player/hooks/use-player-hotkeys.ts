@@ -84,6 +84,8 @@ export function usePlayerHotkeys(params: {
   } = params;
 
   const [showStats, setShowStats] = useState(false);
+  const [statsPage, setStatsPage] = useState<0 | 1 | 2 | 3 | 4 | 5>(1);
+  const [showConsole, setShowConsole] = useState(false);
   const { holdSpeedActive, subtitleOffsetSec } = useKeyboardShortcuts({
     bridgeRef,
     snap,
@@ -98,7 +100,11 @@ export function usePlayerHotkeys(params: {
     togglePip,
     fullscreen,
     cycleSubtitles,
+    showStats,
     setShowStats,
+    setStatsPage,
+    showConsole,
+    setShowConsole,
     metaId,
     svpActive,
     onNextEp: hasNextEpisode ? playNext : undefined,
@@ -131,5 +137,14 @@ export function usePlayerHotkeys(params: {
     onVolumeFeedback,
   });
 
-  return { holdSpeedActive, showStats, subtitleOffsetSec };
+  return {
+    holdSpeedActive,
+    showStats,
+    setShowStats,
+    statsPage,
+    setStatsPage,
+    showConsole,
+    setShowConsole,
+    subtitleOffsetSec,
+  };
 }

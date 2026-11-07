@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
@@ -17,6 +18,170 @@ import { tracePlayback } from "@/lib/player/pause-trace";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
 
+type InputConfBinding = {
+  key: string;
+  cmd: string;
+};
+
+function parseInputConf(raw?: string): Map<string, InputConfBinding> {
+  const map = new Map<string, InputConfBinding>();
+  if (!raw) return map;
+  for (const line of raw.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("//")) continue;
+    const firstSpace = trimmed.search(/\s/);
+    if (firstSpace > 0) {
+      const key = trimmed.slice(0, firstSpace).trim();
+      const cmd = trimmed.slice(firstSpace).trim();
+      if (key && cmd) {
+        map.set(key.toLowerCase(), { key, cmd });
+      }
+    }
+  }
+  return map;
+}
+
+function splitMpvCommands(cmdStr: string): string[] {
+  const commands: string[] = [];
+  let current = "";
+  let inDouble = false;
+  let inSingle = false;
+
+  for (let i = 0; i < cmdStr.length; i++) {
+    const ch = cmdStr[i];
+    if (ch === '"' && !inSingle) {
+      inDouble = !inDouble;
+      current += ch;
+    } else if (ch === "'" && !inDouble) {
+      inSingle = !inSingle;
+      current += ch;
+    } else if (ch === ";" && !inDouble && !inSingle) {
+      if (current.trim()) commands.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  if (current.trim()) commands.push(current.trim());
+  return commands;
+}
+
+function tokenizeMpvCommand(cmd: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  let inDouble = false;
+  let inSingle = false;
+
+  for (let i = 0; i < cmd.length; i++) {
+    const ch = cmd[i];
+    if (ch === '"' && !inSingle) {
+      inDouble = !inDouble;
+    } else if (ch === "'" && !inDouble) {
+      inSingle = !inSingle;
+    } else if (/\s/.test(ch) && !inDouble && !inSingle) {
+      if (current) {
+        tokens.push(current);
+        current = "";
+      }
+    } else {
+      current += ch;
+    }
+  }
+  if (current) tokens.push(current);
+  return tokens;
+}
+
+function formatMpvProperty(val: unknown): string {
+  if (val == null) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "number" || typeof val === "boolean") return String(val);
+  if (Array.isArray(val)) {
+    if (val.length === 0) return "none";
+    const isMultiLineList = val.some(
+      (item) => typeof item === "string" && (item.includes("/") || item.includes("\\") || item.length > 25),
+    );
+    return val.map(formatMpvProperty).join(isMultiLineList ? "\n" : ", ");
+  }
+  if (typeof val === "object") {
+    const entries = Object.entries(val as Record<string, unknown>);
+    if (entries.length === 0) return "none";
+    return entries.map(([k, v]) => `${k}=${formatMpvProperty(v)}`).join(", ");
+  }
+  return String(val);
+}
+
+async function triggerHarborOsd(cmd: string): Promise<void> {
+  const showTextMatch = cmd.match(/show-text\s+(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);
+  let template = showTextMatch ? (showTextMatch[1] ?? showTextMatch[2] ?? showTextMatch[3] ?? "") : "";
+
+  if (!template) {
+    const cycleMatch = cmd.match(/cycle-values\s+([a-zA-Z0-9_-]+)/i);
+    if (cycleMatch) {
+      template = `${cycleMatch[1]}: \${${cycleMatch[1]}}`;
+    }
+  }
+
+  if (!template) return;
+
+  // Brief pause so mpv executes the action command and updates the property
+  await new Promise((resolve) => setTimeout(resolve, 50));
+
+  const propMatches = Array.from(template.matchAll(/\$\{([a-zA-Z0-9_/-]+)\}/g));
+  let result = template;
+
+  for (const m of propMatches) {
+    const fullTag = m[0];
+    const propName = m[1];
+    try {
+      let displayVal: string;
+      try {
+        displayVal = await invoke<string>("mpv_get_property_osd", { name: propName });
+      } catch {
+        const val = await invoke<unknown>("mpv_get_property", { name: propName });
+        displayVal = formatMpvProperty(val);
+      }
+      result = result.split(fullTag).join(displayVal);
+    } catch {
+      // Ignore if property is unavailable
+    }
+  }
+
+  // Unescape literal newlines and tabs from input.conf so multiline text splits correctly
+  result = result
+    .replace(/\\n/g, "\n")
+    .replace(/\\N/g, "\n")
+    .replace(/\\t/g, "  ");
+
+  window.dispatchEvent(new CustomEvent("harbor:osd", { detail: result }));
+}
+
+function eventToMpvKey(e: KeyboardEvent): string {
+  let base = e.key;
+  if (e.code === "Space" || e.key === " ") base = "SPACE";
+  else if (e.code === "ArrowRight" || e.key === "ArrowRight") base = "RIGHT";
+  else if (e.code === "ArrowLeft" || e.key === "ArrowLeft") base = "LEFT";
+  else if (e.code === "ArrowUp" || e.key === "ArrowUp") base = "UP";
+  else if (e.code === "ArrowDown" || e.key === "ArrowDown") base = "DOWN";
+  else if (e.code === "Enter" || e.key === "Enter") base = "ENTER";
+  else if (e.code === "Escape" || e.key === "Escape") base = "ESC";
+  else if (e.code === "Backspace" || e.key === "Backspace") base = "BS";
+  else if (e.code === "Tab" || e.key === "Tab") base = "TAB";
+  else if (e.code === "PageUp") base = "PGUP";
+  else if (e.code === "PageDown") base = "PGDWN";
+  else if (e.code === "Home") base = "HOME";
+  else if (e.code === "End") base = "END";
+  else if (e.code === "Insert") base = "INS";
+  else if (e.code === "Delete") base = "DEL";
+
+  let prefix = "";
+  if (e.ctrlKey) prefix += "Ctrl+";
+  if (e.altKey) prefix += "Alt+";
+  if (e.metaKey) prefix += "Meta+";
+  if (e.shiftKey && (base.length > 1 || !/^[a-zA-Z0-9]$/.test(base))) prefix += "Shift+";
+
+  return prefix + base;
+}
+
 export function useKeyboardShortcuts(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
   snap: PlayerSnapshot;
@@ -32,7 +197,11 @@ export function useKeyboardShortcuts(params: {
   togglePip?: () => void;
   fullscreen: boolean;
   cycleSubtitles: () => void;
+  showStats: boolean;
   setShowStats: (updater: (prev: boolean) => boolean) => void;
+  setStatsPage: (page: 0 | 1 | 2 | 3 | 4 | 5) => void;
+  showConsole?: boolean;
+  setShowConsole?: (updater: (prev: boolean) => boolean) => void;
   metaId: string;
   svpActive: boolean;
   onNextEp?: () => void;
@@ -72,7 +241,11 @@ export function useKeyboardShortcuts(params: {
     toggleFullscreen,
     togglePip,
     cycleSubtitles,
+    showStats,
     setShowStats,
+    setStatsPage,
+    showConsole,
+    setShowConsole,
     metaId,
     svpActive,
     onNextEp,
@@ -163,6 +336,117 @@ export function useKeyboardShortcuts(params: {
         return;
       }
       if (isTypingTarget(e)) return;
+
+      if (e.key === "Escape") {
+        window.dispatchEvent(new CustomEvent("harbor:stats-hide"));
+      }
+
+      if (showStats) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          setShowStats(() => false);
+          return;
+        }
+        if (settings.mpvDetailedStats && bridgeRef.current?.capabilities().engine === "mpv") {
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            if (e.key === "0") {
+              e.preventDefault();
+              setStatsPage(0);
+              return;
+            }
+            if (e.key === "1") {
+              e.preventDefault();
+              setStatsPage(1);
+              return;
+            }
+            if (e.key === "2") {
+              e.preventDefault();
+              setStatsPage(2);
+              return;
+            }
+            if (e.key === "3") {
+              e.preventDefault();
+              setStatsPage(3);
+              return;
+            }
+            if (e.key === "4") {
+              e.preventDefault();
+              setStatsPage(4);
+              return;
+            }
+            if (e.key === "5") {
+              e.preventDefault();
+              setStatsPage(5);
+              return;
+            }
+          }
+        }
+      }
+
+      if (e.key === "`" || e.key === "~") {
+        if (showStats) return;
+        if (settings.mpvConsole && bridgeRef.current?.capabilities().engine === "mpv") {
+          e.preventDefault();
+          setShowConsole?.((v) => !v);
+          return;
+        }
+      }
+
+      if (showConsole) {
+        if (e.key === "Escape" || e.key === "`" || e.key === "~") {
+          e.preventDefault();
+          setShowConsole?.(() => false);
+          return;
+        }
+      }
+
+      if (settings.mpvInputConf?.trim() && bridgeRef.current?.capabilities().engine === "mpv") {
+        const inputMap = parseInputConf(settings.mpvInputConf);
+        const mpvKey = eventToMpvKey(e);
+        const matched = inputMap.get(mpvKey.toLowerCase()) || inputMap.get(e.key.toLowerCase());
+        if (matched) {
+          e.preventDefault();
+
+          // 1. Check for stats page commands (e.g. script-binding stats/display-page-1, display-stats, etc.)
+          const statsMatch = matched.cmd.match(/stats\/(?:display-page-(\d+)|display-stats(?:-toggle)?)/i);
+          if (statsMatch) {
+            const pageNum = statsMatch[1] ? parseInt(statsMatch[1], 10) : 1;
+            window.dispatchEvent(new CustomEvent("harbor:toggle-stats-page", { detail: { page: pageNum } }));
+            return;
+          }
+
+          const hasShowText = /show-text/i.test(matched.cmd);
+          if (hasShowText) {
+            // Semicolon-separated commands in input.conf (e.g. cycle-values ... ; show-text ...)
+            // Execute the action commands WITHOUT show-text so MPV does not render ugly native text on the video canvas
+            const allCmds = splitMpvCommands(matched.cmd);
+            for (const sub of allCmds) {
+              if (!/^\s*show-text\b/i.test(sub)) {
+                const tokens = tokenizeMpvCommand(sub);
+                if (tokens.length > 0) {
+                  void invoke("mpv_command", { cmd: tokens }).catch(() => {});
+                }
+              }
+            }
+            // Exclusively trigger Harbor's styled OSD HUD
+            void triggerHarborOsd(matched.cmd);
+          } else {
+            // Execute action commands without explicit show-text
+            const allCmds = splitMpvCommands(matched.cmd);
+            for (const sub of allCmds) {
+              const tokens = tokenizeMpvCommand(sub);
+              if (tokens.length > 0) {
+                void invoke("mpv_command", { cmd: tokens }).catch(() => {});
+              }
+            }
+            // If the command cycles values or modifies property, trigger Harbor's OSD banner
+            if (/cycle-values\b/i.test(matched.cmd)) {
+              void triggerHarborOsd(matched.cmd);
+            }
+          }
+          return;
+        }
+      }
 
       const binding = eventToBinding(e);
       const match = (id: HotkeyId): boolean => effectiveBinding(id, overrides) === binding;
@@ -407,7 +691,11 @@ export function useKeyboardShortcuts(params: {
       }
       if (match("playerStats")) {
         e.preventDefault();
-        setShowStats((v) => !v);
+        if (!settings.mpvDetailedStats) return;
+        setShowStats((v) => {
+          if (!v) setStatsPage(1);
+          return !v;
+        });
         return;
       }
       if (match("playerSpeedDown")) {
@@ -541,13 +829,33 @@ export function useKeyboardShortcuts(params: {
     const onBlur = () => {
       if (holdRef.current.key != null) releaseHold();
     };
+    const onToggleStatsPage = (e: Event) => {
+      if (!settings.mpvDetailedStats) return;
+      const ce = e as CustomEvent<{ page?: number }>;
+      const targetPage = ce.detail?.page ?? 1;
+      setShowStats((prev) => {
+        if (!prev) {
+          if (targetPage >= 0 && targetPage <= 5) {
+            setStatsPage(targetPage as 0 | 1 | 2 | 3 | 4 | 5);
+          }
+          return true;
+        }
+        if (targetPage >= 0 && targetPage <= 5) {
+          setStatsPage(targetPage as 0 | 1 | 2 | 3 | 4 | 5);
+          return true;
+        }
+        return false;
+      });
+    };
     window.addEventListener("keydown", onKey);
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("blur", onBlur);
+    window.addEventListener("harbor:toggle-stats-page", onToggleStatsPage);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onKeyUp);
       window.removeEventListener("blur", onBlur);
+      window.removeEventListener("harbor:toggle-stats-page", onToggleStatsPage);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

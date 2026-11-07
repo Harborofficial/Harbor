@@ -1034,7 +1034,16 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     })();
   }, [liveUrl, reloadSource, showSyncToast, src.url, t, transcodedUrl]);
 
-  const { holdSpeedActive, showStats, subtitleOffsetSec } = usePlayerHotkeys({
+  const {
+    holdSpeedActive,
+    showStats,
+    setShowStats,
+    statsPage,
+    setStatsPage,
+    showConsole,
+    setShowConsole,
+    subtitleOffsetSec,
+  } = usePlayerHotkeys({
     bridgeRef,
     snap,
     metaId: src.meta.id,
@@ -1421,6 +1430,11 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     subShowInPip: settings.subShowInPip,
     subAssNative,
     showStats,
+    statsPage,
+    onStatsPageChange: setStatsPage,
+    onCloseStats: () => setShowStats(false),
+    showConsole,
+    onCloseConsole: () => setShowConsole(false),
     holdSpeedActive: holdSpeedActive || holdSpeed.active,
     holdSpeed,
     subtitleOffsetSec,

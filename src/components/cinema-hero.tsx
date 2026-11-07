@@ -238,8 +238,31 @@ function CinemaSlide({
   } | null>(null);
   const trailerInfo = trailerResult?.quality === trailerQuality ? trailerResult.info : null;
   const pageVisible = usePageVisible();
+  const [lingered, setLingered] = useState(false);
+  useEffect(() => {
+    if (!active || !inViewport || !pageVisible || !settings.heroTrailers) {
+      setLingered(false);
+      return;
+    }
+    const delaySec = Math.max(0, Math.min(30, settings.heroTrailerStartTime ?? 1));
+    if (delaySec === 0) {
+      setLingered(true);
+      return;
+    }
+    setLingered(false);
+    const id = window.setTimeout(() => setLingered(true), delaySec * 1000);
+    return () => window.clearTimeout(id);
+  }, [
+    active,
+    inViewport,
+    pageVisible,
+    settings.heroTrailers,
+    meta.id,
+    settings.heroTrailerStartTime,
+  ]);
+
   const wantsPlayback =
-    active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers;
+    active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers && lingered;
   const { slot, ready: videoReady } = useTrailerVideo({
     src: trailerInfo ? trailerSrc(trailerInfo) : null,
     active: !!wantsPlayback,

@@ -117,6 +117,13 @@ export type MusicSpeedPreset = {
 
 export type AccountProvider = "stremio" | "nuvio";
 
+export type CustomFileItem = {
+  id: string;
+  name: string;
+  path: string;
+  enabled: boolean;
+};
+
 export type TvCardOptions = {
   showImdbBadge: boolean;
   showTmdbBadge: boolean;
@@ -244,6 +251,7 @@ export type Settings = {
   heroFeed: "trending" | "trakt" | "simkl" | "classic";
   heroTrailers: boolean;
   heroTrailerAudio: boolean;
+  heroTrailerStartTime: number;
   navIconAnimations: boolean;
   bigPicturePlayerUi: "tenFoot" | "desktop";
   screensaver: boolean;
@@ -514,6 +522,9 @@ export type Settings = {
   keenableKey: string;
   playerD3d11Flip: boolean;
   mpvExtraOptions: string;
+  mpvInputConf: string;
+  customGlslShaders: CustomFileItem[];
+  customMpvScripts: CustomFileItem[];
   mpvQuality: "balanced" | "performance" | "quality";
   mpvHwdec: "auto" | "on" | "off";
   mpvRenderer: "gpu-next" | "gpu";
@@ -583,6 +594,10 @@ export type Settings = {
   stillWatching: boolean;
   stillWatchingAfter: number;
   keyboardPauseShowsControls: boolean;
+  /** When enabled, pressing I during playback opens detailed multi-page technical stats in mpv. */
+  mpvDetailedStats: boolean;
+  /** When enabled, pressing ` or ~ during playback opens mpv's interactive console and log history. */
+  mpvConsole: boolean;
   hideWatchedInCatalogs: boolean;
   hideWatchedInHero: boolean;
   hideWatchedInMoreLikeThis: boolean;
