@@ -2937,6 +2937,7 @@ export async function pullAddonsFromNuvio(
 }
 
 const NUVIO_MANIFEST_CACHE_PREFIX = "harbor.nuvio.manifest_cache.v1.";
+const inflightAddonFetch = new Map<string, Promise<Addon[]>>();
 
 function getCachedNuvioManifest(url: string): Addon["manifest"] | null {
   try {
@@ -2962,54 +2963,67 @@ function setCachedNuvioManifest(url: string, manifest: Addon["manifest"]): void 
  * Resolves full Harbor Addon objects from Nuvio for the given profile.
  * Falls back to cache if network is unavailable or slow.
  */
-export async function fetchNuvioAddons(harborProfileId?: string | number): Promise<Addon[]> {
-  if (!isNuvioSignedIn()) return [];
+export function fetchNuvioAddons(harborProfileId?: string | number): Promise<Addon[]> {
+  if (!isNuvioSignedIn()) return Promise.resolve([]);
 
   const profileIndex = resolveEffectiveNuvioAddonSlot(harborProfileId);
-  const cachedItems = readCachedNuvioAddons(profileIndex);
-  let items = cachedItems;
+  // A provider switch wakes home, the picker and the addons manager at once.
+  // They all want the same list, so share one fetch (and its manifest burst).
+  const key = `${getNuvioAccountId() ?? ""}:${profileIndex}`;
+  const pending = inflightAddonFetch.get(key);
+  if (pending) return pending;
 
-  try {
-    const fresh = await pullAddonsFromNuvio(profileIndex);
-    if (fresh.length > 0 || cachedItems.length === 0) {
-      items = fresh;
+  const run = (async (): Promise<Addon[]> => {
+    const cachedItems = readCachedNuvioAddons(profileIndex);
+    let items = cachedItems;
+
+    try {
+      const fresh = await pullAddonsFromNuvio(profileIndex);
+      if (fresh.length > 0 || cachedItems.length === 0) {
+        items = fresh;
+      }
+    } catch {
+      // Keep cachedItems
     }
-  } catch {
-    // Keep cachedItems
-  }
 
-  const activeItems = items.filter((n) => n.enabled !== false);
-  if (activeItems.length === 0) return [];
+    const activeItems = items.filter((n) => n.enabled !== false);
+    if (activeItems.length === 0) return [];
 
-  const addons: Addon[] = await Promise.all(
-    activeItems.map(async (n): Promise<Addon> => {
-      const cached = getCachedNuvioManifest(n.url);
-      if (cached) {
+    const addons: Addon[] = await Promise.all(
+      activeItems.map(async (n): Promise<Addon> => {
+        const cached = getCachedNuvioManifest(n.url);
+        if (cached) {
+          return {
+            transportUrl: n.url,
+            manifest: cached,
+          };
+        }
+        let manifest: Addon["manifest"] = {
+          id: n.url,
+          name: n.name || "Addon",
+        };
+        try {
+          const fetched = await fetchManifestAt(n.url);
+          if (fetched) {
+            manifest = fetched;
+            setCachedNuvioManifest(n.url, fetched);
+          }
+        } catch {}
         return {
           transportUrl: n.url,
-          manifest: cached,
+          manifest,
         };
-      }
-      let manifest: Addon["manifest"] = {
-        id: n.url,
-        name: n.name || "Addon",
-      };
-      try {
-        const fetched = await fetchManifestAt(n.url);
-        if (fetched) {
-          manifest = fetched;
-          setCachedNuvioManifest(n.url, fetched);
-        }
-      } catch {}
-      return {
-        transportUrl: n.url,
-        manifest,
-      };
-    }),
-  );
+      }),
+    );
 
-  recordNuvioAddons(addons);
-  return addons;
+    recordNuvioAddons(addons);
+    return addons;
+  })();
+  const tracked = run.finally(() => {
+    if (inflightAddonFetch.get(key) === tracked) inflightAddonFetch.delete(key);
+  });
+  inflightAddonFetch.set(key, tracked);
+  return tracked;
 }
 
 /**
