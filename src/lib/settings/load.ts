@@ -168,7 +168,10 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
   return settings;
 }
 
-function parseStoredSettings(raw: string | null): { settings: Settings; cacheable: boolean } {
+export function parseStoredSettings(raw: string | null): {
+  settings: Settings;
+  cacheable: boolean;
+} {
   if (!raw) {
     return {
       settings: {
