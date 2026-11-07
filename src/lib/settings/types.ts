@@ -665,6 +665,8 @@ export type Settings = {
   animeCwEnd: "hide" | "timer";
   cwAdvanceNext: boolean;
   cwHideCaughtUp: boolean;
+  /** Whether Continue Watching may play an episode whose release date is still in the future. */
+  cwPlayUnreleased: boolean;
   useNativeTitleBar: boolean;
   fullscreenClockEnabled: boolean;
   fullscreenClockFormat: FullscreenClockFormat;

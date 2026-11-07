@@ -163,6 +163,8 @@ export const ContinueCard = memo(function ContinueCard({
   const [epAirDate, setEpAirDate] = useState<string | null>(null);
   const isUnairedDate = epAirDate ? Date.parse(epAirDate) > now : false;
   const isWaiting = waitingForAir || (isUnairedDate && (settings.animeCwEnd === "timer" || upNext));
+  // The countdown stays even when the user allows playback; it just stops blocking the controls.
+  const playbackBlocked = isWaiting && !settings.cwPlayUnreleased;
   const effectiveAirDate = nextAirDate || (isUnairedDate ? epAirDate : undefined);
 
   useEffect(() => {
@@ -729,6 +731,7 @@ export const ContinueCard = memo(function ContinueCard({
         return !current.local || !!localCwEntry(current._id);
       },
       t,
+      allowUnreleased: settings.cwPlayUnreleased,
       play: (assertCurrent) => latest.current.onPlay(assertCurrent),
       chooseSource: (assertCurrent) => latest.current.onChooseSource(assertCurrent),
       dismiss: onDismiss
@@ -758,7 +761,7 @@ export const ContinueCard = memo(function ContinueCard({
     });
     // Item metadata and callbacks stay live; episode/provider/actor changes own a new command source.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [identity, authKey, activeProfile?.id, !!onDismiss, t]);
+  }, [identity, authKey, activeProfile?.id, !!onDismiss, t, settings.cwPlayUnreleased]);
   const pending = useSyncExternalStore(commands.subscribe, commands.isPending, commands.isPending);
   const runControl = (event: React.MouseEvent, command: () => Promise<void>) => {
     event.stopPropagation();
@@ -794,7 +797,7 @@ export const ContinueCard = memo(function ContinueCard({
         type="button"
         data-continue-card-trigger
         onClick={(event) => runControl(event, commands.chooseSource)}
-        disabled={pending || isWaiting}
+        disabled={pending || playbackBlocked}
         aria-label={`${t("Choose another source")}: ${displayTitle}`}
         title={t("Choose another source")}
         className="block w-full min-w-0 rounded-xl text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -933,7 +936,7 @@ export const ContinueCard = memo(function ContinueCard({
               tabIndex={-1}
               data-tv-skip="true"
               onClick={(event) => runControl(event, commands.play)}
-              disabled={pending || isWaiting}
+              disabled={pending || playbackBlocked}
               aria-label={t("Play {name}", { name: displayTitle })}
               title={t("Play")}
               className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink outline-none transition-transform duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent"
@@ -949,7 +952,7 @@ export const ContinueCard = memo(function ContinueCard({
             tabIndex={-1}
             data-tv-skip="true"
             onClick={(event) => runControl(event, commands.play)}
-            disabled={pending || isWaiting}
+            disabled={pending || playbackBlocked}
             aria-label={t("Play {name}", { name: displayTitle })}
             title={t("Play")}
             className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-canvas ring-1 ring-white/15 shadow-[0_10px_28px_-8px_rgba(0,0,0,0.6)] transition-transform duration-150 hover:scale-[1.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"

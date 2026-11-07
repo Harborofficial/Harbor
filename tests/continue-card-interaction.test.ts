@@ -8,7 +8,14 @@ import * as jsx from "react/jsx-runtime";
 import * as icons from "lucide-react";
 import { createRoot } from "react-dom/client";
 
-function harness(actual: unknown = null) {
+function harness(
+  actual: unknown = null,
+  opts: {
+    settings?: Record<string, unknown>;
+    item?: Record<string, unknown>;
+    seasonEpisodes?: unknown[];
+  } = {},
+) {
   const dom = new JSDOM("<!doctype html><body><div id='app'></div>", { url: "http://localhost/" });
   Object.assign(globalThis, {
     window: dom.window,
@@ -83,7 +90,9 @@ function harness(actual: unknown = null) {
       sharesStremioStorage: () => false,
     },
     "@/lib/auth": { useAuth: () => ({ authKey: "fixture-auth" }) },
-    "@/lib/settings": { useSettings: () => ({ settings: { liquidGlass: false } }) },
+    "@/lib/settings": {
+      useSettings: () => ({ settings: { liquidGlass: false, ...opts.settings } }),
+    },
     "@/lib/view": {
       useView: () => ({
         openMeta: (meta: any) => starts.push({ details: meta }),
@@ -105,7 +114,7 @@ function harness(actual: unknown = null) {
       createMediaServerPlayerSrc: empty,
       decidePlaybackSource: () => ({ kind: "online" }),
     },
-    "@/lib/series-episodes": { fetchSeasonEpisodes: async () => [] },
+    "@/lib/series-episodes": { fetchSeasonEpisodes: async () => opts.seasonEpisodes ?? [] },
     "@/lib/providers/anizip": noopProvider,
     "@/lib/providers/anime-mapping": { animeMappingByKitsu: async () => null },
     "@/lib/logo": { peekCachedLogo: () => null, resolveLogo: async () => null },
@@ -175,7 +184,7 @@ function harness(actual: unknown = null) {
   };
   const { ContinueCard } = load("src/components/continue-card.tsx");
   const root = createRoot(document.querySelector("#app")!);
-  const item = {
+  const item = opts.item ?? {
     _id: "older-b",
     type: "series",
     name: "Older B",
@@ -275,6 +284,57 @@ test("Play refreshes the saved release and Choose another source opens an indepe
     assert.deepEqual(h.starts.at(-1).mode, { autoPlay: false, resume: false });
   } finally {
     await h.dispose();
+  }
+});
+
+test("an episode dated in the future can play when the user allows unreleased episodes", async () => {
+  const future = new Date(Date.now() + 2 * 86400000).toISOString();
+  const item = {
+    _id: "future-card",
+    type: "series",
+    name: "Future Card",
+    upNext: true,
+    state: {
+      season: 1,
+      episode: 2,
+      video_id: "future-card:1:2",
+      duration: 600000,
+      timeOffset: 0,
+    },
+  };
+  const seasonEpisodes = [{ episode: 2, name: "Episode 2", airDate: future }];
+  const flush = () =>
+    React.act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  const playButtons = () => [
+    ...document.querySelectorAll<HTMLButtonElement>("button[title='Play']"),
+  ];
+
+  const blocked = harness(null, { item, seasonEpisodes, settings: { cwPlayUnreleased: false } });
+  try {
+    await blocked.render();
+    await flush();
+    const buttons = playButtons();
+    assert.ok(buttons.length > 0);
+    assert.ok(buttons.every((button) => button.disabled));
+  } finally {
+    await blocked.dispose();
+  }
+
+  const allowed = harness(null, { item, seasonEpisodes, settings: { cwPlayUnreleased: true } });
+  try {
+    await allowed.render();
+    await flush();
+    const buttons = playButtons();
+    assert.ok(buttons.length > 0);
+    assert.ok(buttons.every((button) => !button.disabled));
+    await allowed.click("button[title='Play']");
+    const started = allowed.starts.at(-1);
+    assert.equal(started.episode.season, 1);
+    assert.equal(started.episode.episode, 2);
+  } finally {
+    await allowed.dispose();
   }
 });
 

@@ -516,6 +516,7 @@ export const DEFAULT: Settings = {
   animeCwEnd: "hide",
   cwAdvanceNext: true,
   cwHideCaughtUp: true,
+  cwPlayUnreleased: true,
   useNativeTitleBar: false,
   fullscreenClockEnabled: false,
   fullscreenClockFormat: "system",

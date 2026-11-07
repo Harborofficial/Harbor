@@ -8215,6 +8215,21 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Allow playing unreleased episodes",
+    section: "library",
+    tab: "home",
+    anchorTitle: "Home layout",
+    keywords: [
+      "unreleased episode",
+      "future release date",
+      "play anyway",
+      "blocked playback",
+      "incorrect release date",
+      "continue watching play",
+      "unaired episode",
+    ],
+  },
+  {
     label: "Remove shows once you're caught up",
     section: "library",
     tab: "home",
