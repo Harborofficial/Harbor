@@ -51,7 +51,7 @@ export function getParentsGuideCacheEntry(imdbId: string): CacheEntry | undefine
   return guideCache.get(imdbId.trim());
 }
 
-const GRAPHQL_ENDPOINT = "https://graphql.imdb.com/";
+const GRAPHQL_ENDPOINT = "https://api.graphql.imdb.com/";
 
 const PARENTS_GUIDE_QUERY = `
 query ParentsGuide($id: ID!) {
@@ -204,6 +204,7 @@ export async function fetchImdbParentsGuide(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-imdb-client-name": "imdb-web-next-localized",
           Accept: "application/json",
         },
         body: JSON.stringify({
