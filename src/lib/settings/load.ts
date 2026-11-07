@@ -545,6 +545,11 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
         DEFAULT.seekForwardStepShortSec,
       ),
       theme: sanitizeTheme(parsed.theme),
+      heroTrailerStartTime:
+        typeof parsed.heroTrailerStartTime === "number" &&
+        Number.isFinite(parsed.heroTrailerStartTime)
+          ? Math.min(30, Math.max(0, Math.round(parsed.heroTrailerStartTime)))
+          : DEFAULT.heroTrailerStartTime,
       animeTitleLanguage:
         parsed.animeTitleLanguage === "romaji" || parsed.animeTitleLanguage === "native"
           ? parsed.animeTitleLanguage

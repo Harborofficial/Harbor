@@ -60,12 +60,34 @@ export function svpMpvLines(s: Settings, svpActive: boolean): string {
   );
 }
 
+export function customShadersMpvLines(s: Settings): string {
+  const enabled = (s.customGlslShaders || []).filter((sh) => sh.enabled && sh.path?.trim());
+  if (enabled.length === 0) return "";
+  const paths = enabled.map((sh) => sh.path.replace(/\\/g, "/")).join(";");
+  return `glsl-shaders=${paths}`;
+}
+
+export function customScriptsMpvLines(s: Settings): string {
+  const enabled = (s.customMpvScripts || []).filter((sc) => sc.enabled && sc.path?.trim());
+  if (enabled.length === 0) return "";
+  const lines = [
+    "load-scripts=yes",
+    ...enabled.map((sc) => `load-script=${sc.path.replace(/\\/g, "/")}`),
+  ];
+  return lines.join("\n");
+}
+
 export function mergeMpvOptions(
   s: Settings,
   svpActive: boolean,
   opts?: { anime4k?: boolean; totalPhysBytes?: number },
 ): string | undefined {
-  const merged = [compileMpvOptions(s, opts), svpMpvLines(s, svpActive), s.mpvExtraOptions || ""]
+  const merged = [
+    compileMpvOptions(s, opts),
+    svpMpvLines(s, svpActive),
+    customScriptsMpvLines(s),
+    s.mpvExtraOptions || "",
+  ]
     .filter((p) => p.trim())
     .join("\n");
   return merged.trim() ? merged : undefined;
@@ -93,4 +115,23 @@ export function validateMpvOptions(raw: string): MpvLineCheck {
     }
   }
   return { valid, skipped, risky };
+}
+
+export type InputConfCheck = { valid: number; skipped: number };
+
+export function validateInputConf(raw: string): InputConfCheck {
+  let valid = 0;
+  let skipped = 0;
+  for (const line of raw.split("\n")) {
+    const t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+    // Input conf format: <KEY> <COMMAND> [ARGS...]
+    const m = t.match(/^([^\s#]+)\s+([^#]+)/);
+    if (m && m[1] && m[2].trim()) {
+      valid++;
+    } else {
+      skipped++;
+    }
+  }
+  return { valid, skipped };
 }
