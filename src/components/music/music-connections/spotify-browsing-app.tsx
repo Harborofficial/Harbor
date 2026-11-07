@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { ChevronDown, LoaderCircle } from "@/components/icons/music-icons";
+import { useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, LoaderCircle } from "@/components/icons/music-icons";
+import { emitListToast } from "@/components/lists/list-toast";
 import { useT } from "@/lib/i18n";
 import { connectSpotifyBrowsing, spotifySetupErrorKey } from "@/lib/music/spotify-setup";
 import { getSpotifyStatus } from "@/lib/music/sources";
@@ -17,34 +18,53 @@ export function SpotifyBrowsingApp({ onDone }: { onDone: () => void }) {
   const [status, setStatus] = useState<SpotifyStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
+  const [checking, setChecking] = useState(true);
+  const request = useRef(0);
 
   useEffect(() => {
     let mounted = true;
+    const id = ++request.current;
     void getSpotifyStatus()
       .then((next) => {
-        if (mounted) setStatus(next);
+        if (mounted && request.current === id) setStatus(next);
       })
-      .catch(() => {});
+      .catch((reason) => {
+        if (mounted && request.current === id)
+          setFailure(reason instanceof Error ? reason.message : String(reason));
+      })
+      .finally(() => {
+        if (mounted && request.current === id) setChecking(false);
+      });
     return () => {
       mounted = false;
+      request.current++;
     };
   }, []);
 
   const connect = (id?: string) => {
     if (!guardMusicSource("spotify", () => connect(id))) return;
+    const attempt = ++request.current;
+    setChecking(false);
     setBusy(true);
     setFailure(null);
     void connectSpotifyBrowsing(id)
       .then((next) => {
+        if (request.current !== attempt) return;
         setStatus(next);
+        if (!next.ownAppBrowsing)
+          throw new Error(t("Spotify browsing authorization could not be confirmed. Try again."));
+        emitListToast(t("Spotify browsing authorized. Playback uses device pairing separately."));
         onDone();
       })
       .catch((reason) => {
+        if (request.current !== attempt) return;
         const message = reason instanceof Error ? reason.message : String(reason);
         const localized = spotifySetupErrorKey(message);
         setFailure(localized ? t(localized) : message);
       })
-      .finally(() => setBusy(false));
+      .finally(() => {
+        if (request.current === attempt) setBusy(false);
+      });
   };
 
   const browsingState = status?.ownAppBrowsing
@@ -66,8 +86,20 @@ export function SpotifyBrowsingApp({ onDone }: { onDone: () => void }) {
           <span className="mt-1 block text-[12px] leading-5 text-ink-muted">
             {t("music.spotifySetup.browseBody")}
           </span>
-          <span className="mt-1 block text-[11px] font-medium text-ink-subtle">
-            {t("music.spotify.browsingLabel")}: {t(browsingState)}
+          <span
+            role="status"
+            aria-live="polite"
+            className={`mt-2 flex items-center gap-2 text-[12px] font-medium ${status?.ownAppBrowsing ? "text-accent" : "text-ink-muted"}`}
+          >
+            {status?.ownAppBrowsing && !busy && <Check size={14} aria-hidden="true" />}
+            {t("music.spotify.browsingLabel")}:{" "}
+            {busy
+              ? t("music.connect.connecting")
+              : checking
+                ? t("Checking connection…")
+                : failure && !status
+                  ? t("Could not check connection")
+                  : t(browsingState)}
           </span>
         </span>
         <ChevronDown
