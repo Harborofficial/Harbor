@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { Settings } from "@/lib/settings/types";
 import { isTop10, useTop10Version } from "@/lib/top10-set";
 import { isInCinema, isRerun, deriveBadge } from "@/lib/card-badges";
-import { animeHasDub, dubSetReady, ensureDubSet, subscribeDubSet } from "@/lib/providers/anime-dub-sub";
+import { useAnimeDub } from "@/hooks/use-anime-dub";
 import { useMetaWatched } from "@/lib/watched-flag";
 import { useInWatchlist } from "@/lib/watchlist";
 import { useInLocalLibrary } from "@/lib/local-library";
@@ -33,10 +33,7 @@ export function useCardSharedState({
 }): CardSharedState {
   const isAnime = isCardAnimeId(meta.id);
   useTop10Version();
-  const dubReady = useSyncExternalStore(subscribeDubSet, dubSetReady);
-  useEffect(() => {
-    if (settings.showDubBadge && isAnime) ensureDubSet();
-  }, [isAnime, settings.showDubBadge]);
+  const hasDub = useAnimeDub(meta.id, settings.showDubBadge && isAnime);
 
   const alternateIds = useMemo(() => [imdbId], [imdbId]);
   const watched = useMetaWatched(meta.id, meta.type, imdbId);
@@ -50,7 +47,7 @@ export function useCardSharedState({
     inCinema,
     rerun,
     newBadge: !inCinema && !rerun ? deriveBadge(meta) : null,
-    hasDub: settings.showDubBadge && isAnime && dubReady && animeHasDub(meta.id),
+    hasDub,
     watched,
     inWatchlist,
     inLocalLibrary,
