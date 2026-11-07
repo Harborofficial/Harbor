@@ -274,8 +274,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       const metadataOrder = configuredAddonOrder.length
         ? configuredAddonOrder
         : settings.metadataAddonOrder;
-      // Until the user saves the dialog's default order, addons remain ahead of
-      // TMDB. An empty array must not mean "TMDB first".
+      // Preserve the default addon order for fallback selection. The explicit
+      // TMDB Top Match toggle takes precedence when TMDB returns a result.
       const searchChain = explicitSearchChain.length
         ? explicitSearchChain
         : ["__default_search_addons__", "tmdb"];

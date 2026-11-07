@@ -340,6 +340,29 @@ test("addon Top Match follows metadata priority and matches the configured insta
 
   const tmdbTop = { kind: "movie", meta: { id: "tmdb:movie:1", type: "movie", name: "Batman" } };
   const addonTop = { kind: "series", meta: { id: "tt1", type: "series", name: "Batman" } };
+  for (const chain of [
+    [],
+    ["__default_search_addons__", "tmdb"],
+    ["tmdb"],
+    [`addon:${key(first.transportUrl)}`],
+  ]) {
+    for (const tmdbEnabled of [true, false]) {
+      assert.equal(
+        prioritizedTopMatch({ chain, tmdbTop: null, addonTop, earlyAddonTop: null, tmdbEnabled }),
+        addonTop,
+      );
+    }
+    assert.equal(
+      prioritizedTopMatch({
+        chain,
+        tmdbTop,
+        addonTop,
+        earlyAddonTop: addonTop,
+        tmdbEnabled: false,
+      }),
+      addonTop,
+    );
+  }
   assert.equal(
     prioritizedTopMatch({
       chain: ["tmdb", `addon:${key(first.transportUrl)}`],
@@ -358,7 +381,7 @@ test("addon Top Match follows metadata priority and matches the configured insta
       earlyAddonTop: addonTop,
       tmdbEnabled: true,
     }),
-    addonTop,
+    tmdbTop,
   );
   assert.equal(
     prioritizedTopMatch({
@@ -368,7 +391,7 @@ test("addon Top Match follows metadata priority and matches the configured insta
       earlyAddonTop: null,
       tmdbEnabled: true,
     }),
-    addonTop,
+    tmdbTop,
   );
   assert.equal(
     prioritizedTopMatch({
@@ -388,7 +411,7 @@ test("addon Top Match follows metadata priority and matches the configured insta
       earlyAddonTop: addonTop,
       tmdbEnabled: true,
     }),
-    addonTop,
+    tmdbTop,
   );
   assert.equal(
     prioritizedTopMatch({
