@@ -209,6 +209,9 @@ import { useAnimeAnilistDetails } from "./detail/use-anime-anilist-details";
 import { useAnimeCharacters } from "./detail/use-anime-characters";
 import { TraktComments } from "./detail/trakt-comments";
 import { LetterboxdPanel } from "./detail/letterboxd-panel";
+import { ParentsGuidePanel } from "./detail/parents-guide-panel";
+import { useParentsGuide } from "./detail/use-parents-guide";
+import { useImdbId } from "./play-picker/use-imdb-id";
 import { RateButton } from "@/components/ratings/rate-button";
 import {
   chainedPrimaryRating,
@@ -433,6 +436,13 @@ export function DetailView({
   const titleHomeServers = useTitleMediaServers(meta.id, detail?.imdbId);
   const { toggle: toggleFavorite } = useMediaFavorites();
   const isFav = useIsFavorite(meta.id, [detail?.imdbId]);
+  const inferredImdb = useImdbId(meta, settings.tmdbKey);
+  const resolvedParentsGuideImdb =
+    detail?.imdbId ??
+    animeEpisodes.find((e) => e.imdbId)?.imdbId ??
+    (meta.id.startsWith("tt") ? meta.id : null) ??
+    inferredImdb.id;
+  const parentsGuide = useParentsGuide(resolvedParentsGuideImdb);
   const inSession = roomSnapshot.state === "joined" && roomSnapshot.participants.length >= 2;
   useScrollMemory(`meta:${meta.id}`, scrollRef, settings.resumeDetailScroll, true);
 
@@ -2615,7 +2625,11 @@ export function DetailView({
               />
             ))
           ) : backdrop ? (
-            <HeroBackdrop url={backdrop} fallbacks={backdropPool} fullQuality={settings.heroFullQuality} />
+            <HeroBackdrop
+              url={backdrop}
+              fallbacks={backdropPool}
+              fullQuality={settings.heroFullQuality}
+            />
           ) : (
             <div className="absolute inset-0 animate-pulse bg-white/[0.02]" />
           )}
@@ -3216,6 +3230,21 @@ export function DetailView({
               node: <DetailCharacterRail characters={animeCharacters} />,
             });
           }
+
+          if (resolvedParentsGuideImdb && (parentsGuide.loading || parentsGuide.hasData)) {
+            railSections.push({
+              key: "parentsGuide",
+              label: t("Content Advisory"),
+              minHeight: parentsGuide.loading ? 60 : 120,
+              node: (
+                <ParentsGuidePanel
+                  imdbId={resolvedParentsGuideImdb}
+                  guide={parentsGuide.guide}
+                  loading={parentsGuide.loading}
+                />
+              ),
+            });
+          }
           if (detail?.collection) {
             railSections.push({
               key: "collection",
@@ -3417,6 +3446,7 @@ export function DetailView({
               ),
             });
           }
+
           if (railSections.length === 0) return null;
           return <DetailLayoutEditor sections={railSections} />;
         })()}

@@ -358,8 +358,8 @@ const uiFallback: Record<string, string> = {
     "The cursor fades away when you stop moving the stick. Move it again to bring it back.",
   "{n} s": "{n} s",
   "In the manga reader.": "In the manga reader.",
-  "Choose whether the content advisory appears in full color or a restrained monochrome tone.":
-    "Choose whether the content advisory appears in full color or a restrained monochrome tone.",
+  "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.":
+    "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.",
   "Content advisory theme": "Content advisory theme",
   Monochrome: "Monochrome",
   "#": "#",
