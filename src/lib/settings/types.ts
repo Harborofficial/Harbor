@@ -586,6 +586,7 @@ export type Settings = {
   hideWatchedInCatalogs: boolean;
   hideWatchedInHero: boolean;
   hideWatchedInMoreLikeThis: boolean;
+  moreLikeThisOnAiringSeries: boolean;
   hideUnreleased: boolean;
   localEpisodeSortDesc: boolean;
   /** Review count when the banner was last dismissed; it returns only if more turn up. */

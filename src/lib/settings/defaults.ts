@@ -458,6 +458,7 @@ export const DEFAULT: Settings = {
   hideWatchedInCatalogs: false,
   hideWatchedInHero: false,
   hideWatchedInMoreLikeThis: false,
+  moreLikeThisOnAiringSeries: false,
   hideUnreleased: false,
   localEpisodeSortDesc: false,
   localReviewDismissedCount: 0,
