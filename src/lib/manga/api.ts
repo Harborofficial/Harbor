@@ -213,6 +213,22 @@ export function searchManga(query: string, offset = 0, tagId?: string) {
   );
 }
 
+/** Detail-page recommendations belong to the opened title, not the browse filter. */
+export async function searchMangaForTitleSource(
+  mangaId: string,
+  query: string,
+): Promise<MangaSummary[]> {
+  await ensureMangaSources();
+  const routed = routeById(mangaId);
+  if (routed) {
+    const items = await routed.provider.search(query, 0);
+    return items.map((item) => ({ ...item, id: `${routed.provider.id}::${item.id}` }));
+  }
+  // Do not reinterpret an unavailable routed source as a different extension.
+  if (mangaId.includes("::") || activeMangaSourceId() === "all") return [];
+  return activeMangaProvider().search(query, 0);
+}
+
 export function searchMangaEverywhere(query: string) {
   const revision = suwayomiSourcesRevision();
   return cached(

@@ -67,7 +67,7 @@ test("universe matching searches installed sources instead of only the library",
   const aggregate = source("../src/lib/manga/sources/aggregate.ts");
   const universes = source("../src/views/manga/manga-universes.tsx");
   assert.match(provider, /SEARCH_ALL_CONCURRENCY = 4/);
-  assert.match(provider, /makeClient\(server, 0\)/);
+  assert.match(provider, /makeClient\(server, 0, background\)/);
   assert.match(provider, /Promise\.race\(\[all, exact\]\)/);
   assert.match(aggregate, /searchAll: mergeSearchLists/);
   assert.match(universes, /searchMangaEverywhere\(u\.query\)/);

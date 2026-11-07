@@ -1,4 +1,4 @@
-import { safeFetch } from "@/lib/safe-fetch";
+import { safeFetch, safeFetchBytes } from "@/lib/safe-fetch";
 import {
   MANGA_PAGE,
   mangaThrottle,
@@ -110,9 +110,7 @@ export function parseHtmlConfig(raw: string): HtmlSourceConfig | null {
       title: str(chapters.title),
       date: str(chapters.date),
       listUrl:
-        chapters.listUrl &&
-        typeof chapters.listUrl === "object" &&
-        str(chapters.listUrl.match)
+        chapters.listUrl && typeof chapters.listUrl === "object" && str(chapters.listUrl.match)
           ? {
               match: str(chapters.listUrl.match)!,
               replace: typeof chapters.listUrl.replace === "string" ? chapters.listUrl.replace : "",
@@ -164,7 +162,11 @@ export async function resolveFavicon(baseUrl: string): Promise<string | undefine
   }
 }
 
-export function makeHtmlProvider(id: string, config: HtmlSourceConfig): MangaProvider {
+export function makeHtmlProvider(
+  id: string,
+  config: HtmlSourceConfig,
+  background = false,
+): MangaProvider {
   const throttle = mangaThrottle(350);
   const base = config.baseUrl;
   const start = config.pageStart ?? 1;
@@ -186,7 +188,10 @@ export function makeHtmlProvider(id: string, config: HtmlSourceConfig): MangaPro
   async function fetchDoc(url: string): Promise<Document | null> {
     return throttle(async () => {
       try {
-        const res = await safeFetch(url, config.headers ? { headers: config.headers } : undefined);
+        const init = config.headers ? { headers: config.headers } : undefined;
+        const res = background
+          ? await safeFetchBytes(url, init, 20_000, 8 * 1024 * 1024)
+          : await safeFetch(url, init);
         if (!res.ok) return null;
         const html = await res.text();
         return new DOMParser().parseFromString(html, "text/html");

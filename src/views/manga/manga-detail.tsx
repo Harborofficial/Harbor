@@ -689,7 +689,9 @@ export function MangaDetail({
         />
       </div>
 
-      {detail?.title && <MangaRecommendedRail title={detail.title} onOpen={onOpenManga} />}
+      {detail?.title && (
+        <MangaRecommendedRail mangaId={mangaId} title={detail.title} onOpen={onOpenManga} />
+      )}
 
       <TopMangaModal
         open={topMangaOpen}
