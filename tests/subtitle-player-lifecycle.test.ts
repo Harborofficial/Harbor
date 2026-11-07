@@ -271,18 +271,21 @@ test("delayed candidate preflight blocks structural autosync and an aligned resu
     lang: "ar",
     prepared: true,
     timingStatus: "fixed-offset" as const,
+    selected: true,
   };
   const aligned = {
     external: true,
     lang: "ar",
     prepared: true,
     timingStatus: "aligned" as const,
+    selected: false,
   };
   const alignedEnglish = {
     external: true,
     lang: "en",
     prepared: true,
     timingStatus: "aligned" as const,
+    selected: false,
   };
 
   assert.equal(
@@ -307,7 +310,7 @@ test("delayed candidate preflight blocks structural autosync and an aligned resu
       tracks: [inferior, aligned],
       selectedLanguage: "ar",
     }),
-    false,
+    true,
   );
   assert.equal(
     automaticAutoSyncMayStart({
@@ -326,9 +329,32 @@ test("delayed candidate preflight blocks structural autosync and an aligned resu
     true,
   );
 
+  assert.equal(
+    automaticAutoSyncMayStart({
+      preflightSettled: true,
+      tracks: [{ ...aligned, selected: true }],
+      selectedLanguage: "ar",
+    }),
+    false,
+  );
+
   assert.match(autoloadSource, /subtitlePreflightSettled:/);
   assert.match(playerMediaSource, /subtitlePreflightSettled,/);
   assert.match(autoSyncSource, /automaticAutoSyncMayStart\(\{/);
+});
+
+test("Auto sync never starts from playback for embedded subtitles", () => {
+  // The automatic analyzer only considers external subtitle tracks.
+  assert.match(autoSyncSource, /selected\?\.external === true &&\s*!selectedSynced/);
+  assert.match(
+    autoSyncSource,
+    /if \(!activeSelected \|\| activeSelected\.external !== true \|\| isSyncedTrack\(activeSelected\)\)[\s\S]*?return null;/,
+  );
+  // Embedded tracks reach the playback tap only through a user action.
+  assert.match(
+    autoSyncSource,
+    /const retry = selected && !selected\.external \? \(\) => listen\(true\) : run;/,
+  );
 });
 
 test("mpv autosync reuses retained prepared cues and paths", () => {

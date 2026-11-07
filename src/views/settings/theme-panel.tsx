@@ -2,7 +2,12 @@ import { AppWindow, Frame, Move, PanelTop, PanelTopDashed } from "./icons";
 import { useEffect, useState, type ReactNode, useRef } from "react";
 import { getCustomThemes, subscribeCustomThemes } from "@/lib/custom-themes";
 import { useSettings } from "@/lib/settings";
-import { FEATURED_CUSTOM_THEMES, getThemeById, THEME_PRESETS, type ThemeSettings } from "@/lib/theme";
+import {
+  FEATURED_CUSTOM_THEMES,
+  getThemeById,
+  THEME_PRESETS,
+  type ThemeSettings,
+} from "@/lib/theme";
 import { nextBackgroundImage } from "@/lib/theme-background";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, Segmented, ToggleRow } from "./shared";
@@ -11,6 +16,7 @@ import { useSubTabs } from "./sub-tabs";
 import { BackgroundPicker } from "./theme-panel/background-picker";
 import { ColorThemeBody } from "./theme-panel/color-theme-body";
 import { CustomThemesSection } from "./theme-panel/custom-themes-section";
+import { subscribeThemeEditorRequest } from "./theme-panel/theme-editor-store";
 import {
   consumeThemeLibraryRequest,
   requestThemeLibrary,
@@ -42,10 +48,7 @@ export function ThemePanel() {
   const [tab, setTab] = useState<Tab>("theme");
   const libraryOpen = useThemeLibraryOpen();
   const [themeCount, setThemeCount] = useState(() => getCustomThemes().length);
-  useEffect(
-    () => subscribeCustomThemes(() => setThemeCount(getCustomThemes().length)),
-    [],
-  );
+  useEffect(() => subscribeCustomThemes(() => setThemeCount(getCustomThemes().length)), []);
 
   useEffect(() => {
     const req = consumeThemeLibraryRequest();
@@ -57,6 +60,8 @@ export function ThemePanel() {
       setTab((current) => (current === "mylibrary" ? current : "library")),
     );
   }, []);
+
+  useEffect(() => subscribeThemeEditorRequest(() => setTab("theme")), []);
 
   const tabs = [
     { id: "theme" as const, label: t("Theme") },
@@ -116,6 +121,7 @@ function ThemeTab() {
           activePreset={theme.preset}
           fontPair={theme.fontPair}
           customColors={theme.customColors}
+          restoreTheme={theme}
           onSelect={(id) =>
             setTheme({
               preset: id,
@@ -147,7 +153,6 @@ function ThemeTab() {
           onDimChange={(d) => setTheme({ backgroundDim: d })}
         />
       </Section>
-
     </>
   );
 }
@@ -155,10 +160,12 @@ function ThemeTab() {
 function LogoTab() {
   const t = useT();
   return (
-    <><Section title={t("Logo & app icon")} bare>
-      <LogoPicker />
-    </Section>
-    <StartupArtworkSettings /></>
+    <>
+      <Section title={t("Logo & app icon")} bare>
+        <LogoPicker />
+      </Section>
+      <StartupArtworkSettings />
+    </>
   );
 }
 
@@ -209,7 +216,9 @@ function WindowTab() {
       {isTauri && (
         <Section
           title={t("Window title bar")}
-          subtitle={t("Choose whether your operating system draws the title bar, or Harbor draws its own.")}
+          subtitle={t(
+            "Choose whether your operating system draws the title bar, or Harbor draws its own.",
+          )}
         >
           <SettingGroup>
             <NativeTitleBarRow />
@@ -270,7 +279,9 @@ function NativeTitleBarRow() {
   return (
     <ToggleRow
       label={t("Use the native window title bar")}
-      sub={t("Show your operating system's own title bar with its minimize, maximize, and close buttons. They stay reachable everywhere, including while a video is playing. Turn this off to use Harbor's built-in window buttons.")}
+      sub={t(
+        "Show your operating system's own title bar with its minimize, maximize, and close buttons. They stay reachable everywhere, including while a video is playing. Turn this off to use Harbor's built-in window buttons.",
+      )}
       value={on}
       onChange={(useNativeTitleBar) => update({ useNativeTitleBar })}
       leading={<AppWindow size={18} strokeWidth={2} />}
@@ -291,7 +302,9 @@ function HybridBarRow() {
   return (
     <ToggleRow
       label={t("Native-style hybrid bar")}
-      sub={t("Tuck clean, native-looking window buttons into the top corner, with hover labels. On macOS they become traffic-light dots. Blends into Harbor while feeling like your system's own title bar.")}
+      sub={t(
+        "Tuck clean, native-looking window buttons into the top corner, with hover labels. On macOS they become traffic-light dots. Blends into Harbor while feeling like your system's own title bar.",
+      )}
       lockReason={
         nativeOn
           ? t("Turn off the native window title bar above to use Harbor's hybrid bar instead.")
@@ -316,7 +329,9 @@ function TopbarScrollBlurRow() {
   return (
     <ToggleRow
       label={t("Frost the top bar on scroll")}
-      sub={t("As you scroll, the top bar frosts over the content beneath it. Off by default; it uses a blur, so leave it off on lower-end machines.")}
+      sub={t(
+        "As you scroll, the top bar frosts over the content beneath it. Off by default; it uses a blur, so leave it off on lower-end machines.",
+      )}
       value={on}
       onChange={(topbarScrollBlur) => update({ topbarScrollBlur })}
       leading={<PanelTop size={18} strokeWidth={2} />}
@@ -329,7 +344,9 @@ function TopbarAppearanceRow() {
   const { settings, update } = useSettings();
   const nativeOn = settings.useNativeTitleBar;
   const lockedNote = nativeOn
-    ? t("The operating system draws native window controls, so Harbor cannot change their appearance.")
+    ? t(
+        "The operating system draws native window controls, so Harbor cannot change their appearance.",
+      )
     : undefined;
   return (
     <SettingRow
@@ -337,7 +354,9 @@ function TopbarAppearanceRow() {
       icon={<Frame size={18} strokeWidth={2} />}
       label={t("Top-right controls")}
       lockReason={lockedNote}
-      tip={t("Choose how Watch Together and the minimize, maximize, and close buttons look. Liquid glass replaces the clean transparent controls.")}
+      tip={t(
+        "Choose how Watch Together and the minimize, maximize, and close buttons look. Liquid glass replaces the clean transparent controls.",
+      )}
       desc={lockedNote ?? t("How Watch Together and the window buttons are drawn.")}
     >
       <div inert={nativeOn} className="flex w-full flex-col items-start gap-4">
@@ -369,7 +388,9 @@ function DragAnywhereRow() {
     <ToggleRow
       label={t("Drag the window from anywhere")}
       newId="theme:drag-anywhere"
-      sub={t("Move Harbor by dragging any empty space on a page, not just the top bar. Leave this off to keep clicks inside pages from nudging the window.")}
+      sub={t(
+        "Move Harbor by dragging any empty space on a page, not just the top bar. Leave this off to keep clicks inside pages from nudging the window.",
+      )}
       value={on}
       onChange={(dragAnywhere) => update({ dragAnywhere })}
       leading={<Move size={18} strokeWidth={2} />}

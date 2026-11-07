@@ -43,12 +43,14 @@ const PIECE_OFFSETS = [-2, 0, 2];
 
 const CANDIDATE_COVERAGE = 0.8;
 
-const SCORE_TIMEOUT_MS = 4000;
+// Must outlast the native 25s scoring budget, or valid slow measurements are discarded as timeouts.
+const SCORE_TIMEOUT_MS = 30000;
 const VAD_TIMEOUT_MS = 45000;
-const TORRENT_SCORE_TIMEOUT_MS = 6000;
+const TORRENT_SCORE_TIMEOUT_MS = 30000;
 const TORRENT_VAD_TIMEOUT_MS = 60000;
 const HASH_TIMEOUT_MS = 4000;
 const CROWD_TIMEOUT_MS = 3000;
+const ASR_TIMEOUT_MS = 25000;
 
 function bounded<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
   return Promise.race([
@@ -59,8 +61,19 @@ function bounded<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
 
 function qualityFailureReason(error: unknown): QualityUnknownReason {
   const message = String(error ?? "").toLowerCase();
-  if (message.includes("ffmpeg")) return "ffmpeg-unavailable";
-  if (message.includes("audio") || message.includes("no stream")) return "audio-unavailable";
+  if (message.includes("timeout") || message.includes("cancelled")) return "timeout";
+  if (message.includes("ffmpeg-unavailable") || message.includes("ffmpeg not found"))
+    return "ffmpeg-unavailable";
+  // An installed FFmpeg can fail because the stream rejected a range request,
+  // rejected authentication, or lacks the selected audio track. Do not report
+  // those failures as "FFmpeg is missing".
+  if (
+    message.includes("ffmpeg-failed:") ||
+    message.includes("audio-decode:") ||
+    message.includes("audio") ||
+    message.includes("no stream")
+  )
+    return "audio-unavailable";
   if (message.includes("unsupported") || message.includes("not supported")) return "not-supported";
   return "provider-error";
 }
@@ -123,6 +136,7 @@ async function directScore(
   ctx: PipelineContext,
   transform: SyncTransform,
   request?: QualityMeasurementRequest,
+  diagnostic?: (code: string) => void,
 ): Promise<QualityMeasurement> {
   const method = "subsync-score-transform";
   try {
@@ -130,8 +144,42 @@ async function directScore(
       "subsync_score_transform",
       directScoreInvokeArgs(ctx, transform, request),
     );
-    return directScoreMeasurement(q, request, method);
+    if (q === null) diagnostic?.("audio:native-no-score");
+    if (q && diagnostic && request?.purpose === "validation") {
+      if (typeof q.speechFraction === "number" && Number.isFinite(q.speechFraction))
+        diagnostic(`audio:speech-fraction-${q.speechFraction.toFixed(3)}`);
+      if (typeof q.subtitleFraction === "number" && Number.isFinite(q.subtitleFraction))
+        diagnostic(`audio:cue-fraction-${q.subtitleFraction.toFixed(3)}`);
+      if (typeof q.speechSegments === "number")
+        diagnostic(`audio:speech-segments-${q.speechSegments}`);
+      if (typeof q.subtitleSegments === "number")
+        diagnostic(`audio:cue-segments-${q.subtitleSegments}`);
+    }
+    const measurement = directScoreMeasurement(q, request, method);
+    if (q !== null && request?.purpose === "validation" && measurement.status === "unknown") {
+      diagnostic?.("audio:heldout-provenance-rejected");
+    }
+    return measurement;
   } catch (error) {
+    // Propagate only allowlisted failure categories to exportable mpv logs.
+    // Never log native errors verbatim: FFmpeg may include signed media URLs.
+    const message = String(error ?? "");
+    const decoded =
+      /ffmpeg-failed:(http-auth|audio-track|remote-seek|network-timeout|container|audio-decode|other)/.exec(
+        message,
+      )?.[1];
+    if (decoded) diagnostic?.(`audio:${decoded}`);
+    else if (/scoring-timeout/i.test(message)) diagnostic?.("audio:scoring-timeout");
+    else if (/scoring-no-(speech|subtitle)-timing-contrast/i.test(message)) {
+      diagnostic?.("audio:timing-mask-no-contrast");
+      return unknownQuality("insufficient-data", method);
+    } else if (/scoring-too-few-cues-in-sampled-windows/i.test(message)) {
+      diagnostic?.("audio:sampled-windows-too-few-cues");
+      return unknownQuality("insufficient-data", method);
+    } else if (/scoring-no-speech-in-sampled-windows|audio-window-no-speech/i.test(message)) {
+      diagnostic?.("audio:sampled-windows-no-speech");
+      return unknownQuality("insufficient-data", method);
+    }
     return unknownQuality(qualityFailureReason(error), method);
   }
 }
@@ -159,7 +207,10 @@ async function torrentScore(
   }
 }
 
-async function directVad(ctx: PipelineContext): Promise<VadResult | null> {
+async function directVad(
+  ctx: PipelineContext,
+  diagnostic?: (message: string) => void,
+): Promise<VadResult | null> {
   try {
     const out = await estimateSubtitleOffset({
       mediaUrl: ctx.mediaUrl,
@@ -167,11 +218,16 @@ async function directVad(ctx: PipelineContext): Promise<VadResult | null> {
       cues: ctx.cues,
       durationSec: ctx.durationSec,
       infoHash: null,
+      audioMap: ctx.audioMap,
+      sessionId: ctx.analysisSessionId,
+      reportFailures: true,
     });
     if (!out) {
+      diagnostic?.("vad:no-candidate");
       dinfo("[autosync/vad] audio analyzed, no confident offset");
       return null;
     }
+    diagnostic?.("vad:candidate");
     dinfo(
       `[autosync/vad] offset=${out.offsetSec.toFixed(2)}s ratio=${out.ratio.toFixed(4)} conf=${out.confidence.toFixed(2)}`,
     );
@@ -187,7 +243,19 @@ async function directVad(ctx: PipelineContext): Promise<VadResult | null> {
       fitWindowIds: out.fitWindowIds?.length ? out.fitWindowIds : undefined,
     };
   } catch (e) {
-    dwarn("[autosync/vad] audio engine unavailable", String(e));
+    const detail = String(e ?? "");
+    const ncc = /ncc=(-?[0-9]+(?:\.[0-9]+)?)/.exec(detail)?.[1];
+    const bucket = detail.includes("subsync-low-confidence")
+      ? `vad:low-confidence-ncc-${Number(ncc ?? 0).toFixed(2)}`
+      : detail.includes("timeout")
+        ? "vad:timeout"
+        : detail.includes("ffmpeg")
+          ? "vad:ffmpeg-error"
+          : detail.includes("no-audio") || detail.includes("audio-windows")
+            ? "vad:audio-unavailable"
+            : "vad:unavailable";
+    diagnostic?.(bucket);
+    dwarn("[autosync/vad] audio engine unavailable", bucket);
     return null;
   }
 }
@@ -212,6 +280,7 @@ async function torrentVad(
       headers: ctx.headers ?? null,
       cues: ctx.cues,
       durationSec: ctx.durationSec,
+      mapSpec: ctx.audioMap ?? null,
       confMin: null,
       wantLate,
       positionSec,
@@ -316,8 +385,18 @@ function makePiecewisePort(
 function flattenAsr(out: AsrWindowRaw[] | null): AsrTranscript {
   if (!Array.isArray(out)) return { phrases: [], detectedLanguage: null };
   const segs: AsrPhrase[] = [];
+  const sampledWindows: AsrWindowSpec[] = [];
   const languageCounts = new Map<string, number>();
   for (const w of out) {
+    if (
+      typeof w.startSec === "number" &&
+      Number.isFinite(w.startSec) &&
+      typeof w.lenSec === "number" &&
+      Number.isFinite(w.lenSec) &&
+      w.lenSec > 0
+    ) {
+      sampledWindows.push({ startSec: w.startSec, lenSec: w.lenSec });
+    }
     const lang = normalizeLang(w.lang ?? "");
     if (lang) languageCounts.set(lang, (languageCounts.get(lang) ?? 0) + 1);
     for (const tk of w.tokens ?? []) {
@@ -331,7 +410,7 @@ function flattenAsr(out: AsrWindowRaw[] | null): AsrTranscript {
   const detectedLanguage =
     [...languageCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ??
     null;
-  return { phrases: segs, detectedLanguage };
+  return { phrases: segs, detectedLanguage, sampledWindows };
 }
 
 async function ensureAsrModel(): Promise<string | null> {
@@ -343,10 +422,15 @@ async function ensureAsrModel(): Promise<string | null> {
   }
 }
 
-function makeAsrTranscribePort(): NonNullable<TierPorts["asrTranscribe"]> {
+function makeAsrTranscribePort(
+  diagnostic?: (message: string) => void,
+): NonNullable<TierPorts["asrTranscribe"]> {
   return async (ctx, windows) => {
     const modelPath = await ensureAsrModel();
-    if (!modelPath) return { phrases: [], detectedLanguage: null };
+    if (!modelPath) {
+      diagnostic?.("asr:model-unavailable");
+      return { phrases: [], detectedLanguage: null };
+    }
     const spans: AsrWindowSpec[] = Array.isArray(windows)
       ? windows.filter((w) => w != null && Number.isFinite(w.lenSec))
       : [];
@@ -361,10 +445,14 @@ function makeAsrTranscribePort(): NonNullable<TierPorts["asrTranscribe"]> {
         probeCount,
         windowSec,
         modelPath,
-        mapSpec: null,
+        mapSpec: ctx.audioMap ?? null,
+        sessionId: ctx.analysisSessionId ?? null,
       });
-      return flattenAsr(out);
+      const transcript = flattenAsr(out);
+      diagnostic?.(transcript.phrases.length > 0 ? "asr:transcribed" : "asr:no-speech");
+      return transcript;
     } catch {
+      diagnostic?.("asr:transcription-failed");
       return { phrases: [], detectedLanguage: null };
     }
   };
@@ -402,26 +490,47 @@ export function buildTierPorts(
   const fileIdx = opts.torrent?.fileIdx ?? 0;
   const getPositionSec = opts.torrent?.getPositionSec;
   const positionOf = (): number | null => getPositionSec?.() ?? null;
+  const diagnosticNotes: string[] = [];
+  const record = (message: string) => {
+    if (diagnosticNotes.length < 28) diagnosticNotes.push(message);
+  };
 
   const scoreTimeout = routeTorrent ? TORRENT_SCORE_TIMEOUT_MS : SCORE_TIMEOUT_MS;
-  const measureQuality: TierPorts["measureQuality"] = (mctx, transform, request) =>
-    boundedMeasurement(
+  const measureQuality: TierPorts["measureQuality"] = async (mctx, transform, request) => {
+    const result = await boundedMeasurement(
       routeTorrent
         ? torrentScore(mctx, transform, infoHash, fileIdx, positionOf(), request)
-        : directScore(mctx, transform, request),
+        : directScore(mctx, transform, request, record),
       scoreTimeout,
       routeTorrent ? "torrent-score-transform" : "subsync-score-transform",
     );
+    if (request?.purpose === "validation") {
+      const identity =
+        transform.kind === "affine" && transform.offsetSec === 0 && transform.ratio === 1;
+      const stage = identity ? "baseline" : "post";
+      if (result.status === "measured") {
+        record(`${stage}:ncc-${result.value.ncc.toFixed(3)}`);
+        record(`${stage}:coverage-${result.value.coverage.toFixed(2)}`);
+      } else {
+        record(`${stage}:${result.reason}`);
+      }
+    }
+    return result;
+  };
 
   let fitWindowIds: string[] | undefined;
   const vadAffine: NonNullable<TierPorts["vadAffine"]> = async (mctx, win) => {
+    const before = diagnosticNotes.length;
     const result = await bounded(
       routeTorrent
         ? torrentVad(mctx, win.lateWindow, infoHash, fileIdx, positionOf())
-        : directVad(mctx),
+        : directVad(mctx, record),
       routeTorrent ? TORRENT_VAD_TIMEOUT_MS : VAD_TIMEOUT_MS,
       null,
     );
+    if (diagnosticNotes.length === before) {
+      record(result ? "vad:candidate" : "vad:timeout-or-no-candidate");
+    }
     fitWindowIds = result?.fitWindowIds;
     return result;
   };
@@ -434,6 +543,7 @@ export function buildTierPorts(
   const ports: TierPorts = {
     measureQuality: effectiveMeasure,
     vadAffine,
+    diagnosticNotes: () => [...diagnosticNotes],
   };
   if (os) {
     const rawHash = hashExactPort(os);
@@ -451,9 +561,24 @@ export function buildTierPorts(
   if (piecewise) ports.vadPiecewise = piecewise;
   if (flags.subtitleAutoSyncAsr === true) {
     if (extra.asrMatch) ports.asrMatch = extra.asrMatch;
-    ports.asrTranscribe = makeAsrTranscribePort();
+    const transcribe = makeAsrTranscribePort(record);
+    ports.asrTranscribe = (actx, windows) =>
+      bounded(
+        transcribe(actx, windows),
+        windows.some((window) => window.lenSec > 12) ? 45_000 : ASR_TIMEOUT_MS,
+        {
+          phrases: [],
+          detectedLanguage: null,
+        },
+      );
   }
   if (extra.metadataBounds) ports.metadataBounds = extra.metadataBounds;
-  ports.consensus = createConsensusPort(consensusConfig(ctx, settings, opts.authKey));
+  const consensus = createConsensusPort(consensusConfig(ctx, settings, opts.authKey));
+  ports.consensus = async (cctx) => {
+    const result = await consensus(cctx);
+    record(`consensus:${result?.verdict ?? "unavailable"}`);
+    record(`consensus:anchors-${result?.textAnchors?.length ?? 0}`);
+    return result;
+  };
   return ports;
 }

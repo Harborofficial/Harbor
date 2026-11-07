@@ -1,0 +1,28 @@
+/*
+ * Explicit, self-contained animation. The old "animate-in/zoom-in" utilities
+ * are not available in every player bundle and could render the icon statically.
+ * Each keyed event mounts a fresh element, replaying its entrance and exit.
+ */
+.harbor-pre-download-toast {
+  animation: harbor-pre-download-toast-lifecycle 2800ms both;
+  transform-origin: center;
+}
+
+@keyframes harbor-pre-download-toast-lifecycle {
+  0%   { opacity: 0; transform: scale(0.65); }
+  8%   { opacity: 1; transform: scale(1.09); }
+  14%  { opacity: 1; transform: scale(1); }
+  83%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.83); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .harbor-pre-download-toast {
+    animation-name: harbor-pre-download-toast-reduced;
+  }
+  @keyframes harbor-pre-download-toast-reduced {
+    0%   { opacity: 0; }
+    8%, 83% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+}

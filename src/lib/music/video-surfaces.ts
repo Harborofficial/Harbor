@@ -170,5 +170,9 @@ export function createMusicVideoSurfaces(open: OpenVideo, hold: HoldVideo = rele
       run = null;
       schedule();
     },
+    stop: () => {
+      endHold();
+      stop();
+    },
   };
 }

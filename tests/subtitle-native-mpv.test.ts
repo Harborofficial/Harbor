@@ -207,6 +207,7 @@ test(
       const styleModule = { exports: {} as Record<string, (...args: unknown[]) => Promise<void>> };
       new Function("require", "module", "exports", styleCode)(
         (id: string) => {
+          if (id === "./mpv-tuning") return { mpvExtraOptionKeys: () => new Set<string>() };
           assert.equal(id, "@tauri-apps/api/core");
           return {
             invoke: (name: string, args: { name: string; value: unknown }) => {

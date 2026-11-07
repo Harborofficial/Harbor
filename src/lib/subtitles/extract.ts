@@ -8,6 +8,22 @@ import { SUBTITLE_PREPARATION_LIMITS } from "./prepare";
 export type CueSource = { cues: SubCue[]; format: "srt" | "vtt" };
 export type AnySourceResult = { ok: true; source: CueSource } | { ok: false; reason: string };
 
+export function subtitleDownloadError(reason: string): string {
+  // Older native builds may include a signed URL in FFmpeg stderr.
+  if (reason.includes("timed out")) return "The subtitle export timed out while reading the video.";
+  if (reason.includes("denied access") || /\b(401|403)\b/.test(reason))
+    return "The stream provider denied access while reading the embedded subtitles.";
+  if (reason.includes("ffmpeg not found")) return "Harbor could not find FFmpeg to export this track.";
+  if (reason.includes("track missing") || reason.includes("matches no streams"))
+    return "The selected subtitle track is missing from the video opened for export.";
+  if (reason.includes("image subtitle") || reason.includes("bitmap to bitmap"))
+    return "This subtitle track contains images and cannot be saved as SRT text.";
+  if (reason === "extract-empty" || reason === "no-cues" || reason.includes("no subtitle content"))
+    return "No subtitle text was found in the selected track.";
+  if (reason === "read-failed") return "Harbor could not read the selected external subtitle file.";
+  return "FFmpeg could not extract the selected subtitle track from the video.";
+}
+
 function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 }
@@ -97,13 +113,16 @@ export async function getCuesAnySource(
   // embedded subtitle instead of the one the user selected.
   if (selected?.external) return { ok: false, reason: "read-failed" };
 
-  if (sourceUrl && isTauri()) {
+  // Failover and proxy recovery can load a different URL directly into mpv.
+  // Keep its headers paired with that URL, including when it needs no headers.
+  const media = bridge.getLoadedMediaSource?.() ?? { url: sourceUrl, headers };
+  if (media.url && isTauri()) {
     const streamIndex = selectedEmbeddedIndex(bridge);
     try {
       const srt = await invoke<string>("subtitle_extract", {
-        source: sourceUrl,
+        source: media.url,
         streamIndex,
-        headers: headers ?? null,
+        headers: media.headers ?? null,
       });
       const cues = parseSubtitle(srt, "srt");
       if (cues.length > 0) return { ok: true, source: { cues, format: "srt" } };

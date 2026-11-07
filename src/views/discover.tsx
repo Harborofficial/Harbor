@@ -46,7 +46,6 @@ import { useDedupedRows } from "./discover/use-deduped-rows";
 import { ANCHOR_AWARDS, ANCHOR_TOP_RATED } from "@/lib/feed/daily-rows-anchors";
 import type { HomeRow } from "./home/home-types";
 import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
-import { CatalogBrowser } from "@/views/discover/catalog-browser";
 import { SurpriseMe } from "@/views/discover/surprise-me";
 import { VoyageBanner } from "@/components/voyage/voyage-banner";
 import { SectionEditBar } from "@/views/discover/section-edit-bar";
@@ -466,7 +465,6 @@ export function Discover({ active = true }: { active?: boolean }) {
   }, [shownSurprisePool, featured, criticsPick]);
 
   const hiddenFeatured = pageRows.custom.hidden.includes("section-featured");
-  const hiddenCatalog = pageRows.custom.hidden.includes("section-catalog");
   const hiddenSurprise = pageRows.custom.hidden.includes("section-surprise");
   const customizeBar = (
     <CatalogCustomizeBar
@@ -554,18 +552,6 @@ export function Discover({ active = true }: { active?: boolean }) {
             <div className="flex flex-col gap-4">
               <div>
                 <SectionEditBar
-                  name={t("Browse your catalogs")}
-                  hidden={hiddenCatalog}
-                  onToggle={() =>
-                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-catalog"))
-                  }
-                />
-                <div className={hiddenCatalog ? "pointer-events-none opacity-40" : ""}>
-                  <CatalogBrowser />
-                </div>
-              </div>
-              <div>
-                <SectionEditBar
                   name={t("Can't decide?")}
                   hidden={hiddenSurprise}
                   onToggle={() =>
@@ -578,11 +564,10 @@ export function Discover({ active = true }: { active?: boolean }) {
               </div>
             </div>
           ) : (
-            (!hiddenCatalog || !hiddenSurprise) && (
+            !hiddenSurprise && (
               <div
                 className={`flex flex-wrap items-stretch gap-x-6 gap-y-4 ${!hiddenFeatured ? "-mt-8" : ""}`}
               >
-                {!hiddenCatalog && <CatalogBrowser />}
                 {!hiddenSurprise && <SurpriseMe pool={shownSurprisePool} />}
               </div>
             )

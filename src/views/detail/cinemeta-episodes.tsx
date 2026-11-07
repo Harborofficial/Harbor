@@ -52,7 +52,11 @@ export function CinemetaEpisodes({
   imdbId,
   tmdbTvId,
   seasonPosters,
+  seasonBackdrops,
   seasons,
+  seasonOverviewsBySource,
+  onSeasonSynopsisSource,
+  synopsisOrder: synopsisOrderProp,
 }: {
   meta: Meta;
   videos: NonNullable<Meta["videos"]>;
@@ -62,7 +66,14 @@ export function CinemetaEpisodes({
   imdbId?: string | null;
   tmdbTvId?: number;
   seasonPosters?: Record<number, string>;
+  seasonBackdrops?: Record<number, string>;
   seasons?: Season[];
+  seasonOverviewsBySource?: Record<
+    string,
+    { sourceName?: string; overviews: Record<number, string> }
+  >;
+  onSeasonSynopsisSource?: (source: string | undefined) => void;
+  synopsisOrder?: string[];
 }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -287,6 +298,8 @@ export function CinemetaEpisodes({
     settings.tvdbSeasonExplorer !== false &&
     hasSeasonMetadata &&
     grouped.some((group) => group.seasonNumber >= 1);
+  const synopsisOrder = synopsisOrderProp ?? settings.metadataSources?.seasonSynopsis;
+  const firstSynopsisSource = synopsisOrder?.[0];
   const explorer = useSeasonExplorerView({
     metaId: meta.id,
     imdbId,
@@ -297,11 +310,18 @@ export function CinemetaEpisodes({
     titlePoster: meta.poster,
     seasonType: "official",
     lang: effectiveTmdbLanguage(),
+    preferFallbackSynopsis: !firstSynopsisSource || firstSynopsisSource.startsWith("addon:"),
+    synopsisOrder,
+    addonSeasonOverviews: seasonOverviewsBySource,
+    fallbackSourceName: meta.addonOrigin?.name ?? "Addon",
     items: explorerItems,
     activeKey: String(active),
     enabled: showExplorer,
     allowProxy: false,
   });
+  useEffect(() => {
+    onSeasonSynopsisSource?.(explorer.details.get(active)?.source);
+  }, [active, explorer.details, onSeasonSynopsisSource]);
   if (grouped.length === 0) return null;
 
   return (
@@ -310,7 +330,7 @@ export function CinemetaEpisodes({
         <SeasonExplorer
           key={meta.id}
           data={explorer}
-          background={meta.background}
+          background={seasonBackdrops?.[active] ?? meta.background}
           activeKey={String(active)}
           onSelect={(key) => selectSeason(Number(key))}
         />

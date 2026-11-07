@@ -64,7 +64,8 @@ export function restoreHarness(remembered: memory.RememberedSub, tracks: TrackIn
       meta: { id: "fixture" },
       streamRef: { infoHash: "fixture", fileIdx: 0 },
     },
-    snap: { ...emptySnapshot, durationSec: 60, subtitleTracks: tracks },
+    // Restoring external subtitles begins after the first decoded frame.
+    snap: { ...emptySnapshot, firstFrameReady: true, durationSec: 60, subtitleTracks: tracks },
     bridgeRef: {
       current: {
         canAutoSelectSubtitle: () => true,

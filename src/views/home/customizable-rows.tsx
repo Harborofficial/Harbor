@@ -252,7 +252,7 @@ const CustomizableRow = memo(function CustomizableRow({
   const renderRow = () => {
     let rowEl;
     if (row.libraryGroups) {
-      rowEl = <HomeGroups title={title} />;
+      rowEl = <HomeGroups title={title} groups={row.libraryGroups} />;
     } else if (row.sourceRow) {
       rowEl = (
         <CustomSourcesRow

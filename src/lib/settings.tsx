@@ -14,7 +14,7 @@ import { applyAppIcon } from "@/lib/app-icon";
 import { getCustomThemes, subscribeCustomThemes } from "@/lib/custom-themes";
 import { loadBgImage, saveBgImage } from "@/lib/theme-storage";
 import { effectiveTmdbLanguage, setTmdbLanguage } from "@/lib/providers/tmdb/tmdb-client";
-import { setPosterBaseUrl } from "@/lib/providers/rpdb";
+import { setPosterBaseUrl, setPosterLanguage } from "@/lib/providers/rpdb";
 import { setMdblistBatchKey } from "@/lib/providers/mdblist-batch";
 import { setUiLanguage } from "@/lib/i18n";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
@@ -112,6 +112,7 @@ export function SettingsProvider({
   }, [settings.uiLanguage, settings.region]);
 
   setTmdbLanguage(settings.tmdbLanguage);
+  setPosterLanguage(settings.tmdbImageLangs, settings.tmdbLanguage, settings.uiLanguage);
 
   const lastSavedImageRef = useRef<{ profileId: string; image: string | null }>({
     profileId: sourceRef.current.profileId,

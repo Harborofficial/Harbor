@@ -7,13 +7,31 @@ import test from "node:test";
 import ts from "typescript";
 import { localDateTimeFromIso } from "../src/lib/calendar-time.ts";
 
+type CalendarRow = { id: string; name: string; releaseDate: string };
+
 type Api = {
   fetchLibraryCalendar: (
     authKey: string,
     year: number,
     month: number,
-    opts: { tmdbKey: string; includeTrakt: boolean },
-  ) => Promise<Array<{ id: string; name: string; releaseDate: string }>>;
+    opts: {
+      tmdbKey: string;
+      includeTrakt: boolean;
+      onProgress?: (items: CalendarRow[]) => void;
+    },
+  ) => Promise<CalendarRow[]>;
+  resolveSavedCalendar: (
+    candidates: Array<{
+      id: string;
+      type: "movie" | "series";
+      name: string;
+      mtime: number;
+      temp: boolean;
+    }>,
+    year: number,
+    month: number,
+    opts: { tmdbKey: string; onProgress?: (items: CalendarRow[]) => void },
+  ) => Promise<CalendarRow[]>;
 };
 
 function load(overrides: Record<string, unknown> = {}): Api {
@@ -185,4 +203,162 @@ test("a catalog row in the same franchise as an anime row is dropped", async () 
   assert.equal(out.length, 1, "the catalog duplicate must be dropped");
   assert.equal(out[0].releaseDate, "2026-10-19");
   assert.match(out[0].name, /S17E49/);
+});
+
+test("duplicate detection skips movies and resolves catalog series roots concurrently", async () => {
+  let active = 0;
+  let maxActive = 0;
+  let imdbAnimeLookups = 0;
+  const tvLookups: number[] = [];
+  const api = load({
+    "./local-cw": {
+      listLocalCw: () => [
+        { id: "kitsu:1", type: "series", name: "Anime", t: 10 },
+        ...Array.from({ length: 7 }, (_, i) => ({
+          id: `tmdb:tv:${100 + i}`,
+          type: "series",
+          name: `Catalog ${i}`,
+          t: 9 - i,
+        })),
+        { id: "tt9999999", type: "movie", name: "Movie", t: 1 },
+      ],
+    },
+    "./providers/anime-franchise-root": {
+      franchiseRoot: async (id: string) => (id === "kitsu:1" ? "root:anime" : id),
+    },
+    "./providers/anime-mapping": {
+      imdbToKitsu: async () => {
+        imdbAnimeLookups++;
+        return null;
+      },
+      tmdbTvToKitsu: async (id: number) => {
+        tvLookups.push(id);
+        active++;
+        maxActive = Math.max(maxActive, active);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        active--;
+        return id === 100 ? 1 : id + 1000;
+      },
+    },
+  });
+
+  await api.fetchLibraryCalendar("key", 2026, 9, { tmdbKey: "", includeTrakt: false });
+  assert.equal(imdbAnimeLookups, 0, "movies must not enter anime-root duplicate resolution");
+  assert.deepEqual(tvLookups.sort((a, b) => a - b), [100, 101, 102, 103, 104, 105, 106]);
+  assert.ok(maxActive > 1, "catalog series roots should resolve concurrently");
+  assert.ok(maxActive <= 6, "root lookup concurrency should stay bounded");
+});
+
+test("series and movie enrichment start in parallel", async () => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let seriesStarted!: () => void;
+  let movieStarted!: () => void;
+  const seriesStart = new Promise<void>((resolve) => {
+    seriesStarted = resolve;
+  });
+  const movieStart = new Promise<void>((resolve) => {
+    movieStarted = resolve;
+  });
+  const api = load({
+    "./cinemeta": {
+      meta: async (type: string) => {
+        if (type === "series") {
+          seriesStarted();
+          await gate;
+          return {
+            name: "Series",
+            genres: [],
+            videos: [{ season: 1, episode: 1, released: "2026-10-10", name: "Episode" }],
+          };
+        }
+        movieStarted();
+        await gate;
+        return {
+          id: "tt200",
+          name: "Movie",
+          releaseDate: "2026-10-11",
+          genres: [],
+          description: "",
+          imdbRating: "0",
+        };
+      },
+    },
+  });
+
+  const pending = api.resolveSavedCalendar(
+    [
+      { id: "tt100", type: "series", name: "Series", mtime: 2, temp: false },
+      { id: "tt200", type: "movie", name: "Movie", mtime: 1, temp: false },
+    ],
+    2026,
+    9,
+    { tmdbKey: "" },
+  );
+  await Promise.all([seriesStart, movieStart]);
+  release();
+  const rows = await pending;
+  assert.equal(rows.length, 2);
+});
+
+test("library resolution publishes partial rows before the slowest batch finishes", async () => {
+  let releaseMovie!: () => void;
+  const movieGate = new Promise<void>((resolve) => {
+    releaseMovie = resolve;
+  });
+  let finished = false;
+  let progressResolve!: (rows: CalendarRow[]) => void;
+  const firstProgress = new Promise<CalendarRow[]>((resolve) => {
+    progressResolve = resolve;
+  });
+  const api = load({
+    "./cinemeta": {
+      meta: async (type: string) => {
+        if (type === "series") {
+          return {
+            name: "Series",
+            genres: [],
+            videos: [{ season: 1, episode: 1, released: "2026-10-10", name: "Episode" }],
+          };
+        }
+        await movieGate;
+        return {
+          id: "tt400",
+          name: "Movie",
+          releaseDate: "2026-10-11",
+          genres: [],
+          description: "",
+          imdbRating: "0",
+        };
+      },
+    },
+  });
+
+  const pending = api
+    .resolveSavedCalendar(
+      [
+        { id: "tt300", type: "series", name: "Series", mtime: 2, temp: false },
+        { id: "tt400", type: "movie", name: "Movie", mtime: 1, temp: false },
+      ],
+      2026,
+      9,
+      {
+        tmdbKey: "",
+        onProgress: (rows) => {
+          if (rows.length > 0) progressResolve(rows);
+        },
+      },
+    )
+    .finally(() => {
+      finished = true;
+    });
+
+  const partial = await firstProgress;
+  assert.equal(finished, false, "partial rows should arrive while slower work is still pending");
+  assert.ok(partial.some((row) => row.id === "tt300:1:1"));
+  releaseMovie();
+  const final = await pending;
+  assert.equal(final.length, 2);
 });

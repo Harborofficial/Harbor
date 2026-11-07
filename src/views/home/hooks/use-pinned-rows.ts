@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { pinnedBuiltinTitle, usePinnedCatalogs, type PinnedCatalog } from "@/lib/pinned-catalogs";
+import {
+  catalogSections,
+  pinnedBuiltinTitle,
+  usePinnedCatalogs,
+  type CatalogSection,
+  type PinnedCatalog,
+} from "@/lib/pinned-catalogs";
 import { buildPinnedCatalogRows, pinnedRowKey } from "@/lib/pinned-catalogs-rows";
 import { useAnilistAnimeRails } from "@/lib/use-anilist-anime-rails";
 import { useMalAnimeRails } from "@/lib/use-mal-anime-rails";
@@ -16,14 +22,13 @@ function pinnedTitle(desc: PinnedCatalog, t: Translate): string {
   return title.valueKey ? t(title.key, { name: t(title.valueKey) }) : t(title.key);
 }
 
-export function usePinnedRows(): HomeRow[] {
-  const t = useT();
+export function usePinnedCatalogRows(section: CatalogSection): HomeRow[] {
   const { settings } = useSettings();
-  const pinned = usePinnedCatalogs();
-  const anilistRails = useAnilistAnimeRails();
-  const malRails = useMalAnimeRails();
-  const trendingMetas = useAnilistTrending();
-  const topMetas = useAnilistTop();
+  const allPinned = usePinnedCatalogs();
+  const pinned = useMemo(
+    () => allPinned.filter((p) => p.source === "catalog" && catalogSections(p).includes(section)),
+    [allPinned, section],
+  );
   const [catalogRows, setCatalogRows] = useState<HomeRow[]>([]);
 
   const catalogKey = pinned
@@ -42,6 +47,25 @@ export function usePinnedRows(): HomeRow[] {
       cancelled = true;
     };
   }, [catalogKey, settings.pluginsOutsideTab]);
+
+  return useMemo(() => {
+    const keys = new Set(pinned.map((p) => pinnedRowKey(p.id)));
+    return catalogRows.filter((row) => keys.has(row.key));
+  }, [catalogRows, pinned]);
+}
+
+export function usePinnedRows(section: CatalogSection = "home"): HomeRow[] {
+  const t = useT();
+  const allPinned = usePinnedCatalogs();
+  const pinned = useMemo(
+    () => allPinned.filter((p) => catalogSections(p).includes(section)),
+    [allPinned, section],
+  );
+  const anilistRails = useAnilistAnimeRails();
+  const malRails = useMalAnimeRails();
+  const trendingMetas = useAnilistTrending();
+  const topMetas = useAnilistTop();
+  const catalogRows = usePinnedCatalogRows(section);
 
   const extraMap = useMemo(() => {
     const m = new Map<string, HomeRow>();

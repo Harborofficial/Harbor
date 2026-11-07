@@ -9,7 +9,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { needsImdbForPoster, needsTmdbForPoster, rpdbPoster } from "@/lib/providers/rpdb";
+import {
+  needsImdbForPoster,
+  needsTmdbForPoster,
+  rpdbBackdrop,
+  rpdbPoster,
+} from "@/lib/providers/rpdb";
 import { useTitlePoster } from "@/lib/title-poster";
 import {
   tmdbIdFromImdb,
@@ -18,7 +23,9 @@ import {
   useTmdbImdbId,
 } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 import { useSettings } from "@/lib/settings";
+import { firstPosterTransform, posterTransformEnabled } from "@/lib/metadata-sources";
 import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime-mapping";
+import { simklAnimeArtworkIds } from "@/lib/simkl/anime-artwork-ids";
 import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
 import { sizeImageUrl, qualityMultiplier } from "@/lib/img-size";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
@@ -85,8 +92,13 @@ export function useRpdbAltId(
   type?: "movie" | "series",
 ): { altId: string | undefined; pending: boolean } {
   const { settings } = useSettings();
-  const wantImdb = needsImdbForPoster(rpdbKey, metaId, settings.posterBaseUrl);
-  const wantTmdb = needsTmdbForPoster(rpdbKey, metaId, settings.posterBaseUrl);
+  const chain = settings.metadataSources?.poster?.length
+    ? settings.metadataSources.poster
+    : ["rpdb", "posterService"];
+  const transform = firstPosterTransform(chain, settings);
+  const transformBase = transform?.id === "posterService" ? settings.posterBaseUrl : "";
+  const wantImdb = needsImdbForPoster(rpdbKey, metaId, transformBase);
+  const wantTmdb = needsTmdbForPoster(rpdbKey, metaId, transformBase);
   const imdb = useTmdbImdbId(wantImdb ? metaId : undefined);
   const tmdb = useTmdbIdFromImdb(wantTmdb ? metaId : undefined);
   useEffect(() => {
@@ -108,14 +120,14 @@ function useAnimeRpdbIds(
   const { settings } = useSettings();
   const [animeImdb, setAnimeImdb] = useState<string>();
   const [animeTvdb, setAnimeTvdb] = useState<string>();
-  const isAnime = /^(kitsu|mal|anilist|anidb):/.test(metaId);
+  const isAnime = /^(kitsu|mal|anilist|anidb|simkl):/.test(metaId);
   useEffect(() => {
     setAnimeImdb(undefined);
     setAnimeTvdb(undefined);
   }, [metaId]);
   useEffect(() => {
     if (!isAnime || (!rpdbKey && !settings.posterBaseUrl)) return;
-    const m = metaId.match(/^(kitsu|mal|anilist|anidb):(\d+)/);
+    const m = metaId.match(/^(kitsu|mal|anilist|anidb|simkl):(\d+)/);
     if (!m) return;
     const source = m[1];
     const idNum = Number(m[2]);
@@ -123,18 +135,34 @@ function useAnimeRpdbIds(
     let cancelled = false;
     (async () => {
       let kitsuId: number | null = source === "kitsu" ? idNum : null;
-      if (kitsuId == null) {
+      let directImdb: string | undefined;
+      let directTvdb: number | undefined;
+      if (source === "simkl") {
+        const ids = await simklAnimeArtworkIds(idNum);
+        if (cancelled) return;
+        directImdb = ids.imdb;
+        directTvdb = ids.tvdb;
+        if (kitsuId == null) {
+          if (ids.kitsu) kitsuId = ids.kitsu;
+          else if (ids.mal)
+            kitsuId = await externalToKitsu("myanimelist", ids.mal).catch(() => null);
+          else if (ids.anidb) kitsuId = await externalToKitsu("anidb", ids.anidb).catch(() => null);
+        }
+      } else if (kitsuId == null) {
         const armSource = source === "mal" ? "myanimelist" : source;
         kitsuId = await externalToKitsu(armSource, idNum).catch(() => null);
       }
-      if (cancelled || kitsuId == null) return;
+      if (cancelled) return;
+      if (directImdb) setAnimeImdb(directImdb);
+      if (directTvdb) setAnimeTvdb(String(directTvdb));
+      if (kitsuId == null) return;
       const [tt, tv] = await Promise.all([
         kitsuToImdb(kitsuId).catch(() => null),
         kitsuToTvdb(kitsuId).catch(() => null),
       ]);
       if (cancelled) return;
-      if (tt) setAnimeImdb(tt);
-      if (tv) setAnimeTvdb(String(tv));
+      if (tt && !directImdb) setAnimeImdb(tt);
+      if (tv && !directTvdb) setAnimeTvdb(String(tv));
     })();
     return () => {
       cancelled = true;
@@ -151,6 +179,12 @@ export function usePosterChain(
   type?: "movie" | "series",
 ) {
   const { settings } = useSettings();
+  const transformPoster = posterTransformEnabled(settings);
+  const transformChain = settings.metadataSources?.poster?.length
+    ? settings.metadataSources.poster
+    : ["rpdb", "posterService"];
+  const transform = firstPosterTransform(transformChain, settings);
+  const transformBase = transform?.id === "posterService" ? settings.posterBaseUrl : "";
   const { altId, pending } = useRpdbAltId(rpdbKey, metaId, type);
   const { animeImdb, animeTvdb, animeTmdb } = useAnimeRpdbIds(rpdbKey, metaId);
   const { url: localized, localizing } = useLocalizedPoster(metaId);
@@ -165,20 +199,15 @@ export function usePosterChain(
     const fallbacks = localizing
       ? [pinned]
       : [
-          animeImdb
-            ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb, settings.posterBaseUrl, type)
+          transformPoster && animeImdb
+            ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb, transformBase, type)
             : undefined,
-          animeTvdb
-            ? rpdbPoster(
-                rpdbKey,
-                `tvdb:${animeTvdb}`,
-                base,
-                undefined,
-                settings.posterBaseUrl,
-                type,
-              )
+          transformPoster && animeTvdb
+            ? rpdbPoster(rpdbKey, `tvdb:${animeTvdb}`, base, undefined, transformBase, type)
             : undefined,
-          rpdbPoster(rpdbKey, metaId, base, altId, settings.posterBaseUrl, type),
+          transformPoster
+            ? rpdbPoster(rpdbKey, metaId, base, altId, transformBase, type)
+            : undefined,
           localized,
           metaPoster,
         ];
@@ -192,6 +221,7 @@ export function usePosterChain(
   }, [
     rpdbKey,
     settings.posterBaseUrl,
+    transformBase,
     type,
     metaId,
     altId,
@@ -203,8 +233,33 @@ export function usePosterChain(
     localizing,
     pending,
     pinned,
+    transformPoster,
   ]);
   const sig = candidates.join("|");
+  const backdrop = useMemo(() => {
+    if (pending || !transformPoster) return undefined;
+    return (
+      (animeImdb
+        ? rpdbBackdrop(rpdbKey, animeImdb, undefined, animeTmdb, transformBase, type)
+        : undefined) ??
+      (animeTvdb
+        ? rpdbBackdrop(rpdbKey, `tvdb:${animeTvdb}`, undefined, undefined, transformBase, type)
+        : undefined) ??
+      rpdbBackdrop(rpdbKey, metaId, undefined, altId, transformBase, type)
+    );
+  }, [
+    rpdbKey,
+    settings.posterBaseUrl,
+    transformBase,
+    type,
+    metaId,
+    altId,
+    animeImdb,
+    animeTvdb,
+    animeTmdb,
+    pending,
+    transformPoster,
+  ]);
   const failedRef = useRef<Set<string>>(new Set());
   const sigRef = useRef(sig);
   const [, bump] = useReducer((n: number) => n + 1, 0);
@@ -222,6 +277,7 @@ export function usePosterChain(
   return {
     src,
     onError,
+    backdrop,
   };
 }
 
@@ -253,6 +309,7 @@ function PosterBody({
   children,
   onError,
   lazy = false,
+  preferDirect = false,
   fallbacks,
 }: {
   src?: string;
@@ -263,6 +320,8 @@ function PosterBody({
   children?: React.ReactNode;
   onError?: () => void;
   lazy?: boolean | "release";
+  /** For public browse-grid covers, try HTTPS img loading before the native proxy. */
+  preferDirect?: boolean;
   fallbacks?: Array<string | null | undefined>;
 }) {
   const { settings } = useSettings();
@@ -272,7 +331,7 @@ function PosterBody({
     onError: unknown;
     fallbacks: unknown;
   } | null>(null);
-  const propKey = `${src ?? ""}|${seed}|${ratio}|${className}|${String(lazy)}`;
+  const propKey = `${src ?? ""}|${seed}|${ratio}|${className}|${String(lazy)}|${preferDirect}`;
   const prevRender = renderCauseRef.current;
   const propCause = !prevRender
     ? "mount"
@@ -364,6 +423,7 @@ function PosterBody({
   const displayedRef = useRef(displayed);
   displayedRef.current = displayed;
   const [retry, setRetry] = useState(0);
+  const [nativeRetryUrl, setNativeRetryUrl] = useState<string | undefined>();
   const failedRef = useRef<Set<string>>(new Set());
   const firedRef = useRef(false);
   const failBurstRef = useRef<{ t: number; n: number }>({ t: 0, n: 0 });
@@ -414,7 +474,9 @@ function PosterBody({
   // Remote plain-HTTP images (e.g. a Suwayomi server on a VPS) are mixed-content
   // blocked by the WebView; resolve them to a same-origin blob URL.
   const currentSrc = useProxiedImageSrc(current, {
-    forceProxy: /^https?:\/\//.test(current ?? ""),
+    forceProxy:
+      /^https?:\/\//.test(current ?? "") &&
+      (!preferDirect || nativeRetryUrl === current || !current?.startsWith("https://")),
     persistent: true,
     enabled: imageEnabled && (qMult === 0 || targetPx > 0),
     originalSize: true,
@@ -513,8 +575,9 @@ function PosterBody({
       imgElRef.current = el;
       if (!el) return;
       if (el.complete) {
+        // complete=true with no decoded pixels can mean a deferred or
+        // not-yet-started load. Only the img onError event is a failure.
         if (el.naturalWidth > 0) markLoaded(currentRef.current);
-        else if (currentRef.current) fail(currentRef.current);
         return;
       }
     },
@@ -591,7 +654,18 @@ function PosterBody({
           // would postpone that prefetch until the user is almost on top of the card.
           loading="eager"
           onLoad={() => markLoaded(current)}
-          onError={() => fail(current)}
+          onError={() => {
+            if (
+              preferDirect &&
+              current.startsWith("https://") &&
+              currentSrc === current &&
+              nativeRetryUrl !== current
+            ) {
+              // Retry a rejected public HTTPS cover through native HTTP before showing a plate.
+              rootRef.current?.removeAttribute("data-loaded");
+              setNativeRetryUrl(current);
+            } else fail(current);
+          }}
           className="harbor-poster-img absolute inset-0 h-full w-full object-cover"
         />
       )}

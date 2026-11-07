@@ -32,6 +32,8 @@ function load(path, dependencies, select) {
   }).outputText;
   const exports = {};
   new Function("require", "exports", compiled)((id) => {
+    if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+      return { addonOnlyMetadata: () => false };
     assert.ok(id in dependencies, `Unexpected dependency: ${id}`);
     return dependencies[id];
   }, exports);

@@ -374,7 +374,7 @@ export function MusicSourcePicker({
             )}
           </section>
         )}
-        {!loading && !spotify?.connected && (
+        {!loading && !spotify?.playbackReady && (
           <button
             type="button"
             onClick={connect}
@@ -386,7 +386,11 @@ export function MusicSourcePicker({
             <span>
               <strong className="block text-[13px] text-ink">{t("music.spotify.connect")}</strong>
               <small className="mt-1 block text-[10px] text-ink-muted">
-                {t("music.recovery.spotifySetup")}
+                {t(
+                  spotify?.connected
+                    ? "music.spotify.playbackUnavailableHint"
+                    : "music.recovery.spotifySetup",
+                )}
               </small>
             </span>
             <span className="rounded-full bg-ink px-4 py-2 text-[11px] font-semibold text-canvas">
@@ -399,9 +403,17 @@ export function MusicSourcePicker({
           <div className="mx-2 flex items-center justify-between border-b border-edge-soft py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-ink-subtle">
             <span className="inline-flex items-center gap-2">
               <MusicServiceLogo source="spotify" size={13} fallback={<Check size={12} />} />{" "}
-              {t("music.spotify.connectedAs", { username: spotify.username ?? "Spotify" })}
+              {t("music.spotify.connectedAs", { username: spotify.displayName ?? "Spotify" })}
             </span>
-            <span>{t("music.spotify.premium")}</span>
+            <span>
+              {t(
+                spotify.playbackReady
+                  ? spotify.premium
+                    ? "music.spotify.premium"
+                    : "music.spotify.playbackReady"
+                  : "music.spotify.playbackUnavailable",
+              )}
+            </span>
           </div>
         )}
 

@@ -14,6 +14,9 @@ test("player episode projections follow language, credentials, expiry and cache 
   const calls = [];
   const invalidators = [];
   const dependencies = {
+    "./metadata-addons": { readMetadataAddonOrder: () => [] },
+    "./meta-resource": { preferCustomMeta: () => false },
+    "./metadata-policy": { addonOnlyMetadata: () => false },
     "@/lib/cache": { lruSet },
     "@/lib/memory-profiler": { registerCache() {} },
     "@/lib/media-cache": {

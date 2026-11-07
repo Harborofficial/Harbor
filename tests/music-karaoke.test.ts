@@ -1,6 +1,8 @@
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
+import { readFileSync } from "node:fs";
+// @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import { lyricIndexAt, parseLrc } from "../src/lib/music/lyrics.ts";
 import {
@@ -8,6 +10,8 @@ import {
   karaokeScrollMotion,
   karaokeScrollTop,
 } from "../src/lib/music/karaoke-scroll.ts";
+
+const KARAOKE = readFileSync("src/components/music/music-karaoke.tsx", "utf8");
 
 const LRC = [
   "[00:12.00]I walked the long way home",
@@ -78,4 +82,10 @@ test("the list never scrolls above its start or past its end", () => {
   assert.equal(karaokeScrollTop({ ...view, lineTop: 40 }), 0);
   assert.equal(karaokeScrollTop({ ...view, lineTop: 9999 }), 2000);
   assert.equal(karaokeScrollTop({ ...view, lineTop: Number.NaN }), 0);
+});
+
+test("karaoke follows the same saved live sync as the lyrics tab", () => {
+  assert.match(KARAOKE, /useLyricSync\(track\)/);
+  assert.match(KARAOKE, /applyLyricSync\(lines \?\? \[\], syncPoints\)/);
+  assert.match(KARAOKE, /lyricIndexAt\(timed,/);
 });

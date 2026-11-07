@@ -554,3 +554,50 @@ test("a failure after playback started is not auto-retried", () => {
   assert.equal(h.proxyRequests.length, 0, "no proxy retry");
   assert.equal(h.pickers.length, 0, "no source switch");
 });
+
+test("slow first frames before playback starts are not reported as a dead source", () => {
+  const h = recoveryHarness();
+  const realNow = Date.now;
+  let now = realNow();
+  Date.now = () => now;
+  try {
+    const playing = {
+      ...emptySnapshot,
+      status: "playing",
+      firstFrameReady: false,
+      videoWidth: 0,
+      videoHeight: 0,
+    };
+    h.render({ instantPlay: false, snap: playing });
+    now += 20_000;
+    // Re-run the black-screen watch without changing what the player is doing.
+    h.render({ src: { ...h.params.src, subtitles: [] }, snap: { ...playing } });
+    assert.equal(h.render().sourceError, null);
+  } finally {
+    Date.now = realNow;
+  }
+});
+
+test("a source error raised during playback clears when the stream is running", () => {
+  const h = recoveryHarness();
+  const realNow = Date.now;
+  let now = realNow();
+  Date.now = () => now;
+  try {
+    h.clock(30);
+    const playing = {
+      ...emptySnapshot,
+      status: "playing",
+      firstFrameReady: true,
+      videoWidth: 0,
+      videoHeight: 0,
+    };
+    h.render({ instantPlay: false, snap: playing });
+    now += 20_000;
+    h.render({ src: { ...h.params.src, subtitles: [] }, snap: { ...playing } });
+    assert.equal(h.render().sourceError?.status, 0);
+    assert.equal(h.render().sourceError, null);
+  } finally {
+    Date.now = realNow;
+  }
+});

@@ -83,6 +83,8 @@ function fixture({
       setTimeout,
       clearTimeout,
       require: (name) => {
+        if (name === "@/lib/metadata-policy" || name === "./metadata-policy")
+          return { addonOnlyMetadata: () => false };
         assert.ok(name in dependencies, "unmocked dependency " + name);
         return dependencies[name];
       },

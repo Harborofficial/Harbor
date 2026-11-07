@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { safeFetch } from "@/lib/safe-fetch";
 import { kitsuToTvdb } from "./anime-mapping";
 import { HARBOR_TVDB_BASE } from "@/lib/config/endpoints";
@@ -10,6 +11,7 @@ const inflight = new Map<string, Promise<unknown>>();
 const TTL = 30 * 60_000;
 
 async function cachedJson<T>(url: string): Promise<T | null> {
+  if (addonOnlyMetadata()) return null;
   const hit = cache.get(url);
   if (hit && Date.now() - hit.at < TTL) return hit.value as T;
   const shared = inflight.get(url);

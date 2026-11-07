@@ -8,7 +8,9 @@ export function isPlaybackRedirectCandidate(url: string): boolean {
       !parsed.username &&
       !parsed.password &&
       !parsed.port &&
-      (parsed.hostname === "addon.debridio.com" || parsed.hostname === "mediafusion.elfhosted.com")
+      (parsed.hostname === "addon.debridio.com" ||
+        parsed.hostname === "sooti.click" ||
+        parsed.hostname === "mediafusion.elfhosted.com")
     );
   } catch {
     return false;

@@ -12,14 +12,24 @@ pub async fn subtitle_extract(
     stream_index: Option<u32>,
     headers: Option<HashMap<String, String>>,
 ) -> Result<String, String> {
+    // Export the whole track in one pass. Per-cue range reads are useful for
+    // Auto Sync's short samples but add a round trip for each cue in a full export.
     let ffmpeg = crate::transcode::locate_ffmpeg().ok_or_else(|| "ffmpeg not found".to_string())?;
     let map = format!("0:s:{}", stream_index.unwrap_or(0));
     let mut cmd = std::process::Command::new(&ffmpeg);
     cmd.arg("-nostdin").arg("-loglevel").arg("error");
-    if let Some(h) = &headers {
-        if let Some(ua) = h.get("User-Agent").or_else(|| h.get("user-agent")) {
-            cmd.arg("-user_agent").arg(ua);
+    let remote = source.starts_with("https://") || source.starts_with("http://");
+    if remote {
+        let (ua, _) = crate::mpv::stream_http_options(&headers);
+        cmd.arg("-user_agent").arg(ua);
+        if let Some(h) = &headers {
+            let fields = crate::subsync::url_guard::safe_header_blob(h);
+            if !fields.is_empty() {
+                cmd.arg("-headers").arg(fields);
+            }
         }
+        cmd.arg("-rw_timeout")
+            .arg(EXTRACT_TIMEOUT.as_micros().to_string());
     }
     cmd.arg("-i")
         .arg(&source)
@@ -35,7 +45,14 @@ pub async fn subtitle_extract(
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
-    let output = match crate::process_output::output(cmd, EXTRACT_TIMEOUT).await {
+    // Full remote track extraction can run longer than an individual network read.
+    // Keep the remote Windows-safe process reader so cancellation reaps ffmpeg.
+    let deadline = if remote {
+        Duration::from_secs(600)
+    } else {
+        EXTRACT_TIMEOUT
+    };
+    let output = match crate::process_output::output(cmd, deadline).await {
         Ok(o) => o,
         Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
             return Err("subtitle extraction timed out".to_string())
@@ -44,10 +61,18 @@ pub async fn subtitle_extract(
     };
     if !output.status.success() {
         let err = String::from_utf8_lossy(&output.stderr);
-        return Err(format!(
-            "ffmpeg failed: {}",
-            err.chars().take(200).collect::<String>()
-        ));
+        let reason = if err.contains("403 Forbidden") || err.contains("401 Unauthorized") {
+            "subtitle source denied access"
+        } else if err.contains("matches no streams") {
+            "subtitle track missing"
+        } else if err.contains("bitmap to bitmap") {
+            "image subtitle track"
+        } else if err.to_ascii_lowercase().contains("timed out") {
+            "subtitle extraction timed out"
+        } else {
+            "ffmpeg could not extract subtitle"
+        };
+        return Err(reason.into());
     }
     let mut bytes = output.stdout;
     if bytes.len() > MAX_SRT_BYTES {

@@ -1,6 +1,112 @@
 // Newly introduced UI copy remains usable until each locale provides an override.
 const uiFallback: Record<string, string> = {
   "Episode information is unavailable": "Episode information is unavailable",
+  "music.linked.import": "Import from link",
+  "music.linked.linkLabel": "YouTube Music playlist link or ID",
+  "music.linked.importHelp":
+    "Link a public or unlisted YouTube playlist or a generated Mix watch link. Harbor saves a local copy for manual sync. Mixes save only the current queue, not an endless radio playlist. Signing in is not supported.",
+  "music.linked.loading": "Loading tracks from YouTube Music…",
+  "music.linked.mixHelp":
+    "This generated Mix saves the current queue as a snapshot. Sync refreshes that snapshot; the lineup may change and does not include endless radio continuations. Local edits are overwritten. Unlink to keep them permanently.",
+  "music.linked.mixSyncConfirm":
+    "Replace this playlist with the Mix's current queue snapshot? The lineup may change. Local additions, removals, reordering and title edits will be overwritten.",
+  "music.linked.source": "Linked to YouTube Music",
+  "music.linked.lastSynced": "Last synced: {date}",
+  "music.linked.mirrorHelp":
+    "Sync replaces local edits with YouTube's tracks, order and title. Unlink to keep your changes permanently.",
+  "music.linked.sync": "Sync now",
+  "music.linked.syncTitle": "Sync with YouTube Music?",
+  "music.linked.mixSyncTitle": "Refresh this Mix snapshot?",
+  "music.linked.syncConfirm":
+    "Replace this playlist with YouTube's current tracks, order and title? Local additions, removals and reordering will be overwritten.",
+  "music.linked.syncedNotice": "Synced {count} tracks from YouTube Music.",
+  "music.linked.importedNotice": "Linked {name} with {count} tracks from YouTube Music.",
+  "music.linked.unlink": "Unlink",
+  "music.linked.unlinkTitle": "Unlink this playlist?",
+  "music.linked.unlinkConfirm":
+    "Stop syncing with YouTube Music? The current tracks will stay as a local playlist.",
+  "music.linked.editTitle": "Edit linked playlist?",
+  "music.linked.editContinue": "Continue editing",
+  "music.linked.editConfirm":
+    "This playlist is linked to YouTube Music. Local changes will be overwritten on sync. Continue editing? You can unlink it from the playlist page to keep your changes permanently.",
+  "music.playlist.deleteTitle": "Delete playlist?",
+  "Use installed addons for movie and series metadata, artwork, and episodes. Missing addon metadata stays unavailable. TMDB Top Match is controlled separately below. Restart Harbor after changing this option.":
+    "Use installed addons for movie and series metadata, artwork, and episodes. Missing addon metadata stays unavailable. TMDB Top Match is controlled separately below. Restart Harbor after changing this option.",
+  "games.collections.open": "Open collection",
+  "games.collections.coverUpload": "Change collection picture",
+  "games.collections.coverRemove": "Remove collection picture",
+  "games.collections.coverFailed": "The collection picture could not be saved.",
+  "games.collections.coverType": "Choose a PNG, JPEG, WebP, GIF, or AVIF image.",
+  "games.collections.coverSize": "That image is too large. Choose one under 24 MB.",
+  "Metadata addon priority": "Metadata addon priority",
+  "Metadata addons start in your addon-list order. The first supplies metadata; later addons only fill missing data or replace failed responses. Reordering enables addon preference.":
+    "Metadata addons start in your addon-list order. The first supplies metadata; later addons only fill missing data or replace failed responses. Reordering enables addon preference.",
+  "Loading metadata addons...": "Loading metadata addons...",
+  "Could not load metadata addons": "Could not load metadata addons",
+  "No metadata addons installed": "No metadata addons installed",
+  "Move {name} up": "Move {name} up",
+  "Move {name} down": "Move {name} down",
+  "Use addon-list order": "Use addon-list order",
+  "Use TMDB for Top Match in search": "Use TMDB for Top Match in search",
+  "Use your saved TMDB key for Top Match, even in addon-only mode. If unavailable or turned off, use your highest-priority metadata addon's search results.":
+    "Use your saved TMDB key for Top Match, even in addon-only mode. If unavailable or turned off, use your highest-priority metadata addon's search results.",
+  "Use only addon metadata": "Use only addon metadata",
+  "Disable built-in metadata": "Disable built-in metadata",
+  "Use installed addons and providers you configured. Disable Harbor's keyless built-in metadata and fallbacks. Restart Harbor after changing this option.":
+    "Use installed addons and providers you configured. Disable Harbor's keyless built-in metadata and fallbacks. Restart Harbor after changing this option.",
+  "Metadata source priority": "Metadata source priority",
+  "Choose which addons and configured providers supply each section. The first source with a value wins.":
+    "Choose which addons and configured providers supply each section. The first source with a value wins.",
+  Configure: "Configure",
+  "Configure metadata sources": "Configure metadata sources",
+  "Each section falls through in order until a source provides a value.":
+    "Each section falls through in order until a source provides a value.",
+  "Each section falls through in order until a source provides a value. Drag a source or use the arrows to reorder.":
+    "Each section falls through in order until a source provides a value. Drag a source or use the arrows to reorder.",
+  "fallback order": "fallback order",
+  "No sources are available for this section.": "No sources are available for this section.",
+  "Only configured providers appear here. Episode and season numbering is kept from one source at a time.":
+    "Only configured providers appear here. Episode and season numbering is kept from one source at a time.",
+  "Reset section": "Reset section",
+  Backdrop: "Backdrop",
+  "Episode and Seasons": "Episode and Seasons",
+  "Search / Top Match": "Search / Top Match",
+  "Addon and TMDB order used by search results and Top Match.":
+    "Addon and TMDB order used by search results and Top Match.",
+  "Show source labels on the detail page": "Show source labels on the detail page",
+  "Useful for checking which addon or provider supplied each part.":
+    "Useful for checking which addon or provider supplied each part.",
+  Addon: "Addon",
+  Key: "Key",
+  Transform: "Transform",
+  "Controlled by disabled built-in metadata": "Controlled by disabled built-in metadata",
+  "Controlled by addon-only metadata": "Controlled by addon-only metadata",
+  "Use installed addons for movie and series metadata, artwork, and episodes. Disable Harbor's built-in providers and fallbacks. Missing addon metadata stays unavailable. Restart Harbor after changing this option.":
+    "Use installed addons for movie and series metadata, artwork, and episodes. Disable Harbor's built-in providers and fallbacks. Missing addon metadata stays unavailable. Restart Harbor after changing this option.",
+  Original: "Original",
+  "Hide watched movies": "Hide watched movies",
+  "Checking watched movies...": "Checking watched movies...",
+  "No unwatched titles available": "No unwatched titles available",
+  "No titles available": "No titles available",
+  "games.magnet.debrid": "Download via Debrid",
+  "games.magnet.choose": "Choose a connected debrid service to prepare this magnet.",
+  "games.magnet.none":
+    "No debrid services connected. Connect one in Settings to download this magnet via debrid.",
+  "games.sources.links.none": "Connect a debrid service in Settings to prepare this download link.",
+  "games.magnet.connect": "Connect debrid service",
+  "games.magnet.prepare": "Submit magnet to {name}",
+  "games.magnet.starting": "Submitting magnet...",
+  "games.magnet.preparing":
+    "The magnet was submitted. Your provider is preparing the files. You can refresh its status.",
+  "games.magnet.failed": "The provider could not prepare this magnet.",
+  "games.magnet.review": "Choose files to download",
+  "games.magnet.select": "Select files",
+  "games.magnet.refresh": "Refresh status",
+  "games.magnet.browse": "Browse cloud files",
+  "games.magnet.download": "Choose download destination",
+  "games.magnet.submitted":
+    "Magnet submitted to the debrid service. The remote job remains in your account.",
+  "games.magnet.remember": "Last-used provider is remembered for this profile.",
   "Season explorer": "Season explorer",
   "Shows a season shelf with posters, names, and synopses above the episode list. Anime uses Harbor's TVDB service without a key. Regular shows use your TVDB key when set, otherwise their TMDB metadata. Turn this off to hide the shelf and stop its metadata requests.":
     "Shows a season shelf with posters, names, and synopses above the episode list. Anime uses Harbor's TVDB service without a key. Regular shows use your TVDB key when set, otherwise their TMDB metadata. Turn this off to hide the shelf and stop its metadata requests.",
@@ -10,6 +116,10 @@ const uiFallback: Record<string, string> = {
   "Show Harbor": "Show Harbor",
   "Could not apply this change. Try again.": "Could not apply this change. Try again.",
   "Hide watched titles in the featured hero": "Hide watched titles in the featured hero",
+  "Hide watched titles": "Hide watched titles",
+  "Skip recommendations you've already watched. Uses the same watch history as Hide watched titles in the featured hero.":
+    "Skip recommendations you've already watched. Uses the same watch history as Hide watched titles in the featured hero.",
+  "Hide watched titles in More like this": "Hide watched titles in More like this",
   "Watched movies and shows you've made progress on are skipped in the featured hero and replaced with the next unwatched pick from the same row. Uses your local watch history, Trakt, and Simkl.":
     "Watched movies and shows you've made progress on are skipped in the featured hero and replaced with the next unwatched pick from the same row. Uses your local watch history, Trakt, and Simkl.",
   "Rewatching on AniList": "Rewatching on AniList",
@@ -2607,6 +2717,19 @@ const uiFallback: Record<string, string> = {
   "games.pokemon.noLocations": "games.pokemon.noLocations",
   "games.pokemon.videos": "games.pokemon.videos",
   "games.pokemon.searchVideos": "games.pokemon.searchVideos",
+  "No guide source for this playlist. Add an EPG URL to see program listings.":
+    "No guide source for this playlist. Add an EPG URL to see program listings.",
+  "Guide unavailable. Check the EPG source or refresh the playlist.":
+    "Guide unavailable. Check the EPG source or refresh the playlist.",
+  "Move subtitles above player controls": "Move subtitles above player controls",
+  "Lifts subtitles while the player controls are showing so the controls never cover them. Subtitles you have already placed higher stay where they are.":
+    "Lifts subtitles while the player controls are showing so the controls never cover them. Subtitles you have already placed higher stay where they are.",
+  "Seekr · preview thumbnails": "Seekr · preview thumbnails",
+  "sk_live_…": "sk_live_…",
+  "Optional. Paste your own free Seekr API key to show Seekr's preview thumbnails first and fall back to local FFmpeg trickplay when Seekr has no match. Leave it blank to use local previews only.":
+    "Optional. Paste your own free Seekr API key to show Seekr's preview thumbnails first and fall back to local FFmpeg trickplay when Seekr has no match. Leave it blank to use local previews only.",
+  "Get a key at seekr.tv": "Get a key at seekr.tv",
+  "Seekr preview thumbnails": "Seekr preview thumbnails",
 };
 
 export default uiFallback;

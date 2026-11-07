@@ -2601,6 +2601,22 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   },
 
   {
+    label: "Manga upscaling",
+    section: "shaders",
+    tab: "manga",
+    anchorTitle: "Manga upscaling",
+    keywords: [
+      "manga",
+      "upscale",
+      "upscaling",
+      "waifu2x",
+      "line art",
+      "screentone",
+      "manga shaders",
+      "download model",
+    ],
+  },
+  {
     label: "Anime4K upscaling",
     section: "shaders",
     tab: "anime4k",
@@ -4097,11 +4113,11 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Show tags on cards (New, In Cinema, Rerun, Awards)",
+    label: "Show tags on cards (New, In Cinema, Rerun)",
     section: "library",
     tab: "providers",
     anchorTitle: "Metadata providers",
-    keywords: ["card tags", "new badge", "in cinema", "rerun", "awards", "chips", "overlays"],
+    keywords: ["card tags", "new badge", "in cinema", "rerun", "chips", "overlays"],
   },
   {
     label: "Show ratings on detail pages",
@@ -5369,6 +5385,18 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "picture in picture captions",
       "floating window subs",
       "mini player subtitles",
+    ],
+  },
+  {
+    label: "Move subtitles above player controls",
+    section: "subtitles",
+    tab: "look",
+    anchorTitle: "Elsewhere",
+    keywords: [
+      "subtitles behind controls",
+      "lift subtitles",
+      "subtitles covered by seek bar",
+      "raise captions",
     ],
   },
   {
@@ -7154,6 +7182,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["player title size", "title in player", "bigger player title", "scale title"],
   },
   {
+    label: "Use title artwork in the player",
+    section: "theme",
+    anchorTitle: "Title text",
+    keywords: ["player logo", "title logo", "movie logo", "show logo", "banner title", "artwork"],
+  },
+  {
     label: "Show series name first in the player",
     section: "theme",
     anchorTitle: "Title text",
@@ -7266,6 +7300,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "filmstrip",
       "frame preview",
     ],
+  },
+  {
+    label: "Seekr preview thumbnails",
+    section: "playerLayout",
+    anchorTitle: "Seek bar",
+    keywords: ["seekr", "seekr api key", "preview api", "thumbnail provider"],
   },
   {
     label: "Bar style",
@@ -8339,24 +8379,27 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
-    label: "Award tab on cards",
+    label: "Award display on cards",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: [
+      "award display",
       "award tab",
+      "award badge",
+      "no award",
       "laurel",
       "netflix award",
       "award banner",
       "winner tab",
-      "awards bottom",
+      "awards top",
     ],
   },
   {
     label: "Award tab position",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: [
       "award tab position",
       "above ratings",
@@ -8364,28 +8407,27 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "top of card",
       "award on top",
       "award placement",
-      "laurel position",
     ],
   },
   {
     label: "Top 10 ribbon",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["top 10 ribbon", "top ten", "corner ribbon", "top10", "ribbon badge", "rank ribbon"],
   },
   {
     label: "Ribbon corner",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["ribbon corner", "top left", "top right", "ribbon side", "ribbon placement"],
   },
   {
     label: "Show DUB badge on anime cards",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: [
       "dub badge",
       "anime dub",
@@ -8407,7 +8449,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Watched badge",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: [
       "watched badge",
       "seen badge",
@@ -8928,6 +8970,18 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "queue",
       "next previous",
       "playlist order",
+    ],
+  },
+  {
+    label: "Hide watched titles in More like this",
+    section: "player",
+    tab: "upnext",
+    anchorTitle: "More like this at the end",
+    keywords: [
+      "hide watched recommendations",
+      "skip watched more like this",
+      "end screen watched",
+      "recommendations watched",
     ],
   },
   {
@@ -10125,7 +10179,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Watchlist bookmark",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["bookmark", "watchlist marker", "saved marker", "corner bookmark"],
   },
   {
@@ -10207,7 +10261,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Show an on disk badge on cards",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["on disk", "local file badge", "downloaded badge", "have it locally"],
   },
   {
@@ -10331,7 +10385,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     label: "Bookmark corner",
     section: "library",
     tab: "cards",
-    anchorTitle: "On the poster",
+    anchorTitle: "Card overlays",
     keywords: ["bookmark corner", "marker position", "watchlist corner", "which corner"],
   },
   {

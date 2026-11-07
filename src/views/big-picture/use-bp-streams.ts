@@ -243,6 +243,7 @@ export function useBpStreams(params: { meta: Meta; episode?: PlayEpisode }): BpS
     debrids,
     isCached,
     isAnimeRequest,
+    originalLanguage: meta.originalLanguage,
     hostMatch,
     pinned: rememberedStream,
     addonLogoFor,

@@ -107,6 +107,12 @@ test("re-adopting a live session reuses the stream it already holds instead of r
   assert.match(resolve, /if \(held\) \{[^}]*return;/);
 });
 
+test("the video lyric overlay follows the saved live sync", () => {
+  assert.match(source, /useLyricSync\(track\)/);
+  assert.match(source, /applyLyricSync\(lyrics, syncPoints\)/);
+  assert.match(source, /lyrics=\{timedLyrics\}/);
+});
+
 test("every piece of the geometry chase is gone from the surface", () => {
   for (const banned of [
     "getBoundingClientRect",

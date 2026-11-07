@@ -5,6 +5,7 @@ import * as snapshots from "../../src/lib/player/bridge.ts";
 import * as selection from "../../src/lib/player/subtitle-selection.ts";
 import * as cleanups from "../../src/lib/player/prepared-subtitle-cleanups.ts";
 import * as seeds from "../../src/lib/subtitles/seed-batch.ts";
+import * as autoload from "../../src/lib/subtitles/autoload.ts";
 import * as failures from "../../src/lib/player/mpv-failure.ts";
 import * as translationJobs from "../../src/lib/subtitles/translation-jobs.ts";
 import * as addedSubs from "../../src/lib/subtitles/added-subs.ts";
@@ -116,6 +117,7 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
       clearPendingSub() {},
       wasPendingSub: () => false,
     },
+    "@/lib/subtitles/autoload": autoload,
     "@/lib/subtitles/translation-jobs": translationJobs,
     "@/lib/subtitles/added-subs": addedSubs,
     "@/lib/subtitles/language": language,

@@ -19,8 +19,10 @@
  */
 import { mangaDetail, searchMangaEverywhere } from "@/lib/manga/api";
 import { streamAll } from "@/lib/manga/sources/aggregate";
-import { stripColorTag } from "@/lib/manga/title";
+import { mangaTitlesMatch } from "@/lib/manga/title";
 import type { MangaSummary } from "@/lib/manga/types";
+
+export { mangaTitleKey, mangaTitlesMatch } from "@/lib/manga/title";
 
 export type MangaOpenTarget = {
   id?: string | null;
@@ -29,24 +31,6 @@ export type MangaOpenTarget = {
 };
 
 export type ResolvedManga = { id: string; title: string; cover?: string };
-
-/** Script-agnostic title key: color tag removed, case-folded, punctuation and
- *  spacing dropped while keeping every letter/number (any alphabet). */
-export function mangaTitleKey(title: string): string {
-  return stripColorTag(title)
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "");
-}
-
-export function mangaTitlesMatch(
-  query: string,
-  candidate: string | null | undefined,
-  altTitle?: string | null,
-): boolean {
-  const key = mangaTitleKey(query);
-  if (!key) return false;
-  return [candidate, altTitle].some((v) => !!v && mangaTitleKey(v) === key);
-}
 
 function pick(hits: MangaSummary[], query: string): MangaSummary | null {
   return hits.find((h) => mangaTitlesMatch(query, h.title, h.altTitle)) ?? null;

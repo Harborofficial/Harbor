@@ -2,11 +2,105 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   moveGroupItem,
+  libraryGroupHomeRows,
+  normalizeLibraryGroupSections,
   normalizeLibraryGroups,
   parseGroupListUrl,
   validGroupImage,
 } from "../src/lib/library-groups.ts";
 import { parseMdblistPage } from "../src/lib/providers/mdblist-lists.ts";
+import { applyHomeRowCustomization, resetHomeRows } from "../src/lib/home-customization.ts";
+
+test("Home sections and title preferences survive persistence without changing old groups", () => {
+  const groups = normalizeLibraryGroups(
+    JSON.parse(
+      JSON.stringify([
+        { id: "legacy", name: "Legacy", pinnedToHome: true },
+        {
+          id: "netflix",
+          name: "Netflix",
+          pinnedToHome: true,
+          homeSectionId: "platforms",
+          hideHomeTitle: true,
+        },
+        { id: "private", name: "Private", homeSectionId: "platforms" },
+        { id: "orphan", name: "Orphan", pinnedToHome: true, homeSectionId: "removed" },
+      ]),
+    ),
+  );
+  const sections = normalizeLibraryGroupSections([
+    { id: "platforms", name: " Streaming Platforms " },
+    { id: "platforms", name: "Duplicate" },
+    { id: "empty", name: "Empty" },
+    null,
+    { id: "bad", name: " " },
+  ]);
+  assert.equal(groups[0].hideHomeTitle, false);
+  assert.equal(groups[1].hideHomeTitle, true);
+  assert.equal(groups[1].homeSectionId, "platforms");
+  assert.equal(sections.length, 2);
+  assert.deepEqual(
+    libraryGroupHomeRows(groups, sections).map((row) => [
+      row.key,
+      row.name,
+      row.groups.map((group) => group.id),
+    ]),
+    [
+      ["library-groups", "My Groups", ["legacy", "orphan"]],
+      ["library-groups:platforms", "Streaming Platforms", ["netflix"]],
+    ],
+  );
+  assert.deepEqual(
+    libraryGroupHomeRows(groups, []).flatMap((row) => row.groups.map((group) => group.id)),
+    ["legacy", "netflix", "orphan"],
+  );
+  assert.deepEqual(normalizeLibraryGroupSections(undefined), []);
+});
+
+test("folders can move between independent rows with stable customization keys", () => {
+  const sections = [
+    { id: "a", name: "Platforms" },
+    { id: "b", name: "Weekend" },
+  ];
+  const groups = normalizeLibraryGroups([
+    { id: "one", name: "One", pinnedToHome: true, homeSectionId: "a" },
+    { id: "two", name: "Two", pinnedToHome: true, homeSectionId: "b" },
+  ]);
+  const rows = libraryGroupHomeRows(groups, sections).map((row) => ({
+    ...row,
+    type: "movie" as const,
+    metas: [],
+    page: 1,
+    hasMore: false,
+    libraryGroups: row.groups,
+  }));
+  const custom = {
+    ...resetHomeRows(),
+    order: ["library-groups:b", "catalog", "library-groups:a"],
+    renamed: { "library-groups:a": "Services" },
+  };
+  const catalog = {
+    key: "catalog",
+    name: "Movies",
+    type: "movie" as const,
+    metas: [],
+    page: 1,
+    hasMore: false,
+  };
+  assert.deepEqual(
+    applyHomeRowCustomization([...rows, catalog], custom).map((row) => row.name),
+    ["Weekend", "Movies", "Services"],
+  );
+  const moved = groups.map((group) => ({ ...group, homeSectionId: "b" }));
+  assert.deepEqual(
+    libraryGroupHomeRows(moved, sections).map((row) => row.groups.map((group) => group.id)),
+    [["one", "two"]],
+  );
+  assert.equal(
+    libraryGroupHomeRows(groups, [{ ...sections[0], name: "Renamed" }, sections[1]])[0].key,
+    rows[0].key,
+  );
+});
 
 test("group list URLs normalize supported providers without retaining query credentials", () => {
   assert.deepEqual(
@@ -32,6 +126,124 @@ test("group list URLs normalize supported providers without retaining query cred
     "http://mdblist.com/lists/a/b",
   ])
     assert.equal(parseGroupListUrl(url), null);
+});
+
+test("MDBList list URLs support percent-encoded and unencoded international slugs", () => {
+  const encoded = "https://mdblist.com/lists/jarvis-16246724/netflix-nouveaut%C3%A9s-s%C3%A9ries";
+  const raw = "https://mdblist.com/lists/jarvis-16246724/netflix-nouveaut\u00e9s-s\u00e9ries";
+  const expected = {
+    source: "mdblist",
+    path: "lists/jarvis-16246724/netflix-nouveaut%C3%A9s-s%C3%A9ries",
+    url: encoded,
+  };
+  assert.deepEqual(parseGroupListUrl(encoded), expected);
+  assert.deepEqual(parseGroupListUrl(raw), expected);
+  assert.deepEqual(parseGroupListUrl(encoded + "/?apikey=not-saved"), expected);
+  const persisted = normalizeLibraryGroups([
+    { id: "fr", name: "French series", lists: [{ id: "1", name: "New series", url: raw }] },
+  ]);
+  assert.equal(persisted[0].lists[0].url, encoded);
+});
+
+test("MDBList list URL validation rejects unsafe or malformed encoded slug segments", () => {
+  const base = "https://mdblist.com/lists/alice/";
+  for (const slug of [
+    "season%2Ffinale",
+    "season%5Cfinale",
+    "season%20finale",
+    "season%25finale",
+    "season%E9finale",
+    "season%00finale",
+    "%2e%2e/admin",
+  ]) {
+    assert.equal(parseGroupListUrl(base + slug), null, "rejected " + slug);
+  }
+  assert.equal(parseGroupListUrl("https://mdblist.com/lists/%2Fadmin/shows"), null);
+});
+
+test("international scripts and combining marks work for both list providers", () => {
+  const slugs = [
+    "fran\u00e7ais",
+    "ni\u00f1os",
+    "\u00fcber",
+    "a\u00e7\u00e3o",
+    "\u0627\u0644\u0639\u0631\u0628\u064a\u0629",
+    "\u0939\u093f\u0928\u094d\u0926\u0940",
+    "\u65e5\u672c\u8a9e",
+    "\ud55c\uad6d\uc5b4",
+    "\u4e2d\u6587",
+    "\u0440\u0443\u0441\u0441\u043a\u0438\u0439",
+    "\u03c3\u03b5\u03b9\u03c1\u03ad\u03c2",
+    "\u0e20\u0e32\u0e29\u0e32\u0e44\u0e17\u0e22",
+    "e\u0301pisodes",
+  ];
+  for (const slug of slugs) {
+    const encoded = encodeURIComponent(slug);
+    for (const [host, prefix, source] of [
+      ["mdblist.com", "lists/alice/", "mdblist"],
+      ["app.trakt.tv", "users/alice/lists/", "trakt"],
+    ] as const) {
+      const input = "https://" + host + "/" + prefix + slug;
+      const parsed = parseGroupListUrl(input);
+      assert.equal(parsed?.source, source, input);
+      assert.equal(parsed?.path, prefix + encoded, input);
+      assert.equal(
+        parsed?.url,
+        "https://" + (source === "trakt" ? "trakt.tv" : host) + "/" + prefix + encoded,
+      );
+      assert.deepEqual(parseGroupListUrl("https://" + host + "/" + prefix + encoded), parsed);
+    }
+  }
+});
+
+test("Trakt international list URLs normalize and preserve existing supported formats", () => {
+  const raw =
+    "https://app.trakt.tv/users/\u00e9quipe/lists/\u65e5\u672c\u8a9e-s\u00e9ries?token=private";
+  const canonical =
+    "https://trakt.tv/users/%C3%A9quipe/lists/%E6%97%A5%E6%9C%AC%E8%AA%9E-s%C3%A9ries";
+  const parsed = parseGroupListUrl(raw);
+  assert.deepEqual(parsed, {
+    source: "trakt",
+    path: "users/%C3%A9quipe/lists/%E6%97%A5%E6%9C%AC%E8%AA%9E-s%C3%A9ries",
+    url: canonical,
+  });
+  assert.deepEqual(parseGroupListUrl(canonical), parsed);
+  assert.deepEqual(parseGroupListUrl(canonical + "/"), parsed);
+  assert.deepEqual(
+    parseGroupListUrl(
+      "https://www.trakt.tv/users/\u00e9quipe/lists/\u65e5\u672c\u8a9e-s\u00e9ries",
+    ),
+    parsed,
+  );
+  assert.equal(parseGroupListUrl("https://trakt.tv/lists/123456")?.path, "lists/123456");
+  assert.equal(parseGroupListUrl("https://trakt.tv/lists/official/\u65e5\u672c\u8a9e"), null);
+  assert.equal(
+    normalizeLibraryGroups([
+      { id: "trakt-group", name: "Lists", lists: [{ id: "list", name: "Latest", url: raw }] },
+    ])[0].lists[0].url,
+    canonical,
+  );
+});
+
+test("Trakt rejects encoded separators, invalid UTF-8, and unsafe URL variants", () => {
+  const base = "https://trakt.tv/users/alice/lists/";
+  for (const slug of [
+    "test%2Fother",
+    "test%5Cother",
+    "test%20other",
+    "test%25other",
+    "test%E9other",
+    "test%00other",
+    "test%3Fother",
+    "test%23other",
+    "test%3Aother",
+    "film\u{1F3AC}",
+  ])
+    assert.equal(parseGroupListUrl(base + slug), null, "rejected " + slug);
+  assert.equal(parseGroupListUrl("https://trakt.tv/users/%2Fadmin/lists/good"), null);
+  assert.equal(parseGroupListUrl("https://trakt.tv.evil.invalid/users/alice/lists/show"), null);
+  assert.equal(parseGroupListUrl("https://user:pass@trakt.tv/users/alice/lists/show"), null);
+  assert.equal(parseGroupListUrl("http://trakt.tv/users/alice/lists/show"), null);
 });
 
 test("groups preserve list references and isolate invalid persisted entries", () => {

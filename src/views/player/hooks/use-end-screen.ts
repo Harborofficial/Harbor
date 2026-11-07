@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition, subscribePlaybackClock } from "@/lib/player/playback-clock";
@@ -8,6 +8,11 @@ import type { PlayerSrc } from "@/lib/view";
 import { isFinalSeriesEpisode } from "@/lib/player/series-finale";
 import { animeSeriesFromStreamId } from "@/lib/series-episodes";
 import { endScreenArt, warmEndScreenArt } from "@/lib/player/end-screen-art";
+import { filterUnwatchedRecommendations } from "@/lib/player/end-screen-watched";
+import { recentlyPlayed, subscribePlayback } from "@/lib/playback-history";
+import { useWatchedFlagIds } from "@/lib/watched-flag";
+import { useMovieWatchedIds } from "@/lib/movie-watched";
+import { externalWatchedIds, subscribeExternalWatched } from "@/lib/feed/external-watched";
 
 /** Short stubs and clips should never get a recommendation screen. */
 const MIN_DURATION_SEC = 90;
@@ -35,18 +40,48 @@ export function useEndScreen(params: {
   onZero: "close" | "play";
   tmdbKey: string | null;
   isLive: boolean;
+  hideWatched: boolean;
   onPlay: (meta: Meta) => void;
   onClose: () => void;
 }): EndScreenState {
-  const { src, snap, enabled, leadSec, countdownSec, onZero, tmdbKey, isLive, onPlay, onClose } =
-    params;
+  const {
+    src,
+    snap,
+    enabled,
+    leadSec,
+    countdownSec,
+    onZero,
+    tmdbKey,
+    isLive,
+    hideWatched,
+    onPlay,
+    onClose,
+  } = params;
+
+  const watchedFlags = useWatchedFlagIds();
+  const movieWatched = useMovieWatchedIds();
+  const externalWatched = useSyncExternalStore(subscribeExternalWatched, externalWatchedIds);
+  const [localWatched, setLocalWatched] = useState(() => recentlyPlayed());
+  useEffect(() => subscribePlayback(() => setLocalWatched(recentlyPlayed())), []);
+  const watchedLookup = useMemo(
+    // external-watched already stores collapsed imdb/tmdb keys, the shape isTitleWatched matches.
+    () => ({ traktKeys: externalWatched, localWatched, watchedFlags, movieWatched }),
+    [externalWatched, localWatched, watchedFlags, movieWatched],
+  );
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<EndScreenMode>("full");
-  const [items, setItems] = useState<Meta[]>([]);
+  const [rawItems, setRawItems] = useState<Meta[]>([]);
+  const items = useMemo(
+    () => filterUnwatchedRecommendations(rawItems, hideWatched, watchedLookup),
+    [rawItems, hideWatched, watchedLookup],
+  );
   const [preparedUrl, setPreparedUrl] = useState<string | null>(null);
   const [focused, setFocused] = useState(0);
   const [countdown, setCountdown] = useState<number | null>(null);
+  useEffect(() => {
+    if (focused >= items.length) setFocused(Math.max(0, items.length - 1));
+  }, [focused, items.length]);
   const firedEarlyRef = useRef<string | null>(null);
   const firedEndRef = useRef<string | null>(null);
   const earlySinceRef = useRef(0);
@@ -86,7 +121,7 @@ export function useEndScreen(params: {
     firedEndRef.current = null;
     earlySinceRef.current = 0;
     setOpen(false);
-    setItems([]);
+    setRawItems([]);
     setPreparedUrl(null);
     setFocused(0);
     setCountdown(null);
@@ -206,7 +241,7 @@ export function useEndScreen(params: {
           ...list.map((item) => endScreenArt(item.background ?? item.poster)),
         ]);
         if (!alive) return;
-        setItems(list);
+        setRawItems(list);
         setFocused(0);
         setPreparedUrl(src.url);
       });

@@ -28,8 +28,10 @@ import type {
   TierPorts,
 } from "./pipeline";
 
-const ASR_WINDOW_SEC = 25;
-const MAX_WINDOWS = 8;
+// Whisper Tiny runs locally. Keep a bounded number of short probes so the
+// recognition fallback can complete within the player's analysis deadline.
+const ASR_WINDOW_SEC = 12;
+const MAX_WINDOWS = 4;
 const MIN_JACCARD = 0.34;
 const MIN_SHARED_TOKENS = 2;
 const MIN_ANCHORS = 3;

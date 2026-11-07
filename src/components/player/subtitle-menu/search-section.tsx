@@ -104,7 +104,7 @@ export function SearchSection(
     const e = hasCoords ? playbackContext!.searchEpisode : (episode ?? undefined);
     return {
       imdbId: metaImdbId ?? "",
-      type: s != null && e != null ? "series" : "movie",
+      type: e != null ? "series" : "movie",
       title: metaTitle ?? "",
       season: s ?? undefined,
       episode: e ?? undefined,
@@ -176,7 +176,14 @@ export function SearchSection(
   };
 
   const cacheKeyFor = (tgt: TitleTarget, filename?: string | null) =>
-    subtitleSearchCacheKey({ ...tgt, filename, scope: cacheScope(tgt) });
+    subtitleSearchCacheKey({
+      ...tgt,
+      filename,
+      scope: cacheScope(tgt),
+      contentIds: isPlayingTarget(tgt, playingTarget)
+        ? [playbackContext?.stremioId ?? "", ...(playbackContext?.candidateIds ?? [])]
+        : [],
+    });
 
   const latestStateRef = useRef<Omit<SavedSearchState, "scrollTop">>({
     playingKey,
@@ -290,7 +297,12 @@ export function SearchSection(
     const e = playbackContext.searchEpisode;
     if (s == null && e == null) return;
     if (s === target.season && e === target.episode) return;
-    const next = { ...target, season: s, episode: e };
+    const next: TitleTarget = {
+      ...target,
+      type: e != null ? "series" : target.type,
+      season: s,
+      episode: e,
+    };
     setTarget(next);
   }, [playbackContext, isOverride, target]);
 

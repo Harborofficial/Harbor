@@ -7,7 +7,7 @@ export type MusicVideoStream = {
   httpHeaders?: Record<string, string>;
 };
 
-const STREAM_TTL = 8 * 60_000;
+const STREAM_TTL = 30 * 60_000;
 const STREAM_LIMIT = 12;
 /** Stop trusting a signed URL well before it lapses, so a start never races the expiry. */
 const STREAM_MARGIN = 30_000;
@@ -16,9 +16,9 @@ const PREFETCH_LIMIT = 2;
 const PREFETCH_QUEUE_LIMIT = 4;
 
 const MUSIC_VIDEO_UNAVAILABLE = "music.video.unavailable";
-const MUSIC_VIDEO_RESOLVE_TIMEOUT = 25_000;
+const MUSIC_VIDEO_RESOLVE_TIMEOUT = 30_000;
 
-type CachedStream = { expires: number; stream: MusicVideoStream };
+type CachedStream = { expires: number; stream: MusicVideoStream; sessions: string[] };
 const streamCache = new Map<string, CachedStream>();
 const streamRequests = new Map<string, Promise<MusicVideoStream>>();
 const prefetchQueue: MusicTrack[] = [];
@@ -46,6 +46,56 @@ export function streamExpiry(stream: MusicVideoStream, now = Date.now()): number
   }
   const ceiling = now + STREAM_TTL;
   return Number.isFinite(signed) ? Math.min(ceiling, signed - STREAM_MARGIN) : ceiling;
+}
+
+/**
+ * Media elements cannot send the resolver's headers, and a proxy makes the bytes come from the
+ * same network path as the audio, so googlevideo does not reject the picture on its own.
+ */
+async function proxied(
+  stream: MusicVideoStream,
+): Promise<{ stream: MusicVideoStream; sessions: string[] }> {
+  if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) {
+    return { stream, sessions: [] };
+  }
+  const sessions: string[] = [];
+  let release: ((session: string) => void) | null = null;
+  try {
+    const proxy = await import("@/lib/stream-proxy");
+    release = proxy.releaseStreamProxy;
+    const video = await proxy.registerStreamProxy(stream.url, stream.httpHeaders, {
+      prebufferBytes: 1_000_000,
+    });
+    sessions.push(video.sessionId);
+    let audioUrl = stream.audioUrl;
+    if (audioUrl) {
+      const audio = await proxy.registerStreamProxy(audioUrl, stream.httpHeaders, {
+        prebufferBytes: 256_000,
+      });
+      sessions.push(audio.sessionId);
+      audioUrl = audio.url;
+    }
+    return { stream: { ...stream, url: video.url, audioUrl }, sessions };
+  } catch {
+    for (const session of sessions) release?.(session);
+    return { stream, sessions: [] };
+  }
+}
+
+function releaseSessions(sessions: string[]): void {
+  if (sessions.length === 0) return;
+  void import("@/lib/stream-proxy")
+    .then(({ releaseStreamProxy }) => {
+      for (const session of sessions) releaseStreamProxy(session);
+    })
+    .catch(() => {});
+}
+
+function dropCached(key: string): void {
+  const cached = streamCache.get(key);
+  if (!cached) return;
+  streamCache.delete(key);
+  releaseSessions(cached.sessions);
 }
 
 function boundedResolve(track: MusicTrack, timeoutMs: number): Promise<MusicVideoStream> {
@@ -91,14 +141,17 @@ export function musicVideoStream(
   }
   forgetMusicVideoStreamKey(key);
   const request: Promise<MusicVideoStream> = boundedResolve(track, timeoutMs)
-    .then((stream) => {
+    .then(async (stream) => {
       const expires = streamExpiry(stream);
+      const next = await proxied(stream);
       if (expires > Date.now()) {
-        streamCache.set(key, { expires, stream });
+        streamCache.set(key, { expires, stream: next.stream, sessions: next.sessions });
         while (streamCache.size > STREAM_LIMIT)
-          streamCache.delete(streamCache.keys().next().value!);
+          dropCached(streamCache.keys().next().value!);
+      } else {
+        releaseSessions(next.sessions);
       }
-      return stream;
+      return next.stream;
     })
     .finally(() => {
       if (streamRequests.get(key) === request) streamRequests.delete(key);
@@ -150,6 +203,6 @@ export function prefetchMusicVideoStreams(tracks: MusicTrack[], limit = PREFETCH
  * without this a retry would simply attach to the same wedged call and hang again.
  */
 function forgetMusicVideoStreamKey(key: string): void {
-  streamCache.delete(key);
+  dropCached(key);
   streamRequests.delete(key);
 }

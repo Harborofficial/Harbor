@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { lruGet, lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { safeFetch } from "@/lib/safe-fetch";
@@ -101,6 +102,7 @@ export async function animeKitsuMeta(
   metaId: string,
   maxAge?: number,
 ): Promise<AnimeKitsuMeta | null> {
+  if (addonOnlyMetadata()) return null;
   if (
     !metaId.startsWith("kitsu:") &&
     !metaId.startsWith("mal:") &&

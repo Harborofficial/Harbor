@@ -2,6 +2,7 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowUp,
+  Ban,
   BookOpen,
   Bookmark,
   BookmarkCheck,
@@ -42,6 +43,7 @@ import type { ParticipantLocation } from "@/lib/together/protocol";
 import { useView } from "@/lib/view";
 import { useInWatchlist } from "@/lib/watchlist";
 import {
+  dropContextTitle,
   setContextFavorite,
   setContextWatchlist,
   setContextWatched,
@@ -52,6 +54,9 @@ import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useIsFavorite } from "@/lib/media-favorites";
 import { MyListSubmenu } from "./context-menu/my-list-submenu";
 import { useSettings } from "@/lib/settings";
+import { DropShowConfirmModal } from "@/components/drop-show-confirm-modal";
+import { getAnimeCanonicalId, getAnimeCwId } from "@/lib/anime-cw-ids";
+import { useCanDropShow } from "@/lib/drop-show-eligibility";
 import {
   NAV_ITEMS,
   effectiveNavOrder,
@@ -60,7 +65,11 @@ import {
   toggleNavHidden,
 } from "@/chrome/nav-items";
 import { setNavEditMode, useNavEditMode } from "@/chrome/nav-edit-mode";
-import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
+import {
+  mangaFavoriteFailureMessage,
+  useIsMangaFavorite,
+  useMangaFavorites,
+} from "@/lib/manga-favorites";
 import {
   recordMangaChapterRead,
   removeMangaChapterRead,
@@ -177,6 +186,15 @@ export function ContextMenu() {
       ? current
       : null;
   };
+  const [dropRequest, setDropRequest] = useState<{
+    id: string;
+    type?: string;
+    name: string;
+    poster?: string;
+    imdbId?: string | null;
+    background?: string | null;
+    animeId?: string | null;
+  } | null>(null);
   const { beginManualDownload, manualDownloadDialog } = useManualDownload({
     actorKey: `${activeProfile?.id ?? ""}:${authorId ?? ""}:${stremioUser?._id ?? ""}`,
   });
@@ -307,6 +325,18 @@ export function ContextMenu() {
   const [watchedError, setWatchedError] = useState<{ session: number; message: string } | null>(
     null,
   );
+  const canDropTrackedShow = useCanDropShow(
+    state?.target.kind === "meta" &&
+      !playerActions &&
+      (targetType === "series" || targetType === "anime")
+      ? {
+          id: state.target.meta.id,
+          type: targetType,
+          imdbId: targetImdb,
+          animeId: getAnimeCwId(state.target.meta.id) ?? getAnimeCanonicalId(state.target.meta.id),
+        }
+      : null,
+  );
   const isWatchlisted = useInWatchlist(targetMetaId, [targetImdb]);
   const isFav = useIsFavorite(targetMetaId);
   const { settings: appSettings, update: updateSettings } = useSettings();
@@ -413,7 +443,25 @@ export function ContextMenu() {
     return () => document.removeEventListener("contextmenu", handler);
   }, [open, closeCurrent, player?.meta, topKind, activeAddon, pageContext, inSession]);
 
-  if (!state) return manualDownloadDialog;
+  const dropConfirmDialog = dropRequest ? (
+    <DropShowConfirmModal
+      title={dropRequest.name}
+      onClose={() => setDropRequest(null)}
+      onConfirm={async () => {
+        const { animeId, ...input } = dropRequest;
+        const result = await dropContextTitle(input, { animeId });
+        requireMediaActionSuccess(result);
+        emitListToast(t("Dropped {title}", { title: input.name }));
+      }}
+    />
+  ) : null;
+  if (!state)
+    return (
+      <>
+        {manualDownloadDialog}
+        {dropConfirmDialog}
+      </>
+    );
 
   const subtitleDetails = state.target.kind === "subtitle" ? (state.target.details ?? null) : null;
   const target = state.target;
@@ -793,6 +841,32 @@ export function ContextMenu() {
           </p>,
         );
     }
+    if (organizedMedia && meta.type !== "movie" && !playerActions && canDropTrackedShow) {
+      items.push(
+        <Item
+          key="drop-show"
+          icon={<Ban size={14} strokeWidth={2.1} className="text-danger" />}
+          label={t("Drop show")}
+          onClick={() => {
+            const animeId =
+              getAnimeCwId(meta.id) ??
+              (targetImdb ? getAnimeCwId(targetImdb) : null) ??
+              getAnimeCanonicalId(meta.id) ??
+              (targetImdb ? getAnimeCanonicalId(targetImdb) : null);
+            setDropRequest({
+              id: meta.id,
+              type: meta.type,
+              name: meta.name,
+              poster: meta.poster,
+              imdbId: targetImdb,
+              background: meta.background,
+              animeId,
+            });
+            close(false);
+          }}
+        />,
+      );
+    }
     if (meta.type !== "movie" && meta.type !== "series")
       items.push(
         <Item
@@ -940,7 +1014,13 @@ export function ContextMenu() {
         icon={<Heart size={14} strokeWidth={2} fill={isMangaFav ? "currentColor" : "none"} />}
         label={isMangaFav ? t("Favorited") : t("Favorite")}
         onClick={() => {
-          toggleMangaFav({ id: target.id, title: target.title, cover: target.cover });
+          const result = toggleMangaFav({
+            id: target.id,
+            title: target.title,
+            cover: target.cover,
+          });
+          const message = mangaFavoriteFailureMessage(result, t);
+          if (message) emitListToast(message, "error");
           close();
         }}
         accent={isMangaFav}
@@ -1273,12 +1353,14 @@ export function ContextMenu() {
       <>
         <EmptyMenu session={state.session} close={closeCurrent} completeClose={completeClose} />
         {manualDownloadDialog}
+        {dropConfirmDialog}
       </>
     );
 
   return (
     <>
       {manualDownloadDialog}
+      {dropConfirmDialog}
       <LastPlaybackCommand key={state.session} enabled={isBackground} onClose={close}>
         {(_last, lastRow) => (
           <MenuSurface

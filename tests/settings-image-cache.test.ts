@@ -23,6 +23,7 @@ function fixture() {
       isKnownPreset: () => true,
     },
     "@/lib/subtitles/language": language,
+    "@/lib/player/audio-language": { ORIGINAL_AUDIO_LANG: "Original" },
     "@/lib/screensaver/media": { sanitizeScreensaverMedia },
     "@/lib/seek-step": { sanitizeSeekStep },
     "@/lib/ai-models": { migrateModelId: identity, providerTabFor: () => "openrouter" },
@@ -48,7 +49,10 @@ function fixture() {
         return adoptionWorks;
       },
     },
-    "@/lib/library-groups": { normalizeLibraryGroups: identity },
+    "@/lib/library-groups": {
+      normalizeLibraryGroups: identity,
+      normalizeLibraryGroupSections: identity,
+    },
   };
   function load(path: string): any {
     const compiled = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"), {

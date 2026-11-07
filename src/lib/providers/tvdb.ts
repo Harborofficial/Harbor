@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { safeFetch as tauriFetch } from "@/lib/safe-fetch";
@@ -153,6 +154,7 @@ onMediaCacheClear(() => {
 registerCache("tvdb:response", () => responseCache.size);
 
 async function getJson<T>(apiKey: string, path: string): Promise<T | null> {
+  if (addonOnlyMetadata() && !apiKey.trim()) return null;
   // Paginated catalogs are persisted only after every page succeeds.
   if (path.includes("/episodes/")) return fetchJson<T>(apiKey, path);
   return cachedMedia("tvdb-resource", [apiKey, path], () => fetchJson<T>(apiKey, path), {
@@ -173,6 +175,7 @@ async function getJson<T>(apiKey: string, path: string): Promise<T | null> {
 }
 
 async function fetchJson<T>(apiKey: string, path: string): Promise<T | null> {
+  if (addonOnlyMetadata() && !apiKey.trim()) return null;
   const generation = mediaCacheGeneration();
   const useProxy = !apiKey;
   const key = JSON.stringify([apiKey, path]);

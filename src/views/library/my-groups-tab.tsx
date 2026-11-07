@@ -7,6 +7,7 @@ import { randomUuid } from "@/lib/uuid";
 import { moveGroupItem, type LibraryGroup } from "@/lib/library-groups";
 import { GroupEditor, groupButtonClass } from "./groups/group-editor";
 import { GroupDetail } from "./groups/group-detail";
+import { GroupSections } from "./groups/group-sections";
 
 export function MyGroupsTab() {
   const t = useT();
@@ -46,9 +47,9 @@ export function MyGroupsTab() {
       {creating && (
         <GroupEditor
           onCancel={() => setCreating(false)}
-          onSave={(name, image) => {
+          onSave={(name, image, presentation) => {
             const id = randomUuid();
-            update({ libraryGroups: [...groups, { id, name, image, lists: [] }] });
+            update({ libraryGroups: [...groups, { id, name, image, lists: [], ...presentation }] });
             setCreating(false);
             setSelected(id);
           }}
@@ -65,6 +66,7 @@ export function MyGroupsTab() {
           {t("New group")}
         </button>
       </div>
+      <GroupSections />
       {groups.length === 0 && (
         <p className="text-ink-muted">
           {t("Create a group, choose its artwork, and organize MDBList and Trakt lists inside it.")}
@@ -84,9 +86,9 @@ export function MyGroupsTab() {
               onClick={() => setSelected(entry.id)}
               className="flex w-full flex-col text-start"
             >
-              <span className="flex aspect-video w-full items-center justify-center bg-canvas p-4">
+              <span className="flex aspect-video w-full items-center justify-center overflow-hidden bg-canvas">
                 {entry.image ? (
-                  <img src={entry.image} alt="" className="h-full w-full object-contain" />
+                  <img src={entry.image} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <HarborMark className="h-20 w-20 text-ink" />
                 )}

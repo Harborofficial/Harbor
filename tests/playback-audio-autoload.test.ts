@@ -9,6 +9,8 @@ import * as audioChoice from "../src/lib/player/audio-choice";
 import * as playbackHistory from "../src/lib/playback-history";
 import * as continuation from "../src/lib/player/continue-playback";
 import * as subtitleChoice from "../src/lib/player/subtitle-choice";
+import * as trackPreferences from "../src/lib/player/track-preferences";
+import * as audioLanguage from "../src/lib/player/audio-language";
 import * as language from "../src/lib/subtitles/language";
 import { initialPlayerSnapshot, type TrackInfo } from "../src/lib/player/bridge";
 
@@ -84,6 +86,9 @@ async function fixture(remembered = true) {
     },
     "@/lib/i18n": { t: (message: string) => message },
     "@/lib/player/mpv-properties": {},
+    "@/lib/player/track-preferences": trackPreferences,
+    "@/lib/player/audio-language": audioLanguage,
+    "@/lib/providers/original-language": { resolveOriginalLanguage: async () => "" },
     "@/lib/providers/tmdb": {},
     "@/lib/subtitles/addon-source": { gatherSubtitleAddons: async () => [] },
     "@/lib/streams/stream-ids": { buildStreamIds: () => [] },

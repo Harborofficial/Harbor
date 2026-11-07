@@ -509,8 +509,8 @@ const settings: Record<string, string> = {
     "Installation fehlgeschlagen. Überprüfe die URL und versuche es erneut.",
   "Couldn't reach Trakt. Check your connection and try again.":
     "Trakt konnte nicht erreicht werden. Prüfe deine Verbindung und versuche es erneut.",
-  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
-    "Frühere Builds konnten nicht von harborcommunity.site geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "Couldn't reach GitHub to load earlier builds. Check your connection and try again.":
+    "Frühere Builds konnten nicht von GitHub geladen werden. Prüfe deine Verbindung und versuche es erneut.",
   "Couldn't reach that pack": "Dieses Paket war nicht erreichbar",
   "Couldn't reach that pack (HTTP {n})": "Dieses Paket war nicht erreichbar (HTTP {n})",
   "Couldn't reach the update server. Try again in a moment.":

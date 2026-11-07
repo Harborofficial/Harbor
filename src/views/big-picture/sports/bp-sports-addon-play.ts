@@ -152,10 +152,8 @@ export function useBpSportsAddonPick(sources: BpSportsAddonSources): BpSportsAdd
         reload();
         return;
       }
-      if (!stream.url && (stream.externalUrl || stream.ytId)) {
-        const url =
-          stream.externalUrl ||
-          `https://www.youtube.com/watch?v=${encodeURIComponent(stream.ytId ?? "")}`;
+      if (!stream.url && stream.externalUrl) {
+        const url = stream.externalUrl;
         if (HTTP.test(url)) void openUrl(url);
         else setError("stream");
         return;

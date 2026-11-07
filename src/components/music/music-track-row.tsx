@@ -1,12 +1,12 @@
 import { useTrackPlaybackState } from "@/lib/music/use-track-playback-state";
 import { useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
-import { GripVertical, Heart, LoaderCircle, MoreHorizontal, Pause, Play } from "@/components/icons/music-icons";
+import { GripVertical, Heart, ListPlus, LoaderCircle, MoreHorizontal, Pause, Play } from "@/components/icons/music-icons";
 import { MusicTrackMenu, useMusicTrackMenuItems } from "./music-track-menu";
 import { MusicCardBadgeChip, type MusicCardBadge } from "@/components/music/music-cover-card";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
 import type { MusicTrack } from "@/lib/music/types";
-import { toggleMusicLiked, toggleMusicPlayback } from "@/lib/music/player";
+import { enqueueMusic, toggleMusicLiked, toggleMusicPlayback } from "@/lib/music/player";
 import { useMusicTrackLiked } from "@/lib/music/use-track-liked";
 import { MusicMediaBadge } from "./music-media-badge";
 import { MusicArtistLink } from "./music-artist-link";
@@ -209,6 +209,19 @@ export function MusicTrackRow({
           <span>{track.durationLabel}</span>
         </span>
       )}
+      <button
+        type="button"
+        data-music-queue-action
+        onClick={(event) => {
+          event.stopPropagation();
+          (onAddToQueue ?? (() => enqueueMusic(track)))();
+        }}
+        aria-label={t("music.card.addToQueue")}
+        title={t("music.card.addToQueue")}
+        className="ms-3 grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-subtle opacity-0 transition-[color,background-color,opacity] duration-200 ease-out hover:bg-elevated hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 group-data-[menu-open]:opacity-100"
+      >
+        <ListPlus size={16} aria-hidden="true" />
+      </button>
       {saveable && (
         <button
           type="button"

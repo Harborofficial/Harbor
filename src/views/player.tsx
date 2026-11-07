@@ -53,6 +53,7 @@ import { isWeb } from "@/lib/platform";
 import { usePauseOnInactive } from "./player/hooks/use-pause-on-inactive";
 import { spoilerMaskFor } from "@/lib/spoilers";
 import { usePlayerWatched } from "./player/hooks/use-player-watched";
+import { useHoldSpeed } from "./player/hooks/use-hold-speed";
 import { EXTERNAL_PLAYER_CLOSED_EVENT } from "@/lib/player/external-mpv";
 import { useRoomSync } from "./player/hooks/use-room-sync";
 import { useHostSource } from "./player/hooks/use-host-source";
@@ -96,6 +97,7 @@ import { usePlayerHotkeys } from "./player/hooks/use-player-hotkeys";
 import { clearMediaControls, updateMediaControls } from "@/lib/media-session";
 import { usePlayerMedia } from "./player/hooks/use-player-media";
 import { useTrickplay } from "./player/hooks/use-trickplay";
+import { useSeekr } from "./player/hooks/use-seekr";
 import { useStreamPill } from "./player/hooks/use-stream-pill";
 import { useStubDetection } from "./player/hooks/use-stub-detection";
 import { useBridgeLoad } from "./player/hooks/use-bridge-load";
@@ -300,7 +302,9 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     src,
     snap,
     stremioServerTranscode: settings.stremioServerTranscode,
-    instantPlay: settings.instantPlay,
+    // A manually chosen stream must not be treated as an automatic pick
+    // merely because Instant Play is enabled in Settings.
+    instantPlay: src.autoFired === true,
     inRoom: roomSnapshot.state === "joined",
     debrids,
     selfFrameReadyRef,
@@ -605,7 +609,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     liveStreamRef,
     inRoom,
     isHost,
-    instantPlay: settings.instantPlay,
+    instantPlay: src.autoFired === true,
     captureExitSnapshot,
     exitPip,
     castActiveRef: cast.castActiveRef,
@@ -634,6 +638,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     onZero: settings.endScreenOnZero,
     tmdbKey: settings.tmdbKey,
     isLive: isLiveLike,
+    hideWatched: settings.hideWatchedInMoreLikeThis,
     onPlay: playFromEndScreen,
     onClose: () => void closePlayer(),
   });
@@ -946,85 +951,12 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     snap.videoSourceWidth,
     bridgeReady,
   );
-  const [mouseHoldSpeedActive, setMouseHoldSpeedActive] = useState(false);
-  const mouseHoldRef = useRef<{
-    pointerId: number | null;
-    timer: number | null;
-    engaged: boolean;
-    baseRate: number;
-  }>({ pointerId: null, timer: null, engaged: false, baseRate: 1 });
-  const suppressMouseClickRef = useRef(false);
-  const suppressMouseClickTimerRef = useRef<number | null>(null);
-
-  const releaseMouseHoldSpeed = useCallback(
-    (suppressClick: boolean) => {
-      const hold = mouseHoldRef.current;
-      if (hold.pointerId == null) return;
-      if (hold.timer != null) {
-        window.clearTimeout(hold.timer);
-        hold.timer = null;
-      }
-      const wasEngaged = hold.engaged;
-      hold.pointerId = null;
-      hold.engaged = false;
-      if (!wasEngaged) return;
-
-      bridgeRef.current?.setRate(hold.baseRate);
-      setMouseHoldSpeedActive(false);
-      if (!suppressClick) return;
-
-      suppressMouseClickRef.current = true;
-      if (suppressMouseClickTimerRef.current != null) {
-        window.clearTimeout(suppressMouseClickTimerRef.current);
-      }
-      suppressMouseClickTimerRef.current = window.setTimeout(() => {
-        suppressMouseClickRef.current = false;
-        suppressMouseClickTimerRef.current = null;
-      }, 0);
-    },
-    [bridgeRef],
-  );
-
-  useEffect(() => {
-    return () => {
-      const hold = mouseHoldRef.current;
-      if (hold.timer != null) window.clearTimeout(hold.timer);
-      if (hold.engaged) {
-        bridgeRef.current?.setRate(hold.baseRate);
-        setMouseHoldSpeedActive(false);
-      }
-      hold.pointerId = null;
-      hold.timer = null;
-      hold.engaged = false;
-      suppressMouseClickRef.current = false;
-      if (suppressMouseClickTimerRef.current != null) {
-        window.clearTimeout(suppressMouseClickTimerRef.current);
-      }
-    };
-  }, [bridgeRef, src.url]);
-
-  useEffect(() => {
-    const clear = (e: PointerEvent) => {
-      const hold = mouseHoldRef.current;
-      if (hold.pointerId == null || hold.pointerId !== e.pointerId) return;
-      if (hold.timer != null) {
-        window.clearTimeout(hold.timer);
-        hold.timer = null;
-      }
-      if (hold.engaged) {
-        bridgeRef.current?.setRate(hold.baseRate);
-        setMouseHoldSpeedActive(false);
-      }
-      hold.pointerId = null;
-      hold.engaged = false;
-    };
-    window.addEventListener("pointerup", clear);
-    window.addEventListener("pointercancel", clear);
-    return () => {
-      window.removeEventListener("pointerup", clear);
-      window.removeEventListener("pointercancel", clear);
-    };
-  }, [bridgeRef]);
+  const holdSpeed = useHoldSpeed({
+    enabled: !drawMode && !pipMode && !screenLocked,
+    getRate: () => snapRef.current.rate,
+    canEngage: () => snapRef.current.status === "playing",
+    setRate: (rate) => bridgeRef.current?.setRate(rate),
+  });
 
   const reloadBusyRef = useRef(false);
   const reloadSource = useCallback(() => {
@@ -1230,6 +1162,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     pendingResumeSec,
     acknowledgeResume,
     pendingSeekSec,
+    initialSeek,
     clearPendingSeek,
     sourceKey,
     resumeReady,
@@ -1248,6 +1181,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
 
   usePendingSeekApply({
     pendingSeekSec,
+    initialSeek,
     sourceKey,
     startPaused: src.startPaused,
     preserveExactPosition: src.startPositionMs != null,
@@ -1257,7 +1191,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     inRoomRef,
   });
 
-  useStubDetection({ src, snap, onStub: onStubEject, instantPlay: settings.instantPlay });
+  useStubDetection({ src, snap, onStub: onStubEject, instantPlay: src.autoFired === true });
 
   const reloadLive = useCallback(() => {
     bridgeRef.current?.load({
@@ -1288,10 +1222,12 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     queue,
     isLive: isLiveLike,
     roomGuest,
+    inRoom,
     queueDrivesNav: queuePlaybackEnabled,
     instantPlay: settings.instantPlay,
     startedNearEndRef,
     openPicker,
+    replacePlayerSrc,
     closePlayer,
   });
 
@@ -1317,10 +1253,25 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
 
   const playStreamRef = liveStreamRef ?? src.streamRef;
   const playUrl = liveUrl ?? src.url;
-  useTrickplay({
-    url: playUrl,
+  useSeekr({
+    apiKey: settings.seekrApiKey,
+    metaId: src.meta.id,
+    imdbId: resolvedImdbId ?? src.imdbId ?? null,
+    type: src.meta.type,
+    season: src.episode?.season ?? null,
+    episode: src.episode?.episode ?? null,
+    durationSec: snap.durationSec,
     enabled: settings.seekPreviewEnabled,
     isLive: isLiveLike,
+  });
+  useTrickplay({
+    url: playUrl,
+    headers: src.headers,
+    enabled: settings.seekPreviewEnabled,
+    isLive: isLiveLike,
+    playing: snap.status === "playing",
+    buffering: snap.buffering,
+    durationSec: snap.durationSec,
   });
   const adSegments = useAdSegments(
     src.meta.id,
@@ -1470,7 +1421,8 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     subShowInPip: settings.subShowInPip,
     subAssNative,
     showStats,
-    holdSpeedActive: holdSpeedActive || mouseHoldSpeedActive,
+    holdSpeedActive: holdSpeedActive || holdSpeed.active,
+    holdSpeed,
     subtitleOffsetSec,
     volumeIndicator,
     volumeHudPosition: settings.playerVolumeHudPosition,
@@ -1695,63 +1647,14 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
           transition:
             "left 340ms cubic-bezier(0.22,1,0.36,1), bottom 340ms cubic-bezier(0.22,1,0.36,1), width 340ms cubic-bezier(0.22,1,0.36,1), height 340ms cubic-bezier(0.22,1,0.36,1)",
         }}
-        onPointerDown={(e) => {
-          if (e.target !== e.currentTarget) return;
-          if (
-            e.pointerType !== "mouse" ||
-            !e.isPrimary ||
-            e.button !== 0 ||
-            drawMode ||
-            pipMode ||
-            screenLocked
-          ) {
-            return;
-          }
-          const hold = mouseHoldRef.current;
-          if (hold.pointerId != null) return;
-          const pointerId = e.pointerId;
-          hold.pointerId = pointerId;
-          hold.baseRate = snapRef.current.rate;
-          const stage = e.currentTarget;
-          hold.timer = window.setTimeout(() => {
-            hold.timer = null;
-            if (hold.pointerId !== pointerId || snapRef.current.status !== "playing") return;
-            hold.engaged = true;
-            try {
-              stage.setPointerCapture(pointerId);
-            } catch {
-              hold.pointerId = null;
-              hold.engaged = false;
-              return;
-            }
-            setMouseHoldSpeedActive(true);
-            bridgeRef.current?.setRate(Math.max(2, hold.baseRate));
-          }, 350);
-        }}
-        onPointerUp={(e) => {
-          if (mouseHoldRef.current.pointerId !== e.pointerId) return;
-          releaseMouseHoldSpeed(true);
-          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-            e.currentTarget.releasePointerCapture(e.pointerId);
-          }
-        }}
-        onPointerCancel={(e) => {
-          if (mouseHoldRef.current.pointerId === e.pointerId) releaseMouseHoldSpeed(false);
-        }}
-        onLostPointerCapture={(e) => {
-          if (mouseHoldRef.current.pointerId === e.pointerId) releaseMouseHoldSpeed(false);
-        }}
+        onPointerDown={holdSpeed.onPointerDown}
+        onPointerUp={holdSpeed.onPointerUp}
+        onPointerCancel={holdSpeed.onPointerCancel}
+        onLostPointerCapture={holdSpeed.onLostPointerCapture}
         onClick={(e) => {
           if (e.target !== e.currentTarget) return;
           if (drawMode || pipMode) return;
-          if (suppressMouseClickRef.current) {
-            suppressMouseClickRef.current = false;
-            if (suppressMouseClickTimerRef.current != null) {
-              window.clearTimeout(suppressMouseClickTimerRef.current);
-              suppressMouseClickTimerRef.current = null;
-            }
-            return;
-          }
+          if (holdSpeed.consumeClick()) return;
           if (dismissedJustNow()) {
             clearOverlayDismiss();
             return;

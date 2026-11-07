@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { insertIntoQueue, manualBlockEnd } from "../src/lib/music/queue-insert";
+import {
+  insertIntoQueue,
+  manualBlockEnd,
+  markManuallyQueued,
+  queueInsertAfterManualBlock,
+  withTrackNext,
+} from "../src/lib/music/queue-insert";
 import type { MusicTrack } from "../src/lib/music/types";
 
 const track = (id: string) =>
@@ -68,4 +74,71 @@ test("an out of range insert point is clamped instead of losing the track", () =
     insertIntoQueue(q, track("c"), -5).map((t) => t.id),
     ["c", "a"],
   );
+});
+
+test("play next lands ahead of previously queued songs", () => {
+  const q = queue("playing", "queued", "p1", "p2");
+  assert.deepEqual(
+    withTrackNext(q, track("next"), 0).map((t) => t.id),
+    ["playing", "next", "queued", "p1", "p2"],
+  );
+});
+
+test("play next moves an already queued song to the front of upcoming", () => {
+  const q = queue("playing", "p1", "next", "p2");
+  assert.deepEqual(
+    withTrackNext(q, track("next"), 0).map((t) => t.id),
+    ["playing", "next", "p1", "p2"],
+  );
+});
+
+test("play next on the current song is a no-op", () => {
+  const q = queue("playing", "p1");
+  assert.equal(withTrackNext(q, track("playing"), 0), q);
+});
+
+test("play next with nothing playing starts the queue", () => {
+  const q = queue("p1", "p2");
+  assert.deepEqual(
+    withTrackNext(q, track("next"), -1).map((t) => t.id),
+    ["next", "p1", "p2"],
+  );
+});
+
+test("adding a new song puts it after the current one", () => {
+  const q = queue("playing", "p1", "p2");
+  assert.deepEqual(
+    queueInsertAfterManualBlock(q, track("added"), 0).map((t) => t.id),
+    ["playing", "added", "p1", "p2"],
+  );
+});
+
+test("adding a song already in the collection moves it into the queue block", () => {
+  const q = queue("playing", "a", "target", "b");
+  assert.deepEqual(
+    queueInsertAfterManualBlock(q, track("target"), 0).map((t) => t.id),
+    ["playing", "target", "a", "b"],
+  );
+});
+
+test("adding a song behind the current one brings it up next", () => {
+  const q = queue("target", "playing", "p1");
+  assert.deepEqual(
+    queueInsertAfterManualBlock(q, track("target"), 1).map((t) => t.id),
+    ["playing", "target", "p1"],
+  );
+});
+
+test("adding the current song is a no-op", () => {
+  const q = queue("playing", "p1");
+  assert.equal(queueInsertAfterManualBlock(q, track("playing"), 0), q);
+});
+
+test("a song already in the manual block is not moved again", () => {
+  const first = track("queued-first");
+  const target = track("queued-target");
+  markManuallyQueued(first);
+  markManuallyQueued(target);
+  const q = queue("playing", "queued-first", "queued-target", "p1");
+  assert.equal(queueInsertAfterManualBlock(q, target, 0), q);
 });

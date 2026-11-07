@@ -1,8 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isLinuxDesktop, isMacDesktop } from "@/lib/platform";
 import { applyMotionInterp } from "@/lib/player/motion-interp";
 import { applyRtxVideo, resetRtxVideoState } from "@/lib/player/rtx-video";
-import { applySubStyle } from "@/lib/player/sub-style";
+import {
+  applySubPos,
+  applySubStyle,
+  readOsdBox,
+  subPosLiftPercent,
+  subUsesMargins,
+} from "@/lib/player/sub-style";
 import type { useSettings } from "@/lib/settings";
 
 export function useSubStyleApply(params: {
@@ -10,6 +16,8 @@ export function useSubStyleApply(params: {
   settings: ReturnType<typeof useSettings>["settings"];
   assNativeActive: boolean;
   imageNativeActive: boolean;
+  subNativeRender: boolean;
+  controlsInset: number;
   bridgeReady: boolean;
   mediaReady: boolean;
   sourceGamma: string;
@@ -18,12 +26,14 @@ export function useSubStyleApply(params: {
   assScale?: number;
   subTrackId?: string;
   sdhFilterAllowed: boolean;
-}) {
+}): number {
   const {
     engine,
     settings,
     assNativeActive,
     imageNativeActive,
+    subNativeRender,
+    controlsInset,
     bridgeReady,
     mediaReady,
     sourceGamma,
@@ -34,20 +44,38 @@ export function useSubStyleApply(params: {
     sdhFilterAllowed,
   } = params;
 
+  const styleReady = engine === "mpv" && bridgeReady && mediaReady;
+  const usesMargins = subUsesMargins(settings, { assNativeActive, imageNativeActive });
+  const liftCover = styleReady && subNativeRender ? controlsInset : 0;
+  const [liftPct, setLiftPct] = useState(0);
+  const liftPctRef = useRef(liftPct);
+  liftPctRef.current = liftPct;
+
   useEffect(() => {
-    if (engine !== "mpv") return;
-    if (!bridgeReady) return;
-    if (!mediaReady) return;
+    if (liftCover <= 0) {
+      setLiftPct(0);
+      return;
+    }
+    let live = true;
+    void readOsdBox().then((osd) => {
+      if (live) setLiftPct(subPosLiftPercent(liftCover, osd, usesMargins));
+    });
+    return () => {
+      live = false;
+    };
+  }, [liftCover, usesMargins, bridgeKey]);
+
+  useEffect(() => {
+    if (!styleReady) return;
     void applySubStyle(settings, {
       assNativeActive,
       imageNativeActive,
       assScale,
       sdhFilterAllowed,
+      liftPct: liftPctRef.current,
     });
   }, [
-    engine,
-    bridgeReady,
-    mediaReady,
+    styleReady,
     bridgeKey,
     assNativeActive,
     imageNativeActive,
@@ -71,6 +99,17 @@ export function useSubStyleApply(params: {
     settings.subBoxColor,
     settings.subBold,
   ]);
+
+  useEffect(() => {
+    if (!styleReady) return;
+    void applySubPos(settings, {
+      assNativeActive,
+      imageNativeActive,
+      assScale,
+      sdhFilterAllowed,
+      liftPct,
+    });
+  }, [liftPct]);
 
   useEffect(() => () => resetRtxVideoState(), [bridgeKey]);
 
@@ -108,4 +147,6 @@ export function useSubStyleApply(params: {
     settings.playerRtxHdr,
     settings.playerRtxVsr,
   ]);
+
+  return liftPct;
 }

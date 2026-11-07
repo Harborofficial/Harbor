@@ -93,6 +93,8 @@ export interface SimklGranularFilters {
 
 export type ProfileAudioMode = "auto" | "click" | "off";
 
+export type CardAwardDisplay = "tabs" | "badge" | "none";
+
 export type StreamPriorityEntry = { key: string; name: string };
 
 export type ScreensaverMediaKind = "image" | "gif" | "video";
@@ -115,7 +117,31 @@ export type MusicSpeedPreset = {
 
 export type AccountProvider = "stremio" | "nuvio";
 
+export type TvCardOptions = {
+  showImdbBadge: boolean;
+  showTmdbBadge: boolean;
+  showRtBadge: boolean;
+  showPopcornBadge: boolean;
+  showMalBadge: boolean;
+  animeCardRating: "mal" | "imdb";
+  showMetacriticBadge: boolean;
+  showLetterboxdBadge: boolean;
+  showMdblistBadge: boolean;
+  showTraktBadge: boolean;
+  showSimklBadge: boolean;
+  showDubBadge: boolean;
+  showCardBadges: boolean;
+  top10Ribbon: boolean;
+  top10RibbonSide: "left" | "right";
+  badgePlacement: "top" | "bottom";
+  cardAwardDisplay: CardAwardDisplay;
+  watchlistBadge: "off" | "topStart" | "topEnd" | "bottomStart" | "bottomEnd";
+  showLocalLibraryBadge: boolean;
+  showWatchedBadge: boolean;
+};
+
 export type Settings = {
+  tvCardOptions: TvCardOptions;
   accountProvider: AccountProvider;
   spooktoberBanner: "disabled" | "small" | "below-hero" | undefined;
   soundTheme: "none" | "glass" | "modern" | "retro" | "cinematic";
@@ -184,12 +210,14 @@ export type Settings = {
   posterDockTransitionMs: number;
   top10Ribbon: boolean;
   top10RibbonSide: "left" | "right";
-  awardTabs: boolean;
+  awardTabs: boolean; // Deprecated: Retained strictly for sanitizeCardAwardDisplay parsing
+  cardAwardDisplay: CardAwardDisplay;
   awardTabPosition: "above" | "below" | "top";
   rowTitleScale: number;
   cardTitleScale: number;
   playerTitleScale: number;
   playerTitleSeriesFirst: boolean;
+  playerTitleLogo: boolean;
   uiScale: number;
   serveWebUi: boolean;
   remoteControlEnabled: boolean;
@@ -310,6 +338,7 @@ export type Settings = {
   playerMenuBlack: boolean;
   playerScreenLockEnabled: boolean;
   seekPreviewEnabled: boolean;
+  seekrApiKey: string;
   instantPlay: boolean;
   instantPlaybackPreparation: boolean;
   autoNextStreamOnStall: boolean;
@@ -318,6 +347,12 @@ export type Settings = {
   seasonSourceLock: boolean;
   rememberLastStream: boolean;
   keepSourceNextEpisode: boolean;
+  /** Automatically download the upcoming episode without affecting active playback. */
+  autoPreDownloadNextEpisode: boolean;
+  /** Show the compact Up Next pre-download event icons. */
+  autoPreDownloadNotifications: boolean;
+  /** Last explicit switch-on time; allows retrying a manually canceled episode. */
+  autoPreDownloadNextEpisodeEnabledAt: number;
   playerHdrToSdr: boolean;
   playerRtxHdr: boolean;
   playerRtxVsr: boolean;
@@ -358,6 +393,9 @@ export type Settings = {
   playerAnime4kFolder: string;
   playerAnime4kOverride: string;
   playerShaders: Record<string, { enabled: boolean; variant?: string; dir?: string }>;
+  mangaUpscaleEnabled: boolean;
+  mangaUpscaleQuality: "fast" | "best";
+  mangaUpscaleAutoDownload: boolean;
   preferredSubLangs: string[];
   preferredAudioLangs: string[];
   subFontSize: number;
@@ -394,6 +432,7 @@ export type Settings = {
   subOffsetIndicatorPosition: SubtitleOffsetPosition;
   subOffsetIndicatorSize: SubtitleOffsetSize;
   subShowInPip: boolean;
+  subLiftAboveControls: boolean;
   subHideSdh: boolean;
   secondarySubLang: string;
   subSecondaryPlacement: "top" | "bottom";
@@ -451,7 +490,7 @@ export type Settings = {
     | "spotlight"
     | "custom";
   rowCardStyle: "poster" | "tv";
-  tvCardLogoPos: "center" | "bottomStart" | "bottomEnd";
+  tvCardLogoPos: "center" | "bottomStart" | "bottomEnd" | "off";
   scrollUpTrailer: boolean;
   cardHoverShine: boolean;
   customHoverId: string;
@@ -546,6 +585,7 @@ export type Settings = {
   keyboardPauseShowsControls: boolean;
   hideWatchedInCatalogs: boolean;
   hideWatchedInHero: boolean;
+  hideWatchedInMoreLikeThis: boolean;
   hideUnreleased: boolean;
   localEpisodeSortDesc: boolean;
   /** Review count when the banner was last dismissed; it returns only if more turn up. */
@@ -597,6 +637,28 @@ export type Settings = {
   libraryBookmarkedOnly: boolean;
   librarySort: "recent" | "title" | "year";
   preferCustomMetaAddon: boolean;
+  addonOnlyMetadata: boolean;
+  metadataAddonOrder: string[];
+  /** Per-section metadata source chains. Empty sections use the legacy fallback order. */
+  metadataSources?: Partial<
+    Record<
+      | "title"
+      | "description"
+      | "seasonSynopsis"
+      | "poster"
+      | "seasonPoster"
+      | "backdrop"
+      | "logo"
+      | "episodes"
+      | "ratings"
+      | "cast"
+      | "trailers"
+      | "search",
+      string[]
+    >
+  >;
+  metadataSourceLabels?: boolean;
+  searchTmdbTopMatch: boolean;
   cinemetaEnabled: boolean;
   animeOnlyInAnimeRoom: boolean;
   animeCwEnd: "hide" | "timer";
@@ -790,6 +852,7 @@ export type Settings = {
   cropMode: string;
   customLists: CustomList[];
   libraryGroups: import("@/lib/library-groups").LibraryGroup[];
+  libraryGroupSections: import("@/lib/library-groups").LibraryGroupSection[];
   pauseListStatusOnPause: boolean;
   translateTitles: boolean;
   translateDescriptions: boolean;

@@ -12,6 +12,7 @@ import {
   Heart,
   ListMusic,
   ListPlus,
+  ListStart,
   Play,
   Plus,
   UserRound,
@@ -29,7 +30,7 @@ import {
   musicOriginName,
   musicTitleTarget,
 } from "@/lib/music/playback-origin";
-import { getMusicState } from "@/lib/music/player";
+import { getMusicState, playNextMusic } from "@/lib/music/player";
 import { useMusicTrackLiked } from "@/lib/music/use-track-liked";
 import { useArtistCredits } from "./use-artist-credits";
 import { useMusicNavigate } from "./music-navigate";
@@ -44,6 +45,7 @@ export type MusicTrackMenuItem = {
 
 export type MusicTrackMenuHandlers = {
   onPlay?: () => void;
+  onPlayNext?: () => void;
   onToggleLike?: () => void;
   onAddToQueue?: () => void;
   onAddToPlaylist?: () => void;
@@ -61,6 +63,7 @@ export function useMusicTrackMenuItems(
   const credits = useArtistCredits(track?.artist ?? "", track?.title ?? "");
   const {
     onPlay,
+    onPlayNext,
     onToggleLike,
     onAddToQueue,
     onAddToPlaylist,
@@ -74,6 +77,12 @@ export function useMusicTrackMenuItems(
   if (!track) return items;
   if (onPlay)
     items.push({ id: "play", label: t("music.play"), icon: <Play size={14} />, run: onPlay });
+  items.push({
+    id: "next",
+    label: t("music.queue.playNext"),
+    icon: <ListStart size={14} />,
+    run: onPlayNext ?? (() => playNextMusic(track)),
+  });
   if (onToggleLike) {
     items.push({
       id: "like",
@@ -256,6 +265,7 @@ export function MusicTrackMenu({
             key={item.id}
             type="button"
             role="menuitem"
+            data-music-queue-action={item.id === "queue" || item.id === "next" ? "true" : undefined}
             onClick={() => {
               onClose();
               setActionFailed(false);

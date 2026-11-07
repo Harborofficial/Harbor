@@ -44,6 +44,8 @@ function load(path: string, mocks: Record<string, unknown>) {
   }).outputText;
   const exports: Record<string, any> = {};
   new Function("require", "exports", compiled)((id: string) => {
+    if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+      return { addonOnlyMetadata: () => false };
     assert.ok(id in dependencies, `Unexpected dependency: ${id}`);
     return dependencies[id];
   }, exports);

@@ -93,7 +93,7 @@ export function usePickHandler({
   openPlayer,
   intent,
   seasonEpisodes,
-  autoActive,
+  autoActive: pickerAutoActive,
   autoAttemptIdx,
   autoCandidatesLength,
   autoFiredRef,
@@ -152,20 +152,21 @@ export function usePickHandler({
     committed: boolean,
     forceP2p: boolean,
   ): boolean => {
-    if (!seasonLock && autoActive) return false;
+    if (!seasonLock && pickerAutoActive && autoPickRef.current) return false;
     if (sameSourceRetryRef.current >= SAME_SOURCE_MAX_RETRIES) return false;
     const n = (sameSourceRetryRef.current += 1);
     const delay = SAME_SOURCE_RETRY_DELAY_MS * n;
     console.warn(`[picker] same-source retry ${n}/${SAME_SOURCE_MAX_RETRIES} in ${delay}ms`);
     if (retryTimerRef.current != null) window.clearTimeout(retryTimerRef.current);
     retryTimerRef.current = window.setTimeout(() => {
+      retryTimerRef.current = null;
       void resolveAndOpen(stream, committed, forceP2p);
     }, delay);
     return true;
   };
 
   const advanceAuto = () => {
-    if (!autoActive) return;
+    if (!pickerAutoActive || !autoPickRef.current) return;
     const nextIdx = autoAttemptIdx + 1;
     if (nextIdx < autoCandidatesLength) {
       autoFiredRef.current = false;
@@ -176,6 +177,7 @@ export function usePickHandler({
   };
 
   const resolveAndOpen = async (stream: ScoredStream, userCommitted: boolean, forceP2p = false) => {
+    const autoActive = pickerAutoActive && autoPickRef.current;
     if (continuation && !isPlaybackActorCurrent(continuation.actor)) {
       setResolveError(playError("The active profile changed. Open the menu again."));
       return;
@@ -300,9 +302,9 @@ export function usePickHandler({
       // Native mpv can consume ordinary debrid URLs directly. Keep the local
       // proxy off the startup path unless the source actually requires custom
       // request headers.
-      if (intent !== "download" && hasProxyHeaders) {
+      if (intent !== "download" && (hasProxyHeaders || r.data.transcode)) {
         try {
-          const proxied = await registerStreamProxy(r.data.url, r.data.headers);
+          const proxied = await registerStreamProxy(r.data.url, r.data.headers, { transcode: r.data.transcode });
           playUrl = proxied.url;
           proxySessionId = proxied.sessionId;
         } catch {
@@ -319,6 +321,7 @@ export function usePickHandler({
         intent === "download" ||
         r.via === "p2p" ||
         r.via === "direct" ||
+        r.via === "youtube" ||
         r.via === "local-download" ||
         r.readiness?.exactUrlValidated === true
       );
@@ -476,6 +479,11 @@ export function usePickHandler({
           saveSeasonLock(meta.id, entry, animeId ? null : (episode.season ?? null), animeId);
         }
       }
+    } catch {
+      if (!ac.signal.aborted) {
+        setResolveError(playError("error"));
+        advanceAuto();
+      }
     } finally {
       if (proxySessionId && !proxyTransferred) {
         void unregisterStreamProxy(proxySessionId).catch(() => {});
@@ -483,7 +491,7 @@ export function usePickHandler({
       if (playbackTraceId && !traceTransferred) {
         finishPlaybackTrace(playbackTraceId, ac.signal.aborted ? "aborted" : "failed");
       }
-      if (!opened && !ac.signal.aborted) {
+      if (!opened && !ac.signal.aborted && retryTimerRef.current == null) {
         setResolving(null);
       }
     }
@@ -515,13 +523,10 @@ export function usePickHandler({
       setResolveError(playError("The active profile changed. Open the menu again."));
       return;
     }
+    abortResolve();
     autoPickRef.current = auto;
     if (!stream.url && stream.externalUrl) {
       openUrl(stream.externalUrl);
-      return;
-    }
-    if (!stream.url && stream.ytId) {
-      openUrl(`https://www.youtube.com/watch?v=${stream.ytId}`);
       return;
     }
     if (streamMode === "p2p" && committed && stream.infoHash && engineP2pEligible(stream)) {

@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { lruGet, lruSet } from "@/lib/cache";
 import type { Meta } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
@@ -109,7 +110,8 @@ function rememberSource(url: string, value: unknown, freshUntil: number): void {
   );
 }
 
-async function get<T>(path: string, maxAge?: number): Promise<T | null> {
+async function get<T>(path: string, maxAge?: number, identity = false): Promise<T | null> {
+  if (addonOnlyMetadata() && !identity) return null;
   const url = `${KITSU}${path}`;
   const now = Date.now();
   const hit = lruGet(cache, url);
@@ -269,10 +271,15 @@ export async function kitsuCoverImage(id: number): Promise<string | null> {
 type GenreAttrs = { name?: string; slug?: string; description?: string };
 type CategoryAttrs = { title?: string; slug?: string; description?: string };
 
-export async function kitsuAnime(id: number, maxAge?: number): Promise<KitsuAnimeDetail | null> {
+export async function kitsuAnime(
+  id: number,
+  maxAge?: number,
+  identity = false,
+): Promise<KitsuAnimeDetail | null> {
   const j = await get<Doc<Resource<KitsuAnimeAttrs>, GenreAttrs | CategoryAttrs>>(
     `/anime/${id}?include=genres,categories`,
     maxAge,
+    identity,
   );
   if (!j?.data) return null;
   const a = j.data.attributes;
@@ -543,11 +550,13 @@ export async function kitsuCharacters(id: number, limit = 30): Promise<KitsuChar
   return out;
 }
 
-export async function kitsuRelated(id: number): Promise<KitsuRelated[]> {
+export async function kitsuRelated(id: number, identity = false): Promise<KitsuRelated[]> {
   type RelAttrs = { role?: string };
   type DestAttrs = KitsuAnimeAttrs;
   const j = await get<Doc<Resource<RelAttrs>[], DestAttrs>>(
     `/anime/${id}/media-relationships?include=destination&page[limit]=12`,
+    undefined,
+    identity,
   );
   if (!j?.data) return [];
   const animeById = new Map<string, Resource<DestAttrs>>();
@@ -581,11 +590,11 @@ export async function kitsuRelated(id: number): Promise<KitsuRelated[]> {
 
 const mainTvCache = new Map<number, number | null>();
 
-export async function kitsuMainTvSeries(id: number): Promise<number | null> {
+export async function kitsuMainTvSeries(id: number, identity = false): Promise<number | null> {
   if (mainTvCache.has(id)) return mainTvCache.get(id)!;
   const j = await get<
     Doc<Resource<{ role?: string }>[], { subtype?: string; episodeCount?: number }>
-  >(`/anime/${id}/media-relationships?include=destination&page[limit]=20`);
+  >(`/anime/${id}/media-relationships?include=destination&page[limit]=20`, undefined, identity);
   let best: number | null = null;
   let bestEps = -1;
   const animeById = new Map<string, { subtype?: string; episodeCount?: number }>();
@@ -623,11 +632,17 @@ export type KitsuSearchHit = {
  * a MAL/AniList row whose entry they cannot map can still be reached by the
  * Kitsu entry that carries episodes (and therefore streams).
  */
-export async function kitsuSearchAnime(query: string, limit = 8): Promise<KitsuSearchHit[]> {
+export async function kitsuSearchAnime(
+  query: string,
+  limit = 8,
+  identity = false,
+): Promise<KitsuSearchHit[]> {
   const q = query.trim();
   if (q.length < 2) return [];
   const j = await get<Doc<Resource<KitsuAnimeAttrs>[]>>(
     `/anime?filter%5Btext%5D=${encodeURIComponent(q)}&page%5Blimit%5D=${limit}&sort=-userCount`,
+    undefined,
+    identity,
   );
   const out: KitsuSearchHit[] = [];
   for (const a of j?.data ?? []) {

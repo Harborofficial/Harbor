@@ -26,9 +26,12 @@ test("a forced run tries hard immediately", () => {
   );
 });
 
-test("auto-fire happens once per media item and language, not on every track switch", () => {
-  assert.match(hook, /firedRef = useRef<\{ mediaKey: string; langs: Set<string> \}>/);
-  assert.match(hook, /if \(!fired\.langs\.has\(lang\)\) \{/);
-  assert.match(hook, /fired\.langs\.add\(lang\);/);
-  assert.match(hook, /if \(fired\.mediaKey !== currentMediaKey\) \{/);
+test("auto-fire is scoped to each selected subtitle and audio track", () => {
+  assert.match(hook, /trackAudioKeys: Set<string>/);
+  assert.match(hook, /fired\.trackAudioKeys\.has\(signature\)/);
+  assert.match(hook, /fired\.trackAudioKeys\.add\(signature\)/);
+  assert.match(hook, /audioSelectionKey\(liveSnapRef\.current\)/);
+  assert.match(hook, /if \(fired\.mediaKey !== currentMedia\) \{/);
+  assert.match(hook, /readSavedAutoSyncCorrection\(savedMedia, persistentAudio, cues\)/);
+  assert.match(hook, /if \(ready && isOriginalCurrent\(\)\) beginRun\(false\)/);
 });

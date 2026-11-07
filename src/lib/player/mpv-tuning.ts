@@ -76,6 +76,35 @@ const RISKY =
 
 export type MpvLineCheck = { valid: number; skipped: number; risky: string[] };
 
+/**
+ * Keys the user set explicitly in Advanced (mpv.conf). Harbor still owns every
+ * playback property it writes at runtime, except these: the panel promises the
+ * user's values override Harbor's settings, so runtime passes must not reset
+ * them.
+ */
+export function mpvExtraOptionKeys(raw: string | undefined | null): Set<string> {
+  const keys = new Set<string>();
+  for (const line of (raw ?? "").split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("//")) continue;
+    const body = (trimmed.startsWith("--") ? trimmed.slice(2) : trimmed).trim();
+    const withValue = body.includes("=") ? body.split("=", 1)[0] : body.split(/\s+/, 1)[0];
+    const key = withValue.trim().toLowerCase();
+    if (!key || key === "log-file" || key === "terminal") continue;
+    keys.add(key);
+  }
+  return keys;
+}
+
+/** Visual subtitle options require libmpv to draw subtitles instead of the HTML overlay. */
+export function hasCustomMpvSubtitleStyle(raw: string | undefined | null): boolean {
+  return [...mpvExtraOptionKeys(raw)].some((key) =>
+    /^(?:sub-(?:font(?:-.*)?|color|border(?:-.*)?|outline(?:-.*)?|shadow(?:-.*)?|back(?:-.*)?|spacing|line-spacing|margin-[xy]|pos|align-[xy]|use-margins|ass-override|scale|bold|italic|blur|justify)|ass-line-spacing)$/.test(
+      key,
+    ),
+  );
+}
+
 export function validateMpvOptions(raw: string): MpvLineCheck {
   let valid = 0;
   let skipped = 0;

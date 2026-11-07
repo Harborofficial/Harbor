@@ -95,7 +95,8 @@ if (-not $SkipApp) {
     Step 'App release build (pnpm tauri build --no-bundle)'
     $env:HARBOR_CHANNEL = $channel
     Write-Host "  channel stamp: $env:HARBOR_CHANNEL"
-    Invoke-Tool 'pnpm' @('tauri', 'build', '--no-bundle')
+    . (Join-Path $PSScriptRoot 'whisper-build-env.ps1')
+    Invoke-Tool 'pnpm' @('tauri', 'build', '--no-bundle', '--features', 'asr-whisper')
   }
 }
 $payloadCore = if ($env:HARBOR_MUSIC_CORE_EXE) { $env:HARBOR_MUSIC_CORE_EXE } else { $appExe }

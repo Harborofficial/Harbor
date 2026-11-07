@@ -166,6 +166,21 @@ export async function freeSpaceAt(path) {
   }
 }
 
+/** Read Harbor's existing UI language without changing the installed app's settings. */
+export async function installedHarborLanguage() {
+  // Browser preview cannot read Harbor's on-disk settings. A URL parameter
+  // simulates a previously selected language without changing real settings.
+  if (!isNative()) {
+    return new URLSearchParams(window.location.search).get("installedLang");
+  }
+  try {
+    const code = await T.core.invoke("installed_harbor_language");
+    return typeof code === "string" ? code : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function existingInstall() {
   if (!isNative()) return null;
   try {
@@ -304,8 +319,9 @@ export async function installFacts() {
         { key: "support", bytes: 9961472 },
         { key: "plugins", bytes: 41943040 },
         { key: "games", bytes: 91226112 },
+        { key: "music", bytes: 25165824 },
       ],
-      installed_bytes: 717766110,
+      installed_bytes: 742931934,
       installer_bytes: 287309824,
       webview2_present: true,
       webview2_bytes: 136000000,

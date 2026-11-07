@@ -106,7 +106,7 @@ export async function loadContextImage(
       url.hostname !== "asset.localhost" &&
       url.hostname !== "tauri.localhost" &&
       url.origin !== (typeof window === "undefined" ? "" : window.location.origin);
-    const response =
+    let response =
       native && isRemote
         ? await (
             await import("@tauri-apps/plugin-http")
@@ -120,6 +120,20 @@ export async function loadContextImage(
             credentials: "omit",
             referrerPolicy: "no-referrer",
           });
+    // Some image CDNs return 400 to the Tauri HTTP plugin even when the same
+    // image is accessible through Harbor's native image fetch. Try that
+    // bounded, credential-free path once before reporting a broken image.
+    if (native && isRemote && !response.ok && response.status !== 403 && response.status !== 429) {
+      await response.body?.cancel();
+      response = await (
+        await import("./safe-fetch")
+      ).safeFetchBytes(
+        url.href,
+        { signal: controller.signal },
+        IMAGE_TIMEOUT_MS,
+        MAX_CONTEXT_IMAGE_BYTES,
+      );
+    }
     return await readImageResponse(response);
   } catch (error) {
     if (controller.signal.aborted)

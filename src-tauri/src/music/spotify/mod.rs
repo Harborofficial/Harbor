@@ -21,7 +21,7 @@ mod tokens;
 
 pub use device_auth::{DevicePoll, DevicePrompt};
 
-use super::{MusicConnection, MusicConnectionField, MusicTrack};
+use super::{MusicConnection, MusicTrack};
 use super::engine::MusicMeterSnapshot;
 #[cfg(not(feature="music-sidecar"))]
 use super::engine::MusicMeterChannel;
@@ -91,8 +91,20 @@ impl Account {
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SpotifyStatus {
+    /// A saved account authorization exists; this alone does not mean audio can play.
     pub connected: bool,
+    /// A live local librespot session has been established for playback.
+    pub playback_ready: bool,
+    /// Playback pairing is remembered even when the local audio session is offline.
+    pub playback_linked: bool,
+    /// Browsing can use a current/refreshable Web API token or the live local session.
+    pub browsing_ready: bool,
+    /// The Web API token belongs to the listener's own developer app, not librespot.
+    pub own_app_browsing: bool,
+    /// Stable Spotify account identifier for internal correlation, not a UI label.
     pub username: Option<String>,
+    /// Human-facing name from Spotify /me. May be absent if the profile is unavailable.
+    pub display_name: Option<String>,
     pub country: Option<String>,
     pub premium: bool,
     pub account_type: Option<String>,
@@ -115,6 +127,7 @@ pub struct SpotifyState {
     app: RwLock<Option<AppHandle>>,
     http: reqwest::Client,
     web_token: RwLock<Option<keystore::WebToken>>,
+    profile_display_name: RwLock<Option<String>>,
     last_error: RwLock<Option<String>>,
     linked: AtomicBool,
     remote: RwLock<Option<String>>,
@@ -133,6 +146,7 @@ impl SpotifyState {
             app: RwLock::new(None),
             http: http_client(),
             web_token: RwLock::new(None),
+            profile_display_name: RwLock::new(None),
             last_error: RwLock::new(None),
             linked: AtomicBool::new(false),
             remote: RwLock::new(None),
@@ -163,6 +177,8 @@ impl SpotifyState {
         tauri::async_runtime::spawn(async move {
             if let Err(error) = state.connect_with(app, cache, credentials).await {
                 state.record_failure(error);
+            } else {
+                state.refresh_profile_display_name().await;
             }
         });
     }
@@ -248,6 +264,7 @@ impl SpotifyState {
             session: spotify_session.clone(),
             audio,
         });
+        *self.profile_display_name.write() = None;
         *self.account.write() = Account {
             session: Some(spotify_session),
             username,
@@ -278,6 +295,7 @@ impl SpotifyState {
         drop(slot);
         *self.account.write() = Account::empty();
         *self.web_token.write() = None;
+        *self.profile_display_name.write() = None;
         *self.last_error.write() = None;
         self.linked.store(false, Ordering::SeqCst);
         *self.remote.write() = None;
@@ -294,7 +312,45 @@ impl SpotifyState {
         keystore::forget(&app, &cache_dir)
     }
 
+    /// Resolve Spotify's chosen display name from /me, not librespot's opaque username.
+    /// This is best-effort and capped so a rate limit cannot block the Connections screen.
+    pub(super) async fn refresh_profile_display_name(&self) {
+        if self.profile_display_name.read().is_some() || !self.connected() {
+            return;
+        }
+        let profile = tokio::time::timeout(std::time::Duration::from_secs(3), async {
+            let paired = self.account.read().session.clone()
+                .filter(|session| !session.is_invalid());
+            let token = if let Some(session) = paired.as_ref() {
+                session.login5().auth_token().await.ok()?.access_token
+            } else {
+                // Wait until a saved playback session finishes reconnecting. A separate
+                // browsing account must not be mislabeled as the paired playback account.
+                if self.linked.load(Ordering::SeqCst) {
+                    return None;
+                }
+                self.web_token().await.ok()?
+            };
+            let body = api::me(&self.http, &token).await.ok()?;
+            let name = library::profile_display_name(&body)?;
+            if paired.is_some() {
+                let account = self.account.read();
+                let id = body.get("id").and_then(serde_json::Value::as_str)?;
+                if id != account.username {
+                    return None;
+                }
+            }
+            Some(name)
+        }).await;
+        if let Ok(Some(name)) = profile {
+            if self.connected() && self.profile_display_name.read().is_none() {
+                *self.profile_display_name.write() = Some(name);
+            }
+        }
+    }
+
     pub async fn status(&self) -> Result<SpotifyStatus, String> {
+        self.refresh_profile_display_name().await;
         Ok(self.snapshot())
     }
 
@@ -383,30 +439,36 @@ impl SpotifyState {
         } else {
             "disconnected"
         };
+        let capabilities: &[&str] = if status.playback_ready {
+            &["search", "browse", "play"]
+        } else {
+            &["search", "browse"]
+        };
         let mut connection = MusicConnection::new(
             "spotify",
             "Spotify",
             "streaming",
             state,
-            &["search", "browse", "play"],
+            capabilities,
         );
-        connection.account = status.username;
+        // The librespot username is an opaque account ID, not Spotify's chosen display name.
+        connection.account = status.display_name;
         connection.error = status.error;
         // Spotify only issues tokens to a registered app, and a new app may add at most a
         // handful of listeners. Harbor ships no client id: each listener brings their own.
         if status.connected {
-            connection.detail = status.account_type;
+            connection.detail = if status.playback_ready {
+                status.account_type
+            } else if status.playback_linked {
+                Some("Spotify playback pairing is saved, but the local player is unavailable. Pair again if reconnection fails.".to_string())
+            } else {
+                Some("Spotify browsing is connected. Pair this device to enable local playback.".to_string())
+            };
         } else {
-            // The row truncates this line, so it stays short. The full walkthrough rides
-            // on the error from auth::client_id, which renders unclamped underneath.
-            connection.detail = Some(auth::BRING_YOUR_OWN.to_string());
-            connection = connection.needs(vec![MusicConnectionField::new(
-                "clientId",
-                "Spotify client id",
-                "text",
-                false,
-            )
-            .placeholder("Client id from your own Spotify app")]);
+            // Device pairing is the primary connection; a developer app is optional.
+            connection.detail = Some(
+                "Pair Spotify to play music in Harbor. Own-app browsing is optional.".to_string(),
+            );
         }
         connection
     }
@@ -440,29 +502,61 @@ impl SpotifyState {
         devices::list(self).await
     }
 
+    /// Token status is local only; this checks refreshability, not remote Spotify availability.
+    fn browsing_token_state(&self) -> (bool, bool) {
+        let token = self.web_token.read().clone().or_else(|| {
+            self.app
+                .read()
+                .as_ref()
+                .and_then(keystore::web_token)
+        });
+        let Some(token) = token else {
+            return (false, false);
+        };
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        let usable = token.is_fresh(now) || token.refresh_token.is_some();
+        let own_app = usable
+            && token.client_id.as_ref().is_some_and(|id| {
+                id != &librespot_core::config::SessionConfig::default().client_id
+            });
+        (usable, own_app)
+    }
+
     pub(super) fn connected(&self) -> bool {
-        self.account.read().connected() || self.linked.load(Ordering::SeqCst)
+        self.account.read().connected()
+            || self.linked.load(Ordering::SeqCst)
+            || self.browsing_token_state().0
     }
 
     fn snapshot(&self) -> SpotifyStatus {
         let account = self.account.read();
-        if !account.connected() && !self.linked.load(Ordering::SeqCst) {
-            return SpotifyStatus {
-                connected: false,
-                username: None,
-                country: None,
-                premium: false,
-                account_type: None,
-                error: self.last_error.read().clone(),
-            };
-        }
+        let playback_ready = account.connected();
+        let playback_linked = playback_ready || self.linked.load(Ordering::SeqCst);
+        let (token_ready, own_app_browsing) = self.browsing_token_state();
+        let browsing_ready = token_ready || playback_ready;
+        let connected = playback_linked || browsing_ready;
         SpotifyStatus {
-            connected: true,
-            username: text(&account.username),
-            country: text(&account.country),
-            premium: account.tier.premium(),
-            account_type: account.tier.label().map(str::to_string),
-            error: None,
+            connected,
+            playback_ready,
+            playback_linked,
+            browsing_ready,
+            own_app_browsing,
+            username: playback_linked.then(|| text(&account.username)).flatten(),
+            display_name: connected.then(|| self.profile_display_name.read().clone()).flatten(),
+            country: playback_linked.then(|| text(&account.country)).flatten(),
+            premium: playback_ready && account.tier.premium(),
+            account_type: playback_ready
+                .then(|| account.tier.label().map(str::to_string))
+                .flatten(),
+            // Do not hide a failed session restore behind a stored authorization.
+            error: if playback_ready {
+                None
+            } else {
+                self.last_error.read().clone()
+            },
         }
     }
 
@@ -515,9 +609,67 @@ mod tests {
         let state = SpotifyState::new();
         let status = state.snapshot();
         assert!(!status.connected);
+        assert!(!status.playback_ready);
         assert!(!status.premium);
         assert!(status.account_type.is_none());
         assert!(!state.connected());
+    }
+
+    #[test]
+    fn display_name_is_used_for_ui_but_internal_account_id_is_preserved() {
+        let state = SpotifyState::new();
+        state.linked.store(true, Ordering::SeqCst);
+        state.account.write().username = "internal_opaque_spotify_id".into();
+        *state.profile_display_name.write() = Some("My Spotify Name".into());
+        let status = state.snapshot();
+        assert_eq!(status.username.as_deref(), Some("internal_opaque_spotify_id"));
+        assert_eq!(status.display_name.as_deref(), Some("My Spotify Name"));
+        assert_eq!(state.connection().account.as_deref(), Some("My Spotify Name"));
+
+        *state.profile_display_name.write() = None;
+        assert!(state.connection().account.is_none(), "never fall back to the internal account ID");
+    }
+
+    #[test]
+    fn browsing_only_oauth_is_connected_without_claiming_playback() {
+        let state = SpotifyState::new();
+        *state.web_token.write() = Some(keystore::WebToken {
+            access_token: "test-token".into(),
+            refresh_token: Some("refresh-token".into()),
+            expires_at: u64::MAX,
+            scopes: vec![],
+            client_id: Some("my-personal-developer-app".into()),
+        });
+        let status = state.snapshot();
+        assert!(status.connected);
+        assert!(status.browsing_ready);
+        assert!(status.own_app_browsing);
+        assert!(!status.playback_linked);
+        assert!(!status.playback_ready);
+        assert!(!status.premium);
+        assert!(state.connected());
+        let connection = state.connection();
+        assert_eq!(connection.status, "connected");
+        assert!(connection.detail.unwrap().contains("browsing is connected"));
+    }
+
+    #[test]
+    fn saved_sign_in_without_a_live_session_is_not_reported_as_playback_ready() {
+        let state = SpotifyState::new();
+        state.linked.store(true, Ordering::SeqCst);
+        state.record_failure("Spotify session reconnect failed: network timeout".to_string());
+        let status = state.snapshot();
+        assert!(status.connected, "stored authorization is still present");
+        assert!(!status.playback_ready, "a saved token cannot play audio by itself");
+        assert!(!status.premium, "Premium cannot be inferred from a stale login");
+        assert_eq!(
+            status.error.as_deref(),
+            Some("Spotify session reconnect failed: network timeout")
+        );
+        let connection = state.connection();
+        assert_eq!(connection.status, "connected");
+        assert_eq!(connection.error, status.error);
+        assert!(connection.detail.unwrap().contains("playback is not ready"));
     }
 
     #[test]

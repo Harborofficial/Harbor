@@ -11,6 +11,7 @@ function fixture() {
   let calls = 0;
   const media = memoryMediaCache({ now: () => now });
   const dependencies = {
+    "@/lib/metadata-policy": { addonOnlyMetadata: () => false },
     "@/lib/cache": {
       lruGet: (map, key) => map.get(key),
       lruSet: (map, key, value) => map.set(key, value),

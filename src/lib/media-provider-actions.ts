@@ -16,9 +16,19 @@ import { stremioIdToTraktTarget } from "./trakt/ids";
 import { simklRequest } from "./simkl/client";
 import { isAuthenticated as simklConnected } from "./simkl/session";
 import { isAuthenticated as anilistConnected } from "./anilist/session";
+import { resolveAnilistMediaId } from "./anilist/sync";
+import { saveListEntry as saveAnilistListEntry } from "./anilist/mutations";
 import { isAuthenticated as malConnected } from "./mal/session";
-import { stremioIdToSimklTarget } from "./simkl/ids";
-import { readSimklStateStrict, invalidateSimklListStatus } from "./simkl/list-status";
+import {
+  resolveMalMediaId,
+  saveListEntry as saveMalListEntry,
+} from "./mal/mutations";
+import { resolveSimklTarget, stremioIdToSimklTarget } from "./simkl/ids";
+import {
+  readSimklStateStrict,
+  invalidateSimklListStatus,
+  setSimklStatus,
+} from "./simkl/list-status";
 import { invalidateWatchlistCache } from "./simkl/watchlist";
 import { invalidateHistoryCache } from "./simkl/history";
 import type { SimklTarget } from "./simkl/types";
@@ -53,6 +63,8 @@ import { addNuvioLibraryItem, removeNuvioLibraryItem } from "./nuvio/nuvio-libra
 import { saveLocalCw, clearLocalCw } from "./local-cw";
 import { saveResumeMs } from "./resume";
 import { loadStoredSettings } from "./settings/load";
+import { pmdbDeleteResumesForTitle } from "./publicmetadb/scrobble";
+import { dropPmdbShow } from "./publicmetadb/dropped";
 
 export type ProviderWrite = {
   provider: string;
@@ -495,6 +507,154 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
         }
       },
     });
+  return writes;
+}
+
+export function dropProviderWrites(
+  input: WatchlistInput,
+  animeId?: string | null,
+): ProviderWrite[] {
+  const writes: ProviderWrite[] = [];
+  const syncId = animeId || input.id;
+  const anime = !!animeId || input.type === "anime" || ANIME_CLOUD_ID.test(syncId);
+
+  if (anime && anilistConnected())
+    writes.push({
+      provider: "AniList",
+      run: async (assertCurrent) => {
+        const mediaId = await resolveAnilistMediaId(syncId);
+        assertCurrent();
+        if (!anilistConnected()) throw new Error("AniList disconnected.");
+        if (mediaId == null) return "No verified AniList identity is available for this anime.";
+        const saved = await saveAnilistListEntry({ mediaId, status: "DROPPED" });
+        assertCurrent();
+        if (saved.status !== "DROPPED") throw new Error("AniList did not confirm dropped status.");
+      },
+    });
+
+  if (anime && malConnected())
+    writes.push({
+      provider: "MyAnimeList",
+      run: async (assertCurrent) => {
+        const malId = await resolveMalMediaId(syncId);
+        assertCurrent();
+        if (!malConnected()) throw new Error("MyAnimeList disconnected.");
+        if (malId == null) return "No verified MyAnimeList identity is available for this anime.";
+        const saved = await saveMalListEntry({ malId, status: "dropped" });
+        assertCurrent();
+        if (saved.status !== "dropped") throw new Error("MyAnimeList did not confirm dropped status.");
+      },
+    });
+
+  if (simklConnected())
+    writes.push({
+      provider: "Simkl",
+      run: async (assertCurrent) => {
+        let target = await resolveSimklTarget(syncId, "series");
+        assertCurrent();
+        if (!target && input.imdbId) {
+          target = await resolveSimklTarget(input.imdbId, "series");
+          assertCurrent();
+        }
+        if (!simklConnected()) throw new Error("Simkl disconnected.");
+        if (!target) return "No verified Simkl identity is available for this title.";
+        const status = await setSimklStatus(target, "dropped");
+        assertCurrent();
+        if (status !== "dropped") throw new Error("Simkl did not confirm dropped status.");
+        invalidateSimklListStatus();
+      },
+    });
+
+  if (traktConnected()) {
+    const assertTrakt = captureTraktGuard();
+    writes.push({
+      provider: "Trakt",
+      run: async (assertCurrent) => {
+        const ids = idsFor(input, "Trakt");
+        if (!ids) return "No verified Trakt identity is available for this title.";
+        const validate = () => {
+          assertCurrent();
+          assertTrakt();
+        };
+        validate();
+        const response = await traktRequest<SyncResponse>("/users/hidden/dropped", {
+          method: "POST",
+          body: { shows: [{ ids }] },
+          assertCurrent: validate,
+        });
+        validate();
+        if (
+          !response ||
+          Object.values(response.not_found ?? {}).some(
+            (items) => !Array.isArray(items) || items.length > 0,
+          ) ||
+          typeof response.added?.shows !== "number" ||
+          !Number.isFinite(response.added.shows)
+        )
+          throw new Error("Trakt did not confirm dropped status.");
+      },
+    });
+  }
+
+  if (pmdbConnected()) {
+    const assertPmdb = capturePmdbGuard();
+    const listId = getPmdbDefaultListId();
+    let target: PmdbTarget | null | undefined;
+    const prepare = async (assertCurrent: () => void) => {
+      const validate = () => {
+        assertCurrent();
+        assertPmdb();
+      };
+      validate();
+      if (target === undefined) {
+        let resolved = await resolvePmdbTarget(syncId, "series");
+        validate();
+        if (!resolved && syncId !== input.id) {
+          resolved = await resolvePmdbTarget(input.id, "series");
+          validate();
+        }
+        if (!resolved && input.imdbId) {
+          resolved = await resolvePmdbTarget(input.imdbId, "series");
+          validate();
+        }
+        target = await pmdbTargetWithTmdb(resolved, validate);
+      }
+      return target?.media_type === "tv" ? target : null;
+    };
+    writes.push({
+      provider: "PublicMetaDB",
+      run: async (assertCurrent) => {
+        const validate = () => {
+          assertCurrent();
+          assertPmdb();
+        };
+        const resolved = await prepare(assertCurrent);
+        if (!resolved) return "No verified PublicMetaDB identity is available for this title.";
+        const dropped = await dropPmdbShow(resolved, { assertCurrent: validate });
+        validate();
+        if (!dropped) throw new Error("PublicMetaDB did not confirm dropped status.");
+
+        const items = await fetchPmdbWatchlist({
+          listId,
+          strict: true,
+          assertCurrent: validate,
+        });
+        validate();
+        if (pmdbWatchlistContains(items, resolved)) {
+          const removed = await removeFromPmdbWatchlist(resolved, {
+            listId,
+            strict: true,
+            assertCurrent: validate,
+          });
+          validate();
+          if (!removed) throw new Error("PublicMetaDB did not confirm watchlist removal.");
+        }
+        await pmdbDeleteResumesForTitle(resolved, { assertCurrent: validate });
+        validate();
+      },
+    });
+  }
+
   return writes;
 }
 

@@ -8,6 +8,8 @@ export type StoredPlaylist = {
   epgUrl?: string;
   kind?: "m3u" | "xtream" | "epg";
   xtream?: { server: string; username: string; password: string };
+  /** Set once an M3U fetch has looked for a guide URL in the playlist header. */
+  epgHeaderChecked?: boolean;
 };
 
 const STORAGE_KEY = "harbor.iptv.playlists.v1";
@@ -135,6 +137,23 @@ export function readPlaylists(): StoredPlaylist[] {
   } catch {
     return [];
   }
+}
+
+/**
+ * Remembers the guide URL declared in an M3U header. The checked flag keeps a
+ * header-less list from being re-downloaded on every launch just to look again.
+ */
+export function recordM3uEpgDiscovery(id: string, epgUrl: string | null): void {
+  const lists = readPlaylists();
+  let changed = false;
+  const next = lists.map((entry) => {
+    if (entry.id !== id || (entry.kind ?? "m3u") !== "m3u") return entry;
+    const nextEpgUrl = entry.epgUrl || epgUrl || undefined;
+    if (entry.epgHeaderChecked && nextEpgUrl === entry.epgUrl) return entry;
+    changed = true;
+    return { ...entry, epgUrl: nextEpgUrl, epgHeaderChecked: true };
+  });
+  if (changed) writePlaylists(next);
 }
 
 export function writePlaylists(playlists: StoredPlaylist[]): boolean {

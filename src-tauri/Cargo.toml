@@ -1,6 +1,6 @@
 [package]
 name = "harbor"
-version = "1.0.1"
+version = "1.0.2"
 description = "A Stremio client built for adventure"
 edition = "2021"
 
@@ -40,7 +40,7 @@ music-sidecar = ["music"]
 music-legacy-spotify-player = ["music", "dep:librespot-playback"]
 context-review = []
 silero-vad = ["dep:ort", "dep:ndarray"]
-asr-whisper = ["dep:whisper-rs"]
+asr-whisper = ["dep:whisper-rs", "silero-vad"]
 chromaprint = []
 
 [dependencies]
@@ -169,6 +169,7 @@ windows = { version = "0.62", features = [
   "Win32_Security_Cryptography",
   "Win32_UI_WindowsAndMessaging",
   "Win32_UI_Shell",
+  "Win32_UI_Shell_PropertiesSystem",
   "Win32_Graphics_Dwm",
   "Win32_Graphics_Gdi",
   "Win32_Graphics_Dxgi",
@@ -207,6 +208,7 @@ webview2-com = "0.39"
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = { version = "0.18", features = ["v3_24"] }
 zbus = { version = "5", default-features = false, features = ["tokio"] }
+libpulse-binding = "2.30"
 
 
 [dev-dependencies]

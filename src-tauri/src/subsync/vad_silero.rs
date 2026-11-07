@@ -13,6 +13,8 @@ fn session() -> Result<&'static Mutex<Session>, String> {
         return Ok(s);
     }
     let sess = Session::builder()
+        .and_then(|b| b.with_intra_threads(1))
+        .and_then(|b| b.with_inter_threads(1))
         .and_then(|b| b.commit_from_memory(MODEL))
         .map_err(|e| format!("silero load: {}", e))?;
     let _ = S.set(Mutex::new(sess));
@@ -54,4 +56,19 @@ pub fn probs(pcm: &[f32]) -> Result<Vec<f32>, String> {
         context.copy_from_slice(&chunk[WIN - CTX..]);
     }
     Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn silence_is_not_speech_and_each_clip_resets_recurrent_state() {
+        let pcm = vec![0.0; 16_000];
+        let first = super::probs(&pcm).expect("bundled Silero model loads");
+        let second = super::probs(&pcm).expect("cached session runs");
+        assert_eq!(first.len(), 16_000 / super::WIN);
+        assert_eq!(first, second);
+        assert!(first
+            .iter()
+            .all(|p| p.is_finite() && (0.0..0.55).contains(p)));
+    }
 }

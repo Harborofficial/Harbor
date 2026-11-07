@@ -1,3 +1,4 @@
+import { usePinnedCatalogRows } from "./home/hooks/use-pinned-rows";
 import { RotateCcw, SlidersHorizontal } from "lucide-react";
 import {
   useCallback,
@@ -830,6 +831,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
   }, []);
   useScrollMemory("anime", scrollRef, active);
   const animeCollections = useCollectionRowsForPage("anime");
+  const pinnedRows = usePinnedCatalogRows("anime");
 
   const prevActiveRef = useRef(active);
   useEffect(() => {
@@ -1128,6 +1130,27 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                   >
                     {row.metas.map((m, i) => (
                       <PickCard key={`${m.id}-${i}`} meta={cleanMeta(m)} />
+                    ))}
+                  </Row>
+                ),
+              });
+            }
+            for (const row of pinnedRows) {
+              const nm = nameOf(row.key, row.name);
+              rd.push({
+                key: row.key,
+                name: nm,
+                node: (
+                  <Row
+                    title={nm}
+                    onViewAll={
+                      row.fetcher
+                        ? () => openGrid({ title: nm, fetcher: row.fetcher!, initial: row.metas })
+                        : undefined
+                    }
+                  >
+                    {row.metas.map((meta, i) => (
+                      <PickCard key={`${meta.id}-${i}`} meta={meta} />
                     ))}
                   </Row>
                 ),

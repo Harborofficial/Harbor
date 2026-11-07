@@ -562,7 +562,7 @@ async fn real_http_and_torrent_payloads_share_live_bandwidth_and_keep_exact_byte
     let plan = torrents.prepare("alice", metadata, vec![peer]).unwrap();
     let startup = Instant::now();
     let file = direct.add(NewTransfer {
-        source_link: None, browser_ticket: None, profile: "alice".into(), name: "payload.dat".into(), game: None,
+        source_link: None, torbox_origin: None, browser_ticket: None, profile: "alice".into(), name: "payload.dat".into(), game: None,
         url: format!("http://{address}/payload.dat"), destination: root.join("direct-payload.dat").to_string_lossy().into_owned(),
         expected_bytes: Some(bytes.len() as u64), expected_sha256: Some(files::digest(&bytes)),
     }).unwrap();

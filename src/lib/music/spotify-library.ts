@@ -5,6 +5,8 @@ import type { MusicPlaylist, MusicPlaylistRef, MusicTrack } from "./types";
 export type SpotifyLibraryKind = "liked" | "playlists" | "playlist";
 export type SpotifyLibraryPlaylist = MusicPlaylistRef & { canRead: boolean; editable: boolean };
 export type SpotifyLibraryPage = {
+  /** Display name from Spotify /me; never use its internal ID as a UI label. */
+  accountDisplayName?: string | null;
   tracks: MusicTrack[];
   trackAddedAt?: Record<string, string>;
   playlists: SpotifyLibraryPlaylist[];

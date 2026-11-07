@@ -16,7 +16,12 @@ import { useT } from "@/lib/i18n";
 import { Poster } from "@/components/poster";
 import { mangaBackdrop } from "@/lib/manga/backdrop";
 import { collectionsForTitle } from "@/lib/manga/collections";
-import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
+import {
+  mangaFavoriteFailureMessage,
+  useIsMangaFavorite,
+  useMangaFavorites,
+} from "@/lib/manga-favorites";
+import { emitListToast } from "@/components/lists/list-toast";
 import { useMangaProgressEntry, type MangaProgressEntry } from "@/lib/manga-progress";
 import { chapterNumberKey } from "@/lib/manga/chapter-identity";
 import {
@@ -228,7 +233,8 @@ export function MangaDetail({
   }, [downloadRequest, detailPending, detail, chapters.length, mangaId]);
 
   const favorites = useMangaFavorites();
-  const isFavorite = useIsMangaFavorite(mangaId);
+  const favoriteSourceId = useMemo(() => decodeMangaId(mangaId)?.sourceId, [mangaId]);
+  const isFavorite = useIsMangaFavorite(mangaId, favoriteSourceId);
   const progress = useMangaProgressEntry(mangaId, detail?.title);
 
   useEffect(() => {
@@ -565,15 +571,18 @@ export function MangaDetail({
                   type="button"
                   aria-pressed={isFavorite}
                   aria-label={isFavorite ? t("Remove favorite") : t("Add favorite")}
-                  onClick={() =>
-                    detail &&
-                    favorites.toggle({
+                  onClick={() => {
+                    if (!detail) return;
+                    const result = favorites.toggle({
                       id: mangaId,
                       title: detail.title,
                       altTitle: detail.altTitle,
                       cover: detail.cover,
-                    })
-                  }
+                      sourceId: favoriteSourceId,
+                    });
+                    const message = mangaFavoriteFailureMessage(result, t);
+                    if (message) emitListToast(message, "error");
+                  }}
                   className={`group flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.94] ${
                     isFavorite
                       ? "bg-accent/20 text-accent hover:bg-accent/22"

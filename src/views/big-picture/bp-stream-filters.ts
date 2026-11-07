@@ -32,6 +32,7 @@ import {
   matchesFacets,
   type FacetState,
 } from "@/views/play-picker/stream-facets";
+import { expandOriginalAudioLang } from "@/lib/player/audio-language";
 
 // Resolution and availability are already spoken for by the quality chips and by
 // the cached / stream-mode chips, so only the remaining desktop dimensions get
@@ -89,12 +90,22 @@ export function useBpStreamFilters(params: {
   debrids: DebridStore[];
   isCached: (s: ScoredStream) => boolean;
   isAnimeRequest: boolean;
+  originalLanguage?: string;
   hostMatch: Map<ScoredStream, number> | null;
   pinned: ScoredStream | null;
   addonLogoFor: (key: string) => string | null;
 }): BpStreamFilters {
-  const { result, addons, debrids, isCached, isAnimeRequest, hostMatch, pinned, addonLogoFor } =
-    params;
+  const {
+    result,
+    addons,
+    debrids,
+    isCached,
+    isAnimeRequest,
+    originalLanguage,
+    hostMatch,
+    pinned,
+    addonLogoFor,
+  } = params;
   const { settings, update } = useSettings();
   const baseLangs = settings.preferredLanguages ?? [];
 
@@ -111,8 +122,8 @@ export function useBpStreamFilters(params: {
       seen.add(code);
       out.push(lang);
     }
-    return out;
-  }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest]);
+    return expandOriginalAudioLang(out, originalLanguage, isAnimeRequest);
+  }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest, originalLanguage]);
 
   const [quality, setQuality] = useState<QualityKey>("all");
   const [facet, setFacetState] = useState<FacetState>({});

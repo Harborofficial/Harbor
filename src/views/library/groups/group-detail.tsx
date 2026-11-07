@@ -32,8 +32,8 @@ export function GroupDetail({
       <GroupEditor
         group={group}
         onCancel={() => setEditing(false)}
-        onSave={(nextName, image) => {
-          onSave({ ...group, name: nextName, image });
+        onSave={(nextName, image, presentation) => {
+          onSave({ ...group, name: nextName, image, ...presentation });
           setEditing(false);
         }}
       />
@@ -45,11 +45,7 @@ export function GroupDetail({
       </button>
       <header className="flex flex-wrap items-center gap-4">
         {group.image ? (
-          <img
-            src={group.image}
-            alt=""
-            className="h-20 w-32 rounded-xl bg-elevated object-contain"
-          />
+          <img src={group.image} alt="" className="h-20 w-32 rounded-xl bg-elevated object-cover" />
         ) : (
           <HarborMark className="h-20 w-32 shrink-0 text-ink" />
         )}

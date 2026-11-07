@@ -24,6 +24,7 @@ import { FiltersMenu, type SwitcherFilters } from "./stream-switcher/filters-men
 import { sourceGroup } from "@/views/play-picker/quality-filter";
 import { KidsStreamSwitcher } from "./stream-switcher/kids-switcher";
 import { normalizeLangCode, streamMatchesLangs } from "./stream-switcher/lang-utils";
+import { expandOriginalAudioLang } from "@/lib/player/audio-language";
 import {
   QUALITY_BADGE,
   QUALITY_LABEL,
@@ -93,8 +94,8 @@ export function StreamSwitcher({
       seen.add(code);
       out.push(lang);
     }
-    return out;
-  }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest]);
+    return expandOriginalAudioLang(out, meta.originalLanguage, isAnimeRequest);
+  }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest, meta.originalLanguage]);
   const [cache, setCache] = useState(() =>
     peekPickerCache(meta, episode, settings.animePreferImdbStreams),
   );

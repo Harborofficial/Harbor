@@ -99,6 +99,21 @@ export function continuationFor(
   };
 }
 
+/** Only replay genuinely reusable direct HTTP links without a picker refresh.
+ * Debrid/torrent URLs are signed or provider-resolved and may expire while the
+ * source identity (hash, file index, addon) remains usable for fresh resolution.
+ */
+export function canReuseRecentRemotePlayback(
+  target: Pick<ActualPlayback, "playedAt" | "requiresSourceRefresh" | "src">,
+  now = Date.now(),
+): boolean {
+  const age = now - target.playedAt;
+  if (!Number.isFinite(age) || age < 0 || age > 2 * 60 * 60 * 1000) return false;
+  if (target.requiresSourceRefresh || target.src.streamRef?.infoHash) return false;
+  return /^https?:\/\/(?!127\.0\.0\.1(?:[:/]|$)|localhost(?:[:/]|$)|\[::1\](?:[:/]|$))/i
+    .test(target.src.url);
+}
+
 export async function continueActualPlayback(
   target: ActualPlayback,
   options: { restart?: boolean; actor?: PlaybackActor },

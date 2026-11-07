@@ -20,7 +20,7 @@ test("content advisory restores the compact September design with current timing
   assert.match(toast, /bg-black\/70/);
   assert.match(toast, /const HOLD_MS = 8_000/);
   assert.match(toast, /const HOVER_TAIL_MS = 2_500/);
-  assert.match(toast, /w-\[238px\]/);
+  assert.match(toast, /w-fit min-w-\[238px\]/);
   assert.match(toast, /rounded-xl border border-white\/10/);
   assert.match(toast, /backdrop-blur-xl/);
   assert.match(toast, /ShieldAlert/);

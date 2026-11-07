@@ -5,6 +5,7 @@ import { GamesIcon } from "@/components/icons/games-icon";
 import {
   Droplet,
   Hourglass,
+  Image,
   Library,
   MousePointer2,
   Moon,
@@ -290,6 +291,15 @@ export function DisplaySection() {
             icon={<Text size={18} strokeWidth={2} />}
             value={settings.playerTitleScale}
             onChange={(v) => update({ playerTitleScale: v })}
+          />
+          <ToggleRow
+            label={t("Use title artwork in the player")}
+            sub={t(
+              "Show the movie or show logo instead of its name at the top of the player when artwork is available.",
+            )}
+            value={settings.playerTitleLogo}
+            onChange={(v) => update({ playerTitleLogo: v })}
+            leading={<Image size={18} strokeWidth={2} />}
           />
           <ToggleRow
             label={t("Show series name first in the player")}

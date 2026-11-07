@@ -14,7 +14,7 @@ export function AdvisoryPreview() {
 
   return (
     <div className="hset-row">
-      <div className="relative flex min-h-[192px] w-full max-w-[286px] items-center justify-center overflow-hidden rounded-md bg-canvas p-6">
+      <div className="relative flex min-h-[192px] w-full max-w-[340px] items-center justify-center overflow-hidden rounded-md bg-canvas p-6">
         {art.background && (
           <img
             src={art.background}

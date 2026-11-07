@@ -40,20 +40,46 @@ export type FlipCtor = new (el: HTMLElement, opts: Record<string, unknown>) => F
 type FlipMainInstance = { options?: unknown };
 type FlipMainProto = {
   pageLoaded?: (this: FlipMainInstance, ...args: Array<unknown>) => unknown;
+  loadPageHTML?: (
+    this: FlipMainInstance,
+    page: number,
+    callback: (this: FlipMainInstance, content: unknown, ...args: Array<unknown>) => unknown,
+  ) => unknown;
   __harborPageLoadedGuard?: boolean;
+  __harborPageHtmlContentGuard?: boolean;
 };
 
 export function guardPageLoaded(): void {
   if (typeof window === "undefined") return;
-  const proto = (window as unknown as { FLIPBOOK?: { Main?: { prototype?: FlipMainProto } } })
+  const mainProto = (window as unknown as { FLIPBOOK?: { Main?: { prototype?: FlipMainProto } } })
     .FLIPBOOK?.Main?.prototype;
-  if (!proto || typeof proto.pageLoaded !== "function" || proto.__harborPageLoadedGuard) return;
-  const orig = proto.pageLoaded;
-  proto.pageLoaded = function (this: FlipMainInstance, ...args: Array<unknown>): unknown {
-    if (!this || this.options == null) return undefined;
-    return orig.apply(this, args);
+  if (mainProto && typeof mainProto.pageLoaded === "function" && !mainProto.__harborPageLoadedGuard) {
+    const original = mainProto.pageLoaded;
+    mainProto.pageLoaded = function (this: FlipMainInstance, ...args: Array<unknown>): unknown {
+      if (!this || this.options == null) return undefined;
+      return original.apply(this, args);
+    };
+    mainProto.__harborPageLoadedGuard = true;
+  }
+
+  if (
+    !mainProto ||
+    typeof mainProto.loadPageHTML !== "function" ||
+    mainProto.__harborPageHtmlContentGuard
+  )
+    return;
+  const originalLoadPageHTML = mainProto.loadPageHTML;
+  mainProto.loadPageHTML = function (this: FlipMainInstance, page, callback): unknown {
+    return originalLoadPageHTML.call(this, page, function (content, ...args) {
+      if (content == null || typeof content === "string") {
+        const wrapper = document.createElement("div");
+        if (typeof content === "string") wrapper.innerHTML = content;
+        content = wrapper;
+      }
+      return callback.call(this, content, ...args);
+    });
   };
-  proto.__harborPageLoadedGuard = true;
+  mainProto.__harborPageHtmlContentGuard = true;
 }
 
 export function hasNativeZoom(inst: FlipInstance | null): boolean {

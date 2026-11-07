@@ -12,6 +12,7 @@ export function AddonGroup({
   streams,
   isCached,
   defaultOpen,
+  intent = "play",
   onPick,
 }: {
   addonId: string;
@@ -20,6 +21,7 @@ export function AddonGroup({
   streams: ScoredStream[];
   isCached: (s: ScoredStream) => boolean;
   defaultOpen: boolean;
+  intent?: "play" | "download";
   onPick: (s: ScoredStream) => void;
 }) {
   const t = useT();
@@ -56,6 +58,7 @@ export function AddonGroup({
               key={`${s.url ?? s.infoHash ?? s.title}-${i}`}
               stream={s}
               cached={isCached(s)}
+              intent={intent}
               onPick={() => onPick(s)}
             />
           ))}

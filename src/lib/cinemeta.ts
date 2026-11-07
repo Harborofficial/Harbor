@@ -1,4 +1,5 @@
 import { withMetaCache } from "@/lib/cinemeta-cache";
+import { addonOnlyMetadata } from "./metadata-policy";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 export { persistableAddonOrigin } from "./addon-configuration-key";
 
@@ -18,10 +19,31 @@ export type AddonOrigin = {
   configurationKey?: string;
 };
 
+/** Non-standard season metadata some addons include beside `videos`. */
+export type MetaSeason = {
+  season?: number;
+  number?: number;
+  seasonNumber?: number;
+  name?: string;
+  overview?: string;
+  description?: string;
+  overviewLanguage?: string;
+  language?: string;
+  poster?: string;
+  image?: string;
+  background?: string;
+  backdrop?: string;
+  airDate?: string;
+  released?: string;
+  episodeCount?: number;
+};
+
 export type Meta = {
   id: string;
   type: MetaType;
   name: string;
+  /** Verified alternative titles from the same metadata record for stream matching. */
+  alternateTitles?: string[];
   poster?: string;
   background?: string;
   logo?: string;
@@ -63,12 +85,24 @@ export type Meta = {
   listingYear?: number;
   runtime?: string;
   genres?: string[];
+  cast?: string[];
   trailers?: Array<{ source: string; type?: string }>;
   trailerStreams?: Array<{ ytId?: string; title?: string }>;
   links?: Array<{ name: string; category: string; url: string }>;
   addonOrigin?: AddonOrigin;
   isCollection?: boolean;
   behaviorHints?: { defaultVideoId?: string | null };
+  seasons?: MetaSeason[];
+  /** Some metadata addons put season art or text in this extension instead of `seasons`. */
+  seasonPosters?: Record<string | number, string>;
+  seasonBackdrops?: Record<string | number, string>;
+  seasonOverviews?: Record<string | number, string>;
+  app_extras?: {
+    seasons?: MetaSeason[];
+    seasonPosters?: Record<string | number, string>;
+    seasonBackdrops?: Record<string | number, string>;
+    seasonOverviews?: Record<string | number, string>;
+  };
   videos?: Array<{
     id?: string;
     season?: number;
@@ -117,6 +151,7 @@ export function isAddonNativeMeta(meta: Meta): boolean {
 }
 
 async function catalog(path: string): Promise<Meta[]> {
+  if (addonOnlyMetadata()) return [];
   const res = await fetch(`${CINEMETA}/catalog/${path}.json`);
   if (!res.ok) return [];
   const json = await res.json();
@@ -137,6 +172,7 @@ export const topSeries = (genre?: string, skip = 0) =>
   catalog(cinemetaTopPath("series", genre, skip));
 
 export function cinemetaEnabled(): boolean {
+  if (addonOnlyMetadata()) return false;
   try {
     const raw = localStorage.getItem("harbor.settings");
     return raw ? JSON.parse(raw).cinemetaEnabled !== false : true;
@@ -150,7 +186,7 @@ export async function meta(
   id: string,
   force = false,
 ): Promise<Meta | null> {
-  if (!force && !cinemetaEnabled()) return null;
+  if (addonOnlyMetadata() || (!force && !cinemetaEnabled())) return null;
   const cleanId = id.replace(/^(series|movie):/, "");
   if (!cleanId.startsWith("tt")) return null;
   return withMetaCache(type, cleanId, async () => {

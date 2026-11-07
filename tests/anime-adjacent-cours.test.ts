@@ -143,6 +143,9 @@ function seriesModule() {
   };
   const exports: Record<string, any> = {};
   new Function("require", "exports", compiled)((id: string) => {
+    if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+      return { addonOnlyMetadata: () => false };
+    if (id === "./metadata-addons") return { readMetadataAddonOrder: () => [] };
     assert.ok(Object.hasOwn(mocks, id), `Unexpected dependency: ${id}`);
     return mocks[id];
   }, exports);

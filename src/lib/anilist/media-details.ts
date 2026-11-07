@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { anilistRequest } from "./client";
 import { kitsuToAnilist } from "@/lib/providers/anime-mapping";
 import { lruSet } from "@/lib/cache";
@@ -265,6 +266,7 @@ registerEvictable("anilist-media-details", (aggressive) => {
 export async function fetchAnilistMediaDetails(
   anilistId: number,
 ): Promise<AnilistMediaDetails | null> {
+  if (addonOnlyMetadata()) return null;
   if (cache.has(anilistId) && (expires.get(anilistId) ?? 0) > Date.now())
     return cache.get(anilistId) ?? null;
   const shared = inflight.get(anilistId);
@@ -304,6 +306,7 @@ export async function fetchAnilistMediaDetails(
 export async function fetchAnilistMediaDetailsByKitsu(
   kitsuId: number,
 ): Promise<AnilistMediaDetails | null> {
+  if (addonOnlyMetadata()) return null;
   const anilistId = await kitsuToAnilist(kitsuId).catch(() => null);
   if (!anilistId) return null;
   return fetchAnilistMediaDetails(anilistId);

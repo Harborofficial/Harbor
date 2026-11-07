@@ -57,7 +57,7 @@ export function PrimaryCard({
   const cachedDebrids = debrids.filter((d) => stream.cached[d.slug]);
   const libraryDebrids = debrids.filter((d) => stream.inLibrary[d.slug]);
   const cachedDebrid = cachedDebrids[0] ?? null;
-  const externalOnly = !stream.url && !stream.infoHash && !!(stream.externalUrl || stream.ytId);
+  const externalOnly = !stream.url && !stream.infoHash && !!stream.externalUrl;
   const link = resolveStreamLink(stream);
   const addonCached = anyStreamCached(stream);
   const isCached =

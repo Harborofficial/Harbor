@@ -1,5 +1,34 @@
 use super::*;
 
+#[tokio::test]
+async fn youtube_playback_verification_rejects_cdn_errors_and_empty_media() {
+    use std::io::{Read, Write};
+    for (status, body, accepted) in [
+        ("403 Forbidden", "", false),
+        ("206 Partial Content", "", false),
+        ("206 Partial Content", "video bytes", true),
+    ] {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            let mut request = [0u8; 4096];
+            let count = socket.read(&mut request).unwrap();
+            let request = String::from_utf8_lossy(&request[..count]).to_lowercase();
+            assert!(request.contains("range: bytes=0-"));
+            assert!(request.contains("user-agent: fixture"));
+            write!(socket, "HTTP/1.1 {status}\r\nContent-Type: video/mp4\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).unwrap();
+        });
+        let stream = YoutubeStream {
+            url: format!("http://{address}/video"),
+            headers: [("User-Agent".to_string(), "fixture".to_string())].into(),
+            transcode: false,
+        };
+        assert_eq!(verify_youtube_stream(&stream).await.is_ok(), accepted);
+        server.join().unwrap();
+    }
+}
+
 const YT_DLP_EXTRACTION: &[&str] = &[
     "PYZ.pyz",
     "base_library.zip",
@@ -336,4 +365,12 @@ fn adaptive_selection_and_cache_version_do_not_reuse_legacy_720p_files() {
         .any(|arg| arg.starts_with("after_move:HARBOR_TRAILER:")));
     assert!(args.iter().any(|arg| arg == "--no-simulate"));
     assert!(!args.iter().any(|arg| arg == "--skip-download"));
+}
+#[test]
+fn addon_youtube_stream_preserves_url_and_headers_without_downloading() {
+    let stream = parse_youtube_stream(br#"{"url":"https://media.example/video.mp4","http_headers":{"User-Agent":"resolver"}}"#).unwrap();
+    assert_eq!(stream.url, "https://media.example/video.mp4");
+    assert_eq!(stream.headers.get("User-Agent").map(String::as_str), Some("resolver"));
+    assert!(parse_youtube_stream(br#"{"url":"file:///private"}"#).is_err());
+    assert!(parse_youtube_stream(br#"{"requested_formats":[]}"#).is_err());
 }

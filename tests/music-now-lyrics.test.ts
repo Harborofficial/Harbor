@@ -98,14 +98,14 @@ test("the lyrics panel reads the live engine rather than its own copy", () => {
     /import \{ loadTrackLyrics, lyricIndexAt, type LyricLine \} from "@\/lib\/music\/lyrics"/,
   );
   assert.match(TSX, /loadTrackLyrics\(current\)/);
-  assert.match(TSX, /lyricIndexAt\(lyrics, [^)]*player\.currentTime/);
+  assert.match(TSX, /lyricIndexAt\(\s*timedLyrics,\s*[\s\S]*?player\.currentTime/);
 });
 
 test("the panel covers loading, empty and ready without stranding the user", () => {
   assert.match(TSX, /setLyricsState\("loading"\)/);
   assert.match(
     TSX,
-    /t\(\s*lyricsState === "loading" \? "Finding lyrics" : "No lyrics for this track",?\s*\)/,
+    /t\(\s*lyricsState === "loading"\s*\?\s*"Finding lyrics"\s*:\s*"No lyrics for this track",?\s*\)/,
   );
   assert.ok(
     /setTimeout\([\s\S]{0,160}?setLyricsState/.test(TSX),
@@ -113,9 +113,43 @@ test("the panel covers loading, empty and ready without stranding the user", () 
   );
 });
 
+test("the lyrics panel translates into the selected app language", () => {
+  assert.match(TSX, /translateLyrics/);
+  assert.match(TSX, /toggleLyricTranslation/);
+  assert.match(TSX, /aria-pressed=\{lyricTranslationOn\}/);
+  assert.match(TSX, /lyricTranslation\?\.language === lyricTarget/);
+});
+
+test("the lyrics language is selectable and remembered", () => {
+  assert.match(TSX, /const LYRIC_TARGET_KEY = "harbor\.lyrics\.translate-to\.v1"/);
+  assert.match(TSX, /<Dropdown/);
+  assert.match(TSX, /LANGUAGES\.map/);
+  assert.match(TSX, /localStorage\.setItem\(LYRIC_TARGET_KEY, next\)/);
+});
+
+test("live sync aligns a tapped line to the moment it was heard", () => {
+  assert.match(TSX, /useLyricSync\(current\)/);
+  assert.match(TSX, /addLyricSyncPoint\(syncPoints/);
+  assert.match(TSX, /at: player\.currentTime - lyricOffset/);
+  assert.match(TSX, /t\("Align to now"\)/);
+  assert.match(TSX, /t\("Jump here"\)/);
+  assert.match(TSX, /t\("Live sync"\)/);
+  assert.match(TSX, /applyLyricSync\(lyrics, syncPoints\)/);
+  assert.match(TSX, /lyricIndexAt\(\s*timedLyrics,/);
+});
+
+test("a translation sits under its original line and hides when it is identical", () => {
+  assert.match(TSX, /className="music-now-lyric-text"/);
+  assert.match(TSX, /className="music-now-lyric-translation"/);
+  assert.match(TSX, /translated\.trim\(\) !== line\.text\.trim\(\)/);
+  assert.match(rule(".music-now-lyric-translation"), /display:\s*block/);
+  assert.match(CSS, /\.music-now-lyric-tools\s*\{[^}]*display:\s*flex/);
+});
+
 test("clicking a line seeks the player", () => {
   assert.match(TSX, /import \{[^}]*\bseekMusic\b[^}]*\} from "@\/lib\/music\/player"/);
-  assert.match(TSX, /onClick=\{\(\) => seekMusic\(line\.at\)\}/);
+  assert.match(TSX, /const seekLyric = useCallback\(/);
+  assert.match(TSX, /seekMusic\(line\.at \+ lyricOffset\)/);
 });
 
 test("the active line follows playback by scrolling its own list, not the pull-out", () => {

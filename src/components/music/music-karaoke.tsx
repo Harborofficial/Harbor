@@ -5,6 +5,8 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { useMusicPlayer, seekMusic } from "@/lib/music/player";
 import { lyricIndexAt, loadTrackLyrics, type LyricLine } from "@/lib/music/lyrics";
 import { getLyricOffset, shiftedLyricTime } from "@/lib/music/lyric-offset";
+import { applyLyricSync } from "@/lib/music/lyric-sync";
+import { useLyricSync } from "@/lib/music/use-lyric-sync";
 import {
   karaokeLineState,
   karaokeScrollMotion,
@@ -51,9 +53,11 @@ export function MusicKaraoke({
   const [status, setStatus] = useState<KaraokeStatus>("idle");
   const key = track ? `${track.connectorId ?? ""}:${track.id ?? ""}:${track.title ?? ""}` : "";
   const offset = getLyricOffset(player.current);
+  const [syncPoints] = useLyricSync(track);
+  const timed = applyLyricSync(lines ?? [], syncPoints);
   const active =
     status === "ready" && lines
-      ? lyricIndexAt(lines, shiftedLyricTime(player.currentTime, offset))
+      ? lyricIndexAt(timed, shiftedLyricTime(player.currentTime, offset))
       : -1;
 
   useEffect(() => {
@@ -216,7 +220,10 @@ export function MusicKaraoke({
                   className="music-karaoke-line"
                   data-line={karaokeLineState(index, active)}
                   aria-current={index === active ? "true" : undefined}
-                  onClick={() => seekMusic(line.at)}
+                  onClick={() => {
+                    const line = timed[index];
+                    if (line) seekMusic(line.at + offset);
+                  }}
                 >
                   {line.text.trim() || REST}
                 </button>

@@ -130,6 +130,7 @@ import { HarborNameSync } from "@/components/harbor-name-sync";
 import { SettingsProfileBridge } from "@/lib/settings-profile-bridge";
 import { TrackerProfileBridge } from "@/lib/tracker-profile-bridge";
 import { ProfilePickerModal } from "@/components/profile-picker/picker-modal";
+import { ConfirmActionModal } from "@/components/confirm-action-modal";
 import { WatchlistSync } from "@/lib/watchlist-sync";
 import { ContextMenuProvider } from "@/lib/context-menu";
 import { PageContextNavigationDialogs } from "@/chrome/context-page-navigation";
@@ -213,6 +214,9 @@ const MusicSurprisePrompt = lazy(() =>
   import("@/components/music/music-surprise-prompt").then((m) => ({
     default: m.MusicSurprisePrompt,
   })),
+);
+const MusicVideoMini = lazy(() =>
+  import("@/components/music/music-video-mini").then((m) => ({ default: m.MusicVideoMini })),
 );
 
 class ThemeErrorBoundary extends Component<
@@ -603,6 +607,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                       <CustomHoverCssMount />
                                                       <TopRankModal />
                                                       <ProfilePickerModal />
+                                                      <ConfirmActionModal />
                                                       <CurfewGuard />
                                                       <Profiled id="search.overlay">
                                                         <SearchOverlay />
@@ -1681,7 +1686,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const wrappedAlive = useIdleEvict(wrappedTop);
   const queueAlive = useKeepAlive(queueTop, queueTop);
   const serviceAlive = useKeepAlive(serviceTop, serviceTop && !!service);
-  const detailAlive = useKeepAlive(detailTop, !!meta);
+  // Keep a detail page mounted while Settings is open. Otherwise the keep-alive timer
+  // drops it after 1.5s, and returning refetches the whole title from its addons.
+  const detailAlive = useKeepAlive(detailTop, !!meta, topKind === "settings");
   const personAlive = useKeepAlive(personTop, personId !== null);
   const profileAlive = useKeepAlive(profileTop, profileHandle !== null);
   const feedAlive = useKeepAlive(feedTop, feedOpen, stackKinds.includes("feed"));
@@ -1848,6 +1855,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
           {musicEnabled && (
             <Suspense fallback={null}>
               <MusicDock />
+              <MusicVideoMini />
               <MusicSurprisePrompt />
             </Suspense>
           )}
@@ -2310,7 +2318,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <div {...layerProps(pickerTop)}>
                 <Suspense fallback={null}>
                   <PlayPicker
-                    key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}-${picker.contextRequestId ?? ""}-${picker.continuation?.id ?? ""}-${picker.queueItemId ?? ""}`}
+                    key={`picker-${picker.pickerRevision ?? 0}-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}-${picker.contextRequestId ?? ""}-${picker.continuation?.id ?? ""}-${picker.queueItemId ?? ""}`}
                     meta={picker.meta}
                     queueItemId={picker.queueItemId}
                     episode={picker.episode}

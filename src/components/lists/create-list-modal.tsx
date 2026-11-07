@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { MAX_LISTS, sharedLists, type ListStore } from "@/lib/custom-lists";
+import { mangaLists } from "@/lib/manga-lists";
 import { useT } from "@/lib/i18n";
 import { emitListToast } from "./list-toast";
 
@@ -88,7 +89,9 @@ export function CreateListModal({
             {t("New list")}
           </h2>
           <p className="text-[13px] leading-snug text-ink-muted">
-            {t("Group the movies and shows you want to keep close.")}
+            {store === mangaLists
+              ? t("Group the manga you want to keep close.")
+              : t("Group the movies and shows you want to keep close.")}
           </p>
         </div>
 

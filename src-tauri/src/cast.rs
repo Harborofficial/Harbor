@@ -594,6 +594,7 @@ pub async fn cast_load(
     // use copy mode so we just remux to MPEGTS at line rate — no CPU cost.
     let effective_profile = profile.or(if auto_remux {
         Some(crate::transcode::TranscodeProfile {
+            fragmented_mp4: false,
             max_height: 1080,
             force_h264: false,
             force_aac: false,

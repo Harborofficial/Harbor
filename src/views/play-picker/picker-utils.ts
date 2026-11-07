@@ -7,6 +7,7 @@ import {
   type BadgeKind,
 } from "@/components/format-badge";
 import type { Meta } from "@/lib/cinemeta";
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import type { Rejection } from "@/lib/streams/trust";
 import type { Addon } from "@/lib/addons";
 import type { DebridSlug, ScoredStream, Stream, Tier } from "@/lib/streams/types";
@@ -20,7 +21,7 @@ export async function cinemetaImdbFallback(
   type: "movie" | "series",
   releaseInfo?: string,
 ): Promise<string | null> {
-  if (!name) return null;
+  if (addonOnlyMetadata() || !name) return null;
   const targetYear = releaseInfo ? parseInt(releaseInfo, 10) : null;
   const url = `https://v3-cinemeta.strem.io/catalog/${type}/top/search=${encodeURIComponent(name)}.json`;
   try {

@@ -18,7 +18,12 @@ test("duplicate cards share an in-flight title rating and cache the result", asy
     finish = resolve;
   });
   new Function("require", "exports", "fetch", code)(
-    (name) => (name === "@/lib/maintenance" ? { registerEvictable: () => {} } : {}),
+    (name) =>
+      name === "@/lib/metadata-policy"
+        ? { addonOnlyMetadata: () => false }
+        : name === "@/lib/maintenance"
+          ? { registerEvictable: () => {} }
+          : {},
     exports,
     () => {
       requests++;

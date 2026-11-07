@@ -48,7 +48,20 @@ function harness() {
     },
     "./membership-operations": { captureMembershipProfile: () => profile },
     "./auth": { readActiveStremioAuthKey: () => "fixture-auth" },
-    "./stremio": { ANIME_CLOUD_ID: /^(kitsu|mal|anilist|anidb):/ },
+    "./stremio": {
+      ANIME_CLOUD_ID: /^(kitsu|mal|anilist|anidb):/,
+      cloudWriteId: (id: string, resolved: string | null) => resolved ?? id,
+      libraryGetOne: async () => null,
+    },
+    "./cw-dismiss": { dismissCw: async (...value: unknown[]) => step("dismiss")(...value) },
+    "./local-cw": {
+      clearLocalCw: (...value: unknown[]) => calls.push({ provider: "clear-local-cw", value }),
+    },
+    "./resume": {
+      clearResume: (...value: unknown[]) => calls.push({ provider: "clear-resume", value }),
+    },
+    "./feed/external-cw": { listExternalCw: () => [], removeExternalCwItem: () => {} },
+    "./tracker-status-events": { notifyTrackerStatusChanged: () => {} },
     "./watchlist": {
       setLocalWatchlistAcknowledged: step("local-watchlist"),
       clearWatchlistAggregate: step("aggregate"),
@@ -68,6 +81,10 @@ function harness() {
     "./playback-history": { savePlayback: () => {} },
     "./watch-events": { recordWatchEvent: () => {} },
     "./media-provider-actions": {
+      dropProviderWrites: () => [
+        { provider: "Trakt", run: () => step("trakt-drop")(true) },
+        { provider: "Simkl", run: () => step("simkl-drop")(true) },
+      ],
       watchlistProviderWrites: (_input: unknown, on: boolean) => [
         { provider: "Trakt", run: () => step("trakt-watchlist")(on) },
         {

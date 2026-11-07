@@ -13,6 +13,8 @@ function load(path: string, mocks: Record<string, unknown>) {
   }).outputText;
   const exports: Record<string, any> = {};
   new Function("require", "exports", compiled)((id: string) => {
+    if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+      return { addonOnlyMetadata: () => false };
     assert.ok(id in mocks, `Unexpected dependency: ${id}`);
     return mocks[id];
   }, exports);

@@ -1,6 +1,6 @@
 use rusqlite::Connection;
 
-pub const LATEST_VERSION: i64 = 6;
+pub const LATEST_VERSION: i64 = 7;
 
 const CREATE_SCHEMA: &str = r#"
 CREATE TABLE IF NOT EXISTS music_tracks (
@@ -95,7 +95,8 @@ UPDATE music_tracks SET album_id = (
 
 const STREAM_METADATA: &str = "ALTER TABLE music_tracks ADD COLUMN resolved_metadata TEXT;";
 
-const MEDIA_KIND: &str = "ALTER TABLE music_tracks ADD COLUMN media_kind TEXT CHECK(media_kind IN ('audio', 'video'));";
+const MEDIA_KIND: &str =
+    "ALTER TABLE music_tracks ADD COLUMN media_kind TEXT CHECK(media_kind IN ('audio', 'video'));";
 
 const TRACK_LABELS: &str = "ALTER TABLE music_tracks ADD COLUMN explicit INTEGER; ALTER TABLE music_tracks ADD COLUMN version TEXT;";
 // Separate membership dates survive playlist reordering (which rebuilds positions).
@@ -105,13 +106,20 @@ const PLAYLIST_DATES: &str = "CREATE TABLE playlist_track_dates (
   added_at TEXT NOT NULL,
   PRIMARY KEY (playlist_id, track_id)
 );";
-const STEPS: [(i64, &str); 6] = [
+const PLAYLIST_SOURCES: &str = "CREATE TABLE playlist_sources (
+  playlist_id TEXT PRIMARY KEY NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
+  connector_id TEXT NOT NULL,
+  source_id TEXT NOT NULL,
+  synced_at TEXT NOT NULL
+);";
+const STEPS: [(i64, &str); 7] = [
     (1, CREATE_SCHEMA),
     (2, CREATE_CATALOG),
     (3, STREAM_METADATA),
     (4, MEDIA_KIND),
     (5, TRACK_LABELS),
     (6, PLAYLIST_DATES),
+    (7, PLAYLIST_SOURCES),
 ];
 
 pub fn run(connection: &mut Connection) -> Result<(), String> {
@@ -168,6 +176,78 @@ fn has_table(connection: &Connection, name: &str) -> Result<bool, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn linked_sources_upgrade_version_six_without_changing_local_playlists() {
+        let mut connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch("PRAGMA foreign_keys = ON;")
+            .unwrap();
+        for (_, statements) in STEPS.into_iter().filter(|(version, _)| *version <= 6) {
+            connection.execute_batch(statements).unwrap();
+        }
+        set_user_version(&connection, 6).unwrap();
+        connection.execute_batch(
+            "INSERT INTO playlists VALUES ('local', 'Local', '10', '20');
+             INSERT INTO music_tracks (id, source_id, title, artist) VALUES ('one', 'one', 'One', 'Muse');
+             INSERT INTO playlist_tracks VALUES ('local', 0, 'one');
+             INSERT INTO playlist_track_dates VALUES ('local', 'one', '15');",
+        ).unwrap();
+
+        run(&mut connection).unwrap();
+        assert!(has_table(&connection, "playlist_sources").unwrap());
+        connection
+            .execute_batch(
+                "INSERT INTO playlist_sources VALUES ('local', 'youtube', 'remote', '30');",
+            )
+            .unwrap();
+        run(&mut connection).unwrap();
+        assert_eq!(user_version(&connection).unwrap(), 7);
+        assert_eq!(connection.query_row(
+            "SELECT connector_id, source_id, synced_at FROM playlist_sources WHERE playlist_id = 'local'",
+            [], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?)),
+        ).unwrap(), ("youtube".into(), "remote".into(), "30".into()));
+        assert_eq!(
+            connection
+                .query_row(
+                    "SELECT p.name, p.created_at, p.updated_at, t.track_id, d.added_at
+             FROM playlists p JOIN playlist_tracks t ON t.playlist_id = p.id
+             JOIN playlist_track_dates d ON d.playlist_id = p.id AND d.track_id = t.track_id",
+                    [],
+                    |row| Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, String>(2)?,
+                        row.get::<_, String>(3)?,
+                        row.get::<_, String>(4)?
+                    )),
+                )
+                .unwrap(),
+            (
+                "Local".into(),
+                "10".into(),
+                "20".into(),
+                "one".into(),
+                "15".into()
+            )
+        );
+        assert!(connection
+            .execute(
+                "INSERT INTO playlist_sources VALUES ('missing', 'youtube', 'remote', '30')",
+                [],
+            )
+            .is_err());
+        connection
+            .execute("DELETE FROM playlists WHERE id = 'local'", [])
+            .unwrap();
+        assert_eq!(
+            connection
+                .query_row("SELECT COUNT(*) FROM playlist_sources", [], |row| row
+                    .get::<_, i64>(0))
+                .unwrap(),
+            0
+        );
+    }
 
     fn columns(connection: &Connection, table: &str) -> Vec<String> {
         let mut statement = connection

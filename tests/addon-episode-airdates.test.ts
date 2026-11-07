@@ -19,6 +19,9 @@ function load(path: string, mocks: Record<string, unknown>, expose = ""): any {
   }).outputText;
   const exports = {};
   new Function("require", "exports", compiled + expose)((id: string) => {
+    if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+      return { addonOnlyMetadata: () => false };
+    if (id === "./metadata-addons") return { readMetadataAddonOrder: () => [] };
     assert.ok(Object.hasOwn(mocks, id), `Unexpected dependency: ${id}`);
     return mocks[id];
   }, exports);
@@ -112,7 +115,19 @@ function series(videos: Meta["videos"]) {
         requests++;
         return { videos };
       },
+      metadataAddons: async () => [],
+      resolveAddonMetaSource: async () => null,
       preferCustomMeta: () => false,
+    },
+    "./metadata-sources": {
+      addonKeyFromSource: () => null,
+      normalizeMetadataSourceChain: (_section: string, chain: string[] = []) => chain,
+    },
+    "./providers/tvdb-order": {
+      fetchTvdbOrder: async () => null,
+    },
+    "./providers/tvdb": {
+      tvdbLangFromIso1: () => "eng",
     },
     "./providers/tmdb": {},
     "./providers/tmdb/tmdb-client": {

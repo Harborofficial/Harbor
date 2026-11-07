@@ -3,6 +3,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { useSearch } from "@/lib/search-context";
 import { getSearchDisplayState } from "@/lib/search-display-state";
 import { useSettings } from "@/lib/settings";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { useParental } from "@/lib/parental";
 import { useUiLanguage } from "@/lib/i18n";
 import { matchPersonForQuery } from "@/components/search/person-top-match";
@@ -346,6 +347,7 @@ export function useBpSearch(filter: BpSearchFilter): BpSearchState {
   );
   const collections = useCollectionHits(query.trim());
   const { settings } = useSettings();
+  const playlists = usePlaylists();
   const { hiddenTabs } = useParental();
 
   // Mirrors search-context's own gating exactly. Read it from there if these ever
@@ -355,16 +357,16 @@ export function useBpSearch(filter: BpSearchFilter): BpSearchState {
     () => ({
       anime: !hiddenTabs.anime && !settings.hideContent.anime,
       manga: settings.mangaEnabled,
-      liveTv: !hiddenTabs.liveTv && settings.iptvPlaylists.length > 0,
+      liveTv: !hiddenTabs.liveTv && playlists.some((p) => (p.kind ?? "m3u") !== "epg"),
     }),
-    // length, not the array. Only the count is read, and depending on the array
-    // identity would rebuild every slot on any unrelated settings write.
+    // The dedicated playlist store publishes only when IPTV sources change, so
+    // depending on its array identity does not react to unrelated settings writes.
     [
       hiddenTabs.anime,
       hiddenTabs.liveTv,
       settings.hideContent.anime,
       settings.mangaEnabled,
-      settings.iptvPlaylists.length,
+      playlists,
     ],
   );
 

@@ -1,6 +1,12 @@
 const FANART = "https://webservice.fanart.tv/v3";
 
-type ArtItem = { id?: string; url?: string; lang?: string; likes?: string };
+type ArtItem = {
+  id?: string;
+  url?: string;
+  lang?: string;
+  likes?: string;
+  season?: string | number;
+};
 
 type FanartMovie = {
   hdmovielogo?: ArtItem[];
@@ -67,11 +73,23 @@ function pickAll(items: ArtItem[] | undefined): string[] {
     .filter((u): u is string => Boolean(u));
 }
 
+function pickSeasonPosters(items: ArtItem[] | undefined): Record<number, string> | undefined {
+  const out: Record<number, string> = {};
+  for (const item of rankItems(items)) {
+    const season = Number(item.season);
+    if (item.url && Number.isInteger(season) && season >= 0 && out[season] == null) {
+      out[season] = item.url;
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
 export type FanartArt = {
   logo?: string;
   backdrop?: string;
   backdrops: string[];
   poster?: string;
+  seasonPosters?: Record<number, string>;
   banner?: string;
   thumb?: string;
 };
@@ -99,6 +117,7 @@ export async function fanartTv(key: string, tvdbId: number): Promise<FanartArt |
     backdrop: backdrops[0],
     backdrops,
     poster: pickEnglish(j.tvposter),
+    seasonPosters: pickSeasonPosters(j.seasonposter),
     banner: pickEnglish(j.tvbanner),
     thumb: pickEnglish(j.tvthumb),
   };

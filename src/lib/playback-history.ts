@@ -12,6 +12,7 @@ import {
   persistablePlaybackIdentity,
   persistablePlaybackPreference,
 } from "./player/playback-history-source";
+import { isLocalUrl } from "./player/local-url";
 import { noteNotify } from "./render-cause";
 import { subtitleMediaKey, subtitleStreamKey } from "./subtitles/subtitle-memory";
 import {
@@ -84,6 +85,7 @@ export type PlaybackContinuation = {
 };
 
 const STORAGE_KEY_PREFIX = "harbor.playback-history.v1.";
+const ONLINE_SOURCE_KEY_PREFIX = "harbor.playback-online-source.v1.";
 const LEGACY_STORAGE_KEY = "harbor.playback-history.v1";
 const PROFILES_KEY = "harbor.profiles.v1";
 const TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -178,6 +180,50 @@ function storeKey(): string {
   }
   const id = activeProfileId();
   return id ? STORAGE_KEY_PREFIX + id : LEGACY_STORAGE_KEY;
+}
+
+function onlineSourceStoreKey(): string {
+  const id = activeProfileId();
+  return ONLINE_SOURCE_KEY_PREFIX + (id || "default");
+}
+
+function usableOnlineSource(metaId: string, entry: Pick<PlaybackEntry, "url" | "infoHash" | "addonId" | "bingeGroup" | "releaseGroup">): boolean {
+  if (!metaId || metaId.startsWith("local:") || metaId.startsWith("iptv:")) return false;
+  if (entry.url && isLocalUrl(entry.url)) return false;
+  // A file path or an ordinary web URL alone cannot identify the same release
+  // in the next episode. Keep only the source identifiers used by the picker.
+  return !!(entry.infoHash || entry.addonId || entry.bingeGroup || entry.releaseGroup);
+}
+
+function readOnlineSources(): Record<string, PlaybackEntry> {
+  try {
+    const raw = localStorage.getItem(onlineSourceStoreKey());
+    if (!raw) return {};
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    const now = Date.now();
+    return Object.fromEntries(Object.entries(parsed).filter(([id, value]) => {
+      if (!value || typeof value !== "object") return false;
+      const item = value as PlaybackEntry;
+      return typeof item.savedAt === "number" && now - item.savedAt < TTL_MS && now >= item.savedAt && usableOnlineSource(id, item);
+    })) as Record<string, PlaybackEntry>;
+  } catch { return {}; }
+}
+
+/** Remember exactly which online release the user last selected, independently
+ * of completed/downloaded file playback and episode-specific resume history. */
+function saveOnlineSource(metaId: string, entry: PlaybackEntry): void {
+  if (!usableOnlineSource(metaId, entry)) return;
+  try {
+    const all = readOnlineSources();
+    // The preference must contain source identity only, never the large
+    // episode-specific ActualPlayback/resume snapshot from playback history.
+    // Apply the same privacy/redaction policy as the main playback history.
+    // A standalone source preference must never preserve an online transport URL.
+    all[metaId] = persistablePlaybackPreference(entry);
+    const sorted = Object.entries(all).sort((a, b) => b[1].savedAt - a[1].savedAt);
+    localStorage.setItem(onlineSourceStoreKey(), JSON.stringify(Object.fromEntries(sorted.slice(0, MAX_ENTRIES))));
+  } catch { /* Keep the existing online preference if storage is unavailable. */ }
 }
 
 function migrateLegacy(): void {
@@ -431,6 +477,7 @@ export function savePlayback(
           savedAt: Date.now(),
         };
   writeAll(all);
+  if (usableOnlineSource(metaId, entry)) saveOnlineSource(metaId, all[key]);
 }
 
 export function recordActualPlayback(playback: ActualPlayback): boolean {
@@ -651,6 +698,21 @@ export function readLastActualPlayback(): ActualPlayback | null {
   return last?.actual ?? null;
 }
 
+export function readActualPlaybackForTarget(
+  metaId: string,
+  season?: number,
+  episode?: number,
+): ActualPlayback | null {
+  const entry = readAll()[entryKey(metaId, season, episode)]?.actual;
+  const actor = capturePlaybackActor();
+  return entry &&
+    validActualPlayback(entry) &&
+    entry.actor.storageProfileId === actor.storageProfileId &&
+    entry.actor.accountId === actor.accountId
+    ? entry
+    : null;
+}
+
 export function playbackSourceKey(
   src: Pick<PlayerSrc, "url" | "historyUrl" | "streamRef" | "homeServer">,
 ): string {
@@ -786,6 +848,18 @@ export function readPlayback(
 export function clearPlayback(metaId: string, season?: number, episode?: number): void {
   const all = readAll();
   const key = entryKey(metaId, season, episode);
+  const rejected = all[key];
+  // A failed auto-picked online stream should not remain the new preference.
+  // Clear only the specific selection being rejected, never another episode's
+  // more recent (or previously successful) source.
+  const remembered = readOnlineSources();
+  const preferred = remembered[metaId];
+  if (rejected && preferred && rejected.savedAt === preferred.savedAt &&
+      rejected.infoHash === preferred.infoHash && rejected.addonId === preferred.addonId &&
+      rejected.url === preferred.url) {
+    delete remembered[metaId];
+    try { localStorage.setItem(onlineSourceStoreKey(), JSON.stringify(remembered)); } catch { /* noop */ }
+  }
   const actual = all[key]?.actual;
   if (actual || all[key]?.actualByProfile)
     all[key] = {
@@ -935,11 +1009,17 @@ export function playbackEntries(): Array<{
 
 export function readLastSeriesPlayback(metaId: string): PlaybackEntry | null {
   metaId = persistablePlaybackIdentity(metaId);
+  const remembered = readOnlineSources()[metaId] ?? null;
+  // The independent online preference is authoritative. Marking an older
+  // episode watched can refresh its history timestamp without selecting it.
+  if (remembered) return remembered;
+  // Upgrade existing installations without losing their last online choice.
   const all = readAll();
   const prefix = `${metaId}|`;
   let best: PlaybackEntry | null = null;
   for (const [key, entry] of Object.entries(all)) {
     if (key !== metaId && !key.startsWith(prefix)) continue;
+    if (!usableOnlineSource(metaId, entry)) continue;
     if (!best || entry.savedAt > best.savedAt) best = entry;
   }
   return best;
@@ -985,19 +1065,39 @@ export function streamMatchesReleaseLineage(
   return e.resolution === s.resolution && e.source === s.source;
 }
 
-/**
- * Keep-same-source is more forgiving than the season lock: a per-episode addon
- * often drops the release-group suffix on later episodes, and an aggregator may
- * deliver the same torrent under a different contributor. In that case the
- * addon, resolution, and source still identify the same source.
- */
+/** A confirmed next-episode release match, not an addon/quality fallback. */
 export function streamMatchesPreferredSource(
   s: Parameters<typeof streamMatchesReleaseLineage>[0] & {
     audioLanguages?: string[] | null;
   },
   e: PlaybackEntry,
 ): boolean {
-  if (streamMatchesReleaseLineage(s, e)) return true;
+  if (e.resolution && s.resolution && e.resolution !== s.resolution) return false;
+  const rememberedLangs = (e.audioLanguages ?? []).filter((l) => l !== "Multi");
+  const candidateLangs = (s.audioLanguages ?? []).filter((l) => l !== "Multi");
+  if (
+    rememberedLangs.length > 0 &&
+    candidateLangs.length > 0 &&
+    !rememberedLangs.some((l) => candidateLangs.includes(l))
+  )
+    return false;
+  if (e.infoHash && s.infoHash && e.infoHash.toLowerCase() === s.infoHash.toLowerCase())
+    return true;
+  if (e.bingeGroup && s.behaviorHints?.bingeGroup === e.bingeGroup) return true;
+  // Aggregators share one addon ID across unrelated releases. Only the release
+  // identity can confirm a match; generic quality fallback is handled by the picker.
+  return (
+    !!e.releaseGroup && !!s.releaseGroupNormalized && e.releaseGroup === s.releaseGroupNormalized
+  );
+}
+
+export function streamMatchesPreferredSourceFallback(
+  s: Parameters<typeof streamMatchesReleaseLineage>[0] & {
+    audioLanguages?: string[] | null;
+  },
+  e: PlaybackEntry,
+): boolean {
+  if (streamMatchesPreferredSource(s, e)) return true;
   if (!e.addonId || !offeredBy(s, e.addonId)) return false;
   // A dub is part of the source identity. Only reject when both sides name a
   // concrete language and they have none in common; an unlabelled release must

@@ -261,9 +261,21 @@ mod transfer_retry;
 mod transfer_storage;
 mod download_queue;
 mod download_locations;
+mod download_group_delete;
 #[tauri::command]
 pub async fn games_download_locations(parent: Option<String>) -> Result<download_locations::Locations, String> {
     tauri::async_runtime::spawn_blocking(move || download_locations::inspect(parent)).await.map_err(|_| "download_storage_unavailable".to_owned())
+}
+#[tauri::command]
+pub async fn games_delete_game_downloads(app: tauri::AppHandle, args: download_group_delete::DeleteGroup) -> Result<download_group_delete::DeletedGroup, String> {
+    download_group_delete::delete(app, args).await.map_err(String::from)
+}
+#[tauri::command]
+pub async fn games_download_folders(parent: String) -> Result<Vec<download_locations::Location>, String> {
+    tauri::async_runtime::spawn_blocking(move || download_locations::folders(parent))
+        .await
+        .map_err(|_| "download_destination".to_owned())?
+        .map_err(String::from)
 }
 mod transfer_bandwidth;
 mod download_metadata;
@@ -579,9 +591,18 @@ pub async fn games_launch_launcher_game(app:tauri::AppHandle, profile:String, id
 #[tauri::command]
 pub async fn games_cloud_list(args:cloud_files::Request)->Result<cloud_files::CloudPage,String>{cloud_files::list(args).await.map_err(String::from)}
 #[tauri::command]
+pub async fn games_cloud_tb_recovery_catalog(args:cloud_files::Request)->Result<Vec<cloud_files::TbRemoteFile>,String>{cloud_files::tb_recovery_catalog(args).await.map_err(String::from)}
+#[tauri::command]
 pub async fn games_cloud_download(args:cloud_files::Request)->Result<cloud_files::CloudDownload,String>{cloud_files::resolve(args).await.map_err(String::from)}
 #[tauri::command]
 pub async fn games_cloud_resolve_link(args:cloud_files::LinkRequest)->Result<Vec<cloud_files::CloudDownload>,String>{cloud_files::resolve_link(args).await.map_err(String::from)}
+#[tauri::command]
+pub async fn games_cloud_magnet_create(args:cloud_files::MagnetRequest)->Result<String,String>{cloud_files::magnet_create(args).await.map_err(String::from)}
+#[tauri::command]
+pub async fn games_cloud_magnet_status(args:cloud_files::MagnetRequest)->Result<cloud_files::MagnetJob,String>{cloud_files::magnet_status(args).await.map_err(String::from)}
+#[tauri::command]
+pub async fn games_cloud_magnet_download(args:cloud_files::MagnetRequest)->Result<cloud_files::CloudDownload,String>{cloud_files::magnet_download(args).await.map_err(String::from)}
+
 #[tauri::command]
 pub async fn games_cloud_host_check(args:cloud_files::LinkRequest)->Result<cloud_files::HostCheck,String>{cloud_files::host_check(args).await.map_err(String::from)}
 #[tauri::command]

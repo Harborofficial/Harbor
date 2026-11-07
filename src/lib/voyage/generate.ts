@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { safeFetch } from "@/lib/safe-fetch";
 import { meta as fetchMeta, type Meta } from "@/lib/cinemeta";
 import { watchTitleKey } from "@/lib/playback-history";
@@ -52,6 +53,7 @@ function pageUrl(theme: VoyageTheme, skip: number): string {
 }
 
 async function livePage(theme: VoyageTheme, skip: number): Promise<Meta[]> {
+  if (addonOnlyMetadata()) return [];
   try {
     const res = await safeFetch(pageUrl(theme, skip));
     if (!res.ok) return [];

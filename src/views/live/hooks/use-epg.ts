@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getCachedEpg, loadEpg, subscribeEpg } from "@/lib/iptv/epg-store";
 import { deriveEpgUrls } from "@/lib/iptv/m3u";
 import { findCurrent } from "@/lib/iptv/xmltv";
@@ -11,6 +11,7 @@ export function useEpg(
   index: EpgIndex | null;
   loading: boolean;
   error: string | null;
+  configured: boolean;
 } {
   const [index, setIndex] = useState<EpgIndex | null>(() =>
     source ? getCachedEpg(source.id) : null,
@@ -18,16 +19,26 @@ export function useEpg(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const extraKey = extraUrls.join("|");
+  const configured = useMemo(() => {
+    if (!source) return false;
+    const own = source.epgUrl ? [source.epgUrl] : deriveEpgUrls(source.url);
+    return own.length > 0 || extraUrls.some(Boolean);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source?.epgUrl, source?.url, extraKey]);
 
   useEffect(() => {
     if (!source) {
       setIndex(null);
+      setLoading(false);
+      setError(null);
       return;
     }
     const own = source.epgUrl ? [source.epgUrl] : deriveEpgUrls(source.url);
     const urls = [...new Set([...own, ...extraUrls.filter(Boolean)])];
     if (urls.length === 0) {
       setIndex(null);
+      setLoading(false);
+      setError(null);
       return;
     }
     let cancelled = false;
@@ -56,7 +67,7 @@ export function useEpg(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source?.id, source?.url, source?.epgUrl, extraKey]);
 
-  return { index, loading, error };
+  return { index, loading, error, configured };
 }
 
 export function useNowTick(intervalMs = 30_000): number {

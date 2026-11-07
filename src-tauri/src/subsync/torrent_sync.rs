@@ -25,7 +25,7 @@ use windows::{
 };
 
 const RATIO_UNIT_EPS: f32 = 0.0009;
-const NATIVE_SCORING_TIMEOUT_SECS: u64 = 12;
+const NATIVE_SCORING_TIMEOUT_SECS: u64 = 25;
 
 #[allow(dead_code)]
 pub enum SourceMode {
@@ -253,6 +253,7 @@ pub async fn torrent_sync_subtitle(
     conf_min: Option<f32>,
     want_late: Option<bool>,
     position_sec: Option<f32>,
+    map_spec: Option<String>,
 ) -> Result<Option<TorrentSyncOut>, String> {
     if !crate::transcode::ffmpeg_present() {
         return Err("ffmpeg-unavailable".into());
@@ -274,10 +275,11 @@ pub async fn torrent_sync_subtitle(
     }
 
     let hdrs = headers.unwrap_or_default();
+    let map = url_guard::safe_map_spec(map_spec.as_deref());
     let fit_analysis = analysis_windows_from_torrent("torrent-fit", &wins);
     let Ok(Ok((audio, used_windows))) = tokio::time::timeout(
         Duration::from_secs(NATIVE_SCORING_TIMEOUT_SECS),
-        decode_speech(&url, &hdrs, &fit_analysis),
+        decode_speech(&url, &hdrs, &fit_analysis, &map),
     )
     .await
     else {
@@ -337,6 +339,7 @@ pub async fn torrent_score_transform(
     exclude_window_ids: Option<Vec<String>>,
     validation_windows: Option<Vec<RequestedValidationWindow>>,
     validation_provenance: Option<String>,
+    map_spec: Option<String>,
 ) -> Result<Option<ScoredAlignmentQuality>, String> {
     if !crate::transcode::ffmpeg_present() {
         return Err("ffmpeg-unavailable".into());
@@ -399,16 +402,19 @@ pub async fn torrent_score_transform(
         Some(mask) => mask,
         None => {
             let hdrs = headers.unwrap_or_default();
-            let Ok(Ok((fresh, used_windows))) = tokio::time::timeout(
+            let map = url_guard::safe_map_spec(map_spec.as_deref());
+            let (fresh, used_windows) = match tokio::time::timeout(
                 Duration::from_secs(NATIVE_SCORING_TIMEOUT_SECS),
-                decode_speech(&url, &hdrs, &analysis),
+                decode_speech(&url, &hdrs, &analysis, &map),
             )
             .await
-            else {
-                return Ok(None);
+            {
+                Ok(Ok(value)) => value,
+                Ok(Err(error)) => return Err(format!("audio-decode: {}", error)),
+                Err(_) => return Err("scoring-timeout".into()),
             };
             if fresh.is_empty() || used_windows.len() != analysis.len() {
-                return Ok(None);
+                return Err("audio-window-unavailable".into());
             }
             store_mask(&info_hash, file_idx, sig, fresh.clone());
             fresh

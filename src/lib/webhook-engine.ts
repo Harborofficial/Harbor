@@ -9,11 +9,6 @@ import {
   type LastFiredState,
   type WebhookKind,
 } from "./calendar";
-import {
-  fetchAnticipatedCalendar,
-  fetchLibraryCalendar,
-  fetchTraktCalendar,
-} from "./calendar-sources";
 import { getCachedPlaylist } from "./iptv/store";
 import { fetchAndParseXmltv, indexProgramsByChannel } from "./iptv/xmltv";
 import { computeTvgIdCounts, epgProgramsForChannel } from "./iptv/epg-resolver";
@@ -65,6 +60,7 @@ async function fetchSource(
   try {
     if (source === "library") {
       if (!authKey) return [];
+      const { fetchLibraryCalendar } = await import("./calendar-library");
       return await fetchLibraryCalendar(authKey, year, month, {
         tmdbKey: settings.tmdbKey,
         includeTrakt: traktConnected(),
@@ -72,19 +68,29 @@ async function fetchSource(
     }
     if (source === "trakt") {
       if (!traktConnected()) return [];
+      const { fetchTraktCalendar } = await import("./calendar-sources");
       return await fetchTraktCalendar(year, month);
     }
     if (source === "anticipated") {
+      const { fetchAnticipatedCalendar } = await import("./calendar-sources");
       return await fetchAnticipatedCalendar(year, month);
     }
     if (source === "custom") {
       if (!settings.tmdbKey) return [];
       const extras: CalendarItem[][] = [];
-      if (settings.customCalendar.includeTraktAnticipated) {
-        extras.push(await fetchAnticipatedCalendar(year, month).catch(() => []));
+      const needsTraktSources =
+        settings.customCalendar.includeTraktAnticipated ||
+        (settings.customCalendar.includeTraktWatchlist && traktConnected());
+      const calendarSources = needsTraktSources ? await import("./calendar-sources") : null;
+      if (settings.customCalendar.includeTraktAnticipated && calendarSources) {
+        extras.push(await calendarSources.fetchAnticipatedCalendar(year, month).catch(() => []));
       }
-      if (settings.customCalendar.includeTraktWatchlist && traktConnected()) {
-        extras.push(await fetchTraktCalendar(year, month).catch(() => []));
+      if (
+        settings.customCalendar.includeTraktWatchlist &&
+        traktConnected() &&
+        calendarSources
+      ) {
+        extras.push(await calendarSources.fetchTraktCalendar(year, month).catch(() => []));
       }
       return await fetchCustomCalendar({
         apiKey: settings.tmdbKey,

@@ -1,3 +1,4 @@
+import { libraryGroupHomeRows } from "@/lib/library-groups";
 import {
   startTransition,
   useCallback,
@@ -1280,24 +1281,20 @@ export function Home({
   const shownFilterableRows = useHideAnimeRows(filterableRows);
   const allCustomizableRows = useMemo(
     () => [
-      ...(settings.libraryGroups.some((group) => group.pinnedToHome)
-        ? [
-            {
-              key: "library-groups",
-              type: "movie" as const,
-              name: "My Groups",
-              metas: [],
-              page: 1,
-              hasMore: false,
-              libraryGroups: true,
-              noDedup: true,
-            },
-          ]
-        : []),
+      ...libraryGroupHomeRows(settings.libraryGroups, settings.libraryGroupSections).map((row) => ({
+        key: row.key,
+        type: "movie" as const,
+        name: row.name,
+        metas: [],
+        page: 1,
+        hasMore: false,
+        libraryGroups: row.groups,
+        noDedup: true,
+      })),
       ...sourceRows,
       ...shownFilterableRows,
     ],
-    [sourceRows, shownFilterableRows, settings.libraryGroups],
+    [sourceRows, shownFilterableRows, settings.libraryGroups, settings.libraryGroupSections],
   );
   const visibleRows = useMemo(
     () => applyHomeRowCustomization(allCustomizableRows, homeRowsCustom, false),

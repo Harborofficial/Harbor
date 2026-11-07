@@ -233,7 +233,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $releaseVersion = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
           $releaseRoot = 'src-tauri/target/x86_64-pc-windows-msvc/release'
-          powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-shipyard-modules.ps1 -Channel $env:HARBOR_CHANNEL
+          pnpm shipyard:modules
           if ($LASTEXITCODE -ne 0) { throw 'Modular Shipyard build failed' }
           foreach ($releaseExe in @('src-tauri/target/music-sidecar/release/harbor.exe', 'installer/src-tauri/target/release/harbor-uninstall.exe', 'installer/src-tauri/target/release/harbor-shipyard.exe')) {
             if ((Get-Item -LiteralPath $releaseExe).VersionInfo.FileVersion -ne $releaseVersion) { throw "Wrong version: $releaseExe" }

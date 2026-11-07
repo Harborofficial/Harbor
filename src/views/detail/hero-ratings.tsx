@@ -76,6 +76,7 @@ export function HeroRatings({
   bare = false,
   compact = false,
   tmdbRating,
+  ratingChain,
 }: {
   rating?: string;
   isAnime: boolean;
@@ -89,10 +90,18 @@ export function HeroRatings({
   bare?: boolean;
   compact?: boolean;
   tmdbRating?: string | null;
+  ratingChain?: string[];
 }) {
   const t = useT();
   const { settings } = useSettings();
-  const metacritic = mdblist?.metacritic ?? scores?.metascore ?? null;
+  const omdbFirst =
+    !!ratingChain &&
+    ratingChain.includes("omdb") &&
+    (!ratingChain.includes("mdblist") ||
+      ratingChain.indexOf("omdb") < ratingChain.indexOf("mdblist"));
+  const metacritic = omdbFirst
+    ? (scores?.metascore ?? mdblist?.metacritic ?? null)
+    : (mdblist?.metacritic ?? scores?.metascore ?? null);
   const showPrimary = settings.showDetailRatings;
   const primaryProviderOn = isAnime
     ? settings.showMalDetail
@@ -106,7 +115,8 @@ export function HeroRatings({
 
   if (rating && showPrimary && primaryProviderOn) {
     items.push(
-      <ScoreItem compact={compact}
+      <ScoreItem
+        compact={compact}
         key="imdb"
         label={isAnime ? t("MyAnimeList") : ratingSource === "tmdb" ? t("TMDB") : t("IMDb")}
         sublabel={isAnime ? t("Score /10") : t("Rating /10")}
@@ -130,7 +140,8 @@ export function HeroRatings({
 
   if (isAnime && animeImdbRating && showPrimary && settings.showImdbDetail) {
     items.push(
-      <ScoreItem compact={compact}
+      <ScoreItem
+        compact={compact}
         key="anime-imdb"
         label={t("IMDb")}
         sublabel={t("Rating /10")}
@@ -153,7 +164,12 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showRtDetail && scores?.rtCritics != null) {
     items.push(
-      <ScoreItem compact={compact} key="rt-critics" label={t("Rotten Tomatoes Critics")} sublabel={t("Tomatometer")}>
+      <ScoreItem
+        compact={compact}
+        key="rt-critics"
+        label={t("Rotten Tomatoes Critics")}
+        sublabel={t("Tomatometer")}
+      >
         <RtBadge score={scores.rtCritics} className="h-[16px] w-auto" />
         <span>{scores.rtCritics}%</span>
       </ScoreItem>,
@@ -162,7 +178,12 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showRtAudienceDetail && mdblist?.rtAudience != null) {
     items.push(
-      <ScoreItem compact={compact} key="rt-audience" label={t("Rotten Tomatoes Audience")} sublabel={t("Popcornmeter")}>
+      <ScoreItem
+        compact={compact}
+        key="rt-audience"
+        label={t("Rotten Tomatoes Audience")}
+        sublabel={t("Popcornmeter")}
+      >
         <Popcorn
           size={15}
           strokeWidth={2}
@@ -175,17 +196,14 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showLetterboxdDetail && mdblist?.letterboxd != null) {
     items.push(
-      <ScoreItem compact={compact}
+      <ScoreItem
+        compact={compact}
         key="letterboxd"
         label={t("Letterboxd")}
         sublabel={t("Average /5")}
         onClick={imdbId ? () => onOpenUrl(`https://letterboxd.com/imdb/${imdbId}/`) : undefined}
       >
-        <img
-          src={letterboxdLogo}
-          alt=""
-          className="h-[14px] w-[14px] rounded-[3px] object-cover"
-        />
+        <img src={letterboxdLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-cover" />
         <span>{mdblist.letterboxd.toFixed(1)}</span>
       </ScoreItem>,
     );
@@ -193,7 +211,12 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showMetacriticDetail && metacritic != null) {
     items.push(
-      <ScoreItem compact={compact} key="metacritic" label={t("Metacritic")} sublabel={t("Metascore")}>
+      <ScoreItem
+        compact={compact}
+        key="metacritic"
+        label={t("Metacritic")}
+        sublabel={t("Metascore")}
+      >
         <span
           className={`flex h-[18px] min-w-[22px] items-center justify-center rounded-sm px-1 text-[11px] font-bold text-canvas ${metacriticBand(metacritic)}`}
         >
@@ -205,7 +228,8 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showTraktDetail && mdblist?.trakt != null) {
     items.push(
-      <ScoreItem compact={compact}
+      <ScoreItem
+        compact={compact}
         key="trakt"
         label={t("Trakt")}
         onClick={imdbId ? () => onOpenUrl(`https://trakt.tv/search/imdb/${imdbId}`) : undefined}
@@ -220,17 +244,18 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showSimklDetail && effectiveSimklRating != null) {
     items.push(
-      <ScoreItem compact={compact}
+      <ScoreItem
+        compact={compact}
         key="simkl"
         label={t("SIMKL")}
         sublabel={t("Average /10")}
-        onClick={imdbId ? () => onOpenUrl(`https://api.simkl.com/redirect?to=simkl&imdb=${imdbId}`) : undefined}
+        onClick={
+          imdbId
+            ? () => onOpenUrl(`https://api.simkl.com/redirect?to=simkl&imdb=${imdbId}`)
+            : undefined
+        }
       >
-        <img
-          src={simklLogo}
-          alt=""
-          className="h-[14px] w-[14px] rounded-[3px] object-contain"
-        />
+        <img src={simklLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-contain" />
         <span>{effectiveSimklRating.toFixed(1)}</span>
       </ScoreItem>,
     );
@@ -238,16 +263,13 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showMdblistDetail && mdblist?.score != null) {
     items.push(
-      <ScoreItem compact={compact}
+      <ScoreItem
+        compact={compact}
         key="mdblist"
         label={t("MDBList")}
         onClick={imdbId ? () => onOpenUrl(`https://mdblist.com/${mediaType}/${imdbId}`) : undefined}
       >
-        <img
-          src={mdblistLogo}
-          alt=""
-          className="h-[14px] w-[14px] rounded-[3px] object-contain"
-        />
+        <img src={mdblistLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-contain" />
         <span>{Math.round(mdblist.score)}</span>
       </ScoreItem>,
     );

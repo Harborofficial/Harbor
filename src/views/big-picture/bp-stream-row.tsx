@@ -281,7 +281,7 @@ export function BpStreamRow({
   const dubSub = settings.showDubBadge ? streamDubSub(stream.audioLanguages, isAnime) : null;
   const languages = stream.audioLanguages.filter((l) => l.toLowerCase() !== "unknown");
   const detail = detailLine(rawDescription, streamSummaryParts(stream), headline);
-  const external = !stream.url && !stream.infoHash && Boolean(stream.externalUrl || stream.ytId);
+  const external = !stream.url && !stream.infoHash && Boolean(stream.externalUrl);
   const p2p = !cached && !external && stream.infoHash != null;
   const needsCache = !cached && !external && !stream.url && stream.infoHash == null;
 

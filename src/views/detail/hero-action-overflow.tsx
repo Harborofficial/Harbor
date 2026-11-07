@@ -1,4 +1,4 @@
-import { ArrowDownToLine, Bookmark, Check, MoreHorizontal, RotateCw, X } from "lucide-react";
+import { ArrowDownToLine, Ban, Bookmark, Check, MoreHorizontal, RotateCw, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
@@ -74,6 +74,8 @@ export function HeroActionOverflow({
   simkl = null,
   anilist = null,
   pmdb = null,
+  canDrop = false,
+  onDrop,
 }: {
   meta: Meta;
   isFav: boolean;
@@ -91,6 +93,8 @@ export function HeroActionOverflow({
   simkl?: { harborId: string; type: "movie" | "series" } | null;
   anilist?: { harborId: string } | null;
   pmdb?: { harborId: string; type: "movie" | "series" } | null;
+  canDrop?: boolean;
+  onDrop?: () => void;
 }) {
   const t = useT();
   const { openPicker } = useView();
@@ -237,6 +241,17 @@ export function HeroActionOverflow({
                 }}
               />
             )}
+            {canDrop && (
+              <Item
+                icon={<Ban size={14} strokeWidth={2.1} />}
+                label={t("Drop show")}
+                danger
+                onClick={() => {
+                  onDrop?.();
+                  setMenu(null);
+                }}
+              />
+            )}
             {hasTrailer && (
               <Item
                 icon={<UiIcon name="trailer" className="h-3.5 w-3.5" />}
@@ -297,21 +312,27 @@ function Item({
   label,
   onClick,
   active,
+  danger,
 }: {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
   active?: boolean;
+  danger?: boolean;
 }) {
   return (
     <button
       role="menuitem"
       onClick={onClick}
-      className={`flex h-9 items-center gap-2.5 rounded-lg px-3 text-start text-[13px] transition-colors hover:bg-raised ${
-        active ? "text-accent" : "text-ink"
+      className={`flex h-9 items-center gap-2.5 rounded-lg px-3 text-start text-[13px] transition-colors ${
+        danger
+          ? "text-danger hover:bg-danger/10"
+          : active
+            ? "text-accent hover:bg-raised"
+            : "text-ink hover:bg-raised"
       }`}
     >
-      <span className={active ? "text-accent" : "text-ink-muted"}>{icon}</span>
+      <span className={danger ? "text-danger" : active ? "text-accent" : "text-ink-muted"}>{icon}</span>
       {label}
     </button>
   );

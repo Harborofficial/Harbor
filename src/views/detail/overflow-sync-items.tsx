@@ -25,6 +25,7 @@ import { useTrakt } from "@/lib/trakt/provider";
 import { pushWatched } from "@/lib/trakt/history";
 import { useT } from "@/lib/i18n";
 import { usePmdbWatchlist } from "./add-to-publicmetadb-button";
+import { useTrackerStatusVersion } from "@/lib/tracker-status-events";
 
 const ANILIST_LABELS: Record<MediaListStatus, string> = {
   CURRENT: "Watching",
@@ -114,6 +115,7 @@ export function SimklMenuItems({
 }) {
   const t = useT();
   const { isConnected } = useSimkl();
+  const trackerStatusVersion = useTrackerStatusVersion();
   const [target, setTarget] = useState<SimklTarget | null>(null);
   const [status, setStatus] = useState<WatchlistStatus | null>(null);
   const [ready, setReady] = useState(false);
@@ -139,7 +141,7 @@ export function SimklMenuItems({
     return () => {
       cancelled = true;
     };
-  }, [harborId, isConnected, type]);
+  }, [harborId, isConnected, type, trackerStatusVersion]);
 
   if (!isConnected || !target || !ready) return null;
   const order = target.kind === "movie" ? MOVIE_STATUS_ORDER : SHOW_STATUS_ORDER;
@@ -201,6 +203,7 @@ export function AnilistMenuItems({
 }) {
   const t = useT();
   const { isConnected } = useAnilist();
+  const trackerStatusVersion = useTrackerStatusVersion();
   const [mediaId, setMediaId] = useState<number | null>(null);
   const [entryId, setEntryId] = useState<number | null>(null);
   const [status, setStatus] = useState<MediaListStatus | null>(null);
@@ -227,7 +230,7 @@ export function AnilistMenuItems({
     return () => {
       cancelled = true;
     };
-  }, [harborId, isConnected]);
+  }, [harborId, isConnected, trackerStatusVersion]);
 
   if (!isConnected || !ready || mediaId == null) return null;
 

@@ -1,3 +1,4 @@
+import { usePinnedCatalogRows } from "@/views/home/hooks/use-pinned-rows";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Info, Plus, TrendingUp } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
@@ -48,6 +49,7 @@ function initRows(): Record<string, RowState> {
 
 export function MobileAnime() {
   const t = useT();
+  const pinnedRows = usePinnedCatalogRows("anime");
   const { settings } = useSettings();
   const [rowsByKey, setRowsByKey] = useState<Record<string, RowState>>(initRows);
   const [anilistTrending, setAnilistTrending] = useState<Meta[]>([]);
@@ -207,6 +209,9 @@ export function MobileAnime() {
           onOpenDetail={setDetailMeta}
         />
       )}
+      {pinnedRows.map((row) => (
+        <MobileRail key={row.key} title={row.name} metas={row.metas} onOpenDetail={setDetailMeta} />
+      ))}
       {composed.rows.map((r) =>
         r.rank ? (
           <MobileRankRail

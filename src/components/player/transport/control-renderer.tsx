@@ -76,6 +76,7 @@ import { EpisodeNavBtn } from "./episode-nav-btn";
 import { TimeStart, TimeEnd } from "./time-display";
 import { WindowControlButtons } from "./window-control-buttons";
 import { IdentifySongButton } from "@/components/identify-song-button";
+import { TitleWordmark } from "./title-wordmark";
 
 export type ControlContext = {
   t?: (key: string, vars?: Record<string, string | number>) => string;
@@ -112,6 +113,7 @@ export type ControlContext = {
   titleClickable?: boolean;
   titleScale?: number;
   titleSeriesFirst?: boolean;
+  titleLogo?: string;
   onBack?: () => void;
   onTitleClick?: () => void;
   meta?: Meta;
@@ -235,20 +237,41 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
       if (!ctx.title) return null;
       const scale = ctx.titleScale ?? 1;
       const swap = !!ctx.titleSeriesFirst && !!ctx.subtitle;
-      const primary = swap ? ctx.subtitle : ctx.title;
+      const primary = swap ? (ctx.subtitle ?? ctx.title) : ctx.title;
       const secondary = swap ? ctx.title : ctx.subtitle;
       const qual = realQualityLabel(ctx.snap.videoWidth, ctx.snap.videoHeight);
       const hdr = hdrFormatLabel(ctx.snap.hdrGamma);
-      const lines = (
-        <>
-          <div className="flex items-center gap-2">
+      const logo = ctx.titleLogo;
+      const titleNode = logo ? (
+        <TitleWordmark
+          key={logo}
+          src={logo}
+          alt={primary}
+          maxHeight={Math.round(42 * scale)}
+          fallback={
             <h1
               style={{ fontSize: `${Math.round(19 * scale)}px` }}
               className="font-semibold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
             >
               {primary}
             </h1>
-            <QualityInfo labels={[qual, hdr]} show={ctx.active} />
+          }
+        />
+      ) : (
+        <h1
+          style={{ fontSize: `${Math.round(19 * scale)}px` }}
+          className="font-semibold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+        >
+          {primary}
+        </h1>
+      );
+      const lines = (
+        <>
+          <div className="flex items-center gap-2">
+            {titleNode}
+            <div>
+              <QualityInfo labels={[qual, hdr]} show={ctx.active} />
+            </div>
           </div>
           {secondary && (
             <p

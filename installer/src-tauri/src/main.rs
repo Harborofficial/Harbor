@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod install;
+mod language;
 mod clean_install;
 mod shell;
 mod update;
@@ -24,6 +25,7 @@ fn main() {
             install::fetch_changelog,
             install::free_space_at,
             install::existing_install,
+            language::installed_harbor_language,
             install::print_terms,
             install::save_license,
             install::harbor_version,

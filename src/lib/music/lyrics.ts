@@ -73,14 +73,28 @@ function identity(track: MusicTrack): string {
 }
 
 async function json(url: string): Promise<unknown> {
-  try {
-    const response = await safeFetch(url, { headers: { Accept: "application/json" } });
-    if (!response.ok) return null;
-    return await response.json();
-  } catch {
-    return null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await safeFetch(url, {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(4000),
+      });
+      if (response.status === 404) return null;
+      if (!response.ok) {
+        // Do not turn throttling or permission failures into an immediate retry storm.
+        if (response.status < 500) throw new LyricsRequestError();
+        throw new Error("Lyrics service unavailable");
+      }
+      return await response.json();
+    } catch (error) {
+      if (attempt === 1 || error instanceof LyricsRequestError) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
   }
+  return null;
 }
+
+class LyricsRequestError extends Error {}
 
 function rowsOf(value: unknown): LrcRow[] {
   if (Array.isArray(value))
@@ -135,7 +149,11 @@ export function loadTrackLyrics(track: MusicTrack): Promise<LyricLine[] | null> 
   const key = identity(track);
   const held = cache.get(key);
   if (held) return held;
-  const pending = fetchLyrics(track).catch(() => null);
+  const pending = fetchLyrics(track).catch(() => {
+    // A failed request is not evidence that the song has no lyrics.
+    if (cache.get(key) === pending) cache.delete(key);
+    return null;
+  });
   cache.set(key, pending);
   if (cache.size > CACHE_MAX) {
     const oldest = cache.keys().next();

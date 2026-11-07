@@ -1,11 +1,23 @@
 export type GroupList = { id: string; name: string; url: string };
-export type LibraryGroup = {
+export type LibraryGroupSection = { id: string; name: string };
+export type GroupPresentation = {
+  hideHomeTitle?: boolean;
+  homeSectionId?: string;
+};
+export type LibraryGroup = GroupPresentation & {
   id: string;
   name: string;
   image?: string;
   lists: GroupList[];
   pinnedToHome?: boolean;
 };
+
+// Accept international slugs while keeping each URL/API path segment safe.
+function normalizedListPath(pathname: string): { parts: string[]; path: string } | null {
+  const parts = pathname.split("/").filter(Boolean).map(decodeURIComponent);
+  if (!parts.every((part) => /^[\p{L}\p{M}\p{N}_-]+$/u.test(part))) return null;
+  return { parts, path: parts.map(encodeURIComponent).join("/") };
+}
 
 export function parseMdblistUrl(value: string): { url: string; path: string } | null {
   try {
@@ -18,11 +30,11 @@ export function parseMdblistUrl(value: string): { url: string; path: string } | 
       url.port
     )
       return null;
-    const parts = url.pathname.split("/").filter(Boolean);
+    const normalized = normalizedListPath(url.pathname);
+    if (!normalized) return null;
+    const { parts, path } = normalized;
     if (parts[0] !== "lists" || parts.length < 2 || parts.length > 3) return null;
-    if (!parts.slice(1).every((part) => /^[a-zA-Z0-9_-]+$/.test(part))) return null;
     if (parts.length === 2 && !/^\d+$/.test(parts[1])) return null;
-    const path = parts.join("/");
     return { url: `https://mdblist.com/${path}`, path };
   } catch {
     return null;
@@ -56,12 +68,12 @@ export function parseGroupListUrl(
       url.port
     )
       return null;
-    const parts = url.pathname.split("/").filter(Boolean);
-    if (!parts.every((part) => /^[a-zA-Z0-9_-]+$/.test(part))) return null;
+    const normalized = normalizedListPath(url.pathname);
+    if (!normalized) return null;
+    const { parts, path } = normalized;
     const personal = parts.length === 4 && parts[0] === "users" && parts[2] === "lists";
     const global = parts.length === 2 && parts[0] === "lists" && /^\d+$/.test(parts[1]);
     if (!personal && !global) return null;
-    const path = parts.join("/");
     return { url: `https://trakt.tv/${path}`, path, source: "trakt" };
   } catch {
     return null;
@@ -108,9 +120,47 @@ export function normalizeLibraryGroups(value: unknown): LibraryGroup[] {
           typeof entry.image === "string" && validGroupImage(entry.image) ? entry.image : undefined,
         lists,
         pinnedToHome: entry.pinnedToHome === true,
+        hideHomeTitle: entry.hideHomeTitle === true,
+        homeSectionId: typeof entry.homeSectionId === "string" ? entry.homeSectionId : undefined,
       },
     ];
   });
+}
+
+export function normalizeLibraryGroupSections(value: unknown): LibraryGroupSection[] {
+  if (!Array.isArray(value)) return [];
+  const ids = new Set<string>();
+  return value.flatMap((entry) => {
+    if (
+      !entry ||
+      typeof entry.id !== "string" ||
+      !entry.id ||
+      ids.has(entry.id) ||
+      typeof entry.name !== "string" ||
+      !entry.name.trim()
+    )
+      return [];
+    ids.add(entry.id);
+    return [{ id: entry.id, name: entry.name.trim().slice(0, 100) }];
+  });
+}
+
+export function libraryGroupHomeRows(groups: LibraryGroup[], sections: LibraryGroupSection[]) {
+  const known = new Set(sections.map((section) => section.id));
+  return [
+    {
+      key: "library-groups",
+      name: "My Groups",
+      groups: groups.filter(
+        (group) => group.pinnedToHome && (!group.homeSectionId || !known.has(group.homeSectionId)),
+      ),
+    },
+    ...sections.map((section) => ({
+      key: `library-groups:${section.id}`,
+      name: section.name,
+      groups: groups.filter((group) => group.pinnedToHome && group.homeSectionId === section.id),
+    })),
+  ].filter((row) => row.groups.length > 0);
 }
 
 export function moveGroupItem<T extends { id: string }>(

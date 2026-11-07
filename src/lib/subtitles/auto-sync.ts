@@ -6,6 +6,9 @@ export type AutoSyncInput = {
   cues: Array<[number, number]>;
   durationSec: number;
   infoHash?: string | null;
+  audioMap?: string;
+  sessionId?: string;
+  reportFailures?: boolean;
 };
 
 export type AutoSyncResult = {
@@ -24,5 +27,8 @@ export async function estimateSubtitleOffset(input: AutoSyncInput): Promise<Auto
     cues: input.cues,
     durationSec: input.durationSec,
     infoHash: input.infoHash ?? null,
+    mapSpec: input.audioMap ?? null,
+    sessionId: input.sessionId ?? null,
+    reportFailures: input.reportFailures === true,
   });
 }

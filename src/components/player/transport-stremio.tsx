@@ -23,6 +23,7 @@ import {
 } from "./transport/control-renderer-stremio";
 import { usePlayerNavigation } from "@/lib/view";
 import { useCastModalPlay } from "./use-cast-modal-play";
+import { useReportPlayerControlsInset } from "@/lib/player/controls-inset";
 
 export type TransportStremioProps = {
   snap: PlayerSnapshot;
@@ -61,6 +62,7 @@ export type TransportStremioProps = {
   canPickAnother: boolean;
   title: string;
   subtitle?: string;
+  titleLogo?: string;
   resolution?: string | null;
   quality?: string | null;
   releaseName?: string | null;
@@ -125,6 +127,7 @@ export function TransportStremio(p: TransportStremioProps) {
     canPickAnother,
     title,
     subtitle,
+    titleLogo,
     resolution,
     quality,
     releaseName,
@@ -168,6 +171,7 @@ export function TransportStremio(p: TransportStremioProps) {
   const { openMeta, exitPlayer } = usePlayerNavigation();
   const castModalPlay = useCastModalPlay();
   const controlsRef = useRef<HTMLDivElement>(null);
+  useReportPlayerControlsInset(controlsRef, visible);
 
   useEffect(() => {
     onMenuOpenChange?.(
@@ -232,6 +236,7 @@ export function TransportStremio(p: TransportStremioProps) {
     fullscreen,
     title,
     subtitle,
+    titleLogo,
     resolution,
     quality,
     releaseName,
