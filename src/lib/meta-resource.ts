@@ -27,13 +27,7 @@ if (typeof window !== "undefined") {
 }
 
 export function preferCustomMeta(): boolean {
-  if (addonOnlyMetadata()) return true;
-  try {
-    const raw = localStorage.getItem("harbor.settings");
-    return raw ? JSON.parse(raw).preferCustomMetaAddon === true : false;
-  } catch {
-    return false;
-  }
+  return addonOnlyMetadata();
 }
 
 function localAddons(): Addon[] {

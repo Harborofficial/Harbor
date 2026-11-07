@@ -637,7 +637,6 @@ export type Settings = {
   homeNewEpisodes: boolean;
   libraryBookmarkedOnly: boolean;
   librarySort: "recent" | "title" | "year";
-  preferCustomMetaAddon: boolean;
   addonOnlyMetadata: boolean;
   metadataAddonOrder: string[];
   /** Per-section metadata source chains. Empty sections use the legacy fallback order. */

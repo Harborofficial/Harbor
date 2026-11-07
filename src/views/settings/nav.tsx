@@ -4079,19 +4079,6 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["poster titles", "hide names", "clean grid", "minimal"],
   },
   {
-    label: "Prefer my installed metadata addon",
-    section: "library",
-    tab: "providers",
-    anchorTitle: "Titles and descriptions",
-    keywords: [
-      "meta addon",
-      "localized cinemeta",
-      "custom metadata",
-      "override cinemeta",
-      "descriptions",
-    ],
-  },
-  {
     label: "Fanart.tv · logos and backdrops",
     section: "library",
     tab: "providers",

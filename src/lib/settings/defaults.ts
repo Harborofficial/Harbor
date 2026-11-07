@@ -505,7 +505,6 @@ export const DEFAULT: Settings = {
   homeNewEpisodes: false,
   libraryBookmarkedOnly: true,
   librarySort: "recent",
-  preferCustomMetaAddon: false,
   addonOnlyMetadata: false,
   metadataAddonOrder: [],
   metadataSources: {},

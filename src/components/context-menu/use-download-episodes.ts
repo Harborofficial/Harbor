@@ -166,7 +166,7 @@ export function useDownloadEpisodes(
     tvdbKey: settings.tvdbKey,
     omdbKey: "",
     metaId: title.meta.id,
-    preferCustomMeta: settings.preferCustomMetaAddon,
+    preferCustomMeta: settings.addonOnlyMetadata,
     ratings: false,
   });
   const tvdbStills = useSeriesTvdbStills(

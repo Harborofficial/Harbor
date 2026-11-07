@@ -371,7 +371,7 @@ export function DetailView({
   const pinnedBackdrop = useTitleBackdrop(meta.id);
   const pinnedBackdropHi = toHiResBackdrop(pinnedBackdrop, settings.heroFullQuality);
   const [cinemetaFull, setCinemetaFull] = useState<Meta | null>(
-    !settings.addonOnlyMetadata && !settings.preferCustomMetaAddon && meta.videos?.length
+    !settings.addonOnlyMetadata && meta.videos?.length
       ? meta
       : null,
   );
@@ -547,7 +547,7 @@ export function DetailView({
   }, [meta.id, meta.type, setNavStack]);
 
   const idAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
-  const prioritizeMetadataAddons = settings.addonOnlyMetadata || settings.preferCustomMetaAddon;
+  const prioritizeMetadataAddons = settings.addonOnlyMetadata;
   const animeIdentity = idAnime || detectedKitsu != null;
   // Metadata source and anime identity are separate: an addon-first detail page
   // still knows it is looking at an anime, but keeps its own episode/season source.
@@ -1289,7 +1289,7 @@ export function DetailView({
         : sourceLookup;
       let applyAnimeExtras: (() => void) | undefined;
       const work =
-        settingsRef.current.addonOnlyMetadata || settingsRef.current.preferCustomMetaAddon
+        settingsRef.current.addonOnlyMetadata
           ? cinemetaDetails(lookup)
           : isAnime
             ? animeDetails(
@@ -1451,7 +1451,6 @@ export function DetailView({
     meta.type,
     settings.tmdbKey,
     settings.fanartKey,
-    settings.preferCustomMetaAddon,
     settings.addonOnlyMetadata,
     settings.metadataAddonOrder,
     settings.tvdbKey,

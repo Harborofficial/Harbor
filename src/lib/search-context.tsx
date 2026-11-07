@@ -398,7 +398,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         const mergedMovies = dropAnime(
           dedupeByTitle(
             mergeMetas(
-              settings.preferCustomMetaAddon
+              settings.addonOnlyMetadata
                 ? mergeMetas(acc.addon.movies, base.movies)
                 : mergeMetas(base.movies, acc.addon.movies),
               acc.cine.movies,
@@ -408,7 +408,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         const mergedSeries = dropAnime(
           dedupeByTitle(
             mergeMetas(
-              settings.preferCustomMetaAddon
+              settings.addonOnlyMetadata
                 ? mergeMetas(acc.addon.series, base.series)
                 : mergeMetas(base.series, acc.addon.series),
               acc.cine.series,
@@ -545,7 +545,6 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     settings.searchTmdbTopMatch,
     settings.metadataAddonOrder,
     settings.metadataSources,
-    settings.preferCustomMetaAddon,
     settings.tmdbLanguage,
     settings.translateTitles,
     playlists,
