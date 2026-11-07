@@ -1,5 +1,5 @@
 import type { CalendarItem } from "./calendar-core";
-import { localDateTimeFromIso } from "./calendar-time";
+import { toLocalDateISO, toLocalTimeLabel, localDateTimeFromIso } from "./calendar-time";
 import type { SavedCandidate } from "./calendar-library";
 
 interface CacheEntry {
@@ -90,36 +90,38 @@ async function mapDubFeedToCalendar(year: number, month: number): Promise<Calend
   const out: CalendarItem[] = [];
   const seen = new Set<string>();
   for (const e of entries) {
-    const media = e?.media?.media;
-    if (!media) continue;
-    if (media.isAdult) continue;
-    if (media.format === "MOVIE" || e.episodeNumber == null) continue;
-    const { date: dateISO, time, atMs } = localDateTimeFromIso(e.episodeDate);
-    if (!inMonth(dateISO, year, month)) continue;
-    const title =
-      media.title?.english?.trim() ||
-      media.title?.romaji?.trim() ||
-      e.english?.trim() ||
-      e.romaji?.trim() ||
-      "Untitled";
-    const baseId = media.idMal != null ? `mal:${media.idMal}` : `anilist:${media.id}`;
-    const id = `${baseId}:1:${e.episodeNumber}`;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    out.push({
-      id,
-      imdbId: null,
-      type: "tv",
-      name: `${title} S1E${pad(e.episodeNumber)}`,
-      poster: media.coverImage?.extraLarge ?? media.coverImage?.medium ?? null,
-      background: media.bannerImage ?? null,
-      releaseDate: dateISO,
-      releaseTime: time,
-      releaseAtMs: atMs,
-      isAnime: true,
-      overview: "",
-      voteAverage: 0,
-    });
+    if (e.isAdult || e.format === "MOVIE") continue;
+    const title = e.title?.english?.trim() || e.title?.romaji?.trim() || "Untitled";
+    const baseId =
+      e.idMal != null ? `mal:${e.idMal}` : e.id != null ? `anilist:${e.id}` : null;
+    if (!baseId) continue;
+
+    for (const node of e.airingSchedule?.nodes ?? []) {
+      if (node.episode == null || node.airingAt == null) continue;
+      const timestamp = typeof node.airingAt === "number" ? node.airingAt : Number(node.airingAt);
+      if (!Number.isFinite(timestamp)) continue;
+      const atMs = timestamp * 1000;
+      const date = new Date(atMs);
+      const releaseDate = toLocalDateISO(date);
+      if (!inMonth(releaseDate, year, month)) continue;
+      const id = `${baseId}:1:${node.episode}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      out.push({
+        id,
+        imdbId: null,
+        type: "tv",
+        name: `${title.replace(/\bSeason\s+(\d+)/i, "S$1")} E${pad(node.episode)}`,
+        poster: e.coverImage?.extraLarge ?? e.coverImage?.medium ?? null,
+        background: e.bannerImage ?? null,
+        releaseDate,
+        releaseTime: toLocalTimeLabel(date) || undefined,
+        releaseAtMs: atMs,
+        isAnime: true,
+        overview: "",
+        voteAverage: 0,
+      });
+    }
   }
   out.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate));
   return out;
