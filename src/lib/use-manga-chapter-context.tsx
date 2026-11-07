@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
-import { BookOpen, Bookmark, BookmarkCheck, Check, Download, EyeOff } from "lucide-react";
+import { BookOpen, Bookmark, BookmarkCheck, Check, Download, EyeOff, Sparkles } from "lucide-react";
+import { useSettings } from "./settings";
+import { emitListToast } from "@/components/lists/list-toast";
 import { useContextTarget } from "./context-menu";
 import { useProfiles } from "./profiles";
 import { useT } from "./i18n";
@@ -21,6 +23,7 @@ export function useMangaChapterContext<T extends HTMLElement>(
   onRead?: () => void,
 ) {
   const t = useT();
+  const { settings } = useSettings();
   const { activeId } = useProfiles();
   const source = useMemo(
     () => mangaContextSource(chapter.id, listMangaSources(), activeMangaSourceId()),
@@ -126,6 +129,22 @@ export function useMangaChapterContext<T extends HTMLElement>(
           source &&
           listMangaSources().some((s) => s.id === source.id && s.baseUrl === source.baseUrl);
         const native = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+        if (native && (available || status === "done")) {
+          actions.push({
+            id: `manga:pre-upscale:${chapterId}`,
+            icon: <Sparkles size={16} />,
+            label: t("Upscale chapter"),
+            run: async () => {
+              const { preUpscaleChapter } = await import("./manga/upscale/chapter");
+              await preUpscaleChapter(mangaId, chapterId, {
+                quality: settings.mangaUpscaleQuality,
+                autoDownload: settings.mangaUpscaleAutoDownload,
+                sourceId: source?.id,
+              });
+              emitListToast(t("Chapter upscaled"));
+            },
+          });
+        }
         if (
           native &&
           (status === "done" ||

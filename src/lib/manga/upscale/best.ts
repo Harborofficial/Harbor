@@ -16,6 +16,19 @@ let lastPageHeight = 0;
 let chapterHeight: number | null = null;
 let unloadTimer: number | null = null;
 let active = false;
+let backgroundJobs = 0;
+
+export function retainBestUpscaler(): () => void {
+  backgroundJobs++;
+  if (unloadTimer !== null) {
+    window.clearTimeout(unloadTimer);
+    unloadTimer = null;
+  }
+  return () => {
+    backgroundJobs--;
+    if (!active && backgroundJobs === 0) scheduleBestUpscalerUnload();
+  };
+}
 
 /** Lets the settings suggest a model for the last B&W page the reader saw. */
 export function noteMangaPageHeight(height: number) {
@@ -56,7 +69,7 @@ export function scheduleBestUpscalerUnload(delayMs = 7000): void {
   }
   unloadTimer = window.setTimeout(() => {
     unloadTimer = null;
-    if (inFlight.size > 0) {
+    if (inFlight.size > 0 || backgroundJobs > 0) {
       scheduleBestUpscalerUnload(delayMs);
       return;
     }

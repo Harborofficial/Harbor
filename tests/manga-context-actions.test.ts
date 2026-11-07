@@ -591,11 +591,23 @@ test("chapter contexts download only the selected chapter and preserve server/lo
   let profile = "one",
     success = true;
   const downloads: unknown[][] = [];
+  const upscales: unknown[][] = [];
   const read: string[] = [];
   const states = new Map<string, string>();
   const bookmarks: any[] = [];
   const readChapters = new Set<string>();
   const hook = load("src/lib/use-manga-chapter-context.tsx", {
+    "./manga/upscale/chapter": {
+      preUpscaleChapter: async (...args: unknown[]) => {
+        upscales.push(args);
+      },
+    },
+    "./settings": {
+      useSettings: () => ({
+        settings: { mangaUpscaleQuality: "fast", mangaUpscaleAutoDownload: false },
+      }),
+    },
+    "@/components/lists/list-toast": { emitListToast: () => {} },
     react: React,
     "react/jsx-runtime": jsxRuntime,
     "lucide-react": lucide,
@@ -675,6 +687,18 @@ test("chapter contexts download only the selected chapter and preserve server/lo
     assert.equal(downloadAction("remote::server").label, "Saved on your server");
     assert.equal(downloadAction("remote::server").disabled, true);
     assert.equal(downloadAction("local::one"), undefined);
+    await executeContextAction(target("remote::two"), "manga:pre-upscale:remote::two");
+    assert.deepEqual(upscales, [
+      [
+        "remote::manga",
+        "remote::two",
+        {
+          quality: "fast",
+          autoDownload: false,
+          sourceId: "remote",
+        },
+      ],
+    ]);
     await executeContextAction(target("remote::two"), "manga:bookmark:remote::two");
     assert.equal(bookmarks[0].chapterId, "remote::two");
     assert.equal(bookmarks[0].sourceId, "remote");
