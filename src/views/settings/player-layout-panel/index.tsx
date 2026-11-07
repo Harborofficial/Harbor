@@ -349,7 +349,7 @@ export function PlayerLayoutPanel() {
           <Segmented
             label={t("Content advisory theme")}
             sub={t(
-              "Choose whether the content advisory appears in full color or a restrained monochrome tone.",
+              "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.",
             )}
             value={settings.contentAdvisoryTheme}
             options={[
