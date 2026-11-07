@@ -978,11 +978,29 @@ export function useTrackAutoload(params: {
       subLangs.length > 0
     ) {
       const current = snap.subtitleTracks.find((t) => t.selected) ?? null;
-      const userPicked =
-        current != null && autoSubIdRef.current != null && current.id !== autoSubIdRef.current;
+
+// Preserve an already-selected local subtitle.
+// Do not override it with another automatic subtitle.
+const localSubtitleSelected =
+  current != null &&
+  current.external === true &&
+  current.originalUrl != null &&
+  settings.localSubtitleFolder !== "" &&
+  current.originalUrl
+    .replace(/\\/g, "/")
+    .toLowerCase()
+    .startsWith(
+      settings.localSubtitleFolder
+        .replace(/\\/g, "/")
+        .toLowerCase()
+        .replace(/\/$/, "") + "/",
+    );
+
+const userPicked =
+  current != null && autoSubIdRef.current != null && current.id !== autoSubIdRef.current;
       const lockedToAuto =
         current != null && autoSubIdRef.current != null && !settings.subtitleAutoUpgrade;
-      if (!userPicked && !lockedToAuto) {
+      if (!userPicked && !lockedToAuto && !localSubtitleSelected) {
         const want = pickAutomaticSubtitle(
           snap.subtitleTracks,
           effAudio,

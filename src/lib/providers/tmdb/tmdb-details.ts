@@ -81,6 +81,7 @@ export type TmdbDetail = {
   imdbId: string | null;
   title: string;
   originalTitle: string;
+  altTitles?: string[];
   tagline: string;
   overview: string;
   poster?: string;
