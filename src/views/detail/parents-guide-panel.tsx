@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Check,
   ChevronDown,
   ExternalLink,
   Ghost,
@@ -111,18 +112,28 @@ export function ParentsGuidePanel({
         <div className="flex items-center gap-2">
           {/* Keep expanded toggle visible when the section is expanded */}
           {!sectionCollapsed && (
-            <label
-              className="flex cursor-pointer select-none items-center gap-1.5 rounded-lg bg-white/[0.06] px-2.5 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink focus-within:ring-2 focus-within:ring-primary"
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={keepExpanded}
+              onClick={() => handleKeepExpandedChange(!keepExpanded)}
               title={t("Keep this section expanded by default on future titles")}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                keepExpanded
+                  ? "bg-white/[0.12] text-ink ring-1 ring-white/20 hover:bg-white/[0.16]"
+                  : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
+              }`}
             >
-              <input
-                type="checkbox"
-                checked={keepExpanded}
-                onChange={(e) => handleKeepExpandedChange(e.target.checked)}
-                className="h-3.5 w-3.5 cursor-pointer rounded border-white/20 bg-white/10 text-primary accent-primary"
-              />
+              <span
+                aria-hidden="true"
+                className={`flex h-3.5 w-3.5 items-center justify-center rounded-[3px] transition-colors ${
+                  keepExpanded ? "bg-accent text-canvas" : "border border-white/25 bg-white/[0.04]"
+                }`}
+              >
+                {keepExpanded && <Check size={10} strokeWidth={3} />}
+              </span>
               <span>{t("Keep expanded")}</span>
-            </label>
+            </button>
           )}
 
           <button
