@@ -1,11 +1,7 @@
 import { Blocks, Download, FlaskConical, Loader2, RotateCw } from "../icons";
 import { useEffect, useId, useState } from "react";
 import { useSettings } from "@/lib/settings";
-import {
-  readChannelPreference,
-  selectedUpdateChannel,
-  updateHeaders,
-} from "@/lib/updater/channel";
+import { readChannelPreference, selectedUpdateChannel } from "@/lib/updater/channel";
 import { readBetaReturnContext } from "@/lib/updater/beta-return";
 import {
   openModify,
@@ -223,7 +219,7 @@ export function ModifyInstallationRow() {
     setError(null);
     setProgress(null);
     try {
-      const plan = await readModifyPlan(updateHeaders(selectedUpdateChannel()));
+      const plan = await readModifyPlan(selectedUpdateChannel());
       if (!plan) {
         throw new Error(
           t("The update service has no installer available right now. Try again later."),

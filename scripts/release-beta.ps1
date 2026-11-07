@@ -110,7 +110,8 @@ if (-not $SkipApp) {
   # app shows in About. Tie the stamp to the channel this release is cut for.
   $env:HARBOR_CHANNEL = $Channel
   Write-Host "  channel stamp: $Channel"
-  Run 'pnpm' @('tauri', 'build', '--no-bundle')
+  . (Join-Path $PSScriptRoot 'whisper-build-env.ps1')
+  Run 'pnpm' @('tauri', 'build', '--no-bundle', '--features', 'asr-whisper')
 } else {
   Step 'App build skipped'
 }

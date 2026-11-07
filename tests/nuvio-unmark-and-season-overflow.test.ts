@@ -134,12 +134,12 @@ test("nuvio-sync uses resolveNextEpisodeForSeries to prevent synthetic S1E11 ove
   );
   assert.match(
     nuvioSyncSrc,
-    /if \(nextTarget === null\) \{\s*clearLocalCw\(entry\.id, `nuvio-\$\{profileIndex\}`\);/,
+    /if \(nextTarget === null\) \{\s*localCwMutated = true;\s*clearLocalCw\(entry\.id, `nuvio-\$\{profileIndex\}`\);/,
     "reconcileNuvioWatched must clear completed series when series is genuinely finished, preserving CW on undefined metadata",
   );
   assert.match(
     nuvioSyncSrc,
-    /if \(!hasProgress\) \{\s*clearLocalCw\(entry\.id, `nuvio-\$\{profileIndex\}`\);/,
+    /if \(!hasProgress\) \{\s*localCwMutated = true;\s*clearLocalCw\(entry\.id, `nuvio-\$\{profileIndex\}`\);/,
     "reconcileNuvioWatched must remove series from CW when all episodes are unmarked and no progress exists",
   );
 });
@@ -254,7 +254,7 @@ test("CW tray and localCw update next up when episodes are marked unwatched or w
   );
   assert.match(
     syncSrc,
-    /if \(entry\.season !== nextS \|\| entry\.episode !== nextE \|\| entry\.positionMs !== newPos\) \{\s*saveLocalCw\(/,
+    /if \(entry\.season !== nextS \|\| entry\.episode !== nextE \|\| entry\.positionMs !== newPos\) \{\s*localCwMutated = true;\s*saveLocalCw\(/,
     "reconcileNuvioWatchedOnce must update localCw to nextTarget when episode marked unwatched or watched",
   );
 

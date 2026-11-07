@@ -121,7 +121,9 @@ export type TmdbDetail = {
   collection?: { id: number; name: string } | null;
   seasons: Season[];
   tmdbTvId?: number;
+  tvdbTvId?: number;
   seasonPosters?: Record<number, string>;
+  seasonBackdrops?: Record<number, string>;
   numberOfSeasons: number;
   numberOfEpisodes: number;
   keywords: number[];

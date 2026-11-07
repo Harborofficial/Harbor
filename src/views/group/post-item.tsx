@@ -142,7 +142,6 @@ export function PostItem({
         id: `post:copy:${post.id}`,
         label: t("Copy Text"),
         icon: <Copy size={14} />,
-        quickCopy: true,
         run: () => copyContextText(bodyRef.current?.innerText ?? post.body),
       },
       ...(currentAuthor()

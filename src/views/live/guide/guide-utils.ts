@@ -1,4 +1,4 @@
-export const PX_PER_MIN = 5;
+export const PX_PER_MIN = 8;
 export const PX_PER_MS = PX_PER_MIN / 60_000;
 export const CHANNEL_COL_PX = 200;
 export const ROW_HEIGHT_PX = 110;

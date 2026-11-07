@@ -970,8 +970,8 @@ const miscA: Record<string, string> = {
   "Couldn't reach Trakt": "Trakt'a erişilemedi",
   "Couldn't reach Trakt. Check your connection and try again.":
     "Trakt'a erişilemedi. Bağlantınızı kontrol edip tekrar deneyin.",
-  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
-    "Önceki derlemeleri yüklemek için harborcommunity.site'a erişilemedi. Bağlantınızı kontrol edip tekrar deneyin.",
+  "Couldn't reach GitHub to load earlier builds. Check your connection and try again.":
+    "Önceki derlemeleri yüklemek için GitHub'a erişilemedi. Bağlantınızı kontrol edip tekrar deneyin.",
   "Couldn't reach this Roku": "Bu Roku'ya erişilemedi",
   "Couldn't reach {name}. Try refreshing.": "{name} hizmetine ulaşılamadı. Yenilemeyi deneyin.",
   "Couldn't read that font file.": "Bu yazı tipi dosyası okunamadı.",

@@ -1,7 +1,8 @@
 import { useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useProfiles } from "./profiles";
-import { setItemWithRecovery } from "./storage-recovery";
+import { setItemWithRecoveryDetailed, type StorageWriteResult } from "./storage-recovery";
 import { setMangaInLibrary } from "./manga/api";
+import { dedupeMangaFavorites } from "./manga/favorites-cleanup";
 import { notifyMangaLibraryChanged } from "./manga/library-events";
 import { activeMangaSourceId, listMangaSources } from "./manga/sources";
 import { MangaFavoritesContext as Ctx } from "./manga-favorites-context";
@@ -63,8 +64,41 @@ function readMap(key: string): Map<string, MangaFavEntry> {
   return map;
 }
 
-function writeMap(key: string, map: Map<string, MangaFavEntry>): boolean {
-  return setItemWithRecovery(key, JSON.stringify([...map.values()]));
+function writeMap(key: string, map: Map<string, MangaFavEntry>): StorageWriteResult {
+  return setItemWithRecoveryDetailed(key, JSON.stringify([...map.values()]));
+}
+
+export type MangaFavoriteToggleResult =
+  | { ok: true; added: boolean }
+  | { ok: false; reason: "profile-changed" }
+  | { ok: false; reason: "storage"; quota: boolean };
+
+export function mangaFavoriteFailureMessage(
+  result: MangaFavoriteToggleResult,
+  t: (key: string) => string,
+): string | null {
+  if (result.ok) return null;
+  if (result.reason === "profile-changed") {
+    return t("Your profile changed. Open the menu again and retry.");
+  }
+  return t(
+    result.quota
+      ? "Could not save this favorite. Check available storage and try again."
+      : "Could not save this favorite. Please try again.",
+  );
+}
+
+// Favorites can accumulate the same work under several source-scoped ids (one
+// per source, plus legacy raw ids). Collapse them on load so old duplicate
+// libraries clean themselves up, preferring an entry whose source still exists.
+function loadItems(pid: string): { items: Map<string, MangaFavEntry>; cleaned: boolean } {
+  const items = readMap(keyFor(pid));
+  const entries = [...items.values()];
+  if (entries.length < 2) return { items, cleaned: false };
+  const live = new Set(listMangaSources().map((source) => source.id));
+  const deduped = dedupeMangaFavorites(entries, live);
+  if (deduped.length === entries.length) return { items, cleaned: false };
+  return { items: new Map(deduped.map((entry) => [entry.id, entry])), cleaned: true };
 }
 
 function qualifiedFavoriteId(id: string, sourceId: string): string {
@@ -96,7 +130,7 @@ export type MangaFavoritesStore = {
     altTitle?: string;
     cover?: string;
     sourceId?: string;
-  }) => boolean;
+  }) => MangaFavoriteToggleResult;
   /** Self-heals a stale entry after it re-resolves to a live id/cover. */
   repair: (
     oldId: string,
@@ -108,15 +142,20 @@ export type MangaFavoritesStore = {
 export function MangaFavoritesProvider({ children }: { children: ReactNode }) {
   const { activeId } = useProfiles();
   const pid = activeId ?? "default";
-  const [stored, setStored] = useState(() => ({ pid, items: readMap(keyFor(pid)) }));
+  const [stored, setStored] = useState(() => {
+    const { items } = loadItems(pid);
+    return { pid, items };
+  });
   const items = useMemo(
-    () => (stored.pid === pid ? stored.items : readMap(keyFor(pid))),
+    () => (stored.pid === pid ? stored.items : loadItems(pid).items),
     [stored, pid],
   );
   const current = useRef({ pid, items });
   current.current = { pid, items };
   useEffect(() => {
-    setStored({ pid, items: readMap(keyFor(pid)) });
+    const { items, cleaned } = loadItems(pid);
+    if (cleaned) writeMap(keyFor(pid), items);
+    setStored({ pid, items });
   }, [pid]);
 
   const value = useMemo<MangaFavoritesStore>(
@@ -125,7 +164,12 @@ export function MangaFavoritesProvider({ children }: { children: ReactNode }) {
       has: (id, sourceId = activeMangaSourceId()) =>
         storedFavoriteKey(items, id, sourceId) !== undefined,
       toggle: (input) => {
-        if (current.current.pid !== pid) return false;
+        if (current.current.pid !== pid) {
+          console.warn("[manga-favorites] favorite toggle failed", {
+            category: "profile-changed",
+          });
+          return { ok: false, reason: "profile-changed" };
+        }
         const next = new Map(current.current.items);
         const sourceId = input.sourceId ?? activeMangaSourceId();
         const existing = storedFavoriteKey(next, input.id, sourceId);
@@ -144,11 +188,19 @@ export function MangaFavoritesProvider({ children }: { children: ReactNode }) {
           });
         }
         const saved = writeMap(keyFor(pid), next);
-        if (!saved) return false;
+        if (!saved.ok) {
+          console.warn("[manga-favorites] favorite toggle failed", {
+            category: "storage",
+            exceptionName: saved.errorName ?? "QuotaExceededError",
+            quota: saved.quota,
+            recovered: saved.recovered,
+          });
+          return { ok: false, reason: "storage", quota: saved.quota };
+        }
         syncLibrary(input.id, !removing, sourceId);
         current.current = { pid, items: next };
         setStored({ pid, items: next });
-        return saved;
+        return { ok: true, added: !removing };
       },
       repair: (oldId, update) => {
         if (current.current.pid !== pid) return;
@@ -179,7 +231,7 @@ export function MangaFavoritesProvider({ children }: { children: ReactNode }) {
           sourceId: sourceId || undefined,
           addedAt: existing ? Math.min(existing.addedAt, entry.addedAt) : entry.addedAt,
         });
-        if (!writeMap(keyFor(pid), next)) return;
+        if (!writeMap(keyFor(pid), next).ok) return;
         current.current = { pid, items: next };
         setStored({ pid, items: next });
         // Keep the server library pointing at the live id so it stays openable.
@@ -199,9 +251,9 @@ export function useMangaFavorites(): MangaFavoritesStore {
   return v;
 }
 
-export function useIsMangaFavorite(id?: string): boolean {
+export function useIsMangaFavorite(id?: string, sourceId?: string): boolean {
   const { has } = useMangaFavorites();
-  return !!id && has(id);
+  return !!id && has(id, sourceId);
 }
 
 export function removeMangaFavorites(pid: string): void {

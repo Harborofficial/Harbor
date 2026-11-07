@@ -1,6 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { useSubtitleLiftCover } from "@/lib/player/controls-inset";
 import { useActiveKid } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+
+const LIFT_GAP_PX = 12;
 
 type Props = {
   text: string;
@@ -19,10 +22,13 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({
   const kid = useActiveKid();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [boxH, setBoxH] = useState(0);
+  const [hostGap, setHostGap] = useState(0);
   useEffect(() => {
     const measure = () => {
       const host = wrapRef.current?.offsetParent as HTMLElement | null;
-      if (host && host.clientHeight > 0) setBoxH(host.clientHeight);
+      if (!host || host.clientHeight <= 0) return;
+      setBoxH(host.clientHeight);
+      setHostGap(Math.max(0, window.innerHeight - host.getBoundingClientRect().bottom));
     };
     measure();
     window.addEventListener("resize", measure);
@@ -42,6 +48,20 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({
   );
   const fontSize = useMemo(() => Math.round(baseFont * responsive), [baseFont, responsive]);
   const marginY = useMemo(() => clamp(settings.subMarginY, 0, 100), [settings.subMarginY]);
+  const cover = useSubtitleLiftCover(settings.subLiftAboveControls, marginY);
+  const hostH = boxH > 0 ? boxH : window.innerHeight;
+  const lift =
+    cover > 0
+      ? Math.max(
+          0,
+          Math.round(
+            cover * window.innerHeight -
+              hostGap +
+              LIFT_GAP_PX * responsive -
+              (marginY / 100) * hostH,
+          ),
+        )
+      : 0;
   const fontColor = settings.subFontColor || "#FFFFFF";
   const align = settings.subAlignX || "center";
   const family = useMemo(() => fontFamilyFor(settings.subFontFamily), [settings.subFontFamily]);
@@ -143,8 +163,8 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({
       <div
         key={startSec}
         ref={wrapRef}
-        className={`pointer-events-none absolute inset-x-0 z-10 flex flex-col gap-1.5 ${alignItems} px-[6%]`}
-        style={{ bottom: `${marginY}%`, opacity }}
+        className={`pointer-events-none absolute inset-x-0 z-10 flex flex-col gap-1.5 ${alignItems} px-[6%] transition-transform duration-300 ease-out motion-reduce:transition-none`}
+        style={{ bottom: `${marginY}%`, opacity, transform: `translateY(${-lift}px)` }}
       >
         {secondBlock && !secondTop && secondBlock}
         {text && (

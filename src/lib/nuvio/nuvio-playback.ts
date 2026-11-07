@@ -29,6 +29,36 @@ type AliasResolver = {
   getAliases: (id: string) => Set<string>;
 };
 
+type NuvioIdType = "movie" | "series";
+
+function explicitNuvioIdType(rawId: string): NuvioIdType | undefined {
+  if (rawId.startsWith("series:") || rawId.startsWith("tmdb:tv:")) return "series";
+  if (rawId.startsWith("movie:") || rawId.startsWith("tmdb:movie:")) return "movie";
+  return undefined;
+}
+
+/**
+ * Aliases for a Nuvio content ID. Numeric TMDB IDs are shared by the movie and
+ * TV namespaces, so typed aliases are only generated from an explicit prefix
+ * or a type known from the owning record.
+ */
+export function nuvioAliasVariants(rawId: string, type?: "movie" | "series"): string[] {
+  if (!rawId) return [];
+  const clean = rawId.replace(/^(series|movie|tmdb:tv|tmdb:movie|tmdb):/, "").trim();
+  if (!clean) return [];
+  const resolved = explicitNuvioIdType(rawId) ?? type;
+  const variants = new Set<string>([rawId, clean]);
+  if (resolved === "series") {
+    variants.add(`series:${clean}`);
+    if (/^\d+$/.test(clean)) variants.add(`tmdb:tv:${clean}`);
+  } else if (resolved === "movie") {
+    variants.add(`movie:${clean}`);
+    if (/^\d+$/.test(clean)) variants.add(`tmdb:movie:${clean}`);
+  }
+  if (/^\d+$/.test(clean)) variants.add(`tmdb:${clean}`);
+  return [...variants];
+}
+
 function buildSeriesAliasResolver(
   records: NuvioWatchProgress[],
   watched: NuvioWatchedItem[],
@@ -54,18 +84,9 @@ function buildSeriesAliasResolver(
     }
   };
 
-  const registerVariants = (rawId: string) => {
+  const registerVariants = (rawId: string, type?: NuvioIdType) => {
     if (!rawId) return;
-    const clean = rawId.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "").trim();
-    if (!clean) return;
-    union(rawId, clean);
-    union(rawId, `series:${clean}`);
-    union(rawId, `movie:${clean}`);
-    if (/^\d+$/.test(clean)) {
-      union(rawId, `tmdb:${clean}`);
-      union(rawId, `tmdb:tv:${clean}`);
-      union(rawId, `tmdb:movie:${clean}`);
-    }
+    for (const variant of nuvioAliasVariants(rawId, type)) union(rawId, variant);
   };
 
   // 1. Explicit / custom aliases
@@ -79,15 +100,29 @@ function buildSeriesAliasResolver(
     }
   }
 
-  // 2. Register all IDs from records and watched
+  // 2. Register IDs with the type each owner knows, so numeric movie and TV
+  // namespaces never merge through manufactured aliases.
   for (const r of records) {
-    if (r.content_id) registerVariants(r.content_id);
+    if (r.content_id)
+      registerVariants(r.content_id, r.season != null || r.episode != null ? "series" : undefined);
   }
   for (const w of watched) {
-    if (w.content_id) registerVariants(w.content_id);
+    if (!w.content_id) continue;
+    const type =
+      w.content_type === "movie" || w.content_type === "series"
+        ? w.content_type
+        : w.season != null || w.episode != null
+          ? "series"
+          : undefined;
+    registerVariants(w.content_id, type);
   }
-  for (const [k] of libMap) {
-    registerVariants(k);
+  const registeredLibraryIds = new Set<string>();
+  for (const lib of libMap.values()) {
+    if (registeredLibraryIds.has(lib.content_id)) continue;
+    registeredLibraryIds.add(lib.content_id);
+    const type =
+      lib.content_type === "movie" || lib.content_type === "series" ? lib.content_type : undefined;
+    registerVariants(lib.content_id, type);
   }
 
   // 3. Cached TMDB <-> IMDb lookups
@@ -173,6 +208,124 @@ function buildSeriesAliasResolver(
   };
 }
 
+type EpisodeResume = { ms: number; t: number; pct?: number };
+
+function readEpisodeResume(
+  ids: Iterable<string>,
+  season: number | undefined,
+  episode: number | undefined,
+  ownerId: string,
+): EpisodeResume | null {
+  let best: EpisodeResume | null = null;
+  for (const id of ids) {
+    const entry = readResumeEntry(id, season, episode, ownerId);
+    if (!entry || !(entry.ms > 0)) continue;
+    if (!best || entry.t > best.t) best = { ms: entry.ms, t: entry.t, pct: entry.pct };
+  }
+  return best;
+}
+
+/**
+ * Nuvio's watch_progress can lag behind Harbor's resume entry. When the
+ * generated Next Up card has no progress for its own episode, use that exact
+ * episode's resume instead. Episode identity and timestamps decide; progress
+ * percentage never selects a different episode.
+ */
+function reconcileResumeProgress(
+  items: LibraryItem[],
+  records: NuvioWatchProgress[],
+  watched: NuvioWatchedItem[],
+  aliasResolver: AliasResolver,
+  ownerId: string,
+  activeProfile: boolean,
+): void {
+  const durations = new Map<string, number>();
+  const completions = new Map<string, number>();
+  const note = (
+    map: Map<string, number>,
+    rawId: string,
+    season: number,
+    episode: number,
+    value: number,
+  ) => {
+    for (const id of [rawId, ...aliasResolver.getAliases(rawId)]) {
+      const key = `${id}|${season}|${episode}`;
+      map.set(key, Math.max(map.get(key) ?? 0, value));
+    }
+  };
+
+  for (const record of records) {
+    if (!record.content_id || record.season == null || record.episode == null) continue;
+    const duration = (record.duration_seconds || 0) * 1000;
+    if (duration > 0) note(durations, record.content_id, record.season, record.episode, duration);
+    const position = (record.progress_seconds || 0) * 1000;
+    const finished =
+      (duration > 0 && position / duration >= 0.9) ||
+      (record as Record<string, unknown>).watched === true;
+    if (!finished || !(record.last_watched && record.last_watched > 0)) continue;
+    note(completions, record.content_id, record.season, record.episode, record.last_watched);
+  }
+  for (const item of watched) {
+    if (!item.content_id || item.season == null || item.episode == null) continue;
+    const at = item.watched_at
+      ? typeof item.watched_at === "number"
+        ? item.watched_at
+        : Date.parse(item.watched_at)
+      : 0;
+    if (at > 0) note(completions, item.content_id, item.season, item.episode, at);
+  }
+
+  for (const item of items) {
+    if (item.type !== "series" || !item.state) continue;
+    const season = item.state.season;
+    const episode = item.state.episode;
+    if (season == null || episode == null) continue;
+    if (!item.upNext && (item.state.timeOffset ?? 0) > 0) continue;
+
+    const ids = new Set<string>([
+      item._id,
+      ...(item.altIds ?? []),
+      ...aliasResolver.getAliases(item._id),
+    ]);
+    const resume = readEpisodeResume(ids, season, episode, ownerId);
+    if (!resume) continue;
+    if (activeProfile && [...ids].some((id) => manualWatchedState(id, season, episode) === false)) {
+      continue;
+    }
+    const completedAt = [...ids].reduce(
+      (latest, id) => Math.max(latest, completions.get(`${id}|${season}|${episode}`) ?? 0),
+      0,
+    );
+    if (completedAt > resume.t) continue;
+    const seedAt =
+      typeof (item as Record<string, unknown>).nextUpSeedAt === "number"
+        ? ((item as Record<string, unknown>).nextUpSeedAt as number)
+        : 0;
+    if (seedAt > 0 && resume.t <= seedAt) continue;
+
+    const pct = resume.pct;
+    const percentageDuration = pct != null && pct > 0 && pct < 1 ? Math.round(resume.ms / pct) : 0;
+    const knownDuration = [...ids].reduce(
+      (found, id) => found || durations.get(`${id}|${season}|${episode}`) || 0,
+      0,
+    );
+    item.state.timeOffset = resume.ms;
+    item.state.duration =
+      percentageDuration > 0
+        ? percentageDuration
+        : knownDuration > 0
+          ? knownDuration
+          : item.state.duration || DURATION_MS.series;
+    item.state.lastWatched = new Date(resume.t).toISOString();
+    if (!item.state.video_id) item.state.video_id = `${item._id}:${season}:${episode}`;
+    item.upNext = false;
+    if (item.waitingForAir) {
+      item.waitingForAir = undefined;
+      delete (item as Record<string, unknown>).keptForTimer;
+    }
+  }
+}
+
 export function getPlaybackItemsKey(slot: number, accountId?: string): string {
   const acc = accountId || getNuvioAccountId() || "anon";
   return `${PLAYBACK_ITEMS_CACHE_PREFIX}${acc}.slot.${slot}`;
@@ -181,7 +334,11 @@ export function getPlaybackItemsKey(slot: number, accountId?: string): string {
 /**
  * Loads cached Nuvio playback LibraryItems for a slot from memory/localStorage.
  */
-export function readCachedNuvioPlaybackItems(slot?: number, accountId?: string): LibraryItem[] {
+export function readCachedNuvioPlaybackItems(
+  slot?: number,
+  accountId?: string,
+  clearMissingLocal = false,
+): LibraryItem[] {
   const profileIndex = slot ?? resolveNuvioProfileIndex();
   const records = readCachedWatchProgress(profileIndex, accountId);
   const watched = readCachedWatchedItems(profileIndex, accountId);
@@ -201,6 +358,8 @@ export function readCachedNuvioPlaybackItems(slot?: number, accountId?: string):
     watched,
     undefined,
     cwKeepsCaughtUpForTimer(),
+    undefined,
+    { clearMissingLocal },
   );
   writeCachedNuvioPlaybackItems(profileIndex, built, accountId);
   return built;
@@ -215,7 +374,10 @@ export function writeCachedNuvioPlaybackItems(
   accountId?: string,
 ): void {
   try {
-    localStorage.setItem(getPlaybackItemsKey(slot, accountId), JSON.stringify(items));
+    const key = getPlaybackItemsKey(slot, accountId);
+    const serialized = JSON.stringify(items);
+    if (localStorage.getItem(key) === serialized) return;
+    localStorage.setItem(key, serialized);
   } catch {}
 }
 
@@ -247,6 +409,7 @@ export function buildNuvioPlaybackItems(
   dismissedKeys?: Set<string>,
   keepCaughtUpForTimer = false,
   customAliasMap?: Map<string, string> | Record<string, string>,
+  options?: { clearMissingLocal?: boolean },
 ): LibraryItem[] {
   const safeRecords = Array.isArray(records) ? records : [];
   const ownerId = `nuvio-${profileIndex}`;
@@ -358,10 +521,15 @@ export function buildNuvioPlaybackItems(
       const when =
         r.updated_at ||
         (r.last_watched ? new Date(r.last_watched).toISOString() : new Date().toISOString());
-      const remoteT = r.last_watched || Date.parse(when) || 0;
+      const remoteT = r.last_watched || 0;
 
       // Prefer newer local playback offset if available
-      const existing = readResumeEntry(contentId, undefined, undefined, ownerId);
+      const existing = readEpisodeResume(
+        aliasResolver.getAliases(contentId),
+        undefined,
+        undefined,
+        ownerId,
+      );
       if (existing && existing.t > remoteT && existing.ms > 0) {
         offsetMs = existing.ms;
       }
@@ -444,9 +612,14 @@ export function buildNuvioPlaybackItems(
         (latest.last_watched
           ? new Date(latest.last_watched).toISOString()
           : new Date().toISOString());
-      const remoteT = latest.last_watched || Date.parse(when) || 0;
+      const remoteT = latest.last_watched || 0;
 
-      const existing = readResumeEntry(contentId, targetSeason, targetEpisode, ownerId);
+      const existing = readEpisodeResume(
+        aliasResolver.getAliases(contentId),
+        targetSeason,
+        targetEpisode,
+        ownerId,
+      );
       if (existing && existing.t > remoteT && existing.ms > 0) {
         targetOffsetMs = existing.ms;
       }
@@ -544,6 +717,7 @@ export function buildNuvioPlaybackItems(
         };
 
         if (!isCwDismissed(item) && !isCandidateDismissed(contentId, subSeason, subEpisode)) {
+          (item as Record<string, unknown>).nextUpSeedAt = subsequent.last_watched || 0;
           items.push(item);
           for (const alias of aliasResolver.getAliases(contentId)) {
             activeSeriesIds.add(alias);
@@ -598,7 +772,7 @@ export function buildNuvioPlaybackItems(
     ) {
       continue;
     }
-    const t = r.last_watched || (r.updated_at ? Date.parse(r.updated_at) : 0);
+    const t = r.last_watched || 0;
     const canonical = aliasResolver.getCanonicalId(r.content_id);
     registerSeed(canonical, r.season, r.episode, t, r.name || r.title || undefined);
   }
@@ -715,6 +889,7 @@ export function buildNuvioPlaybackItems(
     if (keptForTimer) {
       (nextUpItem as Record<string, unknown>).keptForTimer = true;
     }
+    (nextUpItem as Record<string, unknown>).nextUpSeedAt = seed.markedAt || 0;
 
     if (isCwDismissed(nextUpItem)) continue;
     items.push(nextUpItem);
@@ -798,7 +973,12 @@ export function buildNuvioPlaybackItems(
         );
       });
 
-      if (!hasCloudProgress && !hasWatchedHistory && safeRecords.length > 0) {
+      if (
+        options?.clearMissingLocal &&
+        !hasCloudProgress &&
+        !hasWatchedHistory &&
+        safeRecords.length > 0
+      ) {
         clearLocalCw(loc.id, ownerId);
         continue;
       }
@@ -838,6 +1018,9 @@ export function buildNuvioPlaybackItems(
         _mtime: when,
         external: "nuvio",
       };
+      if (localItem.upNext) {
+        (localItem as Record<string, unknown>).nextUpSeedAt = loc.t || 0;
+      }
       if (!isCwDismissed(localItem)) {
         items.push(localItem);
       }
@@ -862,6 +1045,15 @@ export function buildNuvioPlaybackItems(
     if (it.altIds) for (const a of it.altIds) seenIds.add(a);
     deduped.push(it);
   }
+
+  reconcileResumeProgress(
+    deduped,
+    safeRecords,
+    watched,
+    aliasResolver,
+    ownerId,
+    profileIndex === resolveNuvioProfileIndex(),
+  );
 
   deduped.sort((a, b) => {
     const ta = Date.parse(a.state?.lastWatched ?? a._mtime ?? "") || 0;

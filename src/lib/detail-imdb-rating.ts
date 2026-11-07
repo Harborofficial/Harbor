@@ -18,6 +18,35 @@ export async function fetchDetailImdbRating(
   return validImdbRating((await fetchMeta(kind, id, true))?.imdbRating);
 }
 
+export function chainedPrimaryRating(input: {
+  chain?: string[];
+  sourceRatings?: Record<string, string>;
+  omdb?: unknown;
+  detail?: unknown;
+  fallback?: unknown;
+}): { value?: string; source: "imdb" | "tmdb" } {
+  for (const id of input.chain ?? []) {
+    if (id === "omdb") {
+      const value = validImdbRating(input.omdb);
+      if (value) return { value, source: "imdb" };
+      continue;
+    }
+    if (id === "tmdb") {
+      const value = validImdbRating(input.sourceRatings?.tmdb);
+      if (value) return { value, source: "tmdb" };
+      continue;
+    }
+    if (id.startsWith("addon:")) {
+      const value = validImdbRating(input.sourceRatings?.[id]);
+      if (value) return { value, source: "imdb" };
+    }
+  }
+  const imdb = validImdbRating(input.fallback);
+  return imdb
+    ? { value: imdb, source: "imdb" }
+    : { value: validImdbRating(input.detail), source: "tmdb" };
+}
+
 export function detailImdbRating(input: {
   id: string;
   inline?: unknown;

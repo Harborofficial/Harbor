@@ -166,6 +166,17 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
         engine={props.engine ?? "html5"}
         count={visibleVariants.length}
         selectedTrack={selectedTrack}
+        hasExternalTrack={tracks.some((track) => track.external === true)}
+        onChooseExternal={() => {
+          setSourceFilter("external");
+          setActiveLang(ALL_LANGS);
+          if (!tracks.some((track) => track.external === true)) {
+            setSearchOpen(true);
+            setSearchFocusLang(null);
+          } else {
+            setSearchOpen(false);
+          }
+        }}
         hasSecondary={secondaryTrack != null}
         delaySec={delaySec}
         delayNonZero={delayNonZero}

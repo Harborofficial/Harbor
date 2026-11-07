@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronLeft, ExternalLink, Heart, Play, RotateCcw, VideoOff } from "@/components/icons/music-icons";
+import {
+  ChevronLeft,
+  ExternalLink,
+  Heart,
+  ListPlus,
+  Play,
+  RotateCcw,
+  VideoOff,
+} from "@/components/icons/music-icons";
 import { MusicServiceLogo } from "@/components/music/music-service-logo";
 import { MusicArtistLink } from "./music-artist-link";
 import { MusicWhereToBuy } from "./music-artist-overview";
@@ -10,21 +18,28 @@ import { MusicMediaBadge } from "./music-media-badge";
 import { musicUpcoming, useMusicTransport } from "./music-queue";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
+import { useMusicAppearance } from "@/lib/music/appearance";
 import { appendMusicVideos, searchMusicVideoPage } from "@/lib/music/video-pages";
 import { searchTrackKey } from "@/lib/music/now-search";
 import { prefetchMusicVideoStreams } from "@/lib/music/video";
 import {
+  enqueueMusic,
   getMusicState,
+  isMusicTrackPrimed,
   playMusic,
   returnMusicToComputer,
   toggleMusicLiked,
   useMusicPlayer,
   waitForMusicAudioReady,
 } from "@/lib/music/player";
+import { useMusicTrackContextMenu } from "./music-track-menu";
+import { setMusicWatchOpen, useMusicVideoMini } from "@/lib/music/video-mini";
 import { getMusicSpeakerState } from "@/lib/music/casting";
 import type { MusicTrack } from "@/lib/music/types";
 import { MusicVideoSurface } from "./music-video-surface";
 import { MusicVideoFullscreen } from "./music-video-fullscreen";
+import { MusicVideoMiniToggle } from "./music-video-mini-toggle";
+import { musicVideoSurfaces } from "@/lib/music/video-session";
 import {
   getMusicVideoFullscreen,
   subscribeMusicVideoFullscreen,
@@ -109,7 +124,8 @@ export function MusicWatch({
         current.current?.id !== track.id ||
         current.current.connectorId !== track.connectorId ||
         current.current.mediaKind !== "video" ||
-        current.phase === "error"
+        current.phase === "error" ||
+        !isMusicTrackPrimed(track)
       )
         await playMusic(
           { ...track, mediaKind: "video" },
@@ -142,6 +158,36 @@ export function MusicWatch({
 
   const playing = readySelection === selection ? (player.current ?? track) : track;
   const playingId = playing.id;
+  const appearance = useMusicAppearance();
+  const theatre = playing.mediaKind === "video" && appearance.theatre;
+  const mini = useMusicVideoMini();
+  const videoMenu = useMusicTrackContextMenu(playing, {
+    onAddToQueue: () => enqueueMusic(playing),
+    onToggleLike: () => toggleMusicLiked(playing),
+  });
+  const miniEnabled = useRef(mini.enabled);
+  miniEnabled.current = mini.enabled;
+  useEffect(() => {
+    const node = stageRef.current;
+    if (!node) return;
+    const onMenu = (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      videoMenu.onContextMenu(event as unknown as React.MouseEvent<HTMLElement>);
+    };
+    node.addEventListener("contextmenu", onMenu, true);
+    return () => node.removeEventListener("contextmenu", onMenu, true);
+  }, [videoMenu.onContextMenu]);
+  useLayoutEffect(() => {
+    setMusicWatchOpen(active);
+    if (!active) return;
+    return () => {
+      setMusicWatchOpen(false);
+      // With the mini player off, leaving the stage should hand playback back to the dock
+      // instead of leaving a hidden video decoder running.
+      if (!miniEnabled.current) musicVideoSurfaces.stop();
+    };
+  }, [active]);
 
   useEffect(() => {
     if (!active) return;
@@ -211,8 +257,14 @@ export function MusicWatch({
 
   return (
     <>
-      <section className="relative z-10 flex flex-col gap-6 lg:flex-row">
+      <section
+        className={`music-watch-layout relative z-10 flex flex-col gap-6 ${
+          theatre ? "" : "lg:flex-row"
+        }`}
+        data-theatre={theatre ? "1" : undefined}
+      >
         <div className="min-w-0 flex-1">
+          <MusicVideoMiniToggle className="mb-3" />
           <button
             type="button"
             data-music-inner-back
@@ -224,6 +276,7 @@ export function MusicWatch({
           </button>
 
           <div ref={stageRef} className="music-watch-stage">
+            {videoMenu.menu}
             {preparationError ? (
               <div className="music-watch-stage-error" role="alert">
                 <VideoOff className="size-6 text-ink-subtle" aria-hidden />
@@ -292,6 +345,15 @@ export function MusicWatch({
                 className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] text-ink-muted ring-1 ring-white/10 transition-colors hover:text-ink"
               >
                 <Heart className="size-4" fill={liked ? "currentColor" : "none"} aria-hidden />
+              </button>
+              <button
+                type="button"
+                onClick={() => enqueueMusic(playing)}
+                aria-label={t("music.card.addToQueue")}
+                title={t("music.card.addToQueue")}
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] text-ink-muted ring-1 ring-white/10 transition-colors hover:text-ink"
+              >
+                <ListPlus className="size-4" aria-hidden />
               </button>
               <MusicAddToPlaylist track={playing} />
             </div>

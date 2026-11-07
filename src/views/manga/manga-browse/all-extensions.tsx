@@ -22,6 +22,7 @@ import {
   subscribeMangaLangFilter,
 } from "./langs";
 import { MangaCard } from "./manga-card";
+import { useOpenTitle } from "../use-open-title";
 
 export function sourceDisplayName(source: SuwayomiSource): string {
   if (isAgnosticLang(source.lang)) return `${source.name} · All languages`;
@@ -173,6 +174,7 @@ export function AllExtensionsView({
 }) {
   const t = useT();
   const { items: favs } = useMangaFavorites();
+  const { open: openTitle, missing } = useOpenTitle();
   const config = useMemo<ServerConfig>(() => ({ baseUrl: activeMangaSource()?.baseUrl ?? "" }), []);
   const [sources, setSources] = useState<SuwayomiSource[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -217,7 +219,13 @@ export function AllExtensionsView({
     () =>
       [...favs.values()]
         .sort((a, b) => b.addedAt - a.addedAt)
-        .map((e) => ({ id: e.id, title: e.title, cover: e.cover })),
+        .map((e) => ({
+          id: e.id,
+          title: e.title,
+          altTitle: e.altTitle,
+          cover: e.cover,
+          sourceId: e.sourceId,
+        })),
     [favs],
   );
 
@@ -250,7 +258,15 @@ export function AllExtensionsView({
       {favList.length > 0 && (
         <Row title={t("Library")} min={140}>
           {favList.map((m) => (
-            <MangaCard key={m.id} manga={m} onOpen={onOpen} />
+            <MangaCard
+              key={m.id}
+              manga={m}
+              onOpen={onOpen}
+              resolveOpen={(entry) =>
+                void openTitle(entry.id, entry.title, entry.altTitle, entry.sourceId)
+              }
+              missing={missing.has(m.id)}
+            />
           ))}
         </Row>
       )}

@@ -12,6 +12,7 @@ import {
   type MangaSummary,
 } from "@/lib/manga/api";
 import { useMangaFavorites } from "@/lib/manga-favorites";
+import { useSessionState } from "@/lib/session-state";
 import { subscribeMangaLibraryChanged } from "@/lib/manga/library-events";
 import { activeMangaSource, activeMangaSourceId, subscribeMangaSources } from "@/lib/manga/sources";
 import type { SuwayomiSource } from "@/lib/manga/sources/suwayomi/provider";
@@ -39,6 +40,7 @@ import {
   subscribeMangaLangFilter,
 } from "./manga-browse/langs";
 import { MangaCard } from "./manga-browse/manga-card";
+import { useOpenTitle } from "./use-open-title";
 
 type Status = "loading" | "ready" | "error";
 type SortMode = "latest" | "new" | "chapters";
@@ -59,11 +61,12 @@ export function MangaBrowse({
   onOpenLibrary?: () => void;
 }) {
   const t = useT();
-  const [query, setQuery] = useState("");
-  const [tagId, setTagId] = useState("");
-  const [sortMode, setSortMode] = useState<SortMode>("latest");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [query, setQuery] = useSessionState<string>("manga.query", "");
+  const [tagId, setTagId] = useSessionState<string>("manga.tag", "");
+  const [sortMode, setSortMode] = useSessionState<SortMode>("manga.sort", "latest");
+  const [statusFilter, setStatusFilter] = useSessionState<StatusFilter>("manga.status", "all");
   const { items: favItems } = useMangaFavorites();
+  const { open: openTitle, missing } = useOpenTitle();
   const [items, setItems] = useState<MangaSummary[]>([]);
   const [searchGroups, setSearchGroups] = useState<SearchResultGroup[]>([]);
   const [status, setStatus] = useState<Status>("loading");
@@ -102,9 +105,13 @@ export function MangaBrowse({
 
   const reload = useCallback(() => setReloadTick((n) => n + 1), []);
 
-  useEffect(() => subscribeMangaLibraryChanged(() => {
-    if (/(?:^|::)category:\d+$/.test(tagRef.current)) reload();
-  }), [reload]);
+  useEffect(
+    () =>
+      subscribeMangaLibraryChanged(() => {
+        if (/(?:^|::)category:\d+$/.test(tagRef.current)) reload();
+      }),
+    [reload],
+  );
 
   const sourceRef = useRef(activeMangaSourceId());
   const activeSource = activeMangaSource();
@@ -262,13 +269,19 @@ export function MangaBrowse({
     return () => window.clearTimeout(timer);
   }, [status, hasMore, items.length, fetchPage]);
 
-  const displayItems = useMemo(() => {
-    let list: MangaSummary[];
+  const displayItems = useMemo<(MangaSummary & { sourceId?: string })[]>(() => {
+    let list: (MangaSummary & { sourceId?: string })[];
     if (tagId === FAVORITES) {
       const qf = query.trim().toLowerCase();
       const favs = [...favItems.values()]
         .sort((a, b) => b.addedAt - a.addedAt)
-        .map((e) => ({ id: e.id, title: e.title, cover: e.cover }));
+        .map((e) => ({
+          id: e.id,
+          title: e.title,
+          altTitle: e.altTitle,
+          cover: e.cover,
+          sourceId: e.sourceId,
+        }));
       list = qf ? favs.filter((m) => m.title.toLowerCase().includes(qf)) : favs;
     } else {
       const favs: MangaSummary[] = [];
@@ -325,18 +338,25 @@ export function MangaBrowse({
   }, [loadingMore, status, hasMore, fetchPage]);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef(loadMore);
+  loadMoreRef.current = loadMore;
+  // Recreate the observer only when the sentinel appears. Recreating it on every
+  // loadingMore/items change makes it fire again while the sentinel is still in
+  // view, which walks the whole source catalog without a scroll.
+  const showSentinel = status === "ready" && displayItems.length > 0;
   useEffect(() => {
+    if (!showSentinel) return;
     const el = sentinelRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) loadMore();
+        if (entries[0]?.isIntersecting) loadMoreRef.current();
       },
       { root: null, rootMargin: "800px 0px" },
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [loadMore]);
+  }, [showSentinel]);
 
   const emptyKind = tagId === FAVORITES ? "favorites" : query.trim() || tagId ? "search" : "source";
 
@@ -441,7 +461,17 @@ export function MangaBrowse({
         <>
           <div className="grid gap-x-4 gap-y-7" style={{ gridTemplateColumns: GRID }}>
             {displayItems.map((m) => (
-              <MangaCard key={m.id} manga={m} onOpen={onOpen} />
+              <MangaCard
+                key={m.id}
+                manga={m}
+                onOpen={onOpen}
+                resolveOpen={
+                  tagId === FAVORITES
+                    ? (entry) => void openTitle(entry.id, entry.title, entry.altTitle, entry.sourceId)
+                    : undefined
+                }
+                missing={tagId === FAVORITES && missing.has(m.id)}
+              />
             ))}
           </div>
           <div ref={sentinelRef} className="h-4" />

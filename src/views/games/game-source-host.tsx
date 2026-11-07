@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { ChevronDown, Globe2, RefreshCw } from "lucide-react";
 import { useT, useUiLanguage } from "@/lib/i18n";
 import type { SourceLinkProvider } from "@/lib/games/source-links";
-import type { HostCheck } from "@/lib/games/source-hosts";
+import { hostCheckNote, type HostCheck } from "@/lib/games/source-hosts";
 import { transferBytes } from "@/lib/games/transfers";
 import "./game-source-host.css";
 
@@ -51,7 +51,7 @@ export function GameSourceHost({ provider, apiKey, url, available }: {
           </dl>}
           {value.limitsUnavailable && <p>{t("games.sources.host.limitsUnavailable")}</p>}
           <small>{t("games.sources.host.checked", { time: new Date(value.checkedAt).toLocaleTimeString(language, { hour: "2-digit", minute: "2-digit" }) })}</small>
-          <p className="games-host-context">{t(value.state === "queue" ? "games.sources.host.queueNote" : value.state === "unknown" ? "games.sources.host.unknownNote" : "games.sources.host.fileNote")}</p>
+          <p className="games-host-context">{t(hostCheckNote(value.state))}</p>
         </>}
       </div></div>
     </div>

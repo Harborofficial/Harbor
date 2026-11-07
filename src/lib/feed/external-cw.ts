@@ -174,9 +174,22 @@ function emit(): void {
 
 function setItems(next: LibraryItem[]): void {
   if (next.length === 0 && items.length === 0) return;
+  if (next === items) return;
+  try {
+    // Conservative content check: false negatives only cost an extra emit.
+    if (JSON.stringify(items) === JSON.stringify(next)) return;
+  } catch {}
   items = next;
   emit();
   void detectAnimeForCw(next.filter((item) => !item.isAnime));
+}
+
+export function willRefreshExternalCw(force = false): boolean {
+  if (!isNuvioSignedIn() || !isNuvioProviderActive() || sourceMask.nuvio === false) return false;
+  if (!externalCwConnected()) return false;
+  if (inflight) return true;
+  if (force) return true;
+  return !(fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS);
 }
 
 export function externalCwConnected(): boolean {
@@ -594,33 +607,27 @@ export function useExternalCw(enabled = true): LibraryItem[] {
     }
     onSessionChange();
     if (isNuvioSignedIn() && isNuvioProviderActive()) {
-      void refreshExternalCw(true);
+      const fresh = fetchedAt > 0 && Date.now() - fetchedAt < STALE_MS;
+      void refreshExternalCw(!fresh);
     } else {
       void refreshExternalCw();
     }
+    // Nuvio periodic and focus refreshes are owned by the app-level sync
+    // coordinator so multiple mounted views cannot stack 30s polls.
+    const nuvioMode = () => isNuvioSignedIn() && isNuvioProviderActive();
     const onFocus = (): void => {
-      const isNuvio = isNuvioSignedIn() && isNuvioProviderActive();
-      if (isNuvio) {
-        void refreshExternalCw(true);
-      } else {
-        if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
-        else void refreshExternalCw();
-      }
+      if (nuvioMode()) return;
+      if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
+      else void refreshExternalCw();
     };
     const onVisible = (): void => {
-      if (document.visibilityState !== "visible") return;
-      const isNuvio = isNuvioSignedIn() && isNuvioProviderActive();
-      if (isNuvio) {
-        void refreshExternalCw(true);
-      } else {
-        if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
-        else void refreshExternalCw();
-      }
+      if (document.visibilityState !== "visible" || nuvioMode()) return;
+      if (Date.now() - fetchedAt > FOCUS_STALE_MS) void refreshExternalCw(true);
+      else void refreshExternalCw();
     };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisible);
-    const pollMs = isNuvioSignedIn() && isNuvioProviderActive() ? 30_000 : STALE_MS;
-    const timer = window.setInterval(onVisible, pollMs);
+    const timer = window.setInterval(onVisible, STALE_MS);
     return () => {
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisible);

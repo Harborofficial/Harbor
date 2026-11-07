@@ -16,6 +16,7 @@ import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
 import { fmtTime } from "./transport/transport-utils";
 import { FullscreenClock } from "./fullscreen-clock";
+import { useReportPlayerControlsInset } from "@/lib/player/controls-inset";
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
@@ -54,6 +55,8 @@ export function TransportKids({
   canPickAnother: boolean;
 }) {
   const t = useT();
+  const controlsRef = useRef<HTMLDivElement>(null);
+  useReportPlayerControlsInset(controlsRef, visible);
   const playing = snap.status === "playing";
   const subActive = snap.subtitleTracks.some((s) => s.selected);
   const firstSub = snap.subtitleTracks[0];
@@ -97,6 +100,7 @@ export function TransportKids({
       </div>
 
       <div
+        ref={controlsRef}
         className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-5 bg-gradient-to-t from-black/80 via-black/35 to-transparent px-8 pb-8 pt-14 transition-opacity duration-300 ${
           visible ? "opacity-100" : "opacity-0"
         }`}

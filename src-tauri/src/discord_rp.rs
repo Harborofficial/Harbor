@@ -121,6 +121,32 @@ fn safe_link(url: Option<String>) -> Option<String> {
     }
 }
 
+fn safe_asset_url(url: Option<String>) -> Option<String> {
+    safe_link(url).filter(|u| u.chars().count() <= 256)
+}
+
+fn safe_asset_text(value: Option<String>) -> Option<String> {
+    clean(value).filter(|v| v.chars().count() >= 2)
+}
+
+#[cfg(test)]
+mod asset_validation_tests {
+    use super::*;
+
+    #[test]
+    fn short_japanese_album_name_is_omitted() {
+        assert_eq!(safe_asset_text(Some("眼".to_string())), None);
+        assert_eq!(safe_asset_text(Some("魔界".to_string())), Some("魔界".to_string()));
+    }
+
+    #[test]
+    fn long_percent_encoded_album_link_is_omitted() {
+        let long_url = format!("https://harborcommunity.site/?harbor-music=album/{}", "%E3%83%87".repeat(40));
+        assert_eq!(safe_asset_url(Some(long_url)), None);
+        assert_eq!(safe_asset_url(Some("https://harborcommunity.site".to_string())), Some("https://harborcommunity.site".to_string()));
+    }
+}
+
 fn safe_buttons(buttons: Vec<ButtonInput>) -> Vec<(String, String)> {
     buttons
         .into_iter()
@@ -142,11 +168,11 @@ pub fn discord_set_presence(state: tauri::State<'_, DiscordState>, p: PresenceIn
         d.state = clean(p.state);
         d.state_url = safe_link(p.state_url);
         d.large_image = safe_image(p.poster_url);
-        d.large_text = clean(p.large_text);
-        d.large_url = safe_link(p.large_url);
+        d.large_text = safe_asset_text(p.large_text);
+        d.large_url = safe_asset_url(p.large_url);
         d.small_image = safe_image(p.small_image_url);
-        d.small_text = clean(p.small_text);
-        d.small_url = safe_link(p.small_url);
+        d.small_text = safe_asset_text(p.small_text);
+        d.small_url = safe_asset_url(p.small_url);
         d.start_ts = if p.paused { None } else { p.start_ts };
         d.end_ts = if p.paused { None } else { p.end_ts };
         d.party_id = clean(p.party_id);

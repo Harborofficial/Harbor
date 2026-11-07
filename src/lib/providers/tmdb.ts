@@ -96,6 +96,7 @@ export { tmdbEpisodeNames } from "./tmdb/tmdb-episode-names";
 export {
   applyTmdbEpisodeNames,
   needsTmdbEpisodeNames,
+  needsTmdbEpisodeDetails,
   pickEpisodeName,
   type NamedEpisode,
   type TmdbEpisodeText,

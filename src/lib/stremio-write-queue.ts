@@ -119,14 +119,9 @@ export async function cloudLibraryPut(
 }
 
 export async function flushWriteQueue(): Promise<void> {
-  if (isNuvioProviderActive()) {
-    load();
-    if (queue.size > 0) {
-      queue.clear();
-      persist();
-    }
-    return;
-  }
+  // Nuvio mode seals Stremio writes, but the queue must survive so unsynced
+  // changes replay when the Stremio provider is active again.
+  if (isNuvioProviderActive()) return;
   load();
   if (queue.size === 0) return;
   // Snapshot this pass: writes queued during an awaited request belong to the next pass.

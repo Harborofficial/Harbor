@@ -1,3 +1,4 @@
+import { enterWindowFullscreen, exitWindowFullscreen } from "../fullscreen-state";
 import type { MusicVideoSurfaceState } from "./video-surfaces";
 
 export type MusicVideoFullscreenState = {
@@ -9,15 +10,24 @@ export type MusicVideoFullscreenState = {
 const listeners = new Set<() => void>();
 let state: MusicVideoFullscreenState = { active: false, stage: null };
 
+let fullscreenRequested = false;
+
 function syncNativeFullscreen(next: MusicVideoFullscreenState): void {
-  if (typeof document === "undefined") return;
-  if (next.active && next.stage) {
-    if (document.fullscreenElement !== next.stage)
-      void Promise.resolve(next.stage.requestFullscreen?.()).catch(() => {});
+  if (typeof window === "undefined") return;
+  if (next.active) {
+    // The stage is only mounted after this update commits, so requesting it here would run
+    // outside the click that opened fullscreen and the browser would reject it. Ask for the
+    // window while the user gesture is still active; the stage rides inside it.
+    if (!fullscreenRequested) {
+      fullscreenRequested = true;
+      void enterWindowFullscreen().catch(() => {
+        fullscreenRequested = false;
+      });
+    }
     return;
   }
-  if (!next.active && document.fullscreenElement)
-    void Promise.resolve(document.exitFullscreen?.()).catch(() => {});
+  fullscreenRequested = false;
+  void exitWindowFullscreen().catch(() => {});
 }
 
 function publish(next: MusicVideoFullscreenState): void {

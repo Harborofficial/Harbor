@@ -9,7 +9,7 @@ import { useT } from "@/lib/i18n";
 import { useSectionBack } from "@/lib/section-back";
 import { openUrl } from "@/lib/window";
 import { type CloudDownload, type CloudKeys } from "@/lib/games/cloud-files";
-import { connectedSourceLinkProviders, SOURCE_LINK_PROVIDERS, SOURCE_LINK_SERVICES, sourceLinkError, type SourceLink, type SourceLinkProvider } from "@/lib/games/source-links";
+import { connectedSourceLinkProviders,  SOURCE_LINK_SERVICES, sourceLinkError, type SourceLink, type SourceLinkProvider } from "@/lib/games/source-links";
 import { transferBytes } from "@/lib/games/transfers";
 import type { GameTransfers } from "@/hooks/use-game-transfers";
 import rdLogo from "@/assets/addon-logos/realdebrid.png";
@@ -17,6 +17,8 @@ import pmLogo from "@/assets/addon-logos/premiumize.png";
 import tbLogo from "@/assets/addon-logos/torbox.png";
 import adLogo from "@/assets/addon-logos/alldebrid.webp";
 import {SourceAllDebrid} from "./game-source-ad";
+import {SourceMagnetDebrid} from "./game-source-magnet";
+import {SourceDirectDownload} from "./game-source-direct";
 import {SourceCloudTransfer} from "./game-source-web";
 import { GameSourceHost } from "./game-source-host";
 import { GameSourceIcon } from "./game-source-icon";
@@ -60,7 +62,9 @@ function SourceLinkDialog({ link, downloads, keys, openSettings, onClose }: { li
   const [copyState,setCopyState]=useState<"idle"|"copied"|"failed">("idle");
   useEffect(()=>{if(copyState!=="copied")return;const timer=setTimeout(()=>setCopyState("idle"),2200);return()=>clearTimeout(timer);},[copyState]);
   const copyLink=async()=>{try{await navigator.clipboard.writeText(link.url);setCopyState("copied");}catch{setCopyState("failed");}};
-  const publicHost=sourcePublicHost(link.url),browserHost=sourceBrowserHost(link.url),directHost=publicHost||browserHost,[publicMode,setPublicMode]=useState(!!directHost);
+  const publicHost=link.kind==="direct"?null:sourcePublicHost(link.url),browserHost=link.kind==="direct"?null:sourceBrowserHost(link.url),directHost=publicHost||browserHost,[publicMode,setPublicMode]=useState(!!directHost);
+  const [directMethod,setDirectMethod]=useState<"direct"|"debrid">("direct");
+  const connectedProviders=connectedSourceLinkProviders(keys);
   const [provider, setProvider] = useState<SourceLinkProvider>(() => connectedSourceLinkProviders(keys)[0] ?? "rd");
   const [pmMode,setPmMode]=useState<'direct'|'cloud'>('direct');
   const cloudJob=provider==='tb'||provider==='pm'&&pmMode==='cloud', separateFlow=cloudJob||provider==='ad';
@@ -101,13 +105,18 @@ function SourceLinkDialog({ link, downloads, keys, openSettings, onClose }: { li
       if(started&&alive.current&&current===revision.current)close();
     }finally{if(current===revision.current)pending.current=false}
   };
-  return <ModalShell closing={closing} onDismiss={dismiss} width={600} labelledBy={id} backdropClassName="games-source-link-backdrop"><div className="games-source-link-dialog" ref={root} inert={closing}>
-    <header><div><span className="games-section-kicker">{t(downloads.selectionOnly?"games.download.relink.title":"games.sources.links.title")}</span><h2 id={id}>{link.title}</h2><div className="games-source-link-address"><button className="games-source-link-origin" onClick={() => void openUrl(link.url)}><Link2 size={14}/>{new URL(link.url).hostname}<ArrowUpRight size={13}/></button><button className="games-source-link-copy" onClick={()=>void copyLink()}>{copyState==="copied"?<Check size={15}/>:<Copy size={15}/>}<span aria-live="polite">{t(copyState==="copied"?"games.sources.links.copied":"games.sources.links.copy")}</span></button></div>{copyState==="failed"&&<div role="alert"><p>{t("games.sources.copyError")}</p><input className="games-source-copy-fallback" value={link.url} readOnly aria-label={t("games.sources.links.copy")} onFocus={event=>event.currentTarget.select()}/></div>}</div><button className="games-icon-button" disabled={saving} onClick={dismiss} aria-label={t("common.close")}><X size={19}/></button></header>
+  return <ModalShell closing={closing} onDismiss={dismiss} width={780} labelledBy={id} backdropClassName="games-source-link-backdrop"><div className="games-source-link-dialog" ref={root} inert={closing}>
+    <header><div><span className="games-section-kicker">{t(downloads.selectionOnly?"games.download.relink.title":"games.sources.links.title")}</span><h2 id={id}>{link.title}</h2><div className="games-source-size-summary">
+      <span><strong>{t("games.sources.download.downloadSize")}</strong> {link.expectedBytes != null ? transferBytes(link.expectedBytes) : t("games.sources.links.unknownSize")}</span>
+      {link.repackSize && <span><strong>{t("games.sources.download.repackSize")}</strong> {link.repackSize}</span>}
+      <span><strong>{t("games.sources.download.installedSize")}</strong> {t("games.sources.download.sizeNotProvided")}</span>
+    </div><div className="games-source-link-address"><button className="games-source-link-origin" onClick={() => void openUrl(link.url)}><Link2 size={14}/>{link.kind==="magnet"?t("games.sources.art.torrent"):new URL(link.url).hostname}<ArrowUpRight size={13}/></button><button className="games-source-link-copy" onClick={()=>void copyLink()}>{copyState==="copied"?<Check size={15}/>:<Copy size={15}/>}<span aria-live="polite">{t(copyState==="copied"?"games.sources.links.copied":"games.sources.links.copy")}</span></button></div>{copyState==="failed"&&<div role="alert"><p>{t("games.sources.copyError")}</p><input className="games-source-copy-fallback" value={link.url} readOnly aria-label={t("games.sources.links.copy")} onFocus={event=>event.currentTarget.select()}/></div>}</div><button className="games-icon-button" disabled={saving} onClick={dismiss} aria-label={t("common.close")}><X size={19}/></button></header>
+    {link.kind==="direct"&&<div className="games-source-link-modes games-source-download-methods" role="group" aria-label={t("games.sources.download.method")}><button type="button" aria-pressed={directMethod==="direct"} disabled={saving} onClick={()=>setDirectMethod("direct")}>{t("games.sources.download.direct")}</button><button type="button" aria-pressed={directMethod==="debrid"} disabled={saving} onClick={()=>setDirectMethod("debrid")}>{t("games.magnet.debrid")}</button></div>}
     {directHost&&<div className="games-source-link-modes"><button aria-pressed={publicMode} disabled={saving} onClick={()=>setPublicMode(true)}>{publicHost||browserLogos[browserHost!]?<img src={publicHost?publicLogos[publicHost]:browserLogos[browserHost!]} alt=""/>:<GameSourceIcon url={link.url} fallback={<ArrowDown size={18}/>}/>} {publicHost?PUBLIC_SOURCE_HOSTS[publicHost]:t('games.sources.browser.direct')}</button><button aria-pressed={!publicMode} disabled={saving} onClick={()=>setPublicMode(false)}>{t('games.sources.public.services')}</button></div>}
-    <div className="games-source-link-content" key={directHost&&publicMode?"public":`${provider}:${pmMode}`} >{directHost&&publicMode?(browserHost?<SourceBrowserFiles link={link} downloads={downloads} onDone={close} closing={closing}/>:<SourcePublicFiles link={link} downloads={downloads} onDone={close} closing={closing}/>):<><div className={`games-source-link-body${separateFlow?" games-source-link-options":""}`}>
+    {link.kind==="magnet"?<SourceMagnetDebrid link={link} downloads={downloads} keys={keys} openSettings={openSettings} onDone={close}/>:link.kind==="direct"&&directMethod==="direct"?<SourceDirectDownload link={link} downloads={downloads} onDone={close}/>:<div className="games-source-link-content" key={directHost&&publicMode?"public":`${provider}:${pmMode}`} >{directHost&&publicMode?(browserHost?<SourceBrowserFiles link={link} downloads={downloads} onDone={close} closing={closing}/>:<SourcePublicFiles link={link} downloads={downloads} onDone={close} closing={closing}/>):<><div className={`games-source-link-body${separateFlow?" games-source-link-options":""}`}>
       <p>{t("games.sources.links.intro")}</p>
-      <div className="games-source-link-providers" aria-label={t("games.sources.links.service")}>{SOURCE_LINK_PROVIDERS.map(item => <button key={item} aria-pressed={provider === item} disabled={saving} onClick={() => setProvider(item)}><img src={logos[item]} alt=""/><span>{SOURCE_LINK_SERVICES.find(value => value.id === item)!.name}</span>{keys[item]?.trim() && <Check size={15} aria-label={t("games.sources.links.connected")}/>}</button>)}</div>
-      <GameSourceHost provider={provider} apiKey={key} url={link.url} available={downloads.available}/>
+      <div className="games-source-link-providers" aria-label={t("games.sources.links.service")}>{connectedProviders.map(item => <button key={item} aria-pressed={provider === item} disabled={saving} onClick={() => setProvider(item)}><img src={logos[item]} alt=""/><span>{SOURCE_LINK_SERVICES.find(value => value.id === item)!.name}</span>{keys[item]?.trim() && <Check size={15} aria-label={t("games.sources.links.connected")}/>}</button>)}</div>
+      {!connectedProviders.length&&<div className="games-source-link-connect"><p>{t("games.sources.links.none")}</p>{openSettings&&<button className="games-button" onClick={()=>{close();openSettings()}}>{t("games.magnet.connect")}</button>}</div>}{!!connectedProviders.length&&<GameSourceHost provider={provider} apiKey={key} url={link.url} available={downloads.available}/>}
       {provider==='pm'&&<div className="games-web-scope games-pm-mode">{(['direct','cloud'] as const).map(mode=><button key={mode} aria-pressed={pmMode===mode} disabled={saving} onClick={()=>setPmMode(mode)}>{t(`games.sources.pm.${mode}`)}</button>)}</div>}
       {!separateFlow&&(!downloads.available ? <p>{t("games.sources.links.desktop")}</p> : !key ? <div className="games-source-link-connect"><p>{t("games.sources.links.connect",{name:service.name})}</p>{openSettings && <button className="games-button" onClick={() => {close();openSettings();}}>{t("games.sources.links.settings")}</button>}</div> : <>
         {loading && <SourceFilesLoading rows={files?.length ? Math.min(files.length, 3) : 1}/>}
@@ -115,5 +124,5 @@ function SourceLinkDialog({ link, downloads, keys, openSettings, onClose }: { li
       </>)}
     </div>{!separateFlow&&(error||downloads.error)&&<div className="games-source-batch-error" role="alert">{t(error||downloads.error)}</div>}
     {provider==='ad'?<SourceAllDebrid link={link} downloads={downloads} apiKey={key} openSettings={openSettings} onDone={close}/>:cloudJob?<SourceCloudTransfer key={provider} provider={provider==='pm'?'pm':'tb'} link={link} downloads={downloads} keys={keys} openSettings={openSettings} onDone={close}/>:<footer><span>{t(downloads.selectionOnly?"games.download.relink.intro":chosen.length>1?'games.sources.batch.note':"games.sources.links.note")}</span>{downloads.available && key && (files?.length && !loading ? <button className="games-button games-button-primary" disabled={saving||!chosen.length} onClick={() => void download()}><ArrowDown size={16}/>{t(downloads.selectionOnly?"games.download.relink.review":chosen.length>1?'games.sources.batch.destination':"games.sources.links.destination")}</button> : <button className="games-button games-button-primary" aria-disabled={loading} onClick={() => void prepare()}>{t(loading ? "games.sources.links.preparing" : error ? "common.retry" : "games.sources.links.prepare")}</button>)}</footer>}
-  </>}</div></div></ModalShell>;
+  </>}</div>}</div></ModalShell>;
 }

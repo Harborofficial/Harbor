@@ -39,6 +39,7 @@ export const SECTION_TABS: Partial<Record<SectionId, TabEntry[]>> = {
   ],
   shaders: [
     { id: "anime4k", label: "Anime Shaders", icon: "Sparkles" },
+    { id: "manga", label: "Manga Shaders", icon: "Wand2" },
     { id: "more", label: "More shaders", icon: "Layers" },
   ],
   anime: [

@@ -1,0 +1,502 @@
+{
+  "capturedAt": "2026-10-30",
+  "first": {
+    "contents": {
+      "twoColumnBrowseResultsRenderer": {
+        "tabs": [
+          {
+            "tabRenderer": {
+              "content": {
+                "sectionListRenderer": {
+                  "contents": [
+                    {
+                      "musicResponsiveHeaderRenderer": {
+                        "title": {
+                          "runs": [
+                            {
+                              "text": "Top 500 Songs of the 80s - Best Pop & Rock Music Playlist"
+                            }
+                          ]
+                        },
+                        "secondSubtitle": {
+                          "runs": [
+                            {
+                              "text": "392K views"
+                            },
+                            {
+                              "text": " • "
+                            },
+                            {
+                              "text": "500 tracks"
+                            },
+                            {
+                              "text": " • "
+                            },
+                            {
+                              "text": "34+ hours"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "secondaryContents": {
+          "sectionListRenderer": {
+            "contents": [
+              {
+                "musicPlaylistShelfRenderer": {
+                  "playlistId": "PLw-VjHDlEOgtH-Ce-dJzPOtIm5xTVC4t2",
+                  "contents": [
+                    {
+                      "musicResponsiveListItemRenderer": {
+                        "flexColumns": [
+                          {
+                            "musicResponsiveListItemFlexColumnRenderer": {
+                              "text": {
+                                "runs": [
+                                  {
+                                    "text": "Beat It",
+                                    "navigationEndpoint": {
+                                      "watchEndpoint": {
+                                        "videoId": "oRdxUFDoQe0",
+                                        "playlistId": "PLw-VjHDlEOgtH-Ce-dJzPOtIm5xTVC4t2",
+                                        "playerParams": "iAQB8AUB",
+                                        "loggingContext": {
+                                          "vssLoggingContext": {
+                                            "serializedContextData": "GiJQTHctVmpIRGxFT2d0SC1DZS1kSnpQT3RJbTV4VFZDNHQy"
+                                          }
+                                        },
+                                        "watchEndpointMusicSupportedConfigs": {
+                                          "watchEndpointMusicConfig": {
+                                            "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+                            }
+                          },
+                          {
+                            "musicResponsiveListItemFlexColumnRenderer": {
+                              "text": {
+                                "runs": [
+                                  {
+                                    "text": "Michael Jackson",
+                                    "navigationEndpoint": {
+                                      "browseEndpoint": {
+                                        "browseId": "UCoIOOL7QKuBhQHVKL8y7BEQ",
+                                        "browseEndpointContextSupportedConfigs": {
+                                          "browseEndpointContextMusicConfig": {
+                                            "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+                            }
+                          },
+                          {
+                            "musicResponsiveListItemFlexColumnRenderer": {
+                              "text": {},
+                              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM"
+                            }
+                          }
+                        ],
+                        "fixedColumns": [
+                          {
+                            "musicResponsiveListItemFixedColumnRenderer": {
+                              "text": {
+                                "runs": [
+                                  {
+                                    "text": "4:59"
+                                  }
+                                ],
+                                "accessibility": {
+                                  "accessibilityData": {
+                                    "label": "4 minutes, 59 seconds"
+                                  }
+                                }
+                              },
+                              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+                              "size": "MUSIC_RESPONSIVE_LIST_ITEM_FIXED_COLUMN_SIZE_SMALL"
+                            }
+                          }
+                        ],
+                        "thumbnail": {
+                          "musicThumbnailRenderer": {
+                            "thumbnail": {
+                              "thumbnails": [
+                                {
+                                  "url": "https://i.ytimg.com/vi/oRdxUFDoQe0/hqdefault.jpg",
+                                  "width": 400,
+                                  "height": 225
+                                }
+                              ]
+                            },
+                            "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+                            "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+                          }
+                        },
+                        "playlistItemData": {
+                          "playlistSetVideoId": "D0A0EF93DCE5742B",
+                          "videoId": "oRdxUFDoQe0",
+                          "voteSortValue": 1503079619
+                        }
+                      }
+                    },
+                    {
+                      "musicResponsiveListItemRenderer": {
+                        "flexColumns": [
+                          {
+                            "musicResponsiveListItemFlexColumnRenderer": {
+                              "text": {
+                                "runs": [
+                                  {
+                                    "text": "Every Breath You Take Video",
+                                    "navigationEndpoint": {
+                                      "watchEndpoint": {
+                                        "videoId": "OMOGaugKpzs",
+                                        "playlistId": "PLw-VjHDlEOgtH-Ce-dJzPOtIm5xTVC4t2",
+                                        "playerParams": "iAQB8AUB",
+                                        "loggingContext": {
+                                          "vssLoggingContext": {
+                                            "serializedContextData": "GiJQTHctVmpIRGxFT2d0SC1DZS1kSnpQT3RJbTV4VFZDNHQy"
+                                          }
+                                        },
+                                        "watchEndpointMusicSupportedConfigs": {
+                                          "watchEndpointMusicConfig": {
+                                            "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+                            }
+                          },
+                          {
+                            "musicResponsiveListItemFlexColumnRenderer": {
+                              "text": {
+                                "runs": [
+                                  {
+                                    "text": "The Police",
+                                    "navigationEndpoint": {
+                                      "browseEndpoint": {
+                                        "browseId": "UCbsRGw640UF_F7AIwHW-zmg",
+                                        "browseEndpointContextSupportedConfigs": {
+                                          "browseEndpointContextMusicConfig": {
+                                            "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+                            }
+                          },
+                          {
+                            "musicResponsiveListItemFlexColumnRenderer": {
+                              "text": {},
+                              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM"
+                            }
+                          }
+                        ],
+                        "fixedColumns": [
+                          {
+                            "musicResponsiveListItemFixedColumnRenderer": {
+                              "text": {
+                                "runs": [
+                                  {
+                                    "text": "3:49"
+                                  }
+                                ],
+                                "accessibility": {
+                                  "accessibilityData": {
+                                    "label": "3 minutes, 49 seconds"
+                                  }
+                                }
+                              },
+                              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+                              "size": "MUSIC_RESPONSIVE_LIST_ITEM_FIXED_COLUMN_SIZE_SMALL"
+                            }
+                          }
+                        ],
+                        "thumbnail": {
+                          "musicThumbnailRenderer": {
+                            "thumbnail": {
+                              "thumbnails": [
+                                {
+                                  "url": "https://i.ytimg.com/vi/OMOGaugKpzs/hqdefault.jpg",
+                                  "width": 400,
+                                  "height": 225
+                                }
+                              ]
+                            },
+                            "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+                            "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+                          }
+                        },
+                        "playlistItemData": {
+                          "playlistSetVideoId": "017208FAA85233F9",
+                          "videoId": "OMOGaugKpzs",
+                          "voteSortValue": 1503079619
+                        }
+                      }
+                    },
+                    {
+                      "continuationItemRenderer": {
+                        "continuationEndpoint": {
+                          "continuationCommand": {
+                            "token": "playlist-page-two"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "continuations": [
+              {
+                "nextContinuationData": {
+                  "continuation": "related-sections"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "second": {
+    "onResponseReceivedActions": [
+      {
+        "appendContinuationItemsAction": {
+          "continuationItems": [
+            {
+              "musicResponsiveListItemRenderer": {
+                "flexColumns": [
+                  {
+                    "musicResponsiveListItemFlexColumnRenderer": {
+                      "text": {
+                        "runs": [
+                          {
+                            "text": "Beds Are Burning",
+                            "navigationEndpoint": {
+                              "watchEndpoint": {
+                                "videoId": "ejorQVy3m8E",
+                                "playlistId": "PLw-VjHDlEOgtH-Ce-dJzPOtIm5xTVC4t2",
+                                "playerParams": "iAQB8AUB0gcJCTUC0OBS9m0t",
+                                "loggingContext": {
+                                  "vssLoggingContext": {
+                                    "serializedContextData": "GiJQTHctVmpIRGxFT2d0SC1DZS1kSnpQT3RJbTV4VFZDNHQy"
+                                  }
+                                },
+                                "watchEndpointMusicSupportedConfigs": {
+                                  "watchEndpointMusicConfig": {
+                                    "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+                    }
+                  },
+                  {
+                    "musicResponsiveListItemFlexColumnRenderer": {
+                      "text": {
+                        "runs": [
+                          {
+                            "text": "Midnight Oil",
+                            "navigationEndpoint": {
+                              "browseEndpoint": {
+                                "browseId": "UCmQb_c5tEEOXgKxvS7i3Qzg",
+                                "browseEndpointContextSupportedConfigs": {
+                                  "browseEndpointContextMusicConfig": {
+                                    "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+                    }
+                  },
+                  {
+                    "musicResponsiveListItemFlexColumnRenderer": {
+                      "text": {},
+                      "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM"
+                    }
+                  }
+                ],
+                "fixedColumns": [
+                  {
+                    "musicResponsiveListItemFixedColumnRenderer": {
+                      "text": {
+                        "runs": [
+                          {
+                            "text": "4:37"
+                          }
+                        ],
+                        "accessibility": {
+                          "accessibilityData": {
+                            "label": "4 minutes, 37 seconds"
+                          }
+                        }
+                      },
+                      "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+                      "size": "MUSIC_RESPONSIVE_LIST_ITEM_FIXED_COLUMN_SIZE_SMALL"
+                    }
+                  }
+                ],
+                "thumbnail": {
+                  "musicThumbnailRenderer": {
+                    "thumbnail": {
+                      "thumbnails": [
+                        {
+                          "url": "https://i.ytimg.com/vi/ejorQVy3m8E/hqdefault.jpg",
+                          "width": 400,
+                          "height": 225
+                        }
+                      ]
+                    },
+                    "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+                    "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+                  }
+                },
+                "playlistItemData": {
+                  "playlistSetVideoId": "8D0D6E3E29A3F128",
+                  "videoId": "ejorQVy3m8E",
+                  "voteSortValue": 1507784113
+                }
+              }
+            },
+            {
+              "musicResponsiveListItemRenderer": {
+                "flexColumns": [
+                  {
+                    "musicResponsiveListItemFlexColumnRenderer": {
+                      "text": {
+                        "runs": [
+                          {
+                            "text": "Holding Back the Years",
+                            "navigationEndpoint": {
+                              "watchEndpoint": {
+                                "videoId": "yG07WSu7Q9w",
+                                "playlistId": "PLw-VjHDlEOgtH-Ce-dJzPOtIm5xTVC4t2",
+                                "playerParams": "iAQB8AUB0gcJCTUC0OBS9m0t",
+                                "loggingContext": {
+                                  "vssLoggingContext": {
+                                    "serializedContextData": "GiJQTHctVmpIRGxFT2d0SC1DZS1kSnpQT3RJbTV4VFZDNHQy"
+                                  }
+                                },
+                                "watchEndpointMusicSupportedConfigs": {
+                                  "watchEndpointMusicConfig": {
+                                    "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+                    }
+                  },
+                  {
+                    "musicResponsiveListItemFlexColumnRenderer": {
+                      "text": {
+                        "runs": [
+                          {
+                            "text": "Simply Red",
+                            "navigationEndpoint": {
+                              "browseEndpoint": {
+                                "browseId": "UC1VJavwj-780ZpZCXgzGscA",
+                                "browseEndpointContextSupportedConfigs": {
+                                  "browseEndpointContextMusicConfig": {
+                                    "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+                    }
+                  },
+                  {
+                    "musicResponsiveListItemFlexColumnRenderer": {
+                      "text": {},
+                      "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_MEDIUM"
+                    }
+                  }
+                ],
+                "fixedColumns": [
+                  {
+                    "musicResponsiveListItemFixedColumnRenderer": {
+                      "text": {
+                        "runs": [
+                          {
+                            "text": "4:27"
+                          }
+                        ],
+                        "accessibility": {
+                          "accessibilityData": {
+                            "label": "4 minutes, 27 seconds"
+                          }
+                        }
+                      },
+                      "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH",
+                      "size": "MUSIC_RESPONSIVE_LIST_ITEM_FIXED_COLUMN_SIZE_SMALL"
+                    }
+                  }
+                ],
+                "thumbnail": {
+                  "musicThumbnailRenderer": {
+                    "thumbnail": {
+                      "thumbnails": [
+                        {
+                          "url": "https://i.ytimg.com/vi/yG07WSu7Q9w/hqdefault.jpg",
+                          "width": 400,
+                          "height": 225
+                        }
+                      ]
+                    },
+                    "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+                    "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT"
+                  }
+                },
+                "playlistItemData": {
+                  "playlistSetVideoId": "6C25BD7A033EB870",
+                  "videoId": "yG07WSu7Q9w",
+                  "voteSortValue": 1529841243
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

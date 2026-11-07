@@ -169,7 +169,7 @@ test("parking every surface leaves the transport alive, so the dock never freeze
   assert.equal(nodes.audio.currentTime, 12);
   assert.equal(nodes.video.currentTime, 12);
   controller().setVolume(0.25);
-  assert.equal(nodes.audio.volume, 0.25);
+  assert.equal(nodes.audio.volume, 0.25 ** 3);
   host.releaseMusicVideoHostSource("youtube:a");
 });
 
@@ -246,6 +246,6 @@ test("a picture with no separate audio track is its own clock and is left unmute
   nodes.video.dispatch("timeupdate");
   assert.deepEqual(reports.at(-1), { currentTime: 7, duration: 200 });
   controller().setVolume(0.5);
-  assert.equal(nodes.video.volume, 0.5);
+  assert.equal(nodes.video.volume, 0.5 ** 3);
   host.releaseMusicVideoHostSource("youtube:a");
 });

@@ -8,6 +8,7 @@ const RESUME_LOOKUP_PER_PAGE = 100;
 // The conflicting point was written moments ago, so it sits on the first
 // pages. Bound the scan: every page is a request against the hourly budget.
 const RESUME_LOOKUP_MAX_PAGES = 3;
+const RESUME_DELETE_MAX_PAGES = 25;
 
 function resumeSeasonEpisode(target: PmdbTarget): { season: number; episode: number } {
   if (target.media_type === "movie") return { season: 0, episode: 0 };
@@ -75,6 +76,49 @@ export async function pmdbDeleteResumeForTarget(target: PmdbTarget): Promise<boo
   const id = await findResumeId(target);
   if (!id) return false;
   return pmdbDeleteResume(id);
+}
+
+export async function pmdbDeleteResumesForTitle(
+  target: PmdbTarget,
+  options: { assertCurrent?: () => void } = {},
+): Promise<number> {
+  if (!isAuthenticated()) return 0;
+  options.assertCurrent?.();
+  let tmdbId = target.tmdb_id;
+  if (tmdbId == null) {
+    if (!target.id_type || !target.id_value) return 0;
+    const found = await getTmdbForExternal(target.id_type, target.id_value).catch(() => null);
+    options.assertCurrent?.();
+    if (!found || (found.media_type && found.media_type !== target.media_type)) return 0;
+    tmdbId = found.tmdb_id;
+  }
+  if (!Number.isInteger(tmdbId) || tmdbId <= 0) return 0;
+
+  const ids: string[] = [];
+  for (let page = 1; page <= RESUME_DELETE_MAX_PAGES; page++) {
+    options.assertCurrent?.();
+    const list = await pmdbRequest<PmdbResumeResponse>(
+      `/api/external/resume?page=${page}&perPage=${RESUME_LOOKUP_PER_PAGE}`,
+      { method: "GET" },
+    );
+    options.assertCurrent?.();
+    if (!Array.isArray(list?.items)) throw new Error("PublicMetaDB resume state could not be read safely.");
+    for (const item of list.items) {
+      if (item.tmdb_id === tmdbId && item.media_type === target.media_type && item.id) ids.push(item.id);
+    }
+    const totalPages = Math.max(1, Number(list?.totalPages ?? 1) || 1);
+    if (totalPages > RESUME_DELETE_MAX_PAGES)
+      throw new Error("PublicMetaDB has too many resume pages to clear safely.");
+    if (page >= totalPages || list.items.length === 0) break;
+  }
+
+  for (const id of ids) {
+    options.assertCurrent?.();
+    const ok = await pmdbDeleteResume(id);
+    options.assertCurrent?.();
+    if (!ok) throw new Error("PublicMetaDB did not confirm resume removal.");
+  }
+  return ids.length;
 }
 
 export async function pmdbSaveResume(

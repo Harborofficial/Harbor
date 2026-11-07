@@ -1,0 +1,115 @@
+{
+  "contents": {
+    "singleColumnMusicWatchNextResultsRenderer": {
+      "tabbedRenderer": {
+        "watchNextTabbedResultsRenderer": {
+          "tabs": [
+            {
+              "tabRenderer": {
+                "content": {
+                  "musicQueueRenderer": {
+                    "content": {
+                      "playlistPanelRenderer": {
+                        "playlistId": "RDGMEMCMFH2exzjBeE_zAHHJOdxgVMWUJYt4Zs3Ko",
+                        "contents": [
+                          {
+                            "playlistPanelVideoRenderer": {
+                              "videoId": "05VSCSna5WA",
+                              "title": { "runs": [{ "text": "Smart" }] },
+                              "longBylineText": {
+                                "runs": [
+                                  {
+                                    "text": "LE SSERAFIM",
+                                    "navigationEndpoint": {
+                                      "browseEndpoint": { "browseId": "UC-clMkTZa7k-FxmNgMjoCgQ" }
+                                    }
+                                  },
+                                  { "text": " • " },
+                                  { "text": "6.8M views" },
+                                  { "text": " • " },
+                                  { "text": "73K likes" }
+                                ]
+                              },
+                              "lengthText": { "runs": [{ "text": "3:09" }] },
+                              "thumbnail": {
+                                "thumbnails": [
+                                  {
+                                    "url": "https://i.ytimg.com/vi/05VSCSna5WA/hq720.jpg",
+                                    "width": 853,
+                                    "height": 479
+                                  }
+                                ]
+                              },
+                              "selected": true
+                            }
+                          },
+                          {
+                            "playlistPanelVideoRenderer": {
+                              "videoId": "0EK_M2taRIM",
+                              "title": { "runs": [{ "text": "ELEVEN" }] },
+                              "longBylineText": {
+                                "runs": [
+                                  {
+                                    "text": "IVE",
+                                    "navigationEndpoint": {
+                                      "browseEndpoint": { "browseId": "UC_4Y1QqJr60C5Z7-eQWy-mw" }
+                                    }
+                                  },
+                                  { "text": " • " },
+                                  {
+                                    "text": "ELEVEN",
+                                    "navigationEndpoint": {
+                                      "browseEndpoint": { "browseId": "MPREb_rixnYPvwDRK" }
+                                    }
+                                  },
+                                  { "text": " • " },
+                                  { "text": "2021" }
+                                ]
+                              },
+                              "lengthText": { "runs": [{ "text": "2:59" }] },
+                              "selected": false
+                            }
+                          },
+                          {
+                            "playlistPanelVideoRenderer": {
+                              "videoId": "V6TEcoNUmc8",
+                              "title": { "runs": [{ "text": "Ditto" }] },
+                              "longBylineText": {
+                                "runs": [
+                                  {
+                                    "text": "NewJeans",
+                                    "navigationEndpoint": {
+                                      "browseEndpoint": { "browseId": "UCxOqS3cYg4FaHbobICo7nFQ" }
+                                    }
+                                  },
+                                  { "text": " • " },
+                                  {
+                                    "text": "NewJeans 'OMG'",
+                                    "navigationEndpoint": {
+                                      "browseEndpoint": { "browseId": "MPREb_ldEii5fZiix" }
+                                    }
+                                  },
+                                  { "text": " • " },
+                                  { "text": "2023" }
+                                ]
+                              },
+                              "lengthText": { "runs": [{ "text": "3:06" }] },
+                              "selected": false
+                            }
+                          }
+                        ],
+                        "continuations": [
+                          { "nextRadioContinuationData": { "continuation": "radio-page-two" } }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

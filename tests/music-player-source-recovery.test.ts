@@ -34,7 +34,10 @@ function fixture(failImmediately = false) {
   const scope = {
     state, queueTrackKey, shouldResolvePreferredSource, adoptRequestedIdentity, sameMusicTrack,
     initializeMusic: async () => {}, cancelMusicQueueAutomation: () => {},
+    musicPlayerWasClosed: () => false, setMusicPlayerClosed: () => {},
     publish: (patch: unknown) => Object.assign(state, patch),
+    clearSpotifyStartupWatchdog: () => {},
+    armSpotifyStartupWatchdog: () => {},
     beginMusicQueue: () => {}, resetMusicOrder: () => {},
     pinSourceFor: () => {}, peekPinnedSource: () => null,
     rankByExplicitness: (candidates: unknown[]) => candidates, explicitnessOf: () => 0,

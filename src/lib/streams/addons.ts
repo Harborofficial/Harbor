@@ -137,6 +137,11 @@ export async function fetchAddonStreams(
     plugin?: boolean;
   }> = [];
   const skipped: string[] = [];
+  const failures: AddonFailure[] = [];
+  const noteFailure = (addonId: string, name: string, code: AddonFailureCode): void => {
+    if (failures.some((f) => f.id === addonId)) return;
+    failures.push({ id: addonId, name, code });
+  };
   for (let i = 0; i < addons.length; i++) {
     const addon = addons[i];
     const priority = ranks ? ranks(i, addon) : i;
@@ -185,6 +190,12 @@ export async function fetchAddonStreams(
       forcedId != null
         ? [forcedId]
         : pickIds(addon, req.type, req.ids, req.animeIdUnverified === true, req.preferredAnimeImdbId);
+    // Non-anime Stremio addons may only index a series under IMDb OR TMDB.
+    // Try other compatible IDs only if the preferred identity has no results.
+    const fallbackIds = forcedId == null && !req.ids.some((id) => ANIME_SCHEMES.some((s) => id.startsWith(s)))
+      ? sortedIds(req.ids, req.preferredAnimeImdbId).filter((id) =>
+          !ids.includes(id) && addonAcceptsId(addon, req.type, id))
+      : [];
     if (ids.length > 0) {
       for (const id of ids) {
         // Local lists only persist movie/series, which can drop the type an addon's
@@ -199,14 +210,27 @@ export async function fetchAddonStreams(
         namedTasks.push({
           addonId: addon.manifest.id,
           name,
-          p: fetchOne(addon, req.type, id, signal, timeoutMs, altTypes, prefetch).then((r) => {
-            if (r.failure) noteFailure(addon.manifest.id, name, r.failure);
-            return r.streams.map((s, idx) => ({
+          p: (async () => {
+            let result = await fetchOne(addon, req.type, id, signal, timeoutMs, altTypes, prefetch);
+            if (result.failure) noteFailure(addon.manifest.id, name, result.failure);
+            if (!result.failure && result.streams.length === 0 && !signal.aborted) {
+              for (const alternate of fallbackIds) {
+                const retry = await fetchOne(addon, req.type, alternate, signal, timeoutMs, [], prefetch);
+                if (retry.failure) noteFailure(addon.manifest.id, name, retry.failure);
+                if (retry.streams.length > 0) {
+                  console.info(`[addons] ${name}: ${idScheme(id)} returned empty, ${idScheme(alternate)} matched`);
+                  result = retry;
+                  break;
+                }
+                if (signal.aborted) break;
+              }
+            }
+            return result.streams.map((s, idx) => ({
               ...s,
               addonPriority: priority,
               addonReturnIdx: idx,
             }));
-          }),
+          })(),
         });
       }
       continue;
@@ -246,11 +270,6 @@ export async function fetchAddonStreams(
   }
   const queriedAddonIds = [...pendingByAddon.keys()];
   const settledAddonIds = new Set<string>();
-  const failures: AddonFailure[] = [];
-  const noteFailure = (addonId: string, name: string, code: AddonFailureCode): void => {
-    if (failures.some((f) => f.id === addonId)) return;
-    failures.push({ id: addonId, name, code });
-  };
   let settled = 0;
   const reportProgress = () =>
     onProgress?.({

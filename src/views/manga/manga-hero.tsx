@@ -5,7 +5,13 @@ import { usePageVisible } from "@/lib/visibility";
 import { useT } from "@/lib/i18n";
 import { useMangaContext } from "@/lib/use-manga-context";
 import { NavArrow } from "@/components/nav-arrow";
-import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
+import {
+  mangaFavoriteFailureMessage,
+  useIsMangaFavorite,
+  useMangaFavorites,
+} from "@/lib/manga-favorites";
+import { emitListToast } from "@/components/lists/list-toast";
+import { decodeMangaId } from "@/lib/manga/sources/suwayomi/model";
 import type { MangaSummary } from "@/lib/manga/model";
 import { CollectionBadges } from "./collection-badge";
 
@@ -58,7 +64,10 @@ export function MangaHero({
   }, [active, shown]);
 
   const current = featured[shown];
-  const fav = useIsMangaFavorite(current?.id);
+  const fav = useIsMangaFavorite(
+    current?.id,
+    current ? decodeMangaId(current.id)?.sourceId : undefined,
+  );
   const context = useMangaContext<HTMLElement>(current ?? { id: "", title: t("Manga") }, {
     open: current ? () => onOpen(current.id) : undefined,
   });
@@ -151,14 +160,17 @@ export function MangaHero({
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
-                    toggle({
+                  onClick={() => {
+                    const result = toggle({
                       id: current.id,
                       title: current.title,
                       altTitle: current.altTitle,
                       cover: current.cover,
-                    })
-                  }
+                      sourceId: decodeMangaId(current.id)?.sourceId,
+                    });
+                    const message = mangaFavoriteFailureMessage(result, t);
+                    if (message) emitListToast(message, "error");
+                  }}
                   aria-label={fav ? t("Remove from favorites") : t("Add to favorites")}
                   aria-pressed={fav}
                   className={`flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.98] ${

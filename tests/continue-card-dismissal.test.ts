@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
+import * as playbackHistorySource from "../src/lib/player/playback-history-source";
 
 function harness() {
   const data = new Map<string, string>();
@@ -71,6 +72,7 @@ function harness() {
         },
         persistCritical() {},
       };
+    if (file === "player/playback-history-source") return playbackHistorySource;
     const mod = { exports: {} };
     cache.set(file, mod.exports);
     const output = ts.transpileModule(

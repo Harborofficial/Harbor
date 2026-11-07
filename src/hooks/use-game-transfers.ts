@@ -1,3 +1,4 @@
+import {DOWNLOAD_PROGRESS_UI_INTERVAL,isImportantDownloadEvent} from "@/lib/games/download-event-batching";
 import {useEffect,useRef,useState} from "react";
 import {invoke,isTauri} from "@tauri-apps/api/core";
 import {listen} from "@tauri-apps/api/event";
@@ -17,16 +18,35 @@ export function useGameTransfers(profile:string,active:boolean){
   const [busy,setBusy]=useState<string[]>([]);
   const alive=useRef(true),owner=useRef(profile),pending=useRef(new Set<string>()),events=useRef(new Map<string,GameTransfer>()),refreshId=useRef(0);
   owner.current=profile;const valid=()=>alive.current&&owner.current===profile;
+  const staged=useRef(new Map<string, GameTransfer>());
+  const progressTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const cancelProgressTimer=()=>{
+    if(progressTimer.current!==null)clearTimeout(progressTimer.current);
+    progressTimer.current=null;staged.current.clear();
+  };
+  const flushProgress=()=>{
+    if(progressTimer.current!==null)clearTimeout(progressTimer.current);
+    progressTimer.current=null;
+    const batch=[...staged.current.values()];
+    staged.current.clear();
+    if(!batch.length||!valid())return;
+    setState(previous=>{
+      const merged=new Map((previous.profile===profile?previous.records:[]).map(record=>[record.id,record]));
+      for(const value of batch)merged.set(value.id,mergeDownloadContext("http",value));
+      return {profile,records:[...merged.values()]};
+    });
+  };
+
   const refresh=async()=>{
     if(!available)return;refreshDownloadContexts();const request=++refreshId.current;setLoading(true);setError("");events.current.clear();
     try{const list=await invoke<GameTransfer[]>("games_list_transfers",{profile});if(valid()&&request===refreshId.current)setState({profile,records:[...new Map([...list,...events.current.values()].filter(item=>item.profile===profile).map(item=>[item.id,mergeDownloadContext("http",item)])).values()]});}
     catch(error){if(valid()&&request===refreshId.current)setError(transferError(error));}finally{if(valid()&&request===refreshId.current)setLoading(false);}
   };
-  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
-  useEffect(()=>{pending.current.clear();events.current.clear();setBusy([]);setError("");},[profile]);
+  useEffect(()=>{alive.current=true;return()=>{cancelProgressTimer();alive.current=false;};},[]);
+  useEffect(()=>{cancelProgressTimer();pending.current.clear();events.current.clear();setBusy([]);setError("");},[profile]);
   useEffect(()=>{
     if(!available)return;let current=true;
-    const stop=listen<GameTransfer>("games:transfer",event=>{if(!current||!valid()||event.payload.profile!==profile)return;const item=mergeDownloadContext("http",event.payload);events.current.set(event.payload.id,event.payload);setState(previous=>({profile,records:[...(previous.profile===profile?previous.records:[]).filter(r=>r.id!==item.id),item]}));}).catch(()=>()=>{});
+    const stop=listen<GameTransfer>("games:transfer",event=>{if(!current||!valid()||event.payload.profile!==profile)return;const value=event.payload,previous=events.current.get(value.id);events.current.set(value.id,value);staged.current.set(value.id,value);if(isImportantDownloadEvent(previous,value))flushProgress();else if(progressTimer.current===null)progressTimer.current=setTimeout(flushProgress,DOWNLOAD_PROGRESS_UI_INTERVAL);}).catch(()=>()=>{});
     const stopQueue=listen<string>("games:download-queue",event=>{if(current&&valid()&&event.payload===profile)void refresh();}).catch(()=>()=>{});
     return()=>{current=false;void stop.then(unlisten=>unlisten());void stopQueue.then(unlisten=>unlisten());};
   },[available,profile]);

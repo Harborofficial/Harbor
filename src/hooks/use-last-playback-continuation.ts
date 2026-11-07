@@ -4,6 +4,7 @@ import { useProfiles } from "@/lib/profiles";
 import { useView, type PlayerSrc } from "@/lib/view";
 import {
   capturePlaybackActor,
+  getPlaybackRevision,
   isPlaybackActorCurrent,
   readLastActualPlayback,
   subscribePlayback,
@@ -11,12 +12,6 @@ import {
 } from "@/lib/playback-history";
 import { currentPlayerActions } from "@/lib/player-actions";
 import { continueActualPlayback } from "@/lib/player/continue-playback";
-
-let version = 0;
-subscribePlayback(() => {
-  version += 1;
-});
-const snapshotVersion = () => version;
 
 async function prepareServer(src: PlayerSrc, positionMs: number): Promise<PlayerSrc> {
   const context = src.homeServer;
@@ -50,10 +45,17 @@ export function useLastPlaybackContinuation() {
   const view = useView();
   const { activeProfile } = useProfiles();
   const { user } = useAuth();
-  const revision = useSyncExternalStore(subscribePlayback, snapshotVersion, snapshotVersion);
-  const target = useMemo(() => readLastActualPlayback(), [revision, activeProfile?.id, user?._id]);
+  const revision = useSyncExternalStore(
+    subscribePlayback,
+    getPlaybackRevision,
+    getPlaybackRevision,
+  );
   const currentActor = capturePlaybackActor();
   const actorKey = JSON.stringify(currentActor);
+  const target = useMemo(
+    () => readLastActualPlayback(),
+    [revision, activeProfile?.id, user?._id, actorKey],
+  );
   const operation = useRef<{ actorKey: string; token: object | null; mounted: boolean }>({
     actorKey,
     token: null,

@@ -186,7 +186,11 @@ test("the row and the page only badge a number the data carries", () => {
   }
   for (const path of ["src/components/curated-list-row.tsx", "src/views/curated-list/list-grid.tsx"]) {
     const source = read(path);
-    assert.match(source, /<CuratedCardBadge list=\{list\} item=\{item\} \/>/, `${path} reuses it`);
+    assert.match(
+      source,
+      /<CuratedCardBadge\s+list=\{list\}\s+item=\{item\}\s+shape=\{sizing\.shape\}\s*\/>/,
+      `${path} passes the active card shape`,
+    );
   }
 });
 

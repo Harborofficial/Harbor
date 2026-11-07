@@ -96,6 +96,7 @@ export async function runTorrentVadSync(input: {
   headers?: Record<string, string>;
   cues: Array<[number, number]>;
   durationSec: number;
+  mapSpec?: string;
   confMin?: number;
   wantLate?: boolean;
   positionSec?: number;
@@ -108,6 +109,7 @@ export async function runTorrentVadSync(input: {
       headers: input.headers ?? null,
       cues: input.cues,
       durationSec: input.durationSec,
+      mapSpec: input.mapSpec ?? null,
       confMin: input.confMin ?? null,
       wantLate: input.wantLate ?? null,
       positionSec: input.positionSec ?? null,
@@ -168,6 +170,7 @@ export function createTorrentPorts(input: TorrentPortInputs): Partial<TierPorts>
       headers: ctx.headers,
       cues: ctx.cues,
       durationSec: ctx.durationSec,
+      mapSpec: ctx.audioMap,
       wantLate: win.lateWindow && (avail?.lateRegionReady ?? true),
       positionSec: input.getPositionSec ? input.getPositionSec() : undefined,
     });

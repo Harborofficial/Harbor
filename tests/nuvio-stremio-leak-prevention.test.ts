@@ -32,13 +32,13 @@ test("stremio module completely guards libraryPut, bookmarks, and provides compr
   assert.match(stremio, /export async function removeStremioBookmark\(/);
   assert.match(stremio, /export async function expungeLeachedNuvioItemsFromStremio/);
   assert.match(stremio, /collectAllNuvioItemIds\(\)/);
-  assert.match(stremio, /sanitizeStremioLocalCw\(Array\.from\(targetIds\)\)/);
+  assert.match(stremio, /sanitizeStremioLocalCw\(\)/);
   assert.match(stremio, /timeOffset: 0/);
   assert.match(stremio, /video_id: undefined/);
   assert.match(stremio, /flaggedWatched: 0/);
 });
 
-test("stremio write queue and flusher strictly refuse execution in Nuvio mode", () => {
+test("stremio write queue seals Nuvio mode without discarding pending changes", () => {
   assert.match(stremioWriteQueue, /export async function cloudLibraryPut/);
   assert.match(
     stremioWriteQueue,
@@ -47,8 +47,9 @@ test("stremio write queue and flusher strictly refuse execution in Nuvio mode", 
   assert.match(stremioWriteQueue, /export async function flushWriteQueue/);
   assert.match(
     stremioWriteQueue,
-    /if \(isNuvioProviderActive\(\)\) \{\s*load\(\);\s*if \(queue\.size > 0\) \{\s*queue\.clear\(\);\s*persist\(\);\s*\}\s*return;\s*\}/,
+    /export async function flushWriteQueue\(\): Promise<void> \{[\s\S]{0,200}?if \(isNuvioProviderActive\(\)\) return;/,
   );
+  assert.doesNotMatch(stremioWriteQueue, /queue\.clear\(\)/);
   assert.match(stremioWriteQueue, /export function startWriteQueueFlusher/);
   assert.match(stremioWriteQueue, /isNuvioProviderActive\(\)/);
 });
@@ -77,13 +78,18 @@ test("nuvio-client exports collectAllNuvioItemIds scanning all Nuvio storage pre
   assert.match(nuvioClient, /key\.startsWith\("harbor\.watchedFlag\.nuvio"\)/);
 });
 
-test("automatic expungement runs across App startup, Nuvio activation, reconcile, and provider switch", () => {
-  assert.match(app, /function StremioLeachedExpungeRunner\(\)/);
-  assert.match(app, /void expungeLeachedNuvioItemsFromStremio\(\)\.catch\(\(\) => \{\}\);/);
+test("automatic expungement runs on startup, Nuvio activation, and provider switch", () => {
+  assert.match(
+    app,
+    /function StremioLeachedExpungeRunner\(\) \{\s*useEffect\(\(\) => \{\s*void expungeLeachedNuvioItemsFromStremio\(\)\.catch\(\(\) => \{\}\);\s*\}, \[\]\);/,
+  );
   assert.match(app, /<StremioLeachedExpungeRunner \/>/);
   assert.match(nuvioAuth, /export function activateNuvioAccountProvider/);
   assert.match(nuvioAuth, /void expungeLeachedNuvioItemsFromStremio\(\)\.catch\(\(\) => \{\}\);/);
-  assert.match(nuvioSync, /export async function reconcileNuvioWatched/);
-  assert.match(nuvioSync, /void expungeLeachedNuvioItemsFromStremio\(\)\.catch\(\(\) => \{\}\);/);
+  assert.doesNotMatch(
+    nuvioSync,
+    /expungeLeachedNuvioItemsFromStremio/,
+    "the reconcile hot path must not rescan Nuvio storage every cycle",
+  );
   assert.match(accountProviderPanel, /void expungeLeachedNuvioItemsFromStremio\(stremioAuth\);/);
 });

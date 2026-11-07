@@ -28,6 +28,7 @@ export function subtitleSearchCacheKey(input: {
   season?: number;
   episode?: number;
   filename?: string | null;
+  contentIds?: readonly string[];
   scope: SubtitleSearchCacheScope;
 }): string {
   return JSON.stringify([
@@ -37,6 +38,7 @@ export function subtitleSearchCacheKey(input: {
     input.season ?? null,
     input.episode ?? null,
     input.filename ?? null,
+    input.contentIds ?? [],
     input.scope.languages.map((language) => normalizeLang(language)),
     input.scope.providers,
     [...input.scope.addonUrls].sort(),

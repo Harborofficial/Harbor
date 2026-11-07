@@ -1,28 +1,10 @@
 import { ChevronDown } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "@/lib/auth";
-import {
-  browseFetcher,
-  listBrowseCatalogs,
-  subscribeBrowseCatalogs,
-  type BrowseCatalog,
-} from "@/lib/catalog-browse";
+import { browseFetcher, catalogTypeLabelKey, type BrowseCatalog } from "@/lib/catalog-browse";
+import { useSessionState } from "@/lib/session-state";
 import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-
-const TYPE_LABELS: Record<string, string> = {
-  movie: "Movies",
-  series: "Series",
-  anime: "Anime",
-  tv: "TV",
-  channel: "Channels",
-};
-
-function typeLabel(ty: string): string {
-  return TYPE_LABELS[ty] ?? ty.charAt(0).toUpperCase() + ty.slice(1);
-}
 
 type Option = { value: string; label: string; sub?: string; logo?: string };
 
@@ -92,7 +74,10 @@ function PillSelect({
         </span>
         {hasLogos && <OptionIcon logo={valueLogo} label={value} />}
         <span className="max-w-[180px] truncate text-[13.5px] font-medium text-ink">{value}</span>
-        <ChevronDown size={14} className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={14}
+          className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute start-0 top-[calc(100%+8px)] z-30 flex max-h-[340px] w-[300px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border border-edge bg-canvas shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">
@@ -122,12 +107,16 @@ function PillSelect({
                     setOpen(false);
                   }}
                   className={`flex items-center gap-2.5 px-3.5 py-2 text-start transition-colors ${
-                    sel ? "bg-elevated text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+                    sel
+                      ? "bg-elevated text-ink"
+                      : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
                   }`}
                 >
                   {hasLogos && <OptionIcon logo={o.logo} label={o.label} />}
                   <span className="flex min-w-0 flex-1 flex-col">
-                    <span className={`truncate text-[13.5px] ${sel ? "font-semibold" : ""}`}>{o.label}</span>
+                    <span className={`truncate text-[13.5px] ${sel ? "font-semibold" : ""}`}>
+                      {o.label}
+                    </span>
                     {o.sub && <span className="truncate text-[11px] text-ink-subtle">{o.sub}</span>}
                   </span>
                 </button>
@@ -140,31 +129,12 @@ function PillSelect({
   );
 }
 
-export function CatalogBrowser() {
+export function CatalogBrowser({ catalogs }: { catalogs: BrowseCatalog[] }) {
   const t = useT();
-  const { authKey } = useAuth();
-  const { settings } = useSettings();
   const { openGrid } = useView();
-  const [catalogs, setCatalogs] = useState<BrowseCatalog[]>([]);
-  const [type, setType] = useState("");
-  const [catKey, setCatKey] = useState("");
-  const [genre, setGenre] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const reload = () => {
-      void listBrowseCatalogs(authKey, { pluginRows: settings.pluginsOutsideTab }).then((list) => {
-        if (!cancelled) setCatalogs(list);
-      });
-    };
-    reload();
-    // A plugin's own catalogs arrive after its runtime is up, which is later than the addons.
-    const stop = subscribeBrowseCatalogs(reload);
-    return () => {
-      cancelled = true;
-      stop();
-    };
-  }, [authKey, settings.pluginsOutsideTab]);
+  const [type, setType] = useSessionState("catalogs.browser.type", "");
+  const [catKey, setCatKey] = useSessionState("catalogs.browser.catKey", "");
+  const [genre, setGenre] = useSessionState<string | null>("catalogs.browser.genre", null);
 
   const types = useMemo(() => {
     const seen = new Set<string>();
@@ -178,19 +148,31 @@ export function CatalogBrowser() {
   }, [catalogs]);
 
   useEffect(() => {
-    if (!type && types.length) setType(types[0]);
-  }, [types, type]);
+    if (types.length === 0 || types.includes(type)) return;
+    setType(types[0]);
+    setCatKey("");
+    setGenre(null);
+  }, [types, type, setType, setCatKey, setGenre]);
 
   const ofType = useMemo(() => catalogs.filter((c) => c.type === type), [catalogs, type]);
 
   useEffect(() => {
-    if (ofType.length && !ofType.some((c) => c.key === catKey)) {
-      setCatKey(ofType[0].key);
-      setGenre(null);
-    }
-  }, [ofType, catKey]);
+    if (ofType.length === 0 || ofType.some((c) => c.key === catKey)) return;
+    setCatKey(ofType[0]?.key ?? "");
+    setGenre(null);
+  }, [ofType, catKey, setCatKey, setGenre]);
 
-  const selected = useMemo(() => catalogs.find((c) => c.key === catKey) ?? null, [catalogs, catKey]);
+  const selected = useMemo(() => ofType.find((c) => c.key === catKey) ?? null, [ofType, catKey]);
+
+  useEffect(() => {
+    if (!selected || genre == null || selected.genres.includes(genre)) return;
+    setGenre(null);
+  }, [selected, genre, setGenre]);
+
+  const typeLabel = (value: string) => {
+    const key = catalogTypeLabelKey(value);
+    return key ? t(key) : value.charAt(0).toUpperCase() + value.slice(1);
+  };
 
   if (catalogs.length === 0 || types.length === 0) return null;
 
@@ -204,20 +186,31 @@ export function CatalogBrowser() {
 
   return (
     <div className="flex shrink-0 flex-col gap-3">
-      <h2 className="text-[15px] font-semibold tracking-tight text-ink">{t("Browse your catalogs")}</h2>
+      <h2 className="text-[15px] font-semibold tracking-tight text-ink">
+        {t("Browse your catalogs")}
+      </h2>
       <div className="flex w-fit max-w-full flex-wrap items-center gap-2 rounded-2xl bg-elevated/30 p-2 ring-1 ring-edge-soft/50">
         <PillSelect
           label={t("Type")}
           value={typeLabel(type)}
           options={types.map((ty) => ({ value: ty, label: typeLabel(ty) }))}
-          onChange={(v) => setType(v)}
+          onChange={(v) => {
+            setType(v);
+            setCatKey("");
+            setGenre(null);
+          }}
         />
         <PillSelect
           label={t("Catalog")}
           value={selected?.name ?? "—"}
           valueLogo={selected?.addonLogo}
           hasLogos
-          options={ofType.map((c) => ({ value: c.key, label: c.name, sub: c.addonName, logo: c.addonLogo }))}
+          options={ofType.map((c) => ({
+            value: c.key,
+            label: c.name,
+            sub: c.addonName,
+            logo: c.addonLogo,
+          }))}
           onChange={(v) => {
             setCatKey(v);
             setGenre(null);
@@ -238,7 +231,8 @@ export function CatalogBrowser() {
         )}
         <button
           onClick={browse}
-          className="flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
+          disabled={!selected}
+          className="flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-40"
         >
           {t("Browse")}
         </button>

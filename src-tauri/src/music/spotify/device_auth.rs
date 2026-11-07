@@ -129,7 +129,7 @@ impl SpotifyState {
                 self.adopt_web_token(&app, device_authorization(&value), None, Some(client_id()));
             }
             return Ok(DevicePoll::Connected {
-                status: self.snapshot(),
+                status: self.status().await?,
             });
         }
         match value.get("error").and_then(Value::as_str) {

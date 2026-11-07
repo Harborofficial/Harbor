@@ -1,4 +1,6 @@
 import { lruSet } from "@/lib/cache";
+import { addonOnlyMetadata } from "./metadata-policy";
+import { readMetadataAddonOrder } from "./metadata-addons";
 import { onMediaCacheClear, mediaCacheGeneration, MEDIA_TTL } from "@/lib/media-cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
@@ -6,7 +8,7 @@ import type { Meta } from "./cinemeta";
 import type { PlayEpisode } from "./view";
 import {
   applyTmdbEpisodeNames,
-  needsTmdbEpisodeNames,
+  needsTmdbEpisodeDetails,
   tmdbDetails,
   tmdbEpisodeNames,
   tmdbSeasonEpisodes,
@@ -21,8 +23,17 @@ import {
   preferredVideoMap,
   preferredVideoName,
   preferredVideoOverview,
+  metadataAddons,
+  resolveAddonMetaSource,
   resolveMeta,
 } from "./meta-resource";
+import {
+  addonKeyFromSource,
+  normalizeMetadataSourceChain,
+  type MetadataSourceSettings,
+} from "./metadata-sources";
+import { fetchTvdbOrder, type TvdbOrder } from "./providers/tvdb-order";
+import { tvdbLangFromIso1 } from "./providers/tvdb";
 import { animeKitsuMeta, type AnimeKitsuMeta } from "./providers/anime-kitsu-addon";
 import { kitsuToAnilist, animeMappingByKitsu } from "./providers/anime-mapping";
 import { nextAnimeEntry, resolveAnimeEntry } from "./providers/anime-entry";
@@ -224,15 +235,47 @@ function readAuthKey(): string | null {
   }
 }
 
-async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
-  const generation = mediaCacheGeneration();
-  const authKey = readAuthKey();
-  const cacheKey = JSON.stringify([id, authKey]);
-  if (addonEpsCache.has(cacheKey)) return addonEpsCache.get(cacheKey)!;
-  const m = await resolveMeta(authKey, "series", id).catch(() => null);
-  const raw = m?.videos ?? [];
+type EpisodeSourceOptions = {
+  tmdbKey: string;
+  episodeSources?: string[];
+  tvdbKey?: string;
+  tvdbSeasonType?: string;
+};
+
+type ConfiguredEpisodeSource =
+  | { kind: "addon"; episodes: PlayEpisode[] }
+  | { kind: "tmdb"; id: number; seasons: number[] }
+  | { kind: "tvdb"; order: TvdbOrder };
+
+function episodeSourceOptions(opts: EpisodeSourceOptions) {
+  let sources = opts.episodeSources;
+  let tvdbKey = opts.tvdbKey;
+  let seasonType = opts.tvdbSeasonType;
+  if (!sources || tvdbKey == null || !seasonType) {
+    try {
+      const raw = JSON.parse(localStorage.getItem("harbor.settings") ?? "{}") as {
+        metadataSources?: { episodes?: unknown };
+        tvdbKey?: unknown;
+        tvdbSeasonType?: unknown;
+      };
+      const stored = raw.metadataSources?.episodes;
+      sources ??= Array.isArray(stored)
+        ? stored.filter((id): id is string => typeof id === "string")
+        : [];
+      tvdbKey ??= typeof raw.tvdbKey === "string" ? raw.tvdbKey : "";
+      seasonType ??= typeof raw.tvdbSeasonType === "string" ? raw.tvdbSeasonType : "official";
+    } catch {
+      sources ??= [];
+      tvdbKey ??= "";
+      seasonType ??= "official";
+    }
+  }
+  return { sources: sources ?? [], tvdbKey: tvdbKey ?? "", seasonType: seasonType || "official" };
+}
+
+function addonVideos(videos: NonNullable<Meta["videos"]>): PlayEpisode[] {
   const eps: PlayEpisode[] = [];
-  for (const v of raw) {
+  for (const v of videos) {
     const season = typeof v.season === "number" ? v.season : null;
     const episode =
       typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
@@ -249,8 +292,112 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
     else if (vid) ep.videoId = vid;
     eps.push(ep);
   }
+  return eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
+}
+
+function tvdbEpisodes(order: TvdbOrder): PlayEpisode[] {
+  return [...order.bySeason.values()]
+    .flat()
+    .map((ep) => ({
+      season: ep.seasonNumber,
+      episode: ep.episodeNumber,
+      name: ep.name || undefined,
+      still: ep.stillUrl,
+      overview: ep.overview || undefined,
+      airDate: ep.airDate || undefined,
+      runtime: ep.runtime ?? undefined,
+      rating: ep.voteAverage ?? undefined,
+    }))
+    .sort((a, b) => a.season - b.season || a.episode - b.episode);
+}
+
+function tvdbRemoteId(meta: Meta): string | null {
+  if (meta.id.startsWith("tt")) return meta.id.split(":")[0];
+  if (meta.id.startsWith("tmdb:tv:")) return meta.id.slice(8);
+  const imdb = (meta as { imdb_id?: string }).imdb_id;
+  return imdb?.startsWith("tt") ? imdb : null;
+}
+
+async function configuredEpisodeSource(
+  meta: Meta,
+  opts: EpisodeSourceOptions,
+): Promise<ConfiguredEpisodeSource | null> {
+  if (!addonOnlyMetadata() || (meta.type !== "series" && !isAnimeId(meta.id))) return null;
+  const { sources: rawSources, tvdbKey, seasonType } = episodeSourceOptions(opts);
+  let stored: Partial<MetadataSourceSettings> = {};
+  try {
+    stored = JSON.parse(
+      localStorage.getItem("harbor.settings") ?? "{}",
+    ) as Partial<MetadataSourceSettings>;
+  } catch {
+    stored = {};
+  }
+  const settings: MetadataSourceSettings = {
+    tmdbKey: opts.tmdbKey || stored.tmdbKey || "",
+    tvdbKey: tvdbKey || stored.tvdbKey || "",
+    fanartKey: stored.fanartKey ?? "",
+    omdbKey: stored.omdbKey ?? "",
+    mdblistKey: stored.mdblistKey ?? "",
+    rpdbKey: stored.rpdbKey ?? "",
+    posterBaseUrl: stored.posterBaseUrl ?? "",
+  };
+  const addons = await metadataAddons(readAuthKey(), []).catch(() => []);
+  const sources = normalizeMetadataSourceChain("episodes", rawSources, addons, settings);
+  if (sources.length === 0) return null;
+  for (const id of sources) {
+    const addonKey = addonKeyFromSource(id);
+    if (addonKey) {
+      const episodes = await getAddonEpisodes(meta.id, addonKey);
+      if (episodes?.length) return { kind: "addon", episodes };
+      continue;
+    }
+    if (id === "tmdb") {
+      if (!opts.tmdbKey) continue;
+      const detail = await tmdbDetails(opts.tmdbKey, meta).catch(() => null);
+      const seasons = (detail?.seasons ?? [])
+        .map((season) => season.seasonNumber)
+        .filter((number) => number >= 1);
+      if (detail && detail.id > 0 && seasons.length > 0) {
+        return { kind: "tmdb", id: detail.id, seasons };
+      }
+      continue;
+    }
+    if (id === "tvdb") {
+      if (!tvdbKey || seasonType === "tmdb") continue;
+      const remoteId = tvdbRemoteId(meta);
+      if (!remoteId) continue;
+      const order = await fetchTvdbOrder(
+        tvdbKey,
+        remoteId,
+        seasonType,
+        tvdbLangFromIso1(tmdbLanguageIso()),
+      ).catch(() => null);
+      if (order && order.bySeason.size > 0) return { kind: "tvdb", order };
+    }
+  }
+  return null;
+}
+
+async function getAddonEpisodes(id: string, sourceKey?: string): Promise<PlayEpisode[] | null> {
+  const generation = mediaCacheGeneration();
+  const authKey = readAuthKey();
+  const cacheKey = JSON.stringify([
+    id,
+    sourceKey ?? null,
+    authKey,
+    addonOnlyMetadata(),
+    preferCustomMeta(),
+    readMetadataAddonOrder(),
+  ]);
+  if (addonEpsCache.has(cacheKey)) return addonEpsCache.get(cacheKey)!;
+  const m = sourceKey
+    ? await resolveAddonMetaSource(authKey, "series", id, sourceKey).catch(() => null)
+    : await resolveMeta(authKey, "series", id, {
+        requireVideos: true,
+        preferAddons: addonOnlyMetadata() || preferCustomMeta(),
+      }).catch(() => null);
+  const eps = addonVideos(m?.videos ?? []);
   if (eps.length === 0) return null;
-  eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
   if (generation === mediaCacheGeneration()) lruSet(addonEpsCache, cacheKey, eps, SEASON_CACHE_MAX);
   return eps;
 }
@@ -276,6 +423,9 @@ export async function fetchAdjacentEpisodes(
   current: { season: number; episode: number },
   opts: {
     tmdbKey: string;
+    episodeSources?: string[];
+    tvdbKey?: string;
+    tvdbSeasonType?: string;
     kitsuStreamId?: string;
     imdbSeason?: number;
     imdbEpisode?: number;
@@ -283,6 +433,18 @@ export async function fetchAdjacentEpisodes(
     skip?: (season: number, episode: number, metaId?: string) => boolean;
   },
 ): Promise<Adjacent> {
+  const configured = await configuredEpisodeSource(meta, opts);
+  if (configured) {
+    if (configured.kind === "addon") {
+      return computeAdjacent(configured.episodes, current, opts.skip);
+    }
+    if (configured.kind === "tmdb") {
+      return tmdbAdjacent(opts.tmdbKey, configured.id, current, opts.skip);
+    }
+    return computeAdjacent(tvdbEpisodes(configured.order), current, opts.skip);
+  }
+  if (addonOnlyMetadata() || preferCustomMeta())
+    return computeAdjacent((await getAddonEpisodes(meta.id)) ?? [], current, opts.skip);
   const generation = mediaCacheGeneration();
   const animeSeries = animeSeriesFromStreamId(opts.kitsuStreamId);
   if (animeSeries) {
@@ -326,8 +488,28 @@ export async function fetchUpcomingEpisodes(
   meta: Meta,
   current: { season: number; episode: number },
   count: number,
-  opts: { tmdbKey: string },
+  opts: EpisodeSourceOptions,
 ): Promise<PlayEpisode[]> {
+  const configured = await configuredEpisodeSource(meta, opts);
+  if (configured) {
+    const eps =
+      configured.kind === "addon"
+        ? configured.episodes
+        : configured.kind === "tvdb"
+          ? tvdbEpisodes(configured.order)
+          : await tmdbSourceEpisodes(configured.id, configured.seasons, opts.tmdbKey);
+    const index = eps.findIndex(
+      (episode) => episode.season === current.season && episode.episode === current.episode,
+    );
+    return eps.slice(index + 1, index + 1 + Math.max(0, count));
+  }
+  if (addonOnlyMetadata() || preferCustomMeta()) {
+    const eps = (await getAddonEpisodes(meta.id)) ?? [];
+    const index = eps.findIndex(
+      (e) => e.season === current.season && e.episode === current.episode,
+    );
+    return eps.slice(index + 1, index + 1 + Math.max(0, count));
+  }
   if ((meta.type !== "series" && !isAnimeId(meta.id)) || count <= 0) return [];
   if (meta.id.startsWith("tt")) {
     const eps = await loadCinemetaEpisodes(meta.id, opts.tmdbKey);
@@ -395,7 +577,7 @@ async function overlayTmdbEpisodeNames(
     if (group) group.push(e);
     else bySeason.set(e.season, [e]);
   }
-  const wanted = [...bySeason].filter(([s, g]) => s >= 1 && needsTmdbEpisodeNames(g));
+  const wanted = [...bySeason].filter(([s, g]) => s >= 1 && needsTmdbEpisodeDetails(g));
   if (wanted.length === 0) return eps;
   const patched = new Map<PlayEpisode, PlayEpisode>();
   await Promise.all(
@@ -487,7 +669,18 @@ function uniqueAnimeSeasons(eps: PlayEpisode[] | null): number[] {
   return [...set].sort((a, b) => a - b);
 }
 
-export async function fetchSeasonList(meta: Meta, opts: { tmdbKey: string }): Promise<number[]> {
+export async function fetchSeasonList(meta: Meta, opts: EpisodeSourceOptions): Promise<number[]> {
+  const configured = await configuredEpisodeSource(meta, opts);
+  if (configured) {
+    if (configured.kind === "addon") return uniqueSeasons(configured.episodes);
+    if (configured.kind === "tmdb") return configured.seasons;
+    return configured.order.seasons
+      .map((season) => season.seasonNumber)
+      .filter((number) => number >= 1)
+      .sort((a, b) => a - b);
+  }
+  if (addonOnlyMetadata() || preferCustomMeta())
+    return uniqueSeasons(await getAddonEpisodes(meta.id));
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) {
     const nums = uniqueSeasons(await loadCinemetaEpisodes(meta.id, opts.tmdbKey));
@@ -505,8 +698,20 @@ export async function fetchSeasonList(meta: Meta, opts: { tmdbKey: string }): Pr
 export async function fetchSeasonEpisodes(
   meta: Meta,
   season: number,
-  opts: { tmdbKey: string },
+  opts: EpisodeSourceOptions,
 ): Promise<PlayEpisode[]> {
+  const configured = await configuredEpisodeSource(meta, opts);
+  if (configured) {
+    if (configured.kind === "addon") {
+      return configured.episodes.filter((episode) => episode.season === season);
+    }
+    if (configured.kind === "tmdb") {
+      return tmdbSeason(opts.tmdbKey, configured.id, season);
+    }
+    return tvdbEpisodes(configured.order).filter((episode) => episode.season === season);
+  }
+  if (addonOnlyMetadata() || preferCustomMeta())
+    return ((await getAddonEpisodes(meta.id)) ?? []).filter((e) => e.season === season);
   if ((meta.type !== "series" && !isAnimeId(meta.id)) || season < 1) return [];
   if (meta.id.startsWith("tt")) {
     const eps = await loadCinemetaEpisodes(meta.id, opts.tmdbKey);
@@ -522,8 +727,15 @@ export async function fetchSeasonEpisodes(
 
 export async function fetchEpisodeList(
   meta: Meta,
-  opts: { tmdbKey: string },
+  opts: EpisodeSourceOptions,
 ): Promise<PlayEpisode[]> {
+  const configured = await configuredEpisodeSource(meta, opts);
+  if (configured) {
+    if (configured.kind === "addon") return configured.episodes;
+    if (configured.kind === "tvdb") return tvdbEpisodes(configured.order);
+    return tmdbSourceEpisodes(configured.id, configured.seasons, opts.tmdbKey);
+  }
+  if (addonOnlyMetadata() || preferCustomMeta()) return (await getAddonEpisodes(meta.id)) ?? [];
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) return (await loadCinemetaEpisodes(meta.id, opts.tmdbKey)) ?? [];
   if (parseTmdbTvId(meta.id) != null && opts.tmdbKey) {
@@ -670,6 +882,16 @@ async function tmdbSeason(key: string, tvId: number, season: number): Promise<Pl
   if (eps.length > 0 && generation === mediaCacheGeneration())
     lruSet(tmdbSeasonCache, cacheKey, eps, SEASON_CACHE_MAX);
   return eps;
+}
+
+async function tmdbSourceEpisodes(
+  id: number,
+  seasons: number[],
+  key: string,
+): Promise<PlayEpisode[]> {
+  const out: PlayEpisode[] = [];
+  for (const season of seasons) out.push(...(await tmdbSeason(key, id, season)));
+  return out.sort((a, b) => a.season - b.season || a.episode - b.episode);
 }
 
 async function tmdbAdjacent(

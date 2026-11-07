@@ -54,6 +54,7 @@ type CwIdentityItem = {
   timeOffset?: number;
   duration?: number;
   lastWatched?: string | number;
+  manualWatched?: boolean;
   cwMembers?: CwIdentityItem[];
 };
 
@@ -479,33 +480,94 @@ function memberKey(item: CwIdentityItem): string {
     .join("|");
 }
 
+function rootOf(parents: Map<string, string>, id: string): string {
+  if (!parents.has(id)) parents.set(id, id);
+  let current = id;
+  while (parents.get(current) !== current) current = parents.get(current)!;
+  while (parents.get(id) !== id) {
+    const next = parents.get(id)!;
+    parents.set(id, current);
+    id = next;
+  }
+  return current;
+}
+
+function mergeCwMembers<T extends CwIdentityItem>(existing: T, item: T): T {
+  const members = [...(existing.cwMembers ?? [existing]), ...(item.cwMembers ?? [item])];
+  const unique = [...new Map(members.map((member) => [memberKey(member), member])).values()];
+  return { ...existing, cwMembers: unique } as T;
+}
+
+function normalizeSeriesId(value: string): string | null {
+  if (/^tt\d+$/.test(value)) return value;
+  const match = /^(?:tmdb:tv:|tv:|series:)([1-9]\d*)$/.exec(value);
+  return match ? `tmdb:tv:${match[1]}` : null;
+}
+
+function seriesAliasIds(item: CwIdentityItem): string[] {
+  if (item.type !== "series" || item.isAnime) return [];
+  const id = normalizeSeriesId(item._id ?? item.id ?? "");
+  if (!id) return [];
+  const ids = new Set([id]);
+  for (const alt of item.altIds ?? []) {
+    const normalized = normalizeSeriesId(alt);
+    if (normalized) ids.add(normalized);
+  }
+  return [...ids];
+}
+
+export function cwTitleKey(item: CwIdentityItem): string | null {
+  const id = item._id ?? item.id ?? "";
+  if (item.isAnime || /^(kitsu|mal|anilist|anidb):/.test(id)) return null;
+  const name = (item.name ?? "")
+    .toLowerCase()
+    .replace(/\(\d{4}\)/g, "")
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
+  if (!name) return null;
+  return `${item.type === "movie" ? "movie" : "series"}|${name}`;
+}
+
+function isDerivedCwItem(item: CwIdentityItem): boolean {
+  return item.local === true || item.manualWatched === true;
+}
+
 /** Items are freshness-sorted; retain every original source checkpoint. */
 export function dedupeAnimeCw<T extends CwIdentityItem>(items: T[]): T[] {
-  // Build movie alias components before picking survivors: a later provider
-  // row can connect an earlier IMDb row to an earlier TMDB row.
+  // Build movie and series alias components before picking survivors: a later
+  // provider row can connect an earlier IMDb row to an earlier TMDB row.
   const parents = new Map<string, string>();
-  const root = (id: string): string => {
-    if (!parents.has(id)) parents.set(id, id);
-    let current = id;
-    while (parents.get(current) !== current) current = parents.get(current)!;
-    while (parents.get(id) !== id) {
-      const next = parents.get(id)!;
-      parents.set(id, current);
-      id = next;
-    }
-    return current;
-  };
-  for (const item of items.flatMap((entry) => [entry, ...(entry.cwMembers ?? [])])) {
+  const seriesParents = new Map<string, string>();
+  const allItems = items.flatMap((entry) => [entry, ...(entry.cwMembers ?? [])]);
+  for (const item of allItems) {
     const ids = movieIds(item);
-    for (const id of ids.slice(1)) parents.set(root(id), root(ids[0]));
+    for (const id of ids.slice(1)) {
+      parents.set(rootOf(parents, id), rootOf(parents, ids[0]));
+    }
+    const seriesIds = seriesAliasIds(item);
+    for (const id of seriesIds.slice(1)) {
+      seriesParents.set(rootOf(seriesParents, id), rootOf(seriesParents, seriesIds[0]));
+    }
   }
   const imdbIds = new Map<string, Set<string>>();
   for (const id of parents.keys()) {
     if (!id.startsWith("tt")) continue;
-    const key = root(id);
+    const key = rootOf(parents, id);
     const ids = imdbIds.get(key) ?? new Set<string>();
     ids.add(id);
     imdbIds.set(key, ids);
+  }
+  // Only ids that actually alias another series may switch identity. A lone
+  // series keeps its old source identity so a not-yet-detected anime row and a
+  // detected row with the same id still collapse.
+  const seriesComponents = new Map<string, Set<string>>();
+  for (const item of allItems) {
+    for (const id of seriesAliasIds(item)) {
+      const key = rootOf(seriesParents, id);
+      const ids = seriesComponents.get(key) ?? new Set<string>();
+      ids.add(id);
+      seriesComponents.set(key, ids);
+    }
   }
   const output: T[] = [];
   const indexes = new Map<string, number>();
@@ -513,7 +575,8 @@ export function dedupeAnimeCw<T extends CwIdentityItem>(items: T[]): T[] {
     const sourceId = item._id ?? item.id ?? "";
     const videoId = item.videoId ?? item.state?.video_id;
     const kind = item.type === "movie" ? "movie" : "series";
-    const movieGroup = movieIds(item).length > 0 ? root(sourceId) : null;
+    const movieAliases = movieIds(item);
+    const movieGroup = movieAliases.length > 0 ? rootOf(parents, sourceId) : null;
     const movieIdentity =
       movieGroup && (imdbIds.get(movieGroup)?.size ?? 0) <= 1 ? `movie:${movieGroup}` : null;
     const animeIdentity = cwAnimeIdentityKey(
@@ -521,9 +584,17 @@ export function dedupeAnimeCw<T extends CwIdentityItem>(items: T[]): T[] {
       videoId,
       checkpointCoords(item, sourceId, videoId),
     );
+    const seriesIds = seriesAliasIds(item);
+    const seriesRoot = seriesIds.length > 0 ? rootOf(seriesParents, seriesIds[0]) : null;
+    const seriesIdentity =
+      seriesRoot && (seriesComponents.get(seriesRoot)?.size ?? 0) > 1
+        ? `series:${seriesRoot}`
+        : null;
     const identity =
       movieIdentity ??
-      (animeIdentity ? `${kind}:${animeIdentity}` : sourceId ? `source:${kind}:${sourceId}` : null);
+      (animeIdentity
+        ? `${kind}:${animeIdentity}`
+        : (seriesIdentity ?? (sourceId ? `source:${kind}:${sourceId}` : null)));
     if (!identity) {
       output.push(item);
       continue;
@@ -534,10 +605,30 @@ export function dedupeAnimeCw<T extends CwIdentityItem>(items: T[]): T[] {
       output.push(item);
       continue;
     }
-    const existing = output[index];
-    const members = [...(existing.cwMembers ?? [existing]), ...(item.cwMembers ?? [item])];
-    const unique = [...new Map(members.map((member) => [memberKey(member), member])).values()];
-    output[index] = { ...existing, cwMembers: unique } as T;
+    output[index] = mergeCwMembers(output[index], item);
   }
-  return output;
+
+  // A manual-watched or local row can carry the playback id while the real
+  // library row uses the other canonical id. Merge those by exact title, but
+  // never merge two ordinary library rows that merely share a name.
+  const final: T[] = [];
+  const titleIndexes = new Map<string, number>();
+  const derivedIndexes = new Set<number>();
+  for (const item of output) {
+    const title = cwTitleKey(item);
+    if (title) {
+      const index = titleIndexes.get(title);
+      if (index != null && (isDerivedCwItem(item) || derivedIndexes.has(index))) {
+        final[index] = mergeCwMembers(final[index], item);
+        derivedIndexes.add(index);
+        continue;
+      }
+      if (index == null) {
+        titleIndexes.set(title, final.length);
+        if (isDerivedCwItem(item)) derivedIndexes.add(final.length);
+      }
+    }
+    final.push(item);
+  }
+  return final;
 }

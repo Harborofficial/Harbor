@@ -74,6 +74,32 @@ test("Rust allows the ao-reload command", () => {
   assert.match(mpvRs, /"ao-reload",/);
 });
 
+test("Windows validates the effective selected output before first media load", () => {
+  // The mpv.conf option is applied only after mpv initialization. Validating in
+  // the React device picker alone cannot prevent the first AO startup failure.
+  const start = mpvRs.indexOf("pub async fn mpv_start(");
+  const preflight = mpvRs.indexOf("fallback_missing_audio_device(&mpv);", start);
+  const extra = mpvRs.indexOf("apply_extra_mpv_options(&mpv, extra);", start);
+  const loadfile = mpvRs.indexOf('mpv_argv_command(&*mpv_arc, &["loadfile"', start);
+  assert.ok(start >= 0 && extra > start && preflight > extra && loadfile > preflight);
+  assert.match(mpvRs.slice(extra, preflight), /#\[cfg\(windows\)\]/);
+  assert.match(mpvRs, /if !audio_device_unavailable\(&selected, &available\)/);
+  assert.match(mpvRs, /mpv\.set_property\("audio-device", "auto"\)/);
+});
+
+test("missing-device fallback does not alter healthy audio reload paths", () => {
+  assert.match(mpvRs, /!devices\.is_empty\(\)/);
+  assert.match(mpvRs, /devices\.iter\(\)\.any\(\|device\| device\.name == selected\)/);
+  assert.doesNotMatch(
+    mpvRs.slice(
+      mpvRs.indexOf("fn fallback_missing_audio_device("),
+      mpvRs.indexOf("fn mpv_header_field("),
+    ),
+    /ao-reload|["']pause["']|["']seek["']/,
+  );
+  assert.match(schedule, /if \(!isWindowsDesktop\(\)\) return;/);
+});
+
 test("refocus reload waits for a long absence and removes both listeners on disposal", () => {
   assert.match(mpv, /const FOCUS_RELOAD_MIN_ABSENT_MS = 60_000/);
   assert.match(mpv, /const onWindowBlur = \(\) => \{\s*lastWindowBlur = Date.now\(\)/);

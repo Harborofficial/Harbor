@@ -12,7 +12,7 @@ import {
   todayLocalISO,
   type CalendarFilter,
   type CalendarItem,
-} from "@/lib/calendar";
+} from "@/lib/calendar-core";
 import { CalendarSkeleton } from "./calendar/calendar-skeleton";
 import { CalendarConfigRail } from "./calendar/config/config-rail";
 import { buildActiveCount } from "./calendar/config/rail-sources";
@@ -23,6 +23,7 @@ import { useSettings } from "@/lib/settings";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useScrollMemory, useView } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { useT } from "@/lib/i18n";
 import { AuthModal } from "@/components/auth-modal";
 import { RemindersManagerButton } from "@/components/reminders-manager";
@@ -51,13 +52,13 @@ export function CalendarView({ active = true, gamesAllowed = true }: { active?: 
   const [showAuth, setShowAuth] = useState(false);
   const { openSettings, openMeta } = useView();
   const today = useMemo(() => new Date(), []);
-  const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth());
-  const [filter, setFilter] = useState<CalendarFilter>("all");
-  const [watchlistOnly, setWatchlistOnly] = useState(false);
-  const [animeDub, setAnimeDub] = useState(false);
+  const [year, setYear] = useSessionState("calendar.year", today.getFullYear());
+  const [month, setMonth] = useSessionState("calendar.month", today.getMonth());
+  const [filter, setFilter] = useSessionState<CalendarFilter>("calendar.filter", "all");
+  const [watchlistOnly, setWatchlistOnly] = useSessionState("calendar.watchlistOnly", false);
+  const [animeDub, setAnimeDub] = useSessionState("calendar.animeDub", false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  useScrollMemory("calendar", scrollRef);
+  useScrollMemory("calendar", scrollRef, active);
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
   const [dayModal, setDayModal] = useState<string | null>(null);
   const [configOpen, setConfigOpen] = useState(() => {

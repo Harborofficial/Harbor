@@ -65,6 +65,11 @@ function harness() {
   const providers = loadModule<Providers>("../src/lib/media-provider-actions.ts", {
     ...shared,
     "./anilist/session": disconnected,
+    "./anilist/sync": {},
+    "./anilist/mutations": {},
+    "./mal/mutations": {},
+    "./publicmetadb/scrobble": {},
+    "./publicmetadb/dropped": {},
     "./mal/session": disconnected,
     "./stremio-item-lock": {},
     "./stremio-watched-sync": {},
@@ -113,6 +118,7 @@ function harness() {
     "./movie-watched": {},
     "./watched-flag": {},
     "./episode-progress": {},
+    "./series-episodes": {},
   });
   return {
     reads,

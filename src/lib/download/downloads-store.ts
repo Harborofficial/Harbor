@@ -3,7 +3,7 @@ import { exists, mkdir } from "@tauri-apps/plugin-fs";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import type { PlayEpisode } from "@/lib/view";
+import type { PlayEpisode, PlayerStreamRef } from "@/lib/view";
 import { buildDefaultFilename, sanitizeName } from "./filename";
 import { startDownload, type DownloadHandle } from "./video-download";
 import { isWindowsDesktop } from "@/lib/platform";
@@ -25,11 +25,15 @@ export type DownloadItem = {
   season: number | null;
   episode: number | null;
   streamLabel: string | null;
+  /** Online release identity retained for automatic next-episode matching offline. */
+  sourceRef?: PlayerStreamRef | null;
   url: string;
   torrentInfoHash?: string | null;
   torrentFileIdx?: number | null;
   path: string;
   status: "downloading" | "paused" | "done" | "error" | "canceled" | "interrupted";
+  /** Set only by explicit cancellation, not network/engine AbortErrors. */
+  canceledAt?: number;
   receivedBytes: number;
   totalBytes: number | null;
   ratio: number;
@@ -79,6 +83,7 @@ type EnqueueArgs = {
   meta: Meta;
   episode?: PlayEpisode;
   streamLabel?: string | null;
+  sourceRef?: PlayerStreamRef | null;
   url: string;
   headers?: Record<string, string> | null;
   destinationPath?: string | null;
@@ -339,6 +344,7 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     season: episode?.season ?? null,
     episode: episode?.episode ?? null,
     streamLabel: streamLabel ?? null,
+    sourceRef: args.sourceRef ? { ...args.sourceRef } : undefined,
     url,
     torrentInfoHash: torrentRef?.infoHash ?? null,
     torrentFileIdx: torrentRef?.fileIdx ?? null,
@@ -517,7 +523,7 @@ export function cancelDownload(id: string): void {
   const item = items.get(id);
   if (!item || (item.status !== "downloading" && item.status !== "paused")) return;
   const wasPaused = item.status === "paused";
-  patch(id, { status: "canceled", bytesPerSec: 0 });
+  patch(id, { status: "canceled", canceledAt: Date.now(), bytesPerSec: 0 });
   managedControllers.get(id)?.abort();
   handles.get(id)?.abort();
   if (wasPaused) releaseDownloadTorrent(item);

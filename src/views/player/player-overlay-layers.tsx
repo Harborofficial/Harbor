@@ -1,6 +1,7 @@
 import { memo, type ComponentProps, type RefObject } from "react";
 import { DrawCanvas, StrokesLayer, type Stroke } from "@/components/player/draw-canvas";
 import { cropTransform } from "./hooks/use-video-fill";
+import type { HoldSpeed } from "./hooks/use-hold-speed";
 import { StreamSwitcher } from "@/components/player/stream-switcher";
 import { StreamCheckPill } from "@/components/player/stream-check-pill";
 import { AdReportButton } from "@/components/player/ad-report-button";
@@ -72,6 +73,7 @@ export type PlayerOverlayLayersProps = {
   toggleFullscreen: () => void;
   onVolumeWheel: (deltaY: number) => void;
   onVolumeFeedback: (volume: number, muted: boolean) => void;
+  holdSpeed: HoldSpeed;
   isLocalSrc: boolean;
   sourceFailed: boolean;
   swappingEp: boolean;
@@ -267,6 +269,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         onClick={p.playPauseToggle}
         onDoubleClick={p.toggleFullscreen}
         onWheelVolume={p.onVolumeWheel}
+        holdSpeed={p.holdSpeed}
       />
 
       {p.tenFoot ? (
@@ -532,6 +535,10 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         queuePlaybackEnabled={p.queuePlaybackEnabled}
         meta={p.src.meta}
         currentEpisode={p.src.episode}
+        currentStreamUrl={p.liveUrl}
+        currentStreamRef={p.currentRef ?? p.src.streamRef ?? null}
+        currentImdbId={p.src.imdbId}
+        currentIsAnime={p.src.isAnime}
         episodePanelOpen={p.episodePanelOpen}
         onOpenEpisodePanel={() => p.setEpisodePanelOpen(true)}
         onCloseEpisodePanel={() => p.setEpisodePanelOpen(false)}
@@ -539,6 +546,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         episodesCorner={p.episodesCorner}
         episodesHidden={p.episodesHidden}
         roomGuest={p.roomGuest}
+        inRoom={p.inRoom}
         onHostAdvance={p.onHostAdvance}
         watchedFor={p.watchedFor}
         nextEp={p.adjacentNext}

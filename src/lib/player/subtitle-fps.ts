@@ -157,12 +157,13 @@ export function createSubtitleFpsAvailabilityController(deps: {
 }
 
 export function isAutoSyncScopeCurrent(
-  scope: { mediaKey: string; trackId: string } | null,
-  current: { mediaKey: string; trackId: string | null; syncedTrack: boolean },
+  scope: { mediaKey: string; trackId: string; audioKey?: string } | null,
+  current: { mediaKey: string; trackId: string | null; audioKey?: string; syncedTrack: boolean },
 ): boolean {
   return (
     scope != null &&
     scope.mediaKey === current.mediaKey &&
+    (scope.audioKey === undefined || scope.audioKey === current.audioKey) &&
     (scope.trackId === current.trackId || current.syncedTrack)
   );
 }

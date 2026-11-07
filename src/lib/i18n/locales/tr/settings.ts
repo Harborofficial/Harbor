@@ -1639,8 +1639,8 @@ const settings: Record<string, string> = {
   "Live-injected into the document. Use it to retheme buttons, change spacing, recolor anything.":
     "Belgeye anında eklenir. Düğmelerin temasını ve aralıkları değiştirmek ya da istediğiniz öğeyi yeniden renklendirmek için kullanın.",
   "Living-room focus, floating glass chrome.": "Oturma odası odaklı, yüzen cam arayüz.",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Öne çıkan alan için en yüksek çözünürlüklü görseli yükleyin. Daha fazla bant genişliği kullanır.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Öne çıkan alan, ayrıntı sayfası görseli ve bulanıklaştırılmamış kaynak seçici arka planları için en yüksek çözünürlüklü görseli yükleyin. Daha fazla bant genişliği ve video belleği kullanır.",
   "Loaded {loaded} of {total} movies...": "{total} filmden {loaded} tanesi yüklendi...",
   "Loaded {loaded} of {total} shows...": "{total} diziden {loaded} tanesi yüklendi...",
   "Loading environment details…": "Ortam ayrıntıları yükleniyor…",

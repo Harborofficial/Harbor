@@ -14,6 +14,34 @@ import musicPlaylists from "./music-playlists";
 import musicPossible from "./music-possible";
 import musicLegal from "./music-legal";
 const music: Record<string, string> = {
+  "music.linked.import": "Import from link",
+  "music.linked.linkLabel": "YouTube Music playlist link or ID",
+  "music.linked.importHelp":
+    "Link a public or unlisted YouTube playlist or a generated Mix watch link. Harbor saves a local copy for manual sync. Mixes save only the current queue, not an endless radio playlist. Signing in is not supported.",
+  "music.linked.loading": "Loading tracks from YouTube Music…",
+  "music.linked.mixHelp":
+    "This generated Mix saves the current queue as a snapshot. Sync refreshes that snapshot; the lineup may change and does not include endless radio continuations. Local edits are overwritten. Unlink to keep them permanently.",
+  "music.linked.mixSyncConfirm":
+    "Replace this playlist with the Mix's current queue snapshot? The lineup may change. Local additions, removals, reordering and title edits will be overwritten.",
+  "music.linked.source": "Linked to YouTube Music",
+  "music.linked.lastSynced": "Last synced: {date}",
+  "music.linked.mirrorHelp":
+    "Sync replaces local edits with YouTube's tracks, order and title. Unlink to keep your changes permanently.",
+  "music.linked.sync": "Sync now",
+  "music.linked.syncTitle": "Sync with YouTube Music?",
+  "music.linked.mixSyncTitle": "Refresh this Mix snapshot?",
+  "music.linked.syncConfirm":
+    "Replace this playlist with YouTube's current tracks, order and title? Local additions, removals and reordering will be overwritten.",
+  "music.linked.syncedNotice": "Synced {count} tracks from YouTube Music.",
+  "music.linked.importedNotice": "Linked {name} with {count} tracks from YouTube Music.",
+  "music.linked.unlink": "Unlink",
+  "music.linked.unlinkTitle": "Unlink this playlist?",
+  "music.linked.unlinkConfirm":
+    "Stop syncing with YouTube Music? The current tracks will stay as a local playlist.",
+  "music.linked.editTitle": "Edit linked playlist?",
+  "music.linked.editContinue": "Continue editing",
+  "music.linked.editConfirm":
+    "This playlist is linked to YouTube Music. Local changes will be overwritten on sync. Continue editing? You can unlink it from the playlist page to keep your changes permanently.",
   "music.xxl.newer": "Newer class",
   "music.xxl.older": "Older class",
   ...musicMiku,
@@ -292,6 +320,7 @@ const music: Record<string, string> = {
   "music.playlist.likeThisFresh": "Only music new to me",
   "music.playlist.likeThisHeard": "Include songs I've heard",
   "music.playlist.delete": "Delete playlist",
+  "music.playlist.deleteTitle": "Delete playlist?",
   "music.playlist.deleteConfirm": "Delete this playlist? The songs stay in your library.",
   "music.watch.back": "Back to music",
   "music.watch.similar": "Similar songs",
@@ -350,6 +379,10 @@ const music: Record<string, string> = {
   "music.spotify.connectAction": "Connect",
   "music.spotify.connectedAs": "Connected as {username}",
   "music.spotify.premium": "Premium",
+  "music.spotify.playbackReady": "Playback ready",
+  "music.spotify.playbackUnavailable": "Local playback unavailable",
+  "music.spotify.playbackUnavailableHint":
+    "Your account is linked, but Harbor's local player is not ready. Pair Spotify again in Music connections.",
   "music.playlist.alreadyAdded": "Already in playlist",
   "music.playlist.add": "Add to selected playlist",
   "music.playlist.duplicateWarning": "{title} is already in {name}. Add another copy?",
@@ -645,7 +678,7 @@ const music: Record<string, string> = {
     "No other Spotify devices are awake. Open Spotify on a phone, speaker or desktop and refresh.",
   "music.spotifySetup.createTitle": "Create a Spotify app",
   "music.spotifySetup.createBody":
-    "Use a Spotify Premium account to create an app in the developer dashboard.",
+    "Create a Spotify Developer app for a separate browsing quota. Premium is only required for local playback.",
   "music.spotifySetup.dashboard": "Open Spotify dashboard",
   "music.spotifySetup.redirectTitle": "Add Harbor’s redirect URI",
   "music.spotifySetup.redirectBody":
@@ -666,9 +699,18 @@ const music: Record<string, string> = {
     "No Client ID is saved on this device. Follow the setup steps and paste your Client ID.",
   "music.spotifySetup.rejected":
     "Check the Client ID and redirect URI in your Spotify app settings, then try again.",
-  "music.spotifySetup.pairTitle": "1 · Pair this device for playback",
-  "music.spotifySetup.pairBody":
-    "No Spotify app setup needed. Harbor shows a code — enter it at spotify.com/pair from a phone or browser, then approve.",
+  "music.spotifySetup.pairTitle": "Pair your Spotify account",
+  "music.spotifySetup.pairBody": "Play Spotify directly in Harbor with Premium. Enter the pairing code at spotify.com/pair and approve it. No Developer app or Client ID is required.",
+  "music.spotifySetup.intro": "Pair Spotify to stream music in Harbor. Spotify Premium is required. Browsing with your own Developer app is optional.",
+  "music.spotifySetup.browseOptional": "Optional",
+  "music.spotify.browsingLabel": "Browsing",
+  "music.spotify.browsingOwnApp": "Own app authorized",
+  "music.spotify.browsingShared": "Available through Spotify pairing",
+  "music.spotify.browsingNotConnected": "Not connected",
+  "music.spotify.playbackConnected": "Local playback connected",
+  "music.spotify.playbackNotConnected": "Local playback not connected",
+  "music.spotify.playbackChecking": "Checking playback connection",
+  "music.spotifySetup.repair": "Re-pair this device",
   "music.spotifySetup.pairAction": "Pair with Spotify",
   "music.spotifySetup.pairCodeLabel": "Pairing code",
   "music.spotifySetup.pairWaiting": "Waiting for approval at spotify.com/pair…",
@@ -676,10 +718,9 @@ const music: Record<string, string> = {
   "music.spotifySetup.pairCopy": "Copy code",
   "music.spotifySetup.pairCopied": "Copied",
   "music.spotifySetup.pairCopyFailed": "Select the code and copy it manually.",
-  "music.spotifySetup.pairManual": "2 · Browse with your own Spotify app",
+  "music.spotifySetup.pairManual": "Advanced Spotify browsing",
   "music.spotifySetup.browseRecommended": "Recommended",
-  "music.spotifySetup.browseBody":
-    "Browsing on Spotify's shared limit saturates often. Your own app gives browsing a private quota — playback stays paired.",
+  "music.spotifySetup.browseBody": "Optional: authorize your own Spotify Developer app for a separate browsing quota. This does not enable local playback.",
   "music.spotifyBrowse.title": "Browsing shares Spotify's rate limit",
   "music.spotifyBrowse.body":
     "Playback is paired and working. Browsing currently shares librespot's Spotify quota, which saturates often — sign in with your own Spotify app to give browsing its own quota. Playback stays paired.",
@@ -699,7 +740,7 @@ const music: Record<string, string> = {
   "music.recovery.network":
     "Check your connection, then retry. You can also choose another source below.",
   "music.recovery.open": "Open {source}",
-  "music.recovery.spotifySetup": "Set up your Spotify app, then sign in with Premium.",
+  "music.recovery.spotifySetup": "Pair your Spotify Premium account with Harbor to enable playback.",
   "music.recovery.setupAction": "Set up",
   "music.recovery.search": "Sources could not be checked. Check your connection and try again.",
   "music.recovery.retrySource": "Couldn’t load · Retry this source",

@@ -10,12 +10,12 @@ const pendingRelease = new Map<string, number>();
 export async function registerStreamProxy(
   url: string,
   headers?: Record<string, string>,
-  opts?: { transcode?: boolean; prebufferBytes?: number },
+  opts?: { transcode?: boolean; prebufferBytes?: number; fragmentedMp4?: boolean },
 ): Promise<ProxyResult> {
   const args: Record<string, unknown> = { url, headers: headers ?? {} };
   if (opts?.transcode) {
     args.transcode = true;
-    args.profile = { force_h264: false, force_aac: false };
+    args.profile = { force_h264: false, force_aac: false, fragmented_mp4: opts.fragmentedMp4 === true };
   }
   if (opts?.prebufferBytes && opts.prebufferBytes > 0) {
     args.prebufferBytes = opts.prebufferBytes;

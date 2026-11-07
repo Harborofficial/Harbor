@@ -119,6 +119,61 @@ async fn mixed_engines_share_two_slots_and_reorder_waiting_work_without_interrup
     assert!(queue.state.lock().unwrap().tickets.is_empty());
 }
 #[tokio::test]
+async fn different_games_run_together_instead_of_one_batch_using_both_slots() {
+    let root = Fixture::new();
+    let queue = root.queue();
+    let entries = vec![
+        entry(Kind::Direct, "one"),
+        entry(Kind::Direct, "one"),
+        entry(Kind::Torrent, "one"),
+    ];
+    register(&queue, &entries);
+    let mut first = Some(
+        queue
+            .ticket_grouped(entries[0].kind, "one", &entries[0].id, "game:a".into())
+            .unwrap(),
+    );
+    let mut same_game = Some(
+        queue
+            .ticket_grouped(entries[1].kind, "one", &entries[1].id, "game:a".into())
+            .unwrap(),
+    );
+    let other = queue
+        .ticket_grouped(entries[2].kind, "one", &entries[2].id, "game:b".into())
+        .unwrap();
+    let cancel = CancellationToken::new();
+    first.as_ref().unwrap().acquire(&cancel).await.unwrap();
+    assert!(tokio::time::timeout(
+        Duration::from_millis(30),
+        same_game.as_ref().unwrap().acquire(&cancel)
+    )
+    .await
+    .is_err());
+    tokio::time::timeout(Duration::from_millis(100), other.acquire(&cancel))
+        .await
+        .unwrap()
+        .unwrap();
+    drop(first.take());
+    assert!(tokio::time::timeout(
+        Duration::from_millis(30),
+        same_game.as_ref().unwrap().acquire(&cancel)
+    )
+    .await
+    .is_err());
+    drop(other);
+    tokio::time::timeout(
+        Duration::from_millis(100),
+        same_game.as_ref().unwrap().acquire(&cancel),
+    )
+    .await
+    .unwrap()
+    .unwrap();
+    drop(same_game);
+    assert!(queue.state.lock().unwrap().tickets.is_empty());
+    assert!(queue.state.lock().unwrap().groups.is_empty());
+}
+
+#[tokio::test]
 async fn canceled_and_dropped_waiters_release_their_place_without_spending_a_slot() {
     let root = Fixture::new();
     let queue = root.queue();

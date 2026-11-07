@@ -95,8 +95,11 @@ export function useSeasonArcPicker({
         }),
         activeKey: String(orderSeasonEff),
         onSelect: (k: string) => {
-          setViewedSeason(metaId, Number(k));
-          setOrderSeason(Number(k));
+          const season = Number(k);
+          userPickedRef.current = true;
+          setViewedSeason(metaId, season);
+          setActive(season);
+          setOrderSeason(season);
         },
       };
     }

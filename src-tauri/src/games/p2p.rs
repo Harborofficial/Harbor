@@ -155,6 +155,19 @@ fn now() -> u64 {
 }
 
 impl Torrents {
+    pub(crate) fn ensure_inactive(&self, id: &str) -> Result<()> {
+        if self.jobs.lock().map_err(|_| "torrent_store")?
+            .get(id).is_some_and(|job| !job.task.is_finished()) {
+            return Err("games_delete_busy");
+        }
+        Ok(())
+    }
+    pub(crate) fn directory_owned_by_another(&self, own_id: &str, path: &Path) -> Result<bool> {
+        let records = self.records.lock().map_err(|_| "torrent_store")?;
+        Ok(records.iter().any(|record| record.id != own_id &&
+            (Path::new(&record.destination).starts_with(path) ||
+             path.starts_with(&record.destination))))
+    }
     pub(crate) fn cleanup_usage(&self,profile:&str,id:&str)->Result<Vec<super::archive_cleanup::Usage>>{
         use super::archive_cleanup::{Usage,Blocker};
         let active:std::collections::HashSet<String>=self.jobs.lock().map_err(|_|"archive_store")?.iter()
@@ -666,7 +679,8 @@ impl Torrents {
         let token = cancel.clone();
         let manager = self.clone();
         let id = record.id.clone();
-        let ticket = self.queue.ticket(QueueKind::Torrent, &record.profile, &record.id).map_err(|_| "torrent_store")?;
+        let ticket = self.queue.ticket_grouped(QueueKind::Torrent, &record.profile, &record.id,
+            super::download_metadata::queue_group(&record.profile, record.game.as_ref(), None, "torrent", &record.id)).map_err(|_| "torrent_store")?;
         let task = tokio::spawn(async move {
             #[cfg(test)]
             let permit = tokio::select! { _ = token.cancelled() => return, permit = manager.slots.clone().acquire_owned() => match permit { Ok(permit) => permit, Err(_) => return } };

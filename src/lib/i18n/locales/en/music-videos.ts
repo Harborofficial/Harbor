@@ -14,5 +14,12 @@ const musicVideos: Record<string, string> = {
   "music.videos.next": "After that",
   "music.videos.more": "More music videos",
   "music.videos.playbackError": "This video could not load. Try again or open it on YouTube.",
+  "music.videos.mini": "Mini player",
+  "music.videos.miniHint": "Keep the video playing in the corner when you leave this page.",
+  "music.videos.collapse": "Collapse mini player",
+  "music.videos.expand": "Expand mini player",
+  "music.videos.closeMini": "Close mini player",
+  "music.videos.resizeMini": "Resize mini player",
+  "Theatre mode": "Theatre mode",
 };
 export default musicVideos;

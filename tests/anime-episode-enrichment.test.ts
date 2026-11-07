@@ -15,8 +15,16 @@ import type { KitsuEpisode } from "../src/lib/providers/kitsu.ts";
 
 function episode(overrides: Partial<KitsuEpisode> = {}): KitsuEpisode {
   return {
-    id: 1, number: 1, seasonNumber: 1, imdbSeason: 3, imdbEpisode: 1,
-    title: "Episode 1", synopsis: "", thumbnail: null, airdate: null, length: 24,
+    id: 1,
+    number: 1,
+    seasonNumber: 1,
+    imdbSeason: 3,
+    imdbEpisode: 1,
+    title: "Episode 1",
+    synopsis: "",
+    thumbnail: null,
+    airdate: null,
+    length: 24,
     ...overrides,
   };
 }
@@ -28,14 +36,23 @@ function load(path: string, mocks: Record<string, unknown>) {
   }).outputText;
   const exports: Record<string, any> = {};
   new Function("require", "exports", compiled)((id: string) => {
+    if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+      return { addonOnlyMetadata: () => false };
+    if (id === "./metadata-addons") return { readMetadataAddonOrder: () => [] };
     assert.ok(id in mocks, `Unexpected dependency: ${id}`);
     return mocks[id];
   }, exports);
   return exports;
 }
 
-function enrichment({ videos = [], ratings = new Map(), thumbs = null }: {
-  videos?: any[]; ratings?: Map<string, number>; thumbs?: any;
+function enrichment({
+  videos = [],
+  ratings = new Map(),
+  thumbs = null,
+}: {
+  videos?: any[];
+  ratings?: Map<string, number>;
+  thumbs?: any;
 } = {}) {
   return load("src/lib/providers/anime-episode-enrich.ts", {
     "@/lib/providers/anime-mapping": { kitsuToMal: async () => null, kitsuToTvdb: async () => 1 },
@@ -44,7 +61,10 @@ function enrichment({ videos = [], ratings = new Map(), thumbs = null }: {
     "@/lib/providers/anime-tvdb-thumbs": { fetchTvdbThumbs: async () => thumbs },
     "@/lib/cinemeta": { meta: async () => ({ videos }) },
     "@/lib/providers/tmdb/tmdb-details": { tmdbSeasonEpisodes: async () => [] },
-    "@/lib/providers/tmdb/tmdb-image-rungs": { STILL_HD_RUNG: "w780", tmdbStillUrl: () => undefined },
+    "@/lib/providers/tmdb/tmdb-image-rungs": {
+      STILL_HD_RUNG: "w780",
+      tmdbStillUrl: () => undefined,
+    },
     "@/lib/dates": load("src/lib/dates.ts", {}),
   }).enrichEpisodes;
 }
@@ -65,7 +85,10 @@ test("newer AniZip lowercase air dates are read by the episode list builder", ()
 
 test("TVDB does not replace a mapped later cour with season-one metadata", () => {
   const ep = episode({ thumbnail: "cour-three.jpg" });
-  mergeTvdbEpisodes([ep], [{ id: 11, number: 1, seasonNumber: 1, name: "Wrong pilot", image: "pilot.jpg" }]);
+  mergeTvdbEpisodes(
+    [ep],
+    [{ id: 11, number: 1, seasonNumber: 1, name: "Wrong pilot", image: "pilot.jpg" }],
+  );
   assert.equal(ep.thumbnail, "cour-three.jpg");
   assert.equal(ep.title, "Episode 1");
 });
@@ -73,7 +96,19 @@ test("TVDB does not replace a mapped later cour with season-one metadata", () =>
 test("TVDB still uses exact episode ID, absolute number and provider coordinates", () => {
   for (const mapping of [{ tvdbEpisodeId: 31 }, { absoluteNumber: 25 }, {}]) {
     const ep = episode(mapping);
-    mergeTvdbEpisodes([ep], [{ id: 31, number: 1, seasonNumber: 3, absoluteNumber: 25, name: "The return", image: "correct.jpg" }]);
+    mergeTvdbEpisodes(
+      [ep],
+      [
+        {
+          id: 31,
+          number: 1,
+          seasonNumber: 3,
+          absoluteNumber: 25,
+          name: "The return",
+          image: "correct.jpg",
+        },
+      ],
+    );
     assert.equal(ep.thumbnail, "correct.jpg");
     assert.equal(ep.title, "The return");
   }
@@ -81,7 +116,18 @@ test("TVDB still uses exact episode ID, absolute number and provider coordinates
 
 test("TMDB never borrows a repeated episode number after a mapped season misses", () => {
   const ep = episode();
-  mergeTmdbEpisodes([ep], [{ id: 11, seasonNumber: 1, episodeNumber: 1, name: "Wrong pilot", overview: "Wrong story" } as any]);
+  mergeTmdbEpisodes(
+    [ep],
+    [
+      {
+        id: 11,
+        seasonNumber: 1,
+        episodeNumber: 1,
+        name: "Wrong pilot",
+        overview: "Wrong story",
+      } as any,
+    ],
+  );
   assert.equal(ep.title, "Episode 1");
   assert.equal(ep.synopsis, "");
 });
@@ -105,34 +151,46 @@ test("unmapped episodes retain exact native season/episode enrichment", () => {
 
 test("Cinemeta cannot fill a missing later-season thumbnail with the pilot", async () => {
   const ep = episode();
-  await enrichment({ videos: [{ season: 1, episode: 1, thumbnail: "pilot.jpg" }] })([ep], {}, 1, "tt1");
+  await enrichment({ videos: [{ season: 1, episode: 1, thumbnail: "pilot.jpg" }] })(
+    [ep],
+    {},
+    1,
+    "tt1",
+  );
   assert.equal(ep.thumbnail, null);
 });
 
 test("missing Cinemeta artwork does not shift absolute episode positions", async () => {
   const ep = episode({ absoluteNumber: 2 });
-  await enrichment({ videos: [
-    { season: 0, episode: 1, thumbnail: "special.jpg" },
-    { season: 1, episode: 1 },
-    { season: 1, episode: 2, thumbnail: "second.jpg" },
-    { season: 1, episode: 3, thumbnail: "third.jpg" },
-  ] })([ep], {}, 1, "tt1");
+  await enrichment({
+    videos: [
+      { season: 0, episode: 1, thumbnail: "special.jpg" },
+      { season: 1, episode: 1 },
+      { season: 1, episode: 2, thumbnail: "second.jpg" },
+      { season: 1, episode: 3, thumbnail: "third.jpg" },
+    ],
+  })([ep], {}, 1, "tt1");
   assert.equal(ep.thumbnail, "second.jpg");
 });
 
 test("TVDB thumbnail fallback requires a known absolute episode number", async () => {
   const ep = episode();
-  await enrichment({ thumbs: { bySeasonEpisode: new Map(), byAbsolute: new Map([[1, "pilot.jpg"]]) } })([ep], { tvdbKey: "fixture" }, 1, "tt1");
+  await enrichment({
+    thumbs: { bySeasonEpisode: new Map(), byAbsolute: new Map([[1, "pilot.jpg"]]) },
+  })([ep], { tvdbKey: "fixture" }, 1, "tt1");
   assert.equal(ep.thumbnail, null);
 });
 
 test("duplicate Cinemeta coordinates can fill art without shifting later episodes", async () => {
-  const first = episode({ absoluteNumber: 1 }), second = episode({ absoluteNumber: 2 });
-  await enrichment({ videos: [
-    { season: 1, episode: 1 },
-    { season: 1, episode: 1, thumbnail: "first.jpg" },
-    { season: 1, episode: 2, thumbnail: "second.jpg" },
-  ] })([first, second], {}, 1, "tt1");
+  const first = episode({ absoluteNumber: 1 }),
+    second = episode({ absoluteNumber: 2 });
+  await enrichment({
+    videos: [
+      { season: 1, episode: 1 },
+      { season: 1, episode: 1, thumbnail: "first.jpg" },
+      { season: 1, episode: 2, thumbnail: "second.jpg" },
+    ],
+  })([first, second], {}, 1, "tt1");
   assert.equal(first.thumbnail, "first.jpg");
   assert.equal(second.thumbnail, "second.jpg");
 });
@@ -154,14 +212,25 @@ test("unaired episodes receive no IMDb rating even when the map carries their ke
 test("undated episodes beyond the airing frontier receive no borrowed rating", async () => {
   const aired = episode({ id: 1, number: 1, imdbSeason: 2, imdbEpisode: 1, airdate: "2026-10-03" });
   const upcoming = episode({
-    id: 2, number: 2, imdbSeason: 2, imdbEpisode: 2, airdate: "2999-10-10",
+    id: 2,
+    number: 2,
+    imdbSeason: 2,
+    imdbEpisode: 2,
+    airdate: "2999-10-10",
   });
   const undated = episode({
-    id: 5, number: 5, imdbSeason: undefined, imdbEpisode: undefined, title: "Episode 5",
+    id: 5,
+    number: 5,
+    imdbSeason: undefined,
+    imdbEpisode: undefined,
+    title: "Episode 5",
   });
-  await enrichment({ ratings: new Map([["2:1", 7.8], ["1:5", 7.9]]) })(
-    [aired, upcoming, undated], {}, 1, "tt1",
-  );
+  await enrichment({
+    ratings: new Map([
+      ["2:1", 7.8],
+      ["1:5", 7.9],
+    ]),
+  })([aired, upcoming, undated], {}, 1, "tt1");
   assert.equal(aired.rating, 7.8);
   assert.equal(upcoming.rating, undefined);
   assert.equal(undated.rating, undefined);
@@ -171,13 +240,24 @@ test("undated episodes beyond the airing frontier receive no borrowed rating", a
 test("undated episodes beyond the airing frontier are not given another season's thumbnail", async () => {
   const aired = episode({ id: 1, number: 1, imdbSeason: 2, imdbEpisode: 1, airdate: "2026-10-03" });
   const upcoming = episode({
-    id: 2, number: 2, imdbSeason: 2, imdbEpisode: 2, airdate: "2999-10-10",
+    id: 2,
+    number: 2,
+    imdbSeason: 2,
+    imdbEpisode: 2,
+    airdate: "2999-10-10",
   });
   const undated = episode({
-    id: 5, number: 5, imdbSeason: undefined, imdbEpisode: undefined, title: "Episode 5",
+    id: 5,
+    number: 5,
+    imdbSeason: undefined,
+    imdbEpisode: undefined,
+    title: "Episode 5",
   });
   await enrichment({ videos: [{ season: 1, episode: 5, thumbnail: "s1e5.jpg" }] })(
-    [aired, upcoming, undated], {}, 1, "tt1",
+    [aired, upcoming, undated],
+    {},
+    1,
+    "tt1",
   );
   assert.equal(undated.thumbnail, null);
 });
@@ -194,23 +274,29 @@ test("the Kitsu addon's shared season-start released date does not mark unaired 
     episode({ id: 11, number: 1, airdate: "2026-10-03" }),
     episode({ id: 12, number: 2, airdate: null }),
   ];
-  const out = buildKitsuEpisodes({
-    videos: [
-      { episode: 1, season: 1, released: "2026-10-03T00:00:00.000Z" },
-      { episode: 2, season: 1, released: "2026-10-03T00:00:00.000Z" },
-    ],
-  } as any, raw);
+  const out = buildKitsuEpisodes(
+    {
+      videos: [
+        { episode: 1, season: 1, released: "2026-10-03T00:00:00.000Z" },
+        { episode: 2, season: 1, released: "2026-10-03T00:00:00.000Z" },
+      ],
+    } as any,
+    raw,
+  );
   assert.equal(out[0].airdate, "2026-10-03");
   assert.equal(out[1].airdate, null);
 });
 
 test("distinct addon released dates still win over the Kitsu raw air date", () => {
-  const out = buildKitsuEpisodes({
-    videos: [
-      { episode: 1, season: 1, released: "2026-10-03T00:00:00.000Z" },
-      { episode: 2, season: 1, released: "2026-10-10T00:00:00.000Z" },
-    ],
-  } as any, []);
+  const out = buildKitsuEpisodes(
+    {
+      videos: [
+        { episode: 1, season: 1, released: "2026-10-03T00:00:00.000Z" },
+        { episode: 2, season: 1, released: "2026-10-10T00:00:00.000Z" },
+      ],
+    } as any,
+    [],
+  );
   assert.equal(out[0].airdate, "2026-10-03T00:00:00.000Z");
   assert.equal(out[1].airdate, "2026-10-10T00:00:00.000Z");
 });
@@ -219,16 +305,23 @@ test("an unaired episode is not given another season's thumbnail", async () => {
   const ep = episode({ imdbSeason: 2, imdbEpisode: 2, absoluteNumber: 172, airdate: "2999-10-10" });
   await enrichment({
     videos: [{ season: 1, episode: 2, thumbnail: "s1e2.jpg" }],
-    thumbs: { bySeasonEpisode: new Map([["1:2", "s1e2.jpg"]]), byAbsolute: new Map([[2, "s1e2.jpg"]]) },
+    thumbs: {
+      bySeasonEpisode: new Map([["1:2", "s1e2.jpg"]]),
+      byAbsolute: new Map([[2, "s1e2.jpg"]]),
+    },
   })([ep], { tvdbKey: "fixture" }, 1, "tt1");
   assert.equal(ep.thumbnail, null);
 });
 
 test("exact provider matches and known absolute fallback remain usable", async () => {
-  const exact = episode(), absolute = episode({ number: 2, imdbEpisode: 2, absoluteNumber: 26 });
+  const exact = episode(),
+    absolute = episode({ number: 2, imdbEpisode: 2, absoluteNumber: 26 });
   await enrichment({
     videos: [{ season: 3, episode: 1, thumbnail: "exact.jpg" }],
-    ratings: new Map([["3:1", 8.1], ["1:26", 8.2]]),
+    ratings: new Map([
+      ["3:1", 8.1],
+      ["1:26", 8.2],
+    ]),
     thumbs: { bySeasonEpisode: new Map(), byAbsolute: new Map([[26, "absolute.jpg"]]) },
   })([exact, absolute], { tvdbKey: "fixture" }, 1, "tt1");
   assert.equal(exact.thumbnail, "exact.jpg");

@@ -123,6 +123,7 @@ import {
   getEBookTracking,
 } from "@/lib/ebook/tracking";
 import { useScrollMemory, useView } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { useProfiles } from "@/lib/profiles";
 import { usePageVisible } from "@/lib/visibility";
 import { openUrl } from "@/lib/window";
@@ -269,19 +270,43 @@ export function EBookView() {
   const [sourcesReady, setSourcesReady] = useState(false);
   const [providerId, setProviderId] = useState("");
   const [selectedProviderId, setSelectedProviderId] = useState("");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useSessionState("ebook.query", "");
   const [results, setResults] = useState<EBook[] | null>(null);
-  const [categoryGroup, setCategoryGroup] = useState<EBookBrowseType>("All");
-  const [appliedCategoryGroup, setAppliedCategoryGroup] = useState<EBookBrowseType>("All");
-  const [category, setCategory] = useState("");
-  const [appliedCategory, setAppliedCategory] = useState("");
-  const [titleLanguage, setTitleLanguage] = useState<EBookTitleLanguage>("auto");
-  const [browseStatus, setBrowseStatus] = useState<EBookBrowseStatus>("any");
-  const [browseLanguage, setBrowseLanguage] = useState<EBookBrowseLanguage>("any");
-  const [browseSort, setBrowseSort] = useState<EBookBrowseSort>("popular");
-  const [appliedBrowseStatus, setAppliedBrowseStatus] = useState<EBookBrowseStatus>("any");
-  const [appliedBrowseLanguage, setAppliedBrowseLanguage] = useState<EBookBrowseLanguage>("any");
-  const [appliedBrowseSort, setAppliedBrowseSort] = useState<EBookBrowseSort>("popular");
+  const [categoryGroup, setCategoryGroup] = useSessionState<EBookBrowseType>(
+    "ebook.categoryGroup",
+    "All",
+  );
+  const [appliedCategoryGroup, setAppliedCategoryGroup] = useSessionState<EBookBrowseType>(
+    "ebook.appliedCategoryGroup",
+    "All",
+  );
+  const [category, setCategory] = useSessionState("ebook.category", "");
+  const [appliedCategory, setAppliedCategory] = useSessionState("ebook.appliedCategory", "");
+  const [titleLanguage, setTitleLanguage] = useSessionState<EBookTitleLanguage>(
+    "ebook.titleLanguage",
+    "auto",
+  );
+  const [browseStatus, setBrowseStatus] = useSessionState<EBookBrowseStatus>(
+    "ebook.status",
+    "any",
+  );
+  const [browseLanguage, setBrowseLanguage] = useSessionState<EBookBrowseLanguage>(
+    "ebook.language",
+    "any",
+  );
+  const [browseSort, setBrowseSort] = useSessionState<EBookBrowseSort>("ebook.sort", "popular");
+  const [appliedBrowseStatus, setAppliedBrowseStatus] = useSessionState<EBookBrowseStatus>(
+    "ebook.appliedStatus",
+    "any",
+  );
+  const [appliedBrowseLanguage, setAppliedBrowseLanguage] = useSessionState<EBookBrowseLanguage>(
+    "ebook.appliedLanguage",
+    "any",
+  );
+  const [appliedBrowseSort, setAppliedBrowseSort] = useSessionState<EBookBrowseSort>(
+    "ebook.appliedSort",
+    "popular",
+  );
   const [selected, setSelected] = useState<EBook | null>(null);
   const [wheelTarget, setWheelTarget] = useState<EBookWheelTarget | null>(null);
   const [readIntent, setReadIntent] = useState<string | null>(null);
@@ -300,7 +325,9 @@ export function EBookView() {
   const providerIdRef = useRef("");
   const cursorRef = useRef<EBookCursor>({});
   const loadingMoreRef = useRef(false);
-  const browseTagRef = useRef<string | undefined>(ebookSourceBrowseTag("any", "popular"));
+  const browseTagRef = useRef<string | undefined>(
+    ebookSourceBrowseTag(appliedBrowseStatus, appliedBrowseSort),
+  );
   const awardSearchScopesRef = useRef(new Set<string>());
   const needsPopularMetadata = sourceCatalogItems !== null && sourceCatalogItems.length === 0;
   const openCardMenu = useCallback(
@@ -696,6 +723,17 @@ export function EBookView() {
         });
     }, 300);
   };
+
+  // A restored search keeps its text but not its results; rerun it once the
+  // source list is ready so the grid does not stay on its skeleton.
+  const restoredSearchRef = useRef(false);
+  useEffect(() => {
+    if (restoredSearchRef.current) return;
+    if (!sourcesReady || !providerId) return;
+    restoredSearchRef.current = true;
+    if (query.trim().length >= 2) search(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourcesReady, providerId]);
 
   const staleStreakRef = useRef(0);
   const loadFailRef = useRef(0);

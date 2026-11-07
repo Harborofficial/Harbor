@@ -16,7 +16,7 @@ function setNuvioState() {
   );
 }
 
-test("custom avatars upload only to Nuvio Storage", async () => {
+test("custom avatars prefer Nuvio Storage", async () => {
   setNuvioState();
 
   let fetchedUrl = "";
@@ -29,10 +29,10 @@ test("custom avatars upload only to Nuvio Storage", async () => {
   try {
     const png = new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" });
     const uploaded = await uploadNuvioCustomAvatar(png, 2);
-    assert.ok(fetchedUrl.includes("/storage/v1/object/avatars/custom/acc-avatar/p2-"));
+    assert.ok(fetchedUrl.includes("/storage/v1/object/avatars/custom/acc-avatar/avatar_p2-"));
     assert.ok(
       uploaded?.startsWith(
-        "https://api.nuvio.tv/storage/v1/object/public/avatars/custom/acc-avatar/p2-",
+        "https://api.nuvio.tv/storage/v1/object/public/avatars/custom/acc-avatar/avatar_p2-",
       ),
       "upload must resolve to a Nuvio Storage public URL",
     );
@@ -50,6 +50,57 @@ test("custom avatars upload only to Nuvio Storage", async () => {
 
     const oversized = new Blob([new Uint8Array(2 * 1024 * 1024 + 1)], { type: "image/png" });
     assert.equal(await uploadNuvioCustomAvatar(oversized, 2), null);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("storage rejection falls back to the public image host chain", async () => {
+  setNuvioState();
+
+  const calls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url: any) => {
+    const value = String(url);
+    calls.push(value);
+    if (value.includes("/storage/v1/object/avatars/")) {
+      return new Response("storage denied", { status: 403 });
+    }
+    if (value.includes("catbox.moe")) {
+      return new Response("https://files.catbox.moe/fallback.webp", { status: 200 });
+    }
+    return new Response("unavailable", { status: 500 });
+  };
+
+  try {
+    const png = new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" });
+    const uploaded = await uploadNuvioCustomAvatar(png, 2);
+    assert.equal(uploaded, "https://files.catbox.moe/fallback.webp");
+    assert.ok(calls.some((url) => url.includes("/storage/v1/object/avatars/")));
+    assert.ok(calls.some((url) => url.includes("catbox.moe")));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("returns null when storage and every public host fail", async () => {
+  setNuvioState();
+
+  const calls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url: any) => {
+    const value = String(url);
+    calls.push(value);
+    return new Response("unavailable", { status: 500 });
+  };
+
+  try {
+    const png = new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" });
+    assert.equal(await uploadNuvioCustomAvatar(png, 2), null);
+    assert.ok(calls.some((url) => url.includes("/storage/v1/object/avatars/")));
+    assert.ok(calls.some((url) => url.includes("catbox.moe")));
+    assert.ok(calls.some((url) => url.includes("tmpfiles.org")));
+    assert.ok(calls.some((url) => url.includes("freeimage.host")));
   } finally {
     globalThis.fetch = originalFetch;
   }

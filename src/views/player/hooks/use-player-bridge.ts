@@ -1,3 +1,4 @@
+import { AUTOMATIC_SUBTITLE_BUFFER_SEC } from "@/lib/subtitles/autoload";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import {
   emptySnapshot,
@@ -28,6 +29,9 @@ function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean
     a.status !== b.status ||
     a.buffering !== b.buffering ||
     a.firstFrameReady !== b.firstFrameReady ||
+    (b.firstFrameReady &&
+      a.bufferedSec >= AUTOMATIC_SUBTITLE_BUFFER_SEC !==
+        b.bufferedSec >= AUTOMATIC_SUBTITLE_BUFFER_SEC) ||
     a.durationSec !== b.durationSec ||
     a.volume !== b.volume ||
     a.muted !== b.muted ||
@@ -37,6 +41,7 @@ function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean
     a.chapters !== b.chapters ||
     a.subDelaySec !== b.subDelaySec ||
     a.audioDelaySec !== b.audioDelaySec ||
+    a.subtitleFps !== b.subtitleFps ||
     a.subText !== b.subText ||
     a.subStartSec !== b.subStartSec ||
     a.secondarySubText !== b.secondarySubText ||

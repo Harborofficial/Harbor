@@ -31,6 +31,8 @@ pub struct SpotifyLibraryPlaylist {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SpotifyLibraryPage {
+    /// Human-facing name from /me; distinct from the immutable account ID used for permissions.
+    account_display_name: Option<String>,
     tracks: Vec<MusicTrack>,
     track_added_at: HashMap<String, String>,
     playlists: Vec<SpotifyLibraryPlaylist>,
@@ -118,14 +120,25 @@ pub(super) fn next_offset(
     Ok(Some(next))
 }
 
-async fn profile_id(state: &SpotifyState, token: &str) -> Result<String, String> {
-    api::me(state.http(), token)
-        .await?
-        .get("id")
+fn profile_id_from_body(body: &Value) -> Result<String, String> {
+    body.get("id")
         .and_then(Value::as_str)
         .filter(|id| !id.is_empty())
         .map(str::to_string)
         .ok_or_else(|| "Spotify did not return the account id".to_string())
+}
+
+pub(super) fn profile_display_name(body: &Value) -> Option<String> {
+    body.get("display_name")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
+        .map(str::to_string)
+}
+
+async fn profile_id(state: &SpotifyState, token: &str) -> Result<String, String> {
+    let body = api::me(state.http(), token).await?;
+    profile_id_from_body(&body)
 }
 
 fn playlist_access(
@@ -206,8 +219,19 @@ pub async fn music_spotify_library_page(
     let mut tracks = Vec::new();
     let mut track_added_at = HashMap::new();
     let mut playlists = Vec::new();
+    // Playlists already need /me to verify ownership. Read the display name from
+    // that same response. Liked songs only need a best-effort profile request on
+    // their first page, so an unavailable profile never blocks the song list.
+    let profile = if matches!(kind, SpotifyLibraryKind::Playlists) {
+        Some(api::me(spotify.http(), &token).await?)
+    } else if matches!(kind, SpotifyLibraryKind::Liked) && offset == 0 {
+        api::me(spotify.http(), &token).await.ok()
+    } else {
+        None
+    };
+    let account_display_name = profile.as_ref().and_then(profile_display_name);
     if matches!(kind, SpotifyLibraryKind::Playlists) {
-        let account = profile_id(spotify, &token).await?;
+        let account = profile_id_from_body(profile.as_ref().expect("profile requested for playlists"))?;
         playlists = entries
             .iter()
             .filter_map(|entry| playlist_access(entry, &account, &scopes))
@@ -224,6 +248,7 @@ pub async fn music_spotify_library_page(
     }
     let skipped = entries.len().saturating_sub(tracks.len() + playlists.len());
     Ok(SpotifyLibraryPage {
+        account_display_name,
         track_added_at,
         tracks,
         playlists,
@@ -414,6 +439,25 @@ pub async fn music_spotify_set_playlist_cover(
 mod tests {
     use super::*;
     const ID: &str = "4iV5W9uYEdYUVa79Axb7Rh";
+    #[test]
+    fn display_name_is_distinct_from_spotify_account_id() {
+        let profile = json!({
+            "id": "ezxqbot33ng4bb5slgdkmpk59",
+            "display_name": "My Spotify Name"
+        });
+        assert_eq!(
+            profile_id_from_body(&profile).unwrap(),
+            "ezxqbot33ng4bb5slgdkmpk59"
+        );
+        assert_eq!(
+            profile_display_name(&profile).as_deref(),
+            Some("My Spotify Name")
+        );
+        assert!(profile_display_name(&json!({"id": "abc", "display_name": "  "})).is_none());
+        assert!(profile_display_name(&json!({"id": "abc"})).is_none());
+        assert!(profile_display_name(&json!({"display_name": null})).is_none());
+    }
+
     #[test]
     fn library_cursor_must_advance_on_the_known_spotify_endpoint() {
         let body = json!({"next":"https://api.spotify.com/v1/me/tracks?offset=50&limit=50"});

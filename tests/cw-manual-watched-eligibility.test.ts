@@ -115,14 +115,64 @@ test("isCwMember keeps unwatched series progression and finished movies unchange
   );
 });
 
+test("placeholder season/episode zero from watched sync never becomes a CW card", () => {
+  const api = cwApi(new Set());
+  assert.equal(
+    api.isCwMember(
+      series(
+        {
+          season: 0,
+          episode: 0,
+          video_id: "tt16358384:0:0",
+          flaggedWatched: 0,
+          timeOffset: 0,
+        },
+        { temp: true },
+      ),
+    ),
+    false,
+  );
+});
+
+test("removed temp records stay in CW only when a real checkpoint exists", () => {
+  const api = cwApi(new Set());
+  assert.equal(
+    api.isCwMember(
+      series(
+        {
+          season: 0,
+          episode: 0,
+          video_id: "tt16358384:0:0",
+          flaggedWatched: 0,
+          timeOffset: 0,
+        },
+        { removed: true, temp: true },
+      ),
+    ),
+    false,
+  );
+  assert.equal(
+    api.isCwMember(
+      series(
+        {
+          season: 0,
+          episode: 0,
+          video_id: "tt16358384:0:0",
+          flaggedWatched: 0,
+          timeOffset: 50_000,
+        },
+        { removed: true, temp: true },
+      ),
+    ),
+    true,
+  );
+});
+
 test("stremio keeps the series progression branch the tray tests pin", () => {
   const source = read("src/lib/stremio.ts");
   assert.match(
     source,
-    /i\.type === "series" &&\s*i\.state\.season != null &&\s*i\.state\.episode != null &&\s*\(i\.state\.flaggedWatched \?\? 0\) === 0/,
+    /i\.type === "series" &&\s*season != null &&\s*season > 0 &&\s*episode != null &&\s*episode > 0 &&\s*\(i\.state\.flaggedWatched \?\? 0\) === 0/,
   );
-  assert.match(
-    source,
-    /manualWatchedState\(i\._id, i\.state\.season, i\.state\.episode\) === true/,
-  );
+  assert.match(source, /manualWatchedState\(i\._id, season, episode\) === true/);
 });

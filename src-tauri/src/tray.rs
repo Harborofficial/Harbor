@@ -353,8 +353,36 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             }
         });
 
+    // The Linux AppIndicator backend exports the icon as an image file that
+    // the host desktop must be able to read. Its default XDG_RUNTIME_DIR/tray-icon
+    // path is isolated inside Flatpak, leaving an invisible KDE tray entry.
+    // Use Tauri's recommended app cache directory instead; this is accessible
+    // to the host without an additional Flatpak filesystem permission.
+    #[cfg(target_os = "linux")]
+    match app.path().app_cache_dir() {
+        Ok(cache_dir) => {
+            let icon_dir = cache_dir.join("tray-icon");
+            match std::fs::create_dir_all(&icon_dir) {
+                Ok(()) => {
+                    builder = builder.temp_dir_path(&icon_dir);
+                }
+                Err(error) => {
+                    eprintln!(
+                        "[harbor::tray] could not create host-readable Linux tray icon directory {}: {error}",
+                        icon_dir.display()
+                    );
+                }
+            }
+        }
+        Err(error) => {
+            eprintln!("[harbor::tray] could not resolve Linux tray icon cache directory: {error}");
+        }
+    }
+
     if let Some(icon) = app.default_window_icon().cloned() {
         builder = builder.icon(icon);
+    } else {
+        eprintln!("[harbor::tray] default window icon missing; tray may be invisible");
     }
 
     let tray = builder.build(app)?;

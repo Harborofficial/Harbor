@@ -1,5 +1,6 @@
 import { useRef, useState, type MouseEvent } from "react";
 import { save } from "@tauri-apps/plugin-dialog";
+import { confirmAction } from "@/lib/confirm-action";
 import { MusicCoverCard } from "@/components/music/music-cover-card";
 import { MusicPlaylistEditDialog, type PlaylistEditTarget } from "@/components/music/music-playlist-edit-dialog";
 import {
@@ -90,7 +91,15 @@ function PinnedToHome({ ctx, title }: { ctx: MusicBandContext; title: string }) 
   };
 
   const deleteEntry = async (entry: MusicPinnedPlaylist) => {
-    if (!window.confirm(t("music.playlist.deleteConfirm"))) return;
+    if (
+      !(await confirmAction({
+        title: t("music.playlist.deleteTitle"),
+        message: t("music.playlist.deleteConfirm"),
+        confirmLabel: t("common.delete"),
+        destructive: true,
+      }))
+    )
+      return;
     await deleteMusicPlaylist(entry.id);
     unpinMusicPlaylist(entry.id);
   };
@@ -110,6 +119,7 @@ function PinnedToHome({ ctx, title }: { ctx: MusicBandContext; title: string }) 
     setEditTarget({
       id: entry.id,
       name: playlist?.name ?? entry.name,
+      source: playlist?.source,
       artwork: playlist?.tracks.map((track) => track.artwork) ?? entry.artwork,
     });
   };

@@ -3,7 +3,7 @@ import { EpisodePanel } from "@/components/player/episode-panel";
 import { ResumePrompt } from "@/components/player/resume-prompt";
 import type { Meta } from "@/lib/cinemeta";
 import type { PanelCorner } from "@/lib/player-chrome";
-import type { PlayEpisode } from "@/lib/view";
+import type { PlayEpisode, PlayerStreamRef } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { HeaderWarning, NoAudioWarning } from "./header-warning";
 
@@ -15,6 +15,10 @@ export const PanelsLayer = memo(function PanelsLayer({
   queuePlaybackEnabled,
   meta,
   currentEpisode,
+  currentStreamUrl,
+  currentStreamRef,
+  currentImdbId,
+  currentIsAnime,
   episodePanelOpen,
   onOpenEpisodePanel,
   onCloseEpisodePanel,
@@ -22,6 +26,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   episodesCorner,
   episodesHidden,
   roomGuest,
+  inRoom,
   onHostAdvance,
   watchedFor,
   nextEp,
@@ -45,6 +50,10 @@ export const PanelsLayer = memo(function PanelsLayer({
   queuePlaybackEnabled: boolean;
   meta: Meta;
   currentEpisode: PlayEpisode | undefined;
+  currentStreamUrl?: string;
+  currentStreamRef?: PlayerStreamRef | null;
+  currentImdbId?: string;
+  currentIsAnime?: boolean;
   episodePanelOpen: boolean;
   onOpenEpisodePanel: () => void;
   onCloseEpisodePanel: () => void;
@@ -52,6 +61,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   episodesCorner: PanelCorner;
   episodesHidden: boolean;
   roomGuest: boolean;
+  inRoom: boolean;
   onHostAdvance: (ep: PlayEpisode) => void;
   watchedFor: (ep: PlayEpisode) => boolean;
   nextEp: PlayEpisode | null;
@@ -111,8 +121,13 @@ export const PanelsLayer = memo(function PanelsLayer({
           queueSessionAvailable={queueSessionAvailable}
           queuePlaybackEnabled={queuePlaybackEnabled}
           currentEpisode={currentEpisode}
+          currentStreamUrl={currentStreamUrl}
+          currentStreamRef={currentStreamRef}
+          currentImdbId={currentImdbId}
+          currentIsAnime={currentIsAnime}
           corner={episodesCorner}
           roomGuest={roomGuest}
+          inRoom={inRoom}
           onHostAdvance={onHostAdvance}
           watchedFor={watchedFor}
           nextEp={nextEp}

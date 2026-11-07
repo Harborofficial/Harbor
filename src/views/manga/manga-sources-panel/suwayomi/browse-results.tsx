@@ -61,22 +61,26 @@ export function BrowseResults({
     [feed.items, sort],
   );
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef(feed.loadMore);
+  loadMoreRef.current = feed.loadMore;
 
   // Auto-load more when the sentinel scrolls into view (800px root margin
   // prefetches before the user reaches the end) instead of a manual button.
+  // Keep the observer alive across page loads so it only fires on a real
+  // enter; recreating it while the sentinel is visible walks every page.
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el || !feed.hasNext || feed.loadingMore || feed.loadMoreFailed) return;
+    if (!el || !feed.hasNext) return;
     const root = scrollRef?.current ?? null;
     const io = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) feed.loadMore();
+        if (entries[0]?.isIntersecting) loadMoreRef.current();
       },
       { root, rootMargin: "800px 0px" },
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [feed, scrollRef]);
+  }, [feed.hasNext, scrollRef]);
 
   const submit = () => setQuery(draft.trim());
   const clear = () => {
@@ -169,9 +173,19 @@ export function BrowseResults({
         <>
           <MangaGrid items={items} onOpen={onOpen} scrollRef={scrollRef} />
           {feed.loadMoreFailed && (
-            <p className="text-center text-[12.5px] font-medium text-danger">
-              {t("Could not load results")}
-            </p>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-center text-[12.5px] font-medium text-danger">
+                {t("Could not load results")}
+              </p>
+              <button
+                type="button"
+                onClick={feed.loadMore}
+                className="inline-flex h-9 items-center gap-2 rounded-lg bg-raised px-4 text-[12.5px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-all hover:text-ink active:scale-95 motion-reduce:active:scale-100"
+              >
+                <RefreshCw size={14} strokeWidth={2.2} />
+                {t("Retry")}
+              </button>
+            </div>
           )}
           <div ref={sentinelRef} className="flex justify-center py-4">
             {feed.hasNext && feed.loadingMore && (

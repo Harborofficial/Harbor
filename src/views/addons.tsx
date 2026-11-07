@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AgeGateModal } from "@/components/age-gate-modal";
 import { HarborLoader } from "@/components/harbor-loader";
 import { useScrollMemory, useView } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { AddonsMosaicBackdrop } from "@/components/addons-mosaic-backdrop";
@@ -81,20 +82,28 @@ export function AddonsView({ active = true }: { active?: boolean }) {
       m.ensureCommunityIndex().catch(() => undefined),
     );
   }, []);
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const [browseMode, setBrowseMode] = useState<BrowseModeId>("top");
+  const [categoryFilter, setCategoryFilter] = useSessionState<string | null>(
+    "addons.category",
+    null,
+  );
+  const [browseMode, setBrowseMode] = useSessionState<BrowseModeId>("addons.browseMode", "top");
   const saCategories = useCategories();
-  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useSessionState("addons.filtersOpen", true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  useScrollMemory("addons", scrollRef);
+  useScrollMemory("addons", scrollRef, active);
 
+  const didMountScrollRef = useRef(false);
   useEffect(() => {
+    if (!didMountScrollRef.current) {
+      didMountScrollRef.current = true;
+      return;
+    }
     scrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [tab, categoryFilter]);
   useEffect(() => {
     if (!settings.showAdultAddons && categoryFilter === "nsfw") setCategoryFilter(null);
   }, [settings.showAdultAddons, categoryFilter]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useSessionState("addons.query", "");
   useEffect(() => {
     if (!active) return;
     const requested = consumeAddonsTab();

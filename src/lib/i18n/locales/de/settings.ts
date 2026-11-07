@@ -509,8 +509,8 @@ const settings: Record<string, string> = {
     "Installation fehlgeschlagen. Überprüfe die URL und versuche es erneut.",
   "Couldn't reach Trakt. Check your connection and try again.":
     "Trakt konnte nicht erreicht werden. Prüfe deine Verbindung und versuche es erneut.",
-  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
-    "Frühere Builds konnten nicht von harborcommunity.site geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "Couldn't reach GitHub to load earlier builds. Check your connection and try again.":
+    "Frühere Builds konnten nicht von GitHub geladen werden. Prüfe deine Verbindung und versuche es erneut.",
   "Couldn't reach that pack": "Dieses Paket war nicht erreichbar",
   "Couldn't reach that pack (HTTP {n})": "Dieses Paket war nicht erreichbar (HTTP {n})",
   "Couldn't reach the update server. Try again in a moment.":
@@ -1245,8 +1245,8 @@ const settings: Record<string, string> = {
     "Wird live in das Dokument eingefügt. Verwende dies, um Schaltflächen neu zu gestalten, Abstände zu ändern oder beliebige Elemente umzufärben.",
   "Living-room focus, floating glass chrome.": "Wohnzimmerfokus, schwebende Glasoptik.",
   "Load effect": "Ladeeffekt",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Lädt das Bildmaterial des hervorgehobenen Titels in höchster Auflösung. Verbraucht mehr Bandbreite.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Lädt das Bildmaterial in höchster Auflösung für den hervorgehobenen Titel, das Titelbild der Detailseite und nicht weichgezeichnete Hintergründe der Stream-Auswahl. Verbraucht mehr Bandbreite und Videospeicher.",
   "Loading environment details…": "Umgebungsdetails werden geladen…",
   "Loading...": "Wird geladen...",
   "Loads a backup file and replaces your current setup with it. Perfect for a new computer. Your Stremio sign-in on this device stays as is.":

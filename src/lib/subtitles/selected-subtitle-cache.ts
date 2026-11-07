@@ -1,6 +1,7 @@
 import type { SubChoiceInput } from "./subtitle-memory";
 import type { SubCue } from "./parser";
 import { toSrt, toVtt } from "./serialize";
+import { playbackTransportFingerprint } from "../player/playback-history-source";
 
 const MAX_SELECTED_SUBTITLE_CHARS = 8 * 1024 * 1024;
 
@@ -60,6 +61,17 @@ export function selectedSubtitleCacheName(
   return `selected-${stableHash(identity)}.${format}`;
 }
 
+/** An exact, non-reversible identity links a redacted history selection to its cached bytes. */
+export function subtitleCacheOriginFingerprint(choice: SubChoiceInput): string | undefined {
+  if (
+    typeof choice.sourceFingerprint === "string" &&
+    /^[a-f0-9]{64}$/.test(choice.sourceFingerprint)
+  )
+    return choice.sourceFingerprint;
+  const origin = choice.source ?? choice.url ?? choice.originalUrl;
+  return origin && /^https?:\/\//i.test(origin) ? playbackTransportFingerprint(origin) : undefined;
+}
+
 export async function cacheSelectedSubtitle(input: CacheInput): Promise<SubChoiceInput | null> {
   if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return null;
   const readablePath = localPath(input.playableUrl) ?? localPath(input.choice.source);
@@ -102,6 +114,9 @@ export async function cacheSelectedSubtitle(input: CacheInput): Promise<SubChoic
       format,
       encoding: "utf-8",
       providerDerived: false,
+      // Retain a one-way link to the selected remote URL when we replace it
+      // with a local cache path. Playback history never needs the URL itself.
+      sourceFingerprint: subtitleCacheOriginFingerprint(input.choice),
     };
   } catch (error) {
     console.warn("[subs/cache] could not persist selected subtitle", {

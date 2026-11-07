@@ -25,6 +25,12 @@ import {
 import { useMiddleDragPan } from "../hooks/use-middle-drag-pan";
 import { BackToTop } from "@/components/back-to-top";
 import { ProgramBlocksRow } from "../skeletons";
+import {
+  guideScrollLeftFor,
+  guideScrollTime,
+  recallGuideScroll,
+  rememberGuideScroll,
+} from "./guide-scroll-memory";
 
 const PREVIEW_DWELL_MS = 2000;
 const COL_MIN = 140;
@@ -49,18 +55,25 @@ export function GuideView({
   showPrograms = true,
   currentChannelId,
   epgLoading = false,
+  epgConfigured = true,
+  epgError = null,
+  scrollKey,
 }: {
   channels: IptvChannel[];
   epg: EpgIndex | null;
   epgLoading?: boolean;
+  epgConfigured?: boolean;
+  epgError?: string | null;
   nowMs: number;
   onPlay: (ch: IptvChannel) => void;
   onPlayCatchup?: (ch: IptvChannel, program: EpgProgram) => void;
   resetKey: string;
+  scrollKey?: string;
   showPrograms?: boolean;
   currentChannelId?: string | null;
 }) {
   const t = useT();
+  const memoryKey = scrollKey ?? resetKey;
   const scrollRef = useRef<HTMLDivElement>(null);
   useMiddleDragPan(scrollRef);
   const { visible: channels, sentinelRef, hasMore, loadMore } = useLazyVisible(
@@ -88,6 +101,7 @@ export function GuideView({
     setAwayFromNow(nowX < from + 40 || nowX > to - 40);
   };
   const scrolledRef = useRef(false);
+  const lastScrollRef = useRef<{ atMs: number; top: number } | null>(null);
   const tvgIdCounts = useMemo(() => computeTvgIdCounts(allChannels), [allChannels]);
   const epgMapVersion = useEpgMapVersion();
   const [matchTarget, setMatchTarget] = useState<IptvChannel | null>(null);
@@ -165,11 +179,57 @@ export function GuideView({
     if (channels.length === 0) return;
     const el = scrollRef.current;
     if (!el) return;
-    const nowLeftInGrid = (nowMs - windowStart) * PX_PER_MS;
-    const viewport = el.clientWidth - colPx;
-    el.scrollLeft = Math.max(0, nowLeftInGrid - viewport / 3);
+    const viewport = Math.max(0, el.clientWidth - colPx);
+    const saved = recallGuideScroll(memoryKey);
+    const restoredLeft = saved ? guideScrollLeftFor(saved, windowStart, viewport) : null;
+    if (saved && restoredLeft != null) {
+      el.scrollLeft = restoredLeft;
+      el.scrollTop = saved.top;
+      lastScrollRef.current = { atMs: saved.atMs, top: saved.top };
+    } else {
+      const nowLeftInGrid = (nowMs - windowStart) * PX_PER_MS;
+      el.scrollLeft = Math.max(0, nowLeftInGrid - viewport / 3);
+      lastScrollRef.current = {
+        atMs: guideScrollTime(windowStart, el.scrollLeft),
+        top: el.scrollTop,
+      };
+    }
     scrolledRef.current = true;
-  }, [channels.length, windowStart, nowMs]);
+  }, [channels.length, windowStart, nowMs, memoryKey, colPx]);
+
+  // The Live layer is evicted a few seconds after the player opens, so the
+  // guide is remounted on return. Keep its time and channel position here.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const capture = () => {
+      const snapshot = {
+        atMs: guideScrollTime(windowStart, el.scrollLeft),
+        top: el.scrollTop,
+      };
+      lastScrollRef.current = snapshot;
+      return snapshot;
+    };
+    capture();
+    let timer: number | null = null;
+    const remember = () => {
+      timer = null;
+      rememberGuideScroll(memoryKey, lastScrollRef.current ?? capture());
+    };
+    const onScroll = () => {
+      capture();
+      if (timer != null) clearTimeout(timer);
+      timer = window.setTimeout(remember, 200);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      if (timer != null) clearTimeout(timer);
+      // The layer is already hidden when this runs; use the position captured
+      // while it was still laid out.
+      rememberGuideScroll(memoryKey, lastScrollRef.current ?? capture());
+    };
+  }, [memoryKey, windowStart]);
 
   const nowOffsetPx = (nowMs - windowStart) * PX_PER_MS;
   const showNowLine = nowMs >= windowStart && nowMs < windowEnd;
@@ -209,8 +269,14 @@ export function GuideView({
       <GuideHoverPreview channel={preview?.channel ?? null} title={preview?.title ?? null} />
       {!epg && (
         <div className="animate-lift-in pointer-events-none absolute bottom-7 start-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-md bg-elevated px-3.5 py-2 text-[12.5px] text-ink-muted shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] ring-1 ring-edge-soft">
-          <Loader2 size={13} className="animate-spin text-ink-subtle" />
-          {t("Loading program listings… channels are ready to play in the meantime.")}
+          {!epgError && epgConfigured && (
+            <Loader2 size={13} className="animate-spin text-ink-subtle" />
+          )}
+          {epgError
+            ? t("Guide unavailable. Check the EPG source or refresh the playlist.")
+            : epgConfigured
+              ? t("Loading program listings… channels are ready to play in the meantime.")
+              : t("No guide source for this playlist. Add an EPG URL to see program listings.")}
         </div>
       )}
       <div
@@ -281,7 +347,9 @@ export function GuideView({
                   className="relative"
                   style={{ width: WINDOW_PX, height: ROW_HEIGHT_PX }}
                 >
-                  {programs.length === 0 && !epg && <ProgramBlocksRow seed={i} />}
+                  {programs.length === 0 && !epg && !epgError && epgConfigured && (
+                    <ProgramBlocksRow seed={i} />
+                  )}
                   {!!epg && !epgLoading && programs.length === 0 && (
                     <div className="flex h-full items-center gap-3 px-3 text-[11.5px] text-ink-subtle">
                       <span>{t("No program info")}</span>

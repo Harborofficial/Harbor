@@ -88,6 +88,7 @@ impl Transfers {
                 old.source_page.clone().unwrap_or_else(|| old.url.clone()),
             ))
         });
+        if !torbox_cdn(&request.url) { record.torbox_origin = None; }
         record.url = request.url;
         record.source_page = source_page;
         record.expected_bytes = expected;

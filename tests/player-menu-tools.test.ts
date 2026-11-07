@@ -71,10 +71,9 @@ test("published player tools refresh after source and subtitle capability change
   assert.equal(actions.currentPlayerActions(), null);
 });
 
-test("player menu has a source-scoped magnet strip and separate subtitle and stream tools", async () => {
+test("player menu keeps magnet as a normal row with subtitle and stream tools and no quick strip", async () => {
   const copied: string[] = [];
   const opened: string[] = [];
-  let settings = 0;
   let synced = 0;
   let current: any = {
     streamUrl: "https://media.invalid/a",
@@ -90,9 +89,10 @@ test("player menu has a source-scoped magnet strip and separate subtitle and str
     },
   };
   const icons = Object.fromEntries(
-    ["AudioLines", "Download", "ExternalLink", "Link2", "Magnet", "Maximize", "Settings"].map(
-      (key) => [key, () => null],
-    ),
+    ["AudioLines", "Download", "ExternalLink", "Link2", "Magnet", "Maximize"].map((key) => [
+      key,
+      () => null,
+    ]),
   );
   const { playerContextSources } = load("src/components/context-menu/player-actions.tsx", {
     "react/jsx-runtime": jsxRuntime,
@@ -109,25 +109,27 @@ test("player menu has a source-scoped magnet strip and separate subtitle and str
       },
     },
   });
-  const source = playerContextSources(
-    () => current,
-    () => ({
-      id: "page:go:settings",
-      label: "Settings",
-      run: () => {
-        settings++;
-      },
-    }),
-  );
+  const source = playerContextSources(() => current);
+  assert.equal(source.quick, undefined, "item menus do not provide an empty or populated strip");
   assert.deepEqual(
-    source.quick.actions().map((a: any) => a.label),
-    ["Copy magnet", "Settings"],
+    source.rows.actions().map((a: any) => a.label),
+    [
+      "Full screen",
+      "Download Video",
+      "Download Subtitle",
+      "Live sync",
+      "Copy stream link",
+      "Open in browser",
+      "Copy magnet",
+    ],
   );
   assert.equal(
-    source.rows.actions().some((a: any) => /magnet|Back|Resume/.test(a.label)),
+    source.rows.actions().some((a: any) => /Settings|Back|Resume/.test(a.label)),
     false,
   );
-  await source.quick.actions()[0].run();
+  const magnet = source.rows.actions().find((a: any) => a.label === "Copy magnet");
+  assert.equal(magnet.group, "links", "magnet shares the ordinary link command group");
+  await magnet.run();
   assert.deepEqual(copied, ["magnet:a"]);
   current = {
     ...current,
@@ -135,9 +137,9 @@ test("player menu has a source-scoped magnet strip and separate subtitle and str
     magnetUrl: null,
     canLiveSync: false,
   };
-  assert.deepEqual(
-    source.quick.actions().map((a: any) => a.label),
-    ["Settings"],
+  assert.equal(
+    source.rows.actions().some((a: any) => a.label === "Copy magnet"),
+    false,
   );
   const live = source.rows.actions().find((a: any) => a.label === "Live sync");
   assert.equal(live.disabled, true);
@@ -153,21 +155,28 @@ test("player menu has a source-scoped magnet strip and separate subtitle and str
     .run();
   assert.equal(copied[1], "https://media.invalid/b");
   assert.deepEqual(opened, ["https://media.invalid/b"]);
-  await source.quick.actions()[0].run();
-  assert.equal(settings, 1);
   current = null;
-  assert.equal(source.quick.isValid(), false);
+  assert.equal(source.rows.isValid(), false);
   assert.deepEqual(source.rows.actions(), []);
 });
 
-test("player Settings preserves the current navigation command's permission, PIN and availability", async () => {
-  let pinRequests = 0;
-  let navigations = 0;
-  let available: any = undefined;
+test("player rows preserve available commands without adding application navigation", async () => {
+  const calls: string[] = [];
+  let current: any = {
+    toggleFullscreen: () => calls.push("fullscreen"),
+    download: () => calls.push("video"),
+    downloadSubtitle: () => calls.push("subtitle"),
+    liveSync: () => calls.push("sync"),
+    canDownload: true,
+    canDownloadSubtitle: true,
+    canLiveSync: true,
+    streamUrl: "file:///disposable-fixture/video.mp4",
+  };
   const icons = Object.fromEntries(
-    ["AudioLines", "Download", "ExternalLink", "Link2", "Magnet", "Maximize", "Settings"].map(
-      (key) => [key, () => null],
-    ),
+    ["AudioLines", "Download", "ExternalLink", "Link2", "Magnet", "Maximize"].map((key) => [
+      key,
+      () => null,
+    ]),
   );
   const { playerContextSources } = load("src/components/context-menu/player-actions.tsx", {
     "react/jsx-runtime": jsxRuntime,
@@ -176,39 +185,17 @@ test("player Settings preserves the current navigation command's permission, PIN
     "./content-actions": { copyContextText: async () => {} },
     "@/lib/social/link-out": { openLinkOut: async () => {} },
   });
-  const source = playerContextSources(
-    () => ({}),
-    () => available,
+  const source = playerContextSources(() => current);
+  assert.equal(source.quick, undefined);
+  assert.deepEqual(
+    source.rows.actions().map((action: any) => action.label),
+    ["Full screen", "Download Video", "Download Subtitle", "Live sync"],
   );
-  assert.deepEqual(source.quick.actions(), [], "hidden/kid navigation must not gain Settings");
-  const lockIcon = React.createElement("span", null, "locked");
-  available = {
-    id: "page:go:settings",
-    label: "Settings",
-    icon: lockIcon,
-    reason: "PIN required",
-    run: () => {
-      pinRequests++;
-    },
-  };
-  const gated = source.quick.actions()[0];
-  assert.equal(gated.id, "player:settings");
-  assert.equal(gated.icon, lockIcon);
-  assert.equal(gated.reason, "PIN required");
-  await gated.run();
-  assert.equal(pinRequests, 1);
-  assert.equal(navigations, 0, "the player menu cannot bypass the supplied PIN operation");
-  available = { ...available, disabled: true };
-  assert.equal(source.quick.actions()[0].disabled, true);
-  available = {
-    ...available,
-    disabled: false,
-    run: () => {
-      navigations++;
-    },
-  };
-  await source.quick.actions()[0].run();
-  assert.equal(navigations, 1, "unlocked navigation retains the shared departure dispatcher");
-  available = undefined;
-  assert.deepEqual(source.quick.actions(), [], "policy changes are read while the menu is open");
+  for (const action of source.rows.actions()) await action.run();
+  assert.deepEqual(calls, ["fullscreen", "video", "subtitle", "sync"]);
+  current = { ...current, canDownload: false, canDownloadSubtitle: false, liveSync: undefined };
+  assert.deepEqual(
+    source.rows.actions().map((action: any) => action.label),
+    ["Full screen"],
+  );
 });

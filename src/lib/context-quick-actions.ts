@@ -1,4 +1,6 @@
 import { findAction, type ContextAction } from "./context-actions";
+import type { ContextMenuTarget } from "./context-menu";
+import { isBackgroundMenuTarget } from "./context-page-background";
 
 export function omitContextActions(
   actions: ContextAction[],
@@ -16,22 +18,22 @@ export function partitionContextActions(
   entity: ContextAction[],
   content: ContextAction[],
   navigation: ContextAction[],
+  target?: ContextMenuTarget,
 ): { quick: ContextAction[]; entity: ContextAction[]; content: ContextAction[] } {
-  const find = findAction;
-  const copy = [
-    entity.find((action) => action.quickCopy),
-    find(content, "image:copy"),
-    find(content, "link:copy"),
-    find(content, "selection:copy"),
-  ].find((action) => action && !action.disabled);
-  const quick = [find(navigation, "page:back"), copy, find(navigation, "page:go:settings")].filter(
-    (action): action is ContextAction => !!action,
+  const quick = (
+    isBackgroundMenuTarget(target)
+      ? [findAction(navigation, "page:back"), findAction(navigation, "page:go:settings")]
+      : []
+  ).filter((action): action is ContextAction => !!action);
+  // Page commands are exclusively rendered in the background strip/footer.
+  // Item copy commands remain in their original command list.
+  const moved = new Set(
+    entity.filter((action) => action.id.startsWith("page:")).map((action) => action.id),
   );
-  const moved = new Set(quick.map((action) => action.id));
   return {
     quick,
     entity: omitContextActions(entity, moved),
-    content: omitContextActions(content, moved),
+    content,
   };
 }
 

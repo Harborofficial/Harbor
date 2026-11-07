@@ -6,7 +6,7 @@ import type { MalListEntry, MalListGroup, MalListStatus } from "@/lib/mal/types"
 
 export type MalRail = { key: string; title: string; metas: Meta[] };
 
-const RAIL_ORDER: Array<{ key: string; title: string; statuses: MalListStatus[] }> = [
+export const MAL_RAIL_ORDER: Array<{ key: string; title: string; statuses: MalListStatus[] }> = [
   { key: "watching", title: "Watching", statuses: ["watching"] },
   { key: "planning", title: "Plan to Watch", statuses: ["plan_to_watch"] },
   { key: "completed", title: "Completed", statuses: ["completed"] },
@@ -41,7 +41,7 @@ export function useMalAnimeRailsState(): MalRailsState & { retry: () => void } {
   const { isConnected, session } = useMal();
   const [state, setState] = useState<MalRailsState>(IDLE);
   const [attempt, setAttempt] = useState(0);
-  const retry = useCallback(() => setAttempt(value => value + 1), []);
+  const retry = useCallback(() => setAttempt((value) => value + 1), []);
   const owner = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -53,21 +53,25 @@ export function useMalAnimeRailsState(): MalRailsState & { retry: () => void } {
     let cancelled = false;
     const sameOwner = owner.current === session?.userName;
     owner.current = session?.userName;
-    setState(previous => ({ rails: sameOwner ? previous.rails : [], loading: true, error: false }));
+    setState((previous) => ({
+      rails: sameOwner ? previous.rails : [],
+      loading: true,
+      error: false,
+    }));
     (async () => {
       let groups: MalListGroup[];
       try {
         groups = await fetchMalList();
       } catch (e) {
         console.error("Failed to fetch MAL list", e);
-        if (!cancelled) setState(previous => ({ ...previous, loading: false, error: true }));
+        if (!cancelled) setState((previous) => ({ ...previous, loading: false, error: true }));
         return;
       }
       if (cancelled) return;
       const entriesByStatus = new Map(groups.map((g) => [g.status, g.entries]));
 
       const out: MalRail[] = [];
-      for (const rail of RAIL_ORDER) {
+      for (const rail of MAL_RAIL_ORDER) {
         let entries = rail.statuses.flatMap((s) => entriesByStatus.get(s) ?? []);
         if (rail.key === "watching" || rail.key === "completed") {
           entries = [...entries].sort(

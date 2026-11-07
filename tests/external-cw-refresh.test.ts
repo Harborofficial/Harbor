@@ -28,6 +28,7 @@ function fixture() {
   const connected = { simkl: true, trakt: true, publicmetadb: false };
   const sessions = { simkl: {}, trakt: {}, publicmetadb: {} };
   const detectionBatches: LibraryItem[][] = [];
+  const nuvio = { signedIn: false, active: false, fetches: 0 };
   const mocks: Record<string, unknown> = {
     react: {},
     "@/lib/simkl/playback": { fetchSimklPlaybackItems: () => providers.simkl() },
@@ -61,15 +62,18 @@ function fixture() {
     },
     "@/lib/render-cause": { noteNotify: () => {} },
     "@/lib/nuvio/nuvio-playback": {
-      fetchNuvioPlaybackItems: async () => [],
+      fetchNuvioPlaybackItems: async () => {
+        nuvio.fetches++;
+        return [];
+      },
       readCachedNuvioPlaybackItems: () => [],
       writeCachedNuvioPlaybackItems: () => {},
     },
     "@/lib/nuvio/nuvio-client": {
-      isNuvioSignedIn: () => false,
+      isNuvioSignedIn: () => nuvio.signedIn,
     },
     "@/lib/nuvio/nuvio-sync": {
-      isNuvioProviderActive: () => false,
+      isNuvioProviderActive: () => nuvio.active,
       resolveNuvioProfileIndex: () => 1,
     },
   };
@@ -104,6 +108,7 @@ function fixture() {
     listeners,
     timers,
     detectionBatches,
+    nuvio,
     retry: async () => {
       assert.equal(timers.size, 1);
       const [token, timer] = [...timers][0];
@@ -175,20 +180,34 @@ test("PublicMetaDB account changes clear only that account's cards and refresh",
   h.connected.publicmetadb = true;
   h.listeners.publicmetadb();
   await settle();
-  assert.deepEqual(new Set(h.api.listExternalCw().map((i) => i._id)), new Set(["keep-trakt", "old-pmdb"]));
+  assert.deepEqual(
+    new Set(h.api.listExternalCw().map((i) => i._id)),
+    new Set(["keep-trakt", "old-pmdb"]),
+  );
 
   h.sessions.publicmetadb = {};
-  h.providers.publicmetadb = async () => { throw new Error("offline"); };
+  h.providers.publicmetadb = async () => {
+    throw new Error("offline");
+  };
   h.listeners.publicmetadb();
-  assert.deepEqual(h.api.listExternalCw().map((i) => i._id), ["keep-trakt"]);
+  assert.deepEqual(
+    h.api.listExternalCw().map((i) => i._id),
+    ["keep-trakt"],
+  );
   await settle();
   h.providers.publicmetadb = async () => [item("publicmetadb", "new-pmdb")];
   await h.retry();
-  assert.deepEqual(new Set(h.api.listExternalCw().map((i) => i._id)), new Set(["keep-trakt", "new-pmdb"]));
+  assert.deepEqual(
+    new Set(h.api.listExternalCw().map((i) => i._id)),
+    new Set(["keep-trakt", "new-pmdb"]),
+  );
 
   h.connected.publicmetadb = false;
   h.listeners.publicmetadb();
-  assert.deepEqual(h.api.listExternalCw().map((i) => i._id), ["keep-trakt"]);
+  assert.deepEqual(
+    h.api.listExternalCw().map((i) => i._id),
+    ["keep-trakt"],
+  );
   await settle();
 });
 
@@ -288,4 +307,41 @@ test("a successful empty response removes old cards, unlike a failed response", 
   await h.api.refreshExternalCw(true);
   assert.deepEqual(h.api.listExternalCw(), []);
   assert.equal(h.timers.size, 0);
+});
+
+test("willRefreshExternalCw reflects provider mode and freshness", async () => {
+  const h = fixture();
+  h.api.setExternalCwSources({ trakt: true, simkl: true, publicmetadb: false, nuvio: true });
+  h.nuvio.signedIn = true;
+  h.nuvio.active = true;
+
+  assert.equal(h.api.willRefreshExternalCw(false), true);
+  assert.equal(h.api.willRefreshExternalCw(true), true);
+
+  await h.api.refreshExternalCw(true);
+  assert.equal(h.api.willRefreshExternalCw(false), false);
+  assert.equal(h.api.willRefreshExternalCw(true), true);
+
+  h.api.setExternalCwSources({ trakt: true, simkl: true, publicmetadb: false, nuvio: false });
+  assert.equal(h.api.willRefreshExternalCw(true), false);
+  h.api.setExternalCwSources({ trakt: true, simkl: true, publicmetadb: false, nuvio: true });
+  h.nuvio.signedIn = false;
+  assert.equal(h.api.willRefreshExternalCw(true), false);
+});
+
+test("identical merged items do not emit a new detection batch", async () => {
+  const h = fixture();
+  h.providers.simkl = async () => [item("simkl", "same")];
+  await h.api.refreshExternalCw(true);
+  const batches = h.detectionBatches.length;
+  await h.api.refreshExternalCw(true);
+  assert.equal(h.detectionBatches.length, batches);
+});
+
+test("the Nuvio mount refresh is freshness-gated", () => {
+  const source = readFileSync(new URL("../src/lib/feed/external-cw.ts", import.meta.url), "utf8");
+  assert.match(
+    source,
+    /const fresh = fetchedAt > 0 && Date\.now\(\) - fetchedAt < STALE_MS;[\s\S]*?refreshExternalCw\(!fresh\)/,
+  );
 });

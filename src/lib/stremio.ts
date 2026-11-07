@@ -130,6 +130,12 @@ export function isCwMember(i: LibraryItem): boolean {
   if (i.removed && !i.temp) return false;
   if (i.upNext) return true;
   if (i.waitingForAir) return true;
+  // A removed item survives only as a temp progress record. Without playback
+  // progress or a resume entry there is nothing to continue, and the placeholder
+  // `season: 0 / episode: 0` state written by watched sync must not become a card.
+  if (i.removed && (i.state?.timeOffset ?? 0) <= 0 && (resumeForItem(i)?.ms ?? 0) <= 0) {
+    return false;
+  }
   // External trackers (Simkl, Trakt, PublicMetaDB) without upNext must be active in-progress
   // playback sessions (1% <= progress <= 98%, timeOffset > 0, unflagged).
   if (i.external === "simkl" || i.external === "trakt" || i.external === "publicmetadb") {
@@ -155,10 +161,14 @@ export function isCwMember(i: LibraryItem): boolean {
       i.state.episode = se.episode;
     }
   }
+  const season = i.state.season;
+  const episode = i.state.episode;
   if (
     i.type === "series" &&
-    i.state.season != null &&
-    i.state.episode != null &&
+    season != null &&
+    season > 0 &&
+    episode != null &&
+    episode > 0 &&
     (i.state.flaggedWatched ?? 0) === 0
   ) {
     return true;
@@ -171,12 +181,14 @@ export function isCwMember(i: LibraryItem): boolean {
     // the row here never leaks a finished show back into Continue Watching.
     if (
       i.type === "series" &&
-      i.state.season != null &&
-      i.state.episode != null &&
+      season != null &&
+      season > 0 &&
+      episode != null &&
+      episode > 0 &&
       (i.manualWatched === true ||
         i.external === "nuvio" ||
         (typeof manualWatchedState === "function" &&
-          manualWatchedState(i._id, i.state.season, i.state.episode) === true))
+          manualWatchedState(i._id, season, episode) === true))
     ) {
       return true;
     }
@@ -379,43 +391,102 @@ export async function removeStremioLibraryItem(
   );
 }
 
+const EXPUNGE_TARGETS_KEY = "harbor.stremio.expunge-targets.v1";
+
+function readExpungeTargets(): Set<string> {
+  try {
+    const raw = JSON.parse(localStorage.getItem(EXPUNGE_TARGETS_KEY) ?? "[]");
+    return new Set(
+      Array.isArray(raw) ? raw.filter((id): id is string => typeof id === "string") : [],
+    );
+  } catch {
+    return new Set();
+  }
+}
+
+function writeExpungeTargets(ids: Set<string>): void {
+  try {
+    if (ids.size === 0) localStorage.removeItem(EXPUNGE_TARGETS_KEY);
+    else localStorage.setItem(EXPUNGE_TARGETS_KEY, JSON.stringify([...ids]));
+  } catch {}
+}
+
+function purgeQueuedWritesFor(targetIds: Set<string>): void {
+  if (targetIds.size === 0) return;
+  try {
+    const rawQ = localStorage.getItem("harbor.stremio.write-queue.v1");
+    if (!rawQ) return;
+    const q = JSON.parse(rawQ);
+    if (!Array.isArray(q)) return;
+    const filtered = q.filter((entry: any) => !targetIds.has(entry?.item?._id));
+    localStorage.setItem("harbor.stremio.write-queue.v1", JSON.stringify(filtered));
+  } catch {}
+}
+
 export async function expungeLeachedNuvioItemsFromStremio(
   authKey?: string | null,
   leachedIds: string[] = [],
 ): Promise<void> {
-  if (!isNuvioProviderActive()) return;
-  const ak = authKey || readPrimaryStremioAuthKey();
-  if (!ak) return;
+  const nuvioActive = isNuvioProviderActive();
   const targetIds = new Set<string>(leachedIds);
-  try {
-    for (const id of collectAllNuvioItemIds()) {
-      targetIds.add(id);
-    }
-  } catch {}
 
-  if (targetIds.size === 0) return;
-
-  for (const id of targetIds) {
+  if (nuvioActive) {
     try {
-      await removeStremioLibraryItem(ak, id, false);
+      for (const id of collectAllNuvioItemIds()) {
+        targetIds.add(id);
+      }
     } catch {}
   }
 
   try {
-    const rawQ = localStorage.getItem("harbor.stremio.write-queue.v1");
-    if (rawQ) {
-      const q = JSON.parse(rawQ);
-      if (Array.isArray(q)) {
-        const filtered = q.filter((entry: any) => !targetIds.has(entry?.item?._id));
-        localStorage.setItem("harbor.stremio.write-queue.v1", JSON.stringify(filtered));
+    sanitizeStremioLocalCw();
+  } catch {}
+
+  if (nuvioActive) {
+    // Stremio cloud writes are sealed during a Nuvio session, so record the
+    // targets and delete them once the Stremio provider is active again.
+    if (targetIds.size > 0) {
+      const queued = readExpungeTargets();
+      let changed = false;
+      for (const id of targetIds) {
+        if (queued.has(id)) continue;
+        queued.add(id);
+        changed = true;
       }
+      if (changed) writeExpungeTargets(queued);
     }
-  } catch {}
+    purgeQueuedWritesFor(targetIds);
+    invalidateLibraryCache();
+    return;
+  }
 
-  try {
-    sanitizeStremioLocalCw(Array.from(targetIds));
-  } catch {}
+  const queued = readExpungeTargets();
+  for (const id of targetIds) queued.add(id);
+  if (queued.size === 0) {
+    invalidateLibraryCache();
+    return;
+  }
 
+  const ak = authKey || readPrimaryStremioAuthKey();
+  if (!ak) {
+    writeExpungeTargets(queued);
+    invalidateLibraryCache();
+    return;
+  }
+
+  const failed = new Set<string>();
+  for (const id of queued) {
+    if (isNuvioProviderActive()) {
+      failed.add(id);
+      continue;
+    }
+    try {
+      await removeStremioLibraryItem(ak, id, false);
+    } catch {
+      failed.add(id);
+    }
+  }
+  writeExpungeTargets(failed);
   invalidateLibraryCache();
 }
 

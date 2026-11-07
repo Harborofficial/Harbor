@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import "./_localstorage-stub.ts";
 import { clearPmdbMappingsCache } from "../src/lib/publicmetadb/mappings.ts";
-import { pmdbDeleteResumeForTarget, pmdbSaveResume } from "../src/lib/publicmetadb/scrobble.ts";
+import {
+  pmdbDeleteResumeForTarget,
+  pmdbDeleteResumesForTitle,
+  pmdbSaveResume,
+} from "../src/lib/publicmetadb/scrobble.ts";
 import { setSession } from "../src/lib/publicmetadb/session.ts";
 import type { PmdbTarget } from "../src/lib/publicmetadb/types.ts";
 
@@ -79,6 +83,31 @@ for (const mapping of [null, { tmdb_id: 550, media_type: "tv" }]) {
     } finally { h.restore(); }
   });
 }
+
+test("title cleanup deletes every PMDB resume for the show and preserves unrelated progress", async () => {
+  const h = fixture((_url, init) =>
+    init.method === "DELETE"
+      ? new Response(null, { status: 204 })
+      : json({
+          items: [
+            { id: "show-1", tmdb_id: 550, media_type: "tv", season: 1, episode: 2 },
+            { id: "show-2", tmdb_id: 550, media_type: "tv", season: 1, episode: 3 },
+            { id: "movie", tmdb_id: 550, media_type: "movie", season: 0, episode: 0 },
+            { id: "other", tmdb_id: 999, media_type: "tv", season: 1, episode: 2 },
+          ],
+          totalPages: 1,
+        }),
+  );
+  try {
+    assert.equal(await pmdbDeleteResumesForTitle({ tmdb_id: 550, media_type: "tv" }), 2);
+    assert.deepEqual(
+      h.calls.filter((c) => c.method === "DELETE").map((c) => c.url.split("/").pop()).sort(),
+      ["show-1", "show-2"],
+    );
+  } finally {
+    h.restore();
+  }
+});
 
 test("409 recovery deletes only the matching point before retrying the save", async () => {
   let posts = 0;

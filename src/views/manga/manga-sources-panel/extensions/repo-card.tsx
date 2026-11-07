@@ -192,7 +192,7 @@ export function RepoCard({ url, onRemove }: { url: string; onRemove: () => void 
 
       {state === "ready" &&
         (repo && repo.plugins.length > 0 ? (
-          <div className="divide-y divide-edge-soft border-t border-edge-soft">
+          <div className="max-h-[min(65vh,800px)] divide-y divide-edge-soft overflow-y-auto overscroll-contain border-t border-edge-soft">
             {repo.plugins.map((m) => (
               <PluginRow key={m.id} manifest={m} repoUrl={url} installed={byId.get(m.id)} />
             ))}

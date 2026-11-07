@@ -81,10 +81,10 @@ test("cache lifetime follows the signature on the URLs and falls back to a bound
     ),
     now + 90_000,
   );
-  assert.equal(api.streamExpiry(stream(at(100_000)), now), now + 8 * 60_000);
+  assert.equal(api.streamExpiry(stream(at(100_000)), now), now + 30 * 60_000);
   assert.equal(
     api.streamExpiry({ url: "https://example.test/video.mp4", audioUrl: null }, now),
-    now + 8 * 60_000,
+    now + 30 * 60_000,
   );
 });
 

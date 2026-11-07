@@ -434,6 +434,8 @@
 .games-completion-times strong { color: var(--color-ink); font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .games-detail .games-detail-dossier .games-completion-times > p { display: flex; align-items: center; gap: 9px; padding: 8px 0; margin: 0; font-size: 11px; color: var(--color-ink-subtle); }
 .games-completion-times img { width: 30px; height: 24px; object-fit: contain; }
+.games-completion-source-link { display: inline-flex; align-items: center; gap: 5px; padding: 0; background: none; border: 0; color: var(--color-ink-muted); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.games-completion-source-link:hover { color: var(--color-ink); }
 
 /* Dossier surfaces use Harbor's fill ladder; grain supplies material without color tint. */
 .games-detail .games-detail-dossier > .games-detail-disclosure { position: relative; isolation: isolate; border-radius: 7px; margin: 9px 0; background: var(--color-surface); }

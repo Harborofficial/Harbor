@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { ExternalLink, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -330,6 +331,7 @@ async function cinemetaSearch(
   year: number | undefined,
   preferSeries: boolean,
 ): Promise<Meta | null> {
+  if (addonOnlyMetadata()) return null;
   const order = preferSeries ? (["series", "movie"] as const) : (["movie", "series"] as const);
   const want = normMatch(title);
   for (const type of order) {
@@ -353,6 +355,7 @@ async function cinemetaSearch(
 }
 
 async function resolveWork(entry: WorkLike, preferSeries: boolean): Promise<Meta | null> {
+  if (addonOnlyMetadata()) return null;
   const order = preferSeries ? (["series", "movie"] as const) : (["movie", "series"] as const);
   if (entry.workImdb) {
     for (const t of order) {

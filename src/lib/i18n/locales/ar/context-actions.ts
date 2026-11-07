@@ -17,6 +17,12 @@ const contextActions: Record<string, string> = {
   "Play this same video from the beginning?": "تشغيل الفيديو نفسه من البداية؟",
   "Opening playback…": "جارٍ فتح التشغيل…",
   "Continue last watched": "متابعة آخر مشاهدة",
+  "Resume last watched": "استكمال آخر مشاهدة",
+  "The saved audio track could not be restored. Choose an audio track.":
+    "تعذّر استعادة مسار الصوت المحفوظ. اختر مسار صوت.",
+  "The saved subtitle could not be restored. Choose a subtitle.":
+    "تعذّر استعادة الترجمة المحفوظة. اختر ترجمة.",
+  "The saved subtitle timing could not be restored.": "تعذّر استعادة توقيت الترجمة المحفوظ.",
   "Local video": "فيديو محلي",
   "Open my profile": "فتح ملفي الشخصي",
   "Add to page": "إضافة إلى صفحة",
@@ -512,6 +518,8 @@ const contextActions: Record<string, string> = {
     "هناك فيديو آخر قيد التشغيل. عُد إلى المشغّل أولًا.",
   "The last video file is missing or unavailable.": "ملف الفيديو الأخير مفقود أو غير متاح.",
   "The last playback source is no longer available.": "لم يعد مصدر آخر مشاهدة متاحًا.",
+  "Open this video from its source or enter the link again. Its network address was not saved.":
+    "افتح الفيديو من مصدره أو أدخل الرابط مجددًا. لم يُحفظ عنوانه الشبكي.",
   "Playback changed. Open the menu again.": "تغيّر التشغيل. افتح القائمة مجددًا.",
   "Playback controls are not available in this session.":
     "أدوات التحكم بالتشغيل غير متاحة في هذه الجلسة.",

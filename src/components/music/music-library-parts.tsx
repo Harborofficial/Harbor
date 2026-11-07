@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { MusicVirtualTrackList } from "./music-virtual-track-list";
 import {
   FileDown,
+  ListPlus,
   PlaylistVariation,
   PlaylistRename,
   Trash2,
@@ -22,6 +23,7 @@ import {
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { Spinner } from "@/components/spinner";
 import { useSectionBack } from "@/lib/section-back";
+import { confirmAction } from "@/lib/confirm-action";
 import { MusicPlaylistCover } from "./music-playlist-cover";
 import { MusicCollectionControls } from "./music-collection-controls";
 import { MusicArtistLink } from "./music-artist-link";
@@ -40,7 +42,7 @@ const ROW_LIKE_SPOKES = [0, 45, 90, 135, 180, 225, 270, 315];
 import { addTracksToMusicPlaylist, createMusicPlaylist } from "@/lib/music/library";
 import { recordMusicPlaylistPlayback } from "@/lib/music/playback-origin";
 import { useMusicNowPlaying } from "@/lib/music/use-now-playing";
-import { deleteMusicPlaylist, renameMusicPlaylist } from "@/lib/music/library";
+import { confirmLinkedMusicPlaylistEdit, deleteMusicPlaylist, renameMusicPlaylist } from "@/lib/music/library";
 import { getMusicState, enqueueMusic, toggleMusicLiked } from "@/lib/music/player";
 import type { MusicPlaylist, MusicTrack } from "@/lib/music/types";
 
@@ -143,7 +145,7 @@ export function LibraryTrackList({
         ))}
       </div>}
       {view && tracks.length > 0 && <div className="music-playlist-columns" aria-hidden="true">
-        <span>#</span><span>{t("music.playlistTools.title")}</span><span className="music-playlist-album">{t("music.playlistTools.album")}</span><span /><span>{t("music.sort.duration")}</span><span />
+        <span>#</span><span>{t("music.playlistTools.title")}</span><span className="music-playlist-album">{t("music.playlistTools.album")}</span><span /><span /><span>{t("music.sort.duration")}</span><span />
       </div>}
       <div ref={resultsRef} style={{ position: "relative" }}>
       <div inert={filtering} style={{ visibility: slowFilter && filtering ? "hidden" : undefined }}>
@@ -330,6 +332,19 @@ function LibraryTrack({
       {showAlbum && <span className="music-playlist-album" title={track.album}>{track.album || "—"}</span>}
       <button
         type="button"
+        className="music-library-track-queue"
+        data-music-queue-action
+        aria-label={t("music.card.addToQueue")}
+        title={t("music.card.addToQueue")}
+        onClick={(event) => {
+          event.stopPropagation();
+          enqueueMusic(track);
+        }}
+      >
+        <ListPlus size={17} />
+      </button>
+      <button
+        type="button"
         className="music-library-track-save"
         data-like-burst
         data-burst={burst || undefined}
@@ -416,6 +431,11 @@ function LibraryTrack({
               type="button"
               role="menuitem"
               tabIndex={-1}
+              data-music-queue-action={
+                "id" in action && (action.id === "queue" || action.id === "next")
+                  ? "true"
+                  : undefined
+              }
               disabled={"disabled" in action && action.disabled}
               onClick={() => {
                 close();
@@ -513,6 +533,7 @@ export function PlaylistHeader({
       setRenaming(false);
       return;
     }
+    if (!(await confirmLinkedMusicPlaylistEdit(playlist))) return;
     setBusy(true);
     onError(null);
     try {
@@ -527,7 +548,15 @@ export function PlaylistHeader({
   };
 
   const remove = async () => {
-    if (!window.confirm(t("music.playlist.deleteConfirm"))) return;
+    if (
+      !(await confirmAction({
+        title: t("music.playlist.deleteTitle"),
+        message: t("music.playlist.deleteConfirm"),
+        confirmLabel: t("common.delete"),
+        destructive: true,
+      }))
+    )
+      return;
     setBusy(true);
     onError(null);
     try {

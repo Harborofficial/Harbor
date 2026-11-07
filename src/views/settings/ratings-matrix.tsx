@@ -20,11 +20,7 @@ const QUAL =
   "inline-flex h-[22px] shrink-0 items-center rounded-[6px] bg-elevated px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle";
 
 export function ImdbBadge({ compact = false }: { compact?: boolean } = {}) {
-  return (
-    <ImdbIcon
-      className={`shrink-0 rounded-[3px] ${compact ? "h-[18px]" : "h-7"} w-auto`}
-    />
-  );
+  return <ImdbIcon className={`shrink-0 rounded-[3px] ${compact ? "h-[18px]" : "h-7"} w-auto`} />;
 }
 
 export function MalBadge({ compact = false }: { compact?: boolean } = {}) {
@@ -66,7 +62,9 @@ function PopcornBadge() {
 }
 
 function MetacriticBadge() {
-  return <img src={metacriticLogo} alt="" className="h-7 w-7 shrink-0 rounded-full object-contain" />;
+  return (
+    <img src={metacriticLogo} alt="" className="h-7 w-7 shrink-0 rounded-full object-contain" />
+  );
 }
 
 function LetterboxdBadge() {
@@ -141,20 +139,14 @@ function MiniToggle({
   );
 }
 
-function ColumnHead({
-  icon,
-  label,
-  hint,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  hint: string;
-}) {
+function ColumnHead({ icon, label, hint }: { icon: React.ReactNode; label: string; hint: string }) {
   return (
     <HoverTooltip side="top" align="center" label={hint}>
       <span className="flex w-12 cursor-help flex-col items-center gap-1 text-ink-subtle">
         {icon}
-        <span className="text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]">{label}</span>
+        <span className="text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]">
+          {label}
+        </span>
       </span>
     </HoverTooltip>
   );
@@ -178,38 +170,113 @@ export function RatingsMatrix({
   };
 
   const sources: Source[] = [
-    { id: "imdb", name: "IMDb", badge: <ImdbBadge />, cardKey: "showImdbBadge", detailKey: "showImdbDetail", lockKey: "tmdb" },
-    { id: "tmdb", name: "TMDB", badge: <TmdbBadge />, cardKey: "showTmdbBadge", detailKey: "showTmdbDetail", lockKey: "tmdb", note: t("The TMDB community score.") },
-    { id: "rt", name: t("Rotten Tomatoes"), badge: <RtPairBadge />, cardKey: "showRtBadge", detailKey: "showRtDetail", lockKey: "omdb" },
-    { id: "audience", name: t("Audience"), badge: <PopcornBadge />, cardKey: "showPopcornBadge", detailKey: "showRtAudienceDetail", lockKey: "mdblist", tip: t("Rotten Tomatoes Popcornmeter, the audience score (%).") },
-    { id: "metacritic", name: "Metacritic", badge: <MetacriticBadge />, cardKey: "showMetacriticBadge", detailKey: "showMetacriticDetail", lockKey: "mdblist" },
-    { id: "letterboxd", name: "Letterboxd", badge: <LetterboxdBadge />, cardKey: "showLetterboxdBadge", detailKey: "showLetterboxdDetail", lockKey: "mdblist" },
-    { id: "mdblist", name: "MDBList", badge: <MdblistBadge />, cardKey: "showMdblistBadge", detailKey: "showMdblistDetail", lockKey: "mdblist" },
-    { id: "trakt", name: "Trakt", badge: <TraktBadge />, cardKey: "showTraktBadge", detailKey: "showTraktDetail", lockKey: "mdblist" },
-    { id: "simkl", name: "SIMKL", badge: <SimklBadge />, cardKey: "showSimklBadge", detailKey: "showSimklDetail" },
-    { id: "mal", name: "MAL", badge: <MalBadge />, cardKey: "showMalBadge", detailKey: "showMalDetail", anime: true },
+    {
+      id: "imdb",
+      name: "IMDb",
+      badge: <ImdbBadge />,
+      cardKey: "showImdbBadge",
+      detailKey: "showImdbDetail",
+      lockKey: "tmdb",
+    },
+    {
+      id: "tmdb",
+      name: "TMDB",
+      badge: <TmdbBadge />,
+      cardKey: "showTmdbBadge",
+      detailKey: "showTmdbDetail",
+      lockKey: "tmdb",
+      note: t("The TMDB community score."),
+    },
+    {
+      id: "rt",
+      name: t("Rotten Tomatoes"),
+      badge: <RtPairBadge />,
+      cardKey: "showRtBadge",
+      detailKey: "showRtDetail",
+      lockKey: "omdb",
+    },
+    {
+      id: "audience",
+      name: t("Audience"),
+      badge: <PopcornBadge />,
+      cardKey: "showPopcornBadge",
+      detailKey: "showRtAudienceDetail",
+      lockKey: "mdblist",
+      tip: t("Rotten Tomatoes Popcornmeter, the audience score (%)."),
+    },
+    {
+      id: "metacritic",
+      name: "Metacritic",
+      badge: <MetacriticBadge />,
+      cardKey: "showMetacriticBadge",
+      detailKey: "showMetacriticDetail",
+      lockKey: "mdblist",
+    },
+    {
+      id: "letterboxd",
+      name: "Letterboxd",
+      badge: <LetterboxdBadge />,
+      cardKey: "showLetterboxdBadge",
+      detailKey: "showLetterboxdDetail",
+      lockKey: "mdblist",
+    },
+    {
+      id: "mdblist",
+      name: "MDBList",
+      badge: <MdblistBadge />,
+      cardKey: "showMdblistBadge",
+      detailKey: "showMdblistDetail",
+      lockKey: "mdblist",
+    },
+    {
+      id: "trakt",
+      name: "Trakt",
+      badge: <TraktBadge />,
+      cardKey: "showTraktBadge",
+      detailKey: "showTraktDetail",
+      lockKey: "mdblist",
+    },
+    {
+      id: "simkl",
+      name: "SIMKL",
+      badge: <SimklBadge />,
+      cardKey: "showSimklBadge",
+      detailKey: "showSimklDetail",
+    },
+    {
+      id: "mal",
+      name: "MAL",
+      badge: <MalBadge />,
+      cardKey: "showMalBadge",
+      detailKey: "showMalDetail",
+      anime: true,
+    },
   ];
 
   const setCard = (src: Source, next: boolean) => {
     if (src.id === "simkl") update({ showSimklBadge: next, simklShowCommunityRatings: next });
-    else update({ [src.cardKey]: next } as Partial<Settings>);
+    else update({ [src.cardKey as string]: next } as Partial<Settings>);
   };
 
   return (
     <div className="flex flex-col gap-1.5 [--hset-row-pad-inline:0px]">
       <div className="flex flex-col items-start gap-3 pb-5">
         <span className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">
-          {t("Choose which ratings appear on cards and detail pages. Locked card ratings need a provider key in Metadata.")}
+          {t(
+            "Choose which ratings appear on cards and detail pages. Locked card ratings need a provider key in Metadata.",
+          )}
         </span>
-        <button type="button" className={ROW_ACTION} onClick={() => setActive("library", settingsAnchor("Metadata providers"))}>
+        <button
+          type="button"
+          className={ROW_ACTION}
+          onClick={() => setActive("library", settingsAnchor("Metadata providers"))}
+        >
           {t("Set up rating providers")}
         </button>
       </div>
 
       <div className="flex items-end gap-1.5">
-        <span className="harbor-settings-label min-w-0 flex-1">
-          {t("Rating")}
-        </span>
+        <span className="harbor-settings-label min-w-0 flex-1">{t("Rating")}</span>
         <div className="flex shrink-0 items-end justify-end gap-2.5">
           <ColumnHead
             icon={<ImageIcon size={18} strokeWidth={2} />}
@@ -226,7 +293,7 @@ export function RatingsMatrix({
 
       {sources.map((src) => {
         const lock = lockReason(src.lockKey);
-        const cardVal = settings[src.cardKey] === true;
+        const cardVal = settings[src.cardKey as keyof Settings] === true;
         const detailVal = src.detailKey ? settings[src.detailKey] === true : false;
         return (
           <SettingRow
@@ -254,7 +321,12 @@ export function RatingsMatrix({
               <MiniToggle
                 on={detailVal}
                 label={`${src.name} ${t("Details")}`}
-                onClick={() => update({ [src.detailKey!]: !detailVal, showDetailRatings: true } as Partial<Settings>)}
+                onClick={() =>
+                  update({
+                    [src.detailKey!]: !detailVal,
+                    showDetailRatings: true,
+                  } as Partial<Settings>)
+                }
               />
             ) : (
               <HoverTooltip

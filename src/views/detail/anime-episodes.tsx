@@ -388,7 +388,7 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
     parseKitsuId(meta.id),
     imdbId ?? null,
     episodes.length,
-    settings.tvdbSeasonType,
+    "aired",
   );
   const ratings = useHarborEpisodeRatings(imdbId ?? null);
   const unratedDisplay = tvdbPanel.panel

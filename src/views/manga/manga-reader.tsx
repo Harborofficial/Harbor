@@ -33,6 +33,13 @@ import { ReaderProgressMeter } from "./manga-reader/reader-progress-meter";
 import { ReaderPageJump } from "./manga-reader/reader-page-jump";
 import { ReaderSettings } from "./manga-reader/reader-settings";
 import { PageImage } from "./manga-reader/page-image";
+import { prefetchBestMangaPage, prefetchMangaPage } from "./manga-reader/manga-upscale";
+import {
+  resetBestChapterHeight,
+  keepBestUpscalerLoaded,
+  scheduleBestUpscalerUnload,
+} from "@/lib/manga/upscale/best";
+import { keepMangaUpscalerLoaded, scheduleMangaUpscalerUnload } from "@/lib/manga/upscale";
 import { BookFlip, type BookApi } from "./manga-reader/book-view";
 import { ReaderNav } from "./manga-reader/reader-nav";
 import { BookmarksPanel, BookmarkPagePicker } from "./manga-reader/reader-bookmarks";
@@ -566,6 +573,62 @@ export function MangaReader({
   } as const;
   const dStyle = doublePageStyle(prefs.fit, prefs.zoom);
   const displayPage = Math.min(currentPage, Math.max(0, total - 1));
+  const pageCacheKey = (index: number) => `${manga.id}:${chapter.id}:${index}`;
+
+  useEffect(() => {
+    resetBestChapterHeight();
+  }, [chapter.id]);
+
+  useEffect(() => {
+    keepMangaUpscalerLoaded();
+    keepBestUpscalerLoaded();
+    return () => {
+      scheduleMangaUpscalerUnload();
+      scheduleBestUpscalerUnload();
+    };
+  }, []);
+
+  // Warm the next page or two once the current page has had time to finish.
+  // The delay resets on every page change, so fast scrolling does not queue work.
+  useEffect(() => {
+    if (!settings.mangaUpscaleEnabled) return;
+    const next = pages.slice(displayPage + 1, displayPage + 3);
+    if (next.length === 0) return;
+    const bestMode = settings.mangaUpscaleQuality === "best";
+    const keyFor = (index: number) => `${manga.id}:${chapter.id}:${index}`;
+    const id = window.setTimeout(() => {
+      void (async () => {
+        if (bestMode) {
+          for (let offset = 1; offset <= 2; offset++) {
+            const page = pages[displayPage + offset];
+            if (page?.url)
+              await prefetchBestMangaPage(
+                page.url,
+                page.headers,
+                keyFor(displayPage + offset),
+                settings.mangaUpscaleAutoDownload,
+              );
+          }
+          return;
+        }
+        for (let offset = 0; offset < next.length; offset++) {
+          const page = next[offset];
+          if (page?.url)
+            await prefetchMangaPage(page.url, page.headers, keyFor(displayPage + 1 + offset));
+        }
+      })();
+    }, 800);
+    return () => window.clearTimeout(id);
+  }, [
+    displayPage,
+    pages,
+    manga.id,
+    chapter.id,
+    settings.mangaUpscaleEnabled,
+    settings.mangaUpscaleQuality,
+    settings.mangaUpscaleAutoDownload,
+  ]);
+
   const focus = prefs.focusMode;
   const autoShown = !manualHide && chromeOpen;
   const barVisible = focus ? edge.top && !manualHide : autoShown;
@@ -993,6 +1056,7 @@ export function MangaReader({
                   inline
                   url={pages[i]?.url ?? ""}
                   headers={pages[i]?.headers}
+                  cacheKey={pageCacheKey(i)}
                   className="block"
                   style={dStyle}
                 />
@@ -1001,6 +1065,7 @@ export function MangaReader({
               <PageImage
                 url={pages[displayPage]?.url ?? ""}
                 headers={pages[displayPage]?.headers}
+                cacheKey={pageCacheKey(displayPage)}
                 className="m-auto block"
                 style={pStyle}
               />
@@ -1020,6 +1085,7 @@ export function MangaReader({
                 <PageImage
                   url={page.url}
                   headers={page.headers}
+                  cacheKey={pageCacheKey(i)}
                   fillHeight
                   className="block"
                   style={hStyle}
@@ -1045,6 +1111,7 @@ export function MangaReader({
                   <PageImage
                     url={page.url}
                     headers={page.headers}
+                    cacheKey={pageCacheKey(i)}
                     className="block"
                     style={longStyle}
                   />

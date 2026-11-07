@@ -15,7 +15,7 @@ let windowFocused = typeof document === "undefined" || document.hasFocus();
 let requestedSession: Parameters<typeof updateMediaControls> | null = null;
 let pendingCommand: Promise<unknown> = Promise.resolve();
 
-// A late update must not re-enable the session after blur/stop withdrew it.
+// Serialize native updates so a late update cannot re-enable an explicitly cleared session.
 function send(command: string, args?: Record<string, unknown>): void {
   pendingCommand = pendingCommand.then(() => invoke(command, args)).catch(() => {});
 }
@@ -29,7 +29,7 @@ function withdrawSession(): void {
   if (wasPublished) send("media_controls_clear");
 }
 
-/** Windows keeps paused SMTC sessions eligible for another app's media keys. */
+/** Keep track of focus for video media-key policy, not session lifetime. */
 export function startMediaSessionWindowTracking(): () => void {
   if (!isTauri() || !isWindowsDesktop()) return () => {};
   let live = true;
@@ -37,7 +37,6 @@ export function startMediaSessionWindowTracking(): () => void {
   let unlisten: (() => void) | undefined;
   const setFocused = (focused: boolean) => {
     windowFocused = focused;
-    if (requestedSession) updateMediaControls(...requestedSession);
   };
   void listen<{ focused: boolean; minimized: boolean }>("harbor://window-activity", (event) => {
     if (!live) return;
@@ -59,9 +58,15 @@ export function startMediaSessionWindowTracking(): () => void {
   };
 }
 
-export function mediaKeyGate(): boolean {
+export function mediaKeyGate(source: "video" | "music" = "video"): boolean {
   if (isPlayerInteractionLocked()) return false;
-  if (isTauri() && isWindowsDesktop() && !windowFocused && !requestedSession?.[0]) return false;
+  // Only the owner of the published session should respond to OS media commands.
+  if (isTauri() && isWindowsDesktop()) {
+    if (!requestedSession || requestedSession[7] !== source) return false;
+    // Avoid resuming an unfocused paused video unexpectedly. Music remains
+    // controllable when paused or minimized, as in a normal desktop player.
+    if (source === "video" && !windowFocused && !requestedSession[0]) return false;
+  }
   const now = Date.now();
   if (now - lastActionAt < 350) return false;
   lastActionAt = now;
@@ -76,13 +81,12 @@ export function updateMediaControls(
   durationSec?: number | null,
   positionSec?: number | null,
   volume?: number | null,
+  mediaType: "music" | "video" = "video",
+  album?: string | null,
 ): void {
   if (!isTauri()) return;
-  requestedSession = [playing, title, subtitle, artUrl, durationSec, positionSec, volume];
-  if (isWindowsDesktop() && !windowFocused && !playing) {
-    withdrawSession();
-    return;
-  }
+  requestedSession = [playing, title, subtitle, artUrl, durationSec, positionSec, volume, mediaType, album];
+  // A paused session must remain published when the window loses focus.
   const art = artUrl ?? null;
   const dur =
     typeof durationSec === "number" && Number.isFinite(durationSec) && durationSec > 0
@@ -97,7 +101,7 @@ export function updateMediaControls(
       : null;
 
   const now = Date.now();
-  const state = `${playing ? 1 : 0}|${title}|${subtitle}|${art ?? ""}|${dur ?? 0}|${volKey}`;
+  const state = `${playing ? 1 : 0}|${mediaType}|${title}|${subtitle}|${album ?? ""}|${art ?? ""}|${dur ?? 0}|${volKey}`;
   const metadataChanged = state !== lastState;
 
   let positionDrift = false;
@@ -107,7 +111,7 @@ export function updateMediaControls(
     } else if (playing) {
       const elapsed = (now - lastPositionAt) / 1000;
       const expected = lastPositionSec + elapsed;
-      if (Math.abs(pos - expected) > 1.2) {
+      if (Math.abs(pos - expected) > 1.2 || (isWindowsDesktop() && now - lastPositionAt >= 5_000)) {
         positionDrift = true;
       }
     } else {
@@ -134,6 +138,8 @@ export function updateMediaControls(
     durationSec: dur,
     positionSec: pos,
     volume: vol,
+    mediaType,
+    album: album ?? null,
   });
 }
 

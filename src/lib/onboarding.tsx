@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { setItemWithRecovery } from "@/lib/storage-recovery";
 
 type Flags = { onboarded: boolean; nudges: Record<string, boolean> };
 
@@ -31,7 +32,7 @@ export function parseOnboardingFlags(raw: string | null): Flags {
     return {
       ...DEFAULT,
       ...parsed,
-      nudges: { [CONTENT_ADVISORY_NUDGE]: true, ...(parsed.nudges ?? {}) },
+      nudges: { [CONTENT_ADVISORY_NUDGE]: true, ...parsed.nudges },
     };
   } catch {
     return DEFAULT;
@@ -46,7 +47,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(flags));
+    // This provider wraps the whole app, so a bare setItem throwing here (a full store
+    // throws on every write) takes the tree down during commit, before anything can
+    // signal the boot splash to clear. Prune and keep going instead.
+    setItemWithRecovery(STORAGE_KEY, JSON.stringify(flags));
   }, [flags]);
 
   const finishOnboarding = useCallback(() => setFlags((f) => ({ ...f, onboarded: true })), []);

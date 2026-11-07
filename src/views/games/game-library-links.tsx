@@ -8,6 +8,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import type { GameLibraryPreferences } from "@/hooks/use-game-library-preferences";
 import { knownGameLinks, orderedLibraryLinks, reviewLibraryLinks, type GameLink, type LibraryLinkItem } from "@/lib/games/library-links";
 import { readLibraryLinks } from "@/lib/games/library-links-cache";
+import { loadNexusGameLink } from "@/lib/games/nexus-game";
 import type { GameSummary } from "@/lib/games/types";
 import { DetailDisclosure } from "./game-detail-disclosure";
 import "./game-library-titles.css";
@@ -19,7 +20,22 @@ function LinkList({ links }: { links: GameLink[] }) {
 }
 
 export function GameLinks({ game, records=[], preferences, active }: {game:GameSummary;records?:(GameSummary|null|undefined)[];preferences:GameLibraryPreferences;active:boolean}) {
-  const t=useT(),[editing,setEditing]=useState(false),links=knownGameLinks(game.id,game,...records);
+  const t=useT(),[editing,setEditing]=useState(false);
+  const name=records.find(record=>record?.igdbId)?.name??records.find(record=>record?.steamId)?.name??game.name;
+  const lookupKey=`${game.id}:${name}`;
+  const [nexus,setNexus]=useState<{key:string;link:GameLink|null}|null>(null);
+  const known=knownGameLinks(game.id,game,...records);
+  const alreadyLinked=known.some(link=>{try{const host=new URL(link.url).hostname.toLowerCase();return host==="nexusmods.com"||host==="www.nexusmods.com";}catch{return false;}});
+  useEffect(()=>{
+    if(!active||alreadyLinked)return;
+    const request=new AbortController();
+    void loadNexusGameLink(name,request.signal).then(link=>{
+      if(!request.signal.aborted)setNexus({key:lookupKey,link});
+    }).catch(()=>{if(!request.signal.aborted)setNexus({key:lookupKey,link:null});});
+    return()=>request.abort();
+  },[active,alreadyLinked,name,lookupKey]);
+  const candidate=active&&!alreadyLinked&&nexus?.key===lookupKey?nexus.link:null;
+  const links=candidate?[...known,candidate]:known;
   useEffect(()=>setEditing(false),[active,game.id,preferences.profile]);
 
   return <><DetailDisclosure title={t("games.links.title")} icon={<Link2 size={22}/>}>

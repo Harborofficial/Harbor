@@ -28,7 +28,7 @@ const item = (id: string, upNext = false) => ({
   },
 });
 
-test("older and Up Next entries each expose contextual continuation and removal independently from latest playback", async () => {
+test("older and Up Next menus expose sources then removal while original playback remains independent", async () => {
   const { createContinueCardActions } = api();
   let globalLatest = "newest-a";
   const continued: any[] = [];
@@ -50,10 +50,12 @@ test("older and Up Next entries each expose contextual continuation and removal 
       },
     });
     const actions = commands.primary.actions();
-    assert.equal(actions[0].label, "Continue watching");
-    assert.equal(actions.length, 2, "primary continuation and alternate sources remain distinct");
-    await actions[0].run();
-    const remove = commands.extra.actions()[0];
+    assert.deepEqual(
+      actions.map((action: any) => action.label),
+      ["Choose another source", "Remove from Continue Watching"],
+    );
+    await commands.play();
+    const remove = actions[1];
     assert.equal(remove.label, "Remove from Continue Watching");
     await remove.run();
     assert.equal(commands.isValid(), false);
@@ -96,10 +98,10 @@ test("a pending primary operation blocks original controls and menu commands; ac
       starts++;
     },
   });
-  const pending = commands.primary.actions()[0].run();
-  assert.equal(commands.primary.actions()[0].disabled, true);
+  const pending = commands.play();
+  assert.ok(commands.primary.actions().every((action: any) => action.disabled));
   await assert.rejects(commands.play(), /already running/);
-  await assert.rejects(commands.extra.actions()[0].run(), /already running/);
+  await assert.rejects(commands.primary.actions()[1].run(), /already running/);
   current = false;
   finish();
   await assert.rejects(pending, /no longer available/);
@@ -129,7 +131,11 @@ test("harmless metadata rerender preserves a menu but replacement entry invalida
   assert.equal(commands.isValid(), false);
   await assert.rejects(commands.play(), /no longer available/);
   assert.equal(starts, 1);
-  assert.deepEqual(commands.extra.actions(), [], "no unsupported removal is invented");
+  assert.deepEqual(
+    commands.primary.actions().map((action: any) => action.label),
+    ["Choose another source"],
+    "no unsupported removal or contextual play command is invented",
+  );
 });
 
 test("removal failure remains retryable while unavailable cards cannot continue or use another source", async () => {
@@ -148,7 +154,12 @@ test("removal failure remains retryable while unavailable cards cannot continue 
       if (fails) throw new Error("Storage unavailable");
     },
   });
-  assert.ok(commands.primary.actions().every((action: any) => action.disabled));
+  assert.equal(commands.primary.actions()[0].disabled, true);
+  assert.equal(
+    commands.primary.actions()[1].disabled,
+    false,
+    "future entries can still be removed",
+  );
   await assert.rejects(commands.play());
   await assert.rejects(commands.dismiss(), /Storage/);
   assert.equal(commands.isValid(), true);

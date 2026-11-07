@@ -128,7 +128,7 @@ test("loadTrackLyrics prefers the exact get endpoint when album and duration are
 test("loadTrackLyrics falls back to search when the exact lookup misses", async () => {
   const { lyrics, calls } = build(async (url) =>
     url.includes("/api/get?")
-      ? { ok: false, json: async () => null }
+      ? { ok: false, status: 404, json: async () => null }
       : ok([{ duration: 116, instrumental: false, syncedLyrics: "[00:05.00]From search" }]),
   );
   const lines = await lyrics.loadTrackLyrics(track({ album: "Welcome to O'Block", id: "t-miss" }));
@@ -148,13 +148,13 @@ test("loadTrackLyrics returns null for instrumentals and for plain-only lyrics",
   assert.equal(await plain.lyrics.loadTrackLyrics(track({ id: "t-plain" })), null);
 });
 
-test("loadTrackLyrics never throws and caches the negative result", async () => {
+test("loadTrackLyrics never throws and permits recovery after network failure", async () => {
   const { lyrics, calls } = build(async () => {
     throw new Error("offline");
   });
   assert.equal(await lyrics.loadTrackLyrics(track({ id: "t-off" })), null);
   assert.equal(await lyrics.loadTrackLyrics(track({ id: "t-off" })), null);
-  assert.equal(calls.length, 1);
+  assert.equal(calls.length, 4);
 });
 
 test("loadTrackLyrics caches a hit so scrubbing never refetches", async () => {
@@ -165,4 +165,29 @@ test("loadTrackLyrics caches a hit so scrubbing never refetches", async () => {
   const second = await lyrics.loadTrackLyrics(track({ id: "t-cache" }));
   assert.deepEqual(first, second);
   assert.equal(calls.length, 1);
+});
+
+test("lyrics retry a temporary server error and retain the recovered result", async () => {
+  let attempts = 0;
+  const { lyrics, calls } = build(async () =>
+    ++attempts === 1
+      ? { ok: false, status: 503 }
+      : ok([{ duration: 116, syncedLyrics: "[00:02]Recovered" }]),
+  );
+  assert.deepEqual(await lyrics.loadTrackLyrics(track()), [{ at: 2, text: "Recovered" }]);
+  await lyrics.loadTrackLyrics(track());
+  assert.equal(calls.length, 2);
+});
+
+test("lyrics do not immediately retry throttled requests or cache them as missing", async () => {
+  let limited = true;
+  const { lyrics, calls } = build(async () =>
+    limited
+      ? { ok: false, status: 429 }
+      : ok([{ duration: 116, syncedLyrics: "[00:02]Recovered" }]),
+  );
+  assert.equal(await lyrics.loadTrackLyrics(track()), null);
+  assert.equal(calls.length, 1);
+  limited = false;
+  assert.deepEqual(await lyrics.loadTrackLyrics(track()), [{ at: 2, text: "Recovered" }]);
 });

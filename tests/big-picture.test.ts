@@ -388,3 +388,30 @@ test("Big Picture autostart is a launch-only check, not a live setting reaction"
   // The old shape set the flag only when it actually booted, which is the bug.
   assert.doesNotMatch(app, /if \(!go\) return;\s*\n\s*bigPictureBootChecked\.current = true;/);
 });
+
+test("Big Picture Live TV uses the dedicated playlist store", () => {
+  const live = readFileSync(
+    new URL("../src/views/big-picture/use-bp-live.ts", import.meta.url),
+    "utf8",
+  );
+  const setup = readFileSync(
+    new URL("../src/views/big-picture/bp-live-setup.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(live, /usePlaylists\(\)/);
+  assert.match(setup, /writePlaylists\(/);
+  assert.doesNotMatch(live, /settings\.iptvPlaylists/);
+  assert.doesNotMatch(setup, /settings\.iptvPlaylists/);
+});
+
+test("the standalone TV shell mounts the player opened by ViewProvider", () => {
+  const tv = readFileSync(
+    new URL("../src/views/big-picture/bp-tv-app.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(tv, /const \{ player \} = useView\(\)/);
+  assert.match(tv, /\{player && \(/);
+  assert.match(tv, /<PlayerView/);
+});

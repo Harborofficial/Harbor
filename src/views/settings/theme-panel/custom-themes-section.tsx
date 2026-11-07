@@ -21,6 +21,7 @@ import {
   setThemeLibraryOpen,
   subscribeThemeLibraryRequest,
 } from "./library-open-store";
+import { requestThemeEditor } from "./theme-editor-store";
 import type { StoreTab } from "./custom-themes-section/community-store/store-tabs";
 import { importForeignTheme } from "@/lib/theme-import";
 import { isHarborStyleName, parseHarborStyle, serializeHarborStyle } from "@/lib/harborstyle";
@@ -262,7 +263,7 @@ export function CustomThemesSection({
       <ActiveBanner
         theme={activeTheme}
         onExport={() => activeTheme && showExport(activeTheme.id)}
-        onCustomize={() => window.dispatchEvent(new CustomEvent("harbor:open-theme-editor"))}
+        onCustomize={requestThemeEditor}
       />
 
       <HeroCards

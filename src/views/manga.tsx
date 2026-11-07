@@ -163,6 +163,9 @@ export function MangaView() {
   useEffect(() => {
     if (!settings.mangaEnabled) return;
     let cancelled = false;
+    // Never leave the previous source's hero on screen when the new source is
+    // still loading (or its request fails).
+    setFeatured([]);
     popularManga(0)
       .then((list) => {
         if (!cancelled) setFeatured(list.filter((m) => m.cover).slice(0, 6));
@@ -297,11 +300,12 @@ export function MangaView() {
           <AnilistMangaRows onOpen={openMangaByTitle} />
         </LazyMount>
         <LazyMount minHeight={280}>
-          <BecauseYouWatched onOpen={openMangaItem} />
+          <BecauseYouWatched key={activeMangaSourceId()} onOpen={openMangaItem} />
         </LazyMount>
         <div className="mt-8">
           <LazyMount minHeight={300}>
             <MangaRail
+              key={activeMangaSourceId()}
               title={t("Popular Manga")}
               subtitle={t("Most read right now")}
               collapsibleKey="harbor.manga.popularRowOpen"

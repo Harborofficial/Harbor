@@ -43,7 +43,7 @@ export function UpdateCard() {
       setRich(experimentalReleaseNote(u.version));
     } else if (u.version) {
       setRich(null);
-      releaseNote(u.version).then((n) => ok && setRich(n));
+      releaseNote(u.version, u.channel).then((n) => ok && setRich(n));
     } else {
       setRich(null);
     }
@@ -91,14 +91,21 @@ export function UpdateCard() {
                         : t("update.available")}
             </span>
             {u.version && (
-              <span className="text-[12.5px] text-ink-subtle">
-                {u.channel === "experimental" && u.experimentalVersion
-                  ? t("Experimental {version} · Build {buildId}", {
-                      version: u.experimentalVersion,
-                      buildId: u.buildId ?? "—",
-                    })
-                  : t("update.harborVersion", { version: u.version })}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[12.5px] text-ink-subtle">
+                  {u.channel === "experimental" && u.experimentalVersion
+                    ? t("Experimental {version} · Build {buildId}", {
+                        version: u.experimentalVersion,
+                        buildId: u.buildId ?? "—",
+                      })
+                    : t("update.harborVersion", { version: u.version })}
+                </span>
+                {u.channel !== "experimental" && (
+                  <span className="shrink-0 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold text-accent">
+                    {u.channel === "beta" ? t("Beta") : t("Stable")}
+                  </span>
+                )}
+              </div>
             )}
           </div>
           {u.status !== "installing" && (

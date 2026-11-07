@@ -108,13 +108,14 @@ if (-not $SkipMusic) {
 
 if (-not $SkipCore) {
   Step 'Sidecar core build'
+  . (Join-Path $PSScriptRoot 'whisper-build-env.ps1')
   $oldTarget = $env:CARGO_TARGET_DIR
   try {
     $env:CARGO_TARGET_DIR = $coreDir
     Invoke-Tool 'cargo' @(
       'build', '--manifest-path', 'src-tauri/Cargo.toml', '--locked',
       '--release', '--no-default-features', '--features',
-      'games,plugins,music,music-sidecar,tauri/custom-protocol', '--bin', 'harbor'
+      'games,plugins,music,music-sidecar,asr-whisper,tauri/custom-protocol', '--bin', 'harbor'
     )
   } finally {
     $env:CARGO_TARGET_DIR = $oldTarget

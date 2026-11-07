@@ -5,6 +5,7 @@ import type { ScoredStream } from "@/lib/streams/types";
 import {
   streamMatchesEntry,
   streamMatchesPreferredSource,
+  streamMatchesPreferredSourceFallback,
   streamMatchesReleaseLineage,
   streamMatchesSource,
   findPreferredSourceMatch,
@@ -182,9 +183,20 @@ export function useAutoCandidates(args: {
       : sourceEntryLineage
         ? streamMatchesReleaseLineage
         : streamMatchesSource;
+    const eligibleSourceStreams = filteredPicker.allRaw.filter(
+      (s) => !isStreamDead(s) && !isWatchHub(s) && !episodeConflict(s) && (isCached(s) || !!s.url),
+    );
     const sourceMatch = sourceEntry
-      ? findPreferredSourceMatch(filteredPicker.allRaw, sourceEntry, matchSource)
+      ? findPreferredSourceMatch(eligibleSourceStreams, sourceEntry, matchSource)
       : null;
+    const fallbackSourceMatch =
+      sourceEntry && sourceEntryBestEffort
+        ? findPreferredSourceMatch(
+            eligibleSourceStreams,
+            sourceEntry,
+            streamMatchesPreferredSourceFallback,
+          )
+        : null;
     // When the exact source is unavailable at the remembered quality, prefer
     // another stream at that quality over a same-group release at a different
     // resolution. The remembered addon still wins ties.
@@ -200,6 +212,7 @@ export function useAutoCandidates(args: {
     const instantPlayable = (s: ScoredStream | null) => !!s && (isCached(s) || !!s.url);
     if (!matchScores) {
       if (instantPlayable(sourceMatch)) push(sourceMatch);
+      if (instantPlayable(fallbackSourceMatch)) push(fallbackSourceMatch);
       if (instantPlayable(preferredQuality)) push(preferredQuality);
       if (instantPlayable(previousMatch)) push(previousMatch);
     }

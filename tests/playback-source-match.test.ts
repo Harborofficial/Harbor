@@ -6,6 +6,7 @@ import {
   findPreferredSourceMatch,
   preferredSourceAddonPending,
   streamMatchesPreferredSource,
+  streamMatchesPreferredSourceFallback,
   streamMatchesReleaseLineage,
   streamMatchesSource,
 } from "../src/lib/playback-history.ts";
@@ -155,7 +156,7 @@ test("an aggregator contributor keeps the remembered addon's source", () => {
   assert.equal(streamMatchesPreferredSource(merged, entry), true);
 });
 
-test("a later episode that drops its release-group suffix keeps the addon source", () => {
+test("a missing release group remains a fallback, not a confirmed source", () => {
   const entry = {
     infoHash: "episode-one-hash",
     addonId: "community.aiostreams",
@@ -174,12 +175,10 @@ test("a later episode that drops its release-group suffix keeps the addon source
   };
 
   assert.equal(streamMatchesReleaseLineage(unparsed, entry), false);
-  assert.equal(streamMatchesPreferredSource(unparsed, entry), true);
+  assert.equal(streamMatchesPreferredSource(unparsed, entry), false);
+  assert.equal(streamMatchesPreferredSourceFallback(unparsed, entry), true);
   assert.equal(
-    streamMatchesPreferredSource(
-      { ...unparsed, releaseGroupNormalized: "DIFFERENT" },
-      entry,
-    ),
+    streamMatchesPreferredSource({ ...unparsed, releaseGroupNormalized: "DIFFERENT" }, entry),
     false,
   );
 });
@@ -210,10 +209,7 @@ test("the same release group does not change the quality", () => {
   assert.equal(streamMatchesPreferredSource(next4k, entry), false);
   assert.equal(streamMatchesPreferredSource(next1080, entry), true);
   assert.equal(
-    streamMatchesPreferredSource(
-      { ...next1080, releaseGroupNormalized: "FLUX" },
-      entry,
-    ),
+    streamMatchesPreferredSource({ ...next1080, releaseGroupNormalized: "FLUX" }, entry),
     false,
   );
 });
@@ -250,11 +246,7 @@ test("the same group and quality win over a higher-ranked 4K release", () => {
   };
 
   assert.equal(
-    findPreferredSourceMatch(
-      [flux4k, megusta4k, megusta1080],
-      entry,
-      streamMatchesPreferredSource,
-    ),
+    findPreferredSourceMatch([flux4k, megusta4k, megusta1080], entry, streamMatchesPreferredSource),
     megusta1080,
   );
 });
@@ -293,7 +285,11 @@ test("a Russian dub stays ahead of an unlabelled English release", () => {
 
   assert.equal(streamMatchesPreferredSource(english, entry), false);
   assert.equal(
-    findPreferredSourceMatch([megusta, rusdub, english], entry, streamMatchesPreferredSource),
+    findPreferredSourceMatch(
+      [megusta, rusdub, english],
+      entry,
+      streamMatchesPreferredSourceFallback,
+    ),
     rusdub,
   );
 });
@@ -324,10 +320,7 @@ test("the selected addon wins over a same-file debrid library copy", () => {
     source: "WEB-DL",
   };
 
-  assert.equal(
-    findPreferredSourceMatch([library, selected], entry, streamMatchesSource),
-    selected,
-  );
+  assert.equal(findPreferredSourceMatch([library, selected], entry, streamMatchesSource), selected);
 });
 
 test("auto-play waits while the remembered source addon is still loading", () => {
@@ -379,4 +372,40 @@ test("auto-play does not wait once the remembered source already matched", () =>
   };
 
   assert.equal(preferredSourceAddonPending(entry, true, false, progress), false);
+});
+
+test("aggregator quality labels cannot confirm VARYG, but the release can cross addons", () => {
+  const entry = {
+    addonId: "aio",
+    resolution: "1080p",
+    source: "WEB-DL",
+    releaseGroup: "VARYG",
+    savedAt: 1,
+  };
+  const generic = {
+    addonId: "aio",
+    resolution: "1080p",
+    source: "WEB-DL",
+    releaseGroupNormalized: "1080P",
+  };
+  const release = { ...generic, addonId: "another-addon", releaseGroupNormalized: "VARYG" };
+  assert.equal(streamMatchesPreferredSource(generic, entry), false);
+  assert.equal(
+    streamMatchesPreferredSource({ ...generic, releaseGroupNormalized: null }, entry),
+    false,
+  );
+  assert.equal(streamMatchesPreferredSource(release, entry), true);
+  assert.equal(
+    findPreferredSourceMatch([generic, release], entry, streamMatchesPreferredSource),
+    release,
+  );
+  assert.equal(
+    preferredSourceAddonPending(entry, streamMatchesPreferredSource(generic, entry), false, {
+      total: 1,
+      settled: 0,
+      queriedAddonIds: ["aio"],
+      settledAddonIds: [],
+    }),
+    true,
+  );
 });

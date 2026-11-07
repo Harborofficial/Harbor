@@ -53,6 +53,7 @@ static NEXT_SMALL: AtomicIsize = AtomicIsize::new(-1);
 static NEXT_BIG: AtomicIsize = AtomicIsize::new(-1);
 static OWNED_SMALL: AtomicIsize = AtomicIsize::new(0);
 static OWNED_BIG: AtomicIsize = AtomicIsize::new(0);
+static ART_REQUEST: AtomicU32 = AtomicU32::new(0);
 
 struct Bar(ITaskbarList3);
 unsafe impl Send for Bar {}
@@ -367,9 +368,12 @@ fn icon_sizes() -> (u32, u32) {
 }
 
 pub fn set_artwork(url: Option<String>, app_icon: bool) {
+    // A null WM_SETICON erases Harbor's window icon. The frontend restores the
+    // configured icon through set_app_icon instead when artwork is disabled.
+    // Increment even when clearing, so an older download cannot restore stale art.
+    let request = ART_REQUEST.fetch_add(1, Ordering::SeqCst).wrapping_add(1);
     let wanted = url.filter(|value| value.starts_with("https://")).filter(|_| app_icon);
     let Some(url) = wanted else {
-        post_art(Some(HICON::default()), Some(HICON::default()));
         return;
     };
     let (small_px, big_px) = icon_sizes();
@@ -391,8 +395,12 @@ pub fn set_artwork(url: Option<String>, app_icon: bool) {
         } else {
             None
         };
-        if small.is_some() || big.is_some() {
+        if ART_REQUEST.load(Ordering::SeqCst) == request && (small.is_some() || big.is_some()) {
             post_art(small, big);
+        } else {
+            for icon in [small, big].into_iter().flatten() {
+                unsafe { let _ = DestroyIcon(icon); }
+            }
         }
     });
 }

@@ -1,5 +1,11 @@
 import { userAddons, type Addon } from "@/lib/addons";
-import { fetchManifestAt, loadInstalled, type InstalledAddon } from "@/lib/addon-store";
+import {
+  fetchManifestAt,
+  filterEnabled,
+  loadDisabledAddons,
+  loadInstalled,
+  type InstalledAddon,
+} from "@/lib/addon-store";
 import { isNuvioSignedIn, isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 import { dlog } from "@/lib/debug";
@@ -38,10 +44,11 @@ export function gatherSubtitleAddons(authKey: string | null): Promise<Addon[]> {
   } catch {}
 
   const localInstalled = loadInstalled();
+  const disabled = [...loadDisabledAddons()].sort().join("|");
   const key = `${isNuvio ? "nuvio-" + nuvioMode : "stremio"}|${authKey ?? ""}|${localInstalled
     .map((l) => l.transportUrl)
     .sort()
-    .join("|")}`;
+    .join("|")}|${disabled}`;
   const now = Date.now();
   const hit = cachedSubtitleAddons;
   if (hit && hit.key === key && now - hit.at < ADDON_CACHE_TTL_MS) return hit.promise;
@@ -91,6 +98,7 @@ async function collectSubtitleAddons(
         )
       : [];
   }
+  cloud = filterEnabled(cloud);
   dlog(`[addon-source] Cloud addons: ${cloud.length}`);
   if (cloud.length > 0) {
     dlog(`[addon-source] Cloud addon names: ${cloud.map((a) => a.manifest.name).join(", ")}`);
@@ -104,7 +112,7 @@ async function collectSubtitleAddons(
   }
 
   const seen = new Set(cloud.map((a) => a.transportUrl));
-  const localOnly = localInstalled.filter((l) => !seen.has(l.transportUrl));
+  const localOnly = filterEnabled(localInstalled).filter((l) => !seen.has(l.transportUrl));
   dlog(`[addon-source] Local addons (not in cloud): ${localOnly.length}`);
 
   const localFull = await Promise.all(

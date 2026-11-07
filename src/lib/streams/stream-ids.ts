@@ -42,6 +42,19 @@ export function unverifiedAnimeSeasonId(
   return `${scheme}:${entry}:${episode.episode}`;
 }
 
+/** A catalog's originating addon must receive episode coordinates, not the series ID. */
+export function catalogEpisodeStreamId(
+  metaId: string,
+  episode: Pick<PlayEpisode, "season" | "episode" | "videoId"> | undefined,
+  streamIds: readonly string[],
+): string {
+  if (!episode) return metaId;
+  // Native addon metadata may give a nonstandard per-video identifier.
+  if (episode.videoId && streamIds.includes(episode.videoId)) return episode.videoId;
+  const scoped = `${metaId}:${episode.season}:${episode.episode}`;
+  return streamIds.find((id) => id === scoped) ?? scoped;
+}
+
 export function buildStreamIds(
   metaId: string,
   episode: PlayEpisode | undefined,

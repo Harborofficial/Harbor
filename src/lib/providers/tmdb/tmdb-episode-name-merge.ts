@@ -28,6 +28,13 @@ export function needsTmdbEpisodeNames(eps: readonly NamedEpisode[]): boolean {
   return eps.some((e) => !e.name?.trim() || isGenericEpisodeName(e.name));
 }
 
+/** Up Next also needs overviews even when providers already supply episode titles. */
+export function needsTmdbEpisodeDetails(eps: readonly NamedEpisode[]): boolean {
+  return eps.some((e) =>
+    !e.name?.trim() || isGenericEpisodeName(e.name) || !e.overview?.trim(),
+  );
+}
+
 export function applyTmdbEpisodeNames<T extends NamedEpisode>(
   eps: T[],
   names: ReadonlyMap<number, TmdbEpisodeText>,

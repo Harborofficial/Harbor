@@ -81,8 +81,9 @@ async function waitForMpvSubtitleFpsTransitions(): Promise<void> {
 export async function writeMpvSubtitleFps(
   choice: SubtitleFpsChoice,
   generation: number,
+  isCurrent: () => boolean = () => true,
 ): Promise<void> {
-  await coordinator.apply(choice, () => generation === subtitleFpsGeneration);
+  await coordinator.apply(choice, () => generation === subtitleFpsGeneration && isCurrent());
 }
 
 export async function resetMpvSubtitleFpsForTransition(

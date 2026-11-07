@@ -75,6 +75,43 @@ test("an unreadable external subtitle cannot fall back to a different embedded t
   }
 });
 
+test("embedded export uses the loaded media and its own headers after player recovery", async () => {
+  const previousWindow = globalThis.window;
+  Object.assign(globalThis, { window: { __TAURI_INTERNALS__: {} } });
+  const requests: unknown[] = [];
+  const output = loadModule("../src/lib/subtitles/extract.ts", {
+    "@tauri-apps/api/core": {
+      invoke: async (command: string, request: unknown) => {
+        assert.equal(command, "subtitle_extract");
+        requests.push(request);
+        return "1\n00:00:01,000 --> 00:00:02,000\nSelected track\n";
+      },
+    },
+    "./parser": { parseSubtitle },
+    "./encoding": {}, "./prepare": {}, "./save-to-disk": {},
+  });
+  const url = "http://127.0.0.1:4567/recovered";
+  try {
+    for (const headers of [undefined, { Referer: "fixture" }]) {
+      const result = await output.getCuesAnySource({
+        getLoadedMediaSource: () => ({ url, headers }),
+        getSelectedTrackCues: () => null,
+        getSelectedTrackUrl: () => null,
+        subscribe(fn: (s: unknown) => void) {
+          fn({ subtitleTracks: [{ id: "1" }, { id: "2", selected: true }] });
+          return () => {};
+        },
+      }, "https://original.invalid", { Authorization: "old origin" });
+      assert.equal(result.source.cues[0].text, "Selected track");
+      assert.deepEqual(requests.at(-1), { source: url, streamIndex: 1, headers: headers ?? null });
+    }
+    assert.match(output.subtitleDownloadError("extract-failed: subtitle extraction timed out"), /timed out/);
+    assert.doesNotMatch(output.subtitleDownloadError("extract-failed: https://private.invalid/secret"), /private|secret/);
+  } finally {
+    Object.assign(globalThis, { window: previousWindow });
+  }
+});
+
 test("a saved single long cue survives bounded local read and decoding without provider-candidate heuristics", async () => {
   const previousWindow = globalThis.window;
   Object.assign(globalThis, { window: { __TAURI_INTERNALS__: {} } });

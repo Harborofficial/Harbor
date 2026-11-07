@@ -1,4 +1,4 @@
-import { t, onLocaleChange } from "./i18n.js";
+import { t, setLocale, onLocaleChange, VARIANTS } from "./i18n.js";
 import {
   minimizeWindow,
   toggleMaximizeWindow,
@@ -7,6 +7,7 @@ import {
   harborVersion,
   isUninstallMode,
   isNative,
+  installedHarborLanguage,
 } from "./bridge.js";
 import * as start from "./screens/start.js";
 import * as uninstall from "./screens/uninstall.js";
@@ -259,6 +260,7 @@ window.HarborInstaller = {
 };
 
 onLocaleChange(() => {
+  if (el.screen.childElementCount === 0) return;
   applyFooter(pending);
   mount(index);
 });
@@ -317,12 +319,26 @@ function startInstallFlow() {
   bootLayer.addEventListener("click", dismissBoot);
 }
 
-isUninstallMode().then(function (yes) {
+// Apply Harbor's existing saved language before the first screen is mounted.
+// No Windows locale detection: fresh installs stay in English.
+Promise.all([isUninstallMode(), installedHarborLanguage()]).then(function ([yes, language]) {
+  // Ignore unsupported or malformed settings values; English remains the default.
+  if (language && language !== "en" && VARIANTS.some((option) => option.code === language)) {
+    state.lang = language;
+    setLocale(language);
+  }
   if (yes) {
     if (bootLayer) bootLayer.remove();
     SCREENS = UNINSTALL_SCREENS;
     index = 0;
     mount(0);
+    return;
+  }
+  // Browser-only shortcut for reviewing the components layout without walking
+  // through the start, language and terms screens. Never active in native Shipyard.
+  if (!isNative() && new URLSearchParams(window.location.search).get("preview") === "components") {
+    if (bootLayer) bootLayer.remove();
+    mount(INSTALL_SCREENS.findIndex((screen) => screen.id === "welcome"));
     return;
   }
   startInstallFlow();

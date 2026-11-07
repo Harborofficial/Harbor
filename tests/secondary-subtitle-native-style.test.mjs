@@ -41,6 +41,7 @@ function nativeStyle(handler = async () => {}) {
         return handler(args);
       },
     },
+    "./mpv-tuning": { mpvExtraOptionKeys: () => new Set() },
   });
   return { apply: style.applySecondarySubNative, calls };
 }
@@ -117,6 +118,7 @@ test("rapid settings changes skip superseded queued styles and recover from nati
 
 function hookHarness() {
   const calls = [],
+    posCalls = [],
     refs = [],
     effects = [];
   let refIndex = 0,
@@ -145,6 +147,9 @@ function hookHarness() {
       applySecondarySubNative: async (...args) => {
         calls.push(args);
       },
+      applySecondarySubPos: async (...args) => {
+        posCalls.push(args);
+      },
     },
   });
   const base = {
@@ -157,9 +162,11 @@ function hookHarness() {
     bridgeKey: 1,
     placement: "top",
     marginY: 4,
+    liftPct: 0,
   };
   return {
     calls,
+    posCalls,
     render(changes = {}) {
       refIndex = 0;
       effectIndex = 0;
@@ -179,7 +186,7 @@ test("native styling waits for a ready mpv bridge/media and is not repeated by p
   assert.deepEqual(h.calls, []);
   h.render();
   h.render({ snap: { subtitleTracks: [], positionSec: 20 } });
-  assert.deepEqual(h.calls, [[true, "top", 4]]);
+  assert.deepEqual(h.calls, [[true, "top", 4, 0]]);
 });
 
 test("HDR to SDR and unmount both turn native secondary rendering off", () => {
@@ -207,5 +214,21 @@ test("placement changes apply during playback without changing subtitle selectio
   const h = hookHarness();
   h.render();
   h.render({ placement: "bottom", marginY: 12 });
-  assert.deepEqual(h.calls.at(-1), [true, "bottom", 12]);
+  assert.deepEqual(h.calls.at(-1), [true, "bottom", 12, 0]);
+});
+
+test("showing the controls moves a bottom second subtitle without re-enabling it", () => {
+  const h = hookHarness();
+  h.render({ placement: "bottom" });
+  const enables = h.calls.length;
+  h.posCalls.length = 0;
+  h.render({ placement: "bottom", liftPct: 20 });
+  h.render({ placement: "bottom", liftPct: 0 });
+  assert.equal(h.calls.length, enables);
+  assert.deepEqual(h.posCalls, [
+    ["bottom", 4, 20],
+    ["bottom", 4, 0],
+  ]);
+  h.render({ placement: "top", liftPct: 20 });
+  assert.equal(h.posCalls.length, 2);
 });

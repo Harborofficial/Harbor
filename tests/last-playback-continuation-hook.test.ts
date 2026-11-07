@@ -17,6 +17,7 @@ test("continuation runner owns pending work across actor changes and rejects sta
   let result: any;
   const releases: Array<() => void> = [];
   const opened: string[] = [];
+  let subscriptions = 0;
   const capture = () => ({ profileId: actorId, storageProfileId: actorId, accountId: actorId });
   const dependencies: Record<string, unknown> = {
     react: React,
@@ -26,8 +27,12 @@ test("continuation runner owns pending work across actor changes and rejects sta
     "@/lib/playback-history": {
       capturePlaybackActor: capture,
       isPlaybackActorCurrent: (actor: any) => actor.profileId === actorId,
+      getPlaybackRevision: () => 0,
       readLastActualPlayback: () => ({ id: actorId }),
-      subscribePlayback: () => () => {},
+      subscribePlayback: () => {
+        subscriptions += 1;
+        return () => subscriptions--;
+      },
     },
     "@/lib/player-actions": { currentPlayerActions: () => null },
     "@/lib/player/continue-playback": {
@@ -51,6 +56,7 @@ test("continuation runner owns pending work across actor changes and rejects sta
     if (!(id in dependencies)) throw new Error(id);
     return dependencies[id];
   }, exports);
+  assert.equal(subscriptions, 0, "loading the hook module must not subscribe to history");
   function Fixture() {
     result = exports.useLastPlaybackContinuation();
     return null;
@@ -59,6 +65,7 @@ test("continuation runner owns pending work across actor changes and rejects sta
   let unmounted = false;
   try {
     await React.act(async () => root.render(React.createElement(Fixture)));
+    assert.equal(subscriptions, 1);
     let first!: Promise<unknown>;
     await React.act(async () => {
       first = result.continuePlayback(result.target).catch((error: Error) => error.message);
@@ -89,11 +96,67 @@ test("continuation runner owns pending work across actor changes and rejects sta
     });
     await React.act(async () => root.unmount());
     unmounted = true;
+    assert.equal(subscriptions, 0, "unmounting the hook releases its history subscription");
     releases[2]();
     assert.equal(await third, "stale");
     assert.deepEqual(opened, ["two"]);
   } finally {
     if (!unmounted) await React.act(async () => root.unmount());
+    dom.window.close();
+  }
+});
+
+test("target refreshes for scope identity changes while Stremio React identities stay unchanged", async () => {
+  const dom = new JSDOM("<!doctype html><div id='app'></div>");
+  Object.assign(globalThis, {
+    window: dom.window,
+    document: dom.window.document,
+    IS_REACT_ACT_ENVIRONMENT: true,
+  });
+  let actor = { profileId: "one", storageProfileId: "one", accountId: "one" };
+  let result: any;
+  const dependencies: Record<string, unknown> = {
+    react: React,
+    "@/lib/auth": { useAuth: () => ({ user: { _id: "unchanged-stremio" } }) },
+    "@/lib/profiles": { useProfiles: () => ({ activeProfile: { id: "unchanged-profile" } }) },
+    "@/lib/view": { useView: () => ({}) },
+    "@/lib/playback-history": {
+      capturePlaybackActor: () => actor,
+      getPlaybackRevision: () => 0,
+      readLastActualPlayback: () => ({ id: JSON.stringify(actor) }),
+      subscribePlayback: () => () => {},
+    },
+    "@/lib/player-actions": {},
+    "@/lib/player/continue-playback": {},
+  };
+  const source = readFileSync(
+    new URL("../src/hooks/use-last-playback-continuation.ts", import.meta.url),
+    "utf8",
+  );
+  const code = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const exports: any = {};
+  new Function("require", "exports", code)((id: string) => {
+    assert.ok(id in dependencies, id);
+    return dependencies[id];
+  }, exports);
+  function Fixture() {
+    result = exports.useLastPlaybackContinuation();
+    return null;
+  }
+  const root = createRoot(document.querySelector("#app")!);
+  try {
+    await React.act(async () => root.render(React.createElement(Fixture)));
+    assert.equal(result.target.id, JSON.stringify(actor));
+    actor = { ...actor, accountId: "two" };
+    await React.act(async () => root.render(React.createElement(Fixture)));
+    assert.equal(result.target.id, JSON.stringify(actor));
+    actor = { ...actor, profileId: "nuvio-2", storageProfileId: "nuvio-2" };
+    await React.act(async () => root.render(React.createElement(Fixture)));
+    assert.equal(result.target.id, JSON.stringify(actor));
+  } finally {
+    await React.act(async () => root.unmount());
     dom.window.close();
   }
 });

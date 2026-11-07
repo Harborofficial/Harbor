@@ -1,5 +1,6 @@
 import { registerEvictable } from "@/lib/maintenance";
 import { registerCache } from "@/lib/memory-profiler";
+import { reusableAnimeBackdrop } from "./anime-art-quality";
 
 export type AnimeArt = { bg?: string; logo?: string; backdrops?: string[] };
 type Entry = AnimeArt & { t: number };
@@ -25,7 +26,9 @@ function ensure(): void {
     const raw = JSON.parse(localStorage.getItem(KEY) || "{}") as { map?: Record<string, Entry> };
     const now = Date.now();
     for (const [k, e] of Object.entries(raw.map ?? {})) {
-      if (e && now - e.t < TTL) mem.set(k, e);
+      // Older builds stored the 1900x400 AniList banner as hero art; drop it on read so the
+      // surfaces that resolve their own artwork can replace it.
+      if (e && now - e.t < TTL) mem.set(k, { ...e, bg: reusableAnimeBackdrop(e.bg) });
     }
   } catch {
     /* ignore */
@@ -54,12 +57,13 @@ export function saveAnimeArt(key: string | undefined | null, art: AnimeArt): voi
   ensure();
   const prev = mem.get(key);
   const next: Entry = {
-    bg: art.bg ?? prev?.bg,
+    bg: reusableAnimeBackdrop(art.bg) ?? reusableAnimeBackdrop(prev?.bg),
     logo: art.logo ?? prev?.logo,
     backdrops: art.backdrops?.length ? art.backdrops : prev?.backdrops,
     t: Date.now(),
   };
-  if (prev && next.bg === prev.bg && next.logo === prev.logo && next.backdrops === prev.backdrops) return;
+  if (prev && next.bg === prev.bg && next.logo === prev.logo && next.backdrops === prev.backdrops)
+    return;
   mem.set(key, next);
   persist();
 }

@@ -1,4 +1,4 @@
-import { t, setLocale } from '../i18n.js';
+import { t, setLocale, VARIANTS } from '../i18n.js';
 export const id = 'language';
 export const title = 'Choose your language';
 export const label = 'Language';
@@ -6,12 +6,7 @@ export const label = 'Language';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const COLS = 2;
 
-const LOCALES = [
-  { code: 'en', name: 'English', english: 'English', flag: 'assets/flags/flag-eng.svg', rtl: false },
-  { code: 'pt', name: 'Português', english: 'Portuguese', flags: ['assets/flags/flag-prt.svg', 'assets/flags/flag-bra.svg'], rtl: false },
-  { code: 'ru', name: 'Русский', english: 'Russian', flag: 'assets/flags/flag-rus.svg', rtl: false },
-  { code: 'ar', name: 'العربية', english: 'Arabic', flag: 'assets/flags/flag-ara.svg', rtl: true }
-];
+const LOCALES = VARIANTS.map((locale) => ({ ...locale, name: locale.label }));
 
 const STEP = {
   ArrowRight: 1,
@@ -57,7 +52,7 @@ export function render(mount, ctx) {
   const grid = document.createElement('div');
   grid.className = 'hb-lang-grid';
   grid.setAttribute('role', 'radiogroup');
-  grid.setAttribute('aria-label', 'Language');
+  grid.setAttribute('aria-label', t('Choose your language'));
 
   const tiles = LOCALES.map((locale, i) => {
     const tile = document.createElement('button');
@@ -79,12 +74,18 @@ export function render(mount, ctx) {
         half.draggable = false;
         flag.appendChild(half);
       });
-    } else {
+    } else if (locale.flag) {
       flag = document.createElement('img');
       flag.className = 'hb-tile-flag';
       flag.src = locale.flag;
       flag.alt = '';
       flag.draggable = false;
+    } else {
+      // Language codes are neutral markers for languages without a dedicated flag.
+      flag = document.createElement('span');
+      flag.className = 'hb-tile-lang-code';
+      flag.textContent = locale.code.toUpperCase();
+      flag.setAttribute('aria-hidden', 'true');
     }
 
     const names = document.createElement('span');
@@ -204,6 +205,11 @@ export function render(mount, ctx) {
   const start = Math.max(0, LOCALES.findIndex((locale) => locale.code === ctx.state.lang));
   setRoving(start);
   select(start, false);
+  // The locale change remounts this screen; keep a selected lower row in view.
+  if (start > 3) {
+    const item = tiles[start];
+    grid.scrollTop = item.offsetTop - grid.offsetTop - (grid.clientHeight - item.offsetHeight) / 2;
+  }
 
   ctx.setFooter({
     backLabel: t('Back'),

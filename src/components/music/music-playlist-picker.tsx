@@ -18,6 +18,7 @@ import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { useT } from "@/lib/i18n";
 import {
   addTrackToMusicPlaylist,
+  confirmLinkedMusicPlaylistEdit,
   createMusicPlaylist,
   listMusicPlaylists,
 } from "@/lib/music/library";
@@ -111,6 +112,7 @@ function PickerModal({ track, onDismiss }: { track: MusicTrack; onDismiss: () =>
       setDuplicateTarget(playlist);
       return;
     }
+    if (playlist && !(await confirmLinkedMusicPlaylistEdit(playlist))) return;
     if (!allowDuplicate) setDuplicateTarget(null);
     setBusy(true);
     setTarget(playlistId);

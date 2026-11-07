@@ -59,7 +59,16 @@ export type MusicSourceCandidate = {
 };
 
 export type SpotifyStatus = {
+  /** An authorization for browsing or playback exists. */
   connected: boolean;
+  /** Human-facing profile name from Spotify /me; distinct from the internal username. */
+  displayName?: string | null;
+  /** A local librespot session is currently connected (audio can still fail separately). */
+  playbackReady: boolean;
+  playbackLinked: boolean;
+  browsingReady: boolean;
+  /** A Web API token issued to the user's own Spotify developer app. */
+  ownAppBrowsing: boolean;
   username?: string;
   country?: string;
   premium: boolean;
@@ -81,11 +90,18 @@ export type MusicArtist = {
   albumCount: number;
 };
 
+export type MusicPlaylistSource = {
+  connectorId: string;
+  sourceId: string;
+  syncedAt: string;
+};
+
 export type MusicPlaylist = {
   id: string;
   name: string;
   createdAt: string;
   updatedAt: string;
+  source?: MusicPlaylistSource;
   /** Collection-specific timestamps; older entries may have no recorded date. */
   trackAddedAt?: Record<string, string>;
   tracks: MusicTrack[];

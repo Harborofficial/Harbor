@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { SpotifyStatus } from "./types";
 
 // Keep in sync with REDIRECT_PORT and redirect_uri in src-tauri/src/music/spotify/auth.rs.
 export const SPOTIFY_REDIRECT_URI = "http://127.0.0.1:8898/login";
@@ -36,8 +37,10 @@ export function cancelSpotifyDevicePairing(): Promise<void> {
  * developer apps and gives browsing a private rate quota. Playback stays on the paired
  * session, which this never touches.
  */
-export function connectSpotifyBrowsing(clientId?: string): Promise<void> {
-  return invoke("music_spotify_browse_connect", { clientId: clientId?.trim() || null });
+export function connectSpotifyBrowsing(clientId?: string): Promise<SpotifyStatus> {
+  return invoke<SpotifyStatus>("music_spotify_browse_connect", {
+    clientId: clientId?.trim() || null,
+  });
 }
 
 /** Replace backend setup instructions with localized, actionable form guidance. */

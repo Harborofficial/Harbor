@@ -399,10 +399,6 @@ export const WINDOW_EVENTS: WindowEvent[] = [
     when: "View change. Scroll main to the top.",
   },
   {
-    name: "harbor:open-theme-editor",
-    when: "The active-theme banner asks to open the color editor.",
-  },
-  {
     name: "harbor:error",
     payload: "CustomEvent<{ message }>",
     when: "An application-level error surfaced.",

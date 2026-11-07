@@ -42,11 +42,14 @@ import { manualWatchedState, manualWatchedVersion, subscribeManualWatched } from
 import { isMovieWatchedLocal, movieWatchedVersion, subscribeMovieWatched } from "./movie-watched";
 import { isWatchedFlagged } from "./watched-flag";
 import { getEpisodeProgress } from "./episode-progress";
+import { fetchEpisodeList } from "./series-episodes";
 
 type ProviderState = { provider: string; watched: Set<string> | null };
 export type ContextWatchedInput = {
   meta: Meta;
   imdbId?: string | null;
+  /** Exact anime entry for catalog-backed CW rows whose primary id is IMDb/TMDB. */
+  animeId?: string | null;
   episode?: PlayEpisode;
   episodeScope?: boolean;
   /** Read-only projection for a loaded source-local episode list, never a write scope. */
@@ -147,21 +150,55 @@ export async function readContextWatchedSnapshot(
   assertCurrent();
   const id = sourceId(input);
   const movie = input.meta.type === "movie";
-  const anime = ANIME_CLOUD_ID.test(id) || input.meta.type === "anime";
+  const mappedAnimeId =
+    typeof input.animeId === "string" && ANIME_CLOUD_ID.test(input.animeId)
+      ? input.animeId
+      : null;
+  const trackerAnimeId = ANIME_CLOUD_ID.test(id) ? id : mappedAnimeId;
+  const anime = !!trackerAnimeId || input.meta.type === "anime";
   const selected = input.episode;
+  let projection = input.episodeProjection;
+  // Anime list providers report progress relative to the exact anime entry.
+  // A Continue Watching card is episode-scoped, but it still needs that entry's
+  // ordering to project progress onto the clicked episode. Only hydrate it when
+  // the selected episode has not declared a different source entry; otherwise
+  // keep the existing fail-closed behavior instead of borrowing a sibling cour.
+  const selectedMatchesAnimeEntry =
+    !selected?.sourceMetaId ||
+    (ANIME_CLOUD_ID.test(input.meta.id)
+      ? selected.sourceMetaId === input.meta.id
+      : selected.sourceMetaId === input.meta.id || selected.sourceMetaId === trackerAnimeId);
+  if (
+    anime &&
+    !movie &&
+    !projection?.length &&
+    (!selected || ((anilist || mal) && selectedMatchesAnimeEntry))
+  ) {
+    const projectionMeta =
+      trackerAnimeId && trackerAnimeId !== input.meta.id
+        ? { ...input.meta, id: trackerAnimeId, type: "anime" as const }
+        : input.meta;
+    const loaded = await fetchEpisodeList(projectionMeta, { tmdbKey: "" }).catch(() => []);
+    assertCurrent();
+    if (loaded.length) projection = loaded;
+  }
+  const projectionImdb =
+    projection
+      ?.find((episode) => /^tt\d+(?::|$)/.test(episode.imdbId ?? ""))
+      ?.imdbId?.split(":")[0] ?? null;
+  const providerImdbId = input.imdbId || projectionImdb;
   const localKey = selected ? episodeKey(selected.season, selected.episode) : null;
   const mappedKey =
-    selected && input.imdbId
+    selected && providerImdbId
       ? episodeKey(selected.imdbSeason ?? selected.season, selected.imdbEpisode ?? selected.episode)
       : localKey;
-  const projection = input.episodeProjection;
   const verifiedProjection =
     !!projection?.length &&
-    !!input.imdbId &&
+    !!providerImdbId &&
     projection.every(
       (ep) =>
         (!ep.sourceMetaId || ep.sourceMetaId === id) &&
-        (!ep.imdbId || ep.imdbId.split(":")[0] === input.imdbId) &&
+        (!ep.imdbId || ep.imdbId.split(":")[0] === providerImdbId) &&
         Number.isInteger(ep.season) &&
         ep.season >= 0 &&
         Number.isInteger(ep.episode) &&
@@ -185,7 +222,7 @@ export async function readContextWatchedSnapshot(
   };
   let videos = id === input.meta.id ? input.meta.videos : undefined;
   if (!movie && !selected && !input.episodeScope && !projection && !videos?.length) {
-    videos = (await fetchMeta("series", anime ? id : input.imdbId || id).catch(() => null))?.videos;
+    videos = (await fetchMeta("series", anime ? id : providerImdbId || id).catch(() => null))?.videos;
     assertCurrent();
   }
   const keys = movie
@@ -229,7 +266,7 @@ export async function readContextWatchedSnapshot(
           id,
           input.meta.type,
           movie ? undefined : episodes,
-          input.imdbId,
+          providerImdbId,
           assertCurrent,
         );
       },
@@ -249,7 +286,10 @@ export async function readContextWatchedSnapshot(
           !canonicalVideos?.length ||
           canonicalVideos.some((v) => !v.id?.startsWith(`${canonical}:`))
         ) {
-          canonicalVideos = (await fetchMeta("series", canonical))?.videos;
+          // Stremio's watched bitfield is indexed against Cinemeta's canonical
+          // episode ordering. This is protocol metadata, not a Cinemeta catalog
+          // choice, so the user's catalog toggle must not make watched state unreadable.
+          canonicalVideos = (await fetchMeta("series", canonical, true))?.videos;
           assertCurrent();
         }
         if (!canonicalVideos?.length) throw new Error("Missing episode information");
@@ -264,12 +304,12 @@ export async function readContextWatchedSnapshot(
           anime &&
           !verifiedProjection &&
           (!selected ||
-            !input.imdbId ||
+            !providerImdbId ||
             selected.imdbSeason == null ||
             selected.imdbEpisode == null)
         )
           throw new Error("Missing verified anime episode mapping");
-        const resolved = stremioIdToTraktTarget(input.imdbId || id);
+        const resolved = stremioIdToTraktTarget(providerImdbId || id);
         if (!resolved.ok) throw new Error("Missing Trakt identity");
         const ids =
           resolved.target.kind === "episode" ? resolved.target.show.ids : resolved.target.ids;
@@ -284,12 +324,12 @@ export async function readContextWatchedSnapshot(
         if (
           anime &&
           !movie &&
-          input.imdbId &&
+          providerImdbId &&
           !verifiedProjection &&
           (!selected || selected.imdbSeason == null || selected.imdbEpisode == null)
         )
           throw new Error("Missing verified anime episode mapping");
-        const resolved = stremioIdToSimklTarget(input.imdbId || id);
+        const resolved = stremioIdToSimklTarget(providerImdbId || id);
         const match = /^(mal|anilist|anidb|kitsu):(\d+)$/.exec(id);
         const target = resolved.ok ? resolved.target : null;
         const ids = target
@@ -316,8 +356,26 @@ export async function readContextWatchedSnapshot(
       throw new Error("Missing verified anime episode total");
     const count = completed && total != null && total > 0 ? total : progress;
     if (movie) return new Set(completed || count > 0 ? ["movie"] : []);
-    const sourceKeys = releasedKeys(input.meta, videos);
-    if (!sourceKeys?.length || !sourceKeys.every((key, index) => key === `1:${index + 1}`))
+    const sourceKeys = releasedKeys(
+      input.meta,
+      projection
+        ? projection.map((episode) => ({
+            season: episode.season,
+            episode: episode.episode,
+            released: episode.airDate,
+          }))
+        : videos,
+    );
+    if (!sourceKeys?.length) throw new Error("Missing verified anime episode order");
+    const sourcePositions = sourceKeys.map((key) => key.split(":").map(Number));
+    const sourceSeason = sourcePositions[0]?.[0];
+    if (
+      !Number.isInteger(sourceSeason) ||
+      sourceSeason! < 1 ||
+      !sourcePositions.every(
+        ([season, episode], index) => season === sourceSeason && episode === index + 1,
+      )
+    )
       throw new Error("Missing verified anime episode order");
     const watched = new Set(sourceKeys.slice(0, Math.min(count, sourceKeys.length)));
     if (localKey && !sourceKeys.includes(localKey))
@@ -328,7 +386,7 @@ export async function readContextWatchedSnapshot(
     jobs.push({
       provider: "AniList",
       read: async () => {
-        const mediaId = await resolveAnilistMediaId(id);
+        const mediaId = await resolveAnilistMediaId(trackerAnimeId ?? id);
         assertCurrent();
         if (!mediaId) throw new Error("Missing AniList identity");
         const info = await readAnilistEntry(mediaId, true);
@@ -345,7 +403,7 @@ export async function readContextWatchedSnapshot(
     jobs.push({
       provider: "MyAnimeList",
       read: async () => {
-        const mediaId = await resolveMalMediaId(id);
+        const mediaId = await resolveMalMediaId(trackerAnimeId ?? id);
         assertCurrent();
         if (!mediaId) throw new Error("Missing MyAnimeList identity");
         const info = await readMalEntry(mediaId, true);
@@ -449,6 +507,7 @@ export function useContextWatchedState(input: ContextWatchedInput | null, sessio
         sourceId(input),
         input.meta.type,
         input.imdbId,
+        input.animeId,
         input.episode,
         input.episodeScope,
         input.episodeProjection,

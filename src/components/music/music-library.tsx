@@ -9,6 +9,8 @@ import {
   useState,
 } from "react";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import { Link } from "lucide-react";
+import { MusicPlaylistLinkDialog } from "./music-playlist-link";
 import {
   ChevronRight,
   FileUp,
@@ -39,9 +41,11 @@ import { MusicPlaylistGridSkeleton } from "@/components/music/music-skeletons";
 import { MusicServiceLogo } from "./music-service-logo";
 import { MusicCollectionGrid } from "./music-collection-grid";
 import { MusicLibraryEmptyState } from "./music-library-empty-state";
+import { confirmAction } from "@/lib/confirm-action";
 import { useT } from "@/lib/i18n";
 import {
   addTracksToMusicPlaylist,
+  confirmLinkedMusicPlaylistEdit,
   createMusicPlaylist,
   deleteMusicPlaylist,
   exportMusicM3u,
@@ -111,6 +115,7 @@ export function MusicLibrary({
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<MusicCollectionSort>("recent");
   const [creating, setCreating] = useState(false);
+  const [linking, setLinking] = useState(false);
   const [playlistName, setPlaylistName] = useState("");
   const [contextEntry, setContextEntry] = useState<MusicCollectionEntry | null>(null);
   const [contextPosition, setContextPosition] = useState<{ x: number; y: number } | null>(null);
@@ -184,7 +189,8 @@ export function MusicLibrary({
       built.push(likedEntry(player.likedTracks, t("music.saved"), t("music.library.savedTracks")));
     if (player.recents.length > 0)
       built.push(recentEntry(player.recents, t("music.library.recent"), t("music.library.recent")));
-    for (const playlist of playlists) built.push(playlistEntry(playlist, t("music.playlists")));
+    for (const playlist of playlists)
+      built.push(playlistEntry(playlist, t(playlist.source ? "music.linked.source" : "music.playlists")));
     if (filter === "all")
       for (const item of shelf) {
         const entry = catalogEntry(item, t("music.connections.local"));
@@ -277,7 +283,16 @@ export function MusicLibrary({
   };
 
   const removePlaylist = async (playlist: MusicPlaylist) => {
-    if (working || !window.confirm(t("music.playlist.deleteConfirm"))) return;
+    if (
+      working ||
+      !(await confirmAction({
+        title: t("music.playlist.deleteTitle"),
+        message: t("music.playlist.deleteConfirm"),
+        confirmLabel: t("common.delete"),
+        destructive: true,
+      }))
+    )
+      return;
     setWorking(true);
     setError(null);
     try {
@@ -408,6 +423,17 @@ export function MusicLibrary({
               >
                 <FileUp size={28} aria-hidden="true" />
               </button>
+          </HoverTooltip>
+          <HoverTooltip label={t("music.linked.import")} align="center">
+            <button
+              type="button"
+              className="music-library-icon-action"
+              aria-label={t("music.linked.import")}
+              disabled={working}
+              onClick={() => setLinking(true)}
+            >
+              <Link size={28} aria-hidden="true" />
+            </button>
           </HoverTooltip>
           <HoverTooltip label={t("music.row.newPlaylist")} align="end">
               <button
@@ -583,6 +609,17 @@ export function MusicLibrary({
         items={contextItems}
         position={contextPosition}
       />
+      {linking && (
+        <MusicPlaylistLinkDialog
+          onClose={() => setLinking(false)}
+          onImported={(playlist) => {
+            setPlaylists((current) => [playlist, ...current.filter((item) => item.id !== playlist.id)]);
+            setFilter("playlists");
+            setError(null);
+            setNotice(t("music.linked.importedNotice", { count: playlist.tracks.length, name: playlist.name }));
+          }}
+        />
+      )}
       {renameTarget && (
         <MusicPlaylistRenameDialog
           key={renameTarget.id}
@@ -597,6 +634,7 @@ export function MusicLibrary({
           target={{
             id: editTarget.id,
             name: editTarget.name,
+            source: editTarget.source,
             artwork: editTarget.tracks.map((track) => track.artwork),
           }}
           onClose={() => setEditTarget(null)}
@@ -644,6 +682,7 @@ function MusicPlaylistRenameDialog({
       close();
       return;
     }
+    if (!(await confirmLinkedMusicPlaylistEdit(playlist))) return;
     setWorking(true);
     setError("");
     try {

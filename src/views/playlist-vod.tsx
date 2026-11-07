@@ -9,6 +9,7 @@ import type { IptvPlaylistSource } from "@/lib/iptv/types";
 import { buildVodLibrary, type VodEpisode, type VodMovie, type VodSeries } from "@/lib/iptv/vod";
 import { credsFromServer } from "@/lib/iptv/xtream";
 import { fetchXtreamSeriesEpisodes } from "@/lib/iptv/xtream-vod";
+import { useSessionState } from "@/lib/session-state";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView } from "@/lib/view";
 import { SourcePicker } from "./live/source-picker";
@@ -54,12 +55,14 @@ export function PlaylistVodView({ active }: { active: boolean }) {
   const error = isXtream ? xtream.error : state.kind === "error" ? state.message : null;
   const fetchedAt = isXtream ? xtream.fetchedAt : (playlist?.fetchedAt ?? null);
 
-  const [tab, setTab] = useState<Tab>("movies");
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<VodSeries | null>(null);
+  const [tab, setTab] = useSessionState<Tab>("vod.tab", "movies");
+  const [query, setQuery] = useSessionState<string>("vod.query", "");
+  const [selected, setSelected] = useSessionState<VodSeries | null>("vod.series", null);
   const [loadingSeriesId, setLoadingSeriesId] = useState<string | null>(null);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [visibleCount, setVisibleCount] = useSessionState<number>("vod.visibleCount", PAGE_SIZE);
   const loadMoreTimer = useRef<number | null>(null);
+  const lastActiveIdRef = useRef(activeId);
+  const lastTabQueryRef = useRef(`${tab}\u0000${query}`);
 
   const chooseTab = useCallback((t: Tab) => {
     setTab(t);
@@ -83,11 +86,16 @@ export function PlaylistVodView({ active }: { active: boolean }) {
   const tabItemCount = tab === "movies" ? library.movies.length : library.series.length;
 
   useEffect(() => {
+    if (lastActiveIdRef.current === activeId) return;
+    lastActiveIdRef.current = activeId;
     setSelected(null);
     setVisibleCount(PAGE_SIZE);
   }, [activeId]);
 
   useEffect(() => {
+    const key = `${tab}\u0000${query}`;
+    if (lastTabQueryRef.current === key) return;
+    lastTabQueryRef.current = key;
     setVisibleCount(PAGE_SIZE);
   }, [query, tab]);
 

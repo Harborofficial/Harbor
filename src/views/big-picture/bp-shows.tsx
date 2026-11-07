@@ -4,6 +4,7 @@ import { goBigPictureTab } from "@/lib/big-picture";
 import { SFX } from "@/lib/sfx";
 import { isAnimeCwItem } from "@/lib/stremio";
 import { useMobileCw, useMobileCwReady } from "@/views/mobile/mobile-cw-row";
+import { useBpCwAdvance } from "./use-bp-cw";
 import { BpPageSkeleton } from "./bp-page-skeleton";
 import { BpSpotlight } from "./bp-spotlight";
 import { BpCwRow, cwMeta } from "./bp-cw-row";
@@ -23,7 +24,7 @@ const VISIBLE_ROWS = 60;
 
 export function BpShows({ onSelect }: { onSelect: (m: Meta) => void }) {
   const { rows, hero, runtimeTitleKeys, loading, failed, retry } = useBpShows();
-  const cwPool = useMobileCw(CW_POOL);
+  const cwPool = useBpCwAdvance(useMobileCw(CW_POOL));
   const cwReady = useMobileCwReady();
   const t = useBpT();
   const grid = useBpRowGrid();

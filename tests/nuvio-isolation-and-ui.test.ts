@@ -120,7 +120,8 @@ test("CW tray retains next up episode and protects against unwanted removal upon
   const mediaActions = read("../src/lib/media-provider-actions.ts");
 
   // useCwAdvance does not drop unwatched upNext cards
-  assert.match(useCwAdvance, /if \(!watchedCur\) continue;/);
+  assert.match(useCwAdvance, /if \(!watchedCur\) \{/);
+  assert.match(useCwAdvance, /\(i as Record<string, unknown>\)\.waitingForAir === true/);
   assert.doesNotMatch(useCwAdvance, /if \(!watchedCur && !i\.upNext\) continue;/);
 
   // deleteEpisodeWatchProgressFromNuvio sends episodeOnly: true

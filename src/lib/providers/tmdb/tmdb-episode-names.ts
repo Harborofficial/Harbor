@@ -46,10 +46,11 @@ export async function tmdbEpisodeNames(
     const out = new Map<number, TmdbEpisodeText>();
     for (const e of raw) {
       const name = e.name?.trim() ?? "";
-      if (!name || isGenericEpisodeName(name)) continue;
+      const overview = e.overview?.trim() ?? "";
+      if ((!name || isGenericEpisodeName(name)) && !overview && !e.stillPath) continue;
       out.set(e.episodeNumber, {
         name,
-        overview: e.overview?.trim() ?? "",
+        overview,
         still: tmdbStillUrl(e.stillPath),
       });
     }

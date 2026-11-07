@@ -17,7 +17,7 @@ function toItems(metas: Meta[], sub: (m: RankedMeta) => string): AmbientItem[] {
   for (const m of metas as RankedMeta[]) {
     if (!m.background || seen.has(m.background)) continue;
     seen.add(m.background);
-    out.push({ bg: m.background, title: m.name ?? "", sub: sub(m) });
+    out.push({ bg: m.background, title: m.name ?? "", sub: sub(m), logo: m.logo });
     if (out.length >= MAX_ITEMS) break;
   }
   return out;

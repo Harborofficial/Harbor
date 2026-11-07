@@ -14,6 +14,8 @@ function load(path, mocks, globals = {}) {
   const exports = {};
   new Function("require", "exports", ...Object.keys(globals), code)(
     (id) => {
+      if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+        return { addonOnlyMetadata: () => false };
       assert.ok(id in mocks, `Unmocked dependency: ${id}`);
       return mocks[id];
     },

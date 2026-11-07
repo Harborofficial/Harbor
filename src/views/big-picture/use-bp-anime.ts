@@ -1,3 +1,4 @@
+import { usePinnedCatalogRows } from "@/views/home/hooks/use-pinned-rows";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAnilist } from "@/lib/anilist/provider";
 import { awardFranchiseKey } from "@/lib/anime-awards";
@@ -58,6 +59,7 @@ export function useBpAnime(): BpAnimeData {
   const anilistTop = useAnilistTop();
   const awardEntries = useCrunchyrollAwardMetas(true);
   const collections = useCollectionRowsForPage("anime");
+  const pinnedRows = usePinnedCatalogRows("anime");
 
   // The AniList watched map is fetched per id, so it has to cover everything the
   // filters run over, not just continue watching. Hero and picks only exist
@@ -208,10 +210,28 @@ export function useBpAnime(): BpAnimeData {
 
   const allRows = useMemo(
     () =>
-      applyAnimeRowCustomization(groups, settings.animeRows)
+      applyAnimeRowCustomization(
+        [
+          ...groups,
+          ...pinnedRows.map((row) => ({
+            key: row.key,
+            name: settings.animeRows.renamed[row.key] ?? row.name,
+            rows: [
+              {
+                id: row.key,
+                group: row.key,
+                title: settings.animeRows.renamed[row.key] ?? row.name,
+                metas: row.metas,
+                source: row,
+              },
+            ],
+          })),
+        ],
+        settings.animeRows,
+      )
         .flatMap((g) => g.rows)
         .filter((r) => !(r.notice && r.id.endsWith(":offline"))),
-    [groups, settings.animeRows],
+    [groups, pinnedRows, settings.animeRows],
   );
 
   const cwRow = useMemo(() => allRows.find((r) => r.cwItems) ?? null, [allRows]);

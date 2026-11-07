@@ -8,6 +8,13 @@ pub struct MusicVideoPage {
     pub next: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MusicPlaylistImport {
+    pub name: String,
+    pub tracks: Vec<MusicTrack>,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MusicAlbumRef {

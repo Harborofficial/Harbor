@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { lruSet } from "@/lib/cache";
 import { meta as fetchCinemeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { ensureCuratedLogos, peekCuratedLogo } from "@/lib/curated-logos";
@@ -35,6 +36,7 @@ export async function resolveLogo(
   meta: Meta,
   opts?: { preferOwn?: boolean },
 ): Promise<string | undefined> {
+  if (addonOnlyMetadata() && !tmdbKey) return meta.logo;
   const pinned = getTitleLogo(meta.id);
   if (pinned) return pinned;
   await ensureCuratedLogos();
@@ -62,6 +64,7 @@ export function peekCachedLogo(
   meta: Meta,
   opts?: { preferOwn?: boolean },
 ): string | undefined {
+  if (addonOnlyMetadata() && !tmdbKey) return meta.logo;
   const pinned = getTitleLogo(meta.id);
   if (pinned) return pinned;
   const curated = peekCuratedLogo(meta.id);

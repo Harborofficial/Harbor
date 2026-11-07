@@ -1,120 +1,75 @@
-// @ts-expect-error Node test types are outside browser config.
 import assert from "node:assert/strict";
-// @ts-expect-error Node test types are outside browser config.
 import test from "node:test";
 import {
   contextNavigationFooter,
   partitionContextActions,
 } from "../src/lib/context-quick-actions.ts";
 
-test("unsupported image copy is omitted from the strip without inventing paste", () => {
-  const result = partitionContextActions(
-    [],
-    [{ id: "image:copy", label: "Copy Image", disabled: true }],
-    [],
-  );
-  assert.deepEqual(result.quick, []);
+const back = { id: "page:back", label: "Back", disabled: true };
+const settings = { id: "page:go:settings", label: "Settings", run: () => {} };
+const nav = [
+  back,
+  { id: "page:go-to", label: "Go to", children: [settings, { id: "page:go:home", label: "Home" }] },
+  { id: "page:my-profile", label: "Open my profile" },
+  { id: "page:refresh", label: "Refresh" },
+];
+const background = {
+  kind: "actions",
+  id: "page:home",
+  label: "Page actions",
+  scope: "page-background",
+  actions: () => nav,
+};
+const partition = partitionContextActions as (
+  ...args: any[]
+) => ReturnType<typeof partitionContextActions>;
+
+test("only explicit unoccupied background gets Back and Settings; copy stays a row", () => {
+  const copy = { id: "collection:copy", label: "Copy share link" };
+  for (const target of [
+    undefined,
+    { kind: "actions" },
+    { kind: "meta", player: true },
+    { ...background, image: { src: "fixture.png" } },
+    { ...background, link: "https://fixture.invalid" },
+    { ...background, selection: "Selected" },
+    { ...background, navigation: false },
+  ]) {
+    const result = partition([copy], [], nav, target);
+    assert.deepEqual(result.quick, [], JSON.stringify(target));
+    assert.deepEqual(result.entity, [copy], "copying is retained as a normal command");
+  }
+  assert.deepEqual(partition(nav, [], nav, background).quick, [back, settings]);
 });
 
-test("root navigation keeps own profile above Go to then Refresh without duplicating Settings", () => {
-  const settings = { id: "page:go:settings", label: "Settings" };
-  const footer = contextNavigationFooter(
-    [
-      { id: "page:back", label: "Back" },
-      { id: "page:my-profile", label: "Open my profile", group: "pages" },
-      { id: "page:refresh", label: "Refresh", shortcut: "Ctrl+R", group: "reload" },
-      {
-        id: "page:go-to",
-        label: "Go to",
-        children: [settings, { id: "page:go:home", label: "Home" }],
-      },
-    ],
-    [settings],
-  );
+test("background navigation order is stable and Settings is removed from Go to", () => {
+  const result = partition(nav, [], nav, background);
+  const footer = contextNavigationFooter(nav, result.quick);
   assert.deepEqual(
-    footer.map((action) => action.id),
+    footer.map((a) => a.id),
     ["page:my-profile", "page:go-to", "page:refresh"],
   );
   assert.deepEqual(
-    footer[1].children?.map((action) => action.id),
+    footer[1].children?.map((a) => a.id),
     ["page:go:home"],
   );
+  assert.deepEqual(result.entity, [], "background does not duplicate its own navigation rows");
 });
 
-test("the strip moves an explicit copy command without conflating image bytes and image link", () => {
-  const entity = [{ id: "comment:copy", label: "Copy comment text", quickCopy: true }];
-  const content = [
-    {
-      id: "image",
-      label: "Image",
-      children: [
-        { id: "image:copy", label: "Copy image" },
-        { id: "image:copy-link", label: "Copy image link" },
-      ],
-    },
-  ];
-  const result = partitionContextActions(entity, content, []);
-  assert.deepEqual(
-    result.quick.map((a) => a.id),
-    ["comment:copy"],
-  );
-  assert.deepEqual(result.entity, []);
-  assert.equal(result.content[0].children?.length, 2);
-  const poster = partitionContextActions([], content, []);
-  assert.deepEqual(
-    poster.quick.map((a) => a.id),
-    ["image:copy"],
-  );
-  assert.deepEqual(
-    poster.content[0].children?.map((a) => a.id),
-    ["image:copy-link"],
-  );
+test("empty items never inherit global navigation and selected text remains a row", () => {
+  const selected = { id: "selection:copy", label: "Copy selected text" };
+  const result = partition([], [selected], nav, { kind: "content", selection: "fixture" });
+  assert.deepEqual(result.quick, []);
+  assert.deepEqual(result.content, [selected]);
+  assert.deepEqual(partition([], [], nav, { kind: "actions" }), {
+    quick: [],
+    entity: [],
+    content: [],
+  });
 });
 
-test("navigation commands preserve their original capability and avoid duplicates", () => {
-  const back = { id: "page:back", label: "Back", disabled: true };
-  const settings = { id: "page:go:settings", label: "Settings", run: () => {} };
-  const nav = [
-    back,
-    {
-      id: "page:go-to",
-      label: "Go to",
-      children: [settings, { id: "page:go:home", label: "Home" }],
-    },
-  ];
-  const result = partitionContextActions(nav, [], nav);
-  assert.deepEqual(result.quick, [back, settings]);
-  assert.deepEqual(
-    result.entity[0].children?.map((a) => a.id),
-    ["page:go:home"],
-  );
-  assert.equal(
-    result.quick.some((a) => /paste/i.test(a.id)),
-    false,
-  );
-});
-
-test("selection never silently replaces a poster copy and empty groups are removed", () => {
-  const result = partitionContextActions(
-    [],
-    [
-      { id: "selection:copy", label: "Copy selected text" },
-      { id: "image", label: "Image", children: [{ id: "image:copy", label: "Copy image" }] },
-    ],
-    [],
-  );
-  assert.deepEqual(
-    result.quick.map((a) => a.id),
-    ["image:copy"],
-  );
-  assert.deepEqual(
-    result.content.map((a) => a.id),
-    ["selection:copy"],
-  );
-});
-
-test("moving a child command preserves its parent's disabled capability", () => {
-  const result = partitionContextActions(
+test("extracting background Settings preserves its inherited disabled/PIN capability", () => {
+  const result = partition(
     [],
     [],
     [
@@ -122,11 +77,12 @@ test("moving a child command preserves its parent's disabled capability", () => 
         id: "page:go-to",
         label: "Go to",
         disabled: true,
-        reason: "Navigation unavailable",
-        children: [{ id: "page:go:settings", label: "Settings", run: () => {} }],
+        reason: "PIN required",
+        children: [settings],
       },
     ],
+    background,
   );
   assert.equal(result.quick[0].disabled, true);
-  assert.equal(result.quick[0].reason, "Navigation unavailable");
+  assert.equal(result.quick[0].reason, "PIN required");
 });

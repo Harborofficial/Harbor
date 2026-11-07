@@ -78,6 +78,7 @@ export function useSubtitleChoices(src: PlayerSrc) {
             imdbId: src.imdbId ?? (src.meta.id?.startsWith("tt") ? src.meta.id : undefined),
             stremioId: src.meta.id,
             candidateIds,
+            title: src.meta.name,
             type: src.meta.type === "series" ? "series" : "movie",
             season: coords
               ? coords.season

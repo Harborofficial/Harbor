@@ -12,9 +12,14 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::sync::Mutex;
 
 const RELEASE_API: &str = "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest";
+const RELEASE_TAG_API: &str = "https://api.github.com/repos/yt-dlp/yt-dlp/releases/tags/";
+// 2026.10.21 and 2026.10.26 resolve URLs that googlevideo rejects with 403 on both audio and
+// video. 2026.08.19 still returns playable URLs; use it until a later release is verified.
+const KNOWN_BAD_RELEASES: [&str; 2] = ["2026.10.21", "2026.10.26"];
+const FALLBACK_RELEASE: &str = "2026.08.19";
 const CHECK_INTERVAL: Duration = Duration::from_secs(24 * 60 * 60);
 const RETRY_INTERVAL: Duration = Duration::from_secs(5 * 60);
-const UPDATE_TIMEOUT: Duration = Duration::from_secs(20);
+const UPDATE_TIMEOUT: Duration = Duration::from_secs(60);
 const METADATA_TIMEOUT: Duration = Duration::from_secs(4);
 const MAX_BINARY: usize = 96 * 1024 * 1024;
 const MAX_METADATA: usize = 1024 * 1024;
@@ -33,6 +38,7 @@ struct CachedRelease {
 impl CachedRelease {
     fn filename(&self) -> Option<String> {
         if !safe_version(&self.version)
+            || known_bad_release(&self.version)
             || Some(self.asset.as_str()) != platform_asset()
             || !valid_digest(&self.sha256)
         {
@@ -82,29 +88,105 @@ async fn run_with_fallback(
         .app_cache_dir()
         .ok()
         .map(|path| path.join("music/yt-dlp"));
-    let remote = match directory {
-        Some(directory) => cached_executable(&directory).await,
-        None => None,
+    let (remote, update) = match directory {
+        Some(directory) => {
+            let cached = read_verified(&directory).await;
+            let path = cached
+                .as_ref()
+                .and_then(CachedRelease::filename)
+                .map(|name| directory.join(name));
+            // A stale verify is old enough that YouTube may already reject the URLs it returns,
+            // which only shows up after playback starts. Refresh it before the first play; a
+            // fresh one is used immediately while the update check runs in the background.
+            let stale = needs_refresh(cached.as_ref(), now_seconds());
+            if stale && path.is_some() {
+                (cached_executable(&directory).await, None)
+            } else {
+                // With no verified extractor there is nothing to refresh: start the update and
+                // let the bundled helper serve this play instead of waiting for the download.
+                let update = tokio::spawn(async move { cached_executable(&directory).await });
+                (path, Some(update))
+            }
+        }
+        None => (None, None),
     };
-    if let Some(executable) = remote {
+    if let Some(executable) = remote.as_ref() {
         // Reserve time for the bundled helper when the current release cannot run.
         let budget = timeout.saturating_sub(started.elapsed()).mul_f32(0.65);
-        if let Ok(output) = execute(&executable, &args, budget).await {
+        if let Ok(output) = execute(executable, &args, budget).await {
             if output.success {
                 return Ok(output);
             }
         }
     }
     let remaining = timeout.saturating_sub(started.elapsed());
-    let output = crate::trailer::run_yt_dlp(app, args, remaining, label).await?;
-    if output.success {
-        Ok(output)
+    let budget = if update.is_some() {
+        remaining.mul_f32(0.65)
     } else {
-        Err(
-            "YouTube Music could not resolve this track. Try again or choose another source."
-                .to_string(),
-        )
+        remaining
+    };
+    let output = crate::trailer::run_yt_dlp(app, args.clone(), budget, label).await;
+    let error = match output {
+        Ok(output) if output.success => return Ok(output),
+        Ok(output) => {
+            let error = extraction_error(&output.stderr);
+            if !retry_after_update(&output.stderr) {
+                return Err(error);
+            }
+            error
+        }
+        Err(error) => error,
+    };
+    // A background update used to benefit only the user's next manual retry.
+    // Adopt it now after failure, without rerunning the same cached executable.
+    if let Some(update) = update {
+        let wait = timeout
+            .saturating_sub(started.elapsed())
+            .saturating_sub(Duration::from_secs(5));
+        if let Ok(Ok(Some(path))) = tokio::time::timeout(wait, update).await {
+            if remote.as_ref() != Some(&path) {
+                let remaining = timeout.saturating_sub(started.elapsed());
+                if let Ok(output) = execute(&path, &args, remaining).await {
+                    return if output.success {
+                        Ok(output)
+                    } else {
+                        Err(extraction_error(&output.stderr))
+                    };
+                }
+            }
+        }
     }
+    Err(error)
+}
+
+fn retry_after_update(stderr: &[u8]) -> bool {
+    let message = String::from_utf8_lossy(stderr).to_ascii_lowercase();
+    ![
+        "not a bot",
+        "http error 429",
+        "private video",
+        "sign in to confirm your age",
+        "video is unavailable",
+        "video has been removed",
+        "not available in your country",
+    ]
+    .iter()
+    .any(|marker| message.contains(marker))
+}
+
+fn extraction_error(stderr: &[u8]) -> String {
+    let message = String::from_utf8_lossy(stderr).to_ascii_lowercase();
+    // Return categories, never raw extractor output containing signed URLs or cookies.
+    if message.contains("not a bot") || message.contains("http error 429") {
+        return "YouTube is limiting requests or requires a browser verification. Wait before retrying, or open this track on YouTube.".to_string();
+    }
+    if message.contains("javascript runtime") || message.contains("challenge solving failed") {
+        return "YouTube extraction needs a supported JavaScript runtime. Install Deno or Node.js 22 or newer, restart Harbor, and retry.".to_string();
+    }
+    if message.contains("private video") || message.contains("sign in to confirm your age") {
+        return "This YouTube video requires account access. Open it on YouTube.".to_string();
+    }
+    "YouTube Music could not resolve this track. Try again or choose another source.".to_string()
 }
 
 async fn execute(path: &Path, args: &[String], timeout: Duration) -> Result<YtDlpOutput, ()> {
@@ -122,6 +204,23 @@ async fn execute(path: &Path, args: &[String], timeout: Duration) -> Result<YtDl
         stdout: output.stdout,
         stderr: output.stderr,
     })
+}
+
+fn needs_refresh(cached: Option<&CachedRelease>, now: u64) -> bool {
+    cached.is_none_or(|entry| !entry.fresh(now))
+}
+
+/// Keeps the extractor current in the background, so the first play does not pay for the check.
+pub async fn warm(app: &tauri::AppHandle) {
+    let Some(directory) = app
+        .path()
+        .app_cache_dir()
+        .ok()
+        .map(|path| path.join("music/yt-dlp"))
+    else {
+        return;
+    };
+    let _ = cached_executable(&directory).await;
 }
 
 async fn cached_executable(directory: &Path) -> Option<PathBuf> {
@@ -193,8 +292,12 @@ async fn refresh(directory: &Path, cached: Option<&CachedRelease>) -> Result<Pat
         }))
         .build()
         .map_err(|_| ())?;
-    let metadata = fetch_limited(&client, RELEASE_API, MAX_METADATA, METADATA_TIMEOUT).await?;
-    let release: Release = serde_json::from_slice(&metadata).map_err(|_| ())?;
+    let release = fetch_release(&client, RELEASE_API).await?;
+    let release = if known_bad_release(&release.tag_name) {
+        fetch_release(&client, &format!("{RELEASE_TAG_API}{FALLBACK_RELEASE}")).await?
+    } else {
+        release
+    };
     if !safe_version(&release.tag_name) {
         return Err(());
     }
@@ -213,7 +316,17 @@ async fn refresh(directory: &Path, cached: Option<&CachedRelease>) -> Result<Pat
         asset_name,
     )
     .ok_or(())?;
-    let bytes = fetch_limited(&client, asset_url, MAX_BINARY, UPDATE_TIMEOUT).await?;
+    // A previously downloaded release may already be on disk after a downgrade or a stale
+    // manifest. Verify it against this tag's checksum instead of downloading it again.
+    let cached_bytes = read_limited(
+        &directory.join(format!("{}-{}", release.tag_name, asset_name)),
+        MAX_BINARY,
+    )
+    .await;
+    let bytes = match cached_bytes.filter(|bytes| digest_matches(bytes, &expected)) {
+        Some(bytes) => bytes,
+        None => fetch_limited(&client, asset_url, MAX_BINARY, UPDATE_TIMEOUT).await?,
+    };
     if !digest_matches(&bytes, &expected) {
         return Err(());
     }
@@ -237,6 +350,16 @@ async fn refresh(directory: &Path, cached: Option<&CachedRelease>) -> Result<Pat
         }
     }
     Ok(path)
+}
+
+fn known_bad_release(version: &str) -> bool {
+    KNOWN_BAD_RELEASES.contains(&version)
+}
+
+async fn fetch_release(client: &reqwest::Client, url: &str) -> Result<Release, ()> {
+    let metadata = fetch_limited(client, url, MAX_METADATA, METADATA_TIMEOUT).await?;
+    let release: Release = serde_json::from_slice(&metadata).map_err(|_| ())?;
+    (!release.tag_name.is_empty()).then_some(release).ok_or(())
 }
 
 async fn fetch_limited(
@@ -364,6 +487,53 @@ fn platform_asset() -> Option<&'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn extraction_errors_explain_requirements_without_exposing_output() {
+        assert!(extraction_error(b"Sign in to confirm you're not a bot").contains("verification"));
+        assert!(extraction_error(b"HTTP Error 429").contains("Wait"));
+        assert!(extraction_error(b"No supported JavaScript runtime").contains("Node.js 22"));
+        assert!(
+            extraction_error(b"Private video https://private.example/?token=secret")
+                .contains("account access")
+        );
+        assert!(!extraction_error(b"https://private.example/?token=secret").contains("secret"));
+    }
+
+    #[test]
+    fn known_broken_extractor_releases_fall_back_to_the_working_one() {
+        assert!(known_bad_release("2026.10.21"));
+        assert!(known_bad_release("2026.10.26"));
+        assert!(!known_bad_release(FALLBACK_RELEASE));
+        assert!(!known_bad_release("2026.11.01"));
+    }
+
+    #[test]
+    fn a_stale_or_missing_extractor_is_updated_before_first_play() {
+        assert!(needs_refresh(None, 1000));
+        let entry = CachedRelease {
+            version: "2026.08.19".into(),
+            asset: platform_asset().expect("desktop fixture").into(),
+            sha256: "0".repeat(64),
+            checked_at: 1000,
+        };
+        assert!(!needs_refresh(Some(&entry), 1000 + CHECK_INTERVAL.as_secs() - 1));
+        assert!(needs_refresh(Some(&entry), 1000 + CHECK_INTERVAL.as_secs()));
+    }
+
+    #[test]
+    fn extractor_updates_retry_compatibility_failures_not_access_restrictions() {
+        assert!(retry_after_update(b"Signature extraction failed"));
+        assert!(retry_after_update(b"No supported JavaScript runtime"));
+        for message in [
+            "Sign in to confirm you're not a bot",
+            "HTTP Error 429",
+            "Private video",
+            "This video is unavailable",
+        ] {
+            assert!(!retry_after_update(message.as_bytes()));
+        }
+    }
 
     #[test]
     fn checksums_match_the_exact_official_asset_and_reject_changed_bytes() {

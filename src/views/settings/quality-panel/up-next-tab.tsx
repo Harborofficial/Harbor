@@ -211,6 +211,14 @@ export function UpNextTab() {
         {settings.endScreenLeadSec !== 0 && (
           <>
             <ToggleRow
+              label={t("Hide watched titles")}
+              sub={t(
+                "Skip recommendations you've already watched. Uses the same watch history as Hide watched titles in the featured hero.",
+              )}
+              value={settings.hideWatchedInMoreLikeThis}
+              onChange={(v) => update({ hideWatchedInMoreLikeThis: v })}
+            />
+            <ToggleRow
               label={t("Countdown")}
               sub={t("Act automatically if nothing is chosen before time runs out.")}
               value={settings.endScreenCountdownSec > 0}

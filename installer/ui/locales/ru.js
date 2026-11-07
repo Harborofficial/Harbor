@@ -225,3 +225,16 @@ export const RU = {
   'Version {version}, {size}': 'Версия {version}, {size}',
   'Installed to {path}': 'Установлено в {path}'
 };
+
+Object.assign(RU, {
+  "Clean install": "Чистая установка",
+  "Permanently removes Harbor settings, accounts, library, add-ons and cached data before reinstalling. Starts fresh with first-run setup.": "Перед переустановкой безвозвратно удаляются настройки Harbour, учетные записи, библиотека, надстройки и кэшированные данные. Начинается заново с установкой при первом запуске.",
+  "Erase old Harbor data?": "Стереть старые данные Харбора?",
+  "Clean install permanently deletes your local Harbor settings, sign-ins, library, add-ons, cached data and saves stored in Harbor's data folders. This cannot be undone. Harbor will start with first-run setup after installation.": "Чистая установка безвозвратно удаляет ваши локальные настройки Harbor, входы в систему, библиотеку, надстройки, кэшированные данные и сохранения, хранящиеся в папках данных Harbor. Это невозможно отменить. После установки Harbour запустится при первом запуске.",
+  "Confirm clean install": "Подтвердить чистую установку",
+  "All local Harbor data will be permanently removed": "Все локальные данные Harbor будут удалены без возможности восстановления.",
+  "Not in this build": "Нет в этой сборке",
+  "Plugins tab only; the extension runtime is not part of this build": "Только вкладка «Плагины»; среда выполнения расширения не является частью этой сборки",
+  "Games tab only; the engine is not part of this build": "Только вкладка «Игры»; двигатель не является частью этой сборки",
+  "Tab only": "Только вкладка"
+});

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Loader2, Wand2 } from "lucide-react";
-import { useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
+import { isAppliedAutoSync, useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
 import { loadSubPresets } from "@/lib/player/sub-presets";
 import { useSettings } from "@/lib/settings";
 import { useBpT } from "../bp-i18n";
@@ -23,7 +23,7 @@ export function BpSubtitleSync({
 }) {
   const t = useBpT();
   const autoSync = useAutoSyncHandle();
-  const busy = autoSync?.status === "analyzing";
+  const busy = autoSync?.status === "analyzing" || autoSync?.status === "listening";
   const offset = offsetLabel(delaySec, t);
 
   return (
@@ -34,7 +34,9 @@ export function BpSubtitleSync({
           label={busy ? t("Cancel sync") : t("Auto sync")}
           on={busy}
           seed
-          icon={busy ? <Loader2 size={19} className={SPIN} /> : <Wand2 size={19} strokeWidth={2.2} />}
+          icon={
+            busy ? <Loader2 size={19} className={SPIN} /> : <Wand2 size={19} strokeWidth={2.2} />
+          }
           onPress={() => {
             if (!canSync || !autoSync) return;
             if (busy) autoSync.stop();
@@ -44,10 +46,11 @@ export function BpSubtitleSync({
         {autoSync && autoSync.offer !== null && (
           <Chip label={t("Use it")} onPress={() => autoSync.applyOffer()} />
         )}
-        {autoSync && autoSync.status === "synced" && (
+        {autoSync && isAppliedAutoSync(autoSync.status) && (
           <Chip label={t("Revert")} onPress={() => autoSync.revert()} />
         )}
       </Row>
+      {autoSync?.status === "matched-embedded" && <p className={NOTE}>{t("Matched embedded subtitles")}</p>}
       {!canSync && <p className={NOTE}>{t("Needs an external subtitle")}</p>}
       <Row>
         <span className={LABEL}>{t("Manual offset")}</span>

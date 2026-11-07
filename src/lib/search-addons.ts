@@ -99,8 +99,9 @@ export async function searchAddonCatalogs(
     for (const m of r.value.metas) {
       if (!m?.id || seen.has(m.id)) continue;
       seen.add(m.id);
-      const tagged = {
+      const tagged: Meta = {
         ...m,
+        type: m.type || (r.value.type === "series" ? "series" : "movie"),
         addonOrigin: r.value.origin,
         ...(r.value.collection ? { isCollection: true } : null),
       };
@@ -230,7 +231,10 @@ export async function searchAddonGroups(
   }
   const startedAt = Date.now();
   const remainingBudget = () => ALL_GROUPS_BUDGET_MS - (Date.now() - startedAt);
-  const groups = await mapLimit(entries, GROUP_CONCURRENCY, async ({ addon, targets }): Promise<AddonResultGroup> => {
+  const groups = await mapLimit(
+    entries,
+    GROUP_CONCURRENCY,
+    async ({ addon, targets }): Promise<AddonResultGroup> => {
       const origin = addonOrigin(addon);
       const cap = isAioMetadataAddon(origin.id) ? AIOMETADATA_SEARCH_CAP : CAP_PER_GROUP;
       const base = origin.base;
@@ -293,6 +297,7 @@ export async function searchAddonGroups(
         metas,
       });
       return group;
-  });
+    },
+  );
   return groups.filter((g) => g.metas.length > 0);
 }

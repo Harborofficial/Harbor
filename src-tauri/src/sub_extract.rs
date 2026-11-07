@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::time::Duration;
 
 const EXTRACT_TIMEOUT: Duration = Duration::from_secs(90);
@@ -10,14 +12,24 @@ pub async fn subtitle_extract(
     stream_index: Option<u32>,
     headers: Option<HashMap<String, String>>,
 ) -> Result<String, String> {
+    // Export the whole track in one pass. Per-cue range reads are useful for
+    // Auto Sync's short samples but add a round trip for each cue in a full export.
     let ffmpeg = crate::transcode::locate_ffmpeg().ok_or_else(|| "ffmpeg not found".to_string())?;
     let map = format!("0:s:{}", stream_index.unwrap_or(0));
-    let mut cmd = tokio::process::Command::new(&ffmpeg);
+    let mut cmd = std::process::Command::new(&ffmpeg);
     cmd.arg("-nostdin").arg("-loglevel").arg("error");
-    if let Some(h) = &headers {
-        if let Some(ua) = h.get("User-Agent").or_else(|| h.get("user-agent")) {
-            cmd.arg("-user_agent").arg(ua);
+    let remote = source.starts_with("https://") || source.starts_with("http://");
+    if remote {
+        let (ua, _) = crate::mpv::stream_http_options(&headers);
+        cmd.arg("-user_agent").arg(ua);
+        if let Some(h) = &headers {
+            let fields = crate::subsync::url_guard::safe_header_blob(h);
+            if !fields.is_empty() {
+                cmd.arg("-headers").arg(fields);
+            }
         }
+        cmd.arg("-rw_timeout")
+            .arg(EXTRACT_TIMEOUT.as_micros().to_string());
     }
     cmd.arg("-i")
         .arg(&source)
@@ -33,17 +45,34 @@ pub async fn subtitle_extract(
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
-    let output = match tokio::time::timeout(EXTRACT_TIMEOUT, cmd.output()).await {
-        Ok(Ok(o)) => o,
-        Ok(Err(e)) => return Err(format!("ffmpeg spawn: {}", e)),
-        Err(_) => return Err("subtitle extraction timed out".to_string()),
+    // Full remote track extraction can run longer than an individual network read.
+    // Keep the remote Windows-safe process reader so cancellation reaps ffmpeg.
+    let deadline = if remote {
+        Duration::from_secs(600)
+    } else {
+        EXTRACT_TIMEOUT
+    };
+    let output = match crate::process_output::output(cmd, deadline).await {
+        Ok(o) => o,
+        Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
+            return Err("subtitle extraction timed out".to_string())
+        }
+        Err(e) => return Err(format!("ffmpeg spawn: {}", e)),
     };
     if !output.status.success() {
         let err = String::from_utf8_lossy(&output.stderr);
-        return Err(format!(
-            "ffmpeg failed: {}",
-            err.chars().take(200).collect::<String>()
-        ));
+        let reason = if err.contains("403 Forbidden") || err.contains("401 Unauthorized") {
+            "subtitle source denied access"
+        } else if err.contains("matches no streams") {
+            "subtitle track missing"
+        } else if err.contains("bitmap to bitmap") {
+            "image subtitle track"
+        } else if err.to_ascii_lowercase().contains("timed out") {
+            "subtitle extraction timed out"
+        } else {
+            "ffmpeg could not extract subtitle"
+        };
+        return Err(reason.into());
     }
     let mut bytes = output.stdout;
     if bytes.len() > MAX_SRT_BYTES {
@@ -67,7 +96,7 @@ pub async fn subtitle_extract_ass(
 ) -> Result<String, String> {
     let ffmpeg = crate::transcode::locate_ffmpeg().ok_or_else(|| "ffmpeg not found".to_string())?;
     let map = format!("0:s:{}", stream_index.unwrap_or(0));
-    let mut cmd = tokio::process::Command::new(&ffmpeg);
+    let mut cmd = std::process::Command::new(&ffmpeg);
     cmd.arg("-nostdin").arg("-loglevel").arg("error");
     if let Some(h) = &headers {
         if let Some(ua) = h.get("User-Agent").or_else(|| h.get("user-agent")) {
@@ -90,10 +119,12 @@ pub async fn subtitle_extract_ass(
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
-    let output = match tokio::time::timeout(ASS_HEADER_TIMEOUT, cmd.output()).await {
-        Ok(Ok(o)) => o,
-        Ok(Err(e)) => return Err(format!("ffmpeg spawn: {}", e)),
-        Err(_) => return Err("ass header extraction timed out".to_string()),
+    let output = match crate::process_output::output(cmd, ASS_HEADER_TIMEOUT).await {
+        Ok(o) => o,
+        Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
+            return Err("ass header extraction timed out".to_string())
+        }
+        Err(e) => return Err(format!("ffmpeg spawn: {}", e)),
     };
     let mut bytes = output.stdout;
     if bytes.len() > MAX_ASS_BYTES {

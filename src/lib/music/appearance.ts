@@ -18,6 +18,7 @@ type Appearance = {
   gifSize: number;
   gifTiming: GifTiming;
   immersive: boolean;
+  theatre: boolean;
 };
 function read(): Appearance {
   try {
@@ -34,9 +35,10 @@ function read(): Appearance {
       gifSize: typeof value.gifSize === "number" && Number.isFinite(value.gifSize) ? Math.max(64, Math.min(220, value.gifSize)) : 126,
       gifTiming: normalizeGifTiming(value.gifTiming),
       immersive: value.immersive === true,
+      theatre: value.theatre === true,
     };
   } catch {
-    return { artworkColors: true, levels: true, dockVisualizer: false, mikuVisualizer: false, mikuModel: DEFAULT_MIKU_MODEL, gifVisualizer: false, gifId: null, gifName: "", gifSize: 126, gifTiming: "auto", immersive: false };
+    return { artworkColors: true, levels: true, dockVisualizer: false, mikuVisualizer: false, mikuModel: DEFAULT_MIKU_MODEL, gifVisualizer: false, gifId: null, gifName: "", gifSize: 126, gifTiming: "auto", immersive: false, theatre: false };
   }
 }
 let appearance = read();

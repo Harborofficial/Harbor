@@ -32,13 +32,12 @@ test("beta 0.9.126 notes load offline without substituting stable notes", async 
   const module = { exports: {} };
   let requests = 0;
   const dependencies = {
-    "@/lib/safe-fetch": {
-      safeFetch: async () => {
+    "./github-releases": {
+      githubReleaseNote: async () => {
         requests++;
-        throw new Error("Offline");
+        return null;
       },
     },
-    "@/lib/config/endpoints": { HARBOR_API_BASE: "https://example.invalid" },
     "./bundled-release-notes.json": { default: notes },
   };
   const { outputText } = ts.transpileModule(read("src/lib/updater/release-notes.ts"), {

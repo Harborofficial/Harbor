@@ -81,6 +81,7 @@ import { SourceDrawer } from "./play-picker/source-drawer";
 import { TierStrip } from "./play-picker/tier-strip";
 import { usePickHandler, type ResolvingSelection } from "./play-picker/use-pick-handler";
 import { useActiveKid } from "@/lib/profiles";
+import { expandOriginalAudioLang } from "@/lib/player/audio-language";
 import { useAutoCandidates } from "./play-picker/use-auto-candidates";
 import { useAutoFire } from "./play-picker/use-auto-fire";
 import { useRoomInvite } from "./play-picker/use-room-invite";
@@ -104,6 +105,16 @@ import { isLivePlaybackSrc } from "@/lib/player/live-src";
 const TIER_ORDER: Tier[] = ["4K_DV", "4K_HDR", "4K", "1080p_HDR", "1080p", "720p", "SD", "ROUGH"];
 
 const RESOLVE_TIMEOUT_MS = 150_000;
+
+const TORRENTS_BANNER_DISMISS_KEY = "harbor.stream-picker.torrents-disabled.dismissed.v1";
+
+function torrentsBannerDismissed(): boolean {
+  try {
+    return localStorage.getItem(TORRENTS_BANNER_DISMISS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 type PerEpisodeStatus =
   | { code: "checking"; total: number }
@@ -264,6 +275,7 @@ export function PlayPicker({
   const closeDrawerWithScrollRef = useRef<(() => void) | null>(null);
   const [strictMode, setStrictMode] = useState(settings.streamFilterLevel === "strict");
   const [forceShowAll, setForceShowAll] = useState(false);
+  const [hideTorrentsBanner, setHideTorrentsBanner] = useState(torrentsBannerDismissed);
   const filterDisabled = settings.streamFilterLevel === "off" || forceShowAll || isDownload;
   const animeTitles = useAnimeAltTitles(meta, episode?.sourceMetaId);
   const {
@@ -310,8 +322,8 @@ export function PlayPicker({
       seen.add(code);
       out.push(lang);
     }
-    return out;
-  }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest]);
+    return expandOriginalAudioLang(out, meta.originalLanguage, isAnimeRequest);
+  }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest, meta.originalLanguage]);
   const [langFilter, setLangFilter] = useState(
     settings.requirePreferredLanguage === true && baseLangs.length > 0,
   );
@@ -764,6 +776,7 @@ export function PlayPicker({
     !!previousMatch && (isCached(previousMatch) || !!previousMatch.url || p2pAutoConsent);
   const rememberedFiredRef = useRef(false);
   const rememberedHandledFirst =
+    !autoCancelled &&
     !!previousMatch &&
     (settings.rememberLastStream || !!continuation) &&
     !!resume &&
@@ -830,7 +843,13 @@ export function PlayPicker({
     expectHostSource,
     hostSource: hostSourceForMedia,
     preferredSourceEntry: lastSeriesSource,
-    preferredSourceMatched: sameSourceMatch != null || previousMatch != null,
+    preferredSourceMatched:
+      !!lastSeriesSource &&
+      !!autoCandidates[0] &&
+      (lastSeriesSourceIsLineage ? streamMatchesPreferredSource : streamMatchesSource)(
+        autoCandidates[0],
+        lastSeriesSource,
+      ),
     season: !isAnimeMetaId ? (episode?.season ?? null) : null,
     episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
     addonQuorum,
@@ -973,11 +992,14 @@ export function PlayPicker({
     };
   }, [engineWarming, setResolveError]);
 
+  // Keep the initial automatic/resume transition mounted while waiting for
+  // the preferred addon's first candidate. The old condition briefly became
+  // false between stream IDs resolving and the first source arriving, exposing
+  // the picker for a frame before switching back to the loading screen.
   const showAutoTransition =
     !pickerErrorText &&
     !isDownload &&
-    ((autoActive && (streamIds === null || loading || autoCandidates.length > 0)) ||
-      resolving != null);
+    (autoActive || resolving != null);
   void terminalEmpty;
 
   const pickerScrollKey = useMemo(() => {
@@ -1078,6 +1100,17 @@ export function PlayPicker({
 
       <div className="relative z-20 mx-auto flex min-h-full w-full max-w-5xl flex-col gap-5 px-12 pb-32 pt-6">
         <PickerNav onBack={backToDetail} onRefresh={refresh} refreshing={loading} />
+        {pickerErrorText && engineWarming && (
+          <div className="flex items-center gap-3 rounded-2xl border border-edge-soft/60 bg-elevated/40 px-5 py-4 text-[13.5px] text-ink-muted">
+            <Loader2 size={16} className="shrink-0 animate-spin text-ink-subtle" />
+            <span>{pickerErrorText}</span>
+          </div>
+        )}
+        {pickerErrorText && !engineWarming && (
+          <div className="rounded-2xl border border-danger/30 bg-danger/15 px-5 py-4 text-[13.5px] text-ink">
+            {pickerErrorText}
+          </div>
+        )}
         <PickerHeader
           meta={metaForDisplay}
           episode={episode}
@@ -1120,19 +1153,36 @@ export function PlayPicker({
           </div>
         )}
 
-        {torrentsDisabled() && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-400/10 px-5 py-3.5 text-[13px] text-amber-100">
-            <span>
+        {torrentsDisabled() && !hideTorrentsBanner && (
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-400/10 px-5 py-3.5 text-[13px] text-amber-100">
+            <span className="min-w-0 flex-1">
               Torrents are disabled in settings. Uncached streams will not play unless they come
               from a debrid service or a direct link.
             </span>
-            <button
-              type="button"
-              onClick={() => openSettings("player")}
-              className="rounded-md border border-amber-300/40 px-3 py-1 text-[12px] font-semibold text-amber-100 transition-colors hover:bg-amber-300/10"
-            >
-              Open Settings
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => openSettings("player")}
+                className="rounded-md border border-amber-300/40 px-3 py-1 text-[12px] font-semibold text-amber-100 transition-colors hover:bg-amber-300/10"
+              >
+                Open Settings
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    localStorage.setItem(TORRENTS_BANNER_DISMISS_KEY, "1");
+                  } catch {
+                    /* noop */
+                  }
+                  setHideTorrentsBanner(true);
+                }}
+                aria-label={t("Dismiss")}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-amber-100/80 transition-colors hover:bg-amber-300/10 hover:text-amber-100"
+              >
+                <X size={14} strokeWidth={2.2} />
+              </button>
+            </div>
           </div>
         )}
 
@@ -1349,17 +1399,6 @@ export function PlayPicker({
           </>
         )}
 
-        {pickerErrorText && engineWarming && (
-          <div className="flex items-center gap-3 rounded-2xl border border-edge-soft/60 bg-elevated/40 px-5 py-4 text-[13.5px] text-ink-muted">
-            <Loader2 size={16} className="shrink-0 animate-spin text-ink-subtle" />
-            <span>{pickerErrorText}</span>
-          </div>
-        )}
-        {pickerErrorText && !engineWarming && (
-          <div className="rounded-2xl border border-danger/30 bg-danger/15 px-5 py-4 text-[13.5px] text-ink">
-            {pickerErrorText}
-          </div>
-        )}
       </div>
       {(settings.pickerLayout === "stremio" || isDownload) &&
         filteredPicker &&

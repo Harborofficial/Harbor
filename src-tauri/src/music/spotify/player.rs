@@ -110,15 +110,18 @@ fn spawn_events(
                     if !record_position(&current, play_request_id, &track_id, position_ms) {
                         continue;
                     }
+                    let Some(id) = current_event_id(&current, play_request_id) else {
+                        continue;
+                    };
                     let _ = app.emit(
                         "music://event",
-                        json!({ "event": "property-change", "name": "time-pos", "data": position_ms as f64 / 1000.0 }),
+                        json!({ "event": "property-change", "name": "time-pos", "data": position_ms as f64 / 1000.0, "trackId": id, "connectorId": "spotify" }),
                     );
                     let _ = app.emit(
                         "music://event",
-                        json!({ "event": "property-change", "name": "pause", "data": false }),
+                        json!({ "event": "property-change", "name": "pause", "data": false, "trackId": id, "connectorId": "spotify" }),
                     );
-                    let _ = app.emit("music://event", json!({ "event": "file-loaded" }));
+                    let _ = app.emit("music://event", json!({ "event": "file-loaded", "trackId": id, "connectorId": "spotify" }));
                 }
                 PlayerEvent::Paused {
                     play_request_id,
@@ -129,13 +132,16 @@ fn spawn_events(
                     if !record_position(&current, play_request_id, &track_id, position_ms) {
                         continue;
                     }
+                    let Some(id) = current_event_id(&current, play_request_id) else {
+                        continue;
+                    };
                     let _ = app.emit(
                         "music://event",
-                        json!({ "event": "property-change", "name": "time-pos", "data": position_ms as f64 / 1000.0 }),
+                        json!({ "event": "property-change", "name": "time-pos", "data": position_ms as f64 / 1000.0, "trackId": id, "connectorId": "spotify" }),
                     );
                     let _ = app.emit(
                         "music://event",
-                        json!({ "event": "property-change", "name": "pause", "data": true }),
+                        json!({ "event": "property-change", "name": "pause", "data": true, "trackId": id, "connectorId": "spotify" }),
                     );
                 }
                 PlayerEvent::PositionChanged {
@@ -159,9 +165,12 @@ fn spawn_events(
                     if !record_position(&current, play_request_id, &track_id, position_ms) {
                         continue;
                     }
+                    let Some(id) = current_event_id(&current, play_request_id) else {
+                        continue;
+                    };
                     let _ = app.emit(
                         "music://event",
-                        json!({ "event": "property-change", "name": "time-pos", "data": position_ms as f64 / 1000.0 }),
+                        json!({ "event": "property-change", "name": "time-pos", "data": position_ms as f64 / 1000.0, "trackId": id, "connectorId": "spotify" }),
                     );
                 }
                 PlayerEvent::VolumeChanged { volume } => {
@@ -176,21 +185,27 @@ fn spawn_events(
                     let Some(context) = finish_context(&current, play_request_id) else {
                         continue;
                     };
+                    let id = context.track.id.clone();
                     scrobble_current(&app, context);
                     let _ = app.emit(
                         "music://event",
-                        json!({ "event": "end-file", "reason": "eof" }),
+                        json!({ "event": "end-file", "reason": "eof", "trackId": id, "connectorId": "spotify" }),
                     );
                 }
                 PlayerEvent::Unavailable {
                     play_request_id, ..
                 } => {
-                    if finish_context(&current, play_request_id).is_none() {
+                    let Some(context) = finish_context(&current, play_request_id) else {
                         continue;
-                    }
+                    };
                     let _ = app.emit(
                         "music://event",
-                        json!({ "event": "player-failure", "reason": "Spotify track is unavailable" }),
+                        json!({
+                            "event": "player-failure",
+                            "reason": "Spotify could not load audio for this track. Try a different song; check Harbor logs for audio-key or network errors.",
+                            "trackId": context.track.id,
+                            "connectorId": "spotify"
+                        }),
                     );
                 }
                 _ => {}
@@ -307,6 +322,18 @@ fn carries(context: &PlaybackContext, track_id: &SpotifyUri) -> bool {
         .is_ok_and(|uri| context.track.source_id.as_deref() == Some(uri.as_str()))
 }
 
+/// Attach Harbor's track identity to player events so a late load cannot complete a newer song.
+fn current_event_id(
+    current: &Arc<RwLock<Option<PlaybackContext>>>,
+    request_id: u64,
+) -> Option<String> {
+    current
+        .read()
+        .as_ref()
+        .filter(|context| context.request_id == Some(request_id))
+        .map(|context| context.track.id.clone())
+}
+
 fn record_position(
     current: &Arc<RwLock<Option<PlaybackContext>>>,
     request_id: u64,
@@ -397,6 +424,15 @@ mod tests {
             previous_position: None,
             request_id: Some(1),
         })))
+    }
+
+    #[test]
+    fn late_spotify_events_cannot_claim_a_different_play_request() {
+        let current = context(300);
+        assert_eq!(current_event_id(&current, 1).as_deref(), Some("spotify:track:test"));
+        assert!(current_event_id(&current, 2).is_none());
+        current.write().as_mut().unwrap().request_id = None;
+        assert!(current_event_id(&current, 1).is_none());
     }
 
     #[test]

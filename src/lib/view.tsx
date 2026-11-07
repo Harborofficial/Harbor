@@ -256,6 +256,8 @@ export type Frame =
   | { kind: "curated-list"; listId: string }
   | {
       kind: "picker";
+      /** Fresh navigation must not reuse the previous picker's async selection state. */
+      pickerRevision?: number;
       meta: Meta;
       queueItemId?: string;
       episode?: PlayEpisode;
@@ -374,6 +376,7 @@ type ViewValue = {
   curatedListId: string | null;
   openCuratedList: (id: string) => void;
   picker: {
+    pickerRevision?: number;
     meta: Meta;
     queueItemId?: string;
     episode?: PlayEpisode;
@@ -739,6 +742,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const picker =
     top.kind === "picker"
       ? {
+          pickerRevision: top.pickerRevision,
           meta: top.meta,
           queueItemId: top.queueItemId,
           episode: top.episode,
@@ -1435,6 +1439,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     });
   }, [setNavStack]);
 
+  const pickerRevisionRef = useRef(0);
   const openPicker = useCallback(
     (m: Meta, ep?: PlayEpisode, opts?: PickerOptions) => {
       if (m.id?.startsWith("magnet:")) {
@@ -1446,6 +1451,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (opts?.autoPlay) beginMarathonAdvance();
+      const pickerRevision = ++pickerRevisionRef.current;
       setNavStack((cur) => {
         const t = cur[cur.length - 1];
         if (samePickerRequest(t, m, ep, opts)) {
@@ -1453,6 +1459,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         }
         return pushFrame(cur, {
           kind: "picker",
+          pickerRevision,
           meta: m,
           queueItemId: opts?.queueItemId,
           episode: ep,

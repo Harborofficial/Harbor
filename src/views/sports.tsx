@@ -7,6 +7,7 @@ import { SportsRefreshButton } from "./sports/refresh-button";
 import { useT, useUiLanguage } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import type { EsportsMatch } from "@/lib/sports/esports-feeds";
 import { officialBroadcastSource } from "@/lib/sports/esports-streams";
 import { getGroupLabel, getLeagueLabel, type SportsGame } from "@/lib/sports/espn";
@@ -75,9 +76,9 @@ function SportsHubView({ active = false }: { active?: boolean }) {
   const scrollRef = useRef<HTMLElement>(null);
   useScrollMemory("sports", scrollRef, active);
   const { ref: sportRail, handlers: sportHandlers } = useDragScroll<HTMLDivElement>();
-  const [tab, setTab] = useState("home");
-  const [requestedGroup, setGroup] = useState("all");
-  const [browsing, setBrowsing] = useState(false);
+  const [tab, setTab] = useSessionState("sports.tab", "home");
+  const [requestedGroup, setGroup] = useSessionState("sports.group", "all");
+  const [browsing, setBrowsing] = useSessionState("sports.browsing", false);
   const [esportsHeroTarget, setEsportsHeroTarget] = useState<HTMLDivElement | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -92,7 +93,7 @@ function SportsHubView({ active = false }: { active?: boolean }) {
     return () => animation?.cancel();
   }, [tab, requestedGroup]);
   const [today, setToday] = useState(() => dayStamp(new Date()));
-  const [day, setDay] = useState(today);
+  const [day, setDay] = useSessionState("sports.day", today);
   const [refresh, setRefresh] = useState(0);
   const [setup, setSetup] = useState(false);
   const eventTrigger = useRef<{ element: HTMLElement; label: string | null } | null>(null);
@@ -116,7 +117,7 @@ function SportsHubView({ active = false }: { active?: boolean }) {
     return () => cancelAnimationFrame(frame);
   }, [active]);
   const [showTop, setShowTop] = useState(false);
-  const [leagueFilter, setLeagueFilter] = useState("");
+  const [leagueFilter, setLeagueFilter] = useSessionState("sports.leagueFilter", "");
   useEffect(() => {
     if (!active) return;
     const timer = setInterval(() => setToday(dayStamp(new Date())), 60_000);
@@ -138,7 +139,12 @@ function SportsHubView({ active = false }: { active?: boolean }) {
   const esportsLeagues = leagues.filter(
     (key) => HUB_LEAGUES.find((l) => l.key === key)?.group === "esports",
   );
+  const sportsLeaguesSeenRef = useRef(false);
   useEffect(() => {
+    if (!sportsLeaguesSeenRef.current) {
+      sportsLeaguesSeenRef.current = true;
+      return;
+    }
     if (!setup) {
       setGroup("all");
       setLeagueFilter("");

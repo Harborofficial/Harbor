@@ -50,7 +50,7 @@ const PAGE_LABELS: Record<string, string> = {
   "p2p.server": "Streaming server",
   "plugins.plugins": "Installed plugins",
   "plugins.repositories": "Plugin repositories",
-  "library.cards": "Poster cards",
+  "library.cards": "Cards",
   "library.providers": "Metadata providers",
   "badges.badges": "Stream badges",
   "badges.rules": "Badge rules",

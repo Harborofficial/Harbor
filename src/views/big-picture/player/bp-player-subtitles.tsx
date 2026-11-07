@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { Flag } from "@/components/flag";
-import { useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
+import { isAppliedAutoSync, useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
 import { pickBestMatch } from "@/components/player/subtitle-menu/best-match";
 import { useSubtitleContext } from "@/components/player/subtitle-menu/subtitle-context-store";
 import { useSubtitleSearch } from "@/components/player/subtitle-menu/subtitle-search-store";
@@ -152,8 +152,8 @@ export function BpPlayerSubtitles(props: BpPlayerSubtitlesProps) {
   }, [lane]);
 
   const selected = tracks.find((track) => track.id === selectedId) ?? null;
-  const syncBusy = autoSync?.status === "analyzing";
-  const canSync = selected?.external === true || syncBusy === true || autoSync?.status === "synced";
+  const syncBusy = autoSync?.status === "analyzing" || autoSync?.status === "listening";
+  const canSync = selected?.external === true || syncBusy === true || isAppliedAutoSync(autoSync?.status);
   const offset = offsetLabel(delaySec, t);
   const context = isSeries
     ? `${props.metaTitle ?? ""} · S${String(props.season).padStart(2, "0")}E${String(props.episode).padStart(2, "0")}`

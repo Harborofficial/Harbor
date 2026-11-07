@@ -5,6 +5,9 @@ import { episodeFromVideoId, libraryGetOne, type LibraryItem } from "@/lib/strem
 const RESTART_THRESHOLD = 0.8;
 const REMOTE_CACHE_TTL_MS = 30_000;
 const MAX_CACHE_KEYS_PER_ACCOUNT = 24;
+// A stored local resume is enough to start playback. A cold Stremio lookup
+// should not hold the media open; a warm lookup still wins inside this budget.
+const LOCAL_RESUME_REMOTE_BUDGET_MS = 500;
 
 type ResumeIdentity = {
   metaId: string;
@@ -89,6 +92,25 @@ export function prefetchResumeStart(identity: ResumeIdentity): void {
   void remoteItems(identity);
 }
 
+function remoteItemsWithin(
+  promise: Promise<Array<LibraryItem | null>>,
+  budgetMs: number,
+): Promise<Array<LibraryItem | null> | null> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(null), budgetMs);
+    promise.then(
+      (items) => {
+        clearTimeout(timer);
+        resolve(items);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(null);
+      },
+    );
+  });
+}
+
 export async function resolveStartMs({
   metaId,
   season,
@@ -112,7 +134,21 @@ export async function resolveStartMs({
     const ep = item.state?.episode ?? fromVid?.episode;
     return se === season && ep === episode;
   };
-  const remotes = await remoteItems({ metaId, authKey, imdbId, imdbVerified });
+  const remotes =
+    local > 0
+      ? await remoteItemsWithin(
+          remoteItems({ metaId, authKey, imdbId, imdbVerified }),
+          LOCAL_RESUME_REMOTE_BUDGET_MS,
+        )
+      : await remoteItems({ metaId, authKey, imdbId, imdbVerified });
+  if (!remotes) {
+    const pct = localEntry?.pct;
+    return {
+      ms: local,
+      fromRemote: false,
+      finished: typeof pct === "number" && pct >= RESTART_THRESHOLD,
+    };
+  }
   for (const remote of remotes) {
     if (!remote || !matchesEpisode(remote)) continue;
     const remoteMs = remote.state?.timeOffset ?? 0;

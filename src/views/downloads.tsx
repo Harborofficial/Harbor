@@ -1,6 +1,8 @@
 import { useMemo, useRef, useState } from "react";
-import { Download as DownloadIcon, ListFilter, ListVideo } from "lucide-react";
+import { CheckSquare2, Download as DownloadIcon, Ellipsis, ListFilter, ListVideo, X } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
+import { useSessionState } from "@/lib/session-state";
+import { useScrollMemory } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
 import {
   downloadsSnapshot,
@@ -16,22 +18,22 @@ import { DownloadRow } from "./downloads/download-row";
 import { SaveLocationChip } from "./downloads/save-location";
 import { AutoDownloadButton, AutoDownloadModal } from "./downloads/auto-download-modal";
 import { fmtBytes, fmtSpeed } from "./downloads/downloads-format";
+import { selectedVisibleIds, toggleDownloadGroupSelection, toggleDownloadSelection } from "./downloads/selection";
+import { DownloadSelectionCheck } from "./downloads/selection-check";
+import { matchesDownloadFilter, type DownloadsFilter } from "./downloads/downloads-visibility";
 
 type DownloadGroup =
   | { kind: "movie"; item: DownloadItem }
   | { kind: "show"; metaId: string; title: string; poster: string | null; items: DownloadItem[] };
 
-type Filter = "all" | "active" | "saved" | "issues";
+type Filter = DownloadsFilter;
 
 function statusRank(s: DownloadItem["status"]): number {
   return s === "downloading" || s === "paused" ? 0 : s === "error" ? 1 : s === "done" ? 2 : 3;
 }
 
 function matchesFilter(d: DownloadItem, f: Filter): boolean {
-  if (f === "active") return d.status === "downloading" || d.status === "paused";
-  if (f === "saved") return d.status === "done";
-  if (f === "issues") return d.status === "error" || d.status === "interrupted";
-  return true;
+  return matchesDownloadFilter(d, f);
 }
 
 function buildGroups(items: DownloadItem[]): DownloadGroup[] {
@@ -67,16 +69,32 @@ function buildGroups(items: DownloadItem[]): DownloadGroup[] {
 export function DownloadsView({ active = false }: { active?: boolean }) {
   const t = useT();
   const items = useDownloads();
-  const [filter, setFilter] = useState<Filter>("all");
+  const contextMenu = useContextMenu();
+  const { batchActions } = useDownloadActions();
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [filter, setFilter] = useSessionState<Filter>("downloads.filter", "all");
+  const changeFilter = (next: Filter) => {
+    setFilter(next);
+    setSelectedIds(new Set());
+  };
+  const toggleSelected = (id: string) =>
+    setSelectedIds((selected) => toggleDownloadSelection(selected, id));
+  const toggleGroupSelected = (ids: string[]) =>
+    setSelectedIds((selected) => toggleDownloadGroupSelection(selected, ids));
+  const scrollRef = useRef<HTMLElement>(null);
+  useScrollMemory("downloads", scrollRef, active);
 
+  const visibleItems = useMemo(() => items.filter((d) => matchesFilter(d, "all")), [items]);
   const counts = useMemo(
     () => ({
-      all: items.length,
+      all: visibleItems.length,
       active: items.filter((d) => matchesFilter(d, "active")).length,
       saved: items.filter((d) => matchesFilter(d, "saved")).length,
       issues: items.filter((d) => matchesFilter(d, "issues")).length,
+      canceled: items.filter((d) => matchesFilter(d, "canceled")).length,
     }),
-    [items],
+    [items, visibleItems],
   );
   const effective: Filter = filter !== "all" && counts[filter] === 0 ? "all" : filter;
 
@@ -90,10 +108,10 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
     0,
   );
   const subtitle =
-    items.length === 0
+    visibleItems.length === 0
       ? t("Saved movies, episodes, and eBooks for offline use")
       : [
-          items.length === 1 ? t("1 item") : t("{count} items", { count: items.length }),
+          visibleItems.length === 1 ? t("1 item") : t("{count} items", { count: visibleItems.length }),
           counts.active - paused > 0
             ? t("{count} downloading", { count: counts.active - paused })
             : null,
@@ -108,9 +126,31 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
     () => buildGroups(items.filter((d) => matchesFilter(d, effective))),
     [items, effective],
   );
+  const visibleIds = groups.flatMap((group) =>
+    group.kind === "movie" ? [group.item.id] : group.items.map((item) => item.id),
+  );
+  const selected = selectedVisibleIds(visibleIds, selectedIds);
+  const openSelectedActions = (anchor: HTMLButtonElement) => {
+    if (selected.length === 0) return;
+    const snapshot = [...selected];
+    const rect = anchor.getBoundingClientRect();
+    contextMenu.openAt(
+      { x: rect.left, y: rect.bottom },
+      {
+        kind: "actions",
+        id: "downloads:selection",
+        label: t("Selected downloads"),
+        subscribe: subscribeDownloads,
+        actions: () => batchActions(snapshot, t("Selected downloads"), "selection"),
+      },
+    );
+  };
 
   return (
-    <main className="flex-1 overflow-y-auto bg-canvas px-5 pb-24 pt-[max(6rem,var(--harbor-floating-back-space,0px))] sm:px-8 lg:px-12 lg:pt-[max(7rem,var(--harbor-floating-back-space,0px))]">
+    <main
+      ref={scrollRef}
+      className="flex-1 overflow-y-auto bg-canvas px-5 pb-24 pt-[max(6rem,var(--harbor-floating-back-space,0px))] sm:px-8 lg:px-12 lg:pt-[max(7rem,var(--harbor-floating-back-space,0px))]"
+    >
       <div className="mx-auto w-full max-w-4xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
           <div className="min-w-0">
@@ -130,14 +170,14 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
               label={t("All")}
               count={counts.all}
               active={effective === "all"}
-              onClick={() => setFilter("all")}
+              onClick={() => changeFilter("all")}
             />
             {counts.active > 0 && (
               <FilterTab
                 label={t("Active")}
                 count={counts.active}
                 active={effective === "active"}
-                onClick={() => setFilter("active")}
+                onClick={() => changeFilter("active")}
               />
             )}
             {counts.saved > 0 && (
@@ -145,7 +185,7 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
                 label={t("Saved")}
                 count={counts.saved}
                 active={effective === "saved"}
-                onClick={() => setFilter("saved")}
+                onClick={() => changeFilter("saved")}
               />
             )}
             {counts.issues > 0 && (
@@ -153,23 +193,92 @@ export function DownloadsView({ active = false }: { active?: boolean }) {
                 label={t("Issues")}
                 count={counts.issues}
                 active={effective === "issues"}
-                onClick={() => setFilter("issues")}
+                onClick={() => changeFilter("issues")}
               />
             )}
+            {counts.canceled > 0 && (
+              <FilterTab
+                label={t("Canceled")}
+                count={counts.canceled}
+                active={effective === "canceled"}
+                onClick={() => changeFilter("canceled")}
+              />
+            )}
+            <button
+              type="button"
+              aria-pressed={selectionMode}
+              onClick={() => {
+                setSelectionMode((value) => !value);
+                setSelectedIds(new Set());
+              }}
+              className={`ml-auto inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold ring-1 transition-colors ${selectionMode
+                ? "bg-accent/10 text-accent ring-accent/40"
+                : "bg-elevated/50 text-ink-muted ring-edge-soft hover:text-ink"}`}
+            >
+              {selectionMode ? <X size={14} /> : <CheckSquare2 size={14} />}
+              {selectionMode ? t("Done selecting") : t("Select multiple")}
+            </button>
           </div>
         )}
 
-        {items.length === 0 ? (
+        <div className={`harbor-download-selection-panel ${selectionMode ? "is-open" : ""}`} inert={!selectionMode} aria-hidden={!selectionMode}>
+          <div className="min-h-0 overflow-hidden">
+          <div className="harbor-download-selection-toolbar flex flex-wrap items-center gap-2 rounded-xl border border-edge-soft bg-elevated/45 px-3 py-2">
+            <span className="mr-auto text-[12px] font-semibold tabular-nums text-ink-muted">
+              {t("{count} selected", { count: selected.length })}
+            </span>
+            <button
+              type="button"
+              disabled={visibleIds.length === 0}
+              onClick={() => setSelectedIds(new Set(visibleIds))}
+              className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-ink-muted hover:bg-elevated hover:text-ink disabled:opacity-40"
+            >
+              {t("Select all")}
+            </button>
+            <button
+              type="button"
+              disabled={selected.length === 0}
+              onClick={() => setSelectedIds(new Set())}
+              className="rounded-lg px-2.5 py-1.5 text-[12px] font-semibold text-ink-muted hover:bg-elevated hover:text-ink disabled:opacity-40"
+            >
+              {t("Clear")}
+            </button>
+            <button
+              type="button"
+              disabled={selected.length === 0}
+              aria-haspopup="menu"
+              onClick={(event) => openSelectedActions(event.currentTarget)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3.5 py-1.5 text-[12px] font-semibold text-canvas transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {t("Actions")} <Ellipsis size={15} />
+            </button>
+          </div>
+          </div>
+        </div>
+
+        {groups.length === 0 ? (
           <EmptyState />
         ) : (
           <div key={effective} className="animate-fade-in flex flex-col gap-2.5">
             {groups.map((g) =>
               g.kind === "movie" ? (
                 <ul key={g.item.id} className="contents">
-                  <DownloadRow d={g.item} />
+                  <DownloadRow
+                    d={g.item}
+                    selected={selectedIds.has(g.item.id)}
+                    onToggleSelection={selectionMode ? () => toggleSelected(g.item.id) : undefined}
+                  />
                 </ul>
               ) : (
-                <ShowGroup key={g.metaId} group={g} filter={effective} />
+                <ShowGroup
+                  key={g.metaId}
+                  group={g}
+                  filter={effective}
+                  selectionMode={selectionMode}
+                  selectedIds={selectedIds}
+                  onToggleSelection={toggleSelected}
+                  onToggleGroup={toggleGroupSelected}
+                />
               ),
             )}
           </div>
@@ -240,9 +349,17 @@ function EmptyState() {
 function ShowGroup({
   group,
   filter,
+  selectionMode,
+  selectedIds,
+  onToggleSelection,
+  onToggleGroup,
 }: {
   group: Extract<DownloadGroup, { kind: "show" }>;
   filter: Filter;
+  selectionMode: boolean;
+  selectedIds: ReadonlySet<string>;
+  onToggleSelection: (id: string) => void;
+  onToggleGroup: (ids: string[]) => void;
 }) {
   const { settings } = useSettings();
   const t = useT();
@@ -251,7 +368,13 @@ function ShowGroup({
   const latest = useRef({ batchActions, filter });
   latest.current = { batchActions, filter };
   const allDownloads = () =>
-    downloadsSnapshot().filter((item) => item.metaId === group.metaId && item.season != null);
+    downloadsSnapshot().filter((item) =>
+      item.metaId === group.metaId &&
+      item.season != null &&
+      (latest.current.filter === "canceled"
+        ? item.status === "canceled"
+        : item.status !== "canceled"),
+    );
   const source = {
     kind: "actions" as const,
     id: `download-group:${group.metaId}`,
@@ -316,15 +439,30 @@ function ShowGroup({
     (sum, d) => (d.status === "done" ? sum + (d.totalBytes ?? d.receivedBytes) : sum),
     0,
   );
+  const episodeIds = episodes.map((d) => d.id);
+  const selectedCount = episodeIds.filter((id) => selectedIds.has(id)).length;
+  const allSelected = episodeIds.length > 0 && selectedCount === episodeIds.length;
   return (
     <div className="overflow-hidden rounded-2xl border border-edge-soft bg-elevated/25">
       <div
         tabIndex={0}
-        role="group"
-        aria-label={t("Download actions for {title}", { title: group.title })}
-        onContextMenu={(event) => contextMenu.open(event, source)}
+        role={selectionMode ? "checkbox" : "group"}
+        aria-checked={selectionMode ? (allSelected ? true : selectedCount > 0 ? "mixed" : false) : undefined}
+        aria-label={selectionMode
+          ? t("Select downloads for {title}", { title: group.title })
+          : t("Download actions for {title}", { title: group.title })}
+        onClick={selectionMode ? () => onToggleGroup(episodeIds) : undefined}
+        onContextMenu={(event) => {
+          if (selectionMode) event.preventDefault();
+          else contextMenu.open(event, source);
+        }}
         onKeyDown={(event) => {
-          if (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10")) return;
+          if (selectionMode && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            onToggleGroup(episodeIds);
+            return;
+          }
+          if (selectionMode || (event.key !== "ContextMenu" && !(event.shiftKey && event.key === "F10"))) return;
           event.preventDefault();
           event.stopPropagation();
           const rect = event.currentTarget.getBoundingClientRect();
@@ -333,7 +471,7 @@ function ShowGroup({
             source,
           );
         }}
-        className="flex items-center gap-3 px-3 py-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+        className={`harbor-download-select-group flex items-center gap-3 px-3 py-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${selectionMode ? "cursor-pointer" : ""}`}
       >
         <div className="h-[52px] w-[36px] shrink-0 overflow-hidden rounded-md">
           <Poster src={poster.src} onError={poster.onError} seed={group.metaId} ratio="portrait" />
@@ -350,10 +488,23 @@ function ShowGroup({
             {totalBytes > 0 ? `  ·  ${fmtBytes(totalBytes)}` : ""}
           </span>
         </div>
+        <div className={`harbor-download-selection-slot ${selectionMode ? "is-visible" : ""}`} aria-hidden={!selectionMode}>
+          <div className="harbor-download-selection-slot-inner">
+            {selectionMode && (
+              <DownloadSelectionCheck checked={allSelected} partial={selectedCount > 0 && !allSelected} delayMs={30} />
+            )}
+          </div>
+        </div>
       </div>
       <ul className="flex flex-col gap-1.5 border-t border-edge-soft/50 px-2 pb-2 pt-2">
         {episodes.map((d) => (
-          <DownloadRow key={d.id} d={d} compact />
+          <DownloadRow
+            key={d.id}
+            d={d}
+            compact
+            selected={selectedIds.has(d.id)}
+            onToggleSelection={selectionMode ? () => onToggleSelection(d.id) : undefined}
+          />
         ))}
       </ul>
     </div>

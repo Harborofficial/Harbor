@@ -1,3 +1,4 @@
+import { libraryGroupHomeRows } from "@/lib/library-groups";
 import {
   startTransition,
   useCallback,
@@ -45,7 +46,6 @@ import { resolveAddonOrigin } from "@/lib/nuvio/nuvio-addon-registry";
 import {
   deleteWatchProgressFromNuvio,
   isNuvioProviderActive,
-  reconcileNuvioWatched,
   resolveNuvioProfileIndex,
 } from "@/lib/nuvio/nuvio-sync";
 import { isNuvioSignedIn } from "@/lib/nuvio/nuvio-client";
@@ -77,7 +77,7 @@ import { reconcileRemoteWatched } from "@/lib/stremio-watched-pull";
 import { isCorruptAnimeEntry } from "@/lib/anime-cw-repair";
 import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
 import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
-import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
+import { cwTitleKey, dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import {
   ANIME_CLOUD_ID,
   CW_FINISHED_RATIO,
@@ -106,12 +106,7 @@ import {
   peekSimklWatchedMap,
   type WatchlistStatus,
 } from "@/lib/simkl/list-status";
-import {
-  refreshExternalCw,
-  removeExternalCwItem,
-  setExternalCwSources,
-  useExternalCw,
-} from "@/lib/feed/external-cw";
+import { removeExternalCwItem, setExternalCwSources, useExternalCw } from "@/lib/feed/external-cw";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useAnilist } from "@/lib/anilist/provider";
 import { loadAnilistWatchedMap } from "@/lib/anilist/watched-map";
@@ -140,6 +135,31 @@ import { mergeLoadedHomeRows } from "./home/merge-loaded-rows";
 import { RowSkeleton } from "./home/row-skeleton";
 import { AddSourceModal } from "@/components/add-source-modal";
 import { updateSourceFolder, type SourceRow } from "@/lib/custom-sources";
+
+function baseCwId(id: string): string {
+  return id.replace(/^(series|movie|tmdb):/, "").trim();
+}
+
+/** A manual/local card belongs to the same title as an existing row when any
+ *  canonical id matches or the normalized display title is identical. */
+function sameCwCard(a: LibraryItem, b: LibraryItem): boolean {
+  const aIds = new Set([a._id, ...(a.altIds ?? [])].map((id) => baseCwId(id)).filter(Boolean));
+  for (const id of [b._id, ...(b.altIds ?? [])]) {
+    if (id && aIds.has(baseCwId(id))) return true;
+  }
+  const aTitle = cwTitleKey(a);
+  return !!aTitle && aTitle === cwTitleKey(b);
+}
+
+function unrepresentedCwItems(manual: LibraryItem[], pool: LibraryItem[]): LibraryItem[] {
+  const out: LibraryItem[] = [];
+  for (const item of manual) {
+    if (pool.some((existing) => sameCwCard(existing, item))) continue;
+    if (out.some((existing) => sameCwCard(existing, item))) continue;
+    out.push(item);
+  }
+  return out;
+}
 
 export function Home({
   active = true,
@@ -665,42 +685,17 @@ export function Home({
     const onProfile = () => {
       setNuvioProfileSwitching(true);
       setBuildTick((n) => n + 1);
-      if (isNuvioProvider) {
-        void reconcileNuvioWatched();
-        void refreshExternalCw(true);
-      }
       clearTimeout(timer);
       timer = setTimeout(() => setNuvioProfileSwitching(false), 300);
     };
-    if (isNuvioProvider) {
-      void reconcileNuvioWatched(undefined, { force: true });
-      void refreshExternalCw(true);
-    }
-    const onFocus = () => {
-      if (document.visibilityState === "visible" && isNuvioProvider) {
-        void reconcileNuvioWatched(undefined, { force: true });
-        void refreshExternalCw(true);
-      }
-    };
-    const periodicSync = setInterval(() => {
-      if (document.visibilityState === "visible" && isNuvioProvider) {
-        void reconcileNuvioWatched(undefined, { force: true });
-        void refreshExternalCw(true);
-      }
-    }, 30000);
     window.addEventListener("harbor:nuvio-profile-changed", onProfile);
     window.addEventListener("harbor:account-provider-changed", onProfile);
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onFocus);
     return () => {
       clearTimeout(timer);
-      clearInterval(periodicSync);
       window.removeEventListener("harbor:nuvio-profile-changed", onProfile);
       window.removeEventListener("harbor:account-provider-changed", onProfile);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [isNuvioProvider]);
+  }, []);
 
   const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
@@ -789,23 +784,20 @@ export function Home({
       .map((e) => e.i);
 
     const manual = manualWatchedLibraryItems();
-    const candidateEligible =
-      manual.length > 0 && !isNuvioProvider
-        ? [
-            ...eligible,
-            ...manual.filter(
-              (m) =>
-                !eligible.some((e) => e._id === m._id) &&
-                isCwMember(m) &&
-                !isCwDismissed(m) &&
-                m.external !== "nuvio" &&
-                !(
-                  (settings.animeOnlyInAnimeRoom || settings.hideContent.anime) &&
-                  isAnimeCwItem(m)
-                ),
-            ),
-          ]
-        : eligible;
+    let candidateEligible = eligible;
+    if (manual.length > 0 && !isNuvioProvider) {
+      const manualToAdd: LibraryItem[] = [];
+      for (const m of manual) {
+        if (!isCwMember(m) || isCwDismissed(m) || m.external === "nuvio") continue;
+        if ((settings.animeOnlyInAnimeRoom || settings.hideContent.anime) && isAnimeCwItem(m)) {
+          continue;
+        }
+        if (eligible.some((e) => sameCwCard(e, m))) continue;
+        if (manualToAdd.some((e) => sameCwCard(e, m))) continue;
+        manualToAdd.push(m);
+      }
+      if (manualToAdd.length > 0) candidateEligible = [...eligible, ...manualToAdd];
+    }
 
     return dedupeAnimeCw(candidateEligible).slice(0, 100);
   }, [
@@ -862,8 +854,7 @@ export function Home({
         ),
       ];
       if (manual.length === 0) return nuvioPool;
-      const cwMemberIds = new Set(nuvioPool.filter(isCwMember).map((i) => i._id));
-      const usable = manual.filter((i) => !cwMemberIds.has(i._id));
+      const usable = unrepresentedCwItems(manual, nuvioPool);
       if (usable.length === 0) return nuvioPool;
       const overrideIds = new Set(usable.map((i) => i._id));
       return [...nuvioPool.filter((i) => !overrideIds.has(i._id)), ...usable];
@@ -882,8 +873,7 @@ export function Home({
       ...externalForStremio,
     ];
     if (manual.length === 0) return pool;
-    const cwMemberIds = new Set(pool.filter(isCwMember).map((i) => i._id));
-    const usable = manual.filter((i) => !cwMemberIds.has(i._id));
+    const usable = unrepresentedCwItems(manual, pool);
     if (usable.length === 0) return pool;
     const overrideIds = new Set(usable.map((i) => i._id));
     return [...pool.filter((i) => !overrideIds.has(i._id)), ...usable];
@@ -1291,24 +1281,20 @@ export function Home({
   const shownFilterableRows = useHideAnimeRows(filterableRows);
   const allCustomizableRows = useMemo(
     () => [
-      ...(settings.libraryGroups.some((group) => group.pinnedToHome)
-        ? [
-            {
-              key: "library-groups",
-              type: "movie" as const,
-              name: "My Groups",
-              metas: [],
-              page: 1,
-              hasMore: false,
-              libraryGroups: true,
-              noDedup: true,
-            },
-          ]
-        : []),
+      ...libraryGroupHomeRows(settings.libraryGroups, settings.libraryGroupSections).map((row) => ({
+        key: row.key,
+        type: "movie" as const,
+        name: row.name,
+        metas: [],
+        page: 1,
+        hasMore: false,
+        libraryGroups: row.groups,
+        noDedup: true,
+      })),
       ...sourceRows,
       ...shownFilterableRows,
     ],
-    [sourceRows, shownFilterableRows, settings.libraryGroups],
+    [sourceRows, shownFilterableRows, settings.libraryGroups, settings.libraryGroupSections],
   );
   const visibleRows = useMemo(
     () => applyHomeRowCustomization(allCustomizableRows, homeRowsCustom, false),

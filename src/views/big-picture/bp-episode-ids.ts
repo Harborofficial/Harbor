@@ -112,7 +112,10 @@ export function bpEpisodeAt(season: number, episode: number, ids: BpEpisodeIds):
   return applyBpEpisodeIds(ids, { season, episode });
 }
 
-export function useBpEpisodeIds(meta: Meta | null | undefined): BpEpisodeIds {
+export function useBpEpisodeIds(
+  meta: Meta | null | undefined,
+  episodeSources?: string[],
+): BpEpisodeIds {
   const { settings } = useSettings();
   const source = useMemo(() => bpEpisodeIdSource(meta), [meta?.id, meta?.videos?.length]);
   const [ids, setIds] = useState<BpEpisodeIds>(
@@ -133,9 +136,12 @@ export function useBpEpisodeIds(meta: Meta | null | undefined): BpEpisodeIds {
     let cancelled = false;
     void (async () => {
       const shell: Meta = { id: source, type: "series", name: "" };
-      const eps = await fetchEpisodeList(shell, { tmdbKey: settings.tmdbKey }).catch(
-        () => [] as PlayEpisode[],
-      );
+      const eps = await fetchEpisodeList(shell, {
+        tmdbKey: settings.tmdbKey,
+        episodeSources: episodeSources ?? settings.metadataSources?.episodes,
+        tvdbKey: settings.tvdbKey,
+        tvdbSeasonType: settings.tvdbSeasonType,
+      }).catch(() => [] as PlayEpisode[]);
       if (cancelled || eps.length === 0) return;
       const built = indexEpisodes(eps);
       lruSet(indexCache, source, built, INDEX_MAX);
@@ -144,7 +150,14 @@ export function useBpEpisodeIds(meta: Meta | null | undefined): BpEpisodeIds {
     return () => {
       cancelled = true;
     };
-  }, [source, settings.tmdbKey]);
+  }, [
+    source,
+    settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    episodeSources,
+    settings.metadataSources?.episodes,
+  ]);
 
   return ids;
 }

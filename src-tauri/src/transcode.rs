@@ -3,9 +3,13 @@ use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use serde::Deserialize;
 use std::collections::HashMap;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct TranscodeProfile {
+    #[serde(default)]
+    pub fragmented_mp4: bool,
     #[serde(default = "default_max_height")]
     pub max_height: u32,
     #[serde(default)]
@@ -21,6 +25,7 @@ pub struct TranscodeProfile {
 impl Default for TranscodeProfile {
     fn default() -> Self {
         TranscodeProfile {
+            fragmented_mp4: false,
             max_height: 1080,
             force_h264: true,
             force_aac: true,
@@ -240,7 +245,7 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
         eprintln!("[harbor::transcode] ffprobe not found, skipping codec probe");
         return ProbedCodecs::default();
     };
-    let mut cmd = tokio::process::Command::new(&ffprobe);
+    let mut cmd = std::process::Command::new(&ffprobe);
     cmd.arg("-v").arg("error");
     let mut has_ua = false;
     if let Some((_, ua)) = headers
@@ -281,7 +286,14 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
     cmd.creation_flags(0x0800_0000);
 
     let fut = async {
-        let output = cmd.output().await.ok()?;
+        let output =
+            match crate::process_output::output(cmd, std::time::Duration::from_secs(12)).await {
+                Ok(output) => output,
+                Err(error) => {
+                    eprintln!("[harbor::transcode] ffprobe failed: {}", error);
+                    return None;
+                }
+            };
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
         if !stderr.trim().is_empty() {
@@ -309,13 +321,9 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
         Some(result)
     };
 
-    match tokio::time::timeout(std::time::Duration::from_secs(12), fut).await {
-        Ok(Some(r)) => r,
-        Ok(None) => ProbedCodecs::default(),
-        Err(_) => {
-            eprintln!("[harbor::transcode] ffprobe timed out");
-            ProbedCodecs::default()
-        }
+    match fut.await {
+        Some(r) => r,
+        None => ProbedCodecs::default(),
     }
 }
 
@@ -354,7 +362,11 @@ pub async fn handle_transcode(
         }
     };
 
-    let probed = probe_codecs(url, headers).await;
+    let probed = if profile.fragmented_mp4 {
+        ProbedCodecs { video: Some("h264".into()), audio: Some("aac".into()) }
+    } else {
+        probe_codecs(url, headers).await
+    };
     eprintln!(
         "[harbor::transcode] probed: video={:?} audio={:?}",
         probed.video, probed.audio
@@ -363,7 +375,7 @@ pub async fn handle_transcode(
     let video_is_h264 = probed.video.as_deref() == Some("h264");
     let audio_is_aac = probed.audio.as_deref() == Some("aac");
     let reencode_video = profile.force_h264 || !video_is_h264 || burn_sub.is_some();
-    let reencode_audio = profile.force_aac || !audio_is_aac;
+    let reencode_audio = profile.fragmented_mp4 || profile.force_aac || !audio_is_aac;
     eprintln!(
         "[harbor::transcode] plan: reencode_video={} reencode_audio={}",
         reencode_video, reencode_audio
@@ -372,12 +384,17 @@ pub async fn handle_transcode(
     let mut cmd = tokio::process::Command::new(&ffmpeg);
     cmd.arg("-hide_banner")
         .arg("-loglevel")
-        .arg("error")
+        .arg("error");
+    // HLS VOD needs its initial packets and normal demuxer buffering. The live
+    // transport flags can discard those packets and break fragmented MP4 audio.
+    if !profile.fragmented_mp4 {
+    cmd
         .arg("-fflags")
         .arg("+genpts+nobuffer+discardcorrupt")
         .arg("-flags")
-        .arg("low_delay")
-        .arg("-reconnect")
+        .arg("low_delay");
+    }
+    cmd.arg("-reconnect")
         .arg("1")
         .arg("-reconnect_streamed")
         .arg("1")
@@ -417,9 +434,9 @@ pub async fn handle_transcode(
         .arg("-i")
         .arg(url)
         .arg("-map")
-        .arg("0:v?")
+        .arg(if profile.fragmented_mp4 { "0:v:0?" } else { "0:v?" })
         .arg("-map")
-        .arg("0:a?");
+        .arg(if profile.fragmented_mp4 { "0:a:0?" } else { "0:a?" });
 
     if reencode_video {
         let mut vf = scale_filter(profile.max_height);
@@ -453,10 +470,12 @@ pub async fn handle_transcode(
                 .arg(format!("{}k", kbps * 2));
         }
     } else {
-        cmd.arg("-c:v")
-            .arg("copy")
+        cmd.arg("-c:v").arg("copy");
+        if !profile.fragmented_mp4 {
+        cmd
             .arg("-bsf:v")
             .arg("h264_mp4toannexb");
+        }
     }
 
     if reencode_audio {
@@ -466,8 +485,16 @@ pub async fn handle_transcode(
         }
     } else {
         cmd.arg("-c:a").arg("copy");
+        if profile.fragmented_mp4 {
+            cmd.arg("-bsf:a").arg("aac_adtstoasc");
+        }
     }
 
+    if profile.fragmented_mp4 {
+        cmd.arg("-f").arg("mp4")
+            .arg("-movflags").arg("frag_keyframe+empty_moov+default_base_moof")
+            .arg("pipe:1");
+    } else {
     cmd.arg("-f")
         .arg("mpegts")
         .arg("-mpegts_flags")
@@ -475,6 +502,7 @@ pub async fn handle_transcode(
         .arg("-mpegts_copyts")
         .arg("1")
         .arg("pipe:1");
+    }
 
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
@@ -539,7 +567,7 @@ pub async fn handle_transcode(
     let body = Body::from_stream(reader);
 
     let mut hmap = HeaderMap::new();
-    hmap.insert("Content-Type", HeaderValue::from_static("video/mp2t"));
+    hmap.insert("Content-Type", HeaderValue::from_static(if profile.fragmented_mp4 { "video/mp4" } else { "video/mp2t" }));
     hmap.insert("Cache-Control", HeaderValue::from_static("no-cache"));
     hmap.insert("Connection", HeaderValue::from_static("close"));
     hmap.insert(

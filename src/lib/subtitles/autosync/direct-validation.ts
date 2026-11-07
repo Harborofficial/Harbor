@@ -23,6 +23,10 @@ export type NativeDirectScore = AlignmentQuality & {
   windows?: NativeScoredWindow[];
   provenance?: string;
   requestProvenance?: string;
+  speechFraction?: number;
+  subtitleFraction?: number;
+  speechSegments?: number;
+  subtitleSegments?: number;
 };
 
 export function directScoreInvokeArgs(
@@ -33,8 +37,10 @@ export function directScoreInvokeArgs(
   return {
     url: ctx.mediaUrl,
     headers: ctx.headers ?? null,
+    sessionId: ctx.analysisSessionId ?? null,
     cues: ctx.cues,
     durationSec: ctx.durationSec,
+    mapSpec: ctx.audioMap ?? null,
     transform,
     validation: request?.purpose === "validation",
     excludeWindowIds: request?.excludeWindowIds ?? [],
@@ -58,6 +64,7 @@ export function torrentScoreInvokeArgs(
     headers: ctx.headers ?? null,
     cues: ctx.cues,
     durationSec: ctx.durationSec,
+    mapSpec: ctx.audioMap ?? null,
     offsetSec: transform.offsetSec,
     ratio: transform.ratio,
     positionSec,

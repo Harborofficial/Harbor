@@ -11,7 +11,7 @@ fn candidate(url: &Url) -> bool {
         && url.port().is_none()
         && matches!(
             url.host_str(),
-            Some("addon.debridio.com" | "mediafusion.elfhosted.com")
+            Some("addon.debridio.com" | "sooti.click" | "mediafusion.elfhosted.com")
         )
 }
 

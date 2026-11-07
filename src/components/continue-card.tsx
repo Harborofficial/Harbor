@@ -1,5 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { Check, X, Play as ContextPlay, ListVideo } from "lucide-react";
+import {
+  isPlaybackRedirectCandidate,
+  resolvePlaybackRedirect,
+} from "@/lib/streams/playback-redirect";
+import { Check, X, ListVideo } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import simklLogo from "@/assets/simkl.png";
 import traktLogo from "@/assets/trakt.svg";
@@ -60,7 +64,13 @@ import {
   createContinueCardActions,
   type ContinueDismiss,
 } from "@/lib/continue-card-actions";
-import { capturePlaybackActor, isPlaybackActorCurrent } from "@/lib/playback-history";
+import {
+  capturePlaybackActor,
+  isPlaybackActorCurrent,
+  readActualPlaybackForTarget,
+} from "@/lib/playback-history";
+import { continuationFor, canReuseRecentRemotePlayback } from "@/lib/player/continue-playback";
+import { readResumeEntry } from "@/lib/resume";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { localCwEntry } from "@/lib/local-cw";
 import { isManualWatchedDismissed } from "@/lib/manual-watched";
@@ -635,6 +645,54 @@ export const ContinueCard = memo(function ContinueCard({
     await openAvailableSources(episode, true, assertCurrent);
   };
 
+  const playSavedSource = async (
+    episode: PlayEpisode | undefined,
+    assertCurrent: () => void,
+  ): Promise<boolean> => {
+    // Continue Watching already knows the source that played a moment ago.
+    // Opening it directly avoids waiting for the picker's source pipeline.
+    const actual = readActualPlaybackForTarget(meta.id, episode?.season, episode?.episode);
+    if (!actual) {
+      return false;
+    }
+    if (actual.completed) {
+      return false;
+    }
+    const src = actual.src;
+    if (src.homeServer) return false;
+    if (actual.requiresSourceRefresh || src.streamRef?.infoHash) {
+      assertCurrent();
+      openPicker(meta, episode, {
+        autoPlay: true,
+        resume: true,
+        continuation: continuationFor(actual, capturePlaybackActor()),
+      });
+      return true;
+    }
+    if (!canReuseRecentRemotePlayback(actual)) return false;
+    const resumeMs =
+      readResumeEntry(meta.id, episode?.season, episode?.episode)?.ms ?? actual.positionMs;
+    const actor = capturePlaybackActor();
+    const historyUrl = src.historyUrl ?? src.url;
+    const url = await resolvePlaybackRedirect({
+      url: isPlaybackRedirectCandidate(historyUrl) ? historyUrl : src.url,
+      headers: src.headers,
+      signal: new AbortController().signal,
+    });
+    assertCurrent();
+    openPlayer({
+      ...src,
+      url,
+      historyUrl,
+      continuation: continuationFor(actual, actor),
+      resume: true,
+      startPositionMs: resumeMs,
+      startFromZero: false,
+      startPaused: false,
+    });
+    return true;
+  };
+
   const onPlay = async (assertCurrent: () => void) => {
     const episode = await resolveEpisode();
     assertCurrent();
@@ -642,6 +700,7 @@ export const ContinueCard = memo(function ContinueCard({
       await onPlayOverride(episode, assertCurrent);
       return;
     }
+    if (await playSavedSource(episode, assertCurrent)) return;
     await openAvailableSources(episode, false, assertCurrent);
   };
 
@@ -693,7 +752,6 @@ export const ContinueCard = memo(function ContinueCard({
       },
       onError: reportActionError,
       icons: {
-        play: <ContextPlay size={16} />,
         sources: <ListVideo size={16} />,
         dismiss: <X size={16} />,
       },
@@ -724,7 +782,6 @@ export const ContinueCard = memo(function ContinueCard({
           }
         : (ep ?? undefined),
       primary: commands.primary,
-      extra: commands.extra,
     });
 
   return (

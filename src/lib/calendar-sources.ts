@@ -1,20 +1,6 @@
-import { meta as cinemetaMeta } from "./cinemeta";
-import {
-  fetchAnticipatedMovies,
-  fetchAnticipatedShows,
-  fetchUpcomingEpisodes,
-  fetchUpcomingMovies,
-} from "./trakt/calendar";
-import type { CalendarItem } from "./calendar";
+import type { CalendarItem } from "./calendar-core";
 import { localDateTimeFromIso } from "./calendar-time";
-import { resolveSavedCalendar, type SavedCandidate } from "./calendar-library";
-import { fetchWatchlist as fetchSimklWatchlist, fetchWatchingItems } from "./simkl/watchlist";
-import { fetchSimklCdnCalendar } from "./simkl/calendar";
-import { isAuthenticated as simklConnected } from "./simkl/session";
-import { fetchAniListAiringCalendar as fetchAniListAiring } from "./anilist/airing";
-import { fetchDubSchedule } from "./providers/anime-dub-sub";
-
-export { fetchLibraryCalendar } from "./calendar-library";
+import type { SavedCandidate } from "./calendar-library";
 
 interface CacheEntry {
   items: CalendarItem[];
@@ -76,7 +62,10 @@ export async function fetchSimklPremieresCalendar(
   month: number,
 ): Promise<CalendarItem[]> {
   const cacheKey = `simkl-premieres:${year}-${month}`;
-  return withCalendarCache(cacheKey, () => fetchSimklCdnCalendar(year, month).catch(() => []));
+  return withCalendarCache(cacheKey, async () => {
+    const { fetchSimklCdnCalendar } = await import("./simkl/calendar");
+    return fetchSimklCdnCalendar(year, month).catch(() => []);
+  });
 }
 
 export async function fetchAniListAiringCalendar(
@@ -84,7 +73,10 @@ export async function fetchAniListAiringCalendar(
   month: number,
 ): Promise<CalendarItem[]> {
   const cacheKey = `anilist-airing:${year}-${month}`;
-  return withCalendarCache(cacheKey, () => fetchAniListAiring(year, month).catch(() => []));
+  return withCalendarCache(cacheKey, async () => {
+    const { fetchAniListAiringCalendar } = await import("./anilist/airing");
+    return fetchAniListAiringCalendar(year, month).catch(() => []);
+  });
 }
 
 export async function fetchAnimeDubCalendar(year: number, month: number): Promise<CalendarItem[]> {
@@ -93,6 +85,7 @@ export async function fetchAnimeDubCalendar(year: number, month: number): Promis
 }
 
 async function mapDubFeedToCalendar(year: number, month: number): Promise<CalendarItem[]> {
+  const { fetchDubSchedule } = await import("./providers/anime-dub-sub");
   const entries = await fetchDubSchedule();
   const out: CalendarItem[] = [];
   const seen = new Set<string>();
@@ -137,11 +130,15 @@ export async function fetchSimklCalendar(
   month: number,
   opts: { tmdbKey: string },
 ): Promise<CalendarItem[]> {
-  if (!simklConnected()) return [];
+  const [{ isAuthenticated }, { fetchWatchlist, fetchWatchingItems }] = await Promise.all([
+    import("./simkl/session"),
+    import("./simkl/watchlist"),
+  ]);
+  if (!isAuthenticated()) return [];
   const cacheKey = `simkl-calendar:${year}-${month}`;
   return withCalendarCache(cacheKey, async () => {
     const [watchlist, watching] = await Promise.all([
-      fetchSimklWatchlist().catch(() => []),
+      fetchWatchlist().catch(() => []),
       fetchWatchingItems().catch(() => []),
     ]);
     const items = [...watchlist, ...watching];
@@ -169,6 +166,7 @@ export async function fetchSimklCalendar(
       });
     }
     if (candidates.length === 0) return [];
+    const { resolveSavedCalendar } = await import("./calendar-library");
     return resolveSavedCalendar(candidates, year, month, opts);
   });
 }
@@ -192,6 +190,8 @@ function isAnimationGenre(genres: string[] | undefined): boolean {
 }
 
 export async function fetchTraktCalendar(year: number, month: number): Promise<CalendarItem[]> {
+  const [{ fetchUpcomingEpisodes, fetchUpcomingMovies }, { meta: cinemetaMeta }] =
+    await Promise.all([import("./trakt/calendar"), import("./cinemeta")]);
   const today = new Date();
   const cur = new Date(year, month, 1);
   const fwdMonths =
@@ -273,6 +273,8 @@ export async function fetchAnticipatedCalendar(
   year: number,
   month: number,
 ): Promise<CalendarItem[]> {
+  const [{ fetchAnticipatedMovies, fetchAnticipatedShows }, { meta: cinemetaMeta }] =
+    await Promise.all([import("./trakt/calendar"), import("./cinemeta")]);
   const [shows, mvs] = await Promise.all([fetchAnticipatedShows(), fetchAnticipatedMovies()]);
   const inMonthShows = shows.filter((s) => inMonth(s.firstAired, year, month));
   const inMonthMovies = mvs.filter((m) => inMonth(m.released, year, month));
