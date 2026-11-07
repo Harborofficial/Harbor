@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ChevronDown,
   ExternalLink,
@@ -12,12 +12,15 @@ import {
 } from "lucide-react";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import {
-  fetchImdbParentsGuide,
   severityColorStyle,
   type ParentsGuideCategory,
   type ParentsGuideResult,
 } from "@/lib/providers/imdb-parents-guide";
+import { useParentsGuide } from "./use-parents-guide";
+
+const KEEP_EXPANDED_KEY = "harbor.content-advisory.keep-expanded";
 
 const SEV_RANK: Record<string, number> = {
   none: 0,
@@ -36,42 +39,45 @@ function getCategoryIcon(id: string, label: string) {
   return Info;
 }
 
-export function ParentsGuidePanel({ imdbId }: { imdbId: string | null }) {
+export function ParentsGuidePanel({
+  imdbId,
+  guide: propGuide,
+  loading: propLoading,
+}: {
+  imdbId: string | null;
+  guide?: ParentsGuideResult | null;
+  loading?: boolean;
+}) {
   const t = useT();
-  const [guide, setGuide] = useState<ParentsGuideResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [sectionCollapsed, setSectionCollapsed] = useState(false);
+  const internalData = useParentsGuide(propGuide === undefined ? imdbId : null);
+  const guide = propGuide !== undefined ? propGuide : internalData.guide;
+  const loading = propLoading !== undefined ? propLoading : internalData.loading;
+
+  const [keepExpanded, setKeepExpanded] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(KEEP_EXPANDED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  // Default to collapsed unless keepExpanded is true
+  const [sectionCollapsed, setSectionCollapsed] = useState<boolean>(!keepExpanded);
   const [expandedCats, setExpandedCats] = useState<Set<string>>(() => new Set());
   const [revealedSpoilers, setRevealedSpoilers] = useState<Set<string>>(() => new Set());
 
-  useEffect(() => {
-    if (!imdbId || !/^tt\d+$/.test(imdbId)) {
-      setGuide(null);
-      setLoading(false);
-      return;
+  const handleKeepExpandedChange = (checked: boolean) => {
+    setKeepExpanded(checked);
+    try {
+      if (checked) {
+        localStorage.setItem(KEEP_EXPANDED_KEY, "1");
+      } else {
+        localStorage.removeItem(KEEP_EXPANDED_KEY);
+      }
+    } catch {
+      void 0;
     }
-
-    let cancelled = false;
-    setLoading(true);
-
-    fetchImdbParentsGuide(imdbId)
-      .then((res) => {
-        if (!cancelled) {
-          setGuide(res);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setGuide(null);
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [imdbId]);
+  };
 
   if (!loading && (!guide || guide.categories.length === 0)) {
     return null;
@@ -98,11 +104,27 @@ export function ParentsGuidePanel({ imdbId }: { imdbId: string | null }) {
   const imdbGuideUrl = imdbId ? `https://www.imdb.com/title/${imdbId}/parentalguide` : null;
 
   return (
-    <section className="flex flex-col pt-3">
-      {/* Heading row with Collapse and IMDb links */}
+    <section className="flex flex-col pt-3" data-testid="parents-guide-section">
+      {/* Heading row with Keep expanded, Collapse/Expand, and IMDb links */}
       <div className="mb-4 flex items-center justify-between gap-4">
         <h3 className="text-[22px] font-medium tracking-tight text-ink">{t("Content Advisory")}</h3>
         <div className="flex items-center gap-2">
+          {/* Keep expanded toggle visible when the section is expanded */}
+          {!sectionCollapsed && (
+            <label
+              className="flex cursor-pointer select-none items-center gap-1.5 rounded-lg bg-white/[0.06] px-2.5 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink focus-within:ring-2 focus-within:ring-primary"
+              title={t("Keep this section expanded by default on future titles")}
+            >
+              <input
+                type="checkbox"
+                checked={keepExpanded}
+                onChange={(e) => handleKeepExpandedChange(e.target.checked)}
+                className="h-3.5 w-3.5 cursor-pointer rounded border-white/20 bg-white/10 text-primary accent-primary"
+              />
+              <span>{t("Keep expanded")}</span>
+            </label>
+          )}
+
           <button
             type="button"
             onClick={() => setSectionCollapsed((c) => !c)}
@@ -175,7 +197,8 @@ function CategoryRow({
   onToggleSpoilers: () => void;
 }) {
   const t = useT();
-  const color = severityColorStyle(category.severity);
+  const { settings } = useSettings();
+  const color = severityColorStyle(category.severity, settings.contentAdvisoryTheme);
   const rank = SEV_RANK[category.severity.toLowerCase()] ?? 0;
   const CategoryIcon = getCategoryIcon(category.id, category.label);
   const plainItems = category.items.filter((item) => !item.isSpoiler);
@@ -189,7 +212,7 @@ function CategoryRow({
         onClick={onToggle}
         className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
-        {/* Left side: Category Icon + Category Label (No dot) */}
+        {/* Left side: Category Icon + Category Label */}
         <div className="flex min-w-0 items-center gap-3">
           <CategoryIcon
             size={16}
@@ -202,14 +225,14 @@ function CategoryRow({
 
         {/* Right side: Badge + Thin Boxy Meter + Chevron */}
         <div className="flex shrink-0 items-center gap-3">
-          {/* Color-tinted Severity Badge */}
+          {/* Severity Badge */}
           <span
             className={`rounded-md border px-2 py-0.5 text-[10.5px] font-bold uppercase tracking-wider ${color.badgeClass}`}
           >
             {category.severity.toUpperCase()}
           </span>
 
-          {/* 3-Segment Visual Boxy Meter (matches content-advisory-toast) */}
+          {/* 3-Segment Visual Boxy Meter */}
           <div className="flex items-center gap-[3px]" aria-hidden="true">
             {[1, 2, 3].map((lvl) => (
               <span
@@ -221,7 +244,7 @@ function CategoryRow({
             ))}
           </div>
 
-          {/* Always-visible Expand / Collapse Chevron */}
+          {/* Chevron */}
           <ChevronDown
             size={16}
             className={`text-ink-muted transition-transform duration-200 ${

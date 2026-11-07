@@ -130,6 +130,7 @@ export default defineConfig(({ mode }) => {
           "prosettings.net",
           "www.speedrun.com",
           "graphql.anilist.co",
+          "graphql.imdb.com",
           "openlibrary.org",
           "covers.openlibrary.org",
           "www.googleapis.com",
