@@ -145,7 +145,6 @@ export type TvCardOptions = {
   watchlistBadge: "off" | "topStart" | "topEnd" | "bottomStart" | "bottomEnd";
   showLocalLibraryBadge: boolean;
   showWatchedBadge: boolean;
-
 };
 
 export type Settings = {

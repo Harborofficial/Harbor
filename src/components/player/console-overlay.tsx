@@ -61,13 +61,18 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
               lvl === "error" || lvl === "fatal"
                 ? "error"
                 : lvl === "warn" || lvl === "warning"
-                ? "warn"
-                : lvl === "info"
-                ? "info"
-                : "debug";
+                  ? "warn"
+                  : lvl === "info"
+                    ? "info"
+                    : "debug";
             return {
               id: `init-${idx}-${Date.now()}`,
-              time: new Date().toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+              time: new Date().toLocaleTimeString([], {
+                hour12: false,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              }),
               prefix: prefix || "mpv",
               level,
               text,
@@ -75,7 +80,12 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
           }
           return {
             id: `init-${idx}-${Date.now()}`,
-            time: new Date().toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+            time: new Date().toLocaleTimeString([], {
+              hour12: false,
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            }),
             prefix: "mpv",
             level: "info",
             text: line,
@@ -112,16 +122,17 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
           const payload = ev.payload;
           if (!payload) return;
 
-          const now = new Date().toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+          const now = new Date().toLocaleTimeString([], {
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
 
           if (payload.event === "log" && payload.text) {
             const lvl = (payload.level || "info").toLowerCase();
             const level: LogEntry["level"] =
-              lvl === "fatal" || lvl === "error"
-                ? "error"
-                : lvl === "warn"
-                ? "warn"
-                : "info";
+              lvl === "fatal" || lvl === "error" ? "error" : lvl === "warn" ? "warn" : "info";
 
             setLogs((prev) => [
               ...prev.slice(-300),
@@ -191,7 +202,12 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
     setHistoryIndex(-1);
     setInputVal("");
 
-    const now = new Date().toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const now = new Date().toLocaleTimeString([], {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
 
     // Echo command in console
     setLogs((prev) => [
@@ -324,7 +340,9 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={() => setFilter("all")}
               className={`rounded px-2 py-0.5 font-medium transition-colors ${
-                filter === "all" ? "bg-accent/20 text-accent font-bold" : "text-ink-muted hover:text-ink"
+                filter === "all"
+                  ? "bg-accent/20 text-accent font-bold"
+                  : "text-ink-muted hover:text-ink"
               }`}
             >
               {tr("All")} ({logs.length})
@@ -333,7 +351,9 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={() => setFilter("shaders")}
               className={`rounded px-2 py-0.5 font-medium transition-colors ${
-                filter === "shaders" ? "bg-accent/20 text-accent font-bold" : "text-ink-muted hover:text-ink"
+                filter === "shaders"
+                  ? "bg-accent/20 text-accent font-bold"
+                  : "text-ink-muted hover:text-ink"
               }`}
             >
               {tr("Shaders & VO")}
@@ -342,7 +362,9 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={() => setFilter("warnings")}
               className={`rounded px-2 py-0.5 font-medium transition-colors ${
-                filter === "warnings" ? "bg-accent/20 text-accent font-bold" : "text-ink-muted hover:text-ink"
+                filter === "warnings"
+                  ? "bg-accent/20 text-accent font-bold"
+                  : "text-ink-muted hover:text-ink"
               }`}
             >
               {tr("Warnings / Errors")}
@@ -406,26 +428,33 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
               item.level === "error"
                 ? "text-rose-400 font-bold"
                 : item.level === "warn"
-                ? "text-amber-400 font-semibold"
-                : item.level === "cmd"
-                ? "text-accent font-bold"
-                : isShader
-                ? "text-cyan-400"
-                : "text-ink";
+                  ? "text-amber-400 font-semibold"
+                  : item.level === "cmd"
+                    ? "text-accent font-bold"
+                    : isShader
+                      ? "text-cyan-400"
+                      : "text-ink";
 
             const levelBadge =
               item.level === "error"
                 ? "bg-rose-500/20 text-rose-400 border border-rose-500/40"
                 : item.level === "warn"
-                ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                : item.level === "cmd"
-                ? "bg-accent/20 text-accent border border-accent/40"
-                : "bg-surface/80 text-ink-muted border border-edge-soft/40";
+                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                  : item.level === "cmd"
+                    ? "bg-accent/20 text-accent border border-accent/40"
+                    : "bg-surface/80 text-ink-muted border border-edge-soft/40";
 
             return (
-              <div key={item.id} className="flex items-baseline gap-2 py-0.2 hover:bg-surface/30 px-1 rounded">
-                <span className="text-[9.5px] tabular-nums text-ink-subtle shrink-0">{item.time}</span>
-                <span className={`rounded px-1 py-0.2 text-[8.5px] uppercase shrink-0 ${levelBadge}`}>
+              <div
+                key={item.id}
+                className="flex items-baseline gap-2 py-0.2 hover:bg-surface/30 px-1 rounded"
+              >
+                <span className="text-[9.5px] tabular-nums text-ink-subtle shrink-0">
+                  {item.time}
+                </span>
+                <span
+                  className={`rounded px-1 py-0.2 text-[8.5px] uppercase shrink-0 ${levelBadge}`}
+                >
                   {item.level}
                 </span>
                 <span className="text-ink-muted shrink-0 text-[10px]">[{item.prefix}]</span>
@@ -445,12 +474,12 @@ export function ConsoleOverlay({ onClose }: { onClose: () => void }) {
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={tr("Type mpv command (e.g. show-text \"hello\", set volume 80) or press ` to hide...")}
+          placeholder={tr(
+            'Type mpv command (e.g. show-text "hello", set volume 80) or press ` to hide...',
+          )}
           className="flex-1 bg-transparent text-[11px] text-ink placeholder:text-ink-subtle focus:outline-none"
         />
-        <span className="text-[9.5px] text-ink-subtle shrink-0">
-          {tr("` or Esc to close")}
-        </span>
+        <span className="text-[9.5px] text-ink-subtle shrink-0">{tr("` or Esc to close")}</span>
       </div>
     </div>
   );

@@ -56,7 +56,7 @@ function getAspectName(aspect: number): string | null {
   if (aspect >= 1.65 && aspect <= 1.76) return "Early 35mm Widescreen Ratio";
   if (Math.abs(aspect - 1.85) < 0.03) return "Flat (1.85:1)";
   if (Math.abs(aspect - 2.35) < 0.03) return "Anamorphic Scope (2.35:1)";
-  if (Math.abs(aspect - 2.39) < 0.04 || Math.abs(aspect - 2.40) < 0.04) return "Scope (2.39:1)";
+  if (Math.abs(aspect - 2.39) < 0.04 || Math.abs(aspect - 2.4) < 0.04) return "Scope (2.39:1)";
   if (Math.abs(aspect - 1.375) < 0.02) return "Academy Ratio (1.37:1)";
   if (Math.abs(aspect - 2.0) < 0.03) return "Univisium (2:1)";
   return null;
@@ -74,8 +74,14 @@ function formatCanvasResolution(
   if (!w || !h) return null;
 
   let res = `${w} x ${h}`;
-  const aspect = (typeof od?.aspect === "number" ? od.aspect : undefined) ?? (h > 0 ? w / h : undefined) ?? (typeof r?.aspect === "number" ? r.aspect : undefined);
-  const aspectName = (typeof directAspectName === "string" ? directAspectName : null) || (typeof r?.["aspect-name"] === "string" ? r["aspect-name"] : null) || (aspect != null ? getAspectName(aspect) : null);
+  const aspect =
+    (typeof od?.aspect === "number" ? od.aspect : undefined) ??
+    (h > 0 ? w / h : undefined) ??
+    (typeof r?.aspect === "number" ? r.aspect : undefined);
+  const aspectName =
+    (typeof directAspectName === "string" ? directAspectName : null) ||
+    (typeof r?.["aspect-name"] === "string" ? r["aspect-name"] : null) ||
+    (aspect != null ? getAspectName(aspect) : null);
 
   if (aspect) {
     res += `  ${aspect.toFixed(2)}:1`;
@@ -143,17 +149,17 @@ test("formatCanvasResolution generates aspect ratio name and crop rect", () => {
   });
   assert.equal(
     result,
-    "1908 x 1103  1.73:1 (Early 35mm Widescreen Ratio)  [x: -26, y: 0, w: 1961, h: 1103]"
+    "1908 x 1103  1.73:1 (Early 35mm Widescreen Ratio)  [x: -26, y: 0, w: 1961, h: 1103]",
   );
 
   // Dynamic calculation from osd-dimensions matching user screenshot:
   const odResult = formatCanvasResolution(
     { pixelformat: "rgb10a2" },
-    { w: 1920, h: 1113, ml: -29, mr: -29, mt: 0, mb: 0 }
+    { w: 1920, h: 1113, ml: -29, mr: -29, mt: 0, mb: 0 },
   );
   assert.equal(
     odResult,
-    "1920 x 1113  1.73:1 (Early 35mm Widescreen Ratio)  [x: -29, y: 0, w: 1978, h: 1113]"
+    "1920 x 1113  1.73:1 (Early 35mm Widescreen Ratio)  [x: -29, y: 0, w: 1978, h: 1113]",
   );
 });
 
@@ -174,7 +180,7 @@ test("video output params take precedence over raw input params matching mpv sta
     "chroma-location": "uhd",
   };
 
-  const activeVParams = (vOutParams && Object.keys(vOutParams).length > 0) ? vOutParams : vParams;
+  const activeVParams = vOutParams && Object.keys(vOutParams).length > 0 ? vOutParams : vParams;
   const vFmtName = parseString(activeVParams?.pixelformat);
   const vMatrix = parseString(activeVParams?.colormatrix);
   const vChroma = parseString(activeVParams?.["chroma-location"]);
@@ -184,21 +190,27 @@ test("video output params take precedence over raw input params matching mpv sta
   assert.equal(vChroma, "uhd");
 
   // On Page 1, Dolby Vision line is only rendered if active output matrix is dolbyvision
-  const showDoviPage1 = (vMatrix === "dolbyvision" || vMatrix.includes("dolby"));
-  assert.equal(showDoviPage1, false, "Dolby Vision line must NOT be shown on Page 1 when stripped to bt.2020-ncl");
+  const showDoviPage1 = vMatrix === "dolbyvision" || vMatrix.includes("dolby");
+  assert.equal(
+    showDoviPage1,
+    false,
+    "Dolby Vision line must NOT be shown on Page 1 when stripped to bt.2020-ncl",
+  );
 });
 
 test("HDR10 Display peak is strictly hidden for SDR transfer curves", () => {
   const dispPeak = 300;
-  
+
   // SDR video (transfer is bt.1886 or srgb)
   const sdrTransfer = "bt.1886";
-  const showSdrHdrDisp = dispPeak != null && dispPeak > 0 && (sdrTransfer === "pq" || sdrTransfer === "hlg");
+  const showSdrHdrDisp =
+    dispPeak != null && dispPeak > 0 && (sdrTransfer === "pq" || sdrTransfer === "hlg");
   assert.equal(showSdrHdrDisp, false, "HDR10 Display must never appear for SDR transfers");
 
   // HDR video (transfer is pq)
   const hdrTransfer = "pq";
-  const showHdrDisp = dispPeak != null && dispPeak > 0 && (hdrTransfer === "pq" || hdrTransfer === "hlg");
+  const showHdrDisp =
+    dispPeak != null && dispPeak > 0 && (hdrTransfer === "pq" || hdrTransfer === "hlg");
   assert.equal(showHdrDisp, true, "HDR10 Display should appear for PQ HDR transfer");
 });
 
@@ -242,7 +254,9 @@ test("tokenizeStatsLine correctly isolates parameter keys from values while pres
   assert.deepEqual(keys2, ["Colormatrix:", "Primaries:", "Transfer:"]);
 
   // 3. Nested HDR10 / PQ(Y) metadata keys
-  const t3 = tokenizeStatsLine("HDR10: Mastering display: 0.0001 / 1001 cd/m²  MaxCLL: 1177 cd/m²  MaxFALL: 246 cd/m²");
+  const t3 = tokenizeStatsLine(
+    "HDR10: Mastering display: 0.0001 / 1001 cd/m²  MaxCLL: 1177 cd/m²  MaxFALL: 246 cd/m²",
+  );
   const keys3 = t3.filter((x) => x.type === "key").map((x) => x.text);
   assert.deepEqual(keys3, ["HDR10:", "Mastering display:", "MaxCLL:", "MaxFALL:"]);
 
@@ -257,7 +271,7 @@ test("tokenizeStatsLine correctly isolates parameter keys from values while pres
 test("detects abnormal dropped frames, A-V drift, and timing spikes for red highlighting", () => {
   // Test dropped frames regex
   const dropRegex = /(\b[1-9]\d*\s*\((?:decoder|output|mistimed|delayed)\))/g;
-  
+
   // 0 drops -> no abnormal matches
   const normalDrops = " 0 (decoder)  0 (output)";
   const normalMatches = normalDrops.match(dropRegex);

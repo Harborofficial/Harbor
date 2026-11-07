@@ -553,15 +553,27 @@ export function StatsOverlay({
         let freshSum: string | null = null;
         let redrawSum: string | null = null;
         if (passes?.fresh && Array.isArray(passes.fresh) && passes.fresh.length > 0) {
-          const lastTotal = Math.round(passes.fresh.reduce((acc, p) => acc + (p.last || 0), 0) / 1000);
-          const avgTotal = Math.round(passes.fresh.reduce((acc, p) => acc + (p.avg || 0), 0) / 1000);
-          const peakTotal = Math.round(passes.fresh.reduce((acc, p) => acc + (p.peak || 0), 0) / 1000);
+          const lastTotal = Math.round(
+            passes.fresh.reduce((acc, p) => acc + (p.last || 0), 0) / 1000,
+          );
+          const avgTotal = Math.round(
+            passes.fresh.reduce((acc, p) => acc + (p.avg || 0), 0) / 1000,
+          );
+          const peakTotal = Math.round(
+            passes.fresh.reduce((acc, p) => acc + (p.peak || 0), 0) / 1000,
+          );
           freshSum = `${lastTotal} / ${avgTotal} / ${peakTotal}`;
         }
         if (passes?.redraw && Array.isArray(passes.redraw) && passes.redraw.length > 0) {
-          const lastTotal = Math.round(passes.redraw.reduce((acc, p) => acc + (p.last || 0), 0) / 1000);
-          const avgTotal = Math.round(passes.redraw.reduce((acc, p) => acc + (p.avg || 0), 0) / 1000);
-          const peakTotal = Math.round(passes.redraw.reduce((acc, p) => acc + (p.peak || 0), 0) / 1000);
+          const lastTotal = Math.round(
+            passes.redraw.reduce((acc, p) => acc + (p.last || 0), 0) / 1000,
+          );
+          const avgTotal = Math.round(
+            passes.redraw.reduce((acc, p) => acc + (p.avg || 0), 0) / 1000,
+          );
+          const peakTotal = Math.round(
+            passes.redraw.reduce((acc, p) => acc + (p.peak || 0), 0) / 1000,
+          );
           redrawSum = `${lastTotal} / ${avgTotal} / ${peakTotal}`;
         }
 
@@ -569,21 +581,34 @@ export function StatsOverlay({
           typeof dstate?.["total-bytes"] === "number"
             ? (dstate["total-bytes"] as number)
             : typeof dstate?.["fw-bytes"] === "number"
-            ? (dstate["fw-bytes"] as number)
-            : null;
+              ? (dstate["fw-bytes"] as number)
+              : null;
 
-        const numSharpen = typeof sharpenVal === "number" ? sharpenVal : typeof sharpenVal === "string" ? parseFloat(sharpenVal) : null;
+        const numSharpen =
+          typeof sharpenVal === "number"
+            ? sharpenVal
+            : typeof sharpenVal === "string"
+              ? parseFloat(sharpenVal)
+              : null;
         const isDeband = debandVal === true || debandVal === "yes";
         const isInterp = interpVal === true || interpVal === "yes";
-        const isVapourSynth = JSON.stringify(vfStr ?? "").toLowerCase().includes("vapoursynth");
+        const isVapourSynth = JSON.stringify(vfStr ?? "")
+          .toLowerCase()
+          .includes("vapoursynth");
 
         const contextStr = parseStringProp(gpuCtx) || parseStringProp(altGpuCtx, "d3d11");
         const isDoviProfile = doviProf != null && String(doviProf).trim().length > 0;
         const codecProfLower = String(vCodecProf || "").toLowerCase();
-        const isDoviCodec = codecProfLower.includes("dolby vision") || codecProfLower.includes("dovi") || codecProfLower.includes("dvhe") || codecProfLower.includes("dvh1");
+        const isDoviCodec =
+          codecProfLower.includes("dolby vision") ||
+          codecProfLower.includes("dovi") ||
+          codecProfLower.includes("dvhe") ||
+          codecProfLower.includes("dvh1");
         let detectedDovi = isDoviProfile ? `Profile ${doviProf}` : null;
         if (!detectedDovi && isDoviCodec) {
-          const match = String(vCodecProf).match(/(?:profile|dv|dovi|dvhe\.|dvh1\.)\s*([0-9]+(?:\.[0-9]+)?)/i);
+          const match = String(vCodecProf).match(
+            /(?:profile|dv|dovi|dvhe\.|dvh1\.)\s*([0-9]+(?:\.[0-9]+)?)/i,
+          );
           detectedDovi = match ? `Profile ${match[1]}` : String(vCodecProf);
         }
 
@@ -595,13 +620,17 @@ export function StatsOverlay({
           fileFormat: fformat,
           demuxerCacheDuration: dcd,
           demuxerCacheBytes: cacheBytes,
-          sharpen: Number.isFinite(numSharpen) && (numSharpen as number) > 0 ? (numSharpen as number) : null,
+          sharpen:
+            Number.isFinite(numSharpen) && (numSharpen as number) > 0
+              ? (numSharpen as number)
+              : null,
           deband: isDeband,
           debandIterations: debandIter,
           debandThreshold: debandThresh,
           interpolation: isInterp,
           tscale: tscaleVal,
-          toneMapping: toneMapVal && toneMapVal !== "auto" && toneMapVal !== "no" ? toneMapVal : null,
+          toneMapping:
+            toneMapVal && toneMapVal !== "auto" && toneMapVal !== "no" ? toneMapVal : null,
           videoFilters: vfStr,
           audioFilters: afStr,
           vapoursynthActive: isVapourSynth,
@@ -685,9 +714,7 @@ export function StatsOverlay({
         ]);
         if (cancelled) return;
         const cacheBytes =
-          typeof dstate?.["total-bytes"] === "number"
-            ? (dstate["total-bytes"] as number)
-            : null;
+          typeof dstate?.["total-bytes"] === "number" ? (dstate["total-bytes"] as number) : null;
         setStats((prev) => ({
           ...prev,
           cacheBufferingState: cb,
@@ -768,7 +795,10 @@ export function StatsOverlay({
       subTrack ? subTrack.title || subTrack.lang || subTrack.id : tr("Off"),
     ]);
     rows.push([tr("Speed"), `${snap.rate.toFixed(2)}×`]);
-    rows.push([tr("Volume"), `${Math.round(snap.volume * 100)}%${snap.muted ? tr(" · muted") : ""}`]);
+    rows.push([
+      tr("Volume"),
+      `${Math.round(snap.volume * 100)}%${snap.muted ? tr(" · muted") : ""}`,
+    ]);
 
     return (
       <div className="pointer-events-none absolute start-6 top-20 z-20 max-w-[320px] animate-fade-in rounded-2xl border border-edge-soft bg-canvas/85 p-4 font-mono text-[11.5px] leading-relaxed text-ink shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md">
@@ -907,15 +937,21 @@ function ColorPipelineGrid({
     <div className="grid grid-cols-3 gap-1.5 rounded-lg bg-surface/60 p-2 border border-edge-soft/40">
       <div className="flex flex-col">
         <span className="text-[8.5px] uppercase tracking-wider text-ink-subtle">Colormatrix</span>
-        <span className="truncate text-[10.5px] font-mono font-medium text-ink">{matrix || "—"}</span>
+        <span className="truncate text-[10.5px] font-mono font-medium text-ink">
+          {matrix || "—"}
+        </span>
       </div>
       <div className="flex flex-col border-l border-edge-soft/40 pl-2">
         <span className="text-[8.5px] uppercase tracking-wider text-ink-subtle">Primaries</span>
-        <span className="truncate text-[10.5px] font-mono font-medium text-ink">{primaries || "—"}</span>
+        <span className="truncate text-[10.5px] font-mono font-medium text-ink">
+          {primaries || "—"}
+        </span>
       </div>
       <div className="flex flex-col border-l border-edge-soft/40 pl-2">
         <span className="text-[8.5px] uppercase tracking-wider text-ink-subtle">Transfer</span>
-        <span className="truncate text-[10.5px] font-mono font-medium text-ink">{transfer || "—"}</span>
+        <span className="truncate text-[10.5px] font-mono font-medium text-ink">
+          {transfer || "—"}
+        </span>
       </div>
     </div>
   );
@@ -935,9 +971,11 @@ function PageOverview({
 }) {
   const fps = stats.estimatedFps ?? stats.containerFps;
   const isHw = Boolean(stats.hwdec && stats.hwdec !== "no");
-  const cacheSec = stats.demuxerCacheDuration != null ? `${stats.demuxerCacheDuration.toFixed(1)}s` : null;
+  const cacheSec =
+    stats.demuxerCacheDuration != null ? `${stats.demuxerCacheDuration.toFixed(1)}s` : null;
   const cacheBytes = formatBytes(stats.demuxerCacheBytes);
-  const cacheInfo = cacheBytes !== "—" ? `${cacheBytes}${cacheSec ? ` (${cacheSec})` : ""}` : cacheSec ?? "—";
+  const cacheInfo =
+    cacheBytes !== "—" ? `${cacheBytes}${cacheSec ? ` (${cacheSec})` : ""}` : (cacheSec ?? "—");
 
   // Check active video filters & processing (Displayed inside Video Stream)
   const hasSharpen = stats.sharpen != null && stats.sharpen > 0;
@@ -947,17 +985,18 @@ function PageOverview({
   const hasToneMapping = Boolean(stats.toneMapping);
 
   const activeCustomVf = parseFilterList(stats.videoFilters).filter(
-    (f) =>
-      !f.toLowerCase().includes("anime4k") &&
-      !f.toLowerCase().includes("vapoursynth"),
+    (f) => !f.toLowerCase().includes("anime4k") && !f.toLowerCase().includes("vapoursynth"),
   );
 
   const rawShaders = stats.glslShaders;
   const activeShaders: string[] = Array.isArray(rawShaders)
     ? (rawShaders as string[])
     : typeof rawShaders === "string"
-    ? (rawShaders as string).split(/[;,]/).map((s) => s.trim()).filter(Boolean)
-    : [];
+      ? (rawShaders as string)
+          .split(/[;,]/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
 
   const hasVideoFilters =
     hasSharpen ||
@@ -1013,7 +1052,9 @@ function PageOverview({
           </div>
 
           <div className="flex flex-col rounded-lg bg-surface/60 border border-edge-soft/40 p-1.5">
-            <span className="text-[8.5px] uppercase tracking-wider text-ink-subtle">Dropped Frames</span>
+            <span className="text-[8.5px] uppercase tracking-wider text-ink-subtle">
+              Dropped Frames
+            </span>
             <span className="text-[11px] font-bold tabular-nums">
               <span className={dropColor(stats.decoderDrops)}>{stats.decoderDrops ?? 0}</span>
               <span className="text-ink-subtle font-normal text-[9px]"> dec / </span>
@@ -1023,7 +1064,9 @@ function PageOverview({
           </div>
 
           <div className="flex flex-col rounded-lg bg-surface/60 border border-edge-soft/40 p-1.5">
-            <span className="text-[8.5px] uppercase tracking-wider text-ink-subtle">Refresh Rate</span>
+            <span className="text-[8.5px] uppercase tracking-wider text-ink-subtle">
+              Refresh Rate
+            </span>
             <span className="text-[11px] font-bold text-ink truncate tabular-nums">
               {stats.displayFps ? `${stats.displayFps.toFixed(0)} Hz` : "60 Hz"}
               <span className="text-[9px] font-normal text-ink-subtle"> (display)</span>
@@ -1070,7 +1113,9 @@ function PageOverview({
 
         {/* Display Canvas Color Pipeline Grid */}
         <div className="mt-1 flex flex-col gap-1">
-          <span className="text-[9px] uppercase tracking-wider text-ink-subtle">{tr("Canvas Color Space")}</span>
+          <span className="text-[9px] uppercase tracking-wider text-ink-subtle">
+            {tr("Canvas Color Space")}
+          </span>
           <ColorPipelineGrid
             matrix={stats.outColormatrix ?? "rgb"}
             primaries={stats.outPrimaries ?? "bt.709"}
@@ -1108,12 +1153,16 @@ function PageOverview({
             <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] pt-0.5">
               <div className="flex justify-between">
                 <span className="text-ink-subtle">Display Peak:</span>
-                <span className="text-ink font-mono font-medium">0 / {stats.targetPeak ?? 300} cd/m²</span>
+                <span className="text-ink font-mono font-medium">
+                  0 / {stats.targetPeak ?? 300} cd/m²
+                </span>
               </div>
               {stats.sigPeak != null && stats.sigPeak > 0 && (
                 <div className="flex justify-between">
                   <span className="text-ink-subtle">Signal Peak:</span>
-                  <span className="text-ink font-mono font-medium">{stats.sigPeak.toFixed(1)} cd/m²</span>
+                  <span className="text-ink font-mono font-medium">
+                    {stats.sigPeak.toFixed(1)} cd/m²
+                  </span>
                 </div>
               )}
               {(stats.maxCll != null || stats.maxFall != null) && (
@@ -1144,7 +1193,9 @@ function PageOverview({
           value={
             <span>
               {stats.videoCodec || stats.videoFormat || "—"}
-              {stats.videoFormat && stats.videoCodec !== stats.videoFormat ? ` [${stats.videoFormat}]` : ""}
+              {stats.videoFormat && stats.videoCodec !== stats.videoFormat
+                ? ` [${stats.videoFormat}]`
+                : ""}
               <span className="ms-1.5 rounded bg-surface px-1.5 py-0.5 text-[9px] font-semibold text-emerald-400">
                 HW: {isHw ? stats.hwdec : "None (CPU)"}
               </span>
@@ -1159,7 +1210,10 @@ function PageOverview({
                 {fps != null ? `${fps.toFixed(3)} fps` : "—"}
               </span>
               {stats.containerFps ? (
-                <span className="text-ink-subtle text-[9.5px]"> (container: {stats.containerFps.toFixed(3)})</span>
+                <span className="text-ink-subtle text-[9.5px]">
+                  {" "}
+                  (container: {stats.containerFps.toFixed(3)})
+                </span>
               ) : null}
             </span>
           }
@@ -1181,7 +1235,9 @@ function PageOverview({
 
         {/* Video Source Color Pipeline Grid */}
         <div className="mt-1 flex flex-col gap-1">
-          <span className="text-[9px] uppercase tracking-wider text-ink-subtle">{tr("Video Stream Color Space")}</span>
+          <span className="text-[9px] uppercase tracking-wider text-ink-subtle">
+            {tr("Video Stream Color Space")}
+          </span>
           <ColorPipelineGrid
             matrix={stats.colormatrix ?? "—"}
             primaries={stats.primaries ?? "—"}
@@ -1192,7 +1248,9 @@ function PageOverview({
         {/* Video Filters & Processing (Rendered cleanly inside Video Stream ONLY when active) */}
         {hasVideoFilters && (
           <div className="mt-2 flex flex-col gap-1 border-t border-edge-soft/50 pt-2">
-            <span className="text-[9px] uppercase tracking-wider text-accent font-bold">Filters:</span>
+            <span className="text-[9px] uppercase tracking-wider text-accent font-bold">
+              Filters:
+            </span>
             <div className="flex flex-wrap gap-1.5">
               {hasVapourSynth && (
                 <div className="flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[9.5px] border border-edge-soft/40">
@@ -1203,7 +1261,9 @@ function PageOverview({
               {activeShaders.length > 0 && (
                 <div className="flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[9.5px] border border-edge-soft/40">
                   <span className="text-ink-subtle">GLSL Shaders</span>
-                  <span className="text-amber-300 font-semibold">{activeShaders.length} active</span>
+                  <span className="text-amber-300 font-semibold">
+                    {activeShaders.length} active
+                  </span>
                 </div>
               )}
               {hasDeband && (
@@ -1233,7 +1293,10 @@ function PageOverview({
                 </div>
               )}
               {activeCustomVf.map((vf, idx) => (
-                <div key={idx} className="flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[9.5px] border border-edge-soft/40">
+                <div
+                  key={idx}
+                  className="flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[9.5px] border border-edge-soft/40"
+                >
                   <span className="text-ink font-mono truncate max-w-[200px]">{vf}</span>
                 </div>
               ))}
@@ -1253,7 +1316,10 @@ function PageOverview({
           value={`${stats.currentAo ?? "wasapi"} · Volume: ${stats.aoVolume ? `${Math.round(stats.aoVolume)}%` : `${Math.round(snap.volume * 100)}%`}`}
         />
         <StatRow label={tr("Audio Device")} value={stats.audioDevice ?? "Default Audio Device"} />
-        <StatRow label={tr("Channels")} value={stats.audioChannels ? `${stats.audioChannels} channels` : "—"} />
+        <StatRow
+          label={tr("Channels")}
+          value={stats.audioChannels ? `${stats.audioChannels} channels` : "—"}
+        />
         <StatRow
           label={tr("Audio Format")}
           value={`${stats.audioInFormat || "—"} → ${stats.audioOutFormat || "—"}`}
@@ -1268,7 +1334,9 @@ function PageOverview({
         {/* Audio Filters (Rendered cleanly inside Audio Stream ONLY when active) */}
         {hasAudioFilters && (
           <div className="mt-2 flex flex-col gap-1 border-t border-edge-soft/50 pt-2">
-            <span className="text-[9px] uppercase tracking-wider text-accent font-bold">Filters:</span>
+            <span className="text-[9px] uppercase tracking-wider text-accent font-bold">
+              Filters:
+            </span>
             <div className="flex flex-wrap gap-1.5">
               {snap.audioNormalize && (
                 <div className="flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[9.5px] border border-edge-soft/40">
@@ -1277,7 +1345,10 @@ function PageOverview({
                 </div>
               )}
               {activeCustomAf.map((af, idx) => (
-                <div key={idx} className="flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[9.5px] border border-edge-soft/40">
+                <div
+                  key={idx}
+                  className="flex items-center gap-1 rounded bg-surface px-2 py-0.5 text-[9.5px] border border-edge-soft/40"
+                >
                   <span className="text-ink font-mono truncate max-w-[200px]">{af}</span>
                 </div>
               ))}
@@ -1301,8 +1372,11 @@ function PageShaders({ stats, tr }: { stats: MpvOverviewStats; tr: ReturnType<ty
   const shadersList: string[] = Array.isArray(rawShaders)
     ? (rawShaders as string[])
     : typeof rawShaders === "string"
-    ? (rawShaders as string).split(/[;,]/).map((s) => s.trim()).filter(Boolean)
-    : [];
+      ? (rawShaders as string)
+          .split(/[;,]/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
 
   return (
     <div className="flex flex-col gap-3">
@@ -1321,7 +1395,8 @@ function PageShaders({ stats, tr }: { stats: MpvOverviewStats; tr: ReturnType<ty
         ) : (
           <div className="flex flex-col gap-1">
             {shadersList.map((path, idx) => {
-              const basename = typeof path === "string" ? (path.split(/[/\\]/).pop() || path) : String(path);
+              const basename =
+                typeof path === "string" ? path.split(/[/\\]/).pop() || path : String(path);
               return (
                 <div
                   key={idx}
@@ -1365,7 +1440,8 @@ function PageShaders({ stats, tr }: { stats: MpvOverviewStats; tr: ReturnType<ty
               const peakUs = Math.round((pass.peak || 0) / 1000);
               const pct = Math.min(100, Math.round(((pass.last || 0) / totalFreshNs) * 100));
               const isShader =
-                pass.desc.toLowerCase().includes("shader") || pass.desc.toLowerCase().includes("anime4k");
+                pass.desc.toLowerCase().includes("shader") ||
+                pass.desc.toLowerCase().includes("anime4k");
 
               return (
                 <div key={idx} className="flex items-center justify-between gap-2 text-[10px]">
@@ -1373,7 +1449,9 @@ function PageShaders({ stats, tr }: { stats: MpvOverviewStats; tr: ReturnType<ty
                     {lastUs} / {avgUs} / {peakUs}
                   </span>
                   <div className="flex w-12 shrink-0 items-center gap-1">
-                    <span className="w-6 text-end tabular-nums text-ink-muted text-[9px]">{pct}%</span>
+                    <span className="w-6 text-end tabular-nums text-ink-muted text-[9px]">
+                      {pct}%
+                    </span>
                     <div className="h-1.5 w-6 overflow-hidden rounded-full bg-surface">
                       <div
                         className={`h-full rounded-full ${isShader ? "bg-amber-400" : "bg-red-500"}`}
@@ -1436,7 +1514,11 @@ function PageCache({
   const bufPct = Math.min(100, Math.max(0, stats.cacheBufferingState ?? 100));
   const aheadSec = stats.demuxerCacheDuration ?? 0;
   const aheadPct = Math.min(100, Math.max(0, (aheadSec / 60) * 100));
-  const p2pPeers = engineStats ? (engineStats.unchoked > 0 ? engineStats.unchoked : engineStats.peers) : null;
+  const p2pPeers = engineStats
+    ? engineStats.unchoked > 0
+      ? engineStats.unchoked
+      : engineStats.peers
+    : null;
 
   return (
     <div className="flex flex-col gap-3">
@@ -1449,11 +1531,13 @@ function PageCache({
               stats.cacheBufferingState != null && stats.cacheBufferingState < 50
                 ? "text-rose-400"
                 : stats.cacheBufferingState != null && stats.cacheBufferingState < 90
-                ? "text-amber-400"
-                : "text-emerald-400"
+                  ? "text-amber-400"
+                  : "text-emerald-400"
             }`}
           >
-            {stats.cacheBufferingState != null ? `${stats.cacheBufferingState.toFixed(0)}%` : "100%"}
+            {stats.cacheBufferingState != null
+              ? `${stats.cacheBufferingState.toFixed(0)}%`
+              : "100%"}
           </span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-surface ring-1 ring-edge-soft/50">
@@ -1468,7 +1552,9 @@ function PageCache({
       <div className="flex flex-col gap-1.5 rounded-xl border border-edge-soft/50 bg-surface/40 p-2.5">
         <div className="flex items-center justify-between text-[10.5px]">
           <span className="text-ink-muted">{tr("Buffered ahead")}</span>
-          <span className={`font-semibold tabular-nums ${cacheDurationColor(stats.demuxerCacheDuration)}`}>
+          <span
+            className={`font-semibold tabular-nums ${cacheDurationColor(stats.demuxerCacheDuration)}`}
+          >
             {stats.demuxerCacheDuration != null ? `${stats.demuxerCacheDuration.toFixed(1)}s` : "—"}
           </span>
         </div>
@@ -1484,18 +1570,24 @@ function PageCache({
       <dl className="flex flex-col gap-1 text-[10.5px]">
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-ink-muted">{tr("Total cache in memory")}</dt>
-          <dd className="tabular-nums font-medium text-ink">{formatBytes(stats.demuxerCacheBytes)}</dd>
+          <dd className="tabular-nums font-medium text-ink">
+            {formatBytes(stats.demuxerCacheBytes)}
+          </dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-ink-muted">{tr("Cache read rate")}</dt>
           <dd className="tabular-nums font-medium text-ink">
-            {stats.cacheSpeed != null && stats.cacheSpeed > 0 ? fmtSpeed(stats.cacheSpeed) : "Idle (sufficient)"}
+            {stats.cacheSpeed != null && stats.cacheSpeed > 0
+              ? fmtSpeed(stats.cacheSpeed)
+              : "Idle (sufficient)"}
           </dd>
         </div>
         {stats.demuxerCacheTime != null && (
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-ink-muted">{tr("Demuxer reader position")}</dt>
-            <dd className="tabular-nums font-medium text-ink">{stats.demuxerCacheTime.toFixed(1)}s</dd>
+            <dd className="tabular-nums font-medium text-ink">
+              {stats.demuxerCacheTime.toFixed(1)}s
+            </dd>
           </div>
         )}
         {engineStats && (
@@ -1508,7 +1600,9 @@ function PageCache({
             </div>
             <div className="flex items-baseline justify-between gap-3">
               <dt className="text-ink-muted">{tr("P2P torrent download speed")}</dt>
-              <dd className="tabular-nums font-medium text-emerald-300">{fmtSpeed(engineStats.downloadSpeed)}</dd>
+              <dd className="tabular-nums font-medium text-emerald-300">
+                {fmtSpeed(engineStats.downloadSpeed)}
+              </dd>
             </div>
           </>
         )}
@@ -1520,13 +1614,7 @@ function PageCache({
 // -------------------------------------------------------------
 // PAGE 4: CONTAINER TRACKS (Audio & Subtitles)
 // -------------------------------------------------------------
-function PageTracks({
-  snap,
-  tr,
-}: {
-  snap: PlayerSnapshot;
-  tr: ReturnType<typeof useT>;
-}) {
+function PageTracks({ snap, tr }: { snap: PlayerSnapshot; tr: ReturnType<typeof useT> }) {
   const audioTracks = snap.audioTracks || [];
   const subtitleTracks = snap.subtitleTracks || [];
 
@@ -1535,7 +1623,9 @@ function PageTracks({
       {/* Audio Tracks */}
       <section className="flex flex-col gap-1.5">
         <div className="flex items-baseline justify-between border-b border-edge-soft/50 pb-1 text-[10px]">
-          <span className="font-bold uppercase tracking-wider text-accent/80">{tr("Audio Streams")}</span>
+          <span className="font-bold uppercase tracking-wider text-accent/80">
+            {tr("Audio Streams")}
+          </span>
           <span className="text-ink-subtle">{audioTracks.length} available</span>
         </div>
         {audioTracks.length === 0 ? (
@@ -1548,12 +1638,16 @@ function PageTracks({
               <div
                 key={track.id || idx}
                 className={`flex items-center justify-between gap-2 rounded-lg p-1.5 text-[10px] transition-colors ${
-                  isSelected ? "bg-accent/15 border border-accent/30 text-ink" : "bg-surface/30 text-ink-muted"
+                  isSelected
+                    ? "bg-accent/15 border border-accent/30 text-ink"
+                    : "bg-surface/30 text-ink-muted"
                 }`}
               >
                 <div className="flex items-center gap-1.5 truncate">
                   <span className="text-ink-subtle font-mono text-[9px] shrink-0">#{idx + 1}</span>
-                  <span className={`truncate font-medium ${isSelected ? "text-ink" : "text-ink-muted"}`}>
+                  <span
+                    className={`truncate font-medium ${isSelected ? "text-ink" : "text-ink-muted"}`}
+                  >
                     {name}
                   </span>
                   {track.lang && (
@@ -1585,7 +1679,9 @@ function PageTracks({
       {/* Subtitle Tracks */}
       <section className="flex flex-col gap-1.5 border-t border-edge-soft/40 pt-1.5">
         <div className="flex items-baseline justify-between border-b border-edge-soft/50 pb-1 text-[10px]">
-          <span className="font-bold uppercase tracking-wider text-accent/80">{tr("Subtitle Streams")}</span>
+          <span className="font-bold uppercase tracking-wider text-accent/80">
+            {tr("Subtitle Streams")}
+          </span>
           <span className="text-ink-subtle">{subtitleTracks.length} available</span>
         </div>
         {subtitleTracks.length === 0 ? (
@@ -1598,12 +1694,16 @@ function PageTracks({
               <div
                 key={track.id || idx}
                 className={`flex items-center justify-between gap-2 rounded-lg p-1.5 text-[10px] transition-colors ${
-                  isSelected ? "bg-accent/15 border border-accent/30 text-ink" : "bg-surface/30 text-ink-muted"
+                  isSelected
+                    ? "bg-accent/15 border border-accent/30 text-ink"
+                    : "bg-surface/30 text-ink-muted"
                 }`}
               >
                 <div className="flex items-center gap-1.5 truncate">
                   <span className="text-ink-subtle font-mono text-[9px] shrink-0">#{idx + 1}</span>
-                  <span className={`truncate font-medium ${isSelected ? "text-ink" : "text-ink-muted"}`}>
+                  <span
+                    className={`truncate font-medium ${isSelected ? "text-ink" : "text-ink-muted"}`}
+                  >
                     {name}
                   </span>
                   {track.lang && (
@@ -1648,11 +1748,16 @@ function PageScripts({ stats, tr }: { stats: MpvOverviewStats; tr: ReturnType<ty
   const shadersList: string[] = Array.isArray(rawShaders)
     ? (rawShaders as string[])
     : typeof rawShaders === "string"
-    ? (rawShaders as string).split(/[;,]/).map((s) => s.trim()).filter(Boolean)
-    : [];
+      ? (rawShaders as string)
+          .split(/[;,]/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
 
   const mpvScripts = Array.isArray(stats.scriptList) ? stats.scriptList : [];
-  const configuredScripts = (settings.customMpvScripts || []).filter((s) => s.enabled && s.path?.trim());
+  const configuredScripts = (settings.customMpvScripts || []).filter(
+    (s) => s.enabled && s.path?.trim(),
+  );
 
   // Also parse scripts specified directly in extra options
   const extraScriptLines = (settings.mpvExtraOptions || "")
@@ -1717,7 +1822,8 @@ function PageScripts({ stats, tr }: { stats: MpvOverviewStats; tr: ReturnType<ty
         ) : (
           <div className="flex flex-col gap-1">
             {shadersList.map((path, idx) => {
-              const basename = typeof path === "string" ? (path.split(/[/\\]/).pop() || path) : String(path);
+              const basename =
+                typeof path === "string" ? path.split(/[/\\]/).pop() || path : String(path);
               return (
                 <div
                   key={idx}
@@ -1749,7 +1855,9 @@ function PageScripts({ stats, tr }: { stats: MpvOverviewStats; tr: ReturnType<ty
         </div>
         {displayScripts.length === 0 ? (
           <div className="rounded-lg bg-surface/50 p-4 text-center text-ink-muted text-[10.5px] flex flex-col gap-1">
-            <span className="font-semibold text-ink">{tr("No external Lua or JavaScript scripts loaded.")}</span>
+            <span className="font-semibold text-ink">
+              {tr("No external Lua or JavaScript scripts loaded.")}
+            </span>
             <span className="text-[9.5px] text-ink-subtle">
               {tr("Add scripts under Settings → Advanced (Lua Scripts) to load them.")}
             </span>
@@ -1766,7 +1874,10 @@ function PageScripts({ stats, tr }: { stats: MpvOverviewStats; tr: ReturnType<ty
                 >
                   <div className="flex items-center gap-1.5 truncate">
                     <span className="text-accent/80 font-mono text-[9px]">{idx + 1}.</span>
-                    <span className="text-ink font-medium truncate" title={scriptPath || scriptName}>
+                    <span
+                      className="text-ink font-medium truncate"
+                      title={scriptPath || scriptName}
+                    >
                       {scriptName}
                     </span>
                     {typeof scriptPath === "string" && scriptPath && (

@@ -8,7 +8,7 @@ function isRawCommand(s: string): boolean {
 function isStatsPage(s: string): boolean {
   if (!s || s.length < 30) return false;
   return /Selected Tracks Info|Tracks Info|Extended Frame Timings|Frame Timings|Cache Info|Cache Statistics|Packet-Queue|Active Key Bindings|Internal stuff|Demuxer ID|Program ID|Hardware Decode/i.test(
-    s
+    s,
   );
 }
 
@@ -73,10 +73,7 @@ export const OsdBanner = memo(function OsdBanner({
 
   if (!visibleText || isStatsPage(visibleText)) return null;
 
-  const normalized = visibleText
-    .replace(/\\n/g, "\n")
-    .replace(/\\N/g, "\n")
-    .replace(/\\t/g, "  ");
+  const normalized = visibleText.replace(/\\n/g, "\n").replace(/\\N/g, "\n").replace(/\\t/g, "  ");
   const rawLines = normalized.split(/\r?\n/);
   const isMultiLine = rawLines.length > 1 || normalized.length > 65;
 

@@ -134,7 +134,7 @@ function getAspectName(aspect: number): string | null {
   if (aspect >= 1.65 && aspect <= 1.76) return "Early 35mm Widescreen Ratio";
   if (Math.abs(aspect - 1.85) < 0.03) return "Flat (1.85:1)";
   if (Math.abs(aspect - 2.35) < 0.03) return "Anamorphic Scope (2.35:1)";
-  if (Math.abs(aspect - 2.39) < 0.04 || Math.abs(aspect - 2.40) < 0.04) return "Scope (2.39:1)";
+  if (Math.abs(aspect - 2.39) < 0.04 || Math.abs(aspect - 2.4) < 0.04) return "Scope (2.39:1)";
   if (Math.abs(aspect - 1.375) < 0.02) return "Academy Ratio (1.37:1)";
   if (Math.abs(aspect - 2.0) < 0.03) return "Univisium (2:1)";
   return null;
@@ -155,7 +155,10 @@ function formatCanvasResolution(
   let res = `${w} x ${h}`;
 
   const aspect = parseNumber(od?.aspect) ?? (h > 0 ? w / h : undefined) ?? parseNumber(r?.aspect);
-  const aspectName = parseString(directAspectName) || parseString(r?.["aspect-name"]) || (aspect != null ? getAspectName(aspect) : null);
+  const aspectName =
+    parseString(directAspectName) ||
+    parseString(r?.["aspect-name"]) ||
+    (aspect != null ? getAspectName(aspect) : null);
 
   if (aspect) {
     res += `  ${aspect.toFixed(2)}:1`;
@@ -208,7 +211,8 @@ function formatVideoResolution(
 
   let res = `${w} x ${h}`;
   const aspect = parseNumber(vParams?.aspect) ?? (h > 0 ? w / h : undefined);
-  const aspectName = parseString(vParams?.["aspect-name"]) || (aspect != null ? getAspectName(aspect) : null);
+  const aspectName =
+    parseString(vParams?.["aspect-name"]) || (aspect != null ? getAspectName(aspect) : null);
   if (aspect) {
     res += `  ${aspect.toFixed(2)}:1`;
     if (aspectName) {
@@ -309,14 +313,19 @@ function detectDolbyVision(
     return {
       detected: true,
       profile: `Profile ${directDoviProf}`,
-      level: directDoviLvl != null && String(directDoviLvl).trim().length > 0 ? String(directDoviLvl) : undefined,
+      level:
+        directDoviLvl != null && String(directDoviLvl).trim().length > 0
+          ? String(directDoviLvl)
+          : undefined,
       rpu: directDoviRpu === true,
     };
   }
 
   // 2. Check track-list video tracks (mpv native tracks)
   if (trackList) {
-    const videoTrack = trackList.find((t) => t.type === "video" && (t.selected || trackList.length === 1));
+    const videoTrack = trackList.find(
+      (t) => t.type === "video" && (t.selected || trackList.length === 1),
+    );
     if (videoTrack) {
       const doviProf = videoTrack["dolby-vision-profile"] ?? videoTrack["dovi-profile"];
       const doviLvl = videoTrack["dolby-vision-level"] ?? videoTrack["dovi-level"];
@@ -330,7 +339,12 @@ function detectDolbyVision(
         };
       }
       const desc = String(videoTrack["decoder-desc"] || videoTrack.codec || "").toLowerCase();
-      if (desc.includes("dolby vision") || desc.includes("dovi") || desc.includes("dvhe") || desc.includes("dvh1")) {
+      if (
+        desc.includes("dolby vision") ||
+        desc.includes("dovi") ||
+        desc.includes("dvhe") ||
+        desc.includes("dvh1")
+      ) {
         const match = desc.match(/(?:profile|dv|dovi|dvhe\.|dvh1\.)\s*([0-9]+(?:\.[0-9]+)?)/i);
         return { detected: true, profile: match ? `Profile ${match[1]}` : "Detected" };
       }
@@ -360,8 +374,15 @@ function detectDolbyVision(
   // 4. Check codec profile (e.g. "Main 10 / Dolby Vision Profile 8.1" or "dvhe.08.06")
   if (codecProfile) {
     const cpLower = codecProfile.toLowerCase();
-    if (cpLower.includes("dolby vision") || cpLower.includes("dovi") || cpLower.includes("dvhe") || cpLower.includes("dvh1")) {
-      const match = codecProfile.match(/(?:profile|dv|dovi|dvhe\.|dvh1\.)\s*([0-9]+(?:\.[0-9]+)?)/i);
+    if (
+      cpLower.includes("dolby vision") ||
+      cpLower.includes("dovi") ||
+      cpLower.includes("dvhe") ||
+      cpLower.includes("dvh1")
+    ) {
+      const match = codecProfile.match(
+        /(?:profile|dv|dovi|dvhe\.|dvh1\.)\s*([0-9]+(?:\.[0-9]+)?)/i,
+      );
       return {
         detected: true,
         profile: match ? `Profile ${match[1]}` : codecProfile,
@@ -409,11 +430,16 @@ function detectHdr(
   const primaries = String(vParams?.primaries ?? outParams?.primaries ?? "").toLowerCase();
   const colormatrix = String(vParams?.colormatrix ?? outParams?.colormatrix ?? "").toLowerCase();
 
-  const maxCll = directHdrProps?.maxCll ?? parseNumber(vParams?.["max-cll"] ?? outParams?.["max-cll"]);
-  const maxFall = directHdrProps?.maxFall ?? parseNumber(vParams?.["max-fall"] ?? outParams?.["max-fall"]);
-  const minLuma = directHdrProps?.minLuma ?? parseNumber(vParams?.["min-luma"] ?? outParams?.["min-luma"]);
-  const maxLuma = directHdrProps?.maxLuma ?? parseNumber(vParams?.["max-luma"] ?? outParams?.["max-luma"]);
-  const sigPeak = directHdrProps?.sigPeak ?? parseNumber(vParams?.["sig-peak"] ?? outParams?.["sig-peak"]);
+  const maxCll =
+    directHdrProps?.maxCll ?? parseNumber(vParams?.["max-cll"] ?? outParams?.["max-cll"]);
+  const maxFall =
+    directHdrProps?.maxFall ?? parseNumber(vParams?.["max-fall"] ?? outParams?.["max-fall"]);
+  const minLuma =
+    directHdrProps?.minLuma ?? parseNumber(vParams?.["min-luma"] ?? outParams?.["min-luma"]);
+  const maxLuma =
+    directHdrProps?.maxLuma ?? parseNumber(vParams?.["max-luma"] ?? outParams?.["max-luma"]);
+  const sigPeak =
+    directHdrProps?.sigPeak ?? parseNumber(vParams?.["sig-peak"] ?? outParams?.["sig-peak"]);
 
   const hasPq = gamma === "pq" || gamma === "smpte2084";
   const hasHlg = gamma === "hlg" || gamma === "arib-std-b67";
@@ -512,7 +538,8 @@ async function fetchPage1(): Promise<string> {
     getMpvProp<string>("media-title"),
     getMpvProp<number>("chapter"),
     getMpvProp<number>("chapter-list/count") || getMpvProp<number>("chapters"),
-    getMpvProp<string>("chapter-metadata/title") || getMpvProp<string>("chapter-list/by-current/title"),
+    getMpvProp<string>("chapter-metadata/title") ||
+      getMpvProp<string>("chapter-list/by-current/title"),
     getMpvProp<number>("file-size"),
     getMpvProp<string>("file-format"),
     getMpvProp<number>("demuxer-cache-duration"),
@@ -531,7 +558,8 @@ async function fetchPage1(): Promise<string> {
     getMpvPropWithFallback<number>("vo-delayed-frame-count", "delayed-frame-count"),
     getMpvProp<Record<string, unknown>>("video-target-params"),
     getMpvProp<Record<string, unknown>>("osd-dimensions"),
-    getMpvProp<string>("video-target-params/aspect-name") || getMpvProp<string>("video-params/aspect-name"),
+    getMpvProp<string>("video-target-params/aspect-name") ||
+      getMpvProp<string>("video-params/aspect-name"),
     getMpvProp<Record<string, unknown>>("video-params"),
     getMpvProp<Record<string, unknown>>("video-out-params"),
     getMpvProp<string>("video-codec"),
@@ -553,7 +581,10 @@ async function fetchPage1(): Promise<string> {
     getMpvProp<number>("audio-bitrate"),
     getMpvProp<unknown>("af"),
     getMpvOsdProp("af"),
-    getMpvProp<{ fresh?: Array<{ last: number; avg: number; peak: number }>; redraw?: Array<{ last: number; avg: number; peak: number }> }>("vo-passes"),
+    getMpvProp<{
+      fresh?: Array<{ last: number; avg: number; peak: number }>;
+      redraw?: Array<{ last: number; avg: number; peak: number }>;
+    }>("vo-passes"),
     getMpvProp<TrackEntry[]>("track-list"),
     getMpvProp<Record<string, unknown>>("filtered-metadata"),
     getMpvProp<number>("video-params/max-cll"),
@@ -575,7 +606,8 @@ async function fetchPage1(): Promise<string> {
   const title = mediaTitle && mediaTitle !== filename ? mediaTitle : "";
   const size = formatBytes(fileSize);
   const fmt = parseString(fileFormat, "stream");
-  const cacheBytes = parseNumber(cacheState?.["total-bytes"]) ?? parseNumber(cacheState?.["fw-bytes"]);
+  const cacheBytes =
+    parseNumber(cacheState?.["total-bytes"]) ?? parseNumber(cacheState?.["fw-bytes"]);
   const totalCache = `${formatBytes(cacheBytes)} (${(cacheDuration || 0).toFixed(1)} sec)`;
 
   // Chapter line: e.g. "Chapter: Main Episode (3 / 4)"
@@ -600,17 +632,19 @@ async function fetchPage1(): Promise<string> {
   const display = `${voName} (${displayStr})  Context: ${contextName}`;
 
   // A-V sync matching native mpv: e.g. "A-V: +0"
-  const av = avsync != null ? (avsync >= 0 ? `+${(avsync * 1000).toFixed(0)}` : `${(avsync * 1000).toFixed(0)}`) : "+0";
+  const av =
+    avsync != null
+      ? avsync >= 0
+        ? `+${(avsync * 1000).toFixed(0)}`
+        : `${(avsync * 1000).toFixed(0)}`
+      : "+0";
   const refresh = `${(displayFps || 60).toFixed(0)} Hz (specified)`;
   const decDropsCount = parseNumber(decDrops) || 0;
   const voDropsCount = parseNumber(voDrops) || 0;
   const mistimedCount = parseNumber(mistimedDrops) || 0;
   const delayedCount = parseNumber(delayedDrops) || 0;
 
-  const dropParts: string[] = [
-    `${decDropsCount} (decoder)`,
-    `${voDropsCount} (output)`,
-  ];
+  const dropParts: string[] = [`${decDropsCount} (decoder)`, `${voDropsCount} (output)`];
   if (mistimedCount > 0) {
     dropParts.push(`${mistimedCount} (mistimed)`);
   }
@@ -643,7 +677,9 @@ async function fetchPage1(): Promise<string> {
   const outFmt = [
     outFormat ? `Format: ${outFormat}` : null,
     outLevels ? `Levels: ${outLevels}` : null,
-  ].filter(Boolean).join("  ");
+  ]
+    .filter(Boolean)
+    .join("  ");
 
   const outColormatrix = parseString(vTargetParams?.colormatrix ?? vOutParams?.colormatrix);
   const outPrimaries = parseString(vTargetParams?.primaries ?? vOutParams?.primaries);
@@ -652,14 +688,23 @@ async function fetchPage1(): Promise<string> {
     outColormatrix ? `Colormatrix: ${outColormatrix}` : null,
     outPrimaries ? `Primaries: ${outPrimaries}` : null,
     outTransfer ? `Transfer: ${outTransfer}` : null,
-  ].filter(Boolean).join("  ");
+  ]
+    .filter(Boolean)
+    .join("  ");
 
-  const dispPeak = parseNumber(displayPeak) ?? parseNumber(targetPeak) ?? parseNumber(vTargetParams?.["target-peak"]);
+  const dispPeak =
+    parseNumber(displayPeak) ??
+    parseNumber(targetPeak) ??
+    parseNumber(vTargetParams?.["target-peak"]);
   const tMap = parseString(toneMapping);
   const showToneMap = tMap && tMap !== "no" && tMap !== "auto";
 
   // Video Stream Codec & Metrics (track codec-desc + [profile] in brackets)
-  const selectedVTrack = trackList?.find((t) => t.type === "video" && (t.selected || (trackList.filter((x) => x.type === "video").length === 1)));
+  const selectedVTrack = trackList?.find(
+    (t) =>
+      t.type === "video" &&
+      (t.selected || trackList.filter((x) => x.type === "video").length === 1),
+  );
   const vCodecDesc = parseString(selectedVTrack?.["codec-desc"]) || parseString(videoCodec);
   const vProfile = parseString(selectedVTrack?.["codec-profile"]) || parseString(videoCodecProfile);
   const vDecoder = parseString(selectedVTrack?.decoder);
@@ -683,16 +728,23 @@ async function fetchPage1(): Promise<string> {
 
   // In native mpv stats.lua: append_img_params(s, r, ro) sets `r = ro or r`
   // ro is video-out-params, r is video-params. Filtered output properties take precedence!
-  const activeVParams = (vOutParams && Object.keys(vOutParams).length > 0) ? vOutParams : vParams;
+  const activeVParams = vOutParams && Object.keys(vOutParams).length > 0 ? vOutParams : vParams;
 
-  const vFmtName = parseString(activeVParams?.["hw-pixelformat"]) || parseString(activeVParams?.pixelformat) || parseString(vParams?.["hw-pixelformat"]) || parseString(vParams?.pixelformat);
+  const vFmtName =
+    parseString(activeVParams?.["hw-pixelformat"]) ||
+    parseString(activeVParams?.pixelformat) ||
+    parseString(vParams?.["hw-pixelformat"]) ||
+    parseString(vParams?.pixelformat);
   const vLevels = parseString(activeVParams?.colorlevels) || parseString(vParams?.colorlevels);
-  const vChroma = parseString(activeVParams?.["chroma-location"]) || parseString(vParams?.["chroma-location"]);
+  const vChroma =
+    parseString(activeVParams?.["chroma-location"]) || parseString(vParams?.["chroma-location"]);
   const vFmt = [
     vFmtName ? `Format: ${vFmtName}` : null,
     vLevels ? `Levels: ${vLevels}` : null,
     vChroma && vChroma !== "unknown" ? `Chroma Loc: ${vChroma}` : null,
-  ].filter(Boolean).join("  ");
+  ]
+    .filter(Boolean)
+    .join("  ");
 
   const vMatrix = parseString(activeVParams?.colormatrix) || parseString(vParams?.colormatrix);
   const vPrim = parseString(activeVParams?.primaries) || parseString(vParams?.primaries);
@@ -701,15 +753,18 @@ async function fetchPage1(): Promise<string> {
     vMatrix ? `Colormatrix: ${vMatrix}` : null,
     vPrim ? `Primaries: ${vPrim}` : null,
     vTrc ? `Transfer: ${vTrc}` : null,
-  ].filter(Boolean).join("  ");
+  ]
+    .filter(Boolean)
+    .join("  ");
 
   const vBitrate = videoBitrate ? `${(videoBitrate / 1000).toFixed(0)} kbps` : "—";
 
   // Video Filters: formatted with labels and graph params matching native mpv
   const vFiltersList = formatFilters(vfRaw ?? vfOsd);
-  const vFiltersFormatted = vFiltersList.length === 1 && vFiltersList[0] === "none"
-    ? "Filters: none"
-    : `Filters:\n  ${vFiltersList.join("\n  ")}`;
+  const vFiltersFormatted =
+    vFiltersList.length === 1 && vFiltersList[0] === "none"
+      ? "Filters: none"
+      : `Filters:\n  ${vFiltersList.join("\n  ")}`;
 
   // Dynamic Dolby Vision & HDR Detection across direct properties, dictionaries & tracks
   const dovi = detectDolbyVision(
@@ -730,20 +785,31 @@ async function fetchPage1(): Promise<string> {
   });
 
   // Audio Stream Metrics (track codec-desc + [profile] in brackets + ASCII arrow)
-  const selectedATrack = trackList?.find((t) => t.type === "audio" && (t.selected || (trackList.filter((x) => x.type === "audio").length === 1)));
-  const aCodecDesc = parseString(selectedATrack?.["codec-desc"]) || parseString(audioCodecName) || parseString(audioCodec, "Audio");
+  const selectedATrack = trackList?.find(
+    (t) =>
+      t.type === "audio" &&
+      (t.selected || trackList.filter((x) => x.type === "audio").length === 1),
+  );
+  const aCodecDesc =
+    parseString(selectedATrack?.["codec-desc"]) ||
+    parseString(audioCodecName) ||
+    parseString(audioCodec, "Audio");
   const aProfile = parseString(selectedATrack?.["codec-profile"]);
   const aCodecDisplay = aProfile ? `${aCodecDesc} [${aProfile}]` : aCodecDesc;
 
   const aoText = parseString(ao, "wasapi");
   const aDev = parseString(audioDevice, "Autoselect device");
   const volText = aoVolume != null ? `${Math.round(aoVolume)}%` : "100%";
-  const aChCount = parseNumber(selectedATrack?.["demux-channel-count"]) ?? parseNumber(aParams?.["channel-count"]) ?? parseNumber(aParams?.channels);
+  const aChCount =
+    parseNumber(selectedATrack?.["demux-channel-count"]) ??
+    parseNumber(aParams?.["channel-count"]) ??
+    parseNumber(aParams?.channels);
   const aCh = aChCount != null ? String(aChCount) : parseString(aParams?.channels, "—");
 
   const aInFmt = parseString(aParams?.format);
   const aOutFmt = parseString(aOutParams?.format);
-  const aFmt = (aInFmt && aOutFmt && aInFmt !== aOutFmt) ? `${aInFmt} -> ${aOutFmt}` : (aOutFmt || aInFmt || "—");
+  const aFmt =
+    aInFmt && aOutFmt && aInFmt !== aOutFmt ? `${aInFmt} -> ${aOutFmt}` : aOutFmt || aInFmt || "—";
 
   const aRate = parseNumber(aParams?.samplerate) ?? parseNumber(aOutParams?.samplerate);
   const aRateText = aRate ? `${aRate} Hz` : "—";
@@ -751,9 +817,10 @@ async function fetchPage1(): Promise<string> {
 
   // Audio Filters
   const aFiltersList = formatFilters(afRaw ?? afOsd);
-  const aFiltersFormatted = aFiltersList.length === 1 && aFiltersList[0] === "none"
-    ? "Filters: none"
-    : `Filters:\n  ${aFiltersList.join("\n  ")}`;
+  const aFiltersFormatted =
+    aFiltersList.length === 1 && aFiltersList[0] === "none"
+      ? "Filters: none"
+      : `Filters:\n  ${aFiltersList.join("\n  ")}`;
 
   // Construct Page 1
   const displayLines: string[] = [
@@ -799,15 +866,18 @@ async function fetchPage1(): Promise<string> {
       videoLines.push(`HDR Format: ${hdr.type}`);
     }
 
-    const hasDml = (hdr.minLuma != null && Math.abs(hdr.minLuma - 0.203) > 1e-4) || (hdr.maxLuma != null && Math.abs(hdr.maxLuma - 203) > 1e-4);
+    const hasDml =
+      (hdr.minLuma != null && Math.abs(hdr.minLuma - 0.203) > 1e-4) ||
+      (hdr.maxLuma != null && Math.abs(hdr.maxLuma - 203) > 1e-4);
     const hasCll = hdr.maxCll != null && hdr.maxCll > 0;
     const hasFall = hdr.maxFall != null && hdr.maxFall > 0;
 
     if (hasDml || hasCll || hasFall) {
       const parts: string[] = [];
       if (hasDml) {
-        const minL = (hdr.minLuma != null && hdr.minLuma <= 1e-6) ? 0 : hdr.minLuma;
-        const minStr = minL != null ? (minL === 0 ? "0" : (minL < 0.01 ? minL.toFixed(4) : minL.toFixed(2))) : "0";
+        const minL = hdr.minLuma != null && hdr.minLuma <= 1e-6 ? 0 : hdr.minLuma;
+        const minStr =
+          minL != null ? (minL === 0 ? "0" : minL < 0.01 ? minL.toFixed(4) : minL.toFixed(2)) : "0";
         const maxStr = hdr.maxLuma != null ? Math.round(hdr.maxLuma).toString() : "1000";
         parts.push(`Mastering display: ${minStr} / ${maxStr} cd/m²`);
       }
@@ -826,7 +896,9 @@ async function fetchPage1(): Promise<string> {
     if (maxPq != null && avgPq != null && maxPq > 0) {
       const maxNit = pqEotf(maxPq);
       const avgNit = pqEotf(avgPq);
-      videoLines.push(`PQ(Y): Max: ${maxNit.toFixed(2)} cd/m² (${(maxPq * 100).toFixed(2)}% PQ)  Avg: ${avgNit.toFixed(2)} cd/m² (${(avgPq * 100).toFixed(2)}% PQ)`);
+      videoLines.push(
+        `PQ(Y): Max: ${maxNit.toFixed(2)} cd/m² (${(maxPq * 100).toFixed(2)}% PQ)  Avg: ${avgNit.toFixed(2)} cd/m² (${(avgPq * 100).toFixed(2)}% PQ)`,
+      );
     } else if (hdr.sigPeak != null && hdr.sigPeak > 0) {
       videoLines.push(`Signal Peak: ${hdr.sigPeak.toFixed(1)} cd/m²`);
     }
@@ -883,8 +955,11 @@ async function fetchPage2(): Promise<string> {
   const shaderList = Array.isArray(shaders)
     ? shaders
     : typeof shaders === "string" && shaders.trim()
-    ? shaders.split(/[;,]/).map((s) => s.trim()).filter(Boolean)
-    : [];
+      ? shaders
+          .split(/[;,]/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
 
   if (shaderList.length > 0) {
     lines.push(`\nActive Shaders (${shaderList.length}):`);
@@ -959,22 +1034,28 @@ async function fetchPage3(): Promise<string> {
   const endPts = cache?.["cache-end"] != null ? cache["cache-end"] : pos + (readahead || 0);
 
   const speedVal = cache?.["raw-input-rate"] ?? cacheSpeed;
-  const speed = speedVal != null && speedVal > 0 ? `${(speedVal / (1024 * 1024)).toFixed(2)} MB/s (${speedVal.toFixed(0)} B/s)` : "0.00 B/s";
+  const speed =
+    speedVal != null && speedVal > 0
+      ? `${(speedVal / (1024 * 1024)).toFixed(2)} MB/s (${speedVal.toFixed(0)} B/s)`
+      : "0.00 B/s";
   const ram = formatBytes(cache?.["total-bytes"]);
   const fwRam = formatBytes(cache?.["fw-bytes"]);
   const disk = cache?.["file-cache-bytes"] ? formatBytes(cache["file-cache-bytes"]) : "(disabled)";
   const state = cache?.["eof-cached"]
     ? "eof"
     : bufferingState != null && bufferingState < 100
-    ? `buffering (${bufferingState}%)`
-    : readahead && readahead > 0
-    ? "buffering / ready"
-    : "idle";
+      ? `buffering (${bufferingState}%)`
+      : readahead && readahead > 0
+        ? "buffering / ready"
+        : "idle";
 
   const ranges = cache?.["seekable-ranges"] || [];
-  const rangeLines = ranges.length > 0
-    ? ranges.map((r, i) => `  Range ${i + 1}: ${formatDuration(r.start)} - ${formatDuration(r.end)}`)
-    : [`  Range 1: ${formatDuration(startPts)} - ${formatDuration(endPts)}`];
+  const rangeLines =
+    ranges.length > 0
+      ? ranges.map(
+          (r, i) => `  Range ${i + 1}: ${formatDuration(r.start)} - ${formatDuration(r.end)}`,
+        )
+      : [`  Range 1: ${formatDuration(startPts)} - ${formatDuration(endPts)}`];
 
   return `Cache Info:
 Packet-Queue: ${formatDuration(startPts)} - ${formatDuration(endPts)}
@@ -1041,7 +1122,7 @@ const OFFICIAL_MPV_KEYBINDS: BindingEntry[] = [
   { key: "Z", cmd: "add sub-delay 0.1", comment: "shift subtitles 100 ms" },
   { key: "r", cmd: "add sub-pos -1", comment: "move subtitles up" },
   { key: "R", cmd: "add sub-pos +1", comment: "move subtitles down" },
-  { key: "u", cmd: "cycle-values sub-ass-override \"force\" \"no\"", comment: "toggle style override" },
+  { key: "u", cmd: 'cycle-values sub-ass-override "force" "no"', comment: "toggle style override" },
   { key: "V", cmd: "cycle sub-ass-vsfilter-aspect-compat", comment: "toggle aspect compatibility" },
   // Video & Window
   { key: "f", cmd: "cycle fullscreen", comment: "toggle fullscreen" },
@@ -1050,7 +1131,11 @@ const OFFICIAL_MPV_KEYBINDS: BindingEntry[] = [
   { key: "Ctrl+s", cmd: "screenshot window", comment: "take screenshot of player window" },
   { key: "w", cmd: "add panscan -0.1", comment: "zoom out / reduce panscan" },
   { key: "W", cmd: "add panscan 0.1", comment: "zoom in / increase panscan" },
-  { key: "A", cmd: "cycle-values video-aspect-override \"16:9\" \"4:3\" \"2.35:1\" \"-1\"", comment: "cycle aspect ratio" },
+  {
+    key: "A",
+    cmd: 'cycle-values video-aspect-override "16:9" "4:3" "2.35:1" "-1"',
+    comment: "cycle aspect ratio",
+  },
   { key: "_", cmd: "cycle video", comment: "switch video track" },
   // Video Equalizer
   { key: "1", cmd: "add contrast -1", comment: "decrease contrast" },
@@ -1065,8 +1150,16 @@ const OFFICIAL_MPV_KEYBINDS: BindingEntry[] = [
   { key: "o", cmd: "show-progress", comment: "show playback progress bar" },
   { key: "P", cmd: "show-progress", comment: "show playback progress bar" },
   { key: "O", cmd: "no-osd cycle-values osd-level 3 1", comment: "toggle OSD level" },
-  { key: "i", cmd: "script-binding stats/display-stats-toggle", comment: "toggle playback statistics" },
-  { key: "I", cmd: "script-binding stats/display-stats-toggle", comment: "toggle playback statistics" },
+  {
+    key: "i",
+    cmd: "script-binding stats/display-stats-toggle",
+    comment: "toggle playback statistics",
+  },
+  {
+    key: "I",
+    cmd: "script-binding stats/display-stats-toggle",
+    comment: "toggle playback statistics",
+  },
   { key: "`", cmd: "script-binding console/enable", comment: "open interactive console" },
   { key: "q", cmd: "quit", comment: "exit player" },
   { key: "Q", cmd: "quit-watch-later", comment: "save position and exit" },
@@ -1130,7 +1223,8 @@ async function fetchPage5(): Promise<string> {
     getMpvProp<string>("path"),
     getMpvProp<string>("media-title"),
     getMpvProp<number>("duration"),
-    getMpvProp<string>("chapter-metadata/title") || getMpvProp<string>("chapter-list/by-current/title"),
+    getMpvProp<string>("chapter-metadata/title") ||
+      getMpvProp<string>("chapter-list/by-current/title"),
     getMpvProp<number>("file-size"),
     getMpvProp<string>("file-format"),
     getMpvProp<TrackEntry[]>("track-list"),
@@ -1159,8 +1253,16 @@ async function fetchPage5(): Promise<string> {
   if (videos.length > 0) {
     lines.push("\nVideo:");
     for (const t of videos) {
-      lines.push(`  ID: ${t.id}  Demuxer ID: ${t["src-id"] ?? t.id}  FFmpeg Index: ${t["ff-index"] ?? 0}`);
-      const flags = [t.default ? "default" : "", t.external ? "external" : "original", t.selected ? "selected" : ""].filter(Boolean).join(", ");
+      lines.push(
+        `  ID: ${t.id}  Demuxer ID: ${t["src-id"] ?? t.id}  FFmpeg Index: ${t["ff-index"] ?? 0}`,
+      );
+      const flags = [
+        t.default ? "default" : "",
+        t.external ? "external" : "original",
+        t.selected ? "selected" : "",
+      ]
+        .filter(Boolean)
+        .join(", ");
       if (flags) lines.push(`  Flags: ${flags}`);
       lines.push(`  Codec: ${t["decoder-desc"] || t.codec || "—"}`);
       const doviP = t["dolby-vision-profile"] ?? t["dovi-profile"];
@@ -1168,8 +1270,10 @@ async function fetchPage5(): Promise<string> {
       if (doviP != null) {
         lines.push(`  Dolby Vision: Profile ${doviP}${doviL != null ? `  Level: ${doviL}` : ""}`);
       }
-      if (t["demux-bitrate"]) lines.push(`  Bitrate: ${(t["demux-bitrate"] / 1000).toFixed(2)} kbps`);
-      if (t["demux-w"] && t["demux-h"]) lines.push(`  Resolution: ${t["demux-w"]} x ${t["demux-h"]}`);
+      if (t["demux-bitrate"])
+        lines.push(`  Bitrate: ${(t["demux-bitrate"] / 1000).toFixed(2)} kbps`);
+      if (t["demux-w"] && t["demux-h"])
+        lines.push(`  Resolution: ${t["demux-w"]} x ${t["demux-h"]}`);
       if (t["demux-fps"]) lines.push(`  Frame Rate: ${t["demux-fps"].toFixed(3)} fps`);
     }
   }
@@ -1178,15 +1282,24 @@ async function fetchPage5(): Promise<string> {
     lines.push("\nAudio:");
     for (const t of audios) {
       const heading = [t.lang, t.title].filter(Boolean).join(" - ");
-      lines.push(`  ${heading ? `${heading} ` : ""}ID: ${t.id}  Demuxer ID: ${t["src-id"] ?? t.id}  FFmpeg Index: ${t["ff-index"] ?? 1}`);
-      const flags = [t.default ? "default" : "", t.external ? "external" : "original", t.selected ? "selected" : ""].filter(Boolean).join(", ");
+      lines.push(
+        `  ${heading ? `${heading} ` : ""}ID: ${t.id}  Demuxer ID: ${t["src-id"] ?? t.id}  FFmpeg Index: ${t["ff-index"] ?? 1}`,
+      );
+      const flags = [
+        t.default ? "default" : "",
+        t.external ? "external" : "original",
+        t.selected ? "selected" : "",
+      ]
+        .filter(Boolean)
+        .join(", ");
       if (flags) lines.push(`  Flags: ${flags}`);
       lines.push(`  Codec: ${t["decoder-desc"] || t.codec || "—"}`);
       if (t.lang) lines.push(`  Language: ${t.lang}`);
       const ch = t["demux-channel-count"] || t["demux-channels"];
       if (ch) lines.push(`  Channels: ${ch}`);
       if (t["demux-samplerate"]) lines.push(`  Sample Rate: ${t["demux-samplerate"]} Hz`);
-      if (t["demux-bitrate"]) lines.push(`  Bitrate: ${(t["demux-bitrate"] / 1000).toFixed(2)} kbps`);
+      if (t["demux-bitrate"])
+        lines.push(`  Bitrate: ${(t["demux-bitrate"] / 1000).toFixed(2)} kbps`);
     }
   }
 
@@ -1194,9 +1307,17 @@ async function fetchPage5(): Promise<string> {
     lines.push("\nSub:");
     for (const t of subs) {
       const heading = [t.lang, t.title].filter(Boolean).join(" - ");
-      lines.push(`  ${heading ? `${heading} ` : ""}ID: ${t.id}  FFmpeg Index: ${t["ff-index"] ?? 0}`);
+      lines.push(
+        `  ${heading ? `${heading} ` : ""}ID: ${t.id}  FFmpeg Index: ${t["ff-index"] ?? 0}`,
+      );
       if (t["external-filename"]) lines.push(`  File: ${t["external-filename"]}`);
-      const flags = [t.default ? "default" : "", t.external ? "external" : "original", t.selected ? "selected" : ""].filter(Boolean).join(", ");
+      const flags = [
+        t.default ? "default" : "",
+        t.external ? "external" : "original",
+        t.selected ? "selected" : "",
+      ]
+        .filter(Boolean)
+        .join(", ");
       if (flags) lines.push(`  Flags: ${flags}`);
       lines.push(`  Codec: ${t["decoder-desc"] || t.codec || "—"}`);
       if (t.lang) lines.push(`  Language: ${t.lang}`);
@@ -1240,7 +1361,12 @@ async function fetchPage0(): Promise<string> {
   if (Array.isArray(scriptsOpt)) {
     loadedScripts.push(...scriptsOpt.filter(Boolean));
   } else if (typeof scriptsOpt === "string" && scriptsOpt.trim()) {
-    loadedScripts.push(...scriptsOpt.split(",").map((s) => s.trim()).filter(Boolean));
+    loadedScripts.push(
+      ...scriptsOpt
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    );
   }
 
   if (loadedScripts.length > 0) {
@@ -1314,7 +1440,7 @@ function renderFormattedValue(prevKey: string | null, text: string) {
             <span key={idx} className="text-ink">
               {p.text}
             </span>
-          )
+          ),
         )}
       </>
     );
@@ -1337,23 +1463,13 @@ function renderFormattedValue(prevKey: string | null, text: string) {
 
   // 4. HW Acceleration: Software fallback in amber warning
   if (prevKey === "HW:" && text.trim() === "no") {
-    return (
-      <span className="font-semibold text-amber-400/90">
-        {text}
-      </span>
-    );
+    return <span className="font-semibold text-amber-400/90">{text}</span>;
   }
 
   return <span className="text-ink">{text}</span>;
 }
 
-function FormattedStatsLine({
-  line,
-  pageIndex,
-}: {
-  line: string;
-  pageIndex: number;
-}) {
+function FormattedStatsLine({ line, pageIndex }: { line: string; pageIndex: number }) {
   // Empty line gives clean vertical rhythm between sections
   if (!line || !line.trim()) {
     return <div className="h-2" />;
@@ -1416,14 +1532,22 @@ function FormattedStatsLine({
     trimmed.startsWith("Internal Performance Info:") ||
     trimmed.startsWith("Loaded Scripts:")
   ) {
-    if (trimmed.startsWith("Frame Timings:") || trimmed.startsWith("Active Shaders") || trimmed.startsWith("Internal Performance Info:")) {
+    if (
+      trimmed.startsWith("Frame Timings:") ||
+      trimmed.startsWith("Active Shaders") ||
+      trimmed.startsWith("Internal Performance Info:")
+    ) {
       const colonIdx = trimmed.indexOf(":");
       const title = colonIdx !== -1 ? trimmed.slice(0, colonIdx + 1) : trimmed;
       const hint = colonIdx !== -1 ? trimmed.slice(colonIdx + 1) : "";
       return (
         <div className="mt-2.5 mb-1 border-b border-edge-soft/40 pb-0.5 font-bold text-accent text-[11.5px]">
           <span className="uppercase tracking-wider">{title}</span>
-          {hint && <span className="ml-1.5 text-[11px] font-normal normal-case text-ink-subtle">{hint}</span>}
+          {hint && (
+            <span className="ml-1.5 text-[11px] font-normal normal-case text-ink-subtle">
+              {hint}
+            </span>
+          )}
         </div>
       );
     }
@@ -1435,7 +1559,9 @@ function FormattedStatsLine({
   }
 
   // Timing lines ending with Fresh, Redraw, or Total
-  const timingMatch = line.match(/^(\s*)(\d+)(\s*\/\s*)(\d+)(\s*\/\s*)(\d+)(\s+)(Fresh|Redraw|Total)$/);
+  const timingMatch = line.match(
+    /^(\s*)(\d+)(\s*\/\s*)(\d+)(\s*\/\s*)(\d+)(\s+)(Fresh|Redraw|Total)$/,
+  );
   if (timingMatch) {
     const [, indent, last, s1, avg, s2, peak, space, suffix] = timingMatch;
     const nLast = Number(last);
@@ -1542,7 +1668,7 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
       setActivePage(id);
       onPageChange?.(id);
     },
-    [onPageChange]
+    [onPageChange],
   );
 
   const fetchCurrentPage = useCallback(async (page: number) => {
@@ -1681,9 +1807,9 @@ export const KeybindStatsOverlay = memo(function KeybindStatsOverlay({
         className="max-h-[75vh] overflow-y-auto rounded-xl border border-edge-soft/50 bg-surface/50 p-3.5 shadow-inner font-mono text-[11.5px] leading-relaxed text-ink select-text animate-in fade-in-50 duration-150 ease-out"
       >
         {pageContent ? (
-          pageContent.split("\n").map((line, idx) => (
-            <FormattedStatsLine key={idx} line={line} pageIndex={activePage} />
-          ))
+          pageContent
+            .split("\n")
+            .map((line, idx) => <FormattedStatsLine key={idx} line={line} pageIndex={activePage} />)
         ) : (
           <div className="text-ink-subtle">Loading statistics...</div>
         )}
