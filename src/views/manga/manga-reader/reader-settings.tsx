@@ -17,7 +17,7 @@ const CATS: Array<{ id: Cat; label: string; icon: string }> = [
   { id: "direction", label: "Direction", icon: "flip-direction" },
   { id: "fit", label: "Fit", icon: "image-position" },
   { id: "nav", label: "Arrows", icon: "arrows" },
-  { id: "background", label: "Brightness", icon: "brightness" },
+  { id: "background", label: "Background", icon: "brightness" },
   { id: "zoom", label: "Zoom & sharpness", icon: "zoom" },
 ];
 
@@ -57,10 +57,14 @@ export function ReaderSettings({
   prefs,
   onChange,
   onClose,
+  backgroundControls,
+  backgroundError,
 }: {
   prefs: ReaderPrefs;
   onChange: (patch: Partial<ReaderPrefs>) => void;
   onClose: () => void;
+  backgroundControls?: ReactNode;
+  backgroundError?: ReactNode;
 }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -186,30 +190,37 @@ export function ReaderSettings({
         </div>
       )}
       {cat === "background" && (
-        <div className="flex items-center gap-3">
-          {BGS.map((b) => (
-            <button
-              key={b.v}
-              type="button"
-              onClick={() => onChange({ bg: b.v })}
-              aria-label={t(b.label)}
-              className={`flex w-24 flex-col items-center gap-2 rounded-2xl border p-3 transition duration-150 active:scale-[0.96] ${prefs.bg === b.v ? "border-accent bg-accent/10" : "border-edge-soft bg-elevated/40 hover:border-edge hover:bg-elevated"}`}
-            >
-              <span
-                className="grid h-12 w-12 place-items-center rounded-full ring-1 ring-black/20"
-                style={{ background: b.color }}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-[14px] font-semibold text-ink">{t("Background image")}</span>
+            {backgroundControls}
+            {backgroundError}
+          </div>
+          <div className="flex items-center gap-3">
+            {BGS.map((b) => (
+              <button
+                key={b.v}
+                type="button"
+                onClick={() => onChange({ bg: b.v })}
+                aria-label={t(b.label)}
+                className={`flex w-24 flex-col items-center gap-2 rounded-2xl border p-3 transition duration-150 active:scale-[0.96] ${prefs.bg === b.v ? "border-accent bg-accent/10" : "border-edge-soft bg-elevated/40 hover:border-edge hover:bg-elevated"}`}
               >
-                {prefs.bg === b.v && (
-                  <Check
-                    size={18}
-                    strokeWidth={3}
-                    style={{ color: b.v === "light" ? "#0b0b0d" : "#fff" }}
-                  />
-                )}
-              </span>
-              <span className="text-[12px] font-medium text-ink">{t(b.label)}</span>
-            </button>
-          ))}
+                <span
+                  className="grid h-12 w-12 place-items-center rounded-full ring-1 ring-black/20"
+                  style={{ background: b.color }}
+                >
+                  {prefs.bg === b.v && (
+                    <Check
+                      size={18}
+                      strokeWidth={3}
+                      style={{ color: b.v === "light" ? "#0b0b0d" : "#fff" }}
+                    />
+                  )}
+                </span>
+                <span className="text-[12px] font-medium text-ink">{t(b.label)}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
       {cat === "zoom" && (

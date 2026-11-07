@@ -33,6 +33,8 @@ import { ReaderProgressMeter } from "./manga-reader/reader-progress-meter";
 import { ReaderPageJump } from "./manga-reader/reader-page-jump";
 import { ReaderSettings } from "./manga-reader/reader-settings";
 import { PageImage } from "./manga-reader/page-image";
+import { useMangaReaderBackground } from "./manga-reader/reader-background";
+import { readerBackgroundStyle } from "@/components/reader-background/use-reader-background";
 import { prefetchBestMangaPage, prefetchMangaPage } from "./manga-reader/manga-upscale";
 import {
   resetBestChapterHeight,
@@ -95,7 +97,13 @@ export function MangaReader({
   onChangeIndex: (i: number) => void;
 }) {
   const chapter = chapters[index];
-  const chapterContext = useMangaChapterContext<HTMLDivElement>(manga, chapter);
+  const readerBackground = useMangaReaderBackground();
+  const chapterContext = useMangaChapterContext<HTMLDivElement>(
+    manga,
+    chapter,
+    undefined,
+    readerBackground.actions,
+  );
   const t = useT();
   const [pages, setPages] = useState<MangaPage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -991,6 +999,19 @@ export function MangaReader({
       ref={disableMangaPersistence ? undefined : chapterContext}
       className={`fixed inset-0 z-[80] ${BG[prefs.bg]} text-ink`}
     >
+      {readerBackground.image && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={readerBackgroundStyle(readerBackground.image, readerBackground.transform)}
+        />
+      )}
+      {readerBackground.input}
+      {readerBackground.error && (
+        <div className="absolute left-1/2 top-20 z-[95] max-w-md -translate-x-1/2 rounded-xl bg-elevated p-4">
+          {readerBackground.error}
+        </div>
+      )}
       <div
         ref={scrollRef}
         dir={horizontal ? (rtl ? "rtl" : "ltr") : undefined}
@@ -1013,7 +1034,8 @@ export function MangaReader({
             <BookFlip
               pages={pageUrls}
               rtl={rtl}
-              bg={BG_HEX[prefs.bg]}
+              bg={readerBackground.image ? "transparent" : BG_HEX[prefs.bg]}
+              contextActions={readerBackground.actions}
               resumePage={bookStart}
               soundEnabled={prefs.flipSound}
               zoom={prefs.zoom}
@@ -1208,6 +1230,8 @@ export function MangaReader({
             patchPrefs(patch);
           }}
           onClose={() => setSettingsOpen(false)}
+          backgroundControls={readerBackground.controls}
+          backgroundError={readerBackground.error}
         />
       )}
 

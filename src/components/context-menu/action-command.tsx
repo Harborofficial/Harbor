@@ -122,7 +122,7 @@ export function ActionCommand({
           data-checked={action.checked}
           data-completed={completed || undefined}
           onClick={(event) => {
-            if (unavailable || event.detail > 1) return;
+            if (unavailable || (event.detail > 1 && !action.repeatable)) return;
             if (action.confirmation) {
               if (!confirmation) setConfirmation(action.confirmation);
             } else void run(action.id);

@@ -21,6 +21,7 @@ export function useMangaChapterContext<T extends HTMLElement>(
   manga: Pick<MangaSummary, "id" | "title" | "cover">,
   chapter: MangaChapter,
   onRead?: () => void,
+  extraActions?: () => ContextAction[],
 ) {
   const t = useT();
   const { settings } = useSettings();
@@ -172,6 +173,7 @@ export function useMangaChapterContext<T extends HTMLElement>(
             },
           });
         }
+        if (extraActions) actions.push(...extraActions());
         return actions;
       },
     };

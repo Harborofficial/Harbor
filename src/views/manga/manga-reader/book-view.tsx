@@ -1,3 +1,4 @@
+import type { ContextAction } from "@/lib/context-actions";
 import { useEffect, useRef } from "react";
 import { useContextMenu, useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
@@ -144,6 +145,7 @@ export function BookFlip({
   resumePage,
   soundEnabled,
   instanceName = NAME,
+  contextActions,
   zoom = 1,
   pageHeaders,
   instantTurns = false,
@@ -157,6 +159,7 @@ export function BookFlip({
   resumePage: number;
   soundEnabled: boolean;
   instanceName?: string;
+  contextActions?: () => ContextAction[];
   zoom?: number;
   pageHeaders?: Record<string, Record<string, string>>;
   instantTurns?: boolean;
@@ -186,7 +189,7 @@ export function BookFlip({
     id: `reader-pages:${instanceName}`,
     label: t("Visible pages"),
     // The reader remains a semantic boundary even without contextual commands.
-    actions: () => [],
+    actions: contextActions ?? (() => []),
   });
   const contextRef = useContextTarget(contextTarget);
 
