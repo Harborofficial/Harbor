@@ -1,5 +1,6 @@
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode } from "@/lib/view";
+import { isPlayableVideoPath } from "@/lib/media-file";
 
 const ILLEGAL = /[<>:"/\\|?*\x00-\x1F]/g;
 const TRAILING = /[. ]+$/g;
@@ -14,7 +15,7 @@ export function extensionFromUrl(url: string): string {
     const m = path.match(/\.([a-z0-9]{2,5})(?:$|\?)/i);
     if (m) {
       const ext = m[1].toLowerCase();
-      if (["mkv", "mp4", "webm", "avi", "mov", "ts", "m4v"].includes(ext)) {
+      if (isPlayableVideoPath(path)) {
         return ext;
       }
     }

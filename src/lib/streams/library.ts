@@ -1,3 +1,4 @@
+import { VIDEO_FILE_RE } from "@/lib/media-file";
 import { parse } from "parse-torrent-title";
 import type { DebridResult, DebridSlug, DebridStore, LibraryEntry } from "@/lib/debrid/types";
 import type { Stream } from "./types";
@@ -53,7 +54,6 @@ function matchEntry(entry: LibraryEntry, query: LibraryQuery): MatchInfo | null 
   return positionalMatch(entry, query);
 }
 
-const VIDEO_EXT_RE = /\.(mkv|mp4|avi|mov|m4v|webm|ts|flv|wmv|m2ts|mpg|mpeg|ogv|3gp)(\?|#|$)/i;
 const NON_EPISODE_RE =
   /(?:^|[^a-z0-9])(?:ncop|nced|creditless|opening|ending|preview|trailer|extra|special|sample|menu|bonus|interview|making|scan|booklet|ost)(?:[^a-z0-9]|$)/i;
 
@@ -73,14 +73,21 @@ function positionalMatch(entry: LibraryEntry, query: LibraryQuery): MatchInfo | 
   if (!titleMatchesEntry(entry, query)) return null;
   const vids = entry.files
     .map((f, idx) => ({ name: f.name, idx }))
-    .filter((f) => VIDEO_EXT_RE.test(f.name) && !NON_EPISODE_RE.test(f.name));
+    .filter((f) => VIDEO_FILE_RE.test(f.name) && !NON_EPISODE_RE.test(f.name));
   if (vids.length < 2) return null;
-  vids.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+  vids.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }),
+  );
   const pos = query.episode - 1;
   if (pos < 0 || pos >= vids.length) return null;
   const chosen = vids[pos];
   const p = parse(chosen.name);
-  return { fileIdx: chosen.idx, parsedTitle: p.title ?? chosen.name, resolution: p.resolution, codec: p.codec };
+  return {
+    fileIdx: chosen.idx,
+    parsedTitle: p.title ?? chosen.name,
+    resolution: p.resolution,
+    codec: p.codec,
+  };
 }
 
 function checkText(

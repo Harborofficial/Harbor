@@ -12,7 +12,10 @@ pub struct ScannedFile {
 }
 
 const VIDEO_EXTS: &[&str] = &[
-    "mkv", "mp4", "m4v", "mov", "avi", "wmv", "webm", "ts", "m2ts", "mpg", "mpeg", "flv", "ogv",
+    "mkv", "mp4", "m4v", "mov", "avi", "wmv", "webm", "ts", "m2ts", "mts", "m2t", "mpg", "mpeg",
+    "mpe", "m1v", "m2v", "m2p", "flv", "f4v", "ogv", "ogm", "3gp", "3g2", "vob", "evo", "vro",
+    "iso", "divx", "asf", "rm", "rmvb", "mxf", "nut", "nsv", "wtv", "dvr-ms", "amv", "flc", "fli",
+    "roq", "bik", "y4m", "ivf", "dv", "mpv", "tod",
 ];
 
 const SUBTITLE_EXTS: &[&str] = &["srt", "ass", "ssa", "vtt"];

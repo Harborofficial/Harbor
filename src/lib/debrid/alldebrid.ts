@@ -1,4 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { isPlayableVideoPath } from "@/lib/media-file";
 import { dlog, dwarn } from "@/lib/debug";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
 import {
@@ -14,7 +15,6 @@ import {
 
 const BASE = "https://api.alldebrid.com/v4";
 const AGENT = "Harbor";
-const VIDEO_EXTS = [".mkv", ".mp4", ".avi", ".m4v", ".webm", ".ts", ".mov", ".wmv"];
 const POLL_DELAY_MS = 1500;
 const POLL_MAX_ATTEMPTS = 12;
 const LIBRARY_TTL_MS = 5 * 60_000;
@@ -262,7 +262,7 @@ function pickAdLink(links: AdMagnetLink[], fileIdx: number | undefined, hint?: E
   if (links.length === 0) return null;
   if (fileIdx != null && links[fileIdx]) return links[fileIdx];
   const videos = links.filter((l) =>
-    VIDEO_EXTS.some((ext) => l.filename.toLowerCase().endsWith(ext)),
+    isPlayableVideoPath(l.filename),
   );
   const pool = videos.length > 0 ? videos : links;
   const mi = matchEpisodeFileIndex(pool.map((l) => l.filename), hint);

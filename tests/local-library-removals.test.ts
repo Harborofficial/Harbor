@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
+import * as mediaFile from "../src/lib/media-file.ts";
 import type { LocalEntry } from "../src/lib/local-library.ts";
 
 function load(path: string, mocks: Record<string, unknown>, storage: unknown) {
@@ -37,6 +38,7 @@ function harness() {
     const removals = load("src/lib/local-library/removals.ts", {}, storage);
     const library = load("src/lib/local-library.ts", {
       react: {},
+      "@/lib/media-file": mediaFile,
       "@/lib/episode-span": { parseEpisodeSpan: () => null },
       "@/lib/local-library/removals": removals,
       "@/lib/local-library/storage": {

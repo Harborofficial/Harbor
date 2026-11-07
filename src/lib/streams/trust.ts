@@ -1,5 +1,6 @@
 import type { ParsedStream, Resolution } from "./types";
 import { episodeSpanContains } from "@/lib/episode-span";
+import { isPlayableVideoPath } from "@/lib/media-file";
 export type { Resolution };
 
 export type TrustOptions = {
@@ -136,7 +137,7 @@ function checkOne(
   if (PLACEHOLDER_BANNER_RX.test(titleNameDesc)) {
     return "addon-placeholder-banner";
   }
-  if (!s.infoHash && !s.url?.match(/\.(mkv|mp4|m4v|avi|webm|mov|ts)(?:\?|$)/i)) {
+  if (!s.infoHash && !isPlayableVideoPath(s.url ?? "")) {
     if (
       STATUS_LINE_RX.test(titleNameDesc) &&
       !s.behaviorHints?.videoSize &&
