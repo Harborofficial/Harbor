@@ -1,0 +1,82 @@
+{
+  "channel": "beta",
+  "notes": {
+    "1.0.3": {
+      "title": "Harbor v1.0.3 Beta",
+      "intro": "Harbor 1.0.3 adds reader background images, manga chapter upscaling, a More Like This option for still-airing series, keyboard-layout-aware shortcuts, simpler subtitle styling, and fixes across settings, library lists, streaming, Music, updates, and the Linux app.",
+      "sections": [
+        {
+          "heading": "🎬 Playback & Continue Watching",
+          "items": [
+            "Unreleased Episodes: Continue Watching can now play an episode even when its listed release date is still in the future. The countdown and Upcoming label stay visible. This is on by default and can be turned off in Settings → Library → Home layout → Allow playing unreleased episodes.",
+            "More Like This on Still-Airing Series: An opt-in setting now shows More Like This after the latest aired episode, even when future or TBA episodes are listed. It still won't appear before the latest aired episode. Find it in Settings → Playback → Player & quality → Up Next → On still-airing series."
+          ]
+        },
+        {
+          "heading": "⌨️ Keyboard & Navigation",
+          "items": [
+            "Keyboard Layouts: Shortcuts now work on non-US keyboard layouts by falling back to physical keys. Custom bindings still take priority, and inactive views no longer intercept global shortcuts.",
+            "Player Screen Lock: The player's screen lock now respects the configured shortcut and keyboard-layout fallbacks."
+          ]
+        },
+        {
+          "heading": "📖 eBook & Manga Readers",
+          "items": [
+            "Reader Backgrounds: eBook and manga readers can now use a background image, with controls to choose, replace, reset, zoom, and position it. Ebook and manga images are stored separately, legacy images migrate automatically, and book mode keeps the flipbook background transparent when an image is set.",
+            "Chapter Upscaling: Manga chapters can be upscaled from their context menu with the configured Fast or Best model. Duplicate requests are combined, reader cache entries are reused, and model workers stay alive until the chapter finishes.",
+            "Scoped Background Lookups: Reader recommendations and alternate chapters now stay scoped to the title you opened, while catalog work stays in browse views and no longer competes with reader requests."
+          ]
+        },
+        {
+          "heading": "💬 Subtitles, Streams & Search",
+          "items": [
+            "Simpler ASS Choices: Styled subtitles now use two primary choices, Keep the file's look and Use my style. Keep the file's look includes Match my size, while Change font only is available under Advanced.",
+            "Hardcoded Styling: Use my style can now also remove styling hardcoded inside a subtitle file, for releases that ignore the normal style override. This can break signs and karaoke, so it is opt-in.",
+            "Per-Addon Stream Results: Each addon installation now keeps its own stream row and playback URL, even when another addon returns the same URL or torrent. Results are no longer merged into one row or owned by a different addon.",
+            "Account Origin Badges Removed: Addon lists and stream rows no longer show account origin badges, keeping the layout cleaner.",
+            "TMDB Top Match: The explicit TMDB Top Match toggle now takes priority over metadata provider order, with addon results as a fallback when TMDB has no match."
+          ]
+        },
+        {
+          "heading": "🎵 Music",
+          "items": [
+            "Source Consent Persists: Music source consent is stored before the native write and survives restarts, so choosing or denying a source is not reset or asked again after reopening.",
+            "Spotify Browsing Authorization: The Spotify browsing setup now shows checking and connecting states, ignores stale requests, surfaces status errors, asks before closing during authorization, and confirms success.",
+            "Natural Track Completion: The Music queue now advances after a track reaches its natural end even when mpv keeps the file loaded with keep-open.",
+            "Dock & Now Playing: The Music dock no longer hides while you interact with its panel, expanded Now Playing stays inside the viewport, and its entrance animation no longer replays after closing."
+          ]
+        },
+        {
+          "heading": "☁️ Nuvio, Settings & Updates",
+          "items": [
+            "Nuvio Addon Refreshes: Switching between Stremio and Nuvio now shares one addon fetch instead of repeating it for every screen that refreshes at once.",
+            "Settings Persistence: Native settings writes are serialized, the disk copy is recovered when browser storage is full, and edits made during startup are preserved instead of being overwritten.",
+            "Theme Recovery: Restoring settings from disk no longer replaces newer edits, loses a loaded background image, or crosses into a different profile if the profile changes while the file is loading.",
+            "Collections Survive Full Storage: New collections and edits now survive a restart even when localStorage is full, using an IndexedDB mirror instead of keeping changes in memory only.",
+            "Reader Background Storage: Reader background fallback storage keeps the newer copy, moves back to IndexedDB when it recovers, and cannot resurrect an older image after a reset.",
+            "Updater Downloads: Installer download progress now persists across settings navigation and duplicate version rows, and late status checks no longer overwrite an active download.",
+            "Linux Detail Pages: A scrolling crash on Linux detail pages caused by WebKitGTK backdrop filtering is mitigated on the affected runtime."
+          ]
+        },
+        {
+          "heading": "📚 Library, Anime & Metadata",
+          "items": [
+            "Mark as Unwatched: Unwatching a movie now asks for confirmation before removing it from Simkl library and history. Watched state stays in sync, and errors are shown outside the context menu.",
+            "AniList & MAL Filtering: Switching between movies and shows in the AniList and MAL tabs now keeps the list counts correct.",
+            "Cast Labels: Crew labels in the player's title panel now align correctly.",
+            "IMDb IDs for Anime On by Default: Anime stream searches now use verified IMDb mappings by default. Turn it off in Settings → Streaming → Streaming sources → Filters → Prefer IMDb IDs for anime.",
+            "Metadata Preference Removed: The Prefer my installed metadata addon option has been removed. Built-in metadata remains the default, while Disable built-in metadata still lets configured addons and providers take over."
+          ]
+        },
+        {
+          "heading": "🔄 Release & Maintenance",
+          "items": [
+            "Platform-Named macOS Releases: macOS release assets now carry explicit Apple Silicon and Intel names, and older app versions can still find them.",
+            "Intel macOS Updates: Intel macOS DMGs are now attached to tagged releases automatically when the Intel build produces one.",
+            "Version: Harbor 1.0.3."
+          ]
+        }
+      ]
+    }
+  }
+}
