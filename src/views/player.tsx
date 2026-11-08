@@ -1766,7 +1766,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
           screenLocked,
           screenLockEnabled,
           screenLockControlsVisible,
-          screenLockBinding,
+          hotkeys: settings.hotkeys,
         }}
         handlers={{
           playPause: playPauseToggle,

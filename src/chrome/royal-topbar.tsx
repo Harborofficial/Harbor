@@ -14,7 +14,7 @@ import { useT } from "@/lib/i18n";
 import { useSearchActions } from "@/lib/search-context";
 import {
   effectiveBinding,
-  eventToBinding,
+  findHotkeyMatch,
   formatBindingForDisplay,
   shouldHandleGlobalKeyboardEvent,
 } from "@/lib/hotkeys";
@@ -305,18 +305,19 @@ function Filigree() {
 function SearchPill({ onOpen }: { onOpen: () => void }) {
   const { settings } = useSettings();
   const t = useT();
-  const binding = effectiveBinding("globalSearchFocus", settings.hotkeys ?? {});
+  const hotkeys = settings.hotkeys;
+  const binding = effectiveBinding("globalSearchFocus", hotkeys ?? {});
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
-      if (eventToBinding(e) !== binding) return;
+      if (findHotkeyMatch(e, hotkeys ?? {}, "Global") !== "globalSearchFocus") return;
       e.preventDefault();
       onOpen();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [binding, onOpen]);
+  }, [hotkeys, onOpen]);
 
   return (
     <button

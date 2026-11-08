@@ -23,7 +23,7 @@ import { malMangaAuthed } from "@/lib/manga/tracking-mal";
 import type { MangaTracker } from "@/lib/manga/sync";
 import { activeMangaSourceId, listMangaSources } from "@/lib/manga/sources";
 import { useProfiles } from "@/lib/profiles";
-import { effectiveBinding, formatBindingForDisplay, matchesBinding } from "@/lib/hotkeys";
+import { effectiveBinding, findHotkeyMatch, formatBindingForDisplay } from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
@@ -543,7 +543,7 @@ export function MangaReader({
         else prevPage();
       } else if (e.key === "f") {
         toggleFullscreen();
-      } else if (matchesBinding(e, matchBinding)) {
+      } else if (findHotkeyMatch(e, settings.hotkeys, "Manga") === "mangaMatch") {
         e.preventDefault();
         if (manga.title) enqueueMatchWith(connectedTrackers());
       }
@@ -987,6 +987,7 @@ export function MangaReader({
 
   return createPortal(
     <div
+      data-harbor-manga-reader
       ref={disableMangaPersistence ? undefined : chapterContext}
       className={`fixed inset-0 z-[80] ${BG[prefs.bg]} text-ink`}
     >

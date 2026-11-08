@@ -156,12 +156,7 @@ import {
   reconcilePendingTorrentRemovals,
   torrentEngineSetOptions,
 } from "@/lib/torrent/local-engine";
-import {
-  effectiveBinding,
-  eventToBinding,
-  findHotkeyMatch,
-  shouldHandleGlobalKeyboardEvent,
-} from "@/lib/hotkeys";
+import { findHotkeyMatch, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
 import { requestOpenProfile, requestEditProfile } from "@/lib/social/open-profile";
 import { openNotificationCenter } from "@/lib/social/notification-open";
@@ -1222,7 +1217,6 @@ function Shell({ onReady }: { onReady?: () => void }) {
     const isDefaultUiScaleReset = (e: KeyboardEvent) => usesZoomModifier(e) && e.key === "0";
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
-      const binding = eventToBinding(e);
       const overrides = settings.hotkeys ?? {};
       const globalMatch = findHotkeyMatch(e, overrides, "Global");
       if (
@@ -1236,14 +1230,11 @@ function Shell({ onReady }: { onReady?: () => void }) {
       const uiScaleDownCustom = "globalUiScaleDown" in overrides;
       const uiScaleResetCustom = "globalUiScaleReset" in overrides;
       const matchesUp =
-        effectiveBinding("globalUiScaleUp", overrides) === binding ||
-        (!uiScaleUpCustom && isDefaultUiScaleUp(e));
+        globalMatch === "globalUiScaleUp" || (!uiScaleUpCustom && isDefaultUiScaleUp(e));
       const matchesDown =
-        effectiveBinding("globalUiScaleDown", overrides) === binding ||
-        (!uiScaleDownCustom && isDefaultUiScaleDown(e));
+        globalMatch === "globalUiScaleDown" || (!uiScaleDownCustom && isDefaultUiScaleDown(e));
       const matchesReset =
-        effectiveBinding("globalUiScaleReset", overrides) === binding ||
-        (!uiScaleResetCustom && isDefaultUiScaleReset(e));
+        globalMatch === "globalUiScaleReset" || (!uiScaleResetCustom && isDefaultUiScaleReset(e));
       if (!matchesUp && !matchesDown && !matchesReset) return;
       if (player && matchesReset) return;
       e.preventDefault();

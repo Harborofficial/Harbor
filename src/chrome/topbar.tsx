@@ -15,7 +15,7 @@ import { RecordingPill } from "@/chrome/recording-pill";
 import { SleepTimerButton } from "@/chrome/sleep-timer-button";
 import {
   effectiveBinding,
-  eventToBinding,
+  findHotkeyMatch,
   formatBindingForDisplay,
   shouldHandleGlobalKeyboardEvent,
 } from "@/lib/hotkeys";
@@ -101,7 +101,12 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
   const sidebarHidden = connecting || view === "settings" || onLiveRoot || topKind === "picker";
   const inSettings = view === "settings";
   const hideSearch =
-    view === "music" || view === "games" || view === "addons" || connecting || topKind === "picker" || inSettings;
+    view === "music" ||
+    view === "games" ||
+    view === "addons" ||
+    connecting ||
+    topKind === "picker" ||
+    inSettings;
   const sidebarOffset =
     layout === "stremio"
       ? "ps-[80px]"
@@ -429,18 +434,19 @@ function SearchPill() {
   const { setOpen } = useSearchActions();
   const { settings } = useSettings();
   const t = useT();
-  const binding = effectiveBinding("globalSearchFocus", settings.hotkeys ?? {});
+  const hotkeys = settings.hotkeys;
+  const binding = effectiveBinding("globalSearchFocus", hotkeys ?? {});
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
-      if (eventToBinding(e) !== binding) return;
+      if (findHotkeyMatch(e, hotkeys ?? {}, "Global") !== "globalSearchFocus") return;
       e.preventDefault();
       setOpen(true);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [binding, setOpen]);
+  }, [hotkeys, setOpen]);
 
   const pill = (
     <button
