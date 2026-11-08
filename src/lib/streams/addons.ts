@@ -1,3 +1,4 @@
+import { addonBaseUrl, addonResourceUrl } from "@/lib/addon-url";
 import { streamKey } from "./identity";
 import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
@@ -156,11 +157,7 @@ export async function fetchAddonStreams(
         skipped.push(`${addon.manifest.name}(other-plugin)`);
         continue;
       }
-      const pluginId = pluginQueryId(
-        addon,
-        req,
-        forcedBases.get(addon.transportUrl.replace(/\/manifest\.json$/, "")),
-      );
+      const pluginId = pluginQueryId(addon, req, forcedBases.get(addonBaseUrl(addon.transportUrl)));
       if (!pluginId) {
         skipped.push(`${addon.manifest.name}(no-matching-id)`);
         continue;
@@ -193,7 +190,7 @@ export async function fetchAddonStreams(
       skipped.push(`${addon.manifest.name}(retired)`);
       continue;
     }
-    const forcedId = forcedBases.get(addon.transportUrl.replace(/\/manifest\.json$/, ""));
+    const forcedId = forcedBases.get(addonBaseUrl(addon.transportUrl));
     const ids =
       forcedId != null
         ? [forcedId]
@@ -496,7 +493,7 @@ async function fetchOneUncached(
   timeoutMs: number,
   altTypes: string[] = [],
 ): Promise<{ streams: Stream[]; failure?: AddonFailureCode }> {
-  const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+  const base = addonBaseUrl(addon.transportUrl);
   const limit = timeoutFor(addon, timeoutMs);
   // A self-hosted addon lives on loopback/LAN, which the guarded bridge fetch
   // rejects outright ("blocked internal target"). Only a URL the user installed
@@ -507,7 +504,7 @@ async function fetchOneUncached(
   const queryOnce = async (
     t: string,
   ): Promise<{ streams?: Stream[]; failure?: AddonFailureCode }> => {
-    const url = `${base}/stream/${t}/${id}.json`;
+    const url = addonResourceUrl(base, `stream/${t}/${id}.json`);
     const ac = new AbortController();
     let timedOut = false;
     const timer = setTimeout(() => {

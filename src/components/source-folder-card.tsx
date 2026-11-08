@@ -1,3 +1,4 @@
+import { addonBaseUrl } from "@/lib/addon-url";
 import { useCallback, useState } from "react";
 import { useView } from "@/lib/view";
 import { tmdbSourceParams, type SourceFolder } from "@/lib/custom-sources";
@@ -130,7 +131,7 @@ export function SourceFolderCard({
       openGrid({
         title: folder.title,
         fetcher: createAddonCatalogFetcher({
-          base: addon.transportUrl.replace(/\/manifest\.json$/, ""),
+          base: addonBaseUrl(addon.transportUrl),
           type: source.type,
           id: source.catalogId,
         }),

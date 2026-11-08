@@ -1,3 +1,4 @@
+import * as addonUrl from "../src/lib/addon-url.ts";
 // @ts-expect-error Node-only tests
 import assert from "node:assert/strict";
 // @ts-expect-error Node-only tests
@@ -89,6 +90,7 @@ function resolver() {
   const exports: Record<string, any> = {};
   new Function("require", "exports", "localStorage", code)(
     (key: string) => {
+      if (key === "@/lib/addon-url") return addonUrl;
       if (key === "@/lib/metadata-policy" || key === "./metadata-policy")
         return { addonOnlyMetadata: () => false };
       assert.ok(key in mocks, "Unexpected import: " + key);

@@ -1,3 +1,4 @@
+import { addonBaseUrl } from "@/lib/addon-url";
 import {
   startTransition,
   useCallback,
@@ -924,7 +925,7 @@ export function DetailView({
         keepProviderListing(full);
         return true;
       };
-      const direct = origin.base ? origin.base.replace(/\/manifest\.json$/, "") : null;
+      const direct = origin.base ? addonBaseUrl(origin.base) : null;
       if (direct && (await attempt(direct))) return;
       if (cancelled) return;
       const addons = await gatherCatalogAddons(authKey).catch(() => []);

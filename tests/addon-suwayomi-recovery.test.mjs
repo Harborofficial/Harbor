@@ -1,3 +1,4 @@
+import * as addonUrl from "../src/lib/addon-url.ts";
 import { streamKey } from "../src/lib/streams/identity.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -14,6 +15,7 @@ function load(file, dependencies, globals = {}) {
   const module = { exports: {} };
   new Function("require", "module", "exports", ...Object.keys(globals), compiled)(
     (id) => {
+      if (id === "@/lib/addon-url") return addonUrl;
       assert.ok(id in dependencies, `Unexpected dependency ${id}`);
       return dependencies[id];
     },
