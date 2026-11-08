@@ -1,3 +1,5 @@
+import { mirrorMembershipSnapshot } from "@/lib/membership-durable";
+
 export type MembershipProfile = {
   activeId: string | null;
   settingsLinked: boolean;
@@ -297,6 +299,7 @@ function persistMembershipSnapshot(
   } catch {
     return { status: "error", reason: "storage-failed" };
   }
+  mirrorMembershipSnapshot(key, containers);
   return { status };
 }
 

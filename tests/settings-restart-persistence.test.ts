@@ -7,6 +7,7 @@ import { DEFAULT } from "../src/lib/settings/defaults.ts";
 import {
   MIRROR_KEY,
   SHARED_KEY,
+  loadEffective,
   persistEffective,
   recoverSettingsFile,
 } from "../src/lib/settings/profile-store.ts";
@@ -50,6 +51,31 @@ test("legacy disk files recover only when browser settings are absent", () => {
   assert.equal(recoverSettingsFile(disk, "default", true), null);
   assert.equal(recoverSettingsFile("[]", "default", true), null);
   assert.equal(recoverSettingsFile("invalid", "default", true), null);
+  localStorage.clear();
+});
+
+test("an immediate close after settings edits keeps the thumbnail and Seek key", () => {
+  localStorage.clear();
+  persistEffective(
+    { ...DEFAULT, seekrApiKey: "dummy-seek", spoilerHideThumbnails: false },
+    "default",
+    true,
+  );
+
+  // No disk-write wait or debounce: this is the state when the window closes.
+  const reopened = loadEffective("default", true);
+  assert.equal(reopened.seekrApiKey, "dummy-seek");
+  assert.equal(reopened.spoilerHideThumbnails, false);
+  localStorage.clear();
+});
+
+test("a failed disk write leaves the newer browser copy as the restart source", () => {
+  localStorage.clear();
+  persistEffective({ ...DEFAULT, seekrApiKey: "browser-new" }, "default", true);
+
+  // No disk file exists after the failed write; recovery has nothing to restore.
+  assert.equal(recoverSettingsFile(null, "default", true), null);
+  assert.equal(loadEffective("default", true).seekrApiKey, "browser-new");
   localStorage.clear();
 });
 
