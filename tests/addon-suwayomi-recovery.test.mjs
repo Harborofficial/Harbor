@@ -283,3 +283,47 @@ test("Suwayomi verifies the mutation result and keeps unavailable-endpoint fallb
   );
   assert.deepEqual(attempted, ["graphql", "rest"]);
 });
+
+test("manifest requests share work across callers but allow later refreshes", async () => {
+  const h = addonsHarness(
+    async () => new Response(JSON.stringify({ id: "shared", name: "Shared" })),
+  );
+  const url = "https://shared.example/manifest.json";
+  const results = await Promise.all([h.fetchManifestAt(url), h.fetchManifestAt(url)]);
+  assert.equal(h.calls.length, 1);
+  assert.deepEqual(results[0], results[1]);
+  await h.fetchManifestAt(url);
+  assert.equal(h.calls.length, 2);
+});
+
+for (const retryAfter of ["120", "Sun, 08 Nov 2026 00:02:00 GMT", "invalid", null]) {
+  test(`manifest rate limit honors cooldown: ${retryAfter}`, async (t) => {
+    let now = Date.parse("2026-11-08T00:00:00Z");
+    t.mock.method(Date, "now", () => now);
+    let limited = true;
+    const h = addonsHarness(async () =>
+      limited
+        ? new Response(null, {
+            status: 429,
+            headers: retryAfter ? { "Retry-After": retryAfter } : {},
+          })
+        : new Response(JSON.stringify({ id: "recovered", name: "Recovered" })),
+    );
+    const url = "https://limited.example/config/manifest.json";
+    await assert.rejects(h.fetchManifestAt(url), /HTTP 429/);
+    limited = false;
+    now += 59_000;
+    await assert.rejects(h.fetchManifestAt(url), /HTTP 429/);
+    assert.equal(h.calls.length, 1, "picker/profile retry does not contact the server");
+    await h.fetchManifestAt("https://limited.example/other-config/manifest.json");
+    assert.equal(h.calls.length, 2, "unrelated addon remains available");
+    now += 31_000;
+    if (retryAfter === "120" || retryAfter?.startsWith("Sun,")) {
+      await assert.rejects(h.fetchManifestAt(url), /HTTP 429/);
+      assert.equal(h.calls.length, 2, "server cooldown lasts longer than the default minute");
+    }
+    now += 31_000;
+    assert.equal((await h.fetchManifestAt(url)).id, "recovered");
+    assert.equal(h.calls.length, 3);
+  });
+}
