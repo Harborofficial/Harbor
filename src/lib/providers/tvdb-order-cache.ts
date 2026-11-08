@@ -12,7 +12,7 @@ import {
 } from "@/lib/media-cache";
 
 // Preserve existing entries; older language evidence is normalized on read.
-const PREFIX = "harbor.tvdbo.v8.";
+const PREFIX = "harbor.tvdbo.v9.";
 const TTL = 3 * 24 * 60 * 60 * 1000;
 onMediaCacheClear(() => {
   try {

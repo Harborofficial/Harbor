@@ -511,7 +511,7 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
   );
   const { watchedKeys: entryMalWatched } = useMalWatched(displaySourceId ?? "", entryPoolEpisodes);
   const showSeason = useMemo(
-    () => new Set(displayEpisodes.map((e) => e.imdbSeason ?? e.seasonNumber ?? 1)).size > 1,
+    () => new Set(displayEpisodes.map((e) => e.displaySeason ?? e.seasonNumber ?? e.imdbSeason ?? 1)).size > 1,
     [displayEpisodes],
   );
   const { pickerItems, selectPickerItem, franchiseActiveKey } = useAnimeFranchiseNav(

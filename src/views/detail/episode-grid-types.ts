@@ -5,8 +5,10 @@ export type Progress = { ratio: number; watched: boolean; startedAt: number };
 export type GridEpisode = {
   key: string;
   number: number;
+  displayNumber?: number;
   season: number;
   absoluteNumber?: number;
+  displaySeason?: number;
   seasonLabel?: string;
   title: string;
   stills: string[];
