@@ -20,17 +20,22 @@ const BACKDROP_DIM = 0.5;
 
 export function MediaGallery({
   detail,
+  trailerCandidates,
   title,
   logo,
   metaId,
 }: {
   detail: TmdbDetail;
+  trailerCandidates: readonly string[];
   title: string;
   logo?: string;
   metaId: string;
 }) {
   const { settings, update } = useSettings();
-  const videos = useMemo(() => collectVideos(detail), [detail]);
+  const videos = useMemo(
+    () => collectVideos(detail, trailerCandidates),
+    [detail, trailerCandidates],
+  );
   const backdrops = detail.gallery.backdrops;
   const posters = detail.gallery.posters;
   const logos = detail.gallery.logos;
@@ -38,8 +43,10 @@ export function MediaGallery({
   const tabs = useMemo(() => {
     const list: Array<{ id: Tab; label: string; count: number }> = [];
     if (videos.length > 0) list.push({ id: "videos", label: t("Videos"), count: videos.length });
-    if (backdrops.length > 0) list.push({ id: "backdrops", label: t("Backdrops"), count: backdrops.length });
-    if (posters.length > 0) list.push({ id: "posters", label: t("Posters"), count: posters.length });
+    if (backdrops.length > 0)
+      list.push({ id: "backdrops", label: t("Backdrops"), count: backdrops.length });
+    if (posters.length > 0)
+      list.push({ id: "posters", label: t("Posters"), count: posters.length });
     if (logos.length > 0) list.push({ id: "logos", label: t("Logos"), count: logos.length });
     return list;
   }, [videos.length, backdrops.length, posters.length, logos.length]);
@@ -47,7 +54,9 @@ export function MediaGallery({
   const [active, setActive] = useState<Tab | null>(null);
   const current = active ?? tabs[0]?.id ?? null;
   const [trailer, setTrailer] = useState<string | null>(null);
-  const [lightbox, setLightbox] = useState<{ images: string[]; index: number; kind: Tab } | null>(null);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number; kind: Tab } | null>(
+    null,
+  );
   const [toast, setToast] = useState<string | null>(null);
 
   const flash = useCallback((text: string) => {
@@ -71,7 +80,11 @@ export function MediaGallery({
   const downloadVideo = useCallback(
     (v: GalleryVideo) => {
       flash(t("Downloading..."));
-      saveTrailerToDisk(v.ytId, resolveTrailerQuality(settings.trailerQuality), `${slug}-${baseName(v.name)}`)
+      saveTrailerToDisk(
+        v.ytId,
+        resolveTrailerQuality(settings.trailerQuality),
+        `${slug}-${baseName(v.name)}`,
+      )
         .then((r) => flash(r.saved ? t("Saved to disk") : t("Download failed")))
         .catch(() => flash(t("Download failed")));
     },
@@ -154,62 +167,69 @@ export function MediaGallery({
       </div>
 
       <div key={current} className="animate-media-swap motion-reduce:animate-none">
-      {current === "videos" && (
-        <MediaRail min={300}>
-          {videos.map((v) => (
-            <VideoTile key={v.ytId} v={v} onPlay={() => setTrailer(v.ytId)} onDownload={() => downloadVideo(v)} />
-          ))}
-        </MediaRail>
-      )}
-      {current === "backdrops" && (
-        <MediaRail min={300}>
-          {backdrops.map((src, i) => (
-            <ImageTile
-              key={src}
-              src={src}
-              ratio="landscape"
-              pinnable
-              backdropPinned={pinnedBackdrop === src}
-              onSetShowBackdrop={() => setShowBackdrop(src)}
-              onOpen={() => setLightbox({ images: backdrops, index: i, kind: "backdrops" })}
-              onDownload={() => downloadImage(src, "backdrop", i)}
-              onSetBackdrop={() => setBackdrop(src)}
-            />
-          ))}
-        </MediaRail>
-      )}
-      {current === "posters" && (
-        <MediaRail min={160}>
-          {posters.map((src, i) => (
-            <ImageTile
-              key={src}
-              src={src}
-              ratio="portrait"
-              posterPinned={pinnedPoster === src}
-              onSetPoster={() => setPoster(src)}
-              onOpen={() => setLightbox({ images: posters, index: i, kind: "posters" })}
-              onDownload={() => downloadImage(src, "poster", i)}
-            />
-          ))}
-        </MediaRail>
-      )}
-      {current === "logos" && (
-        <MediaRail min={220}>
-          {logos.map((src, i) => (
-            <LogoTile
-              key={src}
-              src={src}
-              pinned={pinnedLogo === src}
-              onOpen={() => setLightbox({ images: logos, index: i, kind: "logos" })}
-              onDownload={() => downloadImage(src, "logo", i)}
-              onSetLogo={() => setLogo(src)}
-            />
-          ))}
-        </MediaRail>
-      )}
+        {current === "videos" && (
+          <MediaRail min={300}>
+            {videos.map((v) => (
+              <VideoTile
+                key={v.ytId}
+                v={v}
+                onPlay={() => setTrailer(v.ytId)}
+                onDownload={() => downloadVideo(v)}
+              />
+            ))}
+          </MediaRail>
+        )}
+        {current === "backdrops" && (
+          <MediaRail min={300}>
+            {backdrops.map((src, i) => (
+              <ImageTile
+                key={src}
+                src={src}
+                ratio="landscape"
+                pinnable
+                backdropPinned={pinnedBackdrop === src}
+                onSetShowBackdrop={() => setShowBackdrop(src)}
+                onOpen={() => setLightbox({ images: backdrops, index: i, kind: "backdrops" })}
+                onDownload={() => downloadImage(src, "backdrop", i)}
+                onSetBackdrop={() => setBackdrop(src)}
+              />
+            ))}
+          </MediaRail>
+        )}
+        {current === "posters" && (
+          <MediaRail min={160}>
+            {posters.map((src, i) => (
+              <ImageTile
+                key={src}
+                src={src}
+                ratio="portrait"
+                posterPinned={pinnedPoster === src}
+                onSetPoster={() => setPoster(src)}
+                onOpen={() => setLightbox({ images: posters, index: i, kind: "posters" })}
+                onDownload={() => downloadImage(src, "poster", i)}
+              />
+            ))}
+          </MediaRail>
+        )}
+        {current === "logos" && (
+          <MediaRail min={220}>
+            {logos.map((src, i) => (
+              <LogoTile
+                key={src}
+                src={src}
+                pinned={pinnedLogo === src}
+                onOpen={() => setLightbox({ images: logos, index: i, kind: "logos" })}
+                onDownload={() => downloadImage(src, "logo", i)}
+                onSetLogo={() => setLogo(src)}
+              />
+            ))}
+          </MediaRail>
+        )}
       </div>
 
-      {trailer && <TrailerOverlay id={trailer} title={title} logo={logo} onClose={() => setTrailer(null)} />}
+      {trailer && (
+        <TrailerOverlay id={trailer} title={title} logo={logo} onClose={() => setTrailer(null)} />
+      )}
       {lightbox &&
         createPortal(
           <MediaLightbox
@@ -237,10 +257,10 @@ export function MediaGallery({
   );
 }
 
-function collectVideos(detail: TmdbDetail): GalleryVideo[] {
+function collectVideos(detail: TmdbDetail, trailerCandidates: readonly string[]): GalleryVideo[] {
   const seen = new Set<string>();
   const out: GalleryVideo[] = [];
-  for (const id of detail.trailerCandidates) {
+  for (const id of trailerCandidates) {
     if (seen.has(id)) continue;
     seen.add(id);
     out.push({ ytId: id, name: "Trailer", type: "Trailer" });

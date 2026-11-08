@@ -53,6 +53,7 @@ import {
 import { tmdbAnimeLogo, tmdbDetails, tmdbSeasonEpisodes } from "@/lib/providers/tmdb";
 import type { Episode as TmdbEpisode } from "@/lib/providers/tmdb/tmdb-details";
 import type { CastEntry, TmdbDetail } from "@/lib/providers/tmdb";
+import { mergeTrailerCandidates } from "@/lib/trailer-candidates";
 import type { Settings } from "@/lib/settings";
 
 export type FranchiseEntry = {
@@ -162,6 +163,9 @@ function makeFranchiseMeta(id: number, anime: import("./kitsu").KitsuAnimeDetail
     description: anime.synopsis,
     releaseInfo: anime.year,
     imdbRating: anime.rating,
+    trailerStreams: anime.trailerYtId
+      ? [{ ytId: anime.trailerYtId, title: anime.title }]
+      : undefined,
   };
 }
 
@@ -921,6 +925,10 @@ async function loadAnimeDetails(
           tmdbFull = fullRaw;
       }
     }
+    const trailerCandidates = mergeTrailerCandidates(
+      tmdbFull?.trailerCandidates,
+      anime.trailerYtId ? [anime.trailerYtId] : undefined,
+    );
     const [rails, characters, studios] = await Promise.all([
       recommendationsPromise,
       charactersPromise,
@@ -947,6 +955,8 @@ async function loadAnimeDetails(
       imdbId: seriesImdb ?? addonMeta?.imdb_id ?? tmdbFull?.imdbId ?? null,
       tmdbTvId: tmdbFull?.tmdbTvId,
       seasonPosters: tmdbFull?.seasonPosters,
+      trailerYtId: trailerCandidates[0] ?? null,
+      trailerCandidates,
       extraVideos: tmdbFull?.extraVideos ?? [],
       recommendations: rails.moreLikeThis,
       similar: rails.youMightLike,

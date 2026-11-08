@@ -199,6 +199,7 @@ import { TrailerOverlay } from "./detail/trailer-overlay";
 import { DetailHeroTrailer } from "./detail/detail-hero-trailer";
 import { useScrollUpTrailer } from "./detail/use-scroll-up-trailer";
 import { prefetchTrailerDownload, resolveTrailerQuality } from "@/lib/trailer";
+import { mergeTrailerCandidates } from "@/lib/trailer-candidates";
 import { SeriesEpisodes } from "./detail/series-episodes";
 import { CinemetaEpisodes } from "./detail/cinemeta-episodes";
 import { AnimeEpisodes } from "./detail/anime-episodes";
@@ -578,20 +579,28 @@ export function DetailView({
   const addonNative = liveContext || isAddonNativeMeta(meta);
   const capstanMeta = useCapstanDetail(meta);
   const capstanCanonicalId = capstanMeta?.canonicalId ?? null;
-  const trailerCandidates = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          [
-            ...(sourceText.trailerCandidates ?? []),
-            ...(detail?.trailerCandidates ?? []),
-            ...(meta.trailerStreams?.map((trailer) => trailer.ytId) ?? []),
-            ...(meta.trailers?.map((trailer) => trailer.source) ?? []),
-          ].filter((id): id is string => !!id),
-        ),
-      ),
-    [sourceText.trailerCandidates, detail?.trailerCandidates, meta.trailerStreams, meta.trailers],
-  );
+  const trailerCandidates = useMemo(() => {
+    const fromMeta = [
+      ...(meta.trailerStreams?.map((trailer) => trailer.ytId) ?? []),
+      ...(meta.trailers?.map((trailer) => trailer.source) ?? []),
+    ].filter((id): id is string => !!id);
+    const fromFranchise = franchise
+      .flatMap((entry) => entry.meta.trailerStreams ?? [])
+      .map((trailer) => trailer.ytId)
+      .filter((id): id is string => !!id);
+    return mergeTrailerCandidates(
+      ...(animeIdentity
+        ? [detail?.trailerCandidates, sourceText.trailerCandidates, fromMeta, fromFranchise]
+        : [sourceText.trailerCandidates, detail?.trailerCandidates, fromMeta, fromFranchise]),
+    );
+  }, [
+    animeIdentity,
+    sourceText.trailerCandidates,
+    detail?.trailerCandidates,
+    meta.trailerStreams,
+    meta.trailers,
+    franchise,
+  ]);
   const trailerCandidate = trailerCandidates[0] ?? null;
   const prefetchTrailer = useCallback(() => {
     if (trailerCandidate) {
@@ -3366,7 +3375,15 @@ export function DetailView({
               key: "mediaGallery",
               label: t("Media"),
               minHeight: 210,
-              node: <MediaGallery detail={detail} title={title} logo={logo} metaId={meta.id} />,
+              node: (
+                <MediaGallery
+                  detail={detail}
+                  trailerCandidates={trailerCandidates}
+                  title={title}
+                  logo={logo}
+                  metaId={meta.id}
+                />
+              ),
             });
           }
           if (isAnime || stickyAwardName.current) {
@@ -3487,6 +3504,7 @@ export function DetailView({
       {trailerOpen && trailerCandidate && (
         <TrailerOverlay
           id={trailerCandidate}
+          candidateIds={trailerCandidates}
           title={title}
           logo={logo}
           onClose={() => setTrailerOpen(false)}
