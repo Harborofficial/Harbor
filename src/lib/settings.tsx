@@ -32,6 +32,7 @@ import {
   sourceKeyFor,
 } from "./settings/profile-store";
 import type { Settings, StreamingService } from "./settings/types";
+import { mergeRecoveredSettings, recoveryMatchesSource } from "./settings/recovery";
 import { markSectionDirty } from "./profile-sync/scheduler";
 import { configureLayoutStore } from "./layout-sync/store";
 import { SYNCED_SETTINGS_FIELDS } from "./layout-sync/sections";
@@ -136,24 +137,19 @@ export function SettingsProvider({
 
   useEffect(() => {
     let cancelled = false;
+    const started = { profileId: sourceRef.current.profileId, linked: sourceRef.current.linked };
     const initial = settingsRef.current;
     void readSettingsFile().then((raw) => {
       if (cancelled) return;
-      const recovered = recoverSettingsFile(
-        raw,
-        sourceRef.current.profileId,
-        sourceRef.current.linked,
-      );
+      // A profile switch while the disk read is in flight makes the file belong to
+      // the previous profile; loading it into the new one would cross accounts.
+      if (!recoveryMatchesSource(started, sourceRef.current)) {
+        setSettingsReady(true);
+        return;
+      }
+      const recovered = recoverSettingsFile(raw, started.profileId, started.linked);
       if (recovered) {
-        setSettings((current) => {
-          // Preserve edits made while the native read was in flight.
-          const edits = Object.fromEntries(
-            Object.entries(current).filter(
-              ([key, value]) => value !== initial[key as keyof Settings],
-            ),
-          );
-          return { ...recovered, ...edits };
-        });
+        setSettings((current) => mergeRecoveredSettings(recovered, current, initial));
       }
       setSettingsReady(true);
     });
