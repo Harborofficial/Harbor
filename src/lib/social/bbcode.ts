@@ -1,3 +1,4 @@
+import { t } from "@/lib/i18n";
 import { escapeHtml as esc, escapeWithMentions } from "./bbcode-mentions";
 
 const MAX_DEPTH = 12;
@@ -7,15 +8,51 @@ const INVISIBLE_RE = /[\u061C\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206
 const LI = "\uE000";
 
 const COLOR_NAMES = new Set([
-  "red", "orange", "yellow", "green", "teal", "cyan", "blue", "indigo", "violet",
-  "purple", "pink", "magenta", "brown", "gray", "grey", "black", "white", "gold",
-  "silver", "crimson", "coral", "salmon", "lime", "olive", "navy", "maroon",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "teal",
+  "cyan",
+  "blue",
+  "indigo",
+  "violet",
+  "purple",
+  "pink",
+  "magenta",
+  "brown",
+  "gray",
+  "grey",
+  "black",
+  "white",
+  "gold",
+  "silver",
+  "crimson",
+  "coral",
+  "salmon",
+  "lime",
+  "olive",
+  "navy",
+  "maroon",
 ]);
 
 const SPAM_HOSTS = new Set([
-  "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "buff.ly", "is.gd",
-  "cutt.ly", "rebrand.ly", "shorturl.at", "rb.gy", "adf.ly", "grabify.link",
-  "iplogger.org", "iplogger.com", "blasze.tk",
+  "bit.ly",
+  "tinyurl.com",
+  "t.co",
+  "goo.gl",
+  "ow.ly",
+  "buff.ly",
+  "is.gd",
+  "cutt.ly",
+  "rebrand.ly",
+  "shorturl.at",
+  "rb.gy",
+  "adf.ly",
+  "grabify.link",
+  "iplogger.org",
+  "iplogger.com",
+  "blasze.tk",
 ]);
 
 const SIZE_EM = ["0.85", "0.85", "1", "1.15", "1.4", "1.7", "2.1", "2.6"];
@@ -128,25 +165,20 @@ function tokenize(src: string): Tok[] {
   return toks;
 }
 
-function ytEmbedSrc(id: string): string {
-  const params = new URLSearchParams({
-    rel: "0",
-    modestbranding: "1",
-    playsinline: "1",
-    iv_load_policy: "3",
-  });
-  const proto = typeof window !== "undefined" ? (window.location?.protocol ?? "") : "";
-  if (/^https?:$/.test(proto) && window.location?.origin) params.set("origin", window.location.origin);
-  return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
-}
-
-function iframe(src: string, title: string): string {
+function youtubeFacade(id: string): string {
+  const href = `https://www.youtube.com/watch?v=${id}`;
+  const thumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  const label = esc(t("Watch on YouTube"));
   return (
-    `<div style="position:relative;width:100%;aspect-ratio:16/9;margin:10px 0;border-radius:12px;overflow:hidden;background:#000">` +
-    `<iframe src="${esc(src)}" title="${esc(title)}" loading="lazy" allowfullscreen ` +
-    `allow="encrypted-media;picture-in-picture;clipboard-write;fullscreen" ` +
-    `referrerpolicy="strict-origin-when-cross-origin" ` +
-    `style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>`
+    `<div data-harbor-youtube-frame="${esc(id)}" style="position:relative;width:100%;aspect-ratio:16/9;margin:10px 0;border-radius:12px;overflow:hidden;background:#000">` +
+    `<a href="${esc(href)}" data-harbor-youtube="${esc(id)}" aria-label="${label}" title="${label}" ` +
+    `rel="noopener noreferrer nofollow" style="position:absolute;inset:0;display:block;text-decoration:none;color:#fff">` +
+    `<img src="${esc(thumbnail)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" ` +
+    `style="width:100%;height:100%;object-fit:cover;display:block;opacity:.92" />` +
+    `<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.16)">` +
+    `<span style="width:68px;height:48px;border-radius:12px;background:#f00;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.45)">` +
+    `<span style="width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid #fff;margin-left:4px"></span>` +
+    `</span></span></a></div>`
   );
 }
 
@@ -214,7 +246,7 @@ function embedHtml(tag: string, raw: string): string | null {
   }
   if (tag === "youtube") {
     const id = ytId(raw);
-    return id ? iframe(ytEmbedSrc(id), "YouTube video") : null;
+    return id ? youtubeFacade(id) : null;
   }
   if (tag === "spotify") {
     const s = spotifyEmbed(raw);
@@ -223,7 +255,8 @@ function embedHtml(tag: string, raw: string): string | null {
   return null;
 }
 
-const HEAD_STYLE = "margin:14px 0 6px;font-weight:700;font-size:1.25em;line-height:1.3;color:var(--color-ink)";
+const HEAD_STYLE =
+  "margin:14px 0 6px;font-weight:700;font-size:1.25em;line-height:1.3;color:var(--color-ink)";
 const QUOTE_STYLE =
   "margin:10px 0;padding:6px 0 6px 14px;border-left:3px solid var(--color-edge);color:var(--color-ink-muted)";
 const CODE_STYLE =
@@ -233,7 +266,10 @@ const LIST_STYLE = "margin:8px 0;padding-inline-start:22px;list-style:disc";
 const LINK_STYLE = "color:var(--color-accent);text-decoration:underline";
 
 function trimBr(s: string): string {
-  return s.replace(/^(?:<br\/>)+/, "").replace(/(?:<br\/>)+$/, "").trim();
+  return s
+    .replace(/^(?:<br\/>)+/, "")
+    .replace(/(?:<br\/>)+$/, "")
+    .trim();
 }
 
 const BARE_URL_RE = /https?:\/\/[^\s<>"']+/gi;
@@ -267,7 +303,11 @@ function wrapList(inner: string): string {
     .map((p) => trimBr(p))
     .filter(Boolean);
   if (!items.length) return "";
-  return `<ul style="${LIST_STYLE}">` + items.map((i) => `<li style="margin:2px 0">${i}</li>`).join("") + `</ul>`;
+  return (
+    `<ul style="${LIST_STYLE}">` +
+    items.map((i) => `<li style="margin:2px 0">${i}</li>`).join("") +
+    `</ul>`
+  );
 }
 
 function finalize(f: Frame, addEmbed: () => boolean): { html: string; raw: string } {
@@ -297,7 +337,9 @@ function finalize(f: Frame, addEmbed: () => boolean): { html: string; raw: strin
     }
     case "size": {
       const n = f.arg != null ? Math.max(1, Math.min(7, Math.round(Number(f.arg)))) : NaN;
-      return wrap(Number.isFinite(n) ? `<span style="font-size:${SIZE_EM[n]}em">${inner}</span>` : inner);
+      return wrap(
+        Number.isFinite(n) ? `<span style="font-size:${SIZE_EM[n]}em">${inner}</span>` : inner,
+      );
     }
     case "url": {
       const href = linkUrl((f.arg != null ? f.arg : raw).trim());

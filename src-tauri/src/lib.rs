@@ -124,6 +124,8 @@ mod pip;
 mod pip_mac;
 mod pip_window;
 #[cfg(desktop)]
+mod profile_audio;
+#[cfg(desktop)]
 mod roku;
 #[cfg(desktop)]
 mod shaders;
@@ -1877,6 +1879,7 @@ pub fn run() {
             diagnostics::diagnostics_cleanup,
             trailer::fetch_trailer,
             trailer::resolve_youtube_stream,
+            profile_audio::resolve_profile_audio,
             #[cfg(feature = "music")]
             music::music_health,
             #[cfg(feature = "music")]
