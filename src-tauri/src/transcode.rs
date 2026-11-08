@@ -345,8 +345,56 @@ fn scale_filter(max_height: u32) -> String {
     )
 }
 
+fn push_reconnect_args(cmd: &mut tokio::process::Command) {
+    cmd.arg("-reconnect")
+        .arg("1")
+        .arg("-reconnect_streamed")
+        .arg("1")
+        .arg("-reconnect_on_network_error")
+        .arg("1")
+        .arg("-reconnect_on_http_error")
+        .arg("5xx,4xx")
+        .arg("-reconnect_delay_max")
+        .arg("8");
+}
+
+fn push_http_input(
+    cmd: &mut tokio::process::Command,
+    url: &str,
+    headers: &HashMap<String, String>,
+) {
+    let mut has_ua = false;
+    if let Some((_, ua)) = headers
+        .iter()
+        .find(|(k, _)| k.to_lowercase() == "user-agent")
+    {
+        cmd.arg("-user_agent").arg(ua);
+        has_ua = true;
+    }
+    if !has_ua {
+        cmd.arg("-user_agent").arg(default_ua());
+    }
+    let mut header_blob = String::new();
+    for (k, v) in headers {
+        if k.to_lowercase() == "user-agent" {
+            continue;
+        }
+        header_blob.push_str(&format!("{}: {}\r\n", k, v));
+    }
+    if !header_blob.is_empty() {
+        cmd.arg("-headers").arg(header_blob);
+    }
+    cmd.arg("-analyzeduration")
+        .arg("8M")
+        .arg("-probesize")
+        .arg("8M")
+        .arg("-i")
+        .arg(url);
+}
+
 pub async fn handle_transcode(
     url: &str,
+    audio_url: Option<&str>,
     headers: &HashMap<String, String>,
     profile: &TranscodeProfile,
     burn_sub: Option<&(String, String)>,
@@ -388,55 +436,33 @@ pub async fn handle_transcode(
     // HLS VOD needs its initial packets and normal demuxer buffering. The live
     // transport flags can discard those packets and break fragmented MP4 audio.
     if !profile.fragmented_mp4 {
-    cmd
-        .arg("-fflags")
-        .arg("+genpts+nobuffer+discardcorrupt")
-        .arg("-flags")
-        .arg("low_delay");
+        cmd.arg("-fflags")
+            .arg("+genpts+nobuffer+discardcorrupt")
+            .arg("-flags")
+            .arg("low_delay");
     }
-    cmd.arg("-reconnect")
-        .arg("1")
-        .arg("-reconnect_streamed")
-        .arg("1")
-        .arg("-reconnect_on_network_error")
-        .arg("1")
-        .arg("-reconnect_on_http_error")
-        .arg("5xx,4xx")
-        .arg("-reconnect_delay_max")
-        .arg("8");
-
-    let mut has_ua = false;
-    if let Some((_, ua)) = headers
-        .iter()
-        .find(|(k, _)| k.to_lowercase() == "user-agent")
-    {
-        cmd.arg("-user_agent").arg(ua);
-        has_ua = true;
-    }
-    if !has_ua {
-        cmd.arg("-user_agent").arg(default_ua());
-    }
-    let mut header_blob = String::new();
-    for (k, v) in headers {
-        if k.to_lowercase() == "user-agent" {
-            continue;
-        }
-        header_blob.push_str(&format!("{}: {}\r\n", k, v));
-    }
-    if !header_blob.is_empty() {
-        cmd.arg("-headers").arg(header_blob);
+    push_reconnect_args(&mut cmd);
+    push_http_input(&mut cmd, url, headers);
+    if let Some(audio_url) = audio_url {
+        push_reconnect_args(&mut cmd);
+        push_http_input(&mut cmd, audio_url, headers);
     }
 
-    cmd.arg("-analyzeduration")
-        .arg("8M")
-        .arg("-probesize")
-        .arg("8M")
-        .arg("-i")
-        .arg(url)
-        .arg("-map")
-        .arg(if profile.fragmented_mp4 { "0:v:0?" } else { "0:v?" })
-        .arg("-map")
-        .arg(if profile.fragmented_mp4 { "0:a:0?" } else { "0:a?" });
+    if audio_url.is_some() {
+        // HLS splits video and audio into separate playlists when YouTube
+        // serves an adaptive rendition. Map one stream from each input.
+        cmd.arg("-map")
+            .arg("0:v:0?")
+            .arg("-map")
+            .arg("1:a:0?");
+    } else if profile.fragmented_mp4 {
+        cmd.arg("-map")
+            .arg("0:v:0?")
+            .arg("-map")
+            .arg("0:a:0?");
+    } else {
+        cmd.arg("-map").arg("0:v?").arg("-map").arg("0:a?");
+    }
 
     if reencode_video {
         let mut vf = scale_filter(profile.max_height);

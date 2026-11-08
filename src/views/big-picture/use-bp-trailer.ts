@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { tmdbTrailerList } from "@/lib/providers/tmdb";
-import { fetchFirstTrailer, resolveTrailerQuality, trailerSrc, type TrailerInfo } from "@/lib/trailer";
+import {
+  fetchFirstTrailer,
+  prefetchTrailer,
+  resolveTrailerQuality,
+  trailerSrc,
+  type TrailerInfo,
+} from "@/lib/trailer";
 import { usePageVisible } from "@/lib/visibility";
 import { useSettings } from "@/lib/settings";
 
 const DWELL_MS = 2200;
+const WARM_MS = 300;
 
 export function useBpTrailer(meta: Meta | null): { src: string | null } {
   const { settings } = useSettings();
@@ -23,7 +30,21 @@ export function useBpTrailer(meta: Meta | null): { src: string | null } {
   useEffect(() => {
     if (!request.enabled) return;
     let cancelled = false;
-    const timer = window.setTimeout(() => {
+    let dwellElapsed = false;
+    let ready: TrailerInfo | null = null;
+    let dwellTimer: number | null = null;
+    let warmTimer: number | null = null;
+    const reveal = () => {
+      if (!cancelled && dwellElapsed && ready) setResult({ request, info: ready });
+    };
+    // The reveal waits for the dwell, while resolution runs underneath it.
+    dwellTimer = window.setTimeout(() => {
+      dwellElapsed = true;
+      reveal();
+    }, DWELL_MS);
+
+    // A short settle keeps fast focus changes from starting an extraction.
+    const resolve = () => {
       const lookup: Promise<string[]> = request.id.startsWith("tmdb:")
         ? tmdbTrailerList(request.tmdbKey, request.id)
         : fetchMeta(narrowMediaType(request.type), request.id).then((full) => {
@@ -37,16 +58,21 @@ export function useBpTrailer(meta: Meta | null): { src: string | null } {
       lookup
         .then((ids) => {
           if (cancelled || !ids[0]) return;
+          prefetchTrailer(ids[0], request.quality);
           return fetchFirstTrailer(ids, request.quality, () => !cancelled).then((info) => {
-            if (!cancelled && info) setResult({ request, info });
+            if (cancelled || !info) return;
+            ready = info;
+            reveal();
           });
         })
         .catch(() => {});
-    }, DWELL_MS);
+    };
+    warmTimer = window.setTimeout(resolve, WARM_MS);
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      if (dwellTimer != null) window.clearTimeout(dwellTimer);
+      if (warmTimer != null) window.clearTimeout(warmTimer);
     };
   }, [request]);
 

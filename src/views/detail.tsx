@@ -198,6 +198,7 @@ import { HeroRatings } from "./detail/hero-ratings";
 import { TrailerOverlay } from "./detail/trailer-overlay";
 import { DetailHeroTrailer } from "./detail/detail-hero-trailer";
 import { useScrollUpTrailer } from "./detail/use-scroll-up-trailer";
+import { prefetchTrailerDownload, resolveTrailerQuality } from "@/lib/trailer";
 import { SeriesEpisodes } from "./detail/series-episodes";
 import { CinemetaEpisodes } from "./detail/cinemeta-episodes";
 import { AnimeEpisodes } from "./detail/anime-episodes";
@@ -592,6 +593,11 @@ export function DetailView({
     [sourceText.trailerCandidates, detail?.trailerCandidates, meta.trailerStreams, meta.trailers],
   );
   const trailerCandidate = trailerCandidates[0] ?? null;
+  const prefetchTrailer = useCallback(() => {
+    if (trailerCandidate) {
+      prefetchTrailerDownload(trailerCandidate, resolveTrailerQuality(settings.trailerQuality));
+    }
+  }, [trailerCandidate, settings.trailerQuality]);
 
   useScrollUpTrailer(
     scrollRef,
@@ -3001,6 +3007,8 @@ export function DetailView({
                         <button
                           type="button"
                           onClick={() => setTrailerOpen(true)}
+                          onPointerEnter={prefetchTrailer}
+                          onFocus={prefetchTrailer}
                           aria-label={t("Watch trailer")}
                           className="group flex h-12 w-12 items-center justify-center rounded-full bg-canvas/80 text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.94]"
                         >

@@ -44,7 +44,7 @@ export function TrailerOverlay({
     let cancelled = false;
     const pref = settings.trailerQuality;
     const quality = resolveTrailerQuality(pref);
-    fetchTrailer(id, quality).then((info) => {
+    fetchTrailer(id, quality, true).then((info) => {
       if (cancelled) return;
       if (info) setStreamUrl(trailerSrc(info));
       else setExtractFailed(true);
