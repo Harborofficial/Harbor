@@ -2,6 +2,13 @@ import { writeReaderBackground } from "./reader-background-storage";
 
 const DB_NAME = "harbor-reader-backgrounds";
 const STORE = "backgrounds";
+const AUTHORITY_SUFFIX = ".authority";
+
+type BackgroundAuthority = "local" | "deleted";
+
+export function readerBackgroundAuthorityKey(key: string): string {
+  return key + AUTHORITY_SUFFIX;
+}
 
 let database: Promise<IDBDatabase> | null = null;
 
@@ -66,6 +73,34 @@ async function deleteStored(key: string): Promise<void> {
   });
 }
 
+function readAuthority(key: string): BackgroundAuthority | null {
+  try {
+    const value = localStorage.getItem(readerBackgroundAuthorityKey(key));
+    return value === "local" || value === "deleted" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeAuthority(key: string, value: BackgroundAuthority | null): void {
+  try {
+    const marker = readerBackgroundAuthorityKey(key);
+    if (value) localStorage.setItem(marker, value);
+    else localStorage.removeItem(marker);
+  } catch {
+    // A marker write is tiny; if it still fails, the image write already failed too.
+  }
+}
+
+function removeLegacy(key: string): boolean {
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function legacyBackground(key: string): string | null {
   try {
     const value = localStorage.getItem(key);
@@ -76,6 +111,42 @@ function legacyBackground(key: string): string | null {
 }
 
 export async function loadReaderBackground(key: string): Promise<string | null> {
+  const authority = readAuthority(key);
+
+  if (authority === "deleted") {
+    // A reset owns this key even if the IndexedDB delete failed. Retry the delete
+    // and keep the tombstone until both copies are actually gone.
+    const localGone = removeLegacy(key);
+    if (indexedDbAvailable()) {
+      try {
+        await deleteStored(key);
+      } catch {
+        return null;
+      }
+    }
+    if (localGone) writeAuthority(key, null);
+    return null;
+  }
+
+  if (authority === "local") {
+    const local = legacyBackground(key);
+    if (local) {
+      if (indexedDbAvailable()) {
+        try {
+          await putStored(key, local);
+          // Only after the IndexedDB write lands does the fallback stop being authoritative.
+          writeAuthority(key, null);
+          removeLegacy(key);
+        } catch {
+          // Keep the newer local copy; the next load can try the migration again.
+        }
+      }
+      return local;
+    }
+    // A stale marker without an image: let the IndexedDB copy answer.
+    writeAuthority(key, null);
+  }
+
   if (indexedDbAvailable()) {
     try {
       const stored = await getStored(key);
@@ -87,11 +158,8 @@ export async function loadReaderBackground(key: string): Promise<string | null> 
         } catch {
           return legacy;
         }
-        try {
-          localStorage.removeItem(key);
-        } catch {
-          // The indexed copy is already durable.
-        }
+        removeLegacy(key);
+        writeAuthority(key, null);
         return legacy;
       }
       return null;
@@ -106,37 +174,28 @@ export async function saveReaderBackground(key: string, value: string): Promise<
   if (indexedDbAvailable()) {
     try {
       await putStored(key, value);
-      try {
-        localStorage.removeItem(key);
-      } catch {
-        // The indexed copy is already durable.
-      }
+      // IndexedDB owns the copy now; retire the fallback and its marker only afterwards.
+      writeAuthority(key, null);
+      removeLegacy(key);
       return;
     } catch {
-      // Fall back to the legacy store when IndexedDB is unavailable.
+      // Keep the newer value in the fallback store when the replacement failed.
     }
   }
   writeReaderBackground(localStorage, value, key);
+  writeAuthority(key, "local");
 }
 
 export async function removeReaderBackground(key: string): Promise<void> {
+  // Tombstone before touching either copy so a failed delete cannot resurrect it.
+  writeAuthority(key, "deleted");
+  const localGone = removeLegacy(key);
+
   if (indexedDbAvailable()) {
-    try {
-      await deleteStored(key);
-    } catch (error) {
-      try {
-        writeReaderBackground(localStorage, null, key);
-      } catch {
-        // Keep the original indexed-storage error.
-      }
-      throw error;
-    }
-    try {
-      localStorage.removeItem(key);
-    } catch {
-      // The indexed copy is already gone.
-    }
-    return;
+    // If this rejects, the tombstone stays: loadReaderBackground keeps returning
+    // null and retries the IndexedDB delete on the next open.
+    await deleteStored(key);
   }
-  writeReaderBackground(localStorage, null, key);
+
+  if (localGone) writeAuthority(key, null);
 }
