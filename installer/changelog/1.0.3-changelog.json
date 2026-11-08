@@ -3,13 +3,16 @@
   "notes": {
     "1.0.3": {
       "title": "Harbor v1.0.3 Beta",
-      "intro": "Harbor 1.0.3 adds reader background images, manga chapter upscaling, a More Like This option for still-airing series, keyboard-layout-aware shortcuts, simpler subtitle styling, and fixes across settings, library lists, streaming, Music, updates, and the Linux app.",
+      "intro": "Harbor 1.0.3 adds reader background images, manga chapter upscaling, a More Like This option for still-airing series, keyboard-layout-aware shortcuts, simpler subtitle styling, more reliable trailers, and fixes across settings, library lists, streaming, Music, updates, and manga reading.",
       "sections": [
         {
           "heading": "🎬 Playback & Continue Watching",
           "items": [
             "Unreleased Episodes: Continue Watching can now play an episode even when its listed release date is still in the future. The countdown and Upcoming label stay visible. This is on by default and can be turned off in Settings → Library → Home layout → Allow playing unreleased episodes.",
-            "More Like This on Still-Airing Series: An opt-in setting now shows More Like This after the latest aired episode, even when future or TBA episodes are listed. It still won't appear before the latest aired episode. Find it in Settings → Playback → Player & quality → Up Next → On still-airing series."
+            "More Like This on Still-Airing Series: An opt-in setting now shows More Like This after the latest aired episode, even when future or TBA episodes are listed. It still won't appear before the latest aired episode. Find it in Settings → Playback → Player & quality → Up Next → On still-airing series.",
+            "Windows Audio Recovery: After a long pause, a stalled WASAPI audio output now reloads and re-anchors playback at the same position. Cache waits, seeks, short pauses, and other outputs are left alone.",
+            "Trailer Playback: Trailers now merge video and audio from separate HLS streams at the requested quality, combine sources from different providers, retry a failed start, and keep trailer names and types.",
+            "Season Trailers: Detail pages now list season trailers alongside title trailers, with filters for trailer type."
           ]
         },
         {
@@ -24,7 +27,9 @@
           "items": [
             "Reader Backgrounds: eBook and manga readers can now use a background image, with controls to choose, replace, reset, zoom, and position it. Ebook and manga images are stored separately, legacy images migrate automatically, and book mode keeps the flipbook background transparent when an image is set.",
             "Chapter Upscaling: Manga chapters can be upscaled from their context menu with the configured Fast or Best model. Duplicate requests are combined, reader cache entries are reused, and model workers stay alive until the chapter finishes.",
-            "Scoped Background Lookups: Reader recommendations and alternate chapters now stay scoped to the title you opened, while catalog work stays in browse views and no longer competes with reader requests."
+            "Manga Reading Saves: Marking a chapter read or unread, and saving reading progress, now frees rebuildable caches and retries the write when local storage is full instead of failing with Could not save the change.",
+            "Scoped Background Lookups: Reader recommendations and alternate chapters now stay scoped to the title you opened, while catalog work stays in browse views and no longer competes with reader requests.",
+            "Chapter Source Selection: The chapter list now selects the current chapter's source as soon as that source has chapters instead of waiting for every source to finish refreshing."
           ]
         },
         {
@@ -43,7 +48,9 @@
             "Source Consent Persists: Music source consent is stored before the native write and survives restarts, so choosing or denying a source is not reset or asked again after reopening.",
             "Spotify Browsing Authorization: The Spotify browsing setup now shows checking and connecting states, ignores stale requests, surfaces status errors, asks before closing during authorization, and confirms success.",
             "Natural Track Completion: The Music queue now advances after a track reaches its natural end even when mpv keeps the file loaded with keep-open.",
-            "Dock & Now Playing: The Music dock no longer hides while you interact with its panel, expanded Now Playing stays inside the viewport, and its entrance animation no longer replays after closing."
+            "Dock & Now Playing: The Music dock no longer hides while you interact with its panel, expanded Now Playing stays inside the viewport, and its entrance animation no longer replays after closing.",
+            "Music Stream Validation: Stream URLs are checked before playback and caching, so expired or rejected YouTube Music links are skipped and the next extractor is tried instead of sending a dead URL to the player.",
+            "Profile Songs: Profile songs play natively on desktop with retry and caching, BBCode YouTube embeds show a thumbnail and load the player on click, and profile audio resolves through the bundled yt-dlp sidecar with clearer errors."
           ]
         },
         {
@@ -63,6 +70,8 @@
           "items": [
             "Mark as Unwatched: Unwatching a movie now asks for confirmation before removing it from Simkl library and history. Watched state stays in sync, and errors are shown outside the context menu.",
             "AniList & MAL Filtering: Switching between movies and shows in the AniList and MAL tabs now keeps the list counts correct.",
+            "Anime DUB Badges: Dub badges now use a versioned Kitsu snapshot, re-resolve across poster cards, TV cards, Big Picture tiles, and hero metadata, and match suffixed MAL and AniList IDs. Failed mappings retry after five minutes; successful ones stay for 30 days.",
+            "DUB Calendar: The Anime Dub Calendar now reads AniSchedule's v2 feed, converts schedule nodes to local release times, keeps the existing adult, movie, month, and episode filters, and no longer adds a hardcoded S1 label.",
             "Cast Labels: Crew labels in the player's title panel now align correctly.",
             "IMDb IDs for Anime On by Default: Anime stream searches now use verified IMDb mappings by default. Turn it off in Settings → Streaming → Streaming sources → Filters → Prefer IMDb IDs for anime.",
             "Metadata Preference Removed: The Prefer my installed metadata addon option has been removed. Built-in metadata remains the default, while Disable built-in metadata still lets configured addons and providers take over."
@@ -72,7 +81,6 @@
           "heading": "🔄 Release & Maintenance",
           "items": [
             "Platform-Named macOS Releases: macOS release assets now carry explicit Apple Silicon and Intel names, and older app versions can still find them.",
-            "Intel macOS Updates: Intel macOS DMGs are now attached to tagged releases automatically when the Intel build produces one.",
             "Version: Harbor 1.0.3."
           ]
         }
