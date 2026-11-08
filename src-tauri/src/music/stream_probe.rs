@@ -50,7 +50,7 @@ pub(super) async fn probe_stream(stream: &MusicStream) -> StreamHealth {
 /// Fresh YouTube extraction must be playable before it reaches the stream cache.
 pub(super) async fn validate_stream(stream: MusicStream) -> Result<MusicStream, String> {
     let status = stream_status(&stream).await?;
-    if !status.is_success() {
+    if !matches!(status.as_u16(), 200 | 206) {
         return Err(format!(
             "YouTube rejected the audio stream (HTTP {}). Please retry or choose another source.",
             status.as_u16()
@@ -84,8 +84,10 @@ mod tests {
                 .await
                 .unwrap();
             // No audio body: validation must finish after reading the headers.
-            let mut byte = [0];
-            let _ = socket.read(&mut byte).await;
+            if !status.starts_with("204") {
+                let mut byte = [0];
+                let _ = socket.read(&mut byte).await;
+            }
             String::from_utf8(request).unwrap()
         });
         (
@@ -108,7 +110,11 @@ mod tests {
             .unwrap_err();
         assert!(error.contains("403"));
         assert!(!error.contains("fixture-secret"));
-        let request = server.await.unwrap().to_ascii_lowercase();
+        let request = tokio::time::timeout(Duration::from_secs(2), server)
+            .await
+            .unwrap()
+            .unwrap()
+            .to_ascii_lowercase();
         assert!(request.contains("range: bytes=0-\r\n"));
         assert!(request.contains("user-agent: fixture-player\r\n"));
     }
@@ -124,12 +130,16 @@ mod tests {
             .unwrap();
         assert_eq!(validated.url, url);
         assert_eq!(validated.http_headers, headers);
-        server.await.unwrap();
+        tokio::time::timeout(Duration::from_secs(2), server)
+            .await
+            .unwrap()
+            .unwrap();
     }
 
     #[tokio::test]
     async fn failed_http_responses_are_not_accepted_as_fresh_streams() {
         for status in [
+            "204 No Content",
             "401 Unauthorized",
             "404 Not Found",
             "410 Gone",
@@ -138,7 +148,10 @@ mod tests {
         ] {
             let (stream, server) = fixture(status).await;
             assert!(validate_stream(stream).await.is_err());
-            server.await.unwrap();
+            tokio::time::timeout(Duration::from_secs(2), server)
+                .await
+                .unwrap()
+                .unwrap();
         }
     }
 }
