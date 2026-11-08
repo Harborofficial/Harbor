@@ -740,7 +740,8 @@ export type Settings = {
   animeMalRowsHidden: string[];
   addonTimeoutSec: number;
   profileAudio: ProfileAudioMode;
-  syncIndicator: boolean;
+  anilistSyncIndicator: boolean;
+  malSyncIndicator: boolean;
   syncIndicatorPosition: SyncIndicatorPosition;
   pickerLayout: "condensed" | "stremio";
   streamSort: "harbor" | "addon";

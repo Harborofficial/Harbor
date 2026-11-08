@@ -198,6 +198,8 @@ export function parseStoredSettings(raw: string | null): {
       _stremioDeeplinkOnByDefault?: boolean;
       _skipButtonHideSecV2?: boolean;
       _anilistSyncOnV1?: boolean;
+      /** Legacy shared toggle, now split per tracker. */
+      syncIndicator?: boolean;
       _animeTitleLanguageV1?: boolean;
       /** Legacy: the preference used to live in the Simkl panel. */
       simklAnimeTitleLanguage?: "english" | "romaji" | "native";
@@ -429,9 +431,20 @@ export function parseStoredSettings(raw: string | null): {
     const posterCards = normalizePosterCardSettings(parsed);
     if (parsed.mangaBestEnabled === true) parsed.mangaUpscaleQuality = "best";
     delete parsed.mangaBestEnabled;
+    const legacySyncIndicator =
+      typeof parsed.syncIndicator === "boolean" ? parsed.syncIndicator : undefined;
+    delete parsed.syncIndicator;
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      anilistSyncIndicator:
+        typeof parsed.anilistSyncIndicator === "boolean"
+          ? parsed.anilistSyncIndicator
+          : (legacySyncIndicator ?? DEFAULT.anilistSyncIndicator),
+      malSyncIndicator:
+        typeof parsed.malSyncIndicator === "boolean"
+          ? parsed.malSyncIndicator
+          : (legacySyncIndicator ?? DEFAULT.malSyncIndicator),
       searchTmdbTopMatch: parsed.searchTmdbTopMatch !== false,
       metadataAddonOrder: Array.isArray(parsed.metadataAddonOrder)
         ? [

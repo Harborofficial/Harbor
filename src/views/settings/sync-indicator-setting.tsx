@@ -12,9 +12,10 @@ const POSITIONS: ReadonlyArray<{ value: SyncIndicatorPosition; label: string }> 
   { value: "bottom-center", label: "Bottom center" },
 ];
 
-export function SyncIndicatorSetting() {
+export function SyncIndicatorSetting({ tracker }: { tracker: "anilist" | "mal" }) {
   const { settings, update } = useSettings();
   const t = useT();
+  const enabled = tracker === "anilist" ? settings.anilistSyncIndicator : settings.malSyncIndicator;
   return (
     <Section
       title={t("Sync indicator")}
@@ -23,10 +24,12 @@ export function SyncIndicatorSetting() {
       <ToggleRow
         label={t("Show sync indicator")}
         sub={t("Turn off to hide the sync badge during playback.")}
-        value={settings.syncIndicator}
-        onChange={(v) => update({ syncIndicator: v })}
+        value={enabled}
+        onChange={(v) =>
+          update(tracker === "anilist" ? { anilistSyncIndicator: v } : { malSyncIndicator: v })
+        }
       />
-      {settings.syncIndicator && (
+      {enabled && (
         <SettingRow
           wide
           label={t("Position")}
