@@ -5,7 +5,7 @@ import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
 import { loadStoredSettings } from "@/lib/settings/load";
 import { pickLogo, fetchMovieAssets } from "./tmdb-images";
 import { imageLangParam, imageLangRank } from "./tmdb-image-lang";
-import { pickTrailers, type Video } from "./tmdb-trailers";
+import { pickTrailerVideos, type Video } from "./tmdb-trailers";
 import type { PersonRef } from "./tmdb-people";
 import { isAnimeItem } from "./tmdb-meta-mappers";
 import {
@@ -105,6 +105,7 @@ export type TmdbDetail = {
   networksRich: Array<{ id: number; name: string }>;
   trailerYtId: string | null;
   trailerCandidates: string[];
+  trailerVideos?: ExtraVideo[];
   extraVideos: ExtraVideo[];
   gallery: GalleryImages;
   cast: CastEntry[];
@@ -307,7 +308,12 @@ export async function tmdbDetails(
     .filter((id: unknown): id is number => typeof id === "number");
 
   const videos: Video[] = raw.videos?.results ?? [];
-  const trailerCandidates = pickTrailers(videos);
+  const trailerVideos: ExtraVideo[] = pickTrailerVideos(videos).map((video) => ({
+    ytId: video.key,
+    name: video.name?.trim() || video.type || "Trailer",
+    type: video.type || "Trailer",
+  }));
+  const trailerCandidates = trailerVideos.map((video) => video.ytId);
   const trailerYtId = trailerCandidates[0] ?? null;
   const candidateSet = new Set(trailerCandidates);
   const extraVideos: ExtraVideo[] = videos
@@ -524,6 +530,7 @@ export async function tmdbDetails(
       .map((n: any) => ({ id: n.id, name: n.name })),
     trailerYtId,
     trailerCandidates,
+    trailerVideos,
     extraVideos,
     gallery,
     cast,

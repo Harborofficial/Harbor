@@ -5,10 +5,11 @@ export type Video = {
   site: string;
   type: string;
   official: boolean;
+  name?: string;
   published_at?: string;
 };
 
-export const pickTrailers = (videos: Video[]): string[] => {
+export const pickTrailerVideos = (videos: Video[]): Video[] => {
   const yt = videos.filter((v) => v.site === "YouTube");
   const ranked: Video[] = [
     ...yt.filter((v) => v.type === "Trailer" && v.official),
@@ -18,19 +19,19 @@ export const pickTrailers = (videos: Video[]): string[] => {
     ...yt.filter((v) => v.type === "Clip" || v.type === "Featurette"),
   ];
   const seen = new Set<string>();
-  const out: string[] = [];
+  const out: Video[] = [];
   for (const v of ranked) {
     if (!v.key || seen.has(v.key)) continue;
     seen.add(v.key);
-    out.push(v.key);
+    out.push(v);
   }
   return out;
 };
 
-export async function tmdbTrailerList(
-  key: string,
-  metaId: string,
-): Promise<string[]> {
+export const pickTrailers = (videos: Video[]): string[] =>
+  pickTrailerVideos(videos).map((video) => video.key);
+
+export async function tmdbTrailerList(key: string, metaId: string): Promise<string[]> {
   if (!key) return [];
   const match = metaId.match(/^tmdb:(movie|tv):(\d+)$/);
   if (!match) return [];
@@ -39,10 +40,7 @@ export async function tmdbTrailerList(
   return pickTrailers(data?.results ?? []);
 }
 
-export async function tmdbTrailer(
-  key: string,
-  metaId: string,
-): Promise<string | null> {
+export async function tmdbTrailer(key: string, metaId: string): Promise<string | null> {
   const list = await tmdbTrailerList(key, metaId);
   return list[0] ?? null;
 }

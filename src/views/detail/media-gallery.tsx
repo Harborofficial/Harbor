@@ -260,10 +260,16 @@ export function MediaGallery({
 function collectVideos(detail: TmdbDetail, trailerCandidates: readonly string[]): GalleryVideo[] {
   const seen = new Set<string>();
   const out: GalleryVideo[] = [];
+  const info = new Map((detail.trailerVideos ?? []).map((video) => [video.ytId, video]));
   for (const id of trailerCandidates) {
     if (seen.has(id)) continue;
     seen.add(id);
-    out.push({ ytId: id, name: "Trailer", type: "Trailer" });
+    const video = info.get(id);
+    out.push({
+      ytId: id,
+      name: video?.name?.trim() || "Trailer",
+      type: video?.type?.trim() || "Trailer",
+    });
   }
   for (const v of detail.extraVideos) {
     if (seen.has(v.ytId)) continue;

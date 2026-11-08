@@ -957,6 +957,7 @@ async function loadAnimeDetails(
       seasonPosters: tmdbFull?.seasonPosters,
       trailerYtId: trailerCandidates[0] ?? null,
       trailerCandidates,
+      trailerVideos: tmdbFull?.trailerVideos ?? [],
       extraVideos: tmdbFull?.extraVideos ?? [],
       recommendations: rails.moreLikeThis,
       similar: rails.youMightLike,

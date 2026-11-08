@@ -4,7 +4,7 @@ import { resolveMeta, preferCustomMeta } from "@/lib/meta-resource";
 import { readActiveStremioAuthKey } from "@/lib/auth";
 import { topMovies, topSeries, type Meta, type MetaSeason } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
-import type { CastEntry, Season, TmdbDetail } from "./tmdb/tmdb-details";
+import type { CastEntry, ExtraVideo, Season, TmdbDetail } from "./tmdb/tmdb-details";
 import type { PersonRef } from "./tmdb/tmdb-people";
 import { isGenericSeasonName } from "@/lib/season-name";
 
@@ -187,9 +187,18 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
   const directors = people(m.director);
   const writers = people(m.writer);
   const genres = m.genre ?? m.genres ?? [];
-  const trailerCandidates = (m.trailerStreams ?? [])
-    .map((t) => t.ytId)
-    .filter((id): id is string => typeof id === "string" && id.length > 0);
+  const trailerVideos: ExtraVideo[] = (m.trailerStreams ?? []).flatMap((trailer) =>
+    trailer.ytId
+      ? [
+          {
+            ytId: trailer.ytId,
+            name: trailer.title?.trim() || "Trailer",
+            type: "Trailer",
+          },
+        ]
+      : [],
+  );
+  const trailerCandidates = trailerVideos.map((video) => video.ytId);
   const trailerYtId = trailerCandidates[0] ?? null;
   const year =
     m.year != null
@@ -237,6 +246,7 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
     networksRich: [],
     trailerYtId,
     trailerCandidates,
+    trailerVideos,
     extraVideos: [],
     gallery: { backdrops: [], posters: [], logos: [] },
     cast,
