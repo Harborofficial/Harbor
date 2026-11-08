@@ -588,15 +588,21 @@ export function DetailView({
       .flatMap((entry) => entry.meta.trailerStreams ?? [])
       .map((trailer) => trailer.ytId)
       .filter((id): id is string => !!id);
+    const hasTmdbTrailers =
+      animeIdentity && !prioritizeMetadataAddons && (detail?.trailerVideos?.length ?? 0) > 0;
     return mergeTrailerCandidates(
-      ...(animeIdentity
-        ? [detail?.trailerCandidates, sourceText.trailerCandidates, fromMeta, fromFranchise]
-        : [sourceText.trailerCandidates, detail?.trailerCandidates, fromMeta, fromFranchise]),
+      ...(hasTmdbTrailers
+        ? [detail?.trailerCandidates]
+        : animeIdentity
+          ? [detail?.trailerCandidates, sourceText.trailerCandidates, fromMeta, fromFranchise]
+          : [sourceText.trailerCandidates, detail?.trailerCandidates, fromMeta, fromFranchise]),
     );
   }, [
     animeIdentity,
+    prioritizeMetadataAddons,
     sourceText.trailerCandidates,
     detail?.trailerCandidates,
+    detail?.trailerVideos,
     meta.trailerStreams,
     meta.trailers,
     franchise,

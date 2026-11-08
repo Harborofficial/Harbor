@@ -3,7 +3,7 @@ import { Play } from "@/components/icons/play-filled";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { t } from "@/lib/i18n";
 
-export type GalleryVideo = { ytId: string; name: string; type: string };
+export type GalleryVideo = { ytId: string; name: string; type: string; year?: number };
 
 const VIDEO_THUMB = (ytId: string) => `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
 
@@ -35,7 +35,15 @@ function TileButton({
   );
 }
 
-export function VideoTile({ v, onPlay, onDownload }: { v: GalleryVideo; onPlay: () => void; onDownload: () => void }) {
+export function VideoTile({
+  v,
+  onPlay,
+  onDownload,
+}: {
+  v: GalleryVideo;
+  onPlay: () => void;
+  onDownload: () => void;
+}) {
   return (
     <div className="group flex w-full flex-col gap-2.5">
       <div className="relative">
@@ -57,12 +65,16 @@ export function VideoTile({ v, onPlay, onDownload }: { v: GalleryVideo; onPlay: 
           </span>
         </button>
         <span className="absolute end-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
-          <TileButton icon={<Download size={15} strokeWidth={2.2} />} label={t("Download")} onClick={onDownload} />
+          <TileButton
+            icon={<Download size={15} strokeWidth={2.2} />}
+            label={t("Download")}
+            onClick={onDownload}
+          />
         </span>
       </div>
       <div className="flex flex-col gap-0.5 px-0.5">
         <span className="truncate text-[13.5px] font-semibold text-ink">{v.name}</span>
-        <span className="text-[11.5px] text-ink-subtle">{v.type}</span>
+        <span className="text-[11.5px] text-ink-subtle">{v.year ?? v.type}</span>
       </div>
     </div>
   );
@@ -149,7 +161,11 @@ export function ImageTile({
             onClick={onSetBackdrop}
           />
         )}
-        <TileButton icon={<Download size={15} strokeWidth={2.2} />} label={t("Download")} onClick={onDownload} />
+        <TileButton
+          icon={<Download size={15} strokeWidth={2.2} />}
+          label={t("Download")}
+          onClick={onDownload}
+        />
       </span>
     </div>
   );
@@ -204,7 +220,11 @@ export function LogoTile({
             onClick={onSetLogo}
           />
         )}
-        <TileButton icon={<Download size={15} strokeWidth={2.2} />} label={t("Download")} onClick={onDownload} />
+        <TileButton
+          icon={<Download size={15} strokeWidth={2.2} />}
+          label={t("Download")}
+          onClick={onDownload}
+        />
       </span>
     </div>
   );

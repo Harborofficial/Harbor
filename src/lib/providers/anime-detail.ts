@@ -53,7 +53,6 @@ import {
 import { tmdbAnimeLogo, tmdbDetails, tmdbSeasonEpisodes } from "@/lib/providers/tmdb";
 import type { Episode as TmdbEpisode } from "@/lib/providers/tmdb/tmdb-details";
 import type { CastEntry, TmdbDetail } from "@/lib/providers/tmdb";
-import { mergeTrailerCandidates } from "@/lib/trailer-candidates";
 import type { Settings } from "@/lib/settings";
 
 export type FranchiseEntry = {
@@ -925,10 +924,9 @@ async function loadAnimeDetails(
           tmdbFull = fullRaw;
       }
     }
-    const trailerCandidates = mergeTrailerCandidates(
-      tmdbFull?.trailerCandidates,
-      anime.trailerYtId ? [anime.trailerYtId] : undefined,
-    );
+    const tmdbTrailers = tmdbFull?.trailerCandidates ?? [];
+    const trailerCandidates =
+      tmdbTrailers.length > 0 ? tmdbTrailers : anime.trailerYtId ? [anime.trailerYtId] : [];
     const [rails, characters, studios] = await Promise.all([
       recommendationsPromise,
       charactersPromise,

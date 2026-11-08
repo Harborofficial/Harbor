@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Check } from "lucide-react";
 import { createPortal } from "react-dom";
+import { Dropdown } from "@/components/dropdown";
 import { saveImageToDisk, saveTrailerToDisk } from "@/lib/download/save-binary";
 import { t } from "@/lib/i18n";
 import type { TmdbDetail } from "@/lib/providers/tmdb";
@@ -36,20 +37,39 @@ export function MediaGallery({
     () => collectVideos(detail, trailerCandidates),
     [detail, trailerCandidates],
   );
+  const videoTypes = useMemo(
+    () => Array.from(new Set(videos.map((video) => video.type).filter(Boolean))),
+    [videos],
+  );
+  const [videoFilter, setVideoFilter] = useState("Trailer");
+  const activeVideoFilter =
+    videoFilter === "All" || videoTypes.includes(videoFilter)
+      ? videoFilter
+      : videoTypes.includes("Trailer")
+        ? "Trailer"
+        : "All";
+  const shownVideos = useMemo(
+    () =>
+      activeVideoFilter === "All"
+        ? videos
+        : videos.filter((video) => video.type === activeVideoFilter),
+    [videos, activeVideoFilter],
+  );
   const backdrops = detail.gallery.backdrops;
   const posters = detail.gallery.posters;
   const logos = detail.gallery.logos;
 
   const tabs = useMemo(() => {
     const list: Array<{ id: Tab; label: string; count: number }> = [];
-    if (videos.length > 0) list.push({ id: "videos", label: t("Videos"), count: videos.length });
+    if (videos.length > 0)
+      list.push({ id: "videos", label: t("Videos"), count: shownVideos.length });
     if (backdrops.length > 0)
       list.push({ id: "backdrops", label: t("Backdrops"), count: backdrops.length });
     if (posters.length > 0)
       list.push({ id: "posters", label: t("Posters"), count: posters.length });
     if (logos.length > 0) list.push({ id: "logos", label: t("Logos"), count: logos.length });
     return list;
-  }, [videos.length, backdrops.length, posters.length, logos.length]);
+  }, [videos.length, shownVideos.length, backdrops.length, posters.length, logos.length]);
 
   const [active, setActive] = useState<Tab | null>(null);
   const current = active ?? tabs[0]?.id ?? null;
@@ -164,12 +184,25 @@ export function MediaGallery({
             </button>
           ))}
         </div>
+        {current === "videos" && videoTypes.length > 1 && (
+          <Dropdown
+            size="xs"
+            className="ms-auto w-[142px] shrink-0"
+            value={activeVideoFilter}
+            options={[
+              { value: "All", label: t("All") },
+              ...videoTypes.map((type) => ({ value: type, label: t(type) })),
+            ]}
+            onChange={setVideoFilter}
+            ariaLabel={t("Video type")}
+          />
+        )}
       </div>
 
       <div key={current} className="animate-media-swap motion-reduce:animate-none">
         {current === "videos" && (
           <MediaRail min={300}>
-            {videos.map((v) => (
+            {shownVideos.map((v) => (
               <VideoTile
                 key={v.ytId}
                 v={v}
@@ -269,14 +302,28 @@ function collectVideos(detail: TmdbDetail, trailerCandidates: readonly string[])
       ytId: id,
       name: video?.name?.trim() || "Trailer",
       type: video?.type?.trim() || "Trailer",
+      year: yearFromPublished(video?.publishedAt),
     });
   }
   for (const v of detail.extraVideos) {
     if (seen.has(v.ytId)) continue;
     seen.add(v.ytId);
-    out.push({ ytId: v.ytId, name: v.name, type: v.type });
+    out.push({
+      ytId: v.ytId,
+      name: v.name,
+      type: v.type,
+      year: yearFromPublished(v.publishedAt),
+    });
   }
   return out;
+}
+
+function yearFromPublished(value?: string): number | undefined {
+  if (!value) return undefined;
+  const year = Number(value.slice(0, 4));
+  if (Number.isInteger(year) && year > 1900) return year;
+  const parsed = new Date(value).getFullYear();
+  return Number.isInteger(parsed) && parsed > 1900 ? parsed : undefined;
 }
 
 function baseName(raw: string): string {
