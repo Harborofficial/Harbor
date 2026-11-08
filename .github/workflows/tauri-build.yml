@@ -314,7 +314,7 @@ jobs:
             *) echo "::error::Unknown macOS target ${{ matrix.platform.target }}"; exit 1 ;;
           esac
           copied=0
-          for file in "$BUNDLE"/Harbor_${VERSION}_*.dmg; do
+          for file in "$BUNDLE"/dmg/Harbor_${VERSION}_*.dmg; do
             [ -f "$file" ] || continue
             case "$(basename "$file")" in *macos-*) continue ;; esac
             cp "$file" "$BUNDLE/Harbor_${VERSION}_${CHANNEL}_${PLATFORM}.dmg"
@@ -333,6 +333,10 @@ jobs:
             echo "::error::No macOS bundle files were found to give a platform name"
             exit 1
           fi
+          test -f "$BUNDLE/Harbor_${VERSION}_${CHANNEL}_${PLATFORM}.dmg" || {
+            echo "::error::No macOS dmg was found to give a platform name"
+            exit 1
+          }
 
       - name: Upload artifacts
         if: success()
