@@ -7,6 +7,11 @@ let byMal: Set<number> | null = null;
 let byAnilist: Set<number> | null = null;
 let inflight: Promise<void> | null = null;
 const subs = new Set<() => void>();
+const DUB_KITSU_MISS_TTL_MS = 5 * 60 * 1000;
+const DUB_KITSU_HIT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+export type DubSetSnapshot = { ready: boolean; version: number };
+let snapshot: DubSetSnapshot = { ready: false, version: 0 };
 
 export type DubFeedEntry = {
   id?: number | null;
@@ -21,8 +26,13 @@ export type DubFeedEntry = {
 
 let feedCache: { entries: DubFeedEntry[]; at: number } | null = null;
 const FEED_STALE_MS = 30 * 60 * 1000;
-const resolvedKitsuIds = new Map<number, { mal: number | null; anilist: number | null }>();
+const resolvedKitsuIds = new Map<number, { mal: number | null; anilist: number | null; at: number; }>();
 const resolvingKitsuIds = new Map<number, Promise<void>>();
+
+function notifySubscribers(): void {
+  snapshot = { ready: byMal != null, version: snapshot.version + 1 };
+  for (const listener of subs) listener();
+}
 
 /** Fetch the AniSchedule dub feed, cached briefly. Never rejects. */
 export async function fetchDubSchedule(): Promise<DubFeedEntry[]> {
@@ -55,7 +65,7 @@ function load(): Promise<void> {
       }
       byMal = mal;
       byAnilist = ani;
-      for (const s of subs) s();
+      notifySubscribers();
     } catch {
       /* leave sets null; badge stays hidden */
     } finally {
@@ -76,7 +86,14 @@ export function ensureDubForAnimeId(metaId: string | number | undefined): void {
   const match = /^kitsu:(\d+)/.exec(metaId);
   if (!match) return;
   const kitsuId = Number(match[1]);
-  if (!Number.isSafeInteger(kitsuId) || resolvedKitsuIds.has(kitsuId)) return;
+  if (!Number.isSafeInteger(kitsuId)) return;
+  const cached = resolvedKitsuIds.get(kitsuId);
+  if (cached) {
+    const hasMapping = cached.mal != null || cached.anilist != null;
+    const ttl = hasMapping ? DUB_KITSU_HIT_TTL_MS : DUB_KITSU_MISS_TTL_MS;
+    if (Date.now() - cached.at < ttl) return;
+    resolvedKitsuIds.delete(kitsuId);
+  }
   const existing = resolvingKitsuIds.get(kitsuId);
   if (existing) return;
   const task = (async () => {
@@ -86,12 +103,12 @@ export function ensureDubForAnimeId(metaId: string | number | undefined): void {
         kitsuToMal(kitsuId).catch(() => null),
         kitsuToAnilist(kitsuId).catch(() => null),
       ]);
-      resolvedKitsuIds.set(kitsuId, { mal, anilist });
-      for (const listener of subs) listener();
+      resolvedKitsuIds.set(kitsuId, { mal, anilist, at: Date.now() });
     } catch {
-      // A later render can retry if the mapping module itself fails to load.
+      resolvedKitsuIds.set(kitsuId, { mal: null, anilist: null, at: Date.now() });
     } finally {
       resolvingKitsuIds.delete(kitsuId);
+      notifySubscribers();
     }
   })();
   resolvingKitsuIds.set(kitsuId, task);
@@ -99,6 +116,10 @@ export function ensureDubForAnimeId(metaId: string | number | undefined): void {
 
 export function dubSetReady(): boolean {
   return byMal != null;
+}
+
+export function dubSetSnapshot(): DubSetSnapshot {
+  return snapshot;
 }
 
 export function subscribeDubSet(fn: () => void): () => void {
@@ -120,12 +141,14 @@ export function animeHasDub(metaId: string | undefined): boolean {
         (mapped.anilist != null && !!byAnilist?.has(mapped.anilist)))
     );
   }
-  if (metaId.startsWith("mal:")) {
-    const m = Number(metaId.slice(4));
+  const mal = /^mal:(\d+)/.exec(metaId);
+  if (mal) {
+    const m = Number(mal[1]);
     if (Number.isFinite(m) && byMal.has(m)) return true;
   }
-  if (metaId.startsWith("anilist:")) {
-    const a = Number(metaId.slice(8));
+  const anilist = /^anilist:(\d+)/.exec(metaId);
+  if (anilist) {
+    const a = Number(anilist[1]);
     if (Number.isFinite(a) && byAnilist?.has(a)) return true;
   }
   return false;

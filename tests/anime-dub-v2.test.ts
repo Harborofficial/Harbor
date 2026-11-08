@@ -101,41 +101,65 @@ test("AniSchedule v2 schedule nodes map to local calendar episodes with stable I
   assert.equal(items[0].releaseTime, toLocalTimeLabel(new Date(nov7 * 1000)));
 });
 
-function loadDubProvider() {
+function loadDubProvider(results = { mal: [900, 900], anilist: [700, 700] }) {
   const source = readFileSync(new URL("../src/lib/providers/anime-dub-sub.ts", import.meta.url), "utf8");
   const compiled = ts.transpileModule(source, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
   }).outputText;
   const exports = {} as Record<string, any>;
   let mappingCalls = 0;
+  let now = Date.now();
+  const next = (values: Array<number | null>) => values.shift() ?? null;
   const feed = [{ id: 700, idMal: 900 }];
-  new Function("require", "exports", compiled)((id: string) => {
-    if (id === "@/lib/safe-fetch") {
-      return { safeFetch: async () => ({ ok: true, json: async () => feed }) };
-    }
-    if (id === "@/lib/providers/anime-mapping") {
-      return {
-        kitsuToMal: async () => {
-          mappingCalls++;
-          return 900;
-        },
-        kitsuToAnilist: async () => 700,
-      };
-    }
+  const require = (id: string) => {
+    if (id === "@/lib/safe-fetch") return { safeFetch: async () => ({ ok: true, json: async () => feed }) };
+    if (id === "@/lib/providers/anime-mapping") return {
+      kitsuToMal: async () => { mappingCalls++; return next(results.mal); },
+      kitsuToAnilist: async () => { mappingCalls++; return next(results.anilist); },
+    };
     throw new Error(`Unexpected import: ${id}`);
-  }, exports);
-  return { api: exports, mappingCalls: () => mappingCalls };
+  };
+  new Function("require", "exports", "Date", compiled)(require, exports, { now: () => now });
+  return {
+    api: exports,
+    mappingCalls: () => mappingCalls,
+    advance: (ms: number) => { now += ms; },
+  };
 }
 
 test("Kitsu IDs resolve through shared mappings and match both feed ID systems", async () => {
   const { api, mappingCalls } = loadDubProvider();
+  const version = api.dubSetSnapshot().version;
   api.ensureDubForAnimeId("kitsu:77");
+  api.ensureDubForAnimeId("kitsu:77");
+  for (let i = 0; i < 20 && api.dubSetSnapshot().version < version + 2; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  assert.ok(api.dubSetSnapshot().version >= version + 2);
+  assert.equal(api.animeHasDub("kitsu:77"), true);
+  assert.equal(api.animeHasDub("mal:900:1"), true);
+  assert.equal(api.animeHasDub("anilist:700:1"), true);
+  assert.equal(mappingCalls(), 2);
+});
+
+test("a Kitsu mapping miss retries after its short cache expires", async () => {
+  const { api, mappingCalls, advance } = loadDubProvider({ mal: [null, 900], anilist: [null, 700] });
+  api.ensureDubForAnimeId("kitsu:77");
+  for (let i = 0; i < 20 && api.dubSetSnapshot().version < 2; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  assert.equal(api.animeHasDub("kitsu:77"), false);
+  assert.equal(mappingCalls(), 2);
+
+  api.ensureDubForAnimeId("kitsu:77");
+  assert.equal(mappingCalls(), 2);
+  advance(5 * 60 * 1000 + 1);
   api.ensureDubForAnimeId("kitsu:77");
   for (let i = 0; i < 20 && !api.animeHasDub("kitsu:77"); i++) {
     await new Promise((resolve) => setTimeout(resolve, 0));
   }
   assert.equal(api.animeHasDub("kitsu:77"), true);
-  assert.equal(mappingCalls(), 1);
+  assert.equal(mappingCalls(), 4);
 });
 
 test("Poster/TV and both Big Picture DUB surfaces share the same resolution hook", () => {
