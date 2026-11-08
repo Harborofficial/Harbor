@@ -1,3 +1,4 @@
+import { streamKey } from "./identity";
 import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
 import { clearPrefetchedRequests, prefetchRequest } from "./prefetch-request";
@@ -110,8 +111,13 @@ export function pluginQueryId(
 ): string | undefined {
   if (forcedId) return forcedId;
   return (
-    pickIds(addon, req.type, req.ids, req.animeIdUnverified === true, req.preferredAnimeImdbId)[0] ??
-    pickIdByDeclaredTypes(addon, req.ids, req.preferredAnimeImdbId)?.id
+    pickIds(
+      addon,
+      req.type,
+      req.ids,
+      req.animeIdUnverified === true,
+      req.preferredAnimeImdbId,
+    )[0] ?? pickIdByDeclaredTypes(addon, req.ids, req.preferredAnimeImdbId)?.id
   );
 }
 
@@ -164,7 +170,9 @@ export async function fetchAddonStreams(
         name: addon.manifest.name,
         plugin: true,
         p: prefetchRequest(
-          JSON.stringify([addon.transportUrl, req, pluginId, timeoutMs]), signal, prefetch,
+          JSON.stringify([addon.transportUrl, req, pluginId, timeoutMs]),
+          signal,
+          prefetch,
           (sharedSignal) => runPluginAddon(addon, req, pluginId, sharedSignal, timeoutMs),
           (streams) => streams.length > 0,
         ).then((ss) =>
@@ -189,13 +197,21 @@ export async function fetchAddonStreams(
     const ids =
       forcedId != null
         ? [forcedId]
-        : pickIds(addon, req.type, req.ids, req.animeIdUnverified === true, req.preferredAnimeImdbId);
+        : pickIds(
+            addon,
+            req.type,
+            req.ids,
+            req.animeIdUnverified === true,
+            req.preferredAnimeImdbId,
+          );
     // Non-anime Stremio addons may only index a series under IMDb OR TMDB.
     // Try other compatible IDs only if the preferred identity has no results.
-    const fallbackIds = forcedId == null && !req.ids.some((id) => ANIME_SCHEMES.some((s) => id.startsWith(s)))
-      ? sortedIds(req.ids, req.preferredAnimeImdbId).filter((id) =>
-          !ids.includes(id) && addonAcceptsId(addon, req.type, id))
-      : [];
+    const fallbackIds =
+      forcedId == null && !req.ids.some((id) => ANIME_SCHEMES.some((s) => id.startsWith(s)))
+        ? sortedIds(req.ids, req.preferredAnimeImdbId).filter(
+            (id) => !ids.includes(id) && addonAcceptsId(addon, req.type, id),
+          )
+        : [];
     if (ids.length > 0) {
       for (const id of ids) {
         // Local lists only persist movie/series, which can drop the type an addon's
@@ -215,10 +231,20 @@ export async function fetchAddonStreams(
             if (result.failure) noteFailure(addon.manifest.id, name, result.failure);
             if (!result.failure && result.streams.length === 0 && !signal.aborted) {
               for (const alternate of fallbackIds) {
-                const retry = await fetchOne(addon, req.type, alternate, signal, timeoutMs, [], prefetch);
+                const retry = await fetchOne(
+                  addon,
+                  req.type,
+                  alternate,
+                  signal,
+                  timeoutMs,
+                  [],
+                  prefetch,
+                );
                 if (retry.failure) noteFailure(addon.manifest.id, name, retry.failure);
                 if (retry.streams.length > 0) {
-                  console.info(`[addons] ${name}: ${idScheme(id)} returned empty, ${idScheme(alternate)} matched`);
+                  console.info(
+                    `[addons] ${name}: ${idScheme(id)} returned empty, ${idScheme(alternate)} matched`,
+                  );
                   result = retry;
                   break;
                 }
@@ -455,7 +481,8 @@ async function fetchOne(
 ): Promise<{ streams: Stream[]; failure?: AddonFailureCode }> {
   return prefetchRequest(
     JSON.stringify([addon.transportUrl, addon.manifest.id, type, id, altTypes, timeoutMs]),
-    signal, prefetch,
+    signal,
+    prefetch,
     (sharedSignal) => fetchOneUncached(addon, type, id, sharedSignal, timeoutMs, altTypes),
     (result) => !result.failure && result.streams.length > 0,
   );
@@ -567,12 +594,11 @@ function failureCodeFor(e: unknown): AddonFailureCode {
 }
 
 function dedupeStreams(streams: Stream[]): Stream[] {
-  const seen = new Map<string, Stream>();
+  const seen = new Map<string | Stream, Stream>();
   for (const s of streams) {
-    const baseKey = s.infoHash
-      ? `hash:${s.infoHash}:${s.fileIdx ?? ""}`
-      : `url:${s.url ?? s.title ?? s.name ?? Math.random().toString(36)}`;
-    const key = `${s.addonId}:${baseKey}`;
+    const identity = streamKey(s);
+    const key =
+      typeof identity === "string" ? JSON.stringify([s.addonUrl, s.addonId, identity]) : identity;
     const prior = seen.get(key);
     if (!prior) {
       seen.set(key, s);
