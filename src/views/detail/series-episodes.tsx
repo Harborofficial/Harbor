@@ -565,6 +565,10 @@ export function SeriesEpisodes({
         : orderedEps,
     [orderedEps, hideActive, hiddenSet],
   );
+  const showOrderedSeason = useMemo(
+    () => new Set(visibleOrderedEps.map((e) => e.orderSeason ?? e.seasonNumber)).size > 1,
+    [visibleOrderedEps],
+  );
   const orderedLoading = arcActive && arc.loading;
 
   const activeSeason = seasons.find((s) => s.seasonNumber === active);
@@ -753,6 +757,7 @@ export function SeriesEpisodes({
               onSeasonVisible={
                 orderActive && selectedRatingSeasons.lazy ? onRatingSeasonVisible : undefined
               }
+              showSeason={showOrderedSeason}
             />
           )}
 

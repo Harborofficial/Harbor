@@ -157,7 +157,7 @@ export function EpisodeRow({
           <p className="flex flex-wrap items-center gap-x-2 text-[12px] text-ink-subtle">
             <span>
               {[
-                `S${ep.seasonNumber} E${ep.episodeNumber}`,
+                `S${ep.orderSeason ?? ep.seasonNumber} E${ep.orderNumber ?? ep.episodeNumber}`,
                 ep.runtime ? t("{n} min", { n: ep.runtime }) : null,
                 formatAirDate(ep.airDate) || null,
               ]

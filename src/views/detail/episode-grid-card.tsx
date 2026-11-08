@@ -62,7 +62,7 @@ export function EpisodeGridCard({
   const minsLeft =
     partial && g.runtime ? Math.max(1, Math.round(g.runtime * (1 - progress.ratio))) : 0;
   const spoilered = !!spoiler && (spoiler.thumb || spoiler.title || spoiler.desc);
-  const episodeNumber = g.displayNumber ?? g.number; // Default to .number for TV shows since they lack .displayNumber
+  const episodeNumber = g.displayNumber ?? g.number; // Default to .number if no display number exists
 
   const enter = () => {
     window.clearTimeout(timer.current);
@@ -262,7 +262,7 @@ export function EpisodePreview({
 }) {
   const { openEpisodeDetail } = useView();
   const { settings } = useSettings();
-  const episodeNumber = g.displayNumber ?? g.number; // Default to .number for TV shows since they lack .displayNumber
+  const episodeNumber = g.displayNumber ?? g.number; // Default to .number if no display number exists
 
   return (
     <div className="group animate-popover-in absolute -inset-x-2 -top-2 z-30 overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)]">

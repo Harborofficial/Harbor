@@ -22,6 +22,7 @@ export function OrderedEpisodes({
   seriesImdbId,
   onContextMenu,
   onSeasonVisible,
+  showSeason,
 }: {
   meta: Meta;
   episodes: Episode[];
@@ -35,6 +36,7 @@ export function OrderedEpisodes({
   seriesImdbId?: string | null;
   onContextMenu: (e: React.MouseEvent, season: number, episode: number, watched: boolean) => void;
   onSeasonVisible?: (season: number) => void;
+  showSeason: boolean;
 }) {
   const { settings } = useSettings();
   const mwVersion = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
@@ -148,6 +150,7 @@ export function OrderedEpisodes({
           seriesImdbId={seriesImdbId}
           cinemetaVideos={cinemetaVideos}
           markRatingSeasons={!!onSeasonVisible}
+          showSeason={showSeason}
         />
       </div>
     );
