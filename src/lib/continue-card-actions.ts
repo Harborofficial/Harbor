@@ -61,7 +61,10 @@ export function createContinueCardActions(options: {
     if (pending) throw new Error(options.t("This action is already running."));
     if (kind !== "dismiss") {
       assertCurrent();
-      if (waitingForAir()) throw new Error(options.t("This episode has not aired yet."));
+      // Metadata airdates can be wrong, so a manual source pick stays available as "play anyway";
+      // only automatic playback is held back for an episode listed as unaired.
+      if (kind === "play" && waitingForAir())
+        throw new Error(options.t("This episode has not aired yet."));
     } else {
       if (removed || !options.isCurrent())
         throw new Error(options.t("This Continue Watching entry is no longer available."));
@@ -89,15 +92,13 @@ export function createContinueCardActions(options: {
     isValid,
     subscribe,
     actions: () => {
-      const disabled = pending || !isValid() || waitingForAir();
-      const reason = waitingForAir() ? options.t("This episode has not aired yet.") : undefined;
+      const disabled = pending || !isValid();
       return [
         {
           id: `continue:sources:${identity}`,
           label: options.t("Choose another source"),
           icon: options.icons?.sources,
           disabled,
-          reason,
           restoreFocus: false,
           run: () => run("sources"),
         },

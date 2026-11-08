@@ -794,7 +794,7 @@ export const ContinueCard = memo(function ContinueCard({
         type="button"
         data-continue-card-trigger
         onClick={(event) => runControl(event, commands.chooseSource)}
-        disabled={pending || isWaiting}
+        disabled={pending}
         aria-label={`${t("Choose another source")}: ${displayTitle}`}
         title={t("Choose another source")}
         className="block w-full min-w-0 rounded-xl text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"

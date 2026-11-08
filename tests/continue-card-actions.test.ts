@@ -138,10 +138,11 @@ test("harmless metadata rerender preserves a menu but replacement entry invalida
   );
 });
 
-test("removal failure remains retryable while unavailable cards cannot continue or use another source", async () => {
+test("removal failure remains retryable while unaired cards block autoplay but allow a manual source pick", async () => {
   const { createContinueCardActions } = api();
   const entry = { ...item("future"), waitingForAir: true };
   let fails = true;
+  let picked = 0;
   const commands = createContinueCardActions({
     item: entry,
     getItem: () => entry,
@@ -149,18 +150,26 @@ test("removal failure remains retryable while unavailable cards cannot continue 
     isAvailable: () => true,
     t: (key: string) => key,
     play: async () => assert.fail("Future episode played"),
-    chooseSource: async () => assert.fail("Future episode selected"),
+    chooseSource: async () => {
+      picked++;
+    },
     dismiss: async () => {
       if (fails) throw new Error("Storage unavailable");
     },
   });
-  assert.equal(commands.primary.actions()[0].disabled, true);
+  assert.equal(
+    commands.primary.actions()[0].disabled,
+    false,
+    "a wrong airdate must not lock the viewer out of choosing a source",
+  );
   assert.equal(
     commands.primary.actions()[1].disabled,
     false,
     "future entries can still be removed",
   );
-  await assert.rejects(commands.play());
+  await assert.rejects(commands.play(), /not aired yet/);
+  await commands.chooseSource();
+  assert.equal(picked, 1);
   await assert.rejects(commands.dismiss(), /Storage/);
   assert.equal(commands.isValid(), true);
   fails = false;
