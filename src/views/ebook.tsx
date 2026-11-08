@@ -3152,10 +3152,17 @@ function EBookDetails({
             else window.setTimeout(prefetch, 1_000);
           }
         })
-        .catch(() =>
+        .catch((error) =>
           setReading((current) =>
             current?.chapter.id === chapter.id
-              ? { chapter, content: {}, error: "This chapter could not be loaded." }
+              ? {
+                  chapter,
+                  content: {},
+                  error:
+                    error instanceof Error && error.name === "PdfDocumentError"
+                      ? error.message
+                      : "This chapter could not be loaded.",
+                }
               : current,
           ),
         );

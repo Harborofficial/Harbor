@@ -38,6 +38,7 @@ import {
   type EBookChapterLocationSource,
 } from "./chapter-locations";
 import { migrateEBookChapterLocations, savedEBookChapters } from "./reader-state";
+import { pdfBookInfo, pdfPageCount, pdfPageImage } from "./pdf";
 
 export type EBookChapter = {
   id: string;
@@ -293,11 +294,13 @@ async function localJoin(parent: string, child: string): Promise<string> {
 function localTitle(name: string): string {
   return (
     name
-      .replace(/\.epub$/i, "")
+      .replace(/\.(?:epub|pdf)$/i, "")
       .replaceAll(/[_-]+/g, " ")
       .trim() || "Untitled eBook"
   );
 }
+
+const isPdfPath = (path: string) => /\.pdf$/i.test(path);
 
 async function localPackage(path: string): Promise<EpubBook> {
   let pending = localEpubs.get(path);
@@ -345,18 +348,18 @@ async function scanLocalBooks(
     if (depth > LOCAL_SCAN_MAX_DEPTH || visited >= LOCAL_SCAN_MAX_DIRS) return;
     visited += 1;
     const entries = (await readDir(dir).catch(() => [])).sort(byName);
-    const epubs = entries.filter((item) => item.isFile && /\.epub$/i.test(item.name));
+    const files = entries.filter((item) => item.isFile && /\.(?:epub|pdf)$/i.test(item.name));
     if (!name)
       // A book folder is one entry however many volumes it holds, but loose files at the
       // top of the library are each their own book.
-      for (const file of epubs) {
+      for (const file of files) {
         const path = await localJoin(dir, file.name);
         books.set(path, { title: localTitle(file.name), paths: [path] });
       }
-    else if (epubs.length)
+    else if (files.length)
       books.set(dir, {
         title: localTitle(name),
-        paths: await Promise.all(epubs.map((file) => localJoin(dir, file.name))),
+        paths: await Promise.all(files.map((file) => localJoin(dir, file.name))),
       });
     for (const item of entries) {
       if (!item.isDirectory) continue;
@@ -458,7 +461,9 @@ function localProvider(source: EBookSource): Provider {
     return Promise.all(
       books.slice(offset, offset + 24).map(async ([id, book]) => {
         const item = summary(id, book);
-        const epub = await localPackage(book.paths[0]).catch(() => null);
+        const firstEpub = book.paths.find((path) => !isPdfPath(path));
+        if (!firstEpub) return item;
+        const epub = await localPackage(firstEpub).catch(() => null);
         if (!epub?.cover) return item;
         return {
           ...item,
@@ -473,7 +478,30 @@ function localProvider(source: EBookSource): Provider {
   provider.detail = async (id) => {
     const book = await find(id);
     if (!book) return null;
-    const epub = await localPackage(book.paths[0]);
+    const firstEpub = book.paths.find((path) => !isPdfPath(path));
+    if (!firstEpub) {
+      let pdf: Awaited<ReturnType<typeof pdfBookInfo>> | null = null;
+      let failure: unknown = null;
+      for (const path of book.paths) {
+        try {
+          pdf = await pdfBookInfo(path);
+          break;
+        } catch (error) {
+          failure = error;
+        }
+      }
+      return {
+        ...summary(id, book),
+        title: book.paths.length > 1 ? book.title : pdf?.title || book.title,
+        authors: pdf?.authors ?? [],
+        cover: pdf?.cover,
+        description: pdf ? "" : failure instanceof Error ? failure.message : "",
+        year: pdf?.year,
+        genres: [],
+        chapters: book.paths.length === 1 ? pdf?.pages : undefined,
+      };
+    }
+    const epub = await localPackage(firstEpub);
     return {
       ...summary(id, book),
       title: book.paths.length > 1 ? book.title : epub.title || book.title,
@@ -490,13 +518,31 @@ function localProvider(source: EBookSource): Provider {
     if (!book) return [];
     const chapters: EBookChapter[] = [];
     for (const [volumeIndex, path] of book.paths.entries()) {
+      const volume = book.paths.length > 1 ? String(volumeIndex + 1) : undefined;
+      if (isPdfPath(path)) {
+        try {
+          const pages = await pdfPageCount(path);
+          for (let page = 1; page <= pages; page++)
+            chapters.push({
+              id: JSON.stringify([path, `pdf:${page}`]),
+              title: `Page ${page}`,
+              position: chapters.length,
+              volume,
+              volumeTitle:
+                book.paths.length > 1 ? localTitle(path.split(/[\\/]/).at(-1) ?? path) : undefined,
+            });
+        } catch {
+          // One unreadable volume must not hide the healthy volumes beside it.
+        }
+        continue;
+      }
       const epub = await localPackage(path);
       for (const chapter of epub.chapters)
         chapters.push({
           id: JSON.stringify([path, chapter.path]),
           title: chapter.title,
           position: chapters.length,
-          volume: book.paths.length > 1 ? String(volumeIndex + 1) : undefined,
+          volume,
           volumeTitle: book.paths.length > 1 ? epub.title : undefined,
         });
     }
@@ -504,6 +550,10 @@ function localProvider(source: EBookSource): Provider {
   };
   provider.content = async (id) => {
     const [path, chapter] = JSON.parse(id) as [string, string];
+    if (isPdfPath(path)) {
+      const page = Number(chapter.replace(/^pdf:/, ""));
+      return { images: [await pdfPageImage(path, page)] };
+    }
     const content = readEpubChapterContent(await localPackage(path), chapter);
     return { text: cleanSourceText(content.text), images: content.images };
   };
@@ -511,7 +561,11 @@ function localProvider(source: EBookSource): Provider {
     const book = await find(id);
     if (!book) return [];
     const packages = new Map(
-      await Promise.all(book.paths.map(async (path) => [path, await localPackage(path)] as const)),
+      await Promise.all(
+        book.paths
+          .filter((path) => !isPdfPath(path))
+          .map(async (path) => [path, await localPackage(path)] as const),
+      ),
     );
     return epubChapterLocationSources(chapters, packages);
   };

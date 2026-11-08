@@ -610,6 +610,9 @@ export function HarborReader({
   const [readerText, setReaderText] = useState(content.text ?? "");
   const originalTitle = chapter.title || bookTitle;
   const originalText = content.originalText ?? content.text ?? "";
+  const textAvailable = Boolean(originalText.trim());
+  const imageOnly = !textAvailable && Boolean(content.images?.length);
+  const readingMode = imageOnly ? "harbor" : prefs.mode;
   const [readerTitle, setReaderTitle] = useState(content.translatedTitle ?? originalTitle);
   const [translation, setTranslation] = useState(() =>
     content.translated
@@ -787,7 +790,7 @@ export function HarborReader({
   );
 
   useEffect(() => {
-    if (prefs.mode !== "book") return;
+    if (readingMode !== "book") return;
     setFlipFailed(false);
     const controller = new AbortController();
     const generation = ++flipGeneration.current;
@@ -847,7 +850,7 @@ export function HarborReader({
     prefs.customFontId,
     prefs.fontSize,
     prefs.lineHeight,
-    prefs.mode,
+    readingMode,
     profile,
     progressId,
     readerText,
@@ -974,7 +977,7 @@ export function HarborReader({
   const goTo = useCallback(
     (index: number) => {
       const next = Math.max(0, Math.min(paragraphs.length - 1, index));
-      if (prefs.mode === "book" && flipPages.urls.length) {
+      if (readingMode === "book" && flipPages.urls.length) {
         const page = pageForParagraph(flipPages.paragraphStarts, next);
         bookApi.current?.goToPage(page + 1);
         setFlipPage(page);
@@ -987,7 +990,7 @@ export function HarborReader({
       tracedLine.current = next;
       setCurrent(next);
     },
-    [flipPages.paragraphStarts, flipPages.urls.length, paragraphs.length, prefs.mode],
+    [flipPages.paragraphStarts, flipPages.urls.length, paragraphs.length, readingMode],
   );
 
   useEffect(() => {
@@ -1015,7 +1018,7 @@ export function HarborReader({
       root.removeEventListener("scroll", update);
       cancelAnimationFrame(frame);
     };
-  }, [bookId, prefs.mode, profile, progressId, updateTrace]);
+  }, [bookId, readingMode, profile, progressId, updateTrace]);
 
   useEffect(() => {
     const page = article.current;
@@ -1033,7 +1036,7 @@ export function HarborReader({
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [prefs.mode, updateTrace]);
+  }, [readingMode, updateTrace]);
 
   useEffect(() => {
     const root = scroller.current;
@@ -1079,7 +1082,7 @@ export function HarborReader({
       root.removeEventListener("wheel", onWheel);
       window.clearTimeout(reset);
     };
-  }, [paragraphs.length, persistReadingPosition, prefs.mode, updateTrace]);
+  }, [paragraphs.length, persistReadingPosition, readingMode, updateTrace]);
 
   useEffect(() => {
     const root = scroller.current;
@@ -1167,7 +1170,7 @@ export function HarborReader({
       root.removeEventListener("pointercancel", up);
       root.removeEventListener("click", click, true);
     };
-  }, [prefs.mode, updateTrace]);
+  }, [readingMode, updateTrace]);
 
   useEffect(() => {
     return () => {
@@ -1567,7 +1570,7 @@ export function HarborReader({
   }, [prefs.mouseLineTrack, prefs.fontSize, prefs.lineHeight, prefs.width, updateTrace]);
 
   useEffect(() => {
-    if (prefs.mode !== "harbor") return;
+    if (readingMode !== "harbor") return;
     traceY.current = null;
     smartTarget.current = tracedLine.current >= 0 ? tracedLine.current : 0;
     let secondFrame = 0;
@@ -1578,7 +1581,7 @@ export function HarborReader({
       window.cancelAnimationFrame(firstFrame);
       window.cancelAnimationFrame(secondFrame);
     };
-  }, [prefs.mode, updateTrace]);
+  }, [readingMode, updateTrace]);
 
   const captureSelection = (event: React.MouseEvent<HTMLElement>) => {
     const selected = window.getSelection();
@@ -1784,44 +1787,48 @@ export function HarborReader({
         <div data-tauri-drag-region className="min-w-0 text-center">
           <div className="truncate text-sm font-semibold">{readerTitle}</div>
           <div className="mt-0.5 text-[11px]" style={{ color: colors.muted }}>
-            {prefs.mode === "book"
+            {readingMode === "book"
               ? `${flipPage + 1} / ${Math.max(1, flipPages.urls.length)}`
               : `${current + 1} / ${Math.max(1, paragraphs.length)}`}{" "}
             · {bookTitle}
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button
-            className="reader-icon"
-            onClick={() => {
-              setPanel("search");
-              setChaptersOpen(false);
-            }}
-            aria-label={t("Search chapter")}
-          >
-            <Search size={18} />
-          </button>
-          <button
-            className="reader-icon"
-            onClick={() => {
-              setPanel("annotations");
-              setChaptersOpen(false);
-            }}
-            aria-label={t("Notes and highlights")}
-          >
-            <Highlighter size={18} />
-          </button>
-          <button
-            className="reader-icon"
-            onClick={() => {
-              setPanel("bookmarks");
-              setChaptersOpen(false);
-            }}
-            aria-label={t("Bookmarks")}
-          >
-            <Bookmark size={18} />
-          </button>
-          {prefs.mode === "book" && (
+          {textAvailable && (
+            <>
+              <button
+                className="reader-icon"
+                onClick={() => {
+                  setPanel("search");
+                  setChaptersOpen(false);
+                }}
+                aria-label={t("Search chapter")}
+              >
+                <Search size={18} />
+              </button>
+              <button
+                className="reader-icon"
+                onClick={() => {
+                  setPanel("annotations");
+                  setChaptersOpen(false);
+                }}
+                aria-label={t("Notes and highlights")}
+              >
+                <Highlighter size={18} />
+              </button>
+              <button
+                className="reader-icon"
+                onClick={() => {
+                  setPanel("bookmarks");
+                  setChaptersOpen(false);
+                }}
+                aria-label={t("Bookmarks")}
+              >
+                <Bookmark size={18} />
+              </button>
+            </>
+          )}
+          {readingMode === "book" && (
             <button
               className="reader-icon"
               onClick={() => patchPrefs({ pageTurnSound: !prefs.pageTurnSound })}
@@ -1846,7 +1853,7 @@ export function HarborReader({
         </div>
       </div>
 
-      {prefs.mode === "book" ? (
+      {readingMode === "book" ? (
         <div className="absolute inset-x-0 bottom-16 top-16 overflow-hidden">
           {flipLayers.map((layer) => {
             const isActive = layer.id === activeFlipLayerId;
@@ -1975,6 +1982,16 @@ export function HarborReader({
                 {renderText(text, index)}
               </p>
             ))}
+            {imageOnly && (
+              <p
+                className="mb-8 rounded-xl border p-4 text-sm"
+                style={{ borderColor: `${colors.muted}35`, color: colors.muted }}
+              >
+                {t(
+                  "This PDF is shown as page images. Text search, translation, and narration are not available.",
+                )}
+              </p>
+            )}
             {(content.images ?? []).map((src, index) => (
               <img
                 key={src + index}
@@ -1987,7 +2004,7 @@ export function HarborReader({
         </div>
       )}
 
-      {prefs.mode === "harbor" && trace && (
+      {readingMode === "harbor" && trace && (
         <div
           dir={effectiveDirection}
           className="pointer-events-none fixed z-20 rounded-md transition-[top,height] duration-100"
@@ -2040,14 +2057,16 @@ export function HarborReader({
         >
           <SkipBack size={21} strokeWidth={2} fill="currentColor" />
         </button>
-        <button
-          className="reader-icon"
-          onClick={() => addBookmark()}
-          aria-label={t("Bookmark current passage")}
-        >
-          <Bookmark size={18} />
-        </button>
-        {prefs.mode === "book" && (
+        {textAvailable && (
+          <button
+            className="reader-icon"
+            onClick={() => addBookmark()}
+            aria-label={t("Bookmark current passage")}
+          >
+            <Bookmark size={18} />
+          </button>
+        )}
+        {readingMode === "book" && (
           <>
             <button
               className="reader-icon"
@@ -2075,134 +2094,145 @@ export function HarborReader({
             </button>
           </>
         )}
-        <button
-          className={`reader-icon ${translation ? "reader-icon-accent reader-language-toggle" : translationError ? "text-red-400" : ""}`}
-          disabled={translating}
-          onClick={translation ? toggleTranslation : () => void translateChapter()}
-          aria-label={
-            translation
-              ? showOriginal
-                ? t("Show translation")
-                : t("Show original language")
-              : t("Translate chapter")
-          }
-          title={
-            translationError ||
-            (translation
-              ? showOriginal
-                ? t("Show translation")
-                : t("Show original language")
-              : t("Translate chapter"))
-          }
-        >
-          {translating ? (
-            <TranslationSpinner />
-          ) : (
-            <>
-              <Languages size={18} />
-              {translation && <span>{showOriginal ? t("Translation") : t("Original")}</span>}
-            </>
-          )}
-        </button>
-        {translating && (
-          <div
-            className="flex items-center gap-1 whitespace-nowrap pe-2 text-[11px] tabular-nums"
-            style={{ color: colors.muted }}
-          >
-            <strong className="text-current">≈{translationProgress.percent}%</strong>
-            <span>·</span>
-            <span>
-              {translationProgress.etaMs == null
-                ? t("Estimating…")
-                : formatEtaLabel(translationProgress.etaMs)}
-            </span>
-          </div>
-        )}
-        <VoicePicker
-          voices={availableNarrationVoices}
-          value={prefs.narrationVoice}
-          disabled={narrationLoading}
-          colors={colors}
-          onChange={(voice) => {
-            stopSpeech();
-            patchPrefs({ narrationVoice: voice });
-          }}
-          previewingVoice={voicePreviewId}
-          previewLoading={voicePreviewLoading}
-          onPreview={(voice) => void previewVoice(voice)}
-        />
-        <button
-          className={`reader-icon ${narrationLoading ? "reader-icon-cancel" : "reader-icon-accent"}`}
-          onClick={
-            narrationLoading ? stopSpeech : speaking ? toggleNarrationPause : () => void speakFrom()
-          }
-          aria-label={
-            narrationLoading
-              ? t("Cancel Edge TTS generation")
-              : speaking
-                ? narrationPaused
-                  ? t("Resume narration")
-                  : t("Pause narration")
-                : t("Read chapter with Edge TTS")
-          }
-          title={
-            narrationLoading
-              ? t("Cancel audio generation")
-              : narrationNotice || t("Read the complete chapter with Edge TTS")
-          }
-        >
-          {narrationLoading ? (
-            <X size={18} strokeWidth={2.5} />
-          ) : speaking && !narrationPaused ? (
-            <Pause size={18} fill="currentColor" />
-          ) : (
-            <Play size={18} fill="currentColor" />
-          )}
-        </button>
-        {narrationLoading && (
-          <div
-            className="flex items-center gap-1.5 pe-2 text-[11px] font-semibold tabular-nums"
-            style={{ color: colors.muted }}
-            title={t("Preparing narration audio")}
-          >
-            <Loader2 size={13} className="animate-spin motion-reduce:animate-none" />
-            <span>{generationPercent > 1 ? `${generationPercent}%` : "Preparing"}</span>
-          </div>
-        )}
-        {(speaking || audioDuration > 0) && (
-          <div className="flex w-[clamp(170px,19vw,280px)] items-center gap-2 px-2">
-            <span className="w-9 text-end text-[10px] tabular-nums" style={{ color: colors.muted }}>
-              {formatAudioTime(audioPosition)}
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={Math.max(audioDuration, 0.01)}
-              step={0.05}
-              value={Math.min(audioPosition, Math.max(audioDuration, 0.01))}
-              disabled={!audio.current || !audioDuration}
-              onChange={(event) => {
-                const next = Number(event.target.value);
-                if (!audio.current || !Number.isFinite(next)) return;
-                audio.current.currentTime = next;
-                setAudioPosition(next);
-              }}
-              aria-label={t("Audio position")}
-              className="ebook-audio-seeker h-5 min-w-0 flex-1 cursor-pointer disabled:cursor-wait disabled:opacity-35"
-              style={
-                {
-                  "--audio-progress": `${audioDuration ? (audioPosition / audioDuration) * 100 : 0}%`,
-                } as React.CSSProperties
+        {textAvailable && (
+          <>
+            <button
+              className={`reader-icon ${translation ? "reader-icon-accent reader-language-toggle" : translationError ? "text-red-400" : ""}`}
+              disabled={translating}
+              onClick={translation ? toggleTranslation : () => void translateChapter()}
+              aria-label={
+                translation
+                  ? showOriginal
+                    ? t("Show translation")
+                    : t("Show original language")
+                  : t("Translate chapter")
               }
+              title={
+                translationError ||
+                (translation
+                  ? showOriginal
+                    ? t("Show translation")
+                    : t("Show original language")
+                  : t("Translate chapter"))
+              }
+            >
+              {translating ? (
+                <TranslationSpinner />
+              ) : (
+                <>
+                  <Languages size={18} />
+                  {translation && <span>{showOriginal ? t("Translation") : t("Original")}</span>}
+                </>
+              )}
+            </button>
+            {translating && (
+              <div
+                className="flex items-center gap-1 whitespace-nowrap pe-2 text-[11px] tabular-nums"
+                style={{ color: colors.muted }}
+              >
+                <strong className="text-current">≈{translationProgress.percent}%</strong>
+                <span>·</span>
+                <span>
+                  {translationProgress.etaMs == null
+                    ? t("Estimating…")
+                    : formatEtaLabel(translationProgress.etaMs)}
+                </span>
+              </div>
+            )}
+            <VoicePicker
+              voices={availableNarrationVoices}
+              value={prefs.narrationVoice}
+              disabled={narrationLoading}
+              colors={colors}
+              onChange={(voice) => {
+                stopSpeech();
+                patchPrefs({ narrationVoice: voice });
+              }}
+              previewingVoice={voicePreviewId}
+              previewLoading={voicePreviewLoading}
+              onPreview={(voice) => void previewVoice(voice)}
             />
-            <span className="w-9 text-[10px] tabular-nums" style={{ color: colors.muted }}>
-              -{formatAudioTime(Math.max(0, audioDuration - audioPosition))}
-            </span>
-          </div>
+            <button
+              className={`reader-icon ${narrationLoading ? "reader-icon-cancel" : "reader-icon-accent"}`}
+              onClick={
+                narrationLoading
+                  ? stopSpeech
+                  : speaking
+                    ? toggleNarrationPause
+                    : () => void speakFrom()
+              }
+              aria-label={
+                narrationLoading
+                  ? t("Cancel Edge TTS generation")
+                  : speaking
+                    ? narrationPaused
+                      ? t("Resume narration")
+                      : t("Pause narration")
+                    : t("Read chapter with Edge TTS")
+              }
+              title={
+                narrationLoading
+                  ? t("Cancel audio generation")
+                  : narrationNotice || t("Read the complete chapter with Edge TTS")
+              }
+            >
+              {narrationLoading ? (
+                <X size={18} strokeWidth={2.5} />
+              ) : speaking && !narrationPaused ? (
+                <Pause size={18} fill="currentColor" />
+              ) : (
+                <Play size={18} fill="currentColor" />
+              )}
+            </button>
+            {narrationLoading && (
+              <div
+                className="flex items-center gap-1.5 pe-2 text-[11px] font-semibold tabular-nums"
+                style={{ color: colors.muted }}
+                title={t("Preparing narration audio")}
+              >
+                <Loader2 size={13} className="animate-spin motion-reduce:animate-none" />
+                <span>{generationPercent > 1 ? `${generationPercent}%` : "Preparing"}</span>
+              </div>
+            )}
+            {(speaking || audioDuration > 0) && (
+              <div className="flex w-[clamp(170px,19vw,280px)] items-center gap-2 px-2">
+                <span
+                  className="w-9 text-end text-[10px] tabular-nums"
+                  style={{ color: colors.muted }}
+                >
+                  {formatAudioTime(audioPosition)}
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={Math.max(audioDuration, 0.01)}
+                  step={0.05}
+                  value={Math.min(audioPosition, Math.max(audioDuration, 0.01))}
+                  disabled={!audio.current || !audioDuration}
+                  onChange={(event) => {
+                    const next = Number(event.target.value);
+                    if (!audio.current || !Number.isFinite(next)) return;
+                    audio.current.currentTime = next;
+                    setAudioPosition(next);
+                  }}
+                  aria-label={t("Audio position")}
+                  className="ebook-audio-seeker h-5 min-w-0 flex-1 cursor-pointer disabled:cursor-wait disabled:opacity-35"
+                  style={
+                    {
+                      "--audio-progress": `${audioDuration ? (audioPosition / audioDuration) * 100 : 0}%`,
+                    } as React.CSSProperties
+                  }
+                />
+                <span className="w-9 text-[10px] tabular-nums" style={{ color: colors.muted }}>
+                  -{formatAudioTime(Math.max(0, audioDuration - audioPosition))}
+                </span>
+              </div>
+            )}
+          </>
         )}
         <div className="px-3 text-xs tabular-nums" style={{ color: colors.muted }}>
           {Math.round(
-            prefs.mode === "book"
+            readingMode === "book"
               ? ((flipPage + 1) / Math.max(1, flipPages.urls.length)) * 100
               : ((current + 1) / Math.max(1, paragraphs.length)) * 100,
           )}
@@ -2400,7 +2430,12 @@ export function HarborReader({
                   <p className="text-sm font-medium">{t("Background image")}</p>
                   {readerBackground.controls}
                 </div>
-                <Settings prefs={prefs} patch={patchPrefs} colors={colors} />
+                <Settings
+                  prefs={prefs}
+                  patch={patchPrefs}
+                  colors={colors}
+                  bookModeDisabled={imageOnly}
+                />
               </>
             )}
             {panel === "search" && (
@@ -2868,12 +2903,15 @@ function Settings({
   prefs,
   patch,
   colors,
+  bookModeDisabled,
 }: {
   prefs: EBookReaderPrefs;
   patch: (value: Partial<EBookReaderPrefs>) => void;
   colors: (typeof paper)[keyof typeof paper];
+  bookModeDisabled: boolean;
 }) {
   const t = useT();
+  const activeMode = bookModeDisabled ? "harbor" : prefs.mode;
   const [adjustmentsOpen, setAdjustmentsOpen] = useState(true);
   const [audioCacheStatus, setAudioCacheStatus] = useState("");
   const { fonts, busy: fontBusy, error: fontError, addFont, removeFont } = useCustomFonts();
@@ -2902,19 +2940,21 @@ function Settings({
               { mode: "harbor", label: t("Harbor"), icon: <Type size={18} /> },
               { mode: "book", label: t("Book"), icon: <BookOpen size={18} /> },
             ] as const
-          ).map((item) => (
-            <button
-              key={item.mode}
-              type="button"
-              aria-pressed={prefs.mode === item.mode}
-              onClick={() => patch({ mode: item.mode })}
-              className={`flex h-14 items-center justify-center gap-2 rounded-xl border transition ${prefs.mode === item.mode ? "border-accent bg-accent/10 text-accent" : "hover:bg-white/5"}`}
-              style={{ borderColor: prefs.mode === item.mode ? undefined : `${colors.muted}35` }}
-            >
-              {item.icon}
-              <span className="text-sm font-semibold">{item.label}</span>
-            </button>
-          ))}
+          )
+            .filter((item) => !bookModeDisabled || item.mode !== "book")
+            .map((item) => (
+              <button
+                key={item.mode}
+                type="button"
+                aria-pressed={activeMode === item.mode}
+                onClick={() => patch({ mode: item.mode })}
+                className={`flex h-14 items-center justify-center gap-2 rounded-xl border transition ${activeMode === item.mode ? "border-accent bg-accent/10 text-accent" : "hover:bg-white/5"}`}
+                style={{ borderColor: activeMode === item.mode ? undefined : `${colors.muted}35` }}
+              >
+                {item.icon}
+                <span className="text-sm font-semibold">{item.label}</span>
+              </button>
+            ))}
         </div>
       </Setting>
       <Setting label={t("Saved audio")}>
