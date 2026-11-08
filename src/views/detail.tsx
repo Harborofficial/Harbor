@@ -119,7 +119,10 @@ import { mediaServerConnections } from "@/lib/media-server/connections";
 import { mediaServerItems } from "@/lib/media-server/index-store";
 import { matchingServerItems, serverPlayableCopies } from "@/lib/media-server/selectors";
 import { createMediaServerPlayerSrc, decidePlaybackSource } from "@/lib/media-server/playback";
-import { markMovieWatched, unmarkMovieWatched } from "@/lib/mark-watched";
+import {
+  optimisticMovieWatchedState,
+  setMovieWatchedWithConfirmation,
+} from "@/lib/movie-watched-action";
 import { useIsFavorite, useMediaFavorites } from "@/lib/media-favorites";
 import { openUrl } from "@/lib/window";
 import { profileFromDetail, trackEvent } from "@/lib/discover";
@@ -130,7 +133,11 @@ import { useT } from "@/lib/i18n";
 import { emitListToast } from "@/components/lists/list-toast";
 import { DropShowConfirmModal } from "@/components/drop-show-confirm-modal";
 import { useCanDropShow } from "@/lib/drop-show-eligibility";
-import { dropContextTitle, requireMediaActionSuccess } from "@/lib/media-context-actions";
+import {
+  dropContextTitle,
+  requireMediaActionSuccess,
+  type MediaActionResult,
+} from "@/lib/media-context-actions";
 import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { ReminderButton } from "@/components/reminder-button";
@@ -1868,15 +1875,52 @@ export function DetailView({
     meta.type === "movie" &&
     (isMovieWatchedLocal(meta.id, [detail?.imdbId]) ||
       (!isNuvio && stremioMovieWatched(libraryItem)));
-  const markThisMovieWatched = () => {
-    const tmdb = meta.id.startsWith("tmdb:") ? meta.id.split(":")[2] : null;
-    if (watchedMark) {
-      setLibraryItem((prev) =>
-        prev?.state ? { ...prev, state: { ...prev.state, flaggedWatched: 0 } } : prev,
+  const markThisMovieWatched = async () => {
+    const next = !watchedMark;
+    const previousLibraryItem = libraryItem;
+    if (previousLibraryItem?.state) {
+      const state = optimisticMovieWatchedState(previousLibraryItem.state, next);
+      if (state) setLibraryItem({ ...previousLibraryItem, state });
+    }
+    const revert = () => {
+      if (previousLibraryItem) setLibraryItem(previousLibraryItem);
+    };
+    let result: MediaActionResult | null;
+    try {
+      result = await setMovieWatchedWithConfirmation(meta, next, {
+        imdbId: detail?.imdbId,
+        title: title || meta.name,
+        onUnsafeProvider: next ? "skip" : "block",
+      });
+    } catch (cause) {
+      revert();
+      emitListToast(
+        cause instanceof Error
+          ? cause.message.split("\n").join(" · ")
+          : t("The action could not be completed."),
+        "error",
       );
-      void unmarkMovieWatched(meta, detail?.imdbId);
-    } else {
-      void markMovieWatched(meta, detail?.imdbId, tmdb);
+      return;
+    }
+    if (!result) {
+      revert();
+      return;
+    }
+    if (
+      !result.outcomes.some(
+        (outcome) => outcome.provider === "Harbor" && outcome.status === "updated",
+      )
+    )
+      revert();
+    try {
+      requireMediaActionSuccess(result);
+    } catch (cause) {
+      emitListToast(
+        cause instanceof Error
+          ? cause.message.split("\n").join(" · ")
+          : t("The action could not be completed."),
+        "error",
+      );
     }
   };
 
@@ -2615,7 +2659,11 @@ export function DetailView({
               />
             ))
           ) : backdrop ? (
-            <HeroBackdrop url={backdrop} fallbacks={backdropPool} fullQuality={settings.heroFullQuality} />
+            <HeroBackdrop
+              url={backdrop}
+              fallbacks={backdropPool}
+              fullQuality={settings.heroFullQuality}
+            />
           ) : (
             <div className="absolute inset-0 animate-pulse bg-white/[0.02]" />
           )}
