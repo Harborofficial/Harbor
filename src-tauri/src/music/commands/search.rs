@@ -1,23 +1,12 @@
 use super::super::db::MusicDb;
 use super::super::{MusicState, MusicStream, MusicTrack};
 use std::future::Future;
-use std::sync::LazyLock;
+#[cfg(test)]
 use std::time::Duration;
 
-const PROBE_TIMEOUT: Duration = Duration::from_secs(4);
-
-static PROBE_CLIENT: LazyLock<Option<reqwest::Client>> = LazyLock::new(|| {
-    reqwest::Client::builder()
-        .timeout(PROBE_TIMEOUT)
-        .build()
-        .ok()
-});
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum StreamHealth {
-    Usable,
-    Expired,
-}
+#[cfg(test)]
+use super::super::stream_probe::expiry_status;
+use super::super::stream_probe::{probe_stream, StreamHealth};
 
 #[tauri::command]
 pub async fn music_search(
@@ -43,36 +32,6 @@ pub async fn music_search(
         state.db.upsert_track(track)?;
     }
     Ok(tracks)
-}
-
-fn expiry_status(status: u16) -> bool {
-    matches!(status, 401 | 403 | 410)
-}
-
-async fn probe_stream(stream: &MusicStream) -> StreamHealth {
-    let url = stream.url.trim();
-    if !url.starts_with("http://") && !url.starts_with("https://") {
-        return StreamHealth::Usable;
-    }
-    let Some(client) = PROBE_CLIENT.as_ref() else {
-        return StreamHealth::Usable;
-    };
-    let Ok(headers) = stream.request_headers() else {
-        return StreamHealth::Expired;
-    };
-    match client
-        .get(url)
-        .headers(headers)
-        // Match mpv/ffmpeg's opening request: some signed URLs serve one byte but
-        // reject the open-ended range needed for playback. Only inspect headers;
-        // dropping the response stops the probe without downloading the audio.
-        .header(reqwest::header::RANGE, "bytes=0-")
-        .send()
-        .await
-    {
-        Ok(response) if expiry_status(response.status().as_u16()) => StreamHealth::Expired,
-        _ => StreamHealth::Usable,
-    }
 }
 
 async fn cached_or_resolved<Probe, Probed, Resolve, Resolved>(
