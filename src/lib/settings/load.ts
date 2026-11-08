@@ -462,7 +462,7 @@ export function parseStoredSettings(raw: string | null): {
           : DEFAULT.togetherRelayUrl,
       ),
       ...posterCards,
-      animePreferImdbStreams: parsed.animePreferImdbStreams === true,
+      animePreferImdbStreams: parsed.animePreferImdbStreams !== false,
       showQuickGameLibrary: parsed.showQuickGameLibrary === true,
       topbarAppearance: sanitizeTopbarAppearance(
         parsed.topbarAppearance,
