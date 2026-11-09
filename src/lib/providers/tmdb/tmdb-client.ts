@@ -115,6 +115,7 @@ export async function get<T>(
   key: string,
   path: string,
   params: Record<string, string> = {},
+  _options: { searchTopMatch?: boolean } = {},
 ): Promise<T | null> {
   if (!key) return null;
   const url = new URL(`${TMDB}/${path}`);
@@ -137,7 +138,7 @@ export async function get<T>(
   }
   // Only public title/season metadata belongs in the durable cache.
   const metadata =
-    /^(?:tv|movie)\/\d+(?:\/(?:season\/\d+(?:\/episode\/\d+)?(?:\/images)?|images|external_ids|translations))?$/.test(
+    /^(?:tv|movie)\/\d+(?:\/(?:season\/\d+(?:\/episode\/\d+)?(?:\/(?:images|videos))?|videos|images|external_ids|translations))?$/.test(
       path,
     );
   const run = metadata

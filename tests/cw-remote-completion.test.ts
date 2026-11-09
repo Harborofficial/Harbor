@@ -793,6 +793,190 @@ test("watched-dependent next episodes are recomputed after an account change", a
   assert.equal((await h.flush())[0].state.episode, 2);
 });
 
+const nuvioCard = (episode: number, extra: Record<string, unknown> = {}) => ({
+  ...item(episode),
+  external: "nuvio" as const,
+  upNext: true,
+  ...extra,
+  state: {
+    ...item(episode).state,
+    timeOffset: 0,
+    flaggedWatched: 0,
+    ...(extra.state as Record<string, unknown> | undefined),
+  },
+});
+
+test("an aired kept Nuvio card advances and clears its timer flags", async () => {
+  const h = harness();
+  h.setRemote(progress([1], "tt100"));
+  h.setEpisodes([
+    { season: 1, episode: 10, airDate: "2020-01-01" },
+    { season: 1, episode: 11, airDate: "2020-01-01" },
+  ]);
+  const card = nuvioCard(10, { keptForTimer: true, waitingForAir: true });
+  h.render(
+    [card],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "timer",
+  );
+  const out = await h.flush();
+  assert.equal(out.length, 1);
+  assert.equal(out[0].state.episode, 11);
+  assert.equal(out[0].upNext, true);
+  assert.equal(out[0].waitingForAir, undefined);
+  assert.equal((out[0] as Record<string, unknown>).keptForTimer, undefined);
+});
+
+test("an unaired kept Nuvio card waits on the real next episode", async () => {
+  const h = harness();
+  h.setRemote(progress([1], "tt100"));
+  h.setEpisodes([
+    { season: 1, episode: 10, airDate: "2020-01-01" },
+    { season: 1, episode: 11, airDate: "2099-01-01" },
+  ]);
+  const card = nuvioCard(10, { keptForTimer: true, waitingForAir: true });
+  h.render(
+    [card],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "timer",
+  );
+  const out = await h.flush();
+  assert.equal(out.length, 1);
+  assert.equal(out[0].state.episode, 11);
+  assert.equal(out[0].waitingForAir, true);
+  assert.equal(out[0].nextAirDate, "2099-01-01");
+});
+
+test("manual-unwatched clears a kept card without advancing it", async () => {
+  const h = harness();
+  h.setRemote(progress([1], "tt100"));
+  h.manual.set("tt100:1:10", false);
+  h.setEpisodes([
+    { season: 1, episode: 10, airDate: "2020-01-01" },
+    { season: 1, episode: 11, airDate: "2020-01-01" },
+  ]);
+  const card = nuvioCard(10, { keptForTimer: true, waitingForAir: true });
+  h.render(
+    [card],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "timer",
+  );
+  const out = await h.flush();
+  assert.equal(out.length, 1);
+  assert.equal(out[0].state.episode, 10);
+  assert.equal(out[0].waitingForAir, undefined);
+  assert.equal((out[0] as Record<string, unknown>).keptForTimer, undefined);
+});
+
+test("a season-overflow Nuvio card advances to the next season", async () => {
+  const h = harness();
+  h.setRemote(progress([1], "tt100"));
+  h.setEpisodes([
+    ...Array.from({ length: 10 }, (_, index) => ({
+      season: 1,
+      episode: index + 1,
+      airDate: "2020-01-01",
+    })),
+    { season: 2, episode: 1, airDate: "2020-01-01" },
+  ]);
+  const card = nuvioCard(11, { keptForTimer: true });
+  h.render(
+    [card],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "timer",
+  );
+  const out = await h.flush();
+  assert.equal(out.length, 1);
+  assert.equal(out[0].state.season, 2);
+  assert.equal(out[0].state.episode, 1);
+  assert.equal(out[0].upNext, true);
+});
+
+test("recomputing an aired kept card does not hop it forward again", async () => {
+  const h = harness();
+  h.setRemote(progress([1], "tt100"));
+  h.setEpisodes([
+    { season: 1, episode: 10, airDate: "2020-01-01" },
+    { season: 1, episode: 11, airDate: "2020-01-01" },
+    { season: 1, episode: 12, airDate: "2020-01-01" },
+  ]);
+  const card = nuvioCard(10, { keptForTimer: true, waitingForAir: true });
+  h.render(
+    [card],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "timer",
+  );
+  const first = await h.flush();
+  assert.equal(first[0].state.episode, 11);
+  h.render(
+    [card],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    1,
+    false,
+    "timer",
+  );
+  const second = await h.flush();
+  assert.equal(second[0].state.episode, 11);
+});
+
 test("remote history follows existing recency, source status and request-count bounds", async () => {
   const h = harness();
   const data = progress([], "tt-empty");

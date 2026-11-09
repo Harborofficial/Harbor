@@ -1,10 +1,7 @@
-import { Image } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import type { ContextAction } from "@/lib/context-actions";
+import { useEffect, useRef } from "react";
 import { useContextMenu, useContextTarget, type ContextMenuTarget } from "@/lib/context-menu";
-import { ContextImageViewer } from "@/components/context-image-viewer";
-import type { ContextImage } from "@/lib/context-image";
 import { useT } from "@/lib/i18n";
-import { visibleReaderPages } from "./reader-context";
 import {
   fitLevel,
   guardPageLoaded,
@@ -148,6 +145,7 @@ export function BookFlip({
   resumePage,
   soundEnabled,
   instanceName = NAME,
+  contextActions,
   zoom = 1,
   pageHeaders,
   instantTurns = false,
@@ -161,6 +159,7 @@ export function BookFlip({
   resumePage: number;
   soundEnabled: boolean;
   instanceName?: string;
+  contextActions?: () => ContextAction[];
   zoom?: number;
   pageHeaders?: Record<string, Record<string, string>>;
   instantTurns?: boolean;
@@ -183,30 +182,16 @@ export function BookFlip({
   const wrapRef = useRef<HTMLDivElement>(null);
   const panRef = useRef({ x: 0, y: 0 });
   const zoomRef = useRef(1);
-  const visiblePages = useRef<ReturnType<typeof visibleReaderPages>>([]);
-  const [image, setImage] = useState<ContextImage | null>(null);
   const t = useT();
   const { open } = useContextMenu();
   const contextTarget = (): ContextMenuTarget => ({
     kind: "actions",
     id: `reader-pages:${instanceName}`,
     label: t("Visible pages"),
-    actions: () =>
-      visiblePages.current.map((page) => ({
-        id: `reader-page:${instanceName}:${page.number}`,
-        icon: <Image size={16} />,
-        label: t("View page {number}", { number: page.number }),
-        restoreFocus: false,
-        run: () =>
-          setImage({
-            src: page.src,
-            label: t("Page {number}", { number: page.number }),
-            filename: `page-${page.number}`,
-          }),
-      })),
+    // The reader remains a semantic boundary even without contextual commands.
+    actions: contextActions ?? (() => []),
   });
   const contextRef = useContextTarget(contextTarget);
-  const contextOrigin = useRef<HTMLDivElement | null>(null);
 
   const applyTransform = (smooth: boolean) => {
     const el = wrapRef.current;
@@ -266,7 +251,6 @@ export function BookFlip({
     ensureStyle();
     let cancelled = false;
     let inst: FlipInstance | null = null;
-    visiblePages.current = [];
 
     const origFetch = window.fetch;
     const origOnPopState = window.onpopstate;
@@ -299,7 +283,6 @@ export function BookFlip({
       const d = (e as CustomEvent).detail as { page?: string | number; name?: string } | undefined;
       if (!d || d.name !== instanceName) return;
       const spread = String(d.page);
-      visiblePages.current = visibleReaderPages(pages, spread);
       const first = Number(spread.split("-")[0]);
       if (!Number.isFinite(first) || first <= 0) return;
       report.current(first - 1, spread);
@@ -484,10 +467,7 @@ export function BookFlip({
 
   return (
     <div
-      ref={(node) => {
-        contextOrigin.current = node;
-        contextRef(node);
-      }}
+      ref={contextRef}
       tabIndex={0}
       aria-label={t("Visible pages")}
       className="relative h-full w-full overflow-hidden"
@@ -503,13 +483,6 @@ export function BookFlip({
       >
         <div ref={ref} className="harbor-flipbook h-full w-full" />
       </div>
-      {image && (
-        <ContextImageViewer
-          image={image}
-          returnFocus={contextOrigin.current}
-          onClose={() => setImage(null)}
-        />
-      )}
     </div>
   );
 }

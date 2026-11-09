@@ -1,3 +1,4 @@
+import { usePinnedCatalogRows } from "@/views/home/hooks/use-pinned-rows";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
 import type { HomeRow } from "@/views/home/home-types";
@@ -243,6 +244,7 @@ function useBuiltCatalog(kind: BpCatalogKind): {
 export function useBpCatalogPage(kind: BpCatalogKind): BpCatalogPage {
   const { built, loading, failed, retry } = useBuiltCatalog(kind);
   const collections = useCollectionRowsForPage(kind);
+  const pinnedRows = usePinnedCatalogRows(kind);
   const custom = useMemo(() => loadPageRows(kind), [kind]);
   const hero = useHideAnimeMetas(built.hero);
   const trending = useMemo(
@@ -290,7 +292,10 @@ export function useBpCatalogPage(kind: BpCatalogKind): BpCatalogPage {
       for (const m of metas) seen.add(m.id);
       specRows.push({ ...row, metas });
     }
-    const titled = [...collectionRows, ...specRows].map((r) => ({ ...r, title: r.name }));
+    const titled = [...pinnedRows, ...collectionRows, ...specRows].map((r) => ({
+      ...r,
+      title: r.name,
+    }));
     const ordered = applyPageRows(titled, custom, false).map(({ title, ...rest }) => ({
       ...rest,
       name: title,
@@ -305,7 +310,7 @@ export function useBpCatalogPage(kind: BpCatalogKind): BpCatalogPage {
       hasMore: false,
     };
     return [top, ...ordered];
-  }, [built.rows, ranked, collectionRows, custom, kind]);
+  }, [built.rows, ranked, pinnedRows, collectionRows, custom, kind]);
 
   return { rows: useHideAnimeRows(rows), hero, loading, failed, retry };
 }

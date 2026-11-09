@@ -47,10 +47,20 @@ test("HDR shell mounts with the actual profile, auth and navigation contexts", (
     "src/lib/profiles.tsx",
     {
       "./avatars/catalog": { isRemovedBuiltinAvatar: () => false },
+      "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
+      "./active-profile-id": { isNuvioProviderActive: () => false },
     },
     { localStorage },
   );
-  const auth = load("src/lib/auth.tsx", { "./profiles": profiles }, { localStorage });
+  const auth = load(
+    "src/lib/auth.tsx",
+    {
+      "./profiles": profiles,
+      "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
+      "./active-profile-id": { isNuvioProviderActive: () => false },
+    },
+    { localStorage },
+  );
   const view = load("src/lib/view.tsx");
   const forwarded = [];
   const payload = {
@@ -67,6 +77,7 @@ test("HDR shell mounts with the actual profile, auth and navigation contexts", (
     "@/lib/profiles": profiles,
     "@/lib/view": view,
     "@/lib/settings": { SettingsProvider: ({ children }) => children },
+    "@/lib/hotkeys": { effectiveBinding: () => "ctrl+l" },
     "@/lib/player/mpv-forward": { createForwardingMpvBridge: () => ({}) },
     "./player/hooks/use-player-interaction-lock": { usePlayerInteractionBlocker: () => {} },
     "./player/drag-click-stage": { DragClickStage: () => null },
@@ -138,6 +149,7 @@ test("overlay subscribes before requesting props and cancels late listener regis
         "@/lib/auth": { AuthProvider: passthrough },
         "@/lib/settings": { SettingsProvider: passthrough },
         "@/lib/view": { PlayerNavigationProvider: passthrough },
+        "@/lib/hotkeys": { effectiveBinding: () => "ctrl+l" },
         "@/lib/player/mpv-forward": { createForwardingMpvBridge: () => ({}) },
         "./player/hooks/use-player-interaction-lock": { usePlayerInteractionBlocker() {} },
         "@/lib/hdr-overlay": {

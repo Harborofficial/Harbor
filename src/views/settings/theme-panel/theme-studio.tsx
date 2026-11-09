@@ -40,6 +40,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
   const t = useT();
   const { settings, update } = useSettings();
   const [initialDraft] = useState(() => emptyDraft(seed, settings.navCustomization));
+  const [resetBaseline, setResetBaseline] = useState(() => initialDraft);
   const { draft, setDraft, undo, redo, canUndo, canRedo } = useDraftHistory(() => initialDraft);
   const drag = usePanelDrag();
   const restoreRef = useState(() => settings.theme.preset)[0];
@@ -212,7 +213,11 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
       }
       return next;
     });
-  const onSeed = (t: ThemePreset) => setDraft(emptyDraft(t, draft.navCustomization));
+  const onSeed = (t: ThemePreset) => {
+    const seeded = emptyDraft(t, draft.navCustomization);
+    setResetBaseline(seeded);
+    setDraft(seeded);
+  };
 
   const onChromeChange = (config: ChromeConfig) =>
     setDraft((d) => {
@@ -314,6 +319,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
           />
           <Inspector
             draft={draft}
+            baseline={resetBaseline}
             onPatch={onPatch}
             onSeed={onSeed}
             onChromeChange={onChromeChange}

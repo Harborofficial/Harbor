@@ -20,7 +20,10 @@ import {
   ArrowUpRight,
   AudioLines,
   BarChart3,
+  ChevronUp,
+  Globe2,
   Heart,
+  Loader2,
   Maximize,
   Palette,
   Search,
@@ -37,6 +40,7 @@ import { MusicNowTitle } from "./music-now-title";
 import { MusicUpNextRow } from "./music-up-next-row";
 import { MusicVideoSurface } from "./music-video-surface";
 import { MusicVideoFullscreen } from "./music-video-fullscreen";
+import { MusicVideoMiniToggle } from "./music-video-mini-toggle";
 import {
   exitMusicVideoFullscreen,
   getMusicVideoFullscreen,
@@ -46,7 +50,11 @@ import {
 import { MusicNowSearch } from "./music-now-search";
 import { musicUpcoming } from "./music-queue";
 import { CastIcon } from "@/components/player/cast-icon";
-import { useT } from "@/lib/i18n";
+import { getUiLanguage, LANGUAGES, useT, type UiLanguage } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { aiIsGroq, aiKey } from "@/lib/ai-models";
+import { translateLyrics } from "@/lib/music/lyrics-translation";
+import { Dropdown } from "@/components/dropdown";
 import { pushBackHandler } from "@/lib/back-intercept";
 import {
   useMusicPlayer,
@@ -61,6 +69,8 @@ import {
   setLyricOffset,
   shiftedLyricTime,
 } from "@/lib/music/lyric-offset";
+import { addLyricSyncPoint, applyLyricSync } from "@/lib/music/lyric-sync";
+import { useLyricSync } from "@/lib/music/use-lyric-sync";
 import { karaokeScrollTop } from "@/lib/music/karaoke-scroll";
 import { MusicKaraoke } from "./music-karaoke";
 import { loadMusicAudioDevices, useMusicAudioSettings } from "@/lib/music/audio-settings";
@@ -76,6 +86,27 @@ import { musicTrackQuality } from "@/lib/music/quality";
 import "./music-now-playing.css";
 
 const NOW_LIKE_SPOKES = [0, 45, 90, 135, 180, 225, 270, 315];
+const LYRIC_TARGET_KEY = "harbor.lyrics.translate-to.v1";
+
+function savedLyricTarget(): UiLanguage {
+  try {
+    const saved = localStorage.getItem(LYRIC_TARGET_KEY);
+    if (LANGUAGES.some(({ code }) => code === saved)) return saved as UiLanguage;
+  } catch {
+    /* Storage can be unavailable; the app language is the default. */
+  }
+  return getUiLanguage();
+}
+
+// LRCLib exposes a single lyric version, so the original stays visible and the translation sits
+// underneath it; lines that already match the selected language are left alone.
+type LyricTranslation = { language: UiLanguage; lines: (string | null)[] };
+
+const lyricTranslationDiffers = (lines: (string | null)[], source: LyricLine[]): boolean =>
+  lines.some((text, index) => {
+    const original = source[index]?.text.trim();
+    return !!text && !!original && text.trim() !== original;
+  });
 
 export function MusicNowPlaying({
   inset,
@@ -103,6 +134,7 @@ export function MusicNowPlaying({
   onQueue: () => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
   const player = useMusicPlayer();
   const appearance = useMusicAppearance();
   const audio = useMusicAudioSettings();
@@ -135,6 +167,12 @@ export function MusicNowPlaying({
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [lyricsState, setLyricsState] = useState<"loading" | "ready" | "empty">("loading");
   const [hasLyrics, setHasLyrics] = useState<boolean | null>(null);
+  const [lyricTarget, setLyricTarget] = useState<UiLanguage>(savedLyricTarget);
+  const [lyricTranslation, setLyricTranslation] = useState<LyricTranslation | null>(null);
+  const [lyricTranslationOn, setLyricTranslationOn] = useState(false);
+  const [lyricTranslating, setLyricTranslating] = useState(false);
+  const [lyricTranslationFailed, setLyricTranslationFailed] = useState(false);
+  const lyricTranslationRun = useRef(0);
   const lyricsRef = useRef<HTMLOListElement>(null);
   const [outputs, setOutputs] = useState<Array<{ name: string; description: string }>>([]);
   const current = player.current;
@@ -156,6 +194,7 @@ export function MusicNowPlaying({
   });
   const video = current?.mediaKind === "video";
   const immersive = video && appearance.immersive;
+  const theatre = video && appearance.theatre && !immersive;
   // Immersive swaps position, inset, aspect-ratio and radius at once, and none of those can be
   // transitioned, so the frame snaps. A veil rises over the swap and clears once it has landed,
   // which reads as a deliberate cut and works the same going in as coming out.
@@ -278,7 +317,74 @@ export function MusicNowPlaying({
     },
     [current],
   );
-  const activeLyric = lyricIndexAt(lyrics, shiftedLyricTime(player.currentTime, lyricOffset));
+  const [syncPoints, setSyncPoints] = useLyricSync(current);
+  const [liveSync, setLiveSync] = useState(false);
+  const [syncPick, setSyncPick] = useState<number | null>(null);
+  useEffect(() => {
+    setLiveSync(false);
+    setSyncPick(null);
+  }, [current?.id]);
+  useEffect(() => {
+    lyricTranslationRun.current += 1;
+    setLyricTranslation(null);
+    setLyricTranslationOn(false);
+    setLyricTranslating(false);
+    setLyricTranslationFailed(false);
+  }, [current?.id, lyricTarget]);
+  const toggleLyricTranslation = useCallback(async () => {
+    if (lyricTranslationOn) {
+      setLyricTranslationOn(false);
+      return;
+    }
+    if (lyricTranslation?.language === lyricTarget) {
+      setLyricTranslationOn(lyricTranslationDiffers(lyricTranslation.lines, lyrics));
+      return;
+    }
+    if (lyricTranslating || lyrics.length === 0) return;
+    const run = ++lyricTranslationRun.current;
+    setLyricTranslating(true);
+    setLyricTranslationFailed(false);
+    try {
+      const key = aiKey(settings).trim();
+      const result = await translateLyrics(
+        lyrics,
+        lyricTarget,
+        key ? { key, model: settings.aiSearchModel, groq: aiIsGroq(settings) } : null,
+      );
+      if (run !== lyricTranslationRun.current) return;
+      setLyricTranslation({ language: lyricTarget, lines: result });
+      const translated = lyricTranslationDiffers(result, lyrics);
+      setLyricTranslationOn(translated);
+      setLyricTranslationFailed(!translated && !result.some(Boolean));
+    } catch {
+      if (run === lyricTranslationRun.current) setLyricTranslationFailed(true);
+    } finally {
+      if (run === lyricTranslationRun.current) setLyricTranslating(false);
+    }
+  }, [lyricTarget, lyricTranslation, lyricTranslationOn, lyricTranslating, lyrics, settings]);
+  const timedLyrics = applyLyricSync(lyrics, syncPoints);
+  const activeLyric = lyricIndexAt(timedLyrics, shiftedLyricTime(player.currentTime, lyricOffset));
+  const seekLyric = useCallback(
+    (index: number) => {
+      const line = timedLyrics[index];
+      if (line) seekMusic(line.at + lyricOffset);
+    },
+    [lyricOffset, timedLyrics],
+  );
+  const alignLyric = useCallback(
+    (index: number) => {
+      const line = lyrics[index];
+      if (!line || !Number.isFinite(player.currentTime)) return;
+      setSyncPoints(
+        addLyricSyncPoint(syncPoints, {
+          t: line.at,
+          at: player.currentTime - lyricOffset,
+        }),
+      );
+      setSyncPick(null);
+    },
+    [lyrics, lyricOffset, player.currentTime, setSyncPoints, syncPoints],
+  );
   useEffect(() => {
     if (!current) return;
     let alive = true;
@@ -364,6 +470,7 @@ export function MusicNowPlaying({
         data-now-playing
         data-closing={closing ? "1" : undefined}
         data-immersive={immersive ? "1" : undefined}
+        data-theatre={theatre ? "1" : undefined}
         style={{ insetInlineStart: inset } as CSSProperties}
         aria-label={t("music.now.title")}
       >
@@ -411,11 +518,24 @@ export function MusicNowPlaying({
               <button
                 type="button"
                 aria-pressed={appearance.immersive}
-                onClick={() => setMusicAppearance({ immersive: !appearance.immersive })}
+                onClick={() =>
+                  setMusicAppearance({ immersive: !appearance.immersive, theatre: false })
+                }
                 title={t("Immersive")}
               >
                 <Wallpaper size={17} aria-hidden="true" />
                 <span>{t("Immersive")}</span>
+              </button>
+            )}
+            {video && (
+              <button
+                type="button"
+                aria-pressed={theatre}
+                onClick={() => setMusicAppearance({ theatre: !theatre, immersive: false })}
+                title={t("Theatre mode")}
+              >
+                <ChevronUp size={17} aria-hidden="true" />
+                <span>{t("Theatre mode")}</span>
               </button>
             )}
             <button
@@ -433,7 +553,7 @@ export function MusicNowPlaying({
         <div className="music-now-scroll">
         <div className="music-now-layout">
           {artMenu.menu}
-          <div className="music-now-art-column">
+          <div className="music-now-art-column" data-video={video ? "1" : undefined}>
             <div
               ref={artwork}
               className="music-now-artwork"
@@ -452,6 +572,7 @@ export function MusicNowPlaying({
               )}
             </div>
             {video && <MusicVideoFullscreen track={current} />}
+            {video && <MusicVideoMiniToggle className="music-now-mini-toggle" />}
             {appearance.levels && current.mediaKind !== "video" && (
               <div className="music-now-levels" data-now-levels>
                 <MusicLevelMeter meter={meter} />
@@ -666,6 +787,103 @@ export function MusicNowPlaying({
                 ) : panel === "lyrics" ? (
                   lyricsState === "ready" ? (
                     <>
+                      <div className="music-now-lyric-tools">
+                        <Dropdown
+                          value={lyricTarget}
+                          onChange={(value) => {
+                            const next = value as UiLanguage;
+                            setLyricTarget(next);
+                            try {
+                              localStorage.setItem(LYRIC_TARGET_KEY, next);
+                            } catch {
+                              /* The choice still applies for this session. */
+                            }
+                          }}
+                          ariaLabel={t("Translate lyrics to")}
+                          size="sm"
+                          options={LANGUAGES.map(({ code, nativeLabel }) => ({
+                            value: code,
+                            label: nativeLabel,
+                            dir: "auto",
+                          }))}
+                          className="w-[8.5rem] [&>button]:h-7 [&>button]:rounded-full [&>button]:bg-white/[0.06] [&>button]:px-2.5 [&>button]:text-[12px]"
+                        />
+                        <button
+                          type="button"
+                          className="music-now-lyric-translate"
+                          data-on={lyricTranslationOn ? "1" : undefined}
+                          data-failed={lyricTranslationFailed ? "1" : undefined}
+                          aria-pressed={lyricTranslationOn}
+                          disabled={lyricTranslating}
+                          onClick={() => void toggleLyricTranslation()}
+                          title={lyricTranslationOn ? t("Show original") : t("Translate")}
+                        >
+                          {lyricTranslating ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <Globe2 size={14} />
+                          )}
+                          <span>
+                            {lyricTranslating
+                              ? `${t("Translate")}…`
+                              : lyricTranslationFailed
+                                ? t("Try again")
+                                : lyricTranslationOn
+                                  ? t("Show original")
+                                  : t("Translate")}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          className="music-now-lyric-live"
+                          data-on={liveSync ? "1" : undefined}
+                          aria-pressed={liveSync}
+                          onClick={() => {
+                            setLiveSync((open) => !open);
+                            setSyncPick(null);
+                          }}
+                          title={t("Live sync")}
+                        >
+                          <AudioLines size={14} />
+                          <span>{t("Live sync")}</span>
+                        </button>
+                      </div>
+                      {liveSync && (
+                        <div className="music-now-lyric-live-hint" role="status">
+                          <span>
+                            {syncPoints.length === 0
+                              ? t(
+                                  "Play until you hear a line. Tap that same line below, then choose Align to now.",
+                                )
+                              : syncPoints.length === 1
+                                ? t(
+                                    "Timing is aligned. If it becomes early or late later, repeat this at another line.",
+                                  )
+                                : t("Timing and drift are corrected. Check playback, then save.")}
+                          </span>
+                          {syncPoints.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSyncPoints([]);
+                                setSyncPick(null);
+                              }}
+                            >
+                              {t("Reset")}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            data-primary="1"
+                            onClick={() => {
+                              setLiveSync(false);
+                              setSyncPick(null);
+                            }}
+                          >
+                            {t("Save")}
+                          </button>
+                        </div>
+                      )}
                       <div className="music-now-lyric-sync">
                         <span>{t("Lyric sync")}</span>
                         <button
@@ -691,20 +909,73 @@ export function MusicNowPlaying({
                         </button>
                       </div>
                       <ol ref={lyricsRef} className="music-now-lyrics">
-                        {lyrics.map((line, index) => (
-                          <li
-                            key={`${line.at}:${index}`}
-                            data-active={index === activeLyric ? "1" : undefined}
-                          >
-                            {line.text ? (
-                              <button type="button" onClick={() => seekMusic(line.at)}>
-                                {line.text}
-                              </button>
-                            ) : (
-                              <span className="music-now-lyric-rest" aria-hidden="true" />
-                            )}
-                          </li>
-                        ))}
+                        {lyrics.map((line, index) => {
+                          const translated =
+                            lyricTranslationOn && lyricTranslation?.language === lyricTarget
+                              ? lyricTranslation.lines[index]
+                              : null;
+                          const showTranslation =
+                            !!translated && translated.trim() !== line.text.trim();
+                          const point = syncPoints.findIndex(
+                            (held) => Math.abs(held.t - line.at) < 0.001,
+                          );
+                          return (
+                            <li
+                              key={`${line.at}:${index}`}
+                              data-active={index === activeLyric ? "1" : undefined}
+                            >
+                              {line.text ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    data-sync={liveSync ? "1" : undefined}
+                                    data-picked={syncPick === index ? "1" : undefined}
+                                    onClick={() =>
+                                      liveSync
+                                        ? setSyncPick((pick) => (pick === index ? null : index))
+                                        : seekLyric(index)
+                                    }
+                                  >
+                                    <span className="music-now-lyric-text">
+                                      {line.text}
+                                      {point >= 0 && (
+                                        <span
+                                          className="music-now-lyric-sync-badge"
+                                          title={t(
+                                            point === 0 ? "Aligned here" : "Drift fixed",
+                                          )}
+                                        >
+                                          {point + 1}
+                                        </span>
+                                      )}
+                                    </span>
+                                    {showTranslation && (
+                                      <span
+                                        className="music-now-lyric-translation"
+                                        dir="auto"
+                                        lang={lyricTarget}
+                                      >
+                                        {translated}
+                                      </span>
+                                    )}
+                                  </button>
+                                  {liveSync && syncPick === index && (
+                                    <div className="music-now-lyric-sync-actions">
+                                      <button type="button" onClick={() => alignLyric(index)}>
+                                        {t("Align to now")}
+                                      </button>
+                                      <button type="button" onClick={() => seekLyric(index)}>
+                                        {t("Jump here")}
+                                      </button>
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="music-now-lyric-rest" aria-hidden="true" />
+                              )}
+                            </li>
+                          );
+                        })}
                       </ol>
                     </>
                   ) : (

@@ -8,7 +8,7 @@ import { resolveAddonRanks } from "./addon-priority";
 import { animeAbsoluteFromScopedId, splitAnimeStreamCoordinates } from "./anime-identity-core";
 import type { PipelineInput } from "./pipeline";
 import { PLUGIN_ADDON_PREFIX, isPluginAddon, pluginAddonById, pluginIdFromCatalogueBase, pluginsForAddon } from "./plugins/addon";
-import { preferredAnimeImdbStreamId, unverifiedAnimeSeasonId } from "./stream-ids";
+import { catalogEpisodeStreamId, preferredAnimeImdbStreamId, unverifiedAnimeSeasonId } from "./stream-ids";
 import type { Stream } from "./types";
 
 function runtimeMinutes(runtime: string | number | undefined): number | undefined {
@@ -192,8 +192,12 @@ export function buildEpisodePipelineInput(params: {
     addonTimeoutMs: Math.max(8, Math.min(120, settings.addonTimeoutSec ?? 30)) * 1000,
     addonRanks: resolveAddonRanks(effectiveAddons, settings.streamPriority),
     forcedAddonBases: (() => {
-      const forced = originBases.map((base) => ({ base, id: meta.id }));
-      if (appendedBase) forced.push({ base: appendedBase, id: meta.id });
+      // Catalog provenance selects the addon, not the series-level stream ID.
+      // A bare override here bypasses the episode-aware ID builder and makes
+      // /stream/series/tt123.json requests even while playing S01E01.
+      const episodeId = catalogEpisodeStreamId(meta.id, episode, streamIds);
+      const forced = originBases.map((base) => ({ base, id: episodeId }));
+      if (appendedBase) forced.push({ base: appendedBase, id: episodeId });
       return forced.length > 0 ? forced : undefined;
     })(),
     trust: {
@@ -211,7 +215,7 @@ export function buildEpisodePipelineInput(params: {
       allowSeasonPacks: !strictMode,
       allowSizeOutliers: !strictMode,
       isAnime: animeReq,
-      expectedTitles: animeReq ? (animeTitles ?? null) : null,
+      expectedTitles: animeReq ? (animeTitles ?? null) : (meta.alternateTitles ?? null),
     },
     score: {
       activeDebrids: debrids.map((d) => d.slug),

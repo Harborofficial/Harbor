@@ -6,6 +6,7 @@ import type { Meta } from "@/lib/cinemeta";
 import type { PickerOptions, PlayEpisode, PlayerSrc } from "@/lib/view";
 import { queueSessionIndex } from "@/lib/queue-session";
 import { getSleepAtEnd, queueRemove, setSleepAtEnd, type QueueItem } from "@/lib/queue";
+import { completedEpisodeSource } from "@/lib/download/completed-episode-source";
 
 const STUB_MAX_SEC = 150;
 
@@ -15,10 +16,12 @@ export function useQueueAdvance(params: {
   queue: QueueItem[];
   isLive: boolean;
   roomGuest: boolean;
+  inRoom: boolean;
   queueDrivesNav: boolean;
   instantPlay: boolean;
   startedNearEndRef: RefObject<boolean>;
   openPicker: (meta: Meta, episode?: PlayEpisode, opts?: PickerOptions) => void;
+  replacePlayerSrc: (src: PlayerSrc) => void;
   closePlayer: () => void | Promise<void>;
 }) {
   const {
@@ -27,13 +30,19 @@ export function useQueueAdvance(params: {
     queue,
     isLive,
     roomGuest,
+    inRoom,
     queueDrivesNav,
     instantPlay,
     startedNearEndRef,
     openPicker,
+    replacePlayerSrc,
     closePlayer,
   } = params;
   const firedForRef = useRef<string | null>(null);
+  const latestSrcRef = useRef(src);
+  latestSrcRef.current = src;
+  const advanceRevisionRef = useRef(0);
+  useEffect(() => () => { advanceRevisionRef.current += 1; }, []);
 
   useEffect(() => {
     firedForRef.current = null;
@@ -62,11 +71,29 @@ export function useQueueAdvance(params: {
 
     if (queueActive) {
       if (nextItem) {
-        openPicker(nextItem.meta, nextItem.episode, {
-          autoPlay: instantPlay,
-          resume: true,
-          queueItemId: nextItem.id,
-        });
+        const request = ++advanceRevisionRef.current;
+        const stillCurrent = () =>
+          advanceRevisionRef.current === request && latestSrcRef.current === src;
+        const openNextSource = () => {
+          if (!stillCurrent()) return;
+          openPicker(nextItem.meta, nextItem.episode, {
+            autoPlay: instantPlay,
+            resume: true,
+            queueItemId: nextItem.id,
+          });
+        };
+        if (inRoom || !nextItem.episode) {
+          openNextSource();
+          return;
+        }
+        void completedEpisodeSource(nextItem.meta, nextItem.episode, {
+          imdbId: nextItem.episode.imdbId ?? (nextItem.meta.id.startsWith("tt") ? nextItem.meta.id : undefined),
+          isAnime: nextItem.meta.id === src.meta.id ? src.isAnime : undefined,
+        }).then((download) => {
+          if (!stillCurrent()) return;
+          if (download) replacePlayerSrc({ ...download, queueItemId: nextItem.id, resume: true });
+          else openNextSource();
+        }, openNextSource);
         return;
       }
 
@@ -85,10 +112,12 @@ export function useQueueAdvance(params: {
     queue,
     isLive,
     roomGuest,
+    inRoom,
     queueDrivesNav,
     instantPlay,
     startedNearEndRef,
     openPicker,
+    replacePlayerSrc,
     closePlayer,
   ]);
 }

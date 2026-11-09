@@ -27,11 +27,14 @@ test("saved manga chapters read the server DB before any live source fetch", () 
   const mutation = fn.indexOf("fetchChapters(input:");
   assert.ok(query >= 0, "must query cached chapters");
   assert.ok(mutation > query, "fetchChapters is only the empty-DB prime fallback");
-  assert.match(fn, /cachedNodes\.length > 0\) return mapGqlChapters\(cachedNodes\);/);
+  assert.match(fn, /cachedNodes\.length > 0\)\s*return mapGqlChapters\(cachedNodes\);/);
 });
 
 test("graphql failures still fall through to REST", () => {
-  assert.match(gql, /if \(data == null && fdata == null\) throw new Error\("suwayomi_graphql_error"\);/);
+  assert.match(
+    gql,
+    /if \(data == null && fdata == null\) throw new Error\("suwayomi_graphql_error"\);/,
+  );
 });
 
 test("refs with an empty sourceId still decode (fetch only needs mangaId)", () => {
@@ -45,5 +48,8 @@ test("refs with an empty sourceId still decode (fetch only needs mangaId)", () =
   assert.match(mangaFn, /if \(!mangaId\) return null;/);
   assert.ok(!/!sourceId \|\| !mangaId/.test(mangaFn), "empty sourceId must not kill manga decode");
   assert.match(chapterFn, /if \(!mangaId \|\| !key\) return null;/);
-  assert.ok(!/!sourceId \|\| !mangaId \|\| !key/.test(chapterFn), "empty sourceId must not kill chapter decode");
+  assert.ok(
+    !/!sourceId \|\| !mangaId \|\| !key/.test(chapterFn),
+    "empty sourceId must not kill chapter decode",
+  );
 });

@@ -1,6 +1,6 @@
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { Check, Plus } from "lucide-react";
@@ -287,13 +287,13 @@ export function TitlePanel({
       )}
 
       {crewGroups.length > 0 && (
-        <div className="flex flex-col gap-2 px-0.5">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-2 px-0.5">
           {crewGroups.map((g) => (
-            <div key={g.label} className="flex items-baseline gap-3 text-[13.5px]">
-              <span className="w-16 shrink-0 text-[10.5px] font-bold uppercase tracking-[0.16em] text-white/40">
+            <Fragment key={g.label}>
+              <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-white/40">
                 {g.label}
               </span>
-              <span className="flex flex-wrap gap-x-1.5 text-white/85">
+              <span className="flex flex-wrap gap-x-1.5 text-[13.5px] text-white/85">
                 {g.people.map((p, i) => (
                   <span key={`${p.id}-${i}`}>
                     <button
@@ -308,7 +308,7 @@ export function TitlePanel({
                   </span>
                 ))}
               </span>
-            </div>
+            </Fragment>
           ))}
         </div>
       )}

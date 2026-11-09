@@ -315,7 +315,9 @@ export function useProviderKeys({
               <code>
                 {"postersplus.elfhosted.com/poster?tmdb_id={tmdbId}&imdb_id={imdbId}&type={type}"}
               </code>
-              .
+              . {t("TV cards use 16:9 art when the service supports it; add")}{" "}
+              <code>{"{shape}"}</code>{" "}
+              {t("to a template to switch between landscape and poster.")}
             </>
           }
         />

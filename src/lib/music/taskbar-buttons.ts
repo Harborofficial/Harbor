@@ -3,7 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { isMusicLiked } from "./liked";
 import { setMusicWindowTitle } from "./window-title";
 import { clearMediaControls, mediaKeyGate, updateMediaControls } from "@/lib/media-session";
-import { videoOwnsMediaKeys } from "@/lib/player/media-key-owner";
+import { subscribeVideoMediaKeyOwner, videoOwnsMediaKeys } from "@/lib/player/media-key-owner";
 import {
   getMusicState,
   nextMusic,
@@ -61,7 +61,7 @@ function run(action: string): void {
 function mediaKey(action: string): void {
   if (videoOwnsMediaKeys()) return;
   const state = getMusicState();
-  if (!state.current || !mediaKeyGate()) return;
+  if (!state.current || !mediaKeyGate("music")) return;
   const playing = state.phase === "playing";
   switch (action) {
     case "playpause":
@@ -102,6 +102,8 @@ function pushSession(): void {
     state.duration || null,
     state.currentTime,
     state.volume,
+    "music",
+    track.album ?? null,
   );
 }
 
@@ -144,7 +146,9 @@ function pushArtwork(artwork: string | null): void {
   if (key === lastArt) return;
   lastArt = key;
   invoke("media_controls_music_art", { artUrl: url, appIcon }).catch(() => {});
-  if (!url) void restoreAppIcon();
+  // Disabling album-art icons must restore Harbor's configured window icon,
+  // even when a song is still playing and its artwork URL remains available.
+  if (!url || !appIcon) void restoreAppIcon();
 }
 
 export function syncMusicTaskbarArtwork(): void {
@@ -171,10 +175,18 @@ export function startMusicTaskbarButtons(): () => void {
     })
     .catch(() => {});
   const unsubscribe = subscribeMusic(push);
+  // Video takes ownership while its player is mounted. Once it closes,
+  // republish any loaded music track after the video cleanup clears SMTC.
+  const unsubscribeOwner = subscribeVideoMediaKeyOwner((owns) => {
+    if (!owns) queueMicrotask(() => {
+      if (live && !videoOwnsMediaKeys()) pushSession();
+    });
+  });
   push();
   return () => {
     live = false;
     unsubscribe();
+    unsubscribeOwner();
     setMusicWindowTitle(null, null);
     pushArtwork(null);
     if (!videoOwnsMediaKeys()) clearMediaControls();

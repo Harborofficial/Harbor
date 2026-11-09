@@ -1,4 +1,5 @@
 import { libraryGetOneStrict, libraryPut, type LibraryItem } from "@/lib/stremio";
+import { isNuvioProviderActive } from "./active-profile-id";
 
 const KEY = "harbor.stremio.write-queue.v1";
 
@@ -56,11 +57,18 @@ export function queuedWatched(
   return { watched, flaggedWatched, mtime: mtimeMs(p.item) };
 }
 
-export async function cloudLibraryPut(
+export type CloudLibraryPutResult = { ok: boolean; sealed: boolean };
+
+/**
+ * Detailed result for callers that must distinguish an intentional Nuvio seal
+ * from a successful Stremio write or a queued failure.
+ */
+export async function cloudLibraryPutDetailed(
   authKey: string,
   item: LibraryItem,
   options: { acknowledged?: boolean } = {},
-): Promise<boolean> {
+): Promise<CloudLibraryPutResult> {
+  if (isNuvioProviderActive()) return { ok: true, sealed: true };
   load();
   const key = queueKey(authKey, item._id);
   const queuedAtStart = queue.get(key);
@@ -78,12 +86,12 @@ export async function cloudLibraryPut(
       queue.delete(key);
       persist();
     }
-    return true;
+    return { ok: true, sealed: false };
   } catch {
     if (activeWrites.get(key) !== write) {
       if (options.acknowledged)
         throw new Error("A newer library change replaced this pending write.");
-      return false;
+      return { ok: false, sealed: false };
     }
     const existing = queue.get(key);
     if (!existing || mtimeMs(item) >= mtimeMs(existing.item)) {
@@ -96,13 +104,24 @@ export async function cloudLibraryPut(
         throw error;
       }
     }
-    return false;
+    return { ok: false, sealed: false };
   } finally {
     if (activeWrites.get(key) === write) activeWrites.delete(key);
   }
 }
 
+export async function cloudLibraryPut(
+  authKey: string,
+  item: LibraryItem,
+  options: { acknowledged?: boolean } = {},
+): Promise<boolean> {
+  return (await cloudLibraryPutDetailed(authKey, item, options)).ok;
+}
+
 export async function flushWriteQueue(): Promise<void> {
+  // Nuvio mode seals Stremio writes, but the queue must survive so unsynced
+  // changes replay when the Stremio provider is active again.
+  if (isNuvioProviderActive()) return;
   load();
   if (queue.size === 0) return;
   // Snapshot this pass: writes queued during an awaited request belong to the next pass.
@@ -139,7 +158,17 @@ export function startWriteQueueFlusher(): void {
   if (started || typeof window === "undefined") return;
   started = true;
   load();
-  window.addEventListener("online", () => void flushWriteQueue());
-  window.setInterval(() => void flushWriteQueue(), 60000);
-  if (queue.size > 0) void flushWriteQueue();
+  window.addEventListener("online", () => {
+    if (!isNuvioProviderActive()) void flushWriteQueue();
+  });
+  window.setInterval(() => {
+    if (!isNuvioProviderActive()) void flushWriteQueue();
+  }, 60000);
+  window.addEventListener("harbor:account-provider-changed", (e) => {
+    const detail = (e as CustomEvent)?.detail;
+    if (detail?.provider === "stremio" || !isNuvioProviderActive()) {
+      void flushWriteQueue();
+    }
+  });
+  if (!isNuvioProviderActive() && queue.size > 0) void flushWriteQueue();
 }

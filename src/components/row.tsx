@@ -210,12 +210,12 @@ const Skeleton = memo(function Skeleton({ shape }: { shape: RowShape }) {
   }
   const aspect =
     shape === "landscape" ? "aspect-[16/9]" : shape === "square" ? "aspect-square" : "aspect-[2/3]";
-  const hideText = shape === "portrait" && settings.hidePosterTitles;
+  const hideText = shape === "landscape" || (shape === "portrait" && settings.hidePosterTitles);
   return (
     <div className="flex w-full min-w-0 flex-col gap-2.5">
       <div className={`${aspect} bg-elevated/40`} style={{ borderRadius: radius }} />
       {!hideText && (
-        <div className={`flex flex-col gap-1.5 ${shape === "landscape" ? "" : "h-9"}`}>
+        <div className="flex flex-col gap-1.5 h-9">
           <div className="h-3 w-3/5 rounded bg-elevated/35" />
           <div className="h-3 w-2/5 rounded bg-elevated/25" />
         </div>

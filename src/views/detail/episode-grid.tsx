@@ -16,11 +16,13 @@ export function EpisodeGrid<T extends { number: number } = GridEpisode>({
   onContextMenu,
   present,
   itemKey,
+  markRatingSeasons = false,
 }: {
   meta: Meta;
   episodes: T[];
   present?: (item: T) => GridEpisode;
   itemKey?: (item: T) => string;
+  markRatingSeasons?: boolean;
   progressFor: (g: GridEpisode) => Progress;
   spoilerFor?: (g: GridEpisode) => SpoilerMask;
   onContextMenu?: (
@@ -74,7 +76,7 @@ export function EpisodeGrid<T extends { number: number } = GridEpisode>({
       >
         {pageItems.map((item) => {
           const g = present ? present(item) : (item as unknown as GridEpisode);
-          return (
+          const card = (
             <EpisodeGridCard
               key={g.key}
               meta={meta}
@@ -83,6 +85,13 @@ export function EpisodeGrid<T extends { number: number } = GridEpisode>({
               spoiler={spoilerFor?.(g)}
               onContextMenu={onContextMenu}
             />
+          );
+          return markRatingSeasons ? (
+            <div key={g.key} data-omdb-season={g.season}>
+              {card}
+            </div>
+          ) : (
+            card
           );
         })}
       </div>

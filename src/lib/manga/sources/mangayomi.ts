@@ -26,21 +26,26 @@ function asPlugin(record: MangayomiSourceRecord): InstalledPlugin {
   };
 }
 
-function workerFor(record: MangayomiSourceRecord): PluginWorker {
-  const existing = workers.get(record.id);
+function workerFor(record: MangayomiSourceRecord, background = false): PluginWorker {
+  const key = `${background ? "background:" : ""}${record.id}`;
+  const existing = workers.get(key);
   if (existing) return existing;
-  const w = new PluginWorker(asPlugin(record));
-  workers.set(record.id, w);
+  const w = new PluginWorker(asPlugin(record), { httpPolicy: { background } });
+  workers.set(key, w);
   return w;
 }
 
-export function makeMangayomiProvider(record: MangayomiSourceRecord): MangaProvider {
-  const w = workerFor(record);
+export function makeMangayomiProvider(
+  record: MangayomiSourceRecord,
+  background = false,
+): MangaProvider {
+  const w = workerFor(record, background);
   const provider: MangaProvider = {
     id: record.id,
     name: record.name,
     popular: (offset, tagId) => w.call("popular", [offset, tagId], 20_000).then(toSummaries),
-    search: (query, offset, tagId) => w.call("search", [query, offset, tagId], 20_000).then(toSummaries),
+    search: (query, offset, tagId) =>
+      w.call("search", [query, offset, tagId], 20_000).then(toSummaries),
     detail: (id) => w.call("detail", [id], 20_000).then(toSummary),
     chapters: (id) => w.call("chapters", [id], 25_000).then(toChapters),
     pageUrls: (chapterId) =>
@@ -57,8 +62,10 @@ export function warmMangayomiSource(record: MangayomiSourceRecord): void {
 }
 
 export function disposeMangayomiSource(id: string): void {
-  workers.get(id)?.dispose();
-  workers.delete(id);
+  for (const key of [id, `background:${id}`]) {
+    workers.get(key)?.dispose();
+    workers.delete(key);
+  }
 }
 
 export function disposeAllMangayomiSources(): void {

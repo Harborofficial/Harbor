@@ -105,7 +105,13 @@ function maskSpeech(speech: Interval[], w0: number, n: number, gridHz: number): 
   return out;
 }
 
-function maskCues(cues: SubCue[], delaySec: number, w0: number, n: number, gridHz: number): Float32Array {
+function maskCues(
+  cues: SubCue[],
+  delaySec: number,
+  w0: number,
+  n: number,
+  gridHz: number,
+): Float32Array {
   const out = new Float32Array(n);
   for (const c of cues) {
     const a = c.start + delaySec;
@@ -117,7 +123,11 @@ function maskCues(cues: SubCue[], delaySec: number, w0: number, n: number, gridH
   return out;
 }
 
-function nccCoverageAtShift(speech: Float32Array, cue: Float32Array, shift: number): { ncc: number; coverage: number } {
+function nccCoverageAtShift(
+  speech: Float32Array,
+  cue: Float32Array,
+  shift: number,
+): { ncc: number; coverage: number } {
   const n = speech.length;
   let sx = 0;
   let sy = 0;
@@ -154,6 +164,171 @@ function nccCoverageAtShift(speech: Float32Array, cue: Float32Array, shift: numb
   const ncc = den > 0 ? num / den : 0;
   const coverage = onCue > 0 ? onBoth / onCue : 0;
   return { ncc, coverage };
+}
+
+/** Join word-sized gaps without erasing pauses between phrases. */
+function phraseIntervals(intervals: Interval[]): Interval[] {
+  const merged: Interval[] = [];
+  for (const [start, end] of intervals
+    .filter(([a, b]) => Number.isFinite(a) && Number.isFinite(b) && b > a)
+    .slice()
+    .sort((a, b) => a[0] - b[0])) {
+    const last = merged[merged.length - 1];
+    if (last && start - last[1] <= 0.4) last[1] = Math.max(last[1], end);
+    else merged.push([start, end]);
+  }
+  return merged;
+}
+
+export type SpeechTimingDiagnostic = {
+  startSec: number;
+  lenSec: number;
+  onsets: number;
+  ncc?: number;
+  coverage?: number;
+  competingNcc?: number;
+  lagSec?: number;
+  accepted: boolean;
+};
+
+type SpeechTimingAnchor = { sourceSec: number; lagSec: number };
+
+/** Compare phrase occupancy, not the translated words or individual cue boundaries. */
+function speechTimingAnchors(
+  speech: Interval[],
+  cues: Interval[],
+  windows: Array<{ startSec: number; lenSec: number }>,
+  maxLagSec: number,
+  diagnose?: (value: SpeechTimingDiagnostic) => void,
+): SpeechTimingAnchor[] {
+  const hz = 10;
+  const pad = Math.floor(maxLagSec * hz);
+  const anchors: SpeechTimingAnchor[] = [];
+  const spokenPhrases = phraseIntervals(speech);
+  const subtitlePhrases = phraseIntervals(cues);
+  let previousEnd = -Infinity;
+  for (const { startSec, lenSec } of windows.slice().sort((a, b) => a.startSec - b.startSec)) {
+    if (
+      !Number.isFinite(startSec) ||
+      !Number.isFinite(lenSec) ||
+      lenSec < 5 ||
+      lenSec > 120 ||
+      startSec < previousEnd
+    )
+      continue;
+    previousEnd = startSec + lenSec;
+    const n = Math.round(lenSec * hz);
+    const spoken = maskSpeech(spokenPhrases, startSec, n, hz);
+    let onsets = 0;
+    for (let i = 1; i < n; i++) if (spoken[i] && !spoken[i - 1]) onsets++;
+    if (onsets < 2) {
+      diagnose?.({ startSec, lenSec, onsets, accepted: false });
+      continue;
+    }
+    const subtitles = maskSpeech(subtitlePhrases, startSec - pad / hz, n + 2 * pad, hz);
+    // Every candidate uses the same audio interval, including at large lags.
+    const fits = Array.from({ length: 2 * pad + 1 }, (_, index) => ({
+      lag: (pad - index) / hz,
+      ...nccCoverageAtShift(spoken, subtitles.subarray(index, index + n), 0),
+    })).sort((a, b) => b.ncc - a.ncc);
+    const best = fits[0];
+    const competing = fits.find((fit) => Math.abs(fit.lag - best.lag) >= 2);
+    const accepted =
+      best.ncc >= DEFAULT_DRIFT_CONFIG.minNcc &&
+      best.coverage >= DEFAULT_DRIFT_CONFIG.minCoverage &&
+      !!competing &&
+      best.ncc > DEFAULT_DRIFT_CONFIG.minDominance * competing.ncc;
+    diagnose?.({
+      startSec,
+      lenSec,
+      onsets,
+      ncc: best.ncc,
+      coverage: best.coverage,
+      competingNcc: competing?.ncc,
+      lagSec: best.lag,
+      accepted,
+    });
+    if (accepted) {
+      // The lag is audio time minus subtitle time, so the regression's x axis
+      // must be subtitle time, not the audio-window center.
+      anchors.push({ sourceSec: startSec + lenSec / 2 - best.lag, lagSec: best.lag });
+    }
+  }
+  return anchors;
+}
+
+export function crossLanguageSpeechOffset(
+  speech: Interval[],
+  cues: Interval[],
+  windows: Array<{ startSec: number; lenSec: number }>,
+  maxLagSec: number,
+  acceptAligned = false,
+): number | null {
+  const lags = speechTimingAnchors(speech, cues, windows, maxLagSec).map((a) => a.lagSec);
+  if (lags.length < 3 || Math.max(...lags) - Math.min(...lags) > 1) return null;
+  const offset = robustMedian(lags);
+  return Math.abs(offset) >= DEFAULT_DRIFT_CONFIG.deadbandSec ? offset : acceptAligned ? 0 : null;
+}
+
+/** A playback estimate needs at least 30 seconds of confidently matched audio.
+ * One longer phrase pattern is more informative than three isolated snippets.
+ * This is scene-local evidence, never enough to infer an episode-wide rate.
+ */
+export function crossLanguagePlaybackOffset(
+  speech: Interval[],
+  cues: Interval[],
+  windows: Array<{ startSec: number; lenSec: number }>,
+  maxLagSec: number,
+  diagnose?: (value: SpeechTimingDiagnostic) => void,
+): number | null {
+  const anchors = speechTimingAnchors(speech, cues, windows, maxLagSec, diagnose);
+  const matchedDuration = anchors.reduce((sum, anchor) => {
+    const center = anchor.sourceSec + anchor.lagSec;
+    return (
+      sum + (windows.find((w) => Math.abs(w.startSec + w.lenSec / 2 - center) < 0.01)?.lenSec ?? 0)
+    );
+  }, 0);
+  const lags = anchors.map((a) => a.lagSec);
+  if (matchedDuration < 30 || Math.max(...lags) - Math.min(...lags) > 1) return null;
+  const offset = robustMedian(lags);
+  return Math.abs(offset) < DEFAULT_DRIFT_CONFIG.deadbandSec ? 0 : offset;
+}
+
+/** Only widely separated samples may establish episode-wide clock drift. */
+export function crossLanguageSpeechTransform(
+  speech: Interval[],
+  cues: Interval[],
+  windows: Array<{ startSec: number; lenSec: number }>,
+  maxLagSec: number,
+  durationSec: number,
+): import("./fp-gate").AffineTransform | null {
+  const anchors = speechTimingAnchors(speech, cues, windows, maxLagSec);
+  if (anchors.length < 3) return null;
+  const lags = anchors.map((a) => a.lagSec);
+  if (Math.max(...lags) - Math.min(...lags) <= 1) {
+    const offsetSec = robustMedian(lags);
+    return Math.abs(offsetSec) >= DEFAULT_DRIFT_CONFIG.deadbandSec
+      ? { kind: "affine", offsetSec, ratio: 1 }
+      : null;
+  }
+  // Four independent matches and broad coverage are required for a rate change.
+  // Never extrapolate an episode correction from the 45-second playback clip.
+  const span = anchors[anchors.length - 1].sourceSec - anchors[0].sourceSec;
+  if (anchors.length < 4 || span < Math.max(600, durationSec * 0.5)) return null;
+  const meanX = anchors.reduce((sum, a) => sum + a.sourceSec, 0) / anchors.length;
+  const meanY = anchors.reduce((sum, a) => sum + a.lagSec, 0) / anchors.length;
+  const slope =
+    anchors.reduce((sum, a) => sum + (a.sourceSec - meanX) * (a.lagSec - meanY), 0) /
+    anchors.reduce((sum, a) => sum + (a.sourceSec - meanX) ** 2, 0);
+  const offsetSec = meanY - slope * meanX;
+  if (
+    !Number.isFinite(slope) ||
+    Math.abs(slope) > 0.005 ||
+    anchors.some((a) => Math.abs(offsetSec + slope * a.sourceSec - a.lagSec) > 0.5) ||
+    Math.max(Math.abs(offsetSec), Math.abs(offsetSec + slope * durationSec)) > maxLagSec
+  )
+    return null;
+  return { kind: "affine", offsetSec, ratio: 1 + slope };
 }
 
 export function localFit(
@@ -201,7 +376,13 @@ export function localFit(
   };
 }
 
-export function onsetResidual(speech: Interval[], cues: SubCue[], delaySec: number, window: Interval, bandSec: number): number {
+export function onsetResidual(
+  speech: Interval[],
+  cues: SubCue[],
+  delaySec: number,
+  window: Interval,
+  bandSec: number,
+): number {
   const [w0, w1] = window;
   const starts = speech.map((s) => s[0]).filter((t) => t >= w0 - bandSec && t <= w1 + bandSec);
   if (starts.length === 0) return NaN;
@@ -231,7 +412,11 @@ export function speechFraction(speech: Interval[], window: Interval): number {
   return clamp(sum / span, 0, 1);
 }
 
-export function aggregateQuality(samples: DriftSample[], extraLagSec: number, cfg: DriftConfig): AlignmentQuality {
+export function aggregateQuality(
+  samples: DriftSample[],
+  extraLagSec: number,
+  cfg: DriftConfig,
+): AlignmentQuality {
   let wNcc = 0;
   let wCov = 0;
   let wZ = 0;
@@ -297,7 +482,8 @@ export function driftStep(residualSec: number, cfg: DriftConfig): number {
 }
 
 export function vadEvidence(fit: LocalFit, speechFrac: number, cfg: DriftConfig): SignalEvidence {
-  const cleared = fit.ncc >= cfg.minNcc && fit.coverage >= cfg.minCoverage && fit.dominance >= cfg.minDominance;
+  const cleared =
+    fit.ncc >= cfg.minNcc && fit.coverage >= cfg.minCoverage && fit.dominance >= cfg.minDominance;
   return {
     tier: "vad_affine",
     rawScore: fit.ncc,
@@ -333,7 +519,8 @@ export function sampleUsable(
   onsetSec: number,
   cfg: DriftConfig,
 ): boolean {
-  const crossCheckOk = Number.isFinite(onsetSec) && Math.abs(onsetSec - fit.lagSec) <= cfg.crossCheckTolSec;
+  const crossCheckOk =
+    Number.isFinite(onsetSec) && Math.abs(onsetSec - fit.lagSec) <= cfg.crossCheckTolSec;
   return (
     speechFrac >= cfg.minSpeechFrac &&
     cueCount >= 3 &&

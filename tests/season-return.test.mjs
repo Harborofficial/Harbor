@@ -5,6 +5,7 @@ import test from "node:test";
 import ts from "typescript";
 import { getViewedSeason, setViewedSeason } from "../src/lib/season-view-pref.ts";
 import { groupEpisodes, episodeNumber, episodeSeason } from "../src/views/detail/episode-groups.ts";
+import { selectOmdbSeasonsForOrder } from "../src/lib/omdb-season-queue.ts";
 const require = createRequire(import.meta.url);
 function load(path, mocks) {
   const source = readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replaceAll(
@@ -112,11 +113,14 @@ test("TMDB season picker restores and persists selections across detail recreati
     useState: (initial) => [typeof initial === "function" ? initial() : initial, () => {}],
     useEffect: () => {},
     useMemo: (fn) => fn(),
+    useCallback: (fn) => fn,
     useRef: (value) => ({ current: value }),
     useSyncExternalStore: () => 0,
   };
   const mocks = {
     react,
+    "@/lib/omdb-season-queue": { selectOmdbSeasonsForOrder },
+    "./use-episode-imdb-ratings": { useEpisodeImdbRatings: () => new Map() },
     "@/lib/season-view-pref": { getViewedSeason, setViewedSeason },
     "@/lib/settings": {
       useSettings: () => ({
@@ -128,7 +132,6 @@ test("TMDB season picker restores and persists selections across detail recreati
           episodeSort: "airDate",
           episodeHiding: false,
           episodeArcGroups: false,
-          preferCustomMetaAddon: false,
           tmdbKey: "test-key",
           tvdbKey: "",
           tvdbSeasonType: "aired",

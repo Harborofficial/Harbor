@@ -118,6 +118,7 @@ export function LiveView({ active }: { active: boolean }) {
     index: baseEpg,
     loading: epgLoading,
     error: epgError,
+    configured: epgConfigured,
   } = useEpg(active ? activeSource : null, epgOnlyUrls);
   const [epgErrorHidden, setEpgErrorHidden] = useState<string | null>(null);
   const epgErrorShown = epgError && epgError !== epgErrorHidden ? epgError : null;
@@ -453,10 +454,13 @@ export function LiveView({ active }: { active: boolean }) {
                     channels={visible}
                     epg={epg}
                     epgLoading={epgLoading}
+                    epgConfigured={epgConfigured}
+                    epgError={epgError}
                     nowMs={nowMs}
                     onPlay={handlePlay}
                     onPlayCatchup={handlePlayCatchup}
                     resetKey={`${activeId}|${group ?? ""}|${query}`}
+                    scrollKey={activeId ?? ""}
                   />
                 )}
               </>

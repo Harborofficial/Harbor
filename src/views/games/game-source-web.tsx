@@ -76,7 +76,7 @@ export function SourceCloudTransfer({link,downloads,keys,openSettings,onDone,pro
  };
  const download=async()=>{
   if(!job||pending.current||downloads.busy.includes('new'))return;pending.current=true;setBusy(true);setError('');downloads.dismissError();
-  try{const value=await invoke<CloudDownload>(command('download'),{args:{...args,parent:job.id,file}});if(!valid())return;const started=await downloads.start({url:value.url,sourceLink:link.url,name:link.title,game:link.game,expectedBytes:value.expectedBytes??undefined},value.name);if(started&&valid())onDone()}
+  try{const value=await invoke<CloudDownload>(command('download'),{args:{...args,parent:job.id,file}});if(!valid())return;const started=await downloads.start({url:value.url,sourceLink:link.url,name:link.title,game:link.game,expectedBytes:value.expectedBytes??undefined,torboxOrigin:provider==="tb"?{kind:"web" as const,torrentId:job.id,fileId:file}:undefined},value.name);if(started&&valid())onDone()}
   catch(reason){if(valid())fail(reason)}finally{if(valid()){pending.current=false;setBusy(false)}}
  };
  const saving=downloads.busy.includes('new');

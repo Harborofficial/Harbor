@@ -23,6 +23,8 @@ function load(file, dependencies, globals = {}) {
     AbortSignal: { timeout: () => ({}) },
     ...globals,
     require: (name) => {
+      if (name === "@/lib/metadata-policy" || name === "./metadata-policy")
+        return { addonOnlyMetadata: () => false };
       assert.ok(name in dependencies, "unmocked dependency " + name);
       return dependencies[name];
     },

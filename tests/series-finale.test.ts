@@ -59,21 +59,40 @@ test("only the final catalog episode qualifies, including single-episode series"
   assert.equal(await finale({ fetchEpisodeList: async () => [] })(meta, current, opts), false);
 });
 
-test("future and TBA seasons allow recommendations; released episodes block them", async () => {
-  const eps = [current, { season: 2, episode: 1, airDate: "2099-01-01" }];
-  assert.equal(await finale({ fetchEpisodeList: async () => eps })(meta, current, opts), true);
-  assert.equal(
-    await finale({
-      fetchEpisodeList: async () => [current, { season: 2, episode: 1, airDate: "TBA" }],
-    })(meta, current, opts),
-    true,
-  );
-  assert.equal(
-    await finale({
-      fetchEpisodeList: async () => [current, { season: 2, episode: 1, airDate: "2020-01-01" }],
-    })(meta, current, opts),
-    false,
-  );
+test("upcoming, TBA and released episodes in later seasons block the end screen", async () => {
+  for (const airDate of ["2099-01-01", "TBA", "2020-01-01", undefined]) {
+    const eps = [current, { season: 2, episode: 1, airDate }];
+    assert.equal(
+      await finale({ fetchEpisodeList: async () => eps })(meta, current, opts),
+      false,
+      `S1E12 must not qualify while S2E1 is listed (${airDate ?? "undated"})`,
+    );
+  }
+});
+
+test("the latest aired weekly episode is not the finale when future episodes are listed", async () => {
+  const eps = Array.from({ length: 12 }, (_, index) => ({
+    season: 1,
+    episode: index + 1,
+    airDate: index < 6 ? "2026-10-01" : "2099-01-01",
+  }));
+  const check = finale({ fetchEpisodeList: async () => eps });
+  assert.equal(await check(meta, { season: 1, episode: 5 }, opts), false);
+  assert.equal(await check(meta, { season: 1, episode: 6 }, opts), false);
+  assert.equal(await check(meta, { season: 1, episode: 11 }, opts), false);
+  assert.equal(await check(meta, { season: 1, episode: 12 }, opts), true);
+});
+
+test("undated later episodes also block a premature finale", async () => {
+  const eps = [
+    { season: 1, episode: 5, airDate: "2026-10-01" },
+    { season: 1, episode: 6, airDate: "TBA" },
+    { season: 1, episode: 7 },
+  ];
+  const check = finale({ fetchEpisodeList: async () => eps });
+  assert.equal(await check(meta, { season: 1, episode: 5 }, opts), false);
+  assert.equal(await check(meta, { season: 1, episode: 6 }, opts), false);
+  assert.equal(await check(meta, { season: 1, episode: 7 }, opts), true);
 });
 
 test("Kitsu anime finale permits announced sequels but blocks released sequels", async () => {

@@ -202,20 +202,39 @@ export function usePageContextTarget({ includePlayer = false } = {}): ContextMen
         },
       };
     });
-    if (!kid && !locked && (!author?.handle || canOpenProfile(author.handle))) {
+    const isNuvioActive = settings?.accountProvider === "nuvio";
+    const isPrimary = activeProfile ? activeProfile.isPrimary !== false : true;
+    const canOpen = isNuvioActive
+      ? typeof localStorage !== "undefined" &&
+        Boolean(localStorage.getItem("harbor.nuvio.state.v1")?.includes('"access_token"'))
+      : !!author;
+    if (
+      isPrimary &&
+      !kid &&
+      !locked &&
+      (isNuvioActive || !author?.handle || canOpenProfile(author.handle))
+    ) {
       const actor = captureSocialActor();
       rows.push({
         id: "page:my-profile",
         label: t("Open my profile"),
         icon: <UserRound size={14} />,
-        disabled: !author,
-        reason: !author ? t("Sign in to Harbor to open your profile.") : undefined,
+        disabled: !canOpen,
+        reason: !canOpen
+          ? isNuvioActive
+            ? t("Sign in to Nuvio to open your profile.")
+            : t("Sign in to Harbor to open your profile.")
+          : undefined,
         group: "pages",
         restoreFocus: false,
         run: async () => {
           assertSocialActor(actor);
           if (!(await openMyProfile()))
-            throw new Error(t("Sign in to Harbor to open your profile."));
+            throw new Error(
+              isNuvioActive
+                ? t("Sign in to Nuvio to open your profile.")
+                : t("Sign in to Harbor to open your profile."),
+            );
         },
       });
     }

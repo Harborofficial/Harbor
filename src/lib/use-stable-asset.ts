@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { tmdbBackdropAtSize } from "./tmdb-backdrop-size";
 
 export function useStableAsset(
   candidates: Array<string | undefined | null>,
@@ -17,7 +18,7 @@ export function useStableAsset(
   return locked ?? firstReal;
 }
 
-export function toHiResBackdrop(url: string | undefined): string | undefined {
+export function toHiResBackdrop(url: string | undefined, fullQuality = false): string | undefined {
   if (!url) return url;
-  return url.replace(/\/t\/p\/w\d+\//, "/t/p/original/");
+  return tmdbBackdropAtSize(url, fullQuality ? "original" : "w1280");
 }

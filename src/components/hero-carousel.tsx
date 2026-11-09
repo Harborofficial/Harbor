@@ -292,6 +292,7 @@ export function HeroCarousel({
                     full={full}
                     fullQuality={fullQuality}
                     playTrailer={playTrailers && isActive && !dragging}
+                    warmTrailer={playTrailers && distance <= 1}
                     bottomAlign={bottomAlign}
                     playSquare={playSquare}
                     moreInfo={moreInfo}

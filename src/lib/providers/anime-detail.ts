@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { onMediaCacheClear, mediaCacheGeneration } from "@/lib/media-cache";
 import type { Meta } from "@/lib/cinemeta";
 import {
@@ -27,6 +28,8 @@ import { applyMalEpisodeTitles, episodesMissingTitle } from "@/lib/providers/epi
 import { malEpisodeTitles } from "@/lib/providers/mal-episodes";
 import { anilistFranchise, type AnilistFranchiseNode } from "@/lib/anilist/relations";
 import { anilistArtById } from "@/lib/anilist/browse";
+import { pickAnimeHeroBackdrop } from "./anime-art-quality";
+import { staticHeroArt } from "./anime-hero-art-static";
 import { animeRecommendations } from "./anime-recommendations";
 import { enrichEpisodes } from "@/lib/providers/anime-episode-enrich";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
@@ -159,6 +162,9 @@ function makeFranchiseMeta(id: number, anime: import("./kitsu").KitsuAnimeDetail
     description: anime.synopsis,
     releaseInfo: anime.year,
     imdbRating: anime.rating,
+    trailerStreams: anime.trailerYtId
+      ? [{ ytId: anime.trailerYtId, title: anime.title }]
+      : undefined,
   };
 }
 
@@ -540,6 +546,7 @@ export function animeDetails(
   retry = 0,
   maxAge?: number,
 ): Promise<AnimeDetailResult | null> {
+  if (addonOnlyMetadata()) return Promise.resolve(null);
   const key = detailKey(settings, meta);
   if (maxAge === 0) detailCache.delete(key);
   const hit = detailCache.get(key);
@@ -842,22 +849,34 @@ async function loadAnimeDetails(
       ? kitsuToTvdb(kitsuId).catch(() => null)
       : Promise.resolve(null),
     fetchTvdbArtwork({ kitsuId }).catch(() => null),
+    staticHeroArt(`kitsu:${kitsuId}`).catch(() => undefined),
   ]);
 
   const heroBgPromise: Promise<string | undefined> = Promise.all([firstArtBatch, anilistArtPromise])
-    .then(
-      ([[tmdbHit, , tvdbArt], aniArt]) =>
-        aniArt.banner ?? anime.backdrop ?? tmdbHit?.backdrop ?? tvdbArt?.backgrounds?.[0],
+    .then(([[tmdbHit, , tvdbArt, curated], aniArt]) =>
+      pickAnimeHeroBackdrop({
+        curated: curated?.bg,
+        tvdb: tvdbArt?.backgrounds?.[0],
+        tmdb: tmdbHit?.backdrop,
+        kitsu: anime.backdrop,
+        banner: aniArt.banner,
+      }),
     )
     .catch(() => anime.backdrop);
 
   const extrasPromise: Promise<AnimeDetailExtras> = (async () => {
-    const [tmdbHit, tvdbId, tvdbArt] = await firstArtBatch;
+    const [tmdbHit, tvdbId, tvdbArt, curated] = await firstArtBatch;
     const aniArt = await anilistArtPromise;
     let logo: string | undefined =
       addonMeta?.logo ?? tvdbArt?.clearLogos?.[0] ?? tmdbHit?.logo ?? undefined;
     let poster = anime.poster;
-    const backdrop = aniArt.banner ?? anime.backdrop;
+    const backdrop = pickAnimeHeroBackdrop({
+      curated: curated?.bg,
+      tvdb: tvdbArt?.backgrounds?.[0],
+      tmdb: tmdbHit?.backdrop,
+      kitsu: anime.backdrop,
+      banner: aniArt.banner,
+    });
     const gallery: string[] = [];
     const addBackdrop = (b?: string | null) => {
       if (b && !gallery.includes(b)) gallery.push(b);
@@ -905,6 +924,9 @@ async function loadAnimeDetails(
           tmdbFull = fullRaw;
       }
     }
+    const tmdbTrailers = tmdbFull?.trailerCandidates ?? [];
+    const trailerCandidates =
+      tmdbTrailers.length > 0 ? tmdbTrailers : anime.trailerYtId ? [anime.trailerYtId] : [];
     const [rails, characters, studios] = await Promise.all([
       recommendationsPromise,
       charactersPromise,
@@ -931,6 +953,9 @@ async function loadAnimeDetails(
       imdbId: seriesImdb ?? addonMeta?.imdb_id ?? tmdbFull?.imdbId ?? null,
       tmdbTvId: tmdbFull?.tmdbTvId,
       seasonPosters: tmdbFull?.seasonPosters,
+      trailerYtId: trailerCandidates[0] ?? null,
+      trailerCandidates,
+      trailerVideos: tmdbFull?.trailerVideos ?? [],
       extraVideos: tmdbFull?.extraVideos ?? [],
       recommendations: rails.moreLikeThis,
       similar: rails.youMightLike,

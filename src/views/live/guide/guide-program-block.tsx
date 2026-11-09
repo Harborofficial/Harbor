@@ -68,7 +68,8 @@ export function GuideProgramBlock({
   const left = (program.startMs - windowStart) * PX_PER_MS;
   const width = (program.endMs - program.startMs) * PX_PER_MS;
   const compact = width < 70;
-  const veryCompact = width < 40;
+  // Short slots lose their text to the card padding at the default size.
+  const narrow = width < 140;
   const showEndTime = width >= 190;
   const showRemaining = width >= 250;
 
@@ -144,12 +145,12 @@ export function GuideProgramBlock({
           width: Math.max(20, width - CARD_GAP_X),
         }}
       >
-        <div className={`flex h-full flex-col ${veryCompact ? "px-2" : "px-5"} pb-2 pt-3`}>
+        <div className={`flex h-full flex-col ${narrow ? "px-2" : "px-5"} pb-2 pt-3`}>
           <div
             dir="auto"
-            className={`truncate font-extrabold ${
+            className={`font-extrabold ${narrow ? "line-clamp-2" : "truncate"} ${
               isPast ? "text-ink-muted" : "text-ink"
-            } ${veryCompact ? "text-[12px] leading-[16px]" : "text-[15px] leading-[19px]"}`}
+            } ${narrow ? "text-[12px] leading-[16px]" : "text-[15px] leading-[19px]"}`}
           >
             {program.title}
           </div>
@@ -173,18 +174,19 @@ export function GuideProgramBlock({
                     {t("{n}m left", { n: remainingMin })}
                   </span>
                 )}
-                {isLive && (
+                {isLive && !narrow && (
                   <span className="ms-auto shrink-0 rounded-full bg-danger/80 px-1.5 py-px text-[8.5px] font-semibold uppercase tracking-[0.16em] text-canvas">
                     {t("Live")}
                   </span>
                 )}
-                {canReplay ? (
+                {canReplay && !narrow ? (
                   <span className="ms-auto shrink-0 text-[8.5px] font-bold uppercase tracking-[0.16em] text-accent">
                     {t("Replay")}
                   </span>
                 ) : (
                   isPast &&
-                  !isLive && (
+                  !isLive &&
+                  !narrow && (
                     <span className="ms-auto shrink-0 text-[8.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
                       {t("Ended")}
                     </span>

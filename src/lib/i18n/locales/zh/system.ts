@@ -267,8 +267,8 @@ const system: Record<string, string> = {
     "限制缓存可占用的磁盘空间。超出限制时，Harbor 会优先删除最旧的文件。该限制会在启动时及播放任务结束时执行。",
   "Clear cache now": "立即清除缓存",
   "Could not send: {error}": "无法发送：{error}",
-  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
-    "无法连接到 harborcommunity.site 以加载较早版本。请检查网络连接后重试。",
+  "Couldn't reach GitHub to load earlier builds. Check your connection and try again.":
+    "无法连接到 GitHub 以加载较早版本。请检查网络连接后重试。",
   "Default app cache folder": "默认应用缓存文件夹",
   "Export failed: {reason}": "导出失败：{reason}",
   "Exported {ok}, {fail} failed": "已导出 {ok} 个，{fail} 个失败",

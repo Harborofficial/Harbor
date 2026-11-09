@@ -2,6 +2,8 @@ import { Download, Ellipsis, FolderOpen, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { DownloadCancelIcon, DownloadPauseResumeIcon } from "@/components/download-action-icons";
 import { HarborLoader } from "@/components/harbor-loader";
+import { DownloadDeleteButton } from "@/components/download-delete-button";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import {
   downloadCapabilities,
@@ -12,11 +14,13 @@ import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 import { useContextMenu } from "@/lib/context-menu";
 import { useDownloadItemActions } from "@/views/downloads/download-actions";
+import { matchesDownloadFilter } from "@/views/downloads/downloads-visibility";
 
 type T = (key: string) => string;
 
 export function DownloadsButton() {
   const downloads = useDownloads();
+  const visibleDownloads = downloads.filter((item) => matchesDownloadFilter(item, "all"));
   const t = useT();
   const { openMeta, setView } = useView();
   const [open, setOpen] = useState(false);
@@ -47,7 +51,7 @@ export function DownloadsButton() {
     };
   }, [open]);
 
-  if (downloads.length === 0) return null;
+  if (visibleDownloads.length === 0) return null;
 
   const goToShow = (d: DownloadItem) => {
     setOpen(false);
@@ -110,7 +114,7 @@ export function DownloadsButton() {
             </button>
           </div>
           <div className="flex max-h-[min(60vh,420px)] flex-col gap-0.5 overflow-y-auto px-2 pb-2">
-            {downloads.slice(0, 8).map((d) => (
+            {visibleDownloads.slice(0, 8).map((d) => (
               <DownloadRow key={d.id} d={d} t={t} onOpen={() => goToShow(d)} />
             ))}
           </div>
@@ -225,21 +229,27 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
         )}
         {d.status !== "downloading" && d.status !== "paused" && (
           <>
+            {d.status === "done" && d.kind !== "ebook" && (
+              <RowBtn
+                label={t("Play")}
+                onClick={() => run("play")}
+                disabled={pending || !caps?.play}
+              >
+                <Play size={14} strokeWidth={2.2} fill="currentColor" />
+              </RowBtn>
+            )}
             {caps?.reveal && (
               <RowBtn label={t("Show in folder")} onClick={() => run("reveal")} disabled={pending}>
                 <FolderOpen size={14} strokeWidth={2} />
               </RowBtn>
             )}
-            <RowBtn
-              label={
-                caps?.printReceipt ? t("Remove from downloads") : t("Delete download and file")
-              }
-              onClick={() => run("delete")}
-              disabled={pending || !caps?.delete}
-              danger
+            <DownloadDeleteButton
+              source={source}
+              actionId={`download:${d.id}:delete`}
+              className="download-delete-trigger flex h-7 w-7 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-danger/10 hover:text-danger"
             >
               <Trash2 size={14} strokeWidth={2} className="download-delete-icon" />
-            </RowBtn>
+            </DownloadDeleteButton>
           </>
         )}
         <button

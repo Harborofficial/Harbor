@@ -37,6 +37,68 @@ test("only advertised pending responses are retried; corrupt/final error payload
   final.cleanup();
 });
 
+test("localized progress without a response filename is polled until the translation is ready", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 0 });
+  const queue = createSubtitleTranslationQueue();
+  t.after(() => { queue.clear(); t.mock.timers.reset(); });
+  const placeholder = "1\n00:00:00,000 --> 04:00:00,000\nTRADUCCIÓN EN PROGRESO\nHaz clic para recargar. Los resultados parciales aparecerán a medida que estén listos.\n\n2\n04:00:01,000 --> 04:00:02,500\nEste subtítulo informativo\n";
+  let downloads = 0;
+  let playable = 0;
+  await queue.run(url, () => true, async () => {
+    const result = await prepareSubtitle({ url, translation: true, durationSec: 1440 }, {
+      fetchBytes: async () => new Response(++downloads === 1 ? placeholder : srt, { headers: { "cache-control": "no-store" } }),
+      createPlayable: async () => { playable++; return { url: "memory:final", cleanup() {} }; },
+    });
+    result.cleanup();
+    return true;
+  });
+  assert.equal(subtitleTranslationStatus(url), "pending");
+  assert.equal(playable, 0, "progress notice must not become a playable subtitle");
+  t.mock.timers.tick(30_000);
+  await flushBridge();
+  assert.equal(downloads, 2);
+  assert.equal(playable, 1);
+  assert.equal(subtitleTranslationStatus(url), null);
+});
+
+test("progress detection does not turn final errors or ordinary dialogue into pending jobs", async () => {
+  for (const translation of [false, true]) {
+    const result = await prepareSubtitle({ url, translation }, {
+      fetchBytes: async () => new Response(srt.replace("One", "Translation in progress")),
+      createPlayable: async () => ({ url: "memory:dialogue", cleanup() {} }),
+    });
+    result.cleanup();
+  }
+  for (const text of ["Translation failed", "TRADUCCIÓN FALLIDA"]) {
+    await assert.rejects(prepareSubtitle({ url, translation: true }, {
+      fetchBytes: async () => new Response(`1\n00:00:00,000 --> 04:00:00,000\n${text}\n`),
+    }), (error) => error.reason === "invalid-cues");
+  }
+});
+
+for (const [locale, title, failure] of [
+  ["en", "TRANSLATION IN PROGRESS", "Translation Failed"],
+  ["es", "TRADUCCIÓN EN PROGRESO", "La traducción falló"],
+  ["ar", "الترجمة قيد التنفيذ", "فشلت الترجمة"],
+  ["pt-br", "TRADUÇÃO EM ANDAMENTO", "Tradução Falhou"],
+  ["pt-pt", "TRADUÇÃO EM CURSO", "A Tradução Falhou"],
+]) {
+  test(`SubMaker ${locale} initial and partial progress remain pending without headers`, async () => {
+    for (const partial of [false, true]) {
+      const body = partial
+        ? `${srt}\n3\n00:00:07,000 --> 04:00:00,000\n${title}\nReload\n`
+        : `1\n00:00:00,000 --> 04:00:00,000\n${title}\nReload\n\n2\n04:00:01,000 --> 04:00:02,500\nInformational note\n`;
+      await assert.rejects(prepareSubtitle({ url, translation: true }, {
+        fetchBytes: async () => new Response(body),
+        createPlayable: async () => { throw new Error("Pending bytes must not be played"); },
+      }), (error) => error.reason === "translation-pending");
+    }
+    await assert.rejects(prepareSubtitle({ url, translation: true }, {
+      fetchBytes: async () => new Response(`1\n00:00:00,000 --> 04:00:00,000\n${failure}\n`),
+    }), (error) => error.reason === "invalid-cues");
+  });
+}
+
 for (const deep of [false, true]) {
   test(`translation offers are discoverable but never prefetched (${deep ? "deep" : "initial"})`, async () => {
     const downloads: string[] = [];

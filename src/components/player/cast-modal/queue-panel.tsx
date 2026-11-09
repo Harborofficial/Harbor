@@ -188,6 +188,9 @@ export function QueuePanel({
       8,
       {
         tmdbKey: settings.tmdbKey,
+        episodeSources: settings.metadataSources?.episodes,
+        tvdbKey: settings.tvdbKey,
+        tvdbSeasonType: settings.tvdbSeasonType,
       },
     )
       .then((eps) => {
@@ -197,7 +200,16 @@ export function QueuePanel({
     return () => {
       cancelled = true;
     };
-  }, [queue.length, isSeriesCurrent, currentMeta, currentEpisode, settings.tmdbKey]);
+  }, [
+    queue.length,
+    isSeriesCurrent,
+    currentMeta,
+    currentEpisode,
+    settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    settings.metadataSources?.episodes,
+  ]);
 
   const cwList = useContinueWatching(currentMeta?.id);
   const totalMins = queue.reduce((sum, i) => sum + runtimeMinutes(i), 0);

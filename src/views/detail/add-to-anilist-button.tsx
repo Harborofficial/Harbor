@@ -8,6 +8,7 @@ import { useAnilist } from "@/lib/anilist/provider";
 import { resolveAnilistMediaId } from "@/lib/anilist/sync";
 import type { MediaListStatus } from "@/lib/anilist/types";
 import { useT } from "@/lib/i18n";
+import { notifyTrackerStatusChanged, useTrackerStatusVersion } from "@/lib/tracker-status-events";
 
 const STATUS_LABELS: Record<MediaListStatus, string> = {
   CURRENT: "Watching",
@@ -30,6 +31,7 @@ const STATUS_ORDER: MediaListStatus[] = [
 export function AddToAnilistButton({ harborId, title }: { harborId: string; title: string }) {
   const t = useT();
   const { isConnected } = useAnilist();
+  const trackerStatusVersion = useTrackerStatusVersion();
   const [mediaId, setMediaId] = useState<number | null>(null);
   const [entryId, setEntryId] = useState<number | null>(null);
   const [status, setStatus] = useState<MediaListStatus | null>(null);
@@ -69,7 +71,7 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
       cancelled = true;
       if (timer != null) window.clearTimeout(timer);
     };
-  }, [harborId, isConnected, attempt]);
+  }, [harborId, isConnected, attempt, trackerStatusVersion]);
 
   if (!isConnected || mediaId == null) return null;
 
@@ -82,6 +84,7 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
       const saved = await saveListEntry({ mediaId, status: next });
       setEntryId(saved.id);
       setStatus(saved.status);
+      notifyTrackerStatusChanged();
     } catch {
       setStatus(prev);
     } finally {
@@ -102,7 +105,8 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
     setEntryLists([]);
     setMenuOpen(false);
     try {
-      await deleteListEntry(prevEntry);
+      if (!(await deleteListEntry(prevEntry))) throw new Error("AniList did not confirm removal.");
+      notifyTrackerStatusChanged();
     } catch {
       setStatus(prevStatus);
       setEntryId(prevEntry);

@@ -74,6 +74,8 @@ export type PlayerSnapshot = {
   chapters: Chapter[];
   subDelaySec: number;
   audioDelaySec: number;
+  /** Observed native correction; undefined when the engine does not expose it. Zero means no correction. */
+  subtitleFps?: number;
   subText: string;
   subStartSec: number;
   secondarySubText: string;
@@ -90,6 +92,13 @@ export type PlayerSnapshot = {
 };
 
 export type PlayerSource = {
+  selectInitialTracks?: (
+    audio: TrackInfo[],
+    subtitles: TrackInfo[],
+  ) => {
+    audioId?: string;
+    subtitleId?: string | null;
+  };
   url: string;
   traceId?: string;
   startupProfile?: "standard" | "high-bitrate";
@@ -158,6 +167,7 @@ export type PlayerBridge = {
   ) => Promise<boolean>;
   getSelectedTrackCues: () => SubCue[] | null;
   getSelectedTrackUrl: () => string | null;
+  getLoadedMediaSource?: () => Pick<PlayerSource, "url" | "headers"> | null;
   setAudioNormalize: (on: boolean) => void;
   setAudioProfile?: (profile: string) => void;
   setHdrToSdr?: (on: boolean, oled: boolean) => void;

@@ -1,3 +1,4 @@
+import { streamKey } from "../src/lib/streams/identity.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -44,6 +45,11 @@ function addonsHarness(response) {
     "src/lib/streams/addons.ts",
     {
       ...shared,
+      "./prefetch-request": {
+        clearPrefetchedRequests() {},
+        prefetchRequest: (_key, signal, _prefetch, run) => run(signal),
+      },
+      "./identity": { streamKey },
       "@/lib/debug": { dlog() {}, dwarn() {} },
       "@/lib/fetch-fallback-policy": { isHarborFetchPolicyError: () => false },
       "./addon-detect": { ...detect, isAddonRanked: () => false, isStatusOnlyAddon: () => false },

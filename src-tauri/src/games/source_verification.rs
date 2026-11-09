@@ -114,7 +114,7 @@ fn create_window(app: &tauri::AppHandle, profile: &str, id: &str, url: &reqwest:
         .initialization_script(READ_SCRIPT
             .replace("__HARBOR_SOURCE_MAX_BYTES__", &policy::MAX_BYTES.to_string())
             .replace("__HARBOR_SOURCE_URL__", &serde_json::to_string(url.as_str()).unwrap()))
-        .on_navigation(move |next| next.as_str() == "about:blank" || policy::same_origin(&origin, next))
+        .on_navigation(move |next| policy::navigable(&origin, next.as_str()))
         .on_new_window(|_, _| tauri::webview::NewWindowResponse::Deny)
         .on_download(move |_, event| {
             if let tauri::webview::DownloadEvent::Requested { url, .. } = event {

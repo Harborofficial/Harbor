@@ -1,7 +1,7 @@
 use super::{
     MusicAlbumRef, MusicArtistRef, MusicCatalogItem, MusicCatalogKind, MusicCatalogPage,
-    MusicCatalogRow, MusicCatalogScope, MusicConnection, MusicPlaylistRef, MusicSearchResults,
-    MusicStationRef, MusicStream, MusicTrack, MusicVideoStream,
+    MusicCatalogRow, MusicCatalogScope, MusicConnection, MusicPlaylistImport, MusicPlaylistRef,
+    MusicSearchResults, MusicStationRef, MusicStream, MusicTrack, MusicVideoStream,
 };
 use async_trait::async_trait;
 use serde::Serialize;
@@ -183,6 +183,14 @@ pub trait MusicConnector: Send + Sync {
         _playlist: &MusicPlaylistRef,
     ) -> Result<Vec<MusicTrack>, String> {
         Err(self.unsupported("playlists"))
+    }
+
+    async fn import_playlist(
+        &self,
+        _app: &tauri::AppHandle,
+        _playlist_id: &str,
+    ) -> Result<MusicPlaylistImport, String> {
+        Err(self.unsupported("playlist import"))
     }
 
     async fn station_tracks(

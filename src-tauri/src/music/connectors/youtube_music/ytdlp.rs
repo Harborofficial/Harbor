@@ -18,7 +18,10 @@ const SEPARATOR: &str = "|||";
 
 pub async fn stream(app: &tauri::AppHandle, video_id: &str) -> Result<MusicStream, String> {
     let args = vec![
-        "--no-warnings".to_string(),
+        "--js-runtimes".to_string(),
+        "node".to_string(),
+        "--extractor-args".to_string(),
+        "youtube:player_client=tv_embedded".to_string(),
         "--no-playlist".to_string(),
         "-f".to_string(),
         FORMAT.to_string(),
@@ -26,8 +29,10 @@ pub async fn stream(app: &tauri::AppHandle, video_id: &str) -> Result<MusicStrea
         format!("%(url)s{SEPARATOR}%(ext)s{SEPARATOR}%(abr)s{SEPARATOR}%(http_headers)j"),
         format!("https://www.youtube.com/watch?v={video_id}"),
     ];
-    let output = crate::ytdlp_update::run(app, args, TIMEOUT, "music stream").await?;
-    parse(&String::from_utf8_lossy(&output.stdout))
+    crate::ytdlp_update::run_validated(app, args, TIMEOUT, "music stream", |output| async move {
+        let stream = parse(&String::from_utf8_lossy(&output.stdout))?;
+        super::super::super::stream_probe::validate_stream(stream).await
+    }).await
 }
 
 /// The music video behind a track, for the YouTube Music style video pane.
@@ -36,7 +41,10 @@ pub async fn video_stream(
     video_id: &str,
 ) -> Result<MusicVideoStream, String> {
     let args = vec![
-        "--no-warnings".to_string(),
+        "--js-runtimes".to_string(),
+        "node".to_string(),
+        "--extractor-args".to_string(),
+        "youtube:player_client=tv_embedded".to_string(),
         "--no-playlist".to_string(),
         "-f".to_string(),
         VIDEO_FORMAT.to_string(),

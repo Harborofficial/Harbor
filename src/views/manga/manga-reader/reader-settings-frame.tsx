@@ -52,6 +52,7 @@ export function ReaderSettingsFrame<T extends string>({
       <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[88] flex flex-col items-center px-4">
         <div
           dir={direction}
+          data-reader-panel
           style={{ transformOrigin: "bottom center" }}
           className={`pointer-events-auto w-fit max-w-full overflow-hidden rounded-3xl border border-edge-soft bg-raised/95 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.75)] backdrop-blur-2xl transition-all duration-200 ease-out ${visible ? "translate-y-0 scale-100 opacity-100" : "translate-y-4 scale-[0.96] opacity-0"}`}
         >

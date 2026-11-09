@@ -6,6 +6,7 @@ import * as jsxRuntime from "react/jsx-runtime";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import ts from "typescript";
+import * as favoritesCleanup from "../src/lib/manga/favorites-cleanup.ts";
 import type { MangaFavoritesStore } from "../src/lib/manga-favorites";
 
 const key = (profile: string) => `harbor.mangafav.v1.${profile}`;
@@ -49,6 +50,18 @@ async function fixture() {
         if (storageOk) localStorage.setItem(name, value);
         return storageOk;
       },
+      setItemWithRecoveryDetailed(name: string, value: string) {
+        if (storageOk) {
+          localStorage.setItem(name, value);
+          return { ok: true, quota: false, recovered: false };
+        }
+        return {
+          ok: false,
+          quota: true,
+          recovered: false,
+          errorName: "QuotaExceededError",
+        };
+      },
     },
     "./manga/api": {
       setMangaInLibrary: async (...args: unknown[]) => {
@@ -57,6 +70,7 @@ async function fixture() {
       },
     },
     "./manga/library-events": { notifyMangaLibraryChanged() {} },
+    "./manga/favorites-cleanup": favoritesCleanup,
     "./manga/sources": {
       activeMangaSourceId: () => "unrelated",
       listMangaSources: () => [

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, LoaderCircle, RotateCcw, Speaker } from "@/components/icons/music-icons";
 import { useT } from "@/lib/i18n";
+import { getSpotifyStatus } from "@/lib/music/sources";
+import { SpotifyDevicePairing } from "./spotify-setup";
 import {
   selectableSpotifyDevices,
   setSpotifyPlaybackTarget,
@@ -16,8 +18,9 @@ function describe(cause: unknown): string {
   return cause instanceof Error ? cause.message : String(cause);
 }
 
-export function SpotifyPlaybackTarget() {
+export function SpotifyPlaybackTarget({ onPaired }: { onPaired?: () => void }) {
   const t = useT();
+  const [localReady, setLocalReady] = useState<boolean | null>(null);
   const [devices, setDevices] = useState<SpotifyDevice[]>([]);
   const [target, setTarget] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +39,15 @@ export function SpotifyPlaybackTarget() {
   }, []);
 
   useEffect(() => load(), [load]);
+  useEffect(() => {
+    let current = true;
+    void getSpotifyStatus()
+      .then((status) => {
+        if (current) setLocalReady(status.playbackReady);
+      })
+      .catch(() => {});
+    return () => { current = false; };
+  }, []);
 
   const choose = (device: string | null) => {
     const previous = target;
@@ -56,6 +68,15 @@ export function SpotifyPlaybackTarget() {
           </p>
           <p className="text-[13px] leading-5 text-ink-muted">
             {t("music.spotifyDevices.body")}
+          </p>
+          <p className="mt-1 text-[12px] font-medium text-ink-muted" role="status">
+            {t(
+              localReady === null
+                ? "music.spotify.playbackChecking"
+                : localReady
+                  ? "music.spotify.playbackConnected"
+                  : "music.spotify.playbackNotConnected",
+            )}
           </p>
         </div>
         <button
@@ -116,6 +137,35 @@ export function SpotifyPlaybackTarget() {
         <p role="alert" className="mt-2 text-[13px] leading-5 text-danger">
           {error}
         </p>
+      )}
+      {localReady === false && (
+        <div className="mt-4 border-t border-edge-soft pt-4">
+          <SpotifyDevicePairing
+            disabled={false}
+            onPaired={() => {
+              setLocalReady(true);
+              onPaired?.();
+              load();
+            }}
+          />
+        </div>
+      )}
+      {localReady === true && (
+        <details className="mt-4 border-t border-edge-soft pt-3">
+          <summary className="cursor-pointer text-[12px] font-medium text-ink-muted hover:text-ink">
+            {t("music.spotifySetup.repair")}
+          </summary>
+          <div className="pt-3">
+            <SpotifyDevicePairing
+              disabled={false}
+              onPaired={() => {
+                setLocalReady(true);
+                onPaired?.();
+                load();
+              }}
+            />
+          </div>
+        </details>
       )}
     </section>
   );

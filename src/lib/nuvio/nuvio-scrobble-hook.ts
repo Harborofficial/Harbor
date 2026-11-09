@@ -1,9 +1,17 @@
 import { useEffect, useRef } from "react";
 import { isNuvioSignedIn, loadNuvioState } from "./nuvio-client";
-import { isNuvioProviderActive, markWatchedInNuvio, pushWatchProgressToNuvio, resolveNuvioProfileIndex } from "./nuvio-sync";
+import {
+  isNuvioProviderActive,
+  markWatchedInNuvio,
+  pushWatchProgressToNuvio,
+  resolveNuvioProfileIndex,
+} from "./nuvio-sync";
 import { readActiveProfileIdentity } from "@/lib/profiles";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { PlayerSrc } from "@/lib/view";
+
+const MIN_POSITION_SEC = 6;
+const TICK_MS = 30_000;
 
 type Snap = {
   status: string;
@@ -26,6 +34,8 @@ export function useNuvioScrobble({
   const lastPushedTimeRef = useRef<number>(0);
   const watchedReportedRef = useRef<boolean>(false);
   const isPushingRef = useRef<boolean>(false);
+  const pinnedProfileTargetRef = useRef<number | null>(null);
+  const pendingPushRef = useRef<string | null>(null);
 
   const snapRef = useRef(snap);
   snapRef.current = snap;
@@ -40,7 +50,9 @@ export function useNuvioScrobble({
   const getProfileTarget = () => {
     if (isNuvioSignedIn()) {
       const state = loadNuvioState();
-      return typeof state.activeProfileIndex === "number" && state.activeProfileIndex >= 1 && state.activeProfileIndex <= 6
+      return typeof state.activeProfileIndex === "number" &&
+        state.activeProfileIndex >= 1 &&
+        state.activeProfileIndex <= 6
         ? state.activeProfileIndex
         : 1;
     }
@@ -48,19 +60,40 @@ export function useNuvioScrobble({
     return resolveNuvioProfileIndex(harborProfile);
   };
 
+  // Pin the slot at playback start: switching profiles mid-playback must not
+  // redirect this session's progress to another profile.
+  const resolvePinnedProfileTarget = () => {
+    if (pinnedProfileTargetRef.current == null) {
+      pinnedProfileTargetRef.current = getProfileTarget();
+    }
+    return pinnedProfileTargetRef.current;
+  };
+
   const doPush = async (reason: string) => {
-    if (!isNuvioSignedIn() || !isNuvioProviderActive() || isPushingRef.current) return;
+    if (!isNuvioSignedIn() || !isNuvioProviderActive()) return;
+    if (isPushingRef.current) {
+      // Keep the final flush instead of dropping it behind an in-flight push.
+      pendingPushRef.current = reason;
+      return;
+    }
     const currentSnap = snapRef.current;
     const clockPos = getPlaybackPosition();
-    const effectivePos = Number.isFinite(clockPos) && clockPos > 0 ? clockPos : currentSnap.positionSec;
-    if (currentSnap.durationSec <= 0 || effectivePos < 3) return;
+    const effectivePos =
+      Number.isFinite(clockPos) && clockPos > 0 ? clockPos : currentSnap.positionSec;
+    if (currentSnap.durationSec <= 0 || effectivePos < MIN_POSITION_SEC) return;
 
     const currentSrc = srcRef.current;
-    const profileTarget = getProfileTarget();
+    const profileTarget = resolvePinnedProfileTarget();
 
     isPushingRef.current = true;
     lastPushedPosRef.current = effectivePos;
     lastPushedTimeRef.current = Date.now();
+
+    const progressPct = effectivePos / currentSnap.durationSec;
+    if (progressPct >= 0.9 && !watchedReportedRef.current) {
+      watchedReportedRef.current = true;
+      void markWatchedInNuvio(profileTarget, metaId, effSeason, effEpisode);
+    }
 
     try {
       await pushWatchProgressToNuvio(
@@ -86,6 +119,9 @@ export function useNuvioScrobble({
       console.warn(`[nuvio-scrobble] push failed (${reason})`, err);
     } finally {
       isPushingRef.current = false;
+      const pendingReason = pendingPushRef.current;
+      pendingPushRef.current = null;
+      if (pendingReason) void doPush(pendingReason);
     }
   };
 
@@ -93,6 +129,8 @@ export function useNuvioScrobble({
     lastPushedPosRef.current = 0;
     lastPushedTimeRef.current = 0;
     watchedReportedRef.current = false;
+    pinnedProfileTargetRef.current = null;
+    pendingPushRef.current = null;
   }, [metaId, effSeason, effEpisode]);
 
   // Active playback interval checking clock position directly (since snap.positionSec doesn't rerender every second)
@@ -102,12 +140,12 @@ export function useNuvioScrobble({
 
     const id = window.setInterval(() => {
       const clockPos = getPlaybackPosition();
-      if (!Number.isFinite(clockPos) || clockPos < 4) return;
+      if (!Number.isFinite(clockPos) || clockPos < MIN_POSITION_SEC) return;
       const curSnap = snapRef.current;
       if (curSnap.durationSec <= 0) return;
 
       const progressPct = clockPos / curSnap.durationSec;
-      const profileTarget = getProfileTarget();
+      const profileTarget = resolvePinnedProfileTarget();
 
       if (progressPct >= 0.9 && !watchedReportedRef.current) {
         watchedReportedRef.current = true;
@@ -115,15 +153,13 @@ export function useNuvioScrobble({
       }
 
       const now = Date.now();
-      const timeDiff = now - lastPushedTimeRef.current;
-      const isFirstPush = lastPushedTimeRef.current === 0;
-
-      if (isFirstPush) {
-        void doPush("initial-4s");
-      } else if (timeDiff >= 10_000 && Math.abs(clockPos - lastPushedPosRef.current) >= 2) {
-        void doPush("10s-interval");
+      if (
+        now - lastPushedTimeRef.current >= TICK_MS &&
+        Math.abs(clockPos - lastPushedPosRef.current) >= 2
+      ) {
+        void doPush("30s-interval");
       }
-    }, 1000);
+    }, 1_000);
 
     return () => window.clearInterval(id);
   }, [snap.status, metaId, effSeason, effEpisode]);
@@ -133,7 +169,7 @@ export function useNuvioScrobble({
     if (!isNuvioSignedIn() || !isNuvioProviderActive()) return;
     if (snap.status === "paused") {
       const clockPos = getPlaybackPosition();
-      if (clockPos >= 3 && Math.abs(clockPos - lastPushedPosRef.current) >= 1) {
+      if (clockPos >= MIN_POSITION_SEC && Math.abs(clockPos - lastPushedPosRef.current) >= 1) {
         void doPush("pause");
       }
     }
@@ -141,6 +177,7 @@ export function useNuvioScrobble({
 
   // Flush on unmount, pagehide, and beforeunload
   useEffect(() => {
+    if (!isNuvioSignedIn() || !isNuvioProviderActive()) return;
     const handleUnload = () => {
       void doPush("unload");
     };
@@ -151,7 +188,9 @@ export function useNuvioScrobble({
     return () => {
       window.removeEventListener("pagehide", handleUnload);
       window.removeEventListener("beforeunload", handleUnload);
-      void doPush("unmount");
+      void doPush("unmount").finally(() => {
+        window.dispatchEvent(new CustomEvent("harbor:playback-session-ended"));
+      });
     };
   }, [metaId, effSeason, effEpisode]);
 }

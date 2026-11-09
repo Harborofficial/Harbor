@@ -23,6 +23,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useTogether } from "@/lib/together/provider";
 import { useProfiles } from "@/lib/profiles";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { nameEquals } from "@/lib/account/name-sync";
 import { setPrivate } from "@/lib/social/privacy";
 import { useSettings } from "@/lib/settings";
@@ -373,7 +374,14 @@ export function ProfileSettings({
       const next = await saveSettings(form);
       const trimmed = form.alias.trim();
       if (trimmed && !nameEquals(trimmed, displayName)) setDisplayName(trimmed);
-      if (activeProfile && !activeProfile.kid && trimmed && trimmed !== activeProfile.name) {
+      if (
+        !isNuvioProviderActive() &&
+        activeProfile &&
+        activeProfile.isPrimary &&
+        !activeProfile.kid &&
+        trimmed &&
+        trimmed !== activeProfile.name
+      ) {
         updateProfile(activeProfile.id, { name: trimmed });
       }
       onSaved(next);

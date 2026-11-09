@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { playbackEntries } from "@/lib/playback-history";
 import { resolveAnimeSourceManga } from "@/lib/manga/anime-adaptation";
+import { activeMangaSourceId, subscribeMangaSources } from "@/lib/manga/sources";
 import type { MangaSummary } from "@/lib/manga/types";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -13,11 +14,31 @@ function hasAnimeHistory(): boolean {
   return playbackEntries().some((e) => ANIME_ID.test(e.metaId));
 }
 
-export function useBecauseYouWatched(): { recs: WatchedMangaRec[]; loading: boolean } {
+export function useBecauseYouWatched(enabled: boolean): {
+  recs: WatchedMangaRec[];
+  loading: boolean;
+  hasHistory: boolean;
+} {
+  const [hasHistory] = useState(() => hasAnimeHistory());
   const [recs, setRecs] = useState<WatchedMangaRec[]>([]);
-  const [loading, setLoading] = useState(() => hasAnimeHistory());
+  const [loading, setLoading] = useState(false);
+  useEffect(
+    () =>
+      subscribeMangaSources(() => {
+        // These recommendations resolved against the previous active source.
+        // Drop them instead of showing another source's covers under BatCave.
+        setRecs([]);
+        setLoading(false);
+      }),
+    [],
+  );
   useEffect(() => {
+    // The Manga view can be mounted while Home Continue Watching is visible.
+    // Never search its anime history against a manga source until requested.
+    if (!enabled || !hasHistory) return;
     let cancelled = false;
+    setLoading(true);
+    const sourceId = activeMangaSourceId();
     void (async () => {
       const byAnime = new Map<string, { metaId: string; animeName: string; savedAt: number }>();
       for (const e of playbackEntries()) {
@@ -40,21 +61,23 @@ export function useBecauseYouWatched(): { recs: WatchedMangaRec[]; loading: bool
       const out: WatchedMangaRec[] = [];
       const seenManga = new Set<string>();
       for (const a of anime) {
-        if (cancelled) return;
+        if (cancelled || activeMangaSourceId() !== sourceId) return;
         const node = await resolveAnimeSourceManga(a.metaId, null, a.animeName).catch(() => null);
         if (!node?.title) continue;
+        if (cancelled || activeMangaSourceId() !== sourceId) return;
         const found = (await searchManga(node.title, 0).catch(() => []))[0];
+        if (cancelled || activeMangaSourceId() !== sourceId) return;
         if (!found || seenManga.has(found.id)) continue;
         seenManga.add(found.id);
         out.push({ animeName: a.animeName || node.title, manga: found });
         if (!cancelled) setRecs(out.slice());
         if (out.length >= MAX_RECS) break;
       }
-      if (!cancelled) setLoading(false);
+      if (!cancelled && activeMangaSourceId() === sourceId) setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
-  return { recs, loading };
+  }, [enabled, hasHistory]);
+  return { recs, loading, hasHistory };
 }

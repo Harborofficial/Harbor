@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { useT } from "@/lib/i18n";
+import { useSessionState } from "@/lib/session-state";
 import { useScrollMemory, useView } from "@/lib/view";
 import {
   fetchRankManifest,
@@ -44,14 +45,17 @@ function heroHasArt(person: Person, source: RankSource): boolean {
 
 export function PeopleView({ init }: { init: PeopleInit }) {
   const t = useT();
-  const { openPerson, openMeta, openSettings } = useView();
+  const { openPerson, openMeta, openSettings, topKind } = useView();
   const scrollRef = useRef<HTMLElement>(null);
 
-  const [source, setSource] = useState<RankSource>(init?.source ?? "harbor");
-  const [dept, setDept] = useState<PeopleDept>(init?.dept ?? "Acting");
-  const [country, setCountry] = useState<string | null>(null);
-  const [genre, setGenre] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
+  const [source, setSource] = useSessionState<RankSource>(
+    "people.source",
+    init?.source ?? "harbor",
+  );
+  const [dept, setDept] = useSessionState<PeopleDept>("people.department", init?.dept ?? "Acting");
+  const [country, setCountry] = useSessionState<string | null>("people.country", null);
+  const [genre, setGenre] = useSessionState<string | null>("people.genre", null);
+  const [query, setQuery] = useSessionState<string>("people.query", "");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [explainOpen, setExplainOpen] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
@@ -60,7 +64,8 @@ export function PeopleView({ init }: { init: PeopleInit }) {
   const [reloadNonce, setReloadNonce] = useState(0);
   const [solid, setSolid] = useState(false);
 
-  useScrollMemory("people", scrollRef);
+  const active = topKind === "people";
+  useScrollMemory("people", scrollRef, active);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +91,15 @@ export function PeopleView({ init }: { init: PeopleInit }) {
     }
   }, [init?.nonce]);
 
+  const lastFilterKeyRef = useRef<string | null>(null);
   useEffect(() => {
+    const key = `${source}\u0000${dept}\u0000${country ?? ""}\u0000${genre ?? ""}`;
+    if (lastFilterKeyRef.current === null) {
+      lastFilterKeyRef.current = key;
+      return;
+    }
+    if (lastFilterKeyRef.current === key) return;
+    lastFilterKeyRef.current = key;
     setExpandedId(null);
     scrollRef.current?.scrollTo({ top: 0 });
   }, [source, dept, country, genre]);

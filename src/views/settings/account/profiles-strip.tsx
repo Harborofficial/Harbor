@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Check, Lock, Pencil, Plus } from "../icons";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { useProfiles } from "@/lib/profiles";
@@ -6,7 +7,7 @@ import { ROW_TITLE } from "../shared";
 
 import { useSettings } from "@/lib/settings";
 import { getSecondaryPrivileges } from "@/lib/settings/defaults";
-import { isStremioActivePrimary } from "@/lib/active-profile-id";
+import { isStremioActivePrimary, activeProfileIsPrimary } from "@/lib/active-profile-id";
 
 const QUAL =
   "inline-flex h-[22px] shrink-0 items-center gap-1 rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
@@ -18,7 +19,20 @@ export function ProfilesStrip() {
   const t = useT();
   const { profiles, activeProfile, openPicker, selectProfile } = useProfiles();
   const { settings } = useSettings();
-  const isPrimary = isStremioActivePrimary(activeProfile, profiles);
+  const [, setVersion] = useState(0);
+  useEffect(() => {
+    const onSync = () => setVersion((v: number) => v + 1);
+    window.addEventListener("harbor:secondary-privileges-changed", onSync);
+    window.addEventListener("harbor:settings-changed", onSync);
+    window.addEventListener("harbor:profiles-updated", onSync);
+    return () => {
+      window.removeEventListener("harbor:secondary-privileges-changed", onSync);
+      window.removeEventListener("harbor:settings-changed", onSync);
+      window.removeEventListener("harbor:profiles-updated", onSync);
+    };
+  }, []);
+
+  const isPrimary = activeProfileIsPrimary() || isStremioActivePrimary(activeProfile, profiles);
   const canAdd = isPrimary || getSecondaryPrivileges(settings, false).canAddProfiles;
 
   const switchTo = (id: string, locked: boolean) =>
@@ -40,7 +54,9 @@ export function ProfilesStrip() {
                 active ? openPicker({ kind: "edit", profileId: p.id }) : switchTo(p.id, locked)
               }
               aria-label={
-                active ? t("Edit {name}", { name: p.name }) : t("Switch to {name}", { name: p.name })
+                active
+                  ? t("Edit {name}", { name: p.name })
+                  : t("Switch to {name}", { name: p.name })
               }
               className="flex w-full flex-col items-center gap-3 rounded-[10px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
@@ -69,9 +85,7 @@ export function ProfilesStrip() {
                 )}
               </span>
               <span className="flex w-full flex-col items-center gap-2">
-                <span className={`max-w-full text-center ${ROW_TITLE}`}>
-                  {p.name}
-                </span>
+                <span className={`max-w-full text-center ${ROW_TITLE}`}>{p.name}</span>
                 <span className="flex min-h-[22px] items-center">
                   {active ? (
                     <span className={`${QUAL} bg-accent-soft text-accent`}>

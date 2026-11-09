@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { freshContinuationTracks, loadMusicContinuation, type ContinuationDependencies } from "../src/lib/music/queue-continuation";
+import { freshContinuationTracks, loadMusicContinuation, readSpotifyQueuePages, type ContinuationDependencies } from "../src/lib/music/queue-continuation";
 import type { MusicTrack } from "../src/lib/music/types";
 
 const track = (id: string, title = id, connectorId = "spotify"): MusicTrack => ({ id, title, artist: "Artist", connectorId, artwork: "", durationSeconds: 180, durationLabel: "3:00" });
@@ -73,4 +73,55 @@ test("a contextless track uses its original provider, and duplicate-page scannin
   assert.equal(calls, 4);
   assert.equal(result.exhausted, false);
   assert.equal(result.origin?.kind === "spotify" && result.origin.nextOffset, 200);
+});
+
+test("a paged Spotify queue is read through its final page in order", async () => {
+  const calls: unknown[] = [];
+  const seen: string[] = [];
+  await readSpotifyQueuePages(
+    { kind: "spotify", id: "spotify:playlist:original", name: "Mix", collection: "playlist", nextOffset: 50 },
+    50,
+    (tracks, nextOffset) => {
+      seen.push(...tracks.map(t => t.id), nextOffset === null ? "end" : String(nextOffset));
+    },
+    {
+      ...api,
+      spotify: async (kind, offset, id) => {
+        calls.push([kind, offset, id]);
+        return offset === 50
+          ? { tracks: [track("page-2")], nextOffset: 100 }
+          : { tracks: [track("page-3")], nextOffset: null };
+      },
+    },
+  );
+  assert.deepEqual(calls, [
+    ["playlist", 50, "spotify:playlist:original"],
+    ["playlist", 100, "spotify:playlist:original"],
+  ]);
+  assert.deepEqual(seen, ["page-2", "100", "page-3", "end"]);
+});
+
+test("reading a paged queue stops as soon as the caller no longer owns it", async () => {
+  let pagesRead = 0;
+  const calls: unknown[] = [];
+  await readSpotifyQueuePages(
+    { kind: "spotify", id: "spotify:liked", name: "Liked", collection: "liked", nextOffset: 0 },
+    0,
+    () => { pagesRead += 1; return false; },
+    { ...api, spotify: async (kind, offset, id) => { calls.push([kind, offset, id]); return { tracks: [seed], nextOffset: offset + 50 }; } },
+  );
+  assert.equal(pagesRead, 1);
+  assert.deepEqual(calls, [["liked", 0, undefined]]);
+});
+
+test("a repeated cursor while filling a queue is rejected", async () => {
+  await assert.rejects(
+    readSpotifyQueuePages(
+      { kind: "spotify", id: "spotify:playlist:original", name: "Mix", collection: "playlist", nextOffset: 0 },
+      0,
+      () => true,
+      { ...api, spotify: async () => ({ tracks: [seed], nextOffset: 0 }) },
+    ),
+    /pagination/,
+  );
 });

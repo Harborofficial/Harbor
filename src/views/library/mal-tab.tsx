@@ -3,17 +3,10 @@ import { fetchMalList, readCachedMalList } from "@/lib/mal/lists";
 import { deleteListEntry, saveListEntry } from "@/lib/mal/mutations";
 import { useMal } from "@/lib/mal/provider";
 import type { MalListEntry, MalListStatus } from "@/lib/mal/types";
+import { MAL_RAIL_ORDER } from "@/lib/use-mal-anime-rails";
 import { useT } from "@/lib/i18n";
 import { MalEntryCard } from "./mal-entry-card";
 import { FilterBar, Grid, type TypeKey } from "./shared";
-
-const MAL_RAIL_ORDER: Array<{ key: string; title: string; statuses: MalListStatus[] }> = [
-  { key: "watching", title: "Watching", statuses: ["watching"] },
-  { key: "planning", title: "Plan to Watch", statuses: ["plan_to_watch"] },
-  { key: "completed", title: "Completed", statuses: ["completed"] },
-  { key: "paused", title: "On Hold", statuses: ["on_hold"] },
-  { key: "dropped", title: "Dropped", statuses: ["dropped"] },
-];
 
 function entryName(e: MalListEntry): string {
   return e.anime.title || "";
@@ -115,7 +108,9 @@ export function MalTab() {
           numEpisodesWatched: saved.numEpisodesWatched,
         } as Partial<MalListEntry>);
       } catch {
-        applyLocal(entry.anime.id, { numEpisodesWatched: entry.numEpisodesWatched } as Partial<MalListEntry>);
+        applyLocal(entry.anime.id, {
+          numEpisodesWatched: entry.numEpisodesWatched,
+        } as Partial<MalListEntry>);
       } finally {
         setBusyFor(entry.anime.id, false);
       }
@@ -140,22 +135,23 @@ export function MalTab() {
     [setBusyFor],
   );
 
-  const visible = useMemo(() => {
+  const matching = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return entries.filter((e) => {
-      if (type !== "all" && entryType(e) !== type) return false;
-      if (q && !entryName(e).toLowerCase().includes(q)) return false;
-      return true;
-    });
-  }, [entries, type, query]);
+    return q ? entries.filter((e) => entryName(e).toLowerCase().includes(q)) : entries;
+  }, [entries, query]);
+
+  const visible = useMemo(
+    () => (type === "all" ? matching : matching.filter((e) => entryType(e) === type)),
+    [matching, type],
+  );
 
   const counts = useMemo(
     () => ({
-      all: visible.length,
-      movie: visible.filter((e) => entryType(e) === "movie").length,
-      series: visible.filter((e) => entryType(e) === "series").length,
+      all: matching.length,
+      movie: matching.filter((e) => entryType(e) === "movie").length,
+      series: matching.filter((e) => entryType(e) === "series").length,
     }),
-    [visible],
+    [matching],
   );
 
   if (status === "loading") {
@@ -173,7 +169,9 @@ export function MalTab() {
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-8 py-16 text-center">
         <h2 className="text-[16px] font-semibold text-ink">{t("Your MyAnimeList is empty")}</h2>
         <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {t("Add anime to your MyAnimeList and they show up here, grouped by status and ready to edit.")}
+          {t(
+            "Add anime to your MyAnimeList and they show up here, grouped by status and ready to edit.",
+          )}
         </p>
       </div>
     );

@@ -17,6 +17,13 @@ test("queue picker requests are distinct from manual requests for the same episo
   assert.equal(samePickerRequest(picker, meta, ep, { queueItemId: "other" }), false);
 });
 
+test("a manual picker request supersedes automatic or remembered playback", () => {
+  for (const previous of [{ autoPlay: true }, { resume: true }]) {
+    const picker: Frame = { kind: "picker", meta, episode: ep, ...previous };
+    assert.equal(samePickerRequest(picker, meta, ep, { autoPlay: false, resume: false }), false);
+  }
+});
+
 test("ordinary picker cancellation retains the existing Details destination", () => {
   const picker: Frame = { kind: "picker", meta, episode: ep, intent: "download" };
   assert.deepEqual(pickerExitStack([home, picker], meta), [home, detail]);

@@ -13,33 +13,58 @@ const hour = 60 * minute;
 function fixture() {
   let now = 0;
   let requests = 0;
-  let response: () => Promise<unknown> = async () => ({ ok: true, json: async () => ({ ratings: { "3:1": 7 } }) });
+  let response: () => Promise<unknown> = async () => ({
+    ok: true,
+    json: async () => ({ ratings: { "3:1": 7 } }),
+  });
   const evictors = new Map<string, (aggressive: boolean) => void>();
   // harborImdbEpisodes calls safeFetch, so the injected fetch must be what safe-fetch resolves to.
-  const send = () => { requests++; return response(); };
+  const send = () => {
+    requests++;
+    return response();
+  };
   const mocks: Record<string, unknown> = {
     "@/lib/cache": { lruSet },
-    "@/lib/maintenance": { registerEvictable: (name: string, evict: (aggressive: boolean) => void) => evictors.set(name, evict) },
+    "@/lib/maintenance": {
+      registerEvictable: (name: string, evict: (aggressive: boolean) => void) =>
+        evictors.set(name, evict),
+    },
     "@/lib/config/endpoints": { HARBOR_API_BASE: "https://fixture.invalid" },
     "@/lib/safe-fetch": { safeFetch: send },
     "@/lib/providers/csm": {},
   };
-  const source = readFileSync(new URL("../src/lib/providers/harbor-imdb.ts", import.meta.url), "utf8");
+  const source = readFileSync(
+    new URL("../src/lib/providers/harbor-imdb.ts", import.meta.url),
+    "utf8",
+  );
   const compiled = ts.transpileModule(source, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
   }).outputText;
   const exports: Record<string, any> = {};
-  new Function("require", "exports", "fetch", "Date", compiled)((id: string) => {
-    assert.ok(Object.hasOwn(mocks, id), `Unexpected dependency: ${id}`);
-    return mocks[id];
-  }, exports, send, { now: () => now });
+  new Function("require", "exports", "fetch", "Date", compiled)(
+    (id: string) => {
+      if (id === "@/lib/metadata-policy" || id === "./metadata-policy")
+        return { addonOnlyMetadata: () => false };
+      assert.ok(Object.hasOwn(mocks, id), `Unexpected dependency: ${id}`);
+      return mocks[id];
+    },
+    exports,
+    send,
+    { now: () => now },
+  );
   return {
     get: exports.harborImdbEpisodes as (id: string) => Promise<Map<string, number>>,
     cached: exports.harborImdbEpisodesCached as (id: string) => Map<string, number> | undefined,
-    advance: (ms: number) => { now += ms; },
+    advance: (ms: number) => {
+      now += ms;
+    },
     requests: () => requests,
-    respond: (next: () => Promise<unknown>) => { response = next; },
-    ratings: (ratings: Record<string, unknown>) => { response = async () => ({ ok: true, json: async () => ({ ratings }) }); },
+    respond: (next: () => Promise<unknown>) => {
+      response = next;
+    },
+    ratings: (ratings: Record<string, unknown>) => {
+      response = async () => ({ ok: true, json: async () => ({ ratings }) });
+    },
     evict: (aggressive: boolean) => evictors.get("harbor-imdb-episodes")!(aggressive),
   };
 }
@@ -88,7 +113,12 @@ test("concurrent refreshes share one request and cache age starts at completion"
   await f.get("tt1");
   f.advance(hour);
   let finish!: (value: unknown) => void;
-  f.respond(() => new Promise((resolve) => { finish = resolve; }));
+  f.respond(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
   const first = f.get("tt1");
   const second = f.get("tt1");
   assert.equal(f.requests(), 2);
@@ -125,5 +155,5 @@ test("non-IMDb identifiers make no request and existing invalid-rating filtering
   assert.equal((await f.get("tmdb:tv:1")).size, 0);
   assert.equal(f.requests(), 0);
   f.ratings({ "1:1": "8.2", "1:2": null, "1:3": 0, "1:4": "N/A", "1:5": -1 });
-  assert.deepEqual([...await f.get("tt1")], [["1:1", 8.2]]);
+  assert.deepEqual([...(await f.get("tt1"))], [["1:1", 8.2]]);
 });

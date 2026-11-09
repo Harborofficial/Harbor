@@ -4,6 +4,7 @@ import { notifyMediaSeeked } from "@/lib/media-session";
 
 export function usePendingSeekApply(params: {
   pendingSeekSec: number | null;
+  initialSeek?: boolean;
   preserveExactPosition?: boolean;
   clearPendingSeek: () => void;
   durationSec: number;
@@ -30,10 +31,12 @@ export function usePendingSeekApply(params: {
     if (!b) return;
     const target = pendingSeekSec;
     const t =
-      !params.preserveExactPosition && (target <= 5 || target >= durationSec - 20)
+      !params.initialSeek &&
+      !params.preserveExactPosition &&
+      (target <= 5 || target >= durationSec - 20)
         ? 0
         : Math.max(0, Math.min(target, durationSec - 1));
-    let issued = false;
+    let issued = params.initialSeek === true;
     let applied = false;
     const off = b.subscribe((snap) => {
       // seek() queues a native command. Keep automatic intro/outro actions blocked
@@ -44,7 +47,7 @@ export function usePendingSeekApply(params: {
         bridgeRef.current !== b ||
         snap.status === "loading" ||
         !Number.isFinite(snap.positionSec) ||
-        Math.abs(snap.positionSec - t) > 1
+        (params.initialSeek ? snap.positionSec < t - 1 : Math.abs(snap.positionSec - t) > 1)
       )
         return;
       applied = true;
@@ -53,7 +56,7 @@ export function usePendingSeekApply(params: {
       if (!inRoomRef.current && !startPaused) b.play({ reason: "pending-seek" }).catch(() => {});
     });
     issued = true;
-    b.seek(t);
+    if (!params.initialSeek) b.seek(t);
     return off;
   }, [
     pendingSeekSec,
@@ -63,5 +66,6 @@ export function usePendingSeekApply(params: {
     sourceKey,
     startPaused,
     params.preserveExactPosition,
+    params.initialSeek,
   ]);
 }

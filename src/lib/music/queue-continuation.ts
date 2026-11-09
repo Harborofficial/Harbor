@@ -44,6 +44,30 @@ export function freshContinuationTracks(candidates: readonly MusicTrack[], exclu
   });
 }
 
+/**
+ * Every page after the one already on screen, so a queue started from a paged
+ * collection can hold the whole collection instead of the pages scrolled so far.
+ * The callback sees each page as it arrives and may return false to stop.
+ */
+export async function readSpotifyQueuePages(
+  origin: Extract<MusicPlaybackOrigin, { kind: "spotify" }>,
+  offset: number,
+  onPage: (tracks: MusicTrack[], nextOffset: number | null) => boolean | void,
+  api = dependencies,
+): Promise<void> {
+  for (;;) {
+    if (!Number.isSafeInteger(offset) || offset < 0 || offset > 100_000) throw new Error("Invalid music page");
+    const result = await api.spotify(origin.collection, offset,
+      origin.collection === "playlist" ? origin.id : undefined);
+    const next = result.nextOffset;
+    if (next !== null && (!Number.isSafeInteger(next) || next <= offset || next > 100_000)) {
+      throw new Error("Invalid music pagination");
+    }
+    if (onPage(result.tracks, next) === false || next === null) return;
+    offset = next;
+  }
+}
+
 export async function loadMusicContinuation({ mode, origin, current, queue, history }: {
   mode: MusicContinuationMode;
   origin: MusicPlaybackOrigin;

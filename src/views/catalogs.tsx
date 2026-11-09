@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Pin, Puzzle, SlidersHorizontal, X } from "lucide-react";
 import { PencilOutlineIcon } from "@/components/icons/pencil-outline";
 import { Search } from "@/components/icons/search-icon";
@@ -9,9 +9,11 @@ import {
   subscribeBrowseCatalogs,
   type BrowseCatalog,
 } from "@/lib/catalog-browse";
-import { useView } from "@/lib/view";
+import { useScrollMemory, useView } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { CatalogBrowser } from "./catalogs/catalog-browser";
 import { CatalogShelf } from "./catalogs/catalog-shelf";
 import { CatalogManageList } from "./catalogs/catalog-manage-list";
 import { AddonFilterSelect } from "./catalogs/addon-filter-select";
@@ -26,11 +28,12 @@ export function Catalogs({ active = true }: { active?: boolean }) {
   const contentDrag = useContentDrag();
   const [catalogs, setCatalogs] = useState<BrowseCatalog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [addonFilter, setAddonFilter] = useState("all");
-  const [customize, setCustomize] = useState(false);
-  void active;
+  const [query, setQuery] = useSessionState("catalogs.query", "");
+  const [typeFilter, setTypeFilter] = useSessionState("catalogs.typeFilter", "all");
+  const [addonFilter, setAddonFilter] = useSessionState("catalogs.addonFilter", "all");
+  const [customize, setCustomize] = useSessionState("catalogs.customize", false);
+  const scrollRef = useRef<HTMLElement>(null);
+  useScrollMemory("catalogs", scrollRef, active);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +71,18 @@ export function Catalogs({ active = true }: { active?: boolean }) {
     hidden,
   );
 
+  useEffect(() => {
+    if (types.length === 0) return;
+    if (typeFilter === "all" || types.includes(typeFilter)) return;
+    setTypeFilter("all");
+  }, [types, typeFilter, setTypeFilter]);
+
+  useEffect(() => {
+    if (addons.length === 0) return;
+    if (addonFilter === "all" || addons.some((addon) => addon.name === addonFilter)) return;
+    setAddonFilter("all");
+  }, [addons, addonFilter, setAddonFilter]);
+
   const togglePin = (key: string) =>
     update({
       catalogsPinned: pinned.includes(key) ? pinned.filter((k) => k !== key) : [...pinned, key],
@@ -91,7 +106,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
   );
 
   return (
-    <main className="flex-1 overflow-y-auto px-12 pb-24 pt-28">
+    <main ref={scrollRef} className="flex-1 overflow-y-auto px-12 pb-24 pt-28">
       <div {...contentDrag} className="flex flex-col gap-8">
         <header className="flex flex-col gap-5">
           <div className="flex items-end justify-between gap-4">
@@ -121,6 +136,8 @@ export function Catalogs({ active = true }: { active?: boolean }) {
               </button>
             )}
           </div>
+
+          {!customize && !loading && <CatalogBrowser catalogs={catalogs} />}
 
           {!loading && catalogs.length > 0 && (
             <div className="flex flex-col gap-3">

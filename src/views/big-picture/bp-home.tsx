@@ -5,6 +5,7 @@ import { pushBigPicture } from "@/lib/big-picture";
 import { isAndroidTv } from "@/lib/platform";
 import { useSettings, type StreamingService } from "@/lib/settings";
 import { useMobileCw, useMobileCwReady } from "@/views/mobile/mobile-cw-row";
+import { useBpCwAdvance } from "./use-bp-cw";
 import { BpPageSkeleton } from "./bp-page-skeleton";
 import { BpSpotlight } from "./bp-spotlight";
 import { useBpHeroCycle } from "./use-bp-hero-cycle";
@@ -18,7 +19,6 @@ import { BpBandIdentity } from "./bp-section";
 import { BpCollectionsRow } from "./bp-collections-row";
 import { BpLiveRow } from "./bp-live-row";
 import { BpServiceRow } from "./bp-service-row";
-import { BpAddonRow } from "./addons/bp-addon-row";
 import { useBpCatalog } from "./use-bp-catalog";
 import {
   bpHomeSignature,
@@ -36,7 +36,7 @@ const SERVICES_SLOT = 2;
 
 export function BpHome({ onSelect }: { onSelect: (m: Meta) => void }) {
   const { rows, loading, failed } = useBpCatalog();
-  const cwAll = useMobileCw(16);
+  const cwAll = useBpCwAdvance(useMobileCw(16));
   const cwReady = useMobileCwReady();
   const { cwHidden, collectionsHidden } = useBpPinnedRows();
   const cw = cwReady && !cwHidden ? cwAll : [];
@@ -49,7 +49,9 @@ export function BpHome({ onSelect }: { onSelect: (m: Meta) => void }) {
   const services = useMemo(
     () =>
       settings.tmdbKey
-        ? (Object.keys(settings.streaming) as StreamingService[]).filter((s) => settings.streaming[s])
+        ? (Object.keys(settings.streaming) as StreamingService[]).filter(
+            (s) => settings.streaming[s],
+          )
         : [],
     [settings.tmdbKey, settings.streaming],
   );
@@ -131,7 +133,9 @@ export function BpHome({ onSelect }: { onSelect: (m: Meta) => void }) {
           {t("Couldn't load your catalogs")}
         </h2>
         <p className="max-w-md text-[clamp(13px,1.85vh,21px)] text-ink-muted">
-          {t("Harbor couldn't reach the catalog servers. Check the connection and reopen Big Picture.")}
+          {t(
+            "Harbor couldn't reach the catalog servers. Check the connection and reopen Big Picture.",
+          )}
         </p>
       </div>
     );
@@ -182,8 +186,6 @@ export function BpHome({ onSelect }: { onSelect: (m: Meta) => void }) {
       />
     ) : null,
   });
-
-  entries.push({ key: "addons", band: "addons", node: <BpAddonRow /> });
 
   // Pushed unconditionally: BpLiveRow renders nothing without playlists, and the
   // empty wrapper collapses via empty:hidden, so rail indices stay contiguous

@@ -16,6 +16,7 @@ import {
 } from "@/components/music/music-connections/connection-row";
 import { useT } from "@/lib/i18n";
 import { loadConnections } from "@/lib/music/catalog";
+import { hydrateMusicSourceConsent } from "@/lib/music/source-consent";
 import type { MusicConnection, MusicConnectionKind } from "@/lib/music/types";
 import { MusicSourceConsent } from "./music-source-consent";
 
@@ -53,7 +54,13 @@ export function requestMusicConnection(focusId: string) {
   window.dispatchEvent(new Event("harbor:music-connect"));
 }
 
-export function MusicConnectionsProvider({ children, active = true }: { children: ReactNode; active?: boolean }) {
+export function MusicConnectionsProvider({
+  children,
+  active = true,
+}: {
+  children: ReactNode;
+  active?: boolean;
+}) {
   const [request, setRequest] = useState<ConnectionsRequest | null>(null);
   const [connections, setConnections] = useState<MusicConnection[] | null>(null);
   const [error, setError] = useState("");
@@ -78,8 +85,8 @@ export function MusicConnectionsProvider({ children, active = true }: { children
   const reload = useCallback(() => {
     const run = ++generation.current;
     setError("");
-    void loadConnections()
-      .then((next) => {
+    void Promise.all([loadConnections(), hydrateMusicSourceConsent()])
+      .then(([next]) => {
         if (generation.current !== run) return;
         setConnections(Array.isArray(next) ? next : []);
       })

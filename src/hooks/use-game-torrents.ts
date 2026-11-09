@@ -1,3 +1,4 @@
+import {DOWNLOAD_PROGRESS_UI_INTERVAL,isImportantDownloadEvent} from "@/lib/games/download-event-batching";
 import { useEffect, useRef, useState } from "react";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -15,17 +16,36 @@ export function useGameTorrents(profile: string, active: boolean) {
   const [draftReview, setDraftReview] = useState(false);
   const owner = useRef(profile), live = useRef(true), revision = useRef(0), pending = useRef(new Set<string>()), events = useRef(new Map<string, GameTorrent>());
   owner.current = profile; const valid = () => live.current && owner.current === profile;
+  const staged=useRef(new Map<string, GameTorrent>());
+  const progressTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const cancelProgressTimer=()=>{
+    if(progressTimer.current!==null)clearTimeout(progressTimer.current);
+    progressTimer.current=null;staged.current.clear();
+  };
+  const flushProgress=()=>{
+    if(progressTimer.current!==null)clearTimeout(progressTimer.current);
+    progressTimer.current=null;
+    const batch=[...staged.current.values()];
+    staged.current.clear();
+    if(!batch.length||!valid())return;
+    setState(previous=>{
+      const merged=new Map((previous.profile===profile?previous.records:[]).map(record=>[record.id,record]));
+      for(const value of batch)merged.set(value.id,mergeDownloadContext("torrent",value));
+      return {profile,records:[...merged.values()]};
+    });
+  };
+
   const refresh = async () => {
     if (!available) return; refreshDownloadContexts(); const request = ++revision.current; setLoading(true); setError(""); events.current.clear();
     try { const records = await invoke<GameTorrent[]>("games_list_torrents", { profile }); if (valid() && request === revision.current) setState({ profile, records: [...new Map([...records, ...events.current.values()].filter(item => item.profile === profile).map(item => [item.id, mergeDownloadContext("torrent", item)])).values()] }); }
     catch (reason) { if (valid() && request === revision.current) setError(torrentError(reason)); }
     finally { if (valid() && request === revision.current) setLoading(false); }
   };
-  useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
-  useEffect(() => { pending.current.clear(); events.current.clear(); setBusy([]); setError(""); setDraft(null); setDraftGame(undefined); setDraftReview(false); }, [profile]);
+  useEffect(() => { live.current = true; return () => { live.current = false; cancelProgressTimer(); }; }, []);
+  useEffect(() => { cancelProgressTimer(); pending.current.clear(); events.current.clear(); setBusy([]); setError(""); setDraft(null); setDraftGame(undefined); setDraftReview(false); }, [profile]);
   useEffect(() => {
     if (!available) return; let current = true;
-    const stop = listen<GameTorrent>("games:torrent", ({ payload }) => { if (!current || !valid() || payload.profile !== profile) return; const record = mergeDownloadContext("torrent", payload); events.current.set(payload.id, payload); setState(previous => ({ profile, records: [...(previous.profile === profile ? previous.records : []).filter(item => item.id !== record.id), record] })); }).catch(() => () => {});
+    const stop = listen<GameTorrent>("games:torrent", ({ payload }) => { if (!current || !valid() || payload.profile !== profile) return; const previous=events.current.get(payload.id);events.current.set(payload.id,payload);staged.current.set(payload.id,payload);if(isImportantDownloadEvent(previous,payload))flushProgress();else if(progressTimer.current===null)progressTimer.current=setTimeout(flushProgress,DOWNLOAD_PROGRESS_UI_INTERVAL); }).catch(() => () => {});
     const stopQueue = listen<string>("games:download-queue", ({payload}) => { if (current && valid() && payload === profile) void refresh(); }).catch(() => () => {});
     return () => { current = false; void stop.then(unlisten => unlisten()); void stopQueue.then(unlisten => unlisten()); };
   }, [available, profile]);

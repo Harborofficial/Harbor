@@ -23,11 +23,7 @@ import {
   useMusicConnections,
 } from "@/components/music/music-connections";
 import { MusicHomeHero } from "./music/music-home-hero";
-import {
-  MusicTastes,
-  readMusicTastes,
-  useMusicTasteRows,
-} from "./music/music-tastes";
+import { MusicTastes, readMusicTastes, useMusicTasteRows } from "./music/music-tastes";
 import { MusicCatalogRow } from "@/components/music/music-catalog-row";
 import { MusicSectionError } from "@/components/music/music-track-grid";
 import { MusicNavigateProvider } from "@/components/music/music-navigate";
@@ -35,6 +31,7 @@ import { MusicYouTube } from "@/components/music/music-youtube";
 import { MusicPlaylistPickerProvider } from "@/components/music/music-playlist-picker";
 import { MusicWatch } from "@/components/music/music-watch";
 import { MusicVideoDiscovery } from "@/components/music/music-video-discovery";
+import { takePendingMusicWatch, type MusicWatchRequest } from "@/lib/music/video-mini";
 import { MusicSimilarPage } from "./music/music-similar-page";
 import { MusicRollingStoneRow } from "@/components/music/music-rolling-stone-row";
 import { MusicRollingStonePage } from "@/components/music/music-rolling-stone-page";
@@ -89,10 +86,11 @@ import {
   stopMusicCasting,
 } from "@/lib/music/player";
 import { useMusicPlayback } from "@/lib/music/use-music-playback";
-import { hasUsableMusicSource } from "@/lib/music/source-consent";
+import { hasUsableMusicSource, useMusicSourceConsent } from "@/lib/music/source-consent";
 import type { MusicCatalogItem, MusicSearchResults, MusicTrack } from "@/lib/music/types";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useScrollMemory } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { resetMusicScroll, useMusicScrollContinuity } from "@/lib/music/scroll-continuity";
 import { useSectionBack } from "@/lib/section-back";
 import { MusicBandStack } from "./music/music-band-stack";
@@ -131,7 +129,11 @@ type SearchState = {
 
 type Notice = { kind: "busy" | "info" | "error"; text: string };
 
-const MusicQuickListen = lazy(() => import("@/components/music/music-quick-listen").then(module => ({ default: module.MusicQuickListen })));
+const MusicQuickListen = lazy(() =>
+  import("@/components/music/music-quick-listen").then((module) => ({
+    default: module.MusicQuickListen,
+  })),
+);
 
 export function MusicView({ active }: { active: boolean; shellBackAvailable?: boolean }) {
   return (
@@ -147,6 +149,7 @@ export function MusicView({ active }: { active: boolean; shellBackAvailable?: bo
 
 function MusicViewContent({ active }: { active: boolean }) {
   const t = useT();
+  useMusicSourceConsent();
   const player = useMusicPlayback();
   const { openSourcePicker } = useMusicSourcePicker();
   const {
@@ -180,12 +183,12 @@ function MusicViewContent({ active }: { active: boolean }) {
   }, []);
   useScrollMemory("music", scrollRef, active);
 
-  const [genre, setGenre] = useState<MusicGenreEntry | null>(null);
-  const [discoveryPage, setDiscoveryPage] = useState<
+  const [genre, setGenre] = useSessionState<MusicGenreEntry | null>("music.genre", null);
+  const [discoveryPage, setDiscoveryPage] = useSessionState<
     "tastes" | "playlists" | "videos" | "billboard" | "rollingStone" | null
-  >(null);
-  const [billboardChart, setBillboardChart] = useState("hot-100");
-  const [videoQuery, setVideoQuery] = useState("music videos");
+  >("music.discoveryPage", null);
+  const [billboardChart, setBillboardChart] = useSessionState("music.billboardChart", "hot-100");
+  const [videoQuery, setVideoQuery] = useSessionState("music.videoQuery", "music videos");
   const discoveryOrigin = useRef<{ text: string | null } | null>(null);
   const openDiscovery = (
     page: "tastes" | "playlists" | "videos" | "billboard" | "rollingStone",
@@ -236,8 +239,10 @@ function MusicViewContent({ active }: { active: boolean }) {
     }
   }, [connectionsPage]);
   const [quickListen, setQuickListen] = useState<MusicTrack[] | null>(null);
-  useEffect(() => { if (!active) setQuickListen(null); }, [active]);
-  const [tab, setTab] = useState<MusicTabId>("forYou");
+  useEffect(() => {
+    if (!active) setQuickListen(null);
+  }, [active]);
+  const [tab, setTab] = useSessionState<MusicTabId>("music.tab", "forYou");
   const [search, setSearch] = useState<SearchState | null>(null);
   const [searching, setSearching] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -260,10 +265,10 @@ function MusicViewContent({ active }: { active: boolean }) {
     similarRun.current += 1;
     setSimilar(null);
   }, []);
-  const [collectionPage, setCollectionPage] = useState<{
+  const [collectionPage, setCollectionPage] = useSessionState<{
     kind: "playlist" | "liked" | "recent";
     id: string;
-  } | null>(null);
+  } | null>("music.collectionPage", null);
   const closeCollectionPage = useCallback(() => setCollectionPage(null), []);
   const openCollection = useCallback((entry: MusicCollectionEntry) => {
     if (entry.kind === "playlist" || entry.kind === "liked" || entry.kind === "recent")
@@ -340,29 +345,38 @@ function MusicViewContent({ active }: { active: boolean }) {
     if (active) document.title = `${t("music.title")} | Harbor`;
   }, [active, t]);
 
-  const runSearch = useCallback((query: string, connector: string | null) => {
-    const generation = ++searchGeneration.current;
-    if (detailRef.current) searchOrigin.current = detailRef.current;
-    setDetail(null);
-    setSimilar(null);
-    if (!searchOrigin.current) detailTrail.current = [];
-    resolveGeneration.current += 1;
-    setNotice(null);
-    setSearch({ query, connector, results: null, error: "" });
-    setSearching(true);
-    searchTyped(query, 36, connector ?? undefined)
-      .then((results) => {
-        if (searchGeneration.current !== generation) return;
-        setSearch({ query, connector, results, error: "" });
-      })
-      .catch((cause) => {
-        if (searchGeneration.current !== generation) return;
-        setSearch({ query, connector, results: null, error: errorText(cause) });
-      })
-      .finally(() => {
-        if (searchGeneration.current === generation) setSearching(false);
-      });
-  }, []);
+  const runSearch = useCallback(
+    (query: string, connector: string | null) => {
+      if (watch) {
+        setVideoQuery(query.trim() || "music videos");
+        setWatch(null);
+        setDiscoveryPage("videos");
+        return;
+      }
+      const generation = ++searchGeneration.current;
+      if (detailRef.current) searchOrigin.current = detailRef.current;
+      setDetail(null);
+      setSimilar(null);
+      if (!searchOrigin.current) detailTrail.current = [];
+      resolveGeneration.current += 1;
+      setNotice(null);
+      setSearch({ query, connector, results: null, error: "" });
+      setSearching(true);
+      searchTyped(query, 36, connector ?? undefined)
+        .then((results) => {
+          if (searchGeneration.current !== generation) return;
+          setSearch({ query, connector, results, error: "" });
+        })
+        .catch((cause) => {
+          if (searchGeneration.current !== generation) return;
+          setSearch({ query, connector, results: null, error: errorText(cause) });
+        })
+        .finally(() => {
+          if (searchGeneration.current === generation) setSearching(false);
+        });
+    },
+    [watch],
+  );
 
   const openLabel = useCallback((id: string, name: string) => {
     const generation = ++searchGeneration.current;
@@ -371,7 +385,14 @@ function MusicViewContent({ active }: { active: boolean }) {
     if (!searchOrigin.current) detailTrail.current = [];
     resolveGeneration.current += 1;
     setSimilar(null);
-    setSearch({ labelId: id, query: name, connector: null, results: null, error: "", mode: "label" });
+    setSearch({
+      labelId: id,
+      query: name,
+      connector: null,
+      results: null,
+      error: "",
+      mode: "label",
+    });
     setSearching(true);
     loadMusicLabel(id)
       .then((results) => {
@@ -441,6 +462,29 @@ function MusicViewContent({ active }: { active: boolean }) {
     };
     window.addEventListener("harbor:music-player-closed", closed);
     return () => window.removeEventListener("harbor:music-player-closed", closed);
+  }, []);
+  useEffect(() => {
+    const apply = (request: MusicWatchRequest | null) => {
+      if (!request) return;
+      watchFromVideos.current = false;
+      setDiscoveryPage(null);
+      setYtm(false);
+      setSimilar(null);
+      setSearch(null);
+      const nextTrack = { ...request.track, mediaKind: "video" as const };
+      setWatch({
+        track: nextTrack,
+        queue: request.queue.length
+          ? request.queue.map((item) => ({ ...item, mediaKind: "video" as const }))
+          : [nextTrack],
+      });
+    };
+    const open = (event: Event) => {
+      apply(takePendingMusicWatch() ?? (event as CustomEvent<MusicWatchRequest>).detail ?? null);
+    };
+    window.addEventListener("harbor:music-watch", open);
+    apply(takePendingMusicWatch());
+    return () => window.removeEventListener("harbor:music-watch", open);
   }, []);
   useMusicPageEscape(closeConnections, active && connectionsPage !== null);
   useMusicPageEscape(
@@ -684,32 +728,39 @@ function MusicViewContent({ active }: { active: boolean }) {
     }
   }, []);
 
-  const [libraryTarget, setLibraryTarget] = useState<{ view?: string; playlistId?: string; spotifyKind?: "playlists" | "liked" } | null>(
-    null,
-  );
+  const [libraryTarget, setLibraryTarget] = useState<{
+    view?: string;
+    playlistId?: string;
+    spotifyKind?: "playlists" | "liked";
+  } | null>(null);
   // Clicking a playlist has to land on that playlist, not on whatever tab the library
   // happened to open on last time.
-  const openLibrary = useCallback((target?: { view?: string; playlistId?: string; spotifyKind?: "playlists" | "liked" }) => {
-    similarRun.current += 1;
-    setLibraryTarget(target ?? null);
-    const spotify = target?.view === "spotify";
-    setCollectionPage(!spotify && target?.playlistId
-      ? { kind: "playlist", id: target.playlistId }
-      : target?.view === "saved" || target?.view === "liked"
-        ? { kind: "liked", id: "liked" }
-        : target?.view === "recent"
-          ? { kind: "recent", id: "recent" }
-          : null);
-    setTab("library");
-    setDetail(null);
-    setSearch(null);
-    setSimilar(null);
-    setWatch(null);
-    setYtm(false);
-    setDiscoveryPage(null);
-    searchOrigin.current = null;
-    scrollRef.current?.scrollTo({ top: 0 });
-  }, []);
+  const openLibrary = useCallback(
+    (target?: { view?: string; playlistId?: string; spotifyKind?: "playlists" | "liked" }) => {
+      similarRun.current += 1;
+      setLibraryTarget(target ?? null);
+      const spotify = target?.view === "spotify";
+      setCollectionPage(
+        !spotify && target?.playlistId
+          ? { kind: "playlist", id: target.playlistId }
+          : target?.view === "saved" || target?.view === "liked"
+            ? { kind: "liked", id: "liked" }
+            : target?.view === "recent"
+              ? { kind: "recent", id: "recent" }
+              : null,
+      );
+      setTab("library");
+      setDetail(null);
+      setSearch(null);
+      setSimilar(null);
+      setWatch(null);
+      setYtm(false);
+      setDiscoveryPage(null);
+      searchOrigin.current = null;
+      scrollRef.current?.scrollTo({ top: 0 });
+    },
+    [],
+  );
 
   const showSearch = useCallback(
     (query: string, results: MusicSearchResults | null, error = "", retry?: () => void) => {
@@ -989,7 +1040,9 @@ function MusicViewContent({ active }: { active: boolean }) {
       }
       showSearch("", null);
       requestAnimationFrame(() =>
-        document.querySelector<HTMLInputElement>("[data-music-mast-search]")?.focus({ preventScroll: true }),
+        document
+          .querySelector<HTMLInputElement>("[data-music-mast-search]")
+          ?.focus({ preventScroll: true }),
       );
     };
     window.addEventListener(MUSIC_SEARCH_EVENT, receive);
@@ -1045,21 +1098,46 @@ function MusicViewContent({ active }: { active: boolean }) {
       setDiscoveryPage(null);
       setWatch(null);
       setYtm(false);
-      setSimilar({ seed: recent.seed, tracks: [], state: "loading", label: recent.name, contextId: recent.id });
+      setSimilar({
+        seed: recent.seed,
+        tracks: [],
+        state: "loading",
+        label: recent.name,
+        contextId: recent.id,
+      });
       try {
         if (load) {
           const tracks = await load();
           if (!tracks.length) throw new Error("Music mix unavailable");
-          if (similarRun.current === run) setSimilar({ seed: recent.seed, tracks, state: "ready", label: recent.name, contextId: recent.id });
+          if (similarRun.current === run)
+            setSimilar({
+              seed: recent.seed,
+              tracks,
+              state: "ready",
+              label: recent.name,
+              contextId: recent.id,
+            });
           return;
         }
         await reopenMusicMix(recent, (request) => {
           if (similarRun.current !== run) return;
-          setSimilar({ seed: request.track, tracks: request.queue ?? [], state: "ready", label: request.label, contextId: request.contextId });
+          setSimilar({
+            seed: request.track,
+            tracks: request.queue ?? [],
+            state: "ready",
+            label: request.label,
+            contextId: request.contextId,
+          });
         });
       } catch {
         if (similarRun.current === run)
-          setSimilar({ seed: recent.seed, tracks: [], state: "error", label: recent.name, contextId: recent.id });
+          setSimilar({
+            seed: recent.seed,
+            tracks: [],
+            state: "error",
+            label: recent.name,
+            contextId: recent.id,
+          });
       }
     },
     searchArtist: (name) => navigate.goToArtist(name),
@@ -1200,6 +1278,7 @@ function MusicViewContent({ active }: { active: boolean }) {
             <section data-scroll-anchor="mast">
               <MusicMast
                 initialQuery={search && search.mode !== "genre" ? search.query : ""}
+                videoSearch={watch !== null}
                 onSubmit={runSearch}
                 onClear={clearSearch}
                 onPick={(item) => openItem(item, [item])}
@@ -1302,8 +1381,14 @@ function MusicViewContent({ active }: { active: boolean }) {
                 searching={searching}
                 onRetry={search.retry ?? (() => runSearch(search.query, search.connector))}
                 onClear={clearSearch}
-                onOpenItem={(item, siblings) => { rememberMusicSearchItem(item); openItem(item, siblings); }}
-                onPlayTrack={(track, queue) => { rememberMusicSearchItem({ ...track, kind: "track" }); playTrack(track, queue); }}
+                onOpenItem={(item, siblings) => {
+                  rememberMusicSearchItem(item);
+                  openItem(item, siblings);
+                }}
+                onPlayTrack={(track, queue) => {
+                  rememberMusicSearchItem({ ...track, kind: "track" });
+                  playTrack(track, queue);
+                }}
               />
             ) : discoveryPage === "tastes" ? (
               <MusicTastes
@@ -1375,13 +1460,41 @@ function MusicViewContent({ active }: { active: boolean }) {
                   className="music-navigation flex flex-wrap items-center justify-between gap-3"
                 >
                   <MusicTabs className="min-w-0 flex-1" value={tab} onChange={setTab} />
-                  {tab === "forYou" && <HoverTooltip label={t("music.quickListen.title")}>
-                    <button type="button" className="music-quick-entry" aria-label={t("music.quickListen.title")} onClick={() => setQuickListen([
-                      ...(player.current ? [player.current] : []), ...player.recents, ...player.likedTracks,
-                      ...data.homeRows.flatMap(row => row.items.filter((item): item is MusicCatalogItem & MusicTrack => item.kind === "track")),
-                    ])}><MusicQuickListenIcon /></button>
-                  </HoverTooltip>}
-                  {tab === "forYou" && <MusicSurpriseButton genres={tastes} homeRows={data.homeRows} spotifyConnected={connections.some(connection => connection.id === "spotify" && connection.status === "connected")} onChooseTastes={() => openDiscovery("tastes")} />}
+                  {tab === "forYou" && (
+                    <HoverTooltip label={t("music.quickListen.title")}>
+                      <button
+                        type="button"
+                        className="music-quick-entry"
+                        aria-label={t("music.quickListen.title")}
+                        onClick={() =>
+                          setQuickListen([
+                            ...(player.current ? [player.current] : []),
+                            ...player.recents,
+                            ...player.likedTracks,
+                            ...data.homeRows.flatMap((row) =>
+                              row.items.filter(
+                                (item): item is MusicCatalogItem & MusicTrack =>
+                                  item.kind === "track",
+                              ),
+                            ),
+                          ])
+                        }
+                      >
+                        <MusicQuickListenIcon />
+                      </button>
+                    </HoverTooltip>
+                  )}
+                  {tab === "forYou" && (
+                    <MusicSurpriseButton
+                      genres={tastes}
+                      homeRows={data.homeRows}
+                      spotifyConnected={connections.some(
+                        (connection) =>
+                          connection.id === "spotify" && connection.status === "connected",
+                      )}
+                      onChooseTastes={() => openDiscovery("tastes")}
+                    />
+                  )}
                   <HoverTooltip label={t("music.audio.title")} align="end">
                     <button
                       type="button"
@@ -1488,13 +1601,14 @@ function MusicViewContent({ active }: { active: boolean }) {
               </div>
             )}
           </div>
-          <BackToTop
-            scrollRef={scrollRef}
-            icon={<MusicGlyph name="expand" size={14} />}
-          />
+          <BackToTop scrollRef={scrollRef} icon={<MusicGlyph name="expand" size={14} />} />
         </ScrollRootContext.Provider>
       </main>
-      {active && quickListen && <Suspense fallback={null}><MusicQuickListen seeds={quickListen} onClose={() => setQuickListen(null)} /></Suspense>}
+      {active && quickListen && (
+        <Suspense fallback={null}>
+          <MusicQuickListen seeds={quickListen} onClose={() => setQuickListen(null)} />
+        </Suspense>
+      )}
     </MusicNavigateProvider>
   );
 }

@@ -31,6 +31,7 @@ mod native_context_policy;
 mod playback_redirect;
 mod power;
 mod privacy;
+mod process_output;
 mod proc_guard;
 mod proc_mem;
 mod settings_store;
@@ -107,6 +108,8 @@ mod monitors;
 mod mpv;
 #[cfg(desktop)]
 mod mpv_liquid_glass;
+#[cfg(desktop)]
+mod mpv_preload;
 #[cfg(target_os = "linux")]
 mod linux_gamescope;
 #[cfg(target_os = "linux")]
@@ -123,6 +126,8 @@ mod pip;
 mod pip_mac;
 mod pip_window;
 #[cfg(desktop)]
+mod profile_audio;
+#[cfg(desktop)]
 mod roku;
 #[cfg(desktop)]
 mod shaders;
@@ -130,6 +135,8 @@ mod shaders;
 mod song_id;
 #[cfg(desktop)]
 mod song_id_gemini;
+#[cfg(desktop)]
+mod indexed_mkv_subtitles;
 #[cfg(desktop)]
 mod sub_extract;
 #[cfg(desktop)]
@@ -1110,6 +1117,7 @@ pub fn run() {
             if let Err(error) = crash_report::initialize(app.handle()) {
                 eprintln!("[harbor::crash-report] initialization failed: {error}");
             }
+            thumb_cache::allow_asset_access(app.handle());
             proc_guard::init();
             if !cfg!(feature = "context-review") {
                 proc_guard::reap_orphans();
@@ -1121,6 +1129,12 @@ pub fn run() {
             #[cfg(feature = "music")]
             if install_features::music_enabled() {
                 music::initialize(app.handle()).map_err(std::io::Error::other)?;
+            }
+            {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    crate::ytdlp_update::warm(&handle).await;
+                });
             }
             #[cfg(windows)]
             if !cfg!(feature = "context-review") {
@@ -1617,6 +1631,10 @@ pub fn run() {
             #[cfg(feature = "games")]
             games::games_download_locations,
             #[cfg(feature = "games")]
+            games::games_download_folders,
+            #[cfg(feature = "games")]
+            games::games_delete_game_downloads,
+            #[cfg(feature = "games")]
             games::games_set_transfer_bandwidth,
             #[cfg(feature = "games")]
             games::games_source_public_review,
@@ -1635,7 +1653,15 @@ pub fn run() {
             #[cfg(feature = "games")]
             games::games_cloud_download,
             #[cfg(feature = "games")]
+            games::games_cloud_tb_recovery_catalog,
+            #[cfg(feature = "games")]
             games::games_cloud_resolve_link,
+            #[cfg(feature = "games")]
+            games::games_cloud_magnet_create,
+            #[cfg(feature = "games")]
+            games::games_cloud_magnet_status,
+            #[cfg(feature = "games")]
+            games::games_cloud_magnet_download,
             #[cfg(feature = "games")]
             games::games_cloud_host_check,
             #[cfg(feature = "games")]
@@ -1792,6 +1818,7 @@ pub fn run() {
             desktop_notify::send_clickable_notification,
             installer_handoff::handoff_probe,
             installer_handoff::handoff_stage,
+            installer_handoff::handoff_probe_staged,
             installer_handoff::handoff_launch,
             installer_handoff::handoff_confirm,
             installer_handoff::handoff_save_backup,
@@ -1809,6 +1836,9 @@ pub fn run() {
             save_text_file,
             subsync::moviehash::compute_moviehash,
             subsync::sync_subtitle,
+            subsync::analysis_control::subsync_cancel_session,
+            subsync::cache_audio::subsync_prepare_cache_audio,
+            subsync::embedded_reference::subsync_embedded_reference,
             subsync::scorer::subsync_score_transform,
             subsync::scorer::subsync_preflight_candidates,
             subsync::torrent_sync::torrent_sync_availability,
@@ -1817,6 +1847,7 @@ pub fn run() {
             subsync::audio_tracks::audio_probe_tracks,
             subsync::fingerprint::compute_chromaprint,
             subsync::asr::asr_transcribe_windows,
+            subsync::playback_vad::subsync_playback_speech,
             subsync::asr::asr_verify,
             sub_extract::subtitle_extract,
             sub_extract::subtitle_extract_ass,
@@ -1831,6 +1862,9 @@ pub fn run() {
             anime4k::anime4k_dir,
             asr_model::asr_ensure_model,
             asr_model::asr_model_path,
+            asr_model::asr_model_status,
+            asr_model::asr_model_download,
+            asr_model::asr_model_remove,
             shaders::shader_download,
             shaders::shader_dir,
             svp::svp_status,
@@ -1847,6 +1881,7 @@ pub fn run() {
             diagnostics::diagnostics_cleanup,
             trailer::fetch_trailer,
             trailer::resolve_youtube_stream,
+            profile_audio::resolve_profile_audio,
             #[cfg(feature = "music")]
             music::music_health,
             #[cfg(feature = "music")]
@@ -2036,6 +2071,12 @@ pub fn run() {
             #[cfg(feature = "music")]
             music::music_catalog_playlist_tracks,
             #[cfg(feature = "music")]
+            music::music_import_linked_playlist,
+            #[cfg(feature = "music")]
+            music::music_sync_linked_playlist,
+            #[cfg(feature = "music")]
+            music::music_unlink_playlist,
+            #[cfg(feature = "music")]
             music::music_station_tracks,
             #[cfg(feature = "music")]
             music::music_search_typed,
@@ -2073,6 +2114,7 @@ pub fn run() {
             cf_relay::cf_relay_status,
             mpv::mpv_probe,
             mpv::mpv_start,
+            mpv::mpv_select_preloaded_tracks,
             external_player::external_player_start,
             external_player::external_player_command,
             external_player::external_player_stop,
@@ -2080,6 +2122,7 @@ pub fn run() {
             mpv::mpv_set_property,
             mpv::mpv_glass_layout,
             mpv::mpv_get_property,
+            mpv::mpv_get_seekable_ranges,
             mpv::mpv_get_property_list,
             mpv::mpv_vo_passes,
             mpv::mpv_audio_devices,
@@ -2157,6 +2200,7 @@ pub fn run() {
             thumbs::thumbs_set_url,
             thumbs::thumbs_spawn_eager,
             thumbs::thumbs_get,
+            thumbs::thumbs_prefetch,
             thumbs::thumbs_stop,
             dvr::dvr_start,
             dvr::dvr_stop,
@@ -2177,7 +2221,6 @@ pub fn run() {
             http_fetch::cached_thumb_path,
             subtitle_credentials::subtitle_credential_bind,
             subtitle_credentials::subtitle_credentials_clear,
-            cf_solver::cf_report,
             discord_rp::discord_set_presence,
             discord_rp::discord_clear,
             media_controls::media_controls_update,

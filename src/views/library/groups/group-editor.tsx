@@ -1,9 +1,12 @@
+import { Dropdown } from "@/components/dropdown";
+import { Switch } from "@/views/settings/plugins-panel/bits";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { Upload, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { validGroupImage, type LibraryGroup } from "@/lib/library-groups";
+import { validGroupImage, type LibraryGroup, type GroupPresentation } from "@/lib/library-groups";
+import { useSettings } from "@/lib/settings";
 
 export const groupInputClass =
   "h-11 w-full rounded-xl border border-edge bg-canvas px-3.5 text-[14px] text-ink focus:border-accent outline-none";
@@ -16,10 +19,13 @@ export function GroupEditor({
   onCancel,
 }: {
   group?: LibraryGroup;
-  onSave: (name: string, image: string) => void;
+  onSave: (name: string, image: string, presentation: GroupPresentation) => void;
   onCancel: () => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
+  const [hideHomeTitle, setHideHomeTitle] = useState(group?.hideHomeTitle ?? false);
+  const [homeSectionId, setHomeSectionId] = useState(group?.homeSectionId ?? "");
   const [name, setName] = useState(group?.name ?? "");
   const [image, setImage] = useState(group?.image ?? "");
   const [error, setError] = useState("");
@@ -88,7 +94,7 @@ export function GroupEditor({
         onKeyDown={(event) => {
           if (event.key !== "Tab") return;
           const controls = formRef.current?.querySelectorAll<HTMLElement>(
-            "input:not(:disabled):not([hidden]),button:not(:disabled)",
+            "input:not(:disabled):not([hidden]),select:not(:disabled),button:not(:disabled)",
           );
           const first = controls?.[0];
           const last = controls?.[controls.length - 1];
@@ -107,7 +113,10 @@ export function GroupEditor({
             setError(t("Use an HTTPS image URL or upload an image."));
             return;
           }
-          onSave(name.trim(), image.trim());
+          onSave(name.trim(), image.trim(), {
+            hideHomeTitle,
+            homeSectionId: homeSectionId || undefined,
+          });
         }}
         className="flex max-h-[85vh] w-full max-w-[480px] flex-col overflow-y-auto rounded-2xl border border-edge bg-elevated shadow-2xl"
       >
@@ -141,12 +150,12 @@ export function GroupEditor({
               <span className="text-[13px] font-medium text-ink-muted">{t("Group artwork")}</span>
               <span className="text-[12px] text-ink-subtle">{t("Optional")}</span>
             </div>
-            <div className="flex h-36 items-center justify-center rounded-xl border border-edge-soft bg-canvas p-4">
+            <div className="flex aspect-video items-center justify-center overflow-hidden rounded-xl border border-edge-soft bg-canvas">
               {image && validGroupImage(image) ? (
                 <img
                   src={image}
                   alt={t("Group artwork preview")}
-                  className="h-full max-w-full object-contain"
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 <HarborMark className="h-20 w-20 text-ink" />
@@ -191,6 +200,39 @@ export function GroupEditor({
             <p className="text-[12px] leading-relaxed text-ink-subtle">
               {t("Leave the image empty to use the Harbor logo.")}
             </p>
+          </div>
+          <div className="flex flex-col divide-y divide-edge-soft rounded-xl border border-edge-soft bg-canvas/40 px-4">
+            <div className="flex items-center justify-between gap-4 py-4">
+              <span className="text-[14px] font-medium text-ink">
+                {t("Hide group title on Home")}
+              </span>
+              <Switch
+                label={t("Hide group title on Home")}
+                value={hideHomeTitle}
+                onChange={setHideHomeTitle}
+              />
+            </div>
+            <div className="flex flex-col gap-2.5 py-4">
+              <span className="text-[13px] font-medium text-ink-muted">{t("Home section")}</span>
+              <Dropdown
+                ariaLabel={t("Home section")}
+                className="w-full"
+                value={
+                  settings.libraryGroupSections.some((section) => section.id === homeSectionId)
+                    ? homeSectionId
+                    : ""
+                }
+                onChange={setHomeSectionId}
+                options={[
+                  { value: "", label: t("My Groups") },
+                  ...settings.libraryGroupSections.map((section) => ({
+                    value: section.id,
+                    label:
+                      settings.homeRows.renamed[`library-groups:${section.id}`] ?? section.name,
+                  })),
+                ]}
+              />
+            </div>
           </div>
           {error && (
             <p role="alert" className="text-sm text-red-400">

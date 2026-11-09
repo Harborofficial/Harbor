@@ -81,6 +81,8 @@ export type GateInputs = {
   priorRuntimeOk?: boolean;
   inputAlreadyGood: boolean;
   requireImprovement?: boolean;
+  /** Manual runs may offer lower-confidence guesses; auto runs keep the strict floor. */
+  offerFloor?: number;
 };
 
 export type Outcome = "refuse" | "offer" | "apply";
@@ -180,7 +182,7 @@ function promotionCeiling(inp: GateInputs): Rule {
   if (inp.confidence.agreeingSignals >= 2 && p >= THRESHOLDS.applyMulti) {
     return { name: "promotion", ceiling: "apply", reason: "two independent signals agree" };
   }
-  if (p >= THRESHOLDS.offerFloor) {
+  if (p >= (inp.offerFloor ?? THRESHOLDS.offerFloor)) {
     return { name: "promotion", ceiling: "offer", reason: "single-signal moderate confidence" };
   }
   return { name: "promotion", ceiling: "refuse", reason: "confidence below offer floor" };

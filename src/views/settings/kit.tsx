@@ -1,6 +1,6 @@
 import { Lock, X } from "./icons";
 import { UiIcon } from "@/components/ui-icon";
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { captureFocusReturn } from "@/lib/keyboard-navigation";
@@ -21,13 +21,18 @@ import {
 
 export { ROW_DESC, ROW_TITLE };
 
-export function SettingsWorkbench({ preview, children, compact = false }: {
+export function SettingsWorkbench({ preview, children, compact = false, widePreview = false, widePreviewWidth }: {
   preview: ReactNode;
   children: ReactNode;
   compact?: boolean;
+  widePreview?: boolean;
+  widePreviewWidth?: number;
 }) {
   return (
-    <div className={`hset-workbench${compact ? " hset-workbench-compact" : ""}`}>
+    <div
+      className={`hset-workbench${compact ? " hset-workbench-compact" : ""}${widePreview ? " hset-workbench-wide-preview" : ""}`}
+      style={widePreview ? { "--hset-workbench-preview-width": `${widePreviewWidth ?? 380}px` } as CSSProperties : undefined}
+    >
       <div className="hset-workbench-preview">{preview}</div>
       <div className="hset-workbench-controls">{children}</div>
     </div>

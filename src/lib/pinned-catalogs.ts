@@ -5,12 +5,22 @@ const CAP = 12;
 const subs = new Set<() => void>();
 
 export type PinnedSource = "catalog" | "anilist" | "simkl" | "mal";
+export type CatalogSection = "home" | "movies" | "shows" | "anime";
+
+const SECTIONS: CatalogSection[] = ["home", "movies", "shows", "anime"];
+
+export function catalogSections(catalog: PinnedCatalog): CatalogSection[] {
+  if (Array.isArray(catalog.sections)) return SECTIONS.filter((s) => catalog.sections!.includes(s));
+  return [SECTIONS.includes(catalog.section!) ? catalog.section! : "home"];
+}
 
 export type PinnedCatalog = {
   id: string;
   source: PinnedSource;
   name: string;
   params: Record<string, string>;
+  section?: CatalogSection;
+  sections?: CatalogSection[];
 };
 
 export type PinnedBuiltinTitle = {
@@ -66,10 +76,13 @@ function load(): PinnedCatalog[] {
         e.source !== "mal"
       )
         continue;
+      const sections = catalogSections(e as PinnedCatalog);
+      if (sections.length === 0) continue;
       out.push({
         id: e.id,
         source: e.source,
         name: e.name,
+        sections,
         params:
           e.params && typeof e.params === "object" ? (e.params as Record<string, string>) : {},
       });
@@ -104,6 +117,17 @@ export function pinCatalog(desc: PinnedCatalog): boolean {
   if (isPinned(desc.id)) return true;
   if (cache.length >= CAP) return false;
   commit([...cache, desc]);
+  return true;
+}
+
+export function setPinnedCatalogSections(desc: PinnedCatalog, sections: CatalogSection[]): boolean {
+  const normalized = SECTIONS.filter((section) => sections.includes(section));
+  if (normalized.length === 0) {
+    unpinCatalog(desc.id);
+    return true;
+  }
+  if (!isPinned(desc.id)) return pinCatalog({ ...desc, sections: normalized });
+  commit(cache.map((c) => (c.id === desc.id ? { ...c, sections: normalized } : c)));
   return true;
 }
 

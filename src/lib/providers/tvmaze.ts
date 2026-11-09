@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 
 const TVMAZE = "https://api.tvmaze.com";
@@ -51,6 +52,7 @@ function stripHtml(s: string | null | undefined): string {
 }
 
 export async function tvmazeShow(imdb: string): Promise<TvmazeShow | null> {
+  if (addonOnlyMetadata()) return null;
   if (showCache.has(imdb)) return showCache.get(imdb) ?? null;
   const existing = showInflight.get(imdb);
   if (existing) return existing;
@@ -86,6 +88,7 @@ export async function tvmazeShow(imdb: string): Promise<TvmazeShow | null> {
 }
 
 export async function tvmazeEpisodes(showId: number): Promise<TvmazeEpisode[]> {
+  if (addonOnlyMetadata()) return [];
   const cached = epCache.get(showId);
   if (cached && Date.now() - cached.at < EP_TTL_MS) return cached.eps;
   const existing = epInflight.get(showId);

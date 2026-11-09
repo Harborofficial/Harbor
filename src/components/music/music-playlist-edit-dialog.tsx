@@ -2,7 +2,8 @@ import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { LoaderCircle, Plus, Trash2, X } from "@/components/icons/music-icons";
 import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { useT } from "@/lib/i18n";
-import { renameMusicPlaylist } from "@/lib/music/library";
+import { confirmLinkedMusicPlaylistEdit, renameMusicPlaylist } from "@/lib/music/library";
+import type { MusicPlaylistSource } from "@/lib/music/types";
 import { clearPlaylistCover, savePlaylistCover } from "@/lib/music/playlist-cover";
 import { renameSpotifyPlaylist, setSpotifyPlaylistCover } from "@/lib/music/spotify-library";
 import { MusicPlaylistCover } from "./music-playlist-cover";
@@ -12,6 +13,7 @@ export type PlaylistEditTarget = {
   id: string;
   name: string;
   artwork: readonly (string | null | undefined)[];
+  source?: MusicPlaylistSource;
   /** Spotify playlists change through the Spotify API instead of the local cover store. */
   spotify?: boolean;
 };
@@ -92,6 +94,7 @@ export function MusicPlaylistEditDialog({
   const save = async (event: FormEvent) => {
     event.preventDefault();
     if (busy || !trimmed) return;
+    if (trimmed !== target.name && !(await confirmLinkedMusicPlaylistEdit(target))) return;
     setBusy(true);
     setError("");
     try {

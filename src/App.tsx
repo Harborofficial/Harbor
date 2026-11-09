@@ -1,4 +1,5 @@
 import { startNuvioMutationRetry } from "@/lib/nuvio/nuvio-sync";
+import { useNuvioSyncLoop } from "@/lib/nuvio/nuvio-sync-runtime";
 import { GAMES_IN_NAV } from "@/chrome/nav-items";
 import { GameAccessProvider } from "@/views/games/game-access-context";
 import { GameLibraryDock } from "@/views/games/game-library-dock";
@@ -11,6 +12,7 @@ import { SportsAccessGate } from "@/views/sports/access-gate";
 import { SportsEventSkeleton } from "@/views/sports/sports-skeletons";
 import { SportsReminderLoop } from "@/components/sports-reminder-loop";
 import {
+  Component,
   memo,
   Suspense,
   useCallback,
@@ -18,6 +20,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ErrorInfo,
   type ReactNode,
 } from "react";
 import { lazyView as lazy } from "@/lib/lazy-view";
@@ -47,6 +50,7 @@ import { MiddleClickScroll } from "@/lib/use-middle-click-scroll";
 import { exitWindowFullscreenOnPlayerClose, toggleWindowFullscreen } from "@/lib/fullscreen-state";
 import { flushCloudSync } from "@/views/player/hooks/use-stremio-sync";
 import { startWriteQueueFlusher } from "@/lib/stremio-write-queue";
+import { expungeLeachedNuvioItemsFromStremio } from "@/lib/stremio";
 import {
   mediaServerConnections,
   mediaServerRefreshIntervalMs,
@@ -126,6 +130,7 @@ import { HarborNameSync } from "@/components/harbor-name-sync";
 import { SettingsProfileBridge } from "@/lib/settings-profile-bridge";
 import { TrackerProfileBridge } from "@/lib/tracker-profile-bridge";
 import { ProfilePickerModal } from "@/components/profile-picker/picker-modal";
+import { ConfirmActionModal } from "@/components/confirm-action-modal";
 import { WatchlistSync } from "@/lib/watchlist-sync";
 import { ContextMenuProvider } from "@/lib/context-menu";
 import { PageContextNavigationDialogs } from "@/chrome/context-page-navigation";
@@ -151,12 +156,7 @@ import {
   reconcilePendingTorrentRemovals,
   torrentEngineSetOptions,
 } from "@/lib/torrent/local-engine";
-import {
-  effectiveBinding,
-  eventToBinding,
-  findHotkeyMatch,
-  shouldHandleGlobalKeyboardEvent,
-} from "@/lib/hotkeys";
+import { findHotkeyMatch, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
 import { requestOpenProfile, requestEditProfile } from "@/lib/social/open-profile";
 import { openNotificationCenter } from "@/lib/social/notification-open";
@@ -210,6 +210,30 @@ const MusicSurprisePrompt = lazy(() =>
     default: m.MusicSurprisePrompt,
   })),
 );
+const MusicVideoMini = lazy(() =>
+  import("@/components/music/music-video-mini").then((m) => ({ default: m.MusicVideoMini })),
+);
+
+class ThemeErrorBoundary extends Component<
+  { fallback: ReactNode; children: ReactNode; onError?: () => void },
+  { error: boolean }
+> {
+  state = { error: false };
+  static getDerivedStateFromError() {
+    return { error: true };
+  }
+  componentDidCatch(err: unknown, info: ErrorInfo) {
+    console.error(
+      "[Harbor] Theme render failed, falling back to default chrome",
+      err,
+      info.componentStack,
+    );
+    this.props.onError?.();
+  }
+  render() {
+    return this.state.error ? this.props.fallback : this.props.children;
+  }
+}
 
 const importAnime = () => import("@/views/anime");
 const importCalendar = () => import("@/views/calendar");
@@ -319,6 +343,8 @@ const OnboardingModal = lazy(() =>
 const BigPictureShell = lazy(() =>
   import("@/views/big-picture/bp-shell").then((m) => ({ default: m.BigPictureShell })),
 );
+const importMidnightShell = () => import("@/themes/midnight/MidnightShell");
+let MidnightShellLazy = lazy(importMidnightShell);
 
 function useViewPreloader(tmdbKey: string) {
   const keyRef = useRef(tmdbKey);
@@ -537,6 +563,8 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                         <TogetherLocationPublisher />
                                                         <IdleAwayRunner />
                                                         <SessionRefreshRunner />
+                                                        <StremioLeachedExpungeRunner />
+                                                        <NuvioSyncLoopRunner />
                                                         <RemoteHostMount />
                                                         <RemoteOpenBridge />
                                                       </AfterFirstPaint>
@@ -574,6 +602,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                       <CustomHoverCssMount />
                                                       <TopRankModal />
                                                       <ProfilePickerModal />
+                                                      <ConfirmActionModal />
                                                       <CurfewGuard />
                                                       <Profiled id="search.overlay">
                                                         <SearchOverlay />
@@ -726,6 +755,19 @@ function MediaServerSyncRunner() {
 
 function SessionRefreshRunner() {
   useEffect(startSessionRefresh, []);
+  return null;
+}
+
+function StremioLeachedExpungeRunner() {
+  useEffect(() => {
+    void expungeLeachedNuvioItemsFromStremio().catch(() => {});
+  }, []);
+  return null;
+}
+
+function NuvioSyncLoopRunner() {
+  const { player } = useView();
+  useNuvioSyncLoop(!player);
   return null;
 }
 
@@ -1175,7 +1217,6 @@ function Shell({ onReady }: { onReady?: () => void }) {
     const isDefaultUiScaleReset = (e: KeyboardEvent) => usesZoomModifier(e) && e.key === "0";
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
-      const binding = eventToBinding(e);
       const overrides = settings.hotkeys ?? {};
       const globalMatch = findHotkeyMatch(e, overrides, "Global");
       if (
@@ -1189,14 +1230,11 @@ function Shell({ onReady }: { onReady?: () => void }) {
       const uiScaleDownCustom = "globalUiScaleDown" in overrides;
       const uiScaleResetCustom = "globalUiScaleReset" in overrides;
       const matchesUp =
-        effectiveBinding("globalUiScaleUp", overrides) === binding ||
-        (!uiScaleUpCustom && isDefaultUiScaleUp(e));
+        globalMatch === "globalUiScaleUp" || (!uiScaleUpCustom && isDefaultUiScaleUp(e));
       const matchesDown =
-        effectiveBinding("globalUiScaleDown", overrides) === binding ||
-        (!uiScaleDownCustom && isDefaultUiScaleDown(e));
+        globalMatch === "globalUiScaleDown" || (!uiScaleDownCustom && isDefaultUiScaleDown(e));
       const matchesReset =
-        effectiveBinding("globalUiScaleReset", overrides) === binding ||
-        (!uiScaleResetCustom && isDefaultUiScaleReset(e));
+        globalMatch === "globalUiScaleReset" || (!uiScaleResetCustom && isDefaultUiScaleReset(e));
       if (!matchesUp && !matchesDown && !matchesReset) return;
       if (player && matchesReset) return;
       e.preventDefault();
@@ -1639,7 +1677,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const wrappedAlive = useIdleEvict(wrappedTop);
   const queueAlive = useKeepAlive(queueTop, queueTop);
   const serviceAlive = useKeepAlive(serviceTop, serviceTop && !!service);
-  const detailAlive = useKeepAlive(detailTop, !!meta);
+  // Keep a detail page mounted while Settings is open. Otherwise the keep-alive timer
+  // drops it after 1.5s, and returning refetches the whole title from its addons.
+  const detailAlive = useKeepAlive(detailTop, !!meta, topKind === "settings");
   const personAlive = useKeepAlive(personTop, personId !== null);
   const profileAlive = useKeepAlive(profileTop, profileHandle !== null);
   const feedAlive = useKeepAlive(feedTop, feedOpen, stackKinds.includes("feed"));
@@ -1744,6 +1784,19 @@ function Shell({ onReady }: { onReady?: () => void }) {
             !standaloneLive &&
             !pickerTop &&
             layout === "stremio" && <StremioRail />}
+          {!settingsTop && !playerActive && !pickerTop && layout === "midnight" && !immersive && (
+            <ThemeErrorBoundary
+              key={settings.theme.preset}
+              fallback={<TopDock />}
+              onError={() => {
+                MidnightShellLazy = lazy(importMidnightShell);
+              }}
+            >
+              <Suspense fallback={null}>
+                <MidnightShellLazy />
+              </Suspense>
+            </ThemeErrorBoundary>
+          )}
           {!settingsTop && !playerActive && !pickerTop && layout === "topdock" && !immersive && (
             <TopDock />
           )}
@@ -1757,11 +1810,14 @@ function Shell({ onReady }: { onReady?: () => void }) {
             <SideRail />
           )}
           {!playerActive && !pickerTop && layout === "minui" && !immersive && <MinUIDock />}
-          {!playerActive && !pickerTop && layout === "topdock" && !immersive && (
-            <div className={gamesTop ? "games-library-back" : "contents"}>
-              <FloatingBack offsetTop={92} />
-            </div>
-          )}
+          {!playerActive &&
+            !pickerTop &&
+            (layout === "topdock" || layout === "midnight") &&
+            !immersive && (
+              <div className={gamesTop ? "games-library-back" : "contents"}>
+                <FloatingBack offsetTop={92} />
+              </div>
+            )}
           {!playerActive && !pickerTop && layout === "cinematic" && !immersive && (
             <div className={gamesTop ? "games-library-back" : "contents"}>
               <FloatingBack offsetTop={92} />
@@ -1790,6 +1846,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
           {musicEnabled && (
             <Suspense fallback={null}>
               <MusicDock />
+              <MusicVideoMini />
               <MusicSurprisePrompt />
             </Suspense>
           )}
@@ -1921,9 +1978,15 @@ function Shell({ onReady }: { onReady?: () => void }) {
                       !chromeHidden &&
                       !immersive &&
                       (themeHasTopbar ||
-                        ["minui", "topdock", "cinematic", "royal", "rail", "custom"].includes(
-                          layout,
-                        ))
+                        [
+                          "minui",
+                          "topdock",
+                          "midnight",
+                          "cinematic",
+                          "royal",
+                          "rail",
+                          "custom",
+                        ].includes(layout))
                     }
                     cloudKeys={{
                       rd: settings.rdKey,
@@ -2059,7 +2122,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <div {...layerProps(profileTop)}>
                 <Suspense fallback={null}>
                   <ProfileView
-                    key={`profile-${profileHandle}`}
+                    key={`profile-${settings.accountProvider}-${profileHandle}`}
                     handle={profileHandle}
                     onOpenProfile={requestOpenProfile}
                     onOpenMeta={(id, kind, hint) => {
@@ -2246,7 +2309,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
               <div {...layerProps(pickerTop)}>
                 <Suspense fallback={null}>
                   <PlayPicker
-                    key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}-${picker.contextRequestId ?? ""}-${picker.continuation?.id ?? ""}-${picker.queueItemId ?? ""}`}
+                    key={`picker-${picker.pickerRevision ?? 0}-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}-${picker.seasonEpisodes?.length ?? 0}-${picker.contextRequestId ?? ""}-${picker.continuation?.id ?? ""}-${picker.queueItemId ?? ""}`}
                     meta={picker.meta}
                     queueItemId={picker.queueItemId}
                     episode={picker.episode}

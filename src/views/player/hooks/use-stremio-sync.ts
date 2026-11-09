@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { cloudWriteId, libraryGetOne, libraryGetOneStrict, type LibraryItem } from "@/lib/stremio";
+import { isNuvioProviderActive } from "@/lib/nuvio/nuvio-client";
 import { cloudLibraryPut, flushWriteQueue, queuedWatched } from "@/lib/stremio-write-queue";
 import { withItemLock } from "@/lib/stremio-item-lock";
 import { freshestWatched } from "@/lib/stremio-watched-sync";
@@ -52,12 +53,14 @@ export function useStremioSync(params: {
   const {
     src,
     snap,
-    authKey,
+    authKey: rawAuthKey,
     resolvedImdbId,
     resolvedImdbVerified,
     resolutionSettled,
     castActiveRef,
   } = params;
+  const isNuvio = isNuvioProviderActive();
+  const authKey = isNuvio ? null : rawAuthKey;
   const canonicalId = src.suppressCloudSync
     ? null
     : cloudWriteId(src.meta.id, resolvedImdbId, resolvedImdbVerified);

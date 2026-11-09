@@ -24,9 +24,11 @@ impl SpotifyState {
             }
             return Ok(());
         }
-        // Best effort: a stale session is rebuilt here, and a genuine sign-in problem still
-        // falls through to the message below rather than surfacing a reconnect error.
-        let _ = self.ensure_session().await;
+        // A stored authorization does not guarantee a live decoder session. Preserve the
+        // real refresh/network/account failure instead of replacing it with a sign-in prompt.
+        self.ensure_session()
+            .await
+            .map_err(|error| format!("Spotify playback session could not be restored: {error}"))?;
         let slot = self.runtime.lock().await;
         let runtime = slot
             .as_ref()

@@ -6,6 +6,7 @@ import {
   type ThemeSettings,
 } from "@/lib/theme";
 import { languageName } from "@/lib/subtitles/language";
+import { ORIGINAL_AUDIO_LANG } from "@/lib/player/audio-language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId, providerTabFor } from "@/lib/ai-models";
 import {
@@ -14,7 +15,7 @@ import {
   sanitizeFullscreenClockStyle,
 } from "@/lib/local-time";
 import { normalizePosterCardSettings } from "@/lib/poster-backdrop-expansion";
-import { normalizeLibraryGroups } from "@/lib/library-groups";
+import { normalizeLibraryGroups, normalizeLibraryGroupSections } from "@/lib/library-groups";
 import {
   sanitizeSubtitleOffsetPosition,
   sanitizeSubtitleOffsetSize,
@@ -51,6 +52,16 @@ function sanitizePosterDockTransition(value: unknown): number {
     return DEFAULT.posterDockTransitionMs;
   }
   return Math.min(1500, Math.max(250, Math.round(value)));
+}
+
+function sanitizeCardAwardDisplay(
+  value: unknown,
+  legacyAwardTabs: unknown,
+  legacyCardBadges: unknown,
+): Settings["cardAwardDisplay"] {
+  if (value === "tabs" || value === "badge" || value === "none") return value;
+  if (legacyAwardTabs === true) return "tabs";
+  return legacyCardBadges === false ? "none" : "badge";
 }
 
 const MAX_END_SCREEN_LEAD_SEC = 30 * 60;
@@ -157,7 +168,10 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
   return settings;
 }
 
-function parseStoredSettings(raw: string | null): { settings: Settings; cacheable: boolean } {
+export function parseStoredSettings(raw: string | null): {
+  settings: Settings;
+  cacheable: boolean;
+} {
   if (!raw) {
     return {
       settings: {
@@ -203,6 +217,8 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
       _streamCacheCapV1?: boolean;
       _playbackSourcePreferenceV1?: boolean;
       _playbackSourcePreferenceV2?: boolean;
+      /** Legacy: the high-quality toggle was split into a quality choice. */
+      mangaBestEnabled?: boolean;
     };
     // Legacy defaults and playlist adoption depend on other stores. Re-read them
     // until a self-contained settings blob has been persisted by the normal flow.
@@ -411,10 +427,32 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
       };
     }
     const posterCards = normalizePosterCardSettings(parsed);
+    if (parsed.mangaBestEnabled === true) parsed.mangaUpscaleQuality = "best";
+    delete parsed.mangaBestEnabled;
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      searchTmdbTopMatch: parsed.searchTmdbTopMatch !== false,
+      metadataAddonOrder: Array.isArray(parsed.metadataAddonOrder)
+        ? [
+            ...new Set(
+              parsed.metadataAddonOrder.filter(
+                (key): key is string => typeof key === "string" && key.length <= 256,
+              ),
+            ),
+          ]
+        : [],
+      cardAwardDisplay: sanitizeCardAwardDisplay(
+        parsed.cardAwardDisplay,
+        parsed.awardTabs,
+        parsed.showCardBadges,
+      ),
+      tvCardOptions: {
+        ...DEFAULT.tvCardOptions,
+        ...parsed.tvCardOptions,
+      },
       libraryGroups: normalizeLibraryGroups(parsed.libraryGroups),
+      libraryGroupSections: normalizeLibraryGroupSections(parsed.libraryGroupSections),
       spooktoberBanner: ["disabled", "small", "below-hero"].includes(parsed.spooktoberBanner ?? "")
         ? parsed.spooktoberBanner
         : undefined,
@@ -424,7 +462,7 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
           : DEFAULT.togetherRelayUrl,
       ),
       ...posterCards,
-      animePreferImdbStreams: parsed.animePreferImdbStreams === true,
+      animePreferImdbStreams: parsed.animePreferImdbStreams !== false,
       showQuickGameLibrary: parsed.showQuickGameLibrary === true,
       topbarAppearance: sanitizeTopbarAppearance(
         parsed.topbarAppearance,
@@ -510,9 +548,11 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
       },
       preferredSubLangs: (parsed.preferredSubLangs ?? DEFAULT.preferredSubLangs).map(languageName),
       preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map(
-        languageName,
+        (lang) => (lang === ORIGINAL_AUDIO_LANG ? lang : languageName(lang)),
       ),
       castAlwaysTranscode: parsed.castAlwaysTranscode ?? DEFAULT.castAlwaysTranscode,
+      mangaUpscaleQuality: parsed.mangaUpscaleQuality === "best" ? "best" : "fast",
+      mangaUpscaleAutoDownload: parsed.mangaUpscaleAutoDownload !== false,
       showMalBadge: parsed.showMalBadge ?? DEFAULT.showMalBadge,
       badgePlacement:
         parsed.badgePlacement === "top" || parsed.badgePlacement === "bottom"

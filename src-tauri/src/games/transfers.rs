@@ -44,6 +44,28 @@ pub enum Status {
     Complete,
     Failed,
 }
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TorboxOrigin {
+    pub torrent_id: String,
+    pub file_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<String>,
+}
+impl TorboxOrigin {
+    fn valid(&self) -> bool {
+        self.torrent_id.parse::<u64>().is_ok()
+            && self.file_id.parse::<u64>().is_ok()
+            && self.kind.as_deref().is_none_or(|kind| kind=="torrent" || kind=="web")
+    }
+}
+fn torbox_cdn(value: &str) -> bool {
+    protocol::validate_url(value).ok().is_some_and(|url| {
+        url.scheme() == "https" && url.host_str().is_some_and(|host| {
+            host == "tb-cdn.pw" || host.ends_with(".tb-cdn.pw")
+        })
+    })
+}
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Transfer {
@@ -56,6 +78,8 @@ pub struct Transfer {
     pub preparation: Option<super::download_preparation::Choice>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_link: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub torbox_origin: Option<TorboxOrigin>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_page: Option<String>,
     pub id: String,
@@ -87,6 +111,8 @@ pub struct Transfer {
 pub struct NewTransfer {
     #[serde(default)]
     pub source_link: Option<String>,
+    #[serde(default)]
+    pub torbox_origin: Option<TorboxOrigin>,
     #[serde(default)]
     pub browser_ticket: Option<String>,
     pub profile: String,
@@ -185,6 +211,7 @@ impl Transfers {
             if !profile_valid(&item.profile)
                 || uuid::Uuid::parse_str(&item.id).is_err()
                 || protocol::validate_url(&item.url).is_err()
+                || item.torbox_origin.as_ref().is_some_and(|origin| !origin.valid() || !torbox_cdn(&item.url))
                 || !Path::new(&item.destination).is_absolute()
                 || item.preparation.as_ref().is_some_and(|choice| !super::preparation_intake::belongs_to(choice, super::download_preparation::Engine::Direct, &item.profile, &item.id) || choice.target.archive != item.destination)
             {
@@ -390,6 +417,24 @@ impl Transfers {
     pub fn add_prepared(self: &Arc<Self>, args: NewTransfer, preparation: Option<super::preparation_intake::Draft>) -> Result<Transfer> {
         self.add_records(vec![args], preparation)?.pop().ok_or("transfer_invalid_record")
     }
+    pub(crate) fn ensure_removable(&self, profile: &str, id: &str) -> Result<()> {
+        let state = self.state.lock().map_err(|_| "transfer_store")?;
+        let record = state.records.iter().find(|record| record.profile == profile && record.id == id)
+            .ok_or("games_delete_request")?;
+        if state.active.contains_key(id) ||
+           !matches!(record.status, Status::Paused | Status::Failed | Status::Canceled | Status::Complete) {
+            return Err("games_delete_busy");
+        }
+        Ok(())
+    }
+    pub(crate) fn destination_owned_by_another(&self, own_id: &str, path: &Path) -> Result<bool> {
+        let state = self.state.lock().map_err(|_| "transfer_store")?;
+        Ok(state.records.iter().any(|record| record.id != own_id && Path::new(&record.destination) == path))
+    }
+    pub(crate) fn any_destination_in(&self, folder: &Path) -> Result<bool> {
+        let state = self.state.lock().map_err(|_| "transfer_store")?;
+        Ok(state.records.iter().any(|record| Path::new(&record.destination).starts_with(folder)))
+    }
     pub fn action(self: &Arc<Self>, profile: &str, id: &str, action: &str) -> Result<()> {
         if matches!(action, "earlier" | "later") {
             return self.reorder(profile, id, action == "earlier");
@@ -521,7 +566,8 @@ impl Transfers {
         let records: Vec<_> = state.records.iter().filter(|r| r.status == Status::Queued && !state.active.contains_key(&r.id)).cloned().collect();
         let mut jobs = Vec::new();
         for record in records {
-            let ticket = match self.queue.ticket(QueueKind::Direct, &record.profile, &record.id) { Ok(ticket) => ticket, Err(_) => continue };
+            let ticket = match self.queue.ticket_grouped(QueueKind::Direct, &record.profile, &record.id,
+                download_metadata::queue_group(&record.profile, record.game.as_ref(), record.batch_id.as_deref(), "direct", &record.id)) { Ok(ticket) => ticket, Err(_) => continue };
             let token = CancellationToken::new();
             state.active.insert(record.id.clone(), token.clone());
             jobs.push((record, token, ticket));
@@ -1089,6 +1135,7 @@ mod tests {
     fn args(f: &Fixture, s: &Server, route: &str, name: &str) -> NewTransfer {
         NewTransfer {
             source_link: None,
+            torbox_origin: None,
             browser_ticket: None,
             profile: "one".into(),
             name: name.into(),
@@ -1544,6 +1591,7 @@ mod tests {
             checking_partial: None,
             preparation: None,
             source_link: None,
+            torbox_origin: None,
             source_page: None,
             id: uuid::Uuid::new_v4().to_string(),
             profile: profile.into(),

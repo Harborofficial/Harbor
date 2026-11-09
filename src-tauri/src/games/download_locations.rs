@@ -37,6 +37,32 @@ pub fn inspect(parent: Option<String>) -> Locations {
     Locations { drives, selected }
 }
 
+/// Enumerate immediate subfolders only. A folder may be a symlink or a
+/// junction, so never follow symlink entries during enumeration. The browse
+/// command runs in spawn_blocking and does not do per-child disk-space probes.
+pub fn folders(parent: String) -> Result<Vec<Location>, &'static str> {
+    if parent.len() > 4096 { return Err("download_destination"); }
+    let dir = Path::new(&parent);
+    if !dir.is_absolute() || !dir.is_dir() { return Err("download_destination"); }
+    let entries = std::fs::read_dir(dir).map_err(|_| "download_destination")?;
+    let mut folders = Vec::new();
+    for entry in entries {
+        let entry = match entry { Ok(entry) => entry, Err(_) => continue };
+        let kind = match entry.file_type() { Ok(kind) => kind, Err(_) => continue };
+        if !kind.is_dir() || kind.is_symlink() { continue; }
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if name.starts_with('.') || name.is_empty() { continue; }
+        folders.push(Location {
+            path: entry.path().to_string_lossy().into_owned(),
+            label: name,
+            available_bytes: None,
+        });
+        if folders.len() >= 500 { break; }
+    }
+    folders.sort_by(|a, b| a.label.to_lowercase().cmp(&b.label.to_lowercase()));
+    Ok(folders)
+}
+
 #[cfg(target_os = "windows")]
 fn mounted() -> Vec<(PathBuf, String)> {
     #[link(name = "kernel32")]
@@ -87,6 +113,25 @@ fn mounted() -> Vec<(PathBuf, String)> { Vec::new() }
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn folder_browser_returns_child_directories_without_files() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+        let root = std::env::temp_dir().join(format!("harbor-folder-browser-{}-{unique}", std::process::id()));
+        std::fs::create_dir_all(root.join("Games")).unwrap();
+        std::fs::create_dir_all(root.join("Repack")).unwrap();
+        std::fs::write(root.join("not-a-folder.zip"), b"archive").unwrap();
+        let results = super::folders(root.to_string_lossy().into_owned()).unwrap();
+        assert_eq!(results.len(), 2);
+        assert!(results.iter().all(|entry| entry.available_bytes.is_none()));
+        assert_eq!(results[0].label, "Games");
+        assert_eq!(results[1].label, "Repack");
+        std::fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn folder_browser_rejects_relative_paths() {
+        assert!(super::folders("relative/path".into()).is_err());
+    }
     #[test]
     fn selected_folder_requires_an_existing_absolute_directory() {
         assert!(super::inspect(Some("relative/path".into())).selected.is_none());

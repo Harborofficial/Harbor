@@ -84,9 +84,13 @@ function mapChapters(
   return mapped;
 }
 
-export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): MangaProvider {
+export function makeSuwayomiProvider(
+  baseUrl: string,
+  basicAuth?: string,
+  background = false,
+): MangaProvider {
   const server = makeServer(baseUrl, basicAuth);
-  const client = makeClient(server);
+  const client = makeClient(server, 150, background);
 
   async function browse(
     sourceId: string,
@@ -250,7 +254,7 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
       while (!exactFound) {
         const source = sources[nextSource++];
         if (!source) return;
-        const requestClient = makeClient(server, 0);
+        const requestClient = makeClient(server, 0, background);
         const items = await browse(source.id, "search", 0, q, requestClient).catch(() => []);
         for (const item of items) unique.set(item.id, item);
         if (!exhaustive && items.some((item) => isStrongSearchMatch(item, q))) {

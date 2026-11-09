@@ -34,7 +34,7 @@ function google(respond?: (q: string, call: number) => Response | Promise<Respon
     const q = new URL(url).searchParams.get("q") ?? "";
     sent.push(q);
     const custom = await respond?.(q, calls++);
-    return custom ?? new Response(JSON.stringify([[[`ar:${q}`, q]]]));
+    return custom ?? new Response(JSON.stringify([[`ar:${q}`, "en"]]));
   };
   return { fetch, sent };
 }
@@ -59,6 +59,15 @@ test("without an AI key, reviews go through Google and are cached", async () => 
 test("a translation that keeps failing comes back as null", async () => {
   const { translateReviews } = loadTranslation(async () => new Response("", { status: 403 }));
   assert.deepEqual(await translateReviews(["Slow but rewarding"], "ar", null), [null]);
+});
+
+test("malformed UTF-16 fails one review instead of the whole batch", async () => {
+  const g = google();
+  const { translateReviews } = loadTranslation(g.fetch);
+  assert.deepEqual(await translateReviews(["bad \uD800 text", "good"], "ar", null), [
+    "ar:bad \uFFFD text",
+    "ar:good",
+  ]);
 });
 
 test("rate limits and server errors are retried a bounded number of times", async () => {
@@ -141,7 +150,7 @@ test("Google requests run at most four at a time", async () => {
     await new Promise((resolve) => setTimeout(resolve, 5));
     running--;
     const q = new URL(url).searchParams.get("q");
-    return new Response(JSON.stringify([[[`ar:${q}`, q]]]));
+    return new Response(JSON.stringify([[`ar:${q}`, "en"]]));
   });
   const texts = Array.from({ length: 30 }, (_, i) => `Comment ${i}`);
   const result = await translateReviews(texts, "ar", null);
@@ -158,7 +167,7 @@ test("simultaneous translation calls share the four-request Google limit", async
     await new Promise((resolve) => setTimeout(resolve, 10));
     running--;
     const q = new URL(url).searchParams.get("q");
-    return new Response(JSON.stringify([[[`ar:${q}`, q]]]));
+    return new Response(JSON.stringify([[`ar:${q}`, "en"]]));
   });
   await Promise.all([
     translateReviews(["a1", "a2", "a3", "a4"], "ar", null),

@@ -8,6 +8,7 @@ import {
   type PlaylistKind,
 } from "@/lib/iptv/playlist-entry";
 import { useSettings } from "@/lib/settings";
+import { usePlaylists, writePlaylists } from "@/lib/iptv/playlists-store";
 import { SFX } from "@/lib/sfx";
 import { useBpT } from "./bp-i18n";
 import { BpOnboardField } from "./onboarding/bp-onboard-field";
@@ -99,6 +100,7 @@ export function BpLiveSetup({
 }) {
   const t = useBpT();
   const { settings, update } = useSettings();
+  const playlists = usePlaylists();
   const [form, setForm] = useState<PlaylistFormValue>(EMPTY_PLAYLIST_FORM);
   const [reveal, setReveal] = useState(false);
   const [active, setActive] = useState<string | null>(null);
@@ -116,12 +118,13 @@ export function BpLiveSetup({
     const id = newPlaylistId();
     const entry = materializePlaylistEntry(id, { ...form, name });
     const carriesVod = form.kind !== "epg";
-    update({
-      iptvPlaylists: [...settings.iptvPlaylists, entry],
-      ...(carriesVod && !settings.showPlaylistsTab ? { showPlaylistsTab: true } : {}),
-    });
+    if (!writePlaylists([...playlists, entry])) {
+      console.warn("harbor: Big Picture playlist not persisted", id);
+      return;
+    }
+    if (carriesVod && !settings.showPlaylistsTab) update({ showPlaylistsTab: true });
     setForm(EMPTY_PLAYLIST_FORM);
-    onSaved?.(id);
+    if (form.kind !== "epg") onSaved?.(id);
     onDone?.();
   };
 

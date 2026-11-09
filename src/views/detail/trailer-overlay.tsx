@@ -2,6 +2,7 @@ import { Cast, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { fetchTrailer, resolveTrailerQuality, trailerSrc } from "@/lib/trailer";
+import { mergeTrailerCandidates } from "@/lib/trailer-candidates";
 import { isMacDesktop } from "@/lib/platform";
 import { openUrl } from "@/lib/window";
 import { useSettings } from "@/lib/settings";
@@ -12,11 +13,13 @@ import { Tooltip } from "./tooltip";
 
 export function TrailerOverlay({
   id,
+  candidateIds,
   title,
   logo,
   onClose,
 }: {
   id: string;
+  candidateIds?: readonly string[];
   title: string;
   logo?: string;
   onClose: () => void;
@@ -44,15 +47,24 @@ export function TrailerOverlay({
     let cancelled = false;
     const pref = settings.trailerQuality;
     const quality = resolveTrailerQuality(pref);
-    fetchTrailer(id, quality).then((info) => {
-      if (cancelled) return;
-      if (info) setStreamUrl(trailerSrc(info));
-      else setExtractFailed(true);
-    });
+    const candidates = mergeTrailerCandidates([id], candidateIds);
+    setStreamUrl(null);
+    setExtractFailed(false);
+    void (async () => {
+      for (const videoId of candidates) {
+        const info = await fetchTrailer(videoId, quality, true);
+        if (cancelled) return;
+        if (info) {
+          setStreamUrl(trailerSrc(info));
+          return;
+        }
+      }
+      if (!cancelled) setExtractFailed(true);
+    })();
     return () => {
       cancelled = true;
     };
-  }, [id, settings.trailerQuality]);
+  }, [id, candidateIds, settings.trailerQuality]);
 
   const dismiss = useCallback(() => {
     if (closingRef.current) return;

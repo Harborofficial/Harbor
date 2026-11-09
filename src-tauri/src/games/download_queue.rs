@@ -79,6 +79,9 @@ struct State {
     // A ticket exists before its task is spawned, so executor wake order cannot
     // make a later download jump ahead of an already queued one.
     tickets: HashMap<String, bool>,
+    // Group assignments are ephemeral: they belong to live tickets only and
+    // are reconstructed from durable download records after restart.
+    groups: HashMap<String, String>,
 }
 pub struct Queue {
     root: PathBuf,
@@ -122,6 +125,7 @@ impl Queue {
                 entries,
                 eligible: HashSet::new(),
                 tickets: HashMap::new(),
+                groups: HashMap::new(),
             }),
             changed: Notify::new(),
             emit: Arc::new(emit),
@@ -284,7 +288,20 @@ impl Queue {
         (self.emit)(profile);
         Ok(())
     }
+    #[cfg(test)]
     pub fn ticket(self: &Arc<Self>, kind: Kind, profile: &str, id: &str) -> Result<Ticket> {
+        self.ticket_grouped(kind, profile, id, key(kind, id))
+    }
+    /// Reserve at most one native transfer per game group. The two global
+    /// slots can therefore service two distinct games simultaneously instead
+    /// of being occupied by the first two files of one repack.
+    pub fn ticket_grouped(
+        self: &Arc<Self>,
+        kind: Kind,
+        profile: &str,
+        id: &str,
+        group: String,
+    ) -> Result<Ticket> {
         let mut state = self.state.lock().map_err(|_| "transfer_store")?;
         if !state
             .entries
@@ -299,6 +316,7 @@ impl Queue {
         }
         state.eligible.insert(key.clone());
         state.tickets.insert(key.clone(), false);
+        state.groups.insert(key.clone(), group);
         drop(state);
         self.changed.notify_waiters();
         Ok(Ticket {
@@ -342,12 +360,23 @@ impl Ticket {
             {
                 let mut state = self.queue.state.lock().map_err(|_| "transfer_store")?;
                 let active = state.tickets.values().filter(|value| **value).count();
+                let active_groups: HashSet<String> = state
+                    .tickets
+                    .iter()
+                    .filter(|(_, active)| **active)
+                    .filter_map(|(key, _)| state.groups.get(key).cloned())
+                    .collect();
                 let first = state
                     .entries
                     .iter()
                     .find(|entry| {
-                        state.tickets.get(&entry.key()) == Some(&false)
-                            && state.eligible.contains(&entry.key())
+                        let key = entry.key();
+                        state.tickets.get(&key) == Some(&false)
+                            && state.eligible.contains(&key)
+                            && !state
+                                .groups
+                                .get(&key)
+                                .is_some_and(|group| active_groups.contains(group))
                     })
                     .map(Entry::key);
                 if active < ACTIVE_LIMIT && first.as_deref() == Some(self.key.as_str()) {
@@ -363,12 +392,10 @@ impl Ticket {
 }
 impl Drop for Ticket {
     fn drop(&mut self) {
-        self.queue
-            .state
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .tickets
-            .remove(&self.key);
+        let mut state = self.queue.state.lock().unwrap_or_else(|e| e.into_inner());
+        state.tickets.remove(&self.key);
+        state.groups.remove(&self.key);
+        drop(state);
         self.queue.changed.notify_waiters();
     }
 }

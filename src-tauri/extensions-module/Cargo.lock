@@ -38,7 +38,7 @@ dependencies = [
 
 [[package]]
 name = "harbor-extensions-module"
-version = "1.0.1"
+version = "1.0.3"
 dependencies = [
  "dunce",
  "libc",

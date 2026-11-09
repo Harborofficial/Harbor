@@ -19,6 +19,13 @@ const contextActionsFallback: Record<string, string> = {
   "Play this same video from the beginning?": "Play this same video from the beginning?",
   "Opening playback…": "Opening playback…",
   "Continue last watched": "Continue last watched",
+  "Resume last watched": "Resume last watched",
+  "The saved audio track could not be restored. Choose an audio track.":
+    "The saved audio track could not be restored. Choose an audio track.",
+  "The saved subtitle could not be restored. Choose a subtitle.":
+    "The saved subtitle could not be restored. Choose a subtitle.",
+  "The saved subtitle timing could not be restored.":
+    "The saved subtitle timing could not be restored.",
   "Local video": "Local video",
   "Open my profile": "Open my profile",
   "Add to page": "Add to page",
@@ -165,6 +172,14 @@ const contextActionsFallback: Record<string, string> = {
     "Simkl cannot unwatch a movie without removing it from its library. Manage this title in Simkl.",
   "Unchanged: Simkl cannot unwatch a movie without removing it from its library. Manage this title in Simkl.":
     "Unchanged: Simkl cannot unwatch a movie without removing it from its library. Manage this title in Simkl.",
+  "Simkl can only unwatch this movie by removing it from your Simkl library and history.":
+    "Simkl can only unwatch this movie by removing it from your Simkl library and history.",
+  "Simkl's current state could not be checked. No changes were made.":
+    "Simkl's current state could not be checked. No changes were made.",
+  "Unwatch this movie?": "Unwatch this movie?",
+  'Simkl has no separate unwatched state. Unwatching "{title}" removes it from your Simkl library and watch history.':
+    'Simkl has no separate unwatched state. Unwatching "{title}" removes it from your Simkl library and watch history.',
+  "Unwatch everywhere": "Unwatch everywhere",
   "Anime episode watched state is not synced to Stremio.":
     "Anime episode watched state is not synced to Stremio.",
   "No Stremio identity is available for this title.":
@@ -291,6 +306,12 @@ const contextActionsFallback: Record<string, string> = {
   "Could not save image.": "Could not save image.",
   "Could not save the change. Check available storage and try again.":
     "Could not save the change. Check available storage and try again.",
+  "Could not save this favorite. Check available storage and try again.":
+    "Could not save this favorite. Check available storage and try again.",
+  "Could not save this favorite. Please try again.":
+    "Could not save this favorite. Please try again.",
+  "Your profile changed. Open the menu again and retry.":
+    "Your profile changed. Open the menu again and retry.",
   "Could not save the collection deletion. Your local collection was preserved.":
     "Could not save the collection deletion. Your local collection was preserved.",
   "Create another destination first.": "Create another destination first.",
@@ -541,6 +562,8 @@ const contextActionsFallback: Record<string, string> = {
     "The last video file is missing or unavailable.",
   "The last playback source is no longer available.":
     "The last playback source is no longer available.",
+  "Open this video from its source or enter the link again. Its network address was not saved.":
+    "Open this video from its source or enter the link again. Its network address was not saved.",
   "Playback changed. Open the menu again.": "Playback changed. Open the menu again.",
   "Playback controls are not available in this session.":
     "Playback controls are not available in this session.",

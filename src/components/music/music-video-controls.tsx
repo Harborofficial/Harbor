@@ -1,5 +1,13 @@
 import type { JSX } from "react";
-import { Captions, CaptionsOff, Loader2, Maximize, Minimize, Wallpaper } from "@/components/icons/music-icons";
+import {
+  Captions,
+  CaptionsOff,
+  ChevronUp,
+  Loader2,
+  Maximize,
+  Minimize,
+  Wallpaper,
+} from "@/components/icons/music-icons";
 import { useT } from "@/lib/i18n";
 import { setMusicAppearance, useMusicAppearance } from "@/lib/music/appearance";
 import { lyricIndexAt, type LyricLine } from "@/lib/music/lyrics";
@@ -84,9 +92,22 @@ export function MusicVideoControls({
             aria-pressed={appearance.immersive}
             aria-label={t("Immersive")}
             title={t("Immersive")}
-            onClick={() => setMusicAppearance({ immersive: !appearance.immersive })}
+            onClick={() => setMusicAppearance({ immersive: !appearance.immersive, theatre: false })}
           >
             <Wallpaper size={19} aria-hidden />
+          </button>
+        )}
+        {!fullscreen && (
+          <button
+            type="button"
+            className="music-video-chrome-button"
+            data-state={appearance.theatre ? "on" : undefined}
+            aria-pressed={appearance.theatre}
+            aria-label={t("Theatre mode")}
+            title={t("Theatre mode")}
+            onClick={() => setMusicAppearance({ theatre: !appearance.theatre, immersive: false })}
+          >
+            <ChevronUp size={19} aria-hidden />
           </button>
         )}
         <button

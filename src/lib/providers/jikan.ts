@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import type { Meta } from "@/lib/cinemeta";
 import { adultContentHidden, isAdultText } from "@/lib/addons-store/adult-filter";
 import { armKitsuIds, catalogGet, catalogSet } from "./jikan-cache";
@@ -122,6 +123,7 @@ function isAdultJikan(a: JikanAnime): boolean {
 }
 
 async function metasFromJikan(items: JikanAnime[]): Promise<Meta[]> {
+  if (addonOnlyMetadata()) return [];
   if (items.length === 0) return [];
   if (adultContentHidden()) items = items.filter((a) => !isAdultJikan(a));
 
@@ -171,6 +173,7 @@ async function jikanQuery(
   path: string,
   params: Record<string, string | number> = {},
 ): Promise<Meta[]> {
+  if (addonOnlyMetadata()) return [];
   const effective = adultContentHidden() ? { sfw: "true", ...params } : params;
   const qs = new URLSearchParams();
   // Pin the page size: Midnight's default is 50, while Tenrai's is 25.
@@ -263,6 +266,7 @@ export async function jikanResolveMalId(title: string): Promise<number | null> {
 }
 
 export async function jikanRecommendationsForMalId(malId: number): Promise<Meta[]> {
+  if (addonOnlyMetadata()) return [];
   const j = await animeCatalogRequest<Array<{ entry?: JikanAnime; votes?: number }>>(`/anime/${malId}/recommendations`);
   if (!Array.isArray(j.data)) throw new Error("Invalid anime recommendations response");
   const animes = [...j.data].sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0))
@@ -293,6 +297,7 @@ function isSequelTitle(a: JikanAnime): boolean {
 }
 
 async function fetchRawAnimePage(params: Record<string, string | number>): Promise<JikanAnime[]> {
+  if (addonOnlyMetadata()) return [];
   const qs = new URLSearchParams();
   qs.set("limit", "25");
   for (const [k, v] of Object.entries(params)) qs.set(k, String(v));
@@ -302,6 +307,7 @@ async function fetchRawAnimePage(params: Record<string, string | number>): Promi
 }
 
 export async function jikanUnderratedGems(page = 1): Promise<Meta[]> {
+  if (addonOnlyMetadata()) return [];
   const key = `/gems?page=${page}`;
   const hit = catalogGet(key);
   if (hit) return hit;

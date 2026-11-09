@@ -32,8 +32,8 @@ fn transfer(value: &Value) -> Result<Transfer> {
     })
 }
 impl Api {
-    async fn pm_create(&self, link: &str) -> Result<String> {
-        let link = super::links::source_link(link)?;
+    pub(super) async fn pm_create(&self, link: &str) -> Result<String> {
+        let link = if link.starts_with("magnet:") { super::magnets::checked_magnet(link)?.to_string() } else { super::links::source_link(link)? };
         let result = self.request("/transfer/create", &[], Some(&[("src",link)])).await?;
         if result["type"].as_str() == Some("container") { return Err("cloud_container"); }
         record_id(&result["id"])
@@ -52,7 +52,7 @@ impl Api {
         let start = page as usize * 100;
         Ok(PmPage { next: (records.len() > start + 100 && page < 100).then_some(page + 1), jobs: records.into_iter().skip(start).take(100).map(|v|v.value).collect() })
     }
-    async fn pm_status(&self, id: &str) -> Result<PmJob> {
+    pub(super) async fn pm_status(&self, id: &str) -> Result<PmJob> {
         let mut record = self.pm_transfer(id).await?;
         if record.value.job.status == "ready" {
             if let Some(file) = record.file {
@@ -68,7 +68,7 @@ impl Api {
         }
         Ok(record.value)
     }
-    async fn pm_download(&self, id: &str, file: &str) -> Result<CloudDownload> {
+    pub(super) async fn pm_download(&self, id: &str, file: &str) -> Result<CloudDownload> {
         let record = self.pm_transfer(id).await?;
         if record.value.job.status != "ready" { return Err("cloud_not_ready"); }
         if record.file.as_deref() != Some(file) { return Err("cloud_missing"); }

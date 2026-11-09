@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { EpisodeReleaseCountdown } from "@/components/episode-release-countdown";
-import { Check, ChevronDown, Hourglass, RotateCcw } from "lucide-react";
+import { Check, ChevronDown, Download, Hourglass, RotateCcw, X } from "lucide-react";
 import { Play } from "@/components/icons/play-filled";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
 import type { PlayEpisode } from "@/lib/view";
+import { episodeDownloadAction } from "./download-action";
+import { useEpisodeDownload } from "./use-episode-download";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
 import { useSettings } from "@/lib/settings";
@@ -21,6 +23,7 @@ export function EpisodeRow({
   expanded,
   onToggle,
   onPlay,
+  onDownload,
   isCurrent = false,
   watched = false,
   spoiler,
@@ -31,6 +34,7 @@ export function EpisodeRow({
   expanded: boolean;
   onToggle: () => void;
   onPlay: () => void;
+  onDownload?: () => void;
   isCurrent?: boolean;
   watched?: boolean;
   spoiler?: SpoilerMask;
@@ -51,6 +55,12 @@ export function EpisodeRow({
       ? `S${partSeason} · E${String(episode.episode).padStart(2, "0")}`
       : `S${episode.imdbSeason ?? episode.season} · E${String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}`;
   const hasStill = !!episode.still;
+  const download = useEpisodeDownload(metaId ?? "", episode.season, episode.episode);
+  const downloadAction = episodeDownloadAction(download?.status);
+  const downloadActive = downloadAction === "cancel";
+  const downloadDone = downloadAction === "saved";
+  const downloadPercent = Math.round(Math.min(1, Math.max(0, download?.ratio ?? 0)) * 100);
+  const downloadLabel = downloadDone ? t("Saved offline") : downloadActive ? t("Downloading {pct}%  ·  click to cancel", { pct: downloadPercent }) : download?.status === "error" ? t("Download failed  ·  click to retry") : t("Download for offline");
   const [imgFailed, setImgFailed] = useState(false);
   return (
     <div
@@ -123,6 +133,18 @@ export function EpisodeRow({
               )}
               {isCurrent ? t("Restart") : t("Play")}
             </button>
+            {onDownload && (
+              <button
+                type="button"
+                onClick={onDownload}
+                disabled={downloadDone}
+                title={downloadLabel}
+                aria-label={downloadLabel}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ring-1 transition-colors ${downloadDone ? "cursor-default bg-success/10 text-success ring-success/25" : "bg-elevated text-ink-muted ring-edge-soft hover:bg-raised hover:text-ink"}`}
+              >
+                {downloadDone ? <Check size={19} strokeWidth={2.5} /> : downloadActive ? <span className="flex flex-col items-center text-[11px] font-semibold tabular-nums leading-none">{downloadPercent}%<X size={12} className="mt-0.5" /></span> : <Download size={19} strokeWidth={2} />}
+              </button>
+            )}
             <button
               onClick={onToggle}
               aria-label={expanded ? t("Hide details") : t("Show details")}

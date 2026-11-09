@@ -10,6 +10,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { useView, type PlayerSrc } from "@/lib/view";
+import { useReportPlayerControlsInset } from "@/lib/player/controls-inset";
 import { runBpBack } from "../bp-back";
 import { BpHintBar, type BpAction } from "../bp-hint-bar";
 import { useBpT } from "../bp-i18n";
@@ -115,6 +116,7 @@ export function BpPlayerShell({
   });
 
   const up = phase === "up";
+  useReportPlayerControlsInset(chromeRef, mounted && phase !== "down");
 
   useEffect(() => setTick(phase !== "down"), [phase]);
 

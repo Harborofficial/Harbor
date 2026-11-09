@@ -16,9 +16,17 @@ import { stremioIdToTraktTarget } from "./trakt/ids";
 import { simklRequest } from "./simkl/client";
 import { isAuthenticated as simklConnected } from "./simkl/session";
 import { isAuthenticated as anilistConnected } from "./anilist/session";
+import { resolveAnilistMediaId } from "./anilist/sync";
+import { saveListEntry as saveAnilistListEntry } from "./anilist/mutations";
 import { isAuthenticated as malConnected } from "./mal/session";
-import { stremioIdToSimklTarget } from "./simkl/ids";
-import { readSimklStateStrict, invalidateSimklListStatus } from "./simkl/list-status";
+import { resolveMalMediaId, saveListEntry as saveMalListEntry } from "./mal/mutations";
+import { resolveSimklTarget, simklEntryIdKeys, stremioIdToSimklTarget } from "./simkl/ids";
+import {
+  readSimklStateStrict,
+  invalidateSimklListStatus,
+  loadSimklStatusMap,
+  setSimklStatus,
+} from "./simkl/list-status";
 import { invalidateWatchlistCache } from "./simkl/watchlist";
 import { invalidateHistoryCache } from "./simkl/history";
 import type { SimklTarget } from "./simkl/types";
@@ -37,10 +45,37 @@ import {
 } from "./publicmetadb/watchlist";
 import type { PmdbTarget } from "./publicmetadb/types";
 import { getPmdbDefaultListId } from "./publicmetadb/lists";
+import { isNuvioSignedIn, isNuvioProviderActive } from "./nuvio/nuvio-client";
+import {
+  resolveNuvioProfileIndex,
+  pushWatchedItemToNuvio,
+  deleteWatchedItemFromNuvio,
+  deleteWatchProgressFromNuvio,
+  deleteEpisodeWatchProgressFromNuvio,
+  undismissNextUpInNuvioCloud,
+  readCachedWatchProgress,
+  readCachedWatchedItems,
+} from "./nuvio/nuvio-sync";
+import { buildNuvioPlaybackItems, writeCachedNuvioPlaybackItems } from "./nuvio/nuvio-playback";
+import { addNuvioLibraryItem, removeNuvioLibraryItem } from "./nuvio/nuvio-library";
+import { saveLocalCw, clearLocalCw } from "./local-cw";
+import { saveResumeMs } from "./resume";
+import { loadStoredSettings } from "./settings/load";
+import { pmdbDeleteResumesForTitle } from "./publicmetadb/scrobble";
+import { dropPmdbShow } from "./publicmetadb/dropped";
+
+export type ProviderConfirmation = "simkl-library-removal";
+
+export type ProviderPreflightResult =
+  | string
+  | {
+      reason: string;
+      confirmation?: ProviderConfirmation;
+    };
 
 export type ProviderWrite = {
   provider: string;
-  preflight?: (assertCurrent: () => void) => Promise<string | undefined>;
+  preflight?: (assertCurrent: () => void) => Promise<ProviderPreflightResult | undefined>;
   run: (assertCurrent: () => void) => Promise<void | string>;
 };
 type Ids = {
@@ -414,14 +449,18 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
         if (!!pmdbWatchlistContains(items, target) === on) return;
         const saved = on
           ? await addToPmdbWatchlist(target, { listId, strict: true, assertCurrent: validate })
-          : await removeFromPmdbWatchlist(target, { listId, strict: true, assertCurrent: validate });
+          : await removeFromPmdbWatchlist(target, {
+              listId,
+              strict: true,
+              assertCurrent: validate,
+            });
         validate();
         if (!saved) throw new Error("PublicMetaDB did not confirm this watchlist change.");
       },
     });
   }
   const authKey = readActiveStremioAuthKey();
-  if (authKey)
+  if (authKey && !isNuvioProviderActive())
     writes.push({
       provider: "Stremio",
       run: async (assertCurrent) => {
@@ -445,6 +484,185 @@ export function watchlistProviderWrites(input: WatchlistInput, on: boolean): Pro
           });
       },
     });
+  if (isNuvioProviderActive() && isNuvioSignedIn())
+    writes.push({
+      provider: "Nuvio",
+      run: async (assertCurrent) => {
+        assertCurrent();
+        if (!isNuvioSignedIn()) throw new Error("Nuvio disconnected.");
+        if (!isNuvioProviderActive()) return;
+        const slot = resolveNuvioProfileIndex();
+        const primaryId = input.imdbId || (input.id.startsWith("tt") ? input.id : input.id);
+        const altId = input.id !== primaryId ? input.id : undefined;
+        if (on) {
+          const item = {
+            content_id: primaryId,
+            content_type: movie ? "movie" : "series",
+            name: input.name || "",
+            poster: input.poster || null,
+            added_at: Date.now(),
+          };
+          addNuvioLibraryItem(slot, item);
+          if (altId) {
+            addNuvioLibraryItem(slot, { ...item, content_id: altId });
+          }
+        } else {
+          removeNuvioLibraryItem(slot, primaryId, movie ? "movie" : "series");
+          if (altId) {
+            removeNuvioLibraryItem(slot, altId, movie ? "movie" : "series");
+          }
+        }
+      },
+    });
+  return writes;
+}
+
+export function dropProviderWrites(
+  input: WatchlistInput,
+  animeId?: string | null,
+): ProviderWrite[] {
+  const writes: ProviderWrite[] = [];
+  const syncId = animeId || input.id;
+  const anime = !!animeId || input.type === "anime" || ANIME_CLOUD_ID.test(syncId);
+
+  if (anime && anilistConnected())
+    writes.push({
+      provider: "AniList",
+      run: async (assertCurrent) => {
+        const mediaId = await resolveAnilistMediaId(syncId);
+        assertCurrent();
+        if (!anilistConnected()) throw new Error("AniList disconnected.");
+        if (mediaId == null) return "No verified AniList identity is available for this anime.";
+        const saved = await saveAnilistListEntry({ mediaId, status: "DROPPED" });
+        assertCurrent();
+        if (saved.status !== "DROPPED") throw new Error("AniList did not confirm dropped status.");
+      },
+    });
+
+  if (anime && malConnected())
+    writes.push({
+      provider: "MyAnimeList",
+      run: async (assertCurrent) => {
+        const malId = await resolveMalMediaId(syncId);
+        assertCurrent();
+        if (!malConnected()) throw new Error("MyAnimeList disconnected.");
+        if (malId == null) return "No verified MyAnimeList identity is available for this anime.";
+        const saved = await saveMalListEntry({ malId, status: "dropped" });
+        assertCurrent();
+        if (saved.status !== "dropped")
+          throw new Error("MyAnimeList did not confirm dropped status.");
+      },
+    });
+
+  if (simklConnected())
+    writes.push({
+      provider: "Simkl",
+      run: async (assertCurrent) => {
+        let target = await resolveSimklTarget(syncId, "series");
+        assertCurrent();
+        if (!target && input.imdbId) {
+          target = await resolveSimklTarget(input.imdbId, "series");
+          assertCurrent();
+        }
+        if (!simklConnected()) throw new Error("Simkl disconnected.");
+        if (!target) return "No verified Simkl identity is available for this title.";
+        const status = await setSimklStatus(target, "dropped");
+        assertCurrent();
+        if (status !== "dropped") throw new Error("Simkl did not confirm dropped status.");
+        invalidateSimklListStatus();
+      },
+    });
+
+  if (traktConnected()) {
+    const assertTrakt = captureTraktGuard();
+    writes.push({
+      provider: "Trakt",
+      run: async (assertCurrent) => {
+        const ids = idsFor(input, "Trakt");
+        if (!ids) return "No verified Trakt identity is available for this title.";
+        const validate = () => {
+          assertCurrent();
+          assertTrakt();
+        };
+        validate();
+        const response = await traktRequest<SyncResponse>("/users/hidden/dropped", {
+          method: "POST",
+          body: { shows: [{ ids }] },
+          assertCurrent: validate,
+        });
+        validate();
+        if (
+          !response ||
+          Object.values(response.not_found ?? {}).some(
+            (items) => !Array.isArray(items) || items.length > 0,
+          ) ||
+          typeof response.added?.shows !== "number" ||
+          !Number.isFinite(response.added.shows)
+        )
+          throw new Error("Trakt did not confirm dropped status.");
+      },
+    });
+  }
+
+  if (pmdbConnected()) {
+    const assertPmdb = capturePmdbGuard();
+    const listId = getPmdbDefaultListId();
+    let target: PmdbTarget | null | undefined;
+    const prepare = async (assertCurrent: () => void) => {
+      const validate = () => {
+        assertCurrent();
+        assertPmdb();
+      };
+      validate();
+      if (target === undefined) {
+        let resolved = await resolvePmdbTarget(syncId, "series");
+        validate();
+        if (!resolved && syncId !== input.id) {
+          resolved = await resolvePmdbTarget(input.id, "series");
+          validate();
+        }
+        if (!resolved && input.imdbId) {
+          resolved = await resolvePmdbTarget(input.imdbId, "series");
+          validate();
+        }
+        target = await pmdbTargetWithTmdb(resolved, validate);
+      }
+      return target?.media_type === "tv" ? target : null;
+    };
+    writes.push({
+      provider: "PublicMetaDB",
+      run: async (assertCurrent) => {
+        const validate = () => {
+          assertCurrent();
+          assertPmdb();
+        };
+        const resolved = await prepare(assertCurrent);
+        if (!resolved) return "No verified PublicMetaDB identity is available for this title.";
+        const dropped = await dropPmdbShow(resolved, { assertCurrent: validate });
+        validate();
+        if (!dropped) throw new Error("PublicMetaDB did not confirm dropped status.");
+
+        const items = await fetchPmdbWatchlist({
+          listId,
+          strict: true,
+          assertCurrent: validate,
+        });
+        validate();
+        if (pmdbWatchlistContains(items, resolved)) {
+          const removed = await removeFromPmdbWatchlist(resolved, {
+            listId,
+            strict: true,
+            assertCurrent: validate,
+          });
+          validate();
+          if (!removed) throw new Error("PublicMetaDB did not confirm watchlist removal.");
+        }
+        await pmdbDeleteResumesForTitle(resolved, { assertCurrent: validate });
+        validate();
+      },
+    });
+  }
+
   return writes;
 }
 
@@ -457,6 +675,7 @@ export function watchedProviderWrites(
     videos?: Meta["videos"];
     imdbId?: string | null;
     verifiedEpisodeMapping?: boolean;
+    allowSimklLibraryRemoval?: boolean;
   },
 ): ProviderWrite[] {
   const writes: ProviderWrite[] = [];
@@ -605,25 +824,51 @@ export function watchedProviderWrites(
     (ANIME_CLOUD_ID.test(meta.id) || meta.type === "anime") &&
     !!options.imdbId &&
     !options.verifiedEpisodeMapping;
+  const simklMovieUnwatch = movie && !watched;
   if (simklConnected())
     writes.push({
       provider: "Simkl",
-      preflight: async () =>
-        unverifiedSimklEpisode
-          ? "Provider could not identify the requested content."
-          : movie && !watched
-            ? "Simkl cannot unwatch a movie without removing it from its library. Manage this title in Simkl."
-            : undefined,
+      preflight: async (assertCurrent) => {
+        if (unverifiedSimklEpisode) return "Provider could not identify the requested content.";
+        if (!simklMovieUnwatch || options.allowSimklLibraryRemoval) return undefined;
+        const ids = idsFor(input, "Simkl");
+        if (!ids) return undefined;
+        let statuses: Awaited<ReturnType<typeof loadSimklStatusMap>>;
+        try {
+          statuses = await loadSimklStatusMap();
+        } catch {
+          return "Simkl's current state could not be checked. No changes were made.";
+        }
+        assertCurrent();
+        const status = simklEntryIdKeys(ids, "movie")
+          .map((key) => statuses.get(key))
+          .find(Boolean);
+        if (status !== "completed") return undefined;
+        return {
+          reason:
+            "Simkl can only unwatch this movie by removing it from your Simkl library and history.",
+          confirmation: "simkl-library-removal" as const,
+        };
+      },
       run: async (assertCurrent) => {
         if (unverifiedSimklEpisode) return "Provider could not identify the requested content.";
         const ids = idsFor(input, "Simkl");
         if (!ids) return "No verified Simkl identity is available for this title.";
-        if (movie && !watched)
-          return "Unchanged: Simkl cannot unwatch a movie without removing it from its library. Manage this title in Simkl.";
         const target: SimklTarget = { kind: movie ? "movie" : "show", ids };
         const current = await readSimklStateStrict(target);
         assertCurrent();
         if (!simklConnected()) throw new Error("Simkl disconnected.");
+        if (movie && !watched) {
+          if (current.status !== "completed") return;
+          const response = await simklRequest<SyncResponse>("/sync/history/remove", {
+            method: "POST",
+            body: { movies: [{ ids }] },
+          });
+          ensureResponse(response, "movies", "deleted", 1);
+          invalidateHistoryCache();
+          invalidateSimklListStatus();
+          return;
+        }
         if (movie && current.status === "completed") return;
         const changing = options.episodes.filter(
           (ep) => current.watched.has(`${ep.season}:${ep.episode}`) !== watched,
@@ -647,7 +892,7 @@ export function watchedProviderWrites(
       },
     });
   const authKey = readActiveStremioAuthKey();
-  if (authKey)
+  if (authKey && !isNuvioProviderActive())
     writes.push({
       provider: "Stremio",
       run: async (assertCurrent) => {
@@ -691,6 +936,270 @@ export function watchedProviderWrites(
           throw new Error(
             "Stremio has not confirmed this change; a failed write may be queued for retry.",
           );
+      },
+    });
+  if (isNuvioSignedIn())
+    writes.push({
+      provider: "Nuvio",
+      run: async (assertCurrent) => {
+        assertCurrent();
+        if (!isNuvioSignedIn()) throw new Error("Nuvio disconnected.");
+        if (!isNuvioProviderActive()) return;
+        const slot = resolveNuvioProfileIndex();
+        const primaryId = options.imdbId || (meta.id.startsWith("tt") ? meta.id : meta.id);
+        const altId = meta.id !== primaryId ? meta.id : undefined;
+
+        const rawIds = [options.imdbId, meta.id].filter(Boolean) as string[];
+        const idVariants = new Set<string>();
+        for (const rid of rawIds) {
+          idVariants.add(rid);
+          const clean = rid.replace(/^(series|movie|tmdb):/, "");
+          if (clean) {
+            idVariants.add(clean);
+            idVariants.add(`tmdb:${clean}`);
+            idVariants.add(`series:${clean}`);
+          }
+        }
+        const allIds = Array.from(idVariants);
+        const canonicalId = (options.imdbId || meta.id).replace(/^(series|movie|tmdb):/, "");
+
+        if (movie) {
+          if (watched) {
+            const items = [
+              {
+                contentId: canonicalId,
+                contentType: "movie" as const,
+                title: meta.name,
+                watchedAt: Date.now(),
+              },
+            ];
+            await pushWatchedItemToNuvio(slot, items);
+            for (const cid of allIds) {
+              await deleteWatchProgressFromNuvio(slot, cid);
+            }
+          } else {
+            await deleteWatchedItemFromNuvio(
+              slot,
+              allIds.map((cid) => ({ contentId: cid })),
+            );
+            for (const cid of allIds) {
+              await deleteWatchProgressFromNuvio(slot, cid);
+            }
+          }
+          window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+          window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+          window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+        } else {
+          if (watched) {
+            const itemsToPush = options.episodes.map((ep) => ({
+              contentId: canonicalId,
+              contentType: "series" as const,
+              title: meta.name,
+              season: ep.season,
+              episode: ep.episode,
+              watchedAt: Date.now(),
+            }));
+            await pushWatchedItemToNuvio(slot, itemsToPush);
+
+            // Compute next episode to advance Continue Watching instantly
+            const sorted = [...options.episodes].sort(
+              (a, b) => a.season - b.season || a.episode - b.episode,
+            );
+            const lastEp = sorted[sorted.length - 1];
+            if (lastEp) {
+              let nextSeason: number | null = null;
+              let nextEpisode: number | null = null;
+              let hasNext = false;
+              let videosToScan = options.videos;
+              const hasCandidateInScan = videosToScan?.some(
+                (v) =>
+                  (v.season ?? 0) > lastEp.season ||
+                  ((v.season ?? 0) === lastEp.season &&
+                    (v.episode ?? v.number ?? 0) > lastEp.episode),
+              );
+              if (!hasCandidateInScan) {
+                const lookupId = primaryId.replace(/^(series|movie|tmdb):/, "");
+                const fetchedMeta = await fetchMeta("series", lookupId).catch(() => null);
+                if (fetchedMeta?.videos?.length) {
+                  videosToScan = fetchedMeta.videos;
+                }
+              }
+              if (videosToScan?.length) {
+                const orderedVideos = videosToScan
+                  .flatMap((v) => {
+                    const s = v.season ?? 0;
+                    const e = v.episode ?? v.number ?? 0;
+                    return s > 0 && e > 0 ? [{ season: s, episode: e }] : [];
+                  })
+                  .sort((a, b) => a.season - b.season || a.episode - b.episode);
+                const nextVid = orderedVideos.find(
+                  (v) =>
+                    v.season > lastEp.season ||
+                    (v.season === lastEp.season && v.episode > lastEp.episode),
+                );
+                if (nextVid) {
+                  hasNext = true;
+                  nextSeason = nextVid.season;
+                  nextEpisode = nextVid.episode;
+                }
+              }
+
+              if (hasNext && nextSeason != null && nextEpisode != null) {
+                void undismissNextUpInNuvioCloud(slot, primaryId);
+                if (altId) void undismissNextUpInNuvioCloud(slot, altId);
+                // Delete watch progress for the completed episodes so mobile Next Up
+                // generates cleanly without 0s progress rows poisoning mobile sync!
+                for (const ep of options.episodes) {
+                  await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.season, ep.episode);
+                  if (altId)
+                    await deleteEpisodeWatchProgressFromNuvio(slot, altId, ep.season, ep.episode);
+                }
+
+                const nextCw = {
+                  id: meta.id,
+                  type: "series" as const,
+                  name: meta.name,
+                  poster: meta.poster,
+                  background: meta.background,
+                  season: nextSeason,
+                  episode: nextEpisode,
+                  positionMs: 0,
+                  durationMs: 2640000,
+                  isAnime: meta.type === "anime",
+                  t: Date.now(),
+                };
+                saveLocalCw({ ...nextCw, external: "nuvio" }, `nuvio-${slot}`);
+                saveResumeMs(
+                  meta.id,
+                  0,
+                  nextSeason,
+                  nextEpisode,
+                  undefined,
+                  0,
+                  "nuvio",
+                  `nuvio-${slot}`,
+                );
+                window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+                window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+                window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+              } else if (videosToScan && videosToScan.length > 0) {
+                const settings = loadStoredSettings();
+                const keepForTimer = settings.animeCwEnd === "timer";
+                if (keepForTimer) {
+                  const nextCw = {
+                    id: meta.id,
+                    type: "series" as const,
+                    name: meta.name,
+                    poster: meta.poster,
+                    background: meta.background,
+                    season: lastEp.season,
+                    episode: lastEp.episode,
+                    positionMs: 0,
+                    durationMs: 2640000,
+                    isAnime: meta.type === "anime",
+                    t: Date.now(),
+                  };
+                  saveLocalCw({ ...nextCw, external: "nuvio" }, `nuvio-${slot}`);
+                  if (altId) {
+                    saveLocalCw({ ...nextCw, id: altId, external: "nuvio" }, `nuvio-${slot}`);
+                  }
+                } else {
+                  // Entire series is completed (no further episodes exist)
+                  await deleteWatchProgressFromNuvio(slot, primaryId);
+                  if (altId) await deleteWatchProgressFromNuvio(slot, altId);
+                  clearLocalCw(primaryId, `nuvio-${slot}`);
+                  if (altId) {
+                    clearLocalCw(altId, `nuvio-${slot}`);
+                  }
+                  clearLocalCw(meta.id, `nuvio-${slot}`);
+                }
+              }
+              try {
+                const settings = loadStoredSettings();
+                const keepCaughtUp = settings.animeCwEnd === "timer";
+                const cachedProgress = readCachedWatchProgress(slot);
+                const cachedWatched = readCachedWatchedItems(slot);
+                const built = buildNuvioPlaybackItems(
+                  cachedProgress,
+                  slot,
+                  cachedWatched,
+                  undefined,
+                  keepCaughtUp,
+                );
+                writeCachedNuvioPlaybackItems(slot, built);
+              } catch {}
+              window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+            }
+          } else {
+            const keysToDelete = options.episodes.flatMap((ep) =>
+              allIds.map((cid) => ({ contentId: cid, season: ep.season, episode: ep.episode })),
+            );
+            await deleteWatchedItemFromNuvio(slot, keysToDelete);
+
+            const sorted = [...options.episodes].sort(
+              (a, b) => a.season - b.season || a.episode - b.episode,
+            );
+            const firstEp = sorted[0];
+            if (firstEp) {
+              for (const ep of sorted) {
+                await deleteEpisodeWatchProgressFromNuvio(slot, primaryId, ep.season, ep.episode);
+                if (altId) {
+                  await deleteEpisodeWatchProgressFromNuvio(slot, altId, ep.season, ep.episode);
+                }
+              }
+
+              const cachedWatched = readCachedWatchedItems(slot);
+              const remainingWatched = cachedWatched.filter(
+                (w) =>
+                  w.season != null &&
+                  w.episode != null &&
+                  allIds.some((id) => w.content_id === id || w.content_id.includes(id)),
+              );
+              if (remainingWatched.length > 0) {
+                const nextCw = {
+                  id: primaryId,
+                  type: "series" as const,
+                  name: meta.name,
+                  poster: meta.poster,
+                  background: meta.background,
+                  season: firstEp.season,
+                  episode: firstEp.episode,
+                  positionMs: 0,
+                  durationMs: 2640000,
+                  isAnime: meta.type === "anime",
+                  t: Date.now(),
+                  external: "nuvio" as const,
+                };
+                saveLocalCw(nextCw, `nuvio-${slot}`);
+                if (altId) saveLocalCw({ ...nextCw, id: altId }, `nuvio-${slot}`);
+              } else {
+                clearLocalCw(primaryId, `nuvio-${slot}`);
+                if (altId) clearLocalCw(altId, `nuvio-${slot}`);
+                clearLocalCw(meta.id, `nuvio-${slot}`);
+              }
+
+              try {
+                const settings = loadStoredSettings();
+                const keepCaughtUp = settings.animeCwEnd === "timer";
+                const cachedProgress = readCachedWatchProgress(slot);
+                const cachedWatched = readCachedWatchedItems(slot);
+                const built = buildNuvioPlaybackItems(
+                  cachedProgress,
+                  slot,
+                  cachedWatched,
+                  undefined,
+                  keepCaughtUp,
+                );
+                writeCachedNuvioPlaybackItems(slot, built);
+              } catch {}
+
+              window.dispatchEvent(new CustomEvent("harbor:continue-watching-updated"));
+              window.dispatchEvent(new CustomEvent("harbor:watched-changed"));
+              window.dispatchEvent(new CustomEvent("harbor:manual-watched-changed"));
+              window.dispatchEvent(new CustomEvent("harbor:series-watched-changed"));
+            }
+          }
+        }
       },
     });
   return writes;

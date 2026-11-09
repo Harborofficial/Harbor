@@ -15,8 +15,8 @@ mod video_page;
 use super::super::connector::{ConnectorHealth, HealthCell, MusicConnector};
 use super::super::{
     MusicAlbumRef, MusicArtistRef, MusicCatalogItem, MusicCatalogKind, MusicCatalogPage,
-    MusicCatalogRow, MusicConnection, MusicPlaylistRef, MusicSearchResults, MusicStationRef,
-    MusicStream, MusicTrack, MusicVideoStream,
+    MusicCatalogRow, MusicConnection, MusicPlaylistImport, MusicPlaylistRef, MusicSearchResults,
+    MusicStationRef, MusicStream, MusicTrack, MusicVideoStream,
 };
 use async_trait::async_trait;
 
@@ -169,6 +169,16 @@ impl MusicConnector for YouTubeMusicConnector {
         playlist: &MusicPlaylistRef,
     ) -> Result<Vec<MusicTrack>, String> {
         let result = catalog::playlist_tracks(&self.client, app, playlist).await;
+        self.record(&result);
+        result
+    }
+
+    async fn import_playlist(
+        &self,
+        app: &tauri::AppHandle,
+        playlist_id: &str,
+    ) -> Result<MusicPlaylistImport, String> {
+        let result = catalog::import_playlist(&self.client, app, playlist_id).await;
         self.record(&result);
         result
     }

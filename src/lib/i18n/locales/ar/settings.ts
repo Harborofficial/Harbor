@@ -186,7 +186,7 @@ const settings: Record<string, string> = {
     "تتبّع ما تشاهده تلقائيًا وحفظ تقدّم المشاهدة في الوقت الفعلي.",
   "Auto-play trailer on detail pages": "تشغيل المقطع الدعائي تلقائيًا في صفحات التفاصيل",
   "Award Icons": "أيقونات الجوائز",
-  "Award tab on cards": "علامة تبويب الجوائز على البطاقات",
+  "Award display mode": "وضع الجوائز",
   "Award tab position": "موضع علامة تبويب الجوائز",
   Backdrop: "الخلفية",
   "Badge art": "صور الشارات",
@@ -258,8 +258,8 @@ const settings: Record<string, string> = {
   "Could not send: {error}": "تعذّر الإرسال: {error}",
   "Couldn't reach Trakt. Check your connection and try again.":
     "تعذّر الوصول إلى Trakt. تحقق من اتصالك وحاول مرة أخرى.",
-  "Couldn't reach harborcommunity.site to load earlier builds. Check your connection and try again.":
-    "تعذّر الوصول إلى harborcommunity.site لتحميل الإصدارات السابقة. تحقق من اتصالك وحاول مرة أخرى.",
+  "Couldn't reach GitHub to load earlier builds. Check your connection and try again.":
+    "تعذّر الوصول إلى GitHub لتحميل الإصدارات السابقة. تحقق من اتصالك وحاول مرة أخرى.",
   "Couldn't reach that pack": "تعذّر الوصول إلى تلك الحزمة",
   "Couldn't reach that pack (HTTP {n})": "تعذّر الوصول إلى تلك الحزمة (HTTP {n})",
   "Couldn't read your watchlist. Try again.": "تعذّرت قراءة قائمة مشاهدتك. حاول مرة أخرى.",
@@ -916,8 +916,8 @@ const settings: Record<string, string> = {
   "Stretch the featured hero edge to edge and taller, across every layout.":
     "تمدّد لافتة البطل من الحافة إلى الحافة وبارتفاع أكبر، في جميع التخطيطات.",
   "Full quality hero image": "صورة البطل بأعلى جودة",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "تحميل صورة البطل المميّز بأعلى دقة. يستهلك بيانات أكثر.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "تحميل الصورة بأعلى دقة للبطل المميّز، ولصورة صفحة التفاصيل، ولخلفيات منتقي المصادر غير المشوّشة. يستهلك بيانات وذاكرة فيديو أكثر.",
   "Display language": "لغة العرض",
   "Interface language": "لغة الواجهة",
   "Metadata language": "لغة البيانات الوصفية",

@@ -5022,7 +5022,7 @@
   "Load more": "Показать ещё",
   "Load more comments": "Загрузить ещё комментарии",
   "Load more threads": "Загрузить ещё темы",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.": "Загружать изображение баннера в максимальном разрешении. Расходует больше трафика.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.": "Загружать изображения в максимальном разрешении для баннера, баннера страницы с описанием и фонов выбора источников без размытия. Расходует больше трафика и видеопамяти.",
   "Loaded {loaded} of {total} movies...": "Загружено {loaded} из {total} фильмов...",
   "Loaded {loaded} of {total} shows...": "Загружено {loaded} из {total} сериалов...",
   "Loaded {name}": "Загружено: {name}",

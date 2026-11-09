@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Maximize, Minus, Plus, RotateCcw } from "lucide-react";
 import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { mangaUpscaleStatus } from "@/lib/manga/upscale";
+import { bestModelInstalled, preferredBestHeight } from "@/lib/manga/upscale/best";
 import type { ReaderNavPos, ReaderPrefs } from "./reader-types";
 import { ReaderSettingsFrame } from "./reader-settings-frame";
 
@@ -14,8 +17,8 @@ const CATS: Array<{ id: Cat; label: string; icon: string }> = [
   { id: "direction", label: "Direction", icon: "flip-direction" },
   { id: "fit", label: "Fit", icon: "image-position" },
   { id: "nav", label: "Arrows", icon: "arrows" },
-  { id: "background", label: "Brightness", icon: "brightness" },
-  { id: "zoom", label: "Zoom", icon: "zoom" },
+  { id: "background", label: "Background", icon: "brightness" },
+  { id: "zoom", label: "Zoom & sharpness", icon: "zoom" },
 ];
 
 const NAV_POS: Array<{ v: ReaderNavPos; label: string }> = [
@@ -54,13 +57,37 @@ export function ReaderSettings({
   prefs,
   onChange,
   onClose,
+  backgroundControls,
+  backgroundError,
 }: {
   prefs: ReaderPrefs;
   onChange: (patch: Partial<ReaderPrefs>) => void;
   onClose: () => void;
+  backgroundControls?: ReactNode;
+  backgroundError?: ReactNode;
 }) {
   const t = useT();
+  const { settings, update } = useSettings();
   const [cat, setCat] = useState<Cat>("mode");
+  const [upscaleInstalled, setUpscaleInstalled] = useState(false);
+  const [bestAvailable, setBestAvailable] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    void mangaUpscaleStatus()
+      .then((status) => {
+        if (alive) setUpscaleInstalled(status.installed);
+      })
+      .catch(() => {});
+    void bestModelInstalled(preferredBestHeight())
+      .then((installed) => {
+        if (alive) setBestAvailable(installed);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return (
     <ReaderSettingsFrame
@@ -163,30 +190,37 @@ export function ReaderSettings({
         </div>
       )}
       {cat === "background" && (
-        <div className="flex items-center gap-3">
-          {BGS.map((b) => (
-            <button
-              key={b.v}
-              type="button"
-              onClick={() => onChange({ bg: b.v })}
-              aria-label={t(b.label)}
-              className={`flex w-24 flex-col items-center gap-2 rounded-2xl border p-3 transition duration-150 active:scale-[0.96] ${prefs.bg === b.v ? "border-accent bg-accent/10" : "border-edge-soft bg-elevated/40 hover:border-edge hover:bg-elevated"}`}
-            >
-              <span
-                className="grid h-12 w-12 place-items-center rounded-full ring-1 ring-black/20"
-                style={{ background: b.color }}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-[14px] font-semibold text-ink">{t("Background image")}</span>
+            {backgroundControls}
+            {backgroundError}
+          </div>
+          <div className="flex items-center gap-3">
+            {BGS.map((b) => (
+              <button
+                key={b.v}
+                type="button"
+                onClick={() => onChange({ bg: b.v })}
+                aria-label={t(b.label)}
+                className={`flex w-24 flex-col items-center gap-2 rounded-2xl border p-3 transition duration-150 active:scale-[0.96] ${prefs.bg === b.v ? "border-accent bg-accent/10" : "border-edge-soft bg-elevated/40 hover:border-edge hover:bg-elevated"}`}
               >
-                {prefs.bg === b.v && (
-                  <Check
-                    size={18}
-                    strokeWidth={3}
-                    style={{ color: b.v === "light" ? "#0b0b0d" : "#fff" }}
-                  />
-                )}
-              </span>
-              <span className="text-[12px] font-medium text-ink">{t(b.label)}</span>
-            </button>
-          ))}
+                <span
+                  className="grid h-12 w-12 place-items-center rounded-full ring-1 ring-black/20"
+                  style={{ background: b.color }}
+                >
+                  {prefs.bg === b.v && (
+                    <Check
+                      size={18}
+                      strokeWidth={3}
+                      style={{ color: b.v === "light" ? "#0b0b0d" : "#fff" }}
+                    />
+                  )}
+                </span>
+                <span className="text-[12px] font-medium text-ink">{t(b.label)}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
       {cat === "zoom" && (
@@ -247,6 +281,58 @@ export function ReaderSettings({
               </button>
             ))}
           </div>
+          {upscaleInstalled && (
+            <div className="flex flex-col gap-1 border-t border-edge-soft/60 pt-3">
+              <ToggleRow
+                label={t("Upscale pages")}
+                on={settings.mangaUpscaleEnabled}
+                onToggle={() => update({ mangaUpscaleEnabled: !settings.mangaUpscaleEnabled })}
+              />
+              <p className="max-w-[452px] text-[11.5px] leading-snug text-ink-subtle">
+                {t(
+                  "Sharpens pages that are smaller than the screen. Runs locally and is cached after the first read.",
+                )}
+              </p>
+              {settings.mangaUpscaleEnabled && (
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["fast", "best"] as const).map((quality) => (
+                      <button
+                        key={quality}
+                        type="button"
+                        onClick={() => {
+                          if (quality === "fast" || bestAvailable)
+                            update({ mangaUpscaleQuality: quality });
+                        }}
+                        disabled={quality === "best" && !bestAvailable}
+                        className={`rounded-xl py-2 text-[12.5px] font-semibold transition duration-150 active:scale-95 ${
+                          settings.mangaUpscaleQuality === quality
+                            ? "bg-accent/15 text-accent ring-1 ring-accent/40"
+                            : "bg-elevated/50 text-ink-muted ring-1 ring-edge-soft hover:bg-elevated hover:text-ink"
+                        } ${quality === "best" && !bestAvailable ? "opacity-45" : ""}`}
+                      >
+                        {quality === "fast" ? t("Fast") : t("MangaJaNai")}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="max-w-[452px] text-[11.5px] leading-snug text-ink-subtle">
+                    {settings.mangaUpscaleQuality === "best"
+                      ? t(
+                          "Best quality: a few seconds per page, with the next page pre-upscaled. Color pages use the fast model.",
+                        )
+                      : t("Instant: a quick pass on the page you are reading.")}
+                  </p>
+                  {!bestAvailable && (
+                    <p className="max-w-[452px] text-[11.5px] leading-snug text-ink-subtle">
+                      {t(
+                        "Download the MangaJaNai model in Settings → Shaders → Manga Shaders to unlock it.",
+                      )}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
     </ReaderSettingsFrame>
@@ -302,16 +388,27 @@ function ZoomStep({ onClick, children }: { onClick: () => void; children: ReactN
   );
 }
 
-function ToggleRow({ label, on, onToggle }: { label: string; on: boolean; onToggle: () => void }) {
+function ToggleRow({
+  label,
+  on,
+  onToggle,
+  disabled,
+}: {
+  label: string;
+  on: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+}) {
   return (
-    <div className="flex items-center justify-between">
+    <div className={`flex items-center justify-between ${disabled ? "opacity-45" : ""}`}>
       <span className="text-[13px] font-medium text-ink">{label}</span>
       <button
         type="button"
         role="switch"
         aria-checked={on}
         onClick={onToggle}
-        className={`flex h-6 w-11 shrink-0 items-center rounded-full px-0.5 transition duration-200 active:scale-[0.95] ${on ? "bg-accent" : "bg-raised"}`}
+        disabled={disabled}
+        className={`flex h-6 w-11 shrink-0 items-center rounded-full px-0.5 transition duration-200 active:scale-[0.95] disabled:cursor-default disabled:active:scale-100 ${on ? "bg-accent" : "bg-raised"}`}
       >
         <span
           className={`h-5 w-5 rounded-full bg-canvas shadow-sm transition-transform duration-[280ms] ${on ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"}`}

@@ -168,8 +168,10 @@ function computeBase(): Base {
         state,
         stateUrl: music.artistUrl ?? music.trackUrl,
         posterUrl: config.showPoster ? music.artwork : undefined,
-        largeText: music.album,
-        largeUrl: music.albumUrl ?? music.trackUrl,
+        // Discord requires asset hover text to contain at least two characters.
+        largeText: music.album && Array.from(music.album).length >= 2 ? music.album : undefined,
+        // Asset URLs have a stricter 256-character limit than activity buttons.
+        largeUrl: [music.albumUrl, music.trackUrl].find((url) => url && url.length <= 256),
         smallUrl: STATIC_BUTTONS[0].url,
         startTs: live && config.showTimestamp ? nowSec - Math.floor(music.positionSec) : undefined,
         endTs: live && config.showTimestamp ? nowSec + Math.floor(remaining) : undefined,

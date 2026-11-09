@@ -329,8 +329,8 @@ const catalog07: Record<string, string> = {
   "Load file": "Wczytaj plik",
   "Load more": "Wczytaj więcej",
   "Load more comments": "Wczytaj więcej komentarzy",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Wczytaj grafikę wyróżnionego banera w najwyższej rozdzielczości. Zużywa więcej transferu danych.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Wczytaj grafikę w najwyższej rozdzielczości dla wyróżnionego banera, banera strony szczegółów i nierozmytych tł selektora źródeł. Zużywa więcej transferu danych i pamięci wideo.",
   "Loaded {loaded} of {total} movies...": "Wczytano {loaded} z {total} filmów...",
   "Loaded {loaded} of {total} shows...": "Wczytano {loaded} z {total} seriali...",
   "Loaded {name}": "Wczytano {name}",

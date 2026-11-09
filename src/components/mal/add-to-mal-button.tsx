@@ -12,6 +12,7 @@ import {
 import { useMal } from "@/lib/mal/provider";
 import type { MalListStatus } from "@/lib/mal/types";
 import { useT } from "@/lib/i18n";
+import { notifyTrackerStatusChanged, useTrackerStatusVersion } from "@/lib/tracker-status-events";
 
 const STATUS_LABELS: Record<MalListStatus, string> = {
   watching: "Watching",
@@ -32,6 +33,7 @@ const STATUS_ORDER: MalListStatus[] = [
 export function AddToMalButton({ harborId, title }: { harborId: string; title: string }) {
   const t = useT();
   const { isConnected } = useMal();
+  const trackerStatusVersion = useTrackerStatusVersion();
   const [malId, setMalId] = useState<number | null>(null);
   const [status, setStatus] = useState<MalListStatus | null>(null);
   const [busy, setBusy] = useState(false);
@@ -63,7 +65,7 @@ export function AddToMalButton({ harborId, title }: { harborId: string; title: s
       cancelled = true;
       if (timer != null) window.clearTimeout(timer);
     };
-  }, [harborId, isConnected, attempt]);
+  }, [harborId, isConnected, attempt, trackerStatusVersion]);
 
   if (!isConnected || malId == null) return null;
 
@@ -75,6 +77,7 @@ export function AddToMalButton({ harborId, title }: { harborId: string; title: s
     try {
       const saved = await saveListEntry({ malId, status: next });
       setStatus(saved.status);
+      notifyTrackerStatusChanged();
     } catch {
       setStatus(prev);
     } finally {
@@ -88,7 +91,8 @@ export function AddToMalButton({ harborId, title }: { harborId: string; title: s
     setStatus(null);
     setMenuOpen(false);
     try {
-      await deleteListEntry(malId);
+      if (!(await deleteListEntry(malId))) throw new Error("MyAnimeList did not confirm removal.");
+      notifyTrackerStatusChanged();
     } catch {
       setStatus(prevStatus);
     } finally {

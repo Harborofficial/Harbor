@@ -113,16 +113,26 @@ pub async fn speech_report_ml(
     map_spec: &str,
 ) -> Result<VadReport, String> {
     let pcm = decode_pcm(url, headers, start_sec, len_sec, map_spec).await?;
+    speech_report_pcm(&pcm, start_sec, len_sec, cfg, backend)
+}
+
+pub(super) fn speech_report_pcm(
+    pcm: &[f32],
+    start_sec: f32,
+    len_sec: f32,
+    cfg: &VadConfig,
+    backend: Backend,
+) -> Result<VadReport, String> {
     if pcm.len() < WIN {
         return Err("pcm-decode-insufficient".into());
     }
     let (probs, frame_ms, gated_frac) = match backend {
         Backend::Heuristic => {
-            let (p, g) = dsp::heuristic_probs(&pcm, cfg);
+            let (p, g) = dsp::heuristic_probs(pcm, cfg);
             (p, HOP as f32 * 1000.0 / SR as f32, g)
         }
         #[cfg(feature = "silero-vad")]
-        Backend::Silero => (silero::probs(&pcm)?, WIN as f32 * 1000.0 / SR as f32, 0.0),
+        Backend::Silero => (silero::probs(pcm)?, WIN as f32 * 1000.0 / SR as f32, 0.0),
     };
     let speech_frac = if probs.is_empty() {
         0.0
@@ -175,11 +185,15 @@ async fn decode_pcm(
         .arg("-nostats")
         .arg("-loglevel")
         .arg("error");
-    cmd.arg("-user_agent")
-        .arg(user_agent(headers).unwrap_or_else(|| "Harbor".into()));
-    let blob = safe_header_blob(headers);
-    if !blob.is_empty() {
-        cmd.arg("-headers").arg(blob);
+    // FFmpeg's user_agent/headers are HTTP protocol options and cause
+    // "Option user_agent not found" when decoding a prepared local WAV.
+    if url.starts_with("http://") || url.starts_with("https://") {
+        cmd.arg("-user_agent")
+            .arg(user_agent(headers).unwrap_or_else(|| "Harbor".into()));
+        let blob = safe_header_blob(headers);
+        if !blob.is_empty() {
+            cmd.arg("-headers").arg(blob);
+        }
     }
     cmd.arg("-ss")
         .arg(format!("{}", start_sec))

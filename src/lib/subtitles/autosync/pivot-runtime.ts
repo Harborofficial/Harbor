@@ -3,6 +3,9 @@ import type { PlayerSrc } from "@/lib/view";
 import { analyzeArabicSubtitleQuality } from "@/lib/subtitles/arabic-quality";
 import { rankSubtitleCandidates, streamMatchDetail } from "@/lib/subtitles/candidate-ranking";
 import { normalizeLang } from "@/lib/subtitles/language";
+import { crossLanguageSpeechTransform } from "./drift-dsp";
+import { denseAsrWindows } from "./smart-layer";
+import { rankDialogueScenes } from "./scene-window";
 import { releaseOf, subtitleStreamDescriptor } from "@/lib/subtitles/provider-label";
 import { subtitleTrackDownloadHeaders } from "@/lib/subtitles/provider-auth";
 import type { StreamHints } from "@/lib/subtitles/stream-hints";
@@ -11,6 +14,7 @@ import type { SubResult, SubSearchQuery } from "@/lib/subtitles/types";
 import { DEFAULT_BUNDLE, isReleaseReady, type CalibrationBundle } from "./calibration";
 import {
   outcomeRank,
+  DEFAULT_BOUNDS,
   THRESHOLDS,
   type AlignmentQuality,
   type HeldOutValidation,
@@ -92,8 +96,10 @@ export function isExperimentalPivotEligible(
   const subtitleLanguage = baseLanguage(ctx.subtitleLanguage);
   return (
     settings.subtitleAutoSyncPivot === true &&
-    audioLanguage.length > 0 &&
-    subtitleLanguage.length > 0 &&
+    /^[a-z]{2,3}$/.test(audioLanguage) &&
+    audioLanguage !== "und" &&
+    /^[a-z]{2,3}$/.test(subtitleLanguage) &&
+    subtitleLanguage !== "und" &&
     audioLanguage !== subtitleLanguage &&
     Array.isArray(ctx.cueText) &&
     ctx.cues.length >= MIN_HEALTHY_CUES &&
@@ -416,7 +422,7 @@ function heldOutCueContext(
 }
 
 export function pivotHeldOutQualityRequest(
-  windows: readonly PivotHeldOutWindow[],
+  windows: readonly Pick<PivotHeldOutWindow, "fromSec" | "toSec">[],
   durationSec: number,
 ): QualityMeasurementRequest | null {
   const validationWindows = windows
@@ -457,6 +463,7 @@ function measuredHeldOutValue(
   if (
     expectedIds.size === 0 ||
     actualIds.length !== expectedIds.size ||
+    new Set(actualIds).size !== expectedIds.size ||
     actualIds.some((id) => !expectedIds.has(id)) ||
     measurement.validation.requestProvenance !== request.validationProvenance
   ) {
@@ -528,6 +535,88 @@ export function preferAutoSyncOutcome(
   return pivot.decision.pCorrect > base.decision.pCorrect + 0.02 ? pivot : base;
 }
 
+async function matchWhisperTiming(
+  ctx: PipelineContext,
+  ports: TierPorts,
+): Promise<PipelineOutcome | null> {
+  if (!ports.asrTranscribe) return null;
+  const transcript = await ports.asrTranscribe(
+    ctx,
+    denseAsrWindows(ctx.durationSec).map((window) => ({
+      ...window,
+      lenSec: Math.min(30, ctx.durationSec - window.startSec),
+    })),
+  );
+  const samples = transcript.sampledWindows ?? [];
+  const speech: Array<[number, number]> = transcript.phrases
+    .filter((p) => p.end > p.start && /[\p{L}\p{N}]/u.test(p.text))
+    .map((p) => [p.start, p.end]);
+  const transform = crossLanguageSpeechTransform(
+    speech,
+    ctx.cues,
+    samples,
+    DEFAULT_BOUNDS.maxOffsetSec,
+    ctx.durationSec,
+  );
+  if (!transform) return null;
+  // Verify on three other scenes. Select them by subtitle position only,
+  // before measuring audio, so the verification cannot cherry-pick a score.
+  const shiftedCues = structuralCues(ctx).map((cue) => ({
+    ...cue,
+    start: cue.start * transform.ratio + transform.offsetSec,
+    end: cue.end * transform.ratio + transform.offsetSec,
+  }));
+  const windows: Array<{ fromSec: number; toSec: number }> = [];
+  for (const fraction of [0.25, 0.5, 0.75]) {
+    const scene = rankDialogueScenes(
+      shiftedCues,
+      ctx.durationSec * fraction,
+      ctx.durationSec,
+      20,
+    ).find(
+      (s) =>
+        samples.every((w) => s.endSec <= w.startSec || s.startSec >= w.startSec + w.lenSec) &&
+        windows.every((w) => s.endSec <= w.fromSec || s.startSec >= w.toSec),
+    );
+    if (!scene) return null;
+    windows.push({ fromSec: scene.startSec, toSec: scene.endSec });
+  }
+  const request = pivotHeldOutQualityRequest(windows, ctx.durationSec);
+  if (!request) return null;
+  const [baseline, corrected] = await Promise.all([
+    ports.measureQuality(ctx, IDENTITY, request),
+    ports.measureQuality(ctx, transform, request),
+  ]);
+  const before = measuredHeldOutValue(baseline, request);
+  const after = measuredHeldOutValue(corrected, request);
+  if (
+    !before ||
+    !after ||
+    !(
+      after.ncc >= THRESHOLDS.minAbsoluteNcc &&
+      after.coverage >= THRESHOLDS.minCoverage &&
+      after.ncc - before.ncc >= THRESHOLDS.minImprovement
+    )
+  )
+    return null;
+  return {
+    decision: {
+      decision: "offer",
+      bindingRule: "cross-language-speech-timing",
+      reason:
+        transform.ratio === 1
+          ? "Speech and subtitle timing agree on a shift across multiple scenes."
+          : "Speech timing indicates gradual subtitle drift. This adjusts timing across the episode; review it before keeping it.",
+      pCorrect: THRESHOLDS.offerFloor,
+      transform,
+    },
+    candidate: transform,
+    bestEffort: true,
+    evidence: [],
+    tiersRun: ["asr_match"],
+  };
+}
+
 export async function runExperimentalPivotAutoSync(
   args: ExperimentalPivotArgs,
   dependencies: PivotRuntimeDependencies = {},
@@ -544,6 +633,9 @@ export async function runExperimentalPivotAutoSync(
     targetCues.map((cue) => cue.text).join("\n"),
   );
   if (!targetHealth.healthy) return null;
+
+  const speechTiming = await matchWhisperTiming(ctx, ports).catch(() => null);
+  if (speechTiming) return speechTiming;
 
   const search =
     dependencies.searchSubtitles ?? (await import("@/lib/subtitles/search")).searchSubtitles;

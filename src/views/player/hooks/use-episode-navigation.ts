@@ -9,8 +9,7 @@ import { isEpisodeHidden } from "@/lib/hidden-episodes";
 import { findLocalEpisode, localShowEpisodes } from "@/lib/local-library";
 import { isLocalUrl } from "@/lib/player/local-url";
 import { localPlayerSrc } from "@/views/library/local-tab/show-group";
-import { completedDownloadFor } from "@/lib/download/downloads-store";
-import { downloadPlayerSrc } from "@/lib/download/player-src";
+import { completedEpisodeSource } from "@/lib/download/completed-episode-source";
 
 type OpenPicker = (
   meta: Meta,
@@ -91,6 +90,10 @@ export function useEpisodeNavigation(params: {
   });
   const adjacentRef = useRef(adjacent);
   adjacentRef.current = adjacent;
+  const latestSrcRef = useRef(src);
+  latestSrcRef.current = src;
+  const navigationRevisionRef = useRef(0);
+  useEffect(() => () => { navigationRevisionRef.current += 1; }, []);
 
   const localShowKey = isLocalUrl(src.url)
     ? {
@@ -109,6 +112,9 @@ export function useEpisodeNavigation(params: {
     const cur = { season: src.episode.season, episode: src.episodeEnd ?? src.episode.episode };
     fetchAdjacentEpisodes(src.meta, cur, {
       tmdbKey: settings.tmdbKey,
+      episodeSources: settings.metadataSources?.episodes,
+      tvdbKey: settings.tvdbKey,
+      tvdbSeasonType: settings.tvdbSeasonType,
       kitsuStreamId: src.episode.kitsuStreamId,
       imdbSeason: src.episode.imdbSeason,
       imdbEpisode: src.episode.imdbEpisode,
@@ -152,6 +158,9 @@ export function useEpisodeNavigation(params: {
     src.episodeEnd,
     src.url,
     settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    settings.metadataSources?.episodes,
     settings.episodeHiding,
   ]);
 
@@ -176,45 +185,42 @@ export function useEpisodeNavigation(params: {
           ? { title: targetMeta.name }
           : localShowKey
         : null;
-      if (targetLocalKey) {
-        const local = findLocalEpisode(targetLocalKey, ep.season, ep.episode);
-        if (local) {
-          const localSrc = localPlayerSrc(local, src.isAnime, ep);
-          replacePlayerSrc(
-            changesEntry ? { ...localSrc, meta: targetMeta, episode: carried } : localSrc,
-          );
-          return;
+      const request = ++navigationRevisionRef.current;
+      const stillCurrent = () =>
+        navigationRevisionRef.current === request && latestSrcRef.current === src;
+      const fallback = () => {
+        if (!stillCurrent()) return;
+        if (targetLocalKey) {
+          const local = findLocalEpisode(targetLocalKey, ep.season, ep.episode);
+          if (local) {
+            const localSrc = localPlayerSrc(local, src.isAnime, ep);
+            replacePlayerSrc(
+              changesEntry ? { ...localSrc, meta: targetMeta, episode: carried } : localSrc,
+            );
+            return;
+          }
         }
-      }
-      const withoutDownload = () => {
         openPicker(targetMeta, carried, { autoPlay: true });
       };
-      if (inRoom || settings.localPlaybackMode === "stream") {
-        withoutDownload();
+      // Watch-together peers cannot access the host's private downloaded file.
+      if (inRoom) {
+        fallback();
         return;
       }
-      void completedDownloadFor(targetMeta.id, ep.season, ep.episode).then((item) => {
-        if (!item) {
-          withoutDownload();
-          return;
-        }
-        replacePlayerSrc(
-          downloadPlayerSrc(targetMeta, ep, item, {
-            imdbId: changesEntry ? ep.imdbId : src.imdbId,
-            isAnime: src.isAnime,
-          }),
-        );
-      }, withoutDownload);
+      void completedEpisodeSource(targetMeta, carried, {
+        imdbId: changesEntry ? ep.imdbId : src.imdbId,
+        isAnime: src.isAnime,
+        startFromZero: true,
+      }).then((download) => {
+        if (!stillCurrent()) return;
+        if (download) replacePlayerSrc(download);
+        else fallback();
+      }, fallback);
     },
     [
       openPicker,
       replacePlayerSrc,
-      src.meta,
-      src.episode,
-      src.imdbId,
-      src.isAnime,
-      src.url,
-      settings.localPlaybackMode,
+      src,
       inRoom,
       isHost,
     ],

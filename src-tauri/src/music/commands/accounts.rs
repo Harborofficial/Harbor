@@ -29,8 +29,10 @@ pub async fn music_spotify_status(
 ) -> Result<spotify::SpotifyStatus, String> {
     let status = state.spotify.status().await?;
     if let Some(connector) = state.registry.get("spotify") {
-        connector.set_health(if status.connected {
+        connector.set_health(if status.playback_ready {
             connector::ConnectorHealth::Healthy
+        } else if status.connected || status.error.is_some() {
+            connector::ConnectorHealth::Degraded
         } else {
             connector::ConnectorHealth::Unknown
         });

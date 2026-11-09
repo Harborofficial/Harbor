@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
+import * as playbackHistorySource from "../src/lib/player/playback-history-source";
 
 function harness() {
   const data = new Map<string, string>();
@@ -23,12 +24,27 @@ function harness() {
     const file = name.replace(/^@\/lib\//, "").replace(/^\.\//, "");
     if (cache.has(file)) return cache.get(file);
     if (file === "react") return { useSyncExternalStore() {} };
-    if (file === "nuvio/nuvio-client") return { isNuvioSignedIn: () => false };
+    if (file.startsWith("@tauri-apps/"))
+      return {
+        invoke: async () => {},
+        isTauri: () => false,
+        fetch: async () => {
+          throw new Error(`Unexpected live request: ${file}`);
+        },
+      };
+    if (file.startsWith("@noble/hashes/"))
+      return name.endsWith("/sha256")
+        ? { sha256: (input: Uint8Array) => input }
+        : { bytesToHex: (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16)).join("") };
+    if (file === "feed/external-cw") return { removeExternalCwItem: () => {} };
+    if (file === "nuvio/nuvio-client")
+      return { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false };
     if (file === "nuvio/nuvio-sync")
       return {
-        deleteWatchProgressFromNuvio: async () => {},
         isNuvioProviderActive: () => false,
         resolveNuvioProfileIndex: () => 1,
+        deleteWatchProgressFromNuvio: async () => {},
+        dismissNextUpInNuvioCloud: async () => {},
       };
     if (file === "stremio")
       return {
@@ -56,6 +72,7 @@ function harness() {
         },
         persistCritical() {},
       };
+    if (file === "player/playback-history-source") return playbackHistorySource;
     const mod = { exports: {} };
     cache.set(file, mod.exports);
     const output = ts.transpileModule(

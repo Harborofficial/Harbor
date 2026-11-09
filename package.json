@@ -1,6 +1,6 @@
 {
   "name": "harbor",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -18,7 +18,8 @@
     "check:tvresources": "node scripts/check-tv-resources.mjs",
     "check:orphanstrings": "node scripts/orphan-strings.mjs",
     "check:capstan": "node scripts/capstan-stage.mjs --check",
-    "tauri": "tauri",
+    "tauri": "node scripts/tauri.mjs",
+    "tauri:dev:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-whisper.ps1",
     "tauri:build:linux-system": "tauri build --config src-tauri/tauri.linux-system.conf.json",
     "shipyard": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-shipyard.ps1",
     "shipyard:modules": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-shipyard-modules.ps1",

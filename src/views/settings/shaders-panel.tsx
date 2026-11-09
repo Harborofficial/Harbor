@@ -3,6 +3,7 @@ import { Info } from "./icons";
 import { useEffect, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { isAndroid } from "@/lib/platform";
 import { SHADER_CATALOG } from "@/lib/player/shader-catalog";
 import { shaderDir } from "@/lib/shaders";
 import { Section, ToggleRow } from "./shared";
@@ -10,11 +11,12 @@ import { SettingGroup } from "./kit";
 import { isTauri } from "./player-panel/internals";
 import { Anime4kShaderList } from "./player-panel/anime4k-shader-list";
 import { ShaderCard } from "./shaders-panel/shader-card";
+import { MangaUpscaleCard } from "./shaders-panel/manga-upscale-card";
 import { STAGE_LABEL, STAGE_SEQUENCE } from "./shaders-panel/stages";
 
 const ANIME_IDS = new Set(["fsrcnnx", "ravu", "nnedi3"]);
 
-type Tab = "anime4k" | "more";
+type Tab = "anime4k" | "manga" | "more";
 
 export function ShadersPanel() {
   const [tab, setTab] = useState<Tab>("anime4k");
@@ -49,6 +51,7 @@ export function ShadersPanel() {
     isTauri
       ? [
           { id: "anime4k", label: t("Anime Shaders") },
+          ...(isAndroid() ? [] : [{ id: "manga", label: t("Manga Shaders") }]),
           { id: "more", label: t("More shaders") },
         ]
       : [],
@@ -60,7 +63,9 @@ export function ShadersPanel() {
     return (
       <Section
         title={t("Desktop only")}
-        subtitle={t("Picture shaders run on the bundled mpv engine in the Harbor desktop app. They have no effect in the browser.")}
+        subtitle={t(
+          "Picture shaders run on the bundled mpv engine in the Harbor desktop app. They have no effect in the browser.",
+        )}
       >
         <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
           <Info size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-ink-subtle" />
@@ -78,7 +83,9 @@ export function ShadersPanel() {
         <>
           <Section
             title={t("Anime4K upscaling")}
-            subtitle={t("Sharpen lines and clean up color gradients in anime. Enable Anime4K to download its shader pack and choose a preset.")}
+            subtitle={t(
+              "Sharpen lines and clean up color gradients in anime. Enable Anime4K to download its shader pack and choose a preset.",
+            )}
           >
             <ToggleRow
               label={t("Enable Anime4K")}
@@ -89,9 +96,7 @@ export function ShadersPanel() {
             {settings.playerAnime4k && (
               <ToggleRow
                 label={t("Only on anime")}
-                sub={t(
-                  "Skip live-action video. Turn this off to apply Anime4K to all videos.",
-                )}
+                sub={t("Skip live-action video. Turn this off to apply Anime4K to all videos.")}
                 value={settings.playerAnime4kAnimeOnly}
                 onChange={(v) => update({ playerAnime4kAnimeOnly: v })}
               />
@@ -116,10 +121,14 @@ export function ShadersPanel() {
         </>
       )}
 
+      {tab === "manga" && <MangaUpscaleCard />}
+
       {tab === "more" && (
         <Section
           title={t("More picture shaders")}
-          subtitle={t("Optional video effects downloaded from their authors. Harbor applies enabled shaders in the order shown below.")}
+          subtitle={t(
+            "Optional video effects downloaded from their authors. Harbor applies enabled shaders in the order shown below.",
+          )}
         >
           {STAGE_SEQUENCE.map((stage) => {
             const items = SHADER_CATALOG.filter((e) => e.stage === stage && !ANIME_IDS.has(e.id));

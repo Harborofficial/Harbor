@@ -1,3 +1,4 @@
+import { streamKey } from "../src/lib/streams/identity.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -83,6 +84,7 @@ function harness({ anime = false, deferredParse = false, preferredAddonId = null
   const api = load(
     "src/lib/streams/pipeline.ts",
     {
+      "./identity": { streamKey },
       "@/lib/debug": { dlog() {} },
       "./addons": {
         fetchAddonStreams: (_a, _r, _s, batch, settlement) => {
@@ -293,7 +295,7 @@ test("abort cancels queued verification and prevents late partials", async () =>
   assert.equal(h.partials.length, 0);
 });
 
-test("the remembered addon owns a duplicate stream instead of the fastest addon", async () => {
+test("the remembered addon retains its own candidate alongside the fastest addon", async () => {
   const h = harness({ preferredAddonId: "aiostreams" });
   h.listings.resolve({ ok: true, data: [] });
   const streams = [
@@ -302,14 +304,14 @@ test("the remembered addon owns a duplicate stream instead of the fastest addon"
       addonId: "torrentio",
       addonName: "Torrentio",
       addonPriority: 0,
-      url: "https://torrentio.example/stream",
+      url: "https://cdn.example/stream",
     },
     {
       infoHash: "same",
       addonId: "aiostreams",
       addonName: "AIOStreams",
       addonPriority: 1,
-      url: "https://aiostreams.example/stream",
+      url: "https://cdn.example/stream",
     },
   ];
   await h.tick();
@@ -318,16 +320,14 @@ test("the remembered addon owns a duplicate stream instead of the fastest addon"
   for (const check of h.checks) check.resolve({ ok: true, data: {} });
   await drain();
   const final = await h.result;
-  const merged = final.picker.all.find((s) => s.infoHash === "same");
+  assert.equal(final.picker.all.length, 2);
+  const merged = final.picker.all.find((s) => s.addonId === "aiostreams");
   assert.equal(merged.addonId, "aiostreams");
-  assert.equal(merged.url, "https://aiostreams.example/stream");
-  assert.deepEqual(
-    merged.contributors.map((c) => c.id).sort(),
-    ["aiostreams", "torrentio"],
-  );
+  assert.equal(merged.url, "https://cdn.example/stream");
+  assert.deepEqual(merged.contributors.map((c) => c.id).sort(), ["aiostreams"]);
 });
 
-test("without a remembered addon, the configured addon order owns duplicates", async () => {
+test("without a remembered addon, both addons retain shared endpoints", async () => {
   const h = harness();
   h.listings.resolve({ ok: true, data: [] });
   const streams = [
@@ -336,14 +336,14 @@ test("without a remembered addon, the configured addon order owns duplicates", a
       addonId: "torrentio",
       addonName: "Torrentio",
       addonPriority: 1,
-      url: "https://torrentio.example/stream",
+      url: "https://cdn.example/stream",
     },
     {
       infoHash: "same",
       addonId: "aiostreams",
       addonName: "AIOStreams",
       addonPriority: 0,
-      url: "https://aiostreams.example/stream",
+      url: "https://cdn.example/stream",
     },
   ];
   await h.tick();
@@ -352,7 +352,8 @@ test("without a remembered addon, the configured addon order owns duplicates", a
   for (const check of h.checks) check.resolve({ ok: true, data: {} });
   await drain();
   const final = await h.result;
-  const merged = final.picker.all.find((s) => s.infoHash === "same");
+  assert.equal(final.picker.all.length, 2);
+  const merged = final.picker.all.find((s) => s.addonId === "aiostreams");
   assert.equal(merged.addonId, "aiostreams");
-  assert.equal(merged.url, "https://aiostreams.example/stream");
+  assert.equal(merged.url, "https://cdn.example/stream");
 });

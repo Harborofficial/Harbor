@@ -97,7 +97,7 @@ export function ActionCommand({
     >
       <HoverTooltip
         label={action.reason ?? action.label}
-        disabled={!(quick || action.reason) || unavailable || !!confirmation}
+        disabled={!action.reason || unavailable || !!confirmation}
         contextMenu={inMenu}
         intentional={action.tooltipIntent === "deliberate"}
         side="top"
@@ -122,7 +122,7 @@ export function ActionCommand({
           data-checked={action.checked}
           data-completed={completed || undefined}
           onClick={(event) => {
-            if (unavailable || event.detail > 1) return;
+            if (unavailable || (event.detail > 1 && !action.repeatable)) return;
             if (action.confirmation) {
               if (!confirmation) setConfirmation(action.confirmation);
             } else void run(action.id);

@@ -11,6 +11,7 @@ import * as menu from "../src/lib/context-menu.tsx";
 import { executeContextAction } from "../src/lib/context-actions.ts";
 import * as domain from "../src/lib/manga-context-actions.ts";
 import * as chapterIdentity from "../src/lib/manga/chapter-identity.ts";
+import * as favoritesCleanup from "../src/lib/manga/favorites-cleanup.ts";
 
 function load(file: string, dependencies: Record<string, unknown>): any {
   const code = ts.transpileModule(readFileSync(new URL(`../${file}`, import.meta.url), "utf8"), {
@@ -137,6 +138,18 @@ async function fixture() {
         if (storageOk) localStorage.setItem(key, value);
         return storageOk;
       },
+      setItemWithRecoveryDetailed: (key: string, value: string) => {
+        if (storageOk) {
+          localStorage.setItem(key, value);
+          return { ok: true, quota: false, recovered: false };
+        }
+        return {
+          ok: false,
+          quota: true,
+          recovered: false,
+          errorName: "QuotaExceededError",
+        };
+      },
     },
     "./manga/api": {
       setMangaInLibrary: async (...args: unknown[]) => {
@@ -146,6 +159,7 @@ async function fixture() {
     },
     "./manga/library-events": { notifyMangaLibraryChanged: () => {} },
     "./manga/sources": sourceModule,
+    "./manga/favorites-cleanup": favoritesCleanup,
   });
   const resumed: any[] = [];
   const downloads: string[] = [];
@@ -223,9 +237,13 @@ async function fixture() {
     opened,
     remoteWrites,
     render,
+    failureMessage: favorites.mangaFavoriteFailureMessage,
     store: () => lastStore,
     failStorage: () => {
       storageOk = false;
+    },
+    recoverStorage: () => {
+      storageOk = true;
     },
     setProfile: async (value: string) => {
       profile = value;
@@ -248,6 +266,28 @@ async function fixture() {
     },
   };
 }
+
+test("favorite failures name the actual cause and only mention storage when quota is confirmed", async () => {
+  const f = await fixture();
+  try {
+    const t = (key: string) => key;
+    assert.equal(
+      f.failureMessage({ ok: false, reason: "profile-changed" }, t),
+      "Your profile changed. Open the menu again and retry.",
+    );
+    assert.equal(
+      f.failureMessage({ ok: false, reason: "storage", quota: true }, t),
+      "Could not save this favorite. Check available storage and try again.",
+    );
+    assert.equal(
+      f.failureMessage({ ok: false, reason: "storage", quota: false }, t),
+      "Could not save this favorite. Please try again.",
+    );
+    assert.equal(f.failureMessage({ ok: true, added: true }, t), null);
+  } finally {
+    await f.close();
+  }
+});
 
 test("registered manga actions persist favorites, read only that manga's progress and invalidate after profile changes", async () => {
   const f = await fixture();
@@ -287,7 +327,10 @@ test("registered manga actions persist favorites, read only that manga's progres
       executeContextAction(a, "manga:favorite:alpha::one"),
       /no longer available/,
     );
-    assert.equal(staleStore.toggle({ id: "alpha::one" }), false);
+    assert.deepEqual(staleStore.toggle({ id: "alpha::one" }), {
+      ok: false,
+      reason: "profile-changed",
+    });
     assert.equal(localStorage.getItem("harbor.mangafav.v1.two"), null);
     assert.equal(
       f
@@ -315,12 +358,45 @@ test("a favorite persistence failure is reported instead of menu success", async
     await React.act(async () => {
       await assert.rejects(
         executeContextAction(f.target("alpha::one"), "manga:favorite:alpha::one"),
-        /Could not save the change/,
+        /Could not save this favorite\. Check available storage/,
       );
     });
     assert.equal(localStorage.getItem("harbor.mangafav.v1.one"), null);
     assert.equal(f.store().has("alpha::one"), false);
     assert.deepEqual(f.remoteWrites, []);
+  } finally {
+    await f.close();
+  }
+});
+
+test("a failed favorite write preserves data and a later retry succeeds without restart", async () => {
+  const f = await fixture();
+  try {
+    await React.act(async () => {
+      assert.deepEqual(f.store().toggle({ id: "alpha::one", title: "One" }), {
+        ok: true,
+        added: true,
+      });
+    });
+    const before = localStorage.getItem("harbor.mangafav.v1.one");
+    f.failStorage();
+    await React.act(async () => {
+      assert.deepEqual(f.store().toggle({ id: "beta::one", title: "Two" }), {
+        ok: false,
+        reason: "storage",
+        quota: true,
+      });
+    });
+    assert.equal(localStorage.getItem("harbor.mangafav.v1.one"), before);
+    assert.equal(f.store().has("beta::one"), false);
+    f.recoverStorage();
+    await React.act(async () => {
+      assert.deepEqual(f.store().toggle({ id: "beta::one", title: "Two" }), {
+        ok: true,
+        added: true,
+      });
+    });
+    assert.equal(f.store().has("beta::one"), true);
   } finally {
     await f.close();
   }
@@ -396,8 +472,14 @@ test("favorites with the same raw ID on two providers remain independent in the 
   const f = await fixture();
   try {
     await React.act(async () => {
-      assert.equal(f.store().toggle({ id: "shared", title: "A", sourceId: "alpha" }), true);
-      assert.equal(f.store().toggle({ id: "shared", title: "B", sourceId: "beta" }), true);
+      assert.deepEqual(f.store().toggle({ id: "shared", title: "A", sourceId: "alpha" }), {
+        ok: true,
+        added: true,
+      });
+      assert.deepEqual(f.store().toggle({ id: "shared", title: "B", sourceId: "beta" }), {
+        ok: true,
+        added: true,
+      });
     });
     assert.equal(f.store().has("shared", "alpha"), true);
     assert.equal(f.store().has("shared", "beta"), true);
@@ -406,7 +488,10 @@ test("favorites with the same raw ID on two providers remain independent in the 
       ["alpha::shared", "beta::shared"],
     );
     await React.act(async () => {
-      assert.equal(f.store().toggle({ id: "shared", sourceId: "alpha" }), true);
+      assert.deepEqual(f.store().toggle({ id: "shared", sourceId: "alpha" }), {
+        ok: true,
+        added: false,
+      });
     });
     assert.equal(f.store().has("shared", "alpha"), false);
     assert.equal(f.store().has("shared", "beta"), true);
@@ -506,11 +591,23 @@ test("chapter contexts download only the selected chapter and preserve server/lo
   let profile = "one",
     success = true;
   const downloads: unknown[][] = [];
+  const upscales: unknown[][] = [];
   const read: string[] = [];
   const states = new Map<string, string>();
   const bookmarks: any[] = [];
   const readChapters = new Set<string>();
   const hook = load("src/lib/use-manga-chapter-context.tsx", {
+    "./manga/upscale/chapter": {
+      preUpscaleChapter: async (...args: unknown[]) => {
+        upscales.push(args);
+      },
+    },
+    "./settings": {
+      useSettings: () => ({
+        settings: { mangaUpscaleQuality: "fast", mangaUpscaleAutoDownload: false },
+      }),
+    },
+    "@/components/lists/list-toast": { emitListToast: () => {} },
     react: React,
     "react/jsx-runtime": jsxRuntime,
     "lucide-react": lucide,
@@ -590,6 +687,18 @@ test("chapter contexts download only the selected chapter and preserve server/lo
     assert.equal(downloadAction("remote::server").label, "Saved on your server");
     assert.equal(downloadAction("remote::server").disabled, true);
     assert.equal(downloadAction("local::one"), undefined);
+    await executeContextAction(target("remote::two"), "manga:pre-upscale:remote::two");
+    assert.deepEqual(upscales, [
+      [
+        "remote::manga",
+        "remote::two",
+        {
+          quality: "fast",
+          autoDownload: false,
+          sourceId: "remote",
+        },
+      ],
+    ]);
     await executeContextAction(target("remote::two"), "manga:bookmark:remote::two");
     assert.equal(bookmarks[0].chapterId, "remote::two");
     assert.equal(bookmarks[0].sourceId, "remote");

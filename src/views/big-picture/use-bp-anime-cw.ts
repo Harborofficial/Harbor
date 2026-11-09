@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/lib/auth";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import type { AddonRow } from "@/lib/addons";
 import { loadAnimeAddonRows } from "@/lib/addons-anime-filter";
 import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
@@ -80,8 +81,9 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { activeProfile, profiles } = useProfiles();
+  const isNuvio = settings.accountProvider === "nuvio" || isNuvioProviderActive();
   const hideSharedCw =
-    settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+    !isNuvio && settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const cwVersion = useCwDismissVersion();
   const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
   const animeDetectVer = useDetectedAnimeVersion();
@@ -91,10 +93,11 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
       trakt: cwSources.trakt,
       simkl: cwSources.simkl,
       publicmetadb: cwSources.publicmetadb,
+      ...(isNuvio ? { nuvio: true } : {}),
     });
-  }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb]);
+  }, [cwSources.trakt, cwSources.simkl, cwSources.publicmetadb, isNuvio]);
   const trackerCw = useExternalCw(
-    !hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb),
+    isNuvio || (!hideSharedCw && (cwSources.trakt || cwSources.simkl || cwSources.publicmetadb)),
   );
   const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
@@ -151,10 +154,14 @@ export function useBpAnimeCwBase(): BpAnimeCwBase {
               ? cwSources.trakt
               : i.external === "simkl"
                 ? cwSources.simkl
-                : i.external === "publicmetadb" && cwSources.publicmetadb,
+                : i.external === "publicmetadb"
+                  ? cwSources.publicmetadb
+                  : i.external === "nuvio"
+                    ? isNuvio
+                    : true,
           )),
     ],
-    [localAnimeCw, libItems, trackerCw, hideSharedCw, cwSources],
+    [localAnimeCw, libItems, trackerCw, hideSharedCw, cwSources, isNuvio],
   );
 
   const raw = useMemo(() => {

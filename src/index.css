@@ -167,6 +167,20 @@ html[data-os="linux"] [data-harbor-library] *::after {
   backdrop-filter: none !important;
 }
 
+/* harbor-linux#9: episode scrolling crashes in SkiaCompositingLayer's clip /
+   backdrop painting on WebKitGTK 2.54.1. Avoid backdrop sampling inside the
+   scrolling details surface, including themed pseudo-elements. This is a
+   scoped mitigation; confirmation still requires the affected Linux runtime. */
+html[data-os="linux"] .harbor-detail-enter,
+html[data-os="linux"] .harbor-detail-enter *,
+html[data-os="linux"] .harbor-detail-enter::before,
+html[data-os="linux"] .harbor-detail-enter::after,
+html[data-os="linux"] .harbor-detail-enter *::before,
+html[data-os="linux"] .harbor-detail-enter *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
 body {
   user-select: none;
   cursor: default;
@@ -7179,6 +7193,9 @@ button.hset-rail-me:hover,
   }
   .hset-workbench-compact {
     grid-template-columns: minmax(0, 1fr) 224px;
+  }
+  .hset-workbench-compact.hset-workbench-wide-preview {
+    grid-template-columns: minmax(0, 1fr) var(--hset-workbench-preview-width, 380px);
   }
   .hset-workbench-controls {
     grid-column: 1;

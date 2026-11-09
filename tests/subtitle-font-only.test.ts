@@ -66,6 +66,7 @@ function styleHarness(overrides: string[] = []) {
   };
   new Function("require", "module", "exports", compiled)(
     (id: string) => {
+      if (id === "./mpv-tuning") return { mpvExtraOptionKeys: () => new Set<string>() };
       if (id !== "@tauri-apps/api/core") throw new Error(`Unexpected dependency: ${id}`);
       return {
         invoke: async (command: string, args: { name: string; value: unknown }) => {
@@ -116,6 +117,15 @@ test("Change font only adds the font to the overrides mpv already has", async ()
   const h = styleHarness(["ScaledBorderAndShadow=yes"]);
   await h.apply({ subAssOverride: "font" });
   assert.deepEqual(h.list(), ["ScaledBorderAndShadow=yes", "FontName=Times New Roman"]);
+});
+
+test("Strip all styling forces Harbor's style over tags hardcoded in the subtitle", async () => {
+  const h = styleHarness();
+  const props = await h.apply({ subAssOverride: "strip" });
+  // force and yes both let an inline \fn or \c tag win; only strip removes it.
+  assert.equal(props.get("sub-ass-override"), "strip");
+  assert.equal(props.get("sub-font"), "Times New Roman");
+  assert.equal(props.get("sub-color"), "#FFFFFFFF");
 });
 
 test("leaving Change font only puts mpv's own overrides back exactly", async () => {
@@ -195,6 +205,7 @@ test("the player's override switch goes back to the mode from before", () => {
   // "Change font only" keeps each subtitle's look, so the switch shows off.
   assert.equal(isAssLookMode("font"), true);
   assert.equal(isAssLookMode("force"), false);
+  assert.equal(isAssLookMode("strip"), false);
   const on = flipAssOverride("font", "no");
   assert.deepEqual(on, { mode: "force", before: "font" });
   assert.deepEqual(flipAssOverride(on.mode, on.before), { mode: "font", before: "font" });

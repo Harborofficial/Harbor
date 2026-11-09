@@ -121,17 +121,18 @@ export async function openExternal(url) {
 
 export async function fetchChangelog() {
   if (!isNative()) {
+    // The dev server exposes the embedded copy at /changelog.json (see serve.mjs).
+    // Prefer it so a local build previews its own notes before they are published.
     try {
+      const local = await fetch("changelog.json", { cache: "no-store" });
+      if (!local.ok) throw new Error("changelog " + local.status);
+      return await local.json();
+    } catch {
       const res = await fetch("https://harborcommunity.site/updates/versions-beta.json", {
         cache: "no-store",
       });
       if (!res.ok) throw new Error("changelog " + res.status);
       return await res.json();
-    } catch {
-      // The dev server exposes the embedded copy at /changelog.json (see serve.mjs).
-      const fallback = await fetch("changelog.json", { cache: "no-store" });
-      if (!fallback.ok) throw new Error("changelog " + fallback.status);
-      return await fallback.json();
     }
   }
   const raw = await T.core.invoke("fetch_changelog");
@@ -163,6 +164,21 @@ export async function freeSpaceAt(path) {
     return await T.core.invoke("free_space_at", { path: path });
   } catch {
     return 0;
+  }
+}
+
+/** Read Harbor's existing UI language without changing the installed app's settings. */
+export async function installedHarborLanguage() {
+  // Browser preview cannot read Harbor's on-disk settings. A URL parameter
+  // simulates a previously selected language without changing real settings.
+  if (!isNative()) {
+    return new URLSearchParams(window.location.search).get("installedLang");
+  }
+  try {
+    const code = await T.core.invoke("installed_harbor_language");
+    return typeof code === "string" ? code : null;
+  } catch {
+    return null;
   }
 }
 
@@ -304,8 +320,9 @@ export async function installFacts() {
         { key: "support", bytes: 9961472 },
         { key: "plugins", bytes: 41943040 },
         { key: "games", bytes: 91226112 },
+        { key: "music", bytes: 25165824 },
       ],
-      installed_bytes: 717766110,
+      installed_bytes: 742931934,
       installer_bytes: 287309824,
       webview2_present: true,
       webview2_bytes: 136000000,

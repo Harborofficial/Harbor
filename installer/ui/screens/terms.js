@@ -254,20 +254,19 @@ export function render(mount, ctx) {
   const tools = document.createElement('div');
   tools.className = 'hb-terms-tools';
 
-  const picker = document.createElement('div');
-  picker.className = 'hb-terms-langs';
+  const picker = document.createElement('select');
+  picker.className = 'hb-terms-lang-select t-btn-mini';
+  picker.setAttribute('aria-label', t('Choose your language'));
   VARIANTS.forEach((variant) => {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'hb-terms-lang t-btn-mini';
-    chip.textContent = variant.label;
-    chip.lang = variant.code;
-    chip.setAttribute('aria-pressed', String(variant.code === getLocale()));
-    chip.addEventListener('click', () => {
-      ctx.setState({ lang: variant.code });
-      setLocale(variant.code);
-    });
-    picker.appendChild(chip);
+    const option = document.createElement('option');
+    option.value = variant.code;
+    option.textContent = variant.label;
+    picker.appendChild(option);
+  });
+  picker.value = getLocale();
+  picker.addEventListener('change', () => {
+    ctx.setState({ lang: picker.value });
+    setLocale(picker.value);
   });
 
   const print = document.createElement('button');

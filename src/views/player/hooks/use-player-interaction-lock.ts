@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { effectiveBinding, eventToBinding } from "@/lib/hotkeys";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createHotkeyMatcher, effectiveBinding } from "@/lib/hotkeys";
 import { setPlayerInteractionLocked } from "@/lib/player/interaction-lock";
 import { useSettings } from "@/lib/settings";
 
@@ -19,21 +19,32 @@ function stopInteraction(event: Event): void {
 export function usePlayerInteractionBlocker({
   enabled = true,
   locked,
-  binding,
+  hotkeys,
   onToggle,
   onLockedActivity,
 }: {
   enabled?: boolean;
   locked: boolean;
-  binding: string;
+  hotkeys?: Record<string, string>;
   onToggle: () => void;
   onLockedActivity?: () => void;
 }): void {
+  // The HDR overlay receives a fresh payload object on each playback update.
+  const hotkeysRef = useRef(hotkeys);
+  hotkeysRef.current = hotkeys;
+
   useEffect(() => {
     if (!enabled) return;
 
     const onKeyboard = (event: KeyboardEvent) => {
-      const isToggle = event.type === "keydown" && eventToBinding(event) === binding;
+      const isToggle =
+        event.type === "keydown" &&
+        createHotkeyMatcher(
+          event,
+          hotkeysRef.current ?? {},
+          "Player",
+          locked ? "playerScreenLock" : undefined,
+        )("playerScreenLock");
       if (isToggle) {
         stopInteraction(event);
         if (!event.repeat) onToggle();
@@ -81,7 +92,7 @@ export function usePlayerInteractionBlocker({
       window.removeEventListener("touchmove", onPointer, activePointerOptions);
       window.removeEventListener("touchend", onPointer, activePointerOptions);
     };
-  }, [binding, enabled, locked, onLockedActivity, onToggle]);
+  }, [enabled, locked, onLockedActivity, onToggle]);
 }
 
 export function usePlayerInteractionLock() {
@@ -90,10 +101,7 @@ export function usePlayerInteractionLock() {
   const [locked, setLocked] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(false);
   const idleTimerRef = useRef<number | null>(null);
-  const binding = useMemo(
-    () => effectiveBinding("playerScreenLock", settings.hotkeys ?? {}),
-    [settings.hotkeys],
-  );
+  const binding = effectiveBinding("playerScreenLock", settings.hotkeys ?? {});
   const clearIdleTimer = useCallback(() => {
     if (idleTimerRef.current === null) return;
     window.clearTimeout(idleTimerRef.current);
@@ -125,7 +133,7 @@ export function usePlayerInteractionLock() {
   usePlayerInteractionBlocker({
     enabled,
     locked,
-    binding,
+    hotkeys: settings.hotkeys,
     onToggle: toggle,
     onLockedActivity: wakeControls,
   });

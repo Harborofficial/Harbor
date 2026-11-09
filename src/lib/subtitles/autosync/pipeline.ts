@@ -60,7 +60,7 @@ export type ConsensusResult = {
 };
 export type AsrWindowSpec = { startSec: number; lenSec: number };
 export type AsrPhrase = { start: number; end: number; text: string };
-export type AsrTranscript = { phrases: AsrPhrase[]; detectedLanguage: string | null };
+export type AsrTranscript = { phrases: AsrPhrase[]; detectedLanguage: string | null; sampledWindows?: AsrWindowSpec[] };
 
 export type MediaMeta = {
   expectedRuntimeSec?: number;
@@ -82,6 +82,10 @@ export type PipelineContext = {
   cueText?: string[];
   moviehash?: string;
   moviebytesize?: number;
+  /** ffmpeg stream specifier for the selected audio track, e.g. "0:a:1". */
+  audioMap?: string;
+  /** Native request lifetime, shared by quality, speech and transcription jobs. */
+  analysisSessionId?: string;
   audioLanguage?: string | null;
   subtitleLanguage?: string | null;
   preferredSubtitleLanguages?: string[];
@@ -123,6 +127,8 @@ export type PiecewiseResult = {
 export type AsrResult = { wordMatch: number; supportsTransform: number };
 
 export type TierPorts = {
+  /** Sanitized stage diagnostics; no media URLs, file paths or subtitle text. */
+  diagnosticNotes?: () => string[];
   metadataBounds?: (ctx: PipelineContext, base: Bounds) => Bounds;
   hashExact?: (ctx: PipelineContext) => Promise<HashExactResult | null>;
   crowdDb?: (ctx: PipelineContext) => Promise<CrowdResult | null>;
@@ -158,6 +164,7 @@ export type PipelineOutcome = {
 
 const IDENTITY: AffineTransform = { kind: "affine", offsetSec: 0, ratio: 1 };
 const MIN_SWAP_CUES = 4;
+const MANUAL_OFFER_FLOOR = 0.5;
 const GLOBAL_ESCALATION_VETOES = new Set(["conflict", "already-good", "metadata-hard-refuse"]);
 
 const TIER_GROUP: Record<TierId, string> = {
@@ -381,12 +388,15 @@ export async function runAutoSync(
       priorRuntimeOk,
       inputAlreadyGood: isAlreadyGood(before),
       requireImprovement: over.requireImprovement,
+      offerFloor: opts.tryHarder ? MANUAL_OFFER_FLOOR : undefined,
     });
   };
 
   const gateSubSwap = async (swap: SwapRef): Promise<PipelineOutcome> => {
     const swapOut = { url: swap.url, format: swap.format };
-    const resolved = ports.resolveSwapCues ? await ports.resolveSwapCues(ctx, swap) : null;
+    const resolved = ports.resolveSwapCues
+      ? await ports.resolveSwapCues(ctx, swap).catch(() => null)
+      : null;
     if (!resolved || resolved.cues.length < MIN_SWAP_CUES) {
       const pCorrect = fusedConfidence(evidence, prior, calibration).pCorrect;
       const decision: GateDecision = {
@@ -459,6 +469,73 @@ export async function runAutoSync(
         keep(out);
         if (!opts.tryHarder) return out;
       }
+    }
+  }
+
+  // Audio verification is mandatory for structural changes. If the first
+  // independent seek has already timed out (or cannot extract audio), running
+  // VAD, ASR and another validation against that same remote source merely
+  // stacks more network delays. Preserve any verified earlier result, but do
+  // not synthesize or apply a timing correction without measured audio.
+  if (ctx.sourceKind === "http" || ctx.sourceKind === "hls" || ctx.sourceKind === "debrid") {
+    const baseline = await qualityBeforeP;
+    if (
+      baseline.status === "unknown" &&
+      (baseline.reason === "timeout" ||
+        baseline.reason === "audio-unavailable" ||
+        baseline.reason === "ffmpeg-unavailable")
+    ) {
+      if (best.decision.decision === "offer" || best.decision.decision === "apply") {
+        return best;
+      }
+
+      // Strong agreement between independently sourced subtitle timings can
+      // suggest an offset, but cannot prove the actual movie audio matches
+      // those timings. Only expose this as a user-confirmed, unverified offer.
+      // Never auto-apply it, even when structural auto-apply is enabled.
+      if (consensusRes?.verdict === "right" && consensusRes.agreement >= 0.75) {
+        const fit = consensusAnchorFit(consensusRes);
+        if (fit) {
+          const offsetValid = Math.abs(fit.offsetSec) <= bounds.hardOffsetCapSec;
+          const ratioValid = Math.abs(fit.ratio - 1) <= bounds.maxFramerateDev;
+          const noChange = Math.abs(fit.offsetSec) < 0.25 && Math.abs(fit.ratio - 1) < 0.001;
+          const canRewrite =
+            ctx.subtitleFormat === "srt" ||
+            ctx.subtitleFormat === "vtt" ||
+            ((ctx.subtitleFormat === "ass" || ctx.subtitleFormat === "ssa") &&
+              Math.abs(fit.ratio - 1) < 0.000001);
+          if (offsetValid && ratioValid && !noChange && canRewrite && !metaVerdict?.hardRefuse) {
+            const transform: SyncTransform = {
+              kind: "affine",
+              offsetSec: fit.offsetSec,
+              ratio: fit.ratio,
+            };
+            return {
+              candidate: transform,
+              decision: {
+                decision: "offer",
+                reason: "Matching subtitle files suggest this timing, but video audio could not be verified.",
+                bindingRule: "consensus-audio-unverified",
+                pCorrect: 0.5,
+                transform,
+              },
+              evidence,
+              tiersRun,
+              bestEffort: true,
+            };
+          }
+        }
+      }
+      return {
+        ...best,
+        candidate: null,
+        decision: {
+          ...best.decision,
+          decision: "refuse",
+          reason: `pre-sync quality is unknown (${baseline.reason}), so remote audio verification could not finish`,
+          bindingRule: "quality-measurement",
+        },
+      };
     }
   }
 
@@ -577,7 +654,12 @@ export async function runAutoSync(
     keep({ decision, candidate: lead, evidence, tiersRun });
   }
 
+  // Escalation can only reproduce these vetoes, so ASR would just delay the answer.
+  const settledVeto =
+    best.decision.bindingRule === "already-good" ||
+    best.decision.bindingRule === "metadata-hard-refuse";
   if (
+    !settledVeto &&
     best.decision.decision !== "apply" &&
     !best.subSwap &&
     (opts.tryHarder || !!ports.asrTranscribe)
@@ -610,6 +692,46 @@ export async function runAutoSync(
       }
       keep(esc);
     }
+  }
+
+  if (best.candidate === null && best.decision.bindingRule === "default") {
+    const before = await qualityBeforeP;
+    // No offset candidate is not proof of misalignment. A trusted held-out
+    // score may instead establish that the subtitles are already correct.
+    if (
+      before.status === "measured" &&
+      before.validation?.kind === "held-out" &&
+      before.value.ncc >= THRESHOLDS.alreadyGoodNcc &&
+      before.value.coverage >= THRESHOLDS.minCoverage &&
+      before.value.z >= 6
+    ) {
+      return {
+        ...best,
+        decision: {
+          ...best.decision,
+          reason: "The subtitles are already aligned to the detected speech.",
+          bindingRule: "already-good",
+        },
+      };
+    }
+    // A missing audio measurement and a measured but weak match require
+    // different next steps. Neither justifies fabricating an offset.
+    const notes = ports.diagnosticNotes?.() ?? [];
+    const speechModelUnavailable = notes.includes("asr:model-unavailable");
+    const vadLowConfidence = notes.some((note) => note.startsWith("vad:low-confidence"));
+    const reason =
+      before.status === "unknown" && vadLowConfidence
+        ? "Audio was analyzed, but speech did not align reliably with this subtitle. The timing could not be verified. Try another subtitle release, Sync from playback, or Manual offset."
+        : before.status === "unknown"
+          ? `No reliable offset was found, and audio verification was unavailable (${before.reason}). Try another playable source or Manual offset.`
+        : vadLowConfidence
+          ? "The detected speech did not match the subtitle timing reliably. Try a subtitle for this release or another audio track."
+          : "Audio analysis and subtitle comparison did not establish a reliable offset. Try a different subtitle release or a scene with clear dialogue.";
+    const suffix = speechModelUnavailable
+      ? " Speech recognition is unavailable in this build."
+      : "";
+    return { ...best, decision: { ...best.decision, reason: reason + suffix, bindingRule: "no-candidate" } };
+
   }
 
   return best;

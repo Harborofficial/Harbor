@@ -3,7 +3,12 @@ import { airedOnly } from "./aired";
 import { t } from "./i18n";
 import { captureMembershipProfile } from "./membership-operations";
 import { readActiveStremioAuthKey } from "./auth";
-import { ANIME_CLOUD_ID } from "./stremio";
+import { ANIME_CLOUD_ID, cloudWriteId, libraryGetOne, type LibraryItem } from "./stremio";
+import { dismissCw } from "./cw-dismiss";
+import { clearLocalCw } from "./local-cw";
+import { clearResume } from "./resume";
+import { listExternalCw, removeExternalCwItem } from "./feed/external-cw";
+import { notifyTrackerStatusChanged } from "./tracker-status-events";
 import {
   setLocalWatchlistAcknowledged,
   clearWatchlistAggregate,
@@ -16,13 +21,16 @@ import { setManualWatchedManyAcknowledged, recordManualWatchedMeta } from "./man
 import { savePlayback } from "./playback-history";
 import { recordWatchEvent } from "./watch-events";
 import {
+  dropProviderWrites,
   watchlistProviderWrites,
   watchedProviderWrites,
+  type ProviderConfirmation,
   type ProviderWrite,
 } from "./media-provider-actions";
 
 export type MediaActionResult = {
   noChanges?: boolean;
+  confirmation?: ProviderConfirmation;
   outcomes: Array<{
     provider: string;
     status: "updated" | "failed" | "unsupported";
@@ -45,6 +53,7 @@ function captureAction() {
   if (!profile) throw new Error("The active profile could not be read.");
   return {
     profile,
+    authKey,
     assertCurrent: () => {
       const current = captureMembershipProfile();
       if (
@@ -73,9 +82,12 @@ async function perform(
       for (const write of providers) {
         try {
           assertCurrent();
-          const reason = await write.preflight?.(assertCurrent);
-          if (reason) {
+          const preflight = await write.preflight?.(assertCurrent);
+          if (preflight) {
+            const reason = typeof preflight === "string" ? preflight : preflight.reason;
             result.noChanges = true;
+            if (typeof preflight !== "string" && preflight.confirmation)
+              result.confirmation = preflight.confirmation;
             result.outcomes.push({
               provider: write.provider,
               status: "unsupported",
@@ -154,6 +166,90 @@ export function requireMediaActionSuccess(
   throw new Error(lines.join("\n"));
 }
 
+function dropIdentityIds(input: WatchlistInput, animeId?: string | null): string[] {
+  const ids = new Set<string>();
+  for (const id of [input.id, animeId, input.imdbId]) {
+    if (typeof id === "string" && id) ids.add(id);
+  }
+  const strictCloud = cloudWriteId(input.id, input.imdbId ?? null, !!input.imdbId);
+  const looseCloud = cloudWriteId(input.id, input.imdbId ?? null, false);
+  if (strictCloud) ids.add(strictCloud);
+  if (looseCloud) ids.add(looseCloud);
+  return [...ids];
+}
+
+function matchesDropIdentity(item: LibraryItem, ids: Set<string>): boolean {
+  if (ids.has(item._id)) return true;
+  return item.altIds?.some((id) => ids.has(id)) === true;
+}
+
+async function clearTitleContinueWatching(
+  input: WatchlistInput,
+  animeId: string | null | undefined,
+  authKey: string | null,
+  assertCurrent: () => void,
+): Promise<void> {
+  const ids = dropIdentityIds(input, animeId);
+  const identity = new Set(ids);
+  for (const id of ids) {
+    assertCurrent();
+    clearLocalCw(id, { acknowledged: true });
+    clearResume(id, undefined, undefined, { acknowledged: true });
+  }
+
+  if (authKey) {
+    for (const id of ids) {
+      assertCurrent();
+      const item = await libraryGetOne(authKey, id);
+      assertCurrent();
+      if (item) await dismissCw(item, authKey, { acknowledged: true });
+    }
+  }
+
+  for (const item of listExternalCw().filter((entry) => matchesDropIdentity(entry, identity))) {
+    assertCurrent();
+    removeExternalCwItem(item);
+    await dismissCw(item, null, { acknowledged: true });
+  }
+
+  const epoch = new Date(0).toISOString();
+  for (const id of ids) {
+    assertCurrent();
+    await dismissCw(
+      {
+        _id: id,
+        type: "series",
+        name: input.name ?? "",
+        poster: input.poster,
+        background: input.background ?? undefined,
+        removed: false,
+        temp: false,
+        _ctime: epoch,
+        _mtime: epoch,
+        isAnime: !!animeId || input.type === "anime" || ANIME_CLOUD_ID.test(id),
+      },
+      null,
+      { acknowledged: true },
+    );
+  }
+}
+
+export async function dropContextTitle(
+  input: WatchlistInput,
+  options: { animeId?: string | null } = {},
+): Promise<MediaActionResult> {
+  if (input.type === "movie") throw new Error("Drop is only available for shows and anime.");
+  const { authKey, assertCurrent } = captureAction();
+  const result = await perform(
+    `drop:${input.id}`,
+    () => clearTitleContinueWatching(input, options.animeId, authKey, assertCurrent),
+    dropProviderWrites(input, options.animeId),
+    assertCurrent,
+  );
+  notifyTrackerStatusChanged();
+  return result;
+}
+
 export async function setContextWatchlist(
   input: WatchlistInput,
   on: boolean,
@@ -208,6 +304,7 @@ export async function setContextWatched(
     episodes?: WatchedEpisode[];
     syncMetaId?: string;
     onUnsafeProvider?: UnsafeProviderPolicy;
+    allowSimklLibraryRemoval?: boolean;
   } = {},
 ): Promise<MediaActionResult> {
   const { assertCurrent } = captureAction();
@@ -294,13 +391,16 @@ export async function setContextWatched(
       if (isMovie) {
         setMovieWatchedLocalAcknowledged(meta.id, watched);
         setWatchedFlagAcknowledged(meta.id, watched);
-        if (!watched && options.imdbId && options.imdbId !== meta.id) {
-          setMovieWatchedLocalAcknowledged(options.imdbId, false);
-          setWatchedFlagAcknowledged(options.imdbId, false);
+        if (options.imdbId && options.imdbId !== meta.id) {
+          setMovieWatchedLocalAcknowledged(options.imdbId, watched);
+          setWatchedFlagAcknowledged(options.imdbId, watched);
         }
         if (watched) savePlayback(meta.id, { title: meta.name, parsedTitle: meta.name });
       } else {
         setManualWatchedManyAcknowledged(meta.id, episodes, watched);
+        if (options.imdbId && options.imdbId !== meta.id && watched) {
+          setManualWatchedManyAcknowledged(options.imdbId, episodes, true);
+        }
         // An individual episode can invalidate an all-watched flag, but cannot establish one.
         if ((!options.episode && !options.episodes) || !watched)
           setWatchedFlagAcknowledged(meta.id, watched && !options.episode && !options.episodes);
@@ -318,7 +418,7 @@ export async function setContextWatched(
           );
           setWatchedFlagAcknowledged(options.imdbId, false);
         }
-        if (watched)
+        if (watched) {
           recordManualWatchedMeta(meta.id, {
             type: "series",
             name: meta.name,
@@ -326,6 +426,16 @@ export async function setContextWatched(
             background: meta.background,
             markedAt: new Date().toISOString(),
           });
+          if (options.imdbId && options.imdbId !== meta.id) {
+            recordManualWatchedMeta(options.imdbId, {
+              type: "series",
+              name: meta.name,
+              poster: meta.poster,
+              background: meta.background,
+              markedAt: new Date().toISOString(),
+            });
+          }
+        }
       }
       if (watched)
         recordWatchEvent({
@@ -353,6 +463,7 @@ export async function setContextWatched(
         videos,
         imdbId: options.syncMetaId ? undefined : options.imdbId,
         ...(options.providerEpisode ? { verifiedEpisodeMapping: true } : {}),
+        ...(options.allowSimklLibraryRemoval ? { allowSimklLibraryRemoval: true } : {}),
       },
     ),
     assertCurrent,

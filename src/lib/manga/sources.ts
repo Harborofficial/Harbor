@@ -12,7 +12,6 @@ import {
 } from "./community";
 import { installedPluginsSync, loadInstalledPlugins, subscribePlugins } from "./plugins/store";
 import { pluginProvider } from "./plugins/runtime";
-import { warmPlugins } from "./plugins/lifecycle";
 import { loadRepos } from "./plugins/repos";
 import { makeMangayomiProvider, removeMangayomiRecord } from "./sources/mangayomi";
 import {
@@ -288,17 +287,18 @@ export function activeMangaSource(): MangaSource {
   );
 }
 
-function providerForSource(src: MangaSource): MangaProvider {
-  if (src.kind === "suwayomi") return { ...makeSuwayomiProvider(src.baseUrl), id: src.id };
+function providerForSource(src: MangaSource, background = false): MangaProvider {
+  if (src.kind === "suwayomi")
+    return { ...makeSuwayomiProvider(src.baseUrl, undefined, background), id: src.id };
   if (src.kind === "local") return { ...makeLocalProvider(src.baseUrl), id: src.id };
-  if (src.kind === "html" && src.config) return makeHtmlProvider(src.id, src.config);
+  if (src.kind === "html" && src.config) return makeHtmlProvider(src.id, src.config, background);
   if (src.kind === "plugin") {
     const installed = installedPluginsSync().find((p) => p.id === src.id);
-    return installed ? pluginProvider(installed) : EMPTY_PROVIDER;
+    return installed ? pluginProvider(installed, background) : EMPTY_PROVIDER;
   }
   if (src.kind === "mangayomi") {
     const record = mangayomiSourcesSync().find((s) => s.id === src.id);
-    return record ? makeMangayomiProvider(record) : EMPTY_PROVIDER;
+    return record ? makeMangayomiProvider(record, background) : EMPTY_PROVIDER;
   }
   return EMPTY_PROVIDER;
 }
@@ -313,9 +313,9 @@ export function sourceIconUrl(s: MangaSource): string | undefined {
   }
 }
 
-export function aggregateSubProviders(): MangaProvider[] {
+export function aggregateSubProviders(background = false): MangaProvider[] {
   return configuredSources()
-    .map((s) => providerForSource(s))
+    .map((s) => providerForSource(s, background))
     .filter((p) => p.id !== "");
 }
 
@@ -571,7 +571,8 @@ export function initMangaSource(): void {
   migrateCommunitySources();
   reconcileSuwayomiServers();
   void ensureMangaSources();
-  void loadInstalledPlugins().then(() => warmPlugins());
+  // Loading a detail page must not execute every unrelated extension.
+  void loadInstalledPlugins();
   void loadMangayomiSources();
   void loadRepos();
   activeMangaProvider();

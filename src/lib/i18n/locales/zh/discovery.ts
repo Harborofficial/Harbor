@@ -101,8 +101,8 @@ const discovery: Record<string, string> = {
     "浏览时，这些徽章会显示在海报上。上方密钥设置中的 RPDB 是独立选项，会将评分直接嵌入海报图片。",
   "Home hero": "首页焦点横幅",
   "Make the featured banner on Home bigger and sharper.": "让首页推荐横幅更大、更清晰。",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "为推荐焦点横幅加载最高分辨率的图片。会使用更多带宽。",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "为推荐焦点横幅、详情页横幅以及未模糊的播放源选择器背景加载最高分辨率的图片。会使用更多带宽和显存。",
   "Show Playlists tab": "显示“播放列表”标签",
   "Show IMDb score on cards": "在卡片上显示 IMDb 评分",
   "Only show streams in my languages": "仅显示符合我的语言设置的视频流",

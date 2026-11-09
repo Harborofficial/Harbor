@@ -200,7 +200,7 @@ function setSession(next: Session | null): void {
   for (const fn of subs) fn();
 }
 
-function reloadSession(force = false): void {
+export function reloadSession(force = false): void {
   const id = activeProfileId();
   if (!force && id === loadedProfile) return;
   sessionGeneration += 1;

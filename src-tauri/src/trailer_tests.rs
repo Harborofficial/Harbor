@@ -1,5 +1,131 @@
 use super::*;
 
+#[tokio::test]
+async fn youtube_playback_verification_rejects_cdn_errors_and_empty_media() {
+    use std::io::{Read, Write};
+    for (status, body, accepted) in [
+        ("403 Forbidden", "", false),
+        ("206 Partial Content", "", false),
+        ("206 Partial Content", "video bytes", true),
+    ] {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            let mut request = [0u8; 4096];
+            let count = socket.read(&mut request).unwrap();
+            let request = String::from_utf8_lossy(&request[..count]).to_lowercase();
+            assert!(request.contains("range: bytes=0-"));
+            assert!(request.contains("user-agent: fixture"));
+            write!(socket, "HTTP/1.1 {status}\r\nContent-Type: video/mp4\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).unwrap();
+        });
+        let stream = YoutubeStream {
+            url: format!("http://{address}/video"),
+            audio_url: None,
+            headers: [("User-Agent".to_string(), "fixture".to_string())].into(),
+            transcode: false,
+        };
+        assert_eq!(verify_youtube_stream(&stream).await.is_ok(), accepted);
+        server.join().unwrap();
+    }
+}
+
+#[tokio::test]
+async fn youtube_playback_verification_checks_video_and_audio() {
+    use std::io::{Read, Write};
+    fn serve(body: &'static str) -> (String, std::thread::JoinHandle<()>) {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let handle = std::thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            let mut request = [0u8; 4096];
+            let _ = socket.read(&mut request).unwrap();
+            write!(socket, "HTTP/1.1 206 Partial Content\r\nContent-Type: video/mp4\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).unwrap();
+        });
+        (format!("http://{address}/media"), handle)
+    }
+
+    let (video, video_server) = serve("video bytes");
+    let (audio, audio_server) = serve("audio bytes");
+    let stream = YoutubeStream {
+        url: video,
+        audio_url: Some(audio),
+        headers: [("User-Agent".to_string(), "fixture".to_string())].into(),
+        transcode: true,
+    };
+    assert!(verify_youtube_stream(&stream).await.is_ok());
+    video_server.join().unwrap();
+    audio_server.join().unwrap();
+}
+
+#[test]
+fn maps_the_quality_setting_to_a_height_cap() {
+    assert_eq!(requested_height(Some("360p")), Some(360));
+    assert_eq!(requested_height(Some("720p")), Some(720));
+    assert_eq!(requested_height(Some("1080p")), Some(1080));
+    assert_eq!(requested_height(Some("best")), None);
+    assert_eq!(requested_height(None), None);
+}
+
+#[test]
+fn selects_the_highest_hls_variant_at_or_below_the_requested_quality() {
+    let formats = vec![
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"avc1.4D401E","acodec":"none","height":360,"url":"https://video/360"}),
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"avc1.4D401F","acodec":"none","height":720,"url":"https://video/720"}),
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"avc1.640028","acodec":"none","height":1080,"url":"https://video/1080"}),
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"avc1.640032","acodec":"none","height":1440,"url":"https://video/1440"}),
+    ];
+    assert_eq!(select_hls_video(&formats, Some(360)).unwrap()["url"], "https://video/360");
+    assert_eq!(select_hls_video(&formats, Some(720)).unwrap()["url"], "https://video/720");
+    assert_eq!(select_hls_video(&formats, Some(1080)).unwrap()["url"], "https://video/1080");
+    assert_eq!(select_hls_video(&formats, None).unwrap()["url"], "https://video/1440");
+}
+
+#[test]
+fn prefers_the_original_hls_audio_track() {
+    let formats = vec![
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"none","format_id":"233-0","language":"de-DE","url":"https://audio/233-0"}),
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"none","format_id":"234-0","language":"de-DE","url":"https://audio/234-0"}),
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"none","format_id":"233-7","language":"en-US","language_preference":10,"url":"https://audio/233-7"}),
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"none","format_id":"234-7","language":"en-US","language_preference":10,"url":"https://audio/234-7"}),
+    ];
+    assert_eq!(select_hls_audio(&formats).as_deref(), Some("https://audio/234-7"));
+}
+
+#[test]
+fn separate_audio_is_only_needed_for_video_only_hls() {
+    let muxed = serde_json::json!({"vcodec":"avc1.640028","acodec":"mp4a.40.2"});
+    let video_only = serde_json::json!({"vcodec":"avc1.640028","acodec":"none"});
+    let unknown = serde_json::json!({"vcodec":"avc1.640028"});
+    assert!(format_has_audio(&muxed));
+    assert!(!format_has_audio(&video_only));
+    assert!(!format_has_audio(&unknown));
+}
+
+#[test]
+fn best_quality_detects_a_higher_rendition() {
+    let formats = vec![
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"avc1.640028","acodec":"none","height":1080,"url":"https://video/1080"}),
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"vp09.00.50.08","acodec":"none","height":2160,"url":"https://video/2160"}),
+        serde_json::json!({"protocol":"https","vcodec":"vp09.00.50.08","acodec":"none","height":1440,"url":"https://video/1440"}),
+    ];
+    assert_eq!(highest_video_height(&formats), 2160);
+}
+
+#[test]
+fn progressive_fallback_requires_a_muxed_format() {
+    let formats = vec![
+        serde_json::json!({"protocol":"m3u8_native","vcodec":"avc1.640028","acodec":"mp4a.40.2","height":1080,"url":"https://hls/1080"}),
+        serde_json::json!({"protocol":"https","vcodec":"avc1.640028","acodec":"none","height":1080,"url":"https://video/1080"}),
+        serde_json::json!({"protocol":"https","vcodec":"avc1.4D401F","acodec":"mp4a.40.2","height":720,"url":"https://muxed/720"}),
+        serde_json::json!({"protocol":"https","vcodec":"avc1.4D401E","acodec":"mp4a.40.2","height":360,"url":"https://muxed/360"}),
+    ];
+    assert_eq!(
+        select_muxed(&formats, Some(1080)).unwrap()["url"],
+        "https://muxed/720"
+    );
+}
+
 const YT_DLP_EXTRACTION: &[&str] = &[
     "PYZ.pyz",
     "base_library.zip",
@@ -336,4 +462,12 @@ fn adaptive_selection_and_cache_version_do_not_reuse_legacy_720p_files() {
         .any(|arg| arg.starts_with("after_move:HARBOR_TRAILER:")));
     assert!(args.iter().any(|arg| arg == "--no-simulate"));
     assert!(!args.iter().any(|arg| arg == "--skip-download"));
+}
+#[test]
+fn addon_youtube_stream_preserves_url_and_headers_without_downloading() {
+    let stream = parse_youtube_stream(br#"{"url":"https://media.example/video.mp4","http_headers":{"User-Agent":"resolver"}}"#).unwrap();
+    assert_eq!(stream.url, "https://media.example/video.mp4");
+    assert_eq!(stream.headers.get("User-Agent").map(String::as_str), Some("resolver"));
+    assert!(parse_youtube_stream(br#"{"url":"file:///private"}"#).is_err());
+    assert!(parse_youtube_stream(br#"{"requested_formats":[]}"#).is_err());
 }

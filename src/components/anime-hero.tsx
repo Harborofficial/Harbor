@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useArtFallback } from "./anime-hero-art-fallback";
 import { NavArrow } from "@/components/nav-arrow";
 import { PopIcon } from "@/components/pop-icon";
+import { HeroBackdrop } from "./hero-backdrop";
 import { HeroPips } from "./anime-hero/hero-pips";
 import { HeroSlideBadges } from "./anime-hero/hero-slide-badges";
 import { HeroMangaAdaptation } from "./anime-hero/hero-manga-adaptation";
@@ -114,7 +115,11 @@ export function AnimeHero({
                 transition: `opacity ${FADE_MS}ms cubic-bezier(0.32, 0.72, 0.24, 1)`,
               }}
             >
-              <HeroBackdrop meta={m} />
+              <HeroBackdrop
+                url={m.background ?? m.poster ?? ""}
+                fallbacks={m.poster ? [m.poster] : []}
+                objectPosition="75% center"
+              />
             </div>
           );
         })}
@@ -394,22 +399,6 @@ function HeroTags({ meta }: { meta: Meta }) {
         </span>
       ))}
     </div>
-  );
-}
-
-function HeroBackdrop({ meta }: { meta: Meta }) {
-  const art = useArtFallback([meta.background, meta.poster]);
-  if (!art.src) return null;
-  return (
-    <img
-      src={art.src}
-      alt=""
-      decoding="async"
-      onLoad={art.onLoad}
-      onError={art.onError}
-      className="absolute inset-0 h-full w-full object-cover"
-      style={{ objectPosition: "75% center" }}
-    />
   );
 }
 

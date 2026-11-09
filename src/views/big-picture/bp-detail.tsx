@@ -64,7 +64,15 @@ export function BpDetail({
     applyPreference: boolean,
   ) => void;
 }) {
-  const { meta, detail: tmdbDetail, collection, providers, loading } = useBpDetail(metaId);
+  const {
+    meta,
+    detail: tmdbDetail,
+    collection,
+    providers,
+    loading,
+    chains,
+    sourceRatings,
+  } = useBpDetail(metaId);
   const t = useBpT();
   // A kitsu id resolves to nothing on TMDB, so anime detail comes from the
   // provider chain the desktop uses and stands in for the TMDB record entirely.
@@ -73,7 +81,7 @@ export function BpDetail({
   // only paid for on the path it does not own: a tt or tmdb shell whose videos
   // are Kitsu addon stream ids, and a kitsu title whose provider chain came back
   // empty. Running both costs a second uncached TVDB proxy round trip per title.
-  const episodeIds = useBpEpisodeIds(anime.owns ? null : meta);
+  const episodeIds = useBpEpisodeIds(anime.owns ? null : meta, chains?.episodes);
   const detail = anime.detail ?? tmdbDetail;
   const cwEntry = useBpLibraryItem(meta?.id ?? "", detail?.imdbId ?? null);
   const { settings } = useSettings();
@@ -131,7 +139,14 @@ export function BpDetail({
   // showXDetail for detail pages, and they diverge on stock defaults, so reading
   // the card family here dropped six of the ten providers and ignored a user who
   // had switched a provider off for detail pages only.
-  const { badges } = useBpCardBadges(shell, undefined, imdbId, "detail");
+  const { badges } = useBpCardBadges(
+    shell,
+    undefined,
+    imdbId,
+    "detail",
+    chains?.ratings,
+    sourceRatings,
+  );
   const recSource = useMemo(() => detail?.recommendations ?? [], [detail]);
   const similarSource = useMemo(() => detail?.similar ?? [], [detail]);
   const recommendations = useHideAnimeMetas(recSource);

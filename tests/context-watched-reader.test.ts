@@ -18,19 +18,42 @@ function harness() {
   let trakt = false;
   let simkl = false;
   let anilist = false;
+  let mal = false;
   let pmdb = false;
   let animeEntry = { episodes: 12 as number | null, entry: { status: "CURRENT", progress: 3 } };
   let failTrakt = false;
   let afterRead = () => {};
   const calls: string[] = [];
   let metadataReads = 0;
+  let cinemetaDisabled = false;
+  const metadataForces: boolean[] = [];
   const mappings = (id: string) =>
     /^tt\d+$/.test(id) ? { ok: true, target: { kind: "movie", ids: { imdb: id } } } : { ok: false };
+  const autoAnimeProjection = [
+    {
+      season: 1,
+      episode: 1,
+      imdbId: "tt123",
+      imdbSeason: 4,
+      imdbEpisode: 6,
+      airDate: "2020-01-01",
+    },
+    {
+      season: 1,
+      episode: 2,
+      imdbId: "tt123",
+      imdbSeason: 4,
+      imdbEpisode: 7,
+      airDate: "2020-01-02",
+    },
+  ];
   const mocks: Record<string, unknown> = {
     react: {},
     "./cinemeta": {
-      meta: async () => {
+      meta: async (_type: string, _id: string, force = false) => {
         metadataReads++;
+        metadataForces.push(force);
+        if (cinemetaDisabled && !force) return null;
         return { ...meta };
       },
     },
@@ -73,7 +96,10 @@ function harness() {
       isAuthenticated: () => anilist,
       getSession: () => (anilist ? { userId: profile, accessToken: profile } : null),
     },
-    "./mal/session": { isAuthenticated: () => false, getSession: () => null },
+    "./mal/session": {
+      isAuthenticated: () => mal,
+      getSession: () => (mal ? { userName: profile, accessToken: profile } : null),
+    },
     "./publicmetadb/session": {
       isAuthenticated: () => pmdb,
       getSession: () => (pmdb ? { apiKey: profile } : null),
@@ -85,7 +111,16 @@ function harness() {
         return animeEntry;
       },
     },
-    "./mal/mutations": {},
+    "./mal/mutations": {
+      resolveMalMediaId: async () => 456,
+      fetchListEntry: async (_id: number, strict: boolean) => {
+        assert.equal(strict, true);
+        return {
+          numEpisodes: 12,
+          entry: { status: "watching", numEpisodesWatched: 1 },
+        };
+      },
+    },
     "./trakt/ids": { stremioIdToTraktTarget: mappings },
     "./simkl/ids": { stremioIdToSimklTarget: mappings },
     "./media-provider-actions": {
@@ -97,7 +132,9 @@ function harness() {
         validate: () => void,
       ) => {
         calls.push("PublicMetaDB");
-        assert.deepEqual(episodes, [{ season: 1, episode: 2, absoluteNumber: 13 }]);
+        if ((episodes as Array<{ absoluteNumber?: number }>)[0]?.absoluteNumber === 13)
+          assert.deepEqual(episodes, [{ season: 1, episode: 2, absoluteNumber: 13 }]);
+        else assert.deepEqual(episodes, autoAnimeProjection);
         afterRead();
         validate();
         return new Set(["1:2"]);
@@ -115,6 +152,9 @@ function harness() {
     "./movie-watched": {},
     "./watched-flag": {},
     "./episode-progress": {},
+    "./series-episodes": {
+      fetchEpisodeList: async () => autoAnimeProjection.map((episode) => ({ ...episode })),
+    },
   };
   const output = ts.transpileModule(
     readFileSync(new URL("../src/lib/context-watched-state.ts", import.meta.url), "utf8"),
@@ -133,6 +173,10 @@ function harness() {
     reader: module.exports as Reader,
     calls,
     metadataReads: () => metadataReads,
+    metadataForces: () => [...metadataForces],
+    disableCinemeta: () => {
+      cinemetaDisabled = true;
+    },
     pmdbOnly: () => {
       stremio = false;
       pmdb = true;
@@ -155,6 +199,18 @@ function harness() {
       stremio = false;
       anilist = true;
     },
+    animeProviders: () => {
+      stremio = false;
+      trakt = true;
+      anilist = true;
+      mal = true;
+      pmdb = true;
+    },
+    animeListProviders: () => {
+      stremio = false;
+      anilist = true;
+      mal = true;
+    },
     switchDuringRead: () => {
       afterRead = () => {
         profile = "other";
@@ -168,6 +224,80 @@ test("menu reads Stremio's actual bitfield against released episode scope", asyn
   const state = await h.reader.readContextWatchedSnapshot({ meta });
   assert.deepEqual(state.keys, ["1:1", "1:2"]);
   assert.deepEqual(state.providers, [{ provider: "Stremio", watched: new Set(["1:1"]) }]);
+});
+
+test("Stremio watched decoding force-loads canonical Cinemeta metadata even when its catalog is disabled", async () => {
+  const h = harness();
+  h.disableCinemeta();
+  const state = await h.reader.readContextWatchedSnapshot({
+    meta: { id: "tt123", type: "series", name: "Fixture" },
+  });
+  assert.deepEqual(h.metadataForces(), [false, true]);
+  assert.deepEqual(state.providers, [{ provider: "Stremio", watched: new Set(["1:1"]) }]);
+});
+
+test("episode-scoped anime CW loads source ordering before reading AniList and MAL progress", async () => {
+  const h = harness();
+  h.animeListProviders();
+  const state = await h.reader.readContextWatchedSnapshot({
+    meta: { id: "kitsu:123", type: "anime", name: "CW fixture" },
+    imdbId: "tt123",
+    episode: {
+      season: 1,
+      episode: 2,
+      kitsuStreamId: "kitsu:123:2",
+      imdbId: "tt123",
+      imdbSeason: 4,
+      imdbEpisode: 7,
+    },
+    episodeScope: true,
+  });
+  assert.deepEqual(state.keys, ["1:2"]);
+  assert.deepEqual(state.providers[0], {
+    provider: "AniList",
+    watched: new Set(["1:2"]),
+  });
+  assert.deepEqual(state.providers[1], {
+    provider: "MyAnimeList",
+    watched: new Set(),
+  });
+});
+
+test("anime list progress accepts one contiguous later-season entry", async () => {
+  const h = harness();
+  h.animeListProviders();
+  const projection = [
+    { season: 2, episode: 1, imdbId: "tt123", imdbSeason: 4, imdbEpisode: 6, airDate: "2020-01-01" },
+    { season: 2, episode: 2, imdbId: "tt123", imdbSeason: 4, imdbEpisode: 7, airDate: "2020-01-02" },
+    { season: 2, episode: 3, imdbId: "tt123", imdbSeason: 4, imdbEpisode: 8, airDate: "2020-01-03" },
+  ];
+  const state = await h.reader.readContextWatchedSnapshot({
+    meta: { id: "kitsu:123", type: "anime", name: "Seasonal fixture" },
+    imdbId: "tt123",
+    episodeProjection: projection,
+  });
+  assert.deepEqual(state.providers[0], {
+    provider: "AniList",
+    watched: new Set(["2:1", "2:2", "2:3"]),
+  });
+  assert.deepEqual(state.providers[1], {
+    provider: "MyAnimeList",
+    watched: new Set(["2:1"]),
+  });
+});
+
+test("catalog-backed anime keeps its TV id for TV trackers but uses the recorded anime id for anime lists", async () => {
+  const h = harness();
+  h.animeListProviders();
+  const state = await h.reader.readContextWatchedSnapshot({
+    meta: { id: "tmdb:tv:280042", type: "series", name: "Detected anime" },
+    animeId: "kitsu:123",
+  });
+  assert.deepEqual(
+    state.providers.map((provider) => provider.provider),
+    ["AniList", "MyAnimeList"],
+  );
+  assert.ok(state.providers.every((provider) => provider.watched !== null));
 });
 
 test("mapped anime episode normalizes provider coordinates without marking sibling episodes", async () => {
@@ -211,6 +341,25 @@ test("a loaded source-local projection does not fetch or summarize a different f
   assert.equal(h.metadataReads(), 0);
   assert.deepEqual(state.keys, ["1:2"]);
   assert.deepEqual(state.providers[0]?.watched, new Set(["1:2"]));
+});
+
+test("title-level anime loads its verified episode projection before reading connected trackers", async () => {
+  const h = harness();
+  h.animeProviders();
+  const state = await h.reader.readContextWatchedSnapshot({
+    meta: { id: "kitsu:123", type: "anime", name: "Fixture anime" },
+  });
+
+  assert.deepEqual(state.keys, ["1:1", "1:2"]);
+  assert.deepEqual(
+    state.providers.map((provider) => provider.provider),
+    ["PublicMetaDB", "Trakt", "AniList", "MyAnimeList"],
+  );
+  assert.ok(
+    state.providers.every((provider) => provider.watched !== null),
+    "available anime trackers should not become unavailable just because a card omitted episode metadata",
+  );
+  assert.deepEqual(state.providers[1]?.watched, new Set(["1:2"]));
 });
 
 test("episode projection cannot invent missing coordinates or mix another source", async () => {

@@ -113,7 +113,12 @@ export function EpisodePicker({
     let cancelled = false;
     setLoading(true);
     setEps([]);
-    fetchEpisodeList(meta, { tmdbKey: settings.tmdbKey })
+    fetchEpisodeList(meta, {
+      tmdbKey: settings.tmdbKey,
+      episodeSources: settings.metadataSources?.episodes,
+      tvdbKey: settings.tvdbKey,
+      tvdbSeasonType: settings.tvdbSeasonType,
+    })
       .then((list) => {
         if (!cancelled) {
           setEps(list);
@@ -127,7 +132,13 @@ export function EpisodePicker({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meta.id, settings.tmdbKey]);
+  }, [
+    meta.id,
+    settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    settings.metadataSources?.episodes,
+  ]);
 
   const combinedWatched = useMemo(() => {
     const s = new Set<string>();

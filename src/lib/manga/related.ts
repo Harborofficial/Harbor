@@ -1,5 +1,5 @@
 import { anilistRequest } from "@/lib/anilist/client";
-import { searchManga, type MangaSummary } from "@/lib/manga/api";
+import { searchMangaForTitleSource, type MangaSummary } from "@/lib/manga/api";
 
 export type MangaAdaptation = {
   anilistId: number;
@@ -101,7 +101,12 @@ export async function mangaAdaptation(title: string): Promise<MangaAdaptation | 
   if (!key) return null;
   if (adaptationCache.has(key)) return adaptationCache.get(key) ?? null;
   try {
-    const data = await anilistRequest<AdaptationResp>(ADAPTATION_QUERY, { s: title }, undefined, true);
+    const data = await anilistRequest<AdaptationResp>(
+      ADAPTATION_QUERY,
+      { s: title },
+      undefined,
+      true,
+    );
     const edges = data?.Page?.media?.[0]?.relations?.edges ?? [];
     const anime = edges.filter((e) => e.node?.type === "ANIME");
     const rank = (e: RelationEdge): number => {
@@ -109,7 +114,9 @@ export async function mangaAdaptation(title: string): Promise<MangaAdaptation | 
       const name = (pickTitle(e.node.title) ?? "").toLowerCase();
       const junk = /\b(cm|pv|commercial|promo|promotion|trailer|teaser|recap|special)\b/.test(name);
       const sequel =
-        /season\s*[2-9]|[2-9](nd|rd|th)\s*season|part\s*[2-9]|final season|\bii+\b|arise from/.test(name);
+        /season\s*[2-9]|[2-9](nd|rd|th)\s*season|part\s*[2-9]|final season|\bii+\b|arise from/.test(
+          name,
+        );
       let base: number;
       if (f === "TV") base = 0;
       else if (f === "TV_SHORT") base = 1;
@@ -152,15 +159,16 @@ export async function mangaAdaptation(title: string): Promise<MangaAdaptation | 
   }
 }
 
-export async function similarManga(title: string): Promise<MangaSummary[]> {
-  const key = title.trim().toLowerCase();
-  if (!key) return [];
+export async function similarManga(title: string, mangaId: string): Promise<MangaSummary[]> {
+  const normalizedTitle = title.trim().toLowerCase();
+  if (!normalizedTitle) return [];
+  const key = `${mangaId}\0${normalizedTitle}`;
   if (similarCache.has(key)) return similarCache.get(key)!;
   try {
     const data = await anilistRequest<SimilarResp>(SIMILAR_QUERY, { s: title }, undefined, true);
     const nodes = data?.Page?.media?.[0]?.recommendations?.nodes ?? [];
 
-    const seenTitle = new Set<string>([key]);
+    const seenTitle = new Set<string>([normalizedTitle]);
     const recTitles: string[] = [];
     for (const n of nodes) {
       const t = pickTitle(n.mediaRecommendation?.title ?? null);
@@ -174,10 +182,10 @@ export async function similarManga(title: string): Promise<MangaSummary[]> {
     const results: MangaSummary[] = [];
     const seenId = new Set<string>();
     for (const rec of recTitles.slice(0, SIMILAR_CAP)) {
-      const found = (await searchManga(rec, 0))[0];
+      const found = (await searchMangaForTitleSource(mangaId, rec))[0];
       if (!found) continue;
       if (seenId.has(found.id)) continue;
-      if (found.title.trim().toLowerCase() === key) continue;
+      if (found.title.trim().toLowerCase() === normalizedTitle) continue;
       seenId.add(found.id);
       results.push(found);
     }

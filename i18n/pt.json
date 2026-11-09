@@ -4862,7 +4862,7 @@
   "Load more": "Carregar mais",
   "Load more comments": "Carregar mais comentários",
   "Load more threads": "Carregar mais tópicos",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.": "Carregar a arte na maior resolução para o destaque principal. Usa mais banda.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.": "Carregar a arte na maior resolução para o destaque principal, o destaque da página de detalhes e os fundos sem desfoque do seletor de fontes. Usa mais banda e memória de vídeo.",
   "Loaded {loaded} of {total} movies...": "Carregados {loaded} de {total} filmes...",
   "Loaded {loaded} of {total} shows...": "Carregadas {loaded} de {total} séries...",
   "Loaded {name}": "{name} carregado",

@@ -12,6 +12,18 @@ pub fn source_link(value: Option<String>) -> Option<String> {
         && url.username().is_empty() && url.password().is_none()).then_some(value)
 }
 
+/// Identical semantics to the frontend download group identity. Group data is
+/// applied to each queue ticket, not persisted as a second source of truth.
+pub fn queue_group(profile: &str, game: Option<&DownloadGame>, batch: Option<&str>, kind: &str, id: &str) -> String {
+    if let Some(game) = game {
+        return format!("game:{profile}:{}:{}",game.id,game.content_kind.as_deref().unwrap_or("game"));
+    }
+    if kind == "direct" {
+        if let Some(batch) = batch { return format!("batch:{profile}:{batch}"); }
+    }
+    format!("file:{profile}:{kind}:{id}")
+}
+
 /// Display identity supplied by an exact catalog selection, never inferred from a filename.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]

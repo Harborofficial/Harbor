@@ -28,18 +28,21 @@ export function createContinueCardActions(options: {
   isCurrent: () => boolean;
   isAvailable: () => boolean;
   t: (key: string) => string;
+  /** Lets the user play an entry whose next episode is marked as not aired yet. */
+  allowUnreleased?: boolean;
   play: (assertCurrent: () => void) => Promise<void>;
   chooseSource: (assertCurrent: () => void) => Promise<void>;
   dismiss?: () => void | CwDismissResult | Promise<void | CwDismissResult>;
   onDismissed?: (result: void | CwDismissResult) => void;
   onError?: (error: unknown) => void;
-  icons?: { play: ReactNode; sources: ReactNode; dismiss: ReactNode };
+  icons?: { sources: ReactNode; dismiss: ReactNode };
 }) {
   const identity = continueCardIdentity(options.item);
   const listeners = new Set<() => void>();
   let pending = false;
   let removed = false;
   const waitingForAir = () =>
+    !options.allowUnreleased &&
     (options.getItem() as LibraryItem & { waitingForAir?: boolean }).waitingForAir === true;
   const isValid = () =>
     !removed &&
@@ -59,9 +62,13 @@ export function createContinueCardActions(options: {
   };
   const run = async (kind: "play" | "sources" | "dismiss") => {
     if (pending) throw new Error(options.t("This action is already running."));
-    assertCurrent();
-    if (kind !== "dismiss" && waitingForAir())
-      throw new Error(options.t("This episode has not aired yet."));
+    if (kind !== "dismiss") {
+      assertCurrent();
+      if (waitingForAir()) throw new Error(options.t("This episode has not aired yet."));
+    } else {
+      if (removed || !options.isCurrent())
+        throw new Error(options.t("This Continue Watching entry is no longer available."));
+    }
     pending = true;
     emit();
     try {
@@ -89,15 +96,6 @@ export function createContinueCardActions(options: {
       const reason = waitingForAir() ? options.t("This episode has not aired yet.") : undefined;
       return [
         {
-          id: `continue:play:${identity}`,
-          label: options.t("Continue watching"),
-          icon: options.icons?.play,
-          disabled,
-          reason,
-          restoreFocus: false,
-          run: () => run("play"),
-        },
-        {
           id: `continue:sources:${identity}`,
           label: options.t("Choose another source"),
           icon: options.icons?.sources,
@@ -106,30 +104,24 @@ export function createContinueCardActions(options: {
           restoreFocus: false,
           run: () => run("sources"),
         },
+        ...(options.dismiss
+          ? [
+              {
+                id: `continue:dismiss:${identity}`,
+                label: options.t("Remove from Continue Watching"),
+                icon: options.icons?.dismiss,
+                disabled: pending || removed || !options.isCurrent(),
+                restoreFocus: false,
+                run: () => run("dismiss"),
+              },
+            ]
+          : []),
       ];
     },
-  };
-  const extra: ActionSource = {
-    isValid,
-    subscribe,
-    actions: () =>
-      options.dismiss
-        ? [
-            {
-              id: `continue:dismiss:${identity}`,
-              label: options.t("Remove from Continue Watching"),
-              icon: options.icons?.dismiss,
-              disabled: pending || !isValid(),
-              restoreFocus: false,
-              run: () => run("dismiss"),
-            },
-          ]
-        : [],
   };
   return {
     isValid,
     primary,
-    extra,
     subscribe,
     isPending: () => pending,
     play: () => run("play"),

@@ -252,3 +252,19 @@
     transition: none;
   }
 }
+.music-watch-layout[data-theatre="1"] .music-watch-next {
+  display: grid;
+  width: 100%;
+  padding-top: 0;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+  gap: 20px;
+  align-items: start;
+}
+.music-watch-layout[data-theatre="1"] .music-watch-next > * {
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .music-watch-layout[data-theatre="1"] .music-watch-next {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -20,6 +20,28 @@ export const DEFAULT_SECONDARY_PRIVILEGES: SecondaryProfilePrivileges = {
 };
 
 export const DEFAULT: Settings = {
+  tvCardOptions: {
+    showImdbBadge: true,
+    showTmdbBadge: false,
+    showRtBadge: true,
+    showPopcornBadge: false,
+    showMalBadge: true,
+    animeCardRating: "mal",
+    showMetacriticBadge: false,
+    showLetterboxdBadge: false,
+    showMdblistBadge: false,
+    showTraktBadge: false,
+    showSimklBadge: true,
+    showDubBadge: true,
+    showCardBadges: true,
+    cardAwardDisplay: "badge",
+    top10Ribbon: false,
+    top10RibbonSide: "right",
+    badgePlacement: "bottom",
+    watchlistBadge: "topEnd",
+    showLocalLibraryBadge: true,
+    showWatchedBadge: true,
+  },
   accountProvider: "stremio",
   spooktoberBanner: undefined,
   soundTheme: "none",
@@ -101,11 +123,13 @@ export const DEFAULT: Settings = {
   top10Ribbon: false,
   top10RibbonSide: "right",
   awardTabs: false,
+  cardAwardDisplay: "badge",
   awardTabPosition: "above",
   rowTitleScale: 1,
   cardTitleScale: 1,
   playerTitleScale: 1,
   playerTitleSeriesFirst: false,
+  playerTitleLogo: false,
   uiScale: 1,
   serveWebUi: false,
   remoteControlEnabled: false,
@@ -245,6 +269,7 @@ export const DEFAULT: Settings = {
   playerMenuBlack: false,
   playerScreenLockEnabled: false,
   seekPreviewEnabled: typeof navigator !== "undefined" && (navigator.hardwareConcurrency || 8) >= 4,
+  seekrApiKey: "",
   instantPlay: true,
   instantPlaybackPreparation: false,
   autoNextStreamOnStall: false,
@@ -253,6 +278,9 @@ export const DEFAULT: Settings = {
   seasonSourceLock: false,
   rememberLastStream: true,
   keepSourceNextEpisode: false,
+  autoPreDownloadNextEpisode: false,
+  autoPreDownloadNotifications: true,
+  autoPreDownloadNextEpisodeEnabledAt: 0,
   playerHdrToSdr: true,
   playerRtxHdr: false,
   playerRtxVsr: false,
@@ -290,6 +318,9 @@ export const DEFAULT: Settings = {
   playerAnime4kFolder: "",
   playerAnime4kOverride: "auto",
   playerShaders: {},
+  mangaUpscaleEnabled: false,
+  mangaUpscaleQuality: "fast",
+  mangaUpscaleAutoDownload: true,
   preferredSubLangs: ["English"],
   preferredAudioLangs: ["English", "Japanese"],
   subFontSize: 32,
@@ -320,6 +351,7 @@ export const DEFAULT: Settings = {
   subOffsetIndicatorPosition: "bottom",
   subOffsetIndicatorSize: "medium",
   subShowInPip: true,
+  subLiftAboveControls: true,
   subHideSdh: false,
   secondarySubLang: "",
   subSecondaryPlacement: "top",
@@ -386,6 +418,8 @@ export const DEFAULT: Settings = {
   aiGroqKey: "",
   jinaKey: "",
   aiWebSearch: false,
+  aiWebSource: "jina",
+  keenableKey: "",
   playerD3d11Flip: true,
   mpvExtraOptions: "",
   mpvQuality: "balanced",
@@ -440,6 +474,8 @@ export const DEFAULT: Settings = {
   keyboardPauseShowsControls: true,
   hideWatchedInCatalogs: false,
   hideWatchedInHero: false,
+  hideWatchedInMoreLikeThis: false,
+  moreLikeThisOnAiringSeries: false,
   hideUnreleased: false,
   localEpisodeSortDesc: false,
   localReviewDismissedCount: 0,
@@ -481,16 +517,22 @@ export const DEFAULT: Settings = {
   musicSpeedPresets: [],
   homeMode: "harbor",
   classicCatalogSource: "all",
+  nuvioAddonMode: "separate",
   homeShowAllAddonRows: false,
   homeNewEpisodes: false,
   libraryBookmarkedOnly: true,
   librarySort: "recent",
-  preferCustomMetaAddon: false,
+  addonOnlyMetadata: false,
+  metadataAddonOrder: [],
+  metadataSources: {},
+  metadataSourceLabels: false,
+  searchTmdbTopMatch: true,
   cinemetaEnabled: true,
   animeOnlyInAnimeRoom: true,
   animeCwEnd: "hide",
   cwAdvanceNext: true,
   cwHideCaughtUp: true,
+  cwPlayUnreleased: true,
   useNativeTitleBar: false,
   fullscreenClockEnabled: false,
   fullscreenClockFormat: "system",
@@ -521,7 +563,7 @@ export const DEFAULT: Settings = {
   cwSnapshotFullQuality: false,
   cwPreferEpisodeStill: false,
   streamFilterLevel: "strict",
-  animePreferImdbStreams: false,
+  animePreferImdbStreams: true,
   blockTrackers: true,
   homeRows: {
     order: [],
@@ -562,7 +604,7 @@ export const DEFAULT: Settings = {
   seekBarColor: "",
   seekBarImage: "",
   seekBarFill: true,
-  seekBarChapters: true,
+  seekBarChapters: false,
   seekBarFillOpacity: 0.35,
   seekDotShape: "circle",
   seekDotHover: true,
@@ -629,6 +671,7 @@ export const DEFAULT: Settings = {
   cropMode: "fit",
   customLists: [],
   libraryGroups: [],
+  libraryGroupSections: [],
   pauseListStatusOnPause: false,
   translateTitles: true,
   translateDescriptions: true,
@@ -672,17 +715,15 @@ export function getSecondaryPrivileges(
       isNuvio = settings.accountProvider === "nuvio";
     } else {
       try {
-        isNuvio = localStorage.getItem("harbor.account-provider") === "nuvio";
+        const explicit = localStorage.getItem("harbor.account-provider");
+        isNuvio =
+          explicit === "nuvio" ||
+          Boolean(
+            !explicit &&
+            localStorage.getItem("harbor.settings.shared")?.includes('"accountProvider":"nuvio"'),
+          );
       } catch {}
     }
-  }
-
-  const directSource = isNuvio ? settings?.nuvioSecondaryPrivileges : settings?.secondaryPrivileges;
-  if (directSource) {
-    return {
-      ...DEFAULT_SECONDARY_PRIVILEGES,
-      ...directSource,
-    };
   }
 
   let sharedBlob: {
@@ -695,12 +736,13 @@ export function getSecondaryPrivileges(
     if (raw) sharedBlob = JSON.parse(raw);
   } catch {}
 
-  const fallbackSource = isNuvio
+  const directSource = isNuvio ? settings?.nuvioSecondaryPrivileges : settings?.secondaryPrivileges;
+  if (directSource) return { ...DEFAULT_SECONDARY_PRIVILEGES, ...directSource };
+
+  const sharedSource = isNuvio
     ? sharedBlob?.nuvioSecondaryPrivileges
     : sharedBlob?.secondaryPrivileges;
+  if (sharedSource) return { ...DEFAULT_SECONDARY_PRIVILEGES, ...sharedSource };
 
-  return {
-    ...DEFAULT_SECONDARY_PRIVILEGES,
-    ...fallbackSource,
-  };
+  return { ...DEFAULT_SECONDARY_PRIVILEGES };
 }

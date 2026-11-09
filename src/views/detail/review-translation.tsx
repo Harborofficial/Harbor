@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { Languages, Loader2 } from "lucide-react";
+import { Dropdown } from "@/components/dropdown";
 import { aiIsGroq, aiKey } from "@/lib/ai-models";
 import { getUiLanguage, LANGUAGES, useT, type UiLanguage } from "@/lib/i18n";
 import { translateReviews, type ReviewTranslationAi } from "@/lib/review-translation";
@@ -126,7 +127,9 @@ export function useReviewTranslator(): ReviewTranslator {
             return;
           }
           const failed = new Set(failures);
-          setFailedAll(failureGroups.filter((group) => group.some((text) => failed.has(text))).length);
+          setFailedAll(
+            failureGroups.filter((group) => group.some((text) => failed.has(text))).length,
+          );
         })
         .finally(() => setBusyAll(false));
     },
@@ -154,18 +157,18 @@ export function ReviewTranslateBar({
           {t("{n} reviews couldn't be translated. Try again.", { n: tr.failedAll })}
         </span>
       )}
-      <select
+      <Dropdown
         value={tr.target}
-        onChange={(e) => tr.setTarget(e.target.value as UiLanguage)}
-        aria-label={t("Translate reviews to")}
-        className="h-7 rounded-full bg-white/[0.06] px-2.5 text-[12px] text-ink-muted outline-none transition-colors hover:bg-white/[0.10] hover:text-ink"
-      >
-        {LANGUAGES.map(({ code, nativeLabel }) => (
-          <option key={code} value={code}>
-            {nativeLabel}
-          </option>
-        ))}
-      </select>
+        onChange={(value) => tr.setTarget(value as UiLanguage)}
+        ariaLabel={t("Translate reviews to")}
+        size="sm"
+        options={LANGUAGES.map(({ code, nativeLabel }) => ({
+          value: code,
+          label: nativeLabel,
+          dir: "auto",
+        }))}
+        className="w-[8.5rem] [&>button]:h-7 [&>button]:rounded-full [&>button]:bg-white/[0.06] [&>button]:px-2.5 [&>button]:text-[12px]"
+      />
       <button
         type="button"
         onClick={() => tr.translateAll(texts, failureGroups)}

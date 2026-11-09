@@ -103,8 +103,7 @@ export function MangaAdaptationCard({
   const coverage = info && chapters ? coverageOf(info, chapters) : null;
   if (!adaptation && !coverage) return null;
 
-  const wideBg =
-    adaptation?.banner && adaptation.banner !== heroBg ? adaptation.banner : null;
+  const wideBg = adaptation?.banner && adaptation.banner !== heroBg ? adaptation.banner : null;
   const bg = wideBg ?? adaptation?.cover ?? adaptation?.banner;
   const portrait = !wideBg && Boolean(adaptation?.cover);
   const adaptationFacts = [
@@ -222,9 +221,11 @@ export function MangaAdaptationCard({
 
 export function MangaRecommendedRail({
   title,
+  mangaId,
   onOpen,
 }: {
   title: string;
+  mangaId: string;
   onOpen: (mangaId: string) => void;
 }) {
   const t = useT();
@@ -233,13 +234,13 @@ export function MangaRecommendedRail({
   useEffect(() => {
     let cancelled = false;
     setItems(null);
-    void similarManga(title).then((list) => {
+    void similarManga(title, mangaId).then((list) => {
       if (!cancelled) setItems(list);
     });
     return () => {
       cancelled = true;
     };
-  }, [title]);
+  }, [title, mangaId]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const nudge = (dir: number) =>

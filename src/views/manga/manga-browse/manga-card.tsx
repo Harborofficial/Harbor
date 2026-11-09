@@ -2,26 +2,36 @@ import { Star } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Poster } from "@/components/poster";
 import type { MangaSummary } from "@/lib/manga/api";
-import { useIsMangaFavorite, useMangaFavorites } from "@/lib/manga-favorites";
+import {
+  mangaFavoriteFailureMessage,
+  useIsMangaFavorite,
+  useMangaFavorites,
+} from "@/lib/manga-favorites";
+import { emitListToast } from "@/components/lists/list-toast";
 import { CollectionBadges } from "../collection-badge";
 import { useMangaContext } from "@/lib/use-manga-context";
 
 export function MangaCard({
   manga,
   onOpen,
+  resolveOpen,
+  missing = false,
 }: {
-  manga: MangaSummary;
+  manga: MangaSummary & { sourceId?: string };
   onOpen: (id: string) => void;
+  resolveOpen?: (manga: MangaSummary & { sourceId?: string }) => void;
+  missing?: boolean;
 }) {
   const t = useT();
   const fav = useMangaFavorites();
-  const isFav = useIsMangaFavorite(manga.id);
-  const context = useMangaContext(manga, { open: () => onOpen(manga.id) });
+  const isFav = useIsMangaFavorite(manga.id, manga.sourceId);
+  const open = () => (resolveOpen ? resolveOpen(manga) : onOpen(manga.id));
+  const context = useMangaContext(manga, { open });
   return (
     <button
       ref={context.ref}
       type="button"
-      onClick={() => onOpen(manga.id)}
+      onClick={open}
       className="group flex w-full min-w-0 flex-col gap-2.5 text-start"
     >
       <div className="relative w-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] group-hover:will-change-transform group-hover:[transform:translate3d(0,-0.5rem,0)] motion-reduce:transition-none motion-reduce:group-hover:[transform:none]">
@@ -29,7 +39,7 @@ export function MangaCard({
           src={manga.cover}
           seed={manga.id}
           ratio="portrait"
-          lazy
+          preferDirect
           className="harbor-card-ring rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[box-shadow] duration-300 group-hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]"
         />
         <span
@@ -38,12 +48,15 @@ export function MangaCard({
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            fav.toggle({
+            const result = fav.toggle({
               id: manga.id,
               title: manga.title,
               altTitle: manga.altTitle,
               cover: manga.cover,
+              sourceId: manga.sourceId,
             });
+            const message = mangaFavoriteFailureMessage(result, t);
+            if (message) emitListToast(message, "error");
           }}
           className="absolute start-1.5 top-1.5 rounded-full bg-canvas/70 p-1.5 backdrop-blur-sm transition-transform hover:scale-110 motion-reduce:transition-none motion-reduce:hover:scale-100"
         >
@@ -67,6 +80,11 @@ export function MangaCard({
           {manga.title}
         </p>
         {manga.year != null && <p className="text-[12px] text-ink-subtle">{manga.year}</p>}
+        {missing && (
+          <p className="text-[11.5px] leading-snug text-ink-subtle">
+            {t("This title would not open")}
+          </p>
+        )}
       </div>
     </button>
   );

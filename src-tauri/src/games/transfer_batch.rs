@@ -7,6 +7,8 @@ pub struct BatchFile {
     #[serde(default)]
     pub source_link: Option<String>,
     #[serde(default)]
+    pub torbox_origin: Option<TorboxOrigin>,
+    #[serde(default)]
     pub browser_ticket: Option<String>,
     pub filename: String,
     pub name: String,
@@ -61,6 +63,7 @@ impl Transfers {
             }
             requests.push(NewTransfer {
                 source_link: file.source_link,
+                torbox_origin: file.torbox_origin,
                 browser_ticket: file.browser_ticket,
                 profile: args.profile.clone(), name: file.name, game: file.game, url: file.url,
                 destination: directory.join(file.filename).to_string_lossy().into_owned(),
@@ -78,6 +81,9 @@ impl Transfers {
         for args in requests {
             if !profile_valid(&args.profile) { return Err("transfer_profile"); }
             protocol::validate_url(&args.url)?;
+            if args.torbox_origin.as_ref().is_some_and(|origin| !origin.valid() || !torbox_cdn(&args.url)) {
+                return Err("transfer_invalid_record");
+            }
             if args.name.trim().is_empty() || args.name.len() > 500 || args.expected_bytes == Some(0) {
                 return Err("transfer_invalid_record");
             }
@@ -95,6 +101,7 @@ impl Transfers {
                 checking_partial: None,
                 preparation: None,
                 source_link,
+                torbox_origin: args.torbox_origin,
                 source_page,
                 id: uuid::Uuid::new_v4().to_string(), profile: args.profile, name: args.name.trim().into(),
                 game: download_metadata::sanitize(args.game),

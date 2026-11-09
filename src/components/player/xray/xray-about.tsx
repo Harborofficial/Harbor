@@ -17,7 +17,10 @@ function collectVideos(details: TmdbDetail | null, title: string): Video[] {
     seen.add(ytId);
     out.push({ ytId, name });
   };
-  push(details?.trailerYtId, `${title} trailer`);
+  const primary = details?.trailerYtId
+    ? details.trailerVideos?.find((video) => video.ytId === details.trailerYtId)
+    : undefined;
+  push(details?.trailerYtId, primary?.name?.trim() || `${title} trailer`);
   for (const v of details?.extraVideos ?? []) push(v.ytId, v.name || v.type || title);
   return out;
 }
@@ -97,7 +100,13 @@ export function XrayAbout({
         {(videos.length > 0 || stripBackdrops.length > 1) && (
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
             {videos.map((v) => (
-              <Thumb key={v.ytId} src={YT_THUMB(v.ytId)} label={v.name} play onClick={() => onPlayVideo?.(v.ytId, v.name)} />
+              <Thumb
+                key={v.ytId}
+                src={YT_THUMB(v.ytId)}
+                label={v.name}
+                play
+                onClick={() => onPlayVideo?.(v.ytId, v.name)}
+              />
             ))}
             {stripBackdrops.map((b) => (
               <Thumb key={b} src={b} active={b === shown} onClick={() => setHero(b)} />
@@ -125,7 +134,10 @@ export function XrayAbout({
         {genres.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {genres.map((g) => (
-              <span key={g} className="rounded-full bg-white/[0.08] px-2.5 py-0.5 text-[11.5px] font-medium text-white/70">
+              <span
+                key={g}
+                className="rounded-full bg-white/[0.08] px-2.5 py-0.5 text-[11.5px] font-medium text-white/70"
+              >
                 {g}
               </span>
             ))}
@@ -165,9 +177,14 @@ function MetaDot({ children }: { children: ReactNode }) {
 function FactPeople({ label, people }: { label: string; people: Array<{ name: string }> }) {
   return (
     <div className="min-w-0">
-      <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/40">{label}</div>
+      <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/40">
+        {label}
+      </div>
       <div className="mt-0.5 truncate text-[13px] text-white/85">
-        {people.slice(0, 3).map((p) => p.name).join(", ")}
+        {people
+          .slice(0, 3)
+          .map((p) => p.name)
+          .join(", ")}
       </div>
     </div>
   );
@@ -176,7 +193,9 @@ function FactPeople({ label, people }: { label: string; people: Array<{ name: st
 function FactText({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/40">{label}</div>
+      <div className="text-[10.5px] font-semibold uppercase tracking-wider text-white/40">
+        {label}
+      </div>
       <div className="mt-0.5 truncate text-[13px] text-white/85">{value}</div>
     </div>
   );
@@ -205,7 +224,13 @@ function Thumb({
         active ? "ring-2 ring-accent" : "ring-white/12 hover:ring-white/35"
       }`}
     >
-      <img src={src} alt="" loading="lazy" draggable={false} className="h-full w-full object-cover" />
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        draggable={false}
+        className="h-full w-full object-cover"
+      />
       {play && (
         <span className="absolute inset-0 grid place-items-center bg-black/25 transition-colors group-hover:bg-black/40">
           <span className="grid h-7 w-7 place-items-center rounded-full bg-white/90 text-black shadow-lg">

@@ -1,5 +1,6 @@
 import { parseM3uAsync } from "../parse-m3u-async";
 import { fetchM3uText, shapePlaylist } from "../store";
+import { readM3uHeaderEpgUrls } from "../m3u";
 import { liveContainerPref } from "../settings-bridge";
 import type { IptvChannel, IptvPlaylist, IptvPlaylistSource } from "../types";
 import {
@@ -51,14 +52,27 @@ async function loadM3u(
   signal?: AbortSignal,
 ): Promise<IptvPlaylist> {
   const text = await fetchM3uText(url, signal);
-  if (isM3u(text)) return parseAndShape(src, text, onProgress, signal);
+  if (isM3u(text)) return parseAndShape(withHeaderEpg(src, text, url), text, onProgress, signal);
   if (middleware) {
     const recovered = await probeMiddleware(url, signal);
     if (recovered)
-      return parseAndShape({ ...src, url: recovered.url }, recovered.text, onProgress, signal);
+      return parseAndShape(
+        withHeaderEpg({ ...src, url: recovered.url }, recovered.text, recovered.url),
+        recovered.text,
+        onProgress,
+        signal,
+      );
   }
   const preview = text.slice(0, 120).replace(/\s+/g, " ");
   throw new Error(`Server response was not an M3U playlist. Got: ${preview || "(empty)"}`);
+}
+
+// Players read the guide URL from the #EXTM3U header; adopt it when the user
+// did not configure one, so the guide works without a second manual entry.
+function withHeaderEpg(src: IptvPlaylistSource, text: string, baseUrl: string): IptvPlaylistSource {
+  if (src.epgUrl) return src;
+  const [epgUrl] = readM3uHeaderEpgUrls(text, baseUrl);
+  return epgUrl ? { ...src, epgUrl } : src;
 }
 
 async function probeMiddleware(

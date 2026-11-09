@@ -9,7 +9,6 @@ import * as controllerCursor from "../src/lib/gamepad/cursor.ts";
 import * as monitors from "../src/lib/monitors.ts";
 import * as relayVersion from "../src/lib/together/relay-version.ts";
 import * as liquidGlass from "../src/lib/player/liquid-glass.ts";
-import { normalizeLibraryGroups } from "../src/lib/library-groups.ts";
 
 function fixture() {
   const data = new Map<string, string>();
@@ -25,6 +24,7 @@ function fixture() {
       isKnownPreset: () => true,
     },
     "@/lib/subtitles/language": language,
+    "@/lib/player/audio-language": { ORIGINAL_AUDIO_LANG: "Original" },
     "@/lib/screensaver/media": { sanitizeScreensaverMedia },
     "@/lib/seek-step": { sanitizeSeekStep },
     "@/lib/ai-models": { migrateModelId: identity, providerTabFor: () => "openrouter" },
@@ -41,7 +41,6 @@ function fixture() {
     },
     "@/lib/player/buffer-profile": { sanitizeBufferSize: identity },
     "@/lib/player/liquid-glass": liquidGlass,
-    "@/lib/library-groups": { normalizeLibraryGroups },
     "@/lib/gamepad/cursor": controllerCursor,
     "@/lib/monitors": monitors,
     "@/lib/together/relay-version": relayVersion,
@@ -51,6 +50,10 @@ function fixture() {
         adoptionAttempts += 1;
         return adoptionWorks;
       },
+    },
+    "@/lib/library-groups": {
+      normalizeLibraryGroups: identity,
+      normalizeLibraryGroupSections: identity,
     },
   };
   function load(path: string): any {

@@ -1,3 +1,4 @@
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
 import { safeFetch } from "@/lib/safe-fetch";
 import type { TmdbDetail } from "../tmdb/tmdb-details";
 
@@ -13,6 +14,7 @@ interface ImdbTitleResponse {
   genres?: string[];
   rating?: { aggregateRating: number; voteCount: number };
   plot?: string;
+  spokenLanguages?: Array<{ code?: string; name?: string }>;
   directors?: Array<{
     id: string;
     displayName: string;
@@ -71,6 +73,12 @@ function formatRuntime(seconds: number | undefined): string | undefined {
   return `${min} min`;
 }
 
+/** IMDb has no original-language field; one spoken language is the only unambiguous value. */
+function soleSpokenLanguage(title: ImdbTitleResponse | null | undefined): string {
+  const languages = title?.spokenLanguages ?? [];
+  return languages.length === 1 ? (languages[0]?.code ?? "") : "";
+}
+
 function toTmdbDetail(title: ImdbTitleResponse, cast: TmdbDetail["cast"]): TmdbDetail {
   return {
     kind: title.type === "movie" ? "movie" : "tv",
@@ -91,7 +99,7 @@ function toTmdbDetail(title: ImdbTitleResponse, cast: TmdbDetail["cast"]): TmdbD
     runtime: formatRuntime(title.runtimeSeconds),
     status: "Released",
     genres: title.genres ?? [],
-    originalLanguage: "",
+    originalLanguage: soleSpokenLanguage(title),
     spokenLanguages: [],
     productionCountries: [],
     productionCompanies: [],
@@ -140,7 +148,7 @@ export async function imdbapiDetails(
   season?: number,
   episode?: number,
 ): Promise<TmdbDetail | null> {
-  if (!metaId.startsWith("tt")) return null;
+  if (addonOnlyMetadata() || !metaId.startsWith("tt")) return null;
 
   const cacheKey =
     season !== undefined && episode !== undefined ? `${metaId}:s${season}e${episode}` : metaId;
@@ -161,7 +169,9 @@ export async function imdbapiDetails(
     if (match) targetId = match.id;
   }
 
-  const creditsResp = await fetchJson<{ credits: ImdbCreditsEntry[] }>(`${BASE}/${targetId}/credits`);
+  const creditsResp = await fetchJson<{ credits: ImdbCreditsEntry[] }>(
+    `${BASE}/${targetId}/credits`,
+  );
   const cast = creditsResp ? creditsToCast(creditsResp.credits) : [];
 
   let detail = title;
@@ -173,4 +183,27 @@ export async function imdbapiDetails(
   const result = toTmdbDetail(detail, cast);
   cache.set(cacheKey, result);
   return result;
+}
+
+const originalLanguageCache = new Map<string, Promise<string>>();
+
+/**
+ * The title's original language when IMDb is unambiguous about it: exactly one
+ * spoken language. Keyless, unlike TMDB, so playback can fill a missing value.
+ */
+export function imdbapiOriginalLanguage(metaId: string): Promise<string> {
+  if (addonOnlyMetadata() || !metaId.startsWith("tt")) return Promise.resolve("");
+  const cachedDetail = cache.get(metaId);
+  if (cachedDetail) return Promise.resolve(cachedDetail.originalLanguage);
+  const cached = originalLanguageCache.get(metaId);
+  if (cached) return cached;
+  const pending = fetchJson<ImdbTitleResponse>(`${BASE}/${metaId}`)
+    .then((title) => soleSpokenLanguage(title))
+    .catch(() => "");
+  if (originalLanguageCache.size >= 500) {
+    const oldest = originalLanguageCache.keys().next();
+    if (!oldest.done) originalLanguageCache.delete(oldest.value);
+  }
+  originalLanguageCache.set(metaId, pending);
+  return pending;
 }

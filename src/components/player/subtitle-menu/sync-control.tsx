@@ -1,13 +1,17 @@
 import { AudioLines, ChevronDown, Loader2 } from "lucide-react";
 import { UiIcon } from "@/components/ui-icon";
 import { useEffect, useRef, useState } from "react";
-import { useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
+import { isAppliedAutoSync, useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
 import { useT } from "@/lib/i18n";
 import { openSyncBar } from "@/lib/player/sub-sync";
 
 type Props = {
   canAutoSync: boolean;
+  canChooseExternal: boolean;
+  hasExternalTrack: boolean;
+  onChooseExternal: () => void;
   canLiveSync: boolean;
+  canSyncFromPlayback: boolean;
   delaySec: number;
   delayNonZero: boolean;
   onLiveSync?: () => void | Promise<void>;
@@ -16,7 +20,11 @@ type Props = {
 
 export function SyncControl({
   canAutoSync,
+  canChooseExternal,
+  hasExternalTrack,
+  onChooseExternal,
   canLiveSync,
+  canSyncFromPlayback,
   delaySec,
   delayNonZero,
   onLiveSync,
@@ -27,8 +35,8 @@ export function SyncControl({
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
-  const busy = autoSync?.status === "analyzing";
-  const applied = autoSync?.status === "synced" || autoSync?.status === "best-effort";
+  const busy = autoSync?.status === "analyzing" || autoSync?.status === "listening";
+  const applied = isAppliedAutoSync(autoSync?.status);
   const autoSyncOn = busy || applied;
 
   useEffect(() => {
@@ -51,7 +59,10 @@ export function SyncControl({
   }, [open]);
 
   const runAutoSync = () => {
-    if (!canAutoSync) return;
+    if (!canAutoSync) {
+      if (canChooseExternal) onChooseExternal();
+      return;
+    }
     if (autoSyncOn) {
       autoSync?.stop();
       return;
@@ -60,7 +71,7 @@ export function SyncControl({
     onClose();
   };
 
-  const label = applied ? tr("Synced: on") : tr("Auto sync");
+  const label = autoSync?.status === "matched-embedded" ? tr("Matched embedded subtitles") : applied ? tr("Synced: on") : tr("Auto sync");
 
   return (
     <div ref={wrapRef} className="relative flex items-center">
@@ -74,11 +85,15 @@ export function SyncControl({
             ? "text-accent hover:bg-raised"
             : open
               ? "bg-raised text-ink"
-              : "text-ink-muted hover:bg-raised hover:text-ink"
+              : "text-ink hover:bg-raised"
         }`}
       >
         {busy && (
-          <Loader2 size={13} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" />
+          <Loader2
+            size={13}
+            strokeWidth={2.4}
+            className="animate-spin motion-reduce:animate-none"
+          />
         )}
         <span>{label}</span>
         <ChevronDown
@@ -86,9 +101,7 @@ export function SyncControl({
           strokeWidth={2.4}
           className={`-me-0.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
-        {delayNonZero && !autoSyncOn && (
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-        )}
+        {delayNonZero && !autoSyncOn && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
       </button>
 
       {open && (
@@ -108,7 +121,7 @@ export function SyncControl({
           </button>
           <button
             type="button"
-            disabled={!canAutoSync}
+            disabled={!canAutoSync && !canChooseExternal}
             onClick={() => {
               setOpen(false);
               runAutoSync();
@@ -116,7 +129,27 @@ export function SyncControl({
             className="flex w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] text-ink transition-colors hover:bg-raised disabled:cursor-not-allowed disabled:text-ink-subtle/50"
           >
             <UiIcon name="auto-sync" className="h-3.5 w-3.5" />
-            {autoSyncOn ? tr("Turn off auto-sync") : tr("Auto sync")}
+            {autoSyncOn
+              ? tr("Turn off auto-sync")
+              : canChooseExternal
+                ? hasExternalTrack
+                  ? tr("Choose external subtitle for Auto sync")
+                  : tr("Find external subtitles for Auto sync")
+                : tr("Auto sync")}
+          </button>
+          <button
+            type="button"
+            disabled={!canSyncFromPlayback || busy || !autoSync}
+            onClick={() => {
+              if (!canSyncFromPlayback || busy || !autoSync) return;
+              setOpen(false);
+              autoSync.listen();
+              onClose();
+            }}
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] text-ink transition-colors hover:bg-raised disabled:cursor-not-allowed disabled:text-ink-subtle/50"
+          >
+            <AudioLines size={14} strokeWidth={2.2} />
+            <span className="flex-1">{tr("Sync from playback")}</span>
           </button>
           <button
             type="button"

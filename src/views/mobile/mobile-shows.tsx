@@ -1,3 +1,4 @@
+import { usePinnedCatalogRows } from "@/views/home/hooks/use-pinned-rows";
 import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { topSeries } from "@/lib/cinemeta";
@@ -43,6 +44,7 @@ function dedupeMetas(metas: Meta[]): Meta[] {
 
 export function MobileShows() {
   const t = useT();
+  const pinnedRows = useHideAnimeRows(usePinnedCatalogRows("shows"));
   const { settings } = useSettings();
   const [hero, setHero] = useState<Meta[]>([]);
   const [rows, setRows] = useState<RowData[]>([]);
@@ -142,6 +144,9 @@ export function MobileShows() {
           onOpenDetail={setDetailMeta}
         />
       )}
+      {pinnedRows.map((row) => (
+        <MobileRail key={row.key} title={row.name} metas={row.metas} onOpenDetail={setDetailMeta} />
+      ))}
       {shownRows.slice(1).map((r) => (
         <MobileRail
           key={r.key}

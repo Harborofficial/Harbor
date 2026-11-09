@@ -1,8 +1,12 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
-import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
+import { addonOnlyMetadata } from "@/lib/metadata-policy";
+import { resolveMeta, preferCustomMeta } from "@/lib/meta-resource";
+import { readActiveStremioAuthKey } from "@/lib/auth";
+import { topMovies, topSeries, type Meta, type MetaSeason } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
-import type { CastEntry, TmdbDetail } from "./tmdb/tmdb-details";
+import type { CastEntry, ExtraVideo, Season, TmdbDetail } from "./tmdb/tmdb-details";
 import type { PersonRef } from "./tmdb/tmdb-people";
+import { isGenericSeasonName } from "@/lib/season-name";
 
 const CINEMETA = "https://v3-cinemeta.strem.io";
 
@@ -10,6 +14,10 @@ type CinemetaMeta = {
   id?: string;
   imdb_id?: string;
   moviedb_id?: number;
+  /** ID stamps some metadata addons send instead of the Stremio fields. */
+  _imdbId?: string;
+  _tmdbId?: string | number;
+  _tvdbId?: string | number;
   name?: string;
   type?: string;
   cast?: string[];
@@ -29,7 +37,18 @@ type CinemetaMeta = {
   genres?: string[];
   trailerStreams?: Array<{ ytId?: string; title?: string }>;
   trailers?: Array<{ source?: string; type?: string }>;
-  videos?: Array<{ id?: string; season?: number; episode?: number; released?: string; title?: string }>;
+  seasons?: MetaSeason[];
+  seasonPosters?: Record<string | number, string>;
+  seasonBackdrops?: Record<string | number, string>;
+  seasonOverviews?: Record<string | number, string>;
+  app_extras?: Pick<Meta, "seasons" | "seasonPosters" | "seasonBackdrops" | "seasonOverviews">;
+  videos?: Array<{
+    id?: string;
+    season?: number;
+    episode?: number;
+    released?: string;
+    title?: string;
+  }>;
 };
 
 function extractImdbId(id: string): string | null {
@@ -54,7 +73,110 @@ function people(arr: string[] | undefined): PersonRef[] {
   return out;
 }
 
+function seasonNumber(season: MetaSeason): number | null {
+  const value = season.season ?? season.number ?? season.seasonNumber;
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : null;
+}
+
+function seasonKey(value: string | number): number | null {
+  const number = typeof value === "number" ? value : Number.parseInt(value, 10);
+  return Number.isInteger(number) && number >= 0 ? number : null;
+}
+
+function seasonRecords(m: CinemetaMeta): MetaSeason[] {
+  return [...(m.seasons ?? []), ...(m.app_extras?.seasons ?? [])];
+}
+
+function addSeasonMap(
+  target: Map<number, string>,
+  source: Record<string | number, string> | undefined,
+): void {
+  for (const [key, value] of Object.entries(source ?? {})) {
+    const number = seasonKey(key);
+    if (number != null && typeof value === "string" && value.trim() && !target.has(number)) {
+      target.set(number, value);
+    }
+  }
+}
+
+function seasonOverviewMap(m: CinemetaMeta): Map<number, string> {
+  const out = new Map<number, string>();
+  addSeasonMap(out, m.seasonOverviews);
+  addSeasonMap(out, m.app_extras?.seasonOverviews);
+  return out;
+}
+
+function addonSeasons(m: CinemetaMeta): Season[] {
+  const firstAir = new Map<number, string>();
+  const counts = new Map<number, number>();
+  for (const video of m.videos ?? []) {
+    if (typeof video.season !== "number" || video.season < 0) continue;
+    counts.set(video.season, (counts.get(video.season) ?? 0) + 1);
+    if (video.released && !firstAir.has(video.season)) firstAir.set(video.season, video.released);
+  }
+  const records = seasonRecords(m);
+  const posters = seasonImages(m, "poster");
+  const backdrops = seasonImages(m, "background");
+  const overviews = seasonOverviewMap(m);
+  const numbers = new Set<number>([
+    ...records.map(seasonNumber).filter((number): number is number => number != null),
+    ...Object.keys(posters ?? {})
+      .map(seasonKey)
+      .filter((number): number is number => number != null),
+    ...Object.keys(backdrops ?? {})
+      .map(seasonKey)
+      .filter((number): number is number => number != null),
+    ...overviews.keys(),
+  ]);
+  const out: Season[] = [];
+  for (const number of numbers) {
+    const record = records.find((season) => seasonNumber(season) === number);
+    const name = record?.name?.trim() || (number === 0 ? "Specials" : `Season ${number}`);
+    out.push({
+      id: number,
+      seasonNumber: number,
+      name,
+      isGenericName: isGenericSeasonName(name, number),
+      overview: record?.overview ?? record?.description ?? overviews.get(number) ?? "",
+      overviewLanguage: record?.overviewLanguage ?? record?.language,
+      // Season posters can be absolute addon URLs; Season.posterPath is a TMDB path.
+      posterPath: null,
+      episodeCount: record?.episodeCount ?? counts.get(number) ?? 0,
+      airDate: record?.airDate ?? record?.released ?? firstAir.get(number) ?? null,
+    });
+  }
+  return out.sort((a, b) => a.seasonNumber - b.seasonNumber);
+}
+
+function seasonImages(
+  m: CinemetaMeta,
+  field: "poster" | "background",
+): Record<number, string> | undefined {
+  const out = new Map<number, string>();
+  for (const season of seasonRecords(m)) {
+    const number = seasonNumber(season);
+    const value =
+      field === "poster" ? (season.poster ?? season.image) : (season.background ?? season.backdrop);
+    if (number != null && typeof value === "string" && value.trim() && !out.has(number)) {
+      out.set(number, value);
+    }
+  }
+  addSeasonMap(out, field === "poster" ? m.seasonPosters : m.seasonBackdrops);
+  addSeasonMap(
+    out,
+    field === "poster" ? m.app_extras?.seasonPosters : m.app_extras?.seasonBackdrops,
+  );
+  return out.size > 0 ? Object.fromEntries(out) : undefined;
+}
+
 function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbDetail {
+  const seasons = addonSeasons(m);
+  const stampedTmdbId = Number(m._tmdbId);
+  const stampedTvdbId = Number(m._tvdbId);
+  const tmdbId =
+    m.moviedb_id ??
+    (Number.isInteger(stampedTmdbId) && stampedTmdbId > 0 ? stampedTmdbId : undefined);
+  const tvdbId = Number.isInteger(stampedTvdbId) && stampedTvdbId > 0 ? stampedTvdbId : undefined;
   const cast: CastEntry[] = (m.cast ?? []).map((name, i) => ({
     id: synthId(name),
     name,
@@ -65,9 +187,18 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
   const directors = people(m.director);
   const writers = people(m.writer);
   const genres = m.genre ?? m.genres ?? [];
-  const trailerCandidates = (m.trailerStreams ?? [])
-    .map((t) => t.ytId)
-    .filter((id): id is string => typeof id === "string" && id.length > 0);
+  const trailerVideos: ExtraVideo[] = (m.trailerStreams ?? []).flatMap((trailer) =>
+    trailer.ytId
+      ? [
+          {
+            ytId: trailer.ytId,
+            name: trailer.title?.trim() || "Trailer",
+            type: "Trailer",
+          },
+        ]
+      : [],
+  );
+  const trailerCandidates = trailerVideos.map((video) => video.ytId);
   const trailerYtId = trailerCandidates[0] ?? null;
   const year =
     m.year != null
@@ -82,8 +213,9 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
 
   return {
     kind,
-    id: m.moviedb_id ?? 0,
-    imdbId: m.imdb_id ?? (m.id?.startsWith("tt") ? m.id : null),
+    id: tmdbId ?? 0,
+    imdbId:
+      m.imdb_id ?? (m._imdbId?.startsWith("tt") ? m._imdbId : m.id?.startsWith("tt") ? m.id : null),
     title: m.name ?? "",
     originalTitle: m.name ?? "",
     tagline: "",
@@ -100,7 +232,12 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
     genres,
     originalLanguage: "",
     spokenLanguages: [],
-    productionCountries: m.country ? m.country.split(",").map((s) => s.trim()).filter(Boolean) : [],
+    productionCountries: m.country
+      ? m.country
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
     productionCompanies: [],
     networks: [],
     productionCompaniesRich: [],
@@ -109,6 +246,7 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
     networksRich: [],
     trailerYtId,
     trailerCandidates,
+    trailerVideos,
     extraVideos: [],
     gallery: { backdrops: [], posters: [], logos: [] },
     cast,
@@ -122,9 +260,16 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
     editor: [],
     recommendations: [],
     similar: related,
-    seasons: [],
-    numberOfSeasons: 0,
-    numberOfEpisodes: 0,
+    seasons,
+    seasonPosters: seasonImages(m, "poster"),
+    seasonBackdrops: seasonImages(m, "background"),
+    tmdbTvId: kind === "tv" ? tmdbId : undefined,
+    tvdbTvId: tvdbId,
+    numberOfSeasons: new Set(seasons.map((season) => season.seasonNumber)).size,
+    numberOfEpisodes:
+      seasons.length > 0
+        ? seasons.reduce((sum, season) => sum + season.episodeCount, 0)
+        : (m.videos?.length ?? 0),
     keywords: [],
     firstAirDate: m.released?.slice(0, 10),
     lastAirDate: undefined,
@@ -146,6 +291,14 @@ registerEvictable("cinemeta-details", (aggressive) => {
 });
 
 export async function cinemetaDetails(meta: Meta): Promise<TmdbDetail | null> {
+  if (addonOnlyMetadata() || preferCustomMeta()) {
+    const full = await resolveMeta(
+      readActiveStremioAuthKey(),
+      meta.type === "series" ? "series" : "movie",
+      meta.id,
+    );
+    return full ? toDetail(full, meta.type === "series" ? "tv" : "movie", []) : null;
+  }
   const imdbId = extractImdbId(meta.id);
   if (!imdbId) return null;
   const cacheKey = `${meta.type}:${imdbId}`;

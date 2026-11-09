@@ -4,6 +4,7 @@ import { useTitlePoster } from "@/lib/title-poster";
 import type { Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
 import { useBpCardVisible } from "./bp-card-visible";
+import { bpPosterOverride } from "./bp-poster-override";
 import type { BpTileShape } from "./bp-tile";
 
 /**
@@ -28,7 +29,7 @@ export function useBpPosterChain(
   meta: Meta,
   shape: BpTileShape,
   ref?: RefObject<HTMLElement | null>,
-): string | undefined {
+): { src: string | undefined; custom: boolean } {
   const { settings } = useSettings();
   const visible = useBpCardVisible(ref);
   const poster = shape !== "wide";
@@ -43,5 +44,9 @@ export function useBpPosterChain(
   // The chain falls back to meta.poster itself. Handing that back as an
   // override would route the plain poster around bpCardArt and pull the
   // full-size original onto a 132px tile.
-  return src && src !== meta.poster ? src : undefined;
+  return bpPosterOverride(
+    src,
+    meta.poster,
+    Boolean(pinned || settings.rpdbKey || settings.posterBaseUrl),
+  );
 }

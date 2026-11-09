@@ -109,6 +109,23 @@ test("a confirmed choice can finish copying after exit without losing the local 
   assert.equal(h.saved.get("fixture||")?.source, "cached-6.srt");
 });
 
+test("late selected-subtitle cache attaches to the captured observed session, never a newly opened player", async () => {
+  const h = memoryControlsHarness();
+  const copying = deferred<SubChoiceInput | null>();
+  h.cacheWith(() => copying.promise);
+  const captured = { id: "old-observed-session" };
+  h.actualPlayback(captured);
+  const player = h.mount(six);
+  player.rememberSubChoice(six);
+  player.unmount();
+  h.actualPlayback({ id: "new-session" });
+  copying.resolve({ ...six, source: "C:/fixture/cached-six.srt", imported: true });
+  await flushBridge();
+  assert.equal(h.actualCachePatches.length, 1);
+  assert.equal(h.actualCachePatches[0][0], captured);
+  assert.equal((h.actualCachePatches[0][2] as SubChoiceInput).source, "C:/fixture/cached-six.srt");
+});
+
 test("Off cancels a waiting cache and cannot be overwritten by an older file copy", async () => {
   const h = memoryControlsHarness();
   const copying = deferred<SubChoiceInput | null>();

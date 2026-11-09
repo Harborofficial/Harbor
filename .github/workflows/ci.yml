@@ -90,7 +90,10 @@ jobs:
   native:
     name: Native
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # A cold cache spends ~8m on cargo check and ~19m more building the test
+    # profile, which cargo check never produces. Running the suite needs room
+    # after that.
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -133,6 +136,7 @@ jobs:
             libayatana-appindicator3-dev \
             libgtk-3-dev \
             libmpv-dev \
+            libpulse-dev \
             librsvg2-dev \
             libssl-dev \
             libudev-dev \
@@ -162,4 +166,12 @@ jobs:
         if: steps.native-changes.outputs.changed == 'true'
         env:
           TAURI_CONFIG: '{"bundle":{"externalBin":[],"resources":[]}}'
-        run: cargo test --manifest-path src-tauri/Cargo.toml
+          # The games/ fixtures refuse to guess a root: each one canonicalizes
+          # this path and asserts the directory is a child of it before
+          # remove_dir_all, so a temp_dir fallback would weaken that guard.
+          HARBOR_GAME_TEST_ROOT: ${{ runner.temp }}/harbor-game-tests
+        run: |
+          mkdir -p "$HARBOR_GAME_TEST_ROOT"
+          # games/ serializes on process-global mutexes taken with try_lock,
+          # so concurrent tests fail each other with archive_busy.
+          cargo test --manifest-path src-tauri/Cargo.toml -- --test-threads=1

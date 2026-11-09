@@ -5,7 +5,12 @@ import { tmdbBackdropUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
 import { loadStoredSettings } from "@/lib/settings/load";
 import { pickLogo, fetchMovieAssets } from "./tmdb-images";
 import { imageLangParam, imageLangRank } from "./tmdb-image-lang";
-import { pickTrailers, type Video } from "./tmdb-trailers";
+import {
+  mergeTrailerVideoGroups,
+  pickTrailerVideos,
+  sortTrailerVideos,
+  type Video,
+} from "./tmdb-trailers";
 import type { PersonRef } from "./tmdb-people";
 import { isAnimeItem } from "./tmdb-meta-mappers";
 import {
@@ -67,6 +72,7 @@ export type ExtraVideo = {
   ytId: string;
   name: string;
   type: string;
+  publishedAt?: string;
 };
 
 export type GalleryImages = {
@@ -105,6 +111,7 @@ export type TmdbDetail = {
   networksRich: Array<{ id: number; name: string }>;
   trailerYtId: string | null;
   trailerCandidates: string[];
+  trailerVideos?: ExtraVideo[];
   extraVideos: ExtraVideo[];
   gallery: GalleryImages;
   cast: CastEntry[];
@@ -121,7 +128,9 @@ export type TmdbDetail = {
   collection?: { id: number; name: string } | null;
   seasons: Season[];
   tmdbTvId?: number;
+  tvdbTvId?: number;
   seasonPosters?: Record<number, string>;
+  seasonBackdrops?: Record<number, string>;
   numberOfSeasons: number;
   numberOfEpisodes: number;
   keywords: number[];
@@ -225,6 +234,12 @@ export async function tmdbDetails(
   } else if (meta.id.startsWith("tmdb:tv:")) {
     kind = "tv";
     id = meta.id.slice("tmdb:tv:".length);
+  } else if (meta.id.startsWith("tmdb:")) {
+    kind = meta.type === "movie" ? "movie" : "tv";
+    id = meta.id.slice("tmdb:".length);
+  } else if (/^\d+$/.test(meta.id)) {
+    kind = meta.type === "movie" ? "movie" : "tv";
+    id = meta.id;
   } else if (meta.id.startsWith("tt")) {
     const findKey = `${meta.id}:${meta.type}`;
     const cached = findCache()[findKey];
@@ -299,13 +314,68 @@ export async function tmdbDetails(
     .filter((id: unknown): id is number => typeof id === "number");
 
   const videos: Video[] = raw.videos?.results ?? [];
-  const trailerCandidates = pickTrailers(videos);
+  const rawSeasons: any[] = Array.isArray(raw.seasons) ? raw.seasons : [];
+  const seasonNumbers = Array.from(
+    new Set(
+      rawSeasons
+        .map((season) => ({
+          number: Number(season?.season_number),
+          episodes: Number(season?.episode_count),
+        }))
+        .filter(
+          (season) => Number.isInteger(season.number) && season.number > 0 && season.episodes > 0,
+        )
+        .map((season) => season.number),
+    ),
+  );
+  const seasonVideoGroups =
+    kind === "tv" && seasonNumbers.length > 0
+      ? await Promise.all(
+          seasonNumbers.map(async (seasonNumber) => {
+            const data = await get<{ results?: Video[] }>(
+              key,
+              `tv/${id}/season/${seasonNumber}/videos`,
+              { language: metaLang },
+            ).catch(() => null);
+            return { seasonNumber, videos: data?.results ?? [] };
+          }),
+        )
+      : [];
+  const seasonVideos = seasonVideoGroups.flatMap((group) =>
+    group.videos.map((video) => ({ video, seasonNumber: group.seasonNumber })),
+  );
+  const seasonByKey = new Map(seasonVideos.map((entry) => [entry.video.key, entry.seasonNumber]));
+  const allVideos =
+    kind === "tv" ? [...videos, ...seasonVideos.map((entry) => entry.video)] : videos;
+  const chosenVideos =
+    kind === "tv"
+      ? mergeTrailerVideoGroups(
+          sortTrailerVideos(pickTrailerVideos(seasonVideos.map((entry) => entry.video))),
+          sortTrailerVideos(pickTrailerVideos(videos)),
+        )
+      : sortTrailerVideos(pickTrailerVideos(videos));
+  const trailerVideos: ExtraVideo[] = chosenVideos.map((video) => {
+    const seasonNumber = seasonByKey.get(video.key);
+    const name = video.name?.trim() || video.type || "Trailer";
+    return {
+      ytId: video.key,
+      name: seasonNumber ? `Season ${seasonNumber} - ${name}` : name,
+      type: video.type || "Trailer",
+      publishedAt: video.published_at,
+    };
+  });
+  const trailerCandidates = trailerVideos.map((video) => video.ytId);
   const trailerYtId = trailerCandidates[0] ?? null;
   const candidateSet = new Set(trailerCandidates);
-  const extraVideos: ExtraVideo[] = videos
-    .filter((v) => v.site === "YouTube" && !candidateSet.has(v.key))
+  const extraVideos: ExtraVideo[] = allVideos
+    .filter((video) => video.site === "YouTube" && !candidateSet.has(video.key))
     .slice(0, 12)
-    .map((v) => ({ ytId: v.key, name: (v as any).name ?? v.type, type: v.type }));
+    .map((video) => ({
+      ytId: video.key,
+      name: video.name?.trim() || video.type || "Trailer",
+      type: video.type || "Trailer",
+      publishedAt: video.published_at,
+    }));
 
   const gallery = buildGallery(raw.images, logo);
 
@@ -516,6 +586,7 @@ export async function tmdbDetails(
       .map((n: any) => ({ id: n.id, name: n.name })),
     trailerYtId,
     trailerCandidates,
+    trailerVideos,
     extraVideos,
     gallery,
     cast,

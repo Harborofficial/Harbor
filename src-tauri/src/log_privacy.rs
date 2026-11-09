@@ -88,7 +88,13 @@ pub fn scrub(text: &str) -> String {
         .bearer
         .replace_all(&headers, |_: &regex::Captures| format!("Bearer {REDACTED}"));
     let step2 = r.authorization.replace_all(&step1, |c: &regex::Captures| {
-        format!("{}{}{}", &c[1], &c[2], REDACTED)
+        // The scheme group is optional; indexing it would panic when absent.
+        format!(
+            "{}{}{}",
+            &c[1],
+            c.get(2).map_or("", |m| m.as_str()),
+            REDACTED
+        )
     });
     let step3 = r.storage_key.replace_all(&step2, |c: &regex::Captures| {
         format!("{}{}{}", &c[1], &c[2], REDACTED)
@@ -156,6 +162,25 @@ mod tests {
         assert!(out.contains("HTTP/1.1 403 Forbidden"));
         for secret in ["short", "tiny", "small", "secret", ": key"] {
             assert!(!out.contains(secret), "{out}");
+        }
+    }
+
+    #[test]
+    fn redacts_authorization_headers_without_a_scheme() {
+        for (input, secret) in [
+            ("Authorization: Basic dXNlcjpwYXNz", "dXNlcjpwYXNz"),
+            (
+                "Authorization: Digest username=\"u\", response=\"digest-secret\"",
+                "digest-secret",
+            ),
+            ("Authorization:Bearer tight-secret", "tight-secret"),
+            ("authorization=bare-secret", "bare-secret"),
+            (r#"{"authorization":"json-secret"}"#, "json-secret"),
+            ("Proxy-Authorization: Basic proxy-secret", "proxy-secret"),
+        ] {
+            let out = scrub(input);
+            assert!(out.contains("[REDACTED]"), "{input} -> {out}");
+            assert!(!out.contains(secret), "{input} -> {out}");
         }
     }
 

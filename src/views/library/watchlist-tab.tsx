@@ -32,6 +32,7 @@ import {
   type NuvioLibraryItem,
 } from "@/lib/nuvio/nuvio-library";
 import { useT } from "@/lib/i18n";
+import { useSessionState } from "@/lib/session-state";
 import {
   applyFilter,
   countByType,
@@ -372,8 +373,8 @@ export function WatchlistTab({
     [localEntries, stremio, trakt, isNuvio, nuvioItems],
   );
 
-  const [type, setType] = useState<TypeKey>("all");
-  const [query, setQuery] = useState("");
+  const [type, setType] = useSessionState<TypeKey>(`library.${mode}.type`, "all");
+  const [query, setQuery] = useSessionState<string>(`library.${mode}.query`, "");
   const [flat, setFlat] = useState(() => localStorage.getItem("harbor.watchlist.flat") === "1");
   useEffect(() => {
     try {

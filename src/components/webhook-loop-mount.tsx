@@ -1,8 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
-import { proactiveStorageCleanup } from "@/lib/storage-recovery";
-import { runWebhookTick } from "@/lib/webhook-engine";
 
 const TICK_INTERVAL_MS = 30 * 60 * 1000;
 const INITIAL_DELAY_MS = 90 * 1000;
@@ -18,10 +16,6 @@ export function WebhookLoopMount() {
   const runningRef = useRef(false);
 
   useEffect(() => {
-    proactiveStorageCleanup();
-  }, []);
-
-  useEffect(() => {
     const hasDestination =
       !!settings.webhooks.discordUrl ||
       !!settings.webhooks.telegramUrl ||
@@ -33,6 +27,7 @@ export function WebhookLoopMount() {
       if (runningRef.current || cancelled) return;
       runningRef.current = true;
       try {
+        const { runWebhookTick } = await import("@/lib/webhook-engine");
         const result = await runWebhookTick(settingsRef.current, authRef.current);
         try {
           localStorage.setItem(

@@ -10,7 +10,7 @@ import { useSettings } from "@/lib/settings";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import {
   applyTmdbEpisodeNames,
-  needsTmdbEpisodeNames,
+  needsTmdbEpisodeDetails,
   tmdbEpisodeNames,
 } from "@/lib/providers/tmdb";
 import type { PlayEpisode } from "@/lib/view";
@@ -58,7 +58,12 @@ export function useSeasonBrowser(
   useEffect(() => {
     if (!open || (effMeta.type !== "series" && !isAnimeId(effMeta.id))) return;
     let cancelled = false;
-    fetchSeasonList(effMeta, { tmdbKey: settings.tmdbKey })
+    fetchSeasonList(effMeta, {
+      tmdbKey: settings.tmdbKey,
+      episodeSources: settings.metadataSources?.episodes,
+      tvdbKey: settings.tvdbKey,
+      tvdbSeasonType: settings.tvdbSeasonType,
+    })
       .then((s) => {
         if (!cancelled) setSeasons(s);
       })
@@ -68,7 +73,14 @@ export function useSeasonBrowser(
     return () => {
       cancelled = true;
     };
-  }, [open, effMeta, settings.tmdbKey]);
+  }, [
+    open,
+    effMeta,
+    settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    settings.metadataSources?.episodes,
+  ]);
 
   useEffect(() => {
     if (!open || (effMeta.type !== "series" && !isAnimeId(effMeta.id))) {
@@ -79,7 +91,7 @@ export function useSeasonBrowser(
     setLoading(true);
     const overlayTmdbNames = (eps: PlayEpisode[]) => {
       if (!settings.tmdbKey || effMeta.id.startsWith("tmdb:tv:")) return;
-      if (!needsTmdbEpisodeNames(eps)) return;
+      if (!needsTmdbEpisodeDetails(eps)) return;
       void tmdbEpisodeNames(settings.tmdbKey, effMeta.id, season)
         .then((names) => {
           if (cancelled || names.size === 0) return;
@@ -87,7 +99,12 @@ export function useSeasonBrowser(
         })
         .catch(() => {});
     };
-    fetchSeasonEpisodes(effMeta, season, { tmdbKey: settings.tmdbKey })
+    fetchSeasonEpisodes(effMeta, season, {
+      tmdbKey: settings.tmdbKey,
+      episodeSources: settings.metadataSources?.episodes,
+      tvdbKey: settings.tvdbKey,
+      tvdbSeasonType: settings.tvdbSeasonType,
+    })
       .then((eps) => {
         if (cancelled) return;
         setEpisodes(eps);
@@ -102,7 +119,15 @@ export function useSeasonBrowser(
     return () => {
       cancelled = true;
     };
-  }, [open, effMeta, season, settings.tmdbKey]);
+  }, [
+    open,
+    effMeta,
+    season,
+    settings.tmdbKey,
+    settings.tvdbKey,
+    settings.tvdbSeasonType,
+    settings.metadataSources?.episodes,
+  ]);
 
   return { seasons, season, setSeason, episodes, loading, imdbRatings };
 }

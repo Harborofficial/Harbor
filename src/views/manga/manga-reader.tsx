@@ -23,7 +23,7 @@ import { malMangaAuthed } from "@/lib/manga/tracking-mal";
 import type { MangaTracker } from "@/lib/manga/sync";
 import { activeMangaSourceId, listMangaSources } from "@/lib/manga/sources";
 import { useProfiles } from "@/lib/profiles";
-import { effectiveBinding, formatBindingForDisplay, matchesBinding } from "@/lib/hotkeys";
+import { effectiveBinding, findHotkeyMatch, formatBindingForDisplay } from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
@@ -33,6 +33,15 @@ import { ReaderProgressMeter } from "./manga-reader/reader-progress-meter";
 import { ReaderPageJump } from "./manga-reader/reader-page-jump";
 import { ReaderSettings } from "./manga-reader/reader-settings";
 import { PageImage } from "./manga-reader/page-image";
+import { useMangaReaderBackground } from "./manga-reader/reader-background";
+import { readerBackgroundStyle } from "@/components/reader-background/use-reader-background";
+import { prefetchBestMangaPage, prefetchMangaPage } from "./manga-reader/manga-upscale";
+import {
+  resetBestChapterHeight,
+  keepBestUpscalerLoaded,
+  scheduleBestUpscalerUnload,
+} from "@/lib/manga/upscale/best";
+import { keepMangaUpscalerLoaded, scheduleMangaUpscalerUnload } from "@/lib/manga/upscale";
 import { BookFlip, type BookApi } from "./manga-reader/book-view";
 import { ReaderNav } from "./manga-reader/reader-nav";
 import { BookmarksPanel, BookmarkPagePicker } from "./manga-reader/reader-bookmarks";
@@ -88,7 +97,13 @@ export function MangaReader({
   onChangeIndex: (i: number) => void;
 }) {
   const chapter = chapters[index];
-  const chapterContext = useMangaChapterContext<HTMLDivElement>(manga, chapter);
+  const readerBackground = useMangaReaderBackground();
+  const chapterContext = useMangaChapterContext<HTMLDivElement>(
+    manga,
+    chapter,
+    undefined,
+    readerBackground.actions,
+  );
   const t = useT();
   const [pages, setPages] = useState<MangaPage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -536,7 +551,7 @@ export function MangaReader({
         else prevPage();
       } else if (e.key === "f") {
         toggleFullscreen();
-      } else if (matchesBinding(e, matchBinding)) {
+      } else if (findHotkeyMatch(e, settings.hotkeys, "Manga") === "mangaMatch") {
         e.preventDefault();
         if (manga.title) enqueueMatchWith(connectedTrackers());
       }
@@ -566,6 +581,62 @@ export function MangaReader({
   } as const;
   const dStyle = doublePageStyle(prefs.fit, prefs.zoom);
   const displayPage = Math.min(currentPage, Math.max(0, total - 1));
+  const pageCacheKey = (index: number) => `${manga.id}:${chapter.id}:${index}`;
+
+  useEffect(() => {
+    resetBestChapterHeight();
+  }, [chapter.id]);
+
+  useEffect(() => {
+    keepMangaUpscalerLoaded();
+    keepBestUpscalerLoaded();
+    return () => {
+      scheduleMangaUpscalerUnload();
+      scheduleBestUpscalerUnload();
+    };
+  }, []);
+
+  // Warm the next page or two once the current page has had time to finish.
+  // The delay resets on every page change, so fast scrolling does not queue work.
+  useEffect(() => {
+    if (!settings.mangaUpscaleEnabled) return;
+    const next = pages.slice(displayPage + 1, displayPage + 3);
+    if (next.length === 0) return;
+    const bestMode = settings.mangaUpscaleQuality === "best";
+    const keyFor = (index: number) => `${manga.id}:${chapter.id}:${index}`;
+    const id = window.setTimeout(() => {
+      void (async () => {
+        if (bestMode) {
+          for (let offset = 1; offset <= 2; offset++) {
+            const page = pages[displayPage + offset];
+            if (page?.url)
+              await prefetchBestMangaPage(
+                page.url,
+                page.headers,
+                keyFor(displayPage + offset),
+                settings.mangaUpscaleAutoDownload,
+              );
+          }
+          return;
+        }
+        for (let offset = 0; offset < next.length; offset++) {
+          const page = next[offset];
+          if (page?.url)
+            await prefetchMangaPage(page.url, page.headers, keyFor(displayPage + 1 + offset));
+        }
+      })();
+    }, 800);
+    return () => window.clearTimeout(id);
+  }, [
+    displayPage,
+    pages,
+    manga.id,
+    chapter.id,
+    settings.mangaUpscaleEnabled,
+    settings.mangaUpscaleQuality,
+    settings.mangaUpscaleAutoDownload,
+  ]);
+
   const focus = prefs.focusMode;
   const autoShown = !manualHide && chromeOpen;
   const barVisible = focus ? edge.top && !manualHide : autoShown;
@@ -924,9 +995,23 @@ export function MangaReader({
 
   return createPortal(
     <div
+      data-harbor-manga-reader
       ref={disableMangaPersistence ? undefined : chapterContext}
       className={`fixed inset-0 z-[80] ${BG[prefs.bg]} text-ink`}
     >
+      {readerBackground.image && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={readerBackgroundStyle(readerBackground.image, readerBackground.transform)}
+        />
+      )}
+      {readerBackground.input}
+      {readerBackground.error && (
+        <div className="absolute left-1/2 top-20 z-[95] max-w-md -translate-x-1/2 rounded-xl bg-elevated p-4">
+          {readerBackground.error}
+        </div>
+      )}
       <div
         ref={scrollRef}
         dir={horizontal ? (rtl ? "rtl" : "ltr") : undefined}
@@ -949,7 +1034,8 @@ export function MangaReader({
             <BookFlip
               pages={pageUrls}
               rtl={rtl}
-              bg={BG_HEX[prefs.bg]}
+              bg={readerBackground.image ? "transparent" : BG_HEX[prefs.bg]}
+              contextActions={readerBackground.actions}
               resumePage={bookStart}
               soundEnabled={prefs.flipSound}
               zoom={prefs.zoom}
@@ -993,6 +1079,7 @@ export function MangaReader({
                   inline
                   url={pages[i]?.url ?? ""}
                   headers={pages[i]?.headers}
+                  cacheKey={pageCacheKey(i)}
                   className="block"
                   style={dStyle}
                 />
@@ -1001,6 +1088,7 @@ export function MangaReader({
               <PageImage
                 url={pages[displayPage]?.url ?? ""}
                 headers={pages[displayPage]?.headers}
+                cacheKey={pageCacheKey(displayPage)}
                 className="m-auto block"
                 style={pStyle}
               />
@@ -1020,6 +1108,7 @@ export function MangaReader({
                 <PageImage
                   url={page.url}
                   headers={page.headers}
+                  cacheKey={pageCacheKey(i)}
                   fillHeight
                   className="block"
                   style={hStyle}
@@ -1045,6 +1134,7 @@ export function MangaReader({
                   <PageImage
                     url={page.url}
                     headers={page.headers}
+                    cacheKey={pageCacheKey(i)}
                     className="block"
                     style={longStyle}
                   />
@@ -1140,6 +1230,8 @@ export function MangaReader({
             patchPrefs(patch);
           }}
           onClose={() => setSettingsOpen(false)}
+          backgroundControls={readerBackground.controls}
+          backgroundError={readerBackground.error}
         />
       )}
 

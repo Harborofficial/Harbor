@@ -25,11 +25,13 @@ import {
   Trash2,
   Type,
   Upload,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
+import { useReaderBackground } from "./reader-background";
+import { readerBackgroundStyle } from "@/components/reader-background/use-reader-background";
 import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
-import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 import { copyText } from "@/lib/clipboard-text";
 import type { EBookChapter, EBookChapterContent } from "@/lib/ebook/providers";
 import { ebookTextIdentity } from "@/lib/ebook/chapter-locations";
@@ -524,17 +526,13 @@ export function HarborReader({
   onClose,
 }: Props) {
   const t = useT();
-  const { settings } = useSettings();
-  const fullscreen = useWindowFullscreen();
-  const customTitleBar =
-    "__TAURI_INTERNALS__" in window && !settings.useNativeTitleBar && !fullscreen;
-  const titleBarInset = customTitleBar ? (settings.hybridTitleBar ? 36 : 80) : 0;
   const formatEtaLabel = (milliseconds: number) => {
     const eta = etaParts(milliseconds);
     return eta.unit === "seconds"
       ? t("≈{count}s left", { count: eta.count })
       : t("≈{count}m left", { count: eta.count });
   };
+  const readerBackground = useReaderBackground();
   const [prefs, setPrefs] = useState<EBookReaderPrefs>(loadEBookReaderPrefs);
   const [availableNarrationVoices, setAvailableNarrationVoices] =
     useState<ReaderNarrationVoice[]>(fallbackNarrationVoices);
@@ -1733,15 +1731,28 @@ export function HarborReader({
   return (
     <div
       className="fixed inset-0 z-[90] overflow-hidden transition-colors duration-300"
+      onContextMenu={readerBackground.onContextMenu}
       style={{
-        top: titleBarInset,
-        background: colors.desk,
+        backgroundColor: colors.desk,
         color: colors.ink,
         filter: `brightness(${prefs.brightness}%)`,
       }}
       onMouseMove={revealChrome}
       onClick={revealChrome}
     >
+      {readerBackground.image && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={readerBackgroundStyle(readerBackground.image, readerBackground.transform)}
+        />
+      )}
+      {readerBackground.input}
+      {readerBackground.error && (
+        <div className="absolute left-1/2 top-20 z-50 max-w-md -translate-x-1/2 rounded-xl bg-elevated p-4">
+          {readerBackground.error}
+        </div>
+      )}
       <div
         data-tauri-drag-region
         className={`absolute inset-x-0 top-0 z-30 flex h-16 items-center justify-between border-b px-5 backdrop-blur-xl transition duration-300 ${chrome ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}
@@ -1810,6 +1821,18 @@ export function HarborReader({
           >
             <Bookmark size={18} />
           </button>
+          {prefs.mode === "book" && (
+            <button
+              className="reader-icon"
+              onClick={() => patchPrefs({ pageTurnSound: !prefs.pageTurnSound })}
+              aria-label={
+                prefs.pageTurnSound ? t("Mute page-turn sound") : t("Unmute page-turn sound")
+              }
+              title={prefs.pageTurnSound ? t("Mute page-turn sound") : t("Unmute page-turn sound")}
+            >
+              {prefs.pageTurnSound ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            </button>
+          )}
           <button
             className="reader-icon"
             onClick={() => {
@@ -1844,11 +1867,12 @@ export function HarborReader({
               >
                 <BookFlip
                   instanceName={`harborEBook-${layer.id}`}
+                  contextActions={readerBackground.actions}
                   pages={layer.pages.urls}
                   rtl={layer.presentation.rtl}
                   bg={layer.presentation.background}
                   resumePage={layer.resumePage}
-                  soundEnabled={isActive}
+                  soundEnabled={isActive && prefs.pageTurnSound}
                   onReady={(api) => activateFlipLayer(layer.id, api)}
                   onError={() => {
                     if (flipLayersRef.current.at(-1)?.id === layer.id) setFlipFailed(true);
@@ -2370,7 +2394,15 @@ export function HarborReader({
             </button>
           </div>
           <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {panel === "settings" && <Settings prefs={prefs} patch={patchPrefs} colors={colors} />}
+            {panel === "settings" && (
+              <>
+                <div data-reader-panel className="mb-6 space-y-2">
+                  <p className="text-sm font-medium">{t("Background image")}</p>
+                  {readerBackground.controls}
+                </div>
+                <Settings prefs={prefs} patch={patchPrefs} colors={colors} />
+              </>
+            )}
             {panel === "search" && (
               <div>
                 <div

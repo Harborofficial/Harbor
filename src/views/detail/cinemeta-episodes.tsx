@@ -13,6 +13,7 @@ import {
   manualWatchedVersion,
   subscribeManualWatched,
 } from "@/lib/manual-watched";
+import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { Poster } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
 import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
@@ -47,19 +48,32 @@ export function CinemetaEpisodes({
   videos,
   stremioWatched,
   resumeSeason,
+  resumeEpisode,
   imdbId,
   tmdbTvId,
   seasonPosters,
+  seasonBackdrops,
   seasons,
+  seasonOverviewsBySource,
+  onSeasonSynopsisSource,
+  synopsisOrder: synopsisOrderProp,
 }: {
   meta: Meta;
   videos: NonNullable<Meta["videos"]>;
   stremioWatched?: Set<string>;
   resumeSeason?: number;
+  resumeEpisode?: number;
   imdbId?: string | null;
   tmdbTvId?: number;
   seasonPosters?: Record<number, string>;
+  seasonBackdrops?: Record<number, string>;
   seasons?: Season[];
+  seasonOverviewsBySource?: Record<
+    string,
+    { sourceName?: string; overviews: Record<number, string> }
+  >;
+  onSeasonSynopsisSource?: (source: string | undefined) => void;
+  synopsisOrder?: string[];
 }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -108,13 +122,26 @@ export function CinemetaEpisodes({
   const grouped = useMemo(() => groupEpisodes(videos), [videos]);
   const combinedWatched = useMemo(() => {
     const watched = new Set(stremioWatched ?? []);
-    const manual = manualEpisodeKeys(meta.id);
+    if (resumeSeason != null && resumeEpisode != null && (resumeSeason > 1 || resumeEpisode > 1)) {
+      if (!isNuvioProviderActive()) {
+        for (const v of videos) {
+          const s = v.season ?? 0;
+          const e = v.episode ?? v.number ?? 0;
+          if (s >= 1 && e >= 1) {
+            if (s < resumeSeason || (s === resumeSeason && e < resumeEpisode)) {
+              watched.add(`${s}:${e}`);
+            }
+          }
+        }
+      }
+    }
+    const manual = manualEpisodeKeys(meta.id, [imdbId]);
 
     for (const key of manual.watched) watched.add(key);
     for (const key of manual.unwatched) watched.delete(key);
 
     return watched;
-  }, [meta.id, stremioWatched, mwVersion]);
+  }, [meta.id, imdbId, stremioWatched, mwVersion, resumeSeason, resumeEpisode, videos]);
   const seasonStats = useMemo(
     () =>
       grouped.map((group) => ({
@@ -128,7 +155,7 @@ export function CinemetaEpisodes({
     () =>
       grouped.flatMap((g) =>
         g.episodes.map((ep, i) => ({
-          season: ep.season ?? 0,
+          season: ep.season ?? (g.seasonNumber || 1),
           episode: ep.episode ?? ep.number ?? (ep.season == null ? i + 1 : 1),
           released: ep.released ?? null,
         })),
@@ -197,9 +224,7 @@ export function CinemetaEpisodes({
 
   const watchedAt = (season: number, number: number): boolean => {
     const st = manualWatchedState(meta.id, season, number);
-    return (
-      st === true || (st === undefined && (stremioWatched?.has(`${season}:${number}`) ?? false))
-    );
+    return st === true || (st === undefined && combinedWatched.has(`${season}:${number}`));
   };
 
   const progressFor = (g: GridEpisode): Progress => ({
@@ -273,6 +298,8 @@ export function CinemetaEpisodes({
     settings.tvdbSeasonExplorer !== false &&
     hasSeasonMetadata &&
     grouped.some((group) => group.seasonNumber >= 1);
+  const synopsisOrder = synopsisOrderProp ?? settings.metadataSources?.seasonSynopsis;
+  const firstSynopsisSource = synopsisOrder?.[0];
   const explorer = useSeasonExplorerView({
     metaId: meta.id,
     imdbId,
@@ -283,11 +310,18 @@ export function CinemetaEpisodes({
     titlePoster: meta.poster,
     seasonType: "official",
     lang: effectiveTmdbLanguage(),
+    preferFallbackSynopsis: !firstSynopsisSource || firstSynopsisSource.startsWith("addon:"),
+    synopsisOrder,
+    addonSeasonOverviews: seasonOverviewsBySource,
+    fallbackSourceName: meta.addonOrigin?.name ?? "Addon",
     items: explorerItems,
     activeKey: String(active),
     enabled: showExplorer,
     allowProxy: false,
   });
+  useEffect(() => {
+    onSeasonSynopsisSource?.(explorer.details.get(active)?.source);
+  }, [active, explorer.details, onSeasonSynopsisSource]);
   if (grouped.length === 0) return null;
 
   return (
@@ -296,7 +330,7 @@ export function CinemetaEpisodes({
         <SeasonExplorer
           key={meta.id}
           data={explorer}
-          background={meta.background}
+          background={seasonBackdrops?.[active] ?? meta.background}
           activeKey={String(active)}
           onSelect={(key) => selectSeason(Number(key))}
         />
@@ -379,6 +413,7 @@ export function CinemetaEpisodes({
             background: meta.background,
           }}
           target={watchedMenu}
+          imdbId={imdbId}
           allEpisodes={allEpisodesOrdered}
           onClose={() => setWatchedMenu(null)}
         />

@@ -132,9 +132,10 @@ silently re-add removed components.
   `runInstall` / `runRepair`.
 - `screens/welcome.js` ("What gets installed") grows two groups below the
   existing core rows:
-  - **Optional components** — Extension support (`plugins`, size from facts),
-    Game engine (`games`, hidden when the payload has no engine bytes).
-  - **Optional tabs** — Music, eBook, Manga, each noted as hiding the tab.
+  - **Optional components** — Extension support (`plugins`), Games (`games`),
+    and the native Music playback module (`music`); sizes come from payload
+    facts in modular builds. Removing Music preserves personal music data.
+  - **Optional tabs** — eBook and Manga, which only control tab visibility.
   Rows are toggle buttons following the existing `hb-welcome-row` markup;
   disabling a row subtracts its bytes from the `needed` total and the free
   space check. The row list already comes from a static array, so this is

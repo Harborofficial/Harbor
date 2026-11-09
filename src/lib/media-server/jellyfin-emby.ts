@@ -240,6 +240,7 @@ export class JellyfinEmbyAdapter implements MediaServerAdapter {
         ParentId: collectionId,
         Recursive: "false",
         IncludeItemTypes: "Movie,Series",
+        CollapseBoxSetItems: "false",
         StartIndex: String(start),
         Limit: "500",
       });
@@ -265,6 +266,9 @@ export class JellyfinEmbyAdapter implements MediaServerAdapter {
       ParentId: library.id,
       Recursive: "true",
       IncludeItemTypes: "Movie,Series,Season,Episode",
+      // Index individual titles even when the server groups them into collections.
+      // BoxSet replacements are not playable items and normalization drops them.
+      CollapseBoxSetItems: "false",
       Fields: fields,
       StartIndex: String(start),
       Limit: String(limit),

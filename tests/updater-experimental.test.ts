@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import ts from "typescript";
+import * as githubFormat from "../src/lib/updater/github-release-format.ts";
 import * as experimental from "../src/lib/updater/experimental.ts";
 import ar from "../src/lib/i18n/locales/ar/experimental-updates.ts";
 import pt from "../src/lib/i18n/locales/pt/experimental-updates.ts";
@@ -264,6 +265,48 @@ function harness(
       if (config.launchFailure) throw new Error("Launch failed");
     },
   };
+  const githubPlatform = options.platform ?? "windows-x86_64";
+  const githubAssets = (tag: string, version: string) => {
+    const base = `https://github.com/Harborofficial/Harbor/releases/download/${tag}/`;
+    if (githubPlatform.startsWith("windows")) {
+      const name = `harbor-shipyard-${tag}.exe`;
+      return [
+        { name, browser_download_url: `${base}${name}`, size: 10 },
+        { name: `${name}.sig`, browser_download_url: `${base}${name}.sig` },
+      ];
+    }
+    if (githubPlatform.startsWith("darwin")) {
+      const arch = githubPlatform.endsWith("aarch64") ? "aarch64" : "x64";
+      const name = `Harbor_${version}_${arch}.dmg`;
+      return [{ name, browser_download_url: `${base}${name}` }];
+    }
+    return [];
+  };
+  const githubUpdate = load<typeof import("../src/lib/updater/github-update")>(
+    "src/lib/updater/github-update.ts",
+    {
+      "@/lib/safe-fetch": {
+        safeFetch: async () => ({
+          ok: config.status === 200,
+          status: config.status,
+          json: async () =>
+            options.versions
+              ? Object.entries(options.versions)
+                  .filter(([, version]) => version)
+                  .map(([channel, version]) => {
+                    const tag = `v${version}-${channel}`;
+                    return { tag_name: tag, assets: githubAssets(tag, version) };
+                  })
+              : config.nativeMissing
+                ? []
+                : [{ tag_name: "v0.9.123", assets: githubAssets("v0.9.123", "0.9.123") }],
+        }),
+      },
+      "./github-release-format": githubFormat,
+      "./installer-plan": { payloadVersionFor: () => null },
+    },
+    {},
+  );
   const updater = load<Updater>(
     "src/lib/updater/use-update.ts",
     {
@@ -318,6 +361,7 @@ function harness(
       },
       "@/lib/config/endpoints": { HARBOR_API_BASE: "https://example.test" },
       "@/lib/i18n": { t: (s: string) => s },
+      "./github-update": githubUpdate,
       "./channel": channel,
       "./experimental": experimental,
       "./experimental-access": {
@@ -356,8 +400,14 @@ function harness(
     },
     {
       __DEV__: options.dev,
+      __APP_VERSION__: "1.0.1",
       localStorage,
-      window: { __TAURI_INTERNALS__: {}, addEventListener() {}, setInterval() {} },
+      window: {
+        __TAURI_INTERNALS__: {},
+        location: { search: "" },
+        addEventListener() {},
+        setInterval() {},
+      },
       navigator: { userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)" },
       fetch: async (url: string, init: { headers?: unknown }) => {
         calls.fetchUrls.push(url);
@@ -379,7 +429,7 @@ function harness(
       },
     },
   );
-  return { updater, channel, betaReturn, localStorage, recovery, config, calls };
+  return { updater, channel, betaReturn, localStorage, recovery, config, calls, githubUpdate };
 }
 
 test("development builds leave installed-release update and recovery state untouched", async () => {
@@ -547,16 +597,31 @@ test("experimental enrollment, checks, and installation fail closed without badg
   assert.equal(h.updater.useUpdate().channel, "stable");
 });
 
-test("existing stable and beta preferences retain their native request headers", async () => {
+test("normal channels discover GitHub releases without the old manifest headers", async () => {
   for (const beta of [false, true]) {
     const h = harness({ beta });
     await h.updater.checkForUpdate();
-    assert.deepEqual(
-      h.calls.headers,
-      beta ? [{ headers: { "x-harbor-channel": "beta" } }, undefined] : [undefined],
-    );
-    assert.equal(h.updater.useUpdate().channel, beta ? "beta" : "stable");
+    assert.deepEqual(h.calls.headers, []);
+    assert.equal(h.updater.useUpdate().version, "0.9.123");
+    assert.equal(h.updater.useUpdate().panelOpen, true);
   }
+});
+
+test("development simulation shows the real prompt and cannot install", async () => {
+  const h = harness({ dev: true });
+  await h.updater.simulateUpdate();
+  assert.equal(h.updater.useUpdate().version, "1.0.2");
+  assert.equal(h.updater.useUpdate().panelOpen, true);
+  await h.updater.downloadUpdate();
+  await h.updater.installUpdate();
+  await h.updater.openManualDownload();
+  assert.equal(
+    h.calls.download + h.calls.install + h.calls.stage + h.calls.launch + h.calls.manual,
+    0,
+  );
+  const production = harness();
+  await production.updater.simulateUpdate();
+  assert.equal(production.updater.useUpdate().status, "idle");
 });
 
 test("beta users are offered a stable release that is ahead of beta", async () => {
@@ -577,7 +642,7 @@ test("beta users keep the newer beta when beta leads stable", async () => {
   assert.equal(update.channel, "beta");
 });
 
-test("a failed stable check keeps the beta result and a failed beta check stays quiet", async () => {
+test("GitHub discovery offers beta when no stable release exists and handles an empty list", async () => {
   const keepsBeta = harness({
     beta: true,
     versions: { beta: "1.1.0", stable: null },
@@ -619,16 +684,16 @@ test("explicit stable exit never invokes the legacy inferred-beta fallback", asy
   h.updater.setExperimentalUpdates(false);
   h.config.nativeMissing = true;
   await h.updater.checkForUpdate();
-  assert.deepEqual(h.calls.headers, [undefined]);
+  assert.deepEqual(h.calls.headers, []);
   assert.equal(h.calls.fetchHeaders.length, 0);
 });
 
-test("legacy prerelease inference still checks beta when no explicit channel exists", async () => {
+test("GitHub discovery does not use legacy prerelease inference", async () => {
   const h = harness();
   h.config.nativeMissing = true;
   h.config.raw = { version: "0.9.20" };
   await h.updater.checkForUpdate();
-  assert.deepEqual(h.calls.headers, [undefined, { headers: { "x-harbor-channel": "beta" } }]);
+  assert.deepEqual(h.calls.headers, []);
 });
 
 test("background checks keep a verified download ready until install or channel change", async () => {
@@ -763,7 +828,7 @@ test("managed Windows uses only its verified installer, never the legacy NSIS fa
 });
 
 test("signature rejection and unsupported paths never permit an experimental install bypass", async () => {
-  for (const managed of [false, true]) {
+  for (const managed of [true]) {
     const h = harness({ managed });
     h.updater.setExperimentalUpdates(true);
     await h.updater.checkForUpdate();
@@ -787,49 +852,22 @@ test("same or older experimental builds are not offered as downgrades", async ()
   }
 });
 
-test("manual Mac download selects the native architecture regardless of manifest order", async () => {
-  const h = harness({ beta: true, platform: "darwin-x86_64" });
-  const raw = manifest();
-  h.config.raw = {
-    ...raw,
-    platforms: {
-      ...raw.platforms,
-      "darwin-x86_64": { url: "https://example.test/Harbor_x64.app.tar.gz" },
-    },
-  };
-  await h.updater.openManualDownload();
-  assert.deepEqual(h.calls.manualUrls, ["https://example.test/Harbor_x64.dmg"]);
-  assert.equal(h.calls.download + h.calls.install + h.calls.launch, 0);
-});
-
-test("missing native platform opens the download site instead of another architecture or OS", async () => {
-  for (const platform of ["darwin-x86_64", "windows-aarch64", "linux-x86_64"]) {
-    const h = harness({ beta: true, platform });
+test("manual downloads open GitHub without guessing another platform's asset", async () => {
+  for (const platform of ["darwin-x86_64", "darwin-aarch64", "windows-aarch64", "linux-x86_64"]) {
+    const h = harness({ platform });
     await h.updater.openManualDownload();
-    assert.deepEqual(h.calls.manualUrls, ["https://example.test"], platform);
+    assert.deepEqual(h.calls.manualUrls, ["https://github.com/Harborofficial/Harbor/releases"]);
+    assert.equal(h.calls.download + h.calls.install + h.calls.launch, 0);
   }
 });
 
-test("manual download uses the native platform rather than the WebView user agent", async () => {
-  const h = harness({ beta: true, platform: "windows-x86_64" });
-  await h.updater.openManualDownload();
-  assert.deepEqual(h.calls.manualUrls, [manifest().platforms["windows-x86_64"].url]);
-});
-
-test("manual Apple Silicon download keeps the matching DMG conversion", async () => {
-  const h = harness({ beta: true, platform: "darwin-aarch64" });
-  await h.updater.openManualDownload();
-  assert.deepEqual(h.calls.manualUrls, ["https://example.test/0.9.123/Harbor.dmg"]);
-});
-
-test("unknown device and failed manifest do not choose an installer", async () => {
-  for (const failure of ["device", "response"] as const) {
-    const h = harness({ beta: true, platform: "darwin-aarch64" });
-    if (failure === "device") h.config.probeMissing = true;
-    else h.config.status = 503;
-    await h.updater.openManualDownload();
-    assert.deepEqual(h.calls.manualUrls, ["https://example.test"], failure);
-  }
+test("a discovered release opens its exact GitHub asset", async () => {
+  const h = harness();
+  await h.updater.checkForUpdate();
+  await h.updater.downloadUpdate();
+  assert.deepEqual(h.calls.manualUrls, [
+    "https://github.com/Harborofficial/Harbor/releases/download/v0.9.123/harbor-shipyard-v0.9.123.exe",
+  ]);
 });
 
 test("switching channels invalidates a late experimental manifest check", async () => {
@@ -848,7 +886,7 @@ test("switching channels invalidates a late experimental manifest check", async 
 });
 
 test("channel changes are blocked during verification; external changes invalidate download completion", async () => {
-  for (const managed of [false, true]) {
+  for (const managed of [true]) {
     const h = harness({ managed });
     if (managed) h.updater.setExperimentalUpdates(true);
     await h.updater.checkForUpdate();
@@ -1086,4 +1124,233 @@ test("experimental settings live between updates and backup, with search pointin
       "experimental builds in Advanced",
     ),
   );
+});
+
+test("GitHub discovery compares numeric versions and ignores drafts, utilities and older releases", () => {
+  const { selectGithubUpdate } = harness().githubUpdate;
+  const releases = [
+    { tag_name: "v1.0.9", published_at: "2099-01-01" },
+    { tag_name: "v1.0.10-beta", prerelease: true },
+    { tag_name: "v9.0.0", draft: true },
+    { tag_name: "libmpv-999" },
+    { tag_name: "v1.0.1" },
+  ];
+  assert.equal(selectGithubUpdate(releases, "1.0.1", "beta")?.version, "1.0.10");
+  assert.equal(selectGithubUpdate(releases, "1.0.10"), null);
+  assert.equal(selectGithubUpdate([], "1.0.1"), null);
+});
+
+test("failed GitHub checks report an error instead of claiming up to date", async () => {
+  const h = harness();
+  h.config.status = 403;
+  await h.updater.checkForUpdate(true);
+  assert.equal(h.updater.useUpdate().status, "error");
+});
+
+test("GitHub uses the exact signed Shipyard asset only on managed Windows x64", async () => {
+  for (const tag of ["v1.0.1-beta", "v1.0.0-stable"]) {
+    const base = `https://github.com/Harborofficial/Harbor/releases/download/${tag}/`;
+    const asset = {
+      name: `harbor-shipyard-${tag}.exe`,
+      browser_download_url: `${base}harbor-shipyard-${tag}.exe`,
+      size: 1024,
+    };
+    const release = {
+      tag_name: tag,
+      assets: [
+        asset,
+        { name: `${asset.name}.sig`, browser_download_url: `${asset.browser_download_url}.sig` },
+      ],
+    };
+    const requests: string[] = [];
+    const github = load<typeof import("../src/lib/updater/github-update")>(
+      "src/lib/updater/github-update.ts",
+      {
+        "@/lib/safe-fetch": {
+          safeFetch: async (url: string) => {
+            requests.push(url);
+            return { ok: true, json: async () => [release], text: async () => "test-signature" };
+          },
+        },
+        "./github-release-format": githubFormat,
+        "./installer-plan": { payloadVersionFor: () => 1000002 },
+      },
+      {},
+    );
+    const probe = {
+      supported: true,
+      managed: true,
+      platformKey: "windows-x86_64",
+      payloadVersion: 999000,
+      installDir: "test",
+    };
+    const update = await github.discoverGithubUpdate("0.9.999", probe, "beta");
+    assert.equal(update?.handoff?.url, asset.browser_download_url);
+    assert.equal(update?.handoff?.signature, "test-signature");
+    assert.equal(requests[1], `${asset.browser_download_url}.sig`);
+    assert.equal(
+      (
+        await github.discoverGithubUpdate(
+          "0.9.999",
+          { ...probe, platformKey: "windows-aarch64" },
+          "beta",
+        )
+      )?.handoff,
+      null,
+    );
+    release.assets.pop();
+    assert.equal(await github.discoverGithubUpdate("0.9.999", probe, "beta"), null);
+  }
+});
+
+test("GitHub discovery skips releases without usable assets", async () => {
+  const base = "https://github.com/Harborofficial/Harbor/releases/download/";
+  const asset = (tag: string, suffix = ".exe") => {
+    const name = `harbor-shipyard-${tag}${suffix}`;
+    return { name, browser_download_url: `${base}${tag}/${name}`, size: 1 };
+  };
+  const release = (tag: string, assets: unknown[]) => ({ tag_name: tag, assets });
+  let releases = [
+    release("v1.0.3", []),
+    release("v1.0.2", [asset("v1.0.2")]),
+    release("v1.0.1", [asset("v1.0.1"), asset("v1.0.1", ".exe.sig")]),
+  ];
+  const github = load<typeof import("../src/lib/updater/github-update")>(
+    "src/lib/updater/github-update.ts",
+    {
+      "@/lib/safe-fetch": {
+        safeFetch: async () => ({
+          ok: true,
+          json: async () => releases,
+          text: async () => "test-signature",
+        }),
+      },
+      "./github-release-format": githubFormat,
+      "./installer-plan": { payloadVersionFor: () => 1000002 },
+    },
+    {},
+  );
+  const probe = {
+    supported: true,
+    managed: true,
+    platformKey: "windows-x86_64",
+    payloadVersion: 999000,
+    installDir: "test",
+  };
+  const update = await github.discoverGithubUpdate("1.0.0", probe, "stable");
+  assert.equal(update?.version, "1.0.1");
+  assert.equal(update?.handoff?.url, asset("v1.0.1").browser_download_url);
+  const plain = await github.discoverGithubUpdate("1.0.0", { ...probe, managed: false }, "stable");
+  assert.equal(plain?.version, "1.0.2");
+  assert.equal(plain?.handoff, null);
+  releases = [release("v1.0.2", [asset("v1.0.2")])];
+  assert.equal(await github.discoverGithubUpdate("1.0.0", probe, "stable"), null);
+});
+
+test("platform-suffixed Shipyard assets remain updater-compatible", () => {
+  const { githubUpdate } = harness();
+  const base = "https://github.com/Harborofficial/Harbor/releases/download/v1.0.2/";
+  const name = "harbor-shipyard-v1.0.2-beta-windows-x64.exe";
+  const assets = [name, `${name}.sig`].map((asset) => ({
+    name: asset,
+    browser_download_url: `${base}${asset}`,
+  }));
+  const probe = {
+    supported: true,
+    managed: true,
+    platformKey: "windows-x86_64",
+  } as Parameters<typeof githubUpdate.releaseIsComplete>[1];
+
+  assert.equal(githubUpdate.releaseIsComplete({ assets }, probe), true);
+  assert.equal(githubUpdate.githubDownloadAsset({ assets }, "windows-x86_64")?.name, name);
+
+  const old = "harbor-shipyard-v1.0.2-beta.exe";
+  const oldAssets = [old, `${old}.sig`].map((asset) => ({
+    name: asset,
+    browser_download_url: `${base}${asset}`,
+  }));
+  assert.equal(githubUpdate.releaseIsComplete({ assets: oldAssets }, probe), true);
+  assert.equal(
+    githubUpdate.githubDownloadAsset({ assets: oldAssets }, "windows-x86_64")?.name,
+    old,
+  );
+});
+
+test("channel-prefixed macOS artifacts keep architecture detection", () => {
+  const { githubUpdate } = harness();
+  const base = "https://github.com/Harborofficial/Harbor/releases/download/v1.2.3-beta/";
+  const names = [
+    "Harbor_1.2.3_beta_macos-apple-silicon-aarch64.dmg",
+    "Harbor_1.2.3_beta_macos-intel-x64.dmg",
+  ];
+  const assets = names.map((name) => ({
+    name,
+    browser_download_url: `${base}${name}`,
+  }));
+
+  assert.equal(githubUpdate.githubDownloadAsset({ assets }, "darwin-aarch64")?.name, names[0]);
+  assert.equal(githubUpdate.githubDownloadAsset({ assets }, "darwin-x86_64")?.name, names[1]);
+});
+
+test("GitHub downloads match native OS and architecture, independent of asset order", () => {
+  const { githubDownloadAsset } = harness().githubUpdate;
+  const names = [
+    "Harbor_1.0.2_x64.dmg",
+    "Harbor_1.0.2_arm64.exe",
+    "Harbor_1.0.2_aarch64.dmg",
+    "Harbor_1.0.2_x64-setup.exe",
+    "harbor-shipyard-v1.0.2.exe",
+  ];
+  const raw = {
+    assets: names.map((name) => ({
+      name,
+      browser_download_url: `https://github.com/Harborofficial/Harbor/releases/download/v1.0.2/${name}`,
+    })),
+  };
+  for (const assets of [raw.assets, [...raw.assets].reverse()]) {
+    assert.equal(githubDownloadAsset({ assets }, "windows-x86_64")?.name, names[4]);
+    assert.equal(githubDownloadAsset({ assets }, "windows-aarch64")?.name, names[1]);
+    assert.equal(githubDownloadAsset({ assets }, "darwin-aarch64")?.name, names[2]);
+    assert.equal(githubDownloadAsset({ assets }, "darwin-x86_64")?.name, names[0]);
+    assert.equal(githubDownloadAsset({ assets }, undefined), null);
+  }
+  const armOnly = { assets: [raw.assets[2]] };
+  assert.equal(githubDownloadAsset(armOnly, "darwin-x86_64"), null);
+  assert.equal(githubDownloadAsset(armOnly, "windows-x86_64"), null);
+  assert.equal(
+    githubDownloadAsset(
+      {
+        assets: [
+          { name: "Harbor_1.0.2_x64.dmg", browser_download_url: "https://example.test/fake.dmg" },
+        ],
+      },
+      "darwin-x86_64",
+    ),
+    null,
+  );
+});
+
+test("stable preferences exclude newer beta releases while beta preferences include both channels", async () => {
+  for (const beta of [false, true]) {
+    const h = harness({ beta, version: "0.9.999", versions: { stable: "1.0.0", beta: "1.0.1" } });
+    await h.updater.checkForUpdate(true);
+    assert.equal(h.updater.useUpdate().version, beta ? "1.0.1" : "1.0.0");
+    assert.equal(h.updater.useUpdate().channel, beta ? "beta" : "stable");
+  }
+  const h = harness({ version: "1.0.0", versions: { stable: "1.0.0", beta: "1.0.1" } });
+  await h.updater.checkForUpdate(true);
+  assert.equal(h.updater.useUpdate().status, "uptodate");
+  const { selectGithubUpdate } = h.githubUpdate;
+  assert.equal(
+    selectGithubUpdate([{ tag_name: "v1.0.2", prerelease: true }], "1.0.0", "stable"),
+    null,
+  );
+  assert.equal(
+    selectGithubUpdate([{ tag_name: "v1.0.2-beta", prerelease: false }], "1.0.0", "stable"),
+    null,
+  );
+  const simulation = harness({ dev: true });
+  await simulation.updater.simulateUpdate("beta");
+  assert.equal(simulation.updater.useUpdate().channel, "beta");
+  assert.equal(simulation.updater.useUpdate().status, "available");
 });

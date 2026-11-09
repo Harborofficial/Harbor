@@ -37,6 +37,8 @@ export function samePickerRequest(
     frame.episode?.videoId === episode?.videoId &&
     frame.episode?.sourceMetaId === episode?.sourceMetaId &&
     frame.episode?.kitsuStreamId === episode?.kitsuStreamId &&
+    Boolean(frame.autoPlay) === Boolean(options?.autoPlay) &&
+    Boolean(frame.resume) === Boolean(options?.resume) &&
     (frame.attempt ?? 0) === (options?.attempt ?? 0) &&
     (frame.intent ?? "play") === (options?.intent ?? "play") &&
     Boolean(frame.seasonEpisodes?.length) === Boolean(options?.seasonEpisodes?.length) &&

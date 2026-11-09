@@ -69,9 +69,16 @@ function ratingsHarness() {
       }
     },
     useMemo: (callback) => callback(),
+    useRef(initial) {
+      const index = cursor++;
+      slots[index] ??= { current: initial };
+      return slots[index];
+    },
   };
+  const { createOmdbSeasonQueue } = load("src/lib/omdb-season-queue.ts", {});
   const { useEpisodeImdbRatings } = load("src/views/detail/use-episode-imdb-ratings.ts", {
     react,
+    "@/lib/omdb-season-queue": { createOmdbSeasonQueue },
     "@/lib/providers/harbor-imdb": { harborImdbEpisodes: () => new Promise(() => {}) },
     "@/lib/providers/omdb": {
       omdbSeasonRatings: (key, id, season) =>
@@ -119,7 +126,35 @@ test("late ratings cannot leak into another title or season", async () => {
   h.requests[1].resolve(new Map([[1, 8.2]]));
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(h.render("tt0903747", 1).get("1:1"), 8.2);
-  assert.equal(h.render("tt0903747", 2).size, 0);
+  // Switching seasons of the same show retains previously loaded ratings.
+  assert.equal(h.render("tt0903747", 2).get("1:1"), 8.2);
+  assert.equal(h.render("tt0903747", 2).has("2:1"), false);
+});
+
+test("scrolling to new seasons does not refetch an empty OMDb season", async () => {
+  const h = ratingsHarness();
+  h.render("tt5071412", [1]);
+  assert.deepEqual(
+    h.requests.map((request) => request.season),
+    [1],
+  );
+  h.requests[0].resolve(new Map());
+  await new Promise((resolve) => setImmediate(resolve));
+
+  h.render("tt5071412", [1, 2]);
+  assert.deepEqual(
+    h.requests.map((request) => request.season),
+    [1, 2],
+  );
+  h.requests[1].resolve(new Map([[1, 8.2]]));
+  await new Promise((resolve) => setImmediate(resolve));
+
+  h.render("tt5071412", [1, 2, 3]);
+  assert.deepEqual(
+    h.requests.map((request) => request.season),
+    [1, 2, 3],
+  );
+  assert.equal(h.render("tt5071412", [1, 2, 3]).get("2:1"), 8.2);
 });
 
 test("Cinemeta episode grids receive genuine episode IMDb badges", () => {

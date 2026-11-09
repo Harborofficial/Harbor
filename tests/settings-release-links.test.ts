@@ -3,6 +3,14 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { RELEASES_URL } from "../src/lib/updater/release-links.ts";
 
+test("changelog downloads use the in-app installer controls", () => {
+  for (const path of ["rollback-row/version-item.tsx", "rollback-row/version-notes-modal.tsx"]) {
+    const source = readFileSync(new URL(`../src/views/settings/${path}`, import.meta.url), "utf8");
+    assert.match(source, /VersionDownloadButton/);
+    assert.doesNotMatch(source, /onClick=\{\(\) => openUrl\(url\)\}/);
+  }
+});
+
 test("rollback release actions open the official repository", () => {
   assert.equal(RELEASES_URL, "https://github.com/Harborofficial/Harbor/releases");
 

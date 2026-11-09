@@ -171,6 +171,7 @@ pub struct MpvState {
 }
 
 struct MpvSession {
+    preload: Arc<crate::mpv_preload::PreloadSelection>,
     mpv: Arc<Mpv>,
     glass: Arc<std::sync::Mutex<crate::mpv_liquid_glass::GlassState>>,
     is_live: bool,
@@ -203,7 +204,9 @@ impl MpvState {
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     pub(crate) async fn ctx_addr(&self) -> Option<usize> {
         let guard = self.inner.lock().await;
-        guard.as_ref().map(|session| session.mpv.ctx.as_ptr() as usize)
+        guard
+            .as_ref()
+            .map(|session| session.mpv.ctx.as_ptr() as usize)
     }
 
     /// Preserve the exact selected video track while Linux moves the libmpv
@@ -251,10 +254,15 @@ impl MpvState {
         let Some(session) = session.as_ref() else {
             return Ok(None);
         };
-        let path = session
-            .mpv
-            .get_property::<String>("path")
-            .map_err(|_| "Could not verify the file currently in playback.".to_string())?;
+        let path = match session.mpv.get_property::<String>("path") {
+            Ok(path) => path,
+            // An idle mpv instance has no path, but can outlive the last loaded file.
+            // Only allow deletion when mpv positively confirms that no file is loaded.
+            Err(_) if matches!(session.mpv.get_property::<bool>("idle-active"), Ok(true)) => {
+                return Ok(None);
+            }
+            Err(_) => return Err("Could not verify the file currently in playback.".into()),
+        };
         if let Ok(url) = url::Url::parse(&path) {
             if url.scheme() == "file" {
                 return Ok(url
@@ -304,7 +312,47 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     // so upscaler presets need these to know how much headroom the window has.
     ("width", 22, PropertyKind::Int64),
     ("height", 23, PropertyKind::Int64),
-    ("osd-dimensions", 24, PropertyKind::Node),
+    ("sub-fps", 24, PropertyKind::Double),
+    ("osd-dimensions", 25, PropertyKind::Node),
+];
+
+// Display-info publishes this user-data property after the video window opens.
+// Observe its changes instead of polling mpv synchronously every event-loop tick.
+#[cfg(windows)]
+const HDR_STATUS_OBSERVED_PROP: (&str, u64, PropertyKind) = (
+    "user-data/display-info/hdr-status",
+    30,
+    PropertyKind::String,
+);
+
+// Observed by libmpv itself, without synchronous property queries in the event
+// dispatcher. Do not forward these diagnostic-only changes to the frontend.
+#[cfg(windows)]
+const RESUME_DIAG_PROPS: &[(&str, u64, PropertyKind)] = &[
+    ("avsync", 100, PropertyKind::Double),
+    ("total-avsync-change", 101, PropertyKind::Double),
+    ("audio-pts", 102, PropertyKind::Double),
+    ("demuxer-cache-time", 103, PropertyKind::Double),
+    ("cache-speed", 104, PropertyKind::Int64),
+    ("cache-buffering-state", 105, PropertyKind::Int64),
+    ("demuxer-cache-idle", 106, PropertyKind::Flag),
+    ("core-idle", 107, PropertyKind::Flag),
+    ("seeking", 108, PropertyKind::Flag),
+    ("audio-buffer", 109, PropertyKind::Double),
+    ("current-ao", 110, PropertyKind::String),
+    ("audio-params/samplerate", 111, PropertyKind::Int64),
+    ("audio-out-params/samplerate", 112, PropertyKind::Int64),
+    ("speed", 113, PropertyKind::Double),
+    ("estimated-vf-fps", 114, PropertyKind::Double),
+    ("display-fps", 115, PropertyKind::Double),
+    ("hwdec-current", 116, PropertyKind::String),
+    ("display-sync-active", 117, PropertyKind::Flag),
+    ("frame-drop-count", 118, PropertyKind::Int64),
+    ("decoder-frame-drop-count", 119, PropertyKind::Int64),
+    ("vo-delayed-frame-count", 120, PropertyKind::Int64),
+    ("demuxer-cache-state/fw-bytes", 121, PropertyKind::Int64),
+    ("vsync-ratio", 122, PropertyKind::Double),
+    ("mistimed-frame-count", 123, PropertyKind::Int64),
 ];
 
 #[derive(Clone, Copy)]
@@ -424,10 +472,81 @@ pub async fn mpv_audio_devices(state: State<'_, MpvState>) -> Result<Vec<AudioDe
     Ok(read_audio_devices(&mpv))
 }
 
+// Selecting a removed USB/Bluetooth/WASAPI endpoint can make mpv disable audio
+// entirely while video keeps playing. Check the effective option (including any
+// advanced mpv.conf override) against mpv's own enumeration before loadfile.
+// An empty list can also mean the backend cannot enumerate, so never replace a
+// preferred output without positive evidence that it is missing.
+#[cfg(any(windows, test))]
+fn audio_device_unavailable(selected: &str, devices: &[AudioDevice]) -> bool {
+    !selected.is_empty()
+        && selected != "auto"
+        && !devices.is_empty()
+        && !devices.iter().any(|device| device.name == selected)
+}
+
+#[cfg(windows)]
+fn fallback_missing_audio_device(mpv: &Mpv) {
+    let selected = match mpv.get_property::<String>("audio-device") {
+        Ok(device) => device,
+        Err(_) => return,
+    };
+    if selected == "auto" || selected.is_empty() {
+        return;
+    }
+    let available = read_audio_devices(mpv);
+    if !audio_device_unavailable(&selected, &available) {
+        return;
+    }
+    // Do not overwrite Harbor's saved preference. The device can be used again
+    // after it reconnects; only this mpv session falls back to system default.
+    match mpv.set_property("audio-device", "auto") {
+        Ok(()) => eprintln!("[harbor::mpv] configured audio device unavailable; using system default for this session"),
+        Err(err) => eprintln!("[harbor::mpv] failed to fall back to system audio device: {err}"),
+    }
+}
+
 fn mpv_header_field(name: &str, value: &str) -> String {
     // mpv parses this option as a comma-separated string list. An unescaped
     // Accept-Language comma creates an invalid second HTTP header (HTTP 400).
-    format!("{name}: {value}").replace('\\', "\\\\").replace(',', "\\,")
+    format!("{name}: {value}")
+        .replace('\\', "\\\\")
+        .replace(',', "\\,")
+}
+
+/// The player's HTTP identity for a stream, shared with the thumbnail pipeline.
+pub(crate) fn stream_http_options(
+    headers: &Option<std::collections::HashMap<String, String>>,
+) -> (String, Vec<String>) {
+    let mut user_agent = "VLC/3.0.20 LibVLC/3.0.20".to_string();
+    let mut header_fields: Vec<String> = Vec::new();
+    if let Some(headers) = headers {
+        for (k, v) in headers {
+            if k.eq_ignore_ascii_case("user-agent") {
+                user_agent = v.clone();
+            } else {
+                header_fields.push(mpv_header_field(k, v));
+            }
+        }
+    }
+    (user_agent, header_fields)
+}
+
+// The PulseAudio client name is also how song_id identifies our playback on
+// Linux. Flatpak instances can share a sandbox PID, so PID alone cannot
+// distinguish their streams. A stable, per-process UUID avoids that collision.
+#[cfg(target_os = "linux")]
+pub(crate) fn audio_client_name() -> &'static str {
+    use std::sync::OnceLock;
+
+    static NAME: OnceLock<String> = OnceLock::new();
+    NAME.get_or_init(|| format!("Harbor {}", uuid::Uuid::new_v4().simple()))
+        .as_str()
+}
+
+#[cfg(not(target_os = "linux"))]
+pub(crate) fn audio_client_name() -> &'static str {
+    "Harbor"
 }
 
 fn apply_pre_init(
@@ -460,23 +579,13 @@ fn apply_pre_init(
         .unwrap_or_default();
     let joined_init_only = join_init_only_pairs(&init_only_pairs);
     set("title", "Harbor");
-    set("audio-client-name", "Harbor");
+    set("audio-client-name", audio_client_name());
     set("terminal", "no");
     set("log-file", "");
     set("msg-level", "all=warn,vo=v,d3d11=v,gpu=v,win32=v");
     let is_live = args.is_live.unwrap_or(false);
     set("ytdl", if is_live { "yes" } else { "no" });
-    let mut user_agent = "VLC/3.0.20 LibVLC/3.0.20".to_string();
-    let mut header_fields: Vec<String> = Vec::new();
-    if let Some(headers) = &args.headers {
-        for (k, v) in headers {
-            if k.eq_ignore_ascii_case("user-agent") {
-                user_agent = v.clone();
-            } else {
-                header_fields.push(mpv_header_field(k, v));
-            }
-        }
-    }
+    let (user_agent, header_fields) = stream_http_options(&args.headers);
     set("user-agent", &user_agent);
     if !header_fields.is_empty() {
         set("http-header-fields", &header_fields.join(","));
@@ -1027,7 +1136,9 @@ pub async fn mpv_start(
                     "[harbor::mpv] separate window sized via SetWindowPos {}x{}+{}+{}",
                     w, h, x, y
                 ),
-                None => eprintln!("[harbor::mpv] separate window VO not found yet; relying on mpv geometry"),
+                None => eprintln!(
+                    "[harbor::mpv] separate window VO not found yet; relying on mpv geometry"
+                ),
             }
         }
     }
@@ -1173,6 +1284,8 @@ pub async fn mpv_start(
     if let Some(extra) = args.extra_options.as_deref() {
         apply_extra_mpv_options(&mpv, extra);
     }
+    #[cfg(windows)]
+    fallback_missing_audio_device(&mpv);
     // Keep network playback RAM-only even if an advanced option tried to
     // re-enable mpv's disk cache above.
     let _ = mpv.set_property("cache-on-disk", "no");
@@ -1195,6 +1308,10 @@ pub async fn mpv_start(
     }
 
     let mpv_arc = Arc::new(mpv);
+    let preload = Arc::new(crate::mpv_preload::PreloadSelection::default());
+    // on_preloaded runs after demuxing, before track selection and decoding.
+    let _ =
+        unsafe { libmpv2_sys::mpv_hook_add(mpv_arc.ctx.as_ptr(), 0, c"on_preloaded".as_ptr(), 0) };
 
     let event_ctx = EventContext::new(mpv_arc.ctx);
     for (name, id, kind) in OBSERVED_PROPS {
@@ -1202,10 +1319,24 @@ pub async fn mpv_start(
             eprintln!("[mpv] observe {} failed: {}", name, e);
         }
     }
+    #[cfg(windows)]
+    {
+        let (name, id, kind) = HDR_STATUS_OBSERVED_PROP;
+        if let Err(e) = event_ctx.observe_property(name, kind.fmt(), id) {
+            eprintln!("[mpv] HDR status observe {} failed: {}", name, e);
+        }
+    }
+    #[cfg(windows)]
+    for (name, id, kind) in RESUME_DIAG_PROPS {
+        if let Err(e) = event_ctx.observe_property(name, kind.fmt(), *id) {
+            eprintln!("[mpv] diagnostic observe {} failed: {}", name, e);
+        }
+    }
     spawn_event_loop(
         app.clone(),
         mpv_arc.clone(),
         event_ctx,
+        preload.clone(),
         want_embed,
         args.mac_edr.unwrap_or(false),
         #[cfg(windows)]
@@ -1241,6 +1372,7 @@ pub async fn mpv_start(
     attach_local_sidecars(&mpv_arc, &args.url);
 
     *g = Some(MpvSession {
+        preload,
         mpv: mpv_arc,
         glass: Arc::new(std::sync::Mutex::new(Default::default())),
         is_live,
@@ -1331,6 +1463,636 @@ fn apply_mac_edr(app: &AppHandle, mpv: &Arc<Mpv>, active: bool) {
     });
 }
 
+// Windows-only, bounded high-resolution measurements around a real resume.
+// Outside the first eight seconds we use a sparse five-second health sample.
+// Numeric/boolean properties and fixed enums only: no playback URLs or devices.
+#[cfg(windows)]
+const RESUME_TRACE_WINDOW: Duration = Duration::from_secs(8);
+#[cfg(windows)]
+const RESUME_TRACE_INTERVAL: Duration = Duration::from_millis(250);
+#[cfg(windows)]
+const RESUME_DETAIL_INTERVAL: Duration = Duration::from_secs(1);
+#[cfg(windows)]
+const RESUME_HEALTH_INTERVAL: Duration = Duration::from_secs(5);
+#[cfg(windows)]
+const RESUME_POSITION_STALL: Duration = Duration::from_secs(3);
+#[cfg(windows)]
+const RESUME_EVENT_LOOP_STALL: Duration = Duration::from_secs(3);
+
+#[cfg(windows)]
+struct ResumeTrace {
+    began: std::time::Instant,
+    next_sample: std::time::Instant,
+    next_detail: std::time::Instant,
+}
+
+#[cfg(windows)]
+#[derive(Default)]
+struct ResumePosition {
+    last: Option<(std::time::Instant, f64)>,
+    reported: bool,
+}
+
+#[cfg(windows)]
+impl ResumePosition {
+    // Never flag intentional pauses, seeking, buffering or idle playback as a
+    // freeze; arm again after the media clock makes forward progress.
+    fn observe(
+        &mut self,
+        now: std::time::Instant,
+        position: Option<f64>,
+        playing: bool,
+    ) -> Option<Duration> {
+        if !playing {
+            self.last = None;
+            self.reported = false;
+            return None;
+        }
+        let Some(position) = position.filter(|v| v.is_finite()) else {
+            self.clear();
+            return None;
+        };
+        match self.last {
+            Some((_since, last)) if position >= last + 0.05 || position < last - 0.5 => {
+                self.last = Some((now, position));
+                self.reported = false;
+            }
+            Some((since, _))
+                if !self.reported
+                    && now.saturating_duration_since(since) >= RESUME_POSITION_STALL =>
+            {
+                self.reported = true;
+                return Some(now.saturating_duration_since(since));
+            }
+            None => {
+                self.last = Some((now, position));
+                self.reported = false;
+            }
+            _ => {}
+        }
+        None
+    }
+    fn clear(&mut self) {
+        self.last = None;
+        self.reported = false;
+    }
+}
+
+#[cfg(windows)]
+struct ResumeTraceState {
+    paused_at: Option<std::time::Instant>,
+    last_resumed_at: Option<std::time::Instant>,
+    active: Option<ResumeTrace>,
+    last_health: std::time::Instant,
+    position: ResumePosition,
+}
+
+#[cfg(windows)]
+impl Default for ResumeTraceState {
+    fn default() -> Self {
+        Self {
+            paused_at: None,
+            last_resumed_at: None,
+            active: None,
+            last_health: std::time::Instant::now(),
+            position: ResumePosition::default(),
+        }
+    }
+}
+
+#[cfg(windows)]
+impl ResumeTraceState {
+    fn clear(&mut self) {
+        self.paused_at = None;
+        self.last_resumed_at = None;
+        self.active = None;
+        self.position.clear();
+    }
+
+    // Only capture a real paused -> playing transition, not initial playback.
+    fn on_pause_change(&mut self, paused: bool, now: std::time::Instant) -> Option<Duration> {
+        if paused {
+            self.paused_at.get_or_insert(now);
+            self.active = None;
+            self.position.clear();
+            return None;
+        }
+        let paused_at = self.paused_at.take()?;
+        self.last_resumed_at = Some(now);
+        self.active = Some(ResumeTrace {
+            began: now,
+            next_sample: now,
+            next_detail: now,
+        });
+        self.last_health = now;
+        self.position.clear();
+        Some(now.saturating_duration_since(paused_at))
+    }
+
+    fn sample_age(&mut self, now: std::time::Instant) -> Option<Duration> {
+        let active = self.active.as_mut()?;
+        let age = now.saturating_duration_since(active.began);
+        if age > RESUME_TRACE_WINDOW {
+            self.active = None;
+            return None;
+        }
+        if now < active.next_sample {
+            return None;
+        }
+        active.next_sample = now + RESUME_TRACE_INTERVAL;
+        Some(age)
+    }
+
+    fn detail_due(&mut self, now: std::time::Instant) -> bool {
+        let Some(active) = self.active.as_mut() else {
+            return false;
+        };
+        if now < active.next_detail {
+            return false;
+        }
+        active.next_detail = now + RESUME_DETAIL_INTERVAL;
+        true
+    }
+
+    fn health_due(&mut self, now: std::time::Instant) -> bool {
+        if self.last_resumed_at.is_none()
+            || self.paused_at.is_some()
+            || self.active.is_some()
+            || now.saturating_duration_since(self.last_health) < RESUME_HEALTH_INTERVAL
+        {
+            return false;
+        }
+        self.last_health = now;
+        true
+    }
+}
+
+// Record only warning classes relevant to a stream/audio freeze. The existing
+// raw mpv lines still remain, after redaction by log_privacy.
+#[cfg(windows)]
+fn resume_warning_kind(prefix: &str, text: &str) -> Option<&'static str> {
+    if prefix == "cplayer" && text.contains("Audio device underrun detected") {
+        Some("audio-underrun")
+    } else if prefix == "cplayer" && text.contains("Audio/Video desynchronisation detected") {
+        Some("av-desync")
+    } else if prefix == "curl" && text.contains("Failure when receiving data") {
+        Some("network-retry")
+    } else if prefix == "ao/wasapi" && (text.contains("underflow") || text.contains("underrun")) {
+        Some("wasapi-underrun")
+    } else if prefix == "ffmpeg" && (text.contains("error") || text.contains("Invalid")) {
+        Some("decoder-error")
+    } else {
+        None
+    }
+}
+
+#[cfg(windows)]
+fn resume_wall_ms() -> u128 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis()
+}
+
+// All resume diagnostics are event-fed. A synchronous mpv_get_property call
+// inside the event dispatcher blocked for 14.2 seconds in Static's log. Reading
+// cached event data avoids introducing another synchronous read during freezes.
+#[cfg(windows)]
+#[derive(Default)]
+struct ResumeObserved {
+    values: HashMap<&'static str, String>,
+    time_pos: Option<f64>,
+    last_time_pos_change: Option<std::time::Instant>,
+    audio_pts: Option<f64>,
+    last_audio_pts_change: Option<std::time::Instant>,
+}
+
+#[cfg(windows)]
+impl ResumeObserved {
+    fn update(&mut self, name: &str, change: &PropertyData<'_>, now: std::time::Instant) {
+        let observed_name = OBSERVED_PROPS
+            .iter()
+            .chain(RESUME_DIAG_PROPS.iter())
+            .find(|(known, _, _)| *known == name)
+            .map(|(known, _, kind)| (*known, *kind));
+        let Some((name, kind)) = observed_name else {
+            return;
+        };
+        let value = match (kind, change) {
+            (PropertyKind::Double, PropertyData::Double(n)) if n.is_finite() => {
+                if name == "time-pos" {
+                    if self.time_pos.is_none_or(|prev| (prev - n).abs() > 0.01) {
+                        self.last_time_pos_change = Some(now);
+                    }
+                    self.time_pos = Some(*n);
+                } else if name == "audio-pts" {
+                    if self.audio_pts.is_none_or(|prev| (prev - n).abs() > 0.01) {
+                        self.last_audio_pts_change = Some(now);
+                    }
+                    self.audio_pts = Some(*n);
+                }
+                format!("{n:.4}")
+            }
+            (PropertyKind::Int64, PropertyData::Int64(n)) => n.to_string(),
+            (PropertyKind::Flag, PropertyData::Flag(value)) => u8::from(*value).to_string(),
+            (PropertyKind::String, PropertyData::Str(s)) if name == "current-ao" => match *s {
+                "wasapi" => "wasapi",
+                "" | "null" => "none",
+                _ => "other",
+            }
+            .to_string(),
+            (PropertyKind::String, PropertyData::Str(s)) if name == "hwdec-current" => match *s {
+                "no" | "" => "0",
+                _ => "1",
+            }
+            .to_string(),
+            _ => {
+                self.values.remove(name);
+                if name == "time-pos" {
+                    self.time_pos = None;
+                    self.last_time_pos_change = None;
+                } else if name == "audio-pts" {
+                    self.audio_pts = None;
+                    self.last_audio_pts_change = None;
+                }
+                return;
+            }
+        };
+        self.values.insert(name, value);
+    }
+
+    fn value(&self, name: &str) -> &str {
+        self.values.get(name).map(String::as_str).unwrap_or("?")
+    }
+
+    fn flag(&self, name: &str) -> Option<bool> {
+        match self.value(name) {
+            "0" => Some(false),
+            "1" => Some(true),
+            _ => None,
+        }
+    }
+
+    fn position_age_ms(&self, now: std::time::Instant) -> String {
+        self.last_time_pos_change
+            .map(|last| now.saturating_duration_since(last).as_millis().to_string())
+            .unwrap_or_else(|| "na".into())
+    }
+
+    fn audio_position_age_ms(&self, now: std::time::Instant) -> String {
+        self.last_audio_pts_change
+            .map(|last| now.saturating_duration_since(last).as_millis().to_string())
+            .unwrap_or_else(|| "na".into())
+    }
+
+    fn counter(&self, name: &str) -> Option<i64> {
+        self.value(name).parse::<i64>().ok()
+    }
+}
+
+// Windows-only bounded recovery for the post-pause WASAPI stalls observed
+// in Static's logs. Use event-fed properties, never synchronous reads.
+#[cfg(windows)]
+const RESUME_RECOVERY_MIN_PAUSE: Duration = Duration::from_secs(10);
+#[cfg(windows)]
+const RESUME_RECOVERY_WINDOW: Duration = Duration::from_secs(90);
+#[cfg(windows)]
+const RESUME_RECOVERY_STALL: Duration = Duration::from_secs(4);
+#[cfg(windows)]
+const RESUME_RECOVERY_RETRY: Duration = Duration::from_secs(8);
+#[cfg(windows)]
+const RESUME_RECOVERY_GIVE_UP: Duration = Duration::from_secs(12);
+#[cfg(windows)]
+const RESUME_RECOVERY_AUDIO_REPLY: u64 = 0x4842_5200_0000_0001;
+#[cfg(windows)]
+const RESUME_RECOVERY_SEEK_REPLY: u64 = 0x4842_5200_0000_0002;
+
+#[cfg(windows)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum ResumeRecoveryAction {
+    AudioReload,
+    ResyncSeek(f64),
+}
+
+#[cfg(windows)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum ResumeRecoveryDecision {
+    Attempt(ResumeRecoveryAction),
+    Recovered(u8),
+    Exhausted,
+}
+
+#[cfg(windows)]
+#[derive(Default)]
+struct ResumeStallRecovery {
+    armed_at: Option<std::time::Instant>,
+    attempts: u8,
+    last_attempt_at: Option<std::time::Instant>,
+    before_attempt: Option<(f64, f64)>,
+    own_seek_pending: bool,
+}
+
+#[cfg(windows)]
+impl ResumeStallRecovery {
+    fn clear(&mut self) {
+        *self = Self::default();
+    }
+
+    fn arm(&mut self, now: std::time::Instant, paused_for: Duration) {
+        self.clear();
+        if paused_for >= RESUME_RECOVERY_MIN_PAUSE {
+            self.armed_at = Some(now);
+        }
+    }
+
+    // Do not mistake our own recovery seek for a user-requested seek.
+    fn consume_recovery_seek(&mut self) -> bool {
+        std::mem::take(&mut self.own_seek_pending)
+    }
+
+    fn mark_recovery_seek_queued(&mut self) {
+        self.own_seek_pending = true;
+    }
+
+    fn assess(
+        &mut self,
+        snapshot: &ResumeObserved,
+        now: std::time::Instant,
+        embedded: bool,
+        playing: bool,
+    ) -> Option<ResumeRecoveryDecision> {
+        let armed_at = self.armed_at?;
+        if now.saturating_duration_since(armed_at) > RESUME_RECOVERY_WINDOW {
+            self.clear();
+            return None;
+        }
+        if !embedded || !playing {
+            return None;
+        }
+        let (Some(media), Some(audio)) = (snapshot.time_pos, snapshot.audio_pts) else {
+            return None;
+        };
+        let safe = snapshot.value("current-ao") == "wasapi"
+            && snapshot.flag("paused-for-cache") == Some(false)
+            && snapshot.flag("seeking") == Some(false)
+            && snapshot.flag("core-idle") == Some(false)
+            && snapshot.flag("eof-reached") != Some(true)
+            && snapshot
+                .value("demuxer-cache-duration")
+                .parse::<f64>()
+                .is_ok_and(|sec| sec.is_finite() && sec >= 10.0)
+            && snapshot
+                .value("duration")
+                .parse::<f64>()
+                .is_ok_and(|duration| duration.is_finite() && duration > media + 20.0);
+        if !safe {
+            return None;
+        }
+
+        if let (Some(at), Some((before_media, before_audio))) =
+            (self.last_attempt_at, self.before_attempt)
+        {
+            let elapsed = now.saturating_duration_since(at);
+            let delta_media = media - before_media;
+            let delta_audio = audio - before_audio;
+            // Recovery must advance both clocks at a meaningful fraction
+            // of elapsed wall time, not just produce an occasional jump.
+            if elapsed >= Duration::from_secs(1)
+                && delta_media >= elapsed.as_secs_f64() * 0.6
+                && delta_audio >= elapsed.as_secs_f64() * 0.6
+            {
+                let stage = self.attempts;
+                self.clear();
+                return Some(ResumeRecoveryDecision::Recovered(stage));
+            }
+            if self.attempts == 2 {
+                if elapsed >= RESUME_RECOVERY_GIVE_UP {
+                    self.clear();
+                    return Some(ResumeRecoveryDecision::Exhausted);
+                }
+                return None;
+            }
+            if elapsed < RESUME_RECOVERY_RETRY {
+                return None;
+            }
+            // Once only: re-anchor the audio/video pipelines with an exact
+            // same-position seek, preserving the user's playback position.
+            self.attempts = 2;
+            self.last_attempt_at = Some(now);
+            self.before_attempt = Some((media, audio));
+            return Some(ResumeRecoveryDecision::Attempt(
+                ResumeRecoveryAction::ResyncSeek(media),
+            ));
+        }
+
+        // Old timestamps after a long pause must not count as a fresh stall.
+        let both_stationary = snapshot.last_time_pos_change.is_some_and(|last| {
+            now.saturating_duration_since(last.max(armed_at)) >= RESUME_RECOVERY_STALL
+        }) && snapshot.last_audio_pts_change.is_some_and(|last| {
+            now.saturating_duration_since(last.max(armed_at)) >= RESUME_RECOVERY_STALL
+        });
+        if !both_stationary {
+            return None;
+        }
+        self.attempts = 1;
+        self.last_attempt_at = Some(now);
+        self.before_attempt = Some((media, audio));
+        Some(ResumeRecoveryDecision::Attempt(
+            ResumeRecoveryAction::AudioReload,
+        ))
+    }
+}
+
+#[cfg(windows)]
+fn queue_resume_recovery_command(mpv: &Mpv, args: &[&str], reply_id: u64) -> Result<(), String> {
+    let cstrings: Vec<CString> = args
+        .iter()
+        .map(|arg| CString::new(*arg).map_err(|_| "invalid recovery command".to_string()))
+        .collect::<Result<_, _>>()?;
+    let mut ptrs: Vec<*const std::os::raw::c_char> =
+        cstrings.iter().map(|arg| arg.as_ptr()).collect();
+    ptrs.push(std::ptr::null());
+    // Synchronous mpv operations have previously blocked this event loop.
+    let rc =
+        unsafe { libmpv2_sys::mpv_command_async(mpv.ctx.as_ptr(), reply_id, ptrs.as_mut_ptr()) };
+    if rc < 0 {
+        Err(format!("mpv_command_async rc={rc}"))
+    } else {
+        Ok(())
+    }
+}
+
+// These counters are mpv's *observed* playback/output values, not direct
+// measurements from WASAPI or the GPU driver threads.
+#[cfg(windows)]
+#[derive(Clone, Copy)]
+struct ResumeProgressSample {
+    when: std::time::Instant,
+    media: f64,
+    audio: f64,
+    vo_drops: Option<i64>,
+    decoder_drops: Option<i64>,
+}
+
+#[cfg(windows)]
+#[derive(Default)]
+struct ResumeProgress {
+    last: Option<ResumeProgressSample>,
+}
+
+#[cfg(windows)]
+impl ResumeProgress {
+    fn clear(&mut self) {
+        self.last = None;
+    }
+
+    fn sample(&mut self, snapshot: &ResumeObserved, now: std::time::Instant) -> Option<String> {
+        let (Some(media), Some(audio)) = (snapshot.time_pos, snapshot.audio_pts) else {
+            self.clear();
+            return None;
+        };
+        if !media.is_finite() || !audio.is_finite() {
+            self.clear();
+            return None;
+        }
+        let current = ResumeProgressSample {
+            when: now,
+            media,
+            audio,
+            vo_drops: snapshot.counter("frame-drop-count"),
+            decoder_drops: snapshot.counter("decoder-frame-drop-count"),
+        };
+        let previous = self.last.replace(current)?;
+        let elapsed = now.saturating_duration_since(previous.when).as_secs_f64();
+        if elapsed < 0.25 {
+            return None;
+        }
+        let media_delta = current.media - previous.media;
+        let audio_delta = current.audio - previous.audio;
+        // A seek or stream switch invalidates the clock comparison.
+        if media_delta < -0.5
+            || audio_delta < -0.5
+            || media_delta > elapsed + 4.0
+            || audio_delta > elapsed + 4.0
+        {
+            return None;
+        }
+        let drop_delta = |old: Option<i64>, new: Option<i64>| match (old, new) {
+            (Some(a), Some(b)) if b >= a => (b - a).to_string(),
+            _ => "na".to_string(),
+        };
+        let state = if media_delta < elapsed * 0.2 && audio_delta > elapsed * 0.5 {
+            "media-lagging-audio-clock"
+        } else if media_delta < elapsed * 0.2 && audio_delta < elapsed * 0.2 {
+            "both-clocks-slow"
+        } else if media_delta > elapsed * 0.6 && audio_delta > elapsed * 0.6 {
+            "clocks-advancing"
+        } else {
+            "partial-progress"
+        };
+        Some(format!(
+            "[harbor/resume] info: progress wall_ms={} elapsed_ms={} media_delta_s={media_delta:.3} \
+             audio_delta_s={audio_delta:.3} vo_drop_delta={} decoder_drop_delta={} \
+             avsync={} cache_sec={} cache_pause={} seeking={} state={state} source=observed",
+            resume_wall_ms(), (elapsed * 1000.0).round() as u64,
+            drop_delta(previous.vo_drops, current.vo_drops),
+            drop_delta(previous.decoder_drops, current.decoder_drops),
+            snapshot.value("avsync"),
+            snapshot.value("demuxer-cache-duration"),
+            snapshot.value("paused-for-cache"),
+            snapshot.value("seeking"),
+        ))
+    }
+}
+
+#[cfg(windows)]
+fn trace_resume_fast_sample(
+    snapshot: &ResumeObserved,
+    log: &std::sync::mpsc::SyncSender<String>,
+    age: Duration,
+) {
+    let _ = log.try_send(format!(
+        "[harbor/resume] info: tick wall_ms={} t_ms={} avsync={} audio_pts={} \
+         time_pos={} cache_sec={} cache_rate={} position_age_ms={} audio_position_age_ms={} source=observed",
+        resume_wall_ms(),
+        age.as_millis(),
+        snapshot.value("avsync"),
+        snapshot.value("audio-pts"),
+        snapshot.value("time-pos"),
+        snapshot.value("demuxer-cache-duration"),
+        snapshot.value("cache-speed"),
+        snapshot.position_age_ms(std::time::Instant::now()),
+        snapshot.audio_position_age_ms(std::time::Instant::now()),
+    ));
+}
+
+#[cfg(windows)]
+fn trace_resume_sample(
+    snapshot: &ResumeObserved,
+    log: &std::sync::mpsc::SyncSender<String>,
+    age: Option<Duration>,
+    phase: &str,
+    embedded: bool,
+) {
+    let _ = log.try_send(format!(
+        "[harbor/resume] info: {phase} wall_ms={} t_ms={} embedded={} \
+         avsync={} avsync_total={} audio_pts={} time_pos={} \
+         cache_sec={} cache_end={} cache_rate={} cache_fw_bytes={} buffering_pct={} \
+         cache_pause={} cache_idle={} core_idle={} seeking={} \
+         audio_buffer_cfg={} ao={} audio_hz={} output_hz={} \
+         speed={} vf_fps={} display_fps={} hwdec={} display_sync={} vsync_ratio={} \
+         vo_drops={} decoder_drops={} mistimed={} delayed={} \
+         position_age_ms={} audio_position_age_ms={} source=observed",
+        resume_wall_ms(),
+        age.map(|age| age.as_millis().to_string())
+            .unwrap_or_else(|| "na".into()),
+        u8::from(embedded),
+        snapshot.value("avsync"),
+        snapshot.value("total-avsync-change"),
+        snapshot.value("audio-pts"),
+        snapshot.value("time-pos"),
+        snapshot.value("demuxer-cache-duration"),
+        snapshot.value("demuxer-cache-time"),
+        snapshot.value("cache-speed"),
+        snapshot.value("demuxer-cache-state/fw-bytes"),
+        snapshot.value("cache-buffering-state"),
+        snapshot.value("paused-for-cache"),
+        snapshot.value("demuxer-cache-idle"),
+        snapshot.value("core-idle"),
+        snapshot.value("seeking"),
+        snapshot.value("audio-buffer"),
+        snapshot.value("current-ao"),
+        snapshot.value("audio-params/samplerate"),
+        snapshot.value("audio-out-params/samplerate"),
+        snapshot.value("speed"),
+        snapshot.value("estimated-vf-fps"),
+        snapshot.value("display-fps"),
+        snapshot.value("hwdec-current"),
+        snapshot.value("display-sync-active"),
+        snapshot.value("vsync-ratio"),
+        snapshot.value("frame-drop-count"),
+        snapshot.value("decoder-frame-drop-count"),
+        snapshot.value("mistimed-frame-count"),
+        snapshot.value("vo-delayed-frame-count"),
+        snapshot.position_age_ms(std::time::Instant::now()),
+        snapshot.audio_position_age_ms(std::time::Instant::now()),
+    ));
+}
+
+#[cfg(windows)]
+fn resume_event_loop_phase(code: u8) -> &'static str {
+    match code {
+        1 => "loop-start",
+        2 => "diagnostics",
+        3 => "preload-expire",
+        4 => "wait-event",
+        5 => "handle-event",
+        6 => "emit-event",
+        7 => "hdr-observed-event",
+        _ => "loop-start",
+    }
+}
+
 const MPV_EVENT_MAX_CONSECUTIVE_ERRORS: u32 = 12;
 
 #[derive(Default)]
@@ -1361,6 +2123,7 @@ fn spawn_event_loop(
     app: AppHandle,
     mpv_keepalive: Arc<Mpv>,
     mut ctx: EventContext,
+    preload: Arc<crate::mpv_preload::PreloadSelection>,
     embedded: bool,
     mac_edr: bool,
     #[cfg(windows)] hdr_monitor: Option<isize>,
@@ -1372,6 +2135,70 @@ fn spawn_event_loop(
         });
         let mut last_timepos: Option<std::time::Instant> = None;
         #[cfg(windows)]
+        let mut resume_trace = ResumeTraceState::default();
+        #[cfg(windows)]
+        let mut resume_observed = ResumeObserved::default();
+        #[cfg(windows)]
+        let mut resume_progress = ResumeProgress::default();
+        #[cfg(windows)]
+        let mut resume_recovery = ResumeStallRecovery::default();
+        #[cfg(windows)]
+        let phase = Arc::new(std::sync::atomic::AtomicU8::new(0));
+        #[cfg(windows)]
+        let clock_start = std::time::Instant::now();
+        #[cfg(windows)]
+        let heartbeat_ms = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        #[cfg(windows)]
+        let watch_running = Arc::new(std::sync::atomic::AtomicBool::new(true));
+        #[cfg(windows)]
+        let watch_playing = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        #[cfg(windows)]
+        let last_resume_ms = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        #[cfg(windows)]
+        if let Some(log) = log.as_ref() {
+            // Separate from mpv's event thread. A deadlocked mpv property
+            // query or event dispatcher cannot report its own timeout.
+            let beat = heartbeat_ms.clone();
+            let phase = phase.clone();
+            let running = watch_running.clone();
+            let playing = watch_playing.clone();
+            let resumed = last_resume_ms.clone();
+            let log = log.clone();
+            let _ = std::thread::Builder::new()
+                .name("mpv-resume-watchdog".into())
+                .spawn(move || {
+                    let mut last_report: Option<std::time::Instant> = None;
+                    while running.load(std::sync::atomic::Ordering::Relaxed) {
+                        std::thread::sleep(Duration::from_secs(1));
+                        if !playing.load(std::sync::atomic::Ordering::Relaxed) {
+                            last_report = None;
+                            continue;
+                        }
+                        let now = std::time::Instant::now();
+                        let lag_ms = now.saturating_duration_since(clock_start)
+                            .as_millis()
+                            .saturating_sub(beat.load(std::sync::atomic::Ordering::Relaxed) as u128);
+                        if lag_ms < RESUME_EVENT_LOOP_STALL.as_millis() {
+                            last_report = None;
+                            continue;
+                        }
+                        if last_report.is_none_or(|prev| now.saturating_duration_since(prev) >= Duration::from_secs(10)) {
+                            let since_resume_ms = now.saturating_duration_since(clock_start)
+                                .as_millis()
+                                .saturating_sub(resumed.load(std::sync::atomic::Ordering::Relaxed) as u128);
+                            let _ = log.try_send(format!(
+                                "[harbor/resume] warn: event-loop-stall wall_ms={} no_poll_ms={lag_ms} since_resume_ms={since_resume_ms} phase={}",
+                                resume_wall_ms(),
+                                resume_event_loop_phase(phase.load(std::sync::atomic::Ordering::Relaxed))
+                            ));
+                            last_report = Some(now);
+                        }
+                    }
+                });
+        }
+        #[cfg(windows)]
+        let mut last_clock_check = clock_start;
+        #[cfg(windows)]
         let reassert_gen = Arc::new(std::sync::atomic::AtomicU64::new(0));
         #[cfg(not(windows))]
         let _ = embedded;
@@ -1381,26 +2208,211 @@ fn spawn_event_loop(
         #[cfg(windows)]
         let mut last_hdr_status: Option<String> = None;
         loop {
-            // display-info publishes user-data/display-info/hdr-status only
-            // after the vo window exists, so observing it at init misses the
-            // value; poll it and surface changes so the frontend can react to
-            // the script's display flips.
+            #[cfg(windows)]
+            phase.store(1, std::sync::atomic::Ordering::Relaxed);
+            #[cfg(windows)]
+            heartbeat_ms.store(
+                clock_start.elapsed().as_millis().min(u64::MAX as u128) as u64,
+                std::sync::atomic::Ordering::Relaxed,
+            );
+            // HDR status changes arrive as observed events below.
             #[cfg(windows)]
             {
-                let status = mpv_keepalive
-                    .get_property::<String>("user-data/display-info/hdr-status")
-                    .ok();
-                if status != last_hdr_status {
-                    last_hdr_status = status.clone();
-                    if let Some(s) = &status {
-                        let _ = app.emit("hdr-stage://display-status", s.as_str());
+                phase.store(2, std::sync::atomic::Ordering::Relaxed);
+                let now = std::time::Instant::now();
+                if let Some(age) = resume_trace.sample_age(now) {
+                    let detail = resume_trace.detail_due(now);
+                    if let Some(log) = &log {
+                        if detail {
+                            trace_resume_sample(
+                                &resume_observed,
+                                log,
+                                Some(age),
+                                "sample",
+                                embedded,
+                            );
+                        } else {
+                            trace_resume_fast_sample(&resume_observed, log, age);
+                        }
+                    }
+                } else if resume_trace.health_due(now) {
+                    if let Some(log) = &log {
+                        trace_resume_sample(&resume_observed, log, None, "health", embedded);
+                        if let Some(progress) = resume_progress.sample(&resume_observed, now) {
+                            let _ = log.try_send(progress);
+                        }
+                    }
+                }
+                if now.saturating_duration_since(last_clock_check) >= Duration::from_secs(1) {
+                    last_clock_check = now;
+                    let playing = resume_trace.last_resumed_at.is_some()
+                        && resume_trace.paused_at.is_none()
+                        && resume_observed.flag("paused-for-cache") == Some(false)
+                        && resume_observed.flag("seeking") == Some(false)
+                        && resume_observed.flag("core-idle") == Some(false);
+                    let position = resume_observed.time_pos;
+                    if let Some(stalled_for) = resume_trace.position.observe(now, position, playing)
+                    {
+                        if let Some(log) = &log {
+                            let _ = log.try_send(format!(
+                                "[harbor/resume] warn: clock-stall wall_ms={} stationary_ms={}                                  cache_paused=0 seeking=0 core_idle=0",
+                                resume_wall_ms(),
+                                stalled_for.as_millis(),
+                            ));
+                            trace_resume_sample(&resume_observed, log, None, "stall", embedded);
+                            if let Some(progress) = resume_progress.sample(&resume_observed, now) {
+                                let _ = log.try_send(progress);
+                            }
+                        }
+                    }
+                    if let Some(decision) =
+                        resume_recovery.assess(&resume_observed, now, embedded, playing)
+                    {
+                        match decision {
+                            ResumeRecoveryDecision::Attempt(action) => {
+                                let (step, result) = match action {
+                                    ResumeRecoveryAction::AudioReload => (
+                                        "audio-reload",
+                                        queue_resume_recovery_command(
+                                            &mpv_keepalive,
+                                            &["ao-reload"],
+                                            RESUME_RECOVERY_AUDIO_REPLY,
+                                        ),
+                                    ),
+                                    ResumeRecoveryAction::ResyncSeek(position) => {
+                                        let position = format!("{position:.3}");
+                                        let result = queue_resume_recovery_command(
+                                            &mpv_keepalive,
+                                            &["seek", &position, "absolute+exact"],
+                                            RESUME_RECOVERY_SEEK_REPLY,
+                                        );
+                                        if result.is_ok() {
+                                            resume_recovery.mark_recovery_seek_queued();
+                                        }
+                                        ("resync-seek", result)
+                                    }
+                                };
+                                if let Some(log) = &log {
+                                    let status = match result {
+                                        Ok(()) => "queued".to_string(),
+                                        Err(err) => format!("failed:{err}"),
+                                    };
+                                    let _ = log.try_send(format!(
+                                        "[harbor/resume] warn: recovery wall_ms={} step={step} status={status} media={} audio={} cache_sec={} since_resume_ms={}",
+                                        resume_wall_ms(),
+                                        resume_observed.value("time-pos"),
+                                        resume_observed.value("audio-pts"),
+                                        resume_observed.value("demuxer-cache-duration"),
+                                        resume_recovery.armed_at
+                                            .map(|at| now.saturating_duration_since(at).as_millis())
+                                            .unwrap_or(0),
+                                    ));
+                                }
+                            }
+                            ResumeRecoveryDecision::Recovered(step) => {
+                                if let Some(log) = &log {
+                                    let _ = log.try_send(format!(
+                                        "[harbor/resume] info: recovery-result wall_ms={} status=recovered step={step} media={} audio={}",
+                                        resume_wall_ms(),
+                                        resume_observed.value("time-pos"),
+                                        resume_observed.value("audio-pts"),
+                                    ));
+                                }
+                            }
+                            ResumeRecoveryDecision::Exhausted => {
+                                if let Some(log) = &log {
+                                    let _ = log.try_send(format!(
+                                        "[harbor/resume] warn: recovery-result wall_ms={} status=exhausted attempts=2",
+                                        resume_wall_ms(),
+                                    ));
+                                }
+                            }
+                        }
                     }
                 }
             }
-            let res = ctx.wait_event(0.5);
+            // Shorten polling only for bounded resume/preload work.
+            #[cfg(windows)]
+            let timeout = if resume_trace.active.is_some() {
+                0.25
+            } else {
+                0.5
+            };
+            #[cfg(not(windows))]
+            let timeout = 0.5;
+            #[cfg(windows)]
+            let poll_started = std::time::Instant::now();
+            #[cfg(windows)]
+            phase.store(3, std::sync::atomic::Ordering::Relaxed);
+            preload.expire(|id| unsafe {
+                libmpv2_sys::mpv_hook_continue(mpv_keepalive.ctx.as_ptr(), id);
+            });
+            #[cfg(windows)]
+            phase.store(4, std::sync::atomic::Ordering::Relaxed);
+            let res = ctx.wait_event(preload.poll_timeout(timeout));
+            #[cfg(windows)]
+            phase.store(5, std::sync::atomic::Ordering::Relaxed);
+            #[cfg(windows)]
+            if poll_started.elapsed() >= Duration::from_secs(2)
+                && resume_trace.last_resumed_at.is_some()
+                && resume_trace.paused_at.is_none()
+            {
+                if let Some(log) = &log {
+                    let _ = log.try_send(format!(
+                        "[harbor/resume] warn: event-poll-delay wall_ms={} wait_ms={}",
+                        resume_wall_ms(),
+                        poll_started.elapsed().as_millis(),
+                    ));
+                }
+            }
             match res {
                 Some(Ok(event)) => {
                     record_event_poll_success(&mut error_backoff);
+                    // Track completion of our asynchronous commands without
+                    // forwarding their private reply IDs to the frontend.
+                    #[cfg(windows)]
+                    if let Event::CommandReply(reply_id) = &event {
+                        if matches!(
+                            *reply_id,
+                            RESUME_RECOVERY_AUDIO_REPLY | RESUME_RECOVERY_SEEK_REPLY
+                        ) {
+                            if let Some(log) = &log {
+                                let step = if *reply_id == RESUME_RECOVERY_AUDIO_REPLY {
+                                    "audio-reload"
+                                } else {
+                                    "resync-seek"
+                                };
+                                let _ = log.try_send(format!(
+                                    "[harbor/resume] info: recovery-reply wall_ms={} step={step} status=complete",
+                                    resume_wall_ms(),
+                                ));
+                            }
+                            continue;
+                        }
+                    }
+                    // libmpv2 exposes newer C events through Deprecated(raw).
+                    if let Event::Deprecated(raw) = &event {
+                        if raw.event_id == libmpv2_sys::mpv_event_id_MPV_EVENT_HOOK
+                            && !raw.data.is_null()
+                        {
+                            let hook =
+                                unsafe { &*(raw.data as *const libmpv2_sys::mpv_event_hook) };
+                            let token = preload.begin(hook.id);
+                            let tracks = mpv_keepalive
+                                .get_property::<MpvNode>("track-list")
+                                .map(mpv_node_to_json)
+                                .unwrap_or_else(|_| json!([]));
+                            let path = mpv_keepalive.get_property::<String>("path").ok();
+                            if app.emit("mpv://event", json!({
+                                "event": "preloaded", "token": token, "tracks": tracks, "path": path
+                            })).is_err() {
+                                preload.finish(&token, |id| unsafe {
+                                    libmpv2_sys::mpv_hook_continue(mpv_keepalive.ctx.as_ptr(), id);
+                                });
+                            }
+                            continue;
+                        }
+                    }
                     if let Event::LogMessage {
                         prefix,
                         level,
@@ -1410,6 +2422,61 @@ fn spawn_event_loop(
                     {
                         if let Some(log) = &log {
                             let _ = log.try_send(format!("[{prefix}] {level}: {text}"));
+                            #[cfg(windows)]
+                            if let (Some(resumed_at), Some(kind)) = (
+                                resume_trace.last_resumed_at,
+                                resume_warning_kind(prefix, text),
+                            ) {
+                                let now = std::time::Instant::now();
+                                let wall_ms = std::time::SystemTime::now()
+                                    .duration_since(std::time::UNIX_EPOCH)
+                                    .unwrap_or_default()
+                                    .as_millis();
+                                let _ = log.try_send(format!(
+                                    "[harbor/resume] info: warning wall_ms={wall_ms} since_resume_ms={} kind={kind} paused={}",
+                                    now.saturating_duration_since(resumed_at).as_millis(),
+                                    resume_trace.paused_at.is_some(),
+                                ));
+                                if matches!(
+                                    kind,
+                                    "audio-underrun" | "wasapi-underrun" | "av-desync"
+                                ) {
+                                    let _ = log.try_send(format!(
+                                        "[harbor/resume] info: warning-clocks wall_ms={wall_ms} kind={kind} \
+                                         media={} audio={} avsync={} media_age_ms={} audio_age_ms={} \
+                                         vo_drops={} decoder_drops={} cache_sec={} hwdec={} ao={} source=observed",
+                                        resume_observed.value("time-pos"),
+                                        resume_observed.value("audio-pts"),
+                                        resume_observed.value("avsync"),
+                                        resume_observed.position_age_ms(now),
+                                        resume_observed.audio_position_age_ms(now),
+                                        resume_observed.value("frame-drop-count"),
+                                        resume_observed.value("decoder-frame-drop-count"),
+                                        resume_observed.value("demuxer-cache-duration"),
+                                        resume_observed.value("hwdec-current"),
+                                        resume_observed.value("current-ao"),
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                    #[cfg(windows)]
+                    if let Event::PropertyChange { name, change, .. } = &event {
+                        resume_observed.update(name, change, std::time::Instant::now());
+                        if *name == HDR_STATUS_OBSERVED_PROP.0 {
+                            phase.store(7, std::sync::atomic::Ordering::Relaxed);
+                            let status = match change {
+                                PropertyData::Str(value) if !value.is_empty() => Some(*value),
+                                _ => None,
+                            };
+                            if status != last_hdr_status.as_deref() {
+                                last_hdr_status = status.map(str::to_owned);
+                                if let Some(status) = status {
+                                    let _ = app.emit("hdr-stage://display-status", status);
+                                }
+                            }
+                            // Internal observation only, not an mpv frontend event.
+                            continue;
                         }
                     }
                     let mut shutdown = false;
@@ -1418,6 +2485,99 @@ fn spawn_event_loop(
                     }
                     if let Event::EndFile(reason) = &event {
                         eprintln!("[harbor::mpv] end-file reason={:?}", reason);
+                    }
+                    #[cfg(windows)]
+                    {
+                        let stage = match &event {
+                            Event::Seek => Some("seek"),
+                            Event::PlaybackRestart => Some("playback-restart"),
+                            Event::FileLoaded => Some("file-loaded"),
+                            Event::EndFile(_) => Some("end-file"),
+                            Event::Shutdown => Some("shutdown"),
+                            _ => None,
+                        };
+                        if let Some(stage) = stage {
+                            if let Some(log) = &log {
+                                let _ = log.try_send(format!(
+                                    "[harbor/resume] info: transition wall_ms={} event={stage}",
+                                    resume_wall_ms(),
+                                ));
+                            }
+                            resume_trace.position.clear();
+                            resume_progress.clear();
+                            if matches!(event, Event::Seek)
+                                && !resume_recovery.consume_recovery_seek()
+                            {
+                                // An unrelated seek cancels any pending recovery.
+                                resume_recovery.clear();
+                            }
+                        }
+                        if matches!(
+                            event,
+                            Event::EndFile(_) | Event::FileLoaded | Event::Shutdown
+                        ) {
+                            resume_trace.clear();
+                            resume_recovery.clear();
+                            watch_playing.store(false, std::sync::atomic::Ordering::Relaxed);
+                        }
+                        if let Event::PropertyChange {
+                            name: "pause",
+                            change: PropertyData::Flag(paused),
+                            ..
+                        } = &event
+                        {
+                            let now = std::time::Instant::now();
+                            let paused_for = resume_trace.on_pause_change(*paused, now);
+                            if *paused {
+                                resume_recovery.clear();
+                            } else if let Some(duration) = paused_for {
+                                resume_recovery.arm(now, duration);
+                            }
+                            watch_playing.store(
+                                !paused && resume_trace.last_resumed_at.is_some(),
+                                std::sync::atomic::Ordering::Relaxed,
+                            );
+                            if let Some(log) = &log {
+                                let _ = log.try_send(format!(
+                                    "[harbor/resume] info: pause-state wall_ms={} paused={}",
+                                    resume_wall_ms(),
+                                    u8::from(*paused),
+                                ));
+                                if let Some(paused_for) = paused_for {
+                                    let _ = log.try_send(format!(
+                                        "[harbor/resume] info: begin wall_ms={} paused_ms={}",
+                                        resume_wall_ms(),
+                                        paused_for.as_millis()
+                                    ));
+                                }
+                            }
+                            if paused_for.is_some() {
+                                resume_progress.clear();
+                                let _ = resume_progress.sample(&resume_observed, now);
+                                last_resume_ms.store(
+                                    clock_start.elapsed().as_millis().min(u64::MAX as u128) as u64,
+                                    std::sync::atomic::Ordering::Relaxed,
+                                );
+                            }
+                        }
+                        if let Event::PropertyChange {
+                            name: "paused-for-cache",
+                            change: PropertyData::Flag(paused_for_cache),
+                            ..
+                        } = &event
+                        {
+                            if *paused_for_cache {
+                                resume_trace.position.clear();
+                                resume_progress.clear();
+                            }
+                            if let Some(log) = &log {
+                                let _ = log.try_send(format!(
+                                    "[harbor/resume] info: cache-pause-change wall_ms={} paused={}",
+                                    resume_wall_ms(),
+                                    u8::from(*paused_for_cache),
+                                ));
+                            }
+                        }
                     }
                     if let Event::PropertyChange { name, .. } = &event {
                         if *name == "time-pos" {
@@ -1490,6 +2650,14 @@ fn spawn_event_loop(
                             let _ = app.emit_to("harbor-captions", "captions://text", text);
                         }
                     }
+                    #[cfg(windows)]
+                    if matches!(&event, Event::PropertyChange { name, .. }
+                        if RESUME_DIAG_PROPS.iter().any(|(known, _, _)| known == name))
+                    {
+                        continue;
+                    }
+                    #[cfg(windows)]
+                    phase.store(6, std::sync::atomic::Ordering::Relaxed);
                     let payload = event_to_payload(event);
                     if let Some(p) = payload {
                         let _ = app.emit("mpv://event", p);
@@ -1500,6 +2668,15 @@ fn spawn_event_loop(
                 }
                 Some(Err(e)) => {
                     let delay = error_backoff.next_delay();
+                    #[cfg(windows)]
+                    if let Some(log) = &log {
+                        let _ = log.try_send(format!(
+                            "[harbor/resume] warn: event-error wall_ms={} consecutive={} retry_ms={}",
+                            resume_wall_ms(),
+                            error_backoff.consecutive,
+                            delay.map(|value| value.as_millis()).unwrap_or(0),
+                        ));
+                    }
                     if error_backoff.consecutive == 1 || error_backoff.consecutive.is_power_of_two()
                     {
                         eprintln!(
@@ -1529,6 +2706,11 @@ fn spawn_event_loop(
                 }
                 None => record_event_poll_success(&mut error_backoff),
             }
+        }
+        #[cfg(windows)]
+        {
+            watch_playing.store(false, std::sync::atomic::Ordering::Relaxed);
+            watch_running.store(false, std::sync::atomic::Ordering::Relaxed);
         }
         drop(mpv_keepalive);
     });
@@ -1593,6 +2775,42 @@ fn mpv_node_to_json(node: MpvNode) -> Value {
 }
 
 #[tauri::command]
+pub async fn mpv_select_preloaded_tracks(
+    state: State<'_, MpvState>,
+    token: String,
+    audio_id: Option<String>,
+    subtitle_id: Option<String>,
+) -> Result<bool, String> {
+    let (mpv, preload) = {
+        let g = state.inner.lock().await;
+        let session = g.as_ref().ok_or("mpv not started")?;
+        (session.mpv.clone(), session.preload.clone())
+    };
+    tauri::async_runtime::spawn_blocking(move || {
+        preload.finish(&token, |id| {
+            if let Some(aid) = audio_id
+                .as_deref()
+                .filter(|s| s.parse::<u32>().is_ok_and(|n| n > 0))
+            {
+                let _ = mpv.set_property("aid", aid);
+            }
+            if let Some(sid) = subtitle_id
+                .as_deref()
+                .filter(|s| *s == "no" || s.parse::<u32>().is_ok_and(|n| n > 0))
+            {
+                let _ = mpv.set_property("sid", sid);
+            }
+            // The session owns the handle and the matching pending hook.
+            unsafe {
+                libmpv2_sys::mpv_hook_continue(mpv.ctx.as_ptr(), id);
+            }
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn mpv_command(state: State<'_, MpvState>, cmd: Vec<Value>) -> Result<(), String> {
     let (mpv, is_live) = {
         let g = state.inner.lock().await;
@@ -1652,6 +2870,8 @@ const MPV_ALLOWED_COMMANDS: &[&str] = &[
     "frame-back-step",
     "loadfile",
     "ao-reload",
+    // Auto-sync's live tap writes the buffered minute to a temp file.
+    "dump-cache",
     // Writes a line into mpv's log, which is the only log a release build keeps.
     // The player uses it to name the control behind each pause/play so a user's
     // log explains itself.
@@ -1700,22 +2920,48 @@ pub async fn mpv_set_property(
     name: String,
     value: Value,
 ) -> Result<(), String> {
-    let (mpv, glass) = {
+    let (mpv, is_live, glass) = {
         let g = state.inner.lock().await;
-        g.as_ref()
-            .map(|s| (s.mpv.clone(), s.glass.clone()))
-            .ok_or_else(|| "mpv not started".to_string())?
+        let session = g.as_ref().ok_or_else(|| "mpv not started".to_string())?;
+        (session.mpv.clone(), session.is_live, session.glass.clone())
     };
     if mpv_property_blocked(&name) {
         return Err(format!("mpv property not allowed: {}", name));
     }
-    let mut str_val = value_to_arg(&value);
-    let glass_guard = glass.lock().map_err(|_| "Glass state lock unavailable")?;
+    let str_val = value_to_arg(&value);
     if name == "glsl-shaders" {
-        str_val = glass_guard.preserve_shader(&str_val);
+        let glass_guard = glass.lock().map_err(|_| "Glass state lock unavailable")?;
+        let str_val = glass_guard.preserve_shader(&str_val);
+        return mpv
+            .set_property(&name, str_val.as_str())
+            .map_err(|e| format!("set {}: {}", name, e));
     }
+    let audio_switch = name == "aid"
+        && str_val != "no"
+        && !is_live
+        && mpv.get_property::<String>("aid").ok().as_deref() != Some(str_val.as_str());
     mpv.set_property(&name, str_val.as_str())
-        .map_err(|e| format!("set {}: {}", name, e))
+        .map_err(|e| format!("set {}: {}", name, e))?;
+    // With a large demuxer readahead (Harbor's steady-state buffer), mpv holds
+    // the newly selected audio until the cache drains when its refresh seek
+    // cannot be issued (mpv-player/mpv#18371), leaving minutes of silence. The
+    // same-position seek a viewer uses to recover restarts the demuxer at the
+    // current frame and starts the new track immediately.
+    if audio_switch {
+        resync_audio_after_switch(&mpv);
+    }
+    Ok(())
+}
+
+fn resync_audio_after_switch(mpv: &Mpv) {
+    let Ok(pos) = mpv.get_property::<f64>("time-pos") else {
+        return;
+    };
+    if !pos.is_finite() || pos <= 0.0 {
+        return;
+    }
+    let pos = pos.to_string();
+    let _ = mpv_argv_command(mpv, &["seek", &pos, "absolute+exact"]);
 }
 
 #[tauri::command]
@@ -1765,6 +3011,27 @@ pub async fn mpv_get_property(state: State<'_, MpvState>, name: String) -> Resul
         Ok(n) if n.is_finite() => serde_json::json!(n),
         _ => Value::String(s),
     })
+}
+
+/// Read structured seekable cache ranges from mpv as a real node array.
+/// mpv_get_property reads properties as strings and cannot represent arrays.
+#[tauri::command]
+pub async fn mpv_get_seekable_ranges(state: State<'_, MpvState>) -> Result<Value, String> {
+    let mpv = {
+        let g = state.inner.lock().await;
+        g.as_ref()
+            .map(|s| s.mpv.clone())
+            .ok_or_else(|| "mpv not started".to_string())?
+    };
+    // Some mpv builds expose the ranges only as a field of the cache-state node.
+    let node: MpvNode = mpv
+        .get_property("demuxer-cache-state")
+        .map_err(|_| "seekable-ranges-unavailable".to_string())?;
+    let mut state = mpv_node_to_json(node);
+    state.get_mut("seekable-ranges")
+        .filter(|ranges| ranges.is_array())
+        .map(Value::take)
+        .ok_or_else(|| "seekable-ranges-invalid".to_string())
 }
 
 /// Reads a list option such as `sub-ass-style-overrides` item by item. `mpv_get_property`
@@ -1841,7 +3108,11 @@ pub async fn mpv_set_geometry(
 ) -> Result<(), String> {
     // The detached window owns the live surface and resizes it through its own
     // fit command. Late geometry updates from Harbor must not move that surface.
-    if app.state::<crate::pip_window::PipWindowState>().active.load(std::sync::atomic::Ordering::SeqCst) {
+    if app
+        .state::<crate::pip_window::PipWindowState>()
+        .active
+        .load(std::sync::atomic::Ordering::SeqCst)
+    {
         return Ok(());
     }
     #[cfg(windows)]
@@ -2051,12 +3322,12 @@ pub async fn display_hdr_active(_app: AppHandle) -> Result<bool, String> {
 /// yet, so the caller can fall back to mpv's own geometry.
 #[cfg(windows)]
 fn size_separate_mpv_window(x: i32, y: i32, w: i32, h: i32) -> Option<()> {
+    use windows::core::BOOL;
     use windows::Win32::Foundation::{HWND, LPARAM};
     use windows::Win32::UI::WindowsAndMessaging::{
         EnumWindows, GetClassNameW, GetWindowThreadProcessId, SetWindowPos, HWND_TOP,
         SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOZORDER,
     };
-    use windows::core::BOOL;
 
     let own_pid = std::process::id();
 
@@ -2124,8 +3395,8 @@ fn monitor_hdr_active(hmon: windows::Win32::Graphics::Gdi::HMONITOR) -> bool {
     // rectangle instead.
     let mut mi = MONITORINFOEXW::default();
     mi.monitorInfo.cbSize = std::mem::size_of::<MONITORINFOEXW>() as u32;
-    let have_rect = hmon.0 as isize != 0
-        && unsafe { GetMonitorInfoW(hmon, &mut mi.monitorInfo) }.as_bool();
+    let have_rect =
+        hmon.0 as isize != 0 && unsafe { GetMonitorInfoW(hmon, &mut mi.monitorInfo) }.as_bool();
     let mon_rect = mi.monitorInfo.rcMonitor;
 
     let factory: IDXGIFactory1 = match unsafe { CreateDXGIFactory1() } {
@@ -2159,8 +3430,8 @@ fn monitor_hdr_active(hmon: windows::Win32::Graphics::Gdi::HMONITOR) -> bool {
                 Err(_) => continue,
             };
 
-            let monitor_matches = hmon.0 as isize != 0
-                && desc.Monitor.0 as isize == hmon.0 as isize;
+            let monitor_matches =
+                hmon.0 as isize != 0 && desc.Monitor.0 as isize == hmon.0 as isize;
             let rect_matches = have_rect && {
                 let d = desc.DesktopCoordinates;
                 let cx = (mon_rect.left + mon_rect.right) / 2;
@@ -2180,10 +3451,7 @@ fn monitor_hdr_active(hmon: windows::Win32::Graphics::Gdi::HMONITOR) -> bool {
 /// Windows Settings and display-info.dll use; Harbor calls it as an
 /// authoritative restore after mpv teardown.
 #[cfg(windows)]
-fn set_monitor_advanced_color(
-    hmon: windows::Win32::Graphics::Gdi::HMONITOR,
-    enable: bool,
-) -> bool {
+fn set_monitor_advanced_color(hmon: windows::Win32::Graphics::Gdi::HMONITOR, enable: bool) -> bool {
     use windows::Win32::Devices::Display::{
         DisplayConfigGetDeviceInfo, DisplayConfigSetDeviceInfo, GetDisplayConfigBufferSizes,
         QueryDisplayConfig, DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
@@ -3354,7 +4622,9 @@ fn embedded_surface_trace(app: &AppHandle) -> Option<String> {
         MPV_BLOCKED_ICONIC_RESIZES.load(std::sync::atomic::Ordering::Relaxed),
     );
     let mut last = LAST.lock().ok()?;
-    if last.as_ref() == Some(&line) { return None; }
+    if last.as_ref() == Some(&line) {
+        return None;
+    }
     *last = Some(line.clone());
     Some(line)
 }
@@ -3401,8 +4671,7 @@ unsafe extern "system" fn mpv_size_guard_proc(
 // there. The temporary hook is removed before returning; no mpv calls run in
 // either callback, which would deadlock against the video-output thread.
 #[cfg(windows)]
-static MPV_SIZE_GUARD_STATE: std::sync::Mutex<Option<(isize, bool)>> =
-    std::sync::Mutex::new(None);
+static MPV_SIZE_GUARD_STATE: std::sync::Mutex<Option<(isize, bool)>> = std::sync::Mutex::new(None);
 
 /// Installs the guard at most once per video window. SendMessage crosses to
 /// mpv's video-output thread, so this must never run on every resize frame.
@@ -3435,7 +4704,12 @@ fn install_mpv_size_guard(hwnd: windows::Win32::Foundation::HWND) -> Result<(), 
         if code >= 0 {
             let message = &*(l.0 as *const CWPSTRUCT);
             if message.message == HARBOR_MPV_INSTALL_GUARD {
-                let _ = SetWindowSubclass(message.hwnd, Some(mpv_size_guard_proc), HARBOR_MPV_SIZE_GUARD_ID, 0);
+                let _ = SetWindowSubclass(
+                    message.hwnd,
+                    Some(mpv_size_guard_proc),
+                    HARBOR_MPV_SIZE_GUARD_ID,
+                    0,
+                );
             }
         }
         CallNextHookEx(None, code, w, l)
@@ -3821,9 +5095,9 @@ mod geometry_tests {
         use windows::core::w;
         use windows::Win32::Foundation::RECT;
         use windows::Win32::UI::WindowsAndMessaging::{
-            CreateWindowExW, DestroyWindow, DispatchMessageW, FindWindowExW,
-            GetClientRect, PeekMessageW, ShowWindow, TranslateMessage, MSG,
-            PM_REMOVE, SW_MINIMIZE, SW_RESTORE, SW_SHOW, WS_OVERLAPPEDWINDOW,
+            CreateWindowExW, DestroyWindow, DispatchMessageW, FindWindowExW, GetClientRect,
+            PeekMessageW, ShowWindow, TranslateMessage, MSG, PM_REMOVE, SW_MINIMIZE, SW_RESTORE,
+            SW_SHOW, WS_OVERLAPPEDWINDOW,
         };
         fn pump(ms: u64) {
             let until = std::time::Instant::now() + std::time::Duration::from_millis(ms);
@@ -3840,10 +5114,20 @@ mod geometry_tests {
         }
         unsafe {
             let parent = CreateWindowExW(
-                Default::default(), w!("STATIC"), w!("Harbor mpv minimize regression"),
-                WS_OVERLAPPEDWINDOW, 100, 100, 960, 600,
-                None, None, None, None,
-            ).unwrap();
+                Default::default(),
+                w!("STATIC"),
+                w!("Harbor mpv minimize regression"),
+                WS_OVERLAPPEDWINDOW,
+                100,
+                100,
+                960,
+                600,
+                None,
+                None,
+                None,
+                None,
+            )
+            .unwrap();
             let _ = ShowWindow(parent, SW_SHOW);
             let mpv = libmpv2::Mpv::with_initializer(|init| {
                 init.set_property("wid", (parent.0 as isize).to_string())?;
@@ -3852,7 +5136,8 @@ mod geometry_tests {
                 init.set_property("ao", "null")?;
                 init.set_property("idle", "yes")?;
                 init.set_property("force-window", "yes")
-            }).unwrap();
+            })
+            .unwrap();
             let result = (|| -> Result<(), String> {
                 mpv.command("loadfile", &["av://lavfi:testsrc=size=320x180:rate=24"])
                     .map_err(|e| e.to_string())?;
@@ -3869,27 +5154,46 @@ mod geometry_tests {
                 let _ = ShowWindow(parent, SW_MINIMIZE);
                 pump(500);
                 let unguarded = size()?;
-                if unguarded == full { return Err("control did not reproduce mpv's parent resize".into()); }
+                if unguarded == full {
+                    return Err("control did not reproduce mpv's parent resize".into());
+                }
                 let _ = ShowWindow(parent, SW_RESTORE);
                 pump(500);
                 super::install_mpv_size_guard(child)?;
                 let restored = size()?;
                 let render_size = || -> Result<(i64, i64), String> {
-                    Ok((mpv.get_property::<i64>("osd-width").map_err(|e| e.to_string())?,
-                        mpv.get_property::<i64>("osd-height").map_err(|e| e.to_string())?))
+                    Ok((
+                        mpv.get_property::<i64>("osd-width")
+                            .map_err(|e| e.to_string())?,
+                        mpv.get_property::<i64>("osd-height")
+                            .map_err(|e| e.to_string())?,
+                    ))
                 };
                 let render_restored = render_size()?;
-                let before = mpv.get_property::<f64>("time-pos").map_err(|e| e.to_string())?;
+                let before = mpv
+                    .get_property::<f64>("time-pos")
+                    .map_err(|e| e.to_string())?;
                 for _ in 0..3 {
                     let _ = ShowWindow(parent, SW_MINIMIZE);
                     pump(500);
-                    if render_size()? != render_restored { return Err(format!("guarded renderer resize: {:?} != {render_restored:?}", render_size()?)); }
+                    if render_size()? != render_restored {
+                        return Err(format!(
+                            "guarded renderer resize: {:?} != {render_restored:?}",
+                            render_size()?
+                        ));
+                    }
                     let _ = ShowWindow(parent, SW_RESTORE);
                     pump(500);
-                    if size()? != restored { return Err("surface did not restore".into()); }
+                    if size()? != restored {
+                        return Err("surface did not restore".into());
+                    }
                 }
-                let after = mpv.get_property::<f64>("time-pos").map_err(|e| e.to_string())?;
-                if after <= before + 1.0 { return Err("playback clock stopped".into()); }
+                let after = mpv
+                    .get_property::<f64>("time-pos")
+                    .map_err(|e| e.to_string())?;
+                if after <= before + 1.0 {
+                    return Err("playback clock stopped".into());
+                }
                 println!("native mpv: unguarded={unguarded:?}, guarded={restored:?}, playback advanced {:.2}s", after - before);
                 Ok(())
             })();
@@ -3908,8 +5212,14 @@ mod event_backoff_tests {
 
     #[test]
     fn http_headers_preserve_commas_and_backslashes_in_mpv_string_lists() {
-        assert_eq!(super::mpv_header_field("Accept-Language", "en-US,en;q=0.9"), "Accept-Language: en-US\\,en;q=0.9");
-        assert_eq!(super::mpv_header_field("X-Path", r"one\two,three"), r"X-Path: one\\two\,three");
+        assert_eq!(
+            super::mpv_header_field("Accept-Language", "en-US,en;q=0.9"),
+            "Accept-Language: en-US\\,en;q=0.9"
+        );
+        assert_eq!(
+            super::mpv_header_field("X-Path", r"one\two,three"),
+            r"X-Path: one\\two\,three"
+        );
         assert_eq!(super::mpv_header_field("Accept", "*/*"), "Accept: */*");
     }
 
@@ -4089,5 +5399,494 @@ mod script_pre_init_tests {
             join_init_only_pairs(&init_only),
             vec![("load-scripts".to_string(), "no".to_string())]
         );
+    }
+}
+
+#[cfg(test)]
+mod audio_device_fallback_tests {
+    use super::{audio_device_unavailable, AudioDevice};
+
+    fn device(name: &str) -> AudioDevice {
+        AudioDevice {
+            name: name.to_string(),
+            description: "Test output".to_string(),
+        }
+    }
+
+    #[test]
+    fn missing_explicit_output_uses_default() {
+        let available = [device("wasapi/new"), device("wasapi/other")];
+        assert!(audio_device_unavailable("wasapi/removed", &available));
+    }
+
+    #[test]
+    fn connected_explicit_output_is_preserved() {
+        let available = [device("wasapi/preferred")];
+        assert!(!audio_device_unavailable("wasapi/preferred", &available));
+    }
+
+    #[test]
+    fn default_output_is_never_overridden() {
+        let available = [device("wasapi/preferred")];
+        assert!(!audio_device_unavailable("auto", &available));
+        assert!(!audio_device_unavailable("", &available));
+    }
+
+    #[test]
+    fn enumeration_failure_does_not_clobber_a_valid_preference() {
+        assert!(!audio_device_unavailable("wasapi/preferred", &[]));
+    }
+}
+
+#[cfg(all(test, windows))]
+mod resume_trace_tests {
+    use super::{
+        resume_event_loop_phase, resume_warning_kind, ResumeObserved, ResumePosition,
+        ResumeProgress, ResumeRecoveryAction, ResumeRecoveryDecision, ResumeStallRecovery,
+        ResumeTraceState, HDR_STATUS_OBSERVED_PROP, OBSERVED_PROPS, RESUME_DIAG_PROPS,
+        RESUME_HEALTH_INTERVAL, RESUME_POSITION_STALL, RESUME_TRACE_WINDOW,
+    };
+    use libmpv2::events::PropertyData;
+    use std::time::{Duration, Instant};
+
+    fn recovery_snapshot(now: Instant) -> ResumeObserved {
+        let mut snapshot = ResumeObserved::default();
+        snapshot.update("time-pos", &PropertyData::Double(500.0), now);
+        snapshot.update("audio-pts", &PropertyData::Double(500.0), now);
+        snapshot.update("duration", &PropertyData::Double(2000.0), now);
+        snapshot.update("demuxer-cache-duration", &PropertyData::Double(300.0), now);
+        snapshot.update("current-ao", &PropertyData::Str("wasapi"), now);
+        snapshot.update("paused-for-cache", &PropertyData::Flag(false), now);
+        snapshot.update("seeking", &PropertyData::Flag(false), now);
+        snapshot.update("core-idle", &PropertyData::Flag(false), now);
+        snapshot
+    }
+
+    #[test]
+    fn long_pause_is_not_mistaken_for_a_stall_immediately_after_resume() {
+        let now = Instant::now();
+        let mut snapshot = recovery_snapshot(now);
+        let mut recovery = ResumeStallRecovery::default();
+        let resumed = now + Duration::from_secs(77);
+        recovery.arm(resumed, Duration::from_secs(77));
+        assert_eq!(
+            recovery.assess(&snapshot, resumed + Duration::from_secs(1), true, true),
+            None
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, resumed + Duration::from_secs(3), true, true),
+            None
+        );
+        snapshot.update(
+            "time-pos",
+            &PropertyData::Double(500.5),
+            resumed + Duration::from_secs(3),
+        );
+        snapshot.update(
+            "audio-pts",
+            &PropertyData::Double(500.5),
+            resumed + Duration::from_secs(3),
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, resumed + Duration::from_secs(5), true, true),
+            None
+        );
+    }
+
+    #[test]
+    fn resumed_stall_recovery_is_bounded_to_two_async_actions() {
+        let now = Instant::now();
+        let snapshot = recovery_snapshot(now);
+        let mut recovery = ResumeStallRecovery::default();
+        recovery.arm(now, Duration::from_secs(77));
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(3), true, true),
+            None
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            Some(ResumeRecoveryDecision::Attempt(
+                ResumeRecoveryAction::AudioReload
+            ))
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(6), true, true),
+            None
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(13), true, true),
+            Some(ResumeRecoveryDecision::Attempt(
+                ResumeRecoveryAction::ResyncSeek(500.0)
+            ))
+        );
+        recovery.mark_recovery_seek_queued();
+        assert!(recovery.consume_recovery_seek());
+        assert!(!recovery.consume_recovery_seek());
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(20), true, true),
+            None
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(25), true, true),
+            Some(ResumeRecoveryDecision::Exhausted)
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(30), true, true),
+            None
+        );
+    }
+
+    #[test]
+    fn playback_progress_after_audio_reload_stops_further_recovery() {
+        let now = Instant::now();
+        let mut snapshot = recovery_snapshot(now);
+        let mut recovery = ResumeStallRecovery::default();
+        recovery.arm(now, Duration::from_secs(60));
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            Some(ResumeRecoveryDecision::Attempt(
+                ResumeRecoveryAction::AudioReload
+            ))
+        );
+        snapshot.update(
+            "time-pos",
+            &PropertyData::Double(502.0),
+            now + Duration::from_secs(7),
+        );
+        snapshot.update(
+            "audio-pts",
+            &PropertyData::Double(502.0),
+            now + Duration::from_secs(7),
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(7), true, true),
+            Some(ResumeRecoveryDecision::Recovered(1))
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(20), true, true),
+            None
+        );
+    }
+
+    #[test]
+    fn no_recovery_for_short_pauses_buffering_seeks_or_non_wasapi() {
+        let now = Instant::now();
+        let mut snapshot = recovery_snapshot(now);
+        let mut recovery = ResumeStallRecovery::default();
+        recovery.arm(now, Duration::from_secs(3));
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            None
+        );
+        recovery.arm(now, Duration::from_secs(30));
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), false, true),
+            None
+        );
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, false),
+            None
+        );
+        snapshot.update("paused-for-cache", &PropertyData::Flag(true), now);
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            None
+        );
+        snapshot.update("paused-for-cache", &PropertyData::Flag(false), now);
+        snapshot.update("seeking", &PropertyData::Flag(true), now);
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            None
+        );
+        snapshot.update("seeking", &PropertyData::Flag(false), now);
+        snapshot.update("current-ao", &PropertyData::Str("other"), now);
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            None
+        );
+        snapshot.update("current-ao", &PropertyData::Str("wasapi"), now);
+        snapshot.update("demuxer-cache-duration", &PropertyData::Double(2.0), now);
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            None
+        );
+        snapshot.update("demuxer-cache-duration", &PropertyData::Double(300.0), now);
+        snapshot.update("duration", &PropertyData::Double(510.0), now);
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(5), true, true),
+            None
+        );
+        recovery.clear();
+        assert_eq!(
+            recovery.assess(&snapshot, now + Duration::from_secs(10), true, true),
+            None
+        );
+    }
+
+    #[test]
+    fn resume_diagnostics_are_observed_without_property_reads() {
+        let now = Instant::now();
+        let mut snapshot = ResumeObserved::default();
+        assert_eq!(snapshot.value("time-pos"), "?");
+        assert_eq!(snapshot.flag("core-idle"), None);
+        snapshot.update("time-pos", &PropertyData::Double(90.25), now);
+        snapshot.update("avsync", &PropertyData::Double(0.0625), now);
+        snapshot.update("core-idle", &PropertyData::Flag(false), now);
+        snapshot.update("current-ao", &PropertyData::Str("wasapi"), now);
+        snapshot.update("hwdec-current", &PropertyData::Str("d3d11va"), now);
+        assert_eq!(snapshot.time_pos, Some(90.25));
+        assert_eq!(snapshot.value("avsync"), "0.0625");
+        assert_eq!(snapshot.flag("core-idle"), Some(false));
+        assert_eq!(snapshot.value("current-ao"), "wasapi");
+        assert_eq!(snapshot.value("hwdec-current"), "1");
+        assert_eq!(
+            snapshot.position_age_ms(now + Duration::from_millis(300)),
+            "300"
+        );
+        snapshot.update("audio-pts", &PropertyData::Double(90.23), now);
+        assert_eq!(
+            snapshot.audio_position_age_ms(now + Duration::from_millis(300)),
+            "300"
+        );
+        snapshot.update(
+            "time-pos",
+            &PropertyData::Double(90.5),
+            now + Duration::from_millis(300),
+        );
+        assert_eq!(
+            snapshot.position_age_ms(now + Duration::from_millis(400)),
+            "100"
+        );
+        snapshot.update("time-pos", &PropertyData::Flag(false), now);
+        assert_eq!(snapshot.time_pos, None);
+        snapshot.update("path", &PropertyData::Str("some-sensitive-url"), now);
+        assert_eq!(snapshot.value("path"), "?");
+        snapshot.update("unexpected-field", &PropertyData::Str("bad"), now);
+        assert_eq!(snapshot.value("unexpected-field"), "?");
+    }
+
+    #[test]
+    fn diagnostic_subscriptions_have_disjoint_ids_and_watchdog_phases() {
+        use std::collections::HashSet;
+        let ids = OBSERVED_PROPS
+            .iter()
+            .chain(RESUME_DIAG_PROPS.iter())
+            .map(|(_, id, _)| *id)
+            .chain(std::iter::once(HDR_STATUS_OBSERVED_PROP.1));
+        assert_eq!(ids.clone().count(), ids.collect::<HashSet<_>>().len());
+        assert_eq!(resume_event_loop_phase(1), "loop-start");
+        assert_eq!(resume_event_loop_phase(7), "hdr-observed-event");
+        assert_eq!(resume_event_loop_phase(4), "wait-event");
+        assert_eq!(resume_event_loop_phase(5), "handle-event");
+    }
+
+    #[test]
+    fn observed_progress_identifies_media_lag_and_clocks_stalling() {
+        let mut progress = ResumeProgress::default();
+        let mut snapshot = ResumeObserved::default();
+        let start = Instant::now();
+        snapshot.update("time-pos", &PropertyData::Double(100.0), start);
+        snapshot.update("audio-pts", &PropertyData::Double(100.0), start);
+        snapshot.update("frame-drop-count", &PropertyData::Int64(0), start);
+        snapshot.update("decoder-frame-drop-count", &PropertyData::Int64(0), start);
+        assert!(progress.sample(&snapshot, start).is_none());
+        let later = start + Duration::from_secs(5);
+        snapshot.update("time-pos", &PropertyData::Double(100.3), later);
+        snapshot.update("audio-pts", &PropertyData::Double(104.0), later);
+        snapshot.update("frame-drop-count", &PropertyData::Int64(7), later);
+        let line = progress.sample(&snapshot, later).unwrap();
+        assert!(line.contains("state=media-lagging-audio-clock"));
+        assert!(line.contains("vo_drop_delta=7"));
+        assert!(line.contains("decoder_drop_delta=0"));
+        progress.clear();
+        assert!(progress.sample(&snapshot, later).is_none());
+        let later = later + Duration::from_secs(5);
+        snapshot.update("time-pos", &PropertyData::Double(100.4), later);
+        snapshot.update("audio-pts", &PropertyData::Double(104.1), later);
+        assert!(progress
+            .sample(&snapshot, later)
+            .unwrap()
+            .contains("state=both-clocks-slow"));
+    }
+
+    #[test]
+    fn observed_progress_ignores_missing_clocks_and_seeks() {
+        let mut progress = ResumeProgress::default();
+        let mut snapshot = ResumeObserved::default();
+        let start = Instant::now();
+        snapshot.update("time-pos", &PropertyData::Double(100.0), start);
+        assert!(progress.sample(&snapshot, start).is_none());
+        snapshot.update("audio-pts", &PropertyData::Double(100.0), start);
+        assert!(progress.sample(&snapshot, start).is_none());
+        let later = start + Duration::from_secs(2);
+        snapshot.update("time-pos", &PropertyData::Double(200.0), later);
+        snapshot.update("audio-pts", &PropertyData::Double(200.0), later);
+        assert!(progress.sample(&snapshot, later).is_none());
+    }
+
+    #[test]
+    fn only_samples_after_a_real_pause_resume_transition() {
+        let mut trace = ResumeTraceState::default();
+        let now = Instant::now();
+        assert!(trace.on_pause_change(false, now).is_none());
+        assert!(trace.sample_age(now).is_none());
+        trace.on_pause_change(true, now);
+        assert_eq!(
+            trace.on_pause_change(false, now + Duration::from_secs(65)),
+            Some(Duration::from_secs(65))
+        );
+        assert_eq!(
+            trace.sample_age(now + Duration::from_secs(65)),
+            Some(Duration::ZERO)
+        );
+        assert!(trace.sample_age(now + Duration::from_secs(65)).is_none());
+        assert_eq!(
+            trace.sample_age(now + Duration::from_secs(65) + Duration::from_millis(250)),
+            Some(Duration::from_millis(250))
+        );
+    }
+
+    #[test]
+    fn re_pause_and_media_change_cancel_old_samples() {
+        let mut trace = ResumeTraceState::default();
+        let now = Instant::now();
+        trace.on_pause_change(true, now);
+        trace.on_pause_change(false, now + Duration::from_secs(1));
+        trace.on_pause_change(true, now + Duration::from_secs(2));
+        assert!(trace.sample_age(now + Duration::from_secs(3)).is_none());
+        trace.on_pause_change(false, now + Duration::from_secs(4));
+        trace.clear();
+        assert!(trace.sample_age(now + Duration::from_secs(5)).is_none());
+        assert!(trace
+            .on_pause_change(false, now + Duration::from_secs(6))
+            .is_none());
+    }
+
+    #[test]
+    fn only_marks_relevant_audio_and_stream_warnings() {
+        assert_eq!(
+            resume_warning_kind("cplayer", "Audio device underrun detected."),
+            Some("audio-underrun")
+        );
+        assert_eq!(
+            resume_warning_kind("cplayer", "Audio/Video desynchronisation detected!"),
+            Some("av-desync")
+        );
+        assert_eq!(
+            resume_warning_kind("curl", "Failure when receiving data from the peer"),
+            Some("network-retry")
+        );
+        assert_eq!(resume_warning_kind("cplayer", "Normal playback"), None);
+    }
+
+    #[test]
+    fn deep_samples_are_at_most_once_per_second_during_the_resume_window() {
+        let mut trace = ResumeTraceState::default();
+        let now = Instant::now();
+        trace.on_pause_change(true, now);
+        trace.on_pause_change(false, now + Duration::from_secs(1));
+        assert_eq!(
+            trace.sample_age(now + Duration::from_secs(1)),
+            Some(Duration::ZERO)
+        );
+        assert!(trace.detail_due(now + Duration::from_secs(1)));
+        assert_eq!(
+            trace.sample_age(now + Duration::from_millis(1250)),
+            Some(Duration::from_millis(250))
+        );
+        assert!(!trace.detail_due(now + Duration::from_millis(1250)));
+        assert_eq!(
+            trace.sample_age(now + Duration::from_secs(2)),
+            Some(Duration::from_secs(1))
+        );
+        assert!(trace.detail_due(now + Duration::from_secs(2)));
+        trace.on_pause_change(true, now + Duration::from_secs(3));
+        assert!(!trace.detail_due(now + Duration::from_secs(5)));
+    }
+
+    #[test]
+    fn stalled_clock_needs_three_seconds_of_active_playback() {
+        let mut clock = ResumePosition::default();
+        let now = Instant::now();
+        assert_eq!(clock.observe(now, Some(500.0), true), None);
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(2), Some(500.0), true),
+            None
+        );
+        assert_eq!(
+            clock.observe(now + RESUME_POSITION_STALL, Some(500.0), true),
+            Some(RESUME_POSITION_STALL)
+        );
+        // Report only once until the playback clock actually moves.
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(4), Some(500.0), true),
+            None
+        );
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(5), Some(501.0), true),
+            None
+        );
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(8), Some(501.0), true),
+            Some(RESUME_POSITION_STALL)
+        );
+    }
+
+    #[test]
+    fn seeking_buffering_and_pause_disarm_stationary_clock() {
+        let mut clock = ResumePosition::default();
+        let now = Instant::now();
+        clock.observe(now, Some(10.0), true);
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(5), Some(10.0), false),
+            None
+        );
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(8), Some(10.0), true),
+            None
+        );
+        clock.clear(); // seek, playback restart, or media change
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(15), Some(100.0), true),
+            None
+        );
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(16), None, true),
+            None
+        );
+        assert_eq!(
+            clock.observe(now + Duration::from_secs(17), Some(101.0), true),
+            None
+        );
+    }
+
+    #[test]
+    fn passive_health_starts_after_high_rate_trace_and_is_interval_bounded() {
+        let now = Instant::now();
+        let mut trace = ResumeTraceState::default();
+        trace.on_pause_change(true, now);
+        trace.on_pause_change(false, now + Duration::from_secs(1));
+        assert!(!trace.health_due(now + Duration::from_secs(2)));
+        assert!(!trace.health_due(now + Duration::from_secs(8)));
+        assert!(trace.sample_age(now + Duration::from_secs(10)).is_none());
+        assert!(trace.health_due(now + Duration::from_secs(10)));
+        assert!(!trace.health_due(now + Duration::from_secs(11)));
+        assert!(trace.health_due(now + Duration::from_secs(10) + RESUME_HEALTH_INTERVAL));
+        trace.on_pause_change(true, now + Duration::from_secs(16));
+        assert!(!trace.health_due(now + Duration::from_secs(30)));
+    }
+
+    #[test]
+    fn probe_expires_without_polling_indefinitely() {
+        let mut trace = ResumeTraceState::default();
+        let now = Instant::now();
+        trace.on_pause_change(true, now);
+        trace.on_pause_change(false, now + Duration::from_secs(1));
+        assert!(trace
+            .sample_age(
+                now + Duration::from_secs(1) + RESUME_TRACE_WINDOW + Duration::from_millis(1)
+            )
+            .is_none());
+        assert!(trace.active.is_none());
     }
 }

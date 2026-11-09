@@ -26,6 +26,9 @@ import {
 import { searchAddonIndex } from "@/lib/search-addon-index";
 import { createSearchRequestGuard } from "@/lib/search-request-guard";
 import { normalizeSearchQuery } from "@/lib/search-query";
+import { orderedMetadataAddons } from "@/lib/metadata-addons";
+import { addonKeyFromSource } from "@/lib/metadata-sources";
+import { addonsBeforeTmdb, addonTopMatch, prioritizedTopMatch } from "@/lib/search-top-match";
 import { searchManga } from "@/lib/manga/api";
 import type { MangaSummary } from "@/lib/manga/model";
 import { searchEBooks, type EBook } from "@/lib/ebook/api";
@@ -206,6 +209,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onAddonsChanged = () => {
       addonsRef.current = null;
+      setRetryNonce((value) => value + 1);
     };
     window.addEventListener("harbor:addons-changed", onAddonsChanged);
     return () => window.removeEventListener("harbor:addons-changed", onAddonsChanged);
@@ -254,26 +258,55 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       const normalizedQuery = normalizeSearchQuery(trimmed);
       const tmdbCacheKey = [
         settings.tmdbKey,
+        settings.addonOnlyMetadata,
+        settings.searchTmdbTopMatch,
         settings.tmdbLanguage,
         settings.translateTitles,
         excludeGenres.join(","),
         normalizedQuery,
       ].join("\0");
-      const addonsP = ensureAddons();
-      const tmdbPromise = guard<SearchResults | null>(
-        cachedSearch(tmdbCacheRef.current, tmdbCacheKey, TMDB_CACHE_TTL_MS, () =>
-          searchAll(settings.tmdbKey, trimmed, { excludeGenres }),
-        ),
-        null,
-      );
-      const animePromise = animeAllowed
-        ? guard(
-            cachedSearch(animeCacheRef.current, normalizedQuery, SECONDARY_CACHE_TTL_MS, () =>
-              searchAnime(trimmed),
-            ),
-            [],
-          )
-        : Promise.resolve([]);
+      const explicitSearchChain = settings.metadataSources?.search ?? [];
+      const configuredAddonOrder = (
+        explicitSearchChain.length ? explicitSearchChain : (settings.metadataSources?.title ?? [])
+      )
+        .map(addonKeyFromSource)
+        .filter((key): key is string => !!key);
+      const metadataOrder = configuredAddonOrder.length
+        ? configuredAddonOrder
+        : settings.metadataAddonOrder;
+      // Preserve the default addon order for fallback selection. The explicit
+      // TMDB Top Match toggle takes precedence when TMDB returns a result.
+      const searchChain = explicitSearchChain.length
+        ? explicitSearchChain
+        : ["__default_search_addons__", "tmdb"];
+      let searchAddons: Addon[] = [];
+      const addonsP = ensureAddons().then((addons) => {
+        const metadata = orderedMetadataAddons(addons, metadataOrder);
+        const keys = new Set(metadata.map((addon) => addon.transportUrl));
+        searchAddons = [...metadata, ...addons.filter((addon) => !keys.has(addon.transportUrl))];
+        return searchAddons;
+      });
+      const tmdbPromise =
+        settings.addonOnlyMetadata && !settings.searchTmdbTopMatch
+          ? Promise.resolve(null)
+          : guard<SearchResults | null>(
+              cachedSearch(tmdbCacheRef.current, tmdbCacheKey, TMDB_CACHE_TTL_MS, () =>
+                searchAll(settings.tmdbKey, trimmed, {
+                  excludeGenres,
+                  topMatchOnly: settings.addonOnlyMetadata,
+                }),
+              ),
+              null,
+            );
+      const animePromise =
+        animeAllowed && !settings.addonOnlyMetadata
+          ? guard(
+              cachedSearch(animeCacheRef.current, normalizedQuery, SECONDARY_CACHE_TTL_MS, () =>
+                searchAnime(trimmed),
+              ),
+              [],
+            )
+          : Promise.resolve([]);
       const mangaPromise: Promise<MangaSummary[]> = mangaAllowed
         ? guard(searchManga(trimmed), [])
         : Promise.resolve([]);
@@ -318,12 +351,14 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         ),
         [],
       );
-      const cinemetaPromise = guard(
-        cachedSearch(cinemetaCacheRef.current, normalizedQuery, SECONDARY_CACHE_TTL_MS, () =>
-          searchCinemeta(trimmed),
-        ),
-        { movies: [], series: [] },
-      );
+      const cinemetaPromise = settings.addonOnlyMetadata
+        ? Promise.resolve({ movies: [], series: [] })
+        : guard(
+            cachedSearch(cinemetaCacheRef.current, normalizedQuery, SECONDARY_CACHE_TTL_MS, () =>
+              searchCinemeta(trimmed),
+            ),
+            { movies: [], series: [] },
+          );
       let tmdbResult: SearchResults | null = null;
       const acc = {
         anime: [] as Awaited<typeof animePromise>,
@@ -362,19 +397,56 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           settings.hideContent.anime ? list.filter((m) => !metaLooksAnime(m)) : list;
         const mergedMovies = dropAnime(
           dedupeByTitle(
-            mergeMetas(mergeMetas(base.movies, acc.addon.movies), acc.cine.movies),
+            mergeMetas(
+              settings.addonOnlyMetadata
+                ? mergeMetas(acc.addon.movies, base.movies)
+                : mergeMetas(base.movies, acc.addon.movies),
+              acc.cine.movies,
+            ),
           ).filter(notAnimeDupe),
         );
         const mergedSeries = dropAnime(
           dedupeByTitle(
-            mergeMetas(mergeMetas(base.series, acc.addon.series), acc.cine.series),
+            mergeMetas(
+              settings.addonOnlyMetadata
+                ? mergeMetas(acc.addon.series, base.series)
+                : mergeMetas(base.series, acc.addon.series),
+              acc.cine.series,
+            ),
           ).filter(notAnimeDupe),
         );
         const shown = new Set<string>([...mergedMovies, ...mergedSeries].map((m) => m.id));
         const dedupedGroups = acc.groups
           .map((g) => ({ ...g, metas: dropAnime(g.metas.filter((m) => !shown.has(m.id))) }))
           .filter((g) => g.metas.length > 0);
-        const topMatch = base.topMatch;
+        const topMatchCandidates = dropAnime([
+          ...acc.addon.movies,
+          ...acc.addon.series,
+          ...acc.groups.flatMap((group) => group.metas),
+        ]);
+        const addonTop = addonTopMatch(searchAddons, topMatchCandidates, trimmed, metadataOrder);
+        const defaultSearchChain = searchChain[0] === "__default_search_addons__";
+        const tmdbAt = searchChain.indexOf("tmdb");
+        const beforeTmdb = defaultSearchChain
+          ? metadataOrder
+          : searchChain
+              .slice(0, Math.max(0, tmdbAt))
+              .map(addonKeyFromSource)
+              .filter((key): key is string => !!key);
+        const earlyAddons = defaultSearchChain
+          ? searchAddons
+          : addonsBeforeTmdb(searchAddons, searchChain);
+        const earlyAddonTop =
+          earlyAddons.length > 0
+            ? addonTopMatch(earlyAddons, topMatchCandidates, trimmed, beforeTmdb)
+            : null;
+        const topMatch = prioritizedTopMatch({
+          chain: searchChain,
+          tmdbTop: settings.searchTmdbTopMatch ? base.topMatch : null,
+          addonTop,
+          earlyAddonTop,
+          tmdbEnabled: settings.searchTmdbTopMatch,
+        });
         setResults({
           ...base,
           topMatch:
@@ -469,6 +541,10 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     aiHold,
     retryNonce,
     settings.tmdbKey,
+    settings.addonOnlyMetadata,
+    settings.searchTmdbTopMatch,
+    settings.metadataAddonOrder,
+    settings.metadataSources,
     settings.tmdbLanguage,
     settings.translateTitles,
     playlists,

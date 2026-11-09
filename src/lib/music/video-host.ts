@@ -19,6 +19,14 @@ let sourceKey = "";
 let sourceStream: MusicVideoStream | null = null;
 let detachTransport: (() => void) | null = null;
 
+/**
+ * mpv's internal volume is cubic while HTMLMediaElement.volume is linear.
+ * Without this conversion a music video is much louder than the same song played natively.
+ */
+export function musicVideoElementVolume(volume: number): number {
+  return Math.max(0, Math.min(1, Number.isFinite(volume) ? volume : 0)) ** 3;
+}
+
 export function musicVideoHost(): MusicVideoHost | null {
   if (host) return host;
   if (typeof document === "undefined") return null;
@@ -78,7 +86,7 @@ function attachTransport(nodes: MusicVideoHost, sound: HTMLAudioElement | null):
       if (sound) picture.currentTime = position;
     },
     setVolume: (next) => {
-      clock.volume = Math.max(0, Math.min(1, next));
+      clock.volume = musicVideoElementVolume(next);
     },
   });
   const time = () =>

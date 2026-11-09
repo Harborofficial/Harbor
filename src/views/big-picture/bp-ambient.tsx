@@ -7,6 +7,7 @@ import { useBigPictureRoute } from "@/lib/big-picture";
 import { useBpFocusedMeta } from "./bp-focus-meta";
 import { useArtGlow } from "./bp-art-color";
 import { bpHeroCandidates, type BpHeroCandidate, type BpHeroSource } from "./bp-art";
+import { reusableAnimeBackdrop } from "@/lib/providers/anime-art-quality";
 import { useBpEnrichFor } from "./use-bp-enrich";
 import { useBpLivePanels } from "./use-bp-live-panels";
 import { useBpTrailer } from "./use-bp-trailer";
@@ -44,13 +45,15 @@ export function BpAmbient({ pool, still }: { pool: Meta[]; still?: boolean }) {
   const metaId = meta?.id ?? "";
   const { settings } = useSettings();
   const rtl = isRtl(useUiLanguage());
+  const anime = route.kind === "anime";
+  const art = (url: string | undefined) => (anime ? reusableAnimeBackdrop(url) : url);
 
   const fallback = useMemo<BpHeroSource | null>(() => {
-    const background = pool.find((m) => m.background)?.background;
+    const background = pool.map((m) => art(m.background)).find(Boolean);
     if (background) return { url: background, portrait: false };
     const poster = pool.find((m) => m.poster)?.poster;
     return poster ? { url: poster, portrait: true } : null;
-  }, [pool]);
+  }, [pool, anime]);
   // The pool fallback is another title's artwork, so it can only ever answer for
   // nothing-focused. Listing it beside a focused title's own art meant that
   // whenever that title had not resolved yet the fallback won, committed under
@@ -58,13 +61,26 @@ export function BpAmbient({ pool, still }: { pool: Meta[]; still?: boolean }) {
   // That is the Spider-Man backdrop sitting behind a focused Silo.
   const candidates = useMemo(() => {
     const own: BpHeroSource[] = [
-      { url: detail?.gallery.backdrops[0], portrait: false },
-      { url: detail?.backdrop, portrait: false },
-      { url: meta?.background, portrait: false },
+      { url: art(detail?.gallery.backdrops[0]), portrait: false },
+      { url: art(detail?.backdrop), portrait: false },
+      { url: art(meta?.background), portrait: false },
+      ...(anime
+        ? pool
+            .slice(0, 6)
+            .map((m) => ({ url: art(m.background), portrait: false }))
+        : []),
       { url: meta?.poster, portrait: true },
     ];
     return bpHeroCandidates(meta ? own : fallback ? [fallback] : [], settings.heroFullQuality);
-  }, [detail?.backdrop, detail?.gallery.backdrops[0], meta, fallback, settings.heroFullQuality]);
+  }, [
+    anime,
+    pool,
+    detail?.backdrop,
+    detail?.gallery.backdrops[0],
+    meta,
+    fallback,
+    settings.heroFullQuality,
+  ]);
 
   const { src: trailerSrc } = useBpTrailer(ownsTitle ? meta : null);
   const [trailerReady, setTrailerReady] = useState(false);

@@ -1,4 +1,5 @@
 import { MusicPlaylistToolbar } from "@/components/music/music-playlist-toolbar";
+import { MusicPlaylistLinkActions } from "@/components/music/music-playlist-link";
 import { MusicPlaylistDuplicateConfirm } from "@/components/music/music-playlist-duplicate-confirm";
 import { MusicPlaylistLoading } from "@/components/music/music-skeletons";
 import { usePlaylistFilters } from "@/lib/music/use-playlist-filters";
@@ -18,6 +19,7 @@ import {
 import { useMusicPlayback } from "@/lib/music/use-music-playback";
 import {
   addTrackToMusicPlaylist,
+  confirmLinkedMusicPlaylistEdit,
   exportMusicM3u,
   listMusicPlaylists,
   removeTrackFromMusicPlaylist,
@@ -129,10 +131,11 @@ export function MusicPlaylistPage({
     return () => window.removeEventListener("keydown", escape, true);
   }, [active, close]);
 
-  const mutate = (run: Promise<MusicPlaylist>) => {
+  const mutate = async (run: () => Promise<MusicPlaylist>) => {
+    if (!playlist || !(await confirmLinkedMusicPlaylistEdit(playlist))) return;
     setWorking(true);
     setError(null);
-    void run
+    void run()
       .then(setPlaylist)
       .catch((reason) => setError(reason instanceof Error ? reason.message : String(reason)))
       .finally(() => setWorking(false));
@@ -144,21 +147,21 @@ export function MusicPlaylistPage({
       setDuplicateTrack(track);
       return;
     }
-    mutate(addTrackToMusicPlaylist(playlist.id, track));
+    void mutate(() => addTrackToMusicPlaylist(playlist.id, track));
   };
   const addDuplicateTrack = () => {
     if (!playlist || !duplicateTrack || working) return;
     const track = duplicateTrack;
     setDuplicateTrack(null);
-    mutate(addTrackToMusicPlaylist(playlist.id, track));
+    void mutate(() => addTrackToMusicPlaylist(playlist.id, track));
   };
   const removeTrack = (track: MusicTrack) => {
     if (!playlist || working) return;
-    mutate(removeTrackFromMusicPlaylist(playlist.id, track.id));
+    void mutate(() => removeTrackFromMusicPlaylist(playlist.id, track.id));
   };
   const moveTrack = (track: MusicTrack, toIndex: number) => {
     if (!playlist || working) return;
-    mutate(reorderMusicPlaylist(playlist.id, track.id, toIndex));
+    void mutate(() => reorderMusicPlaylist(playlist.id, track.id, toIndex));
   };
 
   const exportM3u = () => {
@@ -227,6 +230,12 @@ export function MusicPlaylistPage({
                 onExport={exportM3u}
               />
               <span>{t("music.card.trackCount", { count: playlist.tracks.length })}</span>
+              <MusicPlaylistLinkActions
+                key={playlist.id}
+                playlist={playlist}
+                disabled={working || loading}
+                onUpdated={setPlaylist}
+              />
             </div>
           </div>
           {duplicateTrack && (

@@ -16,6 +16,8 @@ import { EpisodeOrderSetting } from "../episode-order-setting";
 import { SportsApiSetting } from "../sports-api-setting";
 import { GameMetadataSetting } from "../game-metadata-setting";
 import { useProviderKeys, type ProviderKeysArgs } from "./provider-keys";
+import { MetadataSourceConfig } from "./metadata-source-config";
+import { Tag } from "../player-panel/choice";
 
 export function ProvidersTab(props: ProviderKeysArgs) {
   const { settings, update } = useSettings();
@@ -39,6 +41,7 @@ export function ProvidersTab(props: ProviderKeysArgs) {
   }, [authKey]);
   const t = useT();
   const { keyRow, modals } = useProviderKeys(props);
+  const [configureSources, setConfigureSources] = useState(false);
 
   return (
     <>
@@ -68,14 +71,53 @@ export function ProvidersTab(props: ProviderKeysArgs) {
       <Section title={t("Titles and descriptions")}>
         <SettingGroup>
           <ToggleRow
+            label={t("Disable built-in metadata")}
+            badge={<Tag text={t("Experimental")} accent />}
+            sub={t(
+              "Use installed addons and providers you configured. Disable Harbor's keyless built-in metadata and fallbacks. Restart Harbor after changing this option.",
+            )}
+            value={settings.addonOnlyMetadata}
+            onChange={(v) => {
+              update({ addonOnlyMetadata: v });
+              if (!v) setConfigureSources(false);
+            }}
+          />
+          {settings.addonOnlyMetadata && (
+            <SettingRow
+              label={t("Metadata source priority")}
+              desc={t(
+                "Choose which addons and configured providers supply each section. The first source with a value wins.",
+              )}
+            >
+              <button
+                type="button"
+                className={ROW_ACTION}
+                onClick={() => setConfigureSources(true)}
+              >
+                {t("Configure")}
+              </button>
+            </SettingRow>
+          )}
+          <ToggleRow
+            label={t("Use TMDB for Top Match in search")}
+            sub={t(
+              "Use your saved TMDB key for Top Match, even in addon-only mode. If unavailable or turned off, use your highest-priority metadata addon's search results.",
+            )}
+            value={settings.searchTmdbTopMatch}
+            onChange={(v) => update({ searchTmdbTopMatch: v })}
+          />
+          <ToggleRow
             label={t("Use Cinemeta for title metadata")}
+            lockReason={
+              settings.addonOnlyMetadata ? t("Controlled by disabled built-in metadata") : undefined
+            }
             sub={t(
               "Cinemeta supplies titles and descriptions. Turn it off when an installed metadata addon supplies them instead.",
             )}
             value={settings.cinemetaEnabled}
             onChange={(v) => update({ cinemetaEnabled: v })}
             warn={
-              !settings.cinemetaEnabled && !hasMetaAddon
+              !settings.addonOnlyMetadata && !settings.cinemetaEnabled && !hasMetaAddon
                 ? t(
                     "No metadata addon detected. Harbor is falling back to Cinemeta so titles still load, but turn this back on unless you are installing one.",
                   )
@@ -83,15 +125,10 @@ export function ProvidersTab(props: ProviderKeysArgs) {
             }
           />
           <ToggleRow
-            label={t("Prefer my installed metadata addon")}
-            sub={t(
-              "Try your addon first for titles and descriptions. Use Cinemeta when the addon has no result.",
-            )}
-            value={settings.preferCustomMetaAddon}
-            onChange={(v) => update({ preferCustomMetaAddon: v })}
-          />
-          <ToggleRow
             label={t("Use free IMDb data without a TMDB key")}
+            lockReason={
+              settings.addonOnlyMetadata ? t("Controlled by disabled built-in metadata") : undefined
+            }
             sub={t(
               "With no TMDB key, the About panel pulls cast, crew, and title info from a free IMDb source. TMDB is still used whenever a key is set.",
             )}
@@ -100,6 +137,8 @@ export function ProvidersTab(props: ProviderKeysArgs) {
           />
         </SettingGroup>
       </Section>
+
+      <MetadataSourceConfig open={configureSources} onClose={() => setConfigureSources(false)} />
 
       <Section title={t("Episode order")}>
         <SettingGroup>

@@ -24,6 +24,7 @@ function metaMappers(language: string) {
   };
   new Function("require", "module", "exports", output)(
     (name: string) => {
+      if (name === "@/lib/metadata-policy") return { addonOnlyMetadata: () => false };
       assert.ok(name in mocks, `unexpected import ${name}`);
       return mocks[name];
     },
@@ -60,10 +61,12 @@ function detailMapper(language: string, translateTitles = true) {
     "@/lib/storage-recovery": { setItemWithRecovery: () => undefined },
     "@/lib/episode-text-language": { episodeTextLanguage: () => language },
     "@/lib/season-name": { isGenericSeasonName: () => false },
+    "./movie-release-dates": { movieReleaseDates: () => [] },
   };
   let raw: Record<string, unknown>;
   new Function("require", "module", "exports", output)(
     (name: string) => {
+      if (name === "@/lib/metadata-policy") return { addonOnlyMetadata: () => false };
       assert.ok(name in mocks, `unexpected import ${name}`);
       return mocks[name];
     },

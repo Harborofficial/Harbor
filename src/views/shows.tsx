@@ -1,3 +1,4 @@
+import { usePinnedCatalogRows } from "./home/hooks/use-pinned-rows";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CatalogRows } from "@/components/catalog/catalog-rows";
@@ -27,7 +28,6 @@ import {
 } from "@/lib/stremio";
 import { listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
 import { localToLibraryItem } from "@/lib/continue-watching";
-import { clearLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -213,6 +213,13 @@ export function Shows({ active = true }: { active?: boolean }) {
     resurfaceLibrary,
     "exclude",
     manualWatchedVer,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    0,
+    settings.episodeHiding,
+    settings.animeCwEnd,
   );
 
   useEffect(() => {
@@ -286,7 +293,15 @@ export function Shows({ active = true }: { active?: boolean }) {
         })),
     [showCollections],
   );
-  const allRestRows = useMemo(() => [...collectionRows, ...restRows], [collectionRows, restRows]);
+  const pinnedRows = usePinnedCatalogRows("shows");
+  const allRestRows = useMemo(
+    () => [
+      ...pinnedRows.map((row) => ({ ...row, title: row.name })),
+      ...collectionRows,
+      ...restRows,
+    ],
+    [pinnedRows, collectionRows, restRows],
+  );
   const catalogRows = useMemo<ShowRow[]>(() => {
     if (top10.length < 10) return allRestRows;
     const trending = rows.find((r) => r.key === "trending");
@@ -335,9 +350,7 @@ export function Shows({ active = true }: { active?: boolean }) {
                   onDismiss={(item) =>
                     item.manualWatched
                       ? dismissManualWatched(item._id, { acknowledged: true })
-                      : item.local
-                        ? clearLocalCw(item._id, { acknowledged: true })
-                        : dismissCw(item, authKey, { acknowledged: true })
+                      : dismissCw(item, authKey, { acknowledged: true })
                   }
                 />
               ))}

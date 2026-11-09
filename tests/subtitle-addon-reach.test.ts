@@ -78,7 +78,7 @@ test("one slow addon manifest cannot drop every other local addon", () => {
 });
 
 test("a cached manifest resolves without any network wait", () => {
-  assert.match(source, /if \(l\.manifest\) return Promise\.resolve\(/);
+  assert.match(source, /if \(l\.manifest\)\s*return Promise\.resolve\(/);
 });
 
 const search = readFileSync(new URL("../src/lib/subtitles/search.ts", import.meta.url), "utf8");
@@ -102,9 +102,11 @@ const subtitlePanelSize = readFileSync(
 test("one slow subtitle addon cannot discard faster addon results", () => {
   assert.match(
     src,
-    /callOne\(addon, type, id, extra, timeoutMs\)/,
+    /callOne\(addon, type, candidate, extra, remaining\)/,
     "each addon request needs its own timeout",
   );
+  assert.match(src, /const deadline = Date\.now\(\) \+ timeoutMs/);
+  assert.match(src, /if \(remaining <= 0\) break/);
   assert.doesNotMatch(
     search,
     /withSubtitleTimeout\(searchAddons\(/,

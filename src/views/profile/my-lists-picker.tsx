@@ -5,13 +5,24 @@ import { Poster } from "@/components/poster";
 import { useCustomLists } from "@/lib/custom-lists";
 import { useT } from "@/lib/i18n";
 import { currentAuthor } from "@/lib/theme-auth";
+import { fetchMediaListCollection, readCachedCollection } from "@/lib/anilist/lists";
+import { useAnilist } from "@/lib/anilist/provider";
+import { anilistEntryToMeta } from "@/lib/anilist/to-meta";
+import type { AnilistListGroup } from "@/lib/anilist/types";
+import { fetchMalList, readCachedMalList } from "@/lib/mal/lists";
+import { useMal } from "@/lib/mal/provider";
+import { malAnimeToMeta } from "@/lib/mal/to-meta";
+import type { MalListGroup } from "@/lib/mal/types";
+import { RAIL_ORDER } from "@/lib/use-anilist-anime-rails";
+import { MAL_RAIL_ORDER } from "@/lib/use-mal-anime-rails";
 import {
+  MAX_FEATURED_ITEMS,
   MAX_FEATURED_LISTS,
   buildFeaturedPayload,
   fetchFeaturedLists,
-  readLocalLists,
   saveFeaturedLists,
   toPickableList,
+  type FeaturedItem,
   type FeaturedList,
   type PickableList,
 } from "@/lib/social/featured-lists";
@@ -20,18 +31,63 @@ function normName(value: string): string {
   return value.replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 40);
 }
 
-function matchSelection(featured: FeaturedList[], lists: PickableList[]): string[] {
-  const byName = new Map<string, string>();
-  for (const list of lists) {
-    const key = normName(list.name);
-    if (!byName.has(key)) byName.set(key, list.id);
+type ConvertedMeta = ReturnType<typeof anilistEntryToMeta>;
+
+function toItems(metas: ConvertedMeta[]): FeaturedItem[] {
+  const items: FeaturedItem[] = [];
+  for (const meta of metas) {
+    if (meta)
+      items.push({ id: meta.id, name: meta.name, poster: meta.poster ?? "", type: meta.type });
   }
-  const ids: string[] = [];
-  for (const f of featured) {
-    const id = byName.get(normName(f.name));
-    if (id && !ids.includes(id)) ids.push(id);
+  return items;
+}
+
+/** Tracker lists can be featured next to the local ones. */
+function anilistPickable(groups: AnilistListGroup[]): PickableList[] {
+  const byStatus = new Map(groups.filter((g) => !g.isCustomList).map((g) => [g.status, g.entries]));
+  const lists: PickableList[] = [];
+  for (const rail of RAIL_ORDER) {
+    const items = toItems(
+      rail.statuses
+        .flatMap((status) => byStatus.get(status) ?? [])
+        .filter((entry) => !entry.private)
+        .slice(0, MAX_FEATURED_ITEMS)
+        .map(anilistEntryToMeta),
+    );
+    if (items.length) {
+      lists.push({ id: `anilist:${rail.key}`, name: `AniList · ${rail.title}`, items });
+    }
   }
-  return ids.slice(0, MAX_FEATURED_LISTS);
+  for (const group of groups) {
+    if (!group.isCustomList || !group.name) continue;
+    const items = toItems(
+      group.entries
+        .filter((entry) => !entry.private)
+        .slice(0, MAX_FEATURED_ITEMS)
+        .map(anilistEntryToMeta),
+    );
+    if (items.length) {
+      lists.push({ id: `anilist:custom:${group.name}`, name: `AniList · ${group.name}`, items });
+    }
+  }
+  return lists;
+}
+
+function malPickable(groups: MalListGroup[]): PickableList[] {
+  const byStatus = new Map(groups.map((g) => [g.status, g.entries]));
+  const lists: PickableList[] = [];
+  for (const rail of MAL_RAIL_ORDER) {
+    const items = toItems(
+      rail.statuses
+        .flatMap((status) => byStatus.get(status) ?? [])
+        .slice(0, MAX_FEATURED_ITEMS)
+        .map((entry) => malAnimeToMeta(entry.anime)),
+    );
+    if (items.length) {
+      lists.push({ id: `mal:${rail.key}`, name: `MyAnimeList · ${rail.title}`, items });
+    }
+  }
+  return lists;
 }
 
 function ListRow({
@@ -171,12 +227,65 @@ function SelectedRow({
 export function MyListsPicker({ onClose }: { onClose?: () => void }) {
   const t = useT();
   const local = useCustomLists();
-  const lists = useMemo(() => local.map(toPickableList), [local]);
+  const { session: anilistSession } = useAnilist();
+  const { isConnected: malConnected } = useMal();
+  const anilistUserId = anilistSession?.userId;
+  const [anilistGroups, setAnilistGroups] = useState<AnilistListGroup[]>(() =>
+    anilistUserId != null ? (readCachedCollection(anilistUserId) ?? []) : [],
+  );
+  const [malGroups, setMalGroups] = useState<MalListGroup[]>(() =>
+    malConnected ? (readCachedMalList() ?? []) : [],
+  );
   const [selected, setSelected] = useState<string[]>([]);
   const [served, setServed] = useState<FeaturedList[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (anilistUserId == null) {
+      setAnilistGroups([]);
+      return;
+    }
+    const cached = readCachedCollection(anilistUserId);
+    if (cached) setAnilistGroups(cached);
+    let cancelled = false;
+    fetchMediaListCollection(anilistUserId)
+      .then((groups) => {
+        if (!cancelled) setAnilistGroups(groups);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [anilistUserId]);
+
+  useEffect(() => {
+    if (!malConnected) {
+      setMalGroups([]);
+      return;
+    }
+    const cached = readCachedMalList();
+    if (cached) setMalGroups(cached);
+    let cancelled = false;
+    fetchMalList()
+      .then((groups) => {
+        if (!cancelled) setMalGroups(groups);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [malConnected]);
+
+  const lists = useMemo(
+    () => [
+      ...local.map(toPickableList),
+      ...anilistPickable(anilistGroups),
+      ...malPickable(malGroups),
+    ],
+    [local, anilistGroups, malGroups],
+  );
 
   const ghosts = useMemo(() => {
     const localNames = new Set(lists.map((l) => normName(l.name)));
@@ -191,13 +300,20 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
   }, [lists, served]);
   const entries = useMemo(() => [...lists, ...ghosts], [lists, ghosts]);
   const ghostIds = useMemo(() => new Set(ghosts.map((g) => g.id)), [ghosts]);
+  const byName = useMemo(() => {
+    const map = new Map<string, PickableList>();
+    for (const entry of entries) {
+      const key = normName(entry.name);
+      if (!map.has(key)) map.set(key, entry);
+    }
+    return map;
+  }, [entries]);
   const selectedEntries = useMemo(
-    () =>
-      selected.map((id) => entries.find((e) => e.id === id)).filter((l): l is PickableList => !!l),
-    [selected, entries],
+    () => selected.map((name) => byName.get(name)).filter((l): l is PickableList => !!l),
+    [selected, byName],
   );
   const unselectedEntries = useMemo(
-    () => entries.filter((e) => !selected.includes(e.id)),
+    () => entries.filter((e) => !selected.includes(normName(e.name))),
     [entries, selected],
   );
 
@@ -208,13 +324,9 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
     fetchFeaturedLists(handle, ctrl.signal)
       .then((featured) => {
         setServed(featured);
-        const localPick = readLocalLists();
-        const localNames = new Set(localPick.map((l) => normName(l.name)));
-        const matched = matchSelection(featured, localPick);
-        const gIds = featured
-          .filter((f) => !localNames.has(normName(f.name)))
-          .map((f) => "srv:" + f.id);
-        setSelected([...matched, ...gIds]);
+        setSelected(
+          Array.from(new Set(featured.map((f) => normName(f.name)))).slice(0, MAX_FEATURED_LISTS),
+        );
         setLoaded(true);
       })
       .catch(() => {});
@@ -229,17 +341,17 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const toggle = (id: string) => {
+  const toggle = (name: string) => {
     setSelected((cur) => {
-      if (cur.includes(id)) return cur.filter((x) => x !== id);
+      if (cur.includes(name)) return cur.filter((x) => x !== name);
       if (cur.length >= MAX_FEATURED_LISTS) return cur;
-      return [...cur, id];
+      return [...cur, name];
     });
   };
 
-  const move = (id: string, dir: -1 | 1) => {
+  const move = (name: string, dir: -1 | 1) => {
     setSelected((cur) => {
-      const i = cur.indexOf(id);
+      const i = cur.indexOf(name);
       const j = i + dir;
       if (i < 0 || j < 0 || j >= cur.length) return cur;
       const next = [...cur];
@@ -253,8 +365,7 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
     setSaving(true);
     setError(null);
     try {
-      const byId = new Map(entries.map((l) => [l.id, l] as const));
-      const picked = selected.map((id) => byId.get(id)).filter((l): l is PickableList => !!l);
+      const picked = selected.map((name) => byName.get(name)).filter((l): l is PickableList => !!l);
       await saveFeaturedLists(buildFeaturedPayload(picked, served), true);
       onClose?.();
     } catch {
@@ -311,9 +422,9 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
                       index={i}
                       total={selectedEntries.length}
                       ghost={ghostIds.has(list.id)}
-                      onMoveUp={() => move(list.id, -1)}
-                      onMoveDown={() => move(list.id, 1)}
-                      onRemove={() => toggle(list.id)}
+                      onMoveUp={() => move(normName(list.name), -1)}
+                      onMoveDown={() => move(normName(list.name), 1)}
+                      onRemove={() => toggle(normName(list.name))}
                     />
                   ))}
                 </div>
@@ -332,7 +443,7 @@ export function MyListsPicker({ onClose }: { onClose?: () => void }) {
                       selected={false}
                       ghost={ghostIds.has(list.id)}
                       disabled={selected.length >= MAX_FEATURED_LISTS}
-                      onToggle={() => toggle(list.id)}
+                      onToggle={() => toggle(normName(list.name))}
                     />
                   ))}
                 </div>

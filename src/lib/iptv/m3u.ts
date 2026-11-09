@@ -208,6 +208,34 @@ export function groupChannels(channels: IptvChannel[]): Map<string, IptvChannel[
   return map;
 }
 
+const EPG_HEADER_ATTRS = ["url-tvg", "x-tvg-url", "tvg-url"];
+
+export function readM3uHeaderEpgUrls(text: string, baseUrl?: string): string[] {
+  const header = text.replace(/^\uFEFF/, "").split(/\r?\n/, 1)[0]?.trim() ?? "";
+  if (!/^#EXTM3U(?:\s|$)/i.test(header)) return [];
+  const urls: string[] = [];
+  for (const name of EPG_HEADER_ATTRS) {
+    const re = new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, "gi");
+    for (const match of header.matchAll(re)) {
+      for (const raw of (match[1] ?? match[2] ?? "").split(",")) {
+        const url = resolveHttpUrl(raw.trim(), baseUrl);
+        if (url && !urls.includes(url)) urls.push(url);
+      }
+    }
+  }
+  return urls;
+}
+
+function resolveHttpUrl(value: string, baseUrl?: string): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value, baseUrl);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 export function deriveEpgFromGetPhp(playlistUrl: string): string | null {
   const urls = deriveEpgUrls(playlistUrl);
   return urls[0] ?? null;

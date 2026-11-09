@@ -477,8 +477,127 @@ pub struct TrailerInfo {
 #[derive(Serialize)]
 pub struct YoutubeStream {
     url: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    audio_url: Option<String>,
     headers: std::collections::BTreeMap<String, String>,
     transcode: bool,
+}
+
+fn requested_height(quality: Option<&str>) -> Option<u64> {
+    match quality {
+        Some("360p") => Some(360),
+        Some("720p") => Some(720),
+        Some("1080p") => Some(1080),
+        _ => None,
+    }
+}
+
+fn format_has_audio(format: &serde_json::Value) -> bool {
+    format["acodec"]
+        .as_str()
+        .is_some_and(|codec| !codec.is_empty() && codec != "none")
+}
+
+fn select_hls_video<'a>(
+    formats: &'a [serde_json::Value],
+    max_height: Option<u64>,
+) -> Option<&'a serde_json::Value> {
+    formats
+        .iter()
+        .filter(|format| {
+            format["protocol"] == "m3u8_native"
+                && format["vcodec"]
+                    .as_str()
+                    .is_some_and(|codec| codec.starts_with("avc1"))
+                && format["url"].as_str().is_some()
+                && format["height"].as_u64().is_some_and(|height| {
+                    max_height.map_or(true, |cap| height <= cap)
+                })
+        })
+        .max_by_key(|format| format["height"].as_u64().unwrap_or(0))
+}
+
+fn select_hls_audio(formats: &[serde_json::Value]) -> Option<String> {
+    formats
+        .iter()
+        .filter(|format| {
+            format["protocol"] == "m3u8_native"
+                && format["vcodec"].as_str() == Some("none")
+                && format["url"].as_str().is_some()
+        })
+        .max_by_key(|format| {
+            (
+                format["language_preference"].as_i64().unwrap_or(0),
+                format["format_id"]
+                    .as_str()
+                    .and_then(|id| id.split('-').next())
+                    .and_then(|id| id.parse::<i64>().ok())
+                    .unwrap_or(0),
+            )
+        })
+        .and_then(|format| format["url"].as_str().map(str::to_string))
+}
+
+fn highest_video_height(formats: &[serde_json::Value]) -> u64 {
+    formats
+        .iter()
+        .filter(|format| {
+            format["url"].as_str().is_some()
+                && format["vcodec"]
+                    .as_str()
+                    .is_some_and(|codec| !codec.is_empty() && codec != "none")
+        })
+        .filter_map(|format| format["height"].as_u64())
+        .max()
+        .unwrap_or(0)
+}
+
+fn select_muxed<'a>(
+    formats: &'a [serde_json::Value],
+    max_height: Option<u64>,
+) -> Option<&'a serde_json::Value> {
+    formats
+        .iter()
+        .filter(|format| {
+            format["url"].as_str().is_some()
+                && format["protocol"]
+                    .as_str()
+                    .is_some_and(|protocol| protocol != "m3u8_native" && protocol != "mhtml")
+                && format["vcodec"]
+                    .as_str()
+                    .is_some_and(|codec| !codec.is_empty() && codec != "none")
+                && format["acodec"]
+                    .as_str()
+                    .is_some_and(|codec| !codec.is_empty() && codec != "none")
+                && format["height"].as_u64().is_some_and(|height| {
+                    max_height.map_or(true, |cap| height <= cap)
+                })
+        })
+        .max_by_key(|format| format["height"].as_u64().unwrap_or(0))
+}
+
+fn stream_from_format(
+    format: &serde_json::Value,
+    audio_url: Option<String>,
+    transcode: bool,
+) -> Result<YoutubeStream, String> {
+    let url = format["url"]
+        .as_str()
+        .filter(|url| url.starts_with("https://"))
+        .ok_or_else(|| "YouTube did not return a playable stream".to_string())?;
+    let headers = serde_json::from_value(
+        format
+            .get("http_headers")
+            .cloned()
+            .unwrap_or_else(|| serde_json::json!({})),
+    )
+    .map_err(|_| "YouTube returned invalid request headers".to_string())?;
+    Ok(YoutubeStream {
+        url: url.to_string(),
+        audio_url,
+        headers,
+        transcode,
+    })
 }
 
 #[tauri::command]
@@ -501,40 +620,98 @@ pub async fn resolve_youtube_stream(
     let output = crate::ytdlp_update::run(&app, args, Duration::from_secs(45), "YouTube stream").await?;
     let metadata: serde_json::Value = serde_json::from_slice(&output.stdout)
         .map_err(|_| "YouTube did not return stream metadata".to_string())?;
-    // YouTube can reject progressive URLs while its HLS delivery remains usable.
-    // Select H.264 and use the master manifest so FFmpeg also receives the audio.
-    let height = match quality.as_deref() {
-        Some("360p") => 360,
-        Some("720p") => 720,
-        _ => 1080,
-    };
     let formats = metadata.get("formats").and_then(serde_json::Value::as_array);
-    let hls = formats.and_then(|formats| formats.iter().filter(|format| {
-        format["protocol"] == "m3u8_native"
-            && format["vcodec"].as_str().is_some_and(|codec| codec.starts_with("avc1"))
-            && format["height"].as_u64().is_some_and(|value| value <= height)
-    }).max_by_key(|format| format["height"].as_u64().unwrap_or(0)));
-    let Some(hls) = hls else {
+
+    // Addon YouTube sources call this without a quality preference. Keep the
+    // master manifest there: those callers do not pass a separate audio URL
+    // through the proxy.
+    if quality.is_none() {
+        if let Some(formats) = formats {
+            if let Some(hls) = select_hls_video(formats, None) {
+                let mut payload = hls.clone();
+                payload["url"] = payload
+                    .get("manifest_url")
+                    .cloned()
+                    .ok_or_else(|| "YouTube did not return an HLS master manifest".to_string())?;
+                let stream = stream_from_format(&payload, None, true)?;
+                verify_youtube_stream(&stream).await?;
+                return Ok(stream);
+            }
+            if let Some(muxed) = select_muxed(formats, None) {
+                let stream = stream_from_format(muxed, None, false)?;
+                verify_youtube_stream(&stream).await?;
+                return Ok(stream);
+            }
+        }
         let stream = parse_youtube_stream(&output.stdout)?;
         verify_youtube_stream(&stream).await?;
         return Ok(stream);
-    };
-    let mut payload = hls.clone();
-    payload["url"] = payload.get("manifest_url").cloned()
-        .ok_or_else(|| "YouTube did not return an HLS master manifest".to_string())?;
-    let mut stream = parse_youtube_stream(&serde_json::to_vec(&payload).map_err(|e| e.to_string())?)?;
-    stream.transcode = true;
-    verify_youtube_stream(&stream).await?;
-    Ok(stream)
+    }
+
+    // Trailer playback always passes a quality. Play the selected HLS variant
+    // directly: the master playlist lets FFmpeg pick the first (lowest)
+    // rendition, and separate HLS audio must be muxed in.
+    let max_height = requested_height(quality.as_deref());
+    if let Some(formats) = formats {
+        let available_height = highest_video_height(formats);
+        let target_height = max_height.map_or(available_height, |cap| cap.min(available_height));
+        if let Some(hls) = select_hls_video(formats, max_height) {
+            let selected_height = hls["height"].as_u64().unwrap_or(0);
+            if selected_height >= target_height {
+                let audio_url = if format_has_audio(hls) {
+                    None
+                } else {
+                    Some(select_hls_audio(formats).ok_or_else(|| {
+                        "YouTube did not return an HLS audio stream".to_string()
+                    })?)
+                };
+                let stream = stream_from_format(hls, audio_url, true)?;
+                verify_youtube_stream(&stream).await?;
+                return Ok(stream);
+            }
+        }
+
+        // Progressive streams are a single muxed URL, so they need no proxy
+        // muxing. Only use one when it meets the requested quality.
+        if let Some(muxed) = select_muxed(formats, max_height) {
+            let selected_height = muxed["height"].as_u64().unwrap_or(0);
+            if selected_height >= target_height {
+                let stream = stream_from_format(muxed, None, false)?;
+                verify_youtube_stream(&stream).await?;
+                return Ok(stream);
+            }
+        }
+    }
+
+    // Let the caller use the download path, which merges the best available
+    // video and audio, rather than silently playing below the selected quality.
+    Err("YouTube has no stream at the requested quality".to_string())
 }
 
 async fn verify_youtube_stream(stream: &YoutubeStream) -> Result<(), String> {
+    let video = verify_media_url(&stream.url, &stream.headers);
+    let audio = async {
+        match stream.audio_url.as_deref() {
+            Some(url) => verify_media_url(url, &stream.headers).await,
+            None => Ok(()),
+        }
+    };
+    let (video, audio) = tokio::join!(video, audio);
+    video?;
+    audio?;
+    Ok(())
+}
+
+async fn verify_media_url(
+    url: &str,
+    headers: &std::collections::BTreeMap<String, String>,
+) -> Result<(), String> {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
         .build()
         .map_err(|_| "Could not verify YouTube playback".to_string())?;
-    let mut request = client.get(&stream.url);
-    for (name, value) in &stream.headers {
+    let mut request = client.get(url);
+    for (name, value) in headers {
         request = request.header(name, value);
     }
     // Extraction can succeed while the CDN refuses the URL. Test an actual
@@ -552,20 +729,14 @@ async fn verify_youtube_stream(stream: &YoutubeStream) -> Result<(), String> {
     }
     match response.chunk().await {
         Ok(Some(bytes)) if !bytes.is_empty() => Ok(()),
-        _ => Err("YouTube returned no video bytes".to_string()),
+        _ => Err("YouTube returned no media bytes".to_string()),
     }
 }
 
 fn parse_youtube_stream(bytes: &[u8]) -> Result<YoutubeStream, String> {
     let payload: serde_json::Value = serde_json::from_slice(bytes)
         .map_err(|_| "YouTube did not return stream metadata".to_string())?;
-    let url = payload.get("url").and_then(serde_json::Value::as_str)
-        .filter(|url| url.starts_with("https://"))
-        .ok_or_else(|| "YouTube did not return a playable stream".to_string())?;
-    let headers = serde_json::from_value(
-        payload.get("http_headers").cloned().unwrap_or_else(|| serde_json::json!({})),
-    ).map_err(|_| "YouTube returned invalid request headers".to_string())?;
-    Ok(YoutubeStream { url: url.to_string(), headers, transcode: false })
+    stream_from_format(&payload, None, false)
 }
 
 #[tauri::command]

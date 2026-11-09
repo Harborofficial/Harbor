@@ -1,19 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  fetchCalendarRange,
-  fetchCustomCalendar,
-  monthRangeISO,
-  type CalendarItem,
-} from "@/lib/calendar";
-import {
-  fetchAnticipatedCalendar,
-  fetchAniListAiringCalendar,
-  fetchAnimeDubCalendar,
-  fetchLibraryCalendar,
-  fetchSimklCalendar,
-  fetchSimklPremieresCalendar,
-  fetchTraktCalendar,
-} from "@/lib/calendar-sources";
+import { monthRangeISO, type CalendarItem } from "@/lib/calendar-core";
 import type { Settings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 
@@ -75,48 +61,79 @@ export function useCalendarData({
       if (source === "library") {
         if (!authKey) return stop();
         return run(
-          fetchLibraryCalendar(authKey, year, month, {
-            tmdbKey: settings.tmdbKey,
-            includeTrakt: traktConnected,
-          }),
+          import("@/lib/calendar-library").then(({ fetchLibraryCalendar }) =>
+            fetchLibraryCalendar(authKey, year, month, {
+              tmdbKey: settings.tmdbKey,
+              includeTrakt: traktConnected,
+              onProgress: (rows) => {
+                if (!cancelled) setItems(rows);
+              },
+            }),
+          ),
         );
       }
       if (source === "trakt") {
         if (!traktConnected) return stop();
-        return run(fetchTraktCalendar(year, month));
+        return run(
+          import("@/lib/calendar-sources").then(({ fetchTraktCalendar }) =>
+            fetchTraktCalendar(year, month),
+          ),
+        );
       }
       if (source === "simkl") {
         if (!simklConnected) return stop();
-        return run(fetchSimklCalendar(year, month, { tmdbKey: settings.tmdbKey }));
+        return run(
+          import("@/lib/calendar-sources").then(({ fetchSimklCalendar }) =>
+            fetchSimklCalendar(year, month, { tmdbKey: settings.tmdbKey }),
+          ),
+        );
       }
       if (source === "simkl-anticipated") {
-        return run(fetchSimklPremieresCalendar(year, month));
+        return run(
+          import("@/lib/calendar-sources").then(({ fetchSimklPremieresCalendar }) =>
+            fetchSimklPremieresCalendar(year, month),
+          ),
+        );
       }
       if (source === "anime") {
         return run(
-          animeDub
-            ? fetchAnimeDubCalendar(year, month)
-            : fetchAniListAiringCalendar(year, month),
+          import("@/lib/calendar-sources").then((sources) =>
+            animeDub
+              ? sources.fetchAnimeDubCalendar(year, month)
+              : sources.fetchAniListAiringCalendar(year, month),
+          ),
         );
       }
       if (source === "anticipated") {
-        return run(fetchAnticipatedCalendar(year, month));
+        return run(
+          import("@/lib/calendar-sources").then(({ fetchAnticipatedCalendar }) =>
+            fetchAnticipatedCalendar(year, month),
+          ),
+        );
       }
       if (source === "custom") {
         if (!settings.tmdbKey) return stop();
         const { start, end } = monthRangeISO(year, month);
         const extras: Promise<CalendarItem[]>[] = [];
         if (settings.customCalendar.includeTraktAnticipated) {
-          extras.push(fetchAnticipatedCalendar(year, month).catch(() => []));
+          extras.push(
+            import("@/lib/calendar-sources")
+              .then(({ fetchAnticipatedCalendar }) => fetchAnticipatedCalendar(year, month))
+              .catch(() => []),
+          );
         }
         if (settings.customCalendar.includeTraktWatchlist && traktConnected) {
-          extras.push(fetchTraktCalendar(year, month).catch(() => []));
+          extras.push(
+            import("@/lib/calendar-sources")
+              .then(({ fetchTraktCalendar }) => fetchTraktCalendar(year, month))
+              .catch(() => []),
+          );
         }
         return run(
           Promise.all(extras)
             .then((batches) => batches.flat())
             .then((extra) =>
-              fetchCustomCalendar({
+              import("@/lib/calendar").then(({ fetchCustomCalendar }) => fetchCustomCalendar({
                 apiKey: settings.tmdbKey,
                 region: settings.region,
                 filters: {
@@ -129,13 +146,17 @@ export function useCalendarData({
                 start,
                 end,
                 extra,
-              }),
+              })),
             ),
         );
       }
       if (!settings.tmdbKey) return stop();
       const { start, end } = monthRangeISO(year, month);
-      return run(fetchCalendarRange(settings.tmdbKey, start, end, settings.region));
+      return run(
+        import("@/lib/calendar").then(({ fetchCalendarRange }) =>
+          fetchCalendarRange(settings.tmdbKey, start, end, settings.region),
+        ),
+      );
     };
 
     dispatch();
@@ -158,10 +179,14 @@ export function useCalendarData({
   ]);
 
   useEffect(() => {
-    if (simklConnected && source !== "games") {
-      void fetchSimklPremieresCalendar(year, month).catch(() => {});
-    }
-  }, [simklConnected, year, month, source]);
+    if (!simklConnected || source === "games" || source === "simkl-anticipated" || loading) return;
+    const timer = window.setTimeout(() => {
+      void import("@/lib/calendar-sources")
+        .then(({ fetchSimklPremieresCalendar }) => fetchSimklPremieresCalendar(year, month))
+        .catch(() => {});
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [simklConnected, year, month, source, loading]);
 
   return { items, loading, error };
 }

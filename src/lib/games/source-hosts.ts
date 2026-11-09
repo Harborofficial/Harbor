@@ -16,3 +16,11 @@ export type HostCheck = {
   limitsUnavailable: boolean;
   checkedAt: number;
 };
+
+/** Host directories report provider status, not guaranteed link availability. */
+export function hostCheckNote(state: HostCheck["state"]): string {
+  if (state === "down") return "games.sources.host.downNote";
+  if (state === "queue") return "games.sources.host.queueNote";
+  if (state === "unknown") return "games.sources.host.unknownNote";
+  return "games.sources.host.fileNote";
+}

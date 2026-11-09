@@ -1,5 +1,9 @@
 import { compatibleVocalVersion, shouldResolvePreferredSource } from "./source-version";
-import { cancelMusicQueueAutomation, markMusicQueueAutomationStarted, ownsMusicQueueAutomation } from "./queue-automation";
+import {
+  cancelMusicQueueAutomation,
+  markMusicQueueAutomationStarted,
+  ownsMusicQueueAutomation,
+} from "./queue-automation";
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
 import { hydrateListeningAffinity, observeMusicListening } from "./listening-affinity";
 import { filterBlockedTracks, hydrateArtistBlockStore } from "./artist-blocks";
@@ -16,9 +20,14 @@ import {
 } from "./deck-sync";
 import { createDeckAdoption, nativePlaybackAdoption } from "./deck-primary";
 import { engineSnapshot } from "./decks";
-import { insertIntoQueue, markManuallyQueued, queueInsertIndex } from "./queue-insert";
+import { markManuallyQueued, queueInsertAfterManualBlock, withTrackNext } from "./queue-insert";
 import { queueTrackKey } from "./queue-order";
 import { adoptRequestedIdentity } from "./queue-source";
+import {
+  shouldReportSpotifyStartupTimeout,
+  SPOTIFY_STARTUP_TIMEOUT_MESSAGE,
+  SPOTIFY_STARTUP_TIMEOUT_MS,
+} from "./spotify-startup";
 import { explicitnessOf, rankByExplicitness } from "./explicit-preference";
 import {
   loadPinnedSources,
@@ -26,11 +35,22 @@ import {
   pinSourceFor,
   unpinSourceFor,
 } from "./pinned-sources";
-import { musicAdvance, musicPrevious, musicWarmTargets, resetMusicOrder } from "./transport";
+import {
+  getMusicTransport,
+  musicAdvance,
+  musicPrevious,
+  musicWarmTargets,
+  resetMusicOrder,
+  setMusicPriorityNext,
+} from "./transport";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useSyncExternalStore } from "react";
-import { readMusicPreference, readStoredMusicPreference, writeMusicPreference } from "./preferences";
+import {
+  readMusicPreference,
+  readStoredMusicPreference,
+  writeMusicPreference,
+} from "./preferences";
 import {
   clampMusicVolume,
   initializeMusicAudioSettings,
@@ -43,7 +63,11 @@ import {
   writeCheckpointToDb,
   type MusicCheckpoint,
 } from "./session-checkpoint";
-import { beginMusicQueue, getMusicPlaybackOrigin, restoreMusicPlaybackOrigin } from "./playback-origin";
+import {
+  beginMusicQueue,
+  getMusicPlaybackOrigin,
+  restoreMusicPlaybackOrigin,
+} from "./playback-origin";
 import { hydrateMusicContextTracks, hydrateMusicRecentContexts } from "./recent-context";
 import { hydrateMusicDestinations } from "./recent-destinations";
 import { hydratePinnedMusicPlaylists } from "./pinned-playlists";
@@ -87,6 +111,7 @@ let endHandledAt = 0;
 let enginePrimed = false;
 const autoSkipped = new Set<string>();
 let recoverPlayback: ((message?: string) => void) | null = null;
+let spotifyStartupTimer: ReturnType<typeof setTimeout> | null = null;
 let activeProfile = "";
 let audioReady: {
   request: number;
@@ -187,7 +212,11 @@ function warmBeforeEnd(): void {
   if (state.current.connectorId === "spotify") {
     // librespot plays a preloaded track without a load gap; stream URLs are warmed below.
     const next = musicWarmTargets(state.queue, state.queueIndex, 1)[0];
-    if (next && musicPlaybackSourceAllowed(next) && queueTrackKey(next) !== queueTrackKey(state.current))
+    if (
+      next &&
+      musicPlaybackSourceAllowed(next) &&
+      queueTrackKey(next) !== queueTrackKey(state.current)
+    )
       void invoke("music_spotify_preload", { track: next }).catch(() => {});
   }
   warmNeighbours();
@@ -369,6 +398,7 @@ export function resetMusicForProfile(): void {
   enginePrimed = false;
   audioReady = null;
   recoverPlayback = null;
+  clearSpotifyStartupWatchdog();
   publish({
     current: null,
     queue: [],
@@ -539,6 +569,38 @@ async function adoptNativePlayback(): Promise<void> {
   updateMediaSession(adopted.track);
 }
 
+function clearSpotifyStartupWatchdog(): void {
+  if (spotifyStartupTimer !== null) {
+    clearTimeout(spotifyStartupTimer);
+    spotifyStartupTimer = null;
+  }
+}
+
+function armSpotifyStartupWatchdog(request: number, track: MusicTrack): void {
+  clearSpotifyStartupWatchdog();
+  if (track.connectorId !== "spotify" || state.phase !== "resolving") return;
+  spotifyStartupTimer = setTimeout(() => {
+    spotifyStartupTimer = null;
+    if (
+      !shouldReportSpotifyStartupTimeout({
+        request,
+        currentRequest: playRequest,
+        expected: track,
+        current: state.current,
+        phase: state.phase,
+        casting: getMusicSpeakerState().active,
+        videoOwned: ownsMusicVideo(),
+      })
+    ) return;
+    console.warn("[music/spotify] accepted play request did not reach file-loaded");
+    if (recoverPlayback) recoverPlayback(SPOTIFY_STARTUP_TIMEOUT_MESSAGE);
+    else {
+      enginePrimed = false;
+      publish({ phase: "error", error: SPOTIFY_STARTUP_TIMEOUT_MESSAGE });
+    }
+  }, SPOTIFY_STARTUP_TIMEOUT_MS);
+}
+
 function handlePlaybackEvent(payload: MpvEvent): void {
   if (
     "trackId" in payload &&
@@ -595,6 +657,7 @@ function handlePlaybackEvent(payload: MpvEvent): void {
     return;
   }
   if (payload.event === "file-loaded") {
+    clearSpotifyStartupWatchdog();
     publish({ phase: observedPause ? "paused" : "playing", error: null });
     if (resumeAt && state.current && resumeAt.key === queueTrackKey(state.current)) {
       const position = resumeAt.position;
@@ -604,6 +667,7 @@ function handlePlaybackEvent(payload: MpvEvent): void {
     return;
   }
   if (payload.event === "player-failure") {
+    clearSpotifyStartupWatchdog();
     if (!ownsMusicVideo() && recoverPlayback) {
       recoverPlayback(typeof payload.reason === "string" ? payload.reason : undefined);
       return;
@@ -617,6 +681,7 @@ function handlePlaybackEvent(payload: MpvEvent): void {
     return;
   }
   if (payload.event === "end-file" && payload.reason === "error") {
+    clearSpotifyStartupWatchdog();
     if (!ownsMusicVideo() && recoverPlayback) recoverPlayback();
     else publish({ phase: "error", error: "Music playback could not start." });
     return;
@@ -720,11 +785,23 @@ export function reportMusicVideoPlayback(report: MusicVideoReport): void {
   if (Object.keys(patch).length > 0) publish(patch);
 }
 
+/** The native engine already holds this track, so a video may take over without a new load. */
+export function isMusicTrackPrimed(track: MusicTrack): boolean {
+  return (
+    enginePrimed &&
+    state.current?.id === track.id &&
+    state.current.connectorId === track.connectorId
+  );
+}
+
 /** Wait for the matching native audio load before a video can take ownership. */
 export async function waitForMusicAudioReady(track: MusicTrack): Promise<boolean> {
   const loading = audioReady;
-  if (!loading || loading.id !== track.id || loading.connectorId !== track.connectorId)
-    return false;
+  if (!loading || loading.id !== track.id || loading.connectorId !== track.connectorId) {
+    // A reload adopts the still-live native engine without creating a new load promise.
+    // Treat that primed track as ready instead of failing the video that opens next.
+    return isMusicTrackPrimed(track) && (state.phase === "playing" || state.phase === "paused");
+  }
   return (
     (await loading.done) &&
     loading.request === playRequest &&
@@ -856,6 +933,7 @@ export async function playMusic(
   if (explicit) pinSourceFor(track);
   const chosenByHand = explicitSource !== null && track.connectorId === explicitSource;
   const request = ++playRequest;
+  clearSpotifyStartupWatchdog();
   // Once admitted, this is the current song. Stopping recommendations leaves it playing;
   // starting a different song still supersedes every asynchronous step via playRequest.
   const ownsRequest = () => request === playRequest;
@@ -874,7 +952,12 @@ export async function playMusic(
     (track.connectorId === "catalog" && !track.playbackUrl) ||
     (sourceBlocked && track.mediaKind !== "video");
   const preferredSource = readMusicPreference("harbor.music.preferred-source.v1");
-  const resolvePreferred = shouldResolvePreferredSource(track, preferredSource, explicitSource !== null, failedAttempts.size > 0);
+  const resolvePreferred = shouldResolvePreferredSource(
+    track,
+    preferredSource,
+    explicitSource !== null,
+    failedAttempts.size > 0,
+  );
   const workingSource = state.current?.connectorId;
   let alternatives: MusicTrack[] = [];
   let searchedAlternatives = catalog || resolvePreferred;
@@ -902,9 +985,16 @@ export async function playMusic(
   });
   try {
     if (catalog || resolvePreferred) {
-      const candidates = await sourcesFor(track).catch(error => {
+      const candidates = await sourcesFor(track).catch((error) => {
         if (catalog) throw error;
-        return [{ connectorId: track.connectorId ?? "", connectorName: "", health: "healthy" as const, track }];
+        return [
+          {
+            connectorId: track.connectorId ?? "",
+            connectorName: "",
+            health: "healthy" as const,
+            track,
+          },
+        ];
       });
       if (!ownsRequest()) return;
       const playable = candidates.filter(
@@ -913,8 +1003,19 @@ export async function playMusic(
           candidate.track.connectorId !== "catalog" &&
           !failedAttempts.has(`${candidate.track.connectorId}:${candidate.track.id}`),
       );
-      if (!catalog && !playable.some(candidate => candidate.track.connectorId === track.connectorId && candidate.track.id === track.id)) {
-        playable.push({ connectorId: track.connectorId ?? "", connectorName: "", health: "healthy", track });
+      if (
+        !catalog &&
+        !playable.some(
+          (candidate) =>
+            candidate.track.connectorId === track.connectorId && candidate.track.id === track.id,
+        )
+      ) {
+        playable.push({
+          connectorId: track.connectorId ?? "",
+          connectorName: "",
+          health: "healthy",
+          track,
+        });
       }
       const preferred = readMusicPreference("harbor.music.preferred-source.v1");
       const ranked = rankByExplicitness(playable, explicitnessOf(track));
@@ -1032,7 +1133,13 @@ export async function playMusic(
       };
       try {
         if (target && !returningToComputer) await loadMusicOnSpeaker(track, target);
-        else await invoke("music_play_track", { track, volume: state.volume });
+        else {
+          await invoke("music_play_track", { track, volume: state.volume });
+          // The music-video host owns the audible track once its surface takes over.
+          // Pause the native engine immediately so a video loop cannot play both.
+          if (track.mediaKind === "video")
+            await invoke("music_engine_pause", { paused: true }).catch(() => {});
+        }
         break;
       } catch (error) {
         if (!ownsRequest()) return;
@@ -1095,6 +1202,7 @@ export async function playMusic(
     }
     if (!ownsRequest()) return;
     enginePrimed = true;
+    armSpotifyStartupWatchdog(request, track);
     if (deckAdoption.deck() !== 0 && !getMusicSpeakerState().active)
       publish({ phase: "playing", error: null });
     const upcoming = queue[queueIndex + 1];
@@ -1191,6 +1299,11 @@ export function toggleMusicPlayback(): void {
   void invoke("music_engine_pause", { paused: state.phase === "playing" }).catch(() => {});
 }
 
+/** Pause running music without ever starting it; used when a movie or series takes the screen. */
+export function pauseMusicPlayer(): void {
+  if (state.phase === "playing") toggleMusicPlayback();
+}
+
 export function setMusicQueue(input: MusicTrack[], automationOwner?: symbol): void {
   if (automationOwner && !ownsMusicQueueAutomation(automationOwner)) return;
   if (!automationOwner) cancelMusicQueueAutomation();
@@ -1230,13 +1343,30 @@ export function seekMusic(position: number): void {
 export function enqueueMusic(track: MusicTrack): void {
   const automated = cancelMusicQueueAutomation();
   const queue = automated ? state.queue.slice(0, state.queueIndex + 1) : state.queue;
-  if (queue.some((item) => queueTrackKey(item) === queueTrackKey(track))) {
+  const next = queueInsertAfterManualBlock(queue, track, state.queueIndex);
+  if (next === queue) {
     if (automated) setMusicQueue(queue);
     return;
   }
-  const at = queueInsertIndex(queue, state.queueIndex);
   markManuallyQueued(track);
-  setMusicQueue(insertIntoQueue(queue, track, at));
+  setMusicQueue(next);
+}
+
+/** Plays next, ahead of songs queued earlier, and keeps the transport pointed at it. */
+export function playNextMusic(track: MusicTrack): void {
+  if (!state.current) {
+    void playMusic(track, state.queue.length ? state.queue : [track]).catch(() => {});
+    return;
+  }
+  if (queueTrackKey(state.current) === queueTrackKey(track)) return;
+  if (filterBlockedTracks([track], "play").length === 0) return;
+  const automated = cancelMusicQueueAutomation();
+  const queue = automated ? state.queue.slice(0, state.queueIndex + 1) : state.queue;
+  const next = withTrackNext(queue, track, state.queueIndex);
+  if (next === queue) return;
+  markManuallyQueued(track);
+  setMusicPriorityNext(track);
+  setMusicQueue(next);
 }
 
 /**
@@ -1269,6 +1399,14 @@ export function setMusicVolume(volume: number): void {
 export function nextMusic(auto = false): void {
   if (!state.current) return;
   if (!auto) autoSkipped.clear();
+  if (auto && ownsMusicVideo() && getMusicTransport().repeat === "one" && videoController) {
+    // Restart the video host itself. Reloading the native track would leave the
+    // picture's audio running beside a second audio engine.
+    videoController.seek(0);
+    videoController.setPaused(false);
+    publish({ phase: "playing", currentTime: 0 });
+    return;
+  }
   const next = musicAdvance(state.queue, state.queueIndex, auto);
   if (next) void playMusic(next, state.queue, new Set(), true, auto).catch(() => {});
   else {
@@ -1330,6 +1468,7 @@ export async function closeMusicPlayer(): Promise<void> {
   cancelMusicQueueAutomation();
   const request = ++playRequest;
   recoverPlayback = null;
+  clearSpotifyStartupWatchdog();
   speakerTransfer = true;
   try {
     if (getMusicSpeakerState().active) await stopMusicSpeaker();

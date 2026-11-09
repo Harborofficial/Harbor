@@ -19,6 +19,7 @@ export function MusicMast({
   initialQuery = "",
   searching = false,
   className = "",
+  videoSearch = false,
 }: {
   onSubmit: (query: string, connector: string | null) => void;
   onClear?: () => void;
@@ -26,6 +27,7 @@ export function MusicMast({
   initialQuery?: string;
   searching?: boolean;
   className?: string;
+  videoSearch?: boolean;
 }) {
   const t = useT();
   const { connections, status, error, connected, reload } = useMusicConnections();
@@ -45,7 +47,7 @@ export function MusicMast({
   const { groups: suggestGroups, loading: suggesting } = useMusicSuggest(query, scope, focused && !dismissed && !!onPick);
   const suggestFlat = suggestGroups.flatMap((group) => group.items);
   const showingHistory = !query.trim();
-  const suggestOpen = focused && !dismissed && !!onPick;
+  const suggestOpen = focused && !dismissed && !!onPick && !videoSearch;
   const optionCount = showingHistory ? history.length : suggestFlat.length;
 
   useEffect(() => setActiveIndex(-1), [query, scope]);
@@ -96,10 +98,12 @@ export function MusicMast({
 
   const scopeOptions = useMemo(
     () =>
-      connections.filter(
-        (row) => row.status === "connected" && row.capabilities.includes("search"),
-      ),
-    [connections],
+      videoSearch
+        ? []
+        : connections.filter(
+            (row) => row.status === "connected" && row.capabilities.includes("search"),
+          ),
+    [connections, videoSearch],
   );
 
   useEffect(() => {
@@ -202,8 +206,8 @@ export function MusicMast({
             if (next && !formRef.current?.contains(next) && !next.closest("[data-music-search-panel]")) setDismissed(true);
           }}
           onKeyDown={onInputKeyDown}
-          placeholder={t("music.searchPlaceholder")}
-          aria-label={t("music.searchLabel")}
+          placeholder={t(videoSearch ? "music.videos.search" : "music.searchPlaceholder")}
+          aria-label={t(videoSearch ? "music.videos.search" : "music.searchLabel")}
           aria-autocomplete="list"
           aria-expanded={suggestOpen}
           type="search"

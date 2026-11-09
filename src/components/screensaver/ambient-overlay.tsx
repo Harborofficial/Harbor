@@ -5,7 +5,7 @@ import {
   useScreensaverClock,
 } from "./screensaver-clock";
 
-export type AmbientItem = { bg: string; title: string; sub: string };
+export type AmbientItem = { bg: string; title: string; sub: string; logo?: string };
 
 const DEEP_IDLE_MS = 6 * 60 * 1000;
 const ROTATE_MS = 13000;
@@ -36,6 +36,27 @@ function AmbientSlide({ src, out, reduce }: { src: string; out: boolean; reduce:
           ? `opacity ${FADE_MS}ms ease-out`
           : `opacity ${FADE_MS}ms ease-out, transform 16000ms steps(${DRIFT_STEPS}, end)`,
       }}
+    />
+  );
+}
+
+function AmbientMark({ logo, title }: { logo: string; title: string }) {
+  const [broken, setBroken] = useState(false);
+  if (broken) {
+    return (
+      <span className="mt-1 truncate text-[30px] font-semibold tracking-tight text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)]">
+        {title}
+      </span>
+    );
+  }
+  return (
+    <img
+      src={logo}
+      alt={title}
+      draggable={false}
+      decoding="async"
+      onError={() => setBroken(true)}
+      className="mt-1 max-h-[120px] w-auto max-w-full object-contain drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)]"
     />
   );
 }
@@ -142,9 +163,13 @@ export function AmbientOverlay({
                 {current.sub}
               </span>
             )}
-            <span className="mt-1 truncate text-[30px] font-semibold tracking-tight text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)]">
-              {current.title}
-            </span>
+            {current.logo ? (
+              <AmbientMark key={current.logo} logo={current.logo} title={current.title} />
+            ) : (
+              <span className="mt-1 truncate text-[30px] font-semibold tracking-tight text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)]">
+                {current.title}
+              </span>
+            )}
           </div>
         )}
       </div>

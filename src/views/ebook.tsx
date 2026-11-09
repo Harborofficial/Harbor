@@ -123,6 +123,7 @@ import {
   getEBookTracking,
 } from "@/lib/ebook/tracking";
 import { useScrollMemory, useView } from "@/lib/view";
+import { useSessionState } from "@/lib/session-state";
 import { useProfiles } from "@/lib/profiles";
 import { usePageVisible } from "@/lib/visibility";
 import { openUrl } from "@/lib/window";
@@ -257,6 +258,7 @@ function scheduleEBookBackground(run: () => void, delay = 1_200): () => void {
 export function EBookView() {
   const t = useT();
   const { ebookId, openEBook, topKind } = useView();
+  const browsing = !ebookId && topKind === "ebook";
   const listScrollRef = useRef<HTMLElement | null>(null);
   useScrollMemory("ebook", listScrollRef, !ebookId);
   const { activeId } = useProfiles();
@@ -269,19 +271,40 @@ export function EBookView() {
   const [sourcesReady, setSourcesReady] = useState(false);
   const [providerId, setProviderId] = useState("");
   const [selectedProviderId, setSelectedProviderId] = useState("");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useSessionState("ebook.query", "");
   const [results, setResults] = useState<EBook[] | null>(null);
-  const [categoryGroup, setCategoryGroup] = useState<EBookBrowseType>("All");
-  const [appliedCategoryGroup, setAppliedCategoryGroup] = useState<EBookBrowseType>("All");
-  const [category, setCategory] = useState("");
-  const [appliedCategory, setAppliedCategory] = useState("");
-  const [titleLanguage, setTitleLanguage] = useState<EBookTitleLanguage>("auto");
-  const [browseStatus, setBrowseStatus] = useState<EBookBrowseStatus>("any");
-  const [browseLanguage, setBrowseLanguage] = useState<EBookBrowseLanguage>("any");
-  const [browseSort, setBrowseSort] = useState<EBookBrowseSort>("popular");
-  const [appliedBrowseStatus, setAppliedBrowseStatus] = useState<EBookBrowseStatus>("any");
-  const [appliedBrowseLanguage, setAppliedBrowseLanguage] = useState<EBookBrowseLanguage>("any");
-  const [appliedBrowseSort, setAppliedBrowseSort] = useState<EBookBrowseSort>("popular");
+  const [categoryGroup, setCategoryGroup] = useSessionState<EBookBrowseType>(
+    "ebook.categoryGroup",
+    "All",
+  );
+  const [appliedCategoryGroup, setAppliedCategoryGroup] = useSessionState<EBookBrowseType>(
+    "ebook.appliedCategoryGroup",
+    "All",
+  );
+  const [category, setCategory] = useSessionState("ebook.category", "");
+  const [appliedCategory, setAppliedCategory] = useSessionState("ebook.appliedCategory", "");
+  const [titleLanguage, setTitleLanguage] = useSessionState<EBookTitleLanguage>(
+    "ebook.titleLanguage",
+    "auto",
+  );
+  const [browseStatus, setBrowseStatus] = useSessionState<EBookBrowseStatus>("ebook.status", "any");
+  const [browseLanguage, setBrowseLanguage] = useSessionState<EBookBrowseLanguage>(
+    "ebook.language",
+    "any",
+  );
+  const [browseSort, setBrowseSort] = useSessionState<EBookBrowseSort>("ebook.sort", "popular");
+  const [appliedBrowseStatus, setAppliedBrowseStatus] = useSessionState<EBookBrowseStatus>(
+    "ebook.appliedStatus",
+    "any",
+  );
+  const [appliedBrowseLanguage, setAppliedBrowseLanguage] = useSessionState<EBookBrowseLanguage>(
+    "ebook.appliedLanguage",
+    "any",
+  );
+  const [appliedBrowseSort, setAppliedBrowseSort] = useSessionState<EBookBrowseSort>(
+    "ebook.appliedSort",
+    "popular",
+  );
   const [selected, setSelected] = useState<EBook | null>(null);
   const [wheelTarget, setWheelTarget] = useState<EBookWheelTarget | null>(null);
   const [readIntent, setReadIntent] = useState<string | null>(null);
@@ -300,7 +323,9 @@ export function EBookView() {
   const providerIdRef = useRef("");
   const cursorRef = useRef<EBookCursor>({});
   const loadingMoreRef = useRef(false);
-  const browseTagRef = useRef<string | undefined>(ebookSourceBrowseTag("any", "popular"));
+  const browseTagRef = useRef<string | undefined>(
+    ebookSourceBrowseTag(appliedBrowseStatus, appliedBrowseSort),
+  );
   const awardSearchScopesRef = useRef(new Set<string>());
   const needsPopularMetadata = sourceCatalogItems !== null && sourceCatalogItems.length === 0;
   const openCardMenu = useCallback(
@@ -523,7 +548,7 @@ export function EBookView() {
 
   const sourceCatalogReady = sourceCatalogItems !== null;
   useEffect(() => {
-    if (screen !== "collections" || !providerId || !sourceCatalogReady) return;
+    if (!browsing || screen !== "collections" || !providerId || !sourceCatalogReady) return;
     const seq = sourceSeq.current;
     let active = true;
     setCollectionsRefreshing(true);
@@ -583,18 +608,20 @@ export function EBookView() {
     return () => {
       active = false;
     };
-  }, [cachedAwardBooks, collectionScope, providerId, screen, sourceCatalogReady]);
+  }, [browsing, cachedAwardBooks, collectionScope, providerId, screen, sourceCatalogReady]);
 
   useEffect(() => {
+    if (!browsing) return;
     loadSources();
     const sources = subscribeEBookSources(loadSources);
     const extensions = subscribeEBookExtensions(loadSources);
     return () => {
+      sourceSeq.current += 1;
       window.clearTimeout(searchTimer.current);
       sources();
       extensions();
     };
-  }, [loadSources, metadataVersion, uiLanguage]);
+  }, [browsing, loadSources, metadataVersion, uiLanguage]);
 
   useEffect(() => {
     const update = () => {
@@ -696,6 +723,17 @@ export function EBookView() {
         });
     }, 300);
   };
+
+  // A restored search keeps its text but not its results; rerun it once the
+  // source list is ready so the grid does not stay on its skeleton.
+  const restoredSearchRef = useRef(false);
+  useEffect(() => {
+    if (restoredSearchRef.current) return;
+    if (!sourcesReady || !providerId) return;
+    restoredSearchRef.current = true;
+    if (query.trim().length >= 2) search(query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourcesReady, providerId]);
 
   const staleStreakRef = useRef(0);
   const loadFailRef = useRef(0);
@@ -2850,7 +2888,9 @@ function EBookDetails({
     const authors = ebook.authors.slice(0, 2);
     void (async () => {
       const sourceResults = (
-        await Promise.all(authors.map((author) => searchSourceEBookCatalog(author, "all")))
+        await Promise.all(
+          authors.map((author) => searchSourceEBookCatalog(author, "all", { background: true })),
+        )
       ).flat();
       const sourceMatches = booksBySameAuthor(ebook, sourceResults);
       if (sourceMatches.length) return sourceMatches;
@@ -2927,7 +2967,7 @@ function EBookDetails({
         .map(({ item }) => item)
         .slice(0, 18);
     };
-    void loadSourceEBookPage(undefined, "all")
+    void loadSourceEBookPage(undefined, "all", {}, undefined, undefined, { background: true })
       .then(async (page) => {
         const sourceItems = sourceRecommendations(page.items);
         if (active && sourceItems.length) setRecommendations(sourceItems);
@@ -2969,7 +3009,9 @@ function EBookDetails({
     const hasArabic = (value: string) => /\p{Script=Arabic}/u.test(value);
     const ebookIsArabic = hasArabic(ebook.title);
     void Promise.all(
-      [...new Set(queries)].slice(0, 6).map((query) => searchSourceEBookCatalog(query, "all")),
+      [...new Set(queries)]
+        .slice(0, 6)
+        .map((query) => searchSourceEBookCatalog(query, "all", { background: true })),
     )
       .then(async (results) => {
         if (!active) return;
@@ -2988,7 +3030,7 @@ function EBookDetails({
           .slice(0, 32);
         const hydrated = await Promise.all(
           promising.map((candidate) =>
-            sourceEBookDetail(candidate.id)
+            sourceEBookDetail(candidate.id, { background: true })
               .then((detail) => detail ?? candidate)
               .catch(() => candidate),
           ),

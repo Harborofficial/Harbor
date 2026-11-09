@@ -117,6 +117,15 @@ type ParsedEntry = {
 const SUBTITLE_EXTENSIONS = new Set(["srt", "vtt", "ass", "ssa"]);
 const ARCHIVE_EXTENSIONS = new Set(["zip", "rar", "7z", "gz", "tgz", "bz2", "xz", "tar"]);
 
+// SubMaker's subtitle.loadingTitle values (locales/{en,es,ar,pt-br,pt-pt}.json).
+const TRANSLATION_PROGRESS_TITLES = new Set([
+  "translation in progress",
+  "traducción en progreso",
+  "الترجمة قيد التنفيذ",
+  "tradução em andamento",
+  "tradução em curso",
+]);
+
 function limitsOf(
   overrides: Partial<SubtitlePreparationLimits> | undefined,
 ): SubtitlePreparationLimits {
@@ -408,6 +417,27 @@ function parseEntry(
   const format = detectFormat(entry.name, formatHint, decode.text);
   if (!format) return null;
   const cues = parseSubtitle(decode.text, format);
+  // Self-hosted translation addons may omit the pending response filename.
+  // Partial translations carry the same long-lived notice after the dialogue.
+  if (
+    hints.translation &&
+    cues.some(
+      (cue) =>
+        cue.end - cue.start > 120 &&
+        cue.end === 4 * 60 * 60 &&
+        TRANSLATION_PROGRESS_TITLES.has(
+          cue.text
+            .replace(/<[^>]*>|\{[^}]*\}/g, "")
+            .trim()
+            .split(/\r?\n/, 1)[0]
+            .trim()
+            .normalize("NFC")
+            .toLowerCase(),
+        ),
+    )
+  ) {
+    throw new SubtitlePreparationError("translation-pending", "subtitle translation is pending");
+  }
   if (!validateCues(cues, hints, minimumCues)) return null;
   const score = candidateScore(entry.name, hints);
   if (score <= -10_000) return null;

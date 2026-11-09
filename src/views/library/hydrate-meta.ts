@@ -52,7 +52,8 @@ export async function hydrateLibraryMeta(
       const tmdbId = id.replace(/^tmdb:(movie|tv|series):/, "");
       try {
         const languageBase = tmdbLanguageBase(language);
-        const wantsTranslations = settings.translateTitles && !!languageBase && languageBase !== "en";
+        const wantsTranslations =
+          settings.translateTitles && !!languageBase && languageBase !== "en";
         const r = await fetch(
           `https://api.themoviedb.org/3/${tmdbType}/${tmdbId}?api_key=${tmdbKey}&language=${encodeURIComponent(language)}${wantsTranslations ? "&append_to_response=translations" : ""}`,
         );
@@ -83,6 +84,7 @@ export async function hydrateLibraryMeta(
               ? `https://image.tmdb.org/t/p/w780${j.backdrop_path}`
               : undefined,
             releaseInfo: (j.release_date || j.first_air_date)?.slice(0, 4),
+            originalLanguage: j.original_language,
             imdbRating: typeof j.vote_average === "number" ? j.vote_average.toFixed(1) : undefined,
             description: settings.translateDescriptions ? j.overview || undefined : undefined,
             genres: Array.isArray(j.genres)

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { useAuth } from "@/lib/auth";
 import { downloadText } from "@/lib/download-text";
-import { getCuesAnySource } from "@/lib/subtitles/extract";
+import { getCuesAnySource, subtitleDownloadError } from "@/lib/subtitles/extract";
+import { invoke } from "@tauri-apps/api/core";
 import { toSrt } from "@/lib/subtitles/serialize";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isAssTrack, isImageSubTrack } from "@/lib/player/sub-format";
+import { hasCustomMpvSubtitleStyle } from "@/lib/player/mpv-tuning";
 import { clearImportedSubs } from "@/lib/player/imported-subs";
 import { readPlayerVolume } from "@/lib/player-volume";
 import { playerMagnetUrl, setPlayerActions } from "@/lib/player-actions";
@@ -35,6 +37,7 @@ import { useActualPlayback } from "./use-actual-playback";
 import { useStremioSync } from "./use-stremio-sync";
 import { useSubDrop } from "./use-sub-drop";
 import { useSubStyleApply } from "./use-sub-style-apply";
+import { useSubtitleLiftCover } from "@/lib/player/controls-inset";
 import { useAssNormalize } from "./use-ass-normalize";
 import { useTrackAutoload } from "./use-track-autoload";
 import { useSecondarySub } from "./use-secondary-sub";
@@ -182,6 +185,8 @@ export function usePlayerMedia(params: {
   const {
     status: asStatus,
     offer: asOffer,
+    reason: asReason,
+    listen: asListen,
     applyOffer: asApply,
     revert: asRevert,
     retry: asRetry,
@@ -194,6 +199,8 @@ export function usePlayerMedia(params: {
     publishAutoSync({
       status: asStatus,
       offer: asOffer,
+      reason: asReason,
+      listen: asListen,
       applyOffer: asApply,
       revert: asRevert,
       retry: asRetry,
@@ -203,7 +210,19 @@ export function usePlayerMedia(params: {
       feedback: asFeedback,
     });
     return () => publishAutoSync(null);
-  }, [asStatus, asOffer, asApply, asRevert, asRetry, asRun, asStop, asFeedback, prepareLiveSync]);
+  }, [
+    asStatus,
+    asOffer,
+    asReason,
+    asListen,
+    asApply,
+    asRevert,
+    asRetry,
+    asRun,
+    asStop,
+    asFeedback,
+    prepareLiveSync,
+  ]);
 
   // Whether the video actually renders inside Harbor's webview. This mirrors the
   // `embedActive` value the player bridge sends to mpv (use-player-bridge.ts):
@@ -231,8 +250,15 @@ export function usePlayerMedia(params: {
   // Addon ASS subtitles render in mpv like embedded ones, so "Use my style" keeps signs in place.
   // Harbor's HTML overlay only has their plain text and would move every sign to the bottom.
   const subAssNative = subEmbed && selectedAssSub;
+  // Advanced mpv.conf subtitle styling needs libmpv's native renderer:
+  // the HTML cue overlay cannot interpret those options.
+  const customNativeSubStyle = subEmbed && hasCustomMpvSubtitleStyle(settings.mpvExtraOptions);
   const subNativeRender =
-    hdrNativeSurface || subAssNative || mpvNativeWindow || (subEmbed && selectedImageSub);
+    hdrNativeSurface ||
+    subAssNative ||
+    mpvNativeWindow ||
+    customNativeSubStyle ||
+    (subEmbed && selectedImageSub);
   const assNativeActive = selectedAssSub && (subNativeRender || !subEmbed);
   const imageNativeActive = selectedImageSub && (subNativeRender || !subEmbed);
   const assNormalizeScale = useAssNormalize({
@@ -251,18 +277,20 @@ export function usePlayerMedia(params: {
       snap.videoWidth > 0 ||
       snap.audioTracks.length > 0 ||
       snap.subtitleTracks.length > 0);
-  const suppressHtmlSubs =
-    subAssNative || mpvNativeWindow || (subEmbed && selectedImageSub) || hdrNativeSurface;
+  const suppressHtmlSubs = subNativeRender;
   const sdhFilterAllowed =
     !selectedSubTrack?.forced &&
     !selectedSubTrack?.foreignOnly &&
     sdhSafeForLanguage(selectedSubTrack?.lang);
   const hideSdh = settings.subHideSdh && sdhFilterAllowed;
-  useSubStyleApply({
+  const controlsInset = useSubtitleLiftCover(settings.subLiftAboveControls, settings.subMarginY);
+  const subLiftPct = useSubStyleApply({
     engine,
     settings,
     assNativeActive,
     imageNativeActive,
+    subNativeRender,
+    controlsInset,
     bridgeReady,
     mediaReady: mpvMediaReadyForStyle,
     sourceGamma: snap.hdrGamma,
@@ -302,6 +330,7 @@ export function usePlayerMedia(params: {
     bridgeKey,
     placement: settings.subSecondaryPlacement,
     marginY: settings.subMarginY,
+    liftPct: subLiftPct,
   });
   useEffect(() => {
     clearImportedSubs();
@@ -338,14 +367,19 @@ export function usePlayerMedia(params: {
       : (src.meta.name ?? "Subtitle");
     const fileName = `${base.replace(/[\\/:*?"<>|]+/g, " ").trim() || "Subtitle"}.srt`;
     const res = await getCuesAnySource(b, src.url, src.headers);
-    if (!res.ok || res.source.cues.length === 0)
-      throw new Error(
-        "Could not read this subtitle track. Pick a different subtitle, then try again.",
-      );
+    if (!res.ok) {
+      const message = subtitleDownloadError(res.reason);
+      if (engine === "mpv") {
+        void invoke("mpv_command", {
+          cmd: ["print-text", `[harbor/subtitle-export] ${message}`],
+        }).catch(() => {});
+      }
+      throw new Error(message);
+    }
     await downloadText(fileName, toSrt(res.source.cues), ["srt"], "Subtitle", {
       nativeFailure: "throw",
     });
-  }, [bridgeRef, src.meta.name, src.episode, src.url, src.headers]);
+  }, [bridgeRef, engine, src.meta.name, src.episode, src.url, src.headers]);
   const canDownloadSub = snap.subtitleTracks.some((trk) => trk.selected);
 
   useEffect(() => {

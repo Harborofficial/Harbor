@@ -15,12 +15,14 @@
   first; without it the signer stops and prompts interactively, which hangs a script.
 
   The Shipyard installer is staged twice: as Harbor_<version>_x64-installer.exe, the name the
-  release API parses, and as harbor-shipyard-v<version>-<channel>.exe for identification.
+  release API parses, and as harbor-shipyard-v<version>-<channel>-windows-x64.exe for
+  identification.
   installer/changelog/<version>-changelog.json must exist with this channel's notes, or the
   script refuses to build the release.
 
-  Mac artifacts are optional. Drop Harbor_<version>_aarch64.app.tar.gz(.sig) and
-  Harbor_<version>_aarch64.dmg into the staging folder before -Publish to include them.
+  Mac artifacts are optional. Drop Harbor_<version>_[channel_]macos-apple-silicon-aarch64.dmg
+  and/or Harbor_<version>_[channel_]macos-intel-x64.dmg into the staging folder before
+  -Publish to include them. The matching .app.tar.gz(.sig) uses the same platform name.
 #>
 param(
   [switch]$Publish,
@@ -110,7 +112,8 @@ if (-not $SkipApp) {
   # app shows in About. Tie the stamp to the channel this release is cut for.
   $env:HARBOR_CHANNEL = $Channel
   Write-Host "  channel stamp: $Channel"
-  Run 'pnpm' @('tauri', 'build', '--no-bundle')
+  . (Join-Path $PSScriptRoot 'whisper-build-env.ps1')
+  Run 'pnpm' @('tauri', 'build', '--no-bundle', '--features', 'asr-whisper')
 } else {
   Step 'App build skipped'
 }
@@ -129,7 +132,7 @@ Run 'cargo' @('build', '--manifest-path', 'installer/src-tauri/Cargo.toml', '--r
 Run 'node' @('scripts/verify-managed-payload.mjs', '--embedded')
 
 Step 'Name the build'
-$namedShipyard = "installer/src-tauri/target/release/harbor-shipyard-v${version}-${nameChannel}.exe"
+$namedShipyard = "installer/src-tauri/target/release/harbor-shipyard-v${version}-${nameChannel}-windows-x64.exe"
 Copy-Item -LiteralPath 'installer/src-tauri/target/release/harbor-shipyard.exe' -Destination $namedShipyard -Force
 Write-Host "  $namedShipyard"
 
@@ -156,7 +159,7 @@ $staged = @{
   "Harbor_${version}_x64-installer.exe"            = $shipyard
   # The channel-named copy marks the channel the folder was cut for and names the GitHub
   # asset. publish-release.mjs only uploads the Harbor_<version>_* name.
-  "harbor-shipyard-v${version}-${nameChannel}.exe" = $namedShipyard
+  "harbor-shipyard-v${version}-${nameChannel}-windows-x64.exe" = $namedShipyard
 }
 foreach ($name in $staged.Keys) {
   Copy-Item -LiteralPath $staged[$name] -Destination (Join-Path $stage $name) -Force

@@ -93,6 +93,7 @@ function harness(layout: "list" | "grid" | "strip", videos: NonNullable<Meta["vi
     "@/lib/season-view-pref": seasonViewPref,
     "./episode-rating-badge": { EpisodeRatingBadge: "EpisodeRatingBadge" },
     "./use-episode-imdb-ratings": { useEpisodeImdbRatings: () => new Map() },
+    "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
   };
   const exports: Record<string, any> = {};
   new Function("require", "exports", compile(read("src/views/detail/cinemeta-episodes.tsx")))(

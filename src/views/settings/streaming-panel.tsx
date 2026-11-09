@@ -1,9 +1,21 @@
-import { ArrowLeft, Check, Download, ExternalLink, Key, Loader2, Plus, Trash2, X } from "./icons";
+import {
+  ArrowLeft,
+  Check,
+  Download,
+  ExternalLink,
+  Globe,
+  Key,
+  Loader2,
+  Plus,
+  Trash2,
+  X,
+} from "./icons";
 import { Search } from "@/components/icons/search-icon";
 import { useEffect, useState } from "react";
 import { AddonLogo } from "@/components/addon-logo";
 import { Flag } from "@/components/flag";
 import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
+import { ORIGINAL_AUDIO_LANG } from "@/lib/player/audio-language";
 import { ServiceLogo } from "@/components/service-logo";
 import { SERVICES } from "@/lib/providers/streaming";
 import {
@@ -18,9 +30,9 @@ import { useT } from "@/lib/i18n";
 import { useSettings, type StreamingService } from "@/lib/settings";
 import { ROW_ACTION, ROW_ACTION_DANGER, ROW_ACTION_PRIMARY, SettingRow } from "./kit";
 
-export function pickDebridForAddon(s: ReturnType<typeof useSettings>["settings"]):
-  | { service: string; key: string; label: string }
-  | null {
+export function pickDebridForAddon(
+  s: ReturnType<typeof useSettings>["settings"],
+): { service: string; key: string; label: string } | null {
   if (s.tbKey) return { service: "torbox", key: s.tbKey, label: "TorBox" };
   if (s.rdKey) return { service: "realdebrid", key: s.rdKey, label: "Real-Debrid" };
   if (s.adKey) return { service: "alldebrid", key: s.adKey, label: "AllDebrid" };
@@ -60,10 +72,20 @@ export function RecommendedAddonCard({
     const url = transportUrlFor(id);
     if (!url) return;
     const current = cometKeyFromUrl(url);
-    const stale = !current || current.service !== debrid.service || current.apiKey !== debrid.key.trim();
+    const stale =
+      !current || current.service !== debrid.service || current.apiKey !== debrid.key.trim();
     if (!stale) return;
     installAddon(id, urlBuilder(debrid.service, debrid.key)).catch(() => {});
-  }, [id, debrid, urlBuilder, settings.tbKey, settings.rdKey, settings.adKey, settings.pmKey, settings.dlKey]);
+  }, [
+    id,
+    debrid,
+    urlBuilder,
+    settings.tbKey,
+    settings.rdKey,
+    settings.adKey,
+    settings.pmKey,
+    settings.dlKey,
+  ]);
 
   const onInstall = async () => {
     if (!debrid) return;
@@ -123,7 +145,11 @@ export function RecommendedAddonCard({
           disabled={!debrid || busy}
           className={ROW_ACTION_PRIMARY}
         >
-          {busy ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={2.2} />}
+          {busy ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <Download size={16} strokeWidth={2.2} />
+          )}
           {t("Install")}
         </button>
       )}
@@ -241,7 +267,11 @@ export function ManualAddonCard({
               disabled={!draft.trim() || busy}
               className={ROW_ACTION_PRIMARY}
             >
-              {busy ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={2.2} />}
+              {busy ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Download size={16} strokeWidth={2.2} />
+              )}
               {t("Install")}
             </button>
           </div>
@@ -269,7 +299,12 @@ export function LanguagesPicker({
   const [expanded, setExpanded] = useState(false);
   const selected = new Set(value);
   const q = query.trim().toLowerCase();
-  const matches = options.filter((lang) => !selected.has(lang) && lang.toLowerCase().includes(q));
+  const labelFor = (lang: string) => (lang === ORIGINAL_AUDIO_LANG ? t("Original") : lang);
+  const matches = options.filter(
+    (lang) =>
+      !selected.has(lang) &&
+      (lang.toLowerCase().includes(q) || labelFor(lang).toLowerCase().includes(q)),
+  );
   const moveEarlier = (index: number) => {
     const next = [...value];
     [next[index - 1], next[index]] = [next[index], next[index - 1]];
@@ -281,60 +316,97 @@ export function LanguagesPicker({
       <div className="flex flex-wrap items-center gap-2">
         <ol aria-label={t("Language preference order")} className="flex flex-wrap gap-2">
           {value.map((lang, index) => (
-            <li key={lang} className="inline-flex min-h-11 items-center gap-2 rounded-[8px] border border-edge-soft bg-elevated ps-3 text-[15px] text-ink">
+            <li
+              key={lang}
+              className="inline-flex min-h-11 items-center gap-2 rounded-[8px] border border-edge-soft bg-elevated ps-3 text-[15px] text-ink"
+            >
               <span className="w-3 text-[13px] tabular-nums text-ink-subtle">{index + 1}</span>
-              <span aria-hidden><Flag language={lang} size="md" showLabel={false} /></span>
-              <span>{lang}</span>
-              {index > 0 && <button
-                type="button"
-                onClick={() => moveEarlier(index)}
-                aria-label={t("Move {language} earlier", { language: lang })}
-                title={t("Move earlier")}
-                className="grid size-11 place-items-center text-ink-muted hover:text-ink"
-              ><ArrowLeft size={15} className="rtl:rotate-180" /></button>}
+              <span aria-hidden>
+                {lang === ORIGINAL_AUDIO_LANG ? (
+                  <Globe size={18} className="text-ink-subtle" />
+                ) : (
+                  <Flag language={lang} size="md" showLabel={false} />
+                )}
+              </span>
+              <span>{labelFor(lang)}</span>
+              {index > 0 && (
+                <button
+                  type="button"
+                  onClick={() => moveEarlier(index)}
+                  aria-label={t("Move {language} earlier", { language: labelFor(lang) })}
+                  title={t("Move earlier")}
+                  className="grid size-11 place-items-center text-ink-muted hover:text-ink"
+                >
+                  <ArrowLeft size={15} className="rtl:rotate-180" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => onChange(value.filter((v) => v !== lang))}
-                aria-label={t("Remove {language}", { language: lang })}
+                aria-label={t("Remove {language}", { language: labelFor(lang) })}
                 className="grid size-11 place-items-center rounded-e-[8px] text-ink-subtle hover:bg-raised hover:text-ink"
-              ><X size={15} /></button>
+              >
+                <X size={15} />
+              </button>
             </li>
           ))}
         </ol>
-        <button type="button" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)} className={ROW_ACTION}>
+        <button
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((v) => !v)}
+          className={ROW_ACTION}
+        >
           {expanded ? <Check size={16} /> : <Plus size={16} />}
           {expanded ? t("Done") : t("Add language")}
         </button>
       </div>
-      {value.length === 0 && !expanded && <p className="text-[15px] text-ink-muted">{t("No preferred languages selected.")}</p>}
-      {expanded && <div className="overflow-hidden rounded-[10px] border border-edge-soft bg-elevated">
-        <div className="flex h-12 items-center gap-3 border-b border-edge-soft px-4">
-          <Search size={18} className="shrink-0 text-ink-subtle" />
-          <input
-            aria-label={t("Search languages")}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={placeholder ?? t("Search languages")}
-            spellCheck={false}
-            className="h-11 min-w-0 flex-1 bg-transparent text-[15.5px] text-ink outline-none placeholder:text-ink-subtle"
-          />
+      {value.length === 0 && !expanded && (
+        <p className="text-[15px] text-ink-muted">{t("No preferred languages selected.")}</p>
+      )}
+      {expanded && (
+        <div className="overflow-hidden rounded-[10px] border border-edge-soft bg-elevated">
+          <div className="flex h-12 items-center gap-3 border-b border-edge-soft px-4">
+            <Search size={18} className="shrink-0 text-ink-subtle" />
+            <input
+              aria-label={t("Search languages")}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={placeholder ?? t("Search languages")}
+              spellCheck={false}
+              className="h-11 min-w-0 flex-1 bg-transparent text-[15.5px] text-ink outline-none placeholder:text-ink-subtle"
+            />
+          </div>
+          <div className="grid max-h-[240px] grid-cols-2 gap-1 overflow-y-auto p-2">
+            {matches.map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => {
+                  onChange([...value, lang]);
+                  setQuery("");
+                }}
+                aria-label={t("Add {language}", { language: labelFor(lang) })}
+                className="flex min-h-11 items-center gap-3 rounded-[6px] px-3 text-start text-[15px] text-ink-muted hover:bg-raised hover:text-ink"
+              >
+                <span aria-hidden>
+                  {lang === ORIGINAL_AUDIO_LANG ? (
+                    <Globe size={18} className="text-ink-subtle" />
+                  ) : (
+                    <Flag language={lang} size="md" showLabel={false} />
+                  )}
+                </span>
+                <span>{labelFor(lang)}</span>
+              </button>
+            ))}
+            {matches.length === 0 && (
+              <p className="col-span-2 px-3 py-4 text-[15px] text-ink-muted" role="status">
+                {q ? t("No language matches that search.") : t("All languages have been added.")}
+              </p>
+            )}
+          </div>
         </div>
-        <div className="grid max-h-[240px] grid-cols-2 gap-1 overflow-y-auto p-2">
-          {matches.map((lang) => <button
-            key={lang}
-            type="button"
-            onClick={() => { onChange([...value, lang]); setQuery(""); }}
-            aria-label={t("Add {language}", { language: lang })}
-            className="flex min-h-11 items-center gap-3 rounded-[6px] px-3 text-start text-[15px] text-ink-muted hover:bg-raised hover:text-ink"
-          >
-            <span aria-hidden><Flag language={lang} size="md" showLabel={false} /></span>
-            <span>{lang}</span>
-          </button>)}
-          {matches.length === 0 && <p className="col-span-2 px-3 py-4 text-[15px] text-ink-muted" role="status">
-            {q ? t("No language matches that search.") : t("All languages have been added.")}
-          </p>}
-        </div>
-      </div>}
+      )}
     </div>
   );
 }

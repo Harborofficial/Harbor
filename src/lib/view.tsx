@@ -20,6 +20,8 @@ import {
 } from "react";
 import { registerProfileDestination, subscribeOpenProfile } from "@/lib/social/open-profile";
 import { subscribeOpenGroup } from "@/lib/social/open-group";
+import { currentAuthor } from "@/lib/theme-auth";
+import { isNuvioProviderActive, loadNuvioState } from "@/lib/nuvio/nuvio-client";
 import { useBigPicture } from "@/lib/big-picture";
 import type { Meta } from "./cinemeta";
 import type { PeopleDept, RankSource } from "./harbor-rank";
@@ -237,7 +239,7 @@ export type Frame =
       playback?: EpisodeDetailPlayback;
     }
   | { kind: "person"; id: number }
-  | { kind: "profile"; handle: string }
+  | { kind: "profile"; handle: string; isMyProfile?: boolean }
   | { kind: "feed" }
   | { kind: "groups" }
   | { kind: "group"; id: string }
@@ -254,6 +256,8 @@ export type Frame =
   | { kind: "curated-list"; listId: string }
   | {
       kind: "picker";
+      /** Fresh navigation must not reuse the previous picker's async selection state. */
+      pickerRevision?: number;
       meta: Meta;
       queueItemId?: string;
       episode?: PlayEpisode;
@@ -372,6 +376,7 @@ type ViewValue = {
   curatedListId: string | null;
   openCuratedList: (id: string) => void;
   picker: {
+    pickerRevision?: number;
     meta: Meta;
     queueItemId?: string;
     episode?: PlayEpisode;
@@ -737,6 +742,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const picker =
     top.kind === "picker"
       ? {
+          pickerRevision: top.pickerRevision,
           meta: top.meta,
           queueItemId: top.queueItemId,
           episode: top.episode,
@@ -1092,18 +1098,75 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   );
 
   const openProfile = useCallback(
-    (handle: string) => {
+    (handle: string, options?: { isMyProfile?: boolean }) => {
       const h = handle.trim().toLowerCase();
       if (!h) return;
+      const authorH = currentAuthor()?.handle?.trim().toLowerCase();
+      const isMyProfile = options?.isMyProfile === true || (!!authorH && authorH === h);
       setNavStack((cur) => {
         const t = cur[cur.length - 1];
-        if (t.kind === "profile" && t.handle === h) return cur;
-        return pushFrame(cur, { kind: "profile", handle: h });
+        if (t.kind === "profile" && t.handle === h) {
+          if (isMyProfile && !t.isMyProfile) {
+            return [...cur.slice(0, -1), { ...t, isMyProfile: true }];
+          }
+          return cur;
+        }
+        return pushFrame(cur, { kind: "profile", handle: h, isMyProfile });
       });
     },
     [setNavStack],
   );
   useEffect(() => subscribeOpenProfile(openProfile), [openProfile]);
+
+  useEffect(() => {
+    const onProviderChange = (e: Event) => {
+      const detail = (e as CustomEvent<{ provider?: string }>).detail;
+      const nextProvider = detail?.provider || (isNuvioProviderActive() ? "nuvio" : "stremio");
+
+      let nextHandle = "";
+      if (nextProvider === "nuvio") {
+        const author = currentAuthor();
+        const ns = loadNuvioState();
+        const primary = ns.profiles.find((p) => p.profile_index === 1) || ns.profiles[0];
+        nextHandle = (
+          author?.handle ||
+          primary?.name?.toLowerCase().replace(/\s+/g, "") ||
+          ns.session?.user?.email?.split("@")[0] ||
+          "nuvio"
+        )
+          .trim()
+          .toLowerCase();
+      } else {
+        nextHandle = (currentAuthor()?.handle || "").trim().toLowerCase();
+      }
+
+      setNavStack((cur) => {
+        let changed = false;
+        const next: Frame[] = [];
+        for (const frame of cur) {
+          if (frame.kind === "profile" && frame.isMyProfile) {
+            if (nextHandle) {
+              if (frame.handle !== nextHandle) {
+                next.push({ ...frame, handle: nextHandle });
+                changed = true;
+              } else {
+                next.push(frame);
+              }
+            } else {
+              changed = true;
+            }
+          } else {
+            next.push(frame);
+          }
+        }
+        if (!changed) return cur;
+        return next.length > 0 ? next : [{ kind: "home" }];
+      });
+    };
+
+    window.addEventListener("harbor:account-provider-changed", onProviderChange);
+    return () => window.removeEventListener("harbor:account-provider-changed", onProviderChange);
+  }, [setNavStack]);
   useLayoutEffect(
     () => registerProfileDestination(() => (top.kind === "profile" ? top.handle : null)),
     [top],
@@ -1376,6 +1439,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
     });
   }, [setNavStack]);
 
+  const pickerRevisionRef = useRef(0);
   const openPicker = useCallback(
     (m: Meta, ep?: PlayEpisode, opts?: PickerOptions) => {
       if (m.id?.startsWith("magnet:")) {
@@ -1387,6 +1451,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (opts?.autoPlay) beginMarathonAdvance();
+      const pickerRevision = ++pickerRevisionRef.current;
       setNavStack((cur) => {
         const t = cur[cur.length - 1];
         if (samePickerRequest(t, m, ep, opts)) {
@@ -1394,6 +1459,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         }
         return pushFrame(cur, {
           kind: "picker",
+          pickerRevision,
           meta: m,
           queueItemId: opts?.queueItemId,
           episode: ep,

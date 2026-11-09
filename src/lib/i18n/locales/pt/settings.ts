@@ -388,8 +388,8 @@ const settings: Record<string, string> = {
   "Stretch the featured hero edge to edge and taller, across every layout.":
     "Esticar o destaque principal de ponta a ponta e mais alto, em todos os layouts.",
   "Full quality hero image": "Imagem principal em qualidade total",
-  "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.":
-    "Carregar a arte na maior resolução para o destaque principal. Usa mais banda.",
+  "Load the highest-resolution artwork for the featured hero, the detail page hero, and unblurred stream picker backgrounds. Uses more bandwidth and video memory.":
+    "Carregar a arte na maior resolução para o destaque principal, o destaque da página de detalhes e os fundos sem desfoque do seletor de fontes. Usa mais banda e memória de vídeo.",
   "Display language": "Idioma de exibição",
   "Interface language": "Idioma da interface",
   "Metadata language": "Idioma dos metadados",

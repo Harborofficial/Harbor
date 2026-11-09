@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
-import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
+import { createHotkeyMatcher, isPlayerHotkeyTarget, isTypingTarget } from "@/lib/hotkeys";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
 import { mediaKeyGate } from "@/lib/media-session";
@@ -12,6 +12,7 @@ import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
 import { isBigPictureActive } from "@/lib/big-picture";
 import { getLeaveConfirm, openLeaveConfirm } from "@/lib/player/leave-confirm";
 import { isPlayerInteractionLocked } from "@/lib/player/interaction-lock";
+import { HOLD_SPEED_DELAY_MS, holdSpeedRate } from "@/lib/player/hold-speed";
 import { tracePlayback } from "@/lib/player/pause-trace";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
@@ -154,17 +155,14 @@ export function useKeyboardShortcuts(params: {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (document.querySelector('[data-harbor-player][data-detached="true"]') && !e.key.startsWith("Media")) return;
-      const dock = document.querySelector('[data-harbor-player][data-docked="true"]');
-      if (dock && !dock.contains(e.target as Node) && !e.key.startsWith("Media")) return;
+      if (!e.key.startsWith("Media") && !isPlayerHotkeyTarget(e)) return;
       if (isPlayerInteractionLocked()) {
         if (e.cancelable) e.preventDefault();
         return;
       }
       if (isTypingTarget(e)) return;
 
-      const binding = eventToBinding(e);
-      const match = (id: HotkeyId): boolean => effectiveBinding(id, overrides) === binding;
+      const match = createHotkeyMatcher(e, overrides, "Player");
 
       if (e.key.startsWith("Media")) tracePlayback(`media-key-dom ${e.key}`);
 
@@ -240,8 +238,8 @@ export function useKeyboardShortcuts(params: {
           h.timer = null;
           h.engaged = true;
           setHoldSpeedActive(true);
-          bridgeRef.current?.setRate(Math.max(2, h.baseRate));
-        }, 350);
+          bridgeRef.current?.setRate(holdSpeedRate(h.baseRate));
+        }, HOLD_SPEED_DELAY_MS);
         return;
       }
       if (match("playerSeekBack10")) {

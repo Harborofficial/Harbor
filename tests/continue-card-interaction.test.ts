@@ -8,7 +8,14 @@ import * as jsx from "react/jsx-runtime";
 import * as icons from "lucide-react";
 import { createRoot } from "react-dom/client";
 
-function harness() {
+function harness(
+  actual: unknown = null,
+  opts: {
+    settings?: Record<string, unknown>;
+    item?: Record<string, unknown>;
+    seasonEpisodes?: unknown[];
+  } = {},
+) {
   const dom = new JSDOM("<!doctype html><body><div id='app'></div>", { url: "http://localhost/" });
   Object.assign(globalThis, {
     window: dom.window,
@@ -41,6 +48,15 @@ function harness() {
     "@/components/icons/play-filled": { Play: icons.Play },
     "@/lib/cinemeta": { narrowMediaType: (type: string) => type },
     "@/lib/meta-resource": { resolveMeta: async () => null },
+    "@/lib/streams/playback-redirect": {
+      isPlaybackRedirectCandidate: () => false,
+      resolvePlaybackRedirect: async ({ url }: { url: string }) => url,
+    },
+    "@/lib/player/continue-playback": {
+      continuationFor: (target: { id: string }) => ({ id: target.id }),
+      canReuseRecentRemotePlayback: () => false,
+    },
+    "@/lib/resume": { readResumeEntry: () => null },
     "@/lib/providers/anime-kitsu-addon": { animeKitsuMeta: async () => null },
     "@/lib/providers/anime-franchise-root": { isSplitFranchiseKitsu: () => false },
     "@/lib/providers/kitsu": { parseKitsuId: () => null },
@@ -74,7 +90,9 @@ function harness() {
       sharesStremioStorage: () => false,
     },
     "@/lib/auth": { useAuth: () => ({ authKey: "fixture-auth" }) },
-    "@/lib/settings": { useSettings: () => ({ settings: { liquidGlass: false } }) },
+    "@/lib/settings": {
+      useSettings: () => ({ settings: { liquidGlass: false, ...opts.settings } }),
+    },
     "@/lib/view": {
       useView: () => ({
         openMeta: (meta: any) => starts.push({ details: meta }),
@@ -96,7 +114,7 @@ function harness() {
       createMediaServerPlayerSrc: empty,
       decidePlaybackSource: () => ({ kind: "online" }),
     },
-    "@/lib/series-episodes": { fetchSeasonEpisodes: async () => [] },
+    "@/lib/series-episodes": { fetchSeasonEpisodes: async () => opts.seasonEpisodes ?? [] },
     "@/lib/providers/anizip": noopProvider,
     "@/lib/providers/anime-mapping": { animeMappingByKitsu: async () => null },
     "@/lib/logo": { peekCachedLogo: () => null, resolveLogo: async () => null },
@@ -107,11 +125,14 @@ function harness() {
       animeCwIdsVersion: () => 0,
       subscribeAnimeCwIds: () => () => {},
     },
-    "@/lib/anime-tracker-entry": { resolveTrackerAnimeEntry: async () => null },
     "@/lib/anime-detect": { isDetectedAnime: () => false },
     "@/lib/streams/anime-identity": {
       resolveAnimeIdentity: async () =>
         assert.fail("ordinary series must not resolve anime identity"),
+    },
+    "@/lib/anime-tracker-entry": {
+      resolveTrackerAnimeEntry: async () =>
+        assert.fail("ordinary series must not resolve anime tracker identity"),
     },
     "@/lib/cw-anime-episode": {
       aniZipLookupKey: () => null,
@@ -127,12 +148,14 @@ function harness() {
     "@/lib/playback-history": {
       capturePlaybackActor: () => profile,
       isPlaybackActorCurrent: (actor: string) => profile === actor,
+      readActualPlaybackForTarget: () => actual,
     },
     "@/lib/cw-dismiss": {
       isCwDismissed: (item: any) => removed.some((entry) => entry._id === item._id),
     },
     "@/lib/local-cw": { localCwEntry: () => ({}) },
     "@/lib/manual-watched": { isManualWatchedDismissed: () => false },
+    "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
   };
   const load = (path: string) => {
     const mod = { exports: {} as any };
@@ -161,7 +184,7 @@ function harness() {
   };
   const { ContinueCard } = load("src/components/continue-card.tsx");
   const root = createRoot(document.querySelector("#app")!);
-  const item = {
+  const item = opts.item ?? {
     _id: "older-b",
     type: "series",
     name: "Older B",
@@ -213,7 +236,7 @@ function harness() {
   };
 }
 
-test("real ContinueCard poster, title and play controls resolve the older entry and reuse primary continuation instead of the body source picker", async () => {
+test("real ContinueCard keeps original playback while its menu groups sources and removal for the clicked entry", async () => {
   const h = harness();
   try {
     await h.render();
@@ -226,20 +249,92 @@ test("real ContinueCard poster, title and play controls resolve the older entry 
     ]) {
       await h.context(selector);
       assert.equal(h.target.meta.id, "older-b");
-      assert.equal(h.target.primary.actions()[0].label, "Continue watching");
+      assert.deepEqual(
+        h.target.primary.actions().map((action: any) => action.label),
+        ["Choose another source", "Remove from Continue Watching"],
+      );
+      assert.equal(h.target.extra, undefined, "removal is not duplicated below the title actions");
       await React.act(() => h.target.primary.actions()[0].run());
       const request = h.starts.at(-1);
       assert.equal(request.meta.id, "older-b");
       assert.deepEqual(request.episode, { season: 2, episode: 3 });
-      assert.deepEqual(request.mode, { autoPlay: true, resume: true });
+      assert.deepEqual(request.mode, { autoPlay: false, resume: false });
     }
     await h.click("button[title='Play']");
     assert.deepEqual(h.starts.at(-1).mode, { autoPlay: true, resume: true });
-    await React.act(() => h.target.extra.actions()[0].run());
+    await React.act(() => h.target.primary.actions()[1].run());
     assert.equal(h.removed[0], h.item);
     assert.equal(h.target.isValid(), false);
   } finally {
     await h.dispose();
+  }
+});
+
+test("Play refreshes the saved release and Choose another source opens an independent picker", async () => {
+  const h = harness({ id: "saved-aio", src: { streamRef: { infoHash: "saved-hash" } } });
+  try {
+    await h.render();
+    await h.click("button[title='Play']");
+    assert.deepEqual(h.starts.at(-1).mode, {
+      autoPlay: true,
+      resume: true,
+      continuation: { id: "saved-aio" },
+    });
+    await h.click("button[title='Choose another source']");
+    assert.deepEqual(h.starts.at(-1).mode, { autoPlay: false, resume: false });
+  } finally {
+    await h.dispose();
+  }
+});
+
+test("an episode dated in the future can play when the user allows unreleased episodes", async () => {
+  const future = new Date(Date.now() + 2 * 86400000).toISOString();
+  const item = {
+    _id: "future-card",
+    type: "series",
+    name: "Future Card",
+    upNext: true,
+    state: {
+      season: 1,
+      episode: 2,
+      video_id: "future-card:1:2",
+      duration: 600000,
+      timeOffset: 0,
+    },
+  };
+  const seasonEpisodes = [{ episode: 2, name: "Episode 2", airDate: future }];
+  const flush = () =>
+    React.act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  const playButtons = () => [
+    ...document.querySelectorAll<HTMLButtonElement>("button[title='Play']"),
+  ];
+
+  const blocked = harness(null, { item, seasonEpisodes, settings: { cwPlayUnreleased: false } });
+  try {
+    await blocked.render();
+    await flush();
+    const buttons = playButtons();
+    assert.ok(buttons.length > 0);
+    assert.ok(buttons.every((button) => button.disabled));
+  } finally {
+    await blocked.dispose();
+  }
+
+  const allowed = harness(null, { item, seasonEpisodes, settings: { cwPlayUnreleased: true } });
+  try {
+    await allowed.render();
+    await flush();
+    const buttons = playButtons();
+    assert.ok(buttons.length > 0);
+    assert.ok(buttons.every((button) => !button.disabled));
+    await allowed.click("button[title='Play']");
+    const started = allowed.starts.at(-1);
+    assert.equal(started.episode.season, 1);
+    assert.equal(started.episode.episode, 2);
+  } finally {
+    await allowed.dispose();
   }
 });
 
@@ -253,7 +348,7 @@ test("an open older-card menu cannot execute after a profile change", async () =
     await h.render();
     assert.equal(target.isValid(), false);
     await assert.rejects(target.primary.actions()[0].run(), /no longer available/);
-    await assert.rejects(target.extra.actions()[0].run(), /no longer available/);
+    await assert.rejects(target.primary.actions()[1].run(), /no longer available/);
     assert.equal(h.starts.length, 0);
     assert.equal(h.removed.length, 0);
   } finally {
@@ -272,7 +367,7 @@ test("original removal invalidates an already-open card menu and matches removal
     directItem = original.removed[0];
     assert.equal(openMenu.isValid(), false);
     await assert.rejects(openMenu.primary.actions()[0].run(), /no longer available/);
-    await assert.rejects(openMenu.extra.actions()[0].run(), /no longer available/);
+    await assert.rejects(openMenu.primary.actions()[1].run(), /no longer available/);
     assert.equal(original.removed.length, 1);
     assert.equal(original.starts.length, 0);
   } finally {
@@ -282,7 +377,7 @@ test("original removal invalidates an already-open card menu and matches removal
   try {
     await contextual.render();
     await contextual.context("button[title='Play']");
-    await React.act(() => contextual.target.extra.actions()[0].run());
+    await React.act(() => contextual.target.primary.actions()[1].run());
     assert.deepEqual(contextual.removed, [directItem]);
   } finally {
     await contextual.dispose();

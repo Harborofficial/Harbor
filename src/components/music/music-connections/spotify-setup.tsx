@@ -22,7 +22,7 @@ function text(reason: unknown): string {
  * The primary Spotify sign-in: pair this device with a code entered at spotify.com/pair.
  * The bring-your-own-app walkthrough below stays for listeners who want their own app.
  */
-function SpotifyDevicePairing({
+export function SpotifyDevicePairing({
   disabled,
   onPaired,
 }: {
@@ -183,16 +183,15 @@ function SpotifyDevicePairing({
   );
 }
 
-export function SpotifySetupFields({
+/** Detailed instructions are only shown when the listener opens optional browsing setup. */
+export function SpotifyBrowsingGuide({
   clientId,
   onChange,
   disabled,
-  onPaired,
 }: {
   clientId: string;
   onChange: (value: string) => void;
   disabled: boolean;
-  onPaired: () => void;
 }) {
   const t = useT();
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
@@ -203,20 +202,7 @@ export function SpotifySetupFields({
   const bodyClass = "mt-1 text-[13px] leading-5 text-ink-muted";
 
   return (
-    <>
-      <SpotifyDevicePairing disabled={disabled} onPaired={onPaired} />
-      <div className="mt-6 max-w-2xl border-t border-edge-soft pt-4">
-        <p className="flex flex-wrap items-center gap-2 text-[13px] font-semibold leading-6 text-ink">
-          {t("music.spotifySetup.pairManual")}
-          <span className="rounded-full bg-accent/15 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
-            {t("music.spotifySetup.browseRecommended")}
-          </span>
-        </p>
-        <p className="mt-1 text-[13px] leading-5 text-ink-muted">
-          {t("music.spotifySetup.browseBody")}
-        </p>
-      </div>
-      <ol className="mt-4 grid max-w-2xl gap-5">
+    <ol className="mt-4 grid max-w-2xl gap-5">
         <li className={stepClass}>
           <span className={numberClass} aria-hidden="true">
             1
@@ -307,7 +293,6 @@ export function SpotifySetupFields({
             <span className={`block ${bodyClass}`}>{t("music.spotifySetup.accountHint")}</span>
           </label>
         </li>
-      </ol>
-    </>
+    </ol>
   );
 }

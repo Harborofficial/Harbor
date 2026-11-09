@@ -65,7 +65,7 @@ const HOLD_MS = 8_000;
 const HOVER_TAIL_MS = 2_500;
 const EXIT_MS = 160;
 const CARD_CLASS =
-  "w-[238px] max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-white/10 bg-black/70 px-3 py-2.5 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.85)] backdrop-blur-xl";
+  "w-fit min-w-[238px] max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-white/10 bg-black/70 px-3 py-2.5 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.85)] backdrop-blur-xl";
 
 type Phase = "idle" | "holding" | "collapsing" | "done";
 

@@ -1,4 +1,5 @@
-const coverage: Record<string, string> = {
+const coverage: Record<string, string> = {
+
   "Waiting for {name}…": "في انتظار {name}…",
   "Keeping the source you were watching.": "الإبقاء على المصدر الذي كنت تشاهده.",
   "Sound descriptions": "أوصاف الأصوات",
@@ -629,6 +630,7 @@ const coverage: Record<string, string> = {
   "Keep the clock on screen when the player is not fullscreen.":
     "أبقِ الساعة على الشاشة عندما لا يكون المشغّل في وضع ملء الشاشة.",
   "On the poster": "على الملصق",
+  "On the TV": "على المسلسلات",
   Scores: "التقييمات",
   "Episode order": "ترتيب الحلقات",
   "Watchlist overlaps ({n})": "عناصر متداخلة في قائمة المشاهدة ({n})",

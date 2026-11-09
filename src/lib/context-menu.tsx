@@ -75,7 +75,6 @@ export type ContextMenuTarget = ContentContext & {
     | { kind: "ebook"; id: string }
     | { kind: "nav"; itemId?: NavItemId; view?: View; label?: string; onOpen?: () => void }
     | { kind: "edit"; element: HTMLElement | null; selection: string }
-    | { kind: "backdrop"; metaId: string; url: string }
     | {
         kind: "subtitle";
         label: string;

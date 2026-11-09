@@ -30,7 +30,11 @@ import {
   type PipelineContext,
   type TierPorts,
 } from "../src/lib/subtitles/autosync/pipeline.ts";
-import { audioLanguageFromSnapshot } from "../src/views/player/hooks/use-auto-sync.helpers.ts";
+import {
+  audioLanguageFromSnapshot,
+  audioStreamMap,
+  liveSyncFailureReason,
+} from "../src/views/player/hooks/use-auto-sync.helpers.ts";
 import type { PlayerSnapshot } from "../src/lib/player/bridge.ts";
 import { consensusLanguages } from "../src/lib/subtitles/autosync/language-context.ts";
 
@@ -258,6 +262,13 @@ test("provisional calibration caps an otherwise valid structural decision at off
   assert.equal(decide({ calibrationReady: isReleaseReady(ready) }).decision, "apply");
 });
 
+test("a manual run may offer a low-confidence guess while automatic runs refuse", () => {
+  const low = { ...confidence, pCorrect: 0.55, agreeingSignals: 0 };
+  assert.equal(decide({ confidence: low }).decision, "refuse");
+  assert.equal(decide({ confidence: low }).bindingRule, "promotion");
+  assert.equal(decide({ confidence: low, offerFloor: 0.5 }).decision, "offer");
+});
+
 test("best effort runs the complete gate and can never auto-apply", () => {
   const safe = evaluateBestEffort(base);
   assert.equal(safe.decision, "offer");
@@ -377,6 +388,96 @@ test("production best-effort escalation preserves conflict, already-good, and wr
   );
   assert.equal(wrongContent?.decision.decision, "refuse");
   assert.equal(wrongContent?.decision.bindingRule, "metadata-hard-refuse");
+});
+
+test("a failed swap download offers the unverified swap instead of aborting the sync", async () => {
+  const ctx: PipelineContext = {
+    ...languageContext("en", "en"),
+    cues: [
+      [10, 12],
+      [20, 22],
+      [30, 32],
+      [40, 42],
+    ],
+    cueText: ["one", "two", "three", "four"],
+  };
+  const outcome = await runAutoSync(ctx, {
+    hashExact: async () => ({
+      transform: { kind: "affine", offsetSec: 0, ratio: 1 },
+      rawScore: 1,
+      subSwap: { url: "https://example.test/exact.srt", format: "srt" },
+    }),
+    resolveSwapCues: async () => {
+      throw new Error("network");
+    },
+    measureQuality: async () => quality(0.5),
+  });
+
+  assert.ok(outcome.subSwap);
+  assert.equal(outcome.decision.decision, "offer");
+});
+
+test("a missing offset candidate still recognizes verified already-aligned subtitles", async () => {
+  const ctx: PipelineContext = {
+    ...languageContext("en", "en"),
+    cues: [[10, 12], [20, 22], [30, 32], [40, 42]],
+    cueText: ["one", "two", "three", "four"],
+  };
+  const aligned = await runAutoSync(ctx, {
+    measureQuality: async () => quality(0.91, 0.9),
+    vadAffine: async () => null,
+  });
+  assert.equal(aligned.decision.bindingRule, "already-good");
+  assert.equal(aligned.decision.decision, "refuse");
+  assert.equal(aligned.candidate, null);
+
+  const weak = await runAutoSync(ctx, {
+    measureQuality: async () => quality(0.19, 0.3),
+    vadAffine: async () => null,
+    diagnosticNotes: () => ["vad:low-confidence-ncc-0.19", "asr:model-unavailable"],
+  });
+  assert.equal(weak.decision.bindingRule, "no-candidate");
+  assert.match(weak.decision.reason, /detected speech did not match/i);
+  assert.match(weak.decision.reason, /Speech recognition is unavailable/);
+
+  const unknown = await runAutoSync(ctx, {
+    measureQuality: async () => unknownQuality("timeout", "test"),
+    vadAffine: async () => null,
+  });
+  assert.equal(unknown.decision.bindingRule, "no-candidate");
+  assert.match(unknown.decision.reason, /audio verification was unavailable \(timeout\)/);
+});
+
+test("already-aligned input is a settled veto and does not wait for ASR", async () => {
+  let transcribeCalls = 0;
+  const ctx: PipelineContext = {
+    ...languageContext("en", "en"),
+    cues: [
+      [10, 12],
+      [20, 22],
+      [30, 32],
+      [40, 42],
+    ],
+    cueText: ["one", "two", "three", "four"],
+  };
+  const outcome = await runAutoSync(ctx, {
+    measureQuality: async (_ctx, transform) =>
+      quality(transform.kind === "affine" && Math.abs(transform.offsetSec) < 1e-9 ? 0.86 : 0.96),
+    vadAffine: async () => ({
+      transform: { kind: "affine", offsetSec: 2, ratio: 1 },
+      rawScore: 0.95,
+      quality: { ncc: 0.95, coverage: 0.8, z: 8 },
+      fitWindowIds: ["fit-early", "fit-late"],
+    }),
+    asrTranscribe: async () => {
+      transcribeCalls += 1;
+      return { phrases: [], detectedLanguage: "en" };
+    },
+  });
+
+  assert.equal(outcome.decision.decision, "refuse");
+  assert.equal(outcome.decision.bindingRule, "already-good");
+  assert.equal(transcribeCalls, 0);
 });
 
 test("production pipeline does not let an earlier offer outrank a metadata hard veto", async () => {
@@ -511,6 +612,56 @@ test("pipeline skips lexical ASR for English/Arabic and Japanese/Arabic", async 
   const englishEnglish = await run("en", "en");
   assert.equal(englishEnglish.matchCalls, 1);
   assert.equal(englishEnglish.transcribeCalls, 1);
+});
+
+test("live sync reports the last attempted source rather than an earlier cache failure", () => {
+  const cacheError = "cache-audio-incomplete";
+  const base = { cacheAudioReady: false, cacheError };
+  const noMatch = liveSyncFailureReason({
+    ...base,
+    directAttempted: true,
+    directError: null,
+  });
+  assert.match(noMatch, /did not match the subtitles confidently/);
+  assert.doesNotMatch(noMatch, /cache|clip/i);
+
+  const timeout = liveSyncFailureReason({
+    ...base,
+    directAttempted: true,
+    directError: "subsync-analysis-timeout",
+  });
+  assert.match(timeout, /source timed out/);
+  assert.doesNotMatch(timeout, /cache|clip/i);
+
+  const unreadable = liveSyncFailureReason({
+    ...base,
+    directAttempted: false,
+    directError: null,
+  });
+  assert.match(unreadable, /couldn't extract usable audio/);
+
+  const lowConfidence = liveSyncFailureReason({
+    cacheAudioReady: true,
+    cacheError: null,
+    directAttempted: false,
+    directError: null,
+  });
+  assert.match(lowConfidence, /decoded the cached audio/);
+});
+
+test("audio analysis follows the selected audio track, not always the first", () => {
+  const snap = {
+    audioTracks: [
+      { id: "1", label: "Italian", kind: "audio", lang: "ita", selected: false, default: true },
+      { id: "2", label: "Korean", kind: "audio", lang: "kor", selected: true },
+    ],
+  } as PlayerSnapshot;
+  assert.equal(audioStreamMap(snap), "0:a:1");
+
+  const noneSelected = {
+    audioTracks: [{ id: "1", label: "Italian", kind: "audio", selected: false }],
+  } as PlayerSnapshot;
+  assert.equal(audioStreamMap(noneSelected), undefined);
 });
 
 test("selected audio metadata supplies audioLanguage independently of subtitle language", () => {

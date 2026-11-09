@@ -1,0 +1,24 @@
+.music-video-mini-toggle {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  cursor: pointer;
+  text-align: start;
+  color: var(--color-ink-muted);
+}
+.music-video-mini-toggle > span:first-child {
+  display: grid;
+  gap: 1px;
+  text-align: start;
+}
+.music-video-mini-toggle strong {
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+.music-video-mini-toggle small {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+}
