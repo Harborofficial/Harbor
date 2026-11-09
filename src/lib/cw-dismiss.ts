@@ -443,14 +443,20 @@ function providerDismissSources(): CwProviderSource[] {
     if (privateCwProfileId()) return [];
     const settings = loadStoredSettings();
     if (settings.cwClearProviderProgress !== true) return [];
-    const out: CwProviderSource[] = [];
-    if (settings.cwSources.trakt) out.push("trakt");
-    if (settings.cwSources.simkl) out.push("simkl");
-    if (settings.cwSources.publicmetadb) out.push("publicmetadb");
-    return out;
+    // Clearing is independent of which sources feed the row. A tracker can be
+    // connected for scrobbling while its cards are hidden, and its stale resume
+    // point would otherwise survive the dismissal.
+    return ["trakt", "simkl", "publicmetadb"];
   } catch {
     return [];
   }
+}
+
+function sameProviderCheckpoint(a: LibraryItem, b: LibraryItem): boolean {
+  const aEp = resolveEpisode(a);
+  const bEp = resolveEpisode(b);
+  if (aEp.season == null || bEp.season == null) return true;
+  return aEp.season === bEp.season && aEp.episode === bEp.episode;
 }
 
 function providerFailureList(results: ProviderDismissResult[]): CwProviderSource[] {
@@ -559,7 +565,16 @@ export function dismissCw(
           (source === "trakt" || source === "simkl" || source === "publicmetadb") &&
           providerSources.includes(source)
         ) {
-          byProvider.set(source, member);
+          const held = byProvider.get(source);
+          // A deduped show can keep an old episode next to the displayed one.
+          // Never let a later stale member replace the provider id that matches
+          // this card's checkpoint.
+          if (
+            !held ||
+            (sameProviderCheckpoint(item, member) && !sameProviderCheckpoint(item, held))
+          ) {
+            byProvider.set(source, member);
+          }
         }
       }
       for (const provider of providerSources) {

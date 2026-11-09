@@ -89,7 +89,7 @@ test("Simkl paused episodes retain timestamp, episode identity and resume progre
     {
       progress: 45.5,
       paused_at: pausedAt,
-      show: { title: "Fixture show", ids: { imdb: "tt1234567" } },
+      show: { title: "Fixture show", ids: { imdb: "tt1234567", tmdb: 1234 } },
       episode: { season: 1, episode: 5 },
     },
     {
@@ -105,6 +105,7 @@ test("Simkl paused episodes retain timestamp, episode identity and resume progre
     items.map((item) => item.state?.video_id),
     ["tt1234567:1:5", "tt1234567:1:6"],
   );
+  assert.deepEqual(items[0].altIds, ["tmdb:tv:1234"]);
   assert.equal(items[0].state?.lastWatched, pausedAt);
   assert.equal(items[0]._mtime, pausedAt);
   assert.equal(items[0].state?.timeOffset, 1_201_200);

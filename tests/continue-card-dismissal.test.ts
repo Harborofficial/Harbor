@@ -180,10 +180,10 @@ test("external dismissal keeps official local resume clearing without writing to
   assert.deepEqual(JSON.parse(h.data.get("harbor.resume")!), {});
 });
 
-test("enabled CW sources also clear their saved playback position", async () => {
+test("the master toggle clears provider playback even when no provider feeds the row", async () => {
   const h = harness();
   h.clearProviderProgress = true;
-  h.cwSources = { trakt: true, simkl: false, publicmetadb: false };
+  h.cwSources = { trakt: false, simkl: false, publicmetadb: false };
   const item = {
     ...entry(),
     external: "trakt",
@@ -192,8 +192,48 @@ test("enabled CW sources also clear their saved playback position", async () => 
   const result = await h.load("cw-dismiss").dismissCw(item, "fixture-auth", { acknowledged: true });
   assert.deepEqual(result, { sync: "not-required" });
   assert.equal(h.providerCalls.length, 1);
-  assert.deepEqual(h.providerCalls[0].providers, ["trakt"]);
+  assert.deepEqual(h.providerCalls[0].providers, ["trakt", "simkl", "publicmetadb"]);
   assert.deepEqual(h.providerCalls[0].item.providerPlaybackIds, { trakt: "playback-42" });
+});
+
+test("a deduped card clears the playback id belonging to each provider member", async () => {
+  const h = harness();
+  h.clearProviderProgress = true;
+  h.cwSources = { trakt: false, simkl: false, publicmetadb: false };
+  const item = {
+    ...entry(),
+    external: "simkl",
+    providerPlaybackIds: { simkl: "simkl-playback" },
+    cwMembers: [
+      {
+        ...entry(),
+        external: "trakt",
+        providerPlaybackIds: { trakt: "trakt-playback" },
+      },
+      {
+        ...entry(),
+        external: "publicmetadb",
+        providerPlaybackIds: { publicmetadb: "pmdb-resume" },
+      },
+      {
+        ...entry(),
+        external: "trakt",
+        state: { ...entry().state, season: 2, episode: 4, video_id: "older-b:2:4" },
+        providerPlaybackIds: { trakt: "stale-trakt-playback" },
+      },
+    ],
+  };
+  const result = await h.load("cw-dismiss").dismissCw(item, "fixture-auth", { acknowledged: true });
+  assert.deepEqual(result, { sync: "not-required" });
+  assert.equal(h.providerCalls.length, 3);
+  assert.deepEqual(
+    h.providerCalls.map((call) => call.providers),
+    [["trakt"], ["simkl"], ["publicmetadb"]],
+  );
+  assert.deepEqual(
+    h.providerCalls.map((call) => call.item.providerPlaybackIds),
+    [{ trakt: "trakt-playback" }, { simkl: "simkl-playback" }, { publicmetadb: "pmdb-resume" }],
+  );
 });
 
 test("acknowledged dismissal persists official progress tombstones and newer progress restores the card", async () => {

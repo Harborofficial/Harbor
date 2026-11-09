@@ -117,6 +117,23 @@ test("finds a provider playback when an older cached item has no stored id", asy
   assert.deepEqual(h.deleted, ["trakt:t2"]);
 });
 
+test("finds a provider playback when the sources use different content ids", async () => {
+  const h = loadProviderDismiss();
+  h.items.trakt = [
+    item({
+      _id: "tmdb:tv:99",
+      altIds: ["tt-test"],
+      external: "trakt",
+      providerPlaybackIds: { trakt: "t-by-alias" },
+    }),
+  ];
+
+  const result = await h.clearProviderPlayback(item(), ["trakt"]);
+
+  assert.deepEqual(result, { failed: [] });
+  assert.deepEqual(h.deleted, ["trakt:t-by-alias"]);
+});
+
 test("does not clear a different episode of the same show", async () => {
   const h = loadProviderDismiss();
   h.items.trakt = [

@@ -84,7 +84,18 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
       item = buildItem(id, "series", raw.show, pct, DURATION_MS.series, when, season, episode);
     }
   }
-  if (item && raw.id != null) item.providerPlaybackIds = { trakt: String(raw.id) };
+  if (item) {
+    if (raw.id != null) item.providerPlaybackIds = { trakt: String(raw.id) };
+    const node = raw.movie ?? raw.show;
+    const altIds: string[] = [];
+    const imdb = node?.ids?.imdb ? String(node.ids.imdb).trim().toLowerCase() : null;
+    if (imdb && /^tt\d+$/.test(imdb)) altIds.push(imdb);
+    if (node?.ids?.tmdb != null) {
+      altIds.push(`${item.type === "movie" ? "tmdb:movie" : "tmdb:tv"}:${node.ids.tmdb}`);
+    }
+    const unique = altIds.filter((id) => id !== item._id);
+    if (unique.length > 0) item.altIds = unique;
+  }
   return item;
 }
 

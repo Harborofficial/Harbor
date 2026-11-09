@@ -273,6 +273,13 @@ export async function fetchSimklPlaybackItems(fresh = false): Promise<LibraryIte
     const item = await toLibraryItem(r);
     if (!item?.state) continue;
     if (r.id != null) item.providerPlaybackIds = { simkl: String(r.id) };
+    const node = r.movie ?? r.show ?? r.anime;
+    if (node) {
+      const altIds = simklEntryIdKeys(node.ids, item.type === "movie" ? "movie" : "show").filter(
+        (id) => id !== item._id,
+      );
+      if (altIds.length > 0) item.altIds = altIds;
+    }
     const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
     if (seen.has(key)) continue;
     seen.add(key);

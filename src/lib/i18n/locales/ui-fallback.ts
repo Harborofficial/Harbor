@@ -2482,10 +2482,8 @@ const uiFallback: Record<string, string> = {
   "Removed on this device. Some provider playback progress could not be cleared.":
     "Removed on this device. Some provider playback progress could not be cleared.",
   "Also clear provider playback progress": "Also clear provider playback progress",
-  "When you dismiss a Continue Watching card, also delete its saved playback position from the connected services that feed this row. Watch history, ratings, and watchlist statuses are unchanged.":
-    "When you dismiss a Continue Watching card, also delete its saved playback position from the connected services that feed this row. Watch history, ratings, and watchlist statuses are unchanged.",
-  "Turn on Trakt, Simkl, or PublicMetaDB progress above first.":
-    "Turn on Trakt, Simkl, or PublicMetaDB progress above first.",
+  "When you dismiss a Continue Watching card, also delete its saved playback position from every connected provider. Watch history, ratings, and watchlist statuses are unchanged.":
+    "When you dismiss a Continue Watching card, also delete its saved playback position from every connected provider. Watch history, ratings, and watchlist statuses are unchanged.",
   "Remove from downloads": "Remove from downloads",
   "Mark {count} episodes up to here": "Mark {count} episodes up to here",
   "Episode information is unavailable.": "Episode information is unavailable.",

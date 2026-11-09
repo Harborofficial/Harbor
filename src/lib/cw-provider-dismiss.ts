@@ -337,7 +337,7 @@ export async function clearProviderPlayback(
       try {
         const direct = ids[provider];
         if (direct) return (await clear(direct, checkpoints[provider])) ? null : provider;
-        const items = await withTimeout(fetchProviderItems(provider));
+        const items = await withTimeout(fetchProviderItems(provider, true));
         const match = items.find(
           (entry) =>
             sameContent(item, entry) ||
