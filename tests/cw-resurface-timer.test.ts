@@ -201,6 +201,63 @@ test("resurfaceCandidates drops caught-up series when hideCaughtUp is true", asy
   );
 });
 
+test("resurfaceCandidates drops a future season placeholder with no air date in timer mode", async () => {
+  const h = harness({ nextEp: { season: 5, episode: 1 } });
+  const resurface = h.load("src/lib/cw-resurface.ts");
+
+  const item = {
+    _id: "tt_from",
+    type: "series",
+    name: "FROM",
+    state: {
+      season: 4,
+      episode: 10,
+      timeOffset: 0,
+      duration: 3600000,
+      flaggedWatched: 1,
+      lastWatched: new Date().toISOString(),
+    },
+  };
+
+  const result = await resurface.resurfaceCandidates([item], new Set(), {
+    tmdbKey: "",
+    animeMode: "all",
+    animeCwEnd: "timer",
+    hideCaughtUp: true,
+  });
+
+  assert.equal(result.get("tt_from"), undefined);
+});
+
+test("resurfaceCandidates still waits on a same-season episode with no air date", async () => {
+  const h = harness({ nextEp: { season: 1, episode: 5 } });
+  const resurface = h.load("src/lib/cw-resurface.ts");
+
+  const item = {
+    _id: "tt_same_season",
+    type: "series",
+    name: "Same Season",
+    state: {
+      season: 1,
+      episode: 4,
+      timeOffset: 0,
+      duration: 3600000,
+      flaggedWatched: 1,
+      lastWatched: new Date().toISOString(),
+    },
+  };
+
+  const result = await resurface.resurfaceCandidates([item], new Set(), {
+    tmdbKey: "",
+    animeMode: "all",
+    animeCwEnd: "timer",
+  });
+
+  const candidate = result.get("tt_same_season");
+  assert.ok(candidate);
+  assert.equal(candidate.waitingForAir, true);
+});
+
 test("resurfaceCandidates isolates cache between timer and hide modes", async () => {
   const futureAir = new Date(Date.now() + 86400000).toISOString();
   const h = harness({ nextEp: { season: 1, episode: 5, airDate: futureAir } });

@@ -153,6 +153,7 @@ export async function resurfaceCandidates(
   });
   for (const i of candidates) {
     const cur = currentEpisode(i)!;
+    const isAnime = isAnimeCwItem(i) || ANIME_ID.test(i._id);
     const key = `${profileScope}|${endMode}|${i._id}:${cur.season}:${cur.episode}`;
     const cached = cache.get(key);
     let nx: ResurfaceTarget | null;
@@ -177,6 +178,9 @@ export async function resurfaceCandidates(
               waitingForAir: false,
               airDate: adj.next.airDate,
             };
+          } else if (!isAnime && !adj.next.airDate && adj.next.season > cur.season) {
+            // A future season's placeholder episode is not a countdown target.
+            nx = null;
           } else if (endMode === "timer") {
             nx = {
               season: adj.next.season,
@@ -223,6 +227,7 @@ export async function resurfaceCandidates(
           const entry = list.find(
             (e) => e.season === target.season && e.episode === target.episode,
           );
+          if (!isAnime && target.season > cur.season && !entry?.airDate) return null;
           if (entry && resurfaceAired(entry.airDate)) {
             return {
               season: target.season,
