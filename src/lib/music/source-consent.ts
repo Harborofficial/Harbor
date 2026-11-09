@@ -6,6 +6,7 @@ export const MUSIC_SOURCE_CONSENT_VERSION = 1;
 export const MUSIC_SOURCE_CONSENT_KEY = "harbor.music.source-consent.v1";
 export const MUSIC_SOURCE_CONSENT_EVENT = "harbor:music-source-consent";
 const CONSENT_STORE = "source-consent";
+const CONSENT_CHECKPOINT_KEY = `${MUSIC_SOURCE_CONSENT_KEY}.checkpoint`;
 
 export const GATED_MUSIC_SOURCES = ["youtube", "soundcloud", "spotify"] as const;
 export type GatedMusicSource = (typeof GATED_MUSIC_SOURCES)[number];
@@ -66,13 +67,28 @@ const listeners = new Set<() => void>();
 
 function publish(next: MusicSourceConsent): MusicSourceConsent {
   consent = next;
+  // Preserve acceptance even if the app quits before the delayed file write.
+  try {
+    localStorage.setItem(CONSENT_CHECKPOINT_KEY, JSON.stringify(next));
+  } catch {
+    // The native JSON store remains available when browser storage is blocked.
+  }
   writeLocalJson(CONSENT_STORE, next);
   for (const listener of listeners) listener();
   return consent;
 }
 
-/** Migrates the old browser-storage value once, then keeps consent in the JSON store. */
+/** Restore the synchronous copy first; it may be newer than a delayed native write. */
 export async function hydrateMusicSourceConsent(): Promise<void> {
+  try {
+    const raw = localStorage.getItem(CONSENT_CHECKPOINT_KEY);
+    if (raw !== null) {
+      publish(parseMusicSourceConsent(raw));
+      return;
+    }
+  } catch {
+    // Fall back to the native store.
+  }
   await hydrateJsonStore(CONSENT_STORE, MUSIC_SOURCE_CONSENT_KEY);
   const next = normalizeConsent(
     readJsonStore<unknown>(CONSENT_STORE, MUSIC_SOURCE_CONSENT_KEY, null),
@@ -112,12 +128,7 @@ export function isGatedMusicSource(
 /** Legacy tracks spell the YouTube connector several ways; they all share one consent switch. */
 function gatedSourceOf(connectorId: string | null | undefined): GatedMusicSource | null {
   const id = connectorId?.trim().toLowerCase();
-  if (
-    id === "youtube" ||
-    id === "youtube_music" ||
-    id === "youtubemusic" ||
-    id === "youtube-music"
-  )
+  if (id === "youtube" || id === "youtube_music" || id === "youtubemusic" || id === "youtube-music")
     return "youtube";
   if (id === "soundcloud") return "soundcloud";
   if (id === "spotify") return "spotify";
@@ -154,8 +165,7 @@ export function filterMusicSourceCandidates(
 ): MusicSourceCandidate[] {
   return candidates.filter(
     (candidate) =>
-      musicSourceAllowed(candidate.connectorId) &&
-      musicSourceAllowed(candidate.track.connectorId),
+      musicSourceAllowed(candidate.connectorId) && musicSourceAllowed(candidate.track.connectorId),
   );
 }
 

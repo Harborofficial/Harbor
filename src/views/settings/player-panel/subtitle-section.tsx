@@ -12,6 +12,7 @@ import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { ColorPopoverTrigger } from "../color-picker";
 import { Segmented, ToggleRow } from "../shared";
 import {
+  Nested,
   ROW_ACTION,
   ROW_ACTION_DANGER,
   ROW_DESC,
@@ -89,6 +90,14 @@ function ColorField({
 export function SubtitleStylePanel() {
   const { settings, update } = useSettings();
   const t = useT();
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const useMyStyle =
+    settings.subAssOverride === "force" || settings.subAssOverride === "strip";
+  const lastLookMode = useRef<"no" | "scale" | "font">("no");
+  useEffect(() => {
+    const mode = settings.subAssOverride;
+    if (mode === "no" || mode === "scale" || mode === "font") lastLookMode.current = mode;
+  }, [settings.subAssOverride]);
 
   const styles: Array<{ id: "shadow" | "outline" | "box"; label: string; sub: string }> = [
     {
@@ -105,35 +114,6 @@ export function SubtitleStylePanel() {
       id: "box",
       label: t("Black bar"),
       sub: t("Rounded background panel behind the text. Most readable."),
-    },
-  ];
-
-  const assModes: Array<{ id: "no" | "scale" | "font" | "force"; label: string; sub: string }> = [
-    {
-      id: "no",
-      label: t("Keep original"),
-      sub: t(
-        "Styled (ASS) subs keep their own font, color, and size. Truest to the release, but the size can vary a lot between files.",
-      ),
-    },
-    {
-      id: "scale",
-      label: t("Resize only"),
-      sub: t(
-        "Keep the original look, scaled by your size. It multiplies the built-in size, so different releases can still differ.",
-      ),
-    },
-    {
-      id: "font",
-      label: t("Change font only"),
-      sub: t("Styled (ASS) subs keep their colors, size, and sign placement, but use your font."),
-    },
-    {
-      id: "force",
-      label: t("Use my style"),
-      sub: t(
-        "Force your size, font, and color onto styled subs so every file looks consistent. Best fix if embedded sizes keep changing, or for Arabic and subs showing boxes. Can affect karaoke and signs.",
-      ),
     },
   ];
 
@@ -400,30 +380,90 @@ export function SubtitleStylePanel() {
       <FontPicker />
 
       <SettingGroup label={t("Styled (ASS) subtitles")}>
-        {assModes.map((m) => (
-          <ChoiceBlock
-            key={m.id}
-            selected={settings.subAssOverride === m.id}
-            onClick={() => update({ subAssOverride: m.id })}
-            label={m.label}
-            sub={m.sub}
-          />
-        ))}
+        <ChoiceBlock
+          selected={!useMyStyle}
+          onClick={() => update({ subAssOverride: lastLookMode.current })}
+          label={t("Keep the file's look")}
+          sub={t(
+            "Styled (ASS) subs keep their own font, color, and size. Truest to the release, but the size can vary a lot between files.",
+          )}
+        />
+        {!useMyStyle && (
+          <Nested>
+            <ToggleRow
+              label={t("Match my size")}
+              sub={t(
+                "Auto-adjusts styled (ASS) subtitles so dialogue stays the same size across files, while keeping their colors, fonts, and sign placement.",
+              )}
+              value={settings.subAssNormalizeSize || settings.subAssOverride === "scale"}
+              onChange={(v) =>
+                update(
+                  settings.subAssOverride === "scale"
+                    ? { subAssNormalizeSize: v, subAssOverride: v ? "scale" : "no" }
+                    : { subAssNormalizeSize: v },
+                )
+              }
+              lockReason={
+                settings.subAssOverride === "font"
+                  ? t("Not available while only the font changes.")
+                  : undefined
+              }
+            />
+            <button
+              type="button"
+              onClick={() => setShowAdvanced((v) => !v)}
+              aria-expanded={showAdvanced}
+              className={ROW_ACTION}
+            >
+              {showAdvanced ? t("Hide advanced") : t("Advanced")}
+            </button>
+            {showAdvanced && (
+              <ToggleRow
+                label={t("Change font only")}
+                sub={t(
+                  "Keeps the file's colors, size, and sign placement, but swaps in your font.",
+                )}
+                value={settings.subAssOverride === "font"}
+                onChange={(v) =>
+                  update({
+                    subAssOverride: v
+                      ? "font"
+                      : lastLookMode.current === "font"
+                        ? "no"
+                        : lastLookMode.current,
+                  })
+                }
+              />
+            )}
+          </Nested>
+        )}
+        <ChoiceBlock
+          selected={useMyStyle}
+          onClick={() =>
+            update({ subAssOverride: settings.subAssOverride === "strip" ? "strip" : "force" })
+          }
+          label={t("Use my style")}
+          sub={t(
+            "Force your size, font, and color onto styled subs so every file looks consistent. Best for Arabic or subs showing boxes.",
+          )}
+        />
+        {useMyStyle && (
+          <Nested>
+            <ToggleRow
+              label={t("Also remove hardcoded styling")}
+              sub={t(
+                "Removes tags the subtitle hardcodes per line, such as its own font or colors. Needed when Use my style does not change the text. Breaks signs and karaoke.",
+              )}
+              value={settings.subAssOverride === "strip"}
+              onChange={(v) => update({ subAssOverride: v ? "strip" : "force" })}
+            />
+          </Nested>
+        )}
         <p className={`max-w-[70ch] ${ROW_DESC}`}>
           {t(
-            "Embedded subtitles changing size between titles, or showing empty boxes? Switch to Use my style for a consistent size. For boxes, also choose Arabic under Font.",
+            "Embedded subtitles changing size between titles, or showing empty boxes? Choose Use my style. If the text still keeps its own font or colors, turn on Also remove hardcoded styling. For boxes, also choose Arabic under Font.",
           )}
         </p>
-        {(settings.subAssOverride === "no" || settings.subAssOverride === "scale") && (
-          <ToggleRow
-            label={t("Normalize embedded subtitle size")}
-            sub={t(
-              "Auto-adjusts styled (ASS) subtitles so dialogue stays the same size across files, while keeping their colors, fonts, and sign placement.",
-            )}
-            value={settings.subAssNormalizeSize}
-            onChange={(v) => update({ subAssNormalizeSize: v })}
-          />
-        )}
       </SettingGroup>
 
       <SettingGroup label={t("Sound descriptions")}>

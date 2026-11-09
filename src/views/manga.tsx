@@ -161,7 +161,7 @@ export function MangaView() {
   }, [mangaId]);
 
   useEffect(() => {
-    if (!settings.mangaEnabled) return;
+    if (!settings.mangaEnabled || !isBrowse || topKind !== "manga") return;
     let cancelled = false;
     // Never leave the previous source's hero on screen when the new source is
     // still loading (or its request fails).
@@ -174,7 +174,7 @@ export function MangaView() {
     return () => {
       cancelled = true;
     };
-  }, [settings.mangaEnabled, sourceTick]);
+  }, [settings.mangaEnabled, sourceTick, isBrowse, topKind]);
 
   useEffect(() => {
     if (mode.screen !== "reader") return;

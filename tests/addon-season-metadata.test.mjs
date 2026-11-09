@@ -60,8 +60,8 @@ test("addon seasons supply names, synopses, posters and backdrops", async () => 
   };
   const f = loadModule("providers/cinemeta-details.ts", {
     "@/lib/safe-fetch": { safeFetch: async () => ({ ok: false }) },
-    "@/lib/metadata-policy": { addonOnlyMetadata: () => false },
-    "@/lib/meta-resource": { preferCustomMeta: () => true, resolveMeta: async () => full },
+    "@/lib/metadata-policy": { addonOnlyMetadata: () => true },
+    "@/lib/meta-resource": { resolveMeta: async () => full },
     "@/lib/auth": { readActiveStremioAuthKey: () => null },
     "@/lib/cinemeta": { topMovies: async () => [], topSeries: async () => [] },
     "@/lib/maintenance": { registerEvictable: () => {} },

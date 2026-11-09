@@ -258,6 +258,7 @@ function scheduleEBookBackground(run: () => void, delay = 1_200): () => void {
 export function EBookView() {
   const t = useT();
   const { ebookId, openEBook, topKind } = useView();
+  const browsing = !ebookId && topKind === "ebook";
   const listScrollRef = useRef<HTMLElement | null>(null);
   useScrollMemory("ebook", listScrollRef, !ebookId);
   const { activeId } = useProfiles();
@@ -286,10 +287,7 @@ export function EBookView() {
     "ebook.titleLanguage",
     "auto",
   );
-  const [browseStatus, setBrowseStatus] = useSessionState<EBookBrowseStatus>(
-    "ebook.status",
-    "any",
-  );
+  const [browseStatus, setBrowseStatus] = useSessionState<EBookBrowseStatus>("ebook.status", "any");
   const [browseLanguage, setBrowseLanguage] = useSessionState<EBookBrowseLanguage>(
     "ebook.language",
     "any",
@@ -550,7 +548,7 @@ export function EBookView() {
 
   const sourceCatalogReady = sourceCatalogItems !== null;
   useEffect(() => {
-    if (screen !== "collections" || !providerId || !sourceCatalogReady) return;
+    if (!browsing || screen !== "collections" || !providerId || !sourceCatalogReady) return;
     const seq = sourceSeq.current;
     let active = true;
     setCollectionsRefreshing(true);
@@ -610,18 +608,20 @@ export function EBookView() {
     return () => {
       active = false;
     };
-  }, [cachedAwardBooks, collectionScope, providerId, screen, sourceCatalogReady]);
+  }, [browsing, cachedAwardBooks, collectionScope, providerId, screen, sourceCatalogReady]);
 
   useEffect(() => {
+    if (!browsing) return;
     loadSources();
     const sources = subscribeEBookSources(loadSources);
     const extensions = subscribeEBookExtensions(loadSources);
     return () => {
+      sourceSeq.current += 1;
       window.clearTimeout(searchTimer.current);
       sources();
       extensions();
     };
-  }, [loadSources, metadataVersion, uiLanguage]);
+  }, [browsing, loadSources, metadataVersion, uiLanguage]);
 
   useEffect(() => {
     const update = () => {
@@ -2888,7 +2888,9 @@ function EBookDetails({
     const authors = ebook.authors.slice(0, 2);
     void (async () => {
       const sourceResults = (
-        await Promise.all(authors.map((author) => searchSourceEBookCatalog(author, "all")))
+        await Promise.all(
+          authors.map((author) => searchSourceEBookCatalog(author, "all", { background: true })),
+        )
       ).flat();
       const sourceMatches = booksBySameAuthor(ebook, sourceResults);
       if (sourceMatches.length) return sourceMatches;
@@ -2965,7 +2967,7 @@ function EBookDetails({
         .map(({ item }) => item)
         .slice(0, 18);
     };
-    void loadSourceEBookPage(undefined, "all")
+    void loadSourceEBookPage(undefined, "all", {}, undefined, undefined, { background: true })
       .then(async (page) => {
         const sourceItems = sourceRecommendations(page.items);
         if (active && sourceItems.length) setRecommendations(sourceItems);
@@ -3007,7 +3009,9 @@ function EBookDetails({
     const hasArabic = (value: string) => /\p{Script=Arabic}/u.test(value);
     const ebookIsArabic = hasArabic(ebook.title);
     void Promise.all(
-      [...new Set(queries)].slice(0, 6).map((query) => searchSourceEBookCatalog(query, "all")),
+      [...new Set(queries)]
+        .slice(0, 6)
+        .map((query) => searchSourceEBookCatalog(query, "all", { background: true })),
     )
       .then(async (results) => {
         if (!active) return;
@@ -3026,7 +3030,7 @@ function EBookDetails({
           .slice(0, 32);
         const hydrated = await Promise.all(
           promising.map((candidate) =>
-            sourceEBookDetail(candidate.id)
+            sourceEBookDetail(candidate.id, { background: true })
               .then((detail) => detail ?? candidate)
               .catch(() => candidate),
           ),

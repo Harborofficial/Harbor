@@ -1333,40 +1333,16 @@ p{{margin:0 0 1em}}\
     Ok(path.to_string_lossy().to_string())
 }
 
-#[cfg(feature = "payload")]
-const CHANGELOG_URL: &str = "https://harborcommunity.site/updates/versions-beta.json";
-
 /// Patch notes shipped inside the installer. build.rs bundles installer/changelog/*-changelog.json
-/// into OUT_DIR/changelog.json; the live feed wins when it answers, and this copy keeps the
-/// Welcome screen useful while the feed is unavailable or not deployed yet.
+/// into OUT_DIR/changelog.json, so the Welcome screen lists the notes that came with this build
+/// even before the live feed has published them.
 #[cfg(feature = "payload")]
 const EMBEDDED_CHANGELOG: &str = include_str!(concat!(env!("OUT_DIR"), "/changelog.json"));
 
 #[cfg(feature = "payload")]
-fn remote_changelog() -> Option<String> {
-    let body = ureq::get(CHANGELOG_URL)
-        .timeout(std::time::Duration::from_secs(8))
-        .call()
-        .ok()?
-        .into_string()
-        .ok()?;
-    // A feed with at least one release is usable; error pages and empty indexes are not.
-    let parsed: serde_json::Value = serde_json::from_str(&body).ok()?;
-    let versions = parsed.get("versions")?.as_array()?;
-    if versions.is_empty() {
-        return None;
-    }
-    Some(body)
-}
-
-#[cfg(feature = "payload")]
 #[tauri::command]
 pub async fn fetch_changelog() -> Result<String, String> {
-    tauri::async_runtime::spawn_blocking(|| {
-        remote_changelog().unwrap_or_else(|| EMBEDDED_CHANGELOG.to_string())
-    })
-    .await
-    .map_err(|e| e.to_string())
+    Ok(EMBEDDED_CHANGELOG.to_string())
 }
 
 #[cfg(windows)]

@@ -1,4 +1,5 @@
 import { isNuvioProviderActive } from "@/lib/active-profile-id";
+import { persistCritical } from "./storage-recovery";
 import { purgeGameNotes } from "./games/game-notes";
 import {
   createContext,
@@ -574,7 +575,7 @@ function readState(): ProfilesState {
 
 function writeState(state: ProfilesState): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    persistCritical(STORAGE_KEY, JSON.stringify(state));
   } catch {
     return;
   }

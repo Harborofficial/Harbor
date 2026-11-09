@@ -135,22 +135,23 @@ export function MalTab() {
     [setBusyFor],
   );
 
-  const visible = useMemo(() => {
+  const matching = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return entries.filter((e) => {
-      if (type !== "all" && entryType(e) !== type) return false;
-      if (q && !entryName(e).toLowerCase().includes(q)) return false;
-      return true;
-    });
-  }, [entries, type, query]);
+    return q ? entries.filter((e) => entryName(e).toLowerCase().includes(q)) : entries;
+  }, [entries, query]);
+
+  const visible = useMemo(
+    () => (type === "all" ? matching : matching.filter((e) => entryType(e) === type)),
+    [matching, type],
+  );
 
   const counts = useMemo(
     () => ({
-      all: visible.length,
-      movie: visible.filter((e) => entryType(e) === "movie").length,
-      series: visible.filter((e) => entryType(e) === "series").length,
+      all: matching.length,
+      movie: matching.filter((e) => entryType(e) === "movie").length,
+      series: matching.filter((e) => entryType(e) === "series").length,
     }),
-    [visible],
+    [matching],
   );
 
   if (status === "loading") {

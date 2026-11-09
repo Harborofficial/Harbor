@@ -1,21 +1,21 @@
 import { useEffect } from "react";
-import { effectiveBinding, eventToBinding, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
+import { findHotkeyMatch, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { useSearchActions } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
 
 export function SearchHotkey() {
   const { setOpen } = useSearchActions();
   const { settings } = useSettings();
-  const binding = effectiveBinding("globalSearchFocus", settings.hotkeys ?? {});
+  const hotkeys = settings.hotkeys;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
-      if (eventToBinding(e) !== binding) return;
+      if (findHotkeyMatch(e, hotkeys ?? {}, "Global") !== "globalSearchFocus") return;
       e.preventDefault();
       setOpen(true);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [binding, setOpen]);
+  }, [hotkeys, setOpen]);
   return null;
 }

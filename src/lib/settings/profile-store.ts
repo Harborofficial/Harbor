@@ -1,9 +1,10 @@
-import { loadStoredSettings } from "./load";
-import { setItemWithRecovery } from "@/lib/storage-recovery";
+import { loadStoredSettings, parseStoredSettings } from "./load";
+import { setItemWithRecovery, setItemWithRecoveryDetailed } from "@/lib/storage-recovery";
 import type { Settings } from "./types";
 
 export const MIRROR_KEY = "harbor.settings";
 export const SHARED_KEY = "harbor.settings.shared";
+let lastSavedAt = 0;
 
 export function profileKey(id: string): string {
   return `harbor.settings.${id}`;
@@ -67,15 +68,50 @@ export function applyLegacyToActive(): boolean {
 }
 
 export function persistEffective(settings: Settings, profileId: string, linked: boolean): string {
-  const json = serializeSettings(settings);
-  const ok = setItemWithRecovery(sourceKeyFor(profileId, linked), json);
-  setItemWithRecovery(MIRROR_KEY, json);
+  const source = sourceKeyFor(profileId, linked);
+  lastSavedAt = Math.max(Date.now(), lastSavedAt + 1);
+  const json = JSON.stringify({
+    ...JSON.parse(serializeSettings(settings)),
+    _savedAt: lastSavedAt,
+    _savedSource: source,
+  });
+  const ok = setItemWithRecoveryDetailed(source, json).ok;
+  setItemWithRecoveryDetailed(MIRROR_KEY, json);
   if (!ok) {
     console.error(
-      `[settings] blob of ${json.length} chars did not persist; changes will be lost on restart`,
+      `[settings] blob of ${json.length} chars did not persist in browser storage; disk backup required`,
     );
   }
   return json;
+}
+
+/** A failed browser write must not hide a newer disk copy on the next launch. */
+export function recoverSettingsFile(
+  raw: string | null,
+  profileId: string,
+  linked: boolean,
+): Settings | null {
+  if (!raw) return null;
+  try {
+    const disk = JSON.parse(raw);
+    if (!disk || typeof disk !== "object" || Array.isArray(disk)) return null;
+    const source = sourceKeyFor(profileId, linked);
+    if (disk._savedSource && disk._savedSource !== source) return null;
+    const existing = localStorage.getItem(source) ?? localStorage.getItem(MIRROR_KEY);
+    if (existing) {
+      const local = JSON.parse(existing);
+      // Legacy files have no ordering information: keep the browser copy.
+      if (!(typeof disk._savedAt === "number" && disk._savedAt > (local?._savedAt ?? 0)))
+        return null;
+    }
+    const { settings } = parseStoredSettings(raw);
+    setItemWithRecoveryDetailed(source, raw);
+    setItemWithRecoveryDetailed(MIRROR_KEY, raw);
+    // Hydrate directly even if browser storage is still full.
+    return settings;
+  } catch {
+    return null;
+  }
 }
 
 export function forkToProfile(profileId: string): void {

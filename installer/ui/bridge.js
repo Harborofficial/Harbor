@@ -121,17 +121,18 @@ export async function openExternal(url) {
 
 export async function fetchChangelog() {
   if (!isNative()) {
+    // The dev server exposes the embedded copy at /changelog.json (see serve.mjs).
+    // Prefer it so a local build previews its own notes before they are published.
     try {
+      const local = await fetch("changelog.json", { cache: "no-store" });
+      if (!local.ok) throw new Error("changelog " + local.status);
+      return await local.json();
+    } catch {
       const res = await fetch("https://harborcommunity.site/updates/versions-beta.json", {
         cache: "no-store",
       });
       if (!res.ok) throw new Error("changelog " + res.status);
       return await res.json();
-    } catch {
-      // The dev server exposes the embedded copy at /changelog.json (see serve.mjs).
-      const fallback = await fetch("changelog.json", { cache: "no-store" });
-      if (!fallback.ok) throw new Error("changelog " + fallback.status);
-      return await fallback.json();
     }
   }
   const raw = await T.core.invoke("fetch_changelog");

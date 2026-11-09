@@ -1247,6 +1247,51 @@ test("GitHub discovery skips releases without usable assets", async () => {
   assert.equal(await github.discoverGithubUpdate("1.0.0", probe, "stable"), null);
 });
 
+test("platform-suffixed Shipyard assets remain updater-compatible", () => {
+  const { githubUpdate } = harness();
+  const base = "https://github.com/Harborofficial/Harbor/releases/download/v1.0.2/";
+  const name = "harbor-shipyard-v1.0.2-beta-windows-x64.exe";
+  const assets = [name, `${name}.sig`].map((asset) => ({
+    name: asset,
+    browser_download_url: `${base}${asset}`,
+  }));
+  const probe = {
+    supported: true,
+    managed: true,
+    platformKey: "windows-x86_64",
+  } as Parameters<typeof githubUpdate.releaseIsComplete>[1];
+
+  assert.equal(githubUpdate.releaseIsComplete({ assets }, probe), true);
+  assert.equal(githubUpdate.githubDownloadAsset({ assets }, "windows-x86_64")?.name, name);
+
+  const old = "harbor-shipyard-v1.0.2-beta.exe";
+  const oldAssets = [old, `${old}.sig`].map((asset) => ({
+    name: asset,
+    browser_download_url: `${base}${asset}`,
+  }));
+  assert.equal(githubUpdate.releaseIsComplete({ assets: oldAssets }, probe), true);
+  assert.equal(
+    githubUpdate.githubDownloadAsset({ assets: oldAssets }, "windows-x86_64")?.name,
+    old,
+  );
+});
+
+test("channel-prefixed macOS artifacts keep architecture detection", () => {
+  const { githubUpdate } = harness();
+  const base = "https://github.com/Harborofficial/Harbor/releases/download/v1.2.3-beta/";
+  const names = [
+    "Harbor_1.2.3_beta_macos-apple-silicon-aarch64.dmg",
+    "Harbor_1.2.3_beta_macos-intel-x64.dmg",
+  ];
+  const assets = names.map((name) => ({
+    name,
+    browser_download_url: `${base}${name}`,
+  }));
+
+  assert.equal(githubUpdate.githubDownloadAsset({ assets }, "darwin-aarch64")?.name, names[0]);
+  assert.equal(githubUpdate.githubDownloadAsset({ assets }, "darwin-x86_64")?.name, names[1]);
+});
+
 test("GitHub downloads match native OS and architecture, independent of asset order", () => {
   const { githubDownloadAsset } = harness().githubUpdate;
   const names = [

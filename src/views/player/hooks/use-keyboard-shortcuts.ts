@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
-import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
+import { createHotkeyMatcher, isPlayerHotkeyTarget, isTypingTarget } from "@/lib/hotkeys";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
 import { mediaKeyGate } from "@/lib/media-session";
@@ -334,13 +334,7 @@ export function useKeyboardShortcuts(params: {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (
-        document.querySelector('[data-harbor-player][data-detached="true"]') &&
-        !e.key.startsWith("Media")
-      )
-        return;
-      const dock = document.querySelector('[data-harbor-player][data-docked="true"]');
-      if (dock && !dock.contains(e.target as Node) && !e.key.startsWith("Media")) return;
+      if (!e.key.startsWith("Media") && !isPlayerHotkeyTarget(e)) return;
       if (isPlayerInteractionLocked()) {
         if (e.cancelable) e.preventDefault();
         return;
@@ -462,8 +456,7 @@ export function useKeyboardShortcuts(params: {
         }
       }
 
-      const binding = eventToBinding(e);
-      const match = (id: HotkeyId): boolean => effectiveBinding(id, overrides) === binding;
+      const match = createHotkeyMatcher(e, overrides, "Player");
 
       if (e.key.startsWith("Media")) tracePlayback(`media-key-dom ${e.key}`);
 

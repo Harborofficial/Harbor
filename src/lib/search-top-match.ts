@@ -30,6 +30,8 @@ export function prioritizedTopMatch({
   earlyAddonTop: SearchResults["topMatch"];
   tmdbEnabled: boolean;
 }): SearchResults["topMatch"] {
+  // The explicit TMDB toggle takes precedence over the metadata source order.
+  if (tmdbEnabled && tmdbTop) return tmdbTop;
   if (chain.length === 0) return tmdbEnabled ? (tmdbTop ?? addonTop) : addonTop;
   const tmdbAt = chain.indexOf("tmdb");
   if (tmdbAt < 0) return addonTop;

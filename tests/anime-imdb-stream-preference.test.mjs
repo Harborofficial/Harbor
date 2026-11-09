@@ -1,9 +1,18 @@
+import { streamKey } from "../src/lib/streams/identity.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
-import { buildStreamIds, preferredAnimeImdbStreamId, unverifiedAnimeSeasonId } from "../src/lib/streams/stream-ids.ts";
-import { animeAbsoluteFromScopedId, splitAnimeStreamCoordinates } from "../src/lib/streams/anime-identity-core.ts";
+import {
+  buildStreamIds,
+  catalogEpisodeStreamId,
+  preferredAnimeImdbStreamId,
+  unverifiedAnimeSeasonId,
+} from "../src/lib/streams/stream-ids.ts";
+import {
+  animeAbsoluteFromScopedId,
+  splitAnimeStreamCoordinates,
+} from "../src/lib/streams/anime-identity-core.ts";
 import { lruSet } from "../src/lib/cache.ts";
 
 function load(path, mocks) {
@@ -11,46 +20,77 @@ function load(path, mocks) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   const exports = {};
-  new Function("require", "exports", "window", "localStorage", code)((id) => {
-    assert.ok(id in mocks, `Unexpected dependency: ${id}`);
-    return mocks[id];
-  }, exports, {}, { length: 0 });
+  new Function("require", "exports", "window", "localStorage", code)(
+    (id) => {
+      assert.ok(id in mocks, `Unexpected dependency: ${id}`);
+      return mocks[id];
+    },
+    exports,
+    {},
+    { length: 0 },
+  );
   return exports;
 }
 
 const pluginMocks = {
   PLUGIN_ADDON_PREFIX: "harbor-plugin://",
   isPluginAddon: (addon) => addon.transportUrl.startsWith("harbor-plugin://"),
-  pluginIdFromCatalogueBase: (base) => base.startsWith("harbor-plugin://") ? base.slice(16) : undefined,
+  pluginIdFromCatalogueBase: (base) =>
+    base.startsWith("harbor-plugin://") ? base.slice(16) : undefined,
   pluginAddonById: () => undefined,
   pluginsForAddon: () => [],
 };
 
 const { buildEpisodePipelineInput } = load("../src/lib/streams/episode-pipeline-input.ts", {
-  "@/lib/addons": { addonBasesForOrigin: (_, origin) => origin ? ["https://native.example"] : [] },
+  "@/lib/addons": {
+    addonBasesForOrigin: (_, origin) => (origin ? ["https://native.example"] : []),
+  },
   "@/lib/cinemeta": { isAddonNativeMeta: (meta) => meta.id.startsWith("native:") },
   "@/lib/playback-history": { readPlayback: () => null },
   "./addon-priority": { resolveAddonRanks: () => null },
   "./anime-identity-core": { animeAbsoluteFromScopedId, splitAnimeStreamCoordinates },
   "./plugins/addon": pluginMocks,
-  "./stream-ids": { preferredAnimeImdbStreamId, unverifiedAnimeSeasonId },
+  "./stream-ids": { catalogEpisodeStreamId, preferredAnimeImdbStreamId, unverifiedAnimeSeasonId },
 });
 
-function input({ enabled = true, id = "kitsu:123", episode, imdbId = "tt1234567", verified = true, ids, origin } = {}) {
+function input({
+  enabled = true,
+  id = "kitsu:123",
+  episode,
+  imdbId = "tt1234567",
+  verified = true,
+  ids,
+  origin,
+} = {}) {
   return buildEpisodePipelineInput({
     meta: { id, name: "Fixture Anime", type: episode ? "series" : "movie", addonOrigin: origin },
-    episode, imdbId, imdbIdVerified: verified,
+    episode,
+    imdbId,
+    imdbIdVerified: verified,
     streamIds: ids ?? buildStreamIds(id, episode, imdbId),
-    addons: [], debrids: [], strictMode: true, filterDisabled: false,
-    settings: { animePreferImdbStreams: enabled, addonTimeoutSec: 30, preferredLanguages: [], bandwidthMbps: 0 },
+    addons: [],
+    debrids: [],
+    strictMode: true,
+    filterDisabled: false,
+    settings: {
+      animePreferImdbStreams: enabled,
+      addonTimeoutSec: 30,
+      preferredLanguages: [],
+      bandwidthMbps: 0,
+    },
   });
 }
 
 function addon(prefixes = ["kitsu", "tt"], types = ["movie", "series"]) {
-  return { transportUrl: "https://addon.example/manifest.json", manifest: {
-    id: "fixture", name: "Fixture", types,
-    resources: [{ name: "stream", types, idPrefixes: prefixes }],
-  } };
+  return {
+    transportUrl: "https://addon.example/manifest.json",
+    manifest: {
+      id: "fixture",
+      name: "Fixture",
+      types,
+      resources: [{ name: "stream", types, idPrefixes: prefixes }],
+    },
+  };
 }
 
 function transport(empty = false) {
@@ -58,35 +98,79 @@ function transport(empty = false) {
   const plugins = [];
   const fetch = async (url) => {
     urls.push(url);
-    return { ok: true, json: async () => ({ streams: empty ? [] : [{ url: "https://video.example/fixture.mp4" }] }) };
+    return {
+      ok: true,
+      json: async () => ({ streams: empty ? [] : [{ url: "https://video.example/fixture.mp4" }] }),
+    };
   };
   const api = load("../src/lib/streams/addons.ts", {
     "@/lib/safe-fetch": { safeFetch: fetch, safeFetchLocal: fetch },
-    "./prefetch-request": { clearPrefetchedRequests() {}, prefetchRequest: (_key, signal, _prefetch, run) => run(signal) },
+    "./prefetch-request": {
+      clearPrefetchedRequests() {},
+      prefetchRequest: (_key, signal, _prefetch, run) => run(signal),
+    },
+    "./identity": { streamKey },
     "@/lib/debug": { dlog() {}, dwarn() {} },
     "@/lib/fetch-fallback-policy": { isHarborFetchPolicyError: () => false },
     "@/lib/local-network": { isLocalNetworkUrl: () => false },
     "./addon-detect": {
-      isAddonRanked: () => false, isRetiredTorboxAddon: () => false,
-      isStatusOnlyAddon: () => false, isStremioLocalAddon: () => false,
+      isAddonRanked: () => false,
+      isRetiredTorboxAddon: () => false,
+      isStatusOnlyAddon: () => false,
+      isStremioLocalAddon: () => false,
     },
     "./cached": { hasUncachedMarker: () => false },
     "@/lib/torrent/magnet": {},
-    "./plugins/addon": { ...pluginMocks, runPluginAddon: async (_, req, id) => { plugins.push({ req, id }); return []; } },
+    "./plugins/addon": {
+      ...pluginMocks,
+      runPluginAddon: async (_, req, id) => {
+        plugins.push({ req, id });
+        return [];
+      },
+    },
   });
-  return { urls, plugins, api, async run(req, source = addon(), forced) {
-    await api.fetchAddonStreams([source], req, new AbortController().signal, undefined, undefined, 1000, undefined, forced);
-    return urls.map((url) => /\/stream\/[^/]+\/(.+)\.json$/.exec(url)[1]);
-  } };
+  return {
+    urls,
+    plugins,
+    api,
+    async run(req, source = addon(), forced) {
+      await api.fetchAddonStreams(
+        [source],
+        req,
+        new AbortController().signal,
+        undefined,
+        undefined,
+        1000,
+        undefined,
+        forced,
+      );
+      return urls.map((url) => /\/stream\/[^/]+\/(.+)\.json$/.exec(url)[1]);
+    },
+  };
 }
 
-const mapped = { season: 1, episode: 1, imdbId: "tt1234567", imdbSeason: 2, imdbEpisode: 13, kitsuStreamId: "kitsu:123:1" };
+const mapped = {
+  season: 1,
+  episode: 1,
+  imdbId: "tt1234567",
+  imdbSeason: 2,
+  imdbEpisode: 13,
+  kitsuStreamId: "kitsu:123:1",
+};
 
 test("TYBW plugins receive S4E9 and absolute 49 without the original Bleach IMDb id", () => {
-  const out = input({ id: "kitsu:49444", imdbId: "tt0434665", episode: {
-    season: 1, episode: 9, kitsuStreamId: "kitsu:49444:9",
-    imdbId: "tt0434665", imdbSeason: 17, imdbEpisode: 49,
-  } });
+  const out = input({
+    id: "kitsu:49444",
+    imdbId: "tt0434665",
+    episode: {
+      season: 1,
+      episode: 9,
+      kitsuStreamId: "kitsu:49444:9",
+      imdbId: "tt0434665",
+      imdbSeason: 17,
+      imdbEpisode: 49,
+    },
+  });
   assert.deepEqual(out.request.ids, ["kitsu:49444:9"]);
   assert.equal(out.request.context.season, 4);
   assert.equal(out.request.context.episode, 9);
@@ -97,7 +181,9 @@ test("TYBW plugins receive S4E9 and absolute 49 without the original Bleach IMDb
 });
 
 test("off keeps Kitsu selection; on sends the mapped IMDb episode to the addon", async () => {
-  assert.deepEqual(await transport().run(input({ episode: mapped, enabled: false }).request), ["kitsu:123:1"]);
+  assert.deepEqual(await transport().run(input({ episode: mapped, enabled: false }).request), [
+    "kitsu:123:1",
+  ]);
   const enabled = input({ episode: mapped });
   assert.deepEqual(await transport().run(enabled.request), ["tt1234567:2:13"]);
   assert.ok(enabled.request.ids.includes("kitsu:123:1"));
@@ -141,12 +227,15 @@ test("an anime mapping resolved from a TMDB page can prefer IMDb", async () => {
 });
 
 test("addon prefix restrictions retain supported anime IDs", async () => {
-  assert.deepEqual(await transport().run(input({ episode: mapped }).request, addon(["kitsu"])), ["kitsu:123:1"]);
+  assert.deepEqual(await transport().run(input({ episode: mapped }).request, addon(["kitsu"])), [
+    "kitsu:123:1",
+  ]);
 });
 
 test("an unverified anime candidate still uses IMDb with the preference off", async () => {
   const req = input({
-    episode: { season: 4, episode: 9, imdbSeason: 4, imdbEpisode: 9 }, enabled: false,
+    episode: { season: 4, episode: 9, imdbSeason: 4, imdbEpisode: 9 },
+    enabled: false,
   }).request;
   assert.equal(req.animeIdUnverified, true);
   assert.deepEqual(await transport().run(req), ["tt1234567:4:9"]);
@@ -154,20 +243,34 @@ test("an unverified anime candidate still uses IMDb with the preference off", as
 
 test("specials retain both identities when the addon supports both", async () => {
   const episode = { ...mapped, imdbSeason: 0, imdbEpisode: 2 };
-  assert.deepEqual(await transport().run(input({ episode }).request), ["tt1234567:0:2", "kitsu:123:1"]);
-  assert.deepEqual(await transport().run(input({ episode, enabled: false }).request), ["kitsu:123:1", "tt1234567:0:2"]);
+  assert.deepEqual(await transport().run(input({ episode }).request), [
+    "tt1234567:0:2",
+    "kitsu:123:1",
+  ]);
+  assert.deepEqual(await transport().run(input({ episode, enabled: false }).request), [
+    "kitsu:123:1",
+    "tt1234567:0:2",
+  ]);
 });
 
 test("empty IMDb results do not add a second lookup", async () => {
-  assert.deepEqual(await transport(true).run(input({ episode: mapped }).request), ["tt1234567:2:13"]);
+  assert.deepEqual(await transport(true).run(input({ episode: mapped }).request), [
+    "tt1234567:2:13",
+  ]);
 });
 
 test("non-anime requests are identical with the option on or off", async () => {
-  for (const [id, episode] of [["tmdb:movie:123", undefined], ["tt1234567", { season: 2, episode: 3 }]]) {
+  for (const [id, episode] of [
+    ["tmdb:movie:123", undefined],
+    ["tt1234567", { season: 2, episode: 3 }],
+  ]) {
     const enabled = input({ id, episode, enabled: true });
     const disabled = input({ id, episode, enabled: false });
     assert.deepEqual(enabled, disabled);
-    assert.deepEqual(await transport().run(enabled.request, addon(["tt", "tmdb:"])), await transport().run(disabled.request, addon(["tt", "tmdb:"])));
+    assert.deepEqual(
+      await transport().run(enabled.request, addon(["tt", "tmdb:"])),
+      await transport().run(disabled.request, addon(["tt", "tmdb:"])),
+    );
   }
 });
 
@@ -179,12 +282,21 @@ test("alternate declared types honor the preference", async () => {
 
 test("forced native addon IDs and pinned plugins retain their lookup contract", async () => {
   const req = input({ episode: mapped }).request;
-  assert.deepEqual(await transport().run(req, addon(), [{ base: "https://addon.example", id: "native:page" }]), ["native:page"]);
+  assert.deepEqual(
+    await transport().run(req, addon(), [{ base: "https://addon.example", id: "native:page" }]),
+    ["native:page"],
+  );
   const h = transport();
   const plugin = { ...addon(), transportUrl: "harbor-plugin://fixture" };
-  assert.equal(h.api.pluginQueryId(plugin, req, "capstan:fixture:page:1:1"), "capstan:fixture:page:1:1");
+  assert.equal(
+    h.api.pluginQueryId(plugin, req, "capstan:fixture:page:1:1"),
+    "capstan:fixture:page:1:1",
+  );
   assert.equal(h.api.pluginQueryId(plugin, req, undefined), "tt1234567:2:13");
-  assert.equal(input({ id: "native:page", episode: mapped, ids: req.ids }).request.preferredAnimeImdbId, undefined);
+  assert.equal(
+    input({ id: "native:page", episode: mapped, ids: req.ids }).request.preferredAnimeImdbId,
+    undefined,
+  );
 });
 
 test("plugins receive the preferred provider coordinates instead of cour display coordinates", async () => {
@@ -209,15 +321,23 @@ test("plugins receive the preferred provider coordinates instead of cour display
 
 test("cache keys change with the anime preference and resolved mapping, with no change for non-anime", () => {
   const api = load("../src/lib/picker-cache.ts", {
-    "./cache": { lruSet }, "./maintenance": { registerEvictable() {} },
+    "./cache": { lruSet },
+    "./maintenance": { registerEvictable() {} },
   });
   const config = { addonTransportUrls: [], debridSlugs: [], scraperKeys: [], filterMode: "strict" };
   const off = api.buildPickerConfigHash({ ...config, animePreferImdbStreams: false });
   const waiting = api.buildPickerConfigHash({ ...config, animePreferImdbStreams: true });
-  const on = api.buildPickerConfigHash({ ...config, animePreferImdbStreams: true, preferredAnimeImdbId: "tt1234567:2:13" });
+  const on = api.buildPickerConfigHash({
+    ...config,
+    animePreferImdbStreams: true,
+    preferredAnimeImdbId: "tt1234567:2:13",
+  });
   assert.notEqual(off, on);
   assert.notEqual(waiting, on);
-  assert.equal(api.buildPickerConfigHash(config), api.buildPickerConfigHash({ ...config, animePreferImdbStreams: undefined }));
+  assert.equal(
+    api.buildPickerConfigHash(config),
+    api.buildPickerConfigHash({ ...config, animePreferImdbStreams: undefined }),
+  );
   const meta = { id: "kitsu:123" };
   const result = { picker: { all: [{ url: "fixture" }] }, rejected: [] };
   api.setPickerCache(meta, mapped, result, off, true, false);

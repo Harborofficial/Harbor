@@ -500,17 +500,28 @@ export const HOTKEY_MAP: Record<HotkeyId, HotkeyDef> = Object.fromEntries(
   HOTKEYS.map((h) => [h.id, h]),
 ) as Record<HotkeyId, HotkeyDef>;
 
-export function eventToBinding(e: KeyboardEvent): string {
+function bindingForKey(
+  key: string,
+  modifiers: { ctrl: boolean; shift: boolean; alt: boolean; meta: boolean },
+): string {
   const mods: string[] = [];
-  let key = e.key;
   const isLetter = key.length === 1 && /[a-zA-Z]/.test(key);
-  if (e.ctrlKey) mods.push("ctrl");
-  if (e.shiftKey && !isLetter) mods.push("shift");
-  if (e.altKey) mods.push("alt");
-  if (e.metaKey) mods.push("meta");
+  if (modifiers.ctrl) mods.push("ctrl");
+  if (modifiers.shift && !isLetter) mods.push("shift");
+  if (modifiers.alt) mods.push("alt");
+  if (modifiers.meta) mods.push("meta");
   if (key === " ") key = "Space";
   if (isLetter) key = key.toLowerCase();
   return mods.length === 0 ? key : mods.join("+") + "+" + key;
+}
+
+export function eventToBinding(e: KeyboardEvent): string {
+  return bindingForKey(e.key, {
+    ctrl: e.ctrlKey,
+    shift: e.shiftKey,
+    alt: e.altKey,
+    meta: e.metaKey,
+  });
 }
 
 export function isModifierOnly(e: KeyboardEvent): boolean {
@@ -518,7 +529,8 @@ export function isModifierOnly(e: KeyboardEvent): boolean {
 }
 
 export function isTypingTarget(e: KeyboardEvent): boolean {
-  const node = (e.target as HTMLElement | null) ?? (document.activeElement as HTMLElement | null);
+  const node = (e.target ??
+    (typeof document === "undefined" ? null : document.activeElement)) as HTMLElement | null;
   if (!node || node.nodeType !== 1) return false;
   const tag = node.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
@@ -532,14 +544,13 @@ export function shouldHandleGlobalKeyboardEvent(e: KeyboardEvent): boolean {
   return !e.isComposing && e.key !== "Process" && !isTypingTarget(e);
 }
 
-export function matchesBinding(e: KeyboardEvent, binding: string): boolean {
-  return eventToBinding(e) === binding;
+function bindingOverride(id: HotkeyId, overrides: Record<string, string>): string | undefined {
+  const override = overrides[id];
+  return typeof override === "string" && override.length > 0 ? override : undefined;
 }
 
 export function effectiveBinding(id: HotkeyId, overrides: Record<string, string>): string {
-  const ov = overrides[id];
-  if (typeof ov === "string" && ov.length > 0) return ov;
-  return HOTKEY_MAP[id].defaultBinding;
+  return bindingOverride(id, overrides) ?? HOTKEY_MAP[id].defaultBinding;
 }
 
 export function formatBindingForDisplay(binding: string): string {
@@ -561,15 +572,110 @@ export function formatBindingForDisplay(binding: string): string {
     .join(" + ");
 }
 
+export function isPlayerHotkeyTarget(e: KeyboardEvent): boolean {
+  const player = document.querySelector("[data-harbor-player]");
+  if (!player || player.getAttribute("data-detached") === "true") return false;
+  return player.getAttribute("data-docked") !== "true" || e.composedPath().includes(player);
+}
+
+function isActiveLocalHotkeyScope(e: KeyboardEvent, scope: HotkeyScope): boolean {
+  if (typeof document === "undefined") return false;
+  if (scope === "Player") return isPlayerHotkeyTarget(e);
+  return scope === "Manga" && document.querySelector("[data-harbor-manga-reader]") !== null;
+}
+
+const US_PUNCTUATION_BY_CODE: Record<string, readonly [string, string]> = {
+  Backquote: ["`", "~"],
+  Minus: ["-", "_"],
+  Equal: ["=", "+"],
+  BracketLeft: ["[", "{"],
+  BracketRight: ["]", "}"],
+  Backslash: ["\\", "|"],
+  IntlBackslash: ["\\", "|"],
+  Semicolon: [";", ":"],
+  Quote: ["'", '"'],
+  Comma: [",", "<"],
+  Period: [".", ">"],
+  Slash: ["/", "?"],
+};
+
+function defaultBindingFallbacks(e: KeyboardEvent): string[] {
+  if (e.isComposing) return [];
+
+  const altGraph = e.getModifierState?.("AltGraph") === true;
+  const modifiers = {
+    ctrl: altGraph ? false : e.ctrlKey,
+    alt: altGraph ? false : e.altKey,
+    meta: e.metaKey,
+  };
+  const fallbacks = new Set<string>();
+  const add = (key: string, shift: boolean) => {
+    fallbacks.add(bindingForKey(key, { ...modifiers, shift }));
+  };
+
+  // A layout can require Shift or AltGr for a character. Try both Shift states
+  // so punctuation defaults such as "shift+<" still match where "<" is
+  // unshifted, and digits match where the number row needs Shift.
+  if (e.key.length === 1 && /^[\p{P}\p{S}\p{N}]$/u.test(e.key)) {
+    add(e.key, false);
+    add(e.key, true);
+  }
+
+  // Map non-ASCII digits back to their physical number-row digit.
+  const digit = /^(?:Digit|Numpad)([0-9])$/.exec(e.code);
+  if (digit && /^\p{Nd}$/u.test(e.key)) {
+    add(digit[1], false);
+    add(digit[1], true);
+  }
+
+  // A non-ASCII key still sits on a physical key. Fall back to what that key
+  // would produce on a US layout. AltGr characters are handled above and must
+  // not be interpreted as their physical position.
+  if (!altGraph && e.key.length === 1 && e.key.charCodeAt(0) > 0x7f) {
+    const letter = /^Key([A-Z])$/.exec(e.code);
+    if (letter && /^\p{L}$/u.test(e.key)) {
+      add(letter[1], false);
+    } else {
+      const us = US_PUNCTUATION_BY_CODE[e.code];
+      if (us) add(e.shiftKey ? us[1] : us[0], e.shiftKey);
+    }
+  }
+
+  return [...fallbacks];
+}
+
+export function createHotkeyMatcher(
+  e: KeyboardEvent,
+  overrides: Record<string, string>,
+  scope: HotkeyScope,
+  only?: HotkeyId,
+): (id: HotkeyId) => boolean {
+  const binding = eventToBinding(e);
+  const isEligible = (id: HotkeyId) => HOTKEY_MAP[id].scope === scope && (!only || id === only);
+  const matchesExact = (id: HotkeyId) =>
+    isEligible(id) && effectiveBinding(id, overrides) === binding;
+  const fallbacks = defaultBindingFallbacks(e);
+  if (fallbacks.length === 0 || isTypingTarget(e)) return matchesExact;
+
+  // An active local shortcut also takes precedence over a global fallback.
+  const exactMatchExists = HOTKEYS.some(
+    (def) =>
+      effectiveBinding(def.id, overrides) === binding &&
+      (isEligible(def.id) || (scope === "Global" && isActiveLocalHotkeyScope(e, def.scope))),
+  );
+  if (exactMatchExists) return matchesExact;
+
+  return (id) =>
+    isEligible(id) &&
+    !bindingOverride(id, overrides) &&
+    fallbacks.includes(HOTKEY_MAP[id].defaultBinding);
+}
+
 export function findHotkeyMatch(
   e: KeyboardEvent,
   overrides: Record<string, string>,
   scope: HotkeyScope,
 ): HotkeyId | null {
-  const binding = eventToBinding(e);
-  for (const def of HOTKEYS) {
-    if (def.scope !== scope) continue;
-    if (effectiveBinding(def.id, overrides) === binding) return def.id;
-  }
-  return null;
+  const matches = createHotkeyMatcher(e, overrides, scope);
+  return HOTKEYS.find(({ id }) => matches(id))?.id ?? null;
 }

@@ -1,3 +1,4 @@
+import { streamKey } from "../src/lib/streams/identity.ts";
 // @ts-expect-error Node-only test
 import assert from "node:assert/strict";
 // @ts-expect-error Node-only test
@@ -16,22 +17,43 @@ function harness(successfulScheme: "tmdb" | "imdb") {
     "@/lib/safe-fetch": {
       safeFetch: async (url: string) => {
         calls.push(url);
-        const found = successfulScheme === "tmdb"
-          ? url.includes("tmdb:326565:1:1")
-          : url.includes("tt48434821:1:1");
-        return { ok: true, json: async () => ({
-          streams: found ? [{ title: "Up and Down S01E01", url: "https://media.invalid/episode.m3u8" }] : [],
-        }) };
+        const found =
+          successfulScheme === "tmdb"
+            ? url.includes("tmdb:326565:1:1")
+            : url.includes("tt48434821:1:1");
+        return {
+          ok: true,
+          json: async () => ({
+            streams: found
+              ? [{ title: "Up and Down S01E01", url: "https://media.invalid/episode.m3u8" }]
+              : [],
+          }),
+        };
       },
     },
-    "./prefetch-request": { prefetchRequest: async (_key: string, _signal: AbortSignal, _prefetch: boolean, load: any) => load(_signal), clearPrefetchedRequests: () => {} },
+    "./prefetch-request": {
+      prefetchRequest: async (_key: string, _signal: AbortSignal, _prefetch: boolean, load: any) =>
+        load(_signal),
+      clearPrefetchedRequests: () => {},
+    },
+    "./identity": { streamKey },
     "@/lib/debug": { dlog() {}, dwarn() {} },
     "@/lib/fetch-fallback-policy": { isHarborFetchPolicyError: () => false },
     "@/lib/local-network": { isLocalNetworkUrl: () => false },
-    "./addon-detect": { isAddonRanked: () => false, isRetiredTorboxAddon: () => false, isStatusOnlyAddon: () => false, isStremioLocalAddon: () => false },
+    "./addon-detect": {
+      isAddonRanked: () => false,
+      isRetiredTorboxAddon: () => false,
+      isStatusOnlyAddon: () => false,
+      isStremioLocalAddon: () => false,
+    },
     "./cached": { hasUncachedMarker: () => false },
     "@/lib/torrent/magnet": { infoHashFromSources: () => null, infoHashFromUrl: () => null },
-    "./plugins/addon": { isPluginAddon: () => false, PLUGIN_ADDON_PREFIX: "plugin://", pluginIdFromCatalogueBase: () => null, runPluginAddon: () => [] },
+    "./plugins/addon": {
+      isPluginAddon: () => false,
+      PLUGIN_ADDON_PREFIX: "plugin://",
+      pluginIdFromCatalogueBase: () => null,
+      runPluginAddon: () => [],
+    },
   };
   new Function("require", "exports", code)((key: string) => {
     assert.ok(key in mocks, `Unexpected import: ${key}`);
@@ -40,7 +62,9 @@ function harness(successfulScheme: "tmdb" | "imdb") {
   const addon = {
     transportUrl: "https://aradeb.invalid/manifest.json",
     manifest: {
-      id: "aradeb", name: "Aradeb", types: ["series"],
+      id: "aradeb",
+      name: "Aradeb",
+      types: ["series"],
       resources: [{ name: "stream", types: ["series"], idPrefixes: ["tt", "tmdb:"] }],
     },
   };
@@ -51,7 +75,9 @@ function harness(successfulScheme: "tmdb" | "imdb") {
 test("Aradeb retries TMDB only when the preferred IMDb episode ID is empty", async () => {
   const h = harness("tmdb");
   const results = await h.api.fetchAddonStreams(
-    [h.addon], { type: "series", ids: h.ids }, new AbortController().signal,
+    [h.addon],
+    { type: "series", ids: h.ids },
+    new AbortController().signal,
   );
   assert.equal(results.length, 1);
   assert.ok(h.calls[0].includes("/stream/series/tt48434821:1:1.json"));
@@ -62,7 +88,9 @@ test("Aradeb retries TMDB only when the preferred IMDb episode ID is empty", asy
 test("Aradeb does not retry TMDB when the preferred IMDb episode ID works", async () => {
   const h = harness("imdb");
   const results = await h.api.fetchAddonStreams(
-    [h.addon], { type: "series", ids: h.ids }, new AbortController().signal,
+    [h.addon],
+    { type: "series", ids: h.ids },
+    new AbortController().signal,
   );
   assert.equal(results.length, 1);
   assert.equal(h.calls.length, 1);
@@ -71,8 +99,13 @@ test("Aradeb does not retry TMDB when the preferred IMDb episode ID works", asyn
 test("an addon forced by a catalog retains the specified episode ID", async () => {
   const h = harness("tmdb");
   const results = await h.api.fetchAddonStreams(
-    [h.addon], { type: "series", ids: h.ids }, new AbortController().signal,
-    undefined, undefined, undefined, undefined,
+    [h.addon],
+    { type: "series", ids: h.ids },
+    new AbortController().signal,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
     [{ base: "https://aradeb.invalid", id: "tmdb:326565:1:1" }],
   );
   assert.equal(results.length, 1);

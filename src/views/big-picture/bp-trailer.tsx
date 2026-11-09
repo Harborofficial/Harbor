@@ -34,7 +34,7 @@ export function BpTrailer({
 
   useEffect(() => {
     let alive = true;
-    fetchTrailer(ytId, resolveTrailerQuality(settings.trailerQuality))
+    fetchTrailer(ytId, resolveTrailerQuality(settings.trailerQuality), true)
       .then((info) => {
         if (!alive) return;
         if (info) setSrc(trailerSrc(info));

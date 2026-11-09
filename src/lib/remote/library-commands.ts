@@ -1,6 +1,6 @@
 import type { Meta } from "@/lib/cinemeta";
 import { toggleWatchlist, watchlistHas } from "@/lib/watchlist";
-import { markMetaWatched, unmarkMetaWatched } from "@/lib/mark-watched";
+import { requireMediaActionSuccess, setContextWatched } from "@/lib/media-context-actions";
 import { setMediaFavorite } from "@/lib/media-favorites";
 import { readActiveProfileIdentity } from "@/lib/profiles";
 import { resolveSimklTarget } from "@/lib/simkl/ids";
@@ -33,9 +33,19 @@ export async function runLibraryAction(cmd: LibraryActionCommand): Promise<void>
       return;
     }
     case "watched": {
-      const meta: Meta = { id: metaId, type: metaType as Meta["type"], name: name ?? "", poster };
-      if (op.on) await markMetaWatched(meta, imdbId);
-      else await unmarkMetaWatched(meta, imdbId);
+      const meta: Meta = {
+        id: metaId,
+        type: metaType === "movie" ? "movie" : metaType === "anime" ? "anime" : "series",
+        name: name ?? "",
+        poster,
+      };
+      requireMediaActionSuccess(
+        await setContextWatched(meta, op.on, {
+          imdbId,
+          onUnsafeProvider: "skip",
+          allowSimklLibraryRemoval: true,
+        }),
+      );
       return;
     }
     case "favorite": {

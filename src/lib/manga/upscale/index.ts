@@ -22,6 +22,16 @@ function resetWorker() {
 
 let unloadTimer: number | null = null;
 let active = false;
+let backgroundJobs = 0;
+
+export function retainMangaUpscaler(): () => void {
+  backgroundJobs++;
+  cancelUnload();
+  return () => {
+    backgroundJobs--;
+    if (!active && backgroundJobs === 0) scheduleMangaUpscalerUnload();
+  };
+}
 
 function cancelUnload() {
   if (unloadTimer === null) return;
@@ -42,7 +52,7 @@ export function scheduleMangaUpscalerUnload(delayMs = 7000): void {
   cancelUnload();
   unloadTimer = window.setTimeout(() => {
     unloadTimer = null;
-    if (inFlight.size > 0) {
+    if (inFlight.size > 0 || backgroundJobs > 0) {
       scheduleMangaUpscalerUnload(delayMs);
       return;
     }

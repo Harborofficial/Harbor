@@ -274,8 +274,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       const metadataOrder = configuredAddonOrder.length
         ? configuredAddonOrder
         : settings.metadataAddonOrder;
-      // Until the user saves the dialog's default order, addons remain ahead of
-      // TMDB. An empty array must not mean "TMDB first".
+      // Preserve the default addon order for fallback selection. The explicit
+      // TMDB Top Match toggle takes precedence when TMDB returns a result.
       const searchChain = explicitSearchChain.length
         ? explicitSearchChain
         : ["__default_search_addons__", "tmdb"];
@@ -398,7 +398,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         const mergedMovies = dropAnime(
           dedupeByTitle(
             mergeMetas(
-              settings.preferCustomMetaAddon
+              settings.addonOnlyMetadata
                 ? mergeMetas(acc.addon.movies, base.movies)
                 : mergeMetas(base.movies, acc.addon.movies),
               acc.cine.movies,
@@ -408,7 +408,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         const mergedSeries = dropAnime(
           dedupeByTitle(
             mergeMetas(
-              settings.preferCustomMetaAddon
+              settings.addonOnlyMetadata
                 ? mergeMetas(acc.addon.series, base.series)
                 : mergeMetas(base.series, acc.addon.series),
               acc.cine.series,
@@ -545,7 +545,6 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     settings.searchTmdbTopMatch,
     settings.metadataAddonOrder,
     settings.metadataSources,
-    settings.preferCustomMetaAddon,
     settings.tmdbLanguage,
     settings.translateTitles,
     playlists,

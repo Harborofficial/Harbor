@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
+import {
+  mirrorMembershipSnapshot,
+  readMembershipMirror,
+  readMembershipSavedAt,
+} from "@/lib/membership-durable";
 import { randomUuid } from "@/lib/uuid";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 import { persistableAddonOrigin, persistableVideos, type Meta } from "@/lib/cinemeta";
@@ -45,11 +50,23 @@ function activeCollectionsKey(): string {
   }
 }
 
+const lastPersistedAt = new Map<string, number>();
+let hydrating = false;
+let hydrateAgain = false;
+
+/** Drop the in-memory session copy when the active profile changes. */
+export function resetCollectionsSessionCache(): void {
+  memoryFallback = null;
+  lastPersistedAt.clear();
+}
+
 if (typeof window !== "undefined") {
   window.addEventListener("harbor:profiles-updated", () => {
-    memoryFallback = null;
+    resetCollectionsSessionCache();
     for (const s of subs) s();
+    void hydrateCollectionsFromDurable();
   });
+  void hydrateCollectionsFromDurable();
 }
 
 export type CollectionItemType = "movie" | "series" | "manga";
@@ -135,11 +152,13 @@ export function setCollectionSharedWithResult(
     return { status: "error", reason: "invalid-data" } as const;
   collection.shared = shared;
   collection.updatedAt = Date.now();
+  const payload = JSON.stringify(snapshot.containers);
   try {
-    localStorage.setItem(snapshot.key, JSON.stringify(snapshot.containers));
+    localStorage.setItem(snapshot.key, payload);
   } catch {
     return { status: "error", reason: "storage-failed" } as const;
   }
+  mirrorMembershipSnapshot(snapshot.key, snapshot.containers);
   for (const subscriber of subs) subscriber();
   return { status: "updated" } as const;
 }
@@ -227,23 +246,82 @@ function read(): Collection[] {
   }
 }
 
+function localCollectionsSavedAt(key: string): number {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return 0;
+    const value = JSON.parse(raw) as unknown;
+    if (!Array.isArray(value)) return 0;
+    let newest = 0;
+    for (const entry of value) {
+      const at = (entry as { updatedAt?: unknown })?.updatedAt;
+      if (typeof at === "number" && Number.isFinite(at) && at > newest) newest = at;
+    }
+    return newest;
+  } catch {
+    return 0;
+  }
+}
+
 function write(collections: Collection[]): void {
   const key = activeCollectionsKey();
   const payload = JSON.stringify(collections);
+  const savedAt = Date.now();
   const ok = setItemWithRecovery(key, payload);
-  if (!ok) {
-    freeStorageSpace();
-    const retry = setItemWithRecovery(key, payload);
-    if (!retry) {
-      memoryFallback = collections;
-      console.warn("[collections] localStorage exhausted, holding collections in memory only");
-    } else {
-      memoryFallback = null;
-    }
-  } else {
+  const persisted = ok ? true : (freeStorageSpace(), setItemWithRecovery(key, payload));
+  if (persisted) {
     memoryFallback = null;
+  } else {
+    memoryFallback = collections;
+    console.warn("[collections] localStorage exhausted, holding collections in memory only");
   }
+  // Keep the durable copy current even when localStorage refused the write. Only a
+  // snapshot that reached localStorage may advance its saved-at marker.
+  mirrorMembershipSnapshot(key, collections, savedAt, persisted);
+  lastPersistedAt.set(key, savedAt);
   for (const s of subs) s();
+}
+
+/** Adopt a newer IndexedDB snapshot after a restart or profile switch. */
+export async function hydrateCollectionsFromDurable(): Promise<void> {
+  if (hydrating) {
+    hydrateAgain = true;
+    return;
+  }
+  hydrating = true;
+  try {
+    const key = activeCollectionsKey();
+    const record = await readMembershipMirror<Collection[]>(key);
+    if (!record || !Array.isArray(record.data)) return;
+    const savedAt = readMembershipSavedAt(key);
+    if (savedAt > 0) {
+      if (record.at <= savedAt) return;
+    } else {
+      // No local marker (a snapshot from before mirrors, or a marker write that
+      // failed). Prefer it when its newest collection is at least as new as the mirror.
+      const localAt = localCollectionsSavedAt(key);
+      if (localAt > 0 && localAt >= record.at) return;
+    }
+    if ((lastPersistedAt.get(key) ?? 0) >= record.at) return;
+    if (activeCollectionsKey() !== key) return;
+    const payload = JSON.stringify(record.data);
+    const ok = setItemWithRecovery(key, payload);
+    if (ok) {
+      memoryFallback = null;
+      mirrorMembershipSnapshot(key, record.data, record.at);
+    } else {
+      memoryFallback = record.data;
+      console.warn("[collections] recovered collections from IndexedDB; storage is still full");
+    }
+    lastPersistedAt.set(key, record.at);
+    for (const s of subs) s();
+  } finally {
+    hydrating = false;
+    if (hydrateAgain) {
+      hydrateAgain = false;
+      void hydrateCollectionsFromDurable();
+    }
+  }
 }
 
 export function readCollections(): Collection[] {

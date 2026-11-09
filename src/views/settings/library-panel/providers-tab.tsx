@@ -125,17 +125,6 @@ export function ProvidersTab(props: ProviderKeysArgs) {
             }
           />
           <ToggleRow
-            label={t("Prefer my installed metadata addon")}
-            lockReason={
-              settings.addonOnlyMetadata ? t("Controlled by disabled built-in metadata") : undefined
-            }
-            sub={t(
-              "Try your addon first for titles and descriptions. Use Cinemeta when the addon has no result.",
-            )}
-            value={settings.preferCustomMetaAddon}
-            onChange={(v) => update({ preferCustomMetaAddon: v })}
-          />
-          <ToggleRow
             label={t("Use free IMDb data without a TMDB key")}
             lockReason={
               settings.addonOnlyMetadata ? t("Controlled by disabled built-in metadata") : undefined

@@ -3,12 +3,13 @@ import type { PlayEpisode } from "@/lib/view";
 import { animeSeriesFromStreamId, fetchEpisodeList } from "@/lib/series-episodes";
 import { externalToKitsu, imdbToKitsu } from "@/lib/providers/anime-mapping";
 import { kitsuAnime, kitsuRelated, parseKitsuId } from "@/lib/providers/kitsu";
+import { isLastAiredEpisode } from "@/lib/player/last-aired-episode";
 
 /** Only the final listed episode qualifies, even while later episodes await release. */
 export async function isFinalSeriesEpisode(
   meta: Meta,
   current: PlayEpisode,
-  opts: { tmdbKey: string; isAnime?: boolean },
+  opts: { tmdbKey: string; isAnime?: boolean; allowLastAired?: boolean },
 ): Promise<boolean> {
   const animeId = animeSeriesFromStreamId(current.kitsuStreamId);
   const id = animeId ?? meta.id;
@@ -35,17 +36,14 @@ export async function isFinalSeriesEpisode(
       ? eps.find((e) => e.kitsuStreamId === current.kitsuStreamId)
       : undefined) ?? eps.find((e) => e.season === current.season && e.episode === current.episode);
   if (!matched) return false;
-  // Air dates are irrelevant here: a weekly show's latest aired episode is
-  // not its finale when the catalog already lists upcoming/TBA episodes.
-  // Autoplay has its own air-date guard and must remain independent.
-  if (
-    eps.some(
-      (e) =>
-        e.season > matched.season ||
-        (e.season === matched.season && e.episode > matched.episode),
-    )
-  )
-    return false;
+  // Air dates are irrelevant for the strict finale. The opt-in airing-series
+  // mode instead accepts the newest already-aired episode while later episodes
+  // are still scheduled or TBA. Autoplay keeps its own air-date guard.
+  const hasLaterEpisode = eps.some(
+    (e) =>
+      e.season > matched.season || (e.season === matched.season && e.episode > matched.episode),
+  );
+  if (hasLaterEpisode && !(opts.allowLastAired && isLastAiredEpisode(eps, matched))) return false;
   if (kitsuId != null) {
     const related = await kitsuRelated(kitsuId);
     const sequels = await Promise.all(

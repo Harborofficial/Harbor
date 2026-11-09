@@ -132,7 +132,6 @@ test("TMDB season picker restores and persists selections across detail recreati
           episodeSort: "airDate",
           episodeHiding: false,
           episodeArcGroups: false,
-          preferCustomMetaAddon: false,
           tmdbKey: "test-key",
           tvdbKey: "",
           tvdbSeasonType: "aired",

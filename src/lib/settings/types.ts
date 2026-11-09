@@ -601,6 +601,7 @@ export type Settings = {
   hideWatchedInCatalogs: boolean;
   hideWatchedInHero: boolean;
   hideWatchedInMoreLikeThis: boolean;
+  moreLikeThisOnAiringSeries: boolean;
   hideUnreleased: boolean;
   localEpisodeSortDesc: boolean;
   /** Review count when the banner was last dismissed; it returns only if more turn up. */
@@ -651,7 +652,6 @@ export type Settings = {
   homeNewEpisodes: boolean;
   libraryBookmarkedOnly: boolean;
   librarySort: "recent" | "title" | "year";
-  preferCustomMetaAddon: boolean;
   addonOnlyMetadata: boolean;
   metadataAddonOrder: string[];
   /** Per-section metadata source chains. Empty sections use the legacy fallback order. */
@@ -679,6 +679,8 @@ export type Settings = {
   animeCwEnd: "hide" | "timer";
   cwAdvanceNext: boolean;
   cwHideCaughtUp: boolean;
+  /** Whether Continue Watching may play an episode whose release date is still in the future. */
+  cwPlayUnreleased: boolean;
   useNativeTitleBar: boolean;
   fullscreenClockEnabled: boolean;
   fullscreenClockFormat: FullscreenClockFormat;

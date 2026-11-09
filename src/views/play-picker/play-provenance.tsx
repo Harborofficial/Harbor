@@ -1,6 +1,5 @@
 import { Zap } from "lucide-react";
 import { AddonLogo } from "@/components/addon-logo";
-import { AccountOriginBadge } from "@/components/account-origin-badge";
 import { useDebridClients } from "@/lib/debrid/registry";
 import { useT } from "@/lib/i18n";
 import type { ScoredStream } from "@/lib/streams/types";
@@ -27,7 +26,6 @@ export function PlayProvenance({
         size="xs"
       />
       <span>{stream.addonName}</span>
-      <AccountOriginBadge addonUrl={stream.addonUrl || stream.addonId} size="sm" />
     </span>
   );
 

@@ -117,6 +117,27 @@ with tempfile.TemporaryDirectory(prefix="Harbor Music IPC ") as temp:
         request("mpv_mute", deck=0, muted=True)
         request("mpv_stop", deck=0)
         assert request("mpv_state", deck=0)["live"] is False
+        # Exercise the installed module's keep-open EOF path, then load the next
+        # queued track from the same completion event consumed by the frontend.
+        for track_id in ["local:queue-first", "local:queue-next"]:
+            request("mpv_play", deck=0, url=str(path), track_id=track_id,
+                    connector_id="local", volume=0.0)
+            deadline = time.monotonic() + 8
+            while time.monotonic() < deadline:
+                try:
+                    payload = events.get(timeout=0.2).get("payload", {})
+                except Empty:
+                    continue
+                if payload.get("trackId") != track_id:
+                    continue
+                if payload.get("event") == "end-file":
+                    assert payload.get("reason") == "eof", payload
+                    assert payload.get("connectorId") == "local", payload
+                    assert payload.get("deck") == 0, payload
+                    break
+            else:
+                raise AssertionError(f"No natural completion event for {track_id}")
+        request("mpv_stop", deck=0)
         captured = []
         while not events.empty():
             captured.append(events.get_nowait())

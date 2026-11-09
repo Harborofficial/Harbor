@@ -48,7 +48,7 @@ function parseId(id: string): { source: string; orig: string } {
 
 function subById(sourceId: string): MangaProvider {
   const subs = aggregateSubProviders();
-  return subs.find((s) => s.id === sourceId) ?? subs[0] ?? EMPTY_PROVIDER;
+  return subs.find((s) => s.id === sourceId) ?? EMPTY_PROVIDER;
 }
 
 export function routeById(id: string): { provider: MangaProvider; orig: string } | null {
@@ -125,7 +125,8 @@ export async function streamAggregateChapters(
     .catch(() => [] as MangaChapter[]);
   const detail = await ownP.detail(orig).catch(() => null);
   const title = detail?.title;
-  const others = title ? subs.filter((p) => p.id !== ownP.id) : [];
+  // Alternate chapters are background discovery, not a request to verify other sources.
+  const others = title ? aggregateSubProviders(true).filter((p) => p.id !== ownP.id) : [];
   await Promise.all([
     ownChaptersP.then((chs) => {
       if (chs.length) onChunk(chs);
@@ -254,7 +255,7 @@ export const aggregateProvider: MangaProvider = {
     const ownChs = labelChapters(await ownP.chapters(orig).catch(() => []), ownP);
     const title = detail?.title;
     if (!title) return ownChs;
-    const others = aggregateSubProviders().filter((p) => p.id !== source);
+    const others = aggregateSubProviders(true).filter((p) => p.id !== source);
     const extra = await Promise.all(
       others.map((p) =>
         withTimeout(

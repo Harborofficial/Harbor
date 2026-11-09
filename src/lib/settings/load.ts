@@ -168,7 +168,10 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
   return settings;
 }
 
-function parseStoredSettings(raw: string | null): { settings: Settings; cacheable: boolean } {
+export function parseStoredSettings(raw: string | null): {
+  settings: Settings;
+  cacheable: boolean;
+} {
   if (!raw) {
     return {
       settings: {
@@ -459,7 +462,7 @@ function parseStoredSettings(raw: string | null): { settings: Settings; cacheabl
           : DEFAULT.togetherRelayUrl,
       ),
       ...posterCards,
-      animePreferImdbStreams: parsed.animePreferImdbStreams === true,
+      animePreferImdbStreams: parsed.animePreferImdbStreams !== false,
       showQuickGameLibrary: parsed.showQuickGameLibrary === true,
       topbarAppearance: sanitizeTopbarAppearance(
         parsed.topbarAppearance,

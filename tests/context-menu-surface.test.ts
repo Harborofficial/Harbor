@@ -434,6 +434,34 @@ test("quick navigation, closing guards, and destination search preserve keyboard
     });
     assert.equal(dialogCloses, 2, "window-dispatched remote Escape also closes only the dialog");
     assert.equal(menuCloses, 0);
+    let modalMenuCloses = 0;
+    let modalClicks = 0;
+    const modal = document.createElement("div");
+    modal.setAttribute("data-harbor-modal", "");
+    const modalButton = document.createElement("button");
+    modalButton.textContent = "Confirm";
+    modalButton.addEventListener("click", () => {
+      modalClicks++;
+    });
+    modal.append(modalButton);
+    document.body.append(modal);
+    await act(() =>
+      root.render(
+        createElement(MenuSurface, {
+          point: { x: 20, y: 20 },
+          onClose: () => {
+            modalMenuCloses++;
+          },
+          children: createElement(Commands),
+        }),
+      ),
+    );
+    await act(() => pointer(modalButton, "pointerdown"));
+    pointer(modalButton, "pointerup");
+    pointer(modalButton, "click");
+    assert.equal(modalClicks, 1, "a modal button keeps the first click while the menu is open");
+    assert.equal(modalMenuCloses, 1, "the menu dismisses without consuming the modal gesture");
+    modal.remove();
   } finally {
     await act(() => root.unmount());
     for (const animation of animations) animation.cancel();

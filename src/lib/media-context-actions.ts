@@ -3,12 +3,7 @@ import { airedOnly } from "./aired";
 import { t } from "./i18n";
 import { captureMembershipProfile } from "./membership-operations";
 import { readActiveStremioAuthKey } from "./auth";
-import {
-  ANIME_CLOUD_ID,
-  cloudWriteId,
-  libraryGetOne,
-  type LibraryItem,
-} from "./stremio";
+import { ANIME_CLOUD_ID, cloudWriteId, libraryGetOne, type LibraryItem } from "./stremio";
 import { dismissCw } from "./cw-dismiss";
 import { clearLocalCw } from "./local-cw";
 import { clearResume } from "./resume";
@@ -29,11 +24,13 @@ import {
   dropProviderWrites,
   watchlistProviderWrites,
   watchedProviderWrites,
+  type ProviderConfirmation,
   type ProviderWrite,
 } from "./media-provider-actions";
 
 export type MediaActionResult = {
   noChanges?: boolean;
+  confirmation?: ProviderConfirmation;
   outcomes: Array<{
     provider: string;
     status: "updated" | "failed" | "unsupported";
@@ -85,9 +82,12 @@ async function perform(
       for (const write of providers) {
         try {
           assertCurrent();
-          const reason = await write.preflight?.(assertCurrent);
-          if (reason) {
+          const preflight = await write.preflight?.(assertCurrent);
+          if (preflight) {
+            const reason = typeof preflight === "string" ? preflight : preflight.reason;
             result.noChanges = true;
+            if (typeof preflight !== "string" && preflight.confirmation)
+              result.confirmation = preflight.confirmation;
             result.outcomes.push({
               provider: write.provider,
               status: "unsupported",
@@ -238,8 +238,7 @@ export async function dropContextTitle(
   input: WatchlistInput,
   options: { animeId?: string | null } = {},
 ): Promise<MediaActionResult> {
-  if (input.type === "movie")
-    throw new Error("Drop is only available for shows and anime.");
+  if (input.type === "movie") throw new Error("Drop is only available for shows and anime.");
   const { authKey, assertCurrent } = captureAction();
   const result = await perform(
     `drop:${input.id}`,
@@ -305,6 +304,7 @@ export async function setContextWatched(
     episodes?: WatchedEpisode[];
     syncMetaId?: string;
     onUnsafeProvider?: UnsafeProviderPolicy;
+    allowSimklLibraryRemoval?: boolean;
   } = {},
 ): Promise<MediaActionResult> {
   const { assertCurrent } = captureAction();
@@ -391,9 +391,9 @@ export async function setContextWatched(
       if (isMovie) {
         setMovieWatchedLocalAcknowledged(meta.id, watched);
         setWatchedFlagAcknowledged(meta.id, watched);
-        if (!watched && options.imdbId && options.imdbId !== meta.id) {
-          setMovieWatchedLocalAcknowledged(options.imdbId, false);
-          setWatchedFlagAcknowledged(options.imdbId, false);
+        if (options.imdbId && options.imdbId !== meta.id) {
+          setMovieWatchedLocalAcknowledged(options.imdbId, watched);
+          setWatchedFlagAcknowledged(options.imdbId, watched);
         }
         if (watched) savePlayback(meta.id, { title: meta.name, parsedTitle: meta.name });
       } else {
@@ -463,6 +463,7 @@ export async function setContextWatched(
         videos,
         imdbId: options.syncMetaId ? undefined : options.imdbId,
         ...(options.providerEpisode ? { verifiedEpisodeMapping: true } : {}),
+        ...(options.allowSimklLibraryRemoval ? { allowSimklLibraryRemoval: true } : {}),
       },
     ),
     assertCurrent,

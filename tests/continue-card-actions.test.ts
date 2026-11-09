@@ -138,6 +138,28 @@ test("harmless metadata rerender preserves a menu but replacement entry invalida
   );
 });
 
+test("allowUnreleased lets a card whose episode has not aired yet start playback", async () => {
+  const { createContinueCardActions } = api();
+  const entry = { ...item("future"), waitingForAir: true };
+  let played = 0;
+  const commands = createContinueCardActions({
+    item: entry,
+    getItem: () => entry,
+    isCurrent: () => true,
+    isAvailable: () => true,
+    t: (key: string) => key,
+    allowUnreleased: true,
+    play: async () => {
+      played++;
+    },
+    chooseSource: async () => {},
+    dismiss: async () => {},
+  });
+  assert.equal(commands.primary.actions()[0].disabled, false);
+  await commands.play();
+  assert.equal(played, 1);
+});
+
 test("removal failure remains retryable while unavailable cards cannot continue or use another source", async () => {
   const { createContinueCardActions } = api();
   const entry = { ...item("future"), waitingForAir: true };

@@ -28,6 +28,8 @@ export function createContinueCardActions(options: {
   isCurrent: () => boolean;
   isAvailable: () => boolean;
   t: (key: string) => string;
+  /** Lets the user play an entry whose next episode is marked as not aired yet. */
+  allowUnreleased?: boolean;
   play: (assertCurrent: () => void) => Promise<void>;
   chooseSource: (assertCurrent: () => void) => Promise<void>;
   dismiss?: () => void | CwDismissResult | Promise<void | CwDismissResult>;
@@ -40,6 +42,7 @@ export function createContinueCardActions(options: {
   let pending = false;
   let removed = false;
   const waitingForAir = () =>
+    !options.allowUnreleased &&
     (options.getItem() as LibraryItem & { waitingForAir?: boolean }).waitingForAir === true;
   const isValid = () =>
     !removed &&

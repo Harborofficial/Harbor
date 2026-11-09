@@ -11,9 +11,16 @@ export async function readSettingsFile(): Promise<string | null> {
   }
 }
 
-export async function writeSettingsFile(content: string): Promise<void> {
-  if (!isTauri) return;
-  try {
-    await invoke("settings_write", { content });
-  } catch {}
+let writes: Promise<void> = Promise.resolve();
+
+export function writeSettingsFile(content: string): Promise<void> {
+  if (!isTauri) return Promise.resolve();
+  writes = writes.then(async () => {
+    try {
+      await invoke("settings_write", { content });
+    } catch {
+      console.error("[settings] Could not save settings to disk");
+    }
+  });
+  return writes;
 }

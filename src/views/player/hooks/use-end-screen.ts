@@ -41,6 +41,7 @@ export function useEndScreen(params: {
   tmdbKey: string | null;
   isLive: boolean;
   hideWatched: boolean;
+  allowLastAired: boolean;
   onPlay: (meta: Meta) => void;
   onClose: () => void;
 }): EndScreenState {
@@ -54,6 +55,7 @@ export function useEndScreen(params: {
     tmdbKey,
     isLive,
     hideWatched,
+    allowLastAired,
     onPlay,
     onClose,
   } = params;
@@ -100,7 +102,7 @@ export function useEndScreen(params: {
         ...src.episode,
         episode: src.episodeEnd ?? src.episode.episode,
       },
-      { tmdbKey: tmdbKey ?? "", isAnime: src.isAnime },
+      { tmdbKey: tmdbKey ?? "", isAnime: src.isAnime, allowLastAired },
     )
       .catch(() => false)
       .then((final) => {
@@ -109,7 +111,7 @@ export function useEndScreen(params: {
     return () => {
       alive = false;
     };
-  }, [src, episodic, tmdbKey]);
+  }, [src, episodic, tmdbKey, allowLastAired]);
 
   // Latest callbacks/mode without making the load effect depend on them.
   const latest = useRef({ mode, items, focused, onPlay, onClose });

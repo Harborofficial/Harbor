@@ -129,6 +129,20 @@ function harness() {
       requireMediaActionSuccess: empty,
     },
     "@/lib/context-watched-state": { useContextWatchedState: () => watched },
+    "@/lib/movie-watched-action": {
+      setMovieWatchedWithConfirmation: async () => ({
+        outcomes: [{ provider: "Harbor", status: "updated" }],
+      }),
+    },
+    "@/lib/anime-cw-ids": {
+      getAnimeCanonicalId: () => null,
+      getAnimeCwId: () => null,
+    },
+    "@/lib/drop-show-eligibility": { useCanDropShow: () => false },
+    "@/lib/together/protocol": {},
+    "@/components/drop-show-confirm-modal": {
+      DropShowConfirmModal: () => null,
+    },
     "@/lib/providers/tmdb": { useTmdbImdbId: () => undefined },
     "@/lib/media-favorites": { useIsFavorite: () => false },
     "@/lib/title-backdrop": { getTitleBackdrop: () => undefined },

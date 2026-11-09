@@ -84,6 +84,7 @@ export function ModalShell({
       className={`fixed inset-0 z-[240] grid place-items-center p-8 ${backdropClassName ?? ""} ${
         closing ? "animate-scrim-out" : "animate-scrim-in"
       }`}
+      data-harbor-modal
       data-tauri-drag-region={dismissOnBackdrop ? undefined : ""}
       onMouseDown={(e) => {
         if (dismissOnBackdrop && e.target === e.currentTarget) onDismiss();

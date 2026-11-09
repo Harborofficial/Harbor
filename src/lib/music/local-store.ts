@@ -29,6 +29,8 @@ export async function readLocalJson<T>(name: string): Promise<T | null> {
     if (!(await exists(path, { baseDir: BaseDirectory.AppData }))) return null;
     const raw = await readTextFile(path, { baseDir: BaseDirectory.AppData });
     const value = JSON.parse(raw) as T;
+    // A selection made while the read was pending is newer than the file.
+    if (cache.has(name)) return cache.get(name) as T;
     cache.set(name, value);
     return value;
   } catch {
@@ -78,6 +80,7 @@ export async function flushLocalJson(): Promise<void> {
 export async function hydrateJsonStore(name: string, legacyKey: string): Promise<void> {
   if (cache.has(name)) return;
   const stored = await readLocalJson<unknown>(name);
+  if (cache.has(name)) return;
   if (stored !== null) return;
   let legacy: unknown = null;
   try {
