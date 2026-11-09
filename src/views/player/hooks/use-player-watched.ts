@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { getEpisodeProgress } from "@/lib/episode-progress";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import { manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
 import { loadSimklWatchedMap, simklWatchedForId } from "@/lib/simkl/list-status";
 import { useSimkl } from "@/lib/simkl/provider";
@@ -86,11 +87,18 @@ export function usePlayerWatched(params: {
       const records = readCachedWatchProgress(slot);
       const set = new Set<string>();
       for (const r of records) {
-        const matches = r.content_id === meta.id || (imdbId && r.content_id === imdbId);
+        const rLower = (r.content_id || "").toLowerCase();
+        const mLower = meta.id.toLowerCase();
+        const imdbLower = (imdbId || "").toLowerCase();
+        const matches =
+          rLower === mLower ||
+          (imdbLower && rLower === imdbLower) ||
+          (imdbLower && rLower.includes(imdbLower)) ||
+          (mLower && rLower.includes(mLower));
         if (matches && r.season != null && r.episode != null) {
           const ratio =
             r.progress_seconds && r.duration_seconds ? r.progress_seconds / r.duration_seconds : 0;
-          if (ratio >= 0.85) {
+          if (ratio >= getWatchedThresholdRatio()) {
             set.add(`${r.season}:${r.episode}`);
           }
         }

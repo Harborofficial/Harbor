@@ -1,3 +1,4 @@
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 import {
   pullWatchProgressFromNuvio,
   isNuvioProviderActive,
@@ -9,6 +10,8 @@ import {
   readCachedDismissedNextUpKeys,
   isDismissedNextUp,
   cwKeepsCaughtUpForTimer,
+  normalizeNuvioContentId,
+  getNuvioContentIdVariants,
 } from "./nuvio-sync";
 import { getNuvioAccountId, isNuvioSignedIn } from "./nuvio-client";
 import type { LibraryItem } from "@/lib/stremio";
@@ -417,11 +420,16 @@ export function buildNuvioPlaybackItems(
   const libMap = new Map<string, (typeof libraryItems)[0]>();
   for (const lib of libraryItems) {
     libMap.set(lib.content_id, lib);
+    libMap.set(lib.content_id.toLowerCase(), lib);
     const clean = lib.content_id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "");
     libMap.set(clean, lib);
+    libMap.set(clean.toLowerCase(), lib);
     libMap.set(`tmdb:${clean}`, lib);
+    libMap.set(`tmdb:${clean.toLowerCase()}`, lib);
     libMap.set(`tmdb:tv:${clean}`, lib);
+    libMap.set(`tmdb:tv:${clean.toLowerCase()}`, lib);
     libMap.set(`series:${clean}`, lib);
+    libMap.set(`series:${clean.toLowerCase()}`, lib);
   }
 
   const dismissed = dismissedKeys ?? readCachedDismissedNextUpKeys(profileIndex);
@@ -446,9 +454,10 @@ export function buildNuvioPlaybackItems(
   const byContent = new Map<string, NuvioWatchProgress[]>();
   for (const r of safeRecords) {
     if (!r.content_id) continue;
-    const list = byContent.get(r.content_id) ?? [];
-    list.push(r);
-    byContent.set(r.content_id, list);
+    const cid = normalizeNuvioContentId(r.content_id) || r.content_id;
+    const list = byContent.get(cid) ?? [];
+    list.push({ ...r, content_id: cid });
+    byContent.set(cid, list);
   }
 
   const items: LibraryItem[] = [];
@@ -520,7 +529,7 @@ export function buildNuvioPlaybackItems(
 
       const when =
         r.updated_at ||
-        (r.last_watched ? new Date(r.last_watched).toISOString() : new Date().toISOString());
+        (r.last_watched ? new Date(r.last_watched).toISOString() : new Date(0).toISOString());
       const remoteT = r.last_watched || 0;
 
       // Prefer newer local playback offset if available
@@ -535,7 +544,7 @@ export function buildNuvioPlaybackItems(
       }
 
       // Filter out movies that are finished (> 92%) or barely started (< 5 seconds)
-      if (durMs > 0 && offsetMs / durMs >= 0.92) {
+      if (durMs > 0 && offsetMs / durMs >= getWatchedThresholdRatio()) {
         if (isNuvioProviderActive() && profileIndex === resolveNuvioProfileIndex()) {
           setMovieWatchedLocal(contentId, true);
         }
@@ -559,6 +568,7 @@ export function buildNuvioPlaybackItems(
         _ctime: when,
         _mtime: when,
         external: "nuvio",
+        altIds: getNuvioContentIdVariants(contentId),
       };
 
       if (isCwDismissed(item) || isCandidateDismissed(contentId, undefined, undefined)) continue;
@@ -599,7 +609,7 @@ export function buildNuvioPlaybackItems(
           : DURATION_MS.series;
     const latestOffsetMs = latestProgressSec * 1000;
     const isLatestFinished =
-      (latestDurMs > 0 && latestOffsetMs / latestDurMs >= 0.9) ||
+      (latestDurMs > 0 && latestOffsetMs / latestDurMs >= getWatchedThresholdRatio()) ||
       (latest as Record<string, unknown>).watched === true;
 
     // If the latest episode is unfinished, it is actively in progress
@@ -611,7 +621,7 @@ export function buildNuvioPlaybackItems(
         latest.updated_at ||
         (latest.last_watched
           ? new Date(latest.last_watched).toISOString()
-          : new Date().toISOString());
+          : new Date(0).toISOString());
       const remoteT = latest.last_watched || 0;
 
       const existing = readEpisodeResume(
@@ -645,6 +655,7 @@ export function buildNuvioPlaybackItems(
         _ctime: when,
         _mtime: when,
         external: "nuvio",
+        altIds: getNuvioContentIdVariants(contentId),
       };
 
       if (!isCwDismissed(item) && !isCandidateDismissed(contentId, targetSeason, targetEpisode)) {
@@ -675,7 +686,7 @@ export function buildNuvioPlaybackItems(
         if (r.season == null || r.episode == null) return false;
         const dur = (r.duration_seconds || 0) * 1000 || DURATION_MS.series;
         const pos = (r.progress_seconds || 0) * 1000;
-        const finished = dur > 0 && pos / dur >= 0.9;
+        const finished = dur > 0 && pos / dur >= getWatchedThresholdRatio();
         return (
           !finished &&
           (r.season > latestSeason || (r.season === latestSeason && r.episode > latestEpisode))
@@ -763,7 +774,8 @@ export function buildNuvioPlaybackItems(
     const dur = (r.duration_seconds || 0) * 1000 || DURATION_MS.series;
     const pos = (r.progress_seconds || 0) * 1000;
     const isFinished =
-      (dur > 0 && pos / dur >= 0.9) || (r as Record<string, unknown>).watched === true;
+      (dur > 0 && pos / dur >= getWatchedThresholdRatio()) ||
+      (r as Record<string, unknown>).watched === true;
     if (!isFinished) continue;
     const clean = r.content_id.replace(/^(series|movie|tmdb|tmdb:tv|tmdb:movie):/, "");
     if (
@@ -1017,6 +1029,7 @@ export function buildNuvioPlaybackItems(
         _ctime: when,
         _mtime: when,
         external: "nuvio",
+        altIds: getNuvioContentIdVariants(loc.id),
       };
       if (localItem.upNext) {
         (localItem as Record<string, unknown>).nextUpSeedAt = loc.t || 0;

@@ -414,7 +414,8 @@ async function loadCatalogRow(
   addon: Addon,
   cat: CatalogDef,
 ): Promise<CatalogLoad<AddonRow | null>> {
-  const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+  let base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+  if (base.startsWith("stremio://")) base = "https://" + base.slice("stremio://".length);
   const url = catalogRequestUrl(base, cat);
   if (!url) return { value: null, ok: true };
   const res = await fetchWithTimeout(url);

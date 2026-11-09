@@ -28,6 +28,7 @@ import {
   subscribeSession as subscribePmdbSession,
 } from "@/lib/publicmetadb/session";
 import { type LibraryItem } from "@/lib/stremio";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 const STALE_MS = 300_000;
 const FOCUS_STALE_MS = 30_000;
@@ -116,7 +117,7 @@ function isEligibleTrackerPlayback(i: LibraryItem): boolean {
   const offset = i.state?.timeOffset ?? 0;
   const dur = i.state?.duration ?? 0;
   if (offset <= 0 || (i.state?.flaggedWatched ?? 0) > 0) return false;
-  if (dur > 0 && offset / dur >= 0.9) return false;
+  if (dur > 0 && offset / dur >= getWatchedThresholdRatio()) return false;
   return true;
 }
 

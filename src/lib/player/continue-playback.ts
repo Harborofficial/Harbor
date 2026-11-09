@@ -73,13 +73,19 @@ export function continuationAppliesToSource(
 export function continuationFor(
   target: ActualPlayback,
   actor: PlaybackActor,
-  restart = false,
+  restart: boolean | { restart?: boolean; positionMs?: number } = false,
 ): PlaybackContinuation {
+  const isObj = typeof restart === "object" && restart !== null;
+  const isRestart = isObj ? restart.restart === true : restart === true;
+  const posOverride =
+    isObj && typeof restart.positionMs === "number" && restart.positionMs >= 0
+      ? restart.positionMs
+      : undefined;
   return {
     id: target.id,
     actor,
-    restart,
-    positionMs: restart ? 0 : target.positionMs,
+    restart: isRestart,
+    positionMs: isRestart ? 0 : (posOverride ?? target.positionMs),
     sourceKey: actualPlaybackSourceKey(target),
     target: {
       metaId: target.src.meta.id,
@@ -110,8 +116,9 @@ export function canReuseRecentRemotePlayback(
   const age = now - target.playedAt;
   if (!Number.isFinite(age) || age < 0 || age > 2 * 60 * 60 * 1000) return false;
   if (target.requiresSourceRefresh || target.src.streamRef?.infoHash) return false;
-  return /^https?:\/\/(?!127\.0\.0\.1(?:[:/]|$)|localhost(?:[:/]|$)|\[::1\](?:[:/]|$))/i
-    .test(target.src.url);
+  return /^https?:\/\/(?!127\.0\.0\.1(?:[:/]|$)|localhost(?:[:/]|$)|\[::1\](?:[:/]|$))/i.test(
+    target.src.url,
+  );
 }
 
 export async function continueActualPlayback(

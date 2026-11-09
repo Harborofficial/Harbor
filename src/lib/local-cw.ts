@@ -1,12 +1,12 @@
 import { cwProfileScope, privateCwProfileId } from "./cw-profile";
 import { isNuvioProviderActive, getNuvioActiveSlot } from "./active-profile-id";
+import { getWatchedThresholdRatio } from "./watched-threshold";
 
 const KEY_PREFIX = "harbor.localcw.v1.";
 const PRIVATE_PREFIX = "harbor.localcw.private.v1.";
 const LEGACY_KEY = "harbor.localcw.v1";
 const PROFILES_KEY = "harbor.profiles.v1";
 const MAX = 60;
-const FINISHED_RATIO = 0.92;
 
 export type LocalCwEntry = {
   id: string;
@@ -159,11 +159,25 @@ function emit(): void {
 }
 
 function applyEntry(all: Record<string, LocalCwEntry>, entry: LocalCwEntry): boolean {
-  const finished = entry.durationMs > 0 && entry.positionMs / entry.durationMs >= FINISHED_RATIO;
+  const threshold = getWatchedThresholdRatio();
+  const finished = entry.durationMs > 0 && entry.positionMs / entry.durationMs >= threshold;
   if (finished && entry.type === "movie") {
     if (!(entry.id in all)) return false;
     delete all[entry.id];
     return true;
+  }
+  const existing = all[entry.id];
+  if (
+    existing &&
+    existing.positionMs === entry.positionMs &&
+    existing.durationMs === entry.durationMs &&
+    existing.season === entry.season &&
+    existing.episode === entry.episode &&
+    existing.videoId === entry.videoId &&
+    existing.type === entry.type &&
+    (existing as any).external === (entry as any).external
+  ) {
+    return false;
   }
   all[entry.id] = entry;
   return true;

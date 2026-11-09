@@ -53,6 +53,7 @@ import {
   deleteWatchProgressFromNuvio,
   deleteEpisodeWatchProgressFromNuvio,
   undismissNextUpInNuvioCloud,
+  dismissNextUpInNuvioCloud,
   readCachedWatchProgress,
   readCachedWatchedItems,
 } from "./nuvio/nuvio-sync";
@@ -659,6 +660,21 @@ export function dropProviderWrites(
         }
         await pmdbDeleteResumesForTitle(resolved, { assertCurrent: validate });
         validate();
+      },
+    });
+  }
+
+  if (isNuvioSignedIn()) {
+    writes.push({
+      provider: "Nuvio",
+      run: async (assertCurrent) => {
+        const slot = resolveNuvioProfileIndex();
+        assertCurrent();
+        await Promise.all([
+          dismissNextUpInNuvioCloud(slot, input.id, -1, -1),
+          deleteWatchProgressFromNuvio(slot, input.id),
+        ]);
+        assertCurrent();
       },
     });
   }

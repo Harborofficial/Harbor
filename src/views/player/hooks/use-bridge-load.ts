@@ -11,9 +11,9 @@ import { releaseStreamProxy, retainStreamProxy } from "@/lib/stream-proxy";
 import { playerLoadIdentity } from "@/lib/player/load-identity";
 import { isPlaybackActorCurrent } from "@/lib/playback-history";
 import { initialTrackSelector } from "@/lib/player/track-preferences";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 const RESUME_PROMPT_MIN_SEC = 30;
-const RESTART_THRESHOLD = 0.8;
 
 export function useBridgeLoad(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
@@ -104,7 +104,7 @@ export function useBridgeLoad(params: {
       const shouldResolveResume =
         !isLive &&
         !src.startFromZero &&
-        src.startPositionMs == null &&
+        (src.startPositionMs == null || src.continuation != null) &&
         (resumePlaybackRef.current || resumePromptRef.current);
       const resumePromise = !shouldResolveResume
         ? Promise.resolve({ ms: 0, fromRemote: false, finished: false })
@@ -122,11 +122,15 @@ export function useBridgeLoad(params: {
         return;
       }
       if (!isCurrent()) return;
-      const startMs = src.startPositionMs ?? resolved.ms;
+      const continuationMs = src.startPositionMs ?? 0;
+      const startMs =
+        resolved.fromRemote && resolved.ms > continuationMs
+          ? resolved.ms
+          : (src.startPositionMs ?? resolved.ms);
       const runtimeMin = src.episode?.runtime ?? null;
       const durationMs = runtimeMin && runtimeMin > 0 ? runtimeMin * 60_000 : 0;
       const finishedNearEnd =
-        resolved.finished || (durationMs > 0 && startMs / durationMs >= RESTART_THRESHOLD);
+        resolved.finished || (durationMs > 0 && startMs / durationMs >= getWatchedThresholdRatio());
       // A source replacement (for example a home-server quality switch) carries
       // an explicit position and must preserve it regardless of the user's
       // automatic resume preference. That preference only governs stored resume

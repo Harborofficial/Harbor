@@ -91,11 +91,24 @@ export function reconcileNuvioMovieWatched(
   } catch {
     // Replace malformed cache with the verified cloud state.
   }
-  const next = new Set(serverIds);
-  if (preserveIds) {
-    for (const id of preserveIds) next.add(id);
+  const next = new Set<string>();
+  for (const id of serverIds) {
+    next.add(id);
+    next.add(id.toLowerCase());
   }
-  if (previous.length === next.size && previous.every((id) => next.has(id))) return;
+  if (preserveIds) {
+    for (const id of preserveIds) {
+      next.add(id);
+      next.add(id.toLowerCase());
+    }
+  }
+  const prevMatches = (id: string) => next.has(id) || next.has(id.toLowerCase());
+  if (
+    previous.length > 0 &&
+    previous.every(prevMatches) &&
+    Array.from(next).every((id) => previous.some((p) => p.toLowerCase() === id.toLowerCase()))
+  )
+    return;
   persistCritical(key, JSON.stringify([...next]));
   if (storeKey() === key) {
     currentScope = key;

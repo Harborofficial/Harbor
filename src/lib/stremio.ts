@@ -5,6 +5,7 @@ import { isNuvioProviderActive } from "@/lib/active-profile-id";
 import { collectAllNuvioItemIds } from "@/lib/nuvio/nuvio-client";
 import { sanitizeStremioLocalCw } from "@/lib/local-cw";
 import { manualWatchedState } from "@/lib/manual-watched";
+import { getWatchedThresholdRatio } from "@/lib/watched-threshold";
 
 const API = "https://api.strem.io/api";
 
@@ -102,13 +103,14 @@ export function cwMemberViaResume(i: LibraryItem): boolean {
   if (i.removed && !i.temp) return false;
   if (!i.state) return (resumeForItem(i)?.ms ?? 0) > 0;
   const duration = i.state.duration ?? 0;
-  const finishedByRatio = duration > 0 && i.state.timeOffset / duration >= CW_FINISHED_RATIO;
+  const thresholdRatio = getWatchedThresholdRatio();
+  const finishedByRatio = duration > 0 && i.state.timeOffset / duration >= thresholdRatio;
   if (i.type === "movie" && ((i.state.flaggedWatched ?? 0) > 0 || finishedByRatio)) return false;
   if (i.state.timeOffset > 0) return false;
   if ((i.state.flaggedWatched ?? 0) > 0) return false;
   const local = resumeForItem(i)?.ms ?? 0;
   if (local <= 0) return false;
-  if (duration > 0 && local / duration >= CW_FINISHED_RATIO) return false;
+  if (duration > 0 && local / duration >= thresholdRatio) return false;
   return true;
 }
 
@@ -143,7 +145,8 @@ export function isCwMember(i: LibraryItem): boolean {
     const offset = i.state.timeOffset ?? 0;
     const duration = i.state.duration ?? 0;
     if (offset <= 0 || (i.state.flaggedWatched ?? 0) > 0) return false;
-    if (duration > 0 && offset / duration >= CW_FINISHED_RATIO) return false;
+    const thresholdRatio = getWatchedThresholdRatio();
+    if (duration > 0 && offset / duration >= thresholdRatio) return false;
     return true;
   }
   if (!i.state) {
@@ -151,7 +154,8 @@ export function isCwMember(i: LibraryItem): boolean {
     return local > 0;
   }
   const duration = i.state.duration ?? 0;
-  const finishedByRatio = duration > 0 && i.state.timeOffset / duration >= CW_FINISHED_RATIO;
+  const thresholdRatio = getWatchedThresholdRatio();
+  const finishedByRatio = duration > 0 && i.state.timeOffset / duration >= thresholdRatio;
   if (i.type === "movie" && ((i.state.flaggedWatched ?? 0) > 0 || finishedByRatio)) return false;
   if (i.state.timeOffset > 0) return true;
   if (i.state && i.state.season == null && i.state.video_id) {
@@ -196,7 +200,7 @@ export function isCwMember(i: LibraryItem): boolean {
   }
   const local = resumeForItem(i)?.ms ?? 0;
   if (local <= 0) return false;
-  if (duration > 0 && local / duration >= CW_FINISHED_RATIO) return false;
+  if (duration > 0 && local / duration >= getWatchedThresholdRatio()) return false;
   return true;
 }
 

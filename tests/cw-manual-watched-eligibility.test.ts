@@ -28,6 +28,13 @@ function cwApi(marked: Set<string>) {
     "@/lib/safe-fetch": { safeFetch: async () => ({ ok: false, status: 0, text: async () => "" }) },
     "@/lib/resume": { readResumeEntry: () => null, readResumeSource: () => undefined },
     "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
+    "@/lib/watched-threshold": {
+      getWatchedThresholdPct: () => 85,
+      getWatchedThresholdRatio: () => 0.85,
+      DEFAULT_WATCHED_THRESHOLD_PCT: 85,
+      MIN_WATCHED_THRESHOLD_PCT: 70,
+      MAX_WATCHED_THRESHOLD_PCT: 100,
+    },
     "@/lib/manual-watched": {
       manualWatchedState: (metaId: string, season: number, episode: number) =>
         marked.has(`${metaId}|${season}|${episode}`) ? true : undefined,

@@ -496,7 +496,8 @@ async function fetchOneUncached(
   timeoutMs: number,
   altTypes: string[] = [],
 ): Promise<{ streams: Stream[]; failure?: AddonFailureCode }> {
-  const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+  let base = addon.transportUrl.replace(/\/manifest\.json$/, "");
+  if (base.startsWith("stremio://")) base = "https://" + base.slice("stremio://".length);
   const limit = timeoutFor(addon, timeoutMs);
   // A self-hosted addon lives on loopback/LAN, which the guarded bridge fetch
   // rejects outright ("blocked internal target"). Only a URL the user installed

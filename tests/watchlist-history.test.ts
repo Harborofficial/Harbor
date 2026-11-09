@@ -65,6 +65,13 @@ function fixture(initial: LibraryItem | null) {
     },
     "@/lib/resume": { readResumeEntry: () => null, readResumeSource: () => undefined },
     "@/lib/active-profile-id": { isNuvioProviderActive: () => false },
+    "@/lib/watched-threshold": {
+      getWatchedThresholdPct: () => 85,
+      getWatchedThresholdRatio: () => 0.85,
+      DEFAULT_WATCHED_THRESHOLD_PCT: 85,
+      MIN_WATCHED_THRESHOLD_PCT: 70,
+      MAX_WATCHED_THRESHOLD_PCT: 100,
+    },
   });
   const history = load("src/views/library/history-merge.ts", {
     "@/lib/stremio": api,

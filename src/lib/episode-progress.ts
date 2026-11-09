@@ -1,14 +1,13 @@
 import { manualWatchedState, createManualWatchedReader } from "@/lib/manual-watched";
 import { lastPlayedEpisode, readResumeEntry, createResumeReader } from "@/lib/resume";
 import { pmdbUsesAbsoluteOrder } from "@/lib/publicmetadb/watched-order";
+import { getWatchedThresholdRatio, getWatchedThresholdPct } from "@/lib/watched-threshold";
 
 export type EpisodeProgress = {
   ratio: number;
   watched: boolean;
   startedAt: number;
 };
-
-const WATCHED_THRESHOLD = 0.85;
 
 export function createEpisodeProgressSnapshot() {
   return { manualWatchedState: createManualWatchedReader(), readResumeEntry: createResumeReader() };
@@ -158,7 +157,10 @@ export function getEpisodeProgress(
 
   return {
     ratio: done ? 1 : ratio,
-    watched: done || ratio >= WATCHED_THRESHOLD,
+    watched:
+      done ||
+      ratio >= getWatchedThresholdRatio() ||
+      Math.round(ratio * 100) >= getWatchedThresholdPct(),
     startedAt,
   };
 }

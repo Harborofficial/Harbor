@@ -664,20 +664,59 @@ export function dismissCw(
 export function undismissCw(id: string): void {
   loadDismissed();
   const cleanId = id.replace(/^(series|movie|tmdb):/, "").trim();
-  const variants = [
-    id,
-    cleanId,
-    `tmdb:${cleanId}`,
-    `series:${cleanId}`,
-    `nuvio|${id}`,
-    `nuvio|${cleanId}`,
-  ];
+  const lowerId = id.toLowerCase();
+  const lowerClean = cleanId.toLowerCase();
+  const encodedId = encodeURIComponent(id);
+  const encodedClean = encodeURIComponent(cleanId);
+  const encodedLowerClean = encodeURIComponent(lowerClean);
+
   let changed = false;
-  for (const v of variants) {
-    if (dismissed.delete(v)) changed = true;
-    if (dismissedVid.delete(v)) changed = true;
-    if (dismissedPos.delete(v)) changed = true;
+
+  const matchesId = (key: string): boolean => {
+    const k = key.toLowerCase();
+    return (
+      key === id ||
+      key === cleanId ||
+      k === lowerId ||
+      k === lowerClean ||
+      k.includes(lowerClean) ||
+      key.includes(encodedId) ||
+      key.includes(encodedClean) ||
+      key.includes(encodedLowerClean)
+    );
+  };
+
+  for (const [key] of Array.from(dismissed.entries())) {
+    if (matchesId(key)) {
+      dismissed.delete(key);
+      changed = true;
+    }
   }
+  for (const [key] of Array.from(dismissedVid.entries())) {
+    if (matchesId(key)) {
+      dismissedVid.delete(key);
+      changed = true;
+    }
+  }
+  for (const [key] of Array.from(dismissedPos.entries())) {
+    if (matchesId(key)) {
+      dismissedPos.delete(key);
+      changed = true;
+    }
+  }
+
+  // Also clean SIMKL dismissal store
+  try {
+    const simkl = JSON.parse(localStorage.getItem(SIMKL_KEY) ?? "[]");
+    if (Array.isArray(simkl)) {
+      const filtered = simkl.filter((k: string) => !matchesId(k));
+      if (filtered.length !== simkl.length) {
+        localStorage.setItem(SIMKL_KEY, JSON.stringify(filtered));
+        changed = true;
+      }
+    }
+  } catch {}
+
   if (changed) {
     persistDismissed(dismissed, dismissedVid, false, dismissedPos);
     emit();
