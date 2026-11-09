@@ -32,7 +32,11 @@ export function useKeyboardShortcuts(params: {
   togglePip?: () => void;
   fullscreen: boolean;
   cycleSubtitles: () => void;
+  cycleAudio?: () => void;
+  onSubSize?: (direction: 1 | -1) => void;
   setShowStats: (updater: (prev: boolean) => boolean) => void;
+  showShortcuts: boolean;
+  setShowShortcuts: (updater: (prev: boolean) => boolean) => void;
   metaId: string;
   svpActive: boolean;
   onNextEp?: () => void;
@@ -72,7 +76,11 @@ export function useKeyboardShortcuts(params: {
     toggleFullscreen,
     togglePip,
     cycleSubtitles,
+    cycleAudio,
+    onSubSize,
     setShowStats,
+    showShortcuts,
+    setShowShortcuts,
     metaId,
     svpActive,
     onNextEp,
@@ -194,6 +202,11 @@ export function useKeyboardShortcuts(params: {
 
       if (match("playerClose")) {
         if (getLeaveConfirm().open) return;
+        if (showShortcuts) {
+          e.preventDefault();
+          setShowShortcuts(() => false);
+          return;
+        }
         if (drawMode) {
           setDrawMode(false);
           return;
@@ -407,6 +420,28 @@ export function useKeyboardShortcuts(params: {
         setShowStats((v) => !v);
         return;
       }
+      if (match("playerAudioCycle") && cycleAudio) {
+        e.preventDefault();
+        if (e.repeat) return;
+        cycleAudio();
+        return;
+      }
+      if (match("playerSubSizeDown") && onSubSize) {
+        e.preventDefault();
+        onSubSize(-1);
+        return;
+      }
+      if (match("playerSubSizeUp") && onSubSize) {
+        e.preventDefault();
+        onSubSize(1);
+        return;
+      }
+      if (match("playerShortcuts")) {
+        e.preventDefault();
+        if (e.repeat) return;
+        setShowShortcuts((v) => !v);
+        return;
+      }
       if (match("playerSpeedDown")) {
         e.preventDefault();
         const r = Math.max(0.25, +(snap.rate - 0.25).toFixed(2));
@@ -552,6 +587,10 @@ export function useKeyboardShortcuts(params: {
     returnToPreview,
     togglePip,
     drawMode,
+    showShortcuts,
+    setShowShortcuts,
+    cycleAudio,
+    onSubSize,
     snap.muted,
     snap.volume,
     snap.rate,
