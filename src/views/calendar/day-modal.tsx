@@ -131,7 +131,7 @@ function DayModalRow({
         <p className="text-[14px] font-semibold leading-tight text-ink">{item.name}</p>
         {item.releaseTime && (
           <p className="text-[11px] font-medium text-ink-subtle">
-            <Clock size={11} className="mr-1 inline text-rose-300" />
+            <Clock size={11} className="me-1 inline text-rose-300" />
             {item.releaseTime}
             {isUpcoming(item) && <AiringCountdown atMs={item.releaseAtMs!} />}
           </p>

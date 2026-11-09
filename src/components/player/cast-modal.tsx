@@ -224,13 +224,13 @@ export function CastModal({
               type="button"
               onClick={back}
               data-tv-modal-close
-              className="flex items-center gap-1 rounded-full py-1.5 pl-2 pr-3.5 text-[13px] font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              className="flex items-center gap-1 rounded-full py-1.5 ps-2 pe-3.5 text-[13px] font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
             >
               <ChevronLeft size={18} strokeWidth={2.3} />
               {t("Back")}
             </button>
           ) : (
-            <span className="pl-1 text-[11px] font-bold uppercase tracking-[0.28em] text-white/45">
+            <span className="ps-1 text-[11px] font-bold uppercase tracking-[0.28em] text-white/45">
               {initialPerson ? t("X-Ray") : t("About this title")}
             </span>
           )}

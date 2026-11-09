@@ -108,7 +108,7 @@ export function PublicMetaDbPanel() {
                     {t("Username (optional)")}
                   </label>
                   <div className="relative flex items-center">
-                    <span className="pointer-events-none absolute left-3.5 text-ink-subtle">
+                    <span className="pointer-events-none absolute start-3.5 text-ink-subtle">
                       <User size={16} />
                     </span>
                     <input
@@ -119,7 +119,7 @@ export function PublicMetaDbPanel() {
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      className="h-11 w-full rounded-[10px] border border-edge bg-elevated pl-10 pr-4 text-[14px] text-ink placeholder:text-ink-subtle focus:border-ink/40 focus:outline-none"
+                      className="h-11 w-full rounded-[10px] border border-edge bg-elevated ps-10 pe-4 text-[14px] text-ink placeholder:text-ink-subtle focus:border-ink/40 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -127,7 +127,7 @@ export function PublicMetaDbPanel() {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[13px] font-medium text-ink-muted">{t("API Key")}</label>
                   <div className="relative flex items-center">
-                    <span className="pointer-events-none absolute left-3.5 text-ink-subtle">
+                    <span className="pointer-events-none absolute start-3.5 text-ink-subtle">
                       <Key size={16} />
                     </span>
                     <input
@@ -141,12 +141,12 @@ export function PublicMetaDbPanel() {
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      className="h-11 w-full rounded-[10px] border border-edge bg-elevated pl-10 pr-11 font-mono text-[14px] text-ink placeholder:text-ink-subtle focus:border-ink/40 focus:outline-none"
+                      className="h-11 w-full rounded-[10px] border border-edge bg-elevated ps-10 pe-11 font-mono text-[14px] text-ink placeholder:text-ink-subtle focus:border-ink/40 focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => setShowKey(!showKey)}
-                      className="absolute right-3 text-ink-subtle hover:text-ink"
+                      className="absolute end-3 text-ink-subtle hover:text-ink"
                       title={showKey ? t("Hide key") : t("Show key")}
                     >
                       {showKey ? <EyeOff size={16} /> : <Eye size={16} />}

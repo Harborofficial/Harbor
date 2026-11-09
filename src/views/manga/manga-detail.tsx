@@ -526,7 +526,7 @@ export function MangaDetail({
                     return (
                       <span
                         key={c.id}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-elevated/60 py-1 pl-2 pr-2.5 text-[12px] font-medium text-accent ring-1 ring-edge-soft backdrop-blur-sm"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-elevated/60 py-1 ps-2 pe-2.5 text-[12px] font-medium text-accent ring-1 ring-edge-soft backdrop-blur-sm"
                       >
                         <Icon size={12.5} strokeWidth={2.4} />
                         {t(c.badge)}

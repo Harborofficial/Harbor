@@ -95,14 +95,14 @@ export function SearchPanel({
         <SearchIcon
           size={18}
           strokeWidth={2.2}
-          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
+          className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-white/40"
         />
         <input
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("Search movies, shows, people...")}
-          className="w-full rounded-full bg-white/[0.07] py-3.5 pl-11 pr-11 text-[15px] text-white outline-none ring-1 ring-white/12 transition-shadow placeholder:text-white/40 focus:ring-2 focus:ring-white/30"
+          className="w-full rounded-full bg-white/[0.07] py-3.5 ps-11 pe-11 text-[15px] text-white outline-none ring-1 ring-white/12 transition-shadow placeholder:text-white/40 focus:ring-2 focus:ring-white/30"
         />
         {query && (
           <button
@@ -112,7 +112,7 @@ export function SearchPanel({
               inputRef.current?.focus();
             }}
             aria-label={t("Clear")}
-            className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+            className="absolute end-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white"
           >
             <X size={16} strokeWidth={2.3} />
           </button>

@@ -380,7 +380,7 @@ export function MangaUpdatesSection({
                     {info.authors.map((a) => (
                       <span key={`${a.name}-${a.role}`} className="text-[14px] text-ink">
                         {a.name}
-                        <span className="ml-2 text-[12.5px] text-ink-subtle">{a.role}</span>
+                        <span className="ms-2 text-[12.5px] text-ink-subtle">{a.role}</span>
                       </span>
                     ))}
                   </div>
