@@ -21,7 +21,14 @@ export function usePlayerWatched(params: {
   authKey: string | null;
   imdbId: string | null;
   enabled: boolean;
-}): { watchedFor: (ep: PlayEpisode) => boolean } {
+}): {
+  watchedFor: (
+    ep: PlayEpisode,
+    entryId?: string,
+    entryImdbId?: string | null,
+    allowAlias?: boolean,
+  ) => boolean;
+} {
   const { meta, authKey, imdbId, enabled } = params;
   const { isConnected: traktConnected } = useTrakt();
   const { isConnected: simklConnected } = useSimkl();
@@ -124,26 +131,36 @@ export function usePlayerWatched(params: {
 
   const imdbKey = meta.id.startsWith("tt") ? meta.id : imdbId;
   const isNuvio = isNuvioProviderActive();
-  const watchedFor = (ep: PlayEpisode): boolean => {
-    if (isNuvio && nuvioWatched.has(`${ep.season}:${ep.episode}`)) {
+  const watchedFor = (
+    ep: PlayEpisode,
+    entryId: string = meta.id,
+    entryImdbId: string | null = null,
+    allowAlias = true,
+  ): boolean => {
+    const sameEntry = entryId === meta.id;
+    const entryImdb = entryImdbId ?? (sameEntry ? imdbKey : null);
+    const read = (id: string, traktImdbId: string | null, entrySets: boolean) =>
+      getEpisodeProgress(
+        id,
+        ep.season,
+        ep.episode,
+        null,
+        traktImdbId,
+        traktWatched,
+        entrySets ? (isNuvio ? nuvioWatched : stremioWatched) : undefined,
+        undefined,
+        entrySets ? simklWatched : undefined,
+        undefined,
+        ep.imdbSeason,
+        ep.imdbEpisode,
+        entrySets ? pmdbWatched : undefined,
+        ep.absoluteNumber,
+      ).watched;
+    if (isNuvio && sameEntry && nuvioWatched.has(`${ep.season}:${ep.episode}`)) {
       return true;
     }
-    return getEpisodeProgress(
-      meta.id,
-      ep.season,
-      ep.episode,
-      null,
-      imdbKey,
-      traktWatched,
-      isNuvio ? nuvioWatched : stremioWatched,
-      undefined,
-      simklWatched,
-      undefined,
-      ep.imdbSeason,
-      ep.imdbEpisode,
-      pmdbWatched,
-      ep.absoluteNumber,
-    ).watched;
+    if (read(entryId, entryImdb, sameEntry)) return true;
+    return allowAlias && !sameEntry ? read(meta.id, imdbKey, true) : false;
   };
 
   return { watchedFor };
