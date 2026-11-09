@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { memo, useContext } from "react";
+import { NativePlayerGlassContext } from "@/components/ThreeLiquidGlassSurface";
 import { EpisodePanel } from "@/components/player/episode-panel";
 import { ResumePrompt } from "@/components/player/resume-prompt";
 import type { Meta } from "@/lib/cinemeta";
@@ -64,6 +65,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   onPickAnother: () => void;
 }) {
   const t = useT();
+  const nativeGlass = useContext(NativePlayerGlassContext);
   return (
     <>
       {!tenFoot && (
@@ -73,14 +75,16 @@ export const PanelsLayer = memo(function PanelsLayer({
           aria-label={t("Up next")}
           tabIndex={upNextButtonVisible ? 0 : -1}
           aria-hidden={!upNextButtonVisible}
-          className={`group absolute top-1/2 z-20 flex h-32 -translate-y-1/2 flex-col items-center justify-center gap-2.5 bg-elevated/45 text-ink shadow-[0_6px_20px_-10px_rgba(0,0,0,0.5)] backdrop-blur-md transition-[padding,background,opacity] duration-300 hover:bg-elevated/85 ${
+          className={`group absolute top-1/2 z-20 flex h-32 -translate-y-1/2 flex-col items-center justify-center gap-2.5 bg-elevated/45 text-ink shadow-[0_6px_20px_-10px_rgba(0,0,0,0.5)] backdrop-blur-md ${nativeGlass ? "mpv-up-next-glass transition-colors duration-150 hover:bg-white/5" : "transition-[padding,background,opacity] duration-300 hover:bg-elevated/85"} ${
             upNextButtonVisible
-              ? "pointer-events-auto opacity-40 hover:opacity-100"
+              ? nativeGlass
+                ? "pointer-events-auto opacity-100"
+                : "pointer-events-auto opacity-40 hover:opacity-100"
               : "pointer-events-none opacity-0"
           } ${
             episodesCorner === "top-left" || episodesCorner === "bottom-left"
-              ? "left-0 rounded-r-2xl border-y border-r border-edge-soft pl-2 pr-2.5 hover:pr-3"
-              : "right-0 rounded-l-2xl border-y border-l border-edge-soft pl-2.5 pr-2 hover:pl-3"
+              ? `left-0 rounded-r-2xl border-y border-r border-edge-soft pl-2 pr-2.5 ${nativeGlass ? "" : "hover:pr-3"}`
+              : `right-0 rounded-l-2xl border-y border-l border-edge-soft pl-2.5 pr-2 ${nativeGlass ? "" : "hover:pl-3"}`
           }`}
         >
           <img

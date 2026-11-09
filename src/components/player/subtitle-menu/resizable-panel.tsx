@@ -136,6 +136,7 @@ export function ResizableSubtitlePanel({
     <div className={className} style={{ width: `${size.width}px`, height: `${size.height}px` }}>
       <div
         data-mpv-glass="panel"
+        data-mpv-glass-moving={resizing ? "" : undefined}
         className="relative flex h-full w-full flex-col overflow-hidden rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       >
         <button

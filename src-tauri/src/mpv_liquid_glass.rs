@@ -14,6 +14,8 @@ pub struct GlassRegion {
     width: f64,
     height: f64,
     radius: f64,
+    #[serde(default, rename = "edgeFeather")]
+    edge_feather: f64,
     #[serde(default)]
     radii: Option<[f64; 4]>,
 }
@@ -242,8 +244,12 @@ impl GlassLayout {
                 || r.width <= 0.0
                 || r.height <= 0.0
                 || r.radius < 0.0
+                || !r.edge_feather.is_finite()
+                || r.edge_feather < 0.0
                 || r.radii.is_some_and(|radii| {
-                    radii.iter().any(|radius| !radius.is_finite() || *radius < 0.0)
+                    radii
+                        .iter()
+                        .any(|radius| !radius.is_finite() || *radius < 0.0)
                 })
             {
                 return Err("Invalid glass region".into());
@@ -313,10 +319,11 @@ impl GlassLayout {
                         radii[1].min(r.width.min(r.height) * 0.5) / self.viewport_width * w / vw,
                         radii[2].min(r.width.min(r.height) * 0.5) / self.viewport_width * w / vw,
                         radii[3].min(r.width.min(r.height) * 0.5) / self.viewport_width * w / vw,
+                        r.edge_feather.min(8.0) / self.viewport_width * w / vw,
                     ]
                 })
-                .unwrap_or([0.0; 8]);
-            for (key, value) in ["x", "y", "w", "h", "r0", "r1", "r2", "r3"]
+                .unwrap_or([0.0; 9]);
+            for (key, value) in ["x", "y", "w", "h", "r0", "r1", "r2", "r3", "f"]
                 .into_iter()
                 .zip(values)
             {
@@ -361,6 +368,7 @@ mod tests {
                 width: 200.0,
                 height: 60.0,
                 radius: 30.0,
+                edge_feather: 0.0,
                 radii: None,
             }],
             viewport_width: 1000.0,
@@ -493,6 +501,7 @@ mod tests {
             )
             .unwrap();
             let mut changed = layout();
+            changed.regions[0].edge_feather = 4.0;
             changed.optics = GlassOptics {
                 zoom: 1.1,
                 refraction: 0.0,

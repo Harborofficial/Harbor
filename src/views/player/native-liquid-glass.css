@@ -1,23 +1,42 @@
-[data-native-liquid-glass="on"] [data-mpv-glass-active] {
+[data-native-liquid-glass-enabled="true"] [data-mpv-glass-prepared] {
   --color-ink: #f5f6fa;
   --color-ink-muted: #ffffffc4;
   --color-ink-subtle: #ffffff99;
   isolation: isolate;
   background: #00000006 !important;
-  border: 1px solid #ffffff24 !important;
   box-shadow:
     0 6px 20px #0002,
+    inset 0 0 0 1px #ffffff24,
     inset 0 1px 0 #ffffff1c !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   text-shadow: 0 1px 3px #000c;
+  transition-property: opacity, transform, translate, scale, rotate !important;
 }
 
-[data-native-liquid-glass="on"] [data-mpv-glass-active] > [data-mpv-glass-content] {
+[data-native-liquid-glass-enabled="true"] [data-mpv-glass-prepared]:not([data-mpv-glass-active]) {
+  background: transparent !important;
+}
+
+[data-native-liquid-glass-enabled="true"] .animate-menu-pop {
+  animation: none;
+}
+
+[data-native-liquid-glass-enabled="true"] .mpv-up-next-glass[data-mpv-glass] {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transition-property: background-color, color !important;
+}
+
+[data-native-liquid-glass-enabled="true"] .mpv-up-next-glass[data-mpv-glass-active]:hover {
+  background: #ffffff0a !important;
+}
+
+[data-native-liquid-glass-enabled="true"] [data-mpv-glass-prepared] > [data-mpv-glass-content] {
   background: transparent;
 }
 
-[data-native-liquid-glass="on"] [data-mpv-glass-active]::before,
-[data-native-liquid-glass="on"] [data-mpv-glass-active]::after {
+[data-native-liquid-glass-enabled="true"] [data-mpv-glass-prepared]::before,
+[data-native-liquid-glass-enabled="true"] [data-mpv-glass-prepared]::after {
   display: none;
 }

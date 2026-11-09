@@ -239,7 +239,7 @@ export const DEFAULT: Settings = {
   playerExternalMpvArgs: "",
   pipBehavior: "resize",
   playerShellId: "default",
-  playerLiquidGlass: true,
+  playerLiquidGlass: false,
   playerGlassOptics: { ...GLASS_DEFAULTS },
   playerChromeTheme: "auto",
   playerMenuBlack: false,

@@ -32,6 +32,7 @@ export type GlassRegion = {
   width: number;
   height: number;
   radius: number;
+  edgeFeather?: number;
   radii?: [number, number, number, number];
 };
 export type GlassLayout = {

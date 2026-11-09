@@ -1,6 +1,14 @@
-import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  type CSSProperties,
+  type HTMLAttributes,
+  type ReactNode,
+} from "react";
 import { ExperimentalLiquidGlassSurface } from "@/components/ExperimentalLiquidGlassSurface";
 import { useSettings } from "@/lib/settings";
+
+export const NativePlayerGlassContext = createContext(false);
 
 export type LiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
@@ -136,9 +144,10 @@ export function ThreeLiquidGlassSurface({
   ...props
 }: LiquidGlassSurfaceProps) {
   const { settings } = useSettings();
+  const nativePlayerGlass = useContext(NativePlayerGlassContext);
   const surfaceProps = { ...props, "data-native-glass-surface": "" };
 
-  if (!settings.liquidGlass) {
+  if (nativePlayerGlass || !settings.liquidGlass) {
     return <PlainSurface {...surfaceProps} style={style} />;
   }
 

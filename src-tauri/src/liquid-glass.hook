@@ -55,6 +55,10 @@
 //!TYPE DYNAMIC float
 0.0
 
+//!PARAM harbor_glass_g0f
+//!TYPE DYNAMIC float
+0.0
+
 //!PARAM harbor_glass_g1x
 //!TYPE DYNAMIC float
 0.0
@@ -84,6 +88,10 @@
 0.0
 
 //!PARAM harbor_glass_g1r3
+//!TYPE DYNAMIC float
+0.0
+
+//!PARAM harbor_glass_g1f
 //!TYPE DYNAMIC float
 0.0
 
@@ -119,6 +127,10 @@
 //!TYPE DYNAMIC float
 0.0
 
+//!PARAM harbor_glass_g2f
+//!TYPE DYNAMIC float
+0.0
+
 //!PARAM harbor_glass_g3x
 //!TYPE DYNAMIC float
 0.0
@@ -148,6 +160,10 @@
 0.0
 
 //!PARAM harbor_glass_g3r3
+//!TYPE DYNAMIC float
+0.0
+
+//!PARAM harbor_glass_g3f
 //!TYPE DYNAMIC float
 0.0
 
@@ -183,6 +199,10 @@
 //!TYPE DYNAMIC float
 0.0
 
+//!PARAM harbor_glass_g4f
+//!TYPE DYNAMIC float
+0.0
+
 //!PARAM harbor_glass_g5x
 //!TYPE DYNAMIC float
 0.0
@@ -215,6 +235,10 @@
 //!TYPE DYNAMIC float
 0.0
 
+//!PARAM harbor_glass_g5f
+//!TYPE DYNAMIC float
+0.0
+
 //!HOOK OUTPUT
 //!BIND HOOKED
 //!DESC Harbor MPV liquid glass GPU
@@ -235,47 +259,48 @@ vec4 hook() {
     vec2 pixel = uv * HOOKED_size;
     vec4 box = vec4(0.0);
     vec4 radii = vec4(0.0);
+    float edgeFeather = 0.0;
     bool inside = false;
     if (harbor_glass_count > 0.0 && !inside) {
         vec4 candidate = vec4(harbor_glass_g0x, harbor_glass_g0y, harbor_glass_g0w, harbor_glass_g0h) * vec4(HOOKED_size, HOOKED_size);
         vec4 cornerRadii = min(vec4(harbor_glass_g0r0, harbor_glass_g0r1, harbor_glass_g0r2, harbor_glass_g0r3) * HOOKED_size.x, vec4(min(candidate.z, candidate.w) * 0.5));
         if (roundedDistance(pixel - candidate.xy - candidate.zw * 0.5, candidate.zw * 0.5, cornerRadii) < 0.0) {
-            box = candidate; radii = cornerRadii; inside = true;
+            box = candidate; radii = cornerRadii; edgeFeather = harbor_glass_g0f * HOOKED_size.x; inside = true;
         }
     }
     if (harbor_glass_count > 1.0 && !inside) {
         vec4 candidate = vec4(harbor_glass_g1x, harbor_glass_g1y, harbor_glass_g1w, harbor_glass_g1h) * vec4(HOOKED_size, HOOKED_size);
         vec4 cornerRadii = min(vec4(harbor_glass_g1r0, harbor_glass_g1r1, harbor_glass_g1r2, harbor_glass_g1r3) * HOOKED_size.x, vec4(min(candidate.z, candidate.w) * 0.5));
         if (roundedDistance(pixel - candidate.xy - candidate.zw * 0.5, candidate.zw * 0.5, cornerRadii) < 0.0) {
-            box = candidate; radii = cornerRadii; inside = true;
+            box = candidate; radii = cornerRadii; edgeFeather = harbor_glass_g1f * HOOKED_size.x; inside = true;
         }
     }
     if (harbor_glass_count > 2.0 && !inside) {
         vec4 candidate = vec4(harbor_glass_g2x, harbor_glass_g2y, harbor_glass_g2w, harbor_glass_g2h) * vec4(HOOKED_size, HOOKED_size);
         vec4 cornerRadii = min(vec4(harbor_glass_g2r0, harbor_glass_g2r1, harbor_glass_g2r2, harbor_glass_g2r3) * HOOKED_size.x, vec4(min(candidate.z, candidate.w) * 0.5));
         if (roundedDistance(pixel - candidate.xy - candidate.zw * 0.5, candidate.zw * 0.5, cornerRadii) < 0.0) {
-            box = candidate; radii = cornerRadii; inside = true;
+            box = candidate; radii = cornerRadii; edgeFeather = harbor_glass_g2f * HOOKED_size.x; inside = true;
         }
     }
     if (harbor_glass_count > 3.0 && !inside) {
         vec4 candidate = vec4(harbor_glass_g3x, harbor_glass_g3y, harbor_glass_g3w, harbor_glass_g3h) * vec4(HOOKED_size, HOOKED_size);
         vec4 cornerRadii = min(vec4(harbor_glass_g3r0, harbor_glass_g3r1, harbor_glass_g3r2, harbor_glass_g3r3) * HOOKED_size.x, vec4(min(candidate.z, candidate.w) * 0.5));
         if (roundedDistance(pixel - candidate.xy - candidate.zw * 0.5, candidate.zw * 0.5, cornerRadii) < 0.0) {
-            box = candidate; radii = cornerRadii; inside = true;
+            box = candidate; radii = cornerRadii; edgeFeather = harbor_glass_g3f * HOOKED_size.x; inside = true;
         }
     }
     if (harbor_glass_count > 4.0 && !inside) {
         vec4 candidate = vec4(harbor_glass_g4x, harbor_glass_g4y, harbor_glass_g4w, harbor_glass_g4h) * vec4(HOOKED_size, HOOKED_size);
         vec4 cornerRadii = min(vec4(harbor_glass_g4r0, harbor_glass_g4r1, harbor_glass_g4r2, harbor_glass_g4r3) * HOOKED_size.x, vec4(min(candidate.z, candidate.w) * 0.5));
         if (roundedDistance(pixel - candidate.xy - candidate.zw * 0.5, candidate.zw * 0.5, cornerRadii) < 0.0) {
-            box = candidate; radii = cornerRadii; inside = true;
+            box = candidate; radii = cornerRadii; edgeFeather = harbor_glass_g4f * HOOKED_size.x; inside = true;
         }
     }
     if (harbor_glass_count > 5.0 && !inside) {
         vec4 candidate = vec4(harbor_glass_g5x, harbor_glass_g5y, harbor_glass_g5w, harbor_glass_g5h) * vec4(HOOKED_size, HOOKED_size);
         vec4 cornerRadii = min(vec4(harbor_glass_g5r0, harbor_glass_g5r1, harbor_glass_g5r2, harbor_glass_g5r3) * HOOKED_size.x, vec4(min(candidate.z, candidate.w) * 0.5));
         if (roundedDistance(pixel - candidate.xy - candidate.zw * 0.5, candidate.zw * 0.5, cornerRadii) < 0.0) {
-            box = candidate; radii = cornerRadii; inside = true;
+            box = candidate; radii = cornerRadii; edgeFeather = harbor_glass_g5f * HOOKED_size.x; inside = true;
         }
     }
     if (!inside) return original;
@@ -287,21 +312,19 @@ vec4 hook() {
     else n = q.x > q.y ? vec2(sign(p.x), 0.0) : vec2(0.0, sign(p.y));
     float distanceToEdge = -roundedDistance(p, box.zw * 0.5, radii);
     float rim = 1.0 - smoothstep(0.0, 24.0 * harbor_glass_scale, distanceToEdge);
+    float edgeBlend = edgeFeather > 0.0 ? smoothstep(0.0, edgeFeather, distanceToEdge) : 1.0;
+    rim *= edgeBlend;
     vec2 bend = n * rim * rim * 16.0 * harbor_glass_refraction * harbor_glass_scale * HOOKED_pt;
-    vec2 lens = uv - bend - p * (1.0 - 1.0 / max(harbor_glass_zoom, 1.0)) * HOOKED_pt;
+    vec2 lens = uv - bend - p * (1.0 - 1.0 / max(harbor_glass_zoom, 1.0)) * HOOKED_pt * edgeBlend;
     vec2 b = HOOKED_pt * 1.1 * harbor_glass_blur * harbor_glass_scale;
-    vec4 glass = HOOKED_tex(lens) * 0.52;
+    vec4 glass = HOOKED_tex(lens) * 0.60;
     glass += HOOKED_tex(lens + vec2(b.x, 0.0)) * 0.10;
     glass += HOOKED_tex(lens - vec2(b.x, 0.0)) * 0.10;
     glass += HOOKED_tex(lens + vec2(0.0, b.y)) * 0.10;
     glass += HOOKED_tex(lens - vec2(0.0, b.y)) * 0.10;
-    glass += HOOKED_tex(lens + b) * 0.02;
-    glass += HOOKED_tex(lens - b) * 0.02;
-    glass += HOOKED_tex(lens + vec2(b.x, -b.y)) * 0.02;
-    glass += HOOKED_tex(lens + vec2(-b.x, b.y)) * 0.02;
     vec2 dispersion = n * rim * 2.8 * harbor_glass_dispersion * harbor_glass_scale * HOOKED_pt;
     vec3 chroma = vec3(HOOKED_tex(lens + dispersion).r, glass.g, HOOKED_tex(lens - dispersion).b);
     glass.rgb = mix(glass.rgb, chroma, rim * 0.80);
-    float coverage = smoothstep(0.0, max(1.0, harbor_glass_scale), distanceToEdge);
+    float coverage = smoothstep(0.0, max(max(1.0, harbor_glass_scale), edgeFeather), distanceToEdge);
     return mix(original, vec4(glass.rgb, original.a), coverage);
 }

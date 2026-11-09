@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { NativePlayerGlassContext } from "@/components/ThreeLiquidGlassSurface";
 import { useT } from "@/lib/i18n";
 import { CONTENT_ADVISORY_NUDGE, useOnboarding } from "@/lib/onboarding";
 import { useSettings } from "@/lib/settings";
@@ -13,6 +14,7 @@ export function ContentAdvisoryPrompt({
 }) {
   const t = useT();
   const { settings, update } = useSettings();
+  const nativeGlass = useContext(NativePlayerGlassContext);
   const { isDismissed, dismiss } = useOnboarding();
   const [phase, setPhase] = useState<"idle" | "visible" | "exiting">("idle");
   const [hovered, setHovered] = useState(false);
@@ -74,7 +76,9 @@ export function ContentAdvisoryPrompt({
         style={{
           animation: exiting
             ? "harborAdvisoryPromptOut 160ms var(--ease-out) forwards"
-            : "harborAdvisoryPromptIn 200ms var(--ease-out) both",
+            : nativeGlass
+              ? "none"
+              : "harborAdvisoryPromptIn 200ms var(--ease-out) both",
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}

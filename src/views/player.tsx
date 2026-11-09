@@ -130,6 +130,7 @@ import { usePlayerInteractionLock } from "./player/hooks/use-player-interaction-
 import { isNextAired } from "@/lib/cw-resurface";
 import { exitAnyFullscreen } from "@/lib/fullscreen-state";
 import { useNativeLiquidGlass } from "./player/hooks/use-native-liquid-glass";
+import { NativePlayerGlassContext } from "@/components/ThreeLiquidGlassSurface";
 import "./player/native-liquid-glass.css";
 
 let hdrFallbackNoticeShown = false;
@@ -1389,18 +1390,20 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
   // television. Big Picture renders its own.
   const showChrome =
     !screenLocked && !loaderActive && !loaderShowing && !tenFoot && (chromeVisible || drawMode);
+  const nativeGlassEnabled =
+    engine === "mpv" &&
+    bridgeReady &&
+    embedActive &&
+    settings.playerLiquidGlass &&
+    !settings.playerExternalMpv &&
+    !hdrStageActive &&
+    !pipMode &&
+    !src.pipDocked &&
+    !docked;
   const nativeGlassActive = useNativeLiquidGlass(
     stageRef,
     videoMountRef,
-    engine === "mpv" &&
-      bridgeReady &&
-      embedActive &&
-      settings.playerLiquidGlass &&
-      !settings.playerExternalMpv &&
-      !hdrStageActive &&
-      !pipMode &&
-      !src.pipDocked &&
-      !docked,
+    nativeGlassEnabled,
     `${bridgeKey}|${playerLoadIdentity(activeMediaSrc, activeMediaSrc.url, season, episode)}`,
     settings.playerGlassOptics,
   );
@@ -1658,10 +1661,11 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
         : prefetchNextEpisode,
     [prefetchNextEpisode, src.meta.id, src.episode?.sourceMetaId],
   );
-  return (
+  const content = (
     <main
       ref={stageRef}
       data-harbor-player
+      data-native-liquid-glass-enabled={nativeGlassEnabled ? "true" : "false"}
       data-native-liquid-glass={nativeGlassActive ? "on" : undefined}
       data-detached={src.pipDocked || undefined}
       inert={src.pipDocked || undefined}
@@ -1902,5 +1906,10 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
         }}
       />
     </main>
+  );
+  return (
+    <NativePlayerGlassContext.Provider value={nativeGlassEnabled}>
+      {content}
+    </NativePlayerGlassContext.Provider>
   );
 }

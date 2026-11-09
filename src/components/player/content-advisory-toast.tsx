@@ -9,7 +9,8 @@ import {
   Wine,
   X,
 } from "lucide-react";
-import { type FocusEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type FocusEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { NativePlayerGlassContext } from "@/components/ThreeLiquidGlassSurface";
 import { useT } from "@/lib/i18n";
 import { ignoreAdvisory } from "@/lib/player/content-advisory-ignore";
 import { usePlaybackPositionGated } from "@/lib/player/playback-clock";
@@ -85,6 +86,7 @@ export function ContentAdvisoryToast({
 }) {
   const t = useT();
   const { settings } = useSettings();
+  const nativeGlass = useContext(NativePlayerGlassContext);
   const enabled = preview || settings.contentAdvisoryToast === true;
   const severityStyles =
     settings.contentAdvisoryTheme === "monochrome" ? SEV_STYLE_MONO : SEV_STYLE_COLORED;
@@ -219,7 +221,9 @@ export function ContentAdvisoryToast({
             : {
                 animation: isCardExiting
                   ? `harborAdvisoryOut ${EXIT_MS}ms var(--ease-out) forwards`
-                  : "harborAdvisoryIn 420ms var(--ease-out) both",
+                  : nativeGlass
+                    ? "none"
+                    : "harborAdvisoryIn 420ms var(--ease-out) both",
               }
         }
       >

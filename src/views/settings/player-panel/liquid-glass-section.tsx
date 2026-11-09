@@ -7,6 +7,7 @@ import {
 import { useSettings } from "@/lib/settings";
 import { useUiLanguage } from "@/lib/i18n";
 import { ToggleRow } from "../shared";
+import { fillStyle } from "@/components/slider";
 
 export function LiquidGlassSection() {
   const { settings, update } = useSettings();
@@ -21,22 +22,31 @@ export function LiquidGlassSection() {
   return (
     <div className="flex flex-col gap-5">
       <ToggleRow
-        label={arabic ? "اللكويد جلاس داخل MPV بلاير" : "Liquid glass inside MPV player"}
+        label={
+          arabic
+            ? "اللكويد جلاس داخل MPV بلاير (GPU، تجريبي)"
+            : "MPV Liquid Glass (GPU, experimental)"
+        }
         sub={
           arabic
-            ? "زجاج وانكسار مباشر خلف زر الرجوع وقوائم الترجمة والصوت والحلقات فوق الفيديو."
-            : "Live video refraction behind the back button, subtitle and audio menus, and episode panels."
+            ? "زجاج يستخدم صورة الفيديو نفسها لمحاكاة الانكسار خلف عناصر واجهة MPV بواسطة GPU. إعداد مستقل ومعطّل افتراضيًا."
+            : "Uses the video image itself to simulate glass refraction behind MPV interface elements on the GPU. Independent and off by default."
         }
         value={settings.playerLiquidGlass}
         onChange={(playerLiquidGlass) => update({ playerLiquidGlass })}
       />
+      <p className="-mt-3 text-sm leading-relaxed text-ink-muted">
+        {arabic
+          ? "يظهر على زر الرجوع، وقوائم الترجمة والصوت، وزر Up Next ولوحة الحلقات، وتحذيرات المحتوى، وأزرار التخطي ومؤشر الصوت العائم والقوائم الأخرى فوق الفيديو. لا يُضاف إلى شريط التحكم السفلي."
+          : "Appears on the back button, subtitle and audio menus, the Up Next button and episode panel, content warnings, skip buttons, the floating volume indicator, and other overlays above the video. It is not added to the bottom playback bar."}
+      </p>
       <p className="-mt-3 text-xs leading-relaxed text-ink-subtle">
         <span className="font-semibold text-ink-muted">
           {arabic ? "استهلاك الموارد:" : "Resource use:"}
         </span>{" "}
         {arabic
-          ? "يعالج MPV إطارات الفيديو على معالج الرسوميات لمحاكاة انكسار الزجاج خلف عناصر الواجهة. قد يزيد ذلك استهلاك GPU ويؤثر في السلاسة على الأجهزة الأضعف."
-          : "MPV processes video frames on the GPU to simulate glass refraction behind interface elements. This can increase GPU use and affect smoothness on less powerful devices."}
+          ? "يضيف معالجة على GPU وقد يؤثر في سلاسة الفيديو والبطارية، خصوصًا على الأجهزة الأضعف وSteam Deck. يتوقف التأثير مؤقتًا أثناء تحريك اللوحات أو تغيير حجمها ويعود بعد استقرارها لتقليل التقطيع وتأخر الزجاج. لم يتم التحقق من الأداء على جميع الأجهزة."
+          : "Adds GPU processing and may affect playback smoothness and battery life, especially on less powerful devices and Steam Deck. Glass pauses while panels move or resize and returns once they settle to reduce stuttering and trailing. Performance has not been validated on all devices."}
       </p>
       <fieldset
         disabled={!settings.playerLiquidGlass}
@@ -56,7 +66,8 @@ export function LiquidGlassSection() {
               step={0.01}
               value={optics[key]}
               dir="ltr"
-              className="col-span-2 w-full accent-accent"
+              style={fillStyle(optics[key], GLASS_LIMITS[key][0], GLASS_LIMITS[key][1], 0.01)}
+              className="harbor-slider col-span-2 w-full"
               onChange={(event) =>
                 update({
                   playerGlassOptics: { ...optics, [key]: event.currentTarget.valueAsNumber },
@@ -68,7 +79,8 @@ export function LiquidGlassSection() {
       </fieldset>
       <button
         type="button"
-        className="self-start text-sm text-ink-muted hover:text-ink"
+        disabled={!settings.playerLiquidGlass}
+        className="self-start text-sm text-ink-muted hover:text-ink disabled:opacity-40"
         onClick={() => update({ playerGlassOptics: { ...GLASS_DEFAULTS } })}
       >
         {arabic ? "استعادة الإعدادات الافتراضية" : "Restore defaults"}

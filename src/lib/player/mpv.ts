@@ -297,6 +297,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let geomResizeObserver: ResizeObserver | null = null;
   let geomTauriUnlisten: Array<() => void> = [];
   let mpvStarted = false;
+  let glassOutputDimensions = "";
   let currentIsLive: boolean | null = null;
   let currentStartupProfile: "standard" | "high-bitrate" | null = null;
   let mediaLoadId = 0;
@@ -836,7 +837,15 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       const name = raw.name;
       const data = raw.data;
       if (name === "osd-dimensions") {
-        window.dispatchEvent(new Event("harbor:mpv-output-layout"));
+        const dimensions =
+          data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+        const nextDimensions = JSON.stringify(
+          ["w", "h", "ml", "mr", "mt", "mb"].map((key) => dimensions[key]),
+        );
+        if (nextDimensions !== glassOutputDimensions) {
+          glassOutputDimensions = nextDimensions;
+          window.dispatchEvent(new Event("harbor:mpv-output-layout"));
+        }
       }
       if (name === "time-pos" && typeof data === "number") snap.positionSec = data;
       if (name === "path" && typeof data === "string") observedMediaPath = data;
