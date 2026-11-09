@@ -1,5 +1,6 @@
 import type { ExternalCwSource } from "@/lib/stremio";
 import { privateCwProfileId } from "./cw-profile";
+import { isNuvioProviderActive as isNuvioMode, getNuvioActiveSlot } from "./active-profile-id";
 
 const KEY = "harbor.resume";
 const PRIVATE_PREFIX = "harbor.resume.private.v1.";
@@ -25,54 +26,22 @@ function nuvioAccountId(): string {
   return "anon";
 }
 
-const cachedSettings = new Map<string, { raw: string; provider: unknown }>();
-
-function isNuvioMode(): boolean {
-  try {
-    const explicit = localStorage.getItem("harbor.account-provider");
-    if (explicit === "nuvio") return true;
-    if (explicit === "stremio") return false;
-    for (const key of ["harbor.settings.shared", "harbor.settings", "harbor.settings.v1"]) {
-      const raw = localStorage.getItem(key);
-      if (raw) {
-        let cached = cachedSettings.get(key);
-        if (cached?.raw !== raw) {
-          cached = { raw, provider: JSON.parse(raw).accountProvider };
-          cachedSettings.set(key, cached);
-        }
-        if (cached.provider === "nuvio") return true;
-      }
-    }
-  } catch {}
-  return false;
-}
-
-let cachedSlotRaw: string | null = null;
-let cachedNuvioSlot = 1;
-
-function nuvioActiveSlot(): number {
-  try {
-    const raw =
-      localStorage.getItem("harbor.nuvio.state.v1") || localStorage.getItem("harbor.nuvio.state");
-    if (raw === cachedSlotRaw) return cachedNuvioSlot;
-    cachedSlotRaw = raw;
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      cachedNuvioSlot =
-        typeof parsed.activeProfileIndex === "number" ? parsed.activeProfileIndex : 1;
-      return cachedNuvioSlot;
-    }
-  } catch {}
-  cachedNuvioSlot = 1;
-  return 1;
-}
-
 function effectiveOwner(ownerId?: string): string | undefined {
   if (ownerId && ownerId.startsWith("nuvio-")) return ownerId;
   if (isNuvioMode()) {
-    return `nuvio-${nuvioActiveSlot()}`;
+    return `nuvio-${getNuvioActiveSlot()}`;
   }
   return ownerId;
+}
+
+function resumeTargetKeys(rawOwner?: string): string[] {
+  const eff = effectiveOwner(rawOwner);
+  if (eff && eff.startsWith("nuvio-")) {
+    const acc = nuvioAccountId();
+    return [`${PRIVATE_PREFIX}${acc}.${eff}`];
+  }
+  if (eff) return [KEY, PRIVATE_PREFIX + eff];
+  return [readKey()];
 }
 
 function readKey(ownerId?: string): string {
@@ -229,6 +198,15 @@ export function readResumeEntry(
     : null;
 }
 
+/** One synchronous episode scan reads its profile and storage snapshot once. */
+export function createResumeReader(ownerId?: string) {
+  const entries = { ...readAll(readKey(ownerId)) };
+  return (id: string, season?: number, episode?: number): ReturnType<typeof readResumeEntry> => {
+    const entry = entries[entryKey(id, season, episode)];
+    return entry ? { ...entry } : null;
+  };
+}
+
 export function readResumeSource(
   id: string,
   season?: number,
@@ -262,17 +240,7 @@ export function clearResume(
 ): void {
   const rawOwner = typeof ownerOrOptions === "string" ? ownerOrOptions : ownerOrOptions?.ownerId;
   const acknowledged = typeof ownerOrOptions === "object" && ownerOrOptions?.acknowledged === true;
-  const eff = effectiveOwner(rawOwner);
-  const targetKeys: string[] = [];
-  if (eff && eff.startsWith("nuvio-")) {
-    const acc = nuvioAccountId();
-    targetKeys.push(`${PRIVATE_PREFIX}${acc}.${eff}`);
-  } else if (eff) {
-    targetKeys.push(KEY, PRIVATE_PREFIX + eff);
-  } else {
-    targetKeys.push(readKey());
-  }
-  for (const key of targetKeys) {
+  for (const key of resumeTargetKeys(rawOwner)) {
     const all = readAll(key);
     if (typeof season === "number" && typeof episode === "number") {
       delete all[entryKey(id, season, episode)];
@@ -284,6 +252,39 @@ export function clearResume(
       }
     }
     writeAll(all, key, acknowledged);
+  }
+}
+
+/** Clear many cloud-resume rows with one write per storage key. */
+export function clearResumeBatch(
+  entries: Array<{ id: string; season?: number | null; episode?: number | null }>,
+  ownerId?: string,
+): void {
+  if (entries.length === 0) return;
+  for (const key of resumeTargetKeys(ownerId)) {
+    const all = readAll(key);
+    let touched = false;
+    for (const { id, season, episode } of entries) {
+      if (!id) continue;
+      if (typeof season === "number" && typeof episode === "number") {
+        const coordinate = entryKey(id, season, episode);
+        if (!(coordinate in all)) continue;
+        delete all[coordinate];
+        touched = true;
+        continue;
+      }
+      if (id in all) {
+        delete all[id];
+        touched = true;
+      }
+      const prefix = `${id}|`;
+      for (const k of Object.keys(all)) {
+        if (!k.startsWith(prefix)) continue;
+        delete all[k];
+        touched = true;
+      }
+    }
+    if (touched) writeAll(all, key);
   }
 }
 

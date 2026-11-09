@@ -16,6 +16,7 @@ import { useT } from "@/lib/i18n";
 import { FillerBadge, UpcomingBadge } from "../badges";
 import { EpisodeRatingBadge } from "../episode-rating-badge";
 import { EpisodeDownloadButton } from "../episode-download-button";
+import { AnimeReviewsButton } from "./anime-reviews-button";
 import { isUpcomingDate } from "../helpers";
 
 function partDisplaySeason(metaId: string, sourceMetaId?: string): number | null {
@@ -180,6 +181,7 @@ export function AnimeEpisodeRow({
           )}
         </div>
       </button>
+      <AnimeReviewsButton meta={meta} ep={ep} compact={false} />
       <EpisodeDownloadButton meta={epMeta} episode={playEpisode} />
     </div>
   );

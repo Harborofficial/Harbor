@@ -5,7 +5,7 @@ import type { Addon } from "@/lib/addons";
 import type { ScoredStream } from "@/lib/streams/types";
 import { StremioRow } from "./stremio-row";
 import { FACET_DIMS, facetOptions, matchesFacets, type FacetState } from "./stream-facets";
-import { addonInstanceKey, buildAddonOptions } from "./picker-utils";
+import { addonInstanceKey, buildAddonOptions, needsDownload } from "./picker-utils";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
@@ -95,17 +95,12 @@ export function StremioLayout({
     const filtered = addonFiltered.filter((s) => matchesFacets(s, facet));
     if (filter !== "all") return filtered;
     if (preserveOrder) return filtered;
-    const downloadRx = /[⏳⌛⬇⏬🔽📥]|\bdownload(ing)?\b|\bqueued?\b|\bnot[\s_-]?cached\b/iu;
-    const isDownload = (s: ScoredStream) => {
-      const haystack = `${s.name ?? ""} ${s.title ?? ""} ${s.description ?? ""}`;
-      return downloadRx.test(haystack);
-    };
     return filtered.slice().sort((a, b) => {
       const aw = /watchhub/i.test(a.addonId) || /watchhub/i.test(a.addonName ?? "") ? 1 : 0;
       const bw = /watchhub/i.test(b.addonId) || /watchhub/i.test(b.addonName ?? "") ? 1 : 0;
       if (aw !== bw) return aw - bw;
-      const ad = isDownload(a) ? 1 : 0;
-      const bd = isDownload(b) ? 1 : 0;
+      const ad = needsDownload(a) ? 1 : 0;
+      const bd = needsDownload(b) ? 1 : 0;
       if (ad !== bd) return ad - bd;
       const ar = addonRank.get(a.addonUrl ?? "") ?? 9999;
       const br = addonRank.get(b.addonUrl ?? "") ?? 9999;

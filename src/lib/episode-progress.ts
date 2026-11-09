@@ -1,5 +1,6 @@
-import { manualWatchedState } from "@/lib/manual-watched";
-import { lastPlayedEpisode, readResumeEntry } from "@/lib/resume";
+import { manualWatchedState, createManualWatchedReader } from "@/lib/manual-watched";
+import { lastPlayedEpisode, readResumeEntry, createResumeReader } from "@/lib/resume";
+import { pmdbUsesAbsoluteOrder } from "@/lib/publicmetadb/watched-order";
 
 export type EpisodeProgress = {
   ratio: number;
@@ -8,6 +9,10 @@ export type EpisodeProgress = {
 };
 
 const WATCHED_THRESHOLD = 0.85;
+
+export function createEpisodeProgressSnapshot() {
+  return { manualWatchedState: createManualWatchedReader(), readResumeEntry: createResumeReader() };
+}
 
 export function resumeDefaultSeason(
   seriesId: string,
@@ -72,20 +77,35 @@ export function getEpisodeProgress(
   traktEpisode?: number,
   pmdbWatched?: Set<string>,
   absoluteNumber?: number,
+  local?: ReturnType<typeof createEpisodeProgressSnapshot>,
 ): EpisodeProgress {
-  const resumeIds = traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
+  const readResume = local?.readResumeEntry ?? readResumeEntry;
+  const readManual = local?.manualWatchedState ?? manualWatchedState;
+  const animeId = /^(kitsu|mal|anilist|anidb):/.test(resumeId);
+  const hasMapping =
+    typeof traktSeason === "number" &&
+    Number.isInteger(traktSeason) &&
+    traktSeason >= 0 &&
+    typeof traktEpisode === "number" &&
+    Number.isInteger(traktEpisode) &&
+    traktEpisode > 0;
+  const providerCoordinates = !animeId || hasMapping;
+  const canonS = providerCoordinates ? (traktSeason ?? season) : season;
+  const canonE = providerCoordinates ? (traktEpisode ?? episode) : episode;
+  const canonDiffers = canonS !== season || canonE !== episode;
+  const imdbAlias = providerCoordinates && traktImdbId !== resumeId ? traktImdbId : null;
+  // The primary ID owns the supplied storage coordinates. Only aliases use the mapping.
+  const resumeTargets: Array<[string, number, number]> = [[resumeId, season, episode]];
+  if (imdbAlias) resumeTargets.push([imdbAlias, canonS, canonE]);
   let entry: { ms: number; t: number; pct?: number } | null = null;
-  for (const id of resumeIds) {
-    const e = readResumeEntry(id, season, episode);
+  for (const [id, s, eNum] of resumeTargets) {
+    const e = readResume(id, s, eNum);
     if (e && (!entry || e.t > entry.t)) entry = e;
   }
   const startedAt = entry?.t ?? 0;
 
-  const canonS = traktSeason ?? season;
-  const canonE = traktEpisode ?? episode;
-  const canonDiffers = canonS !== season || canonE !== episode;
-  const manualSelf = manualWatchedState(resumeId, season, episode);
-  const manualCanon = canonDiffers ? manualWatchedState(resumeId, canonS, canonE) : undefined;
+  const manualSelf = readManual(resumeId, season, episode);
+  const manualCanon = canonDiffers ? readManual(resumeId, canonS, canonE) : undefined;
   const manual = manualSelf !== undefined ? manualSelf : manualCanon;
   if (manual === false) return { ratio: 0, watched: false, startedAt };
 
@@ -99,36 +119,35 @@ export function getEpisodeProgress(
       ? Math.min(1, ms / durationMs)
       : 0;
 
-  const traktKey = traktImdbId
-    ? `imdb:${traktImdbId}:${traktSeason ?? season}:${traktEpisode ?? episode}`
-    : null;
+  const traktKey =
+    providerCoordinates && traktImdbId ? `imdb:${traktImdbId}:${canonS}:${canonE}` : null;
   const traktDone = traktKey ? traktWatched.has(traktKey) : false;
   const stremioDone = stremioWatched ? stremioWatched.has(`${season}:${episode}`) : false;
   const anilistDone = anilistWatched ? anilistWatched.has(`${season}:${episode}`) : false;
   const simklDone = simklWatched ? simklWatched.has(`${season}:${episode}`) : false;
   const malDone = malWatched ? malWatched.has(`${season}:${episode}`) : false;
-  const hasAbs = absoluteNumber != null && Number.isFinite(absoluteNumber) && absoluteNumber > 0;
-  const pmdbDone = pmdbWatched
-    ? pmdbWatched.has(`${season}:${episode}`) ||
-      (canonDiffers ? pmdbWatched.has(`${canonS}:${canonE}`) : false) ||
-      (hasAbs ? pmdbWatched.has(`1:${absoluteNumber}`) : false) ||
-      (traktImdbId
-        ? pmdbWatched.has(`imdb:${traktImdbId}:${season}:${episode}`) ||
-          pmdbWatched.has(`imdb:${traktImdbId}:${canonS}:${canonE}`) ||
-          (hasAbs ? pmdbWatched.has(`imdb:${traktImdbId}:1:${absoluteNumber}`) : false)
-        : false) ||
-      (resumeId.startsWith("tmdb:tv:")
-        ? pmdbWatched.has(`${resumeId}:${season}:${episode}`) ||
-          pmdbWatched.has(`${resumeId}:${canonS}:${canonE}`) ||
-          (hasAbs ? pmdbWatched.has(`${resumeId}:1:${absoluteNumber}`) : false)
-        : false)
-    : false;
-  const manualDone = resumeIds.some(
-    (id) =>
-      manualWatchedState(id, season, episode) === true ||
-      (canonDiffers && manualWatchedState(id, canonS, canonE) === true),
-  );
-  const done = manualDone || traktDone || stremioDone || anilistDone || simklDone || malDone || pmdbDone;
+  const hasAbs =
+    (!canonDiffers || pmdbUsesAbsoluteOrder(pmdbWatched)) &&
+    absoluteNumber != null &&
+    Number.isFinite(absoluteNumber) &&
+    absoluteNumber > 0;
+  const pmdbDone =
+    pmdbWatched && providerCoordinates
+      ? pmdbWatched.has(`${canonS}:${canonE}`) ||
+        (hasAbs ? pmdbWatched.has(`1:${absoluteNumber}`) : false) ||
+        (traktImdbId
+          ? pmdbWatched.has(`imdb:${traktImdbId}:${canonS}:${canonE}`) ||
+            (hasAbs ? pmdbWatched.has(`imdb:${traktImdbId}:1:${absoluteNumber}`) : false)
+          : false) ||
+        (resumeId.startsWith("tmdb:tv:")
+          ? pmdbWatched.has(`${resumeId}:${canonS}:${canonE}`) ||
+            (hasAbs ? pmdbWatched.has(`${resumeId}:1:${absoluteNumber}`) : false)
+          : false)
+      : false;
+  const manualDone =
+    manual === true || (imdbAlias != null && readManual(imdbAlias, canonS, canonE) === true);
+  const done =
+    manualDone || traktDone || stremioDone || anilistDone || simklDone || malDone || pmdbDone;
 
   return {
     ratio: done ? 1 : ratio,

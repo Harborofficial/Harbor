@@ -59,7 +59,8 @@ export type AnilistFranchiseNode = {
   upcoming: boolean;
 };
 
-const edgeCache = new Map<number, RawEdge[]>();
+const edgeCache = new Map<number, { at: number; edges: RawEdge[] }>();
+const edgeInflight = new Map<number, Promise<RawEdge[]>>();
 // A failed fetch is a miss, not an answer. Caching it in `edgeCache` would make
 // a transient 429 look like "this title has no relations" for the whole session,
 // so failures get a short retry window and then the next caller tries again.
@@ -68,24 +69,35 @@ const EDGE_FAILURE_TTL_MS = 60_000;
 
 async function fetchEdges(anilistId: number): Promise<RawEdge[]> {
   const cached = edgeCache.get(anilistId);
-  if (cached) return cached;
+  if (cached && Date.now() - cached.at < 30 * 60_000) return cached.edges;
+  const shared = edgeInflight.get(anilistId);
+  if (shared) return shared;
   const failedAt = edgeFailures.get(anilistId);
   if (failedAt != null && Date.now() - failedAt < EDGE_FAILURE_TTL_MS) return [];
-  try {
-    const data = await anilistRequest<RelationsResponse>(
-      RELATIONS_QUERY,
-      { id: anilistId },
-      undefined,
-      true,
-    );
-    const edges = data?.Media?.relations?.edges ?? [];
-    edgeCache.set(anilistId, edges);
-    edgeFailures.delete(anilistId);
-    return edges;
-  } catch {
-    edgeFailures.set(anilistId, Date.now());
-    return [];
-  }
+  const request = (async () => {
+    try {
+      const data = await anilistRequest<RelationsResponse>(
+        RELATIONS_QUERY,
+        { id: anilistId },
+        undefined,
+        true,
+      );
+      const edges = data?.Media?.relations?.edges ?? [];
+      edgeCache.delete(anilistId);
+      edgeCache.set(anilistId, { at: Date.now(), edges });
+      while (edgeCache.size > 250) edgeCache.delete(edgeCache.keys().next().value!);
+      edgeFailures.delete(anilistId);
+      return edges;
+    } catch {
+      edgeFailures.set(anilistId, Date.now());
+      while (edgeFailures.size > 250) edgeFailures.delete(edgeFailures.keys().next().value!);
+      return [];
+    } finally {
+      edgeInflight.delete(anilistId);
+    }
+  })();
+  edgeInflight.set(anilistId, request);
+  return request;
 }
 
 function fmtDate(d: RawNode["startDate"]): string | undefined {

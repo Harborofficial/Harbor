@@ -8,8 +8,13 @@ mod device_auth;
 pub mod devices;
 mod keystore;
 pub(super) mod library;
+#[cfg(not(feature="music-sidecar"))]
 mod meter;
 mod parse;
+#[cfg(not(feature="music-sidecar"))]
+mod player;
+#[cfg(feature="music-sidecar")]
+#[path="player_sidecar.rs"]
 mod player;
 mod session;
 mod tokens;
@@ -17,7 +22,9 @@ mod tokens;
 pub use device_auth::{DevicePoll, DevicePrompt};
 
 use super::{MusicConnection, MusicConnectionField, MusicTrack};
-use super::engine::{MusicMeterChannel, MusicMeterSnapshot};
+use super::engine::MusicMeterSnapshot;
+#[cfg(not(feature="music-sidecar"))]
+use super::engine::MusicMeterChannel;
 use librespot_core::authentication::Credentials;
 use librespot_core::session::Session;
 use parking_lot::RwLock;
@@ -31,12 +38,15 @@ use tokio::sync::Mutex;
 
 const NOT_INITIALIZED: &str = "Spotify storage is not initialized";
 /// Strongest level the analyzers report, matching the mpv meter's clamp.
+#[cfg(not(feature="music-sidecar"))]
 const MAX_METER_DB: f64 = 24.0;
 /// How far the volume compensation may lift a measurement, so a nearly silent slider
 /// cannot turn into signal.
+#[cfg(not(feature="music-sidecar"))]
 const MAX_COMPENSATION_DB: f64 = 60.0;
 
 /// Decibels to add back to a measurement that already went through the soft volume.
+#[cfg(not(feature="music-sidecar"))]
 fn meter_level_offset_db(attenuation: f64) -> f64 {
     if !attenuation.is_finite() || attenuation <= 0.0 || attenuation >= 1.0 {
         return 0.0;
@@ -44,6 +54,7 @@ fn meter_level_offset_db(attenuation: f64) -> f64 {
     (-20.0 * attenuation.log10()).min(MAX_COMPENSATION_DB)
 }
 
+#[cfg(not(feature="music-sidecar"))]
 fn lift_level(db: f64, offset: f64) -> f64 {
     (db + offset).min(MAX_METER_DB)
 }
@@ -250,6 +261,14 @@ impl SpotifyState {
     }
 
     pub async fn disconnect(&self) -> Result<(), String> {
+        #[cfg(feature="music-sidecar")]
+        {
+            // Explicit disconnect revokes the in-memory external playback session
+            // before Harbor forgets its existing credential keys and cached data.
+            let _=super::m3u::module_request_async(serde_json::json!({
+                "command":"spotify_disconnect"
+            })).await;
+        }
         let mut slot = self.runtime.lock().await;
         if let Some(runtime) = slot.take() {
             runtime.audio.player.stop();
@@ -311,6 +330,15 @@ impl SpotifyState {
         }
     }
 
+    #[cfg(feature="music-sidecar")]
+    pub async fn meter_snapshot(&self) -> Option<MusicMeterSnapshot> {
+        let data=crate::music::m3u::module_request_async(serde_json::json!({
+            "command":"spotify_meter_snapshot"
+        })).await.ok()?;
+        serde_json::from_value(data).ok()
+    }
+
+    #[cfg(not(feature="music-sidecar"))]
     pub async fn meter_snapshot(&self) -> Option<MusicMeterSnapshot> {
         let paused = self.paused.load(Ordering::SeqCst);
         let slot = self.runtime.lock().await;

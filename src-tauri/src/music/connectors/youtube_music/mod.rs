@@ -10,7 +10,6 @@ mod parse;
 mod player;
 mod rows;
 mod ytdlp;
-mod ytdlp_update;
 mod video_page;
 
 use super::super::connector::{ConnectorHealth, HealthCell, MusicConnector};

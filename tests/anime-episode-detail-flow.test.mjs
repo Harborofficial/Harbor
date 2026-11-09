@@ -2,49 +2,82 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
-import { animePlayEpisode, resolveAnimeDetailTarget } from "../src/views/detail/anime-episodes/anime-season-key.ts";
+import { memoryMediaCache } from "./helpers/media-cache.mjs";
+import {
+  animePlayEpisode,
+  resolveAnimeDetailTarget,
+} from "../src/views/detail/anime-episodes/anime-season-key.ts";
 import { cinemetaEpisodeDetail } from "../src/lib/cinemeta-episode.ts";
 
 function load(file, dependencies) {
   const source = readFileSync(new URL(file, import.meta.url), "utf8");
   const code = ts.transpileModule(source, {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      jsx: ts.JsxEmit.ReactJSX,
+    },
   }).outputText;
   const module = { exports: {} };
-  new Function("require", "module", "exports", code)((id) => {
-    assert.ok(id in dependencies, `Unexpected dependency: ${id}`);
-    return dependencies[id];
-  }, module, module.exports);
+  new Function("require", "module", "exports", code)(
+    (id) => {
+      assert.ok(id in dependencies, `Unexpected dependency: ${id}`);
+      return dependencies[id];
+    },
+    module,
+    module.exports,
+  );
   return module.exports;
 }
 
 const parent = { id: "kitsu:parent", type: "series", name: "Franchise" };
 const entry = {
-  id: "kitsu:part2", type: "series", name: "Part two",
+  id: "kitsu:part2",
+  type: "series",
+  name: "Part two",
   videos: [{ season: 3, episode: 13, name: "Wrong entry-relative video" }],
 };
 const row = {
-  id: 7, number: 1, seasonNumber: 1, title: "Selected episode", synopsis: "Selected synopsis",
-  thumbnail: "https://example.test/still.jpg", airdate: "2020-01-01", length: 24,
-  streamId: "kitsu:part2:1", sourceMetaId: entry.id,
-  imdbId: "tt2560140", imdbSeason: 3, imdbEpisode: 13, absoluteNumber: 50, tvdbEpisodeId: 123,
+  id: 7,
+  number: 1,
+  seasonNumber: 1,
+  title: "Selected episode",
+  synopsis: "Selected synopsis",
+  thumbnail: "https://example.test/still.jpg",
+  airdate: "2020-01-01",
+  length: 24,
+  streamId: "kitsu:part2:1",
+  sourceMetaId: entry.id,
+  imdbId: "tt2560140",
+  imdbSeason: 3,
+  imdbEpisode: 13,
+  absoluteNumber: 50,
+  tvdbEpisodeId: 123,
 };
 
 function fetcher({ tmdb = null, canonical = null, fail = false } = {}) {
-  const requests = [], writes = [];
+  const requests = [],
+    writes = [];
   const { fetchEpisodeData } = load("../src/lib/episode-data-fetcher.ts", {
-    "@/lib/cinemeta": { meta: async (type, id) => {
-      requests.push({ type, id });
-      if (fail) throw new Error("Provider unavailable");
-      return canonical;
-    } },
+    "./media-cache": memoryMediaCache(),
+    "./providers/tmdb/tmdb-client": { effectiveTmdbLanguage: () => "en" },
+    "@/lib/cinemeta": {
+      meta: async (type, id) => {
+        requests.push({ type, id });
+        if (fail) throw new Error("Provider unavailable");
+        return canonical;
+      },
+    },
     "@/lib/providers/tmdb/tmdb-client": { get: async () => ({ tv_results: [{ id: 1429 }] }) },
-    "@/lib/providers/tmdb/tmdb-episode-details": { tmdbEpisodeDetail: async (...args) => {
-      requests.push({ tmdb: args });
-      return tmdb;
-    } },
+    "@/lib/providers/tmdb/tmdb-episode-details": {
+      tmdbEpisodeDetail: async (...args) => {
+        requests.push({ tmdb: args });
+        return tmdb;
+      },
+    },
     "@/lib/providers/tmdb/tmdb-episode-cache": {
-      getCachedEpisode: () => null, cacheEpisode: (...args) => writes.push(args),
+      getCachedEpisode: () => null,
+      cacheEpisode: (...args) => writes.push(args),
     },
     "@/lib/cinemeta-episode": { cinemetaEpisodeDetail },
   });
@@ -53,10 +86,17 @@ function fetcher({ tmdb = null, canonical = null, fail = false } = {}) {
 
 // Exercise the actual detail page's Play handler, not a parallel implementation.
 function playFromDetail(seriesMeta, episodeData, playback) {
-  const source = ts.createSourceFile("detail.tsx", readFileSync(new URL("../src/views/episode-detail.tsx", import.meta.url), "utf8"), ts.ScriptTarget.ESNext, true, ts.ScriptKind.TSX);
+  const source = ts.createSourceFile(
+    "detail.tsx",
+    readFileSync(new URL("../src/views/episode-detail.tsx", import.meta.url), "utf8"),
+    ts.ScriptTarget.ESNext,
+    true,
+    ts.ScriptKind.TSX,
+  );
   let declaration;
   function visit(node) {
-    if (ts.isVariableDeclaration(node) && node.name.getText(source) === "handlePlay") declaration = node.getText(source);
+    if (ts.isVariableDeclaration(node) && node.name.getText(source) === "handlePlay")
+      declaration = node.getText(source);
     ts.forEachChild(node, visit);
   }
   visit(source);
@@ -65,9 +105,16 @@ function playFromDetail(seriesMeta, episodeData, playback) {
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText;
   let selection;
-  const scope = { seriesMeta, episodeData, playback, settings: { instantPlay: true },
-    useCallback: (fn) => fn, getImageUrl: (url) => url,
-    openPicker: (...args) => { selection = args; },
+  const scope = {
+    seriesMeta,
+    episodeData,
+    playback,
+    settings: { instantPlay: true },
+    useCallback: (fn) => fn,
+    getImageUrl: (url) => url,
+    openPicker: (...args) => {
+      selection = args;
+    },
   };
   new Function(...Object.keys(scope), code)(...Object.values(scope));
   return selection;
@@ -75,9 +122,19 @@ function playFromDetail(seriesMeta, episodeData, playback) {
 
 test("split-cour lookup uses canonical metadata but Play keeps every source identifier", async () => {
   const target = resolveAnimeDetailTarget(row, parent, entry);
-  const canonical = { id: target.seriesId, videos: [{ season: 3, episode: 13, name: "Canonical episode" }] };
+  const canonical = {
+    id: target.seriesId,
+    videos: [{ season: 3, episode: 13, name: "Canonical episode" }],
+  };
   const h = fetcher({ canonical });
-  const data = await h.fetchEpisodeData(target.seriesId, entry, target.season, target.episode, {}, target.playback.episode);
+  const data = await h.fetchEpisodeData(
+    target.seriesId,
+    entry,
+    target.season,
+    target.episode,
+    {},
+    target.playback.episode,
+  );
   assert.equal(data.name, "Canonical episode");
   assert.deepEqual(h.requests, [{ type: "series", id: "tt2560140" }]);
   const [meta, episode, options] = playFromDetail(target.seriesMeta, data, target.playback);
@@ -91,16 +148,33 @@ test("TMDB enrichment uses mapped coordinates without changing long-running abso
   const target = resolveAnimeDetailTarget(selected, parent, entry);
   const tmdb = { seasonNumber: 21, episodeNumber: 45, name: "TMDB episode" };
   const h = fetcher({ tmdb });
-  const data = await h.fetchEpisodeData(target.seriesId, parent, 21, 45, { tmdbKey: "fixture" }, target.playback.episode);
+  const data = await h.fetchEpisodeData(
+    target.seriesId,
+    parent,
+    21,
+    45,
+    { tmdbKey: "fixture" },
+    target.playback.episode,
+  );
   assert.equal(data, tmdb);
   assert.deepEqual(h.requests, [{ tmdb: ["fixture", 1429, 21, 45] }]);
   assert.equal(playFromDetail(parent, data, target.playback)[1].episode, 1089);
 });
 
 test("pure Kitsu detail works from its selected row without caching partial data", async () => {
-  const target = resolveAnimeDetailTarget({ ...row, imdbId: undefined }, parent, { ...entry, videos: [] });
+  const target = resolveAnimeDetailTarget({ ...row, imdbId: undefined }, parent, {
+    ...entry,
+    videos: [],
+  });
   const h = fetcher();
-  const data = await h.fetchEpisodeData(target.seriesId, target.playback.meta, 1, 1, {}, target.playback.episode);
+  const data = await h.fetchEpisodeData(
+    target.seriesId,
+    target.playback.meta,
+    1,
+    1,
+    {},
+    target.playback.episode,
+  );
   assert.equal(data.name, row.title);
   assert.equal(data.overview, row.synopsis);
   assert.equal(data.runtime, 24);
@@ -137,7 +211,7 @@ test("both strip and grid information buttons pass the same playback payload as 
   const jsx = (type, props) => ({ type, props });
   const marker = (name) => name;
   const { AnimeEpisodeStrip } = load("../src/views/detail/anime-episode-strip.tsx", {
-    "react": { useMemo: (fn) => fn() },
+    react: { useMemo: (fn) => fn(), useCallback: (fn) => fn },
     "react/jsx-runtime": { jsx, jsxs: jsx },
     "lucide-react": { Check: marker("check"), Eye: marker("eye") },
     "@/components/hover-tooltip": { HoverTooltip: marker("tooltip") },
@@ -145,11 +219,17 @@ test("both strip and grid information buttons pass the same playback payload as 
     "@/components/poster": { Poster: marker("poster") },
     "@/lib/settings": { useSettings: () => ({ settings: { instantPlay: true } }) },
     "@/lib/spoilers": {},
-    "@/lib/view": { useView: () => ({
-      openPicker: (...args) => calls.push({ play: args }),
-      openEpisodeDetail: (...args) => calls.push({ detail: args }),
-    }) },
-    "./anime-episodes/anime-season-key": { animePlayEpisode, resolveAnimeDetailTarget, animeSeasonKey: () => 1 },
+    "@/lib/view": {
+      useView: () => ({
+        openPicker: (...args) => calls.push({ play: args }),
+        openEpisodeDetail: (...args) => calls.push({ detail: args }),
+      }),
+    },
+    "./anime-episodes/anime-season-key": {
+      animePlayEpisode,
+      resolveAnimeDetailTarget,
+      animeSeasonKey: () => 1,
+    },
     "@/lib/dates": { formatAirDate: (value) => value },
     "@/lib/i18n": { useT: () => (value) => value },
     "./episode-grid": { EpisodeGrid: marker("grid") },
@@ -157,10 +237,22 @@ test("both strip and grid information buttons pass the same playback payload as 
     "@/lib/providers/anime-episode-enrich": { unairedIndexes: () => new Set() },
     "./helpers": { isUpcomingDate: () => false },
     "./episode-rating-badge": { EpisodeRatingBadge: marker("rating") },
+    "./anime-episodes/anime-reviews-button": { AnimeReviewsButton: marker("reviews") },
+    "@/lib/episode-reviews": {
+      episodeReviewsTarget: (imdbId, season, episode) =>
+        imdbId && season != null && episode != null ? { imdbId, season, episode } : undefined,
+    },
   });
-  const props = { meta: parent, episodes: [row], metaForEp: () => entry,
-    progressFor: () => ({ ratio: 0, watched: false, startedAt: 0 }) };
-  const grid = AnimeEpisodeStrip({ ...props, layout: "grid" }).props.episodes[0];
+  const props = {
+    meta: parent,
+    episodes: [row],
+    metaForEp: () => entry,
+    progressFor: () => ({ ratio: 0, watched: false, startedAt: 0 }),
+  };
+  const gridProps = AnimeEpisodeStrip({ ...props, layout: "grid" }).props;
+  const grid = gridProps.present(gridProps.episodes[0]);
+  // Reviews follow IMDb's numbering, not the franchise entry's own episode number.
+  assert.deepEqual(grid.reviews, { imdbId: "tt2560140", season: 3, episode: 13 });
   grid.play();
   grid.openDetail();
   const strip = AnimeEpisodeStrip({ ...props, layout: "strip" });

@@ -1,3 +1,4 @@
+import reviews from "./vi/reviews";
 import playOrders from "./vi/play-orders";
 import gameRomLibrary from "./vi/game-rom-library";
 import gameNotes from "./vi/game-notes";
@@ -80,6 +81,7 @@ import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./vi/ebook-sources";
 import settingsRefinements from "./vi/settings-refinements";
 import coverage from "./vi/coverage";
+import subtitles from "./vi/subtitles";
 import gap from "./vi/gap";
 import plurals from "./vi/plurals";
 import settingsFill from "./vi/settings-fill";
@@ -117,6 +119,7 @@ import ageGate from "./vi/age-gate";
 import plugins from "./vi/plugins";
 import brands from "./vi/brands";
 import bpSports from "./vi/bp-sports";
+import queueBasket from "./vi/queue-basket";
 
 import nytTv from "./vi/nyt-tv";
 
@@ -295,6 +298,7 @@ const vi: Record<string, string> = {
 
   ...ebookSources,
   ...coverage,
+  ...subtitles,
   ...gap,
   ...plurals,
   ...settingsFill,
@@ -408,6 +412,8 @@ const vi: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...reviews,
+  ...queueBasket,
 };
 
 export default vi;

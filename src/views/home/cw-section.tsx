@@ -8,6 +8,8 @@ import { useT } from "@/lib/i18n";
 import { type LibraryItem } from "@/lib/stremio";
 import { isLibraryItemWatched } from "@/lib/trakt/library-key";
 import type { ContinueDismiss } from "@/lib/continue-card-actions";
+import { QueueContinueCard } from "@/components/queue-basket/queue-continue-card";
+import { useQueueResumeItem } from "@/lib/queue";
 
 type Props = {
   signedIn: boolean;
@@ -18,6 +20,8 @@ type Props = {
 
 export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
   const t = useT();
+  const queueResumeItem = useQueueResumeItem();
+  const showQueueCard = queueResumeItem !== null;
   const [showAuth, setShowAuth] = useState(false);
   const rowKey = useMemo(() => {
     const first = items[0];
@@ -37,7 +41,7 @@ export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
 
   const authModal = showAuth ? <AuthModal onClose={() => setShowAuth(false)} /> : null;
 
-  if (items.length > 0) {
+  if (items.length > 0 || showQueueCard) {
     return (
       <>
         <Row
@@ -47,15 +51,19 @@ export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
           shape="landscape"
           scrollKey="home:cw"
           headerRight={signInButton}
+          className={showQueueCard ? "home-cw-with-queue" : undefined}
         >
-          {items.map((item) => (
-            <ContinueCard
-              key={item._id}
-              item={item}
-              watched={watchedSet ? isLibraryItemWatched(item, watchedSet) : false}
-              onDismiss={onDismiss}
-            />
-          ))}
+          {[
+            ...(showQueueCard ? [<QueueContinueCard key="continue-queue" />] : []),
+            ...items.map((item) => (
+              <ContinueCard
+                key={item._id}
+                item={item}
+                watched={watchedSet ? isLibraryItemWatched(item, watchedSet) : false}
+                onDismiss={onDismiss}
+              />
+            )),
+          ]}
         </Row>
         {authModal}
       </>

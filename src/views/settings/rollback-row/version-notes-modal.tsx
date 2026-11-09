@@ -6,13 +6,12 @@ import { advanceFocus, captureFocusReturn } from "@/lib/keyboard-navigation";
 import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";
 import { useT } from "@/lib/i18n";
 import { hasRichNote, releaseNote, type ReleaseNote } from "@/lib/updater/release-notes";
+import { RELEASES_URL } from "@/lib/updater/release-links";
 import { installerUrl, type VersionEntry } from "@/lib/updater/versions";
 import { openUrl } from "@/lib/window";
 import { ROW_DESC } from "../kit";
 import { SButton } from "../ui";
 import { VERSION_BADGE } from "./badge";
-
-const RELEASES_URL = "https://github.com/harborstremio/harbor/releases";
 
 export function VersionNotesModal({
   entry,

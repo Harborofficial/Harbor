@@ -20,6 +20,9 @@ function load(path: string, mocks: Record<string, unknown>) {
 }
 
 const { pickTvdbImage } = load("src/lib/providers/tvdb-proxy.ts", {
+  "@/lib/cache": {
+    lruSet: (map: Map<unknown, unknown>, key: unknown, value: unknown) => map.set(key, value),
+  },
   "@/lib/safe-fetch": { safeFetch: async () => ({ ok: false }) },
   "./anime-mapping": { kitsuToTvdb: async () => null },
   "@/lib/config/endpoints": {
@@ -89,4 +92,35 @@ test("invalid absolute numbers cannot override a regular episode's exact pair", 
       "correct.jpg",
     );
   }
+});
+
+test("a cour-local episode number is never used as a franchise absolute number", () => {
+  assert.equal(
+    pickTvdbImage(
+      { abs2: "first-cour.jpg" },
+      {
+        seasonNumber: 1,
+        number: 2,
+        imdbSeason: 2,
+        imdbEpisode: 2,
+      },
+    ),
+    null,
+  );
+});
+
+test("an exact provider pair takes precedence over absolute artwork", () => {
+  assert.equal(
+    pickTvdbImage(
+      { abs172: "stale.jpg", s2e2: "exact.jpg" },
+      {
+        seasonNumber: 1,
+        number: 2,
+        absoluteNumber: 172,
+        imdbSeason: 2,
+        imdbEpisode: 2,
+      },
+    ),
+    "exact.jpg",
+  );
 });

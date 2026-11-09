@@ -22,6 +22,7 @@ function load(path: string, mocks: Record<string, unknown>) {
 test("the top-match warm resolves only anime-looking catalog metas", async () => {
   const calls: string[] = [];
   const { warmAnimeResolution } = load("src/lib/anime-detect.ts", {
+    "@/lib/render-cause": { noteNotify() {} },
     react: { useSyncExternalStore: () => 0 },
     "@/lib/cinemeta": { meta: async () => null },
     "@/lib/providers/anime-mapping": {

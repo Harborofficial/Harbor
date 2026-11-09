@@ -28,12 +28,55 @@ const simklIds = (() => {
   return module.exports;
 })();
 
+function animeIdentityHelpers() {
+  const code = ts.transpileModule(read("src/lib/cw-anime-identity.ts"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const aliases: Record<string, string> = { "mal:101": "kitsu:900", "anilist:202": "kitsu:900" };
+  const mocks: Record<string, unknown> = {
+    "@/lib/anime-cw-ids": {
+      getAnimeCanonicalId: (id: string) => aliases[id] ?? null,
+      getAnimeCwId: (id: string) => aliases[id] ?? null,
+      getAnilistMalAlias: () => null,
+      recordAnimeCwId: () => {},
+    },
+    "@/lib/anime-identity-db": {
+      animeDbReadEntries: async () => [],
+      animeDbReadEpisodes: async () => [],
+    },
+    "@/lib/providers/anime-entry": { resolveAnimeEntry: async () => null },
+  };
+  const module = { exports: {} as Record<string, (...args: any[]) => any> };
+  new Function("require", "module", "exports", code)(
+    (name: string) => mocks[name],
+    module,
+    module.exports,
+  );
+  return module.exports;
+}
+
+function dedupeWithSameIdentity(items: LibraryItem[]) {
+  return animeIdentityHelpers().dedupeAnimeCw(items);
+}
+
+const cwNextDisplayCoords = (() => {
+  const code = ts.transpileModule(read("src/lib/cw-next-display.ts"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const module = { exports: {} as Record<string, (...args: any[]) => any> };
+  new Function("module", "exports", code)(module, module.exports);
+  return module.exports.cwNextDisplayCoords;
+})();
+
 // Run the real dismissal module with isolated storage and no cloud/network writes.
-function harness(seed?: string, onChange = () => {}) {
+function harness(seed?: string, onChange = () => {}, options: { nuvio?: boolean } = {}) {
   let privateProfile: string | null = null;
   const data = new Map<string, string>();
   if (seed) data.set("harbor.cw.dismissed.v1", seed);
   const resume = new Map<string, { ms: number; t: number }>();
+  const cloudWrites: unknown[][] = [];
+  const localClears: unknown[][] = [];
+  const nuvioDeletes: unknown[][] = [];
   const key = (id: string, s?: number, e?: number) => `${id}|${s}|${e}`;
   const mocks: Record<string, unknown> = {
     "./cw-profile": { privateCwProfileId: () => privateProfile },
@@ -59,15 +102,27 @@ function harness(seed?: string, onChange = () => {}) {
         return Number.isInteger(season) && Number.isInteger(episode) ? { season, episode } : null;
       },
     },
-    "./stremio-write-queue": { cloudLibraryPut: () => Promise.resolve() },
-    "./render-cause": { noteNotify: () => {} },
-    "./nuvio/nuvio-client": { isNuvioSignedIn: () => false },
-    "./nuvio/nuvio-sync": {
-      isNuvioProviderActive: () => false,
-      resolveNuvioProfileIndex: () => 0,
-      deleteWatchProgressFromNuvio: () => Promise.resolve(),
+    "./stremio-write-queue": {
+      cloudLibraryPut: (...args: unknown[]) => {
+        cloudWrites.push(args);
+        return Promise.resolve(true);
+      },
     },
-    "./local-cw": { clearLocalCw: () => {} },
+    "./render-cause": { noteNotify: () => {} },
+    "./nuvio/nuvio-client": { isNuvioSignedIn: () => options.nuvio === true },
+    "./nuvio/nuvio-sync": {
+      isNuvioProviderActive: () => options.nuvio === true,
+      resolveNuvioProfileIndex: () => 0,
+      deleteWatchProgressFromNuvio: (...args: unknown[]) => {
+        nuvioDeletes.push(args);
+        return Promise.resolve();
+      },
+    },
+    "./local-cw": {
+      clearLocalCw: (...args: unknown[]) => {
+        localClears.push(args);
+      },
+    },
   };
   const output = ts.transpileModule(read("src/lib/cw-dismiss.ts"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
@@ -91,6 +146,9 @@ function harness(seed?: string, onChange = () => {}) {
     setResume: (item: LibraryItem, ms: number, t: number) =>
       resume.set(key(item._id, item.state?.season, item.state?.episode), { ms, t }),
     resume,
+    cloudWrites,
+    localClears,
+    nuvioDeletes,
   };
 }
 
@@ -156,15 +214,27 @@ test("dismissing a mapped entry also covers its alias", () => {
   };
   const restored = harness(h.data.get("harbor.cw.dismissed.v1"));
   assert.equal(restored.api.isCwDismissed(alias), true);
-  assert.equal(restored.api.isCwDismissed({
-    ...alias, state: { ...alias.state!, timeOffset: 205 },
-  }), true);
-  assert.equal(restored.api.isCwDismissed({
-    ...alias, state: { ...alias.state!, timeOffset: 300 },
-  }), false);
-  assert.equal(restored.api.isCwDismissed({
-    ...alias, state: { ...alias.state!, episode: 3, video_id: "tmdb:tv:1396:1:3" },
-  }), false);
+  assert.equal(
+    restored.api.isCwDismissed({
+      ...alias,
+      state: { ...alias.state!, timeOffset: 205 },
+    }),
+    true,
+  );
+  assert.equal(
+    restored.api.isCwDismissed({
+      ...alias,
+      state: { ...alias.state!, timeOffset: 300 },
+    }),
+    false,
+  );
+  assert.equal(
+    restored.api.isCwDismissed({
+      ...alias,
+      state: { ...alias.state!, episode: 3, video_id: "tmdb:tv:1396:1:3" },
+    }),
+    false,
+  );
 });
 
 test("a mapped movie dismissal also lifts when its alias gains progress", () => {
@@ -179,9 +249,13 @@ test("a mapped movie dismissal also lifts when its alias gains progress", () => 
   h.api.dismissCw(mapped, null);
   const alias: LibraryItem = { ...mapped, _id: "tmdb:movie:603", altIds: undefined };
   assert.equal(h.api.isCwDismissed(alias), true);
-  assert.equal(h.api.isCwDismissed({
-    ...alias, state: { ...alias.state!, timeOffset: 300 },
-  }), false);
+  assert.equal(
+    h.api.isCwDismissed({
+      ...alias,
+      state: { ...alias.state!, timeOffset: 300 },
+    }),
+    false,
+  );
 });
 
 test("fresh local resume overrides stale cloud recency for the same episode", () => {
@@ -256,6 +330,14 @@ function advanceHarness(
       useSettings: () => ({ settings: { cwHideCaughtUp: false, cwSources: { simkl: false } } }),
     },
     "@/lib/providers/jikan": { franchiseDedupKey: (name: string) => name.toLowerCase() },
+    "@/lib/cw-anime-identity": {
+      dedupeAnimeCw: dedupeWithSameIdentity,
+      cwAnimeIdentityKey: (...args: any[]) => animeIdentityHelpers().cwAnimeIdentityKey(...args),
+    },
+    "@/lib/cw-next-display": { cwNextDisplayCoords },
+    "@/lib/stremio": {
+      isAnimeCwItem: (item: LibraryItem) => /^(kitsu|mal|anilist|anidb):/.test(item._id),
+    },
   };
   const output = ts.transpileModule(read("src/views/home/hooks/use-cw-advance.ts"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
@@ -273,6 +355,197 @@ function advanceHarness(
     return hook(items, "", true);
   };
 }
+
+test("dismissing a deduped anime card hides every source and clears its progress", () => {
+  const h = harness();
+  const mal: LibraryItem = {
+    ...item("simkl"),
+    _id: "mal:101",
+    state: { ...item().state!, video_id: "mal:101:1:2" },
+  };
+  const sameIdLater: LibraryItem = {
+    ...item("trakt"),
+    _id: "mal:101",
+    state: { ...item().state!, video_id: "mal:101:1:4", episode: 4 },
+  };
+  const [groupedRaw] = dedupeWithSameIdentity([mal, sameIdLater]);
+  const grouped = groupedRaw as LibraryItem & { cwMembers?: LibraryItem[] };
+  assert.equal(grouped.cwMembers?.length, 2);
+  h.setResume(mal, 400, Date.now());
+  h.setResume(sameIdLater, 700, Date.now());
+  const displayed = {
+    ...grouped,
+    upNext: true,
+    state: { ...grouped.state!, video_id: "mal:101:1:5", episode: 5, timeOffset: 0 },
+  };
+  h.api.dismissCw(displayed, "auth");
+  assert.equal(h.api.isCwDismissed(mal), true);
+  assert.equal(h.api.isCwDismissed(sameIdLater), true);
+  assert.equal(
+    h.api.isCwDismissed(displayed),
+    true,
+    "the visible up-next checkpoint is suppressed immediately",
+  );
+  assert.equal(h.resume.size, 0, "grouped dismissal clears each source's saved position");
+  assert.equal(
+    h.cloudWrites.length,
+    0,
+    "tracker-only groups do not write the Stremio cloud record",
+  );
+  const records = JSON.parse(h.data.get("harbor.cw.dismissed.v1")!);
+  assert.equal(records["group|simkl|mal%3A101|mal%3A101%3A1%3A2|1|2"].e, 2);
+  assert.equal(records["group|trakt|mal%3A101|mal%3A101%3A1%3A4|1|4"].e, 4);
+  assert.equal(records["group|simkl|mal%3A101|mal%3A101%3A1%3A5|1|5"].e, 5);
+  assert.equal(
+    h.api.isCwDismissed({
+      ...displayed,
+      state: { ...displayed.state!, episode: 6, video_id: "mal:101:1:6" },
+    }),
+    false,
+    "a later episode follows normal resurfacing semantics",
+  );
+  h.setResume(mal, 500, Date.now() + 1000);
+  assert.equal(
+    h.api.isCwDismissed(mal),
+    false,
+    "fresh activity on the dismissed checkpoint resurfaces it",
+  );
+});
+
+test("a grouped dismissal writes the Stremio library checkpoint once for a mixed group", () => {
+  const h = harness();
+  const library: LibraryItem = {
+    ...item(),
+    _id: "tt100",
+    external: undefined,
+    state: { ...item().state!, season: 1, episode: 3, video_id: "tt100:1:3" },
+  };
+  const tracker: LibraryItem = {
+    ...item("simkl"),
+    _id: "mal:101",
+    state: { ...item().state!, season: 1, episode: 3, video_id: "mal:101:1:3" },
+  };
+  const grouped = {
+    ...library,
+    cwMembers: [library, tracker],
+  } as LibraryItem & { cwMembers: LibraryItem[] };
+  h.setResume(library, 900, Date.now());
+  h.setResume(tracker, 900, Date.now());
+
+  h.api.dismissCw(grouped, "auth");
+
+  assert.equal(h.resume.size, 0);
+  assert.equal(h.cloudWrites.length, 1);
+  const [, written] = h.cloudWrites[0] as [string, LibraryItem];
+  assert.equal(written.state?.timeOffset, 0);
+  assert.equal(written.state?.video_id, "tt100:1:3");
+});
+
+test("a grouped dismissal clears local Continue Watching for local members", () => {
+  const h = harness();
+  const local: LibraryItem = {
+    ...item(),
+    _id: "download:1",
+    local: true,
+    external: undefined,
+  };
+  const grouped = { ...local, cwMembers: [local] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+
+  h.api.dismissCw(grouped, null);
+
+  assert.deepEqual(
+    h.localClears.map(([id]) => id),
+    ["download:1"],
+  );
+});
+
+test("a grouped dismissal removes Nuvio progress and local rows for Nuvio members", () => {
+  const h = harness(undefined, undefined, { nuvio: true });
+  const nuvio: LibraryItem = {
+    ...item(),
+    _id: "tt100",
+    external: "nuvio",
+    state: { ...item().state!, season: 1, episode: 3, video_id: "tt100:1:3" },
+  };
+  const grouped = { ...nuvio, cwMembers: [nuvio] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+
+  h.api.dismissCw(grouped, "auth");
+
+  assert.equal(h.nuvioDeletes.length, 1);
+  assert.deepEqual(h.nuvioDeletes[0].slice(0, 2), [0, "tt100"]);
+  assert.equal(h.localClears.length, 2, "owner-scoped and current local rows are cleared");
+});
+
+test("a grouped dismissal keeps an earlier stale checkpoint hidden", () => {
+  const h = harness();
+  const early: LibraryItem = {
+    ...item("simkl"),
+    _id: "mal:101",
+    state: { ...item().state!, video_id: "mal:101:1:2" },
+  };
+  const later: LibraryItem = {
+    ...item("trakt"),
+    _id: "mal:101",
+    state: { ...item().state!, video_id: "mal:101:1:4", episode: 4 },
+  };
+  const [groupedRaw] = dedupeWithSameIdentity([later, early]);
+  const grouped = groupedRaw as LibraryItem & { cwMembers?: LibraryItem[] };
+  const displayed = {
+    ...grouped,
+    upNext: true,
+    state: { ...grouped.state!, video_id: "mal:101:1:5", episode: 5, timeOffset: 0 },
+  };
+  h.api.dismissCw(displayed, "auth");
+  const stale = {
+    ...early,
+    state: { ...early.state!, video_id: "mal:101:01:2" },
+  };
+  assert.equal(
+    h.api.isCwDismissed(stale),
+    true,
+    "an earlier episode with a different video id stays hidden",
+  );
+  assert.equal(
+    h.api.isCwDismissed({
+      ...early,
+      state: { ...early.state!, video_id: "mal:101:1:6", episode: 6 },
+    }),
+    false,
+    "a later episode still resurfaces",
+  );
+});
+
+test("grouped source checkpoints survive reload without crossing local, library, or tracker sources", () => {
+  const h = harness();
+  const local: LibraryItem = {
+    ...item(),
+    _id: "mal:101",
+    local: true,
+    state: { ...item().state!, video_id: "mal:101:1:2" },
+  };
+  const library: LibraryItem = {
+    ...item(),
+    _id: "mal:101",
+    local: false,
+    state: { ...item().state!, video_id: "mal:101:01:2" },
+  };
+  const group = { ...library, cwMembers: [local, library] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+  h.api.dismissCw(group, null);
+  const reloaded = harness(h.data.get("harbor.cw.dismissed.v1"));
+  assert.equal(reloaded.api.isCwDismissed(local), true);
+  assert.equal(reloaded.api.isCwDismissed(library), true);
+  assert.equal(
+    reloaded.api.isCwDismissed({ ...library, external: "simkl" }),
+    false,
+    "a source without an observed checkpoint stays visible",
+  );
+});
 
 for (const kind of ["advanced", "resurfaced"] as const) {
   test(`dismissing the ${kind} up-next card hides the displayed episode immediately`, () => {
@@ -375,7 +648,7 @@ test("source toggles preserve the shared-profile protection on desktop and mobil
   for (const path of ["src/views/home.tsx", "src/views/mobile/mobile-cw-row.tsx"]) {
     assert.match(
       read(path),
-      /!hideSharedCw\s*&&\s*\(settings\.cwSources\.trakt \|\| settings\.cwSources\.simkl(?: \|\| settings\.cwSources\.publicmetadb)?\)/,
+      /!hideSharedCw\s*&&\s*\(settings\.cwSources\.trakt\s*\|\|\s*settings\.cwSources\.simkl\s*\|\|\s*settings\.cwSources\.publicmetadb\)/,
     );
   }
 });

@@ -17,10 +17,35 @@ pub fn configure_command(cmd: &mut Command) {
     let _ = cmd;
 }
 
+/// Same lifetime guarantee for blocking `std::process` children, such as the
+/// long-lived Music sidecar owned by a synchronous host thread.
+pub fn configure_std_command(cmd: &mut std::process::Command) {
+    #[cfg(target_os = "linux")]
+    unsafe {
+        use std::os::unix::process::CommandExt;
+        cmd.pre_exec(|| {
+            unsafe { libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGKILL) };
+            Ok(())
+        });
+    }
+    #[cfg(not(target_os = "linux"))]
+    let _ = cmd;
+}
+
 pub fn adopt(child: &Child) {
     #[cfg(windows)]
     if let Some(handle) = child.raw_handle() {
         win::assign(handle as isize);
+    }
+    #[cfg(not(windows))]
+    let _ = child;
+}
+
+pub fn adopt_std(child: &std::process::Child) {
+    #[cfg(windows)]
+    {
+        use std::os::windows::io::AsRawHandle;
+        win::assign(child.as_raw_handle() as isize);
     }
     #[cfg(not(windows))]
     let _ = child;

@@ -2,7 +2,7 @@
 use super::NativeFlag;
 use libmpv2::mpv_node::MpvNode;
 use libmpv2::Mpv;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
 const METER_STATS: &str =
     "astats=metadata=1:reset=1:measure_perchannel=RMS_level+Peak_level:measure_overall=none";
@@ -52,14 +52,14 @@ pub(super) fn ensure_enabled(mpv: &Mpv) -> Result<bool, String> {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MusicMeterChannel {
     pub rms_db: f64,
     pub peak_db: f64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MusicMeterSnapshot {
     pub track_id: String,

@@ -45,7 +45,7 @@ export function CastModal({
   meta: Meta;
   tmdbKey: string | null;
   onOpenDetail?: (m: Meta) => void;
-  onPlay?: (m: Meta, episode?: PlayEpisode) => void;
+  onPlay?: (m: Meta, episode?: PlayEpisode, queueItemId?: string) => void;
   currentEpisode?: PlayEpisode | null;
   initialPerson?: { id: number; name: string };
 }) {
@@ -106,8 +106,8 @@ export function CastModal({
     setActiveGenre({ id: genreId, mediaType });
     setStack((s) => [...s, { kind: "genre", name, genreId, mediaType }]);
   };
-  const play = (m: Meta, episode?: PlayEpisode) => {
-    if (onPlay) onPlay(m, episode);
+  const play = (m: Meta, episode?: PlayEpisode, queueItemId?: string) => {
+    if (onPlay) onPlay(m, episode, queueItemId);
   };
 
   const requestExit = (m: Meta) => {

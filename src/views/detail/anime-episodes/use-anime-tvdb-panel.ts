@@ -132,6 +132,7 @@ export function useAnimeTvdbPanel(
     let cancelled = false;
     const lang = tvdbLangFromIso1(tmdbLanguageIso());
     const norm = (seasonType === "official" ? "aired" : seasonType) as TvdbOrderType;
+    const started = typeof performance !== "undefined" ? performance.now() : 0;
     const requested = fetchTvdbOrderBySeriesId(tvdbKey, seriesId, norm, lang, true);
     // Discover the other order tabs concurrently; the selected order can render
     // while those optional availability checks are still in flight.
@@ -147,6 +148,12 @@ export function useAnimeTvdbPanel(
     })().catch(() => []);
     const publish = (type: TvdbOrderType, order: TvdbOrder) => {
       if (cancelled) return;
+      if (typeof window !== "undefined")
+        window.__harborProfiler?.mark("season-selector:metadata-ready", {
+          elapsedMs: Math.round(performance.now() - started),
+          seasons: order.seasons.length,
+          order: type,
+        });
       setActiveType(type);
       setOrdering(order);
       void waitForTvdbSeasonNames(order).then((named) => {
@@ -397,7 +404,10 @@ export function useAnimeTvdbPanel(
         const ep: KitsuEpisode = match
           ? {
               ...match,
-              thumbnail: !match.thumbnail && img ? img : match.thumbnail,
+              thumbnail: !rowUnaired(bi) && img ? img : match.thumbnail,
+              ...(!rowUnaired(bi) && img && img !== match.thumbnail && match.thumbnail
+                ? { thumbnailFallback: match.thumbnail }
+                : {}),
               ...(title != null ? { title } : {}),
               ...(synopsis != null ? { synopsis } : {}),
               titleLanguage:

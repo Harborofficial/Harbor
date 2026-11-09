@@ -68,6 +68,8 @@ test("all resolutions use adaptive selection when ffmpeg is available", () => {
   assert.match(backend, /\("360p", true\) => FORMAT_LOW_MERGED/);
   assert.match(backend, /\("720p", true\) => FORMAT_HIGH_MERGED/);
   assert.doesNotMatch(stringConstant("FORMAT_HIGH"), /(?:^|\/)18(?:\/|$)/);
-  assert.doesNotMatch(backend, /--skip-download/);
+  const downloadArgs = /fn download_args\([\s\S]*?\n\}/.exec(backend)?.[0] ?? "";
+  assert.ok(downloadArgs, "download_args remains inspectable");
+  assert.doesNotMatch(downloadArgs, /--skip-download/);
   assert.match(backend, /after_move:HARBOR_TRAILER:/);
 });

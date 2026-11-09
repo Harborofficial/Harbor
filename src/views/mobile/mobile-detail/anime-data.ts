@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
 import { animeDetails } from "@/lib/providers/anime-detail";
+import { mergeAnimeDetailExtras } from "@/lib/providers/anime-detail-extras";
 import type { CastEntry, TmdbDetail } from "@/lib/providers/tmdb";
 import type { AnimeCharacter } from "@/lib/providers/anime-characters";
 import type { AnilistRelatedNode } from "@/lib/anilist/media-details";
@@ -46,7 +47,7 @@ export function useAnimeDetail(
         setLoading(false);
         const extras = await res.extrasPromise.catch(() => null);
         if (!alive || !extras) return;
-        setDetail((prev) => (prev ? mergeExtras(prev, extras) : prev));
+        setDetail((prev) => (prev ? mergeAnimeDetailExtras(prev, extras) : prev));
       })
       .catch(() => {
         if (alive) setLoading(false);
@@ -62,50 +63,6 @@ export function useAnimeDetail(
   );
 
   return { detail, canonicalId, loading };
-}
-
-type ExtrasPatch = {
-  logo?: string;
-  backdrop?: string;
-  poster?: string;
-  imdbId?: string | null;
-  gallery?: TmdbDetail["gallery"];
-  crew?: TmdbDetail["crew"];
-  directors?: TmdbDetail["directors"];
-  writers?: TmdbDetail["writers"];
-  creators?: TmdbDetail["creators"];
-  producers?: TmdbDetail["producers"];
-  composer?: TmdbDetail["composer"];
-  cinematography?: TmdbDetail["cinematography"];
-  editor?: TmdbDetail["editor"];
-  cast?: CastEntry[];
-  recommendations?: Meta[];
-  similar?: Meta[];
-};
-
-function mergeExtras(detail: TmdbDetail, extras: ExtrasPatch): TmdbDetail {
-  return {
-    ...detail,
-    logo: extras.logo ?? detail.logo,
-    backdrop: extras.backdrop ?? detail.backdrop,
-    poster: extras.poster ?? detail.poster,
-    imdbId: extras.imdbId ?? detail.imdbId,
-    gallery: extras.gallery ?? detail.gallery,
-    crew: extras.crew ?? detail.crew,
-    directors: extras.directors ?? detail.directors,
-    writers: extras.writers ?? detail.writers,
-    creators: extras.creators ?? detail.creators,
-    producers: extras.producers ?? detail.producers,
-    composer: extras.composer ?? detail.composer,
-    cinematography: extras.cinematography ?? detail.cinematography,
-    editor: extras.editor ?? detail.editor,
-    cast: extras.cast && extras.cast.length > 0 ? extras.cast : detail.cast,
-    recommendations:
-      extras.recommendations && extras.recommendations.length > 0
-        ? extras.recommendations
-        : detail.recommendations,
-    similar: extras.similar && extras.similar.length > 0 ? extras.similar : detail.similar,
-  };
 }
 
 const norm = (s: string) => s.trim().toLowerCase();

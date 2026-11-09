@@ -3,6 +3,7 @@ import { EpisodeReleaseCountdown } from "@/components/episode-release-countdown"
 import { Play } from "@/components/icons/play-filled";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { EpisodeDownloadButton } from "./episode-download-button";
+import { EpisodeReviewsDialog, EpisodeReviewsIconButton } from "./episode-reviews-dialog";
 import { useEffect, useRef, useState } from "react";
 import { EpisodeRatingBadge } from "./episode-rating-badge";
 import { Poster } from "@/components/poster";
@@ -45,12 +46,17 @@ export function EpisodeGridCard({
   const { settings } = useSettings();
   const cardMeta = g.meta ?? meta;
   const [imgIdx, setImgIdx] = useState(0);
-  useEffect(() => setImgIdx(0), [g.key]);
+  // Enrichment can replace a broken addon still with a working provider still
+  // for the same episode. Retry the new primary instead of staying on fallback.
+  const stillsKey = g.stills.join("\n");
+  useEffect(() => setImgIdx(0), [g.key, stillsKey]);
   const [preview, setPreview] = useState(false);
+  const [reviewsOpen, setReviewsOpen] = useState(false);
   const timer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  const still = g.stills[imgIdx];
+  const still = g.stills[Math.min(imgIdx, Math.max(0, g.stills.length - 1))];
+  const airDate = formatAirDate(g.airDate);
   const watched = progress.watched;
   const partial = !watched && progress.ratio > 0.01;
   const minsLeft =
@@ -98,7 +104,7 @@ export function EpisodeGridCard({
               seed={g.key}
               ratio="landscape"
               lazy
-              onError={() => setImgIdx((i) => i + 1)}
+              onError={() => setImgIdx((i) => Math.min(i + 1, Math.max(0, g.stills.length - 1)))}
             />
           </div>
           <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink">
@@ -124,7 +130,7 @@ export function EpisodeGridCard({
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-0.5 px-0.5">
+        <div className={`flex flex-col gap-0.5 px-0.5 ${g.reviews ? "pe-8" : ""}`}>
           <span className="flex items-center gap-1.5">
             <span
               className={`line-clamp-2 text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}
@@ -136,7 +142,7 @@ export function EpisodeGridCard({
           <span className="text-[11.5px] text-ink-subtle">
             {bidiIsolate(g.seasonLabel ? `${g.seasonLabel} · E${g.number}` : `E${g.number}`)}
             {g.runtime ? ` · ${bidiIsolate(t("{n} min", { n: g.runtime }))}` : ""}
-            {formatAirDate(g.airDate) ? ` · ${bidiIsolate(formatAirDate(g.airDate))}` : ""}
+            {airDate ? ` · ${bidiIsolate(airDate)}` : ""}
           </span>
           {settings.showEpisodeDescription && g.overview && (
             <p
@@ -149,6 +155,22 @@ export function EpisodeGridCard({
           <EpisodeReleaseCountdown date={g.airDate} className="text-[11.5px]" />
         </div>
       </button>
+      {g.reviews && (
+        // Laid over the end of the title row, after the play button in focus order, so the card
+        // keeps its single play button and no button sits inside another.
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex flex-col gap-2.5">
+          <div className="aspect-video" />
+          <div className="flex justify-end">
+            <span className="pointer-events-auto">
+              <EpisodeReviewsIconButton
+                onClick={() => setReviewsOpen(true)}
+                compact
+                className="shrink-0"
+              />
+            </span>
+          </div>
+        </div>
+      )}
       {preview && !spoilered && (
         <EpisodePreview
           meta={cardMeta}
@@ -158,7 +180,25 @@ export function EpisodeGridCard({
           minsLeft={minsLeft}
           ratio={progress.ratio}
           onContext={ctx}
+          onReviews={
+            g.reviews
+              ? () => {
+                  leave();
+                  setReviewsOpen(true);
+                }
+              : undefined
+          }
           t={t}
+        />
+      )}
+      {reviewsOpen && g.reviews && (
+        <EpisodeReviewsDialog
+          seriesImdbId={g.reviews.imdbId}
+          season={g.reviews.season}
+          episode={g.reviews.episode}
+          episodeTitle={g.title}
+          showTitle={meta.name}
+          onClose={() => setReviewsOpen(false)}
         />
       )}
     </div>
@@ -206,6 +246,7 @@ export function EpisodePreview({
   minsLeft,
   ratio,
   onContext,
+  onReviews,
   t,
 }: {
   meta: Meta;
@@ -215,6 +256,7 @@ export function EpisodePreview({
   minsLeft: number;
   ratio: number;
   onContext: (e: React.MouseEvent) => void;
+  onReviews?: () => void;
   t: T;
 }) {
   const { openEpisodeDetail } = useView();
@@ -251,7 +293,14 @@ export function EpisodePreview({
         <span className="truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
           {meta.name}
         </span>
-        <h4 className="line-clamp-1 text-[14px] font-semibold leading-snug text-ink">{g.title}</h4>
+        <div className="flex items-center gap-1">
+          <h4 className="line-clamp-1 min-w-0 flex-1 text-[14px] font-semibold leading-snug text-ink">
+            {g.title}
+          </h4>
+          {onReviews && (
+            <EpisodeReviewsIconButton onClick={onReviews} compact className="shrink-0" />
+          )}
+        </div>
         <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
           <span className="font-semibold text-ink-muted">
             {bidiIsolate(g.seasonLabel ? `${g.seasonLabel} · E${g.number}` : `E${g.number}`)}

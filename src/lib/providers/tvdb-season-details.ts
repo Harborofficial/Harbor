@@ -4,6 +4,7 @@ import {
   tvdbLangFromIso1,
   tvdbSeasons,
   tvdbSeasonExtended,
+  tvdbSeriesSeasonArtwork,
   tvdbSeasonText,
   type TvdbSeasonInfo,
 } from "./tvdb";
@@ -77,10 +78,17 @@ export async function fetchTvdbSeasonArtwork(
   season: TvdbSeasonInfo,
   lang: string,
 ): Promise<TvdbSeasonArtwork> {
-  // /seasons/{id}/extended is not available through the proxy. The series
-  // extended payload already includes the season poster.
-  if (!apiKey.trim() || season.id == null) return { poster: season.image };
-  const extended = await tvdbSeasonExtended(apiKey, season.id).catch(() => null);
+  if (season.id == null) return { poster: pickSeasonPoster({ baseImage: season.image }) };
+  let extended: Awaited<ReturnType<typeof tvdbSeasonExtended>> = null;
+  if (apiKey.trim()) {
+    extended = await tvdbSeasonExtended(apiKey, season.id).catch(() => null);
+  } else if (season.seriesId) {
+    // The proxy blocks /seasons/* but the supported series endpoint includes
+    // real season posters; its default season image can be a landscape background.
+    extended = {
+      artwork: await tvdbSeriesSeasonArtwork("", season.seriesId, season.id).catch(() => []),
+    };
+  }
   const background = [...(extended?.artwork ?? [])]
     // Landscape artwork keeps posters, square icons, and wide banners out of the backdrop.
     .filter((art) => {
@@ -129,15 +137,16 @@ export function createSeasonArtworkLoader(
   let running = 0;
   let stopped = false;
   const resolve = async (season: TvdbSeasonInfo): Promise<TvdbSeasonArtwork> => {
+    const basePoster = pickSeasonPoster({ baseImage: season.image });
     let artwork = originals.get(season.number);
     if (!artwork) {
       artwork = await fetchTvdbSeasonArtwork(apiKey, season, lang).catch(() => ({
-        poster: season.image,
+        poster: basePoster,
       }));
       originals.set(season.number, artwork);
     }
     const failed = rejected.get(season.number) ?? new Set<string>();
-    let poster = [artwork.poster, season.image].find((url) => url && !failed.has(url));
+    let poster = [artwork.poster, basePoster].find((url) => url && !failed.has(url));
     if (!poster && !stopped)
       poster = await options
         .loadFallback?.(season.number, failed, controller.signal)

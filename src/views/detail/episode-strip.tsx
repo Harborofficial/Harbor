@@ -18,7 +18,9 @@ import { useT } from "@/lib/i18n";
 import { EpisodeGrid } from "./episode-grid";
 import type { GridEpisode } from "./episode-grid-types";
 import { EpisodeDownloadButton } from "./episode-download-button";
+import { EpisodeReviewsDialog, EpisodeReviewsIconButton } from "./episode-reviews-dialog";
 import { isUpcomingDate } from "./helpers";
+import { episodeReviewsTarget } from "@/lib/episode-reviews";
 
 type Progress = { ratio: number; watched: boolean; startedAt: number };
 
@@ -46,6 +48,7 @@ export function EpisodeStrip({
   const { settings } = useSettings();
   const playLocalAware = useLocalAwareSeriesPlay();
   const t = useT();
+  const reviewsImdbId = seriesImdbId ?? (/^tt\d+$/.test(meta.id) ? meta.id : null);
 
   const gridEpisodes = useMemo<GridEpisode[]>(
     () =>
@@ -68,6 +71,7 @@ export function EpisodeStrip({
           rating: ep.imdbRating ?? ep.voteAverage ?? undefined,
           ratingIsImdb: ep.imdbRating != null,
           upcoming: isUpcomingDate(ep.airDate),
+          reviews: episodeReviewsTarget(reviewsImdbId, ep.seasonNumber, ep.episodeNumber),
           play: (opts) =>
             playLocalAware({
               meta,
@@ -98,6 +102,7 @@ export function EpisodeStrip({
       settings.hdEpisodeImages,
       t,
       seriesImdbId,
+      reviewsImdbId,
       cinemetaVideos,
     ],
   );
@@ -171,6 +176,8 @@ function EpisodeStripCard({
   const popupRef = useRef<HTMLDivElement>(null);
   const previewTimer = useRef<number | undefined>(undefined);
   const [preview, setPreview] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [reviewsOpen, setReviewsOpen] = useState(false);
+  const reviewsImdbId = seriesImdbId ?? (/^tt\d+$/.test(meta.id) ? meta.id : null);
   const spoilered = !!spoiler && (spoiler.thumb || spoiler.title || spoiler.desc);
   const cancelPreviewTimer = () => window.clearTimeout(previewTimer.current);
   const closePreview = () => {
@@ -217,8 +224,10 @@ function EpisodeStripCard({
 
   const [imgIdx, setImgIdx] = useState(0);
   useEffect(() => {
+    // Provider stills can arrive after the first render; retry the new source
+    // instead of keeping the fallback selected for this episode.
     setImgIdx(0);
-  }, [ep.id]);
+  }, [ep.id, ep.stillPath, ep.stillUrl, thumbnail, settings.hdEpisodeImages]);
 
   const still = useMemo(() => {
     const tmdbSize = settings.hdEpisodeImages ? "original" : "w300";
@@ -338,6 +347,13 @@ function EpisodeStripCard({
             }}
             size={30}
           />
+          {reviewsImdbId && (
+            <EpisodeReviewsIconButton
+              onClick={() => setReviewsOpen(true)}
+              compact
+              className="shrink-0"
+            />
+          )}
           <HoverTooltip label={t("Episode details")} align="center" className="shrink-0">
             <button
               type="button"
@@ -386,11 +402,29 @@ function EpisodeStripCard({
               onContext={(e) =>
                 onContextMenu?.(e, ep.seasonNumber, ep.episodeNumber, progress.watched)
               }
+              onReviews={
+                reviewsImdbId
+                  ? () => {
+                      closePreview();
+                      setReviewsOpen(true);
+                    }
+                  : undefined
+              }
               t={t}
             />
           </div>,
           document.body,
         )}
+      {reviewsOpen && reviewsImdbId && (
+        <EpisodeReviewsDialog
+          seriesImdbId={reviewsImdbId}
+          season={ep.seasonNumber}
+          episode={ep.episodeNumber}
+          episodeTitle={ep.name || undefined}
+          showTitle={meta.name}
+          onClose={() => setReviewsOpen(false)}
+        />
+      )}
     </div>
   );
 }

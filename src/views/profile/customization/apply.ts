@@ -1,9 +1,18 @@
 import { useEffect } from "react";
+import {
+  parseProfileTheme,
+  profileThemeScope,
+  stripProfileTheme,
+  type ProfileTheme,
+  type ProfileThemeScope,
+} from "@/lib/profile-theme";
 import type { ProfileSummary } from "../profile-types";
 import { CANVAS_DEFAULT, validColor, validFont, validImage } from "./customization-types";
 
 export type ResolvedCustom = {
   allowed: boolean;
+  theme: ProfileTheme;
+  themeScope: ProfileThemeScope;
   font: string;
   fontHref: string;
   background: string;
@@ -33,11 +42,17 @@ export function resolveCustomization(s: ProfileSummary): ResolvedCustom {
   } else if (bgColor) {
     background = bgColor;
   }
+  // A profile theme is colour-only, so it stays visible even when the owner keeps the rest
+  // of their customization private; the marker itself carries no user CSS.
+  const theme = parseProfileTheme(s.customCss);
+  const themeScope = profileThemeScope(theme);
   const html = s.customHtml || "";
-  const css = s.customCss || "";
+  const css = stripProfileTheme(s.customCss);
   const hasCanvas = allowed && (html.trim().length > 0 || css.trim().length > 0);
   return {
     allowed,
+    theme,
+    themeScope,
     font,
     fontHref,
     background,

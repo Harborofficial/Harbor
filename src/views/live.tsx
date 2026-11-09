@@ -26,8 +26,7 @@ import { useEpg, useNowTick } from "./live/hooks/use-epg";
 import { useXtreamEpgFallback } from "./live/hooks/use-xtream-epg-fallback";
 import { useIptvPlaylist } from "./live/hooks/use-iptv-playlist";
 import { MultiviewView } from "./multiview";
-import { ViewModeToggle, type ViewMode } from "./live/view-mode-toggle";
-import { isWindowsDesktop } from "@/lib/platform";
+import { supportsMultiview, ViewModeToggle, type ViewMode } from "./live/view-mode-toggle";
 
 const ACTIVE_KEY = "harbor.iptv.active";
 const MODE_KEY = "harbor.iptv.viewMode";
@@ -53,7 +52,7 @@ function readMode(): ViewMode {
     const v = localStorage.getItem(MODE_KEY);
     if (v === "grid") return "grid";
     if (v === "guide") return "guide";
-    if (v === "multiview" && isWindowsDesktop()) return "multiview";
+    if (v === "multiview" && supportsMultiview()) return "multiview";
     return "home";
   } catch {
     return "home";

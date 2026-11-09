@@ -111,7 +111,11 @@ let warming: Promise<unknown> | null = null;
  * it left a slow one too little of its budget and made the first run report nothing while the
  * second answered. A failed warm is forgotten so the next caller tries again. */
 export function warmBridge(): Promise<unknown> {
-  warming ??= invoke("capstan_ping").catch(() => {
+  warming ??= invoke("native_module_call", {
+    module: "extensions",
+    command: "capstan_ping",
+    args: {},
+  }).catch(() => {
     warming = null;
     return null;
   });
@@ -135,7 +139,11 @@ export async function bridgeProviders(): Promise<BridgeProvider[]> {
   if (hit && Date.now() - hit.at < PROVIDER_TTL_MS) return hit.list;
   if (providerInflight) return providerInflight;
   providerInflight = (async () => {
-    const raw = await invoke("capstan_providers");
+    const raw = await invoke("native_module_call", {
+      module: "extensions",
+      command: "capstan_providers",
+      args: {},
+    });
     const found = list<BridgeProvider>(raw, "providers");
     providerCache = { at: Date.now(), list: found };
     return found;
@@ -155,7 +163,11 @@ export async function bridgeSearch(
   quick: boolean,
   page = 1,
 ): Promise<BridgeResults<BridgeSearchItem>> {
-  const raw = await invoke("capstan_search", { providerId, query, quick, page });
+  const raw = await invoke("native_module_call", {
+    module: "extensions",
+    command: "capstan_search",
+    args: { providerId, query, quick, page },
+  });
   return { items: list<BridgeSearchItem>(raw, "results"), note: note(raw) };
 }
 
@@ -163,14 +175,22 @@ export async function bridgeLoad(
   providerId: string,
   url: string,
 ): Promise<{ media: BridgeMedia | null; note: BridgeNote }> {
-  const raw = await invoke("capstan_load", { providerId, url });
+  const raw = await invoke("native_module_call", {
+    module: "extensions",
+    command: "capstan_load",
+    args: { providerId, url },
+  });
   const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const found = o.found === true && !!o.result && typeof o.result === "object";
   return { media: found ? (o.result as BridgeMedia) : null, note: note(raw) };
 }
 
 export async function bridgeLoadLinks(providerId: string, data: string): Promise<BridgeLinkSet> {
-  const raw = await invoke("capstan_load_links", { providerId, data });
+  const raw = await invoke("native_module_call", {
+    module: "extensions",
+    command: "capstan_load_links",
+    args: { providerId, data },
+  });
   const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   return {
     success: o.success === true,
@@ -189,7 +209,11 @@ function catalogueRow(value: unknown): BridgeCatalogueRow | null {
 }
 
 export async function bridgeCatalogue(providerId: string): Promise<BridgeCatalogueRow[]> {
-  const raw = await invoke("capstan_catalogue", { providerId });
+  const raw = await invoke("native_module_call", {
+    module: "extensions",
+    command: "capstan_catalogue",
+    args: { providerId },
+  });
   const out: BridgeCatalogueRow[] = [];
   for (const entry of list<unknown>(raw, "rows")) {
     const made = catalogueRow(entry);
@@ -205,7 +229,11 @@ export async function bridgeCataloguePage(
   row: string,
   page: number,
 ): Promise<BridgeResults<BridgeSearchItem> & { hasNext: boolean }> {
-  const raw = await invoke("capstan_catalogue_page", { providerId, row, page });
+  const raw = await invoke("native_module_call", {
+    module: "extensions",
+    command: "capstan_catalogue_page",
+    args: { providerId, row, page },
+  });
   const items: BridgeSearchItem[] = [];
   for (const section of list<unknown>(raw, "sections")) {
     items.push(...list<BridgeSearchItem>(section, "items"));

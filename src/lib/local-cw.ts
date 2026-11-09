@@ -23,13 +23,31 @@ export type LocalCwEntry = {
   t: number;
 };
 
+const CLOUD_ID = /^(?:tt\d|kitsu:|mal:|anilist:|anidb:|tmdb:)/;
+
+/**
+ * Entries written before the source field existed are classified the same way
+ * new playback entries are, instead of defaulting every old item to "local".
+ */
+export function localCwSource(entry: Pick<LocalCwEntry, "id" | "source">): "library" | "local" {
+  return entry.source ?? (CLOUD_ID.test(entry.id) ? "library" : "local");
+}
+
+export function localCwSourceEnabled(
+  entry: Pick<LocalCwEntry, "id" | "source">,
+  sources: { library: boolean; local: boolean },
+): boolean {
+  return localCwSource(entry) === "library" ? sources.library : sources.local;
+}
+
 const subs = new Set<() => void>();
 let version = 0;
 const cache = new Map<string, Record<string, LocalCwEntry>>();
 
 function nuvioAccountId(): string {
   try {
-    const raw = localStorage.getItem("harbor.nuvio.state.v1") ?? localStorage.getItem("harbor.nuvio.state");
+    const raw =
+      localStorage.getItem("harbor.nuvio.state.v1") ?? localStorage.getItem("harbor.nuvio.state");
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed?.session?.user?.id) return String(parsed.session.user.id);
@@ -113,14 +131,20 @@ function readAll(key: string): Record<string, LocalCwEntry> {
 }
 
 function writeAll(key: string, all: Record<string, LocalCwEntry>, acknowledged = false): void {
+  const previous = cache.get(key);
   cache.set(key, all);
   try {
     localStorage.setItem(key, JSON.stringify(all));
   } catch (error) {
-    if (acknowledged)
+    if (acknowledged) {
+      // An acknowledged change whose write failed must not leave the memory
+      // cache ahead of storage: callers retry against the previous snapshot.
+      if (previous) cache.set(key, previous);
+      else cache.delete(key);
       throw new Error("Could not save the change. Check available storage and try again.", {
         cause: error,
       });
+    }
   }
 }
 
@@ -129,20 +153,28 @@ function emit(): void {
   for (const fn of subs) fn();
 }
 
-function saveEntry(key: string, entry: LocalCwEntry): void {
-  const all = { ...readAll(key) };
+function applyEntry(all: Record<string, LocalCwEntry>, entry: LocalCwEntry): boolean {
   const finished = entry.durationMs > 0 && entry.positionMs / entry.durationMs >= FINISHED_RATIO;
   if (finished && entry.type === "movie") {
-    if (!(entry.id in all)) return;
+    if (!(entry.id in all)) return false;
     delete all[entry.id];
-  } else {
-    all[entry.id] = entry;
-    const ids = Object.keys(all);
-    if (ids.length > MAX) {
-      ids.sort((a, b) => all[a].t - all[b].t);
-      for (const id of ids.slice(0, ids.length - MAX)) delete all[id];
-    }
+    return true;
   }
+  all[entry.id] = entry;
+  return true;
+}
+
+function capEntries(all: Record<string, LocalCwEntry>): void {
+  const ids = Object.keys(all);
+  if (ids.length <= MAX) return;
+  ids.sort((a, b) => all[a].t - all[b].t);
+  for (const id of ids.slice(0, ids.length - MAX)) delete all[id];
+}
+
+function saveEntry(key: string, entry: LocalCwEntry): void {
+  const all = { ...readAll(key) };
+  if (!applyEntry(all, entry)) return;
+  capEntries(all);
   writeAll(key, all);
 }
 
@@ -160,11 +192,42 @@ export function saveLocalCw(entry: LocalCwEntry, ownerId?: string, shared = true
   emit();
 }
 
-export function listLocalCw(privateOnly = !!privateCwProfileId(), ownerId?: string): LocalCwEntry[] {
+/** One storage write and one notification for a cloud commit or progress pull. */
+export function saveLocalCwBatch(entries: LocalCwEntry[], ownerId?: string, shared = true): void {
+  const valid = entries.filter(
+    (entry) => entry.id && (entry.type === "movie" || entry.type === "series"),
+  );
+  if (valid.length === 0) return;
+  const targetKeys: string[] = [];
+  if (isNuvioMode()) {
+    targetKeys.push(storeKey(false, ownerId));
+  } else {
+    if (ownerId) targetKeys.push(storeKey(true, ownerId));
+    if (shared) targetKeys.push(storeKey(false, ownerId));
+  }
+  let changed = false;
+  for (const key of new Set(targetKeys)) {
+    const all = { ...readAll(key) };
+    let touched = false;
+    for (const entry of valid) touched = applyEntry(all, entry) || touched;
+    if (!touched) continue;
+    capEntries(all);
+    writeAll(key, all);
+    changed = true;
+  }
+  if (changed) emit();
+}
+
+export function listLocalCw(
+  privateOnly = !!privateCwProfileId(),
+  ownerId?: string,
+): LocalCwEntry[] {
   const isNuvio = isNuvioMode();
   const entries = Object.values(readAll(storeKey(privateOnly, ownerId)));
   if (!isNuvio) {
-    return entries.filter((e) => !(e.id && (e as any).external === "nuvio")).sort((a, b) => b.t - a.t);
+    return entries
+      .filter((e) => !(e.id && (e as any).external === "nuvio"))
+      .sort((a, b) => b.t - a.t);
   }
   return entries.sort((a, b) => b.t - a.t);
 }
@@ -200,6 +263,35 @@ export function clearLocalCw(
     const next = { ...all };
     delete next[id];
     writeAll(key, next, acknowledged);
+    changed = true;
+  }
+  if (changed) emit();
+}
+
+/** Clear many continue-watching rows with one write per store and one notification. */
+export function clearLocalCwBatch(ids: string[], ownerId?: string): void {
+  const valid = new Set(ids.filter((id) => !!id));
+  if (valid.size === 0) return;
+  const targetKeys = new Set<string>();
+  if (ownerId) {
+    targetKeys.add(storeKey(true, ownerId));
+    targetKeys.add(storeKey(false, ownerId));
+  } else {
+    targetKeys.add(storeKey(!!privateCwProfileId()));
+  }
+  targetKeys.add(LEGACY_KEY);
+  let changed = false;
+  for (const key of targetKeys) {
+    const all = readAll(key);
+    const next = { ...all };
+    let touched = false;
+    for (const id of valid) {
+      if (!(id in next)) continue;
+      delete next[id];
+      touched = true;
+    }
+    if (!touched) continue;
+    writeAll(key, next);
     changed = true;
   }
   if (changed) emit();

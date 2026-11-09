@@ -7,7 +7,8 @@ import {
   tvdbSeriesByRemote,
   type TvdbEpisode,
 } from "./tvdb";
-import { isStaleTvdbOrder, readOrderCache, writeOrderCache } from "./tvdb-order-cache";
+import { loadOrderCache, persistOrderCache } from "./tvdb-order-cache";
+import { mediaCacheGeneration, onMediaCacheClear } from "@/lib/media-cache";
 import { firstRealEpisodeText } from "./episode-placeholder";
 import { episodeTextLanguage } from "@/lib/episode-text-language";
 
@@ -21,6 +22,7 @@ export type OrderedEpisode = Episode & {
 export type TvdbOrder = {
   seasons: Season[];
   seasonNamesResolved?: boolean;
+  textComplete?: boolean;
   bySeason: Map<number, OrderedEpisode[]>;
   absByEpId: Map<number, number>;
   imageByAbs: Map<number, string>;
@@ -50,12 +52,8 @@ export function seasonDateRange(eps: Episode[]): { from?: string; to?: string } 
   return { from, to };
 }
 
-const orderCache = new Map<string, { t: number; order: TvdbOrder }>();
-// A session can outlive a provider's data correction (e.g. a "TBA" placeholder
-// becomes the real name right after an episode airs), so the in-memory order
-// must expire instead of pinning stale titles until the next restart.
-const ORDER_CACHE_TTL_MS = 10 * 60 * 1000;
 const orderInflight = new Map<string, Promise<TvdbOrder | null>>();
+onMediaCacheClear(() => orderInflight.clear());
 const nameInflight = new WeakMap<TvdbOrder, Promise<TvdbOrder>>();
 
 /** The core order is immediately usable; callers can apply names when ready. */
@@ -84,33 +82,35 @@ export async function fetchTvdbOrderBySeriesId(
   allowProxyNames = false,
 ): Promise<TvdbOrder | null> {
   if (!seriesId) return null;
+  const started = typeof performance !== "undefined" ? performance.now() : 0;
   const mode = apiKey.trim() ? "direct" : "proxy";
   const typeKey = `${mode}:${seasonType}${lang ? `:${lang}` : ""}`;
-  const cacheKey = `${seriesId}:${typeKey}`;
-  const cached = orderCache.get(cacheKey);
-  if (
-    cached &&
-    Date.now() - cached.t < ORDER_CACHE_TTL_MS &&
-    !isStaleTvdbOrder(cached.order.bySeason)
-  ) {
-    return cached.order;
-  }
-  if (cached) orderCache.delete(cacheKey);
+  const cacheKey = `${apiKey}:${seriesId}:${typeKey}:${mode === "direct" || allowProxyNames}`;
   const running = orderInflight.get(cacheKey);
   if (running) return running;
   const load = (async () => {
-    const persisted = readOrderCache(seriesId, typeKey);
-    const result =
-      persisted ??
-      (await build(apiKey, seriesId, seasonType, lang, allowProxyNames).catch(() => null));
+    const generation = mediaCacheGeneration();
+    const cached = await loadOrderCache(
+      apiKey,
+      seriesId,
+      typeKey,
+      () => build(apiKey, seriesId, seasonType, lang, allowProxyNames),
+      allowProxyNames,
+    );
+    const result = cached.value;
     if (!result) return null;
-    orderCache.set(cacheKey, { t: Date.now(), order: result });
-    if (!persisted) writeOrderCache(seriesId, typeKey, result);
-    if (!result.seasonNamesResolved && (mode === "direct" || allowProxyNames)) {
+    if (typeof window !== "undefined")
+      window.__harborProfiler?.mark("tvdb-order:metadata-ready", {
+        elapsedMs: Math.round(performance.now() - started),
+        seasons: result.seasons.length,
+        order: seasonType,
+      });
+    const enrich = async (result: TvdbOrder, storedAt = Date.now()): Promise<TvdbOrder> => {
+      if (result.seasonNamesResolved || !(mode === "direct" || allowProxyNames)) return result;
       const nameType =
         seasonType === "aired" || seasonType === "official" ? "official" : seasonType;
-      const enrichment = tvdbSeasonNames(apiKey, seriesId, nameType, lang)
-        .then((names) => {
+      return tvdbSeasonNames(apiKey, seriesId, nameType, lang)
+        .then(async (names) => {
           const enriched: TvdbOrder = {
             ...result,
             seasonNamesResolved: true,
@@ -129,20 +129,30 @@ export async function fetchTvdbOrderBySeriesId(
               };
             }),
           };
-          orderCache.set(cacheKey, { t: Date.now(), order: enriched });
-          writeOrderCache(seriesId, typeKey, enriched);
+          await persistOrderCache(
+            apiKey,
+            seriesId,
+            typeKey,
+            enriched,
+            storedAt,
+            generation,
+            allowProxyNames,
+          );
           return enriched;
         })
         .catch(() => result);
-      nameInflight.set(result, enrichment);
-    }
+    };
+    const enrichment = cached.refresh
+      ? cached.refresh.then((fresh) => (fresh ? enrich(fresh) : result))
+      : enrich(result, cached.storedAt);
+    nameInflight.set(result, enrichment);
     return result;
   })();
   orderInflight.set(cacheKey, load);
   try {
     return await load;
   } finally {
-    orderInflight.delete(cacheKey);
+    if (orderInflight.get(cacheKey) === load) orderInflight.delete(cacheKey);
   }
 }
 
@@ -163,14 +173,20 @@ async function build(
         : seasonType;
   const nameTypeSlug =
     seasonType === "aired" || joinedClean || rawAbsolute ? "official" : seasonType;
-  const [defaultEps, seasonInfos] = await Promise.all([
-    tvdbEpisodesByType(apiKey, seriesId, "default"),
+  const defaults = tvdbEpisodesByType(apiKey, seriesId, "default");
+  const requestedLang = lang && lang !== "eng" ? lang : undefined;
+  const [defaultEps, seasonInfos, altEps, transAlt, transEn] = await Promise.all([
+    defaults,
     joinedClean || rawAbsolute
       ? Promise.resolve(new Map())
       : tvdbSeasons(apiKey, seriesId, nameTypeSlug, lang),
+    slug === "default" ? defaults : tvdbEpisodesByType(apiKey, seriesId, slug),
+    requestedLang
+      ? tvdbEpisodesByType(apiKey, seriesId, slug, requestedLang).catch(() => [])
+      : Promise.resolve<TvdbEpisode[]>([]),
+    tvdbEpisodesByType(apiKey, seriesId, slug, "eng").catch(() => []),
   ]);
   const names = tvdbBaseSeasonNames(seasonInfos);
-  const altEps = slug === "default" ? defaultEps : await tvdbEpisodesByType(apiKey, seriesId, slug);
   if (altEps.length === 0) return null;
   // Translations in the requested language. When a translation is missing, TVDB falls back to
   // the original (e.g. Japanese for anime) name, which we keep so users see text in their
@@ -178,13 +194,6 @@ async function build(
   // the language-less default fetch returns the series' original language (Japanese for anime),
   // so without this English users would see original-language names — and is carried alongside
   // as nameEn/overviewEn for consumers that need an English fallback when no localized text exists.
-  const requestedLang = lang && lang !== "eng" ? lang : undefined;
-  const [transAlt, transEn] = await Promise.all([
-    requestedLang
-      ? tvdbEpisodesByType(apiKey, seriesId, slug, requestedLang).catch(() => [])
-      : Promise.resolve<TvdbEpisode[]>([]),
-    tvdbEpisodesByType(apiKey, seriesId, slug, "eng").catch(() => []),
-  ]);
   const transById = new Map(transAlt.map((e) => [e.id, e] as const));
   const transEnById = new Map(transEn.map((e) => [e.id, e] as const));
 
@@ -278,7 +287,7 @@ async function build(
   const absByEpId = new Map<number, number>();
   const imageByAbs = new Map<number, string>();
   for (const e of altEps) {
-    if (e.absoluteNumber != null) {
+    if (e.absoluteNumber != null && Number.isFinite(e.absoluteNumber)) {
       absByEpId.set(e.id, e.absoluteNumber);
       if (e.image && Number.isInteger(e.absoluteNumber) && e.absoluteNumber > 0) {
         imageByAbs.set(e.absoluteNumber, e.image);
@@ -310,6 +319,7 @@ async function build(
     });
   return {
     seasons,
+    textComplete: transEn.length > 0 && (!requestedLang || transAlt.length > 0),
     bySeason,
     absByEpId,
     imageByAbs,

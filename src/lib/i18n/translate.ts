@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import en from "./locales/en";
 import { getUiLanguage, getUiRegion, useUiLanguage, useUiRegion } from "./store";
 import { noteNotify } from "@/lib/render-cause";
@@ -159,8 +159,16 @@ export function sourceTranslationKey(value: string): string {
 export function useT(): (key: string, vars?: Vars) => string {
   const lang = useUiLanguage();
   const region = useUiRegion();
-  useSyncExternalStore(subscribeUiCatalog, uiCatalogVersion, uiCatalogVersion);
-  return (key: string, vars?: Vars) => interpolate(resolve(lang, key, vars, region), vars);
+  const catalogVersion = useSyncExternalStore(
+    subscribeUiCatalog,
+    uiCatalogVersion,
+    uiCatalogVersion,
+  );
+  return useMemo(() => {
+    // A newly loaded catalog must invalidate text memoized by callers as well.
+    void catalogVersion;
+    return (key: string, vars?: Vars) => interpolate(resolve(lang, key, vars, region), vars);
+  }, [lang, region, catalogVersion]);
 }
 
 export { useUiLanguage, isRtl, LANGUAGES };

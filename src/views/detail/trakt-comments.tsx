@@ -28,6 +28,12 @@ import { getSession, subscribeSession } from "@/lib/trakt/session";
 import { useView } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
 import { openUrl } from "@/lib/window";
+import {
+  ReviewTranslateBar,
+  ReviewTranslateButton,
+  useReviewTranslator,
+  type ReviewTranslator,
+} from "./review-translation";
 
 type Translate = (key: string, vars?: Record<string, string | number>) => string;
 
@@ -160,11 +166,13 @@ function CommentCard({
   connected,
   username,
   onDelete,
+  tr,
 }: {
   comment: TraktComment;
   connected: boolean;
   username: string | null;
   onDelete: (id: number) => void;
+  tr: ReviewTranslator;
 }) {
   const t = useT();
   const [imgError, setImgError] = useState(false);
@@ -226,6 +234,7 @@ function CommentCard({
             {comment.user.name ?? comment.user.username}
           </span>
           <span className="text-[11px] text-ink-muted">{timeAgo(comment.createdAt, t)}</span>
+          {revealed && <ReviewTranslateButton tr={tr} text={comment.comment} />}
           {comment.userRating != null && (
             <span className="ms-auto">
               <StarRow value={comment.userRating} interactive={false} />
@@ -249,7 +258,7 @@ function CommentCard({
             className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-ink"
             dir="auto"
           >
-            {comment.comment}
+            {tr.display(comment.comment)}
           </p>
         )}
         <div className="mt-2 flex items-center gap-3 text-[12px] text-ink-muted">
@@ -373,6 +382,7 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
   const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<Sort>("likes");
+  const tr = useReviewTranslator();
   const [showSort, setShowSort] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [myComments, setMyComments] = useState(false);
@@ -818,6 +828,14 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
 
         {target && !loading && (
           <div className="flex flex-col gap-3">
+            <div className="flex justify-end">
+              <ReviewTranslateBar
+                tr={tr}
+                texts={(myComments ? comments.filter((c) => c.user.username === username) : comments)
+                  .filter((c) => !c.spoiler)
+                  .map((c) => c.comment)}
+              />
+            </div>
             {(myComments ? comments.filter((c) => c.user.username === username) : comments).map(
               (c) => (
                 <CommentCard
@@ -826,6 +844,7 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
                   connected={connected}
                   username={username}
                   onDelete={handleDelete}
+                  tr={tr}
                 />
               ),
             )}

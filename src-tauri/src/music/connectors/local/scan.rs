@@ -49,6 +49,7 @@ fn index(app: &AppHandle, root: &Path) -> Result<u32, String> {
 
     let mut seen = HashSet::with_capacity(total);
     let mut pending = Vec::with_capacity(BATCH);
+    let mut changed = Vec::with_capacity(BATCH);
     let mut scanned = 0usize;
     let mut indexed = 0usize;
     let mut reported = Instant::now();
@@ -60,14 +61,10 @@ fn index(app: &AppHandle, root: &Path) -> Result<u32, String> {
             .map(|entry| entry.size == file.size && entry.mtime == file.mtime)
             .unwrap_or(false);
         if !unchanged {
-            if let Ok(track) = tags::read(Path::new(&file.path), &covers) {
-                pending.push((file, track));
-                indexed += 1;
-            }
+            changed.push(file);
         }
-        if pending.len() >= BATCH {
-            store::write(database, &pending)?;
-            pending.clear();
+        if changed.len() >= BATCH {
+            index_changed_batch(database, &covers, &mut changed, &mut pending, &mut indexed)?;
         }
         if reported.elapsed() >= PROGRESS_INTERVAL {
             reported = Instant::now();
@@ -82,6 +79,9 @@ fn index(app: &AppHandle, root: &Path) -> Result<u32, String> {
                 }),
             );
         }
+    }
+    if !changed.is_empty() {
+        index_changed_batch(database, &covers, &mut changed, &mut pending, &mut indexed)?;
     }
     if !pending.is_empty() {
         store::write(database, &pending)?;
@@ -102,6 +102,28 @@ fn index(app: &AppHandle, root: &Path) -> Result<u32, String> {
         }),
     );
     Ok(tracks)
+}
+
+fn index_changed_batch(
+    database: &crate::music::db::MusicDb,
+    covers: &Path,
+    changed: &mut Vec<LocalFile>,
+    pending: &mut Vec<(LocalFile, tags::ScannedTrack)>,
+    indexed: &mut usize,
+) -> Result<(), String> {
+    let paths: Vec<String> = changed.iter().map(|file| file.path.clone()).collect();
+    let tracks = tags::read_batch(&paths, covers)?;
+    for (file, track) in changed.drain(..).zip(tracks) {
+        if let Some(track) = track {
+            pending.push((file, track));
+            *indexed += 1;
+        }
+    }
+    if !pending.is_empty() {
+        store::write(database, pending)?;
+        pending.clear();
+    }
+    Ok(())
 }
 
 fn collect(root: &Path) -> Vec<LocalFile> {

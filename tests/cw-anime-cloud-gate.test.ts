@@ -4,6 +4,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
+import ts from "typescript";
+import type { LibraryItem } from "../src/lib/stremio";
 
 const read = (p: string) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 
@@ -101,13 +103,17 @@ test("anime room sources local CW entries", () => {
   assert.match(anime, /const localAnimeCw = useMemo<LibraryItem\[\]>/);
   assert.match(
     anime,
-    /listLocalCw\(hideSharedCw\)\s*\.filter\(\(e\) => ANIME_CLOUD_ID\.test\(e\.id\) \|\| e\.isAnime\)/,
+    /listLocalCw\(hideSharedCw\)\s*\.filter\(\(e\) => localCwSourceEnabled\(e, settings\.cwSources\)\)\s*\.filter\(\(e\) => ANIME_CLOUD_ID\.test\(e\.id\) \|\| e\.isAnime\)/,
   );
-  assert.match(anime, /\[\s*\.\.\.localAnimeCw,\s*\.\.\.\(hideSharedCw \? \[\] : libItems\.filter/);
+  assert.match(
+    anime,
+    /\[\s*\.\.\.localAnimeCw,\s*\.\.\.\(hideSharedCw \|\| !settings\.cwSources\.library\s*\?\s*\[\]\s*:\s*libItems\.filter/,
+  );
+  assert.match(anime, /hideSharedCw \|\| !settings\.cwSources\.simkl\s*\?\s*\[\]\s*:\s*simklCw/);
 });
 
 test("home and anime room absorb legacy cloud anime items into local CW", () => {
-  assert.match(home, /if \(!hideSharedCw\) absorbCloudAnimeCw\(view\);/);
+  assert.match(home, /if \(!hideSharedCw && !isNuvioProvider\) absorbCloudAnimeCw\(view\);/);
   assert.match(anime, /if \(!hideSharedCw\) absorbCloudAnimeCw\(li\);/);
   for (const source of [home, anime]) {
     assert.match(
@@ -120,23 +126,75 @@ test("home and anime room absorb legacy cloud anime items into local CW", () => 
   assert.match(absorb, /if \(i\.removed && !i\.temp\) continue;/);
 });
 
+test("absorbed cloud rows are library entries, and legacy rows infer their source", () => {
+  const absorb = read("src/lib/anime-cw-absorb.ts");
+  assert.match(absorb, /source: "library"/);
+  const code = ts.transpileModule(read("src/lib/local-cw.ts"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const module = { exports: {} as Record<string, (...args: any[]) => any> };
+  new Function("require", "module", "exports", code)(
+    () => ({
+      cwProfileScope: () => ({ sharedId: "test", profileId: "test" }),
+      privateCwProfileId: () => null,
+    }),
+    module,
+    module.exports,
+  );
+  const enabled = module.exports.localCwSourceEnabled as (
+    entry: { id: string; source?: "library" | "local" },
+    sources: { library: boolean; local: boolean },
+  ) => boolean;
+  assert.equal(enabled({ id: "tt123" }, { library: false, local: true }), false);
+  assert.equal(enabled({ id: "download:1" }, { library: true, local: false }), false);
+  assert.equal(enabled({ id: "tt123", source: "local" }, { library: true, local: false }), false);
+});
+
 test("absorb cannot resurrect dismissed or ancient entries", () => {
   const absorb = read("src/lib/anime-cw-absorb.ts");
   assert.match(absorb, /if \(isCwDismissed\(i\)\) continue;/);
   assert.match(absorb, /Date\.now\(\) - t > ABSORB_RECENT_MS\) continue;/);
 });
 
-test("dismissing a local anime entry persists past re-absorb", () => {
+test("Up Next resurfacing follows the Library source toggle", () => {
+  assert.match(read("src/views/home.tsx"), /hideSharedCw \|\| !settings\.cwSources\.library/);
+  assert.match(read("src/views/anime.tsx"), /hideSharedCw \|\| !settings\.cwSources\.library/);
+  assert.match(
+    read("src/views/big-picture/use-bp-anime-cw.ts"),
+    /hideSharedCw \|\| !cwSources\.library/,
+  );
+});
+
+test("detail only treats an actual Kitsu redirect as a side entry", () => {
+  const detail = read("src/views/detail.tsx");
+  assert.match(detail, /const isSideEntry = res\.requestedKitsuId !== res\.kitsuId;/);
+  assert.doesNotMatch(detail, /requestedKitsuId !== res\.kitsuId \|\|/);
+});
+
+test("grouped dismissals delegate to per-source cleanup while single-item behavior remains intact", () => {
+  const dismiss = read("src/lib/cw-dismiss.ts");
+  assert.match(
+    dismiss,
+    /cleanupGroupedSource\(member, authKey, options, now, cloudIds\)/,
+    "grouped rows must clean up each source",
+  );
+  assert.match(dismiss, /clearResumeForItem\(item, options\)/);
+  assert.match(dismiss, /cloudLibraryPut\(/);
+  assert.match(dismiss, /clearLocalCw\(id, options\)/);
+
   const homeDismiss = home.match(
-    /const onDismissCw = useCallback\([\s\S]*?\[authKey\],\s*\);/,
+    /const onDismissCw = useCallback\([\s\S]*?const \{ items: favItems \}/,
   )?.[0];
   assert.ok(homeDismiss, "home onDismissCw must exist");
-  assert.match(
-    homeDismiss,
-    /clearLocalCw\(item\._id, \{ acknowledged: true \}\);\s*return dismissCw\(item, authKey, \{ acknowledged: true \}\);/,
-  );
+  const homeGroupGuard = homeDismiss.indexOf("item.cwMembers?.length");
+  assert.ok(homeGroupGuard >= 0, "grouped home rows must delegate before local cleanup");
+
   const animeDismiss = anime.match(/onDismiss=\{\(it\) => \{[\s\S]*?\}\}/)?.[0];
   assert.ok(animeDismiss, "anime room onDismiss must exist");
+  const animeGroupGuard = animeDismiss.indexOf("it.cwMembers?.length");
+  assert.ok(animeGroupGuard >= 0, "grouped anime rows must delegate before local cleanup");
+  const animeClear = animeDismiss.indexOf("clearLocalCw(it._id");
+  assert.ok(animeClear < 0 || animeClear > animeGroupGuard);
   assert.match(
     animeDismiss,
     /if \(it\.local\) clearLocalCw\(it\._id, \{ acknowledged: true \}\);\s*return dismissCw\(it, authKey, \{ acknowledged: true \}\);/,
@@ -181,10 +239,73 @@ test("tracker sync cannot corrupt the wrong cour", () => {
   );
 });
 
-test("home dedup prefers the twin that actually played most recently", () => {
-  assert.match(home, /lastWatchedOf\(i\) > lastWatchedOf\(held\)/);
-  assert.match(home, /byId\.delete\(held\._id\);/);
-  const fn = home.match(/const lastWatchedOf = \(i: LibraryItem\) => \{[\s\S]*?\};/)?.[0];
-  assert.ok(fn, "lastWatchedOf must exist");
-  assert.match(fn, /i\._mtime/);
+test("Home keeps the newest verified twin with its older source member and leaves same-title IDs apart", () => {
+  const sortSource = read("src/lib/stremio.ts").match(
+    /export function cwSortKey\([\s\S]*?\n\}/,
+  )?.[0];
+  assert.ok(sortSource, "shared CW sort helper must exist");
+  const sortCode = ts.transpileModule(`${sortSource}\nexports.sortKey = cwSortKey;`, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const sortModule = { exports: {} as Record<string, (...args: any[]) => any> };
+  new Function("exports", "resumeForItem", sortCode)(sortModule.exports, () => undefined);
+
+  const aliases: Record<string, string> = { "mal:101": "kitsu:900", "anilist:202": "kitsu:900" };
+  const mocks: Record<string, unknown> = {
+    "@/lib/anime-cw-ids": {
+      getAnimeCanonicalId: (id: string) => aliases[id] ?? null,
+      getAnimeCwId: (id: string) => aliases[id] ?? null,
+      getAnilistMalAlias: () => null,
+      recordAnimeCwId: () => {},
+      notifyAnimeCwIds: () => {},
+    },
+    "@/lib/anime-identity-db": {
+      animeDbReadEntry: async () => null,
+      animeDbReadProvider: async () => null,
+      animeDbWriteProvider: async () => {},
+    },
+    "@/lib/providers/anime-entry": { resolveAnimeEntry: async () => null },
+    "@/lib/providers/anime-kitsu-addon": { animeKitsuMeta: async () => null },
+    "@/lib/anime-tracker-entry": { resolveTrackerAnimeEntry: async () => null },
+    "@/lib/providers/anime-mapping": {
+      imdbToKitsu: async () => null,
+      tmdbTvToKitsu: async () => null,
+    },
+  };
+  const identityCode = ts.transpileModule(read("src/lib/cw-anime-identity.ts"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const identityModule = { exports: {} as Record<string, (...args: any[]) => any> };
+  new Function("require", "module", "exports", identityCode)(
+    (name: string) => mocks[name],
+    identityModule,
+    identityModule.exports,
+  );
+
+  const twin = (id: string, date: string): LibraryItem => ({
+    _id: id,
+    type: "series",
+    name: "Same Anime",
+    removed: false,
+    _mtime: date,
+    isAnime: true,
+    state: { lastWatched: date, timeOffset: 100, duration: 1000, video_id: `${id}:1:2` },
+  });
+  const newest = twin("anilist:202", "2026-10-25T12:00:00Z");
+  const older = twin("mal:101", "2026-10-24T12:00:00Z");
+  const unrelated = twin("tt1234567", "2026-10-23T12:00:00Z");
+  const sorted = [older, unrelated, newest].sort(
+    (a, b) => sortModule.exports.sortKey(b) - sortModule.exports.sortKey(a),
+  );
+  const result = identityModule.exports.dedupeAnimeCw(sorted) as (LibraryItem & {
+    cwMembers?: LibraryItem[];
+  })[];
+  assert.equal(result.length, 2);
+  assert.equal(result[0]._id, newest._id);
+  assert.ok(result[0].cwMembers?.some((member) => member._id === older._id));
+  assert.equal(
+    result[1]._id,
+    unrelated._id,
+    "same title alone must not merge unrelated catalog IDs",
+  );
 });

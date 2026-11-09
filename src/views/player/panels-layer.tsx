@@ -12,6 +12,8 @@ export const PanelsLayer = memo(function PanelsLayer({
   tenFoot,
   engine,
   isSeriesPlayback,
+  queueSessionAvailable,
+  queuePlaybackEnabled,
   meta,
   currentEpisode,
   episodePanelOpen,
@@ -40,6 +42,8 @@ export const PanelsLayer = memo(function PanelsLayer({
   tenFoot: boolean;
   engine: "html5" | "mpv";
   isSeriesPlayback: boolean;
+  queueSessionAvailable: boolean;
+  queuePlaybackEnabled: boolean;
   meta: Meta;
   currentEpisode: PlayEpisode | undefined;
   episodePanelOpen: boolean;
@@ -111,6 +115,8 @@ export const PanelsLayer = memo(function PanelsLayer({
           open={episodePanelOpen && !episodesHidden}
           onClose={onCloseEpisodePanel}
           meta={meta}
+          queueSessionAvailable={queueSessionAvailable}
+          queuePlaybackEnabled={queuePlaybackEnabled}
           currentEpisode={currentEpisode}
           corner={episodesCorner}
           roomGuest={roomGuest}

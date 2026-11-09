@@ -2,7 +2,14 @@
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
-import { effectiveOrder, type CardKey } from "../src/lib/profile-card-layout.ts";
+import {
+  canCommentOnRating,
+  effectiveOrder,
+  isCardHidden,
+  isCardShown,
+  sanitizeLayout,
+  type CardKey,
+} from "../src/lib/profile-card-layout.ts";
 
 const ALL: CardKey[] = ["about", "comments", "favgames", "favbooks", "favmusic", "badges"];
 
@@ -13,7 +20,10 @@ function idx(order: CardKey[], k: CardKey) {
 test("comments never render above games, books or music", () => {
   const order = effectiveOrder({ order: ["comments", "favgames", "favbooks", "favmusic"] }, ALL);
   for (const k of ["favgames", "favbooks", "favmusic"] as CardKey[]) {
-    assert.ok(idx(order, k) < idx(order, "comments"), `${k} must come before comments, got ${order.join(",")}`);
+    assert.ok(
+      idx(order, k) < idx(order, "comments"),
+      `${k} must come before comments, got ${order.join(",")}`,
+    );
   }
 });
 
@@ -33,4 +43,24 @@ test("every present card survives the reorder exactly once", () => {
   const order = effectiveOrder({ order: ["comments", "favmusic"] }, ALL);
   assert.equal(order.length, ALL.length);
   assert.equal(new Set(order).size, ALL.length);
+});
+
+test("quoting a rating is unavailable when the profile owner hid Comments", () => {
+  const layout = sanitizeLayout({ hidden: ["comments"] });
+  assert.equal(isCardHidden(layout, "comments"), true);
+  assert.equal(isCardShown(layout, "comments"), false, "the owner's hidden card stays hidden");
+  assert.equal(canCommentOnRating(layout), false, "no composer is exposed for a hidden card");
+  assert.deepEqual(layout.hidden, ["comments"], "the owner's saved layout remains unchanged");
+});
+
+test("quoting a rating is available when Comments are visible", () => {
+  assert.equal(canCommentOnRating(sanitizeLayout({})), true);
+  assert.equal(canCommentOnRating(undefined), true);
+});
+
+test("the owner still sees hidden cards while arranging them", () => {
+  const layout = sanitizeLayout({ hidden: ["comments", "about"] });
+  assert.equal(isCardShown(layout, "comments", { arranging: true }), true);
+  assert.equal(isCardShown(layout, "comments"), false);
+  assert.equal(isCardShown(layout, "badges", { arranging: true }), true);
 });

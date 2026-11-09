@@ -2,6 +2,11 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { message } from "@tauri-apps/plugin-dialog";
 import { t } from "@/lib/i18n";
+import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import type { Settings } from "@/lib/settings";
+import { takePreparedSubtitle } from "@/lib/subtitles/prepared-registry";
+import { isSafeProviderSubtitleUrl } from "@/lib/subtitles/provider-url";
+import { subtitleSourceIsLocal } from "@/lib/subtitles/subtitle-memory";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import {
   initialPlayerSnapshot,
@@ -10,6 +15,7 @@ import {
   type PlayerSnapshot,
   type PlayerSource,
 } from "./bridge";
+import { PreparedSubtitleCleanupRegistry } from "./prepared-subtitle-cleanups";
 
 /** This tells Harbor when mpv has closed, so it leaves the player screen. */
 export const EXTERNAL_PLAYER_CLOSED_EVENT = "harbor:external-player-closed";
@@ -42,6 +48,11 @@ type ExternalPlayerState = {
   launchError: string | null;
 };
 
+/** Whether videos play in the user's own mpv. Harbor can only start it on desktop. */
+export function externalMpvEnabled(settings: Pick<Settings, "playerExternalMpv">): boolean {
+  return settings.playerExternalMpv && (isWindowsDesktop() || isMacDesktop() || isLinuxDesktop());
+}
+
 /** Cuts the mpv options text into separate options at each space, but it keeps text inside quotes together. */
 export function splitArgs(line: string): string[] {
   const out: string[] = [];
@@ -66,6 +77,22 @@ export function splitArgs(line: string): string[] {
 }
 
 /**
+ * Puts where a subtitle came from in front of its name, like "[SubMaker] Show S01E01", so mpv's
+ * subtitle list shows it. With a provider the dots become spaces, because mpv menus like uosc
+ * treat a name with dots as a file name and cut parts of it off.
+ */
+export function mpvSubtitleTitle(name?: string, provider?: string): string | undefined {
+  const from = provider?.trim();
+  if (!from) return name;
+  const title = name?.trim();
+  const labelled =
+    title && !title.toLowerCase().startsWith(from.toLowerCase())
+      ? `[${from}] ${title}`
+      : title || from;
+  return labelled.replace(/\./g, " ").replace(/\s+/g, " ").trim();
+}
+
+/**
  * The bridge for the user's external mpv. Harbor's player screen will stay open in the
  * background, so resume, Stremio sync, watched marking and next episode all keep working.
  */
@@ -82,7 +109,22 @@ export function createExternalMpvBridge(opts: ExternalMpvOptions): PlayerBridge 
   let destroyed = false;
   let mediaTitle = opts.title;
   let pendingSubs: Array<{ url: string; lang?: string; title?: string }> = [];
+  // Subtitle files that Harbor made on this computer. They stay until mpv no longer needs them.
+  const preparedSubs = new PreparedSubtitleCleanupRegistry();
+  // What mpv already got for this video, by file content and by link. Two sources can serve the
+  // very same subtitle (SubMaker also finds OpenSubtitles files), and mpv only needs one copy.
+  let seenSubs = new Set<string>();
+  // How often each track name was used for this video. Different subtitles often get the same
+  // name (same provider and release), so later ones become "#2", "#3" in mpv's list.
+  let titleUses = new Map<string, number>();
   let unlisten: Array<() => void> = [];
+
+  const numberedTitle = (name?: string) => {
+    if (!name) return name;
+    const uses = (titleUses.get(name) ?? 0) + 1;
+    titleUses.set(name, uses);
+    return uses > 1 ? `${name} #${uses}` : name;
+  };
 
   const emit = () => {
     const next: PlayerSnapshot = { ...snap };
@@ -223,9 +265,18 @@ export function createExternalMpvBridge(opts: ExternalMpvOptions): PlayerBridge 
       const myLoad = ++loadId;
       mediaTitle = src.title ?? mediaTitle;
       session = 0;
-      pendingSubs = (src.subtitles ?? [])
-        .filter((s) => /^https?:\/\//i.test(s.url))
-        .map((s) => ({ url: s.url, lang: s.lang }));
+      pendingSubs = [];
+      seenSubs = new Set();
+      titleUses = new Map();
+      for (const s of src.subtitles ?? []) {
+        // Like Harbor's own players, an addon's link must be public unless the addon runs locally.
+        if (!/^https?:\/\//i.test(s.url)) continue;
+        if (s.trustedSource !== true && !isSafeProviderSubtitleUrl(s.url)) continue;
+        // A stream can list the same subtitle twice, and mpv only needs it once.
+        if (seenSubs.has(`url:${s.url}`)) continue;
+        seenSubs.add(`url:${s.url}`);
+        pendingSubs.push({ url: s.url, lang: s.lang });
+      }
       snap = {
         ...snap,
         status: "loading",
@@ -261,6 +312,8 @@ export function createExternalMpvBridge(opts: ExternalMpvOptions): PlayerBridge 
           void invoke("external_player_stop", { session: id }).catch(() => {});
           return;
         }
+        // Starting this mpv closed the old one, so the subtitle files made for it can go.
+        preparedSubs.clearBefore(myLoad);
         session = id;
         starting = false;
         const replay = early.filter((e) => e.s.session === id);
@@ -302,9 +355,37 @@ export function createExternalMpvBridge(opts: ExternalMpvOptions): PlayerBridge 
     setStretch() {},
     setVideoEq() {},
     setAnime4kShaders() {},
-    async addSubtitle(url, lang, title) {
-      if (!/^https?:\/\//i.test(url)) return false;
-      pendingSubs.push({ url, lang, title });
+    async addSubtitle(url, lang, title, _select, metadata) {
+      // Harbor saves its best subtitles as files on this computer. Taking one here means this
+      // bridge deletes it later.
+      const prepared = takePreparedSubtitle(url);
+      // The same rule as Harbor's own players: a subtitle from a provider needs a public web link.
+      const providerDerived = metadata?.providerDerived ?? Boolean(metadata?.provider);
+      const allowed =
+        !destroyed &&
+        // mpv can open web links and files, but not blob: and data: links from inside Harbor.
+        (/^https?:\/\//i.test(url) || subtitleSourceIsLocal(url)) &&
+        (prepared != null || !providerDerived || isSafeProviderSubtitleUrl(url));
+      if (!allowed) {
+        prepared?.cleanup();
+        return false;
+      }
+      const keys = [
+        prepared ? `text:${prepared.text.replace(/\r\n?/g, "\n").trim()}` : `url:${url}`,
+        ...(metadata?.originalUrl ? [`url:${metadata.originalUrl}`] : []),
+      ];
+      if (keys.some((key) => seenSubs.has(key))) {
+        // mpv already has this subtitle, so the copy's file isn't needed.
+        prepared?.cleanup();
+        return true;
+      }
+      keys.forEach((key) => seenSubs.add(key));
+      if (prepared) preparedSubs.register(prepared.cleanup, loadId);
+      pendingSubs.push({
+        url,
+        lang,
+        title: numberedTitle(mpvSubtitleTitle(title ?? lang, metadata?.provider)),
+      });
       if (snap.firstFrameReady) flushSubs();
       return true;
     },
@@ -354,6 +435,7 @@ export function createExternalMpvBridge(opts: ExternalMpvOptions): PlayerBridge 
       listeners.clear();
       unlisten.forEach((u) => u());
       unlisten = [];
+      preparedSubs.clearAll();
       notice?.remove();
       notice = null;
       host = null;

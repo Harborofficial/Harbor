@@ -6,6 +6,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from "react";
+import { parseQuotedBody } from "@/lib/ratings/quote";
 import { renderBbcode } from "@/lib/social/bbcode";
 import { handleLinkOutActivation } from "@/lib/social/link-out-activation";
 import { scanMentions } from "@/lib/social/mentions";
@@ -13,6 +14,7 @@ import { openLinkOut } from "@/lib/social/link-out";
 import { requestOpenProfile } from "@/lib/social/open-profile";
 import { useView } from "@/lib/view";
 import { useRenderedContentContext } from "@/components/context-menu/rendered-content-context";
+import { QuotedRating } from "@/views/profile/quoted-rating";
 import {
   HOVER_CARD_CLOSE_MS,
   HOVER_CARD_OPEN_MS,
@@ -40,7 +42,11 @@ export function PostBody({
   const openTimer = useRef<number | null>(null);
   const closeTimer = useRef<number | null>(null);
 
-  const html = useMemo(() => renderBbcode(body, new Set(scanMentions(body).notified)), [body]);
+  const quoted = useMemo(() => parseQuotedBody(body), [body]);
+  const html = useMemo(
+    () => renderBbcode(quoted.text, new Set(scanMentions(quoted.text).notified)),
+    [quoted.text],
+  );
   const markup = useMemo(() => ({ __html: html }), [html]);
 
   const clearOpen = () => {
@@ -137,6 +143,22 @@ export function PostBody({
 
   return (
     <>
+      {quoted.quote && (
+        <QuotedRating
+          quote={quoted.quote}
+          onOpenMeta={(id, kind, hint) =>
+            kind === "manga"
+              ? openManga(id)
+              : openMeta({
+                  id,
+                  type: kind === "series" || kind === "anime" ? "series" : "movie",
+                  name: hint?.name ?? "",
+                  poster: hint?.poster,
+                })
+          }
+          onOpenAuthor={onOpenProfile ?? requestOpenProfile}
+        />
+      )}
       <div
         className="max-w-none select-text break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
         onContextMenu={onContextMenu}

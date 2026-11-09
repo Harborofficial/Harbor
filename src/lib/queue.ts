@@ -1,9 +1,13 @@
 import { useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode } from "@/lib/view";
-import { persistCritical } from "@/lib/storage-recovery";
-import { isManuallyWatched, subscribeManualWatched } from "@/lib/manual-watched";
-import { isMovieWatchedLocal } from "@/lib/movie-watched";
+import { persistCritical, setItemWithRecovery } from "@/lib/storage-recovery";
+import {
+  activeProfileId,
+  primaryProfileId,
+  isNuvioProviderActive,
+  nuvioWatchedScope,
+} from "@/lib/active-profile-id";
 
 export type QueueItem = {
   id: string;
@@ -14,23 +18,122 @@ export type QueueItem = {
 
 const KEY = "harbor.queue.v1";
 const SLEEP_KEY = "harbor.queue.sleepAtEnd.v1";
+const RESUME_KEY = "harbor.queue.resumeItem.v1";
 
-let items: QueueItem[] = load();
+const PREFIX = "harbor.queue.v2.";
+const MIGRATION_KEY = "harbor.queue.migration.v2";
+type QueueState = { items: QueueItem[]; resumeItemId: string | null; sleepAtEnd: boolean };
+let scope: string | null | undefined;
+let items: QueueItem[] = [];
+let resumeItemId: string | null = null;
+let sleepAtEnd = false;
+let playingKey: string | null = null;
+const cache = new Map<string, QueueState>();
 const listeners = new Set<() => void>();
 
-function load(): QueueItem[] {
+function profileKey(id: string): string {
+  return `${PREFIX}profile.${encodeURIComponent(id)}`;
+}
+
+function storeKey(): string | null {
+  if (!isNuvioProviderActive()) return profileKey(activeProfileId());
+  const owner = nuvioWatchedScope();
+  return owner === "nuvio.v2.unowned" ? null : PREFIX + owner;
+}
+
+function migrateLegacy(): void {
   try {
     const raw = localStorage.getItem(KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? (arr as QueueItem[]) : [];
+    if (!raw) return;
+    const legacy = JSON.parse(raw);
+    if (!Array.isArray(legacy)) return;
+    let target = localStorage.getItem(MIGRATION_KEY);
+    if (!target) {
+      if (isNuvioProviderActive()) {
+        const owner = nuvioWatchedScope(1);
+        if (owner === "nuvio.v2.unowned") return;
+        target = PREFIX + owner;
+      } else {
+        const primary = primaryProfileId();
+        if (!primary) return;
+        target = profileKey(primary);
+      }
+      // Claim one owner before copying, so a failed write cannot migrate to another profile.
+      if (!setItemWithRecovery(MIGRATION_KEY, target)) return;
+    }
+    if (localStorage.getItem(target) !== null) return;
+    setItemWithRecovery(
+      target,
+      JSON.stringify({
+        items: legacy,
+        resumeItemId: localStorage.getItem(RESUME_KEY),
+        sleepAtEnd: localStorage.getItem(SLEEP_KEY) === "1",
+      }),
+    );
   } catch {
-    return [];
+    // Keep legacy keys intact for retry/recovery; never expose them in another scope.
   }
 }
 
+function syncScope(): string | null {
+  const next = storeKey();
+  if (scope === next) return next;
+  migrateLegacy();
+  scope = next;
+  playingKey = null;
+  let state = next ? cache.get(next) : undefined;
+  if (!state && next) {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(next) ?? "null");
+      if (parsed && Array.isArray(parsed.items)) {
+        state = {
+          items: parsed.items,
+          resumeItemId: typeof parsed.resumeItemId === "string" ? parsed.resumeItemId : null,
+          sleepAtEnd: parsed.sleepAtEnd === true,
+        };
+      }
+    } catch {
+      /* Invalid or unavailable storage starts with an empty scoped queue. */
+    }
+  }
+  items = state?.items ?? [];
+  resumeItemId = state?.resumeItemId ?? null;
+  sleepAtEnd = state?.sleepAtEnd ?? false;
+  return next;
+}
+
 function persist(): void {
-  persistCritical(KEY, JSON.stringify(items));
+  if (!scope) return;
+  const state = { items, resumeItemId, sleepAtEnd };
+  cache.set(scope, state);
+  persistCritical(scope, JSON.stringify(state));
   listeners.forEach((l) => l());
+}
+
+function replaceQueueItems(next: QueueItem[]): void {
+  if (resumeItemId && !next.some((item) => item.id === resumeItemId)) {
+    const previousIndex = items.findIndex((item) => item.id === resumeItemId);
+    const remainingIds = new Set(next.map((item) => item.id));
+    const successor =
+      previousIndex >= 0
+        ? items.slice(previousIndex + 1).find((item) => remainingIds.has(item.id))
+        : undefined;
+
+    resumeItemId = successor?.id ?? next[0]?.id ?? null;
+  }
+
+  items = next;
+  persist();
+}
+
+export function getQueueStartItem(resume = false): QueueItem | null {
+  syncScope();
+  if (resume && resumeItemId) {
+    const saved = items.find((item) => item.id === resumeItemId);
+    if (saved) return saved;
+  }
+
+  return items[0] ?? null;
 }
 
 function rid(): string {
@@ -43,6 +146,7 @@ function keyOf(meta: Meta, episode?: PlayEpisode): string {
 }
 
 export function queueAdd(meta: Meta, episode?: PlayEpisode): void {
+  if (!syncScope()) return;
   const k = keyOf(meta, episode);
   if (items.some((i) => keyOf(i.meta, i.episode) === k)) return;
   items = [...items, { id: rid(), meta, episode, addedAt: Date.now() }];
@@ -50,11 +154,13 @@ export function queueAdd(meta: Meta, episode?: PlayEpisode): void {
 }
 
 export function queueRemove(id: string): void {
-  items = items.filter((i) => i.id !== id);
-  persist();
+  if (!syncScope()) return;
+  if (!items.some((item) => item.id === id)) return;
+  replaceQueueItems(items.filter((item) => item.id !== id));
 }
 
 export function queueToggle(meta: Meta, episode?: PlayEpisode): void {
+  if (!syncScope()) return;
   const k = keyOf(meta, episode);
   const existing = items.find((i) => keyOf(i.meta, i.episode) === k);
   if (existing) queueRemove(existing.id);
@@ -62,18 +168,22 @@ export function queueToggle(meta: Meta, episode?: PlayEpisode): void {
 }
 
 export function queueClear(): void {
-  if (items.length === 0) return;
+  if (!syncScope()) return;
+  if (items.length === 0 && !resumeItemId) return;
+  resumeItemId = null;
   items = [];
   persist();
 }
 
 export function queueReorder(orderedIds: string[]): void {
+  if (!syncScope()) return;
   const pos = new Map(orderedIds.map((id, i) => [id, i] as const));
   items = [...items].sort((a, b) => (pos.get(a.id) ?? 999) - (pos.get(b.id) ?? 999));
   persist();
 }
 
 export function queueIndexOf(meta: Meta, episode?: PlayEpisode): number {
+  syncScope();
   const k = keyOf(meta, episode);
   return items.findIndex((i) => keyOf(i.meta, i.episode) === k);
 }
@@ -98,8 +208,14 @@ function subscribe(fn: () => void): () => void {
 export function useQueue(): QueueItem[] {
   return useSyncExternalStore(
     subscribe,
-    () => items,
-    () => items,
+    () => {
+      syncScope();
+      return items;
+    },
+    () => {
+      syncScope();
+      return items;
+    },
   );
 }
 
@@ -110,47 +226,64 @@ export function useIsQueued(meta: Meta, episode?: PlayEpisode): boolean {
 }
 
 export function getSleepAtEnd(): boolean {
-  try {
-    return localStorage.getItem(SLEEP_KEY) === "1";
-  } catch {
-    return false;
-  }
+  syncScope();
+  return sleepAtEnd;
 }
 
 export function setSleepAtEnd(on: boolean): void {
-  try {
-    if (on) localStorage.setItem(SLEEP_KEY, "1");
-    else localStorage.removeItem(SLEEP_KEY);
-  } catch {
-    /* ignore */
-  }
-  listeners.forEach((l) => l());
+  if (!syncScope()) return;
+  sleepAtEnd = on;
+  persist();
 }
 
 export function useSleepAtEnd(): boolean {
   return useSyncExternalStore(subscribe, getSleepAtEnd, getSleepAtEnd);
 }
 
-let playingKey: string | null = null;
-
 export function setQueuePlaying(meta: Meta | null, episode?: PlayEpisode): void {
+  if (!syncScope()) return;
   const next = meta ? keyOf(meta, episode) : null;
   if (next === playingKey) return;
   playingKey = next;
-  queuePruneWatched();
+
+  const current = next ? items.find((item) => keyOf(item.meta, item.episode) === next) : undefined;
+
+  if (current && resumeItemId !== current.id) {
+    resumeItemId = current.id;
+    persist();
+  }
 }
 
-export function queuePruneWatched(): void {
-  const next = items.filter((i) => {
-    if (playingKey && keyOf(i.meta, i.episode) === playingKey) return true;
-    return i.episode
-      ? !isManuallyWatched(i.meta.id, i.episode.season ?? 0, i.episode.episode ?? 0)
-      : !isMovieWatchedLocal(i.meta.id);
+export function useQueueResumeItem(): QueueItem | null {
+  return useSyncExternalStore(
+    subscribe,
+    () => {
+      syncScope();
+      return items.find((item) => item.id === resumeItemId) ?? null;
+    },
+    () => null,
+  );
+}
+
+if (typeof window !== "undefined") {
+  const onScopeChange = () => {
+    syncScope();
+    listeners.forEach((listener) => listener());
+  };
+  for (const event of [
+    "harbor:active-profile-changed",
+    "harbor:profiles-updated",
+    "harbor:account-provider-changed",
+    "harbor:nuvio-profile-changed",
+    "harbor:nuvio-state-changed",
+  ])
+    window.addEventListener(event, onScopeChange);
+  window.addEventListener("storage", (event) => {
+    if (!event.key || event.key.startsWith(PREFIX)) {
+      if (event.key) cache.delete(event.key);
+      else cache.clear();
+      scope = undefined;
+    }
+    onScopeChange();
   });
-  if (next.length === items.length) return;
-  items = next;
-  persist();
 }
-
-queueMicrotask(() => queuePruneWatched());
-subscribeManualWatched(() => queuePruneWatched());

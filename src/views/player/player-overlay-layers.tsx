@@ -178,6 +178,8 @@ export type PlayerOverlayLayersProps = {
   onSwitchStream: Switcher["onPick"];
   debridSlugs: string[];
   isSeriesPlayback: boolean;
+  queueSessionAvailable: boolean;
+  queuePlaybackEnabled: boolean;
   episodePanelOpen: boolean;
   setEpisodePanelOpen: (v: boolean) => void;
   upNextButtonVisible: boolean;
@@ -514,6 +516,8 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         tenFoot={p.tenFoot}
         engine={p.engine}
         isSeriesPlayback={p.isSeriesPlayback}
+        queueSessionAvailable={p.queueSessionAvailable}
+        queuePlaybackEnabled={p.queuePlaybackEnabled}
         meta={p.src.meta}
         currentEpisode={p.src.episode}
         episodePanelOpen={p.episodePanelOpen}

@@ -289,6 +289,7 @@ function PosterBody({
   const effect = settings.posterEffect;
   const pageScrollRoot = useContext(ScrollRootContext);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const [imageEnabled, setImageEnabled] = useState(!lazy);
   const [targetPx, setTargetPx] = useState(0);
   const targetPxRef = useRef(0);
   const measuredPxRef = useRef(0);
@@ -305,6 +306,7 @@ function PosterBody({
     if (!el) return;
     const onNear = (e: IntersectionObserverEntry) => {
       const near = e.isIntersecting;
+      if (near) setImageEnabled(true);
       el.toggleAttribute("data-near", near);
       el.toggleAttribute("data-idle", !near);
       const img = el.querySelector<HTMLImageElement>("img.harbor-poster-img");
@@ -411,8 +413,18 @@ function PosterBody({
   const exhausted = cursor >= candidates.length;
   // Remote plain-HTTP images (e.g. a Suwayomi server on a VPS) are mixed-content
   // blocked by the WebView; resolve them to a same-origin blob URL.
-  const currentSrc = useProxiedImageSrc(current);
-  const displayedSrc = useProxiedImageSrc(displayed);
+  const currentSrc = useProxiedImageSrc(current, {
+    forceProxy: /^https?:\/\//.test(current ?? ""),
+    persistent: true,
+    enabled: imageEnabled && (qMult === 0 || targetPx > 0),
+    originalSize: true,
+  });
+  const displayedSrc = useProxiedImageSrc(displayed, {
+    forceProxy: /^https?:\/\//.test(displayed ?? ""),
+    persistent: true,
+    enabled: imageEnabled,
+    originalSize: true,
+  });
   const stateCauseRef = useRef<{
     targetPx: number;
     idx: number;
@@ -537,11 +549,13 @@ function PosterBody({
   // which would flash the shimmer even though the bytes are cached.
   useLayoutEffect(() => {
     if (exhausted) return;
-    if (current && decodedPosters.has(current)) {
+    // A decoded URL only skips the wait when this mount already has the blob
+    // src; otherwise the proxy is still loading and there is nothing to show yet.
+    if (current && currentSrc && decodedPosters.has(current)) {
       shownRef.current = current;
       rootRef.current?.setAttribute("data-loaded", "1");
     }
-  }, [current, exhausted]);
+  }, [current, currentSrc, exhausted]);
   const showShimmer = !exhausted;
   const showPlate = exhausted;
   const hue = hash(seed) % 360;

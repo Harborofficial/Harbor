@@ -350,6 +350,7 @@ export type Settings = {
   streamCacheMaxGb: number;
   deleteWatchedDownloads: boolean;
   streamCacheDir: string;
+  /** Legacy custom mpv cache folder; only used to clean up old leftovers. */
   playbackCacheDir: string;
   remoteStreamServerUrl: string;
   remoteStreamServerStrict: boolean;
@@ -368,7 +369,7 @@ export type Settings = {
   subBorderSize: number;
   subMarginY: number;
   subAlignX: "left" | "center" | "right";
-  subAssOverride: "no" | "yes" | "force" | "scale" | "strip";
+  subAssOverride: "no" | "yes" | "force" | "scale" | "strip" | "font";
   subAssNormalizeSize: boolean;
   subStyle: "shadow" | "outline" | "box";
   subFontFamily: string;

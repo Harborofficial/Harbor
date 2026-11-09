@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/lib/auth";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
-import { listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
+import { listLocalCw, localCwSourceEnabled, subscribeLocalCw } from "@/lib/local-cw";
+import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
+import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
+import { isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { setExternalCwSources } from "@/lib/feed/external-cw";
 import { useExternalCw } from "@/lib/feed/external-cw";
 import {
@@ -28,6 +31,9 @@ export type CwCard = {
   videoId?: string;
   progress: number;
   at: number;
+  cwMembers?: LibraryItem[];
+  altIds?: string[];
+  isAnime?: boolean;
 };
 
 export function localToLibraryItem(e: ReturnType<typeof listLocalCw>[number]): LibraryItem {
@@ -92,6 +98,9 @@ function toCard(i: LibraryItem): CwCard {
     videoId: i.state?.video_id,
     progress: duration > 0 ? Math.min(1, offset / duration) : 0,
     at: watchedAt(i),
+    cwMembers: i.cwMembers,
+    altIds: i.altIds,
+    isAnime: i.isAnime,
   };
 }
 
@@ -118,6 +127,8 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   );
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [localVersion, setLocalVersion] = useState(0);
+  const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
+  const dismissVersion = useCwDismissVersion();
 
   useEffect(() => {
     if (!authKey) {
@@ -168,8 +179,10 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
 
   useEffect(() => subscribeLocalCw(() => setLocalVersion((v) => v + 1)), []);
 
-  return useMemo(() => {
+  const cards = useMemo(() => {
     void localVersion;
+    void animeIdsVersion;
+    void dismissVersion;
     const disabledSources = new Set<ExternalCwSource>();
     if (!cwSources.simkl) disabledSources.add("simkl");
     if (!cwSources.trakt) disabledSources.add("trakt");
@@ -180,13 +193,12 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
           ...(cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
           ...externalCw.filter((i) => !(i.external && disabledSources.has(i.external))),
         ];
-    const local = listLocalCw(hideSharedCw).filter((e) =>
-      e.source === "library" ? cwSources.library : cwSources.local,
-    );
+    const local = listLocalCw(hideSharedCw).filter((e) => localCwSourceEnabled(e, cwSources));
     const merged = [...base, ...local.map(localToLibraryItem)]
       .filter((i) => {
         if ((i.type as string) === "other" || i._id.startsWith("iptv:")) return false;
         if (!isCwMember(i)) return false;
+        if (isCwDismissed(i)) return false;
         // A disabled source's backfilled resume entry must not resurrect library cards.
         if (disabledSources.size > 0 && cwMemberViaResume(i)) {
           const src = resumeSourceForItem(i);
@@ -197,14 +209,23 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);
-    const seen = new Set<string>();
-    const out: CwCard[] = [];
-    for (const i of merged) {
-      if (i._id === excludeId || seen.has(i._id)) continue;
-      seen.add(i._id);
-      out.push(toCard(i));
-      if (out.length >= limit) break;
-    }
-    return out;
-  }, [items, externalCw, localVersion, excludeId, limit, hideSharedCw, cwSources, activeProfile?.id]);
+    return dedupeAnimeCw(merged.filter((i) => i._id !== excludeId))
+      .slice(0, limit)
+      .map(toCard);
+  }, [
+    items,
+    externalCw,
+    localVersion,
+    animeIdsVersion,
+    dismissVersion,
+    excludeId,
+    limit,
+    hideSharedCw,
+    cwSources,
+    activeProfile?.id,
+  ]);
+  useEffect(() => {
+    void warmCwAnimeIdentities(cards, { tmdbKey: settings.tmdbKey });
+  }, [cards, settings.tmdbKey]);
+  return cards;
 }

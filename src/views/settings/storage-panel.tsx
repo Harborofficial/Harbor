@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { clearPickerCache, pickerCacheCount } from "@/lib/picker-cache";
 import { clearThumbCache, getThumbCacheSize, type ThumbCacheSize } from "@/lib/remote-image-proxy";
+import { clearMediaCache, mediaCacheStats, MEDIA_CACHE_DISK_BYTES } from "@/lib/media-cache";
 import { clearMangaCache } from "@/lib/manga/api";
 import { clearEpg } from "@/lib/iptv/epg-store";
 import { clearPlaylistCache } from "@/lib/iptv/store";
@@ -119,12 +120,13 @@ function ClearRow({
   title: string;
   sub: string;
   usage?: ReactNode;
-  onClear: () => void;
+  onClear: () => void | Promise<void>;
 }) {
   const t = useT();
   const [armed, setArmed] = useState(false);
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!armed) return;
@@ -138,28 +140,53 @@ function ClearRow({
     return () => window.clearTimeout(timer);
   }, [done]);
 
-  const click = () => {
-    if (done) return;
+  const click = async () => {
+    if (done || busy) return;
     if (!armed) {
       setArmed(true);
       return;
     }
     try {
-      onClear();
+      setBusy(true);
+      await onClear();
       setDone(true);
       setFailed(false);
     } catch {
       setFailed(true);
+    } finally {
+      setBusy(false);
     }
     setArmed(false);
   };
 
   return (
-    <SettingRow label={title} desc={<>{sub}{failed && <span role="alert" className="mt-1 block text-danger">{t("Could not clear this cache. Try again.")}</span>}{usage && <span className="mt-1.5 block text-[12.5px] tabular-nums text-ink-subtle">{usage}</span>}</>}>
+    <SettingRow
+      label={title}
+      desc={
+        <>
+          {sub}
+          {failed && (
+            <span role="alert" className="mt-1 block text-danger">
+              {t("Could not clear this cache. Try again.")}
+            </span>
+          )}
+          {usage && (
+            <span className="mt-1.5 block text-[12.5px] tabular-nums text-ink-subtle">{usage}</span>
+          )}
+        </>
+      }
+    >
       <button
         type="button"
+        disabled={busy}
         onClick={click}
-        aria-label={done ? t("{name} cleared", { name: title }) : armed ? t("Confirm clearing {name}", { name: title }) : t("Clear {name}", { name: title })}
+        aria-label={
+          done
+            ? t("{name} cleared", { name: title })
+            : armed
+              ? t("Confirm clearing {name}", { name: title })
+              : t("Clear {name}", { name: title })
+        }
         className={done ? CLEAR_DONE : armed ? CLEAR_ARMED : CLEAR_IDLE}
       >
         {done ? <Check size={18} strokeWidth={2.4} /> : <Trash2 size={18} strokeWidth={1.9} />}
@@ -195,7 +222,19 @@ export function StoragePanel() {
   }, [tick]);
 
   const ls = useMemo(() => localStorageBreakdown(), [tick]);
-  const THUMB_CACHE_CAP_BYTES = 256 * 1024 * 1024;
+  const THUMB_CACHE_CAP_BYTES = 2 * 1024 * 1024 * 1024;
+  const [mediaSize, setMediaSize] = useState<Awaited<ReturnType<typeof mediaCacheStats>> | null>(
+    null,
+  );
+  useEffect(() => {
+    let alive = true;
+    void mediaCacheStats().then((size) => {
+      if (alive) setMediaSize(size);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [tick]);
 
   const cacheUsage = useMemo(() => {
     const bytesOfKey = (key: string) => {
@@ -232,7 +271,8 @@ export function StoragePanel() {
       alive = false;
     };
   }, [tick]);
-  const pct = estimate && estimate.quota > 0 ? Math.min(100, (estimate.usage / estimate.quota) * 100) : 0;
+  const pct =
+    estimate && estimate.quota > 0 ? Math.min(100, (estimate.usage / estimate.quota) * 100) : 0;
 
   useSubTabs(
     [
@@ -260,13 +300,24 @@ export function StoragePanel() {
                   wide
                   icon={<HardDrive size={18} strokeWidth={1.9} />}
                   label={t("App data cache")}
-                  desc={t("{used} used within a {quota} storage allowance. Video downloads and other files on disk are not included.", {
-                    used: fmtBytes(estimate.usage),
-                    quota: fmtBytes(estimate.quota),
-                  })}
+                  desc={t(
+                    "{used} used within a {quota} storage allowance. Video downloads and other files on disk are not included.",
+                    {
+                      used: fmtBytes(estimate.usage),
+                      quota: fmtBytes(estimate.quota),
+                    },
+                  )}
                 >
                   <div className="flex w-full max-w-[520px] items-center gap-4">
-                    <div role="meter" aria-label={t("App data cache usage")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-valuetext={fmtPercent(pct)} className="h-2 min-w-0 flex-1 rounded-full bg-raised">
+                    <div
+                      role="meter"
+                      aria-label={t("App data cache usage")}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={pct}
+                      aria-valuetext={fmtPercent(pct)}
+                      className="h-2 min-w-0 flex-1 rounded-full bg-raised"
+                    >
                       <div
                         className="h-full rounded-full bg-accent transition-[width] duration-500"
                         style={{ width: `${pct}%`, minWidth: pct > 0 ? 2 : 0 }}
@@ -326,6 +377,21 @@ export function StoragePanel() {
         >
           <SettingGroup>
             <ClearRow
+              title={t("Episode and season metadata")}
+              sub={t(
+                "Cached episode lists, season details and artwork references. Rebuilds as you browse.",
+              )}
+              usage={
+                mediaSize
+                  ? `${fmtBytes(mediaSize.bytes)} / ${fmtBytes(MEDIA_CACHE_DISK_BYTES)} · ${t("{n} entries", { n: mediaSize.entries })} · ${t("{n} cache hits", { n: mediaSize.hits + mediaSize.staleHits })} · ${t("{n} cache misses", { n: mediaSize.misses })}`
+                  : undefined
+              }
+              onClear={async () => {
+                if (!(await clearMediaCache())) throw new Error("Cache clear failed");
+                refresh();
+              }}
+            />
+            <ClearRow
               title={t("Stream picker cache")}
               sub={t(
                 "Remembered source lists per title. Clears stale results after changing addons or debrid.",
@@ -348,7 +414,7 @@ export function StoragePanel() {
             <ClearRow
               title={t("Poster thumbnails")}
               sub={t(
-                "Resized cover cache, kept 30 days up to size limits. Rebuilds as you browse.",
+                "Episode thumbnails and posters, kept up to 30 days within a 2 GB limit. Rebuilds as you browse.",
               )}
               usage={
                 thumbSize == null ? undefined : (
@@ -368,8 +434,9 @@ export function StoragePanel() {
                   </>
                 )
               }
-              onClear={() => {
-                void clearThumbCache().finally(() => refresh());
+              onClear={async () => {
+                await clearThumbCache();
+                refresh();
               }}
             />
             <ClearRow

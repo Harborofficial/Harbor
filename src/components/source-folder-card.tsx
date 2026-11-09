@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useView } from "@/lib/view";
-import type { SourceFolder } from "@/lib/custom-sources";
+import { tmdbSourceParams, type SourceFolder } from "@/lib/custom-sources";
 import { useAuth } from "@/lib/auth";
 import { createAddonCatalogFetcher, gatherCatalogAddons } from "@/lib/addons";
 import { Pencil, X } from "lucide-react";
@@ -21,12 +21,18 @@ export function SourceFolderCard({
 }: {
   folder: SourceFolder;
   editMode?: boolean;
-  sourceId?: string;
-  onEditFolderImages?: (sourceId: string, folderId: string, cover: string, gif: string) => void;
+  sourceId: string;
+  onEditFolderImages?: (
+    sourceId: string,
+    folderId: string,
+    cover: string,
+    gif: string,
+    layout?: "CLASSIC" | "GRID",
+  ) => void;
 }) {
   const t = useT();
   const { settings } = useSettings();
-  const { openGrid } = useView();
+  const { openGrid, openFolderHub } = useView();
   const { authKey } = useAuth();
   const [hover, setHover] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,6 +49,20 @@ export function SourceFolderCard({
   const handleClick = async () => {
     if (loading) return;
 
+    const totalSources = (folder.sources?.length ?? 0) + (folder.catalogSources?.length ?? 0);
+    if (totalSources > 1) {
+      const needsTmdbKey =
+        !settings.tmdbKey &&
+        !folder.catalogSources?.length &&
+        (folder.sources ?? []).every((s) => s.provider === "tmdb" || s.provider === "trakt");
+      if (needsTmdbKey) {
+        setMissingTmdbKey(true);
+        return;
+      }
+      openFolderHub(folder, sourceId);
+      return;
+    }
+
     if (folder.sources && folder.sources.length > 0) {
       const source = folder.sources[0];
       if (source.provider === "tmdb") {
@@ -52,34 +72,14 @@ export function SourceFolderCard({
         }
 
         if (source.tmdbSourceType === "DISCOVER" || source.tmdbSourceType === "COMPANY") {
-          const params: Record<string, string> = {};
-          if (source.sortBy) params["sort_by"] = source.sortBy;
-          if (source.filters) {
-            for (const [k, v] of Object.entries(source.filters)) {
-              if (k === "year") {
-                params[source.mediaType === "TV" ? "first_air_date_year" : "primary_release_year"] = String(v);
-              } else if (k === "voteCountGte") {
-                params["vote_count.gte"] = String(v);
-              } else if (k === "voteAverageGte") {
-                params["vote_average.gte"] = String(v);
-              } else {
-                const snake = k.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-                params[snake] = String(v);
-              }
-            }
-          }
-
-          if (source.tmdbSourceType === "COMPANY" && source.tmdbId) {
-            params["with_companies"] = String(source.tmdbId);
-          }
-
           openGrid({
             title: source.title || folder.title,
             fetcher: async (page: number) => {
-              return tmdbDiscover(settings.tmdbKey!, source.mediaType.toLowerCase() as "movie" | "tv", {
-                ...params,
-                page: String(page),
-              });
+              return tmdbDiscover(
+                settings.tmdbKey!,
+                source.mediaType.toLowerCase() as "movie" | "tv",
+                tmdbSourceParams(source, page),
+              );
             },
           });
           return;
@@ -188,7 +188,7 @@ export function SourceFolderCard({
         </h3>
       )}
 
-      {editMode && sourceId && onEditFolderImages && (
+      {editMode && onEditFolderImages && (
         <div
           className="absolute end-3 top-3 z-10"
           onClick={(e) => {
@@ -281,8 +281,9 @@ export function SourceFolderCard({
         onClose={() => setIsEditModalOpen(false)}
         initialCover={folder.coverImageUrl}
         initialGif={folder.focusGifUrl}
-        onSave={(cover, gif) => {
-          onEditFolderImages(sourceId, folder.id, cover, gif);
+        initialLayout={folder.layout}
+        onSave={(cover, gif, layout) => {
+          onEditFolderImages(sourceId, folder.id, cover, gif, layout);
         }}
       />
     )}

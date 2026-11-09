@@ -175,10 +175,15 @@ test("missing later-season resume reaches the existing sibling identity resolver
       };
     if (name.endsWith("/anime-mapping"))
       return {
+        animeMappingByKitsu: async (id: number) => ({
+          mappings: { imdb_id: "tt2560140" },
+          episodes: { "4": { seasonNumber: id === 310 ? 1 : 3, episodeNumber: 4 } },
+        }),
         kitsuToAnidb: async () => 3100,
         findSiblingAnidbEntries: async () => [3990],
         externalToKitsu: async () => 399,
       };
+    if (name.endsWith("/anime-entry")) return { resolveExternalKitsuId: async () => null };
     if (name.endsWith("/kitsu")) return { kitsuSearchAnime: async () => [] };
     if (name.endsWith("anime-identity-core")) return identityCore;
     if (name.endsWith("stream-ids")) return { buildStreamIds };

@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import { getEpisodeProgress } from "@/lib/episode-progress";
-import { manualWatchedState } from "@/lib/manual-watched";
+import { getEpisodeProgress, createEpisodeProgressSnapshot } from "@/lib/episode-progress";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
@@ -28,6 +27,7 @@ export function useAnimePreferredSeason({
 }): string | null {
   return useMemo(() => {
     if (episodes.length === 0) return null;
+    const local = createEpisodeProgressSnapshot();
     const partScoped =
       splitFranchiseDisplaySeason(parseKitsuId(metaId)) != null ||
       (trackId ? splitFranchiseDisplaySeason(parseKitsuId(trackId)) != null : false);
@@ -97,13 +97,14 @@ export function useAnimePreferredSeason({
         ep.imdbEpisode,
         pmdbWatched,
         ep.absoluteNumber,
+        local,
       );
       if (
         isCurrent &&
         !progress.watched &&
         trackId &&
         trackId !== metaId &&
-        manualWatchedState(metaId, animeSeasonKey(ep), ep.number) !== false
+        local.manualWatchedState(metaId, animeSeasonKey(ep), ep.number) !== false
       ) {
         const alt = getEpisodeProgress(
           trackId,
@@ -120,6 +121,7 @@ export function useAnimePreferredSeason({
           ep.imdbEpisode,
           pmdbWatched,
           ep.absoluteNumber,
+          local,
         );
         if (alt.watched) progress = alt;
       }

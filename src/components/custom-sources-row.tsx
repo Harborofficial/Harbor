@@ -9,7 +9,13 @@ export function CustomSourcesRow({
 }: {
   sourceRow: SourceRow;
   editMode?: boolean;
-  onEditFolderImages?: (sourceId: string, folderId: string, cover: string, gif: string) => void;
+  onEditFolderImages?: (
+    sourceId: string,
+    folderId: string,
+    cover: string,
+    gif: string,
+    layout?: "CLASSIC" | "GRID",
+  ) => void;
 }) {
   if (!sourceRow.folders || sourceRow.folders.length === 0) return null;
 

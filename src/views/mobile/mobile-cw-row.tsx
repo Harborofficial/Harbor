@@ -12,7 +12,14 @@ import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { useHideAnime } from "@/lib/anime-hide";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
-import { listLocalCw, subscribeLocalCw, type LocalCwEntry } from "@/lib/local-cw";
+import {
+  listLocalCw,
+  localCwSourceEnabled,
+  subscribeLocalCw,
+  type LocalCwEntry,
+} from "@/lib/local-cw";
+import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
+import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import { useExternalCw } from "@/lib/feed/external-cw";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
 import { useSettings } from "@/lib/settings";
@@ -100,13 +107,15 @@ export function useMobileCw(limit = 14): LibraryItem[] {
     settings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
   const hideAnime = useHideAnime();
   const externalCw = useExternalCw(
-    !hideSharedCw && (settings.cwSources.trakt || settings.cwSources.simkl),
+    !hideSharedCw &&
+      (settings.cwSources.trakt || settings.cwSources.simkl || settings.cwSources.publicmetadb),
   );
   const [items, setItems] = useState<LibraryItem[]>(() =>
     authKey && cloudKey === authKey ? cloudCache : [],
   );
   const [localVersion, setLocalVersion] = useState(0);
   const dismissVersion = useCwDismissVersion();
+  const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
 
   useEffect(() => {
     if (!authKey) {
@@ -134,13 +143,27 @@ export function useMobileCw(limit = 14): LibraryItem[] {
 
   useEffect(() => subscribeLocalCw(() => setLocalVersion((v) => v + 1)), []);
 
-  return useMemo(() => {
+  const cards = useMemo(() => {
     void localVersion;
     void dismissVersion;
+    void animeIdsVersion;
     const base = hideSharedCw
       ? []
-      : [...items.filter((i) => !ANIME_CLOUD_ID.test(i._id)), ...externalCw];
-    const merged = [...base, ...listLocalCw(hideSharedCw).map(localToLibraryItem)]
+      : [
+          ...(settings.cwSources.library ? items.filter((i) => !ANIME_CLOUD_ID.test(i._id)) : []),
+          ...externalCw.filter(
+            (i) =>
+              (i.external !== "simkl" || settings.cwSources.simkl) &&
+              (i.external !== "trakt" || settings.cwSources.trakt) &&
+              (i.external !== "publicmetadb" || settings.cwSources.publicmetadb),
+          ),
+        ];
+    const merged = [
+      ...base,
+      ...listLocalCw(hideSharedCw)
+        .filter((e) => localCwSourceEnabled(e, settings.cwSources))
+        .map(localToLibraryItem),
+    ]
       .filter(
         (i) =>
           (i.type as string) !== "other" &&
@@ -152,25 +175,23 @@ export function useMobileCw(limit = 14): LibraryItem[] {
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
       .map((e) => e.i);
-    const seen = new Set<string>();
-    const out: LibraryItem[] = [];
-    for (const i of merged) {
-      if (seen.has(i._id)) continue;
-      seen.add(i._id);
-      out.push(i);
-      if (out.length >= limit) break;
-    }
-    return out;
+    return dedupeAnimeCw(merged).slice(0, limit);
   }, [
     items,
     externalCw,
     localVersion,
     dismissVersion,
+    animeIdsVersion,
     limit,
     hideAnime,
     hideSharedCw,
     activeProfile?.id,
+    settings.cwSources,
   ]);
+  useEffect(() => {
+    void warmCwAnimeIdentities(cards, { tmdbKey: settings.tmdbKey });
+  }, [cards, settings.tmdbKey]);
+  return cards;
 }
 
 function toMeta(item: LibraryItem): Meta {

@@ -213,6 +213,12 @@ test("the CW card re-resolves when the title language changes", () => {
   // the card live, not wait for a remount, and must not re-run the artwork
   // hydration that shares the old effect.
   const src = readFileSync("src/components/continue-card.tsx", "utf8");
-  assert.match(src, /resolvePreferredAnimeTitle\(item\._id, settings\.animeTitleLanguage\)/);
-  assert.match(src, /\}, \[item\._id, settings\.animeTitleLanguage\]\);/);
+  assert.match(
+    src,
+    /resolvePreferredAnimeTitle\(\s*item\._id,\s*settings\.animeTitleLanguage,\s*\{[\s\S]*?\}\)\s*\.then/,
+  );
+  assert.match(
+    src,
+    /\},\s*\[\s*item\._id,\s*item\.state\?\.video_id,\s*item\.state\?\.season,\s*item\.state\?\.episode,\s*settings\.animeTitleLanguage,\s*animeIdsVersion,?\s*\]\);/,
+  );
 });

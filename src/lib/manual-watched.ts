@@ -1,6 +1,7 @@
 import {
   isNuvioProviderActive,
-  getNuvioActiveSlot,
+  nuvioWatchedScope,
+  canPersistWatched,
   stremioProfileId as activeProfileId,
   primaryProfileId,
 } from "./active-profile-id";
@@ -45,8 +46,7 @@ let remoteCache: Set<string> | null = null;
 
 function storeKey(kind: keyof typeof PREFIXES): string {
   if (isNuvioProviderActive()) {
-    const slot = getNuvioActiveSlot();
-    return `${PREFIXES[kind]}nuvio.${slot}`;
+    return `${PREFIXES[kind]}${nuvioWatchedScope()}`;
   }
   const id = activeProfileId();
   return id ? PREFIXES[kind] + id : LEGACY_KEYS[kind];
@@ -164,6 +164,7 @@ export function dismissManualWatched(
   metaId: string,
   options: { acknowledged?: boolean } = {},
 ): void {
+  if (!canPersistWatched()) return;
   ensureScope();
   const set = dismissedSet();
   if (set.has(metaId)) return;
@@ -234,15 +235,34 @@ export function manualWatchedState(
   episode: number,
   altIds?: Array<string | null | undefined>,
 ): boolean | undefined {
+  return stateInSets(watchedSet(), unwatchedSet(), metaId, season, episode, altIds);
+}
+
+/** Capture only for a synchronous scan; create a new reader after state changes. */
+export function createManualWatchedReader(): typeof manualWatchedState {
+  const watched = new Set(watchedSet());
+  const unwatched = new Set(unwatchedSet());
+  return (metaId, season, episode, altIds) =>
+    stateInSets(watched, unwatched, metaId, season, episode, altIds);
+}
+
+function stateInSets(
+  watched: Set<string>,
+  unwatched: Set<string>,
+  metaId: string,
+  season: number,
+  episode: number,
+  altIds?: Array<string | null | undefined>,
+): boolean | undefined {
   const k = key(metaId, season, episode);
-  if (watchedSet().has(k)) return true;
-  if (unwatchedSet().has(k)) return false;
+  if (watched.has(k)) return true;
+  if (unwatched.has(k)) return false;
   if (altIds && altIds.length > 0) {
     for (const alt of altIds) {
       if (!alt || alt === metaId) continue;
       const altK = key(alt, season, episode);
-      if (watchedSet().has(altK)) return true;
-      if (unwatchedSet().has(altK)) return false;
+      if (watched.has(altK)) return true;
+      if (unwatched.has(altK)) return false;
     }
   }
   return undefined;
@@ -265,9 +285,14 @@ export function manualEpisodeKeys(metaId: string): {
   return { watched: collect(watchedSet()), unwatched: collect(unwatchedSet()) };
 }
 
-export function reconcileNuvioWatchedEpisodes(slot: number, serverEpisodeKeys: Set<string>): void {
-  const sk = `${PREFIXES.watched}nuvio.${slot}`;
-  const unsk = `${PREFIXES.unwatched}nuvio.${slot}`;
+export function reconcileNuvioWatchedEpisodes(
+  slot: number,
+  serverEpisodeKeys: Set<string>,
+  accountId: string,
+): void {
+  if (!accountId) return;
+  const sk = `${PREFIXES.watched}${nuvioWatchedScope(slot, accountId)}`;
+  const unsk = `${PREFIXES.unwatched}${nuvioWatchedScope(slot, accountId)}`;
 
   const currentLocalWatched = loadSet(sk);
   const currentLocalUnwatched = loadSet(unsk);
@@ -311,6 +336,7 @@ export function setManualWatched(
   episode: number,
   watched: boolean,
 ): void {
+  if (!canPersistWatched()) return;
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   const k = key(metaId, season, episode);
@@ -336,6 +362,7 @@ export function setManualWatchedUpTo(
   episode: number,
   watched: boolean,
 ): void {
+  if (!canPersistWatched()) return;
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   const at = unwatchedAtMap();
@@ -365,6 +392,7 @@ export function setManualWatchedMany(
   episodes: Array<{ season: number; episode: number }>,
   watched: boolean,
 ): void {
+  if (!canPersistWatched()) return;
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   const at = unwatchedAtMap();
@@ -399,6 +427,7 @@ export function setManualWatchedManyAcknowledged(
   episodes: Array<{ season: number; episode: number }>,
   watched: boolean,
 ): void {
+  if (!canPersistWatched()) return;
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   const at = { ...unwatchedAtMap() };
@@ -457,6 +486,7 @@ export function applyRemoteWatched(
   add: Array<{ season: number; episode: number }>,
   unset: Array<{ season: number; episode: number }>,
 ): void {
+  if (!canPersistWatched()) return;
   if (add.length === 0 && unset.length === 0) return;
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
@@ -482,6 +512,7 @@ export function applyRemoteWatched(
 }
 
 export function recordManualWatchedMeta(metaId: string, meta: ManualWatchedMeta): void {
+  if (!canPersistWatched()) return;
   const all = loadMeta();
   const prev = all[metaId];
   undismiss(metaId);
@@ -569,9 +600,9 @@ export function manualWatchedVersion(): number {
 }
 
 if (typeof window !== "undefined") {
-  let lastScope = isNuvioProviderActive() ? `nuvio.${getNuvioActiveSlot()}` : activeProfileId();
+  let lastScope = storeKey("watched");
   const onScopeChange = () => {
-    const nextScope = isNuvioProviderActive() ? `nuvio.${getNuvioActiveSlot()}` : activeProfileId();
+    const nextScope = storeKey("watched");
     if (nextScope === lastScope) return;
     lastScope = nextScope;
     currentScope = "";

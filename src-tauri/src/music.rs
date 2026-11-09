@@ -4,6 +4,10 @@ mod commands;
 mod connector;
 mod connectors;
 mod db;
+#[cfg(not(feature = "music-sidecar"))]
+mod engine;
+#[cfg(feature = "music-sidecar")]
+#[path = "music/engine_sidecar.rs"]
 mod engine;
 mod lastfm;
 mod library;
@@ -24,7 +28,7 @@ pub use model::*;
 pub use spotify::library::*;
 
 use serde::{Deserialize, Serialize};
-use std::sync::atomic::{AtomicU64, AtomicU8, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering};
 use std::sync::Arc;
 use tauri::Manager;
 
@@ -127,6 +131,8 @@ fn bootstrap(database: &db::MusicDb) -> Result<MusicBootstrap, String> {
 const ACTIVE_NONE: u8 = 0;
 const ACTIVE_STREAM: u8 = 1;
 const ACTIVE_SPOTIFY: u8 = 2;
+const ACTIVE_MODULE: u8 = 3;
+const ACTIVE_MODULE_SPOTIFY: u8 = 4;
 
 pub struct MusicState {
     db: db::MusicDb,
@@ -134,6 +140,9 @@ pub struct MusicState {
     engine: engine::MusicEngine,
     spotify: Arc<spotify::SpotifyState>,
     active_engine: AtomicU8,
+    external_primary: AtomicU8,
+    external_crossfade: AtomicU64,
+    external_paused_for_video: AtomicBool,
     play_request: AtomicU64,
     play_commit: tokio::sync::Mutex<()>,
 }
@@ -157,6 +166,9 @@ impl MusicState {
             registry,
             spotify,
             active_engine: AtomicU8::new(ACTIVE_NONE),
+            external_primary: AtomicU8::new(0),
+            external_crossfade: AtomicU64::new((-1.0_f64).to_bits()),
+            external_paused_for_video: AtomicBool::new(false),
             play_request: AtomicU64::new(0),
             play_commit: tokio::sync::Mutex::new(()),
         }
@@ -180,6 +192,7 @@ impl MusicState {
 }
 
 pub fn initialize(app: &tauri::AppHandle) -> Result<(), String> {
+    m3u::configure_event_bridge(app);
     let directory = app
         .path()
         .app_data_dir()
@@ -194,9 +207,12 @@ pub fn initialize(app: &tauri::AppHandle) -> Result<(), String> {
 }
 
 pub fn shutdown(app: &tauri::AppHandle) {
-    let state = app.state::<MusicState>();
+    let Some(state) = app.try_state::<MusicState>() else {
+        return;
+    };
     state.engine.shutdown();
     state.spotify.shutdown();
+    m3u::shutdown_host();
 }
 
 pub fn try_run_connector_worker() -> bool {
@@ -204,10 +220,36 @@ pub fn try_run_connector_worker() -> bool {
 }
 
 pub async fn pause_for_video(app: &tauri::AppHandle) -> Result<bool, String> {
-    let state = app.state::<MusicState>();
+    let Some(state) = app.try_state::<MusicState>() else {
+        return Ok(false);
+    };
     match state.active_engine() {
         ACTIVE_SPOTIFY => state.spotify.pause_for_video().await,
         ACTIVE_STREAM => state.engine.pause_for_video().await,
+        ACTIVE_MODULE_SPOTIFY => {
+            let status = m3u::module_request_async(serde_json::json!({
+                "command":"spotify_state"
+            })).await?;
+            if status["live"] != true || status["paused"] == true { return Ok(false); }
+            m3u::module_request_async(serde_json::json!({
+                "command":"spotify_pause","paused":true
+            })).await?;
+            state.external_paused_for_video.store(true,Ordering::SeqCst);
+            Ok(true)
+        },
+        ACTIVE_MODULE => {
+            let status = m3u::module_request_async(serde_json::json!({
+                "command":"mpv_state","deck":0
+            })).await?;
+            if status["live"] != true || status["paused"] == true {
+                return Ok(false);
+            }
+            m3u::module_request_async(serde_json::json!({
+                "command":"mpv_pause","deck":0,"paused":true
+            })).await?;
+            state.external_paused_for_video.store(true, Ordering::SeqCst);
+            Ok(true)
+        },
         _ => Ok(false),
     }
 }

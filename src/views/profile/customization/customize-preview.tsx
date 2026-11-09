@@ -2,6 +2,7 @@ import { useAuth } from "@/lib/auth";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { currentAuthor } from "@/lib/theme-auth";
+import { parseProfileTheme, profileThemeBackground, withProfileTheme } from "@/lib/profile-theme";
 import type { CustomizationInput, ProfileSummary } from "../profile-types";
 import { AboutCard } from "../about-card";
 import { ProfileHero } from "../profile-hero";
@@ -26,21 +27,34 @@ export function CustomizePreview({
     pageBgColor: form.pageBgColor,
     pageBgImage: form.pageBgImage,
     customHtml: form.customHtml,
-    customCss: form.customCss,
+    customCss: withProfileTheme(form.customCss, parseProfileTheme(summary.customCss)),
     canvasHeight: form.canvasHeight,
     customEnabled: form.customEnabled,
     hideTopBanner: form.hideTopBanner,
   };
   const c = resolveCustomization(preview);
   useFontLink(c.fontHref);
+  const theme = c.themeScope;
 
   const ownerAvatar =
-    activeProfile?.avatar || settings.harborAvatar || user?.avatar || currentAuthor()?.avatar || undefined;
+    activeProfile?.avatar ||
+    settings.harborAvatar ||
+    user?.avatar ||
+    currentAuthor()?.avatar ||
+    undefined;
   const heroAvatar = ownerAvatar || summary.avatarUrl;
   const heroAvatarFallback = summary.avatarUrl || undefined;
 
   return (
-    <div className="min-h-full" style={c.background ? { background: c.background } : undefined}>
+    <div
+      className="min-h-full"
+      data-profile-ui={theme.ui || undefined}
+      style={{
+        ...theme.vars,
+        ...profileThemeBackground(theme, c.background),
+        ...(theme.colorScheme ? { colorScheme: theme.colorScheme } : {}),
+      }}
+    >
       <ProfileHero
         p={preview}
         avatar={heroAvatar}
@@ -52,7 +66,12 @@ export function CustomizePreview({
       <div className="mx-auto w-full max-w-6xl space-y-6 px-6 pb-28 lg:px-10">
         <AboutCard description={preview.description} isOwner userFont={c.font} />
         {c.hasCanvas && (
-          <CanvasCard html={c.html} css={c.css} height={c.height} hiddenFromVisitors={c.hiddenFromVisitors} />
+          <CanvasCard
+            html={c.html}
+            css={c.css}
+            height={c.height}
+            hiddenFromVisitors={c.hiddenFromVisitors}
+          />
         )}
       </div>
     </div>

@@ -228,8 +228,9 @@ export function usePlayerMedia(params: {
   const subAssOverridden = settings.subAssOverride !== "no" && settings.subAssOverride !== "scale";
   const selectedAssSub = isAssTrack(selectedSubTrack);
   const selectedImageSub = isImageSubTrack(selectedSubTrack);
-  const subAssNative =
-    subEmbed && selectedAssSub && (!subAssOverridden || !selectedSubTrack?.external);
+  // Addon ASS subtitles render in mpv like embedded ones, so "Use my style" keeps signs in place.
+  // Harbor's HTML overlay only has their plain text and would move every sign to the bottom.
+  const subAssNative = subEmbed && selectedAssSub;
   const subNativeRender =
     hdrNativeSurface || subAssNative || mpvNativeWindow || (subEmbed && selectedImageSub);
   const assNativeActive = selectedAssSub && (subNativeRender || !subEmbed);

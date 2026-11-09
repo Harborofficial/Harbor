@@ -1,6 +1,9 @@
 import { useMemo } from "react";
-import { getEpisodeProgress, type EpisodeProgress } from "@/lib/episode-progress";
-import { manualWatchedState } from "@/lib/manual-watched";
+import {
+  getEpisodeProgress,
+  createEpisodeProgressSnapshot,
+  type EpisodeProgress,
+} from "@/lib/episode-progress";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
 import { airedOnly } from "../helpers";
@@ -38,6 +41,7 @@ export function useAnimeProgressMap({
   settings: Parameters<typeof spoilerMaskFor>[0];
 }) {
   const progressById = useMemo(() => {
+    const local = createEpisodeProgressSnapshot();
     const m = new Map<number, EpisodeProgress>();
     const add = (ep: KitsuEpisode) => {
       if (m.has(ep.id)) return;
@@ -59,13 +63,14 @@ export function useAnimeProgressMap({
         ep.imdbEpisode,
         pmdbWatched,
         ep.absoluteNumber,
+        local,
       );
       if (
         isCurrent &&
         !prog.watched &&
         trackId &&
         trackId !== metaId &&
-        manualWatchedState(metaId, seasonKey, ep.number) !== false
+        local.manualWatchedState(metaId, seasonKey, ep.number) !== false
       ) {
         const alt = getEpisodeProgress(
           trackId,
@@ -82,6 +87,7 @@ export function useAnimeProgressMap({
           ep.imdbEpisode,
           pmdbWatched,
           ep.absoluteNumber,
+          local,
         );
         if (alt.watched || alt.ratio > prog.ratio) prog = alt;
       }

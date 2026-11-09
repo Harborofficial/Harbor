@@ -1,0 +1,19 @@
+[package]
+name = "harbor-music-module"
+version = "1.0.1"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+url = "2"
+lofty = "0.22"
+librespot-core = "0.8"
+librespot-playback = "0.8"
+librespot-metadata = "0.8"
+realfft = "3"
+tokio = { version = "1", features = ["full"] }
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+libmpv2 = "4"
+libmpv2-sys = "4"

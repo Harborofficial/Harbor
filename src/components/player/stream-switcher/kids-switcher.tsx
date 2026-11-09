@@ -29,6 +29,7 @@ export function KidsStreamSwitcher({
 
   return (
     <div
+      data-harbor-stream-switcher
       className="pointer-events-auto absolute inset-0 z-[60] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#3aa6c4]/95 via-[#1c789f]/96 to-[#0a3d5c]/98 px-8 backdrop-blur-md animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();

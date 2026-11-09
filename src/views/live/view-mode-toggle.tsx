@@ -1,10 +1,20 @@
 import { Grid2x2, Home, LayoutGrid, ListTree } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { isWindowsDesktop } from "@/lib/platform";
+import { isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+
+export function supportsMultiview(): boolean {
+  return isWindowsDesktop() || isMacDesktop();
+}
 
 export type ViewMode = "home" | "grid" | "guide" | "multiview";
 
-export function ViewModeToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
+export function ViewModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: ViewMode;
+  onChange: (m: ViewMode) => void;
+}) {
   const t = useT();
   return (
     <div className="flex h-11 shrink-0 items-center gap-0.5 rounded-xl border border-edge-soft/55 bg-elevated p-1">
@@ -26,7 +36,7 @@ export function ViewModeToggle({ mode, onChange }: { mode: ViewMode; onChange: (
         icon={<ListTree size={14} strokeWidth={2} />}
         label={t("Guide")}
       />
-      {isWindowsDesktop() && (
+      {supportsMultiview() && (
         <ToggleButton
           active={mode === "multiview"}
           onClick={() => onChange("multiview")}

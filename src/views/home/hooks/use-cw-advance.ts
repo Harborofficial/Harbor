@@ -36,8 +36,10 @@ import { franchiseDedupKey } from "@/lib/providers/jikan";
 import { useSettings } from "@/lib/settings";
 import { isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
-import { listLocalCw } from "@/lib/local-cw";
+import { listLocalCw, localCwSourceEnabled } from "@/lib/local-cw";
 import { localToLibraryItem } from "@/lib/continue-watching";
+import { cwAnimeIdentityKey, dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
+import { cwNextDisplayCoords } from "@/lib/cw-next-display";
 
 const FINISHED_RATIO = 0.9;
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -99,10 +101,9 @@ async function animeEntryFollowUp(
     if (cached !== undefined) return cached;
     let fetched: PlayEpisode[] = [];
     try {
-      fetched = await fetchEpisodeList(
-        { id, type: "series", name: item.name } as Meta,
-        { tmdbKey },
-      );
+      fetched = await fetchEpisodeList({ id, type: "series", name: item.name } as Meta, {
+        tmdbKey,
+      });
     } catch {
       // A transient failure must stay retryable: caching the empty result would
       // disable the sequel fallback for this entry for the whole session.
@@ -311,6 +312,14 @@ export function useCwAdvance(
     session: typeof simklSession;
     data: SimklProgress;
   } | null>(null);
+  useEffect(() => {
+    if (!enabled) return;
+    void warmCwAnimeIdentities(
+      [...items.map((item) => advanced.get(item._id) ?? item), ...extra].filter(
+        (item) => isCwMember(item) && !removed.has(item._id) && !isCwDismissed(item),
+      ),
+    );
+  }, [items, advanced, extra, removed, enabled]);
   const simkl =
     !privacyOwner &&
     simklEnabled &&
@@ -522,8 +531,8 @@ export function useCwAdvance(
                 if (privacyOwner) return false;
                 if (checkWatched(s, e)) return true;
                 if (!scoped) return false;
-                return providerAliasCoords(list, s, e).some(
-                  (a) => checkWatched(a.season, a.episode),
+                return providerAliasCoords(list, s, e).some((a) =>
+                  checkWatched(a.season, a.episode),
                 );
               },
               nextSkip,
@@ -547,18 +556,20 @@ export function useCwAdvance(
           if (followUp) nextEp = followUp;
         }
         if (nextEp && nextEpAired(list, nextEp, isAnime)) {
-          const displaySeason = remappedMixed
-            ? nextEp.season
-            : origCur.season !== effCur.season
-              ? origCur.season
-              : nextEp.season;
+          const display = cwNextDisplayCoords(
+            origCur,
+            effCur,
+            nextEp,
+            remappedMixed,
+            i.state?.season === 0,
+          );
           next.set(i._id, {
             ...i,
             state: {
               ...i.state!,
-              season: displaySeason,
-              episode: nextEp.episode,
-              video_id: nextEp.kitsuStreamId ?? `${i._id}:${displaySeason}:${nextEp.episode}`,
+              season: display.season,
+              episode: display.episode,
+              video_id: nextEp.kitsuStreamId ?? `${i._id}:${display.season}:${display.episode}`,
               timeOffset: 0,
               flaggedWatched: 0,
             },
@@ -594,7 +605,9 @@ export function useCwAdvance(
         }
       }
       const baseLibrary = privacyOwner
-        ? listLocalCw(true).map(localToLibraryItem)
+        ? listLocalCw(true)
+            .filter((entry) => localCwSourceEnabled(entry, settings.cwSources))
+            .map(localToLibraryItem)
         : (library ?? items);
       // Playback endpoints remove finished sessions. Keep recent completion anchors
       // available to the existing aired-episode resurfacing path, without saving fake progress.
@@ -717,6 +730,7 @@ export function useCwAdvance(
     simklSession,
     simklEnabled,
     simkl,
+    settings.cwSources,
   ]);
 
   if (
@@ -732,9 +746,13 @@ export function useCwAdvance(
   const base = items
     .map((i) => advanced.get(i._id) ?? i)
     .filter((i) => !removed.has(i._id) && !isCwDismissed(i));
-  if (extra.length === 0) return base;
+  if (extra.length === 0) return dedupeAnimeCw(base);
   const keyOf = (i: LibraryItem) => `${i.type}|${franchiseDedupKey(i.name ?? "")}`;
-  const baseKeys = new Set(base.map(keyOf));
-  const dedupExtra = extra.filter((i) => !baseKeys.has(keyOf(i)) && !isCwDismissed(i));
-  return dedupExtra.length === 0 ? base : base.concat(dedupExtra);
+  const animeIdentity = (i: LibraryItem) =>
+    isAnimeCwItem(i) || cwAnimeIdentityKey(i._id, i.state?.video_id, i.state) != null;
+  const baseKeys = new Set(base.filter((i) => !animeIdentity(i)).map(keyOf));
+  const dedupExtra = extra.filter(
+    (i) => (animeIdentity(i) || !baseKeys.has(keyOf(i))) && !isCwDismissed(i),
+  );
+  return dedupeAnimeCw(dedupExtra.length === 0 ? base : base.concat(dedupExtra));
 }

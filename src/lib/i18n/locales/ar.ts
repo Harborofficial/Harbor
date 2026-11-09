@@ -1,3 +1,4 @@
+import reviews from "./ar/reviews";
 import playOrders from "./ar/play-orders";
 import gameRomLibrary from "./ar/game-rom-library";
 import gameNotes from "./ar/game-notes";
@@ -84,6 +85,7 @@ import settingsRefinements from "./ar/settings-refinements";
 import uiFallback from "./ui-fallback";
 import experimentalUpdates from "./ar/experimental-updates";
 import coverage from "./ar/coverage";
+import subtitles from "./ar/subtitles";
 import settingsFill from "./ar/settings-fill";
 import profileFill from "./ar/profile-fill";
 import appFill from "./ar/app-fill";
@@ -124,6 +126,8 @@ import contextActions from "./ar/context-actions";
 import nytTv from "./ar/nyt-tv";
 
 import gameAchievements from "./ar/game-achievements";
+
+import queueBasket from "./ar/queue-basket";
 
 const ar: Record<string, string> = {
   "collections.feed.more": "تحميل المزيد من المجموعات",
@@ -297,6 +301,7 @@ const ar: Record<string, string> = {
   ...ebookSources,
   ...uiFallback,
   ...coverage,
+  ...subtitles,
   ...settingsFill,
   ...profileFill,
   ...appFill,
@@ -411,6 +416,8 @@ const ar: Record<string, string> = {
   ...gameNotes,
   ...playOrders,
   ...contextActions,
+  ...reviews,
+  ...queueBasket,
 };
 
 export default ar;

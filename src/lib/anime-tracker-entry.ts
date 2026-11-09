@@ -1,10 +1,11 @@
-import { aniZipByAnilist, aniZipByKitsu, type AniZipMapping } from "@/lib/providers/anizip";
+import { aniZipByAnilist, type AniZipMapping } from "@/lib/providers/anizip";
 import {
-  externalToKitsu,
+  animeMappingByKitsu,
   imdbToKitsu,
   kitsuToAnilist,
   tmdbTvToKitsu,
 } from "@/lib/providers/anime-mapping";
+import { resolveExternalKitsuId } from "@/lib/providers/anime-entry";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import {
   animeCoordPairs,
@@ -25,23 +26,8 @@ export type TrackerEntryDeps = {
 function catalogBaseKitsuId(metaId: string): Promise<number | null> {
   const direct = parseKitsuId(metaId);
   if (direct != null) return Promise.resolve(direct);
-  if (metaId.startsWith("mal:")) {
-    const n = Number(metaId.slice(4));
-    return Number.isFinite(n)
-      ? externalToKitsu("myanimelist", n).catch(() => null)
-      : Promise.resolve(null);
-  }
-  if (metaId.startsWith("anilist:")) {
-    const n = Number(metaId.slice(8));
-    return Number.isFinite(n)
-      ? externalToKitsu("anilist", n).catch(() => null)
-      : Promise.resolve(null);
-  }
-  if (metaId.startsWith("anidb:")) {
-    const n = Number(metaId.slice(6));
-    return Number.isFinite(n)
-      ? externalToKitsu("anidb", n).catch(() => null)
-      : Promise.resolve(null);
+  if (metaId.startsWith("mal:") || metaId.startsWith("anilist:") || metaId.startsWith("anidb:")) {
+    return resolveExternalKitsuId(metaId);
   }
   if (/^tt\d+/.test(metaId)) return imdbToKitsu(metaId).catch(() => null);
   const tmdb = /^tmdb:tv:(\d+)/.exec(metaId);
@@ -52,7 +38,7 @@ function catalogBaseKitsuId(metaId: string): Promise<number | null> {
 async function kitsuOfAnilist(anilistId: number): Promise<number | null> {
   const az = await aniZipByAnilist(anilistId).catch(() => null);
   if (typeof az?.mappings?.kitsu_id === "number") return az.mappings.kitsu_id;
-  return externalToKitsu("anilist", anilistId).catch(() => null);
+  return resolveExternalKitsuId(`anilist:${anilistId}`);
 }
 
 /** Highest provider season an AniZip entry covers; a flat entry covers season 1. */
@@ -66,7 +52,7 @@ function maxCoveredSeason(az: AniZipMapping | null): number {
 
 const DEFAULT_DEPS: TrackerEntryDeps = {
   baseKitsuId: catalogBaseKitsuId,
-  azByKitsu: (kitsuId) => aniZipByKitsu(kitsuId).catch(() => null),
+  azByKitsu: (kitsuId) => animeMappingByKitsu(kitsuId).catch(() => null),
   anilistOfKitsu: (kitsuId) => kitsuToAnilist(kitsuId).catch(() => null),
   sequels: async (anilistId) => {
     // Browser-only AniList client, loaded lazily so this module stays testable.

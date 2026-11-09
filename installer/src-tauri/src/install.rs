@@ -107,6 +107,8 @@ fn component_of(rel: &Path) -> Option<&'static str> {
         Some("plugins")
     } else if first.eq_ignore_ascii_case("resources") && second.eq_ignore_ascii_case("pokemon-engine") {
         Some("games")
+    } else if first.eq_ignore_ascii_case("components") && second.eq_ignore_ascii_case("music") {
+        Some("music")
     } else {
         None
     }
@@ -159,6 +161,9 @@ pub struct Facts {
 
 #[cfg(feature = "payload")]
 fn bucket_for(name: &str) -> &'static str {
+    if component_of(Path::new(name)) == Some("music") {
+        return "music";
+    }
     let n = name.to_ascii_lowercase();
     if n.contains("mpv") {
         "mpv"
@@ -525,12 +530,14 @@ fn write_uninstall_entry(_dest: &Path, _version: &str, _size_kb: u32) -> Result<
     Ok(())
 }
 
-const SIDECARS: [&str; 5] = [
+const SIDECARS: [&str; 7] = [
     "mpv.exe",
     "yt-dlp.exe",
     "ffmpeg.exe",
     "ffprobe.exe",
     "stremio-server.exe",
+    "harbor-music-module.exe",
+    "harbor-extensions-module.exe",
 ];
 
 #[derive(Clone, Serialize)]
@@ -822,6 +829,90 @@ pub(crate) fn resolve_disabled(dest: &Path, requested: Option<Vec<String>>) -> V
     }
 }
 
+/// A sidecar killed by `stop_harbor` can keep its file handle for a moment, and a scanner can
+/// hold a freshly written executable. Retry only those transient sharing failures.
+#[cfg(feature = "payload")]
+fn transient_lock(error: &std::io::Error) -> bool {
+    matches!(
+        error.kind(),
+        std::io::ErrorKind::PermissionDenied | std::io::ErrorKind::WouldBlock
+    ) || matches!(error.raw_os_error(), Some(32 | 33 | 26 | 16))
+}
+
+#[cfg(feature = "payload")]
+fn retry_locked<T>(mut operation: impl FnMut() -> std::io::Result<T>) -> std::io::Result<T> {
+    for attempt in 0..20 {
+        match operation() {
+            Ok(value) => return Ok(value),
+            Err(error) if attempt < 19 && transient_lock(&error) => {
+                std::thread::sleep(std::time::Duration::from_millis(150));
+            }
+            Err(error) => return Err(error),
+        }
+    }
+    unreachable!("retry loop always returns")
+}
+
+/// Windows can leave an executable image locked even after its process has exited (for example
+/// a Music sidecar stuck in driver unload). Such a file can still be renamed, so move the old
+/// image out of the install tree instead of failing the whole install.
+#[cfg(feature = "payload")]
+fn replace_locked_file(dest: &Path, path: &Path) -> std::io::Result<()> {
+    let name = path
+        .file_name()
+        .map(|name| name.to_string_lossy().to_string())
+        .unwrap_or_else(|| "payload".to_string());
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|value| value.as_millis())
+        .unwrap_or(0);
+    let backup = dest
+        .join(".harbor-replaced")
+        .join(format!("{name}-{}-{stamp}", std::process::id()));
+    if let Some(parent) = backup.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    fs::rename(path, backup)
+}
+
+#[cfg(feature = "payload")]
+fn write_payload_file(dest: &Path, path: &Path, bytes: &[u8]) -> Result<(), String> {
+    let write = || retry_locked(|| fs::write(path, bytes));
+    let describe = |error: &std::io::Error| {
+        format!(
+            "write {}: {error}. Close Harbor and any playback still running, then try again.",
+            path.display()
+        )
+    };
+    match write() {
+        Ok(()) => Ok(()),
+        Err(error) if transient_lock(&error) => match replace_locked_file(dest, path) {
+            Ok(()) => write().map_err(|error| describe(&error)),
+            Err(_) => Err(describe(&error)),
+        },
+        Err(error) => Err(describe(&error)),
+    }
+}
+
+#[cfg(feature = "payload")]
+fn remove_payload_file(dest: &Path, path: &Path) -> Result<(), String> {
+    let describe = |error: &std::io::Error| {
+        format!(
+            "remove {}: {error}. Close Harbor and any playback still running, then try again.",
+            path.display()
+        )
+    };
+    match retry_locked(|| fs::remove_file(path)) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) if transient_lock(&error) => match replace_locked_file(dest, path) {
+            Ok(()) => Ok(()),
+            Err(_) => Err(describe(&error)),
+        },
+        Err(error) => Err(describe(&error)),
+    }
+}
+
 #[cfg(feature = "payload")]
 pub(crate) fn install_core(
     dest: &Path,
@@ -885,9 +976,7 @@ fn extract_payload(
         }
         let mut buf = Vec::with_capacity(entry.size() as usize);
         entry.read_to_end(&mut buf).map_err(|e| e.to_string())?;
-        fs::write(&out, &buf).map_err(|e| {
-            format!("write {}: {e}. Close Harbor and any playback still running, then try again.", out.display())
-        })?;
+        write_payload_file(dest, &out, &buf)?;
         shipped.insert(rel.clone());
         done += entry.size();
         let pct = 5.0 + (done as f64 / total as f64) * 80.0;
@@ -1022,7 +1111,7 @@ pub async fn run_repair(
 /// Removes every file a deselected component owns, so repair can also serve as "change which
 /// features are installed" without leaving the old files behind.
 #[cfg(feature = "payload")]
-fn prune_disabled(dest: &Path, disabled: &[String]) {
+fn prune_disabled(dest: &Path, disabled: &[String]) -> Result<(), String> {
     let me = std::env::current_exe().ok();
     let mut found = Vec::new();
     collect_files(dest, dest, &mut found);
@@ -1034,9 +1123,10 @@ fn prune_disabled(dest: &Path, disabled: &[String]) {
         if me.as_deref() == Some(full.as_path()) {
             continue;
         }
-        let _ = fs::remove_file(&full);
+        remove_payload_file(dest, &full)?;
     }
     prune_empty_dirs(dest, dest);
+    Ok(())
 }
 
 #[cfg(feature = "payload")]
@@ -1106,16 +1196,19 @@ fn repair_blocking(app: AppHandle, dest: String, disabled_features: Option<Vec<S
         let mut entry = archive.by_index(i).map_err(|e| e.to_string())?;
         let mut buf = Vec::with_capacity(size as usize);
         entry.read_to_end(&mut buf).map_err(|e| e.to_string())?;
-        fs::write(&out, &buf).map_err(|e| {
-            format!("write {}: {e}. Close Harbor and any playback still running, then try again.", out.display())
-        })?;
+        write_payload_file(&dest, &out, &buf)?;
         report.restored_bytes += size;
         emit(&app, 2.0 + (done as f64 / total as f64) * 84.0, &format!("Restoring {name}"));
     }
 
     if !disabled.is_empty() {
+        if !report.stopped_harbor {
+            report.stopped_harbor = true;
+            emit(&app, 86.0, "Closing the running version");
+            stop_harbor();
+        }
         emit(&app, 86.0, "Removing deselected components");
-        prune_disabled(&dest, &disabled);
+        prune_disabled(&dest, &disabled)?;
     }
 
     emit(&app, 88.0, "Checking shortcuts");
@@ -1130,6 +1223,8 @@ fn repair_blocking(app: AppHandle, dest: String, disabled_features: Option<Vec<S
     report.registry_restored = !uninstall_entry_intact(&dest, &version);
     write_uninstall_entry(&dest, &version, (total / 1024) as u32)?;
     write_install_marker(&dest, &version, &disabled)?;
+    // Locked images moved aside earlier can be cleaned once their process is gone.
+    let _ = fs::remove_dir_all(dest.join(".harbor-replaced"));
 
     emit(&app, 100.0, "Finished");
     Ok(report)
@@ -1409,6 +1504,105 @@ mod feature_selection_tests {
         assert!(entry_allowed(Path::new("libmpv-2.dll"), &disabled));
         assert!(entry_allowed(Path::new("uninstall.exe"), &disabled));
         assert!(entry_allowed(Path::new("resources/pokemon-notes.txt"), &disabled));
+    }
+
+    #[test]
+    fn closing_harbor_also_stops_optional_native_modules() {
+        for name in ["harbor-music-module.exe", "harbor-extensions-module.exe"] {
+            assert!(
+                SIDECARS.iter().any(|entry| entry.eq_ignore_ascii_case(name)),
+                "{name} must be stopped before its files are replaced or removed"
+            );
+        }
+    }
+
+    #[test]
+    fn music_payload_is_selected_without_swapping_harbor_executables() {
+        let disabled = keys(&["music"]);
+        assert_eq!(component_of(Path::new("components/music/HarborMusic.dll")), Some("music"));
+        assert_eq!(component_of(Path::new("components/music/ui/index.js")), Some("music"));
+        assert!(!entry_allowed(Path::new("components/music/HarborMusic.dll"), &disabled));
+        assert!(entry_allowed(Path::new("components/music/HarborMusic.dll"), &[]));
+        assert!(entry_allowed(Path::new("harbor.exe"), &disabled));
+        assert!(entry_allowed(Path::new("libmpv-2.dll"), &disabled));
+        assert_eq!(bucket_for("components/music/HarborMusic.dll"), "music");
+    }
+
+    #[test]
+    fn removing_and_readding_music_preserves_existing_app_data() {
+        // A Modify/Repair operation owns the installation directory, never the
+        // pre-modularity Harbor application-data directory or WebView storage.
+        let root = std::env::temp_dir().join(format!(
+            "harbor-music-preservation-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()
+        ));
+        let install = root.join("installed").join("Harbor");
+        let data = root.join("AppData").join("Roaming").join("app.harbor");
+        fs::create_dir_all(install.join("components/music")).unwrap();
+        fs::create_dir_all(data.join("spotify")).unwrap();
+        fs::create_dir_all(data.join("WebView2/IndexedDB")).unwrap();
+
+        fs::write(install.join("harbor.exe"), b"original core").unwrap();
+        fs::write(install.join("components/music/harbor-music-module.exe"), b"module v1").unwrap();
+        for (relative, contents) in [
+            ("music.db", b"existing playlists".as_slice()),
+            ("music-other-profile.db", b"existing other profile".as_slice()),
+            ("secrets.json", b"existing Spotify and Last.fm connections".as_slice()),
+            ("settings.json", b"existing Music settings".as_slice()),
+            ("music-audio.json", b"existing audio preferences".as_slice()),
+            ("spotify/credentials.json", b"legacy Spotify sign-in".as_slice()),
+            ("WebView2/IndexedDB/music", b"existing player state".as_slice()),
+        ] {
+            fs::write(data.join(relative), contents).unwrap();
+        }
+        let saved = [
+            "music.db", "music-other-profile.db", "secrets.json",
+            "settings.json", "music-audio.json",
+            "spotify/credentials.json", "WebView2/IndexedDB/music",
+        ].map(|relative| (relative, fs::read(data.join(relative)).unwrap()));
+
+        prune_disabled(&install, &keys(&["music"])).unwrap();
+        assert!(!install.join("components/music/harbor-music-module.exe").exists());
+        assert_eq!(fs::read(install.join("harbor.exe")).unwrap(), b"original core");
+        for (relative, contents) in &saved {
+            assert_eq!(fs::read(data.join(relative)).unwrap(), *contents, "{relative}");
+        }
+
+        // Adding the component back restores program files; data is not copied
+        // to a new location, migrated, or reset.
+        fs::create_dir_all(install.join("components/music")).unwrap();
+        fs::write(install.join("components/music/harbor-music-module.exe"), b"module v2").unwrap();
+        for (relative, contents) in &saved {
+            assert_eq!(fs::read(data.join(relative)).unwrap(), *contents, "{relative}");
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn removing_extensions_preserves_the_existing_user_data() {
+        let root = std::env::temp_dir().join(format!("harbor-extensions-preservation-{}-{}",
+            std::process::id(), std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        let install = root.join("installed");
+        let data = root.join("AppData/app.harbor/capstan");
+        fs::create_dir_all(install.join("capstan/runtime/bin")).unwrap();
+        fs::create_dir_all(&data).unwrap();
+        fs::write(install.join("harbor.exe"), b"core").unwrap();
+        for file in ["harbor-extensions-module.exe", "extensions-module.json", "capstan.jar", "runtime/bin/java.exe"] {
+            fs::write(install.join("capstan").join(file), b"component").unwrap();
+            assert!(!entry_allowed(&Path::new("capstan").join(file), &keys(&["plugins"])));
+            assert!(entry_allowed(&Path::new("capstan").join(file), &[]));
+        }
+        fs::write(data.join("existing-extension-data"), b"preserved").unwrap();
+        prune_disabled(&install, &keys(&["plugins"])).unwrap();
+        assert!(!install.join("capstan/harbor-extensions-module.exe").exists());
+        assert!(!install.join("capstan/capstan.jar").exists());
+        assert!(!install.join("capstan/runtime/bin/java.exe").exists());
+        assert_eq!(fs::read(install.join("harbor.exe")).unwrap(), b"core");
+        assert_eq!(fs::read(data.join("existing-extension-data")).unwrap(), b"preserved");
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

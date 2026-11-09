@@ -80,6 +80,25 @@ function pinCommentsLast(order: CardKey[]): CardKey[] {
   return out;
 }
 
+/** Whether the owner has hidden a card from visitors. */
+export function isCardHidden(layout: CardLayout | undefined, key: CardKey): boolean {
+  return (layout?.hidden ?? []).includes(key);
+}
+
+/** Hidden cards render only while the owner is arranging the profile. */
+export function isCardShown(
+  layout: CardLayout | undefined,
+  key: CardKey,
+  opts: { arranging?: boolean } = {},
+): boolean {
+  return !isCardHidden(layout, key) || opts.arranging === true;
+}
+
+/** A rating quote needs a visible Comments card to give the viewer a composer. */
+export function canCommentOnRating(layout: CardLayout | undefined): boolean {
+  return !isCardHidden(layout, "comments");
+}
+
 export function moveCard(order: CardKey[], key: CardKey, dir: -1 | 1): CardKey[] {
   const i = order.indexOf(key);
   const j = i + dir;

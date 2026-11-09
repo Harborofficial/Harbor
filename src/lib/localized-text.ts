@@ -1,7 +1,11 @@
+import { isGenericEpisodeName } from "@/lib/providers/anime-episode-build";
 import {
-  isGenericEpisodeName,
-} from "@/lib/providers/anime-episode-build";
-import { episodeLanguageBase, episodeTextRank, isTextInLanguage, isUsableLocalizedText, type EpisodeTextInput } from "@/lib/episode-text-language";
+  episodeLanguageBase,
+  episodeTextRank,
+  isTextInLanguage,
+  isUsableLocalizedText,
+  type EpisodeTextInput,
+} from "@/lib/episode-text-language";
 import { isPlaceholderEpisodeText } from "@/lib/episode-text-placeholder";
 
 /**
@@ -65,10 +69,7 @@ export function pickLocalizedText(
     if (forName && isGenericEpisodeName(text)) continue;
     const rank = candidate.rank ?? rankLocalizedText(text, lang);
     const score =
-      candidate.score ??
-      (forName
-        ? (isGenericEpisodeName(text) ? -1 : 0) + Math.min(text.length, 60)
-        : Math.min(text.length, 200));
+      candidate.score ?? (forName ? Math.min(text.length, 60) : Math.min(text.length, 200));
     if (best == null || rank > best.rank || (rank === best.rank && score > best.score)) {
       best = { text, rank, score };
     }
@@ -82,23 +83,28 @@ function pickPreferredEpisodeText(
   lang?: string,
   forName = false,
 ): string | undefined {
-  const candidates = (inputs: EpisodeTextInput[], prefer: boolean) => inputs.map((input, i) => {
-    const candidate = typeof input === "object" && input ? input : { text: input };
-    const text = candidate.text ?? "";
-    const rank = episodeTextRank(text, candidate.language, lang);
-    const uncertain = rank === 2 && episodeLanguageBase(lang) !== "en";
-    return {
-      text,
-      rank,
-      score: candidate.score ?? (prefer ? (uncertain ? -1 : 300 - i) : Math.min(text.length, forName ? 60 : 200)),
-    };
-  });
+  const candidates = (inputs: EpisodeTextInput[], prefer: boolean) =>
+    inputs.map((input, i) => {
+      const candidate = typeof input === "object" && input ? input : { text: input };
+      const text = candidate.text ?? "";
+      const rank = episodeTextRank(text, candidate.language, lang);
+      const uncertain = rank === 2 && episodeLanguageBase(lang) !== "en";
+      return {
+        text,
+        rank,
+        score:
+          candidate.score ??
+          (prefer ? (uncertain ? -1 : 300 - i) : Math.min(text.length, forName ? 60 : 200)),
+      };
+    });
   const all = [...candidates(preferred, true), ...candidates(fallback, false)];
-  const real = all.filter((candidate) => candidate.text.trim() && !isPlaceholderEpisodeText(candidate.text) && (!forName || !isGenericEpisodeName(candidate.text)));
-  return pickLocalizedText(
-    real.length ? real : all,
-    { forName, lang },
+  const real = all.filter(
+    (candidate) =>
+      candidate.text.trim() &&
+      !isPlaceholderEpisodeText(candidate.text) &&
+      (!forName || !isGenericEpisodeName(candidate.text)),
   );
+  return pickLocalizedText(real.length ? real : all, { forName, lang });
 }
 
 export function pickPreferredEpisodeTitle(

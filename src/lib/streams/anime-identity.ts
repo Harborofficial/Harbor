@@ -1,5 +1,5 @@
-import { aniZipByKitsu } from "@/lib/providers/anizip";
 import {
+  animeMappingByKitsu,
   externalToKitsu,
   findSiblingAnidbEntries,
   imdbToKitsu,
@@ -8,6 +8,7 @@ import {
   tmdbTvToKitsu,
 } from "@/lib/providers/anime-mapping";
 import { franchiseRoot } from "@/lib/providers/anime-franchise-root";
+import { resolveExternalKitsuId } from "@/lib/providers/anime-entry";
 import { kitsuSearchAnime } from "@/lib/providers/kitsu";
 import type { PlayEpisode } from "@/lib/view";
 import {
@@ -28,9 +29,7 @@ async function baseKitsuId(metaId: string): Promise<number | null> {
   const match = ANIME_META_RX.exec(metaId);
   if (match) {
     if (match[1] === "kitsu") return Number(match[2]);
-    if (match[1] === "mal")
-      return externalToKitsu("myanimelist", Number(match[2])).catch(() => null);
-    return externalToKitsu(match[1], Number(match[2])).catch(() => null);
+    return resolveExternalKitsuId(metaId);
   }
   if (/^tt\d+/.test(metaId)) return imdbToKitsu(metaId).catch(() => null);
   const tmdb = /^tmdb:tv:(\d+)/.exec(metaId);
@@ -62,7 +61,7 @@ const IDENTITY_CACHE_MAX = 400;
 
 async function resolveViaSiblingEntry(
   kitsuId: number,
-  az: Awaited<ReturnType<typeof aniZipByKitsu>>,
+  az: Awaited<ReturnType<typeof animeMappingByKitsu>>,
   pairs: Array<[number, number]>,
 ): Promise<AnimeStreamIdentity | null> {
   const season = pairs[0][0];
@@ -87,7 +86,9 @@ async function resolveViaSiblingEntry(
     for (const anidb of siblings.slice(0, 4)) {
       const siblingKitsu = await externalToKitsu("anidb", anidb).catch(() => null);
       if (!siblingKitsu || siblingKitsu === kitsuId) continue;
-      const siblingAz = await aniZipByKitsu(siblingKitsu).catch(() => null);
+      const siblingAz = await animeMappingByKitsu(siblingKitsu, ["thetvdb_id", "imdb_id"]).catch(
+        () => null,
+      );
       const number = findAnimeEntryNumber(siblingAz, pairs);
       if (number != null) {
         return { streamId: `kitsu:${siblingKitsu}:${number}`, kitsuId: siblingKitsu, number };
@@ -109,7 +110,7 @@ async function resolveTask(
   if (kitsuId == null) return null;
   const pairs = animeCoordPairs(coords);
   if (pairs.length === 0) return null;
-  const az = await aniZipByKitsu(kitsuId).catch(() => null);
+  const az = await animeMappingByKitsu(kitsuId, ["thetvdb_id", "imdb_id"]).catch(() => null);
   const number = findAnimeEntryNumber(az, pairs);
   if (number != null) return { streamId: `kitsu:${kitsuId}:${number}`, kitsuId, number };
   return resolveViaSiblingEntry(kitsuId, az, pairs);
@@ -152,7 +153,7 @@ export async function foreignAnimeProviderSeasons(
       kitsuId = await imdbToKitsu(imdbFallbackId).catch(() => null);
     }
     if (kitsuId == null) return null;
-    const az = await aniZipByKitsu(kitsuId).catch(() => null);
+    const az = await animeMappingByKitsu(kitsuId, ["thetvdb_id", "imdb_id"]).catch(() => null);
     if (!az?.mappings) return null;
     // Scoped rollout: only franchises in the allowlist get foreign-season
     // handling; every other title keeps stock behavior.

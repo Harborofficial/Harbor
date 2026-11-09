@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Film } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
 import { isGenericSeasonName } from "@/lib/season-name";
 import type { PickerItem } from "./series-episodes/season-arc-picker";
 import { useSeasonExplorerArtwork, type useSeasonExplorerView } from "./use-season-explorer";
@@ -89,9 +90,10 @@ function SeasonPoster({
   const [failed, setFailed] = useState<string | null>(null);
   useEffect(() => setFailed(null), [src]);
   const usable = src && src !== failed ? src : undefined;
+  const cachedSrc = useProxiedImageSrc(usable, { forceProxy: true, persistent: true });
   return usable ? (
     <img
-      src={usable}
+      src={cachedSrc}
       alt=""
       loading="lazy"
       decoding="async"

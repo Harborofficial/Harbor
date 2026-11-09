@@ -81,11 +81,10 @@ export function QueueUpNext({
               onClick={() => {
                 // Playing the next episode of the current show must go through
                 // auto-play, otherwise keep-same-source never runs.
-                openPicker(
-                  item.meta,
-                  item.episode,
-                  item.meta.id === meta.id ? { autoPlay: true } : undefined,
-                );
+                openPicker(item.meta, item.episode, {
+                  queueItemId: item.id,
+                  autoPlay: item.meta.id === meta.id,
+                });
                 onClose();
               }}
               className="flex min-w-0 flex-1 items-center gap-3 text-start disabled:cursor-default"

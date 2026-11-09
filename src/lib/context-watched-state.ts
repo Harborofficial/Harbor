@@ -369,7 +369,7 @@ export async function readContextWatchedSnapshot(
   };
 }
 
-function localWatched(input: ContextWatchedInput, key: string): boolean | undefined {
+export function localWatched(input: ContextWatchedInput, key: string): boolean | undefined {
   const id = sourceId(input);
   if (key === "movie")
     return [id, input.imdbId].some(

@@ -2,6 +2,7 @@ import { ArrowLeft, Check, Eye } from "lucide-react";
 import { useRef, useState } from "react";
 import { socialPost } from "@/lib/social/client";
 import { useT } from "@/lib/i18n";
+import { parseProfileTheme, stripProfileTheme, withProfileTheme } from "@/lib/profile-theme";
 import type { CustomizationInput, ProfileSummary } from "../profile-types";
 import { CustomizePreview } from "./customize-preview";
 import { PreviewHandle } from "./preview-handle";
@@ -26,7 +27,7 @@ export function CustomizationPanel({
     pageBgColor: summary.pageBgColor ?? "",
     pageBgImage: summary.pageBgImage ?? "",
     customHtml: summary.customHtml ?? "",
-    customCss: summary.customCss ?? "",
+    customCss: stripProfileTheme(summary.customCss),
     canvasHeight: summary.canvasHeight ?? CANVAS_DEFAULT,
     customEnabled: summary.customEnabled ?? false,
     hideTopBanner: summary.hideTopBanner ?? false,
@@ -59,7 +60,7 @@ export function CustomizationPanel({
         pageBgColor: form.pageBgColor.trim(),
         pageBgImage: form.pageBgImage.trim(),
         customHtml: form.customHtml,
-        customCss: form.customCss,
+        customCss: withProfileTheme(form.customCss, parseProfileTheme(summary.customCss)),
         canvasHeight: form.canvasHeight,
         customEnabled: form.customEnabled,
         hideTopBanner: form.hideTopBanner,

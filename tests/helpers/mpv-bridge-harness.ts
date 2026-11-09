@@ -54,6 +54,17 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
   const handlers = new Map<string, (event: { payload: unknown }) => void>();
   const commands: Array<{ command: string; args: Record<string, unknown> }> = [];
   const errors: string[] = [];
+  // Fixed RAM and buffer values keep playback tests independent of the test machine.
+  const totalPhysBytes = 16 * 1024 ** 3;
+  const autoBufferProfile = () => ({
+    cacheSecs: 300,
+    readaheadSecs: 300,
+    maxBytes: 768 * 1024 ** 2,
+    maxBackBytes: 256 * 1024 ** 2,
+    pauseWaitSecs: 1,
+  });
+  const formatMpvBytes = (bytes: number) =>
+    bytes % 1024 ** 3 === 0 ? `${bytes / 1024 ** 3}GiB` : `${Math.round(bytes / 1024 ** 2)}MiB`;
   const properties = new Map<string, unknown>([
     ["sid", "no"],
     ["secondary-sid", "no"],
@@ -86,6 +97,9 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
         return () => handlers.delete(name);
       },
     },
+    "./buffer-profile": { autoBufferProfile, formatMpvBytes },
+    "@/lib/native-memory": { getTotalPhysBytes: () => totalPhysBytes },
+    "./pause-trace": { traceFrameDrops() {}, tracePlayback() {} },
     "@/lib/subtitles/prepare": {
       prepareSubtitle: (input: { url: string }) => prepare(input),
       SubtitlePreparationError: RealSubtitlePreparationError,
@@ -159,7 +173,9 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     },
     { warn() {}, info() {} },
     {
-      get visibilityState() { return visibilityState; },
+      get visibilityState() {
+        return visibilityState;
+      },
       addEventListener: documentEvents.addEventListener.bind(documentEvents),
       removeEventListener: documentEvents.removeEventListener.bind(documentEvents),
     },
@@ -173,7 +189,9 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     bridge,
     commands,
     errors,
-    emitWindow(name: string) { windowEvents.dispatchEvent(new Event(name)); },
+    emitWindow(name: string) {
+      windowEvents.dispatchEvent(new Event(name));
+    },
     emitVisibility(state: DocumentVisibilityState) {
       visibilityState = state;
       documentEvents.dispatchEvent(new Event("visibilitychange"));

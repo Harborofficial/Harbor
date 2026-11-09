@@ -16,9 +16,24 @@ const EPISODE_RATINGS_TTL_MS = 60 * 60_000;
 const EMPTY_EPISODE_RATINGS_TTL_MS = 60_000;
 const episodeCache = new Map<string, { ratings: Map<string, number>; expiresAt: number }>();
 const episodeInflight = new Map<string, Promise<Map<string, number>>>();
+const episodeListeners = new Map<string, Set<() => void>>();
+
+export function subscribeHarborImdbEpisodes(seriesTt: string, listener: () => void): () => void {
+  const listeners = episodeListeners.get(seriesTt) ?? new Set<() => void>();
+  episodeListeners.set(seriesTt, listeners);
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) episodeListeners.delete(seriesTt);
+  };
+}
 
 registerEvictable("harbor-imdb-episodes", (aggressive) => {
-  if (aggressive) episodeCache.clear();
+  if (!aggressive) return;
+  episodeCache.clear();
+  for (const listeners of episodeListeners.values()) {
+    for (const listener of listeners) listener();
+  }
 });
 
 registerEvictable("harbor-imdb-parental", (aggressive) => {
@@ -41,7 +56,7 @@ export async function harborImdbEpisodes(seriesTt: string): Promise<Map<string, 
         const j = (await res.json()) as { ratings?: Record<string, number> };
         for (const [k, raw] of Object.entries(j.ratings ?? {})) {
           const v = Number(raw);
-          if (Number.isFinite(v) && v > 0) map.set(k, v);
+          if (Number.isFinite(v) && v > 0 && v <= 10) map.set(k, v);
         }
       }
     } catch {
@@ -59,6 +74,7 @@ export async function harborImdbEpisodes(seriesTt: string): Promise<Map<string, 
       },
       200,
     );
+    for (const listener of episodeListeners.get(seriesTt) ?? []) listener();
     return map;
   })();
   episodeInflight.set(seriesTt, p);

@@ -21,13 +21,14 @@ import {
   UserPlus,
   Wallpaper,
   X,
+  ListPlus,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useActiveAddon } from "@/lib/active-addon";
 import { copyText } from "@/components/player/copy-link-button";
 import { emitListToast } from "@/components/lists/list-toast";
 import { shareDeepLink } from "@/lib/deep-link";
-import { useAuth } from "@/lib/auth";
+import { readActiveStremioAuthKey, useAuth } from "@/lib/auth";
 import {
   useContextMenu,
   registeredContextTarget,
@@ -81,7 +82,7 @@ import {
   dispatchKeyboardContextMenu,
   editingTarget,
 } from "@/lib/context-content";
-import { useProfiles } from "@/lib/profiles";
+import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { MenuSurface, menuItemClass, useMenuExecution } from "./context-menu/menu-surface";
 import { ActionItems, QuickActions, MenuIcon } from "./context-menu/action-items";
@@ -101,6 +102,11 @@ import { useManualDownload } from "./context-menu/use-manual-download";
 import { LastPlaybackCommand } from "./context-menu/last-playback-command";
 import { MenuBrandFooter } from "./context-menu/menu-brand-footer";
 import { playerContextSources } from "./context-menu/player-actions";
+import { queueAdd, queueIndexOf } from "@/lib/queue";
+import { captureMembershipProfile, isMembershipProfileCurrent } from "@/lib/membership-operations";
+import { ANIME_CLOUD_ID, cloudWriteId, libraryGetOneStrict, type LibraryItem } from "@/lib/stremio";
+import { resolveQueueEpisode } from "@/lib/queue-resolve-episode";
+import { useQueueSurface } from "@/hooks/use-queue-surface";
 
 const MENU_WIDTH = 220;
 const SUBTITLE_MENU_WIDTH = 360;
@@ -126,6 +132,15 @@ const VIEW_LABELS: Record<ViewSummonable, string> = {
 
 export function ContextMenu() {
   const { state, close: closeCurrent, completeClose, open } = useContextMenu();
+  const queueSurface = useQueueSurface();
+  const queueMenuRef = useRef(state);
+  queueMenuRef.current = state;
+
+  useEffect(() => {
+    return () => {
+      queueMenuRef.current = null;
+    };
+  }, []);
   const close = useCallback(
     (restoreFocus = true) => closeCurrent(restoreFocus, state?.session),
     [closeCurrent, state?.session],
@@ -151,8 +166,8 @@ export function ContextMenu() {
     state?.target.kind === "meta" && state.target.player ? availablePlayerActions : null;
   const t = useT();
   const activeAddon = useActiveAddon();
-  const { activeProfile } = useProfiles();
-  const { user: stremioUser } = useAuth();
+  const { activeProfile, profiles } = useProfiles();
+  const { user: stremioUser, authKey } = useAuth();
   const authorId = useSyncExternalStore(
     subscribeAuthor,
     () => currentAuthor()?.id ?? null,
@@ -564,6 +579,86 @@ export function ContextMenu() {
           icon={<Info size={14} strokeWidth={2} />}
           label={t("View details")}
           onClick={handleDetails}
+        />,
+      );
+    }
+    if (queueSurface && organizedMedia && (!episodeScope || targetEpisode)) {
+      const exactTarget = meta.type === "movie" || !!targetEpisode;
+      const queued = exactTarget && queueIndexOf(meta, targetEpisode) >= 0;
+
+      items.push(
+        <Item
+          key="add-to-queue"
+          icon={
+            queued ? <Check size={14} strokeWidth={2} /> : <ListPlus size={14} strokeWidth={2} />
+          }
+          label={queued ? t("In your queue") : t("Add to queue")}
+          accent={queued}
+          disabled={queued}
+          onClick={async () => {
+            if (exactTarget) {
+              queueAdd(meta, targetEpisode);
+              close();
+              return;
+            }
+
+            const session = state.session;
+            const profile = captureMembershipProfile();
+            const requestAuthKey = authKey;
+            const privateOnly =
+              appSettings.cwPerProfile && anyProfileSharesStremioWith(activeProfile, profiles);
+
+            const isCurrent = () => {
+              const current = queueMenuRef.current;
+              return (
+                current?.session === session &&
+                current.phase === "open" &&
+                current.target.isValid?.() !== false &&
+                isMembershipProfileCurrent(profile) &&
+                readActiveStremioAuthKey() === requestAuthKey
+              );
+            };
+
+            const assertCurrent = () => {
+              if (!isCurrent()) {
+                throw new Error("The queue request is no longer active.");
+              }
+            };
+
+            assertCurrent();
+
+            let libraryItem: LibraryItem | null = null;
+            const anime = meta.type === "anime" || ANIME_CLOUD_ID.test(meta.id);
+
+            if (!privateOnly && !anime && requestAuthKey && appSettings.cwSources.library) {
+              const libraryId = cloudWriteId(meta.id, targetImdb ?? null, !!targetImdb);
+
+              if (libraryId) {
+                libraryItem = await libraryGetOneStrict(requestAuthKey, libraryId);
+                assertCurrent();
+              }
+            }
+
+            const episode = await resolveQueueEpisode({
+              meta,
+              imdbId: targetImdb,
+              tmdbKey: appSettings.tmdbKey,
+              libraryItem,
+              privateOnly,
+              isCurrent,
+            });
+
+            assertCurrent();
+
+            if (!episode) {
+              throw new Error(
+                "Could not find an episode to add. Open the title and choose an episode.",
+              );
+            }
+
+            queueAdd(meta, episode);
+            close();
+          }}
         />,
       );
     }

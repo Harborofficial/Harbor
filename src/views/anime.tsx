@@ -62,7 +62,8 @@ import {
   type RowState,
 } from "./anime/anime-rows";
 import { animeFranchiseKey, stripFranchiseSuffix } from "@/lib/providers/jikan";
-import { franchiseRoot, franchiseRootSync } from "@/lib/providers/anime-franchise-root";
+import { animeCwIdsVersion, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
+import { dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
 import { animeFiltered, enrichAnimeCountry, type AnimeFilterOpts } from "@/lib/anime-filter";
 import {
   buildHeroSelection,
@@ -98,7 +99,13 @@ import {
   library,
   type LibraryItem,
 } from "@/lib/stremio";
-import { clearLocalCw, listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import {
+  clearLocalCw,
+  listLocalCw,
+  localCwSourceEnabled,
+  localCwVersion,
+  subscribeLocalCw,
+} from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -396,7 +403,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
   }, [authKey, hideSharedCw]);
 
   useEffect(() => {
-    if (!simklConnected) {
+    if (!simklConnected || !settings.cwSources.simkl || hideSharedCw) {
       setSimklCw([]);
       return;
     }
@@ -409,15 +416,18 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [simklConnected]);
+  }, [simklConnected, settings.cwSources.simkl, hideSharedCw]);
 
   const animeDetectVer = useDetectedAnimeVersion();
-  const trackerCw = useExternalCw(!hideSharedCw && settings.cwSources.trakt);
-  const [cwRootVersion, setCwRootVersion] = useState(0);
+  const trackerCw = useExternalCw(
+    !hideSharedCw && (settings.cwSources.trakt || settings.cwSources.publicmetadb),
+  );
+  const animeIdsVersion = useSyncExternalStore(subscribeAnimeCwIds, animeCwIdsVersion);
   const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
   const localAnimeCw = useMemo<LibraryItem[]>(() => {
     void localCwVer;
     return listLocalCw(hideSharedCw)
+      .filter((e) => localCwSourceEnabled(e, settings.cwSources))
       .filter((e) => ANIME_CLOUD_ID.test(e.id) || e.isAnime)
       .map((e) => ({
         _id: e.id,
@@ -441,33 +451,31 @@ export function AnimeView({ active = true }: { active?: boolean }) {
         _mtime: new Date(e.t).toISOString(),
         local: true,
       }));
-  }, [localCwVer, hideSharedCw, activeProfile?.id]);
+  }, [localCwVer, hideSharedCw, activeProfile?.id, settings.cwSources]);
   const continueWatching = useMemo(() => {
-    const seen = new Set<string>();
-    const seenRoot = new Set<string>();
-    return [
-      ...localAnimeCw,
-      ...(hideSharedCw ? [] : libItems.filter((i) => !ANIME_CLOUD_ID.test(i._id))),
-      ...(hideSharedCw ? [] : simklCw),
-      ...(hideSharedCw ? [] : trackerCw.filter((i) => i.external === "trakt")),
-    ]
-      .filter((i) => {
-        if (!isCwMember(i)) return false;
-        if (!i.local && !isAnimeCwItem(i)) return false;
-        if (isCwDismissed(i)) return false;
-        if (seen.has(i._id)) return false;
-        seen.add(i._id);
-        return true;
-      })
-      .sort((a, b) => cwSortKey(b) - cwSortKey(a))
-      .filter((i) => {
-        const root = franchiseRootSync(i._id);
-        if (!root) return true;
-        if (seenRoot.has(root)) return false;
-        seenRoot.add(root);
-        return true;
-      })
-      .slice(0, 20);
+    return dedupeAnimeCw(
+      [
+        ...localAnimeCw,
+        ...(hideSharedCw || !settings.cwSources.library
+          ? []
+          : libItems.filter((i) => !ANIME_CLOUD_ID.test(i._id))),
+        ...(hideSharedCw || !settings.cwSources.simkl ? [] : simklCw),
+        ...(hideSharedCw
+          ? []
+          : trackerCw.filter(
+              (i) =>
+                (i.external === "trakt" && settings.cwSources.trakt) ||
+                (i.external === "publicmetadb" && settings.cwSources.publicmetadb),
+            )),
+      ]
+        .filter((i) => {
+          if (!isCwMember(i)) return false;
+          if (!i.local && !isAnimeCwItem(i)) return false;
+          if (isCwDismissed(i)) return false;
+          return true;
+        })
+        .sort((a, b) => cwSortKey(b) - cwSortKey(a)),
+    ).slice(0, 20);
   }, [
     localAnimeCw,
     libItems,
@@ -475,30 +483,15 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     trackerCw,
     cwVersion,
     animeDetectVer,
-    cwRootVersion,
+    animeIdsVersion,
     hideSharedCw,
     localCwVer,
+    settings.cwSources,
   ]);
 
   useEffect(() => {
-    const ids = [
-      ...localAnimeCw,
-      ...libItems.filter((i) => !ANIME_CLOUD_ID.test(i._id)),
-      ...simklCw,
-      ...trackerCw.filter((i) => i.external === "trakt"),
-    ]
-      .filter((i) => isCwMember(i) && (i.local || isAnimeCwItem(i)))
-      .map((i) => i._id);
-    if (ids.length === 0) return;
-    if (ids.every((id) => franchiseRootSync(id))) return;
-    let cancelled = false;
-    void Promise.all(ids.map((id) => franchiseRoot(id).catch(() => id))).then(() => {
-      if (!cancelled) setCwRootVersion((v) => v + 1);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [localAnimeCw, libItems, simklCw, trackerCw, animeDetectVer]);
+    void warmCwAnimeIdentities(continueWatching);
+  }, [continueWatching]);
 
   useEffect(() => {
     publishResumeStates(continueWatching);
@@ -506,14 +499,15 @@ export function AnimeView({ active = true }: { active?: boolean }) {
 
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const resurfaceLibrary = useMemo(() => {
+    const library = hideSharedCw || !settings.cwSources.library ? [] : libItems;
     const manual = manualWatchedLibraryItems().filter(isAnimeCwItem);
-    if (manual.length === 0) return libItems;
-    const cwMemberIds = new Set(libItems.filter(isCwMember).map((i) => i._id));
+    if (manual.length === 0) return library;
+    const cwMemberIds = new Set(library.filter(isCwMember).map((i) => i._id));
     const usable = manual.filter((i) => !cwMemberIds.has(i._id));
-    if (usable.length === 0) return libItems;
+    if (usable.length === 0) return library;
     const overrideIds = new Set(usable.map((i) => i._id));
-    return [...libItems.filter((i) => !overrideIds.has(i._id)), ...usable];
-  }, [libItems, manualWatchedVer]);
+    return [...library.filter((i) => !overrideIds.has(i._id)), ...usable];
+  }, [libItems, manualWatchedVer, hideSharedCw, settings.cwSources.library]);
   useEffect(() => {
     if (!simklConnected) {
       setSimklWatchedMap(new Map());
@@ -977,6 +971,8 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                         key={item._id}
                         item={item}
                         onDismiss={(it) => {
+                          if (it.cwMembers?.length)
+                            return dismissCw(it, authKey, { acknowledged: true });
                           if (it.manualWatched) {
                             dismissManualWatched(it._id, { acknowledged: true });
                             return;

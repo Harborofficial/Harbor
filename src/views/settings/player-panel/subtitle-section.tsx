@@ -11,7 +11,14 @@ import { advanceFocus, captureFocusReturn } from "@/lib/keyboard-navigation";
 import { ModalShell, useModalExit } from "@/components/modal-shell";
 import { ColorPopoverTrigger } from "../color-picker";
 import { Segmented, ToggleRow } from "../shared";
-import { ROW_ACTION, ROW_ACTION_DANGER, ROW_DESC, SettingGroup, SettingRow, SettingsWorkbench } from "../kit";
+import {
+  ROW_ACTION,
+  ROW_ACTION_DANGER,
+  ROW_DESC,
+  SettingGroup,
+  SettingRow,
+  SettingsWorkbench,
+} from "../kit";
 import { usePageActions } from "../page-actions";
 import { ChoiceBlock } from "./choice";
 import { previewFamily } from "./internals";
@@ -101,7 +108,7 @@ export function SubtitleStylePanel() {
     },
   ];
 
-  const assModes: Array<{ id: "no" | "scale" | "force"; label: string; sub: string }> = [
+  const assModes: Array<{ id: "no" | "scale" | "font" | "force"; label: string; sub: string }> = [
     {
       id: "no",
       label: t("Keep original"),
@@ -115,6 +122,11 @@ export function SubtitleStylePanel() {
       sub: t(
         "Keep the original look, scaled by your size. It multiplies the built-in size, so different releases can still differ.",
       ),
+    },
+    {
+      id: "font",
+      label: t("Change font only"),
+      sub: t("Styled (ASS) subs keep their colors, size, and sign placement, but use your font."),
     },
     {
       id: "force",
@@ -206,7 +218,10 @@ export function SubtitleStylePanel() {
                 style={fillStyle(settings.subBoxOpacity, 0.2, 1, 0.05)}
               />
               <span className={SLIDER_VALUE}>{`${boxOpacityPct}%`}</span>
-              <SliderReset show={settings.subBoxOpacity !== DEFAULT.subBoxOpacity} onReset={() => update({ subBoxOpacity: DEFAULT.subBoxOpacity })} />
+              <SliderReset
+                show={settings.subBoxOpacity !== DEFAULT.subBoxOpacity}
+                onReset={() => update({ subBoxOpacity: DEFAULT.subBoxOpacity })}
+              />
             </div>
           </SettingRow>
         )}
@@ -232,7 +247,10 @@ export function SubtitleStylePanel() {
                 style={fillStyle(Math.max(1, settings.subBorderSize), 1, 6, 0.5)}
               />
               <span className={SLIDER_VALUE}>{`${Math.max(1, settings.subBorderSize)}px`}</span>
-              <SliderReset show={settings.subBorderSize !== DEFAULT.subBorderSize} onReset={() => update({ subBorderSize: DEFAULT.subBorderSize })} />
+              <SliderReset
+                show={settings.subBorderSize !== DEFAULT.subBorderSize}
+                onReset={() => update({ subBorderSize: DEFAULT.subBorderSize })}
+              />
             </div>
           </SettingRow>
         )}
@@ -270,13 +288,18 @@ export function SubtitleStylePanel() {
               style={fillStyle(settings.subFontSize, 16, 120)}
             />
             <span className={SLIDER_VALUE}>{`${settings.subFontSize}px`}</span>
-              <SliderReset show={settings.subFontSize !== DEFAULT.subFontSize} onReset={() => update({ subFontSize: DEFAULT.subFontSize })} />
+            <SliderReset
+              show={settings.subFontSize !== DEFAULT.subFontSize}
+              onReset={() => update({ subFontSize: DEFAULT.subFontSize })}
+            />
           </div>
         </SettingRow>
 
         <ToggleRow
           label={t("Bold text")}
-          sub={t("Renders subtitles in a heavier weight. Turn off to use your font's normal weight.")}
+          sub={t(
+            "Renders subtitles in a heavier weight. Turn off to use your font's normal weight.",
+          )}
           value={settings.subBold}
           onChange={(v) => update({ subBold: v })}
         />
@@ -302,7 +325,10 @@ export function SubtitleStylePanel() {
               style={fillStyle(settings.subOpacity ?? 1, 0.2, 1, 0.05)}
             />
             <span className={SLIDER_VALUE}>{`${opacityPct}%`}</span>
-              <SliderReset show={(settings.subOpacity ?? 1) !== DEFAULT.subOpacity} onReset={() => update({ subOpacity: DEFAULT.subOpacity })} />
+            <SliderReset
+              show={(settings.subOpacity ?? 1) !== DEFAULT.subOpacity}
+              onReset={() => update({ subOpacity: DEFAULT.subOpacity })}
+            />
           </div>
         </SettingRow>
 
@@ -324,7 +350,10 @@ export function SubtitleStylePanel() {
               style={fillStyle(settings.subMarginY, 0, 100)}
             />
             <span className={SLIDER_VALUE}>{`${settings.subMarginY}%`}</span>
-              <SliderReset show={settings.subMarginY !== DEFAULT.subMarginY} onReset={() => update({ subMarginY: DEFAULT.subMarginY })} />
+            <SliderReset
+              show={settings.subMarginY !== DEFAULT.subMarginY}
+              onReset={() => update({ subMarginY: DEFAULT.subMarginY })}
+            />
           </div>
         </SettingRow>
 

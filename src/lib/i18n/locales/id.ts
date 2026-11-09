@@ -1,3 +1,4 @@
+import reviews from "./id/reviews";
 import playOrders from "./id/play-orders";
 import gameRomLibrary from "./id/game-rom-library";
 import gameNotes from "./id/game-notes";
@@ -80,6 +81,7 @@ import contextActionsFallback from "./context-actions-fallback";
 import ebookSources from "./id/ebook-sources";
 import settingsRefinements from "./id/settings-refinements";
 import coverage from "./id/coverage";
+import subtitles from "./id/subtitles";
 import catalog01 from "./id/catalog-01";
 import catalog02 from "./id/catalog-02";
 import catalog03 from "./id/catalog-03";
@@ -98,6 +100,7 @@ import identityAudit from "./id/identity-audit";
 import plugins from "./id/plugins";
 import brands from "./id/brands";
 import bpSports from "./id/bp-sports";
+import queueBasket from "./id/queue-basket";
 
 import nytTv from "./id/nyt-tv";
 
@@ -277,6 +280,7 @@ const id: Record<string, string> = {
 
   ...ebookSources,
   ...coverage,
+  ...subtitles,
   ...catalog01,
   ...catalog02,
   ...catalog03,
@@ -371,6 +375,8 @@ const id: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...reviews,
+  ...queueBasket,
 };
 
 export default id;

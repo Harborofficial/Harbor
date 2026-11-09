@@ -1,3 +1,4 @@
+import reviews from "./pt/reviews";
 import playOrders from "./pt/play-orders";
 import gameRomLibrary from "./pt/game-rom-library";
 import gameNotes from "./pt/game-notes";
@@ -82,6 +83,7 @@ import ebookSources from "./pt/ebook-sources";
 import settingsRefinements from "./pt/settings-refinements";
 import experimentalUpdates from "./pt/experimental-updates";
 import coverage from "./pt/coverage";
+import subtitles from "./pt/subtitles";
 import chrome from "./pt/chrome";
 import common from "./pt/common";
 import catalog from "./pt/catalog";
@@ -120,6 +122,7 @@ import wiringSweep4 from "./pt/wiring-sweep-4";
 import plugins from "./pt/plugins";
 import brands from "./pt/brands";
 import bpSports from "./pt/bp-sports";
+import queueBasket from "./pt/queue-basket";
 
 import nytTv from "./pt/nyt-tv";
 
@@ -301,6 +304,7 @@ const pt: Record<string, string> = {
 
   ...ebookSources,
   ...coverage,
+  ...subtitles,
   ...chrome,
   ...common,
   ...catalog,
@@ -415,6 +419,8 @@ const pt: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...reviews,
+  ...queueBasket,
 };
 
 export default pt;

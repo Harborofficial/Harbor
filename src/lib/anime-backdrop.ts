@@ -6,7 +6,8 @@ import { anilistArtById, anilistArtByMalId } from "@/lib/anilist/browse";
 import { anilistFranchise } from "@/lib/anilist/relations";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { isDerivedAnimeFormat } from "@/lib/providers/anime-format";
-import { externalToKitsu, kitsuToAnilist } from "@/lib/providers/anime-mapping";
+import { kitsuToAnilist } from "@/lib/providers/anime-mapping";
+import { resolveExternalKitsuId } from "@/lib/providers/anime-entry";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { kitsuCoverImage, parseKitsuId } from "@/lib/providers/kitsu";
 import { staticHeroArt } from "@/lib/providers/anime-hero-art-static";
@@ -49,7 +50,10 @@ export async function resolveHeroArt(tmdbKey: string, meta: Meta): Promise<HeroA
   return p;
 }
 
-export async function resolveHeroBackdrop(tmdbKey: string, meta: Meta): Promise<string | undefined> {
+export async function resolveHeroBackdrop(
+  tmdbKey: string,
+  meta: Meta,
+): Promise<string | undefined> {
   return (await resolveHeroArt(tmdbKey, meta)).background;
 }
 
@@ -59,15 +63,19 @@ async function computeArt(tmdbKey: string, meta: Meta): Promise<HeroArt> {
   const year = akm?.releaseInfo ?? meta.releaseInfo;
   const names = [
     ...new Set(
-      [stripFranchiseSuffix(meta.name ?? ""), stripFranchiseSuffix(akm?.name ?? ""), akm?.name ?? ""].filter(
-        Boolean,
-      ),
+      [
+        stripFranchiseSuffix(meta.name ?? ""),
+        stripFranchiseSuffix(akm?.name ?? ""),
+        akm?.name ?? "",
+      ].filter(Boolean),
     ),
   ];
-  const malId = meta.id.startsWith("mal:") ? Number(meta.id.split(":")[1]) || null : (meta.malId ?? null);
+  const malId = meta.id.startsWith("mal:")
+    ? Number(meta.id.split(":")[1]) || null
+    : (meta.malId ?? null);
   let kitsuId = parseKitsuId(meta.id);
   if (kitsuId == null && malId != null) {
-    kitsuId = await externalToKitsu("myanimelist", malId).catch(() => null);
+    kitsuId = await resolveExternalKitsuId(`mal:${malId}`);
   }
 
   const derived = isDerivedAnimeFormat(meta.animeFormat);
@@ -109,11 +117,13 @@ async function computeArt(tmdbKey: string, meta: Meta): Promise<HeroArt> {
       const art = await anilistArtById(anilistId).catch(() => null);
       if (art?.banner) return art.banner;
       const fam = await anilistFranchise(anilistId).catch(() => []);
-      const rooted = fam.filter((n) => !n.upcoming).sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
+      const rooted = fam
+        .filter((n) => !n.upcoming)
+        .sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
       const rootBanner = rooted.find((n) => n.banner)?.banner;
       if (rootBanner) return rootBanner;
       for (const n of rooted.slice(0, 2)) {
-        const rootKitsu = await externalToKitsu("anilist", n.id).catch(() => null);
+        const rootKitsu = await resolveExternalKitsuId(`anilist:${n.id}`);
         if (rootKitsu == null) continue;
         const rootMeta = await animeKitsuMeta(`kitsu:${rootKitsu}`).catch(() => null);
         if (rootMeta?.background) return rootMeta.background;

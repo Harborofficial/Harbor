@@ -102,12 +102,30 @@ export function SeriesEpisodes({
     watched: boolean,
   ) => {
     e.preventDefault();
+    const selected = [...orderedEps, ...enrichedEpisodes].find(
+      (ep) => ep.seasonNumber === season && ep.episodeNumber === episode,
+    );
+    const video = cinemetaVideos?.find(
+      (entry) => entry.season === season && entry.episode === episode,
+    );
     setWatchedMenu({
       x: e.clientX,
       y: e.clientY,
       season,
       episode,
       watched,
+      queueTarget: {
+        meta,
+        episode: {
+          season,
+          episode,
+          name: selected?.name || video?.name || undefined,
+          runtime: selected?.runtime ?? undefined,
+          overview: selected?.overview || undefined,
+          still: video?.thumbnail || undefined,
+          imdbId: video?.id || undefined,
+        },
+      },
       origin: e.currentTarget instanceof HTMLElement ? e.currentTarget : null,
     });
   };
