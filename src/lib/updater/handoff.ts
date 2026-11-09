@@ -18,6 +18,8 @@ export type HandoffPlan = {
   notes: string | null;
   url: string;
   signature: string;
+  /** Fetched only when the installer is actually staged. */
+  signatureUrl?: string;
   size: number | null;
   payloadVersion: number;
   verifiable: boolean;
@@ -89,10 +91,18 @@ export async function readHandoffPlan(init?: RequestInit): Promise<HandoffPlan |
   };
 }
 
-export function stageHandoff(
+export async function stageHandoff(
   plan: HandoffPlan,
   onProgress: (p: StageProgress) => void,
 ): Promise<void> {
+  let signature = plan.signature.trim();
+  if (!signature && plan.signatureUrl) {
+    const res = await safeFetch(plan.signatureUrl, { cache: "no-store" });
+    if (!res.ok) throw new Error(`installer signature ${res.status}`);
+    signature = (await res.text()).trim();
+    if (!signature) throw new Error("The installer signature is empty.");
+  }
+  if (!signature) throw new Error("The installer signature is missing.");
   const channel = new Channel<StageEvent>();
   channel.onmessage = (ev) => {
     if (ev.kind === "started") {
@@ -103,9 +113,9 @@ export function stageHandoff(
       onProgress({ received: plan.size ?? 0, total: plan.size, verifying: true });
     }
   };
-  return invoke<void>("handoff_stage", {
+  await invoke<void>("handoff_stage", {
     url: plan.url,
-    signature: plan.signature,
+    signature,
     version: plan.version,
     recoverable: plan.recoveryProtocol === 1,
     onEvent: channel,
