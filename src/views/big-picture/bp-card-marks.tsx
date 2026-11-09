@@ -1,16 +1,11 @@
-import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { useMemo } from "react";
 import { CR_CATEGORY_SHORT, shortCategory } from "@/lib/anime-award-labels";
 import { findTopAward, parseAwardYear, type AwardWin } from "@/lib/anime-awards";
 import { useAwardMasterVersion } from "@/lib/anime-awards-source";
 import { mergeBundledAwards } from "@/lib/awards-history";
 import { useBundledAwardsVersion } from "@/lib/use-bundled-awards";
 import type { Meta } from "@/lib/cinemeta";
-import {
-  animeHasDub,
-  dubSetReady,
-  ensureDubSet,
-  subscribeDubSet,
-} from "@/lib/providers/anime-dub-sub";
+import { useAnimeDub } from "@/hooks/use-anime-dub";
 import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { awardSummary, type AwardType } from "@/lib/providers/wikidata";
 import { useSettings } from "@/lib/settings";
@@ -46,12 +41,7 @@ function isRerun(meta: Meta): boolean {
 
 function useDub(metaId: string, isAnime: boolean): boolean {
   const { settings } = useSettings();
-  const want = settings.showDubBadge && isAnime;
-  const ready = useSyncExternalStore(subscribeDubSet, dubSetReady);
-  useEffect(() => {
-    if (want) ensureDubSet();
-  }, [want]);
-  return want && ready && animeHasDub(metaId);
+  return useAnimeDub(metaId, settings.showDubBadge && isAnime);
 }
 
 // Bundled awards only. useClassicAwardWin runs two Wikidata SPARQL queries per

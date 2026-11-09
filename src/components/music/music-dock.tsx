@@ -1,5 +1,5 @@
 import { trackViewportBottom } from "@/lib/viewport-bottom";
-import { musicDockCanAutoHide, MUSIC_DOCK_AUTO_HIDE_MS, MUSIC_DOCK_REVEAL_ZONE_PX, useMusicDockAutoHide } from "@/lib/music/dock-auto-hide";
+import { musicDockCanAutoHide, musicDockHasInteraction, MUSIC_DOCK_AUTO_HIDE_MS, MUSIC_DOCK_REVEAL_ZONE_PX, useMusicDockAutoHide } from "@/lib/music/dock-auto-hide";
 import { isMusicLiked } from "@/lib/music/liked";
 import { pushBackHandler } from "@/lib/back-intercept";
 import { useModalExit } from "@/components/modal-shell";
@@ -159,10 +159,14 @@ export function MusicDock() {
   const [stayed, setStayed] = useState("");
   const [queueOpen, setQueueOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [dockEntered, setDockEntered] = useState(false);
+  useEffect(() => {
+    if (expanded) setDockEntered(true);
+  }, [expanded]);
   const [collapsed, setCollapsed] = useState(false);
   const [autoHidden, setAutoHidden] = useState(false);
   const autoHideTimer = useRef<number | null>(null);
-  const pointerOnDock = useRef(false);
+  const dockPointer = useRef<{ x: number; y: number } | null>(null);
   const [sourceOpen, setSourceOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const closeSource = useCallback(() => setSourceOpen(false), []);
@@ -316,10 +320,10 @@ export function MusicDock() {
   }, [cancelAutoHide]);
   const scheduleAutoHide = useCallback(() => {
     cancelAutoHide();
-    if (!autoHideAllowed || pointerOnDock.current || dockRef.current?.contains(document.activeElement)) return;
+    if (!autoHideAllowed || musicDockHasInteraction(dockRef.current, dockPointer.current)) return;
     autoHideTimer.current = window.setTimeout(() => {
       autoHideTimer.current = null;
-      if (!pointerOnDock.current && !dockRef.current?.contains(document.activeElement)) {
+      if (!musicDockHasInteraction(dockRef.current, dockPointer.current)) {
         setAutoHidden(true);
       }
     }, MUSIC_DOCK_AUTO_HIDE_MS);
@@ -607,14 +611,23 @@ export function MusicDock() {
       ref={dockRef}
       data-music-dock
       data-auto-hidden={autoHidden || undefined}
+      data-expanded={expanded || undefined}
+      data-entering={!dockEntered || undefined}
+      onAnimationEnd={(event) => {
+        if (event.target === event.currentTarget && event.animationName === "music-dock-bar-in")
+          setDockEntered(true);
+      }}
       data-closing={collapseExit.closing || undefined}
       data-art-colors={artworkColor ? "on" : undefined}
-      onPointerEnter={() => {
-        pointerOnDock.current = true;
+      onPointerEnter={(event) => {
+        dockPointer.current = { x: event.clientX, y: event.clientY };
         showAutoHiddenDock();
       }}
+      onPointerMove={(event) => {
+        dockPointer.current = { x: event.clientX, y: event.clientY };
+      }}
       onPointerLeave={() => {
-        pointerOnDock.current = false;
+        dockPointer.current = null;
         scheduleAutoHide();
       }}
       onFocusCapture={showAutoHiddenDock}

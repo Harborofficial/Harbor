@@ -62,24 +62,25 @@ function usableAssets(raw: GithubRelease): Asset[] {
 
 const BINARY = /\.(?:exe|dmg|msi|app\.tar\.gz|deb|rpm|appimage)$/i;
 
+// Old: harbor-shipyard-v1.2.3-beta.exe
+// New: harbor-shipyard-v1.2.3-beta-windows-x64.exe
+const SHIPYARD_INSTALLER =
+  /^harbor-shipyard-v\d+\.\d+\.\d+(?:-(?:beta|stable))?(?:-windows(?:-(?:x64|x86_64|amd64|aarch64|arm64))?)?\.exe$/i;
+
 export function releaseIsComplete(raw: GithubRelease, probe: HandoffProbe | null): boolean {
   const assets = usableAssets(raw);
   if (!assets.some((asset) => BINARY.test(asset.name!) && !/\.sig$/i.test(asset.name!))) {
     return false;
   }
   if (!(probe?.supported && probe.managed && probe.platformKey === "windows-x86_64")) return true;
-  const installer = assets.find((asset) =>
-    /^harbor-shipyard-v\d+\.\d+\.\d+(?:-(?:beta|stable))?\.exe$/i.test(asset.name!),
-  );
+  const installer = assets.find((asset) => SHIPYARD_INSTALLER.test(asset.name!));
   return !!installer && assets.some((asset) => asset.name === `${installer.name}.sig`);
 }
 
 export function githubDownloadAsset(raw: GithubRelease, platformKey: string | undefined) {
   const assets = usableAssets(raw);
   if (platformKey === "windows-x86_64") {
-    const shipyard = assets.find((asset) =>
-      /^harbor-shipyard-v\d+\.\d+\.\d+(?:-(?:beta|stable))?\.exe$/i.test(asset.name!),
-    );
+    const shipyard = assets.find((asset) => SHIPYARD_INSTALLER.test(asset.name!));
     if (shipyard) return shipyard;
   }
   const architectures: Record<string, RegExp> = {

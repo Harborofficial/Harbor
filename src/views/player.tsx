@@ -639,6 +639,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
     tmdbKey: settings.tmdbKey,
     isLive: isLiveLike,
     hideWatched: settings.hideWatchedInMoreLikeThis,
+    allowLastAired: settings.moreLikeThisOnAiringSeries,
     onPlay: playFromEndScreen,
     onClose: () => void closePlayer(),
   });
@@ -1766,7 +1767,7 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
           screenLocked,
           screenLockEnabled,
           screenLockControlsVisible,
-          screenLockBinding,
+          hotkeys: settings.hotkeys,
         }}
         handlers={{
           playPause: playPauseToggle,

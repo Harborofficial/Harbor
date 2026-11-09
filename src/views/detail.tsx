@@ -119,7 +119,10 @@ import { mediaServerConnections } from "@/lib/media-server/connections";
 import { mediaServerItems } from "@/lib/media-server/index-store";
 import { matchingServerItems, serverPlayableCopies } from "@/lib/media-server/selectors";
 import { createMediaServerPlayerSrc, decidePlaybackSource } from "@/lib/media-server/playback";
-import { markMovieWatched, unmarkMovieWatched } from "@/lib/mark-watched";
+import {
+  optimisticMovieWatchedState,
+  setMovieWatchedWithConfirmation,
+} from "@/lib/movie-watched-action";
 import { useIsFavorite, useMediaFavorites } from "@/lib/media-favorites";
 import { openUrl } from "@/lib/window";
 import { profileFromDetail, trackEvent } from "@/lib/discover";
@@ -130,7 +133,11 @@ import { useT } from "@/lib/i18n";
 import { emitListToast } from "@/components/lists/list-toast";
 import { DropShowConfirmModal } from "@/components/drop-show-confirm-modal";
 import { useCanDropShow } from "@/lib/drop-show-eligibility";
-import { dropContextTitle, requireMediaActionSuccess } from "@/lib/media-context-actions";
+import {
+  dropContextTitle,
+  requireMediaActionSuccess,
+  type MediaActionResult,
+} from "@/lib/media-context-actions";
 import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { ReminderButton } from "@/components/reminder-button";
@@ -191,6 +198,8 @@ import { HeroRatings } from "./detail/hero-ratings";
 import { TrailerOverlay } from "./detail/trailer-overlay";
 import { DetailHeroTrailer } from "./detail/detail-hero-trailer";
 import { useScrollUpTrailer } from "./detail/use-scroll-up-trailer";
+import { prefetchTrailerDownload, resolveTrailerQuality } from "@/lib/trailer";
+import { mergeTrailerCandidates } from "@/lib/trailer-candidates";
 import { SeriesEpisodes } from "./detail/series-episodes";
 import { CinemetaEpisodes } from "./detail/cinemeta-episodes";
 import { AnimeEpisodes } from "./detail/anime-episodes";
@@ -365,7 +374,7 @@ export function DetailView({
   const pinnedBackdrop = useTitleBackdrop(meta.id);
   const pinnedBackdropHi = toHiResBackdrop(pinnedBackdrop, settings.heroFullQuality);
   const [cinemetaFull, setCinemetaFull] = useState<Meta | null>(
-    !settings.addonOnlyMetadata && !settings.preferCustomMetaAddon && meta.videos?.length
+    !settings.addonOnlyMetadata && meta.videos?.length
       ? meta
       : null,
   );
@@ -548,7 +557,7 @@ export function DetailView({
   }, [meta.id, meta.type, setNavStack]);
 
   const idAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
-  const prioritizeMetadataAddons = settings.addonOnlyMetadata || settings.preferCustomMetaAddon;
+  const prioritizeMetadataAddons = settings.addonOnlyMetadata;
   const animeIdentity = idAnime || detectedKitsu != null;
   // Metadata source and anime identity are separate: an addon-first detail page
   // still knows it is looking at an anime, but keeps its own episode/season source.
@@ -580,21 +589,40 @@ export function DetailView({
   const addonNative = liveContext || isAddonNativeMeta(meta);
   const capstanMeta = useCapstanDetail(meta);
   const capstanCanonicalId = capstanMeta?.canonicalId ?? null;
-  const trailerCandidates = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          [
-            ...(sourceText.trailerCandidates ?? []),
-            ...(detail?.trailerCandidates ?? []),
-            ...(meta.trailerStreams?.map((trailer) => trailer.ytId) ?? []),
-            ...(meta.trailers?.map((trailer) => trailer.source) ?? []),
-          ].filter((id): id is string => !!id),
-        ),
-      ),
-    [sourceText.trailerCandidates, detail?.trailerCandidates, meta.trailerStreams, meta.trailers],
-  );
+  const trailerCandidates = useMemo(() => {
+    const fromMeta = [
+      ...(meta.trailerStreams?.map((trailer) => trailer.ytId) ?? []),
+      ...(meta.trailers?.map((trailer) => trailer.source) ?? []),
+    ].filter((id): id is string => !!id);
+    const fromFranchise = franchise
+      .flatMap((entry) => entry.meta.trailerStreams ?? [])
+      .map((trailer) => trailer.ytId)
+      .filter((id): id is string => !!id);
+    const hasTmdbTrailers =
+      animeIdentity && !prioritizeMetadataAddons && (detail?.trailerVideos?.length ?? 0) > 0;
+    return mergeTrailerCandidates(
+      ...(hasTmdbTrailers
+        ? [detail?.trailerCandidates]
+        : animeIdentity
+          ? [detail?.trailerCandidates, sourceText.trailerCandidates, fromMeta, fromFranchise]
+          : [sourceText.trailerCandidates, detail?.trailerCandidates, fromMeta, fromFranchise]),
+    );
+  }, [
+    animeIdentity,
+    prioritizeMetadataAddons,
+    sourceText.trailerCandidates,
+    detail?.trailerCandidates,
+    detail?.trailerVideos,
+    meta.trailerStreams,
+    meta.trailers,
+    franchise,
+  ]);
   const trailerCandidate = trailerCandidates[0] ?? null;
+  const prefetchTrailer = useCallback(() => {
+    if (trailerCandidate) {
+      prefetchTrailerDownload(trailerCandidate, resolveTrailerQuality(settings.trailerQuality));
+    }
+  }, [trailerCandidate, settings.trailerQuality]);
 
   useScrollUpTrailer(
     scrollRef,
@@ -1271,7 +1299,7 @@ export function DetailView({
         : sourceLookup;
       let applyAnimeExtras: (() => void) | undefined;
       const work =
-        settingsRef.current.addonOnlyMetadata || settingsRef.current.preferCustomMetaAddon
+        settingsRef.current.addonOnlyMetadata
           ? cinemetaDetails(lookup)
           : isAnime
             ? animeDetails(
@@ -1433,7 +1461,6 @@ export function DetailView({
     meta.type,
     settings.tmdbKey,
     settings.fanartKey,
-    settings.preferCustomMetaAddon,
     settings.addonOnlyMetadata,
     settings.metadataAddonOrder,
     settings.tvdbKey,
@@ -1878,15 +1905,52 @@ export function DetailView({
     meta.type === "movie" &&
     (isMovieWatchedLocal(meta.id, [detail?.imdbId]) ||
       (!isNuvio && stremioMovieWatched(libraryItem)));
-  const markThisMovieWatched = () => {
-    const tmdb = meta.id.startsWith("tmdb:") ? meta.id.split(":")[2] : null;
-    if (watchedMark) {
-      setLibraryItem((prev) =>
-        prev?.state ? { ...prev, state: { ...prev.state, flaggedWatched: 0 } } : prev,
+  const markThisMovieWatched = async () => {
+    const next = !watchedMark;
+    const previousLibraryItem = libraryItem;
+    if (previousLibraryItem?.state) {
+      const state = optimisticMovieWatchedState(previousLibraryItem.state, next);
+      if (state) setLibraryItem({ ...previousLibraryItem, state });
+    }
+    const revert = () => {
+      if (previousLibraryItem) setLibraryItem(previousLibraryItem);
+    };
+    let result: MediaActionResult | null;
+    try {
+      result = await setMovieWatchedWithConfirmation(meta, next, {
+        imdbId: detail?.imdbId,
+        title: title || meta.name,
+        onUnsafeProvider: next ? "skip" : "block",
+      });
+    } catch (cause) {
+      revert();
+      emitListToast(
+        cause instanceof Error
+          ? cause.message.split("\n").join(" · ")
+          : t("The action could not be completed."),
+        "error",
       );
-      void unmarkMovieWatched(meta, detail?.imdbId);
-    } else {
-      void markMovieWatched(meta, detail?.imdbId, tmdb);
+      return;
+    }
+    if (!result) {
+      revert();
+      return;
+    }
+    if (
+      !result.outcomes.some(
+        (outcome) => outcome.provider === "Harbor" && outcome.status === "updated",
+      )
+    )
+      revert();
+    try {
+      requireMediaActionSuccess(result);
+    } catch (cause) {
+      emitListToast(
+        cause instanceof Error
+          ? cause.message.split("\n").join(" · ")
+          : t("The action could not be completed."),
+        "error",
+      );
     }
   };
 
@@ -2967,6 +3031,8 @@ export function DetailView({
                         <button
                           type="button"
                           onClick={() => setTrailerOpen(true)}
+                          onPointerEnter={prefetchTrailer}
+                          onFocus={prefetchTrailer}
                           aria-label={t("Watch trailer")}
                           className="group flex h-12 w-12 items-center justify-center rounded-full bg-canvas/80 text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.94]"
                         >
@@ -3339,7 +3405,15 @@ export function DetailView({
               key: "mediaGallery",
               label: t("Media"),
               minHeight: 210,
-              node: <MediaGallery detail={detail} title={title} logo={logo} metaId={meta.id} />,
+              node: (
+                <MediaGallery
+                  detail={detail}
+                  trailerCandidates={trailerCandidates}
+                  title={title}
+                  logo={logo}
+                  metaId={meta.id}
+                />
+              ),
             });
           }
           if (isAnime || stickyAwardName.current) {
@@ -3461,6 +3535,7 @@ export function DetailView({
       {trailerOpen && trailerCandidate && (
         <TrailerOverlay
           id={trailerCandidate}
+          candidateIds={trailerCandidates}
           title={title}
           logo={logo}
           onClose={() => setTrailerOpen(false)}

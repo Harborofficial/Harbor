@@ -611,6 +611,7 @@ pub async fn cast_load(
     let proxied = proxy_state
         .register_cast(RegisterArgs {
             url: url.clone(),
+            audio_url: None,
             headers: req_headers,
             transcode: do_transcode,
             prebuffer_bytes: None,

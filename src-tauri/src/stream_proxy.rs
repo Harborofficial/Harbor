@@ -30,6 +30,7 @@ use cast_audio::AudioCastState;
 #[derive(Clone)]
 struct Session {
     url: String,
+    audio_url: Option<String>,
     base_url: Option<String>,
     headers: HashMap<String, String>,
     transcode: bool,
@@ -82,6 +83,8 @@ pub struct RegisterResult {
 #[serde(rename_all = "camelCase")]
 pub struct RegisterArgs {
     pub url: String,
+    #[serde(default)]
+    pub audio_url: Option<String>,
     #[serde(default)]
     pub headers: HashMap<String, String>,
     #[serde(default)]
@@ -224,6 +227,7 @@ impl ProxyState {
             if let Some((base, last_seg, query)) = split_playlist_url(&args.url) {
                 let session = Session {
                     url: args.url.clone(),
+                    audio_url: None,
                     base_url: Some(base),
                     headers: args.headers,
                     transcode: false,
@@ -257,6 +261,7 @@ impl ProxyState {
         };
         let session = Session {
             url: args.url.clone(),
+            audio_url: args.audio_url,
             base_url: None,
             headers: args.headers,
             transcode: args.transcode,
@@ -322,6 +327,7 @@ impl ProxyState {
         if let Some((base, last_seg, query)) = playlist_parts {
             let session = Session {
                 url: args.url.clone(),
+                audio_url: None,
                 base_url: Some(base),
                 headers: args.headers,
                 transcode: false,
@@ -340,6 +346,7 @@ impl ProxyState {
         }
         let session = Session {
             url: args.url.clone(),
+            audio_url: args.audio_url,
             base_url: None,
             headers: args.headers,
             transcode: args.transcode,
@@ -890,6 +897,7 @@ async fn handle_stream(
     if session.transcode {
         return handle_transcode(
             &session.url,
+            session.audio_url.as_deref(),
             &session.headers,
             &session.profile,
             session.burn_sub.as_ref(),
@@ -1158,6 +1166,22 @@ pub async fn proxy_gc_idle(state: tauri::State<'_, ProxyState>) -> Result<usize,
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn register_args_accept_a_separate_audio_url() {
+        let args: RegisterArgs = serde_json::from_value(serde_json::json!({
+            "url": "https://media.example/video.m3u8",
+            "audioUrl": "https://media.example/audio.m3u8",
+            "headers": {},
+            "transcode": true
+        }))
+        .unwrap();
+        assert_eq!(
+            args.audio_url.as_deref(),
+            Some("https://media.example/audio.m3u8")
+        );
+        assert!(args.transcode);
+    }
 
     #[test]
     fn parses_media_byte_ranges() {

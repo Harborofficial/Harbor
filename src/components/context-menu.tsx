@@ -50,6 +50,7 @@ import {
   requireMediaActionSuccess,
 } from "@/lib/media-context-actions";
 import { useContextWatchedState } from "@/lib/context-watched-state";
+import { setMovieWatchedWithConfirmation } from "@/lib/movie-watched-action";
 import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useIsFavorite } from "@/lib/media-favorites";
 import { MyListSubmenu } from "./context-menu/my-list-submenu";
@@ -811,7 +812,15 @@ export function ContextMenu() {
                         : {}),
                     }),
                   );
-                else
+                else if (meta.type === "movie") {
+                  const result = await setMovieWatchedWithConfirmation(meta, on, {
+                    imdbId: targetImdb,
+                    title: meta.name,
+                    onUnsafeProvider: UNSAFE_MEDIA_PROVIDER_POLICY,
+                  });
+                  if (!result) return;
+                  requireMediaActionSuccess(result);
+                } else
                   requireMediaActionSuccess(
                     await setContextWatched(meta, on, {
                       imdbId: targetImdb,
@@ -820,13 +829,17 @@ export function ContextMenu() {
                   );
                 close();
               } catch (cause) {
-                setWatchedError({
-                  session: state.session,
-                  message:
-                    cause instanceof Error
-                      ? t(cause.message)
-                      : t("The action could not be completed."),
-                });
+                const message =
+                  cause instanceof Error
+                    ? t(cause.message)
+                    : t("The action could not be completed.");
+                if (queueMenuRef.current?.phase === "open") {
+                  setWatchedError({ session: state.session, message });
+                } else {
+                  // A confirmation dialog can dismiss the menu before the write
+                  // resolves, so keep the failure visible outside the menu.
+                  emitListToast(message.split("\n").join(" · "), "error");
+                }
                 watchedState.refresh();
               }
             }}

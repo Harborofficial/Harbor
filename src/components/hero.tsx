@@ -37,6 +37,7 @@ import { useTitleLogo } from "@/lib/title-logo";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import {
   fetchFirstTrailer,
+  prefetchTrailer,
   resolveTrailerQuality,
   trailerSrc,
   type Quality,
@@ -63,6 +64,7 @@ export const Hero = memo(function Hero({
   meta,
   rank,
   playTrailer = false,
+  warmTrailer = playTrailer,
   active = true,
   loadBackdrop = true,
   full = false,
@@ -74,6 +76,7 @@ export const Hero = memo(function Hero({
   meta: Meta;
   rank?: { label: string; position: number; sources?: Array<{ label: string; rank: number }> };
   playTrailer?: boolean;
+  warmTrailer?: boolean;
   active?: boolean;
   loadBackdrop?: boolean;
   full?: boolean;
@@ -149,7 +152,7 @@ export const Hero = memo(function Hero({
   }, [meta.id]);
 
   useEffect(() => {
-    if (!playTrailer || trailerCandidates.length > 0) return;
+    if (!warmTrailer || trailerCandidates.length > 0) return;
     let cancelled = false;
     const isTmdb = meta.id.startsWith("tmdb:");
     const lookup: Promise<string[]> = isTmdb
@@ -166,12 +169,21 @@ export const Hero = memo(function Hero({
       .then((ids) => {
         if (cancelled) return;
         setTrailerCandidates(ids);
+        if (!playTrailer && ids[0]) prefetchTrailer(ids[0], trailerQuality);
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [meta.id, meta.type, settings.tmdbKey, playTrailer, trailerCandidates.length]);
+  }, [
+    meta.id,
+    meta.type,
+    settings.tmdbKey,
+    warmTrailer,
+    playTrailer,
+    trailerQuality,
+    trailerCandidates.length,
+  ]);
 
   useEffect(() => {
     // peekCachedLogo, not meta.logo: when the image language is not English the

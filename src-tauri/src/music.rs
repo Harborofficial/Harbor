@@ -19,6 +19,7 @@ mod registry;
 mod rows;
 mod spotify;
 mod store;
+mod stream_probe;
 mod worker;
 mod worker_policy;
 

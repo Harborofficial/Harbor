@@ -37,10 +37,16 @@ export function BpVideosRow({
 
   const seen = new Set<string>();
   const clips: Clip[] = [];
+  const info = new Map((detail.trailerVideos ?? []).map((video) => [video.ytId, video]));
   for (const ytId of detail.trailerCandidates.slice(1)) {
     if (seen.has(ytId)) continue;
     seen.add(ytId);
-    clips.push({ ytId, name: t("Trailer"), kind: "Trailer" });
+    const video = info.get(ytId);
+    clips.push({
+      ytId,
+      name: video?.name?.trim() || t("Trailer"),
+      kind: video?.type?.trim() || "Trailer",
+    });
   }
   for (const v of detail.extraVideos) {
     if (seen.has(v.ytId)) continue;

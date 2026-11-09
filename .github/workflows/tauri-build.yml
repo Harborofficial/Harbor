@@ -300,6 +300,40 @@ jobs:
           ARCH="${ARCH%%-*}"
           tar -czf "$BUNDLE/Harbor_${VERSION}_${ARCH}.app.tar.gz" -C "$(dirname "$APP_PATH")" Harbor.app
 
+      - name: Add platform-named macOS bundles
+        if: contains(matrix.platform.runner, 'macos')
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE="src-tauri/target/${{ matrix.platform.target }}/release/bundle"
+          VERSION="$(node -p "JSON.parse(require('fs').readFileSync('src-tauri/tauri.conf.json')).version")"
+          CHANNEL="${HARBOR_CHANNEL:-stable}"
+          case "${{ matrix.platform.target }}" in
+            aarch64-apple-darwin) PLATFORM="macos-apple-silicon-aarch64" ;;
+            x86_64-apple-darwin) PLATFORM="macos-intel-x64" ;;
+            *) echo "::error::Unknown macOS target ${{ matrix.platform.target }}"; exit 1 ;;
+          esac
+          copied=0
+          for file in "$BUNDLE"/Harbor_${VERSION}_*.dmg; do
+            [ -f "$file" ] || continue
+            case "$(basename "$file")" in *macos-*) continue ;; esac
+            cp "$file" "$BUNDLE/Harbor_${VERSION}_${CHANNEL}_${PLATFORM}.dmg"
+            copied=$((copied + 1))
+          done
+          for file in "$BUNDLE"/Harbor_${VERSION}_*.app.tar.gz; do
+            [ -f "$file" ] || continue
+            case "$(basename "$file")" in *macos-*) continue ;; esac
+            cp "$file" "$BUNDLE/Harbor_${VERSION}_${CHANNEL}_${PLATFORM}.app.tar.gz"
+            if [ -f "$file.sig" ]; then
+              cp "$file.sig" "$BUNDLE/Harbor_${VERSION}_${CHANNEL}_${PLATFORM}.app.tar.gz.sig"
+            fi
+            copied=$((copied + 1))
+          done
+          if [ "$copied" -eq 0 ]; then
+            echo "::error::No macOS bundle files were found to give a platform name"
+            exit 1
+          fi
+
       - name: Upload artifacts
         if: success()
         uses: actions/upload-artifact@v4
@@ -356,7 +390,7 @@ jobs:
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'
 
   publish-macos:
-    name: Publish the Apple silicon installer
+    name: Publish the macOS installers
     needs: build
     if: ${{ !inputs.intel-only && !cancelled() && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-24.04
@@ -371,22 +405,35 @@ jobs:
           name: harbor-macOS-AppleSilicon
           path: macos-bundles
 
-      - name: Attach the Apple silicon installer to the release
+      - name: Download the Intel bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: harbor-macOS-Intel
+          path: macos-intel-bundles
+        continue-on-error: true
+
+      - name: Attach the macOS installers to the release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          apple_silicon="$(find macos-bundles -type f -name '*_aarch64.dmg' -print -quit)"
+          apple_silicon="$(find macos-bundles -type f -name 'Harbor_*macos-apple-silicon-aarch64.dmg' -print -quit)"
           if [ -z "$apple_silicon" ]; then
-            echo "::error::The Apple silicon leg produced no *_aarch64.dmg, so there is nothing to attach to $TAG."
+            echo "::error::The Apple silicon leg produced no platform-named aarch64 dmg, so there is nothing to attach to $TAG."
             exit 1
           fi
+          assets=("$apple_silicon")
+          intel="$(find macos-intel-bundles -type f -name 'Harbor_*macos-intel-x64.dmg' -print -quit 2>/dev/null || true)"
+          if [ -n "$intel" ]; then
+            assets+=("$intel")
+          else
+            echo "::warning::The Intel leg produced no platform-named Intel dmg; publishing Apple silicon only."
+          fi
           if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "::warning::$TAG has no release, so $(basename "$apple_silicon") was not attached. This job never creates one, because releases are written by hand. Publish the release for $TAG and re-run this job, or attach the dmg from this run's harbor-macOS-AppleSilicon artifact."
+            echo "::warning::$TAG has no release, so $(basename "$apple_silicon") was not attached. This job never creates one, because releases are written by hand. Publish the release for $TAG and re-run this job, or attach the dmgs from this run's harbor-macOS-AppleSilicon and harbor-macOS-Intel artifacts."
             exit 0
           fi
-          gh release upload "$TAG" "$apple_silicon" --repo "$GITHUB_REPOSITORY" --clobber
-          echo "::notice::The Intel dmg is built and kept as the harbor-macOS-Intel workflow artifact, deliberately not attached to a release. Its bundled libmpv closure comes from Homebrew, which no longer builds Intel bottles, so the dmg declares macOS 15.0 or newer and would not launch on the Sonoma, Ventura and Monterey Macs that asked for it. To ship it, add its *_x64.dmg to this upload and drop the Intel entry's continue-on-error in the build job."
+          gh release upload "$TAG" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'

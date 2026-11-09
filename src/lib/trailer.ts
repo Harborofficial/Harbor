@@ -21,6 +21,7 @@ const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
 // fallback. Keep the UI deadline beyond that complete retry path.
 export const TRAILER_FETCH_TIMEOUT_MS = 400_000;
 const CACHE_MAX = 64;
+const STREAM_CACHE_TTL_MS = 30 * 60_000;
 
 const cache = new Map<string, Promise<TrailerInfo | null>>();
 const streamCache = new Map<string, { expires: number; request: Promise<TrailerInfo | null> }>();
@@ -59,29 +60,59 @@ export function shouldPrefetch(): boolean {
   return true;
 }
 
+/** Resolve a trailer. `download` forces the seekable file; `downloadFallback`
+ *  lets a failed stream resolution fall back to that file. */
 export function fetchTrailer(
   videoId: string,
   quality: Quality = getQualityHint(),
   download = false,
+  downloadFallback = true,
 ): Promise<TrailerInfo | null> {
   if (!isTauri || !videoId) return Promise.resolve(null);
   const key = cacheKey(videoId, quality);
   if (!download) {
     const hit = streamCache.get(key);
     if (hit && hit.expires > Date.now()) return hit.request;
-    const request = invoke<{ url: string; headers: Record<string, string>; transcode?: boolean }>(
-      "resolve_youtube_stream", { videoId, quality },
-    ).then(async (stream): Promise<TrailerInfo> => {
-      const expiry = Number(new URL(stream.url).searchParams.get("expire"));
-      const cached = streamCache.get(key);
-      if (cached && expiry > 0) cached.expires = Math.min(cached.expires, expiry * 1000 - 30_000);
-      const proxy = await registerStreamProxy(stream.url, stream.headers, { transcode: stream.transcode, fragmentedMp4: true });
-      return { file_path: "", stream_url: proxy.url, quality, duration_seconds: 0, title: "", size_bytes: 0 };
-    }).catch(() => {
-      streamCache.delete(key);
-      return fetchTrailer(videoId, quality, true);
-    });
-    streamCache.set(key, { expires: Date.now() + 5 * 60_000, request });
+    const request = invoke<{
+      url: string;
+      audio_url?: string | null;
+      headers: Record<string, string>;
+      transcode?: boolean;
+    }>("resolve_youtube_stream", { videoId, quality })
+      .then(async (stream): Promise<TrailerInfo> => {
+        const expiry = [stream.url, stream.audio_url]
+          .filter((url): url is string => !!url)
+          .map((url) => Number(new URL(url).searchParams.get("expire")))
+          .filter((value) => Number.isFinite(value) && value > 0)
+          .reduce((earliest, value) => Math.min(earliest, value), Number.POSITIVE_INFINITY);
+        const cached = streamCache.get(key);
+        if (cached) {
+          const now = Date.now();
+          const ttl = now + STREAM_CACHE_TTL_MS;
+          cached.expires = Number.isFinite(expiry)
+            ? Math.max(now + 30_000, Math.min(ttl, expiry * 1000 - 30_000))
+            : ttl;
+        }
+        const options: { transcode?: boolean; fragmentedMp4: boolean; audioUrl?: string } = {
+          transcode: stream.transcode,
+          fragmentedMp4: true,
+        };
+        if (stream.audio_url) options.audioUrl = stream.audio_url;
+        const proxy = await registerStreamProxy(stream.url, stream.headers, options);
+        return {
+          file_path: "",
+          stream_url: proxy.url,
+          quality,
+          duration_seconds: 0,
+          title: "",
+          size_bytes: 0,
+        };
+      })
+      .catch(() => {
+        streamCache.delete(key);
+        return downloadFallback ? fetchTrailer(videoId, quality, true) : null;
+      });
+    streamCache.set(key, { expires: Date.now() + STREAM_CACHE_TTL_MS, request });
     while (streamCache.size > CACHE_MAX) streamCache.delete(streamCache.keys().next().value!);
     return request;
   }
@@ -154,8 +185,18 @@ export function prefetchTrailer(videoId: string, quality: Quality = "360p"): voi
   const key = cacheKey(videoId, quality);
   const hit = streamCache.get(key);
   if (hit && hit.expires > Date.now()) return;
-  prefetchQueue.push(() => fetchTrailer(videoId, quality));
+  prefetchQueue.push(() => fetchTrailer(videoId, quality, false, false));
   drainPrefetch();
+}
+
+/** Warm the seekable download used by the manual trailer player. */
+export function prefetchTrailerDownload(
+  videoId: string,
+  quality: Quality = getQualityHint(),
+): void {
+  if (!isTauri || !videoId) return;
+  if (!shouldPrefetch()) return;
+  void fetchTrailer(videoId, quality, true);
 }
 
 export function trailerSrc(info: TrailerInfo): string {

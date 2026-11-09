@@ -27,6 +27,8 @@ export type ContextAction = {
   /** Independent membership state, never a mutually exclusive choice. */
   checked?: boolean;
   dismiss?: "on-success" | "keep-open";
+  /** Allow rapid repeated clicks, such as stepping a zoom or position. */
+  repeatable?: boolean;
   confirmation?: ActionConfirmation;
   searchable?: boolean;
   searchPlaceholder?: string;

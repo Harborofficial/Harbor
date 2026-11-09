@@ -359,7 +359,7 @@ const PosterCard = memo(function PosterCard({
     "card.preferred-title",
     () => {
       setPreferredTitle(null);
-      if (!settings.preferCustomMetaAddon || isAnimeCardId) return;
+      if (!settings.addonOnlyMetadata || isAnimeCardId) return;
       if (meta.type !== "movie" && meta.type !== "series") return;
       const el = ref.current;
       if (!el) return;
@@ -379,7 +379,7 @@ const PosterCard = memo(function PosterCard({
         off?.();
       };
     },
-    [meta.id, meta.type, isAnimeCardId, settings.preferCustomMetaAddon],
+    [meta.id, meta.type, isAnimeCardId, settings.addonOnlyMetadata],
   );
 
   const [translatedTitle, setTranslatedTitle] = useState<string | null>(null);

@@ -219,6 +219,14 @@ export function UpNextTab() {
               onChange={(v) => update({ hideWatchedInMoreLikeThis: v })}
             />
             <ToggleRow
+              label={t("On still-airing series")}
+              sub={t(
+                "Show More Like This after the latest aired episode, even when future episodes are listed. It still won't appear before the latest aired episode.",
+              )}
+              value={settings.moreLikeThisOnAiringSeries}
+              onChange={(v) => update({ moreLikeThisOnAiringSeries: v })}
+            />
+            <ToggleRow
               label={t("Countdown")}
               sub={t("Act automatically if nothing is chosen before time runs out.")}
               value={settings.endScreenCountdownSec > 0}

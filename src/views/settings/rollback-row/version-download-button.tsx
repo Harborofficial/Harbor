@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useT } from "@/lib/i18n";
 import { isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { installerMode, resumedInstallerPhase } from "@/lib/updater/installer-plan";
@@ -11,14 +11,13 @@ import {
   stageVersionInstaller,
   type InstallerProgress,
 } from "@/lib/updater/version-download";
+import { versionDownloadSession, type InstallerPhase } from "@/lib/updater/version-download-state";
 import { installerUrl, type VersionEntry } from "@/lib/updater/versions";
 import { openUrl } from "@/lib/window";
 import { ArrowDownToLine, FolderOpen, RotateCw } from "../icons";
 import { SButton } from "../ui";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-
-type Phase = "checking" | "idle" | "downloading" | "verifying" | "staged" | "saved";
 
 export function VersionDownloadButton({
   entry,
@@ -38,34 +37,37 @@ export function VersionDownloadButton({
     windows: isWindowsDesktop(),
     mac: isMacDesktop(),
   });
-  const [phase, setPhase] = useState<Phase>("checking");
-  const [progress, setProgress] = useState<InstallerProgress>({
-    received: 0,
-    total: null,
-    verifying: false,
-  });
-  const [savedPath, setSavedPath] = useState<string | null>(null);
+  const session = versionDownloadSession(entry.version, url, mode);
+  const { phase, progress, savedPath } = useSyncExternalStore(
+    session.subscribe,
+    session.snapshot,
+    session.snapshot,
+  );
+  const setPhase = (phase: InstallerPhase) => session.set({ phase });
+  const setProgress = (progress: InstallerProgress) => session.set({ progress });
+  const setSavedPath = (savedPath: string) => session.set({ savedPath });
 
   useEffect(() => {
+    const initial = session.snapshot();
+    if (initial.phase === "downloading" || initial.phase === "verifying") return;
     let live = true;
     if (!IS_TAURI || mode === "browser" || !url) {
-      setPhase("idle");
+      session.set({ phase: "idle" });
       return;
     }
     void (async () => {
       const staged = mode === "verified" ? await probeStagedInstaller(entry.version) : false;
       const saved = await resolveSavedInstaller(entry.version, url);
-      if (!live) return;
+      if (!live || session.snapshot() !== initial) return;
       const next = resumedInstallerPhase(mode, staged, saved !== null);
-      if (next === "saved" && saved) setSavedPath(saved);
-      setPhase(next);
+      session.set({ phase: next, savedPath: saved });
     })().catch(() => {
-      if (live) setPhase("idle");
+      if (live && session.snapshot() === initial) session.set({ phase: "idle" });
     });
     return () => {
       live = false;
     };
-  }, [entry.version, mode, url]);
+  }, [entry.version, mode, url, session]);
 
   if (!url) return null;
 
@@ -75,7 +77,7 @@ export function VersionDownloadButton({
       : null;
 
   const start = async () => {
-    if (phase === "checking") return;
+    if (session.snapshot().phase !== "idle") return;
     if (IS_TAURI && mode !== "browser") {
       const report = (next: InstallerProgress) => {
         setProgress(next);

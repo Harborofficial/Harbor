@@ -13,6 +13,7 @@ import {
   type HdrNavigationRequest,
 } from "@/lib/hdr-overlay";
 import { PlayerNavigationProvider, type PlayerNavigation, type PlayerSrc } from "@/lib/view";
+import { effectiveBinding } from "@/lib/hotkeys";
 import { PlayerInteractionLockControls } from "@/components/player/player-interaction-lock";
 import { usePlayerInteractionBlocker } from "./player/hooks/use-player-interaction-lock";
 
@@ -32,7 +33,7 @@ export type HdrStagePayload = {
   screenLockEnabled: boolean;
   screenLocked: boolean;
   screenLockControlsVisible: boolean;
-  screenLockBinding: string;
+  hotkeys: Record<string, string>;
 };
 
 function emitDead() {
@@ -109,7 +110,7 @@ function HdrOverlayChrome() {
   usePlayerInteractionBlocker({
     enabled: payload?.screenLockEnabled ?? false,
     locked: payload?.screenLocked ?? false,
-    binding: payload?.screenLockBinding ?? "ctrl+l",
+    hotkeys: payload?.hotkeys,
     onToggle: toggleLock,
     onLockedActivity: reportLockedActivity,
   });
@@ -262,7 +263,7 @@ function HdrOverlayChrome() {
         enabled={payload.screenLockEnabled}
         locked={payload.screenLocked}
         visible={payload.screenLocked ? payload.screenLockControlsVisible : payload.visible}
-        binding={payload.screenLockBinding}
+        binding={effectiveBinding("playerScreenLock", payload.hotkeys ?? {})}
         onLock={() => act("hdr-stage://lock")}
         onUnlock={() => act("hdr-stage://unlock")}
       />

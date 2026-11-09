@@ -129,7 +129,7 @@ export async function fetchAniListAiringCalendar(
         id,
         imdbId: null,
         type: "tv",
-        name: `${title} S1E${pad(node.episode)}`,
+        name: `${title.replace(/\bSeason\s+(\d+)/i, "S$1")} E${pad(node.episode)}`,
         poster: media.coverImage?.large ?? media.coverImage?.extraLarge ?? null,
         background: media.bannerImage ?? null,
         releaseDate: toLocalDateISO(new Date(airMs)),

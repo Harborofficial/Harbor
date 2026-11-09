@@ -18,7 +18,6 @@ import { setPosterBaseUrl, setPosterLanguage } from "@/lib/providers/rpdb";
 import { setMdblistBatchKey } from "@/lib/providers/mdblist-batch";
 import { setUiLanguage } from "@/lib/i18n";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
-import { STORAGE_KEY } from "./settings/defaults";
 import { noteNotify } from "./render-cause";
 import { readSettingsFile, writeSettingsFile } from "./settings/file-store";
 import { torrentEngineSetEnabled } from "./torrent/local-engine";
@@ -28,10 +27,12 @@ import {
   forkToProfile,
   loadEffective,
   persistEffective,
+  recoverSettingsFile,
   seedSharedFromLegacy,
   sourceKeyFor,
 } from "./settings/profile-store";
 import type { Settings, StreamingService } from "./settings/types";
+import { mergeRecoveredSettings, recoveryMatchesSource } from "./settings/recovery";
 import { markSectionDirty } from "./profile-sync/scheduler";
 import { configureLayoutStore } from "./layout-sync/store";
 import { SYNCED_SETTINGS_FIELDS } from "./layout-sync/sections";
@@ -135,19 +136,20 @@ export function SettingsProvider({
   }, []);
 
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY)) {
-      setSettingsReady(true);
-      return;
-    }
     let cancelled = false;
+    const started = { profileId: sourceRef.current.profileId, linked: sourceRef.current.linked };
+    const initial = settingsRef.current;
     void readSettingsFile().then((raw) => {
       if (cancelled) return;
-      if (raw && !localStorage.getItem(STORAGE_KEY)) {
-        try {
-          localStorage.setItem(STORAGE_KEY, raw);
-          seedSharedFromLegacy();
-          setSettings(loadEffective(sourceRef.current.profileId, sourceRef.current.linked));
-        } catch {}
+      // A profile switch while the disk read is in flight makes the file belong to
+      // the previous profile; loading it into the new one would cross accounts.
+      if (!recoveryMatchesSource(started, sourceRef.current)) {
+        setSettingsReady(true);
+        return;
+      }
+      const recovered = recoverSettingsFile(raw, started.profileId, started.linked);
+      if (recovered) {
+        setSettings((current) => mergeRecoveredSettings(recovered, current, initial));
       }
       setSettingsReady(true);
     });
@@ -192,7 +194,6 @@ export function SettingsProvider({
     void saveBgImage(img, activeId);
   }, [settings.theme.backgroundImage]);
 
-  const fileTimerRef = useRef(0);
   useEffect(() => {
     if (!settingsReady) return;
     try {
@@ -201,8 +202,7 @@ export function SettingsProvider({
         sourceRef.current.profileId,
         sourceRef.current.linked,
       );
-      window.clearTimeout(fileTimerRef.current);
-      fileTimerRef.current = window.setTimeout(() => void writeSettingsFile(json), 600);
+      void writeSettingsFile(json);
     } catch (e) {
       if (e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22)) {
         console.warn("[settings] localStorage quota exceeded, dropping avatar");

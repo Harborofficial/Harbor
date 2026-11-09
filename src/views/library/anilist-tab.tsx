@@ -27,7 +27,7 @@ export function AnilistTab() {
   const { session } = useAnilist();
   const userId = session?.userId;
   const [groups, setGroups] = useState<AnilistListGroup[]>(() =>
-    userId != null ? readCachedCollection(userId) ?? [] : [],
+    userId != null ? (readCachedCollection(userId) ?? []) : [],
   );
   const [status, setStatus] = useState<"loading" | "ready" | "error">(() =>
     userId != null && readCachedCollection(userId) != null ? "ready" : "loading",
@@ -153,56 +153,43 @@ export function AnilistTab() {
     [groups, setBusyFor],
   );
 
-  const matches = useCallback(
-    (entry: AnilistMediaEntry) => {
-      if (type !== "all" && entryType(entry) !== type) return false;
-      const q = query.trim().toLowerCase();
-      return !q || entryName(entry).toLowerCase().includes(q);
-    },
-    [type, query],
-  );
-
   const statusEntries = useMemo(
     () => groups.filter((group) => !group.isCustomList).flatMap((group) => group.entries),
     [groups],
   );
 
-  const sections = useMemo(
-    () =>
-      RAIL_ORDER.map((section) => ({
-        key: section.key,
-        title: section.title,
-        items: statusEntries
-          .filter((entry) => section.statuses.includes(entry.status))
-          .filter(matches),
-      })).filter((section) => section.items.length > 0),
-    [statusEntries, matches],
-  );
-
-  const customSections = useMemo(
-    () =>
-      groups
-        .filter((group) => group.isCustomList && group.name)
-        .map((group) => ({
+  const sections = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const matchesQuery = (entry: AnilistMediaEntry) =>
+      !q || entryName(entry).toLowerCase().includes(q);
+    const statusSections = RAIL_ORDER.map((section) => ({
+      key: section.key,
+      title: t(section.title),
+      items: statusEntries.filter(
+        (entry) => section.statuses.includes(entry.status) && matchesQuery(entry),
+      ),
+    }));
+    const customSections = groups.flatMap((group) => {
+      if (!group.isCustomList || !group.name) return [];
+      return [
+        {
           key: `custom:${group.name}`,
-          name: group.name as string,
-          items: group.entries.filter(matches),
-        }))
-        .filter((section) => section.items.length > 0),
-    [groups, matches],
-  );
+          title: group.name,
+          items: group.entries.filter(matchesQuery),
+        },
+      ];
+    });
+    return [...statusSections, ...customSections];
+  }, [statusEntries, groups, query, t]);
 
   const counts = useMemo(() => {
-    const visible = uniqueEntries([
-      ...sections.flatMap((section) => section.items),
-      ...customSections.flatMap((section) => section.items),
-    ]);
+    const matching = uniqueEntries(sections.flatMap((section) => section.items));
     return {
-      all: visible.length,
-      movie: visible.filter((e) => entryType(e) === "movie").length,
-      series: visible.filter((e) => entryType(e) === "series").length,
+      all: matching.length,
+      movie: matching.filter((e) => entryType(e) === "movie").length,
+      series: matching.filter((e) => entryType(e) === "series").length,
     };
-  }, [sections, customSections]);
+  }, [sections]);
 
   const empty = useMemo(() => groups.every((group) => group.entries.length === 0), [groups]);
 
@@ -221,7 +208,9 @@ export function AnilistTab() {
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-8 py-16 text-center">
         <h2 className="text-[16px] font-semibold text-ink">{t("Your AniList is empty")}</h2>
         <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {t("Add anime to your AniList and they show up here, grouped by status and ready to edit.")}
+          {t(
+            "Add anime to your AniList and they show up here, grouped by status and ready to edit.",
+          )}
         </p>
       </div>
     );
@@ -230,48 +219,34 @@ export function AnilistTab() {
   return (
     <section className="flex flex-col gap-10">
       <FilterBar type={type} setType={setType} query={query} setQuery={setQuery} counts={counts} />
-      {sections.map((section) => (
-        <div key={section.key} className="flex flex-col gap-4">
-          <div className="flex items-baseline gap-3">
-            <h2 className="text-[18px] font-semibold text-ink">{t(section.title)}</h2>
-            <span className="text-[12px] text-ink-muted">{section.items.length}</span>
+      {sections.map((section) => {
+        const items =
+          type === "all"
+            ? section.items
+            : section.items.filter((entry) => entryType(entry) === type);
+        if (items.length === 0) return null;
+        return (
+          <div key={section.key} className="flex flex-col gap-4">
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-[18px] font-semibold text-ink">{section.title}</h2>
+              <span className="text-[12px] text-ink-muted">{items.length}</span>
+            </div>
+            <Grid>
+              {items.map((entry) => (
+                <AnilistEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  busy={busy.has(entry.id)}
+                  onStatus={(s) => void commitStatus(entry, s)}
+                  onProgress={(p) => void commitProgress(entry, p)}
+                  onPrivate={(next) => void commitPrivate(entry, next)}
+                  onRemove={() => void commitRemove(entry)}
+                />
+              ))}
+            </Grid>
           </div>
-          <Grid>
-            {section.items.map((entry) => (
-              <AnilistEntryCard
-                key={entry.id}
-                entry={entry}
-                busy={busy.has(entry.id)}
-                onStatus={(s) => void commitStatus(entry, s)}
-                onProgress={(p) => void commitProgress(entry, p)}
-                onPrivate={(next) => void commitPrivate(entry, next)}
-                onRemove={() => void commitRemove(entry)}
-              />
-            ))}
-          </Grid>
-        </div>
-      ))}
-      {customSections.map((section) => (
-        <div key={section.key} className="flex flex-col gap-4">
-          <div className="flex items-baseline gap-3">
-            <h2 className="text-[18px] font-semibold text-ink">{section.name}</h2>
-            <span className="text-[12px] text-ink-muted">{section.items.length}</span>
-          </div>
-          <Grid>
-            {section.items.map((entry) => (
-              <AnilistEntryCard
-                key={entry.id}
-                entry={entry}
-                busy={busy.has(entry.id)}
-                onStatus={(s) => void commitStatus(entry, s)}
-                onProgress={(p) => void commitProgress(entry, p)}
-                onPrivate={(next) => void commitPrivate(entry, next)}
-                onRemove={() => void commitRemove(entry)}
-              />
-            ))}
-          </Grid>
-        </div>
-      ))}
+        );
+      })}
     </section>
   );
 }

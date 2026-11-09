@@ -6,6 +6,7 @@ import type { PluginGrpcOpts, PluginGrpcResult, PluginHttpOpts, PluginHttpResult
 
 export type PluginHttpPolicy = {
   publicOnly?: boolean;
+  background?: boolean;
   maxBytes?: number;
   openHeaders?: boolean;
 };
@@ -254,7 +255,9 @@ export async function runPluginHttp(
   const method = (opts.method || "GET").toUpperCase();
   const requested = Math.min(Math.max(opts.timeoutMs || DEFAULT_TIMEOUT, 1_000), MAX_TIMEOUT);
   const timeout =
-    opts.responseType === "base64" ? requested : Math.max(requested, TEXT_CHALLENGE_TIMEOUT);
+    opts.responseType === "base64" || policy?.background
+      ? requested
+      : Math.max(requested, TEXT_CHALLENGE_TIMEOUT);
   const headers = filterHeaders(
     opts.headers,
     {
@@ -300,7 +303,9 @@ export async function runPluginHttp(
         timeout,
         Math.min(policy.maxBytes ?? MAX_BYTES, MAX_BYTES),
       )
-    : await safeFetch(target, init);
+    : policy?.background
+      ? await safeFetchBytes(target, init, timeout, MAX_BYTES)
+      : await safeFetch(target, init);
   const bytes = await readCapped(res);
   const body = opts.responseType === "base64" ? toBase64(bytes) : new TextDecoder().decode(bytes);
   const finalUrl = res.headers.get(FINAL_URL_HEADER) ?? undefined;

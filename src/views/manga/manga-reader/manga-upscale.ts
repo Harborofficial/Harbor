@@ -54,7 +54,10 @@ function isCleanSource(src: string): boolean {
   }
 }
 
-async function readBlob(url: string, headers?: Record<string, string>): Promise<Blob | null> {
+export async function readBlob(
+  url: string,
+  headers?: Record<string, string>,
+): Promise<Blob | null> {
   const remembered = sourceBlobs.get(url);
   if (remembered) return remembered;
   const running = blobReads.get(url);

@@ -12,7 +12,10 @@ function load(path: string, mocks: Record<string, unknown>, globals: Record<stri
     (name: string) => {
       assert.ok(name in mocks, `unexpected import ${name}`);
       return mocks[name];
-    }, module, module.exports, ...Object.values(globals),
+    },
+    module,
+    module.exports,
+    ...Object.values(globals),
   );
   return module.exports;
 }
@@ -23,7 +26,10 @@ test("full quality changes hero candidates without expanding TV or card decode s
     "@/lib/platform": { isAndroidTv: () => tv },
   });
   const src = "https://image.tmdb.org/t/p/w500/backdrop.jpg";
-  const sources = [{ url: src, portrait: false }, { url: src, portrait: false }];
+  const sources = [
+    { url: src, portrait: false },
+    { url: src, portrait: false },
+  ];
   assert.deepEqual(art.bpHeroCandidates(sources, true), [
     { src: src.replace("w500", "original"), portrait: false },
   ]);
@@ -42,13 +48,24 @@ function trailerHarness() {
   let slot = 0;
   let nextTimer = 0;
   let visible = true;
-  const settings = { heroTrailers: true, autoplayTrailerQuality: "720p", trailerQuality: "best", tmdbKey: "fixture" };
-  const same = (a?: unknown[], b?: unknown[]) => a && b && a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
+  const settings = {
+    heroTrailers: true,
+    autoplayTrailerQuality: "720p",
+    trailerQuality: "best",
+    tmdbKey: "fixture",
+  };
+  const same = (a?: unknown[], b?: unknown[]) =>
+    a && b && a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
   const react = {
     useState(initial: unknown) {
       const i = slot++;
       if (!(i in slots)) slots[i] = initial;
-      return [slots[i], (value: unknown) => { slots[i] = value; }];
+      return [
+        slots[i],
+        (value: unknown) => {
+          slots[i] = value;
+        },
+      ];
     },
     useMemo(fn: () => unknown, deps: unknown[]) {
       const i = slot++;
@@ -64,39 +81,54 @@ function trailerHarness() {
       });
     },
   };
-  const api = load("src/views/big-picture/use-bp-trailer.ts", {
-    react,
-    "@/lib/cinemeta": { narrowMediaType: (t: string) => t, meta: async (_: string, id: string) => ({ trailers: [{ source: id }] }) },
-    "@/lib/providers/tmdb": { tmdbTrailerList: async (_: string, id: string) => [id] },
-    "@/lib/trailer": {
-      resolveTrailerQuality: (q: string) => q === "auto" ? "360p" : q,
-      fetchFirstTrailer: (ids: readonly string[], quality: string) => new Promise(resolve => requests.push({ id: ids[0], quality, resolve })),
-      prefetchTrailer: () => {},
-      trailerSrc: (info: { stream_url: string }) => info.stream_url,
+  const api = load(
+    "src/views/big-picture/use-bp-trailer.ts",
+    {
+      react,
+      "@/lib/cinemeta": {
+        narrowMediaType: (t: string) => t,
+        meta: async (_: string, id: string) => ({ trailers: [{ source: id }] }),
+      },
+      "@/lib/providers/tmdb": { tmdbTrailerList: async (_: string, id: string) => [id] },
+      "@/lib/trailer": {
+        resolveTrailerQuality: (q: string) => (q === "auto" ? "360p" : q),
+        fetchFirstTrailer: (ids: readonly string[], quality: string) =>
+          new Promise((resolve) => requests.push({ id: ids[0], quality, resolve })),
+        prefetchTrailer: () => {},
+        trailerSrc: (info: { stream_url: string }) => info.stream_url,
+      },
+      "@/lib/visibility": { usePageVisible: () => visible },
+      "@/lib/settings": { useSettings: () => ({ settings }) },
     },
-    "@/lib/visibility": { usePageVisible: () => visible },
-    "@/lib/settings": { useSettings: () => ({ settings }) },
-  }, {
-    window: {
-      setTimeout: (fn: () => void) => { const id = ++nextTimer; timers.set(id, fn); return id; },
-      clearTimeout: (id: number) => timers.delete(id),
+    {
+      window: {
+        setTimeout: (fn: () => void) => {
+          const id = ++nextTimer;
+          timers.set(id, fn);
+          return id;
+        },
+        clearTimeout: (id: number) => timers.delete(id),
+      },
     },
-  });
+  );
   return {
-    settings, requests,
+    settings,
+    requests,
     render(id = "tmdb:movie:1") {
       slot = 0;
       const output = api.useBpTrailer(id ? { id, type: "movie" } : null);
-      pending.splice(0).forEach(fn => fn());
+      pending.splice(0).forEach((fn) => fn());
       return output.src;
     },
     async dwell() {
       const due = [...timers.values()];
       timers.clear();
-      due.forEach(fn => fn());
-      await Promise.resolve();
+      due.forEach((fn) => fn());
+      for (let i = 0; i < 12; i++) await Promise.resolve();
     },
-    hide() { visible = false; },
+    hide() {
+      visible = false;
+    },
   };
 }
 

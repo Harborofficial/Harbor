@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   ArrowDownToLine,
   Bell,
@@ -20,7 +20,9 @@ import type { LibraryItem } from "@/lib/stremio";
 import { useSettings } from "@/lib/settings";
 import { useInWatchlist, toggleWatchlist } from "@/lib/watchlist";
 import { useIsFavorite, useMediaFavorites } from "@/lib/media-favorites";
-import { markMovieWatched, unmarkMovieWatched } from "@/lib/mark-watched";
+import { setMovieWatchedWithConfirmation } from "@/lib/movie-watched-action";
+import { requireMediaActionSuccess, type MediaActionResult } from "@/lib/media-context-actions";
+import { emitListToast } from "@/components/lists/list-toast";
 import {
   isMovieWatchedLocal,
   movieWatchedVersion,
@@ -74,7 +76,13 @@ export function useBpDetailActions(params: {
   useDownloads();
 
   useSyncExternalStore(subscribeMovieWatched, movieWatchedVersion, movieWatchedVersion);
-  const watched = isMovie && (isMovieWatchedLocal(meta.id) || stremioMovieWatched(libraryItem));
+  const [watchedOverride, setWatchedOverride] = useState<boolean | null>(null);
+  useEffect(() => {
+    setWatchedOverride(null);
+  }, [meta.id]);
+  const watched =
+    isMovie &&
+    (watchedOverride ?? (isMovieWatchedLocal(meta.id) || stremioMovieWatched(libraryItem)));
 
   const seed = { id: meta.id, type: meta.type, name: title || meta.name, poster };
   const out: BpDetailAction[] = [];
@@ -187,9 +195,45 @@ export function useBpDetailActions(params: {
       icon: Check,
       active: watched,
       onPress: () => {
-        const tmdb = meta.id.startsWith("tmdb:") ? meta.id.split(":")[2] : null;
-        if (watched) void unmarkMovieWatched(meta, imdbId);
-        else void markMovieWatched(meta, imdbId, tmdb);
+        const next = !watched;
+        setWatchedOverride(next);
+        void (async () => {
+          let result: MediaActionResult | null;
+          try {
+            result = await setMovieWatchedWithConfirmation(meta, next, {
+              imdbId,
+              title: title || meta.name,
+              onUnsafeProvider: next ? "skip" : "block",
+            });
+          } catch (cause) {
+            setWatchedOverride(null);
+            emitListToast(
+              cause instanceof Error
+                ? cause.message.split("\n").join(" · ")
+                : t("The action could not be completed."),
+              "error",
+            );
+            return;
+          }
+          if (
+            !result ||
+            !result.outcomes.some(
+              (outcome) => outcome.provider === "Harbor" && outcome.status === "updated",
+            )
+          )
+            setWatchedOverride(null);
+          if (!result) return;
+          try {
+            requireMediaActionSuccess(result);
+          } catch (cause) {
+            emitListToast(
+              cause instanceof Error
+                ? cause.message.split("\n").join(" · ")
+                : t("The action could not be completed."),
+              "error",
+            );
+          }
+        })();
       },
     });
   }

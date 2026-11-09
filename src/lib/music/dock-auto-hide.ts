@@ -30,6 +30,25 @@ export const MUSIC_DOCK_AUTO_HIDE_MS = 2_000;
 /** A narrow bottom-edge target remains accessible while the dock is hidden. */
 export const MUSIC_DOCK_REVEAL_ZONE_PX = 28;
 
+export function musicDockHasInteraction(
+  dock: HTMLElement | null,
+  pointer: { x: number; y: number } | null,
+): boolean {
+  if (!dock) return false;
+  const focused = dock.ownerDocument.activeElement;
+  // Mouse clicks leave focus behind after a panel closes. Only keyboard focus
+  // should keep the dock visible once the pointer is outside its current bounds.
+  if (focused && dock.contains(focused) && focused.matches(":focus-visible")) return true;
+  if (!pointer) return false;
+  const bounds = dock.getBoundingClientRect();
+  return (
+    pointer.x >= bounds.left &&
+    pointer.x < bounds.right &&
+    pointer.y >= bounds.top &&
+    pointer.y < bounds.bottom
+  );
+}
+
 export function musicDockCanAutoHide({
   enabled,
   visible,

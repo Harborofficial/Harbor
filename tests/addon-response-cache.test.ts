@@ -61,3 +61,28 @@ test("a prefetched addon answer is reused instead of asked twice", async () => {
     clearAddonStreamCache();
   }
 });
+
+test("addon results retain distinct URLs sharing a torrent hash", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        streams: [
+          { infoHash: "a".repeat(40), url: "https://cdn.example/episode-1" },
+          { infoHash: "a".repeat(40), url: "https://cdn.example/episode-2" },
+        ],
+      }),
+    );
+  try {
+    clearAddonStreamCache();
+    const result = await fetchAddonStreams(
+      [addon],
+      { type: "series", ids: ["tt123:1:2"] },
+      new AbortController().signal,
+    );
+    assert.equal(result.length, 2);
+  } finally {
+    globalThis.fetch = original;
+    clearAddonStreamCache();
+  }
+});

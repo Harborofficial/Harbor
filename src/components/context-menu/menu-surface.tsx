@@ -256,6 +256,12 @@ export function MenuSurface({
     const outside = (event: PointerEvent) => {
       if (!(event.target instanceof Element) || event.target.closest("[data-harbor-context-layer]"))
         return;
+      if (event.target.closest("[data-harbor-modal]")) {
+        // A modal owns this gesture. Dismiss the menu without consuming the
+        // click, otherwise the first press on a dialog button is lost.
+        close.current(false);
+        return;
+      }
       if (event.button === 0) {
         // Consume the dismissal gesture before the underlying card sees it.
         event.preventDefault();
@@ -265,6 +271,8 @@ export function MenuSurface({
       close.current(false);
     };
     const keydown = (event: KeyboardEvent) => {
+      // A global modal owns keyboard focus while it is open, including Escape.
+      if (document.querySelector("[data-harbor-modal]")) return;
       const active = document.activeElement;
       const panel =
         active instanceof Element

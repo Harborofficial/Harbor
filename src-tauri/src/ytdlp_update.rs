@@ -71,17 +71,55 @@ pub async fn run(
     timeout: Duration,
     label: &str,
 ) -> Result<YtDlpOutput, String> {
-    tokio::time::timeout(timeout, run_with_fallback(app, args, timeout, label))
-        .await
-        .map_err(|_| "YouTube Music timed out while resolving this track.".to_string())?
+    run_validated(app, args, timeout, label, |output| async { Ok(output) }).await
 }
 
-async fn run_with_fallback(
+/// An extractor exit code does not prove that its signed stream URL is usable.
+/// Validation shares the extraction deadline and can advance to the next helper.
+pub(crate) async fn run_validated<T, Validate, Validated>(
     app: &tauri::AppHandle,
     args: Vec<String>,
     timeout: Duration,
     label: &str,
-) -> Result<YtDlpOutput, String> {
+    validate: Validate,
+) -> Result<T, String>
+where
+    Validate: Fn(YtDlpOutput) -> Validated,
+    Validated: std::future::Future<Output = Result<T, String>>,
+{
+    tokio::time::timeout(
+        timeout,
+        run_with_fallback(app, args, timeout, label, validate),
+    )
+    .await
+    .map_err(|_| "YouTube Music timed out while resolving this track.".to_string())?
+}
+
+async fn validate_output<T, Validate, Validated>(
+    output: YtDlpOutput,
+    validate: &Validate,
+) -> Result<T, String>
+where
+    Validate: Fn(YtDlpOutput) -> Validated,
+    Validated: std::future::Future<Output = Result<T, String>>,
+{
+    if !output.success {
+        return Err(extraction_error(&output.stderr));
+    }
+    validate(output).await
+}
+
+async fn run_with_fallback<T, Validate, Validated>(
+    app: &tauri::AppHandle,
+    args: Vec<String>,
+    timeout: Duration,
+    label: &str,
+    validate: Validate,
+) -> Result<T, String>
+where
+    Validate: Fn(YtDlpOutput) -> Validated,
+    Validated: std::future::Future<Output = Result<T, String>>,
+{
     let started = Instant::now();
     let directory = app
         .path()
@@ -114,8 +152,8 @@ async fn run_with_fallback(
         // Reserve time for the bundled helper when the current release cannot run.
         let budget = timeout.saturating_sub(started.elapsed()).mul_f32(0.65);
         if let Ok(output) = execute(executable, &args, budget).await {
-            if output.success {
-                return Ok(output);
+            if let Ok(validated) = validate_output(output, &validate).await {
+                return Ok(validated);
             }
         }
     }
@@ -127,7 +165,10 @@ async fn run_with_fallback(
     };
     let output = crate::trailer::run_yt_dlp(app, args.clone(), budget, label).await;
     let error = match output {
-        Ok(output) if output.success => return Ok(output),
+        Ok(output) if output.success => match validate_output(output, &validate).await {
+            Ok(validated) => return Ok(validated),
+            Err(error) => error,
+        },
         Ok(output) => {
             let error = extraction_error(&output.stderr);
             if !retry_after_update(&output.stderr) {
@@ -147,11 +188,7 @@ async fn run_with_fallback(
             if remote.as_ref() != Some(&path) {
                 let remaining = timeout.saturating_sub(started.elapsed());
                 if let Ok(output) = execute(&path, &args, remaining).await {
-                    return if output.success {
-                        Ok(output)
-                    } else {
-                        Err(extraction_error(&output.stderr))
-                    };
+                    return validate_output(output, &validate).await;
                 }
             }
         }
@@ -488,6 +525,44 @@ fn platform_asset() -> Option<&'static str> {
 mod tests {
     use super::*;
 
+    fn output(success: bool) -> YtDlpOutput {
+        YtDlpOutput {
+            success,
+            exit_code: Some(if success { 0 } else { 1 }),
+            stdout: b"extracted URL".to_vec(),
+            stderr: Vec::new(),
+        }
+    }
+
+    #[tokio::test]
+    async fn successful_exit_does_not_override_stream_validation_failure() {
+        let result = validate_output(output(true), &|_| async {
+            Err::<(), _>("YouTube rejected the audio stream (HTTP 403)".to_string())
+        })
+        .await;
+        assert!(result.unwrap_err().contains("403"));
+    }
+
+    #[tokio::test]
+    async fn failed_extraction_does_not_probe_partial_output() {
+        let result = validate_output(output(false), &|_| async {
+            panic!("failed extractor output must not be validated");
+            #[allow(unreachable_code)]
+            Ok(())
+        })
+        .await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn valid_extraction_returns_the_validated_result() {
+        let result = validate_output(output(true), &|output| async move {
+            String::from_utf8(output.stdout).map_err(|_| "invalid output".to_string())
+        })
+        .await;
+        assert_eq!(result.unwrap(), "extracted URL");
+    }
+
     #[test]
     fn extraction_errors_explain_requirements_without_exposing_output() {
         assert!(extraction_error(b"Sign in to confirm you're not a bot").contains("verification"));
@@ -517,7 +592,10 @@ mod tests {
             sha256: "0".repeat(64),
             checked_at: 1000,
         };
-        assert!(!needs_refresh(Some(&entry), 1000 + CHECK_INTERVAL.as_secs() - 1));
+        assert!(!needs_refresh(
+            Some(&entry),
+            1000 + CHECK_INTERVAL.as_secs() - 1
+        ));
         assert!(needs_refresh(Some(&entry), 1000 + CHECK_INTERVAL.as_secs()));
     }
 

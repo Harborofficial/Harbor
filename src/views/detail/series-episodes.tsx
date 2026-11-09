@@ -241,7 +241,7 @@ export function SeriesEpisodes({
     tvdbKey: settings.tvdbKey,
     omdbKey: settings.omdbKey,
     metaId: meta.id,
-    preferCustomMeta: settings.preferCustomMetaAddon,
+    preferCustomMeta: settings.addonOnlyMetadata,
   });
   const tvdbStills = useSeriesTvdbStills(
     imdbId,

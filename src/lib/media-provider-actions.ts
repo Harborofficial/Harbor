@@ -19,14 +19,12 @@ import { isAuthenticated as anilistConnected } from "./anilist/session";
 import { resolveAnilistMediaId } from "./anilist/sync";
 import { saveListEntry as saveAnilistListEntry } from "./anilist/mutations";
 import { isAuthenticated as malConnected } from "./mal/session";
-import {
-  resolveMalMediaId,
-  saveListEntry as saveMalListEntry,
-} from "./mal/mutations";
-import { resolveSimklTarget, stremioIdToSimklTarget } from "./simkl/ids";
+import { resolveMalMediaId, saveListEntry as saveMalListEntry } from "./mal/mutations";
+import { resolveSimklTarget, simklEntryIdKeys, stremioIdToSimklTarget } from "./simkl/ids";
 import {
   readSimklStateStrict,
   invalidateSimklListStatus,
+  loadSimklStatusMap,
   setSimklStatus,
 } from "./simkl/list-status";
 import { invalidateWatchlistCache } from "./simkl/watchlist";
@@ -66,9 +64,18 @@ import { loadStoredSettings } from "./settings/load";
 import { pmdbDeleteResumesForTitle } from "./publicmetadb/scrobble";
 import { dropPmdbShow } from "./publicmetadb/dropped";
 
+export type ProviderConfirmation = "simkl-library-removal";
+
+export type ProviderPreflightResult =
+  | string
+  | {
+      reason: string;
+      confirmation?: ProviderConfirmation;
+    };
+
 export type ProviderWrite = {
   provider: string;
-  preflight?: (assertCurrent: () => void) => Promise<string | undefined>;
+  preflight?: (assertCurrent: () => void) => Promise<ProviderPreflightResult | undefined>;
   run: (assertCurrent: () => void) => Promise<void | string>;
 };
 type Ids = {
@@ -542,7 +549,8 @@ export function dropProviderWrites(
         if (malId == null) return "No verified MyAnimeList identity is available for this anime.";
         const saved = await saveMalListEntry({ malId, status: "dropped" });
         assertCurrent();
-        if (saved.status !== "dropped") throw new Error("MyAnimeList did not confirm dropped status.");
+        if (saved.status !== "dropped")
+          throw new Error("MyAnimeList did not confirm dropped status.");
       },
     });
 
@@ -667,6 +675,7 @@ export function watchedProviderWrites(
     videos?: Meta["videos"];
     imdbId?: string | null;
     verifiedEpisodeMapping?: boolean;
+    allowSimklLibraryRemoval?: boolean;
   },
 ): ProviderWrite[] {
   const writes: ProviderWrite[] = [];
@@ -815,25 +824,51 @@ export function watchedProviderWrites(
     (ANIME_CLOUD_ID.test(meta.id) || meta.type === "anime") &&
     !!options.imdbId &&
     !options.verifiedEpisodeMapping;
+  const simklMovieUnwatch = movie && !watched;
   if (simklConnected())
     writes.push({
       provider: "Simkl",
-      preflight: async () =>
-        unverifiedSimklEpisode
-          ? "Provider could not identify the requested content."
-          : movie && !watched
-            ? "Simkl cannot unwatch a movie without removing it from its library. Manage this title in Simkl."
-            : undefined,
+      preflight: async (assertCurrent) => {
+        if (unverifiedSimklEpisode) return "Provider could not identify the requested content.";
+        if (!simklMovieUnwatch || options.allowSimklLibraryRemoval) return undefined;
+        const ids = idsFor(input, "Simkl");
+        if (!ids) return undefined;
+        let statuses: Awaited<ReturnType<typeof loadSimklStatusMap>>;
+        try {
+          statuses = await loadSimklStatusMap();
+        } catch {
+          return "Simkl's current state could not be checked. No changes were made.";
+        }
+        assertCurrent();
+        const status = simklEntryIdKeys(ids, "movie")
+          .map((key) => statuses.get(key))
+          .find(Boolean);
+        if (status !== "completed") return undefined;
+        return {
+          reason:
+            "Simkl can only unwatch this movie by removing it from your Simkl library and history.",
+          confirmation: "simkl-library-removal" as const,
+        };
+      },
       run: async (assertCurrent) => {
         if (unverifiedSimklEpisode) return "Provider could not identify the requested content.";
         const ids = idsFor(input, "Simkl");
         if (!ids) return "No verified Simkl identity is available for this title.";
-        if (movie && !watched)
-          return "Unchanged: Simkl cannot unwatch a movie without removing it from its library. Manage this title in Simkl.";
         const target: SimklTarget = { kind: movie ? "movie" : "show", ids };
         const current = await readSimklStateStrict(target);
         assertCurrent();
         if (!simklConnected()) throw new Error("Simkl disconnected.");
+        if (movie && !watched) {
+          if (current.status !== "completed") return;
+          const response = await simklRequest<SyncResponse>("/sync/history/remove", {
+            method: "POST",
+            body: { movies: [{ ids }] },
+          });
+          ensureResponse(response, "movies", "deleted", 1);
+          invalidateHistoryCache();
+          invalidateSimklListStatus();
+          return;
+        }
         if (movie && current.status === "completed") return;
         const changing = options.episodes.filter(
           (ep) => current.watched.has(`${ep.season}:${ep.episode}`) !== watched,

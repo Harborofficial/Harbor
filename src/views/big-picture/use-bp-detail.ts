@@ -80,7 +80,7 @@ export type BpDetailData = {
 export function useBpDetail(metaId: string): BpDetailData {
   const { authKey } = useAuth();
   const { settings } = useSettings();
-  const prioritizeAddons = settings.addonOnlyMetadata || settings.preferCustomMetaAddon;
+  const prioritizeAddons = settings.addonOnlyMetadata;
   const { type, id } = parseId(metaId);
   const seed = readBpMeta();
   const [meta, setMeta] = useState<Meta | null>(seed?.id === id ? seed : null);

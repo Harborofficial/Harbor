@@ -137,7 +137,6 @@ export function useDownloadTitle(meta: Meta, isCurrent: () => boolean) {
     authKey,
     settings.tmdbKey,
     settings.tmdbLanguage,
-    settings.preferCustomMetaAddon,
     anime,
   ]);
 

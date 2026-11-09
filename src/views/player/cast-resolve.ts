@@ -43,7 +43,7 @@ export async function resolveCompatibleCastUrl(
   device: CastDeviceInfo,
   debrids: ReturnType<typeof useDebridClients>,
   liveDims: { width: number; height: number },
-  animePreferImdbStreams = false,
+  animePreferImdbStreams = true,
 ): Promise<CastResolution> {
   const caps = getDeviceCaps(device);
   const augmented = src.streamRef

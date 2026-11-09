@@ -3,7 +3,7 @@ import { join, basename } from 'node:path';
 import { verifyMacAppArchive } from './macos-verify-artifact.mjs';
 
 const BASE = process.env.HARBOR_OPS_BASE || 'https://harborcommunity.site/themes/api';
-const FNAME = /^Harbor_\d+\.\d+\.\d+_(x64-setup\.exe|x64-installer\.exe|aarch64\.app\.tar\.gz|aarch64\.dmg|aarch64_legacy\.app\.tar\.gz)$/;
+const FNAME = /^Harbor_\d+\.\d+\.\d+_(?:(?:beta|stable)_)?(x64-setup\.exe|x64-installer\.exe|aarch64\.app\.tar\.gz|aarch64\.dmg|aarch64_legacy\.app\.tar\.gz|macos-apple-silicon-aarch64\.app\.tar\.gz|macos-intel-x64\.app\.tar\.gz|macos-apple-silicon-aarch64\.dmg|macos-intel-x64\.dmg)$/;
 const SEMVER = /^\d+\.\d+\.\d+$/;
 const needsSig = (n) => /\.exe$|\.app\.tar\.gz$/.test(n);
 

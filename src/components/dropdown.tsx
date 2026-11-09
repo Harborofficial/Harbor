@@ -46,7 +46,7 @@ export function Dropdown({
   ariaLabel?: string;
   className?: string;
   menuClassName?: string;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
 }) {
   const [open, setOpen] = useState(false);
   const [box, setBox] = useState<MenuBox | null>(null);
@@ -105,7 +105,8 @@ export function Dropdown({
       const maxWidth = Math.min(MENU_MAX, window.innerWidth - EDGE * 2);
       const minWidth = Math.min(r.width, maxWidth);
       const width = Math.min(maxWidth, Math.max(minWidth, menu?.offsetWidth ?? minWidth));
-      const natural = menu?.offsetHeight ?? options.length * (size === "sm" ? 36 : 40) + 8;
+      const natural =
+        menu?.offsetHeight ?? options.length * (size === "xs" ? 32 : size === "sm" ? 36 : 40) + 8;
       const below = window.innerHeight - r.bottom - GAP - EDGE;
       const above = r.top - GAP - EDGE;
       const up = natural > below && above > below;
@@ -204,9 +205,19 @@ export function Dropdown({
         }
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`flex w-full items-center justify-between gap-3 rounded-md outline-none transition-colors ${
-          size === "sm" ? "h-9 px-3 text-[12.5px]" : "h-11 px-3.5 text-[13.5px]"
-        } ${open ? "bg-raised" : "bg-canvas hover:bg-elevated"}`}
+        className={`flex w-full items-center justify-between gap-3 outline-none transition-colors ${
+          size === "xs"
+            ? "h-7 rounded-full px-3 text-[12.5px] font-semibold ring-1 ring-edge"
+            : size === "sm"
+              ? "h-9 rounded-md px-3 text-[12.5px]"
+              : "h-11 rounded-md px-3.5 text-[13.5px]"
+        } ${
+          open
+            ? "bg-raised"
+            : size === "xs"
+              ? "bg-elevated hover:bg-raised"
+              : "bg-canvas hover:bg-elevated"
+        }`}
       >
         <span
           className={`flex min-w-0 items-center gap-2 ${selected ? "text-ink" : "text-ink-subtle"}`}
@@ -270,7 +281,11 @@ export function Dropdown({
                   }}
                   style={{ animationDelay: `${Math.min(i, 8) * 22}ms` }}
                   className={`animate-item-in flex w-full items-center justify-between gap-3 rounded-[4px] px-3 text-start outline-none transition-colors ${
-                    size === "sm" ? "h-9 text-[12.5px]" : "h-10 text-[13.5px]"
+                    size === "xs"
+                      ? "h-8 text-[12.5px]"
+                      : size === "sm"
+                        ? "h-9 text-[12.5px]"
+                        : "h-10 text-[13.5px]"
                   } ${
                     active
                       ? "bg-ink font-semibold text-canvas"

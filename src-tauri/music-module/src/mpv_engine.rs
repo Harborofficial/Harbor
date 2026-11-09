@@ -502,6 +502,32 @@ pub(crate) fn emit_event(payload: serde_json::Value) {
     }
 }
 
+fn playback_end_reason(event: &Event<'_>, eof_signaled: &mut bool) -> Option<&'static str> {
+    let reason = match event {
+        Event::PropertyChange { name: "eof-reached", change: PropertyData::Flag(reached), .. } => {
+            if !reached {
+                *eof_signaled = false;
+                return None;
+            }
+            "eof"
+        }
+        Event::EndFile(reason) => match reason {
+            0 => "eof",
+            2 => "stop",
+            3 => "quit",
+            4 => "error",
+            5 => "redirect",
+            _ => "other",
+        },
+        _ => return None,
+    };
+    if reason == "eof" {
+        if *eof_signaled { return None; }
+        *eof_signaled = true;
+    }
+    Some(reason)
+}
+
 fn spawn_mpv_events(
     player: Arc<Mpv>,
     active_generation: Arc<AtomicU64>,
@@ -521,6 +547,7 @@ fn spawn_mpv_events(
             .map_err(|e|format!("Music event subscription: {e}"))?;
     }
     std::thread::spawn(move || {
+        let mut eof_signaled = false;
         while active_generation.load(Ordering::SeqCst)==generation {
             let Some(Ok(event))=context.wait_event(0.25) else {continue};
             if let Event::LogMessage {prefix,text,..} = &event {
@@ -532,10 +559,12 @@ fn spawn_mpv_events(
             if matches!(event,Event::Seek){
                 if let Ok(mut value)=spectrum.lock(){value.clear();}
             }
+            // keep-open retains the file at EOF, so EndFile may never arrive.
+            let end_reason = playback_end_reason(&event, &mut eof_signaled);
             let output=match event {
                 Event::FileLoaded=>Some(json!({"event":"file-loaded"})),
                 Event::Seek=>Some(json!({"event":"seek"})),
-                Event::EndFile(_)=>Some(json!({"event":"end-file","reason":"eof"})),
+                Event::EndFile(_)=>None,
                 Event::Shutdown=>break,
                 Event::PropertyChange {name,change,..}=>{
                     let data=match change {
@@ -556,6 +585,10 @@ fn spawn_mpv_events(
                 output["deck"]=json!(deck);
                 emit_event(output);
             }
+            if let Some(reason) = end_reason {
+                emit_event(json!({"event":"end-file","reason":reason,
+                    "trackId":track_id,"connectorId":connector_id,"deck":deck}));
+            }
         }
     });
     Ok(())
@@ -563,6 +596,30 @@ fn spawn_mpv_events(
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn eof_event(reached: bool) -> Event<'static> {
+        Event::PropertyChange { name: "eof-reached", change: PropertyData::Flag(reached), reply_userdata: 5 }
+    }
+
+    #[test]
+    fn keep_open_completion_is_emitted_once_and_rearms_after_replay() {
+        let mut signaled = false;
+        assert_eq!(playback_end_reason(&eof_event(false), &mut signaled), None);
+        assert_eq!(playback_end_reason(&eof_event(true), &mut signaled), Some("eof"));
+        assert_eq!(playback_end_reason(&eof_event(true), &mut signaled), None);
+        assert_eq!(playback_end_reason(&Event::EndFile(0), &mut signaled), None);
+        assert_eq!(playback_end_reason(&eof_event(false), &mut signaled), None);
+        assert_eq!(playback_end_reason(&Event::EndFile(0), &mut signaled), Some("eof"));
+        assert_eq!(playback_end_reason(&eof_event(true), &mut signaled), None);
+    }
+
+    #[test]
+    fn stops_and_errors_are_not_natural_completion() {
+        for (code, expected) in [(2, "stop"), (3, "quit"), (4, "error"), (5, "redirect"), (99, "other")] {
+            let mut signaled = false;
+            assert_eq!(playback_end_reason(&Event::EndFile(code), &mut signaled), Some(expected));
+            assert!(!signaled);
+        }
+    }
     #[test]
     fn rejects_untrusted_input_before_opening_mpv() {
         let mut engine = MusicMpvEngine::default();

@@ -33,7 +33,7 @@ import {
   useMangaDownloadGroup,
   type MangaDownloadInfo,
 } from "@/lib/manga-downloads";
-import { listMangaSources, sourceIconUrl } from "@/lib/manga/sources";
+import { activeMangaSourceId, listMangaSources, sourceIconUrl } from "@/lib/manga/sources";
 import { chapterGroupKey } from "@/lib/manga/chapter-identity";
 import { useMangaChapterContext } from "@/lib/use-manga-chapter-context";
 
@@ -232,11 +232,16 @@ function chapterSourceId(id: string): string {
   return i === -1 ? "" : id.slice(0, i);
 }
 
-// The owning provider of an aggregate manga id ("providerId::orig").
+// The owning provider of an aggregate manga id ("providerId::orig"). A
+// single-source browse feed returns unprefixed ids, so the active source owns
+// those instead.
 function ownSourceId(mangaId?: string): string {
-  if (!mangaId) return "";
-  const i = mangaId.indexOf("::");
-  return i === -1 ? "" : mangaId.slice(0, i);
+  if (mangaId) {
+    const i = mangaId.indexOf("::");
+    if (i !== -1) return mangaId.slice(0, i);
+  }
+  const active = activeMangaSourceId();
+  return active === "all" ? "" : active;
 }
 
 const CHAPTER_SOURCE_KEY = "harbor.manga.chaptersource.v1.";
@@ -513,22 +518,26 @@ export function ChapterList({
   }, [chapters]);
 
   // Restore the persisted source/scanlator filter, defaulting to the owning
-  // source instead of "All" on first visit. Runs once per manga after its
-  // chapters finish streaming so partially-loaded options cannot decide.
+  // source instead of "All" as soon as that source has chapters. Waiting for
+  // every source would leave the filter on "All" for the whole refresh.
   useEffect(() => {
     const key = mangaId ?? "";
     if (!key || filterInitRef.current === key || userPickedSourceRef.current) return;
-    if (pending) return;
-    filterInitRef.current = key;
     const stored = readStored(CHAPTER_SOURCE_KEY + key);
+    const own = ownSourceId(mangaId);
+    let next: string | null = null;
     if (stored && sourceOptions.some((o) => o.id === stored)) {
-      setSourceFilterState(stored);
-    } else if (stored !== "") {
-      const own = ownSourceId(mangaId);
-      setSourceFilterState(own && sourceOptions.some((o) => o.id === own) ? own : "");
-    } else {
-      setSourceFilterState("");
+      next = stored;
+    } else if (stored === "") {
+      next = "";
+    } else if (own && sourceOptions.some((o) => o.id === own)) {
+      next = own;
+    } else if (!pending) {
+      next = "";
     }
+    if (next == null) return;
+    filterInitRef.current = key;
+    setSourceFilterState(next);
     const storedScan = readStored(CHAPTER_SCAN_KEY + key);
     setScanFilterState(storedScan ?? "");
   }, [mangaId, pending, sourceOptions]);
