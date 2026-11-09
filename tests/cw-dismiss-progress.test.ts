@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import ts from "typescript";
+import { dedupeCwItems } from "../src/lib/cw-dedupe";
 import type { LibraryItem } from "../src/lib/stremio";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -365,6 +366,7 @@ function advanceHarness(
       dedupeAnimeCw: dedupeWithSameIdentity,
       cwAnimeIdentityKey: (...args: any[]) => animeIdentityHelpers().cwAnimeIdentityKey(...args),
     },
+    "@/lib/cw-dedupe": { dedupeCwItems },
     "@/lib/cw-next-display": { cwNextDisplayCoords },
     "@/lib/stremio": {
       isAnimeCwItem: (item: LibraryItem) => /^(kitsu|mal|anilist|anidb):/.test(item._id),
@@ -575,6 +577,26 @@ test("grouped source checkpoints survive reload without crossing local, library,
     reloaded.api.isCwDismissed({ ...library, external: "simkl" }),
     false,
     "a source without an observed checkpoint stays visible",
+  );
+});
+
+test("a stale copy of the same show is collapsed to the current episode", () => {
+  const h = harness();
+  const stale: LibraryItem = {
+    ...item(),
+    _id: "tt-old",
+    state: { ...item().state!, season: 2, episode: 1, video_id: "tt-old:2:1" },
+  };
+  const current: LibraryItem = {
+    ...item(),
+    _id: "tt-new",
+    name: "Test Season 3",
+    state: { ...item().state!, season: 3, episode: 7, video_id: "tt-new:3:7" },
+  };
+  const render = advanceHarness(h.api, new Map(), []);
+  assert.deepEqual(
+    render([stale, current]).map((i) => [i._id, i.state?.season, i.state?.episode]),
+    [["tt-new", 3, 7]],
   );
 });
 

@@ -44,6 +44,7 @@ import { anyProfileSharesStremioWith, useProfiles } from "@/lib/profiles";
 import { listLocalCw, localCwSourceEnabled } from "@/lib/local-cw";
 import { localToLibraryItem } from "@/lib/continue-watching";
 import { cwAnimeIdentityKey, dedupeAnimeCw, warmCwAnimeIdentities } from "@/lib/cw-anime-identity";
+import { dedupeCwItems } from "@/lib/cw-dedupe";
 import { cwNextDisplayCoords } from "@/lib/cw-next-display";
 import { seasonIndex } from "@/lib/season-index";
 
@@ -986,13 +987,16 @@ export function useCwAdvance(
     resolvedOwner.simklSession !== simklSession ||
     resolvedOwner.simklEnabled !== simklEnabled
   )
-    return items.filter((i) => !isCwDismissed(i));
+    return dedupeCwItems(
+      items.filter((i) => !isCwDismissed(i)),
+      Infinity,
+    );
   // Dismissal targets the displayed up-next episode, which may differ from the
   // library entry. Filter stored display results immediately, without refetching.
   const base = items
     .map((i) => advanced.get(i._id) ?? i)
     .filter((i) => !removed.has(i._id) && !isCwDismissed(i));
-  if (extra.length === 0) return dedupeAnimeCw(base);
+  if (extra.length === 0) return dedupeCwItems(dedupeAnimeCw(base), Infinity);
   const keyOf = (i: LibraryItem) => `${i.type}|${franchiseDedupKey(i.name ?? "")}`;
   const animeIdentity = (i: LibraryItem) =>
     isAnimeCwItem(i) || cwAnimeIdentityKey(i._id, i.state?.video_id, i.state) != null;
@@ -1000,5 +1004,8 @@ export function useCwAdvance(
   const dedupExtra = extra.filter(
     (i) => (animeIdentity(i) || !baseKeys.has(keyOf(i))) && !isCwDismissed(i),
   );
-  return dedupeAnimeCw(dedupExtra.length === 0 ? base : base.concat(dedupExtra));
+  return dedupeCwItems(
+    dedupeAnimeCw(dedupExtra.length === 0 ? base : base.concat(dedupExtra)),
+    Infinity,
+  );
 }
