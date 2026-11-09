@@ -29,47 +29,44 @@ export function EpisodePager({
       <span className="text-[12px] tabular-nums text-ink-subtle">
         {t("{start}-{end} of {total}", { start, end, total })}
       </span>
-      <div className="flex items-center gap-1">
+      <nav aria-label={t("Episode pages")} className="flex items-center gap-1">
         <NavBtn label={t("First page")} disabled={page === 0} onClick={() => onChange(0)}>
-          <ChevronsLeft size={16} strokeWidth={2.2} />
+          <ChevronsLeft className="rtl:rotate-180" size={16} strokeWidth={2.2} />
         </NavBtn>
         <NavBtn label={t("Previous")} disabled={page === 0} onClick={() => onChange(page - 1)}>
-          <ChevronLeft size={16} strokeWidth={2.2} />
+          <ChevronLeft className="rtl:rotate-180" size={16} strokeWidth={2.2} />
         </NavBtn>
-        {pages.map((p, i) =>
-          p === 0 ? (
-            <span key={`gap-${i}`} className="px-1 text-[12px] text-ink-subtle">
-              …
-            </span>
-          ) : (
-            <button
-              key={p}
-              onClick={() => onChange(p - 1)}
-              className={`h-8 min-w-8 rounded-lg px-2 text-[12.5px] font-medium tabular-nums transition-colors ${
-                p - 1 === page
-                  ? "bg-ink text-canvas"
-                  : "text-ink-muted hover:bg-elevated hover:text-ink"
-              }`}
-            >
-              {p}
-            </button>
-          ),
-        )}
+        {pages.map((p) => (
+          <button
+            key={p}
+            aria-label={t("Page {n}", { n: p })}
+            aria-current={p - 1 === page ? "page" : undefined}
+            onClick={() => onChange(p - 1)}
+            className={`h-8 min-w-8 rounded-lg px-2 text-[12.5px] font-medium tabular-nums transition-colors ${
+              p - 1 === page
+                ? "bg-ink text-canvas"
+                : "text-ink-muted hover:bg-elevated hover:text-ink"
+            }`}
+          >
+            {p}
+          </button>
+        ))}
+        <PageNumberInput pageCount={pageCount} onGo={(target) => onChange(target - 1)} />
         <NavBtn
           label={t("Next")}
           disabled={page === pageCount - 1}
           onClick={() => onChange(page + 1)}
         >
-          <ChevronRight size={16} strokeWidth={2.2} />
+          <ChevronRight className="rtl:rotate-180" size={16} strokeWidth={2.2} />
         </NavBtn>
         <NavBtn
           label={t("Last page")}
           disabled={page === pageCount - 1}
           onClick={() => onChange(pageCount - 1)}
         >
-          <ChevronsRight size={16} strokeWidth={2.2} />
+          <ChevronsRight className="rtl:rotate-180" size={16} strokeWidth={2.2} />
         </NavBtn>
-      </div>
+      </nav>
       {onGoToEpisode && maxEpisode ? (
         <GoToEpisode max={maxEpisode} onGo={onGoToEpisode} />
       ) : (
@@ -79,18 +76,41 @@ export function EpisodePager({
   );
 }
 
+function PageNumberInput({ pageCount, onGo }: { pageCount: number; onGo: (page: number) => void }) {
+  const t = useT();
+  const [value, setValue] = useState("");
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const target = Number(value.trim());
+        if (/^\d+$/.test(value.trim()) && target >= 1 && target <= pageCount) {
+          onGo(target);
+          setValue("");
+        }
+      }}
+    >
+      <input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        maxLength={String(pageCount).length}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder={t("Page")}
+        aria-label={t("Go to page")}
+        title={t("Go to page")}
+        className="h-8 w-14 rounded-lg bg-canvas px-1.5 text-center text-[12px] tabular-nums text-ink-subtle outline-none ring-1 ring-inset ring-edge-soft transition-colors focus:text-ink focus:ring-accent/50"
+      />
+    </form>
+  );
+}
+
 function windowPages(page: number, count: number): number[] {
   const cur = page + 1;
-  const keep = new Set<number>([1, count, cur, cur - 1, cur + 1]);
-  const arr = [...keep].filter((p) => p >= 1 && p <= count).sort((a, b) => a - b);
-  const out: number[] = [];
-  let prev = 0;
-  for (const p of arr) {
-    if (p - prev > 1) out.push(0);
-    out.push(p);
-    prev = p;
-  }
-  return out;
+  return [...new Set([1, count, cur - 2, cur - 1, cur, cur + 1, cur + 2])]
+    .filter((number) => number >= 1 && number <= count)
+    .sort((a, b) => a - b);
 }
 
 function NavBtn({

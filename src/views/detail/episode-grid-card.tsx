@@ -263,6 +263,7 @@ export function EpisodePreview({
   const { openEpisodeDetail } = useView();
   const { settings } = useSettings();
   const episodeNumber = g.displayNumber ?? g.number; // Default to .number if no display number exists
+  const seasonLabel = g.seasonLabel ?? `S${g.displaySeason ?? g.season}`;
 
   return (
     <div className="group animate-popover-in absolute -inset-x-2 -top-2 z-30 overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)]">
@@ -306,7 +307,7 @@ export function EpisodePreview({
         </div>
         <span className="flex items-center gap-1.5 text-[11.5px] text-ink-subtle">
           <span className="font-semibold text-ink-muted">
-            {bidiIsolate(g.seasonLabel ? `${g.seasonLabel} · E${episodeNumber}` : `E${episodeNumber}`)}
+            {bidiIsolate(`${seasonLabel} · E${episodeNumber}`)}
           </span>
           {g.airDate && (
             <>
@@ -314,6 +315,11 @@ export function EpisodePreview({
               <CalendarDays size={11} />
               <bdi>{formatAirDate(g.airDate)}</bdi>
             </>
+          )}
+          {g.filler && (
+            <span className="ms-auto">
+            <FillerBadge />
+            </span>
           )}
         </span>
         <EpisodeReleaseCountdown date={g.airDate} className="text-[11.5px]" />
