@@ -1,12 +1,13 @@
 import { addonBaseUrl, addonResourceUrl } from "@/lib/addon-url";
 import { streamKey } from "./identity";
-import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
+import { safeFetch as fetch, safeFetchLocal, safeFetchWithTimeout } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
 import { clearPrefetchedRequests, prefetchRequest } from "./prefetch-request";
 import { dlog, dwarn } from "@/lib/debug";
 import { isHarborFetchPolicyError } from "@/lib/fetch-fallback-policy";
 import { isLocalNetworkUrl } from "@/lib/local-network";
 import {
+  detectAddonFamily,
   isAddonRanked,
   isRetiredTorboxAddon,
   isStatusOnlyAddon,
@@ -26,6 +27,9 @@ import type { Stream } from "./types";
 
 const TIMEOUT_MS_FAST = 8000;
 const TIMEOUT_MS_SLOW = 22000;
+// AIOStreams aggregates many upstream addons and can legitimately take much
+// longer than a normal slow addon when it has a lot of results to merge.
+const TIMEOUT_MS_AIO = 60000;
 export function clearAddonStreamCache(): void {
   clearPrefetchedRequests();
 }
@@ -40,12 +44,17 @@ const SLOW_ADDON_PATTERNS = [
   /torbox/i,
 ];
 
-function timeoutFor(addon: Addon, ceilingMs: number): number {
+export function addonTimeoutFor(addon: Addon, ceilingMs: number): number {
   const name = addon.manifest.name ?? "";
   const id = addon.manifest.id ?? "";
   const url = addon.transportUrl ?? "";
   const slow = SLOW_ADDON_PATTERNS.some((re) => re.test(name) || re.test(id) || re.test(url));
-  const base = slow ? TIMEOUT_MS_SLOW : TIMEOUT_MS_FAST;
+  const base =
+    detectAddonFamily(addon) === "aiostreams"
+      ? TIMEOUT_MS_AIO
+      : slow
+        ? TIMEOUT_MS_SLOW
+        : TIMEOUT_MS_FAST;
   return Math.max(base, ceilingMs);
 }
 
@@ -494,12 +503,20 @@ async function fetchOneUncached(
   altTypes: string[] = [],
 ): Promise<{ streams: Stream[]; failure?: AddonFailureCode }> {
   const base = addonBaseUrl(addon.transportUrl);
-  const limit = timeoutFor(addon, timeoutMs);
+  const limit = addonTimeoutFor(addon, timeoutMs);
+  // safeFetch's default bridge deadline is 35s, shorter than the AIOStreams
+  // budget. Extend the bridge for this request so the addon timer owns the timeout.
+  const bridgeTimeoutMs = detectAddonFamily(addon) === "aiostreams" ? limit + 5_000 : undefined;
   // A self-hosted addon lives on loopback/LAN, which the guarded bridge fetch
   // rejects outright ("blocked internal target"). Only a URL the user installed
   // themselves opts into local networking, so public addons keep the
   // DNS-rebinding guard.
-  const doFetch = isLocalNetworkUrl(base) ? safeFetchLocal : fetch;
+  const doFetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> =
+    isLocalNetworkUrl(base)
+      ? (input, init) => safeFetchLocal(input, init, bridgeTimeoutMs)
+      : bridgeTimeoutMs
+        ? (input, init) => safeFetchWithTimeout(input, init, bridgeTimeoutMs)
+        : fetch;
 
   const queryOnce = async (
     t: string,
@@ -586,6 +603,7 @@ async function fetchOneUncached(
 function failureCodeFor(e: unknown): AddonFailureCode {
   const message = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
   if (/blocked internal target/i.test(message)) return "blocked";
+  if (/TimeoutError|timed? ?out|deadline/i.test(message)) return "timeout";
   if (isHarborFetchPolicyError(e)) return "http";
   return "unreachable";
 }
