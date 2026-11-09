@@ -8,6 +8,8 @@ import { sanitizeScreensaverMedia } from "../src/lib/screensaver/media.ts";
 import * as controllerCursor from "../src/lib/gamepad/cursor.ts";
 import * as monitors from "../src/lib/monitors.ts";
 import * as relayVersion from "../src/lib/together/relay-version.ts";
+import * as liquidGlass from "../src/lib/player/liquid-glass.ts";
+import { normalizeLibraryGroups } from "../src/lib/library-groups.ts";
 
 function fixture() {
   const data = new Map<string, string>();
@@ -38,6 +40,8 @@ function fixture() {
       sanitizeSubtitleOffsetSize: identity,
     },
     "@/lib/player/buffer-profile": { sanitizeBufferSize: identity },
+    "@/lib/player/liquid-glass": liquidGlass,
+    "@/lib/library-groups": { normalizeLibraryGroups },
     "@/lib/gamepad/cursor": controllerCursor,
     "@/lib/monitors": monitors,
     "@/lib/together/relay-version": relayVersion,
@@ -100,9 +104,16 @@ test("saved official relay URLs migrate while custom relays and disabled setting
   const f = fixture();
   for (const old of ["wss://pub.harbor.site", "https://pub.harbor.site/", "pub.harbor.site"]) {
     f.data.set("harbor.settings", f.complete({ togetherRelayUrl: old }));
-    assert.equal(f.settings.loadStoredSettings().togetherRelayUrl, relayVersion.HARBOR_PUBLIC_RELAY);
+    assert.equal(
+      f.settings.loadStoredSettings().togetherRelayUrl,
+      relayVersion.HARBOR_PUBLIC_RELAY,
+    );
   }
-  for (const relay of ["", "wss://custom.example.test/base", "wss://pub.harborcommunity.site.example.test"]) {
+  for (const relay of [
+    "",
+    "wss://custom.example.test/base",
+    "wss://pub.harborcommunity.site.example.test",
+  ]) {
     f.data.set("harbor.settings", f.complete({ togetherRelayUrl: relay }));
     assert.equal(f.settings.loadStoredSettings().togetherRelayUrl, relay);
   }

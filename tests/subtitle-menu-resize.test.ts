@@ -51,7 +51,7 @@ test("subtitle title marquee stays readable at short and long overflow distances
 
 test("the caller positioning stays separate from the panel's relative surface", () => {
   assert.match(resizablePanel, /className=\{className\}/);
-  assert.match(resizablePanel, /<div className="relative flex h-full w-full/);
+  assert.match(resizablePanel, /<div\b[^>]*\bclassName="relative flex h-full w-full/s);
   assert.doesNotMatch(resizablePanel, /className=\{`relative[^`]*\$\{className\}`\}/);
 });
 
