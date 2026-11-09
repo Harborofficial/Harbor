@@ -359,7 +359,15 @@ test("staleCwIds hides an older copy when another source has newer playback", as
       lastWatched: "2026-11-08T00:00:00Z",
     },
   };
-  assert.deepEqual([...(await resurface.staleCwIds([stale], [stale, current]))], ["tt-wild"]);
+  assert.deepEqual(
+    [...(await resurface.staleCwIds([stale, current], [stale, current]))],
+    ["tt-wild"],
+  );
+  assert.deepEqual(
+    [...(await resurface.staleCwIds([stale], [stale, current]))],
+    [],
+    "a newer copy from a hidden source must not remove the visible card",
+  );
 });
 
 test("staleCwIds keeps an older season that was watched after the newer one", async () => {

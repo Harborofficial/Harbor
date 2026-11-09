@@ -38,6 +38,7 @@ export async function staleCwIds(
 ): Promise<Set<string>> {
   const stale = new Set<string>();
   if (visible.length === 0 || pool.length === 0) return stale;
+  const visibleSet = new Set(visible);
   const byId = new Map<string, LibraryItem[]>();
   const byTitle = new Map<string, LibraryItem[]>();
   for (const item of pool) {
@@ -72,7 +73,9 @@ export async function staleCwIds(
     if (related.size === 0) continue;
     let best = item;
     for (const row of related) if (isFurther(row, best)) best = row;
-    if (best !== item) stale.add(item._id);
+    // Only hide a card when the newer copy is actually in this row. A newer
+    // copy from a hidden source must not leave the row with no card at all.
+    if (best !== item && visibleSet.has(best)) stale.add(item._id);
   }
   return stale;
 }
