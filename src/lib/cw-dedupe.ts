@@ -25,7 +25,7 @@ function progressRatio(i: LibraryItem): number {
 }
 
 /** The most recently watched copy wins; episode order and progress break ties. */
-function isFurther(incoming: LibraryItem, existing: LibraryItem): boolean {
+export function isFurther(incoming: LibraryItem, existing: LibraryItem): boolean {
   const incomingAt = playbackAt(incoming);
   const existingAt = playbackAt(existing);
   if (incomingAt !== existingAt) return incomingAt > existingAt;
@@ -56,12 +56,12 @@ function typeKey(type: string): string {
     : type;
 }
 
-function itemIds(i: LibraryItem): string[] {
+export function itemIds(i: LibraryItem): string[] {
   return [i._id, ...(i.altIds ?? [])].filter(Boolean);
 }
 
 /** Stored name plus any title the card resolved and displayed for this checkpoint. */
-function titleKeys(item: LibraryItem): string[] {
+export function titleKeys(item: LibraryItem): string[] {
   const prefix = typeKey(item.type);
   const checkpoint = {
     videoId: item.state?.video_id,

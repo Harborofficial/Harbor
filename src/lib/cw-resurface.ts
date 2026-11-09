@@ -10,6 +10,7 @@ import {
 } from "@/lib/stremio";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { privateCwProfileId } from "@/lib/cw-profile";
+import { isFurther, itemIds, titleKeys } from "@/lib/cw-dedupe";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
@@ -24,6 +25,56 @@ export function isNextAired(isAnime: boolean, airDate: string | undefined): bool
 function resurfaceAired(airDate: string | undefined): boolean {
   const t = airDate ? Date.parse(airDate) : NaN;
   return Number.isFinite(t) && t <= Date.now();
+}
+
+/**
+ * Hide a row copy when the same show has a newer-playback copy in another
+ * source (for example, an old IMDb card while the anime room holds the current
+ * Kitsu progress). Dedupe only sees cards that made it into the same row.
+ */
+export async function staleCwIds(
+  visible: LibraryItem[],
+  pool: LibraryItem[],
+): Promise<Set<string>> {
+  const stale = new Set<string>();
+  if (visible.length === 0 || pool.length === 0) return stale;
+  const byId = new Map<string, LibraryItem[]>();
+  const byTitle = new Map<string, LibraryItem[]>();
+  for (const item of pool) {
+    for (const id of itemIds(item)) {
+      const list = byId.get(id);
+      if (list) list.push(item);
+      else byId.set(id, [item]);
+    }
+    if (!isAnimeCwItem(item) && !ANIME_ID.test(item._id)) continue;
+    for (const key of titleKeys(item)) {
+      const list = byTitle.get(key);
+      if (list) list.push(item);
+      else byTitle.set(key, [item]);
+    }
+  }
+  for (const item of visible) {
+    if (!item.state) continue;
+    const related = new Set<LibraryItem>();
+    for (const id of itemIds(item)) for (const row of byId.get(id) ?? []) related.add(row);
+    const anime = isAnimeCwItem(item) || ANIME_ID.test(item._id);
+    if (anime) {
+      for (const key of titleKeys(item)) for (const row of byTitle.get(key) ?? []) related.add(row);
+    }
+    if (
+      related.size === 0 &&
+      (anime || /^tt\d+$/.test(item._id) || item._id.startsWith("tmdb:tv:"))
+    ) {
+      const ids = await relatedLibraryIds(item._id).catch(() => []);
+      for (const id of ids) for (const row of byId.get(id) ?? []) related.add(row);
+    }
+    related.delete(item);
+    if (related.size === 0) continue;
+    let best = item;
+    for (const row of related) if (isFurther(row, best)) best = row;
+    if (best !== item) stale.add(item._id);
+  }
+  return stale;
 }
 
 function currentEpisode(i: LibraryItem): { season: number; episode: number } | null {

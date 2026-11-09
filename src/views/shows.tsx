@@ -220,6 +220,7 @@ export function Shows({ active = true }: { active?: boolean }) {
     0,
     settings.episodeHiding,
     settings.animeCwEnd,
+    items,
   );
 
   useEffect(() => {

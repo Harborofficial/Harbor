@@ -538,6 +538,10 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     [simklStatusMap, simklWatchedMap, anilistWatchedMap],
   );
   const emptyTrakt = useMemo(() => new Set<string>(), []);
+  const cwProgressPool = useMemo(
+    () => [...libItems, ...localAnimeCw, ...simklCw, ...trackerCw],
+    [libItems, localAnimeCw, simklCw, trackerCw],
+  );
   const cwItems = useCwAdvance(
     continueWatching,
     settings.tmdbKey,
@@ -552,6 +556,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     animeDetectVer,
     settings.episodeHiding,
     settings.animeCwEnd,
+    cwProgressPool,
   );
 
   const cwSig = cwItems

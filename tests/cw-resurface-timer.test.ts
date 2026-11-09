@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
 import ts from "typescript";
+import * as cwDedupe from "../src/lib/cw-dedupe.ts";
 
 function harness(
   opts: {
@@ -30,7 +31,8 @@ function harness(
         if (name.endsWith("/stremio")) {
           return {
             isCwMember: (i: any) => i.state?.timeOffset > 0,
-            isAnimeCwItem: () => false,
+            isAnimeCwItem: (i: any) =>
+              i.isAnime === true || /^(kitsu|mal|anilist|anidb):/.test(i._id),
             libraryMetaType: () => "series",
             episodeFromVideoId: (id: string) => {
               const p = id?.split(":");
@@ -59,6 +61,7 @@ function harness(
         if (name.endsWith("/cw-profile")) {
           return { privateCwProfileId: () => "profile-1" };
         }
+        if (name.endsWith("/cw-dedupe")) return cwDedupe;
         return {};
       },
       exports,
@@ -268,6 +271,70 @@ test("resurfaceCandidates recognizes non-anime TV series with manualWatched or w
   assert.equal(candidate.episode, 3);
   assert.equal(candidate.waitingForAir, true);
   assert.equal(candidate.airDate, futureAir);
+});
+
+test("staleCwIds hides an older copy when another source has newer playback", async () => {
+  const h = harness();
+  const resurface = h.load("src/lib/cw-resurface.ts");
+  const stale = {
+    _id: "tt-wild",
+    type: "series",
+    name: "A Wild Last Boss Appeared!",
+    isAnime: true,
+    state: {
+      season: 2,
+      episode: 2,
+      timeOffset: 300000,
+      duration: 1440000,
+      lastWatched: "2026-10-01T00:00:00Z",
+    },
+  };
+  const current = {
+    _id: "kitsu:999",
+    type: "series",
+    name: "A Wild Last Boss Appeared!",
+    isAnime: true,
+    state: {
+      season: 1,
+      episode: 6,
+      timeOffset: 0,
+      duration: 1440000,
+      lastWatched: "2026-11-08T00:00:00Z",
+    },
+  };
+  assert.deepEqual([...(await resurface.staleCwIds([stale], [stale, current]))], ["tt-wild"]);
+});
+
+test("staleCwIds keeps an older season that was watched after the newer one", async () => {
+  const h = harness();
+  const resurface = h.load("src/lib/cw-resurface.ts");
+  const older = {
+    _id: "kitsu:1",
+    type: "series",
+    name: "Frieren: Beyond Journey's End",
+    isAnime: true,
+    state: {
+      season: 1,
+      episode: 22,
+      timeOffset: 100,
+      duration: 1000,
+      lastWatched: "2026-11-09T00:00:00Z",
+    },
+  };
+  const newer = {
+    _id: "kitsu:2",
+    type: "series",
+    name: "Frieren: Beyond Journey's End",
+    isAnime: true,
+    state: {
+      season: 2,
+      episode: 7,
+      timeOffset: 400,
+      duration: 1000,
+      lastWatched: "2026-11-01T00:00:00Z",
+    },
+  };
+  assert.equal((await resurface.staleCwIds([older], [older, newer])).size, 0);
 });
 
 test("resurfaceCandidates resurfaces newly aired episode when airDate has passed in hide mode", async () => {

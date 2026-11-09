@@ -23,6 +23,7 @@ import { isEpisodeHidden } from "@/lib/hidden-episodes";
 import {
   isNextAired,
   resurfaceCandidates,
+  staleCwIds,
   type AnimeMode,
   type ResurfaceTarget,
 } from "@/lib/cw-resurface";
@@ -55,6 +56,7 @@ const EMPTY_TRAKT_WATCHED: Set<string> = new Set();
 const EMPTY_SIMKL_WATCHED: Map<string, Set<string>> = new Map();
 const EMPTY_ANILIST_WATCHED: Map<string, Set<string>> = new Map();
 const EMPTY_SIMKL_STATUS: Map<string, WatchlistStatus> = new Map();
+const EMPTY_LIBRARY: LibraryItem[] = [];
 
 function isFinishedSeries(i: LibraryItem): boolean {
   if (i.type !== "series" || !i.state) return false;
@@ -313,6 +315,7 @@ export function useCwAdvance(
   animeVersion = 0,
   episodeHiding = false,
   animeCwEnd: "hide" | "timer" = "hide",
+  progressPool: LibraryItem[] = EMPTY_LIBRARY,
 ): LibraryItem[] {
   useCwDismissVersion();
   const { settings } = useSettings();
@@ -417,6 +420,12 @@ export function useCwAdvance(
     }
     let cancelled = false;
     void (async () => {
+      // Cards not in the row can still hold the same show's real progress
+      // (classically an anime-scheme copy hidden from Home).
+      const stalePromise = staleCwIds(
+        items,
+        progressPool.length > 0 ? progressPool : (library ?? items),
+      ).catch(() => new Set<string>());
       // Parent maps may still belong to the outgoing account during a profile
       // switch. Only the snapshot tied to this session can drive advancement.
       const effectiveSimklWatched = simkl?.watched ?? EMPTY_SIMKL_WATCHED;
@@ -900,12 +909,16 @@ export function useCwAdvance(
           effectiveSimklStatus,
           !!privacyOwner,
         );
-      const resurfaced = await resurfaceCandidates(
-        lib,
-        inCw,
-        { tmdbKey, animeMode, animeCwEnd, hideCaughtUp },
-        watchedFor,
-      ).catch(() => new Map<string, ResurfaceTarget>());
+      const [resurfaced, stale] = await Promise.all([
+        resurfaceCandidates(
+          lib,
+          inCw,
+          { tmdbKey, animeMode, animeCwEnd, hideCaughtUp },
+          watchedFor,
+        ).catch(() => new Map<string, ResurfaceTarget>()),
+        stalePromise,
+      ]);
+      for (const id of stale) remove.add(id);
       if (cancelled) return;
       const extraItems: LibraryItem[] = [];
       for (const [id, ep] of resurfaced) {
@@ -971,6 +984,7 @@ export function useCwAdvance(
     episodeHiding,
     hideCaughtUp,
     animeCwEnd,
+    progressPool,
     airTick,
     privacyOwner,
     profileId,

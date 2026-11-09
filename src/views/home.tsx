@@ -907,6 +907,10 @@ export function Home({
     };
   }, [anilistConnected, continueWatching]);
 
+  const cwProgressPool = useMemo(
+    () => [...items, ...localCwItems, ...externalCw],
+    [items, localCwItems, externalCw],
+  );
   const cwItems = useCwAdvance(
     continueWatching,
     settings.tmdbKey,
@@ -921,6 +925,7 @@ export function Home({
     animeDetectVer,
     settings.episodeHiding,
     settings.animeCwEnd,
+    cwProgressPool,
   );
 
   useEffect(() => {
