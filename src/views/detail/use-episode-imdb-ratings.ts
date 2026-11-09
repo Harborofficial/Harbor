@@ -6,6 +6,7 @@ import {
 } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
 import { createOmdbSeasonQueue } from "@/lib/omdb-season-queue";
+import { searchCinemeta } from "@/lib/search";
 
 const NO_RATINGS = new Map<string, number>();
 
@@ -42,6 +43,48 @@ export function useHarborEpisodeRatings(imdbId: string | null): ReadonlyMap<stri
   }, [id]);
 
   return ratings;
+}
+
+/**
+ * A later anime entry can share its franchise's IMDb id while the entry itself
+ * has a separate IMDb series. The shared id has no ratings for the entry's
+ * season, so resolve the entry by its own title and read that series' season 1.
+ */
+export function useEntryEpisodeRatings(
+  imdbId: string | null,
+  entrySeason: number | null,
+  title: string | null,
+  year: number | null,
+): { ratings: ReadonlyMap<string, number>; season: number | null } {
+  const [entryId, setEntryId] = useState<string | null>(null);
+  const baseRatings = useHarborEpisodeRatings(imdbId);
+
+  useEffect(() => {
+    setEntryId(null);
+    if (!imdbId || entrySeason == null || entrySeason <= 1 || !title) return;
+    let cancelled = false;
+    void harborImdbEpisodes(imdbId)
+      .then(async (map) => {
+        if (cancelled) return;
+        if ([...map.keys()].some((key) => key.startsWith(`${entrySeason}:`))) return;
+        const { series } = await searchCinemeta(title).catch(() => ({ series: [] }));
+        if (cancelled) return;
+        const match = series.find(
+          (meta) =>
+            meta.id?.startsWith("tt") &&
+            meta.id !== imdbId &&
+            (year == null || (meta.releaseInfo ?? "").includes(String(year))),
+        );
+        if (match) setEntryId(match.id);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [imdbId, entrySeason, title, year]);
+
+  const entryRatings = useHarborEpisodeRatings(entryId);
+  return entryId ? { ratings: entryRatings, season: 1 } : { ratings: baseRatings, season: null };
 }
 
 export function useEpisodeImdbRatings(

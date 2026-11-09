@@ -67,7 +67,7 @@ import {
   withEpisodeImdbRatings,
   type EpisodeArtwork,
 } from "@/lib/providers/anime-episode-enrich";
-import { useHarborEpisodeRatings } from "./use-episode-imdb-ratings";
+import { useEntryEpisodeRatings } from "./use-episode-imdb-ratings";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
 import { SeasonExplorer } from "./season-explorer";
 import { useSeasonExplorerView } from "./use-season-explorer";
@@ -384,7 +384,17 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
     episodes.length,
     "aired",
   );
-  const ratings = useHarborEpisodeRatings(imdbId ?? null);
+  const entrySeason =
+    episodes.find((ep) => ep.imdbId === imdbId && ep.imdbSeason != null)?.imdbSeason ??
+    episodes.find((ep) => ep.imdbSeason != null)?.imdbSeason ??
+    null;
+  const yearMatch = /(\d{4})/.exec(meta.releaseInfo ?? "");
+  const { ratings, season: ratingSeason } = useEntryEpisodeRatings(
+    imdbId ?? null,
+    entrySeason,
+    meta.name ?? null,
+    yearMatch ? Number(yearMatch[1]) : null,
+  );
   const unratedDisplay = tvdbPanel.panel
     ? tvdbPanel.panel.visibleEpisodes
     : !activeIsAnchor
@@ -397,8 +407,9 @@ export const AnimeEpisodes = memo(function AnimeEpisodes({
       withEpisodeImdbRatings(unratedDisplay, ratings, {
         seriesMetaId: meta.id,
         seriesImdbId: imdbId ?? null,
+        ratingSeason,
       }),
-    [unratedDisplay, ratings, meta.id, imdbId],
+    [unratedDisplay, ratings, meta.id, imdbId, ratingSeason],
   );
   const artworkSeasons = useMemo(
     () => [
