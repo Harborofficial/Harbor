@@ -17,12 +17,13 @@ const series = (
   episode: number,
   timeOffset: number,
   duration = 1000,
+  lastWatched?: string,
 ): LibraryItem =>
   ({
     _id: id,
     name,
     type: "series",
-    state: { season, episode, timeOffset, duration },
+    state: { season, episode, timeOffset, duration, ...(lastWatched ? { lastWatched } : {}) },
   }) as LibraryItem;
 
 test("the same title from two sources keeps one card", () => {
@@ -109,6 +110,62 @@ test("a card's resolved title dedupes sources whose stored names differ", () => 
   assert.deepEqual(
     out.map((i) => [i._id, i.state?.season, i.state?.episode]),
     [["kitsu:1", 2, 9]],
+  );
+});
+
+test("a later rewatch of an older season wins over the newer season", () => {
+  const seasonTwo = series(
+    "kitsu:2",
+    "Frieren: Beyond Journey's End",
+    1,
+    7,
+    400,
+    1000,
+    "2026-11-01T00:00:00Z",
+  );
+  const seasonOne = series(
+    "kitsu:1",
+    "Frieren: Beyond Journey's End",
+    1,
+    22,
+    100,
+    1000,
+    "2026-11-09T00:00:00Z",
+  );
+  rememberCardCoords(seasonTwo, { season: 2, episode: 7 });
+  rememberCardCoords(seasonOne, { season: 1, episode: 22 });
+  const out = dedupeCwItems([seasonTwo, seasonOne], 16);
+  assert.deepEqual(
+    out.map((i) => [i._id, i.state?.episode]),
+    [["kitsu:1", 22]],
+  );
+});
+
+test("a stale older episode loses to the newer season", () => {
+  const stale = series(
+    "kitsu:1",
+    "Frieren: Beyond Journey's End",
+    1,
+    9,
+    400,
+    1000,
+    "2026-10-01T00:00:00Z",
+  );
+  const current = series(
+    "kitsu:2",
+    "Frieren: Beyond Journey's End",
+    1,
+    9,
+    100,
+    1000,
+    "2026-11-01T00:00:00Z",
+  );
+  rememberCardCoords(stale, { season: 1, episode: 9 });
+  rememberCardCoords(current, { season: 2, episode: 9 });
+  const out = dedupeCwItems([stale, current], 16);
+  assert.deepEqual(
+    out.map((i) => i._id),
+    ["kitsu:2"],
   );
 });
 

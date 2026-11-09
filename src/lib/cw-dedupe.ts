@@ -1,6 +1,7 @@
 import { animeTitleKeys } from "@/lib/anime-title-key";
 import { cardCoords } from "@/lib/cw-card-coords";
 import { franchiseDedupKey } from "@/lib/providers/jikan";
+import { readResumeEntry } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
 
 function episodeRank(i: LibraryItem): number {
@@ -10,13 +11,24 @@ function episodeRank(i: LibraryItem): number {
   return season >= 1 && episode >= 1 ? season * 100_000 + episode : -1;
 }
 
+/** Actual playback time; `_mtime` also moves for library maintenance. */
+function playbackAt(i: LibraryItem): number {
+  const lastWatched = Date.parse(i.state?.lastWatched ?? "");
+  if (Number.isFinite(lastWatched) && lastWatched > 0) return lastWatched;
+  const resume = readResumeEntry(i._id, i.state?.season, i.state?.episode);
+  return resume?.t ?? 0;
+}
+
 function progressRatio(i: LibraryItem): number {
   const duration = i.state?.duration ?? 0;
   return duration > 0 ? Math.min(1, (i.state?.timeOffset ?? 0) / duration) : 0;
 }
 
-/** The newer episode wins; on the same episode, further progress wins. */
+/** The most recently watched copy wins; episode order and progress break ties. */
 function isFurther(incoming: LibraryItem, existing: LibraryItem): boolean {
+  const incomingAt = playbackAt(incoming);
+  const existingAt = playbackAt(existing);
+  if (incomingAt !== existingAt) return incomingAt > existingAt;
   const incomingRank = episodeRank(incoming);
   const existingRank = episodeRank(existing);
   if (incomingRank !== existingRank) return incomingRank > existingRank;
