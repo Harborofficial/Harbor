@@ -1320,6 +1320,17 @@ test("platform-suffixed Shipyard assets remain updater-compatible", () => {
     githubUpdate.githubDownloadAsset({ assets: oldAssets }, "windows-x86_64")?.name,
     old,
   );
+
+  const windowsOnly = "harbor-shipyard-v1.0.2-beta-windows.exe";
+  const windowsOnlyAssets = [windowsOnly, `${windowsOnly}.sig`].map((asset) => ({
+    name: asset,
+    browser_download_url: `${base}${asset}`,
+  }));
+  assert.equal(githubUpdate.releaseIsComplete({ assets: windowsOnlyAssets }, probe), true);
+  assert.equal(
+    githubUpdate.githubDownloadAsset({ assets: windowsOnlyAssets }, "windows-x86_64")?.name,
+    windowsOnly,
+  );
 });
 
 test("channel-prefixed macOS artifacts keep architecture detection", () => {

@@ -239,10 +239,10 @@ jobs:
             if ((Get-Item -LiteralPath $releaseExe).VersionInfo.FileVersion -ne $releaseVersion) { throw "Wrong version: $releaseExe" }
           }
           $channel = if ($env:HARBOR_CHANNEL -eq 'beta') { 'beta' } else { 'stable' }
-          $installer = "installer/src-tauri/target/release/harbor-shipyard-v${releaseVersion}-${channel}.exe"
+          $installer = "installer/src-tauri/target/release/harbor-shipyard-v${releaseVersion}-${channel}-windows.exe"
           if (-not (Test-Path -LiteralPath $installer)) { throw "Missing modular installer: $installer" }
           New-Item -ItemType Directory -Force -Path "$releaseRoot/bundle/managed" | Out-Null
-          Copy-Item -LiteralPath $installer -Destination "$releaseRoot/bundle/managed/harbor-shipyard-v${releaseVersion}-${channel}.exe"
+          Copy-Item -LiteralPath $installer -Destination "$releaseRoot/bundle/managed/harbor-shipyard-v${releaseVersion}-${channel}-windows.exe"
 
       - name: Sign the Shipyard installer
         if: matrix.platform.target == 'x86_64-pc-windows-msvc' && steps.sign.outputs.config != ''
