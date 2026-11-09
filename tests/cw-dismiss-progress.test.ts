@@ -305,6 +305,22 @@ test("one dismissal hides entries whose server clock is ahead of the local clock
   assert.equal(h.api.isCwDismissed(value), true);
 });
 
+test("a grouped dismissal covers a member whose provider clock is ahead", () => {
+  const h = harness();
+  const library = item();
+  const simkl = {
+    ...item("simkl"),
+    state: { ...item().state!, lastWatched: new Date(Date.now() + 60_000).toISOString() },
+  };
+  const grouped = { ...library, cwMembers: [library, simkl] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+
+  h.api.dismissCw(grouped, null);
+
+  assert.equal(h.api.isCwDismissed(simkl), true);
+});
+
 test("an older tracker episode cannot undo dismissal, while later episodes and fresh rewatches can", () => {
   const h = harness();
   const current = item("simkl");

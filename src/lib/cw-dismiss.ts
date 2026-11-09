@@ -478,7 +478,10 @@ export function dismissCw(
   const providerSources = providerDismissSources();
   const members = (item as LibraryItem & { cwMembers?: LibraryItem[] }).cwMembers;
   if (members?.length) {
-    const nowMs = Date.now();
+    // A provider's pause time can be ahead of the local clock. The dismissal
+    // must cover every member's activity or the hidden survivor's member
+    // reappears as a fresh card after its checkpoint is filtered out.
+    const nowMs = Math.max(Date.now(), itemActivity(item), ...members.map(itemActivity));
     const now = new Date(nowMs).toISOString();
     const times = new Map(dismissed);
     const videos = new Map(dismissedVid);
