@@ -7,6 +7,14 @@
 # checks for presence, not its value, so remove the entry through the provider.
 Remove-Item Env:WHISPER_DONT_GENERATE_BINDINGS -ErrorAction SilentlyContinue
 
+# Direct Cargo build artifacts to user profile directory to prevent Windows / Antivirus LNK1104 / Access Denied locks
+if (-not $env:CARGO_TARGET_DIR) {
+  $env:CARGO_TARGET_DIR = "$env:USERPROFILE\.cargo_target\harbor"
+}
+if (-not (Test-Path -LiteralPath $env:CARGO_TARGET_DIR)) {
+  New-Item -ItemType Directory -Path $env:CARGO_TARGET_DIR -Force | Out-Null
+}
+
 $vswhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
 $vs = $null
 if (Test-Path -LiteralPath $vswhere) {
