@@ -36,6 +36,7 @@ import { copyText } from "@/lib/clipboard-text";
 import type { EBookChapter, EBookChapterContent } from "@/lib/ebook/providers";
 import { ebookTextIdentity } from "@/lib/ebook/chapter-locations";
 import { createEBookFlipPages, type EBookFlipPages } from "@/lib/ebook/book-pages";
+import { PdfDocumentError, pdfFlipbookPages } from "@/lib/ebook/pdf";
 import {
   addEBookBookmark,
   loadEBookAnnotations,
@@ -511,6 +512,17 @@ type ReaderSelection = {
   annotationId?: string;
 };
 
+function pdfChapterSource(id: string): { path: string; page: number } | null {
+  try {
+    const [path, part] = JSON.parse(id) as [string, string];
+    const match = /^pdf:(\d+)$/.exec(part);
+    if (!match || !/\.pdf$/i.test(path)) return null;
+    return { path, page: Number(match[1]) };
+  } catch {
+    return null;
+  }
+}
+
 export function PdfPageView({
   image,
   pdf,
@@ -657,7 +669,7 @@ export function HarborReader({
   const originalText = content.originalText ?? content.text ?? pdfText;
   const textAvailable = Boolean(originalText.trim());
   const imageOnly = !textAvailable && Boolean(content.images?.length);
-  const readingMode = pdfPage ? "harbor" : prefs.mode;
+  const readingMode = prefs.mode;
   const [readerTitle, setReaderTitle] = useState(content.translatedTitle ?? originalTitle);
   const [translation, setTranslation] = useState(() =>
     content.translated
@@ -772,8 +784,9 @@ export function HarborReader({
       next: EBookFlipPages,
       targetParagraph: number,
       presentation: { rtl: boolean; background: string },
+      resumePage?: number,
     ) => {
-      const page = pageForParagraph(next.paragraphStarts, targetParagraph);
+      const page = resumePage ?? pageForParagraph(next.paragraphStarts, targetParagraph);
       const layer: EBookFlipLayer = {
         id: ++flipLayerSequence.current,
         pages: next,
@@ -847,6 +860,35 @@ export function HarborReader({
     setFlipFailed(false);
     const controller = new AbortController();
     const generation = ++flipGeneration.current;
+    const pdfSource = pdfPage ? pdfChapterSource(chapter.id) : null;
+    if (pdfSource) {
+      const timer = window.setTimeout(() => {
+        void pdfFlipbookPages(pdfSource.path, controller.signal)
+          .then((urls) => {
+            if (controller.signal.aborted || generation !== flipGeneration.current) return;
+            replaceFlipPages(
+              { urls, paragraphStarts: urls.map(() => 0) },
+              0,
+              { rtl: effectiveDirection === "rtl", background: colors.desk },
+              pdfSource.page - 1,
+            );
+          })
+          .catch((error) => {
+            const cancelled =
+              controller.signal.aborted ||
+              (error instanceof DOMException && error.name === "AbortError") ||
+              (error instanceof PdfDocumentError && error.kind === "cancelled");
+            if (!cancelled) {
+              console.warn("[ebook/book-pages]", error);
+              if (generation === flipGeneration.current) setFlipFailed(true);
+            }
+          });
+      }, 0);
+      return () => {
+        window.clearTimeout(timer);
+        controller.abort();
+      };
+    }
     const active = flipPagesRef.current;
     const saved = loadEBookProgress(profile, bookId, progressId);
     const targetParagraph = active.urls.length ? Math.max(0, tracedLine.current) : saved;
@@ -892,6 +934,7 @@ export function HarborReader({
   }, [
     bookCover,
     bookId,
+    chapter.id,
     chapterIndex,
     colors.ink,
     colors.muted,
@@ -903,6 +946,7 @@ export function HarborReader({
     prefs.customFontId,
     prefs.fontSize,
     prefs.lineHeight,
+    pdfPage,
     readingMode,
     profile,
     progressId,
@@ -2503,7 +2547,7 @@ export function HarborReader({
                   prefs={prefs}
                   patch={patchPrefs}
                   colors={colors}
-                  bookModeDisabled={pdfPage}
+                  bookModeDisabled={false}
                 />
               </>
             )}

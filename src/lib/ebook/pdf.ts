@@ -301,3 +301,26 @@ export async function pdfPageContent(
     lease.release();
   }
 }
+
+export async function pdfFlipbookPages(path: string, signal?: AbortSignal): Promise<string[]> {
+  const lease = await acquire(path, signal);
+  try {
+    const pages: string[] = [];
+    for (let pageNumber = 1; pageNumber <= lease.document.numPages; pageNumber += 1) {
+      throwIfAborted(signal);
+      const page = await renderPage(
+        lease.document,
+        pageNumber,
+        { maxWidth: 1200, maxHeight: 1600, maxPixels: 2_500_000 },
+        signal,
+        false,
+      );
+      pages.push(page.image);
+    }
+    return pages;
+  } catch (error) {
+    throw pdfError(error, signal);
+  } finally {
+    lease.release();
+  }
+}
