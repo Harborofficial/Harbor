@@ -47,9 +47,13 @@ function loadProviderDismiss() {
         return !fail.has("publicmetadb");
       },
     },
-    "@/lib/trakt/session": { getSession: () => ({}) },
-    "@/lib/simkl/session": { getSession: () => ({}) },
-    "@/lib/publicmetadb/session": { isAuthenticated: () => true },
+    "@/lib/trakt/session": { getSession: () => ({}), subscribeSession: () => () => {} },
+    "@/lib/simkl/session": { getSession: () => ({}), subscribeSession: () => () => {} },
+    "@/lib/publicmetadb/session": {
+      isAuthenticated: () => true,
+      subscribeSession: () => () => {},
+    },
+    "@/lib/active-profile-id": { activeProfileId: () => "test-profile" },
   };
   const code = ts.transpileModule(
     readFileSync(new URL("../src/lib/cw-provider-dismiss.ts", import.meta.url), "utf8"),
@@ -193,13 +197,13 @@ test("queues a failed provider clear and retries it", async () => {
     ["trakt"],
   );
   assert.deepEqual(h.deleted, ["trakt:retry"]);
-  assert.ok(h.storage.get("harbor.cw.provider-clear.v1"));
+  assert.ok(h.storage.get("harbor.cw.provider-clear.v1.test-profile"));
 
   h.fail.delete("trakt");
   await h.flushProviderDismissQueue();
 
   assert.deepEqual(h.deleted, ["trakt:retry", "trakt:retry"]);
-  assert.equal(h.storage.get("harbor.cw.provider-clear.v1"), undefined);
+  assert.equal(h.storage.get("harbor.cw.provider-clear.v1.test-profile"), undefined);
 });
 
 test("cancels a retry when the user has resumed watching", async () => {
@@ -237,7 +241,7 @@ test("cancels a retry when the user has resumed watching", async () => {
   await h.flushProviderDismissQueue();
 
   assert.deepEqual(h.deleted, ["trakt:resumed"]);
-  assert.equal(h.storage.get("harbor.cw.provider-clear.v1"), undefined);
+  assert.equal(h.storage.get("harbor.cw.provider-clear.v1.test-profile"), undefined);
 });
 
 test("keeps a retry queued when the provider state cannot be checked", async () => {
@@ -253,7 +257,7 @@ test("keeps a retry queued when the provider state cannot be checked", async () 
   await h.flushProviderDismissQueue();
 
   assert.deepEqual(h.deleted, ["trakt:offline"]);
-  assert.ok(h.storage.get("harbor.cw.provider-clear.v1"));
+  assert.ok(h.storage.get("harbor.cw.provider-clear.v1.test-profile"));
 });
 
 test("drops a retry when the provider no longer has that playback id", async () => {
@@ -268,5 +272,5 @@ test("drops a retry when the provider no longer has that playback id", async () 
   await h.flushProviderDismissQueue();
 
   assert.deepEqual(h.deleted, ["trakt:gone"]);
-  assert.equal(h.storage.get("harbor.cw.provider-clear.v1"), undefined);
+  assert.equal(h.storage.get("harbor.cw.provider-clear.v1.test-profile"), undefined);
 });

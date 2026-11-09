@@ -1,11 +1,21 @@
+import { activeProfileId } from "@/lib/active-profile-id";
 import type { LibraryItem } from "@/lib/stremio";
 import { deleteSimklPlayback, fetchSimklPlaybackItems } from "@/lib/simkl/playback";
-import { getSession as getSimklSession } from "@/lib/simkl/session";
+import {
+  getSession as getSimklSession,
+  subscribeSession as subscribeSimklSession,
+} from "@/lib/simkl/session";
 import { deleteTraktPlayback, fetchTraktPlaybackItems } from "@/lib/trakt/playback";
-import { getSession as getTraktSession } from "@/lib/trakt/session";
+import {
+  getSession as getTraktSession,
+  subscribeSession as subscribeTraktSession,
+} from "@/lib/trakt/session";
 import { fetchPublicMetaDbPlaybackItems } from "@/lib/publicmetadb/playback";
 import { pmdbDeleteResume } from "@/lib/publicmetadb/scrobble";
-import { isAuthenticated as isPmdbAuthenticated } from "@/lib/publicmetadb/session";
+import {
+  isAuthenticated as isPmdbAuthenticated,
+  subscribeSession as subscribePmdbSession,
+} from "@/lib/publicmetadb/session";
 
 export const CW_PROVIDER_SOURCES = ["trakt", "simkl", "publicmetadb"] as const;
 export type CwProviderSource = (typeof CW_PROVIDER_SOURCES)[number];
@@ -31,12 +41,36 @@ const QUEUE_KEY = "harbor.cw.provider-clear.v1";
 const MAX_QUEUE = 100;
 const RETRY_BASE_MS = 30_000;
 const RETRY_MAX_MS = 30 * 60_000;
+const PROVIDER_TIMEOUT_MS = 20_000;
 let queueTimer: number | null = null;
 let flushInFlight: Promise<void> | null = null;
 
+function queueStorageKey(): string {
+  return `${QUEUE_KEY}.${activeProfileId()}`;
+}
+
+function withTimeout<T>(promise: Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error("Provider request timed out")),
+      PROVIDER_TIMEOUT_MS,
+    );
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
 function readQueue(): PendingProviderClear[] {
   try {
-    const parsed = JSON.parse(localStorage.getItem(QUEUE_KEY) ?? "[]");
+    const parsed = JSON.parse(localStorage.getItem(queueStorageKey()) ?? "[]");
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(
       (entry): entry is PendingProviderClear =>
@@ -62,8 +96,8 @@ function readQueue(): PendingProviderClear[] {
 
 function writeQueue(entries: PendingProviderClear[]): void {
   try {
-    if (entries.length === 0) localStorage.removeItem(QUEUE_KEY);
-    else localStorage.setItem(QUEUE_KEY, JSON.stringify(entries));
+    if (entries.length === 0) localStorage.removeItem(queueStorageKey());
+    else localStorage.setItem(queueStorageKey(), JSON.stringify(entries));
   } catch {
     // The dismissal already succeeded locally; a queue write failure must not throw.
   }
@@ -148,7 +182,7 @@ export function flushProviderDismissQueue(force = true): Promise<void> {
       }
       let items: LibraryItem[] | null = null;
       try {
-        items = await fetchProviderItems(entry.provider, true);
+        items = await withTimeout(fetchProviderItems(entry.provider, true));
       } catch {
         items = null;
       }
@@ -177,7 +211,7 @@ export function flushProviderDismissQueue(force = true): Promise<void> {
       }
       let ok = false;
       try {
-        ok = await deleteProviderPlayback(entry.provider, entry.id);
+        ok = await withTimeout(deleteProviderPlayback(entry.provider, entry.id));
       } catch {
         ok = false;
       }
@@ -205,9 +239,13 @@ if (typeof window !== "undefined" && typeof document !== "undefined") {
   // also covers a launch while the provider account is still restoring.
   window.setTimeout(() => void flushProviderDismissQueue(), 3_000);
   window.addEventListener("online", () => void flushProviderDismissQueue());
+  window.addEventListener("harbor:active-profile-changed", () => void flushProviderDismissQueue());
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") void flushProviderDismissQueue();
   });
+  subscribeTraktSession(() => void flushProviderDismissQueue());
+  subscribeSimklSession(() => void flushProviderDismissQueue());
+  subscribePmdbSession(() => void flushProviderDismissQueue());
 }
 
 function sameContent(a: LibraryItem, b: LibraryItem): boolean {
@@ -289,7 +327,7 @@ export async function clearProviderPlayback(
       const clear = async (id: string, checkpoint?: ProviderCheckpoint): Promise<boolean> => {
         let cleared = false;
         try {
-          cleared = await deleteProviderPlayback(provider, id);
+          cleared = await withTimeout(deleteProviderPlayback(provider, id));
         } catch {
           cleared = false;
         }
@@ -299,7 +337,7 @@ export async function clearProviderPlayback(
       try {
         const direct = ids[provider];
         if (direct) return (await clear(direct, checkpoints[provider])) ? null : provider;
-        const items = await fetchProviderItems(provider);
+        const items = await withTimeout(fetchProviderItems(provider));
         const match = items.find(
           (entry) =>
             sameContent(item, entry) ||
