@@ -794,6 +794,10 @@ export const ContinueCard = memo(function ContinueCard({
       onDismissed: (result) => {
         if (result?.sync === "queued")
           emitListToast(t("Removed on this device. Stremio synchronization is pending."));
+        if (result?.providerFailures?.length)
+          emitListToast(
+            t("Removed on this device. Some provider playback progress could not be cleared."),
+          );
         if (afterDismiss?.isConnected && !afterDismiss.disabled)
           afterDismiss.focus({ preventScroll: true });
       },

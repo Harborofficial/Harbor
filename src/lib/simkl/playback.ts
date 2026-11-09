@@ -19,6 +19,7 @@ type Ids = {
 type Node = { title?: string; year?: number; ids?: Ids };
 
 type RawSession = {
+  id?: number | string;
   progress?: number;
   paused_at?: string;
   watched_at?: string;
@@ -236,6 +237,16 @@ export function clearCachedSimklPlaybackItems(): void {
   } catch {}
 }
 
+export async function deleteSimklPlayback(id: string): Promise<boolean> {
+  if (!id) return true;
+  try {
+    await simklRequest(`/sync/playback/${encodeURIComponent(id)}`, { method: "DELETE" });
+    return true;
+  } catch (error) {
+    return error instanceof SimklApiError && error.status === 404;
+  }
+}
+
 export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
   const owner = getSession();
   if (!owner) return [];
@@ -260,6 +271,7 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
   for (const r of raw) {
     const item = await toLibraryItem(r);
     if (!item?.state) continue;
+    if (r.id != null) item.providerPlaybackIds = { simkl: String(r.id) };
     const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
     if (seen.has(key)) continue;
     seen.add(key);

@@ -8,6 +8,7 @@ import type { TraktIds } from "./types";
 type Node = { title?: string; year?: number | null; ids?: TraktIds };
 
 type RawPlayback = {
+  id?: number | string;
   progress?: number;
   paused_at?: string;
   type?: "movie" | "episode";
@@ -71,19 +72,20 @@ function toLibraryItem(raw: RawPlayback): LibraryItem | null {
   if (pct <= 0 || pct > 99.9) return null;
   const when = raw.paused_at ?? new Date(0).toISOString();
 
+  let item: LibraryItem | null = null;
   if (raw.movie && !raw.episode) {
     const id = movieMetaId(raw.movie.ids);
-    return id ? buildItem(id, "movie", raw.movie, pct, DURATION_MS.movie, when) : null;
-  }
-
-  if (raw.show) {
+    item = id ? buildItem(id, "movie", raw.movie, pct, DURATION_MS.movie, when) : null;
+  } else if (raw.show) {
     const id = seriesMetaId(raw.show.ids);
-    if (!id) return null;
-    const season = raw.episode?.season;
-    const episode = raw.episode?.number ?? (raw.episode as any)?.episode;
-    return buildItem(id, "series", raw.show, pct, DURATION_MS.series, when, season, episode);
+    if (id) {
+      const season = raw.episode?.season;
+      const episode = raw.episode?.number ?? (raw.episode as any)?.episode;
+      item = buildItem(id, "series", raw.show, pct, DURATION_MS.series, when, season, episode);
+    }
   }
-  return null;
+  if (item && raw.id != null) item.providerPlaybackIds = { trakt: String(raw.id) };
+  return item;
 }
 
 export const TRAKT_PLAYBACK_CACHE_KEY = "harbor.trakt.playback_items";
@@ -137,6 +139,16 @@ export function clearCachedTraktPlaybackItems(): void {
   try {
     localStorage.removeItem(TRAKT_PLAYBACK_CACHE_KEY);
   } catch {}
+}
+
+export async function deleteTraktPlayback(id: string): Promise<boolean> {
+  if (!id) return true;
+  try {
+    await traktRequest(`/sync/playback/${encodeURIComponent(id)}`, { method: "DELETE" });
+    return true;
+  } catch (error) {
+    return error instanceof TraktApiError && error.status === 404;
+  }
 }
 
 export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {

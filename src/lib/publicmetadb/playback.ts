@@ -24,20 +24,22 @@ function mappingKey(raw: PmdbResumePoint): string {
 }
 
 function toLibraryItem(raw: PmdbResumePoint, imdbId?: string): LibraryItem | null {
-  const durMs = raw.runtime_ms > 0
-    ? raw.runtime_ms
-    : raw.media_type === "movie"
-      ? DURATION_MS.movie
-      : DURATION_MS.series;
+  const durMs =
+    raw.runtime_ms > 0
+      ? raw.runtime_ms
+      : raw.media_type === "movie"
+        ? DURATION_MS.movie
+        : DURATION_MS.series;
 
   const posMs = raw.position_ms;
-  const ratio = durMs > 0 ? posMs / durMs : (raw.progress > 1 ? raw.progress / 100 : raw.progress);
+  const ratio = durMs > 0 ? posMs / durMs : raw.progress > 1 ? raw.progress / 100 : raw.progress;
   if (ratio < 0.02 || ratio > 0.98) return null;
 
   const isMovie = raw.media_type === "movie";
   const tmdbId = tmdbItemId(raw);
   const id = imdbId ?? tmdbId;
-  const hasEpisode = !isMovie && raw.season != null && raw.season > 0 && raw.episode != null && raw.episode > 0;
+  const hasEpisode =
+    !isMovie && raw.season != null && raw.season > 0 && raw.episode != null && raw.episode > 0;
   const when = raw.updated || raw.created || new Date().toISOString();
 
   return {
@@ -58,6 +60,7 @@ function toLibraryItem(raw: PmdbResumePoint, imdbId?: string): LibraryItem | nul
     _ctime: raw.created || when,
     _mtime: when,
     external: "publicmetadb",
+    providerPlaybackIds: { publicmetadb: raw.id },
     ...(imdbId ? { altIds: [tmdbId] } : {}),
   };
 }
@@ -67,9 +70,7 @@ function toLibraryItem(raw: PmdbResumePoint, imdbId?: string): LibraryItem | nul
  * Resolve the shared identity before the Continue Watching merge so a title
  * cannot appear once for every source. Mapping failures keep the TMDB id.
  */
-async function resolvePlaybackImdbIds(
-  points: PmdbResumePoint[],
-): Promise<Map<string, string>> {
+async function resolvePlaybackImdbIds(points: PmdbResumePoint[]): Promise<Map<string, string>> {
   const found = new Map<string, string>();
   const pending = new Map<string, PmdbResumePoint>();
 

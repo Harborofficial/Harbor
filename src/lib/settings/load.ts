@@ -535,6 +535,7 @@ export function parseStoredSettings(raw: string | null): {
         ...DEFAULT.cwSources,
         ...parsed.cwSources,
       },
+      cwClearProviderProgress: parsed.cwClearProviderProgress === true,
       subProvidersEnabled: {
         ...DEFAULT.subProvidersEnabled,
         ...parsed.subProvidersEnabled,

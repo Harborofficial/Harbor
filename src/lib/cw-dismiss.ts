@@ -14,6 +14,12 @@ import {
   resolveNuvioProfileIndex,
 } from "./nuvio/nuvio-sync";
 import { clearLocalCw } from "./local-cw";
+import { loadStoredSettings } from "@/lib/settings/load";
+import {
+  clearProviderPlayback,
+  type CwProviderSource,
+  type ProviderDismissResult,
+} from "./cw-provider-dismiss";
 
 const SIMKL_KEY = "harbor.cw.dismissed.simkl";
 const DISMISS_KEY = "harbor.cw.dismissed.v1";
@@ -427,7 +433,29 @@ function cleanupGroupedSource(
   );
 }
 
-export type CwDismissResult = { sync: "not-required" | "synced" | "queued" };
+export type CwDismissResult = {
+  sync: "not-required" | "synced" | "queued";
+  providerFailures?: CwProviderSource[];
+};
+
+function providerDismissSources(): CwProviderSource[] {
+  try {
+    if (privateCwProfileId()) return [];
+    const settings = loadStoredSettings();
+    if (settings.cwClearProviderProgress !== true) return [];
+    const out: CwProviderSource[] = [];
+    if (settings.cwSources.trakt) out.push("trakt");
+    if (settings.cwSources.simkl) out.push("simkl");
+    if (settings.cwSources.publicmetadb) out.push("publicmetadb");
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+function providerFailureList(results: ProviderDismissResult[]): CwProviderSource[] {
+  return [...new Set(results.flatMap((result) => result.failed))];
+}
 
 export function dismissCw(item: LibraryItem, authKey: string | null): void;
 export function dismissCw(
@@ -441,6 +469,7 @@ export function dismissCw(
   options: { acknowledged?: boolean } = {},
 ): void | Promise<CwDismissResult> {
   loadDismissed();
+  const providerSources = providerDismissSources();
   const members = (item as LibraryItem & { cwMembers?: LibraryItem[] }).cwMembers;
   if (members?.length) {
     const nowMs = Date.now();
@@ -521,6 +550,23 @@ export function dismissCw(
     for (const [key, value] of positions) dismissedPos.set(key, value);
     emit();
 
+    const providerWrites: Promise<ProviderDismissResult>[] = [];
+    if (providerSources.length > 0) {
+      const byProvider = new Map<CwProviderSource, LibraryItem>();
+      for (const member of [item, ...members]) {
+        const source = member.external;
+        if (
+          (source === "trakt" || source === "simkl" || source === "publicmetadb") &&
+          providerSources.includes(source)
+        ) {
+          byProvider.set(source, member);
+        }
+      }
+      for (const provider of providerSources) {
+        providerWrites.push(clearProviderPlayback(byProvider.get(provider) ?? item, [provider]));
+      }
+    }
+
     const cleanupSeen = new Set<string>();
     const cloudIds = new Set<string>();
     const cloudWrites: Promise<boolean>[] = [];
@@ -540,7 +586,7 @@ export function dismissCw(
       }
     }
     if (cleanupError) {
-      void Promise.allSettled(cloudWrites);
+      void Promise.allSettled([...cloudWrites, ...providerWrites]);
       throw new Error(
         "Removed from Continue Watching, but the saved position could not be cleared.",
         {
@@ -549,12 +595,23 @@ export function dismissCw(
       );
     }
     if (!options.acknowledged) {
-      void Promise.allSettled(cloudWrites);
+      void Promise.allSettled([...cloudWrites, ...providerWrites]);
       return;
     }
-    if (cloudWrites.length === 0) return Promise.resolve({ sync: "not-required" });
-    return Promise.all(cloudWrites).then(
-      (results) => ({ sync: results.every(Boolean) ? "synced" : "queued" }),
+    return Promise.all([Promise.all(cloudWrites), Promise.all(providerWrites)]).then(
+      ([cloudResults, providerResults]) => {
+        const providerFailures = providerFailureList(providerResults);
+        const sync =
+          cloudWrites.length === 0
+            ? "not-required"
+            : cloudResults.every(Boolean)
+              ? "synced"
+              : "queued";
+        return {
+          sync,
+          ...(providerFailures.length > 0 ? { providerFailures } : {}),
+        };
+      },
       () => {
         throw new Error(
           "Removed from Continue Watching on this device, but synchronization could not be saved.",
@@ -614,6 +671,19 @@ export function dismissCw(
   for (const [key, value] of videos) dismissedVid.set(key, value);
   for (const [key, value] of positions) dismissedPos.set(key, value);
   emit();
+  const providerWrite =
+    providerSources.length > 0 ? clearProviderPlayback(item, providerSources) : null;
+  const withProviderResult = async (result: CwDismissResult): Promise<CwDismissResult> => {
+    if (!providerWrite) return result;
+    try {
+      const providerResult = await providerWrite;
+      return providerResult.failed.length > 0
+        ? { ...result, providerFailures: providerResult.failed }
+        : result;
+    } catch {
+      return { ...result, providerFailures: providerSources };
+    }
+  };
   if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
     const { season, episode } = resolveEpisode(item);
     const slot = resolveNuvioProfileIndex();
@@ -648,7 +718,7 @@ export function dismissCw(
       if (options.acknowledged) {
         if (write && typeof write.then === "function") {
           return write.then(
-            (ok) => ({ sync: ok !== false ? "synced" : "queued" }),
+            (ok) => withProviderResult({ sync: ok !== false ? "synced" : "queued" }),
             () => {
               throw new Error(
                 "Removed from Continue Watching on this device, but synchronization could not be saved.",
@@ -656,8 +726,9 @@ export function dismissCw(
             },
           );
         }
-        return Promise.resolve({ sync: "synced" });
+        return withProviderResult({ sync: "synced" });
       }
+      if (providerWrite) void providerWrite;
       return undefined;
     } catch (err) {
       if (options.acknowledged) {
@@ -680,7 +751,11 @@ export function dismissCw(
     }
   }
   if (item.external || !authKey || !item.state || privateCwProfileId()) {
-    return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;
+    if (!options.acknowledged) {
+      if (providerWrite) void providerWrite;
+      return;
+    }
+    return withProviderResult({ sync: "not-required" });
   }
   const vid = item.state.video_id ?? "";
   const kitsuThreeSeg = /^(kitsu|mal|anilist|anidb):/.test(id) && vid.split(":").length === 3;
@@ -702,10 +777,11 @@ export function dismissCw(
   );
   if (!options.acknowledged) {
     void write;
+    if (providerWrite) void providerWrite;
     return;
   }
   return write.then(
-    (synced) => ({ sync: synced ? "synced" : "queued" }),
+    (synced) => withProviderResult({ sync: synced ? "synced" : "queued" }),
     () => {
       throw new Error(
         "Removed from Continue Watching on this device, but synchronization could not be saved.",

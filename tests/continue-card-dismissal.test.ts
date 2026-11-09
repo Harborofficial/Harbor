@@ -11,6 +11,9 @@ function harness() {
   let online = true;
   let heldAuth = "";
   let releaseHeld: (() => void) | undefined;
+  let clearProviderProgress = false;
+  let cwSources = { trakt: false, simkl: false, publicmetadb: false };
+  const providerCalls: any[] = [];
   const storage = {
     getItem: (key: string) => data.get(key) ?? null,
     setItem(key: string, value: string) {
@@ -37,6 +40,20 @@ function harness() {
         ? { sha256: (input: Uint8Array) => input }
         : { bytesToHex: (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16)).join("") };
     if (file === "feed/external-cw") return { removeExternalCwItem: () => {} };
+    if (file === "settings/load")
+      return {
+        loadStoredSettings: () => ({
+          cwClearProviderProgress: clearProviderProgress,
+          cwSources: { library: true, local: true, ...cwSources },
+        }),
+      };
+    if (file === "cw-provider-dismiss")
+      return {
+        clearProviderPlayback: async (item: unknown, providers: string[]) => {
+          providerCalls.push({ item, providers });
+          return { failed: [] };
+        },
+      };
     if (file === "nuvio/nuvio-client")
       return { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false };
     if (file === "nuvio/nuvio-sync")
@@ -94,6 +111,13 @@ function harness() {
     data,
     writes,
     load,
+    providerCalls,
+    set clearProviderProgress(value: boolean) {
+      clearProviderProgress = value;
+    },
+    set cwSources(value: { trakt: boolean; simkl: boolean; publicmetadb: boolean }) {
+      cwSources = value;
+    },
     set failure(key: string) {
       failKey = key;
     },
@@ -154,6 +178,22 @@ test("external dismissal keeps official local resume clearing without writing to
   assert.deepEqual(result, { sync: "not-required" });
   assert.equal(h.writes.length, 0);
   assert.deepEqual(JSON.parse(h.data.get("harbor.resume")!), {});
+});
+
+test("enabled CW sources also clear their saved playback position", async () => {
+  const h = harness();
+  h.clearProviderProgress = true;
+  h.cwSources = { trakt: true, simkl: false, publicmetadb: false };
+  const item = {
+    ...entry(),
+    external: "trakt",
+    providerPlaybackIds: { trakt: "playback-42" },
+  };
+  const result = await h.load("cw-dismiss").dismissCw(item, "fixture-auth", { acknowledged: true });
+  assert.deepEqual(result, { sync: "not-required" });
+  assert.equal(h.providerCalls.length, 1);
+  assert.deepEqual(h.providerCalls[0].providers, ["trakt"]);
+  assert.deepEqual(h.providerCalls[0].item.providerPlaybackIds, { trakt: "playback-42" });
 });
 
 test("acknowledged dismissal persists official progress tombstones and newer progress restores the card", async () => {

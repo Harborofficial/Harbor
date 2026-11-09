@@ -602,6 +602,8 @@ export type Settings = {
     local: boolean;
     publicmetadb: boolean;
   };
+  /** Dismissing a CW card also deletes its saved playback progress on enabled providers. */
+  cwClearProviderProgress: boolean;
   showPlaylistsTab: boolean;
   skipProfileScreen: boolean;
   profilePromptInterval: "launch" | "15m" | "30m" | "never";

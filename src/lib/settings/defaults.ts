@@ -481,6 +481,7 @@ export const DEFAULT: Settings = {
   showLetterboxdCard: false,
   externalContinueWatching: false,
   cwSources: { library: true, trakt: false, simkl: false, local: true, publicmetadb: false },
+  cwClearProviderProgress: false,
   showPlaylistsTab: false,
   skipProfileScreen: false,
   profilePromptInterval: "launch",

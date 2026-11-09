@@ -125,6 +125,13 @@ function harness(seed?: string, onChange = () => {}, options: { nuvio?: boolean 
       },
     },
     "@/lib/feed/external-cw": { removeExternalCwItem: () => {} },
+    "@/lib/settings/load": {
+      loadStoredSettings: () => ({
+        cwClearProviderProgress: false,
+        cwSources: { trakt: false, simkl: false, publicmetadb: false },
+      }),
+    },
+    "./cw-provider-dismiss": { clearProviderPlayback: async () => ({ failed: [] }) },
   };
   const output = ts.transpileModule(read("src/lib/cw-dismiss.ts"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
