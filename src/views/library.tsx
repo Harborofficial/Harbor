@@ -1,17 +1,20 @@
 import {
   BarChart3,
   Bookmark,
+  Check,
   Clock,
   Eye,
   EyeOff,
   HardDrive,
   Library,
   Server,
+  SlidersHorizontal,
   Star,
 } from "lucide-react";
 import { UiIcon } from "@/components/ui-icon";
 import { Profiled } from "@/components/profiled";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { AnchoredMenu } from "@/components/anchored-menu";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import anilistLogo from "@/assets/anilist.png";
 import simklLogo from "@/assets/simkl.png";
@@ -37,6 +40,11 @@ import { MyListsTab } from "./library/my-lists-tab";
 import { MyGroupsTab } from "./library/my-groups-tab";
 import { FavoritesTab } from "./library/favorites-tab";
 import { TabBtn, type Tab } from "./library/shared";
+import {
+  hiddenLibraryTabs,
+  isLibraryTabShown,
+  toggleHiddenLibraryTab,
+} from "./library/tab-visibility";
 import { SimklTab } from "./library/simkl-tab";
 import { PublicMetaDbTab } from "./library/publicmetadb-tab";
 import { TraktTab } from "./library/trakt-tab";
@@ -243,6 +251,72 @@ function Header({
   const t = useT();
   const { setView } = useView();
   const { settings, update } = useSettings();
+  const tabsButtonRef = useRef<HTMLButtonElement>(null);
+  const [tabsMenuOpen, setTabsMenuOpen] = useState(false);
+  const hidden = useMemo(
+    () => hiddenLibraryTabs(settings.libraryHiddenTabs),
+    [settings.libraryHiddenTabs],
+  );
+  const toggleTab = (id: Tab) => {
+    const next = toggleHiddenLibraryTab(hidden, id);
+    update({ libraryHiddenTabs: next });
+    if (id === tab && next.includes(id)) onTab("library");
+  };
+  const tabs: { id: Tab; label: string; icon: ReactNode }[] = [
+    { id: "library", label: t("Library"), icon: <Library size={14} strokeWidth={2.2} /> },
+    { id: "watchlist", label: t("Watchlist"), icon: <Bookmark size={14} strokeWidth={2.2} /> },
+    { id: "history", label: t("History"), icon: <Clock size={14} strokeWidth={2.2} /> },
+    { id: "local", label: t("Local"), icon: <HardDrive size={14} strokeWidth={2.2} /> },
+    {
+      id: "media-servers",
+      label: t("Media Servers"),
+      icon: <Server size={14} strokeWidth={2.2} />,
+    },
+    {
+      id: "torbox",
+      label: "TorBox",
+      icon: <img src={torboxLogo} alt="" className="h-3.5 w-3.5 object-contain" />,
+    },
+    { id: "lists", label: t("My Lists"), icon: <UiIcon name="list" className="h-3.5 w-3.5" /> },
+    { id: "groups", label: t("My Groups"), icon: <UiIcon name="list" className="h-3.5 w-3.5" /> },
+    { id: "favorites", label: t("Favorites"), icon: <Star size={14} strokeWidth={2.2} /> },
+  ];
+  if (traktConnected)
+    tabs.push({
+      id: "trakt",
+      label: "Trakt",
+      icon: <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />,
+    });
+  if (anilistConnected)
+    tabs.push({
+      id: "anilist",
+      label: "AniList",
+      icon: <img src={anilistLogo} alt="" className="h-3.5 w-3.5 rounded-[3px] object-contain" />,
+    });
+  if (malConnected)
+    tabs.push({ id: "mal", label: "MAL", icon: <MalLogo className="h-3.5 w-3.5" /> });
+  if (simklConnected)
+    tabs.push({
+      id: "simkl",
+      label: "Simkl",
+      icon: <img src={simklLogo} alt="" className="h-3.5 w-3.5 object-contain" />,
+    });
+  if (pmdbConnected)
+    tabs.push({
+      id: "publicmetadb",
+      label: "PMDB",
+      icon: (
+        <img src={publicmetadbLogo} alt="" className="h-3.5 w-3.5 rounded-[3px] object-contain" />
+      ),
+    });
+  if (lbConnected)
+    tabs.push({
+      id: "letterboxd",
+      label: "Letterboxd",
+      icon: (
+        <img src={letterboxdLogo} alt="" className="h-3.5 w-3.5 rounded-[3px] object-contain" />
+      ),
+    });
   return (
     <header className="flex flex-col gap-5">
       <div className="flex items-end justify-between gap-6">
@@ -260,6 +334,20 @@ function Header({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-4 self-center">
+          <button
+            ref={tabsButtonRef}
+            type="button"
+            onClick={() => setTabsMenuOpen((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={tabsMenuOpen}
+            title={t("Choose which tabs appear in your library")}
+            className={`flex items-center gap-1.5 text-[13px] font-medium transition-colors ${
+              tabsMenuOpen || hidden.size > 0 ? "text-ink" : "text-ink-muted hover:text-ink"
+            }`}
+          >
+            <SlidersHorizontal size={15} strokeWidth={2} />
+            {t("Tabs")}
+          </button>
           <button
             type="button"
             onClick={() => update({ libraryHero: !settings.libraryHero })}
@@ -288,83 +376,58 @@ function Header({
         </div>
       </div>
       <div className="flex items-center gap-1 overflow-x-auto border-b border-edge-soft [&>button]:shrink-0">
-        <TabBtn active={tab === "library"} onClick={() => onTab("library")}>
-          <Library size={14} strokeWidth={2.2} />
-          {t("Library")}
-        </TabBtn>
-        <TabBtn active={tab === "watchlist"} onClick={() => onTab("watchlist")}>
-          <Bookmark size={14} strokeWidth={2.2} />
-          {t("Watchlist")}
-        </TabBtn>
-        <TabBtn active={tab === "history"} onClick={() => onTab("history")}>
-          <Clock size={14} strokeWidth={2.2} />
-          {t("History")}
-        </TabBtn>
-        <TabBtn active={tab === "local"} onClick={() => onTab("local")}>
-          <HardDrive size={14} strokeWidth={2.2} />
-          {t("Local")}
-        </TabBtn>
-        <TabBtn active={tab === "media-servers"} onClick={() => onTab("media-servers")}>
-          <Server size={14} strokeWidth={2.2} />
-          {t("Media Servers")}
-        </TabBtn>
-        <TabBtn active={tab === "torbox"} onClick={() => onTab("torbox")}>
-          <img src={torboxLogo} alt="" className="h-3.5 w-3.5 object-contain" />
-          TorBox
-        </TabBtn>
-        <TabBtn active={tab === "lists"} onClick={() => onTab("lists")}>
-          <UiIcon name="list" className="h-3.5 w-3.5" />
-          {t("My Lists")}
-        </TabBtn>
-        <TabBtn active={tab === "groups"} onClick={() => onTab("groups")}>
-          <UiIcon name="list" className="h-3.5 w-3.5" />
-          {t("My Groups")}
-        </TabBtn>
-        <TabBtn active={tab === "favorites"} onClick={() => onTab("favorites")}>
-          <Star size={14} strokeWidth={2.2} />
-          {t("Favorites")}
-        </TabBtn>
-        {traktConnected && (
-          <TabBtn active={tab === "trakt"} onClick={() => onTab("trakt")}>
-            <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />
-            Trakt
-          </TabBtn>
-        )}
-        {anilistConnected && (
-          <TabBtn active={tab === "anilist"} onClick={() => onTab("anilist")}>
-            <img src={anilistLogo} alt="" className="h-3.5 w-3.5 rounded-[3px] object-contain" />
-            AniList
-          </TabBtn>
-        )}
-        {malConnected && (
-          <TabBtn active={tab === "mal"} onClick={() => onTab("mal")}>
-            <MalLogo className="h-3.5 w-3.5" />
-            MAL
-          </TabBtn>
-        )}
-        {simklConnected && (
-          <TabBtn active={tab === "simkl"} onClick={() => onTab("simkl")}>
-            <img src={simklLogo} alt="" className="h-3.5 w-3.5 object-contain" />
-            Simkl
-          </TabBtn>
-        )}
-        {pmdbConnected && (
-          <TabBtn active={tab === "publicmetadb"} onClick={() => onTab("publicmetadb")}>
-            <img
-              src={publicmetadbLogo}
-              alt=""
-              className="h-3.5 w-3.5 rounded-[3px] object-contain"
-            />
-            PMDB
-          </TabBtn>
-        )}
-        {lbConnected && (
-          <TabBtn active={tab === "letterboxd"} onClick={() => onTab("letterboxd")}>
-            <img src={letterboxdLogo} alt="" className="h-3.5 w-3.5 rounded-[3px] object-contain" />
-            Letterboxd
-          </TabBtn>
-        )}
+        {tabs
+          .filter((entry) => isLibraryTabShown(entry.id, hidden, tab))
+          .map((entry) => (
+            <TabBtn key={entry.id} active={tab === entry.id} onClick={() => onTab(entry.id)}>
+              {entry.icon}
+              {entry.label}
+            </TabBtn>
+          ))}
       </div>
+      <AnchoredMenu
+        anchorRef={tabsButtonRef}
+        open={tabsMenuOpen}
+        onClose={() => setTabsMenuOpen(false)}
+        width={240}
+      >
+        <div className="animate-menu-pop overflow-hidden rounded-md bg-elevated shadow-[0_18px_44px_-18px_rgba(0,0,0,0.85)]">
+          <div className="px-3 pt-2.5 pb-1.5">
+            <span className="text-[10.5px] font-medium uppercase tracking-wider text-ink-subtle">
+              {t("Show tabs")}
+            </span>
+          </div>
+          <div className="max-h-[352px] overflow-y-auto pb-1">
+            {tabs
+              .filter((entry) => entry.id !== "library")
+              .map((entry) => {
+                const shown = !hidden.has(entry.id);
+                return (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    role="menuitemcheckbox"
+                    aria-checked={shown}
+                    onClick={() => toggleTab(entry.id)}
+                    className="flex min-h-[40px] w-full items-center gap-2.5 px-3 py-2 text-start text-[13px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                  >
+                    <span
+                      className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] transition-colors ${
+                        shown
+                          ? "bg-accent text-canvas"
+                          : "bg-canvas ring-1 ring-inset ring-edge-soft"
+                      }`}
+                    >
+                      {shown && <Check size={12} strokeWidth={3} />}
+                    </span>
+                    <span className="flex shrink-0 items-center">{entry.icon}</span>
+                    <span className="flex-1 truncate">{entry.label}</span>
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      </AnchoredMenu>
     </header>
   );
 }

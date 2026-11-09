@@ -660,6 +660,7 @@ export const DEFAULT: Settings = {
   gamesOpenInLibrary: false,
   wrappedButton: true,
   libraryHero: false,
+  libraryHiddenTabs: [],
   mangaEnabled: false,
   feedLocaleBias: true,
   uiLanguage: "en",

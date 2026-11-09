@@ -843,6 +843,7 @@ export type Settings = {
   gamesOpenInLibrary: boolean;
   wrappedButton: boolean;
   libraryHero: boolean;
+  libraryHiddenTabs: string[];
   mangaEnabled: boolean;
   feedLocaleBias: boolean;
   uiLanguage: UiLanguage;

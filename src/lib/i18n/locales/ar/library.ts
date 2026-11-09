@@ -129,6 +129,9 @@ const library: Record<string, string> = {
   "Add a TMDB key in Settings to unlock the full discovery feed.":
     "أضف مفتاح TMDB في الإعدادات لفتح موجز الاكتشاف الكامل.",
   "No picks loaded. TMDB might be unreachable.": "لم تُحمّل أي اختيارات. قد يتعذّر الوصول إلى TMDB.",
+  Tabs: "التبويبات",
+  "Show tabs": "إظهار التبويبات",
+  "Choose which tabs appear in your library": "اختر التبويبات التي تظهر في مكتبتك",
 };
 
 export default library;
