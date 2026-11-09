@@ -10,6 +10,14 @@ export type PdfBookInfo = {
   year?: number;
 };
 
+export type PdfPageData = {
+  image: string;
+  width: number;
+  height: number;
+  text: string;
+  textLayer?: string;
+};
+
 export type PdfDocumentErrorKind = "password" | "corrupt" | "inaccessible" | "cancelled";
 
 export class PdfDocumentError extends Error {
@@ -154,13 +162,17 @@ async function renderPage(
   pageNumber: number,
   limits: Partial<PdfRenderLimits>,
   signal?: AbortSignal,
-): Promise<string> {
+  includeText = true,
+): Promise<PdfPageData> {
   const page = await file.getPage(pageNumber);
   let canvas: HTMLCanvasElement | null = null;
   try {
     const base = page.getViewport({ scale: 1 });
     const size = pageRenderSize(base.width, base.height, { ...PDF_RENDER_LIMITS, ...limits });
     const release = await takeRenderSlot(signal);
+    let image = "";
+    let text = "";
+    let textLayer: string | undefined;
     try {
       throwIfAborted(signal);
       const viewport = page.getViewport({ scale: size.scale });
@@ -177,7 +189,34 @@ async function renderPage(
       try {
         await task.promise;
         throwIfAborted(signal);
-        return canvas.toDataURL("image/jpeg", 0.9);
+        image = canvas.toDataURL("image/jpeg", 0.9);
+        if (includeText) {
+          const textContent = await page.getTextContent();
+          const chunks: string[] = [];
+          for (const item of textContent.items) {
+            if (!("str" in item) || !item.str) continue;
+            chunks.push(item.str);
+            if (item.hasEOL) chunks.push("\n");
+            else chunks.push(" ");
+          }
+          text = chunks
+            .join("")
+            .replace(/[ \t]+/g, " ")
+            .replace(/ *\n */g, "\n")
+            .replace(/\n{3,}/g, "\n\n")
+            .trim();
+          if (text && typeof document !== "undefined") {
+            const module = await pdfjs();
+            const container = document.createElement("div");
+            const layer = new module.TextLayer({
+              textContentSource: textContent,
+              container,
+              viewport: base,
+            });
+            await layer.render();
+            textLayer = container.innerHTML;
+          }
+        }
       } finally {
         signal?.removeEventListener("abort", cancel);
       }
@@ -188,6 +227,7 @@ async function renderPage(
         canvas.height = 0;
       }
     }
+    return { image, width: base.width, height: base.height, text, textLayer };
   } finally {
     page.cleanup();
   }
@@ -208,12 +248,15 @@ export async function pdfBookInfo(path: string, signal?: AbortSignal): Promise<P
     const pages = lease.document.numPages;
     const cover =
       pages > 0
-        ? await renderPage(
-            lease.document,
-            1,
-            { maxWidth: 480, maxHeight: 640, maxPixels: 1_000_000 },
-            signal,
-          ).catch(() => undefined)
+        ? (
+            await renderPage(
+              lease.document,
+              1,
+              { maxWidth: 480, maxHeight: 640, maxPixels: 1_000_000 },
+              signal,
+              false,
+            ).catch(() => undefined)
+          )?.image
         : undefined;
     throwIfAborted(signal);
     return {
@@ -241,11 +284,11 @@ export async function pdfPageCount(path: string, signal?: AbortSignal): Promise<
   }
 }
 
-export async function pdfPageImage(
+export async function pdfPageContent(
   path: string,
   pageNumber: number,
   signal?: AbortSignal,
-): Promise<string> {
+): Promise<PdfPageData> {
   const lease = await acquire(path, signal);
   try {
     if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > lease.document.numPages) {

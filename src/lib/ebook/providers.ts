@@ -38,7 +38,7 @@ import {
   type EBookChapterLocationSource,
 } from "./chapter-locations";
 import { migrateEBookChapterLocations, savedEBookChapters } from "./reader-state";
-import { pdfBookInfo, pdfPageCount, pdfPageImage } from "./pdf";
+import { pdfBookInfo, pdfPageContent, pdfPageCount } from "./pdf";
 
 export type EBookChapter = {
   id: string;
@@ -56,6 +56,12 @@ export type EBookChapter = {
 export type EBookChapterContent = {
   text?: string;
   images?: string[];
+  pdf?: {
+    text: string;
+    textLayer?: string;
+    width: number;
+    height: number;
+  };
   translated?: boolean;
   originalText?: string;
   translatedTitle?: string;
@@ -552,7 +558,16 @@ function localProvider(source: EBookSource): Provider {
     const [path, chapter] = JSON.parse(id) as [string, string];
     if (isPdfPath(path)) {
       const page = Number(chapter.replace(/^pdf:/, ""));
-      return { images: [await pdfPageImage(path, page)] };
+      const data = await pdfPageContent(path, page);
+      return {
+        images: [data.image],
+        pdf: {
+          text: data.text,
+          textLayer: data.textLayer,
+          width: data.width,
+          height: data.height,
+        },
+      };
     }
     const content = readEpubChapterContent(await localPackage(path), chapter);
     return { text: cleanSourceText(content.text), images: content.images };

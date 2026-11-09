@@ -511,6 +511,49 @@ type ReaderSelection = {
   annotationId?: string;
 };
 
+export function PdfPageView({
+  image,
+  pdf,
+}: {
+  image: string;
+  pdf: NonNullable<EBookChapterContent["pdf"]>;
+}) {
+  const root = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const node = root.current;
+    if (!node) return;
+    const update = () => {
+      const width = node.getBoundingClientRect().width;
+      if (width > 0 && pdf.width > 0) setScale(width / pdf.width);
+    };
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [pdf.width]);
+
+  return (
+    <div ref={root} className="relative mx-auto my-10 inline-block max-w-full">
+      <img
+        src={image}
+        alt=""
+        className="block max-h-[80vh] w-auto max-w-full rounded"
+        draggable={false}
+      />
+      {pdf.textLayer && (
+        <div
+          className="pdf-text-layer"
+          style={{ "--scale-factor": scale } as CSSProperties}
+          dangerouslySetInnerHTML={{ __html: pdf.textLayer }}
+        />
+      )}
+    </div>
+  );
+}
+
 export function HarborReader({
   profile,
   bookId,
@@ -609,10 +652,12 @@ export function HarborReader({
   } | null>(null);
   const [readerText, setReaderText] = useState(content.text ?? "");
   const originalTitle = chapter.title || bookTitle;
-  const originalText = content.originalText ?? content.text ?? "";
+  const pdfPage = Boolean(content.pdf);
+  const pdfText = content.pdf?.text ?? "";
+  const originalText = content.originalText ?? content.text ?? pdfText;
   const textAvailable = Boolean(originalText.trim());
   const imageOnly = !textAvailable && Boolean(content.images?.length);
-  const readingMode = imageOnly ? "harbor" : prefs.mode;
+  const readingMode = pdfPage ? "harbor" : prefs.mode;
   const [readerTitle, setReaderTitle] = useState(content.translatedTitle ?? originalTitle);
   const [translation, setTranslation] = useState(() =>
     content.translated
@@ -665,13 +710,21 @@ export function HarborReader({
   const textIdentity = useMemo(() => ebookTextIdentity(readerText), [readerText]);
   const paragraphs = useMemo(
     () =>
-      readerText
-        .replace(/\r/g, "")
-        .split(/\n{2,}/)
-        .map((value) => value.replace(/\n/g, " ").trim())
-        .filter(Boolean),
-    [readerText],
+      pdfPage
+        ? pdfText
+          ? pdfText
+              .split(/\n+/)
+              .map((value) => value.trim())
+              .filter(Boolean)
+          : []
+        : readerText
+            .replace(/\r/g, "")
+            .split(/\n{2,}/)
+            .map((value) => value.replace(/\n/g, " ").trim())
+            .filter(Boolean),
+    [pdfPage, pdfText, readerText],
   );
+  const paragraphProgress = pdfPage ? 1 : Math.max(1, paragraphs.length);
   const resumeVolumeLabel =
     chapter.volumeTitle ||
     (chapter.volume ? t("Volume {volume}", { volume: chapter.volume }) : undefined);
@@ -977,6 +1030,11 @@ export function HarborReader({
   const goTo = useCallback(
     (index: number) => {
       const next = Math.max(0, Math.min(paragraphs.length - 1, index));
+      if (pdfPage) {
+        tracedLine.current = 0;
+        setCurrent(0);
+        return;
+      }
       if (readingMode === "book" && flipPages.urls.length) {
         const page = pageForParagraph(flipPages.paragraphStarts, next);
         bookApi.current?.goToPage(page + 1);
@@ -990,7 +1048,7 @@ export function HarborReader({
       tracedLine.current = next;
       setCurrent(next);
     },
-    [flipPages.paragraphStarts, flipPages.urls.length, paragraphs.length, readingMode],
+    [flipPages.paragraphStarts, flipPages.urls.length, paragraphs.length, pdfPage, readingMode],
   );
 
   useEffect(() => {
@@ -1789,23 +1847,25 @@ export function HarborReader({
           <div className="mt-0.5 text-[11px]" style={{ color: colors.muted }}>
             {readingMode === "book"
               ? `${flipPage + 1} / ${Math.max(1, flipPages.urls.length)}`
-              : `${current + 1} / ${Math.max(1, paragraphs.length)}`}{" "}
+              : `${current + 1} / ${paragraphProgress}`}{" "}
             · {bookTitle}
           </div>
         </div>
         <div className="flex items-center gap-1">
           {textAvailable && (
+            <button
+              className="reader-icon"
+              onClick={() => {
+                setPanel("search");
+                setChaptersOpen(false);
+              }}
+              aria-label={t("Search chapter")}
+            >
+              <Search size={18} />
+            </button>
+          )}
+          {textAvailable && !pdfPage && (
             <>
-              <button
-                className="reader-icon"
-                onClick={() => {
-                  setPanel("search");
-                  setChaptersOpen(false);
-                }}
-                aria-label={t("Search chapter")}
-              >
-                <Search size={18} />
-              </button>
               <button
                 className="reader-icon"
                 onClick={() => {
@@ -1964,24 +2024,25 @@ export function HarborReader({
                 {readerTitle}
               </h1>
             </header>
-            {paragraphs.map((text, index) => (
-              <p
-                key={index}
-                data-reader-line={index}
-                ref={(node) => {
-                  blocks.current[index] = node;
-                }}
-                className={`relative mb-[1.1em] scroll-mt-24 text-pretty transition-colors ${index === current ? "reader-current" : index < current ? "reader-read" : ""}`}
-                style={{ textAlign: "start" }}
-                onMouseEnter={() => prefs.mouseLineTrack && setCurrent(index)}
-                onDoubleClick={() => {
-                  setCurrent(index);
-                  addBookmark(index);
-                }}
-              >
-                {renderText(text, index)}
-              </p>
-            ))}
+            {!pdfPage &&
+              paragraphs.map((text, index) => (
+                <p
+                  key={index}
+                  data-reader-line={index}
+                  ref={(node) => {
+                    blocks.current[index] = node;
+                  }}
+                  className={`relative mb-[1.1em] scroll-mt-24 text-pretty transition-colors ${index === current ? "reader-current" : index < current ? "reader-read" : ""}`}
+                  style={{ textAlign: "start" }}
+                  onMouseEnter={() => prefs.mouseLineTrack && setCurrent(index)}
+                  onDoubleClick={() => {
+                    setCurrent(index);
+                    addBookmark(index);
+                  }}
+                >
+                  {renderText(text, index)}
+                </p>
+              ))}
             {imageOnly && (
               <p
                 className="mb-8 rounded-xl border p-4 text-sm"
@@ -1992,14 +2053,18 @@ export function HarborReader({
                 )}
               </p>
             )}
-            {(content.images ?? []).map((src, index) => (
-              <img
-                key={src + index}
-                src={src}
-                className="mx-auto my-10 max-h-[80vh] max-w-full rounded"
-                alt=""
-              />
-            ))}
+            {content.pdf && content.images?.[0] && (
+              <PdfPageView image={content.images[0]} pdf={content.pdf} />
+            )}
+            {!pdfPage &&
+              (content.images ?? []).map((src, index) => (
+                <img
+                  key={src + index}
+                  src={src}
+                  className="mx-auto my-10 max-h-[80vh] max-w-full rounded"
+                  alt=""
+                />
+              ))}
           </article>
         </div>
       )}
@@ -2057,7 +2122,7 @@ export function HarborReader({
         >
           <SkipBack size={21} strokeWidth={2} fill="currentColor" />
         </button>
-        {textAvailable && (
+        {textAvailable && !pdfPage && (
           <button
             className="reader-icon"
             onClick={() => addBookmark()}
@@ -2094,7 +2159,7 @@ export function HarborReader({
             </button>
           </>
         )}
-        {textAvailable && (
+        {textAvailable && !pdfPage && (
           <>
             <button
               className={`reader-icon ${translation ? "reader-icon-accent reader-language-toggle" : translationError ? "text-red-400" : ""}`}
@@ -2139,6 +2204,10 @@ export function HarborReader({
                 </span>
               </div>
             )}
+          </>
+        )}
+        {textAvailable && (
+          <>
             <VoicePicker
               voices={availableNarrationVoices}
               value={prefs.narrationVoice}
@@ -2234,7 +2303,7 @@ export function HarborReader({
           {Math.round(
             readingMode === "book"
               ? ((flipPage + 1) / Math.max(1, flipPages.urls.length)) * 100
-              : ((current + 1) / Math.max(1, paragraphs.length)) * 100,
+              : ((current + 1) / paragraphProgress) * 100,
           )}
           %
         </div>
@@ -2434,7 +2503,7 @@ export function HarborReader({
                   prefs={prefs}
                   patch={patchPrefs}
                   colors={colors}
-                  bookModeDisabled={imageOnly}
+                  bookModeDisabled={pdfPage}
                 />
               </>
             )}
@@ -2654,7 +2723,7 @@ export function HarborReader({
           onClose={() => setEditing(null)}
         />
       )}
-      <style>{`.reader-icon{display:grid;width:42px;height:42px;place-items:center;border-radius:999px;color:inherit;transition:.16s ease}.reader-icon:hover{background:rgba(127,127,127,.16);transform:translateY(-1px)}.reader-icon:active{transform:scale(.92)}.reader-icon:disabled{pointer-events:none;opacity:.28}.reader-icon-accent{background:var(--color-accent);color:#111}.reader-icon-cancel{background:rgba(239,68,68,.16);color:#f87171;box-shadow:inset 0 0 0 1px rgba(248,113,113,.28)}.reader-icon-cancel:hover{background:rgba(239,68,68,.25);color:#fca5a5}.reader-language-toggle{display:flex;width:auto;gap:6px;padding:0 12px;font-size:11px;font-weight:700}.reader-current{border-radius:4px}.reader-read{color:var(--reader-read-color)}.reader-annotation{color:inherit;border-radius:3px;padding:.04em .02em;cursor:pointer}.reader-annotation:hover{outline:1px solid color-mix(in srgb,var(--color-accent) 60%,transparent)}.ebook-book-crossfade-in{animation:ebook-book-fade-in 240ms ease-out both;will-change:opacity}.ebook-book-crossfade-out{animation:ebook-book-fade-out 240ms ease-out both;will-change:opacity}@keyframes ebook-book-fade-in{from{opacity:0}to{opacity:1}}@keyframes ebook-book-fade-out{from{opacity:1}to{opacity:0}}@media(prefers-reduced-motion:reduce){.ebook-book-crossfade-in,.ebook-book-crossfade-out{animation:none}}.ebook-audio-seeker{appearance:none;background:transparent}.ebook-audio-seeker::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:linear-gradient(90deg,var(--color-accent) var(--audio-progress),rgba(127,127,127,.28) var(--audio-progress))}.ebook-audio-seeker::-webkit-slider-thumb{appearance:none;width:12px;height:12px;margin-top:-4px;border:2px solid var(--color-accent);border-radius:50%;background:#111;box-shadow:0 0 0 3px color-mix(in srgb,var(--color-accent) 18%,transparent);transition:transform .15s}.ebook-audio-seeker:hover::-webkit-slider-thumb{transform:scale(1.2)}`}</style>
+      <style>{`.reader-icon{display:grid;width:42px;height:42px;place-items:center;border-radius:999px;color:inherit;transition:.16s ease}.reader-icon:hover{background:rgba(127,127,127,.16);transform:translateY(-1px)}.reader-icon:active{transform:scale(.92)}.reader-icon:disabled{pointer-events:none;opacity:.28}.reader-icon-accent{background:var(--color-accent);color:#111}.reader-icon-cancel{background:rgba(239,68,68,.16);color:#f87171;box-shadow:inset 0 0 0 1px rgba(248,113,113,.28)}.reader-icon-cancel:hover{background:rgba(239,68,68,.25);color:#fca5a5}.reader-language-toggle{display:flex;width:auto;gap:6px;padding:0 12px;font-size:11px;font-weight:700}.reader-current{border-radius:4px}.reader-read{color:var(--reader-read-color)}.reader-annotation{color:inherit;border-radius:3px;padding:.04em .02em;cursor:pointer}.reader-annotation:hover{outline:1px solid color-mix(in srgb,var(--color-accent) 60%,transparent)}.pdf-text-layer{position:absolute;inset:0;z-index:1;overflow:hidden;line-height:1;text-align:initial;text-size-adjust:none;transform-origin:0 0}.pdf-text-layer span,.pdf-text-layer br{position:absolute;color:transparent;white-space:pre;cursor:text;transform-origin:0% 0%}.pdf-text-layer .markedContent{inset:0}.pdf-text-layer ::selection{background:color-mix(in srgb,var(--color-accent) 38%,transparent)}.ebook-book-crossfade-in{animation:ebook-book-fade-in 240ms ease-out both;will-change:opacity}.ebook-book-crossfade-out{animation:ebook-book-fade-out 240ms ease-out both;will-change:opacity}@keyframes ebook-book-fade-in{from{opacity:0}to{opacity:1}}@keyframes ebook-book-fade-out{from{opacity:1}to{opacity:0}}@media(prefers-reduced-motion:reduce){.ebook-book-crossfade-in,.ebook-book-crossfade-out{animation:none}}.ebook-audio-seeker{appearance:none;background:transparent}.ebook-audio-seeker::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:linear-gradient(90deg,var(--color-accent) var(--audio-progress),rgba(127,127,127,.28) var(--audio-progress))}.ebook-audio-seeker::-webkit-slider-thumb{appearance:none;width:12px;height:12px;margin-top:-4px;border:2px solid var(--color-accent);border-radius:50%;background:#111;box-shadow:0 0 0 3px color-mix(in srgb,var(--color-accent) 18%,transparent);transition:transform .15s}.ebook-audio-seeker:hover::-webkit-slider-thumb{transform:scale(1.2)}`}</style>
     </div>
   );
 }

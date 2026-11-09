@@ -1,6 +1,12 @@
 export type CachedEBookChapterContent = {
   text?: string;
   images?: string[];
+  pdf?: {
+    text: string;
+    textLayer?: string;
+    width: number;
+    height: number;
+  };
 };
 
 export type CachedEBookTranslation = {
@@ -67,7 +73,8 @@ function openDb(): Promise<IDBDatabase | null> {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       for (const store of [CHAPTERS, TRANSLATIONS, BOOK_PAGES])
-        if (!request.result.objectStoreNames.contains(store)) request.result.createObjectStore(store);
+        if (!request.result.objectStoreNames.contains(store))
+          request.result.createObjectStore(store);
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => resolve(null);
@@ -123,7 +130,9 @@ async function drop(store: string, key: string): Promise<void> {
 function chapterBytes(content: CachedEBookChapterContent): number {
   return (
     (content.text?.length ?? 0) * 2 +
-    (content.images ?? []).reduce((total, image) => total + image.length * 2, 0)
+    (content.images ?? []).reduce((total, image) => total + image.length * 2, 0) +
+    (content.pdf?.text.length ?? 0) * 2 +
+    (content.pdf?.textLayer?.length ?? 0) * 2
   );
 }
 
