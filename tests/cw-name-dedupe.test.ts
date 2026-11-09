@@ -50,6 +50,20 @@ test("a stale earlier episode is replaced by the current one", () => {
   );
 });
 
+test("the same show from two seasons collapses to the later episode", () => {
+  const out = dedupeCwItems(
+    [
+      series("kitsu:1", "Frieren: Beyond Journey's End", 1, 9, 100),
+      series("kitsu:2", "Frieren: Beyond Journey's End Season 2", 2, 9, 100),
+    ],
+    16,
+  );
+  assert.deepEqual(
+    out.map((i) => [i._id, i.state?.season, i.state?.episode]),
+    [["kitsu:2", 2, 9]],
+  );
+});
+
 test("the same episode keeps the copy with further progress", () => {
   const out = dedupeCwItems(
     [series("tt1", "Show", 1, 2, 100), series("tt2", "Show", 1, 2, 400)],
