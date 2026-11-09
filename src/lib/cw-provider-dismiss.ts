@@ -1,13 +1,21 @@
 import type { LibraryItem } from "@/lib/stremio";
 import { deleteSimklPlayback, fetchSimklPlaybackItems } from "@/lib/simkl/playback";
+import { getSession as getSimklSession } from "@/lib/simkl/session";
 import { deleteTraktPlayback, fetchTraktPlaybackItems } from "@/lib/trakt/playback";
+import { getSession as getTraktSession } from "@/lib/trakt/session";
 import { fetchPublicMetaDbPlaybackItems } from "@/lib/publicmetadb/playback";
 import { pmdbDeleteResume } from "@/lib/publicmetadb/scrobble";
+import { isAuthenticated as isPmdbAuthenticated } from "@/lib/publicmetadb/session";
 
 export const CW_PROVIDER_SOURCES = ["trakt", "simkl", "publicmetadb"] as const;
 export type CwProviderSource = (typeof CW_PROVIDER_SOURCES)[number];
 
 export type ProviderDismissResult = { failed: CwProviderSource[] };
+
+type ProviderCheckpoint = {
+  lastWatched?: number;
+  timeOffset?: number;
+};
 
 type PendingProviderClear = {
   provider: CwProviderSource;
@@ -15,6 +23,8 @@ type PendingProviderClear = {
   attempts: number;
   nextAt: number;
   addedAt: number;
+  lastWatched?: number;
+  timeOffset?: number;
 };
 
 const QUEUE_KEY = "harbor.cw.provider-clear.v1";
@@ -39,7 +49,11 @@ function readQueue(): PendingProviderClear[] {
         typeof entry.nextAt === "number" &&
         Number.isFinite(entry.nextAt) &&
         typeof entry.addedAt === "number" &&
-        Number.isFinite(entry.addedAt),
+        Number.isFinite(entry.addedAt) &&
+        (entry.lastWatched == null ||
+          (typeof entry.lastWatched === "number" && Number.isFinite(entry.lastWatched))) &&
+        (entry.timeOffset == null ||
+          (typeof entry.timeOffset === "number" && Number.isFinite(entry.timeOffset))),
     );
   } catch {
     return [];
@@ -72,13 +86,21 @@ function scheduleQueueFlush(entries = readQueue()): void {
   );
 }
 
-export function queueProviderPlaybackClear(provider: CwProviderSource, id: string): void {
+export function queueProviderPlaybackClear(
+  provider: CwProviderSource,
+  id: string,
+  checkpoint?: ProviderCheckpoint,
+): void {
   if (!id) return;
   const now = Date.now();
   const entries = readQueue();
   const existing = entries.find((entry) => entry.provider === provider && entry.id === id);
   if (existing) {
     existing.nextAt = now + RETRY_BASE_MS;
+    existing.addedAt = now;
+    existing.attempts = 0;
+    if (checkpoint?.lastWatched != null) existing.lastWatched = checkpoint.lastWatched;
+    if (checkpoint?.timeOffset != null) existing.timeOffset = checkpoint.timeOffset;
   } else {
     entries.push({
       provider,
@@ -86,6 +108,8 @@ export function queueProviderPlaybackClear(provider: CwProviderSource, id: strin
       attempts: 0,
       nextAt: now + RETRY_BASE_MS,
       addedAt: now,
+      ...(checkpoint?.lastWatched != null ? { lastWatched: checkpoint.lastWatched } : {}),
+      ...(checkpoint?.timeOffset != null ? { timeOffset: checkpoint.timeOffset } : {}),
     });
   }
   while (entries.length > MAX_QUEUE) entries.shift();
@@ -108,24 +132,57 @@ export function flushProviderDismissQueue(force = true): Promise<void> {
     const original = new Set(due.map(keyOf));
     const cleared = new Set<string>();
     const failed = new Map<string, PendingProviderClear>();
-    for (const entry of due) {
-      let ok = false;
-      try {
-        ok = await deleteProviderPlayback(entry.provider, entry.id);
-      } catch {
-        ok = false;
-      }
-      const key = keyOf(entry);
-      if (ok) {
-        cleared.add(key);
-        continue;
-      }
+    const defer = (key: string, entry: PendingProviderClear) => {
       const attempts = entry.attempts + 1;
       failed.set(key, {
         ...entry,
         attempts,
         nextAt: Date.now() + Math.min(RETRY_BASE_MS * 2 ** attempts, RETRY_MAX_MS),
       });
+    };
+    for (const entry of due) {
+      const key = keyOf(entry);
+      if (!hasProviderSession(entry.provider)) {
+        defer(key, entry);
+        continue;
+      }
+      let items: LibraryItem[] | null = null;
+      try {
+        items = await fetchProviderItems(entry.provider, true);
+      } catch {
+        items = null;
+      }
+      if (!items) {
+        defer(key, entry);
+        continue;
+      }
+      // A missing id means the old session was cleared or replaced. A current
+      // session with newer progress means the user resumed; leave it alone.
+      const current = items.find((item) => item.providerPlaybackIds?.[entry.provider] === entry.id);
+      if (!current) {
+        cleared.add(key);
+        continue;
+      }
+      const remoteAt = Date.parse(current.state?.lastWatched ?? "") || 0;
+      const baseline = entry.lastWatched ?? entry.addedAt;
+      const remoteOffset = current.state?.timeOffset;
+      const resumed =
+        remoteAt > baseline + 1_000 ||
+        (entry.timeOffset != null &&
+          remoteOffset != null &&
+          remoteOffset > entry.timeOffset + 1_000);
+      if (resumed) {
+        cleared.add(key);
+        continue;
+      }
+      let ok = false;
+      try {
+        ok = await deleteProviderPlayback(entry.provider, entry.id);
+      } catch {
+        ok = false;
+      }
+      if (ok) cleared.add(key);
+      else defer(key, entry);
     }
     // A dismissal can enqueue another clear while these requests are in flight.
     // Keep those newer entries instead of overwriting them with the snapshot.
@@ -167,10 +224,27 @@ function sameCheckpoint(a: LibraryItem, b: LibraryItem): boolean {
   return aSeason === bSeason && a.state?.episode === b.state?.episode;
 }
 
-async function fetchProviderItems(provider: CwProviderSource): Promise<LibraryItem[]> {
-  if (provider === "trakt") return fetchTraktPlaybackItems();
-  if (provider === "simkl") return fetchSimklPlaybackItems();
-  return fetchPublicMetaDbPlaybackItems();
+function hasProviderSession(provider: CwProviderSource): boolean {
+  if (provider === "trakt") return !!getTraktSession();
+  if (provider === "simkl") return !!getSimklSession();
+  return isPmdbAuthenticated();
+}
+
+async function fetchProviderItems(
+  provider: CwProviderSource,
+  fresh = false,
+): Promise<LibraryItem[]> {
+  if (provider === "trakt") return fetchTraktPlaybackItems(fresh);
+  if (provider === "simkl") return fetchSimklPlaybackItems(fresh);
+  return fetchPublicMetaDbPlaybackItems(fresh);
+}
+
+function checkpointFromItem(item: LibraryItem): ProviderCheckpoint {
+  const lastWatched = Date.parse(item.state?.lastWatched ?? "");
+  return {
+    ...(Number.isFinite(lastWatched) && lastWatched > 0 ? { lastWatched } : {}),
+    ...(typeof item.state?.timeOffset === "number" ? { timeOffset: item.state.timeOffset } : {}),
+  };
 }
 
 function deleteProviderPlayback(provider: CwProviderSource, id: string): Promise<boolean> {
@@ -188,32 +262,43 @@ export async function clearProviderPlayback(
   providers: readonly CwProviderSource[],
 ): Promise<ProviderDismissResult> {
   const ids: Partial<Record<CwProviderSource, string>> = {};
+  const checkpoints: Partial<Record<CwProviderSource, ProviderCheckpoint>> = {};
   for (const member of [item, ...(item.cwMembers ?? [])]) {
     // A deduped show can carry another episode's member; only use ids for the
     // checkpoint this card actually represents. Members can have different ids
     // for the same title, so this compares the episode checkpoint, not the id.
     if (!sameCheckpoint(item, member)) continue;
+    const memberCheckpoint = checkpointFromItem(member);
     for (const provider of providers) {
       const id = member.providerPlaybackIds?.[provider];
-      if (id) ids[provider] = id;
+      if (!id) continue;
+      ids[provider] = id;
+      const held = checkpoints[provider] ?? {};
+      if (held.lastWatched == null && memberCheckpoint.lastWatched != null) {
+        held.lastWatched = memberCheckpoint.lastWatched;
+      }
+      if (held.timeOffset == null && memberCheckpoint.timeOffset != null) {
+        held.timeOffset = memberCheckpoint.timeOffset;
+      }
+      checkpoints[provider] = held;
     }
   }
 
   const failed = await Promise.all(
     providers.map(async (provider): Promise<CwProviderSource | null> => {
-      const clear = async (id: string): Promise<boolean> => {
+      const clear = async (id: string, checkpoint?: ProviderCheckpoint): Promise<boolean> => {
         let cleared = false;
         try {
           cleared = await deleteProviderPlayback(provider, id);
         } catch {
           cleared = false;
         }
-        if (!cleared) queueProviderPlaybackClear(provider, id);
+        if (!cleared) queueProviderPlaybackClear(provider, id, checkpoint);
         return cleared;
       };
       try {
         const direct = ids[provider];
-        if (direct) return (await clear(direct)) ? null : provider;
+        if (direct) return (await clear(direct, checkpoints[provider])) ? null : provider;
         const items = await fetchProviderItems(provider);
         const match = items.find(
           (entry) =>
@@ -222,7 +307,9 @@ export async function clearProviderPlayback(
         );
         const found = match?.providerPlaybackIds?.[provider];
         if (!found) return null;
-        return (await clear(found)) ? null : provider;
+        return (await clear(found, match ? checkpointFromItem(match) : undefined))
+          ? null
+          : provider;
       } catch {
         return provider;
       }

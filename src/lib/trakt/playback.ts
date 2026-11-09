@@ -151,7 +151,7 @@ export async function deleteTraktPlayback(id: string): Promise<boolean> {
   }
 }
 
-export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
+export async function fetchTraktPlaybackItems(fresh = false): Promise<LibraryItem[]> {
   if (!getSession()) return [];
   let raw: RawPlayback[];
   try {
@@ -161,6 +161,7 @@ export async function fetchTraktPlaybackItems(): Promise<LibraryItem[]> {
       writeCachedTraktPlaybackItems([]);
       return [];
     }
+    if (fresh) throw e;
     const cached = readCachedTraktPlaybackItems();
     if (cached.length > 0) return cached;
     throw e;

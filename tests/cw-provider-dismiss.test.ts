@@ -12,6 +12,7 @@ type Item = Record<string, any>;
 function loadProviderDismiss() {
   const deleted: string[] = [];
   const fail = new Set<Provider>();
+  const fetchFail = new Set<Provider>();
   const items: Record<Provider, Item[]> = { trakt: [], simkl: [], publicmetadb: [] };
   const mocks = {
     "@/lib/trakt/playback": {
@@ -19,17 +20,26 @@ function loadProviderDismiss() {
         deleted.push(`trakt:${id}`);
         return !fail.has("trakt");
       },
-      fetchTraktPlaybackItems: async () => items.trakt,
+      fetchTraktPlaybackItems: async () => {
+        if (fetchFail.has("trakt")) throw new Error("offline");
+        return items.trakt;
+      },
     },
     "@/lib/simkl/playback": {
       deleteSimklPlayback: async (id: string) => {
         deleted.push(`simkl:${id}`);
         return !fail.has("simkl");
       },
-      fetchSimklPlaybackItems: async () => items.simkl,
+      fetchSimklPlaybackItems: async () => {
+        if (fetchFail.has("simkl")) throw new Error("offline");
+        return items.simkl;
+      },
     },
     "@/lib/publicmetadb/playback": {
-      fetchPublicMetaDbPlaybackItems: async () => items.publicmetadb,
+      fetchPublicMetaDbPlaybackItems: async () => {
+        if (fetchFail.has("publicmetadb")) throw new Error("offline");
+        return items.publicmetadb;
+      },
     },
     "@/lib/publicmetadb/scrobble": {
       pmdbDeleteResume: async (id: string) => {
@@ -37,6 +47,9 @@ function loadProviderDismiss() {
         return !fail.has("publicmetadb");
       },
     },
+    "@/lib/trakt/session": { getSession: () => ({}) },
+    "@/lib/simkl/session": { getSession: () => ({}) },
+    "@/lib/publicmetadb/session": { isAuthenticated: () => true },
   };
   const code = ts.transpileModule(
     readFileSync(new URL("../src/lib/cw-provider-dismiss.ts", import.meta.url), "utf8"),
@@ -59,6 +72,7 @@ function loadProviderDismiss() {
     flushProviderDismissQueue: exports.flushProviderDismissQueue,
     deleted,
     fail,
+    fetchFail,
     items,
     storage,
   };
@@ -166,6 +180,13 @@ test("reports a provider failure without throwing", async () => {
 
 test("queues a failed provider clear and retries it", async () => {
   const h = loadProviderDismiss();
+  h.items.trakt = [
+    item({
+      external: "trakt",
+      providerPlaybackIds: { trakt: "retry" },
+      state: { season: 1, episode: 2, timeOffset: 300, duration: 1000 },
+    }),
+  ];
   h.fail.add("trakt");
   await h.clearProviderPlayback(
     item({ external: "trakt", providerPlaybackIds: { trakt: "retry" } }),
@@ -178,5 +199,74 @@ test("queues a failed provider clear and retries it", async () => {
   await h.flushProviderDismissQueue();
 
   assert.deepEqual(h.deleted, ["trakt:retry", "trakt:retry"]);
+  assert.equal(h.storage.get("harbor.cw.provider-clear.v1"), undefined);
+});
+
+test("cancels a retry when the user has resumed watching", async () => {
+  const h = loadProviderDismiss();
+  h.fail.add("trakt");
+  await h.clearProviderPlayback(
+    item({
+      external: "trakt",
+      providerPlaybackIds: { trakt: "resumed" },
+      state: {
+        season: 1,
+        episode: 2,
+        timeOffset: 300,
+        duration: 1000,
+        lastWatched: "2020-01-01T00:00:00Z",
+      },
+    }),
+    ["trakt"],
+  );
+  h.fail.delete("trakt");
+  h.items.trakt = [
+    item({
+      external: "trakt",
+      providerPlaybackIds: { trakt: "resumed" },
+      state: {
+        season: 1,
+        episode: 2,
+        timeOffset: 2000,
+        duration: 3000,
+        lastWatched: "2030-01-01T00:00:00Z",
+      },
+    }),
+  ];
+
+  await h.flushProviderDismissQueue();
+
+  assert.deepEqual(h.deleted, ["trakt:resumed"]);
+  assert.equal(h.storage.get("harbor.cw.provider-clear.v1"), undefined);
+});
+
+test("keeps a retry queued when the provider state cannot be checked", async () => {
+  const h = loadProviderDismiss();
+  h.fail.add("trakt");
+  await h.clearProviderPlayback(
+    item({ external: "trakt", providerPlaybackIds: { trakt: "offline" } }),
+    ["trakt"],
+  );
+  h.fail.delete("trakt");
+  h.fetchFail.add("trakt");
+
+  await h.flushProviderDismissQueue();
+
+  assert.deepEqual(h.deleted, ["trakt:offline"]);
+  assert.ok(h.storage.get("harbor.cw.provider-clear.v1"));
+});
+
+test("drops a retry when the provider no longer has that playback id", async () => {
+  const h = loadProviderDismiss();
+  h.fail.add("trakt");
+  await h.clearProviderPlayback(
+    item({ external: "trakt", providerPlaybackIds: { trakt: "gone" } }),
+    ["trakt"],
+  );
+  h.fail.delete("trakt");
+
+  await h.flushProviderDismissQueue();
+
+  assert.deepEqual(h.deleted, ["trakt:gone"]);
   assert.equal(h.storage.get("harbor.cw.provider-clear.v1"), undefined);
 });

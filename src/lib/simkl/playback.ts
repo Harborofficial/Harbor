@@ -247,7 +247,7 @@ export async function deleteSimklPlayback(id: string): Promise<boolean> {
   }
 }
 
-export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
+export async function fetchSimklPlaybackItems(fresh = false): Promise<LibraryItem[]> {
   const owner = getSession();
   if (!owner) return [];
   let raw: RawSession[];
@@ -258,6 +258,7 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
       writeCachedSimklPlaybackItems([]);
       return [];
     }
+    if (fresh) throw e;
     const cached = readCachedSimklPlaybackItems();
     if (cached.length > 0) return cached;
     throw e;

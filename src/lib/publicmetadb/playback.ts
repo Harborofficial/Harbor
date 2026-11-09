@@ -107,7 +107,7 @@ async function resolvePlaybackImdbIds(points: PmdbResumePoint[]): Promise<Map<st
   return found;
 }
 
-async function fetchAllResumePoints(): Promise<PmdbResumePoint[]> {
+async function fetchAllResumePoints(fresh = false): Promise<PmdbResumePoint[]> {
   const out: PmdbResumePoint[] = [];
   try {
     const first = await pmdbRequest<PmdbResumeResponse>(
@@ -125,20 +125,22 @@ async function fetchAllResumePoints(): Promise<PmdbResumePoint[]> {
         );
         if (!Array.isArray(data?.items) || data.items.length === 0) break;
         out.push(...data.items);
-      } catch {
+      } catch (error) {
+        if (fresh) throw error;
         break;
       }
     }
-  } catch {
+  } catch (error) {
+    if (fresh) throw error;
     return out;
   }
   return out;
 }
 
-export async function fetchPublicMetaDbPlaybackItems(): Promise<LibraryItem[]> {
+export async function fetchPublicMetaDbPlaybackItems(fresh = false): Promise<LibraryItem[]> {
   if (!isAuthenticated()) return [];
 
-  const all = await fetchAllResumePoints();
+  const all = await fetchAllResumePoints(fresh);
   if (all.length === 0) return [];
 
   const candidates = all.filter((raw) => toLibraryItem(raw) !== null);
