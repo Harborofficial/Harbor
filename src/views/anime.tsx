@@ -972,7 +972,12 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                 key: "continueWatching",
                 name: nm,
                 node: cwReady ? (
-                  <Row title={nm} min={260} shape="landscape">
+                  <Row
+                    title={nm}
+                    min={260}
+                    shape="landscape"
+                    scrollAnchorKey={cwItems[0]?._id ?? ""}
+                  >
                     {cwItems.map((item) => (
                       <ContinueCard
                         key={item._id}
