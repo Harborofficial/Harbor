@@ -256,21 +256,44 @@ function groupedSourceDismissalKey(source: string, id: string): string {
   return `group-source|${encodeURIComponent(source)}|${encodeURIComponent(id)}`;
 }
 
+type DismissCheckpoint = { s?: number; e?: number; p: number };
+
+/** Keep the furthest checkpoint when a stale source copy is dismissed later. */
+function furthestCheckpoint(
+  previous: DismissCheckpoint | undefined,
+  previousVideo: string | undefined,
+  next: DismissCheckpoint,
+  nextVideo: string | undefined,
+): { pos: DismissCheckpoint; video: string | undefined } {
+  if (!previous) return { pos: next, video: nextVideo };
+  const previousRank =
+    previous.s != null && previous.e != null ? previous.s * 100_000 + previous.e : -1;
+  const nextRank = next.s != null && next.e != null ? next.s * 100_000 + next.e : -1;
+  if (previousRank > nextRank || (previousRank === nextRank && previous.p > next.p)) {
+    return { pos: previous, video: previousVideo ?? nextVideo };
+  }
+  return { pos: next, video: nextVideo };
+}
+
 function isDismissedCheckpoint(
   item: LibraryItem,
   dismissedAt: number,
   dismissedVid: string | undefined,
-  pos: { s?: number; e?: number; p: number } | undefined,
+  pos: DismissCheckpoint | undefined,
 ): boolean {
-  // Newer progress from any source (Harbor resume, Stremio cloud _mtime/lastWatched,
-  // Trakt paused_at, Simkl watched_at) un-dismisses even when the video_id is unchanged.
-  const activity = itemActivity(item);
+  const { season, episode } = resolveEpisode(item);
+  const resume = readResumeEntry(item._id, season, episode);
+  // Only real playback can lift a checkpoint dismissal. `_mtime` also moves for
+  // library maintenance (name repair, cloud re-save, server clock skew), and
+  // treating that as new progress is what made dismissed cards return.
+  const playbackActivity = Math.max(parseMs(item.state?.lastWatched), resume?.t ?? 0);
+  const activity =
+    pos != null ? playbackActivity : Math.max(playbackActivity, parseMs(item._mtime));
   if (activity > dismissedAt) return false;
   const curVid = item.state?.video_id;
   // Further-ahead position on the same episode un-dismisses even when its timestamp
   // predates the dismissal (e.g. dismissed after watching elsewhere).
   if (pos != null && progressRatio(item) > pos.p + 0.01) {
-    const { season, episode } = resolveEpisode(item);
     if (season === pos.s && episode === pos.e) return false;
   }
   if (dismissedVid && typeof curVid === "string" && curVid) {
@@ -282,7 +305,6 @@ function isDismissedCheckpoint(
       if (ahead === null || ahead) return false;
     }
   } else if (pos != null) {
-    const { season, episode } = resolveEpisode(item);
     if (season !== pos.s || episode !== pos.e) {
       const ahead = isEpisodeAhead({ season, episode }, { season: pos.s, episode: pos.e });
       if (ahead === null || ahead) return false;
@@ -438,25 +460,40 @@ export function dismissCw(
     type SourceCheckpoint = {
       rank: number;
       p: number;
-      checkpoint?: { s?: number; e?: number; p: number };
+      checkpoint?: DismissCheckpoint;
       video?: string;
+    };
+    // A later dismissal may arrive from a stale copy. Never lower an existing
+    // checkpoint or timestamp, or the more advanced episode resurfaces beneath it.
+    const apply = (key: string, checkpoint: DismissCheckpoint | undefined, video?: string) => {
+      times.set(key, Math.max(nowMs, dismissed.get(key) ?? 0));
+      if (checkpoint) {
+        const merged = furthestCheckpoint(
+          dismissedPos.get(key),
+          dismissedVid.get(key),
+          checkpoint,
+          video,
+        );
+        positions.set(key, merged.pos);
+        if (merged.video) videos.set(key, merged.video);
+        else videos.delete(key);
+      } else {
+        // No checkpoint to compare; keep any prior one rather than weakening it.
+        if (video) videos.set(key, video);
+        else videos.delete(key);
+      }
     };
     const sourceCheckpoints = new Map<string, SourceCheckpoint>();
     for (const member of [...members, item]) {
       const ids = itemIds(member);
       const { season, episode } = resolveEpisode(member);
       const source = dismissalSource(member);
-      const vid = member.state?.video_id;
+      const vid = typeof member.state?.video_id === "string" ? member.state.video_id : undefined;
       const keys = ids.map((entryId) => groupedDismissalKey(source, entryId, vid, season, episode));
-      for (const key of keys) times.set(key, nowMs);
-      for (const key of keys) {
-        if (typeof vid === "string" && vid) videos.set(key, vid);
-        else videos.delete(key);
-      }
       const checkpoint = member.state
         ? { s: season, e: episode, p: progressRatio(member) }
         : undefined;
-      if (checkpoint) for (const key of keys) positions.set(key, checkpoint);
+      for (const key of keys) apply(key, checkpoint, vid);
 
       const rank = season == null || episode == null ? -1 : season * 100_000 + episode;
       for (const entryId of ids) {
@@ -467,16 +504,13 @@ export function dismissCw(
             rank,
             p: checkpoint?.p ?? 0,
             checkpoint,
-            video: typeof vid === "string" && vid ? vid : undefined,
+            video: vid,
           });
         }
       }
     }
     for (const [key, value] of sourceCheckpoints) {
-      times.set(key, nowMs);
-      if (value.video) videos.set(key, value.video);
-      else videos.delete(key);
-      if (value.checkpoint) positions.set(key, value.checkpoint);
+      apply(key, value.checkpoint, value.video);
     }
     persistDismissed(times, videos, options.acknowledged, positions);
     dismissed.clear();
@@ -530,28 +564,47 @@ export function dismissCw(
   }
   const id = item._id;
   const now = new Date().toISOString();
-  const nowMs = Date.parse(now);
+  // Never let a stale copy or a server clock ahead of the local one move the
+  // dismissal behind existing progress.
+  const nowMs = Math.max(
+    Date.parse(now),
+    itemActivity(item),
+    ...itemIds(item).map((entryId) => dismissed.get(entryId) ?? 0),
+  );
   const times = new Map(dismissed);
   const videos = new Map(dismissedVid);
-  const ids = itemIds(item);
-  for (const entryId of ids) times.set(entryId, nowMs);
-  const dismissVid = item.state?.video_id;
-  for (const entryId of ids) {
-    if (typeof dismissVid === "string" && dismissVid) videos.set(entryId, dismissVid);
-    else videos.delete(entryId);
-  }
   const positions = new Map(dismissedPos);
-  if (item.state) {
-    const { season, episode } = resolveEpisode(item);
-    const checkpoint = { s: season, e: episode, p: progressRatio(item) };
-    for (const entryId of ids) positions.set(entryId, checkpoint);
-  } else {
-    for (const entryId of ids) positions.delete(entryId);
+  const ids = itemIds(item);
+  const dismissVid = typeof item.state?.video_id === "string" ? item.state.video_id : undefined;
+  const { season, episode } = resolveEpisode(item);
+  const checkpoint = item.state ? { s: season, e: episode, p: progressRatio(item) } : undefined;
+  for (const entryId of ids) {
+    times.set(entryId, nowMs);
+    if (checkpoint) {
+      const merged = furthestCheckpoint(
+        dismissedPos.get(entryId),
+        dismissedVid.get(entryId),
+        checkpoint,
+        dismissVid,
+      );
+      positions.set(entryId, merged.pos);
+      if (merged.video) videos.set(entryId, merged.video);
+      else videos.delete(entryId);
+    } else {
+      positions.delete(entryId);
+      if (dismissVid) videos.set(entryId, dismissVid);
+      else videos.delete(entryId);
+    }
   }
-  if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
-    for (const entryId of ids) times.set(`nuvio|${entryId}`, nowMs);
-  } else if (item.external) {
-    for (const entryId of ids) times.set(`${item.external}|${entryId}`, nowMs);
+  const source =
+    item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())
+      ? "nuvio"
+      : item.external;
+  if (source) {
+    for (const entryId of ids) {
+      const key = `${source}|${entryId}`;
+      times.set(key, Math.max(nowMs, dismissed.get(key) ?? 0));
+    }
   }
   persistDismissed(times, videos, options.acknowledged, positions);
   dismissed.clear();

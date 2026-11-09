@@ -267,6 +267,36 @@ test("fresh local resume overrides stale cloud recency for the same episode", ()
   assert.equal(h.api.isCwDismissed(value), false);
 });
 
+test("library maintenance timestamps cannot resurrect unchanged dismissed progress", () => {
+  const h = harness();
+  const value = item();
+  h.api.dismissCw(value, null);
+  const refreshed = { ...value, _mtime: new Date(Date.now() + 60_000).toISOString() };
+  assert.equal(h.api.isCwDismissed(refreshed), true);
+  assert.equal(
+    h.api.isCwDismissed({ ...refreshed, state: { ...value.state!, timeOffset: 300 } }),
+    false,
+  );
+});
+
+test("dismissing a stale source copy cannot lower the checkpoint", () => {
+  const h = harness();
+  const advanced = { ...item(), state: { ...item().state!, episode: 4, video_id: "tt-test:1:4" } };
+  h.api.dismissCw(advanced, null);
+  h.api.dismissCw(item("trakt"), null);
+  assert.equal(h.api.isCwDismissed(advanced), true);
+  assert.equal(h.api.isCwDismissed(item()), true);
+  h.setResume(advanced, 100, Date.now() + 1000);
+  assert.equal(h.api.isCwDismissed(advanced), false, "fresh playback can still restore it");
+});
+
+test("one dismissal hides entries whose server clock is ahead of the local clock", () => {
+  const h = harness();
+  const value = { ...item(), _mtime: new Date(Date.now() + 60_000).toISOString() };
+  h.api.dismissCw(value, null);
+  assert.equal(h.api.isCwDismissed(value), true);
+});
+
 test("an older tracker episode cannot undo dismissal, while later episodes and fresh rewatches can", () => {
   const h = harness();
   const current = item("simkl");
