@@ -169,10 +169,16 @@ export function usePlayerBridge(params: {
       // Size manual buffer modes from the real machine, not the fallback.
       await ensureNativeMemory();
       let inputConfLine = "";
-      if (settings.mpvInputConf?.trim() && typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+      if (
+        settings.mpvInputConf?.trim() &&
+        typeof window !== "undefined" &&
+        "__TAURI_INTERNALS__" in window
+      ) {
         try {
           const { invoke } = await import("@tauri-apps/api/core");
-          const confPath = await invoke<string>("mpv_write_input_conf", { content: settings.mpvInputConf });
+          const confPath = await invoke<string>("mpv_write_input_conf", {
+            content: settings.mpvInputConf,
+          });
           inputConfLine = `input-conf=${confPath}`;
         } catch (e) {
           console.warn("[mpv] write input.conf failed", e);
@@ -259,23 +265,6 @@ export function usePlayerBridge(params: {
       settings.playerDisplayPanel === "oled",
     );
   }, [bridgeReady, engine, settings.playerHdrToSdr, settings.playerDisplayPanel, bridgeRef]);
-
-  // Load custom Lua / JS scripts dynamically into mpv on startup and settings update
-  useEffect(() => {
-    if (!bridgeReady || engine !== "mpv") return;
-    const scripts = (settings.customMpvScripts || []).filter((s) => s.enabled && s.path?.trim());
-    if (scripts.length === 0) return;
-    if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
-      import("@tauri-apps/api/core").then(({ invoke }) => {
-        for (const sc of scripts) {
-          const cleaned = sc.path.replace(/\\/g, "/");
-          invoke("mpv_command", { cmd: ["load-script", cleaned] }).catch((e) => {
-            console.warn("[mpv] runtime load-script failed", cleaned, e);
-          });
-        }
-      });
-    }
-  }, [bridgeReady, engine, settings.customMpvScripts]);
 
   return { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive: svpOn };
 }

@@ -25,7 +25,6 @@ import { ShellLayer } from "./shell-layer";
 import { StageOverlays } from "./stage-overlays";
 import { ToolsLayer } from "./tools-layer";
 import { TextSyncOverlay } from "./text-sync-overlay";
-import { OsdBanner } from "@/components/player/osd-banner";
 import { Toaster } from "@/views/addons/toaster";
 import type { ToastInfo } from "@/views/addons/addons-types";
 import type { usePlayerCast } from "./hooks/use-player-cast";
@@ -562,7 +561,6 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         onDismissNoAudio={p.onDismissNoAudio}
         onPickAnother={p.pickAnotherOrGuide}
       />
-      <OsdBanner text={p.snap.osdText} seq={p.snap.osdSeq} />
     </>
   );
 });

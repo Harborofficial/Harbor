@@ -396,7 +396,6 @@ fn configured_vsscript_file() -> Option<PathBuf> {
     })
 }
 
-#[allow(dead_code)]
 #[cfg(not(target_os = "linux"))]
 fn configure_vapoursynth() -> Result<(), String> {
     Ok(())

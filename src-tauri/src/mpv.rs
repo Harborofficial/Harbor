@@ -412,7 +412,6 @@ pub async fn mpv_probe(_app: AppHandle) -> MpvProbe {
     }
 }
 
-#[allow(dead_code)]
 pub(crate) fn supports_vapoursynth_filter() -> bool {
     force_c_numeric_locale();
     Mpv::new()
@@ -661,8 +660,8 @@ fn apply_pre_init(
                 .map_err(|e| format!("parse wid {}: {}", hwnd, e))?;
             init.set_property("wid", hwnd_i64)
                 .map_err(|e| format!("set wid={}: {}", hwnd_i64, e))?;
-            if args.d3d11_flip.unwrap_or(true) {
-                set("d3d11-flip", "yes");
+            if args.d3d11_flip.unwrap_or(false) && args.hdr_to_sdr.unwrap_or(false) {
+                set("d3d11-flip", "no");
             }
         }
         #[cfg(not(windows))]
@@ -923,12 +922,15 @@ fn is_disk_cache_option(key: &str) -> bool {
 }
 
 fn apply_extra_mpv_options(mpv: &Mpv, raw: &str) {
+    let mut loaded_scripts = std::collections::HashSet::new();
     for (key, value) in parse_extra_option_lines(raw) {
         if key == "load-script" || key == "script" {
             let cleaned = value.replace('\\', "/");
-            eprintln!("[harbor::mpv] loading script via mpv command: {}", cleaned);
-            if let Err(e) = mpv_argv_command(mpv, &["load-script", cleaned.as_str()]) {
-                eprintln!("[harbor::mpv] load-script command failed for {}: {}", cleaned, e);
+            if loaded_scripts.insert(cleaned.clone()) {
+                eprintln!("[harbor::mpv] loading script via mpv command: {}", cleaned);
+                if let Err(e) = mpv_argv_command(mpv, &["load-script", cleaned.as_str()]) {
+                    eprintln!("[harbor::mpv] load-script command failed for {}: {}", cleaned, e);
+                }
             }
             continue;
         }
@@ -938,9 +940,11 @@ fn apply_extra_mpv_options(mpv: &Mpv, raw: &str) {
                 let part = part.trim();
                 if !part.is_empty() {
                     let cleaned = part.replace('\\', "/");
-                    eprintln!("[harbor::mpv] loading script via mpv command: {}", cleaned);
-                    if let Err(e) = mpv_argv_command(mpv, &["load-script", cleaned.as_str()]) {
-                        eprintln!("[harbor::mpv] load-script command failed for {}: {}", cleaned, e);
+                    if loaded_scripts.insert(cleaned.clone()) {
+                        eprintln!("[harbor::mpv] loading script via mpv command: {}", cleaned);
+                        if let Err(e) = mpv_argv_command(mpv, &["load-script", cleaned.as_str()]) {
+                            eprintln!("[harbor::mpv] load-script command failed for {}: {}", cleaned, e);
+                        }
                     }
                 }
             }

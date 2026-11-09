@@ -422,7 +422,7 @@ export function AdvancedMpvSection() {
             {mpvCheck.skipped > 0 && (
               <span className="text-ink-subtle">
                 {mpvCheck.skipped === 1
-                  ? t("1 line skipped (not valid)")
+                  ? t("1 line skipped (unrecognized format or command)")
                   : t("{n} lines skipped (not valid)", { n: mpvCheck.skipped })}
               </span>
             )}
@@ -513,8 +513,10 @@ export function AdvancedMpvSection() {
             {inputCheck.skipped > 0 && (
               <span className="text-ink-subtle">
                 {inputCheck.skipped === 1
-                  ? t("1 line skipped (not valid)")
-                  : t("{n} lines skipped (not valid)", { n: inputCheck.skipped })}
+                  ? t("1 line skipped (unrecognized format or command)")
+                  : t("{n} lines skipped (unrecognized format or command)", {
+                      n: inputCheck.skipped,
+                    })}
               </span>
             )}
             {inputCheck.valid === 0 && inputCheck.skipped === 0 && (
@@ -684,7 +686,9 @@ glsl-shaders="~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/FSRCNNX_x2_8-0-4-
         {/* ------------------------------------------------------------- */}
         <Section
           title={t("Lua Scripts")}
-          subtitle={t("Manage custom Lua scripts to extend player functionality.")}
+          subtitle={t(
+            "Manage custom Lua scripts to extend player functionality. Scripts load when playback starts or restarts.",
+          )}
         >
           {isLocked && (
             <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-ink-subtle">

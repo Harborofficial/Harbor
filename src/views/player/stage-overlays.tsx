@@ -2,6 +2,8 @@ import { memo } from "react";
 import { Anime4kIndicator } from "@/components/player/anime4k-indicator";
 import { SvpIndicator } from "@/components/player/svp-indicator";
 import { KeybindStatsOverlay } from "@/components/player/keybind-stats-overlay";
+import { StatsOverlay } from "@/components/player/stats-overlay";
+import { useSettings } from "@/lib/settings";
 import { ConsoleOverlay } from "@/components/player/console-overlay";
 import { OsdBanner } from "@/components/player/osd-banner";
 import { SubtitleOffsetIndicator } from "@/components/player/subtitle-offset-indicator";
@@ -80,6 +82,7 @@ export const StageOverlays = memo(function StageOverlays({
   chromeVisible: boolean;
 }) {
   const t = useT();
+  const { settings } = useSettings();
   const captionsPopout = useCaptionsPopoutOpen();
   const showVolumeIndicator = volumeIndicator.visible;
   const topVolumeShowing = showVolumeIndicator && volumeHudPosition === "top";
@@ -97,16 +100,20 @@ export const StageOverlays = memo(function StageOverlays({
             secondaryText={snap.secondarySubText}
           />
         )}
-      {!pipMode && (
-        <KeybindStatsOverlay
-          snap={snap}
-          engine={engine}
-          showStats={showStats}
-          page={statsPage}
-          onPageChange={onStatsPageChange}
-          onClose={onCloseStats}
-        />
-      )}
+      {!pipMode &&
+        showStats &&
+        (settings.mpvDetailedStats ? (
+          <KeybindStatsOverlay
+            snap={snap}
+            engine={engine}
+            showStats={showStats}
+            page={statsPage}
+            onPageChange={onStatsPageChange}
+            onClose={onCloseStats}
+          />
+        ) : (
+          <StatsOverlay snap={snap} engine={engine} />
+        ))}
       {showConsole && !pipMode && engine === "mpv" && (
         <ConsoleOverlay onClose={onCloseConsole ?? (() => {})} />
       )}

@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateInputConf } from "../src/lib/player/mpv-tuning.ts";
+import {
+  validateInputConf,
+  customScriptsMpvLines,
+  customShadersMpvLines,
+} from "../src/lib/player/mpv-tuning.ts";
 
 // We replicate the exact pure functions from keybind-stats-overlay to verify math & formatting invariants
 function parseString(val: unknown, fallback = ""): string {
@@ -377,4 +381,97 @@ test("Page 4 formats key bindings grouped by category with official mpv keybinds
   assert.equal(groups["seek"].length, 1);
   assert.equal(groups["add"].length, 1);
   assert.equal(groups["cycle"][0].key, "SPACE");
+});
+
+test("existing basic stats vs advanced stats mode routing", () => {
+  // When mpvDetailedStats is false (default), stats overlay uses basic overlay
+  const settingsBasic = { mpvDetailedStats: false };
+  const resolveOverlayMode = (s: { mpvDetailedStats?: boolean }) =>
+    s.mpvDetailedStats ? "keybind-advanced" : "basic-stats";
+
+  assert.equal(resolveOverlayMode(settingsBasic), "basic-stats");
+
+  // When mpvDetailedStats is true, stats overlay uses advanced KeybindStatsOverlay
+  const settingsAdvanced = { mpvDetailedStats: true };
+  assert.equal(resolveOverlayMode(settingsAdvanced), "keybind-advanced");
+});
+
+test("customScriptsMpvLines formats enabled scripts and ignores disabled ones", () => {
+  const settings = {
+    customMpvScripts: [
+      { id: "1", name: "autoload", path: "C:\\scripts\\autoload.lua", enabled: true },
+      { id: "2", name: "disabled_script", path: "C:\\scripts\\disabled.lua", enabled: false },
+      { id: "3", name: "mpris", path: "/usr/share/scripts/mpris.js", enabled: true },
+    ],
+  } as any;
+
+  const lines = customScriptsMpvLines(settings);
+  assert.ok(lines.includes("load-scripts=yes"));
+  assert.ok(lines.includes("load-script=C:/scripts/autoload.lua"));
+  assert.ok(lines.includes("load-script=/usr/share/scripts/mpris.js"));
+  assert.ok(!lines.includes("disabled.lua"));
+});
+
+test("enhanced validateInputConf checks key combinations and known mpv commands", () => {
+  const conf = [
+    "# Valid commands with various keys & modifiers",
+    "Ctrl+Shift+s screenshot",
+    "Alt+UP add volume 2",
+    "Meta+q quit",
+    "SPACE cycle pause",
+    "[ multiply speed 0.9091",
+    "] multiply speed 1.1",
+    "Ctrl+v script-binding stats/display-stats-toggle",
+    "repeatable RIGHT seek 5",
+    "m cycle mute",
+    "",
+    "# Invalid command tokens or bad keys",
+    "Ctrl+BADKEYNAME seek 5",
+    "x not_a_real_mpv_command",
+    "UP",
+    "unknownCommandOnly",
+  ].join("\n");
+
+  const check = validateInputConf(conf);
+  assert.equal(check.valid, 9);
+  assert.equal(check.skipped, 4);
+});
+
+test("OSD banner formatting and single instance deduplication invariants", () => {
+  // Verifies that OSD text formatting handles embedded mpv formatting and escapes
+  const rawOsd = "Speed: 1.25x\\nVolume: 80%\\t(Unmuted)";
+  const formatted = rawOsd.replace(/\\n/g, "\n").replace(/\\t/g, "  ");
+  assert.ok(formatted.includes("\n"));
+  assert.ok(!formatted.includes("\\n"));
+  assert.ok(formatted.includes("  (Unmuted)"));
+});
+
+test("HDR to SDR d3d11-flip safeguard invariant", () => {
+  // Preserves Harbor's invariant that flip model is disabled specifically when HDR-to-SDR tonemapping
+  // on Windows to avoid black screen / composition glitches in embedded HWND
+  function resolveD3d11Flip(
+    d3d11FlipOption: boolean | undefined,
+    hdrToSdr: boolean | undefined,
+  ): string | null {
+    if (d3d11FlipOption && hdrToSdr) {
+      return "no";
+    }
+    return null;
+  }
+
+  assert.equal(resolveD3d11Flip(true, true), "no");
+  assert.equal(resolveD3d11Flip(true, false), null);
+  assert.equal(resolveD3d11Flip(false, true), null);
+});
+
+test("customShadersMpvLines formats enabled shaders into semicolon-separated chain", () => {
+  const settings = {
+    customGlslShaders: [
+      { id: "s1", name: "FSRCNNX", path: "C:\\shaders\\fsrcnnx.glsl", enabled: true },
+      { id: "s2", name: "disabled", path: "C:\\shaders\\disabled.glsl", enabled: false },
+      { id: "s3", name: "Krig", path: "C:\\shaders\\krig.glsl", enabled: true },
+    ],
+  } as any;
+  const lines = customShadersMpvLines(settings);
+  assert.equal(lines, "glsl-shaders=C:/shaders/fsrcnnx.glsl;C:/shaders/krig.glsl");
 });

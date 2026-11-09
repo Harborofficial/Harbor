@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
@@ -98,7 +98,8 @@ function formatMpvProperty(val: unknown): string {
   if (Array.isArray(val)) {
     if (val.length === 0) return "none";
     const isMultiLineList = val.some(
-      (item) => typeof item === "string" && (item.includes("/") || item.includes("\\") || item.length > 25),
+      (item) =>
+        typeof item === "string" && (item.includes("/") || item.includes("\\") || item.length > 25),
     );
     return val.map(formatMpvProperty).join(isMultiLineList ? "\n" : ", ");
   }
@@ -112,7 +113,9 @@ function formatMpvProperty(val: unknown): string {
 
 async function triggerHarborOsd(cmd: string): Promise<void> {
   const showTextMatch = cmd.match(/show-text\s+(?:"([^"]+)"|'([^']+)'|([^\s;]+))/i);
-  let template = showTextMatch ? (showTextMatch[1] ?? showTextMatch[2] ?? showTextMatch[3] ?? "") : "";
+  let template = showTextMatch
+    ? (showTextMatch[1] ?? showTextMatch[2] ?? showTextMatch[3] ?? "")
+    : "";
 
   if (!template) {
     const cycleMatch = cmd.match(/cycle-values\s+([a-zA-Z0-9_-]+)/i);
@@ -147,10 +150,7 @@ async function triggerHarborOsd(cmd: string): Promise<void> {
   }
 
   // Unescape literal newlines and tabs from input.conf so multiline text splits correctly
-  result = result
-    .replace(/\\n/g, "\n")
-    .replace(/\\N/g, "\n")
-    .replace(/\\t/g, "  ");
+  result = result.replace(/\\n/g, "\n").replace(/\\N/g, "\n").replace(/\\t/g, "  ");
 
   window.dispatchEvent(new CustomEvent("harbor:osd", { detail: result }));
 }
@@ -272,6 +272,12 @@ export function useKeyboardShortcuts(params: {
     onVolumeFeedback,
   } = params;
   const { settings, update } = useSettings();
+
+  const inputConfMap = useMemo(() => {
+    if (!settings.mpvInputConf?.trim()) return new Map<string, InputConfBinding>();
+    return parseInputConf(settings.mpvInputConf);
+  }, [settings.mpvInputConf]);
+
   const overrides = settings.hotkeys ?? {};
   const seekBackStepSec = settings.seekBackStepSec;
   const seekForwardStepSec = settings.seekForwardStepSec;
@@ -328,7 +334,11 @@ export function useKeyboardShortcuts(params: {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (document.querySelector('[data-harbor-player][data-detached="true"]') && !e.key.startsWith("Media")) return;
+      if (
+        document.querySelector('[data-harbor-player][data-detached="true"]') &&
+        !e.key.startsWith("Media")
+      )
+        return;
       const dock = document.querySelector('[data-harbor-player][data-docked="true"]');
       if (dock && !dock.contains(e.target as Node) && !e.key.startsWith("Media")) return;
       if (isPlayerInteractionLocked()) {
@@ -400,18 +410,22 @@ export function useKeyboardShortcuts(params: {
         }
       }
 
-      if (settings.mpvInputConf?.trim() && bridgeRef.current?.capabilities().engine === "mpv") {
-        const inputMap = parseInputConf(settings.mpvInputConf);
+      if (inputConfMap.size > 0 && bridgeRef.current?.capabilities().engine === "mpv") {
         const mpvKey = eventToMpvKey(e);
-        const matched = inputMap.get(mpvKey.toLowerCase()) || inputMap.get(e.key.toLowerCase());
+        const matched =
+          inputConfMap.get(mpvKey.toLowerCase()) || inputConfMap.get(e.key.toLowerCase());
         if (matched) {
           e.preventDefault();
 
           // 1. Check for stats page commands (e.g. script-binding stats/display-page-1, display-stats, etc.)
-          const statsMatch = matched.cmd.match(/stats\/(?:display-page-(\d+)|display-stats(?:-toggle)?)/i);
+          const statsMatch = matched.cmd.match(
+            /stats\/(?:display-page-(\d+)|display-stats(?:-toggle)?)/i,
+          );
           if (statsMatch) {
             const pageNum = statsMatch[1] ? parseInt(statsMatch[1], 10) : 1;
-            window.dispatchEvent(new CustomEvent("harbor:toggle-stats-page", { detail: { page: pageNum } }));
+            window.dispatchEvent(
+              new CustomEvent("harbor:toggle-stats-page", { detail: { page: pageNum } }),
+            );
             return;
           }
 
@@ -691,7 +705,6 @@ export function useKeyboardShortcuts(params: {
       }
       if (match("playerStats")) {
         e.preventDefault();
-        if (!settings.mpvDetailedStats) return;
         setShowStats((v) => {
           if (!v) setStatsPage(1);
           return !v;
