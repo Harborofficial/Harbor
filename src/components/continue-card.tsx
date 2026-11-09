@@ -41,7 +41,13 @@ import { aniZipByAnidb, aniZipByAnilist, aniZipByKitsu, aniZipByMal } from "@/li
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
-import { animeCwIdsVersion, getAnimeCwId, subscribeAnimeCwIds } from "@/lib/anime-cw-ids";
+import {
+  animeCwIdsVersion,
+  getAnimeCwId,
+  notifyAnimeCwIds,
+  subscribeAnimeCwIds,
+} from "@/lib/anime-cw-ids";
+import { rememberCardCoords } from "@/lib/cw-card-coords";
 import {
   aniZipLookupKey,
   applyAniZipEpisode,
@@ -447,6 +453,21 @@ export const ContinueCard = memo(function ContinueCard({
   );
   const partSeasonCard = splitFranchiseDisplaySeason(cardKitsuId);
   const animeSeasonMapped = providerMappedEpisode(kitsuVideo, ep, seasonForeignCard);
+  const displaySeason = animeSeasonMapped?.season ?? partSeasonCard ?? ep?.season;
+  const displayEpisode = animeSeasonMapped?.episode ?? ep?.episode;
+  useEffect(() => {
+    if (displaySeason == null || displayEpisode == null) return;
+    if (rememberCardCoords(item, { season: displaySeason, episode: displayEpisode })) {
+      notifyAnimeCwIds();
+    }
+  }, [
+    item,
+    item.state?.video_id,
+    item.state?.season,
+    item.state?.episode,
+    displaySeason,
+    displayEpisode,
+  ]);
   const sub =
     isAnimeItem && absoluteNumber != null && Number.isFinite(absoluteNumber) && absoluteNumber > 0
       ? `Ep ${absoluteNumber}`

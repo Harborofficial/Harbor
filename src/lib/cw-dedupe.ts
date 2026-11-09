@@ -1,9 +1,12 @@
+import { animeTitleKeys } from "@/lib/anime-title-key";
+import { cardCoords } from "@/lib/cw-card-coords";
 import { franchiseDedupKey } from "@/lib/providers/jikan";
 import type { LibraryItem } from "@/lib/stremio";
 
 function episodeRank(i: LibraryItem): number {
-  const season = i.state?.season ?? 0;
-  const episode = i.state?.episode ?? 0;
+  const coords = cardCoords(i);
+  const season = coords?.season ?? i.state?.season ?? 0;
+  const episode = coords?.episode ?? i.state?.episode ?? 0;
   return season >= 1 && episode >= 1 ? season * 100_000 + episode : -1;
 }
 
@@ -34,11 +37,45 @@ function memberKey(i: LibraryItem): string {
     .join("|");
 }
 
+/** A series can arrive as series, anime, tv or channel depending on its source. */
+function typeKey(type: string): string {
+  return type === "series" || type === "anime" || type === "tv" || type === "channel"
+    ? "series"
+    : type;
+}
+
+function itemIds(i: LibraryItem): string[] {
+  return [i._id, ...(i.altIds ?? [])].filter(Boolean);
+}
+
+/** Stored name plus any title the card resolved and displayed for this checkpoint. */
+function titleKeys(item: LibraryItem): string[] {
+  const prefix = typeKey(item.type);
+  const checkpoint = {
+    videoId: item.state?.video_id,
+    season: item.state?.season,
+    episode: item.state?.episode,
+    imdbId:
+      item.altIds?.find((id) => /^tt\d+$/.test(id)) ??
+      (/^tt\d+$/.test(item._id) ? item._id : undefined),
+  };
+  const keys = [...animeTitleKeys(item._id, checkpoint)];
+  if (item.name) keys.push(franchiseDedupKey(item.name));
+  return [...new Set(keys)].filter(Boolean).map((key) => `${prefix}|${key}`);
+}
+
 /** Keep every source checkpoint so dismissing the survivor clears all copies. */
 function mergeCopies(survivor: LibraryItem, copy: LibraryItem): LibraryItem {
   const members = [...(survivor.cwMembers ?? [survivor]), ...(copy.cwMembers ?? [copy])];
   const unique = [...new Map(members.map((member) => [memberKey(member), member])).values()];
-  return { ...survivor, cwMembers: unique };
+  const altIds = [...new Set([...(survivor.altIds ?? []), ...(copy.altIds ?? [])])].filter(
+    (id) => id !== survivor._id,
+  );
+  return {
+    ...survivor,
+    altIds: altIds.length > 0 ? altIds : undefined,
+    cwMembers: unique,
+  };
 }
 
 // Cloud, local and tracker rows can carry a different id for the same title, so
@@ -49,23 +86,29 @@ export function dedupeCwItems(items: LibraryItem[], limit: number): LibraryItem[
   const nameIndex = new Map<string, number>();
   const out: LibraryItem[] = [];
   for (const item of items) {
-    const nameKey = item.name ? `${item.type}|${franchiseDedupKey(item.name)}` : null;
-    const index = idIndex.get(item._id) ?? (nameKey ? nameIndex.get(nameKey) : undefined);
+    const keys = titleKeys(item);
+    const index =
+      itemIds(item)
+        .map((id) => idIndex.get(id))
+        .find((value) => value != null) ??
+      keys.map((key) => nameIndex.get(key)).find((value) => value != null);
     if (index == null) {
       if (out.length >= limit) continue;
       const next = out.length;
       out.push(item);
-      idIndex.set(item._id, next);
-      if (nameKey) nameIndex.set(nameKey, next);
+      for (const id of itemIds(item)) idIndex.set(id, next);
+      for (const key of keys) nameIndex.set(key, next);
       continue;
     }
     const existing = out[index];
     // Episode order only applies to series. Movie copies keep the first
     // (freshness-sorted) row, as before, and just retain their members.
     const replace =
-      existing.type === "series" && item.type === "series" && isFurther(item, existing);
+      typeKey(existing.type) === "series" &&
+      typeKey(item.type) === "series" &&
+      isFurther(item, existing);
     out[index] = replace ? mergeCopies(item, existing) : mergeCopies(existing, item);
-    idIndex.set(item._id, index);
+    for (const id of itemIds(out[index])) idIndex.set(id, index);
   }
   return out;
 }
