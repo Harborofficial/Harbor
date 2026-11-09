@@ -26,8 +26,10 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
       >
         <header className="flex items-center justify-between gap-4 border-b border-edge-soft px-6 py-4">
           <div className="flex flex-col gap-0.5">
-            <h2 className="text-[16px] font-semibold text-ink">{t("Keyboard shortcuts")}</h2>
-            <p className="text-[12.5px] text-ink-subtle">
+            <h2 dir="auto" className="text-[16px] font-semibold text-ink">
+              {t("Keyboard shortcuts")}
+            </h2>
+            <p dir="auto" className="text-[12.5px] text-ink-subtle">
               {t("Press {key} to close. Change these in Settings.", { key: closeKey })}
             </p>
           </div>
@@ -50,7 +52,7 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
                 <dl className="flex flex-col gap-1.5">
                   {group.items.map((item) => (
                     <div key={item.id} className="flex items-center justify-between gap-3">
-                      <dt className="min-w-0 truncate text-[13px] text-ink-muted">
+                      <dt dir="auto" className="min-w-0 truncate text-[13px] text-ink-muted">
                         {t(item.label)}
                       </dt>
                       <dd className="shrink-0">
