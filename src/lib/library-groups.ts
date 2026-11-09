@@ -15,7 +15,10 @@ export type LibraryGroup = GroupPresentation & {
 // Accept international slugs while keeping each URL/API path segment safe.
 function normalizedListPath(pathname: string): { parts: string[]; path: string } | null {
   const parts = pathname.split("/").filter(Boolean).map(decodeURIComponent);
-  if (!parts.every((part) => /^[\p{L}\p{M}\p{N}_-]+$/u.test(part))) return null;
+  if (
+    !parts.every((part) => part !== "." && part !== ".." && /^[\p{L}\p{M}\p{N}._~-]+$/u.test(part))
+  )
+    return null;
   return { parts, path: parts.map(encodeURIComponent).join("/") };
 }
 
