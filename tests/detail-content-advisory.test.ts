@@ -217,3 +217,112 @@ test("parents guide panel: keep-expanded preference defaults to collapsed and re
   localStorage.removeItem(STORAGE_KEY);
   assert.equal(localStorage.getItem(STORAGE_KEY), null);
 });
+
+test("imdb advisory cache: HTTP 200 GraphQL error responses are treated as transient failures and not cached", async () => {
+  clearParentsGuideCache();
+
+  let callCount = 0;
+  const mockGraphQLErrorFetch: typeof fetch = async () => {
+    callCount += 1;
+    return new Response(
+      JSON.stringify({
+        errors: [
+          {
+            message: "Rate limit exceeded or service unavailable",
+            extensions: { code: "SERVICE_UNAVAILABLE" },
+          },
+        ],
+        data: null,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  };
+
+  const res = await fetchImdbParentsGuide("tt2222222", mockGraphQLErrorFetch as any);
+  assert.equal(res, null);
+  assert.equal(callCount, 1);
+
+  // Must NOT cache null or an entry for GraphQL errors returning HTTP 200
+  const entry = getParentsGuideCacheEntry("tt2222222");
+  assert.equal(entry, undefined);
+
+  // Subsequent call should not hit cache and can recover when the API returns data
+  const mockRecoverFetch: typeof fetch = async () => {
+    return new Response(
+      JSON.stringify({
+        data: {
+          title: {
+            parentsGuide: {
+              categories: [
+                {
+                  category: { id: "violence", text: "Violence & Gore" },
+                  severity: { text: "Moderate", votedFor: 5 },
+                  totalSeverityVotes: 10,
+                  guideItems: {
+                    total: 1,
+                    edges: [{ node: { isSpoiler: false, text: { plainText: "Action scene" } } }],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  };
+
+  const recovered = await fetchImdbParentsGuide("tt2222222", mockRecoverFetch as any);
+  assert.ok(recovered);
+  assert.equal(recovered.categories[0].id, "violence");
+
+  clearParentsGuideCache();
+});
+
+test("imdb advisory notes: parses totalItems count when guideItems exceeds fetched batch", async () => {
+  clearParentsGuideCache();
+
+  const mockLargeCategoryFetch: typeof fetch = async () => {
+    return new Response(
+      JSON.stringify({
+        data: {
+          title: {
+            parentsGuide: {
+              categories: [
+                {
+                  category: { id: "violence", text: "Violence & Gore" },
+                  severity: { text: "Severe", votedFor: 40 },
+                  totalSeverityVotes: 50,
+                  guideItems: {
+                    total: 85,
+                    edges: [
+                      { node: { isSpoiler: false, text: { plainText: "Note 1" } } },
+                      { node: { isSpoiler: false, text: { plainText: "Note 2" } } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  };
+
+  const res = await fetchImdbParentsGuide("tt3333333", mockLargeCategoryFetch as any);
+  assert.ok(res);
+  assert.equal(res.categories[0].items.length, 2);
+  assert.equal(res.categories[0].totalItems, 85);
+
+  clearParentsGuideCache();
+});

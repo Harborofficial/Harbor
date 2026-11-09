@@ -182,6 +182,7 @@ export function ParentsGuidePanel({
                   category={cat}
                   expanded={expandedCats.has(cat.id)}
                   spoilersRevealed={revealedSpoilers.has(cat.id)}
+                  imdbGuideUrl={imdbGuideUrl}
                   onToggle={() => toggleCategory(cat.id)}
                   onToggleSpoilers={() => toggleSpoilers(cat.id)}
                 />
@@ -198,12 +199,14 @@ function CategoryRow({
   category,
   expanded,
   spoilersRevealed,
+  imdbGuideUrl,
   onToggle,
   onToggleSpoilers,
 }: {
   category: ParentsGuideCategory;
   expanded: boolean;
   spoilersRevealed: boolean;
+  imdbGuideUrl?: string | null;
   onToggle: () => void;
   onToggleSpoilers: () => void;
 }) {
@@ -336,6 +339,27 @@ function CategoryRow({
             ) : (
               <div className="text-[12.5px] italic text-ink-muted/80">
                 {t("No detailed notes submitted for this category.")}
+              </div>
+            )}
+
+            {category.totalItems > category.items.length && (
+              <div className="flex items-center justify-between gap-3 border-t border-edge-soft/30 pt-2 text-[11.5px] text-ink-subtle">
+                <span>
+                  {t("Showing {shown} of {total} notes", {
+                    shown: category.items.length,
+                    total: category.totalItems,
+                  })}
+                </span>
+                {imdbGuideUrl && (
+                  <button
+                    type="button"
+                    onClick={() => openUrl(imdbGuideUrl)}
+                    className="inline-flex items-center gap-1 font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+                  >
+                    <span>{t("Open on IMDb")}</span>
+                    <ExternalLink size={11} strokeWidth={2.2} />
+                  </button>
+                )}
               </div>
             )}
           </div>

@@ -13,6 +13,7 @@ export type ParentsGuideCategory = {
   severity: "None" | "Mild" | "Moderate" | "Severe" | string;
   severityVotes: number;
   totalVotes: number;
+  totalItems: number;
   items: ParentsGuideItem[];
 };
 
@@ -61,7 +62,8 @@ query ParentsGuide($id: ID!) {
         category { id text }
         severity { text voteType votedFor }
         totalSeverityVotes
-        guideItems(first: 30) {
+        guideItems(first: 50) {
+          total
           edges {
             node {
               isSpoiler
@@ -237,7 +239,10 @@ export async function fetchImdbParentsGuide(
         category?: { id?: string; text?: string };
         severity?: { text?: string; voteType?: string; votedFor?: number };
         totalSeverityVotes?: number;
-        guideItems?: { edges?: RawEdge[] };
+        guideItems?: {
+          total?: number;
+          edges?: RawEdge[];
+        };
       };
 
       type ImdbResponse = {
@@ -246,20 +251,24 @@ export async function fetchImdbParentsGuide(
             parentsGuide?: {
               categories?: RawCategory[];
             };
-          };
-        };
+          } | null;
+        } | null;
+        errors?: Array<{ message?: string; [key: string]: unknown }>;
       };
 
       const json = (await res.json()) as ImdbResponse;
+      const hasErrors = Array.isArray(json.errors) && json.errors.length > 0;
       const rawCategories = json.data?.title?.parentsGuide?.categories;
 
       if (!rawCategories || !Array.isArray(rawCategories) || rawCategories.length === 0) {
-        lruSet(
-          guideCache,
-          cleanId,
-          { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
-          150,
-        );
+        if (!hasErrors) {
+          lruSet(
+            guideCache,
+            cleanId,
+            { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
+            150,
+          );
+        }
         return null;
       }
 
@@ -280,23 +289,31 @@ export async function fetchImdbParentsGuide(
           }
         }
 
+        const totalItems =
+          typeof raw.guideItems?.total === "number" && raw.guideItems.total >= items.length
+            ? raw.guideItems.total
+            : items.length;
+
         categories.push({
           id: cat?.id ?? "",
           label: cat?.text ?? "",
           severity: (sev?.text ?? "None") as "None" | "Mild" | "Moderate" | "Severe",
           severityVotes: Number(sev?.votedFor) || 0,
           totalVotes: Number(raw.totalSeverityVotes) || 0,
+          totalItems,
           items,
         });
       }
 
       if (categories.length === 0) {
-        lruSet(
-          guideCache,
-          cleanId,
-          { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
-          150,
-        );
+        if (!hasErrors) {
+          lruSet(
+            guideCache,
+            cleanId,
+            { data: null, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS },
+            150,
+          );
+        }
         return null;
       }
 

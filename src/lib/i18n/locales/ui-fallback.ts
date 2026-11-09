@@ -360,6 +360,7 @@ const uiFallback: Record<string, string> = {
   "In the manga reader.": "In the manga reader.",
   "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.":
     "Choose whether the content advisory appears in full color or a restrained monochrome tone. Also affects the Content Advisory section on detail pages.",
+  "Showing {shown} of {total} notes": "Showing {shown} of {total} notes",
   "Content advisory theme": "Content advisory theme",
   Monochrome: "Monochrome",
   "#": "#",
