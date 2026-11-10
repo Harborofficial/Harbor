@@ -461,7 +461,9 @@ export function savePlayback(
   const all = readAll();
   const key = entryKey(metaId, season, episode);
   const prev = all[key];
-  const thin = !entry.infoHash && !entry.addonId && !entry.url;
+  // A local file has no streaming identity. Keep the last online source so the
+  // picker can still match it instead of remembering an unplayable path.
+  const thin = !entry.infoHash && !entry.addonId && (!entry.url || isLocalUrl(entry.url));
   all[key] =
     thin && prev
       ? {
@@ -1123,6 +1125,44 @@ export function streamMatchesPreferredSourceFallback(
   }
   if (e.source && s.source && e.source !== s.source) return false;
   return true;
+}
+
+type RememberedStreamCandidate = Parameters<typeof streamMatchesEntry>[0] &
+  Parameters<typeof streamMatchesPreferredSource>[0];
+
+/**
+ * The exact file when the addon still offers it, otherwise the same release
+ * lineage. Episode-scoped callers must reject other episodes first.
+ */
+/** A remembered source from the addon that served it, not an aggregator duplicate. */
+export function streamMatchesRememberedSource(
+  stream: RememberedStreamCandidate,
+  entry: PlaybackEntry,
+): boolean {
+  return (
+    (streamMatchesEntry(stream, entry) || streamMatchesPreferredSource(stream, entry)) &&
+    (!entry.addonId || streamOfferedByAddon(stream, entry.addonId))
+  );
+}
+
+export function findRememberedSourceMatch<T extends RememberedStreamCandidate>(
+  streams: readonly T[],
+  entry: PlaybackEntry,
+): T | null {
+  // Aggregators repeat the same file. The remembered stream is the copy from
+  // the addon that served it, not whichever duplicate answered first.
+  const served = entry.addonId
+    ? streams.filter((stream) => streamOfferedByAddon(stream, entry.addonId))
+    : [];
+  const servedExact = served.find((stream) => streamMatchesEntry(stream, entry));
+  if (servedExact) return servedExact;
+  const servedLineage = served.length
+    ? findPreferredSourceMatch(served, entry, streamMatchesPreferredSource)
+    : null;
+  if (servedLineage) return servedLineage;
+  const exact = streams.find((stream) => streamMatchesEntry(stream, entry));
+  if (exact) return exact;
+  return findPreferredSourceMatch([...streams], entry, streamMatchesPreferredSource);
 }
 
 export function preferredSourceAddonPending(

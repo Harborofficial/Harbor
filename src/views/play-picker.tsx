@@ -33,11 +33,13 @@ import {
   readPlayback,
   isPlaybackActorCurrent,
   readLastSeriesPlayback,
-  streamMatchesEntry,
   streamMatchesPreferredSource,
+  streamMatchesRememberedSource,
   streamMatchesSource,
   findPreferredSourceMatch,
+  findRememberedSourceMatch,
   preferredSourceAddonPending,
+  streamOfferedByAddon,
 } from "@/lib/playback-history";
 import { readSeasonLock } from "@/lib/season-lock";
 import { continuationStream } from "@/lib/player/continue-playback";
@@ -266,6 +268,7 @@ export function PlayPicker({
   const [resolving, setResolving] = useState<ResolvingSelection | null>(null);
   const [failedStreams, setFailedStreams] = useState<Set<ScoredStream>>(new Set());
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
+  const tierTouchedRef = useRef(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerOpenRef = useRef(drawerOpen);
   drawerOpenRef.current = drawerOpen;
@@ -492,11 +495,6 @@ export function PlayPicker({
     [filteredPicker],
   );
 
-  useEffect(() => {
-    if (!filteredPicker?.primary) return;
-    setSelectedTier((s) => s ?? filteredPicker.primary!.tier);
-  }, [filteredPicker]);
-
   const previousPlayback = useMemo(
     () =>
       continuation?.source ??
@@ -505,6 +503,16 @@ export function PlayPicker({
         : null),
     [meta.id, episode?.season, episode?.episode, settings.rememberLastStream, continuation],
   );
+
+  // The same episode's exact source is more specific than the series lineage,
+  // but an explicit season lock stays in charge.
+  const preferredSourceEntry =
+    !seasonLockEntry && previousPlayback ? previousPlayback : lastSeriesSource;
+  const rememberedAddonPending =
+    !!previousPlayback &&
+    !pipelineDone &&
+    (preferredSourceAddonPending(previousPlayback, false, pipelineDone, addonQuorum) ||
+      (!addonQuorum.queriedAddonIds.length && !!previousPlayback.addonId));
 
   const kidProfile = useActiveKid();
   const p2pAutoConsent = settings.p2pAutoConsent || !!kidProfile;
@@ -522,6 +530,7 @@ export function PlayPicker({
     hostSource: hostSourceForMedia,
     prefer1080: !!kidProfile,
     preferPacks: seasonLock,
+    sourceEntryFirst: !lastSeriesSourceIsLineage,
     season: !isAnimeMetaId ? (episode?.season ?? null) : null,
     episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
     expectedTitle: meta.name,
@@ -543,10 +552,10 @@ export function PlayPicker({
     !roomGuestPick;
   useEffect(() => {
     if (!autoActive) return;
-    if (preferredSourceAddonPending(lastSeriesSource, false, pipelineDone, addonQuorum)) return;
+    if (preferredSourceAddonPending(preferredSourceEntry, false, pipelineDone, addonQuorum)) return;
     const t = window.setTimeout(() => setAutoCancelled(true), 45_000);
     return () => window.clearTimeout(t);
-  }, [autoActive, lastSeriesSource, pipelineDone, addonQuorum]);
+  }, [autoActive, preferredSourceEntry, pipelineDone, addonQuorum]);
 
   const setMainRef = useCallback(
     (node: HTMLElement | null) => {
@@ -643,7 +652,7 @@ export function PlayPicker({
       ? (filteredPicker.allRaw
           .map((s) => continuationStream(s, continuation))
           .find((s) => s != null) ?? null)
-      : (filteredPicker.allRaw.find((s) => streamMatchesEntry(s, previousPlayback)) ?? null);
+      : findRememberedSourceMatch(filteredPicker.allRaw, previousPlayback);
     if (!m || isAnimeMetaId || !episode) return m;
     if (
       m.episode != null &&
@@ -666,8 +675,18 @@ export function PlayPicker({
     return findPreferredSourceMatch(filteredPicker.allRaw, lastSeriesSource, matches);
   }, [filteredPicker, lastSeriesSource, lastSeriesSourceIsLineage, previousMatch]);
 
+  useEffect(() => {
+    const preferred = previousMatch ?? sameSourceMatch ?? filteredPicker?.primary;
+    if (!preferred || tierTouchedRef.current) return;
+    setSelectedTier(preferred.tier);
+  }, [filteredPicker, previousMatch, sameSourceMatch]);
+
   const currentPick: ScoredStream | null = useMemo(() => {
     if (!filteredPicker) return null;
+    if (!tierTouchedRef.current) {
+      if (previousMatch) return previousMatch;
+      if (sameSourceMatch) return sameSourceMatch;
+    }
     if (selectedTier && filteredPicker.byTier[selectedTier]) {
       return filteredPicker.byTier[selectedTier]!;
     }
@@ -784,6 +803,7 @@ export function PlayPicker({
     !isDownload &&
     !roomGuestPick &&
     !inSession &&
+    !rememberedAddonPending &&
     rememberedInstant &&
     (attempt ?? 0) === 0;
   useEffect(() => {
@@ -842,14 +862,22 @@ export function PlayPicker({
     isTorrentioStream,
     expectHostSource,
     hostSource: hostSourceForMedia,
-    preferredSourceEntry: lastSeriesSource,
-    preferredSourceMatched:
-      !!lastSeriesSource &&
-      !!autoCandidates[0] &&
-      (lastSeriesSourceIsLineage ? streamMatchesPreferredSource : streamMatchesSource)(
-        autoCandidates[0],
-        lastSeriesSource,
-      ),
+    preferredSourceEntry,
+    preferredSourceMatched: (() => {
+      if (!preferredSourceEntry || !autoCandidates[0]) return false;
+      const remembered =
+        preferredSourceEntry === previousPlayback ? previousPlayback : null;
+      if (remembered) return streamMatchesRememberedSource(autoCandidates[0], remembered);
+      if (!lastSeriesSource) return false;
+      const matched = lastSeriesSourceIsLineage
+        ? streamMatchesPreferredSource(autoCandidates[0], lastSeriesSource)
+        : streamMatchesSource(autoCandidates[0], lastSeriesSource);
+      return (
+        matched &&
+        (!lastSeriesSource.addonId ||
+          streamOfferedByAddon(autoCandidates[0], lastSeriesSource.addonId))
+      );
+    })(),
     season: !isAnimeMetaId ? (episode?.season ?? null) : null,
     episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
     addonQuorum,
@@ -861,10 +889,10 @@ export function PlayPicker({
   });
   const preferredAddonName = useMemo(() => {
     if (!waitingForPreferredSource) return null;
-    const id = lastSeriesSource?.addonId;
+    const id = preferredSourceEntry?.addonId;
     if (!id) return null;
     return addons?.find((a) => a.manifest.id === id)?.manifest.name ?? id;
-  }, [waitingForPreferredSource, lastSeriesSource, addons]);
+  }, [waitingForPreferredSource, preferredSourceEntry, addons]);
 
   const allCount = filteredPicker?.all.length ?? 0;
   const rawCount = (result?.raw.addon.length ?? 0) + (result?.raw.library.length ?? 0);
@@ -1341,7 +1369,10 @@ export function PlayPicker({
               <TierStrip
                 tiers={populatedTiers}
                 selected={selectedTier}
-                onSelect={setSelectedTier}
+                onSelect={(tier) => {
+                  tierTouchedRef.current = true;
+                  setSelectedTier(tier);
+                }}
                 byTier={filteredPicker.byTier}
                 debrids={debrids}
                 langFilterSlot={
