@@ -682,7 +682,12 @@ mod tests {
         assert_eq!(connection.capabilities, vec!["search", "browse", "play"]);
         assert_eq!(connection.error.as_deref(), Some(session::FREE_ACCOUNT));
         assert!(connection.account.is_none());
-        assert_eq!(connection.detail.as_deref(), Some(auth::BRING_YOUR_OWN));
+        assert!(
+            connection
+                .detail
+                .as_deref()
+                .is_some_and(|detail| detail.contains("Own-app browsing is optional"))
+        );
     }
 
     #[test]

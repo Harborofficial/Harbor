@@ -133,7 +133,7 @@ async fn different_games_run_together_instead_of_one_batch_using_both_slots() {
             .ticket_grouped(entries[0].kind, "one", &entries[0].id, "game:a".into())
             .unwrap(),
     );
-    let mut same_game = Some(
+    let same_game = Some(
         queue
             .ticket_grouped(entries[1].kind, "one", &entries[1].id, "game:a".into())
             .unwrap(),
