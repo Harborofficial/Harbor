@@ -390,14 +390,20 @@ export function DetailView({
   useEffect(() => {
     const onWatchedUpdated = () => setNuvioWatchedTick((t) => t + 1);
     window.addEventListener("harbor:nuvio-watched-reconciled", onWatchedUpdated);
+    window.addEventListener("harbor:watched-changed", onWatchedUpdated);
     window.addEventListener("harbor:series-watched-changed", onWatchedUpdated);
     window.addEventListener("harbor:manual-watched-changed", onWatchedUpdated);
     window.addEventListener("harbor:continue-watching-updated", onWatchedUpdated);
+    window.addEventListener("harbor:nuvio-progress-pushed", onWatchedUpdated);
+    window.addEventListener("harbor:playback-ended", onWatchedUpdated);
     return () => {
       window.removeEventListener("harbor:nuvio-watched-reconciled", onWatchedUpdated);
+      window.removeEventListener("harbor:watched-changed", onWatchedUpdated);
       window.removeEventListener("harbor:series-watched-changed", onWatchedUpdated);
       window.removeEventListener("harbor:manual-watched-changed", onWatchedUpdated);
       window.removeEventListener("harbor:continue-watching-updated", onWatchedUpdated);
+      window.removeEventListener("harbor:nuvio-progress-pushed", onWatchedUpdated);
+      window.removeEventListener("harbor:playback-ended", onWatchedUpdated);
     };
   }, []);
   const [nuvioEpisodeProgress, setNuvioEpisodeProgress] = useState<{

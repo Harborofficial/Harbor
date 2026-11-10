@@ -913,12 +913,14 @@ export const ContinueCard = memo(function ContinueCard({
               </span>
             </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
-            <div
-              className="h-full bg-accent"
-              style={{ width: `${isWaiting ? 100 : progress * 100}%` }}
-            />
-          </div>
+          {progress > 0 && !isWaiting && !upNext && (
+            <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
+              <div
+                className="h-full bg-accent"
+                style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }}
+              />
+            </div>
+          )}
         </div>
       </button>
       {settings.liquidGlass ? (

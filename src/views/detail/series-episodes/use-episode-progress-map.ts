@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getEpisodeProgress, createEpisodeProgressSnapshot } from "@/lib/episode-progress";
 import { episodeSpoilerMasks, spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
 import type { Episode } from "@/lib/providers/tmdb";
@@ -25,6 +25,26 @@ export function useEpisodeProgressMap({
   mwVersion: number;
   settings: Parameters<typeof spoilerMaskFor>[0];
 }) {
+  const [updateVersion, setUpdateVersion] = useState(0);
+
+  useEffect(() => {
+    const bump = () => setUpdateVersion((v) => v + 1);
+    window.addEventListener("harbor:continue-watching-updated", bump);
+    window.addEventListener("harbor:watched-changed", bump);
+    window.addEventListener("harbor:series-watched-changed", bump);
+    window.addEventListener("harbor:nuvio-progress-pushed", bump);
+    window.addEventListener("harbor:playback-ended", bump);
+    window.addEventListener("focus", bump);
+    return () => {
+      window.removeEventListener("harbor:continue-watching-updated", bump);
+      window.removeEventListener("harbor:watched-changed", bump);
+      window.removeEventListener("harbor:series-watched-changed", bump);
+      window.removeEventListener("harbor:nuvio-progress-pushed", bump);
+      window.removeEventListener("harbor:playback-ended", bump);
+      window.removeEventListener("focus", bump);
+    };
+  }, []);
+
   const progressByEp = useMemo(() => {
     const local = createEpisodeProgressSnapshot();
     const m = new Map<number, ReturnType<typeof getEpisodeProgress>>();
@@ -60,6 +80,7 @@ export function useEpisodeProgressMap({
     simklWatched,
     pmdbWatched,
     mwVersion,
+    updateVersion,
   ]);
 
   const nextUpEp = useMemo(() => {

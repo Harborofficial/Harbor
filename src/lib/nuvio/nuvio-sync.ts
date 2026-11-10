@@ -23,7 +23,7 @@ import {
   localCwEntry,
   saveLocalCw,
 } from "@/lib/local-cw";
-import { clearResume, clearResumeBatch, createResumeReader } from "@/lib/resume";
+import { clearResume, clearResumeBatch, createResumeReader, saveResumeMs } from "@/lib/resume";
 import { persistCritical } from "@/lib/storage-recovery";
 import {
   isNuvioProviderActive,
@@ -230,12 +230,14 @@ export function extractCleanNumericTmdbId(rawId?: string | null): string | null 
 export function normalizeNuvioContentId(rawId: string): string {
   if (!rawId) return "";
   const trimmed = rawId.trim();
-  if (/^tt\d+/i.test(trimmed)) return trimmed.toLowerCase();
+  const stripped = trimmed.replace(/^(series|movie|stremio):/i, "").trim();
+  if (/^tt\d+/i.test(stripped)) return stripped.toLowerCase();
 
-  const numId = extractCleanNumericTmdbId(trimmed);
+  const numId = extractCleanNumericTmdbId(stripped);
   if (numId) {
     const cachedImdb =
       tmdbImdbCached(trimmed) ||
+      tmdbImdbCached(stripped) ||
       tmdbImdbCached(`tmdb:${numId}`) ||
       tmdbImdbCached(`tmdb:tv:${numId}`) ||
       tmdbImdbCached(`tmdb:movie:${numId}`);
@@ -245,7 +247,7 @@ export function normalizeNuvioContentId(rawId: string): string {
     return `tmdb:${numId}`;
   }
 
-  return trimmed;
+  return stripped;
 }
 
 /**
@@ -952,6 +954,18 @@ export async function pushWatchProgressToNuvio(
         t: nowEpoch,
       },
       `nuvio-${profileIndex}`,
+    );
+
+    saveResumeMs(
+      contentId,
+      progSec * 1000,
+      season ?? undefined,
+      episode ?? undefined,
+      undefined,
+      durSec > 0 ? progSec / durSec : undefined,
+      "nuvio",
+      `nuvio-${profileIndex}`,
+      nowEpoch,
     );
 
     window.dispatchEvent(
@@ -2858,7 +2872,12 @@ async function pullWatchProgressOnce(
     )
       continue;
     const newest = newestByContent.get(local.id) ?? 0;
-    if (local.t <= newest || (!newestByContent.has(local.id) && local.t <= startedAt)) continue;
+    if (local.t <= newest || (!newestByContent.has(local.id) && local.t <= startedAt)) {
+      if (!newestByContent.has(local.id) && local.t <= startedAt) {
+        clearLocalCw(local.id, ownerId);
+      }
+      continue;
+    }
     const localRow: NuvioWatchProgress = {
       profile_id: slot,
       content_id: local.id,

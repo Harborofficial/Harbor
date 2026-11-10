@@ -483,7 +483,7 @@ export function reconcileNuvioWatchedEpisodes(
         (lowerClean &&
           parts.length === 3 &&
           serverEpisodeKeys.has(`${lowerClean}|${parts[1]}|${parts[2]}`));
-      if (hasShow && !hasEpisode) {
+      if (hasShow && !serverEpisodeKeys.has(lKey) && !hasEpisode) {
         currentLocalWatched.delete(lKey);
         currentLocalUnwatched.add(lKey);
         changed = true;

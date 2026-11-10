@@ -16,8 +16,7 @@ type LastAction = "start" | "pause" | "stop" | null;
 
 const STUB_MAX_SEC = 150;
 // Keep pause scrobbles (resumable on other devices) up to where Harbor's own
-// CW drops the card (CW_FINISHED_RATIO); only beyond that report stop/watched.
-const WATCHED_MARK_PCT = 90;
+// CW drops the card; only beyond that report stop/watched.
 
 export function useTraktScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }): void {
   const { isConnected, resolveTarget, scrobble } = useTrakt();
@@ -61,7 +60,7 @@ export function useTraktScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
       const prev = prevIdentityRef.current;
       const prevProgress = progressRef.current;
       if (lastActionRef.current !== "stop") {
-        if (prevProgress >= WATCHED_MARK_PCT) {
+        if (prevProgress >= getWatchedThresholdPct()) {
           scrobble("stop", { metaId: prev.metaId, episode: prev.episode, progress: 100 });
         } else if (prevProgress > 0) {
           scrobble("pause", { metaId: prev.metaId, episode: prev.episode, progress: prevProgress });
@@ -155,7 +154,7 @@ export function useTraktScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
       if (a.snap.durationSec > 0) {
         const live = (getPlaybackPosition() / a.snap.durationSec) * 100;
         const progress = Math.min(100, Math.max(progressRef.current, live));
-        const action = progress >= WATCHED_MARK_PCT ? "stop" : "pause";
+        const action = progress >= getWatchedThresholdPct() ? "stop" : "pause";
         scrobble(action, {
           metaId: a.metaId,
           episode: a.episode,
