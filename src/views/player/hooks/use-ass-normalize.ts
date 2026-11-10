@@ -3,11 +3,28 @@ import { useEffect, useRef, useState } from "react";
 import { safeFetch } from "@/lib/safe-fetch";
 import { decodeSubtitleBytes } from "@/lib/subtitles/encoding";
 import { embeddedSubIndex, resolveReadableUrl } from "@/lib/subtitles/extract";
+import { readNonNetworkSubtitleBytes } from "@/lib/subtitles/save-to-disk";
 import { assScaleFromFactor, computeAssBaseFactor } from "@/lib/player/ass-header";
 import type { TrackInfo } from "@/lib/player/bridge";
 
 function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+
+/** The file mpv is actually playing is the best copy: prepared addon subtitles are
+ * already a local ASS file, while the provider URL can need headers Harbor does not
+ * have here and is another download. */
+export function assNormalizeSource(track: TrackInfo): string | null {
+  return track.externalFilename ?? track.url ?? null;
+}
+
+function isLocalPath(url: string): boolean {
+  return (
+    /^file:/i.test(url) ||
+    /^[a-z]:[\\/]/i.test(url) ||
+    url.startsWith("\\\\") ||
+    url.startsWith("/")
+  );
 }
 
 async function loadAssText(
@@ -16,9 +33,13 @@ async function loadAssText(
   tracks: TrackInfo[],
   headers?: Record<string, string>,
 ): Promise<string | null> {
-  if (track.external === true || track.url) {
-    const raw = track.url ?? track.externalFilename;
+  if (track.external === true || track.url || track.externalFilename) {
+    const raw = assNormalizeSource(track);
     if (!raw) return null;
+    if (isLocalPath(raw)) {
+      const bytes = await readNonNetworkSubtitleBytes(raw);
+      return decodeSubtitleBytes(bytes, {});
+    }
     const readable = await resolveReadableUrl(raw);
     if (!readable) return null;
     const res = await safeFetch(readable, { method: "GET" });
@@ -44,7 +65,7 @@ export function useAssNormalize(params: {
   targetFontSize: number;
 }): number | undefined {
   const { enabled, sourceUrl, headers, track, tracks, targetFontSize } = params;
-  const cacheRef = useRef<Map<string, number | null>>(new Map());
+  const cacheRef = useRef<Map<string, number>>(new Map());
   const liveRef = useRef({ sourceUrl, track, tracks, headers });
   liveRef.current = { sourceUrl, track, tracks, headers };
   const [factor, setFactor] = useState<number | null>(null);
@@ -74,7 +95,14 @@ export function useAssNormalize(params: {
       } catch {
         result = null;
       }
-      cacheRef.current.set(key, result);
+      // A failed read can be transient (a slow stream, a restart), so only a
+      // successful factor is cached and the next attempt can still resolve it.
+      if (result != null) cacheRef.current.set(key, result);
+      else {
+        console.warn(
+          "[subtitle-style] could not resolve the ASS header; sizing falls back to a plain scale",
+        );
+      }
       if (!cancelled) setFactor(result);
     })();
     return () => {
