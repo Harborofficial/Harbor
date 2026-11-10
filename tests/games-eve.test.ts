@@ -18,13 +18,40 @@ import {
   readEvePlan,
 } from "../src/lib/games/eve-data.ts";
 
-// public/games is gitignored bulk data, so the directory-dependent tests skip on
-// a checkout that has not downloaded it.
+// public/games is gitignored bulk data. The parser, filters and security maths run
+// against a small fixture; the shipped directory is compared when it is downloaded.
 const eveAsset = new URL("../public/games/eve/universe-3569502.json", import.meta.url);
 const hasEveUniverse = existsSync(eveAsset);
-const raw = hasEveUniverse ? JSON.parse(readFileSync(eveAsset, "utf8")) : null;
-const universe = hasEveUniverse ? parseEveUniverse(raw) : null;
-const universeTest = hasEveUniverse ? test : test.skip;
+const fixture = {
+  schema: 1,
+  build: 1,
+  released: "2026-08-18T00:00:00Z",
+  systems: [
+    [30000142, { en: "Jita", ja: "ジタ" }, 0.95, 20000020, 10000002, 0],
+    [30002187, { en: "Amarr" }, 1, 20000024, 10000043, 0],
+    [30002659, { en: "Dodixie" }, 0.9, 20000032, 10000032, 0],
+    [30002510, { en: "Rens" }, 0.5, 20000048, 10000030, 0],
+    [30002053, { en: "Hek" }, 0.6, 20000042, 10000042, 0],
+  ],
+  constellations: [
+    [20000020, { en: "Kimotoro" }],
+    [20000024, { en: "Throne Worlds" }],
+    [20000032, { en: "Ferlaux" }],
+    [20000048, { en: "Mattari" }],
+    [20000042, { en: "Braweer" }],
+  ],
+  regions: [
+    [10000002, { en: "The Forge" }],
+    [10000043, { en: "Domain" }],
+    [10000032, { en: "Sinq Laison" }],
+    [10000030, { en: "Heimatar" }],
+    [10000042, { en: "Metropolis" }],
+  ],
+};
+const universe = parseEveUniverse(fixture);
+const shipped = hasEveUniverse
+  ? parseEveUniverse(JSON.parse(readFileSync(eveAsset, "utf8")))
+  : null;
 const plan = defaultEvePlan();
 test("EVE exact identity excludes conflicting Steam editions", () => {
   assert.ok(isEve({ steamId: 8500 }));
@@ -32,18 +59,21 @@ test("EVE exact identity excludes conflicting Steam editions", () => {
   assert.equal(isEve({ steamId: 1, igdbId: 2584 }), false);
   assert.equal(isEve({ igdbId: 1 }), false);
 });
-universeTest("bundled official directory validates all system joins and localized search", () => {
-  assert.equal(universe.systems.length, 8089);
+test("directory joins, localized search and shipped system count", () => {
+  assert.equal(universe.systems.length, 5);
+  if (shipped) assert.equal(shipped.systems.length, 8089);
   assert.equal(universe.byId.get(30000142)?.names.en, "Jita");
   assert.equal(filterEveSystems(universe, "jItA", "en")[0].id, 30000142);
   assert.equal(filterEveSystems(universe, "", "en").length, 5);
   assert.ok(filterEveSystems(universe, "a", "en").length <= 30);
   assert.equal(eveName({ en: "Jita", ja: "ジタ" }, "ja-JP"), "ジタ");
   assert.equal(eveName({ en: "Jita" }, "ar"), "Jita");
-  assert.throws(() => parseEveUniverse({ ...raw, systems: [raw.systems[0], raw.systems[0]] }));
-  assert.throws(() => parseEveUniverse({ ...raw, constellations: [] }));
+  assert.throws(() =>
+    parseEveUniverse({ ...fixture, systems: [fixture.systems[0], fixture.systems[0]] }),
+  );
+  assert.throws(() => parseEveUniverse({ ...fixture, constellations: [] }));
 });
-universeTest("security rounding retains EVE's positive minimum and wormhole distinction", () => {
+test("security rounding retains EVE's positive minimum and wormhole distinction", () => {
   assert.equal(eveSecurity(0.001), 0.1);
   assert.equal(eveSecurity(0.46), 0.5);
   assert.equal(eveSecurity(-0.98), -1);

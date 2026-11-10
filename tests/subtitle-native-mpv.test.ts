@@ -5,11 +5,11 @@ import test from "node:test";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import { spawn, execFileSync } from "node:child_process";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
-import { mkdtempSync, unlinkSync, rmdirSync, readFileSync } from "node:fs";
+import { mkdtempSync, unlinkSync, rmdirSync, readFileSync, readdirSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import { tmpdir } from "node:os";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import { connect } from "node:net";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
@@ -19,7 +19,17 @@ import { mpvBridgeHarness, playerSnapshotChanged } from "./helpers/mpv-bridge-ha
 import ts from "typescript";
 
 // @ts-expect-error This opt-in test runs only in Node, not in the browser build.
-const binary = process.env.HARBOR_MPV_TEST_BINARY;
+const binaries = fileURLToPath(new URL("../src-tauri/binaries/", import.meta.url));
+function bundled(name: string): string | undefined {
+  try {
+    const match = readdirSync(binaries).find((file) => file.split("-")[0] === name);
+    return match ? join(binaries, match) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+const binary = process.env.HARBOR_MPV_TEST_BINARY ?? bundled("mpv");
+const ffmpeg = process.env.HARBOR_FFMPEG_TEST_BINARY ?? bundled("ffmpeg");
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 async function eventually(predicate: () => boolean, timeout = 5000) {
   const until = Date.now() + timeout;
@@ -30,7 +40,7 @@ async function eventually(predicate: () => boolean, timeout = 5000) {
 test(
   "native Windows mpv preserves subtitle cues while switching secondary rendering",
   {
-    skip: !binary,
+    skip: !binary || !ffmpeg,
     timeout: 25000,
   },
   async () => {
@@ -55,7 +65,7 @@ test(
     const h = mpvBridgeHarness();
     try {
       execFileSync(
-        join(dirname(binary), "ffmpeg.exe"),
+        ffmpeg,
         [
           "-hide_banner",
           "-loglevel",
