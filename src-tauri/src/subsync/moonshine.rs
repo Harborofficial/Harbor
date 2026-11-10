@@ -80,9 +80,9 @@ struct Python {
 async fn find_python() -> Result<Python, String> {
     // Never run via a shell or accept a program path from web/UI input.
     #[cfg(windows)]
-    let candidates = [("python", &[][..]), ("py", &["-3"][..])];
+    let candidates: [(&str, &[&str]); 2] = [("python", &[][..]), ("py", &["-3"][..])];
     #[cfg(not(windows))]
-    let candidates = [("python3", &[][..]), ("python", &[][..])];
+    let candidates: [(&str, &[&str]); 2] = [("python3", &[][..]), ("python", &[][..])];
     for (name, prefix) in candidates {
         let mut cmd = Command::new(name);
         cmd.args(prefix)

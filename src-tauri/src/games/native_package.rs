@@ -162,6 +162,7 @@ pub fn allow_execution(value: String) -> Result<String, &'static str> {
     }
     #[cfg(target_os = "linux")]
     {
+        use std::{fs, io::Read};
         use std::os::unix::fs::PermissionsExt;
         let selected = Path::new(&value);
         if !selected.is_absolute() || value.len() > 8192 {
