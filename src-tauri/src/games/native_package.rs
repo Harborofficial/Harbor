@@ -200,6 +200,7 @@ mod permission_tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn permission_repair_only_changes_the_selected_native_files_owner_bit() {
+        use std::{fs, path::PathBuf};
         use std::os::unix::fs::{symlink, PermissionsExt};
         let root = std::env::var_os("HARBOR_GAME_TEST_ROOT")
             .map(PathBuf::from)
