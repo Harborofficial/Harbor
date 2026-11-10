@@ -62,7 +62,7 @@ jobs:
             # Generated data, bundled third-party assets, and vendored crates keep
             # their own layout, so they are not part of the format gate.
             case "$file" in
-              src-tauri/vendor/* | public/* | src/assets/* | android-extension-compat/spec/* | *.json | *.jsonc) ;;
+              .coderabbit.yaml | src-tauri/vendor/* | public/* | src/assets/* | android-extension-compat/spec/* | *.json | *.jsonc) ;;
               *.cjs | *.css | *.html | *.js | *.jsx | *.md | *.mdx | *.mjs | *.scss | *.toml | *.ts | *.tsx | *.yaml | *.yml)
                 format_files+=("$file")
                 ;;
