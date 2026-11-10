@@ -15,13 +15,7 @@ import { useHandoffApply } from "./bp-handoff-apply";
  */
 const Ctx = createContext<TvHandoff | null>(null);
 
-export function BpHandoffProvider({
-  active,
-  children,
-}: {
-  active: boolean;
-  children: ReactNode;
-}) {
+export function BpHandoffProvider({ active, children }: { active: boolean; children: ReactNode }) {
   const { settings } = useSettings();
   const apply = useHandoffApply();
   const handoff = useTvHandoff({

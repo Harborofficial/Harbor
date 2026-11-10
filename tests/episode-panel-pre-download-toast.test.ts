@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  enqueuePreDownloadToast, dismissPreDownloadToast, preDownloadToastDurationMs, visiblePreDownloadToast,
+  enqueuePreDownloadToast,
+  dismissPreDownloadToast,
+  preDownloadToastDurationMs,
+  visiblePreDownloadToast,
 } from "../src/components/player/episode-panel/pre-download-toast-queue.ts";
 
 const enabled = { id: 1, kind: "enabled", label: "Automatic downloads on" };
@@ -13,7 +16,10 @@ test("enabling is shown first and fast download events queue behind it", () => {
   let queue = enqueuePreDownloadToast([], enabled);
   queue = enqueuePreDownloadToast(queue, downloading);
   queue = enqueuePreDownloadToast(queue, completed);
-  assert.deepEqual(queue.map((x) => x.kind), ["enabled", "downloading", "completed"]);
+  assert.deepEqual(
+    queue.map((x) => x.kind),
+    ["enabled", "downloading", "completed"],
+  );
   // The enabled icon remains active for its complete display interval.
   assert.equal(queue[0].id, enabled.id);
   queue = dismissPreDownloadToast(queue, enabled.id);
@@ -34,10 +40,10 @@ test("disabling takes priority and flushes stale download notifications", () => 
 });
 
 test("duplicate download notifications do not occupy the queue twice", () => {
-  assert.deepEqual(
-    enqueuePreDownloadToast([enabled, downloading], { ...downloading, id: 5 }),
-    [enabled, downloading],
-  );
+  assert.deepEqual(enqueuePreDownloadToast([enabled, downloading], { ...downloading, id: 5 }), [
+    enabled,
+    downloading,
+  ]);
 });
 
 test("individual events retain distinct IDs to remount and replay their animation", () => {

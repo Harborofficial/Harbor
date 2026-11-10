@@ -68,7 +68,12 @@ export function SetupBoat({
               ? HOIST_OF[part]
               : "";
         return (
-          <svg key={part} viewBox={VIEW_BOX} fill="currentColor" className={`setup-boat-part ${hoist}`}>
+          <svg
+            key={part}
+            viewBox={VIEW_BOX}
+            fill="currentColor"
+            className={`setup-boat-part ${hoist}`}
+          >
             <g transform={FLIP}>
               <path d={PATH_OF[part]} />
             </g>

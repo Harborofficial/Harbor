@@ -32,10 +32,13 @@ export default {
   "Show Sports": "Показывать «Спорт»",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "Показывать «Спорт» в навигации. Перед загрузкой страницы необходимо подтвердить уведомление раздела «Спорт».",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "Включите спорт без провайдера или добавьте источник Live TV, M3U или Xtream.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "Включите спорт без провайдера или добавьте источник Live TV, M3U или Xtream.",
   "Set up Live TV": "Настроить Live TV",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "Счёт, расписание и таблицы работают без провайдера. Harbor не предоставляет трансляции, поэтому для просмотра матча нужен ваш источник Live TV, M3U или Xtream.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "Счёт, расписание и таблицы берутся из открытых спортивных данных и не требуют провайдера. Harbor не предоставляет трансляции: для просмотра матча нужен ваш собственный источник Live TV, M3U или Xtream.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "Счёт, расписание и таблицы работают без провайдера. Harbor не предоставляет трансляции, поэтому для просмотра матча нужен ваш источник Live TV, M3U или Xtream.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "Счёт, расписание и таблицы берутся из открытых спортивных данных и не требуют провайдера. Harbor не предоставляет трансляции: для просмотра матча нужен ваш собственный источник Live TV, M3U или Xtream.",
   "Show Sports without a TV provider": "Показывать спорт без ТВ-провайдера",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "Включение раздела «Спорт» не означает принятия уведомления. Выбор хранится на этом устройстве и не синхронизируется с вашей учётной записью.",

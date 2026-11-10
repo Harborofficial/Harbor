@@ -47,13 +47,7 @@ test("a row from a plugin's catalogue is asked of that plugin alone", () => {
   const uhdr = "harbor-plugin://plugin:repo.uhdmovies";
   // The catalogue handed the request the listing plugin's base, so the others stand down.
   assert.equal(pinnedPluginBase([{ base: uhdr }]), uhdr);
-  assert.equal(
-    pinnedPluginBase([
-      { base: "https://v3-cinemeta.strem.io" },
-      { base: uhdr },
-    ]),
-    uhdr,
-  );
+  assert.equal(pinnedPluginBase([{ base: "https://v3-cinemeta.strem.io" }, { base: uhdr }]), uhdr);
   // A row from a normal addon names no plugin, so every plugin stays free to answer.
   assert.equal(pinnedPluginBase([{ base: "https://v3-cinemeta.strem.io" }]), undefined);
   assert.equal(pinnedPluginBase([]), undefined);

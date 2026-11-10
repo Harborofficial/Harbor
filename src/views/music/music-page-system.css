@@ -232,7 +232,9 @@
 [data-music-view] .music-detail-film {
   margin-inline-start: auto;
 }
-[data-music-view] .music-collection-controls button:not(.music-collection-play):not(.music-collection-shuffle):not(.music-collection-extra) {
+[data-music-view]
+  .music-collection-controls
+  button:not(.music-collection-play):not(.music-collection-shuffle):not(.music-collection-extra) {
   min-height: 48px;
   padding-inline: 18px;
   font-size: 14px;

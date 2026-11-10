@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "تصفح التعديلات وأدر المحتوى المثبت.",
   "games.modHub.switchGame": "تغيير اللعبة",
   "games.modHub.creatorDownload": "التنزيل من المنشئ",
-  "games.modHub.legacyNote": "تتوفر تنزيلات The Sims 2 وThe Sims 3 لدى المنشئ. تدعم إدارة التعديلات المحلية حاليًا The Sims 4.",
+  "games.modHub.legacyNote":
+    "تتوفر تنزيلات The Sims 2 وThe Sims 3 لدى المنشئ. تدعم إدارة التعديلات المحلية حاليًا The Sims 4.",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "الأنماط",
   "games.modHub.sets": "مجموعات ذات طابع",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "المنشئ",
   "games.modHub.viewOnSource": "صفحة المنشئ",
   "games.modHub.filesPending": "جارٍ تحميل ملفات المشروع…",
-  "games.modHub.picked": "اختيار MTS"
+  "games.modHub.picked": "اختيار MTS",
 };

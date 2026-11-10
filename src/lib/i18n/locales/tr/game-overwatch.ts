@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Stadyum kadrosu",
   "games.overwatch.searchHeroes": "Kahraman bul",
   "games.overwatch.refresh": "Rehberi yenile",
-  "games.overwatch.unavailable": "Rehber yenilenemedi. Daha önce yüklenen bilgiler gösterilmeye devam edebilir.",
+  "games.overwatch.unavailable":
+    "Rehber yenilenemedi. Daha önce yüklenen bilgiler gösterilmeye devam edebilir.",
   "games.overwatch.partial": "Bazı bilgiler kullanılamıyor.",
   "games.overwatch.checked": "Kontrol edildi: {date}",
-  "games.overwatch.scope": "OverFast üzerinden Blizzard kahraman bilgileri. Denge değişiklikleri, rehber güncellenmeden önce oyuna gelebilir.",
-  "games.overwatch.mapsScope": "OverFast harita ve mod bilgileri. Arcade ve eski haritaları içerir; kullanılabilirlik moda göre değişir.",
+  "games.overwatch.scope":
+    "OverFast üzerinden Blizzard kahraman bilgileri. Denge değişiklikleri, rehber güncellenmeden önce oyuna gelebilir.",
+  "games.overwatch.mapsScope":
+    "OverFast harita ve mod bilgileri. Arcade ve eski haritaları içerir; kullanılabilirlik moda göre değişir.",
   "games.overwatch.empty": "Eşleşme yok. Farklı bir arama veya filtre dene.",
   "games.overwatch.moreHeroes": "Daha fazla kahraman",
   "games.overwatch.moreMaps": "Daha fazla harita",
@@ -33,6 +36,5 @@ export default {
   "games.overwatch.videoFailed": "Gösterim oynatılamadı. İzlemek için resmî kahraman sayfasını aç.",
   "games.overwatch.mode": "Oyun modu",
   "games.overwatch.allModes": "Tüm modlar",
-  "games.overwatch.searchMaps": "Harita veya konum ara"
+  "games.overwatch.searchMaps": "Harita veya konum ara",
 };
-

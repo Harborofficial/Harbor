@@ -71,7 +71,11 @@ export function MusicQuickStrip({ onLeave }: { onLeave: () => void }) {
         </div>
       ))}
       {tracks.length === 0 && (
-        <HoverTooltip label={t("music.quick.empty")} sublabel={t("music.quick.emptyNote")} align="end">
+        <HoverTooltip
+          label={t("music.quick.empty")}
+          sublabel={t("music.quick.emptyNote")}
+          align="end"
+        >
           <button
             className="game-dock-empty"
             aria-label={t("music.quick.empty")}

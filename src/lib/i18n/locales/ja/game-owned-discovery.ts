@@ -10,10 +10,13 @@ export default {
   "games.calendar.search": "保存したゲームを検索",
   "games.calendar.platform": "発売プラットフォーム",
   "games.calendar.allPlatforms": "すべてのプラットフォーム",
-  "games.calendar.dates": "発売元が発表した日程は変更される場合があります。Steamの日付は米国ストアの情報です。IGDBの記録にはプラットフォームと地域を表示します。",
-  "games.calendar.noDays": "確認済みのゲームに、{month}の具体的な発売日が指定されたものはありません。",
+  "games.calendar.dates":
+    "発売元が発表した日程は変更される場合があります。Steamの日付は米国ストアの情報です。IGDBの記録にはプラットフォームと地域を表示します。",
+  "games.calendar.noDays":
+    "確認済みのゲームに、{month}の具体的な発売日が指定されたものはありません。",
   "games.calendar.windows": "発売時期",
-  "games.calendar.windowsNote": "これらの予定には表示中の月が含まれますが、具体的な日は指定されていません。",
+  "games.calendar.windowsNote":
+    "これらの予定には表示中の月が含まれますが、具体的な日は指定されていません。",
   "games.calendar.undated": "日付未確定",
   "games.calendar.undatedNote": "未発表・取得不能・未確認の日付はカレンダーに表示されません。",
   "games.calendar.cancelled": "発売中止の記録を{count}件除外しています。",
@@ -34,9 +37,11 @@ export default {
   "games.watchlist.coverage": "{total}本のうち{count}本を確認済み",
   "games.watchlist.refresh": "発売日を更新",
   "games.watchlist.unavailable": "発売日を取得できません",
-  "games.watchlist.partial": "一部の発売日を確認できませんでした。保存済みの情報がある場合は表示しています。",
+  "games.watchlist.partial":
+    "一部の発売日を確認できませんでした。保存済みの情報がある場合は表示しています。",
   "games.watchlist.noMatch": "条件に一致するお気に入りはありません。",
-  "games.watchlist.dateNote": "発売日はSteamとIGDBの情報に基づきます。発売予定は変更される場合があります。",
+  "games.watchlist.dateNote":
+    "発売日はSteamとIGDBの情報に基づきます。発売予定は変更される場合があります。",
   "games.watchlist.remove": "{name}をお気に入りから削除",
   "games.watchlist.saved": "保存済みの情報",
   "games.owned.availability": "このデバイス上",
@@ -54,9 +59,12 @@ export default {
   "games.owned.pickHint": "この結果からゲームをランダムに開きます。",
   "games.owned.clear": "ライブラリの絞り込みを解除",
   "games.owned.scanning": "ローカルのインストール状況を確認中…",
-  "games.owned.scanUnavailable": "ローカルのインストール状況を取得できません。更新して、このデバイスを確認してください。",
-  "games.owned.partial": "一部のSteamフォルダーを確認できませんでした。インストール済みのゲームをすべて認識できていない可能性があります。",
+  "games.owned.scanUnavailable":
+    "ローカルのインストール状況を取得できません。更新して、このデバイスを確認してください。",
+  "games.owned.partial":
+    "一部のSteamフォルダーを確認できませんでした。インストール済みのゲームをすべて認識できていない可能性があります。",
   "games.owned.results": "全{total}本中{count}本",
-  "games.owned.playtimeNote": "プレイ履歴は前回のSteam同期時の情報です。プレイ時間の記録がないことは、ゲームをクリアしたかどうかを示すものではありません。",
-  "games.owned.resetAvailability": "インストール状況に関係なくゲームを表示"
+  "games.owned.playtimeNote":
+    "プレイ履歴は前回のSteam同期時の情報です。プレイ時間の記録がないことは、ゲームをクリアしたかどうかを示すものではありません。",
+  "games.owned.resetAvailability": "インストール状況に関係なくゲームを表示",
 };

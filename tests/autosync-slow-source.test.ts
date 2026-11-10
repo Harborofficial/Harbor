@@ -4,7 +4,11 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import { denseAsrWindows } from "../src/lib/subtitles/autosync/smart-layer.ts";
-import { runAutoSync, type PipelineContext, type TierPorts } from "../src/lib/subtitles/autosync/pipeline.ts";
+import {
+  runAutoSync,
+  type PipelineContext,
+  type TierPorts,
+} from "../src/lib/subtitles/autosync/pipeline.ts";
 import { unknownQuality } from "../src/lib/subtitles/autosync/fp-gate.ts";
 import { shouldAttemptAudioPivot } from "../src/views/player/hooks/use-auto-sync.helpers.ts";
 
@@ -49,7 +53,12 @@ test("remote baseline timeout returns before VAD, ASR, or a second quality read"
       mediaUrl: "https://example.test/movie",
       sourceKind,
       durationSec: 5400,
-      cues: [[20, 22], [70, 73], [120, 123], [200, 204]],
+      cues: [
+        [20, 22],
+        [70, 73],
+        [120, 123],
+        [200, 204],
+      ],
       cueText: ["one line", "two lines", "more lines", "last line"],
       audioLanguage: "ko",
       subtitleLanguage: "en",
@@ -70,7 +79,10 @@ test("remote baseline timeout returns before VAD, ASR, or a second quality read"
         agreement: 0.85,
         // A consensus-derived timing candidate must still not bypass
         // independent audio verification once that source has timed out.
-        textAnchors: Array.from({ length: 8 }, (_, i): [number, number] => [100 + i * 10, 102 + i * 10]),
+        textAnchors: Array.from({ length: 8 }, (_, i): [number, number] => [
+          100 + i * 10,
+          102 + i * 10,
+        ]),
       }),
       vadAffine: async () => {
         vadCalls += 1;
@@ -106,7 +118,12 @@ test("local baseline timeout may still attempt independent audio analysis", asyn
       mediaUrl: "/movie.mkv",
       sourceKind: "local",
       durationSec: 5400,
-      cues: [[20, 22], [70, 73], [120, 123], [200, 204]],
+      cues: [
+        [20, 22],
+        [70, 73],
+        [120, 123],
+        [200, 204],
+      ],
       audioLanguage: "en",
       subtitleLanguage: "en",
       languages: ["en"],
@@ -126,7 +143,10 @@ test("local baseline timeout may still attempt independent audio analysis", asyn
 test("remote UI has a hard deadline below one minute", () => {
   const hook = read("src/views/player/hooks/use-auto-sync.ts");
   assert.match(hook, /REMOTE_ANALYSIS_DEADLINE_MS = 55_000/);
-  assert.match(hook, /sourceKind === "http" \|\| sourceKind === "hls" \|\| sourceKind === "debrid"/);
+  assert.match(
+    hook,
+    /sourceKind === "http" \|\| sourceKind === "hls" \|\| sourceKind === "debrid"/,
+  );
   assert.match(hook, /\? REMOTE_ANALYSIS_DEADLINE_MS\s*: ANALYSIS_DEADLINE_MS/);
   const popover = read("src/components/player/autosync/autosync-popover.tsx");
   assert.match(popover, /phase === "listening" \|\| phase === "analyzing"/);
@@ -138,7 +158,12 @@ test("no unverified offer without enough corroborating anchors and a safe offset
     mediaUrl: "https://example.test/movie",
     sourceKind: "http",
     durationSec: 3600,
-    cues: [[30, 32], [60, 62], [90, 92], [120, 122]],
+    cues: [
+      [30, 32],
+      [60, 62],
+      [90, 92],
+      [120, 122],
+    ],
     cueText: ["a sentence", "another sentence", "third sentence", "fourth sentence"],
     audioLanguage: "ja",
     subtitleLanguage: "en",
@@ -187,21 +212,33 @@ test("only an audio-verified candidate can auto-apply; unverified reference offe
     bestEffort: true,
   };
   assert.equal(shouldAttemptAudioPivot(referenceOffer), false);
-  assert.equal(shouldAttemptAudioPivot({
-    ...referenceOffer,
-    decision: { ...referenceOffer.decision, decision: "apply" as const, bindingRule: "audio-verified" },
-  }), false);
-  assert.equal(shouldAttemptAudioPivot({
-    ...referenceOffer,
-    decision: { ...referenceOffer.decision, bindingRule: "no-candidate" },
-  }), true);
+  assert.equal(
+    shouldAttemptAudioPivot({
+      ...referenceOffer,
+      decision: {
+        ...referenceOffer.decision,
+        decision: "apply" as const,
+        bindingRule: "audio-verified",
+      },
+    }),
+    false,
+  );
+  assert.equal(
+    shouldAttemptAudioPivot({
+      ...referenceOffer,
+      decision: { ...referenceOffer.decision, bindingRule: "no-candidate" },
+    }),
+    true,
+  );
   const hook = read("src/views/player/hooks/use-auto-sync.ts");
   assert.match(hook, /o\.decision\.bindingRule !== "consensus-audio-unverified"/);
   const popover = read("src/components/player/autosync/autosync-popover.tsx");
-  assert.match(popover, /Reference subtitles suggest a shift, but video audio verification was unavailable/);
+  assert.match(
+    popover,
+    /Reference subtitles suggest a shift, but video audio verification was unavailable/,
+  );
   assert.match(popover, /unverifiedAudio=\{handle\.offer\?\.decision\.bindingRule/);
 });
-
 
 test("strong subtitle timing references create an explicit manual offer when remote audio is unseekable", async () => {
   const durationSec = 7200;
@@ -227,7 +264,10 @@ test("strong subtitle timing references create an explicit manual offer when rem
         verdict: "right",
         bestCandidate: null,
         agreement: 0.92,
-        textAnchors: Array.from({ length: 12 }, (_, i): [number, number] => [100 + i * 120, 104 + i * 120]),
+        textAnchors: Array.from({ length: 12 }, (_, i): [number, number] => [
+          100 + i * 120,
+          104 + i * 120,
+        ]),
       }),
       vadAffine: async () => {
         throw new Error("must not read remote media after timeout");

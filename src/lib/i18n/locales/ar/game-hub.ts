@@ -1,4 +1,4 @@
-const gameHub: Record<string,string> = {
+const gameHub: Record<string, string> = {
   "games.hub.filesTitle": "ملفات المشروع",
   "games.hub.videoUnavailable": "تعذّر تحميل فيديوهات اللعب.",
   "games.hub.noVideos": "لا توجد فيديوهات لهذه التعديلات حتى الآن.",
@@ -8,7 +8,8 @@ const gameHub: Record<string,string> = {
   "games.hub.searchOriginal": "ابحث عن لعبة أصلية…",
   "games.hub.getFiles": "جلب الملفات",
   "games.hub.packNote": "يستخدم هذا المشروع حزمة تعديلات. اتبع دليل المنشئ الخاص بنظامك.",
-  "games.hub.noDownload": "لم يُعثر على رابط تنزيل مباشر للرقعة. افتح موقع المشروع أو الصق رابط الملف.",
+  "games.hub.noDownload":
+    "لم يُعثر على رابط تنزيل مباشر للرقعة. افتح موقع المشروع أو الصق رابط الملف.",
   "games.hub.downloadFailed": "تعذّر جلب الملفات. حاول مجددًا أو افتح موقع المشروع.",
   "games.hub.downloadNote": "نزّل رقعة المنشئ، ثم اختر اللعبة الأصلية لتطبيقها عليها.",
   "games.hub.downloadLink": "لصق رابط تنزيل",
@@ -20,18 +21,22 @@ const gameHub: Record<string,string> = {
   "games.hub.toolkitNote": "نزّل رقعة لاستخدامها مع لعبتك الأصلية.",
   "games.hub.communityMade": "من صنع المجتمع",
   "games.hub.title": "تعديلات ROM",
-  "games.hub.note": "مغامرات جديدة وكلاسيكيات بحلة مختلفة. اعثر على تعديل واحفظه والعب نسختك المعدّلة في Harbor.",
+  "games.hub.note":
+    "مغامرات جديدة وكلاسيكيات بحلة مختلفة. اعثر على تعديل واحفظه والعب نسختك المعدّلة في Harbor.",
   "games.hub.hacksFor": "تعديلات {name}",
   "games.hub.baseNote": "اكتشف ما صنعه المجتمع انطلاقًا من هذه اللعبة.",
   "games.hub.how": "كيفية لعب تعديل ROM",
   "games.hub.stepFind": "افتح التعديل للعثور على موقع المشروع واللعبة الأصلية المطلوبة.",
-  "games.hub.stepPatch": "اختر ملف ROM الأصلي ورقعة BPS أو IPS. يتحقق Harbor منهما ويحفظ نسخة منفصلة.",
-  "games.hub.stepPlay": "أضف النسخة إلى مكتبتك. العب الأنظمة المدعومة في Harbor أو استخدم المحاكي الذي أعددته.",
+  "games.hub.stepPatch":
+    "اختر ملف ROM الأصلي ورقعة BPS أو IPS. يتحقق Harbor منهما ويحفظ نسخة منفصلة.",
+  "games.hub.stepPlay":
+    "أضف النسخة إلى مكتبتك. العب الأنظمة المدعومة في Harbor أو استخدم المحاكي الذي أعددته.",
   "games.hub.byOriginal": "التعديلات حسب اللعبة الأصلية",
   "games.hub.allHacks": "تصفح جميع التعديلات",
   "games.hub.baseUnlisted": "اللعبة الأصلية غير مذكورة",
   "games.hub.makePlayable": "جهّزها للعب",
-  "games.hub.installNote": "احصل على الرقعة من موقع المشروع وطبّقها على نسختك الخاصة. تحقّق أولًا من الإصدار المطلوب.",
+  "games.hub.installNote":
+    "احصل على الرقعة من موقع المشروع وطبّقها على نسختك الخاصة. تحقّق أولًا من الإصدار المطلوب.",
   "games.hub.moreFor": "المزيد من تعديلات {name}",
   "games.hub.project": "موقع المشروع",
   "games.hub.relatedError": "تعذّر تحميل التعديلات المرتبطة.",
@@ -41,9 +46,11 @@ const gameHub: Record<string,string> = {
   "games.hub.added": "أُضيفت إلى المكتبة",
   "games.hub.addLibrary": "أضف إلى المكتبة",
   "games.collectionsLive.greats": "أفضل الألعاب عبر الزمن",
-  "games.collectionsLive.greatsNote": "الأعلى تقييمًا على IGDB، مع 100 تقييم على الأقل من اللاعبين والنقاد.",
+  "games.collectionsLive.greatsNote":
+    "الأعلى تقييمًا على IGDB، مع 100 تقييم على الأقل من اللاعبين والنقاد.",
   "games.collectionsLive.coop": "معًا أفضل",
-  "games.collectionsLive.coopNote": "ألعاب تعاونية عالية التقييم، مع 100 تقييم IGDB على الأقل. تختلف الأوضاع حسب المنصة.",
+  "games.collectionsLive.coopNote":
+    "ألعاب تعاونية عالية التقييم، مع 100 تقييم IGDB على الأقل. تختلف الأوضاع حسب المنصة.",
   "games.collectionsLive.records": "ألعاب في كتب الأرقام القياسية",
   "games.collectionsLive.recordsNote": "إنجازات مميزة مع قصة كل منها ومصدرها.",
   "games.collectionsLive.minecraft": "Minecraft",
@@ -56,6 +63,6 @@ const gameHub: Record<string,string> = {
   "games.collectionsLive.gtaRecord": "من المبيعات في ثلاثة أيام فقط",
   "games.collectionsLive.gtaDate": "سبتمبر 2013",
   "games.atlas.kind.greats": "أفضل الألعاب عبر الزمن",
-  "games.atlas.kind.coop": "ألعاب تعاونية"
+  "games.atlas.kind.coop": "ألعاب تعاونية",
 };
 export default gameHub;

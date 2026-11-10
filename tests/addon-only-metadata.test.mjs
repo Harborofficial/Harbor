@@ -73,8 +73,7 @@ function fixture({ only = true, addons = [], results = {}, order = [] } = {}) {
       "./metadata-addons": metadata,
       "@/lib/addon-url": {
         addonBaseUrl: (url) => url.replace(/\/manifest\.json\/?$/i, "").replace(/\/+$/, ""),
-        addonResourceUrl: (base, path) =>
-          `${base.replace(/\/$/, "")}/${path.replace(/^\/+/, "")}`,
+        addonResourceUrl: (base, path) => `${base.replace(/\/$/, "")}/${path.replace(/^\/+/, "")}`,
       },
       "./safe-fetch": {
         safeFetch: async (url) => {

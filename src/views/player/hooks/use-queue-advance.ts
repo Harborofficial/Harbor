@@ -42,7 +42,12 @@ export function useQueueAdvance(params: {
   const latestSrcRef = useRef(src);
   latestSrcRef.current = src;
   const advanceRevisionRef = useRef(0);
-  useEffect(() => () => { advanceRevisionRef.current += 1; }, []);
+  useEffect(
+    () => () => {
+      advanceRevisionRef.current += 1;
+    },
+    [],
+  );
 
   useEffect(() => {
     firedForRef.current = null;
@@ -87,7 +92,9 @@ export function useQueueAdvance(params: {
           return;
         }
         void completedEpisodeSource(nextItem.meta, nextItem.episode, {
-          imdbId: nextItem.episode.imdbId ?? (nextItem.meta.id.startsWith("tt") ? nextItem.meta.id : undefined),
+          imdbId:
+            nextItem.episode.imdbId ??
+            (nextItem.meta.id.startsWith("tt") ? nextItem.meta.id : undefined),
           isAnime: nextItem.meta.id === src.meta.id ? src.isAnime : undefined,
         }).then((download) => {
           if (!stillCurrent()) return;

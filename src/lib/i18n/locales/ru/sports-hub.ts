@@ -171,7 +171,7 @@ export default {
   "Show all {count}": "Показать все ({count})",
   "{count} competing": "участников: {count}",
   "Starting field": "Стартовый состав",
-  "Leaderboard": "Турнирная таблица",
+  Leaderboard: "Турнирная таблица",
   "Full field": "Весь состав",
   "Loading event schedule…": "Загрузка расписания события…",
   "Loading lineups…": "Загрузка составов…",

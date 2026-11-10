@@ -10,18 +10,24 @@ export default {
   "games.pokemon.mapView.grid": "Cuadrícula de imágenes",
   "games.pokemon.mapCount": "{count} mapas",
   "games.pokemon.mapNoMatch": "Ningún mapa coincide con estos filtros.",
-  "games.pokemon.bankUnreadable": "No se pudieron cargar algunos Pokémon ({count}). Sus archivos siguen en este dispositivo.",
-  "games.pokemon.bankTruncated": "Se muestran los primeros 10.000 archivos del banco. Todos siguen en este dispositivo.",
+  "games.pokemon.bankUnreadable":
+    "No se pudieron cargar algunos Pokémon ({count}). Sus archivos siguen en este dispositivo.",
+  "games.pokemon.bankTruncated":
+    "Se muestran los primeros 10.000 archivos del banco. Todos siguen en este dispositivo.",
   "games.pokemon.showBankFolder": "Mostrar carpeta del banco",
   "games.pokemon.noChoices": "No hay opciones que coincidan.",
   "games.pokemon.detectedSaves": "Partidas de este juego",
   "games.pokemon.refreshSaves": "Actualizar partidas",
-  "games.pokemon.discoverFailed": "No se pudieron buscar partidas. Actualiza la lista o elige un archivo.",
-  "games.pokemon.noDetectedSaves": "Aún no se encontró ninguna partida. Guarda dentro del juego o elige un archivo de tu emulador.",
+  "games.pokemon.discoverFailed":
+    "No se pudieron buscar partidas. Actualiza la lista o elige un archivo.",
+  "games.pokemon.noDetectedSaves":
+    "Aún no se encontró ninguna partida. Guarda dentro del juego o elige un archivo de tu emulador.",
   "games.pokemon.saveOrigin.harbor": "Guardada en Harbor",
   "games.pokemon.saveOrigin.adjacent": "Junto a tu ROM",
-  "games.pokemon.error.pokemon_hack_export": "La exportación al banco de este ROM hack aún no está lista: todavía no se pueden conservar sus datos Pokémon adicionales. Puedes seguir consultando y editando esta partida.",
-  "games.pokemon.error.pokemon_save_running": "Cierra este juego en Harbor antes de guardar los cambios. Tu vista previa se conserva.",
+  "games.pokemon.error.pokemon_hack_export":
+    "La exportación al banco de este ROM hack aún no está lista: todavía no se pueden conservar sus datos Pokémon adicionales. Puedes seguir consultando y editando esta partida.",
+  "games.pokemon.error.pokemon_save_running":
+    "Cierra este juego en Harbor antes de guardar los cambios. Tu vista previa se conserva.",
   "games.pokemon.title": "Tu aventura Pokémon",
   "games.pokemon.intro": "Encuentra tu próxima ruta. Forma tu equipo. Lleva tus Pokémon contigo.",
   "games.pokemon.browse": "Explora este juego Pokémon",
@@ -40,50 +46,64 @@ export default {
   "games.pokemon.levelRange": "Nv. {min}–{max}",
   "games.pokemon.level": "Nv. {level}",
   "games.pokemon.levelLabel": "Nivel",
-  "games.pokemon.noEncounters": "No hay encuentros registrados para esta edición exacta. Pueden faltar regalos, intercambios y eventos especiales.",
+  "games.pokemon.noEncounters":
+    "No hay encuentros registrados para esta edición exacta. Pueden faltar regalos, intercambios y eventos especiales.",
   "games.pokemon.backDex": "Volver a los Pokémon",
   "games.pokemon.pokemonDetails": "Detalles del Pokémon",
   "games.pokemon.moves": "Movimientos",
   "games.pokemon.evolution": "Evolución",
   "games.pokemon.stats": "Estadísticas y habilidades",
-  "games.pokemon.editionMoves": "Movimientos de esta edición, incluidos los aprendidos por nivel, máquinas y tutores.",
+  "games.pokemon.editionMoves":
+    "Movimientos de esta edición, incluidos los aprendidos por nivel, máquinas y tutores.",
   "games.pokemon.noMoves": "No hay datos de movimientos para esta edición.",
-  "games.pokemon.evolutionScope": "Familia evolutiva completa según los datos actuales. Las evoluciones y métodos posteriores pueden no existir en este juego.",
-  "games.pokemon.currentStats": "Estadísticas y habilidades actuales de PokeAPI. Las ediciones antiguas pueden diferir. Los tipos de arriba corresponden a la generación de este juego.",
-  "games.pokemon.dexScope": "Pokédex regional de este juego. Las tarjetas muestran los números de la Pokédex Nacional.",
+  "games.pokemon.evolutionScope":
+    "Familia evolutiva completa según los datos actuales. Las evoluciones y métodos posteriores pueden no existir en este juego.",
+  "games.pokemon.currentStats":
+    "Estadísticas y habilidades actuales de PokeAPI. Las ediciones antiguas pueden diferir. Los tipos de arriba corresponden a la generación de este juego.",
+  "games.pokemon.dexScope":
+    "Pokédex regional de este juego. Las tarjetas muestran los números de la Pokédex Nacional.",
   "games.pokemon.searchPokemon": "Busca un Pokémon o un número",
   "games.pokemon.loadMore": "Mostrar más",
   "games.pokemon.noResults": "Ningún Pokémon coincide con tu búsqueda.",
-  "games.pokemon.noRetailDex": "Aún no hay una Pokédex verificada para este juego. No se asigna automáticamente una Pokédex oficial a los ROM hacks ni a los juegos derivados.",
+  "games.pokemon.noRetailDex":
+    "Aún no hay una Pokédex verificada para este juego. No se asigna automáticamente una Pokédex oficial a los ROM hacks ni a los juegos derivados.",
   "games.pokemon.unavailable": "Esta fuente no está disponible ahora. Inténtalo de nuevo.",
-  "games.pokemon.readProgress": "Elige un capítulo. Se guardarán tu posición y los capítulos completados.",
+  "games.pokemon.readProgress":
+    "Elige un capítulo. Se guardarán tu posición y los capítulos completados.",
   "games.pokemon.chapters": "Capítulos de la guía",
   "games.pokemon.overview": "Resumen",
   "games.pokemon.completed": "Completado",
   "games.pokemon.markComplete": "Marcar como completado",
   "games.pokemon.nextChapter": "Siguiente capítulo",
-  "games.pokemon.locationScope": "Explora los lugares de esta región. Los encuentros se filtran por esta edición exacta.",
+  "games.pokemon.locationScope":
+    "Explora los lugares de esta región. Los encuentros se filtran por esta edición exacta.",
   "games.pokemon.searchLocation": "Busca una ruta o un lugar",
   "games.pokemon.chooseLocation": "Elige un lugar para ver sus Pokémon.",
   "games.pokemon.noLocations": "Aún no hay datos de lugares para este juego.",
-  "games.pokemon.mapScope": "Mapas originales de Bulbagarden Archives. Los archivos compartidos indican la variante del juego en el título de la imagen.",
+  "games.pokemon.mapScope":
+    "Mapas originales de Bulbagarden Archives. Los archivos compartidos indican la variante del juego en el título de la imagen.",
   "games.pokemon.searchMaps": "Buscar en los mapas cargados",
   "games.pokemon.moreMaps": "Cargar más mapas",
   "games.pokemon.noMaps": "Aún no hay un archivo de mapas verificado para este juego.",
   "games.pokemon.searchVideos": "Buscar guías y consejos",
-  "games.pokemon.noVideos": "No se encontraron vídeos. Prueba con una ruta, un jefe o el nombre de un Pokémon.",
-  "games.pokemon.sources": "Datos Pokémon: PokeAPI · Guías: Bulbapedia · Mapas: Bulbagarden Archives · Vídeos: YouTube. La cobertura varía según el juego.",
-  "games.pokemon.bankIntro": "Abre una partida, trabaja con tu equipo y revisa cada cambio antes de guardar.",
+  "games.pokemon.noVideos":
+    "No se encontraron vídeos. Prueba con una ruta, un jefe o el nombre de un Pokémon.",
+  "games.pokemon.sources":
+    "Datos Pokémon: PokeAPI · Guías: Bulbapedia · Mapas: Bulbagarden Archives · Vídeos: YouTube. La cobertura varía según el juego.",
+  "games.pokemon.bankIntro":
+    "Abre una partida, trabaja con tu equipo y revisa cada cambio antes de guardar.",
   "games.pokemon.openSave": "Abrir partida guardada",
   "games.pokemon.importPokemon": "Importar archivo Pokémon",
-  "games.pokemon.engineMissing": "El motor Pokémon aún no está instalado en esta versión de Harbor.",
+  "games.pokemon.engineMissing":
+    "El motor Pokémon aún no está instalado en esta versión de Harbor.",
   "games.pokemon.bankError": "No se pudo completar la acción.",
   "games.pokemon.bankBrowse": "Explorar tus Pokémon",
   "games.pokemon.gameSave": "Partida guardada",
   "games.pokemon.myBank": "Mi banco",
   "games.pokemon.readOnly": "Esta partida está abierta solo para consulta.",
   "games.pokemon.bankWelcome": "Un hogar para tus Pokémon",
-  "games.pokemon.bankPrivacy": "Tus partidas y tu banco permanecen en este dispositivo. Abre un archivo guardado dentro del juego, no un estado del emulador. Cierra el juego antes de hacer cambios.",
+  "games.pokemon.bankPrivacy":
+    "Tus partidas y tu banco permanecen en este dispositivo. Abre un archivo guardado dentro del juego, no un estado del emulador. Cierra el juego antes de hacer cambios.",
   "games.pokemon.box": "Elegir caja",
   "games.pokemon.party": "Equipo",
   "games.pokemon.slot": "Posición {slot}",
@@ -96,14 +116,19 @@ export default {
   "games.pokemon.edited": "{name} editado",
   "games.pokemon.released": "Quitar a {name} de la partida",
   "games.pokemon.release": "Preparar eliminación de la partida",
-  "games.pokemon.chooseSlot": "Elige un Pokémon para verlo o editarlo. Elige una posición vacía para crear uno.",
-  "games.pokemon.bankCopies": "Los depósitos conservan el original en tu partida. Las transferencias también conservan la copia del banco.",
-  "games.pokemon.emptyBank": "Tu banco está vacío. Guarda un Pokémon desde una partida abierta o importa un archivo Pokémon.",
-  "games.pokemon.transferHint": "Elige una posición de destino vacía en tu partida y revisa la transferencia de este Pokémon.",
+  "games.pokemon.chooseSlot":
+    "Elige un Pokémon para verlo o editarlo. Elige una posición vacía para crear uno.",
+  "games.pokemon.bankCopies":
+    "Los depósitos conservan el original en tu partida. Las transferencias también conservan la copia del banco.",
+  "games.pokemon.emptyBank":
+    "Tu banco está vacío. Guarda un Pokémon desde una partida abierta o importa un archivo Pokémon.",
+  "games.pokemon.transferHint":
+    "Elige una posición de destino vacía en tu partida y revisa la transferencia de este Pokémon.",
   "games.pokemon.previewTransfer": "Revisar transferencia a la partida",
   "games.pokemon.imported": "Pokémon importado del banco",
   "games.pokemon.review": "Revisar tus cambios",
-  "games.pokemon.reviewNote": "Estos cambios están pendientes. Mantén el juego cerrado. Al guardar se crea primero una copia de seguridad del original.",
+  "games.pokemon.reviewNote":
+    "Estos cambios están pendientes. Mantén el juego cerrado. Al guardar se crea primero una copia de seguridad del original.",
   "games.pokemon.discard": "Descartar cambios",
   "games.pokemon.commit": "Crear copia y guardar",
   "games.pokemon.savedBackup": "Guardado. El original tiene una copia de seguridad.",
@@ -112,7 +137,8 @@ export default {
   "games.pokemon.localEngine": "Motor local de partidas · GPL-3.0-or-later",
   "games.pokemon.create": "Crear un Pokémon",
   "games.pokemon.showdown": "Set de Pokémon Showdown",
-  "games.pokemon.createNote": "Elige un Pokémon y su nivel. El motor busca un encuentro compatible con este juego y rechaza combinaciones no admitidas. También puedes pegar un set de Showdown debajo.",
+  "games.pokemon.createNote":
+    "Elige un Pokémon y su nivel. El motor busca un encuentro compatible con este juego y rechaza combinaciones no admitidas. También puedes pegar un set de Showdown debajo.",
   "games.pokemon.previewCreate": "Previsualizar Pokémon",
   "games.pokemon.nickname": "Mote",
   "games.pokemon.nature": "Naturaleza",
@@ -122,15 +148,21 @@ export default {
   "games.pokemon.move": "Movimiento {number}",
   "games.pokemon.training": "Valores individuales y puntos de esfuerzo",
   "games.pokemon.previewEdits": "Revisar cambios",
-  "games.pokemon.error.pokemon_engine_missing": "El motor Pokémon aún no está instalado en esta versión de Harbor.",
+  "games.pokemon.error.pokemon_engine_missing":
+    "El motor Pokémon aún no está instalado en esta versión de Harbor.",
   "games.pokemon.error.pokemon_engine_start": "No se pudo iniciar el motor Pokémon.",
-  "games.pokemon.error.pokemon_engine_timeout": "El motor tardó demasiado. Tu partida no ha cambiado.",
+  "games.pokemon.error.pokemon_engine_timeout":
+    "El motor tardó demasiado. Tu partida no ha cambiado.",
   "games.pokemon.error.pokemon_read": "No se pudo leer el archivo seleccionado.",
   "games.pokemon.error.pokemon_file": "Elige un archivo de partida o Pokémon compatible.",
-  "games.pokemon.error.pokemon_save_changed": "La partida cambió fuera de Harbor. Vuelve a abrirla antes de continuar.",
-  "games.pokemon.error.pokemon_review_changed": "Esta revisión ya no está actualizada. Revisa los cambios de nuevo.",
-  "games.pokemon.error.pokemon_write": "No se pudo guardar el archivo. Tu copia de seguridad sigue disponible.",
-  "games.pokemon.error.pokemon_export_exists": "Ya existe un archivo en ese destino. Elige otro nombre.",
+  "games.pokemon.error.pokemon_save_changed":
+    "La partida cambió fuera de Harbor. Vuelve a abrirla antes de continuar.",
+  "games.pokemon.error.pokemon_review_changed":
+    "Esta revisión ya no está actualizada. Revisa los cambios de nuevo.",
+  "games.pokemon.error.pokemon_write":
+    "No se pudo guardar el archivo. Tu copia de seguridad sigue disponible.",
+  "games.pokemon.error.pokemon_export_exists":
+    "Ya existe un archivo en ese destino. Elige otro nombre.",
   "games.pokemon.error.pokemon_session": "Vuelve a abrir tu partida para continuar.",
   "games.pokemon.error.pokemon_session_limit": "Cierra otra partida Pokémon antes de abrir esta.",
   "games.pokemon.allBoxes": "Todas las cajas",
@@ -165,9 +197,12 @@ export default {
   "games.pokemon.field.statusCondition": "Estado",
   "games.pokemon.error.generic": "La acción falló. Tu partida seleccionada no se ha sobrescrito.",
   "games.pokemon.error.pokemon_save_open": "Esta partida ya está abierta en otro espacio Pokémon.",
-  "games.pokemon.error.pokemon_draft_limit": "Guarda o descarta estos cambios antes de seguir editando.",
-  "games.pokemon.error.pokemon_draft_changed": "No se pudo recuperar un borrador anterior porque la partida cambió o no se pudo leer. Se conserva en el almacenamiento local de recuperación.",
-  "games.pokemon.draftKept": "Los cambios pendientes permanecen en este dispositivo. Abre la misma partida para continuar tu borrador.",
+  "games.pokemon.error.pokemon_draft_limit":
+    "Guarda o descarta estos cambios antes de seguir editando.",
+  "games.pokemon.error.pokemon_draft_changed":
+    "No se pudo recuperar un borrador anterior porque la partida cambió o no se pudo leer. Se conserva en el almacenamiento local de recuperación.",
+  "games.pokemon.draftKept":
+    "Los cambios pendientes permanecen en este dispositivo. Abre la misma partida para continuar tu borrador.",
   "games.pokemon.operation.edit": "Editar Pokémon",
   "games.pokemon.operation.import": "Transferir desde el banco",
   "games.pokemon.operation.create": "Crear un Pokémon",
@@ -193,7 +228,8 @@ export default {
   "games.pokemon.evolution.min_beauty": "Belleza mínima",
   "games.pokemon.evolution.min_affection": "Afecto mínimo",
   "games.pokemon.evolution.gender": "Sexo (1 hembra, 2 macho)",
-  "games.pokemon.evolution.relative_physical_stats": "Ataque frente a defensa (−1 menor, 0 igual, 1 mayor)",
+  "games.pokemon.evolution.relative_physical_stats":
+    "Ataque frente a defensa (−1 menor, 0 igual, 1 mayor)",
   "games.pokemon.evolution.time_of_day": "Momento del día",
   "games.pokemon.evolution.needs_overworld_rain": "Requiere lluvia",
   "games.pokemon.evolution.turn_upside_down": "Girar el dispositivo boca abajo",
@@ -201,6 +237,7 @@ export default {
   "games.pokemon.searchBank": "Buscar en tu banco",
   "games.pokemon.movePokemon": "Mover dentro de esta partida",
   "games.pokemon.destinationSlot": "Elegir posición de destino",
-  "games.pokemon.swapHint": "Si el destino está ocupado, se intercambian los dos Pokémon. Revisa el movimiento antes de guardar.",
+  "games.pokemon.swapHint":
+    "Si el destino está ocupado, se intercambian los dos Pokémon. Revisa el movimiento antes de guardar.",
   "games.pokemon.previewMove": "Revisar movimiento",
 };

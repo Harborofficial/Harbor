@@ -40,7 +40,8 @@ export default {
   "games.league.more": "Mais campeões",
   "games.league.empty": "Nenhum campeão corresponde à busca.",
   "games.league.poolEmpty": "Guarde seus favoritos aqui. Abra um campeão e adicione à sua seleção.",
-  "games.league.unavailable": "Não foi possível atualizar os dados. Os resultados anteriores continuam disponíveis.",
+  "games.league.unavailable":
+    "Não foi possível atualizar os dados. Os resultados anteriores continuam disponíveis.",
   "games.league.back": "Voltar aos campeões",
   "games.league.addPool": "Adicionar aos meus campeões",
   "games.league.inPool": "Nos meus campeões",
@@ -62,10 +63,12 @@ export default {
   "games.league.matchupRate": "Taxa de vitória de {champion} contra cada adversário.",
   "games.league.noSample": "Ainda não há dados suficientes de confrontos.",
   "games.league.combos": "Veja o combo",
-  "games.league.combosIntro": "Demonstrações curtas selecionadas pelo OP.GG. Assista quando quiser.",
+  "games.league.combosIntro":
+    "Demonstrações curtas selecionadas pelo OP.GG. Assista quando quiser.",
   "games.league.watchCombo": "Ver demonstração",
   "games.league.updated": "Fonte atualizada em {date}",
-  "games.league.buildEmpty": "Não há build para esta função. Tente outra função ou os guias abaixo.",
+  "games.league.buildEmpty":
+    "Não há build para esta função. Tente outra função ou os guias abaixo.",
   "games.league.iconsUnavailable": "Alguns detalhes de itens ou runas não puderam ser carregados.",
   "games.league.passive": "Passiva",
   "games.league.cooldown": "Tempo de recarga: {seconds}s",
@@ -74,17 +77,22 @@ export default {
   "games.league.story": "História do campeão",
   "games.league.exploreMore": "Explore mais",
   "games.league.guides": "Guias em vídeo",
-  "games.league.metaScope": "O OP.GG fornece o ranking de rotas com sua amostra padrão, sem especificar atualização, região ou faixa de elo. As vitórias são calculadas com partidas e vitórias informadas; a fonte arredonda as taxas de escolha. Rankings e builds usam amostras separadas.",
-  "games.league.buildNote": "Cada build tem sua própria amostra. Builds completas favorecem partidas que duraram o bastante para comprar os itens; sua taxa de vitória não é a taxa geral do campeão. Confrontos podem ter amostras pequenas. Adapte-se ao time e adversário. Os vídeos podem ser de atualizações anteriores.",
-  "games.league.patchDifference": "Estatísticas da build: {patch}; dados de itens e habilidades: {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "O OP.GG fornece o ranking de rotas com sua amostra padrão, sem especificar atualização, região ou faixa de elo. As vitórias são calculadas com partidas e vitórias informadas; a fonte arredonda as taxas de escolha. Rankings e builds usam amostras separadas.",
+  "games.league.buildNote":
+    "Cada build tem sua própria amostra. Builds completas favorecem partidas que duraram o bastante para comprar os itens; sua taxa de vitória não é a taxa geral do campeão. Confrontos podem ter amostras pequenas. Adapte-se ao time e adversário. Os vídeos podem ser de atualizações anteriores.",
+  "games.league.patchDifference":
+    "Estatísticas da build: {patch}; dados de itens e habilidades: {assets}.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Lista de tiers",
   "games.league.tierScope": "Ranqueada solo/duo · Esmeralda+ · Global",
   "games.league.patchFilter": "Escolher atualização",
   "games.league.allRoles": "Todas as funções",
   "games.league.banRate": "Taxa de banimento",
   "games.league.matches": "Partidas",
-  "games.league.tierNote": "As posições são por função. As builds mostram os dados mais recentes disponíveis.",
+  "games.league.tierNote":
+    "As posições são por função. As builds mostram os dados mais recentes disponíveis.",
   "games.official.publisherSource": "Download oficial da publicadora",
   "games.official.get": "Obter {launcher}",
 };

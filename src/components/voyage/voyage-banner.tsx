@@ -29,16 +29,22 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
   const collapse = () => {
     if (closing) return;
     setClosing(true);
-    closeTimer.current = setTimeout(() => {
-      closeVoyage();
-      setClosing(false);
-      requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
-    }, reduce ? 0 : 180);
+    closeTimer.current = setTimeout(
+      () => {
+        closeVoyage();
+        setClosing(false);
+        requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
+      },
+      reduce ? 0 : 180,
+    );
   };
-  useEffect(() => () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeVoyage();
-  }, []);
+  useEffect(
+    () => () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+      closeVoyage();
+    },
+    [],
+  );
   const rootRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number>();
@@ -54,7 +60,11 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
   useEffect(() => {
     if (!expanded) return;
     const root = rootRef.current;
-    if (root && (root.getBoundingClientRect().top < 80 || root.getBoundingClientRect().top > window.innerHeight - 460)) {
+    if (
+      root &&
+      (root.getBoundingClientRect().top < 80 ||
+        root.getBoundingClientRect().top > window.innerHeight - 460)
+    ) {
       root.scrollIntoView({ block: "start", behavior: reduce ? "instant" : "smooth" });
     }
   }, [expanded, reduce]);
@@ -104,7 +114,11 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
       aria-label={t("Harbor Voyages")}
       style={{ height }}
       onKeyDown={(e) => {
-        if (expanded && e.key === "Escape") { e.preventDefault(); e.stopPropagation(); collapse(); }
+        if (expanded && e.key === "Escape") {
+          e.preventDefault();
+          e.stopPropagation();
+          collapse();
+        }
       }}
       className={`voyage-card group relative min-h-[172px] w-full overflow-hidden rounded-2xl bg-canvas ring-1 ring-edge-soft ${expanded ? "is-expanded" : ""} ${closing ? "is-closing" : ""}`}
     >
@@ -119,7 +133,10 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
             >
               <div
                 className={`flex h-full items-stretch gap-2 ${reduce ? "" : "voyage-marquee"} group-hover:[animation-play-state:paused]`}
-                style={{ width: "max-content", animationPlayState: onScreen ? undefined : "paused" }}
+                style={{
+                  width: "max-content",
+                  animationPlayState: onScreen ? undefined : "paused",
+                }}
               >
                 {strip.map((m, i) => (
                   <VoyageCapsule key={`${m.id}-${i}`} meta={m} />
@@ -173,7 +190,6 @@ export function VoyageBanner({ pool }: { pool: Meta[] }) {
                 {cta}
               </span>
             </div>
-
           </div>
         )}
       </div>

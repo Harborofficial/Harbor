@@ -3,13 +3,7 @@ import { useT } from "@/lib/i18n";
 import type { CriticismEpisode } from "@/lib/providers/podcast-criticism";
 import { CriticismPanel } from "./criticism-panel";
 
-export function CriticismRow({
-  title,
-  episodes,
-}: {
-  title: string;
-  episodes: CriticismEpisode[];
-}) {
+export function CriticismRow({ title, episodes }: { title: string; episodes: CriticismEpisode[] }) {
   const t = useT();
   const ref = useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);

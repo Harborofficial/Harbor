@@ -19,11 +19,12 @@ export default {
   "games.wow.runs.copy": "نسخ المواهب",
   "games.wow.runs.copyFailed": "تعذر النسخ. حاول مجددًا.",
   "games.wow.runs.party": "تشكيلة المجموعة",
-  "games.wow.runs.snapshots": "المواهب والمعدات المنشورة لقطات من المزوّد. قد تختلف عما استُخدم خلال هذه الجولة.",
+  "games.wow.runs.snapshots":
+    "المواهب والمعدات المنشورة لقطات من المزوّد. قد تختلف عما استُخدم خلال هذه الجولة.",
   "games.wow.runs.gear": "المعدات",
   "games.wow.runs.tank": "دبابة",
   "games.wow.runs.healer": "معالج",
   "games.wow.runs.dps": "ضرر",
   "games.wow.runs.snapshotAt": "لقطة المعدات: {date}",
-  "games.wow.runs.closeGear": "إغلاق المعدات"
+  "games.wow.runs.closeGear": "إغلاق المعدات",
 };

@@ -3,7 +3,8 @@ export default {
   "games.guides.saveTxt": "Enregistrer en TXT",
   "games.guides.savePdf": "Enregistrer en PDF",
   "games.guides.preparingPdf": "Préparation du PDF…",
-  "games.guides.exportError": "Impossible d’enregistrer le guide. Vérifiez votre connexion et réessayez.",
+  "games.guides.exportError":
+    "Impossible d’enregistrer le guide. Vérifiez votre connexion et réessayez.",
   "games.guides.filters": "Filtres",
   "games.guides.clearFilters": "Effacer les filtres",
   "games.guides.popular": "Les plus populaires",
@@ -52,16 +53,22 @@ export default {
   "games.guides.date.all": "À tout moment",
   "games.guides.viewers": "{count} spectateurs",
   "games.guides.views": "{count} vues",
-  "games.guides.import.callofdutywarzone": "Copiez ces valeurs dans les réglages correspondants de Warzone. Réglez les DPI dans le logiciel de votre souris.",
-  "games.guides.import.css": "Copiez ces réglages dans Counter-Strike: Source. Ils proviennent d’archives communautaires datées.",
-  "games.guides.import.cod": "Utilisez ces valeurs dans l’édition correspondante du jeu. Réglez les DPI dans le logiciel de votre souris.",
-  "games.guides.noCrosshair": "Cette source ne fournit pas assez de détails sur le réticule pour un aperçu fiable.",
-  "games.guides.previewNote": "Aperçu statique des valeurs publiées. Résolution, mouvement et recul peuvent modifier le résultat en jeu.",
+  "games.guides.import.callofdutywarzone":
+    "Copiez ces valeurs dans les réglages correspondants de Warzone. Réglez les DPI dans le logiciel de votre souris.",
+  "games.guides.import.css":
+    "Copiez ces réglages dans Counter-Strike: Source. Ils proviennent d’archives communautaires datées.",
+  "games.guides.import.cod":
+    "Utilisez ces valeurs dans l’édition correspondante du jeu. Réglez les DPI dans le logiciel de votre souris.",
+  "games.guides.noCrosshair":
+    "Cette source ne fournit pas assez de détails sur le réticule pour un aperçu fiable.",
+  "games.guides.previewNote":
+    "Aperçu statique des valeurs publiées. Résolution, mouvement et recul peuvent modifier le résultat en jeu.",
   "games.guides.previewBackground": "Changer le fond clair de l’aperçu",
   "games.guides.crosshairPreview": "Aperçu du réticule",
   "games.guides.noPlayers": "Aucun joueur correspondant. Essayez un autre nom.",
   "games.guides.playerCount": "{count} joueurs",
-  "games.guides.archived": "Configuration historique. Vérifiez l’édition du jeu et la date avant de l’utiliser.",
+  "games.guides.archived":
+    "Configuration historique. Vérifiez l’édition du jeu et la date avant de l’utiliser.",
   "games.guides.rateLimit": "Cette source limite les requêtes. Réessayez dans {seconds} s.",
   "games.guides.configs": "Configs de pros",
   "games.guides.searchPlayers": "Rechercher un joueur",
@@ -69,26 +76,33 @@ export default {
   "games.guides.allPlatforms": "Toutes les plateformes",
   "games.guides.refresh": "Actualiser les directs",
   "games.guides.twitchUnavailable": "Les directs Twitch sont actuellement consultables sur Twitch.",
-  "games.guides.partial": "Certaines sources n’ont pas chargé. Les résultats disponibles sont affichés.",
+  "games.guides.partial":
+    "Certaines sources n’ont pas chargé. Les résultats disponibles sont affichés.",
   "games.guides.sourceErrorTitle": "Réessayons",
   "games.guides.more": "Charger plus",
   "games.guides.moreKick": "Plus sur Kick",
-  "games.guides.configNote": "Réglages publiés par des joueurs et des créateurs. Choisissez un profil pour voir sa source, sa date et sa configuration.",
+  "games.guides.configNote":
+    "Réglages publiés par des joueurs et des créateurs. Choisissez un profil pour voir sa source, sa date et sa configuration.",
   "games.guides.players": "Tous les joueurs",
   "games.guides.useConfig": "Utiliser ces réglages",
-  "games.guides.import.cs2": "Collez les commandes dans la console de développement de CS2. Les codes de viseur s’importent dans Paramètres → Jeu → Viseur. Vérifiez les valeurs avant de les appliquer.",
-  "games.guides.import.valorant": "Copiez le code du viseur, puis ouvrez Paramètres → Viseur → Importer un code de profil dans VALORANT. Saisissez les autres valeurs dans les réglages correspondants.",
-  "games.guides.import.rainbowsixsiege": "Copiez les réglages et saisissez-les dans les paramètres de souris et d’affichage de Siege. Le DPI se règle dans le logiciel de la souris.",
+  "games.guides.import.cs2":
+    "Collez les commandes dans la console de développement de CS2. Les codes de viseur s’importent dans Paramètres → Jeu → Viseur. Vérifiez les valeurs avant de les appliquer.",
+  "games.guides.import.valorant":
+    "Copiez le code du viseur, puis ouvrez Paramètres → Viseur → Importer un code de profil dans VALORANT. Saisissez les autres valeurs dans les réglages correspondants.",
+  "games.guides.import.rainbowsixsiege":
+    "Copiez les réglages et saisissez-les dans les paramètres de souris et d’affichage de Siege. Le DPI se règle dans le logiciel de la souris.",
   "games.guides.copyCrosshair": "Copier le viseur",
   "games.guides.copyCommands": "Copier les commandes",
   "games.guides.copySettings": "Copier les réglages",
   "games.guides.copied": "Copié",
   "games.guides.copyError": "Impossible de copier. Réessayez.",
-  "games.guides.embedNote": "La lecture est assurée par la plateforme du créateur. Si l’intégration est limitée, ouvrez l’original.",
+  "games.guides.embedNote":
+    "La lecture est assurée par la plateforme du créateur. Si l’intégration est limitée, ouvrez l’original.",
   "games.guides.readerErrorTitle": "Impossible de charger ce guide",
   "games.guides.short": "Guides",
   "games.guides.title": "Guides et solutions",
-  "games.guides.note": "Trouvez la prochaine étape. Lisez les guides de la communauté, regardez une solution ou un joueur en direct.",
+  "games.guides.note":
+    "Trouvez la prochaine étape. Lisez les guides de la communauté, regardez une solution ou un joueur en direct.",
   "games.guides.written": "Guides écrits",
   "games.guides.videos": "Vidéos",
   "games.guides.live": "En direct",
@@ -102,18 +116,19 @@ export default {
   "games.guides.videoTitle": "Regarder et apprendre",
   "games.guides.twitch": "Parcourir Twitch",
   "games.guides.youtube": "Plus sur YouTube",
-  "games.guides.liveNote": "Directs de YouTube. Leur disponibilité peut changer pendant la navigation.",
+  "games.guides.liveNote":
+    "Directs de YouTube. Leur disponibilité peut changer pendant la navigation.",
   "games.guides.error": "Cette source ne se charge pas. Réessayez.",
   "games.guides.empty": "Aucun guide trouvé. Essayez une autre recherche ou source.",
   "games.guides.noLive": "Aucun direct correspondant pour le moment.",
   "games.guides.previous": "Précédent",
   "games.guides.next": "Suivant",
   "games.guides.original": "Ouvrir l’original",
-  "games.guides.playerNote": "Lecture fournie par YouTube. Si le créateur refuse l’intégration, ouvrez la vidéo originale.",
+  "games.guides.playerNote":
+    "Lecture fournie par YouTube. Si le créateur refuse l’intégration, ouvrez la vidéo originale.",
   "games.guides.readerError": "Ce guide ne peut pas être lu ici. Réessayez ou ouvrez l’original.",
   "games.guides.contents": "Dans ce guide",
-  "games.guides.credits": "Auteurs et licence"
-,
+  "games.guides.credits": "Auteurs et licence",
   "games.guides.copy": "Copier",
   "games.guides.previewMap": "Afficher une capture de map derrière le réticule",
   "games.guides.skins": "Skins",
@@ -123,5 +138,5 @@ export default {
   "games.guides.teammates": "Coéquipiers",
   "games.guides.specs": "Caractéristiques",
   "games.guides.exportAll": "Tout exporter",
-  "games.guides.copyValue": "Copier {label}"
+  "games.guides.copyValue": "Copier {label}",
 } satisfies Record<string, string>;

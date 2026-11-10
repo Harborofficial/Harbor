@@ -675,12 +675,7 @@ export function MangaReader({
     warmedChapter.current = chapterKey;
     const key = pageCacheKey(index);
     if (settings.mangaUpscaleQuality === "best") {
-      void prefetchBestMangaPage(
-        page.url,
-        page.headers,
-        key,
-        settings.mangaUpscaleAutoDownload,
-      );
+      void prefetchBestMangaPage(page.url, page.headers, key, settings.mangaUpscaleAutoDownload);
     } else {
       void prefetchMangaPage(page.url, page.headers, key);
     }

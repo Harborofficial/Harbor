@@ -60,7 +60,10 @@ export function useCinemetaFull(meta: Meta): Meta | null {
   return full;
 }
 
-export function useTmdbDetail(meta: Meta, key: string): { detail: TmdbDetail | null; loading: boolean } {
+export function useTmdbDetail(
+  meta: Meta,
+  key: string,
+): { detail: TmdbDetail | null; loading: boolean } {
   const [detail, setDetail] = useState<TmdbDetail | null>(null);
   const [loading, setLoading] = useState(!!key);
   useEffect(() => {

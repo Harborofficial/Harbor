@@ -39,8 +39,10 @@ export default {
   "games.league.patch": "Patch {patch}",
   "games.league.more": "Mehr Champions",
   "games.league.empty": "Keine Champions passen zur Suche.",
-  "games.league.poolEmpty": "Sammle hier deine Favoriten. Öffne einen Champion und füge ihn deinem Pool hinzu.",
-  "games.league.unavailable": "Aktualisierung fehlgeschlagen. Vorherige Ergebnisse bleiben verfügbar.",
+  "games.league.poolEmpty":
+    "Sammle hier deine Favoriten. Öffne einen Champion und füge ihn deinem Pool hinzu.",
+  "games.league.unavailable":
+    "Aktualisierung fehlgeschlagen. Vorherige Ergebnisse bleiben verfügbar.",
   "games.league.back": "Zurück zu Champions",
   "games.league.addPool": "Zum Pool hinzufügen",
   "games.league.inPool": "In meinem Pool",
@@ -65,7 +67,8 @@ export default {
   "games.league.combosIntro": "Kurze Demos von OP.GG. Starte, wenn du bereit bist.",
   "games.league.watchCombo": "Demo ansehen",
   "games.league.updated": "Quelle aktualisiert: {date}",
-  "games.league.buildEmpty": "Kein Build für diese Rolle verfügbar. Probiere eine andere Rolle oder die Guides unten.",
+  "games.league.buildEmpty":
+    "Kein Build für diese Rolle verfügbar. Probiere eine andere Rolle oder die Guides unten.",
   "games.league.iconsUnavailable": "Einige Item- oder Runendetails konnten nicht geladen werden.",
   "games.league.passive": "Passiv",
   "games.league.cooldown": "Abklingzeit: {seconds}s",
@@ -74,17 +77,22 @@ export default {
   "games.league.story": "Champion-Geschichte",
   "games.league.exploreMore": "Mehr entdecken",
   "games.league.guides": "Video-Guides",
-  "games.league.metaScope": "OP.GG liefert diese Lane-Rangliste mit seiner Standardstichprobe. Patch, Region und Ranggruppe werden nicht angegeben. Siegraten werden aus gemeldeten Siegen und Spielen berechnet; Pickraten rundet die Quelle. Ranglisten und Builds nutzen getrennte Stichproben.",
-  "games.league.buildNote": "Jeder Build hat eine eigene Stichprobe. Vollständige Builds bevorzugen Spiele, die lange genug für den Kauf dauerten; ihre Siegraten sind nicht die Gesamtsiegrate des Champions. Matchup-Stichproben können klein sein. Passe dich Team und Gegner an. Videos können aus älteren Patches stammen.",
-  "games.league.patchDifference": "Build-Statistiken: {patch}; Item- und Fähigkeitsdaten: {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "OP.GG liefert diese Lane-Rangliste mit seiner Standardstichprobe. Patch, Region und Ranggruppe werden nicht angegeben. Siegraten werden aus gemeldeten Siegen und Spielen berechnet; Pickraten rundet die Quelle. Ranglisten und Builds nutzen getrennte Stichproben.",
+  "games.league.buildNote":
+    "Jeder Build hat eine eigene Stichprobe. Vollständige Builds bevorzugen Spiele, die lange genug für den Kauf dauerten; ihre Siegraten sind nicht die Gesamtsiegrate des Champions. Matchup-Stichproben können klein sein. Passe dich Team und Gegner an. Videos können aus älteren Patches stammen.",
+  "games.league.patchDifference":
+    "Build-Statistiken: {patch}; Item- und Fähigkeitsdaten: {assets}.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Rangliste",
   "games.league.tierScope": "Solo/Duo-Rangliste · Smaragd+ · Weltweit",
   "games.league.patchFilter": "Patch wählen",
   "games.league.allRoles": "Alle Rollen",
   "games.league.banRate": "Bannrate",
   "games.league.matches": "Spiele",
-  "games.league.tierNote": "Die Platzierung gilt innerhalb der jeweiligen Rolle. Champion-Builds zeigen die neuesten verfügbaren Daten.",
+  "games.league.tierNote":
+    "Die Platzierung gilt innerhalb der jeweiligen Rolle. Champion-Builds zeigen die neuesten verfügbaren Daten.",
   "games.official.publisherSource": "Offizieller Download des Publishers",
   "games.official.get": "{launcher} herunterladen",
 };

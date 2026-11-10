@@ -82,7 +82,11 @@
 .music-collection-pinned[data-pinned="liked"],
 .music-collection-pinned[data-pinned="surprise"],
 .music-collection-pinned[data-pinned="recent"] {
-  background: linear-gradient(150deg, color-mix(in oklab, var(--color-accent) 30%, var(--color-elevated)) 0%, var(--color-elevated) 100%);
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklab, var(--color-accent) 30%, var(--color-elevated)) 0%,
+    var(--color-elevated) 100%
+  );
 }
 .music-collection-pinned > svg {
   position: relative;

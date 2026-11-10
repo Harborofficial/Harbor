@@ -76,7 +76,9 @@ function walk(children: ReactNode, out: BpPlayerSlotEntry[]): void {
       // Identity first, position last. Children.toArray keys by position, so a
       // conditionally rendered sibling would renumber every slot after it and
       // remount a panel that never changed.
-      key: props.id ? `${props.area}:${props.id}` : `${props.area}:${String(child.key ?? out.length)}`,
+      key: props.id
+        ? `${props.area}:${props.id}`
+        : `${props.area}:${String(child.key ?? out.length)}`,
       node: props.children,
     });
   }
@@ -88,10 +90,7 @@ export function collectBpPlayerSlots(children: ReactNode): BpPlayerSlotEntry[] {
   return out.sort((a, b) => a.order - b.order);
 }
 
-export function bpSlotsIn(
-  slots: BpPlayerSlotEntry[],
-  area: BpPlayerArea,
-): BpPlayerSlotEntry[] {
+export function bpSlotsIn(slots: BpPlayerSlotEntry[], area: BpPlayerArea): BpPlayerSlotEntry[] {
   return slots.filter((s) => s.area === area);
 }
 

@@ -36,13 +36,17 @@ export function RepositoriesTab() {
     setBusy(false);
     if (last) {
       setLink("");
-      setAdded(t("Added {repo} with {count} providers.", { repo: last.name, count: last.entries.length }));
+      setAdded(
+        t("Added {repo} with {count} providers.", { repo: last.name, count: last.entries.length }),
+      );
       window.setTimeout(() => setAdded(null), 5000);
     }
     if (lastError) setError(lastError);
   };
 
-  const repos = pluginKinds().flatMap((adapter) => adapter.repos().map((repo) => ({ repo, adapter })));
+  const repos = pluginKinds().flatMap((adapter) =>
+    adapter.repos().map((repo) => ({ repo, adapter })),
+  );
 
   // The list is read from memory, and the read that fills it runs once per session. An edit that
   // hot-replaces these modules leaves the new instance with an empty list and nothing left to ask
@@ -65,7 +69,10 @@ export function RepositoriesTab() {
           icon={<Link2 size={18} strokeWidth={2} />}
           label={t("Repository link")}
           desc={
-            added ?? t("Any GitHub link works, raw or not. Harbor adds /manifest.json when it is missing. Paste several to add them all.")
+            added ??
+            t(
+              "Any GitHub link works, raw or not. Harbor adds /manifest.json when it is missing. Paste several to add them all.",
+            )
           }
           warn={error ?? undefined}
         >

@@ -117,7 +117,8 @@ void idbCacheGet(CATALOG_KEY).then((stored) => {
   const now = Date.now();
   for (const [k, e] of Object.entries(raw)) {
     if (isSearchKey(k) || catalog.has(k)) continue;
-    if (e && Array.isArray(e.metas) && e.metas.length > 0 && now - e.t < JIKAN_CACHE_TTL) catalog.set(k, e);
+    if (e && Array.isArray(e.metas) && e.metas.length > 0 && now - e.t < JIKAN_CACHE_TTL)
+      catalog.set(k, e);
   }
 });
 

@@ -10,7 +10,9 @@
   place-items: center;
   opacity: 0;
   transform: translateY(2px);
-  transition: opacity 140ms ease-in-out, transform 160ms ease-in-out;
+  transition:
+    opacity 140ms ease-in-out,
+    transform 160ms ease-in-out;
 }
 .music-action-glyph:is([data-state="idle"], [data-state="error"]) > .music-action-glyph-idle,
 .music-action-glyph[data-state="busy"] > .music-action-glyph-busy,
@@ -29,11 +31,19 @@ button.music-action-button[data-music-action-state="done"]:disabled {
   opacity: 1;
 }
 @keyframes music-action-working {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes music-action-signed {
-  from { stroke-dasharray: 0 32; stroke-width: .9; }
-  to { stroke-dasharray: 32 32; stroke-width: 1.8; }
+  from {
+    stroke-dasharray: 0 32;
+    stroke-width: 0.9;
+  }
+  to {
+    stroke-dasharray: 32 32;
+    stroke-width: 1.8;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .music-action-glyph > span {

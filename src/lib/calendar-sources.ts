@@ -92,8 +92,7 @@ async function mapDubFeedToCalendar(year: number, month: number): Promise<Calend
   for (const e of entries) {
     if (e.isAdult || e.format === "MOVIE") continue;
     const title = e.title?.english?.trim() || e.title?.romaji?.trim() || "Untitled";
-    const baseId =
-      e.idMal != null ? `mal:${e.idMal}` : e.id != null ? `anilist:${e.id}` : null;
+    const baseId = e.idMal != null ? `mal:${e.idMal}` : e.id != null ? `anilist:${e.id}` : null;
     if (!baseId) continue;
 
     for (const node of e.airingSchedule?.nodes ?? []) {

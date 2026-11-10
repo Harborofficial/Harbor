@@ -81,7 +81,8 @@ const catalog04: Record<string, string> = {
   "Hand-tuned colors. Edit them in the section above.":
     "Colori rifiniti a mano. Modificali nella sezione qui sopra.",
   Handle: "Identificativo",
-  "Handles P2P playback and transcoding for this machine.": "Gestisce la riproduzione P2P e la transcodifica su questo dispositivo.",
+  "Handles P2P playback and transcoding for this machine.":
+    "Gestisce la riproduzione P2P e la transcodifica su questo dispositivo.",
   "Hang tight, won't be a sec.": "Un attimo, ci siamo quasi.",
   "Hangout Comedy": "Commedie da compagnia",
   Harbor: "Harbor",
@@ -187,7 +188,8 @@ const catalog04: Record<string, string> = {
   "Harbor never hosts your books or source files.":
     "Harbor non ospita mai i tuoi libri né i file sorgente.",
   "Harbor never hosts your books.": "Harbor non ospita mai i tuoi libri.",
-  "Harbor normally starts its P2P engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a P2P stream. Takes effect next launch.": "Di norma Harbor avvia il motore P2P all'apertura, così il primo stream P2P si connette più rapidamente. In questo modo, un nodo DHT resta attivo e comunica con la rete anche quando non stai guardando nulla. Attiva questa opzione se usi una connessione a consumo o limitata: il motore si avvierà la prima volta che riprodurrai effettivamente uno stream P2P. La modifica sarà applicata al prossimo avvio.",
+  "Harbor normally starts its P2P engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a P2P stream. Takes effect next launch.":
+    "Di norma Harbor avvia il motore P2P all'apertura, così il primo stream P2P si connette più rapidamente. In questo modo, un nodo DHT resta attivo e comunica con la rete anche quando non stai guardando nulla. Attiva questa opzione se usi una connessione a consumo o limitata: il motore si avvierà la prima volta che riprodurrai effettivamente uno stream P2P. La modifica sarà applicata al prossimo avvio.",
   "Harbor on other devices": "Harbor su altri dispositivi",
   "Harbor on other devices (web app)": "Harbor su altri dispositivi (app web)",
   "Harbor pick": "Scelta di Harbor",
@@ -247,7 +249,8 @@ const catalog04: Record<string, string> = {
     "Harbor è stato sviluppato in inglese. Il supporto multilingue è parziale, quindi di solito gli Add-on trovano ciò che sfugge ai filtri interni di Harbor. Se parli un'altra lingua e vuoi contribuire, il codice sorgente è aperto.",
   "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.":
     "Harbor segnerà su Simkl come visti i contenuti che completi e sincronizzerà la tua Lista Da guardare.",
-  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.": "Harbor non avvierà il motore P2P, non contatterà i tracker e non eseguirà DHT. Usa questa opzione se vuoi solo link debrid e diretti. Disattivala per riabilitare lo streaming P2P.",
+  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.":
+    "Harbor non avvierà il motore P2P, non contatterà i tracker e non eseguirà DHT. Usa questa opzione se vuoi solo link debrid e diretti. Disattivala per riabilitare lo streaming P2P.",
   "Harbor will scrobble your playback to Trakt and sync your watchlist.":
     "Harbor invierà a Trakt i dati sulla riproduzione tramite scrobbling e sincronizzerà la tua Lista.",
   "Harbor would not be possible without Stremio. It is the foundation everything here is built on.":
@@ -1225,7 +1228,8 @@ const catalog04: Record<string, string> = {
   "Live preview": "Anteprima in tempo reale",
   "Live preview is on. Done and Save both keep what you've picked as your Custom theme. Reset reverts the editor to the saved palette.":
     "L'anteprima in tempo reale è attiva. Sia Fine sia Salva mantengono le scelte come tema personalizzato. Ripristina riporta l'editor alla palette salvata.",
-  "Live state of Harbor's own P2P engine on this machine.": "Stato in tempo reale del motore P2P di Harbor su questo dispositivo.",
+  "Live state of Harbor's own P2P engine on this machine.":
+    "Stato in tempo reale del motore P2P di Harbor su questo dispositivo.",
   "Live streams that actually work.": "Streaming in diretta che funzionano davvero.",
   "Live sync": "Sincronizzazione in tempo reale",
   "Live web": "Web in tempo reale",

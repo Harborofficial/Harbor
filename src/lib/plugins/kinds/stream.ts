@@ -24,7 +24,14 @@ import {
 } from "@/lib/streams/plugins";
 import { pluginIdFor } from "@/lib/streams/plugins/manifest";
 import { PluginError } from "@/lib/streams/plugins/types";
-import { repoHost, type EntryView, type KindAdapter, type PluginState, type PluginView, type RepoView } from "../types";
+import {
+  repoHost,
+  type EntryView,
+  type KindAdapter,
+  type PluginState,
+  type PluginView,
+  type RepoView,
+} from "../types";
 
 const SAMPLE = {
   type: "movie" as const,
@@ -85,7 +92,11 @@ function toView(p: InstalledStreamPlugin): PluginView {
 }
 
 function repoView(r: StreamRepoRecord): RepoView {
-  const installed = new Map(installedStreamPluginsSync().filter((p) => p.repoUrl === r.url).map((p) => [p.id, p]));
+  const installed = new Map(
+    installedStreamPluginsSync()
+      .filter((p) => p.repoUrl === r.url)
+      .map((p) => [p.id, p]),
+  );
   const entries: EntryView[] = r.entries.map((e) => {
     const cur = installed.get(pluginIdFor(r.url, e.id));
     return {

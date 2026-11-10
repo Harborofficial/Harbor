@@ -81,7 +81,9 @@ export function BpAnime({ onSelect }: { onSelect: (m: Meta) => void }) {
     return (
       <BpPageMessage
         title={t("Couldn't load anime")}
-        body={t("Harbor couldn't reach MyAnimeList or AniList. Check the connection and reopen Big Picture.")}
+        body={t(
+          "Harbor couldn't reach MyAnimeList or AniList. Check the connection and reopen Big Picture.",
+        )}
       />
     );
   }
@@ -116,7 +118,11 @@ export function BpAnime({ onSelect }: { onSelect: (m: Meta) => void }) {
           <BpAnimeRailBody
             row={row}
             onSelect={onSelect}
-            onSeeAll={source ? () => grid.open({ row: source, title: row.title, rowKey: row.id }) : undefined}
+            onSeeAll={
+              source
+                ? () => grid.open({ row: source, title: row.title, rowKey: row.id })
+                : undefined
+            }
           />
         ),
       };

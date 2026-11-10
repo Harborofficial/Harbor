@@ -32,10 +32,13 @@ export default {
   "Show Sports": "Afficher Sports",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "Afficher Sports dans la navigation. Vous devez accepter l’avis de Sports avant le chargement de la page.",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "Activez Sports sans fournisseur, ou ajoutez une source Live TV, M3U ou Xtream.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "Activez Sports sans fournisseur, ou ajoutez une source Live TV, M3U ou Xtream.",
   "Set up Live TV": "Configurer Live TV",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "Les scores, calendriers et classements fonctionnent sans fournisseur. Harbor ne fournit pas de flux, regarder un match demande donc votre propre source Live TV, M3U ou Xtream.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "Les scores, calendriers et classements proviennent de donnees sportives publiques et ne necessitent aucun fournisseur. Harbor ne fournit pas de flux : regarder un match demande votre propre source Live TV, M3U ou Xtream.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "Les scores, calendriers et classements fonctionnent sans fournisseur. Harbor ne fournit pas de flux, regarder un match demande donc votre propre source Live TV, M3U ou Xtream.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "Les scores, calendriers et classements proviennent de donnees sportives publiques et ne necessitent aucun fournisseur. Harbor ne fournit pas de flux : regarder un match demande votre propre source Live TV, M3U ou Xtream.",
   "Show Sports without a TV provider": "Afficher Sports sans fournisseur TV",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "Activer Sports ne vaut pas acceptation de l’avis. Votre choix reste sur cet appareil et n’est pas synchronisé avec votre compte.",

@@ -34,12 +34,12 @@ function load(profile: any, search: any, authority: any = {}) {
         : id.includes("artist-credit")
           ? { featuredCreditNames }
           : id.includes("artist-authority")
-          ? identity
-          : id.includes("recording-profile")
-            ? { loadRecordingProfile: async () => profile }
-            : id.includes("/catalog")
-              ? { searchTyped: search }
-              : {},
+            ? identity
+            : id.includes("recording-profile")
+              ? { loadRecordingProfile: async () => profile }
+              : id.includes("/catalog")
+                ? { searchTyped: search }
+                : {},
     module,
     module.exports,
   );

@@ -56,7 +56,10 @@ export function MangayomiImport({ url, count }: { url: string; count: number }) 
             <Check size={16} className="text-accent" />
             <span>
               {result.failed > 0
-                ? t("Imported {n} sources, {f} could not load", { n: result.installed, f: result.failed })
+                ? t("Imported {n} sources, {f} could not load", {
+                    n: result.installed,
+                    f: result.failed,
+                  })
                 : t("Imported {n} sources", { n: result.installed })}
             </span>
           </div>

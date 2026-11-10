@@ -12,7 +12,12 @@ function pad(id: string, mapping: string, buttons: number, axes: number): Gamepa
 }
 
 test("admits pads Chromium reports with the standard mapping", () => {
-  const xbox = pad("Xbox 360 Controller (STANDARD GAMEPAD Vendor: 045e Product: 028e)", "standard", 17, 4);
+  const xbox = pad(
+    "Xbox 360 Controller (STANDARD GAMEPAD Vendor: 045e Product: 028e)",
+    "standard",
+    17,
+    4,
+  );
   assert.equal(isLikelyGamepad(xbox), true);
 });
 

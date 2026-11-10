@@ -29,7 +29,9 @@ async function fileToWebp(file: File, max: number, t: ReturnType<typeof useT>): 
     const w = img.width * scale;
     const h = img.height * scale;
     ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/webp", 0.9));
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/webp", 0.9),
+    );
     if (!blob) throw new Error(t("Could not process image."));
     return blob;
   } finally {
@@ -47,7 +49,9 @@ export function ProfileMedia({
   const t = useT();
   const { activeProfile, updateProfile } = useProfiles();
   const { update: updateSettings } = useSettings();
-  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(summary.avatarUrl || currentAuthor()?.avatar || undefined);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(
+    summary.avatarUrl || currentAuthor()?.avatar || undefined,
+  );
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [bannerUrl, setBannerUrl] = useState<string | undefined>(summary.bannerUrl || undefined);
   const [bannerBusy, setBannerBusy] = useState(false);
@@ -152,7 +156,9 @@ export function ProfileMedia({
               </button>
             )}
           </div>
-          <span className="text-[12px] text-ink-subtle">{t("Stored as a small optimized webp.")}</span>
+          <span className="text-[12px] text-ink-subtle">
+            {t("Stored as a small optimized webp.")}
+          </span>
         </div>
         <input
           ref={fileRef}
@@ -171,7 +177,10 @@ export function ProfileMedia({
           ) : (
             <div
               className="h-full w-full"
-              style={{ background: "linear-gradient(135deg, var(--color-elevated), var(--color-surface) 55%, var(--color-canvas))" }}
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--color-elevated), var(--color-surface) 55%, var(--color-canvas))",
+              }}
             />
           )}
         </div>
@@ -182,7 +191,8 @@ export function ProfileMedia({
             disabled={bannerBusy}
             className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-elevated px-3 text-[13px] font-medium text-ink ring-1 ring-edge-soft hover:bg-raised disabled:opacity-50"
           >
-            <ImageIcon size={20} /> {bannerBusy ? t("Saving") : bannerUrl ? t("Change banner") : t("Add banner")}
+            <ImageIcon size={20} />{" "}
+            {bannerBusy ? t("Saving") : bannerUrl ? t("Change banner") : t("Add banner")}
           </button>
           {bannerUrl && (
             <button

@@ -25,6 +25,17 @@
   gap: 10px;
   flex-wrap: wrap;
 }
-.music-collection-page-title { font-size: clamp(32px, 4.5vw, 64px); line-height: 1.05; font-weight: 700; letter-spacing: -.035em; overflow-wrap: anywhere; color: var(--color-ink); }
-.music-playlist-page { container-type: inline-size; }
-.music-playlist-page .music-library-playlist-hero:focus-visible { outline: none !important; }
+.music-collection-page-title {
+  font-size: clamp(32px, 4.5vw, 64px);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+  color: var(--color-ink);
+}
+.music-playlist-page {
+  container-type: inline-size;
+}
+.music-playlist-page .music-library-playlist-hero:focus-visible {
+  outline: none !important;
+}

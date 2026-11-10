@@ -36,7 +36,10 @@ export function mapIds(ids: RawIds | undefined): SimklIds {
 }
 
 const WATCHLIST_TTL_MS = 25000;
-const statusCache = new Map<string, { at: number; marker: string | null; val: Promise<SimklItem[]> }>();
+const statusCache = new Map<
+  string,
+  { at: number; marker: string | null; val: Promise<SimklItem[]> }
+>();
 
 export function invalidateWatchlistCache(): void {
   statusCache.clear();

@@ -96,5 +96,7 @@ export function cableResampleKey(by: string | null): string {
 }
 
 export function cableErrorKey(error: unknown): string {
-  return String(error).replace(/^Error:\s*/, "").trim();
+  return String(error)
+    .replace(/^Error:\s*/, "")
+    .trim();
 }

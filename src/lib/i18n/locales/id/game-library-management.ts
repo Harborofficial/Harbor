@@ -14,18 +14,24 @@ export default {
   "games.manage.uninstallOptions": "Opsi pencopotan…",
   "games.manage.remove": "Hapus dari Harbor…",
   "games.manage.manage": "Kelola",
-  "games.manage.failed": "Tindakan gagal. Pastikan game dan peluncurnya masih tersedia, lalu coba lagi.",
+  "games.manage.failed":
+    "Tindakan gagal. Pastikan game dan peluncurnya masih tersedia, lalu coba lagi.",
   "games.manage.removed": "Dihapus dari Harbor",
   "games.manage.sent": "Lanjutkan di {source}",
   "games.manage.removeTitle": "Hapus entri pustaka ini?",
   "games.manage.uninstallTitle": "Copot pemasangan game ini?",
   "games.manage.optionsTitle": "Copot melalui {source}",
   "games.manage.removedNote": "Entri pustaka dihapus. File game tetap ada di komputer ini.",
-  "games.manage.sentNote": "{source} dibuka. Selesaikan di sana; Harbor memperbarui status pemasangan saat kamu kembali.",
-  "games.manage.removeNote": "Menghapus {name} dan riwayat bermain Harbor dari profil ini. Ini tidak mencopot game atau menghapus filenya.",
-  "games.manage.steamNote": "Steam akan mencopot {name}. Kamu mungkin perlu mengonfirmasi lagi di Steam. Cadangkan simpanan lokal dan mod yang ingin disimpan terlebih dahulu.",
-  "games.manage.launcherNote": "Buka {source}, pilih {name}, lalu Kelola atau Copot. Peluncur menangani penghapusan; Harbor tidak menghapus folder game.",
-  "games.manage.windowsNote": "Cari {name} di Aplikasi terinstal Windows dan pilih Copot. Untuk game portabel, ikuti petunjuknya sendiri. Harbor tidak akan menghapus foldernya.",
+  "games.manage.sentNote":
+    "{source} dibuka. Selesaikan di sana; Harbor memperbarui status pemasangan saat kamu kembali.",
+  "games.manage.removeNote":
+    "Menghapus {name} dan riwayat bermain Harbor dari profil ini. Ini tidak mencopot game atau menghapus filenya.",
+  "games.manage.steamNote":
+    "Steam akan mencopot {name}. Kamu mungkin perlu mengonfirmasi lagi di Steam. Cadangkan simpanan lokal dan mod yang ingin disimpan terlebih dahulu.",
+  "games.manage.launcherNote":
+    "Buka {source}, pilih {name}, lalu Kelola atau Copot. Peluncur menangani penghapusan; Harbor tidak menghapus folder game.",
+  "games.manage.windowsNote":
+    "Cari {name} di Aplikasi terinstal Windows dan pilih Copot. Untuk game portabel, ikuti petunjuknya sendiri. Harbor tidak akan menghapus foldernya.",
   "games.manage.opening": "Membuka…",
   "games.manage.confirmUninstall": "Lanjutkan ke Steam",
   "games.manage.openSource": "Buka {source}",

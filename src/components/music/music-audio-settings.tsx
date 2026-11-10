@@ -485,11 +485,46 @@ export function MusicAudioSettings({
 }
 
 const SPEED_PRESETS = [
-  { id: "normal", icon: "speed-normal", label: "music.speed.normal", speed: 1, reverb: 0, pitch: 0 },
-  { id: "nightcore", icon: "speed-nightcore", label: "music.speed.nightcore", speed: 1.25, reverb: 0, pitch: 0 },
-  { id: "slowed", icon: "speed-slowed", label: "music.speed.slowed", speed: 0.85, reverb: 0, pitch: 0 },
-  { id: "reverb", icon: "speed-reverb", label: "music.speed.slowedReverb", speed: 0.8, reverb: 0.6, pitch: 0 },
-  { id: "daycore", icon: "speed-daycore", label: "music.speed.daycore", speed: 0.75, reverb: 0.3, pitch: 0 },
+  {
+    id: "normal",
+    icon: "speed-normal",
+    label: "music.speed.normal",
+    speed: 1,
+    reverb: 0,
+    pitch: 0,
+  },
+  {
+    id: "nightcore",
+    icon: "speed-nightcore",
+    label: "music.speed.nightcore",
+    speed: 1.25,
+    reverb: 0,
+    pitch: 0,
+  },
+  {
+    id: "slowed",
+    icon: "speed-slowed",
+    label: "music.speed.slowed",
+    speed: 0.85,
+    reverb: 0,
+    pitch: 0,
+  },
+  {
+    id: "reverb",
+    icon: "speed-reverb",
+    label: "music.speed.slowedReverb",
+    speed: 0.8,
+    reverb: 0.6,
+    pitch: 0,
+  },
+  {
+    id: "daycore",
+    icon: "speed-daycore",
+    label: "music.speed.daycore",
+    speed: 0.75,
+    reverb: 0.3,
+    pitch: 0,
+  },
 ] as const;
 
 function SpeedSlider({

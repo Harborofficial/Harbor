@@ -18,12 +18,14 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "Let’s Plays",
   "games.roms.watchVideo": "Video ansehen",
   "games.roms.noVideos": "Für diese Spiele sind noch keine Videos verfügbar.",
-  "games.roms.libraryNote": "Deine eigenen Spiele an einem Ort. Importiere Dateien und wähle einen Emulator.",
+  "games.roms.libraryNote":
+    "Deine eigenen Spiele an einem Ort. Importiere Dateien und wähle einen Emulator.",
   "games.roms.openLibrary": "Bibliothek öffnen",
   "games.roms.downloadCharts": "Meistgeladene ROM-Hacks",
   "games.roms.downloadChartsNote": "Nach Patch-Downloads auf Romhack Plaza.",
   "games.roms.downloadCount": "{count} Downloads",
-  "games.roms.chartUnavailable": "Die Download-Charts sind derzeit nicht verfügbar. Romhack Plaza kannst du weiterhin besuchen.",
+  "games.roms.chartUnavailable":
+    "Die Download-Charts sind derzeit nicht verfügbar. Romhack Plaza kannst du weiterhin besuchen.",
   "games.roms.allPlatforms": "Alle Plattformen",
   "games.roms.moreReleases": "Weitere Veröffentlichungen",
   "games.roms.fewerReleases": "Weniger Veröffentlichungen",
@@ -54,19 +56,24 @@ const gameRoms: Record<string, string> = {
   "games.roms.platformerNote": "Plattformer, die eine weitere Runde verdienen.",
   "games.roms.seeAll": "Alle anzeigen",
   "games.roms.franchises": "Lieblingsreihen entdecken",
-  "games.roms.franchiseNote": "Entdecke zusammengehörige Spiele und Reihen über Generationen hinweg.",
-  "games.roms.noFranchises": "Für diese Spiele sind noch keine Informationen zu Spielereihen verfügbar.",
-  "games.roms.noCollection": "Auf der ausgewählten Konsole passen noch keine Spiele zu dieser Sammlung.",
+  "games.roms.franchiseNote":
+    "Entdecke zusammengehörige Spiele und Reihen über Generationen hinweg.",
+  "games.roms.noFranchises":
+    "Für diese Spiele sind noch keine Informationen zu Spielereihen verfügbar.",
+  "games.roms.noCollection":
+    "Auf der ausgewählten Konsole passen noch keine Spiele zu dieser Sammlung.",
   "games.roms.community": "Von der Community gemacht",
   "games.roms.hacksTitle": "Ein vertrautes Spiel. Ein neues Abenteuer.",
   "games.roms.hacksNote": "Klassische Spiele, von Fans verändert.",
-  "games.roms.catalogNote": "Durchstöbere den Katalog nach Konsole, Genre, Erscheinungszeitraum und Reihe.",
+  "games.roms.catalogNote":
+    "Durchstöbere den Katalog nach Konsole, Genre, Erscheinungszeitraum und Reihe.",
   "games.roms.genre": "Genre",
   "games.roms.allGenres": "Alle Genres",
   "games.roms.era": "Erscheinungszeitraum",
   "games.roms.reset": "Filter zurücksetzen",
   "games.roms.empty": "Versuche einen anderen Titel oder erweitere die Filter für diese Konsole.",
-  "games.roms.source": "Spieldaten und Verknüpfungen stammen von IGDB. Importiere deine lokalen Dateien, um unterstützte Spiele in Harbor zu spielen.",
+  "games.roms.source":
+    "Spieldaten und Verknüpfungen stammen von IGDB. Importiere deine lokalen Dateien, um unterstützte Spiele in Harbor zu spielen.",
   "games.roms.playerScore": "IGDB-Spielerwertung · {count} Bewertungen",
   "games.roms.combinedScore": "Kombinierte IGDB-Wertung · {count} Bewertungen",
   "games.roms.sort.discussed": "Meiste Bewertungen",

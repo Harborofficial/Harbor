@@ -8,7 +8,14 @@ import * as general from "../src/lib/player/shader-chain";
 import type { Settings } from "../src/lib/settings";
 import type { PlayerSrc } from "../src/lib/view";
 
-const ALL_MODES: Array<Parameters<typeof modes.anime4kChain>[1]> = ["A", "B", "C", "AA", "BB", "CA"];
+const ALL_MODES: Array<Parameters<typeof modes.anime4kChain>[1]> = [
+  "A",
+  "B",
+  "C",
+  "AA",
+  "BB",
+  "CA",
+];
 const ALL_TIERS: Array<Parameters<typeof modes.anime4kChain>[2]> = ["hq", "fast"];
 
 /** Local shader names the Rust download manifest installs. */
@@ -22,38 +29,72 @@ function manifestFiles(): Set<string> {
 
 function fixture() {
   const settings = {
-    playerAnime4k: true, playerAnime4kAnimeOnly: true, playerAnime4kFolder: "D:/shaders",
-    playerAnime4kMode: "A", playerAnime4kTier: "hq", playerAnime4kOverride: "auto",
-    mpvQuality: "balanced", playerShaders: {},
+    playerAnime4k: true,
+    playerAnime4kAnimeOnly: true,
+    playerAnime4kFolder: "D:/shaders",
+    playerAnime4kMode: "A",
+    playerAnime4kTier: "hq",
+    playerAnime4kOverride: "auto",
+    mpvQuality: "balanced",
+    playerShaders: {},
   } as Settings;
   let effectDeps: unknown[] | undefined;
   const pending: Array<() => void> = [];
   const calls: string[][] = [];
-  const bridgeRef = { current: {
-    setAnime4kShaders: (paths: string[]) => calls.push(paths), setShaderProps: () => {},
-  } };
+  const bridgeRef = {
+    current: {
+      setAnime4kShaders: (paths: string[]) => calls.push(paths),
+      setShaderProps: () => {},
+    },
+  };
   const mocks: Record<string, unknown> = {
-    react: { useEffect: (fn: () => void, deps: unknown[]) => {
-      if (effectDeps?.length === deps.length && deps.every((v, i) => Object.is(v, effectDeps![i]))) return;
-      effectDeps = deps;
-      pending.push(fn);
-    } },
+    react: {
+      useEffect: (fn: () => void, deps: unknown[]) => {
+        if (
+          effectDeps?.length === deps.length &&
+          deps.every((v, i) => Object.is(v, effectDeps![i]))
+        )
+          return;
+        effectDeps = deps;
+        pending.push(fn);
+      },
+    },
     "@/lib/player/anime4k-modes": modes,
     "@/lib/player/anime-src": anime,
     "@/lib/player/shader-chain": general,
-    "@/lib/settings": { useSettings: () => ({ settings, update: (patch: Partial<Settings>) => Object.assign(settings, patch) }) },
+    "@/lib/settings": {
+      useSettings: () => ({
+        settings,
+        update: (patch: Partial<Settings>) => Object.assign(settings, patch),
+      }),
+    },
   };
-  const compiled = ts.transpileModule(readFileSync(new URL("../src/views/player/hooks/use-anime4k.ts", import.meta.url), "utf8"), {
-    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
-  }).outputText;
+  const compiled = ts.transpileModule(
+    readFileSync(new URL("../src/views/player/hooks/use-anime4k.ts", import.meta.url), "utf8"),
+    {
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+    },
+  ).outputText;
   const api = {} as typeof import("../src/views/player/hooks/use-anime4k");
   new Function("require", "exports", "window", compiled)(
-    (id: string) => { assert.ok(id in mocks, id); return mocks[id]; }, api,
+    (id: string) => {
+      assert.ok(id in mocks, id);
+      return mocks[id];
+    },
+    api,
     { screen: { width: 2560 }, devicePixelRatio: 1 },
   );
-  const source = { url: "fixture:anime", isAnime: true, meta: { id: "tt123", genres: [] } } as PlayerSrc;
+  const source = {
+    url: "fixture:anime",
+    isAnime: true,
+    meta: { id: "tt123", genres: [] },
+  } as PlayerSrc;
   return {
-    api, settings, source, calls, bridgeRef,
+    api,
+    settings,
+    source,
+    calls,
+    bridgeRef,
     render(ready = true, width = 1920, sourceWidth = 1280) {
       const result = api.useAnime4k(
         bridgeRef as never,
@@ -63,7 +104,7 @@ function fixture() {
         sourceWidth,
         ready,
       );
-      pending.splice(0).forEach(fn => fn());
+      pending.splice(0).forEach((fn) => fn());
       return result;
     },
   };
@@ -82,13 +123,13 @@ test("tier, folder and off/on changes replace the active shader chain without ch
   const h = fixture();
   h.source.meta.id = "kitsu:123";
   h.render();
-  assert.ok(h.calls.at(-1)?.some(path => path.includes("_VL.glsl")));
+  assert.ok(h.calls.at(-1)?.some((path) => path.includes("_VL.glsl")));
   h.settings.playerAnime4kTier = "fast";
   h.render();
-  assert.ok(h.calls.at(-1)?.every(path => !path.includes("_VL.glsl")));
+  assert.ok(h.calls.at(-1)?.every((path) => !path.includes("_VL.glsl")));
   h.settings.playerAnime4kFolder = "E:/new shaders";
   h.render();
-  assert.ok(h.calls.at(-1)?.every(path => path.startsWith("E:/new shaders/")));
+  assert.ok(h.calls.at(-1)?.every((path) => path.startsWith("E:/new shaders/")));
   h.settings.playerAnime4k = false;
   h.render();
   assert.deepEqual(h.calls.at(-1), []);
@@ -106,10 +147,10 @@ test("external override and performance changes refresh playback, unrelated sett
   assert.deepEqual(h.calls.at(-1), []);
   h.settings.playerAnime4kOverride = "B";
   h.render();
-  assert.ok(h.calls.at(-1)?.some(path => path.includes("Restore_CNN_Soft_VL")));
+  assert.ok(h.calls.at(-1)?.some((path) => path.includes("Restore_CNN_Soft_VL")));
   h.settings.mpvQuality = "performance";
   h.render();
-  assert.ok(h.calls.at(-1)?.some(path => path.includes("Restore_CNN_Soft_M")));
+  assert.ok(h.calls.at(-1)?.some((path) => path.includes("Restore_CNN_Soft_M")));
   const count = h.calls.length;
   h.settings.playerAnime4kIndicator = false;
   h.render();
@@ -174,8 +215,8 @@ test("the runtime gate uses the decoded size, not the display width", () => {
   // against the screen and quietly drop the second restore pass.
   h.render(true, 1920, 1920);
   assert.equal(
-    h.calls.at(-1)?.filter(p => p.includes("Restore_CNN")).length,
-    modes.anime4kChain("D:/shaders", "A", "hq").filter(p => p.includes("Restore_CNN")).length,
+    h.calls.at(-1)?.filter((p) => p.includes("Restore_CNN")).length,
+    modes.anime4kChain("D:/shaders", "A", "hq").filter((p) => p.includes("Restore_CNN")).length,
   );
   // A small source on a large display keeps the requested AA chain.
   h.settings.playerAnime4kOverride = "AA";
@@ -186,7 +227,7 @@ test("the runtime gate uses the decoded size, not the display width", () => {
 test("upstream chain order is used for every mode", () => {
   const h = fixture();
   const files = (mode: Parameters<typeof modes.anime4kChain>[1], tier: "hq" | "fast") =>
-    modes.anime4kChain("D:/shaders", mode, tier).map(p => p.split("/").pop()!);
+    modes.anime4kChain("D:/shaders", mode, tier).map((p) => p.split("/").pop()!);
   const clamp = "Anime4K_Clamp_Highlights.glsl";
   const d2 = "Anime4K_AutoDownscalePre_x2.glsl";
   const d4 = "Anime4K_AutoDownscalePre_x4.glsl";
@@ -239,10 +280,10 @@ test("the pack is topped up once per run and only when it is incomplete", async 
     { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } },
   ).outputText;
   const api = {} as typeof import("../src/lib/anime4k");
-  new Function("require", "exports", compiled)(
-    (id: string) => { assert.ok(id in mods, id); return mods[id]; },
-    api,
-  );
+  new Function("require", "exports", compiled)((id: string) => {
+    assert.ok(id in mods, id);
+    return mods[id];
+  }, api);
   assert.equal(await api.anime4kPackComplete(), false);
   await api.repairAnime4kPack();
   // Both are memoized, so later players reuse the answer instead of re-probing.
@@ -264,7 +305,7 @@ test("catalog shaders that feed an upscale run before Anime4K", () => {
     srcWidth: 1080,
     displayWidth: 3840,
   });
-  const idx = (needle: string) => chain.findIndex(p => p.includes(needle));
+  const idx = (needle: string) => chain.findIndex((p) => p.includes(needle));
   const clamp = idx("Clamp_Highlights");
   assert.ok(clamp > -1, `Anime4K is present: ${JSON.stringify(chain)}`);
   assert.ok(idx("FSRCNNX") < clamp, `prescale upscaler runs first: ${JSON.stringify(chain)}`);

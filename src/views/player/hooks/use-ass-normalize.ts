@@ -48,7 +48,8 @@ export function useAssNormalize(params: {
   const liveRef = useRef({ sourceUrl, track, tracks, headers });
   liveRef.current = { sourceUrl, track, tracks, headers };
   const [factor, setFactor] = useState<number | null>(null);
-  const key = enabled && sourceUrl && track ? `${sourceUrl}|${track.id}|${track.external ? 1 : 0}` : "";
+  const key =
+    enabled && sourceUrl && track ? `${sourceUrl}|${track.id}|${track.external ? 1 : 0}` : "";
 
   useEffect(() => {
     if (!key) {

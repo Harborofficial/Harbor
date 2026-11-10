@@ -2,12 +2,14 @@ export default {
   "games.minecraft.discovery.viewAll": "Смотреть все",
   "games.minecraft.discovery.searchCurseForge": "Поиск в CurseForge",
   "games.minecraft.discovery.downloads": "Загрузки",
-  "games.minecraft.discovery.curseForgeBlocked": "CurseForge сейчас не разрешает Harbor загрузить этот каталог. Повторите попытку или откройте источник.",
+  "games.minecraft.discovery.curseForgeBlocked":
+    "CurseForge сейчас не разрешает Harbor загрузить этот каталог. Повторите попытку или откройте источник.",
   "games.minecraft.discovery.unavailable": "Не удалось загрузить каталог. Повторите попытку.",
   "games.minecraft.discovery.openSource": "Открыть сайт источника",
   "games.minecraft.discovery.loadMore": "Загрузить ещё",
   "games.minecraft.discovery.servers": "Серверы",
-  "games.minecraft.discovery.serverNote": "Независимые каталоги. Harbor не связан с этими сайтами и серверами. Числа предоставлены каждым каталогом.",
+  "games.minecraft.discovery.serverNote":
+    "Независимые каталоги. Harbor не связан с этими сайтами и серверами. Числа предоставлены каждым каталогом.",
   "games.minecraft.discovery.searchServers": "Поиск среди загруженных серверов",
   "games.minecraft.discovery.directory": "Каталог",
   "games.minecraft.discovery.mode": "Режим игры",
@@ -15,7 +17,8 @@ export default {
   "games.minecraft.discovery.directoryRank": "Рейтинг каталога",
   "games.minecraft.discovery.playersLoaded": "Игроки · загруженные серверы",
   "games.minecraft.discovery.loaded": "Загружено серверов: {count}",
-  "games.minecraft.discovery.noLoadedMatches": "Среди загруженных серверов совпадений нет. Загрузите ещё или измените запрос.",
+  "games.minecraft.discovery.noLoadedMatches":
+    "Среди загруженных серверов совпадений нет. Загрузите ещё или измените запрос.",
   "games.minecraft.discovery.copy": "Копировать {address}",
   "games.minecraft.discovery.copied": "Адрес скопирован",
   "games.minecraft.discovery.copyError": "Не удалось скопировать. Выделите адрес для копирования.",
@@ -38,12 +41,15 @@ export default {
   "games.minecraft.lifecycle.worlds": "Включить миры",
   "games.minecraft.lifecycle.settings": "Включить управление и список серверов",
   "games.minecraft.lifecycle.exportNote": "Создай переносимый файл .mrpack с модами и настройками.",
-  "games.minecraft.lifecycle.privateNote": "Данные аккаунта Harbor, файлы запуска и журналы исключены. Проверь настройки модов перед публикацией.",
+  "games.minecraft.lifecycle.privateNote":
+    "Данные аккаунта Harbor, файлы запуска и журналы исключены. Проверь настройки модов перед публикацией.",
   "games.minecraft.lifecycle.included": "Включённые файлы",
   "games.minecraft.lifecycle.referenced": "Ссылки на загрузку",
-  "games.minecraft.lifecycle.referenceNote": "Проверенные файлы поставщика скачиваются при импорте. Изменённые и локальные файлы включаются в архив.",
+  "games.minecraft.lifecycle.referenceNote":
+    "Проверенные файлы поставщика скачиваются при импорте. Изменённые и локальные файлы включаются в архив.",
   "games.minecraft.lifecycle.edit": "Изменить выбор",
-  "games.minecraft.lifecycle.storageNote": "Предыдущие версии, сохранённые при обновлении. Последнюю копию можно восстановить в разделе версий модпака.",
+  "games.minecraft.lifecycle.storageNote":
+    "Предыдущие версии, сохранённые при обновлении. Последнюю копию можно восстановить в разделе версий модпака.",
   "games.minecraft.lifecycle.latest": "Текущая точка восстановления",
   "games.minecraft.lifecycle.reviewCopy": "Проверить {version}",
   "games.minecraft.lifecycle.review": "Проверить файлы",
@@ -51,10 +57,13 @@ export default {
   "games.minecraft.lifecycle.unreadable": "Нечитаемые копии ({count}) останутся без изменений.",
   "games.minecraft.lifecycle.removeNote": "Проверь сборку и её копии перед перемещением в корзину.",
   "games.minecraft.lifecycle.worldCount": "Миры: {count}",
-  "games.minecraft.lifecycle.latestNote": "Удаление этой копии уберёт текущую точку восстановления. Активная сборка не изменится.",
+  "games.minecraft.lifecycle.latestNote":
+    "Удаление этой копии уберёт текущую точку восстановления. Активная сборка не изменится.",
   "games.minecraft.lifecycle.copiesIncluded": "Копий для восстановления: {count}.",
-  "games.minecraft.lifecycle.trashNote": "Перемести файлы в системную корзину. Место освободится после её очистки.",
-  "games.minecraft.lifecycle.undoNote": "Чтобы отменить, восстанови исходные папки из системной корзины.",
+  "games.minecraft.lifecycle.trashNote":
+    "Перемести файлы в системную корзину. Место освободится после её очистки.",
+  "games.minecraft.lifecycle.undoNote":
+    "Чтобы отменить, восстанови исходные папки из системной корзины.",
   "games.minecraft.lifecycle.trash": "В корзину",
   "games.minecraft.lifecycle.save": "Сохранить модпак",
   "games.minecraft.lifecycle.exported": "Модпак экспортирован",
@@ -65,15 +74,19 @@ export default {
   "games.minecraft.lifecycle.choosing": "Выбери место сохранения…",
   "games.minecraft.lifecycle.exporting": "Экспорт модпака…",
   "games.minecraft.lifecycle.removing": "Перемещение файлов в корзину…",
-  "games.minecraft.lifecycle.trashError": "Не удалось переместить все папки в корзину. Обнови, чтобы увидеть текущее состояние.",
+  "games.minecraft.lifecycle.trashError":
+    "Не удалось переместить все папки в корзину. Обнови, чтобы увидеть текущее состояние.",
   "games.minecraft.lifecycle.pathError": "Выбери файл .mrpack вне библиотеки сборок.",
   "games.minecraft.lifecycle.existsError": "Такой файл уже существует. Выбери другое имя.",
-  "games.minecraft.lifecycle.limitError": "Экспорт превышает лимит архива 256 МБ. Попробуй без миров.",
+  "games.minecraft.lifecycle.limitError":
+    "Экспорт превышает лимит архива 256 МБ. Попробуй без миров.",
 
-  "games.minecraft.update.compatibilityError": "Эти моды несовместимы с выбранными версиями Minecraft и загрузчика. Текущий экземпляр не изменён.",
+  "games.minecraft.update.compatibilityError":
+    "Эти моды несовместимы с выбранными версиями Minecraft и загрузчика. Текущий экземпляр не изменён.",
   "games.minecraft.update.title": "Версии сборки",
   "games.minecraft.update.complete": "Версия сборки готова",
-  "games.minecraft.update.completeNote": "Миры и личные настройки сохранены. Перед игрой проверьте настройку игры.",
+  "games.minecraft.update.completeNote":
+    "Миры и личные настройки сохранены. Перед игрой проверьте настройку игры.",
   "games.minecraft.update.installed": "Установлена",
   "games.minecraft.update.loading": "Загрузка версий сборки…",
   "games.minecraft.update.version": "Версия сборки",
@@ -82,13 +95,17 @@ export default {
   "games.minecraft.update.localNote": "Выберите локальный файл .mrpack для просмотра обновления.",
   "games.minecraft.update.chooseFile": "Выбрать файл .mrpack",
   "games.minecraft.update.restoreVersion": "Восстановить {version}",
-  "games.minecraft.update.reviewNote": "Просмотрите все изменения перед применением. Harbor сохраняет отдельную копию предыдущего экземпляра.",
+  "games.minecraft.update.reviewNote":
+    "Просмотрите все изменения перед применением. Harbor сохраняет отдельную копию предыдущего экземпляра.",
   "games.minecraft.update.changeVersion": "Сменить версию",
   "games.minecraft.update.download": "Загрузка",
   "games.minecraft.update.recoveryCopy": "Копия для восстановления",
-  "games.minecraft.update.loaderConflict": "Дополнительные моды нельзя переносить между разными загрузчиками. Удалите их перед сменой загрузчика.",
-  "games.minecraft.update.conflictNote": "Некоторые файлы сборки пересекаются с изменёнными или отдельно управляемыми модами. Устраните конфликты перед применением.",
-  "games.minecraft.update.environmentNote": "Версия Minecraft или загрузчика изменится. После этого проверьте настройку игры.",
+  "games.minecraft.update.loaderConflict":
+    "Дополнительные моды нельзя переносить между разными загрузчиками. Удалите их перед сменой загрузчика.",
+  "games.minecraft.update.conflictNote":
+    "Некоторые файлы сборки пересекаются с изменёнными или отдельно управляемыми модами. Устраните конфликты перед применением.",
+  "games.minecraft.update.environmentNote":
+    "Версия Minecraft или загрузчика изменится. После этого проверьте настройку игры.",
   "games.minecraft.update.fileGroups": "Файлы сборки",
   "games.minecraft.update.changes": "Изменения",
   "games.minecraft.update.preserved": "Сохранённые",
@@ -100,7 +117,8 @@ export default {
   "games.minecraft.update.action.conflict": "Конфликт",
   "games.minecraft.update.noChanges": "В этом разделе нет файлов.",
   "games.minecraft.update.extraMods": "Сохранено дополнительных модов: {count}",
-  "games.minecraft.update.preserveNote": "Существующие миры, личные настройки и изменённые конфигурации сохраняются. Восстановление версии также сохраняет текущий прогресс.",
+  "games.minecraft.update.preserveNote":
+    "Существующие миры, личные настройки и изменённые конфигурации сохраняются. Восстановление версии также сохраняет текущий прогресс.",
   "games.minecraft.update.chooseOriginal": "Выбрать исходный .mrpack",
   "games.minecraft.update.originalSelected": "Исходная сборка выбрана",
   "games.minecraft.update.footer": "Текущий экземпляр остаётся доступным до готовности изменений.",
@@ -111,11 +129,14 @@ export default {
   "games.minecraft.update.phase.copy": "Создание копии для восстановления…",
   "games.minecraft.update.phase.commit": "Завершение смены версии…",
   "games.minecraft.update.running": "Закройте этот экземпляр Minecraft перед сменой версии сборки.",
-  "games.minecraft.update.recoveryError": "Не удалось проверить файлы восстановления. Существующие папки сохранены.",
+  "games.minecraft.update.recoveryError":
+    "Не удалось проверить файлы восстановления. Существующие папки сохранены.",
   "games.minecraft.update.sourceError": "Выберите версию той же сборки модов.",
-  "games.minecraft.update.originalError": "Для этой старой локальной установки нужен исходный файл .mrpack, чтобы определить файлы сборки.",
+  "games.minecraft.update.originalError":
+    "Для этой старой локальной установки нужен исходный файл .mrpack, чтобы определить файлы сборки.",
   "games.minecraft.update.previousError": "Предыдущая версия сборки недоступна.",
-  "games.minecraft.update.spaceError": "Не удалось подтвердить наличие места для копии и новых файлов. Проверьте диск и повторите попытку.",
+  "games.minecraft.update.spaceError":
+    "Не удалось подтвердить наличие места для копии и новых файлов. Проверьте диск и повторите попытку.",
   "games.minecraft.creation.style": "Стиль игры",
   "games.minecraft.creation.vanillaNote": "Оригинальный Minecraft.",
   "games.minecraft.creation.fabricNote": "Соберите собственный набор модов.",
@@ -123,19 +144,28 @@ export default {
   "games.minecraft.creation.loading": "Поиск совместимых версий {loader}…",
   "games.minecraft.creation.version": "Версия {loader} Loader",
   "games.minecraft.creation.preview": "Предварительная",
-  "games.minecraft.creation.unavailable": "{loader} недоступен для Minecraft {version}. Выберите другую версию или Vanilla.",
-  "games.minecraft.creation.note": "Создаёт отдельную папку игры. Файлы игры и Java подготавливаются в настройке игры.",
+  "games.minecraft.creation.unavailable":
+    "{loader} недоступен для Minecraft {version}. Выберите другую версию или Vanilla.",
+  "games.minecraft.creation.note":
+    "Создаёт отдельную папку игры. Файлы игры и Java подготавливаются в настройке игры.",
   "games.minecraft.creation.creating": "Создание экземпляра…",
-  "games.minecraft.creation.versionError": "Эта версия загрузчика недоступна для выбранной версии Minecraft. Обновите список и повторите попытку.",
+  "games.minecraft.creation.versionError":
+    "Эта версия загрузчика недоступна для выбранной версии Minecraft. Обновите список и повторите попытку.",
   "games.minecraft.content.title": "Управление модами",
-  "games.minecraft.content.compatible": "Моды Fabric для Minecraft {version}. Проверьте изменения перед установкой.",
+  "games.minecraft.content.compatible":
+    "Моды Fabric для Minecraft {version}. Проверьте изменения перед установкой.",
   "games.minecraft.content.search": "Поиск модов",
   "games.minecraft.content.packFiles": "Файлы сборки и другие",
-  "games.minecraft.content.packFilesNote": "Включены в сборку или добавлены вне этого менеджера. Здесь доступны только для чтения.",
-  "games.minecraft.content.empty": "Добавьте совместимые моды через каталог. Они будут установлены в этот экземпляр.",
-  "games.minecraft.content.ready": "Моды готовы в {name}. Закройте эту панель и откройте настройку игры, чтобы играть.",
-  "games.minecraft.content.reviewNote": "Изменения применяются к этому экземпляру. Миры и настройки сохраняются.",
-  "games.minecraft.content.running": "Закройте этот экземпляр Minecraft перед изменением модов и повторите попытку.",
+  "games.minecraft.content.packFilesNote":
+    "Включены в сборку или добавлены вне этого менеджера. Здесь доступны только для чтения.",
+  "games.minecraft.content.empty":
+    "Добавьте совместимые моды через каталог. Они будут установлены в этот экземпляр.",
+  "games.minecraft.content.ready":
+    "Моды готовы в {name}. Закройте эту панель и откройте настройку игры, чтобы играть.",
+  "games.minecraft.content.reviewNote":
+    "Изменения применяются к этому экземпляру. Миры и настройки сохраняются.",
+  "games.minecraft.content.running":
+    "Закройте этот экземпляр Minecraft перед изменением модов и повторите попытку.",
   "games.minecraft.launch.play": "Играть",
   "games.minecraft.launch.account": "Аккаунт Minecraft",
   "games.minecraft.launch.accountNote": "Играть с этим аккаунтом.",
@@ -153,11 +183,16 @@ export default {
   "games.minecraft.launch.failed": "Игра завершилась с кодом {code}.",
   "games.minecraft.launch.log": "Журнал игры",
   "games.minecraft.launch.noLog": "Журнал этой сессии недоступен.",
-  "games.minecraft.launch.filesError": "Некоторые файлы игры отсутствуют или изменены. Проверьте файлы и повторите попытку.",
-  "games.minecraft.launch.argumentsError": "Конфигурация запуска этой версии пока не поддерживается.",
-  "games.minecraft.launch.startError": "Не удалось запустить Minecraft. Проверьте Java и повторите попытку.",
-  "games.minecraft.launch.stateError": "Не удалось проверить запущенную игру. Повторите попытку перед запуском.",
-  "games.minecraft.launch.limitError": "Закройте запущенный экземпляр Minecraft перед запуском другого.",
+  "games.minecraft.launch.filesError":
+    "Некоторые файлы игры отсутствуют или изменены. Проверьте файлы и повторите попытку.",
+  "games.minecraft.launch.argumentsError":
+    "Конфигурация запуска этой версии пока не поддерживается.",
+  "games.minecraft.launch.startError":
+    "Не удалось запустить Minecraft. Проверьте Java и повторите попытку.",
+  "games.minecraft.launch.stateError":
+    "Не удалось проверить запущенную игру. Повторите попытку перед запуском.",
+  "games.minecraft.launch.limitError":
+    "Закройте запущенный экземпляр Minecraft перед запуском другого.",
   "games.minecraft.java.title": "Java для этого экземпляра",
   "games.minecraft.java.note": "Этой версии Minecraft нужна Java {version}.",
   "games.minecraft.java.managed": "Установить через Harbor",
@@ -177,10 +212,12 @@ export default {
   "games.minecraft.java.choose": "Выберите исполняемый файл Java",
   "games.minecraft.java.versionError": "Выберите Java {version} для вашей системы.",
   "games.minecraft.java.invalidError": "Не удалось проверить эту установку Java.",
-  "games.minecraft.java.metadataError": "Не удалось проверить совместимую загрузку Java. Повторите попытку.",
+  "games.minecraft.java.metadataError":
+    "Не удалось проверить совместимую загрузку Java. Повторите попытку.",
   "games.minecraft.java.managedNote": "Harbor хранит эту версию в вашей библиотеке Minecraft.",
   "games.minecraft.runtime.setup": "Настроить игру",
-  "games.minecraft.runtime.note": "Установите официальные файлы игры для этого экземпляра. Ваши миры и моды останутся на месте.",
+  "games.minecraft.runtime.note":
+    "Установите официальные файлы игры для этого экземпляра. Ваши миры и моды останутся на месте.",
   "games.minecraft.runtime.gameFiles": "Файлы Minecraft",
   "games.minecraft.runtime.fileCount": "Необходимых файлов: {count}",
   "games.minecraft.runtime.java": "Java {version}",
@@ -190,14 +227,18 @@ export default {
   "games.minecraft.runtime.installing": "Установка файлов Minecraft…",
   "games.minecraft.runtime.progress": "Файлы: {done} из {total}",
   "games.minecraft.runtime.ready": "Файлы игры готовы",
-  "games.minecraft.runtime.readyNote": "Файлы проверены. Для игры ещё нужны Java {version} и подключённая учётная запись Minecraft.",
+  "games.minecraft.runtime.readyNote":
+    "Файлы проверены. Для игры ещё нужны Java {version} и подключённая учётная запись Minecraft.",
   "games.minecraft.runtime.preserved": "Ваши миры и моды не изменены.",
   "games.minecraft.runtime.resumeNote": "Завершённые загрузки сохраняются при отмене.",
   "games.minecraft.runtime.install": "Установить файлы",
   "games.minecraft.runtime.verify": "Проверить файлы",
-  "games.minecraft.runtime.metadataError": "Не удалось проверить файлы игры. Повторите попытку позже.",
-  "games.minecraft.runtime.legacyError": "Эта версия использует формат установки или запуска, который Harbor пока не поддерживает.",
-  "games.minecraft.runtime.loaderError": "Формат установки этого загрузчика пока не поддерживается.",
+  "games.minecraft.runtime.metadataError":
+    "Не удалось проверить файлы игры. Повторите попытку позже.",
+  "games.minecraft.runtime.legacyError":
+    "Эта версия использует формат установки или запуска, который Harbor пока не поддерживает.",
+  "games.minecraft.runtime.loaderError":
+    "Формат установки этого загрузчика пока не поддерживается.",
   "games.minecraft.runtime.platformError": "Настройка игры пока не поддерживается в этой системе.",
   "games.minecraft.runtime.versionError": "Эта версия Minecraft не найдена в официальном каталоге.",
   "games.minecraft.instances.tab": "Сборки",
@@ -205,59 +246,76 @@ export default {
   "games.minecraft.instances.note": "Отдельные миры, моды и настройки для каждой сборки.",
   "games.minecraft.instances.import": "Импортировать сборку",
   "games.minecraft.instances.create": "Создать сборку",
-  "games.minecraft.instances.desktop": "Откройте настольный Harbor, чтобы создавать локальные сборки и управлять ими.",
+  "games.minecraft.instances.desktop":
+    "Откройте настольный Harbor, чтобы создавать локальные сборки и управлять ими.",
   "games.minecraft.instances.search": "Поиск своих сборок",
   "games.minecraft.instances.storage": "Папка хранения",
   "games.minecraft.instances.chooseFolder": "Выбрать папку",
-  "games.minecraft.instances.unreadable": "Не удалось прочитать записи сборок: {count}. Их файлы не изменены.",
+  "games.minecraft.instances.unreadable":
+    "Не удалось прочитать записи сборок: {count}. Их файлы не изменены.",
   "games.minecraft.instances.files": "Файлов: {count}",
   "games.minecraft.instances.newWorld": "Новая сборка",
-  "games.minecraft.instances.runtimeNeeded": "Перед игрой ещё нужно установить файлы игры и среду Java.",
+  "games.minecraft.instances.runtimeNeeded":
+    "Перед игрой ещё нужно установить файлы игры и среду Java.",
   "games.minecraft.instances.openFolder": "Открыть папку",
   "games.minecraft.instances.renameName": "Переименовать {name}",
   "games.minecraft.instances.noMatches": "Подходящих сборок нет",
   "games.minecraft.instances.empty": "Начните новый мир.",
   "games.minecraft.instances.noMatchesNote": "Попробуйте другое название, версию или загрузчик.",
-  "games.minecraft.instances.emptyNote": "Создайте свою конфигурацию или импортируйте модпак сообщества в отдельную папку.",
+  "games.minecraft.instances.emptyNote":
+    "Создайте свою конфигурацию или импортируйте модпак сообщества в отдельную папку.",
   "games.minecraft.instances.clear": "Очистить поиск",
   "games.minecraft.instances.browse": "Обзор модпаков",
   "games.minecraft.instances.rename": "Переименовать сборку",
   "games.minecraft.instances.review": "Проверить модпак",
   "games.minecraft.instances.name": "Название сборки",
-  "games.minecraft.instances.createNote": "Создаёт отдельную папку Vanilla для этой версии. Игра и Java устанавливаются отдельно.",
+  "games.minecraft.instances.createNote":
+    "Создаёт отдельную папку Vanilla для этой версии. Игра и Java устанавливаются отдельно.",
   "games.minecraft.instances.contents": "Содержимое модпака",
   "games.minecraft.instances.filterFiles": "Фильтр файлов",
   "games.minecraft.instances.optional": "Необязательный",
   "games.minecraft.instances.filterMore": "Ещё файлов: {count}. Уточните фильтр, чтобы увидеть их.",
   "games.minecraft.instances.overrides": "Включены файлы конфигурации и замены: {count}.",
   "games.minecraft.instances.skipped": "Пропущены файлы только для сервера: {count}.",
-  "games.minecraft.instances.verifyNote": "Загрузки сверяются с хешами файлов модпака. Существующие миры и сборки остаются отдельно.",
+  "games.minecraft.instances.verifyNote":
+    "Загрузки сверяются с хешами файлов модпака. Существующие миры и сборки остаются отдельно.",
   "games.minecraft.instances.reviewAgain": "Проверить снова",
   "games.minecraft.instances.loadingVersions": "Загрузка версий Minecraft…",
   "games.minecraft.instances.added": "Добавлено в ваши сборки",
-  "games.minecraft.instances.storageNote": "Выберите место для сборок Minecraft. У каждого профиля Harbor здесь будет своя папка.",
+  "games.minecraft.instances.storageNote":
+    "Выберите место для сборок Minecraft. У каждого профиля Harbor здесь будет своя папка.",
   "games.minecraft.instances.isolated": "Установка в новую отдельную сборку.",
   "games.minecraft.instances.cancelling": "Отмена…",
   "games.minecraft.instances.install": "Установить файлы модпака",
   "games.minecraft.instances.save": "Сохранить название",
-  "games.minecraft.instances.packNote": "Проверьте новейший подходящий релиз или выберите другой в разделе Версии.",
+  "games.minecraft.instances.packNote":
+    "Проверьте новейший подходящий релиз или выберите другой в разделе Версии.",
   "games.minecraft.instances.phase.pack": "Загрузка модпака…",
   "games.minecraft.instances.phase.review": "Чтение содержимого…",
   "games.minecraft.instances.phase.files": "Установка файлов…",
   "games.minecraft.instances.phase.overrides": "Применение конфигурации…",
   "games.minecraft.instances.phase.done": "Файлы установлены",
-  "games.minecraft.instances.folderError": "Выберите доступную локальную папку для этого профиля Harbor.",
-  "games.minecraft.instances.writeError": "Не удалось записать сборку. Проверьте права на папку и свободное место.",
-  "games.minecraft.instances.readError": "Не удалось прочитать сборку. Проверьте подключение диска и доступность файлов.",
-  "games.minecraft.instances.networkError": "Загрузка не удалась. Проверьте соединение и проверьте модпак снова.",
+  "games.minecraft.instances.folderError":
+    "Выберите доступную локальную папку для этого профиля Harbor.",
+  "games.minecraft.instances.writeError":
+    "Не удалось записать сборку. Проверьте права на папку и свободное место.",
+  "games.minecraft.instances.readError":
+    "Не удалось прочитать сборку. Проверьте подключение диска и доступность файлов.",
+  "games.minecraft.instances.networkError":
+    "Загрузка не удалась. Проверьте соединение и проверьте модпак снова.",
   "games.minecraft.instances.rateLimit": "Сервис занят. Подождите немного и повторите попытку.",
-  "games.minecraft.instances.integrityError": "Файл не совпадает с контрольной суммой модпака. В библиотеку ничего не добавлено.",
-  "games.minecraft.instances.changedError": "Модпак изменился или срок проверки истёк. Проверьте его снова.",
+  "games.minecraft.instances.integrityError":
+    "Файл не совпадает с контрольной суммой модпака. В библиотеку ничего не добавлено.",
+  "games.minecraft.instances.changedError":
+    "Модпак изменился или срок проверки истёк. Проверьте его снова.",
   "games.minecraft.instances.formatError": "Это некорректный или неподдерживаемый архив .mrpack.",
-  "games.minecraft.instances.loaderError": "Модпак использует неизвестный или конфликтующий загрузчик.",
-  "games.minecraft.instances.sourceError": "Модпаку нужен источник загрузки, который Harbor не поддерживает.",
+  "games.minecraft.instances.loaderError":
+    "Модпак использует неизвестный или конфликтующий загрузчик.",
+  "games.minecraft.instances.sourceError":
+    "Модпаку нужен источник загрузки, который Harbor не поддерживает.",
   "games.minecraft.instances.limitError": "Модпак или библиотека превышает допустимый размер.",
-  "games.minecraft.instances.busyError": "Другая операция со сборкой ещё выполняется. Дождитесь её завершения или отмените.",
+  "games.minecraft.instances.busyError":
+    "Другая операция со сборкой ещё выполняется. Дождитесь её завершения или отмените.",
   "games.minecraft.instances.error": "Не удалось завершить операцию. Попробуйте снова.",
   "games.minecraft.catalog.updated": "Обновлено",
   "games.minecraft.catalog.gameVersion": "Версия Minecraft",
@@ -282,9 +340,11 @@ export default {
   "games.minecraft.catalog.allVersions": "Все версии",
   "games.minecraft.catalog.allLoaders": "Все загрузчики",
   "games.minecraft.catalog.sort": "Сортировка",
-  "games.minecraft.catalog.filterError": "Часть фильтров не загрузилась. Проекты всё ещё можно просматривать.",
+  "games.minecraft.catalog.filterError":
+    "Часть фильтров не загрузилась. Проекты всё ещё можно просматривать.",
   "games.minecraft.catalog.results": "Проектов: {count}",
-  "games.minecraft.catalog.empty": "Подходящих проектов нет. Попробуйте другую версию или категорию.",
+  "games.minecraft.catalog.empty":
+    "Подходящих проектов нет. Попробуйте другую версию или категорию.",
   "games.minecraft.catalog.project": "О проекте",
   "games.minecraft.catalog.about": "Описание",
   "games.minecraft.catalog.versions": "Версии",
@@ -297,21 +357,26 @@ export default {
   "games.minecraft.catalog.issues": "Сообщить о проблеме",
   "games.minecraft.catalog.wiki": "Вики",
   "games.minecraft.catalog.linkError": "Не удалось открыть ссылку.",
-  "games.minecraft.catalog.manageNote": "Проверьте совместимые файлы и зависимости в подключённой папке модов Fabric.",
+  "games.minecraft.catalog.manageNote":
+    "Проверьте совместимые файлы и зависимости в подключённой папке модов Fabric.",
   "games.minecraft.catalog.manage": "Управлять в модах",
   "games.minecraft.catalog.discover": "Обзор",
   "games.minecraft.account.signIn": "Войти",
   "games.minecraft.account.title": "Ваш аккаунт Minecraft",
-  "games.minecraft.account.intro": "Подключите Microsoft, чтобы видеть скин и плащи Minecraft и применять свои работы.",
-  "games.minecraft.account.desktop": "Откройте Harbor для компьютера, чтобы подключить аккаунт Minecraft.",
-  "games.minecraft.account.setup": "В этой сборке Harbor вход через Microsoft ещё не настроен. Скины можно редактировать локально.",
+  "games.minecraft.account.intro":
+    "Подключите Microsoft, чтобы видеть скин и плащи Minecraft и применять свои работы.",
+  "games.minecraft.account.desktop":
+    "Откройте Harbor для компьютера, чтобы подключить аккаунт Minecraft.",
+  "games.minecraft.account.setup":
+    "В этой сборке Harbor вход через Microsoft ещё не настроен. Скины можно редактировать локально.",
   "games.minecraft.account.codeNote": "Введите этот код на странице входа Microsoft.",
   "games.minecraft.account.copy": "Копировать код",
   "games.minecraft.account.openMicrosoft": "Продолжить в Microsoft",
   "games.minecraft.account.waiting": "Ожидание завершения входа…",
   "games.minecraft.account.openManually": "Откройте этот адрес в браузере:",
   "games.minecraft.account.capes": "Ваши плащи",
-  "games.minecraft.account.capeNote": "Плащи этого аккаунта Minecraft. Выберите плащ для просмотра.",
+  "games.minecraft.account.capeNote":
+    "Плащи этого аккаунта Minecraft. Выберите плащ для просмотра.",
   "games.minecraft.account.noCape": "Без плаща",
   "games.minecraft.account.applyCape": "Применить плащ",
   "games.minecraft.account.noSkin": "Предпросмотр скина аккаунта недоступен.",
@@ -319,16 +384,21 @@ export default {
   "games.minecraft.account.editCurrent": "Редактировать скин аккаунта",
   "games.minecraft.account.applySkin": "Применить в Minecraft",
   "games.minecraft.account.applied": "Применено в Minecraft.",
-  "games.minecraft.account.network": "Не удалось связаться со службой аккаунтов. Попробуйте чуть позже.",
+  "games.minecraft.account.network":
+    "Не удалось связаться со службой аккаунтов. Попробуйте чуть позже.",
   "games.minecraft.account.rateLimit": "Слишком много запросов. Немного подождите.",
   "games.minecraft.account.reconnect": "Войдите снова, чтобы восстановить подключение.",
   "games.minecraft.account.expired": "Код входа истёк. Начните заново, чтобы получить новый.",
   "games.minecraft.account.declined": "Вход отменён или отклонён.",
-  "games.minecraft.account.notOwned": "Для этого аккаунта нужны Minecraft: Java Edition и профиль Minecraft.",
+  "games.minecraft.account.notOwned":
+    "Для этого аккаунта нужны Minecraft: Java Edition и профиль Minecraft.",
   "games.minecraft.account.xbox": "Создайте профиль Xbox на сайте Xbox и попробуйте снова.",
-  "games.minecraft.account.restricted": "Настройки Microsoft или Xbox блокируют вход. Проверьте возраст, семейные ограничения и регион аккаунта.",
-  "games.minecraft.account.skinError": "Не удалось применить скин или плащ. Обновите аккаунт и повторите попытку.",
-  "games.minecraft.account.storeError": "Harbor не удалось безопасно сохранить аккаунт на устройстве.",
+  "games.minecraft.account.restricted":
+    "Настройки Microsoft или Xbox блокируют вход. Проверьте возраст, семейные ограничения и регион аккаунта.",
+  "games.minecraft.account.skinError":
+    "Не удалось применить скин или плащ. Обновите аккаунт и повторите попытку.",
+  "games.minecraft.account.storeError":
+    "Harbor не удалось безопасно сохранить аккаунт на устройстве.",
   "games.minecraft.account.error": "Запрос аккаунта не выполнен. Попробуйте снова.",
   "games.minecraft.studio": "Мастерская скинов",
   "games.minecraft.skinTitle": "Ваш собственный стиль.",
@@ -363,14 +433,17 @@ export default {
   "games.minecraft.library": "Ваши скины",
   "games.minecraft.localNote": "Сохранены на этом устройстве для этого профиля Harbor.",
   "games.minecraft.new": "Новый скин",
-  "games.minecraft.empty": "Импортируйте скин или начните рисовать. Изменения сохраняются автоматически.",
+  "games.minecraft.empty":
+    "Импортируйте скин или начните рисовать. Изменения сохраняются автоматически.",
   "games.minecraft.delete": "Удалить {name}",
   "games.minecraft.saved": "Сохранено локально",
   "games.minecraft.saving": "Сохранение…",
   "games.minecraft.pixel": "Пиксель {x}, {y}: {color}",
   "games.minecraft.webgl": "3D-просмотр недоступен. Редактирование и экспорт по-прежнему доступны.",
-  "games.minecraft.errorImport": "Выберите PNG Minecraft размером 64 × 64 или 64 × 32, не более 1 МБ.",
-  "games.minecraft.errorSave": "Не удалось сохранить. Освободите место или удалите старый скин; библиотека вмещает 40.",
+  "games.minecraft.errorImport":
+    "Выберите PNG Minecraft размером 64 × 64 или 64 × 32, не более 1 МБ.",
+  "games.minecraft.errorSave":
+    "Не удалось сохранить. Освободите место или удалите старый скин; библиотека вмещает 40.",
   "games.minecraft.head": "Голова",
   "games.minecraft.body": "Туловище",
   "games.minecraft.rightArm": "Правая рука",
@@ -399,20 +472,26 @@ export default {
   "games.minecraft.release.optional": "Необязательная",
   "games.minecraft.release.incompatible": "Несовместимая",
   "games.minecraft.release.embedded": "Включена",
-  "games.minecraft.release.dependencyError": "Не удалось загрузить некоторые сведения о зависимостях.",
+  "games.minecraft.release.dependencyError":
+    "Не удалось загрузить некоторые сведения о зависимостях.",
   "games.minecraft.release.moreDependencies": "Показать ещё зависимости",
-  "games.minecraft.release.dependencyLimit": "Показано зависимостей: {count}. Полный список доступен на Modrinth.",
-  "games.minecraft.release.versionLimit": "Показано версий: {count}. Уточните фильтры, чтобы найти другие.",
+  "games.minecraft.release.dependencyLimit":
+    "Показано зависимостей: {count}. Полный список доступен на Modrinth.",
+  "games.minecraft.release.versionLimit":
+    "Показано версий: {count}. Уточните фильтры, чтобы найти другие.",
   "games.minecraft.release.release": "Релиз",
   "games.minecraft.release.beta": "Бета",
   "games.minecraft.release.alpha": "Альфа",
   "games.minecraft.creation.forgeNote": "Для модов и сборок Forge.",
   "games.minecraft.creation.neoforgeNote": "Для модов и сборок NeoForge.",
-  "games.minecraft.runtime.processorNote": "{loader} использует Java для подготовки файлов игры. Настройте Java перед установкой.",
+  "games.minecraft.runtime.processorNote":
+    "{loader} использует Java для подготовки файлов игры. Настройте Java перед установкой.",
   "games.minecraft.runtime.preparingLoader": "Подготовка {loader}…",
   "games.minecraft.runtime.processorProgress": "Шаг {done} из {total}",
-  "games.minecraft.runtime.processorError": "Загрузчик не смог завершить подготовку файлов. Повторите попытку: проверенные загрузки будут использованы снова.",
-  "games.minecraft.runtime.javaRequired": "Настройте совместимую версию Java и повторите установку.",
+  "games.minecraft.runtime.processorError":
+    "Загрузчик не смог завершить подготовку файлов. Повторите попытку: проверенные загрузки будут использованы снова.",
+  "games.minecraft.runtime.javaRequired":
+    "Настройте совместимую версию Java и повторите установку.",
   "games.minecraft.notes.title": "История изменений",
   "games.minecraft.notes.version": "Версия",
   "games.minecraft.notes.empty": "Автор ещё не опубликовал примечания к этой версии.",
@@ -427,4 +506,3 @@ export default {
   "games.minecraft.hub.curseforge": "Подборка CurseForge",
   "games.minecraft.hub.browseCurseforge": "Обзор CurseForge",
 } satisfies Record<string, string>;
-

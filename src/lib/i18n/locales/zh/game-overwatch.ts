@@ -15,8 +15,10 @@ export default {
   "games.overwatch.unavailable": "无法刷新指南。此前加载的信息可能仍会显示。",
   "games.overwatch.partial": "部分信息暂不可用。",
   "games.overwatch.checked": "检查时间：{date}",
-  "games.overwatch.scope": "通过 OverFast 获取的暴雪英雄资料。平衡性调整可能先于本指南更新在游戏中生效。",
-  "games.overwatch.mapsScope": "OverFast 提供的地图与模式资料。包含街机先锋和旧版地图，可用性因模式而异。",
+  "games.overwatch.scope":
+    "通过 OverFast 获取的暴雪英雄资料。平衡性调整可能先于本指南更新在游戏中生效。",
+  "games.overwatch.mapsScope":
+    "OverFast 提供的地图与模式资料。包含街机先锋和旧版地图，可用性因模式而异。",
   "games.overwatch.empty": "没有匹配结果。请更换搜索词或筛选条件。",
   "games.overwatch.moreHeroes": "更多英雄",
   "games.overwatch.moreMaps": "更多地图",
@@ -33,6 +35,5 @@ export default {
   "games.overwatch.videoFailed": "无法播放演示。请前往英雄官方页面观看。",
   "games.overwatch.mode": "游戏模式",
   "games.overwatch.allModes": "所有模式",
-  "games.overwatch.searchMaps": "搜索地图或地点"
+  "games.overwatch.searchMaps": "搜索地图或地点",
 };
-

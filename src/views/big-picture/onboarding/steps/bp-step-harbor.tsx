@@ -56,15 +56,7 @@ export function BpStepHarbor({ setSatisfied }: BpOnboardStepProps) {
   );
 }
 
-function Note({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
+function Note({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
     <div className="flex min-w-[min(100%,28ch)] flex-1 items-start gap-[clamp(11px,1.1vw,20px)] rounded-[var(--bp-r-md)] border border-[var(--bp-edge)] bg-[var(--bp-panel)] px-[clamp(15px,1.4vw,28px)] py-[clamp(13px,1.7vh,24px)]">
       <span className="shrink-0 text-ink-subtle">{icon}</span>

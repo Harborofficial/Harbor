@@ -473,7 +473,8 @@ const catalog: Record<string, string> = {
   "Live preview": "Pratinjau langsung",
   "Live preview is on. Done and Save both keep what you've picked as your Custom theme. Reset reverts the editor to the saved palette.":
     "Pratinjau langsung aktif. Selesai dan Simpan sama-sama mempertahankan pilihan Anda sebagai tema Kustom. Atur ulang mengembalikan editor ke palet tersimpan.",
-  "Live state of Harbor's own P2P engine on this machine.": "Status langsung mesin P2P milik Harbor di perangkat ini.",
+  "Live state of Harbor's own P2P engine on this machine.":
+    "Status langsung mesin P2P milik Harbor di perangkat ini.",
   "Live streams that actually work.": "Stream langsung yang benar-benar berfungsi.",
   "Live sync": "Sinkronisasi langsung",
   "Live web": "Web langsung",

@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "アジリティ",
   "games.dota.attribute.int": "インテリジェンス",
   "games.dota.attribute.all": "ユニバーサル",
-  "games.dota.trendsScope": "OpenDotaのサンプル：今日を含むUTCの7日間。ランクは試合の平均です。Turboとプロの試合は別集計です。",
+  "games.dota.trendsScope":
+    "OpenDotaのサンプル：今日を含むUTCの7日間。ランクは試合の平均です。Turboとプロの試合は別集計です。",
   "games.dota.wins": "勝率",
   "games.dota.picks": "{count} 回選択",
   "games.dota.noSample": "サンプルなし",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "さらに表示",
   "games.dota.matchups": "プロの対戦成績",
   "games.dota.refreshMatchups": "対戦成績を更新",
-  "games.dota.matchupsScope": "過去1年間に記録されたプロの試合での{hero}の各相手に対する勝率。過去のパッチを含み、ランクの絞り込みは適用されません。",
+  "games.dota.matchupsScope":
+    "過去1年間に記録されたプロの試合での{hero}の各相手に対する勝率。過去のパッチを含み、ランクの絞り込みは適用されません。",
   "games.dota.opponent": "対戦相手を検索",
   "games.dota.minimum": "最低試合数",
   "games.dota.minGames": "{count} 試合以上",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "レジェンド",
   "games.dota.sample.6": "エンシェント",
   "games.dota.sample.7": "ディヴァイン",
-  "games.dota.sample.8": "イモータル"
+  "games.dota.sample.8": "イモータル",
 };

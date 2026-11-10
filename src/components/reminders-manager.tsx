@@ -50,7 +50,9 @@ export function RemindersManagerButton({
           </div>
           {reminders.length === 0 ? (
             <p className="px-3.5 py-4 text-[12.5px] leading-snug text-ink-subtle">
-              {t("No reminders yet. Use the clock on a show's page to get told about new episodes and seasons.")}
+              {t(
+                "No reminders yet. Use the clock on a show's page to get told about new episodes and seasons.",
+              )}
             </p>
           ) : (
             <div className="max-h-[320px] overflow-y-auto py-1.5">

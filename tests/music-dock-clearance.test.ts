@@ -17,9 +17,7 @@ function topLevelBlock(css: string, selector: string): string {
 }
 
 test("the dock publishes its height for everything else to clear", () => {
-  assert.ok(
-    read("src/components/music/music-dock.tsx").includes('setProperty("--harbor-music-dock"'),
-  );
+  assert.match(read("src/components/music/music-dock.tsx"), /setProperty\(\s*"--harbor-music-dock"/);
 });
 
 test("settings content, rail and footer all clear the dock", () => {
@@ -27,7 +25,10 @@ test("settings content, rail and footer all clear the dock", () => {
   for (const selector of [".hset-main", ".hset-rail", ".hset-main:has(.hset-footer)"]) {
     assert.ok(topLevelBlock(css, selector).includes(GAP), selector + " sits under the music dock");
   }
-  assert.ok(topLevelBlock(css, ".hset-footer").includes("inset-block-end: 0"), "footer must not count the dock clearance twice");
+  assert.ok(
+    topLevelBlock(css, ".hset-footer").includes("inset-block-end: 0"),
+    "footer must not count the dock clearance twice",
+  );
 });
 
 test("the composite gap covers both the dock and any viewport lift", () => {

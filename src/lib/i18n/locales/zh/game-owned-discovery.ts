@@ -10,7 +10,8 @@ export default {
   "games.calendar.search": "搜索已收藏的游戏",
   "games.calendar.platform": "发售平台",
   "games.calendar.allPlatforms": "所有平台",
-  "games.calendar.dates": "发行商公布的日期可能变更。Steam 日期以美国商店为准；IGDB 记录会显示对应的平台和地区。",
+  "games.calendar.dates":
+    "发行商公布的日期可能变更。Steam 日期以美国商店为准；IGDB 记录会显示对应的平台和地区。",
   "games.calendar.noDays": "已检查的游戏中，没有游戏在{month}有明确的发售日。",
   "games.calendar.windows": "预计发售时段",
   "games.calendar.windowsNote": "这些计划涵盖本月，但尚未指定具体日期。",
@@ -58,5 +59,5 @@ export default {
   "games.owned.partial": "部分Steam文件夹无法检查。可能未能识别所有已安装的游戏。",
   "games.owned.results": "{count}款，共{total}款",
   "games.owned.playtimeNote": "游玩记录来自上次Steam同步。没有游玩时长记录并不代表游戏是否已通关。",
-  "games.owned.resetAvailability": "显示所有安装状态的游戏"
+  "games.owned.resetAvailability": "显示所有安装状态的游戏",
 };

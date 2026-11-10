@@ -1,13 +1,6 @@
 import { ScoreStack } from "./card-score-stack";
 import { Bookmark, Check } from "lucide-react";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TopTenRibbon } from "@/components/top-ten-ribbon";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useContextMenu, type MembershipContext } from "@/lib/context-menu";
@@ -24,10 +17,7 @@ import { useCardScoreState } from "@/components/use-card-score-state";
 import { needsImdbForPoster, needsTmdbForPoster, rpdbPoster } from "@/lib/providers/rpdb";
 import { useTitlePoster } from "@/lib/title-poster";
 import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime-mapping";
-import {
-  useTmdbIdFromImdb,
-  useTmdbImdbId,
-} from "@/lib/providers/tmdb";
+import { useTmdbIdFromImdb, useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { simklTitleDetail } from "@/lib/simkl/title-detail";
 import { getLocalCache } from "@/lib/simkl/activities";
@@ -48,9 +38,21 @@ import {
 import { CustomHoverOverlay, customHoverPosterProps } from "./pick-card/custom-hover";
 import { ExpandingCardArtwork, useExpandingCard } from "./pick-card/use-expanding-card";
 import { getCustomHover } from "@/lib/custom-hover";
-import { ClassicAwardBadge, ClassicAwardTab, useClassicAwardWin, AnimeAwardBadge, AnimeAwardTab } from "./card-award";
+import {
+  ClassicAwardBadge,
+  ClassicAwardTab,
+  useClassicAwardWin,
+  AnimeAwardBadge,
+  AnimeAwardTab,
+} from "./card-award";
 import { useCardSharedState } from "@/components/use-card-shared-state";
-import { CinemaBadge, RerunBadge, StatusBadge, KidsStarBadge, stackTop } from "@/components/card-status-badges";
+import {
+  CinemaBadge,
+  RerunBadge,
+  StatusBadge,
+  KidsStarBadge,
+  stackTop,
+} from "@/components/card-status-badges";
 import { findTopAward, parseAwardYear } from "@/lib/anime-awards";
 import { isCardAnimeId } from "@/lib/card-anime";
 
@@ -135,15 +137,15 @@ const PosterCard = memo(function PosterCard({
   const resolvedImdb = useTmdbImdbId(meta.id);
   const imdbId = resolvedImdb ?? undefined;
   const sharedCardState = useCardSharedState({ meta, settings, imdbId, flagRerun });
-  const { hasDub, showTop10, inCinema, rerun, newBadge, watched, inWatchlist, inLocalLibrary } = sharedCardState;
+  const { hasDub, showTop10, inCinema, rerun, newBadge, watched, inWatchlist, inLocalLibrary } =
+    sharedCardState;
   const showCinema = inCinema && !rerun;
   const hasStatusBadge = settings.showCardBadges && (rerun || showCinema || !!newBadge);
   const topLeftBadges = (hasDub ? 1 : 0) + (hasStatusBadge ? 1 : 0);
   const ribbonLeft = showTop10 && settings.top10RibbonSide === "left";
   const ribbonRight = showTop10 && settings.top10RibbonSide === "right";
   const awardYear = parseAwardYear(meta.releaseInfo);
-  const awardImdb =
-    !isAnimeCardId && settings.cardAwardDisplay !== "none" ? imdbId : undefined;
+  const awardImdb = !isAnimeCardId && settings.cardAwardDisplay !== "none" ? imdbId : undefined;
   const classicWin = useClassicAwardWin(meta, awardImdb);
   const animeAwardWin =
     settings.cardAwardDisplay !== "none" && isAnimeCardId
@@ -642,14 +644,14 @@ const PosterCard = memo(function PosterCard({
                 dubShift={hasDub}
                 ribbonShift={ribbonLeft}
               />
-            ): (
+            ) : (
               <ClassicAwardBadge
                 win={classicWin}
                 stacked={hasStatusBadge}
                 dubShift={hasDub}
                 ribbonShift={ribbonLeft}
-            />
-          ))}
+              />
+            ))}
           {settings.cardAwardDisplay === "tabs" && isAnimeCardId && (
             <AnimeAwardTab
               name={awardLookupName ?? meta.name}

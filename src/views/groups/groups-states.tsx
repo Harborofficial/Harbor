@@ -5,7 +5,11 @@ export function GroupsSkeleton({ count = 8 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="harbor-shimmer relative flex h-[148px] flex-col gap-3 rounded-lg p-4 ring-1 ring-edge-soft" style={{ ["--ai-delay" as string]: `${i * 90}ms` }}>
+        <div
+          key={i}
+          className="harbor-shimmer relative flex h-[148px] flex-col gap-3 rounded-lg p-4 ring-1 ring-edge-soft"
+          style={{ ["--ai-delay" as string]: `${i * 90}ms` }}
+        >
           <div className="flex items-center gap-3">
             <span className="h-12 w-12 shrink-0 rounded-full bg-elevated" />
             <span className="flex flex-1 flex-col gap-2">

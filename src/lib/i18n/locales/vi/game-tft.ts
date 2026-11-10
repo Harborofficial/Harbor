@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "Lưu đội hình",
   "games.tft.savedTeams": "Đội hình đã lưu",
   "games.tft.delete": "Xóa đội hình đã lưu",
-  "games.tft.note": "Mỗi tướng được tính một lần. Trang bị và hiệu ứng đặc biệt có thể thay đổi tộc hệ hoặc số ô đội hình.",
+  "games.tft.note":
+    "Mỗi tướng được tính một lần. Trang bị và hiệu ứng đặc biệt có thể thay đổi tộc hệ hoặc số ô đội hình.",
   "games.tft.saveFailed": "Không thể lưu trên thiết bị này. Đội hình hiện tại vẫn còn.",
   "games.tft.missing": "Một số tướng đã lưu không còn trong mùa này.",
   "games.tft.imported": "Đã nhập đội hình.",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Hồi máu",
   "games.tft.stat.set14AmpIcon": "Khuếch đại sát thương",
   "games.tft.stat.TFTManaRegen": "Hồi năng lượng",
-  "games.tft.stat.scaleSV": "Hút máu toàn phần"
+  "games.tft.stat.scaleSV": "Hút máu toàn phần",
 };

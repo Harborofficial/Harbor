@@ -1,9 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import {
-  musicPlaybackSourceAllowed,
-  musicSourceAllowed,
-} from "./source-consent";
+import { musicPlaybackSourceAllowed, musicSourceAllowed } from "./source-consent";
 import { appDataDir, audioDir, join } from "@tauri-apps/api/path";
 import { exists, mkdir, remove } from "@tauri-apps/plugin-fs";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
@@ -85,7 +82,10 @@ async function freeTarget(folder: string, name: string): Promise<string> {
   const stem = dot > 0 ? name.slice(0, dot) : name;
   const extension = dot > 0 ? name.slice(dot) : "";
   for (let attempt = 0; attempt < 50; attempt += 1) {
-    const candidate = await join(folder, attempt === 0 ? name : `${stem} (${attempt + 1})${extension}`);
+    const candidate = await join(
+      folder,
+      attempt === 0 ? name : `${stem} (${attempt + 1})${extension}`,
+    );
     if (!(await exists(candidate))) return candidate;
   }
   return join(folder, `${stem} ${Date.now()}${extension}`);
@@ -151,10 +151,7 @@ export async function downloadedMusicTrack(entry: MusicDownload): Promise<MusicT
     mediaKind: "audio",
   };
 }
-export async function downloadMusic(
-  track: MusicTrack,
-  withFilters = false,
-): Promise<void> {
+export async function downloadMusic(track: MusicTrack, withFilters = false): Promise<void> {
   const prior = musicDownloadFor(track);
   if (prior?.status === "downloading" || prior?.status === "done") return;
   if (

@@ -373,7 +373,8 @@ const catalog: Record<string, string> = {
     "Digunakan untuk ketersediaan streaming dan rentang rilis Sedang Diputar. Pilih negara agar Harbor dapat menyesuaikan bahasa antarmuka, metadata, dan subtitle dengannya.",
   "Used for your cursor in Watch Together, your draw color, and your name pill in chat.":
     "Digunakan untuk kursor Anda di Nonton Bersama, warna gambar, dan label nama Anda di obrolan.",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Digunakan untuk memeriksa cache dan membuka batasan tautan. Harbor tidak pernah menambahkan atau menghapus apa pun di akun Anda secara otomatis.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Digunakan untuk memeriksa cache dan membuka batasan tautan. Harbor tidak pernah menambahkan atau menghapus apa pun di akun Anda secara otomatis.",
   "Used to lift Time's Up and to leave the kids space.":
     "Digunakan untuk menonaktifkan Waktu Habis dan keluar dari ruang anak.",
   Usenet: "Usenet",
@@ -673,7 +674,8 @@ const catalog: Record<string, string> = {
     "Saat memutar episode berikutnya secara otomatis, gunakan rilis/sumber yang sama dengan yang baru saja Anda tonton, bukan stream peringkat teratas Harbor. Jika sumber itu tidak tersedia, stream terbaik akan digunakan.",
   "When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.":
     "Saat dalam layar penuh, Esc keluar dari layar penuh, bukan menutup pemutar. Tekan Esc lagi untuk menutup. Nonaktifkan agar Esc selalu menutup.",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "Jika dinonaktifkan, transfer P2P berhenti begitu Anda menutup atau mengganti stream, sehingga tidak ada yang terus diunduh di latar belakang. Aktifkan agar unduhan tetap berjalan setelah Anda keluar; kelola atau jeda dari tab Unduhan.",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "Jika dinonaktifkan, transfer P2P berhenti begitu Anda menutup atau mengganti stream, sehingga tidak ada yang terus diunduh di latar belakang. Aktifkan agar unduhan tetap berjalan setelah Anda keluar; kelola atau jeda dari tab Unduhan.",
   "When on, a connected controller moves focus around Harbor and drives the player. Turn it off to ignore all controllers.":
     "Jika diaktifkan, controller yang terhubung memindahkan fokus di Harbor dan mengendalikan pemutar. Nonaktifkan untuk mengabaikan semua controller.",
   "When people share a collection it shows up here. Build one you love and share it, that is how it starts.":

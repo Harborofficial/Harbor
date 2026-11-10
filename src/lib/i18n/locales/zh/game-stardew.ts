@@ -26,13 +26,15 @@ export default {
   "games.stardew.install": "安装模组",
   "games.stardew.update": "更新模组",
   "games.stardew.done": "更改已应用",
-  "games.stardew.reviewNote": "请先关闭星露谷物语。更新会保留当前 config.json 和生成的文件。历史版本保存在此电脑上。",
+  "games.stardew.reviewNote":
+    "请先关闭星露谷物语。更新会保留当前 config.json 和生成的文件。历史版本保存在此电脑上。",
   "games.stardew.removeNote": "整个模组文件夹将移至历史版本，之后可以恢复。",
   "games.stardew.running": "更改模组文件前，请关闭星露谷物语和 SMAPI。",
   "games.stardew.requirementsError": "缺少必需的模组或 SMAPI 版本，或版本过旧。请查看模组要求。",
   "games.stardew.dependentsError": "某个已启用模组需要此版本。请先禁用该模组或选择兼容版本。",
   "games.stardew.unmanagedError": "此模组已存在，但不在 Harbor 的记录中。请先移走现有副本再导入。",
-  "games.stardew.archiveError": "选择包含一个可直接使用的模组文件夹的 ZIP，最大 32 MB（解压后 128 MB）。源码下载不是可安装的模组。",
+  "games.stardew.archiveError":
+    "选择包含一个可直接使用的模组文件夹的 ZIP，最大 32 MB（解压后 128 MB）。源码下载不是可安装的模组。",
   "games.stardew.moreFiles": "还有 {count} 个文件",
   "games.stardew.partialError": "部分模组无法检查。更改文件前，请先解决扫描不完整的问题。",
   "games.stardew.linkError": "请选择真实的文件和文件夹，而非快捷方式或链接文件夹。",
@@ -80,7 +82,8 @@ export default {
   "games.stardew.attention": "需要处理",
   "games.stardew.updates": "有可用更新",
   "games.stardew.noMatches": "没有符合筛选条件的模组。",
-  "games.stardew.share": "检查更新时会向 SMAPI 发送模组 ID、版本及支持的更新密钥。存档和设置保留在此设备上。",
+  "games.stardew.share":
+    "检查更新时会向 SMAPI 发送模组 ID、版本及支持的更新密钥。存档和设置保留在此设备上。",
   "games.stardew.empty": "此文件夹中未找到 SMAPI 模组。",
   "games.stardew.partial": "部分文件夹无法检查",
   "games.stardew.notChecked": "尚未检查",
@@ -104,5 +107,5 @@ export default {
   "games.stardew.folderError": "请选择包含游戏本体和 Mods 文件夹的 Stardew Valley 游戏文件夹。",
   "games.stardew.changed": "检查期间模组文件发生了变化。请重新扫描文件夹。",
   "games.stardew.networkError": "SMAPI 未能完成更新检查，请稍后重试。",
-  "games.stardew.readError": "无法读取文件夹，请检查路径和访问权限后重试。"
+  "games.stardew.readError": "无法读取文件夹，请检查路径和访问权限后重试。",
 };

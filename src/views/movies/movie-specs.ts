@@ -59,9 +59,7 @@ export function rotateDaily<T extends { id: string; name: string }>(
   n: number,
   seen: ReturnType<typeof recentlyPlayed>,
 ): T[] {
-  const unseen = pool.filter(
-    (m) => !seen.ids.has(m.id) && !seen.titles.has(watchTitleKey(m.name)),
-  );
+  const unseen = pool.filter((m) => !seen.ids.has(m.id) && !seen.titles.has(watchTitleKey(m.name)));
   const base = unseen.length >= n ? unseen : pool;
   if (base.length === 0) return [];
   const day = Math.floor(Date.now() / 86_400_000);

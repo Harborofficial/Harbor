@@ -187,7 +187,11 @@ export function useRatingsImport(): RatingsImport {
               found.targets,
               (written, failed, note) => {
                 saved = written;
-                push({ written, failed: found.unmatched + failed, ...(note ? { message: note } : {}) });
+                push({
+                  written,
+                  failed: found.unmatched + failed,
+                  ...(note ? { message: note } : {}),
+                });
               },
               ac.signal,
             )

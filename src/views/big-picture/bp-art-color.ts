@@ -265,7 +265,8 @@ const queued = new Set<string>();
 let draining = false;
 
 function idle(run: () => void): void {
-  if (typeof requestIdleCallback === "function") requestIdleCallback(() => run(), { timeout: 4000 });
+  if (typeof requestIdleCallback === "function")
+    requestIdleCallback(() => run(), { timeout: 4000 });
   else window.setTimeout(run, 120);
 }
 

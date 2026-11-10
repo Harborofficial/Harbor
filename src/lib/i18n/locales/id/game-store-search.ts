@@ -1,14 +1,17 @@
 export default {
   "Search shortcuts": "Pintasan pencarian",
   "Steam search shortcut": "Pintasan pencarian Steam",
-  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "Ketik “st ” atau “st:” untuk mencari di toko Steam. Nonaktifkan untuk menggunakan pencarian Harbor biasa untuk kueri ini.",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.":
+    "Ketik “st ” atau “st:” untuk mencari di toko Steam. Nonaktifkan untuk menggunakan pencarian Harbor biasa untuk kueri ini.",
   "games.storeSearch.title": "Toko Steam",
   "games.storeSearch.hint": "Gunakan “st ” dalam pencarian Harbor untuk mencari langsung di Steam.",
   "games.storeSearch.automatic": "Otomatis",
   "games.storeSearch.region": "Wilayah toko",
   "games.storeSearch.showLibrary": "Tandai game yang sudah ada di pustaka saya",
-  "games.storeSearch.settingsError": "Preferensi pencarian tidak dapat disimpan atau dibaca. Coba lagi sebelum mengubahnya.",
-  "games.storeSearch.openError": "Tautan ini tidak dapat dibuka. Pastikan Steam atau browser tersedia, lalu coba lagi.",
+  "games.storeSearch.settingsError":
+    "Preferensi pencarian tidak dapat disimpan atau dibaca. Coba lagi sebelum mengubahnya.",
+  "games.storeSearch.openError":
+    "Tautan ini tidak dapat dibuka. Pastikan Steam atau browser tersedia, lalu coba lagi.",
   "games.storeSearch.empty": "Masukkan nama game.",
   "games.storeSearch.saved": "Hasil dan harga tersimpan dari {date}.",
   "games.storeSearch.error": "Pencarian Steam tidak tersedia. Coba lagi.",
@@ -16,5 +19,5 @@ export default {
   "games.storeSearch.inLibrary": "Di pustaka Anda",
   "games.storeSearch.unavailable": "Harga tidak tersedia",
   "games.storeSearch.web": "Situs web",
-  "games.storeSearch.client": "Buka di Steam"
+  "games.storeSearch.client": "Buka di Steam",
 };

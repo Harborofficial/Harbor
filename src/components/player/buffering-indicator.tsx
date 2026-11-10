@@ -21,7 +21,14 @@ export function BufferingIndicator({ show }: { show: boolean }) {
           viewBox="0 0 40 40"
           fill="none"
         >
-          <circle cx="20" cy="20" r="16" stroke="currentColor" strokeOpacity="0.2" strokeWidth="3" />
+          <circle
+            cx="20"
+            cy="20"
+            r="16"
+            stroke="currentColor"
+            strokeOpacity="0.2"
+            strokeWidth="3"
+          />
           <circle
             cx="20"
             cy="20"

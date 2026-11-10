@@ -52,11 +52,15 @@ export default {
   "games.guides.date.all": "전체 기간",
   "games.guides.viewers": "{count}명 시청 중",
   "games.guides.views": "조회수 {count}회",
-  "games.guides.import.callofdutywarzone": "Warzone의 해당 설정에 값을 복사하세요. DPI는 마우스 소프트웨어에서 설정합니다.",
-  "games.guides.import.css": "Counter-Strike: Source에 설정을 복사하세요. 날짜가 기록된 커뮤니티 자료입니다.",
-  "games.guides.import.cod": "해당 게임 버전에서 이 값을 사용하세요. DPI는 마우스 소프트웨어에서 설정합니다.",
+  "games.guides.import.callofdutywarzone":
+    "Warzone의 해당 설정에 값을 복사하세요. DPI는 마우스 소프트웨어에서 설정합니다.",
+  "games.guides.import.css":
+    "Counter-Strike: Source에 설정을 복사하세요. 날짜가 기록된 커뮤니티 자료입니다.",
+  "games.guides.import.cod":
+    "해당 게임 버전에서 이 값을 사용하세요. DPI는 마우스 소프트웨어에서 설정합니다.",
   "games.guides.noCrosshair": "이 출처에는 정확한 미리 보기에 필요한 조준선 정보가 부족합니다.",
-  "games.guides.previewNote": "공개된 값으로 만든 정적 미리 보기입니다. 해상도, 움직임과 반동에 따라 게임 내 결과가 달라질 수 있습니다.",
+  "games.guides.previewNote":
+    "공개된 값으로 만든 정적 미리 보기입니다. 해상도, 움직임과 반동에 따라 게임 내 결과가 달라질 수 있습니다.",
   "games.guides.previewBackground": "미리 보기의 밝은 배경 전환",
   "games.guides.crosshairPreview": "조준선 미리 보기",
   "games.guides.noPlayers": "일치하는 플레이어가 없습니다. 다른 이름을 검색하세요.",
@@ -73,12 +77,16 @@ export default {
   "games.guides.sourceErrorTitle": "다시 시도해 보세요",
   "games.guides.more": "더 불러오기",
   "games.guides.moreKick": "Kick에서 더 보기",
-  "games.guides.configNote": "플레이어와 크리에이터가 공개한 설정입니다. 프로필을 선택하면 출처, 날짜와 설정을 볼 수 있습니다.",
+  "games.guides.configNote":
+    "플레이어와 크리에이터가 공개한 설정입니다. 프로필을 선택하면 출처, 날짜와 설정을 볼 수 있습니다.",
   "games.guides.players": "모든 선수",
   "games.guides.useConfig": "이 설정 사용",
-  "games.guides.import.cs2": "명령어를 CS2 개발자 콘솔에 붙여넣으세요. 조준점 코드는 설정 → 게임 → 조준점에서 가져올 수 있습니다. 적용 전에 값을 확인하세요.",
-  "games.guides.import.valorant": "조준점 코드를 복사한 다음 VALORANT에서 설정 → 조준점 → 프로필 코드 가져오기를 여세요. 나머지 값은 해당 설정에 입력하세요.",
-  "games.guides.import.rainbowsixsiege": "설정을 복사한 뒤 Siege의 마우스 및 화면 설정에 값을 입력하세요. DPI는 마우스 소프트웨어에서 설정합니다.",
+  "games.guides.import.cs2":
+    "명령어를 CS2 개발자 콘솔에 붙여넣으세요. 조준점 코드는 설정 → 게임 → 조준점에서 가져올 수 있습니다. 적용 전에 값을 확인하세요.",
+  "games.guides.import.valorant":
+    "조준점 코드를 복사한 다음 VALORANT에서 설정 → 조준점 → 프로필 코드 가져오기를 여세요. 나머지 값은 해당 설정에 입력하세요.",
+  "games.guides.import.rainbowsixsiege":
+    "설정을 복사한 뒤 Siege의 마우스 및 화면 설정에 값을 입력하세요. DPI는 마우스 소프트웨어에서 설정합니다.",
   "games.guides.copyCrosshair": "조준점 복사",
   "games.guides.copyCommands": "명령어 복사",
   "games.guides.copySettings": "설정 복사",
@@ -88,7 +96,8 @@ export default {
   "games.guides.readerErrorTitle": "가이드를 불러오지 못했습니다",
   "games.guides.short": "가이드",
   "games.guides.title": "가이드와 공략",
-  "games.guides.note": "다음 단계를 찾아보세요. 커뮤니티 가이드를 읽고, 공략 영상을 보거나 실시간 플레이를 시청하세요.",
+  "games.guides.note":
+    "다음 단계를 찾아보세요. 커뮤니티 가이드를 읽고, 공략 영상을 보거나 실시간 플레이를 시청하세요.",
   "games.guides.written": "공략 글",
   "games.guides.videos": "동영상",
   "games.guides.live": "라이브",
@@ -102,18 +111,19 @@ export default {
   "games.guides.videoTitle": "보면서 배우기",
   "games.guides.twitch": "Twitch 둘러보기",
   "games.guides.youtube": "YouTube에서 더 보기",
-  "games.guides.liveNote": "YouTube 라이브 검색 결과입니다. 탐색 중 방송 상태가 달라질 수 있습니다.",
+  "games.guides.liveNote":
+    "YouTube 라이브 검색 결과입니다. 탐색 중 방송 상태가 달라질 수 있습니다.",
   "games.guides.error": "이 출처를 불러오지 못했습니다. 다시 시도하세요.",
   "games.guides.empty": "가이드가 없습니다. 다른 검색어나 출처를 이용해 보세요.",
   "games.guides.noLive": "현재 일치하는 라이브 방송이 없습니다.",
   "games.guides.previous": "이전",
   "games.guides.next": "다음",
   "games.guides.original": "원본 열기",
-  "games.guides.playerNote": "YouTube에서 재생합니다. 제작자가 임베드를 제한하면 원본 동영상을 여세요.",
+  "games.guides.playerNote":
+    "YouTube에서 재생합니다. 제작자가 임베드를 제한하면 원본 동영상을 여세요.",
   "games.guides.readerError": "이 가이드를 여기서 읽을 수 없습니다. 다시 시도하거나 원본을 여세요.",
   "games.guides.contents": "이 가이드의 목차",
-  "games.guides.credits": "저자 및 라이선스"
-,
+  "games.guides.credits": "저자 및 라이선스",
   "games.guides.copy": "복사",
   "games.guides.previewMap": "조준선 뒤에 맵 스크린샷 표시",
   "games.guides.skins": "스킨",
@@ -123,5 +133,5 @@ export default {
   "games.guides.teammates": "팀 동료",
   "games.guides.specs": "사양",
   "games.guides.exportAll": "전체 내보내기",
-  "games.guides.copyValue": "{label} 복사"
+  "games.guides.copyValue": "{label} 복사",
 } satisfies Record<string, string>;

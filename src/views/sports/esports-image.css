@@ -22,7 +22,9 @@
   user-select: none;
   opacity: 0;
 }
-.ea-image[data-image-ready="true"] > img { opacity: 1; }
+.ea-image[data-image-ready="true"] > img {
+  opacity: 1;
+}
 .ea-image-fallback {
   position: relative;
   display: grid;

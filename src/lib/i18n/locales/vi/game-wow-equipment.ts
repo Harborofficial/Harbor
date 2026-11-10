@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "Không có ghi nhận",
   "games.wow.equipment.detailsUnavailable": "Không có thông tin chi tiết",
   "games.wow.equipment.unavailable": "Không có thông tin trang bị của nhân vật này.",
-  "games.wow.equipment.note": "Trang bị từ lần cập nhật gần nhất của Raider.IO. Hãy kiểm tra trang bị hiện tại trong trò chơi.",
+  "games.wow.equipment.note":
+    "Trang bị từ lần cập nhật gần nhất của Raider.IO. Hãy kiểm tra trang bị hiện tại trong trò chơi.",
   "games.wow.equipment.partial": "Không thể đọc một số vật phẩm đang trang bị.",
   "games.wow.equipment.level": "Cấp vật phẩm {level}",
   "games.wow.equipment.gems": "Ngọc",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "Tay chính",
   "games.wow.equipment.offhand": "Tay phụ",
   "games.wow.equipment.shirt": "Áo sơ mi",
-  "games.wow.equipment.tabard": "Áo choàng bang hội"
+  "games.wow.equipment.tabard": "Áo choàng bang hội",
 };

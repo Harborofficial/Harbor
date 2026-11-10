@@ -76,7 +76,9 @@ export function VoyageSailing({
         >
           <Flag size={13} strokeWidth={2.2} /> {t("End voyage")}
         </button>
-        <span className="text-[11.5px] text-ink-subtle">{t("Your queue is saved until you clear it.")}</span>
+        <span className="text-[11.5px] text-ink-subtle">
+          {t("Your queue is saved until you clear it.")}
+        </span>
       </div>
     </div>
   );

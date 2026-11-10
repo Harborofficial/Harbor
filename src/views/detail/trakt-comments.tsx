@@ -662,206 +662,209 @@ export function TraktComments({ resolution }: { resolution: IdResolution | null 
       </div>
 
       <div className="trakt-comments-shell">
-      <div
-        className={`trakt-comments-body relative rounded-xl ${settings.blurComments && blurred ? "overflow-hidden" : ""}`}
-      >
-        {settings.blurComments && blurred && (
-          <div
-            className="absolute inset-0 z-10 flex flex-col items-center gap-3 pt-16 backdrop-blur-sm"
-            style={{
-              background:
-                "linear-gradient(to bottom, color-mix(in srgb, var(--color-canvas) 5%, transparent) 0%, color-mix(in srgb, var(--color-canvas) 78%, transparent) 40%, color-mix(in srgb, var(--color-canvas) 95%, transparent) 100%)",
-            }}
-          >
-            <button
-              onClick={() => setBlurred(false)}
-              className="rounded-xl bg-ink px-5 py-2.5 text-[13px] font-semibold text-canvas shadow-lg transition-transform hover:scale-[1.03] active:scale-[0.97]"
+        <div
+          className={`trakt-comments-body relative rounded-xl ${settings.blurComments && blurred ? "overflow-hidden" : ""}`}
+        >
+          {settings.blurComments && blurred && (
+            <div
+              className="absolute inset-0 z-10 flex flex-col items-center gap-3 pt-16 backdrop-blur-sm"
+              style={{
+                background:
+                  "linear-gradient(to bottom, color-mix(in srgb, var(--color-canvas) 5%, transparent) 0%, color-mix(in srgb, var(--color-canvas) 78%, transparent) 40%, color-mix(in srgb, var(--color-canvas) 95%, transparent) 100%)",
+              }}
             >
-              {t("Reveal comments")}
-            </button>
-            <span className="text-[11px] text-ink-muted/60">{t("Comments are hidden")}</span>
-          </div>
-        )}
-
-        {target && connected && (
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-[12px] font-medium text-ink-muted">{t("Rating")}:</span>
-            <StarRow
-              value={userRating}
-              interactive={true}
-              onRate={handleRate}
-              onHover={setHoverRating}
-            />
-            {(hoverRating || userRating) > 0 && (
-              <span className="text-[12px] font-medium text-ink-muted">
-                {((hoverRating || userRating) / 2).toFixed(1).replace(/\.0$/, "")}
-              </span>
-            )}
-            {userRating > 0 && !hoverRating && (
               <button
-                onClick={() => handleRate(userRating)}
-                disabled={ratinging}
-                className="text-[11px] text-ink-muted/50 underline transition-colors hover:text-ink-muted"
+                onClick={() => setBlurred(false)}
+                className="rounded-xl bg-ink px-5 py-2.5 text-[13px] font-semibold text-canvas shadow-lg transition-transform hover:scale-[1.03] active:scale-[0.97]"
               >
-                {t("Remove")}
+                {t("Reveal comments")}
               </button>
-            )}
-          </div>
-        )}
-
-        {resolution && !resolution.ok && (
-          <p className="rounded-xl bg-elevated p-4 text-[13px] text-ink-muted ring-1 ring-edge">
-            {resolution.reason === "anime"
-              ? t("Trakt comments are not available for anime titles.")
-              : t("Could not identify this title on Trakt.")}
-          </p>
-        )}
-
-        {target && !connected && (
-          <div className="mb-5 flex flex-col items-start gap-2">
-            <button
-              onClick={() => openSettings("trakt")}
-              className="group inline-flex items-center gap-2.5 text-[22px] font-semibold text-ink no-underline transition-opacity hover:opacity-80"
-            >
-              {t("Connect Trakt")}
-              <img
-                src={traktLogo}
-                alt=""
-                draggable={false}
-                className="h-[22px] w-auto shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
-              />
-            </button>
-            <p className="text-[14px] text-ink-muted">
-              {t("Connect your Trakt account to leave comments and reviews.")}
-            </p>
-          </div>
-        )}
-
-        {target && connected && (
-          <div className="mb-5">
-            <div className="flex items-start gap-3">
-              {userAvatar ? (
-                <img
-                  src={userAvatar}
-                  alt={username ?? ""}
-                  className="h-8 w-8 shrink-0 rounded-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <UserAvatar username={username} size="sm" />
-              )}
-              <div className="flex flex-1 items-start gap-2">
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder={t("Write a comment...")}
-                  rows={1}
-                  className="min-h-[36px] max-h-32 flex-1 resize-none overflow-y-auto rounded-xl bg-elevated px-3.5 py-2 text-[13px] text-ink outline-none ring-1 ring-edge placeholder:text-ink-muted/50 focus:ring-2 focus:ring-ink/20"
-                  onInput={(e) => {
-                    const el = e.currentTarget;
-                    el.style.height = "auto";
-                    el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
-                  }}
-                />
-                <button
-                  onClick={handlePost}
-                  disabled={!text.trim() || posting}
-                  className={`flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-[13px] font-semibold transition-all ${
-                    !text.trim() || posting
-                      ? "bg-ink-muted/20 text-ink-muted/50 cursor-not-allowed"
-                      : "bg-ink text-canvas hover:scale-[1.02]"
-                  }`}
-                >
-                  {posting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                </button>
-              </div>
+              <span className="text-[11px] text-ink-muted/60">{t("Comments are hidden")}</span>
             </div>
-            <div className="mt-2 flex items-center gap-4">
-              <label className="flex cursor-pointer items-center gap-1.5 text-[12px] text-ink-muted transition-colors hover:text-ink">
-                <input
-                  type="checkbox"
-                  checked={spoiler}
-                  onChange={(e) => setSpoiler(e.target.checked)}
-                  className="h-3.5 w-3.5 rounded border-edge bg-elevated accent-ink"
-                />
-                {t("Contains spoiler")}
-              </label>
-              <span className="text-[11px] text-ink-muted/40">
-                {t("Comments may take a moment to appear on Trakt")}
-              </span>
-            </div>
-            {postError && (
-              <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-red-500/10 px-3 py-2 text-[12px] text-red-400">
-                <AlertCircle size={12} />
-                {postError}
-              </div>
-            )}
-          </div>
-        )}
-
-        {target && loading && (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
-                <div className="h-9 w-9 animate-pulse rounded-full bg-ink-muted/20" />
-                <div className="flex-1">
-                  <div className="mb-2 h-3 w-24 animate-pulse rounded bg-ink-muted/20" />
-                  <div className="mb-1 h-3 w-full animate-pulse rounded bg-ink-muted/20" />
-                  <div className="h-3 w-3/4 animate-pulse rounded bg-ink-muted/20" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {target && !loading && comments.length === 0 && (
-          <p className="text-[14px] text-ink-muted">{t("No comments yet")}</p>
-        )}
-
-        {target &&
-          !loading &&
-          (myComments ? comments.filter((c) => c.user.username === username) : comments).length ===
-            0 &&
-          myComments && (
-            <p className="text-[14px] text-ink-muted">{t("You haven't commented yet")}</p>
           )}
 
-        {target && !loading && (
-          <div className="flex flex-col gap-3">
-            <div className="flex justify-end">
-              <ReviewTranslateBar
-                tr={tr}
-                texts={(myComments ? comments.filter((c) => c.user.username === username) : comments)
-                  .filter((c) => !c.spoiler)
-                  .map((c) => c.comment)}
+          {target && connected && (
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-[12px] font-medium text-ink-muted">{t("Rating")}:</span>
+              <StarRow
+                value={userRating}
+                interactive={true}
+                onRate={handleRate}
+                onHover={setHoverRating}
               />
+              {(hoverRating || userRating) > 0 && (
+                <span className="text-[12px] font-medium text-ink-muted">
+                  {((hoverRating || userRating) / 2).toFixed(1).replace(/\.0$/, "")}
+                </span>
+              )}
+              {userRating > 0 && !hoverRating && (
+                <button
+                  onClick={() => handleRate(userRating)}
+                  disabled={ratinging}
+                  className="text-[11px] text-ink-muted/50 underline transition-colors hover:text-ink-muted"
+                >
+                  {t("Remove")}
+                </button>
+              )}
             </div>
-            {(myComments ? comments.filter((c) => c.user.username === username) : comments).map(
-              (c) => (
-                <CommentCard
-                  key={c.id}
-                  comment={c}
-                  connected={connected}
-                  username={username}
-                  onDelete={handleDelete}
-                  tr={tr}
-                />
-              ),
-            )}
-            {hasMore && !myComments && (
+          )}
+
+          {resolution && !resolution.ok && (
+            <p className="rounded-xl bg-elevated p-4 text-[13px] text-ink-muted ring-1 ring-edge">
+              {resolution.reason === "anime"
+                ? t("Trakt comments are not available for anime titles.")
+                : t("Could not identify this title on Trakt.")}
+            </p>
+          )}
+
+          {target && !connected && (
+            <div className="mb-5 flex flex-col items-start gap-2">
               <button
-                type="button"
-                onClick={() => void loadMore()}
-                disabled={loadingMore}
-                className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-white/[0.06] text-[13px] font-semibold text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink disabled:opacity-60"
+                onClick={() => openSettings("trakt")}
+                className="group inline-flex items-center gap-2.5 text-[22px] font-semibold text-ink no-underline transition-opacity hover:opacity-80"
               >
-                {loadingMore && <Loader2 size={15} className="animate-spin" />}
-                {loadingMore ? t("Loading more") : t("Load more comments")}
+                {t("Connect Trakt")}
+                <img
+                  src={traktLogo}
+                  alt=""
+                  draggable={false}
+                  className="h-[22px] w-auto shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
+                />
               </button>
+              <p className="text-[14px] text-ink-muted">
+                {t("Connect your Trakt account to leave comments and reviews.")}
+              </p>
+            </div>
+          )}
+
+          {target && connected && (
+            <div className="mb-5">
+              <div className="flex items-start gap-3">
+                {userAvatar ? (
+                  <img
+                    src={userAvatar}
+                    alt={username ?? ""}
+                    className="h-8 w-8 shrink-0 rounded-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <UserAvatar username={username} size="sm" />
+                )}
+                <div className="flex flex-1 items-start gap-2">
+                  <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder={t("Write a comment...")}
+                    rows={1}
+                    className="min-h-[36px] max-h-32 flex-1 resize-none overflow-y-auto rounded-xl bg-elevated px-3.5 py-2 text-[13px] text-ink outline-none ring-1 ring-edge placeholder:text-ink-muted/50 focus:ring-2 focus:ring-ink/20"
+                    onInput={(e) => {
+                      const el = e.currentTarget;
+                      el.style.height = "auto";
+                      el.style.height = `${Math.min(el.scrollHeight, 128)}px`;
+                    }}
+                  />
+                  <button
+                    onClick={handlePost}
+                    disabled={!text.trim() || posting}
+                    className={`flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-[13px] font-semibold transition-all ${
+                      !text.trim() || posting
+                        ? "bg-ink-muted/20 text-ink-muted/50 cursor-not-allowed"
+                        : "bg-ink text-canvas hover:scale-[1.02]"
+                    }`}
+                  >
+                    {posting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                  </button>
+                </div>
+              </div>
+              <div className="mt-2 flex items-center gap-4">
+                <label className="flex cursor-pointer items-center gap-1.5 text-[12px] text-ink-muted transition-colors hover:text-ink">
+                  <input
+                    type="checkbox"
+                    checked={spoiler}
+                    onChange={(e) => setSpoiler(e.target.checked)}
+                    className="h-3.5 w-3.5 rounded border-edge bg-elevated accent-ink"
+                  />
+                  {t("Contains spoiler")}
+                </label>
+                <span className="text-[11px] text-ink-muted/40">
+                  {t("Comments may take a moment to appear on Trakt")}
+                </span>
+              </div>
+              {postError && (
+                <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-red-500/10 px-3 py-2 text-[12px] text-red-400">
+                  <AlertCircle size={12} />
+                  {postError}
+                </div>
+              )}
+            </div>
+          )}
+
+          {target && loading && (
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
+                  <div className="h-9 w-9 animate-pulse rounded-full bg-ink-muted/20" />
+                  <div className="flex-1">
+                    <div className="mb-2 h-3 w-24 animate-pulse rounded bg-ink-muted/20" />
+                    <div className="mb-1 h-3 w-full animate-pulse rounded bg-ink-muted/20" />
+                    <div className="h-3 w-3/4 animate-pulse rounded bg-ink-muted/20" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {target && !loading && comments.length === 0 && (
+            <p className="text-[14px] text-ink-muted">{t("No comments yet")}</p>
+          )}
+
+          {target &&
+            !loading &&
+            (myComments ? comments.filter((c) => c.user.username === username) : comments)
+              .length === 0 &&
+            myComments && (
+              <p className="text-[14px] text-ink-muted">{t("You haven't commented yet")}</p>
             )}
-          </div>
-        )}
-      </div>
+
+          {target && !loading && (
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-end">
+                <ReviewTranslateBar
+                  tr={tr}
+                  texts={(myComments
+                    ? comments.filter((c) => c.user.username === username)
+                    : comments
+                  )
+                    .filter((c) => !c.spoiler)
+                    .map((c) => c.comment)}
+                />
+              </div>
+              {(myComments ? comments.filter((c) => c.user.username === username) : comments).map(
+                (c) => (
+                  <CommentCard
+                    key={c.id}
+                    comment={c}
+                    connected={connected}
+                    username={username}
+                    onDelete={handleDelete}
+                    tr={tr}
+                  />
+                ),
+              )}
+              {hasMore && !myComments && (
+                <button
+                  type="button"
+                  onClick={() => void loadMore()}
+                  disabled={loadingMore}
+                  className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-white/[0.06] text-[13px] font-semibold text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink disabled:opacity-60"
+                >
+                  {loadingMore && <Loader2 size={15} className="animate-spin" />}
+                  {loadingMore ? t("Loading more") : t("Load more comments")}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ export default {
   "Most liked": "En çok beğenilen",
   "Most recent": "En yeni",
   "Lowest rated": "En düşük puanlı",
-  "Longest": "En uzun",
+  Longest: "En uzun",
   "Sort reviews": "İncelemeleri sırala",
   "Episode reviews": "Bölüm incelemeleri",
   "Gathering reviews from IMDb and Trakt…": "IMDb ve Trakt'tan incelemeler toplanıyor…",
@@ -13,12 +13,14 @@ export default {
   "Translate reviews to": "İncelemeleri şu dile çevir",
   "Translate all": "Tümünü çevir",
   "Show original": "Orijinalini göster",
-  "Translate": "Çevir",
+  Translate: "Çevir",
   "In {language}": "{language} dilinde",
   "No reviews in {language} here.": "Burada {language} dilinde inceleme yok.",
   "{n} reviews couldn't be translated. Try again.": "{n} inceleme çevrilemedi. Tekrar deneyin.",
   "Couldn't translate. Try again": "Çevrilemedi. Tekrar deneyin",
-  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.": "Bazı yeni incelemeler yüklenemedi; bu yüzden yedek incelemeler en yeni sonuçların ardından gösteriliyor.",
-  "Letterboxd didn't share review dates right now, so these are shown by popularity.": "Letterboxd şu anda inceleme tarihlerini vermiyor, bu yüzden popülerliğe göre gösteriliyor.",
+  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.":
+    "Bazı yeni incelemeler yüklenemedi; bu yüzden yedek incelemeler en yeni sonuçların ardından gösteriliyor.",
+  "Letterboxd didn't share review dates right now, so these are shown by popularity.":
+    "Letterboxd şu anda inceleme tarihlerini vermiyor, bu yüzden popülerliğe göre gösteriliyor.",
   "Reviewers' average: {rating}": "İnceleyenlerin ortalaması: {rating}",
 } as Record<string, string>;

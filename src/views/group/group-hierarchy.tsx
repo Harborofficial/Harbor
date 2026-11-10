@@ -48,11 +48,16 @@ export function GroupHierarchy({
         const shown = tier.role === "member" ? list.slice(0, MEMBER_PREVIEW) : list;
         const rest = list.length - shown.length;
         return (
-          <div key={tier.role} className="flex flex-col gap-2 border-t border-edge-soft/60 pt-3.5 first:border-0 first:pt-0">
+          <div
+            key={tier.role}
+            className="flex flex-col gap-2 border-t border-edge-soft/60 pt-3.5 first:border-0 first:pt-0"
+          >
             <div className="flex items-center gap-2">
               <span className="text-[13px] font-semibold text-ink">{t(tier.title)}</span>
               <RoleBadge role={tier.role} />
-              <span className="ms-auto text-[12px] tabular-nums text-ink-subtle">{list.length}</span>
+              <span className="ms-auto text-[12px] tabular-nums text-ink-subtle">
+                {list.length}
+              </span>
             </div>
             <span className="-mt-1 text-[11.5px] text-ink-subtle">{t(tier.blurb)}</span>
             <div className="flex flex-wrap gap-1.5">
@@ -64,7 +69,9 @@ export function GroupHierarchy({
                     className="flex min-h-11 items-center gap-2 rounded-full bg-elevated py-1 pe-3 ps-1 text-start transition-colors hover:bg-raised"
                   >
                     <Avatar src={m.avatarUrl} size={28} online={m.online} alias={m.alias} />
-                    <span className="max-w-[140px] truncate text-[12.5px] font-medium text-ink">{m.alias}</span>
+                    <span className="max-w-[140px] truncate text-[12.5px] font-medium text-ink">
+                      {m.alias}
+                    </span>
                   </button>
                 </UserHoverCard>
               ))}

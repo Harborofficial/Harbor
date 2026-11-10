@@ -153,9 +153,7 @@ function StatBar({ row }: { row: MatchTeamStatRow }) {
         {row.homeValue || "0"}
       </span>
       <div className="flex flex-col gap-1">
-        <span className="text-center text-[12px] text-ink-muted">
-          {statLabel(t, row.label)}
-        </span>
+        <span className="text-center text-[12px] text-ink-muted">{statLabel(t, row.label)}</span>
         <div className="flex h-1.5 gap-px overflow-hidden rounded-full bg-canvas">
           <div
             className={`pitch-bar-grow ${homeLeads ? "bg-ink" : "bg-ink-subtle"}`}

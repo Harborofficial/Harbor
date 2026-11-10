@@ -1,15 +1,19 @@
 export default {
   "games.cleanup.title": "Tệp nén đã tải",
-  "games.cleanup.intro": "Kiểm tra tệp nén sau khi giải nén. Các tệp trò chơi đã giải nén vẫn được giữ nguyên.",
+  "games.cleanup.intro":
+    "Kiểm tra tệp nén sau khi giải nén. Các tệp trò chơi đã giải nén vẫn được giữ nguyên.",
   "games.cleanup.search": "Tìm bản tải đã giải nén",
   "games.cleanup.empty": "Các lần giải nén hoàn tất sẽ xuất hiện ở đây.",
   "games.cleanup.review": "Kiểm tra tệp nén",
   "games.cleanup.confirm": "Chuyển các phần tệp nén này vào thùng rác?",
   "games.cleanup.binNote": "Dung lượng được giải phóng khi bạn tự làm trống thùng rác.",
-  "games.cleanup.completedNote": "Thư mục giữ tệp nén nằm trong thùng rác. Hãy khôi phục từ đó nếu cần.",
+  "games.cleanup.completedNote":
+    "Thư mục giữ tệp nén nằm trong thùng rác. Hãy khôi phục từ đó nếu cần.",
   "games.cleanup.restoredNote": "Các phần tệp nén đã trở lại thư mục ban đầu.",
-  "games.cleanup.uncertainNote": "Harbor không thể xác nhận kết quả. Kiểm tra thư mục ban đầu và thùng rác trước khi tiếp tục.",
-  "games.cleanup.recoveryNote": "Một số phần có thể nằm trong thư mục tạm của Harbor. Tiếp tục dọn dẹp hoặc khôi phục mà không thay thế tệp hiện có.",
+  "games.cleanup.uncertainNote":
+    "Harbor không thể xác nhận kết quả. Kiểm tra thư mục ban đầu và thùng rác trước khi tiếp tục.",
+  "games.cleanup.recoveryNote":
+    "Một số phần có thể nằm trong thư mục tạm của Harbor. Tiếp tục dọn dẹp hoặc khôi phục mà không thay thế tệp hiện có.",
   "games.cleanup.working": "Đang kiểm tra tệp nén",
   "games.cleanup.restore": "Khôi phục tệp được giữ",
   "games.cleanup.resume": "Tiếp tục dọn dẹp",
@@ -19,17 +23,23 @@ export default {
   "games.cleanup.restored": "Đã khôi phục tệp nén",
   "games.cleanup.unconfirmed": "Chưa xác nhận kết quả",
   "games.cleanup.unavailable": "Cập nhật ứng dụng máy tính để quản lý tệp nén đã tải.",
-  "games.cleanup.archive_cleanup_in_use": "Thao tác khác đang dùng các tệp này. Dừng thao tác đó rồi kiểm tra lại.",
-  "games.cleanup.archive_cleanup_recovery": "Cần kiểm tra lần dọn dẹp đã lưu. Giữ các tệp và kiểm tra thư mục của chúng.",
-  "games.cleanup.archive_cleanup_recycle": "Không thể chuyển tệp vào thùng rác. Khôi phục hoặc thử lại.",
-  "games.cleanup.archive_cleanup_receipt": "Lần giải nén này thiếu bản ghi nguồn đầy đủ. Không thể dọn các tệp nén này tại đây.",
+  "games.cleanup.archive_cleanup_in_use":
+    "Thao tác khác đang dùng các tệp này. Dừng thao tác đó rồi kiểm tra lại.",
+  "games.cleanup.archive_cleanup_recovery":
+    "Cần kiểm tra lần dọn dẹp đã lưu. Giữ các tệp và kiểm tra thư mục của chúng.",
+  "games.cleanup.archive_cleanup_recycle":
+    "Không thể chuyển tệp vào thùng rác. Khôi phục hoặc thử lại.",
+  "games.cleanup.archive_cleanup_receipt":
+    "Lần giải nén này thiếu bản ghi nguồn đầy đủ. Không thể dọn các tệp nén này tại đây.",
   "games.cleanup.blocker.anotherProfile": "Hồ sơ khác đang dùng các tệp nén này.",
   "games.cleanup.blocker.activeDownload": "Một bản tải vẫn cần các tệp này.",
   "games.cleanup.blocker.sharing": "Dừng chia sẻ torrent này trước khi dọn dẹp.",
   "games.cleanup.blocker.pendingPreparation": "Các tệp này đang chờ giải nén.",
   "games.cleanup.blocker.otherExtraction": "Lần giải nén khác đang dùng các tệp này.",
-  "games.cleanup.orphanNote": "Bản ghi giải nén đã bị xóa. Khôi phục các tệp nén được giữ về thư mục ban đầu.",
-  "games.preparation.storeError": "Không thể lưu lựa chọn giải nén. Các lựa chọn vẫn được giữ ở đây; hãy thử lại.",
+  "games.cleanup.orphanNote":
+    "Bản ghi giải nén đã bị xóa. Khôi phục các tệp nén được giữ về thư mục ban đầu.",
+  "games.preparation.storeError":
+    "Không thể lưu lựa chọn giải nén. Các lựa chọn vẫn được giữ ở đây; hãy thử lại.",
   "games.preparation.enable": "Giải nén sau khi tải xuống",
   "games.preparation.note": "Giữ lại tệp nén. Xem lại việc cài đặt trước khi chạy trình cài đặt.",
   "games.preparation.folder": "{name} đã giải nén",
@@ -51,7 +61,8 @@ export default {
   "games.archive.location.unknown": "Chưa rõ dung lượng trống",
   "games.archive.location.unavailable": "Không thể tải các vị trí. Chọn thư mục bên dưới.",
   "games.setupShortcuts.title": "Lối tắt",
-  "games.setupShortcuts.note": "Mở trò chơi trực tiếp từ Windows bằng biểu tượng riêng của trò chơi.",
+  "games.setupShortcuts.note":
+    "Mở trò chơi trực tiếp từ Windows bằng biểu tượng riêng của trò chơi.",
   "games.setupShortcuts.startMenu": "Menu Bắt đầu",
   "games.setupShortcuts.desktop": "Màn hình nền",
   "games.setupShortcuts.added": "Đã thêm",
@@ -62,8 +73,10 @@ export default {
   "games.setupShortcuts.unsupported": "Lối tắt có sẵn cho trò chơi chạy trực tiếp trên Windows.",
   "games.setupShortcuts.error": "Không thể cập nhật lối tắt. Hãy thử lại.",
 
-  "games.archive.archive_decoder": "Harbor không thể giải mã tệp nén này trong giới hạn cho phép. Hãy thử công cụ giải nén khác.",
-  "games.archive.archive_password_or_checksum": "Mật khẩu có thể không đúng hoặc tệp nén bị hỏng. Kiểm tra mật khẩu hoặc tải lại tệp nén.",
+  "games.archive.archive_decoder":
+    "Harbor không thể giải mã tệp nén này trong giới hạn cho phép. Hãy thử công cụ giải nén khác.",
+  "games.archive.archive_password_or_checksum":
+    "Mật khẩu có thể không đúng hoặc tệp nén bị hỏng. Kiểm tra mật khẩu hoặc tải lại tệp nén.",
   "games.archive.password": "Mật khẩu tệp nén",
   "games.archive.passwordNote": "Chỉ dùng cho lần giải nén này. Không lưu trong lịch sử tải xuống.",
   "games.archive.archive_password": "Mật khẩu này không mở được tệp nén. Hãy kiểm tra và thử lại.",
@@ -71,7 +84,8 @@ export default {
   "games.archive.extractNamed": "Giải nén {name}",
   "games.archive.eyebrow": "Từ bản tải xuống đến thư viện",
   "games.archive.title": "Giải nén tệp trò chơi",
-  "games.archive.intro": "Xem xét tệp ZIP / 7z / RAR / TAR / TAR.GZ / ISO và chọn nơi đặt các tệp bên trong. Harbor tạo thư mục mới và giữ nguyên tệp nén gốc.",
+  "games.archive.intro":
+    "Xem xét tệp ZIP / 7z / RAR / TAR / TAR.GZ / ISO và chọn nơi đặt các tệp bên trong. Harbor tạo thư mục mới và giữ nguyên tệp nén gốc.",
   "games.archive.source": "Tệp nén",
   "games.archive.chooseSource": "Chọn tệp nén",
   "games.archive.chooseParent": "Chọn thư mục đích",
@@ -86,36 +100,50 @@ export default {
   "games.archive.searchPreview": "Tìm trong phần xem trước này",
   "games.archive.destination": "Chọn nơi cho các tệp này",
   "games.archive.folderName": "Tên thư mục mới",
-  "games.archive.destinationNote": "Thư mục hiện có sẽ không bị thay thế. Chọn tên khác nếu tên này đã được dùng.",
+  "games.archive.destinationNote":
+    "Thư mục hiện có sẽ không bị thay thế. Chọn tên khác nếu tên này đã được dùng.",
   "games.archive.phase.checking": "Đang kiểm tra tệp nén",
   "games.archive.phase.extracting": "Đang giải nén tệp",
   "games.archive.phase.complete": "Các tệp đã sẵn sàng",
   "games.archive.ready": "Sẵn sàng cho bước tiếp theo",
   "games.archive.complete": "Đã giải nén {count} tệp",
-  "games.archive.completeNote": "Các tệp đã sẵn sàng. Với trò chơi chạy trực tiếp, thêm tệp thực thi vào Trò chơi cục bộ. Trò chơi cần trình cài đặt vẫn phải được cài đặt riêng.",
+  "games.archive.completeNote":
+    "Các tệp đã sẵn sàng. Với trò chơi chạy trực tiếp, thêm tệp thực thi vào Trò chơi cục bộ. Trò chơi cần trình cài đặt vẫn phải được cài đặt riêng.",
   "games.archive.originalKept": "Đã giữ tệp nén gốc.",
   "games.archive.zipOnly": "Tệp ZIP / 7z / RAR / TAR / TAR.GZ / ISO · các tệp không tự động chạy",
   "games.archive.openFolder": "Mở thư mục",
   "games.archive.localLibrary": "Trò chơi cục bộ",
-  "games.archive.archive_profile": "Không thể xác định hồ sơ Harbor này. Mở lại Trò chơi rồi thử lại.",
-  "games.archive.archive_busy": "Một thao tác tệp nén khác đang chạy. Hãy hoàn tất hoặc hủy thao tác đó trước.",
+  "games.archive.archive_profile":
+    "Không thể xác định hồ sơ Harbor này. Mở lại Trò chơi rồi thử lại.",
+  "games.archive.archive_busy":
+    "Một thao tác tệp nén khác đang chạy. Hãy hoàn tất hoặc hủy thao tác đó trước.",
   "games.archive.archive_canceled": "Đã hủy giải nén. Tệp nén gốc vẫn còn.",
   "games.archive.archive_read": "Không thể đọc tệp nén. Kiểm tra xem tệp còn khả dụng rồi thử lại.",
-  "games.archive.archive_links": "Tệp nén này chứa liên kết hoặc tệp đặc biệt. Hãy làm theo hướng dẫn cài đặt của dự án.",
+  "games.archive.archive_links":
+    "Tệp nén này chứa liên kết hoặc tệp đặc biệt. Hãy làm theo hướng dẫn cài đặt của dự án.",
   "games.archive.archive_limit": "Tệp nén này vượt giới hạn giải nén hiện tại của Harbor.",
-  "games.archive.archive_changed": "Tệp nén đã thay đổi sau khi xem xét. Xem xét lại trước khi giải nén.",
-  "games.archive.archive_path": "Tệp nén chứa đường dẫn mà Harbor không thể giải nén an toàn. Không có tệp trò chơi nào bị thay thế.",
-  "games.archive.archive_format": "Đây không phải tệp ZIP / 7z / RAR / TAR / TAR.GZ / ISO được hỗ trợ hoặc danh mục của tệp đã hỏng.",
+  "games.archive.archive_changed":
+    "Tệp nén đã thay đổi sau khi xem xét. Xem xét lại trước khi giải nén.",
+  "games.archive.archive_path":
+    "Tệp nén chứa đường dẫn mà Harbor không thể giải nén an toàn. Không có tệp trò chơi nào bị thay thế.",
+  "games.archive.archive_format":
+    "Đây không phải tệp ZIP / 7z / RAR / TAR / TAR.GZ / ISO được hỗ trợ hoặc danh mục của tệp đã hỏng.",
   "games.archive.archive_encrypted": "Nhập mật khẩu của tệp nén này để tiếp tục.",
-  "games.archive.archive_compression": "Tệp ZIP / 7z / RAR / TAR / TAR.GZ / ISO này dùng phương pháp nén mà Harbor chưa hỗ trợ.",
-  "games.archive.archive_collision": "Một số mục trong tệp nén sẽ ghi đè lên nhau. Chưa giải nén gì.",
+  "games.archive.archive_compression":
+    "Tệp ZIP / 7z / RAR / TAR / TAR.GZ / ISO này dùng phương pháp nén mà Harbor chưa hỗ trợ.",
+  "games.archive.archive_collision":
+    "Một số mục trong tệp nén sẽ ghi đè lên nhau. Chưa giải nén gì.",
   "games.archive.archive_destination": "Chọn thư mục khả dụng và tên hợp lệ cho thư mục mới.",
-  "games.archive.archive_write": "Không thể ghi các tệp. Kiểm tra dung lượng và quyền của thư mục đích, rồi xem xét lại tệp nén.",
-  "games.archive.archive_exists": "Thư mục đó đã tồn tại. Chọn tên khác để giữ nguyên các tệp trong đó.",
+  "games.archive.archive_write":
+    "Không thể ghi các tệp. Kiểm tra dung lượng và quyền của thư mục đích, rồi xem xét lại tệp nén.",
+  "games.archive.archive_exists":
+    "Thư mục đó đã tồn tại. Chọn tên khác để giữ nguyên các tệp trong đó.",
   "games.archive.archive_platform": "Thiết bị này không hỗ trợ giải nén.",
   "games.archive.archive_expired": "Lần xem xét tệp nén này đã hết hạn. Xem xét lại để tiếp tục.",
-  "games.archive.archive_space": "Không đủ dung lượng trống cho các tệp được giải nén. Chọn nơi khác.",
-  "games.archive.archive_checksum": "Một tệp trong gói nén không vượt qua kiểm tra tính toàn vẹn. Kết quả giải nén chưa hoàn chỉnh không được đưa vào sử dụng.",
+  "games.archive.archive_space":
+    "Không đủ dung lượng trống cho các tệp được giải nén. Chọn nơi khác.",
+  "games.archive.archive_checksum":
+    "Một tệp trong gói nén không vượt qua kiểm tra tính toàn vẹn. Kết quả giải nén chưa hoàn chỉnh không được đưa vào sử dụng.",
   "games.archive.space.title": "Dung lượng nơi lưu",
   "games.archive.space.checking": "Đang kiểm tra dung lượng nơi lưu…",
   "games.archive.space.free": "Còn trống {size}",
@@ -123,12 +151,15 @@ export default {
   "games.archive.space.reserved": "Đã dành {size} cho tác vụ Harbor khác",
   "games.archive.space.after": "Còn trống {size} sau giải nén",
   "games.archive.space.shortfall": "Cần thêm {size} dung lượng",
-  "games.archive.space.unknown": "Không thể đọc dung lượng trống. Harbor sẽ kiểm tra lại khi bắt đầu giải nén.",
+  "games.archive.space.unknown":
+    "Không thể đọc dung lượng trống. Harbor sẽ kiểm tra lại khi bắt đầu giải nén.",
   "games.archive.space.error": "Không thể kiểm tra dung lượng nơi lưu.",
   "games.archive.space.refresh": "Kiểm tra lại dung lượng",
-  "games.archive.space.note": "Bao gồm một phần dung lượng dự phòng nhỏ. Ứng dụng khác vẫn có thể dùng ổ đĩa này.",
+  "games.archive.space.note":
+    "Bao gồm một phần dung lượng dự phòng nhỏ. Ứng dụng khác vẫn có thể dùng ổ đĩa này.",
   "games.archive.space.shortfallNote": "Giải phóng dung lượng hoặc chọn nơi khác rồi kiểm tra lại.",
-  "games.archive.keepWorking": "Quá trình giải nén tiếp tục trong Tải xuống. Bạn có thể đóng cửa sổ này.",
+  "games.archive.keepWorking":
+    "Quá trình giải nén tiếp tục trong Tải xuống. Bạn có thể đóng cửa sổ này.",
   "games.archive.viewDownloads": "Xem trong Tải xuống",
   "games.archive.phase.publishing": "Đang hoàn tất",
   "games.archive.state.failed": "Giải nén thất bại",
@@ -139,21 +170,29 @@ export default {
   "games.archive.cancelExtract": "Hủy giải nén",
   "games.archive.retry": "Xem lại và thử lại",
   "games.archive.showPartial": "Hiển thị tệp chưa hoàn tất",
-  "games.archive.partialNote": "Harbor đã giữ lại thư mục chưa hoàn tất. Hãy xem lại trước khi xóa; thử lại sẽ bắt đầu một lần giải nén mới.",
+  "games.archive.partialNote":
+    "Harbor đã giữ lại thư mục chưa hoàn tất. Hãy xem lại trước khi xóa; thử lại sẽ bắt đầu một lần giải nén mới.",
   "games.archive.progressFiles": "{count} trên {total} tệp",
-  "games.archive.archive_store": "Harbor không thể lưu tiến trình giải nén. Các tệp của bạn đã được giữ lại để xem lại.",
+  "games.archive.archive_store":
+    "Harbor không thể lưu tiến trình giải nén. Các tệp của bạn đã được giữ lại để xem lại.",
   "games.archive.archive_start": "Không thể bắt đầu giải nén. Hãy thử lại.",
-  "games.archive.archive_history": "Lịch sử giải nén đã đầy. Xóa một mục cũ để tiếp tục; các tệp của mục đó vẫn được giữ lại.",
-  "games.archive.archive_interrupted": "Harbor đã đóng trước khi giải nén xong. Kiểm tra vị trí đã lưu rồi thử lại.",
-  "games.archive.archive_parts": "Các phần này không tạo thành một tệp nén. Hãy kiểm tra xem chúng có thuộc cùng một bản tải xuống không.",
+  "games.archive.archive_history":
+    "Lịch sử giải nén đã đầy. Xóa một mục cũ để tiếp tục; các tệp của mục đó vẫn được giữ lại.",
+  "games.archive.archive_interrupted":
+    "Harbor đã đóng trước khi giải nén xong. Kiểm tra vị trí đã lưu rồi thử lại.",
+  "games.archive.archive_parts":
+    "Các phần này không tạo thành một tệp nén. Hãy kiểm tra xem chúng có thuộc cùng một bản tải xuống không.",
   "games.archive.archive_tool": "Bản dựng này không hỗ trợ thêm các định dạng tệp nén khác.",
   "games.archive.unavailable": "Cập nhật ứng dụng máy tính để giải nén trong nền.",
   "games.archive.continueSetup": "Thiết lập trò chơi",
   "games.archive.dismissRecord": "Xóa mục · giữ tệp",
-  "games.archive.archive_multipart": "Định dạng tệp nén chia nhỏ này chưa được hỗ trợ. Hãy giải nén bằng ứng dụng khác rồi mở thư mục đã giải nén trong Harbor.",
+  "games.archive.archive_multipart":
+    "Định dạng tệp nén chia nhỏ này chưa được hỗ trợ. Hãy giải nén bằng ứng dụng khác rồi mở thư mục đã giải nén trong Harbor.",
   "games.archive.partsCount": "{count} phần tệp nén",
-  "games.archive.partsNote": "Giữ tất cả các phần trong cùng một thư mục. Harbor sẽ giải nén chúng cùng nhau.",
+  "games.archive.partsNote":
+    "Giữ tất cả các phần trong cùng một thư mục. Harbor sẽ giải nén chúng cùng nhau.",
   "games.archive.partsMore": "Hiện thêm phần",
   "games.archive.setHash": "SHA-256 của bộ tệp nén",
-  "games.archive.archive_missing_part": "Thiếu một phần tệp nén. Hãy tải mọi phần vào cùng một thư mục rồi kiểm tra lại.",
+  "games.archive.archive_missing_part":
+    "Thiếu một phần tệp nén. Hãy tải mọi phần vào cùng một thư mục rồi kiểm tra lại.",
 };

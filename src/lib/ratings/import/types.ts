@@ -69,13 +69,7 @@ export type RatingsSource = {
   ) => Promise<ImportedRating[]>;
 };
 
-export type ScoreScale =
-  | "point10"
-  | "point100"
-  | "point10decimal"
-  | "point5"
-  | "point3"
-  | "tmdb";
+export type ScoreScale = "point10" | "point100" | "point10decimal" | "point5" | "point3" | "tmdb";
 
 const SCALE_FACTOR: Record<ScoreScale, number> = {
   point10: 1,

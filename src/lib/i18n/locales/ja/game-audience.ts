@@ -3,11 +3,13 @@ export default {
   "games.audience.deck": "Steam Deck · 人気のプレイ",
   "games.audience.deckNote": "Steam Deckで最もプレイされたゲーム · 過去1週間",
   "games.audience.deckSource": "Steam Deck · 週間プレイランキング",
-  "games.audience.deckCoverage": "ValveのSteam Deck週間ランキングを自動更新します。このランキングの同時接続プレイヤー数は公開されていません。",
+  "games.audience.deckCoverage":
+    "ValveのSteam Deck週間ランキングを自動更新します。このランキングの同時接続プレイヤー数は公開されていません。",
   "games.audience.xbox": "Xbox · 人気のゲーム",
   "games.audience.xboxNote": "最もプレイされているXboxゲーム · 米国",
   "games.audience.xboxSource": "Xbox · 最新の人気ランキング",
-  "games.audience.xboxCoverage": "Microsoftの米国Xboxランキングを自動更新します。Xboxはプレイヤー数を公開していません。",
+  "games.audience.xboxCoverage":
+    "Microsoftの米国Xboxランキングを自動更新します。Xboxはプレイヤー数を公開していません。",
   "games.audience.xboxChecked": "確認日時 {date}",
   "games.audience.xboxView": "Xboxで見る",
   "games.audience.pc": "PC · 全ランチャー",
@@ -19,6 +21,7 @@ export default {
   "games.audience.monthlyRank": "月間順位 {rank}",
   "games.audience.onSteamNow": "現在Steamでプレイ中",
   "games.audience.source": "Newzoo · 月間アクティブプレイヤー",
-  "games.audience.coverage": "中国とインドを除く37市場の月間アクティブプレイヤー数による公開トップ10。指定月のランキングであり、リアルタイム人数や世界ランキングではありません。",
-  "games.audience.snapshot": "Newzoo · 公開ランキング · {month}"
+  "games.audience.coverage":
+    "中国とインドを除く37市場の月間アクティブプレイヤー数による公開トップ10。指定月のランキングであり、リアルタイム人数や世界ランキングではありません。",
+  "games.audience.snapshot": "Newzoo · 公開ランキング · {month}",
 };

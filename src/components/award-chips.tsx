@@ -23,7 +23,7 @@ export function AwardChips({
   size?: "sm" | "md";
 }) {
   const isAnime = meta.id.startsWith("kitsu:") || meta.id.startsWith("mal:");
-  const live = useAwards(isAnime ? undefined : imdbId ?? undefined, meta.type === "series");
+  const live = useAwards(isAnime ? undefined : (imdbId ?? undefined), meta.type === "series");
   const { openAward } = useView();
   const chips = useMemo(() => {
     if (isAnime) return [];
@@ -41,7 +41,10 @@ export function AwardChips({
     <div className="flex flex-wrap items-center gap-1.5">
       {chips.map((c) => {
         const tint = laurelColorFor(c.type);
-        const label = c.wins > 0 ? `${shortName(c.type)}${c.wins > 1 ? ` · ${c.wins}` : ""}` : shortName(c.type);
+        const label =
+          c.wins > 0
+            ? `${shortName(c.type)}${c.wins > 1 ? ` · ${c.wins}` : ""}`
+            : shortName(c.type);
         return (
           <button
             key={c.type}

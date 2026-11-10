@@ -137,9 +137,7 @@ async function fetchTrakt(clientId, seed) {
       itemCount = res.itemCount;
       pageCount = Math.max(1, res.pageCount);
       const pages = pageCount === 1 ? "1 page" : `${pageCount} pages`;
-      console.log(
-        `  ${itemCount} items per x-pagination-item-count, ${pages} of ${res.pageLimit}`,
-      );
+      console.log(`  ${itemCount} items per x-pagination-item-count, ${pages} of ${res.pageLimit}`);
     }
     items.push(...normalise(res.items, seed, skipped));
     if (page < pageCount) await sleep(POLITE_DELAY_MS);
@@ -174,14 +172,18 @@ async function snapshot(clientId, seed) {
     seed.source.kind === "wikidata" ? await fetchWikidata(seed) : await fetchTrakt(clientId, seed);
   const problems = [];
   if (items.length < seed.expectedCount) {
-    problems.push(`${items.length} usable items, the descriptor expects at least ${seed.expectedCount}`);
+    problems.push(
+      `${items.length} usable items, the descriptor expects at least ${seed.expectedCount}`,
+    );
   }
   if (previous && items.length < previous.count) {
     problems.push(`shrank from ${previous.count} to ${items.length}`);
   }
   problems.push(...checkOrdering(seed, items));
   if (items.length > seed.expectedCount) {
-    console.log(`  grew to ${items.length} of ${itemCount} slots, descriptor floor ${seed.expectedCount}`);
+    console.log(
+      `  grew to ${items.length} of ${itemCount} slots, descriptor floor ${seed.expectedCount}`,
+    );
   }
 
   if (problems.length > 0) {
@@ -220,7 +222,10 @@ async function writeIndex() {
       head: snap.items.slice(0, seed.rowCount),
     });
   }
-  lists.sort((a, b) => LIST_SEEDS.findIndex((s) => s.id === a.id) - LIST_SEEDS.findIndex((s) => s.id === b.id));
+  lists.sort(
+    (a, b) =>
+      LIST_SEEDS.findIndex((s) => s.id === a.id) - LIST_SEEDS.findIndex((s) => s.id === b.id),
+  );
   const index = { builtAt: new Date().toISOString().slice(0, 10), lists };
   await writeFile(INDEX, JSON.stringify(index, null, 2));
   const bytes = JSON.stringify(index).length;
@@ -240,7 +245,9 @@ async function writeSpines() {
   }
   const { spines, rows, skipped, ms, lowest, highest } = result;
   const count = Object.keys(spines).length;
-  console.log(`  ${rows} rows in ${ms} ms, ${count} with an IMDb id, spines ${lowest} to ${highest}`);
+  console.log(
+    `  ${rows} rows in ${ms} ms, ${count} with an IMDb id, spines ${lowest} to ${highest}`,
+  );
   if (skipped.size > 0) {
     console.log(`  skipped ${[...skipped].map(([k, v]) => `${v} ${k}`).join(", ")}`);
   }
@@ -271,7 +278,8 @@ for (const seed of LIST_SEEDS) {
   const result = await snapshot(clientId, seed);
   if (!result.ok) {
     refused += 1;
-    if (result.previous) console.log(`  kept ${result.previous.count} items from ${result.previous.snapshotDate}`);
+    if (result.previous)
+      console.log(`  kept ${result.previous.count} items from ${result.previous.snapshotDate}`);
   }
   if (seed.source.kind !== "bundled") await sleep(POLITE_DELAY_MS);
 }

@@ -6,9 +6,11 @@ export default {
   "games.recommend.filterTitle": "استبعاد من الاقتراحات",
   "games.recommend.hideLibrary": "الألعاب في مكتبتي",
   "games.recommend.hideSaved": "الألعاب المحفوظة",
-  "games.recommend.libraryNote": "تُحدَّد الألعاب الموجودة في مكتبتك بناءً على الألعاب المكتشفة والألعاب المستوردة المرتبطة وآخر مزامنة مع Steam.",
+  "games.recommend.libraryNote":
+    "تُحدَّد الألعاب الموجودة في مكتبتك بناءً على الألعاب المكتشفة والألعاب المستوردة المرتبطة وآخر مزامنة مع Steam.",
   "games.recommend.steamSynced": "تمت مزامنة مكتبة Steam في {date}",
-  "games.recommend.steamUnavailable": "معلومات الألعاب المملوكة على Steam غير متاحة. لا تزال ألعاب المكتبة المحلية تؤخذ في الحسبان.",
+  "games.recommend.steamUnavailable":
+    "معلومات الألعاب المملوكة على Steam غير متاحة. لا تزال ألعاب المكتبة المحلية تؤخذ في الحسبان.",
   "games.recommend.inLibrary": "في مكتبتك",
   "games.recommend.removeSaved": "إزالة {name} من الألعاب المحفوظة",
   "games.recommend.forYou": "لك",
@@ -21,7 +23,8 @@ export default {
   "games.recommend.recent": "ما لعبته مؤخرًا",
   "games.recommend.reset": "إظهار الألعاب المخفية مجددًا",
   "games.recommend.empty": "اكتشف ما يناسبك",
-  "games.recommend.emptyNote": "احفظ الألعاب التي تثير اهتمامك أو العب من مكتبتك. ستظهر الاقتراحات هنا.",
+  "games.recommend.emptyNote":
+    "احفظ الألعاب التي تثير اهتمامك أو العب من مكتبتك. ستظهر الاقتراحات هنا.",
   "games.recommend.signalsOff": "فعّل الألعاب المحفوظة أو ما لعبته مؤخرًا أعلاه لتخصيص اقتراحاتك.",
   "games.recommend.save": "حفظ {name}",
   "games.recommend.hide": "إخفاء {name} من الاقتراحات",
@@ -31,9 +34,11 @@ export default {
   "games.recommend.unavailable": "الروابط ليست متاحة بعد.",
   "games.recommend.retryNote": "مكتبتك موجودة. حاول تحميل الألعاب المرتبطة بها مجددًا.",
   "games.recommend.caughtUp": "جرّب اتجاهًا آخر.",
-  "games.recommend.caughtUpNote": "جرّب إيقاف أحد الفلاتر أو استعادة اقتراح مخفي أو حفظ لعبة مفضلة أخرى.",
+  "games.recommend.caughtUpNote":
+    "جرّب إيقاف أحد الفلاتر أو استعادة اقتراح مخفي أو حفظ لعبة مفضلة أخرى.",
   "games.recommend.finding": "جارٍ البحث عن روابط بألعابك…",
-  "games.recommend.source": "اقتراحات من وسوم Steam وIGDB، بناءً على مكتبتك. تنطبق خيارات الإخفاء على هذا الملف الشخصي فقط.",
+  "games.recommend.source":
+    "اقتراحات من وسوم Steam وIGDB، بناءً على مكتبتك. تنطبق خيارات الإخفاء على هذا الملف الشخصي فقط.",
   "games.recommend.retrySome": "إعادة محاولة تحميل الروابط المفقودة",
   "games.recommend.saveError": "تعذّر حفظ تفضيلات الاكتشاف على هذا الجهاز. حاول مجددًا.",
   "games.recommend.influences": "ما يؤثر في اقتراحاتك",
@@ -50,6 +55,5 @@ export default {
   "games.recommend.allExcluded": "جميع المؤثرات مستبعدة.",
   "games.recommend.allExcludedNote": "أعد استخدام لعبة من تخصيص الاقتراحات أو احفظ لعبة مفضلة أخرى.",
   "games.recommend.saved": "الألعاب المحفوظة",
-  "games.recommend.close": "إغلاق إعدادات الاقتراحات"
+  "games.recommend.close": "إغلاق إعدادات الاقتراحات",
 };
-

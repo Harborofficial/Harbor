@@ -17,13 +17,17 @@ export function LayoutStep() {
     {
       id: "harbor",
       label: t("Harbor curated"),
-      sub: t("Hero, Top 10, Trending, In Theaters, per-service rails. Your addons append underneath."),
+      sub: t(
+        "Hero, Top 10, Trending, In Theaters, per-service rails. Your addons append underneath.",
+      ),
       img: harborStyleImg,
     },
     {
       id: "classic",
       label: t("Classic Stremio"),
-      sub: t("Continue Watching, then your addon catalogs in install order. No hero, no Harbor rails."),
+      sub: t(
+        "Continue Watching, then your addon catalogs in install order. No hero, no Harbor rails.",
+      ),
       img: traditionalStyleImg,
     },
   ];
@@ -37,7 +41,11 @@ export function LayoutStep() {
           {t("You can switch later in Settings under Library & metadata.")}
         </p>
       </div>
-      <div role="radiogroup" aria-label={t("Pick a home layout")} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div
+        role="radiogroup"
+        aria-label={t("Pick a home layout")}
+        className="grid grid-cols-1 gap-4 md:grid-cols-2"
+      >
         {options.map((opt) => {
           const selected = choice === opt.id;
           return (
@@ -70,7 +78,9 @@ export function LayoutStep() {
                   </span>
                   <span
                     className={`text-[15px] tracking-tight transition-colors duration-200 ${
-                      selected ? "font-semibold text-ink" : "font-medium text-ink-muted group-hover:text-ink"
+                      selected
+                        ? "font-semibold text-ink"
+                        : "font-medium text-ink-muted group-hover:text-ink"
                     }`}
                   >
                     {opt.label}

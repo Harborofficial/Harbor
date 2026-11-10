@@ -9,13 +9,7 @@ import type { SuwayomiServer } from "./types";
 type Probe = { state: "idle" | "testing" | "ok" | "fail"; label?: string };
 type FailReason = "auth" | "not_found" | "unreachable" | "unsupported";
 
-export function ServerForm({
-  edit,
-  onDone,
-}: {
-  edit?: SuwayomiServer;
-  onDone: () => void;
-}) {
+export function ServerForm({ edit, onDone }: { edit?: SuwayomiServer; onDone: () => void }) {
   const t = useT();
   const [name, setName] = useState(edit?.name ?? "");
   const [baseUrl, setBaseUrl] = useState(edit?.baseUrl ?? "");
@@ -50,7 +44,10 @@ export function ServerForm({
     setError(null);
     setProbe({ state: "testing" });
     try {
-      const res = await testConnection({ baseUrl: baseUrl.trim().replace(/\/+$/, ""), auth: authInput });
+      const res = await testConnection({
+        baseUrl: baseUrl.trim().replace(/\/+$/, ""),
+        auth: authInput,
+      });
       if (res.ok) {
         setFailReason(null);
         setProbe({
@@ -140,7 +137,8 @@ export function ServerForm({
 
       {probe.state === "ok" && (
         <p className="flex items-center gap-1.5 text-[13px] font-medium text-accent">
-          <CheckCircle2 size={15} /> {probe.label ? t("Connected to {name}", { name: probe.label }) : t("Connected")}
+          <CheckCircle2 size={15} />{" "}
+          {probe.label ? t("Connected to {name}", { name: probe.label }) : t("Connected")}
         </p>
       )}
       {probe.state === "fail" && (
@@ -156,7 +154,11 @@ export function ServerForm({
           disabled={probe.state === "testing"}
           className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-raised text-[14.5px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-all hover:text-ink active:scale-[0.98] disabled:opacity-60 motion-reduce:active:scale-100"
         >
-          {probe.state === "testing" ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+          {probe.state === "testing" ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <CheckCircle2 size={16} />
+          )}
           {t("Test connection")}
         </button>
         <button type="button" onClick={save} className={`flex-1 ${PRIMARY_BTN}`}>

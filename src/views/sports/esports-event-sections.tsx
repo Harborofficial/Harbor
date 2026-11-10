@@ -89,13 +89,14 @@ export function EsportsEventStages({
   const [stage, setStage] = useState("");
   const [phase, setPhase] = useState<"all" | "upcoming" | "completed">("all");
   const stages = useMemo(
-    () => [
-      ...new Set(
-        matches
-          .map((match) => match.event.stage)
-          .filter((value): value is string => !!value?.trim()),
-      ),
-    ].slice(0, 12),
+    () =>
+      [
+        ...new Set(
+          matches
+            .map((match) => match.event.stage)
+            .filter((value): value is string => !!value?.trim()),
+        ),
+      ].slice(0, 12),
     [matches],
   );
   const shown = matches
@@ -262,9 +263,7 @@ export function EsportsEventPrizes({ detail }: { detail: EsportsEventDetail }) {
               {slot.place}
             </span>
             <span className="eev-prize-teams">{slot.teams.join(", ")}</span>
-            {slot.usd !== undefined && (
-              <b className="eev-prize-money">{money.format(slot.usd)}</b>
-            )}
+            {slot.usd !== undefined && <b className="eev-prize-money">{money.format(slot.usd)}</b>}
           </li>
         ))}
       </ol>

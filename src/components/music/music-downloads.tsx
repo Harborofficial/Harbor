@@ -113,7 +113,11 @@ export function MusicDownloads({ query = "" }: { query?: string }) {
             onClick={() => void run(entry.id, () => play(entry))}
             aria-label={`${t("music.play")} · ${entry.track.title}`}
           >
-            <Poster src={entry.track.artwork} seed={entry.id} ratio="square" className="size-12"><MusicTrackPlaybackMark track={{...entry.track,id:`download:${entry.id}`,connectorId:"local"}}/></Poster>
+            <Poster src={entry.track.artwork} seed={entry.id} ratio="square" className="size-12">
+              <MusicTrackPlaybackMark
+                track={{ ...entry.track, id: `download:${entry.id}`, connectorId: "local" }}
+              />
+            </Poster>
           </button>
           <div className="min-w-0 flex-1">
             <strong className="block truncate">{entry.track.title}</strong>

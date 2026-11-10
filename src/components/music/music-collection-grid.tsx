@@ -9,7 +9,6 @@ import { useMusicPlaybackOrigin } from "@/lib/music/playback-origin";
 import { useMusicNowPlaying } from "@/lib/music/use-now-playing";
 import { MusicNowPlayingMark } from "./music-now-playing-mark";
 
-
 function EntryCover({ entry }: { entry: MusicCollectionEntry }) {
   const custom = useMusicPlaylistCover(entry.kind === "playlist" ? entry.id : "");
   if (entry.kind === "liked" || entry.kind === "recent")
@@ -28,9 +27,7 @@ function EntryCover({ entry }: { entry: MusicCollectionEntry }) {
     ) : (
       <span className="music-collection-art" data-blank="" />
     );
-  return (
-    <MusicPlaylistCover artwork={entry.artwork} seed={entry.id} glyphSize={36} />
-  );
+  return <MusicPlaylistCover artwork={entry.artwork} seed={entry.id} glyphSize={36} />;
 }
 
 export function MusicCollectionGrid({
@@ -64,7 +61,9 @@ export function MusicCollectionGrid({
         >
           <span className="music-collection-cover-wrap">
             <EntryCover entry={entry} />
-            {origin?.kind === "playlist" && entry.kind === "playlist" && origin.id === entry.id &&
+            {origin?.kind === "playlist" &&
+              entry.kind === "playlist" &&
+              origin.id === entry.id &&
               (now.phase === "playing" || now.phase === "resolving") && (
                 <MusicNowPlayingMark loading={now.phase === "resolving"} />
               )}

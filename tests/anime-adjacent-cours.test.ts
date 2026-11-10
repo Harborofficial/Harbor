@@ -411,7 +411,7 @@ test("the player panel browses anime entries and plays with the entry meta", () 
   assert.match(panel, /entryBrowser\.browsing \? entryBrowser\.activeMeta : null/);
   assert.match(panel, /const playbackMeta = entryBrowser\.activeMeta \?\? meta/);
   assert.match(panel, /openPicker\(playbackMeta, ep/);
-  assert.match(panel, /savePlayback\(playbackMeta\.id/);
+  assert.match(panel, /savePlayback\(\s*playbackMeta\.id/);
   assert.match(panel, /entryBrowser\.entries\.length > 1/);
   assert.match(panel, /isNextAired\(false, ep\.airDate\)/);
   assert.match(panel, /seasons\.includes\(0\)/);

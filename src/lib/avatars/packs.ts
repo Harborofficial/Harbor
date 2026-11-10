@@ -30,7 +30,8 @@ async function readAll(): Promise<AvatarPack[]> {
     return await new Promise((resolve) => {
       const tx = db.transaction(STORE, "readonly");
       const req = tx.objectStore(STORE).getAll();
-      req.onsuccess = () => resolve((req.result as AvatarPack[]).sort((a, b) => a.createdAt - b.createdAt));
+      req.onsuccess = () =>
+        resolve((req.result as AvatarPack[]).sort((a, b) => a.createdAt - b.createdAt));
       req.onerror = () => resolve([]);
     });
   } catch {
@@ -58,7 +59,11 @@ export async function saveAvatarPack(pack: AvatarPack): Promise<void> {
   await refresh();
 }
 
-export async function appendToAvatarPack(id: string, name: string, add: AvatarPackItem[]): Promise<number> {
+export async function appendToAvatarPack(
+  id: string,
+  name: string,
+  add: AvatarPackItem[],
+): Promise<number> {
   if (!add.length) return 0;
   const existing = (cache ?? (await readAll())).find((p) => p.id === id);
   const stamp = Date.now().toString(36);

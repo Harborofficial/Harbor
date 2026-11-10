@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "Evita {name}",
   "games.eve.less": "Meno tappe",
   "games.eve.allStops": "Tutte le tappe",
-  "games.eve.activityNote": "L’attività riportata è storica ed esclude lo spazio wormhole. La preferenza di sicurezza non garantisce una rotta sicura.",
+  "games.eve.activityNote":
+    "L’attività riportata è storica ed esclude lo spazio wormhole. La preferenza di sicurezza non garantisce una rotta sicura.",
   "games.eve.noRoute": "Nessuna rotta tramite stargate trovata.",
   "games.eve.incursions": "Incursioni",
   "games.eve.refreshIncursions": "Aggiorna incursioni",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "Influenza",
   "games.eve.systems": "Sistemi · {count}",
   "games.eve.boss": "Boss presente",
-  "games.eve.routeThere": "Rotta verso questa meta"
+  "games.eve.routeThere": "Rotta verso questa meta",
 };

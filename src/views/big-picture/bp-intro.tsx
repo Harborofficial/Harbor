@@ -82,9 +82,7 @@ export function BpIntro({ pool, leaving }: { pool: Meta[]; leaving: boolean }) {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
       const cell = bpIntroCellWidth();
-      frozen.current = shuffled
-        .slice(0, COLUMNS * PER_COLUMN)
-        .map((u) => bpCardArt(u, cell) ?? u);
+      frozen.current = shuffled.slice(0, COLUMNS * PER_COLUMN).map((u) => bpCardArt(u, cell) ?? u);
     }
   }
 
@@ -112,7 +110,11 @@ export function BpIntro({ pool, leaving }: { pool: Meta[]; leaving: boolean }) {
       />
 
       <div className="relative flex h-full flex-col items-center justify-center gap-[clamp(28px,4.5vh,64px)]">
-        <CustomArtwork role="launch" className="h-[min(22vh,200px)] w-[min(24vw,200px)]" fallback={<BpIntroMark settled={handoff.current} />} />
+        <CustomArtwork
+          role="launch"
+          className="h-[min(22vh,200px)] w-[min(24vw,200px)]"
+          fallback={<BpIntroMark settled={handoff.current} />}
+        />
         <BpIntroSpinner settled={handoff.current} />
       </div>
     </div>
@@ -128,7 +130,12 @@ const LOTTIE_LAST_FRAME = 146;
 // viewer is not shown the logo assembling itself a second time.
 function BpIntroStaticMark() {
   return (
-    <svg viewBox="0 0 700 642.88" fill="currentColor" aria-hidden className="h-full w-full text-ink">
+    <svg
+      viewBox="0 0 700 642.88"
+      fill="currentColor"
+      aria-hidden
+      className="h-full w-full text-ink"
+    >
       <g transform="matrix(0.13333333,0,0,-0.13333333,0,642.88)">
         <path d="m 72.0781,1534.27 c 0,0 1127.5819,922.03 1526.9319,2636.89 0,0 463.95,-1274.4 17.61,-2625.15 L 72.0781,1534.27" />
         <path d="M 3975.59,2945.05 2812.18,2222.26 c -36.68,-22.79 -84.13,3.59 -84.13,46.78 v 1391.45 c 0,42.35 45.8,68.85 82.51,47.75 l 1163.41,-668.68 c 36.11,-20.75 37,-72.53 1.62,-94.51 z M 2021.85,4821.57 V 1438.84 l 2818.94,416.96 c 0,0 252.54,2501.82 -2818.94,2965.77" />
@@ -167,8 +174,7 @@ function BpIntroMark({ settled }: { settled: boolean }) {
         });
         if (reduce) anim.goToAndStop(LOTTIE_LAST_FRAME, true);
         else anim.playSegments([0, LOTTIE_LAST_FRAME], true);
-      } catch {
-      }
+      } catch {}
     })();
     return () => {
       dead = true;

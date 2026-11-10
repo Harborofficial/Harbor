@@ -9,8 +9,10 @@ import type { PlayerSrc } from "@/lib/view";
 export type Anime4kChoice = "auto" | "off" | Anime4kMode;
 
 function autoActive(settings: Settings, src: PlayerSrc): boolean {
-  return settings.playerAnime4k &&
-    (!settings.playerAnime4kAnimeOnly || !!src.isAnime || metaIsAnime(src.meta));
+  return (
+    settings.playerAnime4k &&
+    (!settings.playerAnime4kAnimeOnly || !!src.isAnime || metaIsAnime(src.meta))
+  );
 }
 
 type Anime4kDims = { srcWidth: number; displayWidth: number };

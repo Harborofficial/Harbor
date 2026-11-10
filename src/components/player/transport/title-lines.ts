@@ -29,7 +29,11 @@ export function playerTitleLines({
   // under it, but never the name it already shows.
   const movieSubtitle = subtitle?.trim() === name ? undefined : subtitle;
   if (!hasLogo) {
-    return { title, subtitle: isSeries ? subtitle : movieSubtitle, seriesFirst: seriesFirst && isSeries };
+    return {
+      title,
+      subtitle: isSeries ? subtitle : movieSubtitle,
+      seriesFirst: seriesFirst && isSeries,
+    };
   }
   if (!isSeries) {
     return { title, subtitle: movieSubtitle, seriesFirst: false };

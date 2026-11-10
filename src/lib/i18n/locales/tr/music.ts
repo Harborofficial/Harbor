@@ -34,7 +34,8 @@ const music: Record<string, string> = {
   "dj.minimize": "Küçült",
   "dj.maximize": "Büyüt",
   "dj.close": "Kapat",
-  "dj.blurb": "Tempo, perde, EQ kesmeleri ve cue pedleri kendi penceresinde, çalan parçanın üzerinde.",
+  "dj.blurb":
+    "Tempo, perde, EQ kesmeleri ve cue pedleri kendi penceresinde, çalan parçanın üzerinde.",
   "dj.open": "Konsolu aç",
   "dj.idle": "Çalan bir şey yok",
   "dj.tempo": "Tempo",
@@ -94,7 +95,8 @@ const music: Record<string, string> = {
   "dj.pads.jump": "Beat jump",
   "dj.pads.sampler": "Sampler",
   "dj.pads.triplet": "Triole",
-  "dj.pads.rollHint": "Roll için pedi basılı tutun, bıraktığınızda parça olması gereken yerden devam eder",
+  "dj.pads.rollHint":
+    "Roll için pedi basılı tutun, bıraktığınızda parça olması gereken yerden devam eder",
   "dj.pads.jumpHint": "Ritmi kaçırmadan ileri veya geri atlayın",
   "dj.pads.noBpm": "Henüz BPM yok, siz vurana kadar uzunluklar saniye cinsinden",
   "dj.reset": "Sıfırla",
@@ -109,21 +111,27 @@ const music: Record<string, string> = {
   "music.broadcast.output": "Çıkış",
   "music.broadcast.stop": "Durdur",
   "music.broadcast.start": "Başlat",
-  "music.broadcast.blurb": "Çalanı sanal bir mikrofona gönderin, böylece aramadaki arkadaşlarınız da duysun. Siz hoparlörünüzden duymaya devam edersiniz.",
+  "music.broadcast.blurb":
+    "Çalanı sanal bir mikrofona gönderin, böylece aramadaki arkadaşlarınız da duysun. Siz hoparlörünüzden duymaya devam edersiniz.",
   "music.broadcast.title": "Sesli sohbete yayınla",
-  "music.cable.mac.installNeeded": "Harbor kendi sanal mikrofonunu kurabilir. macOS yönetici parolanızı ister, ardından Core Audio yeniden başlar.",
+  "music.cable.mac.installNeeded":
+    "Harbor kendi sanal mikrofonunu kurabilir. macOS yönetici parolanızı ister, ardından Core Audio yeniden başlar.",
   "music.cable.mac.installMissing": "Harbor'ın bu sürümünde sanal mikrofon sürücüsü yok.",
   "music.cable.mac.installCancelled": "Kurulum iptal edildi.",
   "music.cable.mac.installFailed": "Sanal mikrofon kurulamadı.",
-  "music.cable.mac.restartNeeded": "Sanal mikrofon kurulu ama Core Audio henüz görmedi. Tamamlamak için Mac'i yeniden başlatın.",
-  "music.cable.mac.updateAvailable": "Harbor'ın bu sürümünde daha yeni bir sanal mikrofon var. Kablonun çalışmaya devam etmesi için kurun.",
+  "music.cable.mac.restartNeeded":
+    "Sanal mikrofon kurulu ama Core Audio henüz görmedi. Tamamlamak için Mac'i yeniden başlatın.",
+  "music.cable.mac.updateAvailable":
+    "Harbor'ın bu sürümünde daha yeni bir sanal mikrofon var. Kablonun çalışmaya devam etmesi için kurun.",
   "music.cable.title": "Harbor sanal mikrofonu",
-  "music.cable.blurb": "Harbor sanal mikrofonu kendisi kurar. İndirilecek ya da yüklenecek bir şey yok.",
+  "music.cable.blurb":
+    "Harbor sanal mikrofonu kendisi kurar. İndirilecek ya da yüklenecek bir şey yok.",
   "music.cable.create": "Sanal mikrofon oluştur",
   "music.cable.remove": "Sanal mikrofonu kaldır",
   "music.cable.spec": "{rate}, {depth}",
   "music.cable.perfect": "Yeniden örnekleme yok",
-  "music.cable.resampledGraph": "PipeWire grafiğini {graph} üzerinde çalıştırıyor, bu yüzden burada yeniden örnekleniyor",
+  "music.cable.resampledGraph":
+    "PipeWire grafiğini {graph} üzerinde çalıştırıyor, bu yüzden burada yeniden örnekleniyor",
   "music.cable.resampledServer": "Ses sunucusu {requested} yerine {rate} seçti",
   "music.cable.resampledFormat": "Ses sunucusu 32 bit float taşımıyor",
   "music.cable.resampledOther": "Ses yolunda bir yerde yeniden örnekleme yapılıyor",
@@ -144,8 +152,10 @@ const music: Record<string, string> = {
   "music.cable.createFailed": "Sanal mikrofon oluşturulamadı",
   "music.cable.installNeeded": "Sanal mikrofonu yüklemek için Harbor iznini istiyor",
   "music.cable.installMissing": "Harbor'ın bu sürümü sanal mikrofon içermiyor",
-  "music.cable.restartNeeded": "Sanal mikrofonun görünmesi için ses sisteminin yeniden başlaması gerekiyor",
-  "music.cable.updateAvailable": "Bu Harbor daha yeni bir sanal mikrofon getiriyor. Güncellemek için yeniden oluştur.",
+  "music.cable.restartNeeded":
+    "Sanal mikrofonun görünmesi için ses sisteminin yeniden başlaması gerekiyor",
+  "music.cable.updateAvailable":
+    "Bu Harbor daha yeni bir sanal mikrofon getiriyor. Güncellemek için yeniden oluştur.",
   "dj.crossfade": "Crossfader",
   "dj.b.broadcasting": "Yayını taşıyor",
   "dj.b.eject": "Çıkar",
@@ -192,7 +202,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "Perde",
   "music.speed.reverb": "Yankı",
   "music.speed.keepPitch": "Özgün tonu koru",
-  "music.speed.keepPitchHelp": "Açıkken tempo değişir, ton değişmez. Kapalıyken nightcore ve slowed sesini verir.",
+  "music.speed.keepPitchHelp":
+    "Açıkken tempo değişir, ton değişmez. Kapalıyken nightcore ve slowed sesini verir.",
   "music.speed.reset": "Sıfırla",
   "music.speed.normal": "Normal",
   "music.speed.nightcore": "Nightcore",
@@ -358,7 +369,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "Sahneden",
   "music.artist.inPlaylists": "{name} içeren listeler",
   "music.audio.preferredSource": "Tercih edilen kaynak",
-  "music.audio.preferredSourceHint": "Harbor önce buradan çalar, sonra çalışan herhangi bir kaynağa geçer.",
+  "music.audio.preferredSourceHint":
+    "Harbor önce buradan çalar, sonra çalışan herhangi bir kaynağa geçer.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "Yerel ve reklamsız oynatma için bir kez bağlanın.",
   "music.spotify.connectAction": "Bağlan",
@@ -493,7 +505,8 @@ const music: Record<string, string> = {
   "music.connect.shelfBody": "Harbor, gerçek veriyle destekleyemediği bir satırı tahmin etmez.",
   "music.connect.title": "{name} bağla",
   "music.connect.connected": "{account} olarak bağlı",
-  "music.connect.browserHandoff": "Tarayıcıda Harbor'ı onaylayın, sonra bağlantıyı burada tamamlayın.",
+  "music.connect.browserHandoff":
+    "Tarayıcıda Harbor'ı onaylayın, sonra bağlantıyı burada tamamlayın.",
   "music.connect.scanningFolder": "Klasör okunuyor. Büyük bir kitaplık zaman alır.",
   "music.connect.scanned": "{count} dosya tarandı",
   "music.connect.connecting": "Bağlanıyor",
@@ -522,9 +535,11 @@ const music: Record<string, string> = {
   "music.ytm.loading": "YouTube Music yükleniyor",
   "music.row.scrobble": "{tag} dinlediğin için",
   "music.row.scrobbleWaiting": "Last.fm bağlı. Henüz bir etiket rafı göndermedi.",
-  "music.connect.scrobbleBody": "Last.fm'i bağla, bu raf gerçekten dinlediğin etiketlerden oluşsun.",
+  "music.connect.scrobbleBody":
+    "Last.fm'i bağla, bu raf gerçekten dinlediğin etiketlerden oluşsun.",
   "music.connect.serverName": "bir medya sunucusu veya klasör",
-  "music.connect.serverBody": "Harbor'ı bir klasöre, Plex, Jellyfin, Navidrome ya da Subsonic'e yönlendir; bu raf zaten sahip olduğun albümlerle dolsun.",
+  "music.connect.serverBody":
+    "Harbor'ı bir klasöre, Plex, Jellyfin, Navidrome ya da Subsonic'e yönlendir; bu raf zaten sahip olduğun albümlerle dolsun.",
   "music.row.recents": "Kaldığın yerden devam et",
   "music.row.fresh": "Dinlediğin sanatçılardan yeni çıkanlar",
   "music.row.freshSubtitle": "Dinleme geçmişindeki sanatçıların son çıkan eserleri",
@@ -589,7 +604,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "Önizlemeleri döngüye al",
   "music.quickListen.mute": "Önizlemeyi sessize al",
   "music.quickListen.unmute": "Sesi aç",
-  "music.quickListen.empty": "Henüz dinlemediğin şarkı bulunamadı. Daha fazla müzik keşfettikten sonra tekrar dene.",
+  "music.quickListen.empty":
+    "Henüz dinlemediğin şarkı bulunamadı. Daha fazla müzik keşfettikten sonra tekrar dene.",
   "music.quickListen.finding": "Henüz dinlemediğin şarkılar bulunuyor…",
   "music.quickListen.more": "Diğer seçenekler",
   "music.playlist.search": "Çalma listesi ara",

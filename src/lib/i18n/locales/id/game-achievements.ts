@@ -17,42 +17,56 @@ export default {
   "games.achievementManager.applying": "Menerapkan perubahan…",
   "games.achievementManager.applied": "Steam mengonfirmasi seluruh {count} perubahan.",
   "games.achievementManager.unconfirmed": "Belum dikonfirmasi",
-  "games.achievementManager.partial": "Steam mengonfirmasi {count} dari {total} perubahan. Muat ulang untuk memeriksa pencapaian lainnya.",
+  "games.achievementManager.partial":
+    "Steam mengonfirmasi {count} dari {total} perubahan. Muat ulang untuk memeriksa pencapaian lainnya.",
   "games.achievementManager.refresh": "Muat ulang dari Steam",
   "games.achievementManager.back": "Lanjutkan mengedit",
   "games.achievementManager.note": "Hanya perubahan yang tercantum akan dikirim ke Steam.",
   "games.achievementManager.error.noClient": "Steam tidak ditemukan di komputer ini.",
-  "games.achievementManager.error.clientLoad": "Tidak dapat terhubung ke klien Steam yang terpasang.",
+  "games.achievementManager.error.clientLoad":
+    "Tidak dapat terhubung ke klien Steam yang terpasang.",
   "games.achievementManager.error.clientVersion": "Versi klien Steam ini belum didukung.",
   "games.achievementManager.error.offline": "Buka Steam dan masuk, lalu coba lagi.",
-  "games.achievementManager.error.accountChanged": "Akun Steam aktif telah berubah. Muat ulang sebelum mengedit.",
+  "games.achievementManager.error.accountChanged":
+    "Akun Steam aktif telah berubah. Muat ulang sebelum mengedit.",
   "games.achievementManager.error.notOwned": "Akun Steam aktif tidak memiliki akses ke game ini.",
-  "games.achievementManager.error.timeout": "Steam tidak mengembalikan data pencapaian tepat waktu. Coba muat ulang.",
+  "games.achievementManager.error.timeout":
+    "Steam tidak mengembalikan data pencapaian tepat waktu. Coba muat ulang.",
   "games.achievementManager.error.unavailable": "Tidak dapat membaca pencapaian game dari Steam.",
-  "games.achievementManager.error.rejected": "Steam menolak perubahan. Muat ulang untuk memeriksa keadaan terkini.",
-  "games.achievementManager.error.uncertain": "Steam belum mengonfirmasi hasilnya. Muat ulang untuk memeriksa sebelum membuat perubahan lagi.",
-  "games.achievementManager.error.platform": "Pengelolaan pencapaian saat ini tersedia di Harbor untuk Windows x64.",
+  "games.achievementManager.error.rejected":
+    "Steam menolak perubahan. Muat ulang untuk memeriksa keadaan terkini.",
+  "games.achievementManager.error.uncertain":
+    "Steam belum mengonfirmasi hasilnya. Muat ulang untuk memeriksa sebelum membuat perubahan lagi.",
+  "games.achievementManager.error.platform":
+    "Pengelolaan pencapaian saat ini tersedia di Harbor untuk Windows x64.",
   "games.achievementManager.error.invalid": "Pilih hingga 2.000 perubahan sekaligus.",
-  "games.achievementManager.error.stale": "Pencapaian ini telah berubah di Steam. Muat ulang sebelum mengedit.",
-  "games.achievementManager.error.protected": "Game mengelola pencapaian ini. Harbor tidak dapat mengeditnya.",
-  "games.achievementManager.error.expired": "Tinjauan ini telah kedaluwarsa. Muat ulang sebelum menerapkan perubahan.",
+  "games.achievementManager.error.stale":
+    "Pencapaian ini telah berubah di Steam. Muat ulang sebelum mengedit.",
+  "games.achievementManager.error.protected":
+    "Game mengelola pencapaian ini. Harbor tidak dapat mengeditnya.",
+  "games.achievementManager.error.expired":
+    "Tinjauan ini telah kedaluwarsa. Muat ulang sebelum menerapkan perubahan.",
   "games.achievementManager.error.busy": "Permintaan pencapaian Steam lainnya sedang berlangsung.",
   "games.details.achievementSearch": "Cari pencapaian",
   "games.details.achievementEmpty": "Tidak ada pencapaian yang cocok dengan pencarian Anda.",
   "games.account.secretAchievement": "Pencapaian rahasia",
-  "games.account.secretNote": "Disembunyikan sampai Anda membukanya atau memilih untuk menampilkannya.",
+  "games.account.secretNote":
+    "Disembunyikan sampai Anda membukanya atau memilih untuk menampilkannya.",
   "games.account.moreAchievements": "Pencapaian lainnya",
   "games.account.revealSecrets": "Tampilkan pencapaian rahasia",
   "games.discovery.about": "Tentang game",
   "games.discovery.steamCharts": "Peringkat Steam",
   "games.achievementManager.commit": "Terapkan perubahan",
   "games.achievementManager.consentTitle": "Buka pencapaian Steam",
-  "games.achievementManager.consentBody": "Buka atau kunci kembali pencapaian akun Steam yang sedang masuk. Pilihan tetap berupa draf hingga kamu menerapkan perubahan.",
-  "games.achievementManager.consentRules": "Harbor menggunakan antarmuka pencapaian Steam tanpa menyuntikkan kode ke game. Aturan dan syarat hadiah setiap game tetap berlaku.",
+  "games.achievementManager.consentBody":
+    "Buka atau kunci kembali pencapaian akun Steam yang sedang masuk. Pilihan tetap berupa draf hingga kamu menerapkan perubahan.",
+  "games.achievementManager.consentRules":
+    "Harbor menggunakan antarmuka pencapaian Steam tanpa menyuntikkan kode ke game. Aturan dan syarat hadiah setiap game tetap berlaku.",
   "games.achievementManager.consentSam": "Terinspirasi alur pencapaian SAM",
   "games.achievementManager.consentOnce": "Ditampilkan sekali untuk profil Harbor ini.",
   "games.achievementManager.consentAccept": "Saya mengerti",
-  "games.achievementManager.desktopOnly": "Gunakan Harbor di Windows dengan Steam berjalan untuk mengubah pencapaian.",
+  "games.achievementManager.desktopOnly":
+    "Gunakan Harbor di Windows dengan Steam berjalan untuk mengubah pencapaian.",
   "games.achievementManager.all": "Semua",
   "games.achievementManager.filter": "Filter pencapaian",
   "games.achievementManager.rewards": "Hadiah item",
@@ -67,12 +81,16 @@ export default {
   "games.achievementManager.rewardGame": "Item di {game}",
   "games.achievementManager.rewardVia": "melalui {achievement}",
   "games.achievementManager.rewardAction": "Buka {item}",
-  "games.achievementManager.rewardNote": "Game yang memberikan item. Membuka pencapaian tidak memastikan item diterima, dan hadiah yang sudah diklaim tidak diberikan lagi.",
+  "games.achievementManager.rewardNote":
+    "Game yang memberikan item. Membuka pencapaian tidak memastikan item diterima, dan hadiah yang sudah diklaim tidak diberikan lagi.",
   "games.achievementManager.progressCount": "{count} dari {total} diraih",
   "games.achievementManager.progressLoading": "Membaca progres Steam kamu…",
-  "games.achievementManager.progressUnavailable": "Progres kamu tidak tersedia. Buka Steam atau hubungkan akun Steam, lalu muat ulang.",
-  "games.achievementManager.progressReadOnly": "Progres Steam kamu · Melihat daftar tidak mengubah pencapaian.",
-  "games.achievementManager.progressPublic": "Hanya statistik global · Progres pribadi tidak tersedia.",
+  "games.achievementManager.progressUnavailable":
+    "Progres kamu tidak tersedia. Buka Steam atau hubungkan akun Steam, lalu muat ulang.",
+  "games.achievementManager.progressReadOnly":
+    "Progres Steam kamu · Melihat daftar tidak mengubah pencapaian.",
+  "games.achievementManager.progressPublic":
+    "Hanya statistik global · Progres pribadi tidak tersedia.",
   "games.achievementManager.status.steam": "Hubungkan ke Steam",
   "games.achievementManager.status.connection": "Koneksi Steam tidak tersedia",
   "games.achievementManager.status.refresh": "Periksa progres Steam Anda",
@@ -88,23 +106,29 @@ export default {
   "games.achievementManager.status.filtered": "Tidak ada hasil yang cocok",
   "games.achievementManager.status.noGames": "Tidak ada game Steam ditemukan",
   "games.achievementManager.status.library": "Pustaka Steam Anda tidak dapat dibaca",
-  "games.achievementManager.status.libraryNote": "Coba pindai lagi. Game dari akun Steam yang terhubung masih tersedia.",
+  "games.achievementManager.status.libraryNote":
+    "Coba pindai lagi. Game dari akun Steam yang terhubung masih tersedia.",
   "games.achievementManager.status.emptyNote": "Steam tidak mengembalikan pencapaian untuk {game}.",
   "games.achievementManager.status.store": "Lihat di Steam",
-  "games.achievementManager.recentGamesNote": "Setelah ini, Steam akan menampilkan {game} di game yang baru Anda mainkan.",
+  "games.achievementManager.recentGamesNote":
+    "Setelah ini, Steam akan menampilkan {game} di game yang baru Anda mainkan.",
   "games.achievementManager.rewardOwned": "Sudah terbuka",
   "games.achievementManager.pending": "Tertunda",
   "games.achievementManager.managed": "Dikelola",
   "games.achievementManager.clear": "Hapus perubahan",
-  "games.achievementManager.discardConfirm": "Memuat ulang dari Steam akan membuang {count} perubahan yang Anda pilih.",
-  "games.achievementManager.schemaMissing": "Steam belum menyimpan detail pencapaian game ini di komputer ini, jadi pencapaian hanya dapat dibaca di sini. Jalankan game sekali melalui Steam, lalu muat ulang.",
+  "games.achievementManager.discardConfirm":
+    "Memuat ulang dari Steam akan membuang {count} perubahan yang Anda pilih.",
+  "games.achievementManager.schemaMissing":
+    "Steam belum menyimpan detail pencapaian game ini di komputer ini, jadi pencapaian hanya dapat dibaca di sini. Jalankan game sekali melalui Steam, lalu muat ulang.",
   "games.achievementManager.pickGame": "Pilih game lain",
   "games.achievementManager.pickTitle": "Pilih game",
   "games.achievementManager.pickSearch": "Cari game Anda",
-  "games.achievementManager.pickNote": "Harbor dapat mengedit game setelah Steam menyimpan pencapaiannya di komputer ini.",
+  "games.achievementManager.pickNote":
+    "Harbor dapat mengedit game setelah Steam menyimpan pencapaiannya di komputer ini.",
   "games.achievementManager.pickInstalled": "Terpasang",
   "games.achievementManager.pickEmpty": "Tidak ada game yang cocok dengan pencarian Anda.",
-  "games.achievementManager.pickUnavailable": "Tidak ada game Steam ditemukan. Pasang game melalui Steam atau hubungkan akun Steam Anda, lalu coba lagi.",
+  "games.achievementManager.pickUnavailable":
+    "Tidak ada game Steam ditemukan. Pasang game melalui Steam atau hubungkan akun Steam Anda, lalu coba lagi.",
   "games.achievementManager.pickMore": "Tampilkan game lainnya",
   "games.achievementManager.status.getSteam": "Unduh Steam",
   "games.achievementManager.showLockedDetails": "Tampilkan detail terkunci",

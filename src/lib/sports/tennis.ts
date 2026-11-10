@@ -199,7 +199,11 @@ export async function fetchTournamentDraw(t: TennisTournament): Promise<Tourname
     draw,
     rounds: [...roundMap.entries()]
       .map(([name, list]) => ({ name, matches: list.sort((a, b) => a.startMs - b.startMs) }))
-      .sort((a, b) => earliest(a.matches) - earliest(b.matches) || roundOrder(a.matches) - roundOrder(b.matches)),
+      .sort(
+        (a, b) =>
+          earliest(a.matches) - earliest(b.matches) ||
+          roundOrder(a.matches) - roundOrder(b.matches),
+      ),
   }));
   sections.sort((a, b) => a.draw.localeCompare(b.draw));
 

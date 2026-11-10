@@ -49,9 +49,7 @@ setBpOverscanDefault(TEN_FOOT_OVERSCAN);
 const BigPictureShell = lazy(() =>
   import("./bp-shell").then((m) => ({ default: m.BigPictureShell })),
 );
-const PlayerView = lazy(() =>
-  import("@/views/player").then((m) => ({ default: m.PlayerView })),
-);
+const PlayerView = lazy(() => import("@/views/player").then((m) => ({ default: m.PlayerView })));
 
 type BpTvProvider = ComponentType<{ children: ReactNode }>;
 

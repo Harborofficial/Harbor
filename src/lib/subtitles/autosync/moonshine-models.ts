@@ -54,9 +54,13 @@ export function resolveMoonshineLanguage(
 // model without going through Sync from playback. Only the active player can
 // turn this signal into a prompt. There is no download side effect here.
 const missingModelListeners = new Set<(language: MoonshineLanguage) => void>();
-export function onMoonshineModelMissing(callback: (language: MoonshineLanguage) => void): () => void {
+export function onMoonshineModelMissing(
+  callback: (language: MoonshineLanguage) => void,
+): () => void {
   missingModelListeners.add(callback);
-  return () => { missingModelListeners.delete(callback); };
+  return () => {
+    missingModelListeners.delete(callback);
+  };
 }
 export function announceMoonshineModelMissing(language: MoonshineLanguage): void {
   for (const listener of missingModelListeners) listener(language);

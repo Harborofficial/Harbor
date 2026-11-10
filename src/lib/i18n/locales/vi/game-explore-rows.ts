@@ -23,7 +23,8 @@ export default {
   "games.launchers.visit": "Truy cập {name}",
   "games.launchers.picks": "Trò chơi tuyển chọn",
   "games.launchers.unavailable": "Không thể tải thông tin trò chơi mới nhất.",
-  "games.launchers.source": "Thông tin trò chơi từ IGDB · Liên kết trình khởi chạy mở trang web chính thức.",
+  "games.launchers.source":
+    "Thông tin trò chơi từ IGDB · Liên kết trình khởi chạy mở trang web chính thức.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +60,8 @@ export default {
   "games.recent.open": "Mở {name} từ {source}",
   "games.recent.files": "Tệp từ nguồn",
   "games.recent.empty": "Kết nối một nguồn trò chơi để xem các mục mới thêm tại đây.",
-  "games.recent.undated": "Các nguồn của bạn chưa có trò chơi kèm ngày tải lên. Hãy duyệt trong Quản lý nguồn.",
+  "games.recent.undated":
+    "Các nguồn của bạn chưa có trò chơi kèm ngày tải lên. Hãy duyệt trong Quản lý nguồn.",
   "games.recent.adult": "Nội dung người lớn · ảnh đã làm mờ",
   "games.recent.artHidden": "Đã ẩn ảnh",
   "games.recent.artUnrated": "Chưa có phân loại nội dung",
@@ -85,7 +87,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Doanh thu máy arcade, 1980–1999",
   "games.collectionsLive.wowRecord": "Số thuê bao trả phí cao nhất",
   "games.collectionsLive.wiiRecord": "Bản bán trên Wii",
-  "games.collectionsLive.manhuntRecord": "Trò chơi hành động phiêu lưu đầu tiên bị từ chối phân loại tại Anh",
+  "games.collectionsLive.manhuntRecord":
+    "Trò chơi hành động phiêu lưu đầu tiên bị từ chối phân loại tại Anh",
   "games.collectionsLive.gtaVSalesRecord": "Game hành động phiêu lưu bán chạy nhất",
   "games.collectionsLive.blackOps3Record": "Game bắn súng góc nhìn thứ nhất bán chạy nhất",
   "games.collectionsLive.smashUltimateRecord": "Game đối kháng bán chạy nhất",
@@ -108,10 +111,13 @@ export default {
   "games.collectionsLive.justDanceSeriesRecord": "Dòng game nhảy bán chạy nhất",
   "games.collectionsLive.maddenSeriesRecord": "Dòng game bóng bầu dục Mỹ bán chạy nhất",
   "games.collectionsLive.nba2kSeriesRecord": "Dòng game bóng rổ bán chạy nhất",
-  "games.collectionsLive.honorKingsRecord": "Doanh thu cao nhất từ trước đến nay của một game di động",
-  "games.collectionsLive.gearsBillionRecord": "Dòng game bắn súng góc nhìn thứ ba đầu tiên đạt mốc này",
+  "games.collectionsLive.honorKingsRecord":
+    "Doanh thu cao nhất từ trước đến nay của một game di động",
+  "games.collectionsLive.gearsBillionRecord":
+    "Dòng game bắn súng góc nhìn thứ ba đầu tiên đạt mốc này",
   "games.collectionsLive.oldRepublicRecord": "MMORPG đắt đỏ nhất từng được phát triển",
-  "games.collectionsLive.mario64AuctionRecord": "Số tiền cao nhất từng trả cho một game tại phiên đấu giá",
+  "games.collectionsLive.mario64AuctionRecord":
+    "Số tiền cao nhất từng trả cho một game tại phiên đấu giá",
   "games.collectionsLive.dotaPrizeRecord": "Giải thưởng esports lớn nhất thời bấy giờ",
   "games.collectionsLive.ocarinaScoreRecord": "Điểm phê bình cao nhất từng được ghi nhận",
   "games.collectionsLive.breathScoreRecord": "Game thế giới mở điểm cao nhất",
@@ -143,7 +149,8 @@ export default {
   "games.tournaments.schedule": "Thông tin sự kiện chính thức",
   "games.tournaments.watch": "Xem ở đâu",
   "games.tournaments.channelsNote": "Kênh chính thức. Phát sóng theo lịch giải đấu.",
-  "games.tournaments.broadcastPending": "Chưa xác nhận thông tin phát sóng tại đây. Hãy xem trang của ban tổ chức.",
+  "games.tournaments.broadcastPending":
+    "Chưa xác nhận thông tin phát sóng tại đây. Hãy xem trang của ban tổ chức.",
   "games.tournaments.noDates": "Chưa có giải Major sắp tới được xác nhận trong lịch này.",
   "games.launchers.topGames": "Chơi nhiều nhất trên Steam",
   "games.launchers.chartRank": "Hạng {rank} được chơi nhiều nhất",

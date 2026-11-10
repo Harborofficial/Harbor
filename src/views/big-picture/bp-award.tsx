@@ -63,8 +63,7 @@ export function BpAward({
   const groups = useMemo(
     () =>
       byDecade.filter(
-        (g) =>
-          (categoryKey === ALL || g.category.key === categoryKey) && g.entries.length > 0,
+        (g) => (categoryKey === ALL || g.category.key === categoryKey) && g.entries.length > 0,
       ),
     [byDecade, categoryKey],
   );
@@ -83,10 +82,7 @@ export function BpAward({
     return out;
   }, [groups, limit]);
 
-  const mounted = useMemo(
-    () => paged.reduce((n, g) => n + g.entries.length, 0),
-    [paged],
-  );
+  const mounted = useMemo(() => paged.reduce((n, g) => n + g.entries.length, 0), [paged]);
 
   const shown = useMemo(() => {
     let wins = 0;
@@ -102,9 +98,7 @@ export function BpAward({
     return { wins, span: wins === 0 ? "" : lo === hi ? String(lo) : `${lo} - ${hi}` };
   }, [groups]);
 
-  const sentinelRef = useBpAutoPage(mounted, mounted < shown.wins, () =>
-    setLimit((n) => n + PAGE),
-  );
+  const sentinelRef = useBpAutoPage(mounted, mounted < shown.wins, () => setLimit((n) => n + PAGE));
 
   return (
     <div className="flex h-full flex-col pt-[var(--bp-page-top)]">
@@ -247,16 +241,10 @@ function BpAwardWinner({
   // A miss used to live in component state, so the same dead url was requested
   // again by every later mount of this row. The dead set is the shared one, so a
   // failure costs once per session rather than once per visit.
-  const raw = entry.imdb
-    ? `https://images.metahub.space/poster/small/${entry.imdb}/img`
-    : null;
+  const raw = entry.imdb ? `https://images.metahub.space/poster/small/${entry.imdb}/img` : null;
   const sized = raw ? (bpCardArt(raw, POSTER_ART_W) ?? null) : null;
   const poster =
-    sized && !bpArtDead(sized)
-      ? sized
-      : raw && raw !== sized && !bpArtDead(raw)
-        ? raw
-        : null;
+    sized && !bpArtDead(sized) ? sized : raw && raw !== sized && !bpArtDead(raw) ? raw : null;
 
   const open = (meta: Meta) => {
     if (onSelect) {
@@ -287,12 +275,7 @@ function BpAwardWinner({
     setBusy(true);
     setMissing(false);
     try {
-      const hit = await resolveBpAwardWork(
-        settings.tmdbKey,
-        entry.workTitle,
-        entry.year,
-        preferTv,
-      );
+      const hit = await resolveBpAwardWork(settings.tmdbKey, entry.workTitle, entry.year, preferTv);
       if (hit) {
         open({
           id: `tmdb:${hit.type}:${hit.id}`,

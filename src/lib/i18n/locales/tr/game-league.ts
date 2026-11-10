@@ -65,7 +65,8 @@ export default {
   "games.league.combosIntro": "OP.GG tarafından seçilen kısa gösterimler. Hazır olunca oynat.",
   "games.league.watchCombo": "Gösterimi izle",
   "games.league.updated": "Kaynak güncellendi: {date}",
-  "games.league.buildEmpty": "Bu rol için dizilim yok. Başka bir rol veya aşağıdaki rehberleri dene.",
+  "games.league.buildEmpty":
+    "Bu rol için dizilim yok. Başka bir rol veya aşağıdaki rehberleri dene.",
   "games.league.iconsUnavailable": "Bazı eşya veya rün ayrıntıları yüklenemedi.",
   "games.league.passive": "Pasif",
   "games.league.cooldown": "Bekleme süresi: {seconds}sn",
@@ -74,17 +75,22 @@ export default {
   "games.league.story": "Şampiyonun hikâyesi",
   "games.league.exploreMore": "Daha fazlasını keşfet",
   "games.league.guides": "Video rehberleri",
-  "games.league.metaScope": "OP.GG koridor sıralamalarını varsayılan örneklemiyle sunar; yama, bölge ve derece aralığını belirtmez. Kazanma oranları bildirilen galibiyet ve maçlardan hesaplanır; seçilme oranları kaynakta yuvarlanır. Sıralamalar ve dizilimler ayrı örneklemler kullanır.",
-  "games.league.buildNote": "Her dizilimin örneklemi ayrıdır. Tamamlanmış dizilimler eşyaları alacak kadar uzun süren maçlara eğilimlidir; kazanma oranları şampiyonun genel kazanma oranı değildir. Eşleşme örneklemleri küçük olabilir. Takımına ve rakibine uyum sağla. Videolar eski yamalardan olabilir.",
-  "games.league.patchDifference": "Dizilim istatistikleri {patch}; eşya ve yetenek verileri {assets} sürümünden.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "OP.GG koridor sıralamalarını varsayılan örneklemiyle sunar; yama, bölge ve derece aralığını belirtmez. Kazanma oranları bildirilen galibiyet ve maçlardan hesaplanır; seçilme oranları kaynakta yuvarlanır. Sıralamalar ve dizilimler ayrı örneklemler kullanır.",
+  "games.league.buildNote":
+    "Her dizilimin örneklemi ayrıdır. Tamamlanmış dizilimler eşyaları alacak kadar uzun süren maçlara eğilimlidir; kazanma oranları şampiyonun genel kazanma oranı değildir. Eşleşme örneklemleri küçük olabilir. Takımına ve rakibine uyum sağla. Videolar eski yamalardan olabilir.",
+  "games.league.patchDifference":
+    "Dizilim istatistikleri {patch}; eşya ve yetenek verileri {assets} sürümünden.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Seviye listesi",
   "games.league.tierScope": "Dereceli tek/çift · Zümrüt+ · Dünya geneli",
   "games.league.patchFilter": "Yama seç",
   "games.league.allRoles": "Tüm roller",
   "games.league.banRate": "Yasaklanma oranı",
   "games.league.matches": "Maçlar",
-  "games.league.tierNote": "Sıralama her rol için ayrıdır. Şampiyon dizilimleri mevcut en yeni verileri gösterir.",
+  "games.league.tierNote":
+    "Sıralama her rol için ayrıdır. Şampiyon dizilimleri mevcut en yeni verileri gösterir.",
   "games.official.publisherSource": "Yayıncının resmî indirmesi",
   "games.official.get": "{launcher} indir",
 };

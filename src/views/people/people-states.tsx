@@ -26,7 +26,10 @@ export function LoadingState({ hero }: { hero: boolean }) {
 function HeroSkeleton() {
   return (
     <div className="flex items-end gap-6 rounded-lg bg-elevated p-8">
-      <div className="harbor-shimmer relative h-[188px] w-[128px] shrink-0 rounded-lg" style={delayVar(0)} />
+      <div
+        className="harbor-shimmer relative h-[188px] w-[128px] shrink-0 rounded-lg"
+        style={delayVar(0)}
+      />
       <div className="flex min-w-0 flex-1 flex-col gap-3 pb-2">
         <div className="harbor-shimmer relative h-3 w-24 rounded-md" style={delayVar(60)} />
         <div className="harbor-shimmer relative h-12 w-3/5 rounded-lg" style={delayVar(120)} />
@@ -40,12 +43,21 @@ function HeroSkeleton() {
 function RowSkeleton({ delay }: { delay: number }) {
   return (
     <div className="flex items-center gap-5 rounded-lg bg-elevated p-5">
-      <div className="harbor-shimmer relative h-14 w-12 shrink-0 rounded-lg" style={delayVar(delay)} />
-      <div className="harbor-shimmer relative h-[152px] w-[104px] shrink-0 rounded-lg" style={delayVar(delay)} />
+      <div
+        className="harbor-shimmer relative h-14 w-12 shrink-0 rounded-lg"
+        style={delayVar(delay)}
+      />
+      <div
+        className="harbor-shimmer relative h-[152px] w-[104px] shrink-0 rounded-lg"
+        style={delayVar(delay)}
+      />
       <div className="flex min-w-0 flex-1 flex-col gap-2.5">
         <div className="harbor-shimmer relative h-5 w-2/5 rounded-md" style={delayVar(delay)} />
         <div className="harbor-shimmer relative h-3 w-1/4 rounded-md" style={delayVar(delay)} />
-        <div className="harbor-shimmer relative mt-1 h-3 w-3/5 rounded-md" style={delayVar(delay)} />
+        <div
+          className="harbor-shimmer relative mt-1 h-3 w-3/5 rounded-md"
+          style={delayVar(delay)}
+        />
         <div className="mt-2 flex h-1.5 gap-px overflow-hidden rounded-full">
           {GHOST_LEDGER.map((w, i) => (
             <span key={i} className="h-full bg-ink/10" style={{ width: `${w}%` }} />

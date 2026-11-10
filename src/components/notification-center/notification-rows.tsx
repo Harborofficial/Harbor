@@ -1,4 +1,15 @@
-import { ArrowDownToLine, AtSign, Award, Check, LifeBuoy, MessageSquare, Star, UserPlus, Users, X } from "lucide-react";
+import {
+  ArrowDownToLine,
+  AtSign,
+  Award,
+  Check,
+  LifeBuoy,
+  MessageSquare,
+  Star,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
 import { CoverImg } from "@/components/cover-img";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
@@ -120,17 +131,28 @@ export function RequestRow({
       <button type="button" onClick={() => onOpen(from.handle)} className="shrink-0">
         <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-elevated">
           {from.avatarUrl ? (
-            <img src={from.avatarUrl} alt="" className="h-full w-full object-cover" draggable={false} />
+            <img
+              src={from.avatarUrl}
+              alt=""
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           ) : (
             <UserPlus size={16} className="text-ink-subtle" />
           )}
         </span>
       </button>
       <div className="flex min-w-0 flex-1 flex-col">
-        <button type="button" onClick={() => onOpen(from.handle)} className="truncate text-start text-[13px] font-semibold text-ink hover:underline">
+        <button
+          type="button"
+          onClick={() => onOpen(from.handle)}
+          className="truncate text-start text-[13px] font-semibold text-ink hover:underline"
+        >
           {from.alias || `@${from.handle}`}
         </button>
-        <span className="truncate text-[11.5px] text-ink-subtle">{request.slogan || t("wants to connect")}</span>
+        <span className="truncate text-[11.5px] text-ink-subtle">
+          {request.slogan || t("wants to connect")}
+        </span>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         <button
@@ -197,15 +219,26 @@ export function FeedRow({
         >
           <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-lg bg-elevated/80 ring-1 ring-inset ring-white/[0.06]">
             {notif.cover ? (
-              <CoverImg src={notif.cover} alt="" className="h-full w-full object-cover" draggable={false} />
+              <CoverImg
+                src={notif.cover}
+                alt=""
+                className="h-full w-full object-cover"
+                draggable={false}
+              />
             ) : (
               <Icon size={15} className={iconTint(notif.kind)} />
             )}
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13px] leading-snug text-ink group-hover:underline">{notifTitle(notif, t)}</span>
-            {notif.body && <span className="truncate text-[11.5px] text-ink-subtle">{notif.body}</span>}
-            <span className="mt-0.5 text-[10.5px] text-ink-subtle">{timeAgo(notif.createdAt, t)}</span>
+            <span className="truncate text-[13px] leading-snug text-ink group-hover:underline">
+              {notifTitle(notif, t)}
+            </span>
+            {notif.body && (
+              <span className="truncate text-[11.5px] text-ink-subtle">{notif.body}</span>
+            )}
+            <span className="mt-0.5 text-[10.5px] text-ink-subtle">
+              {timeAgo(notif.createdAt, t)}
+            </span>
           </span>
         </button>
         <div className="relative mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
@@ -245,14 +278,23 @@ export function NotificationDetail({
       <div className="flex flex-col items-center gap-3.5 pt-3 text-center">
         <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-elevated">
           {notif.cover ? (
-            <CoverImg src={notif.cover} alt="" className="h-full w-full object-cover" draggable={false} />
+            <CoverImg
+              src={notif.cover}
+              alt=""
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           ) : (
             <Icon size={26} className={iconTint(notif.kind)} strokeWidth={1.8} />
           )}
         </span>
         <div className="flex flex-col gap-1.5">
-          <span className="font-display text-[18px] font-medium leading-snug text-ink">{notifTitle(notif, t)}</span>
-          {notif.body && <span className="text-[13px] leading-relaxed text-ink-muted">{notif.body}</span>}
+          <span className="font-display text-[18px] font-medium leading-snug text-ink">
+            {notifTitle(notif, t)}
+          </span>
+          {notif.body && (
+            <span className="text-[13px] leading-relaxed text-ink-muted">{notif.body}</span>
+          )}
         </div>
         <span className="text-[11.5px] text-ink-subtle">{fullDate(notif.createdAt)}</span>
       </div>

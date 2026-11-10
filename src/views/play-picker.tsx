@@ -865,8 +865,7 @@ export function PlayPicker({
     preferredSourceEntry,
     preferredSourceMatched: (() => {
       if (!preferredSourceEntry || !autoCandidates[0]) return false;
-      const remembered =
-        preferredSourceEntry === previousPlayback ? previousPlayback : null;
+      const remembered = preferredSourceEntry === previousPlayback ? previousPlayback : null;
       if (remembered) return streamMatchesRememberedSource(autoCandidates[0], remembered);
       if (!lastSeriesSource) return false;
       const matched = lastSeriesSourceIsLineage
@@ -1024,10 +1023,7 @@ export function PlayPicker({
   // the preferred addon's first candidate. The old condition briefly became
   // false between stream IDs resolving and the first source arriving, exposing
   // the picker for a frame before switching back to the loading screen.
-  const showAutoTransition =
-    !pickerErrorText &&
-    !isDownload &&
-    (autoActive || resolving != null);
+  const showAutoTransition = !pickerErrorText && !isDownload && (autoActive || resolving != null);
   void terminalEmpty;
 
   const pickerScrollKey = useMemo(() => {
@@ -1429,7 +1425,6 @@ export function PlayPicker({
             )}
           </>
         )}
-
       </div>
       {(settings.pickerLayout === "stremio" || isDownload) &&
         filteredPicker &&

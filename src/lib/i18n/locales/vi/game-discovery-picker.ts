@@ -9,8 +9,10 @@ export default {
   "games.pick.heading0": "Bạn đang muốn chơi gì?",
   "games.pick.heading1": "Vài game yêu thích sẽ giúp ích rất nhiều.",
   "games.pick.heading2": "Một game đáng để chơi.",
-  "games.pick.note0": "Chọn điều bạn muốn chơi tối nay. Trò chơi khớp hoàn toàn sẽ xuất hiện trước, rồi đến những lựa chọn gần nhất. Chế độ chơi và các bộ lọc khác vẫn được giữ nguyên.",
-  "games.pick.note1": "Chọn tối đa năm game yêu thích. Chúng tôi sẽ xét đặc điểm của chúng cùng hoạt động gần đây.",
+  "games.pick.note0":
+    "Chọn điều bạn muốn chơi tối nay. Trò chơi khớp hoàn toàn sẽ xuất hiện trước, rồi đến những lựa chọn gần nhất. Chế độ chơi và các bộ lọc khác vẫn được giữ nguyên.",
+  "games.pick.note1":
+    "Chọn tối đa năm game yêu thích. Chúng tôi sẽ xét đặc điểm của chúng cùng hoạt động gần đây.",
   "games.pick.note2": "Danh sách dựa trên lựa chọn, sở thích chung và đánh giá của người chơi.",
   "games.pick.company": "Bạn chơi cùng ai?",
   "games.pick.refine": "Tinh chỉnh tìm kiếm",
@@ -37,15 +39,18 @@ export default {
   "games.pick.remove": "Xóa {name} khỏi yêu thích",
   "games.pick.addFavorite": "Dùng {name} làm game yêu thích",
   "games.pick.history": "Dùng hoạt động thư viện của tôi",
-  "games.pick.historyNote": "Game chơi gần đây, chơi nhiều nhất, mới thêm và đã lưu. Game yêu thích có trọng số cao hơn.",
+  "games.pick.historyNote":
+    "Game chơi gần đây, chơi nhiều nhất, mới thêm và đã lưu. Game yêu thích có trọng số cao hơn.",
   "games.pick.signal.recent": "Chơi gần đây",
   "games.pick.signal.mostPlayed": "Chơi nhiều nhất",
   "games.pick.signal.added": "Mới thêm",
   "games.pick.signal.saved": "Đã lưu",
   "games.pick.hours": "giờ",
-  "games.pick.noHistory": "Chưa có hoạt động. Chọn game yêu thích hoặc kết nối Steam trong cài đặt Game.",
+  "games.pick.noHistory":
+    "Chưa có hoạt động. Chọn game yêu thích hoặc kết nối Steam trong cài đặt Game.",
   "games.pick.manualOnly": "Chỉ game yêu thích và bộ lọc đã chọn sẽ quyết định các gợi ý.",
-  "games.pick.addedNote": "“Mới thêm” là lần đầu được thấy trong Harbor sau lần nhập ban đầu, không phải ngày mua.",
+  "games.pick.addedNote":
+    "“Mới thêm” là lần đầu được thấy trong Harbor sau lần nhập ban đầu, không phải ngày mua.",
   "games.pick.because": "Vì bạn thích {name}",
   "games.pick.matches": "Khớp lựa chọn của bạn",
   "games.pick.steamCatalog": "Danh mục Steam",
@@ -59,12 +64,15 @@ export default {
   "games.pick.undo": "Hoàn tác",
   "games.pick.resetHidden": "Hiện lại game đã bỏ qua",
   "games.pick.more": "Tìm thêm gợi ý",
-  "games.pick.rankingNote": "Xếp theo thẻ Steam chung, hoạt động, độ tin cậy đánh giá và tính đa dạng. Điểm là tỷ lệ đánh giá tích cực trên Steam. Giá và tình trạng bán theo danh mục Mỹ.",
+  "games.pick.rankingNote":
+    "Xếp theo thẻ Steam chung, hoạt động, độ tin cậy đánh giá và tính đa dạng. Điểm là tỷ lệ đánh giá tích cực trên Steam. Giá và tình trạng bán theo danh mục Mỹ.",
   "games.pick.error": "Game tiếp theo có thể đợi một chút.",
   "games.pick.errorNote": "Không kết nối được danh mục. Lựa chọn đã được lưu; hãy thử lại.",
   "games.pick.noMatches": "Chưa tìm thấy trò chơi với những yêu cầu này.",
-  "games.pick.noMatchesNote": "Hãy mở rộng lựa chọn nền tảng, giá hoặc thư viện. Các lựa chọn gần với tâm trạng của bạn đã được đưa vào.",
-  "games.pick.saveError": "Lựa chọn có hiệu lực trong phiên này nhưng không lưu được trên thiết bị.",
+  "games.pick.noMatchesNote":
+    "Hãy mở rộng lựa chọn nền tảng, giá hoặc thư viện. Các lựa chọn gần với tâm trạng của bạn đã được đưa vào.",
+  "games.pick.saveError":
+    "Lựa chọn có hiệu lực trong phiên này nhưng không lưu được trên thiết bị.",
   "games.pick.selected": "Đã chọn {count} thẻ",
   "games.pick.favoriteCount": "{count} trong 5 game yêu thích",
   "games.pick.resultsCount": "Đã có {count} kết quả khớp",
@@ -74,7 +82,8 @@ export default {
   "games.pick.reviews": "{count} đánh giá",
   "games.pick.unrated": "Chưa có điểm đánh giá",
   "games.pick.owned": "Trong thư viện của bạn",
-  "games.pick.closest": "Có cả những lựa chọn gần nhất. Chế độ chơi và các bộ lọc khác vẫn được giữ nguyên.",
+  "games.pick.closest":
+    "Có cả những lựa chọn gần nhất. Chế độ chơi và các bộ lọc khác vẫn được giữ nguyên.",
   "games.pick.closeMatch": "Khớp {count} trên {total} thẻ tâm trạng",
-  "games.pick.missing": "Không có thẻ: {tags}"
+  "games.pick.missing": "Không có thẻ: {tags}",
 };

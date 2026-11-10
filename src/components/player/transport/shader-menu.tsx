@@ -51,7 +51,8 @@ export function ShaderMenu({
   if (!anime4kAvailable && installed.length === 0) return null;
 
   const a4kActive = mode !== "auto" && mode !== "off";
-  const activeCount = (a4kActive ? 1 : 0) + installed.filter((e) => shaderMap[e.id]?.enabled).length;
+  const activeCount =
+    (a4kActive ? 1 : 0) + installed.filter((e) => shaderMap[e.id]?.enabled).length;
   const accent = open || activeCount > 0;
 
   const toggleShader = (id: string) => {
@@ -69,21 +70,28 @@ export function ShaderMenu({
           }}
           aria-label={t("Shaders")}
           className={`flex h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 transition-[background-color,color] ${
-            accent ? "bg-white/22 text-white hover:bg-white/30" : "text-white/85 hover:bg-white/10 hover:text-white"
+            accent
+              ? "bg-white/22 text-white hover:bg-white/30"
+              : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
           {iconUrl ? (
-            <img src={iconUrl} alt="" className="h-[22px] w-[22px] shrink-0 select-none object-contain" draggable={false} />
+            <img
+              src={iconUrl}
+              alt=""
+              className="h-[22px] w-[22px] shrink-0 select-none object-contain"
+              draggable={false}
+            />
           ) : (
             <Layers size={19} strokeWidth={1.9} />
           )}
-          {activeCount > 0 ? <span className="text-[11px] font-bold tracking-wider">{activeCount}</span> : null}
+          {activeCount > 0 ? (
+            <span className="text-[11px] font-bold tracking-wider">{activeCount}</span>
+          ) : null}
         </button>
       </Tooltip>
       {open && (
-        <div
-          className="fixed end-14 bottom-[150px] max-h-[calc(100vh-174px)] w-[340px] max-w-[calc(100vw-72px)] overflow-y-auto rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop"
-        >
+        <div className="fixed end-14 bottom-[150px] max-h-[calc(100vh-174px)] w-[340px] max-w-[calc(100vw-72px)] overflow-y-auto rounded-md bg-elevated shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] animate-menu-pop">
           <div className="p-2">
             {anime4kAvailable && (
               <>
@@ -98,7 +106,9 @@ export function ShaderMenu({
                         key={o.id}
                         onClick={() => onMode(o.id)}
                         className={`flex h-9 w-full items-center justify-between rounded-lg px-3 text-start text-[13.5px] transition-colors ${
-                          sel ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
+                          sel
+                            ? "bg-elevated text-ink ring-1 ring-edge"
+                            : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
                         }`}
                       >
                         <span className={sel ? "font-medium" : ""}>{t(o.label)}</span>
@@ -119,19 +129,24 @@ export function ShaderMenu({
                     const st = shaderMap[e.id];
                     const on = !!st?.enabled;
                     const variantLabel =
-                      e.variants?.find((v) => v.id === st?.variant)?.label ?? e.variants?.[0]?.label;
+                      e.variants?.find((v) => v.id === st?.variant)?.label ??
+                      e.variants?.[0]?.label;
                     return (
                       <button
                         key={e.id}
                         onClick={() => toggleShader(e.id)}
                         className={`flex min-h-9 w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-start text-[13.5px] transition-colors ${
-                          on ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
+                          on
+                            ? "bg-elevated text-ink ring-1 ring-edge"
+                            : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
                         }`}
                       >
                         <span className="flex min-w-0 flex-col">
                           <span className={on ? "font-medium" : ""}>{t(e.name)}</span>
                           {variantLabel && (
-                            <span className="truncate text-[10.5px] text-ink-subtle">{t(variantLabel)}</span>
+                            <span className="truncate text-[10.5px] text-ink-subtle">
+                              {t(variantLabel)}
+                            </span>
                           )}
                         </span>
                         <span

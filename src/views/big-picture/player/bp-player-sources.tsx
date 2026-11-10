@@ -21,9 +21,12 @@ import { BpStreams } from "../bp-streams";
 // private listener: the second listener on arrows the focus contract forbids.
 // Render in place and none of it is needed.
 
-const CARD = "flex h-[min(86vh,900px)] w-[min(92vw,1180px)] flex-col overflow-hidden rounded-[var(--bp-r-lg)] border border-[var(--bp-edge)] bg-[var(--bp-void)] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.95)] [animation:bp-rise_var(--bp-dur)_var(--bp-ease)_backwards] motion-reduce:[animation:none]";
-const SCRIM = "absolute inset-0 flex items-center justify-center bg-[var(--bp-void)]/50 p-[clamp(14px,2.4vh,40px)] [animation:bp-fade_var(--bp-dur)_var(--bp-ease)_backwards] motion-reduce:[animation:none]";
-const BTN = "flex h-[clamp(48px,5.6vh,66px)] shrink-0 items-center gap-[clamp(7px,0.7vw,13px)] rounded-[var(--bp-r-xs)] border border-[var(--bp-edge-2)] px-[clamp(16px,1.5vw,30px)] text-[clamp(14px,1.95vh,22px)] font-bold tabular-nums text-ink disabled:opacity-40";
+const CARD =
+  "flex h-[min(86vh,900px)] w-[min(92vw,1180px)] flex-col overflow-hidden rounded-[var(--bp-r-lg)] border border-[var(--bp-edge)] bg-[var(--bp-void)] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.95)] [animation:bp-rise_var(--bp-dur)_var(--bp-ease)_backwards] motion-reduce:[animation:none]";
+const SCRIM =
+  "absolute inset-0 flex items-center justify-center bg-[var(--bp-void)]/50 p-[clamp(14px,2.4vh,40px)] [animation:bp-fade_var(--bp-dur)_var(--bp-ease)_backwards] motion-reduce:[animation:none]";
+const BTN =
+  "flex h-[clamp(48px,5.6vh,66px)] shrink-0 items-center gap-[clamp(7px,0.7vw,13px)] rounded-[var(--bp-r-xs)] border border-[var(--bp-edge-2)] px-[clamp(16px,1.5vw,30px)] text-[clamp(14px,1.95vh,22px)] font-bold tabular-nums text-ink disabled:opacity-40";
 const SCROLL = "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
 const LANE = `flex items-center gap-[clamp(9px,0.9vw,16px)] overflow-x-auto px-[var(--bp-gutter)] py-[clamp(14px,1.8vh,26px)] ${SCROLL}`;
 const MUTED = "line-clamp-1 text-[clamp(13px,1.75vh,20px)] font-medium text-ink-subtle";
@@ -89,7 +92,9 @@ export function BpPlayerAudio(props: BpPlayerAudioProps) {
             <Languages size={26} strokeWidth={2} />
             {t("Audio")}
           </h2>
-          <p className={MUTED}>{`${title ? `${title} · ` : ""}${t("{n} tracks", { n: tracks.length })}`}</p>
+          <p
+            className={MUTED}
+          >{`${title ? `${title} · ` : ""}${t("{n} tracks", { n: tracks.length })}`}</p>
         </header>
 
         <div
@@ -100,11 +105,18 @@ export function BpPlayerAudio(props: BpPlayerAudioProps) {
             <p className="text-[clamp(13.5px,1.85vh,21px)] font-medium leading-relaxed text-ink-subtle">
               {engine === "mpv"
                 ? t("This file has one audio track.")
-                : t("Track switching isn't supported on the current engine. The file's default audio is playing.")}
+                : t(
+                    "Track switching isn't supported on the current engine. The file's default audio is playing.",
+                  )}
             </p>
           )}
           {tracks.map((track, i) => (
-            <div key={track.id} data-bp-row data-bp-scroll-x style={{ containIntrinsicSize: "auto 96px" }}>
+            <div
+              key={track.id}
+              data-bp-row
+              data-bp-scroll-x
+              style={{ containIntrinsicSize: "auto 96px" }}
+            >
               <BpAudioRow
                 track={track}
                 selected={track.id === selectedId}
@@ -132,7 +144,11 @@ function BpAudioLane({ delaySec, engine, onDelay, onClose }: BpPlayerAudioProps)
   const locked = engine === "html5";
   const dim = locked ? "opacity-45" : "";
   const round = (v: number) => Math.round(v * 100) / 100;
-  const cells = DELAY_STEPS.map((step) => ({ key: String(step), body: `${step > 0 ? "+" : ""}${step}s`, to: round(delaySec + step) }));
+  const cells = DELAY_STEPS.map((step) => ({
+    key: String(step),
+    body: `${step > 0 ? "+" : ""}${step}s`,
+    to: round(delaySec + step),
+  }));
   if (delaySec !== 0) cells.push({ key: "reset", body: t("Reset"), to: 0 });
 
   return (
@@ -150,10 +166,14 @@ function BpAudioLane({ delaySec, engine, onDelay, onClose }: BpPlayerAudioProps)
         >
           {t("Back")}
         </button>
-        <span className={`ms-[clamp(6px,0.6vw,12px)] shrink-0 text-[clamp(12.5px,1.7vh,19px)] font-bold uppercase tracking-[0.12em] text-ink-subtle ${dim}`}>
+        <span
+          className={`ms-[clamp(6px,0.6vw,12px)] shrink-0 text-[clamp(12.5px,1.7vh,19px)] font-bold uppercase tracking-[0.12em] text-ink-subtle ${dim}`}
+        >
           {t("Sync Offset")}
         </span>
-        <span className={`shrink-0 font-mono text-[clamp(15px,2.1vh,24px)] font-bold tabular-nums ${dim} ${delaySec !== 0 ? "text-ink" : "text-ink-subtle"}`}>
+        <span
+          className={`shrink-0 font-mono text-[clamp(15px,2.1vh,24px)] font-bold tabular-nums ${dim} ${delaySec !== 0 ? "text-ink" : "text-ink-subtle"}`}
+        >
           {`${delaySec > 0 ? "+" : ""}${delaySec.toFixed(2)}s`}
         </span>
         {cells.map((cell) => (
@@ -215,8 +235,14 @@ function BpAudioRow({ track, selected, autofocus, onPick }: RowProps) {
         )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-[clamp(3px,0.4vh,7px)]">
-        <span className="line-clamp-1 text-[clamp(14px,1.95vh,23px)] font-semibold leading-tight">{label}</span>
-        {detail && <span className="line-clamp-1 text-[clamp(12px,1.6vh,18px)] font-medium opacity-65">{detail}</span>}
+        <span className="line-clamp-1 text-[clamp(14px,1.95vh,23px)] font-semibold leading-tight">
+          {label}
+        </span>
+        {detail && (
+          <span className="line-clamp-1 text-[clamp(12px,1.6vh,18px)] font-medium opacity-65">
+            {detail}
+          </span>
+        )}
       </span>
     </button>
   );

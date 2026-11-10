@@ -3,12 +3,21 @@ import { launcherSceneArtwork, launcherTitleLogo } from "./launcher-title-art";
 import type { GameSummary } from "./types";
 
 export type AudienceBoard = "pc" | "console" | "steam" | "xbox" | "deck";
-export type AudienceGame = GameSummary & { chartRank: number; hero?: string; logo?: string; description?: string; sourceUrl?: string; openGame?: GameSummary };
+export type AudienceGame = GameSummary & {
+  chartRank: number;
+  hero?: string;
+  logo?: string;
+  description?: string;
+  sourceUrl?: string;
+  openGame?: GameSummary;
+};
 /** Published monthly positions, not an inferred worldwide concurrent-player ranking. */
 export const AUDIENCE_REPORT = {
-  month: "2026-08-01", published: "2026-09-28",
+  month: "2026-08-01",
+  published: "2026-09-28",
   url: "https://newzoo.com/articles/august-2026-pc-console-rankings",
-  markets: 37, excludes: ["China", "India"],
+  markets: 37,
+  excludes: ["China", "India"],
 } as const;
 
 // Transcribed from the source's two MAU charts. Preserve their order and cohort.
@@ -19,12 +28,16 @@ const positions = {
 export function audienceChart(board: "pc" | "console"): AudienceGame[] {
   return positions[board].map((key, index) => {
     const game: GameSummary & { hero?: string; description?: string } = snapshot[key];
-    return { ...game, id: board === "pc" && game.steamId ? `steam:${game.steamId}` : game.id, chartRank: index + 1,
+    return {
+      ...game,
+      id: board === "pc" && game.steamId ? `steam:${game.steamId}` : game.id,
+      chartRank: index + 1,
       // Keep verified provider artwork as the fallback; current Steam filenames may be hashed.
       capsule: game.capsule,
-      hero: game.steamId ? launcherSceneArtwork(game.igdbId) ?? game.hero : game.hero,
+      hero: game.steamId ? (launcherSceneArtwork(game.igdbId) ?? game.hero) : game.hero,
       logo: launcherTitleLogo(game.igdbId),
-      ...(key === "hq" ? { name: "Call of Duty" } : {}) };
+      ...(key === "hq" ? { name: "Call of Duty" } : {}),
+    };
   });
 }
 

@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "ملاحظات الإصدار",
   "games.wow.addons.fullNotes": "اقرأ النص الكامل في صفحة المطوّر",
 
-  "games.wow.manager.errorIdentity": "المجلدات المثبتة لا تطابق حزمة المطور. أعد الفحص وتحقق من مصدر الإضافة.",
+  "games.wow.manager.errorIdentity":
+    "المجلدات المثبتة لا تطابق حزمة المطور. أعد الفحص وتحقق من مصدر الإضافة.",
   "games.wow.manager.importInstalled": "استيراد الإضافات المثبتة",
   "games.wow.manager.import": "الإدارة عبر Harbor",
-  "games.wow.manager.importScope": "إضافات مثبتة لها هوية WoWInterface. تبقى الإضافات الأخرى في قائمة المثبتة.",
-  "games.wow.manager.importNote": "احتفظ بملفاتك المثبتة. يتحقق Harbor من حزمة المطور ويحفظ الإصدار السابق قبل التحديثات أو الإزالة مستقبلًا.",
+  "games.wow.manager.importScope":
+    "إضافات مثبتة لها هوية WoWInterface. تبقى الإضافات الأخرى في قائمة المثبتة.",
+  "games.wow.manager.importNote":
+    "احتفظ بملفاتك المثبتة. يتحقق Harbor من حزمة المطور ويحفظ الإصدار السابق قبل التحديثات أو الإزالة مستقبلًا.",
   "games.wow.manager.keepVersion": "الاحتفاظ بالإصدار المثبت {version}",
   "games.wow.manager.keep": "احتفاظ",
   "games.wow.manager.importSuccess": "أصبحت هذه الإضافة بإدارة Harbor.",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "البحث عن إضافات",
   "games.wow.manager.managed": "بإدارة Harbor",
   "games.wow.manager.backups": "النسخ الاحتياطية",
-  "games.wow.manager.catalogNote": "تصفح WoWInterface. يُفحص التوافق مع WoW المثبتة قبل تطبيق التغييرات.",
-  "games.wow.manager.managedNote": "يمكن تعديل الإضافات المثبتة عبر Harbor فقط هنا. تبقى الإضافات الأخرى في قائمة المثبتة.",
+  "games.wow.manager.catalogNote":
+    "تصفح WoWInterface. يُفحص التوافق مع WoW المثبتة قبل تطبيق التغييرات.",
+  "games.wow.manager.managedNote":
+    "يمكن تعديل الإضافات المثبتة عبر Harbor فقط هنا. تبقى الإضافات الأخرى في قائمة المثبتة.",
   "games.wow.manager.category": "الفئة",
   "games.wow.manager.allCategories": "كل الفئات",
   "games.wow.manager.popular": "التنزيلات الشهرية",
@@ -33,7 +38,8 @@ export default {
   "games.wow.manager.partial": "بعض سجلات المزود غير متاحة. قد تكون النتائج غير مكتملة.",
   "games.wow.manager.emptyManaged": "لا توجد إضافات بإدارة Harbor بعد.",
   "games.wow.manager.emptyBackups": "لا توجد إصدارات سابقة محفوظة بعد.",
-  "games.wow.manager.reviewNote": "راجع الحزمة وتغييرات المجلدات أولًا. أغلق WoW قبل المراجعة أو التطبيق.",
+  "games.wow.manager.reviewNote":
+    "راجع الحزمة وتغييرات المجلدات أولًا. أغلق WoW قبل المراجعة أو التطبيق.",
   "games.wow.manager.backupNote": "الملفات السابقة محفوظة محليًا: {size}.",
   "games.wow.manager.fileSummary": "{count} ملفات · {size}",
   "games.wow.manager.preparing": "جارٍ إعداد مراجعة التغييرات…",
@@ -76,7 +82,8 @@ export default {
   "games.wow.addons.noMatches": "لا توجد إضافات تطابق هذه المرشحات.",
   "games.wow.addons.more": "عرض المزيد من الإضافات",
   "games.wow.addons.empty": "لم يُعثر على إضافات لهذا التثبيت.",
-  "games.wow.addons.scope": "يحدد مطور الإضافة إصدارات اللعبة. لا يتم التحقق من حالة التفعيل أو التحديثات المتاحة.",
+  "games.wow.addons.scope":
+    "يحدد مطور الإضافة إصدارات اللعبة. لا يتم التحقق من حالة التفعيل أو التحديثات المتاحة.",
   "games.wow.realm.LOCKED": "مغلق",
   "games.wow.classic.title": "حالة العوالم",
   "games.wow.classic.intro": "تحقق من عالمك قبل التوجه إلى أزيروث. حالة مباشرة من Blizzard.",
@@ -98,7 +105,8 @@ export default {
   "games.wow.classic.news": "أخبار Classic",
   "games.wow.realm.browse": "تصفّح العوالم",
   "games.wow.realm.unavailable": "حالة العوالم غير متاحة. لا يزال بإمكانك إدخال عالم.",
-  "games.wow.realm.unsupported": "خدمة Blizzard العالمية للحالة لا تغطي هذه المنطقة. أدخل عالمك يدويًا.",
+  "games.wow.realm.unsupported":
+    "خدمة Blizzard العالمية للحالة لا تغطي هذه المنطقة. أدخل عالمك يدويًا.",
   "games.wow.realm.noMatches": "لا توجد عوالم مطابقة. يمكنك إدخال الاسم يدويًا.",
   "games.wow.realm.refresh": "تحديث حالة العوالم",
   "games.wow.realm.unknown": "الحالة غير معروفة",
@@ -154,7 +162,8 @@ export default {
   "games.wow.resetNote": "حسب توقيتك المحلي. قد تستمر الصيانة بعد إعادة الضبط.",
   "games.wow.resetUnavailable": "توقيت إعادة الضبط غير متاح.",
   "games.wow.affixes": "تعديلات هذا الأسبوع",
-  "games.wow.affixesUnavailable": "التعديلات الحالية غير متاحة. تحقق مجددًا بعد إعادة الضبط في منطقتك.",
+  "games.wow.affixesUnavailable":
+    "التعديلات الحالية غير متاحة. تحقق مجددًا بعد إعادة الضبط في منطقتك.",
   "games.wow.dungeons": "زنزانات Mythic+",
   "games.wow.timer": "المهلة: {minutes} دقيقة",
   "games.wow.rankings": "عرض التصنيف",
@@ -163,7 +172,8 @@ export default {
   "games.wow.bosses": "الزعماء · {count}",
   "games.wow.raidsUnavailable": "معلومات الغارات الحالية غير متاحة.",
   "games.wow.checked": "آخر تحقق: {date}",
-  "games.wow.scope": "بيانات Retail من Raider.IO. المؤقتات تخص مفاتيح الزنزانات؛ تختلف التعديلات حسب مستوى المفتاح.",
+  "games.wow.scope":
+    "بيانات Retail من Raider.IO. المؤقتات تخص مفاتيح الزنزانات؛ تختلف التعديلات حسب مستوى المفتاح.",
   "games.wow.region.us": "الأمريكتان / أوقيانوسيا",
   "games.wow.region.eu": "أوروبا",
   "games.wow.region.kr": "كوريا",

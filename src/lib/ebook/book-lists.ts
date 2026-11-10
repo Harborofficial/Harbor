@@ -46,7 +46,12 @@ const HUGO: BookListEntry[] = [
 const BOOKER: BookListEntry[] = [
   { rank: null, title: "Orbital", author: "Samantha Harvey", year: 2024 },
   { rank: null, title: "Prophet Song", author: "Paul Lynch", year: 2023 },
-  { rank: null, title: "The Seven Moons of Maali Almeida", author: "Shehan Karunatilaka", year: 2022 },
+  {
+    rank: null,
+    title: "The Seven Moons of Maali Almeida",
+    author: "Shehan Karunatilaka",
+    year: 2022,
+  },
   { rank: null, title: "The Promise", author: "Damon Galgut", year: 2021 },
   { rank: null, title: "Shuggie Bain", author: "Douglas Stuart", year: 2020 },
   { rank: null, title: "Girl, Woman, Other", author: "Bernardine Evaristo", year: 2019 },
@@ -79,7 +84,12 @@ const PULITZER: BookListEntry[] = [
   { rank: null, title: "A Visit from the Goon Squad", author: "Jennifer Egan", year: 2011 },
   { rank: null, title: "The Road", author: "Cormac McCarthy", year: 2007 },
   { rank: null, title: "Middlesex", author: "Jeffrey Eugenides", year: 2003 },
-  { rank: null, title: "The Amazing Adventures of Kavalier & Clay", author: "Michael Chabon", year: 2001 },
+  {
+    rank: null,
+    title: "The Amazing Adventures of Kavalier & Clay",
+    author: "Michael Chabon",
+    year: 2001,
+  },
   { rank: null, title: "Beloved", author: "Toni Morrison", year: 1988 },
   { rank: null, title: "To Kill a Mockingbird", author: "Harper Lee", year: 1961 },
 ];
@@ -153,7 +163,8 @@ export const BOOK_SUBJECT_LISTS: readonly BookListSeed[] = [
     id: "classics",
     title: "The classics",
     curator: "Open Library",
-    blurb: "The books that kept being reprinted, ranked by how many editions the world has bothered to make.",
+    blurb:
+      "The books that kept being reprinted, ranked by how many editions the world has bothered to make.",
     ordering: "ranked",
     query: { subject: "classic literature", sort: "editions" },
     expectedCount: 100,

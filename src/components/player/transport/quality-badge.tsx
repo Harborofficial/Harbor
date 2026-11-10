@@ -60,7 +60,15 @@ function BarReveal({ labels, on }: { labels: string[]; on: boolean }) {
   );
 }
 
-export function QualityBadgeDisplay({ items, show, bar }: { items: string[]; show: boolean; bar: boolean }) {
+export function QualityBadgeDisplay({
+  items,
+  show,
+  bar,
+}: {
+  items: string[];
+  show: boolean;
+  bar: boolean;
+}) {
   const entered = useEntered();
   const on = show && entered;
   if (bar) return <BarReveal labels={items} on={on} />;
@@ -94,5 +102,7 @@ export function QualityInfo({
     return () => window.clearTimeout(timer);
   }, [key, settledKey]);
   if (!key || settledKey !== key) return null;
-  return <QualityBadgeDisplay items={items} show={show} bar={settings.qualityBadgeStyle === "bar"} />;
+  return (
+    <QualityBadgeDisplay items={items} show={show} bar={settings.qualityBadgeStyle === "bar"} />
+  );
 }

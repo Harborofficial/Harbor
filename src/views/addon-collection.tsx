@@ -19,7 +19,11 @@ function videoToMeta(v: CollectionVideo, fallback: "movie" | "series"): Meta | n
   if (!id) return null;
   const raw = v as Record<string, unknown>;
   const poster =
-    typeof raw.poster === "string" ? raw.poster : typeof v.thumbnail === "string" ? v.thumbnail : undefined;
+    typeof raw.poster === "string"
+      ? raw.poster
+      : typeof v.thumbnail === "string"
+        ? v.thumbnail
+        : undefined;
   return {
     id,
     type: memberType(id, fallback),
@@ -89,7 +93,11 @@ export function AddonCollectionView({ meta }: { meta: Meta }) {
         if (full?.background) setHeroBg(full.background);
         if (full?.description) setHeroDesc(full.description);
         found = dedupe(fromVideos(full), meta.id);
-        console.log("[harbor:collection] members mapped from videos:", found.length, found.slice(0, 4));
+        console.log(
+          "[harbor:collection] members mapped from videos:",
+          found.length,
+          found.slice(0, 4),
+        );
         if (found.length === 0) {
           const catalog = await fetchAddonCatalogPage(base, meta.type, meta.id, 0).catch((e) => {
             console.log("[harbor:collection] catalog fetch threw", e);
@@ -129,7 +137,11 @@ export function AddonCollectionView({ meta }: { meta: Meta }) {
   const count = members.length;
 
   return (
-    <main ref={scrollRef} data-rail-flush className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
+    <main
+      ref={scrollRef}
+      data-rail-flush
+      className="relative flex min-h-0 flex-1 flex-col overflow-y-auto"
+    >
       {(heroBg || meta.poster) && (
         <div
           aria-hidden
@@ -171,7 +183,9 @@ export function AddonCollectionView({ meta }: { meta: Meta }) {
             </h1>
             {count > 0 && (
               <div className="mt-3 text-[13.5px] font-medium text-ink-muted">
-                <span>{count === 1 ? t("{n} title", { n: count }) : t("{n} titles", { n: count })}</span>
+                <span>
+                  {count === 1 ? t("{n} title", { n: count }) : t("{n} titles", { n: count })}
+                </span>
               </div>
             )}
             {heroDesc && (
@@ -185,7 +199,9 @@ export function AddonCollectionView({ meta }: { meta: Meta }) {
 
       <div className="px-12 pb-16 pt-10">
         {count > 0 && (
-          <h2 className="mb-4 text-[13px] font-bold uppercase tracking-[0.2em] text-ink-subtle">{t("Titles")}</h2>
+          <h2 className="mb-4 text-[13px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
+            {t("Titles")}
+          </h2>
         )}
         {loading ? (
           <div className={grid}>

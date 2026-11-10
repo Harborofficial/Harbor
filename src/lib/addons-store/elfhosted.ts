@@ -60,11 +60,7 @@ export function elfProductFor(input: {
 }): ElfProduct | null {
   const id = fold(input.id ?? "");
   const name = fold(input.name ?? "");
-  const parts = [
-    ...tokens(input.id ?? ""),
-    ...tokens(input.name ?? ""),
-    ...hostTokens(input.url),
-  ];
+  const parts = [...tokens(input.id ?? ""), ...tokens(input.name ?? ""), ...hostTokens(input.url)];
   if (!id && !name && parts.length === 0) return null;
   for (const p of PRODUCTS) {
     for (const key of p.match) {

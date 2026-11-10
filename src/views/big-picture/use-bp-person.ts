@@ -182,7 +182,10 @@ export function useBpPerson(personId: number): BpPersonState {
       { id: "directing", credits: crewIn(DIRECTOR_JOBS) },
       { id: "writing", credits: crewIn(WRITER_JOBS) },
       { id: "producing", credits: crewIn(PRODUCER_JOBS) },
-      { id: "otherCrew", credits: other.length > OTHER_CREW_MIN ? other.slice(0, OTHER_CREW_MAX) : [] },
+      {
+        id: "otherCrew",
+        credits: other.length > OTHER_CREW_MIN ? other.slice(0, OTHER_CREW_MAX) : [],
+      },
     ];
     const shaped = raw.map((s) => ({
       id: s.id,

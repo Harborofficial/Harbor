@@ -30,9 +30,15 @@ export function MoonshineModelRow() {
     setStatus(null);
     setError(null);
     void invoke<MoonshineModelStatus>("moonshine_model_status", { language: manageLanguage })
-      .then((result) => { if (active) setStatus(result); })
-      .catch((reason) => { if (active) setError(String(reason)); });
-    return () => { active = false; };
+      .then((result) => {
+        if (active) setStatus(result);
+      })
+      .catch((reason) => {
+        if (active) setError(String(reason));
+      });
+    return () => {
+      active = false;
+    };
   }, [manageLanguage]);
 
   async function perform(mode: "runtime" | "download" | "remove") {
@@ -47,9 +53,11 @@ export function MoonshineModelRow() {
           language: manageLanguage,
         });
       }
-      setStatus(await invoke<MoonshineModelStatus>("moonshine_model_status", {
-        language: manageLanguage,
-      }));
+      setStatus(
+        await invoke<MoonshineModelStatus>("moonshine_model_status", {
+          language: manageLanguage,
+        }),
+      );
     } catch (cause) {
       setError(String(cause));
     } finally {
@@ -61,7 +69,9 @@ export function MoonshineModelRow() {
     <>
       <SettingRow
         label={t("Moonshine language")}
-        desc={t("Automatic uses the currently selected audio track. It never guesses from subtitles or downloads a model without approval. Override this if an audio track has incorrect language metadata.")}
+        desc={t(
+          "Automatic uses the currently selected audio track. It never guesses from subtitles or downloads a model without approval. Override this if an audio track has incorrect language metadata.",
+        )}
       >
         <select
           value={selectedPreference}
@@ -71,13 +81,17 @@ export function MoonshineModelRow() {
         >
           <option value="auto">{t("Automatic (audio track)")}</option>
           {MOONSHINE_LANGUAGES.map(([code, name]) => (
-            <option key={code} value={code}>{name}</option>
+            <option key={code} value={code}>
+              {name}
+            </option>
           ))}
         </select>
       </SettingRow>
       <SettingRow
         label={t("Manage Moonshine models")}
-        desc={t("Download only the languages you want. Models remain installed between playback sessions; switching languages does not trigger a download. Silero works without Moonshine models.")}
+        desc={t(
+          "Download only the languages you want. Models remain installed between playback sessions; switching languages does not trigger a download. Silero works without Moonshine models.",
+        )}
       >
         <select
           value={manageLanguage}
@@ -87,7 +101,9 @@ export function MoonshineModelRow() {
           className="min-h-10 rounded-lg border border-edge-soft bg-elevated px-3 text-sm text-ink"
         >
           {MOONSHINE_LANGUAGES.map(([code, name]) => (
-            <option key={code} value={code}>{name}</option>
+            <option key={code} value={code}>
+              {name}
+            </option>
           ))}
         </select>
       </SettingRow>
@@ -95,29 +111,50 @@ export function MoonshineModelRow() {
         {!status ? (
           <span>{t("Checking Moonshine…")}</span>
         ) : !status.supported ? (
-          <span>{t("The experimental runtime needs Python 3. Native runtime bundling is not yet available in this build.")}</span>
+          <span>
+            {t(
+              "The experimental runtime needs Python 3. Native runtime bundling is not yet available in this build.",
+            )}
+          </span>
         ) : !status.runtimeInstalled ? (
-          <button type="button" disabled={busy !== null} aria-busy={busy !== null}
-            onClick={() => void perform("runtime")} className={ROW_ACTION_PRIMARY}>
+          <button
+            type="button"
+            disabled={busy !== null}
+            aria-busy={busy !== null}
+            onClick={() => void perform("runtime")}
+            className={ROW_ACTION_PRIMARY}
+          >
             {busy === "runtime" ? t("Installing…") : t("Install Moonshine test runtime")}
           </button>
         ) : (
           <>
-            <span>{status.installed ? t("Language model installed") : t("Language model not installed")}</span>
-            <button type="button" disabled={busy !== null} aria-busy={busy !== null}
+            <span>
+              {status.installed ? t("Language model installed") : t("Language model not installed")}
+            </span>
+            <button
+              type="button"
+              disabled={busy !== null}
+              aria-busy={busy !== null}
               onClick={() => void perform(status.installed ? "remove" : "download")}
-              className={status.installed ? ROW_ACTION_DANGER : ROW_ACTION_PRIMARY}>
-              {busy === "download" ? t("Downloading…") :
-                busy === "remove" ? t("Removing…") :
-                status.installed ? t("Remove model") : t("Download language model")}
+              className={status.installed ? ROW_ACTION_DANGER : ROW_ACTION_PRIMARY}
+            >
+              {busy === "download"
+                ? t("Downloading…")
+                : busy === "remove"
+                  ? t("Removing…")
+                  : status.installed
+                    ? t("Remove model")
+                    : t("Download language model")}
             </button>
           </>
         )}
         {busy && <span role="status">{t("Processing Moonshine request…")}</span>}
       </div>
-      {error && <p role="alert" className="ps-4 text-[13px] text-danger">
-        {t("Moonshine operation failed")}: {error}
-      </p>}
+      {error && (
+        <p role="alert" className="ps-4 text-[13px] text-danger">
+          {t("Moonshine operation failed")}: {error}
+        </p>
+      )}
     </>
   );
 }

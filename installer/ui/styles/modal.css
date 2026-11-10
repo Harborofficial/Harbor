@@ -60,7 +60,7 @@
   cursor: pointer;
 }
 
-[dir='rtl'] .hb-modal-action {
+[dir="rtl"] .hb-modal-action {
   right: auto;
   left: 10px;
 }
@@ -135,25 +135,50 @@
 }
 
 @keyframes modal-scrim-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modal-scrim-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes modal-panel-in {
-  0% { opacity: 0; transform: translateY(14px) scale(0.97, 0.94); }
-  55% { opacity: 1; transform: translateY(-4px) scale(1.01, 1.03); }
-  78% { transform: translateY(1px) scale(0.998, 0.99); }
-  100% { opacity: 1; transform: translateY(0) scale(1, 1); }
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97, 0.94);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.01, 1.03);
+  }
+  78% {
+    transform: translateY(1px) scale(0.998, 0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1, 1);
+  }
 }
 
 @keyframes modal-panel-out {
-  from { opacity: 1; transform: translateY(0) scale(1, 1); }
-  to { opacity: 0; transform: translateY(8px) scale(0.985, 0.97); }
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1, 1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985, 0.97);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -163,7 +188,9 @@
   .hb-modal-scrim.is-out .hb-modal {
     animation: none;
   }
-  .hb-modal-scrim.is-out { opacity: 0; }
+  .hb-modal-scrim.is-out {
+    opacity: 0;
+  }
 }
 
 .hb-modal:focus {

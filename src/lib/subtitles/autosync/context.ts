@@ -424,9 +424,11 @@ function makeAsrTranscribePort(
       diagnostic?.("moonshine:language-unsupported");
       return { phrases: [], detectedLanguage: null };
     }
-    const status = await invoke<{ installed: boolean; runtimeInstalled: boolean; supported: boolean }>(
-      "moonshine_model_status", { language: modelLanguage },
-    ).catch(() => null);
+    const status = await invoke<{
+      installed: boolean;
+      runtimeInstalled: boolean;
+      supported: boolean;
+    }>("moonshine_model_status", { language: modelLanguage }).catch(() => null);
     if (!status?.installed) {
       if (status?.supported && status.runtimeInstalled) {
         announceMoonshineModelMissing(modelLanguage);

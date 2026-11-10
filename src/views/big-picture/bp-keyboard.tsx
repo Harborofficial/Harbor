@@ -15,11 +15,10 @@ const LETTERS = [
 // margin, which would push every key row outside the panel that hosts it.
 const FLUSH = { paddingInline: 0, marginInline: 0 } as const;
 
-
 const SYMBOLS = [
   "!@#$%^&*()".split(""),
   "+=/\\|~`°£€".split(""),
-  ":;\"?<>[]{}".split(""),
+  ':;"?<>[]{}'.split(""),
   "éèáàöüñçåø".split(""),
 ];
 
@@ -87,24 +86,42 @@ export function BpKeyboard({
         </div>
       ))}
       <div data-bp-row style={FLUSH}>
-      <div data-bp-scroll-x className="flex gap-[clamp(5px,0.45vw,9px)]">
-        <Key
-          label={symbols ? "abc" : "?#+"}
-          aria={symbols ? t("Letters") : t("Symbols")}
-          onPress={() => setSymbols((s) => !s)}
-          wide={2}
-          disabled={disabled}
-        />
-        <Key label="Space" aria={t("Space")} onPress={() => onChar(" ")} wide={5} disabled={disabled}>
-          <Space size={19} strokeWidth={2.1} />
-        </Key>
-        <Key label="Backspace" aria={t("Backspace")} onPress={onBackspace} wide={2} disabled={disabled}>
-          <Delete size={19} strokeWidth={2.1} />
-        </Key>
-        <Key label="Clear" aria={t("Clear search")} onPress={onClear} wide={2} disabled={disabled}>
-          <X size={19} strokeWidth={2.2} />
-        </Key>
-      </div>
+        <div data-bp-scroll-x className="flex gap-[clamp(5px,0.45vw,9px)]">
+          <Key
+            label={symbols ? "abc" : "?#+"}
+            aria={symbols ? t("Letters") : t("Symbols")}
+            onPress={() => setSymbols((s) => !s)}
+            wide={2}
+            disabled={disabled}
+          />
+          <Key
+            label="Space"
+            aria={t("Space")}
+            onPress={() => onChar(" ")}
+            wide={5}
+            disabled={disabled}
+          >
+            <Space size={19} strokeWidth={2.1} />
+          </Key>
+          <Key
+            label="Backspace"
+            aria={t("Backspace")}
+            onPress={onBackspace}
+            wide={2}
+            disabled={disabled}
+          >
+            <Delete size={19} strokeWidth={2.1} />
+          </Key>
+          <Key
+            label="Clear"
+            aria={t("Clear search")}
+            onPress={onClear}
+            wide={2}
+            disabled={disabled}
+          >
+            <X size={19} strokeWidth={2.2} />
+          </Key>
+        </div>
       </div>
     </div>
   );

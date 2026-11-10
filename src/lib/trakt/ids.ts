@@ -13,10 +13,7 @@ export type TraktEpisodeRef = {
   tvdbEpisodeId?: number;
 };
 
-export function stremioIdToTraktTarget(
-  metaId: string,
-  episode?: TraktEpisodeRef,
-): IdResolution {
+export function stremioIdToTraktTarget(metaId: string, episode?: TraktEpisodeRef): IdResolution {
   if (!metaId) return { ok: false, reason: "unrecognized" };
 
   if (metaId.startsWith("kitsu:") || metaId.startsWith("mal:")) {

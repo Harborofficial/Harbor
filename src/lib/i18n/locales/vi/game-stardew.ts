@@ -5,36 +5,47 @@ export default {
   "games.stardew.starterNote": "Một vài bổ sung hữu ích từ các dự án lâu năm.",
   "games.stardew.catalog": "Đang tìm bản mod…",
   "games.stardew.catalogError": "Không thể tải thông tin bản mod. Vui lòng thử lại sau ít phút.",
-  "games.stardew.catalogStale": "Đang hiển thị danh mục đã lưu gần nhất. Làm mới khi có mạng trở lại.",
+  "games.stardew.catalogStale":
+    "Đang hiển thị danh mục đã lưu gần nhất. Làm mới khi có mạng trở lại.",
   "games.stardew.catalogPartial": "Không thể tải một số dự án. Làm mới để thử lại.",
   "games.stardew.creatorChoose": "Chọn thư mục trò chơi ở trên để xem lại việc cài đặt.",
   "games.stardew.creatorGet": "Tải từ tác giả",
-  "games.stardew.creatorRoute": "Các lượt tải khác mở trên Nexus. Sau khi tải, hãy nhập tệp ZIP của tác giả.",
+  "games.stardew.creatorRoute":
+    "Các lượt tải khác mở trên Nexus. Sau khi tải, hãy nhập tệp ZIP của tác giả.",
   "games.stardew.snapshot": "Ngày danh mục",
   "games.stardew.moreMods": "Khám phá thêm bản mod",
   "games.stardew.downloading": "Đang tải từ tác giả…",
   "games.stardew.rateLimit": "Nhà cung cấp đang giới hạn yêu cầu. Vui lòng thử lại sau.",
-  "games.stardew.creatorError": "Không thể xác minh bản phát hành của tác giả. Kiểm tra các tệp trên trang dự án.",
+  "games.stardew.creatorError":
+    "Không thể xác minh bản phát hành của tác giả. Kiểm tra các tệp trên trang dự án.",
   "games.stardew.refresh": "Làm mới bản mod",
 
   "games.stardew.import": "Nhập ZIP bản mod",
   "games.stardew.manage": "Quản lý bằng Harbor",
-  "games.stardew.manageNote": "Nhập bản mod SMAPI đã tải để quản lý tại đây. Nhập ZIP phiên bản mới để cập nhật.",
+  "games.stardew.manageNote":
+    "Nhập bản mod SMAPI đã tải để quản lý tại đây. Nhập ZIP phiên bản mới để cập nhật.",
   "games.stardew.previous": "Phiên bản trước",
   "games.stardew.review": "Xem lại thay đổi",
   "games.stardew.apply": "Áp dụng thay đổi",
   "games.stardew.install": "Cài bản mod",
   "games.stardew.update": "Cập nhật bản mod",
   "games.stardew.done": "Đã áp dụng thay đổi",
-  "games.stardew.reviewNote": "Đóng Stardew Valley trước. Bản cập nhật giữ config.json hiện tại và các tệp được tạo. Phiên bản cũ vẫn ở trên máy này.",
-  "games.stardew.removeNote": "Toàn bộ thư mục mod sẽ chuyển sang Phiên bản trước. Bạn có thể khôi phục sau.",
+  "games.stardew.reviewNote":
+    "Đóng Stardew Valley trước. Bản cập nhật giữ config.json hiện tại và các tệp được tạo. Phiên bản cũ vẫn ở trên máy này.",
+  "games.stardew.removeNote":
+    "Toàn bộ thư mục mod sẽ chuyển sang Phiên bản trước. Bạn có thể khôi phục sau.",
   "games.stardew.running": "Đóng Stardew Valley và SMAPI trước khi thay đổi tệp mod.",
-  "games.stardew.requirementsError": "Thiếu bản mod bắt buộc hoặc phiên bản SMAPI quá cũ. Hãy kiểm tra yêu cầu của mod.",
-  "games.stardew.dependentsError": "Một bản mod đang bật cần phiên bản này. Tắt mod đó trước hoặc chọn phiên bản tương thích.",
-  "games.stardew.unmanagedError": "Bản mod này đã tồn tại ngoài hồ sơ Harbor. Di chuyển bản hiện có trước khi nhập.",
-  "games.stardew.archiveError": "Chọn ZIP chứa một thư mục mod sẵn dùng, tối đa 32 MB (128 MB sau giải nén). Mã nguồn tải về không phải bản mod có thể cài.",
+  "games.stardew.requirementsError":
+    "Thiếu bản mod bắt buộc hoặc phiên bản SMAPI quá cũ. Hãy kiểm tra yêu cầu của mod.",
+  "games.stardew.dependentsError":
+    "Một bản mod đang bật cần phiên bản này. Tắt mod đó trước hoặc chọn phiên bản tương thích.",
+  "games.stardew.unmanagedError":
+    "Bản mod này đã tồn tại ngoài hồ sơ Harbor. Di chuyển bản hiện có trước khi nhập.",
+  "games.stardew.archiveError":
+    "Chọn ZIP chứa một thư mục mod sẵn dùng, tối đa 32 MB (128 MB sau giải nén). Mã nguồn tải về không phải bản mod có thể cài.",
   "games.stardew.moreFiles": "Thêm {count} tệp",
-  "games.stardew.partialError": "Không thể kiểm tra một số mod. Giải quyết việc quét chưa hoàn tất trước khi thay đổi tệp.",
+  "games.stardew.partialError":
+    "Không thể kiểm tra một số mod. Giải quyết việc quét chưa hoàn tất trước khi thay đổi tệp.",
   "games.stardew.linkError": "Chọn tệp và thư mục thật thay vì lối tắt hoặc thư mục liên kết.",
   "games.stardew.timeoutError": "Kiểm tra mất quá nhiều thời gian. Hãy thử lại.",
   "games.stardew.canceled": "Đã hủy thay đổi.",
@@ -59,7 +70,8 @@ export default {
   "games.stardew.busyError": "Một thay đổi mod khác đang chạy. Hoàn tất hoặc hủy trước.",
   "games.stardew.expired": "Lượt xem lại đã hết hạn. Hãy xem lại thay đổi.",
   "games.stardew.spaceError": "Không đủ dung lượng trống. Giải phóng dung lượng rồi thử lại.",
-  "games.stardew.writeError": "Không thể thay đổi tệp. Kiểm tra quyền truy cập thư mục và đóng trò chơi.",
+  "games.stardew.writeError":
+    "Không thể thay đổi tệp. Kiểm tra quyền truy cập thư mục và đóng trò chơi.",
   "games.stardew.canceling": "Đang hủy…",
 
   "games.stardew.title": "Mod Stardew của bạn",
@@ -72,20 +84,24 @@ export default {
   "games.stardew.scanning": "Đang đọc mod…",
   "games.stardew.checking": "Đang kiểm tra SMAPI…",
   "games.stardew.modCount": "{count} mod",
-  "games.stardew.scope": "Kiểm tra yêu cầu do từng mod khai báo. SMAPI vẫn quyết định nội dung được tải.",
-  "games.stardew.noSmapiVersion": "Không đọc được phiên bản SMAPI đã cài. Đề xuất cập nhật có thể không khả dụng.",
+  "games.stardew.scope":
+    "Kiểm tra yêu cầu do từng mod khai báo. SMAPI vẫn quyết định nội dung được tải.",
+  "games.stardew.noSmapiVersion":
+    "Không đọc được phiên bản SMAPI đã cài. Đề xuất cập nhật có thể không khả dụng.",
   "games.stardew.search": "Tìm mod",
   "games.stardew.filter": "Hiển thị mod",
   "games.stardew.all": "Tất cả mod",
   "games.stardew.attention": "Cần kiểm tra",
   "games.stardew.updates": "Có bản cập nhật",
   "games.stardew.noMatches": "Không có mod phù hợp với bộ lọc.",
-  "games.stardew.share": "Việc kiểm tra gửi ID, phiên bản và khóa cập nhật được hỗ trợ đến SMAPI. Bản lưu và cài đặt vẫn ở trên thiết bị này.",
+  "games.stardew.share":
+    "Việc kiểm tra gửi ID, phiên bản và khóa cập nhật được hỗ trợ đến SMAPI. Bản lưu và cài đặt vẫn ở trên thiết bị này.",
   "games.stardew.empty": "Không tìm thấy mod SMAPI trong thư mục này.",
   "games.stardew.partial": "Không kiểm tra được một số thư mục",
   "games.stardew.notChecked": "Chưa kiểm tra",
   "games.stardew.noneSuggested": "Không có đề xuất cập nhật",
-  "games.stardew.duplicateNote": "ID mod này xuất hiện trong nhiều thư mục. Chỉ giữ một bản trước khi khởi động SMAPI.",
+  "games.stardew.duplicateNote":
+    "ID mod này xuất hiện trong nhiều thư mục. Chỉ giữ một bản trước khi khởi động SMAPI.",
   "games.stardew.dllNote": "Thiếu tệp chương trình được chỉ định trong bản kê khai của mod.",
   "games.stardew.viewUpdate": "Xem bản cập nhật",
   "games.stardew.project": "Trang dự án",
@@ -93,7 +109,8 @@ export default {
   "games.stardew.optional": "Tùy chọn",
   "games.stardew.providerError": "SMAPI không kiểm tra được mọi nguồn của mod này.",
   "games.stardew.history": "Ghi chú cũ của cộng đồng",
-  "games.stardew.historyNote": "Danh sách tương thích không còn được duy trì đầy đủ. Ghi chú này có thể đã lỗi thời.",
+  "games.stardew.historyNote":
+    "Danh sách tương thích không còn được duy trì đầy đủ. Ghi chú này có thể đã lỗi thời.",
   "games.stardew.requirement.present": "Đã tìm thấy",
   "games.stardew.requirement.older": "Phiên bản cũ hơn",
   "games.stardew.requirement.missing": "Còn thiếu",
@@ -104,5 +121,6 @@ export default {
   "games.stardew.folderError": "Chọn thư mục Stardew Valley chứa game và thư mục Mods.",
   "games.stardew.changed": "Tệp mod đã thay đổi trong lúc kiểm tra. Hãy quét lại thư mục.",
   "games.stardew.networkError": "SMAPI không hoàn tất được việc kiểm tra. Hãy thử lại sau ít phút.",
-  "games.stardew.readError": "Không đọc được thư mục. Kiểm tra vị trí và quyền truy cập rồi thử lại."
+  "games.stardew.readError":
+    "Không đọc được thư mục. Kiểm tra vị trí và quyền truy cập rồi thử lại.",
 };

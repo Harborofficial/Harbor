@@ -41,7 +41,9 @@ export function DownloadMenu({
     }
     const dir = getDirection(e.nativeEvent);
     if (dir !== "up" && dir !== "down") return;
-    const items = Array.from(listRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+    const items = Array.from(
+      listRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [],
+    );
     if (!items.length) return;
     e.preventDefault();
     const from = items.indexOf(e.target as HTMLElement);

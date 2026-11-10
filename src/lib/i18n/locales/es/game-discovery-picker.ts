@@ -9,8 +9,10 @@ export default {
   "games.pick.heading0": "¿Qué te apetece jugar?",
   "games.pick.heading1": "Unos cuantos favoritos ayudan mucho.",
   "games.pick.heading2": "Algo que merece la pena jugar.",
-  "games.pick.note0": "Elige lo que te apetece hoy. Primero aparecen las coincidencias exactas y después las alternativas más cercanas. El modo de juego y los demás filtros se mantienen.",
-  "games.pick.note1": "Elige hasta cinco favoritos. Tendremos en cuenta sus características y tu actividad reciente.",
+  "games.pick.note0":
+    "Elige lo que te apetece hoy. Primero aparecen las coincidencias exactas y después las alternativas más cercanas. El modo de juego y los demás filtros se mantienen.",
+  "games.pick.note1":
+    "Elige hasta cinco favoritos. Tendremos en cuenta sus características y tu actividad reciente.",
   "games.pick.note2": "Una selección basada en tus preferencias, intereses compartidos y reseñas.",
   "games.pick.company": "¿Con quién vas a jugar?",
   "games.pick.refine": "Afinar la búsqueda",
@@ -37,21 +39,26 @@ export default {
   "games.pick.remove": "Quitar {name} de favoritos",
   "games.pick.addFavorite": "Usar {name} como favorito",
   "games.pick.history": "Usar mi actividad de la biblioteca",
-  "games.pick.historyNote": "Jugados recientemente, más jugados, recién añadidos y guardados. Los favoritos tienen más peso.",
+  "games.pick.historyNote":
+    "Jugados recientemente, más jugados, recién añadidos y guardados. Los favoritos tienen más peso.",
   "games.pick.signal.recent": "Jugado recientemente",
   "games.pick.signal.mostPlayed": "Más jugado",
   "games.pick.signal.added": "Añadido recientemente",
   "games.pick.signal.saved": "Guardado",
   "games.pick.hours": "h",
-  "games.pick.noHistory": "Todavía no hay actividad. Elige favoritos o conecta Steam en los ajustes de Juegos.",
-  "games.pick.manualOnly": "Solo tus favoritos y filtros elegidos determinarán las recomendaciones.",
-  "games.pick.addedNote": "«Añadido recientemente» significa detectado en Harbor tras la primera importación, no la fecha de compra.",
+  "games.pick.noHistory":
+    "Todavía no hay actividad. Elige favoritos o conecta Steam en los ajustes de Juegos.",
+  "games.pick.manualOnly":
+    "Solo tus favoritos y filtros elegidos determinarán las recomendaciones.",
+  "games.pick.addedNote":
+    "«Añadido recientemente» significa detectado en Harbor tras la primera importación, no la fecha de compra.",
   "games.pick.because": "Porque te gusta {name}",
   "games.pick.matches": "Coincide con tus preferencias",
   "games.pick.steamCatalog": "Catálogo de Steam",
   "games.pick.edit": "Editar preferencias",
   "games.pick.finding": "Buscando tu próximo juego…",
-  "games.pick.partial": "No se pudieron cargar algunos datos. Estas recomendaciones usan lo disponible.",
+  "games.pick.partial":
+    "No se pudieron cargar algunos datos. Estas recomendaciones usan lo disponible.",
   "games.pick.cached": "Incluye datos del catálogo guardados el {date}.",
   "games.pick.startHere": "Empieza aquí",
   "games.pick.notForMe": "No es para mí",
@@ -59,12 +66,16 @@ export default {
   "games.pick.undo": "Deshacer",
   "games.pick.resetHidden": "Volver a mostrar juegos descartados",
   "games.pick.more": "Buscar más recomendaciones",
-  "games.pick.rankingNote": "Ordenados por etiquetas compartidas de Steam, actividad, solidez de las reseñas y variedad. Las puntuaciones son reseñas positivas de Steam. Disponibilidad y precios del catálogo de EE. UU.",
+  "games.pick.rankingNote":
+    "Ordenados por etiquetas compartidas de Steam, actividad, solidez de las reseñas y variedad. Las puntuaciones son reseñas positivas de Steam. Disponibilidad y precios del catálogo de EE. UU.",
   "games.pick.error": "Tu próximo juego tendrá que esperar un momento.",
-  "games.pick.errorNote": "No pudimos acceder al catálogo. Tus preferencias están guardadas; vuelve a intentarlo.",
+  "games.pick.errorNote":
+    "No pudimos acceder al catálogo. Tus preferencias están guardadas; vuelve a intentarlo.",
   "games.pick.noMatches": "Aún no encontramos juegos con estos requisitos.",
-  "games.pick.noMatchesNote": "Amplía las opciones de plataforma, precio o biblioteca. Tus preferencias de ambiente ya incluyen alternativas cercanas.",
-  "games.pick.saveError": "Las preferencias se aplican en esta sesión, pero no se pudieron guardar en este dispositivo.",
+  "games.pick.noMatchesNote":
+    "Amplía las opciones de plataforma, precio o biblioteca. Tus preferencias de ambiente ya incluyen alternativas cercanas.",
+  "games.pick.saveError":
+    "Las preferencias se aplican en esta sesión, pero no se pudieron guardar en este dispositivo.",
   "games.pick.selected": "{count} etiquetas seleccionadas",
   "games.pick.favoriteCount": "{count} de 5 favoritos",
   "games.pick.resultsCount": "{count} coincidencias por ahora",
@@ -74,7 +85,8 @@ export default {
   "games.pick.reviews": "{count} reseñas",
   "games.pick.unrated": "Sin puntuación disponible",
   "games.pick.owned": "En tu biblioteca",
-  "games.pick.closest": "Incluimos alternativas cercanas. El modo de juego y los demás filtros se mantienen.",
+  "games.pick.closest":
+    "Incluimos alternativas cercanas. El modo de juego y los demás filtros se mantienen.",
   "games.pick.closeMatch": "Coincide con {count} de {total} etiquetas de ambiente",
-  "games.pick.missing": "Sin estas etiquetas: {tags}"
+  "games.pick.missing": "Sin estas etiquetas: {tags}",
 };

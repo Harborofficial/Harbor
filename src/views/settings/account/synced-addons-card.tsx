@@ -157,9 +157,7 @@ function AddonList({ addons, onClose }: { addons: Addon[]; onClose: () => void }
       className="harbor-float flex flex-col overflow-hidden rounded-[10px] bg-raised"
     >
       <div className="flex items-center justify-between gap-3 ps-4 pe-2 pt-2">
-        <span className={CAPTION}>
-          {t("All addons ({n})", { n: addons.length })}
-        </span>
+        <span className={CAPTION}>{t("All addons ({n})", { n: addons.length })}</span>
         <button
           ref={closeRef}
           type="button"

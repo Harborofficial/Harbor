@@ -65,7 +65,9 @@ export function MalProvider({ children }: { children: ReactNode }) {
     completeAuthorization(code, requireState)
       .then((final) => setConnectState({ kind: "success", session: final }))
       .catch((e: Error) => setConnectState({ kind: "error", message: e.message }))
-      .finally(() => { verifying.current = false; });
+      .finally(() => {
+        verifying.current = false;
+      });
   }, []);
   const submitCode = useCallback((code: string) => verifyCode(code), [verifyCode]);
   useEffect(() => onMalCallback((url) => verifyCode(url, true)), [verifyCode]);

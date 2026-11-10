@@ -12,10 +12,15 @@ export function downloadDestination(parent: string, filename?: string) {
 }
 export function recentDownloadFolders(records: GameTransfer[], profile: string) {
   const seen = new Set<string>();
-  return records.filter(record => record.profile === profile && record.status !== "canceled")
-    .sort((a, b) => b.createdAt - a.createdAt).flatMap(record => {
-      const path = setupParent(record.destination), key = downloadLocationKey(path);
+  return records
+    .filter((record) => record.profile === profile && record.status !== "canceled")
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .flatMap((record) => {
+      const path = setupParent(record.destination),
+        key = downloadLocationKey(path);
       if (!path || seen.has(key)) return [];
-      seen.add(key); return [path];
-    }).slice(0, 2);
+      seen.add(key);
+      return [path];
+    })
+    .slice(0, 2);
 }

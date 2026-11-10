@@ -34,20 +34,24 @@ export default {
   "games.valorant.sampleNote": "Agents with fewer than 200 appearances are listed last.",
   "games.valorant.empty": "Nothing matches these filters.",
   "games.valorant.checked": "Checked {date}",
-  "games.valorant.metaScope": "OP.GG competitive data for the selected patch. Pick rate is the share of agent appearances. These results describe the source sample, not every player.",
-  "games.valorant.referenceScope": "Game artwork and references via Valorant-API. Updates may lag the game. Harbor is not endorsed by Riot Games.",
+  "games.valorant.metaScope":
+    "OP.GG competitive data for the selected patch. Pick rate is the share of agent appearances. These results describe the source sample, not every player.",
+  "games.valorant.referenceScope":
+    "Game artwork and references via Valorant-API. Updates may lag the game. Harbor is not endorsed by Riot Games.",
   "games.valorant.samples": "{count} appearances",
   "games.valorant.smallSample": "Small sample",
   "games.valorant.abilities": "Abilities",
   "games.valorant.watchAbility": "Watch ability",
   "games.valorant.videoError": "This demonstration could not play.",
   "games.valorant.mapMeta": "Agent meta on this map",
-  "games.valorant.mapScope": "Map reference, including maps outside the current ranked rotation. Map names and callouts are in English.",
+  "games.valorant.mapScope":
+    "Map reference, including maps outside the current ranked rotation. Map names and callouts are in English.",
   "games.valorant.callouts": "Callouts",
   "games.valorant.compareWeapon": "Compare with",
   "games.valorant.weapon": "Weapon",
   "games.valorant.distance": "Distance",
-  "games.valorant.damageScope": "Base primary-fire values before armor, penetration or abilities. Shotguns show damage per pellet.",
+  "games.valorant.damageScope":
+    "Base primary-fire values before armor, penetration or abilities. Shotguns show damage per pellet.",
   "games.valorant.weaponStats": "Weapon stats",
   "games.valorant.cost": "Credits",
   "games.valorant.magazine": "Magazine",
@@ -55,5 +59,5 @@ export default {
   "games.valorant.reload": "Reload · seconds",
   "games.valorant.head": "Head damage",
   "games.valorant.body": "Body damage",
-  "games.valorant.legs": "Leg damage"
+  "games.valorant.legs": "Leg damage",
 };

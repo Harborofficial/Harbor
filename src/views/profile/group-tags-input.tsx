@@ -15,7 +15,13 @@ function clean(raw: string): string {
     .slice(0, TAG_MAX);
 }
 
-export function GroupTagsInput({ tags, onChange }: { tags: string[]; onChange: (t: string[]) => void }) {
+export function GroupTagsInput({
+  tags,
+  onChange,
+}: {
+  tags: string[];
+  onChange: (t: string[]) => void;
+}) {
   const t = useT();
   const [draft, setDraft] = useState("");
 

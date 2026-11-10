@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "لا شيء مسجل",
   "games.wow.equipment.detailsUnavailable": "التفاصيل غير متاحة",
   "games.wow.equipment.unavailable": "معدات هذه الشخصية غير متاحة.",
-  "games.wow.equipment.note": "المعدات حسب آخر تحديث من Raider.IO. تحقق من تجهيزاتك الحالية داخل اللعبة.",
+  "games.wow.equipment.note":
+    "المعدات حسب آخر تحديث من Raider.IO. تحقق من تجهيزاتك الحالية داخل اللعبة.",
   "games.wow.equipment.partial": "تعذرت قراءة بعض العناصر المجهزة.",
   "games.wow.equipment.level": "مستوى العنصر {level}",
   "games.wow.equipment.gems": "الأحجار الكريمة",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "اليد الرئيسية",
   "games.wow.equipment.offhand": "اليد الثانوية",
   "games.wow.equipment.shirt": "القميص",
-  "games.wow.equipment.tabard": "شعار النقابة"
+  "games.wow.equipment.tabard": "شعار النقابة",
 };

@@ -35,7 +35,8 @@ const music: Record<string, string> = {
   "dj.minimize": "Minimizar",
   "dj.maximize": "Maximizar",
   "dj.close": "Fechar",
-  "dj.blurb": "Velocidade, tom, cortes de EQ e pads de cue numa janela própria, sobre o que está a tocar.",
+  "dj.blurb":
+    "Velocidade, tom, cortes de EQ e pads de cue numa janela própria, sobre o que está a tocar.",
   "dj.open": "Abrir a mesa",
   "dj.idle": "Nada a tocar",
   "dj.tempo": "Velocidade",
@@ -105,21 +106,28 @@ const music: Record<string, string> = {
   "music.broadcast.drift": "({ms} ms de desvio)",
   "music.broadcast.live": "A transmitir por {product}",
   "music.broadcast.install": "Obter {product}",
-  "music.broadcast.none": "Não há nenhum cabo de áudio virtual instalado. Instale {product} e escolha-o aqui.",
+  "music.broadcast.none":
+    "Não há nenhum cabo de áudio virtual instalado. Instale {product} e escolha-o aqui.",
   "music.broadcast.auto": "O primeiro encontrado",
   "music.broadcast.output": "Saída",
   "music.broadcast.stop": "Parar",
   "music.broadcast.start": "Iniciar",
-  "music.broadcast.blurb": "Envie o que está a tocar para um microfone virtual para que os amigos na chamada ouçam. Continua a ouvir nas suas colunas.",
+  "music.broadcast.blurb":
+    "Envie o que está a tocar para um microfone virtual para que os amigos na chamada ouçam. Continua a ouvir nas suas colunas.",
   "music.broadcast.title": "Transmitir para o chat de voz",
-  "music.cable.mac.installNeeded": "O Harbor pode instalar o próprio microfone virtual. O macOS vai pedir a sua senha de administrador e depois o Core Audio reinicia.",
-  "music.cable.mac.installMissing": "Esta versão do Harbor não inclui o driver do microfone virtual.",
+  "music.cable.mac.installNeeded":
+    "O Harbor pode instalar o próprio microfone virtual. O macOS vai pedir a sua senha de administrador e depois o Core Audio reinicia.",
+  "music.cable.mac.installMissing":
+    "Esta versão do Harbor não inclui o driver do microfone virtual.",
   "music.cable.mac.installCancelled": "Instalação cancelada.",
   "music.cable.mac.installFailed": "Não foi possível instalar o microfone virtual.",
-  "music.cable.mac.restartNeeded": "O microfone virtual está instalado, mas o Core Audio ainda não o detectou. Reinicie o Mac para concluir.",
-  "music.cable.mac.updateAvailable": "Esta versão do Harbor traz um microfone virtual mais recente. Instale-o para o cabo continuar funcionando.",
+  "music.cable.mac.restartNeeded":
+    "O microfone virtual está instalado, mas o Core Audio ainda não o detectou. Reinicie o Mac para concluir.",
+  "music.cable.mac.updateAvailable":
+    "Esta versão do Harbor traz um microfone virtual mais recente. Instale-o para o cabo continuar funcionando.",
   "music.cable.title": "Microfone virtual do Harbor",
-  "music.cable.blurb": "O Harbor monta o microfone virtual sozinho. Nada para baixar, nada para instalar.",
+  "music.cable.blurb":
+    "O Harbor monta o microfone virtual sozinho. Nada para baixar, nada para instalar.",
   "music.cable.create": "Criar microfone virtual",
   "music.cable.remove": "Remover microfone virtual",
   "music.cable.spec": "{rate}, {depth}",
@@ -143,10 +151,13 @@ const music: Record<string, string> = {
   "music.cable.driverNeeded": "O Harbor ainda não cria um microfone virtual neste sistema",
   "music.cable.pipewireFailed": "O PipeWire não iniciou o loopback",
   "music.cable.createFailed": "Não foi possível criar o microfone virtual",
-  "music.cable.installNeeded": "O Harbor precisa da sua permissão para instalar o microfone virtual",
+  "music.cable.installNeeded":
+    "O Harbor precisa da sua permissão para instalar o microfone virtual",
   "music.cable.installMissing": "Esta versão do Harbor não traz microfone virtual",
-  "music.cable.restartNeeded": "O sistema de áudio precisa reiniciar para o microfone virtual aparecer",
-  "music.cable.updateAvailable": "Este Harbor traz um microfone virtual mais novo. Recrie para atualizar.",
+  "music.cable.restartNeeded":
+    "O sistema de áudio precisa reiniciar para o microfone virtual aparecer",
+  "music.cable.updateAvailable":
+    "Este Harbor traz um microfone virtual mais novo. Recrie para atualizar.",
   "dj.crossfade": "Crossfader",
   "dj.b.broadcasting": "A transportar a emissão",
   "dj.b.eject": "Ejetar",
@@ -193,7 +204,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "Tom",
   "music.speed.reverb": "Reverberação",
   "music.speed.keepPitch": "Manter o tom original",
-  "music.speed.keepPitchHelp": "Ligado muda o andamento mas não o tom. Desligado dá o som nightcore e slowed.",
+  "music.speed.keepPitchHelp":
+    "Ligado muda o andamento mas não o tom. Desligado dá o som nightcore e slowed.",
   "music.speed.reset": "Repor",
   "music.speed.normal": "Normal",
   "music.speed.nightcore": "Nightcore",
@@ -359,7 +371,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "Da cena",
   "music.artist.inPlaylists": "Playlists com {name}",
   "music.audio.preferredSource": "Fonte preferida",
-  "music.audio.preferredSourceHint": "O Harbor toca primeiro daqui e depois recorre a qualquer fonte que funcione.",
+  "music.audio.preferredSourceHint":
+    "O Harbor toca primeiro daqui e depois recorre a qualquer fonte que funcione.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "Conecte uma vez para reprodução nativa e sem anúncios.",
   "music.spotify.connectAction": "Conectar",
@@ -490,7 +503,8 @@ const music: Record<string, string> = {
   "music.playlist.new": "Nova playlist",
   "music.row.charts": "Paradas",
   "music.connect.shelfTitle": "Conecte {name} para preencher esta prateleira",
-  "music.connect.shelfBody": "O Harbor não chuta uma linha que não consegue sustentar com dados reais.",
+  "music.connect.shelfBody":
+    "O Harbor não chuta uma linha que não consegue sustentar com dados reais.",
   "music.connect.title": "Conectar {name}",
   "music.connect.connected": "Conectado como {account}",
   "music.connect.browserHandoff": "Aprove o Harbor no navegador e conclua a conexão aqui.",
@@ -521,10 +535,13 @@ const music: Record<string, string> = {
   "music.video.loading": "Procurando o vídeo",
   "music.ytm.loading": "Carregando o YouTube Music",
   "music.row.scrobble": "Porque você escuta {tag}",
-  "music.row.scrobbleWaiting": "O Last.fm está conectado, mas ainda não enviou uma prateleira de tags.",
-  "music.connect.scrobbleBody": "Conecte o Last.fm e esta prateleira será montada com as tags que você realmente escuta.",
+  "music.row.scrobbleWaiting":
+    "O Last.fm está conectado, mas ainda não enviou uma prateleira de tags.",
+  "music.connect.scrobbleBody":
+    "Conecte o Last.fm e esta prateleira será montada com as tags que você realmente escuta.",
   "music.connect.serverName": "um servidor de mídia ou pasta",
-  "music.connect.serverBody": "Aponte o Harbor para uma pasta, Plex, Jellyfin, Navidrome ou Subsonic e esta prateleira se enche de álbuns que você já tem.",
+  "music.connect.serverBody":
+    "Aponte o Harbor para uma pasta, Plex, Jellyfin, Navidrome ou Subsonic e esta prateleira se enche de álbuns que você já tem.",
   "music.row.recents": "Continue de onde parou",
   "music.row.fresh": "Novidades de artistas que você toca",
   "music.row.freshSubtitle": "Lançamentos recentes de artistas do seu histórico",
@@ -589,7 +606,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "Repetir prévias",
   "music.quickListen.mute": "Silenciar prévia",
   "music.quickListen.unmute": "Ativar som",
-  "music.quickListen.empty": "Nenhuma música inédita encontrada. Explore mais músicas e tente novamente.",
+  "music.quickListen.empty":
+    "Nenhuma música inédita encontrada. Explore mais músicas e tente novamente.",
   "music.quickListen.finding": "Buscando músicas que você ainda não ouviu…",
   "music.quickListen.more": "Mais opções",
   "music.playlist.search": "Buscar playlists",

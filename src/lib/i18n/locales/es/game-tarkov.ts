@@ -14,17 +14,19 @@ export default {
   "games.tarkov.listedStart": "Inicio indicado:",
   "games.tarkov.noSeason": "No figura ninguna temporada activa",
   "games.tarkov.noSeasonDetail": "La fuente no incluye ninguna temporada actual o próxima.",
-  "games.tarkov.scheduleNote": "tarkov.dev mantiene estas fechas, que pueden cambiar. No es un anuncio oficial de reinicio.",
+  "games.tarkov.scheduleNote":
+    "tarkov.dev mantiene estas fechas, que pueden cambiar. No es un anuncio oficial de reinicio.",
   "games.tarkov.seasonSource": "Fechas de temporadas · tarkov.dev",
   "games.tarkov.checked": "Consultado: {time}",
   "games.tarkov.fullWipe": "Último reinicio completo en la fuente",
   "games.tarkov.historyFailed": "No se pudo cargar el historial de reinicios.",
   "games.tarkov.elapsed": "{days} días",
   "games.tarkov.noHistory": "No figuran reinicios anteriores.",
-  "games.tarkov.modeNote": "El progreso de temporada y los reinicios completos de cuenta son distintos. Este historial no describe reinicios de personajes persistentes de JcJ o JcE.",
+  "games.tarkov.modeNote":
+    "El progreso de temporada y los reinicios completos de cuenta son distintos. Este historial no describe reinicios de personajes persistentes de JcJ o JcE.",
   "games.tarkov.historySource": "Fechas de reinicios · tarkov.dev",
   "games.tarkov.history": "Historial de reinicios completos",
   "games.tarkov.patch": "Parche",
   "games.tarkov.date": "Fecha de inicio (UTC)",
-  "games.tarkov.duration": "Hasta el siguiente reinicio completo"
+  "games.tarkov.duration": "Hasta el siguiente reinicio completo",
 };

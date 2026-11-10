@@ -151,7 +151,11 @@ function BpGroupHead({
   const t = useBpT();
   return (
     <div className={HEAD}>
-      {source ? <BpAddonMark source={source} /> : portrait ? <BpPortraitMark src={portrait} /> : null}
+      {source ? (
+        <BpAddonMark source={source} />
+      ) : portrait ? (
+        <BpPortraitMark src={portrait} />
+      ) : null}
       <h2 className="min-w-0 truncate text-[clamp(14px,2.05vh,26px)] font-bold tracking-[-0.01em] text-ink">
         {title}
       </h2>

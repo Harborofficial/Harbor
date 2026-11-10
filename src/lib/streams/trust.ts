@@ -210,7 +210,9 @@ function checkOne(
 
   if (strict && opts.kind === "movie" && opts.expectedTitle && s.parsedTitle) {
     const titles = [opts.expectedTitle, ...(opts.expectedTitles ?? [])];
-    if (!titles.some((title) => titleMatches(title, s.parsedTitle, s.year, opts.expectedYear ?? null))) {
+    if (
+      !titles.some((title) => titleMatches(title, s.parsedTitle, s.year, opts.expectedYear ?? null))
+    ) {
       return "title-mismatch";
     }
   }
@@ -272,7 +274,9 @@ function checkOne(
 
   if (strict && opts.kind === "series" && !opts.isAnime && opts.expectedTitle && s.parsedTitle) {
     const titles = [opts.expectedTitle, ...(opts.expectedTitles ?? [])];
-    if (!titles.some((title) => titleMatches(title, s.parsedTitle, s.year, opts.expectedYear ?? null))) {
+    if (
+      !titles.some((title) => titleMatches(title, s.parsedTitle, s.year, opts.expectedYear ?? null))
+    ) {
       return "title-mismatch";
     }
   }
@@ -290,8 +294,15 @@ function checkOne(
   }
 
   const hasFileIdx = s.fileIdx != null;
-  if (strict && opts.kind === "series" && !opts.isAnime && opts.expectedEpisode != null &&
-      s.seasonPack && !opts.allowSeasonPacks && !hasFileIdx) {
+  if (
+    strict &&
+    opts.kind === "series" &&
+    !opts.isAnime &&
+    opts.expectedEpisode != null &&
+    s.seasonPack &&
+    !opts.allowSeasonPacks &&
+    !hasFileIdx
+  ) {
     return "season-pack-not-episode";
   }
 

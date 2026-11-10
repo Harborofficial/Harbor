@@ -420,7 +420,12 @@ test("a failed swap download offers the unverified swap instead of aborting the 
 test("a missing offset candidate still recognizes verified already-aligned subtitles", async () => {
   const ctx: PipelineContext = {
     ...languageContext("en", "en"),
-    cues: [[10, 12], [20, 22], [30, 32], [40, 42]],
+    cues: [
+      [10, 12],
+      [20, 22],
+      [30, 32],
+      [40, 42],
+    ],
     cueText: ["one", "two", "three", "four"],
   };
   const aligned = await runAutoSync(ctx, {

@@ -12,7 +12,9 @@ export function rankAndPick(
   const all = scored
     .slice()
     .sort((a, b) =>
-      respectAddonOrder ? pri(a) - pri(b) || ret(a) - ret(b) || b.score - a.score : b.score - a.score,
+      respectAddonOrder
+        ? pri(a) - pri(b) || ret(a) - ret(b) || b.score - a.score
+        : b.score - a.score,
     );
   const cachedFirst = all.slice().sort((a, b) => {
     const ac = isCached(a, activeDebrids) ? 1 : 0;

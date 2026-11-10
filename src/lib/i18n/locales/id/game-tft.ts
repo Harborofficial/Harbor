@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "Simpan tim",
   "games.tft.savedTeams": "Tim tersimpan",
   "games.tft.delete": "Hapus tim tersimpan",
-  "games.tft.note": "Setiap champion dihitung sekali. Item dan efek khusus dapat mengubah trait atau ruang tim.",
+  "games.tft.note":
+    "Setiap champion dihitung sekali. Item dan efek khusus dapat mengubah trait atau ruang tim.",
   "games.tft.saveFailed": "Gagal menyimpan di perangkat ini. Tim saat ini masih ada.",
   "games.tft.missing": "Beberapa champion tersimpan tidak lagi ada dalam set ini.",
   "games.tft.imported": "Tim diimpor.",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Regen health",
   "games.tft.stat.set14AmpIcon": "Penguatan damage",
   "games.tft.stat.TFTManaRegen": "Regen mana",
-  "games.tft.stat.scaleSV": "Omnivamp"
+  "games.tft.stat.scaleSV": "Omnivamp",
 };

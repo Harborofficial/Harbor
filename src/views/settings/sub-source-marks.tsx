@@ -14,7 +14,12 @@ function CaptionGlyph() {
 export function OpenSubsMark() {
   return (
     <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white p-[5px] ring-1 ring-edge-soft/60">
-      <img src={opensubtitlesLogo} alt="" draggable={false} className="h-full w-full object-contain" />
+      <img
+        src={opensubtitlesLogo}
+        alt=""
+        draggable={false}
+        className="h-full w-full object-contain"
+      />
     </span>
   );
 }

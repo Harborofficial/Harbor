@@ -14,7 +14,9 @@ import type { NuvioProfile } from "@/lib/nuvio/nuvio-types";
 export function NuvioProfileMappingCard() {
   const t = useT();
   const { activeId, activeProfile } = useProfiles();
-  const [nuvioProfiles, setNuvioProfiles] = useState<NuvioProfile[]>(() => loadNuvioState().profiles);
+  const [nuvioProfiles, setNuvioProfiles] = useState<NuvioProfile[]>(
+    () => loadNuvioState().profiles,
+  );
   const [selectedSlot, setSelectedSlot] = useState<number>(() =>
     getNuvioProfileIndexForHarborProfile(activeId || "primary"),
   );
@@ -64,7 +66,11 @@ export function NuvioProfileMappingCard() {
               }`}
             >
               {resolveNuvioAvatar(profile) ? (
-                <img src={resolveNuvioAvatar(profile)!} alt="" className="h-4 w-4 rounded-full object-cover" />
+                <img
+                  src={resolveNuvioAvatar(profile)!}
+                  alt=""
+                  className="h-4 w-4 rounded-full object-cover"
+                />
               ) : (
                 <User size={14} />
               )}

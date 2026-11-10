@@ -15,17 +15,69 @@ import { StreamRowPreview } from "./stream-row-preview";
 const GROUPS: Array<{ label: string; kinds: BadgeKind[] }> = [
   {
     label: "Resolution",
-    kinds: ["8k", "4k-uhd", "uhd", "2k-qhd", "1080p", "1080i", "720p", "576p", "480p", "360p", "hd", "sd"],
+    kinds: [
+      "8k",
+      "4k-uhd",
+      "uhd",
+      "2k-qhd",
+      "1080p",
+      "1080i",
+      "720p",
+      "576p",
+      "480p",
+      "360p",
+      "hd",
+      "sd",
+    ],
   },
   {
     label: "Source",
-    kinds: ["remux", "bluray", "webdl", "webrip", "hdtv", "dvb", "dvd", "3d", "imax", "cam", "hdcam", "telesync", "hdts", "telecine", "scr", "wp"],
+    kinds: [
+      "remux",
+      "bluray",
+      "webdl",
+      "webrip",
+      "hdtv",
+      "dvb",
+      "dvd",
+      "3d",
+      "imax",
+      "cam",
+      "hdcam",
+      "telesync",
+      "hdts",
+      "telecine",
+      "scr",
+      "wp",
+    ],
   },
   { label: "HDR", kinds: ["dv", "hdr10-plus", "hdr10", "hdr", "hlg", "sdr"] },
   { label: "Codec", kinds: ["hevc", "av1"] },
   {
     label: "Audio",
-    kinds: ["atmos", "atmos-912", "truehd", "dts-hd-ma", "dts-hd", "dts-x", "dts", "ddp", "dd", "eac3", "ac3", "aac", "flac", "mp3", "opus", "pcm", "lpcm", "stereo", "mono", "5.1", "7.1"],
+    kinds: [
+      "atmos",
+      "atmos-912",
+      "truehd",
+      "dts-hd-ma",
+      "dts-hd",
+      "dts-x",
+      "dts",
+      "ddp",
+      "dd",
+      "eac3",
+      "ac3",
+      "aac",
+      "flac",
+      "mp3",
+      "opus",
+      "pcm",
+      "lpcm",
+      "stereo",
+      "mono",
+      "5.1",
+      "7.1",
+    ],
   },
   { label: "Flags", kinds: ["extended", "remastered", "repack", "no-label", "unknown"] },
 ];
@@ -72,15 +124,21 @@ export function BadgesTab() {
     <>
       <Section
         title={t("Stream format chips")}
-        subtitle={t("The little 4K, HDR, codec, and audio chips that ride along each stream in the play picker.")}
+        subtitle={t(
+          "The little 4K, HDR, codec, and audio chips that ride along each stream in the play picker.",
+        )}
         newId="badges:stream-format-chips"
       >
         <StreamRowPreview
-          caption={t("Every change on this page shows up here first. The art you pick below rides on rows exactly like this one.")}
+          caption={t(
+            "Every change on this page shows up here first. The art you pick below rides on rows exactly like this one.",
+          )}
         />
         <ToggleRow
           label={t("Show format chips on stream rows")}
-          sub={t("The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.")}
+          sub={t(
+            "The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.",
+          )}
           value={settings.showQualityBadge}
           onChange={(v) => update({ showQualityBadge: v })}
         />
@@ -88,13 +146,17 @@ export function BadgesTab() {
 
       <Section
         title={t("Badge art")}
-        subtitle={t("Every format badge Harbor can show on streams. Pick one to swap its art, hide it, or put it back. Changes apply everywhere badges appear.")}
+        subtitle={t(
+          "Every format badge Harbor can show on streams. Pick one to swap its art, hide it, or put it back. Changes apply everywhere badges appear.",
+        )}
       >
         {overrideCount > 0 && (
           <SettingRow
             icon={<Palette size={18} strokeWidth={2} />}
             label={t("Badges you have changed")}
-            desc={t("{n} badges use art you picked instead of Harbor's default.", { n: overrideCount })}
+            desc={t("{n} badges use art you picked instead of Harbor's default.", {
+              n: overrideCount,
+            })}
           />
         )}
         {GROUPS.map((g, gi) => (

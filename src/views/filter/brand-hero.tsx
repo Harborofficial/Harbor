@@ -82,9 +82,7 @@ export function BrandHero({
         ) : (
           <h1 className="brand-hero-title">{title}</h1>
         )}
-        {facts.length > 0 && (
-          <span className="brand-hero-facts">{facts.join(" · ")}</span>
-        )}
+        {facts.length > 0 && <span className="brand-hero-facts">{facts.join(" · ")}</span>}
         <p className="brand-hero-sub">{subtitle}</p>
         {children}
       </div>

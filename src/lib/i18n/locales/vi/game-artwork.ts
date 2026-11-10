@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "Nhập dữ liệu trò chơi",
-  "games.metadataImport.note": "Ghép trò chơi theo tên, nền tảng và mã cửa hàng. Các liên kết hiện có được giữ nguyên.",
+  "games.metadataImport.note":
+    "Ghép trò chơi theo tên, nền tảng và mã cửa hàng. Các liên kết hiện có được giữ nguyên.",
   "games.metadataImport.scope": "Trò chơi cần ghép",
   "games.metadataImport.progress": "Đã kiểm tra {count}/{total}",
   "games.metadataImport.savedCount": "Đã nhập {count}",
@@ -14,20 +15,23 @@ export default {
   "games.metadataImport.incomplete": "Có quá nhiều kết quả. Hãy chọn một kết quả.",
   "games.metadataImport.artwork": "Chọn hình ảnh để hoàn tất việc nhập.",
   "games.metadataImport.reviewAction": "Xem lại",
-  "games.metadataImport.stopNote": "Dừng hoặc đóng sẽ hủy công việc còn lại. Các mục đã nhập được giữ nguyên.",
+  "games.metadataImport.stopNote":
+    "Dừng hoặc đóng sẽ hủy công việc còn lại. Các mục đã nhập được giữ nguyên.",
   "games.metadataImport.stop": "Dừng",
   "games.metadataImport.resume": "Tiếp tục / thử lại",
   "games.metadataImport.start": "Tìm kết quả phù hợp",
   "games.metadataImport.review": "Cần xem lại",
   "games.artwork.selectionSetting": "Chọn nền IGDB",
-  "games.artwork.selectionNote": "Dùng cho các lần khớp siêu dữ liệu mới. Ảnh hiện có không thay đổi.",
+  "games.artwork.selectionNote":
+    "Dùng cho các lần khớp siêu dữ liệu mới. Ảnh hiện có không thay đổi.",
   "games.artwork.policy.first": "Ảnh đầu tiên",
   "games.artwork.policy.random": "Ảnh ngẫu nhiên",
   "games.artwork.policy.manual": "Để tôi chọn",
   "games.artwork.screenshotsSetting": "Dùng ảnh chụp màn hình khi không có tranh",
   "games.artwork.screenshotsNote": "Chỉ dùng ảnh chụp màn hình khi IGDB không có tranh nền.",
   "games.artwork.iconSetting": "Dùng ảnh bìa làm biểu tượng thư viện",
-  "games.artwork.iconNote": "Dùng ảnh bìa IGDB nhỏ trong thanh bên và thư viện nhanh cho các lần khớp mới. Ảnh cục bộ được ưu tiên.",
+  "games.artwork.iconNote":
+    "Dùng ảnh bìa IGDB nhỏ trong thanh bên và thư viện nhanh cho các lần khớp mới. Ảnh cục bộ được ưu tiên.",
   "games.artwork.importError": "Không thể tải ảnh cho lần khớp này. Hãy thử lại.",
 
   "games.artwork.browse": "Duyệt hình ảnh IGDB",
@@ -37,14 +41,18 @@ export default {
   "games.artwork.cover": "Ảnh bìa",
   "games.artwork.unknownSize": "Không rõ kích thước",
   "games.artwork.original": "Tự động",
-  "games.artwork.noMatch": "Không tìm thấy ảnh cho trò chơi này. Hãy thử chọn bản ghi siêu dữ liệu khác.",
-  "games.artwork.localCover": "Ảnh bìa cục bộ vẫn được dùng. Hãy gỡ ảnh đó trong tùy chỉnh thư viện để dùng ảnh này.",
+  "games.artwork.noMatch":
+    "Không tìm thấy ảnh cho trò chơi này. Hãy thử chọn bản ghi siêu dữ liệu khác.",
+  "games.artwork.localCover":
+    "Ảnh bìa cục bộ vẫn được dùng. Hãy gỡ ảnh đó trong tùy chỉnh thư viện để dùng ảnh này.",
   "games.artwork.choose": "{count} ảnh",
   "games.artwork.first": "Ảnh đầu tiên",
   "games.artwork.random": "Ảnh ngẫu nhiên",
-  "games.artwork.screenshotFallback": "Không có hình minh họa. Ảnh chụp màn hình được hiển thị thay thế.",
+  "games.artwork.screenshotFallback":
+    "Không có hình minh họa. Ảnh chụp màn hình được hiển thị thay thế.",
   "games.artwork.empty": "IGDB không có ảnh cho lựa chọn này.",
   "games.artwork.imageError": "Không tải được một số ảnh.",
   "games.artwork.reset": "Đặt lại hình ảnh",
-  "games.artwork.conflict": "Hình ảnh hoặc siêu dữ liệu đã thay đổi ở nơi khác. Hãy mở lại trình chọn."
+  "games.artwork.conflict":
+    "Hình ảnh hoặc siêu dữ liệu đã thay đổi ở nơi khác. Hãy mở lại trình chọn.",
 } satisfies Record<string, string>;

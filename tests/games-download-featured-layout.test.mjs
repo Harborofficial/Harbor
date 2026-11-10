@@ -12,25 +12,27 @@ const page = readFileSync(
   "utf8",
 );
 
+const flat = css.replace(/\s+/g, "");
+
 test("featured cards size to their own content, not the tallest group in the grid", () => {
-  assert.ok(css.includes(".games-download-feature-grid{display:grid;"));
-  assert.ok(css.includes("align-items:start"));
-  const start = css.indexOf(".games-download-feature-grid>.games-download-bundle{");
+  assert.ok(flat.includes(".games-download-feature-grid{display:grid;"));
+  assert.ok(flat.includes("align-items:start"));
+  const start = flat.indexOf(".games-download-feature-grid>.games-download-bundle{");
   assert.ok(start !== -1, "Expected a featured group grid-item rule");
-  const rule = css.slice(start, css.indexOf("}", start));
+  const rule = flat.slice(start, flat.indexOf("}", start));
   assert.ok(rule.includes("align-self:start"));
   assert.ok(!rule.includes("height:100%"));
   assert.ok(card.includes("const [expanded, setExpanded] = useState(false)"));
-  assert.ok(page.includes("<GameDownloadGroupCard key={group.key}"));
+  assert.match(page, /<GameDownloadGroupCard\s+key=\{group\.key\}/);
 });
 
 test("top-left disclosure arrow points down when collapsed and up when open", () => {
   assert.ok(
-    css.includes(
+    flat.includes(
       ".games-download-bundle-chevron{position:absolute;inset-block-start:12px;inset-inline-start:12px",
     ),
   );
-  assert.ok(css.includes(".games-download-bundle-chevron.is-expanded{transform:rotate(180deg)}"));
+  assert.ok(flat.includes(".games-download-bundle-chevron.is-expanded{transform:rotate(180deg);}"));
   const arrow = card.indexOf("<ChevronDown");
   const artwork = card.indexOf("!featured && <DownloadArtwork");
   assert.ok(arrow > 0 && artwork > arrow, "Disclosure must precede the game's artwork");

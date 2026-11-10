@@ -104,6 +104,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.limited":
     "このソースは一部の作品を提供しており、カタログ全体を含まない場合があります。",
   "music.rockHall.title": "ロックの殿堂",
-  "music.rockHall.subtitle": "1986年以降の全クラス、Wikipediaから直接"
+  "music.rockHall.subtitle": "1986年以降の全クラス、Wikipediaから直接",
 };
 export default musicTaste;

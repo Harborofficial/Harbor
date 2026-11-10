@@ -19,10 +19,7 @@ import { useT } from "@/lib/i18n";
 import { adoptRequestedIdentity } from "@/lib/music/queue-source";
 import { playMusic } from "@/lib/music/player";
 import { MUSIC_SOURCE_REQUIRED, resolveAndPlayMusicTrack } from "@/lib/music/play-track";
-import {
-  getMusicSourceCandidates,
-  getSpotifyStatus,
-} from "@/lib/music/sources";
+import { getMusicSourceCandidates, getSpotifyStatus } from "@/lib/music/sources";
 import { musicProviderSearch, musicRecoveryKey, musicSourceName } from "@/lib/music/recovery";
 import { openUrl } from "@/lib/window";
 import type { MusicSourceCandidate, MusicTrack, SpotifyStatus } from "@/lib/music/types";
@@ -51,14 +48,18 @@ type MusicSourcePickerContextValue = {
 
 const MusicSourcePickerContext = createContext<MusicSourcePickerContextValue | null>(null);
 
-export function MusicSourcePickerProvider({ children, active = true }: { children: ReactNode; active?: boolean }) {
+export function MusicSourcePickerProvider({
+  children,
+  active = true,
+}: {
+  children: ReactNode;
+  active?: boolean;
+}) {
   // Nesting a second provider renders a second dialog over the first. A view that sits inside one
   // already has a working picker, so the inner provider passes straight through.
   const outer = useContext(MusicSourcePickerContext);
   if (outer) return <>{children}</>;
-  return (
-    <MusicSourcePickerRoot active={active}>{children}</MusicSourcePickerRoot>
-  );
+  return <MusicSourcePickerRoot active={active}>{children}</MusicSourcePickerRoot>;
 }
 
 function MusicSourcePickerRoot({ children, active }: { children: ReactNode; active: boolean }) {
@@ -310,8 +311,7 @@ export function MusicSourcePicker({
       });
   };
 
-  const select = (candidate: MusicSourceCandidate) =>
-    start(candidate.track, candidate.connectorId);
+  const select = (candidate: MusicSourceCandidate) => start(candidate.track, candidate.connectorId);
 
   const connect = () => {
     onClose();
@@ -418,8 +418,12 @@ export function MusicSourcePicker({
         )}
 
         {loading ? (
-          <div className="flex min-h-36 items-center justify-center gap-3 text-sm text-ink-muted" role="status">
-            <MusicSourceSearchMotion /><span>{t("music.source.loading")}</span>
+          <div
+            className="flex min-h-36 items-center justify-center gap-3 text-sm text-ink-muted"
+            role="status"
+          >
+            <MusicSourceSearchMotion />
+            <span>{t("music.source.loading")}</span>
           </div>
         ) : (
           ordered.map((candidate) => (

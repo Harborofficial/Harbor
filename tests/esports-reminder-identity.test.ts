@@ -4,12 +4,21 @@ import { esportsSportsGame } from "../src/lib/sports/esports-sports-game.ts";
 import type { EsportsMatch } from "../src/lib/sports/esports-feeds.ts";
 
 const match: EsportsMatch = {
-  id: "match-1", game: "cs2", state: "upcoming", startMs: 1800000000000,
+  id: "match-1",
+  game: "cs2",
+  state: "upcoming",
+  startMs: 1800000000000,
   event: { id: "same-tournament", name: "Championship", stage: "Semi-final" },
-  teams: [{ id: "a", name: "Team A" }, { id: "b", name: "Team B" }], streams: [], sourceUrl: "https://example.com",
+  teams: [
+    { id: "a", name: "Team A" },
+    { id: "b", name: "Team B" },
+  ],
+  streams: [],
+  sourceUrl: "https://example.com",
 };
 test("two matches in one tournament have independent reminder identities", () => {
-  const first = esportsSportsGame(match), second = esportsSportsGame({ ...match, id: "match-2", startMs: match.startMs + 3600000 });
+  const first = esportsSportsGame(match),
+    second = esportsSportsGame({ ...match, id: "match-2", startMs: match.startMs + 3600000 });
   assert.notEqual(first.context?.id, second.context?.id);
   assert.equal(first.context?.name, "Championship");
   assert.equal(second.startMs, match.startMs + 3600000);

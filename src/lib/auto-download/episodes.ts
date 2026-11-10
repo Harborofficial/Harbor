@@ -3,7 +3,13 @@ import type { Meta } from "@/lib/cinemeta";
 import { activeDownloadFor } from "@/lib/download/downloads-store";
 import type { PlayEpisode } from "@/lib/view";
 
-type AiredEpisode = { season: number; episode: number; rel: number; videoId?: string; name?: string };
+type AiredEpisode = {
+  season: number;
+  episode: number;
+  rel: number;
+  videoId?: string;
+  name?: string;
+};
 
 export function grabKey(seriesId: string, season: number, episode: number): string {
   return `${seriesId}:S${season}E${episode}`;
@@ -64,7 +70,10 @@ export function eligibleEpisodes(
 
   const remaining =
     series.stop.kind === "count"
-      ? Math.max(0, series.stop.value - (series.grabbedCount - (series.stop.from ?? series.grabbedCount)))
+      ? Math.max(
+          0,
+          series.stop.value - (series.grabbedCount - (series.stop.from ?? series.grabbedCount)),
+        )
       : Infinity;
 
   const eps: PlayEpisode[] = [];

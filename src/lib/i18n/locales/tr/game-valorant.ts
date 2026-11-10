@@ -21,7 +21,8 @@ export default {
   "games.valorant.search": "Ajan bul",
   "games.valorant.referenceError": "Oyun referansı yüklenemedi.",
   "games.valorant.stale": "Yenilenemedi. Son yüklenen sonuçlar gösteriliyor.",
-  "games.valorant.metaError": "Dereceli istatistikler kullanılamıyor. Ajan bilgileri hâlâ kullanılabilir.",
+  "games.valorant.metaError":
+    "Dereceli istatistikler kullanılamıyor. Ajan bilgileri hâlâ kullanılabilir.",
   "games.valorant.agents": "Ajan sıralaması",
   "games.valorant.sort": "Ajanları sırala",
   "games.valorant.winSort": "En yüksek kazanma oranı",
@@ -34,20 +35,24 @@ export default {
   "games.valorant.sampleNote": "200’den az görünümü olan ajanlar en sonda listelenir.",
   "games.valorant.empty": "Bu filtrelerle eşleşen sonuç yok.",
   "games.valorant.checked": "Kontrol: {date}",
-  "games.valorant.metaScope": "Seçili yama için OP.GG rekabetçi verileri. Seçilme oranı, ajan görünümlerinin payıdır. Sonuçlar tüm oyuncuları değil, kaynağın örneklemini temsil eder.",
-  "games.valorant.referenceScope": "Oyun görselleri ve referanslar Valorant-API üzerinden sağlanır. Güncellemeler gecikebilir. Harbor, Riot Games tarafından onaylanmamıştır.",
+  "games.valorant.metaScope":
+    "Seçili yama için OP.GG rekabetçi verileri. Seçilme oranı, ajan görünümlerinin payıdır. Sonuçlar tüm oyuncuları değil, kaynağın örneklemini temsil eder.",
+  "games.valorant.referenceScope":
+    "Oyun görselleri ve referanslar Valorant-API üzerinden sağlanır. Güncellemeler gecikebilir. Harbor, Riot Games tarafından onaylanmamıştır.",
   "games.valorant.samples": "{count} görünüm",
   "games.valorant.smallSample": "Küçük örneklem",
   "games.valorant.abilities": "Yetenekler",
   "games.valorant.watchAbility": "Yeteneği izle",
   "games.valorant.videoError": "Bu gösterim oynatılamadı.",
   "games.valorant.mapMeta": "Bu haritadaki ajan metası",
-  "games.valorant.mapScope": "Mevcut dereceli rotasyon dışındaki haritaları da içerir. Harita ve bölge adları İngilizcedir.",
+  "games.valorant.mapScope":
+    "Mevcut dereceli rotasyon dışındaki haritaları da içerir. Harita ve bölge adları İngilizcedir.",
   "games.valorant.callouts": "Bölge adları",
   "games.valorant.compareWeapon": "Karşılaştır",
   "games.valorant.weapon": "Silah",
   "games.valorant.distance": "Mesafe",
-  "games.valorant.damageScope": "Zırh, delme veya yetenekler öncesi temel birincil atış değerleri. Pompalı tüfeklerde saçma başına hasar gösterilir.",
+  "games.valorant.damageScope":
+    "Zırh, delme veya yetenekler öncesi temel birincil atış değerleri. Pompalı tüfeklerde saçma başına hasar gösterilir.",
   "games.valorant.weaponStats": "Silah istatistikleri",
   "games.valorant.cost": "Kredi",
   "games.valorant.magazine": "Şarjör",
@@ -55,5 +60,5 @@ export default {
   "games.valorant.reload": "Doldurma · saniye",
   "games.valorant.head": "Kafa hasarı",
   "games.valorant.body": "Gövde hasarı",
-  "games.valorant.legs": "Bacak hasarı"
+  "games.valorant.legs": "Bacak hasarı",
 };

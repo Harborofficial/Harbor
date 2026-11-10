@@ -377,6 +377,9 @@ export async function applySubStyle(
         ? subPos.set(Number(value))
         : invoke("mpv_set_property", { name, value }).catch(() => {}),
     ),
-    applyFontOnlyOverrides(s.subAssOverride === "font", mpvFontFor(s.subFontFamily, customFontName(s))),
+    applyFontOnlyOverrides(
+      s.subAssOverride === "font",
+      mpvFontFor(s.subFontFamily, customFontName(s)),
+    ),
   ]);
 }

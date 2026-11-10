@@ -7,5 +7,5 @@ export default {
   "games.emulation.addGames": "إضافة ألعاب",
   "games.emulation.importNote": "اختر نظامًا، ثم اختر مجلد ألعابه. تُضمَّن المجلدات الفرعية.",
   "games.emulation.noMatches": "جرّب نظامًا آخر أو امسح عوامل التصفية.",
-  "games.emulation.clearFilters": "مسح عوامل التصفية"
+  "games.emulation.clearFilters": "مسح عوامل التصفية",
 };

@@ -18,7 +18,9 @@ function Card({ children, tint }: { children: ReactNode; tint?: boolean }) {
 
 function Label({ children }: { children: ReactNode }) {
   return (
-    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-ink-subtle">{children}</p>
+    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-ink-subtle">
+      {children}
+    </p>
   );
 }
 
@@ -43,7 +45,9 @@ export function HeroCard({ stats }: { stats: WrappedStats }) {
 function Stat({ value, unit, big }: { value: string; unit: string; big?: boolean }) {
   return (
     <div className="flex flex-col">
-      <span className={`font-display font-medium tracking-tight text-ink ${big ? "text-[64px] leading-none" : "text-[40px] leading-none"}`}>
+      <span
+        className={`font-display font-medium tracking-tight text-ink ${big ? "text-[64px] leading-none" : "text-[40px] leading-none"}`}
+      >
         {value}
       </span>
       <span className="mt-1 text-[13px] text-ink-muted">{unit}</span>
@@ -69,9 +73,14 @@ export function SplitCard({ stats }: { stats: WrappedStats }) {
             <r.icon size={18} className="shrink-0 text-ink-muted" />
             <span className="w-16 text-[13.5px] text-ink-muted">{r.label}</span>
             <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-canvas/70">
-              <div className={`h-full rounded-full ${r.cls}`} style={{ width: `${(r.n / total) * 100}%` }} />
+              <div
+                className={`h-full rounded-full ${r.cls}`}
+                style={{ width: `${(r.n / total) * 100}%` }}
+              />
             </div>
-            <span className="w-10 text-end text-[13px] font-semibold tabular-nums text-ink">{r.n}</span>
+            <span className="w-10 text-end text-[13px] font-semibold tabular-nums text-ink">
+              {r.n}
+            </span>
           </div>
         ))}
       </div>
@@ -79,7 +88,13 @@ export function SplitCard({ stats }: { stats: WrappedStats }) {
   );
 }
 
-export function TopTitlesCard({ stats, onOpen }: { stats: WrappedStats; onOpen: (tt: TopTitle) => void }) {
+export function TopTitlesCard({
+  stats,
+  onOpen,
+}: {
+  stats: WrappedStats;
+  onOpen: (tt: TopTitle) => void;
+}) {
   const t = useT();
   if (stats.topTitles.length === 0) return null;
   return (
@@ -93,7 +108,9 @@ export function TopTitlesCard({ stats, onOpen }: { stats: WrappedStats; onOpen: 
             onClick={() => onOpen(tt)}
             className="group/row flex items-center gap-3 rounded-xl px-2 py-1.5 text-start transition-colors hover:bg-canvas/50 active:scale-[0.99] motion-reduce:active:scale-100"
           >
-            <span className="w-5 shrink-0 text-end font-display text-[15px] text-ink-subtle">{i + 1}</span>
+            <span className="w-5 shrink-0 text-end font-display text-[15px] text-ink-subtle">
+              {i + 1}
+            </span>
             <div className="w-9 shrink-0 overflow-hidden rounded-md">
               <Poster src={stats.posters[tt.id]} seed={tt.id} ratio="portrait" />
             </div>
@@ -112,7 +129,10 @@ export function TopTitlesCard({ stats, onOpen }: { stats: WrappedStats; onOpen: 
 
 function initials(name: string): string {
   const parts = name.split(/\s+/).filter(Boolean);
-  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() || "?";
+  return (
+    ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() ||
+    "?"
+  );
 }
 
 export function ActorsCard({ stats }: { stats: WrappedStats }) {
@@ -126,7 +146,12 @@ export function ActorsCard({ stats }: { stats: WrappedStats }) {
           <div key={a.name} className="flex items-center gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-canvas/70 font-display text-[13.5px] text-ink-subtle ring-1 ring-edge-soft">
               {a.photo ? (
-                <img src={a.photo} alt="" draggable={false} className="h-full w-full object-cover" />
+                <img
+                  src={a.photo}
+                  alt=""
+                  draggable={false}
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 initials(a.name)
               )}
@@ -144,7 +169,9 @@ export function ActorsCard({ stats }: { stats: WrappedStats }) {
 
 function prettyDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 export function HighlightsCard({ stats }: { stats: WrappedStats }) {
@@ -196,7 +223,10 @@ export function GenresCard({ stats }: { stats: WrappedStats }) {
           <div key={g.genre} className="flex items-center gap-3">
             <span className="w-28 shrink-0 truncate text-[13.5px] text-ink">{g.genre}</span>
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-canvas/70">
-              <div className="h-full rounded-full bg-accent/80" style={{ width: `${(g.count / max) * 100}%` }} />
+              <div
+                className="h-full rounded-full bg-accent/80"
+                style={{ width: `${(g.count / max) * 100}%` }}
+              />
             </div>
           </div>
         ))}
@@ -236,7 +266,11 @@ export function HeatmapCard({ stats }: { stats: WrappedStats }) {
         {weeks.map((w, wi) => (
           <div key={wi} className="flex flex-col gap-[3px]">
             {w.map((c) => (
-              <div key={c.key} title={`${c.key}: ${c.count}`} className={`h-2.5 w-2.5 rounded-[3px] ${heatColor(c.count, max)}`} />
+              <div
+                key={c.key}
+                title={`${c.key}: ${c.count}`}
+                className={`h-2.5 w-2.5 rounded-[3px] ${heatColor(c.count, max)}`}
+              />
             ))}
           </div>
         ))}

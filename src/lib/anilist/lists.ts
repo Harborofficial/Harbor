@@ -105,10 +105,12 @@ export async function fetchMediaListCollection(userId: number): Promise<AnilistL
   const existing = inflight.get(userId);
   if (existing) return existing;
   const run = (async () => {
-    const data = await anilistRequest<CollectionResponse>(COLLECTION_QUERY, { userId }).catch((e) => {
-      if (e instanceof AnilistApiError && e.isAuthenticationError) void validateAnilistSession();
-      throw e;
-    });
+    const data = await anilistRequest<CollectionResponse>(COLLECTION_QUERY, { userId }).catch(
+      (e) => {
+        if (e instanceof AnilistApiError && e.isAuthenticationError) void validateAnilistSession();
+        throw e;
+      },
+    );
     const groups = buildGroups(data.MediaListCollection?.lists ?? []);
     writeCachedCollection(userId, groups);
     return groups;

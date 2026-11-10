@@ -115,7 +115,9 @@ function PacksSection() {
   return (
     <Section
       title={t("Packs & import")}
-      subtitle={t("Rulesets bring a full badge set with their own matching. Art remaps only swap the pictures on Harbor's built-in badges. Anything shared as a badges.json link imports here too.")}
+      subtitle={t(
+        "Rulesets bring a full badge set with their own matching. Art remaps only swap the pictures on Harbor's built-in badges. Anything shared as a badges.json link imports here too.",
+      )}
     >
       <div ref={packsRef} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {COMMUNITY_PACKS.map((p) => (
@@ -132,7 +134,9 @@ function PacksSection() {
       <SettingRow
         wide
         label={t("Make your own")}
-        desc={t("Build a pack in one of these tools, export the JSON, host it as a gist, then paste the raw link below.")}
+        desc={t(
+          "Build a pack in one of these tools, export the JSON, host it as a gist, then paste the raw link below.",
+        )}
       >
         <div className="flex w-full flex-wrap items-center gap-2.5">
           {BADGE_STUDIOS.map((s) => (
@@ -148,7 +152,9 @@ function PacksSection() {
         wide
         icon={<Link2 size={18} strokeWidth={2} />}
         label={t("Import from a link")}
-        desc={t("Any badges.json address works: a raw gist, Pastebin, or a file in a repo. Broken JSON gets repaired automatically.")}
+        desc={t(
+          "Any badges.json address works: a raw gist, Pastebin, or a file in a repo. Broken JSON gets repaired automatically.",
+        )}
       >
         <div className="flex w-full max-w-[680px] flex-wrap items-center gap-2.5">
           <input
@@ -195,7 +201,9 @@ function PacksSection() {
 
       <SettingRow
         label={t("Export my setup")}
-        desc={t("Copies your badge art and rules to the clipboard as JSON, ready to paste into a gist and share.")}
+        desc={t(
+          "Copies your badge art and rules to the clipboard as JSON, ready to paste into a gist and share.",
+        )}
       >
         <SButton
           onClick={() => {
@@ -217,7 +225,9 @@ function CommunityInstalledSection() {
   return (
     <Section
       title={t("Downloaded from community")}
-      subtitle={t("Badge art packs you installed from the community store. Remove one to put its badges back to Harbor's default.")}
+      subtitle={t(
+        "Badge art packs you installed from the community store. Remove one to put its badges back to Harbor's default.",
+      )}
     >
       {packs.map((p) => (
         <SettingRow
@@ -284,7 +294,9 @@ export function PacksTab() {
     <>
       <Section
         title={t("Where badges come from")}
-        subtitle={t("A pack swaps Harbor's built-in badge art, or adds whole new badges of its own.")}
+        subtitle={t(
+          "A pack swaps Harbor's built-in badge art, or adds whole new badges of its own.",
+        )}
       >
         <SRow
           title={t("Browse community badge packs")}
@@ -297,7 +309,9 @@ export function PacksTab() {
         />
         <SRow
           title={t("Curated packs and link import")}
-          description={t("A short hand-picked list, plus a box for pasting any badges.json link you were sent.")}
+          description={t(
+            "A short hand-picked list, plus a box for pasting any badges.json link you were sent.",
+          )}
           leading={<Package size={20} strokeWidth={2} />}
           trailing={
             browseOpen ? (

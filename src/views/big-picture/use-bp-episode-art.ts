@@ -118,7 +118,8 @@ function proxyStill(
 ): string | undefined {
   if (absFirst && abs != null) {
     return (
-      pickTvdbImage(map, { seasonNumber: season, number: episode, absoluteNumber: abs }) ?? undefined
+      pickTvdbImage(map, { seasonNumber: season, number: episode, absoluteNumber: abs }) ??
+      undefined
     );
   }
   return map[`s${season}e${episode}`] ?? (abs != null ? map[`abs${abs}`] : undefined);

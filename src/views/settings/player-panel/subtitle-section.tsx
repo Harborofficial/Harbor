@@ -91,8 +91,7 @@ export function SubtitleStylePanel() {
   const { settings, update } = useSettings();
   const t = useT();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const useMyStyle =
-    settings.subAssOverride === "force" || settings.subAssOverride === "strip";
+  const useMyStyle = settings.subAssOverride === "force" || settings.subAssOverride === "strip";
   const lastLookMode = useRef<"no" | "scale" | "font">("no");
   useEffect(() => {
     const mode = settings.subAssOverride;

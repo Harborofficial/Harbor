@@ -32,7 +32,11 @@ export function MusicGenreChannels({
       active={active}
       onWatch={onWatch}
       headerContent={
-        <div className="music-genre-channel-picker" role="group" aria-label={t("music.explore.scene")}>
+        <div
+          className="music-genre-channel-picker"
+          role="group"
+          aria-label={t("music.explore.scene")}
+        >
           {channels.map((channel, index) => (
             <button
               key={channel.name}
@@ -41,10 +45,18 @@ export function MusicGenreChannels({
               onClick={() => setAt(index)}
             >
               {channel.logo ? (
-                <img className="music-genre-channel-logo" src={channel.logo} alt="" loading="lazy" />
+                <img
+                  className="music-genre-channel-logo"
+                  src={channel.logo}
+                  alt=""
+                  loading="lazy"
+                />
               ) : (
                 <span className="music-genre-channel-logo" data-monogram aria-hidden>
-                  {channel.name.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
+                  {channel.name
+                    .replace(/[^A-Za-z0-9]/g, "")
+                    .slice(0, 2)
+                    .toUpperCase()}
                 </span>
               )}
               {channel.name}

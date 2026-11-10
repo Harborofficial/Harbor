@@ -15,11 +15,7 @@ import {
   esportsRailMatches,
   selectedEsportsFeeds,
 } from "../src/lib/sports/esports-match-rail.ts";
-import type {
-  EsportsFeed,
-  EsportsGameId,
-  EsportsMatch,
-} from "../src/lib/sports/esports-feeds.ts";
+import type { EsportsFeed, EsportsGameId, EsportsMatch } from "../src/lib/sports/esports-feeds.ts";
 import { parseEvents } from "../src/lib/sports/espn-parse.ts";
 import { parseDotaMatches } from "../src/lib/sports/opendota.ts";
 import { twitchEmbedUrl } from "../src/lib/sports/broadcasts.ts";

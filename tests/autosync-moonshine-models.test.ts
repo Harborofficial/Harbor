@@ -48,7 +48,10 @@ test("missing-model notifications are local, opt-in and unsubscribe cleanly", ()
 
 test("missing-model request only accepts known fixed language codes", () => {
   assert.equal(moonshineMissingModelLanguage(moonshineMissingModelError("ja")), "ja");
-  assert.equal(moonshineMissingModelLanguage("moonshine-model-not-installed:../../../secret"), null);
+  assert.equal(
+    moonshineMissingModelLanguage("moonshine-model-not-installed:../../../secret"),
+    null,
+  );
   assert.equal(moonshineMissingModelLanguage("moonshine-model-not-installed:ko"), null);
   assert.equal(moonshineMissingModelLanguage("some other failure"), null);
 });

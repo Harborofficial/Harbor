@@ -152,7 +152,7 @@ test("cache sync verifies decoded audio while remote sources use a bounded curre
   assert.match(hook, /mapSpec: "0:a:0"/);
   assert.match(
     hook,
-    /cleanupFiles\.push\(\(\) => fs\.remove\(capturePath\.replace\(\/\\\.mkv\$\/, "\.wav"\)\)\)/,
+    /cleanupFiles\.push\(\s*\(\) =>\s*fs\.remove\(\s*capturePath\.replace\(\/\\\.mkv\$\/,\s*"\.wav",?\s*\)\s*\)\s*\)/,
   );
   assert.match(hook, /playbackClip: true/);
   assert.match(hook, /readBufferedRanges\(\)/);

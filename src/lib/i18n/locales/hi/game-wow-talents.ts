@@ -14,6 +14,7 @@ const gameWowTalents: Record<string, string> = {
   "games.wow.talents.import": "यह कोड WoW के प्रतिभा इंपोर्ट में पेस्ट करें।",
   "games.wow.talents.descriptionUnavailable": "मंत्र का विवरण उपलब्ध नहीं है।",
   "games.wow.talents.otherChoice": "दूसरा विकल्प · नहीं चुना गया",
-  "games.wow.talents.reference": "Wowhead से मंत्र का वर्तमान विवरण। मान प्रतिभा की रैंक, पात्र और पैच के अनुसार बदल सकते हैं।"
+  "games.wow.talents.reference":
+    "Wowhead से मंत्र का वर्तमान विवरण। मान प्रतिभा की रैंक, पात्र और पैच के अनुसार बदल सकते हैं।",
 };
 export default gameWowTalents;

@@ -15,7 +15,10 @@ export async function bakeDefaultPosters(lists: FeaturedList[]): Promise<Feature
     lists.map(async (l) => ({
       ...l,
       items: await Promise.all(
-        l.items.map(async (it) => ({ ...it, poster: await defaultItemPoster(it.id, it.poster, key) })),
+        l.items.map(async (it) => ({
+          ...it,
+          poster: await defaultItemPoster(it.id, it.poster, key),
+        })),
       ),
     })),
   );

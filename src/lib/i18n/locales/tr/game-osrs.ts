@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "Anında alım",
   "games.osrs.sell": "Anında satış",
   "games.osrs.unseen": "Henüz gözlem yok",
-  "games.osrs.observed": "Bildirilen işlemlerdir, açık teklifler değildir. Alım ve satış gözlemleri farklı zamanlara ait olabilir.",
+  "games.osrs.observed":
+    "Bildirilen işlemlerdir, açık teklifler değildir. Alım ve satış gözlemleri farklı zamanlara ait olabilir.",
   "games.osrs.history": "Fiyat geçmişi",
   "games.osrs.period": "Dönem",
   "games.osrs.range.6h": "Son 6 saat",
@@ -42,5 +43,5 @@ export default {
   "games.osrs.averages": "Eksik işlemler boşluk bırakır. Borsa vergisi burada hesaplanmaz.",
   "games.osrs.table": "Son 24 aralık",
   "games.osrs.time": "Zaman",
-  "games.osrs.volume": "İşlem gören eşyalar"
+  "games.osrs.volume": "İşlem gören eşyalar",
 };

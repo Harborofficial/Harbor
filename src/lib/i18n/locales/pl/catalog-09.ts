@@ -223,7 +223,8 @@ const catalog09: Record<string, string> = {
     "Otwiera Stremio w przeglądarce. Działa z kontami e-mail, Facebook i Apple.",
   "Opens Stremio in your browser. Works with email, Facebook, and Apple. Harbor never sees your password.":
     "Otwiera Stremio w przeglądarce. Działa z kontami e-mail, Facebook i Apple. Harbor nigdy nie ma dostępu do Twojego hasła.",
-  "Opens the folder holding the DHT cache and active transfer data.": "Otwiera folder zawierający pamięć podręczną DHT i dane aktywnych transferów.",
+  "Opens the folder holding the DHT cache and active transfer data.":
+    "Otwiera folder zawierający pamięć podręczną DHT i dane aktywnych transferów.",
   "Opens the free signup page": "Otwiera stronę bezpłatnej rejestracji",
   "Opens your API settings page": "Otwiera stronę ustawień API",
   Optional: "Opcjonalnie",
@@ -426,7 +427,8 @@ const catalog09: Record<string, string> = {
   Peacock: "Peacock",
   "Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.":
     "Widżet z liczbą peerów, szybkością i postępem wyświetlany w odtwarzaczu podczas odtwarzania torrenta. Wyłącz, aby zachować przejrzysty interfejs odtwarzacza.",
-  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.": "Informacje o peerach, prędkości i postępie w odtwarzaczu podczas odtwarzania strumienia P2P. Pojawiają się w lewym górnym rogu, z dala od przycisku wyjścia.",
+  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.":
+    "Informacje o peerach, prędkości i postępie w odtwarzaczu podczas odtwarzania strumienia P2P. Pojawiają się w lewym górnym rogu, z dala od przycisku wyjścia.",
   "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.":
     "Peery, szybkość i postęp podczas strumieniowania torrenta. Wyświetlane w lewym górnym rogu, z dala od przycisku zamykania.",
   "Penalty Goals": "Gole z rzutów karnych",
@@ -710,7 +712,8 @@ const catalog09: Record<string, string> = {
   "Pluto TV": "Pluto TV",
   "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.":
     "Wskaż aplikacji Harbor folder. Przeskanujemy go w poszukiwaniu filmów i seriali, odczytamy tytuły z nazw plików i uzupełnimy dane z TMDB, aby wyglądały tak samo jak pozostałe materiały. Zapamiętamy tylko ścieżkę, niczego nie skopiujemy ani nie przeniesiemy.",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Połącz Harbor z serwerem strumieniowym na innym urządzeniu, na przykład z usługą Stremio na serwerze domowym. Strumienie P2P będą pobierane i odtwarzane z tamtego urządzenia zamiast z tego.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Połącz Harbor z serwerem strumieniowym na innym urządzeniu, na przykład z usługą Stremio na serwerze domowym. Strumienie P2P będą pobierane i odtwarzane z tamtego urządzenia zamiast z tego.",
   "Point Harbor at your self-hosted library to browse and install sources":
     "Połącz Harbor z własnym serwerem biblioteki, aby przeglądać i instalować źródła",
   "Point Harbor's built-in scraper at any HTML site with a config":

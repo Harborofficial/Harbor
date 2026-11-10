@@ -3,7 +3,8 @@ export default {
   "games.wow.runs.title": "Intentos de mazmorra",
   "games.wow.runs.all": "Todos los afijos",
   "games.wow.runs.current": "Afijos actuales",
-  "games.wow.runs.currentNote": "Coincide con la combinación actual de afijos, incluidas semanas anteriores.",
+  "games.wow.runs.currentNote":
+    "Coincide con la combinación actual de afijos, incluidas semanas anteriores.",
   "games.wow.runs.allNote": "Mejores intentos registrados con todos los afijos de esta temporada.",
   "games.wow.runs.page": "Página {page}",
   "games.wow.runs.refresh": "Actualizar intentos",
@@ -19,11 +20,12 @@ export default {
   "games.wow.runs.copy": "Copiar talentos",
   "games.wow.runs.copyFailed": "No se pudo copiar. Inténtalo de nuevo.",
   "games.wow.runs.party": "Composición del grupo",
-  "games.wow.runs.snapshots": "Los talentos y el equipo publicados son registros del proveedor. Pueden diferir de los usados en este intento.",
+  "games.wow.runs.snapshots":
+    "Los talentos y el equipo publicados son registros del proveedor. Pueden diferir de los usados en este intento.",
   "games.wow.runs.gear": "Equipo",
   "games.wow.runs.tank": "Tanque",
   "games.wow.runs.healer": "Sanador",
   "games.wow.runs.dps": "Daño",
   "games.wow.runs.snapshotAt": "Registro de equipo: {date}",
-  "games.wow.runs.closeGear": "Cerrar equipo"
+  "games.wow.runs.closeGear": "Cerrar equipo",
 };

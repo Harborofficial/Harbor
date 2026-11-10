@@ -93,7 +93,12 @@ export function useEpisodeNavigation(params: {
   const latestSrcRef = useRef(src);
   latestSrcRef.current = src;
   const navigationRevisionRef = useRef(0);
-  useEffect(() => () => { navigationRevisionRef.current += 1; }, []);
+  useEffect(
+    () => () => {
+      navigationRevisionRef.current += 1;
+    },
+    [],
+  );
 
   const localShowKey = isLocalUrl(src.url)
     ? {
@@ -217,13 +222,7 @@ export function useEpisodeNavigation(params: {
         else fallback();
       }, fallback);
     },
-    [
-      openPicker,
-      replacePlayerSrc,
-      src,
-      inRoom,
-      isHost,
-    ],
+    [openPicker, replacePlayerSrc, src, inRoom, isHost],
   );
 
   return { adjacent, swappingEp: false, goToEpisode };

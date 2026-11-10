@@ -57,7 +57,25 @@
   filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.55));
   pointer-events: none;
 }
-.music-mix-cover-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.music-mix-cover[data-portrait] .music-mix-cover-band { inset-inline: 0; bottom: 14px; gap: 0; background: var(--mix-accent); }
-.music-mix-cover[data-portrait] .music-mix-cover-name { padding-inline: 8px; min-height: 26px; font-size: 13px; text-transform: none; letter-spacing: -.01em; border-radius: 0; }
-.music-mix-cover[data-portrait] .music-mix-cover-index { margin-inline-end: 6px; }
+.music-mix-cover-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-mix-cover[data-portrait] .music-mix-cover-band {
+  inset-inline: 0;
+  bottom: 14px;
+  gap: 0;
+  background: var(--mix-accent);
+}
+.music-mix-cover[data-portrait] .music-mix-cover-name {
+  padding-inline: 8px;
+  min-height: 26px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  border-radius: 0;
+}
+.music-mix-cover[data-portrait] .music-mix-cover-index {
+  margin-inline-end: 6px;
+}

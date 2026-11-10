@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "استيراد بيانات الألعاب",
-  "games.metadataImport.note": "مطابقة الألعاب حسب العنوان والمنصة ومعرّف المتجر. تبقى المطابقات الحالية كما هي.",
+  "games.metadataImport.note":
+    "مطابقة الألعاب حسب العنوان والمنصة ومعرّف المتجر. تبقى المطابقات الحالية كما هي.",
   "games.metadataImport.scope": "الألعاب المطلوب مطابقتها",
   "games.metadataImport.progress": "تم فحص {count} من {total}",
   "games.metadataImport.savedCount": "تم استيراد {count}",
@@ -14,20 +15,23 @@ export default {
   "games.metadataImport.incomplete": "نتائج البحث كثيرة جدًا. اختر مطابقة.",
   "games.metadataImport.artwork": "اختر الصور لإكمال الاستيراد.",
   "games.metadataImport.reviewAction": "مراجعة",
-  "games.metadataImport.stopNote": "يؤدي الإيقاف أو الإغلاق إلى إلغاء العمل المتبقي. تُحفظ عمليات الاستيراد المكتملة.",
+  "games.metadataImport.stopNote":
+    "يؤدي الإيقاف أو الإغلاق إلى إلغاء العمل المتبقي. تُحفظ عمليات الاستيراد المكتملة.",
   "games.metadataImport.stop": "إيقاف",
   "games.metadataImport.resume": "متابعة / إعادة المحاولة",
   "games.metadataImport.start": "البحث عن مطابقات",
   "games.metadataImport.review": "تحتاج إلى مراجعة",
   "games.artwork.selectionSetting": "اختيار خلفية IGDB",
-  "games.artwork.selectionNote": "يُستخدم للمطابقات الجديدة للبيانات الوصفية. تبقى صورك الحالية كما هي.",
+  "games.artwork.selectionNote":
+    "يُستخدم للمطابقات الجديدة للبيانات الوصفية. تبقى صورك الحالية كما هي.",
   "games.artwork.policy.first": "الصورة الأولى",
   "games.artwork.policy.random": "صورة عشوائية",
   "games.artwork.policy.manual": "دعني أختار",
   "games.artwork.screenshotsSetting": "استخدام لقطات الشاشة عند غياب الصور",
   "games.artwork.screenshotsNote": "استخدم لقطة شاشة فقط إذا لم تتوفر صورة خلفية في IGDB.",
   "games.artwork.iconSetting": "استخدام الأغلفة كأيقونات للمكتبة",
-  "games.artwork.iconNote": "استخدم أغلفة IGDB صغيرة في الشريط الجانبي والمكتبة السريعة للمطابقات الجديدة. للصور المحلية الأولوية.",
+  "games.artwork.iconNote":
+    "استخدم أغلفة IGDB صغيرة في الشريط الجانبي والمكتبة السريعة للمطابقات الجديدة. للصور المحلية الأولوية.",
   "games.artwork.importError": "تعذّر تحميل صور هذه المطابقة. حاول مجددًا.",
 
   "games.artwork.browse": "تصفّح صور IGDB",
@@ -38,7 +42,8 @@ export default {
   "games.artwork.unknownSize": "الأبعاد غير متاحة",
   "games.artwork.original": "تلقائي",
   "games.artwork.noMatch": "لم يتم العثور على صور لهذه اللعبة. جرّب اختيار بيانات وصفية أخرى.",
-  "games.artwork.localCover": "سيبقى الغلاف المحلي مستخدمًا. أزله من تخصيص المكتبة لاستخدام هذا الغلاف.",
+  "games.artwork.localCover":
+    "سيبقى الغلاف المحلي مستخدمًا. أزله من تخصيص المكتبة لاستخدام هذا الغلاف.",
   "games.artwork.choose": "{count} صور",
   "games.artwork.first": "الصورة الأولى",
   "games.artwork.random": "صورة عشوائية",
@@ -46,5 +51,5 @@ export default {
   "games.artwork.empty": "لا توجد صور لهذا الخيار في IGDB.",
   "games.artwork.imageError": "تعذّر تحميل بعض الصور.",
   "games.artwork.reset": "إعادة تعيين الصور",
-  "games.artwork.conflict": "تغيّرت الصور أو البيانات الوصفية في مكان آخر. أعد فتح نافذة الاختيار."
+  "games.artwork.conflict": "تغيّرت الصور أو البيانات الوصفية في مكان آخر. أعد فتح نافذة الاختيار.",
 } satisfies Record<string, string>;

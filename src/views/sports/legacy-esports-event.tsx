@@ -5,7 +5,17 @@ import { legacyEsportsMatch } from "@/lib/sports/legacy-esports-match";
 import { officialBroadcastSource } from "@/lib/sports/esports-streams";
 import { useView } from "@/lib/view";
 import { EsportsMatchView } from "./esports-match";
-export function LegacyEsportsEvent({ game, onClose, page = false, shellBackAvailable = false }: { game: SportsGame; onClose: () => void; page?: boolean; shellBackAvailable?: boolean }) {
+export function LegacyEsportsEvent({
+  game,
+  onClose,
+  page = false,
+  shellBackAvailable = false,
+}: {
+  game: SportsGame;
+  onClose: () => void;
+  page?: boolean;
+  shellBackAvailable?: boolean;
+}) {
   const { openPlayer } = useView();
   const fallback = legacyEsportsMatch(game)!;
   const [resolved, setResolved] = useState<{ key: string; match: EsportsMatch }>();

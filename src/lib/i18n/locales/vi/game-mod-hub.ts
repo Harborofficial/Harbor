@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "Khám phá bản mod và quản lý nội dung đã cài.",
   "games.modHub.switchGame": "Đổi trò chơi",
   "games.modHub.creatorDownload": "Tải từ tác giả",
-  "games.modHub.legacyNote": "Bản tải cho The Sims 2 và The Sims 3 có trên trang tác giả. Quản lý mod cục bộ hiện hỗ trợ The Sims 4.",
+  "games.modHub.legacyNote":
+    "Bản tải cho The Sims 2 và The Sims 3 có trên trang tác giả. Quản lý mod cục bộ hiện hỗ trợ The Sims 4.",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "Họa tiết",
   "games.modHub.sets": "Bộ theo chủ đề",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "Tác giả",
   "games.modHub.viewOnSource": "Trang tác giả",
   "games.modHub.filesPending": "Đang tải tệp dự án…",
-  "games.modHub.picked": "Lựa chọn của MTS"
+  "games.modHub.picked": "Lựa chọn của MTS",
 };

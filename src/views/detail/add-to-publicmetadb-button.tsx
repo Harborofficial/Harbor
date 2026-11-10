@@ -28,8 +28,12 @@ type WatchlistScope = {
 };
 
 function sameScope(previous: WatchlistScope | undefined, current: WatchlistScope): boolean {
-  return previous?.harborId === current.harborId && previous.type === current.type &&
-    previous.listId === current.listId && previous.session === current.session;
+  return (
+    previous?.harborId === current.harborId &&
+    previous.type === current.type &&
+    previous.listId === current.listId &&
+    previous.session === current.session
+  );
 }
 
 export function usePmdbWatchlist(harborId: string, type: "movie" | "series") {
@@ -69,9 +73,10 @@ export function usePmdbWatchlist(harborId: string, type: "movie" | "series") {
     void (async () => {
       // Add-to-list takes tmdb_id + media_type only: ID-only targets must
       // resolve through mappings first, otherwise hide instead of erroring.
-      let tgt = refresh && previous
-        ? previous.target
-        : await resolveTargetAsync(harborId, undefined, type).catch(() => null);
+      let tgt =
+        refresh && previous
+          ? previous.target
+          : await resolveTargetAsync(harborId, undefined, type).catch(() => null);
       if (!cancelled && tgt && tgt.tmdb_id == null && tgt.id_type && tgt.id_value) {
         const found = await getTmdbForExternal(tgt.id_type, tgt.id_value).catch(() => null);
         tgt = found ? { ...tgt, tmdb_id: found.tmdb_id } : null;
@@ -105,7 +110,8 @@ export function usePmdbWatchlist(harborId: string, type: "movie" | "series") {
   }, [harborId, isConnected, session, listId, version, resolveTargetAsync, type]);
 
   const toggle = useCallback(async () => {
-    if (!target || running.current || !sameScope(loaded.current?.scope, current.current)) return false;
+    if (!target || running.current || !sameScope(loaded.current?.scope, current.current))
+      return false;
     running.current = true;
     const owner = capturePmdbListOwner();
     const identity = current.current;
@@ -136,9 +142,14 @@ export function usePmdbWatchlist(harborId: string, type: "movie" | "series") {
   }, [target, inList, listId]);
 
   return {
-    isConnected, target, inList,
+    isConnected,
+    target,
+    inList,
     ready: ready && sameScope(loaded.current?.scope, current.current),
-    busy, error, toggle, listName,
+    busy,
+    error,
+    toggle,
+    listName,
   };
 }
 
@@ -162,9 +173,11 @@ export function AddToPmdbButton({
   return (
     <div className="relative shrink-0">
       <HoverTooltip
-        label={inList
-          ? t("Remove {title} from {list} on PMDB", { title, list: listName })
-          : t("Add {title} to {list} on PMDB", { title, list: listName })}
+        label={
+          inList
+            ? t("Remove {title} from {list} on PMDB", { title, list: listName })
+            : t("Add {title} to {list} on PMDB", { title, list: listName })
+        }
         align="center"
       >
         <button
@@ -177,7 +190,11 @@ export function AddToPmdbButton({
               : "bg-canvas/80 text-ink hover:bg-canvas/95"
           }`}
         >
-          <img src={publicmetadbLogo} alt="" className="h-[18px] w-[18px] rounded-[4px] object-contain" />
+          <img
+            src={publicmetadbLogo}
+            alt=""
+            className="h-[18px] w-[18px] rounded-[4px] object-contain"
+          />
           {inList ? (
             <Check size={16} strokeWidth={2.2} className="-ms-1" />
           ) : (

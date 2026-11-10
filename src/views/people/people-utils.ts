@@ -25,7 +25,8 @@ export function bandImage(person: { profilePath: string | null } | undefined): s
 }
 
 export function titleToMeta(tt: TopTitle): Meta {
-  const isSeries = tt.mediaType === "tv" || tt.metaId.includes(":tv:") || tt.metaId.includes(":series:");
+  const isSeries =
+    tt.mediaType === "tv" || tt.metaId.includes(":tv:") || tt.metaId.includes(":series:");
   const id = tt.metaId || (tt.tmdbId ? `tmdb:${isSeries ? "tv" : "movie"}:${tt.tmdbId}` : "");
   return {
     id,

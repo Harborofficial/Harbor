@@ -74,10 +74,7 @@ export function ebookSourceBrowseTag(
   return `sort:${sort}`;
 }
 
-export function applyEBookBrowseFilters(
-  books: EBook[],
-  filters: EBookBrowseFilters,
-): EBook[] {
+export function applyEBookBrowseFilters(books: EBook[], filters: EBookBrowseFilters): EBook[] {
   const filtered = books.filter(
     (book) =>
       (filters.status === "any" || normalizedStatus(book.status) === filters.status) &&

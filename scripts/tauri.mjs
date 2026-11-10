@@ -25,7 +25,11 @@ const fullArgs = withWhisper
   : [cli, ...args];
 
 function runTauri() {
-  const child = spawn(command, fullArgs, { stdio: "inherit", cwd: process.cwd(), env: process.env });
+  const child = spawn(command, fullArgs, {
+    stdio: "inherit",
+    cwd: process.cwd(),
+    env: process.env,
+  });
   child.on("error", (error) => {
     console.error("Unable to start Tauri:", error.message);
     process.exitCode = 1;
@@ -40,7 +44,13 @@ function runTauri() {
 if (process.platform === "win32" && args[0] === "build") {
   const worker = spawn(
     "powershell.exe",
-    ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", join(scriptsDir, "build-moonshine-worker.ps1")],
+    [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      join(scriptsDir, "build-moonshine-worker.ps1"),
+    ],
     { stdio: "inherit", cwd: process.cwd(), env: process.env },
   );
   worker.on("error", (error) => {

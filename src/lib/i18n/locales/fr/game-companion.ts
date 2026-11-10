@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "Donjons dans cette liste : {count}",
   "games.wow.weekly.partial": "Certains donjons enregistrés n’ont pas pu être vérifiés.",
   "games.wow.weekly.empty": "Aucun donjon enregistré pour cette période.",
-  "games.wow.weekly.scope": "Raider.IO affiche jusqu’à 10 des plus hautes clés de la saison actuelle par réinitialisation. Les nouveaux donjons peuvent apparaître avec un délai.",
+  "games.wow.weekly.scope":
+    "Raider.IO affiche jusqu’à 10 des plus hautes clés de la saison actuelle par réinitialisation. Les nouveaux donjons peuvent apparaître avec un délai.",
   "games.helldivers.title": "Guerre galactique",
   "games.helldivers.intro": "Choisissez votre prochain déploiement.",
   "games.helldivers.refresh": "Actualiser la Guerre galactique",
@@ -30,7 +31,8 @@ export default {
   "games.helldivers.all": "Tous les fronts",
   "games.helldivers.search": "Chercher une planète ou un secteur",
   "games.helldivers.map": "Carte galactique",
-  "games.helldivers.mapScope": "Secteurs, planètes et lignes de ravitaillement. Campagnes en surbrillance.",
+  "games.helldivers.mapScope":
+    "Secteurs, planètes et lignes de ravitaillement. Campagnes en surbrillance.",
   "games.helldivers.campaigns": "Campagnes",
   "games.helldivers.sort": "Trier les campagnes",
   "games.helldivers.sort.players": "Plus de joueurs",
@@ -45,7 +47,8 @@ export default {
   "games.helldivers.ordersEmpty": "La source ne signale aucun ordre majeur.",
   "games.helldivers.ends": "Se termine le {date}",
   "games.helldivers.ended": "Terminé le {date}",
-  "games.helldivers.source": "API communautaire · Les briefings et descriptions des planètes sont en anglais.",
+  "games.helldivers.source":
+    "API communautaire · Les briefings et descriptions des planètes sont en anglais.",
   "games.helldivers.Humans": "Super-Terre",
   "games.helldivers.Terminids": "Terminides",
   "games.helldivers.Automaton": "Automatons",
@@ -54,7 +57,8 @@ export default {
   "games.helldivers.disabled": "La source indique que cette planète est indisponible.",
   "games.helldivers.liberated": "Libéré",
   "games.helldivers.recovery": "Régénération ennemie : {rate}/heure",
-  "games.helldivers.recoveryNote": "Il s’agit de la récupération ennemie, pas du rythme net de libération.",
+  "games.helldivers.recoveryNote":
+    "Il s’agit de la récupération ennemie, pas du rythme net de libération.",
   "games.helldivers.event": "Événement planétaire",
   "games.helldivers.eventHealth": "Santé restante de l’événement : {percent}",
   "games.helldivers.regions": "Régions",
@@ -77,30 +81,40 @@ export default {
   "games.warhammer.all": "Tous",
   "games.warhammer.play": "Incarner",
   "games.warhammer.face": "Affronter",
-  "games.warhammer.unavailable": "Impossible d’actualiser les jeux. Les entrées déjà chargées peuvent rester affichées.",
+  "games.warhammer.unavailable":
+    "Impossible d’actualiser les jeux. Les entrées déjà chargées peuvent rester affichées.",
   "games.warhammer.partial": "Certains jeux sont indisponibles.",
   "games.warhammer.empty": "Aucun lien vérifié pour ce rôle pour le moment.",
-  "games.warhammer.scope": "Un point de départ pour chaque faction. Le catalogue complet vous attend ci-dessous.",
+  "games.warhammer.scope":
+    "Un point de départ pour chaque faction. Le catalogue complet vous attend ci-dessous.",
   "games.warhammer.evidence": "Informations de l’éditeur sur {name}",
   "games.warhammer.crossover": "Crossover : 40K / Age of Sigmar",
   "games.warhammer.faction.marines": "Space Marines",
-  "games.warhammer.lore.marines": "Les champions en armure de l’humanité, organisés en Chapitres distincts.",
+  "games.warhammer.lore.marines":
+    "Les champions en armure de l’humanité, organisés en Chapitres distincts.",
   "games.warhammer.faction.mechanicus": "Adeptus Mechanicus",
-  "games.warhammer.lore.mechanicus": "Le clergé du culte de la machine de l’Imperium, gardien de technologies anciennes.",
+  "games.warhammer.lore.mechanicus":
+    "Le clergé du culte de la machine de l’Imperium, gardien de technologies anciennes.",
   "games.warhammer.faction.necrons": "Nécrons",
-  "games.warhammer.lore.necrons": "D’antiques dynasties s’éveillent dans des corps de métal vivant.",
+  "games.warhammer.lore.necrons":
+    "D’antiques dynasties s’éveillent dans des corps de métal vivant.",
   "games.warhammer.faction.orks": "Orks",
-  "games.warhammer.lore.orks": "Des peaux-vertes avides de guerre et leurs machines de combat bricolées.",
+  "games.warhammer.lore.orks":
+    "Des peaux-vertes avides de guerre et leurs machines de combat bricolées.",
   "games.warhammer.faction.tyranids": "Tyranides",
-  "games.warhammer.lore.tyranids": "Des flottes-ruches extraterrestres qui dévorent des mondes entiers.",
+  "games.warhammer.lore.tyranids":
+    "Des flottes-ruches extraterrestres qui dévorent des mondes entiers.",
   "games.warhammer.faction.chaos": "Forces du Chaos",
   "games.warhammer.lore.chaos": "Traîtres, cultistes et démons au service des puissances du Warp.",
   "games.warframe.title": "À travers le Système Origine",
   "games.warframe.intro": "Regardez ce qui est disponible avant votre prochaine mission.",
   "games.warframe.refresh": "Actualiser le calendrier",
-  "games.warframe.unavailable": "Le calendrier n’a pas pu être actualisé. Les détails affichés proviennent du relevé précédent.",
-  "games.warframe.stale": "La source est en retard. Voici les derniers états signalés ; les entrées expirées sont masquées.",
-  "games.warframe.expired": "Ce relevé est trop ancien. Les listes actuelles sont masquées jusqu’à l’arrivée de nouvelles données.",
+  "games.warframe.unavailable":
+    "Le calendrier n’a pas pu être actualisé. Les détails affichés proviennent du relevé précédent.",
+  "games.warframe.stale":
+    "La source est en retard. Voici les derniers états signalés ; les entrées expirées sont masquées.",
+  "games.warframe.expired":
+    "Ce relevé est trop ancien. Les listes actuelles sont masquées jusqu’à l’arrivée de nouvelles données.",
   "games.warframe.partial": "Certaines parties du calendrier sont indisponibles.",
   "games.warframe.reported": "Dernier état signalé",
   "games.warframe.waiting": "En attente de données récentes",
@@ -137,7 +151,8 @@ export default {
   "games.warframe.noMatches": "Aucune fissure actuelle ne correspond à ces filtres.",
   "games.warframe.more": "Afficher plus",
   "games.warframe.snapshot": "Relevé : {date}",
-  "games.warframe.scope": "Calendrier mondial commun. L’accès dépend de votre progression dans les quêtes. Les noms des missions sont fournis en anglais.",
+  "games.warframe.scope":
+    "Calendrier mondial commun. L’accès dépend de votre progression dans les quêtes. Les noms des missions sont fournis en anglais.",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -148,11 +163,14 @@ export default {
   "games.warframe.state.corpus": "Corpus",
   "games.warframe.state.grineer": "Grineer",
   "games.rivals.title": "Choisissez votre héros",
-  "games.rivals.intro": "Explorez les héros, comparez les adversaires et trouvez des partenaires pour votre prochaine partie.",
+  "games.rivals.intro":
+    "Explorez les héros, comparez les adversaires et trouvez des partenaires pour votre prochaine partie.",
   "games.rivals.refresh": "Actualiser le guide",
-  "games.rivals.statsFailed": "Impossible d’actualiser les statistiques. Les chiffres affichés proviennent du relevé précédent.",
+  "games.rivals.statsFailed":
+    "Impossible d’actualiser les statistiques. Les chiffres affichés proviennent du relevé précédent.",
   "games.rivals.artFailed": "Impossible d’actualiser les illustrations et rôles officiels.",
-  "games.rivals.stale": "Certaines statistiques datent de plus de deux jours. Vérifiez les dates avant de comparer.",
+  "games.rivals.stale":
+    "Certaines statistiques datent de plus de deux jours. Vérifiez les dates avant de comparer.",
   "games.rivals.partial": "Certains relevés sont illisibles. L’échantillon peut être incomplet.",
   "games.rivals.role": "Rôle du héros",
   "games.rivals.all": "Tous",
@@ -178,12 +196,15 @@ export default {
   "games.rivals.heroRate": "Taux de victoire de {hero} contre chaque adversaire",
   "games.rivals.with": "Avec des coéquipiers",
   "games.rivals.duoRate": "Taux de victoire commun du duo",
-  "games.rivals.scope": "Parties compétitives 6 contre 6 observées, tous niveaux. Au moins 200 parties par héros et 100 par duo. Ces résultats n’impliquent pas de capacité d’équipe et ne prédisent pas votre prochaine partie.",
+  "games.rivals.scope":
+    "Parties compétitives 6 contre 6 observées, tous niveaux. Au moins 200 parties par héros et 100 par duo. Ces résultats n’impliquent pas de capacité d’équipe et ne prédisent pas votre prochaine partie.",
   "games.rivals.snapshot": "Relevé : {date}",
   "games.rivals.noMatches": "Aucun héros ne correspond aux filtres.",
   "games.rivals.unavailable": "Le guide est indisponible. Essayez de l’actualiser.",
-  "games.rivals.pairsFailed": "Impossible d’actualiser les confrontations. Les duos affichés proviennent du relevé précédent.",
-  "games.rivals.mismatch": "Les relevés des sources concernent des saisons différentes. Actualisez pour comparer des données compatibles.",
+  "games.rivals.pairsFailed":
+    "Impossible d’actualiser les confrontations. Les duos affichés proviennent du relevé précédent.",
+  "games.rivals.mismatch":
+    "Les relevés des sources concernent des saisons différentes. Actualisez pour comparer des données compatibles.",
   "games.rivals.sample": "{count} parties",
   "games.darktide.scriptures": "Récupérer des écritures",
   "games.darktide.grimoires": "Récupérer des grimoires",
@@ -198,14 +219,17 @@ export default {
   "games.darktide.unknown": "Non classée",
   "games.darktide.difficulty": "Difficulté",
   "games.darktide.search": "Rechercher une carte",
-  "games.darktide.stale": "La dernière consultation est trop ancienne. Actualisez les missions disponibles.",
-  "games.darktide.failed": "Impossible d’actualiser les missions. Celles affichées proviennent de la dernière consultation.",
+  "games.darktide.stale":
+    "La dernière consultation est trop ancienne. Actualisez les missions disponibles.",
+  "games.darktide.failed":
+    "Impossible d’actualiser les missions. Celles affichées proviennent de la dernière consultation.",
   "games.darktide.partial": "Certaines missions n’ont pas pu être lues.",
   "games.darktide.noMatches": "Aucune mission ne correspond à ces filtres.",
   "games.darktide.empty": "Aucune mission encore disponible dans les dernières données.",
   "games.darktide.more": "Afficher plus de missions",
   "games.darktide.checked": "Vérifié le {date}",
-  "games.darktide.scope": "Source communautaire. La disponibilité et les récompenses peuvent varier en jeu ; ce n’est pas le tableau de votre personnage.",
+  "games.darktide.scope":
+    "Source communautaire. La disponibilité et les récompenses peuvent varier en jeu ; ce n’est pas le tableau de votre personnage.",
   "games.darktide.remaining": "Encore {count} min",
   "games.darktide.credits": "Bons Ordo",
   "games.darktide.xp": "EXP",
@@ -245,19 +269,25 @@ export default {
   "games.companion.showAll": "Voir les {count} héros",
   "games.companion.noMatches": "Aucun héros ne correspond à votre recherche.",
   "games.companion.through": "Parties jusqu’au {date}",
-  "games.companion.sampleNote": "Échantillon communautaire, tous rangs ; au moins 100 parties par héros. Ce ne sont pas des prédictions.",
-  "games.companion.unavailable": "Impossible d’actualiser les données. Les données affichées proviennent de la dernière consultation.",
-  "games.companion.statsUnavailable": "Les statistiques sont indisponibles. Vous pouvez toujours consulter les héros.",
+  "games.companion.sampleNote":
+    "Échantillon communautaire, tous rangs ; au moins 100 parties par héros. Ce ne sont pas des prédictions.",
+  "games.companion.unavailable":
+    "Impossible d’actualiser les données. Les données affichées proviennent de la dernière consultation.",
+  "games.companion.statsUnavailable":
+    "Les statistiques sont indisponibles. Vous pouvez toujours consulter les héros.",
   "games.gw2.title": "Chambre forte du sorcier",
   "games.gw2.intro": "Choisissez des récompenses et prévoyez vos acclamations astrales.",
   "games.gw2.refresh": "Actualiser les récompenses",
-  "games.gw2.unavailable": "Impossible d’actualiser les récompenses. Les données précédentes peuvent être obsolètes.",
+  "games.gw2.unavailable":
+    "Impossible d’actualiser les récompenses. Les données précédentes peuvent être obsolètes.",
   "games.gw2.ends": "Fin de saison : {date}",
-  "games.gw2.expired": "Cette saison n’est pas active. Actualisez avant de prévoir vos récompenses.",
+  "games.gw2.expired":
+    "Cette saison n’est pas active. Actualisez avant de prévoir vos récompenses.",
   "games.gw2.partial": "Certains détails d’objets sont indisponibles. Les prix restent inclus.",
   "games.gw2.guide": "Guide de la chambre forte",
   "games.gw2.checked": "Vérifié le {date}",
-  "games.gw2.scope": "Enregistré dans ce profil Harbor. Chaque sélection compte une offre ; votre solde, les limites d’achat et l’accès aux extensions ne sont pas vérifiés. Confirmez la disponibilité et achetez en jeu.",
+  "games.gw2.scope":
+    "Enregistré dans ce profil Harbor. Chaque sélection compte une offre ; votre solde, les limites d’achat et l’accès aux extensions ne sont pas vérifiés. Confirmez la disponibilité et achetez en jeu.",
   "games.gw2.total": "Total prévu",
   "games.gw2.currency": "Acclamations astrales",
   "games.gw2.selected": "{count} offres sélectionnées",
@@ -287,14 +317,16 @@ export default {
   "games.gw2.quantity": "Quantité : {count}",
   "games.deadlockBuilds.open": "Builds de la communauté",
   "games.deadlockBuilds.back": "Retour aux builds",
-  "games.deadlockBuilds.intro": "Guides d’objets de la communauté. Vérifiez leur date avant de choisir.",
+  "games.deadlockBuilds.intro":
+    "Guides d’objets de la communauté. Vérifiez leur date avant de choisir.",
   "games.deadlockBuilds.search": "Rechercher des builds",
   "games.deadlockBuilds.recent": "Récemment mis à jour",
   "games.deadlockBuilds.popular": "Favoris de la semaine",
   "games.deadlockBuilds.language": "Langue du build",
   "games.deadlockBuilds.allLanguages": "Toutes les langues",
   "games.deadlockBuilds.refresh": "Actualiser les builds",
-  "games.deadlockBuilds.failed": "Impossible d’actualiser les builds. Les guides déjà chargés peuvent être obsolètes.",
+  "games.deadlockBuilds.failed":
+    "Impossible d’actualiser les builds. Les guides déjà chargés peuvent être obsolètes.",
   "games.deadlockBuilds.updated": "Mis à jour le {date}",
   "games.deadlockBuilds.undated": "Date de mise à jour inconnue",
   "games.deadlockBuilds.favorites": "{count} favoris hebdomadaires",
@@ -305,9 +337,12 @@ export default {
   "games.deadlockBuilds.copied": "Copié",
   "games.deadlockBuilds.copy": "Copier l’ID du build",
   "games.deadlockBuilds.use": "ID du build :",
-  "games.deadlockBuilds.copyFailed": "Échec de la copie. Sélectionnez l’ID pour le copier manuellement.",
-  "games.deadlockBuilds.definitions": "Les noms et coûts des objets proviennent des dernières données connues du jeu. Les anciens guides peuvent différer ; les groupes peuvent proposer des alternatives.",
-  "games.deadlockBuilds.itemsFailed": "Certains détails d’objets sont indisponibles. Le guide de l’auteur et les ID restent visibles.",
+  "games.deadlockBuilds.copyFailed":
+    "Échec de la copie. Sélectionnez l’ID pour le copier manuellement.",
+  "games.deadlockBuilds.definitions":
+    "Les noms et coûts des objets proviennent des dernières données connues du jeu. Les anciens guides peuvent différer ; les groupes peuvent proposer des alternatives.",
+  "games.deadlockBuilds.itemsFailed":
+    "Certains détails d’objets sont indisponibles. Le guide de l’auteur et les ID restent visibles.",
   "games.deadlockBuilds.noItems": "Ce build n’a aucun groupe d’objets.",
   "games.deadlockBuilds.group": "Groupe {number}",
   "games.deadlockBuilds.optional": "Facultatif",
@@ -329,7 +364,8 @@ export default {
   "games.rivals.guide.teamUp": "Capacités de coopération",
   "games.rivals.guide.base": "Effet de base",
   "games.rivals.guide.enhanced": "Effet renforcé",
-  "games.rivals.guide.reference": "Référence officielle du héros · Anglais. Les valeurs peuvent changer avec les mises à jour d’équilibrage.",
+  "games.rivals.guide.reference":
+    "Référence officielle du héros · Anglais. Les valeurs peuvent changer avec les mises à jour d’équilibrage.",
   "games.rivals.guide.failed": "Impossible de charger le guide officiel du héros.",
   "games.rivals.guide.partial": "Certains détails des capacités sont indisponibles.",
   "games.rivals.guide.checked": "Consulté le {date}",

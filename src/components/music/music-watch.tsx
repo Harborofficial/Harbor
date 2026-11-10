@@ -73,8 +73,11 @@ export function MusicWatch({
   const [similar, setSimilar] = useState<MusicTrack[]>([]);
   const [similarBusy, setSimilarBusy] = useState(true);
   const [similarNext, setSimilarNext] = useState<string | null>(null);
-  const [moreBusy, setMoreBusy] = useState(false), [moreError, setMoreError] = useState(false);
-  const similarGeneration = useRef(0), moreLoading = useRef(false), moreButton = useRef<HTMLButtonElement>(null);
+  const [moreBusy, setMoreBusy] = useState(false),
+    [moreError, setMoreError] = useState(false);
+  const similarGeneration = useRef(0),
+    moreLoading = useRef(false),
+    moreButton = useRef<HTMLButtonElement>(null);
   const seenPages = useRef(new Set<string>());
   const [readySelection, setReadySelection] = useState("");
   const [videoShowing, setVideoShowing] = useState(false);
@@ -193,14 +196,18 @@ export function MusicWatch({
     if (!active) return;
     let cancelled = false;
     const generation = ++similarGeneration.current;
-    moreLoading.current = false; seenPages.current.clear();
-    setSimilarNext(null); setMoreBusy(false); setMoreError(false);
+    moreLoading.current = false;
+    seenPages.current.clear();
+    setSimilarNext(null);
+    setMoreBusy(false);
+    setMoreError(false);
     setSimilarBusy(true);
     searchMusicVideoPage(`${playing.artist} music videos`, false)
       .then(({ tracks, next: cursor }) => {
         if (cancelled) return;
         const next = tracks.filter((item) => item.id !== playingId);
-        setSimilar(next); setSimilarNext(cursor);
+        setSimilar(next);
+        setSimilarNext(cursor);
         // Warmed against the same predicate the surface resolves by, because video.ts cannot
         // import it back from video-session without a cycle.
         prefetchMusicVideoStreams(
@@ -224,21 +231,40 @@ export function MusicWatch({
 
   const loadMoreVideos = useCallback(async () => {
     if (!active || !similarNext || moreLoading.current) return;
-    const generation = similarGeneration.current, cursor = similarNext;
-    moreLoading.current = true; setMoreBusy(true); setMoreError(false);
+    const generation = similarGeneration.current,
+      cursor = similarNext;
+    moreLoading.current = true;
+    setMoreBusy(true);
+    setMoreError(false);
     try {
       const page = await searchMusicVideoPage(`${playing.artist} music videos`, false, cursor);
       if (similarGeneration.current !== generation) return;
       seenPages.current.add(cursor);
-      setSimilar(previous => appendMusicVideos(previous, page.tracks.filter(item => item.id !== playingId)));
+      setSimilar((previous) =>
+        appendMusicVideos(
+          previous,
+          page.tracks.filter((item) => item.id !== playingId),
+        ),
+      );
       setSimilarNext(page.next && !seenPages.current.has(page.next) ? page.next : null);
-    } catch { if (similarGeneration.current === generation) setMoreError(true); }
-    finally { if (similarGeneration.current === generation) { moreLoading.current = false; setMoreBusy(false); } }
+    } catch {
+      if (similarGeneration.current === generation) setMoreError(true);
+    } finally {
+      if (similarGeneration.current === generation) {
+        moreLoading.current = false;
+        setMoreBusy(false);
+      }
+    }
   }, [active, similarNext, playing.artist, playingId]);
   useEffect(() => {
     const button = moreButton.current;
     if (!button || similarBusy || moreBusy || moreError || !active) return;
-    const observer = new IntersectionObserver(entries => { if (entries.some(entry => entry.isIntersecting)) void loadMoreVideos(); }, { rootMargin: "160px" });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) void loadMoreVideos();
+      },
+      { rootMargin: "160px" },
+    );
     observer.observe(button);
     return () => observer.disconnect();
   }, [active, similarBusy, moreBusy, moreError, loadMoreVideos]);
@@ -389,10 +415,26 @@ export function MusicWatch({
               ))}
             </div>
           )}
-          {moreError && <p role="alert" className="text-sm text-ink-muted">{t("music.videos.error")}</p>}
-          {similarNext && <button ref={moreButton} type="button" className="music-watch-retry" disabled={moreBusy} onClick={() => { void loadMoreVideos(); }}>
-            {t(moreError ? "common.retry" : moreBusy ? "common.loading" : "music.library.loadMore")}
-          </button>}
+          {moreError && (
+            <p role="alert" className="text-sm text-ink-muted">
+              {t("music.videos.error")}
+            </p>
+          )}
+          {similarNext && (
+            <button
+              ref={moreButton}
+              type="button"
+              className="music-watch-retry"
+              disabled={moreBusy}
+              onClick={() => {
+                void loadMoreVideos();
+              }}
+            >
+              {t(
+                moreError ? "common.retry" : moreBusy ? "common.loading" : "music.library.loadMore",
+              )}
+            </button>
+          )}
         </section>
       )}
     </>

@@ -32,10 +32,13 @@ export default {
   "Show Sports": "Tampilkan Olahraga",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "Tampilkan Olahraga di navigasi. Anda harus menyetujui pemberitahuan Olahraga sebelum halaman dimuat.",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "Aktifkan Sports tanpa penyedia, atau tambahkan sumber Live TV, M3U atau Xtream.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "Aktifkan Sports tanpa penyedia, atau tambahkan sumber Live TV, M3U atau Xtream.",
   "Set up Live TV": "Siapkan Live TV",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "Skor, jadwal dan klasemen bekerja tanpa penyedia. Harbor tidak menyediakan siaran, jadi menonton pertandingan butuh sumber Live TV, M3U atau Xtream milikmu.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "Skor, jadwal dan klasemen berasal dari data olahraga publik dan tidak perlu penyedia. Harbor tidak menyediakan siaran: menonton pertandingan tetap butuh sumber Live TV, M3U atau Xtream milikmu.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "Skor, jadwal dan klasemen bekerja tanpa penyedia. Harbor tidak menyediakan siaran, jadi menonton pertandingan butuh sumber Live TV, M3U atau Xtream milikmu.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "Skor, jadwal dan klasemen berasal dari data olahraga publik dan tidak perlu penyedia. Harbor tidak menyediakan siaran: menonton pertandingan tetap butuh sumber Live TV, M3U atau Xtream milikmu.",
   "Show Sports without a TV provider": "Tampilkan Sports tanpa penyedia TV",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "Mengaktifkan Olahraga tidak berarti menyetujui pemberitahuan. Pilihan Anda disimpan di perangkat ini dan tidak disinkronkan ke akun Anda.",

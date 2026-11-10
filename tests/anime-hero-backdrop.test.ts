@@ -62,7 +62,7 @@ test("the anime home hero uses the measured shared hero backdrop", () => {
   );
   assert.match(
     SHARED_HERO,
-    /rememberHeroArtQuality\(url, suitable \? Math\.max\(width, 1600\) : width, suitable \? Math\.max\(height, 800\) : height\)/,
+    /rememberHeroArtQuality\(\s*url,\s*suitable \? Math\.max\(width, 1600\) : width,\s*suitable \? Math\.max\(\s*height,\s*800,?\s*\) : height,?\s*\)/,
   );
   assert.match(SHARED_HERO, /onUnavailable=\{\(\) => advance\(layer\.url\)\}/);
 });

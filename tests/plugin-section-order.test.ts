@@ -21,7 +21,9 @@ function row(key: string) {
 }
 
 function groups(...names: [string, string[]][]): [string, ReturnType<typeof row>[]][] {
-  return names.map(([plugin, keys]) => [plugin, keys.map(row)] as [string, ReturnType<typeof row>[]]);
+  return names.map(
+    ([plugin, keys]) => [plugin, keys.map(row)] as [string, ReturnType<typeof row>[]],
+  );
 }
 
 function laid(groups_: [string, ReturnType<typeof row>[]][]): [string, string[]][] {
@@ -43,12 +45,19 @@ test("an untouched tab lists plugins and rows in the order they arrived", () => 
   // The absence of an arrangement has to look exactly like the tab before arrangements existed,
   // because that is what every user sees until they choose to change anything.
   const input = groups(["Ultima", ["a", "b", "c"]], ["Vegamovies", ["d"]]);
-  assert.deepEqual(laid(arrange(input, EMPTY_ORDER)), [["Ultima", ["a", "b", "c"]], ["Vegamovies", ["d"]]]);
+  assert.deepEqual(laid(arrange(input, EMPTY_ORDER)), [
+    ["Ultima", ["a", "b", "c"]],
+    ["Vegamovies", ["d"]],
+  ]);
 });
 
 test("plugins are shown in the order they were put in", () => {
   const input = groups(["Ultima", ["a"]], ["Vegamovies", ["d"]], ["Moviesmod", ["x"]]);
-  const order: SectionOrder = { plugins: ["Moviesmod", "Ultima", "Vegamovies"], rows: {}, hidden: [] };
+  const order: SectionOrder = {
+    plugins: ["Moviesmod", "Ultima", "Vegamovies"],
+    rows: {},
+    hidden: [],
+  };
   assert.deepEqual(laid(arrange(input, order)), [
     ["Moviesmod", ["x"]],
     ["Ultima", ["a"]],
@@ -73,7 +82,10 @@ test("a row added after the tab was arranged still appears, at the end", () => {
 test("a plugin installed after the tab was arranged still appears, at the end", () => {
   const input = groups(["Ultima", ["a"]], ["Newcomer", ["z"]]);
   const order: SectionOrder = { plugins: ["Ultima"], rows: {}, hidden: [] };
-  assert.deepEqual(laid(arrange(input, order)), [["Ultima", ["a"]], ["Newcomer", ["z"]]]);
+  assert.deepEqual(laid(arrange(input, order)), [
+    ["Ultima", ["a"]],
+    ["Newcomer", ["z"]],
+  ]);
 });
 
 test("a row that is gone is dropped rather than ordered into a gap", () => {
@@ -85,7 +97,10 @@ test("a row that is gone is dropped rather than ordered into a gap", () => {
 test("a plugin installed after the tab was arranged is not claimed by a similarly named one", () => {
   const input = groups(["Ultima", ["a"]], ["Ultima Extra", ["z"]]);
   const order: SectionOrder = { plugins: ["Ultima"], rows: {}, hidden: [] };
-  assert.deepEqual(laid(arrange(input, order)), [["Ultima", ["a"]], ["Ultima Extra", ["z"]]]);
+  assert.deepEqual(laid(arrange(input, order)), [
+    ["Ultima", ["a"]],
+    ["Ultima Extra", ["z"]],
+  ]);
 });
 
 test("a hidden row is not shown, and turning it back on restores where it was", () => {
@@ -111,12 +126,20 @@ test("a move stops at the ends rather than wrapping round", () => {
 
 test("moving a row leaves the rest of the arrangement alone", () => {
   const input = groups(["Ultima", ["a", "b", "c"]], ["Vegamovies", ["d"]]);
-  const order: SectionOrder = { plugins: ["Vegamovies"], rows: { Ultima: ["a", "b", "c"] }, hidden: ["x"] };
+  const order: SectionOrder = {
+    plugins: ["Vegamovies"],
+    rows: { Ultima: ["a", "b", "c"] },
+    hidden: ["x"],
+  };
   const moved = withMove(order, input, "Ultima", "c", -1);
   assert.deepEqual(moved.plugins, ["Vegamovies"], "the plugin order is untouched");
   assert.deepEqual(moved.hidden, ["x"], "and so is what is hidden");
   const shown = arrange(input, moved).find(([name]) => name === "Ultima");
-  assert.deepEqual(shown?.[1].map((r) => r.key), ["a", "c", "b"], "the row moved one place up");
+  assert.deepEqual(
+    shown?.[1].map((r) => r.key),
+    ["a", "c", "b"],
+    "the row moved one place up",
+  );
 });
 
 test("moving a row that was never arranged puts the whole plugin in order first", () => {
@@ -143,7 +166,11 @@ test("moving a plugin does not disturb the rows inside it", () => {
   const order: SectionOrder = { plugins: [], rows: { Ultima: ["b", "a"] }, hidden: [] };
   const moved = withMove(order, input, "Ultima", null, 1);
   const ult = arrange(input, moved).find(([name]) => name === "Ultima");
-  assert.deepEqual(ult?.[1].map((r) => r.key), ["b", "a"], "the row order held");
+  assert.deepEqual(
+    ult?.[1].map((r) => r.key),
+    ["b", "a"],
+    "the row order held",
+  );
 });
 
 test("what was arranged is read back", () => {
@@ -168,7 +195,9 @@ test("an arrangement that cannot be read reads as none, not as a fault", () => {
 });
 
 test("entries of the wrong type in a stored arrangement are left out", () => {
-  const store = memory(JSON.stringify({ plugins: ["A", 7, null], rows: { A: ["k", 3] }, hidden: [1] }));
+  const store = memory(
+    JSON.stringify({ plugins: ["A", 7, null], rows: { A: ["k", 3] }, hidden: [1] }),
+  );
   assert.deepEqual(readOrder(store), { plugins: ["A"], rows: { A: ["k"] }, hidden: [] });
 });
 
@@ -178,7 +207,11 @@ test("no storage at all reads as no arrangement", () => {
 
 test("an arrangement applies to the page that shows every plugin", () => {
   const input = groups(["Ultima", ["a"]], ["Vegamovies", ["d"]]);
-  const order: SectionOrder = { plugins: ["Vegamovies", "Ultima"], rows: { Ultima: ["a"] }, hidden: [] };
+  const order: SectionOrder = {
+    plugins: ["Vegamovies", "Ultima"],
+    rows: { Ultima: ["a"] },
+    hidden: [],
+  };
   assert.deepEqual(laid(forFilter(input, null, order)), [
     ["Vegamovies", ["d"]],
     ["Ultima", ["a"]],

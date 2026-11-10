@@ -47,7 +47,9 @@ export function GroupAbout({
     setSaving(true);
     setError(null);
     try {
-      onApply(await editGroup(detail.id, { visibility: vis, tags, description: description.trim() }));
+      onApply(
+        await editGroup(detail.id, { visibility: vis, tags, description: description.trim() }),
+      );
     } catch (e) {
       setError((e as Error).message || t("Could not save changes."));
     } finally {
@@ -71,7 +73,10 @@ export function GroupAbout({
             <Field label={t("Tags")}>
               <div className="flex flex-wrap gap-1.5">
                 {detail.tags.map((tg) => (
-                  <span key={tg} className="rounded-full bg-elevated px-2.5 py-1 text-[11.5px] font-medium text-ink-muted">
+                  <span
+                    key={tg}
+                    className="rounded-full bg-elevated px-2.5 py-1 text-[11.5px] font-medium text-ink-muted"
+                  >
                     {tg}
                   </span>
                 ))}
@@ -96,7 +101,9 @@ export function GroupAbout({
             placeholder={t("What is this group about?")}
             className="w-full resize-none rounded-md bg-elevated px-3.5 py-2.5 text-[14px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft transition-shadow placeholder:text-ink-subtle focus:ring-edge"
           />
-          <span className="self-end text-[11.5px] tabular-nums text-ink-subtle">{DESC_MAX - description.length}</span>
+          <span className="self-end text-[11.5px] tabular-nums text-ink-subtle">
+            {DESC_MAX - description.length}
+          </span>
         </Field>
         <Field label={t("Who can join")}>
           <VisibilityToggle value={vis} onChange={setVis} />
@@ -104,7 +111,9 @@ export function GroupAbout({
         <Field label={t("Tags")}>
           <GroupTagsInput tags={tags} onChange={setTags} />
         </Field>
-        {error && <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
+        {error && (
+          <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>
+        )}
         {dirty && (
           <button
             type="button"
@@ -122,39 +131,41 @@ export function GroupAbout({
       <GroupCustomizer detail={detail} onApply={onApply} />
 
       {perms.deleteGroup && (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-danger/25 bg-danger/[0.06] p-4">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[13.5px] font-semibold text-ink">{t("Delete this group")}</span>
-          <span className="text-[12.5px] text-ink-subtle">{t("Everyone loses access. This cannot be undone.")}</span>
-        </div>
-        {confirming ? (
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setConfirming(false)}
-              className="flex h-10 items-center rounded-full px-4 text-[13px] font-semibold text-ink-muted transition-colors hover:text-ink"
-            >
-              {t("Keep")}
-            </button>
-            <button
-              type="button"
-              onClick={onDestroy}
-              disabled={busy}
-              className="flex h-10 items-center gap-2 rounded-full bg-danger px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              {busy && <Loader2 size={14} className="animate-spin" />} {t("Delete")}
-            </button>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-danger/25 bg-danger/[0.06] p-4">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[13.5px] font-semibold text-ink">{t("Delete this group")}</span>
+            <span className="text-[12.5px] text-ink-subtle">
+              {t("Everyone loses access. This cannot be undone.")}
+            </span>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setConfirming(true)}
-            className="flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:text-danger hover:ring-danger/40"
-          >
-            <Trash2 size={15} /> {t("Delete group")}
-          </button>
-        )}
-      </div>
+          {confirming ? (
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                className="flex h-10 items-center rounded-full px-4 text-[13px] font-semibold text-ink-muted transition-colors hover:text-ink"
+              >
+                {t("Keep")}
+              </button>
+              <button
+                type="button"
+                onClick={onDestroy}
+                disabled={busy}
+                className="flex h-10 items-center gap-2 rounded-full bg-danger px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                {busy && <Loader2 size={14} className="animate-spin" />} {t("Delete")}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirming(true)}
+              className="flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:text-danger hover:ring-danger/40"
+            >
+              <Trash2 size={15} /> {t("Delete group")}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -163,7 +174,9 @@ export function GroupAbout({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+        {label}
+      </span>
       {children}
     </div>
   );

@@ -14,9 +14,10 @@ export type StreamSubtitleSeed = {
  * public addon never gains local reach and its subtitles stay
  * public-network-only.
  */
-export function streamSubtitles(
-  stream: { subtitles?: StreamSubtitle[]; addonUrl?: string },
-): StreamSubtitleSeed[] | undefined {
+export function streamSubtitles(stream: {
+  subtitles?: StreamSubtitle[];
+  addonUrl?: string;
+}): StreamSubtitleSeed[] | undefined {
   if (!stream.subtitles) return undefined;
   return stream.subtitles.map((s) => ({
     url: s.url,

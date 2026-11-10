@@ -102,7 +102,9 @@ async function enterBorderless(): Promise<boolean> {
     const monitor = await currentMonitor().catch(() => null);
     if (!monitor) return false;
     const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("window_geometry_pause", { recordBefore: true, borderlessActive: true }).catch(() => {});
+    await invoke("window_geometry_pause", { recordBefore: true, borderlessActive: true }).catch(
+      () => {},
+    );
     if (await win.isFullscreen().catch(() => false)) await win.setFullscreen(false).catch(() => {});
     // Read maximized before unmaximizing: toggleMaximize is async, so reading
     // geometry right after would capture the (unsafe-to-restore) maximized bounds.
@@ -179,7 +181,9 @@ async function exitBorderless(): Promise<boolean> {
       await import("@tauri-apps/api/window");
     const win = getCurrentWindow();
     const { invoke } = await import("@tauri-apps/api/core");
-    await invoke("window_geometry_pause", { recordBefore: false, borderlessActive: false }).catch(() => {});
+    await invoke("window_geometry_pause", { recordBefore: false, borderlessActive: false }).catch(
+      () => {},
+    );
     await win.setDecorations(loadStoredSettings().useNativeTitleBar === true).catch(() => {});
     if (!saved) return true;
     if (saved.maximized) {

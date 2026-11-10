@@ -184,7 +184,9 @@ export function StreamCacheSection() {
               <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
                 <span className="min-w-0">{t("Cache location")}</span>
                 {!customDir && (
-                  <span className={`${BADGE_BASE} bg-elevated text-ink-subtle`}>{t("Default")}</span>
+                  <span className={`${BADGE_BASE} bg-elevated text-ink-subtle`}>
+                    {t("Default")}
+                  </span>
                 )}
               </span>
             }
@@ -252,7 +254,9 @@ export function StreamCacheSection() {
         <SettingRow
           label={t("Clear cache now")}
           desc={t("Deletes every cached stream file and restarts the engine.")}
-          warn={t("Everything cached is removed. Anything you reopen downloads again from scratch.")}
+          warn={t(
+            "Everything cached is removed. Anything you reopen downloads again from scratch.",
+          )}
         >
           <button
             type="button"
@@ -335,10 +339,10 @@ export function P2PPowerToolsSection() {
             torrentEnginePolicyError
               ? t("Harbor could not apply the P2P setting. Reopen Harbor to try again.")
               : settings.torrentsDisabled
-              ? t(
-                  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.",
-                )
-              : undefined
+                ? t(
+                    "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.",
+                  )
+                : undefined
           }
         />
 
@@ -361,9 +365,7 @@ export function P2PPowerToolsSection() {
 
         <ToggleRow
           label={t("Auto-confirm peer-to-peer streaming")}
-          sub={t(
-            "Start eligible peer-to-peer streams without asking for confirmation each time.",
-          )}
+          sub={t("Start eligible peer-to-peer streams without asking for confirmation each time.")}
           leading={<ShieldCheck size={18} strokeWidth={2.2} />}
           value={settings.p2pAutoConsent}
           onChange={(v) => update({ p2pAutoConsent: v })}

@@ -3,7 +3,8 @@ export default {
   "games.guides.saveTxt": "Salvar como TXT",
   "games.guides.savePdf": "Salvar como PDF",
   "games.guides.preparingPdf": "Preparando PDF…",
-  "games.guides.exportError": "Não foi possível salvar o guia. Verifique sua conexão e tente novamente.",
+  "games.guides.exportError":
+    "Não foi possível salvar o guia. Verifique sua conexão e tente novamente.",
   "games.guides.filters": "Filtros",
   "games.guides.clearFilters": "Limpar filtros",
   "games.guides.popular": "Mais populares",
@@ -52,43 +53,57 @@ export default {
   "games.guides.date.all": "Qualquer data",
   "games.guides.viewers": "{count} assistindo",
   "games.guides.views": "{count} visualizações",
-  "games.guides.import.callofdutywarzone": "Copie os valores para as configurações correspondentes de Warzone. Ajuste o DPI no software do mouse.",
-  "games.guides.import.css": "Copie as configurações para Counter-Strike: Source. Elas vêm de arquivos históricos da comunidade.",
-  "games.guides.import.cod": "Use estes valores na edição correspondente do jogo. Ajuste o DPI no software do mouse.",
-  "games.guides.noCrosshair": "Esta fonte não fornece detalhes suficientes da mira para uma prévia confiável.",
-  "games.guides.previewNote": "Prévia estática dos valores publicados. Resolução, movimento e recuo podem alterar o resultado no jogo.",
+  "games.guides.import.callofdutywarzone":
+    "Copie os valores para as configurações correspondentes de Warzone. Ajuste o DPI no software do mouse.",
+  "games.guides.import.css":
+    "Copie as configurações para Counter-Strike: Source. Elas vêm de arquivos históricos da comunidade.",
+  "games.guides.import.cod":
+    "Use estes valores na edição correspondente do jogo. Ajuste o DPI no software do mouse.",
+  "games.guides.noCrosshair":
+    "Esta fonte não fornece detalhes suficientes da mira para uma prévia confiável.",
+  "games.guides.previewNote":
+    "Prévia estática dos valores publicados. Resolução, movimento e recuo podem alterar o resultado no jogo.",
   "games.guides.previewBackground": "Alternar fundo claro da prévia",
   "games.guides.crosshairPreview": "Prévia da mira",
   "games.guides.noPlayers": "Nenhum jogador encontrado. Tente outro nome.",
   "games.guides.playerCount": "{count} jogadores",
-  "games.guides.archived": "Configuração histórica. Confira a edição do jogo e a data antes de usar.",
-  "games.guides.rateLimit": "Esta fonte está limitando solicitações. Tente novamente em {seconds} s.",
+  "games.guides.archived":
+    "Configuração histórica. Confira a edição do jogo e a data antes de usar.",
+  "games.guides.rateLimit":
+    "Esta fonte está limitando solicitações. Tente novamente em {seconds} s.",
   "games.guides.configs": "Configurações profissionais",
   "games.guides.searchPlayers": "Buscar jogadores",
   "games.guides.platform": "Plataforma de transmissão",
   "games.guides.allPlatforms": "Todas as plataformas",
   "games.guides.refresh": "Atualizar transmissões",
-  "games.guides.twitchUnavailable": "As transmissões da Twitch podem ser vistas atualmente na Twitch.",
+  "games.guides.twitchUnavailable":
+    "As transmissões da Twitch podem ser vistas atualmente na Twitch.",
   "games.guides.partial": "Algumas fontes não carregaram. Os resultados disponíveis são exibidos.",
   "games.guides.sourceErrorTitle": "Vamos tentar de novo",
   "games.guides.more": "Carregar mais",
   "games.guides.moreKick": "Mais no Kick",
-  "games.guides.configNote": "Configurações publicadas por jogadores e criadores. Escolha um perfil para ver a fonte, a data e os ajustes.",
+  "games.guides.configNote":
+    "Configurações publicadas por jogadores e criadores. Escolha um perfil para ver a fonte, a data e os ajustes.",
   "games.guides.players": "Todos os jogadores",
   "games.guides.useConfig": "Usar esta configuração",
-  "games.guides.import.cs2": "Cole os comandos no console de desenvolvedor do CS2. Importe códigos de mira em Configurações → Jogo → Mira. Confira os valores antes de aplicá-los.",
-  "games.guides.import.valorant": "Copie o código da mira e abra Configurações → Mira → Importar código de perfil no VALORANT. Insira os outros valores nas configurações correspondentes.",
-  "games.guides.import.rainbowsixsiege": "Copie as configurações e insira os valores nas opções de mouse e vídeo do Siege. O DPI é ajustado no software do mouse.",
+  "games.guides.import.cs2":
+    "Cole os comandos no console de desenvolvedor do CS2. Importe códigos de mira em Configurações → Jogo → Mira. Confira os valores antes de aplicá-los.",
+  "games.guides.import.valorant":
+    "Copie o código da mira e abra Configurações → Mira → Importar código de perfil no VALORANT. Insira os outros valores nas configurações correspondentes.",
+  "games.guides.import.rainbowsixsiege":
+    "Copie as configurações e insira os valores nas opções de mouse e vídeo do Siege. O DPI é ajustado no software do mouse.",
   "games.guides.copyCrosshair": "Copiar mira",
   "games.guides.copyCommands": "Copiar comandos",
   "games.guides.copySettings": "Copiar configurações",
   "games.guides.copied": "Copiado",
   "games.guides.copyError": "Não foi possível copiar. Tente novamente.",
-  "games.guides.embedNote": "A reprodução é fornecida pela plataforma do criador. Se a incorporação for restrita, abra o original.",
+  "games.guides.embedNote":
+    "A reprodução é fornecida pela plataforma do criador. Se a incorporação for restrita, abra o original.",
   "games.guides.readerErrorTitle": "Não conseguimos carregar este guia",
   "games.guides.short": "Guias",
   "games.guides.title": "Guias e detonados",
-  "games.guides.note": "Encontre o próximo passo. Leia guias da comunidade, assista a um detonado ou acompanhe quem está jogando.",
+  "games.guides.note":
+    "Encontre o próximo passo. Leia guias da comunidade, assista a um detonado ou acompanhe quem está jogando.",
   "games.guides.written": "Guias escritos",
   "games.guides.videos": "Vídeos",
   "games.guides.live": "Ao vivo",
@@ -102,18 +117,20 @@ export default {
   "games.guides.videoTitle": "Assista e aprenda",
   "games.guides.twitch": "Explorar Twitch",
   "games.guides.youtube": "Mais no YouTube",
-  "games.guides.liveNote": "Transmissões do YouTube. A disponibilidade pode mudar durante a navegação.",
+  "games.guides.liveNote":
+    "Transmissões do YouTube. A disponibilidade pode mudar durante a navegação.",
   "games.guides.error": "Não foi possível carregar esta fonte. Tente novamente.",
   "games.guides.empty": "Nenhum guia encontrado. Tente outra busca ou fonte.",
   "games.guides.noLive": "Nenhuma transmissão correspondente agora.",
   "games.guides.previous": "Anterior",
   "games.guides.next": "Próxima",
   "games.guides.original": "Abrir original",
-  "games.guides.playerNote": "Reprodução pelo YouTube. Se o criador restringir a incorporação, abra o vídeo original.",
-  "games.guides.readerError": "Não foi possível ler este guia aqui. Tente novamente ou abra o original.",
+  "games.guides.playerNote":
+    "Reprodução pelo YouTube. Se o criador restringir a incorporação, abra o vídeo original.",
+  "games.guides.readerError":
+    "Não foi possível ler este guia aqui. Tente novamente ou abra o original.",
   "games.guides.contents": "Neste guia",
-  "games.guides.credits": "Autores e licença"
-,
+  "games.guides.credits": "Autores e licença",
   "games.guides.copy": "Copiar",
   "games.guides.previewMap": "Mostrar uma captura do mapa atrás da mira",
   "games.guides.skins": "Skins",
@@ -123,5 +140,5 @@ export default {
   "games.guides.teammates": "Colegas de equipe",
   "games.guides.specs": "Especificações",
   "games.guides.exportAll": "Exportar tudo",
-  "games.guides.copyValue": "Copiar {label}"
+  "games.guides.copyValue": "Copiar {label}",
 } satisfies Record<string, string>;

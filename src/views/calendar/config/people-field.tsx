@@ -14,7 +14,12 @@ function PersonAvatar({ profile, size }: { profile?: string | null; size: number
       style={{ height: size, width: size }}
     >
       {profile ? (
-        <img src={`https://image.tmdb.org/t/p/w92${profile}`} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <img
+          src={`https://image.tmdb.org/t/p/w92${profile}`}
+          alt=""
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
       ) : (
         <User size={Math.round(size * 0.42)} strokeWidth={1.8} />
       )}
@@ -68,7 +73,9 @@ export function PeopleField({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={tmdbKey ? t("Search actors, directors…") : t("Add a TMDB key in settings first")}
+          placeholder={
+            tmdbKey ? t("Search actors, directors…") : t("Add a TMDB key in settings first")
+          }
           disabled={!tmdbKey}
           className="h-full flex-1 bg-transparent text-[14px] text-ink placeholder:text-ink-subtle outline-none"
         />
@@ -110,7 +117,10 @@ export function PeopleField({
       {tracked.length > 0 && (
         <ul className="flex flex-col gap-1.5">
           {tracked.map((p) => (
-            <li key={p.id} className="flex items-center gap-3 rounded-lg bg-surface px-3 py-2 ring-1 ring-edge-soft/60">
+            <li
+              key={p.id}
+              className="flex items-center gap-3 rounded-lg bg-surface px-3 py-2 ring-1 ring-edge-soft/60"
+            >
               <PersonAvatar profile={p.profile} size={36} />
               <span className="flex-1 truncate text-[13.5px] text-ink">{p.name}</span>
               <button

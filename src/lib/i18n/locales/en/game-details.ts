@@ -1,9 +1,8 @@
 export default {
-
-
   "games.story.title": "Story order",
   "games.story.entryNote": "Resident Evil games, films & series · Capcom timeline",
-  "games.story.note": "Follow the story across games and animated films. Dates show when events happen; some stories overlap.",
+  "games.story.note":
+    "Follow the story across games and animated films. Dates show when events happen; some stories overlap.",
   "games.story.filter.all": "Everything",
   "games.story.filter.games": "Games",
   "games.story.filter.screen": "Films & series",
@@ -15,7 +14,8 @@ export default {
   "games.story.overlap": "Resident Evil 2 and 3 overlap in Raccoon City.",
   "games.story.spans": "Revisits earlier events across these years.",
   "games.story.autumn": "Autumn",
-  "games.story.scope": "Based on Capcom's published timeline through Village. Later releases and DLC are not included. Live-action adaptations follow separate continuities.",
+  "games.story.scope":
+    "Based on Capcom's published timeline through Village. Later releases and DLC are not included. Live-action adaptations follow separate continuities.",
   "games.story.source": "Capcom · View the source timeline",
   "games.story.error": "Game artwork is unavailable. You can still open each title.",
   "games.atlas.kind.mode": "Play mode",
@@ -41,8 +41,10 @@ export default {
   "games.prices.seller": "Store",
   "games.prices.allStores": "All stores",
   "games.prices.refresh": "Refresh prices",
-  "games.prices.steamHint": "Steam offers are identified by CheapShark. Confirm the activation platform and country at the store.",
-  "games.prices.allHint": "Includes other PC launchers. A matching Steam game does not mean every offer activates on Steam.",
+  "games.prices.steamHint":
+    "Steam offers are identified by CheapShark. Confirm the activation platform and country at the store.",
+  "games.prices.allHint":
+    "Includes other PC launchers. A matching Steam game does not mean every offer activates on Steam.",
   "games.prices.refreshError": "Couldn’t refresh. Showing the prices checked below.",
   "games.prices.error": "Prices are unavailable right now. Try again, or explore key shops.",
   "games.prices.offerCount": "{count} offers",
@@ -52,7 +54,8 @@ export default {
   "games.prices.checkActivation": "Activation platform: check store",
   "games.prices.viewAt": "View offer at {store}",
   "games.prices.view": "View offer",
-  "games.prices.coverage": "Prices from stores tracked by CheapShark. Activation-country restrictions and checkout fees are not included in this feed.",
+  "games.prices.coverage":
+    "Prices from stores tracked by CheapShark. Activation-country restrictions and checkout fees are not included in this feed.",
   "games.prices.partial": "Some results may be unavailable.",
   "games.prices.keyshops": "Explore key shops",
   "games.prices.keyshopsHint": "Browse stores, marketplaces and price comparison sites",
@@ -71,7 +74,8 @@ export default {
   "games.shops.products.accounts": "Account marketplace",
   "games.shops.products.mixed": "Keys, accounts & more",
   "games.shops.products.compare": "Compare stores & offers",
-  "games.shops.note": "Open a shop to search this game and choose your region. Check the edition, activation platform and whether the listing is a key or an account.",
+  "games.shops.note":
+    "Open a shop to search this game and choose your region. Check the edition, activation platform and whether the listing is a key or an account.",
   "games.shops.empty": "No shops match. Try another name or shop type.",
   "games.shops.back": "Back to prices",
   "games.shops.footer": "Shop directory · Prices and availability checked on each website",
@@ -85,7 +89,8 @@ export default {
   "games.details.controllerState.none": "No controller support",
   "games.details.controllerNoneNote": "Use a keyboard and mouse.",
   "games.details.sourcesEmpty": "Connect your first source",
-  "games.details.sourcesEmptyNote": "Add a catalog to see its releases, versions and download options here.",
+  "games.details.sourcesEmptyNote":
+    "Add a catalog to see its releases, versions and download options here.",
   "games.details.sourcesNoMatch": "No matching releases",
   "games.details.controllerFull": "Ready for a controller",
   "games.details.controllerPartial": "Controller support",

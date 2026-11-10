@@ -36,8 +36,19 @@ export function ContentRails({
         const hidden = custom.hidden.includes(key);
         if (hidden && !editMode) return null;
         return (
-          <div key={key} data-section={key} data-detail-section={key} className="flex scroll-mt-24 flex-col">
-            <div className="detail-layout-controls" data-editing={editMode} data-hidden={hidden} inert={!editMode} aria-hidden={!editMode}>
+          <div
+            key={key}
+            data-section={key}
+            data-detail-section={key}
+            className="flex scroll-mt-24 flex-col"
+          >
+            <div
+              className="detail-layout-controls"
+              data-editing={editMode}
+              data-hidden={hidden}
+              inert={!editMode}
+              aria-hidden={!editMode}
+            >
               <div>
                 <div className="detail-layout-controls-content">
                   <RailControls
@@ -80,7 +91,9 @@ function RailControls({
   const t = useT();
   return (
     <div className="flex items-center gap-2 rounded-xl bg-elevated px-3 py-2">
-      <span className={`flex-1 truncate text-[13px] font-semibold ${hidden ? "text-ink-subtle" : "text-ink"}`}>
+      <span
+        className={`flex-1 truncate text-[13px] font-semibold ${hidden ? "text-ink-subtle" : "text-ink"}`}
+      >
         {label}
       </span>
       <HoverTooltip label={t("Move up")} align="center" className="shrink-0">
@@ -106,16 +119,16 @@ function RailControls({
         </button>
       </HoverTooltip>
       <HoverTooltip label={hidden ? t("Show") : t("Hide")} align="center" className="shrink-0">
-      <button
-        type="button"
-        onClick={onToggleHidden}
-        aria-label={hidden ? t("Show") : t("Hide")}
-        className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-raised ${
-          hidden ? "text-ink-subtle hover:text-ink" : "text-ink-muted hover:text-ink"
-        }`}
-      >
-        {hidden ? <EyeOff size={16} strokeWidth={2.2} /> : <Eye size={16} strokeWidth={2.2} />}
-      </button>
+        <button
+          type="button"
+          onClick={onToggleHidden}
+          aria-label={hidden ? t("Show") : t("Hide")}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-raised ${
+            hidden ? "text-ink-subtle hover:text-ink" : "text-ink-muted hover:text-ink"
+          }`}
+        >
+          {hidden ? <EyeOff size={16} strokeWidth={2.2} /> : <Eye size={16} strokeWidth={2.2} />}
+        </button>
       </HoverTooltip>
     </div>
   );

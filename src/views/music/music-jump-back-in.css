@@ -23,11 +23,17 @@
   background: var(--color-elevated);
   text-align: start;
   overflow: hidden;
-  transition: background-color 180ms ease-in-out, transform 180ms ease-in-out;
+  transition:
+    background-color 180ms ease-in-out,
+    transform 180ms ease-in-out;
 }
-.music-jump-tile:nth-child(9) { display: none; }
+.music-jump-tile:nth-child(9) {
+  display: none;
+}
 @media (min-width: 880px) and (max-width: 1279.98px) {
-  .music-jump-tile:nth-child(9) { display: flex; }
+  .music-jump-tile:nth-child(9) {
+    display: flex;
+  }
 }
 .music-jump-tile:hover,
 .music-jump-tile:focus-visible {

@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Héroes de Estadio",
   "games.overwatch.searchHeroes": "Buscar héroe",
   "games.overwatch.refresh": "Actualizar guía",
-  "games.overwatch.unavailable": "No se pudo actualizar la guía. Puede que sigan apareciendo los datos cargados anteriormente.",
+  "games.overwatch.unavailable":
+    "No se pudo actualizar la guía. Puede que sigan apareciendo los datos cargados anteriormente.",
   "games.overwatch.partial": "Algunas entradas no están disponibles.",
   "games.overwatch.checked": "Revisado: {date}",
-  "games.overwatch.scope": "Información de héroes de Blizzard a través de OverFast. Los cambios de equilibrio pueden llegar al juego antes de que se actualice esta guía.",
-  "games.overwatch.mapsScope": "Información de mapas y modos de OverFast. Incluye mapas de Arcade y antiguos; la disponibilidad depende del modo.",
+  "games.overwatch.scope":
+    "Información de héroes de Blizzard a través de OverFast. Los cambios de equilibrio pueden llegar al juego antes de que se actualice esta guía.",
+  "games.overwatch.mapsScope":
+    "Información de mapas y modos de OverFast. Incluye mapas de Arcade y antiguos; la disponibilidad depende del modo.",
   "games.overwatch.empty": "Sin coincidencias. Prueba otra búsqueda o filtro.",
   "games.overwatch.moreHeroes": "Más héroes",
   "games.overwatch.moreMaps": "Más mapas",
@@ -30,9 +33,9 @@ export default {
   "games.overwatch.watchDemo": "Ver demostración",
   "games.overwatch.hideDemo": "Ocultar demostración",
   "games.overwatch.closeDemo": "Cerrar demostración",
-  "games.overwatch.videoFailed": "No se pudo reproducir la demostración. Ábrela en la página oficial del héroe.",
+  "games.overwatch.videoFailed":
+    "No se pudo reproducir la demostración. Ábrela en la página oficial del héroe.",
   "games.overwatch.mode": "Modo de juego",
   "games.overwatch.allModes": "Todos los modos",
-  "games.overwatch.searchMaps": "Buscar mapas o lugares"
+  "games.overwatch.searchMaps": "Buscar mapas o lugares",
 };
-

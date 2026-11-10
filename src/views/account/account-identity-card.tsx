@@ -27,7 +27,10 @@ export function AccountIdentityCard({ author }: { author: Author }) {
 
         <span className="flex min-w-0 flex-[1_1_240px] flex-col gap-2">
           <span className="flex min-w-0 items-center gap-2">
-            <bdi dir="ltr" className="min-w-0 break-words text-[28px] font-semibold leading-[34px] tracking-[-0.5px] text-ink">
+            <bdi
+              dir="ltr"
+              className="min-w-0 break-words text-[28px] font-semibold leading-[34px] tracking-[-0.5px] text-ink"
+            >
               {author.handle ? `@${author.handle}` : author.username}
             </bdi>
             {author.verified && <VerifiedBadge />}
@@ -65,7 +68,10 @@ export function AccountIdentityCard({ author }: { author: Author }) {
       </div>
 
       {editing && (
-        <div id={handleEditorId} className="animate-lift-in w-full max-w-[560px] border-t border-edge-soft pt-6">
+        <div
+          id={handleEditorId}
+          className="animate-lift-in w-full max-w-[560px] border-t border-edge-soft pt-6"
+        >
           <HandleClaimCard author={author} />
         </div>
       )}

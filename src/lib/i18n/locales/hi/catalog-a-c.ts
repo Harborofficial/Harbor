@@ -1219,7 +1219,8 @@ const catalogAC: Record<string, string> = {
     "बजट खत्म हो गया है। यह UTC के अनुसार आधी रात को रीसेट होगा।",
   "Buffer fill": "बफ़र फ़िल",
   "Reveal the dot on hover": "होवर करने पर डॉट दिखाएँ",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "डॉट रास्ते से हटा रहता है और जब आप बार पर पॉइंटर लाते हैं तब दिखता है। इसे बंद करें ताकि यह हर समय दिखता रहे।",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "डॉट रास्ते से हटा रहता है और जब आप बार पर पॉइंटर लाते हैं तब दिखता है। इसे बंद करें ताकि यह हर समय दिखता रहे।",
   "Buffer fill brightness": "बफ़र फ़िल की ब्राइटनेस",
   "Buffer size": "बफ़र का आकार",
   Buffering: "बफ़र हो रहा है",
@@ -1429,7 +1430,8 @@ const catalogAC: Record<string, string> = {
   Checking: "जाँच हो रही है",
   "Checking SVP installation...": "SVP इंस्टॉलेशन की जाँच हो रही है...",
   "Checking availability": "उपलब्धता जाँची जा रही है",
-  "Checking harborcommunity.site for a newer build.": "नए बिल्ड के लिए harborcommunity.site की जाँच हो रही है।",
+  "Checking harborcommunity.site for a newer build.":
+    "नए बिल्ड के लिए harborcommunity.site की जाँच हो रही है।",
   "Checking plots, cast, and scenes": "कथानक, कलाकारों और दृश्यों की जाँच हो रही है",
   "Checking sources and audio": "स्रोतों और ऑडियो की जाँच हो रही है",
   "Checking the local SVP and VapourSynth installation...":
@@ -1697,9 +1699,11 @@ const catalogAC: Record<string, string> = {
     "टिप्पणियाँ तब तक धुंधली रहती हैं, जब तक आप उन्हें नहीं दिखाते, भले ही उन पर स्पॉइलर का टैग न हो।",
   "Comments are hidden": "टिप्पणियाँ छिपी हुई हैं",
   "Hosted elsewhere": "कहीं और होस्टेड",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "ये प्लान कोई तीसरा पक्ष चलाता है। Harbor उससे जुड़ा नहीं है और साइनअप से कुछ नहीं पाता। मौजूदा कीमत और शर्तें उनकी साइट पर हैं।",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "ये प्लान कोई तीसरा पक्ष चलाता है। Harbor उससे जुड़ा नहीं है और साइनअप से कुछ नहीं पाता। मौजूदा कीमत और शर्तें उनकी साइट पर हैं।",
   "{name} can run on a hosted instance": "{name} होस्टेड इंस्टेंस पर चल सकता है",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "इसे कोई तीसरा पक्ष चलाता है। Harbor उससे जुड़ा नहीं है, इसे बेचता नहीं, और साइन अप पर कुछ नहीं पाता। कीमत और ब्यौरा उनकी साइट पर है।",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "इसे कोई तीसरा पक्ष चलाता है। Harbor उससे जुड़ा नहीं है, इसे बेचता नहीं, और साइन अप पर कुछ नहीं पाता। कीमत और ब्यौरा उनकी साइट पर है।",
   "Show comments": "टिप्पणियाँ दिखाएँ",
   "Hide comments": "टिप्पणियाँ छिपाएँ",
   "Comments may take a moment to appear on Trakt": "Trakt पर टिप्पणियाँ दिखने में कुछ समय लग सकता है",
@@ -1802,7 +1806,8 @@ const catalogAC: Record<string, string> = {
   "Connect your Trakt account": "अपना Trakt अकाउंट कनेक्ट करें",
   "Connect your Trakt account to scrobble playback, sync your watchlist, and pull personalized recommendations.":
     "प्लेबैक स्क्रॉबल करने, अपनी वॉचलिस्ट सिंक करने और आपके मुताबिक सुझाव पाने के लिए अपना Trakt अकाउंट कनेक्ट करें।",
-  "Connect your Trakt account to leave comments and reviews.": "टिप्पणियाँ और समीक्षाएँ लिखने के लिए अपना Trakt खाता कनेक्ट करें।",
+  "Connect your Trakt account to leave comments and reviews.":
+    "टिप्पणियाँ और समीक्षाएँ लिखने के लिए अपना Trakt खाता कनेक्ट करें।",
   "Connect your provider.": "अपना प्रोवाइडर कनेक्ट करें।",
   "Connect {name} in Settings first": "पहले सेटिंग्स में {name} को कनेक्ट करें",
   Connected: "कनेक्टेड",

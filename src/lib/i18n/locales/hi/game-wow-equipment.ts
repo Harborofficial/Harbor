@@ -25,5 +25,5 @@ export default {
   "games.wow.equipment.mainhand": "मुख्य हाथ",
   "games.wow.equipment.offhand": "दूसरा हाथ",
   "games.wow.equipment.shirt": "कमीज़",
-  "games.wow.equipment.tabard": "टैबर्ड"
+  "games.wow.equipment.tabard": "टैबर्ड",
 };

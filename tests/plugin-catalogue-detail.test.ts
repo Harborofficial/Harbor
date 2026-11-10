@@ -42,7 +42,14 @@ test("a catalogue id carries its provider and url back out intact", () => {
 
 test("only a well formed catalogue id is claimed", () => {
   assert.ok(isCapstanId(capstanId("p", "https://x/")));
-  for (const id of ["", "tt0133093", "tmdb:movie:603", "harbor-plugin://x", "capstan", "CAPSTAN:a:b"]) {
+  for (const id of [
+    "",
+    "tt0133093",
+    "tmdb:movie:603",
+    "harbor-plugin://x",
+    "capstan",
+    "CAPSTAN:a:b",
+  ]) {
     assert.equal(isCapstanId(id), false, id);
     assert.equal(parseCapstanId(id), null, id);
   }
@@ -148,7 +155,13 @@ test("a provider's recommendations are addressed the way its catalogue addresses
           quality: "1080p",
         },
         { name: "No url", url: "", type: null, posterUrl: null, quality: null },
-        { name: "", url: "https://provider.example/watch/3", type: null, posterUrl: null, quality: null },
+        {
+          name: "",
+          url: "https://provider.example/watch/3",
+          type: null,
+          posterUrl: null,
+          quality: null,
+        },
       ],
     },
     origin,

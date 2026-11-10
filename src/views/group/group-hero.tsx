@@ -89,7 +89,10 @@ export function GroupHero({
           {detail.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {detail.tags.map((tg) => (
-                <span key={tg} className="rounded-full bg-surface px-2.5 py-1 text-[11.5px] font-medium text-ink-muted ring-1 ring-edge-soft">
+                <span
+                  key={tg}
+                  className="rounded-full bg-surface px-2.5 py-1 text-[11.5px] font-medium text-ink-muted ring-1 ring-edge-soft"
+                >
                   {tg}
                 </span>
               ))}
@@ -114,7 +117,11 @@ export function GroupHero({
               disabled={busy}
               className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-[opacity,transform] hover:opacity-90 active:scale-[0.97] disabled:opacity-50"
             >
-              {busy ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} strokeWidth={2.4} />}
+              {busy ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <UserPlus size={16} strokeWidth={2.4} />
+              )}
               {t("Join group")}
             </button>
           ) : detail.isOwner ? null : (
@@ -131,7 +138,9 @@ export function GroupHero({
       </div>
 
       {detail.description && (
-        <p className="max-w-[70ch] text-[14px] leading-relaxed text-ink-muted">{detail.description}</p>
+        <p className="max-w-[70ch] text-[14px] leading-relaxed text-ink-muted">
+          {detail.description}
+        </p>
       )}
     </header>
   );

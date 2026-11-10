@@ -162,9 +162,7 @@ export function SubTabBar({
                 {tab.count}
               </span>
             )}
-            {tab.dot && (
-              <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-success" />
-            )}
+            {tab.dot && <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-success" />}
           </button>
         );
       })}

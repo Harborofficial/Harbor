@@ -78,9 +78,7 @@ export function BpChip({
       className={`flex h-[clamp(44px,5vh,58px)] shrink-0 items-center gap-[clamp(5px,0.45vw,9px)] rounded-full px-[clamp(14px,1.2vw,22px)] text-[clamp(12.5px,1.78vh,20px)] font-semibold transition-colors duration-[var(--bp-dur-fast)] ${
         disabled ? "opacity-55" : ""
       } ${
-        selected
-          ? "bg-[var(--bp-on)] text-ink"
-          : "border border-[var(--bp-edge)] text-ink-subtle"
+        selected ? "bg-[var(--bp-on)] text-ink" : "border border-[var(--bp-edge)] text-ink-subtle"
       }`}
     >
       {icon}

@@ -16,11 +16,17 @@ const ALIGN: Record<string, string> = { left: "Left", center: "Center", right: "
 const EDGE: Record<string, string> = { shadow: "Shadow", outline: "Outline", box: "Box" };
 
 function tvLanguages(languages: string[]): string[] {
-  return [...new Set(languages.flatMap((language) => {
-    if (LANG_SET.has(language)) return [language];
-    const found = TV_LANGS.find((option) => option.label.toLowerCase() === language.toLowerCase());
-    return found ? [found.value] : [];
-  }))];
+  return [
+    ...new Set(
+      languages.flatMap((language) => {
+        if (LANG_SET.has(language)) return [language];
+        const found = TV_LANGS.find(
+          (option) => option.label.toLowerCase() === language.toLowerCase(),
+        );
+        return found ? [found.value] : [];
+      }),
+    ),
+  ];
 }
 
 export function buildMirrorPlan(s: Settings): MirrorPlan {

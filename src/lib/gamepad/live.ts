@@ -17,7 +17,11 @@ function emit(): void {
 
 export function setLiveButton(button: GpButton, pressed: boolean): void {
   if (!!state.buttons[button] === pressed) return;
-  state = { buttons: { ...state.buttons, [button]: pressed }, axes: state.axes, seq: state.seq + 1 };
+  state = {
+    buttons: { ...state.buttons, [button]: pressed },
+    axes: state.axes,
+    seq: state.seq + 1,
+  };
   emit();
 }
 

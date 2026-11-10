@@ -35,7 +35,8 @@ const music: Record<string, string> = {
   "dj.minimize": "Réduire",
   "dj.maximize": "Agrandir",
   "dj.close": "Fermer",
-  "dj.blurb": "Vitesse, hauteur, coupures d'EQ et pads de cue dans leur propre fenêtre, sur ce qui joue.",
+  "dj.blurb":
+    "Vitesse, hauteur, coupures d'EQ et pads de cue dans leur propre fenêtre, sur ce qui joue.",
   "dj.open": "Ouvrir la table",
   "dj.idle": "Rien en lecture",
   "dj.tempo": "Vitesse",
@@ -95,9 +96,11 @@ const music: Record<string, string> = {
   "dj.pads.jump": "Beat jump",
   "dj.pads.sampler": "Sampler",
   "dj.pads.triplet": "Triolet",
-  "dj.pads.rollHint": "Maintenez un pad pour le roll, au relâchement le titre reprend là où il en serait",
+  "dj.pads.rollHint":
+    "Maintenez un pad pour le roll, au relâchement le titre reprend là où il en serait",
   "dj.pads.jumpHint": "Sautez en arrière ou en avant sans perdre le rythme",
-  "dj.pads.noBpm": "Pas encore de BPM, les durées sont en secondes tant que vous ne l'avez pas tapé",
+  "dj.pads.noBpm":
+    "Pas encore de BPM, les durées sont en secondes tant que vous ne l'avez pas tapé",
   "dj.reset": "Réinitialiser",
   "dj.b.noSource": "Aucune source lisible pour ce titre",
   "dj.b.searching": "Recherche d'une source lisible",
@@ -105,26 +108,34 @@ const music: Record<string, string> = {
   "music.broadcast.drift": "(décalage de {ms} ms)",
   "music.broadcast.live": "Diffusion via {product}",
   "music.broadcast.install": "Obtenir {product}",
-  "music.broadcast.none": "Aucun câble audio virtuel n'est installé. Installez {product}, puis choisissez-le ici.",
+  "music.broadcast.none":
+    "Aucun câble audio virtuel n'est installé. Installez {product}, puis choisissez-le ici.",
   "music.broadcast.auto": "Le premier trouvé",
   "music.broadcast.output": "Sortie",
   "music.broadcast.stop": "Arrêter",
   "music.broadcast.start": "Démarrer",
-  "music.broadcast.blurb": "Envoyez ce que vous écoutez vers un micro virtuel pour que vos amis en appel l'entendent. Vous continuez de l'entendre sur vos enceintes.",
+  "music.broadcast.blurb":
+    "Envoyez ce que vous écoutez vers un micro virtuel pour que vos amis en appel l'entendent. Vous continuez de l'entendre sur vos enceintes.",
   "music.broadcast.title": "Diffuser vers le chat vocal",
-  "music.cable.mac.installNeeded": "Harbor peut installer son propre micro virtuel. macOS demandera votre mot de passe administrateur, puis Core Audio redémarrera.",
-  "music.cable.mac.installMissing": "Cette version de Harbor ne contient pas le pilote du micro virtuel.",
+  "music.cable.mac.installNeeded":
+    "Harbor peut installer son propre micro virtuel. macOS demandera votre mot de passe administrateur, puis Core Audio redémarrera.",
+  "music.cable.mac.installMissing":
+    "Cette version de Harbor ne contient pas le pilote du micro virtuel.",
   "music.cable.mac.installCancelled": "Installation annulée.",
   "music.cable.mac.installFailed": "Impossible d'installer le micro virtuel.",
-  "music.cable.mac.restartNeeded": "Le micro virtuel est installé, mais Core Audio ne l'a pas encore détecté. Redémarrez le Mac pour terminer.",
-  "music.cable.mac.updateAvailable": "Cette version de Harbor contient un micro virtuel plus récent. Installez-le pour que le câble continue de fonctionner.",
+  "music.cable.mac.restartNeeded":
+    "Le micro virtuel est installé, mais Core Audio ne l'a pas encore détecté. Redémarrez le Mac pour terminer.",
+  "music.cable.mac.updateAvailable":
+    "Cette version de Harbor contient un micro virtuel plus récent. Installez-le pour que le câble continue de fonctionner.",
   "music.cable.title": "Micro virtuel Harbor",
-  "music.cable.blurb": "Harbor met le micro virtuel en place tout seul. Rien à télécharger, rien à installer.",
+  "music.cable.blurb":
+    "Harbor met le micro virtuel en place tout seul. Rien à télécharger, rien à installer.",
   "music.cable.create": "Créer le micro virtuel",
   "music.cable.remove": "Supprimer le micro virtuel",
   "music.cable.spec": "{rate}, {depth}",
   "music.cable.perfect": "Aucun rééchantillonnage",
-  "music.cable.resampledGraph": "PipeWire fait tourner son graphe à {graph}, il y a donc rééchantillonnage",
+  "music.cable.resampledGraph":
+    "PipeWire fait tourner son graphe à {graph}, il y a donc rééchantillonnage",
   "music.cable.resampledServer": "Le serveur audio s'est fixé sur {rate} au lieu de {requested}",
   "music.cable.resampledFormat": "Le serveur audio ne transporte pas de flottant 32 bits",
   "music.cable.resampledOther": "Quelque chose rééchantillonne dans la chaîne audio",
@@ -143,10 +154,13 @@ const music: Record<string, string> = {
   "music.cable.driverNeeded": "Harbor ne sait pas encore créer de micro virtuel sur ce système",
   "music.cable.pipewireFailed": "PipeWire n'a pas démarré le loopback",
   "music.cable.createFailed": "Le micro virtuel n'a pas pu être créé",
-  "music.cable.installNeeded": "Harbor a besoin de votre autorisation pour installer le micro virtuel",
+  "music.cable.installNeeded":
+    "Harbor a besoin de votre autorisation pour installer le micro virtuel",
   "music.cable.installMissing": "Cette version de Harbor ne fournit pas de micro virtuel",
-  "music.cable.restartNeeded": "Le système audio doit redémarrer pour que le micro virtuel apparaisse",
-  "music.cable.updateAvailable": "Ce Harbor apporte un micro virtuel plus récent. Recréez-le pour le mettre à jour.",
+  "music.cable.restartNeeded":
+    "Le système audio doit redémarrer pour que le micro virtuel apparaisse",
+  "music.cable.updateAvailable":
+    "Ce Harbor apporte un micro virtuel plus récent. Recréez-le pour le mettre à jour.",
   "dj.crossfade": "Crossfader",
   "dj.b.broadcasting": "Porte la diffusion",
   "dj.b.eject": "Éjecter",
@@ -193,7 +207,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "Hauteur",
   "music.speed.reverb": "Réverbération",
   "music.speed.keepPitch": "Conserver la tonalité d'origine",
-  "music.speed.keepPitchHelp": "Activé, le tempo change mais pas la tonalité. Désactivé donne le son nightcore et slowed.",
+  "music.speed.keepPitchHelp":
+    "Activé, le tempo change mais pas la tonalité. Désactivé donne le son nightcore et slowed.",
   "music.speed.reset": "Réinitialiser",
   "music.speed.normal": "Normal",
   "music.speed.nightcore": "Nightcore",
@@ -359,7 +374,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "La scène",
   "music.artist.inPlaylists": "Playlists avec {name}",
   "music.audio.preferredSource": "Source préférée",
-  "music.audio.preferredSourceHint": "Harbor lit d'abord ici, puis bascule vers n'importe quelle source qui fonctionne.",
+  "music.audio.preferredSourceHint":
+    "Harbor lit d'abord ici, puis bascule vers n'importe quelle source qui fonctionne.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail":
     "Connectez-vous une fois pour une lecture native et sans publicité.",
@@ -493,10 +509,12 @@ const music: Record<string, string> = {
   "music.playlist.new": "Nouvelle playlist",
   "music.row.charts": "Classements",
   "music.connect.shelfTitle": "Connectez {name} pour remplir cette étagère",
-  "music.connect.shelfBody": "Harbor ne devine pas une ligne qu'il ne peut pas appuyer sur de vraies données.",
+  "music.connect.shelfBody":
+    "Harbor ne devine pas une ligne qu'il ne peut pas appuyer sur de vraies données.",
   "music.connect.title": "Connecter {name}",
   "music.connect.connected": "Connecté en tant que {account}",
-  "music.connect.browserHandoff": "Autorisez Harbor dans le navigateur, puis terminez la connexion ici.",
+  "music.connect.browserHandoff":
+    "Autorisez Harbor dans le navigateur, puis terminez la connexion ici.",
   "music.connect.scanningFolder": "Lecture du dossier. Une grande bibliothèque prend du temps.",
   "music.connect.scanned": "{count} fichiers analysés",
   "music.connect.connecting": "Connexion",
@@ -524,10 +542,13 @@ const music: Record<string, string> = {
   "music.video.loading": "Recherche de la vidéo",
   "music.ytm.loading": "Chargement de YouTube Music",
   "music.row.scrobble": "Parce que vous scrobblez {tag}",
-  "music.row.scrobbleWaiting": "Last.fm est connecté, mais n'a pas encore envoyé d'étagère de tags.",
-  "music.connect.scrobbleBody": "Connectez Last.fm et cette étagère se construira à partir des tags que vous scrobblez vraiment.",
+  "music.row.scrobbleWaiting":
+    "Last.fm est connecté, mais n'a pas encore envoyé d'étagère de tags.",
+  "music.connect.scrobbleBody":
+    "Connectez Last.fm et cette étagère se construira à partir des tags que vous scrobblez vraiment.",
   "music.connect.serverName": "un serveur multimédia ou un dossier",
-  "music.connect.serverBody": "Pointez Harbor vers un dossier, Plex, Jellyfin, Navidrome ou Subsonic et cette étagère se remplira d'albums que vous possédez déjà.",
+  "music.connect.serverBody":
+    "Pointez Harbor vers un dossier, Plex, Jellyfin, Navidrome ou Subsonic et cette étagère se remplira d'albums que vous possédez déjà.",
   "music.row.recents": "Reprenez où vous en étiez",
   "music.row.fresh": "Du neuf chez les artistes que vous écoutez",
   "music.row.freshSubtitle": "Les sorties récentes des artistes de votre historique d’écoute",
@@ -592,7 +613,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "Répéter les extraits",
   "music.quickListen.mute": "Couper le son",
   "music.quickListen.unmute": "Activer le son",
-  "music.quickListen.empty": "Aucun titre inédit trouvé. Explorez davantage de musique, puis réessayez.",
+  "music.quickListen.empty":
+    "Aucun titre inédit trouvé. Explorez davantage de musique, puis réessayez.",
   "music.quickListen.finding": "Recherche de titres que vous n’avez pas encore écoutés…",
   "music.quickListen.more": "Plus d’options",
   "music.playlist.search": "Rechercher des playlists",

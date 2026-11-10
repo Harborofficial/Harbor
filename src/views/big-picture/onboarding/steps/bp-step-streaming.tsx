@@ -3,11 +3,7 @@ import { SERVICES } from "@/lib/providers/streaming";
 import { SFX } from "@/lib/sfx";
 import { useSettings, type StreamingService } from "@/lib/settings";
 import { useBpT } from "../../bp-i18n";
-import {
-  BP_ROW_FLUSH,
-  BpDecisionNote,
-  BpDecisionScroll,
-} from "../bp-step-parts";
+import { BP_ROW_FLUSH, BpDecisionNote, BpDecisionScroll } from "../bp-step-parts";
 
 const PER_ROW = 4;
 const ROW_SCOPE = { ...BP_ROW_FLUSH, containIntrinsicSize: "auto 120px" } as const;

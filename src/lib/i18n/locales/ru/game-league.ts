@@ -40,7 +40,8 @@ export default {
   "games.league.more": "Больше чемпионов",
   "games.league.empty": "По вашему запросу чемпионов нет.",
   "games.league.poolEmpty": "Сохраняйте любимых чемпионов. Откройте чемпиона и добавьте его в пул.",
-  "games.league.unavailable": "Не удалось обновить данные. Предыдущие результаты остаются доступны.",
+  "games.league.unavailable":
+    "Не удалось обновить данные. Предыдущие результаты остаются доступны.",
   "games.league.back": "К чемпионам",
   "games.league.addPool": "Добавить в мой пул",
   "games.league.inPool": "В моём пуле",
@@ -74,17 +75,21 @@ export default {
   "games.league.story": "История чемпиона",
   "games.league.exploreMore": "Узнать больше",
   "games.league.guides": "Видеогайды",
-  "games.league.metaScope": "OP.GG предоставляет рейтинг линий на стандартной выборке без указания патча, региона и диапазона рангов. Доля побед вычисляется из опубликованных побед и игр; частота выбора округлена источником. Рейтинги и билды используют разные выборки.",
-  "games.league.buildNote": "У каждого билда своя выборка. Готовые билды чаще встречаются в играх, которые длились достаточно долго для покупки предметов; их доля побед не равна общей доле побед чемпиона. Выборки матчапов могут быть малы. Подстраивайтесь под команду и соперника. Видео могут относиться к старым патчам.",
+  "games.league.metaScope":
+    "OP.GG предоставляет рейтинг линий на стандартной выборке без указания патча, региона и диапазона рангов. Доля побед вычисляется из опубликованных побед и игр; частота выбора округлена источником. Рейтинги и билды используют разные выборки.",
+  "games.league.buildNote":
+    "У каждого билда своя выборка. Готовые билды чаще встречаются в играх, которые длились достаточно долго для покупки предметов; их доля побед не равна общей доле побед чемпиона. Выборки матчапов могут быть малы. Подстраивайтесь под команду и соперника. Видео могут относиться к старым патчам.",
   "games.league.patchDifference": "Статистика билда: {patch}; данные предметов и умений: {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Тир-лист",
   "games.league.tierScope": "Ранговая соло/дуо · Изумруд+ · Все регионы",
   "games.league.patchFilter": "Выбрать патч",
   "games.league.allRoles": "Все роли",
   "games.league.banRate": "Частота банов",
   "games.league.matches": "Матчи",
-  "games.league.tierNote": "Места указаны в пределах каждой роли. Сборки чемпионов открывают последние доступные данные.",
+  "games.league.tierNote":
+    "Места указаны в пределах каждой роли. Сборки чемпионов открывают последние доступные данные.",
   "games.official.publisherSource": "Официальная загрузка от издателя",
   "games.official.get": "Скачать {launcher}",
 };

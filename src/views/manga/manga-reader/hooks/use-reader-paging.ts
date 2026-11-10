@@ -20,7 +20,24 @@ type Args = {
 };
 
 export function useReaderPaging(a: Args) {
-  const { paged, double, horizontal = false, rtl = false, total, currentPage, step, lastStart, nextIndex, prevIndex, autoNext, setCurrentPage, onChangeIndex, onEndReached, pageEls, scrollRef } = a;
+  const {
+    paged,
+    double,
+    horizontal = false,
+    rtl = false,
+    total,
+    currentPage,
+    step,
+    lastStart,
+    nextIndex,
+    prevIndex,
+    autoNext,
+    setCurrentPage,
+    onChangeIndex,
+    onEndReached,
+    pageEls,
+    scrollRef,
+  } = a;
 
   const goToPage = (p: number) => {
     if (paged) {

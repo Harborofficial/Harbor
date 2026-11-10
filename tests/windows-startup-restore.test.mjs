@@ -3,9 +3,15 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const source = readFileSync(new URL("../src-tauri/src/lib.rs", import.meta.url), "utf8");
-const placement = readFileSync(new URL("../src-tauri/src/window_placement.rs", import.meta.url), "utf8");
+const placement = readFileSync(
+  new URL("../src-tauri/src/window_placement.rs", import.meta.url),
+  "utf8",
+);
 const fullscreen = readFileSync(new URL("../src-tauri/src/fullscreen.rs", import.meta.url), "utf8");
-const browserFullscreen = readFileSync(new URL("../src/lib/fullscreen-state.ts", import.meta.url), "utf8");
+const browserFullscreen = readFileSync(
+  new URL("../src/lib/fullscreen-state.ts", import.meta.url),
+  "utf8",
+);
 
 test("taskbar-gap paint is restricted to the one-pixel nonclient strip", () => {
   const start = source.indexOf("unsafe fn paint_main_taskbar_gap(");
@@ -65,6 +71,12 @@ test("maximized windows track the display independently of their normal bounds",
 test("fullscreen and borderless transitions suppress normal geometry capture", () => {
   assert.match(fullscreen, /pause_for_transition\(main\.app_handle\(\), true\)/);
   assert.match(fullscreen, /pause_for_transition\(main\.app_handle\(\), false\)/);
-  assert.match(browserFullscreen, /window_geometry_pause", \{ recordBefore: true, borderlessActive: true \}/);
-  assert.match(browserFullscreen, /window_geometry_pause", \{ recordBefore: false, borderlessActive: false \}/);
+  assert.match(
+    browserFullscreen,
+    /window_geometry_pause", \{ recordBefore: true, borderlessActive: true \}/,
+  );
+  assert.match(
+    browserFullscreen,
+    /window_geometry_pause", \{ recordBefore: false, borderlessActive: false \}/,
+  );
 });

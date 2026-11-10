@@ -32,9 +32,15 @@ export function SvpSection() {
     let cancelled = false;
     setStatusFailed(false);
     svpStatus()
-      .then((next) => { if (!cancelled) setStatus(next); })
-      .catch(() => { if (!cancelled) setStatusFailed(true); });
-    return () => { cancelled = true; };
+      .then((next) => {
+        if (!cancelled) setStatus(next);
+      })
+      .catch(() => {
+        if (!cancelled) setStatusFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [checkAttempt]);
 
   const installed = status?.installed ?? false;
@@ -43,7 +49,9 @@ export function SvpSection() {
   const supported = status?.supported ?? false;
   const linux = isLinuxDesktop();
   const loadFailed = status?.loadable === false;
-  const getUrl = linux ? "https://www.svp-team.com/wiki/SVP:Linux" : "https://www.svp-team.com/get/";
+  const getUrl = linux
+    ? "https://www.svp-team.com/wiki/SVP:Linux"
+    : "https://www.svp-team.com/get/";
 
   const openSvp = async () => {
     if (busy) return;
@@ -100,50 +108,50 @@ export function SvpSection() {
         desc: t("Harbor couldn't check the SVP installation. Try again."),
       }
     : checking
-    ? {
-        pill: t("Checking"),
-        tone: "neutral",
-        desc: t("Checking the local SVP and VapourSynth installation..."),
-      }
-    : !supported
       ? {
-          pill: t("Unavailable"),
-          tone: "bad",
-          desc: t(status?.reason ?? "SVP is not supported by this Harbor package."),
+          pill: t("Checking"),
+          tone: "neutral",
+          desc: t("Checking the local SVP and VapourSynth installation..."),
         }
-      : loadFailed
+      : !supported
         ? {
-            pill: t("Needs repair"),
+            pill: t("Unavailable"),
             tone: "bad",
-            desc: t("SVP's files are here, but its VapourSynth engine won't load."),
+            desc: t(status?.reason ?? "SVP is not supported by this Harbor package."),
           }
-        : ready
+        : loadFailed
           ? {
-              pill: t("Ready"),
-              tone: "ok",
-              desc: linux
-                ? t(
-                    "Installed and detected. Harbor found the native svpflow plugins and VapourSynth script library.",
-                  )
-                : t(
-                    "Installed and detected. Harbor found its interpolation engine and will drive it directly.",
-                  ),
+              pill: t("Needs repair"),
+              tone: "bad",
+              desc: t("SVP's files are here, but its VapourSynth engine won't load."),
             }
-          : installed
+          : ready
             ? {
-                pill: t("Not detected"),
-                tone: "bad",
-                desc: t(
-                  "SVP is installed but Harbor couldn't find its engine files (svpflow + VapourSynth). Try repairing the SVP install, or reopen SVP once.",
-                ),
+                pill: t("Ready"),
+                tone: "ok",
+                desc: linux
+                  ? t(
+                      "Installed and detected. Harbor found the native svpflow plugins and VapourSynth script library.",
+                    )
+                  : t(
+                      "Installed and detected. Harbor found its interpolation engine and will drive it directly.",
+                    ),
               }
-            : {
-                pill: t("Not installed"),
-                tone: "neutral",
-                desc: t(
-                  "Install SVP with its VapourSynth components, then check again so Harbor can find them.",
-                ),
-              };
+            : installed
+              ? {
+                  pill: t("Not detected"),
+                  tone: "bad",
+                  desc: t(
+                    "SVP is installed but Harbor couldn't find its engine files (svpflow + VapourSynth). Try repairing the SVP install, or reopen SVP once.",
+                  ),
+                }
+              : {
+                  pill: t("Not installed"),
+                  tone: "neutral",
+                  desc: t(
+                    "Install SVP with its VapourSynth components, then check again so Harbor can find them.",
+                  ),
+                };
 
   return (
     <Section
@@ -165,7 +173,10 @@ export function SvpSection() {
             {!checking && (
               <button
                 type="button"
-                onClick={() => { setStatus(null); setCheckAttempt((n) => n + 1); }}
+                onClick={() => {
+                  setStatus(null);
+                  setCheckAttempt((n) => n + 1);
+                }}
                 className={ROW_ACTION}
               >
                 {t("Check again")}
@@ -191,11 +202,7 @@ export function SvpSection() {
                 {t("Open SVP")}
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => openUrl(getUrl)}
-                className={ROW_ACTION_PRIMARY}
-              >
+              <button type="button" onClick={() => openUrl(getUrl)} className={ROW_ACTION_PRIMARY}>
                 {t("Get SVP")}
                 <ExternalLink size={16} strokeWidth={2.2} />
               </button>
@@ -210,15 +217,11 @@ export function SvpSection() {
           sub={
             ready
               ? linux
-                ? t(
-                    "Uses SVP's motion engine through VapourSynth. Restart playback to apply.",
-                  )
+                ? t("Uses SVP's motion engine through VapourSynth. Restart playback to apply.")
                 : t(
                     "Smooths motion using SVP. Restart playback to apply; turn this off if video will not play.",
                   )
-              : t(
-                  "Install SVP and check again before enabling it.",
-                )
+              : t("Install SVP and check again before enabling it.")
           }
           value={settings.playerSvp}
           onChange={(v) => void onToggle(v)}
@@ -243,9 +246,7 @@ export function SvpSection() {
           <SettingRow
             wide
             label={t("Apply SVP to")}
-            desc={t(
-              "Choose which videos use motion smoothing. Restart playback to apply.",
-            )}
+            desc={t("Choose which videos use motion smoothing. Restart playback to apply.")}
             lockReason={
               settings.playerSvp
                 ? undefined

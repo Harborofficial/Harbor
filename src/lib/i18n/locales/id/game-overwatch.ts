@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Hero Stadium",
   "games.overwatch.searchHeroes": "Cari hero",
   "games.overwatch.refresh": "Perbarui panduan",
-  "games.overwatch.unavailable": "Panduan tidak dapat diperbarui. Informasi yang dimuat sebelumnya mungkin masih ditampilkan.",
+  "games.overwatch.unavailable":
+    "Panduan tidak dapat diperbarui. Informasi yang dimuat sebelumnya mungkin masih ditampilkan.",
   "games.overwatch.partial": "Sebagian entri tidak tersedia.",
   "games.overwatch.checked": "Diperiksa {date}",
-  "games.overwatch.scope": "Informasi hero dari Blizzard melalui OverFast. Perubahan keseimbangan bisa hadir dalam gim sebelum panduan ini diperbarui.",
-  "games.overwatch.mapsScope": "Informasi peta dan mode dari OverFast. Termasuk peta Arcade dan lama; ketersediaan bergantung pada mode.",
+  "games.overwatch.scope":
+    "Informasi hero dari Blizzard melalui OverFast. Perubahan keseimbangan bisa hadir dalam gim sebelum panduan ini diperbarui.",
+  "games.overwatch.mapsScope":
+    "Informasi peta dan mode dari OverFast. Termasuk peta Arcade dan lama; ketersediaan bergantung pada mode.",
   "games.overwatch.empty": "Tidak ada hasil. Coba pencarian atau filter lain.",
   "games.overwatch.moreHeroes": "Hero lainnya",
   "games.overwatch.moreMaps": "Peta lainnya",
@@ -30,9 +33,9 @@ export default {
   "games.overwatch.watchDemo": "Tonton demonstrasi",
   "games.overwatch.hideDemo": "Sembunyikan demonstrasi",
   "games.overwatch.closeDemo": "Tutup demonstrasi",
-  "games.overwatch.videoFailed": "Demonstrasi tidak dapat diputar. Buka halaman resmi hero untuk menontonnya.",
+  "games.overwatch.videoFailed":
+    "Demonstrasi tidak dapat diputar. Buka halaman resmi hero untuk menontonnya.",
   "games.overwatch.mode": "Mode permainan",
   "games.overwatch.allModes": "Semua mode",
-  "games.overwatch.searchMaps": "Cari peta atau lokasi"
+  "games.overwatch.searchMaps": "Cari peta atau lokasi",
 };
-

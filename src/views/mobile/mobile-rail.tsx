@@ -84,7 +84,15 @@ function useOpen(onOpenDetail?: OpenDetail) {
   return (meta: Meta) => (onOpenDetail ? onOpenDetail(meta) : openOnHost(meta));
 }
 
-function RankTile({ meta, rank, onOpenDetail }: { meta: Meta; rank: number; onOpenDetail?: OpenDetail }) {
+function RankTile({
+  meta,
+  rank,
+  onOpenDetail,
+}: {
+  meta: Meta;
+  rank: number;
+  onOpenDetail?: OpenDetail;
+}) {
   const { settings } = useSettings();
   const open = useOpen(onOpenDetail);
   const { src, onError } = usePosterChain(
@@ -113,10 +121,19 @@ function RankTile({ meta, rank, onOpenDetail }: { meta: Meta; rank: number; onOp
           {rank}
         </span>
         <div className="absolute end-0 top-0 w-[62%]">
-          <Poster src={src} onError={onError} seed={meta.id} ratio="portrait" lazy className="rounded-[12px]" />
+          <Poster
+            src={src}
+            onError={onError}
+            seed={meta.id}
+            ratio="portrait"
+            lazy
+            className="rounded-[12px]"
+          />
         </div>
       </div>
-      <p className="mt-1.5 line-clamp-1 ps-[38%] text-[12px] font-medium text-ink-muted">{meta.name}</p>
+      <p className="mt-1.5 line-clamp-1 ps-[38%] text-[12px] font-medium text-ink-muted">
+        {meta.name}
+      </p>
     </button>
   );
 }
@@ -137,7 +154,14 @@ export function PosterTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail?: 
       onClick={() => open(meta)}
       className="w-[124px] shrink-0 text-start transition-transform duration-150 active:scale-[0.96]"
     >
-      <Poster src={src} onError={onError} seed={meta.id} ratio="portrait" lazy className="rounded-lg">
+      <Poster
+        src={src}
+        onError={onError}
+        seed={meta.id}
+        ratio="portrait"
+        lazy
+        className="rounded-lg"
+      >
         {award && <AwardCorner award={award} />}
         {!settings.rpdbKey && meta.imdbRating && (
           <span className="pointer-events-none absolute bottom-1.5 end-1.5 flex items-center gap-0.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[10.5px] font-bold text-white backdrop-blur-sm">
@@ -146,7 +170,9 @@ export function PosterTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail?: 
           </span>
         )}
       </Poster>
-      <p className="mt-1.5 line-clamp-2 text-[12.5px] font-medium leading-snug text-ink-muted">{meta.name}</p>
+      <p className="mt-1.5 line-clamp-2 text-[12.5px] font-medium leading-snug text-ink-muted">
+        {meta.name}
+      </p>
     </button>
   );
 }
@@ -181,7 +207,13 @@ function LandscapeTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail?: Open
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-surface ring-1 ring-edge-soft/50">
         {bg && (
-          <img src={bg} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={bg}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         )}
       </div>
       <p className="mt-1.5 line-clamp-1 text-[13px] font-medium text-ink-muted">{meta.name}</p>

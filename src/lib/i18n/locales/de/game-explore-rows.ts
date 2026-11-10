@@ -14,7 +14,8 @@ export default {
   "games.discovery.steamVerdict.Positive": "Positiv",
   "games.discovery.steamVerdict.Very Positive": "Sehr positiv",
   "games.discovery.steamVerdict.Overwhelmingly Positive": "Äußerst positiv",
-  "games.discovery.ratingNote.steam": "Anteil der Steam-Spielerrezensionen, die dieses Spiel empfehlen.",
+  "games.discovery.ratingNote.steam":
+    "Anteil der Steam-Spielerrezensionen, die dieses Spiel empfehlen.",
   "games.launchers.explore": "Nach Launcher entdecken",
   "games.launchers.note": "Entdecke Spiele aus verschiedenen PC-Launchern.",
   "games.launchers.choose": "Launcher auswählen",
@@ -23,7 +24,8 @@ export default {
   "games.launchers.visit": "{name} besuchen",
   "games.launchers.picks": "Spieleauswahl",
   "games.launchers.unavailable": "Aktuelle Spieldetails konnten nicht geladen werden.",
-  "games.launchers.source": "Spieldetails von IGDB · Launcher-Links öffnen die offiziellen Websites.",
+  "games.launchers.source":
+    "Spieldetails von IGDB · Launcher-Links öffnen die offiziellen Websites.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +61,8 @@ export default {
   "games.recent.open": "{name} aus {source} öffnen",
   "games.recent.files": "Quelldateien",
   "games.recent.empty": "Verbinde eine Spielequelle, um hier ihre neuesten Ergänzungen zu sehen.",
-  "games.recent.undated": "Deine Quellen haben noch keine Spiele-Uploads mit Datum. Öffne sie unter Quellen verwalten.",
+  "games.recent.undated":
+    "Deine Quellen haben noch keine Spiele-Uploads mit Datum. Öffne sie unter Quellen verwalten.",
   "games.recent.adult": "Inhalt für Erwachsene · Bild weichgezeichnet",
   "games.recent.artHidden": "Bild ausgeblendet",
   "games.recent.artUnrated": "Inhaltseinstufung nicht verfügbar",
@@ -142,8 +145,10 @@ export default {
   "games.tournaments.checked": "Veranstaltertermine geprüft am {date}",
   "games.tournaments.schedule": "Offizielle Veranstaltungsdetails",
   "games.tournaments.watch": "Übertragungen",
-  "games.tournaments.channelsNote": "Offizielle Kanäle. Die Übertragung richtet sich nach dem Turnierplan.",
-  "games.tournaments.broadcastPending": "Hier liegen noch keine bestätigten Übertragungsdetails vor. Prüfe die Veranstalterseite.",
+  "games.tournaments.channelsNote":
+    "Offizielle Kanäle. Die Übertragung richtet sich nach dem Turnierplan.",
+  "games.tournaments.broadcastPending":
+    "Hier liegen noch keine bestätigten Übertragungsdetails vor. Prüfe die Veranstalterseite.",
   "games.tournaments.noDates": "In diesem Kalender ist kein kommendes Major bestätigt.",
   "games.launchers.topGames": "Meistgespielt auf Steam",
   "games.launchers.chartRank": "Platz {rank} der meistgespielten Spiele",

@@ -33,7 +33,8 @@ export function loadPinnedSources(): Promise<void> {
       for (const row of rows) {
         if (!Array.isArray(row) || typeof row[0] !== "string") continue;
         const value = row[1] as Partial<PinnedSource> | undefined;
-        if (!value || typeof value.connectorId !== "string" || typeof value.id !== "string") continue;
+        if (!value || typeof value.connectorId !== "string" || typeof value.id !== "string")
+          continue;
         pins.set(row[0], { connectorId: value.connectorId, id: value.id });
       }
     })

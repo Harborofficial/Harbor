@@ -97,7 +97,9 @@ export async function bpHomeCacheSave(key: string, snap: BpHomeSnapshot): Promis
   // Trimmed before it is written, never after it is read. What goes in is what
   // the opening frame draws, and drawing thirty cards of a row nobody has
   // scrolled to costs the same as drawing three hundred.
-  const rows = snap.rows.slice(0, MAX_ROWS).map((r) => ({ ...r, metas: r.metas.slice(0, MAX_PER_ROW) }));
+  const rows = snap.rows
+    .slice(0, MAX_ROWS)
+    .map((r) => ({ ...r, metas: r.metas.slice(0, MAX_PER_ROW) }));
   const payload: Stored = { key, at: Date.now(), rows, hero: snap.hero.slice(0, 12) };
   try {
     await writeSlot(SLOT, payload);

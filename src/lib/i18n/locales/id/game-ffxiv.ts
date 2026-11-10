@@ -25,7 +25,8 @@ export default {
   "games.ffxiv.marketFailed": "Data pasar tidak dapat diperbarui.",
   "games.ffxiv.checked": "Diperiksa {date}",
   "games.ffxiv.listings": "Penawaran",
-  "games.ffxiv.listingScope": "Hingga 20 penawaran berdasarkan harga satuan. Total belum termasuk pajak.",
+  "games.ffxiv.listingScope":
+    "Hingga 20 penawaran berdasarkan harga satuan. Total belum termasuk pajak.",
   "games.ffxiv.unit": "Gil / unit",
   "games.ffxiv.stack": "Tumpukan",
   "games.ffxiv.seen": "Terakhir terlihat",
@@ -34,6 +35,7 @@ export default {
   "games.ffxiv.sales": "Penjualan terbaru",
   "games.ffxiv.sold": "Terjual",
   "games.ffxiv.noSales": "Tidak ada penjualan terbaru dalam catatan ini.",
-  "games.ffxiv.community": "Data komunitas mungkin sudah lama. Penawaran mungkin telah terjual sejak pembaruan terakhir.",
-  "games.ffxiv.open": "Lihat di Universalis"
+  "games.ffxiv.community":
+    "Data komunitas mungkin sudah lama. Penawaran mungkin telah terjual sejak pembaruan terakhir.",
+  "games.ffxiv.open": "Lihat di Universalis",
 };

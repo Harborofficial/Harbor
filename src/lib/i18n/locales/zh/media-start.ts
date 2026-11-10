@@ -6,7 +6,7 @@ const mediaStart: Record<string, string> = {
   "start.live.playlist": "通过 M3U 链接添加播放列表。",
   "start.live.guide": "为频道添加节目单。",
   "start.manga.extensions": "从信任的仓库添加漫画源。",
-  "start.server": "连接自己服务器上的书库。"
+  "start.server": "连接自己服务器上的书库。",
 };
 
 export default mediaStart;

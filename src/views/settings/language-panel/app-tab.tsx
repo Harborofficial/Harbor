@@ -96,12 +96,16 @@ export function AppLanguageTab() {
 
       <Section
         title={t("Titles and descriptions")}
-        subtitle={t("The language TMDB serves show and film text in. Separate from the interface language above.")}
+        subtitle={t(
+          "The language TMDB serves show and film text in. Separate from the interface language above.",
+        )}
       >
         <SettingRow
           wide
           label={t("Language")}
-          desc={t("Untranslated text stays in English. Choose a language, then select Apply and reload.")}
+          desc={t(
+            "Untranslated text stays in English. Choose a language, then select Apply and reload.",
+          )}
         >
           <div ref={anchorRef}>
             <Dropdown
@@ -114,13 +118,17 @@ export function AppLanguageTab() {
         </SettingRow>
         <ToggleRow
           label={t("Translate titles")}
-          sub={t("Show translated names in the language selected above. Turn off to keep original titles.")}
+          sub={t(
+            "Show translated names in the language selected above. Turn off to keep original titles.",
+          )}
           value={settings.translateTitles}
           onChange={(v) => update({ translateTitles: v })}
         />
         <ToggleRow
           label={t("Translate overviews")}
-          sub={t("Translate plot descriptions and taglines into the language above. Turn off to keep English overviews.")}
+          sub={t(
+            "Translate plot descriptions and taglines into the language above. Turn off to keep English overviews.",
+          )}
           lockReason={
             settings.tmdbLanguage === ""
               ? t("Pick a metadata language above to translate overviews.")
@@ -131,7 +139,9 @@ export function AppLanguageTab() {
         />
         <SettingRow
           label={t("Anime Title Language")}
-          desc={t("Preferred language for anime titles shown on cards, in the picker, and in your Discord presence.")}
+          desc={t(
+            "Preferred language for anime titles shown on cards, in the picker, and in your Discord presence.",
+          )}
         >
           <Dropdown
             value={settings.animeTitleLanguage}
@@ -148,7 +158,9 @@ export function AppLanguageTab() {
 
       <Section
         title={t("Artwork")}
-        subtitle={t("Posters, logos, and title art load in the first available language from this list. \"Original\" uses the title's own language. Needs a TMDB key.")}
+        subtitle={t(
+          'Posters, logos, and title art load in the first available language from this list. "Original" uses the title\'s own language. Needs a TMDB key.',
+        )}
       >
         <LanguagesPicker
           value={imgLangsDraft}

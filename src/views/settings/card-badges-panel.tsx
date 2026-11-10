@@ -134,7 +134,11 @@ function PreviewCard({
   limit: number;
   layout?: "poster" | "tv";
 }) {
-  const { poster: normalPoster, background: normalBackground, name: normalName } = useSampleArtwork(8);
+  const {
+    poster: normalPoster,
+    background: normalBackground,
+    name: normalName,
+  } = useSampleArtwork(8);
   const animePoster = ANIME_PREVIEW;
   const extras = previewExtras(flags);
   const normal: React.ReactNode[] = [];
@@ -174,7 +178,9 @@ function PreviewCard({
   const cap = Math.max(1, limit);
   const badgePos = position === "top" ? "top-2" : layout === "tv" ? "bottom-9" : "bottom-2";
   return (
-    <div className={`relative w-full overflow-hidden rounded-md bg-raised ${layout === "tv" ? "aspect-[16/9]" : "aspect-[2/3]"}`}>
+    <div
+      className={`relative w-full overflow-hidden rounded-md bg-raised ${layout === "tv" ? "aspect-[16/9]" : "aspect-[2/3]"}`}
+    >
       <img
         src={layout === "tv" ? normalBackground : normalPoster}
         alt=""
@@ -210,8 +216,16 @@ function PreviewCard({
           </div>
         </>
       )}
-      <PreviewBadgeRow nodes={normal.slice(0, cap)} badgePos={badgePos} visible={phase === "normal"} />
-      <PreviewBadgeRow nodes={anime.slice(0, cap)} badgePos={badgePos} visible={phase === "anime"} />
+      <PreviewBadgeRow
+        nodes={normal.slice(0, cap)}
+        badgePos={badgePos}
+        visible={phase === "normal"}
+      />
+      <PreviewBadgeRow
+        nodes={anime.slice(0, cap)}
+        badgePos={badgePos}
+        visible={phase === "anime"}
+      />
       {watchlistBadge !== "off" && (
         <span
           className={`absolute z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-canvas text-ink ${WL_PREVIEW_POS[watchlistBadge]}`}
@@ -270,7 +284,9 @@ export function WatchlistControl({
   const t = useT();
   const rtl = useIsRtl();
   const on = value !== "off";
-  const [last, setLast] = useState<Exclude<WatchlistPos, "off">>(value !== "off" ? value : "topEnd");
+  const [last, setLast] = useState<Exclude<WatchlistPos, "off">>(
+    value !== "off" ? value : "topEnd",
+  );
   const corners: Array<{ value: Exclude<WatchlistPos, "off">; label: string }> = [
     { value: "topStart", label: rtl ? t("Top right") : t("Top left") },
     { value: "topEnd", label: rtl ? t("Top left") : t("Top right") },
@@ -328,7 +344,10 @@ export function CardScoresPreview({
     <div className="flex flex-col items-center gap-4 rounded-[12px] bg-elevated p-4">
       <Segmented
         value={phase}
-        options={[{ value: "normal", label: t("Movies") }, { value: "anime", label: t("Anime") }]}
+        options={[
+          { value: "normal", label: t("Movies") },
+          { value: "anime", label: t("Anime") },
+        ]}
         onChange={(v) => setPhase(v as "normal" | "anime")}
       />
       <div
@@ -348,7 +367,9 @@ export function CardScoresPreview({
           layout={layout}
         />
       </div>
-      <p className="text-center text-[14px] leading-5 text-ink-muted">{t("Example scores with your settings.")}</p>
+      <p className="text-center text-[14px] leading-5 text-ink-muted">
+        {t("Example scores with your settings.")}
+      </p>
     </div>
   );
 }

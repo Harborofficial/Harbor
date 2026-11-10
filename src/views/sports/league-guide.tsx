@@ -92,12 +92,7 @@ export function LeagueGuide({ league, onClose }: { league: LeagueDef; onClose: (
   const columns =
     table?.columns.filter((column) => !["rank", "playoffSeed"].includes(column.name)) || [];
   return (
-    <ModalShell
-      closing={false}
-      onDismiss={onClose}
-      width={1080}
-      labelledBy="league-guide-title"
-    >
+    <ModalShell closing={false} onDismiss={onClose} width={1080} labelledBy="league-guide-title">
       <article className="sh-league-guide">
         <header className="sh-league-guide-head">
           <span className="sh-eyebrow">{t("League guide")}</span>
@@ -168,17 +163,13 @@ export function LeagueGuide({ league, onClose }: { league: LeagueDef; onClose: (
                 <div className="sh-league-guide-description">
                   {data.description.length > 1100 ? (
                     <>
-                      <p>
-                        {data.description.slice(0, data.description.lastIndexOf(" ", 1100))}…
-                      </p>
+                      <p>{data.description.slice(0, data.description.lastIndexOf(" ", 1100))}…</p>
                       <details>
                         <summary className="cursor-pointer py-3 font-semibold">
                           {t("Read more")}
                         </summary>
                         <p>
-                          {data.description
-                            .slice(data.description.lastIndexOf(" ", 1100))
-                            .trim()}
+                          {data.description.slice(data.description.lastIndexOf(" ", 1100)).trim()}
                         </p>
                       </details>
                     </>
@@ -269,10 +260,7 @@ export function LeagueGuide({ league, onClose }: { league: LeagueDef; onClose: (
               </label>
               <LeagueGuideAthletes athletes={athletes.slice(0, limit)} league={league} />
               {athletes.length > limit && (
-                <button
-                  className="sh-button mt-4"
-                  onClick={() => setLimit((count) => count + 60)}
-                >
+                <button className="sh-button mt-4" onClick={() => setLimit((count) => count + 60)}>
                   {t("Show more")}
                 </button>
               )}
@@ -342,10 +330,7 @@ export function LeagueGuide({ league, onClose }: { league: LeagueDef; onClose: (
                 ))}
               </div>
               {teams.length > limit && (
-                <button
-                  className="sh-button mt-4"
-                  onClick={() => setLimit((count) => count + 60)}
-                >
+                <button className="sh-button mt-4" onClick={() => setLimit((count) => count + 60)}>
                   {t("Show more")}
                 </button>
               )}
@@ -432,8 +417,7 @@ export function LeagueGuide({ league, onClose }: { league: LeagueDef; onClose: (
                           </td>
                           {columns.map((column) => (
                             <td key={column.name}>
-                              {row.cells.find((cell) => cell.name === column.name)?.display ||
-                                "—"}
+                              {row.cells.find((cell) => cell.name === column.name)?.display || "—"}
                             </td>
                           ))}
                         </tr>

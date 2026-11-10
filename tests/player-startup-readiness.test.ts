@@ -71,7 +71,10 @@ test("startup subtitle downloads no longer block the initial media load", () => 
   assert.match(mpv, /subtitles: \[\]/);
   assert.match(mpv, /queueSeedSubtitles\(src\.subtitles, activeLoadId\)/);
   const coldStart = mpv.indexOf('await invoke("mpv_start"');
-  const deferredSubtitles = mpv.indexOf("queueSeedSubtitles(src.subtitles, activeLoadId)", coldStart);
+  const deferredSubtitles = mpv.indexOf(
+    "queueSeedSubtitles(src.subtitles, activeLoadId)",
+    coldStart,
+  );
   assert.ok(coldStart >= 0 && deferredSubtitles > coldStart);
 });
 

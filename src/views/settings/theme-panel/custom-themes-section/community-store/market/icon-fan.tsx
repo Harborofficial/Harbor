@@ -23,7 +23,15 @@ function FanTile({ icon, first }: { icon: IconThumb; first: boolean }) {
   );
 }
 
-export function IconFan({ icons, max = 5, fallback }: { icons: IconThumb[]; max?: number; fallback?: ReactNode }) {
+export function IconFan({
+  icons,
+  max = 5,
+  fallback,
+}: {
+  icons: IconThumb[];
+  max?: number;
+  fallback?: ReactNode;
+}) {
   const shown = icons.slice(0, max);
   if (shown.length === 0) return fallback ? <>{fallback}</> : null;
   return (

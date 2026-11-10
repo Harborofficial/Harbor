@@ -16,7 +16,12 @@ export function SwatchField({
 }) {
   const [hover, setHover] = useState(false);
   return (
-    <ColorPopover label={label} value={value} onChange={onChange} className={`overflow-hidden ${className}`}>
+    <ColorPopover
+      label={label}
+      value={value}
+      onChange={onChange}
+      className={`overflow-hidden ${className}`}
+    >
       {(open) => (
         <span
           className="block h-full min-h-11 w-full"

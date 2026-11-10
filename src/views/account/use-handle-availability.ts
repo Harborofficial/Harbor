@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { handleAvailable, localHandleCheck, normalizeHandle, type HandleCheck } from "@/lib/account/handle";
+import {
+  handleAvailable,
+  localHandleCheck,
+  normalizeHandle,
+  type HandleCheck,
+} from "@/lib/account/handle";
 
 export type HandleStatus =
   | { state: "idle" }

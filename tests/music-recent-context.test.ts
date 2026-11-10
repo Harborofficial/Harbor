@@ -52,14 +52,12 @@ describe("music recent contexts", () => {
   });
 
   it("keeps the newest context first and dedupes on kind and id", () => {
-    recordMusicRecentContext(
-      { kind: "playlist", id: "p1", name: "Late Night", artwork: [] },
-      [deezer],
-    );
-    recordMusicRecentContext(
-      { kind: "playlist", id: "p1", name: "Late Night", artwork: [] },
-      [deezer],
-    );
+    recordMusicRecentContext({ kind: "playlist", id: "p1", name: "Late Night", artwork: [] }, [
+      deezer,
+    ]);
+    recordMusicRecentContext({ kind: "playlist", id: "p1", name: "Late Night", artwork: [] }, [
+      deezer,
+    ]);
     const contexts = getMusicRecentContexts();
     assert.equal(contexts[0]?.id, "p1");
     assert.equal(contexts.filter((entry) => entry.id === "p1").length, 1);

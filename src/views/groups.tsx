@@ -27,7 +27,10 @@ export function GroupsView() {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[420px]"
-        style={{ background: "linear-gradient(180deg, color-mix(in oklch, var(--color-elevated), transparent 45%), transparent 78%)" }}
+        style={{
+          background:
+            "linear-gradient(180deg, color-mix(in oklch, var(--color-elevated), transparent 45%), transparent 78%)",
+        }}
       />
 
       <div className="relative mx-auto w-full max-w-[1180px] px-6 pb-24 pt-28 sm:px-10">
@@ -41,7 +44,9 @@ export function GroupsView() {
                 {t("Groups")}
               </h1>
               <p className="max-w-[46ch] text-[13.5px] leading-relaxed text-ink-muted">
-                {t("Find people who watch what you watch. Join a group to share lists, post, and watch together.")}
+                {t(
+                  "Find people who watch what you watch. Join a group to share lists, post, and watch together.",
+                )}
               </p>
             </div>
             {signedIn && (
@@ -64,13 +69,20 @@ export function GroupsView() {
                 placeholder={t("Search groups by name or tag")}
                 className="h-full flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-subtle"
               />
-              {d.phase === "loading" && d.q && <Loader2 size={15} className="shrink-0 animate-spin text-ink-subtle" />}
+              {d.phase === "loading" && d.q && (
+                <Loader2 size={15} className="shrink-0 animate-spin text-ink-subtle" />
+              )}
             </div>
             {d.topTags.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5">
                 <TagChip active={!d.tag} label={t("All")} onClick={() => d.setTag(null)} />
                 {d.topTags.map((tg) => (
-                  <TagChip key={tg} active={d.tag === tg} label={tg} onClick={() => d.setTag(tg === d.tag ? null : tg)} />
+                  <TagChip
+                    key={tg}
+                    active={d.tag === tg}
+                    label={tg}
+                    onClick={() => d.setTag(tg === d.tag ? null : tg)}
+                  />
                 ))}
               </div>
             )}
@@ -88,7 +100,9 @@ export function GroupsView() {
         )}
 
         <Section
-          title={browsing ? t("Results") : mine.length > 0 ? t("Discover more") : t("Public groups")}
+          title={
+            browsing ? t("Results") : mine.length > 0 ? t("Discover more") : t("Public groups")
+          }
           count={d.phase === "ready" ? d.total : undefined}
         >
           {d.phase === "loading" ? (
@@ -96,7 +110,10 @@ export function GroupsView() {
           ) : d.phase === "error" ? (
             <GroupsError onRetry={d.reload} />
           ) : rest.length === 0 ? (
-            <GroupsEmpty query={d.q.trim()} onCreate={signedIn ? () => setCreating(true) : undefined} />
+            <GroupsEmpty
+              query={d.q.trim()}
+              onCreate={signedIn ? () => setCreating(true) : undefined}
+            />
           ) : (
             <>
               <Grid>
@@ -133,7 +150,15 @@ export function GroupsView() {
   );
 }
 
-function TagChip({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
+function TagChip({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -149,11 +174,21 @@ function TagChip({ active, label, onClick }: { active: boolean; label: string; o
   );
 }
 
-function Section({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
+function Section({
+  title,
+  count,
+  children,
+}: {
+  title: string;
+  count?: number;
+  children: React.ReactNode;
+}) {
   return (
     <section className="mt-12">
       <div className="mb-4 flex items-baseline gap-2.5">
-        <h2 className="text-[13px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">{title}</h2>
+        <h2 className="text-[13px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+          {title}
+        </h2>
         {count !== undefined && count > 0 && (
           <span className="text-[12px] tabular-nums text-ink-subtle/70">{count}</span>
         )}
@@ -164,5 +199,7 @@ function Section({ title, count, children }: { title: string; count?: number; ch
 }
 
 function Grid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">{children}</div>;
+  return (
+    <div className="grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">{children}</div>
+  );
 }

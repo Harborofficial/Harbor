@@ -14,7 +14,8 @@ export default {
   "games.discovery.steamVerdict.Positive": "Positivas",
   "games.discovery.steamVerdict.Very Positive": "Muy positivas",
   "games.discovery.steamVerdict.Overwhelmingly Positive": "Extremadamente positivas",
-  "games.discovery.ratingNote.steam": "Porcentaje de reseñas de jugadores de Steam que recomiendan este juego.",
+  "games.discovery.ratingNote.steam":
+    "Porcentaje de reseñas de jugadores de Steam que recomiendan este juego.",
   "games.launchers.explore": "Explorar por launcher",
   "games.launchers.note": "Descubre juegos de distintos launchers de PC.",
   "games.launchers.choose": "Elige un launcher",
@@ -23,7 +24,8 @@ export default {
   "games.launchers.visit": "Visitar {name}",
   "games.launchers.picks": "Juegos seleccionados",
   "games.launchers.unavailable": "No se pudieron cargar los detalles actuales.",
-  "games.launchers.source": "Detalles de IGDB · Los enlaces abren los sitios oficiales de los launchers.",
+  "games.launchers.source":
+    "Detalles de IGDB · Los enlaces abren los sitios oficiales de los launchers.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +61,8 @@ export default {
   "games.recent.open": "Abrir {name} de {source}",
   "games.recent.files": "Archivos de la fuente",
   "games.recent.empty": "Conecta una fuente de juegos para ver aquí sus últimas novedades.",
-  "games.recent.undated": "Tus fuentes aún no tienen juegos subidos con fecha. Explóralas en Gestionar fuentes.",
+  "games.recent.undated":
+    "Tus fuentes aún no tienen juegos subidos con fecha. Explóralas en Gestionar fuentes.",
   "games.recent.adult": "Contenido para adultos · imagen difuminada",
   "games.recent.artHidden": "Imagen oculta",
   "games.recent.artUnrated": "Clasificación de contenido no disponible",
@@ -85,7 +88,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Ingresos en recreativas, 1980–1999",
   "games.collectionsLive.wowRecord": "Máximo de suscriptores de pago",
   "games.collectionsLive.wiiRecord": "Copias vendidas en Wii",
-  "games.collectionsLive.manhuntRecord": "Primer juego de acción y aventura al que se denegó la clasificación británica",
+  "games.collectionsLive.manhuntRecord":
+    "Primer juego de acción y aventura al que se denegó la clasificación británica",
   "games.collectionsLive.gtaVSalesRecord": "El juego de acción y aventura más vendido",
   "games.collectionsLive.blackOps3Record": "El shooter en primera persona más vendido",
   "games.collectionsLive.smashUltimateRecord": "El juego de lucha más vendido",
@@ -103,13 +107,15 @@ export default {
   "games.collectionsLive.metalGearSeriesRecord": "La saga de sigilo más vendida",
   "games.collectionsLive.haloSeriesRecord": "La saga de shooters de ciencia ficción más vendida",
   "games.collectionsLive.mortalSeriesRecord": "La saga de lucha más vendida",
-  "games.collectionsLive.granTurismoSeriesRecord": "La saga de simulación de conducción más vendida",
+  "games.collectionsLive.granTurismoSeriesRecord":
+    "La saga de simulación de conducción más vendida",
   "games.collectionsLive.commandSeriesRecord": "La saga de estrategia en tiempo real más vendida",
   "games.collectionsLive.justDanceSeriesRecord": "La saga de baile más vendida",
   "games.collectionsLive.maddenSeriesRecord": "La saga de fútbol americano más vendida",
   "games.collectionsLive.nba2kSeriesRecord": "La saga de baloncesto más vendida",
   "games.collectionsLive.honorKingsRecord": "Los mayores ingresos de un juego para móviles",
-  "games.collectionsLive.gearsBillionRecord": "La primera saga de shooters en tercera persona en lograrlo",
+  "games.collectionsLive.gearsBillionRecord":
+    "La primera saga de shooters en tercera persona en lograrlo",
   "games.collectionsLive.oldRepublicRecord": "El MMORPG más caro jamás desarrollado",
   "games.collectionsLive.mario64AuctionRecord": "Lo máximo pagado por un juego en una subasta",
   "games.collectionsLive.dotaPrizeRecord": "El mayor premio de un torneo de esports de su época",
@@ -125,7 +131,8 @@ export default {
   "games.collectionsLive.odysseyScoreRecord": "El juego de Switch mejor valorado",
   "games.collectionsLive.hawkScoreRecord": "El juego de PlayStation mejor valorado",
   "games.collectionsLive.soulScoreRecord": "El juego de Dreamcast mejor valorado",
-  "games.collectionsLive.crossfirePlayersRecord": "Jugadores registrados, un récord para un shooter",
+  "games.collectionsLive.crossfirePlayersRecord":
+    "Jugadores registrados, un récord para un shooter",
   "games.collectionsLive.candyPlayersRecord": "Jugadores mensuales en su mejor momento",
   "games.collectionsLive.gta6TrailerRecord": "Visitas del tráiler en 24 horas",
   "games.collectionsLive.fortniteConcertRecord": "Jugadores en un solo concierto dentro del juego",
@@ -142,8 +149,10 @@ export default {
   "games.tournaments.checked": "Fechas del organizador verificadas el {date}",
   "games.tournaments.schedule": "Información oficial del evento",
   "games.tournaments.watch": "Dónde verlo",
-  "games.tournaments.channelsNote": "Canales oficiales. La cobertura sigue el calendario del torneo.",
-  "games.tournaments.broadcastPending": "Aún no hay detalles de emisión confirmados aquí. Consulta la página del organizador.",
+  "games.tournaments.channelsNote":
+    "Canales oficiales. La cobertura sigue el calendario del torneo.",
+  "games.tournaments.broadcastPending":
+    "Aún no hay detalles de emisión confirmados aquí. Consulta la página del organizador.",
   "games.tournaments.noDates": "No hay un próximo major confirmado en este calendario.",
   "games.launchers.topGames": "Más jugados en Steam",
   "games.launchers.chartRank": "Puesto {rank} entre los más jugados",

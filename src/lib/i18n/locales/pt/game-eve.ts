@@ -22,7 +22,8 @@ export default {
   "games.eve.avoiding": "Evitar",
   "games.eve.allow": "Permitir {name}",
   "games.eve.clear": "Limpar tudo",
-  "games.eve.stargates": "Apenas rotas por portais estelares. Buracos de minhoca e pontes de salto não estão incluídos.",
+  "games.eve.stargates":
+    "Apenas rotas por portais estelares. Buracos de minhoca e pontes de salto não estão incluídos.",
   "games.eve.saveFailed": "Não foi possível salvar esta rota neste dispositivo.",
   "games.eve.routeFailed": "Não foi possível carregar a rota. Tente novamente.",
   "games.eve.ready": "Escolha o destino e trace uma rota.",
@@ -46,7 +47,8 @@ export default {
   "games.eve.avoid": "Evitar {name}",
   "games.eve.less": "Mostrar menos paradas",
   "games.eve.allStops": "Mostrar todas as paradas",
-  "games.eve.activityNote": "A atividade registrada é histórica e exclui buracos de minhoca. A preferência de segurança não garante uma rota segura.",
+  "games.eve.activityNote":
+    "A atividade registrada é histórica e exclui buracos de minhoca. A preferência de segurança não garante uma rota segura.",
   "games.eve.noRoute": "Nenhuma rota por portais estelares encontrada.",
   "games.eve.incursions": "Incursões",
   "games.eve.refreshIncursions": "Atualizar incursões",
@@ -60,5 +62,5 @@ export default {
   "games.eve.influence": "Influência",
   "games.eve.systems": "Sistemas · {count}",
   "games.eve.boss": "Chefe presente",
-  "games.eve.routeThere": "Traçar rota até aqui"
+  "games.eve.routeThere": "Traçar rota até aqui",
 };

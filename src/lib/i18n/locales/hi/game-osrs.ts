@@ -42,5 +42,5 @@ export default {
   "games.osrs.averages": "सौदे न होने पर अंतराल खाली रहते हैं। एक्सचेंज कर की गणना यहाँ नहीं की जाती।",
   "games.osrs.table": "हाल के 24 अंतराल",
   "games.osrs.time": "समय",
-  "games.osrs.volume": "व्यापार किए गए आइटम"
+  "games.osrs.volume": "व्यापार किए गए आइटम",
 };

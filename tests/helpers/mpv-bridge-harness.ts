@@ -44,10 +44,7 @@ export function playerSnapshotChanged() {
   }).outputText;
   return new Function(
     `const AUTOMATIC_SUBTITLE_BUFFER_SEC = ${autoload.AUTOMATIC_SUBTITLE_BUFFER_SEC}; ${compiled}; return snapChangedIgnoringClock;`,
-  )() as (
-    a: PlayerSnapshot,
-    b: PlayerSnapshot,
-  ) => boolean;
+  )() as (a: PlayerSnapshot, b: PlayerSnapshot) => boolean;
 }
 
 export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options?: MpvOptions) {

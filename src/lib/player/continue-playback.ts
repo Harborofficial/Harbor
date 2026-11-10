@@ -110,8 +110,9 @@ export function canReuseRecentRemotePlayback(
   const age = now - target.playedAt;
   if (!Number.isFinite(age) || age < 0 || age > 2 * 60 * 60 * 1000) return false;
   if (target.requiresSourceRefresh || target.src.streamRef?.infoHash) return false;
-  return /^https?:\/\/(?!127\.0\.0\.1(?:[:/]|$)|localhost(?:[:/]|$)|\[::1\](?:[:/]|$))/i
-    .test(target.src.url);
+  return /^https?:\/\/(?!127\.0\.0\.1(?:[:/]|$)|localhost(?:[:/]|$)|\[::1\](?:[:/]|$))/i.test(
+    target.src.url,
+  );
 }
 
 export async function continueActualPlayback(

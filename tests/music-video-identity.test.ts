@@ -6,10 +6,20 @@ const same = (a: [string, string], b: [string, string]) =>
   musicVideoIdentity(a[0], a[1]) === musicVideoIdentity(b[0], b[1]);
 
 test("re-uploads of one song collapse to a single entry", () => {
-  const base: [string, string] = ["F**kin' Problems (feat. Drake, 2 Chainz & Kendrick Lamar)", "A$AP Rocky"];
-  assert.ok(same(base, ["F**kin' Problems (feat. Kendrick Lamar, Drake & 2 Chainz)", "A$AP Rocky"]));
+  const base: [string, string] = [
+    "F**kin' Problems (feat. Drake, 2 Chainz & Kendrick Lamar)",
+    "A$AP Rocky",
+  ];
+  assert.ok(
+    same(base, ["F**kin' Problems (feat. Kendrick Lamar, Drake & 2 Chainz)", "A$AP Rocky"]),
+  );
   assert.ok(same(base, ["F**kin' Problems", "A$AP Rocky"]));
-  assert.ok(same(base, ["F**kin' Problems (Clean - Official Video) (feat. Drake, 2 Chainz & Kendrick Lamar)", "A$AP Rocky"]));
+  assert.ok(
+    same(base, [
+      "F**kin' Problems (Clean - Official Video) (feat. Drake, 2 Chainz & Kendrick Lamar)",
+      "A$AP Rocky",
+    ]),
+  );
 });
 
 test("different songs by the same artist stay distinct", () => {

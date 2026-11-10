@@ -14,7 +14,9 @@ export function MotionCompare() {
   const [pageVisible, setPageVisible] = useState(true);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.1 });
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      threshold: 0.1,
+    });
     if (ref.current) observer.observe(ref.current);
     const updateVisibility = () => setPageVisible(document.visibilityState === "visible");
     updateVisibility();
@@ -28,7 +30,14 @@ export function MotionCompare() {
   const playing = !paused && !reducedMotion && inView && pageVisible;
 
   return (
-    <div ref={ref} className="hset-motion-comparison pt-4" role="group" aria-label={t("Before and after")} data-paused={paused ? "" : undefined} style={{ animationPlayState: playing ? "running" : "paused" }}>
+    <div
+      ref={ref}
+      className="hset-motion-comparison pt-4"
+      role="group"
+      aria-label={t("Before and after")}
+      data-paused={paused ? "" : undefined}
+      style={{ animationPlayState: playing ? "running" : "paused" }}
+    >
       <div className="flex items-center justify-between gap-4">
         <h3 className={ROW_TITLE}>{t("Before and after")}</h3>
         {!reducedMotion && (
@@ -37,16 +46,25 @@ export function MotionCompare() {
           </button>
         )}
       </div>
-      <p className={`mt-2 ${ROW_DESC}`}>{t("The same slow camera pan, with motion smoothing off and on.")}</p>
+      <p className={`mt-2 ${ROW_DESC}`}>
+        {t("The same slow camera pan, with motion smoothing off and on.")}
+      </p>
       <div className="mt-4 grid grid-cols-2 gap-4">
         {[false, true].map((smooth) => (
           <figure key={String(smooth)} className="min-w-0">
             <div className="hset-motion-viewport">
               <div className="hset-motion-scene">
-                <img src={animeFrame} alt="" draggable={false} className={`hset-motion-image${smooth ? "" : " hset-motion-image-original"}`} />
+                <img
+                  src={animeFrame}
+                  alt=""
+                  draggable={false}
+                  className={`hset-motion-image${smooth ? "" : " hset-motion-image-original"}`}
+                />
               </div>
             </div>
-            <figcaption className={`mt-2.5 ${ROW_TITLE}`}>{smooth ? t("Smoothing on") : t("Smoothing off")}</figcaption>
+            <figcaption className={`mt-2.5 ${ROW_TITLE}`}>
+              {smooth ? t("Smoothing on") : t("Smoothing off")}
+            </figcaption>
           </figure>
         ))}
       </div>

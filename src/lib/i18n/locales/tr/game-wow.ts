@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "Sürüm notları",
   "games.wow.addons.fullNotes": "Tam metni geliştiricinin sayfasında oku",
 
-  "games.wow.manager.errorIdentity": "Kurulu klasörler yazarın eklenti paketiyle eşleşmiyor. Yeniden tarayıp kaynağı kontrol edin.",
+  "games.wow.manager.errorIdentity":
+    "Kurulu klasörler yazarın eklenti paketiyle eşleşmiyor. Yeniden tarayıp kaynağı kontrol edin.",
   "games.wow.manager.importInstalled": "Kurulu eklentileri içe aktar",
   "games.wow.manager.import": "Harbor ile yönet",
-  "games.wow.manager.importScope": "WoWInterface kimliği olan kurulu eklentiler. Diğerleri kurulu listesinde kalır.",
-  "games.wow.manager.importNote": "Kurulu dosyalarınızı koruyun. Harbor yazarın paketini denetler ve gelecekteki güncelleme veya kaldırmalardan önce önceki sürümü saklar.",
+  "games.wow.manager.importScope":
+    "WoWInterface kimliği olan kurulu eklentiler. Diğerleri kurulu listesinde kalır.",
+  "games.wow.manager.importNote":
+    "Kurulu dosyalarınızı koruyun. Harbor yazarın paketini denetler ve gelecekteki güncelleme veya kaldırmalardan önce önceki sürümü saklar.",
   "games.wow.manager.keepVersion": "Kurulu {version} sürümünü koru",
   "games.wow.manager.keep": "Koru",
   "games.wow.manager.importSuccess": "Bu eklenti artık Harbor tarafından yönetiliyor.",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "Eklenti bul",
   "games.wow.manager.managed": "Harbor yönetiminde",
   "games.wow.manager.backups": "Yedekler",
-  "games.wow.manager.catalogNote": "WoWInterface kataloğunu keşfedin. Değişikliklerden önce kurulu WoW ile uyumluluk denetlenir.",
-  "games.wow.manager.managedNote": "Burada yalnızca Harbor ile kurulan eklentiler değiştirilebilir. Diğerleri kurulu eklentiler listesinde kalır.",
+  "games.wow.manager.catalogNote":
+    "WoWInterface kataloğunu keşfedin. Değişikliklerden önce kurulu WoW ile uyumluluk denetlenir.",
+  "games.wow.manager.managedNote":
+    "Burada yalnızca Harbor ile kurulan eklentiler değiştirilebilir. Diğerleri kurulu eklentiler listesinde kalır.",
   "games.wow.manager.category": "Kategori",
   "games.wow.manager.allCategories": "Tüm kategoriler",
   "games.wow.manager.popular": "Aylık indirmeler",
@@ -29,30 +34,38 @@ export default {
   "games.wow.manager.sort": "Eklentileri sırala",
   "games.wow.manager.monthly": "Bu ay indirilenler",
   "games.wow.manager.catalogError": "Katalog yüklenemedi. Önceki sonuçlar güncel olmayabilir.",
-  "games.wow.manager.categoriesError": "Kategoriler kullanılamıyor. Tüm eklentilerde arama yapabilirsiniz.",
+  "games.wow.manager.categoriesError":
+    "Kategoriler kullanılamıyor. Tüm eklentilerde arama yapabilirsiniz.",
   "games.wow.manager.partial": "Bazı sağlayıcı kayıtları eksik. Sonuçlar tamamlanmamış olabilir.",
   "games.wow.manager.emptyManaged": "Henüz Harbor tarafından yönetilen eklenti yok.",
   "games.wow.manager.emptyBackups": "Henüz önceki sürüm kaydedilmedi.",
-  "games.wow.manager.reviewNote": "Önce paketi ve klasör değişikliklerini inceleyin. İncelemeden veya uygulamadan önce WoW’u kapatın.",
+  "games.wow.manager.reviewNote":
+    "Önce paketi ve klasör değişikliklerini inceleyin. İncelemeden veya uygulamadan önce WoW’u kapatın.",
   "games.wow.manager.backupNote": "Önceki dosyalar yerelde tutulur: {size}.",
   "games.wow.manager.fileSummary": "{count} dosya · {size}",
   "games.wow.manager.preparing": "Değişiklik incelemesi hazırlanıyor…",
   "games.wow.manager.applying": "Değişiklikler uygulanıyor…",
   "games.wow.manager.success": "Eklenti kurulumunuz güncellendi.",
   "games.wow.manager.cancelled": "İptal edildi. Güncel durumu kontrol etmek için yenileyin.",
-  "games.wow.manager.recovery": "Devam etmeden önce kesintiye uğramış değişiklik kurtarılmalı. Önce WoW’u kapatın.",
+  "games.wow.manager.recovery":
+    "Devam etmeden önce kesintiye uğramış değişiklik kurtarılmalı. Önce WoW’u kapatın.",
   "games.wow.manager.recover": "Kurulumu kurtar",
   "games.wow.manager.add": "Ekle",
   "games.wow.manager.replace": "Değiştir",
   "games.wow.manager.remove": "Kaldır",
-  "games.wow.manager.error": "Değişiklik tamamlanamadı. Bağlantıyı ve boş disk alanını kontrol edip tekrar deneyin.",
+  "games.wow.manager.error":
+    "Değişiklik tamamlanamadı. Bağlantıyı ve boş disk alanını kontrol edip tekrar deneyin.",
   "games.wow.manager.errorRunning": "WoW’u tamamen kapatıp tekrar deneyin.",
-  "games.wow.manager.errorCompatibility": "Bu paket kurulu WoW sürümüyle veya edisyonuyla eşleşmiyor.",
-  "games.wow.manager.errorUnmanaged": "Bu klasörler Harbor dışında kurulmuş. Buradan üzerlerine yazılamaz.",
+  "games.wow.manager.errorCompatibility":
+    "Bu paket kurulu WoW sürümüyle veya edisyonuyla eşleşmiyor.",
+  "games.wow.manager.errorUnmanaged":
+    "Bu klasörler Harbor dışında kurulmuş. Buradan üzerlerine yazılamaz.",
   "games.wow.manager.errorChanged": "Dosyalar değişmiş veya kontrol gerekiyor. Yeniden tarayın.",
-  "games.wow.manager.errorDependency": "Gerekli bağımlılıklar eksik ya da başka bir eklenti bu dosyalara ihtiyaç duyuyor.",
+  "games.wow.manager.errorDependency":
+    "Gerekli bağımlılıklar eksik ya da başka bir eklenti bu dosyalara ihtiyaç duyuyor.",
   "games.wow.manager.errorExpired": "Bu incelemenin süresi doldu. Değişiklikleri tekrar inceleyin.",
-  "games.wow.manager.errorDesktop": "Eklenti yönetimi Windows için güncel Harbor masaüstü uygulamasını gerektirir.",
+  "games.wow.manager.errorDesktop":
+    "Eklenti yönetimi Windows için güncel Harbor masaüstü uygulamasını gerektirir.",
 
   "games.wow.addons.screenshots": "Geliştiricinin ekran görüntüleri",
   "games.wow.addons.screenshotsUnavailable": "Geliştiricinin ekran görüntüleri yüklenemedi.",
@@ -67,7 +80,8 @@ export default {
   "games.wow.addons.attention": "Kontrol gerekli",
   "games.wow.addons.unreadable": "Bu eklentinin bildirim dosyası okunamadı.",
   "games.wow.addons.noManifest": "Bu istemciye uygun bildirim dosyası bulunamadı.",
-  "games.wow.addons.ambiguous": "Birden fazla uygun bildirim dosyası bulundu. Eklenti kurulumunu kontrol et.",
+  "games.wow.addons.ambiguous":
+    "Birden fazla uygun bildirim dosyası bulundu. Eklenti kurulumunu kontrol et.",
   "games.wow.addons.missing": "Gerekli klasörler eksik: {names}",
   "games.wow.addons.gameVersions": "Bildirilen oyun sürümleri",
   "games.wow.addons.requires": "Gerektirir",
@@ -76,10 +90,12 @@ export default {
   "games.wow.addons.noMatches": "Bu filtrelerle eşleşen eklenti yok.",
   "games.wow.addons.more": "Daha fazla eklenti göster",
   "games.wow.addons.empty": "Bu kurulumda eklenti bulunamadı.",
-  "games.wow.addons.scope": "Oyun sürümlerini eklenti yazarı belirtir. Etkinlik durumu ve mevcut güncellemeler kontrol edilmez.",
+  "games.wow.addons.scope":
+    "Oyun sürümlerini eklenti yazarı belirtir. Etkinlik durumu ve mevcut güncellemeler kontrol edilmez.",
   "games.wow.realm.LOCKED": "Kilitli",
   "games.wow.classic.title": "Diyar durumu",
-  "games.wow.classic.intro": "Azeroth’a gitmeden önce diyarını kontrol et. Blizzard’dan canlı durum bilgisi.",
+  "games.wow.classic.intro":
+    "Azeroth’a gitmeden önce diyarını kontrol et. Blizzard’dan canlı durum bilgisi.",
   "games.wow.classic.classic": "Classic ilerleme",
   "games.wow.classic.classic1x": "Classic Era ve sezonlar",
   "games.wow.classic.classicann": "Classic yıl dönümü",
@@ -98,7 +114,8 @@ export default {
   "games.wow.classic.news": "Classic haberleri",
   "games.wow.realm.browse": "Diyarlara göz at",
   "games.wow.realm.unavailable": "Diyar durumu kullanılamıyor. Yine de bir diyar girebilirsin.",
-  "games.wow.realm.unsupported": "Blizzard’ın küresel durum hizmeti bu bölgeyi kapsamıyor. Diyarını elle gir.",
+  "games.wow.realm.unsupported":
+    "Blizzard’ın küresel durum hizmeti bu bölgeyi kapsamıyor. Diyarını elle gir.",
   "games.wow.realm.noMatches": "Eşleşen diyar yok. Adı elle girebilirsin.",
   "games.wow.realm.refresh": "Diyar durumunu yenile",
   "games.wow.realm.unknown": "Durum bilinmiyor",
@@ -145,7 +162,8 @@ export default {
   "games.wow.character.raidUnavailable": "Güncel baskın ilerlemesi kullanılamıyor.",
   "games.wow.character.updated": "Profil güncellendi: {date}",
   "games.wow.character.gearUpdated": "Ekipman güncellendi: {date}",
-  "games.wow.character.sourceNote": "Raider.IO herkese açık verileri. Güncellemeler oyunun gerisinde kalabilir.",
+  "games.wow.character.sourceNote":
+    "Raider.IO herkese açık verileri. Güncellemeler oyunun gerisinde kalabilir.",
   "games.wow.title": "Azeroth’ta bu hafta",
   "games.wow.region": "Bölge",
   "games.wow.refresh": "WoW verilerini yenile",
@@ -154,7 +172,8 @@ export default {
   "games.wow.resetNote": "Yerel saatiniz. Bakım, sıfırlamadan sonra da devam edebilir.",
   "games.wow.resetUnavailable": "Sıfırlama zamanı kullanılamıyor.",
   "games.wow.affixes": "Bu haftanın eklentileri",
-  "games.wow.affixesUnavailable": "Güncel eklentiler kullanılamıyor. Bölgesel sıfırlamadan sonra tekrar kontrol edin.",
+  "games.wow.affixesUnavailable":
+    "Güncel eklentiler kullanılamıyor. Bölgesel sıfırlamadan sonra tekrar kontrol edin.",
   "games.wow.dungeons": "Mythic+ zindanları",
   "games.wow.timer": "{minutes} dk süre sınırı",
   "games.wow.rankings": "Sıralamayı gör",
@@ -163,7 +182,8 @@ export default {
   "games.wow.bosses": "{count} boss",
   "games.wow.raidsUnavailable": "Güncel baskın bilgileri kullanılamıyor.",
   "games.wow.checked": "Kontrol: {date}",
-  "games.wow.scope": "Raider.IO Retail verileri. Süreler keystone içindir; eklentiler anahtar seviyesine göre değişir.",
+  "games.wow.scope":
+    "Raider.IO Retail verileri. Süreler keystone içindir; eklentiler anahtar seviyesine göre değişir.",
   "games.wow.region.us": "Amerika / Okyanusya",
   "games.wow.region.eu": "Avrupa",
   "games.wow.region.kr": "Kore",

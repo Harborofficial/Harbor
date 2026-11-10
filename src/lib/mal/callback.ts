@@ -4,10 +4,17 @@ let pending: string | null = null;
 export function isMalCallback(input: string): boolean {
   try {
     const url = new URL(input);
-    return url.protocol === "harbor:" && url.hostname === "mal" &&
-      (!url.pathname || url.pathname === "/") && !url.username && !url.password && !url.port &&
-      !url.hash && url.searchParams.getAll("code").length === 1 &&
-      url.searchParams.getAll("state").length === 1;
+    return (
+      url.protocol === "harbor:" &&
+      url.hostname === "mal" &&
+      (!url.pathname || url.pathname === "/") &&
+      !url.username &&
+      !url.password &&
+      !url.port &&
+      !url.hash &&
+      url.searchParams.getAll("code").length === 1 &&
+      url.searchParams.getAll("state").length === 1
+    );
   } catch {
     return false;
   }
@@ -25,5 +32,7 @@ export function onMalCallback(listener: (url: string) => void): () => void {
   const url = pending;
   pending = null;
   if (url) listener(url);
-  return () => { listeners.delete(listener); };
+  return () => {
+    listeners.delete(listener);
+  };
 }

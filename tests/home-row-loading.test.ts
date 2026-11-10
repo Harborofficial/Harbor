@@ -5,14 +5,23 @@ import type { HomeRow } from "../src/views/home/home-types";
 
 const fetcher = async () => [];
 const firstPage: HomeRow = {
-  key: "tmdb-popular-movies", type: "movie", name: "Popular Movies",
-  metas: Array.from({ length: 6 }, (_, i) => ({ id: `movie:${i}`, type: "movie", name: `Movie ${i}` })),
-  page: 1, hasMore: true, fetcher,
+  key: "tmdb-popular-movies",
+  type: "movie",
+  name: "Popular Movies",
+  metas: Array.from({ length: 6 }, (_, i) => ({
+    id: `movie:${i}`,
+    type: "movie",
+    name: `Movie ${i}`,
+  })),
+  page: 1,
+  hasMore: true,
+  fetcher,
 };
 const loaded: HomeRow = {
   ...firstPage,
   metas: [...firstPage.metas, { id: "movie:6", type: "movie", name: "Seventh poster" }],
-  page: 2, hasMore: false,
+  page: 2,
+  hasMore: false,
 };
 
 test("a late addon stage cannot remove the seventh poster or reset pagination", () => {

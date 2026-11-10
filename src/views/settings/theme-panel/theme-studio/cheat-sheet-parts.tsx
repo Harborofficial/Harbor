@@ -99,7 +99,9 @@ export function CopyName({ text }: { text: string }) {
           }}
         >
           <Check size={14} strokeWidth={2.6} className="text-accent" />
-          <code className="font-mono text-[15.5px] font-semibold leading-[22px] text-accent">{t("Copied")}</code>
+          <code className="font-mono text-[15.5px] font-semibold leading-[22px] text-accent">
+            {t("Copied")}
+          </code>
         </span>
       </button>
     </HoverTip>

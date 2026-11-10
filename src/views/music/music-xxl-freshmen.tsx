@@ -12,7 +12,12 @@ import { artistIdentityKey, peekArtistIdentity, resolveArtist } from "@/lib/musi
 import type { MusicArtistRef } from "@/lib/music/types";
 import { safeFetch } from "@/lib/safe-fetch";
 import { useInViewport } from "@/lib/visibility";
-import { parseXxlFreshmen, xxlPortraits, XXL_FRESHMEN_URL, type XxlFreshmanClass } from "@/lib/music/xxl-freshmen";
+import {
+  parseXxlFreshmen,
+  xxlPortraits,
+  XXL_FRESHMEN_URL,
+  type XxlFreshmanClass,
+} from "@/lib/music/xxl-freshmen";
 import "./music-xxl-freshmen.css";
 
 let held: XxlFreshmanClass[] | null = null;
@@ -23,12 +28,29 @@ const portraits = new Map<number, Promise<Record<string, string>>>();
 function loadPortraits(row: XxlFreshmanClass) {
   let pending = portraits.get(row.year);
   if (!pending) {
-    const params = new URLSearchParams({ action: "query", prop: "pageimages|pageprops", ppprop: "disambiguation", piprop: "thumbnail", pithumbsize: "360", pilicense: "any", redirects: "1", titles: Object.values(row.pages).slice(0, 50).join("|"), format: "json", origin: "*" });
-    pending = safeFetch(`https://en.wikipedia.org/w/api.php?${params}`, { signal: AbortSignal.timeout(12_000) })
-      .then(async response => {
+    const params = new URLSearchParams({
+      action: "query",
+      prop: "pageimages|pageprops",
+      ppprop: "disambiguation",
+      piprop: "thumbnail",
+      pithumbsize: "360",
+      pilicense: "any",
+      redirects: "1",
+      titles: Object.values(row.pages).slice(0, 50).join("|"),
+      format: "json",
+      origin: "*",
+    });
+    pending = safeFetch(`https://en.wikipedia.org/w/api.php?${params}`, {
+      signal: AbortSignal.timeout(12_000),
+    })
+      .then(async (response) => {
         if (!response.ok) throw new Error("Artist portraits unavailable");
         return xxlPortraits(await response.json(), row);
-      }).catch(() => { portraits.delete(row.year); return {}; });
+      })
+      .catch(() => {
+        portraits.delete(row.year);
+        return {};
+      });
     portraits.set(row.year, pending);
   }
   return pending;
@@ -58,7 +80,9 @@ export function MusicXxlFreshmen({ active }: { active: boolean }) {
   const visible = useInViewport(root);
   const [classes, setClasses] = useState<XxlFreshmanClass[]>(held ?? []);
   const [year, setYear] = useState<number | null>(lastYear ?? held?.[0]?.year ?? null);
-  useEffect(() => { if (year !== null) lastYear = year; }, [year]);
+  useEffect(() => {
+    if (year !== null) lastYear = year;
+  }, [year]);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -84,25 +108,39 @@ export function MusicXxlFreshmen({ active }: { active: boolean }) {
     <section ref={root} className="music-xxl flex min-w-0 flex-col gap-4">
       <div className="music-xxl-heading">
         <MusicSectionHead title={t("music.xxl.title")} subtitle={t("music.xxl.subtitle")} />
-        {selected && <div className="music-xxl-years">
-          <HoverTooltip label={t("music.xxl.newer")}>
-            <button type="button" className="music-xxl-year-step" aria-label={t("music.xxl.newer")}
-              disabled={classes.indexOf(selected) === 0}
-              onClick={() => setYear(classes[classes.indexOf(selected) - 1].year)}>
-              <ChevronLeft size={18} className="dir-icon" aria-hidden />
-            </button>
-          </HoverTooltip>
-          <Dropdown value={String(selected.year)} options={classes.map(row => ({ value: String(row.year), label: String(row.year) }))}
-            onChange={value => setYear(Number(value))} ariaLabel={`${t("music.xxl.title")} · ${t("music.explore.year")}`}
-            className="music-xxl-year-picker" />
-          <HoverTooltip label={t("music.xxl.older")}>
-            <button type="button" className="music-xxl-year-step" aria-label={t("music.xxl.older")}
-              disabled={classes.indexOf(selected) === classes.length - 1}
-              onClick={() => setYear(classes[classes.indexOf(selected) + 1].year)}>
-              <ChevronRight size={18} className="dir-icon" aria-hidden />
-            </button>
-          </HoverTooltip>
-        </div>}
+        {selected && (
+          <div className="music-xxl-years">
+            <HoverTooltip label={t("music.xxl.newer")}>
+              <button
+                type="button"
+                className="music-xxl-year-step"
+                aria-label={t("music.xxl.newer")}
+                disabled={classes.indexOf(selected) === 0}
+                onClick={() => setYear(classes[classes.indexOf(selected) - 1].year)}
+              >
+                <ChevronLeft size={18} className="dir-icon" aria-hidden />
+              </button>
+            </HoverTooltip>
+            <Dropdown
+              value={String(selected.year)}
+              options={classes.map((row) => ({ value: String(row.year), label: String(row.year) }))}
+              onChange={(value) => setYear(Number(value))}
+              ariaLabel={`${t("music.xxl.title")} · ${t("music.explore.year")}`}
+              className="music-xxl-year-picker"
+            />
+            <HoverTooltip label={t("music.xxl.older")}>
+              <button
+                type="button"
+                className="music-xxl-year-step"
+                aria-label={t("music.xxl.older")}
+                disabled={classes.indexOf(selected) === classes.length - 1}
+                onClick={() => setYear(classes[classes.indexOf(selected) + 1].year)}
+              >
+                <ChevronRight size={18} className="dir-icon" aria-hidden />
+              </button>
+            </HoverTooltip>
+          </div>
+        )}
       </div>
       {classes.length === 0 ? (
         <div className="flex gap-5 overflow-hidden" aria-hidden>
@@ -111,55 +149,101 @@ export function MusicXxlFreshmen({ active }: { active: boolean }) {
           ))}
         </div>
       ) : (
-        selected && <FreshmanArtists key={selected.year} freshmanClass={selected} active={active && visible} />
+        selected && (
+          <FreshmanArtists
+            key={selected.year}
+            freshmanClass={selected}
+            active={active && visible}
+          />
+        )
       )}
     </section>
   );
 }
 
-function FreshmanArtists({ freshmanClass, active }: { freshmanClass: XxlFreshmanClass; active: boolean }) {
+function FreshmanArtists({
+  freshmanClass,
+  active,
+}: {
+  freshmanClass: XxlFreshmanClass;
+  active: boolean;
+}) {
   const { goToArtist } = useMusicNavigate();
-  const [artists, setArtists] = useState<MusicArtistRef[]>(() => freshmanClass.artists.map(name => {
-    const result = peekArtistIdentity(name).ranking;
-    const artist = result?.canonical;
-    return { name, id: `xxl:${name}`, connectorId: "catalog", artwork: artist && !result?.ambiguous && artistIdentityKey(artist.name) === artistIdentityKey(name) ? artist.artwork : undefined };
-  }));
+  const [artists, setArtists] = useState<MusicArtistRef[]>(() =>
+    freshmanClass.artists.map((name) => {
+      const result = peekArtistIdentity(name).ranking;
+      const artist = result?.canonical;
+      return {
+        name,
+        id: `xxl:${name}`,
+        connectorId: "catalog",
+        artwork:
+          artist && !result?.ambiguous && artistIdentityKey(artist.name) === artistIdentityKey(name)
+            ? artist.artwork
+            : undefined,
+      };
+    }),
+  );
   useEffect(() => {
     if (!active) return;
-    let live = true, next = 0;
+    let live = true,
+      next = 0;
     // One exact-article portrait request per class; use the shared music identity
     // resolver only for missing portraits, three at a time.
-    void loadPortraits(freshmanClass).then(async artwork => {
+    void loadPortraits(freshmanClass).then(async (artwork) => {
       if (!live) return;
-      setArtists(previous => previous.map(artist => ({ ...artist, artwork: artwork[artist.name] || artist.artwork })));
-      await Promise.all(Array.from({ length: Math.min(3, freshmanClass.artists.length) }, async () => {
-      while (live && next < freshmanClass.artists.length) {
-        const name = freshmanClass.artists[next++];
-        if (artwork[name]) continue;
-        const result = await resolveArtist(name).catch(() => null);
-        const artist = result?.canonical;
-        if (live && artist && !result?.ambiguous && artistIdentityKey(artist.name) === artistIdentityKey(name)) {
-          setArtists(previous => previous.map(row => row.name === name ? { ...artist, name } : row));
-        }
-      }
-      }));
+      setArtists((previous) =>
+        previous.map((artist) => ({ ...artist, artwork: artwork[artist.name] || artist.artwork })),
+      );
+      await Promise.all(
+        Array.from({ length: Math.min(3, freshmanClass.artists.length) }, async () => {
+          while (live && next < freshmanClass.artists.length) {
+            const name = freshmanClass.artists[next++];
+            if (artwork[name]) continue;
+            const result = await resolveArtist(name).catch(() => null);
+            const artist = result?.canonical;
+            if (
+              live &&
+              artist &&
+              !result?.ambiguous &&
+              artistIdentityKey(artist.name) === artistIdentityKey(name)
+            ) {
+              setArtists((previous) =>
+                previous.map((row) => (row.name === name ? { ...artist, name } : row)),
+              );
+            }
+          }
+        }),
+      );
     });
-    return () => { live = false; };
+    return () => {
+      live = false;
+    };
   }, [active, freshmanClass]);
   const itemMenu = useMusicItemMenu({
     onOpen: (item) => {
       if (item.kind === "artist") goToArtist(item.name);
     },
   });
-  return <>
-    <Row min={136} shape="square" arrowsAlways scrollKey={`music:xxl:${freshmanClass.year}`} className="music-xxl-artists">
-      {artists.map((artist, index) => <MusicArtistCard
-        key={artist.name}
-        artist={artist}
-        onOpen={() => goToArtist(artist.name)}
-        onMenu={itemMenu.openFor({ ...artist, kind: "artist" }, index)}
-      />)}
-    </Row>
-    {itemMenu.menu}
-  </>;
+  return (
+    <>
+      <Row
+        min={136}
+        shape="square"
+        arrowsAlways
+        scrollKey={`music:xxl:${freshmanClass.year}`}
+        className="music-xxl-artists"
+      >
+        {artists.map((artist, index) => (
+          <MusicArtistCard
+            key={artist.name}
+            artist={artist}
+            onOpen={() => goToArtist(artist.name)}
+            onMenu={itemMenu.openFor({ ...artist, kind: "artist" }, index)}
+          />
+        ))}
+      </Row>
+      {itemMenu.menu}
+    </>
+  );
 }

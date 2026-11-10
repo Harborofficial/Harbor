@@ -334,10 +334,17 @@ function Body(props: {
         <p className="text-[12px] leading-snug text-ink-muted">
           {model.source === "audio-track"
             ? t("The selected audio track is labeled")
-            : t("Moonshine's manual language override is set to")} <strong>{language}</strong>.
-          {" "}{t("Silero can still sync without it. This model downloads only if you approve. If the audio language is wrong, change Moonshine's override in Settings.")}
+            : t("Moonshine's manual language override is set to")}{" "}
+          <strong>{language}</strong>.{" "}
+          {t(
+            "Silero can still sync without it. This model downloads only if you approve. If the audio language is wrong, change Moonshine's override in Settings.",
+          )}
         </p>
-        {model.error && <p role="alert" className="text-[12px] text-danger">{model.error}</p>}
+        {model.error && (
+          <p role="alert" className="text-[12px] text-danger">
+            {model.error}
+          </p>
+        )}
         <div className="flex flex-wrap items-center gap-1.5">
           <PrimaryBtn
             icon={<Wand2 size={14} strokeWidth={2.2} />}

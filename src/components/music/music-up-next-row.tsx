@@ -48,7 +48,9 @@ export function MusicUpNextRow({
           ratio="square"
           className="w-full [--poster-radius:0px]"
           lazy
-        ><MusicTrackPlaybackMark track={track}/></Poster>
+        >
+          <MusicTrackPlaybackMark track={track} />
+        </Poster>
       </button>
       <span className="music-now-next-title">
         <button type="button" onClick={play}>

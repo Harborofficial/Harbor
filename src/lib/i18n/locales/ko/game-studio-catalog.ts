@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}점 이상 / 100",
   "games.studioCatalog.minimumVotes.all": "모든 평가 수",
   "games.studioCatalog.minimumVotes.value": "평가 {count}개 이상",
-  "games.studioCatalog.ratingFloor": "점수에는 평가가 5개 이상 필요합니다."
+  "games.studioCatalog.ratingFloor": "점수에는 평가가 5개 이상 필요합니다.",
 };

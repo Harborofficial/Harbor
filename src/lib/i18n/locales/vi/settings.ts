@@ -188,7 +188,8 @@ const settings: Record<string, string> = {
   "Groq API key (gsk-...)": "Khóa API Groq (gsk-...)",
   "Group Refresh on the left beside Back instead of the far right of the header.":
     "Đặt Làm mới ở bên trái cạnh Quay lại, thay vì ngoài cùng bên phải của tiêu đề.",
-  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.": "Harbor sẽ không khởi động công cụ P2P, liên hệ tracker hoặc chạy DHT. Dùng tùy chọn này nếu bạn chỉ muốn liên kết debrid và trực tiếp. Tắt tùy chọn để bật lại phát trực tuyến qua P2P.",
+  "Harbor will not start the P2P engine, contact trackers, or run DHT. Use this if you only want debrid and direct links. Turn off to re-enable P2P streaming.":
+    "Harbor sẽ không khởi động công cụ P2P, liên hệ tracker hoặc chạy DHT. Dùng tùy chọn này nếu bạn chỉ muốn liên kết debrid và trực tiếp. Tắt tùy chọn để bật lại phát trực tuyến qua P2P.",
   "Hide badge": "Ẩn huy hiệu",
   "Hide manga": "Ẩn manga",
   "Hide pack instructions": "Ẩn hướng dẫn về gói",
@@ -332,7 +333,8 @@ const settings: Record<string, string> = {
     "Các huy hiệu này được hiển thị trên áp phích khi bạn duyệt. RPDB trong các khóa ở trên là một tùy chọn riêng, nhúng điểm trực tiếp vào hình ảnh áp phích.",
   "This score only appears on cards.": "Điểm này chỉ xuất hiện trên các thẻ nội dung.",
   "Top 10 ribbon": "Dải băng Top 10",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "P2P đang bị tắt. Các luồng chưa lưu vào bộ nhớ đệm sẽ không phát được, trừ khi đến từ dịch vụ debrid hoặc liên kết trực tiếp. Để dùng P2P, hãy tắt tùy chọn này.",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "P2P đang bị tắt. Các luồng chưa lưu vào bộ nhớ đệm sẽ không phát được, trừ khi đến từ dịch vụ debrid hoặc liên kết trực tiếp. Để dùng P2P, hãy tắt tùy chọn này.",
   "True black menus": "Menu đen tuyệt đối",
   "Try it": "Dùng thử",
   "Turn off to hide the sync badge during playback.": "Tắt để ẩn huy hiệu đồng bộ trong khi phát.",
@@ -351,7 +353,8 @@ const settings: Record<string, string> = {
     "Dùng các phím mũi tên và Enter để di chuyển tiêu điểm trong Harbor. Tắt tùy chọn này để không dùng phím mũi tên cho điều hướng và vô hiệu hóa điều hướng bằng tiêu điểm ở mọi nơi.",
   "Use your own image as the app icon": "Dùng hình ảnh của bạn làm biểu tượng ứng dụng",
   "Watchlist bookmark": "Dấu trang danh sách xem",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "Khi tắt, lượt truyền P2P sẽ dừng ngay khi bạn đóng hoặc chuyển luồng, nên không có nội dung nào tiếp tục tải xuống trong nền. Bật để nó tiếp tục sau khi bạn rời đi; quản lý hoặc tạm dừng chúng trong thẻ Tải xuống.",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "Khi tắt, lượt truyền P2P sẽ dừng ngay khi bạn đóng hoặc chuyển luồng, nên không có nội dung nào tiếp tục tải xuống trong nền. Bật để nó tiếp tục sau khi bạn rời đi; quản lý hoặc tạm dừng chúng trong thẻ Tải xuống.",
   "Where scores appear": "Vị trí hiển thị điểm",
   "Where the Refresh button sits in the picker header. Default keeps it on the right, across from Back.":
     "Vị trí của nút Làm mới trong tiêu đề trình chọn. Mặc định đặt nút ở bên phải, đối diện nút Quay lại.",
@@ -595,8 +598,7 @@ const settings: Record<string, string> = {
   "Scans your Stremio library and rewrites any item whose shape doesn't match Stremio's exact schema.":
     "Quét thư viện Stremio và ghi lại mọi mục có cấu trúc không khớp chính xác với lược đồ của Stremio.",
   About: "Giới thiệu",
-  "Build identity. Useful when filing a bug report.":
-    "Thông tin bản dựng. Hữu ích khi báo lỗi.",
+  "Build identity. Useful when filing a bug report.": "Thông tin bản dựng. Hữu ích khi báo lỗi.",
   "Reveal the show or movie artwork.": "Hiện hình ảnh của phim bộ hoặc phim điện ảnh.",
   Legal: "Pháp lý",
   "Made with": "Được tạo nên bằng",
@@ -646,7 +648,8 @@ const settings: Record<string, string> = {
   "Real-Debrid API token": "Token API Real-Debrid",
   "API token": "Token API",
   "API key": "Khóa API",
-  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.": "Nhanh hơn và ít ồn hơn P2P nếu bạn đã trả phí cho Usenet. Hãy cấu hình trên trang tiện ích bổ sung rồi dán URL manifest được trả về.",
+  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.":
+    "Nhanh hơn và ít ồn hơn P2P nếu bạn đã trả phí cho Usenet. Hãy cấu hình trên trang tiện ích bổ sung rồi dán URL manifest được trả về.",
   "Searches and streams directly off Easynews. No debrid needed. Just your Easynews login.":
     "Tìm kiếm và phát trực tiếp từ Easynews. Không cần dịch vụ debrid. Chỉ cần thông tin đăng nhập Easynews.",
   Expired: "Đã hết hạn",
@@ -1597,10 +1600,12 @@ const settings: Record<string, string> = {
   "Run self-test": "Chạy tự kiểm tra",
   "Running self-test": "Đang tự kiểm tra",
   "Restart engine": "Khởi động lại công cụ",
-  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.": "Tính năng tự kiểm tra bị tắt khi chế độ phát trực tuyến từ xa nghiêm ngặt đang bật. Tính năng này tải một tệp thử nghiệm nhỏ qua mạng ngang hàng trên máy này.",
+  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.":
+    "Tính năng tự kiểm tra bị tắt khi chế độ phát trực tuyến từ xa nghiêm ngặt đang bật. Tính năng này tải một tệp thử nghiệm nhỏ qua mạng ngang hàng trên máy này.",
   "Self-test": "Tự kiểm tra",
   "Remote streaming server": "Máy chủ phát trực tuyến từ xa",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Kết nối Harbor với máy chủ phát trực tuyến trên một máy khác, chẳng hạn như dịch vụ Stremio trên máy chủ tại nhà. Luồng P2P sẽ được tải xuống và phát từ máy đó thay vì máy này.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Kết nối Harbor với máy chủ phát trực tuyến trên một máy khác, chẳng hạn như dịch vụ Stremio trên máy chủ tại nhà. Luồng P2P sẽ được tải xuống và phát từ máy đó thay vì máy này.",
   "Use exclusively (never fall back to local)":
     "Chỉ sử dụng máy chủ này (không bao giờ chuyển về cục bộ)",
   "If the server is unreachable, playback fails instead of streaming locally. Use this when your VPN runs on the server machine and torrent traffic must never leave this one.":
@@ -1710,7 +1715,8 @@ const settings: Record<string, string> = {
     "Lưu ý: nếu Stremio cũng được cài đặt, Windows có thể hỏi ứng dụng cần dùng trong lần đầu mở liên kết stremio://. Chọn Harbor để đặt làm mặc định.",
   "stremio:// links now open in the Stremio app. Harbor will only install when you trigger it from inside Harbor.":
     "Liên kết stremio:// hiện sẽ mở trong ứng dụng Stremio. Harbor chỉ cài đặt khi bạn kích hoạt từ trong Harbor.",
-  "Checking harborcommunity.site for a newer build.": "Đang kiểm tra bản dựng mới hơn trên harborcommunity.site.",
+  "Checking harborcommunity.site for a newer build.":
+    "Đang kiểm tra bản dựng mới hơn trên harborcommunity.site.",
   "Downloading {pct}%": "Đang tải xuống {pct}%",
   "Downloaded. Ready to install and restart.": "Đã tải xuống. Sẵn sàng cài đặt và khởi động lại.",
   "Installing. Harbor will restart.": "Đang cài đặt. Harbor sẽ khởi động lại.",
@@ -2198,9 +2204,12 @@ const settings: Record<string, string> = {
     "Lùi một khung hình rồi tạm dừng. Chính xác đến từng khung hình trên mpv.",
   "Step forward one frame and pause. Frame-accurate on mpv.":
     "Tiến một khung hình rồi tạm dừng. Chính xác đến từng khung hình trên mpv.",
-  "Cached source resolution and direct download links.": "Phân giải nguồn đã lưu trong bộ nhớ đệm và liên kết tải xuống trực tiếp.",
-  "Cached source resolution and cloud library access.": "Phân giải nguồn đã lưu trong bộ nhớ đệm và truy cập thư viện đám mây.",
-  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.": "Cả hai hiển thị cùng lúc kết quả trực tiếp, debrid và ngang hàng. Trực tiếp/debrid để kết quả P2P sang một bên trừ khi không còn lựa chọn nào khác. P2P đưa chúng lên đầu.",
+  "Cached source resolution and direct download links.":
+    "Phân giải nguồn đã lưu trong bộ nhớ đệm và liên kết tải xuống trực tiếp.",
+  "Cached source resolution and cloud library access.":
+    "Phân giải nguồn đã lưu trong bộ nhớ đệm và truy cập thư viện đám mây.",
+  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.":
+    "Cả hai hiển thị cùng lúc kết quả trực tiếp, debrid và ngang hàng. Trực tiếp/debrid để kết quả P2P sang một bên trừ khi không còn lựa chọn nào khác. P2P đưa chúng lên đầu.",
 };
 
 export default settings;

@@ -3,5 +3,5 @@ export default {
   "games.antiCheat.unknown": "記載なし",
   "games.antiCheat.kernel": "カーネルレベルのアンチチート",
   "games.antiCheat.unavailable": "アンチチートの詳細は利用できません。",
-  "games.antiCheat.source": "情報元：{source}"
+  "games.antiCheat.source": "情報元：{source}",
 };

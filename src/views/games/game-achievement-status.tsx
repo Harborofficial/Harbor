@@ -1,5 +1,20 @@
 import type { ReactNode } from "react";
-import { CircleHelp, Clock3, Gamepad2, KeyRound, ListChecks, LockKeyhole, Monitor, RefreshCw, Search, ShieldAlert, Trophy, Unplug, UserRound, WifiOff } from "lucide-react";
+import {
+  CircleHelp,
+  Clock3,
+  Gamepad2,
+  KeyRound,
+  ListChecks,
+  LockKeyhole,
+  Monitor,
+  RefreshCw,
+  Search,
+  ShieldAlert,
+  Trophy,
+  Unplug,
+  UserRound,
+  WifiOff,
+} from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 const states = {
@@ -25,16 +40,37 @@ const states = {
   library: { title: "library", icon: Unplug },
 } as const;
 
-export function AchievementStatus({ kind, message, children, compact = false, alert = false }: {
-  kind: string; message: string; children?: ReactNode; compact?: boolean; alert?: boolean;
+export function AchievementStatus({
+  kind,
+  message,
+  children,
+  compact = false,
+  alert = false,
+}: {
+  kind: string;
+  message: string;
+  children?: ReactNode;
+  compact?: boolean;
+  alert?: boolean;
 }) {
   const t = useT();
   const state = states[kind as keyof typeof states] ?? states.unavailable;
   const Icon = state.icon;
-  return <section className="gam-status" data-compact={compact || undefined} data-kind={kind} role={alert ? "alert" : "status"}>
-    <span className="gam-status-mark" aria-hidden="true"><Icon size={30} strokeWidth={1.6} /></span>
-    <div className="gam-status-copy"><h3>{t(`games.achievementManager.status.${state.title}`)}</h3><p>{message}</p>
-      {children && <div className="gam-status-actions">{children}</div>}
-    </div>
-  </section>;
+  return (
+    <section
+      className="gam-status"
+      data-compact={compact || undefined}
+      data-kind={kind}
+      role={alert ? "alert" : "status"}
+    >
+      <span className="gam-status-mark" aria-hidden="true">
+        <Icon size={30} strokeWidth={1.6} />
+      </span>
+      <div className="gam-status-copy">
+        <h3>{t(`games.achievementManager.status.${state.title}`)}</h3>
+        <p>{message}</p>
+        {children && <div className="gam-status-actions">{children}</div>}
+      </div>
+    </section>
+  );
 }

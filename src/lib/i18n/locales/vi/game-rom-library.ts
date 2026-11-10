@@ -7,5 +7,5 @@ export default {
   "games.emulation.addGames": "Thêm trò chơi",
   "games.emulation.importNote": "Chọn hệ máy, rồi chọn thư mục trò chơi. Bao gồm cả thư mục con.",
   "games.emulation.noMatches": "Thử hệ máy khác hoặc xóa bộ lọc.",
-  "games.emulation.clearFilters": "Xóa bộ lọc"
+  "games.emulation.clearFilters": "Xóa bộ lọc",
 };

@@ -85,7 +85,11 @@ export function StatusBubble({
               onClick={() => void commit(value)}
               className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-success transition-colors hover:bg-success/12 disabled:opacity-40"
             >
-              {busy ? <Loader2 size={13} className="animate-spin" /> : <Check size={14} strokeWidth={2.8} />}
+              {busy ? (
+                <Loader2 size={13} className="animate-spin" />
+              ) : (
+                <Check size={14} strokeWidth={2.8} />
+              )}
             </button>
             {trimmed && (
               <button

@@ -28,7 +28,10 @@ function fixture(settings: Settings) {
   const calls: string[] = [];
   let statusVersion = 0;
   const statusListeners = new Set<() => void>();
-  const notifyStatus = () => { statusVersion++; for (const fn of statusListeners) fn(); };
+  const notifyStatus = () => {
+    statusVersion++;
+    for (const fn of statusListeners) fn();
+  };
   const pmdbSession = settings.pmdb ? { apiKey: "fixture" } : null;
   const traktSession = settings.trakt ? { accessToken: "fixture" } : null;
   const simklSession = settings.simkl ? { accessToken: "fixture" } : null;
@@ -37,67 +40,107 @@ function fixture(settings: Settings) {
   const mods: Record<string, unknown> = {
     react: React,
     "./profiles": { useProfiles: () => ({ activeId: "profile-one" }) },
-    "./tracker-status-events": { useTrackerStatusVersion: () => React.useSyncExternalStore(
-      (fn) => { statusListeners.add(fn); return () => { statusListeners.delete(fn); }; },
-      () => statusVersion,
-    ) },
+    "./tracker-status-events": {
+      useTrackerStatusVersion: () =>
+        React.useSyncExternalStore(
+          (fn) => {
+            statusListeners.add(fn);
+            return () => {
+              statusListeners.delete(fn);
+            };
+          },
+          () => statusVersion,
+        ),
+    },
     "./publicmetadb/list-hooks": { usePmdbListsVersion: () => 0 },
     "./publicmetadb/session": { getSession: () => pmdbSession, subscribeSession: () => () => {} },
     "./trakt/session": { getSession: () => traktSession, subscribeSession: () => () => {} },
     "./simkl/session": { getSession: () => simklSession, subscribeSession: () => () => {} },
     "./mal/session": { getSession: () => malSession, subscribeSession: () => () => {} },
     "./anilist/session": { getSession: () => anilistSession, subscribeSession: () => () => {} },
-    "./mal/mutations": { resolveMalMediaId: async () => 123, fetchListEntry: async () => {
-      calls.push("mal");
-      return { entry: settings.malEntry ? { status: "watching" } : null };
-    } },
+    "./mal/mutations": {
+      resolveMalMediaId: async () => 123,
+      fetchListEntry: async () => {
+        calls.push("mal");
+        return { entry: settings.malEntry ? { status: "watching" } : null };
+      },
+    },
     "./anilist/sync": { resolveAnilistMediaId: async () => 123 },
-    "./anilist/mutations": { fetchListEntry: async () => {
-      calls.push("anilist");
-      return { entry: settings.anilistEntry ? { status: "CURRENT" } : null };
-    } },
-    "./simkl/ids": { resolveSimklTarget: async (id: string) => ({ kind: "show", ids: { imdb: id } }) },
-    "./simkl/list-status": { readSimklStateStrict: async (target: any) => {
-      calls.push("simkl");
-      return target.ids?.imdb === "tt777888"
-        ? { status: null, watched: new Set() }
-        : { status: settings.simklStatus ?? null, watched: new Set(settings.simklWatched ?? []) };
-    } },
+    "./anilist/mutations": {
+      fetchListEntry: async () => {
+        calls.push("anilist");
+        return { entry: settings.anilistEntry ? { status: "CURRENT" } : null };
+      },
+    },
+    "./simkl/ids": {
+      resolveSimklTarget: async (id: string) => ({ kind: "show", ids: { imdb: id } }),
+    },
+    "./simkl/list-status": {
+      readSimklStateStrict: async (target: any) => {
+        calls.push("simkl");
+        return target.ids?.imdb === "tt777888"
+          ? { status: null, watched: new Set() }
+          : { status: settings.simklStatus ?? null, watched: new Set(settings.simklWatched ?? []) };
+      },
+    },
     "./publicmetadb/ids": { resolvePmdbTarget: async () => ({ tmdb_id: 555, media_type: "tv" }) },
     "./publicmetadb/mappings": { getTmdbForExternal: async () => ({ tmdb_id: 555 }) },
-    "./publicmetadb/history": { fetchPmdbWatchedKeySet: async () => {
-      calls.push("pmdb-history");
-      if (settings.pmdbHistoryFails) throw new Error("history temporarily offline");
-      return new Set(settings.pmdbWatched ?? []);
-    } },
+    "./publicmetadb/history": {
+      fetchPmdbWatchedKeySet: async () => {
+        calls.push("pmdb-history");
+        if (settings.pmdbHistoryFails) throw new Error("history temporarily offline");
+        return new Set(settings.pmdbWatched ?? []);
+      },
+    },
     "./publicmetadb/watchlist": {
       fetchPmdbWatchlist: async () => {
         calls.push("pmdb-list");
         return settings.pmdbWatchlist ? [{ tmdb_id: 555, media_type: "tv" }] : [];
       },
       pmdbWatchlistContains: (items: any[], target: any) =>
-        items.find((row) => row.tmdb_id === target.tmdb_id && row.media_type === target.media_type) ?? null,
+        items.find(
+          (row) => row.tmdb_id === target.tmdb_id && row.media_type === target.media_type,
+        ) ?? null,
     },
     "./publicmetadb/lists": { getPmdbDefaultListId: () => null },
-    "./trakt/ids": { stremioIdToTraktTarget: () => ({ ok: true, target: { kind: "show", ids: { imdb: "tt123456" } } }) },
-    "./trakt/client": { traktRequest: async (path: string) => {
-      calls.push(path);
-      return path.includes(settings.traktSource ?? "IMPOSSIBLE")
-        ? [{ show: { ids: { imdb: "tt123456" } } }]
-        : [{ show: { ids: { imdb: "tt999999" } } }];
-    } },
+    "./trakt/ids": {
+      stremioIdToTraktTarget: () => ({
+        ok: true,
+        target: { kind: "show", ids: { imdb: "tt123456" } },
+      }),
+    },
+    "./trakt/client": {
+      traktRequest: async (path: string) => {
+        calls.push(path);
+        return path.includes(settings.traktSource ?? "IMPOSSIBLE")
+          ? [{ show: { ids: { imdb: "tt123456" } } }]
+          : [{ show: { ids: { imdb: "tt999999" } } }];
+      },
+    },
   };
   const js = ts.transpileModule(source("src/lib/drop-show-eligibility.ts"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  const mod = { exports: {} as { isShowTracked: (input: any) => Promise<boolean>; useCanDropShow: (input: any) => boolean } };
+  const mod = {
+    exports: {} as {
+      isShowTracked: (input: any) => Promise<boolean>;
+      useCanDropShow: (input: any) => boolean;
+    },
+  };
   new Function("require", "module", "exports", js)(
     (key: string) => {
       assert.ok(key in mods, `Unexpected module ${key}`);
       return mods[key];
-    }, mod, mod.exports,
+    },
+    mod,
+    mod.exports,
   );
-  return { isShowTracked: mod.exports.isShowTracked, useCanDropShow: mod.exports.useCanDropShow, calls, notifyStatus };
+  return {
+    isShowTracked: mod.exports.isShowTracked,
+    useCanDropShow: mod.exports.useCanDropShow,
+    calls,
+    notifyStatus,
+  };
 }
 
 const series = { id: "tt123456", type: "series" };
@@ -157,11 +200,18 @@ test("Drop Show UI gates both entry points and restricts the PMDB note to its se
   assert.doesNotMatch(modal, /PublicMetaDB does not have a Dropped status/);
 });
 
-
 test("live tracker status changes update Drop eligibility without navigating away", async () => {
   const dom = new JSDOM("<div id='root'></div>", { url: "https://example.test" });
-  const old = { window: globalThis.window, document: globalThis.document, IS_REACT_ACT_ENVIRONMENT: (globalThis as any).IS_REACT_ACT_ENVIRONMENT };
-  Object.assign(globalThis, { window: dom.window, document: dom.window.document, IS_REACT_ACT_ENVIRONMENT: true });
+  const old = {
+    window: globalThis.window,
+    document: globalThis.document,
+    IS_REACT_ACT_ENVIRONMENT: (globalThis as any).IS_REACT_ACT_ENVIRONMENT,
+  };
+  Object.assign(globalThis, {
+    window: dom.window,
+    document: dom.window.document,
+    IS_REACT_ACT_ENVIRONMENT: true,
+  });
   try {
     const settings: Settings = { simkl: true };
     const h = fixture(settings);
@@ -176,15 +226,27 @@ test("live tracker status changes update Drop eligibility without navigating awa
     settings.simklStatus = "watching";
     await React.act(async () => h.notifyStatus());
     await React.act(async () => {});
-    assert.equal(document.body.textContent, "Drop show", "successful tracker write should appear in the current view");
+    assert.equal(
+      document.body.textContent,
+      "Drop show",
+      "successful tracker write should appear in the current view",
+    );
     settings.simklStatus = null;
     await React.act(async () => h.notifyStatus());
     await React.act(async () => {});
-    assert.equal(document.body.textContent, "No drop", "removal should also update the current view");
+    assert.equal(
+      document.body.textContent,
+      "No drop",
+      "removal should also update the current view",
+    );
     settings.simklStatus = "watching";
     await React.act(async () => h.notifyStatus());
     await React.act(async () => root.render(React.createElement(Probe, { id: "tt777888" })));
-    assert.equal(document.body.textContent, "No drop", "the previous title must not flash Drop on the next title");
+    assert.equal(
+      document.body.textContent,
+      "No drop",
+      "the previous title must not flash Drop on the next title",
+    );
     await React.act(async () => root.unmount());
   } finally {
     Object.assign(globalThis, old);

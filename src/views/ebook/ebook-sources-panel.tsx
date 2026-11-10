@@ -68,11 +68,7 @@ const INPUT = "ebook-source-input";
 const PRIMARY_BTN = "ebook-source-button ebook-source-button-primary";
 
 function SectionLabel({ children }: { children: ReactNode }) {
-  return (
-    <p className="text-[15px] font-semibold text-ink">
-      {children}
-    </p>
-  );
+  return <p className="text-[15px] font-semibold text-ink">{children}</p>;
 }
 
 function MetadataProviders() {
@@ -177,9 +173,7 @@ function TranslationSelect({
   }, [open]);
   return (
     <label className="flex min-w-0 flex-col gap-1.5">
-      <span className="text-[13px] font-medium text-ink-muted">
-        {label}
-      </span>
+      <span className="text-[13px] font-medium text-ink-muted">{label}</span>
       <div ref={root} className="relative">
         <button
           type="button"
@@ -329,9 +323,7 @@ function Translation() {
               onClick={() => patch({ enabled: !settings.enabled })}
               className="ebook-source-switch"
             >
-              <span
-                className="ebook-source-switch-knob"
-              />
+              <span className="ebook-source-switch-knob" />
             </button>
           </div>
           <TranslationSelect
@@ -401,13 +393,7 @@ function Translation() {
 }
 
 function GutenbergMark({ size = "h-11 w-11" }: { size?: string }) {
-  return (
-    <img
-      src={gutenbergLogo}
-      alt=""
-      className={`${size} shrink-0 rounded-md object-cover`}
-    />
-  );
+  return <img src={gutenbergLogo} alt="" className={`${size} shrink-0 rounded-md object-cover`} />;
 }
 
 function SourceIcon({ source }: { source: EBookSource }) {
@@ -622,9 +608,7 @@ function InstalledSourceRow({ item }: { item: ReturnType<typeof installedEBookPl
         onClick={() => void setEBookPluginEnabled(item.id, !item.enabled)}
         className="ebook-source-switch"
       >
-        <span
-          className="ebook-source-switch-knob"
-        />
+        <span className="ebook-source-switch-knob" />
       </button>
       <button
         type="button"
@@ -679,9 +663,7 @@ function PluginRow({ item, repoUrl }: { item: EBookPluginManifest; repoUrl: stri
           onClick={() => void setEBookPluginEnabled(installed.id, !installed.enabled)}
           className="ebook-source-switch"
         >
-          <span
-            className="ebook-source-switch-knob"
-          />
+          <span className="ebook-source-switch-knob" />
         </button>
       )}
       <button
@@ -829,9 +811,22 @@ function Extensions() {
         <Scale size={18} aria-hidden="true" />
         <div>
           <h3 id="ebook-source-legal-title">{t("Copyright & third-party sources")}</h3>
-          <p>{t("Use extensions only for content you may lawfully access, including public-domain books, licensed content, or uses permitted by law.")}</p>
-          <p>{t("You are responsible for checking copyright status, local law, and each source’s terms.")}</p>
-          <p>{t("Extensions come from repositories you add. Harbor does not verify their content rights.")} {t("Harbor does not support copyright infringement.")}</p>
+          <p>
+            {t(
+              "Use extensions only for content you may lawfully access, including public-domain books, licensed content, or uses permitted by law.",
+            )}
+          </p>
+          <p>
+            {t(
+              "You are responsible for checking copyright status, local law, and each source’s terms.",
+            )}
+          </p>
+          <p>
+            {t(
+              "Extensions come from repositories you add. Harbor does not verify their content rights.",
+            )}{" "}
+            {t("Harbor does not support copyright infringement.")}
+          </p>
         </div>
       </aside>
       <div className={`flex flex-col gap-2.5 px-5 py-4 ${CARD}`}>
@@ -884,12 +879,8 @@ function WorkspaceSection({
     <section id={id} className="ebook-source-workspace-section">
       <header className="ebook-source-workspace-heading">
         <span className="min-w-0">
-          <h2 className="text-[20px] font-semibold tracking-tight text-ink">
-            {title}
-          </h2>
-          <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-muted">
-            {description}
-          </p>
+          <h2 className="text-[20px] font-semibold tracking-tight text-ink">{title}</h2>
+          <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ink-muted">{description}</p>
         </span>
       </header>
       <div className="flex flex-col gap-5">{children}</div>
@@ -954,7 +945,9 @@ export function EBookSourcesView({ onBack }: { onBack: () => void }) {
   const jumpTo = (id: string) => {
     setActiveSection(id);
     document.getElementById(id)?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
       block: "start",
     });
   };
@@ -977,19 +970,11 @@ export function EBookSourcesView({ onBack }: { onBack: () => void }) {
   return (
     <div className="ebook-sources-shell">
       <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="ebook-source-back"
-        >
+        <button type="button" onClick={onBack} className="ebook-source-back">
           <ChevronLeft size={19} /> {t("Back")}
         </button>
         {total > 0 && (
-          <button
-            type="button"
-            onClick={onBack}
-            className={`${PRIMARY_BTN} min-w-20`}
-          >
+          <button type="button" onClick={onBack} className={`${PRIMARY_BTN} min-w-20`}>
             {t("Done")}
           </button>
         )}
@@ -1092,9 +1077,7 @@ export function EBookSourcesView({ onBack }: { onBack: () => void }) {
           <WorkspaceSection
             id="ebook-source-extensions"
             title={t("Extensions")}
-            description={t(
-              "Add eBook sources from a repository you trust.",
-            )}
+            description={t("Add eBook sources from a repository you trust.")}
           >
             <Extensions />
             <PluginGuide kind="ebook" />

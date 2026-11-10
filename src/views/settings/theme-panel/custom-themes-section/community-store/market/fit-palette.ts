@@ -10,7 +10,7 @@ function clamp01(x: number): number {
 
 function hslToHex(h: number, s: number, l: number): string {
   const c = (1 - Math.abs(2 * l - 1)) * s;
-  const hp = ((((h % 360) + 360) % 360) / 60);
+  const hp = (((h % 360) + 360) % 360) / 60;
   const x = c * (1 - Math.abs((hp % 2) - 1));
   let r = 0;
   let g = 0;
@@ -31,7 +31,13 @@ function hslToHex(h: number, s: number, l: number): string {
 
 function hexToRgb(hex: string): [number, number, number] | null {
   const m = hex.replace(/^#/, "");
-  const full = m.length === 3 ? m.split("").map((ch) => ch + ch).join("") : m;
+  const full =
+    m.length === 3
+      ? m
+          .split("")
+          .map((ch) => ch + ch)
+          .join("")
+      : m;
   if (full.length !== 6) return null;
   const r = parseInt(full.slice(0, 2), 16);
   const g = parseInt(full.slice(2, 4), 16);
@@ -61,7 +67,9 @@ function withAlpha(hex: string, alpha: number): string {
 }
 
 export function tokensFromStoreTheme(t: StoreTheme): FitTokens {
-  const sw = Array.isArray(t.swatch) ? t.swatch.filter((c): c is string => typeof c === "string") : [];
+  const sw = Array.isArray(t.swatch)
+    ? t.swatch.filter((c): c is string => typeof c === "string")
+    : [];
   const canvas = sw[0] ?? "#20222a";
   const surface = sw[1] ?? lighten(canvas, 0.05);
   const accent = sw[2] ?? sw[1] ?? "#8b8f98";

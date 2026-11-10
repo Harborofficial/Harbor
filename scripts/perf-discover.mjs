@@ -247,14 +247,19 @@ const sweepBody = (pxPerFrame, frames, fromPx) => `(async (main) => {
   });
   return { pxPerFrame: ${pxPerFrame}, fromPx: ${fromPx}, framesRun: n, pxTravelled: Math.round(main.scrollTop - start) };
 })`;
-const idleBody = (ms) => `(async () => { await new Promise((r) => setTimeout(r, ${ms})); return { idleMs: ${ms} }; })`;
-
+const idleBody = (ms) =>
+  `(async () => { await new Promise((r) => setTimeout(r, ${ms})); return { idleMs: ${ms} }; })`;
 
 // ---------------------------------------------------------------- node side
 
 async function evalOn(cdp, expr) {
-  const r = await cdp.send("Runtime.evaluate", { expression: expr, returnByValue: true, awaitPromise: true });
-  if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description ?? "eval failed");
+  const r = await cdp.send("Runtime.evaluate", {
+    expression: expr,
+    returnByValue: true,
+    awaitPromise: true,
+  });
+  if (r.exceptionDetails)
+    throw new Error(r.exceptionDetails.exception?.description ?? "eval failed");
   return r.result.value;
 }
 
@@ -263,11 +268,35 @@ function metricsMap(res) {
 }
 
 function metricsDelta(a, b) {
-  const keep = ["LayoutCount", "RecalcStyleCount", "LayoutDuration", "RecalcStyleDuration", "ScriptDuration", "TaskDuration", "ThreadTime", "Nodes", "LayoutObjects", "JSEventListeners", "Resources", "DetachedScriptStates"];
+  const keep = [
+    "LayoutCount",
+    "RecalcStyleCount",
+    "LayoutDuration",
+    "RecalcStyleDuration",
+    "ScriptDuration",
+    "TaskDuration",
+    "ThreadTime",
+    "Nodes",
+    "LayoutObjects",
+    "JSEventListeners",
+    "Resources",
+    "DetachedScriptStates",
+  ];
   const out = {};
   for (const k of keep) if (typeof b[k] === "number") out[k] = +(b[k] - (a[k] ?? 0)).toFixed(3);
-  for (const k of ["LayoutDuration", "RecalcStyleDuration", "ScriptDuration", "TaskDuration", "ThreadTime"]) {
-    if (out[k] != null) { out[k.replace("Duration", "Ms").replace("ThreadTime", "ThreadMs")] = Math.round(out[k] * 1000); delete out[k]; }
+  for (const k of [
+    "LayoutDuration",
+    "RecalcStyleDuration",
+    "ScriptDuration",
+    "TaskDuration",
+    "ThreadTime",
+  ]) {
+    if (out[k] != null) {
+      out[k.replace("Duration", "Ms").replace("ThreadTime", "ThreadMs")] = Math.round(
+        out[k] * 1000,
+      );
+      delete out[k];
+    }
   }
   return out;
 }
@@ -275,23 +304,51 @@ function metricsDelta(a, b) {
 function netCollector(cdp) {
   const reqs = new Map();
   const done = [];
-  cdp.on("Network.requestWillBeSent", (p) => reqs.set(p.requestId, { url: p.request.url, type: p.type }));
-  cdp.on("Network.loadingFinished", (p) => { const r = reqs.get(p.requestId); if (r) done.push({ ...r, bytes: p.encodedDataLength }); });
+  cdp.on("Network.requestWillBeSent", (p) =>
+    reqs.set(p.requestId, { url: p.request.url, type: p.type }),
+  );
+  cdp.on("Network.loadingFinished", (p) => {
+    const r = reqs.get(p.requestId);
+    if (r) done.push({ ...r, bytes: p.encodedDataLength });
+  });
   return {
-    reset: () => { done.length = 0; },
+    reset: () => {
+      done.length = 0;
+    },
     harvest: () => {
-      const lane = (u, t) => u.startsWith("http://ipc.localhost") ? "ipc" : t === "Image" ? "image" : u.startsWith("http://tauri.localhost") ? "local" : "data";
+      const lane = (u, t) =>
+        u.startsWith("http://ipc.localhost")
+          ? "ipc"
+          : t === "Image"
+            ? "image"
+            : u.startsWith("http://tauri.localhost")
+              ? "local"
+              : "data";
       const out = {};
       for (const d of done) {
         const k = lane(d.url, d.type);
         const b = out[k] ?? (out[k] = { requests: 0, kb: 0 });
-        b.requests++; b.kb += d.bytes / 1024;
+        b.requests++;
+        b.kb += d.bytes / 1024;
       }
       for (const k of Object.keys(out)) out[k].kb = Math.round(out[k].kb);
       const hosts = {};
-      for (const d of done) { let h = "ipc"; try { h = new URL(d.url).hostname; } catch {} hosts[h] = (hosts[h] ?? 0) + d.bytes / 1024; }
-      const topHosts = Object.entries(hosts).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([h, kb]) => ({ host: h, kb: Math.round(kb) }));
-      return { byLane: out, topHosts, totalKB: Math.round(done.reduce((s, d) => s + d.bytes, 0) / 1024) };
+      for (const d of done) {
+        let h = "ipc";
+        try {
+          h = new URL(d.url).hostname;
+        } catch {}
+        hosts[h] = (hosts[h] ?? 0) + d.bytes / 1024;
+      }
+      const topHosts = Object.entries(hosts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([h, kb]) => ({ host: h, kb: Math.round(kb) }));
+      return {
+        byLane: out,
+        topHosts,
+        totalKB: Math.round(done.reduce((s, d) => s + d.bytes, 0) / 1024),
+      };
     },
   };
 }
@@ -304,16 +361,26 @@ function boxState() {
     "[PSCustomObject]@{ cpuLoadPct = $c; onBattery = [bool]($b -and $b.BatteryStatus -eq 1); noisy = $noisy } | ConvertTo-Json -Compress",
   ].join(" ");
   const out = spawnSync("powershell", ["-NoProfile", "-Command", ps], { encoding: "utf8" });
-  try { return JSON.parse(out.stdout || "{}"); } catch { return { error: "box state unavailable" }; }
+  try {
+    return JSON.parse(out.stdout || "{}");
+  } catch {
+    return { error: "box state unavailable" };
+  }
 }
 
 function gitStamp() {
   try {
     return {
-      commit: execFileSync("git", ["-C", ROOT, "rev-parse", "--short", "HEAD"], { encoding: "utf8" }).trim(),
-      dirty: execFileSync("git", ["-C", ROOT, "status", "--porcelain"], { encoding: "utf8" }).trim().length > 0,
+      commit: execFileSync("git", ["-C", ROOT, "rev-parse", "--short", "HEAD"], {
+        encoding: "utf8",
+      }).trim(),
+      dirty:
+        execFileSync("git", ["-C", ROOT, "status", "--porcelain"], { encoding: "utf8" }).trim()
+          .length > 0,
     };
-  } catch { return { commit: null, dirty: null }; }
+  } catch {
+    return { commit: null, dirty: null };
+  }
 }
 
 const FATAL = [];
@@ -321,17 +388,34 @@ const WARN = [];
 
 function gate(pre, box, version) {
   if (!pre.targetFound) FATAL.push("no visible Discover main: open Discover before running");
-  if (!pre.focus) FATAL.push("window is not focused: WebView2 throttles rAF and swallows real input when it is not");
+  if (!pre.focus)
+    FATAL.push(
+      "window is not focused: WebView2 throttles rAF and swallows real input when it is not",
+    );
   if (pre.visibility !== "visible") FATAL.push(`document.visibilityState is ${pre.visibility}`);
   if (pre.screensaverVisible) FATAL.push("screensaver overlay is up: dismiss it, then rerun");
   if (!pre.loafSupported) FATAL.push("long-animation-frame unsupported in this WebView2");
-  if (pre.devServer) WARN.push("DEV build: StrictMode double effects and unminified React. Numbers are not comparable to a shipped build");
-  if (pre.mainsInDocument > 1 && pre.targetIsFirstMain === false) WARN.push(`${pre.mainsInDocument} <main> elements present, ${pre.mainsInDocument - 1} parked: using .harbor-layer-active main, not querySelector("main")`);
-  if (pre.profilerRunning) WARN.push("memory profiler is running: it patches window.fetch and ticks every 1s (src/lib/memory-profiler.ts:247,380). Stop it for frame phases");
+  if (pre.devServer)
+    WARN.push(
+      "DEV build: StrictMode double effects and unminified React. Numbers are not comparable to a shipped build",
+    );
+  if (pre.mainsInDocument > 1 && pre.targetIsFirstMain === false)
+    WARN.push(
+      `${pre.mainsInDocument} <main> elements present, ${pre.mainsInDocument - 1} parked: using .harbor-layer-active main, not querySelector("main")`,
+    );
+  if (pre.profilerRunning)
+    WARN.push(
+      "memory profiler is running: it patches window.fetch and ticks every 1s (src/lib/memory-profiler.ts:247,380). Stop it for frame phases",
+    );
   if (box.onBattery) WARN.push("on battery: clock throttling will widen every distribution");
-  if (typeof box.cpuLoadPct === "number" && box.cpuLoadPct > 25) WARN.push(`box is busy at ${box.cpuLoadPct}% CPU before the run`);
-  if (Array.isArray(box.noisy) && box.noisy.length) WARN.push(`noisy processes: ${box.noisy.join(", ")}`);
-  if (!RELOAD && pre.pageAgeSec > 1800) WARN.push(`page has been alive ${Math.round(pre.pageAgeSec / 60)} min. :has() invalidation flags are sticky for an element's lifetime, so style fixes need --reload to be visible`);
+  if (typeof box.cpuLoadPct === "number" && box.cpuLoadPct > 25)
+    WARN.push(`box is busy at ${box.cpuLoadPct}% CPU before the run`);
+  if (Array.isArray(box.noisy) && box.noisy.length)
+    WARN.push(`noisy processes: ${box.noisy.join(", ")}`);
+  if (!RELOAD && pre.pageAgeSec > 1800)
+    WARN.push(
+      `page has been alive ${Math.round(pre.pageAgeSec / 60)} min. :has() invalidation flags are sticky for an element's lifetime, so style fixes need --reload to be visible`,
+    );
   return { fatal: FATAL, warn: WARN, version };
 }
 
@@ -344,8 +428,12 @@ async function phase(cdp, net, name, bodySrc, settleSrc) {
 }
 
 function summarise(runs) {
-  const pick = (f) => runs.map(f).filter((x) => typeof x === "number").sort((a, b) => a - b);
-  const med = (xs) => xs.length ? xs[Math.floor(xs.length / 2)] : null;
+  const pick = (f) =>
+    runs
+      .map(f)
+      .filter((x) => typeof x === "number")
+      .sort((a, b) => a - b);
+  const med = (xs) => (xs.length ? xs[Math.floor(xs.length / 2)] : null);
   const p95 = pick((r) => r.frames?.p95Ms);
   return {
     repeats: runs.length,
@@ -367,7 +455,9 @@ function summarise(runs) {
 async function waitReady(cdp, ms = 25000) {
   const until = Date.now() + ms;
   while (Date.now() < until) {
-    const ok = await evalOn(cdp, `!!document.querySelector('[data-harbor-nav="discover"]')`).catch(() => false);
+    const ok = await evalOn(cdp, `!!document.querySelector('[data-harbor-nav="discover"]')`).catch(
+      () => false,
+    );
     if (ok) return true;
     await new Promise((r) => setTimeout(r, 400));
   }
@@ -378,7 +468,14 @@ async function clickDiscover(cdp, pre) {
   if (!pre.discoverNav) throw new Error("discover nav item not found");
   const { x, y } = pre.discoverNav;
   for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) {
-    await cdp.send("Input.dispatchMouseEvent", { type, x, y, button: "left", clickCount: type === "mouseMoved" ? 0 : 1, buttons: type === "mousePressed" ? 1 : 0 });
+    await cdp.send("Input.dispatchMouseEvent", {
+      type,
+      x,
+      y,
+      button: "left",
+      clickCount: type === "mouseMoved" ? 0 : 1,
+      buttons: type === "mousePressed" ? 1 : 0,
+    });
   }
 }
 
@@ -403,7 +500,23 @@ async function main() {
       net.reset();
       await new Promise((r) => setTimeout(r, 5000));
       const b = metricsMap(await cdp.send("Performance.getMetrics"));
-      const out = { runId, mode: "census", stamp: { version: pkg.version, ...gitStamp(), bundle: pre.bundle, dpr: pre.dpr, viewport: pre.viewport, devServer: pre.devServer, box }, preflight: pre, census, idle5s: { engine: metricsDelta(a, b), bytes: net.harvest() }, os: rss() };
+      const out = {
+        runId,
+        mode: "census",
+        stamp: {
+          version: pkg.version,
+          ...gitStamp(),
+          bundle: pre.bundle,
+          dpr: pre.dpr,
+          viewport: pre.viewport,
+          devServer: pre.devServer,
+          box,
+        },
+        preflight: pre,
+        census,
+        idle5s: { engine: metricsDelta(a, b), bytes: net.harvest() },
+        os: rss(),
+      };
       writeFileSync(join(OUT, `${runId}-census.json`), JSON.stringify(out, null, 2));
       return console.log(JSON.stringify(out, null, 2));
     }
@@ -414,16 +527,42 @@ async function main() {
       const B = JSON.parse(readFileSync(join(OUT, `${y}.json`), "utf8"));
       const rows = [];
       for (const key of Object.keys(A.phases)) {
-        const a = A.phases[key].summary, b = B.phases[key]?.summary;
+        const a = A.phases[key].summary,
+          b = B.phases[key]?.summary;
         if (!b) continue;
-        for (const m of ["framesP95Ms", "loafBlockingMs", "settledMsMed", "recalcStyleCountMed", "bytesKBMed", "clsMed"]) {
+        for (const m of [
+          "framesP95Ms",
+          "loafBlockingMs",
+          "settledMsMed",
+          "recalcStyleCountMed",
+          "bytesKBMed",
+          "clsMed",
+        ]) {
           const band = Math.max(a.framesP95BandMs ?? 0, b.framesP95BandMs ?? 0);
           const d = (b[m] ?? 0) - (a[m] ?? 0);
-          const verdict = m === "framesP95Ms" && Math.abs(d) <= band ? "indistinguishable (inside measured noise band)" : d === 0 ? "same" : d < 0 ? "better" : "worse";
+          const verdict =
+            m === "framesP95Ms" && Math.abs(d) <= band
+              ? "indistinguishable (inside measured noise band)"
+              : d === 0
+                ? "same"
+                : d < 0
+                  ? "better"
+                  : "worse";
           rows.push({ phase: key, metric: m, a: a[m], b: b[m], delta: +d.toFixed(2), verdict });
         }
       }
-      return console.log(JSON.stringify({ a: x, b: y, noteBandFrom: "per-phase spread of the repeats, not a guessed percentage", rows }, null, 2));
+      return console.log(
+        JSON.stringify(
+          {
+            a: x,
+            b: y,
+            noteBandFrom: "per-phase spread of the repeats, not a guessed percentage",
+            rows,
+          },
+          null,
+          2,
+        ),
+      );
     }
 
     const g = gate(pre, box, pkg.version);
@@ -439,16 +578,22 @@ async function main() {
       for (let i = 0; i < times; i++) runs.push(await phase(cdp, net, name, bodySrc, settleSrc));
       phases[name] = { runs, summary: summarise(runs) };
       const s = phases[name].summary;
-      console.error(`  ${name.padEnd(14)} p50 ${s.framesP50Ms}ms  p95 ${s.framesP95Ms}ms (band ${s.framesP95BandMs})  block ${s.loafBlockingMs}ms  cls ${s.clsMed}  ${s.bytesKBMed}KB`);
+      console.error(
+        `  ${name.padEnd(14)} p50 ${s.framesP50Ms}ms  p95 ${s.framesP95Ms}ms (band ${s.framesP95BandMs})  block ${s.loafBlockingMs}ms  cls ${s.clsMed}  ${s.bytesKBMed}KB`,
+      );
     };
 
-    console.error(`run ${runId}  harbor ${pkg.version}  ${pre.devServer ? "DEV" : "prod bundle"} ${pre.bundle ?? ""}`);
+    console.error(
+      `run ${runId}  harbor ${pkg.version}  ${pre.devServer ? "DEV" : "prod bundle"} ${pre.bundle ?? ""}`,
+    );
     if (g.warn.length) for (const w of g.warn) console.error(`  warn: ${w}`);
 
     await record("idle", idleBody(5000), SETTLE_NONE, Math.min(2, REPEATS));
     const idleP50 = phases.idle.summary.framesP50Ms;
     if (idleP50 != null && phases.idle.summary.framesP95Ms > idleP50 * 3) {
-      console.error("  ABORT: idle itself is not clean. Nothing measured after this would be interpretable.");
+      console.error(
+        "  ABORT: idle itself is not clean. Nothing measured after this would be interpretable.",
+      );
       process.exit(3);
     }
 
@@ -463,8 +608,15 @@ async function main() {
       await clickDiscover(cdp, pre2);
       const open = await evalOn(cdp, WINDOW(idleBody(50), SETTLE_ROWS) + "()");
       const b = metricsMap(await cdp.send("Performance.getMetrics"));
-      phases.coldOpen = { runs: [{ ...open, wallMs: Date.now() - t0, engine: metricsDelta(a, b), bytes: net.harvest() }], summary: summarise([open]) };
-      console.error(`  coldOpen       settle ${open.settledMs}ms  block ${open.loaf.totalBlockingMs}ms  worst LoAF ${open.loaf.worstMs}ms`);
+      phases.coldOpen = {
+        runs: [
+          { ...open, wallMs: Date.now() - t0, engine: metricsDelta(a, b), bytes: net.harvest() },
+        ],
+        summary: summarise([open]),
+      };
+      console.error(
+        `  coldOpen       settle ${open.settledMs}ms  block ${open.loaf.totalBlockingMs}ms  worst LoAF ${open.loaf.worstMs}ms`,
+      );
     }
 
     // scrollCold is a single sample by construction: rows can only be cold once.
@@ -477,14 +629,42 @@ async function main() {
 
     const census = await evalOn(cdp, CENSUS);
     await evalOn(cdp, KEEPALIVE_OFF);
-    const out = { runId, mode: "run", stamp: { version: pkg.version, ...gitStamp(), bundle: pre.bundle, dpr: pre.dpr, viewport: pre.viewport, devServer: pre.devServer, frameBudgetMs: phases.idle.summary.framesP50Ms, repeats: REPEATS, reload: RELOAD, box }, gate: g, phases, censusAtEnd: census, os: rss() };
+    const out = {
+      runId,
+      mode: "run",
+      stamp: {
+        version: pkg.version,
+        ...gitStamp(),
+        bundle: pre.bundle,
+        dpr: pre.dpr,
+        viewport: pre.viewport,
+        devServer: pre.devServer,
+        frameBudgetMs: phases.idle.summary.framesP50Ms,
+        repeats: REPEATS,
+        reload: RELOAD,
+        box,
+      },
+      gate: g,
+      phases,
+      censusAtEnd: census,
+      os: rss(),
+    };
     writeFileSync(join(OUT, `${runId}.json`), JSON.stringify(out, null, 2));
-    appendFileSync(join(OUT, "index.log"), `${runId} v${pkg.version} ${gitStamp().commit} scrollFlickP95=${phases.scrollFlick.summary.framesP95Ms}ms band=${phases.scrollFlick.summary.framesP95BandMs} cls=${phases.scrollFlick.summary.clsMed}\n`);
+    appendFileSync(
+      join(OUT, "index.log"),
+      `${runId} v${pkg.version} ${gitStamp().commit} scrollFlickP95=${phases.scrollFlick.summary.framesP95Ms}ms band=${phases.scrollFlick.summary.framesP95BandMs} cls=${phases.scrollFlick.summary.clsMed}\n`,
+    );
     console.error(`\nwrote ${join(OUT, `${runId}.json`)}`);
-    if (PROFILE) console.error("profile flag set: rerun the worst phase alone with --profile to keep the sampled CPU profile");
+    if (PROFILE)
+      console.error(
+        "profile flag set: rerun the worst phase alone with --profile to keep the sampled CPU profile",
+      );
   } finally {
     cdp.close();
   }
 }
 
-main().catch((e) => { console.error(e.message); process.exit(1); });
+main().catch((e) => {
+  console.error(e.message);
+  process.exit(1);
+});

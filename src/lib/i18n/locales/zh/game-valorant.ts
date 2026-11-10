@@ -34,8 +34,10 @@ export default {
   "games.valorant.sampleNote": "出场不足 200 次的特工排在末尾。",
   "games.valorant.empty": "没有符合筛选条件的结果。",
   "games.valorant.checked": "查看于 {date}",
-  "games.valorant.metaScope": "所选版本的 OP.GG 竞技数据。选取率是特工出场占比。结果仅代表来源样本，并非全部玩家。",
-  "games.valorant.referenceScope": "游戏图片和资料由 Valorant-API 提供，更新可能晚于游戏。Harbor 未获 Riot Games 官方认可。",
+  "games.valorant.metaScope":
+    "所选版本的 OP.GG 竞技数据。选取率是特工出场占比。结果仅代表来源样本，并非全部玩家。",
+  "games.valorant.referenceScope":
+    "游戏图片和资料由 Valorant-API 提供，更新可能晚于游戏。Harbor 未获 Riot Games 官方认可。",
   "games.valorant.samples": "{count} 次出场",
   "games.valorant.smallSample": "样本较少",
   "games.valorant.abilities": "技能",
@@ -47,7 +49,8 @@ export default {
   "games.valorant.compareWeapon": "对比武器",
   "games.valorant.weapon": "武器",
   "games.valorant.distance": "距离",
-  "games.valorant.damageScope": "护甲、穿透或技能影响前的基础主射击数值。霰弹枪按每颗弹丸计算伤害。",
+  "games.valorant.damageScope":
+    "护甲、穿透或技能影响前的基础主射击数值。霰弹枪按每颗弹丸计算伤害。",
   "games.valorant.weaponStats": "武器数据",
   "games.valorant.cost": "信用点",
   "games.valorant.magazine": "弹匣容量",
@@ -55,5 +58,5 @@ export default {
   "games.valorant.reload": "换弹 · 秒",
   "games.valorant.head": "头部伤害",
   "games.valorant.body": "躯干伤害",
-  "games.valorant.legs": "腿部伤害"
+  "games.valorant.legs": "腿部伤害",
 };

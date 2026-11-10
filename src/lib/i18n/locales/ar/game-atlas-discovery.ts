@@ -7,7 +7,8 @@ export default {
   "games.atlas.era.before1990": "قبل 1990",
   "games.atlas.searchOrder": "مرتبة حسب صلة نتائج البحث",
   "games.atlas.empty": "جرّب عنوانًا آخر أو فترة إصدار مختلفة.",
-  "games.atlas.source": "بيانات الألعاب وعلاقاتها وتقييماتها وصورها من IGDB. توفر اللعبة على منصة لا يعني امتلاكها أو توافقها مع المحاكيات.",
+  "games.atlas.source":
+    "بيانات الألعاب وعلاقاتها وتقييماتها وصورها من IGDB. توفر اللعبة على منصة لا يعني امتلاكها أو توافقها مع المحاكيات.",
   "games.hero.pauseMotion": "إيقاف حركة الواجهة مؤقتًا",
   "games.hero.playMotion": "تشغيل حركة الواجهة",
   "games.catalog.sort": "ترتيب الألعاب",
@@ -15,5 +16,5 @@ export default {
   "games.catalog.reset": "إعادة ضبط الفلاتر",
   "games.discovery.ratingCombined": "تقييم IGDB المجمّع",
   "games.discovery.ratingCombinedNote": "درجة اللاعبين والنقاد المجمّعة من {count} تقييمات.",
-  "games.discovery.ratingCombinedValue": "تقييم IGDB المجمّع: {score}/100"
+  "games.discovery.ratingCombinedValue": "تقييم IGDB المجمّع: {score}/100",
 };

@@ -50,29 +50,40 @@ export function parseXxlFreshmen(wikitext: string): XxlFreshmanClass[] {
 }
 
 /** Match exact linked articles, including MediaWiki's normalized titles/redirects. */
-export function xxlPortraits(value: unknown, freshmanClass: XxlFreshmanClass): Record<string, string> {
+export function xxlPortraits(
+  value: unknown,
+  freshmanClass: XxlFreshmanClass,
+): Record<string, string> {
   type Obj = Record<string, unknown>;
-  const obj = (v: unknown): Obj => v && typeof v === "object" ? v as Obj : {};
+  const obj = (v: unknown): Obj => (v && typeof v === "object" ? (v as Obj) : {});
   const query = obj(obj(value).query);
   const redirects = new Map<string, string>();
   for (const key of ["normalized", "redirects"]) {
     for (const entry of Array.isArray(query[key]) ? query[key] : []) {
       const row = obj(entry);
-      if (typeof row.from === "string" && typeof row.to === "string") redirects.set(row.from, row.to);
+      if (typeof row.from === "string" && typeof row.to === "string")
+        redirects.set(row.from, row.to);
     }
   }
-  const pages = new Map(Object.values(obj(query.pages)).map(value => {
-    const page = obj(value); return [page.title, page] as const;
-  }));
+  const pages = new Map(
+    Object.values(obj(query.pages)).map((value) => {
+      const page = obj(value);
+      return [page.title, page] as const;
+    }),
+  );
   const artwork: Record<string, string> = {};
   for (const name of freshmanClass.artists) {
     let title = freshmanClass.pages[name];
     const visited = new Set<string>();
-    while (redirects.has(title) && !visited.has(title)) { visited.add(title); title = redirects.get(title)!; }
+    while (redirects.has(title) && !visited.has(title)) {
+      visited.add(title);
+      title = redirects.get(title)!;
+    }
     const page = pages.get(title);
     if (!page || "missing" in page || "disambiguation" in obj(page.pageprops)) continue;
     const source = obj(page.thumbnail).source;
-    if (typeof source === "string" && /^https:\/\/(?:upload|thumb)\.wikimedia\.org\//.test(source)) artwork[name] = source;
+    if (typeof source === "string" && /^https:\/\/(?:upload|thumb)\.wikimedia\.org\//.test(source))
+      artwork[name] = source;
   }
   return artwork;
 }

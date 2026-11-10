@@ -6,9 +6,11 @@ export default {
   "games.recommend.filterTitle": "Loại khỏi gợi ý",
   "games.recommend.hideLibrary": "Trò chơi trong thư viện của tôi",
   "games.recommend.hideSaved": "Trò chơi đã lưu",
-  "games.recommend.libraryNote": "Việc đối chiếu thư viện dựa trên các trò chơi đã phát hiện, các mục nhập đã liên kết và lần đồng bộ Steam gần nhất của bạn.",
+  "games.recommend.libraryNote":
+    "Việc đối chiếu thư viện dựa trên các trò chơi đã phát hiện, các mục nhập đã liên kết và lần đồng bộ Steam gần nhất của bạn.",
   "games.recommend.steamSynced": "Thư viện Steam đã đồng bộ: {date}",
-  "games.recommend.steamUnavailable": "Không có thông tin về các trò chơi bạn sở hữu trên Steam. Trò chơi trong thư viện cục bộ vẫn được tính đến.",
+  "games.recommend.steamUnavailable":
+    "Không có thông tin về các trò chơi bạn sở hữu trên Steam. Trò chơi trong thư viện cục bộ vẫn được tính đến.",
   "games.recommend.inLibrary": "Trong thư viện của bạn",
   "games.recommend.removeSaved": "Xóa {name} khỏi trò chơi đã lưu",
   "games.recommend.forYou": "Dành cho bạn",
@@ -21,7 +23,8 @@ export default {
   "games.recommend.recent": "Chơi gần đây",
   "games.recommend.reset": "Hiện lại trò chơi đã ẩn",
   "games.recommend.empty": "Khám phá theo sở thích",
-  "games.recommend.emptyNote": "Lưu trò chơi bạn quan tâm hoặc chơi từ thư viện. Gợi ý sẽ xuất hiện ở đây.",
+  "games.recommend.emptyNote":
+    "Lưu trò chơi bạn quan tâm hoặc chơi từ thư viện. Gợi ý sẽ xuất hiện ở đây.",
   "games.recommend.signalsOff": "Bật Trò chơi đã lưu hoặc Chơi gần đây ở trên để điều chỉnh gợi ý.",
   "games.recommend.save": "Lưu {name}",
   "games.recommend.hide": "Ẩn {name} khỏi gợi ý",
@@ -31,13 +34,16 @@ export default {
   "games.recommend.unavailable": "Chưa tải được các liên kết.",
   "games.recommend.retryNote": "Thư viện của bạn vẫn có ở đây. Hãy thử tải lại trò chơi liên quan.",
   "games.recommend.caughtUp": "Thử một hướng khác.",
-  "games.recommend.caughtUpNote": "Thử tắt một bộ lọc, khôi phục một gợi ý đã ẩn hoặc lưu thêm một trò yêu thích.",
+  "games.recommend.caughtUpNote":
+    "Thử tắt một bộ lọc, khôi phục một gợi ý đã ẩn hoặc lưu thêm một trò yêu thích.",
   "games.recommend.finding": "Đang tìm trò chơi liên quan đến trò bạn chơi…",
-  "games.recommend.source": "Gợi ý từ thẻ Steam và IGDB, dựa trên thư viện của bạn. Lựa chọn ẩn chỉ áp dụng cho hồ sơ này.",
+  "games.recommend.source":
+    "Gợi ý từ thẻ Steam và IGDB, dựa trên thư viện của bạn. Lựa chọn ẩn chỉ áp dụng cho hồ sơ này.",
   "games.recommend.retrySome": "Thử lại các liên kết chưa tải",
   "games.recommend.saveError": "Không thể lưu tùy chọn khám phá trên thiết bị này. Hãy thử lại.",
   "games.recommend.influences": "Yếu tố định hình gợi ý",
-  "games.recommend.influencesNote": "Chọn trò chơi Harbor dùng làm cơ sở. Thư viện của bạn không thay đổi.",
+  "games.recommend.influencesNote":
+    "Chọn trò chơi Harbor dùng làm cơ sở. Thư viện của bạn không thay đổi.",
   "games.recommend.exclude": "Ngừng dùng {name}",
   "games.recommend.excluded": "Cơ sở đã loại trừ ({count})",
   "games.recommend.useAgain": "Dùng lại {name}",
@@ -48,8 +54,8 @@ export default {
   "games.recommend.undo": "Hoàn tác",
   "games.recommend.undoLabel": "Hoàn tác thay đổi cho {name}",
   "games.recommend.allExcluded": "Mọi cơ sở gợi ý đều đã bị loại trừ.",
-  "games.recommend.allExcludedNote": "Khôi phục một trò trong Điều chỉnh gợi ý hoặc lưu thêm trò yêu thích.",
+  "games.recommend.allExcludedNote":
+    "Khôi phục một trò trong Điều chỉnh gợi ý hoặc lưu thêm trò yêu thích.",
   "games.recommend.saved": "Trò chơi đã lưu",
-  "games.recommend.close": "Đóng cài đặt gợi ý"
+  "games.recommend.close": "Đóng cài đặt gợi ý",
 };
-

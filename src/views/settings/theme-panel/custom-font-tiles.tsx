@@ -69,7 +69,10 @@ export function CustomFontTiles({
                 Harbor
               </span>
               {!compact && (
-                <span className="text-[15.5px] leading-[22px] text-ink-muted" style={{ fontFamily: family }}>
+                <span
+                  className="text-[15.5px] leading-[22px] text-ink-muted"
+                  style={{ fontFamily: family }}
+                >
                   {t("The quick brown fox jumps over the lazy dog")}
                 </span>
               )}

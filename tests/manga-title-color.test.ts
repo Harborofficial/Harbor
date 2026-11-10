@@ -36,7 +36,10 @@ const isConfidentTitleMatch = match.isConfidentTitleMatch as (
 ) => boolean;
 
 test("bracketed color markers are stripped", () => {
-  assert.equal(stripColorTag("Surviving the Game as a Barbarian (Color)"), "Surviving the Game as a Barbarian");
+  assert.equal(
+    stripColorTag("Surviving the Game as a Barbarian (Color)"),
+    "Surviving the Game as a Barbarian",
+  );
   assert.equal(stripColorTag("Solo Leveling (Official Colored)"), "Solo Leveling");
   assert.equal(stripColorTag("Solo Leveling [Full Color]"), "Solo Leveling");
   assert.equal(stripColorTag("Solo Leveling (Color Version)"), "Solo Leveling");

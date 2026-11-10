@@ -91,14 +91,20 @@ function sortsFor(media) {
     { sort_by: "vote_count.desc" },
     { sort_by: "vote_average.desc", "vote_count.gte": 200 },
   ];
-  return media === "movie" ? [...common, { sort_by: "revenue.desc", "vote_count.gte": 50 }] : common;
+  return media === "movie"
+    ? [...common, { sort_by: "revenue.desc", "vote_count.gte": 50 }]
+    : common;
 }
 
 async function collectIds(media, pages) {
   const ids = new Map();
-  const jobs = sortsFor(media).flatMap((params) => Array.from({ length: pages }, (_, i) => ({ params, page: i + 1 })));
+  const jobs = sortsFor(media).flatMap((params) =>
+    Array.from({ length: pages }, (_, i) => ({ params, page: i + 1 })),
+  );
   await mapAll(jobs, async ({ params, page }) => {
-    const res = await get(`discover/${media}`, { ...params, page, include_adult: "false" }).catch(() => null);
+    const res = await get(`discover/${media}`, { ...params, page, include_adult: "false" }).catch(
+      () => null,
+    );
     for (const r of res?.results ?? []) {
       if (typeof r.id !== "number") continue;
       ids.set(r.id, Math.max(ids.get(r.id) ?? 0, r.popularity ?? 0));
@@ -144,7 +150,10 @@ async function harvestTitles(media, ids) {
       return null;
     });
     done += 1;
-    if (done % 2000 === 0) console.log(`  ${media} ${done}/${ids.size} (requests ${requests}, throttled ${throttled}, failed ${failed})`);
+    if (done % 2000 === 0)
+      console.log(
+        `  ${media} ${done}/${ids.size} (requests ${requests}, throttled ${throttled}, failed ${failed})`,
+      );
     if (!d) return;
     const w = weightOf(pop);
     for (const c of d.production_companies ?? []) tally(studios, c, w, media);
@@ -182,14 +191,32 @@ async function enrich(kind, brand) {
   }).catch(() => null);
   const results = page?.results ?? [];
   if (results.length === 0) return bare;
-  const rated = results.filter((r) => (r.vote_count ?? 0) >= 100 && typeof r.vote_average === "number");
-  const rating = rated.length ? Math.round((rated.reduce((s, r) => s + r.vote_average, 0) / rated.length) * 10) / 10 : null;
-  const years = results.map((r) => yearOf(r.release_date ?? r.first_air_date)).filter((y) => y !== null);
-  const span = years.length > 1 ? `${Math.min(...years)} to ${Math.max(...years)}` : years.length === 1 ? String(years[0]) : "";
+  const rated = results.filter(
+    (r) => (r.vote_count ?? 0) >= 100 && typeof r.vote_average === "number",
+  );
+  const rating = rated.length
+    ? Math.round((rated.reduce((s, r) => s + r.vote_average, 0) / rated.length) * 10) / 10
+    : null;
+  const years = results
+    .map((r) => yearOf(r.release_date ?? r.first_air_date))
+    .filter((y) => y !== null);
+  const span =
+    years.length > 1
+      ? `${Math.min(...years)} to ${Math.max(...years)}`
+      : years.length === 1
+        ? String(years[0])
+        : "";
   const genreCounts = new Map();
-  for (const r of results) for (const g of r.genre_ids ?? []) genreCounts.set(g, (genreCounts.get(g) ?? 0) + 1);
-  const genres = [...genreCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([g]) => g);
-  const pool = results.filter((r) => typeof r.id === "number" && r.poster_path).slice(0, ART_POOL).map((r) => ({ id: r.id, p: r.poster_path }));
+  for (const r of results)
+    for (const g of r.genre_ids ?? []) genreCounts.set(g, (genreCounts.get(g) ?? 0) + 1);
+  const genres = [...genreCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([g]) => g);
+  const pool = results
+    .filter((r) => typeof r.id === "number" && r.poster_path)
+    .slice(0, ART_POOL)
+    .map((r) => ({ id: r.id, p: r.poster_path }));
   return { ...bare, k: page.total_results ?? results.length, y: span, r: rating, g: genres, pool };
 }
 
@@ -197,7 +224,10 @@ function assignArt(list) {
   const claimed = new Set();
   return list.map((b) => {
     const fresh = b.pool.filter((p) => !claimed.has(p.id));
-    const picks = fresh.length >= ART_PER_BRAND ? fresh.slice(0, ART_PER_BRAND) : b.pool.slice(0, ART_PER_BRAND);
+    const picks =
+      fresh.length >= ART_PER_BRAND
+        ? fresh.slice(0, ART_PER_BRAND)
+        : b.pool.slice(0, ART_PER_BRAND);
     for (const p of picks) claimed.add(p.id);
     const { pool: _pool, ...rest } = b;
     return { ...rest, a: picks.map((p) => p.p) };
@@ -206,7 +236,10 @@ function assignArt(list) {
 
 async function build(kind, list, keep) {
   const ranked = list
-    .filter((b) => b.count >= MIN_COUNT && !(kind === "network" && SKIP_NETWORKS.has(b.name.toLowerCase())))
+    .filter(
+      (b) =>
+        b.count >= MIN_COUNT && !(kind === "network" && SKIP_NETWORKS.has(b.name.toLowerCase())),
+    )
     .sort((a, b) => b.score - a.score)
     .slice(0, keep);
   console.log(`${kind}: ${list.length} seen, ${ranked.length} kept, enriching`);
@@ -214,7 +247,10 @@ async function build(kind, list, keep) {
   const enriched = await mapAll(ranked, async (b) => {
     const e = await enrich(kind, b);
     done += 1;
-    if (done % 1000 === 0) console.log(`  ${kind} enriched ${done}/${ranked.length} (requests ${requests}, throttled ${throttled})`);
+    if (done % 1000 === 0)
+      console.log(
+        `  ${kind} enriched ${done}/${ranked.length} (requests ${requests}, throttled ${throttled})`,
+      );
     return e;
   });
   enriched.sort((a, b) => b.s - a.s);
@@ -224,19 +260,33 @@ async function build(kind, list, keep) {
 const t0 = Date.now();
 let tallyData;
 if (STAGE !== "enrich" || !existsSync(TALLY)) {
-  console.log(`collecting title ids (movie ${MOVIE_PAGES} pages x ${sortsFor("movie").length} sorts, tv ${TV_PAGES} x ${sortsFor("tv").length}, limit ${LIMIT})`);
-  const [movieIds, tvIds] = await Promise.all([collectIds("movie", MOVIE_PAGES), collectIds("tv", TV_PAGES)]);
-  console.log(`movies ${movieIds.size}, shows ${tvIds.size} (requests ${requests}, throttled ${throttled}, ${Math.round((Date.now() - t0) / 1000)}s)`);
+  console.log(
+    `collecting title ids (movie ${MOVIE_PAGES} pages x ${sortsFor("movie").length} sorts, tv ${TV_PAGES} x ${sortsFor("tv").length}, limit ${LIMIT})`,
+  );
+  const [movieIds, tvIds] = await Promise.all([
+    collectIds("movie", MOVIE_PAGES),
+    collectIds("tv", TV_PAGES),
+  ]);
+  console.log(
+    `movies ${movieIds.size}, shows ${tvIds.size} (requests ${requests}, throttled ${throttled}, ${Math.round((Date.now() - t0) / 1000)}s)`,
+  );
   await Promise.all([harvestTitles("movie", movieIds), harvestTitles("tv", tvIds)]);
   tallyData = { studios: [...studios.values()], networks: [...networks.values()] };
   writeFileSync(TALLY, JSON.stringify(tallyData));
-  console.log(`studios seen ${studios.size}, networks seen ${networks.size}; tally saved (requests ${requests}, throttled ${throttled}, ${Math.round((Date.now() - t0) / 1000)}s)`);
+  console.log(
+    `studios seen ${studios.size}, networks seen ${networks.size}; tally saved (requests ${requests}, throttled ${throttled}, ${Math.round((Date.now() - t0) / 1000)}s)`,
+  );
   if (STAGE === "collect") process.exit(0);
 } else {
   tallyData = JSON.parse(readFileSync(TALLY, "utf8"));
-  console.log(`loaded tally: ${tallyData.studios.length} studios, ${tallyData.networks.length} networks`);
+  console.log(
+    `loaded tally: ${tallyData.studios.length} studios, ${tallyData.networks.length} networks`,
+  );
 }
-const [studio, network] = await Promise.all([build("studio", tallyData.studios, KEEP_STUDIOS), build("network", tallyData.networks, KEEP_NETWORKS)]);
+const [studio, network] = await Promise.all([
+  build("studio", tallyData.studios, KEEP_STUDIOS),
+  build("network", tallyData.networks, KEEP_NETWORKS),
+]);
 const builtAt = new Date().toISOString().slice(0, 10);
 const full = { builtAt, studio, network };
 const top = { builtAt, studio: studio.slice(0, TOP), network: network.slice(0, TOP) };

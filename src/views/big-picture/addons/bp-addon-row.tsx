@@ -11,10 +11,7 @@ export function BpAddonRow() {
   const t = useBpT();
   const { entries, posters, onFocusAddon } = useBpAddonRow();
 
-  const byUrl = useMemo(
-    () => new Map(entries.map((e) => [e.transportUrl, e] as const)),
-    [entries],
-  );
+  const byUrl = useMemo(() => new Map(entries.map((e) => [e.transportUrl, e] as const)), [entries]);
 
   // same() in use-bp-sections compares poster lists by length alone, which is
   // only safe because the pool appends and never replaces: a base's list length
@@ -101,7 +98,8 @@ export function BpAddonRow() {
         data-bp-scroll-x
         onFocus={(e) => {
           const cell = (e.target as HTMLElement).closest<HTMLElement>("[data-bp-addon]");
-          const entry = (cell?.dataset.bpAddon ? byUrl.get(cell.dataset.bpAddon) : undefined) ?? lead;
+          const entry =
+            (cell?.dataset.bpAddon ? byUrl.get(cell.dataset.bpAddon) : undefined) ?? lead;
           focusedRef.current = entry;
           // The label tile publishes its own record for the lead addon, so this
           // only speaks for real cards. Both paths agree because both are

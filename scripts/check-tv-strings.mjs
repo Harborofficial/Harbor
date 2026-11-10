@@ -92,24 +92,34 @@ for (const [name, values] of Object.entries(wideNow)) {
 const likelyCopy = wideOnly.filter((row) => row.kind === "copy").length;
 
 if (listing) {
-  const rows = [...wideOnly].sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind.localeCompare(b.kind)));
+  const rows = [...wideOnly].sort((a, b) =>
+    a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind.localeCompare(b.kind),
+  );
   for (const row of rows) console.log(`${row.kind}\t${row.name}\t${JSON.stringify(row.value)}`);
   console.log(`${rows.length} wide-only literals, ${likelyCopy} classed likely copy.`);
   process.exit(0);
 }
 
 if (wideAdded.length) {
-  console.warn(`Warning, ${wideAdded.length} new literal(s) the wide checks see and the strict gate does not:`);
+  console.warn(
+    `Warning, ${wideAdded.length} new literal(s) the wide checks see and the strict gate does not:`,
+  );
   for (const item of wideAdded.slice(0, 20)) {
-    console.warn(`  ${item.name}: ${JSON.stringify(item.value)} (${wideKind.get(kindKey(item.name, item.value)) ?? "copy"})`);
+    console.warn(
+      `  ${item.name}: ${JSON.stringify(item.value)} (${wideKind.get(kindKey(item.name, item.value)) ?? "copy"})`,
+    );
   }
   if (wideAdded.length > 20) console.warn(`  and ${wideAdded.length - 20} more.`);
-  console.warn("These do not fail the build. Record them with --update once you have decided copy or data.");
+  console.warn(
+    "These do not fail the build. Record them with --update once you have decided copy or data.",
+  );
 }
 
 if (strictAdded.length) {
   console.error(`New hardcoded user-facing strings (${strictAdded.length}):`);
-  console.error(strictAdded.map((item) => `${item.name}: ${JSON.stringify(item.value)}`).join("\n"));
+  console.error(
+    strictAdded.map((item) => `${item.name}: ${JSON.stringify(item.value)}`).join("\n"),
+  );
   console.error("");
   console.error("Move each to res/values/strings.xml and read it through HarborText.get,");
   console.error("or if it is not user-facing copy, record it with --update and say why.");

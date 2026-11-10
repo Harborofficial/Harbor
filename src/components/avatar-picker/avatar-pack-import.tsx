@@ -10,8 +10,12 @@ export function AvatarImportProgress({ done, total }: { done: number; total: num
         <ImageDown size={24} strokeWidth={1.9} />
       </span>
       <div className="flex flex-col items-center gap-1">
-        <span className="font-display text-[16px] font-semibold text-ink">{t("Preparing your images")}</span>
-        <span className="text-[12.5px] tabular-nums text-ink-subtle">{t("{done} of {total}", { done, total })}</span>
+        <span className="font-display text-[16px] font-semibold text-ink">
+          {t("Preparing your images")}
+        </span>
+        <span className="text-[12.5px] tabular-nums text-ink-subtle">
+          {t("{done} of {total}", { done, total })}
+        </span>
       </div>
       <div className="h-1.5 w-[240px] overflow-hidden rounded-full bg-elevated">
         <div

@@ -3,15 +3,29 @@ import test from "node:test";
 import { parseStream } from "../src/lib/streams/parser.ts";
 import { applyTrust } from "../src/lib/streams/trust.ts";
 
-const stream = (title: string) => parseStream({
-  addonId: "fixture", addonName: "Fixture", title,
-  url: "https://example.invalid/video.m3u8",
-  behaviorHints: { videoSize: 2 * 1024 ** 3 },
-});
-const check = (title: string, kind: "movie"|"series", expectedTitle: string, aliases: string[] = []) =>
-  applyTrust([stream(title)], { kind, strict: true, expectedTitle, expectedTitles: aliases,
+const stream = (title: string) =>
+  parseStream({
+    addonId: "fixture",
+    addonName: "Fixture",
+    title,
+    url: "https://example.invalid/video.m3u8",
+    behaviorHints: { videoSize: 2 * 1024 ** 3 },
+  });
+const check = (
+  title: string,
+  kind: "movie" | "series",
+  expectedTitle: string,
+  aliases: string[] = [],
+) =>
+  applyTrust([stream(title)], {
+    kind,
+    strict: true,
+    expectedTitle,
+    expectedTitles: aliases,
     expectedSeason: kind === "series" ? 1 : undefined,
-    expectedEpisode: kind === "series" ? 1 : undefined, allowSeasonPacks: false });
+    expectedEpisode: kind === "series" ? 1 : undefined,
+    allowSeasonPacks: false,
+  });
 
 for (const [language, release, title] of [
   ["English", "Breaking.Bad.S01E01.1080p.WEB-DL.mkv", "Breaking Bad"],
@@ -40,9 +54,23 @@ test("non-Latin series never pass solely because expected title is English", () 
 });
 test("anime is not subject to the live-action strict season pack guard", () => {
   const s = stream("One.Piece.S01.1080p.WEB-DL");
-  const result = applyTrust([s], {kind:"series",isAnime:true,strict:true,expectedTitle:"One Piece",expectedEpisode:1,expectedSeason:1,allowSeasonPacks:false});
-  assert.equal(result.rejected.some(r=>r.reason==="season-pack-not-episode"),false);
+  const result = applyTrust([s], {
+    kind: "series",
+    isAnime: true,
+    strict: true,
+    expectedTitle: "One Piece",
+    expectedEpisode: 1,
+    expectedSeason: 1,
+    allowSeasonPacks: false,
+  });
+  assert.equal(
+    result.rejected.some((r) => r.reason === "season-pack-not-episode"),
+    false,
+  );
 });
 test("English season packs are blocked for single-episode strict mode", () => {
-  assert.equal(check("Breaking.Bad.S01.1080p.WEB-DL", "series", "Breaking Bad").rejected[0]?.reason,"season-pack-not-episode");
+  assert.equal(
+    check("Breaking.Bad.S01.1080p.WEB-DL", "series", "Breaking Bad").rejected[0]?.reason,
+    "season-pack-not-episode",
+  );
 });

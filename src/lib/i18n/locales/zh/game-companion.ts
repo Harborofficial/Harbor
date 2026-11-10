@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "此列表中的记录数：{count}",
   "games.wow.weekly.partial": "部分通关记录无法验证。",
   "games.wow.weekly.empty": "本次重置暂无通关记录。",
-  "games.wow.weekly.scope": "Raider.IO 每个重置周期最多列出当前赛季等级最高的 10 次钥石记录。新记录可能需要一些时间才会显示。",
+  "games.wow.weekly.scope":
+    "Raider.IO 每个重置周期最多列出当前赛季等级最高的 10 次钥石记录。新记录可能需要一些时间才会显示。",
   "games.helldivers.title": "银河战争",
   "games.helldivers.intro": "选择下一次空降地点。",
   "games.helldivers.refresh": "刷新银河战争",
@@ -137,7 +138,8 @@ export default {
   "games.warframe.noMatches": "没有符合筛选条件的当前裂缝。",
   "games.warframe.more": "显示更多",
   "games.warframe.snapshot": "快照：{date}",
-  "games.warframe.scope": "共享世界日程。能否参与取决于你的系列任务进度。任务名称由来源以英语提供。",
+  "games.warframe.scope":
+    "共享世界日程。能否参与取决于你的系列任务进度。任务名称由来源以英语提供。",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -178,7 +180,8 @@ export default {
   "games.rivals.heroRate": "{hero}对抗各对手的胜率",
   "games.rivals.with": "与队友配合",
   "games.rivals.duoRate": "组合共同胜率",
-  "games.rivals.scope": "观测到的竞技6对6比赛，涵盖所有技术水平。每位英雄至少200场，每组至少100场。组合结果不代表存在联动技能，也不能预测下一场比赛。",
+  "games.rivals.scope":
+    "观测到的竞技6对6比赛，涵盖所有技术水平。每位英雄至少200场，每组至少100场。组合结果不代表存在联动技能，也不能预测下一场比赛。",
   "games.rivals.snapshot": "快照：{date}",
   "games.rivals.noMatches": "没有符合筛选条件的英雄。",
   "games.rivals.unavailable": "英雄指南暂不可用，请尝试刷新。",
@@ -257,7 +260,8 @@ export default {
   "games.gw2.partial": "部分物品详情暂不可用，奖励价格仍计入总额。",
   "games.gw2.guide": "宝库指南",
   "games.gw2.checked": "检查时间：{date}",
-  "games.gw2.scope": "保存在当前 Harbor 个人资料中。每个选择按一份商品计算；不会检查你的余额、购买限制或扩展包权限。请确认可用性后在游戏内购买。",
+  "games.gw2.scope":
+    "保存在当前 Harbor 个人资料中。每个选择按一份商品计算；不会检查你的余额、购买限制或扩展包权限。请确认可用性后在游戏内购买。",
   "games.gw2.total": "计划总额",
   "games.gw2.currency": "星界赞誉",
   "games.gw2.selected": "已选择 {count} 份商品",
@@ -306,7 +310,8 @@ export default {
   "games.deadlockBuilds.copy": "复制出装 ID",
   "games.deadlockBuilds.use": "出装 ID：",
   "games.deadlockBuilds.copyFailed": "复制失败。请选择 ID 手动复制。",
-  "games.deadlockBuilds.definitions": "物品名称和价格使用最新已知的游戏数据。旧指南可能有所不同；各组可能包含备选项。",
+  "games.deadlockBuilds.definitions":
+    "物品名称和价格使用最新已知的游戏数据。旧指南可能有所不同；各组可能包含备选项。",
   "games.deadlockBuilds.itemsFailed": "部分物品详情不可用。作者指南和物品 ID 仍会显示。",
   "games.deadlockBuilds.noItems": "此出装没有物品分组。",
   "games.deadlockBuilds.group": "分组 {number}",

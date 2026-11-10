@@ -1,8 +1,8 @@
 export default {
   "Match stats": "Maç istatistikleri",
-  "Timeline": "Maç akışı",
+  Timeline: "Maç akışı",
   "Head to head": "İkili rekabet",
-  "Standings": "Puan durumu",
+  Standings: "Puan durumu",
   "Loading team results…": "Takım sonuçları yükleniyor…",
   "No completed matches were returned for this team.":
     "Kaynak, bu takım için tamamlanmış maç döndürmedi.",

@@ -16,7 +16,8 @@ const oversized = {};
 const emDashed = [];
 for (const [name, source] of sources) {
   const split = source.split("\n");
-  const lines = split.length > 0 && split[split.length - 1] === "" ? split.length - 1 : split.length;
+  const lines =
+    split.length > 0 && split[split.length - 1] === "" ? split.length - 1 : split.length;
   if (lines > LOC_CEILING) oversized[name] = lines;
   if (source.includes(emDash)) emDashed.push(name);
 }
@@ -26,7 +27,9 @@ const unregistered = [];
 let stateful = 0;
 for (const [name, source] of sources) {
   if (name === "HarborApplication.kt") continue;
-  for (const match of source.matchAll(/^(?:(?:internal|private|public|expect|actual)\s+)*object\s+(\w+)\s*\{/gm)) {
+  for (const match of source.matchAll(
+    /^(?:(?:internal|private|public|expect|actual)\s+)*object\s+(\w+)\s*\{/gm,
+  )) {
     const object = match[1];
     const rest = source.slice(match.index + match[0].length);
     const end = rest.indexOf("\n}");
@@ -57,14 +60,20 @@ const failures = [];
 
 for (const [name, lines] of Object.entries(oversized)) {
   const was = baseline.oversized?.[name];
-  if (was === undefined) failures.push(`${name} is ${lines} lines, over the ${LOC_CEILING} ceiling and not in the baseline`);
-  else if (lines > was) failures.push(`${name} grew ${was} to ${lines} lines while already over the ceiling`);
+  if (was === undefined)
+    failures.push(
+      `${name} is ${lines} lines, over the ${LOC_CEILING} ceiling and not in the baseline`,
+    );
+  else if (lines > was)
+    failures.push(`${name} grew ${was} to ${lines} lines while already over the ceiling`);
 }
 
 for (const name of emDashed) failures.push(`${name} contains a literal em dash`);
 
 for (const entry of unregistered) {
-  failures.push(`${entry} owns Compose state and is not touched in HarborApplication, snapshot crash risk`);
+  failures.push(
+    `${entry} owns Compose state and is not touched in HarborApplication, snapshot crash risk`,
+  );
 }
 
 const shrunk = Object.entries(baseline.oversized ?? {}).filter(([name, was]) => {

@@ -24,7 +24,8 @@ export default {
   "games.setup.checkProblems": "{bad} 个不匹配 · {missing} 个缺失",
   "games.setup.checkingPending": "正在等待检查进度…",
   "games.setup.setup_verification": "检查发现损坏或缺失的文件。添加此游戏前，请查看检查结果。",
-  "games.setup.setup_verification_unknown": "文件检查已结束，但结果尚未确认。添加此游戏前，请查看检查结果。",
+  "games.setup.setup_verification_unknown":
+    "文件检查已结束，但结果尚未确认。添加此游戏前，请查看检查结果。",
   "games.setup.state.verificationFailed": "文件检查失败",
   "games.setup.state.verificationUnknown": "查看结果",
   "games.setup.viewProgress": "查看安装进度",
@@ -57,14 +58,16 @@ export default {
   "games.setup.continue": "继续设置",
   "games.setup.refresh": "重新扫描",
   "games.setup.openFolder": "打开文件夹",
-  "games.setup.installerNote": "安装程序将在独立窗口中打开。结束后，请在下方选择已安装游戏的可执行文件。",
+  "games.setup.installerNote":
+    "安装程序将在独立窗口中打开。结束后，请在下方选择已安装游戏的可执行文件。",
   "games.setup.state.running": "安装程序正在运行",
   "games.setup.state.finished": "安装程序已关闭 — 请选择游戏文件",
   "games.setup.state.failed": "安装程序未成功完成",
   "games.setup.state.interrupted": "请检查安装情况 — 安装程序运行时 Harbor 已关闭",
   "games.setup.state.external": "安装程序已在其他窗口中打开",
   "games.setup.exitCode": "退出代码：{code}",
-  "games.setup.unavailable": "此版本无法查看安装程序。你仍可选择已安装的游戏文件，或打开下载文件夹。",
+  "games.setup.unavailable":
+    "此版本无法查看安装程序。你仍可选择已安装的游戏文件，或打开下载文件夹。",
   "games.setup.setup_profile": "此设置属于其他个人资料。请重新打开该下载。",
   "games.setup.setup_path": "此文件夹或文件不可用。请选择其当前位置。",
   "games.setup.setup_read": "无法读取这些文件。请打开文件夹或重新扫描。",
@@ -92,10 +95,12 @@ export default {
   "games.setup.registering": "正在添加到游戏库…",
   "games.setup.scanInstalled": "正在查找已安装的游戏…",
   "games.setup.manual": "手动选择文件",
-  "games.setup.installedMissing": "安装已结束，但未找到可启动游戏的文件。请检查安装文件夹，或在下方选择文件。",
+  "games.setup.installedMissing":
+    "安装已结束，但未找到可启动游戏的文件。请检查安装文件夹，或在下方选择文件。",
   "games.setup.setup_destination": "请选择下载文件夹之外的新建空文件夹作为安装位置。",
   "games.setup.setup_engine": "此安装程序需要在独立窗口中运行。请选择“运行安装程序”以继续。",
-  "games.setup.setup_candidates": "安装已结束，但 Harbor 无法读取已安装的文件。请重新扫描安装文件夹。",
+  "games.setup.setup_candidates":
+    "安装已结束，但 Harbor 无法读取已安装的文件。请重新扫描安装文件夹。",
   "games.setup.state.installing": "正在安装",
   "games.setup.externalAction": "运行安装程序",
   "games.setup.files": "已下载的文件",

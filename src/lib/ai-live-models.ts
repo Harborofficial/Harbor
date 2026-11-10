@@ -28,7 +28,11 @@ function writeCache(key: string, ids: Set<string>): void {
   }
 }
 
-async function fetchCatalog(cacheKey: string, url: string, headers: Record<string, string>): Promise<Set<string> | null> {
+async function fetchCatalog(
+  cacheKey: string,
+  url: string,
+  headers: Record<string, string>,
+): Promise<Set<string> | null> {
   if (memory.has(cacheKey)) return memory.get(cacheKey) ?? null;
   const cached = readCache(cacheKey);
   if (cached) {
@@ -91,7 +95,9 @@ export function useOpenRouterCatalog(): Set<string> | null {
 }
 
 export function useGroqCatalog(key: string): Set<string> | null {
-  const [cat, setCat] = useState<Set<string> | null>(() => (key.trim() ? readCache(GROQ_KEY) : null));
+  const [cat, setCat] = useState<Set<string> | null>(() =>
+    key.trim() ? readCache(GROQ_KEY) : null,
+  );
   useEffect(() => {
     if (!key.trim()) return;
     let alive = true;

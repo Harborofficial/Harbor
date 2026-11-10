@@ -33,7 +33,13 @@ const windows = [
 ].map((window) => ({
   ...window,
   tokens: window.tokens.map(([t0, t1]) => ({ t0, t1, text: "speech" })),
-  stats: { recognizedLines: 3, wordCandidates: 3, wordIntervals: 3, audioPeak: 0.4, audioRms: 0.06 },
+  stats: {
+    recognizedLines: 3,
+    wordCandidates: 3,
+    wordIntervals: 3,
+    audioPeak: 0.4,
+    audioRms: 0.06,
+  },
 }));
 
 const base = {
@@ -100,8 +106,16 @@ test("Moonshine transcribes prepared playback audio using the selected audio lan
 
 test("explicit Moonshine language overrides the audio metadata for testing", async () => {
   const bridge = native();
-  await matchPlaybackSpeech({ ...base, audioLanguage: "de", modelLanguage: "en" }, bridge.invoke, () => {}, () => true);
-  assert.equal(bridge.calls.find((call) => call.command === "moonshine_transcribe_windows")?.args?.subLang, "en");
+  await matchPlaybackSpeech(
+    { ...base, audioLanguage: "de", modelLanguage: "en" },
+    bridge.invoke,
+    () => {},
+    () => true,
+  );
+  assert.equal(
+    bridge.calls.find((call) => call.command === "moonshine_transcribe_windows")?.args?.subLang,
+    "en",
+  );
 });
 
 test("disabled recognition, missing runtime and missing models explain why Moonshine did not run", async () => {
@@ -114,7 +128,12 @@ test("disabled recognition, missing runtime and missing models explain why Moons
   ] as const) {
     const bridge = native(options);
     await assert.rejects(
-      matchPlaybackSpeech(input, bridge.invoke, () => {}, () => true),
+      matchPlaybackSpeech(
+        input,
+        bridge.invoke,
+        () => {},
+        () => true,
+      ),
       error,
     );
     assert.equal(
@@ -128,17 +147,26 @@ test("no transcript is reported separately from recognized speech without timest
   const cases = [
     { output: [], expected: /did not recognize speech/ },
     {
-      output: [{ startSec: 5, lenSec: 35, tokens: [], stats: { audioPeak: 0.3, recognizedLines: 2 } }],
+      output: [
+        { startSec: 5, lenSec: 35, tokens: [], stats: { audioPeak: 0.3, recognizedLines: 2 } },
+      ],
       expected: /recognized some dialogue but could not provide reliable word or phrase timestamps/,
     },
     {
-      output: [{ startSec: 5, lenSec: 35, tokens: [], stats: { audioPeak: 0.0001, recognizedLines: 0 } }],
+      output: [
+        { startSec: 5, lenSec: 35, tokens: [], stats: { audioPeak: 0.0001, recognizedLines: 0 } },
+      ],
       expected: /extracted playback audio is nearly silent/,
     },
   ];
   for (const { output, expected } of cases) {
     await assert.rejects(
-      matchPlaybackSpeech(base, native({ output }).invoke, () => {}, () => true),
+      matchPlaybackSpeech(
+        base,
+        native({ output }).invoke,
+        () => {},
+        () => true,
+      ),
       expected,
     );
   }
@@ -147,31 +175,44 @@ test("no transcript is reported separately from recognized speech without timest
 test("Moonshine diagnostics contain timing counts but no transcript text", async () => {
   const bridge = native();
   const received: unknown[] = [];
-  const result = await matchPlaybackSpeech(base, bridge.invoke, () => {}, () => true, (diagnostic) => {
-    received.push(diagnostic);
-  });
+  const result = await matchPlaybackSpeech(
+    base,
+    bridge.invoke,
+    () => {},
+    () => true,
+    (diagnostic) => {
+      received.push(diagnostic);
+    },
+  );
   assert.ok(result.offsetSec > 0);
-  assert.deepEqual(received, [{
-    modelLanguage: "en",
-    windows: 3,
-    recognizedLines: 9,
-    wordCandidates: 9,
-    wordIntervals: 9,
-    lineIntervals: 0,
-    audioRms: 0.06,
-    audioPeak: 0.4,
-    chunkRetries: 0,
-    retryRecognizedLines: 0,
-    retryWordCandidates: 0,
-    retryTimedIntervals: 0,
-    acceptedIntervals: 9,
-  }]);
+  assert.deepEqual(received, [
+    {
+      modelLanguage: "en",
+      windows: 3,
+      recognizedLines: 9,
+      wordCandidates: 9,
+      wordIntervals: 9,
+      lineIntervals: 0,
+      audioRms: 0.06,
+      audioPeak: 0.4,
+      chunkRetries: 0,
+      retryRecognizedLines: 0,
+      retryWordCandidates: 0,
+      retryTimedIntervals: 0,
+      acceptedIntervals: 9,
+    },
+  ]);
 });
 
 test("cancelled playback cannot produce an offer", async () => {
   const bridge = native();
   await assert.rejects(
-    matchPlaybackSpeech(base, bridge.invoke, () => {}, () => false),
+    matchPlaybackSpeech(
+      base,
+      bridge.invoke,
+      () => {},
+      () => false,
+    ),
     /cancelled/,
   );
   assert.equal(bridge.calls.length, 1);
@@ -179,7 +220,12 @@ test("cancelled playback cannot produce an offer", async () => {
 
 test("unrelated subtitle timing is refused after Moonshine recognition", async () => {
   await assert.rejects(
-    matchPlaybackSpeech({ ...base, cues: [[0, 45]] }, native().invoke, () => {}, () => true),
+    matchPlaybackSpeech(
+      { ...base, cues: [[0, 45]] },
+      native().invoke,
+      () => {},
+      () => true,
+    ),
     /Moonshine processed.*did not agree/,
   );
 });

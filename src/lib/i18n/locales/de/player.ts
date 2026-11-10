@@ -405,7 +405,7 @@ const player: Record<string, string> = {
   "{word} {n}s · hold for options": "{word} {n}s · für Optionen gedrückt halten",
   "Search audio language": "Audiosprache suchen",
   "No audio track in that language.": "Keine Tonspur in dieser Sprache.",
-  "Clear": "Löschen",
+  Clear: "Löschen",
 };
 
 export default player;

@@ -1,14 +1,16 @@
 export default {
   "games.shortcuts.reviewLaunch": "مراجعة التشغيل",
   "games.shortcuts.state.local": "التشغيل المباشر متاح",
-  "games.shortcuts.shortcut_identity": "لم يعيّن Steam معرّفًا صالحًا لهذا الاختصار. راجع إعداداته وشغّله مباشرة، أو احفظه مجددًا في Steam ثم حدّث القائمة.",
+  "games.shortcuts.shortcut_identity":
+    "لم يعيّن Steam معرّفًا صالحًا لهذا الاختصار. راجع إعداداته وشغّله مباشرة، أو احفظه مجددًا في Steam ثم حدّث القائمة.",
 
   "games.shortcuts.activity.open": "النشاط",
   "games.shortcuts.activity.title": "نشاط الاختصارات",
   "games.shortcuts.activity.note": "عمليات الفحص والتشغيل الأخيرة لملف Harbor هذا. حتى 300 سجل.",
   "games.shortcuts.activity.remember": "الاحتفاظ بين الجلسات",
   "games.shortcuts.activity.detailed": "تضمين تفاصيل الفحص",
-  "games.shortcuts.activity.storageError": "تعذر الوصول إلى النشاط المحفوظ. لا تزال سجلات هذه الجلسة ظاهرة.",
+  "games.shortcuts.activity.storageError":
+    "تعذر الوصول إلى النشاط المحفوظ. لا تزال سجلات هذه الجلسة ظاهرة.",
   "games.shortcuts.activity.empty": "لا يوجد نشاط بعد.",
   "games.shortcuts.activity.clear": "مسح النشاط",
   "games.shortcuts.activity.duration": "{ms} مللي ثانية",
@@ -25,9 +27,12 @@ export default {
 
   "games.shortcuts.launchDirect": "تشغيل مباشر",
   "games.shortcuts.viaSteam": "اللعب عبر Steam",
-  "games.shortcuts.directNote": "يشغّل هذا الملف التنفيذي باستخدام خيارات التشغيل ومجلد البدء الخاص به.",
-  "games.shortcuts.shortcut_changed": "تغيّر هذا الاختصار في Steam. حدّث المكتبة وراجع إعدادات تشغيله.",
-  "games.shortcuts.shortcut_options": "تستخدم خيارات التشغيل هذه غلاف أوامر Steam. شغّل هذا الاختصار عبر Steam.",
+  "games.shortcuts.directNote":
+    "يشغّل هذا الملف التنفيذي باستخدام خيارات التشغيل ومجلد البدء الخاص به.",
+  "games.shortcuts.shortcut_changed":
+    "تغيّر هذا الاختصار في Steam. حدّث المكتبة وراجع إعدادات تشغيله.",
+  "games.shortcuts.shortcut_options":
+    "تستخدم خيارات التشغيل هذه غلاف أوامر Steam. شغّل هذا الاختصار عبر Steam.",
   "games.dock.shortcut": "اختصارات Steam",
   "games.shortcuts.note": "ألعاب من خارج Steam أضفتها إلى مكتبتك في Steam.",
   "games.shortcuts.chooseFolder": "اختيار مجلد Steam",
@@ -47,9 +52,10 @@ export default {
   "games.shortcuts.tags": "الوسوم",
   "games.shortcuts.storeError": "تعذر حفظ هذه الإعدادات.",
   "games.shortcuts.shortcut_location": "اختر مجلد Steam أو مجلد userdata الموجود فيه.",
-  "games.shortcuts.shortcut_account": "افتح Steam بحساب هذا الاختصار ثم حدّث. يجب أن يستخدم Harbor تثبيت Steam نفسه.",
+  "games.shortcuts.shortcut_account":
+    "افتح Steam بحساب هذا الاختصار ثم حدّث. يجب أن يستخدم Harbor تثبيت Steam نفسه.",
   "games.shortcuts.shortcut_missing": "لم يعد هذا الاختصار موجودًا. حدّث المكتبة.",
   "games.shortcuts.shortcut_executable": "الملف التنفيذي للاختصار مفقود أو مساره المطلق غير مدعوم.",
   "games.shortcuts.shortcut_launch": "تعذر على Steam فتح هذا الاختصار. حاول مجددًا.",
-  "games.shortcuts.shortcut_read": "تعذرت قراءة اختصارات Steam. جرّب التحديث."
+  "games.shortcuts.shortcut_read": "تعذرت قراءة اختصارات Steam. جرّب التحديث.",
 };

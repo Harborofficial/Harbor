@@ -34,6 +34,7 @@ export default {
   "games.ffxiv.sales": "최근 거래",
   "games.ffxiv.sold": "판매 시각",
   "games.ffxiv.noSales": "이 기록에 최근 거래가 없습니다.",
-  "games.ffxiv.community": "커뮤니티 자료가 오래되었을 수 있습니다. 마지막 갱신 후 판매되었을 수 있습니다.",
-  "games.ffxiv.open": "Universalis에서 보기"
+  "games.ffxiv.community":
+    "커뮤니티 자료가 오래되었을 수 있습니다. 마지막 갱신 후 판매되었을 수 있습니다.",
+  "games.ffxiv.open": "Universalis에서 보기",
 };

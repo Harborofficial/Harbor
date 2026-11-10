@@ -128,9 +128,7 @@ export function SetupHarbor({
         body={
           confirmed
             ? undefined
-            : t(
-                "Syncs your profile, themes, lists and friends. Optional, and you can do it later.",
-              )
+            : t("Syncs your profile, themes, lists and friends. Optional, and you can do it later.")
         }
       />
 

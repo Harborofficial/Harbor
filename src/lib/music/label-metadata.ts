@@ -140,9 +140,7 @@ export function artistLabels(artistId: string, signal?: AbortSignal): Promise<Mu
           else counts.set(id, { id, name, releases: 1 });
         }
       }
-      return [...counts.values()]
-        .sort((a, b) => b.releases - a.releases)
-        .slice(0, MAX_LABELS);
+      return [...counts.values()].sort((a, b) => b.releases - a.releases).slice(0, MAX_LABELS);
     },
     signal,
   );
@@ -157,7 +155,10 @@ function relationUrl(body: Obj, type: string): string {
   return "";
 }
 
-export function labelProfile(labelId: string, signal?: AbortSignal): Promise<MusicLabelProfile | null> {
+export function labelProfile(
+  labelId: string,
+  signal?: AbortSignal,
+): Promise<MusicLabelProfile | null> {
   if (!uuid.test(labelId)) return Promise.resolve(null);
   return mb(
     `label/${labelId}?inc=url-rels&fmt=json`,
@@ -189,10 +190,7 @@ function labelSearchPath(labelId: string, offset = 0): string {
   return `release?query=${encodeURIComponent(query)}&limit=${PAGE}${page}&fmt=json`;
 }
 
-export function labelReleases(
-  labelId: string,
-  signal?: AbortSignal,
-): Promise<MusicLabelRelease[]> {
+export function labelReleases(labelId: string, signal?: AbortSignal): Promise<MusicLabelRelease[]> {
   if (!uuid.test(labelId)) return Promise.resolve([]);
   return mb(
     labelSearchPath(labelId),
@@ -243,5 +241,3 @@ export async function labelRoster(labelId: string, signal?: AbortSignal): Promis
     .slice(0, MAX_ROSTER)
     .map((entry) => entry.name);
 }
-
-

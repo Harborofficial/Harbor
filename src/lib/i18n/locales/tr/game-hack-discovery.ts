@@ -16,28 +16,41 @@ export default {
   "games.patch.saveCopy": "Yeni bir kopya kaydet",
   "games.patch.verified": "Dosyalar doğrulandı",
   "games.patch.ready": "Yama hazır",
-  "games.patch.verifiedNote": "Orijinal oyun, yama ve tamamlanan kopya, BPS yamasındaki sağlama toplamlarıyla eşleşiyor.",
-  "games.patch.ipsNote": "IPS, orijinal oyun için sağlama toplamı içermez. Kaydetmeden önce projenin gerektirdiği oyun sürümünü kontrol et.",
+  "games.patch.verifiedNote":
+    "Orijinal oyun, yama ve tamamlanan kopya, BPS yamasındaki sağlama toplamlarıyla eşleşiyor.",
+  "games.patch.ipsNote":
+    "IPS, orijinal oyun için sağlama toplamı içermez. Kaydetmeden önce projenin gerektirdiği oyun sürümünü kontrol et.",
   "games.patch.output": "Tamamlanan kopya",
   "games.patch.fingerprint": "Dosya parmak izi · SHA-256",
   "games.patch.fingerprints": "Dosya parmak izleri · SHA-256",
   "games.patch.localNote": "Cihazında işlenir · BPS · IPS · UPS · En fazla 256 MB",
-  "games.patch.desktop": "Windows, macOS veya Linux için Harbor masaüstü uygulamasında yama uygula. Dosyaların cihazında kalır ve orijinal oyun korunur.",
+  "games.patch.desktop":
+    "Windows, macOS veya Linux için Harbor masaüstü uygulamasında yama uygula. Dosyaların cihazında kalır ve orijinal oyun korunur.",
   "games.patch.done": "Yeni bir maceraya hazır",
   "games.patch.preserved": "Yamalı kopyan kaydedildi. Orijinal oyun ve yama değiştirilmedi.",
-  "games.patch.patch_source_mismatch": "Bu yama farklı bir oyun dosyası veya sürümü gerektiriyor. Projenin gereksinimlerini kontrol edip uygun dosyayı seç.",
-  "games.patch.patch_checksum_mismatch": "Yamanın sağlama toplamı eşleşmiyor. Dosya eksik olabilir; proje sayfasından yeniden indir.",
-  "games.patch.patch_target_mismatch": "Tamamlanan kopya beklenen sağlama toplamıyla eşleşmiyor. Hiçbir şey kaydedilmedi.",
+  "games.patch.patch_source_mismatch":
+    "Bu yama farklı bir oyun dosyası veya sürümü gerektiriyor. Projenin gereksinimlerini kontrol edip uygun dosyayı seç.",
+  "games.patch.patch_checksum_mismatch":
+    "Yamanın sağlama toplamı eşleşmiyor. Dosya eksik olabilir; proje sayfasından yeniden indir.",
+  "games.patch.patch_target_mismatch":
+    "Tamamlanan kopya beklenen sağlama toplamıyla eşleşmiyor. Hiçbir şey kaydedilmedi.",
   "games.patch.patch_expired": "Bu hazırlığın süresi doldu. Yamayı yeniden kontrol et.",
-  "games.patch.patch_inputs_changed": "Seçilen bir dosya doğrulamadan sonra değişti. Kaydetmeden önce yamayı yeniden kontrol et.",
-  "games.patch.patch_output_exists": "Bu konumda zaten bir dosya var. Başka bir ad seç; Harbor mevcut dosyaların üzerine yazmaz.",
-  "games.patch.patch_read_failed": "Seçilen dosyalardan biri okunamadı. Hâlâ erişilebilir olduğunu kontrol edip yeniden seç.",
-  "games.patch.patch_write_failed": "Kopya kaydedilemedi. Klasörü ve boş alanı kontrol et veya başka bir konum seç.",
-  "games.patch.patch_too_large": "Orijinal oyun, yama ve tamamlanan kopyanın her biri en fazla 256 MB olmalıdır.",
+  "games.patch.patch_inputs_changed":
+    "Seçilen bir dosya doğrulamadan sonra değişti. Kaydetmeden önce yamayı yeniden kontrol et.",
+  "games.patch.patch_output_exists":
+    "Bu konumda zaten bir dosya var. Başka bir ad seç; Harbor mevcut dosyaların üzerine yazmaz.",
+  "games.patch.patch_read_failed":
+    "Seçilen dosyalardan biri okunamadı. Hâlâ erişilebilir olduğunu kontrol edip yeniden seç.",
+  "games.patch.patch_write_failed":
+    "Kopya kaydedilemedi. Klasörü ve boş alanı kontrol et veya başka bir konum seç.",
+  "games.patch.patch_too_large":
+    "Orijinal oyun, yama ve tamamlanan kopyanın her biri en fazla 256 MB olmalıdır.",
   "games.patch.patch_busy": "Başka bir yama işleniyor. Tamamlandığında yeniden dene.",
-  "games.patch.patch_game_type": "GBA, GB, NES, SFC, NDS veya ROM gibi desteklenen bir oyun dosyası seç.",
+  "games.patch.patch_game_type":
+    "GBA, GB, NES, SFC, NDS veya ROM gibi desteklenen bir oyun dosyası seç.",
   "games.patch.patch_output_type": "Kopyayı kaydederken orijinal oyunun dosya uzantısını koru.",
-  "games.patch.invalid": "Bu yama okunamadı. Dosyayı ve projenin gerektirdiği oyun sürümünü kontrol et.",
+  "games.patch.invalid":
+    "Bu yama okunamadı. Dosyayı ve projenin gerektirdiği oyun sürümünü kontrol et.",
   "games.hub.spotlight": "Öne çıkan",
   "games.hub.watch": "Oynanışı izle",
   "games.hub.watchTitle": "Nasıl oynandığını gör",
@@ -49,7 +62,8 @@ export default {
   "games.hub.viewOriginal": "Orijinal oyunu görüntüle",
   "games.hub.toolkitNote": "Orijinal oyununuz için bir yama indirin.",
   "games.hub.baseVersion": "Projenin belirttiği oyun sürümünü ve bölgesini kullan.",
-  "games.hub.catalogNote": "ROM hacklerini ve konsol modlarını keşfet. Sisteme göre filtrele veya adla ara.",
+  "games.hub.catalogNote":
+    "ROM hacklerini ve konsol modlarını keşfet. Sisteme göre filtrele veya adla ara.",
   "games.hub.findVideos": "Oynanış ara",
   "games.hub.resources": "ROM hack toplulukları",
   "games.patch.open": "Yama uygula",
@@ -60,10 +74,12 @@ export default {
   "games.atlas.sort.rated": "En yüksek puanlı",
   "games.atlas.sort.newest": "En yeni",
   "games.atlas.sort.oldest": "En eski",
-  "games.hub.stepPatch": "Orijinal oyununu ve BPS, IPS veya UPS yamasını seç. Harbor ayrı bir kopya kaydeder.",
-  "games.patch.description": "Orijinal oyununu ve BPS, IPS veya UPS yamasını seç. Harbor ayrı bir kopya kaydeder.",
+  "games.hub.stepPatch":
+    "Orijinal oyununu ve BPS, IPS veya UPS yamasını seç. Harbor ayrı bir kopya kaydeder.",
+  "games.patch.description":
+    "Orijinal oyununu ve BPS, IPS veya UPS yamasını seç. Harbor ayrı bir kopya kaydeder.",
   "games.patch.choosePatch": "Yama seç (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "Bu dosya desteklenen bir BPS, IPS veya UPS yaması değil.",
   "games.discovery.viewGame": "Oyunu görüntüle",
-  "games.atlas.basedOn": "Bu oyun temel alındı"
+  "games.atlas.basedOn": "Bu oyun temel alındı",
 };

@@ -164,10 +164,16 @@ export function useCastPick(params: {
         return;
       }
       const snap = snapRef.current;
-      const resolved = await resolveCompatibleCastUrl(src, device, debrids, {
-        width: snap.videoWidth,
-        height: snap.videoHeight,
-      }, settings.animePreferImdbStreams);
+      const resolved = await resolveCompatibleCastUrl(
+        src,
+        device,
+        debrids,
+        {
+          width: snap.videoWidth,
+          height: snap.videoHeight,
+        },
+        settings.animePreferImdbStreams,
+      );
       if (resolved.kind === "incompatible") {
         const hint =
           resolved.candidatesChecked === 0

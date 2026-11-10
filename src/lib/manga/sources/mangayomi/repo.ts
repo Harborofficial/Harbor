@@ -146,7 +146,8 @@ function fold32(s: string): string {
 
 function entryId(entry: MangayomiIndexEntry, repoUrl: string): string {
   const rk = fold32(repoUrl);
-  if (entry.id != null && String(entry.id).trim()) return "my-" + rk + "-" + String(entry.id).trim();
+  if (entry.id != null && String(entry.id).trim())
+    return "my-" + rk + "-" + String(entry.id).trim();
   const slug = (entry.name + "-" + entry.lang)
     .replace(/[^a-z0-9]+/gi, "-")
     .replace(/^-+|-+$/g, "")
@@ -187,7 +188,10 @@ function dedupeVariants(entries: MangayomiIndexEntry[]): MangayomiIndexEntry[] {
   return out;
 }
 
-async function toRecord(entry: MangayomiIndexEntry, repoUrl: string): Promise<MangayomiSourceRecord> {
+async function toRecord(
+  entry: MangayomiIndexEntry,
+  repoUrl: string,
+): Promise<MangayomiSourceRecord> {
   const target = assertSafeUrl(new URL(entry.sourceCodeUrl, repoUrl).href);
   const res = await safeFetch(target, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
   if (!res.ok) throw new Error("source fetch failed: " + res.status);

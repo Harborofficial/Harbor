@@ -25,8 +25,10 @@ export default {
   "games.pokemon.videosHint": "Прохождения и советы",
   "games.pokemon.bank": "Сохранения и покемоны",
   "games.pokemon.bankHint": "Редактирование сохранений и боксов",
-  "games.pokemon.bankIntro": "Откройте сохранение эмулятора для редактирования команды или импортируйте отдельных покемонов в коллекцию.",
-  "games.pokemon.guideSourceNote": "Читайте оригинальное руководство или откройте его здесь, если источник доступен.",
+  "games.pokemon.bankIntro":
+    "Откройте сохранение эмулятора для редактирования команды или импортируйте отдельных покемонов в коллекцию.",
+  "games.pokemon.guideSourceNote":
+    "Читайте оригинальное руководство или откройте его здесь, если источник доступен.",
   "games.pokemon.readGuide": "Читать на Bulbapedia",
   "games.pokemon.readInside": "Читать в Harbor",
   "games.pokemon.closeReader": "Закрыть просмотр",
@@ -34,19 +36,24 @@ export default {
   "games.pokemon.imageSaved": "Изображение {name} сохранено",
   "games.pokemon.imageFailed": "Не удалось скачать. Повторите попытку.",
   "games.pokemon.saveStart": "Играете в эмуляторе?",
-  "games.pokemon.emulatorSave": "Эмулятор создаёт файл сохранения, когда вы сохраняетесь через меню самой игры.",
+  "games.pokemon.emulatorSave":
+    "Эмулятор создаёт файл сохранения, когда вы сохраняетесь через меню самой игры.",
   "games.pokemon.saveStep1": "Откройте игру и выберите сохранение в её меню.",
-  "games.pokemon.saveStep2": "Закройте игру, затем найдите или экспортируйте батарейное сохранение (.sav, .srm или .dsv).",
+  "games.pokemon.saveStep2":
+    "Закройте игру, затем найдите или экспортируйте батарейное сохранение (.sav, .srm или .dsv).",
   "games.pokemon.saveStep3": "Нажмите «Открыть сохранение» выше для редактирования в Harbor.",
   "games.pokemon.findSave": "Где моё сохранение?",
-  "games.pokemon.saveLocations": "Поищите рядом с ROM или в папке сохранений эмулятора. Если есть только снимок состояния, загрузите его в эмуляторе, затем сохранитесь через меню игры.",
+  "games.pokemon.saveLocations":
+    "Поищите рядом с ROM или в папке сохранений эмулятора. Если есть только снимок состояния, загрузите его в эмуляторе, затем сохранитесь через меню игры.",
   "games.pokemon.noSave": "Ещё нет сохранения?",
   "games.pokemon.communitySaves": "Сохранения сообщества",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Выберите точную игру и прочитайте примечания автора.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Выберите точную игру и прочитайте примечания автора.",
   "games.pokemon.pkhexNote": "Редактор сохранений, загрузки и помощь от разработчиков.",
-  "games.pokemon.noSaveNeeded": "Файлы покемонов можно импортировать без сохранения игры. Оно нужно только для редактирования команды или боксов игры.",
+  "games.pokemon.noSaveNeeded":
+    "Файлы покемонов можно импортировать без сохранения игры. Оно нужно только для редактирования команды или боксов игры.",
   "games.pokemon.videoUnavailable": "Не удалось загрузить видео здесь.",
   "games.pokemon.youtubeSearch": "Поиск на YouTube",
   "games.hub.downloadApply": "Скачать патч",
-  "games.hub.manualPatch": "Использовать имеющийся патч или ссылку"
+  "games.hub.manualPatch": "Использовать имеющийся патч или ссылку",
 };

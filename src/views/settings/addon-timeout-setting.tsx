@@ -35,7 +35,9 @@ export function AddonTimeoutSetting() {
         </select>
       </SettingRow>
       <p className="max-w-[68ch] text-[15px] leading-[22px] text-ink-muted">
-        {t("Results appear as they arrive. Increase the wait time if an addon often needs a refresh before its results appear.")}
+        {t(
+          "Results appear as they arrive. Increase the wait time if an addon often needs a refresh before its results appear.",
+        )}
       </p>
     </Section>
   );

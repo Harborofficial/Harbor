@@ -48,9 +48,7 @@ export function rankByRating(credits: PersonCredit[], limit: number): PersonCred
     .map((credit) => ({ credit, score: weightedRating(credit, prior) }))
     .sort(
       (a, b) =>
-        b.score - a.score ||
-        b.credit.voteCount - a.credit.voteCount ||
-        byTitle(a.credit, b.credit),
+        b.score - a.score || b.credit.voteCount - a.credit.voteCount || byTitle(a.credit, b.credit),
     )
     .slice(0, limit)
     .map((entry) => entry.credit);
@@ -60,10 +58,7 @@ function ratingRank(credit: PersonCredit, prior: number): [number, number] {
   return meetsVoteFloor(credit) ? [1, weightedRating(credit, prior)] : [0, credit.voteAverage];
 }
 
-export function sortFilmography(
-  credits: PersonCredit[],
-  sort: FilmographySort,
-): PersonCredit[] {
+export function sortFilmography(credits: PersonCredit[], sort: FilmographySort): PersonCredit[] {
   const out = credits.slice();
   if (sort === "newest") {
     return out.sort((a, b) => creditYear(b) - creditYear(a) || b.popularity - a.popularity);

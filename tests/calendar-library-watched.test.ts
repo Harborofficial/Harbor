@@ -160,8 +160,24 @@ test("a merged parent-season episode does not duplicate the real sequel airing",
         poster: null,
         isAnime: true,
         episodes: [
-          { season: 1, number: 14, name: "Episode 14", airDate: "2026-10-10", image: null, overview: "", voteAverage: 0 },
-          { season: 2, number: 3, name: "Episode 3", airDate: "2026-10-10", image: null, overview: "", voteAverage: 0 },
+          {
+            season: 1,
+            number: 14,
+            name: "Episode 14",
+            airDate: "2026-10-10",
+            image: null,
+            overview: "",
+            voteAverage: 0,
+          },
+          {
+            season: 2,
+            number: 3,
+            name: "Episode 3",
+            airDate: "2026-10-10",
+            image: null,
+            overview: "",
+            voteAverage: 0,
+          },
         ],
       }),
       tmdbMovieRelease: async () => null,
@@ -177,7 +193,12 @@ test("a catalog row in the same franchise as an anime row is dropped", async () 
   const api = load({
     "./local-cw": {
       listLocalCw: () => [
-        { id: "kitsu:49444", type: "series", name: "Bleach: Thousand-Year Blood War - The Calamity", t: Date.now() },
+        {
+          id: "kitsu:49444",
+          type: "series",
+          name: "Bleach: Thousand-Year Blood War - The Calamity",
+          t: Date.now(),
+        },
         { id: "tmdb:tv:30984", type: "series", name: "Bleach", t: Date.now() },
       ],
     },
@@ -193,7 +214,9 @@ test("a catalog row in the same franchise as an anime row is dropped", async () 
           ? {
               titles: { en: "Bleach: Thousand-Year Blood War - The Calamity" },
               mappings: {},
-              episodes: { "9": { episode: "9", seasonNumber: 17, episodeNumber: 49, airdate: monthDay(1) } },
+              episodes: {
+                "9": { episode: "9", seasonNumber: 17, episodeNumber: 49, airdate: monthDay(1) },
+              },
             }
           : null,
       aniZipByMal: async () => null,
@@ -206,7 +229,15 @@ test("a catalog row in the same franchise as an anime row is dropped", async () 
         poster: null,
         isAnime: true,
         episodes: [
-          { season: 2, number: 49, name: "THE BLADE", airDate: monthDay(2), image: null, overview: "", voteAverage: 0 },
+          {
+            season: 2,
+            number: 49,
+            name: "THE BLADE",
+            airDate: monthDay(2),
+            image: null,
+            overview: "",
+            voteAverage: 0,
+          },
         ],
       }),
       tmdbMovieRelease: async () => null,
@@ -261,7 +292,10 @@ test("duplicate detection skips movies and resolves catalog series roots concurr
 
   await api.fetchLibraryCalendar("key", 2026, 9, { tmdbKey: "", includeTrakt: false });
   assert.equal(imdbAnimeLookups, 0, "movies must not enter anime-root duplicate resolution");
-  assert.deepEqual(tvLookups.sort((a, b) => a - b), [100, 101, 102, 103, 104, 105, 106]);
+  assert.deepEqual(
+    tvLookups.sort((a, b) => a - b),
+    [100, 101, 102, 103, 104, 105, 106],
+  );
   assert.ok(maxActive > 1, "catalog series roots should resolve concurrently");
   assert.ok(maxActive <= 6, "root lookup concurrency should stay bounded");
 });

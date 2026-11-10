@@ -15,8 +15,10 @@ export default {
   "games.overwatch.unavailable": "تعذّر تحديث الدليل. قد تبقى التفاصيل المحمّلة سابقًا ظاهرة.",
   "games.overwatch.partial": "بعض المعلومات غير متاحة.",
   "games.overwatch.checked": "تم التحقق في {date}",
-  "games.overwatch.scope": "معلومات الأبطال من Blizzard عبر OverFast. قد تصل تغييرات التوازن إلى اللعبة قبل تحديث هذا الدليل.",
-  "games.overwatch.mapsScope": "معلومات الخرائط والأطوار من OverFast. تشمل خرائط Arcade والخرائط القديمة؛ ويختلف التوفر حسب الطور.",
+  "games.overwatch.scope":
+    "معلومات الأبطال من Blizzard عبر OverFast. قد تصل تغييرات التوازن إلى اللعبة قبل تحديث هذا الدليل.",
+  "games.overwatch.mapsScope":
+    "معلومات الخرائط والأطوار من OverFast. تشمل خرائط Arcade والخرائط القديمة؛ ويختلف التوفر حسب الطور.",
   "games.overwatch.empty": "لا توجد نتائج مطابقة. جرّب بحثًا أو مرشحًا آخر.",
   "games.overwatch.moreHeroes": "المزيد من الأبطال",
   "games.overwatch.moreMaps": "المزيد من الخرائط",
@@ -33,6 +35,5 @@ export default {
   "games.overwatch.videoFailed": "تعذّر تشغيل العرض. افتح صفحة البطل الرسمية لمشاهدته هناك.",
   "games.overwatch.mode": "طور اللعب",
   "games.overwatch.allModes": "جميع الأطوار",
-  "games.overwatch.searchMaps": "البحث عن خرائط أو مواقع"
+  "games.overwatch.searchMaps": "البحث عن خرائط أو مواقع",
 };
-

@@ -116,11 +116,12 @@ export function RailSection({ filter, rail }: { filter: MetaFilter; rail: Standa
   return (
     <Row {...posterRow} title={title} onEndReached={onEndReached}>
       {visible
-        ? visible.map((m) => (
-            <PickCard key={m.id} meta={m} />
-          ))
+        ? visible.map((m) => <PickCard key={m.id} meta={m} />)
         : Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className={`${posterRow.shape === "landscape" ? "aspect-[16/9]" : "aspect-[2/3]"} animate-pulse rounded-xl bg-elevated/40`} />
+            <div
+              key={i}
+              className={`${posterRow.shape === "landscape" ? "aspect-[16/9]" : "aspect-[2/3]"} animate-pulse rounded-xl bg-elevated/40`}
+            />
           ))}
     </Row>
   );

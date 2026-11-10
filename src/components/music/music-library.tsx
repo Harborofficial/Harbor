@@ -122,7 +122,8 @@ export function MusicLibrary({
   const contextAnchor = useRef<HTMLElement | null>(null);
   const [renameTarget, setRenameTarget] = useState<MusicPlaylist | null>(null);
   const [editTarget, setEditTarget] = useState<MusicPlaylist | null>(null);
-  const contextPlaylistId = contextEntry?.kind === "playlist" ? (contextEntry.playlist?.id ?? "") : "";
+  const contextPlaylistId =
+    contextEntry?.kind === "playlist" ? (contextEntry.playlist?.id ?? "") : "";
   const contextPlaylistPinned = useMusicPlaylistPinned(contextPlaylistId);
   const closeContextMenu = useCallback(() => {
     setContextEntry(null);
@@ -190,7 +191,9 @@ export function MusicLibrary({
     if (player.recents.length > 0)
       built.push(recentEntry(player.recents, t("music.library.recent"), t("music.library.recent")));
     for (const playlist of playlists)
-      built.push(playlistEntry(playlist, t(playlist.source ? "music.linked.source" : "music.playlists")));
+      built.push(
+        playlistEntry(playlist, t(playlist.source ? "music.linked.source" : "music.playlists")),
+      );
     if (filter === "all")
       for (const item of shelf) {
         const entry = catalogEntry(item, t("music.connections.local"));
@@ -247,11 +250,7 @@ export function MusicLibrary({
     const playlist = entry.kind === "playlist" ? entry.playlist : undefined;
     const tracks =
       playlist?.tracks ??
-      (entry.kind === "liked"
-        ? player.likedTracks
-        : entry.kind === "recent"
-          ? player.recents
-          : []);
+      (entry.kind === "liked" ? player.likedTracks : entry.kind === "recent" ? player.recents : []);
     const first = tracks[0];
     if (!first) return;
     if (playlist) recordMusicPlaylistPlayback(playlist, tracks);
@@ -318,9 +317,7 @@ export function MusicLibrary({
     itemMenu.close();
     contextAnchor.current = event.currentTarget;
     setContextPosition(
-      event.clientX !== 0 || event.clientY !== 0
-        ? { x: event.clientX, y: event.clientY }
-        : null,
+      event.clientX !== 0 || event.clientY !== 0 ? { x: event.clientX, y: event.clientY } : null,
     );
     setContextEntry(entry);
   };
@@ -328,7 +325,8 @@ export function MusicLibrary({
   const contextItems: MusicTrackMenuItem[] = [];
   if (contextEntry) {
     const playlist = contextEntry.kind === "playlist" ? contextEntry.playlist : undefined;
-    const tracks = playlist?.tracks ??
+    const tracks =
+      playlist?.tracks ??
       (contextEntry.kind === "liked"
         ? player.likedTracks
         : contextEntry.kind === "recent"
@@ -375,7 +373,7 @@ export function MusicLibrary({
   }
 
   const updateRenamedPlaylist = useCallback((playlist: MusicPlaylist) => {
-    setPlaylists((current) => current.map((item) => item.id === playlist.id ? playlist : item));
+    setPlaylists((current) => current.map((item) => (item.id === playlist.id ? playlist : item)));
     // The pinned shelf keeps a copy of the name; keep it in step.
     renamePinnedMusicPlaylist(playlist.id, playlist.name);
   }, []);
@@ -403,26 +401,26 @@ export function MusicLibrary({
         </div>
         <div className="music-library-actions music-library-header-actions">
           <HoverTooltip label={t("music.home.addFolder")} align="center">
-              <button
-                type="button"
-                className="music-library-icon-action"
-                aria-label={t("music.home.addFolder")}
-                onClick={() => openConnections("local")}
-              >
-                <FolderOpen size={28} aria-hidden="true" />
-              </button>
+            <button
+              type="button"
+              className="music-library-icon-action"
+              aria-label={t("music.home.addFolder")}
+              onClick={() => openConnections("local")}
+            >
+              <FolderOpen size={28} aria-hidden="true" />
+            </button>
           </HoverTooltip>
           <HoverTooltip label={t("music.m3u.import")} align="center">
-              <button
-                type="button"
-                className="music-library-icon-action"
-                aria-label={t("music.m3u.import")}
-                aria-busy={working}
-                disabled={working}
-                onClick={importM3u}
-              >
-                <FileUp size={28} aria-hidden="true" />
-              </button>
+            <button
+              type="button"
+              className="music-library-icon-action"
+              aria-label={t("music.m3u.import")}
+              aria-busy={working}
+              disabled={working}
+              onClick={importM3u}
+            >
+              <FileUp size={28} aria-hidden="true" />
+            </button>
           </HoverTooltip>
           <HoverTooltip label={t("music.linked.import")} align="center">
             <button
@@ -436,18 +434,18 @@ export function MusicLibrary({
             </button>
           </HoverTooltip>
           <HoverTooltip label={t("music.row.newPlaylist")} align="end">
-              <button
-                type="button"
-                className="music-library-icon-action"
-                aria-label={t("music.row.newPlaylist")}
-                aria-expanded={creating}
-                onClick={() => {
-                  setFilter("playlists");
-                  setCreating((value) => !value);
-                }}
-              >
-                <Plus size={28} aria-hidden="true" />
-              </button>
+            <button
+              type="button"
+              className="music-library-icon-action"
+              aria-label={t("music.row.newPlaylist")}
+              aria-expanded={creating}
+              onClick={() => {
+                setFilter("playlists");
+                setCreating((value) => !value);
+              }}
+            >
+              <Plus size={28} aria-hidden="true" />
+            </button>
           </HoverTooltip>
         </div>
       </header>
@@ -572,7 +570,14 @@ export function MusicLibrary({
           <MusicCollectionGrid
             entries={arranged}
             emptyCopy={t(query ? "music.searchEmpty" : "music.playlist.first")}
-            emptyState={!query && !readError ? <MusicLibraryEmptyState onConnect={() => openConnections("local")} onTastes={onTastes} /> : undefined}
+            emptyState={
+              !query && !readError ? (
+                <MusicLibraryEmptyState
+                  onConnect={() => openConnections("local")}
+                  onTastes={onTastes}
+                />
+              ) : undefined
+            }
             onOpen={(entry) => (entry.item ? onOpen(entry.item, shelf) : onCollection(entry))}
             onContextMenu={openEntryMenu}
           />
@@ -613,10 +618,18 @@ export function MusicLibrary({
         <MusicPlaylistLinkDialog
           onClose={() => setLinking(false)}
           onImported={(playlist) => {
-            setPlaylists((current) => [playlist, ...current.filter((item) => item.id !== playlist.id)]);
+            setPlaylists((current) => [
+              playlist,
+              ...current.filter((item) => item.id !== playlist.id),
+            ]);
             setFilter("playlists");
             setError(null);
-            setNotice(t("music.linked.importedNotice", { count: playlist.tracks.length, name: playlist.name }));
+            setNotice(
+              t("music.linked.importedNotice", {
+                count: playlist.tracks.length,
+                name: playlist.name,
+              }),
+            );
           }}
         />
       )}
@@ -717,13 +730,19 @@ function MusicPlaylistRenameDialog({
           aria-label={t("music.playlist.nameLabel")}
           className="min-h-11 w-full rounded-md bg-elevated px-3 py-2 text-[15px] text-ink outline-none placeholder:text-ink-subtle focus-visible:outline-2 focus-visible:outline-accent"
         />
-        {error && <p role="alert" className="text-[13px] text-danger">{error}</p>}
+        {error && (
+          <p role="alert" className="text-[13px] text-danger">
+            {error}
+          </p>
+        )}
         <div className="flex justify-end gap-2">
           <button type="button" className="music-library-text" disabled={working} onClick={close}>
             {t("common.cancel")}
           </button>
           <button type="submit" className="music-library-button" disabled={!name.trim() || working}>
-            {working ? <LoaderCircle size={17} className="animate-spin motion-reduce:animate-none" /> : null}
+            {working ? (
+              <LoaderCircle size={17} className="animate-spin motion-reduce:animate-none" />
+            ) : null}
             {t("common.save")}
           </button>
         </div>

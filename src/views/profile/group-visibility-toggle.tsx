@@ -12,7 +12,12 @@ export function VisibilityToggle({
   const t = useT();
   const opts: Array<{ id: GroupVisibility; label: string; sub: string; icon: typeof Globe }> = [
     { id: "invite", label: t("Invite only"), sub: t("Only people you add can join"), icon: Lock },
-    { id: "public", label: t("Public"), sub: t("Anyone can find and join from search"), icon: Globe },
+    {
+      id: "public",
+      label: t("Public"),
+      sub: t("Anyone can find and join from search"),
+      icon: Globe,
+    },
   ];
   return (
     <div className="grid grid-cols-2 gap-2">

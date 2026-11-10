@@ -1,26 +1,31 @@
 export default {
   "games.download.relink.title": "ダウンロードリンクを更新",
-  "games.download.relink.intro": "配信元で同じファイルを選ぶか、新しい直接リンクを貼り付けてください。保存先は変わりません。",
+  "games.download.relink.intro":
+    "配信元で同じファイルを選ぶか、新しい直接リンクを貼り付けてください。保存先は変わりません。",
   "games.download.relink.source": "配信元から選ぶ",
   "games.download.relink.manual": "ファイルへの直接リンクを使う",
   "games.download.relink.url": "新しいファイルURL",
   "games.download.relink.review": "ファイルを確認",
   "games.download.relink.saved": "保存済み：{size}",
-  "games.download.relink.note": "Harborは保存済みの部分を再ダウンロードして比較し、一致を確認してから新しいデータを追加します。",
+  "games.download.relink.note":
+    "Harborは保存済みの部分を再ダウンロードして比較し、一致を確認してから新しいデータを追加します。",
   "games.download.relink.apply": "リンクを更新して再開",
   "games.download.relink.working": "リンクを更新中…",
   "games.download.relink.checking": "保存済みデータを確認中",
   "games.download.relink.single": "このダウンロードリンクを置き換えるファイルを1つ選んでください。",
   "games.download.relink.native": "このリンクを更新するには、最新版のHarborを再起動してください。",
-  "games.download.transfer_relink_mismatch": "このダウンロードを続けるには、名前とサイズが同じ元のファイルを選んでください。",
+  "games.download.transfer_relink_mismatch":
+    "このダウンロードを続けるには、名前とサイズが同じ元のファイルを選んでください。",
   "games.download.center.content.patch": "ゲームの更新",
   "games.download.center.content.mod": "MODコンテンツ",
   "games.download.center.content.extra": "追加コンテンツ",
   "games.download.center.completedAt": "完了: {date}",
   "games.download.center.clearCompleted": "完了した項目を非表示",
-  "games.download.center.keepFiles": "このリストから非表示にします。ファイルとライブラリのゲームは保持されます。",
+  "games.download.center.keepFiles":
+    "このリストから非表示にします。ファイルとライブラリのゲームは保持されます。",
   "games.download.center.dismiss": "{name}を非表示",
-  "games.download.center.retention": "完了したダウンロードは24時間後、または非表示にすると履歴へ移動します。ファイルは保持されます。",
+  "games.download.center.retention":
+    "完了したダウンロードは24時間後、または非表示にすると履歴へ移動します。ファイルは保持されます。",
   "games.download.center.showHistory": "完了履歴を表示（{count}）",
   "games.download.center.hideHistory": "完了履歴を非表示",
   "games.download.center.contentInfo": "コンテンツ情報",
@@ -47,6 +52,8 @@ export default {
   "games.download.center.canceled": "キャンセル済み",
   "games.download.center.readyToExtract": "展開の準備ができました",
   "games.download.center.downloadComplete": "ダウンロードが完了しました",
-  "games.download.center.installNote": "ファイルの準備ができました。インストールするにはアーカイブを展開するか、フォルダーを開いてください。",
-  "games.download.center.diskNote": "このダウンロードによる書き込みです。システムキャッシュを含みますが、インストールや他のアプリは含みません。"
+  "games.download.center.installNote":
+    "ファイルの準備ができました。インストールするにはアーカイブを展開するか、フォルダーを開いてください。",
+  "games.download.center.diskNote":
+    "このダウンロードによる書き込みです。システムキャッシュを含みますが、インストールや他のアプリは含みません。",
 };

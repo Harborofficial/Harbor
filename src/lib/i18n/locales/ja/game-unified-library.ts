@@ -1,39 +1,50 @@
 export default {
-  "games.battlenet.changed": "Battle.netのアカウントが変わりました。このプロフィールのインポート内容を置き換えるには、再度サインインしてください。",
+  "games.battlenet.changed":
+    "Battle.netのアカウントが変わりました。このプロフィールのインポート内容を置き換えるには、再度サインインしてください。",
   "games.battlenet.connect": "サインイン",
-  "games.battlenet.intro": "Battle.netにサインインしてゲームをインポートします。この接続は現在のHarborプロフィールに保存されます。",
+  "games.battlenet.intro":
+    "Battle.netにサインインしてゲームをインポートします。この接続は現在のHarborプロフィールに保存されます。",
   "games.battlenet.installed": "インストール済みのゲームを表示",
   "games.battlenet.uninstalled": "アカウント内の未インストールのゲームを表示",
-  "games.battlenet.partial": "一部のアカウント情報を更新できませんでした。以前インポートしたゲームは引き続き表示されます。",
+  "games.battlenet.partial":
+    "一部のアカウント情報を更新できませんでした。以前インポートしたゲームは引き続き表示されます。",
   "games.battlenet.unresolved": "一部のアカウント項目のゲームエディションを特定できませんでした。",
-  "games.battlenet.expired": "Battle.netのセッションが切れました。再度サインインしてください。インポートしたゲームは保持されています。",
+  "games.battlenet.expired":
+    "Battle.netのセッションが切れました。再度サインインしてください。インポートしたゲームは保持されています。",
   "games.battlenet.timeout": "Battle.netからの応答がタイムアウトしました。再試行してください。",
   "games.battlenet.busy": "Battle.netアカウントの操作がすでに実行中です。",
-  "games.battlenet.update": "Battle.netに接続するには、更新済みのHarborデスクトップアプリを再起動してください。",
-  "games.battlenet.error": "Battle.netを更新できませんでした。最後にインポートしたライブラリは保持されています。",
+  "games.battlenet.update":
+    "Battle.netに接続するには、更新済みのHarborデスクトップアプリを再起動してください。",
+  "games.battlenet.error":
+    "Battle.netを更新できませんでした。最後にインポートしたライブラリは保持されています。",
   "games.battlenet.disconnect": "Battle.netの接続を解除",
-  "games.battlenet.removeNote": "このプロフィールのアカウントからインポートした項目を削除します。インストール済みファイルと他のプロフィールは保持されます。",
+  "games.battlenet.removeNote":
+    "このプロフィールのアカウントからインポートした項目を削除します。インストール済みファイルと他のプロフィールは保持されます。",
   "games.battlenet.signing": "Battle.netウィンドウでサインインを完了してください。",
   "games.battlenet.cached": "アカウントのゲーム {count} 件 · 最終更新 {date}",
 
   "games.launcherSession.waiting": "ゲームの起動を待機中",
   "games.launcherSession.unconfirmed": "ゲームの状態を確認中",
   "games.launcherSession.notStarted": "ゲームが起動しませんでした",
-  "games.launcherSession.error": "ゲームのプレイ状況を記録できませんでした。Harbor を開き直して再試行してください。",
+  "games.launcherSession.error":
+    "ゲームのプレイ状況を記録できませんでした。Harbor を開き直して再試行してください。",
 
   "games.steamImport.importedTitle": "インポートしたゲーム",
   "games.steamImport.excluded": "インポート設定により除外",
   "games.steamImport.ignoreSettings": "除外するSteam ID（{count}件）",
   "games.steamImport.ignoreLabel": "除外するSteam ID",
-  "games.steamImport.ignoreNote": "手動インポート時にこれらのIDをスキップします。既存のライブラリ項目やファイルは保持されます。除外を解除するには欄を空にしてください。",
+  "games.steamImport.ignoreNote":
+    "手動インポート時にこれらのIDをスキップします。既存のライブラリ項目やファイルは保持されます。除外を解除するには欄を空にしてください。",
   "games.steamImport.ignoreSave": "除外するIDを保存",
   "games.steamImport.ignoreSaved": "除外するIDを保存しました。",
   "games.steamImport.title": "Steamゲームをインポート",
-  "games.steamImport.note": "このHarborプロフィールにゲームの記録を保存します。所有権とインストール状況は別途確認されます。",
+  "games.steamImport.note":
+    "このHarborプロフィールにゲームの記録を保存します。所有権とインストール状況は別途確認されます。",
   "games.steamImport.input": "SteamアプリIDまたはストアURL",
   "games.steamImport.profile": "Depressurizerプロフィールを選択",
   "games.steamImport.count": "{selected}件選択 · 全{total}件",
-  "games.steamImport.unavailableNote": "詳細を取得できない項目は未選択です。選択するとIDを保存し、後で詳細を読み込めます。",
+  "games.steamImport.unavailableNote":
+    "詳細を取得できない項目は未選択です。選択するとIDを保存し、後で詳細を読み込めます。",
   "games.steamImport.unknown": "Steamアプリ {id}",
   "games.steamImport.ready": "Steamの詳細を取得済み",
   "games.steamImport.profileName": "プロフィールの名前",
@@ -43,10 +54,14 @@ export default {
   "games.steamImport.invalid": "無効なIDまたはURL",
   "games.steamImport.duplicate": "重複した項目",
   "games.steamImport.nonSteam": "非Steamショートカット · スキップ",
-  "games.steamImport.limit": "1プロフィールにつき最大5,000件をインポートできます。ファイルは4 MB未満にしてください。",
-  "games.steamImport.inputError": "有効なSteam IDやストアURLを入力するか、有効なDepressurizerプロフィールを選択してください。",
-  "games.steamImport.writeError": "インポートを保存できませんでした。既存の項目は変更されていません。再試行してください。",
-  "games.steamImport.readError": "インポートしたゲームを読み取れませんでした。変更する前に再試行してください。",
+  "games.steamImport.limit":
+    "1プロフィールにつき最大5,000件をインポートできます。ファイルは4 MB未満にしてください。",
+  "games.steamImport.inputError":
+    "有効なSteam IDやストアURLを入力するか、有効なDepressurizerプロフィールを選択してください。",
+  "games.steamImport.writeError":
+    "インポートを保存できませんでした。既存の項目は変更されていません。再試行してください。",
+  "games.steamImport.readError":
+    "インポートしたゲームを読み取れませんでした。変更する前に再試行してください。",
   "games.steamImport.done": "ライブラリに追加：{count}件",
   "games.steamImport.stop": "確認を停止",
   "games.steamImport.restart": "最初からやり直す",
@@ -65,7 +80,8 @@ export default {
   "games.libraryStatus.finished": "クリア済み",
   "games.libraryStatus.onHold": "保留中",
   "games.libraryStatus.stopped": "プレイを中断",
-  "games.libraryStatus.note": "このコピーに対する選択は、このHarborプロフィールに保存されます。プレイ時間や実績によって自動変更されることはありません。",
+  "games.libraryStatus.note":
+    "このコピーに対する選択は、このHarborプロフィールに保存されます。プレイ時間や実績によって自動変更されることはありません。",
 
   "games.unified.playtime": "プレイ時間",
   "games.unified.playtime.all": "すべてのプレイ時間",
@@ -78,8 +94,10 @@ export default {
   "games.unified.playtime.steam": "Steamで{time}",
   "games.unified.playtime.zeroSteam": "Steamにプレイ時間の記録はありません",
   "games.unified.playtime.zeroHarbor": "Harborにプレイ時間の記録はありません",
-  "games.unified.playtime.unknownHint": "Steamアカウントのプレイ時間を取得できないか、このソースはプレイ時間を提供していません。",
-  "games.unified.playtime.note": "Steamの合計時間と、修正内容を含むHarborの記録時間を使用します。取得できない時間は区別されます。",
+  "games.unified.playtime.unknownHint":
+    "Steamアカウントのプレイ時間を取得できないか、このソースはプレイ時間を提供していません。",
+  "games.unified.playtime.note":
+    "Steamの合計時間と、修正内容を含むHarborの記録時間を使用します。取得できない時間は区別されます。",
   "games.unified.note": "Steamライブラリ、PCゲーム、インポートしたROMをまとめて表示します。",
   "games.unified.allSources": "すべての入手元",
   "games.unified.availability": "利用状況",
@@ -94,10 +112,13 @@ export default {
   "games.unified.state.setup": "設定が必要",
   "games.unified.state.unknown": "インストール未確認",
   "games.unified.refresh": "ローカルライブラリを更新",
-  "games.unified.scanNote": "一部のライブラリを確認できませんでした。それらのゲームは、状態不明または利用不可として引き続き表示されます。",
-  "games.unified.partial": "一部のフォルダーを確認できませんでした。インストール済みのゲームをすべて認識できていない可能性があります。",
+  "games.unified.scanNote":
+    "一部のライブラリを確認できませんでした。それらのゲームは、状態不明または利用不可として引き続き表示されます。",
+  "games.unified.partial":
+    "一部のフォルダーを確認できませんでした。インストール済みのゲームをすべて認識できていない可能性があります。",
   "games.unified.empty": "ゲームをひとまとめに",
-  "games.unified.emptyNote": "Steamと連携するか、PCゲームを追加するか、ROMフォルダーをインポートすると、ここにゲームが表示されます。",
+  "games.unified.emptyNote":
+    "Steamと連携するか、PCゲームを追加するか、ROMフォルダーをインポートすると、ここにゲームが表示されます。",
   "games.unified.pcGames": "PCゲームを管理",
   "games.unified.roms": "ROMを管理",
   "games.unified.steam": "Steamを管理",
@@ -117,5 +138,5 @@ export default {
   "games.libraryNews.failed": "ゲームのお知らせを読み込めませんでした。",
   "games.libraryNews.hide": "ゲームのお知らせを非表示",
   "games.libraryNews.show": "ゲームのお知らせを表示",
-  "games.libraryNews.pending": "ゲームのお知らせを確認中…"
+  "games.libraryNews.pending": "ゲームのお知らせを確認中…",
 };

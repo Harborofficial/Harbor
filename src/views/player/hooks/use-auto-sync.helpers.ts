@@ -18,11 +18,16 @@ export function shouldFallbackToPlayback(
   sourceKind: SourceKind,
   userInitiated: boolean,
 ): boolean {
-  if (!userInitiated ||
-      (sourceKind !== "http" && sourceKind !== "hls" && sourceKind !== "debrid") ||
-      outcome.decision.decision !== "refuse") return false;
+  if (
+    !userInitiated ||
+    (sourceKind !== "http" && sourceKind !== "hls" && sourceKind !== "debrid") ||
+    outcome.decision.decision !== "refuse"
+  )
+    return false;
   if (outcome.decision.bindingRule === "quality-measurement") {
-    return /remote audio verification could not finish|insufficient.data/i.test(outcome.decision.reason);
+    return /remote audio verification could not finish|insufficient.data/i.test(
+      outcome.decision.reason,
+    );
   }
   // The gate already compared the score to its floor. Recheck a fresh scene
   // without carrying the rejected timing into the playback matcher.
@@ -32,15 +37,23 @@ export function shouldFallbackToPlayback(
   if (outcome.decision.bindingRule === "promotion") return true;
   // A direct scorer returning null used to reach the generic "no candidate"
   // exit without offering the buffered playback recovery path.
-  return outcome.decision.bindingRule === "no-candidate" &&
-    /audio verification was unavailable \((?:insufficient-data|audio-unavailable|timeout)\)|Audio was analyzed, but speech did not align reliably/i
-      .test(outcome.decision.reason);
+  return (
+    outcome.decision.bindingRule === "no-candidate" &&
+    /audio verification was unavailable \((?:insufficient-data|audio-unavailable|timeout)\)|Audio was analyzed, but speech did not align reliably/i.test(
+      outcome.decision.reason,
+    )
+  );
 }
 
 /** Do not retry unseekable remote audio via the expensive cross-language pivot. */
 export function shouldAttemptAudioPivot(outcome: PipelineOutcome): boolean {
   if (outcome.decision.decision === "apply") return false;
-  if (["metadata-hard-refuse", "consensus-wrong-content", "already-good"].includes(outcome.decision.bindingRule)) return false;
+  if (
+    ["metadata-hard-refuse", "consensus-wrong-content", "already-good"].includes(
+      outcome.decision.bindingRule,
+    )
+  )
+    return false;
   if (outcome.decision.bindingRule === "consensus-audio-unverified") return false;
   if (
     outcome.decision.bindingRule === "quality-measurement" &&
@@ -108,14 +121,23 @@ export function subLanguages(trackLang: string | undefined, preferred: string[])
 
 /** MPV's seekable ranges, not demuxer-cache-time, indicate which exact
  * section can be dumped without another source request. */
-export function coversBufferedRange(value: unknown, startSec: number, endSec: number): boolean | null {
+export function coversBufferedRange(
+  value: unknown,
+  startSec: number,
+  endSec: number,
+): boolean | null {
   if (!Array.isArray(value)) return null;
   const ranges = value
-    .filter((item): item is { start: number; end: number } =>
-      item != null && typeof item === "object" &&
-      typeof item.start === "number" && Number.isFinite(item.start) &&
-      typeof item.end === "number" && Number.isFinite(item.end) &&
-      item.end > item.start)
+    .filter(
+      (item): item is { start: number; end: number } =>
+        item != null &&
+        typeof item === "object" &&
+        typeof item.start === "number" &&
+        Number.isFinite(item.start) &&
+        typeof item.end === "number" &&
+        Number.isFinite(item.end) &&
+        item.end > item.start,
+    )
     .sort((a, b) => a.start - b.start);
   let coveredTo = startSec;
   for (const range of ranges) {
@@ -136,17 +158,27 @@ export function selectBufferedExcerptStart(
   clipSec: number,
   durationSec: number,
 ): number | null {
-  if (!Array.isArray(value) || !Number.isFinite(preferredSec) ||
-      !Number.isFinite(clipSec) || clipSec <= 0 ||
-      !Number.isFinite(durationSec) || durationSec < clipSec) {
+  if (
+    !Array.isArray(value) ||
+    !Number.isFinite(preferredSec) ||
+    !Number.isFinite(clipSec) ||
+    clipSec <= 0 ||
+    !Number.isFinite(durationSec) ||
+    durationSec < clipSec
+  ) {
     return null;
   }
   const ranges = value
-    .filter((item): item is { start: number; end: number } =>
-      item != null && typeof item === "object" &&
-      typeof item.start === "number" && Number.isFinite(item.start) &&
-      typeof item.end === "number" && Number.isFinite(item.end) &&
-      item.end > item.start)
+    .filter(
+      (item): item is { start: number; end: number } =>
+        item != null &&
+        typeof item === "object" &&
+        typeof item.start === "number" &&
+        Number.isFinite(item.start) &&
+        typeof item.end === "number" &&
+        Number.isFinite(item.end) &&
+        item.end > item.start,
+    )
     .sort((a, b) => a.start - b.start);
   let bestStart: number | null = null;
   let distance = Number.POSITIVE_INFINITY;
@@ -192,10 +224,7 @@ export function autoSyncUiWatchdogMs(
 /** A change of selected audio track invalidates all previous timing analysis. */
 export function audioSelectionKey(snap: PlayerSnapshot): string {
   const index = snap.audioTracks.findIndex((track) => track.selected);
-  return JSON.stringify([
-    index >= 0 ? snap.audioTracks[index].id : null,
-    index,
-  ]);
+  return JSON.stringify([index >= 0 ? snap.audioTracks[index].id : null, index]);
 }
 
 /** ffmpeg stream specifier for the audio track the viewer is actually hearing. */

@@ -175,7 +175,8 @@ class HarborScratchProcessor extends AudioWorkletProcessor {
     if (this.env !== this.envTo) {
       const move = this.envTo > this.env ? this.envStep : -this.envStep;
       this.env = Math.max(0, Math.min(1, this.env + move));
-      this.envGain = this.env <= 0 ? 0 : this.env >= 1 ? 1 : 0.5 - 0.5 * Math.cos(Math.PI * this.env);
+      this.envGain =
+        this.env <= 0 ? 0 : this.env >= 1 ? 1 : 0.5 - 0.5 * Math.cos(Math.PI * this.env);
     }
     if (this.seatAt !== null && this.env <= 0) this.seat();
   }
@@ -203,7 +204,8 @@ class HarborScratchProcessor extends AudioWorkletProcessor {
       const span = HALF * stretch;
       const at = this.cursor;
       const room = Math.min(at - span, last - at - span);
-      const gate = room >= GUARD ? 1 : room <= 0 ? 0 : 0.5 - 0.5 * Math.cos((Math.PI * room) / GUARD);
+      const gate =
+        room >= GUARD ? 1 : room <= 0 ? 0 : 0.5 - 0.5 * Math.cos((Math.PI * room) / GUARD);
       let rawL = 0;
       let rawR = 0;
       if (gate > 0) {

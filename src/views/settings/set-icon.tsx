@@ -23,12 +23,7 @@ export type SetIconProps = {
   absoluteStrokeWidth?: boolean;
 };
 
-function markup(
-  body: string,
-  size: number,
-  strokeWidth?: number | string,
-  fill?: string,
-): string {
+function markup(body: string, size: number, strokeWidth?: number | string, fill?: string): string {
   let out = body
     .replace(/<\?xml[^>]*\?>/i, "")
     .replace(/\swidth="[^"]*"/i, ` width="${size}"`)

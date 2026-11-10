@@ -202,9 +202,7 @@ function Breakdown({ outcome, t }: { outcome: ImportOutcome; t: Translate }) {
             ))}
           </ul>
           {extra > 0 && (
-            <p className="mt-1.5 text-[12px] text-ink-subtle">
-              {t("and {n} more", { n: extra })}
-            </p>
+            <p className="mt-1.5 text-[12px] text-ink-subtle">{t("and {n} more", { n: extra })}</p>
           )}
         </div>
       )}

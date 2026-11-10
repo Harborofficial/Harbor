@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "Avoid {name}",
   "games.eve.less": "Show fewer stops",
   "games.eve.allStops": "Show all stops",
-  "games.eve.activityNote": "Reported activity is historical and excludes wormhole space. Security preference cannot guarantee a safe route.",
+  "games.eve.activityNote":
+    "Reported activity is historical and excludes wormhole space. Security preference cannot guarantee a safe route.",
   "games.eve.noRoute": "No stargate route was found.",
   "games.eve.incursions": "Incursions",
   "games.eve.refreshIncursions": "Refresh incursions",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "Influence",
   "games.eve.systems": "Systems · {count}",
   "games.eve.boss": "Boss present",
-  "games.eve.routeThere": "Route here"
+  "games.eve.routeThere": "Route here",
 };

@@ -6,27 +6,39 @@ import type { MusicAudioMeterState } from "../src/lib/music/audio-meter";
 
 function drums(now: number, period: number, hard: boolean): MusicAudioMeterState {
   const kick = now % period < 65;
-  const bass = hard ? (kick ? -4 : -38) : (kick ? -43 : -56);
-  return { status: "ready", data: {
-    trackId: "current", connectorId: "local", active: true,
-    channels: [{ rmsDb: -10, peakDb: -4 }],
-    // The vocal stays loud even through the softer intro and breakdown.
-    spectrumDb: [bass, bass - 2, bass - 6, -8, -13, -20, -40, -45],
-    outputSampleRateHz: null, outputChannels: null, outputDevice: null, outputBackend: null,
-  } };
+  const bass = hard ? (kick ? -4 : -38) : kick ? -43 : -56;
+  return {
+    status: "ready",
+    data: {
+      trackId: "current",
+      connectorId: "local",
+      active: true,
+      channels: [{ rmsDb: -10, peakDb: -4 }],
+      // The vocal stays loud even through the softer intro and breakdown.
+      spectrumDb: [bass, bass - 2, bass - 6, -8, -13, -20, -40, -45],
+      outputSampleRateHz: null,
+      outputChannels: null,
+      outputDevice: null,
+      outputBackend: null,
+    },
+  };
 }
 
 test("real measured drums earn a sustained drop dance; a loud vocal cannot extend the breakdown", () => {
   for (const period of [350, 500, 650]) {
-    const groove = createMikuGroove(), dance = createMikuDance();
-    let previous = "listening", firstStart = 0, firstEnd = 0;
+    const groove = createMikuGroove(),
+      dance = createMikuDance();
+    let previous = "listening",
+      firstStart = 0,
+      firstEnd = 0;
     const routines: number[] = [];
     for (let now = 0; now < 100000; now += 10) {
       const hard = (now >= 12000 && now < 44000) || (now >= 70000 && now < 94000);
       if (now % 50 === 0) groove.sample(drums(now, period, hard), "current", "local", now);
       const pulse = groove.advance(10, true);
       const state = dance.advance(10, pulse, true, true);
-      if (now < 12000) assert.equal(state.stage, "listening", "quiet drums under a loud vocal are not a drop");
+      if (now < 12000)
+        assert.equal(state.stage, "listening", "quiet drums under a loud vocal are not a drop");
       if (state.stage === "dancing" && previous !== "dancing") {
         if (!firstStart) firstStart = now;
         routines.push(state.kind);
@@ -40,8 +52,14 @@ test("real measured drums earn a sustained drop dance; a loud vocal cannot exten
       if (now > 52000 && now < 70000) assert.equal(state.stage, "listening");
       previous = state.stage;
     }
-    assert.ok(firstStart >= 12000 && firstStart < 18500, `${period}ms: dance joins the stronger phrase at ${firstStart}`);
-    assert.ok(firstEnd >= 44000 && firstEnd < 49500, `${period}ms: finish the loop after the breakdown at ${firstEnd}`);
+    assert.ok(
+      firstStart >= 12000 && firstStart < 18500,
+      `${period}ms: dance joins the stronger phrase at ${firstStart}`,
+    );
+    assert.ok(
+      firstEnd >= 44000 && firstEnd < 49500,
+      `${period}ms: finish the loop after the breakdown at ${firstEnd}`,
+    );
     assert.deepEqual(routines, [0, 1], "the next drop earns the other approved routine");
   }
 });
@@ -50,7 +68,8 @@ test("short drum fills keep a highlight, while sustained quiet or missing audio 
   const groove = createMikuGroove();
   let pulse = groove.advance(0);
   for (let now = 0; now < 12000; now += 10) {
-    if (now % 50 === 0) groove.sample(drums(now, 400, now < 7000 || now >= 7350), "current", "local", now);
+    if (now % 50 === 0)
+      groove.sample(drums(now, 400, now < 7000 || now >= 7350), "current", "local", now);
     pulse = groove.advance(10, true);
     if (now > 5000) assert.ok(pulse.highlight, "a one-beat fill must not end the section");
   }
@@ -65,18 +84,20 @@ test("after repeated seek gaps the new drum tempo is acquired without keeping pr
     // No rendering reset/toggle: the same live groove receives inactive seek data.
     for (let gap = 0; gap < 1600; gap += 10, now += 10) {
       if (gap % 50 === 0) {
-        const state = drums(now, period, true); state.data!.active = false;
+        const state = drums(now, period, true);
+        state.data!.active = false;
         groove.sample(state, "current", "local", now);
       }
       groove.advance(10, false);
     }
     const start = now;
-    let locked = 0, nods = new Set<number>();
+    let locked = 0,
+      nods = new Set<number>();
     for (; now - start < 6000; now += 10) {
       if (now % 50 === 0) groove.sample(drums(now, period, true), "current", "local", now);
       const pulse = groove.advance(10, true);
       if (now - start > 4000) {
-        if (pulse.locked && Math.abs(pulse.period! - period) < period * .08) locked++;
+        if (pulse.locked && Math.abs(pulse.period! - period) < period * 0.08) locked++;
         nods.add(Math.round(pulse.bob * 24));
       }
     }

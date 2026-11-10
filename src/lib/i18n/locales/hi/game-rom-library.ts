@@ -7,5 +7,5 @@ export default {
   "games.emulation.addGames": "गेम जोड़ें",
   "games.emulation.importNote": "सिस्टम चुनें, फिर उसका गेम फ़ोल्डर चुनें। सबफ़ोल्डर भी शामिल होंगे।",
   "games.emulation.noMatches": "दूसरा सिस्टम आज़माएँ या फ़िल्टर हटाएँ।",
-  "games.emulation.clearFilters": "फ़िल्टर हटाएँ"
+  "games.emulation.clearFilters": "फ़िल्टर हटाएँ",
 };

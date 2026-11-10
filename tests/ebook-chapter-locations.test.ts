@@ -46,7 +46,9 @@ function storage() {
   Object.defineProperty(globalThis, "localStorage", {
     configurable: true,
     value: {
-      get length() { return values.size; },
+      get length() {
+        return values.size;
+      },
       key: (index: number) => [...values.keys()][index] ?? null,
       getItem: (key: string) => values.get(key) ?? null,
       setItem: (key: string, value: string) => values.set(key, value),
@@ -129,7 +131,10 @@ test("resume, bookmark and annotation offsets migrate without deleting legacy st
 
 test("translated resume and annotations spanning new chapters keep readable legacy IDs", () => {
   storage();
-  saveEBookResume("profile", "book", { chapterId: legacy.chapter.id, chapterTitle: "Original title" });
+  saveEBookResume("profile", "book", {
+    chapterId: legacy.chapter.id,
+    chapterTitle: "Original title",
+  });
   saveEBookProgress("profile", "book", `${legacy.chapter.id}:harbor`, 2);
   const translated = { ...legacy, translated: true };
   const remaining = migrate([translated]);
@@ -138,7 +143,10 @@ test("translated resume and annotations spanning new chapters keep readable lega
   storage();
   saveEBookAnnotation("profile", "book", {
     chapterId: legacy.chapter.id,
-    ranges: [{ line: 2, start: 0, end: 16 }, { line: 3, start: 0, end: 11 }],
+    ranges: [
+      { line: 2, start: 0, end: 16 },
+      { line: 3, start: 0, end: 11 },
+    ],
     text: "First paragraph. Chapter Two",
     color: "orange",
     density: 50,

@@ -56,7 +56,9 @@ export function AiModelSelect({
     }
     const dir = getDirection(e.nativeEvent);
     if (dir !== "up" && dir !== "down") return;
-    const items = Array.from(listRef.current?.querySelectorAll<HTMLElement>('[role="option"]') ?? []);
+    const items = Array.from(
+      listRef.current?.querySelectorAll<HTMLElement>('[role="option"]') ?? [],
+    );
     if (!items.length) return;
     e.preventDefault();
     const from = items.indexOf(e.target as HTMLElement);
@@ -138,9 +140,7 @@ export function AiModelSelect({
                           {m.provider === "groq" ? t("Free tier") : t("Free")}
                         </span>
                       )}
-                      <span className={PROVIDER_TAG}>
-                        {PROVIDER_NAME[m.family ?? m.provider]}
-                      </span>
+                      <span className={PROVIDER_TAG}>{PROVIDER_NAME[m.family ?? m.provider]}</span>
                     </span>
                   </span>
                   {sel && <Check size={18} className="shrink-0 text-accent" />}

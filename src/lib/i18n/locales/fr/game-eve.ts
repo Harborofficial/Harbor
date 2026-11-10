@@ -22,7 +22,8 @@ export default {
   "games.eve.avoiding": "À éviter",
   "games.eve.allow": "Autoriser {name}",
   "games.eve.clear": "Tout effacer",
-  "games.eve.stargates": "Routes par portails uniquement. Les trous de ver et ponts de saut ne sont pas inclus.",
+  "games.eve.stargates":
+    "Routes par portails uniquement. Les trous de ver et ponts de saut ne sont pas inclus.",
   "games.eve.saveFailed": "Impossible de mémoriser cette route sur cet appareil.",
   "games.eve.routeFailed": "Impossible de charger la route. Réessayez.",
   "games.eve.ready": "Choisissez votre destination, puis tracez la route.",
@@ -46,7 +47,8 @@ export default {
   "games.eve.avoid": "Éviter {name}",
   "games.eve.less": "Moins d’étapes",
   "games.eve.allStops": "Toutes les étapes",
-  "games.eve.activityNote": "L’activité rapportée est historique et exclut les trous de ver. La préférence de sécurité ne garantit pas une route sûre.",
+  "games.eve.activityNote":
+    "L’activité rapportée est historique et exclut les trous de ver. La préférence de sécurité ne garantit pas une route sûre.",
   "games.eve.noRoute": "Aucune route par portails trouvée.",
   "games.eve.incursions": "Incursions",
   "games.eve.refreshIncursions": "Actualiser les incursions",
@@ -60,5 +62,5 @@ export default {
   "games.eve.influence": "Influence",
   "games.eve.systems": "Systèmes · {count}",
   "games.eve.boss": "Boss présent",
-  "games.eve.routeThere": "Route vers ce système"
+  "games.eve.routeThere": "Route vers ce système",
 };

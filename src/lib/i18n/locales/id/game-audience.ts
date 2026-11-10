@@ -3,11 +3,13 @@ export default {
   "games.audience.deck": "Steam Deck · paling banyak dimainkan",
   "games.audience.deckNote": "Game Steam Deck paling banyak dimainkan · seminggu terakhir",
   "games.audience.deckSource": "Steam Deck · peringkat mingguan",
-  "games.audience.deckCoverage": "Peringkat Steam Deck mingguan dari Valve, diperbarui otomatis. Jumlah pemain bersamaan tidak dipublikasikan untuk daftar ini.",
+  "games.audience.deckCoverage":
+    "Peringkat Steam Deck mingguan dari Valve, diperbarui otomatis. Jumlah pemain bersamaan tidak dipublikasikan untuk daftar ini.",
   "games.audience.xbox": "Xbox · paling banyak dimainkan",
   "games.audience.xboxNote": "Game Xbox paling banyak dimainkan · Amerika Serikat",
   "games.audience.xboxSource": "Xbox · peringkat terkini",
-  "games.audience.xboxCoverage": "Peringkat Xbox AS terkini dari Microsoft, diperbarui otomatis. Xbox tidak menerbitkan jumlah pemain.",
+  "games.audience.xboxCoverage":
+    "Peringkat Xbox AS terkini dari Microsoft, diperbarui otomatis. Xbox tidak menerbitkan jumlah pemain.",
   "games.audience.xboxChecked": "Diperiksa {date}",
   "games.audience.xboxView": "Lihat di Xbox",
   "games.audience.pc": "PC · semua peluncur",
@@ -19,6 +21,7 @@ export default {
   "games.audience.monthlyRank": "Peringkat bulanan {rank}",
   "games.audience.onSteamNow": "di Steam sekarang",
   "games.audience.source": "Newzoo · pemain aktif bulanan",
-  "games.audience.coverage": "10 besar yang diterbitkan berdasarkan pemain aktif bulanan di 37 pasar, tidak termasuk Tiongkok dan India. Peringkat bertanggal, bukan jumlah langsung atau peringkat dunia.",
-  "games.audience.snapshot": "Newzoo · peringkat terbitan · {month}"
+  "games.audience.coverage":
+    "10 besar yang diterbitkan berdasarkan pemain aktif bulanan di 37 pasar, tidak termasuk Tiongkok dan India. Peringkat bertanggal, bukan jumlah langsung atau peringkat dunia.",
+  "games.audience.snapshot": "Newzoo · peringkat terbitan · {month}",
 };

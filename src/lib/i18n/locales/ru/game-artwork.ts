@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "Импорт данных игр",
-  "games.metadataImport.note": "Поиск по названию, платформе и идентификатору магазина. Существующие привязки сохраняются.",
+  "games.metadataImport.note":
+    "Поиск по названию, платформе и идентификатору магазина. Существующие привязки сохраняются.",
   "games.metadataImport.scope": "Игры для поиска",
   "games.metadataImport.progress": "Проверено {count} из {total}",
   "games.metadataImport.savedCount": "Импортировано: {count}",
@@ -14,21 +15,26 @@ export default {
   "games.metadataImport.incomplete": "Слишком много результатов. Выберите совпадение.",
   "games.metadataImport.artwork": "Выберите изображения для завершения импорта.",
   "games.metadataImport.reviewAction": "Проверить",
-  "games.metadataImport.stopNote": "Остановка или закрытие отменяет оставшуюся работу. Завершённые импорты сохраняются.",
+  "games.metadataImport.stopNote":
+    "Остановка или закрытие отменяет оставшуюся работу. Завершённые импорты сохраняются.",
   "games.metadataImport.stop": "Остановить",
   "games.metadataImport.resume": "Продолжить / повторить",
   "games.metadataImport.start": "Найти совпадения",
   "games.metadataImport.review": "Нужна проверка",
   "games.artwork.selectionSetting": "Выбор фона IGDB",
-  "games.artwork.selectionNote": "Для новых привязок метаданных. Существующие изображения не изменятся.",
+  "games.artwork.selectionNote":
+    "Для новых привязок метаданных. Существующие изображения не изменятся.",
   "games.artwork.policy.first": "Первое изображение",
   "games.artwork.policy.random": "Случайное изображение",
   "games.artwork.policy.manual": "Выбрать вручную",
   "games.artwork.screenshotsSetting": "Использовать скриншоты, если нет иллюстраций",
-  "games.artwork.screenshotsNote": "Использовать скриншот только при отсутствии фоновых иллюстраций в IGDB.",
+  "games.artwork.screenshotsNote":
+    "Использовать скриншот только при отсутствии фоновых иллюстраций в IGDB.",
   "games.artwork.iconSetting": "Использовать обложки как значки библиотеки",
-  "games.artwork.iconNote": "Показывать небольшие обложки IGDB в боковой панели и быстрой библиотеке для новых привязок. Локальные изображения имеют приоритет.",
-  "games.artwork.importError": "Не удалось загрузить изображения для этой привязки. Попробуйте снова.",
+  "games.artwork.iconNote":
+    "Показывать небольшие обложки IGDB в боковой панели и быстрой библиотеке для новых привязок. Локальные изображения имеют приоритет.",
+  "games.artwork.importError":
+    "Не удалось загрузить изображения для этой привязки. Попробуйте снова.",
 
   "games.artwork.browse": "Изображения IGDB",
   "games.artwork.title": "Выбрать изображения",
@@ -37,8 +43,10 @@ export default {
   "games.artwork.cover": "Обложка",
   "games.artwork.unknownSize": "Размер недоступен",
   "games.artwork.original": "Автоматически",
-  "games.artwork.noMatch": "Изображения для этой игры не найдены. Попробуйте другую запись метаданных.",
-  "games.artwork.localCover": "Локальная обложка останется. Удалите её в настройках библиотеки, чтобы использовать эту.",
+  "games.artwork.noMatch":
+    "Изображения для этой игры не найдены. Попробуйте другую запись метаданных.",
+  "games.artwork.localCover":
+    "Локальная обложка останется. Удалите её в настройках библиотеки, чтобы использовать эту.",
   "games.artwork.choose": "{count} изображений",
   "games.artwork.first": "Первое изображение",
   "games.artwork.random": "Случайное изображение",
@@ -46,5 +54,6 @@ export default {
   "games.artwork.empty": "В IGDB нет изображений для этого варианта.",
   "games.artwork.imageError": "Некоторые изображения не удалось загрузить.",
   "games.artwork.reset": "Сбросить изображения",
-  "games.artwork.conflict": "Изображения или метаданные изменены в другом месте. Откройте окно выбора заново."
+  "games.artwork.conflict":
+    "Изображения или метаданные изменены в другом месте. Откройте окно выбора заново.",
 } satisfies Record<string, string>;

@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "Runs in this list: {count}",
   "games.wow.weekly.partial": "Some recorded runs could not be verified.",
   "games.wow.weekly.empty": "No runs recorded for this reset.",
-  "games.wow.weekly.scope": "Raider.IO lists up to 10 highest keys per reset, from the current season. New runs may take time to appear.",
+  "games.wow.weekly.scope":
+    "Raider.IO lists up to 10 highest keys per reset, from the current season. New runs may take time to appear.",
   "games.helldivers.title": "Galactic War",
   "games.helldivers.intro": "Choose your next drop.",
   "games.helldivers.refresh": "Refresh Galactic War",
@@ -77,20 +78,24 @@ export default {
   "games.warhammer.all": "All",
   "games.warhammer.play": "Play as",
   "games.warhammer.face": "Face them",
-  "games.warhammer.unavailable": "Game connections could not be refreshed. Previously loaded entries may still appear.",
+  "games.warhammer.unavailable":
+    "Game connections could not be refreshed. Previously loaded entries may still appear.",
   "games.warhammer.partial": "Some game connections are unavailable.",
   "games.warhammer.empty": "No verified connections for this role yet.",
   "games.warhammer.scope": "A starting point for each faction. Explore the full catalog below.",
   "games.warhammer.evidence": "Publisher details for {name}",
   "games.warhammer.crossover": "40K / Age of Sigmar crossover",
   "games.warhammer.faction.marines": "Space Marines",
-  "games.warhammer.lore.marines": "Humanity’s armoured champions, organised into distinct Chapters.",
+  "games.warhammer.lore.marines":
+    "Humanity’s armoured champions, organised into distinct Chapters.",
   "games.warhammer.faction.mechanicus": "Adeptus Mechanicus",
-  "games.warhammer.lore.mechanicus": "The Imperium’s machine-worshipping priesthood, guardians of ancient technology.",
+  "games.warhammer.lore.mechanicus":
+    "The Imperium’s machine-worshipping priesthood, guardians of ancient technology.",
   "games.warhammer.faction.necrons": "Necrons",
   "games.warhammer.lore.necrons": "Ancient dynasties awakening in bodies of living metal.",
   "games.warhammer.faction.orks": "Orks",
-  "games.warhammer.lore.orks": "War-hungry greenskins whose ramshackle machines are built for battle.",
+  "games.warhammer.lore.orks":
+    "War-hungry greenskins whose ramshackle machines are built for battle.",
   "games.warhammer.faction.tyranids": "Tyranids",
   "games.warhammer.lore.tyranids": "Alien hive fleets that consume entire worlds.",
   "games.warhammer.faction.chaos": "Forces of Chaos",
@@ -98,9 +103,12 @@ export default {
   "games.warframe.title": "Across the Origin System",
   "games.warframe.intro": "See what’s available before your next run.",
   "games.warframe.refresh": "Refresh world schedule",
-  "games.warframe.unavailable": "The schedule could not be refreshed. Any shown details are from the previous snapshot.",
-  "games.warframe.stale": "The source is delayed. These are its last reported states; expired entries are hidden.",
-  "games.warframe.expired": "This snapshot is too old. Current listings are hidden until fresh data arrives.",
+  "games.warframe.unavailable":
+    "The schedule could not be refreshed. Any shown details are from the previous snapshot.",
+  "games.warframe.stale":
+    "The source is delayed. These are its last reported states; expired entries are hidden.",
+  "games.warframe.expired":
+    "This snapshot is too old. Current listings are hidden until fresh data arrives.",
   "games.warframe.partial": "Some parts of the schedule are unavailable.",
   "games.warframe.reported": "Last reported",
   "games.warframe.waiting": "Awaiting fresh data",
@@ -137,7 +145,8 @@ export default {
   "games.warframe.noMatches": "No current fissures match these filters.",
   "games.warframe.more": "Show more",
   "games.warframe.snapshot": "Snapshot: {date}",
-  "games.warframe.scope": "Shared world schedule. Access depends on your quest progress. Mission names are supplied in English.",
+  "games.warframe.scope":
+    "Shared world schedule. Access depends on your quest progress. Mission names are supplied in English.",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -148,11 +157,14 @@ export default {
   "games.warframe.state.corpus": "Corpus",
   "games.warframe.state.grineer": "Grineer",
   "games.rivals.title": "Choose your hero",
-  "games.rivals.intro": "Explore the roster, compare opponents, and find teammates for your next match.",
+  "games.rivals.intro":
+    "Explore the roster, compare opponents, and find teammates for your next match.",
   "games.rivals.refresh": "Refresh hero guide",
-  "games.rivals.statsFailed": "Statistics could not be refreshed. Any shown figures are from the previous snapshot.",
+  "games.rivals.statsFailed":
+    "Statistics could not be refreshed. Any shown figures are from the previous snapshot.",
   "games.rivals.artFailed": "Official artwork and roles could not be refreshed.",
-  "games.rivals.stale": "Some statistics are over two days old. Check the snapshot dates before comparing.",
+  "games.rivals.stale":
+    "Some statistics are over two days old. Check the snapshot dates before comparing.",
   "games.rivals.partial": "Some records could not be read. The sample may be incomplete.",
   "games.rivals.role": "Hero role",
   "games.rivals.all": "All",
@@ -178,12 +190,15 @@ export default {
   "games.rivals.heroRate": "{hero} win rate against each opponent",
   "games.rivals.with": "With teammates",
   "games.rivals.duoRate": "The pair’s shared win rate",
-  "games.rivals.scope": "Observed competitive 6v6 matches, all skill brackets. At least 200 matches per hero and 100 per pair. Pair results do not imply a Team-Up ability or predict your next match.",
+  "games.rivals.scope":
+    "Observed competitive 6v6 matches, all skill brackets. At least 200 matches per hero and 100 per pair. Pair results do not imply a Team-Up ability or predict your next match.",
   "games.rivals.snapshot": "Snapshot: {date}",
   "games.rivals.noMatches": "No heroes match these filters.",
   "games.rivals.unavailable": "The hero guide is unavailable. Try refreshing.",
-  "games.rivals.pairsFailed": "Matchup data could not be refreshed. Any shown pairs are from the previous snapshot.",
-  "games.rivals.mismatch": "The providers’ season snapshots differ. Refresh to compare matching data.",
+  "games.rivals.pairsFailed":
+    "Matchup data could not be refreshed. Any shown pairs are from the previous snapshot.",
+  "games.rivals.mismatch":
+    "The providers’ season snapshots differ. Refresh to compare matching data.",
   "games.rivals.sample": "{count} matches",
   "games.darktide.scriptures": "Recover scriptures",
   "games.darktide.grimoires": "Recover grimoires",
@@ -199,7 +214,8 @@ export default {
   "games.darktide.difficulty": "Difficulty",
   "games.darktide.search": "Search maps",
   "games.darktide.stale": "The last check is out of date. Refresh to see available missions.",
-  "games.darktide.failed": "Could not refresh missions. Any shown missions are from the last check.",
+  "games.darktide.failed":
+    "Could not refresh missions. Any shown missions are from the last check.",
   "games.darktide.partial": "Some mission records could not be read.",
   "games.darktide.noMatches": "No missions match these filters.",
   "games.darktide.empty": "No unexpired missions in the latest feed.",
@@ -245,19 +261,24 @@ export default {
   "games.companion.showAll": "Show all {count} heroes",
   "games.companion.noMatches": "No heroes match your search.",
   "games.companion.through": "Matches through {date}",
-  "games.companion.sampleNote": "Community sample, all ranks; at least 100 matches per hero. Not a prediction.",
-  "games.companion.unavailable": "Could not refresh hero data. Any shown data is from the previous check.",
-  "games.companion.statsUnavailable": "Hero statistics are unavailable. You can still explore the roster.",
+  "games.companion.sampleNote":
+    "Community sample, all ranks; at least 100 matches per hero. Not a prediction.",
+  "games.companion.unavailable":
+    "Could not refresh hero data. Any shown data is from the previous check.",
+  "games.companion.statsUnavailable":
+    "Hero statistics are unavailable. You can still explore the roster.",
   "games.gw2.title": "Wizard’s Vault",
   "games.gw2.intro": "Choose rewards and plan your Astral Acclaim.",
   "games.gw2.refresh": "Refresh rewards",
-  "games.gw2.unavailable": "Rewards could not be refreshed. Previously checked information may be out of date.",
+  "games.gw2.unavailable":
+    "Rewards could not be refreshed. Previously checked information may be out of date.",
   "games.gw2.ends": "Season ends {date}",
   "games.gw2.expired": "This season is not active. Refresh before planning rewards.",
   "games.gw2.partial": "Some item details are unavailable. Reward prices are still included.",
   "games.gw2.guide": "Vault guide",
   "games.gw2.checked": "Checked {date}",
-  "games.gw2.scope": "Saved in this Harbor profile. Each selection totals one offer; your wallet, purchase limits and expansion access are not checked. Confirm availability and buy in game.",
+  "games.gw2.scope":
+    "Saved in this Harbor profile. Each selection totals one offer; your wallet, purchase limits and expansion access are not checked. Confirm availability and buy in game.",
   "games.gw2.total": "Planned total",
   "games.gw2.currency": "Astral Acclaim",
   "games.gw2.selected": "{count} offers selected",
@@ -287,14 +308,16 @@ export default {
   "games.gw2.quantity": "Quantity: {count}",
   "games.deadlockBuilds.open": "Community builds",
   "games.deadlockBuilds.back": "Back to builds",
-  "games.deadlockBuilds.intro": "Item guides from the community. Check update dates before choosing.",
+  "games.deadlockBuilds.intro":
+    "Item guides from the community. Check update dates before choosing.",
   "games.deadlockBuilds.search": "Search builds",
   "games.deadlockBuilds.recent": "Recently updated",
   "games.deadlockBuilds.popular": "Weekly favorites",
   "games.deadlockBuilds.language": "Build language",
   "games.deadlockBuilds.allLanguages": "All languages",
   "games.deadlockBuilds.refresh": "Refresh builds",
-  "games.deadlockBuilds.failed": "Builds could not be refreshed. Previously checked guides may be out of date.",
+  "games.deadlockBuilds.failed":
+    "Builds could not be refreshed. Previously checked guides may be out of date.",
   "games.deadlockBuilds.updated": "Updated {date}",
   "games.deadlockBuilds.undated": "Update date unavailable",
   "games.deadlockBuilds.favorites": "{count} weekly favorites",
@@ -306,8 +329,10 @@ export default {
   "games.deadlockBuilds.copy": "Copy build ID",
   "games.deadlockBuilds.use": "Build ID:",
   "games.deadlockBuilds.copyFailed": "Copy failed. Select the ID to copy it manually.",
-  "games.deadlockBuilds.definitions": "Item names and costs use the latest known game data. Older guides may differ; groups can include alternatives.",
-  "games.deadlockBuilds.itemsFailed": "Some item details are unavailable. The author’s guide and item IDs remain visible.",
+  "games.deadlockBuilds.definitions":
+    "Item names and costs use the latest known game data. Older guides may differ; groups can include alternatives.",
+  "games.deadlockBuilds.itemsFailed":
+    "Some item details are unavailable. The author’s guide and item IDs remain visible.",
   "games.deadlockBuilds.noItems": "This build has no item groups.",
   "games.deadlockBuilds.group": "Group {number}",
   "games.deadlockBuilds.optional": "Optional",
@@ -329,7 +354,8 @@ export default {
   "games.rivals.guide.teamUp": "Team-Up abilities",
   "games.rivals.guide.base": "Base effect",
   "games.rivals.guide.enhanced": "Enhanced effect",
-  "games.rivals.guide.reference": "Official hero reference · English. Values may change with balance updates.",
+  "games.rivals.guide.reference":
+    "Official hero reference · English. Values may change with balance updates.",
   "games.rivals.guide.failed": "The official hero guide could not be loaded.",
   "games.rivals.guide.partial": "Some ability details are unavailable.",
   "games.rivals.guide.checked": "Checked {date}",

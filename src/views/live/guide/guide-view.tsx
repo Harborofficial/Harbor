@@ -76,11 +76,12 @@ export function GuideView({
   const memoryKey = scrollKey ?? resetKey;
   const scrollRef = useRef<HTMLDivElement>(null);
   useMiddleDragPan(scrollRef);
-  const { visible: channels, sentinelRef, hasMore, loadMore } = useLazyVisible(
-    allChannels,
-    resetKey,
-    scrollRef,
-  );
+  const {
+    visible: channels,
+    sentinelRef,
+    hasMore,
+    loadMore,
+  } = useLazyVisible(allChannels, resetKey, scrollRef);
   const [awayFromNow, setAwayFromNow] = useState(false);
   const jumpToNow = () => {
     const el = scrollRef.current;
@@ -234,7 +235,6 @@ export function GuideView({
   const nowOffsetPx = (nowMs - windowStart) * PX_PER_MS;
   const showNowLine = nowMs >= windowStart && nowMs < windowEnd;
 
-
   if (!showPrograms) {
     return (
       <div className="flex flex-col">
@@ -338,15 +338,16 @@ export function GuideView({
                   index={i}
                   width={colPx}
                   current={ch.id === currentChannelId}
-                  onMatch={epg ? (trigger) => {
-                    matchTriggerRef.current = trigger;
-                    setMatchTarget(ch);
-                  } : undefined}
+                  onMatch={
+                    epg
+                      ? (trigger) => {
+                          matchTriggerRef.current = trigger;
+                          setMatchTarget(ch);
+                        }
+                      : undefined
+                  }
                 />
-                <div
-                  className="relative"
-                  style={{ width: WINDOW_PX, height: ROW_HEIGHT_PX }}
-                >
+                <div className="relative" style={{ width: WINDOW_PX, height: ROW_HEIGHT_PX }}>
                   {programs.length === 0 && !epg && !epgError && epgConfigured && (
                     <ProgramBlocksRow seed={i} />
                   )}
@@ -358,8 +359,7 @@ export function GuideView({
                   {programs.map((p) => {
                     const clip = clampDuration(p.startMs, p.endMs, windowStart, windowEnd);
                     if (!clip) return null;
-                    const replayable =
-                      p.endMs <= nowMs && !!onPlayCatchup && channelHasCatchup(ch);
+                    const replayable = p.endMs <= nowMs && !!onPlayCatchup && channelHasCatchup(ch);
                     return (
                       <GuideProgramBlock
                         key={`${p.startMs}-${p.endMs}-${p.title}`}
@@ -369,9 +369,7 @@ export function GuideView({
                         rowHeight={ROW_HEIGHT_PX}
                         nowMs={nowMs}
                         replayable={replayable}
-                        onClick={() =>
-                          replayable ? onPlayCatchup!(ch, p) : onPlay(ch)
-                        }
+                        onClick={() => (replayable ? onPlayCatchup!(ch, p) : onPlay(ch))}
                         onHover={(on) => armPreview(on, ch, p.title)}
                       />
                     );
@@ -411,10 +409,13 @@ export function GuideView({
           </div>
         ) : allChannels.length > channels.length ? (
           <div className="mx-6 mt-3 mb-2 rounded-md bg-canvas/50 px-4 py-2.5 text-center text-[12px] text-ink-subtle ring-1 ring-inset ring-edge-soft">
-            {t("Showing first {shown} of {total} channels. Use search or a category to narrow down.", {
-              shown: channels.length.toLocaleString(),
-              total: allChannels.length.toLocaleString(),
-            })}
+            {t(
+              "Showing first {shown} of {total} channels. Use search or a category to narrow down.",
+              {
+                shown: channels.length.toLocaleString(),
+                total: allChannels.length.toLocaleString(),
+              },
+            )}
           </div>
         ) : null}
       </div>
@@ -430,9 +431,7 @@ export function GuideView({
         {t("Now")}
       </button>
       <BackToTop scrollRef={scrollRef} threshold={400} />
-      {matchTarget && epg && (
-        <EpgMatchModal channel={matchTarget} epg={epg} onClose={closeMatch} />
-      )}
+      {matchTarget && epg && <EpgMatchModal channel={matchTarget} epg={epg} onClose={closeMatch} />}
     </div>
   );
 }

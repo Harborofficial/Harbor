@@ -171,7 +171,7 @@ export default {
   "Show all {count}": "Xem tat ca {count}",
   "{count} competing": "{count} tranh tai",
   "Starting field": "Danh sach xuat phat",
-  "Leaderboard": "Bang xep hang",
+  Leaderboard: "Bang xep hang",
   "Full field": "Toan bo danh sach",
   "Loading event schedule…": "Đang tải lịch sự kiện…",
   "Loading lineups…": "Đang tải đội hình…",

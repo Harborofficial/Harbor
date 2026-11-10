@@ -35,7 +35,10 @@ const TABLE = `
 
 test("classes come back newest first with the rowspan year carried down", () => {
   const classes = parseRockHall(TABLE);
-  assert.deepEqual(classes.map((c) => c.year), [2026, 1988, 1986]);
+  assert.deepEqual(
+    classes.map((c) => c.year),
+    [2026, 1988, 1986],
+  );
 });
 
 test("a rowspan class keeps every performer under one year", () => {
@@ -82,21 +85,28 @@ test("years before the first class are ignored", () => {
 
 test("refs do not leak into a performer name", () => {
   const classes = parseRockHall(TABLE);
-  for (const c of classes) for (const name of c.artists) {
-    assert.ok(!/<ref|\{\{|\]\]/.test(name), `dirty name: ${name}`);
-  }
+  for (const c of classes)
+    for (const name of c.artists) {
+      assert.ok(!/<ref|\{\{|\]\]/.test(name), `dirty name: ${name}`);
+    }
 });
 
 test("portraits resolve through the shared Wikipedia helper", () => {
   const first = parseRockHall(TABLE).find((c) => c.year === 1986)!;
-  const art = xxlPortraits({
-    query: {
-      pages: {
-        "1": { title: "Chuck Berry", thumbnail: { source: "https://upload.wikimedia.org/x.jpg" } },
-        "2": { title: "James Brown", pageprops: { disambiguation: "" } },
+  const art = xxlPortraits(
+    {
+      query: {
+        pages: {
+          "1": {
+            title: "Chuck Berry",
+            thumbnail: { source: "https://upload.wikimedia.org/x.jpg" },
+          },
+          "2": { title: "James Brown", pageprops: { disambiguation: "" } },
+        },
       },
     },
-  }, first);
+    first,
+  );
   assert.equal(art["Chuck Berry"], "https://upload.wikimedia.org/x.jpg");
   assert.ok(!("James Brown" in art), "a disambiguation page must not supply a portrait");
 });

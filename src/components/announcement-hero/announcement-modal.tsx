@@ -77,7 +77,9 @@ export function AnnouncementModal({
             </h2>
           )}
           {announcement.intro && (
-            <p className="mt-4 text-[14.5px] leading-relaxed text-ink-muted">{announcement.intro}</p>
+            <p className="mt-4 text-[14.5px] leading-relaxed text-ink-muted">
+              {announcement.intro}
+            </p>
           )}
           {announcement.body && announcement.body.length > 0 && (
             <div className="mt-5 flex max-h-[46vh] flex-col gap-5 overflow-y-auto pr-1">
@@ -91,7 +93,10 @@ export function AnnouncementModal({
                   <ul className="flex flex-col gap-2">
                     {section.items.map((item, j) => (
                       <li key={j} className="flex gap-2.5 text-[14px] leading-relaxed text-ink">
-                        <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                        <span
+                          aria-hidden
+                          className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
+                        />
                         <span>{item}</span>
                       </li>
                     ))}

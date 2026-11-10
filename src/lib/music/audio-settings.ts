@@ -64,7 +64,10 @@ export const DEFAULT_MUSIC_AUDIO: MusicAudioSettingsValue = {
 // eslint-disable-next-line no-control-regex
 const DEVICE_CONTROL = /[\x00-\x1f]/;
 const deviceName = (value: unknown): string =>
-  typeof value === "string" && value.length > 0 && value.length <= 500 && !DEVICE_CONTROL.test(value)
+  typeof value === "string" &&
+  value.length > 0 &&
+  value.length <= 500 &&
+  !DEVICE_CONTROL.test(value)
     ? value
     : "auto";
 

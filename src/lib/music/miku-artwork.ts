@@ -18,9 +18,33 @@ import modernEyes from "@/assets/music/miku-modern-eyes-closed.webp";
 import modernSway from "@/assets/music/miku-modern-dance-sway.webp";
 import modernReference from "@/assets/music/miku-modern-dance-reference.webp";
 
-export type MikuArtworkSet = { portrait: string; idle: string; motion: string; eyes: string; dances: readonly [string, string] };
+export type MikuArtworkSet = {
+  portrait: string;
+  idle: string;
+  motion: string;
+  eyes: string;
+  dances: readonly [string, string];
+};
 export const MIKU_ARTWORK: Record<MikuModel, MikuArtworkSet> = {
-  classic: { portrait: classicPortrait, idle: classicIdle, motion: classicMotion, eyes: classicEyes, dances: [classicSway, classicReference] },
-  retro: { portrait: retroPortrait, idle: retroIdle, motion: retroMotion, eyes: retroEyes, dances: [retroSway, retroReference] },
-  modern: { portrait: modernPortrait, idle: modernIdle, motion: modernMotion, eyes: modernEyes, dances: [modernSway, modernReference] },
+  classic: {
+    portrait: classicPortrait,
+    idle: classicIdle,
+    motion: classicMotion,
+    eyes: classicEyes,
+    dances: [classicSway, classicReference],
+  },
+  retro: {
+    portrait: retroPortrait,
+    idle: retroIdle,
+    motion: retroMotion,
+    eyes: retroEyes,
+    dances: [retroSway, retroReference],
+  },
+  modern: {
+    portrait: modernPortrait,
+    idle: modernIdle,
+    motion: modernMotion,
+    eyes: modernEyes,
+    dances: [modernSway, modernReference],
+  },
 };

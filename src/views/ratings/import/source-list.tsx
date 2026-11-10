@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { SourceLogo } from "./source-logo";
 import { IMPORT_SOURCES } from "@/lib/ratings/import/registry";
-import type {ImportSourceId, RatingsSource} from "@/lib/ratings/import/types";
+import type { ImportSourceId, RatingsSource } from "@/lib/ratings/import/types";
 
 export type KeyField = { name: "apiKey" | "username"; label: string; placeholder: string };
 

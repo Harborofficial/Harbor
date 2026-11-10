@@ -8,5 +8,5 @@ export default {
   "games.playtime.seconds": "秒",
   "games.playtime.preciseDuration": "{hours}小时 {minutes}分钟 {seconds}秒",
   "games.playtime.decimalInvalid": "请输入不带千位分隔符的非负数，总计不超过1,000,000小时。",
-  "games.playtime.decimalHint": "支持小数，总时长将四舍五入到最近的整秒。"
+  "games.playtime.decimalHint": "支持小数，总时长将四舍五入到最近的整秒。",
 };

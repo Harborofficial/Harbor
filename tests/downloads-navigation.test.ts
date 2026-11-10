@@ -31,21 +31,42 @@ function fixture(initial: any[]) {
   const forwardStackRef = { current: [] as any[] };
   const scrollMem = { current: new Map([["meta:movie", { fallback: 420 }]]) };
   const rowScrollMem = { current: new Map([["home:popular", 560]]) };
-  const names = ["STACK_MAX", "pushFrame", "pop", "goForward", "clearForwardStack", "setNavStack", "setView"];
+  const names = [
+    "STACK_MAX",
+    "pushFrame",
+    "pop",
+    "goForward",
+    "clearForwardStack",
+    "setNavStack",
+    "setView",
+  ];
   const code = ts.transpileModule(names.map(declaration).join("\n"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
   }).outputText;
   const scope = {
-    stackRef, forwardStackRef, scrollMem, rowScrollMem, navigateUnderPreview, previewPageStack,
+    stackRef,
+    forwardStackRef,
+    scrollMem,
+    rowScrollMem,
+    navigateUnderPreview,
+    previewPageStack,
     useCallback: (fn: any) => fn,
     consumeBack: () => false,
-    setStack: (value: any) => { stackRef.current = typeof value === "function" ? value(stackRef.current) : value; },
-    setForwardStack: (value: any[]) => { forwardStackRef.current = value; },
+    setStack: (value: any) => {
+      stackRef.current = typeof value === "function" ? value(stackRef.current) : value;
+    },
+    setForwardStack: (value: any[]) => {
+      forwardStackRef.current = value;
+    },
     setHomeResetTick: () => {},
     window: { dispatchEvent() {}, requestAnimationFrame() {}, setTimeout() {} },
-    CustomEvent: class { constructor(_name: string, _options: unknown) {} },
+    CustomEvent: class {
+      constructor(_name: string, _options: unknown) {}
+    },
   };
-  const nav = new Function(...Object.keys(scope), `${code}\nreturn {setView, pop, goForward};`)(...Object.values(scope));
+  const nav = new Function(...Object.keys(scope), `${code}\nreturn {setView, pop, goForward};`)(
+    ...Object.values(scope),
+  );
   return { ...nav, stackRef, scrollMem, rowScrollMem, forwardStackRef };
 }
 
@@ -74,7 +95,10 @@ test("opening and leaving Downloads keeps a docked sports player mounted", () =>
   const dock = { kind: "player", src: { sportsDocked: true, url: "fixture-stream" } };
   const h = fixture([{ kind: "sports" }, dock]);
   h.setView("downloads");
-  assert.deepEqual(h.stackRef.current.map((f: any) => f.kind), ["sports", "downloads", "player"]);
+  assert.deepEqual(
+    h.stackRef.current.map((f: any) => f.kind),
+    ["sports", "downloads", "player"],
+  );
   assert.equal(h.stackRef.current.at(-1), dock);
   h.pop();
   assert.deepEqual(h.stackRef.current, [{ kind: "sports" }, dock]);

@@ -75,7 +75,8 @@ const catalog: Record<string, string> = {
   "Connect your Trakt account": "Hubungkan akun Trakt Anda",
   "Connect your Trakt account to scrobble playback, sync your watchlist, and pull personalized recommendations.":
     "Hubungkan akun Trakt Anda untuk melakukan scrobble Pemutaran, menyinkronkan daftar tontonan, dan mengambil rekomendasi yang dipersonalisasi.",
-  "Connect your Trakt account to leave comments and reviews.": "Hubungkan akun Trakt untuk menulis komentar dan ulasan.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "Hubungkan akun Trakt untuk menulis komentar dan ulasan.",
   "Connect your provider.": "Hubungkan penyedia Anda.",
   "Connect {name} in Settings first": "Hubungkan {name} di Pengaturan terlebih dahulu",
   Connected: "Terhubung",
@@ -166,7 +167,8 @@ const catalog: Record<string, string> = {
   "Copy Webhook URL": "Salin URL Webhook",
   "Copy code": "Salin kode",
   "Copy diagnostics": "Salin diagnostik",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "Salin diagnostik mengambil status mesin dan pengaturan P2P Anda dalam format JSON, praktis untuk ditempelkan ke laporan bug. Folder mesin berisi cache DHT (dht.json) dan data transfer aktif.",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "Salin diagnostik mengambil status mesin dan pengaturan P2P Anda dalam format JSON, praktis untuk ditempelkan ke laporan bug. Folder mesin berisi cache DHT (dht.json) dan data transfer aktif.",
   "Copy error": "Kesalahan penyalinan",
   "Copy example": "Salin contoh",
   "Copy filename": "Salin nama file",
@@ -960,9 +962,12 @@ const catalog: Record<string, string> = {
   "Embedded track": "Trek tertanam",
   "Emergency medical care in crisis zones, independent of politics.":
     "Layanan medis darurat di zona krisis, independen dari politik.",
-  "Cached source resolution and direct download links.": "Resolusi sumber yang di-cache dan tautan unduhan langsung.",
-  "Cached source resolution and cloud library access.": "Resolusi sumber yang di-cache dan akses pustaka cloud.",
-  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.": "Keduanya menampilkan hasil langsung, debrid, dan peer-to-peer bersama-sama. Langsung/debrid menyisihkan hasil P2P kecuali tidak ada pilihan lain. P2P menempatkannya di urutan pertama.",
+  "Cached source resolution and direct download links.":
+    "Resolusi sumber yang di-cache dan tautan unduhan langsung.",
+  "Cached source resolution and cloud library access.":
+    "Resolusi sumber yang di-cache dan akses pustaka cloud.",
+  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.":
+    "Keduanya menampilkan hasil langsung, debrid, dan peer-to-peer bersama-sama. Langsung/debrid menyisihkan hasil P2P kecuali tidak ada pilihan lain. P2P menempatkannya di urutan pertama.",
 };
 
 export default catalog;

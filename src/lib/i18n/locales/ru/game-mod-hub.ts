@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "Находите моды и управляйте установленным контентом.",
   "games.modHub.switchGame": "Сменить игру",
   "games.modHub.creatorDownload": "Скачать у автора",
-  "games.modHub.legacyNote": "Контент для The Sims 2 и The Sims 3 доступен на странице автора. Локальное управление модами пока поддерживает The Sims 4.",
+  "games.modHub.legacyNote":
+    "Контент для The Sims 2 и The Sims 3 доступен на странице автора. Локальное управление модами пока поддерживает The Sims 4.",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "Узоры",
   "games.modHub.sets": "Тематические наборы",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "Автор",
   "games.modHub.viewOnSource": "Страница автора",
   "games.modHub.filesPending": "Загрузка файлов проекта…",
-  "games.modHub.picked": "Выбор MTS"
+  "games.modHub.picked": "Выбор MTS",
 };

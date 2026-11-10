@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "Нет записей",
   "games.wow.equipment.detailsUnavailable": "Подробности недоступны",
   "games.wow.equipment.unavailable": "Экипировка этого персонажа недоступна.",
-  "games.wow.equipment.note": "Экипировка на момент последнего обновления Raider.IO. Текущий комплект проверьте в игре.",
+  "games.wow.equipment.note":
+    "Экипировка на момент последнего обновления Raider.IO. Текущий комплект проверьте в игре.",
   "games.wow.equipment.partial": "Не удалось прочитать некоторые надетые предметы.",
   "games.wow.equipment.level": "Уровень предмета: {level}",
   "games.wow.equipment.gems": "Самоцветы",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "Правая рука",
   "games.wow.equipment.offhand": "Левая рука",
   "games.wow.equipment.shirt": "Рубашка",
-  "games.wow.equipment.tabard": "Гербовая накидка"
+  "games.wow.equipment.tabard": "Гербовая накидка",
 };

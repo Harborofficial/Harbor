@@ -267,9 +267,30 @@ test("anime list progress accepts one contiguous later-season entry", async () =
   const h = harness();
   h.animeListProviders();
   const projection = [
-    { season: 2, episode: 1, imdbId: "tt123", imdbSeason: 4, imdbEpisode: 6, airDate: "2020-01-01" },
-    { season: 2, episode: 2, imdbId: "tt123", imdbSeason: 4, imdbEpisode: 7, airDate: "2020-01-02" },
-    { season: 2, episode: 3, imdbId: "tt123", imdbSeason: 4, imdbEpisode: 8, airDate: "2020-01-03" },
+    {
+      season: 2,
+      episode: 1,
+      imdbId: "tt123",
+      imdbSeason: 4,
+      imdbEpisode: 6,
+      airDate: "2020-01-01",
+    },
+    {
+      season: 2,
+      episode: 2,
+      imdbId: "tt123",
+      imdbSeason: 4,
+      imdbEpisode: 7,
+      airDate: "2020-01-02",
+    },
+    {
+      season: 2,
+      episode: 3,
+      imdbId: "tt123",
+      imdbSeason: 4,
+      imdbEpisode: 8,
+      airDate: "2020-01-03",
+    },
   ];
   const state = await h.reader.readContextWatchedSnapshot({
     meta: { id: "kitsu:123", type: "anime", name: "Seasonal fixture" },

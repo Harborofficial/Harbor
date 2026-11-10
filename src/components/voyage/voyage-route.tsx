@@ -47,8 +47,12 @@ export function VoyageRoute({ voyage, inline = false }: { voyage: Voyage; inline
   const start = () => {
     if (launching.current) return;
     launching.current = true;
-    const confirmation = root.current?.querySelectorAll<HTMLImageElement>("[data-voyage-launch-thumb]");
-    const images = confirmation?.length ? confirmation : root.current?.querySelectorAll<HTMLImageElement>("[data-voyage-thumb]");
+    const confirmation = root.current?.querySelectorAll<HTMLImageElement>(
+      "[data-voyage-launch-thumb]",
+    );
+    const images = confirmation?.length
+      ? confirmation
+      : root.current?.querySelectorAll<HTMLImageElement>("[data-voyage-thumb]");
     const thumbs = [...(images ?? [])]
       .map((img) => ({ src: img.currentSrc || img.src, rect: img.getBoundingClientRect() }))
       .filter((thumb) => thumb.src && thumb.rect.width > 0);
@@ -60,7 +64,12 @@ export function VoyageRoute({ voyage, inline = false }: { voyage: Voyage; inline
   };
 
   return (
-    <div ref={root} className={inline ? "voyage-inline-route" : "flex flex-col gap-6"} aria-busy={!!launch} inert={launch ? true : undefined}>
+    <div
+      ref={root}
+      className={inline ? "voyage-inline-route" : "flex flex-col gap-6"}
+      aria-busy={!!launch}
+      inert={launch ? true : undefined}
+    >
       {firstUp?.type === "movie" && <VoyagePrefetch key={firstUp.id} meta={firstUp} />}
       {launch && (
         <VoyageLaunch
@@ -77,7 +86,11 @@ export function VoyageRoute({ voyage, inline = false }: { voyage: Voyage; inline
             className="text-[11px] font-semibold uppercase tracking-[0.2em]"
             style={{ color: voyage.accent }}
           >
-            {sailing ? t("On a voyage") : ready ? t("Your voyage is ready") : t("Building your voyage")}
+            {sailing
+              ? t("On a voyage")
+              : ready
+                ? t("Your voyage is ready")
+                : t("Building your voyage")}
           </span>
           <h2 className="font-display text-[24px] font-medium tracking-tight text-ink">
             {voyage.themeLabel}
@@ -85,7 +98,6 @@ export function VoyageRoute({ voyage, inline = false }: { voyage: Voyage; inline
         </div>
 
         <RouteRail voyage={voyage} onPlay={sailing ? play : undefined} />
-
       </div>
       <div className={inline ? "voyage-inline-main" : "contents"}>
         {sailing ? (

@@ -190,7 +190,8 @@ const extra: Record<string, string> = {
   Budget: "製作費",
   "Buffer fill": "バッファ部分",
   "Reveal the dot on hover": "ホバーでドットを表示",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "ドットは普段は隠れていて、バーにポインターを合わせると現れます。オフにすると常に表示されます。",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "ドットは普段は隠れていて、バーにポインターを合わせると現れます。オフにすると常に表示されます。",
   "Buffer fill brightness": "バッファ部分の明るさ",
   Buffering: "バッファリング中",
   Build: "ビルド",
@@ -247,7 +248,8 @@ const extra: Record<string, string> = {
     "デブリッドサービス（Real-Debrid、TorBox、AllDebrid）に接続すると、待ち時間なしですぐにHDで視聴できます。",
   "Connect MyAnimeList": "MyAnimeListに接続",
   "Connect your MyAnimeList account": "MyAnimeListアカウントに接続",
-  "Connect your Trakt account to leave comments and reviews.": "コメントやレビューを投稿するには Trakt アカウントを接続してください。",
+  "Connect your Trakt account to leave comments and reviews.":
+    "コメントやレビューを投稿するには Trakt アカウントを接続してください。",
   "Connected as {username}": "{username}として接続済み",
   "Connected as @{user}": "@{user}として接続済み",
   "Connected as @{username}": "@{username}として接続済み",
@@ -261,7 +263,8 @@ const extra: Record<string, string> = {
   "Continue from last watched": "前回視聴したところから再開",
   "Continue in your browser...": "ブラウザで続行してください...",
   "Copy diagnostics": "診断情報をコピー",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "「診断情報をコピー」では、エンジンの状態とP2P設定をJSON形式で取得できます。バグ報告への貼り付けに便利です。エンジンフォルダーには、DHTキャッシュ（dht.json）と実行中の転送データが保存されています。",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "「診断情報をコピー」では、エンジンの状態とP2P設定をJSON形式で取得できます。バグ報告への貼り付けに便利です。エンジンフォルダーには、DHTキャッシュ（dht.json）と実行中の転送データが保存されています。",
   "Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.":
     "HarborのウォッチリストをTraktにコピーするか、TraktのウォッチリストをHarborに取り込めます。再実行しても安全です。Traktにすでにある作品はスキップされます。",
   "Corner radius": "角の丸み",
@@ -860,7 +863,8 @@ const extra: Record<string, string> = {
   "Show the full notes for this build": "このビルドのリリースノートを全文表示",
   "Show the IMDb rating and synopsis on episodes across the list, grid, and panel layouts.":
     "リスト、グリッド、パネルの各レイアウトで、エピソードにIMDb評価とあらすじを表示します。",
-  "Show the report button on every P2P stream, not just likely new releases.": "新作と思われるものだけでなく、すべてのP2Pストリームに報告ボタンを表示します。",
+  "Show the report button on every P2P stream, not just likely new releases.":
+    "新作と思われるものだけでなく、すべてのP2Pストリームに報告ボタンを表示します。",
   "Show the Skip button": "「スキップ」ボタンを表示",
   "Show title": "タイトルを表示",
   "Show TMDB score on cards": "カードにTMDBスコアを表示",

@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "스타디움 영웅",
   "games.overwatch.searchHeroes": "영웅 찾기",
   "games.overwatch.refresh": "가이드 새로 고침",
-  "games.overwatch.unavailable": "가이드를 새로 고치지 못했어요. 이전에 불러온 정보가 표시될 수 있어요.",
+  "games.overwatch.unavailable":
+    "가이드를 새로 고치지 못했어요. 이전에 불러온 정보가 표시될 수 있어요.",
   "games.overwatch.partial": "일부 정보를 불러올 수 없어요.",
   "games.overwatch.checked": "확인: {date}",
-  "games.overwatch.scope": "OverFast를 통해 제공되는 블리자드 영웅 정보입니다. 밸런스 변경이 가이드 업데이트보다 먼저 게임에 적용될 수 있어요.",
-  "games.overwatch.mapsScope": "OverFast의 전장 및 모드 정보입니다. 아케이드와 이전 전장을 포함하며, 이용 가능 여부는 모드에 따라 달라요.",
+  "games.overwatch.scope":
+    "OverFast를 통해 제공되는 블리자드 영웅 정보입니다. 밸런스 변경이 가이드 업데이트보다 먼저 게임에 적용될 수 있어요.",
+  "games.overwatch.mapsScope":
+    "OverFast의 전장 및 모드 정보입니다. 아케이드와 이전 전장을 포함하며, 이용 가능 여부는 모드에 따라 달라요.",
   "games.overwatch.empty": "일치하는 결과가 없어요. 다른 검색어나 필터를 사용해 보세요.",
   "games.overwatch.moreHeroes": "영웅 더 보기",
   "games.overwatch.moreMaps": "전장 더 보기",
@@ -33,6 +36,5 @@ export default {
   "games.overwatch.videoFailed": "시연을 재생하지 못했어요. 영웅 공식 페이지에서 확인해 주세요.",
   "games.overwatch.mode": "게임 모드",
   "games.overwatch.allModes": "모든 모드",
-  "games.overwatch.searchMaps": "전장이나 장소 검색"
+  "games.overwatch.searchMaps": "전장이나 장소 검색",
 };
-

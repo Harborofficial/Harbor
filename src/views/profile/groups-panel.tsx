@@ -68,7 +68,10 @@ export function GroupsPanel({ isOwner, handle }: { isOwner: boolean; handle: str
   if (!isOwner && (phase !== "ready" || groups.length === 0)) return null;
 
   return (
-    <section aria-label={t("Groups")} className="mt-6 rounded-lg bg-surface p-4 ring-1 ring-edge-soft">
+    <section
+      aria-label={t("Groups")}
+      className="mt-6 rounded-lg bg-surface p-4 ring-1 ring-edge-soft"
+    >
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
           <UsersRound size={20} /> {t("Groups")}
@@ -125,7 +128,9 @@ export function GroupsPanel({ isOwner, handle }: { isOwner: boolean; handle: str
         </div>
       ) : groups.length === 0 ? (
         <div className="flex flex-col items-center gap-2.5 py-6 text-center">
-          <p className="text-[13px] text-ink-subtle">{t("Create a group to watch and share together.")}</p>
+          <p className="text-[13px] text-ink-subtle">
+            {t("Create a group to watch and share together.")}
+          </p>
           <button
             onClick={openGroups}
             className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent transition-opacity hover:opacity-80"

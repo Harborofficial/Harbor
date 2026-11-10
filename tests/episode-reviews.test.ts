@@ -209,14 +209,33 @@ test("episode review sorts are requested from IMDb and Trakt instead of only reo
     const { query } = JSON.parse(String(init?.body)) as { query: string };
     calls.push(query);
     if (query.includes("episodes{")) {
-      return new Response(JSON.stringify({
-        data: { title: { episodes: { episodes: {
-          pageInfo: { hasNextPage: false },
-          edges: [{ node: { id: "tt5000001", series: { displayableEpisodeNumber: { episodeNumber: { text: "1" } } } } }],
-        } } } },
-      }));
+      return new Response(
+        JSON.stringify({
+          data: {
+            title: {
+              episodes: {
+                episodes: {
+                  pageInfo: { hasNextPage: false },
+                  edges: [
+                    {
+                      node: {
+                        id: "tt5000001",
+                        series: { displayableEpisodeNumber: { episodeNumber: { text: "1" } } },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        }),
+      );
     }
-    return new Response(JSON.stringify({ data: { title: { reviews: { pageInfo: { hasNextPage: false }, edges: [] } } } }));
+    return new Response(
+      JSON.stringify({
+        data: { title: { reviews: { pageInfo: { hasNextPage: false }, edges: [] } } },
+      }),
+    );
   };
   const traktSorts: string[] = [];
   const { fetchEpisodeReviews } = lib(safeFetch, async (_target, sort) => {
@@ -246,10 +265,18 @@ test("temporary review page failures keep the source cursor so Show more can ret
     const { query } = JSON.parse(String(init?.body)) as { query: string };
     if (!query.includes("reviews(")) return new Response("{}", { status: 500 });
     if (imdbFails) return new Response("", { status: 503 });
-    return new Response(JSON.stringify({ data: { title: { reviews: {
-      pageInfo: { hasNextPage: false },
-      edges: [{ node: { id: "rw1", text: { originalText: { plainText: "Recovered" } } } }],
-    } } } }));
+    return new Response(
+      JSON.stringify({
+        data: {
+          title: {
+            reviews: {
+              pageInfo: { hasNextPage: false },
+              edges: [{ node: { id: "rw1", text: { originalText: { plainText: "Recovered" } } } }],
+            },
+          },
+        },
+      }),
+    );
   };
   const { fetchEpisodeReviews } = lib(safeFetch, async () => {
     if (traktFails) throw new Error("temporary Trakt failure");
@@ -313,12 +340,30 @@ test("Longest drains review pagination before presenting the sorted result", asy
 
   const calls: Array<{ sort: string; cursor: unknown }> = [];
   const short = {
-    id: "imdb:short", source: "imdb", author: "a", avatar: null, rating: null,
-    date: null, likes: 1, title: "", text: "short", spoiler: false, url: null,
+    id: "imdb:short",
+    source: "imdb",
+    author: "a",
+    avatar: null,
+    rating: null,
+    date: null,
+    likes: 1,
+    title: "",
+    text: "short",
+    spoiler: false,
+    url: null,
   };
   const long = {
-    id: "imdb:long", source: "imdb", author: "b", avatar: null, rating: null,
-    date: null, likes: 0, title: "", text: "this is the much longer review", spoiler: false, url: null,
+    id: "imdb:long",
+    source: "imdb",
+    author: "b",
+    avatar: null,
+    rating: null,
+    date: null,
+    likes: 0,
+    title: "",
+    text: "this is the much longer review",
+    spoiler: false,
+    url: null,
   };
   const fetchEpisodeReviews = async (
     _id: string,
@@ -371,12 +416,19 @@ test("Longest drains review pagination before presenting the sorted result", asy
   );
   const root = createRoot(document.getElementById("root")!);
   await React.act(async () => {
-    root.render(React.createElement(EpisodeReviewsDialog, {
-      seriesImdbId: "tt0903747", season: 1, episode: 1, onClose: () => {},
-    }));
+    root.render(
+      React.createElement(EpisodeReviewsDialog, {
+        seriesImdbId: "tt0903747",
+        season: 1,
+        episode: 1,
+        onClose: () => {},
+      }),
+    );
   });
   await React.act(async () => {});
-  const longest = [...document.querySelectorAll("button")].find((b) => b.textContent === "Longest")!;
+  const longest = [...document.querySelectorAll("button")].find(
+    (b) => b.textContent === "Longest",
+  )!;
   await React.act(async () => longest.click());
   await React.act(async () => {});
   const longestCalls = calls.filter((c) => c.sort === "longest");

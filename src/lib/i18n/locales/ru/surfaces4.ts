@@ -131,8 +131,10 @@ const surfaces4: Record<string, string> = {
   "No previous versions yet. Your next update starts the history.":
     "Предыдущих версий пока нет. История начнётся со следующего обновления.",
   "Get yours at": "Получить можно на",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Используется для проверки кеша и снятия ограничений со ссылок. Harbor никогда ничего не добавляет в ваш аккаунт и не удаляет из него самостоятельно.",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Такой же доступ только для чтения, как у Real-Debrid. Также позволяет ставить некешированные источники в очередь из меню выбора источника воспроизведения.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Используется для проверки кеша и снятия ограничений со ссылок. Harbor никогда ничего не добавляет в ваш аккаунт и не удаляет из него самостоятельно.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Такой же доступ только для чтения, как у Real-Debrid. Также позволяет ставить некешированные источники в очередь из меню выбора источника воспроизведения.",
   "AllDebrid deprecated their cache-check endpoint, so streams may show as unknown until you actually hit Play.":
     "AllDebrid объявил endpoint проверки кеша устаревшим, поэтому статус потоков может отображаться как неизвестный, пока вы не нажмёте «Воспроизвести».",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":

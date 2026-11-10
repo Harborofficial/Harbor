@@ -3,10 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const api = readFileSync(new URL("../src/lib/ebook/api.ts", import.meta.url), "utf8");
-const providers = readFileSync(
-  new URL("../src/lib/ebook/providers.ts", import.meta.url),
-  "utf8",
-);
+const providers = readFileSync(new URL("../src/lib/ebook/providers.ts", import.meta.url), "utf8");
 const view = readFileSync(new URL("../src/views/ebook.tsx", import.meta.url), "utf8");
 
 test("eBook metadata persists merged provider results and coalesces duplicate requests", () => {

@@ -186,7 +186,8 @@ const catalog: Record<string, string> = {
   Peacock: "Peacock",
   "Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.":
     "Chip peer, kecepatan, dan progres pada pemutar selama pemutaran torrent. Nonaktifkan agar tampilan pemutar tetap bersih.",
-  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.": "Peer, kecepatan, dan progres pada pemutar saat stream P2P diputar. Berada di kiri atas, tidak menghalangi tombol keluar.",
+  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.":
+    "Peer, kecepatan, dan progres pada pemutar saat stream P2P diputar. Berada di kiri atas, tidak menghalangi tombol keluar.",
   "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.":
     "Peer, kecepatan, dan progres saat torrent di-stream. Berada di kiri atas dan tidak menghalangi tombol keluar.",
   "Penalty Goals": "Gol Penalti",
@@ -474,7 +475,8 @@ const catalog: Record<string, string> = {
   "Pluto TV": "Pluto TV",
   "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.":
     "Arahkan Harbor ke sebuah folder. Kami akan memindainya untuk mencari film dan acara, mengurai judul dari nama file, lalu melengkapinya dengan TMDB agar tampil seragam dengan konten lain di sini. Kami hanya mengingat lokasinya; tidak ada yang disalin atau dipindahkan.",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Arahkan Harbor ke server streaming di perangkat lain, seperti layanan Stremio di server rumah. Stream P2P akan diunduh dan diputar dari perangkat tersebut, bukan perangkat ini.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Arahkan Harbor ke server streaming di perangkat lain, seperti layanan Stremio di server rumah. Stream P2P akan diunduh dan diputar dari perangkat tersebut, bukan perangkat ini.",
   "Point Harbor at your self-hosted library to browse and install sources":
     "Arahkan Harbor ke perpustakaan yang Anda hosting sendiri untuk menjelajahi dan menginstal sumber",
   "Point Harbor's built-in scraper at any HTML site with a config":

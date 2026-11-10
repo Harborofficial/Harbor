@@ -102,6 +102,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.recordings": "التسجيلات",
   "music.artist.limited": "يوفر هذا المصدر مجموعة مختارة قد لا تشمل الكتالوج الكامل.",
   "music.rockHall.title": "قاعة مشاهير الروك أند رول",
-  "music.rockHall.subtitle": "كل دفعة منذ 1986، مباشرة من ويكيبيديا"
+  "music.rockHall.subtitle": "كل دفعة منذ 1986، مباشرة من ويكيبيديا",
 };
 export default musicTaste;

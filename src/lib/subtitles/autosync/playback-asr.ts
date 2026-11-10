@@ -75,14 +75,17 @@ export async function matchPlaybackSpeech(
   }
   const modelLanguage = resolveMoonshineLanguage(input.modelLanguage, input.audioLanguage);
   if (!modelLanguage) {
-    throw new Error(input.modelLanguage && input.modelLanguage !== "auto"
-      ? "Moonshine does not support the chosen override language. Silero remains available."
-      : "Moonshine cannot select a supported model from this audio track. Silero remains available; you can choose a language manually in Settings.");
+    throw new Error(
+      input.modelLanguage && input.modelLanguage !== "auto"
+        ? "Moonshine does not support the chosen override language. Silero remains available."
+        : "Moonshine cannot select a supported model from this audio track. Silero remains available; you can choose a language manually in Settings.",
+    );
   }
-  const status = await invoke<{ supported: boolean; runtimeInstalled: boolean; installed: boolean }>(
-    "moonshine_model_status",
-    { language: modelLanguage },
-  );
+  const status = await invoke<{
+    supported: boolean;
+    runtimeInstalled: boolean;
+    installed: boolean;
+  }>("moonshine_model_status", { language: modelLanguage });
   if (!isCurrent()) throw new Error("Sync cancelled.");
   if (!status.supported)
     throw new Error("Moonshine testing requires Python 3. Install Python first.");

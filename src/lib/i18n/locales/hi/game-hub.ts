@@ -1,4 +1,4 @@
-const gameHub: Record<string,string> = {
+const gameHub: Record<string, string> = {
   "games.hub.filesTitle": "प्रोजेक्ट की फ़ाइलें",
   "games.hub.videoUnavailable": "गेमप्ले वीडियो लोड नहीं हो सके।",
   "games.hub.noVideos": "इन ROM हैक्स के लिए अभी कोई वीडियो सूचीबद्ध नहीं है।",
@@ -7,7 +7,8 @@ const gameHub: Record<string,string> = {
   "games.hub.allOriginals": "सभी मूल गेम",
   "games.hub.searchOriginal": "मूल गेम खोजें…",
   "games.hub.getFiles": "फ़ाइलें प्राप्त करें",
-  "games.hub.packNote": "यह प्रोजेक्ट मॉड पैक का उपयोग करता है। अपने सिस्टम के लिए निर्माता की स्थापना गाइड का पालन करें।",
+  "games.hub.packNote":
+    "यह प्रोजेक्ट मॉड पैक का उपयोग करता है। अपने सिस्टम के लिए निर्माता की स्थापना गाइड का पालन करें।",
   "games.hub.noDownload": "पैच का सीधा डाउनलोड नहीं मिला। प्रोजेक्ट की वेबसाइट खोलें या फ़ाइल लिंक पेस्ट करें।",
   "games.hub.downloadFailed": "फ़ाइलें प्राप्त नहीं हो सकीं। फिर कोशिश करें या प्रोजेक्ट की वेबसाइट खोलें।",
   "games.hub.downloadNote": "निर्माता का पैच डाउनलोड करें, फिर उसे लगाने के लिए मूल गेम चुनें।",
@@ -26,7 +27,8 @@ const gameHub: Record<string,string> = {
   "games.hub.how": "ROM हैक कैसे खेलें",
   "games.hub.stepFind": "प्रोजेक्ट की वेबसाइट और ज़रूरी मूल गेम जानने के लिए हैक खोलें।",
   "games.hub.stepPatch": "अपनी मूल ROM और BPS या IPS पैच चुनें। Harbor जाँच करके अलग कॉपी सहेजता है।",
-  "games.hub.stepPlay": "कॉपी को लाइब्रेरी में जोड़ें। समर्थित सिस्टम Harbor में खेलें या अपना सेट किया एमुलेटर इस्तेमाल करें।",
+  "games.hub.stepPlay":
+    "कॉपी को लाइब्रेरी में जोड़ें। समर्थित सिस्टम Harbor में खेलें या अपना सेट किया एमुलेटर इस्तेमाल करें।",
   "games.hub.byOriginal": "मूल गेम के अनुसार हैक",
   "games.hub.allHacks": "सभी हैक्स देखें",
   "games.hub.baseUnlisted": "मूल गेम सूचीबद्ध नहीं है",
@@ -41,9 +43,11 @@ const gameHub: Record<string,string> = {
   "games.hub.added": "लाइब्रेरी में जोड़ा गया",
   "games.hub.addLibrary": "लाइब्रेरी में जोड़ें",
   "games.collectionsLive.greats": "सर्वकालिक महान गेम",
-  "games.collectionsLive.greatsNote": "IGDB पर सबसे ऊँची रेटिंग, कम से कम 100 खिलाड़ी और समीक्षक रेटिंग के साथ।",
+  "games.collectionsLive.greatsNote":
+    "IGDB पर सबसे ऊँची रेटिंग, कम से कम 100 खिलाड़ी और समीक्षक रेटिंग के साथ।",
   "games.collectionsLive.coop": "साथ में बेहतर",
-  "games.collectionsLive.coopNote": "कम से कम 100 IGDB रेटिंग वाले उच्च रेटिंग के सहकारी गेम। मोड प्लेटफ़ॉर्म के अनुसार बदलते हैं।",
+  "games.collectionsLive.coopNote":
+    "कम से कम 100 IGDB रेटिंग वाले उच्च रेटिंग के सहकारी गेम। मोड प्लेटफ़ॉर्म के अनुसार बदलते हैं।",
   "games.collectionsLive.records": "रिकॉर्ड पुस्तकों में गेम",
   "games.collectionsLive.recordsNote": "अनोखी उपलब्धियाँ, उनकी कहानी और स्रोत के साथ।",
   "games.collectionsLive.minecraft": "Minecraft",
@@ -56,6 +60,6 @@ const gameHub: Record<string,string> = {
   "games.collectionsLive.gtaRecord": "सिर्फ़ तीन दिनों में बिक्री",
   "games.collectionsLive.gtaDate": "सितंबर 2013",
   "games.atlas.kind.greats": "सर्वकालिक महान गेम",
-  "games.atlas.kind.coop": "सहकारी गेम"
+  "games.atlas.kind.coop": "सहकारी गेम",
 };
 export default gameHub;

@@ -8,7 +8,8 @@ export default {
   "games.sidebar.customOrder": "मेरा क्रम",
   "games.sidebar.arrange": "साइडबार व्यवस्थित करें",
   "games.sidebar.resetFilters": "फ़िल्टर रीसेट करें",
-  "games.sidebar.arrangeNote": "क्रम बदलने के लिए खींचें या तीर इस्तेमाल करें। पसंदीदा गेम पिन करें या इस साइडबार से छिपाएँ।",
+  "games.sidebar.arrangeNote":
+    "क्रम बदलने के लिए खींचें या तीर इस्तेमाल करें। पसंदीदा गेम पिन करें या इस साइडबार से छिपाएँ।",
   "games.sidebar.saveFailed": "साइडबार की पसंद सहेजी नहीं जा सकी। बदलाव इस सत्र के लिए लागू हैं।",
   "games.sidebar.move": "{name} को स्थानांतरित करें",
   "games.sidebar.up": "{name} को ऊपर ले जाएँ",
@@ -19,11 +20,13 @@ export default {
   "games.sidebar.hide": "{name} को साइडबार से छिपाएँ",
   "games.sidebar.pinned": "पिन किए गए",
   "games.dock.welcomeTitle": "गेम टैब दिखाएँ?",
-  "games.dock.welcomeNote": "कर्सर ले जाते ही अपने गेम पाएँ। सेटिंग्स → थीम और रूप → इंटरफ़ेस में इसे कभी भी बंद कर सकते हैं।",
+  "games.dock.welcomeNote":
+    "कर्सर ले जाते ही अपने गेम पाएँ। सेटिंग्स → थीम और रूप → इंटरफ़ेस में इसे कभी भी बंद कर सकते हैं।",
   "games.dock.welcomeEnable": "गेम टैब दिखाएँ",
   "games.dock.welcomeDismiss": "अभी नहीं",
   "games.dock.settingTitle": "त्वरित लाइब्रेरी",
-  "games.dock.settingNote": "अपनी लाइब्रेरी तक तेज़ पहुँच के लिए किनारे पर एक हल्का टैब दिखाएँ। डिफ़ॉल्ट रूप से बंद।",
+  "games.dock.settingNote":
+    "अपनी लाइब्रेरी तक तेज़ पहुँच के लिए किनारे पर एक हल्का टैब दिखाएँ। डिफ़ॉल्ट रूप से बंद।",
   "games.dock.launchError": "यह गेम नहीं खुल सका। इंस्टॉलेशन और लॉन्चर जाँचें, फिर दोबारा प्रयास करें।",
   "games.dock.launcher": "लॉन्चर",
   "games.dock.client": "{launcher} में खोलें",
@@ -75,5 +78,5 @@ export default {
   "games.badge.unavailable": "फ़ाइलें अनुपलब्ध",
   "games.badge.notInstalled": "इंस्टॉल नहीं है",
   "games.home.libraryFirstTitle": "गेम्स को अपनी लाइब्रेरी में खोलें",
-  "games.home.libraryFirstNote": "हर बार गेम्स खोलने पर अन्वेषण के बजाय अपनी लाइब्रेरी से शुरू करें।"
+  "games.home.libraryFirstNote": "हर बार गेम्स खोलने पर अन्वेषण के बजाय अपनी लाइब्रेरी से शुरू करें।",
 };

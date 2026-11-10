@@ -3,7 +3,7 @@ export default {
   "Most liked": "最多点赞",
   "Most recent": "最新",
   "Lowest rated": "评分最低",
-  "Longest": "最长",
+  Longest: "最长",
   "Sort reviews": "排序评论",
   "Episode reviews": "本集评论",
   "Gathering reviews from IMDb and Trakt…": "正在从 IMDb 和 Trakt 收集评论…",
@@ -13,12 +13,14 @@ export default {
   "Translate reviews to": "将评论翻译为",
   "Translate all": "全部翻译",
   "Show original": "显示原文",
-  "Translate": "翻译",
+  Translate: "翻译",
   "In {language}": "仅{language}",
   "No reviews in {language} here.": "这里没有{language}评论。",
   "{n} reviews couldn't be translated. Try again.": "有 {n} 条评论未能翻译，请重试。",
   "Couldn't translate. Try again": "翻译失败，重试",
-  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.": "部分最新评论无法加载，因此备用评论会显示在最新结果之后。",
-  "Letterboxd didn't share review dates right now, so these are shown by popularity.": "Letterboxd 暂未提供评论日期，因此按热度显示。",
+  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.":
+    "部分最新评论无法加载，因此备用评论会显示在最新结果之后。",
+  "Letterboxd didn't share review dates right now, so these are shown by popularity.":
+    "Letterboxd 暂未提供评论日期，因此按热度显示。",
   "Reviewers' average: {rating}": "评论者平均分：{rating}",
 } as Record<string, string>;

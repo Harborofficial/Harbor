@@ -149,7 +149,9 @@ function SourceRow({
       onClick={onClick}
       onMouseDown={(e) => e.preventDefault()}
       className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-[12.5px] transition-colors ${
-        active ? "bg-accent/15 font-semibold text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
+        active
+          ? "bg-accent/15 font-semibold text-ink"
+          : "text-ink-muted hover:bg-raised hover:text-ink"
       }`}
     >
       {icon}

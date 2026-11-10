@@ -111,7 +111,8 @@ const catalog06: Record<string, string> = {
     "Apre Stremio nel browser. Funziona con account email, Facebook e Apple.",
   "Opens Stremio in your browser. Works with email, Facebook, and Apple. Harbor never sees your password.":
     "Apre Stremio nel browser. Funziona con email, Facebook e Apple. Harbor non vede mai la tua password.",
-  "Opens the folder holding the DHT cache and active transfer data.": "Apre la cartella contenente la cache DHT e i dati dei trasferimenti attivi.",
+  "Opens the folder holding the DHT cache and active transfer data.":
+    "Apre la cartella contenente la cache DHT e i dati dei trasferimenti attivi.",
   "Opens the free signup page": "Apre la pagina di registrazione gratuita",
   "Opens your API settings page": "Apre la pagina delle impostazioni API",
   Optional: "Facoltativo",
@@ -314,7 +315,8 @@ const catalog06: Record<string, string> = {
   Peacock: "Peacock",
   "Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.":
     "Peer, velocità e indicatore di avanzamento nel player durante la riproduzione di torrent. Disattiva questa opzione per mantenere il player essenziale.",
-  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.": "Peer, velocità e avanzamento nel player durante la riproduzione di uno stream P2P. Sono visualizzati in alto a sinistra, lontano dal pulsante di uscita.",
+  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.":
+    "Peer, velocità e avanzamento nel player durante la riproduzione di uno stream P2P. Sono visualizzati in alto a sinistra, lontano dal pulsante di uscita.",
   "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.":
     "Peer, velocità e avanzamento durante lo streaming di un torrent. Sono visualizzati in alto a sinistra, lontano dal pulsante di uscita.",
   "Penalty Goals": "Gol su rigore",
@@ -598,7 +600,8 @@ const catalog06: Record<string, string> = {
   "Pluto TV": "Pluto TV",
   "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.":
     "Indica a Harbor una cartella. Harbor la analizzerà per trovare film e serie, ricaverà i titoli dai nomi dei file e li arricchirà con TMDB, così avranno lo stesso aspetto di tutti gli altri contenuti. Viene memorizzato solo il percorso: nulla viene copiato o spostato.",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Collega Harbor a un server di streaming su un altro computer, ad esempio il servizio Stremio su un server domestico. Gli stream P2P vengono scaricati e riprodotti da quel computer anziché da questo.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Collega Harbor a un server di streaming su un altro computer, ad esempio il servizio Stremio su un server domestico. Gli stream P2P vengono scaricati e riprodotti da quel computer anziché da questo.",
   "Point Harbor at your self-hosted library to browse and install sources":
     "Collega Harbor alla tua libreria self-hosted per sfogliare e installare fonti",
   "Point Harbor's built-in scraper at any HTML site with a config":

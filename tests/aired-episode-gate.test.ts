@@ -49,7 +49,10 @@ test("an undated episode between two aired ones is kept", () => {
 test("mark all watched runs the same aired rule as mark season", () => {
   const src = readFileSync(new URL("../src/lib/mark-watched.ts", import.meta.url), "utf8");
   assert.match(src, /import \{ airedOnly \} from "@\/lib\/aired"/);
-  assert.match(src, /ordered\.sort\(\(a, b\) => a\.season - b\.season \|\| a\.episode - b\.episode\)/);
+  assert.match(
+    src,
+    /ordered\.sort\(\(a, b\) => a\.season - b\.season \|\| a\.episode - b\.episode\)/,
+  );
   assert.match(src, /return airedOnly\(ordered, \(v\) => v\.rel\)/);
   assert.doesNotMatch(
     src,
@@ -59,7 +62,10 @@ test("mark all watched runs the same aired rule as mark season", () => {
 });
 
 test("tracker progress is projected onto aired episodes, not a left-shifted list", () => {
-  for (const path of ["../src/lib/anilist/use-anilist-watched.ts", "../src/lib/mal/use-mal-watched.ts"]) {
+  for (const path of [
+    "../src/lib/anilist/use-anilist-watched.ts",
+    "../src/lib/mal/use-mal-watched.ts",
+  ]) {
     const src = readFileSync(new URL(path, import.meta.url), "utf8");
     assert.match(src, /const sorted = airedOnly\(\s+\[\.\.\.episodesRef\.current\]\.sort\(/, path);
     assert.doesNotMatch(src, /function airedEpisodes/, path);

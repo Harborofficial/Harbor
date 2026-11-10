@@ -216,10 +216,7 @@ export interface MediaServerAdapter {
   /** Server-side collections (Jellyfin/Emby BoxSets), when supported. */
   collections?(connection: MediaServerConnection): Promise<MediaServerCollection[]>;
   /** Ids of the items inside a collection, for filtering the synced library. */
-  collectionItemIds?(
-    connection: MediaServerConnection,
-    collectionId: string,
-  ): Promise<string[]>;
+  collectionItemIds?(connection: MediaServerConnection, collectionId: string): Promise<string[]>;
   lookup(connection: MediaServerConnection, identity: MediaIdentity): Promise<MediaServerItem[]>;
   playback(
     connection: MediaServerConnection,

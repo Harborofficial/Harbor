@@ -175,7 +175,7 @@ export default {
   "Show all {count}": "Afficher les {count}",
   "{count} competing": "{count} en lice",
   "Starting field": "Grille de depart",
-  "Leaderboard": "Classement",
+  Leaderboard: "Classement",
   "Full field": "Plateau complet",
   "Loading event schedule…": "Chargement du programme…",
   "Loading lineups…": "Chargement des compositions…",

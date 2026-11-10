@@ -25,7 +25,11 @@ export function BpCollectionShell({
           className="pointer-events-none absolute inset-x-0 top-0 h-[46vh] w-full object-cover opacity-0 transition-opacity duration-[var(--bp-dur-slow)] data-[on=true]:opacity-[0.22]"
         />
       )}
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: SCRIM }} />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ background: SCRIM }}
+      />
 
       <div className="relative flex shrink-0 items-end gap-[clamp(12px,1.4vw,28px)] [animation:bp-rise_var(--bp-dur-slow)_var(--bp-ease)_both] motion-reduce:[animation:none]">
         {header}

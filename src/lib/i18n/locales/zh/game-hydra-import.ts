@@ -36,5 +36,5 @@ export default {
   "games.hydra.resetTime": "恢复为导入和记录的时长",
   "games.hydra.fileLabel": "游戏文件",
   "games.hydra.argumentsLabel": "启动选项",
-  "games.hydra.prefixLabel": "兼容性文件夹"
+  "games.hydra.prefixLabel": "兼容性文件夹",
 };

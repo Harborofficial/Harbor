@@ -50,7 +50,9 @@
   border-radius: 50%;
   background: var(--color-ink);
   color: var(--color-canvas);
-  transition: opacity 100ms ease-out, transform 150ms ease-out;
+  transition:
+    opacity 100ms ease-out,
+    transform 150ms ease-out;
 }
 [data-art-colors] .music-sticky-play {
   background: var(--music-art-accent, var(--color-ink));

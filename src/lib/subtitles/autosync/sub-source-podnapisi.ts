@@ -30,12 +30,17 @@ function tag(el: Element, name: string): string | null {
   return el.getElementsByTagName(name)[0]?.textContent?.trim() || null;
 }
 
-async function searchByHash(q: SubSearchQuery, ctx: ProviderCtx): Promise<SourceSubCandidate[] | null> {
+async function searchByHash(
+  q: SubSearchQuery,
+  ctx: ProviderCtx,
+): Promise<SourceSubCandidate[] | null> {
   if (!q.videoHash) return null;
   const url = `${BASE}/subtitles/search/old?sMH=${encodeURIComponent(q.videoHash)}&sXML=1`;
   let res: Response;
   try {
-    res = await safeFetch(url, { headers: { "User-Agent": ctx.userAgent, Accept: "application/xml" } });
+    res = await safeFetch(url, {
+      headers: { "User-Agent": ctx.userAgent, Accept: "application/xml" },
+    });
   } catch {
     return null;
   }
@@ -87,7 +92,10 @@ type PnRow = {
   url?: string;
 };
 
-async function searchByMeta(q: SubSearchQuery, ctx: ProviderCtx): Promise<SourceSubCandidate[] | null> {
+async function searchByMeta(
+  q: SubSearchQuery,
+  ctx: ProviderCtx,
+): Promise<SourceSubCandidate[] | null> {
   if (!q.title) return [];
   const langs = wantedLangs(q);
   const params = new URLSearchParams({

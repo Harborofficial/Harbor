@@ -9,7 +9,8 @@ export default {
   "games.retro.pressKey": "Premi un tasto. Esc annulla. F1, F2 e F4 sono riservati al lettore.",
   "games.retro.pressButton": "Premi un pulsante o muovi uno stick.",
   "games.retro.disconnected": "Controller scollegato. Ricollegalo e riprendi quando vuoi.",
-  "games.retro.controlsSaveFailed": "I comandi funzionano in questa sessione, ma non è stato possibile salvarli.",
+  "games.retro.controlsSaveFailed":
+    "I comandi funzionano in questa sessione, ma non è stato possibile salvarli.",
   "games.retro.menuChord": "Select + Start: menu",
   "games.retro.pause": "Pausa",
   "games.retro.resume": "Riprendi",
@@ -18,7 +19,8 @@ export default {
   "games.retro.controls": "Comandi",
   "games.retro.saveExit": "Salva ed esci",
   "games.retro.popout": "Finestra separata",
-  "games.retro.dock": "Torna a Harbor",  "games.retro.mute": "Disattiva audio",
+  "games.retro.dock": "Torna a Harbor",
+  "games.retro.mute": "Disattiva audio",
   "games.retro.unmute": "Attiva audio",
   "games.retro.volume": "Volume",
   "games.retro.picture": "Immagine",
@@ -27,7 +29,8 @@ export default {
   "games.retro.fullscreen": "Schermo intero",
   "games.retro.exitFullscreen": "Esci da schermo intero",
   "games.retro.playInside": "Gioca in Harbor",
-  "games.retro.setup": "Installa una volta il lettore {system} e gioca qui. Il gioco resta su questo dispositivo.",
+  "games.retro.setup":
+    "Installa una volta il lettore {system} e gioca qui. Il gioco resta su questo dispositivo.",
   "games.retro.install": "Installa e gioca · {size} MB",
   "games.retro.runtime": "EmulatorJS {version} · un download, disponibile offline",
   "games.retro.aboutRuntime": "Codice sorgente e licenze",
@@ -40,5 +43,6 @@ export default {
   "games.retro.saving": "Salvataggio dei progressi…",
   "games.retro.exitWithoutSave": "Esci senza salvare",
   "games.retro.moving": "Spostamento del gioco…",
-  "games.retro.moveFailed": "Impossibile spostare il lettore. I progressi sono salvati; scegli Riprendi.",
+  "games.retro.moveFailed":
+    "Impossibile spostare il lettore. I progressi sono salvati; scegli Riprendi.",
 } satisfies Record<string, string>;

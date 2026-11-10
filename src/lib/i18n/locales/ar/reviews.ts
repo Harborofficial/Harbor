@@ -3,7 +3,7 @@ export default {
   "Most liked": "الأكثر إعجابًا",
   "Most recent": "الأحدث",
   "Lowest rated": "الأقل تقييمًا",
-  "Longest": "الأطول",
+  Longest: "الأطول",
   "Sort reviews": "ترتيب المراجعات",
   "Episode reviews": "مراجعات الحلقة",
   "Gathering reviews from IMDb and Trakt…": "جارٍ جمع المراجعات من IMDb وTrakt…",
@@ -13,12 +13,14 @@ export default {
   "Translate reviews to": "ترجمة المراجعات إلى",
   "Translate all": "ترجمة الكل",
   "Show original": "عرض الأصل",
-  "Translate": "ترجمة",
+  Translate: "ترجمة",
   "In {language}": "باللغة {language}",
   "No reviews in {language} here.": "لا توجد مراجعات باللغة {language} هنا.",
   "{n} reviews couldn't be translated. Try again.": "تعذّرت ترجمة {n} من المراجعات. حاول مرة أخرى.",
   "Couldn't translate. Try again": "تعذّرت الترجمة. حاول مرة أخرى",
-  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.": "تعذّر تحميل بعض أحدث المراجعات، لذلك تظهر المراجعات الاحتياطية بعد أحدث النتائج.",
-  "Letterboxd didn't share review dates right now, so these are shown by popularity.": "لم يوفّر Letterboxd تواريخ المراجعات الآن، لذا تظهر حسب الشعبية.",
+  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.":
+    "تعذّر تحميل بعض أحدث المراجعات، لذلك تظهر المراجعات الاحتياطية بعد أحدث النتائج.",
+  "Letterboxd didn't share review dates right now, so these are shown by popularity.":
+    "لم يوفّر Letterboxd تواريخ المراجعات الآن، لذا تظهر حسب الشعبية.",
   "Reviewers' average: {rating}": "متوسط تقييم المراجعين: {rating}",
 } as Record<string, string>;

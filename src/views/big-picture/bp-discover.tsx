@@ -20,12 +20,7 @@ import { BpQueue } from "./queue/bp-queue";
 import { BpQueueBand } from "./queue/bp-queue-band";
 import { useBpRail } from "./use-bp-rail";
 import { bpRailSignature, useBpLayoutReflow } from "./use-bp-row-layout";
-import {
-  bpFocusables,
-  currentBpFocus,
-  markBpInteracted,
-  setBpFocus,
-} from "./use-bp-focus";
+import { bpFocusables, currentBpFocus, markBpInteracted, setBpFocus } from "./use-bp-focus";
 import {
   BP_GENRES,
   useBpAwardsOverview,
@@ -146,7 +141,9 @@ export function BpDiscover({ onSelect }: { onSelect: (m: Meta) => void }) {
     openerRef.current = null;
     if (!key) return;
     const frame = window.requestAnimationFrame(() => {
-      const back = document.querySelector<HTMLElement>(`[data-bp-restore-key="${CSS.escape(key)}"]`);
+      const back = document.querySelector<HTMLElement>(
+        `[data-bp-restore-key="${CSS.escape(key)}"]`,
+      );
       if (back) setBpFocus(back, { silent: true });
     });
     return () => window.cancelAnimationFrame(frame);
@@ -161,9 +158,7 @@ export function BpDiscover({ onSelect }: { onSelect: (m: Meta) => void }) {
     return (
       <div ref={overlayRef} data-bp-dialog className="absolute inset-0 bg-[var(--bp-void)]">
         {overlay.kind === "queue" && <BpQueue onSelect={onSelect} />}
-        {overlay.kind === "award" && (
-          <BpAward awardType={overlay.awardType} onSelect={onSelect} />
-        )}
+        {overlay.kind === "award" && <BpAward awardType={overlay.awardType} onSelect={onSelect} />}
         {overlay.kind === "anime-award" && (
           <BpAnimeAward sourceId={overlay.source} onSelect={onSelect} />
         )}

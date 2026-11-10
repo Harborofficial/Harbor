@@ -2,13 +2,16 @@ export default {
   "games.recommend.sharedTags": "Tag Steam yang sama",
   "games.recommend.platform": "Platform",
   "games.recommend.allPlatforms": "Semua platform",
-  "games.recommend.noPlatformGames": "Tidak ada rekomendasi untuk platform ini dalam pilihan saat ini.",
+  "games.recommend.noPlatformGames":
+    "Tidak ada rekomendasi untuk platform ini dalam pilihan saat ini.",
   "games.recommend.filterTitle": "Kecualikan dari saran",
   "games.recommend.hideLibrary": "Gim di koleksi saya",
   "games.recommend.hideSaved": "Gim tersimpan",
-  "games.recommend.libraryNote": "Pencocokan koleksi menggunakan gim yang terdeteksi, impor yang ditautkan, dan sinkronisasi Steam terakhir kamu.",
+  "games.recommend.libraryNote":
+    "Pencocokan koleksi menggunakan gim yang terdeteksi, impor yang ditautkan, dan sinkronisasi Steam terakhir kamu.",
   "games.recommend.steamSynced": "Koleksi Steam disinkronkan pada {date}",
-  "games.recommend.steamUnavailable": "Informasi kepemilikan gim di Steam tidak tersedia. Pencocokan koleksi lokal tetap berlaku.",
+  "games.recommend.steamUnavailable":
+    "Informasi kepemilikan gim di Steam tidak tersedia. Pencocokan koleksi lokal tetap berlaku.",
   "games.recommend.inLibrary": "Di koleksi kamu",
   "games.recommend.removeSaved": "Hapus {name} dari gim tersimpan",
   "games.recommend.forYou": "Untukmu",
@@ -21,8 +24,10 @@ export default {
   "games.recommend.recent": "Baru dimainkan",
   "games.recommend.reset": "Tampilkan lagi gim tersembunyi",
   "games.recommend.empty": "Temukan sesuai seleramu",
-  "games.recommend.emptyNote": "Simpan gim yang menarik perhatianmu atau mainkan dari koleksimu. Saran akan muncul di sini.",
-  "games.recommend.signalsOff": "Aktifkan Gim tersimpan atau Baru dimainkan di atas untuk menyesuaikan saranmu.",
+  "games.recommend.emptyNote":
+    "Simpan gim yang menarik perhatianmu atau mainkan dari koleksimu. Saran akan muncul di sini.",
+  "games.recommend.signalsOff":
+    "Aktifkan Gim tersimpan atau Baru dimainkan di atas untuk menyesuaikan saranmu.",
   "games.recommend.save": "Simpan {name}",
   "games.recommend.hide": "Sembunyikan {name} dari saran",
   "games.recommend.hideShort": "Bukan seleraku",
@@ -31,11 +36,14 @@ export default {
   "games.recommend.unavailable": "Kaitan gim belum tersedia.",
   "games.recommend.retryNote": "Koleksimu tetap ada. Coba muat kembali gim yang terkait.",
   "games.recommend.caughtUp": "Coba arah lain.",
-  "games.recommend.caughtUpNote": "Coba nonaktifkan filter, pulihkan saran yang disembunyikan, atau simpan favorit lain.",
+  "games.recommend.caughtUpNote":
+    "Coba nonaktifkan filter, pulihkan saran yang disembunyikan, atau simpan favorit lain.",
   "games.recommend.finding": "Mencari kaitan dengan gim kamu…",
-  "games.recommend.source": "Saran dari tag Steam dan IGDB berdasarkan koleksimu. Pilihan yang disembunyikan hanya berlaku di profil ini.",
+  "games.recommend.source":
+    "Saran dari tag Steam dan IGDB berdasarkan koleksimu. Pilihan yang disembunyikan hanya berlaku di profil ini.",
   "games.recommend.retrySome": "Coba lagi kaitan yang belum dimuat",
-  "games.recommend.saveError": "Preferensi penemuan tidak dapat disimpan di perangkat ini. Coba lagi.",
+  "games.recommend.saveError":
+    "Preferensi penemuan tidak dapat disimpan di perangkat ini. Coba lagi.",
   "games.recommend.influences": "Dasar saranmu",
   "games.recommend.influencesNote": "Pilih gim yang digunakan Harbor. Koleksimu tidak berubah.",
   "games.recommend.exclude": "Berhenti menggunakan {name}",
@@ -50,6 +58,5 @@ export default {
   "games.recommend.allExcluded": "Semua dasar saranmu dikecualikan.",
   "games.recommend.allExcludedNote": "Pulihkan gim di Sesuaikan saran atau simpan favorit lain.",
   "games.recommend.saved": "Gim tersimpan",
-  "games.recommend.close": "Tutup pengaturan saran"
+  "games.recommend.close": "Tutup pengaturan saran",
 };
-

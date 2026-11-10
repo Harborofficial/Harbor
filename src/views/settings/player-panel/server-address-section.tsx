@@ -1,4 +1,14 @@
-import { Check, Copy, ExternalLink, Globe, Loader2, Play, RotateCw, Server, Square } from "../icons";
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  Globe,
+  Loader2,
+  Play,
+  RotateCw,
+  Server,
+  Square,
+} from "../icons";
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -29,7 +39,10 @@ async function probeBundled(): Promise<boolean> {
   try {
     const ctrl = new AbortController();
     const timer = window.setTimeout(() => ctrl.abort(), 1500);
-    const res = await fetch(`${bundledServerUrl()}/settings`, { method: "GET", signal: ctrl.signal });
+    const res = await fetch(`${bundledServerUrl()}/settings`, {
+      method: "GET",
+      signal: ctrl.signal,
+    });
     window.clearTimeout(timer);
     return res.ok;
   } catch {
@@ -45,7 +58,15 @@ async function readEngineState(): Promise<EngineState> {
   return (await probeBundled()) ? "running" : "stopped";
 }
 
-export function AddressRow({ label, url, openable }: { label: string; url: string; openable?: boolean }) {
+export function AddressRow({
+  label,
+  url,
+  openable,
+}: {
+  label: string;
+  url: string;
+  openable?: boolean;
+}) {
   const t = useT();
   const [copied, setCopied] = useState(false);
   const copy = () => {
@@ -64,7 +85,12 @@ export function AddressRow({ label, url, openable }: { label: string; url: strin
         </span>
       }
     >
-      <button type="button" onClick={copy} aria-label={t("Copy {label} address", { label })} className={ROW_ACTION}>
+      <button
+        type="button"
+        onClick={copy}
+        aria-label={t("Copy {label} address", { label })}
+        className={ROW_ACTION}
+      >
         {copied ? (
           <Check size={16} strokeWidth={2.4} className="text-success" />
         ) : (
@@ -73,7 +99,12 @@ export function AddressRow({ label, url, openable }: { label: string; url: strin
         {copied ? t("Copied") : t("Copy")}
       </button>
       {openable && (
-        <button type="button" onClick={() => openUrl(url)} aria-label={t("Open {label} address", { label })} className={ROW_ACTION}>
+        <button
+          type="button"
+          onClick={() => openUrl(url)}
+          aria-label={t("Open {label} address", { label })}
+          className={ROW_ACTION}
+        >
           <ExternalLink size={16} strokeWidth={1.9} />
           {t("Open")}
         </button>
@@ -121,7 +152,7 @@ export function ServerAddressSection() {
     if (aliveRef.current) {
       setEngine(next);
       setPort(bundledServerPort());
-      setLastError(next === "stopped" ? s?.last_error ?? null : null);
+      setLastError(next === "stopped" ? (s?.last_error ?? null) : null);
     }
   };
 
@@ -251,7 +282,11 @@ export function ServerAddressSection() {
       </SettingGroup>
 
       <SettingGroup label={t("Addresses")}>
-        <AddressRow label={t("On this computer")} url={`http://127.0.0.1:${port}`} openable={running} />
+        <AddressRow
+          label={t("On this computer")}
+          url={`http://127.0.0.1:${port}`}
+          openable={running}
+        />
         {lanIp && <AddressRow label={t("On your local network")} url={`http://${lanIp}:${port}`} />}
       </SettingGroup>
 
