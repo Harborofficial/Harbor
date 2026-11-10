@@ -154,13 +154,7 @@ async fn different_games_run_together_instead_of_one_batch_using_both_slots() {
         .unwrap()
         .unwrap();
     drop(first.take());
-    assert!(tokio::time::timeout(
-        Duration::from_millis(30),
-        same_game.as_ref().unwrap().acquire(&cancel)
-    )
-    .await
-    .is_err());
-    drop(other);
+    // The group limit only blocks a second file of the same game while that game holds a slot.
     tokio::time::timeout(
         Duration::from_millis(100),
         same_game.as_ref().unwrap().acquire(&cancel),
@@ -168,6 +162,7 @@ async fn different_games_run_together_instead_of_one_batch_using_both_slots() {
     .await
     .unwrap()
     .unwrap();
+    drop(other);
     drop(same_game);
     assert!(queue.state.lock().unwrap().tickets.is_empty());
     assert!(queue.state.lock().unwrap().groups.is_empty());

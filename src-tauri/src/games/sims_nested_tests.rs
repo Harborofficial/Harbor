@@ -211,11 +211,12 @@ fn interrupted_nested_preparation_and_publication_recover_the_original_data() {
         let before = snapshot(f.path()).unwrap().0;
         let marker = f.0.join("owned-interrupt-marker");
         let mut cmd = std::process::Command::new(std::env::current_exe().unwrap());
+        let module = module_path!().split_once("::").unwrap().1;
         cmd.args([
-            "--exact",
-            "sims_store::tests::nested_tests::interruption_worker",
-            "--ignored",
-            "--nocapture",
+            "--exact".into(),
+            format!("{module}::interruption_worker"),
+            "--ignored".into(),
+            "--nocapture".into(),
         ])
         .env("HARBOR_NESTED_ROOT", f.path())
         .env("HARBOR_SAVE_INTERRUPT_PHASE", phase)

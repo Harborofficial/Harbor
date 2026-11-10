@@ -167,8 +167,13 @@ mod tests {
             .open(root.join("Stardew Valley.exe"))
             .is_err());
         drop(guard);
+        let module = module_path!().split_once("::").unwrap().1;
         let mut child = Command::new(root.join("StardewModdingAPI.exe"))
-            .args(["stardew_guard::tests::hold_worker", "--ignored", "--exact"])
+            .args([
+                format!("{module}::hold_worker"),
+                "--ignored".into(),
+                "--exact".into(),
+            ])
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .spawn()
