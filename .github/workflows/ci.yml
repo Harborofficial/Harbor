@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - beta-branch
+  workflow_dispatch:
 
 permissions:
   contents: read
