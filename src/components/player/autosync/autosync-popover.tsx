@@ -301,7 +301,7 @@ function Lead({ phase }: { phase: Phase }) {
 }
 
 function Body(props: {
-  t: (s: string) => string;
+  t: ReturnType<typeof useT>;
   phase: Phase;
   reason: string | null;
   moonshineModelRequest: NonNullable<AutoSyncHandle["moonshineModelRequest"]> | null;
