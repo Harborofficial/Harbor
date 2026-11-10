@@ -95,7 +95,10 @@ async function fixture({
     "@/lib/context-quick-actions": quickActions,
     "@/lib/context-actions": actions,
     "@/lib/active-addon": { useActiveAddon: empty },
+    "@/lib/anime-cw-ids": { getAnimeCanonicalId: () => null, getAnimeCwId: () => null },
+    "@/lib/drop-show-eligibility": { useCanDropShow: () => false },
     "@/components/player/copy-link-button": { copyText: async () => true },
+    "@/components/drop-show-confirm-modal": { DropShowConfirmModal: empty },
     "@/components/lists/list-toast": { emitListToast: empty },
     "@/lib/deep-link": { shareDeepLink: empty },
     "@/lib/settings": {
@@ -164,6 +167,13 @@ async function fixture({
         return { outcomes: [{ provider: "Harbor", status: "updated" }] };
       },
       requireMediaActionSuccess: empty,
+    },
+    "@/lib/movie-watched-action": {
+      optimisticMovieWatchedState: (state: unknown) => state,
+      setMovieWatchedWithConfirmation: async (meta: unknown, on: boolean, options: any) => {
+        watchedWrites.push({ meta, on, options });
+        return { outcomes: [{ provider: "Harbor", status: "updated" }] };
+      },
     },
     "@/lib/context-watched-state": {
       useContextWatchedState: (input: unknown) => {

@@ -1,21 +1,26 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { defaultEvePlan, eveName, evePlan, evePlanKey, eveSecurity, eveSecurityClass, filterEveSystems, isEve, parseEveIncursions, parseEveKills, parseEveRoute, parseEveStatus, parseEveUniverse, readEvePlan } from "../src/lib/games/eve-data.ts";
 
-const raw = JSON.parse(readFileSync(new URL("../public/games/eve/universe-3569502.json", import.meta.url), "utf8"));
-const universe = parseEveUniverse(raw);
+// public/games is gitignored bulk data, so the directory-dependent tests skip on
+// a checkout that has not downloaded it.
+const eveAsset = new URL("../public/games/eve/universe-3569502.json", import.meta.url);
+const hasEveUniverse = existsSync(eveAsset);
+const raw = hasEveUniverse ? JSON.parse(readFileSync(eveAsset, "utf8")) : null;
+const universe = hasEveUniverse ? parseEveUniverse(raw) : null;
+const universeTest = hasEveUniverse ? test : test.skip;
 const plan = defaultEvePlan();
 test("EVE exact identity excludes conflicting Steam editions", () => {
   assert.ok(isEve({ steamId: 8500 })); assert.ok(isEve({ igdbId: 2584 })); assert.equal(isEve({ steamId: 1, igdbId: 2584 }), false); assert.equal(isEve({ igdbId: 1 }), false);
 });
-test("bundled official directory validates all system joins and localized search", () => {
+universeTest("bundled official directory validates all system joins and localized search", () => {
   assert.equal(universe.systems.length, 8089); assert.equal(universe.byId.get(30000142)?.names.en, "Jita");
   assert.equal(filterEveSystems(universe, "jItA", "en")[0].id, 30000142); assert.equal(filterEveSystems(universe, "", "en").length, 5);
   assert.ok(filterEveSystems(universe, "a", "en").length <= 30); assert.equal(eveName({ en: "Jita", ja: "ジタ" }, "ja-JP"), "ジタ"); assert.equal(eveName({ en: "Jita" }, "ar"), "Jita");
   assert.throws(() => parseEveUniverse({ ...raw, systems: [raw.systems[0], raw.systems[0]] })); assert.throws(() => parseEveUniverse({ ...raw, constellations: [] }));
 });
-test("security rounding retains EVE's positive minimum and wormhole distinction", () => {
+universeTest("security rounding retains EVE's positive minimum and wormhole distinction", () => {
   assert.equal(eveSecurity(.001), .1); assert.equal(eveSecurity(.46), .5); assert.equal(eveSecurity(-.98), -1);
   const system = universe.byId.get(30000142)!;
   assert.equal(eveSecurityClass({ ...system, security: .46 }), "high"); assert.equal(eveSecurityClass({ ...system, security: .001 }), "low"); assert.equal(eveSecurityClass({ ...system, security: 0 }), "null"); assert.equal(eveSecurityClass({ ...system, id: 31000001, security: -1 }), "wormhole");

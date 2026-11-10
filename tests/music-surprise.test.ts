@@ -8,11 +8,11 @@ import * as daily from "../src/lib/music/daily-discovery-selection";
 import * as ranking from "../src/lib/music/made-for-you-selection";
 import * as quality from "../src/lib/music/mix-quality";
 import { artistIdentityKey } from "../src/lib/music/artist-popularity";
-import { dedupeMusicTracks, musicTrackIdentity } from "../src/lib/music/track-identity";
+import { dedupeMusicTracks, musicTrackIdentity, sameMusicTrack } from "../src/lib/music/track-identity";
 import { musicTrackKeys } from "../src/lib/music/playlist-membership";
 import type { MusicPlayerState, MusicTrack } from "../src/lib/music/types";
 import { queueTrackKey } from "../src/lib/music/queue-order";
-import { insertIntoQueue, markManuallyQueued, queueInsertIndex } from "../src/lib/music/queue-insert";
+import { insertIntoQueue, markManuallyQueued, queueInsertAfterManualBlock, queueInsertIndex, withTrackNext } from "../src/lib/music/queue-insert";
 import { adoptRequestedIdentity } from "../src/lib/music/queue-source";
 
 const track = (artist: string, n: number): MusicTrack => ({ id: `deezer:track:${artist}-${n}`, title: `Song ${n}`, artist, artwork: `${artist}.jpg`, durationSeconds: 180, durationLabel: "3:00", connectorId: "catalog" });
@@ -331,6 +331,11 @@ function playerEntries() {
   const scope = { ...automation, state, initializeMusic: () => initialized.promise, queueTrackKey,
     filterBlockedTracks: (tracks: MusicTrack[]) => tracks, publish: (patch: unknown) => Object.assign(state, patch),
     invoke: async () => {}, insertIntoQueue, markManuallyQueued, queueInsertIndex,
+    queueInsertAfterManualBlock, withTrackNext, sameMusicTrack,
+    musicPlayerWasClosed: () => false, setMusicPlayerClosed: () => {},
+    musicPlaybackSourceAllowed: () => true, pinSourceFor: () => {},
+    peekPinnedSource: () => null, clearSpotifyStartupWatchdog: () => {},
+    armSpotifyStartupWatchdog: () => {},
     readMusicPreference: () => null, beginMusicQueue: () => {}, resetMusicOrder: () => {},
     shouldResolvePreferredSource: () => false, clampMusicVolume: (v: number) => v,
     sourcesFor: async (t: MusicTrack) => { await sourceReady.promise; return [{ connectorId: "local", track: { ...t, id: `resolved:${t.id}`, connectorId: "local" } }]; },

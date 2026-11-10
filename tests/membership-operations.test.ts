@@ -166,7 +166,7 @@ test("context list creation persists the initial item in one write and preserves
   assert.deepEqual(after[0], container("existing", [savedItem]));
   assert.equal(after[1].id, created.id);
   assert.equal(after[1].items[0].id, "tt1");
-  assert.deepEqual(storage.writes, [key]);
+  assert.deepEqual(storage.writes, [key, `${key}.savedAt.v1`]);
 });
 
 test("failed context list creation preserves existing lists and returns no new list ID", () => {
@@ -256,7 +256,7 @@ for (const store of stores) {
       status: "already-present",
     });
     assert.equal(storage.values.get(store.key), afterAdd);
-    assert.deepEqual(storage.writes, [store.key]);
+    assert.deepEqual(storage.writes, [store.key, `${store.key}.savedAt.v1`]);
   });
 
   test(`${store.name}: Add recognizes duplicates before checking capacity`, () => {
@@ -290,7 +290,7 @@ for (const store of stores) {
   test(`${store.name}: existing two-argument Add calls use the current profile`, () => {
     seed([container("destination", [])]);
     assert.deepEqual(store.add("destination", item), { status: "added" });
-    assert.deepEqual(storage.writes, [store.key]);
+    assert.deepEqual(storage.writes, [store.key, `${store.key}.savedAt.v1`]);
   });
 
   test(`${store.name}: Move preserves complete metadata, order, and unrelated containers`, () => {
@@ -318,7 +318,7 @@ for (const store of stores) {
       });
       assert.ok(after[1].updatedAt > 20);
       assert.equal(after[1].updatedAt, after[2].updatedAt);
-      assert.deepEqual(storage.writes, [store.key]);
+      assert.deepEqual(storage.writes, [store.key, `${store.key}.savedAt.v1`]);
       assert.equal(notifications, 1);
     } finally {
       unsubscribe();
@@ -404,7 +404,7 @@ for (const store of stores) {
     assert.deepEqual(move(), { status: "moved" });
     assert.equal(storage.values.get(store.baseKey), inherited);
     assert.deepEqual(snapshot()[1].items, [savedItem]);
-    assert.deepEqual(storage.writes, [store.key]);
+    assert.deepEqual(storage.writes, [store.key, `${store.key}.savedAt.v1`]);
   });
 
   for (const failure of [
@@ -474,7 +474,7 @@ for (const store of stores) {
     const after = snapshot();
     assert.deepEqual(after[0], { ...before[0], items: [otherItem], updatedAt: after[0].updatedAt });
     assert.deepEqual(after[1], before[1]);
-    assert.deepEqual(storage.writes, [store.key]);
+    assert.deepEqual(storage.writes, [store.key, `${store.key}.savedAt.v1`]);
   });
 
   test(`${store.name}: explicit Remove rejects failed persistence and stale profiles`, () => {
@@ -550,7 +550,9 @@ test("pre-factory profile lists take precedence and all edits preserve their sna
   store.reorderLists(["destination", "source"]);
   assert.equal(store.readLists()[0].name, "Restored");
   assert.ok(store.createList("New list"));
-  assert.ok(storage.writes.every((writtenKey) => writtenKey === key));
+  assert.ok(
+    storage.writes.every((writtenKey) => writtenKey === key || writtenKey === `${key}.savedAt.v1`),
+  );
   assert.equal(storage.values.get(newerKey), fallback);
   assert.equal(storage.values.get("harbor.customlists.v1"), fallback);
   assert.equal(storage.values.get("harbor.customlists.profile-b"), fallback);
@@ -593,7 +595,7 @@ test("factory list operations use the official profile key and keep manga stores
   assert.equal(mangaStore.readLists()[0].items[0].type, "manga");
   assert.equal(mangaStore.readLists()[0].description, "keep description");
   assert.deepEqual(movieStore.readLists()[0].items, []);
-  assert.deepEqual(storage.writes, [mangaKey]);
+  assert.deepEqual(storage.writes, [mangaKey, `${mangaKey}.savedAt.v1`]);
   assert.equal(storage.values.has("harbor.mangalists.profile-a"), false);
   assert.equal(storage.values.has("harbor.customlists.profile-a"), false);
   stop();
@@ -611,7 +613,7 @@ test("factory creation and rename persist descriptions atomically and reject fai
   assert.equal(created.result.status, "added");
   assert.ok(created.id);
   assert.equal(store.readLists()[0].description, "Notes");
-  assert.deepEqual(storage.writes, [key]);
+  assert.deepEqual(storage.writes, [key, `${key}.savedAt.v1`]);
   assert.equal(
     store.renameListWithResult(created.id, "Renamed", profile, "New notes").status,
     "updated",

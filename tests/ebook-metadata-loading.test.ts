@@ -38,7 +38,10 @@ test("local EPUB catalog entries expose their embedded cover before metadata mer
   const end = providers.indexOf("function pluginProvider(", start);
   const implementation = providers.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(implementation, /localPackage\(book\.paths\[0\]\)/);
+  assert.match(
+    implementation,
+    /const firstEpub = book\.paths\.find\(\(path\) => !isPdfPath\(path\)\);[\s\S]*?localPackage\(firstEpub\)/,
+  );
   assert.match(implementation, /cover: epub\.cover/);
   assert.match(implementation, /internalCover: epub\.cover/);
 });

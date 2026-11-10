@@ -48,6 +48,7 @@ function searchHarness() {
     "./person-top-match": { matchPersonForQuery: () => null },
     "@/lib/search-display-state": { getSearchDisplayState: () => ({ currentResults: null }) },
     "@/lib/torrent/magnet": { isMagnetInput: () => false, isDirectVideoUrl: () => false },
+    "@/lib/features/install": { useInstallFeatures: () => ({ games: false }) },
   };
   const source = readFileSync(
     new URL("../src/components/search/search-overlay.tsx", import.meta.url),

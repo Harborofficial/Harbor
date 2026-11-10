@@ -172,6 +172,8 @@ function fixture({
       "./anime-hero-art-static": { staticHeroArt: async () => undefined },
       "@/lib/providers/anime-episode-enrich": { enrichEpisodes: async () => {} },
       "@/lib/providers/harbor-imdb": { harborImdbEpisodes: async () => new Map() },
+      "@/lib/providers/anime-tvdb-source": { isSharedSplitTvdb: () => false },
+      "@/lib/streams/anime-identity-core": { splitFranchiseDisplaySeason: () => null },
       "@/lib/providers/fanart": {},
       "@/lib/providers/tvdb-proxy": { fetchTvdbArtwork: async () => ({}) },
       "@/lib/providers/tvdb": {},

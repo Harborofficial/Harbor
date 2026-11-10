@@ -56,11 +56,14 @@ test("reward links match the exact game and achievement with locally available s
   assert.equal(achievementReward(99900, "REACHED_TERMINAL_1")?.name, "Spiral Sallet");
   assert.equal(achievementReward(440, "ASW_PARA_HAT"), undefined);
   assert.deepEqual(achievementRewards(1174180), []);
+  // public/games is gitignored artwork, so a checkout without the downloaded
+  // files still verifies the mapping and source hosts.
+  const localArtwork = existsSync(new URL("../public/games/rewards", import.meta.url));
   for (const appId of [440, 630, 99900]) {
     const rewards = achievementRewards(appId);
     assert.equal(new Set(rewards.map(reward => reward.achievementId)).size, rewards.length);
     for (const reward of rewards) {
-      assert.ok(existsSync(new URL("../public" + reward.image, import.meta.url)));
+      if (localArtwork) assert.ok(existsSync(new URL("../public" + reward.image, import.meta.url)));
       assert.equal(new URL(reward.source).hostname, "wiki.teamfortress.com");
     }
   }

@@ -106,7 +106,7 @@ function transport(empty = false) {
     };
   };
   const api = load("../src/lib/streams/addons.ts", {
-    "@/lib/safe-fetch": { safeFetch: fetch, safeFetchLocal: fetch },
+    "@/lib/safe-fetch": { safeFetch: fetch, safeFetchLocal: fetch, safeFetchWithTimeout: fetch },
     "./prefetch-request": {
       clearPrefetchedRequests() {},
       prefetchRequest: (_key, signal, _prefetch, run) => run(signal),
@@ -116,13 +116,14 @@ function transport(empty = false) {
     "@/lib/fetch-fallback-policy": { isHarborFetchPolicyError: () => false },
     "@/lib/local-network": { isLocalNetworkUrl: () => false },
     "./addon-detect": {
+      detectAddonFamily: () => "other",
       isAddonRanked: () => false,
       isRetiredTorboxAddon: () => false,
       isStatusOnlyAddon: () => false,
       isStremioLocalAddon: () => false,
     },
     "./cached": { hasUncachedMarker: () => false },
-    "@/lib/torrent/magnet": {},
+    "@/lib/torrent/magnet": { infoHashFromSources: () => null, infoHashFromUrl: () => null },
     "./plugins/addon": {
       ...pluginMocks,
       runPluginAddon: async (_, req, id) => {

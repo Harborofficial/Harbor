@@ -61,7 +61,7 @@ test("duplicate books retain all readable sources and expose the details source 
   assert.match(view, /buttonLabel=\{t\("Source"\)\}/);
   assert.match(view, /setSourceRoute/);
   assert.match(view, /sourceEBookChapters\(sourceRoute\)/);
-  assert.match(view, /searchSourceEBookCatalog\(query, "all"\)/);
+  assert.match(view, /searchSourceEBookCatalog\(query, "all", \{ background: true \}\)/);
   assert.match(providers, /crossScript/);
   assert.match(providers, /job\.provider\.search\(job\.query, 0\)/);
   assert.match(providers, /matchingCompanions/);
@@ -201,7 +201,10 @@ test("book showcases distinguish read and partially read titles", () => {
 });
 
 test("book details recommendations come from installed sources and share a genre", () => {
-  assert.match(view, /loadSourceEBookPage\(undefined, "all"\)/);
+  assert.match(
+    view,
+    /loadSourceEBookPage\(undefined, "all", \{\}, undefined, undefined, \{ background: true \}\)/,
+  );
   assert.match(view, /genreScore\(item\)/);
   assert.match(view, /filter\(\(\{ score \}\) => score > 0\)/);
   assert.match(view, /Same-genre picks from your installed sources/);

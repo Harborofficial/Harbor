@@ -37,10 +37,45 @@ function fixture({ preferred = null, candidates = [] } = {}) {
     "./liked-artists": { hydrateLikedArtistStore: async () => {} },
     "./recent-context": { hydrateMusicContextTracks: async () => {}, hydrateMusicRecentContexts: async () => {} },
     "./recent-destinations": { hydrateMusicDestinations: async () => {} },
-    "./source-consent": { hydrateMusicSourceConsent: async () => {} },
+    "./pinned-playlists": { hydratePinnedMusicPlaylists: async () => {} },
+    "./source-consent": {
+      hydrateMusicSourceConsent: async () => {},
+      filterMusicSourceCandidates: candidates => candidates,
+      musicPlaybackSourceAllowed: () => true,
+      subscribeMusicSourceConsent: () => () => {},
+    },
+    "./queue-automation": {
+      cancelMusicQueueAutomation: () => false,
+      markMusicQueueAutomationStarted: noop,
+      ownsMusicQueueAutomation: () => false,
+    },
+    "./decks": { engineSnapshot: async () => null },
+    "./spotify-startup": {
+      shouldReportSpotifyStartupTimeout: () => false,
+      SPOTIFY_STARTUP_TIMEOUT_MESSAGE: "Spotify playback timed out.",
+      SPOTIFY_STARTUP_TIMEOUT_MS: 35_000,
+    },
+    "./explicit-preference": {
+      explicitnessOf: () => 0,
+      rankByExplicitness: list => list,
+    },
+    "./pinned-sources": {
+      loadPinnedSources: noop,
+      peekPinnedSource: () => null,
+      pinSourceFor: noop,
+      unpinSourceFor: noop,
+    },
+    "@/lib/platform": { isWindowsDesktop: () => false },
     "./source-version": load("source-version", {}),
     "./queue-source": load("queue-source", {}),
-    "./transport": { resetMusicOrder: noop, musicWarmTargets: () => [], musicAdvance: () => null, musicPrevious: () => null },
+    "./transport": {
+      resetMusicOrder: noop,
+      musicWarmTargets: () => [],
+      musicAdvance: () => null,
+      musicPrevious: () => null,
+      getMusicTransport: () => ({ shuffle: false, repeat: "off" }),
+      setMusicPriorityNext: noop,
+    },
     "./liked": load("liked", {}),
     "./track-identity": {
       sameMusicTrack: (a, b) => a.id === b.id,
@@ -51,7 +86,10 @@ function fixture({ preferred = null, candidates = [] } = {}) {
       answerDeckRequests: noop, broadcastDeckState: noop, isDeckWindow: () => false,
       sendDeckAdopted: noop, sendDeckCommand: noop, serveDeckCommands: noop,
     },
-    "./deck-primary": { createDeckAdoption: () => ({ deck: () => 0, adopt: () => false }) },
+    "./deck-primary": {
+      createDeckAdoption: () => ({ deck: () => 0, adopt: () => false }),
+      nativePlaybackAdoption: () => null,
+    },
     "./queue-insert": {},
     "@tauri-apps/api/core": { invoke: async (command, args) => {
       calls.push({ command, args });
@@ -65,7 +103,11 @@ function fixture({ preferred = null, candidates = [] } = {}) {
       return noop;
     } },
     react,
-    "./preferences": { readMusicPreference: key => key === "harbor.music.preferred-source.v1" ? preferred : null, writeMusicPreference: noop },
+    "./preferences": {
+      readMusicPreference: key => key === "harbor.music.preferred-source.v1" ? preferred : null,
+      readStoredMusicPreference: () => null,
+      writeMusicPreference: noop,
+    },
     "./audio-settings": {
       clampMusicVolume: volume => volume, initializeMusicAudioSettings: async () => {},
       subscribeMusicAudioSettings: noop,

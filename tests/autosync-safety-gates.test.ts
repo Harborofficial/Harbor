@@ -689,7 +689,11 @@ test("selected audio metadata supplies audioLanguage independently of subtitle l
 
 test("ASR language and ASS application paths are wired conservatively", () => {
   const context = read("src/lib/subtitles/autosync/context.ts");
-  assert.match(context, /subLang: ctx\.audioLanguage \|\| null/);
+  assert.match(
+    context,
+    /const modelLanguage = resolveMoonshineLanguage\(language, ctx\.audioLanguage\)/,
+  );
+  assert.match(context, /subLang: modelLanguage/);
   assert.doesNotMatch(context, /subLang: ctx\.languages\[0\]/);
   assert.doesNotMatch(context, /NEUTRAL_QUALITY|TORRENT_BASELINE/);
 

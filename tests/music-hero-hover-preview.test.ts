@@ -12,7 +12,7 @@ test("only one connector can resolve a video, so a fallback is required", () => 
 
 test("the hero falls back to searching for a music video when the item's own source has none", () => {
   assert.match(media, /searchMusicVideos/);
-  const fn = media.slice(media.indexOf("async function previewUrlFor"));
+  const fn = media.slice(media.indexOf("async function previewFor"));
   assert.ok(
     fn.indexOf("musicVideoStream") < fn.indexOf("searchMusicVideos"),
     "direct resolve must be tried before searching",

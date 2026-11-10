@@ -72,8 +72,11 @@ test("subtitle surface follows the real embed state, including True HDR separate
   assert.match(usePlayerMedia, /settings\.playerHdrOpaqueWindow/);
   assert.match(usePlayerMedia, /const mpvNativeWindow/);
   // mpvNativeWindow must suppress Harbor's HTML overlay and mark mpv as rendering.
-  assert.match(usePlayerMedia, /subAssNative \|\| mpvNativeWindow/);
-  assert.match(usePlayerMedia, /subNativeRender[\s\S]*mpvNativeWindow/);
+  assert.match(
+    usePlayerMedia,
+    /const subNativeRender =\s*hdrNativeSurface \|\|[\s\S]*subAssNative \|\|[\s\S]*mpvNativeWindow/,
+  );
+  assert.match(usePlayerMedia, /const suppressHtmlSubs = subNativeRender/);
 });
 
 test("embed toggle locks with an explanation when True HDR separate window is on", () => {

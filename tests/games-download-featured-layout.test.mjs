@@ -50,8 +50,9 @@ test("featured games without artwork keep the same hero dimensions and controls"
 
 test("featured slots do not reconcile saved positions before the first download list arrives", () => {
   const workspace = readFileSync(new URL("../src/views/games/index.tsx", import.meta.url), "utf8");
-  assert.ok(
-    workspace.includes("featuredBundles.length>0&&!downloads.loading&&!downloads.torrents.loading"),
+  assert.match(
+    workspace,
+    /featuredBundles\.length\s*>\s*0\s*&&\s*!downloads\.loading\s*&&\s*!downloads\.torrents\.loading/,
   );
   assert.ok(workspace.includes("useGameFeaturedDownloads"));
   assert.ok(page.includes("placeFeaturedDownloads"));

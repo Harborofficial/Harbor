@@ -50,5 +50,5 @@ test("Whisper model has explicit download, status, remove and integrity verifica
   assert.doesNotMatch(rust.split("pub async fn asr_ensure_model")[1]?.split("#\[tauri::command\]")[0] ?? "", /\.get\(MODEL_URL/);
   assert.match(panel, /listen<\[number, number\]>\("asr-model:\/\/progress"/);
   assert.match(panel, /<progress /);
-  assert.match(syncPanel, /<WhisperModelRow \/>/);
+  assert.match(syncPanel, /<MoonshineModelRow \/>/);
 });

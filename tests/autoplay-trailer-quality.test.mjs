@@ -23,6 +23,9 @@ function evaluate(file, resolve, window = {}, navigator = {}) {
 function trailers(invoke, connection) {
   return evaluate("lib/trailer.ts", name => {
     if (name === "@tauri-apps/api/core") return { invoke, convertFileSrc: path => path };
+    if (name === "@/lib/stream-proxy") {
+      return { registerStreamProxy: async url => ({ url, sessionId: "test-session" }) };
+    }
     return {};
   }, { __TAURI_INTERNALS__: {} }, { connection });
 }
@@ -40,28 +43,31 @@ test("autoplay resolution uses the selected quality and Auto follows the connect
 test("unavailable trailers fall through to the next distinct candidate at the selected resolution", async () => {
   const calls = [];
   const api = trailers(async (command, args) => {
-    calls.push(args);
+    calls.push({ command, ...args });
     if (args.videoId === "unavailable") throw new Error("unavailable");
-    return info;
+    return command === "resolve_youtube_stream"
+      ? { url: "https://video.example/trailer.m3u8", headers: {} }
+      : info;
   });
   const result = await api.fetchFirstTrailer(["", "unavailable", "unavailable", "working", "unused"], "1080p");
-  assert.equal(result, info);
+  assert.equal(result?.stream_url, "https://video.example/trailer.m3u8");
   assert.deepEqual(calls, [
-    { videoId: "unavailable", quality: "1080p" },
-    { videoId: "working", quality: "1080p" },
+    { command: "resolve_youtube_stream", videoId: "unavailable", quality: "1080p" },
+    { command: "fetch_trailer", videoId: "unavailable", quality: "1080p" },
+    { command: "resolve_youtube_stream", videoId: "working", quality: "1080p" },
   ]);
 });
 
 test("changing page during retrieval prevents another candidate from starting", async () => {
   let current = true;
-  let calls = 0;
-  const api = trailers(async () => {
-    calls += 1;
+  const calls = [];
+  const api = trailers(async (_command, args) => {
+    calls.push(args.videoId);
     current = false;
     throw new Error("unavailable");
   });
   assert.equal(await api.fetchFirstTrailer(["first", "second"], "720p", () => current), null);
-  assert.equal(calls, 1);
+  assert.deepEqual(calls, ["first", "first"]);
 });
 
 test("different requested resolutions do not reuse the same cached download", async () => {

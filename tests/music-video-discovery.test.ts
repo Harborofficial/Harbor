@@ -101,6 +101,7 @@ test("failed requests are retryable and browsing never invokes playback or strea
 test("a caller that can render more than a rail gets more than a rail, and the default rail is unchanged", async () => {
   const many = Array.from({ length: 40 }, (_, index) => ({
     ...video,
+    title: `One More Time ${index}`,
     sourceId: `FGBhQbmPw${index.toString().padStart(2, "0")}`,
     id: `youtube:${index}`,
   }));
@@ -115,6 +116,7 @@ test("a shared in-flight request still answers each caller at its own size", asy
   let complete!: (data: unknown) => void;
   const many = Array.from({ length: 30 }, (_, index) => ({
     ...video,
+    title: `One More Time ${index}`,
     sourceId: `AAAAAAAAA${index.toString().padStart(2, "0")}`,
     id: `youtube:${index}`,
   }));
