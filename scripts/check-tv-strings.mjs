@@ -1,8 +1,13 @@
 import { readFile, readdir, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { scanKotlin, hitsFor, STRICT, WIDE } from "./tv-strings-scan.mjs";
 
 const sourceDir = resolve("android-native/app/src/main/java/com/harbor/tv");
+if (!existsSync(sourceDir)) {
+  console.log("check-tv-strings: skipped, android-native/ is not in this checkout");
+  process.exit(0);
+}
 const strictPath = resolve("scripts/tv-strings-baseline.json");
 const widePath = resolve("scripts/tv-strings-wide.json");
 const writing = process.argv.includes("--update");

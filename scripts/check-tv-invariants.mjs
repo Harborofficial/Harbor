@@ -1,7 +1,12 @@
 import { readFile, readdir, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 const mainDir = resolve("android-native/app/src/main/java/com/harbor/tv");
+if (!existsSync(mainDir)) {
+  console.log("check-tv-invariants: skipped, android-native/ is not in this checkout");
+  process.exit(0);
+}
 const baselinePath = resolve("scripts/tv-invariants-baseline.json");
 const writing = process.argv.includes("--update");
 

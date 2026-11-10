@@ -1,8 +1,13 @@
 import { readFile, readdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 const mainDir = resolve("android-native/app/src/main/java/com/harbor/tv");
 const stringsPath = resolve("android-native/app/src/main/res/values/strings.xml");
+if (!existsSync(stringsPath)) {
+  console.log("check-tv-resources: skipped, android-native/ is not in this checkout");
+  process.exit(0);
+}
 
 const quote = String.fromCharCode(34);
 const backslash = String.fromCharCode(92);
