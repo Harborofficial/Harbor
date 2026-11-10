@@ -128,10 +128,7 @@ export function archivedProPlayers(game: ProConfigGame, gameName = ""): ProPlaye
   if (game !== "cod" && game !== "callofdutywarzone") return [];
   // A generic CoD hub may show dated editions, but a specific game must never
   // silently receive Warzone or a different generation's settings.
-  const key = gameName
-    .toLowerCase()
-    .replace(/[™®]/g, "")
-    .trim();
+  const key = gameName.toLowerCase().replace(/[™®]/g, "").trim();
   if (game === "callofdutywarzone") return creators.filter((p) => p.id === "archive-nate-mw");
   if (key === "call of duty" || !key) return creators;
   if (/black ops (?:ii|2)(?:\b|$)/i.test(key))

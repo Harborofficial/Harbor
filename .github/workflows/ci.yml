@@ -28,6 +28,9 @@ jobs:
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
+          # Pinned: the formatter's output changes between minors, and a silent
+          # "latest" upgrade turns a green PR red without any code change.
+          version: 1.5.1
           node-version: 24
           cache: true
           run-install: |

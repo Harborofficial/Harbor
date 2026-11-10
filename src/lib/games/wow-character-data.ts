@@ -13,10 +13,7 @@ const number = (value: unknown, max: number) =>
 const date = (value: unknown) =>
   typeof value === "string" && Number.isFinite(Date.parse(value)) ? Date.parse(value) : null;
 const normalize = (value: string) => value.normalize("NFC").toLowerCase();
-const realmKey = (value: string) =>
-  normalize(value)
-    .replace(/['’]/g, "")
-    .replace(/\s+/g, "-");
+const realmKey = (value: string) => normalize(value).replace(/['’]/g, "").replace(/\s+/g, "-");
 export type WowCharacterTarget = { region: WowRegion; realm: string; name: string };
 export function wowCharacterTarget(value: unknown): WowCharacterTarget | null {
   const item = row(value),

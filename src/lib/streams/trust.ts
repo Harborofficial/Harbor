@@ -426,10 +426,7 @@ function sequelMarker(title: string): number | null {
 }
 
 function tokenize(text: string): string[] {
-  const lower = text
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "");
+  const lower = text.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
   // Keep Arabic, CJK and other scripts instead of silently discarding them.
   const words = lower.match(/[\p{L}\p{N}]+/gu) ?? [];
   return words.filter((w) => w.length >= 3 && !TITLE_STOPWORDS.has(w));

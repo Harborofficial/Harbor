@@ -22,12 +22,7 @@ export type WowRealmDirectory = { realms: WowRealm[]; editionName: string };
 export const wowRealmRegion = (value: WowRegion): value is WowRealmRegion =>
   (WOW_REALM_REGIONS as readonly string[]).includes(value);
 export const wowRealmKey = (value: string) =>
-  value
-    .normalize("NFC")
-    .trim()
-    .toLocaleLowerCase("en")
-    .replace(/['’]/g, "")
-    .replace(/\s+/g, "-");
+  value.normalize("NFC").trim().toLocaleLowerCase("en").replace(/['’]/g, "").replace(/\s+/g, "-");
 export const wowRealmStatusUrl = (region: WowRealmRegion, edition: WowRealmEdition = "retail") =>
   `https://worldofwarcraft.blizzard.com/en-us/${edition === "retail" ? "worldsoul" : edition}/${region}/server-status`;
 
