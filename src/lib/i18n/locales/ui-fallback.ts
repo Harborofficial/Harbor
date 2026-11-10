@@ -1134,6 +1134,8 @@ const uiFallback: Record<string, string> = {
   "The stroke or halo drawn behind the letters.": "The stroke or halo drawn behind the letters.",
   "The text Harbor prints on the badge, for example REMUX.":
     "The text Harbor prints on the badge, for example REMUX.",
+  "This font is not available to styled (ASS) subtitles. Re-import it as a TTF or OTF file.":
+    "This font is not available to styled (ASS) subtitles. Re-import it as a TTF or OTF file.",
   "The typeface subtitles are drawn in. Add your own TTF, OTF or WOFF file if none of these suit.":
     "The typeface subtitles are drawn in. Add your own TTF, OTF or WOFF file if none of these suit.",
   "The volume bar stops at 100 percent. No boost is available.":

@@ -335,13 +335,6 @@ export function SettingsProvider({
           console.warn("[fonts] failed to load", family, e);
         }
       }
-      if (cancelled) return;
-      try {
-        const { syncSubFontsToDisk } = await import("@/lib/player/sub-font-install");
-        await syncSubFontsToDisk(fonts);
-      } catch (e) {
-        console.warn("[fonts] could not sync fonts to disk for libass", e);
-      }
     })();
     return () => {
       cancelled = true;
@@ -353,6 +346,14 @@ export function SettingsProvider({
       });
       for (const ff of toRemove) document.fonts.delete(ff);
     };
+  }, [settings.customFonts]);
+
+  // The files libass reads live outside React. A font import must still reach the
+  // fonts directory when the user leaves Settings before the preview finishes loading.
+  useEffect(() => {
+    void import("@/lib/player/sub-font-install")
+      .then(({ syncSubFontsToDisk }) => syncSubFontsToDisk(settings.customFonts ?? []))
+      .catch((e) => console.warn("[fonts] could not sync fonts to disk for libass", e));
   }, [settings.customFonts]);
 
   useEffect(() => {
