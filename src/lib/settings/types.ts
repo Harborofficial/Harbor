@@ -187,7 +187,6 @@ export type Settings = {
   showSimklBadge: boolean;
   showSimklDetail: boolean;
   showDubBadge: boolean;
-  simklShowCommunityRatings: boolean;
   simklEnableUserRatings: boolean;
   simklGranularFilters: SimklGranularFilters;
   cardBadgeLimit: number;
@@ -210,7 +209,6 @@ export type Settings = {
   posterDockTransitionMs: number;
   top10Ribbon: boolean;
   top10RibbonSide: "left" | "right";
-  awardTabs: boolean; // Deprecated: Retained strictly for sanitizeCardAwardDisplay parsing
   cardAwardDisplay: CardAwardDisplay;
   awardTabPosition: "above" | "below" | "top";
   rowTitleScale: number;
@@ -629,7 +627,6 @@ export type Settings = {
   customLogoMark: string;
   customLogoWordmark: string;
   customAppIcon: string;
-  customAppIconPreset: string;
   musicArtworkAppIcon: boolean;
   musicSeekThumb: boolean;
   musicSeekThumbHover: boolean;
@@ -680,7 +677,6 @@ export type Settings = {
   fullscreenClockSizePx: number;
   hybridTitleBar: boolean;
   topbarScrollBlur: boolean;
-  transparentTopBar: boolean;
   topbarAppearance: "transparent" | "glass" | "filled";
   dragAnywhere: boolean;
   resumeDetailScroll: boolean;
@@ -725,11 +721,6 @@ export type Settings = {
     hidden: string[];
     renamed: Record<string, string>;
   };
-  navCustomizationOwn: {
-    order: string[];
-    hidden: string[];
-    renamed: Record<string, string>;
-  } | null;
   animeRows: {
     order: string[];
     hidden: string[];

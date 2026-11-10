@@ -32,7 +32,7 @@ export function SyncIndicatorSetting({ tracker }: { tracker: "anilist" | "mal" }
       {enabled && (
         <SettingRow
           wide
-          label={t("Position")}
+          label={t("Sync badge position")}
           desc={t("Corners keep it clear of subtitles along the bottom.")}
         >
           <Segmented

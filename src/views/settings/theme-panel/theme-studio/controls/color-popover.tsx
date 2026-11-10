@@ -148,8 +148,10 @@ export function ColorPopover({
             <div
               className="fixed inset-0 z-[310]"
               onMouseDown={(e) => {
-                e.stopPropagation();
-                setOpen(false);
+                if (e.target === e.currentTarget) {
+                  e.stopPropagation();
+                  setOpen(false);
+                }
               }}
             />
             <div

@@ -96,7 +96,7 @@ export function MalPanel() {
           />
 
           <ToggleRow
-            label={t("Sync watch progress")}
+            label={t("Sync watch progress with MyAnimeList")}
             sub={t(
               "Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.",
             )}

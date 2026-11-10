@@ -17,7 +17,10 @@ function topLevelBlock(css: string, selector: string): string {
 }
 
 test("the dock publishes its height for everything else to clear", () => {
-  assert.match(read("src/components/music/music-dock.tsx"), /setProperty\(\s*"--harbor-music-dock"/);
+  assert.match(
+    read("src/components/music/music-dock.tsx"),
+    /setProperty\(\s*"--harbor-music-dock"/,
+  );
 });
 
 test("settings content, rail and footer all clear the dock", () => {

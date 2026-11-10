@@ -307,7 +307,12 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
   return createPortal(
     <div className="pointer-events-none fixed inset-0 z-[210]">
       {!inspectorHidden && (
-        <StudioShell cardRef={drag.ref} position={drag.position} dragging={drag.dragging}>
+        <StudioShell
+          cardRef={drag.ref}
+          position={drag.position}
+          dragging={drag.dragging}
+          onClose={requestClose}
+        >
           <StudioHeader
             name={trimmedName}
             minimizeRef={minimizeRef}

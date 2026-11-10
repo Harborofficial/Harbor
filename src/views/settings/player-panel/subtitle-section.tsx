@@ -251,7 +251,7 @@ export function SubtitleStylePanel() {
       <SettingGroup label={t("Text")}>
         <SettingRow
           wide
-          label={t("Size")}
+          label={t("Subtitle font size")}
           desc={t("How large subtitles are drawn on the video, at any window size.")}
         >
           <div className={SLIDER_WRAP}>
@@ -262,7 +262,7 @@ export function SubtitleStylePanel() {
               step={1}
               value={settings.subFontSize}
               onChange={(e) => update({ subFontSize: parseInt(e.target.value, 10) })}
-              aria-label={t("Size")}
+              aria-label={t("Subtitle font size")}
               className="harbor-slider h-11 min-w-0 flex-1"
               style={fillStyle(settings.subFontSize, 16, 120)}
             />

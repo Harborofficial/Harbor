@@ -58,7 +58,7 @@ import { useAnilist } from "@/lib/anilist/provider";
 import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useSettings } from "@/lib/settings";
-import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { getSecondaryPrivileges } from "@/lib/profiles/privileges";
 import { isStremioActivePrimary, isNuvioProviderActive } from "@/lib/active-profile-id";
 import {
   uploadNuvioCustomAvatar,

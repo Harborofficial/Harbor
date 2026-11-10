@@ -3051,6 +3051,13 @@ const uiFallback: Record<string, string> = {
     "You can add up to {count} catalogs. Remove one first.",
   "Your profile changed. Open the menu again and retry.":
     "Your profile changed. Open the menu again and retry.",
+  "Sync watch progress with AniList": "Sync watch progress with AniList",
+  "Sync watch progress with MyAnimeList": "Sync watch progress with MyAnimeList",
+  "Offset badge position": "Offset badge position",
+  "Offset badge size": "Offset badge size",
+  "Sync badge position": "Sync badge position",
+  "Subtitle font size": "Subtitle font size",
+  "Poster size": "Poster size",
 };
 
 export default uiFallback;

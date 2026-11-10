@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Award, Captions, Check, Eye, HardDrive, Sparkles, Tag, Trophy, Type } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { ROW_DESC, Section, Segmented, ToggleRow } from "../shared";
+import { ROW_DESC, Section, Segmented, ToggleRow, settingsAnchor } from "../shared";
 import { SettingGroup, SettingRow, Nested, SettingsWorkbench } from "../kit";
 import { SongCardStylePicker } from "../song-card-style-picker";
 import { HoverStyleGallery } from "../hover-style-preview";
@@ -85,7 +85,7 @@ export function CardsTab() {
       />
       <Section
         title={layout === "poster" ? t("On the poster") : t("On the TV")}
-        anchorTitle="Card overlays"
+        id={settingsAnchor("Card overlays")}
       >
         <ToggleRow
           label={t("Show tags on cards")}
@@ -131,7 +131,6 @@ export function CardsTab() {
                 const display = v as "tabs" | "badge" | "none";
                 updateCard({
                   cardAwardDisplay: display,
-                  awardTabs: display === "tabs",
                 });
               }}
             />

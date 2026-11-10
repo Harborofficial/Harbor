@@ -221,6 +221,10 @@ export function parseStoredSettings(raw: string | null): {
       _playbackSourcePreferenceV2?: boolean;
       /** Legacy: the high-quality toggle was split into a quality choice. */
       mangaBestEnabled?: boolean;
+      /** Legacy: folded into cardAwardDisplay. */
+      awardTabs?: boolean;
+      /** Legacy: folded into topbarAppearance. */
+      transparentTopBar?: boolean;
     };
     // Legacy defaults and playlist adoption depend on other stores. Re-read them
     // until a self-contained settings blob has been persisted by the normal flow.
