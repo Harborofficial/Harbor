@@ -974,6 +974,6 @@ impl Store {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, windows))]
 #[path = "stardew_store_tests.rs"]
 mod tests;

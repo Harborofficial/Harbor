@@ -530,13 +530,12 @@ mod tests {
 
     #[test]
     fn music_host_search_path_starts_with_the_app_directory() {
-        let app = Path::new("C:/Harbor");
-        let value = prepend_search_path(app, Some(std::ffi::OsStr::new("C:/Windows"))).unwrap();
+        let app = std::env::temp_dir().join("harbor-music-app");
+        let other = std::env::temp_dir().join("harbor-music-other");
+        let value = prepend_search_path(&app, Some(other.as_os_str())).unwrap();
         let entries: Vec<_> = std::env::split_paths(&value).collect();
-        assert_eq!(entries.first().map(|entry| entry.as_path()), Some(app));
-        assert!(entries
-            .iter()
-            .any(|entry| entry.as_path() == Path::new("C:/Windows")));
+        assert_eq!(entries.first().map(|entry| entry.as_path()), Some(app.as_path()));
+        assert!(entries.iter().any(|entry| entry.as_path() == other.as_path()));
     }
 
     #[test]

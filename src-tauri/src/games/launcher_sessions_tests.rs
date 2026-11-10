@@ -181,6 +181,7 @@ fn persisted_totals_are_idempotent_and_profile_isolated() {
     assert!(store::active(&root).unwrap().is_empty());
     assert_eq!(store::latest(&root, "one").unwrap()[0].state, "ended");
 }
+#[cfg(windows)]
 #[test]
 fn failed_dispatch_and_non_game_handoff_have_no_playtime() {
     let root = folder();

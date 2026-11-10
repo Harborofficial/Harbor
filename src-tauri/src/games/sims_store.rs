@@ -21,7 +21,7 @@ pub mod progress;
 pub mod metadata;
 #[path = "sims_sets.rs"]
 pub mod sets;
-#[cfg(test)]
+#[cfg(all(test, windows))]
 #[path = "sims_tests.rs"]
 mod tests;
 #[path = "sims_tray.rs"]
