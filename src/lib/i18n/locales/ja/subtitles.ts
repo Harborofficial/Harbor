@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "スタイル付き（ASS）字幕の色、サイズ、看板文字の位置はそのままで、指定したフォントを使用します。",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor は字幕をお使いの mpv に送ります。mpv の字幕メニューから選んでください。",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "スタイル付き（ASS）字幕の色、サイズ、看板文字の位置はそのままで、指定したフォントを使用します。",
 };
 
 export default subtitles;

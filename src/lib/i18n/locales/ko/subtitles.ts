@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "스타일 자막(ASS)은 색상, 크기, 화면 글자 위치를 유지하면서 설정한 글꼴을 사용합니다.",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor가 자막을 사용 중인 mpv로 보냅니다. mpv의 자막 메뉴에서 하나를 고르세요.",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "스타일 자막(ASS)은 색상, 크기, 화면 글자 위치를 유지하면서 설정한 글꼴을 사용합니다.",
 };
 
 export default subtitles;

@@ -805,6 +805,9 @@ const settingsRefinements: Record<string, string> = {
   GIF: "GIF",
   "{kind} · In use": "{kind} · قيد الاستخدام",
   Use: "استخدام",
+  "Poster cards": "بطاقات الملصقات",
+  "Show a laurel tab on award-winning titles. Choose its position below.":
+    "أظهر تبويب الغار في العناوين الحائزة على جوائز. اختر موضعه أدناه.",
 };
 
 export default settingsRefinements;
