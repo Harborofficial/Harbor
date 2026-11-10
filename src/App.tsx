@@ -1677,9 +1677,14 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const wrappedAlive = useIdleEvict(wrappedTop);
   const queueAlive = useKeepAlive(queueTop, queueTop);
   const serviceAlive = useKeepAlive(serviceTop, serviceTop && !!service);
-  // Keep a detail page mounted while Settings is open. Otherwise the keep-alive timer
-  // drops it after 1.5s, and returning refetches the whole title from its addons.
-  const detailAlive = useKeepAlive(detailTop, !!meta, topKind === "settings");
+  // Keep detail state while a child playback or episode-detail screen is on top.
+  // Otherwise the keep-alive timer drops the page during playback and Back starts it over.
+  const keepDetailAlive =
+    topKind === "settings" ||
+    stackKinds.includes("episode-detail") ||
+    stackKinds.includes("picker") ||
+    stackKinds.includes("player");
+  const detailAlive = useKeepAlive(detailTop, !!meta, keepDetailAlive);
   const personAlive = useKeepAlive(personTop, personId !== null);
   const profileAlive = useKeepAlive(profileTop, profileHandle !== null);
   const feedAlive = useKeepAlive(feedTop, feedOpen, stackKinds.includes("feed"));

@@ -41,7 +41,7 @@ export function EpisodeDetailView({
 }: EpisodeDetailViewProps) {
   const t = useT();
   const { settings } = useSettings();
-  const { openPicker, openMeta, goBack } = useView();
+  const { openPicker, goBack } = useView();
 
   const [seriesMeta, setSeriesMeta] = useState<Meta | null>(initialSeriesMeta || null);
   const [episodeData, setEpisodeData] = useState<EpisodeDetail | null>(null);
@@ -191,10 +191,6 @@ export function EpisodeDetailView({
     openPicker(playback?.meta ?? seriesMeta, playEpisode, { autoPlay: settings.instantPlay });
   }, [seriesMeta, episodeData, playback, openPicker, settings.instantPlay]);
 
-  const handleSeriesClick = useCallback(() => {
-    if (seriesMeta) openMeta(seriesMeta);
-  }, [seriesMeta, openMeta]);
-
   if (error) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-12">
@@ -211,7 +207,7 @@ export function EpisodeDetailView({
             </button>
             {seriesMeta && (
               <button
-                onClick={handleSeriesClick}
+                onClick={goBack}
                 className="rounded-lg bg-ink px-5 py-2.5 text-[14px] font-semibold text-canvas transition-colors hover:bg-ink/90"
               >
                 {t("View Series")}
@@ -262,7 +258,7 @@ export function EpisodeDetailView({
           <div className="absolute inset-x-0 bottom-0 px-12 pb-14">
             <div className="max-w-3xl">
               <button
-                onClick={handleSeriesClick}
+                onClick={goBack}
                 className="mb-4 inline-flex items-center gap-1 text-[14px] font-semibold text-ink-muted transition-colors hover:text-ink"
               >
                 <ArrowLeft size={16} />
