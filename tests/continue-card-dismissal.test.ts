@@ -236,6 +236,30 @@ test("a deduped card clears the playback id belonging to each provider member", 
   );
 });
 
+test("a stale provider member cannot authorize clearing another episode", async () => {
+  const h = harness();
+  h.clearProviderProgress = true;
+  h.cwSources = { trakt: false, simkl: false, publicmetadb: false };
+  const item = {
+    ...entry(),
+    cwMembers: [
+      {
+        ...entry(),
+        external: "trakt",
+        state: { ...entry().state, season: 2, episode: 4, video_id: "older-b:2:4" },
+        providerPlaybackIds: { trakt: "stale-trakt-playback" },
+      },
+    ],
+  };
+  await h.load("cw-dismiss").dismissCw(item, "fixture-auth", { acknowledged: true });
+
+  assert.deepEqual(
+    h.providerCalls.map((call) => call.item.providerPlaybackIds),
+    [undefined, undefined, undefined],
+    "the visible card is passed instead, so the provider re-verifies the episode",
+  );
+});
+
 test("acknowledged dismissal persists official progress tombstones and newer progress restores the card", async () => {
   const h = harness();
   await h.load("cw-dismiss").dismissCw(entry(), null, { acknowledged: true });

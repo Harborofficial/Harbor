@@ -76,13 +76,20 @@ export function titleKeys(item: LibraryItem): string[] {
   return [...new Set(keys)].filter(Boolean).map((key) => `${prefix}|${key}`);
 }
 
+function sharesContentId(a: LibraryItem, b: LibraryItem): boolean {
+  const ids = new Set(itemIds(b));
+  return itemIds(a).some((id) => ids.has(id));
+}
+
 /** Keep every source checkpoint so dismissing the survivor clears all copies. */
 function mergeCopies(survivor: LibraryItem, copy: LibraryItem): LibraryItem {
   const members = [...(survivor.cwMembers ?? [survivor]), ...(copy.cwMembers ?? [copy])];
   const unique = [...new Map(members.map((member) => [memberKey(member), member])).values()];
-  const altIds = [...new Set([...(survivor.altIds ?? []), ...(copy.altIds ?? [])])].filter(
-    (id) => id !== survivor._id,
-  );
+  // Only called for copies that share a content id, so the copy's own id is a
+  // verified alias of the survivor.
+  const altIds = [
+    ...new Set([...(survivor.altIds ?? []), ...(copy.altIds ?? []), copy._id]),
+  ].filter((id) => id !== survivor._id);
   return {
     ...survivor,
     altIds: altIds.length > 0 ? altIds : undefined,
@@ -93,15 +100,29 @@ function mergeCopies(survivor: LibraryItem, copy: LibraryItem): LibraryItem {
 // Cloud, local and tracker rows can carry a different id for the same title, so
 // matching on the id alone can show one title twice. Collapse them by type and
 // franchise name, keeping the furthest episode instead of the first one seen.
+//
+// Only a shared content id proves two records are the same title. A name match
+// hides the duplicate but must never join `cwMembers` or `altIds`: those decide
+// which records a dismissal wipes, and a title collision (two shows named
+// "The Office") would otherwise clear the other show's saved progress.
 export function dedupeCwItems(items: LibraryItem[], limit: number): LibraryItem[] {
   const idIndex = new Map<string, number>();
+  const aliasIndex = new Map<string, number>();
   const nameIndex = new Map<string, number>();
   const out: LibraryItem[] = [];
+  const replaceShown = (existing: LibraryItem, item: LibraryItem) =>
+    typeKey(existing.type) === "series" &&
+    typeKey(item.type) === "series" &&
+    isFurther(item, existing);
   for (const item of items) {
     const keys = titleKeys(item);
+    const verified = itemIds(item)
+      .map((id) => idIndex.get(id))
+      .find((value) => value != null);
     const index =
+      verified ??
       itemIds(item)
-        .map((id) => idIndex.get(id))
+        .map((id) => aliasIndex.get(id))
         .find((value) => value != null) ??
       keys.map((key) => nameIndex.get(key)).find((value) => value != null);
     if (index == null) {
@@ -113,13 +134,22 @@ export function dedupeCwItems(items: LibraryItem[], limit: number): LibraryItem[
       continue;
     }
     const existing = out[index];
+    // Identity is judged against the card that is actually shown: sharing a
+    // content id verifies the pair, whichever index found it.
+    if (!sharesContentId(item, existing)) {
+      // Track the ids so a later copy of this duplicate still finds the card,
+      // without promoting them to verified aliases.
+      for (const id of itemIds(item)) aliasIndex.set(id, index);
+      // Showing the further episode is a display choice; the dropped copy keeps
+      // its own progress and its own provider ids.
+      if (replaceShown(existing, item)) out[index] = item;
+      continue;
+    }
     // Episode order only applies to series. Movie copies keep the first
     // (freshness-sorted) row, as before, and just retain their members.
-    const replace =
-      typeKey(existing.type) === "series" &&
-      typeKey(item.type) === "series" &&
-      isFurther(item, existing);
-    out[index] = replace ? mergeCopies(item, existing) : mergeCopies(existing, item);
+    out[index] = replaceShown(existing, item)
+      ? mergeCopies(item, existing)
+      : mergeCopies(existing, item);
     for (const id of itemIds(out[index])) idIndex.set(id, index);
   }
   return out;

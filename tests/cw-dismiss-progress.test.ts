@@ -321,6 +321,28 @@ test("a grouped dismissal covers a member whose provider clock is ahead", () => 
   assert.equal(h.api.isCwDismissed(simkl), true);
 });
 
+test("a far-future provider timestamp cannot block a later rewatch", () => {
+  const h = harness();
+  const library = item();
+  const simkl = {
+    ...item("simkl"),
+    state: { ...item().state!, lastWatched: new Date(Date.now() + 2 * 864e5).toISOString() },
+  };
+  const grouped = { ...library, cwMembers: [library, simkl] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+
+  h.api.dismissCw(grouped, null);
+
+  const rewatch = { ...library, state: { ...library.state!, timeOffset: 300 } };
+  h.setResume(rewatch, 300, Date.now() + 10 * 60_000);
+  assert.equal(
+    h.api.isCwDismissed(rewatch),
+    false,
+    "progress after the skew tolerance is not swallowed by the provider's clock",
+  );
+});
+
 test("an older tracker episode cannot undo dismissal, while later episodes and fresh rewatches can", () => {
   const h = harness();
   const current = item("simkl");

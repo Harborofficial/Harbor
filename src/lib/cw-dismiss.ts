@@ -455,8 +455,29 @@ function providerDismissSources(): CwProviderSource[] {
 function sameProviderCheckpoint(a: LibraryItem, b: LibraryItem): boolean {
   const aEp = resolveEpisode(a);
   const bEp = resolveEpisode(b);
-  if (aEp.season == null || bEp.season == null) return true;
+  // Deleting provider progress is irreversible: an unknown episode must be
+  // resolved through a fresh lookup, never guessed from a stale member.
+  if (aEp.season == null || aEp.episode == null) return false;
+  if (bEp.season == null || bEp.episode == null) return false;
   return aEp.season === bEp.season && aEp.episode === bEp.episode;
+}
+
+function providerSourceOf(item: LibraryItem): CwProviderSource | null {
+  return item.external === "trakt" || item.external === "simkl" || item.external === "publicmetadb"
+    ? item.external
+    : null;
+}
+
+/**
+ * Provider pause times can come from another device's clock. Trust a little
+ * skew so a late copy stays covered, but never enough to hide real progress
+ * for hours after the dismissal.
+ */
+const DISMISS_CLOCK_SKEW_MS = 5 * 60_000;
+
+function dismissalNow(item: LibraryItem, members: readonly LibraryItem[]): number {
+  const latest = Math.max(Date.now(), itemActivity(item), ...members.map(itemActivity));
+  return Math.min(latest, Date.now() + DISMISS_CLOCK_SKEW_MS);
 }
 
 function providerFailureList(results: ProviderDismissResult[]): CwProviderSource[] {
@@ -481,7 +502,7 @@ export function dismissCw(
     // A provider's pause time can be ahead of the local clock. The dismissal
     // must cover every member's activity or the hidden survivor's member
     // reappears as a fresh card after its checkpoint is filtered out.
-    const nowMs = Math.max(Date.now(), itemActivity(item), ...members.map(itemActivity));
+    const nowMs = dismissalNow(item, members);
     const now = new Date(nowMs).toISOString();
     const times = new Map(dismissed);
     const videos = new Map(dismissedVid);
@@ -561,24 +582,19 @@ export function dismissCw(
 
     const providerWrites: Promise<ProviderDismissResult>[] = [];
     if (providerSources.length > 0) {
+      // A deduped show can keep an old episode next to the displayed one. Only a
+      // member whose episode matches this card may authorize deleting a
+      // provider's saved position; a stale member would clear another episode.
+      // Providers left without such a member fall back to the fresh lookup in
+      // clearProviderPlayback, which verifies the episode before deleting.
       const byProvider = new Map<CwProviderSource, LibraryItem>();
-      for (const member of [item, ...members]) {
-        const source = member.external;
-        if (
-          (source === "trakt" || source === "simkl" || source === "publicmetadb") &&
-          providerSources.includes(source)
-        ) {
-          const held = byProvider.get(source);
-          // A deduped show can keep an old episode next to the displayed one.
-          // Never let a later stale member replace the provider id that matches
-          // this card's checkpoint.
-          if (
-            !held ||
-            (sameProviderCheckpoint(item, member) && !sameProviderCheckpoint(item, held))
-          ) {
-            byProvider.set(source, member);
-          }
-        }
+      const itemSource = providerSourceOf(item);
+      if (itemSource) byProvider.set(itemSource, item);
+      for (const member of members) {
+        const source = providerSourceOf(member);
+        if (!source || !providerSources.includes(source)) continue;
+        if (!sameProviderCheckpoint(item, member)) continue;
+        byProvider.set(source, member);
       }
       for (const provider of providerSources) {
         providerWrites.push(clearProviderPlayback(byProvider.get(provider) ?? item, [provider]));
@@ -640,11 +656,14 @@ export function dismissCw(
   const id = item._id;
   const now = new Date().toISOString();
   // Never let a stale copy or a server clock ahead of the local one move the
-  // dismissal behind existing progress.
-  const nowMs = Math.max(
-    Date.parse(now),
-    itemActivity(item),
-    ...itemIds(item).map((entryId) => dismissed.get(entryId) ?? 0),
+  // dismissal behind existing progress, and never let it run hours ahead either.
+  const nowMs = Math.min(
+    Math.max(
+      Date.parse(now),
+      itemActivity(item),
+      ...itemIds(item).map((entryId) => dismissed.get(entryId) ?? 0),
+    ),
+    Date.now() + DISMISS_CLOCK_SKEW_MS,
   );
   const times = new Map(dismissed);
   const videos = new Map(dismissedVid);

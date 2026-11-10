@@ -39,8 +39,9 @@ test("a franchise suffix does not count as a different title", () => {
   assert.equal(out.length, 1);
 });
 
-test("a stale earlier episode is replaced by the current one", () => {
-  const stale = series("tt1", "Show", 2, 1, 100);
+test("a stale earlier episode is replaced by the current verified copy", () => {
+  // Same content id: the dropped copy is safe to include in the dismissal group.
+  const stale = { ...series("tt1", "Show", 2, 1, 100), altIds: ["tt2"] };
   const current = series("tt2", "Show Season 3", 3, 7, 0);
   const out = dedupeCwItems([stale, current], 16);
   assert.deepEqual(
@@ -50,6 +51,47 @@ test("a stale earlier episode is replaced by the current one", () => {
   assert.deepEqual(
     out[0].cwMembers?.map((i) => i._id),
     ["tt2", "tt1"],
+  );
+  assert.ok(out[0].altIds?.includes("tt1"), "verified copies keep each other's ids");
+});
+
+test("a title-only duplicate is shown but owns no other show's progress", () => {
+  // Two different shows that share a title (The Office US/UK). One card is fine;
+  // a dismissal of it must not clear the other show's saved position.
+  const us = series("tt0386676", "The Office", 2, 1, 100);
+  const uk = series("tt0290978", "The Office", 3, 7, 100);
+  const out = dedupeCwItems([us, uk], 16);
+  assert.deepEqual(
+    out.map((i) => i._id),
+    ["tt0290978"],
+    "the further episode is still the one shown",
+  );
+  assert.equal(out[0].cwMembers, undefined, "no dismissal ownership across a title match");
+  assert.equal(out[0].altIds, undefined, "no verified alias across a title match");
+});
+
+test("an id seen only on a collapsed duplicate still finds the card", () => {
+  const first = series("tt1", "Show", 2, 1, 100);
+  const duplicate = series("tt2", "Show Season 2", 3, 7, 100);
+  const hiddenTwin = { ...series("tt3", "Unrelated Stored Name", 3, 7, 100), altIds: ["tt2"] };
+  const out = dedupeCwItems([first, duplicate, hiddenTwin], 16);
+  assert.equal(out.length, 1, "the twin of the collapsed copy joins the same card");
+  assert.deepEqual(
+    out[0].cwMembers?.map((i) => i._id),
+    ["tt2", "tt3"],
+    "only the copies that share an id with the shown card are owned",
+  );
+  assert.ok(!out[0].cwMembers?.some((i) => i._id === "tt1"));
+});
+
+test("same episode keeps the copy with further progress", () => {
+  const out = dedupeCwItems(
+    [series("tt1", "Show", 1, 2, 100), series("tt2", "Show", 1, 2, 400)],
+    16,
+  );
+  assert.deepEqual(
+    out.map((i) => i._id),
+    ["tt2"],
   );
 });
 
