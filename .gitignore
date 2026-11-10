@@ -130,6 +130,8 @@ gemini.key
 # Built separately from pinned GPL sources; see tools/pokemon-engine/README.md.
 !tools/pokemon-engine/README.md
 /src-tauri/resources/pokemon-engine/
+# Staged 40MB self-contained Moonshine worker, generated at Windows build time.
+/src-tauri/resources/moonshine/*.exe
 
 # Rotated dev-server logs: *.log covers dev.log but not its .prev rotation.
 dev.log*

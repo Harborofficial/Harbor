@@ -109,6 +109,9 @@ Step 'Uninstaller build'
 Invoke-Tool 'cargo' @('build', '--manifest-path', 'installer/src-tauri/Cargo.toml', '--release',
   '--no-default-features', '--features', 'tauri/custom-protocol', '--bin', 'harbor-uninstall', '--locked')
 
+Step 'Moonshine runtime'
+Invoke-Tool 'powershell' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/build-moonshine-worker.ps1')
+
 Step 'Payload'
 Invoke-Tool 'node' @('installer/scripts/make-payload.mjs')
 Invoke-Tool 'node' @('scripts/verify-managed-payload.mjs')

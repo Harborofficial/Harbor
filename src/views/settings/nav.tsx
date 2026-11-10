@@ -10121,7 +10121,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     section: "subtitles",
     tab: "sync",
     anchorTitle: "Subtitle auto-sync",
-    keywords: ["speech recognition", "asr", "smart resync", "audio derived sync", "whisper"],
+    keywords: ["speech recognition", "asr", "smart resync", "audio derived sync", "moonshine"],
   },
   {
     label: "Match subtitles across languages (experimental)",

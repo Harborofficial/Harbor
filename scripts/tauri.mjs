@@ -24,11 +24,36 @@ const fullArgs = withWhisper
     ]
   : [cli, ...args];
 
-const child = spawn(command, fullArgs, { stdio: "inherit", cwd: process.cwd(), env: process.env });
-child.on("error", (error) => {
-  console.error("Unable to start Tauri:", error.message);
-  process.exitCode = 1;
-});
-child.on("exit", (code, signal) => {
-  process.exitCode = code ?? (signal ? 1 : 0);
-});
+function runTauri() {
+  const child = spawn(command, fullArgs, { stdio: "inherit", cwd: process.cwd(), env: process.env });
+  child.on("error", (error) => {
+    console.error("Unable to start Tauri:", error.message);
+    process.exitCode = 1;
+  });
+  child.on("exit", (code, signal) => {
+    process.exitCode = code ?? (signal ? 1 : 0);
+  });
+}
+
+// All Windows release builds carry the shared, self-contained Moonshine
+// worker. Development runs do not build it or download any language models.
+if (process.platform === "win32" && args[0] === "build") {
+  const worker = spawn(
+    "powershell.exe",
+    ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", join(scriptsDir, "build-moonshine-worker.ps1")],
+    { stdio: "inherit", cwd: process.cwd(), env: process.env },
+  );
+  worker.on("error", (error) => {
+    console.error("Unable to stage Moonshine worker:", error.message);
+    process.exitCode = 1;
+  });
+  worker.on("exit", (code) => {
+    if (code !== 0) {
+      process.exitCode = code ?? 1;
+      return;
+    }
+    runTauri();
+  });
+} else {
+  runTauri();
+}

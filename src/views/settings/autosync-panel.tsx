@@ -3,7 +3,7 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ROW_DESC, Section, ToggleRow } from "./shared";
 import { ModalButton, ROW_ACTION, SettingGroup, SettingRow, SettingsModal, Nested } from "./kit";
-import { WhisperModelRow } from "./whisper-model-row";
+import { MoonshineModelRow } from "./moonshine-model-row";
 
 export function AutoSyncPanel() {
   const t = useT();
@@ -96,11 +96,27 @@ export function AutoSyncPanel() {
               <ToggleRow
                 label={t("Smart resync with speech recognition")}
                 sub={t(
-                  "Transcribe brief speech samples on your device to synchronize difficult subtitles. Download the optional Whisper model below before using this feature.",
+                  "Transcribe brief speech samples on your device to synchronize difficult subtitles. Harbor uses an installed model matching your audio track and asks before downloading a missing one.",
                 )}
                 value={settings.subtitleAutoSyncAsr}
                 onChange={(v) => update({ subtitleAutoSyncAsr: v })}
               />
+              <SettingRow
+                label={t("Speech engine (testing)")}
+                desc={t("Automatic uses Silero first, then Moonshine when needed. Moonshine direct skips Silero timing matching for Sync from playback tests.")}
+              >
+                <select
+                  aria-label={t("Speech engine")}
+                  value={settings.subtitleAutoSyncEngine ?? "automatic"}
+                  onChange={(e) => update({
+                    subtitleAutoSyncEngine: e.target.value as "automatic" | "moonshine",
+                  })}
+                  className="min-h-10 rounded-lg border border-edge-soft bg-elevated px-3 text-sm text-ink"
+                >
+                  <option value="automatic">{t("Automatic (Silero → Moonshine)")}</option>
+                  <option value="moonshine">{t("Moonshine direct (testing)")}</option>
+                </select>
+              </SettingRow>
               <ToggleRow
                 label={t("Match subtitles across languages (experimental)")}
                 sub={t(
@@ -112,7 +128,7 @@ export function AutoSyncPanel() {
             </SettingGroup>
           </Nested>
         )}
-        <WhisperModelRow />
+        <MoonshineModelRow />
       </Section>
 
       <Section
