@@ -1787,7 +1787,6 @@ export function DetailView({
   // A plugin's own episodes are the ones that actually stream, so a resolved record may describe
   // the title but must not take the list away from the player. It only supplies the list when the
   // provider offered none.
-  const providerEpisodeList = addonNative && (capstanMeta?.meta.videos?.length ?? 0) > 0;
   const episodeFromProvider = episodeSource?.kind === "tmdb" || episodeSource?.kind === "tvdb";
   const episodeListDetail = episodeFromProvider ? episodeSource?.detail : detail;
   const episodeSeasons = episodeSource?.seasons ?? episodeListDetail?.seasons ?? [];
@@ -1798,6 +1797,11 @@ export function DetailView({
   const episodeListTvId = episodeListDetail?.id ?? 0;
   const episodeVideos =
     episodeSource?.kind === "addon" ? episodeSource.videos : cinemetaFull?.videos;
+  // An addon's own videos are the episode source for its native anime entries.
+  // Without this, type "anime" has no Kitsu identity and the page shows no list.
+  const addonEpisodeList = addonNative && (episodeVideos?.length ?? 0) > 0;
+  const providerEpisodeList =
+    addonNative && ((capstanMeta?.meta.videos?.length ?? 0) > 0 || addonEpisodeList);
   // Addon seasons describe the addon's own `videos`; a configured TMDB/TVDB
   // episode source uses the provider's own season list instead.
   const tmdbEpisodeList =
@@ -3085,7 +3089,10 @@ export function DetailView({
             <EpisodeGridSkeleton />
           ))}
 
-        {!liveContext && isAnime && (animeEpisodes.length > 1 || franchise.length > 1) && (
+        {!liveContext &&
+          !addonEpisodeList &&
+          isAnime &&
+          (animeEpisodes.length > 1 || franchise.length > 1) && (
           <FadeInUp>
             <AnimeEpisodes
               meta={playMeta}
@@ -3112,6 +3119,7 @@ export function DetailView({
 
         {!liveContext &&
           !loading &&
+          !addonEpisodeList &&
           animeUnavailable === meta.id &&
           animeEpisodes.length === 0 &&
           franchise.length <= 1 &&
@@ -3166,10 +3174,13 @@ export function DetailView({
         {!liveContext &&
           !loading &&
           !tmdbEpisodeList &&
-          !isAnime &&
+          (!isAnime || addonEpisodeList) &&
           (isSeries ||
             (addonNative &&
-              (meta.type === "channel" || meta.type === "tv" || meta.type === "other"))) &&
+              (meta.type === "anime" ||
+                meta.type === "channel" ||
+                meta.type === "tv" ||
+                meta.type === "other"))) &&
           episodeVideos &&
           (addonNative
             ? episodeVideos.length > 0
