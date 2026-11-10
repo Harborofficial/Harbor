@@ -25,7 +25,6 @@ reviews:
   path_filters:
     - "!src-tauri/vendor/**"
     - "!public/**"
-    - "!flatpak/**"
     - "!android-extension-compat/spec/**"
     - "!pnpm-lock.yaml"
 
