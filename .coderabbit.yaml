@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+tone_instructions: Be precise, professional and technically rigorous. Prioritize verified, actionable findings over
+  speculation. Explain the cause and impact concisely. Avoid unnecessary praise, repetition, style nitpicks and em
+  dashes.
+
+reviews:
+  merge_risk_instructions: Consider changes to playback, native code, account isolation, tracker synchronization,
+    downloads, persistence, optional module dependencies, and installer behavior higher risk. Assess whether the changes
+    affect other platforms or existing user data. Documentation-only and isolated cosmetic changes are generally lower
+    risk. Rate risk according to reachable failures and their impact, not just the number of files changed.
+  sequence_diagrams: false
+  suggested_labels: false
+  suggested_reviewers: false
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 0
+    drafts: false
+    base_branches:
+      - "^(main|stable-branch)$"
+  finishing_touches:
+    unit_tests:
+      enabled: false
+  
+  path_filters:
+    - "!src-tauri/vendor/**"
+    - "!public/**"
+    - "!flatpak/**"
+    - "!android-extension-compat/spec/**"
+    - "!pnpm-lock.yaml"
+
+  path_instructions:
+    - path: "**/*"
+      instructions: |
+        Prioritize functional bugs, regressions,
+        race conditions, security vulnerabilities,
+        performance issues and resource leaks.
+
+        Inspect surrounding code and related
+        implementations before reporting findings.
+
+        Explain the root cause, triggering conditions,
+        impact and suggested fix.
+
+        Avoid speculative warnings, duplicate findings,
+        style nitpicks and unnecessary refactoring.
+
+    - path: "src/**/player*/**"
+      instructions: |
+        Check playback lifecycle, mpv integration,
+        subtitle synchronization, buffering,
+        source switching and resume behavior.
+
+    - path: "harbor-core/**"
+      instructions: |
+        Check stream parsing and ranking correctness,
+        input validation, panic paths and ordering determinism.
+
+    - path: "src-tauri/**"
+      instructions: |
+        Check Rust error handling, concurrency,
+        resource cleanup and cross-platform behavior.
