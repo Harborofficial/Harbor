@@ -10,7 +10,7 @@ import {
 } from "@/lib/stremio";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { privateCwProfileId } from "@/lib/cw-profile";
-import { isFurther, itemIds, titleKeys } from "@/lib/cw-dedupe";
+import { isFurther, itemIds, recordKey, sameRecord, titleKeys } from "@/lib/cw-dedupe";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
@@ -38,7 +38,7 @@ export async function staleCwIds(
 ): Promise<Set<string>> {
   const stale = new Set<string>();
   if (visible.length === 0 || pool.length === 0) return stale;
-  const visibleSet = new Set(visible);
+  const staleRecords = new Set<string>();
   const byId = new Map<string, LibraryItem[]>();
   const byTitle = new Map<string, LibraryItem[]>();
   for (const item of pool) {
@@ -54,6 +54,9 @@ export async function staleCwIds(
       else byTitle.set(key, [item]);
     }
   }
+  const withoutCurrent = (related: Set<LibraryItem>, item: LibraryItem) => {
+    for (const row of related) if (sameRecord(row, item)) related.delete(row);
+  };
   for (const item of visible) {
     if (!item.state) continue;
     const related = new Set<LibraryItem>();
@@ -62,20 +65,37 @@ export async function staleCwIds(
     if (anime) {
       for (const key of titleKeys(item)) for (const row of byTitle.get(key) ?? []) related.add(row);
     }
-    if (
-      related.size === 0 &&
-      (anime || /^tt\d+$/.test(item._id) || item._id.startsWith("tmdb:tv:"))
-    ) {
+    // The card itself is always in the pool; exclude that record before asking
+    // whether an identity lookup is needed, or the fallback never runs.
+    withoutCurrent(related, item);
+    if (related.size === 0 && anime) {
       const ids = await relatedLibraryIds(item._id).catch(() => []);
       for (const id of ids) for (const row of byId.get(id) ?? []) related.add(row);
+      withoutCurrent(related, item);
     }
-    related.delete(item);
     if (related.size === 0) continue;
     let best = item;
     for (const row of related) if (isFurther(row, best)) best = row;
     // Only hide a card when the newer copy is actually in this row. A newer
     // copy from a hidden source must not leave the row with no card at all.
-    if (best !== item && visibleSet.has(best)) stale.add(item._id);
+    // Compare records, not object references: the pool and the row can hold
+    // separate objects for the same checkpoint.
+    if (!sameRecord(best, item) && visible.some((row) => sameRecord(row, best))) {
+      staleRecords.add(recordKey(item));
+    }
+  }
+  // The consumer can only remove whole ids. Do not remove an id while any
+  // visible record with that id survives (same-content copies at other
+  // episodes); the final dedupe then keeps the newer one.
+  const visibleById = new Map<string, LibraryItem[]>();
+  for (const item of visible) {
+    if (!item.state) continue;
+    const rows = visibleById.get(item._id);
+    if (rows) rows.push(item);
+    else visibleById.set(item._id, [item]);
+  }
+  for (const [id, rows] of visibleById) {
+    if (rows.every((row) => staleRecords.has(recordKey(row)))) stale.add(id);
   }
   return stale;
 }
@@ -254,8 +274,12 @@ export async function resurfaceCandidates(
       // of this cache, including after switching connected accounts.
     }
     if (nx) {
-      const related = await relatedLibraryIds(i._id).catch(() => []);
-      if (related.some((r) => inCw.has(r))) continue;
+      // Identity lookup only matters for anime, where one show can be in CW
+      // under a different scheme's id. Live-action ids are consistent.
+      if (isAnime) {
+        const related = await relatedLibraryIds(i._id).catch(() => []);
+        if (related.some((r) => inCw.has(r))) continue;
+      }
       out.set(i._id, nx);
     }
   }

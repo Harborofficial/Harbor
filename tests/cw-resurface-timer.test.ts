@@ -8,8 +8,10 @@ import * as cwDedupe from "../src/lib/cw-dedupe.ts";
 function harness(
   opts: {
     nextEp?: { season: number; episode: number; airDate?: string } | null;
+    relatedIds?: (id: string) => string[];
   } = {},
 ) {
+  const relatedCalls: string[] = [];
   const data = new Map<string, string>();
   const storage = {
     getItem: (k: string) => data.get(k) ?? null,
@@ -53,7 +55,12 @@ function harness(
           };
         }
         if (name.endsWith("/providers/anime-mapping")) {
-          return { relatedLibraryIds: async () => [] };
+          return {
+            relatedLibraryIds: async (id: string) => {
+              relatedCalls.push(id);
+              return opts.relatedIds?.(id) ?? [];
+            },
+          };
         }
         if (name.endsWith("/cw-dismiss")) {
           return { isCwDismissed: () => false };
@@ -70,7 +77,7 @@ function harness(
     );
     return exports;
   };
-  return { load, data };
+  return { load, data, relatedCalls };
 }
 
 test("resurfaceCandidates keeps unaired episode with waitingForAir and airDate when animeCwEnd is timer", async () => {
@@ -434,4 +441,165 @@ test("resurfaceCandidates resurfaces newly aired episode when airDate has passed
   assert.equal(candidate.season, 4);
   assert.equal(candidate.episode, 3);
   assert.equal(candidate.waitingForAir, false);
+});
+
+test("stale removal keeps the newer episode when a stale copy shares its id", async () => {
+  const h = harness();
+  const resurface = h.load("src/lib/cw-resurface.ts");
+  const older = {
+    _id: "tt_same_source",
+    type: "series",
+    name: "Same Source",
+    state: {
+      season: 1,
+      episode: 1,
+      timeOffset: 100,
+      duration: 1000,
+      lastWatched: "2026-01-01T00:00:00Z",
+    },
+  };
+  const newer = {
+    ...older,
+    state: { ...older.state, episode: 2, lastWatched: "2026-02-01T00:00:00Z" },
+  };
+
+  const stale = await resurface.staleCwIds([older, newer], [older, newer]);
+
+  assert.deepEqual(
+    [...stale],
+    [],
+    "an id is not removed while a newer record with that id is visible",
+  );
+  const afterRemoval = [older, newer].filter((item) => !stale.has(item._id));
+  const row = cwDedupe.dedupeCwItems(afterRemoval, Infinity);
+  assert.deepEqual(
+    row.map((item) => [item._id, item.state?.episode]),
+    [["tt_same_source", 2]],
+    "the row still shows the newer episode",
+  );
+});
+
+test("staleCwIds recognizes a newer visible copy held as a separate object", async () => {
+  const h = harness();
+  const resurface = h.load("src/lib/cw-resurface.ts");
+  const older = {
+    _id: "tt_old_object",
+    type: "series",
+    name: "Object Show",
+    altIds: ["tt_new_object"],
+    state: {
+      season: 1,
+      episode: 1,
+      timeOffset: 100,
+      duration: 1000,
+      lastWatched: "2026-01-01T00:00:00Z",
+    },
+  };
+  const newerVisible = {
+    _id: "tt_new_object",
+    type: "series",
+    name: "Object Show",
+    state: {
+      season: 1,
+      episode: 2,
+      timeOffset: 100,
+      duration: 1000,
+      lastWatched: "2026-02-01T00:00:00Z",
+    },
+  };
+  const newerPoolCopy = { ...newerVisible };
+
+  const stale = await resurface.staleCwIds([older, newerVisible], [older, newerPoolCopy]);
+
+  assert.deepEqual([...stale], ["tt_old_object"]);
+});
+
+test("staleCwIds does not look up identities for live-action cards", async () => {
+  const h = harness();
+  const resurface = h.load("src/lib/cw-resurface.ts");
+  const item = {
+    _id: "tt_live_action_only",
+    type: "series",
+    name: "Live Action",
+    state: { season: 1, episode: 1, timeOffset: 100, duration: 1000 },
+  };
+
+  await resurface.staleCwIds([item], [item]);
+
+  assert.deepEqual(h.relatedCalls, []);
+});
+
+test("staleCwIds runs the identity fallback when only the card itself is related", async () => {
+  const h = harness({ relatedIds: (id) => (id === "kitsu:41" ? ["kitsu:42"] : []) });
+  const resurface = h.load("src/lib/cw-resurface.ts");
+  const stale = {
+    _id: "kitsu:41",
+    type: "series",
+    isAnime: true,
+    name: "Fallback A",
+    state: {
+      season: 1,
+      episode: 1,
+      timeOffset: 100,
+      duration: 1000,
+      lastWatched: "2026-01-01T00:00:00Z",
+    },
+  };
+  const current = {
+    _id: "kitsu:42",
+    type: "series",
+    isAnime: true,
+    name: "Fallback B",
+    state: {
+      season: 1,
+      episode: 2,
+      timeOffset: 100,
+      duration: 1000,
+      lastWatched: "2026-02-01T00:00:00Z",
+    },
+  };
+
+  const result = await resurface.staleCwIds([stale, current], [{ ...stale }, current]);
+
+  assert.deepEqual([...result], ["kitsu:41"]);
+  assert.ok(h.relatedCalls.includes("kitsu:41"));
+});
+
+test("resurfaceCandidates only looks up identities for anime", async () => {
+  const h = harness();
+  const resurface = h.load("src/lib/cw-resurface.ts");
+  const live = {
+    _id: "tt_resurface_live",
+    type: "series",
+    name: "Live Resurface",
+    state: {
+      season: 1,
+      episode: 1,
+      timeOffset: 0,
+      duration: 3600000,
+      flaggedWatched: 1,
+      lastWatched: new Date().toISOString(),
+    },
+  };
+  const anime = {
+    ...live,
+    _id: "kitsu:77",
+    isAnime: true,
+    name: "Anime Resurface",
+  };
+
+  const liveResult = await resurface.resurfaceCandidates([live], new Set(), {
+    tmdbKey: "",
+    animeMode: "all",
+    animeCwEnd: "timer",
+  });
+  assert.ok(liveResult.get("tt_resurface_live"));
+  assert.deepEqual(h.relatedCalls, [], "live-action skips the identity lookup");
+
+  await resurface.resurfaceCandidates([anime], new Set(), {
+    tmdbKey: "",
+    animeMode: "all",
+    animeCwEnd: "timer",
+  });
+  assert.ok(h.relatedCalls.includes("kitsu:77"), "anime still checks its aliases");
 });

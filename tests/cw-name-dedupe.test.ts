@@ -277,3 +277,29 @@ test("unnamed entries and the limit are both kept", () => {
     ["a", "b"],
   );
 });
+
+test("a verified merge indexes title aliases without granting ownership", () => {
+  const show = (id: string, name: string, episode: number, extra: Record<string, unknown> = {}) =>
+    ({ ...series(id, name, 1, episode, 100), ...extra }) as LibraryItem;
+
+  const a = show("ttA", "Alias Show", 1, { altIds: ["ttB"] });
+  const b = show("ttB", "Alias Show: The Sequel", 2);
+  const c = show("ttC", "Alias Show: The Sequel", 1, { altIds: ["tmdb:tv:77"] });
+
+  const out = dedupeCwItems([a, b, c], 16);
+
+  assert.equal(out.length, 1);
+  assert.equal(out[0]._id, "ttB");
+  assert.deepEqual(out[0].cwMembers?.map((item) => item._id).sort(), ["ttA", "ttB"]);
+  assert.ok(!out[0].cwMembers?.some((item) => item._id === "ttC"));
+  assert.deepEqual(out[0].altIds, ["ttA"], "only the verified copy's id is an alias");
+  assert.ok(!out[0].altIds?.includes("ttC"));
+  assert.ok(!out[0].altIds?.includes("tmdb:tv:77"));
+  assert.equal(out[0].state?.episode, 2, "the further verified copy is displayed");
+
+  const d = show("ttD", "Alias Show: The Sequel", 1);
+  const again = dedupeCwItems([a, b, c, d], 16);
+  assert.equal(again.length, 1);
+  assert.deepEqual(again[0].cwMembers?.map((item) => item._id).sort(), ["ttA", "ttB"]);
+  assert.deepEqual(again[0].altIds, ["ttA"]);
+});

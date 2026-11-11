@@ -151,6 +151,22 @@ export function dedupeCwItems(items: LibraryItem[], limit: number): LibraryItem[
       ? mergeCopies(item, existing)
       : mergeCopies(existing, item);
     for (const id of itemIds(out[index])) idIndex.set(id, index);
+    // Display-only: a title discovered on either side helps later copies find
+    // this card, but never authorizes ownership (altIds/cwMembers).
+    for (const source of [existing, item]) {
+      for (const key of titleKeys(source)) {
+        if (!nameIndex.has(key)) nameIndex.set(key, index);
+      }
+    }
   }
   return out;
+}
+
+/** Stable identity of one source record, including its season/episode checkpoint. */
+export function recordKey(item: LibraryItem): string {
+  return memberKey(item);
+}
+
+export function sameRecord(a: LibraryItem, b: LibraryItem): boolean {
+  return recordKey(a) === recordKey(b);
 }
