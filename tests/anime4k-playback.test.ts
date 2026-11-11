@@ -38,9 +38,11 @@ function fixture() {
     mpvQuality: "balanced",
     playerShaders: {},
   } as Settings;
-  let effectDeps: unknown[] | undefined;
+  let effectDeps: unknown[][] = [];
+  let effectIndex = 0;
   const pending: Array<() => void> = [];
   const calls: string[][] = [];
+  const update = (patch: Partial<Settings>) => Object.assign(settings, patch);
   const bridgeRef = {
     current: {
       setAnime4kShaders: (paths: string[]) => calls.push(paths),
@@ -50,12 +52,11 @@ function fixture() {
   const mocks: Record<string, unknown> = {
     react: {
       useEffect: (fn: () => void, deps: unknown[]) => {
-        if (
-          effectDeps?.length === deps.length &&
-          deps.every((v, i) => Object.is(v, effectDeps![i]))
-        )
+        const index = effectIndex++;
+        const previous = effectDeps[index];
+        if (previous?.length === deps.length && deps.every((v, i) => Object.is(v, previous[i])))
           return;
-        effectDeps = deps;
+        effectDeps[index] = deps;
         pending.push(fn);
       },
     },
@@ -63,10 +64,7 @@ function fixture() {
     "@/lib/player/anime-src": anime,
     "@/lib/player/shader-chain": general,
     "@/lib/settings": {
-      useSettings: () => ({
-        settings,
-        update: (patch: Partial<Settings>) => Object.assign(settings, patch),
-      }),
+      useSettings: () => ({ settings, update }),
     },
   };
   const compiled = ts.transpileModule(
@@ -96,6 +94,7 @@ function fixture() {
     calls,
     bridgeRef,
     render(ready = true, width = 1920, sourceWidth = 1280) {
+      effectIndex = 0;
       const result = api.useAnime4k(
         bridgeRef as never,
         source.url,
@@ -117,6 +116,29 @@ test("an explicit anime source uses shaders even when its catalog has no anime g
   assert.deepEqual(h.api.anime4kShadersFor(h.settings, h.source, "auto"), []);
   h.source.meta.id = "anilist:123";
   assert.ok(h.api.anime4kShadersFor(h.settings, h.source, "auto").length > 0);
+});
+
+test("only-on-anime also gates an explicit mode and the startup chain", () => {
+  const h = fixture();
+  const liveAction = {
+    ...h.source,
+    isAnime: false,
+    meta: { id: "tt777", genres: ["Drama"] },
+  } as PlayerSrc;
+  assert.deepEqual(h.api.anime4kShadersFor(h.settings, liveAction, "A"), []);
+  assert.deepEqual(h.api.fullShaderChain(h.settings, liveAction, "A"), []);
+  assert.ok(h.api.anime4kShadersFor(h.settings, h.source, "A").length > 0);
+  h.settings.playerAnime4kAnimeOnly = false;
+  assert.ok(h.api.anime4kShadersFor(h.settings, liveAction, "A").length > 0);
+});
+
+test("the player menu is unavailable on non-anime while only-on-anime is set", () => {
+  const h = fixture();
+  h.source.isAnime = false;
+  h.source.meta = { id: "tt777", genres: ["Drama"] } as PlayerSrc["meta"];
+  assert.equal(h.render().available, false);
+  h.source.isAnime = true;
+  assert.equal(h.render().available, true);
 });
 
 test("tier, folder and off/on changes replace the active shader chain without changing the source", () => {
