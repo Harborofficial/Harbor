@@ -31,6 +31,7 @@ export const DEFAULT: Settings = {
     showMdblistBadge: false,
     showTraktBadge: false,
     showSimklBadge: true,
+    scaleScoreStack: true,
     showDubBadge: true,
     showCardBadges: true,
     cardAwardDisplay: "badge",

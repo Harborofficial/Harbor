@@ -129,6 +129,7 @@ export type TvCardOptions = {
   showMdblistBadge: boolean;
   showTraktBadge: boolean;
   showSimklBadge: boolean;
+  scaleScoreStack: boolean;
   showDubBadge: boolean;
   showCardBadges: boolean;
   top10Ribbon: boolean;
