@@ -1,4 +1,4 @@
-import { traktRequest, TraktApiError } from "./client";
+import { traktRequest, traktRequestWithResponse, TraktApiError } from "./client";
 import { getSession } from "./session";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { readResumeEntry, saveResumeMs } from "@/lib/resume";
@@ -152,42 +152,90 @@ export function clearCachedTraktPlaybackItems(): void {
   } catch {}
 }
 
-export async function deleteTraktPlayback(id: string): Promise<boolean> {
-  if (!id) return true;
+export async function deleteTraktPlayback(
+  id: string,
+): Promise<{ ok: boolean; retryAfterMs?: number; rateLimited?: boolean }> {
+  if (!id) return { ok: true };
+  const session = getSession();
+  if (!session) return { ok: false };
+  const account = session.username;
+  // A destructive request may not drift onto another account. Token refreshes
+  // of the same account are allowed; an account change cancels the attempt.
+  const assertCurrent = () => {
+    const current = getSession();
+    if (!current) throw new Error("Trakt session ended");
+    if (account != null) {
+      if (current.username !== account) throw new Error("Trakt account changed");
+    } else if (current !== session) {
+      throw new Error("Trakt session changed");
+    }
+  };
   try {
-    await traktRequest(`/sync/playback/${encodeURIComponent(id)}`, { method: "DELETE" });
-    return true;
+    await traktRequestWithResponse(`/sync/playback/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      assertCurrent,
+    });
+    return { ok: true };
   } catch (error) {
-    return error instanceof TraktApiError && error.status === 404;
+    if (!(error instanceof TraktApiError)) return { ok: false };
+    if (error.status === 404) return { ok: true };
+    const retryAfterMs =
+      error.retryAt != null ? Math.max(0, error.retryAt - Date.now()) : undefined;
+    return {
+      ok: false,
+      ...(retryAfterMs != null ? { retryAfterMs } : {}),
+      ...(error.status === 429 ? { rateLimited: true } : {}),
+    };
   }
 }
 
-export async function fetchTraktPlaybackItems(fresh = false): Promise<LibraryItem[]> {
-  if (!getSession()) return [];
-  let raw: RawPlayback[];
-  try {
-    raw = await traktRequest<RawPlayback[]>("/sync/playback?limit=40");
-  } catch (e) {
-    if (e instanceof TraktApiError && e.status === 404) {
-      writeCachedTraktPlaybackItems([]);
-      return [];
-    }
-    if (fresh) throw e;
-    const cached = readCachedTraktPlaybackItems();
-    if (cached.length > 0) return cached;
-    throw e;
-  }
-  if (!Array.isArray(raw)) return [];
+const PLAYBACK_PAGE_SIZE = 40;
+const PLAYBACK_MAX_PAGES = 5;
 
+export type TraktPlaybackSnapshot = { items: LibraryItem[]; complete: boolean };
+
+/** Live read used by dismissal retries. `complete` is only true when Trakt's own
+ * pagination headers prove every page was read; a missing header fails closed. */
+export async function fetchTraktPlaybackSnapshot(): Promise<TraktPlaybackSnapshot> {
+  if (!getSession()) return { items: [], complete: false };
+  const raws: RawPlayback[] = [];
+  let page = 1;
+  let pageCount = 0;
+  while (page <= PLAYBACK_MAX_PAGES) {
+    const { data, headers } = await traktRequestWithResponse<RawPlayback[]>(
+      `/sync/playback?limit=${PLAYBACK_PAGE_SIZE}&page=${page}`,
+    );
+    if (!Array.isArray(data)) throw new Error("Trakt playback response was not a list");
+    raws.push(...data);
+    if (page === 1) {
+      const headerCount = Number(headers.get("x-pagination-page-count"));
+      if (!Number.isFinite(headerCount) || headerCount < 1) {
+        return { items: itemsFromRaw(raws, false, false), complete: false };
+      }
+      pageCount = headerCount;
+    }
+    if (page >= pageCount) break;
+    page += 1;
+  }
+  return {
+    items: itemsFromRaw(raws, false, false),
+    complete: pageCount > 0 && page >= pageCount && pageCount <= PLAYBACK_MAX_PAGES,
+  };
+}
+
+function itemsFromRaw(raw: RawPlayback[], backfill: boolean, dedupe = true): LibraryItem[] {
   const items: LibraryItem[] = [];
   const seen = new Set<string>();
   for (const r of raw) {
     const item = toLibraryItem(r);
     if (!item?.state) continue;
-    const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    if (dedupe) {
+      const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+    }
     items.push(item);
+    if (!backfill) continue;
     // Same dismiss guard as Simkl: no resume backfill for dismissed cards, so a
     // background refresh cannot manufacture fresh activity that beats the dismissal.
     if (isCwDismissed(item)) continue;
@@ -216,6 +264,27 @@ export async function fetchTraktPlaybackItems(fresh = false): Promise<LibraryIte
       );
     }
   }
+  return items;
+}
+
+export async function fetchTraktPlaybackItems(fresh = false): Promise<LibraryItem[]> {
+  if (!getSession()) return [];
+  let raw: RawPlayback[];
+  try {
+    raw = await traktRequest<RawPlayback[]>("/sync/playback?limit=40");
+  } catch (e) {
+    if (e instanceof TraktApiError && e.status === 404) {
+      writeCachedTraktPlaybackItems([]);
+      return [];
+    }
+    if (fresh) throw e;
+    const cached = readCachedTraktPlaybackItems();
+    if (cached.length > 0) return cached;
+    throw e;
+  }
+  if (!Array.isArray(raw)) return [];
+
+  const items = itemsFromRaw(raw, true);
   writeCachedTraktPlaybackItems(items);
   return items;
 }

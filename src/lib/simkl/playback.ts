@@ -237,38 +237,56 @@ export function clearCachedSimklPlaybackItems(): void {
   } catch {}
 }
 
-export async function deleteSimklPlayback(id: string): Promise<boolean> {
-  if (!id) return true;
+export async function deleteSimklPlayback(
+  id: string,
+): Promise<{ ok: boolean; retryAfterMs?: number; rateLimited?: boolean }> {
+  if (!id) return { ok: true };
   try {
     await simklRequest(`/sync/playback/${encodeURIComponent(id)}`, { method: "DELETE" });
-    return true;
+    return { ok: true };
   } catch (error) {
-    return error instanceof SimklApiError && error.status === 404;
+    if (!(error instanceof SimklApiError)) return { ok: false };
+    if (error.status === 404) return { ok: true };
+    const retryAfterMs =
+      error.retryAt != null ? Math.max(0, error.retryAt - Date.now()) : undefined;
+    return {
+      ok: false,
+      ...(retryAfterMs != null ? { retryAfterMs } : {}),
+      ...(error.status === 429 || error.status === 412 ? { rateLimited: true } : {}),
+    };
   }
 }
 
-export async function fetchSimklPlaybackItems(fresh = false): Promise<LibraryItem[]> {
-  const owner = getSession();
-  if (!owner) return [];
-  let raw: RawSession[];
-  try {
-    raw = await simklRequest<RawSession[]>("/sync/playback?hide_watched=true&limit=40");
-  } catch (e) {
-    if (e instanceof SimklApiError && e.status === 404) {
-      writeCachedSimklPlaybackItems([]);
-      return [];
-    }
-    if (fresh) throw e;
-    const cached = readCachedSimklPlaybackItems();
-    if (cached.length > 0) return cached;
-    throw e;
-  }
-  if (getSession() !== owner) throw new Error("SIMKL session changed");
-  if (!Array.isArray(raw)) return [];
+const PLAYBACK_PAGE_LIMIT = 40;
 
+export type SimklPlaybackSnapshot = { items: LibraryItem[]; complete: boolean };
+
+/**
+ * Live read for dismissal retries. `hide_watched=false` is required: the regular
+ * list hides records watched after their pause, which would make a present record
+ * look deleted. `complete` still fails closed at the page limit.
+ */
+export async function fetchSimklPlaybackSnapshot(): Promise<SimklPlaybackSnapshot> {
+  const owner = getSession();
+  if (!owner) return { items: [], complete: false };
+  const raw = await simklRequest<RawSession[]>(
+    `/sync/playback?hide_watched=false&limit=${PLAYBACK_PAGE_LIMIT}`,
+  );
+  if (getSession() !== owner) throw new Error("SIMKL session changed");
+  if (!Array.isArray(raw)) throw new Error("Simkl playback response was not a list");
+  return {
+    items: await itemsFromRaw(raw, false, false),
+    complete: raw.length < PLAYBACK_PAGE_LIMIT,
+  };
+}
+
+async function itemsFromRaw(
+  raw: RawSession[],
+  backfill: boolean,
+  dedupe = true,
+): Promise<LibraryItem[]> {
   const items: LibraryItem[] = [];
   const seen = new Set<string>();
-  const seenSeries = new Set<string>();
   for (const r of raw) {
     const item = await toLibraryItem(r);
     if (!item?.state) continue;
@@ -280,14 +298,13 @@ export async function fetchSimklPlaybackItems(fresh = false): Promise<LibraryIte
       );
       if (altIds.length > 0) item.altIds = altIds;
     }
-    const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    seenSeries.add(item._id);
-    const cleanId = item._id.replace(/^(series|movie|tmdb|tmdb:tv):/, "");
-    seenSeries.add(cleanId);
-    seenSeries.add(`tmdb:tv:${cleanId}`);
+    if (dedupe) {
+      const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+    }
     items.push(item);
+    if (!backfill) continue;
     // A dismissed card must not be resurrected by this backfill: dismiss clears the
     // resume entry, and rewriting it with t=now would manufacture fresh activity that
     // beats the dismissal. Genuine new progress still surfaces via paused_at/ratio.
@@ -318,6 +335,36 @@ export async function fetchSimklPlaybackItems(fresh = false): Promise<LibraryIte
         },
       ]);
     }
+  }
+  return items;
+}
+
+export async function fetchSimklPlaybackItems(fresh = false): Promise<LibraryItem[]> {
+  const owner = getSession();
+  if (!owner) return [];
+  let raw: RawSession[];
+  try {
+    raw = await simklRequest<RawSession[]>("/sync/playback?hide_watched=true&limit=40");
+  } catch (e) {
+    if (e instanceof SimklApiError && e.status === 404) {
+      writeCachedSimklPlaybackItems([]);
+      return [];
+    }
+    if (fresh) throw e;
+    const cached = readCachedSimklPlaybackItems();
+    if (cached.length > 0) return cached;
+    throw e;
+  }
+  if (getSession() !== owner) throw new Error("SIMKL session changed");
+  if (!Array.isArray(raw)) return [];
+
+  const items = await itemsFromRaw(raw, true);
+  const seenSeries = new Set<string>();
+  for (const item of items) {
+    seenSeries.add(item._id);
+    const cleanId = item._id.replace(/^(series|movie|tmdb|tmdb:tv):/, "");
+    seenSeries.add(cleanId);
+    seenSeries.add(`tmdb:tv:${cleanId}`);
   }
 
   try {

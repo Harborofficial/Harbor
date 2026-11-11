@@ -12,10 +12,13 @@ export type TraktRequestOptions = {
 export class TraktApiError extends Error {
   public status: number;
   public body: string;
-  constructor(status: number, body: string) {
+  /** Epoch milliseconds from the response's Retry-After, when present. */
+  public retryAt?: number;
+  constructor(status: number, body: string, retryAt?: number) {
     super(`Trakt HTTP ${status}: ${body.slice(0, 200)}`);
     this.status = status;
     this.body = body;
+    this.retryAt = retryAt;
   }
 }
 
@@ -111,7 +114,36 @@ async function doFetch(path: string, opts: TraktRequestOptions): Promise<Respons
   return fetch(`${TRAKT_API_BASE}${path}`, init);
 }
 
-export async function traktRequest<T>(path: string, opts: TraktRequestOptions = {}): Promise<T> {
+export type TraktResponse<T> = { data: T; status: number; headers: Headers };
+
+function retryDelayMs(header: string | null): number {
+  if (!header) return 1_000;
+  const seconds = Number(header);
+  if (Number.isFinite(seconds)) return Math.min(Math.max(seconds, 1), 30) * 1_000;
+  // Trakt documents Retry-After as seconds, but HTTP allows a date. An
+  // unparseable value must not collapse into an immediate retry.
+  const at = Date.parse(header);
+  if (Number.isFinite(at)) {
+    return Math.min(Math.max(at - Date.now(), 1_000), 30_000);
+  }
+  return 1_000;
+}
+
+function retryAtFromResponse(res: Response): number | undefined {
+  const header = res.headers.get("retry-after");
+  if (!header) return undefined;
+  const seconds = Number(header);
+  if (Number.isFinite(seconds) && seconds >= 0) return Date.now() + seconds * 1000;
+  const at = Date.parse(header);
+  return Number.isFinite(at) ? at : undefined;
+}
+
+/** Same request path as traktRequest, keeping the status and headers for callers
+ * that need pagination or Retry-After metadata. */
+export async function traktRequestWithResponse<T>(
+  path: string,
+  opts: TraktRequestOptions = {},
+): Promise<TraktResponse<T>> {
   let res = await doFetch(path, opts);
 
   if (res.status === 401 && opts.authed !== false) {
@@ -121,17 +153,21 @@ export async function traktRequest<T>(path: string, opts: TraktRequestOptions = 
   }
 
   if (res.status === 429) {
-    const retry = Number(res.headers.get("retry-after") ?? "1");
-    const waitMs = Math.min(Math.max(retry, 1), 30) * 1000;
-    await new Promise((r) => setTimeout(r, waitMs));
+    await new Promise((r) => setTimeout(r, retryDelayMs(res.headers.get("retry-after"))));
     res = await doFetch(path, opts);
   }
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new TraktApiError(res.status, body);
+    throw new TraktApiError(res.status, body, retryAtFromResponse(res));
   }
 
-  if (res.status === 204) return undefined as unknown as T;
-  return (await res.json()) as T;
+  if (res.status === 204) {
+    return { data: undefined as unknown as T, status: 204, headers: res.headers };
+  }
+  return { data: (await res.json()) as T, status: res.status, headers: res.headers };
+}
+
+export async function traktRequest<T>(path: string, opts: TraktRequestOptions = {}): Promise<T> {
+  return (await traktRequestWithResponse<T>(path, opts)).data;
 }

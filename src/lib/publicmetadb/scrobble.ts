@@ -166,17 +166,30 @@ export async function pmdbSaveResume(
   }
 }
 
-export async function pmdbDeleteResume(resumeId: string): Promise<boolean> {
-  if (!isAuthenticated() || !resumeId) return false;
+export async function pmdbDeleteResumeOutcome(
+  resumeId: string,
+): Promise<{ ok: boolean; retryAfterMs?: number; rateLimited?: boolean }> {
+  if (!isAuthenticated() || !resumeId) return { ok: false };
 
   try {
     await pmdbRequest(`/api/external/resume/${encodeURIComponent(resumeId)}`, {
       method: "DELETE",
     });
-    return true;
+    return { ok: true };
   } catch (err) {
-    if (err instanceof PmdbApiError && err.status === 404) return true;
-    console.error("PublicMetaDB resume delete failed:", err);
-    return false;
+    if (err instanceof PmdbApiError) {
+      if (err.status === 404) return { ok: true };
+      const retryAfterMs = err.retryAt != null ? Math.max(0, err.retryAt - Date.now()) : undefined;
+      return {
+        ok: false,
+        ...(retryAfterMs != null ? { retryAfterMs } : {}),
+        ...(err.status === 429 ? { rateLimited: true } : {}),
+      };
+    }
+    return { ok: false };
   }
+}
+
+export async function pmdbDeleteResume(resumeId: string): Promise<boolean> {
+  return (await pmdbDeleteResumeOutcome(resumeId)).ok;
 }

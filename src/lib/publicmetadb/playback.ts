@@ -107,15 +107,31 @@ async function resolvePlaybackImdbIds(points: PmdbResumePoint[]): Promise<Map<st
   return found;
 }
 
-async function fetchAllResumePoints(fresh = false): Promise<PmdbResumePoint[]> {
-  const out: PmdbResumePoint[] = [];
+type ResumePages = {
+  points: PmdbResumePoint[];
+  totalPages: number;
+  totalPagesKnown: boolean;
+  pagesFetched: number;
+  invalidPage: boolean;
+};
+
+async function readResumePages(fresh = false): Promise<ResumePages> {
+  const points: PmdbResumePoint[] = [];
+  let totalPages = 1;
+  let totalPagesKnown = false;
+  let pagesFetched = 0;
+  let invalidPage = false;
   try {
     const first = await pmdbRequest<PmdbResumeResponse>(
       `/api/external/resume?page=1&perPage=${RESUME_PER_PAGE}`,
       { method: "GET" },
     );
-    if (Array.isArray(first?.items)) out.push(...first.items);
-    const totalPages = Math.max(1, Number(first?.totalPages ?? 1) || 1);
+    if (!Array.isArray(first?.items)) throw new Error("PublicMetaDB resume page was not a list");
+    points.push(...first.items);
+    pagesFetched = 1;
+    const declared = Number(first?.totalPages);
+    totalPagesKnown = Number.isFinite(declared) && declared >= 1;
+    totalPages = totalPagesKnown ? Math.floor(declared) : 1;
     const pages = Math.min(totalPages, RESUME_MAX_PAGES);
     for (let page = 2; page <= pages; page++) {
       try {
@@ -123,8 +139,14 @@ async function fetchAllResumePoints(fresh = false): Promise<PmdbResumePoint[]> {
           `/api/external/resume?page=${page}&perPage=${RESUME_PER_PAGE}`,
           { method: "GET" },
         );
-        if (!Array.isArray(data?.items) || data.items.length === 0) break;
-        out.push(...data.items);
+        // A missing list or an early empty page means the walk did not reach the
+        // documented end of the list, so absence cannot be proven.
+        if (!Array.isArray(data?.items) || data.items.length === 0) {
+          invalidPage = true;
+          break;
+        }
+        points.push(...data.items);
+        pagesFetched = page;
       } catch (error) {
         if (fresh) throw error;
         break;
@@ -132,18 +154,20 @@ async function fetchAllResumePoints(fresh = false): Promise<PmdbResumePoint[]> {
     }
   } catch (error) {
     if (fresh) throw error;
-    return out;
   }
-  return out;
+  return { points, totalPages, totalPagesKnown, pagesFetched, invalidPage };
 }
 
-export async function fetchPublicMetaDbPlaybackItems(fresh = false): Promise<LibraryItem[]> {
-  if (!isAuthenticated()) return [];
+async function fetchAllResumePoints(fresh = false): Promise<PmdbResumePoint[]> {
+  return (await readResumePages(fresh)).points;
+}
 
-  const all = await fetchAllResumePoints(fresh);
-  if (all.length === 0) return [];
-
-  const candidates = all.filter((raw) => toLibraryItem(raw) !== null);
+async function mapResumePoints(
+  points: PmdbResumePoint[],
+  backfill: boolean,
+  dedupe = true,
+): Promise<LibraryItem[]> {
+  const candidates = points.filter((raw) => toLibraryItem(raw) !== null);
   if (candidates.length === 0) return [];
 
   const imdbByTmdb = await resolvePlaybackImdbIds(candidates);
@@ -154,12 +178,14 @@ export async function fetchPublicMetaDbPlaybackItems(fresh = false): Promise<Lib
     const item = toLibraryItem(raw, imdbByTmdb.get(mappingKey(raw)));
     if (!item?.state) continue;
 
-    const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    if (dedupe) {
+      const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+    }
     items.push(item);
 
-    if (isCwDismissed(item)) continue;
+    if (!backfill || isCwDismissed(item)) continue;
 
     const existing = readResumeEntry(item._id, item.state.season, item.state.episode);
     const remoteT = Date.parse(item.state.lastWatched ?? "");
@@ -184,4 +210,24 @@ export async function fetchPublicMetaDbPlaybackItems(fresh = false): Promise<Lib
   }
 
   return items;
+}
+
+export type PublicMetaDbPlaybackSnapshot = { items: LibraryItem[]; complete: boolean };
+
+export async function fetchPublicMetaDbPlaybackSnapshot(): Promise<PublicMetaDbPlaybackSnapshot> {
+  if (!isAuthenticated()) return { items: [], complete: false };
+  const pages = await readResumePages(true);
+  const items = await mapResumePoints(pages.points, false, false);
+  const complete =
+    pages.totalPagesKnown &&
+    !pages.invalidPage &&
+    pages.pagesFetched === pages.totalPages &&
+    pages.totalPages <= RESUME_MAX_PAGES;
+  return { items, complete };
+}
+
+export async function fetchPublicMetaDbPlaybackItems(fresh = false): Promise<LibraryItem[]> {
+  if (!isAuthenticated()) return [];
+  const all = await fetchAllResumePoints(fresh);
+  return mapResumePoints(all, true);
 }
