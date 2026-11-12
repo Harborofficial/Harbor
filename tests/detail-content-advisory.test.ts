@@ -347,6 +347,12 @@ test("detail view: avoids unnecessary IMDb resolution lookups and eliminates pag
     /const inferredImdb = useImdbId\(meta, settings\.tmdbKey, \{\s*enabled: !existingImdbId && !isParentsGuideHidden,\s*\}\);/,
   );
 
+  // Inferred IMDb ID is only resolved for content advisory when verified
+  assert.match(
+    detail,
+    /const resolvedParentsGuideImdb =\s*existingImdbId \?\? \(inferredImdb\.verified \? inferredImdb\.id : null\);/,
+  );
+
   // DetailView does NOT invoke useParentsGuide at page level
   assert.equal(detail.includes("useParentsGuide("), false);
 

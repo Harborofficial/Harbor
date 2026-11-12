@@ -453,7 +453,8 @@ export function DetailView({
   const inferredImdb = useImdbId(meta, settings.tmdbKey, {
     enabled: !existingImdbId && !isParentsGuideHidden,
   });
-  const resolvedParentsGuideImdb = existingImdbId ?? inferredImdb.id;
+  const resolvedParentsGuideImdb =
+    existingImdbId ?? (inferredImdb.verified ? inferredImdb.id : null);
   const inSession = roomSnapshot.state === "joined" && roomSnapshot.participants.length >= 2;
   useScrollMemory(`meta:${meta.id}`, scrollRef, settings.resumeDetailScroll, true);
 
