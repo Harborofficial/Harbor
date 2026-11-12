@@ -145,7 +145,7 @@ export function NuvioProfilesTab() {
             type="button"
             onClick={refresh}
             disabled={loading}
-            className="ml-4 flex shrink-0 items-center gap-1.5 text-xs text-ink-subtle transition hover:text-ink"
+            className="ms-4 flex shrink-0 items-center gap-1.5 text-xs text-ink-subtle transition hover:text-ink"
             title={t("Sync profiles now")}
           >
             <RefreshCw size={12} className={loading ? "animate-spin" : ""} />

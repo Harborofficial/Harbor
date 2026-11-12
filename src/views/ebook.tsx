@@ -2323,13 +2323,13 @@ function EBookChapterSection({
       <div className="relative">
         <Search
           size={18}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-subtle"
+          className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-ink-subtle"
         />
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("Search chapters...")}
-          className="h-11 w-full rounded-lg bg-canvas pl-11 pr-4 text-[14px] text-ink ring-1 ring-inset ring-edge-soft transition-colors placeholder:text-ink-subtle focus:ring-edge focus:outline-none"
+          className="h-11 w-full rounded-lg bg-canvas ps-11 pe-4 text-[14px] text-ink ring-1 ring-inset ring-edge-soft transition-colors placeholder:text-ink-subtle focus:ring-edge focus:outline-none"
         />
       </div>
 

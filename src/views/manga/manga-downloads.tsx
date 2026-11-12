@@ -137,7 +137,7 @@ function DownloadGroupSection({
               <div className="flex shrink-0 items-center gap-1.5">
                 {active ? (
                   <>
-                    <span className="mr-1 text-[12px] tabular-nums text-ink-muted">
+                    <span className="me-1 text-[12px] tabular-nums text-ink-muted">
                       {c.rec!.total > 0
                         ? `${Math.min(c.rec!.done, c.rec!.total)} / ${c.rec!.total}`
                         : t("Resolving pages")}

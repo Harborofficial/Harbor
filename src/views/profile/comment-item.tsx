@@ -219,7 +219,7 @@ export function CommentItem({
               disabled={!signedIn}
               aria-pressed={!!c.liked}
               aria-label={c.liked ? t("Unlike comment") : t("Like comment")}
-              className={`-ml-2 inline-flex h-8 items-center gap-1.5 rounded-[8px] px-2 text-[12px] tabular-nums transition-colors disabled:cursor-default ${
+              className={`-ms-2 inline-flex h-8 items-center gap-1.5 rounded-[8px] px-2 text-[12px] tabular-nums transition-colors disabled:cursor-default ${
                 c.liked
                   ? "text-danger"
                   : `text-ink-subtle ${signedIn ? "hover:text-ink-muted" : ""}`
@@ -279,7 +279,7 @@ export function CommentItem({
         </p>
       )}
       {replies && replies.length > 0 && (
-        <div className="ml-12 flex flex-col">
+        <div className="ms-12 flex flex-col">
           <button
             type="button"
             onClick={() => setShowReplies((v) => !v)}
@@ -297,7 +297,7 @@ export function CommentItem({
                 : t("Show {count} replies", { count: replies.length })}
           </button>
           {showReplies && (
-            <div className="flex flex-col border-l border-edge-soft pl-2">
+            <div className="flex flex-col border-s border-edge-soft ps-2">
               {replies.map((r) => (
                 <CommentItem
                   key={r.id}

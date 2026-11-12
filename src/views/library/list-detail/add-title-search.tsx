@@ -114,14 +114,14 @@ export function AddTitleSearch({
         <SearchIcon
           size={17}
           strokeWidth={2.2}
-          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-subtle"
+          className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ink-subtle"
         />
         <input
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("Add a movie or show to this list...")}
-          className="h-12 w-full rounded-full bg-elevated/40 pl-11 pr-11 text-[14px] text-ink outline-none ring-1 ring-edge-soft/60 transition-shadow placeholder:text-ink-subtle focus:ring-edge"
+          className="h-12 w-full rounded-full bg-elevated/40 ps-11 pe-11 text-[14px] text-ink outline-none ring-1 ring-edge-soft/60 transition-shadow placeholder:text-ink-subtle focus:ring-edge"
         />
         {query && (
           <button
@@ -131,7 +131,7 @@ export function AddTitleSearch({
               inputRef.current?.focus();
             }}
             aria-label={t("Clear")}
-            className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+            className="absolute end-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
           >
             <X size={16} strokeWidth={2.3} />
           </button>

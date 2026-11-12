@@ -324,15 +324,15 @@ function WatchTimePill({ totalMinutes }: { totalMinutes: number }) {
         <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
           {a}
         </span>
-        <span className="ml-1 text-[17px] font-semibold text-ink">{pad(aVal)}</span>
-        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+        <span className="ms-1 text-[17px] font-semibold text-ink">{pad(aVal)}</span>
+        <span className="ms-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
           {b}
         </span>
-        <span className="ml-1 text-[17px] font-semibold text-ink">{pad(bVal)}</span>
-        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+        <span className="ms-1 text-[17px] font-semibold text-ink">{pad(bVal)}</span>
+        <span className="ms-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
           {c}
         </span>
-        <span className="ml-1 text-[17px] font-semibold text-ink">{pad(cVal)}</span>
+        <span className="ms-1 text-[17px] font-semibold text-ink">{pad(cVal)}</span>
       </span>
       <span className="text-[11px] uppercase tracking-[0.1em] text-ink-subtle">
         {t("Watch Time")}

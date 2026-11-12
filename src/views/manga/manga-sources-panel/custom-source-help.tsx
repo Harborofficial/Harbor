@@ -30,7 +30,7 @@ export function CustomSourceHelp() {
       </p>
 
       <Section title={t("1. Fill in the top")}>
-        <ul className="flex list-disc flex-col gap-1 pl-5">
+        <ul className="flex list-disc flex-col gap-1 ps-5">
           <li>
             <b>baseUrl</b>: {t("the site root, like")} <C>https://example-manga.test</C>.
           </li>
@@ -45,7 +45,7 @@ export function CustomSourceHelp() {
       </Section>
 
       <Section title={t("2. Selector syntax")}>
-        <ul className="flex list-disc flex-col gap-1 pl-5">
+        <ul className="flex list-disc flex-col gap-1 ps-5">
           <li>
             <C>.title</C> {t("reads the text inside the first match.")}
           </li>
@@ -65,7 +65,7 @@ export function CustomSourceHelp() {
       </Section>
 
       <Section title={t("3. The four blocks")}>
-        <ul className="flex list-disc flex-col gap-1 pl-5">
+        <ul className="flex list-disc flex-col gap-1 ps-5">
           <li>
             <b>list</b>: {t("each card on a browse/search page.")} <b>item</b>{" "}
             {t("is the box around one manga; inside it")} <b>link</b> {t("is the manga URL")},{" "}
@@ -87,7 +87,7 @@ export function CustomSourceHelp() {
       </Section>
 
       <Section title={t("4. Paging + search tokens")}>
-        <ul className="flex list-disc flex-col gap-1 pl-5">
+        <ul className="flex list-disc flex-col gap-1 ps-5">
           <li>
             <C>{"{query}"}</C> {t("is the search text (searchPath only).")}
           </li>
@@ -110,7 +110,7 @@ export function CustomSourceHelp() {
       </Section>
 
       <Section title={t("5. Optional power fields")}>
-        <ul className="flex list-disc flex-col gap-1 pl-5">
+        <ul className="flex list-disc flex-col gap-1 ps-5">
           <li>
             <b>chapters.listUrl</b>:{" "}
             {t(
@@ -134,7 +134,7 @@ export function CustomSourceHelp() {
       </Section>
 
       <Section title={t("6. How to find a selector")}>
-        <ul className="flex list-disc flex-col gap-1 pl-5">
+        <ul className="flex list-disc flex-col gap-1 ps-5">
           <li>
             {t(
               "Open the site in a browser. Right-click the thing you want (a cover, a title, a chapter link) and choose Inspect.",
@@ -152,7 +152,7 @@ export function CustomSourceHelp() {
       </Section>
 
       <Section title={t("Rules + limits")}>
-        <ul className="flex list-disc flex-col gap-1 pl-5">
+        <ul className="flex list-disc flex-col gap-1 ps-5">
           <li>
             <b>{t("Publicly accessible pages only.")}</b>{" "}
             {t(

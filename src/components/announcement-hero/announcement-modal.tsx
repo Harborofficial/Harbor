@@ -82,7 +82,7 @@ export function AnnouncementModal({
             </p>
           )}
           {announcement.body && announcement.body.length > 0 && (
-            <div className="mt-5 flex max-h-[46vh] flex-col gap-5 overflow-y-auto pr-1">
+            <div className="mt-5 flex max-h-[46vh] flex-col gap-5 overflow-y-auto pe-1">
               {announcement.body.map((section, i) => (
                 <div key={i} className="flex flex-col gap-2">
                   {section.heading && (
