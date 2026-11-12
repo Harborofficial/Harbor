@@ -1,19 +1,51 @@
 import { useState, useEffect } from "react";
-import { fetchImdbParentsGuide, type ParentsGuideResult } from "@/lib/providers/imdb-parents-guide";
+import {
+  fetchImdbParentsGuide,
+  getParentsGuideCacheEntry,
+  type ParentsGuideResult,
+} from "@/lib/providers/imdb-parents-guide";
 
-export function useParentsGuide(imdbId: string | null | undefined): {
+export function useParentsGuide(
+  imdbId: string | null | undefined,
+  options?: { enabled?: boolean },
+): {
   guide: ParentsGuideResult | null;
   loading: boolean;
   hasData: boolean;
 } {
-  const [guide, setGuide] = useState<ParentsGuideResult | null>(null);
+  const enabled = options?.enabled ?? true;
+  const normalizedId = imdbId && /^tt\d+$/.test(imdbId.trim()) ? imdbId.trim() : null;
+
+  const [state, setState] = useState<{
+    id: string | null;
+    guide: ParentsGuideResult | null;
+  }>(() => {
+    if (!enabled || !normalizedId) {
+      return { id: null, guide: null };
+    }
+    const cached = getParentsGuideCacheEntry(normalizedId);
+    if (cached && cached.expiresAt > Date.now()) {
+      return { id: normalizedId, guide: cached.data };
+    }
+    return { id: null, guide: null };
+  });
+
   const [loading, setLoading] = useState<boolean>(() => {
-    return Boolean(imdbId && /^tt\d+$/.test(imdbId.trim()));
+    if (!enabled || !normalizedId) return false;
+    const cached = getParentsGuideCacheEntry(normalizedId);
+    return !(cached && cached.expiresAt > Date.now());
   });
 
   useEffect(() => {
-    if (!imdbId || !/^tt\d+$/.test(imdbId.trim())) {
-      setGuide(null);
+    if (!enabled || !normalizedId) {
+      setState({ id: null, guide: null });
+      setLoading(false);
+      return;
+    }
+
+    const cached = getParentsGuideCacheEntry(normalizedId);
+    if (cached && cached.expiresAt > Date.now()) {
+      setState({ id: normalizedId, guide: cached.data });
       setLoading(false);
       return;
     }
@@ -21,16 +53,16 @@ export function useParentsGuide(imdbId: string | null | undefined): {
     let cancelled = false;
     setLoading(true);
 
-    fetchImdbParentsGuide(imdbId)
+    fetchImdbParentsGuide(normalizedId)
       .then((res) => {
         if (!cancelled) {
-          setGuide(res);
+          setState({ id: normalizedId, guide: res });
           setLoading(false);
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setGuide(null);
+          setState({ id: normalizedId, guide: null });
           setLoading(false);
         }
       });
@@ -38,8 +70,10 @@ export function useParentsGuide(imdbId: string | null | undefined): {
     return () => {
       cancelled = true;
     };
-  }, [imdbId]);
+  }, [normalizedId, enabled]);
 
+  // Associate fetched results with their IMDb ID: only expose data matching currently resolved title
+  const guide = state.id === normalizedId ? state.guide : null;
   const hasData = Boolean(guide && guide.categories.length > 0);
 
   return { guide, loading, hasData };

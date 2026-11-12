@@ -1,8 +1,13 @@
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
+import { readFileSync } from "node:fs";
+// @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import "./_localstorage-stub.ts";
+
+const at = (path: string) => new URL(`../${path}`, import.meta.url);
+const read = (path: string) => readFileSync(at(path), "utf8");
 import {
   moveSection,
   orderedSectionKeys,
@@ -325,4 +330,90 @@ test("imdb advisory notes: parses totalItems count when guideItems exceeds fetch
   assert.equal(res.categories[0].totalItems, 85);
 
   clearParentsGuideCache();
+});
+
+test("detail view: avoids unnecessary IMDb resolution lookups and eliminates page-level advisory requests", () => {
+  const detail = read("src/views/detail.tsx");
+
+  // Reuses existing IMDb ID directly from meta/detail/episodes
+  assert.match(
+    detail,
+    /const existingImdbId =\s*\(meta\.id\.startsWith\("tt"\) \? meta\.id : null\) \?\?\s*detail\?\.imdbId \?\?\s*animeEpisodes\.find\(\(e\) => e\.imdbId\)\?\.imdbId \?\?\s*null;/,
+  );
+
+  // useImdbId is only enabled when no existing IMDb ID is found and Content Advisory is not hidden
+  assert.match(
+    detail,
+    /const inferredImdb = useImdbId\(meta, settings\.tmdbKey, \{\s*enabled: !existingImdbId && !isParentsGuideHidden,\s*\}\);/,
+  );
+
+  // DetailView does NOT invoke useParentsGuide at page level
+  assert.equal(detail.includes("useParentsGuide("), false);
+
+  // In rail sections, parentsGuide is mounted via ParentsGuidePanel without passing eager page-level guide data
+  assert.match(
+    detail,
+    /if \(resolvedParentsGuideImdb && !isParentsGuideHidden\) \{\s*railSections\.push\(\{\s*key: "parentsGuide",\s*label: t\("Content Advisory"\),\s*minHeight: 60,\s*node: <ParentsGuidePanel imdbId=\{resolvedParentsGuideImdb\} \/>,\s*\}\);/,
+  );
+});
+
+test("useParentsGuide hook: binds fetched data strictly to IMDb ID preventing stale title data", () => {
+  const hook = read("src/views/detail/use-parents-guide.ts");
+
+  // Associates state with id
+  assert.match(
+    hook,
+    /const \[state, setState\] = useState<\{\s*id: string \| null;\s*guide: ParentsGuideResult \| null;/,
+  );
+
+  // Strictly returns guide only when matching the normalized ID
+  assert.match(hook, /const guide = state\.id === normalizedId \? state\.guide : null;/);
+
+  // Accepts enabled option to prevent eager fetching when section is collapsed
+  assert.match(
+    hook,
+    /export function useParentsGuide\(\s*imdbId: string \| null \| undefined,\s*options\?: \{ enabled\?: boolean \},/,
+  );
+  assert.match(hook, /if \(!enabled \|\| !normalizedId\) \{/);
+});
+
+test("parents guide panel: defers fetching until section is expanded and renders notes only when category is expanded", () => {
+  const panel = read("src/views/detail/parents-guide-panel.tsx");
+
+  // Hook fetching is gated by !sectionCollapsed
+  assert.match(
+    panel,
+    /const isFetchEnabled = propGuide !== undefined \? false : !sectionCollapsed;/,
+  );
+  assert.match(
+    panel,
+    /const internalData = useParentsGuide\(propGuide === undefined \? imdbId : null, \{\s*enabled: isFetchEnabled,\s*\}\);/,
+  );
+
+  // Collapsed section does not render category rows
+  assert.match(panel, /\{!sectionCollapsed && \(/);
+
+  // CategoryRow only renders detailed notes and spoilers when expanded
+  assert.match(panel, /\{expanded && \(\s*<div\s*className="flex flex-col gap-2\.5/);
+});
+
+test("parents guide panel: implements full keyboard and focus accessibility with aria-expanded and inert", () => {
+  const panel = read("src/views/detail/parents-guide-panel.tsx");
+
+  // Main section expand toggle button has aria-expanded and aria-controls
+  assert.match(panel, /aria-expanded=\{!sectionCollapsed\}/);
+  assert.match(panel, /aria-controls="parents-guide-content"/);
+
+  // Collapsed content area is made inert and aria-hidden
+  assert.match(panel, /id="parents-guide-content"/);
+  assert.match(panel, /inert=\{sectionCollapsed \? true : undefined\}/);
+  assert.match(panel, /aria-hidden=\{sectionCollapsed \? true : undefined\}/);
+
+  // Category toggle button has aria-expanded and aria-controls
+  assert.match(panel, /aria-expanded=\{expanded\}/);
+  assert.match(panel, /aria-controls=\{contentId\}/);
+
+  // Category accordion container has inert and aria-hidden when not expanded
+  assert.match(panel, /inert=\{!expanded \? true : undefined\}/);
+  assert.match(panel, /aria-hidden=\{!expanded \? true : undefined\}/);
 });

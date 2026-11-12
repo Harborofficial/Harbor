@@ -9,9 +9,18 @@ export type ResolvedImdb = { id: string | null; verified: boolean };
 
 const UNRESOLVED: ResolvedImdb = { id: null, verified: false };
 
-export function useImdbId(meta: Meta, tmdbKey: string | undefined): ResolvedImdb {
+export function useImdbId(
+  meta: Meta,
+  tmdbKey: string | undefined,
+  options?: { enabled?: boolean },
+): ResolvedImdb {
+  const enabled = options?.enabled ?? true;
   const [resolved, setResolved] = useState<ResolvedImdb>(UNRESOLVED);
   useEffect(() => {
+    if (!enabled) {
+      setResolved(UNRESOLVED);
+      return;
+    }
     let cancelled = false;
     const set = (r: ResolvedImdb) => {
       if (!cancelled) setResolved(r);
@@ -68,6 +77,6 @@ export function useImdbId(meta: Meta, tmdbKey: string | undefined): ResolvedImdb
     return () => {
       cancelled = true;
     };
-  }, [meta.id, meta.type, meta.addonOrigin?.id, tmdbKey]);
+  }, [meta.id, meta.type, meta.addonOrigin?.id, tmdbKey, enabled]);
   return resolved;
 }

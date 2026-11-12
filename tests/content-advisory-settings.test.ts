@@ -112,6 +112,6 @@ test("profile background adapts slider units and reloads when the picker opens",
   assert.match(picker, /setDim\(pct\);\s*void savePickerBgDim\(pct\);/);
   assert.match(
     modal,
-    /if \(!pickerOpen\) return;\s*let alive = true;[\s\S]*loadPickerBg\(\)[\s\S]*\}, \[pickerOpen\]\)/,
+    /if \(!pickerOpen\) return;\s*let alive = true;[\s\S]*loadPickerBg\([^)]*\)[\s\S]*\}, \[pickerOpen(?:, isNuvio)?\]\)/,
   );
 });

@@ -50,9 +50,6 @@ export function ParentsGuidePanel({
   loading?: boolean;
 }) {
   const t = useT();
-  const internalData = useParentsGuide(propGuide === undefined ? imdbId : null);
-  const guide = propGuide !== undefined ? propGuide : internalData.guide;
-  const loading = propLoading !== undefined ? propLoading : internalData.loading;
 
   const [keepExpanded, setKeepExpanded] = useState<boolean>(() => {
     try {
@@ -67,6 +64,14 @@ export function ParentsGuidePanel({
   const [expandedCats, setExpandedCats] = useState<Set<string>>(() => new Set());
   const [revealedSpoilers, setRevealedSpoilers] = useState<Set<string>>(() => new Set());
 
+  // Only enable internal fetching if the section is expanded (or keepExpanded)
+  const isFetchEnabled = propGuide !== undefined ? false : !sectionCollapsed;
+  const internalData = useParentsGuide(propGuide === undefined ? imdbId : null, {
+    enabled: isFetchEnabled,
+  });
+  const guide = propGuide !== undefined ? propGuide : internalData.guide;
+  const loading = propLoading !== undefined ? propLoading : internalData.loading;
+
   const handleKeepExpandedChange = (checked: boolean) => {
     setKeepExpanded(checked);
     try {
@@ -80,7 +85,8 @@ export function ParentsGuidePanel({
     }
   };
 
-  if (!loading && (!guide || guide.categories.length === 0)) {
+  // When guide is explicitly passed from outside, hide if empty & not loading
+  if (propGuide !== undefined && !loading && (!guide || guide.categories.length === 0)) {
     return null;
   }
 
@@ -141,6 +147,7 @@ export function ParentsGuidePanel({
             onClick={() => setSectionCollapsed((c) => !c)}
             className="flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-expanded={!sectionCollapsed}
+            aria-controls="parents-guide-content"
           >
             <span>{sectionCollapsed ? t("Expand") : t("Collapse")}</span>
             <ChevronDown
@@ -164,31 +171,39 @@ export function ParentsGuidePanel({
 
       {/* Collapsible Content Area */}
       <div
+        id="parents-guide-content"
         className={`grid transition-[grid-template-rows] duration-200 ease-out ${
           sectionCollapsed ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
         }`}
+        inert={sectionCollapsed ? true : undefined}
+        aria-hidden={sectionCollapsed ? true : undefined}
       >
         <div className="overflow-hidden">
-          {loading && !guide ? (
-            <div className="flex items-center gap-2 py-6 text-[13px] text-ink-subtle">
-              <Loader2 size={14} className="animate-spin" />
-              {t("Loading Content Advisory…")}
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2.5 pt-1">
-              {guide?.categories.map((cat) => (
-                <CategoryRow
-                  key={cat.id || cat.label}
-                  category={cat}
-                  expanded={expandedCats.has(cat.id)}
-                  spoilersRevealed={revealedSpoilers.has(cat.id)}
-                  imdbGuideUrl={imdbGuideUrl}
-                  onToggle={() => toggleCategory(cat.id)}
-                  onToggleSpoilers={() => toggleSpoilers(cat.id)}
-                />
-              ))}
-            </div>
-          )}
+          {!sectionCollapsed &&
+            (loading && !guide ? (
+              <div className="flex items-center gap-2 py-6 text-[13px] text-ink-subtle">
+                <Loader2 size={14} className="animate-spin" />
+                {t("Loading Content Advisory…")}
+              </div>
+            ) : !guide || guide.categories.length === 0 ? (
+              <div className="py-4 text-[13px] text-ink-muted">
+                {t("No detailed content advisory submitted for this title on IMDb.")}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5 pt-1">
+                {guide.categories.map((cat) => (
+                  <CategoryRow
+                    key={cat.id || cat.label}
+                    category={cat}
+                    expanded={expandedCats.has(cat.id)}
+                    spoilersRevealed={revealedSpoilers.has(cat.id)}
+                    imdbGuideUrl={imdbGuideUrl}
+                    onToggle={() => toggleCategory(cat.id)}
+                    onToggleSpoilers={() => toggleSpoilers(cat.id)}
+                  />
+                ))}
+              </div>
+            ))}
         </div>
       </div>
     </section>
@@ -218,12 +233,15 @@ function CategoryRow({
   const plainItems = category.items.filter((item) => !item.isSpoiler);
   const spoilerItems = category.items.filter((item) => item.isSpoiler);
   const hasNotes = category.items.length > 0;
+  const contentId = `parents-guide-cat-${category.id}`;
 
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-edge-soft/60 bg-white/[0.04] transition-colors duration-150 hover:bg-white/[0.07]">
       <button
         type="button"
         onClick={onToggle}
+        aria-expanded={expanded}
+        aria-controls={contentId}
         className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         {/* Left side: Category Icon + Category Label */}
@@ -270,99 +288,100 @@ function CategoryRow({
 
       {/* Accordion Notes Dropdown */}
       <div
+        id={contentId}
         className={`grid transition-[grid-template-rows] duration-200 ease-out ${
           expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
+        inert={!expanded ? true : undefined}
+        aria-hidden={!expanded ? true : undefined}
       >
         <div className="overflow-hidden">
-          <div
-            className={`flex flex-col gap-2.5 border-t border-edge-soft/40 bg-white/[0.02] px-4 py-3.5 transition-opacity duration-200 ${
-              expanded ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            {category.totalVotes > 0 && (
-              <div className="text-[11.5px] font-medium text-ink-subtle">
-                {t("{votedFor} of {totalVotes} users rated {severity}", {
-                  votedFor: category.severityVotes,
-                  totalVotes: category.totalVotes,
-                  severity: category.severity.toLowerCase(),
-                })}
-              </div>
-            )}
+          {expanded && (
+            <div className="flex flex-col gap-2.5 border-t border-edge-soft/40 bg-white/[0.02] px-4 py-3.5 opacity-100 transition-opacity duration-200">
+              {category.totalVotes > 0 && (
+                <div className="text-[11.5px] font-medium text-ink-subtle">
+                  {t("{votedFor} of {totalVotes} users rated {severity}", {
+                    votedFor: category.severityVotes,
+                    totalVotes: category.totalVotes,
+                    severity: category.severity.toLowerCase(),
+                  })}
+                </div>
+              )}
 
-            {hasNotes ? (
-              <>
-                {plainItems.length > 0 && (
-                  <ul className="flex flex-col gap-2">
-                    {plainItems.map((item, idx) => (
-                      <li
-                        key={idx}
-                        className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-muted"
+              {hasNotes ? (
+                <>
+                  {plainItems.length > 0 && (
+                    <ul className="flex flex-col gap-2">
+                      {plainItems.map((item, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-muted"
+                        >
+                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ink-subtle/50" />
+                          <span>{item.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {spoilerItems.length > 0 && (
+                    <div className="flex flex-col gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={onToggleSpoilers}
+                        className="self-start rounded-full border border-edge-soft bg-white/[0.04] px-3 py-1 text-[11px] font-semibold tracking-wide text-amber-400 transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       >
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ink-subtle/50" />
-                        <span>{item.text}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                        {spoilersRevealed
+                          ? t("Hide spoilers")
+                          : t("{count} spoiler entry hidden — SHOW", {
+                              count: spoilerItems.length,
+                            })}
+                      </button>
 
-                {spoilerItems.length > 0 && (
-                  <div className="flex flex-col gap-2 pt-1">
+                      {spoilersRevealed && (
+                        <ul className="flex flex-col gap-2 border-l-2 border-amber-500/30 pl-2">
+                          {spoilerItems.map((item, idx) => (
+                            <li
+                              key={idx}
+                              className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-muted"
+                            >
+                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/60" />
+                              <span>{item.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-[12.5px] italic text-ink-muted/80">
+                  {t("No detailed notes submitted for this category.")}
+                </div>
+              )}
+
+              {category.totalItems > category.items.length && (
+                <div className="flex items-center justify-between gap-3 border-t border-edge-soft/30 pt-2 text-[11.5px] text-ink-subtle">
+                  <span>
+                    {t("Showing {shown} of {total} notes", {
+                      shown: category.items.length,
+                      total: category.totalItems,
+                    })}
+                  </span>
+                  {imdbGuideUrl && (
                     <button
                       type="button"
-                      onClick={onToggleSpoilers}
-                      className="self-start rounded-full border border-edge-soft bg-white/[0.04] px-3 py-1 text-[11px] font-semibold tracking-wide text-amber-400 transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      onClick={() => openUrl(imdbGuideUrl)}
+                      className="inline-flex items-center gap-1 font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                     >
-                      {spoilersRevealed
-                        ? t("Hide spoilers")
-                        : t("{count} spoiler entry hidden — SHOW", {
-                            count: spoilerItems.length,
-                          })}
+                      <span>{t("Open on IMDb")}</span>
+                      <ExternalLink size={11} strokeWidth={2.2} />
                     </button>
-
-                    {spoilersRevealed && (
-                      <ul className="flex flex-col gap-2 border-l-2 border-amber-500/30 pl-2">
-                        {spoilerItems.map((item, idx) => (
-                          <li
-                            key={idx}
-                            className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-muted"
-                          >
-                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/60" />
-                            <span>{item.text}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-[12.5px] italic text-ink-muted/80">
-                {t("No detailed notes submitted for this category.")}
-              </div>
-            )}
-
-            {category.totalItems > category.items.length && (
-              <div className="flex items-center justify-between gap-3 border-t border-edge-soft/30 pt-2 text-[11.5px] text-ink-subtle">
-                <span>
-                  {t("Showing {shown} of {total} notes", {
-                    shown: category.items.length,
-                    total: category.totalItems,
-                  })}
-                </span>
-                {imdbGuideUrl && (
-                  <button
-                    type="button"
-                    onClick={() => openUrl(imdbGuideUrl)}
-                    className="inline-flex items-center gap-1 font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-                  >
-                    <span>{t("Open on IMDb")}</span>
-                    <ExternalLink size={11} strokeWidth={2.2} />
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

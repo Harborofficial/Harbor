@@ -219,8 +219,8 @@ import { useAnimeCharacters } from "./detail/use-anime-characters";
 import { TraktComments } from "./detail/trakt-comments";
 import { LetterboxdPanel } from "./detail/letterboxd-panel";
 import { ParentsGuidePanel } from "./detail/parents-guide-panel";
-import { useParentsGuide } from "./detail/use-parents-guide";
 import { useImdbId } from "./play-picker/use-imdb-id";
+import { loadDetailCustomization } from "@/lib/detail-customization";
 import { RateButton } from "@/components/ratings/rate-button";
 import {
   chainedPrimaryRating,
@@ -374,9 +374,7 @@ export function DetailView({
   const pinnedBackdrop = useTitleBackdrop(meta.id);
   const pinnedBackdropHi = toHiResBackdrop(pinnedBackdrop, settings.heroFullQuality);
   const [cinemetaFull, setCinemetaFull] = useState<Meta | null>(
-    !settings.addonOnlyMetadata && meta.videos?.length
-      ? meta
-      : null,
+    !settings.addonOnlyMetadata && meta.videos?.length ? meta : null,
   );
   const [libraryItem, setLibraryItem] = useState<LibraryItem | null>(null);
   const [stremioWatched, setStremioWatched] = useState<Set<string>>(new Set());
@@ -445,13 +443,16 @@ export function DetailView({
   const titleHomeServers = useTitleMediaServers(meta.id, detail?.imdbId);
   const { toggle: toggleFavorite } = useMediaFavorites();
   const isFav = useIsFavorite(meta.id, [detail?.imdbId]);
-  const inferredImdb = useImdbId(meta, settings.tmdbKey);
-  const resolvedParentsGuideImdb =
+  const isParentsGuideHidden = loadDetailCustomization().hidden.includes("parentsGuide");
+  const existingImdbId =
+    (meta.id.startsWith("tt") ? meta.id : null) ??
     detail?.imdbId ??
     animeEpisodes.find((e) => e.imdbId)?.imdbId ??
-    (meta.id.startsWith("tt") ? meta.id : null) ??
-    inferredImdb.id;
-  const parentsGuide = useParentsGuide(resolvedParentsGuideImdb);
+    null;
+  const inferredImdb = useImdbId(meta, settings.tmdbKey, {
+    enabled: !existingImdbId && !isParentsGuideHidden,
+  });
+  const resolvedParentsGuideImdb = existingImdbId ?? inferredImdb.id;
   const inSession = roomSnapshot.state === "joined" && roomSnapshot.participants.length >= 2;
   useScrollMemory(`meta:${meta.id}`, scrollRef, settings.resumeDetailScroll, true);
 
@@ -1298,95 +1299,94 @@ export function DetailView({
           }
         : sourceLookup;
       let applyAnimeExtras: (() => void) | undefined;
-      const work =
-        settingsRef.current.addonOnlyMetadata
-          ? cinemetaDetails(lookup)
-          : isAnime
-            ? animeDetails(
-                settingsRef.current,
-                detectedKitsu != null ? { ...meta, id: `kitsu:${detectedKitsu}` } : lookup,
-                (earlyEpisodes, kitsuId) => {
-                  if (cancelled || request !== generation) return;
-                  setAnimeCanonicalId(`kitsu:${kitsuId}`);
-                  setAnimeEpisodes(earlyEpisodes);
-                },
-                0,
-                forceRefresh ? 0 : undefined,
-              ).then((res) => {
-                if (cancelled || request !== generation) return null;
-                if (!res) {
-                  setAnimeUnavailable(meta.id);
-                  if (detectedKitsu != null) {
-                    failedKitsu.current = detectedKitsu;
-                    setDetectedKitsu(null);
-                  }
-                  return null;
+      const work = settingsRef.current.addonOnlyMetadata
+        ? cinemetaDetails(lookup)
+        : isAnime
+          ? animeDetails(
+              settingsRef.current,
+              detectedKitsu != null ? { ...meta, id: `kitsu:${detectedKitsu}` } : lookup,
+              (earlyEpisodes, kitsuId) => {
+                if (cancelled || request !== generation) return;
+                setAnimeCanonicalId(`kitsu:${kitsuId}`);
+                setAnimeEpisodes(earlyEpisodes);
+              },
+              0,
+              forceRefresh ? 0 : undefined,
+            ).then((res) => {
+              if (cancelled || request !== generation) return null;
+              if (!res) {
+                setAnimeUnavailable(meta.id);
+                if (detectedKitsu != null) {
+                  failedKitsu.current = detectedKitsu;
+                  setDetectedKitsu(null);
                 }
-                if (animeDetailUnavailable(res)) setAnimeUnavailable(meta.id);
-                setAnimeEpisodes(res.episodes);
-                // Only record identities after this detail request has resolved. The
-                // previous page's canonical state must not seed a newly opened title.
-                const canonical = `kitsu:${res.kitsuId}`;
-                // The detail provider may show a parent TV series for a one-episode
-                // special. Never save the parent's identity under that special's ID.
-                // A multi-episode ONA/OVA is its own entry, so format alone must not
-                // disqualify it from recording the canonical mapping.
-                const isSideEntry = res.requestedKitsuId !== res.kitsuId;
-                if (!isSideEntry) recordAnimeCwId(meta.id, canonical);
-                const seriesImdb = res.detail.imdbId;
-                // Standalone specials can share a parent series' IMDb id. Only an
-                // actual multi-episode show (or a movie) can record the shared alias.
-                if (
-                  seriesImdb?.startsWith("tt") &&
-                  seriesImdb !== meta.id &&
-                  !isSideEntry &&
-                  (meta.type === "movie" || res.episodes.length > 1)
-                ) {
-                  recordAnimeCwId(seriesImdb, canonical);
-                }
-                if (!refreshing) setFranchise([]);
-                void res.franchisePromise
-                  .then((fr) => {
-                    if (!cancelled && request === generation) setFranchise(fr);
+                return null;
+              }
+              if (animeDetailUnavailable(res)) setAnimeUnavailable(meta.id);
+              setAnimeEpisodes(res.episodes);
+              // Only record identities after this detail request has resolved. The
+              // previous page's canonical state must not seed a newly opened title.
+              const canonical = `kitsu:${res.kitsuId}`;
+              // The detail provider may show a parent TV series for a one-episode
+              // special. Never save the parent's identity under that special's ID.
+              // A multi-episode ONA/OVA is its own entry, so format alone must not
+              // disqualify it from recording the canonical mapping.
+              const isSideEntry = res.requestedKitsuId !== res.kitsuId;
+              if (!isSideEntry) recordAnimeCwId(meta.id, canonical);
+              const seriesImdb = res.detail.imdbId;
+              // Standalone specials can share a parent series' IMDb id. Only an
+              // actual multi-episode show (or a movie) can record the shared alias.
+              if (
+                seriesImdb?.startsWith("tt") &&
+                seriesImdb !== meta.id &&
+                !isSideEntry &&
+                (meta.type === "movie" || res.episodes.length > 1)
+              ) {
+                recordAnimeCwId(seriesImdb, canonical);
+              }
+              if (!refreshing) setFranchise([]);
+              void res.franchisePromise
+                .then((fr) => {
+                  if (!cancelled && request === generation) setFranchise(fr);
+                })
+                .catch(() => {});
+              void res.enrichPromise
+                .then((eps) => {
+                  if (!cancelled && request === generation) setAnimeEpisodes(eps);
+                })
+                .catch(() => {});
+              void res.heroBgPromise
+                .then((bg) => {
+                  if (cancelled || request !== generation || !bg) return;
+                  setEnrichedBg(bg);
+                  saveAnimeArt(meta.id, { bg });
+                })
+                .catch(() => {});
+              // Install the base detail before subscribing: on a warm cache this
+              // promise can settle before the shared work.then below runs.
+              applyAnimeExtras = () => {
+                void res.extrasPromise
+                  .then((patch) => {
+                    if (cancelled || request !== generation) return;
+                    setDetail((prev) => (prev ? mergeAnimeDetailExtras(prev, patch) : prev));
+                    if (patch.gallery?.backdrops?.length) setBackdrops(patch.gallery.backdrops);
+                    saveAnimeArt(meta.id, {
+                      logo: patch.logo,
+                      backdrops: patch.gallery?.backdrops,
+                    });
                   })
                   .catch(() => {});
-                void res.enrichPromise
-                  .then((eps) => {
-                    if (!cancelled && request === generation) setAnimeEpisodes(eps);
-                  })
-                  .catch(() => {});
-                void res.heroBgPromise
-                  .then((bg) => {
-                    if (cancelled || request !== generation || !bg) return;
-                    setEnrichedBg(bg);
-                    saveAnimeArt(meta.id, { bg });
-                  })
-                  .catch(() => {});
-                // Install the base detail before subscribing: on a warm cache this
-                // promise can settle before the shared work.then below runs.
-                applyAnimeExtras = () => {
-                  void res.extrasPromise
-                    .then((patch) => {
-                      if (cancelled || request !== generation) return;
-                      setDetail((prev) => (prev ? mergeAnimeDetailExtras(prev, patch) : prev));
-                      if (patch.gallery?.backdrops?.length) setBackdrops(patch.gallery.backdrops);
-                      saveAnimeArt(meta.id, {
-                        logo: patch.logo,
-                        backdrops: patch.gallery?.backdrops,
-                      });
-                    })
-                    .catch(() => {});
-                };
-                setAnimeCanonicalId(`kitsu:${res.kitsuId}`);
-                setStreamers(res.streamers);
-                setBackdrops(res.backdrops);
-                return res.detail;
-              })
-            : settingsRef.current.tmdbKey
-              ? tmdbDetails(settingsRef.current.tmdbKey, lookup).then(
-                  (d) => d ?? cinemetaDetails(lookup),
-                )
-              : cinemetaDetails(lookup);
+              };
+              setAnimeCanonicalId(`kitsu:${res.kitsuId}`);
+              setStreamers(res.streamers);
+              setBackdrops(res.backdrops);
+              return res.detail;
+            })
+          : settingsRef.current.tmdbKey
+            ? tmdbDetails(settingsRef.current.tmdbKey, lookup).then(
+                (d) => d ?? cinemetaDetails(lookup),
+              )
+            : cinemetaDetails(lookup);
       work
         .then((d) => {
           if (cancelled || request !== generation) return;
@@ -3297,18 +3297,12 @@ export function DetailView({
             });
           }
 
-          if (resolvedParentsGuideImdb && (parentsGuide.loading || parentsGuide.hasData)) {
+          if (resolvedParentsGuideImdb && !isParentsGuideHidden) {
             railSections.push({
               key: "parentsGuide",
               label: t("Content Advisory"),
-              minHeight: parentsGuide.loading ? 60 : 120,
-              node: (
-                <ParentsGuidePanel
-                  imdbId={resolvedParentsGuideImdb}
-                  guide={parentsGuide.guide}
-                  loading={parentsGuide.loading}
-                />
-              ),
+              minHeight: 60,
+              node: <ParentsGuidePanel imdbId={resolvedParentsGuideImdb} />,
             });
           }
           if (detail?.collection) {
