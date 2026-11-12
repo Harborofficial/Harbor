@@ -73,32 +73,40 @@ const entry = (id: number, isPrivate = false) => ({
 test("AniList status groups merge, keep custom lists, and skip private entries", () => {
   const lists = anilistPickable([
     { status: "CURRENT", isCustomList: false, entries: [entry(1), entry(2, true)] },
-    { status: "REPEATING", isCustomList: false, entries: [entry(3)] },
+    { status: "REPEATING", isCustomList: false, entries: [entry(3), entry(5, true)] },
     { status: null, name: "Favorites", isCustomList: true, entries: [entry(4)] },
     { status: null, name: "Empty", isCustomList: true, entries: [] },
   ]);
   assert.deepEqual(
     lists.map((list) => list.name),
-    ["AniList · Watching", "AniList · Favorites"],
+    ["AniList · Watching", "AniList · Rewatching", "AniList · Favorites"],
   );
   assert.deepEqual(
     lists[0].items.map((item) => item?.id),
     ["anilist:1", "anilist:3"],
   );
+  assert.deepEqual(
+    lists[1].items.map((item) => item?.id),
+    ["anilist:3"],
+  );
 });
 
 test("MyAnimeList groups become prefixed featured lists", () => {
   const lists = malPickable([
-    { status: "watching", entries: [{ anime: { id: 7, title: "Show" } }] },
+    { status: "watching", entries: [{ anime: { id: 7, title: "Show" }, isRewatching: true }] },
     { status: "completed", entries: [{ anime: { id: 8, title: "Done" } }] },
     { status: "dropped", entries: [{ anime: { id: 9, title: "Dropped" } }] },
   ]);
   assert.deepEqual(
     lists.map((list) => list.name),
-    ["MyAnimeList · Watching", "MyAnimeList · Completed"],
+    ["MyAnimeList · Watching", "MyAnimeList · Completed", "MyAnimeList · Rewatching"],
   );
   assert.deepEqual(
     lists[1].items.map((item) => item?.id),
     ["mal:8"],
+  );
+  assert.deepEqual(
+    lists[2].items.map((item) => item?.id),
+    ["mal:7"],
   );
 });

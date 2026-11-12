@@ -170,7 +170,7 @@ export default {
   "Show all {count}": "عرض الكل ({count})",
   "{count} competing": "{count} متسابقًا",
   "Starting field": "قائمة الانطلاق",
-  "Leaderboard": "لوحة الترتيب",
+  Leaderboard: "لوحة الترتيب",
   "Full field": "كامل المتسابقين",
   "Loading event schedule…": "جارٍ تحميل جدول الحدث…",
   "Loading lineups…": "جارٍ تحميل التشكيلات…",

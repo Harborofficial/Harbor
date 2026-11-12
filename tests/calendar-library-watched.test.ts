@@ -72,12 +72,20 @@ function load(overrides: Record<string, unknown> = {}): Api {
   return exports as Api;
 }
 
+// The library calendar only keeps episodes inside its recent-lookback window,
+// so fixtures must be relative to today rather than a fixed month.
+const now = new Date();
+const CURRENT_YEAR = now.getFullYear();
+const CURRENT_MONTH = now.getMonth();
+const monthDay = (day: number) =>
+  `${CURRENT_YEAR}-${String(CURRENT_MONTH + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
 const TOUGEN_S2 = {
   titles: { en: "Tougen Anki: Nikko Kegon Falls Arc" },
   mappings: {},
   episodes: {
-    "1": { episode: "1", airdate: "2026-10-02" },
-    "2": { episode: "2", airdate: "2026-10-09" },
+    "1": { episode: "1", airdate: monthDay(1) },
+    "2": { episode: "2", airdate: monthDay(2) },
   },
 };
 
@@ -93,10 +101,13 @@ test("a locally started anime reaches the library calendar without a Stremio ent
       pickEpisodeTitle: () => null,
     },
   });
-  const out = await api.fetchLibraryCalendar("key", 2026, 9, { tmdbKey: "", includeTrakt: false });
+  const out = await api.fetchLibraryCalendar("key", CURRENT_YEAR, CURRENT_MONTH, {
+    tmdbKey: "",
+    includeTrakt: false,
+  });
   assert.equal(out.length, 2);
   assert.equal(out[0].id, "mal:63181:1:1");
-  assert.equal(out[0].releaseDate, "2026-10-02");
+  assert.equal(out[0].releaseDate, monthDay(1));
 });
 
 test("manual-watched anime also becomes a candidate", async () => {
@@ -118,7 +129,10 @@ test("manual-watched anime also becomes a candidate", async () => {
       pickEpisodeTitle: () => null,
     },
   });
-  const out = await api.fetchLibraryCalendar("key", 2026, 9, { tmdbKey: "", includeTrakt: false });
+  const out = await api.fetchLibraryCalendar("key", CURRENT_YEAR, CURRENT_MONTH, {
+    tmdbKey: "",
+    includeTrakt: false,
+  });
   assert.equal(out.length, 2);
   assert.equal(out[0].id, "kitsu:51018:1:1");
 });
@@ -146,8 +160,24 @@ test("a merged parent-season episode does not duplicate the real sequel airing",
         poster: null,
         isAnime: true,
         episodes: [
-          { season: 1, number: 14, name: "Episode 14", airDate: "2026-10-10", image: null, overview: "", voteAverage: 0 },
-          { season: 2, number: 3, name: "Episode 3", airDate: "2026-10-10", image: null, overview: "", voteAverage: 0 },
+          {
+            season: 1,
+            number: 14,
+            name: "Episode 14",
+            airDate: "2026-10-10",
+            image: null,
+            overview: "",
+            voteAverage: 0,
+          },
+          {
+            season: 2,
+            number: 3,
+            name: "Episode 3",
+            airDate: "2026-10-10",
+            image: null,
+            overview: "",
+            voteAverage: 0,
+          },
         ],
       }),
       tmdbMovieRelease: async () => null,
@@ -163,7 +193,12 @@ test("a catalog row in the same franchise as an anime row is dropped", async () 
   const api = load({
     "./local-cw": {
       listLocalCw: () => [
-        { id: "kitsu:49444", type: "series", name: "Bleach: Thousand-Year Blood War - The Calamity", t: Date.now() },
+        {
+          id: "kitsu:49444",
+          type: "series",
+          name: "Bleach: Thousand-Year Blood War - The Calamity",
+          t: Date.now(),
+        },
         { id: "tmdb:tv:30984", type: "series", name: "Bleach", t: Date.now() },
       ],
     },
@@ -179,7 +214,9 @@ test("a catalog row in the same franchise as an anime row is dropped", async () 
           ? {
               titles: { en: "Bleach: Thousand-Year Blood War - The Calamity" },
               mappings: {},
-              episodes: { "9": { episode: "9", seasonNumber: 17, episodeNumber: 49, airdate: "2026-10-19" } },
+              episodes: {
+                "9": { episode: "9", seasonNumber: 17, episodeNumber: 49, airdate: monthDay(1) },
+              },
             }
           : null,
       aniZipByMal: async () => null,
@@ -192,16 +229,27 @@ test("a catalog row in the same franchise as an anime row is dropped", async () 
         poster: null,
         isAnime: true,
         episodes: [
-          { season: 2, number: 49, name: "THE BLADE", airDate: "2026-10-20", image: null, overview: "", voteAverage: 0 },
+          {
+            season: 2,
+            number: 49,
+            name: "THE BLADE",
+            airDate: monthDay(2),
+            image: null,
+            overview: "",
+            voteAverage: 0,
+          },
         ],
       }),
       tmdbMovieRelease: async () => null,
       tmdbTvPoster: async () => null,
     },
   });
-  const out = await api.fetchLibraryCalendar("key", 2026, 9, { tmdbKey: "k", includeTrakt: false });
+  const out = await api.fetchLibraryCalendar("key", CURRENT_YEAR, CURRENT_MONTH, {
+    tmdbKey: "k",
+    includeTrakt: false,
+  });
   assert.equal(out.length, 1, "the catalog duplicate must be dropped");
-  assert.equal(out[0].releaseDate, "2026-10-19");
+  assert.equal(out[0].releaseDate, monthDay(1));
   assert.match(out[0].name, /S17E49/);
 });
 
@@ -244,7 +292,10 @@ test("duplicate detection skips movies and resolves catalog series roots concurr
 
   await api.fetchLibraryCalendar("key", 2026, 9, { tmdbKey: "", includeTrakt: false });
   assert.equal(imdbAnimeLookups, 0, "movies must not enter anime-root duplicate resolution");
-  assert.deepEqual(tvLookups.sort((a, b) => a - b), [100, 101, 102, 103, 104, 105, 106]);
+  assert.deepEqual(
+    tvLookups.sort((a, b) => a - b),
+    [100, 101, 102, 103, 104, 105, 106],
+  );
   assert.ok(maxActive > 1, "catalog series roots should resolve concurrently");
   assert.ok(maxActive <= 6, "root lookup concurrency should stay bounded");
 });
@@ -271,7 +322,7 @@ test("series and movie enrichment start in parallel", async () => {
           return {
             name: "Series",
             genres: [],
-            videos: [{ season: 1, episode: 1, released: "2026-10-10", name: "Episode" }],
+            videos: [{ season: 1, episode: 1, released: monthDay(1), name: "Episode" }],
           };
         }
         movieStarted();
@@ -279,7 +330,7 @@ test("series and movie enrichment start in parallel", async () => {
         return {
           id: "tt200",
           name: "Movie",
-          releaseDate: "2026-10-11",
+          releaseDate: monthDay(2),
           genres: [],
           description: "",
           imdbRating: "0",
@@ -293,8 +344,8 @@ test("series and movie enrichment start in parallel", async () => {
       { id: "tt100", type: "series", name: "Series", mtime: 2, temp: false },
       { id: "tt200", type: "movie", name: "Movie", mtime: 1, temp: false },
     ],
-    2026,
-    9,
+    CURRENT_YEAR,
+    CURRENT_MONTH,
     { tmdbKey: "" },
   );
   await Promise.all([seriesStart, movieStart]);
@@ -320,14 +371,14 @@ test("library resolution publishes partial rows before the slowest batch finishe
           return {
             name: "Series",
             genres: [],
-            videos: [{ season: 1, episode: 1, released: "2026-10-10", name: "Episode" }],
+            videos: [{ season: 1, episode: 1, released: monthDay(1), name: "Episode" }],
           };
         }
         await movieGate;
         return {
           id: "tt400",
           name: "Movie",
-          releaseDate: "2026-10-11",
+          releaseDate: monthDay(2),
           genres: [],
           description: "",
           imdbRating: "0",
@@ -342,8 +393,8 @@ test("library resolution publishes partial rows before the slowest batch finishe
         { id: "tt300", type: "series", name: "Series", mtime: 2, temp: false },
         { id: "tt400", type: "movie", name: "Movie", mtime: 1, temp: false },
       ],
-      2026,
-      9,
+      CURRENT_YEAR,
+      CURRENT_MONTH,
       {
         tmdbKey: "",
         onProgress: (rows) => {

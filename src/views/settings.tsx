@@ -16,7 +16,11 @@ import { requestTracker } from "./settings/tracker-request";
 import { SubTabsProvider, type SubTabReg } from "./settings/sub-tabs";
 import { SettingsSidebar } from "./settings/settings-sidebar";
 import { tabsFor } from "./settings/tab-registry";
-import { glideSettingsToTop, useSettingsAnchor, type SettingsAnchorRequest } from "./settings/anchor-navigation";
+import {
+  glideSettingsToTop,
+  useSettingsAnchor,
+  type SettingsAnchorRequest,
+} from "./settings/anchor-navigation";
 import { PageActionsProvider, type PageActionReg } from "./settings/page-actions";
 import { SettingsFooter } from "./settings/settings-footer";
 import { SettingsActiveContext, type SectionId } from "./settings/shared";

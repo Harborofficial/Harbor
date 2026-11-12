@@ -111,6 +111,24 @@ test("a cour-local episode number is never used as a franchise absolute number",
   );
 });
 
+test("a split cour prefers its franchise absolute still over the colliding display season", () => {
+  const map = { s3e1: "bleach-2004.jpg", abs393: "tybw-cour-3.jpg" };
+  assert.equal(
+    pickTvdbImage(
+      map,
+      {
+        seasonNumber: 1,
+        number: 1,
+        absoluteNumber: 393,
+        imdbSeason: 3,
+        imdbEpisode: 1,
+      },
+      { preferAbsolute: true },
+    ),
+    "tybw-cour-3.jpg",
+  );
+});
+
 test("an exact provider pair takes precedence over absolute artwork", () => {
   assert.equal(
     pickTvdbImage(

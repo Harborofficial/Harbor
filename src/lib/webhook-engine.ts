@@ -85,11 +85,7 @@ async function fetchSource(
       if (settings.customCalendar.includeTraktAnticipated && calendarSources) {
         extras.push(await calendarSources.fetchAnticipatedCalendar(year, month).catch(() => []));
       }
-      if (
-        settings.customCalendar.includeTraktWatchlist &&
-        traktConnected() &&
-        calendarSources
-      ) {
+      if (settings.customCalendar.includeTraktWatchlist && traktConnected() && calendarSources) {
         extras.push(await calendarSources.fetchTraktCalendar(year, month).catch(() => []));
       }
       return await fetchCustomCalendar({

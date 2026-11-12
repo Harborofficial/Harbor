@@ -77,9 +77,7 @@ const REFRESH_UNIT_MS: Record<RefreshUnit, number> = {
   weeks: 604_800_000,
 };
 
-export function mediaServerRefreshIntervalMs(
-  connection: MediaServerConnection,
-): number | null {
+export function mediaServerRefreshIntervalMs(connection: MediaServerConnection): number | null {
   if (!connection.enabled) return null;
   if (connection.refreshInterval === "manual" || connection.refreshInterval === "launch")
     return null;

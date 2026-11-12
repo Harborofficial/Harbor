@@ -23,11 +23,7 @@ const STAGGER_MS = 65;
 
 export type RosterEntry = { instance: HarborInstance; leaving: boolean; stagger: number };
 
-function reconcile(
-  prev: RosterEntry[],
-  peers: HarborInstance[],
-  settled: boolean,
-): RosterEntry[] {
+function reconcile(prev: RosterEntry[], peers: HarborInstance[], settled: boolean): RosterEntry[] {
   const live = new Map(peers.map((p) => [p.id, p]));
   const kept = new Set<string>();
   const out: RosterEntry[] = [];
@@ -88,10 +84,7 @@ export function useDeviceRoster(peers: HarborInstance[], settled: boolean): Rost
 
 export function ListeningPulse({ active }: { active: boolean }) {
   return (
-    <span
-      className="relative flex size-4 shrink-0 items-center justify-center"
-      aria-hidden="true"
-    >
+    <span className="relative flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
       {active ? (
         <>
           <span
@@ -149,7 +142,10 @@ function ThemeTile({
   return (
     <span
       className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg ring-1 ring-edge-soft"
-      style={{ background: `linear-gradient(155deg, ${swatch[1]}, ${swatch[0]})`, color: swatch[2] }}
+      style={{
+        background: `linear-gradient(155deg, ${swatch[1]}, ${swatch[0]})`,
+        color: swatch[2],
+      }}
     >
       {glyph}
       <span
@@ -296,14 +292,10 @@ export function HarborDeviceCard({
             pulse={busy || state === "checking"}
           />
         </span>
-        <span
-          className={`truncate text-[12px] ${failed ? "text-danger" : "text-ink-muted"}`}
-        >
+        <span className={`truncate text-[12px] ${failed ? "text-danger" : "text-ink-muted"}`}>
           {line}
         </span>
-        {why ? (
-          <span className="text-[11.5px] leading-relaxed text-ink-subtle">{why}</span>
-        ) : null}
+        {why ? <span className="text-[11.5px] leading-relaxed text-ink-subtle">{why}</span> : null}
       </span>
     </>
   );

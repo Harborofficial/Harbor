@@ -65,7 +65,10 @@ function BatteryGlyph({ level, charging }: BatteryInfo) {
   return (
     <span className="flex items-center gap-1.5">
       {charging ? (
-        <BatteryCharging strokeWidth={2} className="h-[clamp(14px,1.9vh,22px)] w-auto text-[var(--bp-live)]" />
+        <BatteryCharging
+          strokeWidth={2}
+          className="h-[clamp(14px,1.9vh,22px)] w-auto text-[var(--bp-live)]"
+        />
       ) : (
         <span
           aria-hidden

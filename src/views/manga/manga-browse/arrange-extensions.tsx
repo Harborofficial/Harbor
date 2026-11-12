@@ -80,7 +80,9 @@ function DragGhost({
     if (!el) return;
     const box = el.getBoundingClientRect();
     setSize((prev) =>
-      prev && prev.w === box.width && prev.h === box.height ? prev : { w: box.width, h: box.height },
+      prev && prev.w === box.width && prev.h === box.height
+        ? prev
+        : { w: box.width, h: box.height },
     );
   }, [label]);
 
@@ -190,7 +192,7 @@ function ArrangeExtensionsModal({
     if (!held) return;
     setGrab((prev) => (prev ? { ...prev, x: e.clientX, y: e.clientY } : prev));
     const under = document.elementFromPoint(e.clientX, e.clientY)?.closest("[data-arrange-row]");
-    const id = under instanceof HTMLElement ? under.dataset.arrangeRow ?? null : null;
+    const id = under instanceof HTMLElement ? (under.dataset.arrangeRow ?? null) : null;
     setOver((prev) => (prev === id ? prev : id));
   };
 
@@ -287,12 +289,7 @@ export function ArrangeExtensions({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-expanded={open}
-        className={TRIGGER}
-      >
+      <button type="button" onClick={() => setOpen(true)} aria-expanded={open} className={TRIGGER}>
         <ListOrdered size={15} className="text-ink-subtle" />
         <span className="font-medium">{t("Arrange")}</span>
       </button>

@@ -370,7 +370,9 @@ export function EsportsEventPage({
                   </button>
                 </li>
               )}
-              {detail.hero?.credits.map((line) => <li key={line}>{line}</li>)}
+              {detail.hero?.credits.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
               <li>
                 {t(
                   "Logos belong to their owners. Coverage and regional viewing availability vary.",

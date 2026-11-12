@@ -147,6 +147,6 @@ pub fn recover(
     )
 }
 
-#[cfg(test)]
+#[cfg(all(test, windows))]
 #[path = "sims_saves_tests.rs"]
 mod tests;

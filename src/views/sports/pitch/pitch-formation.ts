@@ -21,10 +21,45 @@ export type PitchLayout = {
 };
 
 const BAND_EXACT: Record<string, number> = {
-  G: 0, GK: 0, K: 0, GOL: 0,
-  D: 1, CB: 1, LCB: 1, RCB: 1, LB: 1, RB: 1, LWB: 1, RWB: 1, WB: 1, SW: 1, FB: 1, DF: 1,
-  M: 2, MF: 2, CM: 2, DM: 2, CDM: 2, AM: 2, CAM: 2, LM: 2, RM: 2, LCM: 2, RCM: 2, CDF: 2,
-  F: 3, FW: 3, ST: 3, CF: 3, SS: 3, LW: 3, RW: 3, LF: 3, RF: 3, W: 3, ATT: 3,
+  G: 0,
+  GK: 0,
+  K: 0,
+  GOL: 0,
+  D: 1,
+  CB: 1,
+  LCB: 1,
+  RCB: 1,
+  LB: 1,
+  RB: 1,
+  LWB: 1,
+  RWB: 1,
+  WB: 1,
+  SW: 1,
+  FB: 1,
+  DF: 1,
+  M: 2,
+  MF: 2,
+  CM: 2,
+  DM: 2,
+  CDM: 2,
+  AM: 2,
+  CAM: 2,
+  LM: 2,
+  RM: 2,
+  LCM: 2,
+  RCM: 2,
+  CDF: 2,
+  F: 3,
+  FW: 3,
+  ST: 3,
+  CF: 3,
+  SS: 3,
+  LW: 3,
+  RW: 3,
+  LF: 3,
+  RF: 3,
+  W: 3,
+  ATT: 3,
 };
 
 const SIDE_RIGHT = new Set(["R", "RB", "RCB", "RWB", "RM", "RCM", "RW", "RF"]);
@@ -42,7 +77,13 @@ export function positionBand(position: string): number {
   if (word.includes("keep") || word.includes("goal")) return 0;
   if (word.includes("back") || word.includes("def")) return 1;
   if (word.includes("mid")) return 2;
-  if (word.includes("forward") || word.includes("strik") || word.includes("wing") || word.includes("attack")) return 3;
+  if (
+    word.includes("forward") ||
+    word.includes("strik") ||
+    word.includes("wing") ||
+    word.includes("attack")
+  )
+    return 3;
   return 2;
 }
 
@@ -79,7 +120,8 @@ export function rowDepth(index: number, rows: number): number {
 export function rowSpread(count: number): number[] {
   if (count <= 0) return [];
   if (count === 1) return [0.5];
-  const margin = count === 2 ? 0.29 : count === 3 ? 0.2 : count === 4 ? 0.135 : count === 5 ? 0.095 : 0.07;
+  const margin =
+    count === 2 ? 0.29 : count === 3 ? 0.2 : count === 4 ? 0.135 : count === 5 ? 0.095 : 0.07;
   const span = 1 - margin * 2;
   return Array.from({ length: count }, (_, i) => margin + (i * span) / (count - 1));
 }
@@ -91,7 +133,9 @@ function chunk<T>(items: T[], size: number): T[][] {
 }
 
 function inferCounts(field: MatchPlayer[]): number[] {
-  const bands = [1, 2, 3].map((band) => field.filter((p) => positionBand(p.position) === band).length);
+  const bands = [1, 2, 3].map(
+    (band) => field.filter((p) => positionBand(p.position) === band).length,
+  );
   const used = bands.filter((n) => n > 0);
   if (used.length >= 2) return used;
   return chunk(field, 4).map((row) => row.length);
@@ -146,9 +190,7 @@ export function buildPitchLayout(
   const counts = inferred ? inferCounts(field) : parsed;
   const rows = sliceRows(field, counts);
 
-  const slots: PitchSlot[] = [
-    { player: keeper, x: KEEPER_DEPTH, y: 0.5, band: 0, keeper: true },
-  ];
+  const slots: PitchSlot[] = [{ player: keeper, x: KEEPER_DEPTH, y: 0.5, band: 0, keeper: true }];
 
   rows.forEach((row, rowIndex) => {
     const depth = rowDepth(rowIndex, rows.length);
@@ -163,9 +205,7 @@ export function buildPitchLayout(
 }
 
 export function toCanvasPoint(slot: PitchSlot, side: PitchSide): { x: number; y: number } {
-  return side === "home"
-    ? { x: slot.x * 0.5, y: slot.y }
-    : { x: 1 - slot.x * 0.5, y: 1 - slot.y };
+  return side === "home" ? { x: slot.x * 0.5, y: slot.y } : { x: 1 - slot.x * 0.5, y: 1 - slot.y };
 }
 
 export function orientPoint(

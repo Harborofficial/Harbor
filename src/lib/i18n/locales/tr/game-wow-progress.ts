@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "Koşu sayıları kullanılamıyor",
   "games.wow.progress.counts": "{total} koşu · {timed} süre içinde",
   "games.wow.progress.best": "En iyi koşu",
-  "games.wow.progress.explore": "Koşuları keşfet"
+  "games.wow.progress.explore": "Koşuları keşfet",
 };
 export default gameWowProgress;

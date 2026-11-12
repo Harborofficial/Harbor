@@ -22,32 +22,53 @@ import type { SubResult } from "../src/lib/subtitles/types.ts";
 test("only same-origin subtitles of a user-installed local addon are locally trusted", () => {
   const localBase = "http://127.0.0.1:7000";
   assert.equal(isLocalAddonSubtitleUrl(`${localBase}/subtitles/a.srt`, localBase), true);
-  assert.equal(isLocalAddonSubtitleUrl("http://localhost:7000/a.srt", "http://localhost:7000"), true);
-  assert.equal(isLocalAddonSubtitleUrl("http://192.168.1.5:7000/a.srt", "http://192.168.1.5:7000"), true);
+  assert.equal(
+    isLocalAddonSubtitleUrl("http://localhost:7000/a.srt", "http://localhost:7000"),
+    true,
+  );
+  assert.equal(
+    isLocalAddonSubtitleUrl("http://192.168.1.5:7000/a.srt", "http://192.168.1.5:7000"),
+    true,
+  );
   assert.equal(isLocalAddonSubtitleUrl("http://10.0.0.5:7000/a.srt", "http://10.0.0.5:7000"), true);
   assert.equal(isLocalAddonSubtitleUrl("http://[::1]:7000/a.srt", "http://[::1]:7000"), true);
   // The loopback aliases are one host: an addon installed as one alias can serve
   // subtitles under another.
-  assert.equal(isLocalAddonSubtitleUrl("http://127.0.0.1:7000/a.srt", "http://localhost:7000"), true);
+  assert.equal(
+    isLocalAddonSubtitleUrl("http://127.0.0.1:7000/a.srt", "http://localhost:7000"),
+    true,
+  );
   assert.equal(isLocalAddonSubtitleUrl("http://[::1]:7000/a.srt", "http://127.0.0.1:7000"), true);
 
   // DNS names cannot be judged from their shape - `.local`/`.lan`/`.internal`
   // may resolve anywhere - so they never grant the local-network exemption.
-  assert.equal(isLocalAddonSubtitleUrl("http://myaddon.local:7000/a.srt", "http://myaddon.local:7000"), false);
+  assert.equal(
+    isLocalAddonSubtitleUrl("http://myaddon.local:7000/a.srt", "http://myaddon.local:7000"),
+    false,
+  );
   assert.equal(
     isLocalAddonSubtitleUrl("http://media.home.arpa:7000/a.srt", "http://media.home.arpa:7000"),
     false,
   );
   // Routable-but-reserved ranges are not the user's local network either.
-  assert.equal(isLocalAddonSubtitleUrl("http://100.64.0.5:7000/a.srt", "http://100.64.0.5:7000"), false);
-  assert.equal(isLocalAddonSubtitleUrl("http://198.18.0.1:7000/a.srt", "http://198.18.0.1:7000"), false);
+  assert.equal(
+    isLocalAddonSubtitleUrl("http://100.64.0.5:7000/a.srt", "http://100.64.0.5:7000"),
+    false,
+  );
+  assert.equal(
+    isLocalAddonSubtitleUrl("http://198.18.0.1:7000/a.srt", "http://198.18.0.1:7000"),
+    false,
+  );
 
   // The addon must itself be non-public: a public addon never gains local reach.
   assert.equal(
     isLocalAddonSubtitleUrl("http://127.0.0.1:7000/a.srt", "https://addon.example.com"),
     false,
   );
-  assert.equal(isLocalAddonSubtitleUrl("https://addon.example.com/a.srt", "https://addon.example.com"), false);
+  assert.equal(
+    isLocalAddonSubtitleUrl("https://addon.example.com/a.srt", "https://addon.example.com"),
+    false,
+  );
   // Same host, different origin (port or scheme) stays out of trust.
   assert.equal(isLocalAddonSubtitleUrl("http://127.0.0.1:7001/a.srt", localBase), false);
   assert.equal(isLocalAddonSubtitleUrl("https://127.0.0.1:7000/a.srt", localBase), false);
@@ -77,10 +98,7 @@ test("locally trusted results survive ranking while unmarked local URLs are drop
     ],
     ["en"],
   );
-  assert.deepEqual(
-    ranked.map((r) => r.id).sort(),
-    ["local", "public"],
-  );
+  assert.deepEqual(ranked.map((r) => r.id).sort(), ["local", "public"]);
 });
 
 test("local-addon subtitles map to non-provider metadata with local trust", () => {
@@ -143,10 +161,7 @@ test("prepared subtitle downloads forward the local-network opt-in per track", a
     { url: "http://127.0.0.1:7000/subtitles/a.srt", allowLocalNetwork: true },
     { fetchBytes, createPlayable },
   );
-  await prepareSubtitle(
-    { url: "https://cdn.example.com/a.srt" },
-    { fetchBytes, createPlayable },
-  );
+  await prepareSubtitle({ url: "https://cdn.example.com/a.srt" }, { fetchBytes, createPlayable });
   assert.deepEqual(calls, [true, false]);
 });
 

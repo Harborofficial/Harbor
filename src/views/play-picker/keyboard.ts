@@ -16,11 +16,7 @@ export function shouldIgnoreSourceDrawerKey(
   ) {
     return true;
   }
-  if (
-    element &&
-    element !== picker.ownerDocument.body &&
-    !picker.contains(element)
-  ) {
+  if (element && element !== picker.ownerDocument.body && !picker.contains(element)) {
     return true;
   }
   const activeModal = picker.ownerDocument.querySelector<HTMLElement>('[aria-modal="true"]');

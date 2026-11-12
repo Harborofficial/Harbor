@@ -209,7 +209,8 @@ const repairs: Record<string, string> = {
     "Пунктир – это равномерное сжатие всего диапазона. Кривая, идущая высоко, сохраняет сочность средних тонов и сжимает света в конце; более низкая кривая спадает раньше и выглядит мягче.",
   "The editor is a working copy of the player. Click any control on it to move, resize, restyle or hide that control.":
     "Редактор – это рабочая копия плеера. Нажмите на любой элемент, чтобы переместить, изменить размер, оформление или скрыть его.",
-  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.": "Движок слушает локальный порт и подключается к DHT для поиска пиров. Активные передачи – это потоки, открытые сейчас.",
+  "The engine listens on a local port and joins the DHT to find peers. Active transfers are the streams it currently has open.":
+    "Движок слушает локальный порт и подключается к DHT для поиска пиров. Активные передачи – это потоки, открытые сейчас.",
   "The next three screens need typing. Scan this and your phone does it for you.":
     "На следующих трёх экранах нужно вводить текст. Отсканируйте код – телефон сделает это за вас.",
   "The same camera pan on each setting. The lit lane is what you get right now.":

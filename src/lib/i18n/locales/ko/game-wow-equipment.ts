@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "기록 없음",
   "games.wow.equipment.detailsUnavailable": "상세 정보 없음",
   "games.wow.equipment.unavailable": "이 캐릭터의 장비 정보를 이용할 수 없습니다.",
-  "games.wow.equipment.note": "Raider.IO의 마지막 업데이트 시점 장비입니다. 현재 장비는 게임에서 확인하세요.",
+  "games.wow.equipment.note":
+    "Raider.IO의 마지막 업데이트 시점 장비입니다. 현재 장비는 게임에서 확인하세요.",
   "games.wow.equipment.partial": "일부 착용 아이템을 읽을 수 없습니다.",
   "games.wow.equipment.level": "아이템 레벨 {level}",
   "games.wow.equipment.gems": "보석",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "주 장비",
   "games.wow.equipment.offhand": "보조 장비",
   "games.wow.equipment.shirt": "속옷",
-  "games.wow.equipment.tabard": "겉옷"
+  "games.wow.equipment.tabard": "겉옷",
 };

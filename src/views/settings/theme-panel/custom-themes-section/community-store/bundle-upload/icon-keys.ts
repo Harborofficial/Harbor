@@ -1,5 +1,10 @@
 import { AWARD_ICON_REGISTRY, keyForFilename } from "@/lib/award-icons";
-import { ALL_BADGE_KINDS, badgeLabel, defaultBadgeSrc, type BadgeKind } from "@/components/format-badge";
+import {
+  ALL_BADGE_KINDS,
+  badgeLabel,
+  defaultBadgeSrc,
+  type BadgeKind,
+} from "@/components/format-badge";
 
 export type BundleKind = "badge" | "award";
 export type IconKey = { key: string; label: string };
@@ -20,11 +25,72 @@ const AWARD_GROUPS: IconGroup[] = AWARD_ICON_REGISTRY.map((g) => ({
 }));
 
 const BADGE_GROUP_DEFS: Array<{ title: string; kinds: BadgeKind[] }> = [
-  { title: "Resolution", kinds: ["8k", "4k-uhd", "uhd", "2k-qhd", "1080p", "1080i", "720p", "576p", "480p", "360p", "hd", "sd"] },
-  { title: "Source", kinds: ["remux", "bluray", "webdl", "webrip", "hdtv", "dvb", "dvd", "3d", "imax", "cam", "hdcam", "telesync", "hdts", "telecine", "scr", "wp"] },
+  {
+    title: "Resolution",
+    kinds: [
+      "8k",
+      "4k-uhd",
+      "uhd",
+      "2k-qhd",
+      "1080p",
+      "1080i",
+      "720p",
+      "576p",
+      "480p",
+      "360p",
+      "hd",
+      "sd",
+    ],
+  },
+  {
+    title: "Source",
+    kinds: [
+      "remux",
+      "bluray",
+      "webdl",
+      "webrip",
+      "hdtv",
+      "dvb",
+      "dvd",
+      "3d",
+      "imax",
+      "cam",
+      "hdcam",
+      "telesync",
+      "hdts",
+      "telecine",
+      "scr",
+      "wp",
+    ],
+  },
   { title: "HDR", kinds: ["dv", "hdr10-plus", "hdr10", "hdr", "hlg", "sdr"] },
   { title: "Codec", kinds: ["hevc", "av1"] },
-  { title: "Audio", kinds: ["atmos", "atmos-912", "truehd", "dts-hd-ma", "dts-hd", "dts-x", "dts", "ddp", "dd", "eac3", "ac3", "aac", "flac", "mp3", "opus", "pcm", "lpcm", "stereo", "mono", "5.1", "7.1"] },
+  {
+    title: "Audio",
+    kinds: [
+      "atmos",
+      "atmos-912",
+      "truehd",
+      "dts-hd-ma",
+      "dts-hd",
+      "dts-x",
+      "dts",
+      "ddp",
+      "dd",
+      "eac3",
+      "ac3",
+      "aac",
+      "flac",
+      "mp3",
+      "opus",
+      "pcm",
+      "lpcm",
+      "stereo",
+      "mono",
+      "5.1",
+      "7.1",
+    ],
+  },
   { title: "Flags", kinds: ["extended", "remastered", "repack", "no-label", "unknown"] },
 ];
 
@@ -56,7 +122,10 @@ const BADGE_ALIASES: Record<string, string> = {
 };
 
 function normKind(base: string): string {
-  return base.trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+  return base
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
 }
 
 export function iconKeysFor(kind: BundleKind): IconKey[] {

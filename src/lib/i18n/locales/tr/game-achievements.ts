@@ -12,12 +12,14 @@ export default {
   "games.achievementManager.changes": "Seçilen değişiklikler: {count}",
   "games.achievementManager.review": "Değişiklikleri gözden geçir",
   "games.achievementManager.reviewTitle": "Steam değişikliklerini gözden geçir",
-  "games.achievementManager.reviewNote": "Bu değişiklikleri {id} Steam hesabındaki {game} oyununa uygula.",
+  "games.achievementManager.reviewNote":
+    "Bu değişiklikleri {id} Steam hesabındaki {game} oyununa uygula.",
   "games.achievementManager.apply": "Steam’e uygula",
   "games.achievementManager.applying": "Değişiklikler uygulanıyor…",
   "games.achievementManager.applied": "Steam, {count} değişikliğin tamamını onayladı.",
   "games.achievementManager.unconfirmed": "Onaylanmadı",
-  "games.achievementManager.partial": "Steam, {total} değişikliğin {count} tanesini onayladı. Kalan başarımları kontrol etmek için yenile.",
+  "games.achievementManager.partial":
+    "Steam, {total} değişikliğin {count} tanesini onayladı. Kalan başarımları kontrol etmek için yenile.",
   "games.achievementManager.refresh": "Steam’den yenile",
   "games.achievementManager.back": "Düzenlemeye devam et",
   "games.achievementManager.note": "Yalnızca listelenen değişiklikler Steam’e gönderilir.",
@@ -25,17 +27,24 @@ export default {
   "games.achievementManager.error.clientLoad": "Yüklü Steam istemcisine bağlanılamadı.",
   "games.achievementManager.error.clientVersion": "Bu Steam istemcisi sürümü henüz desteklenmiyor.",
   "games.achievementManager.error.offline": "Steam’i açıp giriş yap ve tekrar dene.",
-  "games.achievementManager.error.accountChanged": "Etkin Steam hesabı değişti. Düzenlemeden önce yenile.",
+  "games.achievementManager.error.accountChanged":
+    "Etkin Steam hesabı değişti. Düzenlemeden önce yenile.",
   "games.achievementManager.error.notOwned": "Etkin Steam hesabının bu oyuna erişimi yok.",
-  "games.achievementManager.error.timeout": "Steam başarım verilerini zamanında döndürmedi. Yenilemeyi dene.",
+  "games.achievementManager.error.timeout":
+    "Steam başarım verilerini zamanında döndürmedi. Yenilemeyi dene.",
   "games.achievementManager.error.unavailable": "Oyunun başarımları Steam’den okunamadı.",
-  "games.achievementManager.error.rejected": "Steam değişikliği reddetti. Mevcut durumu kontrol etmek için yenile.",
-  "games.achievementManager.error.uncertain": "Steam sonucu henüz onaylamadı. Yeni değişikliklerden önce yenileyerek kontrol et.",
-  "games.achievementManager.error.platform": "Başarım yönetimi şu anda Windows x64 için Harbor’da kullanılabilir.",
+  "games.achievementManager.error.rejected":
+    "Steam değişikliği reddetti. Mevcut durumu kontrol etmek için yenile.",
+  "games.achievementManager.error.uncertain":
+    "Steam sonucu henüz onaylamadı. Yeni değişikliklerden önce yenileyerek kontrol et.",
+  "games.achievementManager.error.platform":
+    "Başarım yönetimi şu anda Windows x64 için Harbor’da kullanılabilir.",
   "games.achievementManager.error.invalid": "Tek seferde en fazla 2.000 değişiklik seç.",
-  "games.achievementManager.error.stale": "Bu başarımlar Steam’de değişti. Düzenlemeden önce yenile.",
+  "games.achievementManager.error.stale":
+    "Bu başarımlar Steam’de değişti. Düzenlemeden önce yenile.",
   "games.achievementManager.error.protected": "Bu başarımı oyun yönetiyor. Harbor düzenleyemez.",
-  "games.achievementManager.error.expired": "Bu incelemenin süresi doldu. Değişiklikleri uygulamadan önce yenile.",
+  "games.achievementManager.error.expired":
+    "Bu incelemenin süresi doldu. Değişiklikleri uygulamadan önce yenile.",
   "games.achievementManager.error.busy": "Başka bir Steam başarım isteği devam ediyor.",
   "games.details.achievementSearch": "Başarım ara",
   "games.details.achievementEmpty": "Aramana uyan başarım yok.",
@@ -47,12 +56,15 @@ export default {
   "games.discovery.steamCharts": "Steam listeleri",
   "games.achievementManager.commit": "Değişiklikleri uygula",
   "games.achievementManager.consentTitle": "Steam başarımlarını aç",
-  "games.achievementManager.consentBody": "Oturum açtığın Steam hesabındaki başarımları aç veya yeniden kilitle. Değişiklikleri uygulayana kadar seçimlerin taslak olarak kalır.",
-  "games.achievementManager.consentRules": "Harbor, oyunlara kod enjekte etmeden Steam’in başarım arayüzünü kullanır. Her oyunun kuralları ve ödül koşulları geçerlidir.",
+  "games.achievementManager.consentBody":
+    "Oturum açtığın Steam hesabındaki başarımları aç veya yeniden kilitle. Değişiklikleri uygulayana kadar seçimlerin taslak olarak kalır.",
+  "games.achievementManager.consentRules":
+    "Harbor, oyunlara kod enjekte etmeden Steam’in başarım arayüzünü kullanır. Her oyunun kuralları ve ödül koşulları geçerlidir.",
   "games.achievementManager.consentSam": "SAM’in başarım iş akışından esinlenildi",
   "games.achievementManager.consentOnce": "Bu Harbor profili için bir kez gösterilir.",
   "games.achievementManager.consentAccept": "Anladım",
-  "games.achievementManager.desktopOnly": "Başarımları değiştirmek için Windows’ta Harbor’ı Steam açıkken kullan.",
+  "games.achievementManager.desktopOnly":
+    "Başarımları değiştirmek için Windows’ta Harbor’ı Steam açıkken kullan.",
   "games.achievementManager.all": "Tümü",
   "games.achievementManager.filter": "Başarım filtresi",
   "games.achievementManager.rewards": "Eşya ödülleri",
@@ -67,12 +79,16 @@ export default {
   "games.achievementManager.rewardGame": "{game} içinde eşya",
   "games.achievementManager.rewardVia": "{achievement} ile",
   "games.achievementManager.rewardAction": "{item} aç",
-  "games.achievementManager.rewardNote": "Eşyaları oyun verir. Bir başarımın açılması teslimatı doğrulamaz; daha önce alınan ödüller tekrar verilmez.",
+  "games.achievementManager.rewardNote":
+    "Eşyaları oyun verir. Bir başarımın açılması teslimatı doğrulamaz; daha önce alınan ödüller tekrar verilmez.",
   "games.achievementManager.progressCount": "{total} başarımdan {count} tanesi kazanıldı",
   "games.achievementManager.progressLoading": "Steam ilerlemen okunuyor…",
-  "games.achievementManager.progressUnavailable": "İlerlemen kullanılamıyor. Steam’i aç veya Steam hesabını bağla, ardından yenile.",
-  "games.achievementManager.progressReadOnly": "Steam ilerlemen · Göz atmak başarımları değiştirmez.",
-  "games.achievementManager.progressPublic": "Yalnızca genel istatistikler · Kişisel ilerleme kullanılamıyor.",
+  "games.achievementManager.progressUnavailable":
+    "İlerlemen kullanılamıyor. Steam’i aç veya Steam hesabını bağla, ardından yenile.",
+  "games.achievementManager.progressReadOnly":
+    "Steam ilerlemen · Göz atmak başarımları değiştirmez.",
+  "games.achievementManager.progressPublic":
+    "Yalnızca genel istatistikler · Kişisel ilerleme kullanılamıyor.",
   "games.achievementManager.status.steam": "Steam’e bağlanın",
   "games.achievementManager.status.connection": "Steam bağlantısı kullanılamıyor",
   "games.achievementManager.status.refresh": "Steam ilerlemenizi kontrol edin",
@@ -88,23 +104,29 @@ export default {
   "games.achievementManager.status.filtered": "Eşleşme bulunamadı",
   "games.achievementManager.status.noGames": "Steam oyunu bulunamadı",
   "games.achievementManager.status.library": "Steam kütüphaneniz okunamadı",
-  "games.achievementManager.status.libraryNote": "Yeniden taramayı deneyin. Bağlı Steam hesabındaki oyunlar hâlâ kullanılabilir.",
+  "games.achievementManager.status.libraryNote":
+    "Yeniden taramayı deneyin. Bağlı Steam hesabındaki oyunlar hâlâ kullanılabilir.",
   "games.achievementManager.status.emptyNote": "Steam, {game} için başarım döndürmedi.",
   "games.achievementManager.status.store": "Steam’de görüntüle",
-  "games.achievementManager.recentGamesNote": "Bu işlemden sonra Steam, {game} oyununu son oynadığınız oyunlar arasında gösterecek.",
+  "games.achievementManager.recentGamesNote":
+    "Bu işlemden sonra Steam, {game} oyununu son oynadığınız oyunlar arasında gösterecek.",
   "games.achievementManager.rewardOwned": "Zaten açılmış",
   "games.achievementManager.pending": "Bekleyen",
   "games.achievementManager.managed": "Yönetilen",
   "games.achievementManager.clear": "Değişiklikleri temizle",
-  "games.achievementManager.discardConfirm": "Steam’den yenilemek, seçtiğiniz {count} değişikliği siler.",
-  "games.achievementManager.schemaMissing": "Steam bu bilgisayarda oyunun başarım ayrıntılarını önbelleğe almamış, bu nedenle burada salt okunurdur. Oyunu Steam’de bir kez başlatın, ardından yenileyin.",
+  "games.achievementManager.discardConfirm":
+    "Steam’den yenilemek, seçtiğiniz {count} değişikliği siler.",
+  "games.achievementManager.schemaMissing":
+    "Steam bu bilgisayarda oyunun başarım ayrıntılarını önbelleğe almamış, bu nedenle burada salt okunurdur. Oyunu Steam’de bir kez başlatın, ardından yenileyin.",
   "games.achievementManager.pickGame": "Başka oyun seç",
   "games.achievementManager.pickTitle": "Oyun seç",
   "games.achievementManager.pickSearch": "Oyunlarınızda ara",
-  "games.achievementManager.pickNote": "Steam, oyunun başarımlarını bu bilgisayarda önbelleğe aldıktan sonra Harbor bunları düzenleyebilir.",
+  "games.achievementManager.pickNote":
+    "Steam, oyunun başarımlarını bu bilgisayarda önbelleğe aldıktan sonra Harbor bunları düzenleyebilir.",
   "games.achievementManager.pickInstalled": "Yüklü",
   "games.achievementManager.pickEmpty": "Aramanızla eşleşen oyun yok.",
-  "games.achievementManager.pickUnavailable": "Steam oyunu bulunamadı. Steam üzerinden bir oyun yükleyin veya Steam hesabınızı bağlayıp tekrar deneyin.",
+  "games.achievementManager.pickUnavailable":
+    "Steam oyunu bulunamadı. Steam üzerinden bir oyun yükleyin veya Steam hesabınızı bağlayıp tekrar deneyin.",
   "games.achievementManager.pickMore": "Daha fazla oyun göster",
   "games.achievementManager.status.getSteam": "Steam’i indir",
   "games.achievementManager.showLockedDetails": "Gizli ayrıntıları göster",

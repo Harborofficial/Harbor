@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "Nombre de parcours indisponible",
   "games.wow.progress.counts": "{total} parcours · {timed} dans les temps",
   "games.wow.progress.best": "Meilleur parcours",
-  "games.wow.progress.explore": "Voir les parcours"
+  "games.wow.progress.explore": "Voir les parcours",
 };
 export default gameWowProgress;

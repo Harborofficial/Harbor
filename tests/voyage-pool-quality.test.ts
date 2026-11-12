@@ -47,6 +47,9 @@ test("a genre that rarely leads still gets api picks instead of going empty", ()
 
 test("the pool blends curated and api picks rather than one or the other", () => {
   assert.match(generate, /interleave\(shuffle\(curated\), shuffle\(live\)\)/);
-  const il = generate.slice(generate.indexOf("function interleave"), generate.indexOf("export async function generatePool"));
+  const il = generate.slice(
+    generate.indexOf("function interleave"),
+    generate.indexOf("export async function generatePool"),
+  );
   assert.match(il, /seen\.has\(m\.id\)/, "interleaving must not duplicate a title");
 });

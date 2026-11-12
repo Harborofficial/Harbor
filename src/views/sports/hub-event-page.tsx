@@ -54,19 +54,29 @@ function StandardHubEventPage({
     .sort((a, b) => Number(b.id === game.id) - Number(a.id === game.id) || b.startMs - a.startMs);
   const combat = hubLeague(game.league)?.group === "combat" && game.id.includes("|");
   const field = ["cycling", "athletics", "winter"].includes(hubLeague(game.league)?.group || "");
-  const competition =
-    field || ["motorsport", "golf"].includes(hubLeague(game.league)?.group || "");
+  const competition = field || ["motorsport", "golf"].includes(hubLeague(game.league)?.group || "");
   const fieldArt = field ? game.artwork || game.poster || "" : "";
   return (
-    <main ref={scrollRef} className="sh-match-page sh-event-page" aria-labelledby="sports-event-title">
+    <main
+      ref={scrollRef}
+      className="sh-match-page sh-event-page"
+      aria-labelledby="sports-event-title"
+    >
       <header className="sh-match-header">
-        {!shellBackAvailable && <button className="sh-button" onClick={goBack}><ArrowLeft size={18} />{t("Back")}</button>}
+        {!shellBackAvailable && (
+          <button className="sh-button" onClick={goBack}>
+            <ArrowLeft size={18} />
+            {t("Back")}
+          </button>
+        )}
         {league && <LeagueLogo league={league} size={28} />}
         <span>{league ? getLeagueLabel(league) : game.league}</span>
       </header>
       <div className="sh-event-page-heading">
         <div>
-          <h1 ref={titleRef} tabIndex={-1} id="sports-event-title">{game.context?.name || game.home.name}</h1>
+          <h1 ref={titleRef} tabIndex={-1} id="sports-event-title">
+            {game.context?.name || game.home.name}
+          </h1>
           <p>
             {date(game.startMs, false, game.dateOnly)}
             {game.context?.venue ? ` · ${game.context.venue}` : ""}
@@ -167,8 +177,13 @@ function StandardHubEventPage({
         )}
         <EventOdds game={game} />
       </div>
-      <BackToTop scrollRef={scrollRef} onReturnToTop={() => titleRef.current?.focus({ preventScroll: true })} />
-      {watch && broadcast && <BroadcastPlayer broadcast={broadcast} onClose={() => setWatch(false)} />}
+      <BackToTop
+        scrollRef={scrollRef}
+        onReturnToTop={() => titleRef.current?.focus({ preventScroll: true })}
+      />
+      {watch && broadcast && (
+        <BroadcastPlayer broadcast={broadcast} onClose={() => setWatch(false)} />
+      )}
     </main>
   );
 }
@@ -180,7 +195,12 @@ export function HubEventPage(props: {
 }) {
   const { goBack } = useView();
   return legacyEsportsMatch(props.game) ? (
-    <LegacyEsportsEvent game={props.game} onClose={goBack} page shellBackAvailable={props.shellBackAvailable} />
+    <LegacyEsportsEvent
+      game={props.game}
+      onClose={goBack}
+      page
+      shellBackAvailable={props.shellBackAvailable}
+    />
   ) : (
     <StandardHubEventPage {...props} />
   );

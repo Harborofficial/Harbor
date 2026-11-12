@@ -4,8 +4,18 @@ import { launcherGameSummary, type LauncherGame } from "../src/lib/games/launche
 import { launcherCatalogArtwork } from "../src/lib/games/launcher-discovery.ts";
 import { WOW_CLASSIC_ART, wowClassicArt } from "../src/lib/games/wow-art.ts";
 
-const install = (launcher: LauncherGame["launcher"], productId: string, name: string): LauncherGame => ({
-  id: `${launcher}:${productId}`, launcher, productId, name, installPath: "W:/Games/Test", state: "installed", launchMode: "client",
+const install = (
+  launcher: LauncherGame["launcher"],
+  productId: string,
+  name: string,
+): LauncherGame => ({
+  id: `${launcher}:${productId}`,
+  launcher,
+  productId,
+  name,
+  installPath: "W:/Games/Test",
+  state: "installed",
+  launchMode: "client",
 });
 
 test("installed Fortnite, League and Warcraft reuse verified artwork without changing their copy", () => {
@@ -25,12 +35,23 @@ test("installed Fortnite, League and Warcraft reuse verified artwork without cha
 });
 
 test("Classic uses its publisher artwork, never Retail metadata or a guessed expansion", () => {
-  const anniversary = launcherGameSummary(install("battlenet", "wow_classic_anniversary", "Burning Crusade Classic"));
-  assert.equal(anniversary.capsule, wowClassicArt("classicann", "Burning Crusade Classic").backdrop);
+  const anniversary = launcherGameSummary(
+    install("battlenet", "wow_classic_anniversary", "Burning Crusade Classic"),
+  );
+  assert.equal(
+    anniversary.capsule,
+    wowClassicArt("classicann", "Burning Crusade Classic").backdrop,
+  );
   assert.equal(anniversary.igdbId, undefined);
-  const unknownSeason = launcherGameSummary(install("battlenet", "wow_classic_anniversary", "Future Classic season"));
+  const unknownSeason = launcherGameSummary(
+    install("battlenet", "wow_classic_anniversary", "Future Classic season"),
+  );
   assert.equal(unknownSeason.capsule, WOW_CLASSIC_ART.backdrop);
-  for (const native of [install("battlenet", "wowt", "World of Warcraft"), install("riot", "league_of_legends:pbe", "League of Legends"), install("epic", "other:other:Fortnite", "Fortnite")]) {
+  for (const native of [
+    install("battlenet", "wowt", "World of Warcraft"),
+    install("riot", "league_of_legends:pbe", "League of Legends"),
+    install("epic", "other:other:Fortnite", "Fortnite"),
+  ]) {
     assert.equal(launcherGameSummary(native).capsule, "");
   }
 });

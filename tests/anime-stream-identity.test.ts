@@ -27,24 +27,71 @@ const ONE_PIECE = {
 test("TYBW S4E9 rejects earlier seasons even when the episode number matches", () => {
   const target = splitAnimeStreamCoordinates("kitsu:49444:9")!;
   assert.deepEqual(target.absoluteNumbers, [49, 415]);
-  const stream = (season: number | null, episode: number | null, seasonPack = false) => ({ season, episode, seasonPack });
+  const stream = (season: number | null, episode: number | null, seasonPack = false) => ({
+    season,
+    episode,
+    seasonPack,
+  });
   const good = [stream(4, 9), stream(17, 49), stream(null, 49), stream(null, 415)];
-  const bad = [stream(1, 9), stream(2, 9), stream(3, 9), stream(1, null, true), stream(17, 9), stream(null, 48)];
-  const result = partitionByExactAnimeEpisode([...good, ...bad], new Set([9, 49, 415]), target.coordinates);
+  const bad = [
+    stream(1, 9),
+    stream(2, 9),
+    stream(3, 9),
+    stream(1, null, true),
+    stream(17, 9),
+    stream(null, 48),
+  ];
+  const result = partitionByExactAnimeEpisode(
+    [...good, ...bad],
+    new Set([9, 49, 415]),
+    target.coordinates,
+  );
   assert.deepEqual(result.keep, good);
   assert.deepEqual(result.drop, bad);
 });
 
 test("TYBW never queries the original Bleach catalog id through its S17 mapping", () => {
-  assert.deepEqual(buildStreamIds("kitsu:49444", {
-    season: 1, episode: 9, kitsuStreamId: "kitsu:49444:9",
-    imdbId: "tt0434665", imdbSeason: 17, imdbEpisode: 49,
-  }, "tt0434665"), ["kitsu:49444:9"]);
+  assert.deepEqual(
+    buildStreamIds(
+      "kitsu:49444",
+      {
+        season: 1,
+        episode: 9,
+        kitsuStreamId: "kitsu:49444:9",
+        imdbId: "tt0434665",
+        imdbSeason: 17,
+        imdbEpisode: 49,
+      },
+      "tt0434665",
+    ),
+    ["kitsu:49444:9"],
+  );
+});
+
+test("TYBW S4 episode does not query the shared 2004 provider id", () => {
+  assert.deepEqual(
+    buildStreamIds(
+      "kitsu:49444",
+      {
+        season: 4,
+        episode: 11,
+        kitsuStreamId: "kitsu:49444:11",
+        imdbId: "tt0434665",
+        imdbSeason: 4,
+        imdbEpisode: 11,
+      },
+      "tt0434665",
+    ),
+    ["kitsu:49444:11"],
+  );
 });
 
 test("bare TYBW episode 09 does not prove part 4 ownership", () => {
   const make = (filename: string, episode = 9) => ({
-    season: null, episode, seasonPack: false, behaviorHints: { filename },
+    season: null,
+    episode,
+    seasonPack: false,
+    behaviorHints: { filename },
   });
   const bad = [
     make("Bleach_-_Thousand_Year_Blood_War_[09]_[BDRip_1080p_AV1].mkv"),
@@ -56,14 +103,25 @@ test("bare TYBW episode 09 does not prove part 4 ownership", () => {
     make("Bleach Thousand-Year Blood War - 49.mkv", 49),
     make("Bleach - 415.mkv", 415),
   ];
-  const result = partitionByExactAnimeEpisode([...bad, ...good], new Set([9, 49, 415]), [[4, 9], [17, 49]], 4);
+  const result = partitionByExactAnimeEpisode(
+    [...bad, ...good],
+    new Set([9, 49, 415]),
+    [
+      [4, 9],
+      [17, 49],
+    ],
+    4,
+  );
   assert.deepEqual(result.keep, good);
   assert.deepEqual(result.drop, bad);
 });
 
 test("JoJo S6E5 rejects Comet's earlier seasons and Stardust Crusaders entry", () => {
   const make = (filename: string, season: number | null) => ({
-    episode: 5, season, seasonPack: false, behaviorHints: { filename },
+    episode: 5,
+    season,
+    seasonPack: false,
+    behaviorHints: { filename },
   });
   const bad = [
     make("JoJo's Bizarre Adventure (2012) S03E05 The Nijimura Brothers (3).mkv", 3),
@@ -75,20 +133,40 @@ test("JoJo S6E5 rejects Comet's earlier seasons and Stardust Crusaders entry", (
     make("JoJos.Bizarre.Adventure.S06E05.The.Terrorist.from.a.Faraway.Country.mkv", 6),
     make("[Erai-raws] JoJo no Kimyou na Bouken: Steel Ball Run - 05.mkv", null),
   ];
-  const result = partitionByExactAnimeEpisode([...bad, ...good], new Set([5]), [[6, 5]], undefined,
-    ["JoJo's Bizarre Adventure: Steel Ball Run"]);
+  const result = partitionByExactAnimeEpisode(
+    [...bad, ...good],
+    new Set([5]),
+    [[6, 5]],
+    undefined,
+    ["JoJo's Bizarre Adventure: Steel Ball Run"],
+  );
   assert.deepEqual(result.keep, good);
   assert.deepEqual(result.drop, bad);
 });
 
 test("bracketed Comet episode survives parsing as a number so it can be rejected", async () => {
-  const streams = [{
-    season: null, episode: null, seasonPack: false,
-    behaviorHints: { filename: "Bleach_-_Thousand_Year_Blood_War_[09]_[BDRip_1080p_AV1].mkv" },
-  }];
+  const streams = [
+    {
+      season: null,
+      episode: null,
+      seasonPack: false,
+      behaviorHints: { filename: "Bleach_-_Thousand_Year_Blood_War_[09]_[BDRip_1080p_AV1].mkv" },
+    },
+  ];
   await enhanceAnimeStreams(streams as never);
   assert.equal(streams[0].episode, 9);
-  assert.equal(partitionByExactAnimeEpisode(streams, new Set([9, 49, 415]), [[4, 9], [17, 49]], 4).keep.length, 0);
+  assert.equal(
+    partitionByExactAnimeEpisode(
+      streams,
+      new Set([9, 49, 415]),
+      [
+        [4, 9],
+        [17, 49],
+      ],
+      4,
+    ).keep.length,
+    0,
+  );
 });
 
 test("long-running anime resolves provider season coordinates to the absolute episode", () => {
@@ -227,7 +305,10 @@ test("a verified kitsu episode id still leads", () => {
 test("an unverified anime id hands the imdb pair to addons that accept both", () => {
   const src = readFileSync(new URL("../src/lib/streams/addons.ts", import.meta.url), "utf8");
   assert.match(src, /if \(animeIdUnverified\) return \[ttId\];/);
-  assert.match(src, /pickIds\(addon, req\.type, req\.ids, req\.animeIdUnverified === true(?:,|\))/);
+  assert.match(
+    src,
+    /pickIds\(\s*addon,\s*req\.type,\s*req\.ids,\s*req\.animeIdUnverified === true(?:,|\))/,
+  );
 });
 
 test("episode filter drops only confident single-episode mismatches", () => {

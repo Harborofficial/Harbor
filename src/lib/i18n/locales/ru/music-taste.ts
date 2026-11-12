@@ -104,6 +104,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.limited":
     "Этот источник предлагает подборку, которая может не включать весь каталог.",
   "music.rockHall.title": "Зал славы рок-н-ролла",
-  "music.rockHall.subtitle": "Каждый состав с 1986 года, напрямую из Википедии"
+  "music.rockHall.subtitle": "Каждый состав с 1986 года, напрямую из Википедии",
 };
 export default musicTaste;

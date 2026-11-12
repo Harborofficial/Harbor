@@ -15,8 +15,10 @@ export default {
   "games.overwatch.unavailable": "गाइड रीफ़्रेश नहीं हो सकी। पहले लोड की गई जानकारी अभी भी दिख सकती है।",
   "games.overwatch.partial": "कुछ जानकारी उपलब्ध नहीं है।",
   "games.overwatch.checked": "जाँच का समय: {date}",
-  "games.overwatch.scope": "OverFast के ज़रिए Blizzard की हीरो जानकारी। बैलेंस बदलाव इस गाइड के अपडेट होने से पहले गेम में आ सकते हैं।",
-  "games.overwatch.mapsScope": "OverFast से मैप और मोड की जानकारी। इसमें Arcade और पुराने मैप शामिल हैं; उपलब्धता मोड पर निर्भर करती है।",
+  "games.overwatch.scope":
+    "OverFast के ज़रिए Blizzard की हीरो जानकारी। बैलेंस बदलाव इस गाइड के अपडेट होने से पहले गेम में आ सकते हैं।",
+  "games.overwatch.mapsScope":
+    "OverFast से मैप और मोड की जानकारी। इसमें Arcade और पुराने मैप शामिल हैं; उपलब्धता मोड पर निर्भर करती है।",
   "games.overwatch.empty": "कोई परिणाम नहीं मिला। कोई और खोज या फ़िल्टर आज़माएँ।",
   "games.overwatch.moreHeroes": "और हीरो",
   "games.overwatch.moreMaps": "और मैप",
@@ -33,6 +35,5 @@ export default {
   "games.overwatch.videoFailed": "यह डेमो नहीं चल सका। इसे देखने के लिए हीरो का आधिकारिक पेज खोलें।",
   "games.overwatch.mode": "गेम मोड",
   "games.overwatch.allModes": "सभी मोड",
-  "games.overwatch.searchMaps": "मैप या जगह खोजें"
+  "games.overwatch.searchMaps": "मैप या जगह खोजें",
 };
-

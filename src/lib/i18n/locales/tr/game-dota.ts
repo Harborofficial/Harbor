@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "Çeviklik",
   "games.dota.attribute.int": "Zekâ",
   "games.dota.attribute.all": "Evrensel",
-  "games.dota.trendsScope": "OpenDota örneklemi: bugün dahil yedi UTC günü. Rütbe maçın ortalamasıdır; Turbo ve profesyonel maçlar ayrıdır.",
+  "games.dota.trendsScope":
+    "OpenDota örneklemi: bugün dahil yedi UTC günü. Rütbe maçın ortalamasıdır; Turbo ve profesyonel maçlar ayrıdır.",
   "games.dota.wins": "kazanma oranı",
   "games.dota.picks": "{count} seçim",
   "games.dota.noSample": "Örneklem yok",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "Daha fazla kahraman",
   "games.dota.matchups": "Profesyonel eşleşmeler",
   "games.dota.refreshMatchups": "Eşleşmeleri yenile",
-  "games.dota.matchupsScope": "Son bir yılda kaydedilen profesyonel maçlarda {hero} kahramanının her rakibe karşı galibiyetleri. Eski yamaları içerir; rütbe filtresinden bağımsızdır.",
+  "games.dota.matchupsScope":
+    "Son bir yılda kaydedilen profesyonel maçlarda {hero} kahramanının her rakibe karşı galibiyetleri. Eski yamaları içerir; rütbe filtresinden bağımsızdır.",
   "games.dota.opponent": "Rakip ara",
   "games.dota.minimum": "Asgari maç",
   "games.dota.minGames": "{count}+ maç",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "Efsane",
   "games.dota.sample.6": "Kadim",
   "games.dota.sample.7": "İlahi",
-  "games.dota.sample.8": "Ölümsüz"
+  "games.dota.sample.8": "Ölümsüz",
 };

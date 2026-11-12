@@ -9,7 +9,8 @@ export type ProgramMeta = {
   directors: string[];
 };
 
-const LIVE_PREFIX = /^(live|new|encore|repeat|premiere|season premiere|series premiere)\s*[:\-–]\s*/i;
+const LIVE_PREFIX =
+  /^(live|new|encore|repeat|premiere|season premiere|series premiere)\s*[:\-–]\s*/i;
 const TRAILING_PART = /\s*[,(-]\s*(part|pt\.?|ep\.?|episode)\s*\d+\s*\)?$/i;
 const BRACKETED = /\s*[[(]\s*(hd|sd|4k|uhd|cc|new|live|repeat|r|s\d+\s*e\d+)\s*[\])]\s*/gi;
 const YEAR = /\s*[([]?((?:19|20)\d{2})[)\]]?\s*$/;
@@ -57,7 +58,10 @@ async function resolve(key: string, title: string): Promise<ProgramMeta | null> 
   if (!found) return null;
 
   const detail = await tmdbDetails(key, found).catch(() => null);
-  const cast = (detail?.cast ?? []).slice().sort((a, b) => a.order - b.order).slice(0, 6);
+  const cast = (detail?.cast ?? [])
+    .slice()
+    .sort((a, b) => a.order - b.order)
+    .slice(0, 6);
   const directors = (detail?.crew ?? [])
     .filter((c) => c.job === "Director" || c.department === "Directing")
     .slice(0, 2)

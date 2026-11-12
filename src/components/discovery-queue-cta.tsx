@@ -64,15 +64,25 @@ export function DiscoveryQueueCta({ items, title }: { items: FeedItem[]; title?:
             <div
               key={item.meta.id}
               className="relative h-full min-w-0 flex-1 overflow-hidden [transition:transform_450ms_cubic-bezier(0.22,0.61,0.36,1)] group-hover:will-change-transform motion-reduce:transition-none motion-reduce:!transform-none"
-              style={{ transform: `translate3d(calc(var(--px,0) * ${DEPTH[i]}px), calc(var(--py,0) * ${DEPTH[i] * 0.5}px), 0)` }}
+              style={{
+                transform: `translate3d(calc(var(--px,0) * ${DEPTH[i]}px), calc(var(--py,0) * ${DEPTH[i] * 0.5}px), 0)`,
+              }}
             >
               <img
-                src={artAtWidth(rpdbPoster(settings.rpdbKey, item.meta.id, item.meta.background ?? item.meta.poster), 200)}
+                src={artAtWidth(
+                  rpdbPoster(
+                    settings.rpdbKey,
+                    item.meta.id,
+                    item.meta.background ?? item.meta.poster,
+                  ),
+                  200,
+                )}
                 alt=""
                 draggable={false}
                 loading="lazy"
                 onError={(e) => {
-                  if (item.meta.poster && e.currentTarget.src !== item.meta.poster) e.currentTarget.src = item.meta.poster;
+                  if (item.meta.poster && e.currentTarget.src !== item.meta.poster)
+                    e.currentTarget.src = item.meta.poster;
                 }}
                 className="absolute inset-0 h-full w-full object-cover brightness-[0.7] transition-[filter] duration-300 group-hover:brightness-90"
               />
@@ -96,7 +106,9 @@ export function DiscoveryQueueCta({ items, title }: { items: FeedItem[]; title?:
 
         <div
           className="relative flex items-center gap-4 [transition:transform_450ms_cubic-bezier(0.22,0.61,0.36,1)] group-hover:will-change-transform motion-reduce:transition-none motion-reduce:!transform-none"
-          style={{ transform: "translate3d(calc(var(--px,0) * -16px), calc(var(--py,0) * -8px), 0)" }}
+          style={{
+            transform: "translate3d(calc(var(--px,0) * -16px), calc(var(--py,0) * -8px), 0)",
+          }}
         >
           <span className="font-display text-[clamp(38px,5.5vw,58px)] font-medium leading-none tracking-tight text-ink [text-shadow:0_4px_30px_rgba(0,0,0,0.7)]">
             {t("Explore")}

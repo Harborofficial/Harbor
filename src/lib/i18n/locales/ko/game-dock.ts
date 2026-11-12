@@ -8,8 +8,10 @@ export default {
   "games.sidebar.customOrder": "내 순서",
   "games.sidebar.arrange": "사이드바 정리",
   "games.sidebar.resetFilters": "필터 초기화",
-  "games.sidebar.arrangeNote": "드래그하거나 화살표로 순서를 바꾸세요. 자주 하는 게임을 고정하거나 사이드바에서 숨길 수 있습니다.",
-  "games.sidebar.saveFailed": "사이드바 설정을 저장하지 못했습니다. 변경 사항은 이번 세션에만 적용됩니다.",
+  "games.sidebar.arrangeNote":
+    "드래그하거나 화살표로 순서를 바꾸세요. 자주 하는 게임을 고정하거나 사이드바에서 숨길 수 있습니다.",
+  "games.sidebar.saveFailed":
+    "사이드바 설정을 저장하지 못했습니다. 변경 사항은 이번 세션에만 적용됩니다.",
   "games.sidebar.move": "{name} 이동",
   "games.sidebar.up": "{name} 위로 이동",
   "games.sidebar.down": "{name} 아래로 이동",
@@ -19,11 +21,13 @@ export default {
   "games.sidebar.hide": "{name} 사이드바에서 숨기기",
   "games.sidebar.pinned": "고정됨",
   "games.dock.welcomeTitle": "게임 탭을 표시할까요?",
-  "games.dock.welcomeNote": "마우스를 올리면 게임에 바로 접근할 수 있어요. 설정 → 테마 및 외관 → 인터페이스에서 언제든 끌 수 있어요.",
+  "games.dock.welcomeNote":
+    "마우스를 올리면 게임에 바로 접근할 수 있어요. 설정 → 테마 및 외관 → 인터페이스에서 언제든 끌 수 있어요.",
   "games.dock.welcomeEnable": "게임 탭 표시",
   "games.dock.welcomeDismiss": "나중에",
   "games.dock.settingTitle": "빠른 라이브러리",
-  "games.dock.settingNote": "가장자리에 은은한 탭을 표시해 라이브러리에 빠르게 접근합니다. 기본적으로 꺼져 있습니다.",
+  "games.dock.settingNote":
+    "가장자리에 은은한 탭을 표시해 라이브러리에 빠르게 접근합니다. 기본적으로 꺼져 있습니다.",
   "games.dock.launchError": "게임을 열 수 없습니다. 설치 상태와 런처를 확인한 후 다시 시도하세요.",
   "games.dock.launcher": "런처",
   "games.dock.client": "{launcher}에서 열기",
@@ -75,5 +79,5 @@ export default {
   "games.badge.unavailable": "파일 사용 불가",
   "games.badge.notInstalled": "설치되지 않음",
   "games.home.libraryFirstTitle": "게임을 라이브러리에서 열기",
-  "games.home.libraryFirstNote": "게임을 여는 마다 탐색이 아닌 라이브러리에서 시작합니다."
+  "games.home.libraryFirstNote": "게임을 여는 마다 탐색이 아닌 라이브러리에서 시작합니다.",
 };

@@ -23,6 +23,8 @@ import { readSettingsFile, writeSettingsFile } from "./settings/file-store";
 import { torrentEngineSetEnabled } from "./torrent/local-engine";
 import { loadFontData, saveFontData } from "./font-storage";
 import { isRemovedBuiltinAvatar } from "./avatars/catalog";
+import { isLinuxDesktop } from "@/lib/platform";
+import { svpApply } from "@/lib/svp";
 import {
   forkToProfile,
   loadEffective,
@@ -101,6 +103,7 @@ export function SettingsProvider({
   const [torrentEnginePolicyPending, setTorrentEnginePolicyPending] = useState(false);
   const [torrentEnginePolicyError, setTorrentEnginePolicyError] = useState(false);
   const settingsRef = useRef(settings);
+  const svpAppliedTargetRef = useRef<string | null>(null);
   const trayBridgeRef = useRef<TrayMenuBridge | null>(null);
   const [trayPrefsReady, setTrayPrefsReady] = useState(false);
   const [trayListenersReady, setTrayListenersReady] = useState(false);
@@ -213,6 +216,17 @@ export function SettingsProvider({
     }
   }, [settings, settingsReady]);
 
+  // Apply the saved frame rate once per launch on Linux, so a vpy written by an
+  // older choice matches the setting. Never launches SVP; failures stay silent.
+  useEffect(() => {
+    if (!settingsReady) return;
+    const target = settings.svpTargetFps;
+    if (!isLinuxDesktop() || !settings.playerSvp || !settings.svpVpyPath) return;
+    if (svpAppliedTargetRef.current === target) return;
+    svpAppliedTargetRef.current = target;
+    void svpApply(target).catch(() => {});
+  }, [settingsReady, settings.playerSvp, settings.svpVpyPath, settings.svpTargetFps]);
+
   useEffect(() => {
     if (!syncTorrentEnginePolicy || !settingsReady || !("__TAURI_INTERNALS__" in window)) return;
     let cancelled = false;
@@ -321,13 +335,6 @@ export function SettingsProvider({
           console.warn("[fonts] failed to load", family, e);
         }
       }
-      if (cancelled) return;
-      try {
-        const { syncSubFontsToDisk } = await import("@/lib/player/sub-font-install");
-        await syncSubFontsToDisk(fonts);
-      } catch (e) {
-        console.warn("[fonts] could not sync fonts to disk for libass", e);
-      }
     })();
     return () => {
       cancelled = true;
@@ -339,6 +346,14 @@ export function SettingsProvider({
       });
       for (const ff of toRemove) document.fonts.delete(ff);
     };
+  }, [settings.customFonts]);
+
+  // The files libass reads live outside React. A font import must still reach the
+  // fonts directory when the user leaves Settings before the preview finishes loading.
+  useEffect(() => {
+    void import("@/lib/player/sub-font-install")
+      .then(({ syncSubFontsToDisk }) => syncSubFontsToDisk(settings.customFonts ?? []))
+      .catch((e) => console.warn("[fonts] could not sync fonts to disk for libass", e));
   }, [settings.customFonts]);
 
   useEffect(() => {

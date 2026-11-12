@@ -12,7 +12,7 @@ import * as subtitleChoice from "../src/lib/player/subtitle-choice";
 import * as trackPreferences from "../src/lib/player/track-preferences";
 import * as audioLanguage from "../src/lib/player/audio-language";
 import * as language from "../src/lib/subtitles/language";
-import { initialPlayerSnapshot, type TrackInfo } from "../src/lib/player/bridge";
+import { initialPlayerSnapshot, type PlayerStatus, type TrackInfo } from "../src/lib/player/bridge";
 
 const tracks: TrackInfo[] = [
   {
@@ -86,6 +86,7 @@ async function fixture(remembered = true) {
     },
     "@/lib/i18n": { t: (message: string) => message },
     "@/lib/player/mpv-properties": {},
+    "@/lib/player/subtitle-delay-scope": { initialDelayForSelectedTrack: () => 0 },
     "@/lib/player/track-preferences": trackPreferences,
     "@/lib/player/audio-language": audioLanguage,
     "@/lib/providers/original-language": { resolveOriginalLanguage: async () => "" },
@@ -146,9 +147,11 @@ async function fixture(remembered = true) {
   function Fixture({
     audioTracks,
     firstFrameReady,
+    status = "ready",
   }: {
     audioTracks: TrackInfo[];
     firstFrameReady: boolean;
+    status?: PlayerStatus;
   }) {
     exports.useTrackAutoload({
       bridgeRef,
@@ -156,14 +159,24 @@ async function fixture(remembered = true) {
       settings,
       engine: "mpv",
       authKey: null,
-      snap: { ...initialPlayerSnapshot(), durationSec: 360, audioTracks, firstFrameReady },
+      snap: {
+        ...initialPlayerSnapshot(),
+        status,
+        durationSec: 360,
+        audioTracks,
+        firstFrameReady,
+      },
     });
     return null;
   }
   const root = createRoot(document.getElementById("root")!);
-  const render = async (audioTracks: TrackInfo[], firstFrameReady = false) =>
+  const render = async (
+    audioTracks: TrackInfo[],
+    firstFrameReady = false,
+    status: PlayerStatus = "ready",
+  ) =>
     React.act(async () =>
-      root.render(React.createElement(Fixture, { audioTracks, firstFrameReady })),
+      root.render(React.createElement(Fixture, { audioTracks, firstFrameReady, status })),
     );
   const dispose = async () => {
     await React.act(async () => root.unmount());
@@ -265,6 +278,26 @@ test("unavailable remembered audio reports once after decoding, without claiming
     assert.deepEqual(f.errors, [
       "The saved audio track could not be restored. Choose an audio track.",
     ]);
+  } finally {
+    await f.dispose();
+  }
+});
+
+test("natural end does not report a lost remembered audio track", async () => {
+  const f = await fixture();
+  try {
+    await f.render([tracks[0]], true, "ended");
+    assert.deepEqual(f.errors, []);
+  } finally {
+    await f.dispose();
+  }
+});
+
+test("an empty audio track list does not report a lost remembered audio track", async () => {
+  const f = await fixture();
+  try {
+    await f.render([], true, "playing");
+    assert.deepEqual(f.errors, []);
   } finally {
     await f.dispose();
   }

@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "Release notes",
   "games.wow.addons.fullNotes": "Read the full text on the author’s page",
 
-  "games.wow.manager.errorIdentity": "The installed folders do not match the author’s addon bundle. Rescan and check the addon’s source.",
+  "games.wow.manager.errorIdentity":
+    "The installed folders do not match the author’s addon bundle. Rescan and check the addon’s source.",
   "games.wow.manager.importInstalled": "Import installed addons",
   "games.wow.manager.import": "Manage with Harbor",
-  "games.wow.manager.importScope": "Installed addons with a WoWInterface identity. Other addons remain in the installed list.",
-  "games.wow.manager.importNote": "Keep your installed files. Harbor checks the author’s bundle and saves the previous version before future updates or removal.",
+  "games.wow.manager.importScope":
+    "Installed addons with a WoWInterface identity. Other addons remain in the installed list.",
+  "games.wow.manager.importNote":
+    "Keep your installed files. Harbor checks the author’s bundle and saves the previous version before future updates or removal.",
   "games.wow.manager.keepVersion": "Keep installed version {version}",
   "games.wow.manager.keep": "Keep",
   "games.wow.manager.importSuccess": "This addon is now managed by Harbor.",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "Find addons",
   "games.wow.manager.managed": "Managed by Harbor",
   "games.wow.manager.backups": "Backups",
-  "games.wow.manager.catalogNote": "Browse WoWInterface. Compatibility is checked against your installed WoW before applying changes.",
-  "games.wow.manager.managedNote": "Only addons installed through Harbor can be changed here. Your other addons remain in the installed list.",
+  "games.wow.manager.catalogNote":
+    "Browse WoWInterface. Compatibility is checked against your installed WoW before applying changes.",
+  "games.wow.manager.managedNote":
+    "Only addons installed through Harbor can be changed here. Your other addons remain in the installed list.",
   "games.wow.manager.category": "Category",
   "games.wow.manager.allCategories": "All categories",
   "games.wow.manager.popular": "Monthly downloads",
@@ -28,31 +33,41 @@ export default {
   "games.wow.manager.name": "Name",
   "games.wow.manager.sort": "Sort addons",
   "games.wow.manager.monthly": "Downloads this month",
-  "games.wow.manager.catalogError": "Could not load the catalog. Previously loaded results may be out of date.",
-  "games.wow.manager.categoriesError": "Categories are unavailable. You can still search all addons.",
+  "games.wow.manager.catalogError":
+    "Could not load the catalog. Previously loaded results may be out of date.",
+  "games.wow.manager.categoriesError":
+    "Categories are unavailable. You can still search all addons.",
   "games.wow.manager.partial": "Some provider records were unavailable. Results may be incomplete.",
   "games.wow.manager.emptyManaged": "No addons managed by Harbor yet.",
   "games.wow.manager.emptyBackups": "No previous versions saved yet.",
-  "games.wow.manager.reviewNote": "Review the package and folder changes first. Close WoW before reviewing or applying changes.",
+  "games.wow.manager.reviewNote":
+    "Review the package and folder changes first. Close WoW before reviewing or applying changes.",
   "games.wow.manager.backupNote": "Previous files kept locally: {size}.",
   "games.wow.manager.fileSummary": "{count} files · {size}",
   "games.wow.manager.preparing": "Preparing change review…",
   "games.wow.manager.applying": "Applying changes…",
   "games.wow.manager.success": "Your addon setup is updated.",
   "games.wow.manager.cancelled": "Cancelled. Refresh the setup to check its current state.",
-  "games.wow.manager.recovery": "An interrupted change needs recovery before continuing. Close WoW first.",
+  "games.wow.manager.recovery":
+    "An interrupted change needs recovery before continuing. Close WoW first.",
   "games.wow.manager.recover": "Recover setup",
   "games.wow.manager.add": "Add",
   "games.wow.manager.replace": "Replace",
   "games.wow.manager.remove": "Remove",
-  "games.wow.manager.error": "Could not complete this change. Check the connection and available disk space, then try again.",
+  "games.wow.manager.error":
+    "Could not complete this change. Check the connection and available disk space, then try again.",
   "games.wow.manager.errorRunning": "Close WoW completely, then try again.",
-  "games.wow.manager.errorCompatibility": "This package does not match your installed WoW edition or version.",
-  "games.wow.manager.errorUnmanaged": "These folders were installed outside Harbor. They cannot be overwritten here.",
-  "games.wow.manager.errorChanged": "Files have changed or need attention. Rescan before trying again.",
-  "games.wow.manager.errorDependency": "Required dependencies are missing or another addon needs these files.",
+  "games.wow.manager.errorCompatibility":
+    "This package does not match your installed WoW edition or version.",
+  "games.wow.manager.errorUnmanaged":
+    "These folders were installed outside Harbor. They cannot be overwritten here.",
+  "games.wow.manager.errorChanged":
+    "Files have changed or need attention. Rescan before trying again.",
+  "games.wow.manager.errorDependency":
+    "Required dependencies are missing or another addon needs these files.",
   "games.wow.manager.errorExpired": "This review has expired. Review the changes again.",
-  "games.wow.manager.errorDesktop": "Addon management requires the current Harbor desktop app on Windows.",
+  "games.wow.manager.errorDesktop":
+    "Addon management requires the current Harbor desktop app on Windows.",
 
   "games.wow.addons.screenshots": "Author screenshots",
   "games.wow.addons.screenshotsUnavailable": "Couldn’t load the author’s screenshots.",
@@ -61,13 +76,15 @@ export default {
   "games.wow.addons.intro": "Versions and required dependencies for this installation.",
   "games.wow.addons.refresh": "Rescan addons",
   "games.wow.addons.client": "Installed WoW {version}",
-  "games.wow.addons.unavailable": "Could not read this installation. Check that its drive is connected, then rescan.",
+  "games.wow.addons.unavailable":
+    "Could not read this installation. Check that its drive is connected, then rescan.",
   "games.wow.addons.partial": "Some folders could not be scanned. This list may be incomplete.",
   "games.wow.addons.search": "Find an addon",
   "games.wow.addons.attention": "Needs attention",
   "games.wow.addons.unreadable": "This addon’s manifest could not be read.",
   "games.wow.addons.noManifest": "No matching manifest was found for this client.",
-  "games.wow.addons.ambiguous": "Multiple matching manifests were found. Check this addon’s installation.",
+  "games.wow.addons.ambiguous":
+    "Multiple matching manifests were found. Check this addon’s installation.",
   "games.wow.addons.missing": "Required folders missing: {names}",
   "games.wow.addons.gameVersions": "Declared game versions",
   "games.wow.addons.requires": "Requires",
@@ -76,10 +93,12 @@ export default {
   "games.wow.addons.noMatches": "No addons match these filters.",
   "games.wow.addons.more": "Show more addons",
   "games.wow.addons.empty": "No addons found for this installation.",
-  "games.wow.addons.scope": "Game versions are declared by the addon author. Enabled state and available updates are not checked.",
+  "games.wow.addons.scope":
+    "Game versions are declared by the addon author. Enabled state and available updates are not checked.",
   "games.wow.realm.LOCKED": "Locked",
   "games.wow.classic.title": "Realm status",
-  "games.wow.classic.intro": "Check your realm before heading into Azeroth. Live status from Blizzard.",
+  "games.wow.classic.intro":
+    "Check your realm before heading into Azeroth. Live status from Blizzard.",
   "games.wow.classic.classic": "Classic progression",
   "games.wow.classic.classic1x": "Classic Era & seasonal",
   "games.wow.classic.classicann": "Classic Anniversary",
@@ -98,7 +117,8 @@ export default {
   "games.wow.classic.news": "Classic news",
   "games.wow.realm.browse": "Browse realms",
   "games.wow.realm.unavailable": "Realm status is unavailable. You can still enter a realm.",
-  "games.wow.realm.unsupported": "Blizzard’s global status feed does not cover this region. Enter your realm manually.",
+  "games.wow.realm.unsupported":
+    "Blizzard’s global status feed does not cover this region. Enter your realm manually.",
   "games.wow.realm.noMatches": "No matching realms. You can enter the name manually.",
   "games.wow.realm.refresh": "Refresh realm status",
   "games.wow.realm.unknown": "Status unknown",
@@ -145,7 +165,8 @@ export default {
   "games.wow.character.raidUnavailable": "Current raid progress is unavailable.",
   "games.wow.character.updated": "Profile updated {date}",
   "games.wow.character.gearUpdated": "Equipment updated {date}",
-  "games.wow.character.sourceNote": "Public Raider.IO observations. Updates may lag behind the game.",
+  "games.wow.character.sourceNote":
+    "Public Raider.IO observations. Updates may lag behind the game.",
   "games.wow.title": "This week in Azeroth",
   "games.wow.region": "Region",
   "games.wow.refresh": "Refresh WoW data",
@@ -154,7 +175,8 @@ export default {
   "games.wow.resetNote": "Your local time. Maintenance may extend beyond the reset.",
   "games.wow.resetUnavailable": "Reset timing is unavailable.",
   "games.wow.affixes": "This week’s affixes",
-  "games.wow.affixesUnavailable": "Current affixes are unavailable. Check again after the regional reset.",
+  "games.wow.affixesUnavailable":
+    "Current affixes are unavailable. Check again after the regional reset.",
   "games.wow.dungeons": "Mythic+ dungeons",
   "games.wow.timer": "{minutes} min timer",
   "games.wow.rankings": "View rankings",
@@ -163,7 +185,8 @@ export default {
   "games.wow.bosses": "Bosses · {count}",
   "games.wow.raidsUnavailable": "Current raid information is unavailable.",
   "games.wow.checked": "Checked {date}",
-  "games.wow.scope": "Retail data from Raider.IO. Dungeon timers are for the timed keystone; affixes vary by key level.",
+  "games.wow.scope":
+    "Retail data from Raider.IO. Dungeon timers are for the timed keystone; affixes vary by key level.",
   "games.wow.region.us": "Americas / Oceania",
   "games.wow.region.eu": "Europe",
   "games.wow.region.kr": "Korea",

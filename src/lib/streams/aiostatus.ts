@@ -1,3 +1,4 @@
+import { addonBaseUrl, addonResourceUrl } from "@/lib/addon-url";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
 import { dlog, dwarn } from "@/lib/debug";
@@ -69,7 +70,7 @@ export async function fetchAioStatusHealth(
     return null;
   }
   dlog(`[aiostatus] found: ${status.manifest.name}`);
-  const base = status.transportUrl.replace(/\/manifest\.json$/, "");
+  const base = addonBaseUrl(status.transportUrl);
 
   const catalogDefs =
     status.manifest.catalogs && status.manifest.catalogs.length > 0
@@ -80,7 +81,10 @@ export async function fetchAioStatusHealth(
   const metas: Array<CatalogMeta & { resType: string }> = [];
   await Promise.all(
     catalogDefs.map(async (def) => {
-      const catalogUrl = `${base}/catalog/${encodeURIComponent(def.type)}/${encodeURIComponent(def.id)}.json`;
+      const catalogUrl = addonResourceUrl(
+        base,
+        `catalog/${encodeURIComponent(def.type)}/${encodeURIComponent(def.id)}.json`,
+      );
       try {
         const res = await fetch(catalogUrl, { signal });
         if (!res.ok) return;
@@ -101,7 +105,10 @@ export async function fetchAioStatusHealth(
   const services: AioService[] = [];
   await Promise.all(
     metas.map(async (meta) => {
-      const url = `${base}/stream/${encodeURIComponent(meta.resType)}/${encodeURIComponent(meta.id)}.json`;
+      const url = addonResourceUrl(
+        base,
+        `stream/${encodeURIComponent(meta.resType)}/${encodeURIComponent(meta.id)}.json`,
+      );
       try {
         const res = await fetch(url, { signal });
         if (!res.ok) return;
@@ -168,7 +175,9 @@ function parseStatus(stream: StatusStream): {
   rawLine: string;
 } {
   const text = `${stream.name ?? ""}\n${stream.title ?? ""}\n${stream.description ?? ""}`;
-  const daysMatch = text.match(/Days?\s+left[:\s]+(-?\d+)/i) ?? text.match(/(-?\d{1,4})\s*days?\s+(?:left|remaining)/i);
+  const daysMatch =
+    text.match(/Days?\s+left[:\s]+(-?\d+)/i) ??
+    text.match(/(-?\d{1,4})\s*days?\s+(?:left|remaining)/i);
   let days = daysMatch ? parseInt(daysMatch[1], 10) : null;
   // A debrid subscription is realistically days to a couple of years. A 4-digit
   // reading (e.g. Premiumize loyalty points like 4234) is a misparse, not days-left.
@@ -205,7 +214,9 @@ async function tryStreamFallback(
   ];
   for (const probe of probes) {
     try {
-      const res = await fetch(`${base}/stream/${probe.type}/${probe.id}.json`, { signal });
+      const res = await fetch(addonResourceUrl(base, `stream/${probe.type}/${probe.id}.json`), {
+        signal,
+      });
       if (!res.ok) continue;
       const json = (await res.json()) as { streams?: StatusStream[] };
       const streams = json.streams ?? [];
@@ -227,9 +238,9 @@ async function tryStreamFallback(
 function matchService(text: string): DebridSlug | null {
   const lower = text.toLowerCase();
   if (/\bpremiumize\b/.test(lower)) return "pm";
-  if (/\breal[\s\-]?debrid\b/.test(lower)) return "rd";
+  if (/\breal[\s-]?debrid\b/.test(lower)) return "rd";
   if (/\btorbox\b/.test(lower)) return "tb";
-  if (/\ball[\s\-]?debrid\b/.test(lower)) return "ad";
-  if (/\bdebrid[\s\-]?link\b/.test(lower)) return "dl";
+  if (/\ball[\s-]?debrid\b/.test(lower)) return "ad";
+  if (/\bdebrid[\s-]?link\b/.test(lower)) return "dl";
   return null;
 }

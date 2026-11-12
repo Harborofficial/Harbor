@@ -11,12 +11,6 @@ export function AvatarImage({ src, className }: { src?: string | null; className
   if (!src || failed) return <CatAvatar className={className} />;
 
   return (
-    <img
-      src={src}
-      alt=""
-      draggable={false}
-      className={className}
-      onError={() => setFailed(true)}
-    />
+    <img src={src} alt="" draggable={false} className={className} onError={() => setFailed(true)} />
   );
 }

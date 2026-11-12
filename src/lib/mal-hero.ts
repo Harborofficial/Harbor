@@ -29,7 +29,9 @@ function cleanSynopsis(s?: string): string | undefined {
 
 async function jikanPage(filter: string, page: number): Promise<Array<Record<string, unknown>>> {
   try {
-    const j = await animeCatalogRequest<Array<Record<string, unknown>>>(`/top/anime?filter=${filter}&page=${page}&limit=25&sfw=true`);
+    const j = await animeCatalogRequest<Array<Record<string, unknown>>>(
+      `/top/anime?filter=${filter}&page=${page}&limit=25&sfw=true`,
+    );
     return j?.data ?? [];
   } catch {
     return [];
@@ -49,7 +51,11 @@ function toItem(a: Record<string, any>): MalHeroItem | null {
       a.images?.webp?.large_image_url ||
       a.images?.jpg?.large_image_url ||
       undefined,
-    year: a.year ? String(a.year) : a.aired?.prop?.from?.year ? String(a.aired.prop.from.year) : undefined,
+    year: a.year
+      ? String(a.year)
+      : a.aired?.prop?.from?.year
+        ? String(a.aired.prop.from.year)
+        : undefined,
     rating: a.score ? Number(a.score).toFixed(1) : undefined,
     format: a.type ? String(a.type).toUpperCase() : undefined,
   };

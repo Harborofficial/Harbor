@@ -6,9 +6,11 @@ export default {
   "games.recommend.filterTitle": "Исключить из рекомендаций",
   "games.recommend.hideLibrary": "Игры в моей библиотеке",
   "games.recommend.hideSaved": "Сохранённые игры",
-  "games.recommend.libraryNote": "Наличие в библиотеке определяется по обнаруженным играм, связанным импортам и последней синхронизации со Steam.",
+  "games.recommend.libraryNote":
+    "Наличие в библиотеке определяется по обнаруженным играм, связанным импортам и последней синхронизации со Steam.",
   "games.recommend.steamSynced": "Библиотека Steam синхронизирована: {date}",
-  "games.recommend.steamUnavailable": "Сведения о ваших играх в Steam недоступны. Игры из локальной библиотеки по-прежнему учитываются.",
+  "games.recommend.steamUnavailable":
+    "Сведения о ваших играх в Steam недоступны. Игры из локальной библиотеки по-прежнему учитываются.",
   "games.recommend.inLibrary": "В вашей библиотеке",
   "games.recommend.removeSaved": "Убрать {name} из сохранённых игр",
   "games.recommend.forYou": "Для вас",
@@ -21,23 +23,30 @@ export default {
   "games.recommend.recent": "Недавно играли",
   "games.recommend.reset": "Вернуть скрытые игры",
   "games.recommend.empty": "Находите игры по вкусу",
-  "games.recommend.emptyNote": "Сохраняйте интересные игры или запускайте их из библиотеки. Здесь появятся рекомендации.",
-  "games.recommend.signalsOff": "Включите выше «Сохранённые игры» или «Недавно играли», чтобы настроить рекомендации.",
+  "games.recommend.emptyNote":
+    "Сохраняйте интересные игры или запускайте их из библиотеки. Здесь появятся рекомендации.",
+  "games.recommend.signalsOff":
+    "Включите выше «Сохранённые игры» или «Недавно играли», чтобы настроить рекомендации.",
   "games.recommend.save": "Сохранить {name}",
   "games.recommend.hide": "Скрыть {name} из рекомендаций",
   "games.recommend.hideShort": "Не для меня",
   "games.recommend.because.saved": "На основе сохранённой игры",
   "games.recommend.because.played": "На основе сыгранной игры",
   "games.recommend.unavailable": "Связи пока недоступны.",
-  "games.recommend.retryNote": "Ваша библиотека доступна. Попробуйте снова загрузить связанные игры.",
+  "games.recommend.retryNote":
+    "Ваша библиотека доступна. Попробуйте снова загрузить связанные игры.",
   "games.recommend.caughtUp": "Попробуйте другое направление.",
-  "games.recommend.caughtUpNote": "Попробуйте отключить фильтр, вернуть скрытую рекомендацию или сохранить ещё одну любимую игру.",
+  "games.recommend.caughtUpNote":
+    "Попробуйте отключить фильтр, вернуть скрытую рекомендацию или сохранить ещё одну любимую игру.",
   "games.recommend.finding": "Ищем связи с вашими играми…",
-  "games.recommend.source": "Рекомендации по меткам Steam и данным IGDB с учётом вашей библиотеки. Скрытые варианты относятся только к этому профилю.",
+  "games.recommend.source":
+    "Рекомендации по меткам Steam и данным IGDB с учётом вашей библиотеки. Скрытые варианты относятся только к этому профилю.",
   "games.recommend.retrySome": "Повторить загрузку недостающих связей",
-  "games.recommend.saveError": "Не удалось сохранить настройки рекомендаций на этом устройстве. Попробуйте ещё раз.",
+  "games.recommend.saveError":
+    "Не удалось сохранить настройки рекомендаций на этом устройстве. Попробуйте ещё раз.",
   "games.recommend.influences": "Что влияет на рекомендации",
-  "games.recommend.influencesNote": "Выберите игры, которые Harbor учитывает. Ваша библиотека останется без изменений.",
+  "games.recommend.influencesNote":
+    "Выберите игры, которые Harbor учитывает. Ваша библиотека останется без изменений.",
   "games.recommend.exclude": "Не учитывать {name}",
   "games.recommend.excluded": "Исключённые основы ({count})",
   "games.recommend.useAgain": "Снова учитывать {name}",
@@ -48,8 +57,8 @@ export default {
   "games.recommend.undo": "Отменить",
   "games.recommend.undoLabel": "Отменить изменение для {name}",
   "games.recommend.allExcluded": "Все основы рекомендаций исключены.",
-  "games.recommend.allExcludedNote": "Верните игру в разделе «Настроить рекомендации» или сохраните ещё одну любимую игру.",
+  "games.recommend.allExcludedNote":
+    "Верните игру в разделе «Настроить рекомендации» или сохраните ещё одну любимую игру.",
   "games.recommend.saved": "Сохранённые игры",
-  "games.recommend.close": "Закрыть настройки рекомендаций"
+  "games.recommend.close": "Закрыть настройки рекомендаций",
 };
-

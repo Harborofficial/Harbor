@@ -174,7 +174,7 @@ export default {
   "Show all {count}": "Ver los {count}",
   "{count} competing": "{count} compitiendo",
   "Starting field": "Parrilla de salida",
-  "Leaderboard": "Clasificacion",
+  Leaderboard: "Clasificacion",
   "Full field": "Parrilla completa",
   "Loading event schedule…": "Cargando calendario del evento…",
   "Loading lineups…": "Cargando alineaciones…",

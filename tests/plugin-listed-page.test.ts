@@ -32,8 +32,18 @@ test("a row's own page is opened by the provider that listed it, and by no other
 });
 
 test("anything that is not a web page is not treated as one", () => {
-  for (const url of ["", "   ", "ftp://p.example/x", "magnet:?xt=urn:btih:" + "0".repeat(40), "not a url"]) {
-    assert.equal(namedPage(req({ url, providerId: "ext/provider" }), "ext/provider"), undefined, url);
+  for (const url of [
+    "",
+    "   ",
+    "ftp://p.example/x",
+    "magnet:?xt=urn:btih:" + "0".repeat(40),
+    "not a url",
+  ]) {
+    assert.equal(
+      namedPage(req({ url, providerId: "ext/provider" }), "ext/provider"),
+      undefined,
+      url,
+    );
   }
 });
 

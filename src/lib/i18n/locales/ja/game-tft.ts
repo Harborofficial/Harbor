@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "チームを保存",
   "games.tft.savedTeams": "保存済みチーム",
   "games.tft.delete": "保存済みチームを削除",
-  "games.tft.note": "各チャンピオンは1回だけ数えます。アイテムや特殊効果により特性やチーム枠が変わる場合があります。",
+  "games.tft.note":
+    "各チャンピオンは1回だけ数えます。アイテムや特殊効果により特性やチーム枠が変わる場合があります。",
   "games.tft.saveFailed": "この端末に保存できませんでした。現在のチームは残っています。",
   "games.tft.missing": "保存済みの一部のチャンピオンはこのセットに存在しません。",
   "games.tft.imported": "チームをインポートしました。",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "体力自動回復",
   "games.tft.stat.set14AmpIcon": "ダメージ増幅",
   "games.tft.stat.TFTManaRegen": "マナ自動回復",
-  "games.tft.stat.scaleSV": "オムニヴァンプ"
+  "games.tft.stat.scaleSV": "オムニヴァンプ",
 };

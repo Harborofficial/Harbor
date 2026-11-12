@@ -1,13 +1,6 @@
 export const SPOOKTOBER_PLAYLIST_EVENT = "harbor:spooktober-playlist";
 export type SpooktoberPlaylistRequest = { id: string; trackId?: string };
-export const SPOOKTOBER_PLAYLISTS = new Set([
-  "party",
-  "dark",
-  "scores",
-  "goth",
-  "emo",
-  "darkpop",
-]);
+export const SPOOKTOBER_PLAYLISTS = new Set(["party", "dark", "scores", "goth", "emo", "darkpop"]);
 let pending: SpooktoberPlaylistRequest | null = null;
 
 export function requestSpooktoberPlaylist(id: string, trackId?: string): boolean {

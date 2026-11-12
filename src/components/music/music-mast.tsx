@@ -1,5 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { Check, ChevronDown, Globe2, Library, LoaderCircle, Search, X } from "@/components/icons/music-icons";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import {
+  Check,
+  ChevronDown,
+  Globe2,
+  Library,
+  LoaderCircle,
+  Search,
+  X,
+} from "@/components/icons/music-icons";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { MusicServiceLogo } from "@/components/music/music-service-logo";
 import {
@@ -9,7 +25,12 @@ import {
 import { useT } from "@/lib/i18n";
 import { MusicSearchSuggest, useMusicSuggest } from "@/components/music/music-search-suggest";
 import type { MusicCatalogItem } from "@/lib/music/types";
-import { rememberMusicSearch, rememberMusicSearchItem, useMusicSearchHistory, type MusicSearchHistoryEntry } from "@/lib/music/search-history";
+import {
+  rememberMusicSearch,
+  rememberMusicSearchItem,
+  useMusicSearchHistory,
+  type MusicSearchHistoryEntry,
+} from "@/lib/music/search-history";
 import { MusicSearchHistory } from "./music-search-history";
 
 export function MusicMast({
@@ -44,7 +65,11 @@ export function MusicMast({
   const [activeIndex, setActiveIndex] = useState(-1);
   const history = useMusicSearchHistory();
 
-  const { groups: suggestGroups, loading: suggesting } = useMusicSuggest(query, scope, focused && !dismissed && !!onPick);
+  const { groups: suggestGroups, loading: suggesting } = useMusicSuggest(
+    query,
+    scope,
+    focused && !dismissed && !!onPick,
+  );
   const suggestFlat = suggestGroups.flatMap((group) => group.items);
   const showingHistory = !query.trim();
   const suggestOpen = focused && !dismissed && !!onPick && !videoSearch;
@@ -61,9 +86,14 @@ export function MusicMast({
   };
 
   const recall = (entry: MusicSearchHistoryEntry) => {
-    if (entry.item) { choose(entry.item); return; }
+    if (entry.item) {
+      choose(entry.item);
+      return;
+    }
     if (!entry.query) return;
-    const connector = scopeOptions.some((option) => option.id === entry.scope) ? entry.scope! : null;
+    const connector = scopeOptions.some((option) => option.id === entry.scope)
+      ? entry.scope!
+      : null;
     setQuery(entry.query);
     setScope(connector);
     setDismissed(true);
@@ -199,11 +229,22 @@ export function MusicMast({
             setQuery(event.currentTarget.value);
             setDismissed(false);
           }}
-          onFocus={() => { setFocused(true); setDismissed(false); }}
-          onClick={() => { setFocused(true); setDismissed(false); }}
+          onFocus={() => {
+            setFocused(true);
+            setDismissed(false);
+          }}
+          onClick={() => {
+            setFocused(true);
+            setDismissed(false);
+          }}
           onBlur={(event) => {
             const next = event.relatedTarget as HTMLElement | null;
-            if (next && !formRef.current?.contains(next) && !next.closest("[data-music-search-panel]")) setDismissed(true);
+            if (
+              next &&
+              !formRef.current?.contains(next) &&
+              !next.closest("[data-music-search-panel]")
+            )
+              setDismissed(true);
           }}
           onKeyDown={onInputKeyDown}
           placeholder={t(videoSearch ? "music.videos.search" : "music.searchPlaceholder")}
@@ -246,14 +287,31 @@ export function MusicMast({
         onClose={() => setDismissed(true)}
         backdrop={false}
       >
-        {showingHistory ? <div data-music-search-panel className="harbor-float animate-menu-in max-h-[min(560px,60vh)] overflow-y-auto overscroll-contain rounded-md bg-elevated ring-1 ring-edge-soft">
-          <MusicSearchHistory entries={history} activeIndex={activeIndex} onPick={recall} />
-        </div> : suggestFlat.length ? <MusicSearchSuggest
-          groups={suggestGroups}
-          activeIndex={activeIndex}
-          onPick={choose}
-          onHover={setActiveIndex}
-        /> : <div className="rounded-md bg-elevated p-5 text-sm text-ink-muted" role="status">{t(query.trim().length < 2 ? "music.searchPlaceholder" : suggesting ? "music.loading" : "music.searchEmpty")}</div>}
+        {showingHistory ? (
+          <div
+            data-music-search-panel
+            className="harbor-float animate-menu-in max-h-[min(560px,60vh)] overflow-y-auto overscroll-contain rounded-md bg-elevated ring-1 ring-edge-soft"
+          >
+            <MusicSearchHistory entries={history} activeIndex={activeIndex} onPick={recall} />
+          </div>
+        ) : suggestFlat.length ? (
+          <MusicSearchSuggest
+            groups={suggestGroups}
+            activeIndex={activeIndex}
+            onPick={choose}
+            onHover={setActiveIndex}
+          />
+        ) : (
+          <div className="rounded-md bg-elevated p-5 text-sm text-ink-muted" role="status">
+            {t(
+              query.trim().length < 2
+                ? "music.searchPlaceholder"
+                : suggesting
+                  ? "music.loading"
+                  : "music.searchEmpty",
+            )}
+          </div>
+        )}
       </AnchoredMenu>
 
       <AnchoredMenu anchorRef={chipRef} open={menuOpen} onClose={closeMenu} width={224}>
@@ -271,7 +329,15 @@ export function MusicMast({
             <ScopeOption
               key={row.id}
               label={row.name}
-              icon={<MusicServiceLogo source={row.id} size={16} fallback={row.kind === "catalog" ? <Library size={16} aria-hidden="true" /> : undefined} />}
+              icon={
+                <MusicServiceLogo
+                  source={row.id}
+                  size={16}
+                  fallback={
+                    row.kind === "catalog" ? <Library size={16} aria-hidden="true" /> : undefined
+                  }
+                />
+              }
               detail={row.account}
               selected={scope === row.id}
               onSelect={() => pick(row.id)}
@@ -305,7 +371,9 @@ function ScopeOption({
         selected ? "text-ink" : "text-ink-muted"
       }`}
     >
-      <span className="inline-flex size-4 shrink-0 items-center justify-center" aria-hidden="true">{icon}</span>
+      <span className="inline-flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
+        {icon}
+      </span>
       <span className="min-w-0 flex-1 truncate">
         {label}
         {detail ? <span className="ms-1.5 text-ink-subtle">{detail}</span> : null}

@@ -119,8 +119,9 @@ export function catalogBands(ctx: MusicBandContext): {
         ? [homeBand(ctx, "stations", undefined, "music.row.stations", "music.row.stationsSubtitle")]
         : [];
 
-  const extras = [...spare, ...slots.extra.filter((row) => row.source !== HOISTED_SOURCE)].map((row) =>
-    homeBand(ctx, `home:${row.id}`, row, "music.row.newReleases", "music.rail.newSubtitle"),
+  const extras = [...spare, ...slots.extra.filter((row) => row.source !== HOISTED_SOURCE)].map(
+    (row) =>
+      homeBand(ctx, `home:${row.id}`, row, "music.row.newReleases", "music.rail.newSubtitle"),
   );
 
   const scrobbleConnection = connections.find((row) => row.kind === "scrobbler");

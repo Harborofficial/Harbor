@@ -16,10 +16,7 @@ import { BpStepTmdb } from "./steps/bp-step-tmdb";
  * bp-onboarding-frame, never against bp-onboarding itself: the frame is the
  * leaf of that tree and importing the machine from a step is a require cycle.
  */
-export const BP_ONBOARD_STEP_VIEWS: Record<
-  BpOnboardStepId,
-  ComponentType<BpOnboardStepProps>
-> = {
+export const BP_ONBOARD_STEP_VIEWS: Record<BpOnboardStepId, ComponentType<BpOnboardStepProps>> = {
   language: BpStepLanguage,
   phone: BpStepPhone,
   tmdb: BpStepTmdb,

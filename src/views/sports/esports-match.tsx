@@ -24,7 +24,6 @@ import { fetchCsMatchDetail } from "@/lib/sports/esports-cs-detail";
 import { useScrollMemory } from "@/lib/view";
 import { BackToTop } from "@/components/back-to-top";
 
-
 export function EsportsMatchView({
   match,
   onClose,
@@ -117,16 +116,21 @@ export function EsportsMatchView({
   if (accountId !== null)
     return <EsportsPlayerProfile accountId={accountId} onClose={() => setAccountId(null)} />;
   const Heading = page ? "h1" : "h2";
-  const content = <>
+  const content = (
+    <>
       <div className={page ? "sh-event-page-heading" : "ea-dialog-head"}>
         <div>
           <span className="ea-kicker">{def.name}</span>
-          <Heading ref={heading} tabIndex={page ? -1 : undefined} id={id}>{match.event.name}</Heading>
+          <Heading ref={heading} tabIndex={page ? -1 : undefined} id={id}>
+            {match.event.name}
+          </Heading>
           <p>{match.event.stage}</p>
         </div>
-        {!page && <button ref={close} className="sh-icon" aria-label={t("Close")} onClick={onClose}>
-          <X size={20} />
-        </button>}
+        {!page && (
+          <button ref={close} className="sh-icon" aria-label={t("Close")} onClick={onClose}>
+            <X size={20} />
+          </button>
+        )}
       </div>
       <div className="ea-match-detail">
         <div className="ea-detail-versus">
@@ -258,13 +262,35 @@ export function EsportsMatchView({
           />
         )}
       </Suspense>
-    </>;
-  return page ? <main ref={scroll} className="sh-match-page sh-event-page" aria-labelledby={id}>
-    <header className="sh-match-header">
-      {!shellBackAvailable && <button ref={close} className="sh-button" onClick={onClose}><ArrowLeft size={18} />{t("Back")}</button>}
-      <span>{def.name}</span>
-    </header>
-    <div className="sh-event-page-body">{content}</div>
-    <BackToTop scrollRef={scroll} onReturnToTop={() => heading.current?.focus({ preventScroll: true })} />
-  </main> : <ModalShell closing={false} onDismiss={onClose} labelledBy={id} width={1050} portalTarget={portalTarget} backdropClassName={portalTarget ? "broadcast-match-details" : undefined}>{content}</ModalShell>;
+    </>
+  );
+  return page ? (
+    <main ref={scroll} className="sh-match-page sh-event-page" aria-labelledby={id}>
+      <header className="sh-match-header">
+        {!shellBackAvailable && (
+          <button ref={close} className="sh-button" onClick={onClose}>
+            <ArrowLeft size={18} />
+            {t("Back")}
+          </button>
+        )}
+        <span>{def.name}</span>
+      </header>
+      <div className="sh-event-page-body">{content}</div>
+      <BackToTop
+        scrollRef={scroll}
+        onReturnToTop={() => heading.current?.focus({ preventScroll: true })}
+      />
+    </main>
+  ) : (
+    <ModalShell
+      closing={false}
+      onDismiss={onClose}
+      labelledBy={id}
+      width={1050}
+      portalTarget={portalTarget}
+      backdropClassName={portalTarget ? "broadcast-match-details" : undefined}
+    >
+      {content}
+    </ModalShell>
+  );
 }

@@ -78,9 +78,11 @@ const misc: Record<string, string> = {
   "Reveal comments": "Hiện bình luận",
   "Comments are hidden": "Bình luận đã bị ẩn",
   "Hosted elsewhere": "Được lưu trữ nơi khác",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "Các gói này do một bên thứ ba vận hành. Harbor không liên kết và không nhận gì từ việc đăng ký. Giá và điều khoản hiện tại nằm trên trang của họ.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "Các gói này do một bên thứ ba vận hành. Harbor không liên kết và không nhận gì từ việc đăng ký. Giá và điều khoản hiện tại nằm trên trang của họ.",
   "{name} can run on a hosted instance": "{name} có thể chạy trên một phiên bản được lưu trữ",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "Một bên thứ ba vận hành dịch vụ này. Harbor không liên kết, không bán lại và không nhận gì nếu bạn đăng ký. Giá và nội dung nằm trên trang của họ.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "Một bên thứ ba vận hành dịch vụ này. Harbor không liên kết, không bán lại và không nhận gì nếu bạn đăng ký. Giá và nội dung nằm trên trang của họ.",
   "Show comments": "Hiện bình luận",
   "Hide comments": "Ẩn bình luận",
   "You haven't commented yet": "Bạn chưa bình luận",

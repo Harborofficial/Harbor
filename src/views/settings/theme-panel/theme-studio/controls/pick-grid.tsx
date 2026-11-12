@@ -2,7 +2,9 @@ import { Check } from "../../../icons";
 import type { ReactNode } from "react";
 
 export function PickGrid({ cols = 2, children }: { cols?: 1 | 2; children: ReactNode }) {
-  return <div className={`grid gap-2.5 ${cols === 1 ? "grid-cols-1" : "grid-cols-2"}`}>{children}</div>;
+  return (
+    <div className={`grid gap-2.5 ${cols === 1 ? "grid-cols-1" : "grid-cols-2"}`}>{children}</div>
+  );
 }
 
 export function PickCard({

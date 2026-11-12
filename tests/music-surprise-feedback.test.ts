@@ -1,16 +1,27 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  dismissSurprisePrompt, noteSurpriseTrack, resetSurpriseFeedback, surpriseEnjoyed,
-  surpriseFeedbackState, surpriseNotEnjoyed,
+  dismissSurprisePrompt,
+  noteSurpriseTrack,
+  resetSurpriseFeedback,
+  surpriseEnjoyed,
+  surpriseFeedbackState,
+  surpriseNotEnjoyed,
 } from "../src/lib/music/surprise-feedback.ts";
 import type { MusicTrack } from "../src/lib/music/types.ts";
 
 const song = (n: number, artwork: string | undefined = `cover-${n}.jpg`): MusicTrack => ({
-  id: `deezer:track:${n}`, title: `Song ${n}`, artist: "Someone", artwork: artwork as string,
-  durationSeconds: 180, durationLabel: "3:00", connectorId: "catalog",
+  id: `deezer:track:${n}`,
+  title: `Song ${n}`,
+  artist: "Someone",
+  artwork: artwork as string,
+  durationSeconds: 180,
+  durationLabel: "3:00",
+  connectorId: "catalog",
 });
-const play = (from: number, to: number) => { for (let n = from; n <= to; n += 1) noteSurpriseTrack(song(n)); };
+const play = (from: number, to: number) => {
+  for (let n = from; n <= to; n += 1) noteSurpriseTrack(song(n));
+};
 
 test("the mix waits until it has played enough to be worth judging", () => {
   resetSurpriseFeedback();

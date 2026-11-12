@@ -3,7 +3,8 @@ export default {
   "games.torrent.introClean": "Dán liên kết magnet hoặc chọn tệp torrent để xem nội dung.",
   "games.torrent.filesLabel": "Tệp",
   "games.torrent.sizeLabel": "Kích thước",
-  "games.torrent.pieceNoteClean": "Cấu trúc thư mục được giữ nguyên. Các phần dùng chung cũng có thể tạo tệp chưa hoàn chỉnh.",
+  "games.torrent.pieceNoteClean":
+    "Cấu trúc thư mục được giữ nguyên. Các phần dùng chung cũng có thể tạo tệp chưa hoàn chỉnh.",
   "games.torrent.drive": "Chọn ổ đĩa",
   "games.torrent.loadingDrives": "Đang đọc ổ đĩa…",
   "games.torrent.free": "Còn trống {size}",

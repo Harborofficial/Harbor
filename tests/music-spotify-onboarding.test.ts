@@ -15,14 +15,19 @@ test("Spotify onboarding makes device pairing primary and own-app browsing optio
   assert.match(browsing, /<SpotifyBrowsingGuide\b/);
   assert.match(translations, /"music\.spotifySetup\.pairTitle": "Pair your Spotify account"/);
   assert.match(translations, /"music\.spotifySetup\.browseOptional": "Optional"/);
-  assert.match(translations, /"music\.spotifySetup\.browseBody": "Optional:/);
+  assert.match(translations, /"music\.spotifySetup\.browseBody":\s*"Optional:/);
   assert.doesNotMatch(row, /<SpotifySetupFields\b/);
 });
 
 test("browsing-only Spotify authorization is distinct from a live playback pairing", () => {
   const state = text("src-tauri/src/music/spotify/mod.rs");
   const types = text("src/lib/music/types.ts");
-  for (const property of ["playback_ready", "playback_linked", "browsing_ready", "own_app_browsing"]) {
+  for (const property of [
+    "playback_ready",
+    "playback_linked",
+    "browsing_ready",
+    "own_app_browsing",
+  ]) {
     assert.match(state, new RegExp("pub " + property + ": bool"));
   }
   for (const property of ["playbackReady", "playbackLinked", "browsingReady", "ownAppBrowsing"]) {

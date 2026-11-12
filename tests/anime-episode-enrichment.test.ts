@@ -45,7 +45,7 @@ function load(path: string, mocks: Record<string, unknown>) {
   return exports;
 }
 
-function enrichment({
+function enrichModule({
   videos = [],
   ratings = new Map(),
   thumbs = null,
@@ -66,7 +66,11 @@ function enrichment({
       tmdbStillUrl: () => undefined,
     },
     "@/lib/dates": load("src/lib/dates.ts", {}),
-  }).enrichEpisodes;
+  });
+}
+
+function enrichment(options: Parameters<typeof enrichModule>[0] = {}) {
+  return enrichModule(options).enrichEpisodes;
 }
 
 test("a newer AniZip entry's lowercase air date still reaches the episode", () => {
@@ -200,6 +204,24 @@ test("ratings cannot fall back to episode one of another season", async () => {
   await enrichment({ ratings: new Map([["1:1", 9.5]]) })([ep], {}, 1, "tt1");
   assert.equal(ep.rating, undefined);
   assert.equal(ep.ratingIsImdb, undefined);
+});
+
+test("entry-specific IMDb ratings can use the entry series' season 1 keys", () => {
+  const ep = episode({
+    imdbSeason: 2,
+    imdbEpisode: 8,
+    absoluteNumber: 21,
+    airdate: "2025-08-23",
+  });
+  const { withEpisodeImdbRatings } = enrichModule();
+  const ratings = new Map([["1:8", 8.4]]);
+
+  const [shared] = withEpisodeImdbRatings([ep], ratings);
+  assert.equal(shared.rating, undefined);
+
+  const [entry] = withEpisodeImdbRatings([ep], ratings, { ratingSeason: 1 });
+  assert.equal(entry.rating, 8.4);
+  assert.equal(entry.ratingIsImdb, true);
 });
 
 test("unaired episodes receive no IMDb rating even when the map carries their key", async () => {

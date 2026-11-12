@@ -52,16 +52,22 @@ export default {
   "games.guides.date.all": "Kapan saja",
   "games.guides.viewers": "{count} sedang menonton",
   "games.guides.views": "{count} tayangan",
-  "games.guides.import.callofdutywarzone": "Salin nilai ke pengaturan Warzone yang sesuai. Atur DPI di perangkat lunak mouse.",
-  "games.guides.import.css": "Salin pengaturan ke Counter-Strike: Source. Nilai ini berasal dari arsip komunitas bertanggal.",
-  "games.guides.import.cod": "Gunakan nilai ini pada edisi game yang sesuai. Atur DPI di perangkat lunak mouse.",
-  "games.guides.noCrosshair": "Sumber ini tidak memberikan detail crosshair yang cukup untuk pratinjau yang akurat.",
-  "games.guides.previewNote": "Pratinjau statis dari nilai yang diterbitkan. Resolusi, gerakan, dan recoil dapat mengubah hasil dalam game.",
+  "games.guides.import.callofdutywarzone":
+    "Salin nilai ke pengaturan Warzone yang sesuai. Atur DPI di perangkat lunak mouse.",
+  "games.guides.import.css":
+    "Salin pengaturan ke Counter-Strike: Source. Nilai ini berasal dari arsip komunitas bertanggal.",
+  "games.guides.import.cod":
+    "Gunakan nilai ini pada edisi game yang sesuai. Atur DPI di perangkat lunak mouse.",
+  "games.guides.noCrosshair":
+    "Sumber ini tidak memberikan detail crosshair yang cukup untuk pratinjau yang akurat.",
+  "games.guides.previewNote":
+    "Pratinjau statis dari nilai yang diterbitkan. Resolusi, gerakan, dan recoil dapat mengubah hasil dalam game.",
   "games.guides.previewBackground": "Ubah latar terang pratinjau",
   "games.guides.crosshairPreview": "Pratinjau crosshair",
   "games.guides.noPlayers": "Tidak ada pemain yang cocok. Coba nama lain.",
   "games.guides.playerCount": "{count} pemain",
-  "games.guides.archived": "Pengaturan historis. Periksa edisi game dan tanggal sebelum menggunakannya.",
+  "games.guides.archived":
+    "Pengaturan historis. Periksa edisi game dan tanggal sebelum menggunakannya.",
   "games.guides.rateLimit": "Sumber ini membatasi permintaan. Coba lagi dalam {seconds} dtk.",
   "games.guides.configs": "Konfigurasi pemain pro",
   "games.guides.searchPlayers": "Cari pemain",
@@ -73,22 +79,28 @@ export default {
   "games.guides.sourceErrorTitle": "Mari coba lagi",
   "games.guides.more": "Muat lebih banyak",
   "games.guides.moreKick": "Lainnya di Kick",
-  "games.guides.configNote": "Pengaturan yang diterbitkan pemain dan kreator. Pilih profil untuk melihat sumber, tanggal, dan pengaturannya.",
+  "games.guides.configNote":
+    "Pengaturan yang diterbitkan pemain dan kreator. Pilih profil untuk melihat sumber, tanggal, dan pengaturannya.",
   "games.guides.players": "Semua pemain",
   "games.guides.useConfig": "Gunakan pengaturan ini",
-  "games.guides.import.cs2": "Tempel perintah di konsol pengembang CS2. Impor kode crosshair melalui Pengaturan → Game → Crosshair. Periksa nilainya sebelum menerapkan.",
-  "games.guides.import.valorant": "Salin kode crosshair, lalu buka Pengaturan → Crosshair → Impor kode profil di VALORANT. Masukkan nilai lainnya di pengaturan terkait.",
-  "games.guides.import.rainbowsixsiege": "Salin pengaturan dan masukkan nilainya di opsi mouse dan tampilan Siege. DPI diatur melalui perangkat lunak mouse.",
+  "games.guides.import.cs2":
+    "Tempel perintah di konsol pengembang CS2. Impor kode crosshair melalui Pengaturan → Game → Crosshair. Periksa nilainya sebelum menerapkan.",
+  "games.guides.import.valorant":
+    "Salin kode crosshair, lalu buka Pengaturan → Crosshair → Impor kode profil di VALORANT. Masukkan nilai lainnya di pengaturan terkait.",
+  "games.guides.import.rainbowsixsiege":
+    "Salin pengaturan dan masukkan nilainya di opsi mouse dan tampilan Siege. DPI diatur melalui perangkat lunak mouse.",
   "games.guides.copyCrosshair": "Salin crosshair",
   "games.guides.copyCommands": "Salin perintah",
   "games.guides.copySettings": "Salin pengaturan",
   "games.guides.copied": "Disalin",
   "games.guides.copyError": "Gagal menyalin. Coba lagi.",
-  "games.guides.embedNote": "Pemutaran disediakan oleh platform kreator. Jika penyematan dibatasi, buka sumber aslinya.",
+  "games.guides.embedNote":
+    "Pemutaran disediakan oleh platform kreator. Jika penyematan dibatasi, buka sumber aslinya.",
   "games.guides.readerErrorTitle": "Panduan ini tidak dapat dimuat",
   "games.guides.short": "Panduan",
   "games.guides.title": "Panduan & walkthrough",
-  "games.guides.note": "Temukan langkah berikutnya. Baca panduan komunitas, tonton walkthrough, atau ikuti orang yang sedang bermain.",
+  "games.guides.note":
+    "Temukan langkah berikutnya. Baca panduan komunitas, tonton walkthrough, atau ikuti orang yang sedang bermain.",
   "games.guides.written": "Panduan tertulis",
   "games.guides.videos": "Video",
   "games.guides.live": "Langsung",
@@ -102,18 +114,20 @@ export default {
   "games.guides.videoTitle": "Tonton & pelajari",
   "games.guides.twitch": "Jelajahi Twitch",
   "games.guides.youtube": "Lainnya di YouTube",
-  "games.guides.liveNote": "Siaran langsung dari YouTube. Ketersediaan dapat berubah saat menjelajah.",
+  "games.guides.liveNote":
+    "Siaran langsung dari YouTube. Ketersediaan dapat berubah saat menjelajah.",
   "games.guides.error": "Sumber ini tidak dapat dimuat. Coba lagi.",
   "games.guides.empty": "Panduan tidak ditemukan. Coba pencarian atau sumber lain.",
   "games.guides.noLive": "Tidak ada siaran langsung yang cocok saat ini.",
   "games.guides.previous": "Sebelumnya",
   "games.guides.next": "Berikutnya",
   "games.guides.original": "Buka sumber asli",
-  "games.guides.playerNote": "Pemutaran melalui YouTube. Jika kreator membatasi penyematan, buka video aslinya.",
-  "games.guides.readerError": "Panduan ini tidak dapat dibaca di sini. Coba lagi atau buka sumber asli.",
+  "games.guides.playerNote":
+    "Pemutaran melalui YouTube. Jika kreator membatasi penyematan, buka video aslinya.",
+  "games.guides.readerError":
+    "Panduan ini tidak dapat dibaca di sini. Coba lagi atau buka sumber asli.",
   "games.guides.contents": "Dalam panduan ini",
-  "games.guides.credits": "Penulis & lisensi"
-,
+  "games.guides.credits": "Penulis & lisensi",
   "games.guides.copy": "Salin",
   "games.guides.previewMap": "Tampilkan tangkapan layar peta di belakang crosshair",
   "games.guides.skins": "Skin",
@@ -123,5 +137,5 @@ export default {
   "games.guides.teammates": "Rekan satu tim",
   "games.guides.specs": "Spesifikasi",
   "games.guides.exportAll": "Ekspor semua",
-  "games.guides.copyValue": "Salin {label}"
+  "games.guides.copyValue": "Salin {label}",
 } satisfies Record<string, string>;

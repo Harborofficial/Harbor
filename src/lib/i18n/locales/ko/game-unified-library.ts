@@ -1,18 +1,25 @@
 export default {
-  "games.battlenet.changed": "Battle.net 계정이 변경되었습니다. 이 프로필의 가져온 항목을 교체하려면 다시 로그인하세요.",
+  "games.battlenet.changed":
+    "Battle.net 계정이 변경되었습니다. 이 프로필의 가져온 항목을 교체하려면 다시 로그인하세요.",
   "games.battlenet.connect": "로그인",
-  "games.battlenet.intro": "게임을 가져오려면 Battle.net에 로그인하세요. 이 연결은 현재 Harbor 프로필에 저장됩니다.",
+  "games.battlenet.intro":
+    "게임을 가져오려면 Battle.net에 로그인하세요. 이 연결은 현재 Harbor 프로필에 저장됩니다.",
   "games.battlenet.installed": "설치된 게임 표시",
   "games.battlenet.uninstalled": "계정의 미설치 게임 표시",
-  "games.battlenet.partial": "일부 계정 데이터를 새로 고칠 수 없습니다. 이전에 가져온 게임은 계속 표시됩니다.",
+  "games.battlenet.partial":
+    "일부 계정 데이터를 새로 고칠 수 없습니다. 이전에 가져온 게임은 계속 표시됩니다.",
   "games.battlenet.unresolved": "일부 계정 항목의 정확한 게임 에디션을 확인할 수 없습니다.",
-  "games.battlenet.expired": "Battle.net 세션이 만료되었습니다. 다시 로그인하세요. 가져온 게임은 그대로 보관됩니다.",
+  "games.battlenet.expired":
+    "Battle.net 세션이 만료되었습니다. 다시 로그인하세요. 가져온 게임은 그대로 보관됩니다.",
   "games.battlenet.timeout": "Battle.net의 응답 시간이 초과되었습니다. 다시 시도하세요.",
   "games.battlenet.busy": "Battle.net 계정 작업이 이미 진행 중입니다.",
-  "games.battlenet.update": "Battle.net에 연결하려면 업데이트된 Harbor 데스크톱 앱을 다시 시작하세요.",
-  "games.battlenet.error": "Battle.net을 업데이트할 수 없습니다. 마지막으로 가져온 라이브러리는 보관됩니다.",
+  "games.battlenet.update":
+    "Battle.net에 연결하려면 업데이트된 Harbor 데스크톱 앱을 다시 시작하세요.",
+  "games.battlenet.error":
+    "Battle.net을 업데이트할 수 없습니다. 마지막으로 가져온 라이브러리는 보관됩니다.",
   "games.battlenet.disconnect": "Battle.net 연결 해제",
-  "games.battlenet.removeNote": "이 프로필의 계정에서 가져온 항목을 제거합니다. 설치된 파일과 다른 프로필은 유지됩니다.",
+  "games.battlenet.removeNote":
+    "이 프로필의 계정에서 가져온 항목을 제거합니다. 설치된 파일과 다른 프로필은 유지됩니다.",
   "games.battlenet.signing": "Battle.net 창에서 로그인을 완료하세요.",
   "games.battlenet.cached": "계정 게임 {count}개 · 마지막 업데이트 {date}",
 
@@ -25,15 +32,18 @@ export default {
   "games.steamImport.excluded": "가져오기 설정에 따라 제외됨",
   "games.steamImport.ignoreSettings": "제외된 Steam ID ({count})",
   "games.steamImport.ignoreLabel": "제외할 Steam ID",
-  "games.steamImport.ignoreNote": "수동 가져오기에서 이 ID를 건너뜁니다. 기존 라이브러리 항목과 파일은 유지됩니다. 제외를 해제하려면 입력란을 비우세요.",
+  "games.steamImport.ignoreNote":
+    "수동 가져오기에서 이 ID를 건너뜁니다. 기존 라이브러리 항목과 파일은 유지됩니다. 제외를 해제하려면 입력란을 비우세요.",
   "games.steamImport.ignoreSave": "제외할 ID 저장",
   "games.steamImport.ignoreSaved": "제외할 ID를 저장했습니다.",
   "games.steamImport.title": "Steam 게임 가져오기",
-  "games.steamImport.note": "이 Harbor 프로필에 게임 기록을 보관합니다. 소유권과 설치 상태는 별도로 확인합니다.",
+  "games.steamImport.note":
+    "이 Harbor 프로필에 게임 기록을 보관합니다. 소유권과 설치 상태는 별도로 확인합니다.",
   "games.steamImport.input": "Steam 앱 ID 또는 상점 URL",
   "games.steamImport.profile": "Depressurizer 프로필 선택",
   "games.steamImport.count": "{selected}개 선택 · 전체 {total}개",
-  "games.steamImport.unavailableNote": "정보를 가져올 수 없는 항목은 선택되지 않습니다. 선택하면 ID를 보관하고 나중에 정보를 불러올 수 있습니다.",
+  "games.steamImport.unavailableNote":
+    "정보를 가져올 수 없는 항목은 선택되지 않습니다. 선택하면 ID를 보관하고 나중에 정보를 불러올 수 있습니다.",
   "games.steamImport.unknown": "Steam 앱 {id}",
   "games.steamImport.ready": "Steam 정보 확인됨",
   "games.steamImport.profileName": "프로필의 이름",
@@ -43,9 +53,12 @@ export default {
   "games.steamImport.invalid": "잘못된 ID 또는 URL",
   "games.steamImport.duplicate": "중복 항목",
   "games.steamImport.nonSteam": "비 Steam 바로 가기 · 건너뜀",
-  "games.steamImport.limit": "프로필당 최대 5,000개 게임을 가져올 수 있습니다. 파일은 4 MB 미만이어야 합니다.",
-  "games.steamImport.inputError": "유효한 Steam ID 또는 상점 URL을 입력하거나 유효한 Depressurizer 프로필을 선택하세요.",
-  "games.steamImport.writeError": "가져오기를 저장하지 못했습니다. 기존 항목은 변경되지 않았습니다. 다시 시도하세요.",
+  "games.steamImport.limit":
+    "프로필당 최대 5,000개 게임을 가져올 수 있습니다. 파일은 4 MB 미만이어야 합니다.",
+  "games.steamImport.inputError":
+    "유효한 Steam ID 또는 상점 URL을 입력하거나 유효한 Depressurizer 프로필을 선택하세요.",
+  "games.steamImport.writeError":
+    "가져오기를 저장하지 못했습니다. 기존 항목은 변경되지 않았습니다. 다시 시도하세요.",
   "games.steamImport.readError": "가져온 게임을 읽지 못했습니다. 변경하기 전에 다시 시도하세요.",
   "games.steamImport.done": "라이브러리에 추가됨: {count}",
   "games.steamImport.stop": "확인 중지",
@@ -65,7 +78,8 @@ export default {
   "games.libraryStatus.finished": "완료",
   "games.libraryStatus.onHold": "보류",
   "games.libraryStatus.stopped": "플레이 중단",
-  "games.libraryStatus.note": "이 사본에 대한 선택은 현재 Harbor 프로필에 저장됩니다. 플레이 시간이나 도전 과제로 자동 변경되지 않습니다.",
+  "games.libraryStatus.note":
+    "이 사본에 대한 선택은 현재 Harbor 프로필에 저장됩니다. 플레이 시간이나 도전 과제로 자동 변경되지 않습니다.",
 
   "games.unified.playtime": "플레이 시간",
   "games.unified.playtime.all": "모든 플레이 시간",
@@ -78,8 +92,10 @@ export default {
   "games.unified.playtime.steam": "Steam에서 {time}",
   "games.unified.playtime.zeroSteam": "Steam에 기록된 플레이 시간 없음",
   "games.unified.playtime.zeroHarbor": "Harbor에 기록된 플레이 시간 없음",
-  "games.unified.playtime.unknownHint": "Steam 계정의 플레이 시간을 확인할 수 없거나 이 출처가 플레이 시간을 제공하지 않습니다.",
-  "games.unified.playtime.note": "Steam 총 시간과 사용자의 수정 사항을 포함한 Harbor 기록 시간을 사용합니다. 확인할 수 없는 시간은 별도로 구분합니다.",
+  "games.unified.playtime.unknownHint":
+    "Steam 계정의 플레이 시간을 확인할 수 없거나 이 출처가 플레이 시간을 제공하지 않습니다.",
+  "games.unified.playtime.note":
+    "Steam 총 시간과 사용자의 수정 사항을 포함한 Harbor 기록 시간을 사용합니다. 확인할 수 없는 시간은 별도로 구분합니다.",
   "games.unified.note": "Steam 라이브러리, PC 게임, 가져온 ROM을 한곳에서 확인하세요.",
   "games.unified.allSources": "모든 출처",
   "games.unified.availability": "이용 가능 상태",
@@ -94,10 +110,13 @@ export default {
   "games.unified.state.setup": "설정 필요",
   "games.unified.state.unknown": "설치 여부 확인 안 됨",
   "games.unified.refresh": "로컬 라이브러리 새로고침",
-  "games.unified.scanNote": "일부 라이브러리를 확인하지 못했습니다. 해당 게임은 상태 알 수 없음 또는 이용 불가로 여기에 계속 표시됩니다.",
-  "games.unified.partial": "일부 폴더를 확인하지 못했습니다. 일부 설치가 인식되지 않았을 수 있습니다.",
+  "games.unified.scanNote":
+    "일부 라이브러리를 확인하지 못했습니다. 해당 게임은 상태 알 수 없음 또는 이용 불가로 여기에 계속 표시됩니다.",
+  "games.unified.partial":
+    "일부 폴더를 확인하지 못했습니다. 일부 설치가 인식되지 않았을 수 있습니다.",
   "games.unified.empty": "게임을 한곳에 모으세요",
-  "games.unified.emptyNote": "Steam을 연결하거나, PC 게임을 추가하거나, ROM 폴더를 가져오면 여기에 게임이 표시됩니다.",
+  "games.unified.emptyNote":
+    "Steam을 연결하거나, PC 게임을 추가하거나, ROM 폴더를 가져오면 여기에 게임이 표시됩니다.",
   "games.unified.pcGames": "PC 게임 관리",
   "games.unified.roms": "ROM 관리",
   "games.unified.steam": "Steam 관리",
@@ -117,5 +136,5 @@ export default {
   "games.libraryNews.failed": "게임 소식을 불러오지 못했습니다.",
   "games.libraryNews.hide": "게임 소식 숨기기",
   "games.libraryNews.show": "게임 소식 표시",
-  "games.libraryNews.pending": "게임 소식 확인 중…"
+  "games.libraryNews.pending": "게임 소식 확인 중…",
 };

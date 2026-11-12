@@ -5,14 +5,20 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 
-const hook = readFileSync(new URL("../src/views/calendar/use-calendar-data.ts", import.meta.url), "utf8");
+const hook = readFileSync(
+  new URL("../src/views/calendar/use-calendar-data.ts", import.meta.url),
+  "utf8",
+);
 const sources = readFileSync(new URL("../src/lib/calendar-sources.ts", import.meta.url), "utf8");
 const view = readFileSync(new URL("../src/views/calendar.tsx", import.meta.url), "utf8");
 const webhookLoop = readFileSync(
   new URL("../src/components/webhook-loop-mount.tsx", import.meta.url),
   "utf8",
 );
-const webhookEngine = readFileSync(new URL("../src/lib/webhook-engine.ts", import.meta.url), "utf8");
+const webhookEngine = readFileSync(
+  new URL("../src/lib/webhook-engine.ts", import.meta.url),
+  "utf8",
+);
 
 test("calendar source implementations are loaded on demand", () => {
   assert.doesNotMatch(hook, /from ["']@\/lib\/calendar-sources["']/);

@@ -11,10 +11,7 @@ import type { TitleCreditPerson } from "../src/lib/providers/tmdb/tmdb-title-cre
 
 const SUBJECT = 1;
 
-function actor(
-  id: number,
-  over: Partial<TitleCreditPerson> = {},
-): TitleCreditPerson {
+function actor(id: number, over: Partial<TitleCreditPerson> = {}): TitleCreditPerson {
   return {
     id,
     name: `Actor ${id}`,
@@ -25,7 +22,11 @@ function actor(
   };
 }
 
-function title(key: string, cast: TitleCreditPerson[], crew: TitleCreditPerson[] = []): CollaboratorTitle {
+function title(
+  key: string,
+  cast: TitleCreditPerson[],
+  crew: TitleCreditPerson[] = [],
+): CollaboratorTitle {
   return { key, cast: [actor(SUBJECT, { order: 0 }), ...cast], crew };
 }
 
@@ -46,7 +47,10 @@ test("the person is never their own collaborator", () => {
     ranked.find((c) => c.id === SUBJECT),
     undefined,
   );
-  assert.deepEqual(ranked.map((c) => c.id), [2, 3]);
+  assert.deepEqual(
+    ranked.map((c) => c.id),
+    [2, 3],
+  );
 });
 
 test("a single shared title is dropped", () => {
@@ -54,7 +58,10 @@ test("a single shared title is dropped", () => {
     [title("movie:10", [actor(2), actor(3)]), title("movie:11", [actor(2), actor(4)])],
     SUBJECT,
   );
-  assert.deepEqual(ranked.map((c) => c.id), [2]);
+  assert.deepEqual(
+    ranked.map((c) => c.id),
+    [2],
+  );
   assert.equal(ranked[0].titles, MIN_SHARED_TITLES);
 });
 
@@ -69,8 +76,14 @@ test("shared-title count outranks popularity", () => {
     ],
     SUBJECT,
   );
-  assert.deepEqual(ranked.map((c) => c.name), ["Regular", "Star"]);
-  assert.deepEqual(ranked.map((c) => c.titles), [3, 2]);
+  assert.deepEqual(
+    ranked.map((c) => c.name),
+    ["Regular", "Star"],
+  );
+  assert.deepEqual(
+    ranked.map((c) => c.titles),
+    [3, 2],
+  );
 });
 
 test("popularity only breaks a tie on equal counts", () => {
@@ -83,7 +96,10 @@ test("popularity only breaks a tie on equal counts", () => {
     ],
     SUBJECT,
   );
-  assert.deepEqual(ranked.map((c) => c.id), [3, 2]);
+  assert.deepEqual(
+    ranked.map((c) => c.id),
+    [3, 2],
+  );
 });
 
 test("only the top-billed cast is counted", () => {
@@ -121,7 +137,10 @@ test("a title counted twice still counts once", () => {
     [title("movie:10", cast), title("movie:10", cast), title("movie:11", cast)],
     SUBJECT,
   );
-  assert.deepEqual(ranked.map((c) => c.titles), [2, 2]);
+  assert.deepEqual(
+    ranked.map((c) => c.titles),
+    [2, 2],
+  );
 });
 
 test("recurring directors and writers rank alongside cast and carry a role", () => {
@@ -135,14 +154,25 @@ test("recurring directors and writers rank alongside cast and carry a role", () 
     ],
     SUBJECT,
   );
-  assert.deepEqual(ranked.map((c) => c.name), ["Evan Goldberg", "Actor 2"]);
-  assert.deepEqual(ranked.map((c) => c.titles), [3, 2]);
+  assert.deepEqual(
+    ranked.map((c) => c.name),
+    ["Evan Goldberg", "Actor 2"],
+  );
+  assert.deepEqual(
+    ranked.map((c) => c.titles),
+    [3, 2],
+  );
   assert.equal(ranked[0].role, "Director");
   assert.equal(ranked[1].role, null);
 });
 
 test("cast wins a tie against crew", () => {
-  const director = actor(9, { name: "Aaa Director", job: "Director", order: undefined, popularity: 500 });
+  const director = actor(9, {
+    name: "Aaa Director",
+    job: "Director",
+    order: undefined,
+    popularity: 500,
+  });
   const ranked = rankCollaborators(
     [
       title("movie:10", [actor(2, { name: "Zzz Actor", popularity: 1 })], [director]),
@@ -150,7 +180,10 @@ test("cast wins a tie against crew", () => {
     ],
     SUBJECT,
   );
-  assert.deepEqual(ranked.map((c) => c.name), ["Zzz Actor", "Aaa Director"]);
+  assert.deepEqual(
+    ranked.map((c) => c.name),
+    ["Zzz Actor", "Aaa Director"],
+  );
 });
 
 test("producers are not treated as collaborators", () => {

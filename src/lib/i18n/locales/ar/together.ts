@@ -62,10 +62,10 @@ const together: Record<string, string> = {
 
   "Invite via link": "دعوة عبر رابط",
   "Watch together": "المشاهدة معاً",
-  "Back": "رجوع",
-  "Invite": "دعوة",
+  Back: "رجوع",
+  Invite: "دعوة",
   "Paste invite link": "لصق رابط الدعوة",
-  "Join": "انضمام",
+  Join: "انضمام",
   "Open Settings": "فتح الإعدادات",
   "Your name": "اسمك",
   "Starting…": "جاري البدء…",
@@ -78,7 +78,8 @@ const together: Record<string, string> = {
   "Show cursors": "إظهار المؤشرات",
   "Leave room": "مغادرة الغرفة",
   "Watch Together needs a relay.": "المشاهدة معاً تتطلب اتصالاً وسيطاً (Relay).",
-  "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.": "الوسيط هو عبارة عن أداة Cloudflare Worker صغيرة تقوم بتمرير رسائل التشغيل/الإيقاف/التقديم بينك وبين أصدقائك. لا تمر أي بيانات فيديو من خلاله أبداً. قم بنشر الوسيط الخاص بك بنقرة واحدة (الخطة المجانية كافية)، أو الصق رابط دعوة من صديق لاستخدام الوسيط الخاص به.",
+  "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.":
+    "الوسيط هو عبارة عن أداة Cloudflare Worker صغيرة تقوم بتمرير رسائل التشغيل/الإيقاف/التقديم بينك وبين أصدقائك. لا تمر أي بيانات فيديو من خلاله أبداً. قم بنشر الوسيط الخاص بك بنقرة واحدة (الخطة المجانية كافية)، أو الصق رابط دعوة من صديق لاستخدام الوسيط الخاص به.",
   "Watch Together": "المشاهدة معاً",
 };
 

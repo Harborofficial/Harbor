@@ -390,7 +390,8 @@ const catalog11: Record<string, string> = {
     "스트리밍 제공 여부와 현재 상영작 공개 기간에 사용됩니다. 국가를 선택하면 Harbor에서 인터페이스, 메타데이터 및 자막 언어를 해당 국가에 맞출 수 있습니다.",
   "Used for your cursor in Watch Together, your draw color, and your name pill in chat.":
     "함께 보기의 커서, 그리기 색상, 채팅의 이름표에 사용됩니다.",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "캐시를 확인하고 링크 제한을 해제하는 데 사용됩니다. Harbor는 자체적으로 계정에 무언가를 추가하거나 제거하지 않습니다.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "캐시를 확인하고 링크 제한을 해제하는 데 사용됩니다. Harbor는 자체적으로 계정에 무언가를 추가하거나 제거하지 않습니다.",
   "Used to lift Time's Up and to leave the kids space.":
     "시간 제한을 해제하고 키즈 공간에서 나갈 때 사용합니다.",
   Usenet: "Usenet",
@@ -674,7 +675,8 @@ const catalog11: Record<string, string> = {
     "다음 에피소드를 자동 재생할 때 Harbor에서 가장 높은 순위의 스트림 대신 방금 보던 것과 같은 릴리스/소스를 유지합니다. 해당 소스를 사용할 수 없으면 최적의 스트림을 사용합니다.",
   "When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.":
     "전체 화면에서 Esc를 누르면 플레이어가 닫히지 않고 전체 화면이 종료됩니다. 다시 Esc를 누르면 닫힙니다. Esc를 누를 때 항상 닫히게 하려면 끄세요.",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "끄면 스트림을 닫거나 전환하는 즉시 P2P 전송이 중지되어 백그라운드에서 다운로드되지 않습니다. 나간 후에도 계속 다운로드하려면 켜세요. 다운로드 탭에서 관리하거나 일시 정지할 수 있습니다.",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "끄면 스트림을 닫거나 전환하는 즉시 P2P 전송이 중지되어 백그라운드에서 다운로드되지 않습니다. 나간 후에도 계속 다운로드하려면 켜세요. 다운로드 탭에서 관리하거나 일시 정지할 수 있습니다.",
   "When on, a connected controller moves focus around Harbor and drives the player. Turn it off to ignore all controllers.":
     "켜면 연결된 컨트롤러로 Harbor의 포커스를 이동하고 플레이어를 조작할 수 있습니다. 모든 컨트롤러를 무시하려면 끄세요.",
   "When people share a collection it shows up here. Build one you love and share it, that is how it starts.":

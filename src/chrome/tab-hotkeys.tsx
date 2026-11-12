@@ -13,7 +13,10 @@ export function TabHotkeys() {
     usePreviewNavCustomization(settings.navCustomization),
   );
   const enabled = settings.tabHotkeys !== false;
-  const order = items.map((item) => item.view).filter(Boolean).join(",");
+  const order = items
+    .map((item) => item.view)
+    .filter(Boolean)
+    .join(",");
   useEffect(() => {
     if (!enabled) return;
     const views = order.split(",").filter(Boolean);

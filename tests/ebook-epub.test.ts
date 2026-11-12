@@ -223,7 +223,10 @@ test("chapter order follows the spine and anchors while continuations span stora
     epub(
       [
         ["a.xhtml", '<h2 id="one">First</h2><p>Chapter one begins.</p>'],
-        ["b.xhtml", '<p>Chapter one continues.</p><h2 id="two">Second</h2><p>Chapter two begins.</p>'],
+        [
+          "b.xhtml",
+          '<p>Chapter one continues.</p><h2 id="two">Second</h2><p>Chapter two begins.</p>',
+        ],
         ["c.xhtml", "<p>Chapter two continues in another file.</p>"],
       ],
       { nav: toc(["b.xhtml#two", "Second"], ["a.xhtml#one", "First"]) },
@@ -329,7 +332,10 @@ test("document-start links and encoded fragments have stable cache-distinct targ
     ["OPS/text one.xhtml#", "OPS/text one.xhtml#chapter%252"],
   );
   assert.equal(readEpubChapter(book, book.chapters[0].path), "Opening text.");
-  assert.match(readEpubChapter(book, "OPS/text one.xhtml"), /Opening text\.[\s\S]*The final text\./);
+  assert.match(
+    readEpubChapter(book, "OPS/text one.xhtml"),
+    /Opening text\.[\s\S]*The final text\./,
+  );
 });
 
 test("document-start targets preserve leading text with one unique chapter path", async () => {
@@ -375,7 +381,10 @@ test("135 chapter anchors remain complete and distinct when an EPUB groups them 
   const book = await parseEpub(epub(files, { nav: toc(...links) }));
   assert.equal(files.length, 11);
   assert.equal(book.chapters.length, 135);
-  assert.deepEqual(book.chapters.map((chapter) => readEpubChapter(book, chapter.path)), expected);
+  assert.deepEqual(
+    book.chapters.map((chapter) => readEpubChapter(book, chapter.path)),
+    expected,
+  );
 });
 
 test("legacy title recovery preserves the exact original label used by cached translations", async () => {
@@ -394,8 +403,7 @@ test("legacy title recovery preserves the exact original label used by cached tr
 
   const landmarks = await parseEpub(
     epub(files, {
-      nav:
-        '<nav epub:type="landmarks"><a href="book.xhtml">Start reading</a></nav>' + nav,
+      nav: '<nav epub:type="landmarks"><a href="book.xhtml">Start reading</a></nav>' + nav,
     }),
   );
   assert.equal(legacyEpubChapterTitle(landmarks, "OPS/book.xhtml"), "Start reading");

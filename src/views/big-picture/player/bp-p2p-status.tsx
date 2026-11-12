@@ -189,22 +189,16 @@ function useMonotonicPct(ready: number, done: boolean): number {
   return pct;
 }
 
-function BpReadinessMeter({
-  pct,
-  done,
-  reduce,
-}: {
-  pct: number;
-  done: boolean;
-  reduce: boolean;
-}) {
+function BpReadinessMeter({ pct, done, reduce }: { pct: number; done: boolean; reduce: boolean }) {
   const indeterminate = pct < 1 && !done;
   return (
     <div className="h-[clamp(5px,0.7vh,9px)] w-full overflow-hidden rounded-full bg-[var(--bp-glass)]">
       {indeterminate ? (
         <div
           className="h-full w-2/5 rounded-full bg-ink/60"
-          style={reduce ? { width: "20%" } : { animation: "stremio-progress 1.5s ease-in-out infinite" }}
+          style={
+            reduce ? { width: "20%" } : { animation: "stremio-progress 1.5s ease-in-out infinite" }
+          }
         />
       ) : (
         <div

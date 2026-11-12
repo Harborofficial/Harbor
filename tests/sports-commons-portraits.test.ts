@@ -47,10 +47,7 @@ test("Commons resolves the exact tennis player's photo without an English Wikipe
   const result = await resolver.resolve(who);
   assert.equal(result?.source, "Wikimedia Commons");
   assert.equal(result?.url, photo.imageinfo[0].thumburl);
-  assert.match(
-    result!.sourceUrl,
-    /^https:\/\/commons.wikimedia.org\/wiki\/File%3AMelisa_Ercan/,
-  );
+  assert.match(result!.sourceUrl, /^https:\/\/commons.wikimedia.org\/wiki\/File%3AMelisa_Ercan/);
   assert.equal(urls.length, 4);
   assert.equal(new URL(urls[3]).searchParams.get("gcmlimit"), "8");
   assert.deepEqual(await resolver.resolve(who), result);

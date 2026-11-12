@@ -12,7 +12,9 @@ import { markSourceAlertsRead } from "@/lib/games/source-alerts";
 const POLL_MS = 60000;
 
 export function useNotificationCenter() {
-  const { activeId } = useProfiles(), profile = activeId ?? "default", t = useT();
+  const { activeId } = useProfiles(),
+    profile = activeId ?? "default",
+    t = useT();
   const alerts = useSourceAlerts(profile);
   const [authed, setAuthed] = useState(() => !!currentAuthor());
   const [items, setItems] = useState<CenterNotif[]>([]);
@@ -74,34 +76,59 @@ export function useNotificationCenter() {
   }, [authed, refresh]);
 
   const markRead = useCallback(async () => {
-    try { markSourceAlertsRead(profile); } catch { /* Keep unread local notices if storage cannot commit. */ }
+    try {
+      markSourceAlertsRead(profile);
+    } catch {
+      /* Keep unread local notices if storage cannot commit. */
+    }
     if (!unread) return;
     setItems((prev) => prev.map((n) => ({ ...n, read: true })));
     setUnread(0);
     await markAllNotificationsRead();
   }, [unread, profile]);
 
-  const accept = useCallback(async (edgeId: string) => {
-    setPending((prev) => prev.filter((p) => p.edgeId !== edgeId));
-    await acceptFriend(edgeId).catch(() => {});
-    void refresh();
-  }, [refresh]);
+  const accept = useCallback(
+    async (edgeId: string) => {
+      setPending((prev) => prev.filter((p) => p.edgeId !== edgeId));
+      await acceptFriend(edgeId).catch(() => {});
+      void refresh();
+    },
+    [refresh],
+  );
 
-  const decline = useCallback(async (edgeId: string) => {
-    setPending((prev) => prev.filter((p) => p.edgeId !== edgeId));
-    await declineFriend(edgeId).catch(() => {});
-    void refresh();
-  }, [refresh]);
+  const decline = useCallback(
+    async (edgeId: string) => {
+      setPending((prev) => prev.filter((p) => p.edgeId !== edgeId));
+      await declineFriend(edgeId).catch(() => {});
+      void refresh();
+    },
+    [refresh],
+  );
 
   const dismiss = useCallback((id: string) => dismissNotifs([id]), []);
 
   const clearAll = useCallback(async () => {
-    dismissNotifs([...items.map((n) => n.id), ...alerts.notices.map(notice => notice.id)]);
+    dismissNotifs([...items.map((n) => n.id), ...alerts.notices.map((notice) => notice.id)]);
     await markRead();
   }, [items, alerts.notices, markRead]);
 
-  const localItems: CenterNotif[] = alerts.notices.map(notice => ({ id: notice.id, source: "game", kind: "game-source-available", title: t("games.sourceAlerts.noticeTitle", { name: notice.game.name }), body: t("games.sourceAlerts.noticeBody", { source: notice.sourceName, title: notice.releaseTitle }), cover: notice.game.adultContent ? undefined : notice.game.capsule, createdAt: notice.createdAt, read: notice.read, data: { profile, game: notice.game } }));
-  const visibleItems = [...items, ...localItems].filter((n) => !isDismissed(n.id) && n.kind !== "friend-request").sort((a, b) => b.createdAt - a.createdAt);
+  const localItems: CenterNotif[] = alerts.notices.map((notice) => ({
+    id: notice.id,
+    source: "game",
+    kind: "game-source-available",
+    title: t("games.sourceAlerts.noticeTitle", { name: notice.game.name }),
+    body: t("games.sourceAlerts.noticeBody", {
+      source: notice.sourceName,
+      title: notice.releaseTitle,
+    }),
+    cover: notice.game.adultContent ? undefined : notice.game.capsule,
+    createdAt: notice.createdAt,
+    read: notice.read,
+    data: { profile, game: notice.game },
+  }));
+  const visibleItems = [...items, ...localItems]
+    .filter((n) => !isDismissed(n.id) && n.kind !== "friend-request")
+    .sort((a, b) => b.createdAt - a.createdAt);
   const unreadCount = visibleItems.filter((n) => !n.read).length;
   const badge = unreadCount + pending.length;
 

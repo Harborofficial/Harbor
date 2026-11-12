@@ -19,7 +19,16 @@ export function useSettingsPreviewArt(): PreviewArt {
   const samples = useSettingsSamples();
   return {
     ...ARTWORK,
-    posters: Array.from({ length: 8 }, (_, index) => samples[index % samples.length].poster || ARTWORK.posters[index]),
-    stills: Array.from({ length: 6 }, (_, index) => samples[index % samples.length].background || samples[index % samples.length].poster || ARTWORK.stills[index]),
+    posters: Array.from(
+      { length: 8 },
+      (_, index) => samples[index % samples.length].poster || ARTWORK.posters[index],
+    ),
+    stills: Array.from(
+      { length: 6 },
+      (_, index) =>
+        samples[index % samples.length].background ||
+        samples[index % samples.length].poster ||
+        ARTWORK.stills[index],
+    ),
   };
 }

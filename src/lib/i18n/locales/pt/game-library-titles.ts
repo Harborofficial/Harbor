@@ -1,6 +1,7 @@
 export default {
   "games.titles.title": "Padronizar títulos",
-  "games.titles.note": "Revise os nomes exibidos localmente. Os títulos originais do provedor e os arquivos dos jogos são preservados.",
+  "games.titles.note":
+    "Revise os nomes exibidos localmente. Os títulos originais do provedor e os arquivos dos jogos são preservados.",
   "games.titles.ignored": "Manter estas palavras como estão",
   "games.titles.uppercase": "Sempre em maiúsculas",
   "games.titles.dash": "Trocar hífens isolados por dois-pontos",
@@ -12,5 +13,6 @@ export default {
   "games.titles.changes": "{count} títulos serão alterados",
   "games.titles.applied": "{count} títulos atualizados.",
   "games.titles.unchanged": "Nenhum título será alterado. Você ainda pode salvar as preferências.",
-  "games.titles.conflict": "Os títulos foram alterados em outro lugar. Feche e reabra esta revisão antes de salvar."
+  "games.titles.conflict":
+    "Os títulos foram alterados em outro lugar. Feche e reabra esta revisão antes de salvar.",
 };

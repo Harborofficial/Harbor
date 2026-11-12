@@ -126,8 +126,20 @@ function merge(lists: LibraryItem[][]): LibraryItem[] {
     for (const i of list) {
       if (!isEligibleTrackerPlayback(i)) continue;
       const held = byId.get(i._id);
-      if (!held) byId.set(i._id, i);
-      else byId.set(i._id, mergeItem(held, i));
+      if (!held) {
+        byId.set(i._id, i);
+      } else {
+        const next = mergeItem(held, i);
+        // A provider's playback id belongs to one episode. Do not let a deduped
+        // show carry a different episode's id from another source.
+        const sameEpisode =
+          held.state?.season === i.state?.season && held.state?.episode === i.state?.episode;
+        const ids = sameEpisode
+          ? { ...held.providerPlaybackIds, ...i.providerPlaybackIds }
+          : next.providerPlaybackIds;
+        if (ids && Object.keys(ids).length > 0) next.providerPlaybackIds = ids;
+        byId.set(i._id, next);
+      }
     }
   }
   return [...byId.values()].sort((a, b) => activityOf(b) - activityOf(a));

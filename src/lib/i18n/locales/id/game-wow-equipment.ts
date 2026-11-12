@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "Tidak ada yang tercatat",
   "games.wow.equipment.detailsUnavailable": "Detail tidak tersedia",
   "games.wow.equipment.unavailable": "Perlengkapan karakter ini tidak tersedia.",
-  "games.wow.equipment.note": "Perlengkapan dari pembaruan terakhir Raider.IO. Periksa perlengkapan saat ini di dalam game.",
+  "games.wow.equipment.note":
+    "Perlengkapan dari pembaruan terakhir Raider.IO. Periksa perlengkapan saat ini di dalam game.",
   "games.wow.equipment.partial": "Beberapa item yang dipakai tidak dapat dibaca.",
   "games.wow.equipment.level": "Level item {level}",
   "games.wow.equipment.gems": "Permata",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "Tangan utama",
   "games.wow.equipment.offhand": "Tangan kedua",
   "games.wow.equipment.shirt": "Kemeja",
-  "games.wow.equipment.tabard": "Tabard"
+  "games.wow.equipment.tabard": "Tabard",
 };

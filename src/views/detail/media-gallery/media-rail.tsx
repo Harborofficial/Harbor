@@ -193,7 +193,15 @@ export function MediaRail({ children, min = 300 }: { children: React.ReactNode; 
   );
 }
 
-function RailArrow({ side, visible, onClick }: { side: "start" | "end"; visible: boolean; onClick: () => void }) {
+function RailArrow({
+  side,
+  visible,
+  onClick,
+}: {
+  side: "start" | "end";
+  visible: boolean;
+  onClick: () => void;
+}) {
   const t = useT();
   const isStart = side === "start";
   const label = t(isStart ? "Scroll left" : "Scroll right");

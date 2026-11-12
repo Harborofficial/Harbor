@@ -228,7 +228,11 @@ export function DeckB({ next }: { next: MusicTrack | undefined }) {
           label={t(playing ? "dj.pause" : "dj.play")}
           onClick={() => void deckPause(freeRef.current, playing).catch(() => {})}
         >
-          {playing ? <Pause size={15} fill="currentColor" /> : <Play size={15} fill="currentColor" />}
+          {playing ? (
+            <Pause size={15} fill="currentColor" />
+          ) : (
+            <Play size={15} fill="currentColor" />
+          )}
         </Hardware>
         <Hardware
           tone="red"

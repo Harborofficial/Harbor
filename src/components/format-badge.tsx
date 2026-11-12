@@ -325,13 +325,7 @@ export function defaultBadgeSrc(kind: BadgeKind): string {
   return SRC[kind];
 }
 
-export function FormatBadge({
-  kind,
-  size = "md",
-}: {
-  kind: BadgeKind;
-  size?: BadgeSize;
-}) {
+export function FormatBadge({ kind, size = "md" }: { kind: BadgeKind; size?: BadgeSize }) {
   const override = useBadgeOverride(kind);
   const note = QUALITY_NOTES[kind];
   if (override?.hidden) return null;
@@ -384,8 +378,7 @@ export function RuleBadgeChip({ rule, size = "md" }: { rule: CustomBadgeRule; si
   const style = rule.tagStyle ?? "filled";
   const outline = style === "outlined" || style === "bordered";
   const bg = !outline ? cssColor(rule.tagColor) : undefined;
-  const border =
-    style !== "filled" ? cssColor(rule.borderColor ?? rule.tagColor) : undefined;
+  const border = style !== "filled" ? cssColor(rule.borderColor ?? rule.tagColor) : undefined;
   return (
     <span
       className="inline-flex shrink-0 items-center rounded-md font-semibold uppercase tracking-wide"
@@ -430,17 +423,13 @@ export function RuleBadges({
 const TOOLTIP_WIDTH = 280;
 const TOOLTIP_GAP = 8;
 
-function BadgeWithTooltip({
-  note,
-  children,
-}: {
-  note: QualityNote;
-  children: React.ReactNode;
-}) {
+function BadgeWithTooltip({ note, children }: { note: QualityNote; children: React.ReactNode }) {
   const t = useT();
   const wrapRef = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{ top: number; left: number; place: "above" | "below" } | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; place: "above" | "below" } | null>(
+    null,
+  );
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -452,7 +441,8 @@ function BadgeWithTooltip({
     const desiredHeight = 120;
     const place: "above" | "below" =
       rect.top - desiredHeight - TOOLTIP_GAP > 12 ? "above" : "below";
-    const top = place === "above" ? rect.top - TOOLTIP_GAP - desiredHeight : rect.bottom + TOOLTIP_GAP;
+    const top =
+      place === "above" ? rect.top - TOOLTIP_GAP - desiredHeight : rect.bottom + TOOLTIP_GAP;
     let left = rect.left + rect.width / 2 - TOOLTIP_WIDTH / 2;
     left = Math.max(12, Math.min(left, vw - TOOLTIP_WIDTH - 12));
     setPos({ top, left, place });
@@ -479,7 +469,8 @@ function BadgeWithTooltip({
       className="relative inline-flex shrink-0 items-center cursor-help outline-none"
     >
       {children}
-      {open && pos &&
+      {open &&
+        pos &&
         createPortal(
           <div
             style={{
@@ -491,7 +482,9 @@ function BadgeWithTooltip({
             }}
             className="pointer-events-none fixed z-[145] flex flex-col gap-1.5 rounded-xl border border-edge px-3.5 py-3 text-start shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
           >
-            <span className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] ${accent}`}>
+            <span
+              className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] ${accent}`}
+            >
               {note.tone === "warn" ? (
                 <AlertTriangle size={11} strokeWidth={2.4} />
               ) : (

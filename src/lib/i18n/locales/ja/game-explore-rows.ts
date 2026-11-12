@@ -59,7 +59,8 @@ export default {
   "games.recent.open": "{source} の {name} を開く",
   "games.recent.files": "ソースのファイル",
   "games.recent.empty": "ゲームのソースを接続すると、最新の追加分がここに表示されます。",
-  "games.recent.undated": "ソースにはアップロード日付きのゲームがまだありません。「ソースの管理」からご覧ください。",
+  "games.recent.undated":
+    "ソースにはアップロード日付きのゲームがまだありません。「ソースの管理」からご覧ください。",
   "games.recent.adult": "成人向けコンテンツ · 画像をぼかしています",
   "games.recent.artHidden": "画像を非表示",
   "games.recent.artUnrated": "コンテンツのレーティングは不明です",
@@ -85,7 +86,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "アーケード収益（1980〜1999年）",
   "games.collectionsLive.wowRecord": "有料会員数の最高記録",
   "games.collectionsLive.wiiRecord": "Wiiでの販売本数",
-  "games.collectionsLive.manhuntRecord": "英国でレーティングを拒否された初のアクションアドベンチャー",
+  "games.collectionsLive.manhuntRecord":
+    "英国でレーティングを拒否された初のアクションアドベンチャー",
   "games.collectionsLive.gtaVSalesRecord": "最も売れたアクションアドベンチャー",
   "games.collectionsLive.blackOps3Record": "最も売れたFPS",
   "games.collectionsLive.smashUltimateRecord": "最も売れた格闘ゲーム",
@@ -143,7 +145,8 @@ export default {
   "games.tournaments.schedule": "大会の公式情報",
   "games.tournaments.watch": "視聴方法",
   "games.tournaments.channelsNote": "公式チャンネル。大会の日程に合わせて配信されます。",
-  "games.tournaments.broadcastPending": "配信情報はまだ確認できていません。主催者のページをご確認ください。",
+  "games.tournaments.broadcastPending":
+    "配信情報はまだ確認できていません。主催者のページをご確認ください。",
   "games.tournaments.noDates": "このカレンダーには今後の主要大会がまだ確認されていません。",
   "games.launchers.topGames": "Steamで最もプレイされているゲーム",
   "games.launchers.chartRank": "プレイヤー数ランキング {rank}位",

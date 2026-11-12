@@ -7,11 +7,13 @@ export default {
   "games.searchUi.web": "Konteks web",
   "games.searchUi.settings": "Pengaturan AI",
   "games.searchUi.setup": "Hubungkan penyedia AI",
-  "games.searchUi.setupNote": "Gunakan akun OpenRouter atau Groq dan model yang sama dengan yang kamu pakai di Harbor.",
+  "games.searchUi.setupNote":
+    "Gunakan akun OpenRouter atau Groq dan model yang sama dengan yang kamu pakai di Harbor.",
   "games.searchUi.aiHint": "Tekan Enter saat siap. Filter pilihanmu juga berlaku untuk hasil AI.",
   "games.searchUi.thinking": "Mencari game dan memeriksa Steam…",
   "games.searchUi.verified": "{count} hasil Steam · Saran AI",
-  "games.searchUi.noAiResults": "Tidak ada hasil Steam terverifikasi dengan filter ini. Coba deskripsi lain atau kurangi filter.",
+  "games.searchUi.noAiResults":
+    "Tidak ada hasil Steam terverifikasi dengan filter ini. Coba deskripsi lain atau kurangi filter.",
   "games.searchUi.random": "Game acak",
   "games.searchUi.randomHint": "Pilih game acak yang cocok dengan pencarian dan filter ini.",
   "games.searchUi.picking": "Memilih…",
@@ -21,5 +23,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · Game PC, konsol, dan modifikasi ROM.",
   "games.searchUi.steamScope": "Filter atau urutan ini menggunakan data Steam.",
   "games.searchUi.allCatalogs": "Cari di semua katalog",
-  "games.searchUi.partial": "Sebagian hasil tidak tersedia: {providers}."
+  "games.searchUi.partial": "Sebagian hasil tidak tersedia: {providers}.",
 };

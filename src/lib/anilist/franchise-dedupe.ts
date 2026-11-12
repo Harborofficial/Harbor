@@ -60,7 +60,5 @@ export function dedupeAnimeFranchises(list: AnilistMedia[]): AnilistMedia[] {
     if (g) g.items.push(m);
     else groups.set(key, { items: [m], order: i });
   });
-  return [...groups.values()]
-    .sort((a, b) => a.order - b.order)
-    .map((g) => representative(g.items));
+  return [...groups.values()].sort((a, b) => a.order - b.order).map((g) => representative(g.items));
 }

@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}+ / 100",
   "games.studioCatalog.minimumVotes.all": "रेटिंग की कोई भी संख्या",
   "games.studioCatalog.minimumVotes.value": "{count}+ रेटिंग",
-  "games.studioCatalog.ratingFloor": "स्कोर के लिए कम से कम 5 रेटिंग ज़रूरी हैं।"
+  "games.studioCatalog.ratingFloor": "स्कोर के लिए कम से कम 5 रेटिंग ज़रूरी हैं।",
 };

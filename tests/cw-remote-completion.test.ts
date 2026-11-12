@@ -400,6 +400,33 @@ test("future and unknown anime episodes are not presented as playable up next", 
   }
 });
 
+test("a future season placeholder with no air date is not kept in timer mode", async () => {
+  const h = harness();
+  h.setRemote(progress([1, 2, 3], "tt100"));
+  h.setEpisodes([
+    { season: 1, episode: 1, airDate: "2020-01-01" },
+    { season: 1, episode: 2, airDate: "2020-01-01" },
+    { season: 1, episode: 3, airDate: "2020-01-01" },
+    { season: 2, episode: 1 },
+  ]);
+  h.render(
+    [item(3)],
+    "",
+    true,
+    [],
+    "all",
+    0,
+    new Set(),
+    new Map(),
+    new Map(),
+    new Map(),
+    0,
+    false,
+    "timer",
+  );
+  assert.equal((await h.flush()).length, 0);
+});
+
 // A just-started sequel season: the provider list only holds the S2E1
 // placeholder, so the finished S2E2 is unplaceable and Cinemeta offers no next
 // episode. The recorded anime entry knows the follow-up and must keep the card.

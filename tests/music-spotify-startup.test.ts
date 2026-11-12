@@ -12,28 +12,43 @@ const track = { id: "spotify:track:fixture", connectorId: "spotify" };
 
 test("Spotify startup timeout applies only to the current unresolved audio request", () => {
   const base = {
-    request: 7, currentRequest: 7, expected: track, current: track,
-    phase: "resolving", casting: false, videoOwned: false,
+    request: 7,
+    currentRequest: 7,
+    expected: track,
+    current: track,
+    phase: "resolving",
+    casting: false,
+    videoOwned: false,
   };
   assert.equal(shouldReportSpotifyStartupTimeout(base), true);
   assert.equal(shouldReportSpotifyStartupTimeout({ ...base, currentRequest: 8 }), false);
-  assert.equal(shouldReportSpotifyStartupTimeout({ ...base, current: { ...track, id: "new" } }), false);
+  assert.equal(
+    shouldReportSpotifyStartupTimeout({ ...base, current: { ...track, id: "new" } }),
+    false,
+  );
   assert.equal(shouldReportSpotifyStartupTimeout({ ...base, phase: "playing" }), false);
   assert.equal(shouldReportSpotifyStartupTimeout({ ...base, phase: "paused" }), false);
   assert.equal(shouldReportSpotifyStartupTimeout({ ...base, casting: true }), false);
   assert.equal(shouldReportSpotifyStartupTimeout({ ...base, videoOwned: true }), false);
-  assert.equal(shouldReportSpotifyStartupTimeout({
-    ...base, expected: { id: "other", connectorId: "soundcloud" },
-  }), false);
+  assert.equal(
+    shouldReportSpotifyStartupTimeout({
+      ...base,
+      expected: { id: "other", connectorId: "soundcloud" },
+    }),
+    false,
+  );
 });
 
 function watchdogHarness() {
   const source = readFileSync(new URL("../src/lib/music/player.ts", import.meta.url), "utf8");
   const ast = ts.createSourceFile("player.ts", source, ts.ScriptTarget.Latest, true);
   const declarations = ast.statements
-    .filter((node): node is ts.FunctionDeclaration =>
-      ts.isFunctionDeclaration(node) &&
-      ["armSpotifyStartupWatchdog", "clearSpotifyStartupWatchdog"].includes(node.name?.text ?? ""),
+    .filter(
+      (node): node is ts.FunctionDeclaration =>
+        ts.isFunctionDeclaration(node) &&
+        ["armSpotifyStartupWatchdog", "clearSpotifyStartupWatchdog"].includes(
+          node.name?.text ?? "",
+        ),
     )
     .map((node) => node.getText(ast))
     .join("\n");
@@ -61,7 +76,9 @@ function watchdogHarness() {
       timers.set(id, fn);
       return id;
     },
-    clearTimeout(id: number) { timers.delete(id); },
+    clearTimeout(id: number) {
+      timers.delete(id);
+    },
     console: { warn() {} },
   };
   const callbacks = new Function(

@@ -25,6 +25,9 @@ test("catalog browsing preserves genre selection and pagination and resets on ca
     "lucide-react": { ChevronDown: () => <svg /> },
     "@/components/icons/search-icon": { Search: () => <svg /> },
     "@/lib/i18n": { useT: () => (key: string) => key },
+    "@/lib/session-state": {
+      useSessionState: (_key: string, initial: unknown) => React.useState(initial),
+    },
     "@/lib/view": { useView: () => ({ openGrid: (grid: any) => opened.push(grid) }) },
     "@/lib/catalog-browse": {
       catalogTypeLabelKey: (type: string) => ({ movie: "Movies", series: "Series" })[type],

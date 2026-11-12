@@ -8,7 +8,8 @@ export default {
   "games.warhammerUniverse.sections": "इस दुनिया को खोजें",
   "games.warhammerUniverse.start": "यहाँ से शुरू करें",
   "games.warhammerUniverse.storyTitle": "गेम के आगे Titus की कहानी",
-  "games.warhammerUniverse.storyNote": "Space Marine 2 से Secret Level तक जाएँ, फिर उनकी दुनिया को खोजें।",
+  "games.warhammerUniverse.storyNote":
+    "Space Marine 2 से Secret Level तक जाएँ, फिर उनकी दुनिया को खोजें।",
   "games.warhammerUniverse.playing": "अभी Steam पर {count} खिलाड़ी",
   "games.warhammerUniverse.openSeries": "सीरीज़ खोलें",
   "games.warhammerUniverse.trailer": "ट्रेलर देखें",
@@ -18,15 +19,19 @@ export default {
   "games.warhammerUniverse.screenNote": "41वीं सहस्राब्दी के मूल एनिमेशन और एक फ़ीचर फ़िल्म।",
   "games.warhammerUniverse.free": "Warhammer TV पर मुफ़्त",
   "games.warhammerUniverse.subscription": "Warhammer+ सदस्यता की ज़रूरत हो सकती है",
-  "games.warhammerUniverse.movieNote": "2010 की एनिमेटेड फ़िल्म। कलाकार, ट्रेलर और स्रोतों के लिए Harbor विवरण खोलें।",
-  "games.warhammerUniverse.screenScope": "Warhammer TV का सार्वजनिक चयन। Hammer and Bolter कई दुनियाओं में है; उपलब्धता प्रदाता तय करता है।",
+  "games.warhammerUniverse.movieNote":
+    "2010 की एनिमेटेड फ़िल्म। कलाकार, ट्रेलर और स्रोतों के लिए Harbor विवरण खोलें।",
+  "games.warhammerUniverse.screenScope":
+    "Warhammer TV का सार्वजनिक चयन। Hammer and Bolter कई दुनियाओं में है; उपलब्धता प्रदाता तय करता है।",
   "games.warhammerUniverse.lore": "कथाजगत के भीतर",
-  "games.warhammerUniverse.loreNote": "इन दुनियाओं के रचनाकारों के चित्रों के साथ पात्र, गुट और महत्वपूर्ण घटनाएँ।",
+  "games.warhammerUniverse.loreNote":
+    "इन दुनियाओं के रचनाकारों के चित्रों के साथ पात्र, गुट और महत्वपूर्ण घटनाएँ।",
   "games.warhammerUniverse.setting": "दुनिया चुनें",
   "games.warhammerUniverse.searchLore": "पात्र, गुट या घटना खोजें",
   "games.warhammerUniverse.subjects": "{count} विषय",
   "games.warhammerUniverse.watchLore": "Warhammer TV पर देखें",
-  "games.warhammerUniverse.loreScope": "आधिकारिक अंग्रेज़ी एपिसोड सारांश। हर दुनिया का अपना संग्रह है; यह शुरुआती रास्ता है, संपूर्ण विश्वकोश नहीं।",
+  "games.warhammerUniverse.loreScope":
+    "आधिकारिक अंग्रेज़ी एपिसोड सारांश। हर दुनिया का अपना संग्रह है; यह शुरुआती रास्ता है, संपूर्ण विश्वकोश नहीं।",
   "games.warhammerUniverse.fullLibrary": "पूरा कथा संग्रह",
   "games.warhammerUniverse.settingGuide": "40K दुनिया की जानकारी",
   "games.warhammerUniverse.books": "उपन्यास और ऑडियोबुक",
@@ -35,5 +40,5 @@ export default {
   "games.warhammerUniverse.videosNote": "YouTube रचनाकारों के कथा विवरण, विस्तृत बातचीत और कहानियाँ।",
   "games.warhammerUniverse.searchVideos": "Warhammer वीडियो खोजें",
   "games.warhammerUniverse.unavailable": "यह स्रोत रीफ़्रेश नहीं हो सका। अन्य हिस्से उपलब्ध हैं।",
-  "games.warhammerUniverse.partial": "यह सूची अधूरी है। अधिक सामग्री के लिए पूरा संग्रह खोलें।"
+  "games.warhammerUniverse.partial": "यह सूची अधूरी है। अधिक सामग्री के लिए पूरा संग्रह खोलें।",
 };

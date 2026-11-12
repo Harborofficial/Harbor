@@ -306,11 +306,17 @@ export function PmdbMenuItems({
         title={error ? t(error) : listName}
         disabled={busy}
         onClick={() => {
-          void toggle().then((ok) => { if (ok) onAction(); });
+          void toggle().then((ok) => {
+            if (ok) onAction();
+          });
         }}
         className="flex h-9 items-center gap-2.5 rounded-lg px-3 text-start text-[13px] text-ink transition-colors hover:bg-raised disabled:opacity-60"
       >
-        <img src={publicmetadbLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-contain" />
+        <img
+          src={publicmetadbLogo}
+          alt=""
+          className="h-[14px] w-[14px] rounded-[3px] object-contain"
+        />
         <span className="flex-1 truncate">
           {inList
             ? t("Remove from {list} on PMDB", { list: listName })
@@ -318,7 +324,11 @@ export function PmdbMenuItems({
         </span>
         {inList && <Check size={13} className="text-ink" />}
       </button>
-      {error && <p role="alert" className="max-w-xs px-3 py-1 text-[12px] text-danger">{t(error)}</p>}
+      {error && (
+        <p role="alert" className="max-w-xs px-3 py-1 text-[12px] text-danger">
+          {t(error)}
+        </p>
+      )}
     </>
   );
 }

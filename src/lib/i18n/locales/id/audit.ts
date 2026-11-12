@@ -185,7 +185,8 @@ const audit: Record<string, string> = {
   "British independent film": "Film independen Britania",
   "Buffer fill": "Isian buffer",
   "Reveal the dot on hover": "Tampilkan titik saat disorot",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "Titik tidak mengganggu dan muncul saat kamu mengarahkan kursor ke bilah. Matikan agar titik selalu terlihat.",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "Titik tidak mengganggu dan muncul saat kamu mengarahkan kursor ke bilah. Matikan agar titik selalu terlihat.",
   "Buffer fill brightness": "Kecerahan isian buffer",
   "Build a pack in any of these, export the JSON, host it as a gist, and paste the raw link below.":
     "Buat paket dengan salah satu alat ini, ekspor JSON, unggah sebagai gist, lalu tempel tautan mentahnya di bawah.",
@@ -248,7 +249,8 @@ const audit: Record<string, string> = {
   "Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.":
     "Kendalikan flipbook manga dari ponsel saat membaca di layar besar: balik halaman, perbesar, dan ganti mode. Pembaca juga menampilkan tautan ini saat Anda membaca.",
   "Copied. Paste it to your friend.": "Disalin. Tempelkan untuk teman Anda.",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "Salin diagnostik mengambil status mesin dan pengaturan P2P Anda dalam format JSON, praktis untuk ditempelkan ke laporan bug. Folder mesin berisi cache DHT (dht.json) dan data transfer aktif.",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "Salin diagnostik mengambil status mesin dan pengaturan P2P Anda dalam format JSON, praktis untuk ditempelkan ke laporan bug. Folder mesin berisi cache DHT (dht.json) dan data transfer aktif.",
   "Copy the settings you already tuned here onto the TV in one go. It overwrites the matching TV rows and leaves everything else alone.":
     "Salin sekaligus pengaturan yang telah Anda sesuaikan di sini ke TV. Tindakan ini menimpa baris pengaturan yang sesuai di TV tanpa mengubah yang lain.",
   "Corners keep it clear of subtitles along the bottom.":
@@ -395,7 +397,8 @@ const audit: Record<string, string> = {
   "Favorite {channel}": "Favoritkan {channel}",
   "Fee to the listing agent": "Biaya untuk agen penjual",
   "Feel-Good Hits": "Lagu Hit Pembangkit Semangat",
-  "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.": "Mengambil file uji publik berukuran kecil melalui P2P, lalu melaporkan egress UDP dan HTTPS, bootstrap DHT, serta keterjangkauan tracker langkah demi langkah.",
+  "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.":
+    "Mengambil file uji publik berukuran kecil melalui P2P, lalu melaporkan egress UDP dan HTTPS, bootstrap DHT, serta keterjangkauan tracker langkah demi langkah.",
   "Filmographies come from TMDB. Add a key in Setup to fill this page.":
     "Filmografi berasal dari TMDB. Tambahkan kunci di Pengaturan untuk mengisi halaman ini.",
   "Find closer match": "Cari kecocokan yang lebih sesuai",
@@ -677,7 +680,8 @@ const audit: Record<string, string> = {
   "Live controller preview": "Pratinjau pengontrol secara langsung",
   "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
     "Pemindaian wajah real-time memuat model AI di perangkat dan dapat meningkatkan penggunaan RAM, CPU, dan GPU secara signifikan selama pemutaran aktif. Nonaktifkan jika Harbor melambat atau perangkat Anda menjadi panas.",
-  "Live state of Harbor's own P2P engine on this machine.": "Status langsung mesin P2P milik Harbor di perangkat ini.",
+  "Live state of Harbor's own P2P engine on this machine.":
+    "Status langsung mesin P2P milik Harbor di perangkat ini.",
   "Live sync": "Sinkronisasi real-time",
   "Live web": "Web real-time",
   "Live web (Jina Reader)": "Web real-time (Jina Reader)",
@@ -848,7 +852,8 @@ const audit: Record<string, string> = {
   Pass: "Operan",
   "Paste a track, album or playlist link.": "Tempel tautan trek, album, atau daftar tontonan.",
   "Pause when unfocused": "Jeda saat kehilangan fokus",
-  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.": "Peer, kecepatan, dan progres pada pemutar saat stream P2P diputar. Berada di kiri atas, tidak menghalangi tombol keluar.",
+  "Peers, speed and progress on the player while a P2P stream plays. Sits top left, clear of the exit button.":
+    "Peer, kecepatan, dan progres pada pemutar saat stream P2P diputar. Berada di kiri atas, tidak menghalangi tombol keluar.",
   "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.":
     "Peer, kecepatan, dan progres selama stream torrent berlangsung. Berada di kiri atas dan tidak menghalangi tombol keluar.",
   "People from the week's hottest titles, weighted by what is being talked about.":
@@ -879,7 +884,8 @@ const audit: Record<string, string> = {
   "Player volume sounds": "Suara saat mengubah volume pemutar",
   "Plays HDR content in its own window so Windows treats it as true HDR (the SDR brightness slider stops dimming it). Turn off HDR-to-SDR tonemapping above to use this on an HDR display.":
     "Memutar konten HDR di jendela tersendiri agar Windows memperlakukannya sebagai HDR asli (penggeser kecerahan SDR tidak lagi meredupkannya). Nonaktifkan tonemapping HDR-ke-SDR di atas untuk menggunakannya pada layar HDR.",
-  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.": "Arahkan Harbor ke server streaming di perangkat lain, seperti layanan Stremio di server rumah. Stream P2P akan diunduh dan diputar dari perangkat tersebut, bukan perangkat ini.",
+  "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.":
+    "Arahkan Harbor ke server streaming di perangkat lain, seperti layanan Stremio di server rumah. Stream P2P akan diunduh dan diputar dari perangkat tersebut, bukan perangkat ini.",
   "Point Harbor at your self-hosted library to browse and install sources":
     "Arahkan Harbor ke perpustakaan yang dihosting sendiri untuk menjelajahi dan menginstal sumber",
   "Pop out subtitles": "Tampilkan subtitle di jendela terpisah",
@@ -1101,7 +1107,8 @@ const audit: Record<string, string> = {
     "Pilih bagian teks untuk menambahkan sorotan, catatan, atau referensi.",
   "Select renderer": "Pilih renderer",
   "Self-host": "Hosting mandiri",
-  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.": "Uji mandiri dinonaktifkan saat streaming jarak jauh ketat aktif. Tindakan ini mengunduh file uji kecil melalui peer-to-peer di komputer ini.",
+  "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.":
+    "Uji mandiri dinonaktifkan saat streaming jarak jauh ketat aktif. Tindakan ini mengunduh file uji kecil melalui peer-to-peer di komputer ini.",
   "Send audio to specific speakers, headphones or a receiver. System default follows Windows.":
     "Kirim audio ke speaker, headphone, atau receiver tertentu. Output audio bawaan sistem mengikuti pengaturan Windows.",
   "Send rating": "Kirim penilaian",
@@ -1397,7 +1404,8 @@ const audit: Record<string, string> = {
   "Top rated television": "Tayangan televisi dengan peringkat teratas",
   "Top {n}, ranked by the work they left behind":
     "{n} Teratas, diberi peringkat berdasarkan karya yang mereka tinggalkan",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "P2P dinonaktifkan. Stream yang belum di-cache tidak dapat diputar kecuali berasal dari layanan debrid atau tautan langsung. Untuk menggunakan P2P, nonaktifkan opsi ini.",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "P2P dinonaktifkan. Stream yang belum di-cache tidak dapat diputar kecuali berasal dari layanan debrid atau tautan langsung. Untuk menggunakan P2P, nonaktifkan opsi ini.",
   "Track switching isn't supported on the current engine. The file's default audio is playing.":
     "Penggantian trek tidak didukung oleh mesin pemutar saat ini. Audio bawaan file sedang diputar.",
   "Trakt anticipated": "Paling dinantikan di Trakt",
@@ -1457,7 +1465,8 @@ const audit: Record<string, string> = {
     "Digunakan untuk ketersediaan streaming dan periode rilis Sedang Diputar. Pilih negara agar Harbor dapat menyesuaikan bahasa antarmuka, metadata, dan subtitle dengan negara tersebut.",
   "Used for your cursor in Watch Together, your draw color, and your name pill in chat.":
     "Digunakan untuk kursor Anda di Nonton Bersama, warna untuk menggambar, dan label nama Anda di obrolan.",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Digunakan untuk memeriksa cache dan membuka batasan tautan. Harbor tidak pernah menambahkan atau menghapus apa pun di akun Anda secara otomatis.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Digunakan untuk memeriksa cache dan membuka batasan tautan. Harbor tidak pernah menambahkan atau menghapus apa pun di akun Anda secara otomatis.",
   "Using AIOStreams or another aggregator addon? Its own sorting and filtering happen inside the addon before Harbor ever sees the results, then Harbor applies the stream filter and result order above on top. If results look thinner than expected, keep one side permissive: either relax the addon's internal filters or set Harbor's stream filter to Balanced or Off.":
     "Menggunakan AIOStreams atau addon agregator lain? Pengurutan dan pemfilteran internalnya dilakukan di dalam addon sebelum Harbor melihat hasilnya, lalu Harbor menambahkan filter stream dan urutan hasil di atas. Jika hasil lebih sedikit dari yang diharapkan, buat salah satu sisi lebih longgar: longgarkan filter internal addon atau atur filter stream Harbor ke Seimbang atau Nonaktif.",
   Venice: "Venice",

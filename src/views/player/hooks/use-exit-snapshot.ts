@@ -41,12 +41,39 @@ export function useExitSnapshot(params: {
   resolvedImdbVerified: boolean;
   seekPreviewEnabled: boolean;
 }) {
-  const { src, engine, status, durationSec, videoMountRef, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled } = params;
+  const {
+    src,
+    engine,
+    status,
+    durationSec,
+    videoMountRef,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    seekPreviewEnabled,
+  } = params;
   const { settings } = useSettings();
   const fullQuality = settings.cwSnapshotFullQuality;
   const snapshotsOff = settings.cwSnapshotRetentionDays === 0;
-  const latest = useRef({ src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality, snapshotsOff });
-  latest.current = { src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality, snapshotsOff };
+  const latest = useRef({
+    src,
+    engine,
+    durationSec,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    seekPreviewEnabled,
+    fullQuality,
+    snapshotsOff,
+  });
+  latest.current = {
+    src,
+    engine,
+    durationSec,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    seekPreviewEnabled,
+    fullQuality,
+    snapshotsOff,
+  };
   const lastGoodRef = useRef<Cached | null>(null);
   const lastGrabAtRef = useRef(0);
   const capturedKeyRef = useRef<string | null>(null);
@@ -67,7 +94,13 @@ export function useExitSnapshot(params: {
   );
 
   const captureExitSnapshot = useCallback(async () => {
-    const { src: s, durationSec: dur, resolvedImdbId: resolved, resolvedImdbVerified: verified, snapshotsOff: off } = latest.current;
+    const {
+      src: s,
+      durationSec: dur,
+      resolvedImdbId: resolved,
+      resolvedImdbVerified: verified,
+      snapshotsOff: off,
+    } = latest.current;
     if (off) return;
     const id = snapshotId(s, resolved, verified);
     if (!id) {
@@ -102,7 +135,12 @@ export function useExitSnapshot(params: {
   useEffect(() => {
     if (status !== "playing" || snapshotsOff) return;
     const tick = async () => {
-      const { src: s, durationSec: dur, resolvedImdbId: resolved, resolvedImdbVerified: verified } = latest.current;
+      const {
+        src: s,
+        durationSec: dur,
+        resolvedImdbId: resolved,
+        resolvedImdbVerified: verified,
+      } = latest.current;
       const id = snapshotId(s, resolved, verified);
       if (!id) return;
       const good = lastGoodRef.current;

@@ -20,9 +20,7 @@ export function SpoilerPreview() {
   return (
     <div className="flex flex-col gap-4 rounded-[12px] bg-elevated p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="harbor-settings-label">
-          {t("Unwatched episodes")}
-        </span>
+        <span className="harbor-settings-label">{t("Unwatched episodes")}</span>
         {active && (
           <span className="flex items-center gap-2 text-[15.5px] leading-[22px] text-ink-subtle">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
@@ -93,7 +91,9 @@ function PreviewCard({
         </span>
       </div>
       <div className="mt-2.5 flex flex-col gap-0.5 px-0.5">
-        <span className={`text-[15px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}>
+        <span
+          className={`text-[15px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}
+        >
           {title}
         </span>
         <span className="text-[13px] text-ink-subtle">

@@ -1674,7 +1674,12 @@ test("TMDB English season names survive both default and TVDB-fallback picker pa
       "@/lib/settings/load": { loadStoredSettings: () => ({}) },
       "./tmdb-images": { pickLogo: () => undefined },
       "./tmdb-image-lang": { imageLangParam: () => "en", imageLangRank: () => 0 },
-      "./tmdb-trailers": { pickTrailers: () => [] },
+      "./tmdb-trailers": {
+        pickTrailers: () => [],
+        pickTrailerVideos: () => [],
+        sortTrailerVideos: (videos) => videos,
+        mergeTrailerVideoGroups: () => [],
+      },
       "./tmdb-meta-mappers": { isAnimeItem: () => false },
       "./tmdb-title-fallback": tmdbTitleFallback,
       "@/lib/storage-recovery": {},
@@ -1691,7 +1696,7 @@ test("TMDB English season names survive both default and TVDB-fallback picker pa
   }
   const english = await metadata("The Final Season", "en-US");
   assert.equal(english.seasons[0].nameLanguage, "en");
-  assert.equal(english.requests.length, 1);
+  assert.equal(english.requests.filter((path) => !path.endsWith("/videos")).length, 1);
   assert.equal(english.tmdbTvId, 42);
   assert.deepEqual(
     Array.from(english.seasons, (s) => s.seasonNumber),

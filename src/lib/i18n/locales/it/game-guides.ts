@@ -52,16 +52,22 @@ export default {
   "games.guides.date.all": "Qualsiasi data",
   "games.guides.viewers": "{count} spettatori",
   "games.guides.views": "{count} visualizzazioni",
-  "games.guides.import.callofdutywarzone": "Copia i valori nelle impostazioni corrispondenti di Warzone. Imposta i DPI nel software del mouse.",
-  "games.guides.import.css": "Copia le impostazioni in Counter-Strike: Source. Provengono da archivi datati della community.",
-  "games.guides.import.cod": "Usa questi valori nell’edizione corrispondente del gioco. Imposta i DPI nel software del mouse.",
-  "games.guides.noCrosshair": "Questa fonte non offre abbastanza dettagli sul mirino per un’anteprima affidabile.",
-  "games.guides.previewNote": "Anteprima statica dei valori pubblicati. Risoluzione, movimento e rinculo possono cambiare il risultato nel gioco.",
+  "games.guides.import.callofdutywarzone":
+    "Copia i valori nelle impostazioni corrispondenti di Warzone. Imposta i DPI nel software del mouse.",
+  "games.guides.import.css":
+    "Copia le impostazioni in Counter-Strike: Source. Provengono da archivi datati della community.",
+  "games.guides.import.cod":
+    "Usa questi valori nell’edizione corrispondente del gioco. Imposta i DPI nel software del mouse.",
+  "games.guides.noCrosshair":
+    "Questa fonte non offre abbastanza dettagli sul mirino per un’anteprima affidabile.",
+  "games.guides.previewNote":
+    "Anteprima statica dei valori pubblicati. Risoluzione, movimento e rinculo possono cambiare il risultato nel gioco.",
   "games.guides.previewBackground": "Cambia lo sfondo chiaro dell’anteprima",
   "games.guides.crosshairPreview": "Anteprima del mirino",
   "games.guides.noPlayers": "Nessun giocatore corrispondente. Prova un altro nome.",
   "games.guides.playerCount": "{count} giocatori",
-  "games.guides.archived": "Configurazione storica. Verifica edizione del gioco e data prima di usarla.",
+  "games.guides.archived":
+    "Configurazione storica. Verifica edizione del gioco e data prima di usarla.",
   "games.guides.rateLimit": "Questa fonte limita le richieste. Riprova tra {seconds} s.",
   "games.guides.configs": "Config dei professionisti",
   "games.guides.searchPlayers": "Cerca giocatori",
@@ -69,26 +75,33 @@ export default {
   "games.guides.allPlatforms": "Tutte le piattaforme",
   "games.guides.refresh": "Aggiorna le dirette",
   "games.guides.twitchUnavailable": "Le dirette Twitch sono attualmente consultabili su Twitch.",
-  "games.guides.partial": "Alcune fonti non sono state caricate. Sono mostrati i risultati disponibili.",
+  "games.guides.partial":
+    "Alcune fonti non sono state caricate. Sono mostrati i risultati disponibili.",
   "games.guides.sourceErrorTitle": "Riproviamo",
   "games.guides.more": "Carica altro",
   "games.guides.moreKick": "Altro su Kick",
-  "games.guides.configNote": "Impostazioni pubblicate da giocatori e creator. Scegli un profilo per vedere fonte, data e configurazione.",
+  "games.guides.configNote":
+    "Impostazioni pubblicate da giocatori e creator. Scegli un profilo per vedere fonte, data e configurazione.",
   "games.guides.players": "Tutti i giocatori",
   "games.guides.useConfig": "Usa queste impostazioni",
-  "games.guides.import.cs2": "Incolla i comandi nella console sviluppatore di CS2. Importa i codici del mirino in Impostazioni → Gioco → Mirino. Controlla i valori prima di applicarli.",
-  "games.guides.import.valorant": "Copia il codice del mirino e apri Impostazioni → Mirino → Importa codice profilo in VALORANT. Inserisci gli altri valori nelle impostazioni corrispondenti.",
-  "games.guides.import.rainbowsixsiege": "Copia le impostazioni e inserisci i valori nelle opzioni del mouse e dello schermo di Siege. I DPI si impostano nel software del mouse.",
+  "games.guides.import.cs2":
+    "Incolla i comandi nella console sviluppatore di CS2. Importa i codici del mirino in Impostazioni → Gioco → Mirino. Controlla i valori prima di applicarli.",
+  "games.guides.import.valorant":
+    "Copia il codice del mirino e apri Impostazioni → Mirino → Importa codice profilo in VALORANT. Inserisci gli altri valori nelle impostazioni corrispondenti.",
+  "games.guides.import.rainbowsixsiege":
+    "Copia le impostazioni e inserisci i valori nelle opzioni del mouse e dello schermo di Siege. I DPI si impostano nel software del mouse.",
   "games.guides.copyCrosshair": "Copia mirino",
   "games.guides.copyCommands": "Copia comandi",
   "games.guides.copySettings": "Copia impostazioni",
   "games.guides.copied": "Copiato",
   "games.guides.copyError": "Copia non riuscita. Riprova.",
-  "games.guides.embedNote": "La riproduzione è fornita dalla piattaforma del creatore. Se l’incorporamento è limitato, apri l’originale.",
+  "games.guides.embedNote":
+    "La riproduzione è fornita dalla piattaforma del creatore. Se l’incorporamento è limitato, apri l’originale.",
   "games.guides.readerErrorTitle": "Impossibile caricare questa guida",
   "games.guides.short": "Guide",
   "games.guides.title": "Guide e soluzioni",
-  "games.guides.note": "Trova il prossimo passo. Leggi le guide della comunità, guarda una soluzione o segui chi sta giocando.",
+  "games.guides.note":
+    "Trova il prossimo passo. Leggi le guide della comunità, guarda una soluzione o segui chi sta giocando.",
   "games.guides.written": "Guide scritte",
   "games.guides.videos": "Video",
   "games.guides.live": "In diretta",
@@ -102,18 +115,19 @@ export default {
   "games.guides.videoTitle": "Guarda e impara",
   "games.guides.twitch": "Esplora Twitch",
   "games.guides.youtube": "Altro su YouTube",
-  "games.guides.liveNote": "Dirette da YouTube. La disponibilità può cambiare durante la navigazione.",
+  "games.guides.liveNote":
+    "Dirette da YouTube. La disponibilità può cambiare durante la navigazione.",
   "games.guides.error": "Impossibile caricare questa fonte. Riprova.",
   "games.guides.empty": "Nessuna guida trovata. Prova un’altra ricerca o fonte.",
   "games.guides.noLive": "Nessuna diretta corrispondente al momento.",
   "games.guides.previous": "Precedente",
   "games.guides.next": "Successiva",
   "games.guides.original": "Apri originale",
-  "games.guides.playerNote": "Riproduzione tramite YouTube. Se il creatore limita l’incorporamento, apri il video originale.",
+  "games.guides.playerNote":
+    "Riproduzione tramite YouTube. Se il creatore limita l’incorporamento, apri il video originale.",
   "games.guides.readerError": "Impossibile leggere questa guida qui. Riprova o apri l’originale.",
   "games.guides.contents": "In questa guida",
-  "games.guides.credits": "Autori e licenza"
-,
+  "games.guides.credits": "Autori e licenza",
   "games.guides.copy": "Copia",
   "games.guides.previewMap": "Mostra uno screenshot della mappa dietro il mirino",
   "games.guides.skins": "Skin",
@@ -123,5 +137,5 @@ export default {
   "games.guides.teammates": "Compagni di squadra",
   "games.guides.specs": "Specifiche",
   "games.guides.exportAll": "Esporta tutto",
-  "games.guides.copyValue": "Copia {label}"
+  "games.guides.copyValue": "Copia {label}",
 } satisfies Record<string, string>;

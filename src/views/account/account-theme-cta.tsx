@@ -37,11 +37,7 @@ export function AccountThemeCta() {
             {t("Create a theme or share one you've made with the Harbor community.")}
           </p>
         </div>
-        <button
-          type="button"
-          className={ROW_ACTION}
-          onClick={() => openPage("theme", "library")}
-        >
+        <button type="button" className={ROW_ACTION} onClick={() => openPage("theme", "library")}>
           {t("Your themes")}
         </button>
       </div>

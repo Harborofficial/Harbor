@@ -7,6 +7,8 @@ export default {
   "games.playtime.days": "Dias",
   "games.playtime.seconds": "Segundos",
   "games.playtime.preciseDuration": "{hours} h {minutes} min {seconds} s",
-  "games.playtime.decimalInvalid": "Use números não negativos sem separadores de milhares, até 1.000.000 de horas no total.",
-  "games.playtime.decimalHint": "Valores decimais são aceitos. O total é arredondado para o segundo mais próximo."
+  "games.playtime.decimalInvalid":
+    "Use números não negativos sem separadores de milhares, até 1.000.000 de horas no total.",
+  "games.playtime.decimalHint":
+    "Valores decimais são aceitos. O total é arredondado para o segundo mais próximo.",
 };

@@ -127,7 +127,10 @@ test("the playback gate keeps the whole embed allowlist at the packaged origin",
     "https://www.twitch.tv/videos/123",
     "https://www.twitch.tv/directory",
   ])
-    assert.equal(esportsPlayback({ title: "Unsafe", url, platform: "twitch" }, PACKAGED_HOST), null);
+    assert.equal(
+      esportsPlayback({ title: "Unsafe", url, platform: "twitch" }, PACKAGED_HOST),
+      null,
+    );
   assert.equal(
     esportsPlayback(
       { title: "Channel", url: "https://www.youtube.com/@valorantesports", platform: "youtube" },
@@ -143,7 +146,10 @@ test("the playback gate keeps the whole embed allowlist at the packaged origin",
     null,
   );
   assert.equal(
-    esportsPlayback({ title: "Feed", url: "https://example.test/feed", platform: "external" }, PACKAGED_HOST),
+    esportsPlayback(
+      { title: "Feed", url: "https://example.test/feed", platform: "external" },
+      PACKAGED_HOST,
+    ),
     null,
   );
 });

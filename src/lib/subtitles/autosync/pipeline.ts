@@ -60,7 +60,11 @@ export type ConsensusResult = {
 };
 export type AsrWindowSpec = { startSec: number; lenSec: number };
 export type AsrPhrase = { start: number; end: number; text: string };
-export type AsrTranscript = { phrases: AsrPhrase[]; detectedLanguage: string | null; sampledWindows?: AsrWindowSpec[] };
+export type AsrTranscript = {
+  phrases: AsrPhrase[];
+  detectedLanguage: string | null;
+  sampledWindows?: AsrWindowSpec[];
+};
 
 export type MediaMeta = {
   expectedRuntimeSec?: number;
@@ -514,7 +518,8 @@ export async function runAutoSync(
               candidate: transform,
               decision: {
                 decision: "offer",
-                reason: "Matching subtitle files suggest this timing, but video audio could not be verified.",
+                reason:
+                  "Matching subtitle files suggest this timing, but video audio could not be verified.",
                 bindingRule: "consensus-audio-unverified",
                 pCorrect: 0.5,
                 transform,
@@ -724,14 +729,16 @@ export async function runAutoSync(
         ? "Audio was analyzed, but speech did not align reliably with this subtitle. The timing could not be verified. Try another subtitle release, Sync from playback, or Manual offset."
         : before.status === "unknown"
           ? `No reliable offset was found, and audio verification was unavailable (${before.reason}). Try another playable source or Manual offset.`
-        : vadLowConfidence
-          ? "The detected speech did not match the subtitle timing reliably. Try a subtitle for this release or another audio track."
-          : "Audio analysis and subtitle comparison did not establish a reliable offset. Try a different subtitle release or a scene with clear dialogue.";
+          : vadLowConfidence
+            ? "The detected speech did not match the subtitle timing reliably. Try a subtitle for this release or another audio track."
+            : "Audio analysis and subtitle comparison did not establish a reliable offset. Try a different subtitle release or a scene with clear dialogue.";
     const suffix = speechModelUnavailable
       ? " Speech recognition is unavailable in this build."
       : "";
-    return { ...best, decision: { ...best.decision, reason: reason + suffix, bindingRule: "no-candidate" } };
-
+    return {
+      ...best,
+      decision: { ...best.decision, reason: reason + suffix, bindingRule: "no-candidate" },
+    };
   }
 
   return best;

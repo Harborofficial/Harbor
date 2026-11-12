@@ -1,8 +1,7 @@
 // The clamp is multiplied by --bp-up (the non-TV upscale in bp-tokens, default 1)
 // so desktop and Steam Deck lay out fewer, larger poster columns while the 607px
 // television keeps the authored floor. See bp-art BP_UP / bpBoxCss.
-export const BP_POSTER_COLUMNS =
-  "repeat(auto-fill, minmax(clamp(122px, 9.8vw, 186px), 1fr))";
+export const BP_POSTER_COLUMNS = "repeat(auto-fill, minmax(clamp(122px, 9.8vw, 186px), 1fr))";
 
 // A focused tile scales past its own box and paints a ring outside that, and a
 // scroll container cannot reach content before its origin. The headroom is on
@@ -42,11 +41,7 @@ export function BpGrid({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      data-bp-grid
-      className="grid pb-6 pt-[14px]"
-      style={{ gridTemplateColumns: columns, gap }}
-    >
+    <div data-bp-grid className="grid pb-6 pt-[14px]" style={{ gridTemplateColumns: columns, gap }}>
       {children}
     </div>
   );

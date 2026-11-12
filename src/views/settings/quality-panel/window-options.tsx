@@ -13,14 +13,19 @@ export function PlayerWindowOptions() {
   return (
     <>
       <Section title={t("Fullscreen")}>
-        <SettingsWorkbench compact preview={<FullscreenPreview mode={normalizeFullscreenMode(settings.fullscreenMode)} />}>
+        <SettingsWorkbench
+          compact
+          preview={<FullscreenPreview mode={normalizeFullscreenMode(settings.fullscreenMode)} />}
+        >
           <Anchored id="set-what-fullscreen-does">
             <Anchored id="set-fullscreen-mode">
               <SettingRow wide label={t("What fullscreen does")}>
                 <select
                   aria-label={t("What fullscreen does")}
                   value={normalizeFullscreenMode(settings.fullscreenMode)}
-                  onChange={(event) => update({ fullscreenMode: event.target.value as FullscreenMode })}
+                  onChange={(event) =>
+                    update({ fullscreenMode: event.target.value as FullscreenMode })
+                  }
                   className="h-11 w-full max-w-[300px] rounded-[8px] border border-edge-soft bg-elevated px-3 text-[15px] text-ink"
                 >
                   <option value="fullscreen">{t("True fullscreen")}</option>
@@ -45,7 +50,14 @@ export function PlayerWindowOptions() {
         </SettingsWorkbench>
       </Section>
       <Section title={t("Volume pop-up")}>
-        <SettingsWorkbench compact preview={settings.playerVolumeHud ? <VolumeHudPreview position={settings.playerVolumeHudPosition} /> : null}>
+        <SettingsWorkbench
+          compact
+          preview={
+            settings.playerVolumeHud ? (
+              <VolumeHudPreview position={settings.playerVolumeHudPosition} />
+            ) : null
+          }
+        >
           <ToggleRow
             label={t("Volume pop-up while watching")}
             sub={t("Show the volume level when you adjust it with the player controls hidden.")}

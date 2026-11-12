@@ -33,17 +33,23 @@ export function IntrosTab() {
   return (
     <Section
       title={t("Skip intros & credits")}
-      subtitle={t("Harbor finds intro and credits timing from AniSkip, TheIntroDB, and the file's own chapters, then shows a Skip button at the right moment.")}
+      subtitle={t(
+        "Harbor finds intro and credits timing from AniSkip, TheIntroDB, and the file's own chapters, then shows a Skip button at the right moment.",
+      )}
     >
       <ToggleRow
         label={t("Show the Skip button")}
-        sub={t("Show a Skip Intro / Skip Credits button when Harbor detects one. Turn this off to never show it. You can also tap the X on the button to dismiss a wrong one for the rest of the episode.")}
+        sub={t(
+          "Show a Skip Intro / Skip Credits button when Harbor detects one. Turn this off to never show it. You can also tap the X on the button to dismiss a wrong one for the rest of the episode.",
+        )}
         value={settings.showSkipButton}
         onChange={(v) => update({ showSkipButton: v })}
       />
       <ToggleRow
         label={t("Auto-skip intros")}
-        sub={t("Jump past openings automatically the moment one starts. Seeking back into an intro replays it without skipping again. The Skip button follows the setting above.")}
+        sub={t(
+          "Jump past openings automatically the moment one starts. Seeking back into an intro replays it without skipping again. The Skip button follows the setting above.",
+        )}
         value={settings.autoSkipIntro}
         onChange={(v) => update({ autoSkipIntro: v })}
       />
@@ -55,7 +61,9 @@ export function IntrosTab() {
       />
       <ToggleRow
         label={t("Auto-skip credit outros")}
-        sub={t("Automatically skip ending credits and trigger the next episode countdown immediately.")}
+        sub={t(
+          "Automatically skip ending credits and trigger the next episode countdown immediately.",
+        )}
         value={settings.autoSkipOutro}
         onChange={(v) => update({ autoSkipOutro: v })}
       />
@@ -63,7 +71,9 @@ export function IntrosTab() {
         <SettingRow
           wide
           label={t("Auto-hide the Skip button after")}
-          desc={t("Hides the button on its own after a few seconds so a wrong one doesn't sit there the whole episode.")}
+          desc={t(
+            "Hides the button on its own after a few seconds so a wrong one doesn't sit there the whole episode.",
+          )}
         >
           <Segmented
             value={String(settings.skipButtonHideSec)}

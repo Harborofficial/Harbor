@@ -22,13 +22,13 @@ today's installer.
 One key per user-visible feature. Keys are stable and used in the installer UI,
 the install marker and the app's runtime gating.
 
-| Key | What it controls | Payload prefix skipped when off |
-| --- | --- | --- |
-| `plugins` | Extension support (Capstan JVM runtime + jars) and the Plugins tab | `capstan/` |
-| `games` | Games tab and the local Pokémon engine | `resources/pokemon-engine/` |
-| `music` | Music tab, dock and related entry points | none (UI in `harbor.exe`) |
-| `ebook` | eBook tab | none |
-| `manga` | Manga tab | none |
+| Key       | What it controls                                                   | Payload prefix skipped when off |
+| --------- | ------------------------------------------------------------------ | ------------------------------- |
+| `plugins` | Extension support (Capstan JVM runtime + jars) and the Plugins tab | `capstan/`                      |
+| `games`   | Games tab and the local Pokémon engine                             | `resources/pokemon-engine/`     |
+| `music`   | Music tab, dock and related entry points                           | none (UI in `harbor.exe`)       |
+| `ebook`   | eBook tab                                                          | none                            |
+| `manga`   | Manga tab                                                          | none                            |
 
 Everything not listed is core and always installed: `harbor.exe`,
 `uninstall.exe`, mpv/libmpv, ffmpeg/ffprobe, yt-dlp, fonts, notices.
@@ -88,6 +88,7 @@ Rules:
   Skips entries whose first segments match `capstan/` or
   `resources/pokemon-engine/` when the matching key is disabled; everything
   else passes.
+
 - `extract_payload` takes the disabled list and skips disallowed entries.
   The `shipped` set keeps only extracted files, so the existing `prune_stale`
   removes previously installed files for newly disabled features on any
@@ -136,10 +137,10 @@ silently re-add removed components.
     and the native Music playback module (`music`); sizes come from payload
     facts in modular builds. Removing Music preserves personal music data.
   - **Optional tabs** — eBook and Manga, which only control tab visibility.
-  Rows are toggle buttons following the existing `hb-welcome-row` markup;
-  disabling a row subtracts its bytes from the `needed` total and the free
-  space check. The row list already comes from a static array, so this is
-  additive.
+    Rows are toggle buttons following the existing `hb-welcome-row` markup;
+    disabling a row subtracts its bytes from the `needed` total and the free
+    space check. The row list already comes from a static array, so this is
+    additive.
 - For Repair/Update on an existing managed install, seed the toggles from
   `installed_features` and keep the current action label logic untouched.
 - Strings: English literals via `t()`; add keys to

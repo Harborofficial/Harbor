@@ -226,9 +226,32 @@ export function bundledAwardsForPerson(name: string | undefined): AwardEntry[] {
 }
 
 const CATEGORY_STOPWORDS = new Set([
-  "outstanding", "performance", "by", "a", "an", "the", "in", "of", "for", "role",
-  "award", "awards", "best", "achievement", "motion", "picture", "television", "tv",
-  "miniseries", "series", "mini", "and", "or", "at", "as", "to",
+  "outstanding",
+  "performance",
+  "by",
+  "a",
+  "an",
+  "the",
+  "in",
+  "of",
+  "for",
+  "role",
+  "award",
+  "awards",
+  "best",
+  "achievement",
+  "motion",
+  "picture",
+  "television",
+  "tv",
+  "miniseries",
+  "series",
+  "mini",
+  "and",
+  "or",
+  "at",
+  "as",
+  "to",
 ]);
 
 function normCategoryKey(s: string): string {

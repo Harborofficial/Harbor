@@ -34,6 +34,7 @@ export default {
   "games.ffxiv.sales": "Недавние продажи",
   "games.ffxiv.sold": "Продано",
   "games.ffxiv.noSales": "В этом снимке нет недавних продаж.",
-  "games.ffxiv.community": "Данные сообщества могут устареть. Предложения могли быть проданы после последнего обновления.",
-  "games.ffxiv.open": "Открыть в Universalis"
+  "games.ffxiv.community":
+    "Данные сообщества могут устареть. Предложения могли быть проданы после последнего обновления.",
+  "games.ffxiv.open": "Открыть в Universalis",
 };

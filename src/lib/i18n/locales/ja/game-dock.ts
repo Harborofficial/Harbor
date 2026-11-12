@@ -8,7 +8,8 @@ export default {
   "games.sidebar.customOrder": "自分の並び順",
   "games.sidebar.arrange": "サイドバーを整理",
   "games.sidebar.resetFilters": "フィルターをリセット",
-  "games.sidebar.arrangeNote": "ドラッグまたは矢印で並べ替えます。よく遊ぶゲームを固定したり、このサイドバーから非表示にできます。",
+  "games.sidebar.arrangeNote":
+    "ドラッグまたは矢印で並べ替えます。よく遊ぶゲームを固定したり、このサイドバーから非表示にできます。",
   "games.sidebar.saveFailed": "設定を保存できませんでした。変更は今回のセッションのみ有効です。",
   "games.sidebar.move": "{name}を移動",
   "games.sidebar.up": "{name}を上へ",
@@ -19,12 +20,15 @@ export default {
   "games.sidebar.hide": "{name}をサイドバーから非表示",
   "games.sidebar.pinned": "固定済み",
   "games.dock.welcomeTitle": "ゲームタブを表示しますか？",
-  "games.dock.welcomeNote": "カーソルを合わせるだけでゲームにアクセスできます。設定 → テーマと外観 → インターフェースでいつでもオフにできます。",
+  "games.dock.welcomeNote":
+    "カーソルを合わせるだけでゲームにアクセスできます。設定 → テーマと外観 → インターフェースでいつでもオフにできます。",
   "games.dock.welcomeEnable": "ゲームタブを表示",
   "games.dock.welcomeDismiss": "今はしない",
   "games.dock.settingTitle": "クイックライブラリ",
-  "games.dock.settingNote": "画面の端に控えめなタブを表示し、ライブラリにすばやくアクセスできます。初期設定ではオフです。",
-  "games.dock.launchError": "ゲームを開けませんでした。インストールとランチャーを確認して、もう一度お試しください。",
+  "games.dock.settingNote":
+    "画面の端に控えめなタブを表示し、ライブラリにすばやくアクセスできます。初期設定ではオフです。",
+  "games.dock.launchError":
+    "ゲームを開けませんでした。インストールとランチャーを確認して、もう一度お試しください。",
   "games.dock.launcher": "ランチャー",
   "games.dock.client": "{launcher} で開く",
   "games.dock.openClient": "{launcher} で {name} を開く",
@@ -75,5 +79,5 @@ export default {
   "games.badge.unavailable": "ファイルを利用できません",
   "games.badge.notInstalled": "未インストール",
   "games.home.libraryFirstTitle": "ゲームをライブラリで開く",
-  "games.home.libraryFirstNote": "ゲームを開くたびに、探索ではなくライブラリから始めます。"
+  "games.home.libraryFirstNote": "ゲームを開くたびに、探索ではなくライブラリから始めます。",
 };

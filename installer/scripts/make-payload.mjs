@@ -70,6 +70,13 @@ if (!capstanStaged && !skipPlugins && !process.env.HARBOR_CAPSTAN_OPTIONAL) {
 // The game engine is optional at build time the same way: ship it when it is staged, refuse to
 // forget it silently, and let an explicit env var declare a build without it.
 const POKEMON = join(APP, "resources", "pokemon-engine");
+const MOONSHINE = join(APP, "resources", "moonshine");
+const moonshineStaged = existsSync(join(MOONSHINE, "moonshine-worker.exe"));
+if (!moonshineStaged && process.env.HARBOR_MOONSHINE_OPTIONAL !== "1") {
+  throw new Error(
+    "The self-contained Moonshine worker is not staged. Run scripts/build-moonshine-worker.ps1 or explicitly set HARBOR_MOONSHINE_OPTIONAL=1 for a developer-only build.",
+  );
+}
 const pokemonStaged = !skipGames && existsSync(join(POKEMON, "Harbor.PokemonEngine.exe"));
 if (!pokemonStaged && !skipGames && !process.env.HARBOR_POKEMON_OPTIONAL) {
   console.error("No game engine is staged, so this installer would ship tab-only games.\n");
@@ -176,6 +183,14 @@ if (pokemonStaged) {
   console.error("GAME ENGINE SKIPPED BY REQUEST: no pokemon-engine component in this payload.");
 } else {
   console.error("SHIPPING WITHOUT THE GAME ENGINE: no engine staged at " + POKEMON);
+}
+
+if (moonshineStaged) {
+  mkdirSync(join(STAGE, "resources"), { recursive: true });
+  cpSync(MOONSHINE, join(STAGE, "resources", "moonshine"), { recursive: true });
+  total += treeBytes(MOONSHINE);
+} else {
+  console.error("DEVELOPER BUILD: Moonshine native runtime is not bundled.");
 }
 
 // A genuine Music module will be staged here once its native interface is

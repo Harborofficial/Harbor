@@ -66,10 +66,12 @@ export function usePipelineResult({
   });
   const [pipelineStartedAt, setPipelineStartedAt] = useState<number | null>(null);
 
-  const animePreference = streamIds && hasAnimeStreamIds(streamIds)
-    ? settings.animePreferImdbStreams : undefined;
-  const preferredAnimeImdbId = animePreference && streamIds
-    ? preferredAnimeImdbStreamId(meta.id, episode, imdbId, imdbIdVerified, streamIds) : undefined;
+  const animePreference =
+    streamIds && hasAnimeStreamIds(streamIds) ? settings.animePreferImdbStreams : undefined;
+  const preferredAnimeImdbId =
+    animePreference && streamIds
+      ? preferredAnimeImdbStreamId(meta.id, episode, imdbId, imdbIdVerified, streamIds)
+      : undefined;
   const configHash = useMemo(
     () =>
       buildPickerConfigHash({

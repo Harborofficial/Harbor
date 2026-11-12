@@ -5,7 +5,12 @@ const REVERT_MS = 700;
 
 type Pending = { target: number; seq: number; dir: TurnDir };
 
-export function useOptimisticPage(pageIndex: number, pageCount: number, chapterId: string, seq: number) {
+export function useOptimisticPage(
+  pageIndex: number,
+  pageCount: number,
+  chapterId: string,
+  seq: number,
+) {
   const [pending, setPending] = useState<Pending | null>(null);
 
   useEffect(() => {

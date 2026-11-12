@@ -1,3 +1,4 @@
+import * as addonUrl from "../src/lib/addon-url.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -18,6 +19,7 @@ function provider() {
   new Function("require", "exports", code)(
     (name) =>
       ({
+        "@/lib/addon-url": addonUrl,
         "./addons": { isCollectionCatalog: () => false },
         "./safe-fetch": { safeFetch: async () => ({ ok: true, json: async () => ({ metas }) }) },
       })[name] ?? {},

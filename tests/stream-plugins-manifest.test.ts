@@ -25,10 +25,16 @@ test("github page links become raw manifest links", () => {
 });
 
 test("base links get manifest.json appended and https is required", () => {
-  assert.equal(normalizeRepoUrl("https://example.com/repo/"), "https://example.com/repo/manifest.json");
+  assert.equal(
+    normalizeRepoUrl("https://example.com/repo/"),
+    "https://example.com/repo/manifest.json",
+  );
   assert.equal(normalizeRepoUrl("https://example.com/repo.json"), "https://example.com/repo.json");
   assert.equal(normalizeRepoUrl("example.com/repo#x"), "https://example.com/repo/manifest.json");
-  assert.throws(() => normalizeRepoUrl("http://example.com/repo"), (e: unknown) => e instanceof PluginError && e.code === "only-https");
+  assert.throws(
+    () => normalizeRepoUrl("http://example.com/repo"),
+    (e: unknown) => e instanceof PluginError && e.code === "only-https",
+  );
 });
 
 test("cloudstream repo links are named as android extensions, not as bad urls", () => {
@@ -49,10 +55,10 @@ test("cloudstream repo links are named as android extensions, not as bad urls", 
 });
 
 test("several pasted links become separate repositories", () => {
-  assert.deepEqual(splitRepoLinks("https://a.example/x\nhttps://b.example/y, https://a.example/x"), [
-    "https://a.example/x",
-    "https://b.example/y",
-  ]);
+  assert.deepEqual(
+    splitRepoLinks("https://a.example/x\nhttps://b.example/y, https://a.example/x"),
+    ["https://a.example/x", "https://b.example/y"],
+  );
 });
 
 test("provider-script manifests map scrapers to entries", () => {
@@ -89,7 +95,10 @@ test("provider-script manifests map scrapers to entries", () => {
   assert.equal(first.note, "hls · limited");
   assert.deepEqual(second.types, ["series"]);
   assert.equal(second.enabled, false);
-  assert.equal(pluginIdFor("https://example.com/repo/manifest.json", "example").startsWith("plugin:"), true);
+  assert.equal(
+    pluginIdFor("https://example.com/repo/manifest.json", "example").startsWith("plugin:"),
+    true,
+  );
 });
 
 test("harbor manifests keep their richer fields", () => {
@@ -127,11 +136,19 @@ test("harbor manifests keep their richer fields", () => {
 
 test("manga repositories and junk are refused with a reason", () => {
   assert.throws(
-    () => parseStreamRepoManifest({ name: "x", type: "manga", plugins: [] }, "https://e.com/manifest.json"),
+    () =>
+      parseStreamRepoManifest(
+        { name: "x", type: "manga", plugins: [] },
+        "https://e.com/manifest.json",
+      ),
     (e: unknown) => e instanceof PluginError && e.code === "manga-repo",
   );
   assert.throws(
-    () => parseStreamRepoManifest([{ name: "a", sourceCodeUrl: "x.js", baseUrl: "https://a" }], "https://e.com/manifest.json"),
+    () =>
+      parseStreamRepoManifest(
+        [{ name: "a", sourceCodeUrl: "x.js", baseUrl: "https://a" }],
+        "https://e.com/manifest.json",
+      ),
     (e: unknown) => e instanceof PluginError && e.code === "manga-repo",
   );
   assert.throws(
@@ -151,7 +168,10 @@ test("an extension repository document hands back its plugin lists", () => {
   assert.equal(parsed.format, "android-extension");
   assert.equal(parsed.name, "Sample Repo");
   assert.deepEqual(parsed.entries, []);
-  assert.deepEqual(parsed.lists, ["https://lists.example/one.json", "https://lists.example/two.json"]);
+  assert.deepEqual(parsed.lists, [
+    "https://lists.example/one.json",
+    "https://lists.example/two.json",
+  ]);
 });
 
 test("a plugin list maps provider entries onto repository entries", () => {
@@ -170,7 +190,14 @@ test("a plugin list maps provider entries onto repository entries", () => {
         tvTypes: ["Movie", "TvSeries"],
         url: "files/Sample.cs3",
       },
-      { status: 0, internalName: "Down", name: "Down", version: 1, tvTypes: ["Anime", "NSFW"], url: "https://cdn.example/Down.cs3" },
+      {
+        status: 0,
+        internalName: "Down",
+        name: "Down",
+        version: 1,
+        tvTypes: ["Anime", "NSFW"],
+        url: "https://cdn.example/Down.cs3",
+      },
       { internalName: "NoFile", name: "No File" },
       { status: 1, internalName: "Sample", name: "Duplicate", url: "files/Other.cs3" },
     ],

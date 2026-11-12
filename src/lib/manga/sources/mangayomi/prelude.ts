@@ -36,12 +36,6 @@ function metaOf(record: MangayomiSourceRecord): MangayomiSourceMeta {
 export function buildMangayomiSource(record: MangayomiSourceRecord): string {
   const meta = JSON.stringify(metaOf(record));
   return (
-    MANGAYOMI_PRELUDE +
-    "\nvar __harborSource = " +
-    meta +
-    ";\n" +
-    record.source +
-    "\n" +
-    EPILOGUE
+    MANGAYOMI_PRELUDE + "\nvar __harborSource = " + meta + ";\n" + record.source + "\n" + EPILOGUE
   );
 }

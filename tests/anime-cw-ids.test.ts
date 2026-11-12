@@ -10,9 +10,8 @@ const store = new Map<string, string>();
   removeItem: (k: string) => void store.delete(k),
 };
 
-const { getAnimeCanonicalId, getAnimeCwId, recordAnimeCwId, recordAnimePlayId } = await import(
-  "../src/lib/anime-cw-ids.ts"
-);
+const { getAnimeCanonicalId, getAnimeCwId, recordAnimeCwId, recordAnimePlayId } =
+  await import("../src/lib/anime-cw-ids.ts");
 
 test("catalog ids record their resolved anime entry", () => {
   recordAnimeCwId("tt2359704", "kitsu:49847");

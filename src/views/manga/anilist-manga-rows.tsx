@@ -22,11 +22,7 @@ export function AnilistMangaRows({ onOpen }: { onOpen: (item: MangaSummary) => v
       hideKey="anilist"
       title={t("Your AniList")}
       leading={
-        <img
-          src={anilistLogo}
-          alt=""
-          className="h-5 w-5 shrink-0 rounded-[4px] object-contain"
-        />
+        <img src={anilistLogo} alt="" className="h-5 w-5 shrink-0 rounded-[4px] object-contain" />
       }
       trailing={
         current ? (

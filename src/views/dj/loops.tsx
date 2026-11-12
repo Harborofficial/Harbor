@@ -130,7 +130,12 @@ export function LoopBay({
             onClick={() => beatLoop(beats)}
           />
         ))}
-        <Hardware tone="red" label={bpm ? `${bpm} ${t("dj.bpm")}` : t("dj.tap")} onClick={tap} wide />
+        <Hardware
+          tone="red"
+          label={bpm ? `${bpm} ${t("dj.bpm")}` : t("dj.tap")}
+          onClick={tap}
+          wide
+        />
       </div>
     </div>
   );

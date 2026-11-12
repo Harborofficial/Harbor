@@ -68,8 +68,11 @@ function slugify(title: string): string {
 async function malInfo(malId: number): Promise<{ titles: string[]; year?: number }> {
   try {
     const j = await animeCatalogRequest<{
-      title?: string; title_english?: string; titles?: Array<{ title?: string }>;
-      year?: number; aired?: { from?: string };
+      title?: string;
+      title_english?: string;
+      titles?: Array<{ title?: string }>;
+      year?: number;
+      aired?: { from?: string };
     }>(`/anime/${malId}`);
     const d = j?.data ?? {};
     const titles: string[] = [];

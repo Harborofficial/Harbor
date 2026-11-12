@@ -16,7 +16,13 @@ import { useGroup } from "./group/use-group";
 
 type Tab = "posts" | "members" | "about";
 
-export function GroupView({ id, onOpenProfile }: { id: string; onOpenProfile?: (handle: string) => void }) {
+export function GroupView({
+  id,
+  onOpenProfile,
+}: {
+  id: string;
+  onOpenProfile?: (handle: string) => void;
+}) {
   const t = useT();
   const { goBack, openGroups } = useView();
   const g = useGroup(id, goBack);
@@ -41,10 +47,17 @@ export function GroupView({ id, onOpenProfile }: { id: string; onOpenProfile?: (
       }}
     >
       {g.detail?.avatarUrl && !custom?.background && (
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[420px] overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-[420px] overflow-hidden"
+        >
           <div
             className="h-full w-full scale-125 opacity-[0.18] blur-[80px] saturate-[1.4]"
-            style={{ backgroundImage: `url(${g.detail.avatarUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}
+            style={{
+              backgroundImage: `url(${g.detail.avatarUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-canvas/10 via-canvas/60 to-canvas" />
         </div>
@@ -59,7 +72,9 @@ export function GroupView({ id, onOpenProfile }: { id: string; onOpenProfile?: (
 
         {g.phase === "error" && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-edge bg-surface/30 px-6 py-20 text-center">
-            <span className="text-[15px] font-semibold text-ink">{t("This group could not be loaded.")}</span>
+            <span className="text-[15px] font-semibold text-ink">
+              {t("This group could not be loaded.")}
+            </span>
             <span className="max-w-sm text-[13px] text-ink-subtle">
               {t("It may be invite only, or it no longer exists.")}
             </span>
@@ -95,7 +110,9 @@ export function GroupView({ id, onOpenProfile }: { id: string; onOpenProfile?: (
             />
 
             {g.error && (
-              <p className="mt-4 rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{g.error}</p>
+              <p className="mt-4 rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">
+                {g.error}
+              </p>
             )}
 
             {g.detail.isPending && (

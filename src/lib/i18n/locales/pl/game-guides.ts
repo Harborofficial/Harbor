@@ -3,7 +3,8 @@ export default {
   "games.guides.saveTxt": "Zapisz jako TXT",
   "games.guides.savePdf": "Zapisz jako PDF",
   "games.guides.preparingPdf": "Przygotowywanie PDF…",
-  "games.guides.exportError": "Nie udało się zapisać poradnika. Sprawdź połączenie i spróbuj ponownie.",
+  "games.guides.exportError":
+    "Nie udało się zapisać poradnika. Sprawdź połączenie i spróbuj ponownie.",
   "games.guides.filters": "Filtry",
   "games.guides.clearFilters": "Wyczyść filtry",
   "games.guides.popular": "Najpopularniejsze",
@@ -52,11 +53,16 @@ export default {
   "games.guides.date.all": "Dowolny czas",
   "games.guides.viewers": "{count} widzów",
   "games.guides.views": "{count} wyświetleń",
-  "games.guides.import.callofdutywarzone": "Skopiuj wartości do odpowiednich ustawień Warzone. DPI ustaw w oprogramowaniu myszy.",
-  "games.guides.import.css": "Skopiuj ustawienia do Counter-Strike: Source. Pochodzą z datowanych archiwów społeczności.",
-  "games.guides.import.cod": "Użyj tych wartości w odpowiedniej wersji gry. DPI ustaw w oprogramowaniu myszy.",
-  "games.guides.noCrosshair": "To źródło nie podaje wystarczających szczegółów celownika do wiarygodnego podglądu.",
-  "games.guides.previewNote": "Statyczny podgląd opublikowanych wartości. Rozdzielczość, ruch i odrzut mogą zmienić wygląd w grze.",
+  "games.guides.import.callofdutywarzone":
+    "Skopiuj wartości do odpowiednich ustawień Warzone. DPI ustaw w oprogramowaniu myszy.",
+  "games.guides.import.css":
+    "Skopiuj ustawienia do Counter-Strike: Source. Pochodzą z datowanych archiwów społeczności.",
+  "games.guides.import.cod":
+    "Użyj tych wartości w odpowiedniej wersji gry. DPI ustaw w oprogramowaniu myszy.",
+  "games.guides.noCrosshair":
+    "To źródło nie podaje wystarczających szczegółów celownika do wiarygodnego podglądu.",
+  "games.guides.previewNote":
+    "Statyczny podgląd opublikowanych wartości. Rozdzielczość, ruch i odrzut mogą zmienić wygląd w grze.",
   "games.guides.previewBackground": "Przełącz jasne tło podglądu",
   "games.guides.crosshairPreview": "Podgląd celownika",
   "games.guides.noPlayers": "Brak pasujących graczy. Spróbuj innej nazwy.",
@@ -73,22 +79,28 @@ export default {
   "games.guides.sourceErrorTitle": "Spróbujmy ponownie",
   "games.guides.more": "Wczytaj więcej",
   "games.guides.moreKick": "Więcej na Kick",
-  "games.guides.configNote": "Ustawienia opublikowane przez graczy i twórców. Wybierz profil, aby zobaczyć źródło, datę i konfigurację.",
+  "games.guides.configNote":
+    "Ustawienia opublikowane przez graczy i twórców. Wybierz profil, aby zobaczyć źródło, datę i konfigurację.",
   "games.guides.players": "Wszyscy gracze",
   "games.guides.useConfig": "Użyj tych ustawień",
-  "games.guides.import.cs2": "Wklej polecenia do konsoli deweloperskiej CS2. Kody celownika można zaimportować w Ustawienia → Gra → Celownik. Sprawdź wartości przed zastosowaniem.",
-  "games.guides.import.valorant": "Skopiuj kod celownika i otwórz Ustawienia → Celownik → Importuj kod profilu w VALORANT. Pozostałe wartości wpisz w odpowiednich ustawieniach.",
-  "games.guides.import.rainbowsixsiege": "Skopiuj ustawienia i wpisz wartości w opcjach myszy i obrazu w Siege. DPI ustawisz w oprogramowaniu myszy.",
+  "games.guides.import.cs2":
+    "Wklej polecenia do konsoli deweloperskiej CS2. Kody celownika można zaimportować w Ustawienia → Gra → Celownik. Sprawdź wartości przed zastosowaniem.",
+  "games.guides.import.valorant":
+    "Skopiuj kod celownika i otwórz Ustawienia → Celownik → Importuj kod profilu w VALORANT. Pozostałe wartości wpisz w odpowiednich ustawieniach.",
+  "games.guides.import.rainbowsixsiege":
+    "Skopiuj ustawienia i wpisz wartości w opcjach myszy i obrazu w Siege. DPI ustawisz w oprogramowaniu myszy.",
   "games.guides.copyCrosshair": "Kopiuj celownik",
   "games.guides.copyCommands": "Kopiuj polecenia",
   "games.guides.copySettings": "Kopiuj ustawienia",
   "games.guides.copied": "Skopiowano",
   "games.guides.copyError": "Nie udało się skopiować. Spróbuj ponownie.",
-  "games.guides.embedNote": "Odtwarzanie zapewnia platforma twórcy. Jeśli osadzanie jest ograniczone, otwórz oryginał.",
+  "games.guides.embedNote":
+    "Odtwarzanie zapewnia platforma twórcy. Jeśli osadzanie jest ograniczone, otwórz oryginał.",
   "games.guides.readerErrorTitle": "Nie udało się wczytać poradnika",
   "games.guides.short": "Poradniki",
   "games.guides.title": "Poradniki i solucje",
-  "games.guides.note": "Znajdź kolejny krok. Czytaj poradniki społeczności, oglądaj solucje lub dołącz do kogoś, kto gra.",
+  "games.guides.note":
+    "Znajdź kolejny krok. Czytaj poradniki społeczności, oglądaj solucje lub dołącz do kogoś, kto gra.",
   "games.guides.written": "Poradniki tekstowe",
   "games.guides.videos": "Filmy",
   "games.guides.live": "Na żywo",
@@ -102,18 +114,20 @@ export default {
   "games.guides.videoTitle": "Oglądaj i ucz się",
   "games.guides.twitch": "Przeglądaj Twitch",
   "games.guides.youtube": "Więcej na YouTube",
-  "games.guides.liveNote": "Transmisje na żywo z YouTube. Dostępność może się zmienić podczas przeglądania.",
+  "games.guides.liveNote":
+    "Transmisje na żywo z YouTube. Dostępność może się zmienić podczas przeglądania.",
   "games.guides.error": "Nie udało się wczytać źródła. Spróbuj ponownie.",
   "games.guides.empty": "Brak poradników. Spróbuj innego wyszukiwania lub źródła.",
   "games.guides.noLive": "Obecnie brak pasujących transmisji.",
   "games.guides.previous": "Poprzednia",
   "games.guides.next": "Następna",
   "games.guides.original": "Otwórz oryginał",
-  "games.guides.playerNote": "Odtwarzanie przez YouTube. Jeśli autor blokuje osadzanie, otwórz oryginalny film.",
-  "games.guides.readerError": "Nie można odczytać poradnika tutaj. Spróbuj ponownie lub otwórz oryginał.",
+  "games.guides.playerNote":
+    "Odtwarzanie przez YouTube. Jeśli autor blokuje osadzanie, otwórz oryginalny film.",
+  "games.guides.readerError":
+    "Nie można odczytać poradnika tutaj. Spróbuj ponownie lub otwórz oryginał.",
   "games.guides.contents": "W tym poradniku",
-  "games.guides.credits": "Autorzy i licencja"
-,
+  "games.guides.credits": "Autorzy i licencja",
   "games.guides.copy": "Kopiuj",
   "games.guides.previewMap": "Pokaż zrzut mapy za celownikiem",
   "games.guides.skins": "Skiny",
@@ -123,5 +137,5 @@ export default {
   "games.guides.teammates": "Koledzy z drużyny",
   "games.guides.specs": "Specyfikacja",
   "games.guides.exportAll": "Eksportuj wszystko",
-  "games.guides.copyValue": "Kopiuj {label}"
+  "games.guides.copyValue": "Kopiuj {label}",
 } satisfies Record<string, string>;

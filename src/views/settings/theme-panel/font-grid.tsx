@@ -36,7 +36,10 @@ export function FontGrid({
               >
                 Harbor
               </span>
-              <span className="text-[15.5px] leading-[22px] text-ink-muted" style={{ fontFamily: p.sans }}>
+              <span
+                className="text-[15.5px] leading-[22px] text-ink-muted"
+                style={{ fontFamily: p.sans }}
+              >
                 The quick brown fox jumps over the lazy dog
               </span>
             </div>

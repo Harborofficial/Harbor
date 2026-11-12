@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "Guardar equipo",
   "games.tft.savedTeams": "Equipos guardados",
   "games.tft.delete": "Eliminar equipo guardado",
-  "games.tft.note": "Cada campeón cuenta una vez. Los objetos y efectos especiales pueden cambiar los rasgos o el espacio del equipo.",
+  "games.tft.note":
+    "Cada campeón cuenta una vez. Los objetos y efectos especiales pueden cambiar los rasgos o el espacio del equipo.",
   "games.tft.saveFailed": "No se pudo guardar en este dispositivo. Tu equipo actual sigue aquí.",
   "games.tft.missing": "Algunos campeones guardados ya no están en este set.",
   "games.tft.imported": "Equipo importado.",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Regeneración de vida",
   "games.tft.stat.set14AmpIcon": "Amplificación de daño",
   "games.tft.stat.TFTManaRegen": "Regeneración de maná",
-  "games.tft.stat.scaleSV": "Omnisucción"
+  "games.tft.stat.scaleSV": "Omnisucción",
 };

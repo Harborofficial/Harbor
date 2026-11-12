@@ -7,7 +7,10 @@ export function DeviceScene() {
         <span className="absolute inset-x-0 bottom-[8px] block h-px bg-ink/[0.08]" />
 
         <Screen left={0} top={26} w={120} h={70} radius={6} glow="harbor-slot-a" />
-        <span className="absolute block bg-raised" style={{ left: 53, top: 96, width: 14, height: 11 }} />
+        <span
+          className="absolute block bg-raised"
+          style={{ left: 53, top: 96, width: 14, height: 11 }}
+        />
         <span
           className="absolute block rounded-[2px] bg-raised"
           style={{ left: 36, top: 107, width: 48, height: 5 }}

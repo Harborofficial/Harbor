@@ -94,6 +94,7 @@ export function pickTvdbImage(
     imdbSeason?: number;
     imdbEpisode?: number;
   },
+  options?: { preferAbsolute?: boolean },
 ): string | null {
   // TVDB specials share absolute-number placeholders, so only their exact
   // season/episode pair can identify artwork.
@@ -101,6 +102,11 @@ export function pickTvdbImage(
     return map[`s0e${ep.imdbEpisode ?? ep.number}`] ?? null;
   }
   const abs = ep.absoluteNumber;
+  const absHit = abs != null && Number.isInteger(abs) && abs > 0 ? map[`abs${abs}`] : undefined;
+  // A split-franchise cour is displayed under its franchise season (e.g. TYBW
+  // cour 3 as S3), which collides with the base show's own season 3. Its own
+  // artwork lives at the franchise absolute number.
+  if (options?.preferAbsolute && absHit) return absHit;
   // A sequel cour's entry-local numbers restart at 1 while its IMDb identity
   // points at a later season (Kitsu labels every cour "season 1"), so the
   // seasonNumber:number pair would resolve to the first season's episode.
@@ -112,7 +118,7 @@ export function pickTvdbImage(
     (ep.imdbSeason != null && ep.imdbEpisode != null
       ? map[`s${ep.imdbSeason}e${ep.imdbEpisode}`]
       : undefined) ??
-    (abs != null && Number.isInteger(abs) && abs > 0 ? map[`abs${abs}`] : undefined) ??
+    absHit ??
     (localPairUsable ? map[`s${ep.seasonNumber}e${ep.number}`] : undefined) ??
     null
   );

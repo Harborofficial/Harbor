@@ -5,13 +5,7 @@ import type { HandoffOffer } from "@/lib/tv-handoff/handoff-protocol";
 import type { SetupPayload, SetupStepId } from "./setup-wire";
 
 export type LinkStatus = "connecting" | "connected" | "unreachable";
-export type DeliveryState =
-  | "idle"
-  | "sending"
-  | "confirmed"
-  | "rejected"
-  | "timeout"
-  | "offline";
+export type DeliveryState = "idle" | "sending" | "confirmed" | "rejected" | "timeout" | "offline";
 
 /**
  * A live socket whose TV never broadcasts an offer used to spin forever while
@@ -107,7 +101,9 @@ export function useSetupLink(token: string): SetupLink {
   }, []);
 
   const resetDelivery = useCallback((step: SetupStepId) => {
-    setDelivery((prev) => (prev[step] && prev[step] !== "confirmed" ? { ...prev, [step]: "idle" } : prev));
+    setDelivery((prev) =>
+      prev[step] && prev[step] !== "confirmed" ? { ...prev, [step]: "idle" } : prev,
+    );
     setReasons((prev) => (prev[step] ? { ...prev, [step]: null } : prev));
   }, []);
 

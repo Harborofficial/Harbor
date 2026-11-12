@@ -8,7 +8,11 @@ type LinkResult = { token: string; refresh: string; user: RawUser };
 async function linkWithKey(authKey: string): Promise<void> {
   const key = authKey.trim();
   if (!key) throw new Error("No Stremio sign-in received. Try again.");
-  const { state } = await postJson<LoopbackStart>("/identity/api/stremio/loopback/start", {}, { bearer: true });
+  const { state } = await postJson<LoopbackStart>(
+    "/identity/api/stremio/loopback/start",
+    {},
+    { bearer: true },
+  );
   const d = await postJson<LinkResult>(
     "/identity/api/stremio/link",
     { state, mode: "link", authKey: key },

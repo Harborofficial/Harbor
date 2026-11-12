@@ -63,8 +63,7 @@ export function fillAiredPlaceholderTitles(
   const byPair = new Map<string, KitsuEpisode>();
   const byAbs = new Map<number, KitsuEpisode>();
   for (const ep of pool) {
-    const hasRealSynopsis =
-      !!ep.synopsis?.trim() && !isPlaceholderEpisodeText(ep.synopsis);
+    const hasRealSynopsis = !!ep.synopsis?.trim() && !isPlaceholderEpisodeText(ep.synopsis);
     if (!isRealTitle(ep.title) && !hasRealSynopsis) continue;
     if (ep.tvdbEpisodeId != null && !byTvdbId.has(ep.tvdbEpisodeId)) {
       byTvdbId.set(ep.tvdbEpisodeId, ep);

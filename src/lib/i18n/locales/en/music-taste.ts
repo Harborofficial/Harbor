@@ -74,7 +74,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.moreSets": "More from this stage",
   "music.explore.noRecommendations": "Try another artist for more discoveries.",
   "music.taste.choose": "Choose your tastes",
-  "music.taste.body": "Pick genres for For you. Selections rotate, and you can change them anytime.",
+  "music.taste.body":
+    "Pick genres for For you. Selections rotate, and you can change them anytime.",
   "music.taste.search": "Search genres",
   "music.taste.selected": "{count} selected",
   "music.taste.clear": "Clear selections",

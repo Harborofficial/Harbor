@@ -16,7 +16,9 @@ function decodeName(v: DataView, off: number, len: number, wide: boolean): strin
   } else {
     for (let i = 0; i < len; i++) bytes.push(v.getUint8(off + i));
   }
-  return String.fromCharCode(...bytes).replace(/\0/g, "").trim();
+  return String.fromCharCode(...bytes)
+    .replace(/\0/g, "")
+    .trim();
 }
 
 function readNameTable(v: DataView, tableOff: number): string {

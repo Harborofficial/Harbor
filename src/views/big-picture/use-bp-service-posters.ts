@@ -15,7 +15,12 @@ const inflight = new Map<string, Promise<string[]>>();
 const slot = (service: StreamingService, key: string, region: string): string =>
   `${service}\u0000${key}\u0000${region}`;
 
-function load(id: string, key: string, service: StreamingService, region: string): Promise<string[]> {
+function load(
+  id: string,
+  key: string,
+  service: StreamingService,
+  region: string,
+): Promise<string[]> {
   const pending = inflight.get(id);
   if (pending) return pending;
   const next = servicePosters(key, service, region)

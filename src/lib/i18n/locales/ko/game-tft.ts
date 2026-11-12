@@ -19,7 +19,8 @@ export default {
   "games.tft.save": "팀 저장",
   "games.tft.savedTeams": "저장된 팀",
   "games.tft.delete": "저장된 팀 삭제",
-  "games.tft.note": "각 챔피언은 한 번만 계산됩니다. 아이템과 특수 효과에 따라 특성이나 팀 공간이 달라질 수 있습니다.",
+  "games.tft.note":
+    "각 챔피언은 한 번만 계산됩니다. 아이템과 특수 효과에 따라 특성이나 팀 공간이 달라질 수 있습니다.",
   "games.tft.saveFailed": "이 기기에 저장하지 못했습니다. 현재 팀은 유지됩니다.",
   "games.tft.missing": "저장된 챔피언 일부가 이 세트에 더 이상 없습니다.",
   "games.tft.imported": "팀을 가져왔습니다.",
@@ -54,5 +55,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "체력 재생",
   "games.tft.stat.set14AmpIcon": "피해 증폭",
   "games.tft.stat.TFTManaRegen": "마나 재생",
-  "games.tft.stat.scaleSV": "모든 피해 흡혈"
+  "games.tft.stat.scaleSV": "모든 피해 흡혈",
 };

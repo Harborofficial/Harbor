@@ -1,7 +1,8 @@
 const musicGif: Record<string, string> = {
   "music.gif.title": "Свой GIF-визуализатор",
   "music.gif.body": "Ваша GIF-анимация над музыкальной панелью. Хранится на этом устройстве.",
-  "music.gif.timingHelp": "Следует распознанному ритму и останавливается при паузе. Подберите длительность цикла для своей GIF-анимации.",
+  "music.gif.timingHelp":
+    "Следует распознанному ритму и останавливается при паузе. Подберите длительность цикла для своей GIF-анимации.",
   "music.gif.upload": "Загрузить GIF",
   "music.gif.replace": "Заменить GIF",
   "music.gif.remove": "Удалить",
@@ -16,6 +17,6 @@ const musicGif: Record<string, string> = {
   "music.gif.error.invalid": "Не удалось прочитать GIF. Попробуйте другой файл.",
   "music.gif.error.large": "Выберите GIF до 25 МБ с меньшим количеством или размером кадров.",
   "music.gif.error.storage": "Не удалось сохранить GIF на этом устройстве.",
-  "music.gif.error.missing": "Этот GIF недоступен. Загрузите его снова."
+  "music.gif.error.missing": "Этот GIF недоступен. Загрузите его снова.",
 };
 export default musicGif;

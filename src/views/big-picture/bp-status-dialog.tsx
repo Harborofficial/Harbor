@@ -12,13 +12,7 @@ const CHOICE_SCOPE = {
   containIntrinsicSize: "auto 78px",
 } as const;
 
-export function BpStatusDialog({
-  tracker,
-  onClose,
-}: {
-  tracker: BpTracker;
-  onClose: () => void;
-}) {
+export function BpStatusDialog({ tracker, onClose }: { tracker: BpTracker; onClose: () => void }) {
   const t = useBpT();
   const seedRef = useRef<HTMLButtonElement | null>(null);
 
@@ -87,9 +81,7 @@ export function BpStatusDialog({
                     onClose();
                   }}
                   className={`flex h-[clamp(56px,6.2vh,78px)] w-full items-center justify-between gap-4 rounded-[var(--bp-r-sm)] px-[clamp(16px,1.4vw,28px)] text-start text-[clamp(14px,1.95vh,23px)] font-bold transition-colors duration-[var(--bp-dur-fast)] ${
-                    on
-                      ? "bg-[var(--bp-on)] text-ink"
-                      : "border border-[var(--bp-edge-2)] text-ink"
+                    on ? "bg-[var(--bp-on)] text-ink" : "border border-[var(--bp-edge-2)] text-ink"
                   }`}
                 >
                   <span className="line-clamp-1">{t(c.label)}</span>

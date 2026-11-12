@@ -204,11 +204,36 @@ export function Kids({ active = true }: { active?: boolean }) {
           <KidsDoodles />
           <div className="relative">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-10 bottom-0">
-              <img src="/kids/doodles/lilleaflitter.png" alt="" draggable={false} className="absolute left-[2%] top-6 h-11 w-auto -rotate-12 opacity-90" />
-              <img src="/kids/doodles/lilpurpocto.png" alt="" draggable={false} className="absolute left-[26%] top-9 h-12 w-auto opacity-90" />
-              <img src="/kids/doodles/lilwhitestar.png" alt="" draggable={false} className="absolute left-[46%] top-3 h-6 w-auto opacity-80" />
-              <img src="/kids/doodles/lilorangestar2.png" alt="" draggable={false} className="absolute left-[56%] top-11 h-9 w-auto opacity-90" />
-              <img src="/kids/doodles/lilpurplestar.png" alt="" draggable={false} className="absolute left-[67%] top-4 h-14 w-auto opacity-85" />
+              <img
+                src="/kids/doodles/lilleaflitter.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[2%] top-6 h-11 w-auto -rotate-12 opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilpurpocto.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[26%] top-9 h-12 w-auto opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilwhitestar.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[46%] top-3 h-6 w-auto opacity-80"
+              />
+              <img
+                src="/kids/doodles/lilorangestar2.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[56%] top-11 h-9 w-auto opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilpurplestar.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[67%] top-4 h-14 w-auto opacity-85"
+              />
             </div>
             <CatalogCustomizeBar
               editMode={pageRows.editMode}

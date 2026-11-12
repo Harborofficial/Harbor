@@ -121,34 +121,54 @@ export function RepoGroup({ repo, adapter }: { repo: RepoView; adapter: KindAdap
       : `${repo.host}${repo.checkedAt ? ` · ${t("checked {when}", { when: relativeTime(repo.checkedAt) })}` : ""}`;
   const warn = repo.error
     ? t("Could not reach this repository. Installed plugins keep working.")
-    : (errors.remove ?? errors.refresh ?? errors["install-all"] ?? errors["update-all"] ?? errors["remove-all"]);
+    : (errors.remove ??
+      errors.refresh ??
+      errors["install-all"] ??
+      errors["update-all"] ??
+      errors["remove-all"]);
 
   return (
     <SettingGroup>
       <div className="hset-row" data-settings-row>
-        <RowText lead={<PackageOpen size={18} strokeWidth={2} />} onClick={() => setOpen((v) => !v)} expanded={open}>
+        <RowText
+          lead={<PackageOpen size={18} strokeWidth={2} />}
+          onClick={() => setOpen((v) => !v)}
+          expanded={open}
+        >
           <RowTitle>
             <span className="min-w-0">{repo.name}</span>
             <Chip>{kindLabel(t, repo.kind)}</Chip>
             {repo.format === "provider-script" && <Chip>{t("Script")}</Chip>}
             {repo.format === "android-extension" && <Chip>{t("Android")}</Chip>}
-            {repo.entries.length > 0 && <Chip>{t("{count} plugins", { count: repo.entries.length })}</Chip>}
+            {repo.entries.length > 0 && (
+              <Chip>{t("{count} plugins", { count: repo.entries.length })}</Chip>
+            )}
             {repo.installedCount > 0 && (
               <Chip accent>{t("{count} installed", { count: repo.installedCount })}</Chip>
             )}
           </RowTitle>
-          <RowDesc accent={repo.updates > 0}>{progress ? t("Installing {done} of {total}", progress) : headerDesc}</RowDesc>
+          <RowDesc accent={repo.updates > 0}>
+            {progress ? t("Installing {done} of {total}", progress) : headerDesc}
+          </RowDesc>
           {warn && <RowNote>{warn}</RowNote>}
         </RowText>
         <RowControl>
           {updatable.length > 0 && adapter.update && (
             <SButton variant="primary" disabled={!!busy} onClick={() => void updateAll()}>
-              {busy === "update-all" ? <Loader2 size={16} className="animate-spin" /> : t("Update all")}
+              {busy === "update-all" ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                t("Update all")
+              )}
             </SButton>
           )}
           {pending.length > 0 && !repo.foreign && (
             <SButton variant="primary" disabled={!!busy} onClick={() => void installAll()}>
-              {busy === "install-all" ? <Loader2 size={16} className="animate-spin" /> : t("Install all")}
+              {busy === "install-all" ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                t("Install all")
+              )}
             </SButton>
           )}
           {installed.length > 0 && (
@@ -182,12 +202,26 @@ export function RepoGroup({ repo, adapter }: { repo: RepoView; adapter: KindAdap
           <button
             type="button"
             className={`${BARE_ICON} ${confirm === "remove" ? "scale-110 text-danger" : "text-danger/75 hover:text-danger"}`}
-            aria-label={confirm === "remove" ? t("Remove and uninstall {count}?", { count: repo.installedCount }) : t("Remove")}
-            title={confirm === "remove" ? t("Remove and uninstall {count}?", { count: repo.installedCount }) : t("Remove")}
+            aria-label={
+              confirm === "remove"
+                ? t("Remove and uninstall {count}?", { count: repo.installedCount })
+                : t("Remove")
+            }
+            title={
+              confirm === "remove"
+                ? t("Remove and uninstall {count}?", { count: repo.installedCount })
+                : t("Remove")
+            }
             disabled={!!busy && busy !== "remove"}
-            onClick={() => arm("remove", () => void run("remove", () => adapter.removeRepo(repo.url)))}
+            onClick={() =>
+              arm("remove", () => void run("remove", () => adapter.removeRepo(repo.url)))
+            }
           >
-            {busy === "remove" ? <Loader2 size={19} className="animate-spin" /> : <Trash2 size={19} />}
+            {busy === "remove" ? (
+              <Loader2 size={19} className="animate-spin" />
+            ) : (
+              <Trash2 size={19} />
+            )}
           </button>
         </RowControl>
       </div>
@@ -197,7 +231,10 @@ export function RepoGroup({ repo, adapter }: { repo: RepoView; adapter: KindAdap
           {repo.foreign && <SettingRow label={repo.host} desc={foreignText(t, repo.foreign)} />}
 
           {repo.loading && repo.entries.length === 0 && !repo.foreign && (
-            <SettingRow icon={<Loader2 size={18} className="animate-spin" />} label={t("Loading plugins...")} />
+            <SettingRow
+              icon={<Loader2 size={18} className="animate-spin" />}
+              label={t("Loading plugins...")}
+            />
           )}
 
           {!repo.loading && !repo.error && !repo.foreign && repo.entries.length === 0 && (
@@ -240,13 +277,19 @@ function EntryRow({
   run: (key: string, fn: () => Promise<unknown>) => Promise<void>;
 }) {
   const t = useT();
-  const desc = [entry.description, entry.note, languageNames(entry.lang, uiLang, t("All languages"))]
+  const desc = [
+    entry.description,
+    entry.note,
+    languageNames(entry.lang, uiLang, t("All languages")),
+  ]
     .filter(Boolean)
     .join(" · ");
   const working = busy === entry.id;
   return (
     <SettingRow
-      icon={<AddonLogo addonId={entry.id} addonName={entry.name} manifestLogo={entry.icon} size="md" />}
+      icon={
+        <AddonLogo addonId={entry.id} addonName={entry.name} manifestLogo={entry.icon} size="md" />
+      }
       label={
         <span className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="min-w-0">{entry.name}</span>

@@ -14,8 +14,7 @@ function markForced(on: boolean): void {
   try {
     if (on) localStorage.setItem(FLAG, "1");
     else localStorage.removeItem(FLAG);
-  } catch {
-  }
+  } catch {}
 }
 
 function wasForced(): boolean {

@@ -120,7 +120,13 @@ export function BpChannelCell({ hit, onCommit }: { hit: LiveTvHit; onCommit: () 
         style={{ width: "clamp(44px, 3.4vw, 62px)", aspectRatio: "1 / 1" }}
       >
         {hit.logo ? (
-          <img src={hit.logo} alt="" loading="lazy" decoding="async" className="h-full w-full object-contain" />
+          <img
+            src={hit.logo}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-contain"
+          />
         ) : (
           <Tv size={20} className="text-ink-subtle" strokeWidth={1.8} />
         )}
@@ -138,7 +144,13 @@ export function BpChannelCell({ hit, onCommit }: { hit: LiveTvHit; onCommit: () 
   );
 }
 
-export function BpCollectionCell({ hit, onCommit }: { hit: TvdbCollectionHit; onCommit: () => void }) {
+export function BpCollectionCell({
+  hit,
+  onCommit,
+}: {
+  hit: TvdbCollectionHit;
+  onCommit: () => void;
+}) {
   return (
     <button
       type="button"
@@ -183,13 +195,7 @@ export function BpCollectionCell({ hit, onCommit }: { hit: TvdbCollectionHit; on
 // reader exactly the way BpHeroManga already does. Do not swap it for a
 // pushBigPicture({ kind: "manga" }) until that route actually exists; the detail
 // route cannot resolve a manga id and the card opens nothing.
-export function BpMangaCell({
-  manga,
-  onOpen,
-}: {
-  manga: MangaSummary;
-  onOpen: () => void;
-}) {
+export function BpMangaCell({ manga, onOpen }: { manga: MangaSummary; onOpen: () => void }) {
   const src = useProxiedImageSrc(bpCardArt(manga.cover, bpBoxPx(MANGA_BOX)));
   return (
     <button
@@ -249,7 +255,13 @@ export function BpAddonHitCell({ hit, onOpen }: { hit: AddonHit; onOpen: () => v
         style={{ width: "clamp(44px, 3.4vw, 62px)", aspectRatio: "1 / 1" }}
       >
         {src ? (
-          <img src={src} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+          <img
+            src={src}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <Blocks size={20} className="text-ink-subtle" strokeWidth={1.8} />
         )}

@@ -13,7 +13,14 @@ test("published boxing records retain zeroes and put both fighters' metrics in t
 });
 
 test("unknown, partial and duplicate records stay unparsed rather than inventing statistics", () => {
-  for (const value of [undefined, "", "24-7-1", "W 7 · L 0", "W 7 · L 0 · D 0 · W 8", "W 7 · L 0 · D 0 · NC 1"])
+  for (const value of [
+    undefined,
+    "",
+    "24-7-1",
+    "W 7 · L 0",
+    "W 7 · L 0 · D 0 · W 8",
+    "W 7 · L 0 · D 0 · NC 1",
+  ])
     assert.equal(boxingRecord(value), null);
   assert.equal(boxingRecord("W 7 · L 0 · D 0")?.length, 3);
 });

@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "Beli instan",
   "games.osrs.sell": "Jual instan",
   "games.osrs.unseen": "Belum ada pengamatan",
-  "games.osrs.observed": "Transaksi yang tercatat, bukan penawaran terbuka. Waktu pengamatan beli dan jual dapat berbeda.",
+  "games.osrs.observed":
+    "Transaksi yang tercatat, bukan penawaran terbuka. Waktu pengamatan beli dan jual dapat berbeda.",
   "games.osrs.history": "Riwayat harga",
   "games.osrs.period": "Periode",
   "games.osrs.range.6h": "6 jam terakhir",
@@ -39,8 +40,9 @@ export default {
   "games.osrs.averageSell": "Rata-rata jual",
   "games.osrs.chart": "Riwayat harga beli dan jual",
   "games.osrs.observation": "Pilih pengamatan",
-  "games.osrs.averages": "Transaksi yang tidak tercatat menyisakan celah. Pajak Grand Exchange tidak dihitung di sini.",
+  "games.osrs.averages":
+    "Transaksi yang tidak tercatat menyisakan celah. Pajak Grand Exchange tidak dihitung di sini.",
   "games.osrs.table": "24 interval terbaru",
   "games.osrs.time": "Waktu",
-  "games.osrs.volume": "Item diperdagangkan"
+  "games.osrs.volume": "Item diperdagangkan",
 };

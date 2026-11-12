@@ -14,18 +14,25 @@ export default {
   "games.manage.uninstallOptions": "Uninstall options…",
   "games.manage.remove": "Remove from Harbor…",
   "games.manage.manage": "Manage",
-  "games.manage.failed": "Couldn’t complete this action. Check that the game and launcher are still available, then try again.",
+  "games.manage.failed":
+    "Couldn’t complete this action. Check that the game and launcher are still available, then try again.",
   "games.manage.removed": "Removed from Harbor",
   "games.manage.sent": "Continue in {source}",
   "games.manage.removeTitle": "Remove this library entry?",
   "games.manage.uninstallTitle": "Uninstall this game?",
   "games.manage.optionsTitle": "Uninstall with {source}",
-  "games.manage.removedNote": "The library entry was removed. Your game files are still on this computer.",
-  "games.manage.sentNote": "{source} opened. Finish there; Harbor updates the installation status when you return.",
-  "games.manage.removeNote": "Remove {name} and its Harbor play history from this profile. This does not uninstall the game or delete its files.",
-  "games.manage.steamNote": "Steam will handle uninstalling {name}. You may need to confirm again in Steam. Back up any local saves or mods you want to keep first.",
-  "games.manage.launcherNote": "Open {source}, select {name}, then choose its Manage or Uninstall option. The launcher handles removal; Harbor does not delete the game folder.",
-  "games.manage.windowsNote": "Find {name} in Windows Installed apps and choose Uninstall. If it is a portable game, use its own removal instructions. Harbor will not delete its folder.",
+  "games.manage.removedNote":
+    "The library entry was removed. Your game files are still on this computer.",
+  "games.manage.sentNote":
+    "{source} opened. Finish there; Harbor updates the installation status when you return.",
+  "games.manage.removeNote":
+    "Remove {name} and its Harbor play history from this profile. This does not uninstall the game or delete its files.",
+  "games.manage.steamNote":
+    "Steam will handle uninstalling {name}. You may need to confirm again in Steam. Back up any local saves or mods you want to keep first.",
+  "games.manage.launcherNote":
+    "Open {source}, select {name}, then choose its Manage or Uninstall option. The launcher handles removal; Harbor does not delete the game folder.",
+  "games.manage.windowsNote":
+    "Find {name} in Windows Installed apps and choose Uninstall. If it is a portable game, use its own removal instructions. Harbor will not delete its folder.",
   "games.manage.opening": "Opening…",
   "games.manage.confirmUninstall": "Continue to Steam",
   "games.manage.openSource": "Open {source}",

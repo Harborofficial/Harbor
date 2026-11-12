@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import {
-  quickLibraryAvailable,
-  quickLibraryMode,
-} from "../src/lib/features/quick-library.ts";
+import { quickLibraryAvailable, quickLibraryMode } from "../src/lib/features/quick-library.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -61,7 +58,7 @@ test("Quick library remains available while game-only search and navigation stay
   const dock = read("src/views/games/game-library-dock.tsx");
   assert.match(dock, /const musicEnabled = features\.music;/);
   assert.match(dock, /quickLibraryMode\(gamesEnabled, musicEnabled, requestedMode\)/);
-  assert.match(dock, /\{gamesEnabled && musicEnabled && <HoverTooltip/);
+  assert.match(dock, /\{gamesEnabled &&\s*musicEnabled &&\s*\(\s*<HoverTooltip/);
 
   const search = read("src/components/search/search-overlay.tsx");
   assert.match(search, /useInstallFeatures/);

@@ -591,7 +591,8 @@ function armSpotifyStartupWatchdog(request: number, track: MusicTrack): void {
         casting: getMusicSpeakerState().active,
         videoOwned: ownsMusicVideo(),
       })
-    ) return;
+    )
+      return;
     console.warn("[music/spotify] accepted play request did not reach file-loaded");
     if (recoverPlayback) recoverPlayback(SPOTIFY_STARTUP_TIMEOUT_MESSAGE);
     else {

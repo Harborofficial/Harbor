@@ -14,8 +14,10 @@ export default {
   "games.pokemon.videosHint": "Guías y consejos",
   "games.pokemon.bank": "Partidas y Pokémon",
   "games.pokemon.bankHint": "Editar partidas y organizar cajas",
-  "games.pokemon.bankIntro": "Abre una partida del emulador para editar tu equipo o importa Pokémon individuales a tu colección.",
-  "games.pokemon.guideSourceNote": "Lee la guía original o ábrela aquí cuando la fuente esté disponible.",
+  "games.pokemon.bankIntro":
+    "Abre una partida del emulador para editar tu equipo o importa Pokémon individuales a tu colección.",
+  "games.pokemon.guideSourceNote":
+    "Lee la guía original o ábrela aquí cuando la fuente esté disponible.",
   "games.pokemon.readGuide": "Leer en Bulbapedia",
   "games.pokemon.readInside": "Leer en Harbor",
   "games.pokemon.closeReader": "Cerrar lector",
@@ -23,19 +25,24 @@ export default {
   "games.pokemon.imageSaved": "Imagen de {name} guardada",
   "games.pokemon.imageFailed": "No se pudo descargar. Inténtalo de nuevo.",
   "games.pokemon.saveStart": "¿Usas un emulador?",
-  "games.pokemon.emulatorSave": "El emulador crea un archivo de guardado cuando guardas desde el menú del juego.",
+  "games.pokemon.emulatorSave":
+    "El emulador crea un archivo de guardado cuando guardas desde el menú del juego.",
   "games.pokemon.saveStep1": "Abre el juego y elige Guardar en su menú.",
-  "games.pokemon.saveStep2": "Cierra el juego y busca o exporta el guardado de batería (.sav, .srm o .dsv).",
+  "games.pokemon.saveStep2":
+    "Cierra el juego y busca o exporta el guardado de batería (.sav, .srm o .dsv).",
   "games.pokemon.saveStep3": "Elige Abrir partida arriba para editarla en Harbor.",
   "games.pokemon.findSave": "¿Dónde está mi partida?",
-  "games.pokemon.saveLocations": "Busca junto a la ROM o en la carpeta de guardados del emulador. Si solo tienes un estado guardado, cárgalo en el emulador y luego guarda desde el menú del juego.",
+  "games.pokemon.saveLocations":
+    "Busca junto a la ROM o en la carpeta de guardados del emulador. Si solo tienes un estado guardado, cárgalo en el emulador y luego guarda desde el menú del juego.",
   "games.pokemon.noSave": "¿Aún no tienes partida?",
   "games.pokemon.communitySaves": "Explorar partidas de la comunidad",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Elige el juego exacto y revisa las notas del autor.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Elige el juego exacto y revisa las notas del autor.",
   "games.pokemon.pkhexNote": "Editor de partidas, descargas y ayuda de sus desarrolladores.",
-  "games.pokemon.noSaveNeeded": "Puedes importar archivos Pokémon sin una partida. Solo necesitas una para editar el equipo o las cajas del juego.",
+  "games.pokemon.noSaveNeeded":
+    "Puedes importar archivos Pokémon sin una partida. Solo necesitas una para editar el equipo o las cajas del juego.",
   "games.pokemon.videoUnavailable": "No se pudieron cargar los vídeos aquí.",
   "games.pokemon.youtubeSearch": "Buscar en YouTube",
   "games.hub.downloadApply": "Descargar parche",
-  "games.hub.manualPatch": "Usar un parche o enlace que ya tienes"
+  "games.hub.manualPatch": "Usar un parche o enlace que ya tienes",
 };

@@ -1,14 +1,17 @@
 export default {
   "games.shortcuts.reviewLaunch": "실행 설정 확인",
   "games.shortcuts.state.local": "직접 실행 가능",
-  "games.shortcuts.shortcut_identity": "Steam에서 이 바로 가기에 유효한 ID를 할당하지 않았습니다. 설정을 확인하고 직접 실행하거나, Steam에서 다시 저장한 후 새로 고침하세요.",
+  "games.shortcuts.shortcut_identity":
+    "Steam에서 이 바로 가기에 유효한 ID를 할당하지 않았습니다. 설정을 확인하고 직접 실행하거나, Steam에서 다시 저장한 후 새로 고침하세요.",
 
   "games.shortcuts.activity.open": "활동",
   "games.shortcuts.activity.title": "바로가기 활동",
-  "games.shortcuts.activity.note": "이 Harbor 프로필의 최근 검색 및 실행 기록입니다. 최대 300개 항목입니다.",
+  "games.shortcuts.activity.note":
+    "이 Harbor 프로필의 최근 검색 및 실행 기록입니다. 최대 300개 항목입니다.",
   "games.shortcuts.activity.remember": "세션 간 기록 유지",
   "games.shortcuts.activity.detailed": "검색 세부 정보 포함",
-  "games.shortcuts.activity.storageError": "저장된 활동에 접근할 수 없습니다. 이 세션의 기록은 계속 표시됩니다.",
+  "games.shortcuts.activity.storageError":
+    "저장된 활동에 접근할 수 없습니다. 이 세션의 기록은 계속 표시됩니다.",
   "games.shortcuts.activity.empty": "아직 활동이 없습니다.",
   "games.shortcuts.activity.clear": "활동 지우기",
   "games.shortcuts.activity.duration": "{ms}밀리초",
@@ -26,8 +29,10 @@ export default {
   "games.shortcuts.launchDirect": "직접 실행",
   "games.shortcuts.viaSteam": "Steam으로 플레이",
   "games.shortcuts.directNote": "이 실행 파일을 지정된 실행 옵션과 시작 폴더로 실행합니다.",
-  "games.shortcuts.shortcut_changed": "Steam에서 이 바로가기가 변경되었습니다. 라이브러리를 새로 고치고 실행 설정을 확인하세요.",
-  "games.shortcuts.shortcut_options": "이 실행 옵션은 Steam 명령 래퍼를 사용합니다. Steam을 통해 이 바로가기를 실행하세요.",
+  "games.shortcuts.shortcut_changed":
+    "Steam에서 이 바로가기가 변경되었습니다. 라이브러리를 새로 고치고 실행 설정을 확인하세요.",
+  "games.shortcuts.shortcut_options":
+    "이 실행 옵션은 Steam 명령 래퍼를 사용합니다. Steam을 통해 이 바로가기를 실행하세요.",
   "games.dock.shortcut": "Steam 바로가기",
   "games.shortcuts.note": "Steam 라이브러리에 추가한 비 Steam 게임입니다.",
   "games.shortcuts.chooseFolder": "Steam 폴더 선택",
@@ -47,9 +52,11 @@ export default {
   "games.shortcuts.tags": "태그",
   "games.shortcuts.storeError": "설정을 저장하지 못했습니다.",
   "games.shortcuts.shortcut_location": "Steam 폴더나 그 안의 userdata 폴더를 선택하세요.",
-  "games.shortcuts.shortcut_account": "이 바로가기의 계정으로 Steam을 연 후 새로고침하세요. Harbor는 같은 Steam 설치를 사용해야 합니다.",
-  "games.shortcuts.shortcut_missing": "이 바로가기는 더 이상 없습니다. 라이브러리를 새로고침하세요.",
+  "games.shortcuts.shortcut_account":
+    "이 바로가기의 계정으로 Steam을 연 후 새로고침하세요. Harbor는 같은 Steam 설치를 사용해야 합니다.",
+  "games.shortcuts.shortcut_missing":
+    "이 바로가기는 더 이상 없습니다. 라이브러리를 새로고침하세요.",
   "games.shortcuts.shortcut_executable": "실행 파일이 없거나 절대 경로가 지원되지 않습니다.",
   "games.shortcuts.shortcut_launch": "Steam에서 바로가기를 열지 못했습니다. 다시 시도하세요.",
-  "games.shortcuts.shortcut_read": "Steam 바로가기를 읽지 못했습니다. 새로고침해 보세요."
+  "games.shortcuts.shortcut_read": "Steam 바로가기를 읽지 못했습니다. 새로고침해 보세요.",
 };

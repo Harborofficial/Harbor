@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "クリエイターのプレイ動画",
   "games.roms.watchVideo": "動画を見る",
   "games.roms.noVideos": "これらのゲームにはまだ動画が登録されていません。",
-  "games.roms.libraryNote": "自分のゲームをまとめよう。ファイルを読み込み、エミュレーターを選んでコレクションを管理。",
+  "games.roms.libraryNote":
+    "自分のゲームをまとめよう。ファイルを読み込み、エミュレーターを選んでコレクションを管理。",
   "games.roms.openLibrary": "ライブラリを開く",
   "games.roms.downloadCharts": "ダウンロード上位のROMハック",
-  "games.roms.downloadChartsNote": "Romhack Plazaの累計パッチダウンロード数。作者、バージョン、必要環境はプロジェクトで確認できます。",
+  "games.roms.downloadChartsNote":
+    "Romhack Plazaの累計パッチダウンロード数。作者、バージョン、必要環境はプロジェクトで確認できます。",
   "games.roms.downloadCount": "{count}ダウンロード",
-  "games.roms.chartUnavailable": "ダウンロードランキングを取得できません。Romhack Plazaで直接閲覧できます。",
+  "games.roms.chartUnavailable":
+    "ダウンロードランキングを取得できません。Romhack Plazaで直接閲覧できます。",
   "games.roms.allPlatforms": "すべてのプラットフォーム",
   "games.roms.moreReleases": "発売情報をもっと見る",
   "games.roms.fewerReleases": "発売情報を少なく表示",
@@ -56,17 +59,20 @@ const gameRoms: Record<string, string> = {
   "games.roms.franchises": "好きなシリーズをたどる",
   "games.roms.franchiseNote": "世代を超えて、関連するゲームやシリーズを探しましょう。",
   "games.roms.noFranchises": "これらのゲームのシリーズ情報はまだありません。",
-  "games.roms.noCollection": "選択したゲーム機では、このコレクションに該当するゲームがまだありません。",
+  "games.roms.noCollection":
+    "選択したゲーム機では、このコレクションに該当するゲームがまだありません。",
   "games.roms.community": "コミュニティの作品",
   "games.roms.hacksTitle": "おなじみのゲームで、新たな冒険。",
-  "games.roms.hacksNote": "ROMハックを探し、元になったゲームを確認して、パッチを適用したコピーを遊べるように準備しましょう。",
+  "games.roms.hacksNote":
+    "ROMハックを探し、元になったゲームを確認して、パッチを適用したコピーを遊べるように準備しましょう。",
   "games.roms.catalogNote": "ゲーム機、ジャンル、発売年代、シリーズでカタログを探しましょう。",
   "games.roms.genre": "ジャンル",
   "games.roms.allGenres": "すべてのジャンル",
   "games.roms.era": "発売年代",
   "games.roms.reset": "フィルターをリセット",
   "games.roms.empty": "別のタイトルで検索するか、このゲーム機の絞り込み条件を緩めてください。",
-  "games.roms.source": "ゲーム情報と関連情報はIGDBより。ローカルファイルをインポートすると、対応ゲームをHarborで遊べます。",
+  "games.roms.source":
+    "ゲーム情報と関連情報はIGDBより。ローカルファイルをインポートすると、対応ゲームをHarborで遊べます。",
   "games.roms.playerScore": "IGDBプレイヤー評価 · {count}件の評価",
   "games.roms.combinedScore": "IGDB総合評価 · {count}件の評価",
   "games.roms.sort.discussed": "評価件数が多い順",

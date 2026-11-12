@@ -34,6 +34,7 @@ export default {
   "games.ffxiv.sales": "Son satışlar",
   "games.ffxiv.sold": "Satıldı",
   "games.ffxiv.noSales": "Bu kayıtta yakın tarihli satış yok.",
-  "games.ffxiv.community": "Topluluk verileri eski olabilir. İlanlar son güncellemeden sonra satılmış olabilir.",
-  "games.ffxiv.open": "Universalis’te görüntüle"
+  "games.ffxiv.community":
+    "Topluluk verileri eski olabilir. İlanlar son güncellemeden sonra satılmış olabilir.",
+  "games.ffxiv.open": "Universalis’te görüntüle",
 };

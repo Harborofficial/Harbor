@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "Liczba podejść niedostępna",
   "games.wow.progress.counts": "Podejścia: {total} · W czasie: {timed}",
   "games.wow.progress.best": "Najlepsze podejście",
-  "games.wow.progress.explore": "Przeglądaj podejścia"
+  "games.wow.progress.explore": "Przeglądaj podejścia",
 };
 export default gameWowProgress;

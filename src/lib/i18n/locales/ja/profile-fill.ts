@@ -316,7 +316,7 @@ const profileFill: Record<string, string> = {
   "Show your Letterboxd card": "Letterboxdカードを表示",
   "Off by default. Shows your Letterboxd name, lists and film counts on your profile for anyone who visits. Manage the connection itself in Settings, Letterboxd.":
     "初期設定ではオフです。プロフィールを訪れた人に、Letterboxdの名前、リスト、映画の本数を表示します。接続自体は「設定」の「Letterboxd」で管理できます。",
-  "Letterboxd": "Letterboxd",
+  Letterboxd: "Letterboxd",
 };
 
 export default profileFill;

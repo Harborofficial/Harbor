@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "Entdecke Mods und verwalte deine installierten Inhalte.",
   "games.modHub.switchGame": "Spiel wechseln",
   "games.modHub.creatorDownload": "Beim Ersteller herunterladen",
-  "games.modHub.legacyNote": "Downloads für Die Sims 2 und Die Sims 3 sind beim Ersteller verfügbar. Die lokale Mod-Verwaltung unterstützt derzeit Die Sims 4.",
+  "games.modHub.legacyNote":
+    "Downloads für Die Sims 2 und Die Sims 3 sind beim Ersteller verfügbar. Die lokale Mod-Verwaltung unterstützt derzeit Die Sims 4.",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "Muster",
   "games.modHub.sets": "Thematische Sets",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "Ersteller",
   "games.modHub.viewOnSource": "Seite des Erstellers",
   "games.modHub.filesPending": "Projektdateien werden geladen…",
-  "games.modHub.picked": "MTS-Auswahl"
+  "games.modHub.picked": "MTS-Auswahl",
 };

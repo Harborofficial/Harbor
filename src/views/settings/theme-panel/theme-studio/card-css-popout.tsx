@@ -76,7 +76,9 @@ export function CardCssPopout({
       >
         <header className="flex shrink-0 items-start gap-4 px-6 pb-5 pt-6">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-muted">{t("Custom cards")}</span>
+            <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-muted">
+              {t("Custom cards")}
+            </span>
             <h2 className="truncate text-[17px] font-semibold tracking-tight text-ink">
               {t("Write CSS, watch real posters react")}
             </h2>
@@ -96,10 +98,14 @@ export function CardCssPopout({
         <div className="flex min-h-0 flex-1 gap-3 px-6 pb-6">
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-md bg-canvas">
             <div className="flex h-14 shrink-0 items-center gap-2 px-3">
-              <span className="font-mono text-[15.5px] leading-[22px] text-ink-muted">styles.css</span>
+              <span className="font-mono text-[15.5px] leading-[22px] text-ink-muted">
+                styles.css
+              </span>
               <button
                 type="button"
-                onClick={() => onChange({ css: css.trim() ? `${css.trimEnd()}\n\n${STARTER}` : STARTER })}
+                onClick={() =>
+                  onChange({ css: css.trim() ? `${css.trimEnd()}\n\n${STARTER}` : STARTER })
+                }
                 disabled={hasStarter}
                 className="harbor-press-pop ms-auto flex h-11 items-center gap-1.5 rounded-md bg-elevated px-3 text-[15.5px] font-semibold text-ink-muted transition-colors hover:text-ink disabled:opacity-50 disabled:cursor-default"
               >

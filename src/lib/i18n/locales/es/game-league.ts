@@ -40,7 +40,8 @@ export default {
   "games.league.more": "Más campeones",
   "games.league.empty": "Ningún campeón coincide con tu búsqueda.",
   "games.league.poolEmpty": "Guarda aquí tus favoritos. Abre un campeón y añádelo a tu selección.",
-  "games.league.unavailable": "No se pudieron actualizar los datos. Los resultados anteriores siguen disponibles.",
+  "games.league.unavailable":
+    "No se pudieron actualizar los datos. Los resultados anteriores siguen disponibles.",
   "games.league.back": "Volver a campeones",
   "games.league.addPool": "Añadir a mis campeones",
   "games.league.inPool": "En mis campeones",
@@ -62,10 +63,12 @@ export default {
   "games.league.matchupRate": "Tasa de victoria de {champion} contra cada rival.",
   "games.league.noSample": "Aún no hay suficientes datos de enfrentamientos.",
   "games.league.combos": "Mira el combo",
-  "games.league.combosIntro": "Demostraciones breves seleccionadas por OP.GG. Reprodúcelas cuando quieras.",
+  "games.league.combosIntro":
+    "Demostraciones breves seleccionadas por OP.GG. Reprodúcelas cuando quieras.",
   "games.league.watchCombo": "Ver demostración",
   "games.league.updated": "Fuente actualizada: {date}",
-  "games.league.buildEmpty": "No hay una build para este rol. Prueba otro rol o las guías de abajo.",
+  "games.league.buildEmpty":
+    "No hay una build para este rol. Prueba otro rol o las guías de abajo.",
   "games.league.iconsUnavailable": "No se pudieron cargar algunos detalles de objetos o runas.",
   "games.league.passive": "Pasiva",
   "games.league.cooldown": "Enfriamiento: {seconds}s",
@@ -74,17 +77,22 @@ export default {
   "games.league.story": "Historia del campeón",
   "games.league.exploreMore": "Explora más",
   "games.league.guides": "Guías en vídeo",
-  "games.league.metaScope": "OP.GG ofrece esta clasificación con su muestra predeterminada. No indica parche, región ni rango. Las victorias se calculan con las partidas y victorias publicadas; la fuente redondea las tasas de elección. Clasificaciones y builds usan muestras distintas.",
-  "games.league.buildNote": "Cada build tiene su propia muestra. Los objetos completos favorecen partidas que duraron lo suficiente para comprarlos; sus victorias no equivalen a la tasa global del campeón. Los enfrentamientos pueden tener muestras pequeñas. Adapta tu build al equipo y rival. Los vídeos pueden ser de parches anteriores.",
-  "games.league.patchDifference": "Estadísticas de build de {patch}; datos de objetos y habilidades de {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "OP.GG ofrece esta clasificación con su muestra predeterminada. No indica parche, región ni rango. Las victorias se calculan con las partidas y victorias publicadas; la fuente redondea las tasas de elección. Clasificaciones y builds usan muestras distintas.",
+  "games.league.buildNote":
+    "Cada build tiene su propia muestra. Los objetos completos favorecen partidas que duraron lo suficiente para comprarlos; sus victorias no equivalen a la tasa global del campeón. Los enfrentamientos pueden tener muestras pequeñas. Adapta tu build al equipo y rival. Los vídeos pueden ser de parches anteriores.",
+  "games.league.patchDifference":
+    "Estadísticas de build de {patch}; datos de objetos y habilidades de {assets}.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Lista de niveles",
   "games.league.tierScope": "Clasificatoria solo/dúo · Esmeralda+ · Global",
   "games.league.patchFilter": "Elegir parche",
   "games.league.allRoles": "Todos los roles",
   "games.league.banRate": "Tasa de bloqueo",
   "games.league.matches": "Partidas",
-  "games.league.tierNote": "La clasificación es por rol. Las builds muestran los últimos datos disponibles.",
+  "games.league.tierNote":
+    "La clasificación es por rol. Las builds muestran los últimos datos disponibles.",
   "games.official.publisherSource": "Descarga oficial del editor",
   "games.official.get": "Obtener {launcher}",
 };

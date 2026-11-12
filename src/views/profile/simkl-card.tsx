@@ -11,8 +11,7 @@ import { Avatar, compactNumber, timeAgo } from "./profile-bits";
 import type { SimklPublished } from "./profile-types";
 import { useSimklCard } from "./use-simkl-card";
 
-const TILE =
-  "flex flex-col items-center rounded-md bg-elevated px-2 py-2.5 ring-1 ring-edge-soft";
+const TILE = "flex flex-col items-center rounded-md bg-elevated px-2 py-2.5 ring-1 ring-edge-soft";
 const LABEL = "text-[10.5px] uppercase tracking-[0.1em] text-ink-subtle";
 const CENTERED = "flex flex-col items-center gap-3.5 px-5 py-5 text-center";
 

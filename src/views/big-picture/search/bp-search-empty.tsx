@@ -19,9 +19,14 @@ export function bpSearchEmptyMessage(params: {
   if (filterStale) return t("Nothing in this filter. Choose All to see everything that answered.");
   if (tmdbUnavailable) return t("TMDB is temporarily unavailable. Try your search again shortly.");
   if (failedCount > 0 && !hasResults)
-    return t('Nothing found for "{q}". {n} of your addons did not answer.', { q: trimmed, n: failedCount });
+    return t('Nothing found for "{q}". {n} of your addons did not answer.', {
+      q: trimmed,
+      n: failedCount,
+    });
   if (noResults) return t('Nothing found for "{q}"', { q: trimmed });
   if (hasResults)
-    return t('Your addons answered for "{q}", but nothing in the results opens here.', { q: trimmed });
+    return t('Your addons answered for "{q}", but nothing in the results opens here.', {
+      q: trimmed,
+    });
   return t('Nothing found for "{q}"', { q: trimmed });
 }

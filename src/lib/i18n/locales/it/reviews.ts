@@ -3,7 +3,7 @@ export default {
   "Most liked": "Più apprezzate",
   "Most recent": "Più recenti",
   "Lowest rated": "Voto più basso",
-  "Longest": "Più lunghe",
+  Longest: "Più lunghe",
   "Sort reviews": "Ordina recensioni",
   "Episode reviews": "Recensioni dell’episodio",
   "Gathering reviews from IMDb and Trakt…": "Raccolta delle recensioni da IMDb e Trakt…",
@@ -13,12 +13,15 @@ export default {
   "Translate reviews to": "Traduci le recensioni in",
   "Translate all": "Traduci tutto",
   "Show original": "Mostra originale",
-  "Translate": "Traduci",
+  Translate: "Traduci",
   "In {language}": "In {language}",
   "No reviews in {language} here.": "Nessuna recensione in {language} qui.",
-  "{n} reviews couldn't be translated. Try again.": "Non è stato possibile tradurre {n} recensioni. Riprova.",
+  "{n} reviews couldn't be translated. Try again.":
+    "Non è stato possibile tradurre {n} recensioni. Riprova.",
   "Couldn't translate. Try again": "Traduzione non riuscita. Riprova",
-  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.": "Non è stato possibile caricare alcune recensioni recenti, quindi le recensioni di fallback vengono mostrate dopo i risultati più recenti.",
-  "Letterboxd didn't share review dates right now, so these are shown by popularity.": "Letterboxd ora non fornisce le date delle recensioni, quindi sono ordinate per popolarità.",
+  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.":
+    "Non è stato possibile caricare alcune recensioni recenti, quindi le recensioni di fallback vengono mostrate dopo i risultati più recenti.",
+  "Letterboxd didn't share review dates right now, so these are shown by popularity.":
+    "Letterboxd ora non fornisce le date delle recensioni, quindi sono ordinate per popolarità.",
   "Reviewers' average: {rating}": "Media dei recensori: {rating}",
 } as Record<string, string>;

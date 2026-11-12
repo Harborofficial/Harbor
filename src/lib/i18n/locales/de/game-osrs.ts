@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "Sofortkauf",
   "games.osrs.sell": "Sofortverkauf",
   "games.osrs.unseen": "Noch keine Beobachtung",
-  "games.osrs.observed": "Gemeldete Geschäfte, keine offenen Angebote. Kauf und Verkauf können unterschiedlich alt sein.",
+  "games.osrs.observed":
+    "Gemeldete Geschäfte, keine offenen Angebote. Kauf und Verkauf können unterschiedlich alt sein.",
   "games.osrs.history": "Preisverlauf",
   "games.osrs.period": "Zeitraum",
   "games.osrs.range.6h": "Letzte 6 Stunden",
@@ -39,8 +40,9 @@ export default {
   "games.osrs.averageSell": "Verkaufsdurchschnitt",
   "games.osrs.chart": "Verlauf der Kauf- und Verkaufspreise",
   "games.osrs.observation": "Beobachtung auswählen",
-  "games.osrs.averages": "Fehlende Geschäfte bleiben als Lücken sichtbar. Die Markthallensteuer wird hier nicht berechnet.",
+  "games.osrs.averages":
+    "Fehlende Geschäfte bleiben als Lücken sichtbar. Die Markthallensteuer wird hier nicht berechnet.",
   "games.osrs.table": "Letzte 24 Intervalle",
   "games.osrs.time": "Zeit",
-  "games.osrs.volume": "Gehandelte Gegenstände"
+  "games.osrs.volume": "Gehandelte Gegenstände",
 };

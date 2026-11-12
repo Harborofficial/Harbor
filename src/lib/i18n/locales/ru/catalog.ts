@@ -31,8 +31,10 @@ const catalog: Record<string, string> = {
   "Show on home": "Показывать на главной",
   "Hide from home": "Скрыть с главной",
   "Feature this catalog in the hero carousel": "Показывать этот каталог в главной карусели",
-  "Stop feeding the hero carousel (back to automatic)": "Убрать из главной карусели (снова автоматически)",
-  "Needs artwork-rich titles to feed the hero": "Для главного баннера нужны материалы с качественными изображениями",
+  "Stop feeding the hero carousel (back to automatic)":
+    "Убрать из главной карусели (снова автоматически)",
+  "Needs artwork-rich titles to feed the hero":
+    "Для главного баннера нужны материалы с качественными изображениями",
   "Needs at least 10 titles for the Top 10 look": "Для вида Топ-10 нужно минимум 10 материалов",
   "Customize home": "Настроить главную",
   "Customize anime": "Настроить аниме",
@@ -40,15 +42,21 @@ const catalog: Record<string, string> = {
   "How the Home page assembles its rails.": "Как главная страница собирает свои ряды.",
   "Card overlays": "Наложения на карточках",
   "Hover preview": "Предпросмотр при наведении",
-  "Rest the cursor on a poster to peek at the rating, runtime, and story without opening it.": "Наведите курсор на постер, чтобы увидеть рейтинг, длительность и описание, не открывая его.",
-  "Cleaner grid when your poster service already prints the title on the artwork.": "Чище сетка, если ваш сервис постеров уже наносит название на изображение.",
+  "Rest the cursor on a poster to peek at the rating, runtime, and story without opening it.":
+    "Наведите курсор на постер, чтобы увидеть рейтинг, длительность и описание, не открывая его.",
+  "Cleaner grid when your poster service already prints the title on the artwork.":
+    "Чище сетка, если ваш сервис постеров уже наносит название на изображение.",
   "Hide titles under posters": "Скрывать названия под постерами",
   "No matches for these filters.": "По этим фильтрам ничего не найдено.",
   "No more found for this category.": "Больше в этой категории ничего не найдено.",
-  "Cinemeta didn't return anything for {genre}. Try a different genre or add a TMDB key.": "От Cinemeta ничего не пришло по жанру {genre}. Попробуйте другой жанр или добавьте ключ TMDB.",
-  "That's everything Cinemeta has for {genre}. Add a TMDB key for deeper rails.": "Это всё, что есть в Cinemeta по жанру {genre}. Добавьте ключ TMDB, чтобы ряды были полнее.",
-  "Year, runtime, language, and country filters need TMDB. Genre browsing falls back to Cinemeta automatically.": "Фильтры по году, длительности, языку и стране требуют TMDB. Просмотр по жанрам автоматически переключается на Cinemeta.",
-  "The best {genre} {media}, layered by mood. Browse trending, dive into a director's run, sort by decade, find quiet gems.": "Лучшие {media} в жанре {genre}, собранные по настроению. Смотрите популярное, изучайте фильмографию режиссёра, сортируйте по десятилетиям, находите скрытые жемчужины.",
+  "Cinemeta didn't return anything for {genre}. Try a different genre or add a TMDB key.":
+    "От Cinemeta ничего не пришло по жанру {genre}. Попробуйте другой жанр или добавьте ключ TMDB.",
+  "That's everything Cinemeta has for {genre}. Add a TMDB key for deeper rails.":
+    "Это всё, что есть в Cinemeta по жанру {genre}. Добавьте ключ TMDB, чтобы ряды были полнее.",
+  "Year, runtime, language, and country filters need TMDB. Genre browsing falls back to Cinemeta automatically.":
+    "Фильтры по году, длительности, языку и стране требуют TMDB. Просмотр по жанрам автоматически переключается на Cinemeta.",
+  "The best {genre} {media}, layered by mood. Browse trending, dive into a director's run, sort by decade, find quiet gems.":
+    "Лучшие {media} в жанре {genre}, собранные по настроению. Смотрите популярное, изучайте фильмографию режиссёра, сортируйте по десятилетиям, находите скрытые жемчужины.",
 };
 
 export default catalog;

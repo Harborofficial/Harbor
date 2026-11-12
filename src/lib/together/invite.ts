@@ -32,7 +32,8 @@ export function onTogetherInvite(listener: (invite: ParsedInvite) => void): () =
 }
 
 function parseInviteParams(params: URLSearchParams): ParsedInvite | null {
-  if (params.getAll(RELAY_PARAM).length !== 1 || params.getAll(ROOM_PARAM).length !== 1) return null;
+  if (params.getAll(RELAY_PARAM).length !== 1 || params.getAll(ROOM_PARAM).length !== 1)
+    return null;
   const relay = migratePublicRelayUrl(params.get(RELAY_PARAM)?.trim() ?? "");
   const roomRaw = params.get(ROOM_PARAM)?.trim();
   if (!relay || !roomRaw) return null;
@@ -42,8 +43,12 @@ function parseInviteParams(params: URLSearchParams): ParsedInvite | null {
     const url = new URL(relay);
     if (
       !["ws:", "wss:"].includes(url.protocol) ||
-      !url.hostname || url.username || url.password || url.hash
-    ) return null;
+      !url.hostname ||
+      url.username ||
+      url.password ||
+      url.hash
+    )
+      return null;
   } catch {
     return null;
   }
@@ -54,9 +59,11 @@ export function parseTogetherDeepLink(input: string): ParsedInvite | null {
   try {
     const url = new URL(input);
     if (
-      url.protocol !== "harbor:" || url.hostname !== "together" ||
+      url.protocol !== "harbor:" ||
+      url.hostname !== "together" ||
       (url.pathname && url.pathname !== "/")
-    ) return null;
+    )
+      return null;
     if (url.username || url.password || url.port || url.hash) return null;
     return parseInviteParams(url.searchParams);
   } catch {

@@ -36,7 +36,9 @@
   align-items: center;
   gap: 28px;
 }
-.music-deck-preview-copy { min-width: 0; }
+.music-deck-preview-copy {
+  min-width: 0;
+}
 .music-deck-preview-image {
   display: block;
   width: 100%;
@@ -46,8 +48,13 @@
   background: #0a0b0e;
 }
 @media (max-width: 640px) {
-  .music-deck-preview { grid-template-columns: minmax(0, 1fr); gap: 18px; }
-  .music-deck-preview-image { max-width: 420px; }
+  .music-deck-preview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .music-deck-preview-image {
+    max-width: 420px;
+  }
 }
 .music-audio-row {
   display: flex;

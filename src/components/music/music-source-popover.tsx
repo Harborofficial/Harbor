@@ -27,7 +27,8 @@ export function MusicSourcePopover({
       if (!host) return;
       const rect = host.getBoundingClientRect();
       const width = Math.min(360, window.innerWidth - 16);
-      const top = (host.closest("[data-music-dock]") ?? dock)?.getBoundingClientRect().top ?? rect.top;
+      const top =
+        (host.closest("[data-music-dock]") ?? dock)?.getBoundingClientRect().top ?? rect.top;
       setBox({
         width,
         left: Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8)),

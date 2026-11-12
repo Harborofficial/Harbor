@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "Примечания к выпуску",
   "games.wow.addons.fullNotes": "Читать полный текст на странице автора",
 
-  "games.wow.manager.errorIdentity": "Установленные папки не соответствуют пакету автора. Повторите сканирование и проверьте источник аддона.",
+  "games.wow.manager.errorIdentity":
+    "Установленные папки не соответствуют пакету автора. Повторите сканирование и проверьте источник аддона.",
   "games.wow.manager.importInstalled": "Импортировать установленные аддоны",
   "games.wow.manager.import": "Управлять через Harbor",
-  "games.wow.manager.importScope": "Установленные аддоны с идентификатором WoWInterface. Остальные остаются в списке установленных.",
-  "games.wow.manager.importNote": "Сохраните установленные файлы. Harbor проверит пакет автора и сохранит предыдущую версию перед будущим обновлением или удалением.",
+  "games.wow.manager.importScope":
+    "Установленные аддоны с идентификатором WoWInterface. Остальные остаются в списке установленных.",
+  "games.wow.manager.importNote":
+    "Сохраните установленные файлы. Harbor проверит пакет автора и сохранит предыдущую версию перед будущим обновлением или удалением.",
   "games.wow.manager.keepVersion": "Сохранить установленную версию {version}",
   "games.wow.manager.keep": "Сохранить",
   "games.wow.manager.importSuccess": "Этот аддон теперь управляется через Harbor.",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "Найти аддоны",
   "games.wow.manager.managed": "Управление через Harbor",
   "games.wow.manager.backups": "Резервные копии",
-  "games.wow.manager.catalogNote": "Каталог WoWInterface. Перед применением проверяется совместимость с установленным WoW.",
-  "games.wow.manager.managedNote": "Здесь можно менять только аддоны, установленные через Harbor. Остальные остаются в списке установленных.",
+  "games.wow.manager.catalogNote":
+    "Каталог WoWInterface. Перед применением проверяется совместимость с установленным WoW.",
+  "games.wow.manager.managedNote":
+    "Здесь можно менять только аддоны, установленные через Harbor. Остальные остаются в списке установленных.",
   "games.wow.manager.category": "Категория",
   "games.wow.manager.allCategories": "Все категории",
   "games.wow.manager.popular": "Загрузки за месяц",
@@ -28,31 +33,41 @@ export default {
   "games.wow.manager.name": "Название",
   "games.wow.manager.sort": "Сортировка аддонов",
   "games.wow.manager.monthly": "Загрузки в этом месяце",
-  "games.wow.manager.catalogError": "Не удалось загрузить каталог. Предыдущие результаты могут устареть.",
+  "games.wow.manager.catalogError":
+    "Не удалось загрузить каталог. Предыдущие результаты могут устареть.",
   "games.wow.manager.categoriesError": "Категории недоступны. Поиск по всем аддонам работает.",
-  "games.wow.manager.partial": "Часть данных поставщика недоступна. Результаты могут быть неполными.",
+  "games.wow.manager.partial":
+    "Часть данных поставщика недоступна. Результаты могут быть неполными.",
   "games.wow.manager.emptyManaged": "Пока нет аддонов под управлением Harbor.",
   "games.wow.manager.emptyBackups": "Предыдущие версии пока не сохранены.",
-  "games.wow.manager.reviewNote": "Сначала проверьте пакет и изменения папок. Закройте WoW перед проверкой или применением.",
+  "games.wow.manager.reviewNote":
+    "Сначала проверьте пакет и изменения папок. Закройте WoW перед проверкой или применением.",
   "games.wow.manager.backupNote": "Предыдущие файлы сохранены локально: {size}.",
   "games.wow.manager.fileSummary": "Файлов: {count} · {size}",
   "games.wow.manager.preparing": "Подготовка проверки…",
   "games.wow.manager.applying": "Применение изменений…",
   "games.wow.manager.success": "Ваши аддоны обновлены.",
   "games.wow.manager.cancelled": "Отменено. Обновите список, чтобы проверить текущее состояние.",
-  "games.wow.manager.recovery": "Прерванное изменение нужно восстановить перед продолжением. Сначала закройте WoW.",
+  "games.wow.manager.recovery":
+    "Прерванное изменение нужно восстановить перед продолжением. Сначала закройте WoW.",
   "games.wow.manager.recover": "Восстановить конфигурацию",
   "games.wow.manager.add": "Добавить",
   "games.wow.manager.replace": "Заменить",
   "games.wow.manager.remove": "Удалить",
-  "games.wow.manager.error": "Не удалось завершить изменение. Проверьте подключение и свободное место и повторите попытку.",
+  "games.wow.manager.error":
+    "Не удалось завершить изменение. Проверьте подключение и свободное место и повторите попытку.",
   "games.wow.manager.errorRunning": "Полностью закройте WoW и повторите попытку.",
-  "games.wow.manager.errorCompatibility": "Пакет не подходит к установленной редакции или версии WoW.",
-  "games.wow.manager.errorUnmanaged": "Эти папки установлены вне Harbor. Их нельзя перезаписать здесь.",
-  "games.wow.manager.errorChanged": "Файлы изменились или требуют внимания. Выполните повторное сканирование.",
-  "games.wow.manager.errorDependency": "Отсутствуют обязательные зависимости или эти файлы нужны другому аддону.",
+  "games.wow.manager.errorCompatibility":
+    "Пакет не подходит к установленной редакции или версии WoW.",
+  "games.wow.manager.errorUnmanaged":
+    "Эти папки установлены вне Harbor. Их нельзя перезаписать здесь.",
+  "games.wow.manager.errorChanged":
+    "Файлы изменились или требуют внимания. Выполните повторное сканирование.",
+  "games.wow.manager.errorDependency":
+    "Отсутствуют обязательные зависимости или эти файлы нужны другому аддону.",
   "games.wow.manager.errorExpired": "Срок проверки истёк. Проверьте изменения снова.",
-  "games.wow.manager.errorDesktop": "Для управления аддонами нужна актуальная настольная версия Harbor для Windows.",
+  "games.wow.manager.errorDesktop":
+    "Для управления аддонами нужна актуальная настольная версия Harbor для Windows.",
 
   "games.wow.addons.screenshots": "Скриншоты автора",
   "games.wow.addons.screenshotsUnavailable": "Не удалось загрузить скриншоты автора.",
@@ -61,13 +76,15 @@ export default {
   "games.wow.addons.intro": "Версии и необходимые зависимости этой установки.",
   "games.wow.addons.refresh": "Повторно проверить аддоны",
   "games.wow.addons.client": "Установленная версия WoW {version}",
-  "games.wow.addons.unavailable": "Не удалось прочитать установку. Подключите диск и повторите проверку.",
+  "games.wow.addons.unavailable":
+    "Не удалось прочитать установку. Подключите диск и повторите проверку.",
   "games.wow.addons.partial": "Некоторые папки не удалось проверить. Список может быть неполным.",
   "games.wow.addons.search": "Найти аддон",
   "games.wow.addons.attention": "Требует внимания",
   "games.wow.addons.unreadable": "Не удалось прочитать манифест аддона.",
   "games.wow.addons.noManifest": "Подходящий манифест для этого клиента не найден.",
-  "games.wow.addons.ambiguous": "Найдено несколько подходящих манифестов. Проверьте установку аддона.",
+  "games.wow.addons.ambiguous":
+    "Найдено несколько подходящих манифестов. Проверьте установку аддона.",
   "games.wow.addons.missing": "Отсутствуют обязательные папки: {names}",
   "games.wow.addons.gameVersions": "Заявленные версии игры",
   "games.wow.addons.requires": "Требуется",
@@ -76,10 +93,12 @@ export default {
   "games.wow.addons.noMatches": "Нет аддонов, соответствующих фильтрам.",
   "games.wow.addons.more": "Показать ещё аддоны",
   "games.wow.addons.empty": "Аддоны для этой установки не найдены.",
-  "games.wow.addons.scope": "Версии игры указаны автором аддона. Состояние включения и доступные обновления не проверяются.",
+  "games.wow.addons.scope":
+    "Версии игры указаны автором аддона. Состояние включения и доступные обновления не проверяются.",
   "games.wow.realm.LOCKED": "Закрыт",
   "games.wow.classic.title": "Состояние миров",
-  "games.wow.classic.intro": "Проверьте свой мир перед путешествием в Азерот. Данные Blizzard в реальном времени.",
+  "games.wow.classic.intro":
+    "Проверьте свой мир перед путешествием в Азерот. Данные Blizzard в реальном времени.",
   "games.wow.classic.classic": "Развитие Classic",
   "games.wow.classic.classic1x": "Classic Era и сезоны",
   "games.wow.classic.classicann": "Юбилейный Classic",
@@ -98,7 +117,8 @@ export default {
   "games.wow.classic.news": "Новости Classic",
   "games.wow.realm.browse": "Выбрать игровой мир",
   "games.wow.realm.unavailable": "Статус миров недоступен. Название мира можно ввести вручную.",
-  "games.wow.realm.unsupported": "Глобальный сервис Blizzard не охватывает этот регион. Введите название мира вручную.",
+  "games.wow.realm.unsupported":
+    "Глобальный сервис Blizzard не охватывает этот регион. Введите название мира вручную.",
   "games.wow.realm.noMatches": "Подходящих миров нет. Можно ввести название вручную.",
   "games.wow.realm.refresh": "Обновить статус миров",
   "games.wow.realm.unknown": "Статус неизвестен",
@@ -145,7 +165,8 @@ export default {
   "games.wow.character.raidUnavailable": "Текущий прогресс в рейдах недоступен.",
   "games.wow.character.updated": "Профиль обновлён: {date}",
   "games.wow.character.gearUpdated": "Экипировка обновлена: {date}",
-  "games.wow.character.sourceNote": "Открытые данные Raider.IO. Обновления могут отставать от событий в игре.",
+  "games.wow.character.sourceNote":
+    "Открытые данные Raider.IO. Обновления могут отставать от событий в игре.",
   "games.wow.title": "Эта неделя в Азероте",
   "games.wow.region": "Регион",
   "games.wow.refresh": "Обновить данные WoW",
@@ -154,7 +175,8 @@ export default {
   "games.wow.resetNote": "Ваше местное время. Техобслуживание может продолжиться после сброса.",
   "games.wow.resetUnavailable": "Время сброса недоступно.",
   "games.wow.affixes": "Аффиксы этой недели",
-  "games.wow.affixesUnavailable": "Текущие аффиксы недоступны. Проверьте ещё раз после сброса в регионе.",
+  "games.wow.affixesUnavailable":
+    "Текущие аффиксы недоступны. Проверьте ещё раз после сброса в регионе.",
   "games.wow.dungeons": "Эпохальные+ подземелья",
   "games.wow.timer": "Лимит: {minutes} мин",
   "games.wow.rankings": "Смотреть рейтинг",
@@ -163,7 +185,8 @@ export default {
   "games.wow.bosses": "Боссов: {count}",
   "games.wow.raidsUnavailable": "Информация о текущих рейдах недоступна.",
   "games.wow.checked": "Проверено: {date}",
-  "games.wow.scope": "Данные Retail от Raider.IO. Таймеры относятся к ключам; аффиксы зависят от уровня ключа.",
+  "games.wow.scope":
+    "Данные Retail от Raider.IO. Таймеры относятся к ключам; аффиксы зависят от уровня ключа.",
   "games.wow.region.us": "Америка / Океания",
   "games.wow.region.eu": "Европа",
   "games.wow.region.kr": "Корея",

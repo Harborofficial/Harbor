@@ -1,12 +1,14 @@
 export default {
   "games.download.relink.title": "Update download link",
-  "games.download.relink.intro": "Choose the same file from its source, or paste a fresh direct file link. Your destination stays the same.",
+  "games.download.relink.intro":
+    "Choose the same file from its source, or paste a fresh direct file link. Your destination stays the same.",
   "games.download.relink.source": "Choose from source",
   "games.download.relink.manual": "Use a direct file link",
   "games.download.relink.url": "Fresh file URL",
   "games.download.relink.review": "Review file",
   "games.download.relink.saved": "Saved: {size}",
-  "games.download.relink.note": "Harbor will download the saved portion again to compare it before adding new data.",
+  "games.download.relink.note":
+    "Harbor will download the saved portion again to compare it before adding new data.",
   "games.download.relink.apply": "Update link and resume",
   "games.download.relink.working": "Updating link…",
   "games.download.relink.downloadingAndVerifying": "Downloading and verifying",
@@ -14,10 +16,12 @@ export default {
   "games.download.relink.checking": "Verifying saved data",
   "games.download.relink.finalVerification": "Verifying downloaded file",
   "games.download.relink.verificationProgress": "Verifying {size} / {total} saved",
-  "games.download.relink.verifyingFiles": "Verifying previously downloaded data ({count} files). Saved download progress is preserved.",
+  "games.download.relink.verifyingFiles":
+    "Verifying previously downloaded data ({count} files). Saved download progress is preserved.",
   "games.download.relink.single": "Select one file to replace this download link.",
   "games.download.relink.native": "Restart Harbor with the latest build to update this link.",
-  "games.download.transfer_relink_mismatch": "Choose the same file, with the same name and size, to continue this download.",
+  "games.download.transfer_relink_mismatch":
+    "Choose the same file, with the same name and size, to continue this download.",
   "games.download.center.content.patch": "Game update",
   "games.download.center.content.mod": "Mod content",
   "games.download.center.content.extra": "Extra content",
@@ -25,7 +29,8 @@ export default {
   "games.download.center.clearCompleted": "Clear completed",
   "games.download.center.keepFiles": "Dismiss from this list. Files and library games are kept.",
   "games.download.center.dismiss": "Dismiss {name}",
-  "games.download.center.retention": "Completed downloads move to history after 24 hours or when dismissed. Files are kept.",
+  "games.download.center.retention":
+    "Completed downloads move to history after 24 hours or when dismissed. Files are kept.",
   "games.download.center.showHistory": "Show completed history ({count})",
   "games.download.center.hideHistory": "Hide completed history",
   "games.download.center.contentInfo": "Content information",
@@ -36,7 +41,8 @@ export default {
   "games.download.center.seedersNote": "Connected seeders. The line uses a separate count scale.",
   "games.download.center.unfinished": "Unfinished games: {count}",
   "games.download.center.timeRemaining": "Time remaining",
-  "games.download.center.connections": "Connected peers, including peers that are not currently sending data.",
+  "games.download.center.connections":
+    "Connected peers, including peers that are not currently sending data.",
   "games.download.center.current": "Current download",
   "games.download.center.network": "Network",
   "games.download.center.peak": "Peak",
@@ -49,8 +55,10 @@ export default {
   "games.download.recovery.running": "Refreshing expired TorBox download links...",
   "games.download.recovery.starting": "Checking expired TorBox download links...",
   "games.download.recovery.error": "TorBox recovery could not complete.",
-  "games.download.recovery.result": "Refreshed {count} TorBox download links. Verifying saved data...",
-  "games.download.recovery.unmatched": "No safe match found in TorBox. Existing downloads were kept.",
+  "games.download.recovery.result":
+    "Refreshed {count} TorBox download links. Verifying saved data...",
+  "games.download.recovery.unmatched":
+    "No safe match found in TorBox. Existing downloads were kept.",
   "games.download.recovery.retry": "Retry TorBox recovery",
   "games.download.center.active": "Downloading",
   "games.download.center.queue": "Up next",
@@ -59,6 +67,8 @@ export default {
   "games.download.center.canceled": "Canceled",
   "games.download.center.readyToExtract": "Ready to extract",
   "games.download.center.downloadComplete": "Download complete",
-  "games.download.center.installNote": "Files are ready. Extract an archive or open its folder to install.",
-  "games.download.center.diskNote": "Writes from this download, including the system cache. Installation and other apps are not included."
+  "games.download.center.installNote":
+    "Files are ready. Extract an archive or open its folder to install.",
+  "games.download.center.diskNote":
+    "Writes from this download, including the system cache. Installation and other apps are not included.",
 };

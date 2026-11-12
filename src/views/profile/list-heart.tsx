@@ -46,7 +46,9 @@ export function ListHeart({
 
   if (!canInteract) {
     return (
-      <span className={`inline-flex items-center gap-1 text-[12px] tabular-nums text-ink-subtle ${className}`}>
+      <span
+        className={`inline-flex items-center gap-1 text-[12px] tabular-nums text-ink-subtle ${className}`}
+      >
         <Heart size={13} strokeWidth={2} className={on ? "fill-current text-danger" : ""} />
         {n}
       </span>

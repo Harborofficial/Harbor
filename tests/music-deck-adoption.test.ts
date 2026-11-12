@@ -56,11 +56,7 @@ function ask(extra: Partial<DeckAdoptRequest> = {}): DeckAdoptRequest {
 
 type Snapshots = MusicDeckSnapshot | (() => MusicDeckSnapshot);
 
-function harness(
-  start: Partial<MusicPlayerState> = {},
-  snapshot?: Snapshots,
-  releaseMs?: number,
-) {
+function harness(start: Partial<MusicPlayerState> = {}, snapshot?: Snapshots, releaseMs?: number) {
   let state: MusicPlayerState = {
     phase: "playing",
     current: A,

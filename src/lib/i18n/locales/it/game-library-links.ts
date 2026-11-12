@@ -2,7 +2,8 @@ export default {
   "games.links.title": "Link",
   "games.links.sort": "Ordina link",
   "games.links.note": "Ordina per URL, dalla A alla Z. Nomi e destinazioni restano invariati.",
-  "games.links.available": "Usa i link già disponibili in Harbor. I nuovi link compaiono dopo l’ordine salvato.",
+  "games.links.available":
+    "Usa i link già disponibili in Harbor. I nuovi link compaiono dopo l’ordine salvato.",
   "games.links.original": "Ripristina l’ordine originale",
   "games.links.applied": "Link aggiornati per {count} giochi.",
   "games.links.changes": "Verranno modificati {count} giochi.",
@@ -13,5 +14,5 @@ export default {
   "games.links.error": "Impossibile leggere i link salvati. Riprova.",
   "games.links.openError": "Impossibile aprire questo link. Riprova.",
   "games.links.current": "Ordine attuale",
-  "games.links.preview": "Dopo l’ordinamento"
+  "games.links.preview": "Dopo l’ordinamento",
 };

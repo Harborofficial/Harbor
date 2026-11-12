@@ -3,10 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const api = readFileSync(new URL("../src/lib/ebook/api.ts", import.meta.url), "utf8");
-const providers = readFileSync(
-  new URL("../src/lib/ebook/providers.ts", import.meta.url),
-  "utf8",
-);
+const providers = readFileSync(new URL("../src/lib/ebook/providers.ts", import.meta.url), "utf8");
 const view = readFileSync(new URL("../src/views/ebook.tsx", import.meta.url), "utf8");
 
 test("eBook metadata persists merged provider results and coalesces duplicate requests", () => {
@@ -38,7 +35,10 @@ test("local EPUB catalog entries expose their embedded cover before metadata mer
   const end = providers.indexOf("function pluginProvider(", start);
   const implementation = providers.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(implementation, /localPackage\(book\.paths\[0\]\)/);
+  assert.match(
+    implementation,
+    /const firstEpub = book\.paths\.find\(\(path\) => !isPdfPath\(path\)\);[\s\S]*?localPackage\(firstEpub\)/,
+  );
   assert.match(implementation, /cover: epub\.cover/);
   assert.match(implementation, /internalCover: epub\.cover/);
 });

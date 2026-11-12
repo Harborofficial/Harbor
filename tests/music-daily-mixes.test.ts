@@ -47,7 +47,10 @@ const playlists: MusicPlaylist[] = [
   },
 ];
 
-const artistGenres = Object.fromEntries([...RAP.map(name => [name.toLowerCase(), ["hip-hop"]]), ...DANCE.map(name => [name.toLowerCase(), ["hands up"]])]);
+const artistGenres = Object.fromEntries([
+  ...RAP.map((name) => [name.toLowerCase(), ["hip-hop"]]),
+  ...DANCE.map((name) => [name.toLowerCase(), ["hands up"]]),
+]);
 
 function scene(artist: string): "rap" | "dance" | "other" {
   if (RAP.includes(artist)) return "rap";
@@ -60,11 +63,7 @@ test("playlist membership keeps unrelated scenes out of one mix", () => {
   assert.ok(mixes.length > 0, "expected at least one mix");
   for (const mix of mixes) {
     const scenes = new Set(mix.artists.map(scene));
-    assert.equal(
-      scenes.size,
-      1,
-      `mix ${mix.index} mixed scenes: ${mix.artists.join(", ")}`,
-    );
+    assert.equal(scenes.size, 1, `mix ${mix.index} mixed scenes: ${mix.artists.join(", ")}`);
   }
 });
 
@@ -101,7 +100,13 @@ function dailyMixes(loadPlaylistLikeThis: (...args: unknown[]) => Promise<MusicT
     },
     "./artist-authority": { resolveArtist: async (name: string) => ({ canonical: { name } }) },
     "./catalog": { artistTop: loadPlaylistLikeThis },
-    "./recent-context": { hydrateMusicContextTracks: async () => {}, heldMusicContextTracks: () => cached, rememberMusicContextTracks: (_kind: string, _id: string, tracks: MusicTrack[]) => { cached = tracks; } },
+    "./recent-context": {
+      hydrateMusicContextTracks: async () => {},
+      heldMusicContextTracks: () => cached,
+      rememberMusicContextTracks: (_kind: string, _id: string, tracks: MusicTrack[]) => {
+        cached = tracks;
+      },
+    },
   };
   const module = { exports: {} };
   new Function("require", "module", "exports", code)(
@@ -164,12 +169,15 @@ test("catalog expansion rejects unrelated artists instead of filling a genre gap
 test("listening adjacency and a mixed playlist are not evidence of a shared genre", () => {
   const mixes = planDailyMixes(shuffled, [], {}, 1000, { playlists });
   assert.equal(mixes.length, 6);
-  assert.ok(mixes.every(mix => mix.artists.length === 1));
+  assert.ok(mixes.every((mix) => mix.artists.length === 1));
 });
 
 test("reopening a Daily Mix reuses its queue without another catalog request", async () => {
   let calls = 0;
-  const api = dailyMixes(async () => { calls++; return [track("Juice WRLD", "expanded")]; });
+  const api = dailyMixes(async () => {
+    calls++;
+    return [track("Juice WRLD", "expanded")];
+  });
   const mix = mixOf([track("Juice WRLD", "seed")]);
   const first = await api.loadDailyMixTracks(mix);
   assert.deepEqual(await api.loadDailyMixTracks(mix), first);

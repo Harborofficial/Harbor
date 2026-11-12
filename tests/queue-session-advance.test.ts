@@ -14,6 +14,7 @@ function setup() {
     "@/lib/queue-session": { queueSessionIndex },
     "@/lib/player/playback-clock": { getPlaybackPosition: () => 600 },
     "@/lib/player/playback-end": { isNaturalEnd },
+    "@/lib/download/completed-episode-source": { completedEpisodeSource: async () => null },
     "@/lib/queue": {
       getSleepAtEnd: () => false,
       setSleepAtEnd: (value: boolean) => calls.push(["sleep", value]),

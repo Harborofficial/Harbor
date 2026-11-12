@@ -47,7 +47,10 @@ export function AiExampleHint({
   if (hidden) return null;
   return (
     <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center overflow-hidden">
-      <span key={i} className={`${cycled ? "animate-ai-status" : ""} flex whitespace-nowrap ${sizeClass}`}>
+      <span
+        key={i}
+        className={`${cycled ? "animate-ai-status" : ""} flex whitespace-nowrap ${sizeClass}`}
+      >
         {prefix && <span className="text-ink-subtle">{t(prefix)}&nbsp;</span>}
         <span className="ai-text-shimmer">{t(examples[i % examples.length])}</span>
       </span>

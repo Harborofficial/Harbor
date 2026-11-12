@@ -38,9 +38,7 @@ export function MovieEntryCard({
   const banner = meta.background || meta.poster;
   return (
     <button
-      onClick={() =>
-        openPicker(meta, entryPlayEpisode(ep), { autoPlay: settings.instantPlay })
-      }
+      onClick={() => openPicker(meta, entryPlayEpisode(ep), { autoPlay: settings.instantPlay })}
       className="group relative block h-[300px] w-full overflow-hidden rounded-2xl text-start"
     >
       {banner ? (

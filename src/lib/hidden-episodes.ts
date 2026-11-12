@@ -11,7 +11,9 @@ function load(): Set<string> {
   if (cache) return cache;
   try {
     const arr = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    cache = new Set(Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : []);
+    cache = new Set(
+      Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [],
+    );
   } catch {
     cache = new Set();
   }
@@ -33,7 +35,12 @@ export function isEpisodeHidden(metaId: string, season: number, episode: number)
   return load().has(key(metaId, season, episode));
 }
 
-export function setEpisodeHidden(metaId: string, season: number, episode: number, hidden: boolean): void {
+export function setEpisodeHidden(
+  metaId: string,
+  season: number,
+  episode: number,
+  hidden: boolean,
+): void {
   const set = load();
   const k = key(metaId, season, episode);
   if (set.has(k) === hidden) return;

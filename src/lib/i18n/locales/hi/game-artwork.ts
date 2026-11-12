@@ -27,7 +27,8 @@ export default {
   "games.artwork.screenshotsSetting": "आर्टवर्क न होने पर स्क्रीनशॉट इस्तेमाल करें",
   "games.artwork.screenshotsNote": "IGDB में पृष्ठभूमि आर्टवर्क न होने पर ही स्क्रीनशॉट इस्तेमाल करें।",
   "games.artwork.iconSetting": "लाइब्रेरी आइकन के लिए कवर इस्तेमाल करें",
-  "games.artwork.iconNote": "नए मिलानों के लिए साइडबार और त्वरित लाइब्रेरी में छोटे IGDB कवर दिखाएँ। स्थानीय तस्वीरों को प्राथमिकता मिलेगी।",
+  "games.artwork.iconNote":
+    "नए मिलानों के लिए साइडबार और त्वरित लाइब्रेरी में छोटे IGDB कवर दिखाएँ। स्थानीय तस्वीरों को प्राथमिकता मिलेगी।",
   "games.artwork.importError": "इस मिलान की तस्वीरें लोड नहीं हो सकीं। फिर कोशिश करें।",
 
   "games.artwork.browse": "IGDB के चित्र देखें",
@@ -38,7 +39,8 @@ export default {
   "games.artwork.unknownSize": "आकार उपलब्ध नहीं",
   "games.artwork.original": "अपने आप",
   "games.artwork.noMatch": "इस गेम के लिए चित्र नहीं मिले। कोई दूसरा मेटाडेटा मिलान चुनें।",
-  "games.artwork.localCover": "आपका स्थानीय कवर इस्तेमाल होता रहेगा। यह कवर इस्तेमाल करने के लिए लाइब्रेरी कस्टमाइज़ेशन में स्थानीय कवर हटाएँ।",
+  "games.artwork.localCover":
+    "आपका स्थानीय कवर इस्तेमाल होता रहेगा। यह कवर इस्तेमाल करने के लिए लाइब्रेरी कस्टमाइज़ेशन में स्थानीय कवर हटाएँ।",
   "games.artwork.choose": "{count} चित्र",
   "games.artwork.first": "पहला चित्र",
   "games.artwork.random": "कोई भी चित्र",
@@ -46,5 +48,5 @@ export default {
   "games.artwork.empty": "इस विकल्प के लिए IGDB पर चित्र नहीं हैं।",
   "games.artwork.imageError": "कुछ चित्र लोड नहीं हो सके।",
   "games.artwork.reset": "चित्र रीसेट करें",
-  "games.artwork.conflict": "चित्र या मेटाडेटा कहीं और बदल गए हैं। चयन विंडो दोबारा खोलें।"
+  "games.artwork.conflict": "चित्र या मेटाडेटा कहीं और बदल गए हैं। चयन विंडो दोबारा खोलें।",
 } satisfies Record<string, string>;

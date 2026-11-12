@@ -22,8 +22,7 @@ import { IconUpload } from "./icon-upload";
 import { slotLimit, SLOT_LABEL, visibleInSlot } from "./panel-utils";
 import { stripArrowKeys } from "../shared";
 
-const OVERLAY_LABEL =
-  "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
+const OVERLAY_LABEL = "text-[13px] font-extrabold uppercase leading-[17px] tracking-[0.72px]";
 const OVERLAY_TITLE = "text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-white";
 const SEG_BTN =
   "flex h-11 shrink-0 items-center whitespace-nowrap rounded-md px-3 text-[15px] font-medium transition-colors";
@@ -146,7 +145,9 @@ export function FloatingInspector({
             <Divider />
             <Group label={t("Preview state")}>
               <div
-                onKeyDown={stripArrowKeys(stateRefs, (i) => onSetPreviewState(selectedId, states[i]))}
+                onKeyDown={stripArrowKeys(stateRefs, (i) =>
+                  onSetPreviewState(selectedId, states[i]),
+                )}
                 className="flex items-center gap-0.5 rounded-md bg-white/8 p-0.5"
               >
                 {states.map((s, i) => {
@@ -357,7 +358,8 @@ function PanelInspector({
   const eyebrow = t(panelId === "episodes" ? "Series tab" : "Watch Together panel");
   const sides = ["left", "right"] as const;
   const placeCommit = (i: number) => {
-    if (meta.placementMode === "side") onSetCorner(panelId, sides[i] === "left" ? "top-left" : "top-right");
+    if (meta.placementMode === "side")
+      onSetCorner(panelId, sides[i] === "left" ? "top-left" : "top-right");
     else onSetCorner(panelId, PANEL_CORNERS[i]);
   };
   return (
@@ -374,7 +376,10 @@ function PanelInspector({
           <span className={`${OVERLAY_LABEL} text-white/60`}>
             {t(meta.placementMode === "side" ? "Side" : "Corner")}
           </span>
-          <div onKeyDown={stripArrowKeys(placeRefs, placeCommit)} className="flex items-center gap-1">
+          <div
+            onKeyDown={stripArrowKeys(placeRefs, placeCommit)}
+            className="flex items-center gap-1"
+          >
             {meta.placementMode === "side"
               ? sides.map((side, i) => {
                   const active = sideFromCorner(cfg.corner) === side;

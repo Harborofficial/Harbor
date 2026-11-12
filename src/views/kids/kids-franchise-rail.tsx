@@ -28,7 +28,11 @@ function FranchiseTile({ franchise, tmdbKey }: { franchise: Franchise; tmdbKey: 
     openGrid({
       title: franchise.name,
       fetcher: (page) => fetch(page).then(dropUnreleased).then(dropUnsafeGenres),
-      kidsHero: { grad: franchise.grad, art: `/kids/cta/${franchise.key}.webp`, name: franchise.name },
+      kidsHero: {
+        grad: franchise.grad,
+        art: `/kids/cta/${franchise.key}.webp`,
+        name: franchise.name,
+      },
     });
   };
   return (

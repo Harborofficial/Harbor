@@ -1,3 +1,4 @@
+import { addonBaseUrl, addonResourceUrl } from "@/lib/addon-url";
 import { isCollectionCatalog, type Addon, type CatalogDef } from "./addons";
 import type { Meta } from "./cinemeta";
 import { safeFetch } from "./safe-fetch";
@@ -18,7 +19,7 @@ function addonOrigin(addon: Addon) {
     id: addon.manifest.id,
     name: addon.manifest.name,
     logo: addon.manifest.logo,
-    base: addon.transportUrl.replace(/\/manifest\.json$/, ""),
+    base: addonBaseUrl(addon.transportUrl),
   };
 }
 
@@ -74,8 +75,11 @@ export async function searchAddonCatalogs(
 
   const settled = await Promise.allSettled(
     targets.map(async ({ addon, type, id, collection }) => {
-      const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
-      const url = `${base}/catalog/${type}/${id}/search=${encodeURIComponent(q)}.json`;
+      const base = addonBaseUrl(addon.transportUrl);
+      const url = addonResourceUrl(
+        base,
+        `catalog/${type}/${id}/search=${encodeURIComponent(q)}.json`,
+      );
       const res = await safeFetch(url, { headers: { Accept: "application/json" } });
       if (!res.ok) return { type, collection, metas: [] as Meta[], origin: addonOrigin(addon) };
       const json = (await res.json()) as { metas?: Meta[] };
@@ -240,7 +244,10 @@ export async function searchAddonGroups(
       const base = origin.base;
       const settled = await Promise.allSettled(
         targets.map(async ({ type, id, collection }) => {
-          const url = `${base}/catalog/${type}/${id}/search=${encodeURIComponent(q)}.json`;
+          const url = addonResourceUrl(
+            base,
+            `catalog/${type}/${id}/search=${encodeURIComponent(q)}.json`,
+          );
           // An IPTV catalog scanning tens of thousands of titles can take ~9s, so the
           // budget is generous. It exists only so one unreachable addon cannot hang
           // the whole results section.

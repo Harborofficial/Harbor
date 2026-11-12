@@ -10,8 +10,10 @@ export default {
   "games.wow.manager.errorIdentity": "已安装文件夹与作者的插件包不匹配。请重新扫描并检查插件来源。",
   "games.wow.manager.importInstalled": "导入已安装的插件",
   "games.wow.manager.import": "交由 Harbor 管理",
-  "games.wow.manager.importScope": "具有 WoWInterface 标识的已安装插件。其他插件仍保留在已安装列表中。",
-  "games.wow.manager.importNote": "保留已安装的文件。Harbor 会检查作者的安装包，并在今后更新或移除前保存旧版本。",
+  "games.wow.manager.importScope":
+    "具有 WoWInterface 标识的已安装插件。其他插件仍保留在已安装列表中。",
+  "games.wow.manager.importNote":
+    "保留已安装的文件。Harbor 会检查作者的安装包，并在今后更新或移除前保存旧版本。",
   "games.wow.manager.keepVersion": "保留已安装版本 {version}",
   "games.wow.manager.keep": "保留",
   "games.wow.manager.importSuccess": "此插件现已由 Harbor 管理。",
@@ -20,7 +22,8 @@ export default {
   "games.wow.manager.managed": "Harbor 管理",
   "games.wow.manager.backups": "备份",
   "games.wow.manager.catalogNote": "浏览 WoWInterface。应用更改前会检查与已安装 WoW 的兼容性。",
-  "games.wow.manager.managedNote": "这里只能修改通过 Harbor 安装的插件。其他插件仍显示在已安装列表中。",
+  "games.wow.manager.managedNote":
+    "这里只能修改通过 Harbor 安装的插件。其他插件仍显示在已安装列表中。",
   "games.wow.manager.category": "分类",
   "games.wow.manager.allCategories": "全部分类",
   "games.wow.manager.popular": "月下载量",

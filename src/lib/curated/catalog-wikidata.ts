@@ -26,8 +26,7 @@ export const WIKIDATA_SEEDS: readonly CuratedListSeed[] = [
     id: "locarno-golden-leopard",
     title: "Golden Leopard",
     curator: "Locarno Film Festival",
-    blurb:
-      "Locarno's top prize, awarded since 1946 by the jury of its international competition.",
+    blurb: "Locarno's top prize, awarded since 1946 by the jury of its international competition.",
     ordering: "awarded",
     kind: "movie",
     source: wikidata("Q1700510", "ceremony"),

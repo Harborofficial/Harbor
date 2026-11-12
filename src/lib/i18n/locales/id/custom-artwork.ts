@@ -15,7 +15,10 @@ export default {
   "artwork.resetLaunch": "Atur ulang logo pembukaan",
   "artwork.local": "Disimpan di perangkat ini. Pengurangan gerakan menggunakan gambar diam.",
   "artwork.error.large": "Pilih berkas lebih kecil: maksimal 8 MB dan 4096 × 4096 piksel.",
-  "artwork.error.external": "Animasi ini menggunakan media eksternal. Ekspor dengan gambar yang disematkan.",
-  "artwork.error.storage": "Berkas tidak dapat disimpan di perangkat ini. Pilihan sebelumnya tidak berubah.",
-  "artwork.error.invalid": "Berkas tidak dapat dibaca. Pilih Lottie (.json atau .lottie), GIF, PNG, JPEG, atau WebP."
+  "artwork.error.external":
+    "Animasi ini menggunakan media eksternal. Ekspor dengan gambar yang disematkan.",
+  "artwork.error.storage":
+    "Berkas tidak dapat disimpan di perangkat ini. Pilihan sebelumnya tidak berubah.",
+  "artwork.error.invalid":
+    "Berkas tidak dapat dibaca. Pilih Lottie (.json atau .lottie), GIF, PNG, JPEG, atau WebP.",
 };

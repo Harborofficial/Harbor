@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { hookHarness, flushPromises } from "./helpers/hook-harness.ts";
 import "./_localstorage-stub.ts";
-import { clearPendingResumes, listPendingResumes, recordPendingResume, syncPendingResume } from "../src/lib/publicmetadb/pending-sync.ts";
+import {
+  clearPendingResumes,
+  listPendingResumes,
+  recordPendingResume,
+  syncPendingResume,
+} from "../src/lib/publicmetadb/pending-sync.ts";
 import type { PmdbTarget } from "../src/lib/publicmetadb/types.ts";
 
 function fixture(
@@ -21,46 +26,77 @@ function fixture(
   const listeners = new Map<string, () => void>();
   const saves: Array<{ target: PmdbTarget; positionMs: number }> = [];
   let timerId = 0;
-  const harness = hookHarness("src/lib/publicmetadb/scrobble-hook.ts", "usePublicMetaDbScrobble", {
-    "@/lib/player/playback-clock": { getPlaybackPosition: () => position },
-    "@/lib/settings": { useSettings: () => ({ settings: { publicmetadbScrobbleEnabled: true } }) },
-    "./provider": { usePublicMetaDb: () => ({ isConnected: true }) },
-    "./ids": { resolvePmdbTarget: async (id: string) => ({ tmdb_id: Number(id.split(":")[2]), media_type: "movie" }) },
-    "./scrobble": {
-      pmdbDeleteResumeForTarget: async () => { deleted++; return true; },
-      pmdbSaveResume: (target: PmdbTarget, positionMs: number) => {
-        saves.push({ target, positionMs });
-        return save();
+  const harness = hookHarness(
+    "src/lib/publicmetadb/scrobble-hook.ts",
+    "usePublicMetaDbScrobble",
+    {
+      "@/lib/player/playback-clock": { getPlaybackPosition: () => position },
+      "@/lib/settings": {
+        useSettings: () => ({ settings: { publicmetadbScrobbleEnabled: true } }),
+      },
+      "./provider": { usePublicMetaDb: () => ({ isConnected: true }) },
+      "./ids": {
+        resolvePmdbTarget: async (id: string) => ({
+          tmdb_id: Number(id.split(":")[2]),
+          media_type: "movie",
+        }),
+      },
+      "./scrobble": {
+        pmdbDeleteResumeForTarget: async () => {
+          deleted++;
+          return true;
+        },
+        pmdbSaveResume: (target: PmdbTarget, positionMs: number) => {
+          saves.push({ target, positionMs });
+          return save();
+        },
+      },
+      "./history": {
+        markPmdbWatched: () => {
+          marked++;
+          return mark();
+        },
+      },
+      "./pending-sync": {
+        recordPendingResume: (...args: Parameters<typeof recordPendingResume>) => {
+          recorded++;
+          return recordPendingResume(...args);
+        },
+        syncPendingResume: (...args: Parameters<typeof syncPendingResume>) => {
+          recorded++;
+          return syncPendingResume(...args);
+        },
       },
     },
-    "./history": { markPmdbWatched: () => { marked++; return mark(); } },
-    "./pending-sync": {
-      recordPendingResume: (...args: Parameters<typeof recordPendingResume>) => {
-        recorded++;
-        return recordPendingResume(...args);
-      },
-      syncPendingResume: (...args: Parameters<typeof syncPendingResume>) => {
-        recorded++;
-        return syncPendingResume(...args);
+    {
+      Date: { now: () => now },
+      window: {
+        setInterval: (callback: () => void) => {
+          const id = ++timerId;
+          intervals.set(id, callback);
+          return id;
+        },
+        clearInterval: (id: number) => {
+          intervals.delete(id);
+          if (resetClockOnCleanup) position = 0;
+        },
+        setTimeout: (callback: () => void) => {
+          const id = ++timerId;
+          timeouts.set(id, callback);
+          return id;
+        },
+        clearTimeout: (id: number) => timeouts.delete(id),
+        addEventListener: (name: string, callback: () => void) => listeners.set(name, callback),
+        removeEventListener: (name: string) => listeners.delete(name),
       },
     },
-  }, {
-    Date: { now: () => now },
-    window: {
-      setInterval: (callback: () => void) => { const id = ++timerId; intervals.set(id, callback); return id; },
-      clearInterval: (id: number) => {
-        intervals.delete(id);
-        if (resetClockOnCleanup) position = 0;
-      },
-      setTimeout: (callback: () => void) => { const id = ++timerId; timeouts.set(id, callback); return id; },
-      clearTimeout: (id: number) => timeouts.delete(id),
-      addEventListener: (name: string, callback: () => void) => listeners.set(name, callback),
-      removeEventListener: (name: string) => listeners.delete(name),
-    },
-  });
+  );
   return {
     render(status = "playing", id = "tmdb:movie:550") {
-      harness.render({ src: { meta: { id, type: "movie" } }, snap: { status, durationSec: 1000, positionSec: position } });
+      harness.render({
+        src: { meta: { id, type: "movie" } },
+        snap: { status, durationSec: 1000, positionSec: position },
+      });
     },
     async tick(seconds = 1) {
       for (let i = 0; i < seconds; i++) {
@@ -72,7 +108,9 @@ function fixture(
     },
     counts: () => ({ marked, deleted, recorded }),
     saves,
-    setPosition: (next: number) => { position = next; },
+    setPosition: (next: number) => {
+      position = next;
+    },
     pageHide: () => listeners.get("pagehide")?.(),
     unmount: () => harness.unmount(),
   };
@@ -92,7 +130,12 @@ test("completed playback sends one watched write across ticks, pause, end and un
 
 test("completion stays single-flight while the watched write is pending", async () => {
   let finish!: (ok: boolean) => void;
-  const h = fixture(() => new Promise((resolve) => { finish = resolve; }));
+  const h = fixture(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
   h.render();
   await flushPromises();
   await h.tick(120);
@@ -139,7 +182,10 @@ test("leaving the player online sends the final rewound position immediately", a
   h.setPosition(400);
   h.unmount();
   await flushPromises();
-  assert.deepEqual(h.saves.map((s) => s.positionMs), [400_000]);
+  assert.deepEqual(
+    h.saves.map((s) => s.positionMs),
+    [400_000],
+  );
   assert.equal(h.counts().marked, 0);
   assert.equal(listPendingResumes().length, 0);
 });
@@ -152,7 +198,10 @@ test("exit captures the position before passive player teardown clears the clock
   h.setPosition(400);
   h.unmount();
   await flushPromises();
-  assert.deepEqual(h.saves.map((s) => s.positionMs), [400_000]);
+  assert.deepEqual(
+    h.saves.map((s) => s.positionMs),
+    [400_000],
+  );
 });
 
 test("page shutdown persists the rewound position without attempting a live save", async () => {
@@ -200,6 +249,9 @@ test("changing media uses the previous item's latest position after a backward s
   h.setPosition(0);
   h.render("playing", "tmdb:movie:551");
   await flushPromises();
-  assert.deepEqual(h.saves.map((s) => [s.target.tmdb_id, s.positionMs]), [[550, 401_000]]);
+  assert.deepEqual(
+    h.saves.map((s) => [s.target.tmdb_id, s.positionMs]),
+    [[550, 401_000]],
+  );
   h.unmount();
 });

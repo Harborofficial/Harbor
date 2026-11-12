@@ -1,14 +1,17 @@
 export default {
   "games.shortcuts.reviewLaunch": "Revisar inicialização",
   "games.shortcuts.state.local": "Inicialização direta disponível",
-  "games.shortcuts.shortcut_identity": "O Steam não atribuiu um ID válido a este atalho. Revise as configurações e inicie diretamente, ou salve-o novamente no Steam e atualize.",
+  "games.shortcuts.shortcut_identity":
+    "O Steam não atribuiu um ID válido a este atalho. Revise as configurações e inicie diretamente, ou salve-o novamente no Steam e atualize.",
 
   "games.shortcuts.activity.open": "Atividade",
   "games.shortcuts.activity.title": "Atividade dos atalhos",
-  "games.shortcuts.activity.note": "Verificações e inicializações recentes deste perfil do Harbor. Até 300 registros.",
+  "games.shortcuts.activity.note":
+    "Verificações e inicializações recentes deste perfil do Harbor. Até 300 registros.",
   "games.shortcuts.activity.remember": "Manter entre sessões",
   "games.shortcuts.activity.detailed": "Incluir detalhes da verificação",
-  "games.shortcuts.activity.storageError": "Não foi possível acessar a atividade salva. Os registros desta sessão continuam visíveis.",
+  "games.shortcuts.activity.storageError":
+    "Não foi possível acessar a atividade salva. Os registros desta sessão continuam visíveis.",
   "games.shortcuts.activity.empty": "Ainda não há atividade.",
   "games.shortcuts.activity.clear": "Limpar atividade",
   "games.shortcuts.activity.duration": "{ms} ms",
@@ -25,9 +28,12 @@ export default {
 
   "games.shortcuts.launchDirect": "Iniciar diretamente",
   "games.shortcuts.viaSteam": "Jogar pelo Steam",
-  "games.shortcuts.directNote": "Inicia este executável com as suas opções de inicialização e pasta inicial.",
-  "games.shortcuts.shortcut_changed": "Este atalho foi alterado no Steam. Atualize a biblioteca e confira as configurações de inicialização.",
-  "games.shortcuts.shortcut_options": "Estas opções usam um comando wrapper do Steam. Inicie este atalho pelo Steam.",
+  "games.shortcuts.directNote":
+    "Inicia este executável com as suas opções de inicialização e pasta inicial.",
+  "games.shortcuts.shortcut_changed":
+    "Este atalho foi alterado no Steam. Atualize a biblioteca e confira as configurações de inicialização.",
+  "games.shortcuts.shortcut_options":
+    "Estas opções usam um comando wrapper do Steam. Inicie este atalho pelo Steam.",
   "games.dock.shortcut": "Atalhos do Steam",
   "games.shortcuts.note": "Jogos não Steam adicionados à sua biblioteca Steam.",
   "games.shortcuts.chooseFolder": "Escolher pasta do Steam",
@@ -35,8 +41,10 @@ export default {
   "games.shortcuts.accountNumber": "Conta {id}",
   "games.shortcuts.automatic": "Usar pasta detectada",
   "games.shortcuts.pickerError": "Não foi possível abrir o seletor de pastas. Tente novamente.",
-  "games.shortcuts.partial": "Alguns atalhos não puderam ser lidos. Atualize quando o Steam terminar de salvar.",
-  "games.shortcuts.empty": "Nenhum atalho encontrado. Adicione um jogo não Steam no Steam e atualize.",
+  "games.shortcuts.partial":
+    "Alguns atalhos não puderam ser lidos. Atualize quando o Steam terminar de salvar.",
+  "games.shortcuts.empty":
+    "Nenhum atalho encontrado. Adicione um jogo não Steam no Steam e atualize.",
   "games.shortcuts.state.ready": "Pronto para jogar",
   "games.shortcuts.state.missing": "Executável ausente",
   "games.shortcuts.state.account": "Abra esta conta Steam",
@@ -47,9 +55,11 @@ export default {
   "games.shortcuts.tags": "Marcadores",
   "games.shortcuts.storeError": "Não foi possível salvar estas configurações.",
   "games.shortcuts.shortcut_location": "Escolha a pasta do Steam ou sua pasta userdata.",
-  "games.shortcuts.shortcut_account": "Abra o Steam com a conta deste atalho e atualize. O Harbor precisa usar a mesma instalação do Steam.",
+  "games.shortcuts.shortcut_account":
+    "Abra o Steam com a conta deste atalho e atualize. O Harbor precisa usar a mesma instalação do Steam.",
   "games.shortcuts.shortcut_missing": "Este atalho não existe mais. Atualize a biblioteca.",
-  "games.shortcuts.shortcut_executable": "O executável está ausente ou o caminho absoluto não é compatível.",
+  "games.shortcuts.shortcut_executable":
+    "O executável está ausente ou o caminho absoluto não é compatível.",
   "games.shortcuts.shortcut_launch": "O Steam não conseguiu abrir este atalho. Tente novamente.",
-  "games.shortcuts.shortcut_read": "Não foi possível ler os atalhos do Steam. Tente atualizar."
+  "games.shortcuts.shortcut_read": "Não foi possível ler os atalhos do Steam. Tente atualizar.",
 };

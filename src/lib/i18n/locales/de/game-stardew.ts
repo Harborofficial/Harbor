@@ -4,43 +4,58 @@ export default {
   "games.stardew.starterTitle": "Mods für den Einstieg",
   "games.stardew.starterNote": "Nützliche Ergänzungen aus etablierten Projekten.",
   "games.stardew.catalog": "Mods werden gesucht…",
-  "games.stardew.catalogError": "Mod-Informationen konnten nicht geladen werden. Versuche es gleich erneut.",
-  "games.stardew.catalogStale": "Der zuletzt gespeicherte Katalog wird angezeigt. Aktualisiere ihn, sobald du wieder online bist.",
-  "games.stardew.catalogPartial": "Einige Projekte konnten nicht geladen werden. Versuche es durch Aktualisieren erneut.",
+  "games.stardew.catalogError":
+    "Mod-Informationen konnten nicht geladen werden. Versuche es gleich erneut.",
+  "games.stardew.catalogStale":
+    "Der zuletzt gespeicherte Katalog wird angezeigt. Aktualisiere ihn, sobald du wieder online bist.",
+  "games.stardew.catalogPartial":
+    "Einige Projekte konnten nicht geladen werden. Versuche es durch Aktualisieren erneut.",
   "games.stardew.creatorChoose": "Wähle oben deinen Spielordner, um eine Installation zu prüfen.",
   "games.stardew.creatorGet": "Vom Entwickler laden",
-  "games.stardew.creatorRoute": "Andere Downloads öffnen sich auf Nexus. Importiere danach die ZIP-Datei des Entwicklers.",
+  "games.stardew.creatorRoute":
+    "Andere Downloads öffnen sich auf Nexus. Importiere danach die ZIP-Datei des Entwicklers.",
   "games.stardew.snapshot": "Katalogstand",
   "games.stardew.moreMods": "Weitere Mods entdecken",
   "games.stardew.downloading": "Download vom Entwickler…",
   "games.stardew.rateLimit": "Der Anbieter begrenzt die Anfragen. Versuche es später erneut.",
-  "games.stardew.creatorError": "Die Veröffentlichung konnte nicht überprüft werden. Prüfe die Dateien auf der Projektseite.",
+  "games.stardew.creatorError":
+    "Die Veröffentlichung konnte nicht überprüft werden. Prüfe die Dateien auf der Projektseite.",
   "games.stardew.refresh": "Mods aktualisieren",
 
   "games.stardew.import": "Mod-ZIP importieren",
   "games.stardew.manage": "Mit Harbor verwaltet",
-  "games.stardew.manageNote": "Importiere einen heruntergeladenen SMAPI-Mod, um ihn hier zu verwalten. Zum Aktualisieren importierst du seine neuere ZIP-Datei.",
+  "games.stardew.manageNote":
+    "Importiere einen heruntergeladenen SMAPI-Mod, um ihn hier zu verwalten. Zum Aktualisieren importierst du seine neuere ZIP-Datei.",
   "games.stardew.previous": "Vorherige Versionen",
   "games.stardew.review": "Änderungen prüfen",
   "games.stardew.apply": "Änderungen anwenden",
   "games.stardew.install": "Mod installieren",
   "games.stardew.update": "Mod aktualisieren",
   "games.stardew.done": "Änderungen angewendet",
-  "games.stardew.reviewNote": "Schließe zuerst Stardew Valley. Updates behalten deine aktuelle config.json und erzeugte Dateien. Vorherige Versionen bleiben auf diesem PC.",
-  "games.stardew.removeNote": "Der gesamte Mod-Ordner wird zu den vorherigen Versionen verschoben. Du kannst ihn später wiederherstellen.",
+  "games.stardew.reviewNote":
+    "Schließe zuerst Stardew Valley. Updates behalten deine aktuelle config.json und erzeugte Dateien. Vorherige Versionen bleiben auf diesem PC.",
+  "games.stardew.removeNote":
+    "Der gesamte Mod-Ordner wird zu den vorherigen Versionen verschoben. Du kannst ihn später wiederherstellen.",
   "games.stardew.running": "Schließe Stardew Valley und SMAPI, bevor du Mod-Dateien änderst.",
-  "games.stardew.requirementsError": "Ein benötigter Mod oder die SMAPI-Version fehlt oder ist zu alt. Prüfe die Anforderungen des Mods.",
-  "games.stardew.dependentsError": "Ein aktivierter Mod benötigt diese Version. Deaktiviere ihn zuerst oder wähle eine kompatible Version.",
-  "games.stardew.unmanagedError": "Dieser Mod ist bereits außerhalb von Harbors Aufzeichnungen vorhanden. Verschiebe die vorhandene Kopie vor dem Import.",
-  "games.stardew.archiveError": "Wähle eine ZIP mit einem fertigen Mod-Ordner, bis zu 32 MB (entpackt 128 MB). Quellcode-Downloads sind keine installierbaren Mods.",
+  "games.stardew.requirementsError":
+    "Ein benötigter Mod oder die SMAPI-Version fehlt oder ist zu alt. Prüfe die Anforderungen des Mods.",
+  "games.stardew.dependentsError":
+    "Ein aktivierter Mod benötigt diese Version. Deaktiviere ihn zuerst oder wähle eine kompatible Version.",
+  "games.stardew.unmanagedError":
+    "Dieser Mod ist bereits außerhalb von Harbors Aufzeichnungen vorhanden. Verschiebe die vorhandene Kopie vor dem Import.",
+  "games.stardew.archiveError":
+    "Wähle eine ZIP mit einem fertigen Mod-Ordner, bis zu 32 MB (entpackt 128 MB). Quellcode-Downloads sind keine installierbaren Mods.",
   "games.stardew.moreFiles": "{count} weitere Dateien",
-  "games.stardew.partialError": "Einige Mods konnten nicht geprüft werden. Behebe den unvollständigen Scan, bevor du Dateien änderst.",
-  "games.stardew.linkError": "Wähle echte Ordner und Dateien statt Verknüpfungen oder verlinkter Ordner.",
+  "games.stardew.partialError":
+    "Einige Mods konnten nicht geprüft werden. Behebe den unvollständigen Scan, bevor du Dateien änderst.",
+  "games.stardew.linkError":
+    "Wähle echte Ordner und Dateien statt Verknüpfungen oder verlinkter Ordner.",
   "games.stardew.timeoutError": "Die Prüfung hat zu lange gedauert. Versuche es erneut.",
   "games.stardew.canceled": "Änderungen abgebrochen.",
   "games.stardew.files": "Dateien",
   "games.stardew.openFiles": "Aufbewahrten Ordner öffnen",
-  "games.stardew.conflictError": "Am Ziel sind bereits Dateien vorhanden. Behebe den Konflikt vor einem erneuten Versuch.",
+  "games.stardew.conflictError":
+    "Am Ziel sind bereits Dateien vorhanden. Behebe den Konflikt vor einem erneuten Versuch.",
   "games.stardew.enable": sims["games.sims.enable"],
   "games.stardew.disable": sims["games.sims.disable"],
   "games.stardew.remove": sims["games.sims.remove"],
@@ -59,7 +74,8 @@ export default {
   "games.stardew.busyError": "Eine andere Mod-Änderung läuft noch. Beende sie oder brich sie ab.",
   "games.stardew.expired": "Diese Prüfung ist abgelaufen. Prüfe die Änderungen erneut.",
   "games.stardew.spaceError": "Nicht genügend Speicherplatz. Schaffe Platz und versuche es erneut.",
-  "games.stardew.writeError": "Dateien konnten nicht geändert werden. Prüfe den Ordnerzugriff und schließe das Spiel.",
+  "games.stardew.writeError":
+    "Dateien konnten nicht geändert werden. Prüfe den Ordnerzugriff und schließe das Spiel.",
   "games.stardew.canceling": "Wird abgebrochen…",
 
   "games.stardew.title": "Deine Stardew-Mods",
@@ -72,20 +88,24 @@ export default {
   "games.stardew.scanning": "Mods werden gelesen…",
   "games.stardew.checking": "SMAPI wird geprüft…",
   "games.stardew.modCount": "{count} Mods",
-  "games.stardew.scope": "Prüft die von den Mods angegebenen Voraussetzungen. SMAPI entscheidet weiterhin, was geladen wird.",
-  "games.stardew.noSmapiVersion": "Die installierte SMAPI-Version konnte nicht gelesen werden. Update-Empfehlungen sind möglicherweise nicht verfügbar.",
+  "games.stardew.scope":
+    "Prüft die von den Mods angegebenen Voraussetzungen. SMAPI entscheidet weiterhin, was geladen wird.",
+  "games.stardew.noSmapiVersion":
+    "Die installierte SMAPI-Version konnte nicht gelesen werden. Update-Empfehlungen sind möglicherweise nicht verfügbar.",
   "games.stardew.search": "Mod suchen",
   "games.stardew.filter": "Mods anzeigen",
   "games.stardew.all": "Alle Mods",
   "games.stardew.attention": "Handlungsbedarf",
   "games.stardew.updates": "Updates verfügbar",
   "games.stardew.noMatches": "Keine Mods entsprechen diesen Filtern.",
-  "games.stardew.share": "Update-Prüfungen senden Mod-IDs, Versionen und unterstützte Update-Schlüssel an SMAPI. Spielstände und Einstellungen bleiben auf diesem Gerät.",
+  "games.stardew.share":
+    "Update-Prüfungen senden Mod-IDs, Versionen und unterstützte Update-Schlüssel an SMAPI. Spielstände und Einstellungen bleiben auf diesem Gerät.",
   "games.stardew.empty": "In diesem Ordner wurden keine SMAPI-Mods gefunden.",
   "games.stardew.partial": "Einige Ordner konnten nicht geprüft werden",
   "games.stardew.notChecked": "Nicht geprüft",
   "games.stardew.noneSuggested": "Kein Update vorgeschlagen",
-  "games.stardew.duplicateNote": "Diese Mod-ID ist in mehreren Ordnern vorhanden. Behalte vor dem Start von SMAPI nur eine Kopie.",
+  "games.stardew.duplicateNote":
+    "Diese Mod-ID ist in mehreren Ordnern vorhanden. Behalte vor dem Start von SMAPI nur eine Kopie.",
   "games.stardew.dllNote": "Die im Manifest genannte Programmdatei dieser Mod fehlt.",
   "games.stardew.viewUpdate": "Update ansehen",
   "games.stardew.project": "Projektseite",
@@ -93,7 +113,8 @@ export default {
   "games.stardew.optional": "Optional",
   "games.stardew.providerError": "SMAPI konnte nicht alle Quellen dieser Mod prüfen.",
   "games.stardew.history": "Älterer Community-Hinweis",
-  "games.stardew.historyNote": "Die Kompatibilitätsliste wird nicht mehr umfassend gepflegt. Dieser Hinweis kann veraltet sein.",
+  "games.stardew.historyNote":
+    "Die Kompatibilitätsliste wird nicht mehr umfassend gepflegt. Dieser Hinweis kann veraltet sein.",
   "games.stardew.requirement.present": "Gefunden",
   "games.stardew.requirement.older": "Ältere Version",
   "games.stardew.requirement.missing": "Fehlt",
@@ -101,8 +122,12 @@ export default {
   "games.stardew.requirement.unchecked": "Unbestätigt",
   "games.stardew.requirement.duplicate": "Mehrere Kopien",
   "games.stardew.requirement.unusable": "Dateien fehlen",
-  "games.stardew.folderError": "Wähle den Stardew-Valley-Spielordner mit dem Spiel und seinem Mods-Ordner.",
-  "games.stardew.changed": "Mod-Dateien wurden während der Prüfung geändert. Prüfe den Ordner erneut.",
-  "games.stardew.networkError": "SMAPI konnte die Update-Prüfung nicht abschließen. Versuche es gleich noch einmal.",
-  "games.stardew.readError": "Der Ordner konnte nicht gelesen werden. Prüfe den Speicherort und die Zugriffsrechte."
+  "games.stardew.folderError":
+    "Wähle den Stardew-Valley-Spielordner mit dem Spiel und seinem Mods-Ordner.",
+  "games.stardew.changed":
+    "Mod-Dateien wurden während der Prüfung geändert. Prüfe den Ordner erneut.",
+  "games.stardew.networkError":
+    "SMAPI konnte die Update-Prüfung nicht abschließen. Versuche es gleich noch einmal.",
+  "games.stardew.readError":
+    "Der Ordner konnte nicht gelesen werden. Prüfe den Speicherort und die Zugriffsrechte.",
 };

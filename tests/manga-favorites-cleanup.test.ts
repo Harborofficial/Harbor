@@ -36,7 +36,13 @@ test("collapses same-title entries with the same cover and keeps the live source
 test("collapses same-title entries with a matching alt title and fills a missing cover", () => {
   const out = dedupeMangaFavorites(
     [
-      entry({ id: "live-source::x", sourceId: "live-source", title: "X", altTitle: "エックス", addedAt: 1 }),
+      entry({
+        id: "live-source::x",
+        sourceId: "live-source",
+        title: "X",
+        altTitle: "エックス",
+        addedAt: 1,
+      }),
       entry({
         id: "other-live::x",
         sourceId: "other-live",

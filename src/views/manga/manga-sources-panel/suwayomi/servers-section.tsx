@@ -96,13 +96,19 @@ function AddServerCard() {
           <Server size={20} />
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="text-[16px] font-semibold text-ink">{t("Connect a Suwayomi server")}</span>
+          <span className="text-[16px] font-semibold text-ink">
+            {t("Connect a Suwayomi server")}
+          </span>
           <span className="truncate text-[13px] text-ink-muted">
             {t("Point Harbor at your self-hosted library to browse and install sources")}
           </span>
         </span>
         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-raised text-ink-muted ring-1 ring-edge-soft">
-          <Plus size={18} strokeWidth={2.4} className={`transition-transform ${open ? "rotate-45" : ""}`} />
+          <Plus
+            size={18}
+            strokeWidth={2.4}
+            className={`transition-transform ${open ? "rotate-45" : ""}`}
+          />
         </span>
       </button>
       {open && (

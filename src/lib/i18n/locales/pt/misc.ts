@@ -173,9 +173,11 @@ const misc: Record<string, string> = {
   "Reveal comments": "Mostrar comentários",
   "Comments are hidden": "Os comentários estão ocultos",
   "Hosted elsewhere": "Hospedado por terceiros",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "Esses planos são de um terceiro. O Harbor não tem afiliação e não recebe nada por uma assinatura. Preços e termos atuais estão no site deles.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "Esses planos são de um terceiro. O Harbor não tem afiliação e não recebe nada por uma assinatura. Preços e termos atuais estão no site deles.",
   "{name} can run on a hosted instance": "{name} pode rodar em uma instância hospedada",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "Um terceiro opera isso. O Harbor não tem afiliação, não revende e não recebe nada se você assinar. Preço e o que inclui estão no site deles.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "Um terceiro opera isso. O Harbor não tem afiliação, não revende e não recebe nada se você assinar. Preço e o que inclui estão no site deles.",
   "Show comments": "Mostrar comentários",
   "Hide comments": "Ocultar comentários",
   "You haven't commented yet": "Você ainda não comentou",

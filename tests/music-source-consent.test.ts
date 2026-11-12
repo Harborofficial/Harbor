@@ -134,7 +134,10 @@ test("a provider-less track follows the backend's YouTube fallback", () => {
     false,
   );
   assert.equal(
-    musicPlaybackSourceAllowed({ connectorId: undefined, playbackUrl: "https://example.test/a.mp3" }),
+    musicPlaybackSourceAllowed({
+      connectorId: undefined,
+      playbackUrl: "https://example.test/a.mp3",
+    }),
     true,
   );
   acceptMusicSources(["youtube"]);

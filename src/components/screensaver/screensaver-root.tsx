@@ -108,9 +108,9 @@ export function ScreensaverRoot() {
           ? import("./cat-boat-overlay")
           : halloween
             ? import("./halloween-overlay")
-          : customMedia
-            ? import("./custom-media-overlay")
-            : import("./ambient-overlay")),
+            : customMedia
+              ? import("./custom-media-overlay")
+              : import("./ambient-overlay")),
       3000,
     );
     return () => window.clearTimeout(warm);

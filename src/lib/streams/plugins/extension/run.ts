@@ -48,7 +48,12 @@ async function providersFor(plugin: InstalledStreamPlugin): Promise<BridgeProvid
   return all.filter((p) => p.extensionId === extensionId).slice(0, MAX_PROVIDERS);
 }
 
-function limit<T>(work: Promise<T>, deadline: number, signal: AbortSignal, what: string): Promise<T> {
+function limit<T>(
+  work: Promise<T>,
+  deadline: number,
+  signal: AbortSignal,
+  what: string,
+): Promise<T> {
   const left = deadline - Date.now();
   if (signal.aborted) return Promise.reject(abortError());
   if (left <= 0) return Promise.reject(new Error(`${what} had no time left`));
@@ -188,7 +193,10 @@ async function fromProvider(
   if (!urls.length) {
     if (found.note) outage(provider, found.note, hooks);
     else
-      hooks.log("warn", `${provider.name}: ${found.items.length} results, none matched ${req.title}`);
+      hooks.log(
+        "warn",
+        `${provider.name}: ${found.items.length} results, none matched ${req.title}`,
+      );
     if (remembered) pageMemo.delete(key);
     return [];
   }

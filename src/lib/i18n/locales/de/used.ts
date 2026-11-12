@@ -32,7 +32,8 @@ const used: Record<string, string> = {
   "Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.":
     "Weichzeichnen wirkt am flüssigsten. Überblenden belastet ältere Geräte weniger. Sofort deaktiviert den Effekt.",
   "Browse public groups": "Öffentliche Gruppen durchsuchen",
-  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.": "Puffert während der Wiedergabe die gesamte Datei im Hintergrund, auch bei pausierter Wiedergabe. So werden große Remux-Dateien vorgeladen, und du kannst in einer zwischengespeicherten Datei vor- und zurückspulen, ohne erneut puffern zu müssen. Funktioniert mit Debrid- und P2P-Streams. Verbraucht mehr Speicherplatz und Bandbreite; der Zwischenspeicher wird beim Wechseln oder Schließen geleert.",
+  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
+    "Puffert während der Wiedergabe die gesamte Datei im Hintergrund, auch bei pausierter Wiedergabe. So werden große Remux-Dateien vorgeladen, und du kannst in einer zwischengespeicherten Datei vor- und zurückspulen, ohne erneut puffern zu müssen. Funktioniert mit Debrid- und P2P-Streams. Verbraucht mehr Speicherplatz und Bandbreite; der Zwischenspeicher wird beim Wechseln oder Schließen geleert.",
   "Bulk upload is not live yet, sending one rating per second.":
     "Der Massenupload ist noch nicht verfügbar, daher wird eine Bewertung pro Sekunde gesendet.",
   "Cancel import": "Import abbrechen",

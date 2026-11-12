@@ -84,15 +84,7 @@ function RemoteArt() {
 function ReaderArt() {
   return (
     <Phone>
-      <rect
-        x="20"
-        y="14"
-        width="24"
-        height="30"
-        rx="2.5"
-        className="fill-ink"
-        opacity={0.14}
-      />
+      <rect x="20" y="14" width="24" height="30" rx="2.5" className="fill-ink" opacity={0.14} />
       <path d="M32 14v30" stroke="currentColor" strokeOpacity={0.28} strokeWidth={1.4} />
       <g className="fill-ink" opacity={0.26}>
         <rect x="23" y="19" width="6" height="1.8" rx="0.9" />

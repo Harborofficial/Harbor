@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "Прохождений в списке: {count}",
   "games.wow.weekly.partial": "Некоторые записанные прохождения не удалось проверить.",
   "games.wow.weekly.empty": "За этот период нет записанных прохождений.",
-  "games.wow.weekly.scope": "Raider.IO показывает до 10 самых высоких ключей текущего сезона за каждый сброс. Новые прохождения могут появляться с задержкой.",
+  "games.wow.weekly.scope":
+    "Raider.IO показывает до 10 самых высоких ключей текущего сезона за каждый сброс. Новые прохождения могут появляться с задержкой.",
   "games.helldivers.title": "Галактическая война",
   "games.helldivers.intro": "Выберите место следующей высадки.",
   "games.helldivers.refresh": "Обновить Галактическую войну",
@@ -77,16 +78,19 @@ export default {
   "games.warhammer.all": "Все",
   "games.warhammer.play": "Играть за",
   "games.warhammer.face": "Сражаться против",
-  "games.warhammer.unavailable": "Не удалось обновить игры. Ранее загруженные данные могут оставаться на экране.",
+  "games.warhammer.unavailable":
+    "Не удалось обновить игры. Ранее загруженные данные могут оставаться на экране.",
   "games.warhammer.partial": "Некоторые игры недоступны.",
   "games.warhammer.empty": "Пока нет подтверждённых связей для этой роли.",
   "games.warhammer.scope": "Отправная точка для каждой фракции. Полный каталог находится ниже.",
   "games.warhammer.evidence": "Информация издателя об игре {name}",
   "games.warhammer.crossover": "Кроссовер: 40K / Age of Sigmar",
   "games.warhammer.faction.marines": "Космодесант",
-  "games.warhammer.lore.marines": "Бронированные защитники человечества, объединённые в отдельные ордены.",
+  "games.warhammer.lore.marines":
+    "Бронированные защитники человечества, объединённые в отдельные ордены.",
   "games.warhammer.faction.mechanicus": "Адептус Механикус",
-  "games.warhammer.lore.mechanicus": "Почитающие машины жрецы Империума, хранители древних технологий.",
+  "games.warhammer.lore.mechanicus":
+    "Почитающие машины жрецы Империума, хранители древних технологий.",
   "games.warhammer.faction.necrons": "Некроны",
   "games.warhammer.lore.necrons": "Древние династии пробуждаются в телах из живого металла.",
   "games.warhammer.faction.orks": "Орки",
@@ -98,9 +102,12 @@ export default {
   "games.warframe.title": "По Изначальной системе",
   "games.warframe.intro": "Узнайте, что доступно перед следующим заходом.",
   "games.warframe.refresh": "Обновить расписание мира",
-  "games.warframe.unavailable": "Не удалось обновить расписание. Показанные сведения взяты из предыдущего снимка.",
-  "games.warframe.stale": "Источник задерживается. Это последние известные состояния; истёкшие записи скрыты.",
-  "games.warframe.expired": "Этот снимок слишком старый. Текущие списки скрыты до получения новых данных.",
+  "games.warframe.unavailable":
+    "Не удалось обновить расписание. Показанные сведения взяты из предыдущего снимка.",
+  "games.warframe.stale":
+    "Источник задерживается. Это последние известные состояния; истёкшие записи скрыты.",
+  "games.warframe.expired":
+    "Этот снимок слишком старый. Текущие списки скрыты до получения новых данных.",
   "games.warframe.partial": "Часть расписания недоступна.",
   "games.warframe.reported": "Последнее сообщение",
   "games.warframe.waiting": "Ожидание свежих данных",
@@ -137,7 +144,8 @@ export default {
   "games.warframe.noMatches": "Нет текущих разломов, соответствующих фильтрам.",
   "games.warframe.more": "Показать ещё",
   "games.warframe.snapshot": "Снимок: {date}",
-  "games.warframe.scope": "Общее расписание мира. Доступ зависит от прохождения заданий. Названия миссий предоставлены на английском.",
+  "games.warframe.scope":
+    "Общее расписание мира. Доступ зависит от прохождения заданий. Названия миссий предоставлены на английском.",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -148,7 +156,8 @@ export default {
   "games.warframe.state.corpus": "Corpus",
   "games.warframe.state.grineer": "Grineer",
   "games.rivals.title": "Выберите героя",
-  "games.rivals.intro": "Изучайте героев, сравнивайте соперников и подбирайте напарников для следующего матча.",
+  "games.rivals.intro":
+    "Изучайте героев, сравнивайте соперников и подбирайте напарников для следующего матча.",
   "games.rivals.refresh": "Обновить справочник",
   "games.rivals.statsFailed": "Не удалось обновить статистику. Показаны данные предыдущего снимка.",
   "games.rivals.artFailed": "Не удалось обновить официальные изображения и роли.",
@@ -178,12 +187,15 @@ export default {
   "games.rivals.heroRate": "Доля побед героя {hero} против каждого соперника",
   "games.rivals.with": "С напарниками",
   "games.rivals.duoRate": "Совместная доля побед пары",
-  "games.rivals.scope": "Наблюдаемые соревновательные матчи 6 на 6 всех уровней. Не менее 200 матчей на героя и 100 на пару. Результаты пары не означают командную способность и не предсказывают следующий матч.",
+  "games.rivals.scope":
+    "Наблюдаемые соревновательные матчи 6 на 6 всех уровней. Не менее 200 матчей на героя и 100 на пару. Результаты пары не означают командную способность и не предсказывают следующий матч.",
   "games.rivals.snapshot": "Снимок: {date}",
   "games.rivals.noMatches": "Нет героев по выбранным фильтрам.",
   "games.rivals.unavailable": "Справочник недоступен. Попробуйте обновить.",
-  "games.rivals.pairsFailed": "Не удалось обновить сравнения. Показанные пары взяты из предыдущего снимка.",
-  "games.rivals.mismatch": "Снимки источников относятся к разным сезонам. Обновите для сравнения совместимых данных.",
+  "games.rivals.pairsFailed":
+    "Не удалось обновить сравнения. Показанные пары взяты из предыдущего снимка.",
+  "games.rivals.mismatch":
+    "Снимки источников относятся к разным сезонам. Обновите для сравнения совместимых данных.",
   "games.rivals.sample": "{count} матчей",
   "games.darktide.scriptures": "Собрать священные писания",
   "games.darktide.grimoires": "Собрать гримуары",
@@ -205,7 +217,8 @@ export default {
   "games.darktide.empty": "В последних данных нет действующих миссий.",
   "games.darktide.more": "Показать ещё миссии",
   "games.darktide.checked": "Проверено: {date}",
-  "games.darktide.scope": "Данные сообщества. Доступность и награды могут отличаться в игре; это не доска миссий вашего персонажа.",
+  "games.darktide.scope":
+    "Данные сообщества. Доступность и награды могут отличаться в игре; это не доска миссий вашего персонажа.",
   "games.darktide.remaining": "Осталось {count} мин",
   "games.darktide.credits": "Ордо-докеты",
   "games.darktide.xp": "Опыт",
@@ -245,9 +258,12 @@ export default {
   "games.companion.showAll": "Показать всех героев ({count})",
   "games.companion.noMatches": "Нет героев по вашему запросу.",
   "games.companion.through": "Матчи по {date}",
-  "games.companion.sampleNote": "Выборка сообщества, все ранги; не менее 100 матчей на героя. Это не прогноз.",
-  "games.companion.unavailable": "Не удалось обновить данные. Показаны результаты предыдущей проверки.",
-  "games.companion.statsUnavailable": "Статистика недоступна. Вы по-прежнему можете просматривать героев.",
+  "games.companion.sampleNote":
+    "Выборка сообщества, все ранги; не менее 100 матчей на героя. Это не прогноз.",
+  "games.companion.unavailable":
+    "Не удалось обновить данные. Показаны результаты предыдущей проверки.",
+  "games.companion.statsUnavailable":
+    "Статистика недоступна. Вы по-прежнему можете просматривать героев.",
   "games.gw2.title": "Хранилище волшебника",
   "games.gw2.intro": "Выберите награды и спланируйте расход Astral Acclaim.",
   "games.gw2.refresh": "Обновить награды",
@@ -257,7 +273,8 @@ export default {
   "games.gw2.partial": "Некоторые сведения о предметах недоступны. Цены по-прежнему учитываются.",
   "games.gw2.guide": "Руководство по хранилищу",
   "games.gw2.checked": "Проверено: {date}",
-  "games.gw2.scope": "Сохранено в этом профиле Harbor. Каждый выбор учитывает одно предложение; баланс, лимиты покупок и доступ к дополнениям не проверяются. Проверьте доступность и купите в игре.",
+  "games.gw2.scope":
+    "Сохранено в этом профиле Harbor. Каждый выбор учитывает одно предложение; баланс, лимиты покупок и доступ к дополнениям не проверяются. Проверьте доступность и купите в игре.",
   "games.gw2.total": "Планируемая сумма",
   "games.gw2.currency": "Astral Acclaim",
   "games.gw2.selected": "Выбрано предложений: {count}",
@@ -287,14 +304,16 @@ export default {
   "games.gw2.quantity": "Количество: {count}",
   "games.deadlockBuilds.open": "Сборки сообщества",
   "games.deadlockBuilds.back": "Назад к сборкам",
-  "games.deadlockBuilds.intro": "Руководства по предметам от сообщества. Перед выбором проверьте дату обновления.",
+  "games.deadlockBuilds.intro":
+    "Руководства по предметам от сообщества. Перед выбором проверьте дату обновления.",
   "games.deadlockBuilds.search": "Поиск сборок",
   "games.deadlockBuilds.recent": "Недавно обновлённые",
   "games.deadlockBuilds.popular": "Избранное за неделю",
   "games.deadlockBuilds.language": "Язык сборки",
   "games.deadlockBuilds.allLanguages": "Все языки",
   "games.deadlockBuilds.refresh": "Обновить сборки",
-  "games.deadlockBuilds.failed": "Не удалось обновить сборки. Ранее загруженные руководства могут устареть.",
+  "games.deadlockBuilds.failed":
+    "Не удалось обновить сборки. Ранее загруженные руководства могут устареть.",
   "games.deadlockBuilds.updated": "Обновлено: {date}",
   "games.deadlockBuilds.undated": "Дата обновления неизвестна",
   "games.deadlockBuilds.favorites": "Добавлений в избранное за неделю: {count}",
@@ -306,8 +325,10 @@ export default {
   "games.deadlockBuilds.copy": "Копировать ID сборки",
   "games.deadlockBuilds.use": "ID сборки:",
   "games.deadlockBuilds.copyFailed": "Не удалось скопировать. Выделите ID и скопируйте вручную.",
-  "games.deadlockBuilds.definitions": "Названия и цены предметов взяты из последних известных данных игры. Старые руководства могут отличаться; группы могут включать альтернативы.",
-  "games.deadlockBuilds.itemsFailed": "Некоторые данные предметов недоступны. Руководство автора и ID предметов остаются видимыми.",
+  "games.deadlockBuilds.definitions":
+    "Названия и цены предметов взяты из последних известных данных игры. Старые руководства могут отличаться; группы могут включать альтернативы.",
+  "games.deadlockBuilds.itemsFailed":
+    "Некоторые данные предметов недоступны. Руководство автора и ID предметов остаются видимыми.",
   "games.deadlockBuilds.noItems": "В этой сборке нет групп предметов.",
   "games.deadlockBuilds.group": "Группа {number}",
   "games.deadlockBuilds.optional": "Необязательно",
@@ -329,7 +350,8 @@ export default {
   "games.rivals.guide.teamUp": "Командные способности",
   "games.rivals.guide.base": "Базовый эффект",
   "games.rivals.guide.enhanced": "Усиленный эффект",
-  "games.rivals.guide.reference": "Официальный справочник героя · На английском. Значения могут меняться с обновлениями баланса.",
+  "games.rivals.guide.reference":
+    "Официальный справочник героя · На английском. Значения могут меняться с обновлениями баланса.",
   "games.rivals.guide.failed": "Не удалось загрузить официальный справочник героя.",
   "games.rivals.guide.partial": "Некоторые сведения о способностях недоступны.",
   "games.rivals.guide.checked": "Проверено: {date}",

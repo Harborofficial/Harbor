@@ -106,7 +106,8 @@ function bump(counts, key) {
 }
 
 export async function fetchWikidataList(source) {
-  const query = source.awardYear === "ceremony" ? ceremonyQuery(source.award) : releaseQuery(source.award);
+  const query =
+    source.awardYear === "ceremony" ? ceremonyQuery(source.award) : releaseQuery(source.award);
   const { rows, ms } = await ask(query);
   const skipped = new Map();
   const seen = new Set();

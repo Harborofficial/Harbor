@@ -57,7 +57,8 @@ const used: Record<string, string> = {
   "Blur up looks smoothest. Fade is lighter on older devices. Instant turns it off.":
     "El desenfoque ascendente se ve más fluido. El fundido es más ligero en dispositivos antiguos. La opción instantánea lo desactiva.",
   "Browse public groups": "Explorar grupos públicos",
-  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.": "Almacena todo el archivo en búfer en segundo plano mientras lo ves, incluso en pausa, para que los remuxes grandes se precarguen y puedas desplazarte por un archivo en caché sin volver a almacenarlo en búfer. Funciona con fuentes de debrid y P2P. Usa más espacio en disco y ancho de banda; se borra al cambiar de fuente o cerrar.",
+  "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and P2P streams. Uses more disk and bandwidth; cleared when you switch or close.":
+    "Almacena todo el archivo en búfer en segundo plano mientras lo ves, incluso en pausa, para que los remuxes grandes se precarguen y puedas desplazarte por un archivo en caché sin volver a almacenarlo en búfer. Funciona con fuentes de debrid y P2P. Usa más espacio en disco y ancho de banda; se borra al cambiar de fuente o cerrar.",
   "Bulk upload is not live yet, sending one rating per second.":
     "La carga masiva aún no está disponible; se enviará una calificación por segundo.",
   "Cancel import": "Cancelar importación",

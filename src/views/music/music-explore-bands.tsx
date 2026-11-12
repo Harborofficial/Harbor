@@ -123,14 +123,19 @@ export function MusicExploreBands({ recents, liked, active, onPlay, onOpen, genr
   useEffect(() => {
     if (!genre) return;
     let live = true;
-    void readArtistGenres().then((value) => { if (live) setTags(value); });
-    return () => { live = false; };
+    void readArtistGenres().then((value) => {
+      if (live) setTags(value);
+    });
+    return () => {
+      live = false;
+    };
   }, [genre]);
   const scoped = useCallback(
     (list: readonly MusicTrack[]) =>
       genre
         ? list.filter((track) =>
-            genreMatchesTags(genre, tags.get(genreSearchKey(track.artist ?? "")) ?? []))
+            genreMatchesTags(genre, tags.get(genreSearchKey(track.artist ?? "")) ?? []),
+          )
         : [...list],
     [genre, tags],
   );

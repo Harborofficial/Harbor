@@ -8,6 +8,11 @@ import { useTogether } from "@/lib/together/provider";
 import { useView, type PlayEpisode, type PlayerSrc } from "@/lib/view";
 import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { playError, streamIdentity, type PickerError } from "@/views/play-picker/picker-utils";
+import {
+  streamMatchesRememberedSource,
+  streamMatchesSource,
+  streamOfferedByAddon,
+} from "@/lib/playback-history";
 import { useAutoCandidates } from "@/views/play-picker/use-auto-candidates";
 import { useAutoFire } from "@/views/play-picker/use-auto-fire";
 import { usePickHandler } from "@/views/play-picker/use-pick-handler";
@@ -134,6 +139,7 @@ export function useBpStreamPlay(params: {
     hostSource: hostSourceForMedia,
     prefer1080: !!kid,
     preferPacks: seasonLock,
+    sourceEntryFirst: seasonLock,
     season,
     episode: episodeNo,
     expectedTitle: meta.name,
@@ -191,6 +197,20 @@ export function useBpStreamPlay(params: {
       setResolving,
     });
 
+  const preferredSourceEntry =
+    seasonLock && s.sourceEntry ? s.sourceEntry : (s.previousPlayback ?? s.sourceEntry);
+  const preferredSourceMatched = (() => {
+    const candidate = autoCandidates[0];
+    if (!preferredSourceEntry || !candidate) return false;
+    if (preferredSourceEntry === s.previousPlayback)
+      return streamMatchesRememberedSource(candidate, preferredSourceEntry);
+    return (
+      streamMatchesSource(candidate, preferredSourceEntry) &&
+      (!preferredSourceEntry.addonId ||
+        streamOfferedByAddon(candidate, preferredSourceEntry.addonId))
+    );
+  })();
+
   useAutoFire({
     autoActive,
     autoCandidates,
@@ -206,6 +226,8 @@ export function useBpStreamPlay(params: {
     isTorrentioStream,
     expectHostSource,
     hostSource: hostSourceForMedia,
+    preferredSourceEntry,
+    preferredSourceMatched,
     season,
     episode: episodeNo,
     addonQuorum: s.addonQuorum,

@@ -47,7 +47,11 @@ function SuggestSuccess({ onAgain }: { onAgain: () => void }) {
             stroke="currentColor"
             strokeWidth="2"
             className="text-accent/40"
-            style={{ strokeDasharray: 64, strokeDashoffset: 64, animation: "harbor-check-ring 0.5s ease-out forwards" }}
+            style={{
+              strokeDasharray: 64,
+              strokeDashoffset: 64,
+              animation: "harbor-check-ring 0.5s ease-out forwards",
+            }}
           />
           <path
             d="M7 12.5l3.2 3.2L17 8.2"
@@ -57,14 +61,20 @@ function SuggestSuccess({ onAgain }: { onAgain: () => void }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             className="text-accent"
-            style={{ strokeDasharray: 22, strokeDashoffset: 22, animation: "harbor-check-draw 0.4s 0.32s ease-out forwards" }}
+            style={{
+              strokeDasharray: 22,
+              strokeDashoffset: 22,
+              animation: "harbor-check-draw 0.4s 0.32s ease-out forwards",
+            }}
           />
         </svg>
       </span>
       <div className="flex flex-col gap-1.5">
         <p className="text-[17px] font-semibold text-ink">{t("Suggestion sent")}</p>
         <p className="mx-auto max-w-[19rem] text-[14px] leading-snug text-ink-muted">
-          {t("We review every source. Yours will be reviewed and approved shortly if it checks out.")}
+          {t(
+            "We review every source. Yours will be reviewed and approved shortly if it checks out.",
+          )}
         </p>
       </div>
       <button
@@ -124,7 +134,10 @@ export function SuggestSection() {
         className="flex w-full items-center justify-between px-5 py-4 text-start transition-colors hover:bg-raised/40 active:scale-[0.99]"
       >
         <span className="text-[16px] font-semibold text-ink">{t("Suggest a source")}</span>
-        <ChevronDown size={19} className={`text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={19}
+          className={`text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="border-t border-edge-soft p-5">
@@ -133,7 +146,9 @@ export function SuggestSection() {
           ) : (
             <div className="harbor-rise flex flex-col gap-3">
               <p className="text-[13.5px] leading-relaxed text-ink-muted">
-                {t("Know a good one? Add a name, its API or site URL, and an icon if you have one. We review every suggestion before it goes live.")}
+                {t(
+                  "Know a good one? Add a name, its API or site URL, and an icon if you have one. We review every suggestion before it goes live.",
+                )}
               </p>
               <div className="flex items-center gap-3">
                 <button
@@ -179,10 +194,21 @@ export function SuggestSection() {
               />
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPick} />
               {state === "error" && (
-                <p className="text-[13px] font-medium text-danger">{t("Enter a name and a valid https:// URL.")}</p>
+                <p className="text-[13px] font-medium text-danger">
+                  {t("Enter a name and a valid https:// URL.")}
+                </p>
               )}
-              <button type="button" onClick={submit} disabled={state === "sending"} className={PRIMARY_BTN}>
-                {state === "sending" ? <Loader2 size={17} className="animate-spin" /> : <Send size={17} />}
+              <button
+                type="button"
+                onClick={submit}
+                disabled={state === "sending"}
+                className={PRIMARY_BTN}
+              >
+                {state === "sending" ? (
+                  <Loader2 size={17} className="animate-spin" />
+                ) : (
+                  <Send size={17} />
+                )}
                 {state === "sending" ? t("Sending...") : t("Send suggestion")}
               </button>
             </div>

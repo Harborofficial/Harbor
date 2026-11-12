@@ -43,17 +43,22 @@ export function MusicCollectionControls({
         )}
       </button>
       {(tracks.length > 1 || loading) && (
-        <HoverTooltip label={t("music.transport.shuffle")} side="top" align="center" disabled={disabled || loading}>
-        <button
-          type="button"
-          className="music-collection-shuffle"
+        <HoverTooltip
+          label={t("music.transport.shuffle")}
+          side="top"
+          align="center"
           disabled={disabled || loading}
-          aria-pressed={transport.shuffle}
-          aria-label={t("music.transport.shuffle")}
-          onClick={toggleMusicShuffle}
         >
-          <Shuffle size={26} aria-hidden />
-        </button>
+          <button
+            type="button"
+            className="music-collection-shuffle"
+            disabled={disabled || loading}
+            aria-pressed={transport.shuffle}
+            aria-label={t("music.transport.shuffle")}
+            onClick={toggleMusicShuffle}
+          >
+            <Shuffle size={26} aria-hidden />
+          </button>
         </HoverTooltip>
       )}
       {extra}

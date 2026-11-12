@@ -40,7 +40,8 @@ export default {
   "games.league.more": "Więcej bohaterów",
   "games.league.empty": "Żaden bohater nie pasuje do wyszukiwania.",
   "games.league.poolEmpty": "Zapisz tu ulubionych. Otwórz bohatera i dodaj go do swojej puli.",
-  "games.league.unavailable": "Nie udało się odświeżyć danych. Poprzednie wyniki pozostają dostępne.",
+  "games.league.unavailable":
+    "Nie udało się odświeżyć danych. Poprzednie wyniki pozostają dostępne.",
   "games.league.back": "Wróć do bohaterów",
   "games.league.addPool": "Dodaj do mojej puli",
   "games.league.inPool": "W mojej puli",
@@ -74,17 +75,22 @@ export default {
   "games.league.story": "Historia bohatera",
   "games.league.exploreMore": "Odkryj więcej",
   "games.league.guides": "Poradniki wideo",
-  "games.league.metaScope": "OP.GG dostarcza ranking alei z domyślnej próbki, bez informacji o aktualizacji, regionie i zakresie rang. Odsetek zwycięstw wynika ze zgłoszonych zwycięstw i gier; częstość wyboru jest zaokrąglana przez źródło. Rankingi i buildy korzystają z osobnych próbek.",
-  "games.league.buildNote": "Każdy build ma osobną próbkę. Pełne buildy dotyczą częściej gier trwających dość długo, by kupić przedmioty; ich odsetek zwycięstw nie jest ogólnym wynikiem bohatera. Próbki pojedynków mogą być małe. Dostosuj się do drużyny i rywala. Filmy mogą pochodzić ze starszych aktualizacji.",
-  "games.league.patchDifference": "Statystyki buildu: {patch}; dane przedmiotów i umiejętności: {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "OP.GG dostarcza ranking alei z domyślnej próbki, bez informacji o aktualizacji, regionie i zakresie rang. Odsetek zwycięstw wynika ze zgłoszonych zwycięstw i gier; częstość wyboru jest zaokrąglana przez źródło. Rankingi i buildy korzystają z osobnych próbek.",
+  "games.league.buildNote":
+    "Każdy build ma osobną próbkę. Pełne buildy dotyczą częściej gier trwających dość długo, by kupić przedmioty; ich odsetek zwycięstw nie jest ogólnym wynikiem bohatera. Próbki pojedynków mogą być małe. Dostosuj się do drużyny i rywala. Filmy mogą pochodzić ze starszych aktualizacji.",
+  "games.league.patchDifference":
+    "Statystyki buildu: {patch}; dane przedmiotów i umiejętności: {assets}.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Lista poziomów",
   "games.league.tierScope": "Ranking solo/duo · Szmaragd+ · Globalnie",
   "games.league.patchFilter": "Wybierz aktualizację",
   "games.league.allRoles": "Wszystkie role",
   "games.league.banRate": "Odsetek banów",
   "games.league.matches": "Mecze",
-  "games.league.tierNote": "Pozycje dotyczą poszczególnych ról. Buildy bohaterów pokazują najnowsze dostępne dane.",
+  "games.league.tierNote":
+    "Pozycje dotyczą poszczególnych ról. Buildy bohaterów pokazują najnowsze dostępne dane.",
   "games.official.publisherSource": "Oficjalne pobieranie od wydawcy",
   "games.official.get": "Pobierz {launcher}",
 };

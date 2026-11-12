@@ -63,7 +63,15 @@ export function PlayOnModal() {
   );
 }
 
-function QueueButton({ onClick, disabled, label }: { onClick: () => void; disabled: boolean; label: string }) {
+function QueueButton({
+  onClick,
+  disabled,
+  label,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  label: string;
+}) {
   return (
     <button
       type="button"
@@ -176,7 +184,10 @@ function PlayOnPanel({ request, themeId }: { request: PlayOnRequest; themeId: st
 
   const runRemote = useCallback(
     async (instance: HarborInstance, action: PlayOnAction) => {
-      setRows((prev) => ({ ...prev, [instance.id]: { kind: "busy", text: t("Sending to that Harbor") } }));
+      setRows((prev) => ({
+        ...prev,
+        [instance.id]: { kind: "busy", text: t("Sending to that Harbor") },
+      }));
       const result = await sendToInstance(instance, action, payload);
       if (!alive.current) return;
       if (result.ok) {
@@ -309,7 +320,9 @@ function PlayOnPanel({ request, themeId }: { request: PlayOnRequest; themeId: st
           {settled && peers.length === 0 ? (
             <p className="px-4 py-6 text-center text-[12.5px] leading-relaxed text-ink-muted">
               {isTauri
-                ? t("No other Harbor answered on this network. One shows up here a moment after it starts.")
+                ? t(
+                    "No other Harbor answered on this network. One shows up here a moment after it starts.",
+                  )
                 : t("Network discovery needs the desktop app.")}
             </p>
           ) : null}

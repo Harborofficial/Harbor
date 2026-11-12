@@ -44,7 +44,7 @@ test("ignores missing headers, non-http URLs, and headers after the first line",
   assert.deepEqual(readM3uHeaderEpgUrls("#EXTINF:-1,One\nhttps://example.com/1.ts"), []);
   assert.deepEqual(readM3uHeaderEpgUrls('#EXTM3U url-tvg="file:///tmp/epg.xml"'), []);
   assert.deepEqual(
-    readM3uHeaderEpgUrls("#EXTINF:-1,One\n#EXTM3U url-tvg=\"https://example.com/epg.xml\""),
+    readM3uHeaderEpgUrls('#EXTINF:-1,One\n#EXTM3U url-tvg="https://example.com/epg.xml"'),
     [],
   );
 });

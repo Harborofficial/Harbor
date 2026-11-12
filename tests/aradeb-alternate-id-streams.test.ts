@@ -1,4 +1,5 @@
 import { streamKey } from "../src/lib/streams/identity.ts";
+import { addonBaseUrl, addonResourceUrl } from "../src/lib/addon-url.ts";
 // @ts-expect-error Node-only test
 import assert from "node:assert/strict";
 // @ts-expect-error Node-only test
@@ -14,6 +15,7 @@ function harness(successfulScheme: "tmdb" | "imdb") {
   }).outputText;
   const api: Record<string, any> = {};
   const mocks: Record<string, any> = {
+    "@/lib/addon-url": { addonBaseUrl, addonResourceUrl },
     "@/lib/safe-fetch": {
       safeFetch: async (url: string) => {
         calls.push(url);
@@ -41,6 +43,7 @@ function harness(successfulScheme: "tmdb" | "imdb") {
     "@/lib/fetch-fallback-policy": { isHarborFetchPolicyError: () => false },
     "@/lib/local-network": { isLocalNetworkUrl: () => false },
     "./addon-detect": {
+      detectAddonFamily: () => "other",
       isAddonRanked: () => false,
       isRetiredTorboxAddon: () => false,
       isStatusOnlyAddon: () => false,

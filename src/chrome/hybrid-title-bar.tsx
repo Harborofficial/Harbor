@@ -46,10 +46,7 @@ function BarSearch() {
     prevOpen.current = open;
   }, [open, setQuery]);
   return (
-    <div
-      data-tauri-drag-region="false"
-      className="flex h-full w-[360px] items-center gap-2.5"
-    >
+    <div data-tauri-drag-region="false" className="flex h-full w-[360px] items-center gap-2.5">
       <Search size={15} strokeWidth={2} className="shrink-0 text-ink-subtle" />
       <input
         value={query}
@@ -77,13 +74,22 @@ export function WindowCaptionPreview({ native = false }: { native?: boolean }) {
   return osClass() === "macos" ? <MacDots preview /> : <WinControls preview native={native} />;
 }
 
-function WinControls({ preview = false, native = false }: { preview?: boolean; native?: boolean } = {}) {
+function WinControls({
+  preview = false,
+  native = false,
+}: { preview?: boolean; native?: boolean } = {}) {
   const t = useT();
   const maxed = useMaximized();
   const win = osClass() === "windows";
   return (
     <div data-tauri-drag-region="false" className="flex h-full items-stretch">
-      <WinBtn label={t("chrome.minimize")} onClick={preview ? undefined : minimize} win={win} native={native} glyph={""}>
+      <WinBtn
+        label={t("chrome.minimize")}
+        onClick={preview ? undefined : minimize}
+        win={win}
+        native={native}
+        glyph={""}
+      >
         <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       </WinBtn>
       <WinBtn
@@ -95,7 +101,15 @@ function WinControls({ preview = false, native = false }: { preview?: boolean; n
       >
         {maxed ? (
           <>
-            <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
+            <rect
+              x="2.5"
+              y="4.5"
+              width="6"
+              height="6"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              rx="1"
+            />
             <path
               d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
               stroke="currentColor"
@@ -107,8 +121,20 @@ function WinControls({ preview = false, native = false }: { preview?: boolean; n
           <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
         )}
       </WinBtn>
-      <WinBtn label={t("common.close")} onClick={preview ? undefined : close} danger win={win} native={native} glyph={""}>
-        <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <WinBtn
+        label={t("common.close")}
+        onClick={preview ? undefined : close}
+        danger
+        win={win}
+        native={native}
+        glyph={""}
+      >
+        <path
+          d="M3.5 3.5l6 6M9.5 3.5l-6 6"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
       </WinBtn>
     </div>
   );
@@ -172,7 +198,12 @@ function MacDots({ preview = false }: { preview?: boolean } = {}) {
   return (
     <div data-tauri-drag-region="false" className="flex h-full items-center gap-2 pl-3.5 pr-2">
       <MacDot color="#ff5f57" label={t("common.close")} onClick={preview ? undefined : close}>
-        <path d="M3.2 3.2l3.6 3.6M6.8 3.2l-3.6 3.6" stroke="#4d0000" strokeWidth="1.3" strokeLinecap="round" />
+        <path
+          d="M3.2 3.2l3.6 3.6M6.8 3.2l-3.6 3.6"
+          stroke="#4d0000"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+        />
       </MacDot>
       <MacDot color="#febc2e" label={t("chrome.minimize")} onClick={preview ? undefined : minimize}>
         <path d="M2.6 5h4.8" stroke="#5a3d00" strokeWidth="1.3" strokeLinecap="round" />

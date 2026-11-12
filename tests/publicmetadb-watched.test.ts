@@ -209,16 +209,14 @@ test("mappings cache 404s and avoids repeat lookups", async () => {
   clearPmdbMappingsCache();
   const calls: string[] = [];
   const restore = mockFetch(
-    (url) => (url.includes("/api/external/mappings") ? new Response("nope", { status: 404 }) : null),
+    (url) =>
+      url.includes("/api/external/mappings") ? new Response("nope", { status: 404 }) : null,
     calls,
   );
   try {
     assert.equal(await getImdbForTmdb(1, "movie"), null);
     assert.equal(await getImdbForTmdb(1, "movie"), null);
-    assert.equal(
-      calls.filter((u) => u.includes("/api/external/mappings")).length,
-      1,
-    );
+    assert.equal(calls.filter((u) => u.includes("/api/external/mappings")).length, 1);
     assert.equal(await getTmdbForExternal("mal", "1"), null);
   } finally {
     restore();

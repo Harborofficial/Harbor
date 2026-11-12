@@ -3,11 +3,13 @@ export default {
   "games.audience.deck": "Steam Deck · 최다 플레이",
   "games.audience.deckNote": "Steam Deck 최다 플레이 게임 · 지난 1주",
   "games.audience.deckSource": "Steam Deck · 주간 플레이 순위",
-  "games.audience.deckCoverage": "Valve의 Steam Deck 주간 순위가 자동으로 갱신됩니다. 이 순위의 동시 접속자 수는 공개되지 않습니다.",
+  "games.audience.deckCoverage":
+    "Valve의 Steam Deck 주간 순위가 자동으로 갱신됩니다. 이 순위의 동시 접속자 수는 공개되지 않습니다.",
   "games.audience.xbox": "Xbox · 가장 많이 플레이한 게임",
   "games.audience.xboxNote": "가장 많이 플레이한 Xbox 게임 · 미국",
   "games.audience.xboxSource": "Xbox · 현재 인기 순위",
-  "games.audience.xboxCoverage": "자동으로 갱신되는 Microsoft의 미국 Xbox 순위입니다. Xbox는 플레이어 수를 공개하지 않습니다.",
+  "games.audience.xboxCoverage":
+    "자동으로 갱신되는 Microsoft의 미국 Xbox 순위입니다. Xbox는 플레이어 수를 공개하지 않습니다.",
   "games.audience.xboxChecked": "확인: {date}",
   "games.audience.xboxView": "Xbox에서 보기",
   "games.audience.pc": "PC · 모든 런처",
@@ -19,6 +21,7 @@ export default {
   "games.audience.monthlyRank": "월간 순위 {rank}",
   "games.audience.onSteamNow": "현재 Steam에서 플레이 중",
   "games.audience.source": "Newzoo · 월간 활성 플레이어",
-  "games.audience.coverage": "중국과 인도를 제외한 37개 시장의 월간 활성 플레이어 기준 공개 상위 10위입니다. 해당 월의 순위이며 실시간 인원이나 전 세계 순위가 아닙니다.",
-  "games.audience.snapshot": "Newzoo · 공개 순위 · {month}"
+  "games.audience.coverage":
+    "중국과 인도를 제외한 37개 시장의 월간 활성 플레이어 기준 공개 상위 10위입니다. 해당 월의 순위이며 실시간 인원이나 전 세계 순위가 아닙니다.",
+  "games.audience.snapshot": "Newzoo · 공개 순위 · {month}",
 };

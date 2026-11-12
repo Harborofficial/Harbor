@@ -2,7 +2,11 @@
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
-import { rankEpisodes, riskyTitle, type RawEpisode } from "../src/lib/providers/podcast-criticism/match.ts";
+import {
+  rankEpisodes,
+  riskyTitle,
+  type RawEpisode,
+} from "../src/lib/providers/podcast-criticism/match.ts";
 
 type Seed = {
   show: string;
@@ -106,8 +110,16 @@ test("a following year that is not this film's year is rejected", () => {
 test("a show outside the allowlist, the film genres and the film-named shows is rejected", () => {
   const kept = titlesKept(
     [
-      { show: "Fake Doctors, Real Friends", track: "314: My Screw Up with Joshua Radin", genre: "Comedy" },
-      { show: "Stand Up for Doctors!", track: "A Life Doctors Want to Keep Showing Up For", genre: "Mental Health" },
+      {
+        show: "Fake Doctors, Real Friends",
+        track: "314: My Screw Up with Joshua Radin",
+        genre: "Comedy",
+      },
+      {
+        show: "Stand Up for Doctors!",
+        track: "A Life Doctors Want to Keep Showing Up For",
+        genre: "Mental Health",
+      },
     ],
     "Up",
     2009,
@@ -153,5 +165,13 @@ test("one show contributes at most two episodes", () => {
 
 test("no results is an empty list rather than a failure", () => {
   assert.deepEqual(rankEpisodes([], ["Parasite"], 2019, ["Bong Joon-ho"]), []);
-  assert.deepEqual(rankEpisodes([episode({ show: "Filmspotting", track: "Weekend Review" })], ["Parasite"], 2019, []), []);
+  assert.deepEqual(
+    rankEpisodes(
+      [episode({ show: "Filmspotting", track: "Weekend Review" })],
+      ["Parasite"],
+      2019,
+      [],
+    ),
+    [],
+  );
 });

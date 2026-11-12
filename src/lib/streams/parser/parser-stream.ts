@@ -34,7 +34,9 @@ export function parseStream(stream: Stream): ParsedStream {
   const ptt = parse(filenameLine || text) as DefaultParserResult;
   // Torrent-title parsers can return "[" for bracket-prefixed Arabic releases,
   // preventing the trust filter from ever comparing the actual show title.
-  const nativeScriptTitle = filenameLine.match(/[\p{Script=Arabic}][\p{Script=Arabic}\p{M}\s\u200c\u200d'-]*/u)?.[0]?.trim();
+  const nativeScriptTitle = filenameLine
+    .match(/[\p{Script=Arabic}][\p{Script=Arabic}\p{M}\s\u200c\u200d'-]*/u)?.[0]
+    ?.trim();
 
   const resolution = mapResolution(ptt.resolution);
   const hdrFormat = detectHdr(text);
@@ -75,9 +77,10 @@ export function parseStream(stream: Stream): ParsedStream {
 
   return {
     ...stream,
-    parsedTitle: nativeScriptTitle && (!ptt.title || ptt.title.trim().length < 3)
-      ? nativeScriptTitle
-      : (ptt.title ?? filenameLine.slice(0, 100) ?? text.slice(0, 100)),
+    parsedTitle:
+      nativeScriptTitle && (!ptt.title || ptt.title.trim().length < 3)
+        ? nativeScriptTitle
+        : (ptt.title ?? filenameLine.slice(0, 100) ?? text.slice(0, 100)),
     episodeTitle: parseEpisodeTitle(filenameLine, ptt.season, ptt.episode),
     resolution,
     hdrFormat,

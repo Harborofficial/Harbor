@@ -1,25 +1,180 @@
 const GROUPS = [
   ["Director", ["director", "directors", "co-director", "codirector", "director/producer"]],
-  ["Screenplay", ["screenplay", "screenwriter", "screen writer", "written by", "writer", "writers", "scenario", "story", "adaptation", "dialogue", "screen story", "script"]],
-  ["Based on", ["literary source", "novel", "play", "book", "short story", "source material", "comic strip", "musical", "opera", "poem", "libretto"]],
-  ["Cinematography", ["cinematographer", "cinematography", "director of photography", "camera", "cameraman", "camera operator", "cinematographer(seq)", "photography", "additional photography", "aerial photography"]],
-  ["Editing", ["editor", "editing", "film editor", "supervising editor", "editors", "supervising film editor"]],
-  ["Production design", ["production design", "production designer", "art direction", "art director", "set design", "set designer", "set decoration", "set decorator", "settings", "art directors", "production designers"]],
+  [
+    "Screenplay",
+    [
+      "screenplay",
+      "screenwriter",
+      "screen writer",
+      "written by",
+      "writer",
+      "writers",
+      "scenario",
+      "story",
+      "adaptation",
+      "dialogue",
+      "screen story",
+      "script",
+    ],
+  ],
+  [
+    "Based on",
+    [
+      "literary source",
+      "novel",
+      "play",
+      "book",
+      "short story",
+      "source material",
+      "comic strip",
+      "musical",
+      "opera",
+      "poem",
+      "libretto",
+    ],
+  ],
+  [
+    "Cinematography",
+    [
+      "cinematographer",
+      "cinematography",
+      "director of photography",
+      "camera",
+      "cameraman",
+      "camera operator",
+      "cinematographer(seq)",
+      "photography",
+      "additional photography",
+      "aerial photography",
+    ],
+  ],
+  [
+    "Editing",
+    [
+      "editor",
+      "editing",
+      "film editor",
+      "supervising editor",
+      "editors",
+      "supervising film editor",
+    ],
+  ],
+  [
+    "Production design",
+    [
+      "production design",
+      "production designer",
+      "art direction",
+      "art director",
+      "set design",
+      "set designer",
+      "set decoration",
+      "set decorator",
+      "settings",
+      "art directors",
+      "production designers",
+    ],
+  ],
   ["Costumes", ["costumes", "costume design", "costume designer", "wardrobe", "gowns", "costume"]],
-  ["Music", ["music", "original music", "musical score", "music composer", "composer", "music direction", "score", "songs", "song", "lyrics", "music supervisor", "musical direction", "music (uncredited)", "original score"]],
-  ["Sound", ["sound", "sound design", "sound designer", "sound recording", "sound re-recording mixer", "sound effects", "sound editor", "sound mixer"]],
-  ["Animation", ["animation", "animator", "animators", "animation director", "animation supervisor", "animation design"]],
-  ["Visual effects", ["visual effects", "special effects", "special photographic effects", "optical effects", "visual effects supervisor", "special visual effects"]],
+  [
+    "Music",
+    [
+      "music",
+      "original music",
+      "musical score",
+      "music composer",
+      "composer",
+      "music direction",
+      "score",
+      "songs",
+      "song",
+      "lyrics",
+      "music supervisor",
+      "musical direction",
+      "music (uncredited)",
+      "original score",
+    ],
+  ],
+  [
+    "Sound",
+    [
+      "sound",
+      "sound design",
+      "sound designer",
+      "sound recording",
+      "sound re-recording mixer",
+      "sound effects",
+      "sound editor",
+      "sound mixer",
+    ],
+  ],
+  [
+    "Animation",
+    [
+      "animation",
+      "animator",
+      "animators",
+      "animation director",
+      "animation supervisor",
+      "animation design",
+    ],
+  ],
+  [
+    "Visual effects",
+    [
+      "visual effects",
+      "special effects",
+      "special photographic effects",
+      "optical effects",
+      "visual effects supervisor",
+      "special visual effects",
+    ],
+  ],
   ["Choreography", ["choreography", "choreographer", "dance director"]],
   ["Titles", ["titles", "title design", "title designer", "main titles"]],
-  ["Producer", ["producer", "producers", "executive producer", "associate producer", "co-producer", "coproducer", "executive producers"]],
+  [
+    "Producer",
+    [
+      "producer",
+      "producers",
+      "executive producer",
+      "associate producer",
+      "co-producer",
+      "coproducer",
+      "executive producers",
+    ],
+  ],
 ];
 
 const PERFORMER = new Set([
-  "actor", "actress", "actors", "actresses", "voice", "performer", "performers", "narrator",
-  "appearance", "himself", "herself", "themselves", "self", "cast", "actor (voice)",
-  "actress (voice)", "actor?", "actress?", "musical performer", "host", "commentator",
-  "interviewee", "subject", "interviewer", "guest", "singer", "dancer", "voices",
+  "actor",
+  "actress",
+  "actors",
+  "actresses",
+  "voice",
+  "performer",
+  "performers",
+  "narrator",
+  "appearance",
+  "himself",
+  "herself",
+  "themselves",
+  "self",
+  "cast",
+  "actor (voice)",
+  "actress (voice)",
+  "actor?",
+  "actress?",
+  "musical performer",
+  "host",
+  "commentator",
+  "interviewee",
+  "subject",
+  "interviewer",
+  "guest",
+  "singer",
+  "dancer",
+  "voices",
 ]);
 
 const lookup = new Map();
@@ -37,7 +192,10 @@ function normal(role) {
 function variants(role) {
   const base = normal(role);
   const out = [base];
-  const bare = base.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
+  const bare = base
+    .replace(/\s*\([^)]*\)\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   if (bare && bare !== base) out.push(bare);
   for (const v of [...out]) {
     const byless = v.replace(/\s+by$/, "").trim();
@@ -58,7 +216,9 @@ function classify(role) {
 const CREDENTIAL = /^(?:[A-Z]\.?){2,5}$/;
 
 export function displayName(raw) {
-  const name = String(raw ?? "").replace(/\s+/g, " ").trim();
+  const name = String(raw ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
   const parts = name.split(",").map((p) => p.trim());
   while (parts.length > 1 && CREDENTIAL.test(parts[parts.length - 1])) parts.pop();
   if (parts.length !== 2) return parts.join(", ");

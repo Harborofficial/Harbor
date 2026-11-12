@@ -15,7 +15,9 @@ export default {
   "artwork.resetLaunch": "Açılış logosunu sıfırla",
   "artwork.local": "Bu cihazda saklanır. Hareket azaltıldığında sabit bir resim kullanılır.",
   "artwork.error.large": "Daha küçük bir dosya seçin: en fazla 8 MB ve 4096 × 4096 piksel.",
-  "artwork.error.external": "Bu animasyon harici medya kullanıyor. Resimleri gömülü olarak dışa aktarın.",
+  "artwork.error.external":
+    "Bu animasyon harici medya kullanıyor. Resimleri gömülü olarak dışa aktarın.",
   "artwork.error.storage": "Dosya bu cihaza kaydedilemedi. Önceki seçiminiz değişmedi.",
-  "artwork.error.invalid": "Dosya okunamadı. Lottie (.json veya .lottie), GIF, PNG, JPEG ya da WebP seçin."
+  "artwork.error.invalid":
+    "Dosya okunamadı. Lottie (.json veya .lottie), GIF, PNG, JPEG ya da WebP seçin.",
 };

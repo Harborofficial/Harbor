@@ -23,13 +23,15 @@ export function CardOverlayPreview({
   const art = useSampleArtwork(9);
   const ribbonSide = settings.top10RibbonSide;
   const watchlist = settings.watchlistBadge;
-  const sharesRibbonCorner = layout === "poster" && settings.top10Ribbon &&
+  const sharesRibbonCorner =
+    layout === "poster" &&
+    settings.top10Ribbon &&
     ((watchlist === "topStart" && ribbonSide === "left") ||
       (watchlist === "topEnd" && ribbonSide === "right"));
   const tvRibbonLeft = layout === "tv" && settings.top10Ribbon && ribbonSide === "left";
   const tvRibbonRight = layout === "tv" && settings.top10Ribbon && ribbonSide === "right";
-  const tvLeftSlots = (tvRibbonLeft ? 1 : 0) +
-    (layout === "tv" && settings.cardAwardDisplay === "badge" ? 1 : 0);
+  const tvLeftSlots =
+    (tvRibbonLeft ? 1 : 0) + (layout === "tv" && settings.cardAwardDisplay === "badge" ? 1 : 0);
   const tvStartTop = tvLeftSlots > 0 ? stackTop(tvLeftSlots, false, "tv", true) : "top-2";
   const tvEndTop = tvRibbonRight ? stackTop(1, false, "tv", true) : "top-2";
   const start = layout === "tv" ? "start-2" : "start-1.5";
@@ -55,7 +57,9 @@ export function CardOverlayPreview({
           draggable={false}
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className={`absolute inset-x-0 bottom-0 ${layout === "tv" ? "h-full bg-gradient-to-t from-black/90 via-black/25 to-black/5" : "h-1/2 bg-gradient-to-t from-black/55 to-transparent"}`} />
+        <div
+          className={`absolute inset-x-0 bottom-0 ${layout === "tv" ? "h-full bg-gradient-to-t from-black/90 via-black/25 to-black/5" : "h-1/2 bg-gradient-to-t from-black/55 to-transparent"}`}
+        />
         {layout === "tv" && (
           <div className="absolute inset-x-3 bottom-3 flex items-end gap-2.5">
             <img
@@ -100,7 +104,9 @@ export function CardOverlayPreview({
           />
         )}
       </div>
-      <span className="text-center text-[14px] leading-5 text-ink-muted">{t("Ribbon, award and bookmark preview")}</span>
+      <span className="text-center text-[14px] leading-5 text-ink-muted">
+        {t("Ribbon, award and bookmark preview")}
+      </span>
     </div>
   );
 }

@@ -35,7 +35,8 @@ export async function moveDeviceAddonsToAccount(
         const manifest = await fetchManifestAt(item.transportUrl);
         prepared.push({ manifest, transportUrl: item.transportUrl });
       } catch {
-        if (item.manifest) prepared.push({ manifest: item.manifest, transportUrl: item.transportUrl });
+        if (item.manifest)
+          prepared.push({ manifest: item.manifest, transportUrl: item.transportUrl });
         else skipped.push(displayName(item));
       }
     }),

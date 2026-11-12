@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "Ninguno registrado",
   "games.wow.equipment.detailsUnavailable": "Detalles no disponibles",
   "games.wow.equipment.unavailable": "El equipo de este personaje no está disponible.",
-  "games.wow.equipment.note": "Equipo de la última actualización de Raider.IO. Consulta tu equipo actual en el juego.",
+  "games.wow.equipment.note":
+    "Equipo de la última actualización de Raider.IO. Consulta tu equipo actual en el juego.",
   "games.wow.equipment.partial": "No se pudieron leer algunos objetos equipados.",
   "games.wow.equipment.level": "Nivel de objeto {level}",
   "games.wow.equipment.gems": "Gemas",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "Mano derecha",
   "games.wow.equipment.offhand": "Mano izquierda",
   "games.wow.equipment.shirt": "Camisa",
-  "games.wow.equipment.tabard": "Tabardo"
+  "games.wow.equipment.tabard": "Tabardo",
 };

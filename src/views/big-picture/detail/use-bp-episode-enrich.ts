@@ -77,8 +77,5 @@ export function useBpEpisodeEnrich(imdbId: string | null, season: number): BpEpi
   const omdbLive = omdb.season === season ? omdb.map : NO_OMDB;
   const tvdbLive = tvdb.season === season ? tvdb.map : NO_TVDB;
 
-  return useMemo(
-    () => ({ imdb, omdb: omdbLive, tvdb: tvdbLive }),
-    [imdb, omdbLive, tvdbLive],
-  );
+  return useMemo(() => ({ imdb, omdb: omdbLive, tvdb: tvdbLive }), [imdb, omdbLive, tvdbLive]);
 }

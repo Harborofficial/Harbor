@@ -34,8 +34,7 @@ export async function buildPinnedCatalogRows(
   // when the setting keeps plugins out of the surfaces outside their own page.
   const catalogDescs = descriptors.filter(
     (d) =>
-      d.source === "catalog" &&
-      (opts.pluginRows || !isExtensionCatalogueBase(d.params.base ?? "")),
+      d.source === "catalog" && (opts.pluginRows || !isExtensionCatalogueBase(d.params.base ?? "")),
   );
   const built = await Promise.all(
     catalogDescs.map(async (desc) => {

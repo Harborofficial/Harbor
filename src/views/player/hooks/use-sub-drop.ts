@@ -28,18 +28,16 @@ export function useSubDrop(
           if (!path) return;
           const name = path.split(/[\\/]/).pop() ?? "Subtitle";
           const title = name.replace(SUB_EXT, "");
-          void bridgeRef.current
-            ?.addSubtitle(path, undefined, title, true)
-            .then((ok) => {
-              if (ok) {
-                writePlayerPrefs(metaId, { subsOff: false });
-                markImportedSub(title);
-                writeRememberedSub(mediaKey, { source: path, title, imported: true });
-              }
-              setToast(ok ? t("Loaded {name}", { name }) : t("Couldn't load {name}", { name }));
-              if (timer.current) window.clearTimeout(timer.current);
-              timer.current = window.setTimeout(() => setToast(null), 2200);
-            });
+          void bridgeRef.current?.addSubtitle(path, undefined, title, true).then((ok) => {
+            if (ok) {
+              writePlayerPrefs(metaId, { subsOff: false });
+              markImportedSub(title);
+              writeRememberedSub(mediaKey, { source: path, title, imported: true });
+            }
+            setToast(ok ? t("Loaded {name}", { name }) : t("Couldn't load {name}", { name }));
+            if (timer.current) window.clearTimeout(timer.current);
+            timer.current = window.setTimeout(() => setToast(null), 2200);
+          });
         });
         if (cancelled) {
           unlisten();

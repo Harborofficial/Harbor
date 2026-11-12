@@ -12,7 +12,9 @@ export function AutoplayTrailerQuality() {
     <SettingRow
       icon={<Film size={18} strokeWidth={2} />}
       label={t("Autoplay trailer resolution")}
-      desc={t("Resolution for trailers that play automatically on Home and detail pages. Higher resolutions may take longer to start.")}
+      desc={t(
+        "Resolution for trailers that play automatically on Home and detail pages. Higher resolutions may take longer to start.",
+      )}
     >
       <div className="w-[280px] max-w-full">
         <Dropdown

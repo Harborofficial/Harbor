@@ -3,7 +3,10 @@ import { LoaderCircle } from "@/components/icons/music-icons";
 import { MusicCatalogRow } from "@/components/music/music-catalog-row";
 import { useMusicSourcePicker } from "@/components/music/music-source-picker";
 import { listMusicPlaylists } from "@/lib/music/library";
-import { recordMusicPlaylistPlayback, recordMusicSimilarPlayback } from "@/lib/music/playback-origin";
+import {
+  recordMusicPlaylistPlayback,
+  recordMusicSimilarPlayback,
+} from "@/lib/music/playback-origin";
 import "./music-recent-contexts-band.css";
 import { requestMusicPlaylist } from "@/lib/music/navigation";
 import {
@@ -57,14 +60,16 @@ function MusicRecentContextsRow({
         loadSpooktoberMusic().then((data) => {
           const songs = new Map(data.songs.map((song) => [song.id, song]));
           refreshMusicRecentContextArtwork(
-            new Map(data.playlists.map((entry) => [
-              `spooktober:${entry.id}`,
-              entry.songIds
-                .map((id) => songs.get(id))
-                .filter((song) => Boolean(song?.poster))
-                .slice(0, 8)
-                .map((song) => spooktoberAsset(song!.poster)),
-            ])),
+            new Map(
+              data.playlists.map((entry) => [
+                `spooktober:${entry.id}`,
+                entry.songIds
+                  .map((id) => songs.get(id))
+                  .filter((song) => Boolean(song?.poster))
+                  .slice(0, 8)
+                  .map((song) => spooktoberAsset(song!.poster)),
+              ]),
+            ),
           );
         }),
       )
@@ -76,30 +81,50 @@ function MusicRecentContextsRow({
   const liveContext = useMusicTrackContext(current);
   const liveItemId = liveContext ? `${liveContext.kind}:${liveContext.id}` : null;
   const request = useRef(0);
-  useEffect(() => () => { request.current += 1; }, []);
+  useEffect(
+    () => () => {
+      request.current += 1;
+    },
+    [],
+  );
   const play = async (context: MusicRecentContext) => {
     const current = ++request.current;
     setBusy(`${context.kind}:${context.id}`);
     setNote(null);
     try {
-      const playlist = context.kind === "playlist"
-        ? context.id.startsWith("spooktober:")
-          ? await (async () => {
-              const { loadSpooktoberMusic, spooktoberSongToTrack } = await import("@/views/spooktober/spooktober-music");
-              const data = await loadSpooktoberMusic();
-              const festival = data.playlists.find((item) => `spooktober:${item.id}` === context.id);
-              const byId = new Map(data.songs.map((song) => [song.id, song]));
-              return festival ? { id: context.id, name: context.name, tracks: festival.songIds.map((id) => spooktoberSongToTrack(byId.get(id)!)) } : null;
-            })()
-          : (await listMusicPlaylists()).find((item) => item.id === context.id)
-        : null;
-      const tracks = context.kind === "playlist"
-        ? playlist?.tracks ?? []
-        : context.seed
-          ? await (await import("@/lib/music/radio")).loadSimilarTracks(context.seed)
-          : [];
+      const playlist =
+        context.kind === "playlist"
+          ? context.id.startsWith("spooktober:")
+            ? await (async () => {
+                const { loadSpooktoberMusic, spooktoberSongToTrack } =
+                  await import("@/views/spooktober/spooktober-music");
+                const data = await loadSpooktoberMusic();
+                const festival = data.playlists.find(
+                  (item) => `spooktober:${item.id}` === context.id,
+                );
+                const byId = new Map(data.songs.map((song) => [song.id, song]));
+                return festival
+                  ? {
+                      id: context.id,
+                      name: context.name,
+                      tracks: festival.songIds.map((id) => spooktoberSongToTrack(byId.get(id)!)),
+                    }
+                  : null;
+              })()
+            : (await listMusicPlaylists()).find((item) => item.id === context.id)
+          : null;
+      const tracks =
+        context.kind === "playlist"
+          ? (playlist?.tracks ?? [])
+          : context.seed
+            ? await (await import("@/lib/music/radio")).loadSimilarTracks(context.seed)
+            : [];
       if (current !== request.current) return;
-      const queue = tracks.length ? tracks : context.kind === "similar" && context.seed ? [context.seed] : [];
+      const queue = tracks.length
+        ? tracks
+        : context.kind === "similar" && context.seed
+          ? [context.seed]
+          : [];
       if (!queue[0]) {
         setNote("error");
         return;
@@ -126,13 +151,22 @@ function MusicRecentContextsRow({
     setNote("loading");
     setBusy(`${context.kind}:${context.id}`);
     void reopenMusicMix(context)
-      .then(() => { if (current === request.current) setNote(null); })
-      .catch(() => { if (current === request.current) setNote("error"); })
-      .finally(() => { if (current === request.current) setBusy(null); });
+      .then(() => {
+        if (current === request.current) setNote(null);
+      })
+      .catch(() => {
+        if (current === request.current) setNote("error");
+      })
+      .finally(() => {
+        if (current === request.current) setBusy(null);
+      });
   };
   if (contexts.length === 0) return null;
   return (
-    <section className="music-recent-contexts flex min-w-0 flex-col gap-3" data-busy={busy ?? undefined}>
+    <section
+      className="music-recent-contexts flex min-w-0 flex-col gap-3"
+      data-busy={busy ?? undefined}
+    >
       <MusicCatalogRow
         playingItemId={busy}
         row={localRow(
@@ -159,7 +193,11 @@ function MusicRecentContextsRow({
           className="music-recent-contexts-note ps-[9px] text-[13px]"
         >
           {note === "loading" && (
-            <LoaderCircle size={15} className="animate-spin motion-reduce:animate-none" aria-hidden />
+            <LoaderCircle
+              size={15}
+              className="animate-spin motion-reduce:animate-none"
+              aria-hidden
+            />
           )}
           {t(note === "error" ? "music.error.load" : "music.similar.building")}
         </p>

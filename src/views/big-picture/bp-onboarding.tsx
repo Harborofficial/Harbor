@@ -115,7 +115,9 @@ function BpOnboardLeave({
             {t("Leave setup?")}
           </h2>
           <p className="text-[clamp(17px,2.2vh,22px)] leading-relaxed text-ink-subtle">
-            {t("Nothing you have already set is lost. Harbor picks this back up where you left it.")}
+            {t(
+              "Nothing you have already set is lost. Harbor picks this back up where you left it.",
+            )}
           </p>
         </div>
 

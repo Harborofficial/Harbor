@@ -16,7 +16,7 @@ const overlays = read("src/views/player/stage-overlays.tsx");
 const overlayLayers = read("src/views/player/player-overlay-layers.tsx");
 
 test("content advisory restores the compact September design with current timing", () => {
-  assert.match(toast, /start-6 top-20/);
+  assert.match(toast, /start-6 top-24/);
   assert.match(toast, /bg-black\/70/);
   assert.match(toast, /const HOLD_MS = 8_000/);
   assert.match(toast, /const HOVER_TAIL_MS = 2_500/);
@@ -79,8 +79,8 @@ test("content advisory avoids occupied player corners", () => {
   assert.match(overlayLayers, /const topRightOccupied = roomAvatarTopRight \|\| roomChatTopRight/);
   assert.match(overlayLayers, /topRightOccupied[\s\S]*\? "top-center"[\s\S]*: "top-end"/);
   assert.match(overlays, /position=\{contentAdvisoryPosition\}/);
-  assert.match(toast, /position === "top-end"[\s\S]*end-6 top-20/);
-  assert.match(toast, /position === "top-center"[\s\S]*start-1\/2 top-20/);
+  assert.match(toast, /position === "top-end"[\s\S]*end-6 top-24/);
+  assert.match(toast, /position === "top-center"[\s\S]*start-1\/2 top-24/);
 });
 
 test("content advisory keeps IMDb fetching and PiP suppression", () => {
@@ -112,6 +112,6 @@ test("profile background adapts slider units and reloads when the picker opens",
   assert.match(picker, /setDim\(pct\);\s*void savePickerBgDim\(pct\);/);
   assert.match(
     modal,
-    /if \(!pickerOpen\) return;\s*let alive = true;[\s\S]*loadPickerBg\(\)[\s\S]*\}, \[pickerOpen\]\)/,
+    /if \(!pickerOpen\) return;\s*let alive = true;[\s\S]*loadPickerBg\(mode\)[\s\S]*\}, \[pickerOpen, isNuvio\]\)/,
   );
 });

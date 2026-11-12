@@ -7,15 +7,20 @@ import test from "node:test";
 import ts from "typescript";
 import { navigateUnderPreview, previewPageStack } from "../src/lib/player/docked-navigation.ts";
 
-const source = ts.createSourceFile("view.tsx",
+const source = ts.createSourceFile(
+  "view.tsx",
   readFileSync(new URL("../src/lib/view.tsx", import.meta.url), "utf8"),
-  ts.ScriptTarget.ESNext, true, ts.ScriptKind.TSX);
+  ts.ScriptTarget.ESNext,
+  true,
+  ts.ScriptKind.TSX,
+);
 
 function declaration(name: string): string {
   let text = "";
   const visit = (node: ts.Node) => {
     if (ts.isFunctionDeclaration(node) && node.name?.text === name) text = node.getText(source);
-    if (ts.isVariableDeclaration(node) && node.name.getText(source) === name) text = `const ${node.getText(source)};`;
+    if (ts.isVariableDeclaration(node) && node.name.getText(source) === name)
+      text = `const ${node.getText(source)};`;
     ts.forEachChild(node, visit);
   };
   visit(source);
@@ -27,27 +32,56 @@ function fixture(initial: any[]) {
   const stackRef = { current: initial };
   const forwardStackRef = { current: [] as any[] };
   const events: unknown[] = [];
-  const names = ["STACK_MAX", "pushFrame", "pop", "clearForwardStack", "setNavStack", "openMeta", "openEpisodeDetail"];
+  const names = [
+    "STACK_MAX",
+    "pushFrame",
+    "pop",
+    "clearForwardStack",
+    "setNavStack",
+    "openMeta",
+    "openEpisodeDetail",
+  ];
   const code = ts.transpileModule(names.map(declaration).join("\n"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
   }).outputText;
   const scope = {
-    stackRef, forwardStackRef, navigateUnderPreview, previewPageStack,
+    stackRef,
+    forwardStackRef,
+    navigateUnderPreview,
+    previewPageStack,
     useCallback: (fn: any) => fn,
     consumeBack: () => false,
-    setStack: (value: any) => { stackRef.current = typeof value === "function" ? value(stackRef.current) : value; },
-    setForwardStack: (value: any[]) => { forwardStackRef.current = value; },
+    setStack: (value: any) => {
+      stackRef.current = typeof value === "function" ? value(stackRef.current) : value;
+    },
+    setForwardStack: (value: any[]) => {
+      forwardStackRef.current = value;
+    },
     trackEvent: (...args: unknown[]) => events.push(args),
     profileFromMeta: () => ({}),
   };
-  const nav = new Function(...Object.keys(scope), `${code}\nreturn {openMeta, openEpisodeDetail, pop};`)(...Object.values(scope));
+  const nav = new Function(
+    ...Object.keys(scope),
+    `${code}\nreturn {openMeta, openEpisodeDetail, pop};`,
+  )(...Object.values(scope));
   return { ...nav, stackRef, events };
 }
 
 const series = { id: "tt1", type: "series", name: "Fixture series" };
-const parent = { kind: "meta", meta: series, episodeHint: { season: 3, episode: 7 }, seasonEntryId: "saved-season" };
+const parent = {
+  kind: "meta",
+  meta: series,
+  episodeHint: { season: 3, episode: 7 },
+  seasonEntryId: "saved-season",
+};
 const home = { kind: "home" };
-const ep = { kind: "episode-detail", seriesId: series.id, season: 3, episode: 7, seriesMeta: series };
+const ep = {
+  kind: "episode-detail",
+  seriesId: series.id,
+  season: 3,
+  episode: 7,
+  seriesMeta: series,
+};
 
 test("episode series link restores the original parent then Back leaves the title", () => {
   const h = fixture([home, parent]);
@@ -72,7 +106,10 @@ test("repeated episode visits never grow a series/episode Back loop", () => {
 test("a directly opened episode is replaced by its parent title", () => {
   const h = fixture([home, ep]);
   h.openMeta(series);
-  assert.deepEqual(h.stackRef.current.map((f: any) => f.kind), ["home", "meta"]);
+  assert.deepEqual(
+    h.stackRef.current.map((f: any) => f.kind),
+    ["home", "meta"],
+  );
   assert.equal(h.events.length, 1);
   h.pop();
   assert.deepEqual(h.stackRef.current, [home]);
@@ -80,7 +117,14 @@ test("a directly opened episode is replaced by its parent title", () => {
 
 test("returning from consecutive episode details finds the nearest matching parent", () => {
   const olderParent = { ...parent, seasonEntryId: "older" };
-  const h = fixture([home, olderParent, { kind: "person", id: 1 }, parent, ep, { ...ep, episode: 8 }]);
+  const h = fixture([
+    home,
+    olderParent,
+    { kind: "person", id: 1 },
+    parent,
+    ep,
+    { ...ep, episode: 8 },
+  ]);
   h.openMeta(series);
   assert.deepEqual(h.stackRef.current, [home, olderParent, { kind: "person", id: 1 }, parent]);
 });
@@ -108,7 +152,13 @@ test("canonical anime detail preserves cour playback and returns to the exact Ki
   const kitsuParent = { ...parent, meta: kitsu, seasonEntryId: "kitsu:part2" };
   const playback = {
     meta: { ...series, id: "kitsu:part2" },
-    episode: { season: 1, episode: 1, kitsuStreamId: "kitsu:part2:1", imdbSeason: 3, imdbEpisode: 13 },
+    episode: {
+      season: 1,
+      episode: 1,
+      kitsuStreamId: "kitsu:part2:1",
+      imdbSeason: 3,
+      imdbEpisode: 13,
+    },
   };
   const h = fixture([home, kitsuParent]);
   h.openEpisodeDetail("tt2560140", 3, 13, kitsu, playback);

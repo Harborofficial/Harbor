@@ -1,14 +1,17 @@
 export default {
   "games.shortcuts.reviewLaunch": "Kiểm tra cách khởi chạy",
   "games.shortcuts.state.local": "Có thể khởi chạy trực tiếp",
-  "games.shortcuts.shortcut_identity": "Steam chưa gán ID hợp lệ cho lối tắt này. Kiểm tra thiết lập rồi khởi chạy trực tiếp, hoặc lưu lại trong Steam và làm mới.",
+  "games.shortcuts.shortcut_identity":
+    "Steam chưa gán ID hợp lệ cho lối tắt này. Kiểm tra thiết lập rồi khởi chạy trực tiếp, hoặc lưu lại trong Steam và làm mới.",
 
   "games.shortcuts.activity.open": "Hoạt động",
   "games.shortcuts.activity.title": "Hoạt động lối tắt",
-  "games.shortcuts.activity.note": "Các lần quét và khởi chạy gần đây của hồ sơ Harbor này. Tối đa 300 mục.",
+  "games.shortcuts.activity.note":
+    "Các lần quét và khởi chạy gần đây của hồ sơ Harbor này. Tối đa 300 mục.",
   "games.shortcuts.activity.remember": "Giữ lại giữa các phiên",
   "games.shortcuts.activity.detailed": "Ghi chi tiết quét",
-  "games.shortcuts.activity.storageError": "Không thể truy cập hoạt động đã lưu. Các mục trong phiên này vẫn được hiển thị.",
+  "games.shortcuts.activity.storageError":
+    "Không thể truy cập hoạt động đã lưu. Các mục trong phiên này vẫn được hiển thị.",
   "games.shortcuts.activity.empty": "Chưa có hoạt động.",
   "games.shortcuts.activity.clear": "Xóa hoạt động",
   "games.shortcuts.activity.duration": "{ms} ms",
@@ -25,9 +28,12 @@ export default {
 
   "games.shortcuts.launchDirect": "Khởi chạy trực tiếp",
   "games.shortcuts.viaSteam": "Chơi qua Steam",
-  "games.shortcuts.directNote": "Khởi chạy tệp thực thi này với tùy chọn khởi chạy và thư mục bắt đầu của nó.",
-  "games.shortcuts.shortcut_changed": "Lối tắt này đã thay đổi trong Steam. Hãy làm mới thư viện và kiểm tra cài đặt khởi chạy.",
-  "games.shortcuts.shortcut_options": "Các tùy chọn này dùng lệnh bao của Steam. Hãy khởi chạy lối tắt này qua Steam.",
+  "games.shortcuts.directNote":
+    "Khởi chạy tệp thực thi này với tùy chọn khởi chạy và thư mục bắt đầu của nó.",
+  "games.shortcuts.shortcut_changed":
+    "Lối tắt này đã thay đổi trong Steam. Hãy làm mới thư viện và kiểm tra cài đặt khởi chạy.",
+  "games.shortcuts.shortcut_options":
+    "Các tùy chọn này dùng lệnh bao của Steam. Hãy khởi chạy lối tắt này qua Steam.",
   "games.dock.shortcut": "Lối tắt Steam",
   "games.shortcuts.note": "Trò chơi ngoài Steam được thêm vào thư viện Steam.",
   "games.shortcuts.chooseFolder": "Chọn thư mục Steam",
@@ -36,7 +42,8 @@ export default {
   "games.shortcuts.automatic": "Dùng thư mục đã tìm thấy",
   "games.shortcuts.pickerError": "Không mở được trình chọn thư mục. Hãy thử lại.",
   "games.shortcuts.partial": "Không đọc được một số lối tắt. Làm mới sau khi Steam lưu xong.",
-  "games.shortcuts.empty": "Không tìm thấy lối tắt. Thêm trò chơi ngoài Steam vào Steam rồi làm mới.",
+  "games.shortcuts.empty":
+    "Không tìm thấy lối tắt. Thêm trò chơi ngoài Steam vào Steam rồi làm mới.",
   "games.shortcuts.state.ready": "Sẵn sàng chơi",
   "games.shortcuts.state.missing": "Thiếu tệp thực thi",
   "games.shortcuts.state.account": "Mở tài khoản Steam này",
@@ -47,9 +54,11 @@ export default {
   "games.shortcuts.tags": "Thẻ",
   "games.shortcuts.storeError": "Không lưu được cài đặt.",
   "games.shortcuts.shortcut_location": "Chọn thư mục Steam hoặc thư mục userdata bên trong.",
-  "games.shortcuts.shortcut_account": "Mở Steam bằng tài khoản của lối tắt này rồi làm mới. Harbor phải dùng cùng bản cài đặt Steam.",
+  "games.shortcuts.shortcut_account":
+    "Mở Steam bằng tài khoản của lối tắt này rồi làm mới. Harbor phải dùng cùng bản cài đặt Steam.",
   "games.shortcuts.shortcut_missing": "Lối tắt này không còn tồn tại. Hãy làm mới thư viện.",
-  "games.shortcuts.shortcut_executable": "Thiếu tệp thực thi hoặc đường dẫn tuyệt đối không được hỗ trợ.",
+  "games.shortcuts.shortcut_executable":
+    "Thiếu tệp thực thi hoặc đường dẫn tuyệt đối không được hỗ trợ.",
   "games.shortcuts.shortcut_launch": "Steam không mở được lối tắt này. Hãy thử lại.",
-  "games.shortcuts.shortcut_read": "Không đọc được lối tắt Steam. Hãy thử làm mới."
+  "games.shortcuts.shortcut_read": "Không đọc được lối tắt Steam. Hãy thử làm mới.",
 };

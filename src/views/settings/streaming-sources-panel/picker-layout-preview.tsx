@@ -94,7 +94,9 @@ export function PickerLayoutPreview({ layout }: { layout: "condensed" | "stremio
                     <FormatBadge kind={index === 0 ? "1080p" : "720p"} size="lg" />
                     <div className="flex flex-col gap-0.5 text-[12.5px] font-semibold text-ink-muted">
                       <span>{stream.resolution}</span>
-                      <span className="text-[12px] text-ink-subtle">{formatSize(stream.size!)}</span>
+                      <span className="text-[12px] text-ink-subtle">
+                        {formatSize(stream.size!)}
+                      </span>
                     </div>
                   </div>
                 ))}

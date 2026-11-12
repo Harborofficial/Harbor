@@ -16,7 +16,8 @@ export function ownMusicQueueAutomation(stop: () => void): symbol {
 }
 
 export const ownsMusicQueueAutomation = (owner: symbol): boolean => session?.owner === owner;
-export const musicQueueAutomationStarted = (owner: symbol): boolean => session?.owner === owner && session.started;
+export const musicQueueAutomationStarted = (owner: symbol): boolean =>
+  session?.owner === owner && session.started;
 
 export function markMusicQueueAutomationStarted(owner: symbol): void {
   if (session?.owner === owner) session.started = true;

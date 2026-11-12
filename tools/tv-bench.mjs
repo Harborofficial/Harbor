@@ -28,7 +28,8 @@ const PORT = 9333;
 const JSON_OUT = process.argv.includes("--json");
 const QUICK = process.argv.includes("--quick");
 
-const adb = (...args) => execFileSync("adb", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+const adb = (...args) =>
+  execFileSync("adb", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function pct(xs, p) {
@@ -476,7 +477,10 @@ async function main() {
     ["down, move p50", out.pressDown.moveP50],
     ["down, move p95", out.pressDown.moveP95],
     ["down, painted p50", out.pressDown.paintP50],
-    ["samples / pressed", `${out.pressRight.samples + out.pressDown.samples}/${out.pressRight.presses + out.pressDown.presses}`],
+    [
+      "samples / pressed",
+      `${out.pressRight.samples + out.pressDown.samples}/${out.pressRight.presses + out.pressDown.presses}`,
+    ],
     ["over 1.5s, dropped", out.pressRight.missed + out.pressDown.missed],
   ]);
   table("HELD DIRECTION KEY (the freeze test)", [
@@ -489,9 +493,21 @@ async function main() {
   if (out.census) {
     console.log("");
     console.log("NETWORK CENSUS (whole session so far, " + out.census.total + " resources)");
-    console.log("  " + "host / kind".padEnd(34) + "count".padStart(6) + "KB".padStart(9) + "cached".padStart(8));
+    console.log(
+      "  " +
+        "host / kind".padEnd(34) +
+        "count".padStart(6) +
+        "KB".padStart(9) +
+        "cached".padStart(8),
+    );
     for (const r of out.census.rows) {
-      console.log("  " + r.k.slice(0, 33).padEnd(34) + String(r.n).padStart(6) + String(r.kb).padStart(9) + String(r.cached).padStart(8));
+      console.log(
+        "  " +
+          r.k.slice(0, 33).padEnd(34) +
+          String(r.n).padStart(6) +
+          String(r.kb).padStart(9) +
+          String(r.cached).padStart(8),
+      );
     }
   }
   table("IDLE (6s, nothing touched)", [

@@ -20,7 +20,9 @@
 .music-live-mark .music-eq-bars i {
   width: 2.5px;
 }
-.music-live-mark[data-paused] .music-eq-bars i { animation-play-state: paused; }
+.music-live-mark[data-paused] .music-eq-bars i {
+  animation-play-state: paused;
+}
 @keyframes music-live-mark-in {
   from {
     opacity: 0;

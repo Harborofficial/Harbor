@@ -1186,8 +1186,9 @@ test("GitHub uses the exact signed Shipyard asset only on managed Windows x64", 
     };
     const update = await github.discoverGithubUpdate("0.9.999", probe, "beta");
     assert.equal(update?.handoff?.url, asset.browser_download_url);
-    assert.equal(update?.handoff?.signature, "test-signature");
-    assert.equal(requests[1], `${asset.browser_download_url}.sig`);
+    assert.equal(update?.handoff?.signature, "");
+    assert.equal(update?.handoff?.signatureUrl, `${asset.browser_download_url}.sig`);
+    assert.equal(requests.length, 1);
     assert.equal(
       (
         await github.discoverGithubUpdate(
@@ -1201,6 +1202,51 @@ test("GitHub uses the exact signed Shipyard asset only on managed Windows x64", 
     release.assets.pop();
     assert.equal(await github.discoverGithubUpdate("0.9.999", probe, "beta"), null);
   }
+});
+
+test("the GitHub installer signature is fetched only when staging", async () => {
+  const requests: string[] = [];
+  let staged: Record<string, unknown> | null = null;
+  const handoff = load<typeof import("../src/lib/updater/handoff")>(
+    "src/lib/updater/handoff.ts",
+    {
+      "@tauri-apps/api/core": {
+        Channel: class {
+          onmessage: unknown = null;
+        },
+        invoke: async (_command: string, args: Record<string, unknown>) => {
+          staged = args;
+        },
+      },
+      "@/lib/config/endpoints": { HARBOR_API_BASE: "https://example.test" },
+      "@/lib/safe-fetch": {
+        safeFetch: async (url: string) => {
+          requests.push(url);
+          return { ok: true, status: 200, text: async () => "test-signature" };
+        },
+      },
+      "./github-releases": { githubInstallerFor: async () => null },
+      "./installer-plan": { payloadVersionFor: () => 1 },
+    },
+    {},
+  );
+
+  await handoff.stageHandoff(
+    {
+      version: "1.0.1",
+      notes: null,
+      url: "https://example.test/Harbor.exe",
+      signature: "",
+      signatureUrl: "https://example.test/Harbor.exe.sig",
+      size: 10,
+      payloadVersion: 1000001,
+      verifiable: true,
+    },
+    () => {},
+  );
+
+  assert.deepEqual(requests, ["https://example.test/Harbor.exe.sig"]);
+  assert.equal(staged?.signature, "test-signature");
 });
 
 test("GitHub discovery skips releases without usable assets", async () => {
@@ -1273,6 +1319,17 @@ test("platform-suffixed Shipyard assets remain updater-compatible", () => {
   assert.equal(
     githubUpdate.githubDownloadAsset({ assets: oldAssets }, "windows-x86_64")?.name,
     old,
+  );
+
+  const windowsOnly = "harbor-shipyard-v1.0.2-beta-windows.exe";
+  const windowsOnlyAssets = [windowsOnly, `${windowsOnly}.sig`].map((asset) => ({
+    name: asset,
+    browser_download_url: `${base}${asset}`,
+  }));
+  assert.equal(githubUpdate.releaseIsComplete({ assets: windowsOnlyAssets }, probe), true);
+  assert.equal(
+    githubUpdate.githubDownloadAsset({ assets: windowsOnlyAssets }, "windows-x86_64")?.name,
+    windowsOnly,
   );
 });
 

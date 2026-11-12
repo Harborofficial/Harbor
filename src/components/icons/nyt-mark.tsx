@@ -30,9 +30,7 @@ export function NytBestsellerTag({
   return (
     <span className="inline-flex items-center gap-2">
       <NytMark size={compact ? 15 : 18} />
-      <span
-        className={`font-semibold tracking-tight ${compact ? "text-[12px]" : "text-[13px]"}`}
-      >
+      <span className={`font-semibold tracking-tight ${compact ? "text-[12px]" : "text-[13px]"}`}>
         {`#${rank} Bestseller`}
       </span>
       {weeks != null && weeks > 0 && (

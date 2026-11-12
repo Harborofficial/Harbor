@@ -17,7 +17,10 @@ const URL_BRANCH = 'if (stream.url && stream.url !== "#")';
 
 test("a torrent url pointed at a hosted streaming server is recognised", () => {
   assert.equal(isHostedTorrentServerUrl(`https://streaming.strem.io/${HASH}/0`), true);
-  assert.equal(isHostedTorrentServerUrl(`https://strem.io/${HASH}/-1?tr=udp%3A%2F%2Ftracker`), true);
+  assert.equal(
+    isHostedTorrentServerUrl(`https://strem.io/${HASH}/-1?tr=udp%3A%2F%2Ftracker`),
+    true,
+  );
   assert.equal(isHostedTorrentServerUrl(`http://192.168.1.50:11470/${HASH}/2`), true);
 });
 

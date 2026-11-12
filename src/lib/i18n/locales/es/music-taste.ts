@@ -63,7 +63,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.performance": "Vale la pena verlo",
   "music.explore.stage": "Escenarios y sesiones",
   "music.explore.liveFrom": "{artist} en directo",
-  "music.explore.performanceHint": "Grandes escenarios, sesiones íntimas y actuaciones para revivir.",
+  "music.explore.performanceHint":
+    "Grandes escenarios, sesiones íntimas y actuaciones para revivir.",
   "music.explore.watchPerformance": "Ver actuación",
   "music.explore.events": "Festivales en primera fila",
   "music.explore.eventHint": "Primero los sets recientes. Elige un evento y explora sus años.",
@@ -104,6 +105,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.limited":
     "Esta fuente ofrece una selección que puede no incluir el catálogo completo.",
   "music.rockHall.title": "Salón de la Fama del Rock & Roll",
-  "music.rockHall.subtitle": "Cada promoción desde 1986, en vivo desde Wikipedia"
+  "music.rockHall.subtitle": "Cada promoción desde 1986, en vivo desde Wikipedia",
 };
 export default musicTaste;

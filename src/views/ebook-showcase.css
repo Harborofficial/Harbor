@@ -27,13 +27,7 @@
   bottom: 7px;
   width: 9px;
   border-radius: 0 5px 5px 0;
-  background: repeating-linear-gradient(
-    to right,
-    #c8bdab 0,
-    #eee6d9 1px,
-    #d2c7b6 2px,
-    #f5eee3 3px
-  );
+  background: repeating-linear-gradient(to right, #c8bdab 0, #eee6d9 1px, #d2c7b6 2px, #f5eee3 3px);
   box-shadow: inset -2px 0 3px rgba(0, 0, 0, 0.2);
 }
 

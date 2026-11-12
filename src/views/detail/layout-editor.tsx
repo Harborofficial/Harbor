@@ -47,7 +47,10 @@ export function DetailLayoutEditor({ sections }: { sections: DetailSection[] }) 
       const top = root.getBoundingClientRect().top;
       // Capture before the update, including any in-flight movement on rapid clicks.
       root.querySelectorAll<HTMLElement>("[data-detail-section]").forEach((element) => {
-        positions.current.set(element.dataset.detailSection!, element.getBoundingClientRect().top - top);
+        positions.current.set(
+          element.dataset.detailSection!,
+          element.getBoundingClientRect().top - top,
+        );
       });
     }
     animations.current.forEach((animation) => animation.cancel());
@@ -65,10 +68,12 @@ export function DetailLayoutEditor({ sections }: { sections: DetailSection[] }) 
       const rect = element.getBoundingClientRect();
       const delta = previous === undefined ? 0 : previous - (rect.top - top);
       if (Math.abs(delta) < 1 || rect.bottom < 0 || rect.top > window.innerHeight) return;
-      animations.current.push(element.animate(
-        [{ transform: `translateY(${delta}px)` }, { transform: "translateY(0)" }],
-        { duration: 220, easing: "cubic-bezier(0.2, 0, 0, 1)" },
-      ));
+      animations.current.push(
+        element.animate([{ transform: `translateY(${delta}px)` }, { transform: "translateY(0)" }], {
+          duration: 220,
+          easing: "cubic-bezier(0.2, 0, 0, 1)",
+        }),
+      );
     });
     positions.current.clear();
   }, [layout, reducedMotion]);
@@ -76,7 +81,12 @@ export function DetailLayoutEditor({ sections }: { sections: DetailSection[] }) 
   return (
     <>
       <div className="detail-layout-toolbar flex items-center justify-end">
-        <div className="detail-layout-reset" data-visible={showReset} inert={!showReset} aria-hidden={!showReset}>
+        <div
+          className="detail-layout-reset"
+          data-visible={showReset}
+          inert={!showReset}
+          aria-hidden={!showReset}
+        >
           <div>
             <button
               type="button"
@@ -103,7 +113,9 @@ export function DetailLayoutEditor({ sections }: { sections: DetailSection[] }) 
             setEditing(!editing);
           }}
           className={`detail-layout-action detail-layout-toggle flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[12px] font-medium ${
-            editing ? "bg-ink text-canvas hover:opacity-90" : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
+            editing
+              ? "bg-ink text-canvas hover:opacity-90"
+              : "bg-white/[0.06] text-ink-muted hover:bg-white/[0.10] hover:text-ink"
           }`}
         >
           <span className="detail-layout-glyph" aria-hidden="true">

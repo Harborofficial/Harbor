@@ -1,7 +1,8 @@
 export default {
   "games.hydra.checkOnImport": "Tệp trò chơi sẽ được kiểm tra khi nhập",
   "games.hydra.title": "Nhập từ Hydra",
-  "games.hydra.note": "Xem lại trò chơi và nguồn đã đăng ký trong Hydra. Đóng Hydra trước khi chọn thư mục cơ sở dữ liệu.",
+  "games.hydra.note":
+    "Xem lại trò chơi và nguồn đã đăng ký trong Hydra. Đóng Hydra trước khi chọn thư mục cơ sở dữ liệu.",
   "games.hydra.choose": "Chọn thư mục cơ sở dữ liệu Hydra",
   "games.hydra.reading": "Đang đọc thư viện Hydra…",
   "games.hydra.checking": "Đang kiểm tra tệp trò chơi · {count} / {total}",
@@ -14,20 +15,25 @@ export default {
   "games.hydra.missing": "Chưa liên kết tệp trò chơi",
   "games.hydra.ready": "Đã tìm thấy tệp trò chơi",
   "games.hydra.original": "Cài đặt từ Hydra",
-  "games.hydra.pendingNote": "Sau khi nhập, hãy mở Quản lý trò chơi để kiểm tra tệp và cài đặt khởi chạy trước khi chơi.",
-  "games.hydra.unsupported": "Không thể chuyển một số cài đặt Hydra ({count}). Hãy kiểm tra trong Hydra.",
+  "games.hydra.pendingNote":
+    "Sau khi nhập, hãy mở Quản lý trò chơi để kiểm tra tệp và cài đặt khởi chạy trước khi chơi.",
+  "games.hydra.unsupported":
+    "Không thể chuyển một số cài đặt Hydra ({count}). Hãy kiểm tra trong Hydra.",
   "games.hydra.skipped": "Đã bỏ qua mục bị xóa hoặc không đọc được: {count}",
   "games.hydra.done": "Đã nhập {games} trò chơi và {sources} nguồn.",
   "games.hydra.kept": "Đã giữ {count} mục hiện có.",
-  "games.hydra.scope": "Nhập thông tin thư viện và danh mục đã chọn. Tệp trò chơi vẫn ở thư mục hiện tại.",
+  "games.hydra.scope":
+    "Nhập thông tin thư viện và danh mục đã chọn. Tệp trò chơi vẫn ở thư mục hiện tại.",
   "games.hydra.apply": "Nhập mục đã chọn ({count})",
   "games.hydra.stopped": "Đã dừng. Các mục đã nhập được giữ lại.",
   "games.hydra.changed": "Hydra đã thay đổi sau lần kiểm tra này. Chọn lại thư mục để làm mới.",
-  "games.hydra.space": "Không đủ dung lượng tạm để kiểm tra cơ sở dữ liệu này. Hãy giải phóng dung lượng rồi thử lại.",
+  "games.hydra.space":
+    "Không đủ dung lượng tạm để kiểm tra cơ sở dữ liệu này. Hãy giải phóng dung lượng rồi thử lại.",
   "games.hydra.busy": "Một lần kiểm tra Hydra khác đang chạy. Thử lại khi hoàn tất.",
   "games.hydra.timeout": "Đọc cơ sở dữ liệu mất quá lâu. Đóng Hydra rồi thử lại.",
   "games.hydra.limit": "Cơ sở dữ liệu này vượt quá kích thước kiểm tra được hỗ trợ.",
-  "games.hydra.readError": "Không đọc được cơ sở dữ liệu Hydra. Đóng Hydra rồi chọn lại thư mục cơ sở dữ liệu.",
+  "games.hydra.readError":
+    "Không đọc được cơ sở dữ liệu Hydra. Đóng Hydra rồi chọn lại thư mục cơ sở dữ liệu.",
   "games.hydra.imported": "Đã nhập từ Hydra",
   "games.hydra.sourceExists": "Nguồn đã được thêm",
   "games.hydra.useFile": "Dùng tệp trò chơi đã lưu",
@@ -36,5 +42,5 @@ export default {
   "games.hydra.resetTime": "Đặt lại về thời gian nhập và đã ghi nhận",
   "games.hydra.fileLabel": "Tệp trò chơi",
   "games.hydra.argumentsLabel": "Tùy chọn khởi chạy",
-  "games.hydra.prefixLabel": "Thư mục tương thích"
+  "games.hydra.prefixLabel": "Thư mục tương thích",
 };

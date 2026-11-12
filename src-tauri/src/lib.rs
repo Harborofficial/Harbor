@@ -78,6 +78,8 @@ mod desktop_notify;
 mod discord_rp;
 #[cfg(desktop)]
 mod display_fit;
+#[cfg(windows)]
+mod window_placement;
 #[cfg(desktop)]
 mod ytdlp_update;
 #[cfg(all(desktop, feature = "music"))]
@@ -522,7 +524,7 @@ pub(crate) fn force_show_foreground(window: &tauri::WebviewWindow) {
 const HARBOR_MAXGUARD_SUBCLASS_ID: usize = 0x4842_4D47;
 
 #[cfg(windows)]
-static MAIN_IN_SIZE_MOVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+pub(crate) static MAIN_IN_SIZE_MOVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
 #[cfg(windows)]
 unsafe extern "system" fn maxguard_subclass_proc(
@@ -543,7 +545,11 @@ unsafe extern "system" fn maxguard_subclass_proc(
     };
     if msg == WM_ENTERSIZEMOVE {
         MAIN_IN_SIZE_MOVE.store(true, std::sync::atomic::Ordering::Relaxed);
-    } else if msg == WM_EXITSIZEMOVE || msg == WM_NCDESTROY {
+    } else if msg == WM_EXITSIZEMOVE {
+        if MAIN_IN_SIZE_MOVE.swap(false, std::sync::atomic::Ordering::Relaxed) {
+            window_placement::mark_user_placement_complete();
+        }
+    } else if msg == WM_NCDESTROY {
         MAIN_IN_SIZE_MOVE.store(false, std::sync::atomic::Ordering::Relaxed);
     }
     // Suppress repeated erases only during an interactive move/resize, where
@@ -860,7 +866,7 @@ fn install_reveal_failsafe(app: &tauri::AppHandle) {
     });
 }
 
-#[cfg(desktop)]
+#[cfg(all(desktop, not(windows)))]
 fn ensure_window_on_screen(app: &tauri::AppHandle) {
     use tauri::Manager;
     let Some(window) = app.get_webview_window("main") else {
@@ -1047,20 +1053,20 @@ pub fn run() {
         .plugin({
             let builder = tauri_plugin_window_state::Builder::default()
                 .with_denylist(&[
-                    #[cfg(target_os = "macos")]
+                    #[cfg(any(target_os = "macos", windows))]
                     "main",
                     "harbor-ytmusic-embed",
                     "harbor-tray-menu",
+                    "harbor-hdr-overlay",
+                    "harbor-cf-solver",
                 ])
                 .with_state_flags(
                     tauri_plugin_window_state::StateFlags::SIZE
                         | tauri_plugin_window_state::StateFlags::POSITION
                         | tauri_plugin_window_state::StateFlags::MAXIMIZED,
                 );
-            // Restore the Windows main window only after its maximize guard is
-            // installed, so startup uses the same work-area rules as user maximize.
-            #[cfg(windows)]
-            let builder = builder.skip_initial_state("main");
+            // Windows main-window geometry is owned by window_placement instead.
+            // Auxiliary windows still use the stock plugin where applicable.
             builder.build()
         })
         .manage(proxy_state)
@@ -1157,19 +1163,11 @@ pub fn run() {
             #[cfg(windows)]
             install_maximize_guard(&app.handle());
             #[cfg(windows)]
-            {
-                use tauri::Manager;
-                use tauri_plugin_window_state::{StateFlags, WindowExt};
-                if let Some(window) = app.get_webview_window("main") {
-                    if let Err(error) = window.restore_state(
-                        StateFlags::SIZE | StateFlags::POSITION | StateFlags::MAXIMIZED,
-                    ) {
-                        eprintln!("[harbor::window] startup restore failed: {error}");
-                    }
-                }
-            }
+            window_placement::install(app.handle());
+            #[cfg(not(windows))]
             display_fit::install(app.handle());
             install_reveal_failsafe(app.handle());
+            #[cfg(not(windows))]
             ensure_window_on_screen(&app.handle());
             #[cfg(target_os = "macos")]
             {
@@ -1803,6 +1801,8 @@ pub fn run() {
             privacy::privacy_status,
             privacy::privacy_set_enabled,
             set_maximize_clamp,
+            #[cfg(windows)]
+            window_placement::window_geometry_pause,
             monitors::list_monitors,
             monitors::move_main_to_monitor,
             crash_report::take_startup_crash_report,
@@ -1847,6 +1847,11 @@ pub fn run() {
             subsync::audio_tracks::audio_probe_tracks,
             subsync::fingerprint::compute_chromaprint,
             subsync::asr::asr_transcribe_windows,
+            subsync::moonshine::moonshine_model_status,
+            subsync::moonshine::moonshine_runtime_install,
+            subsync::moonshine::moonshine_model_download,
+            subsync::moonshine::moonshine_model_remove,
+            subsync::moonshine::moonshine_transcribe_windows,
             subsync::playback_vad::subsync_playback_speech,
             subsync::asr::asr_verify,
             sub_extract::subtitle_extract,

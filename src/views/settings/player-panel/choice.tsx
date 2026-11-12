@@ -47,10 +47,7 @@ export function ChoiceBlock({
         </RowTitle>
         {sub && <RowDesc>{sub}</RowDesc>}
       </RowText>
-      <span
-        aria-hidden
-        className="hset-row-control flex min-h-11 min-w-0 items-center justify-end"
-      >
+      <span aria-hidden className="hset-row-control flex min-h-11 min-w-0 items-center justify-end">
         <Check
           size={20}
           strokeWidth={2.6}

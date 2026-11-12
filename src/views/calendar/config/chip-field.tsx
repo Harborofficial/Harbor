@@ -33,10 +33,18 @@ export function SourceChipField({
       )}
       <div className="flex flex-wrap gap-2 gap-y-2.5">
         {shown.map((it) => (
-          <SourceChip key={it.key} label={it.label} selected={it.selected} onToggle={it.onToggle} leading={it.leading} />
+          <SourceChip
+            key={it.key}
+            label={it.label}
+            selected={it.selected}
+            onToggle={it.onToggle}
+            leading={it.leading}
+          />
         ))}
       </div>
-      {q && shown.length === 0 && <p className="text-[12.5px] text-ink-subtle">{t("No matches")}</p>}
+      {q && shown.length === 0 && (
+        <p className="text-[12.5px] text-ink-subtle">{t("No matches")}</p>
+      )}
     </div>
   );
 }

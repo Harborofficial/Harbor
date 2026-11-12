@@ -34,7 +34,8 @@ const music: Record<string, string> = {
   "dj.minimize": "Свернуть",
   "dj.maximize": "Развернуть",
   "dj.close": "Закрыть",
-  "dj.blurb": "Темп, высота, вырезы эквалайзера и кью-пэды в отдельном окне поверх того, что играет.",
+  "dj.blurb":
+    "Темп, высота, вырезы эквалайзера и кью-пэды в отдельном окне поверх того, что играет.",
   "dj.open": "Открыть пульт",
   "dj.idle": "Ничего не играет",
   "dj.tempo": "Темп",
@@ -94,7 +95,8 @@ const music: Record<string, string> = {
   "dj.pads.jump": "Бит-джамп",
   "dj.pads.sampler": "Сэмплер",
   "dj.pads.triplet": "Триоль",
-  "dj.pads.rollHint": "Удерживайте пэд для ролла, отпустите и трек продолжится там, где был бы без него",
+  "dj.pads.rollHint":
+    "Удерживайте пэд для ролла, отпустите и трек продолжится там, где был бы без него",
   "dj.pads.jumpHint": "Прыжок назад или вперёд без потери ритма",
   "dj.pads.noBpm": "BPM ещё не задан, длины в секундах, пока вы его не отстучите",
   "dj.reset": "Сброс",
@@ -104,26 +106,33 @@ const music: Record<string, string> = {
   "music.broadcast.drift": "(расхождение {ms} мс)",
   "music.broadcast.live": "Идёт трансляция через {product}",
   "music.broadcast.install": "Получить {product}",
-  "music.broadcast.none": "Виртуальный аудиокабель не установлен. Установите {product}, затем выберите его здесь.",
+  "music.broadcast.none":
+    "Виртуальный аудиокабель не установлен. Установите {product}, затем выберите его здесь.",
   "music.broadcast.auto": "Первое найденное",
   "music.broadcast.output": "Выход",
   "music.broadcast.stop": "Остановить",
   "music.broadcast.start": "Запустить",
-  "music.broadcast.blurb": "Отправляйте то, что играет, на виртуальный микрофон, чтобы друзья в звонке это слышали. У вас звук остаётся в колонках.",
+  "music.broadcast.blurb":
+    "Отправляйте то, что играет, на виртуальный микрофон, чтобы друзья в звонке это слышали. У вас звук остаётся в колонках.",
   "music.broadcast.title": "Транслировать в голосовой чат",
-  "music.cable.mac.installNeeded": "Harbor может установить собственный виртуальный микрофон. macOS запросит пароль администратора, затем Core Audio перезапустится.",
+  "music.cable.mac.installNeeded":
+    "Harbor может установить собственный виртуальный микрофон. macOS запросит пароль администратора, затем Core Audio перезапустится.",
   "music.cable.mac.installMissing": "В этой сборке Harbor нет драйвера виртуального микрофона.",
   "music.cable.mac.installCancelled": "Установка отменена.",
   "music.cable.mac.installFailed": "Не удалось установить виртуальный микрофон.",
-  "music.cable.mac.restartNeeded": "Виртуальный микрофон установлен, но Core Audio его ещё не увидел. Перезагрузите Mac, чтобы завершить.",
-  "music.cable.mac.updateAvailable": "В этой версии Harbor есть более новый виртуальный микрофон. Установите его, чтобы кабель продолжал работать.",
+  "music.cable.mac.restartNeeded":
+    "Виртуальный микрофон установлен, но Core Audio его ещё не увидел. Перезагрузите Mac, чтобы завершить.",
+  "music.cable.mac.updateAvailable":
+    "В этой версии Harbor есть более новый виртуальный микрофон. Установите его, чтобы кабель продолжал работать.",
   "music.cable.title": "Виртуальный микрофон Harbor",
-  "music.cable.blurb": "Harbor сам создаёт виртуальный микрофон. Ничего не нужно скачивать и устанавливать.",
+  "music.cable.blurb":
+    "Harbor сам создаёт виртуальный микрофон. Ничего не нужно скачивать и устанавливать.",
   "music.cable.create": "Создать виртуальный микрофон",
   "music.cable.remove": "Удалить виртуальный микрофон",
   "music.cable.spec": "{rate}, {depth}",
   "music.cable.perfect": "Без передискретизации",
-  "music.cable.resampledGraph": "Граф PipeWire работает на {graph}, поэтому здесь идёт передискретизация",
+  "music.cable.resampledGraph":
+    "Граф PipeWire работает на {graph}, поэтому здесь идёт передискретизация",
   "music.cable.resampledServer": "Звуковой сервер выбрал {rate} вместо {requested}",
   "music.cable.resampledFormat": "Звуковой сервер не передаёт 32-битный float",
   "music.cable.resampledOther": "Что-то в звуковом тракте выполняет передискретизацию",
@@ -145,7 +154,8 @@ const music: Record<string, string> = {
   "music.cable.installNeeded": "Для установки виртуального микрофона нужно ваше разрешение",
   "music.cable.installMissing": "В этой сборке Harbor нет виртуального микрофона",
   "music.cable.restartNeeded": "Чтобы микрофон появился, звуковую систему нужно перезапустить",
-  "music.cable.updateAvailable": "В этом Harbor есть более новый виртуальный микрофон. Пересоздайте его для обновления.",
+  "music.cable.updateAvailable":
+    "В этом Harbor есть более новый виртуальный микрофон. Пересоздайте его для обновления.",
   "dj.crossfade": "Кроссфейдер",
   "dj.b.broadcasting": "Ведёт трансляцию",
   "dj.b.eject": "Извлечь",
@@ -192,7 +202,8 @@ const music: Record<string, string> = {
   "music.speed.pitch": "Высота",
   "music.speed.reverb": "Реверберация",
   "music.speed.keepPitch": "Сохранять исходную тональность",
-  "music.speed.keepPitchHelp": "Включено меняет темп, но не тональность. Выключено даёт звук nightcore и slowed.",
+  "music.speed.keepPitchHelp":
+    "Включено меняет темп, но не тональность. Выключено даёт звук nightcore и slowed.",
   "music.speed.reset": "Сбросить",
   "music.speed.normal": "Обычно",
   "music.speed.nightcore": "Найткор",
@@ -358,7 +369,8 @@ const music: Record<string, string> = {
   "music.explore.scene": "Из сцены",
   "music.artist.inPlaylists": "Плейлисты с {name}",
   "music.audio.preferredSource": "Предпочитаемый источник",
-  "music.audio.preferredSourceHint": "Harbor сначала играет отсюда, затем переходит к любому рабочему источнику.",
+  "music.audio.preferredSourceHint":
+    "Harbor сначала играет отсюда, затем переходит к любому рабочему источнику.",
   "music.spotify.connect": "Spotify Premium",
   "music.spotify.connectDetail": "Подключите один раз для встроенного воспроизведения без рекламы.",
   "music.spotify.connectAction": "Подключить",
@@ -492,7 +504,8 @@ const music: Record<string, string> = {
   "music.connect.shelfBody": "Harbor не угадывает ряд, который нечем подкрепить реальными данными.",
   "music.connect.title": "Подключить {name}",
   "music.connect.connected": "Подключено как {account}",
-  "music.connect.browserHandoff": "Подтвердите Harbor в браузере, затем завершите подключение здесь.",
+  "music.connect.browserHandoff":
+    "Подтвердите Harbor в браузере, затем завершите подключение здесь.",
   "music.connect.scanningFolder": "Читаем папку. Большая библиотека займёт время.",
   "music.connect.scanned": "Просканировано файлов: {count}",
   "music.connect.connecting": "Подключение",
@@ -521,9 +534,11 @@ const music: Record<string, string> = {
   "music.ytm.loading": "Загружаем YouTube Music",
   "music.row.scrobble": "Потому что вы скробблите {tag}",
   "music.row.scrobbleWaiting": "Last.fm подключён, но полку по тегам он ещё не прислал.",
-  "music.connect.scrobbleBody": "Подключите Last.fm, и эта полка соберётся из тегов, которые вы действительно скробблите.",
+  "music.connect.scrobbleBody":
+    "Подключите Last.fm, и эта полка соберётся из тегов, которые вы действительно скробблите.",
   "music.connect.serverName": "медиасервер или папку",
-  "music.connect.serverBody": "Укажите Harbor папку, Plex, Jellyfin, Navidrome или Subsonic, и эта полка заполнится альбомами, которые у вас уже есть.",
+  "music.connect.serverBody":
+    "Укажите Harbor папку, Plex, Jellyfin, Navidrome или Subsonic, и эта полка заполнится альбомами, которые у вас уже есть.",
   "music.row.recents": "Продолжите с того же места",
   "music.row.fresh": "Новое у исполнителей, которых вы слушаете",
   "music.row.freshSubtitle": "Новые релизы исполнителей из вашей истории прослушивания",
@@ -588,7 +603,8 @@ const music: Record<string, string> = {
   "music.quickListen.loop": "Повторять фрагменты",
   "music.quickListen.mute": "Выключить звук",
   "music.quickListen.unmute": "Включить звук",
-  "music.quickListen.empty": "Не удалось найти непрослушанные треки. Откройте для себя больше музыки и попробуйте снова.",
+  "music.quickListen.empty":
+    "Не удалось найти непрослушанные треки. Откройте для себя больше музыки и попробуйте снова.",
   "music.quickListen.finding": "Ищем треки, которые вы ещё не слушали…",
   "music.quickListen.more": "Другие действия",
   "music.playlist.search": "Поиск плейлистов",

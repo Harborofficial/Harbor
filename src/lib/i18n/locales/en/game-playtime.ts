@@ -9,8 +9,10 @@ export default {
   "games.playtime.minutes": "Minutes",
   "games.playtime.duration": "{hours} h {minutes} min",
   "games.playtime.card": "Played {time}",
-  "games.playtime.note": "Add time played elsewhere or correct your total. Harbor keeps its recorded sessions and adds future sessions to this total.",
-  "games.playtime.localNote": "Applies to this local copy in your Harbor profile. Steam and other accounts are unchanged.",
+  "games.playtime.note":
+    "Add time played elsewhere or correct your total. Harbor keeps its recorded sessions and adds future sessions to this total.",
+  "games.playtime.localNote":
+    "Applies to this local copy in your Harbor profile. Steam and other accounts are unchanged.",
   "games.playtime.running": "Close this game before adjusting its playtime.",
   "games.playtime.save": "Save playtime",
   "games.playtime.finishEdit": "Save or cancel the playtime edit before saving other settings.",
@@ -18,5 +20,6 @@ export default {
   "games.playtime.invalid": "Enter whole hours from 0 to 999,999 and minutes from 0 to 59.",
   "games.playtime.saved": "Playtime saved.",
   "games.playtime.resetDone": "Using Harbor's tracked time.",
-  "games.custom.launch_playtime": "This playtime could not be saved. Check the hours and minutes and try again.",
+  "games.custom.launch_playtime":
+    "This playtime could not be saved. Check the hours and minutes and try again.",
 } satisfies Record<string, string>;

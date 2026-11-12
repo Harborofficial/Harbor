@@ -170,7 +170,7 @@ export default {
   "Show all {count}": "Tumunu goster ({count})",
   "{count} competing": "{count} yarismaci",
   "Starting field": "Baslangic listesi",
-  "Leaderboard": "Siralama",
+  Leaderboard: "Siralama",
   "Full field": "Tum katilimcilar",
   "Loading event schedule…": "Etkinlik takvimi yükleniyor…",
   "Loading lineups…": "Kadrolar yükleniyor…",

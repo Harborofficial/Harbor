@@ -11,7 +11,10 @@ export function SharedListLoading() {
       </div>
       <div className="grid w-full grid-cols-2 gap-x-5 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="aspect-[2/3] w-full animate-pulse rounded-[12px] bg-elevated/40" />
+          <div
+            key={i}
+            className="aspect-[2/3] w-full animate-pulse rounded-[12px] bg-elevated/40"
+          />
         ))}
       </div>
     </div>

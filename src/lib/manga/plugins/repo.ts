@@ -75,7 +75,10 @@ function classifyForeign(parsed: unknown): { kind: ForeignRepoKind; count: numbe
 
   const mihon = arr.filter((e) => typeof e.apk === "string" && "pkg" in e);
   if (mihon.length) {
-    const sources = mihon.reduce((n, e) => n + (Array.isArray(e.sources) ? e.sources.length : 1), 0);
+    const sources = mihon.reduce(
+      (n, e) => n + (Array.isArray(e.sources) ? e.sources.length : 1),
+      0,
+    );
     return { kind: "tachiyomi", count: sources };
   }
 
@@ -139,7 +142,10 @@ async function sha256Hex(text: string): Promise<string> {
     .join("");
 }
 
-async function fetchPluginSource(manifest: PluginManifest, repoUrl: string): Promise<InstalledPlugin> {
+async function fetchPluginSource(
+  manifest: PluginManifest,
+  repoUrl: string,
+): Promise<InstalledPlugin> {
   const entry = new URL(manifest.entry, repoUrl).href;
   const target = assertSafeUrl(entry);
   const res = await safeFetch(target, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
@@ -163,7 +169,10 @@ async function fetchPluginSource(manifest: PluginManifest, repoUrl: string): Pro
   };
 }
 
-export async function installPlugin(manifest: PluginManifest, repoUrl: string): Promise<InstalledPlugin> {
+export async function installPlugin(
+  manifest: PluginManifest,
+  repoUrl: string,
+): Promise<InstalledPlugin> {
   const plugin = await fetchPluginSource(manifest, repoUrl);
   const probe = new PluginWorker(plugin);
   try {

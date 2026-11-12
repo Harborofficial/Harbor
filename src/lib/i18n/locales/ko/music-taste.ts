@@ -74,7 +74,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.moreSets": "이 무대 더 보기",
   "music.explore.noRecommendations": "다른 아티스트를 선택해 더 많은 음악을 찾아보세요.",
   "music.taste.choose": "음악 취향 선택",
-  "music.taste.body": "추천에 사용할 장르를 고르세요. 선곡은 순환하며 언제든 취향을 바꿀 수 있어요.",
+  "music.taste.body":
+    "추천에 사용할 장르를 고르세요. 선곡은 순환하며 언제든 취향을 바꿀 수 있어요.",
   "music.taste.search": "장르 검색",
   "music.taste.selected": "{count}개 선택됨",
   "music.taste.clear": "선택 지우기",
@@ -103,6 +104,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.limited":
     "이 소스는 일부 작품을 제공하며 전체 카탈로그를 포함하지 않을 수 있습니다.",
   "music.rockHall.title": "로큰롤 명예의 전당",
-  "music.rockHall.subtitle": "1986년 이후 모든 헌액자, 위키백과에서 바로"
+  "music.rockHall.subtitle": "1986년 이후 모든 헌액자, 위키백과에서 바로",
 };
 export default musicTaste;

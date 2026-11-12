@@ -52,7 +52,12 @@ export function TitleSuggestDropdown({
             >
               <span className="flex h-12 w-8 shrink-0 items-center justify-center overflow-hidden rounded bg-raised">
                 {c.poster ? (
-                  <img src={c.poster} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  <img
+                    src={c.poster}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
                 ) : c.type === "series" ? (
                   <Tv size={14} className="text-ink-subtle" />
                 ) : (
@@ -107,10 +112,20 @@ export function TargetBar({
   );
 }
 
-function NumStepper({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
+function NumStepper({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (n: number) => void;
+}) {
   return (
     <div className="flex items-center gap-0.5 rounded-lg bg-raised px-1 py-0.5">
-      <span className="ps-1 pe-0.5 text-[10.5px] font-bold uppercase tracking-wide text-ink-subtle">{label}</span>
+      <span className="ps-1 pe-0.5 text-[10.5px] font-bold uppercase tracking-wide text-ink-subtle">
+        {label}
+      </span>
       <button
         type="button"
         onClick={() => onChange(Math.max(1, value - 1))}
@@ -119,7 +134,9 @@ function NumStepper({ label, value, onChange }: { label: string; value: number; 
       >
         <Minus size={12} strokeWidth={2.4} />
       </button>
-      <span className="min-w-[20px] text-center text-[12.5px] font-semibold tabular-nums text-ink">{value}</span>
+      <span className="min-w-[20px] text-center text-[12.5px] font-semibold tabular-nums text-ink">
+        {value}
+      </span>
       <button
         type="button"
         onClick={() => onChange(value + 1)}

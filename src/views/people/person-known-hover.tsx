@@ -44,7 +44,12 @@ function placement(rect: DOMRect): CSSProperties {
   const left = Math.max(8, Math.min(centerX - CARD_W / 2, window.innerWidth - CARD_W - 8));
   const above = rect.top >= CARD_MAX_H + GAP + 8;
   return above
-    ? { left, bottom: window.innerHeight - rect.top + GAP, width: CARD_W, transformOrigin: "bottom center" }
+    ? {
+        left,
+        bottom: window.innerHeight - rect.top + GAP,
+        width: CARD_W,
+        transformOrigin: "bottom center",
+      }
     : { left, top: rect.bottom + GAP, width: CARD_W, transformOrigin: "top center" };
 }
 

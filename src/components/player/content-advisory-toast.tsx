@@ -167,10 +167,10 @@ export function ContentAdvisoryToast({
   };
   const positionClass =
     position === "top-end"
-      ? "end-6 top-20"
+      ? "end-6 top-24"
       : position === "top-center"
-        ? "start-1/2 top-20 -translate-x-1/2 rtl:translate-x-1/2"
-        : "start-6 top-20";
+        ? "start-1/2 top-24 -translate-x-1/2 rtl:translate-x-1/2"
+        : "start-6 top-24";
 
   return (
     <>

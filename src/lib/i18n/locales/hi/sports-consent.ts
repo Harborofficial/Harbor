@@ -32,10 +32,13 @@ export default {
   "Show Sports": "स्पोर्ट्स दिखाएँ",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "नेविगेशन में स्पोर्ट्स दिखाएँ। पेज लोड होने से पहले आपको स्पोर्ट्स की सूचना स्वीकार करनी होगी।",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "बिना प्रोवाइडर के Sports चालू करें, या Live TV, M3U या Xtream स्रोत जोड़ें।",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "बिना प्रोवाइडर के Sports चालू करें, या Live TV, M3U या Xtream स्रोत जोड़ें।",
   "Set up Live TV": "Live TV सेट करें",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "स्कोर, शेड्यूल और स्टैंडिंग बिना प्रोवाइडर काम करते हैं। Harbor स्ट्रीम नहीं देता, इसलिए मैच देखने के लिए अपना Live TV, M3U या Xtream स्रोत चाहिए।",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "स्कोर, शेड्यूल और स्टैंडिंग सार्वजनिक खेल डेटा से आते हैं और इनके लिए प्रोवाइडर ज़रूरी नहीं। Harbor स्ट्रीम नहीं देता: मैच देखने के लिए अपना Live TV, M3U या Xtream स्रोत चाहिए।",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "स्कोर, शेड्यूल और स्टैंडिंग बिना प्रोवाइडर काम करते हैं। Harbor स्ट्रीम नहीं देता, इसलिए मैच देखने के लिए अपना Live TV, M3U या Xtream स्रोत चाहिए।",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "स्कोर, शेड्यूल और स्टैंडिंग सार्वजनिक खेल डेटा से आते हैं और इनके लिए प्रोवाइडर ज़रूरी नहीं। Harbor स्ट्रीम नहीं देता: मैच देखने के लिए अपना Live TV, M3U या Xtream स्रोत चाहिए।",
   "Show Sports without a TV provider": "बिना TV प्रोवाइडर के Sports दिखाएँ",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "स्पोर्ट्स चालू करने से सूचना स्वीकार नहीं होती। आपका चुनाव इस डिवाइस पर रहता है और आपके खाते से सिंक नहीं होता।",

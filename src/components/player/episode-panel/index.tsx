@@ -2,6 +2,7 @@ import {
   AlertCircle,
   CheckCheck,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Download,
   ToggleLeft,
@@ -45,8 +46,10 @@ import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { useT } from "@/lib/i18n";
 import { EpisodeRow } from "./episode-row";
 import { SeasonPicker } from "./season-picker";
+import { EntryPicker } from "./entry-picker";
 import { StreamsView } from "./streams-view";
 import { useSeasonBrowser } from "./use-season-browser";
+import { useAnimeEntryBrowser } from "./use-anime-entries";
 import { PreDownloadNextEpisode, type PreDownloadToastKind } from "./pre-download-next";
 import "./pre-download-toast.css";
 import {
@@ -109,7 +112,12 @@ export function EpisodePanel({
   roomGuest?: boolean;
   inRoom?: boolean;
   onHostAdvance?: (ep: PlayEpisode) => void;
-  watchedFor?: (ep: PlayEpisode) => boolean;
+  watchedFor?: (
+    ep: PlayEpisode,
+    entryId?: string,
+    entryImdbId?: string | null,
+    allowAlias?: boolean,
+  ) => boolean;
   nextEp?: PlayEpisode | null;
   onRestart?: () => void;
 }) {
@@ -118,12 +126,21 @@ export function EpisodePanel({
   const { openPicker, replacePlayerSrc } = usePlayerNavigation();
   const queue = useQueue();
   const debrids = useDebridClients();
+  const entryBrowser = useAnimeEntryBrowser(meta, currentEpisode, open);
   const { seasons, season, setSeason, episodes, loading, imdbRatings } = useSeasonBrowser(
     meta,
     currentEpisode,
     open,
+    entryBrowser.browsing ? entryBrowser.activeMeta : null,
   );
+  const playbackMeta = entryBrowser.activeMeta ?? meta;
   const nextSeason = seasons.find((n) => n > season);
+  const prevSeason = [...seasons].reverse().find((n) => n < season);
+  const seasonLabel = (n: number) => (n === 0 ? t("Specials") : t("Season {n}", { n }));
+  const entryLabel = (entry: { id: string; meta: Meta }) => {
+    const part = splitFranchiseDisplaySeason(parseKitsuId(entry.id));
+    return part != null ? seasonLabel(part) : entry.meta.name;
+  };
   const listRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     listRef.current?.scrollTo({ top: 0 });
@@ -239,7 +256,7 @@ export function EpisodePanel({
           setPickingFor(ep);
         } else {
           onClose();
-          openPicker(meta, ep, { autoPlay: true });
+          openPicker(playbackMeta, ep, { autoPlay: true });
         }
       };
       playLocalAware({
@@ -262,7 +279,7 @@ export function EpisodePanel({
     const hasFinishedDownload = downloadsSnapshot().some(
       (d) =>
         d.status === "done" &&
-        d.metaId === meta.id &&
+        d.metaId === playbackMeta.id &&
         d.season === ep.season &&
         d.episode === ep.episode,
     );
@@ -271,7 +288,7 @@ export function EpisodePanel({
       playNormally();
       return;
     }
-    void completedEpisodeSource(meta, ep, {
+    void completedEpisodeSource(playbackMeta, ep, {
       imdbId: currentImdbId ?? ep.imdbId,
       isAnime: currentIsAnime,
       startFromZero: restartCurrent,
@@ -361,10 +378,10 @@ export function EpisodePanel({
           .map(([k]) => k),
       };
       replacePlayerSrc({
-        meta,
+        meta: playbackMeta,
         episode: ep,
         url: playUrl,
-        title: stream.parsedTitle ?? stream.title ?? stream.name ?? meta.name,
+        title: stream.parsedTitle ?? stream.title ?? stream.name ?? playbackMeta.name,
         notWebReady: !stream.url && !!stream.infoHash,
         playbackTraceId,
         proxySessionId,
@@ -375,8 +392,8 @@ export function EpisodePanel({
       // Record the exact release immediately so an intervening offline episode
       // cannot obscure the previous online source before the next auto-advance.
       savePlayback(
-        meta.id,
-        { ...streamRef, url: r.data.url, title: meta.name },
+        playbackMeta.id,
+        { ...streamRef, url: r.data.url, title: playbackMeta.name },
         ep.season,
         ep.episode,
       );
@@ -395,7 +412,7 @@ export function EpisodePanel({
   };
   const beginEpisodeDownload = (ep: PlayEpisode) => {
     manualPlayRevisionRef.current += 1;
-    const existing = contextDownloadTask(downloadsSnapshot(), meta.id, ep);
+    const existing = contextDownloadTask(downloadsSnapshot(), playbackMeta.id, ep);
     const action = episodeDownloadAction(existing?.status);
     if (action === "saved") return;
     if (action === "cancel" && existing) {
@@ -427,7 +444,7 @@ export function EpisodePanel({
       );
       return;
     }
-    const existing = contextDownloadTask(downloadsSnapshot(), meta.id, ep);
+    const existing = contextDownloadTask(downloadsSnapshot(), playbackMeta.id, ep);
     if (episodeDownloadAction(existing?.status) !== "choose") {
       setDownloadFor(null);
       return;
@@ -455,7 +472,7 @@ export function EpisodePanel({
         return;
       }
       // Another source may have been queued while this one was resolving.
-      const current = contextDownloadTask(downloadsSnapshot(), meta.id, ep);
+      const current = contextDownloadTask(downloadsSnapshot(), playbackMeta.id, ep);
       if (episodeDownloadAction(current?.status) !== "choose") {
         setDownloadFor(null);
         return;
@@ -468,7 +485,7 @@ export function EpisodePanel({
         stream.addonName ||
         null;
       await enqueueDownload({
-        meta,
+        meta: playbackMeta,
         episode: ep,
         streamLabel: label,
         url: result.data.url,
@@ -476,7 +493,7 @@ export function EpisodePanel({
         sourceRef: downloadSourceRef(stream),
       });
       if (!ac.signal.aborted) {
-        setDownloadNotice(`${t("Added to downloads")} · ${displayEpLabel(ep, meta.id)}`);
+        setDownloadNotice(`${t("Added to downloads")} · ${displayEpLabel(ep, playbackMeta.id)}`);
         setDownloadFor(null);
       }
     } catch {
@@ -490,6 +507,24 @@ export function EpisodePanel({
       }
     }
   };
+  const prevEntry = entryBrowser.prevEntry;
+  const nextEntry = entryBrowser.nextEntry;
+  // While a browsed entry loads, its season list may still be the previous
+  // entry's; the franchise neighbours are safe to show in the meantime.
+  const numericPrev = loading ? undefined : prevSeason;
+  const numericNext = loading ? undefined : nextSeason;
+  const prevJump =
+    numericPrev !== undefined
+      ? { label: seasonLabel(numericPrev), go: () => setSeason(numericPrev) }
+      : prevEntry
+        ? { label: entryLabel(prevEntry), go: () => entryBrowser.browse(prevEntry.id) }
+        : null;
+  const nextJump =
+    numericNext !== undefined
+      ? { label: seasonLabel(numericNext), go: () => setSeason(numericNext) }
+      : nextEntry
+        ? { label: entryLabel(nextEntry), go: () => entryBrowser.browse(nextEntry.id) }
+        : null;
   return (
     <>
       <div
@@ -504,7 +539,7 @@ export function EpisodePanel({
             />
             <p className="text-[13px] text-white/75">
               {t("Loading {label}", {
-                label: `${displayEpLabel(resolvingFor, meta.id)}${
+                label: `${displayEpLabel(resolvingFor, playbackMeta.id)}${
                   resolvingFor.name ? ` · ${resolvingFor.name}` : ""
                 }`,
               })}
@@ -551,7 +586,7 @@ export function EpisodePanel({
           >
             {downloadFor ? (
               <StreamsView
-                meta={meta}
+                meta={playbackMeta}
                 episode={downloadFor}
                 intent="download"
                 error={downloadError}
@@ -564,7 +599,7 @@ export function EpisodePanel({
               />
             ) : pickingFor ? (
               <StreamsView
-                meta={meta}
+                meta={playbackMeta}
                 episode={pickingFor}
                 onBack={() => setPickingFor(null)}
                 onClose={onClose}
@@ -578,7 +613,7 @@ export function EpisodePanel({
                       {t("Up Next")}
                     </p>
                     <h2 className="mt-1 font-display text-[22px] font-semibold leading-tight text-ink">
-                      {meta.name}
+                      {playbackMeta.name}
                     </h2>
                   </div>
                   <div className="flex shrink-0 items-center gap-2.5">
@@ -630,9 +665,30 @@ export function EpisodePanel({
                   ) : (
                     <span />
                   )}
-                  {seasons.length > 1 && (
+                  {entryBrowser.entries.length > 1 ? (
+                    <EntryPicker
+                      entries={entryBrowser.entries.map((entry) => ({
+                        id: entry.id,
+                        label: entryLabel(entry),
+                      }))}
+                      activeId={entryBrowser.activeId ?? ""}
+                      onSelect={(id) => {
+                        if (season === 0) setSeason(1);
+                        entryBrowser.browse(id);
+                      }}
+                      specials={
+                        seasons.includes(0)
+                          ? {
+                              label: t("Specials"),
+                              active: season === 0,
+                              onSelect: () => setSeason(0),
+                            }
+                          : undefined
+                      }
+                    />
+                  ) : seasons.length > 1 ? (
                     <SeasonPicker seasons={seasons} active={season} onChange={setSeason} />
-                  )}
+                  ) : null}
                 </div>
                 <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-8 pt-2">
                   {downloadNotice && (
@@ -699,12 +755,22 @@ export function EpisodePanel({
                             const key = `${ep.season}:${ep.episode}`;
                             const isCurrent = !!currentEpisode && sameEpisode(ep, currentEpisode);
                             const isNextUp = !!nextEp && sameEpisode(ep, nextEp);
+                            const rowWatched =
+                              isNextAired(false, ep.airDate) &&
+                              (watchedFor?.(
+                                ep,
+                                playbackMeta.id,
+                                ep.imdbId ?? null,
+                                !entryBrowser.browsing,
+                              ) ??
+                                false);
                             // Navigation may already carry a synopsis even when the season
                             // provider omits it. Use that description until enrichment finishes.
                             const playbackOverview = [currentEpisode, nextEp].find(
                               (candidate) =>
                                 candidate &&
-                                (!candidate.sourceMetaId || candidate.sourceMetaId === meta.id) &&
+                                (!candidate.sourceMetaId ||
+                                  candidate.sourceMetaId === playbackMeta.id) &&
                                 sameEpisode(ep, candidate) &&
                                 candidate.overview?.trim(),
                             )?.overview;
@@ -716,7 +782,7 @@ export function EpisodePanel({
                               <EpisodeRow
                                 key={key}
                                 episode={rowEpisode}
-                                metaId={meta.id}
+                                metaId={playbackMeta.id}
                                 imdbRating={imdbRatings.get(`${ep.season}:${ep.episode}`)}
                                 expanded={expandedEp === key}
                                 onToggle={() => setExpandedEp((cur) => (cur === key ? null : key))}
@@ -726,7 +792,7 @@ export function EpisodePanel({
                                     const saved = downloadsSnapshot().some(
                                       (d) =>
                                         d.status === "done" &&
-                                        d.metaId === meta.id &&
+                                        d.metaId === playbackMeta.id &&
                                         d.season === ep.season &&
                                         d.episode === ep.episode,
                                     );
@@ -741,9 +807,9 @@ export function EpisodePanel({
                                 }}
                                 isCurrent={isCurrent}
                                 onDownload={() => beginEpisodeDownload(ep)}
-                                watched={watchedFor?.(ep) ?? false}
+                                watched={rowWatched}
                                 spoiler={spoilerMaskFor(settings, {
-                                  watched: isCurrent || (watchedFor?.(ep) ?? false),
+                                  watched: isCurrent || rowWatched,
                                   isNextUp,
                                 })}
                               />
@@ -751,14 +817,37 @@ export function EpisodePanel({
                           })}
                         </div>
                       )}
-                      {!loading && nextSeason !== undefined && (
-                        <button
-                          onClick={() => setSeason(nextSeason)}
-                          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-elevated px-4 py-3.5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
-                        >
-                          {t("Season {n}", { n: nextSeason })}
-                          <ChevronRight size={16} strokeWidth={2.4} />
-                        </button>
+                      {(!loading || entryBrowser.browsing) && (prevJump || nextJump) && (
+                        <div className="mt-3 flex gap-2">
+                          {prevJump && (
+                            <button
+                              onClick={prevJump.go}
+                              title={prevJump.label}
+                              className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-elevated px-4 py-3.5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+                            >
+                              <ChevronLeft
+                                size={16}
+                                strokeWidth={2.4}
+                                className="shrink-0 rtl:-scale-x-100"
+                              />
+                              <span className="min-w-0 truncate">{prevJump.label}</span>
+                            </button>
+                          )}
+                          {nextJump && (
+                            <button
+                              onClick={nextJump.go}
+                              title={nextJump.label}
+                              className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-elevated px-4 py-3.5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+                            >
+                              <span className="min-w-0 truncate">{nextJump.label}</span>
+                              <ChevronRight
+                                size={16}
+                                strokeWidth={2.4}
+                                className="shrink-0 rtl:-scale-x-100"
+                              />
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}

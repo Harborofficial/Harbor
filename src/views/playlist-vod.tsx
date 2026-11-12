@@ -68,11 +68,7 @@ export function PlaylistVodView({ active }: { active: boolean }) {
     setTab(t);
     setSelected(null);
   }, []);
-  const viewError = isXtream
-    ? tab === "movies"
-      ? xtream.movieError
-      : xtream.seriesError
-    : error;
+  const viewError = isXtream ? (tab === "movies" ? xtream.movieError : xtream.seriesError) : error;
   const tabLoading = isXtream
     ? tab === "movies"
       ? xtream.moviesLoading

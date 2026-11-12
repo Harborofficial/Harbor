@@ -166,5 +166,8 @@ export function useMyRatings(): MyRating[] {
 
 export function useRating(itemKey: string | undefined): MyRating | null {
   const list = useMyRatings();
-  return useMemo(() => (itemKey ? list.find((r) => r.itemKey === itemKey) ?? null : null), [list, itemKey]);
+  return useMemo(
+    () => (itemKey ? (list.find((r) => r.itemKey === itemKey) ?? null) : null),
+    [list, itemKey],
+  );
 }

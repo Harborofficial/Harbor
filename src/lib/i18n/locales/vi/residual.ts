@@ -129,8 +129,10 @@ const residual: Record<string, string> = {
   "No previous versions yet. Your next update starts the history.":
     "Chưa có phiên bản trước. Bản cập nhật tiếp theo sẽ bắt đầu lịch sử.",
   "Get yours at": "Lấy token của bạn tại",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Dùng để kiểm tra bộ nhớ đệm và bỏ hạn chế liên kết. Harbor không bao giờ tự thêm hoặc xóa bất cứ thứ gì trong tài khoản của bạn.",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Quyền sử dụng chỉ đọc giống Real-Debrid. Đồng thời cho phép bạn đưa nguồn chưa được lưu vào bộ nhớ đệm vào hàng đợi từ trình chọn phát.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Dùng để kiểm tra bộ nhớ đệm và bỏ hạn chế liên kết. Harbor không bao giờ tự thêm hoặc xóa bất cứ thứ gì trong tài khoản của bạn.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Quyền sử dụng chỉ đọc giống Real-Debrid. Đồng thời cho phép bạn đưa nguồn chưa được lưu vào bộ nhớ đệm vào hàng đợi từ trình chọn phát.",
   "AllDebrid deprecated their cache-check endpoint, so streams may show as unknown until you actually hit Play.":
     "AllDebrid đã ngừng dùng endpoint kiểm tra bộ nhớ đệm, nên luồng phát có thể hiển thị là không xác định cho đến khi bạn thực sự nhấn Phát.",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":

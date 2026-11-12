@@ -23,7 +23,8 @@ export default {
   "games.launchers.visit": "{name} sitesine git",
   "games.launchers.picks": "Seçilen oyunlar",
   "games.launchers.unavailable": "Güncel oyun ayrıntıları yüklenemedi.",
-  "games.launchers.source": "Oyun ayrıntıları IGDB’den · Başlatıcı bağlantıları resmî siteleri açar.",
+  "games.launchers.source":
+    "Oyun ayrıntıları IGDB’den · Başlatıcı bağlantıları resmî siteleri açar.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +60,8 @@ export default {
   "games.recent.open": "{source} kaynağından {name} oyununu aç",
   "games.recent.files": "Kaynak dosyaları",
   "games.recent.empty": "Son eklenenleri burada görmek için bir oyun kaynağı bağlayın.",
-  "games.recent.undated": "Kaynaklarınızda henüz tarihli oyun yüklemesi yok. Kaynakları yönet bölümünden göz atın.",
+  "games.recent.undated":
+    "Kaynaklarınızda henüz tarihli oyun yüklemesi yok. Kaynakları yönet bölümünden göz atın.",
   "games.recent.adult": "Yetişkin içeriği · görsel bulanıklaştırıldı",
   "games.recent.artHidden": "Görsel gizlendi",
   "games.recent.artUnrated": "İçerik derecelendirmesi mevcut değil",
@@ -85,7 +87,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Atari salonu geliri, 1980–1999",
   "games.collectionsLive.wowRecord": "En yüksek ücretli abone sayısı",
   "games.collectionsLive.wiiRecord": "Wii için satılan kopya",
-  "games.collectionsLive.manhuntRecord": "Birleşik Krallık’ta sınıflandırması reddedilen ilk aksiyon-macera oyunu",
+  "games.collectionsLive.manhuntRecord":
+    "Birleşik Krallık’ta sınıflandırması reddedilen ilk aksiyon-macera oyunu",
   "games.collectionsLive.gtaVSalesRecord": "En çok satan aksiyon-macera oyunu",
   "games.collectionsLive.blackOps3Record": "En çok satan birinci şahıs nişancı oyunu",
   "games.collectionsLive.smashUltimateRecord": "En çok satan dövüş oyunu",
@@ -111,7 +114,8 @@ export default {
   "games.collectionsLive.honorKingsRecord": "Bir mobil oyunun elde ettiği en yüksek gelir",
   "games.collectionsLive.gearsBillionRecord": "Buna ulaşan ilk üçüncü şahıs nişancı serisi",
   "games.collectionsLive.oldRepublicRecord": "Şimdiye kadar geliştirilen en pahalı MMORPG",
-  "games.collectionsLive.mario64AuctionRecord": "Bir oyun için açık artırmada ödenen en yüksek tutar",
+  "games.collectionsLive.mario64AuctionRecord":
+    "Bir oyun için açık artırmada ödenen en yüksek tutar",
   "games.collectionsLive.dotaPrizeRecord": "Döneminin en büyük espor ödül havuzu",
   "games.collectionsLive.ocarinaScoreRecord": "Şimdiye kadar kaydedilen en yüksek eleştirmen puanı",
   "games.collectionsLive.breathScoreRecord": "En yüksek puanlı açık dünya oyunu",
@@ -143,7 +147,8 @@ export default {
   "games.tournaments.schedule": "Resmî etkinlik ayrıntıları",
   "games.tournaments.watch": "Nereden izlenir",
   "games.tournaments.channelsNote": "Resmî kanallar. Yayınlar turnuva takvimine göre yapılır.",
-  "games.tournaments.broadcastPending": "Yayın ayrıntıları burada henüz doğrulanmadı. Organizatörün sayfasını kontrol edin.",
+  "games.tournaments.broadcastPending":
+    "Yayın ayrıntıları burada henüz doğrulanmadı. Organizatörün sayfasını kontrol edin.",
   "games.tournaments.noDates": "Bu takvimde yaklaşan bir Major henüz doğrulanmadı.",
   "games.launchers.topGames": "Steam’de en çok oynananlar",
   "games.launchers.chartRank": "En çok oynananlarda {rank}. sırada",

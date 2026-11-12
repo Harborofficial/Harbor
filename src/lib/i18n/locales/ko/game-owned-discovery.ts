@@ -10,12 +10,15 @@ export default {
   "games.calendar.search": "저장한 게임 검색",
   "games.calendar.platform": "출시 플랫폼",
   "games.calendar.allPlatforms": "모든 플랫폼",
-  "games.calendar.dates": "배급사가 발표한 날짜는 변경될 수 있습니다. Steam 날짜는 미국 상점 기준이며, IGDB 기록에는 플랫폼과 지역이 표시됩니다.",
+  "games.calendar.dates":
+    "배급사가 발표한 날짜는 변경될 수 있습니다. Steam 날짜는 미국 상점 기준이며, IGDB 기록에는 플랫폼과 지역이 표시됩니다.",
   "games.calendar.noDays": "확인한 게임 중 {month}에 정확한 출시일이 정해진 게임이 없습니다.",
   "games.calendar.windows": "출시 예정 시기",
-  "games.calendar.windowsNote": "이 계획에는 선택한 달이 포함되지만 정확한 날짜는 정해지지 않았습니다.",
+  "games.calendar.windowsNote":
+    "이 계획에는 선택한 달이 포함되지만 정확한 날짜는 정해지지 않았습니다.",
   "games.calendar.undated": "확정된 날짜 없음",
-  "games.calendar.undatedNote": "미발표, 조회 불가 또는 아직 확인하지 않은 날짜는 달력에 표시하지 않습니다.",
+  "games.calendar.undatedNote":
+    "미발표, 조회 불가 또는 아직 확인하지 않은 날짜는 달력에 표시하지 않습니다.",
   "games.calendar.cancelled": "출시가 취소된 기록 {count}개는 제외됩니다.",
   "games.calendar.unchecked": "아직 날짜를 확인하지 않음",
   "games.watchlist.note": "즐겨찾는 게임의 출시 일정을 확인하세요.",
@@ -54,9 +57,12 @@ export default {
   "games.owned.pickHint": "이 결과에서 게임 하나를 무작위로 엽니다.",
   "games.owned.clear": "라이브러리 필터 초기화",
   "games.owned.scanning": "로컬 설치 확인 중…",
-  "games.owned.scanUnavailable": "로컬 설치 상태를 확인할 수 없습니다. 새로고침하여 이 기기를 확인하세요.",
-  "games.owned.partial": "일부 Steam 폴더를 확인하지 못했습니다. 일부 설치가 인식되지 않았을 수 있습니다.",
+  "games.owned.scanUnavailable":
+    "로컬 설치 상태를 확인할 수 없습니다. 새로고침하여 이 기기를 확인하세요.",
+  "games.owned.partial":
+    "일부 Steam 폴더를 확인하지 못했습니다. 일부 설치가 인식되지 않았을 수 있습니다.",
   "games.owned.results": "전체 {total}개 중 {count}개 게임",
-  "games.owned.playtimeNote": "플레이 기록은 마지막 Steam 동기화 시점의 정보입니다. 기록된 플레이 시간이 없다는 것이 게임의 완료 여부를 나타내지는 않습니다.",
-  "games.owned.resetAvailability": "설치 상태와 관계없이 게임 표시"
+  "games.owned.playtimeNote":
+    "플레이 기록은 마지막 Steam 동기화 시점의 정보입니다. 기록된 플레이 시간이 없다는 것이 게임의 완료 여부를 나타내지는 않습니다.",
+  "games.owned.resetAvailability": "설치 상태와 관계없이 게임 표시",
 };

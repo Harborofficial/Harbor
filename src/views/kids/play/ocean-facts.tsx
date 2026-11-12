@@ -4,24 +4,96 @@ import { Sparkles } from "lucide-react";
 const WM = "https://upload.wikimedia.org/wikipedia/commons/thumb";
 
 const FACTS: Array<{ fact: string; art: string; img: string }> = [
-  { fact: "Octopuses have three hearts and blue blood!", art: "liloctored", img: `${WM}/5/57/Octopus2.jpg/960px-Octopus2.jpg` },
-  { fact: "A blue whale's heart is as big as a small car.", art: "lilbluewhale", img: `${WM}/1/1c/Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg/960px-Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg` },
-  { fact: "Starfish can regrow a whole arm if they lose one.", art: "lilorangestar2", img: `${WM}/c/c7/Starfish_montage.png/960px-Starfish_montage.png` },
-  { fact: "Whales sing songs that travel for miles under the sea.", art: "lilwhale1", img: `${WM}/6/61/Humpback_Whale_underwater_shot.jpg/960px-Humpback_Whale_underwater_shot.jpg` },
-  { fact: "Sea otters hold hands while they sleep so they don't float apart.", art: "lilwhitestar", img: `${WM}/0/02/Sea_Otter_%28Enhydra_lutris%29_%2825169790524%29_crop.jpg/960px-Sea_Otter_%28Enhydra_lutris%29_%2825169790524%29_crop.jpg` },
-  { fact: "Seahorse dads are the ones who carry the babies.", art: "lilpurplestar", img: `${WM}/2/25/Hippocampus_hippocampus_%28on_Ascophyllum_nodosum%29.jpg/960px-Hippocampus_hippocampus_%28on_Ascophyllum_nodosum%29.jpg` },
-  { fact: "Crabs walk sideways, and they're really fast at it!", art: "lilpurpocto", img: `${WM}/7/71/Cancer_pagurus.jpg/960px-Cancer_pagurus.jpg` },
-  { fact: "Sharks grow new teeth their whole lives, row after row.", art: "lilbluewhale", img: `${WM}/5/56/White_shark.jpg/960px-White_shark.jpg` },
-  { fact: "The ocean covers more than half of our whole planet.", art: "lilwhale1", img: `${WM}/d/db/Pacific_Ocean_as_viewed_from_GOES-18_on_September_23%2C_2023.jpg/960px-Pacific_Ocean_as_viewed_from_GOES-18_on_September_23%2C_2023.jpg` },
-  { fact: "Some jellyfish can glow in the dark like little lanterns.", art: "lilpurplestar", img: `${WM}/4/44/Jelly_cc11.jpg/960px-Jelly_cc11.jpg` },
-  { fact: "An octopus can squeeze through a hole the size of a coin.", art: "lilpurpocto", img: `${WM}/0/0b/Enteroctopus_dolfeini.jpg/960px-Enteroctopus_dolfeini.jpg` },
-  { fact: "Dolphins sleep with one eye open to stay safe.", art: "lilwhitestar2", img: `${WM}/b/bc/Tursiops_truncatus_01-cropped.jpg/960px-Tursiops_truncatus_01-cropped.jpg` },
-  { fact: "A group of fish swimming together is called a school.", art: "lilorangestar2", img: `${WM}/b/b1/Sardines_-_%E9%B0%AF%28%E3%81%84%E3%82%8F%E3%81%97%29.jpg/960px-Sardines_-_%E9%B0%AF%28%E3%81%84%E3%82%8F%E3%81%97%29.jpg` },
-  { fact: "Sea turtles can live to be more than 100 years old.", art: "lilwhitestar", img: `${WM}/a/a3/Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg/960px-Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg` },
-  { fact: "Penguins can't fly in the air, but they fly underwater.", art: "liloctored", img: `${WM}/a/a3/Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg/960px-Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg` },
-  { fact: "Coral reefs are built by tiny animals smaller than your fingernail.", art: "lilpurplestar", img: `${WM}/7/76/Blue_Linckia_Starfish.JPG/960px-Blue_Linckia_Starfish.JPG` },
-  { fact: "Clownfish live safely inside stinging anemones. The stings don't hurt them!", art: "lilorangestar2", img: `${WM}/f/f6/Clown_fish_in_the_Andaman_Coral_Reef.jpg/960px-Clown_fish_in_the_Andaman_Coral_Reef.jpg` },
-  { fact: "Electric eels can make their own electricity to light up their hunt.", art: "lilwhale1", img: `${WM}/8/8f/Electric-eel.jpg/960px-Electric-eel.jpg` },
+  {
+    fact: "Octopuses have three hearts and blue blood!",
+    art: "liloctored",
+    img: `${WM}/5/57/Octopus2.jpg/960px-Octopus2.jpg`,
+  },
+  {
+    fact: "A blue whale's heart is as big as a small car.",
+    art: "lilbluewhale",
+    img: `${WM}/1/1c/Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg/960px-Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg`,
+  },
+  {
+    fact: "Starfish can regrow a whole arm if they lose one.",
+    art: "lilorangestar2",
+    img: `${WM}/c/c7/Starfish_montage.png/960px-Starfish_montage.png`,
+  },
+  {
+    fact: "Whales sing songs that travel for miles under the sea.",
+    art: "lilwhale1",
+    img: `${WM}/6/61/Humpback_Whale_underwater_shot.jpg/960px-Humpback_Whale_underwater_shot.jpg`,
+  },
+  {
+    fact: "Sea otters hold hands while they sleep so they don't float apart.",
+    art: "lilwhitestar",
+    img: `${WM}/0/02/Sea_Otter_%28Enhydra_lutris%29_%2825169790524%29_crop.jpg/960px-Sea_Otter_%28Enhydra_lutris%29_%2825169790524%29_crop.jpg`,
+  },
+  {
+    fact: "Seahorse dads are the ones who carry the babies.",
+    art: "lilpurplestar",
+    img: `${WM}/2/25/Hippocampus_hippocampus_%28on_Ascophyllum_nodosum%29.jpg/960px-Hippocampus_hippocampus_%28on_Ascophyllum_nodosum%29.jpg`,
+  },
+  {
+    fact: "Crabs walk sideways, and they're really fast at it!",
+    art: "lilpurpocto",
+    img: `${WM}/7/71/Cancer_pagurus.jpg/960px-Cancer_pagurus.jpg`,
+  },
+  {
+    fact: "Sharks grow new teeth their whole lives, row after row.",
+    art: "lilbluewhale",
+    img: `${WM}/5/56/White_shark.jpg/960px-White_shark.jpg`,
+  },
+  {
+    fact: "The ocean covers more than half of our whole planet.",
+    art: "lilwhale1",
+    img: `${WM}/d/db/Pacific_Ocean_as_viewed_from_GOES-18_on_September_23%2C_2023.jpg/960px-Pacific_Ocean_as_viewed_from_GOES-18_on_September_23%2C_2023.jpg`,
+  },
+  {
+    fact: "Some jellyfish can glow in the dark like little lanterns.",
+    art: "lilpurplestar",
+    img: `${WM}/4/44/Jelly_cc11.jpg/960px-Jelly_cc11.jpg`,
+  },
+  {
+    fact: "An octopus can squeeze through a hole the size of a coin.",
+    art: "lilpurpocto",
+    img: `${WM}/0/0b/Enteroctopus_dolfeini.jpg/960px-Enteroctopus_dolfeini.jpg`,
+  },
+  {
+    fact: "Dolphins sleep with one eye open to stay safe.",
+    art: "lilwhitestar2",
+    img: `${WM}/b/bc/Tursiops_truncatus_01-cropped.jpg/960px-Tursiops_truncatus_01-cropped.jpg`,
+  },
+  {
+    fact: "A group of fish swimming together is called a school.",
+    art: "lilorangestar2",
+    img: `${WM}/b/b1/Sardines_-_%E9%B0%AF%28%E3%81%84%E3%82%8F%E3%81%97%29.jpg/960px-Sardines_-_%E9%B0%AF%28%E3%81%84%E3%82%8F%E3%81%97%29.jpg`,
+  },
+  {
+    fact: "Sea turtles can live to be more than 100 years old.",
+    art: "lilwhitestar",
+    img: `${WM}/a/a3/Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg/960px-Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg`,
+  },
+  {
+    fact: "Penguins can't fly in the air, but they fly underwater.",
+    art: "liloctored",
+    img: `${WM}/a/a3/Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg/960px-Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg`,
+  },
+  {
+    fact: "Coral reefs are built by tiny animals smaller than your fingernail.",
+    art: "lilpurplestar",
+    img: `${WM}/7/76/Blue_Linckia_Starfish.JPG/960px-Blue_Linckia_Starfish.JPG`,
+  },
+  {
+    fact: "Clownfish live safely inside stinging anemones. The stings don't hurt them!",
+    art: "lilorangestar2",
+    img: `${WM}/f/f6/Clown_fish_in_the_Andaman_Coral_Reef.jpg/960px-Clown_fish_in_the_Andaman_Coral_Reef.jpg`,
+  },
+  {
+    fact: "Electric eels can make their own electricity to light up their hunt.",
+    art: "lilwhale1",
+    img: `${WM}/8/8f/Electric-eel.jpg/960px-Electric-eel.jpg`,
+  },
 ];
 
 function shuffled(seed: number): number[] {

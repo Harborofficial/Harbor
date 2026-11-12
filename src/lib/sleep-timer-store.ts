@@ -83,9 +83,17 @@ export function registerSleepFireHandler(h: (() => void) | null): void {
 }
 
 export function useSleepMode(): SleepMode {
-  return useSyncExternalStore(subscribe, () => mode, () => mode);
+  return useSyncExternalStore(
+    subscribe,
+    () => mode,
+    () => mode,
+  );
 }
 
 export function useSleepRemainingMs(): number | null {
-  return useSyncExternalStore(subscribe, () => remainingMs, () => remainingMs);
+  return useSyncExternalStore(
+    subscribe,
+    () => remainingMs,
+    () => remainingMs,
+  );
 }

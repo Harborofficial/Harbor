@@ -1,6 +1,7 @@
 import { animeKitsuMeta, type AnimeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { externalToKitsu } from "@/lib/providers/anime-mapping";
 import { parseKitsuId } from "@/lib/providers/kitsu";
+import { franchiseRoot } from "@/lib/providers/anime-franchise-root";
 
 export type AnimeEntry = {
   kitsuId: number;
@@ -73,6 +74,23 @@ export async function resolveAnimeEntry(id: string, maxAge?: number): Promise<An
 }
 
 /**
+ * The series entry linked by one franchise relation on the Kitsu addon meta.
+ * Returns null when the link is absent or does not name a series detail page.
+ */
+function linkedAnimeEntry(meta: AnimeKitsuMeta | null, relation: RegExp): string | null {
+  const link = meta?.links?.find(
+    (entry) => entry.category?.toLowerCase() === "franchise" && relation.test(entry.name ?? ""),
+  );
+  const match = link ? /\/detail\/series\/([^/?#]+)/.exec(link.url ?? "") : null;
+  if (!match) return null;
+  try {
+    return decodeURIComponent(match[1]) || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The next series entry linked by the Kitsu addon's Sequel relation. Addon
  * metadata already carries these links, so crossing a cour costs one cached
  * lookup rather than a fresh franchise walk.
@@ -82,18 +100,37 @@ export async function nextAnimeEntry(
   lookup: AnimeMetaLookup = animeKitsuMeta,
 ): Promise<NextAnimeEntry | null> {
   const meta = await lookup(id).catch(() => null);
-  const sequel = meta?.links?.find(
-    (link) => link.category?.toLowerCase() === "franchise" && /^sequel\b/i.test(link.name ?? ""),
-  );
-  const match = sequel ? /\/detail\/series\/([^/?#]+)/.exec(sequel.url ?? "") : null;
-  if (!match) return null;
-  let nextId: string;
-  try {
-    nextId = decodeURIComponent(match[1]);
-  } catch {
-    return null;
-  }
+  const nextId = linkedAnimeEntry(meta, /^sequel\b/i);
   if (!nextId) return null;
   const nextMeta = await lookup(nextId).catch(() => null);
   return { id: nextId, meta: nextMeta };
+}
+
+/**
+ * The entry immediately before this one. Prefer the addon's Prequel link; when
+ * that link is missing, walk the cached franchise root forward. Returns null at
+ * the root or when this entry is not part of that forward chain.
+ */
+export async function previousAnimeEntry(
+  id: string,
+  lookup: AnimeMetaLookup = animeKitsuMeta,
+): Promise<NextAnimeEntry | null> {
+  const meta = await lookup(id).catch(() => null);
+  const prequelId = linkedAnimeEntry(meta, /^prequel\b/i);
+  if (prequelId && prequelId !== id) {
+    return { id: prequelId, meta: await lookup(prequelId).catch(() => null) };
+  }
+  const root = await franchiseRoot(id).catch(() => id);
+  if (root === id) return null;
+  let cursor = root;
+  for (let step = 0; step < 20; step += 1) {
+    const next = await nextAnimeEntry(cursor, lookup);
+    if (!next) return null;
+    if (next.id === id) {
+      return { id: cursor, meta: await lookup(cursor).catch(() => null) };
+    }
+    cursor = next.id;
+    if (cursor === id) return null;
+  }
+  return null;
 }

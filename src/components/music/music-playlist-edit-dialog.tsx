@@ -88,8 +88,7 @@ export function MusicPlaylistEditDialog({
 
   const custom = preview || (storedCover && !cleared ? storedCover : "");
   const trimmed = name.trim();
-  const changed =
-    trimmed !== target.name || Boolean(file) || (cleared && Boolean(storedCover));
+  const changed = trimmed !== target.name || Boolean(file) || (cleared && Boolean(storedCover));
 
   const save = async (event: FormEvent) => {
     event.preventDefault();

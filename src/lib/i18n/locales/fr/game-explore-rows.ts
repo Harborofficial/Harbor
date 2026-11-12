@@ -23,7 +23,8 @@ export default {
   "games.launchers.visit": "Visiter {name}",
   "games.launchers.picks": "Sélection de jeux",
   "games.launchers.unavailable": "Les détails à jour des jeux n’ont pas pu être chargés.",
-  "games.launchers.source": "Détails des jeux fournis par IGDB · Les liens ouvrent les sites officiels des lanceurs.",
+  "games.launchers.source":
+    "Détails des jeux fournis par IGDB · Les liens ouvrent les sites officiels des lanceurs.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +60,8 @@ export default {
   "games.recent.open": "Ouvrir {name} depuis {source}",
   "games.recent.files": "Fichiers de la source",
   "games.recent.empty": "Connectez une source de jeux pour voir ses derniers ajouts ici.",
-  "games.recent.undated": "Vos sources ne proposent pas encore de jeux datés. Consultez-les dans Gérer les sources.",
+  "games.recent.undated":
+    "Vos sources ne proposent pas encore de jeux datés. Consultez-les dans Gérer les sources.",
   "games.recent.adult": "Contenu pour adultes · image floutée",
   "games.recent.artHidden": "Image masquée",
   "games.recent.artUnrated": "Classification du contenu indisponible",
@@ -85,7 +87,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Recettes en arcade, 1980–1999",
   "games.collectionsLive.wowRecord": "Pic d’abonnés payants",
   "games.collectionsLive.wiiRecord": "Exemplaires vendus sur Wii",
-  "games.collectionsLive.manhuntRecord": "Premier jeu d’action-aventure privé de classification au Royaume-Uni",
+  "games.collectionsLive.manhuntRecord":
+    "Premier jeu d’action-aventure privé de classification au Royaume-Uni",
   "games.collectionsLive.gtaVSalesRecord": "Le jeu d’action-aventure le plus vendu",
   "games.collectionsLive.blackOps3Record": "Le jeu de tir à la première personne le plus vendu",
   "games.collectionsLive.smashUltimateRecord": "Le jeu de combat le plus vendu",
@@ -103,15 +106,18 @@ export default {
   "games.collectionsLive.metalGearSeriesRecord": "La série d’infiltration la plus vendue",
   "games.collectionsLive.haloSeriesRecord": "La série de jeux de tir SF la plus vendue",
   "games.collectionsLive.mortalSeriesRecord": "La série de combat la plus vendue",
-  "games.collectionsLive.granTurismoSeriesRecord": "La série de simulation de conduite la plus vendue",
+  "games.collectionsLive.granTurismoSeriesRecord":
+    "La série de simulation de conduite la plus vendue",
   "games.collectionsLive.commandSeriesRecord": "La série de stratégie en temps réel la plus vendue",
   "games.collectionsLive.justDanceSeriesRecord": "La série de danse la plus vendue",
   "games.collectionsLive.maddenSeriesRecord": "La série de football américain la plus vendue",
   "games.collectionsLive.nba2kSeriesRecord": "La série de basket la plus vendue",
   "games.collectionsLive.honorKingsRecord": "Les plus gros revenus pour un jeu mobile",
-  "games.collectionsLive.gearsBillionRecord": "La première série de tir à la troisième personne à y parvenir",
+  "games.collectionsLive.gearsBillionRecord":
+    "La première série de tir à la troisième personne à y parvenir",
   "games.collectionsLive.oldRepublicRecord": "Le MMORPG le plus cher jamais développé",
-  "games.collectionsLive.mario64AuctionRecord": "La plus grosse somme payée pour un jeu aux enchères",
+  "games.collectionsLive.mario64AuctionRecord":
+    "La plus grosse somme payée pour un jeu aux enchères",
   "games.collectionsLive.dotaPrizeRecord": "La plus grande cagnotte esport de son époque",
   "games.collectionsLive.ocarinaScoreRecord": "La meilleure note critique jamais enregistrée",
   "games.collectionsLive.breathScoreRecord": "Le jeu en monde ouvert le mieux noté",
@@ -142,8 +148,10 @@ export default {
   "games.tournaments.checked": "Dates des organisateurs vérifiées le {date}",
   "games.tournaments.schedule": "Détails officiels de l’événement",
   "games.tournaments.watch": "Où regarder",
-  "games.tournaments.channelsNote": "Chaînes officielles. La diffusion suit le calendrier du tournoi.",
-  "games.tournaments.broadcastPending": "Les détails de diffusion ne sont pas encore confirmés ici. Consultez la page de l’organisateur.",
+  "games.tournaments.channelsNote":
+    "Chaînes officielles. La diffusion suit le calendrier du tournoi.",
+  "games.tournaments.broadcastPending":
+    "Les détails de diffusion ne sont pas encore confirmés ici. Consultez la page de l’organisateur.",
   "games.tournaments.noDates": "Aucun prochain Major confirmé dans ce calendrier.",
   "games.launchers.topGames": "Les plus joués sur Steam",
   "games.launchers.chartRank": "Nº {rank} des jeux les plus joués",

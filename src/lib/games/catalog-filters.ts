@@ -23,12 +23,17 @@ export const GAME_TAGS = [
 // Steam genres also include labels outside the curated discovery tag menu.
 // Verified with IStoreService/GetTagList (English), October 2, 2026.
 const GENRE_TAGS: Record<string, number> = {
-  "indie": 492, "casual": 597, "sports": 701, "racing": 699,
-  "free to play": 113, "massively multiplayer": 128, "early access": 493,
+  indie: 492,
+  casual: 597,
+  sports: 701,
+  racing: 699,
+  "free to play": 113,
+  "massively multiplayer": 128,
+  "early access": 493,
 };
 export function genreCatalogTag(genre: string): number | undefined {
   const name = genre.trim().toLowerCase();
-  return GAME_TAGS.find(tag => tag.label.toLowerCase() === name)?.id ?? GENRE_TAGS[name];
+  return GAME_TAGS.find((tag) => tag.label.toLowerCase() === name)?.id ?? GENRE_TAGS[name];
 }
 
 export type CatalogFilters = {
@@ -42,16 +47,42 @@ export type CatalogFilters = {
   publisher?: string;
   features?: { id: number; name: string }[];
 };
-export const DEFAULT_CATALOG_FILTERS: CatalogFilters = { tags: [], platform: "all", mode: "all", price: "all", controller: false, sort: "_ASC" };
+export const DEFAULT_CATALOG_FILTERS: CatalogFilters = {
+  tags: [],
+  platform: "all",
+  mode: "all",
+  price: "all",
+  controller: false,
+  sort: "_ASC",
+};
 export const CATALOG_PAGE_SIZE = 30;
 
-export function catalogParameters(query: string, filters: CatalogFilters, offset = 0): URLSearchParams {
-  const params = new URLSearchParams({ term: query.trim().slice(0, 180), start: String(Math.max(0, Math.floor(offset))), count: String(CATALOG_PAGE_SIZE), category1: "998", cc: "us", l: "english", infinite: "1", sort_by: filters.sort });
-  const tags = [...new Set(filters.tags)].filter(id => Number.isSafeInteger(id) && id > 0).slice(0, 32).sort((a, b) => a - b);
+export function catalogParameters(
+  query: string,
+  filters: CatalogFilters,
+  offset = 0,
+): URLSearchParams {
+  const params = new URLSearchParams({
+    term: query.trim().slice(0, 180),
+    start: String(Math.max(0, Math.floor(offset))),
+    count: String(CATALOG_PAGE_SIZE),
+    category1: "998",
+    cc: "us",
+    l: "english",
+    infinite: "1",
+    sort_by: filters.sort,
+  });
+  const tags = [...new Set(filters.tags)]
+    .filter((id) => Number.isSafeInteger(id) && id > 0)
+    .slice(0, 32)
+    .sort((a, b) => a - b);
   if (tags.length) params.set("tags", tags.join(","));
   if (filters.platform !== "all") params.set("os", filters.platform);
   if (filters.mode !== "all") params.set("category3", filters.mode);
-  const features = [...new Set((filters.features ?? []).map(feature => feature.id))].filter(id => Number.isSafeInteger(id) && id > 0 && id <= 4_294_967_295).slice(0, 32).sort((a, b) => a - b);
+  const features = [...new Set((filters.features ?? []).map((feature) => feature.id))]
+    .filter((id) => Number.isSafeInteger(id) && id > 0 && id <= 4_294_967_295)
+    .slice(0, 32)
+    .sort((a, b) => a - b);
   if (features.length) params.set("category2", features.join(","));
   if (filters.price === "free") params.set("maxprice", "free");
   if (filters.price === "offers") params.set("specials", "1");

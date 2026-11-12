@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "敏捷",
   "games.dota.attribute.int": "智力",
   "games.dota.attribute.all": "全才",
-  "games.dota.trendsScope": "OpenDota 样本涵盖包括今天在内的七个 UTC 日。段位为比赛平均段位；快速模式和职业比赛单独统计。",
+  "games.dota.trendsScope":
+    "OpenDota 样本涵盖包括今天在内的七个 UTC 日。段位为比赛平均段位；快速模式和职业比赛单独统计。",
   "games.dota.wins": "胜率",
   "games.dota.picks": "选择 {count} 次",
   "games.dota.noSample": "暂无样本",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "更多英雄",
   "games.dota.matchups": "职业对阵",
   "games.dota.refreshMatchups": "刷新对阵",
-  "games.dota.matchupsScope": "{hero} 在过去一年已记录的职业比赛中对各对手的胜率。包括旧版本；不受段位筛选影响。",
+  "games.dota.matchupsScope":
+    "{hero} 在过去一年已记录的职业比赛中对各对手的胜率。包括旧版本；不受段位筛选影响。",
   "games.dota.opponent": "查找对手",
   "games.dota.minimum": "最少比赛数",
   "games.dota.minGames": "至少 {count} 场",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "传奇",
   "games.dota.sample.6": "万古流芳",
   "games.dota.sample.7": "超凡入圣",
-  "games.dota.sample.8": "冠绝一世"
+  "games.dota.sample.8": "冠绝一世",
 };

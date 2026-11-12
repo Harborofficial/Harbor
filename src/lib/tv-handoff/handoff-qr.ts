@@ -67,9 +67,7 @@ export function buildHandoffQr(text: string, opts: HandoffQrOptions = {}): Hando
   const viewBox = `0 0 ${extent} ${extent}`;
   const dark = opts.dark ?? QR_DARK;
   const light = opts.light ?? QR_LIGHT;
-  const title = opts.title
-    ? `<title>${opts.title.replace(/[<>&]/g, "")}</title>`
-    : "";
+  const title = opts.title ? `<title>${opts.title.replace(/[<>&]/g, "")}</title>` : "";
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" shape-rendering="crispEdges" role="img">` +
     `${title}<rect width="${extent}" height="${extent}" fill="${light}"/>` +

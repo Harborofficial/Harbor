@@ -64,6 +64,8 @@ fn enter_fullscreen(
 ) -> Result<(), String> {
     let already_fs = main.is_fullscreen().unwrap_or(false);
     if !already_fs {
+        #[cfg(windows)]
+        crate::window_placement::pause_for_transition(main.app_handle(), true);
         // The OS owns a maximized window's restored bounds. Save its mode before
         // unmaximizing instead of capturing the maximized dimensions.
         let maximized = main.is_maximized().unwrap_or(false);
@@ -112,6 +114,8 @@ fn exit_fullscreen(
     restore_position: bool,
 ) -> Result<(), String> {
     let is_fs = main.is_fullscreen().unwrap_or(false);
+    #[cfg(windows)]
+    crate::window_placement::pause_for_transition(main.app_handle(), false);
     if is_fs {
         main.set_fullscreen(false)
             .map_err(|e| format!("set_fullscreen(false): {}", e))?;

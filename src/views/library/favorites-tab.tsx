@@ -43,12 +43,7 @@ export function FavoritesTab() {
     [charItems],
   );
 
-  if (
-    characters.length === 0 &&
-    anime.length === 0 &&
-    movies.length === 0 &&
-    shows.length === 0
-  ) {
+  if (characters.length === 0 && anime.length === 0 && movies.length === 0 && shows.length === 0) {
     return <EmptyFavorites />;
   }
 
@@ -119,9 +114,11 @@ function EmptyFavorites() {
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-8 py-16 text-center">
       <Heart size={28} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[16px] font-semibold text-ink">{t("No favorites yet")}</h2>
-        <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {t("Tap the heart on any movie, show, or character to save it here. Manga lives in the manga Library.")}
-        </p>
+      <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
+        {t(
+          "Tap the heart on any movie, show, or character to save it here. Manga lives in the manga Library.",
+        )}
+      </p>
     </div>
   );
 }

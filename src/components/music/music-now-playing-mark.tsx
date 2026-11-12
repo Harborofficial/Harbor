@@ -4,15 +4,27 @@ import "./music-now-playing-mark.css";
 import { useTrackPlaybackState } from "@/lib/music/use-track-playback-state";
 import type { MusicTrack } from "@/lib/music/types";
 
-export function MusicTrackPlaybackMark({ track, loading = false }: { track: MusicTrack; loading?: boolean }) {
+export function MusicTrackPlaybackMark({
+  track,
+  loading = false,
+}: {
+  track: MusicTrack;
+  loading?: boolean;
+}) {
   const status = useTrackPlaybackState(track);
-  return loading || status.loading || status.current
-    ? <MusicNowPlayingMark loading={loading || status.loading} paused={status.paused}/>
-    : null;
+  return loading || status.loading || status.current ? (
+    <MusicNowPlayingMark loading={loading || status.loading} paused={status.paused} />
+  ) : null;
 }
 
 /** Resolving a source takes a moment, so the badge waits as a spinner before it starts moving. */
-export function MusicNowPlayingMark({ loading = false, paused = false }: { loading?: boolean; paused?: boolean }) {
+export function MusicNowPlayingMark({
+  loading = false,
+  paused = false,
+}: {
+  loading?: boolean;
+  paused?: boolean;
+}) {
   const t = useT();
   return (
     <span

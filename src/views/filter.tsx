@@ -7,7 +7,12 @@ import { Header } from "./filter/header";
 import { BrandBrowse } from "./filter/brand-browse";
 import { BrandFacts, useBrandStats } from "./filter/brand-facts";
 import { BrandPeople } from "./filter/brand-people";
-import { BoxOfficeRail, DecadesSection, FranchisesRail, LongestRunningRail } from "./filter/brand-rails";
+import {
+  BoxOfficeRail,
+  DecadesSection,
+  FranchisesRail,
+  LongestRunningRail,
+} from "./filter/brand-rails";
 import { CountryBody } from "./filter/country-body";
 import { Rails } from "./filter/rails";
 import { YearTopTen } from "./filter/year-top-ten";
@@ -61,7 +66,11 @@ export function FilterView({ filter }: { filter: MetaFilter }) {
   );
 }
 
-function BrandedBody({ filter }: { filter: MetaFilter & { kind: "studio" | "network"; id: number; name: string } }) {
+function BrandedBody({
+  filter,
+}: {
+  filter: MetaFilter & { kind: "studio" | "network"; id: number; name: string };
+}) {
   const { details, stats } = useBrandStats(filter);
   return (
     <>
@@ -69,7 +78,9 @@ function BrandedBody({ filter }: { filter: MetaFilter & { kind: "studio" | "netw
       <Rails filter={filter} />
       {stats && filter.mediaType === "movie" && <BoxOfficeRail stats={stats} />}
       {stats && <FranchisesRail stats={stats} name={filter.name} />}
-      {stats && filter.mediaType === "tv" && <LongestRunningRail stats={stats} name={filter.name} />}
+      {stats && filter.mediaType === "tv" && (
+        <LongestRunningRail stats={stats} name={filter.name} />
+      )}
       <BrandPeople filter={filter} stats={stats} />
       {stats && <DecadesSection filter={filter} stats={stats} />}
       <BrandBrowse filter={filter} />

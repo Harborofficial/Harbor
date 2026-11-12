@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "探索模组并管理已安装的内容。",
   "games.modHub.switchGame": "切换游戏",
   "games.modHub.creatorDownload": "从作者网站下载",
-  "games.modHub.legacyNote": "The Sims 2 和 The Sims 3 的内容可从作者网站下载。本地模组管理目前支持 The Sims 4。",
+  "games.modHub.legacyNote":
+    "The Sims 2 和 The Sims 3 的内容可从作者网站下载。本地模组管理目前支持 The Sims 4。",
   "games.modHub.bodyShop": "模特工坊",
   "games.modHub.patterns": "图案",
   "games.modHub.sets": "主题套装",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "作者",
   "games.modHub.viewOnSource": "作者页面",
   "games.modHub.filesPending": "正在加载项目文件…",
-  "games.modHub.picked": "MTS 精选"
+  "games.modHub.picked": "MTS 精选",
 };

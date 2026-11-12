@@ -3,7 +3,8 @@ export default {
   "games.notes.title": "マイノート",
   "games.notes.new": "新しいノート",
   "games.notes.limit": "最大100件、各10万文字、合計2 MBまでです。",
-  "games.notes.readError": "ノートを読み込めませんでした。再試行前にバックアップを書き出してください。",
+  "games.notes.readError":
+    "ノートを読み込めませんでした。再試行前にバックアップを書き出してください。",
   "games.notes.saveError": "保存できませんでした。下書きは残っています。",
   "games.notes.conflict": "別の場所で変更されました。再読み込み前に下書きを書き出してください。",
   "games.notes.invalidTitle": "すべてのノートにタイトルを付けてください。",
@@ -28,5 +29,5 @@ export default {
   "games.notes.export": "バックアップを書き出す",
   "games.notes.unsaved": "未保存の変更",
   "games.notes.local": "このHarborプロフィールに保存",
-  "games.notes.importGuide": "マイノートにコピー"
+  "games.notes.importGuide": "マイノートにコピー",
 };

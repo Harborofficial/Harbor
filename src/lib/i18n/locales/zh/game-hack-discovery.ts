@@ -22,15 +22,18 @@ export default {
   "games.patch.fingerprint": "文件指纹 · SHA-256",
   "games.patch.fingerprints": "文件指纹列表 · SHA-256",
   "games.patch.localNote": "在本机处理 · BPS · IPS · UPS · 最大 256 MB",
-  "games.patch.desktop": "在 Windows、macOS 或 Linux 版 Harbor 桌面应用中应用补丁。文件保留在你的设备上，原版游戏不会被修改。",
+  "games.patch.desktop":
+    "在 Windows、macOS 或 Linux 版 Harbor 桌面应用中应用补丁。文件保留在你的设备上，原版游戏不会被修改。",
   "games.patch.done": "准备好开始新的冒险",
   "games.patch.preserved": "修改后的副本已保存。原版游戏和补丁均未更改。",
-  "games.patch.patch_source_mismatch": "此补丁需要其他原版游戏文件或版本。请查看项目要求并选择匹配的文件。",
+  "games.patch.patch_source_mismatch":
+    "此补丁需要其他原版游戏文件或版本。请查看项目要求并选择匹配的文件。",
   "games.patch.patch_checksum_mismatch": "补丁校验和不匹配。文件可能不完整，请从项目页面重新下载。",
   "games.patch.patch_target_mismatch": "最终副本与预期校验和不匹配。未保存任何内容。",
   "games.patch.patch_expired": "本次准备已过期。请重新检查补丁。",
   "games.patch.patch_inputs_changed": "某个已选文件在验证后发生了变化。请在保存前重新检查补丁。",
-  "games.patch.patch_output_exists": "此位置已有同名文件。请选择其他文件名，Harbor 不会覆盖现有文件。",
+  "games.patch.patch_output_exists":
+    "此位置已有同名文件。请选择其他文件名，Harbor 不会覆盖现有文件。",
   "games.patch.patch_read_failed": "无法读取所选文件。请确认文件仍然可用，然后重新选择。",
   "games.patch.patch_write_failed": "无法保存副本。请检查文件夹和可用空间，或选择其他位置。",
   "games.patch.patch_too_large": "原版游戏、补丁和最终副本的大小均不能超过 256 MB。",
@@ -65,5 +68,5 @@ export default {
   "games.patch.choosePatch": "选择补丁（BPS、IPS、UPS）",
   "games.patch.patch_unsupported": "此文件不是受支持的 BPS、IPS 或 UPS 补丁。",
   "games.discovery.viewGame": "查看游戏",
-  "games.atlas.basedOn": "基于此游戏"
+  "games.atlas.basedOn": "基于此游戏",
 };

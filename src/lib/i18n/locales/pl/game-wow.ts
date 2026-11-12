@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "Informacje o wydaniu",
   "games.wow.addons.fullNotes": "Przeczytaj pełny tekst na stronie autora",
 
-  "games.wow.manager.errorIdentity": "Zainstalowane foldery nie pasują do pakietu autora. Przeskanuj ponownie i sprawdź źródło dodatku.",
+  "games.wow.manager.errorIdentity":
+    "Zainstalowane foldery nie pasują do pakietu autora. Przeskanuj ponownie i sprawdź źródło dodatku.",
   "games.wow.manager.importInstalled": "Importuj zainstalowane dodatki",
   "games.wow.manager.import": "Zarządzaj przez Harbor",
-  "games.wow.manager.importScope": "Zainstalowane dodatki z identyfikatorem WoWInterface. Pozostałe zostają na liście zainstalowanych.",
-  "games.wow.manager.importNote": "Zachowaj zainstalowane pliki. Harbor sprawdza pakiet autora i zapisuje poprzednią wersję przed przyszłą aktualizacją lub usunięciem.",
+  "games.wow.manager.importScope":
+    "Zainstalowane dodatki z identyfikatorem WoWInterface. Pozostałe zostają na liście zainstalowanych.",
+  "games.wow.manager.importNote":
+    "Zachowaj zainstalowane pliki. Harbor sprawdza pakiet autora i zapisuje poprzednią wersję przed przyszłą aktualizacją lub usunięciem.",
   "games.wow.manager.keepVersion": "Zachowaj zainstalowaną wersję {version}",
   "games.wow.manager.keep": "Zachowaj",
   "games.wow.manager.importSuccess": "Ten dodatek jest teraz zarządzany przez Harbor.",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "Znajdź dodatki",
   "games.wow.manager.managed": "Zarządzane przez Harbor",
   "games.wow.manager.backups": "Kopie zapasowe",
-  "games.wow.manager.catalogNote": "Przeglądaj WoWInterface. Zgodność z zainstalowanym WoW jest sprawdzana przed wprowadzeniem zmian.",
-  "games.wow.manager.managedNote": "Tutaj zmienisz tylko dodatki zainstalowane przez Harbor. Pozostałe są nadal na liście zainstalowanych.",
+  "games.wow.manager.catalogNote":
+    "Przeglądaj WoWInterface. Zgodność z zainstalowanym WoW jest sprawdzana przed wprowadzeniem zmian.",
+  "games.wow.manager.managedNote":
+    "Tutaj zmienisz tylko dodatki zainstalowane przez Harbor. Pozostałe są nadal na liście zainstalowanych.",
   "games.wow.manager.category": "Kategoria",
   "games.wow.manager.allCategories": "Wszystkie kategorie",
   "games.wow.manager.popular": "Pobrania miesięczne",
@@ -28,31 +33,40 @@ export default {
   "games.wow.manager.name": "Nazwa",
   "games.wow.manager.sort": "Sortuj dodatki",
   "games.wow.manager.monthly": "Pobrania w tym miesiącu",
-  "games.wow.manager.catalogError": "Nie udało się wczytać katalogu. Poprzednie wyniki mogą być nieaktualne.",
-  "games.wow.manager.categoriesError": "Kategorie są niedostępne. Nadal możesz wyszukiwać wszystkie dodatki.",
+  "games.wow.manager.catalogError":
+    "Nie udało się wczytać katalogu. Poprzednie wyniki mogą być nieaktualne.",
+  "games.wow.manager.categoriesError":
+    "Kategorie są niedostępne. Nadal możesz wyszukiwać wszystkie dodatki.",
   "games.wow.manager.partial": "Brakuje części danych dostawcy. Wyniki mogą być niepełne.",
   "games.wow.manager.emptyManaged": "Brak dodatków zarządzanych przez Harbor.",
   "games.wow.manager.emptyBackups": "Nie zapisano wcześniejszych wersji.",
-  "games.wow.manager.reviewNote": "Najpierw sprawdź pakiet i zmiany folderów. Zamknij WoW przed sprawdzeniem lub zastosowaniem zmian.",
+  "games.wow.manager.reviewNote":
+    "Najpierw sprawdź pakiet i zmiany folderów. Zamknij WoW przed sprawdzeniem lub zastosowaniem zmian.",
   "games.wow.manager.backupNote": "Poprzednie pliki zachowane lokalnie: {size}.",
   "games.wow.manager.fileSummary": "Pliki: {count} · {size}",
   "games.wow.manager.preparing": "Przygotowywanie przeglądu…",
   "games.wow.manager.applying": "Wprowadzanie zmian…",
   "games.wow.manager.success": "Dodatki zostały zaktualizowane.",
   "games.wow.manager.cancelled": "Anulowano. Odśwież widok, aby sprawdzić aktualny stan.",
-  "games.wow.manager.recovery": "Przerwana zmiana wymaga odzyskania przed kontynuowaniem. Najpierw zamknij WoW.",
+  "games.wow.manager.recovery":
+    "Przerwana zmiana wymaga odzyskania przed kontynuowaniem. Najpierw zamknij WoW.",
   "games.wow.manager.recover": "Odzyskaj konfigurację",
   "games.wow.manager.add": "Dodaj",
   "games.wow.manager.replace": "Zastąp",
   "games.wow.manager.remove": "Usuń",
-  "games.wow.manager.error": "Nie udało się ukończyć zmiany. Sprawdź połączenie i wolne miejsce, a potem spróbuj ponownie.",
+  "games.wow.manager.error":
+    "Nie udało się ukończyć zmiany. Sprawdź połączenie i wolne miejsce, a potem spróbuj ponownie.",
   "games.wow.manager.errorRunning": "Zamknij całkowicie WoW i spróbuj ponownie.",
-  "games.wow.manager.errorCompatibility": "Pakiet nie pasuje do zainstalowanej edycji lub wersji WoW.",
-  "games.wow.manager.errorUnmanaged": "Te foldery zainstalowano poza Harbor. Nie można ich tutaj nadpisać.",
+  "games.wow.manager.errorCompatibility":
+    "Pakiet nie pasuje do zainstalowanej edycji lub wersji WoW.",
+  "games.wow.manager.errorUnmanaged":
+    "Te foldery zainstalowano poza Harbor. Nie można ich tutaj nadpisać.",
   "games.wow.manager.errorChanged": "Pliki się zmieniły lub wymagają uwagi. Przeskanuj ponownie.",
-  "games.wow.manager.errorDependency": "Brakuje wymaganych zależności lub inny dodatek potrzebuje tych plików.",
+  "games.wow.manager.errorDependency":
+    "Brakuje wymaganych zależności lub inny dodatek potrzebuje tych plików.",
   "games.wow.manager.errorExpired": "Przegląd wygasł. Sprawdź zmiany ponownie.",
-  "games.wow.manager.errorDesktop": "Zarządzanie dodatkami wymaga aktualnej aplikacji Harbor na Windows.",
+  "games.wow.manager.errorDesktop":
+    "Zarządzanie dodatkami wymaga aktualnej aplikacji Harbor na Windows.",
 
   "games.wow.addons.screenshots": "Zrzuty ekranu autora",
   "games.wow.addons.screenshotsUnavailable": "Nie udało się wczytać zrzutów ekranu autora.",
@@ -61,13 +75,16 @@ export default {
   "games.wow.addons.intro": "Wersje i wymagane zależności tej instalacji.",
   "games.wow.addons.refresh": "Przeskanuj dodatki ponownie",
   "games.wow.addons.client": "Zainstalowany WoW {version}",
-  "games.wow.addons.unavailable": "Nie można odczytać instalacji. Podłącz dysk i przeskanuj ponownie.",
-  "games.wow.addons.partial": "Nie udało się przeskanować części folderów. Lista może być niepełna.",
+  "games.wow.addons.unavailable":
+    "Nie można odczytać instalacji. Podłącz dysk i przeskanuj ponownie.",
+  "games.wow.addons.partial":
+    "Nie udało się przeskanować części folderów. Lista może być niepełna.",
   "games.wow.addons.search": "Znajdź dodatek",
   "games.wow.addons.attention": "Wymaga uwagi",
   "games.wow.addons.unreadable": "Nie można odczytać manifestu tego dodatku.",
   "games.wow.addons.noManifest": "Nie znaleziono manifestu pasującego do tego klienta.",
-  "games.wow.addons.ambiguous": "Znaleziono kilka pasujących manifestów. Sprawdź instalację dodatku.",
+  "games.wow.addons.ambiguous":
+    "Znaleziono kilka pasujących manifestów. Sprawdź instalację dodatku.",
   "games.wow.addons.missing": "Brak wymaganych folderów: {names}",
   "games.wow.addons.gameVersions": "Deklarowane wersje gry",
   "games.wow.addons.requires": "Wymaga",
@@ -76,10 +93,12 @@ export default {
   "games.wow.addons.noMatches": "Żaden dodatek nie pasuje do tych filtrów.",
   "games.wow.addons.more": "Pokaż więcej dodatków",
   "games.wow.addons.empty": "Nie znaleziono dodatków dla tej instalacji.",
-  "games.wow.addons.scope": "Wersje gry deklaruje autor dodatku. Stan włączenia i dostępne aktualizacje nie są sprawdzane.",
+  "games.wow.addons.scope":
+    "Wersje gry deklaruje autor dodatku. Stan włączenia i dostępne aktualizacje nie są sprawdzane.",
   "games.wow.realm.LOCKED": "Zablokowany",
   "games.wow.classic.title": "Status serwerów",
-  "games.wow.classic.intro": "Sprawdź serwer przed wyruszeniem do Azeroth. Aktualny status od Blizzard.",
+  "games.wow.classic.intro":
+    "Sprawdź serwer przed wyruszeniem do Azeroth. Aktualny status od Blizzard.",
   "games.wow.classic.classic": "Progresja Classic",
   "games.wow.classic.classic1x": "Classic Era i sezony",
   "games.wow.classic.classicann": "Rocznica Classic",
@@ -98,7 +117,8 @@ export default {
   "games.wow.classic.news": "Aktualności Classic",
   "games.wow.realm.browse": "Przeglądaj serwery",
   "games.wow.realm.unavailable": "Status serwerów jest niedostępny. Nadal możesz wpisać serwer.",
-  "games.wow.realm.unsupported": "Globalna usługa Blizzarda nie obejmuje tego regionu. Wpisz serwer ręcznie.",
+  "games.wow.realm.unsupported":
+    "Globalna usługa Blizzarda nie obejmuje tego regionu. Wpisz serwer ręcznie.",
   "games.wow.realm.noMatches": "Brak pasujących serwerów. Możesz wpisać nazwę ręcznie.",
   "games.wow.realm.refresh": "Odśwież status serwerów",
   "games.wow.realm.unknown": "Status nieznany",
@@ -145,7 +165,8 @@ export default {
   "games.wow.character.raidUnavailable": "Bieżące postępy w rajdach są niedostępne.",
   "games.wow.character.updated": "Profil zaktualizowany: {date}",
   "games.wow.character.gearUpdated": "Ekwipunek zaktualizowany: {date}",
-  "games.wow.character.sourceNote": "Publiczne dane Raider.IO. Aktualizacje mogą być opóźnione względem gry.",
+  "games.wow.character.sourceNote":
+    "Publiczne dane Raider.IO. Aktualizacje mogą być opóźnione względem gry.",
   "games.wow.title": "Ten tydzień w Azeroth",
   "games.wow.region": "Region",
   "games.wow.refresh": "Odśwież dane WoW",
@@ -154,7 +175,8 @@ export default {
   "games.wow.resetNote": "Twój czas lokalny. Prace techniczne mogą potrwać dłużej niż reset.",
   "games.wow.resetUnavailable": "Czas resetu jest niedostępny.",
   "games.wow.affixes": "Afiksy tego tygodnia",
-  "games.wow.affixesUnavailable": "Bieżące afiksy są niedostępne. Sprawdź ponownie po resecie regionalnym.",
+  "games.wow.affixesUnavailable":
+    "Bieżące afiksy są niedostępne. Sprawdź ponownie po resecie regionalnym.",
   "games.wow.dungeons": "Podziemia Mythic+",
   "games.wow.timer": "Limit {minutes} min",
   "games.wow.rankings": "Zobacz ranking",
@@ -163,7 +185,8 @@ export default {
   "games.wow.bosses": "Bossowie: {count}",
   "games.wow.raidsUnavailable": "Informacje o bieżących rajdach są niedostępne.",
   "games.wow.checked": "Sprawdzono: {date}",
-  "games.wow.scope": "Dane Retail z Raider.IO. Limity czasu dotyczą kluczy; afiksy zależą od poziomu klucza.",
+  "games.wow.scope":
+    "Dane Retail z Raider.IO. Limity czasu dotyczą kluczy; afiksy zależą od poziomu klucza.",
   "games.wow.region.us": "Ameryki / Oceania",
   "games.wow.region.eu": "Europa",
   "games.wow.region.kr": "Korea",

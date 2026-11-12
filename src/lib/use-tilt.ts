@@ -5,7 +5,9 @@ const LIFT = 7;
 const SCALE = 1.028;
 
 function reduced(): boolean {
-  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return (
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 }
 
 export function useTilt<T extends HTMLElement = HTMLDivElement>() {
@@ -26,20 +28,23 @@ export function useTilt<T extends HTMLElement = HTMLDivElement>() {
     el.style.transform = base;
   }, [base]);
 
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    const el = ref.current;
-    const r = rect.current;
-    if (!el || !r || reduced()) return;
-    if (!r.width) return;
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(() => {
-      const rx = (-py * 2 * MAX_DEG).toFixed(2);
-      const ry = (px * 2 * MAX_DEG).toFixed(2);
-      el.style.transform = `${base} rotateX(${rx}deg) rotateY(${ry}deg)`;
-    });
-  }, [base]);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      const el = ref.current;
+      const r = rect.current;
+      if (!el || !r || reduced()) return;
+      if (!r.width) return;
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      cancelAnimationFrame(raf.current);
+      raf.current = requestAnimationFrame(() => {
+        const rx = (-py * 2 * MAX_DEG).toFixed(2);
+        const ry = (px * 2 * MAX_DEG).toFixed(2);
+        el.style.transform = `${base} rotateX(${rx}deg) rotateY(${ry}deg)`;
+      });
+    },
+    [base],
+  );
 
   const onPointerLeave = useCallback(() => {
     cancelAnimationFrame(raf.current);

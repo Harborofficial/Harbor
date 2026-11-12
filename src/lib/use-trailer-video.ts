@@ -18,7 +18,17 @@ export function useTrailerVideo(opts: {
   video: RefObject<HTMLVideoElement | null>;
   ready: boolean;
 } {
-  const { src, active, playing, muted, volume = 1, className, loop, onEnded, onAutoplayMuted } = opts;
+  const {
+    src,
+    active,
+    playing,
+    muted,
+    volume = 1,
+    className,
+    loop,
+    onEnded,
+    onAutoplayMuted,
+  } = opts;
   const slot = useRef<HTMLDivElement | null>(null);
   const video = useRef<HTMLVideoElement | null>(null);
   const token = useRef<object>({});

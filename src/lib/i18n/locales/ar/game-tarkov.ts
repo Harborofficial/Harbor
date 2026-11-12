@@ -14,17 +14,19 @@ export default {
   "games.tarkov.listedStart": "البداية المدرجة:",
   "games.tarkov.noSeason": "لا يوجد موسم نشط مدرج",
   "games.tarkov.noSeasonDetail": "لم يدرج المصدر موسمًا حاليًا أو قادمًا.",
-  "games.tarkov.scheduleNote": "يتولى tarkov.dev تحديث التواريخ وقد تتغير. هذا ليس إعلانًا رسميًا عن المسح.",
+  "games.tarkov.scheduleNote":
+    "يتولى tarkov.dev تحديث التواريخ وقد تتغير. هذا ليس إعلانًا رسميًا عن المسح.",
   "games.tarkov.seasonSource": "تواريخ المواسم · tarkov.dev",
   "games.tarkov.checked": "آخر تحقق: {time}",
   "games.tarkov.fullWipe": "آخر مسح كامل في المصدر",
   "games.tarkov.historyFailed": "تعذر تحميل سجل المسح.",
   "games.tarkov.elapsed": "{days} يوم",
   "games.tarkov.noHistory": "لا توجد عمليات مسح سابقة مدرجة.",
-  "games.tarkov.modeNote": "تقدم الموسم منفصل عن المسح الكامل للحساب. هذا السجل لا يصف إعادة ضبط شخصيات PvP أو PvE الدائمة.",
+  "games.tarkov.modeNote":
+    "تقدم الموسم منفصل عن المسح الكامل للحساب. هذا السجل لا يصف إعادة ضبط شخصيات PvP أو PvE الدائمة.",
   "games.tarkov.historySource": "تواريخ المسح · tarkov.dev",
   "games.tarkov.history": "سجل المسح الكامل",
   "games.tarkov.patch": "التحديث",
   "games.tarkov.date": "تاريخ البداية (UTC)",
-  "games.tarkov.duration": "حتى المسح الكامل التالي"
+  "games.tarkov.duration": "حتى المسح الكامل التالي",
 };

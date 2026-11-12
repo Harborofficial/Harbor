@@ -21,7 +21,18 @@ export function useAutoEndExit(params: {
   reloadLive: () => void;
   closePlayer: () => void | Promise<void>;
 }) {
-  const { src, snap, nextEp, canChangeEpisode, roomGuest, isLive, suspend, startedNearEndRef, reloadLive, closePlayer } = params;
+  const {
+    src,
+    snap,
+    nextEp,
+    canChangeEpisode,
+    roomGuest,
+    isLive,
+    suspend,
+    startedNearEndRef,
+    reloadLive,
+    closePlayer,
+  } = params;
   const firedForRef = useRef<string | null>(null);
   const reloadTimesRef = useRef<number[]>([]);
 
@@ -60,5 +71,17 @@ export function useAutoEndExit(params: {
       void closePlayer();
     }, POST_END_DELAY_MS);
     return () => window.clearTimeout(t);
-  }, [snap.status, snap.errorCode, snap.durationSec, nextEp, canChangeEpisode, roomGuest, isLive, suspend, reloadLive, src.url, closePlayer]);
+  }, [
+    snap.status,
+    snap.errorCode,
+    snap.durationSec,
+    nextEp,
+    canChangeEpisode,
+    roomGuest,
+    isLive,
+    suspend,
+    reloadLive,
+    src.url,
+    closePlayer,
+  ]);
 }

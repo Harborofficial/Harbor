@@ -47,7 +47,9 @@ export function RegistryEntries({
   }, [shown, items.length, scrollRoot]);
 
   if (items.length === 0) {
-    return <p className="py-20 text-center text-[14px] text-ink-subtle">{t("Nothing here yet.")}</p>;
+    return (
+      <p className="py-20 text-center text-[14px] text-ink-subtle">{t("Nothing here yet.")}</p>
+    );
   }
 
   return (

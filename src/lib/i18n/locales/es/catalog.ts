@@ -1734,7 +1734,8 @@ const catalog: Record<string, string> = {
   "S{season} · E{episode}": "T{season} · E{episode}",
   "S{season} E{episode}": "T{season} E{episode}",
   "Safe by design": "Seguro por diseño",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Ofrece el mismo acceso de solo lectura que Real-Debrid. También permite poner en cola fuentes sin caché desde el selector de reproducción.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Ofrece el mismo acceso de solo lectura que Real-Debrid. También permite poner en cola fuentes sin caché desde el selector de reproducción.",
   "Same-genre picks from your installed sources":
     "Selecciones del mismo género de tus fuentes instaladas",
   "Sample title": "Título de muestra",
@@ -2219,7 +2220,8 @@ const catalog: Record<string, string> = {
   "Use this icon for all states": "Usar este ícono para todos los estados",
   "Use your API key to Translate Chapters to Your Language. Get a key from the":
     "Usa tu clave de API para traducir capítulos a tu idioma. Obtén una clave de",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Se usa para comprobar la caché y desbloquear enlaces. Harbor nunca agrega ni elimina nada de tu cuenta por sí solo.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Se usa para comprobar la caché y desbloquear enlaces. Harbor nunca agrega ni elimina nada de tu cuenta por sí solo.",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":
     "Usa el endpoint directdl, que omite la cola para todo lo que ya esté en caché.",
   "Uses up to 150 MB": "Usa hasta 150 MB",

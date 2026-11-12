@@ -7,11 +7,14 @@ export default {
   "games.wow.addons.changes": "Ghi chú phát hành",
   "games.wow.addons.fullNotes": "Đọc toàn bộ nội dung trên trang tác giả",
 
-  "games.wow.manager.errorIdentity": "Các thư mục đã cài không khớp với gói của tác giả. Quét lại và kiểm tra nguồn addon.",
+  "games.wow.manager.errorIdentity":
+    "Các thư mục đã cài không khớp với gói của tác giả. Quét lại và kiểm tra nguồn addon.",
   "games.wow.manager.importInstalled": "Nhập addon đã cài",
   "games.wow.manager.import": "Quản lý bằng Harbor",
-  "games.wow.manager.importScope": "Addon đã cài có danh tính WoWInterface. Các addon khác vẫn ở danh sách đã cài.",
-  "games.wow.manager.importNote": "Giữ nguyên các tệp đã cài. Harbor kiểm tra gói của tác giả và lưu phiên bản trước khi cập nhật hoặc gỡ bỏ sau này.",
+  "games.wow.manager.importScope":
+    "Addon đã cài có danh tính WoWInterface. Các addon khác vẫn ở danh sách đã cài.",
+  "games.wow.manager.importNote":
+    "Giữ nguyên các tệp đã cài. Harbor kiểm tra gói của tác giả và lưu phiên bản trước khi cập nhật hoặc gỡ bỏ sau này.",
   "games.wow.manager.keepVersion": "Giữ phiên bản đã cài {version}",
   "games.wow.manager.keep": "Giữ nguyên",
   "games.wow.manager.importSuccess": "Addon này hiện do Harbor quản lý.",
@@ -19,8 +22,10 @@ export default {
   "games.wow.manager.browse": "Tìm addon",
   "games.wow.manager.managed": "Harbor quản lý",
   "games.wow.manager.backups": "Bản sao lưu",
-  "games.wow.manager.catalogNote": "Duyệt WoWInterface. Khả năng tương thích với WoW đã cài sẽ được kiểm tra trước khi áp dụng.",
-  "games.wow.manager.managedNote": "Chỉ addon cài qua Harbor mới có thể thay đổi tại đây. Các addon khác vẫn ở danh sách đã cài.",
+  "games.wow.manager.catalogNote":
+    "Duyệt WoWInterface. Khả năng tương thích với WoW đã cài sẽ được kiểm tra trước khi áp dụng.",
+  "games.wow.manager.managedNote":
+    "Chỉ addon cài qua Harbor mới có thể thay đổi tại đây. Các addon khác vẫn ở danh sách đã cài.",
   "games.wow.manager.category": "Danh mục",
   "games.wow.manager.allCategories": "Mọi danh mục",
   "games.wow.manager.popular": "Lượt tải hàng tháng",
@@ -33,24 +38,30 @@ export default {
   "games.wow.manager.partial": "Thiếu một số dữ liệu từ nhà cung cấp. Kết quả có thể chưa đầy đủ.",
   "games.wow.manager.emptyManaged": "Chưa có addon nào do Harbor quản lý.",
   "games.wow.manager.emptyBackups": "Chưa lưu phiên bản trước nào.",
-  "games.wow.manager.reviewNote": "Xem lại gói và các thay đổi thư mục trước. Đóng WoW trước khi kiểm tra hoặc áp dụng.",
+  "games.wow.manager.reviewNote":
+    "Xem lại gói và các thay đổi thư mục trước. Đóng WoW trước khi kiểm tra hoặc áp dụng.",
   "games.wow.manager.backupNote": "Các tệp trước được lưu cục bộ: {size}.",
   "games.wow.manager.fileSummary": "{count} tệp · {size}",
   "games.wow.manager.preparing": "Đang chuẩn bị bản xem lại…",
   "games.wow.manager.applying": "Đang áp dụng thay đổi…",
   "games.wow.manager.success": "Đã cập nhật addon.",
   "games.wow.manager.cancelled": "Đã hủy. Làm mới để kiểm tra trạng thái hiện tại.",
-  "games.wow.manager.recovery": "Cần khôi phục thay đổi bị gián đoạn trước khi tiếp tục. Hãy đóng WoW trước.",
+  "games.wow.manager.recovery":
+    "Cần khôi phục thay đổi bị gián đoạn trước khi tiếp tục. Hãy đóng WoW trước.",
   "games.wow.manager.recover": "Khôi phục cấu hình",
   "games.wow.manager.add": "Thêm",
   "games.wow.manager.replace": "Thay thế",
   "games.wow.manager.remove": "Xóa",
-  "games.wow.manager.error": "Không thể hoàn tất thay đổi. Kiểm tra kết nối và dung lượng trống rồi thử lại.",
+  "games.wow.manager.error":
+    "Không thể hoàn tất thay đổi. Kiểm tra kết nối và dung lượng trống rồi thử lại.",
   "games.wow.manager.errorRunning": "Đóng hoàn toàn WoW rồi thử lại.",
-  "games.wow.manager.errorCompatibility": "Gói này không phù hợp với phiên bản hoặc bản WoW đã cài.",
-  "games.wow.manager.errorUnmanaged": "Các thư mục này được cài ngoài Harbor và không thể ghi đè tại đây.",
+  "games.wow.manager.errorCompatibility":
+    "Gói này không phù hợp với phiên bản hoặc bản WoW đã cài.",
+  "games.wow.manager.errorUnmanaged":
+    "Các thư mục này được cài ngoài Harbor và không thể ghi đè tại đây.",
   "games.wow.manager.errorChanged": "Tệp đã thay đổi hoặc cần kiểm tra. Quét lại trước khi thử.",
-  "games.wow.manager.errorDependency": "Thiếu thành phần phụ thuộc hoặc addon khác cần các tệp này.",
+  "games.wow.manager.errorDependency":
+    "Thiếu thành phần phụ thuộc hoặc addon khác cần các tệp này.",
   "games.wow.manager.errorExpired": "Bản xem lại đã hết hạn. Hãy kiểm tra lại các thay đổi.",
   "games.wow.manager.errorDesktop": "Quản lý addon yêu cầu ứng dụng Harbor hiện tại trên Windows.",
 
@@ -76,10 +87,12 @@ export default {
   "games.wow.addons.noMatches": "Không có addon phù hợp với bộ lọc.",
   "games.wow.addons.more": "Hiện thêm addon",
   "games.wow.addons.empty": "Không tìm thấy addon cho bản cài này.",
-  "games.wow.addons.scope": "Phiên bản game do tác giả addon công bố. Trạng thái bật và bản cập nhật hiện có không được kiểm tra.",
+  "games.wow.addons.scope":
+    "Phiên bản game do tác giả addon công bố. Trạng thái bật và bản cập nhật hiện có không được kiểm tra.",
   "games.wow.realm.LOCKED": "Đã khóa",
   "games.wow.classic.title": "Trạng thái máy chủ",
-  "games.wow.classic.intro": "Kiểm tra máy chủ trước khi đến Azeroth. Trạng thái trực tiếp từ Blizzard.",
+  "games.wow.classic.intro":
+    "Kiểm tra máy chủ trước khi đến Azeroth. Trạng thái trực tiếp từ Blizzard.",
   "games.wow.classic.classic": "Classic tiến trình",
   "games.wow.classic.classic1x": "Classic Era và theo mùa",
   "games.wow.classic.classicann": "Classic kỷ niệm",
@@ -98,7 +111,8 @@ export default {
   "games.wow.classic.news": "Tin tức Classic",
   "games.wow.realm.browse": "Duyệt máy chủ",
   "games.wow.realm.unavailable": "Không có trạng thái máy chủ. Bạn vẫn có thể nhập máy chủ.",
-  "games.wow.realm.unsupported": "Dịch vụ trạng thái toàn cầu của Blizzard không hỗ trợ khu vực này. Hãy nhập máy chủ thủ công.",
+  "games.wow.realm.unsupported":
+    "Dịch vụ trạng thái toàn cầu của Blizzard không hỗ trợ khu vực này. Hãy nhập máy chủ thủ công.",
   "games.wow.realm.noMatches": "Không có máy chủ phù hợp. Bạn có thể nhập tên thủ công.",
   "games.wow.realm.refresh": "Làm mới trạng thái máy chủ",
   "games.wow.realm.unknown": "Chưa rõ trạng thái",
@@ -145,7 +159,8 @@ export default {
   "games.wow.character.raidUnavailable": "Tiến độ raid hiện tại không khả dụng.",
   "games.wow.character.updated": "Hồ sơ cập nhật: {date}",
   "games.wow.character.gearUpdated": "Trang bị cập nhật: {date}",
-  "games.wow.character.sourceNote": "Dữ liệu công khai từ Raider.IO. Cập nhật có thể chậm hơn trò chơi.",
+  "games.wow.character.sourceNote":
+    "Dữ liệu công khai từ Raider.IO. Cập nhật có thể chậm hơn trò chơi.",
   "games.wow.title": "Tuần này ở Azeroth",
   "games.wow.region": "Khu vực",
   "games.wow.refresh": "Làm mới dữ liệu WoW",
@@ -154,7 +169,8 @@ export default {
   "games.wow.resetNote": "Theo giờ địa phương của bạn. Bảo trì có thể kéo dài sau khi đặt lại.",
   "games.wow.resetUnavailable": "Chưa có thời gian đặt lại.",
   "games.wow.affixes": "Hiệu ứng tuần này",
-  "games.wow.affixesUnavailable": "Chưa có hiệu ứng hiện tại. Kiểm tra lại sau khi khu vực đặt lại.",
+  "games.wow.affixesUnavailable":
+    "Chưa có hiệu ứng hiện tại. Kiểm tra lại sau khi khu vực đặt lại.",
   "games.wow.dungeons": "Phó bản Mythic+",
   "games.wow.timer": "Giới hạn {minutes} phút",
   "games.wow.rankings": "Xem bảng xếp hạng",
@@ -163,7 +179,8 @@ export default {
   "games.wow.bosses": "{count} trùm",
   "games.wow.raidsUnavailable": "Chưa có thông tin raid hiện tại.",
   "games.wow.checked": "Đã kiểm tra: {date}",
-  "games.wow.scope": "Dữ liệu Retail từ Raider.IO. Thời gian áp dụng cho keystone; hiệu ứng thay đổi theo cấp độ chìa khóa.",
+  "games.wow.scope":
+    "Dữ liệu Retail từ Raider.IO. Thời gian áp dụng cho keystone; hiệu ứng thay đổi theo cấp độ chìa khóa.",
   "games.wow.region.us": "Châu Mỹ / Châu Đại Dương",
   "games.wow.region.eu": "Châu Âu",
   "games.wow.region.kr": "Hàn Quốc",

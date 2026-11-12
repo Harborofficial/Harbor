@@ -572,7 +572,11 @@ export function HubHero({
         />
       )}
 
-      <div className="sh-hero-copy" data-long={heroTitleLength > 17 || undefined} data-longest={heroTitleLength > 24 || undefined}>
+      <div
+        className="sh-hero-copy"
+        data-long={heroTitleLength > 17 || undefined}
+        data-longest={heroTitleLength > 24 || undefined}
+      >
         <div className="sh-hero-kicker">
           {game?.state === "in" && !stale ? (
             <span className="sh-live">{t("Live now")}</span>

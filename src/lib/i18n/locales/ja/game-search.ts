@@ -3,15 +3,19 @@ export default {
   "games.searchUi.rows": "行表示",
   "games.searchUi.aiPlaceholder": "ゲームの特徴や雰囲気、遊びたい内容を説明…",
   "games.searchUi.guide": "タイトルで検索し、フィルターで結果を絞り込めます。",
-  "games.searchUi.aiGuide": "探している内容を説明してください。HarborがAIの提案をSteamカタログと照合します。",
+  "games.searchUi.aiGuide":
+    "探している内容を説明してください。HarborがAIの提案をSteamカタログと照合します。",
   "games.searchUi.web": "ウェブ情報",
   "games.searchUi.settings": "AI設定",
   "games.searchUi.setup": "AIプロバイダーを接続",
-  "games.searchUi.setupNote": "Harborで使用中のOpenRouterまたはGroqのアカウントとモデルを使います。",
-  "games.searchUi.aiHint": "準備ができたらEnterを押してください。選択したフィルターはAIの結果にも適用されます。",
+  "games.searchUi.setupNote":
+    "Harborで使用中のOpenRouterまたはGroqのアカウントとモデルを使います。",
+  "games.searchUi.aiHint":
+    "準備ができたらEnterを押してください。選択したフィルターはAIの結果にも適用されます。",
   "games.searchUi.thinking": "ゲームを探してSteamで確認中…",
   "games.searchUi.verified": "Steamで{count}件一致 · AIの提案",
-  "games.searchUi.noAiResults": "このフィルターに一致するSteamのゲームを確認できませんでした。説明を変えるかフィルターを減らしてください。",
+  "games.searchUi.noAiResults":
+    "このフィルターに一致するSteamのゲームを確認できませんでした。説明を変えるかフィルターを減らしてください。",
   "games.searchUi.random": "ランダムなゲーム",
   "games.searchUi.randomHint": "この検索とフィルターに合うゲームをランダムに選びます。",
   "games.searchUi.picking": "選択中…",
@@ -21,5 +25,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · PC・家庭用ゲーム・ROMハック。",
   "games.searchUi.steamScope": "このフィルターまたは並び順はSteamのデータを使用します。",
   "games.searchUi.allCatalogs": "すべてのカタログを検索",
-  "games.searchUi.partial": "一部の検索結果を取得できません：{providers}。"
+  "games.searchUi.partial": "一部の検索結果を取得できません：{providers}。",
 };

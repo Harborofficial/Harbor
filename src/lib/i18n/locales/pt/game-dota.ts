@@ -3,7 +3,8 @@ export default {
   "games.dota.title": "Tendências de heróis",
   "games.dota.intro": "Encontre sua próxima escolha.",
   "games.dota.refresh": "Atualizar tendências",
-  "games.dota.unavailable": "Não foi possível atualizar. Os dados já carregados podem continuar visíveis.",
+  "games.dota.unavailable":
+    "Não foi possível atualizar. Os dados já carregados podem continuar visíveis.",
   "games.dota.partial": "Alguns dados estão indisponíveis.",
   "games.dota.checked": "Verificado em {date}",
   "games.dota.search": "Buscar herói",
@@ -18,7 +19,8 @@ export default {
   "games.dota.attribute.agi": "Agilidade",
   "games.dota.attribute.int": "Inteligência",
   "games.dota.attribute.all": "Universal",
-  "games.dota.trendsScope": "Amostra OpenDota: sete dias UTC, incluindo hoje. O rank é a média da partida; Turbo e partidas profissionais são separados.",
+  "games.dota.trendsScope":
+    "Amostra OpenDota: sete dias UTC, incluindo hoje. O rank é a média da partida; Turbo e partidas profissionais são separados.",
   "games.dota.wins": "de vitórias",
   "games.dota.picks": "{count} escolhas",
   "games.dota.noSample": "Sem amostra",
@@ -26,7 +28,8 @@ export default {
   "games.dota.moreHeroes": "Mais heróis",
   "games.dota.matchups": "Confrontos profissionais",
   "games.dota.refreshMatchups": "Atualizar confrontos",
-  "games.dota.matchupsScope": "Vitórias de {hero} contra cada adversário em partidas profissionais registradas no último ano. Inclui patches antigos; independente do filtro de rank.",
+  "games.dota.matchupsScope":
+    "Vitórias de {hero} contra cada adversário em partidas profissionais registradas no último ano. Inclui patches antigos; independente do filtro de rank.",
   "games.dota.opponent": "Buscar adversário",
   "games.dota.minimum": "Mínimo de partidas",
   "games.dota.minGames": "{count}+ partidas",
@@ -48,5 +51,5 @@ export default {
   "games.dota.sample.5": "Lenda",
   "games.dota.sample.6": "Ancestral",
   "games.dota.sample.7": "Divino",
-  "games.dota.sample.8": "Imortal"
+  "games.dota.sample.8": "Imortal",
 };

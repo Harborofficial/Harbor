@@ -14,18 +14,25 @@ export default {
   "games.manage.uninstallOptions": "Deinstallationsoptionen…",
   "games.manage.remove": "Aus Harbor entfernen…",
   "games.manage.manage": "Verwalten",
-  "games.manage.failed": "Aktion fehlgeschlagen. Prüfe, ob Spiel und Launcher noch verfügbar sind, und versuche es erneut.",
+  "games.manage.failed":
+    "Aktion fehlgeschlagen. Prüfe, ob Spiel und Launcher noch verfügbar sind, und versuche es erneut.",
   "games.manage.removed": "Aus Harbor entfernt",
   "games.manage.sent": "In {source} fortfahren",
   "games.manage.removeTitle": "Bibliothekseintrag entfernen?",
   "games.manage.uninstallTitle": "Dieses Spiel deinstallieren?",
   "games.manage.optionsTitle": "Mit {source} deinstallieren",
-  "games.manage.removedNote": "Der Bibliothekseintrag wurde entfernt. Deine Spieldateien bleiben auf diesem Computer.",
-  "games.manage.sentNote": "{source} wurde geöffnet. Schließe den Vorgang dort ab; Harbor aktualisiert den Installationsstatus bei deiner Rückkehr.",
-  "games.manage.removeNote": "Entfernt {name} und den Harbor-Spielverlauf aus diesem Profil. Das Spiel und seine Dateien werden nicht gelöscht.",
-  "games.manage.steamNote": "Steam übernimmt die Deinstallation von {name}. Möglicherweise musst du in Steam erneut bestätigen. Sichere vorher lokale Spielstände und Mods, die du behalten möchtest.",
-  "games.manage.launcherNote": "Öffne {source}, wähle {name} und dann Verwalten oder Deinstallieren. Der Launcher übernimmt die Entfernung; Harbor löscht den Spielordner nicht.",
-  "games.manage.windowsNote": "Suche {name} unter Installierte Apps in Windows und wähle Deinstallieren. Bei portablen Spielen beachte deren Anweisungen. Harbor löscht den Ordner nicht.",
+  "games.manage.removedNote":
+    "Der Bibliothekseintrag wurde entfernt. Deine Spieldateien bleiben auf diesem Computer.",
+  "games.manage.sentNote":
+    "{source} wurde geöffnet. Schließe den Vorgang dort ab; Harbor aktualisiert den Installationsstatus bei deiner Rückkehr.",
+  "games.manage.removeNote":
+    "Entfernt {name} und den Harbor-Spielverlauf aus diesem Profil. Das Spiel und seine Dateien werden nicht gelöscht.",
+  "games.manage.steamNote":
+    "Steam übernimmt die Deinstallation von {name}. Möglicherweise musst du in Steam erneut bestätigen. Sichere vorher lokale Spielstände und Mods, die du behalten möchtest.",
+  "games.manage.launcherNote":
+    "Öffne {source}, wähle {name} und dann Verwalten oder Deinstallieren. Der Launcher übernimmt die Entfernung; Harbor löscht den Spielordner nicht.",
+  "games.manage.windowsNote":
+    "Suche {name} unter Installierte Apps in Windows und wähle Deinstallieren. Bei portablen Spielen beachte deren Anweisungen. Harbor löscht den Ordner nicht.",
   "games.manage.opening": "Wird geöffnet…",
   "games.manage.confirmUninstall": "Weiter zu Steam",
   "games.manage.openSource": "{source} öffnen",

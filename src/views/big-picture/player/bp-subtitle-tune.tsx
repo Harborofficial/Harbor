@@ -50,7 +50,9 @@ export function BpSubtitleSync({
           <Chip label={t("Revert")} onPress={() => autoSync.revert()} />
         )}
       </Row>
-      {autoSync?.status === "matched-embedded" && <p className={NOTE}>{t("Matched embedded subtitles")}</p>}
+      {autoSync?.status === "matched-embedded" && (
+        <p className={NOTE}>{t("Matched embedded subtitles")}</p>
+      )}
       {!canSync && <p className={NOTE}>{t("Needs an external subtitle")}</p>}
       <Row>
         <span className={LABEL}>{t("Manual offset")}</span>

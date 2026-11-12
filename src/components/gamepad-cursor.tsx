@@ -44,14 +44,7 @@ function Dot({ className }: { className?: string }) {
 function Ring({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <circle
-        cx="12"
-        cy="12"
-        r="8"
-        fill="none"
-        stroke={OUTLINE}
-        strokeWidth="5.5"
-      />
+      <circle cx="12" cy="12" r="8" fill="none" stroke={OUTLINE} strokeWidth="5.5" />
       <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2.6" />
       <circle
         cx="12"

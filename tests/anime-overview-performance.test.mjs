@@ -225,6 +225,8 @@ function detailFixture() {
       applyAnidbSeasonWindow: async () => {},
     },
     "@/lib/providers/episode-placeholder": { episodesMissingTitle: () => false },
+    "@/lib/providers/anime-tvdb-source": { isSharedSplitTvdb: () => false },
+    "@/lib/streams/anime-identity-core": { splitFranchiseDisplaySeason: () => null },
     "@/lib/providers/mal-episodes": {},
     "@/lib/anilist/relations": { anilistFranchise: async () => [] },
     "@/lib/anilist/browse": {},

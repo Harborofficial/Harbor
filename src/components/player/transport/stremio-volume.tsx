@@ -91,7 +91,11 @@ export function StremioVolume({
           onWheel={onWheel}
           className="pointer-events-auto flex h-16 w-16 items-center justify-center rounded-xl text-white/90 transition-colors duration-150 hover:bg-white/[0.05]"
         >
-          {muted ? <VolumeX size={28} strokeWidth={1.9} /> : <Volume2 size={28} strokeWidth={1.9} />}
+          {muted ? (
+            <VolumeX size={28} strokeWidth={1.9} />
+          ) : (
+            <Volume2 size={28} strokeWidth={1.9} />
+          )}
         </button>
       </Tooltip>
     );
@@ -111,7 +115,11 @@ export function StremioVolume({
             aria-label={muted ? tr("Unmute") : tr("Mute")}
             className="flex h-12 w-12 items-center justify-center rounded-xl text-white/90 transition-colors hover:bg-white/[0.05]"
           >
-            {muted ? <VolumeX size={26} strokeWidth={1.9} /> : <Volume2 size={26} strokeWidth={1.9} />}
+            {muted ? (
+              <VolumeX size={26} strokeWidth={1.9} />
+            ) : (
+              <Volume2 size={26} strokeWidth={1.9} />
+            )}
           </button>
         </Tooltip>
         <button
@@ -154,7 +162,11 @@ export function StremioVolume({
           aria-label={muted ? tr("Unmute") : tr("Mute")}
           className="pointer-events-auto flex h-16 w-16 items-center justify-center rounded-xl text-white/90 transition-colors duration-150 hover:bg-white/[0.05]"
         >
-          {muted ? <VolumeX size={28} strokeWidth={1.9} /> : <Volume2 size={28} strokeWidth={1.9} />}
+          {muted ? (
+            <VolumeX size={28} strokeWidth={1.9} />
+          ) : (
+            <Volume2 size={28} strokeWidth={1.9} />
+          )}
         </button>
       ) : (
         <Tooltip label={muted ? tr("Unmute") : tr("Mute")}>
@@ -164,7 +176,11 @@ export function StremioVolume({
             aria-label={muted ? tr("Unmute") : tr("Mute")}
             className="pointer-events-auto flex h-16 w-16 items-center justify-center rounded-xl text-white/90 transition-colors duration-150 hover:bg-white/[0.05]"
           >
-            {muted ? <VolumeX size={28} strokeWidth={1.9} /> : <Volume2 size={28} strokeWidth={1.9} />}
+            {muted ? (
+              <VolumeX size={28} strokeWidth={1.9} />
+            ) : (
+              <Volume2 size={28} strokeWidth={1.9} />
+            )}
           </button>
         </Tooltip>
       )}

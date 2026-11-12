@@ -23,5 +23,6 @@ export function useBpCwAdvance(items: LibraryItem[]): LibraryItem[] {
     0,
     settings.episodeHiding,
     settings.animeCwEnd,
+    items,
   );
 }

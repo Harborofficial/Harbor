@@ -1,7 +1,8 @@
 export default {
   "games.hydra.checkOnImport": "Le fichier du jeu sera vérifié à l’importation",
   "games.hydra.title": "Importer depuis Hydra",
-  "games.hydra.note": "Vérifiez les jeux et les abonnements aux sources de Hydra. Fermez Hydra avant de choisir le dossier de sa base de données.",
+  "games.hydra.note":
+    "Vérifiez les jeux et les abonnements aux sources de Hydra. Fermez Hydra avant de choisir le dossier de sa base de données.",
   "games.hydra.choose": "Choisir le dossier de la base Hydra",
   "games.hydra.reading": "Lecture de la bibliothèque Hydra…",
   "games.hydra.checking": "Vérification des fichiers · {count} / {total}",
@@ -14,20 +15,27 @@ export default {
   "games.hydra.missing": "Aucun fichier de jeu lié",
   "games.hydra.ready": "Fichier de jeu trouvé",
   "games.hydra.original": "Paramètres de Hydra",
-  "games.hydra.pendingNote": "Après l’importation, ouvrez Gérer le jeu pour vérifier le fichier et les paramètres de lancement avant de jouer.",
-  "games.hydra.unsupported": "Certains paramètres Hydra n’ont pas pu être transférés ({count}). Vérifiez-les dans Hydra.",
+  "games.hydra.pendingNote":
+    "Après l’importation, ouvrez Gérer le jeu pour vérifier le fichier et les paramètres de lancement avant de jouer.",
+  "games.hydra.unsupported":
+    "Certains paramètres Hydra n’ont pas pu être transférés ({count}). Vérifiez-les dans Hydra.",
   "games.hydra.skipped": "Entrées supprimées ou illisibles ignorées : {count}",
   "games.hydra.done": "{games} jeux et {sources} sources importés.",
   "games.hydra.kept": "{count} entrées existantes conservées.",
-  "games.hydra.scope": "Importe les détails de la bibliothèque et les catalogues sélectionnés. Les fichiers de jeu restent dans leurs dossiers.",
+  "games.hydra.scope":
+    "Importe les détails de la bibliothèque et les catalogues sélectionnés. Les fichiers de jeu restent dans leurs dossiers.",
   "games.hydra.apply": "Importer la sélection ({count})",
   "games.hydra.stopped": "Arrêté. Les entrées déjà importées ont été conservées.",
-  "games.hydra.changed": "Hydra a changé depuis cette vérification. Choisissez à nouveau le dossier pour l’actualiser.",
-  "games.hydra.space": "Espace temporaire insuffisant pour lire cette base. Libérez de l’espace et réessayez.",
-  "games.hydra.busy": "Une autre vérification Hydra est en cours. Réessayez une fois celle-ci terminée.",
+  "games.hydra.changed":
+    "Hydra a changé depuis cette vérification. Choisissez à nouveau le dossier pour l’actualiser.",
+  "games.hydra.space":
+    "Espace temporaire insuffisant pour lire cette base. Libérez de l’espace et réessayez.",
+  "games.hydra.busy":
+    "Une autre vérification Hydra est en cours. Réessayez une fois celle-ci terminée.",
   "games.hydra.timeout": "La lecture a pris trop de temps. Fermez Hydra et réessayez.",
   "games.hydra.limit": "Cette base dépasse la taille de vérification prise en charge.",
-  "games.hydra.readError": "Impossible de lire cette base Hydra. Fermez Hydra et choisissez à nouveau son dossier.",
+  "games.hydra.readError":
+    "Impossible de lire cette base Hydra. Fermez Hydra et choisissez à nouveau son dossier.",
   "games.hydra.imported": "Importé depuis Hydra",
   "games.hydra.sourceExists": "Source déjà ajoutée",
   "games.hydra.useFile": "Utiliser le fichier de jeu enregistré",
@@ -36,5 +44,5 @@ export default {
   "games.hydra.resetTime": "Rétablir les temps importé et mesuré",
   "games.hydra.fileLabel": "Fichier du jeu",
   "games.hydra.argumentsLabel": "Options de lancement",
-  "games.hydra.prefixLabel": "Dossier de compatibilité"
+  "games.hydra.prefixLabel": "Dossier de compatibilité",
 };

@@ -8,7 +8,10 @@ import { AnimeRowStatus } from "./anime-row-status";
 export function AnilistTrendingRow() {
   const t = useT();
   const { metas, loading, error, retry } = useAnilistBrowseState("trending");
-  if (metas.length === 0) return loading || error ? <AnimeRowStatus title={t("Trending on AniList")} loading={loading} onRetry={retry} /> : null;
+  if (metas.length === 0)
+    return loading || error ? (
+      <AnimeRowStatus title={t("Trending on AniList")} loading={loading} onRetry={retry} />
+    ) : null;
   return (
     <div data-scroll-anchor="row:anilist-trending">
       <Row
@@ -36,7 +39,10 @@ export function AnilistTrendingRow() {
 export function AnilistTopRow() {
   const t = useT();
   const { metas, loading, error, retry } = useAnilistBrowseState("top");
-  if (metas.length === 0) return loading || error ? <AnimeRowStatus title={t("Top 100 on AniList")} loading={loading} onRetry={retry} /> : null;
+  if (metas.length === 0)
+    return loading || error ? (
+      <AnimeRowStatus title={t("Top 100 on AniList")} loading={loading} onRetry={retry} />
+    ) : null;
   return (
     <div data-scroll-anchor="row:anilist-top">
       <Row

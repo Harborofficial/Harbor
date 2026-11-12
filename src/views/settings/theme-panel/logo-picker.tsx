@@ -129,9 +129,26 @@ function AppIconPicker() {
   const [applied, setApplied] = useState(false);
   const [failed, setFailed] = useState(false);
   const [rot, setRot] = useState(0);
-  const presetId = settings.customAppIconPreset;
+  const [presetId, setPresetId] = useState("");
   const hasCustom = !!settings.customAppIcon && !presetId;
   const active = presetId || hasCustom;
+
+  useEffect(() => {
+    let active = true;
+    if (!settings.customAppIcon) {
+      setPresetId("");
+      return;
+    }
+    void Promise.all(
+      APP_ICON_PRESETS.map(async (p) => ({ id: p.id, dataUrl: await srcToDataUrl(p.src) })),
+    ).then((presets) => {
+      if (!active) return;
+      setPresetId(presets.find((p) => p.dataUrl === settings.customAppIcon)?.id ?? "");
+    });
+    return () => {
+      active = false;
+    };
+  }, [settings.customAppIcon]);
 
   useEffect(() => {
     const id = window.setInterval(() => setRot((i) => (i + 1) % APP_ICON_PRESETS.length), 3000);
@@ -143,7 +160,10 @@ function AppIconPicker() {
     setBusy(true);
     try {
       const dataUrl = await srcToDataUrl(src);
-      if (dataUrl) update({ customAppIcon: dataUrl, customAppIconPreset: id });
+      if (dataUrl) {
+        setPresetId(id);
+        update({ customAppIcon: dataUrl });
+      }
     } finally {
       setBusy(false);
     }
@@ -153,7 +173,10 @@ function AppIconPicker() {
     setBusy(true);
     try {
       const processed = await processLogoImage(file, 256);
-      if (processed) update({ customAppIcon: processed, customAppIconPreset: "" });
+      if (processed) {
+        setPresetId("");
+        update({ customAppIcon: processed });
+      }
     } finally {
       setBusy(false);
     }
@@ -215,11 +238,7 @@ function AppIconPicker() {
               {applied ? t("Applied") : failed ? t("Could not apply") : t("Apply now")}
             </SButton>
           )}
-          {active && (
-            <SButton onClick={() => update({ customAppIcon: "", customAppIconPreset: "" })}>
-              {t("Reset")}
-            </SButton>
-          )}
+          {active && <SButton onClick={() => update({ customAppIcon: "" })}>{t("Reset")}</SButton>}
         </div>
       </SettingRow>
 

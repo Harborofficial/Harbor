@@ -83,7 +83,11 @@ export interface LpTemplate {
 }
 
 const NOISE = /<!--[\s\S]*?-->|<ref\b[^>]*\/>|<ref\b[^>]*>[\s\S]*?<\/ref>|<\/?nowiki\s*\/?>/gi;
-const normName = (value: string) => value.replace(/[_\s]+/g, " ").trim().toLowerCase();
+const normName = (value: string) =>
+  value
+    .replace(/[_\s]+/g, " ")
+    .trim()
+    .toLowerCase();
 
 /** Comments and <ref> blocks carry stray pipes and braces that would desync the scanner. */
 const denoise = (src: string) => (src ?? "").replace(NOISE, "");
@@ -696,7 +700,10 @@ async function cacheWrite(key: string, entry: Cached): Promise<void> {
   }
   clearTimeout(indexTimer);
   const snapshot = { ...map };
-  indexTimer = setTimeout(() => void idbCacheSet(INDEX_KEY, { at: Date.now(), data: snapshot }), 1000);
+  indexTimer = setTimeout(
+    () => void idbCacheSet(INDEX_KEY, { at: Date.now(), data: snapshot }),
+    1000,
+  );
 }
 
 // The durable copy survives either way, so only an aggressive pass gives up the warm pages.

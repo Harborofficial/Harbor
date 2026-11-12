@@ -25,7 +25,8 @@ export default {
   "games.pokemon.videosHint": "شروحات ونصائح",
   "games.pokemon.bank": "الحفظ والبوكيمون",
   "games.pokemon.bankHint": "تعديل الحفظ وإدارة الصناديق",
-  "games.pokemon.bankIntro": "افتح ملف حفظ من المحاكي لتعديل فريقك، أو استورد بوكيمون منفردًا إلى مجموعتك.",
+  "games.pokemon.bankIntro":
+    "افتح ملف حفظ من المحاكي لتعديل فريقك، أو استورد بوكيمون منفردًا إلى مجموعتك.",
   "games.pokemon.guideSourceNote": "اقرأ الدليل الأصلي، أو افتحه هنا عندما يكون المصدر متاحًا.",
   "games.pokemon.readGuide": "اقرأ على Bulbapedia",
   "games.pokemon.readInside": "اقرأ في Harbor",
@@ -39,14 +40,17 @@ export default {
   "games.pokemon.saveStep2": "أغلق اللعبة، ثم ابحث عن حفظ البطارية أو صدّره (.sav أو .srm أو .dsv).",
   "games.pokemon.saveStep3": "اختر فتح ملف حفظ أعلاه لتعديله في Harbor.",
   "games.pokemon.findSave": "أين ملف الحفظ؟",
-  "games.pokemon.saveLocations": "ابحث بجوار ملف ROM أو في مجلد الحفظ الخاص بالمحاكي. إذا كان لديك حالة حفظ فقط، حمّلها في المحاكي ثم احفظ من قائمة اللعبة.",
+  "games.pokemon.saveLocations":
+    "ابحث بجوار ملف ROM أو في مجلد الحفظ الخاص بالمحاكي. إذا كان لديك حالة حفظ فقط، حمّلها في المحاكي ثم احفظ من قائمة اللعبة.",
   "games.pokemon.noSave": "ليس لديك حفظ بعد؟",
   "games.pokemon.communitySaves": "تصفح ملفات حفظ المجتمع",
-  "games.pokemon.communitySavesNote": "Project Pokémon · اختر اللعبة المطابقة واقرأ ملاحظات صاحب الملف.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · اختر اللعبة المطابقة واقرأ ملاحظات صاحب الملف.",
   "games.pokemon.pkhexNote": "محرر حفظ وتنزيلات ومساعدة من مطوريه.",
-  "games.pokemon.noSaveNeeded": "يمكنك استيراد ملفات بوكيمون دون حفظ لعبة. تحتاج إلى الحفظ فقط لتعديل فريق اللعبة أو صناديقها.",
+  "games.pokemon.noSaveNeeded":
+    "يمكنك استيراد ملفات بوكيمون دون حفظ لعبة. تحتاج إلى الحفظ فقط لتعديل فريق اللعبة أو صناديقها.",
   "games.pokemon.videoUnavailable": "تعذر تحميل الفيديوهات هنا.",
   "games.pokemon.youtubeSearch": "البحث في YouTube",
   "games.hub.downloadApply": "تنزيل التصحيح",
-  "games.hub.manualPatch": "استخدام تصحيح أو رابط لديك"
+  "games.hub.manualPatch": "استخدام تصحيح أو رابط لديك",
 };

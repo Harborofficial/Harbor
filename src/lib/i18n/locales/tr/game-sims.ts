@@ -1,14 +1,20 @@
 export default {
-  "games.sims.catalogUpdateRequired": "The Sims 2 ve The Sims 3 indirmelerine göz atmak için Harbor’ı güncelleyip yeniden başlatın.",
+  "games.sims.catalogUpdateRequired":
+    "The Sims 2 ve The Sims 3 indirmelerine göz atmak için Harbor’ı güncelleyip yeniden başlatın.",
   "games.sims.creatorNotesTitle": "Üreticinin bağlantıları · {count}",
-  "games.sims.creatorNotesNote": "Üreticinin notlarındaki bağlantılar. Talimatları okumak için sayfayı açın.",
+  "games.sims.creatorNotesNote":
+    "Üreticinin notlarındaki bağlantılar. Talimatları okumak için sayfayı açın.",
   "games.sims.ccBuildTitle": "Bu yapının kullandığı içerik",
-  "games.sims.ccBuildNote": "Bu yapıyla bağlantılı dosyalar. Ek modeller veya dokular hâlâ gerekebilir.",
+  "games.sims.ccBuildNote":
+    "Bu yapıyla bağlantılı dosyalar. Ek modeller veya dokular hâlâ gerekebilir.",
   "games.sims.ccBuildObjects": "Okunan yerleştirilmiş nesneler: {count}",
-  "games.sims.ccBuildPartial": "Bazı yapı ayrıntıları ve bağlantılı içerikler henüz kontrol edilemiyor.",
+  "games.sims.ccBuildPartial":
+    "Bazı yapı ayrıntıları ve bağlantılı içerikler henüz kontrol edilemiyor.",
   "games.sims.creatorCcTitle": "Üreticinin CC listesi · {count}",
-  "games.sims.creatorCcNote": "Üreticinin verdiği bilgiler. Dosya içeriği ve kurulum ayrı kontrol edilir.",
-  "games.sims.creatorCcPartial": "Bazı kayıtlar okunamadı. Üreticinin sayfasında daha fazla bilgi olabilir.",
+  "games.sims.creatorCcNote":
+    "Üreticinin verdiği bilgiler. Dosya içeriği ve kurulum ayrı kontrol edilir.",
+  "games.sims.creatorCcPartial":
+    "Bazı kayıtlar okunamadı. Üreticinin sayfasında daha fazla bilgi olabilir.",
   "games.sims.creatorCcEmpty": "Bu sayfada yapılandırılmış bir CC listesi bulunamadı.",
   "games.sims.creatorCcIncluded": "Üretici dahil olduğunu belirtmiş",
   "games.sims.creatorCcSeparate": "Üretici ayrı indirilmesi gerektiğini belirtmiş",
@@ -22,7 +28,8 @@ export default {
   "games.sims.ccNote": "Bu haneyle bağlantılı dosyalar. Ek modeller veya dokular hâlâ gerekebilir.",
   "games.sims.ccCoverage": "Kontrol edilen paketler: {files} · İçerik referansları: {references}",
   "games.sims.ccPartial": "Bazı dosyalar kontrol edilemedi. Sonuçlar eksik.",
-  "games.sims.ccUnresolved": "Tanımlanamayan içerik: {count}. Bazıları oyuna veya paketlerine ait olabilir.",
+  "games.sims.ccUnresolved":
+    "Tanımlanamayan içerik: {count}. Bazıları oyuna veya paketlerine ait olabilir.",
   "games.sims.ccLocal": "Özel içerik dosyaları",
   "games.sims.ccNoMods": "Bu kontrolde eşleşen özel içerik dosyası bulunamadı.",
   "games.sims.ccGame": "Oyun dosyaları · {count}",
@@ -36,16 +43,20 @@ export default {
   "games.sims.packsLaunchChecked": "Başlatma seçenekleri: {source}",
   "games.sims.packsLaunchClear": "Bu başlatma seçeneklerinde devre dışı bırakılan paket yok.",
   "games.sims.packsLaunchDisabled": "Devre dışı paketler: {packs}",
-  "games.sims.packsLaunchUnknown": "Başlatma seçenekleri doğrulanmadı. Başlatıcınızı veya özel başlatma seçeneklerinizi kontrol edin.",
+  "games.sims.packsLaunchUnknown":
+    "Başlatma seçenekleri doğrulanmadı. Başlatıcınızı veya özel başlatma seçeneklerinizi kontrol edin.",
   "games.sims.packsLaunchConflict": "Başlatma seçenekleri kopyalar veya hesaplar arasında farklı.",
-  "games.sims.depsPackMissing": "Pakete bağlı gereksinimleri kontrol etmek için yukarıdan bir oyun kurulumu seçin.",
+  "games.sims.depsPackMissing":
+    "Pakete bağlı gereksinimleri kontrol etmek için yukarıdan bir oyun kurulumu seçin.",
   "games.sims.depsPackUsing": "Paket koşulları {path} için kontrol edildi.",
-  "games.sims.depsPackError": "Seçilen oyun kurulumu kontrol edilemedi. Pakete bağlı gereksinimler doğrulanmamış olarak kalır.",
+  "games.sims.depsPackError":
+    "Seçilen oyun kurulumu kontrol edilemedi. Pakete bağlı gereksinimler doğrulanmamış olarak kalır.",
   "games.sims.packsLibrary": "Kütüphanendeki kurulumlar",
   "games.sims.packsUse": "Bu kurulumdaki paketleri kontrol et",
   "games.sims.packsManual": "Elle eklendi",
   "games.sims.packsTitle": "Oyun paketlerin",
-  "games.sims.packsIntro": "İçerik üreticisinin gereksinimlerini yerel paket dosyalarıyla karşılaştırmak için Sims 4 oyun klasörünü seç.",
+  "games.sims.packsIntro":
+    "İçerik üreticisinin gereksinimlerini yerel paket dosyalarıyla karşılaştırmak için Sims 4 oyun klasörünü seç.",
   "games.sims.packsChoose": "Oyun klasörünü seç",
   "games.sims.packsChange": "Oyun klasörünü değiştir",
   "games.sims.packsRefresh": "Paketleri yeniden kontrol et",
@@ -53,12 +64,14 @@ export default {
   "games.sims.packsChecked": "Kontrol zamanı: {date}",
   "games.sims.packsPartial": "Bazı klasörler kontrol edilemedi. Eksik paketler doğrulanamadı.",
   "games.sims.packsEmpty": "Hiçbir paket dosyası doğrulanamadı.",
-  "games.sims.packsScope": "Yalnızca yerel dosyalar ve başlatma seçenekleri; oyun içi uyumluluğu doğrulamaz.",
+  "games.sims.packsScope":
+    "Yalnızca yerel dosyalar ve başlatma seçenekleri; oyun içi uyumluluğu doğrulamaz.",
   "games.sims.packsFound": "Dosyalar bulundu",
   "games.sims.packsMissing": "Bulunamadı",
   "games.sims.packsUnchecked": "Doğrulanmadı",
   "games.sims.packsFolderError": "Game ve Data klasörlerini içeren Sims 4 kurulumunu seç.",
-  "games.sims.mtsDiscoveryIntro": "İçerik üreticilerinin indirmelerini keşfet. Oyununa eklemeden önce dosyaları incele.",
+  "games.sims.mtsDiscoveryIntro":
+    "İçerik üreticilerinin indirmelerini keşfet. Oyununa eklemeden önce dosyaları incele.",
   "games.sims.mtsWaiting": "Mod The Sims bekleniyor…",
   "games.sims.mtsQueryError": "Aramayı ve filtreleri kontrol edip tekrar dene.",
   "games.sims.mtsSearch": "İndirmeleri ara",
@@ -89,19 +102,24 @@ export default {
   "games.sims.mtsCatTraits": "Özellikler",
   "games.sims.mtsCatMisc": "Diğer",
   "games.sims.mtsCatTools": "Araçlar",
-  "games.sims.mtsIntro": "Harbor’a bir mod veya özel içerik aktarın. The Sims 4 sayfasını yapıştırıp istediğiniz dosyayı seçin.",
+  "games.sims.mtsIntro":
+    "Harbor’a bir mod veya özel içerik aktarın. The Sims 4 sayfasını yapıştırıp istediğiniz dosyayı seçin.",
   "games.sims.mtsPage": "İndirme sayfası",
   "games.sims.mtsLoad": "Dosyaları bul",
   "games.sims.mtsBrowse": "Mod The Sims’e göz at",
   "games.sims.mtsFile": "Yüklenecek dosya",
-  "games.sims.mtsZip": "Doğrudan içe aktarmak için ZIP seçin. Diğer biçimleri içerik üreticisinin sayfasından indirip önce modu çıkarın.",
-  "games.sims.mtsPageError": "The Sims 4 için herkese açık bir Mod The Sims indirme sayfası kullanın.",
+  "games.sims.mtsZip":
+    "Doğrudan içe aktarmak için ZIP seçin. Diğer biçimleri içerik üreticisinin sayfasından indirip önce modu çıkarın.",
+  "games.sims.mtsPageError":
+    "The Sims 4 için herkese açık bir Mod The Sims indirme sayfası kullanın.",
   "games.sims.depsTitle": "Mod gereksinimleri",
-  "games.sims.depsNote": "Oluşturucunun meta verileriyle gerekli mod dosyalarını bulur ve seçilen kurulum için paket koşullarını kontrol eder. Oyun içi uyumluluğu doğrulamaz.",
+  "games.sims.depsNote":
+    "Oluşturucunun meta verileriyle gerekli mod dosyalarını bulur ve seçilen kurulum için paket koşullarını kontrol eder. Oyun içi uyumluluğu doğrulamaz.",
   "games.sims.depsScan": "Gereksinimleri kontrol et",
   "games.sims.depsNone": "Kontrol edilen dosyalarda belirtilmiş mod gereksinimi bulunamadı.",
   "games.sims.depsCoverage": "{count} dosya kontrol edildi · {manifests} dosyada meta veri var",
-  "games.sims.depsPartial": "Bazı dosyalar veya gereksinimler kontrol edilemedi. Doğrulanamayan sonuçlar kontrol edilmedi olarak işaretlenir.",
+  "games.sims.depsPartial":
+    "Bazı dosyalar veya gereksinimler kontrol edilemedi. Doğrulanamayan sonuçlar kontrol edilmedi olarak işaretlenir.",
   "games.sims.depsFound": "Gerekli dosyalar bulundu",
   "games.sims.depsMissing": "Gerekli içerik eksik",
   "games.sims.depsUnchecked": "Kontrol edilmedi",
@@ -122,19 +140,23 @@ export default {
   "games.sims.infoFeatures": "Gerekli özellikler:",
 
   "games.sims.duplicatesTitle": "Yinelenen dosyalar",
-  "games.sims.duplicatesNote": "Mods klasörünüzdeki aynı kopyaları bulun. Farklı sürümleri veya diğer mod çakışmalarını denetlemez.",
+  "games.sims.duplicatesNote":
+    "Mods klasörünüzdeki aynı kopyaları bulun. Farklı sürümleri veya diğer mod çakışmalarını denetlemez.",
   "games.sims.duplicatesScan": "Yinelenenleri denetle",
   "games.sims.duplicatesAgain": "Yeniden denetle",
   "games.sims.duplicatesFound": "Özdeş dosya grupları: {count}",
   "games.sims.duplicatesNonePartial": "Denetlenen dosyalarda yinelenen bulunamadı.",
   "games.sims.duplicatesNone": "Yinelenen dosya bulunamadı.",
   "games.sims.duplicatesChecked": "{count} dosya denetlendi · {time}",
-  "games.sims.duplicatesPartial": "Bazı dosyalar denetlenemedi. Bu sonuçlar klasörün tamamını kapsamaz.",
+  "games.sims.duplicatesPartial":
+    "Bazı dosyalar denetlenemedi. Bu sonuçlar klasörün tamamını kapsamaz.",
   "games.sims.duplicatesCopies": "{count} aynı kopya",
   "games.sims.duplicatesShow": "Dosyayı göster",
   "games.sims.duplicatesDisable": "Grubu kapatmayı incele",
-  "games.sims.lotCached": "Katalog {date} tarihinde kaydedildi. Güncel sürümü kontrol etmek için yapımcının sayfasını açın.",
-  "games.sims.lotManual": "Doğrudan indirme kullanılamıyor. Dosyayı yapımcıdan indirin, ardından buraya aktarın.",
+  "games.sims.lotCached":
+    "Katalog {date} tarihinde kaydedildi. Güncel sürümü kontrol etmek için yapımcının sayfasını açın.",
+  "games.sims.lotManual":
+    "Doğrudan indirme kullanılamıyor. Dosyayı yapımcıdan indirin, ardından buraya aktarın.",
 
   "games.sims.lotTitle": "The Sims’te daha fazla olanak",
   "games.sims.lotSearch": "Mod bul",
@@ -143,16 +165,23 @@ export default {
   "games.sims.lotPacks": "Oyun gereksinimleri: {packs}",
   "games.sims.lotGuide": "Yapımcının rehberi",
   "games.sims.lotNew": "Yeni kurulum",
-  "games.sims.lotCompatibility": "Bu sürümü uygulamadan önce yapımcının uyumluluk notlarını okuyun.",
-  "games.sims.lotDependencyError": "Etkin bir mod, doğrulanmış bir Core Library kurulumu gerektiriyor. Gerekli sürümü kurulu ve etkin tutun.",
-  "games.sims.lotTargetError": "Bu grup yapımcının bu sürümüyle eşleşmiyor. Kendi grubunu seçin veya ayrı kurun.",
+  "games.sims.lotCompatibility":
+    "Bu sürümü uygulamadan önce yapımcının uyumluluk notlarını okuyun.",
+  "games.sims.lotDependencyError":
+    "Etkin bir mod, doğrulanmış bir Core Library kurulumu gerektiriyor. Gerekli sürümü kurulu ve etkin tutun.",
+  "games.sims.lotTargetError":
+    "Bu grup yapımcının bu sürümüyle eşleşmiyor. Kendi grubunu seçin veya ayrı kurun.",
 
   "games.sims.creatorExisting": "Mevcut kurulum",
   "games.sims.creatorManage": "Mevcut dosyaları incele",
-  "games.sims.creatorAdoptNote": "Önce bu dosyaları Harbor yönetimine alın. Ardından güncellemek için geliştiricinin bir sürümünü seçin.",
-  "games.sims.creatorLinkNote": "Bu grubun güncellemesini inceleyin. Harbor önceki dosyaları ve ayarlarınızı saklar.",
-  "games.sims.creatorTarget": "Bu grupta seçilen sürüme ait olmayan mod dosyaları var. MCCC’yi güncellemeden önce bunları ayrı bir gruba taşıyın.",
-  "games.sims.creatorExistingError": "MCCC dosyaları zaten mevcut. Geliştiricinin bir sürümünü eklemeden önce bu dosyaları yönetime alın.",
+  "games.sims.creatorAdoptNote":
+    "Önce bu dosyaları Harbor yönetimine alın. Ardından güncellemek için geliştiricinin bir sürümünü seçin.",
+  "games.sims.creatorLinkNote":
+    "Bu grubun güncellemesini inceleyin. Harbor önceki dosyaları ve ayarlarınızı saklar.",
+  "games.sims.creatorTarget":
+    "Bu grupta seçilen sürüme ait olmayan mod dosyaları var. MCCC’yi güncellemeden önce bunları ayrı bir gruba taşıyın.",
+  "games.sims.creatorExistingError":
+    "MCCC dosyaları zaten mevcut. Geliştiricinin bir sürümünü eklemeden önce bu dosyaları yönetime alın.",
   "games.sims.creatorRefresh": "Sürümleri yenile",
   "games.sims.creatorTitle": "Doğrudan yapımcıdan",
   "games.sims.creatorIntro": "Sim’lerin ve mahallen üzerinde daha fazla kontrol.",
@@ -163,7 +192,8 @@ export default {
   "games.sims.creatorChanges": "Sürüm notları",
   "games.sims.creatorNetwork": "Yapımcının sürümleri yüklenemedi. Biraz sonra tekrar dene.",
   "games.sims.creatorChoose": "Bir sürümü içe aktarmak için The Sims 4 klasörünü seç.",
-  "games.sims.creatorPatch": "Oyunun test edilen yamadan daha eski. Önceki bir sürümü incele veya oyunu güncelle.",
+  "games.sims.creatorPatch":
+    "Oyunun test edilen yamadan daha eski. Önceki bir sürümü incele veya oyunu güncelle.",
   "games.sims.creatorReviewNote": "Yükleme yapılmadan önce dosyaları inceleyebilirsin.",
   "games.sims.creatorChanged": "Bu sürüm veya yönetilen mod değişti. Yenile ve tekrar dene.",
   "games.sims.creatorDownloading": "Yapımcıdan indiriliyor…",
@@ -176,57 +206,77 @@ export default {
   "games.sims.trayImport": "Yapı veya aile içe aktar",
   "games.sims.trayRemove": "Kitaplıktan kaldır",
   "games.sims.trayRestore": "Kitaplığa geri yükle",
-  "games.sims.trayNote": "İndirdiğin arsaları, odaları veya aileleri içe aktar. Harbor ilgili dosyaları Tray klasöründe bir arada tutar.",
-  "games.sims.trayReviewNote": "Tray dosyaları doğrudan kitaplık klasörüne gider. Paketteki özel içerikler ayrı bir mod grubu olarak yönetilir.",
-  "games.sims.trayRemoveNote": "İçe aktarılan dosyalar kitaplıktan kaldırılır ve kurtarma kopyası saklanır. Paketteki özel içerikler kurulu kalır.",
-  "games.sims.trayDone": "Kitaplık dosyaların güncellendi. The Sims 4 içinde Kitaplığım bölümünü aç ve gerekirse özel içerikleri gösterme seçeneğini etkinleştir.",
-  "games.sims.trayPlayNote": "Oyunda Kitaplığım bölümünü aç. Gerekli paketler ve özel içerikler kurulu olmalıdır.",
+  "games.sims.trayNote":
+    "İndirdiğin arsaları, odaları veya aileleri içe aktar. Harbor ilgili dosyaları Tray klasöründe bir arada tutar.",
+  "games.sims.trayReviewNote":
+    "Tray dosyaları doğrudan kitaplık klasörüne gider. Paketteki özel içerikler ayrı bir mod grubu olarak yönetilir.",
+  "games.sims.trayRemoveNote":
+    "İçe aktarılan dosyalar kitaplıktan kaldırılır ve kurtarma kopyası saklanır. Paketteki özel içerikler kurulu kalır.",
+  "games.sims.trayDone":
+    "Kitaplık dosyaların güncellendi. The Sims 4 içinde Kitaplığım bölümünü aç ve gerekirse özel içerikleri gösterme seçeneğini etkinleştir.",
+  "games.sims.trayPlayNote":
+    "Oyunda Kitaplığım bölümünü aç. Gerekli paketler ve özel içerikler kurulu olmalıdır.",
   "games.sims.trayCc": "Paketteki özel içerikler ayrı yönetilir.",
   "games.sims.trayEmpty": "Burada yönetmek için indirdiğin bir tasarımı içe aktar.",
-  "games.sims.trayFormat": "Desteklenen bir ZIP veya eksiksiz Tray dışa aktarımı seç. Dosyaların özgün adlarını koru.",
-  "games.sims.traySet": "Tray öğesi, içerik ve görseller dahil tek bir tasarımın tüm dosyalarını seç.",
-  "games.sims.trayExists": "Bu tasarım veya dosyalarından biri zaten kitaplığında ya da yedeklerinde. Buradan geri yükle veya önce kopya sorununu çöz.",
+  "games.sims.trayFormat":
+    "Desteklenen bir ZIP veya eksiksiz Tray dışa aktarımı seç. Dosyaların özgün adlarını koru.",
+  "games.sims.traySet":
+    "Tray öğesi, içerik ve görseller dahil tek bir tasarımın tüm dosyalarını seç.",
+  "games.sims.trayExists":
+    "Bu tasarım veya dosyalarından biri zaten kitaplığında ya da yedeklerinde. Buradan geri yükle veya önce kopya sorununu çöz.",
   "games.sims.trayInstalled": "Kitaplığında",
   "games.sims.trayRemoved": "Kaldırıldı · kopyası saklandı",
   "games.sims.trayLot": "Arsa",
   "games.sims.trayRoom": "Oda",
   "games.sims.trayHousehold": "Aile",
   "games.sims.trayName": "Tasarım adı",
-  "games.sims.testActive": "Diğer modları değiştirmeden önce etkin mod testini bitirip başlangıç düzenini geri yükleyin.",
+  "games.sims.testActive":
+    "Diğer modları değiştirmeden önce etkin mod testini bitirip başlangıç düzenini geri yükleyin.",
   "games.sims.testTitle": "Sorunlu bir mod bul",
   "games.sims.startTest": "Test başlat",
   "games.sims.answerTest": "Sonraki adımı incele",
   "games.sims.restoreTest": "Başlangıç düzenini geri yükle",
   "games.sims.testIntro": "Sorunu daraltmak için yönetilen grupları partiler hâlinde test edin.",
-  "games.sims.testPlayNote": "Sorunu oyunda kontrol edip kaydetmeden çıkın. Sonucu kaydetmeden önce The Sims 4’ü kapatın.",
+  "games.sims.testPlayNote":
+    "Sorunu oyunda kontrol edip kaydetmeden çıkın. Sonucu kaydetmeden önce The Sims 4’ü kapatın.",
   "games.sims.testRound": "Test {count}",
   "games.sims.testBaseline": "Seçili modlar olmadan başlayın",
   "games.sims.testBaselineNote": "Bu gruplar devre dışı. Aynı sorun hâlâ oluyor mu?",
   "games.sims.testBatch": "Bu partiyi kontrol edin",
   "games.sims.testBatchNote": "Bu testte seçili gruplardan bunlar etkin. Sorun geri geliyor mu?",
   "games.sims.testSuspect": "Bu grubu kontrol edin",
-  "games.sims.testSuspectNote": "Bu grup etkinken sorun geri geldi. Gereksinimlerini ve güncellemelerini kontrol edin. Başka modlar veya etkileşimler de etkili olabilir.",
+  "games.sims.testSuspectNote":
+    "Bu grup etkinken sorun geri geldi. Gereksinimlerini ve güncellemelerini kontrol edin. Başka modlar veya etkileşimler de etkili olabilir.",
   "games.sims.testInconclusive": "Bir grup belirlenemedi",
-  "games.sims.testBaselineFailed": "Seçili gruplar devre dışıyken sorun devam etti. Oyunu veya test dışındaki modları kontrol edin.",
-  "games.sims.testInconclusiveNote": "Sorun tutarlı biçimde tekrarlanmadı. Birlikte çalışan modlara veya kayıt dosyasına bağlı olabilir.",
+  "games.sims.testBaselineFailed":
+    "Seçili gruplar devre dışıyken sorun devam etti. Oyunu veya test dışındaki modları kontrol edin.",
+  "games.sims.testInconclusiveNote":
+    "Sorun tutarlı biçimde tekrarlanmadı. Birlikte çalışan modlara veya kayıt dosyasına bağlı olabilir.",
   "games.sims.testOutside": "Seçim dışındaki modlar olduğu gibi kalır.",
-  "games.sims.testPatch": "Oyun sürümü değişti. Yeni testten önce başlangıç düzenini geri yükleyin.",
+  "games.sims.testPatch":
+    "Oyun sürümü değişti. Yeni testten önce başlangıç düzenini geri yükleyin.",
   "games.sims.testPresent": "Sorun devam ediyor",
   "games.sims.testGone": "Sorun kayboldu",
   "games.sims.testIncluded": "Bu testteki gruplar",
   "games.sims.testHelp": "EA mod sorun giderme rehberi",
-  "games.sims.testRestoreNote": "Grupların başlangıçtaki etkinlik durumunu geri yükleyin. Mevcut oluşturucu ayarları korunur. Oyun kayıtları geri yüklenmez.",
-  "games.sims.testReviewNote": "The Sims 4’ü kapatın. Uygulamadan önce grupları inceleyin. Eksik CC kayıt dosyasından silinmesin diye testlerde kaydetmeden çıkın.",
-  "games.sims.testChooseNote": "Test edilecek grupları seçin. Bağımlılıkları birlikte tutun veya ortak kitaplıkları testten çıkararak etkin bırakın.",
+  "games.sims.testRestoreNote":
+    "Grupların başlangıçtaki etkinlik durumunu geri yükleyin. Mevcut oluşturucu ayarları korunur. Oyun kayıtları geri yüklenmez.",
+  "games.sims.testReviewNote":
+    "The Sims 4’ü kapatın. Uygulamadan önce grupları inceleyin. Eksik CC kayıt dosyasından silinmesin diye testlerde kaydetmeden çıkın.",
+  "games.sims.testChooseNote":
+    "Test edilecek grupları seçin. Bağımlılıkları birlikte tutun veya ortak kitaplıkları testten çıkararak etkin bırakın.",
   "games.sims.testBackup": "Testten önce oyun kayıtlarını yedekle",
 
   "games.sims.adopt": "Mevcut modları yönet",
-  "games.sims.adoptNote": "The Sims 4’ü kapatın. Aynı klasörden bir modu veya ilgili CC dosyalarını ayarlarıyla birlikte seçin. Listelenen dosyalar bir Harbor grubuna taşınır; diğer dosyalar yerinde kalır.",
+  "games.sims.adoptNote":
+    "The Sims 4’ü kapatın. Aynı klasörden bir modu veya ilgili CC dosyalarını ayarlarıyla birlikte seçin. Listelenen dosyalar bir Harbor grubuna taşınır; diğer dosyalar yerinde kalır.",
   "games.sims.adoptFrom": "Mevcut klasör",
   "games.sims.adoptTo": "Taşınacağı klasör",
   "games.sims.adoptFolder": "Mods içindeki tek bir klasörden ilgili dosyaları seçin.",
-  "games.sims.adoptManaged": "Harbor tarafından yönetilen klasörlerin dışından dosya seçin ve Resource.cfg dosyasını yerinde bırakın.",
-  "games.sims.adoptScan": "Bazı mod klasörleri taranamadı. Bu dosyaları yönetmeden önce sorunu giderin.",
+  "games.sims.adoptManaged":
+    "Harbor tarafından yönetilen klasörlerin dışından dosya seçin ve Resource.cfg dosyasını yerinde bırakın.",
+  "games.sims.adoptScan":
+    "Bazı mod klasörleri taranamadı. Bu dosyaları yönetmeden önce sorunu giderin.",
 
   "games.sims.sets": "Mod setleri",
   "games.sims.setsNote": "Yönetilen modlarını birlikte değiştir. Setler kurulu sürümleri kullanır.",
@@ -238,21 +288,25 @@ export default {
   "games.sims.emptySets": "Geri dönebileceğin bir seçim kaydet.",
   "games.sims.setsNeedMods": "Set oluşturmadan önce bir mod içe aktar.",
   "games.sims.setName": "Set adı",
-  "games.sims.setEditNote": "Bu setin etkinleştireceği grupları seç. Seti kaydetmek mod dosyalarını değiştirmez.",
+  "games.sims.setEditNote":
+    "Bu setin etkinleştireceği grupları seç. Seti kaydetmek mod dosyalarını değiştirmez.",
   "games.sims.setRemovedNote": "Kaldırılan gruplar kaydettiğinde bu setten çıkarılır.",
   "games.sims.setFiles": "Dosyalar · {count}",
   "games.sims.deleteSetNote": "Bu kayıtlı seçim silinsin mi? Mod dosyaların yerinde kalır.",
   "games.sims.deleteSet": "Seti sil",
   "games.sims.saveSet": "Seti kaydet",
   "games.sims.applySet": "Mod setini değiştir",
-  "games.sims.setReviewNote": "Önce The Sims 4’ü kapat. Yalnızca listedeki gruplar değişir; sonradan içe aktarılanlar aynı kalır. CC devre dışıyken oyunu kaydetmek haneleri veya yapıları değiştirebilir.",
+  "games.sims.setReviewNote":
+    "Önce The Sims 4’ü kapat. Yalnızca listedeki gruplar değişir; sonradan içe aktarılanlar aynı kalır. CC devre dışıyken oyunu kaydetmek haneleri veya yapıları değiştirebilir.",
   "games.sims.setBackup": "Değiştirmeden önce kayıtları yedekle",
   "games.sims.setBackupDone": "Yedeğin Oyun kaydı yedekleri bölümünde.",
   "games.sims.setUnchanged": "Bu set zaten mevcut düzeninle aynı.",
   "games.sims.setScan": "Bazı mod klasörleri taranamadı. Set değiştirmeden önce bunu çöz.",
   "games.sims.savesLabelHint": "Yeni modlardan önce",
-  "games.sims.savesRunning": "Kayıtları yedeklemeden veya geri yüklemeden önce The Sims 4’ü kapat. Harbor oyunun kapandığını doğrulayabilmelidir.",
-  "games.sims.savesIntro": "Modları değiştirmeden önce kayıtlarını yedekle. Önce The Sims 4’ü kapat. Modlar ve Tray klasöründeki haneler dahil değildir.",
+  "games.sims.savesRunning":
+    "Kayıtları yedeklemeden veya geri yüklemeden önce The Sims 4’ü kapat. Harbor oyunun kapandığını doğrulayabilmelidir.",
+  "games.sims.savesIntro":
+    "Modları değiştirmeden önce kayıtlarını yedekle. Önce The Sims 4’ü kapat. Modlar ve Tray klasöründeki haneler dahil değildir.",
   "games.sims.title": "Modların ve özel içeriklerin",
   "games.sims.intro": "İndirmelerini düzenle, güncellerken önceki sürümü sakla.",
   "games.sims.choose": "Sims klasörünü seç",
@@ -266,21 +320,27 @@ export default {
   "games.sims.recover": "Yarım kalan değişikliği kurtar",
   "games.sims.name": "Mod veya koleksiyon adı",
   "games.sims.nameError": "Bu gruba kısa bir ad ver.",
-  "games.sims.reviewNote": "Önce The Sims 4’ü kapat. Her seferinde bir mod veya ilgili özel içerik grubunu aktar. Güncellemelerde oluşturucu ayarları korunur. Oynamadan önce gereksinimleri kontrol et.",
-  "games.sims.removeNote": "Önce The Sims 4’ü kapat. Özel içerikler kaldırılmışken kaydetmek ailelerini veya yapılarını değiştirebilir. Kaldırılan dosyalar Yedekler’de kalır; devre dışı olanlar Mods dışına taşınır.",
-  "games.sims.recovery": "Önceki değişiklik yarım kaldı. Yeni değişiklikten önce önceki kurulumu kurtar.",
+  "games.sims.reviewNote":
+    "Önce The Sims 4’ü kapat. Her seferinde bir mod veya ilgili özel içerik grubunu aktar. Güncellemelerde oluşturucu ayarları korunur. Oynamadan önce gereksinimleri kontrol et.",
+  "games.sims.removeNote":
+    "Önce The Sims 4’ü kapat. Özel içerikler kaldırılmışken kaydetmek ailelerini veya yapılarını değiştirebilir. Kaldırılan dosyalar Yedekler’de kalır; devre dışı olanlar Mods dışına taşınır.",
+  "games.sims.recovery":
+    "Önceki değişiklik yarım kaldı. Yeni değişiklikten önce önceki kurulumu kurtar.",
   "games.sims.success": "Mod dosyaların güncellendi.",
   "games.sims.applying": "Değişiklikler uygulanıyor. Harbor’ı açık tut…",
   "games.sims.checking": "Dosyalar kontrol ediliyor…",
   "games.sims.skipped": "Atlanan belgeler ve görseller · {count}",
   "games.sims.preview": "Pakete gömülü önizleme",
   "games.sims.connect": "Sims klasörünle başla",
-  "games.sims.folderNote": "Mods, saves ve Options.ini içeren The Sims 4 kullanıcı verisi klasörünü seç. Klasör henüz yoksa oyunu bir kez başlat.",
+  "games.sims.folderNote":
+    "Mods, saves ve Options.ini içeren The Sims 4 kullanıcı verisi klasörünü seç. Klasör henüz yoksa oyunu bir kez başlat.",
   "games.sims.version": "Oyun sürümü {version}",
   "games.sims.refresh": "Mod dosyalarını yenile",
   "games.sims.checkSettings": "Oyun ayarlarını kontrol et",
-  "games.sims.settingsNote": "Modlar veya betikler kapalı ya da ayarları okunamadı. The Sims 4’te Oyun Seçenekleri → Diğer bölümünde özel içerikleri ve betik modlarını etkinleştir, ardından oyunu yeniden başlat. Güncellemeler bunları kapatabilir.",
-  "games.sims.resourceNote": "Alt klasörlerdeki paketler için Mods/Resource.cfg kuralı doğrulanamadı. Oynamadan önce oyunun özgün mod ayarlarını kontrol et.",
+  "games.sims.settingsNote":
+    "Modlar veya betikler kapalı ya da ayarları okunamadı. The Sims 4’te Oyun Seçenekleri → Diğer bölümünde özel içerikleri ve betik modlarını etkinleştir, ardından oyunu yeniden başlat. Güncellemeler bunları kapatabilir.",
+  "games.sims.resourceNote":
+    "Alt klasörlerdeki paketler için Mods/Resource.cfg kuralı doğrulanamadı. Oynamadan önce oyunun özgün mod ayarlarını kontrol et.",
   "games.sims.partial": "Bazı dosyalar veya bağlantılı klasörler taranamadı. Liste eksik olabilir.",
   "games.sims.eaHelp": "EA mod kurulum rehberi",
   "games.sims.managed": "Yönetilen modlar",
@@ -291,23 +351,34 @@ export default {
   "games.sims.package": "Özel içerik",
   "games.sims.script": "Betik modu",
   "games.sims.settings": "Oluşturucu ayarları",
-  "games.sims.managedNote": "Her içe aktarma bir grup olarak kalır. Modun tamamını buradan etkinleştir, güncelle veya kaldır.",
-  "games.sims.filesNote": "Mods içindeki mevcut dosyalar değiştirilmeden gösterilir. Görseller varsa gömülü önizlemelerden alınır.",
-  "games.sims.backupsNote": "Önceki sürümler bu bilgisayarda kalır. Mod hâlâ kuruluysa geri yükleme mevcut oluşturucu ayarlarını korur.",
+  "games.sims.managedNote":
+    "Her içe aktarma bir grup olarak kalır. Modun tamamını buradan etkinleştir, güncelle veya kaldır.",
+  "games.sims.filesNote":
+    "Mods içindeki mevcut dosyalar değiştirilmeden gösterilir. Görseller varsa gömülü önizlemelerden alınır.",
+  "games.sims.backupsNote":
+    "Önceki sürümler bu bilgisayarda kalır. Mod hâlâ kuruluysa geri yükleme mevcut oluşturucu ayarlarını korur.",
   "games.sims.patchChanged": "İçe aktarmadan sonra oyun güncellendi",
-  "games.sims.compatibility": "Dosya kontrolü uyumluluğu doğrulamaz. Oyun yamasından sonra modları kontrol et.",
+  "games.sims.compatibility":
+    "Dosya kontrolü uyumluluğu doğrulamaz. Oyun yamasından sonra modları kontrol et.",
   "games.sims.tooDeep": "Betik birden fazla alt klasör derinliğinde.",
   "games.sims.noMatches": "Sonuç yok. Farklı bir arama dene.",
   "games.sims.emptyManaged": "Buradan yönetmek için indirdiğin bir modu içe aktar.",
   "games.sims.emptyBackups": "Önceki sürümler güncelleme veya kaldırma sonrasında burada görünür.",
   "games.sims.emptyFiles": "Mods içinde desteklenen dosya bulunamadı.",
   "games.sims.desktop": "Mod yönetimi için Windows’ta güncel Harbor masaüstü uygulaması gerekir.",
-  "games.sims.folderError": "Kısayol veya bağlantı olmayan gerçek The Sims 4 kullanıcı verisi klasörünü seç. Mods, saves, GameVersion.txt ve Options.ini bulunmalıdır.",
+  "games.sims.folderError":
+    "Kısayol veya bağlantı olmayan gerçek The Sims 4 kullanıcı verisi klasörünü seç. Mods, saves, GameVersion.txt ve Options.ini bulunmalıdır.",
   "games.sims.readError": "Dosyalar okunamadı. Klasör erişimini kontrol edip tekrar dene.",
-  "games.sims.formatError": "Bu dosya desteklenen bir The Sims 4 modu değil veya arşiv bozuk. Çalıştırılabilir dosyalar, iç içe arşivler ve Tray dosyaları buradan aktarılamaz.",
-  "games.sims.layoutError": "Arşiv ayrı mod klasörleri veya yinelenen dosya adları içeriyor. Dosyaları birlikte tutmak için her modu ayrı aktar.",
-  "games.sims.running": "Mod dosyalarını değiştirmeden önce The Sims 4’ü kapat. Harbor oyunun kapandığını doğrulayabilmelidir.",
-  "games.sims.duplicate": "Aynı dosya adına sahip mod başka bir Mods klasöründe mevcut. Grubu aktarmadan veya etkinleştirmeden önce bu çakışmayı çöz.",
-  "games.sims.recordError": "Yerel mod kaydı doğrulanamadı. Dosyaların korunuyor. Kurulumu değiştirmeden önce özgün kaydı geri yükle.",
-  "games.sims.reviewError": "Bu değişiklik incelemesi mevcut profil için geçerli değil. Kapatıp dosyaları tekrar incele."
+  "games.sims.formatError":
+    "Bu dosya desteklenen bir The Sims 4 modu değil veya arşiv bozuk. Çalıştırılabilir dosyalar, iç içe arşivler ve Tray dosyaları buradan aktarılamaz.",
+  "games.sims.layoutError":
+    "Arşiv ayrı mod klasörleri veya yinelenen dosya adları içeriyor. Dosyaları birlikte tutmak için her modu ayrı aktar.",
+  "games.sims.running":
+    "Mod dosyalarını değiştirmeden önce The Sims 4’ü kapat. Harbor oyunun kapandığını doğrulayabilmelidir.",
+  "games.sims.duplicate":
+    "Aynı dosya adına sahip mod başka bir Mods klasöründe mevcut. Grubu aktarmadan veya etkinleştirmeden önce bu çakışmayı çöz.",
+  "games.sims.recordError":
+    "Yerel mod kaydı doğrulanamadı. Dosyaların korunuyor. Kurulumu değiştirmeden önce özgün kaydı geri yükle.",
+  "games.sims.reviewError":
+    "Bu değişiklik incelemesi mevcut profil için geçerli değil. Kapatıp dosyaları tekrar incele.",
 } satisfies Record<string, string>;

@@ -669,7 +669,7 @@ mod tests {
         let connection = state.connection();
         assert_eq!(connection.status, "connected");
         assert_eq!(connection.error, status.error);
-        assert!(connection.detail.unwrap().contains("playback is not ready"));
+        assert!(connection.detail.unwrap().contains("pairing is saved"));
     }
 
     #[test]
@@ -679,21 +679,28 @@ mod tests {
         let connection = state.connection();
         assert_eq!(connection.id, "spotify");
         assert_eq!(connection.status, "error");
-        assert_eq!(connection.capabilities, vec!["search", "browse", "play"]);
+        assert_eq!(connection.capabilities, vec!["search", "browse"]);
         assert_eq!(connection.error.as_deref(), Some(session::FREE_ACCOUNT));
         assert!(connection.account.is_none());
-        assert_eq!(connection.detail.as_deref(), Some(auth::BRING_YOUR_OWN));
+        assert!(
+            connection
+                .detail
+                .as_deref()
+                .is_some_and(|detail| detail.contains("Own-app browsing is optional"))
+        );
     }
 
     #[test]
-    fn a_disconnected_spotify_asks_for_a_client_id_of_your_own() {
+    fn a_disconnected_spotify_pairs_first_and_keeps_own_app_browsing_optional() {
         let connection = SpotifyState::new().connection();
-        let field = connection
-            .needs
-            .iter()
-            .find(|field| field.key == "clientId")
-            .expect("disconnected Spotify offers a client id field");
-        assert!(!field.required, "connecting without one is a valid attempt");
+        assert!(
+            connection.needs.is_empty(),
+            "pairing is the primary connection; no client id field is required"
+        );
+        assert!(connection
+            .detail
+            .unwrap()
+            .contains("Own-app browsing is optional"));
         assert!(auth::setup_hint().contains("127.0.0.1:8898/login"));
     }
 

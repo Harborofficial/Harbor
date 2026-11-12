@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "Keine erfasst",
   "games.wow.equipment.detailsUnavailable": "Details nicht verfügbar",
   "games.wow.equipment.unavailable": "Für diesen Charakter ist keine Ausrüstung verfügbar.",
-  "games.wow.equipment.note": "Ausrüstung laut letzter Aktualisierung von Raider.IO. Prüfe deine aktuelle Ausrüstung im Spiel.",
+  "games.wow.equipment.note":
+    "Ausrüstung laut letzter Aktualisierung von Raider.IO. Prüfe deine aktuelle Ausrüstung im Spiel.",
   "games.wow.equipment.partial": "Einige ausgerüstete Gegenstände konnten nicht gelesen werden.",
   "games.wow.equipment.level": "Gegenstandsstufe {level}",
   "games.wow.equipment.gems": "Edelsteine",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "Waffenhand",
   "games.wow.equipment.offhand": "Schildhand",
   "games.wow.equipment.shirt": "Hemd",
-  "games.wow.equipment.tabard": "Wappenrock"
+  "games.wow.equipment.tabard": "Wappenrock",
 };

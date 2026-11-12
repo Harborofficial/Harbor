@@ -143,11 +143,22 @@ export async function bpAddonTopUp(entry: BpAddonEntry): Promise<void> {
   if (Date.now() < (cooledUntil.get(entry.base) ?? 0)) return;
   inflight.add(entry.base);
   try {
-    const metas = await fetchAddonCatalogPage(cursor.base, cursor.type, cursor.id, 0, cursor.extras);
+    const metas = await fetchAddonCatalogPage(
+      cursor.base,
+      cursor.type,
+      cursor.id,
+      0,
+      cursor.extras,
+    );
     // Only a real answer is kept. Caching the empty one would pin the card blank
     // for the session with no retry and no error; the cooldown is what stops a
     // dead addon being asked again every time focus lands back on it.
-    if (addPosters(entry.base, metas.map((m) => bpCardArt(m.poster, bpTileArtWidth("poster")))))
+    if (
+      addPosters(
+        entry.base,
+        metas.map((m) => bpCardArt(m.poster, bpTileArtWidth("poster"))),
+      )
+    )
       commit();
     else cooledUntil.set(entry.base, Date.now() + RETRY_MS);
   } catch {

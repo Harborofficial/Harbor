@@ -61,13 +61,7 @@ const MAL_LABELS: Record<MalListStatus, string> = {
   dropped: "Dropped",
 };
 
-const MAL_ORDER: MalListStatus[] = [
-  "watching",
-  "plan_to_watch",
-  "completed",
-  "on_hold",
-  "dropped",
-];
+const MAL_ORDER: MalListStatus[] = ["watching", "plan_to_watch", "completed", "on_hold", "dropped"];
 
 export type BpTrackerChoice = { id: string; label: string };
 
@@ -86,7 +80,11 @@ export function isBpAnime(meta: Meta): boolean {
   return meta.type === "anime" || ANIME_ID_RE.test(meta.id);
 }
 
-function useBpSimkl(harborId: string, type: "movie" | "series", enabled: boolean): BpTracker | null {
+function useBpSimkl(
+  harborId: string,
+  type: "movie" | "series",
+  enabled: boolean,
+): BpTracker | null {
   const { isConnected } = useSimkl();
   const [target, setTarget] = useState<SimklTarget | null>(null);
   const [status, setStatus] = useState<WatchlistStatus | null>(null);
@@ -115,7 +113,9 @@ function useBpSimkl(harborId: string, type: "movie" | "series", enabled: boolean
       if (!target) return;
       const next = id as WatchlistStatus;
       setStatus(next);
-      void setSimklStatus(target, next).then(setStatus).catch(() => setStatus(status));
+      void setSimklStatus(target, next)
+        .then(setStatus)
+        .catch(() => setStatus(status));
     },
     [target, status],
   );

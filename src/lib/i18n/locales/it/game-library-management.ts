@@ -14,18 +14,24 @@ export default {
   "games.manage.uninstallOptions": "Opzioni di disinstallazione…",
   "games.manage.remove": "Rimuovi da Harbor…",
   "games.manage.manage": "Gestisci",
-  "games.manage.failed": "Impossibile completare l’azione. Verifica che gioco e launcher siano disponibili e riprova.",
+  "games.manage.failed":
+    "Impossibile completare l’azione. Verifica che gioco e launcher siano disponibili e riprova.",
   "games.manage.removed": "Rimosso da Harbor",
   "games.manage.sent": "Continua in {source}",
   "games.manage.removeTitle": "Rimuovere questa voce?",
   "games.manage.uninstallTitle": "Disinstallare questo gioco?",
   "games.manage.optionsTitle": "Disinstalla con {source}",
   "games.manage.removedNote": "La voce è stata rimossa. I file del gioco restano sul computer.",
-  "games.manage.sentNote": "{source} è aperto. Completa lì; Harbor aggiornerà lo stato al tuo ritorno.",
-  "games.manage.removeNote": "Rimuove {name} e la sua cronologia di gioco Harbor da questo profilo. Non disinstalla il gioco né elimina i file.",
-  "games.manage.steamNote": "Steam gestirà la disinstallazione di {name}. Potresti dover confermare nuovamente in Steam. Prima salva i salvataggi locali e le mod da conservare.",
-  "games.manage.launcherNote": "Apri {source}, seleziona {name}, poi Gestisci o Disinstalla. Il launcher gestisce la rimozione; Harbor non elimina la cartella.",
-  "games.manage.windowsNote": "Cerca {name} nelle App installate di Windows e scegli Disinstalla. Per i giochi portatili, segui le loro istruzioni. Harbor non eliminerà la cartella.",
+  "games.manage.sentNote":
+    "{source} è aperto. Completa lì; Harbor aggiornerà lo stato al tuo ritorno.",
+  "games.manage.removeNote":
+    "Rimuove {name} e la sua cronologia di gioco Harbor da questo profilo. Non disinstalla il gioco né elimina i file.",
+  "games.manage.steamNote":
+    "Steam gestirà la disinstallazione di {name}. Potresti dover confermare nuovamente in Steam. Prima salva i salvataggi locali e le mod da conservare.",
+  "games.manage.launcherNote":
+    "Apri {source}, seleziona {name}, poi Gestisci o Disinstalla. Il launcher gestisce la rimozione; Harbor non elimina la cartella.",
+  "games.manage.windowsNote":
+    "Cerca {name} nelle App installate di Windows e scegli Disinstalla. Per i giochi portatili, segui le loro istruzioni. Harbor non eliminerà la cartella.",
   "games.manage.opening": "Apertura…",
   "games.manage.confirmUninstall": "Continua su Steam",
   "games.manage.openSource": "Apri {source}",

@@ -14,8 +14,10 @@ export default {
   "games.pokemon.videosHint": "Komplettlösungen und Tipps",
   "games.pokemon.bank": "Spielstände & Pokémon",
   "games.pokemon.bankHint": "Spielstände und Boxen verwalten",
-  "games.pokemon.bankIntro": "Öffne einen Emulator-Spielstand, um dein Team zu bearbeiten, oder importiere einzelne Pokémon in deine Sammlung.",
-  "games.pokemon.guideSourceNote": "Lies die Originalanleitung oder öffne sie hier, wenn die Quelle erreichbar ist.",
+  "games.pokemon.bankIntro":
+    "Öffne einen Emulator-Spielstand, um dein Team zu bearbeiten, oder importiere einzelne Pokémon in deine Sammlung.",
+  "games.pokemon.guideSourceNote":
+    "Lies die Originalanleitung oder öffne sie hier, wenn die Quelle erreichbar ist.",
   "games.pokemon.readGuide": "Auf Bulbapedia lesen",
   "games.pokemon.readInside": "In Harbor lesen",
   "games.pokemon.closeReader": "Leser schließen",
@@ -23,19 +25,24 @@ export default {
   "games.pokemon.imageSaved": "Bild von {name} gespeichert",
   "games.pokemon.imageFailed": "Download fehlgeschlagen. Versuche es erneut.",
   "games.pokemon.saveStart": "Spielst du im Emulator?",
-  "games.pokemon.emulatorSave": "Dein Emulator erstellt eine Speicherdatei, wenn du im Menü des Spiels speicherst.",
+  "games.pokemon.emulatorSave":
+    "Dein Emulator erstellt eine Speicherdatei, wenn du im Menü des Spiels speicherst.",
   "games.pokemon.saveStep1": "Öffne dein Spiel und wähle Speichern im Spielmenü.",
-  "games.pokemon.saveStep2": "Schließe das Spiel und suche oder exportiere den Spielstand (.sav, .srm oder .dsv).",
+  "games.pokemon.saveStep2":
+    "Schließe das Spiel und suche oder exportiere den Spielstand (.sav, .srm oder .dsv).",
   "games.pokemon.saveStep3": "Wähle oben Spielstand öffnen, um ihn in Harbor zu bearbeiten.",
   "games.pokemon.findSave": "Wo ist mein Spielstand?",
-  "games.pokemon.saveLocations": "Suche neben deiner ROM oder im Speicherordner des Emulators. Hast du nur einen Speicherzustand, lade ihn im Emulator und speichere anschließend im Spielmenü.",
+  "games.pokemon.saveLocations":
+    "Suche neben deiner ROM oder im Speicherordner des Emulators. Hast du nur einen Speicherzustand, lade ihn im Emulator und speichere anschließend im Spielmenü.",
   "games.pokemon.noSave": "Noch kein Spielstand?",
   "games.pokemon.communitySaves": "Community-Spielstände ansehen",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Wähle das genaue Spiel und beachte die Hinweise des Erstellers.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Wähle das genaue Spiel und beachte die Hinweise des Erstellers.",
   "games.pokemon.pkhexNote": "Spielstand-Editor, Downloads und Hilfe der Entwickler.",
-  "games.pokemon.noSaveNeeded": "Du kannst Pokémon-Dateien ohne Spielstand importieren. Einen Spielstand brauchst du nur zum Bearbeiten eines Teams oder seiner Boxen.",
+  "games.pokemon.noSaveNeeded":
+    "Du kannst Pokémon-Dateien ohne Spielstand importieren. Einen Spielstand brauchst du nur zum Bearbeiten eines Teams oder seiner Boxen.",
   "games.pokemon.videoUnavailable": "Videos konnten hier nicht geladen werden.",
   "games.pokemon.youtubeSearch": "Auf YouTube suchen",
   "games.hub.downloadApply": "Patch herunterladen",
-  "games.hub.manualPatch": "Vorhandenen Patch oder Link verwenden"
+  "games.hub.manualPatch": "Vorhandenen Patch oder Link verwenden",
 };

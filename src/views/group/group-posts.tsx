@@ -104,7 +104,9 @@ export function GroupPosts({
               post={p}
               index={i}
               groupId={detail.id}
-              onChanged={(next) => setPosts((cur) => sort(cur.map((x) => (x.id === next.id ? next : x))))}
+              onChanged={(next) =>
+                setPosts((cur) => sort(cur.map((x) => (x.id === next.id ? next : x))))
+              }
               onRemoved={(id) => setPosts((cur) => cur.filter((x) => x.id !== id))}
               onOpenProfile={onOpenProfile}
             />

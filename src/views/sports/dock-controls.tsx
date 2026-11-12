@@ -55,7 +55,9 @@ export function SportsDockControls({
       if (event.ctrlKey || !event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       event.preventDefault();
       event.stopPropagation();
-      audioRef.current.changeVolume(Math.round((audioRef.current.volume + (event.deltaY < 0 ? .05 : -.05)) * 100) / 100);
+      audioRef.current.changeVolume(
+        Math.round((audioRef.current.volume + (event.deltaY < 0 ? 0.05 : -0.05)) * 100) / 100,
+      );
     };
     node.addEventListener("wheel", adjust, { passive: false });
     return () => node.removeEventListener("wheel", adjust);
@@ -64,7 +66,15 @@ export function SportsDockControls({
   return (
     <div className="sports-dock-chrome">
       <header {...dragHandlers}>
-        {logo && logo !== failedLogo && <img className="sports-dock-logo" src={logo} alt="" draggable={false} onError={() => setFailedLogo(logo)} />}
+        {logo && logo !== failedLogo && (
+          <img
+            className="sports-dock-logo"
+            src={logo}
+            alt=""
+            draggable={false}
+            onError={() => setFailedLogo(logo)}
+          />
+        )}
         <span>
           <strong>{src.title}</strong>
           <small>

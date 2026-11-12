@@ -1,10 +1,23 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { loadSpooktoberMusic, spooktoberAsset, spooktoberSongToTrack } from "../src/views/spooktober/spooktober-music.ts";
+import {
+  loadSpooktoberMusic,
+  spooktoberAsset,
+  spooktoberSongToTrack,
+} from "../src/views/spooktober/spooktober-music.ts";
 
 test("festival tracks retain catalog identity and never bypass source resolution with previews", () => {
-  const song = { id: "music-1485823641", title: "witchblades", creator: "Lil Peep & Lil Tracy", album: "EVERYBODY’S EVERYTHING", duration: 150, poster: "assets/music/music-1485823641.jpg", preview: "https://example.com/preview.m4a", explicit: true };
+  const song = {
+    id: "music-1485823641",
+    title: "witchblades",
+    creator: "Lil Peep & Lil Tracy",
+    album: "EVERYBODY’S EVERYTHING",
+    duration: 150,
+    poster: "assets/music/music-1485823641.jpg",
+    preview: "https://example.com/preview.m4a",
+    explicit: true,
+  };
   const track = spooktoberSongToTrack(song);
   assert.equal(track.id, "itunes:track:1485823641");
   assert.equal(track.connectorId, "catalog");
@@ -26,9 +39,11 @@ test("catalog loading retries a failure, shares concurrent reads, and preserves 
     await assert.rejects(loadSpooktoberMusic());
     globalThis.fetch = async (url) => {
       calls++;
-      return Response.json(String(url).endsWith("playlist-data.json")
-        ? [{ id: "dark", title: "After dark", art: [], coverIds: [], songIds: [song.id] }]
-        : [song]);
+      return Response.json(
+        String(url).endsWith("playlist-data.json")
+          ? [{ id: "dark", title: "After dark", art: [], coverIds: [], songIds: [song.id] }]
+          : [song],
+      );
     };
     const [first, second] = await Promise.all([loadSpooktoberMusic(), loadSpooktoberMusic()]);
     assert.equal(calls, 2);
@@ -40,7 +55,24 @@ test("catalog loading retries a failure, shares concurrent reads, and preserves 
 });
 
 test("all shipped locales include translated festival controls and playlist descriptions", async () => {
-  const locales = ["en", "ar", "de", "es", "fr", "hi", "id", "it", "ja", "ko", "pl", "pt", "ru", "tr", "vi", "zh"];
+  const locales = [
+    "en",
+    "ar",
+    "de",
+    "es",
+    "fr",
+    "hi",
+    "id",
+    "it",
+    "ja",
+    "ko",
+    "pl",
+    "pt",
+    "ru",
+    "tr",
+    "vi",
+    "zh",
+  ];
   const english = (await import("../src/lib/i18n/locales/en/spooktober.ts")).default;
   assert.equal(Object.keys(english).length, 28);
   for (const locale of locales) {
@@ -51,7 +83,10 @@ test("all shipped locales include translated festival controls and playlist desc
       assert.ok(value, `${locale}: ${key}`);
       if (locale !== "en") assert.notEqual(value, english[key], `${locale}: ${key}`);
     }
-    const runtime = await readFile(new URL(`../src/lib/i18n/locales/${locale}.ts`, import.meta.url), "utf8");
+    const runtime = await readFile(
+      new URL(`../src/lib/i18n/locales/${locale}.ts`, import.meta.url),
+      "utf8",
+    );
     assert.match(runtime, /\.\.\.spooktober,/);
   }
 });

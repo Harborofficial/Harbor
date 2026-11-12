@@ -3,7 +3,12 @@ import { AwardTab } from "./award-tab";
 import { AwardLogo } from "./icons/award-logo";
 import { awardSummary, useAwards } from "@/lib/providers/wikidata";
 import { mergeBundledAwards } from "@/lib/awards-history";
-import { awardSourceMeta, findAnyAwardWins, findTopAward, parseAwardYear } from "@/lib/anime-awards";
+import {
+  awardSourceMeta,
+  findAnyAwardWins,
+  findTopAward,
+  parseAwardYear,
+} from "@/lib/anime-awards";
 import type { AwardWin } from "@/lib/anime-awards";
 import type { Meta } from "@/lib/cinemeta";
 import { shortCategory } from "@/lib/anime-award-labels";

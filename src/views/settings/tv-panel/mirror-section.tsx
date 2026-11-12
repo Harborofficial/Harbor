@@ -46,7 +46,9 @@ export function TvMirrorSection({ profileId }: { profileId: string }) {
   return (
     <Section
       title={t("Start from this computer")}
-      subtitle={t("Copy the settings you already tuned here onto the TV in one go. It overwrites the matching TV rows and leaves everything else alone.")}
+      subtitle={t(
+        "Copy the settings you already tuned here onto the TV in one go. It overwrites the matching TV rows and leaves everything else alone.",
+      )}
     >
       <div className="flex flex-col gap-4 py-1">
         <div ref={rowRef} className="flex flex-wrap items-center gap-2.5">

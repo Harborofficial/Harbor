@@ -3,10 +3,27 @@ import test from "node:test";
 import { composeProviderSource } from "../src/lib/streams/plugins/provider-compat/prelude.ts";
 
 const SHADOW = [
-  "self", "globalThis", "window", "fetch", "XMLHttpRequest", "WebSocket",
-  "EventSource", "importScripts", "indexedDB", "caches", "Worker",
-  "SharedWorker", "BroadcastChannel", "MessageChannel", "postMessage",
-  "close", "navigator", "location", "document", "Request", "Response",
+  "self",
+  "globalThis",
+  "window",
+  "fetch",
+  "XMLHttpRequest",
+  "WebSocket",
+  "EventSource",
+  "importScripts",
+  "indexedDB",
+  "caches",
+  "Worker",
+  "SharedWorker",
+  "BroadcastChannel",
+  "MessageChannel",
+  "postMessage",
+  "close",
+  "navigator",
+  "location",
+  "document",
+  "Request",
+  "Response",
 ];
 
 type Registered = {
@@ -27,14 +44,21 @@ function boot(code: string, settings: Record<string, string | boolean> = {}) {
     http: async (url: string, opts: Record<string, unknown>) => {
       calls.push({ url, opts });
       if (url.includes("/json")) {
-        return { status: 200, ok: true, headers: { "content-type": "application/json" }, body: b64(JSON.stringify({ hello: "world", n: 2 })) };
+        return {
+          status: 200,
+          ok: true,
+          headers: { "content-type": "application/json" },
+          body: b64(JSON.stringify({ hello: "world", n: 2 })),
+        };
       }
       if (url.includes("/html")) {
         return {
           status: 200,
           ok: true,
           headers: { "content-type": "text/html" },
-          body: b64('<html><body><div class="row"><a href="/one" data-id="1">One</a><a href="/two">Two</a></div><p id="x">Hi <b>there</b></p></body></html>'),
+          body: b64(
+            '<html><body><div class="row"><a href="/one" data-id="1">One</a><a href="/two">Two</a></div><p id="x">Hi <b>there</b></p></body></html>',
+          ),
         };
       }
       if (url.includes("/404")) return { status: 404, ok: false, headers: {}, body: b64("nope") };
@@ -48,7 +72,8 @@ function boot(code: string, settings: Record<string, string | boolean> = {}) {
     },
   };
   const source = composeProviderSource(code, { id: "example", name: "Example", settings });
-  const body = '"use strict";\n' + source + "\n;return (typeof plugin !== 'undefined') ? plugin : undefined;";
+  const body =
+    '"use strict";\n' + source + "\n;return (typeof plugin !== 'undefined') ? plugin : undefined;";
   const factory = new Function(...["harbor", ...SHADOW], body);
   factory(harbor, ...SHADOW.map(() => undefined));
   if (!registered) throw new Error("nothing registered");
@@ -63,9 +88,19 @@ test("a module.exports provider script registers and receives the provider-scrip
     module.exports = { getStreams };
   `);
   assert.equal(plugin.id, "example");
-  const out = (await plugin.streams({ tmdb: { id: 603 }, type: "series", season: 1, episode: 2 })) as Array<{ title: string }>;
+  const out = (await plugin.streams({
+    tmdb: { id: 603 },
+    type: "series",
+    season: 1,
+    episode: 2,
+  })) as Array<{ title: string }>;
   assert.equal(out[0].title, "603:tv:1:2");
-  const movie = (await plugin.streams({ tmdb: { id: 603 }, type: "movie", season: null, episode: null })) as Array<{ title: string }>;
+  const movie = (await plugin.streams({
+    tmdb: { id: 603 },
+    type: "movie",
+    season: null,
+    episode: null,
+  })) as Array<{ title: string }>;
   assert.equal(movie[0].title, "603:movie:undefined:undefined");
 });
 
@@ -77,7 +112,10 @@ test("global.getStreams and settings are wired, and SCRAPER_SETTINGS reach the s
   `,
     { domain: "a.example" },
   );
-  const out = (await plugin.streams({ tmdb: { id: 1 }, type: "movie" })) as Array<{ url: string; name: string }>;
+  const out = (await plugin.streams({ tmdb: { id: 1 }, type: "movie" })) as Array<{
+    url: string;
+    name: string;
+  }>;
   assert.equal(out[0].url, "https://x.example/a.example");
   assert.equal(out[0].name, "example");
   assert.ok(plugin.settings);

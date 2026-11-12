@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "تجارب صناع المحتوى",
   "games.roms.watchVideo": "شاهد الفيديو",
   "games.roms.noVideos": "لا توجد فيديوهات مدرجة لهذه الألعاب حتى الآن.",
-  "games.roms.libraryNote": "أضف ألعابك الخاصة. استورد الملفات واختر محاكيًا واجمع مكتبتك في مكان واحد.",
+  "games.roms.libraryNote":
+    "أضف ألعابك الخاصة. استورد الملفات واختر محاكيًا واجمع مكتبتك في مكان واحد.",
   "games.roms.openLibrary": "افتح المكتبة",
   "games.roms.downloadCharts": "تعديلات ROM الأكثر تنزيلًا",
-  "games.roms.downloadChartsNote": "إجمالي تنزيلات ملفات التعديل على Romhack Plaza. افتح المشروع لمعرفة المؤلف والإصدار والمتطلبات.",
+  "games.roms.downloadChartsNote":
+    "إجمالي تنزيلات ملفات التعديل على Romhack Plaza. افتح المشروع لمعرفة المؤلف والإصدار والمتطلبات.",
   "games.roms.downloadCount": "{count} تنزيل",
-  "games.roms.chartUnavailable": "ترتيب التنزيلات غير متاح حاليًا. لا يزال بإمكانك تصفح Romhack Plaza.",
+  "games.roms.chartUnavailable":
+    "ترتيب التنزيلات غير متاح حاليًا. لا يزال بإمكانك تصفح Romhack Plaza.",
   "games.roms.allPlatforms": "جميع المنصات",
   "games.roms.moreReleases": "عرض المزيد من الإصدارات",
   "games.roms.fewerReleases": "عرض إصدارات أقل",
@@ -59,14 +62,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "لا توجد ألعاب تطابق هذه المجموعة على الجهاز المحدد بعد.",
   "games.roms.community": "من صنع المجتمع",
   "games.roms.hacksTitle": "لعبة مألوفة. مغامرة مختلفة.",
-  "games.roms.hacksNote": "اكتشف تعديلات ROM، وتعرّف على الألعاب الأصلية التي تستند إليها، وجهّز نسختك المعدّلة للعب.",
+  "games.roms.hacksNote":
+    "اكتشف تعديلات ROM، وتعرّف على الألعاب الأصلية التي تستند إليها، وجهّز نسختك المعدّلة للعب.",
   "games.roms.catalogNote": "تصفّح الدليل حسب الجهاز والنوع وفترة الإصدار والسلسلة.",
   "games.roms.genre": "النوع",
   "games.roms.allGenres": "جميع الأنواع",
   "games.roms.era": "فترة الإصدار",
   "games.roms.reset": "إعادة ضبط الفلاتر",
   "games.roms.empty": "جرّب عنوانًا آخر أو وسّع نطاق الفلاتر لهذا الجهاز.",
-  "games.roms.source": "بيانات الألعاب والعلاقات بينها من IGDB. استورد ملفاتك المحلية للعب الألعاب المدعومة في Harbor.",
+  "games.roms.source":
+    "بيانات الألعاب والعلاقات بينها من IGDB. استورد ملفاتك المحلية للعب الألعاب المدعومة في Harbor.",
   "games.roms.playerScore": "تقييم لاعبي IGDB · {count} تقييمًا",
   "games.roms.combinedScore": "تقييم IGDB المجمّع · {count} تقييمًا",
   "games.roms.sort.discussed": "الأكثر تقييمًا",

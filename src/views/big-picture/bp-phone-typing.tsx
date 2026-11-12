@@ -11,7 +11,11 @@ const WEB_PORT = 11471;
 
 // [data-bp-row] carries the page gutter as padding plus a matching negative
 // margin, which would push the header outside the dialog panel.
-const HEADER_SCOPE = { paddingInline: 0, marginInline: 0, containIntrinsicSize: "auto 76px" } as const;
+const HEADER_SCOPE = {
+  paddingInline: 0,
+  marginInline: 0,
+  containIntrinsicSize: "auto 76px",
+} as const;
 
 export function BpPhoneTyping({ onClose }: { onClose: () => void }) {
   const t = useBpT();
@@ -60,26 +64,26 @@ export function BpPhoneTyping({ onClose }: { onClose: () => void }) {
     >
       <div className="flex w-[min(88vw,620px)] flex-col gap-[clamp(14px,1.9vh,26px)] rounded-[var(--bp-r-lg)] bg-[var(--bp-panel)] p-[clamp(22px,2.6vw,42px)]">
         <div data-bp-row style={HEADER_SCOPE}>
-        <div data-bp-scroll-x className="flex items-center gap-3">
-          <Smartphone size={22} strokeWidth={2.1} className="shrink-0 text-ink-muted" />
-          <h2 className="flex-1 font-display text-[clamp(19px,2.7vh,32px)] font-semibold text-ink">
-            {t("Type on your phone")}
-          </h2>
-          <button
-            type="button"
-            data-bp-focusable
-            data-bp-chip
-            data-bp-autofocus="true"
-            onClick={() => {
-              SFX.close();
-              onClose();
-            }}
-            aria-label={t("Close")}
-            className="flex h-[clamp(44px,4.4vh,50px)] w-[clamp(44px,4.4vh,50px)] shrink-0 items-center justify-center rounded-full border border-[var(--bp-edge)] text-ink-muted"
-          >
-            <X size={18} strokeWidth={2.3} />
-          </button>
-        </div>
+          <div data-bp-scroll-x className="flex items-center gap-3">
+            <Smartphone size={22} strokeWidth={2.1} className="shrink-0 text-ink-muted" />
+            <h2 className="flex-1 font-display text-[clamp(19px,2.7vh,32px)] font-semibold text-ink">
+              {t("Type on your phone")}
+            </h2>
+            <button
+              type="button"
+              data-bp-focusable
+              data-bp-chip
+              data-bp-autofocus="true"
+              onClick={() => {
+                SFX.close();
+                onClose();
+              }}
+              aria-label={t("Close")}
+              className="flex h-[clamp(44px,4.4vh,50px)] w-[clamp(44px,4.4vh,50px)] shrink-0 items-center justify-center rounded-full border border-[var(--bp-edge)] text-ink-muted"
+            >
+              <X size={18} strokeWidth={2.3} />
+            </button>
+          </div>
         </div>
 
         {!serving ? (
@@ -116,7 +120,9 @@ export function BpPhoneTyping({ onClose }: { onClose: () => void }) {
               </div>
               <div className="flex min-w-0 flex-col gap-[clamp(7px,1vh,14px)]">
                 <p className="text-[clamp(13px,1.8vh,20px)] leading-relaxed text-ink-subtle">
-                  {t("Scan this with your phone camera to open the Harbor remote, then type straight into the search box.")}
+                  {t(
+                    "Scan this with your phone camera to open the Harbor remote, then type straight into the search box.",
+                  )}
                 </p>
                 <p className="text-[clamp(11.5px,1.6vh,17px)] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
                   {t("Same Wi-Fi as this computer")}

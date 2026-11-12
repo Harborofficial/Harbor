@@ -28,10 +28,17 @@ function loadComponent(path: string, dependencies: Record<string, unknown>) {
   return exports;
 }
 
-const hero = loadComponent("src/views/detail/hero-backdrop.tsx", {
+const hero = loadComponent("src/components/hero-backdrop.tsx", {
   react: React,
   "react/jsx-runtime": jsxRuntime,
   "@/lib/tmdb-backdrop-size": { tmdbBackdropAtSize },
+  "@/lib/hero-art-quality": {
+    firstUsableHeroBackdrop: (list: string[]) => list[0],
+    isHighQualityHeroArt: () => true,
+    knownHeroArtQuality: () => undefined,
+    nextUsableHeroBackdrop: () => undefined,
+    rememberHeroArtQuality: () => undefined,
+  },
 }).HeroBackdrop;
 
 const settings = { heroFullQuality: true, streamBackdropBlur: true };
@@ -118,5 +125,8 @@ test("detail keeps setting-dependent candidates and passes quality to its hero",
   assert.match(source, /toHiResBackdrop\(pinnedBackdrop, settings\.heroFullQuality\)/);
   assert.match(source, /toHiResBackdrop\(b \?\? undefined, settings\.heroFullQuality\)/);
   assert.match(source, /\[primaryBackdrop, backdrops, settings\.heroFullQuality\]/);
-  assert.match(source, /<HeroBackdrop url=\{backdrop\} fullQuality=\{settings\.heroFullQuality\}/);
+  assert.match(
+    source,
+    /<HeroBackdrop\s+url=\{backdrop\}\s+fallbacks=\{backdropPool\}\s+fullQuality=\{settings\.heroFullQuality\}/,
+  );
 });

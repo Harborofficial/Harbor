@@ -34,6 +34,7 @@ export default {
   "games.ffxiv.sales": "Ventes récentes",
   "games.ffxiv.sold": "Vendu",
   "games.ffxiv.noSales": "Aucune vente récente dans ce relevé.",
-  "games.ffxiv.community": "Les relevés communautaires peuvent être anciens. Des annonces peuvent déjà être vendues.",
-  "games.ffxiv.open": "Voir sur Universalis"
+  "games.ffxiv.community":
+    "Les relevés communautaires peuvent être anciens. Des annonces peuvent déjà être vendues.",
+  "games.ffxiv.open": "Voir sur Universalis",
 };

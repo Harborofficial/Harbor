@@ -19,11 +19,12 @@ export default {
   "games.wow.runs.copy": "특성 복사",
   "games.wow.runs.copyFailed": "복사하지 못했습니다. 다시 시도하세요.",
   "games.wow.runs.party": "파티 구성",
-  "games.wow.runs.snapshots": "공개된 특성과 장비는 제공업체의 스냅샷입니다. 해당 공략에서 사용한 것과 다를 수 있습니다.",
+  "games.wow.runs.snapshots":
+    "공개된 특성과 장비는 제공업체의 스냅샷입니다. 해당 공략에서 사용한 것과 다를 수 있습니다.",
   "games.wow.runs.gear": "장비",
   "games.wow.runs.tank": "방어 전담",
   "games.wow.runs.healer": "치유 전담",
   "games.wow.runs.dps": "공격 전담",
   "games.wow.runs.snapshotAt": "장비 기록: {date}",
-  "games.wow.runs.closeGear": "장비 닫기"
+  "games.wow.runs.closeGear": "장비 닫기",
 };

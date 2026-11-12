@@ -69,19 +69,26 @@ export function listMusicPlaylists(): Promise<MusicPlaylist[]> {
   return invoke<MusicPlaylist[]>("music_list_playlists");
 }
 
-async function linkedPlaylistCommand(command: string, args: Record<string, string>): Promise<MusicPlaylist> {
+async function linkedPlaylistCommand(
+  command: string,
+  args: Record<string, string>,
+): Promise<MusicPlaylist> {
   const profile = activeProfileId();
   const playlist = await invoke<MusicPlaylist>(command, args);
   if (activeProfileId() !== profile) {
     throw new Error("Music profile changed while fetching playlist; retry in the current profile");
   }
-  if (command === "music_sync_linked_playlist") renamePinnedMusicPlaylist(playlist.id, playlist.name);
+  if (command === "music_sync_linked_playlist")
+    renamePinnedMusicPlaylist(playlist.id, playlist.name);
   window.dispatchEvent(new Event("harbor:music-library-changed"));
   return playlist;
 }
 
 export function importLinkedMusicPlaylist(sourceId: string): Promise<MusicPlaylist> {
-  return linkedPlaylistCommand("music_import_linked_playlist", { connectorId: "youtube", sourceId });
+  return linkedPlaylistCommand("music_import_linked_playlist", {
+    connectorId: "youtube",
+    sourceId,
+  });
 }
 
 export function syncLinkedMusicPlaylist(playlistId: string): Promise<MusicPlaylist> {

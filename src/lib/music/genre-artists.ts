@@ -22,7 +22,9 @@ async function page(path: string, offset: number, limit = PAGE_SIZE): Promise<Pa
   const hit = cache.get(key);
   if (hit && hit.until > Date.now()) return hit.request;
   const request = (async () => {
-    const response = await safeFetch(`https://api.deezer.com/${key}`, { signal: AbortSignal.timeout(12000) });
+    const response = await safeFetch(`https://api.deezer.com/${key}`, {
+      signal: AbortSignal.timeout(12000),
+    });
     if (!response.ok) throw new Error("Genre artists unavailable");
     const body = await response.json();
     if (body.error || !Array.isArray(body.data)) throw new Error("Genre artists unavailable");
@@ -37,14 +39,23 @@ async function page(path: string, offset: number, limit = PAGE_SIZE): Promise<Pa
   })();
   cache.set(key, { until: Date.now() + 15 * 60_000, request });
   while (cache.size > 100) cache.delete(cache.keys().next().value!);
-  void request.catch(() => { if (cache.get(key)?.request === request) cache.delete(key); });
+  void request.catch(() => {
+    if (cache.get(key)?.request === request) cache.delete(key);
+  });
   return request;
 }
 
 export function firstGenreArtistCursor(genreId: number): GenreArtistCursor {
   const genre = musicGenre(genreId);
   if (!genre) throw new Error("Unknown music genre");
-  return { chartOffset: genre.deezerId ? 24 : null, chartPages: [], term: 0, searchOffset: 0, playlists: [], seenPlaylists: [] };
+  return {
+    chartOffset: genre.deezerId ? 24 : null,
+    chartPages: [],
+    term: 0,
+    searchOffset: 0,
+    playlists: [],
+    seenPlaylists: [],
+  };
 }
 
 /** Continue through genre charts, then genre-matched playlists, without a total artist cap. */
@@ -56,7 +67,9 @@ export async function loadGenreArtistPage(
   const genre = musicGenre(genreId);
   if (!genre) throw new Error("Unknown music genre");
   const cursor: GenreArtistCursor = {
-    ...previous, chartPages: [...previous.chartPages], playlists: previous.playlists.map(item => ({ ...item })),
+    ...previous,
+    chartPages: [...previous.chartPages],
+    playlists: previous.playlists.map((item) => ({ ...item })),
     seenPlaylists: [...previous.seenPlaylists],
   };
   const terms = [...new Set([genre.name, ...genre.aliases])];
@@ -69,12 +82,13 @@ export async function loadGenreArtistPage(
       artists.push(artist);
     }
   };
-  const available = () => cursor.chartOffset !== null || cursor.playlists.length > 0 || cursor.term < terms.length;
+  const available = () =>
+    cursor.chartOffset !== null || cursor.playlists.length > 0 || cursor.term < terms.length;
   // A duplicate-only page can advance, but one gesture never launches an unbounded crawl.
   for (let requests = 0; requests < 4 && artists.length < 12 && available(); requests++) {
     if (cursor.chartOffset !== null) {
       const result = await page(`chart/${genre.deezerId}/tracks`, cursor.chartOffset);
-      const signature = JSON.stringify(result.data.map(item => (item as { id?: unknown })?.id));
+      const signature = JSON.stringify(result.data.map((item) => (item as { id?: unknown })?.id));
       if (cursor.chartPages.includes(signature)) cursor.chartOffset = null;
       else {
         cursor.chartPages.push(signature);
@@ -87,17 +101,29 @@ export async function loadGenreArtistPage(
       collect(result.data);
       if (result.next !== null) cursor.playlists.push({ ...playlist, offset: result.next });
     } else {
-      const result = await page(`search/playlist?q=${encodeURIComponent(terms[cursor.term])}`, cursor.searchOffset, 12);
+      const result = await page(
+        `search/playlist?q=${encodeURIComponent(terms[cursor.term])}`,
+        cursor.searchOffset,
+        12,
+      );
       for (const value of result.data) {
         if (!value || typeof value !== "object") continue;
         const item = value as { id?: number; title?: string };
-        if (!Number.isSafeInteger(item.id) || item.id! <= 0 || typeof item.title !== "string"
-          || cursor.seenPlaylists.includes(item.id!) || !matchesGenrePlaylist(item.title, terms)) continue;
+        if (
+          !Number.isSafeInteger(item.id) ||
+          item.id! <= 0 ||
+          typeof item.title !== "string" ||
+          cursor.seenPlaylists.includes(item.id!) ||
+          !matchesGenrePlaylist(item.title, terms)
+        )
+          continue;
         cursor.seenPlaylists.push(item.id!);
         cursor.playlists.push({ id: item.id!, offset: 0 });
       }
-      if (result.next === null) { cursor.term++; cursor.searchOffset = 0; }
-      else cursor.searchOffset = result.next;
+      if (result.next === null) {
+        cursor.term++;
+        cursor.searchOffset = 0;
+      } else cursor.searchOffset = result.next;
     }
   }
   return { artists, next: available() ? cursor : null };

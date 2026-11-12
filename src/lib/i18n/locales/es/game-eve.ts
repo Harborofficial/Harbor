@@ -22,7 +22,8 @@ export default {
   "games.eve.avoiding": "Evitar",
   "games.eve.allow": "Permitir {name}",
   "games.eve.clear": "Borrar todo",
-  "games.eve.stargates": "Solo rutas por puertas estelares. No se incluyen agujeros de gusano ni puentes de salto.",
+  "games.eve.stargates":
+    "Solo rutas por puertas estelares. No se incluyen agujeros de gusano ni puentes de salto.",
   "games.eve.saveFailed": "No se pudo guardar esta ruta en este dispositivo.",
   "games.eve.routeFailed": "No se pudo cargar la ruta. Inténtalo de nuevo.",
   "games.eve.ready": "Elige tu destino y traza una ruta.",
@@ -46,7 +47,8 @@ export default {
   "games.eve.avoid": "Evitar {name}",
   "games.eve.less": "Mostrar menos paradas",
   "games.eve.allStops": "Mostrar todas las paradas",
-  "games.eve.activityNote": "La actividad registrada es histórica y excluye los agujeros de gusano. La preferencia de seguridad no garantiza una ruta segura.",
+  "games.eve.activityNote":
+    "La actividad registrada es histórica y excluye los agujeros de gusano. La preferencia de seguridad no garantiza una ruta segura.",
   "games.eve.noRoute": "No se encontró una ruta por puertas estelares.",
   "games.eve.incursions": "Incursiones",
   "games.eve.refreshIncursions": "Actualizar incursiones",
@@ -60,5 +62,5 @@ export default {
   "games.eve.influence": "Influencia",
   "games.eve.systems": "Sistemas · {count}",
   "games.eve.boss": "Jefe presente",
-  "games.eve.routeThere": "Trazar ruta aquí"
+  "games.eve.routeThere": "Trazar ruta aquí",
 };

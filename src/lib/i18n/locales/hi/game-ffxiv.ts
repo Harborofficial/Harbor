@@ -35,5 +35,5 @@ export default {
   "games.ffxiv.sold": "बिक्री का समय",
   "games.ffxiv.noSales": "इस रिकॉर्ड में हाल की बिक्री नहीं।",
   "games.ffxiv.community": "समुदाय का डेटा पुराना हो सकता है। पिछली अपडेट के बाद वस्तुएँ बिक चुकी हो सकती हैं।",
-  "games.ffxiv.open": "Universalis पर देखें"
+  "games.ffxiv.open": "Universalis पर देखें",
 };

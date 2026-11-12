@@ -21,10 +21,11 @@ export default {
   "games.tarkov.historyFailed": "Wipe history couldn’t load.",
   "games.tarkov.elapsed": "{days} days",
   "games.tarkov.noHistory": "No past wipes listed.",
-  "games.tarkov.modeNote": "Seasonal progression and full-account wipes are separate. This history does not describe resets for persistent PvP or PvE characters.",
+  "games.tarkov.modeNote":
+    "Seasonal progression and full-account wipes are separate. This history does not describe resets for persistent PvP or PvE characters.",
   "games.tarkov.historySource": "Wipe dates · tarkov.dev",
   "games.tarkov.history": "Full wipe history",
   "games.tarkov.patch": "Patch",
   "games.tarkov.date": "Start date (UTC)",
-  "games.tarkov.duration": "Until next full wipe"
+  "games.tarkov.duration": "Until next full wipe",
 };

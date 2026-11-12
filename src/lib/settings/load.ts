@@ -198,6 +198,8 @@ export function parseStoredSettings(raw: string | null): {
       _stremioDeeplinkOnByDefault?: boolean;
       _skipButtonHideSecV2?: boolean;
       _anilistSyncOnV1?: boolean;
+      /** Legacy shared toggle, now split per tracker. */
+      syncIndicator?: boolean;
       _animeTitleLanguageV1?: boolean;
       /** Legacy: the preference used to live in the Simkl panel. */
       simklAnimeTitleLanguage?: "english" | "romaji" | "native";
@@ -219,6 +221,10 @@ export function parseStoredSettings(raw: string | null): {
       _playbackSourcePreferenceV2?: boolean;
       /** Legacy: the high-quality toggle was split into a quality choice. */
       mangaBestEnabled?: boolean;
+      /** Legacy: folded into cardAwardDisplay. */
+      awardTabs?: boolean;
+      /** Legacy: folded into topbarAppearance. */
+      transparentTopBar?: boolean;
     };
     // Legacy defaults and playlist adoption depend on other stores. Re-read them
     // until a self-contained settings blob has been persisted by the normal flow.
@@ -429,9 +435,20 @@ export function parseStoredSettings(raw: string | null): {
     const posterCards = normalizePosterCardSettings(parsed);
     if (parsed.mangaBestEnabled === true) parsed.mangaUpscaleQuality = "best";
     delete parsed.mangaBestEnabled;
+    const legacySyncIndicator =
+      typeof parsed.syncIndicator === "boolean" ? parsed.syncIndicator : undefined;
+    delete parsed.syncIndicator;
     const settings: Settings = {
       ...DEFAULT,
       ...parsed,
+      anilistSyncIndicator:
+        typeof parsed.anilistSyncIndicator === "boolean"
+          ? parsed.anilistSyncIndicator
+          : (legacySyncIndicator ?? DEFAULT.anilistSyncIndicator),
+      malSyncIndicator:
+        typeof parsed.malSyncIndicator === "boolean"
+          ? parsed.malSyncIndicator
+          : (legacySyncIndicator ?? DEFAULT.malSyncIndicator),
       searchTmdbTopMatch: parsed.searchTmdbTopMatch !== false,
       metadataAddonOrder: Array.isArray(parsed.metadataAddonOrder)
         ? [
@@ -522,6 +539,7 @@ export function parseStoredSettings(raw: string | null): {
         ...DEFAULT.cwSources,
         ...parsed.cwSources,
       },
+      cwClearProviderProgress: parsed.cwClearProviderProgress === true,
       subProvidersEnabled: {
         ...DEFAULT.subProvidersEnabled,
         ...parsed.subProvidersEnabled,
@@ -547,8 +565,8 @@ export function parseStoredSettings(raw: string | null): {
         ...parsed.letterboxd,
       },
       preferredSubLangs: (parsed.preferredSubLangs ?? DEFAULT.preferredSubLangs).map(languageName),
-      preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map(
-        (lang) => (lang === ORIGINAL_AUDIO_LANG ? lang : languageName(lang)),
+      preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map((lang) =>
+        lang === ORIGINAL_AUDIO_LANG ? lang : languageName(lang),
       ),
       castAlwaysTranscode: parsed.castAlwaysTranscode ?? DEFAULT.castAlwaysTranscode,
       mangaUpscaleQuality: parsed.mangaUpscaleQuality === "best" ? "best" : "fast",

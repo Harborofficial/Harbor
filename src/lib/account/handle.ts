@@ -18,11 +18,16 @@ export function normalizeHandle(raw: string): string {
 
 export function localHandleCheck(raw: string): HandleCheck | null {
   const h = normalizeHandle(raw);
-  if (h.length < HANDLE_MIN) return { state: "too-short", reason: `Handles are at least ${HANDLE_MIN} characters.` };
-  if (h.length > HANDLE_MAX) return { state: "invalid", reason: `Handles are at most ${HANDLE_MAX} characters.` };
-  if (!/^[a-z0-9-]+$/.test(h)) return { state: "invalid", reason: "Use letters, numbers, and single hyphens only." };
-  if (h.startsWith("-") || h.endsWith("-")) return { state: "invalid", reason: "Handles cannot start or end with a hyphen." };
-  if (h.includes("--")) return { state: "invalid", reason: "Handles cannot contain two hyphens in a row." };
+  if (h.length < HANDLE_MIN)
+    return { state: "too-short", reason: `Handles are at least ${HANDLE_MIN} characters.` };
+  if (h.length > HANDLE_MAX)
+    return { state: "invalid", reason: `Handles are at most ${HANDLE_MAX} characters.` };
+  if (!/^[a-z0-9-]+$/.test(h))
+    return { state: "invalid", reason: "Use letters, numbers, and single hyphens only." };
+  if (h.startsWith("-") || h.endsWith("-"))
+    return { state: "invalid", reason: "Handles cannot start or end with a hyphen." };
+  if (h.includes("--"))
+    return { state: "invalid", reason: "Handles cannot contain two hyphens in a row." };
   if (!/[a-z]/.test(h)) return { state: "invalid", reason: "Handles need at least one letter." };
   return null;
 }
@@ -36,6 +41,10 @@ export async function handleAvailable(raw: string, signal?: AbortSignal): Promis
 
 export async function claimHandle(raw: string): Promise<void> {
   const h = normalizeHandle(raw);
-  const d = await postJson<{ user: RawUser }>("/account/handle/claim", { handle: h }, { bearer: true });
+  const d = await postJson<{ user: RawUser }>(
+    "/account/handle/claim",
+    { handle: h },
+    { bearer: true },
+  );
   applyServerUser(d.user);
 }

@@ -8,8 +8,10 @@ export default {
   "games.sidebar.customOrder": "Mon ordre",
   "games.sidebar.arrange": "Organiser la barre latérale",
   "games.sidebar.resetFilters": "Réinitialiser les filtres",
-  "games.sidebar.arrangeNote": "Glissez ou utilisez les flèches pour réorganiser. Épinglez vos jeux ou masquez des entrées de cette barre.",
-  "games.sidebar.saveFailed": "Impossible d’enregistrer les préférences. Les changements s’appliquent pour cette session.",
+  "games.sidebar.arrangeNote":
+    "Glissez ou utilisez les flèches pour réorganiser. Épinglez vos jeux ou masquez des entrées de cette barre.",
+  "games.sidebar.saveFailed":
+    "Impossible d’enregistrer les préférences. Les changements s’appliquent pour cette session.",
   "games.sidebar.move": "Déplacer {name}",
   "games.sidebar.up": "Monter {name}",
   "games.sidebar.down": "Descendre {name}",
@@ -19,12 +21,15 @@ export default {
   "games.sidebar.hide": "Masquer {name} dans la barre",
   "games.sidebar.pinned": "Épinglés",
   "games.dock.welcomeTitle": "Afficher l’onglet des jeux ?",
-  "games.dock.welcomeNote": "Retrouvez vos jeux d’un survol. Désactivez-le à tout moment dans Paramètres → Thème et apparence → Interface.",
+  "games.dock.welcomeNote":
+    "Retrouvez vos jeux d’un survol. Désactivez-le à tout moment dans Paramètres → Thème et apparence → Interface.",
   "games.dock.welcomeEnable": "Afficher l’onglet",
   "games.dock.welcomeDismiss": "Pas maintenant",
   "games.dock.settingTitle": "Bibliothèque rapide",
-  "games.dock.settingNote": "Affiche un onglet discret sur le bord pour accéder rapidement à votre bibliothèque. Désactivé par défaut.",
-  "games.dock.launchError": "Impossible d’ouvrir ce jeu. Vérifiez son installation et son lanceur, puis réessayez.",
+  "games.dock.settingNote":
+    "Affiche un onglet discret sur le bord pour accéder rapidement à votre bibliothèque. Désactivé par défaut.",
+  "games.dock.launchError":
+    "Impossible d’ouvrir ce jeu. Vérifiez son installation et son lanceur, puis réessayez.",
   "games.dock.launcher": "Lanceurs",
   "games.dock.client": "Ouvrir dans {launcher}",
   "games.dock.openClient": "Ouvrir {name} dans {launcher}",
@@ -75,5 +80,6 @@ export default {
   "games.badge.unavailable": "Fichiers indisponibles",
   "games.badge.notInstalled": "Non installé",
   "games.home.libraryFirstTitle": "Ouvrir Jeux dans votre bibliothèque",
-  "games.home.libraryFirstNote": "Démarrer dans votre bibliothèque au lieu d'Explorer chaque fois que vous ouvrez Jeux."
+  "games.home.libraryFirstNote":
+    "Démarrer dans votre bibliothèque au lieu d'Explorer chaque fois que vous ouvrez Jeux.",
 };

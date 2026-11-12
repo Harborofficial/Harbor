@@ -259,7 +259,8 @@ test("page adapter forwards cursor, abort signal and auth; normalizes artwork an
     "@/lib/theme-auth": { authToken: () => "fixture-token" },
     "@/lib/config/endpoints": { HARBOR_API_BASE: "https://harborcommunity.site" },
     "@/lib/collections": {
-      absCollectionImage: (path: string) => (path ? `https://harborcommunity.site${path}` : undefined),
+      absCollectionImage: (path: string) =>
+        path ? `https://harborcommunity.site${path}` : undefined,
     },
     "@/lib/membership-operations": {},
     "@/lib/collection-publication-queue": {},

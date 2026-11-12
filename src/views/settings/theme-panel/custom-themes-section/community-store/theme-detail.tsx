@@ -131,7 +131,9 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
               </h2>
 
               {t.blurb && (
-                <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">{t.blurb}</p>
+                <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
+                  {t.blurb}
+                </p>
               )}
 
               <PaletteSeam swatch={t.swatch} labeled />

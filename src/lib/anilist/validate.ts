@@ -22,6 +22,11 @@ async function run(): Promise<void> {
       setSession({ ...session, avatar: viewer.avatar });
     }
   } catch (e) {
-    if (e instanceof AnilistApiError && e.isAuthenticationError && getSession()?.accessToken === session.accessToken) setSession(null);
+    if (
+      e instanceof AnilistApiError &&
+      e.isAuthenticationError &&
+      getSession()?.accessToken === session.accessToken
+    )
+      setSession(null);
   }
 }

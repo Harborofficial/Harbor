@@ -18,27 +18,31 @@ export function CompetitionAthletes({
 }) {
   if (!isIndividualCompetition(group)) return <>{name}</>;
   const normalize = (value: string) =>
-    value
-      .normalize("NFKD")
-      .replace(/\p{M}/gu, "")
-      .toLowerCase()
-      .replace(/\s+/g, " ")
-      .trim();
+    value.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/\s+/g, " ").trim();
   return (
     <span className="sh-competition-athletes">
       {name.split(" / ").map((label, index) => {
-        const matches = (athletes ?? []).filter((person) => normalize(person.name) === normalize(label));
+        const matches = (athletes ?? []).filter(
+          (person) => normalize(person.name) === normalize(label),
+        );
         const person = matches.length === 1 ? matches[0] : undefined;
         const named = !/^(?:tbd|tba|unknown|winner|loser|bye)(?:\b|$)/i.test(label);
         return (
           <span className="sh-competition-athlete" key={`${label}:${index}`}>
             {named && (
-              <CompetitionAthletePortrait name={label} athlete={person} league={league} group={group} />
+              <CompetitionAthletePortrait
+                name={label}
+                athlete={person}
+                league={league}
+                group={group}
+              />
             )}
             <span className="sh-competition-athlete-name">
               {person && named ? (
                 <AthleteProfileLink athlete={person} league={league} label={label} inline />
-              ) : label}
+              ) : (
+                label
+              )}
             </span>
           </span>
         );

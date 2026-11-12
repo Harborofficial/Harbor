@@ -5,7 +5,11 @@ type AntiCheatArt = { src: string; shape?: "wide"; lightBackdrop?: boolean };
 
 const VAC = { src: "/games/anti-cheat/vac.jpg" };
 const EAC = { src: easyAntiCheat, lightBackdrop: true };
-const JAVELIN: AntiCheatArt = { src: "/games/anti-cheat/ea-javelin.png", shape: "wide", lightBackdrop: true };
+const JAVELIN: AntiCheatArt = {
+  src: "/games/anti-cheat/ea-javelin.png",
+  shape: "wide",
+  lightBackdrop: true,
+};
 
 // Artwork only: match the provider's reported system, never infer protection
 // from a game title. Provenance is in public/games/anti-cheat/SOURCES.md.

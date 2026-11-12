@@ -20,7 +20,11 @@ export function StoreHero({
       tag={tag}
       onOpen={(it) => onOpen(it as StoreTheme)}
       onGet={() =>
-        downloadTheme(theme.id, theme.cover ?? theme.screenshots[0] ?? null, theme.versionsCount).then(() => {})
+        downloadTheme(
+          theme.id,
+          theme.cover ?? theme.screenshots[0] ?? null,
+          theme.versionsCount,
+        ).then(() => {})
       }
     />
   );

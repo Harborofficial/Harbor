@@ -18,7 +18,13 @@ export function CuratedListTiles({ title }: { title?: string }) {
   const lists = shelfLists();
   if (lists.length === 0) return null;
   return (
-    <Row title={title ?? t("The canon")} min={210} shape="tile" scrollKey="discover:canon" alwaysActive>
+    <Row
+      title={title ?? t("The canon")}
+      min={210}
+      shape="tile"
+      scrollKey="discover:canon"
+      alwaysActive
+    >
       {lists.map((list) => (
         <CuratedListTile key={list.id} list={list} />
       ))}
@@ -60,8 +66,15 @@ function CuratedListTile({ list }: { list: CuratedList }) {
         }}
       />
       <div className="absolute inset-x-5 top-4 bottom-[58px] flex items-center justify-center">
-        {logo && <img src={logo} alt="" aria-hidden draggable={false}
-          className="h-16 w-full max-w-[170px] object-contain brightness-0 invert" />}
+        {logo && (
+          <img
+            src={logo}
+            alt=""
+            aria-hidden
+            draggable={false}
+            className="h-16 w-full max-w-[170px] object-contain brightness-0 invert"
+          />
+        )}
       </div>
       <div className="absolute inset-x-5 bottom-4 flex items-end justify-between gap-3">
         <span className="min-w-0">

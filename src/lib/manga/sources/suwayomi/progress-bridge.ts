@@ -2,7 +2,13 @@ import { pushChapterProgress } from "./sync";
 import { decodeChapterId } from "./model";
 import { soleSuwayomiBase, suwayomiBaseForSource } from "./auth-registry";
 
-type Pending = { baseUrl: string; chapterId: string; page: number; totalPages: number; completed?: boolean };
+type Pending = {
+  baseUrl: string;
+  chapterId: string;
+  page: number;
+  totalPages: number;
+  completed?: boolean;
+};
 
 const queue = new Map<string, Pending>();
 const timers = new Map<string, number>();
@@ -40,7 +46,13 @@ function flush(chapterId: string): void {
   queue.delete(chapterId);
   timers.delete(chapterId);
   if (!item) return;
-  void pushChapterProgress(item.baseUrl, item.chapterId, item.page, item.totalPages, item.completed).catch(() => {});
+  void pushChapterProgress(
+    item.baseUrl,
+    item.chapterId,
+    item.page,
+    item.totalPages,
+    item.completed,
+  ).catch(() => {});
 }
 
 export function queueSuwayomiProgress(entry: {
@@ -55,10 +67,19 @@ export function queueSuwayomiProgress(entry: {
   if (!decodeChapterId(raw)) return;
   const baseUrl = baseForChapter(raw, harborId ?? entry.sourceId);
   if (!baseUrl) return;
-  queue.set(raw, { baseUrl, chapterId: raw, page: entry.page, totalPages: entry.totalPages, completed: entry.completed });
+  queue.set(raw, {
+    baseUrl,
+    chapterId: raw,
+    page: entry.page,
+    totalPages: entry.totalPages,
+    completed: entry.completed,
+  });
   const existing = timers.get(raw);
   if (existing) window.clearTimeout(existing);
-  timers.set(raw, window.setTimeout(() => flush(raw), DEBOUNCE_MS));
+  timers.set(
+    raw,
+    window.setTimeout(() => flush(raw), DEBOUNCE_MS),
+  );
 }
 
 export function flushSuwayomiProgress(): void {

@@ -19,10 +19,19 @@ function BlockedBanner({ blocked }: { blocked: TvWireName[] }) {
         </span>
         <span className="max-w-[70ch] text-[15.5px] font-normal leading-[22px] text-ink-muted">
           {t(
-                "Some TV settings cannot sync in this build. Your changes remain saved on this computer.",
+            "Some TV settings cannot sync in this build. Your changes remain saved on this computer.",
           )}{" "}
           {t("Affected settings:")}{" "}
-          <span className="font-medium text-ink">{blocked.map((wire) => t(wire === "settings" ? "TV options" : wire === "theme" ? "Theme" : "Player layout")).join(", ")}</span>.
+          <span className="font-medium text-ink">
+            {blocked
+              .map((wire) =>
+                t(
+                  wire === "settings" ? "TV options" : wire === "theme" ? "Theme" : "Player layout",
+                ),
+              )
+              .join(", ")}
+          </span>
+          .
         </span>
       </div>
     </div>
@@ -40,8 +49,7 @@ function ago(at: number, now: number): string {
 }
 
 function Dot({ tone }: { tone: "on" | "off" | "warn" }) {
-  const cls =
-    tone === "on" ? "bg-accent" : tone === "warn" ? "bg-danger" : "bg-ink-subtle";
+  const cls = tone === "on" ? "bg-accent" : tone === "warn" ? "bg-danger" : "bg-ink-subtle";
   return <span className={`h-2 w-2 shrink-0 rounded-full ${cls}`} />;
 }
 
@@ -74,33 +82,45 @@ export function TvStatusHeader() {
           line: "Cloud sync is off. TV settings stay saved on this computer.",
           fix: "account",
         }
-    : status.phase === "signed-out"
-      ? {
-          tone: "warn",
-          line: "Sign in to Harbor to sync these settings through your account.",
-          fix: "account",
-        }
-      : status.phase === "no-refresh"
+      : status.phase === "signed-out"
         ? {
             tone: "warn",
-            line: "Sign in again to resume cloud sync. Your changes are saved on this computer.",
+            line: "Sign in to Harbor to sync these settings through your account.",
             fix: "account",
           }
-        : !scoped
+        : status.phase === "no-refresh"
           ? {
               tone: "warn",
-              line: "Choose a profile to sync its TV settings.",
+              line: "Sign in again to resume cloud sync. Your changes are saved on this computer.",
+              fix: "account",
             }
-          : status.lastError
-            ? { tone: "warn", line: "Cloud sync couldn't finish. Your changes are saved here; try syncing again." }
-          : status.queued > 0
-            ? { tone: "on", line: `${status.queued} change${status.queued === 1 ? "" : "s"} waiting to sync.` }
-            : status.lastPushAt > 0
-              ? { tone: "on", line: `Sent to your account ${ago(status.lastPushAt, now)}.` }
-              : { tone: "off", line: "Changes sync automatically through your Harbor account." };
+          : !scoped
+            ? {
+                tone: "warn",
+                line: "Choose a profile to sync its TV settings.",
+              }
+            : status.lastError
+              ? {
+                  tone: "warn",
+                  line: "Cloud sync couldn't finish. Your changes are saved here; try syncing again.",
+                }
+              : status.queued > 0
+                ? {
+                    tone: "on",
+                    line: `${status.queued} change${status.queued === 1 ? "" : "s"} waiting to sync.`,
+                  }
+                : status.lastPushAt > 0
+                  ? { tone: "on", line: `Sent to your account ${ago(status.lastPushAt, now)}.` }
+                  : {
+                      tone: "off",
+                      line: "Changes sync automatically through your Harbor account.",
+                    };
 
   return (
-    <div id={settingsAnchor("The link to your TV")} className="flex flex-col gap-3 border-b border-edge-soft pb-5">
+    <div
+      id={settingsAnchor("The link to your TV")}
+      className="flex flex-col gap-3 border-b border-edge-soft pb-5"
+    >
       {blocked.length > 0 && <BlockedBanner blocked={blocked} />}
       <SettingRow
         icon={<Dot tone={read.tone} />}
@@ -111,11 +131,19 @@ export function TvStatusHeader() {
         }
         desc={t(read.line)}
       >
-        <SButton onClick={pushTvNow} disabled={!ready || !scoped || !status.armed || !!read.fix || status.phase === "pushing"}>
+        <SButton
+          onClick={pushTvNow}
+          disabled={!ready || !scoped || !status.armed || !!read.fix || status.phase === "pushing"}
+        >
           {status.phase === "pushing" ? t("Syncing…") : t("Sync now")}
         </SButton>
         {read.fix && (
-          <SButton variant="primary" onClick={() => setActive("account", settingsAnchor("Harbor account"))}>{t("Open Harbor account")}</SButton>
+          <SButton
+            variant="primary"
+            onClick={() => setActive("account", settingsAnchor("Harbor account"))}
+          >
+            {t("Open Harbor account")}
+          </SButton>
         )}
       </SettingRow>
     </div>

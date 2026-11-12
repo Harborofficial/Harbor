@@ -14,17 +14,19 @@ export default {
   "games.tarkov.listedStart": "Указанное начало:",
   "games.tarkov.noSeason": "Активный сезон не указан",
   "games.tarkov.noSeasonDetail": "В источнике нет текущего или предстоящего сезона.",
-  "games.tarkov.scheduleNote": "Даты поддерживает tarkov.dev, и они могут измениться. Это не официальное объявление вайпа.",
+  "games.tarkov.scheduleNote":
+    "Даты поддерживает tarkov.dev, и они могут измениться. Это не официальное объявление вайпа.",
   "games.tarkov.seasonSource": "Даты сезонов · tarkov.dev",
   "games.tarkov.checked": "Проверено: {time}",
   "games.tarkov.fullWipe": "Последний полный вайп в источнике",
   "games.tarkov.historyFailed": "Не удалось загрузить историю вайпов.",
   "games.tarkov.elapsed": "{days} дн.",
   "games.tarkov.noHistory": "Прошлые вайпы не указаны.",
-  "games.tarkov.modeNote": "Сезонный прогресс и полные вайпы аккаунтов учитываются отдельно. Эта история не описывает сбросы постоянных персонажей PvP или PvE.",
+  "games.tarkov.modeNote":
+    "Сезонный прогресс и полные вайпы аккаунтов учитываются отдельно. Эта история не описывает сбросы постоянных персонажей PvP или PvE.",
   "games.tarkov.historySource": "Даты вайпов · tarkov.dev",
   "games.tarkov.history": "История полных вайпов",
   "games.tarkov.patch": "Патч",
   "games.tarkov.date": "Дата начала (UTC)",
-  "games.tarkov.duration": "До следующего полного вайпа"
+  "games.tarkov.duration": "До следующего полного вайпа",
 };

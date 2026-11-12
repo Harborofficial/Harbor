@@ -295,7 +295,8 @@ export function createEsportsProfileClient(loader: Loader) {
     entry.status === "fulfilled" ? entry.value : null;
   return {
     fetchTeams: async (signal: AbortSignal) => parseEsportsTeams(await json("teams", signal)),
-    fetchTeamLogos: async (signal: AbortSignal) => parseEsportsTeamLogos(await json("teams", signal)),
+    fetchTeamLogos: async (signal: AbortSignal) =>
+      parseEsportsTeamLogos(await json("teams", signal)),
     fetchTeam: async (teamId: number, signal: AbortSignal): Promise<EsportsTeamRecord> => {
       valid(teamId);
       const budget = AbortSignal.any([signal, AbortSignal.timeout(10000)]);

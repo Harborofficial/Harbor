@@ -14,7 +14,9 @@ export function DiscoveryLanguageTab() {
     <>
       <Section
         title={t("Home catalogs")}
-        subtitle={t("Only show titles in these original languages on the Home rows. Leave all off to show everything.")}
+        subtitle={t(
+          "Only show titles in these original languages on the Home rows. Leave all off to show everything.",
+        )}
       >
         <HomeLanguagePicker />
         <ToggleRow
@@ -37,7 +39,9 @@ export function DiscoveryLanguageTab() {
         />
         <ToggleRow
           label={t("Only show streams in my languages")}
-          sub={t("Hides streams with no detected preferred language. Multi-audio releases count as a match.")}
+          sub={t(
+            "Hides streams with no detected preferred language. Multi-audio releases count as a match.",
+          )}
           value={settings.requirePreferredLanguage}
           onChange={(v) => update({ requirePreferredLanguage: v })}
         />
@@ -47,7 +51,9 @@ export function DiscoveryLanguageTab() {
         <SettingRow
           wide
           label={t("Fill the gaps")}
-          desc={t("Harbor was built in English. Multi-language support is partial, so your addons usually catch what Harbor's own filters miss. If you speak another language and want to help, the source is open.")}
+          desc={t(
+            "Harbor was built in English. Multi-language support is partial, so your addons usually catch what Harbor's own filters miss. If you speak another language and want to help, the source is open.",
+          )}
         >
           <span className="flex flex-wrap items-center gap-2.5">
             <button

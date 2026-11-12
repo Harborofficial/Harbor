@@ -1,8 +1,8 @@
 export default {
   "Match stats": "경기 통계",
-  "Timeline": "경기 진행",
+  Timeline: "경기 진행",
   "Head to head": "맞대결 기록",
-  "Standings": "순위",
+  Standings: "순위",
   "Loading team results…": "팀 결과 불러오는 중…",
   "No completed matches were returned for this team.": "이 팀의 종료된 경기가 반환되지 않았습니다.",
   "Team results could not be loaded. Your current schedule is still shown.":

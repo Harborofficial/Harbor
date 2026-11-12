@@ -35,7 +35,12 @@ function isSameResumePoint(
   season: number,
   episode: number,
   isMovie: boolean,
-): (i: { tmdb_id: number; media_type: string; season?: number | null; episode?: number | null }) => boolean {
+): (i: {
+  tmdb_id: number;
+  media_type: string;
+  season?: number | null;
+  episode?: number | null;
+}) => boolean {
   return (i) => {
     if (tmdbId == null || i.tmdb_id !== tmdbId || i.media_type !== mediaType) return false;
     const iSeason = Number(i.season ?? 0);
@@ -102,9 +107,11 @@ export async function pmdbDeleteResumesForTitle(
       { method: "GET" },
     );
     options.assertCurrent?.();
-    if (!Array.isArray(list?.items)) throw new Error("PublicMetaDB resume state could not be read safely.");
+    if (!Array.isArray(list?.items))
+      throw new Error("PublicMetaDB resume state could not be read safely.");
     for (const item of list.items) {
-      if (item.tmdb_id === tmdbId && item.media_type === target.media_type && item.id) ids.push(item.id);
+      if (item.tmdb_id === tmdbId && item.media_type === target.media_type && item.id)
+        ids.push(item.id);
     }
     const totalPages = Math.max(1, Number(list?.totalPages ?? 1) || 1);
     if (totalPages > RESUME_DELETE_MAX_PAGES)
@@ -159,16 +166,30 @@ export async function pmdbSaveResume(
   }
 }
 
-export async function pmdbDeleteResume(resumeId: string): Promise<boolean> {
-  if (!isAuthenticated() || !resumeId) return false;
+export async function pmdbDeleteResumeOutcome(
+  resumeId: string,
+): Promise<{ ok: boolean; retryAfterMs?: number; rateLimited?: boolean }> {
+  if (!isAuthenticated() || !resumeId) return { ok: false };
 
   try {
     await pmdbRequest(`/api/external/resume/${encodeURIComponent(resumeId)}`, {
       method: "DELETE",
     });
-    return true;
+    return { ok: true };
   } catch (err) {
-    console.error("PublicMetaDB resume delete failed:", err);
-    return false;
+    if (err instanceof PmdbApiError) {
+      if (err.status === 404) return { ok: true };
+      const retryAfterMs = err.retryAt != null ? Math.max(0, err.retryAt - Date.now()) : undefined;
+      return {
+        ok: false,
+        ...(retryAfterMs != null ? { retryAfterMs } : {}),
+        ...(err.status === 429 ? { rateLimited: true } : {}),
+      };
+    }
+    return { ok: false };
   }
+}
+
+export async function pmdbDeleteResume(resumeId: string): Promise<boolean> {
+  return (await pmdbDeleteResumeOutcome(resumeId)).ok;
 }

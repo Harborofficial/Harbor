@@ -12,7 +12,11 @@ import { useT } from "@/lib/i18n";
 
 function PluginIcon({ src, name }: { src?: string; name: string }) {
   const [failed, setFailed] = useState(false);
-  const initials = name.replace(/[^a-z0-9]/gi, "").slice(0, 2).toUpperCase() || "?";
+  const initials =
+    name
+      .replace(/[^a-z0-9]/gi, "")
+      .slice(0, 2)
+      .toUpperCase() || "?";
   return (
     <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-canvas ring-1 ring-edge-soft">
       {src && !failed ? (
@@ -26,13 +30,7 @@ function PluginIcon({ src, name }: { src?: string; name: string }) {
 
 function EnableSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      onClick={onToggle}
-      className="shrink-0"
-    >
+    <button type="button" role="switch" aria-checked={on} onClick={onToggle} className="shrink-0">
       <span
         aria-hidden
         className={`relative block h-6 w-10 rounded-full transition-colors ${on ? "bg-ink" : "bg-edge"}`}
@@ -98,7 +96,10 @@ export function PluginRow({
         <span className="truncate text-[12.5px] text-ink-muted">
           {languageName(manifest.lang)}
           {outdated && (
-            <span className="text-accent"> · {t("update to v{version}", { version: manifest.version })}</span>
+            <span className="text-accent">
+              {" "}
+              · {t("update to v{version}", { version: manifest.version })}
+            </span>
           )}
           {error && <span className="text-danger"> · {error}</span>}
         </span>

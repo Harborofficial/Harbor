@@ -46,7 +46,8 @@ export default {
   "games.eve.avoid": "تجنب {name}",
   "games.eve.less": "عرض محطات أقل",
   "games.eve.allStops": "عرض كل المحطات",
-  "games.eve.activityNote": "النشاط المبلغ عنه تاريخي ولا يشمل فضاء الثقوب الدودية. تفضيل الأمان لا يضمن مسارًا آمنًا.",
+  "games.eve.activityNote":
+    "النشاط المبلغ عنه تاريخي ولا يشمل فضاء الثقوب الدودية. تفضيل الأمان لا يضمن مسارًا آمنًا.",
   "games.eve.noRoute": "لم يُعثر على مسار عبر البوابات النجمية.",
   "games.eve.incursions": "الغارات",
   "games.eve.refreshIncursions": "تحديث الغارات",
@@ -60,5 +61,5 @@ export default {
   "games.eve.influence": "النفوذ",
   "games.eve.systems": "الأنظمة · {count}",
   "games.eve.boss": "الزعيم موجود",
-  "games.eve.routeThere": "مسار إلى هنا"
+  "games.eve.routeThere": "مسار إلى هنا",
 };

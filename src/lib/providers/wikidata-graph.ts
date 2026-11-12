@@ -193,12 +193,12 @@ function parseSiblings(rows: Binding[]): Map<string, AdaptationSibling[]> {
 }
 
 function parseSources(rows: Binding[]): AdaptationSource[] {
-function namedAuthors(raw: string | undefined): string[] {
-  return (raw ?? "")
-    .split(" & ")
-    .map((name) => name.trim())
-    .filter((name) => name && !/^https?:\/\//i.test(name) && !/^Q\d+$/.test(name));
-}
+  function namedAuthors(raw: string | undefined): string[] {
+    return (raw ?? "")
+      .split(" & ")
+      .map((name) => name.trim())
+      .filter((name) => name && !/^https?:\/\//i.test(name) && !/^Q\d+$/.test(name));
+  }
 
   const out: AdaptationSource[] = [];
   for (const row of rows) {
@@ -269,7 +269,9 @@ export async function fetchGraph(imdbId: string): Promise<Entry> {
     ]);
     const entry: Entry = {
       crew: crewRows ? parseCrew(crewRows) : [],
-      family: sourceRows ? pickFamily(parseSources(sourceRows), parseSiblings(siblingRows ?? [])) : null,
+      family: sourceRows
+        ? pickFamily(parseSources(sourceRows), parseSiblings(siblingRows ?? []))
+        : null,
       fetchedAt: Date.now(),
     };
     if (crewRows !== null || sourceRows !== null) {

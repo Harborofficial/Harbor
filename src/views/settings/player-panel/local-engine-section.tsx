@@ -65,7 +65,9 @@ export function LocalEngineSection() {
   const selfTestLockReason = settings.torrentsDisabled
     ? t("Enable P2P streaming to run the local engine self-test.")
     : strictRemote
-      ? t("Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.")
+      ? t(
+          "Self-test is disabled while strict remote streaming is on. It downloads a small test file over peer-to-peer on this machine.",
+        )
       : undefined;
   const [status, setStatus] = useState<EngineStatus | null>(null);
   const [running, setRunning] = useState(false);
@@ -131,7 +133,8 @@ export function LocalEngineSection() {
 
   const state = engineState(status);
   const pill = PILL[state];
-  const pillLabel = state === "running" ? t("Running") : state === "error" ? t("Error") : t("Stopped");
+  const pillLabel =
+    state === "running" ? t("Running") : state === "error" ? t("Error") : t("Stopped");
   const udpStep = result?.steps.find((s) => s.label === "udp egress");
   const httpsStep = result?.steps.find((s) => s.label === "https egress");
   const udpBlocked = !!udpStep && !udpStep.ok && !!httpsStep && httpsStep.ok;
@@ -219,9 +222,13 @@ export function LocalEngineSection() {
       <SettingGroup label={t("Maintenance")}>
         <SettingRow
           label={t("Run self-test")}
-          desc={selfTestLockReason
-            ? <span id={selfTestReasonId}>{selfTestLockReason}</span>
-            : t("Checks that this network can reach trackers and peers.")}
+          desc={
+            selfTestLockReason ? (
+              <span id={selfTestReasonId}>{selfTestLockReason}</span>
+            ) : (
+              t("Checks that this network can reach trackers and peers.")
+            )
+          }
           tip={t(
             "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.",
           )}
@@ -237,7 +244,11 @@ export function LocalEngineSection() {
               busy || selfTestLockReason ? " pointer-events-none opacity-40" : ""
             }`}
           >
-            {running ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} strokeWidth={2.4} />}
+            {running ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Play size={16} strokeWidth={2.4} />
+            )}
             {running ? t("Running self-test") : t("Run self-test")}
           </button>
         </SettingRow>
@@ -264,7 +275,9 @@ export function LocalEngineSection() {
         <SettingRow
           label={t("Clear & restart")}
           desc={t("Wipes engine data and starts fresh on a new port.")}
-          warn={t("Cached stream files and the DHT cache are deleted. The next stream starts from scratch.")}
+          warn={t(
+            "Cached stream files and the DHT cache are deleted. The next stream starts from scratch.",
+          )}
           tip={t(
             "The stronger fix when streams refuse to load. Cached stream files and the DHT cache are removed, so the next stream starts from scratch.",
           )}
@@ -293,7 +306,11 @@ export function LocalEngineSection() {
                   result.pass ? "bg-canvas text-success" : "bg-canvas text-danger"
                 }`}
               >
-                {result.pass ? <Check size={14} strokeWidth={2.8} /> : <X size={14} strokeWidth={2.8} />}
+                {result.pass ? (
+                  <Check size={14} strokeWidth={2.8} />
+                ) : (
+                  <X size={14} strokeWidth={2.8} />
+                )}
                 {result.pass ? t("Pass") : t("Fail")}
               </span>
             </div>
@@ -327,7 +344,11 @@ export function LocalEngineSection() {
             </ul>
             {udpBlocked && (
               <span className="flex items-start gap-2.5">
-                <AlertTriangle size={18} strokeWidth={2.4} className="mt-[2px] shrink-0 text-accent" />
+                <AlertTriangle
+                  size={18}
+                  strokeWidth={2.4}
+                  className="mt-[2px] shrink-0 text-accent"
+                />
                 <span className={`max-w-[66ch] ${ROW_DESC}`}>
                   {t(
                     "Your network blocks UDP, so DHT is offline, but HTTPS trackers are reachable over TCP. Streams can still find peers, they may just take a little longer to start.",

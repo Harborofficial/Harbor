@@ -39,11 +39,12 @@ export function EventField({
         {rows.map((side, index) => (
           <li key={`${side.id || side.name}-${index}`} data-podium={index < 3 || undefined}>
             <span className="sh-field-place">{index + 1}</span>
-            {!individual && (side.logo ? (
-              <img src={side.logo} alt="" loading="lazy" />
-            ) : (
-              <span className="sh-field-blank" aria-hidden="true" />
-            ))}
+            {!individual &&
+              (side.logo ? (
+                <img src={side.logo} alt="" loading="lazy" />
+              ) : (
+                <span className="sh-field-blank" aria-hidden="true" />
+              ))}
             <span className="sh-field-name">
               <CompetitionAthletes
                 name={side.name}
@@ -51,12 +52,14 @@ export function EventField({
                 group={group}
                 athletes={
                   side.athleteSource
-                    ? [{
-                        id: side.athleteId ?? "",
-                        name: side.name,
-                        source: side.athleteSource,
-                        image: side.athleteImage,
-                      }]
+                    ? [
+                        {
+                          id: side.athleteId ?? "",
+                          name: side.name,
+                          source: side.athleteSource,
+                          image: side.athleteImage,
+                        },
+                      ]
                     : undefined
                 }
               />

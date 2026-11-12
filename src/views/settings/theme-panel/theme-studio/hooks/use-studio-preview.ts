@@ -4,7 +4,11 @@ import type { NavCustomization } from "@/chrome/nav-items";
 import { setThemePreview } from "@/lib/theme-preview";
 import { useView } from "@/lib/view";
 
-export function useStudioPreview(layout: ThemeLayout, bokeh: boolean, navCustomization: NavCustomization) {
+export function useStudioPreview(
+  layout: ThemeLayout,
+  bokeh: boolean,
+  navCustomization: NavCustomization,
+) {
   const { setView } = useView();
   const [inspectorHidden, setInspectorHidden] = useState(false);
 

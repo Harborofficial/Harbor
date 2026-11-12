@@ -60,7 +60,13 @@ export function EpisodeRow({
   const downloadActive = downloadAction === "cancel";
   const downloadDone = downloadAction === "saved";
   const downloadPercent = Math.round(Math.min(1, Math.max(0, download?.ratio ?? 0)) * 100);
-  const downloadLabel = downloadDone ? t("Saved offline") : downloadActive ? t("Downloading {pct}%  ·  click to cancel", { pct: downloadPercent }) : download?.status === "error" ? t("Download failed  ·  click to retry") : t("Download for offline");
+  const downloadLabel = downloadDone
+    ? t("Saved offline")
+    : downloadActive
+      ? t("Downloading {pct}%  ·  click to cancel", { pct: downloadPercent })
+      : download?.status === "error"
+        ? t("Download failed  ·  click to retry")
+        : t("Download for offline");
   const [imgFailed, setImgFailed] = useState(false);
   return (
     <div
@@ -142,7 +148,15 @@ export function EpisodeRow({
                 aria-label={downloadLabel}
                 className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ring-1 transition-colors ${downloadDone ? "cursor-default bg-success/10 text-success ring-success/25" : "bg-elevated text-ink-muted ring-edge-soft hover:bg-raised hover:text-ink"}`}
               >
-                {downloadDone ? <Check size={19} strokeWidth={2.5} /> : downloadActive ? <span className="flex flex-col items-center text-[11px] font-semibold tabular-nums leading-none">{downloadPercent}%<X size={12} className="mt-0.5" /></span> : <Download size={19} strokeWidth={2} />}
+                {downloadDone ? (
+                  <Check size={19} strokeWidth={2.5} />
+                ) : downloadActive ? (
+                  <span className="flex flex-col items-center text-[11px] font-semibold tabular-nums leading-none">
+                    {downloadPercent}%<X size={12} className="mt-0.5" />
+                  </span>
+                ) : (
+                  <Download size={19} strokeWidth={2} />
+                )}
               </button>
             )}
             <button

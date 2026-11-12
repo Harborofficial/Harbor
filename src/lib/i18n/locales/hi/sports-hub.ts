@@ -169,7 +169,7 @@ export default {
   "Show all {count}": "सभी {count} दिखाएँ",
   "{count} competing": "{count} प्रतिस्पर्धी",
   "Starting field": "शुरुआती सूची",
-  "Leaderboard": "लीडरबोर्ड",
+  Leaderboard: "लीडरबोर्ड",
   "Full field": "पूरा मैदान",
   "Loading event schedule…": "इवेंट का शेड्यूल लोड हो रहा है…",
   "Loading lineups…": "लाइनअप लोड हो रहे हैं…",

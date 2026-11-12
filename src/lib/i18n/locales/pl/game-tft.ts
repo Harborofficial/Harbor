@@ -19,8 +19,10 @@ export default {
   "games.tft.save": "Zapisz drużynę",
   "games.tft.savedTeams": "Zapisane drużyny",
   "games.tft.delete": "Usuń zapisaną drużynę",
-  "games.tft.note": "Każdy bohater liczy się raz. Przedmioty i efekty specjalne mogą zmieniać cechy lub liczbę miejsc w drużynie.",
-  "games.tft.saveFailed": "Nie udało się zapisać na tym urządzeniu. Obecna drużyna pozostaje dostępna.",
+  "games.tft.note":
+    "Każdy bohater liczy się raz. Przedmioty i efekty specjalne mogą zmieniać cechy lub liczbę miejsc w drużynie.",
+  "games.tft.saveFailed":
+    "Nie udało się zapisać na tym urządzeniu. Obecna drużyna pozostaje dostępna.",
   "games.tft.missing": "Niektórych zapisanych bohaterów nie ma już w tym zestawie.",
   "games.tft.imported": "Zaimportowano drużynę.",
   "games.tft.full": "Kod mieści maksymalnie 10 różnych bohaterów.",
@@ -54,5 +56,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Regeneracja zdrowia",
   "games.tft.stat.set14AmpIcon": "Wzmocnienie obrażeń",
   "games.tft.stat.TFTManaRegen": "Regeneracja many",
-  "games.tft.stat.scaleSV": "Wszechwampiryzm"
+  "games.tft.stat.scaleSV": "Wszechwampiryzm",
 };

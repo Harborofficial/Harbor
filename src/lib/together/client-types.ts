@@ -29,10 +29,34 @@ export type RoomEvent =
   | { kind: "invite"; from: string; name: string; invite: PlayInvite; at: number }
   | { kind: "host-leaving"; from: string; name: string; at: number }
   | { kind: "summon"; from: string; name: string; target: SummonTarget; at: number }
-  | { kind: "cursor"; from: string; name: string; x: number; y: number; visible: boolean; path: string }
-  | { kind: "draw"; from: string; name: string; strokeId: string; phase: "start" | "point" | "end" | "clear"; x?: number; y?: number; color?: string; path: string }
+  | {
+      kind: "cursor";
+      from: string;
+      name: string;
+      x: number;
+      y: number;
+      visible: boolean;
+      path: string;
+    }
+  | {
+      kind: "draw";
+      from: string;
+      name: string;
+      strokeId: string;
+      phase: "start" | "point" | "end" | "clear";
+      x?: number;
+      y?: number;
+      color?: string;
+      path: string;
+    }
   | { kind: "presence"; from: string; activeAt: number; location?: ParticipantLocation }
-  | { kind: "participant-left"; clientId: string; name: string; avatar?: string | null; color?: string | null }
+  | {
+      kind: "participant-left";
+      clientId: string;
+      name: string;
+      avatar?: string | null;
+      color?: string | null;
+    }
   | { kind: "started"; started: boolean };
 
 export async function diagnoseRelayFailure(httpBase: string): Promise<string> {

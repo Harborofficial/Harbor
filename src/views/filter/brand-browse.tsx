@@ -21,7 +21,11 @@ const DECADES = [2020, 2010, 2000, 1990, 1980, 1970];
 
 function dateKeys(mediaType: "movie" | "tv"): { gte: string; lte: string; sortDate: string } {
   return mediaType === "movie"
-    ? { gte: "primary_release_date.gte", lte: "primary_release_date.lte", sortDate: "primary_release_date" }
+    ? {
+        gte: "primary_release_date.gte",
+        lte: "primary_release_date.lte",
+        sortDate: "primary_release_date",
+      }
     : { gte: "first_air_date.gte", lte: "first_air_date.lte", sortDate: "first_air_date" };
 }
 
@@ -60,7 +64,10 @@ export function BrandBrowse({ filter }: { filter: Browsed }) {
   const params = useMemo(() => {
     const spec = SORTS.find((s) => s.id === sort) ?? SORTS[0];
     const d = dateKeys(mediaType);
-    const by = sort === "newest" || sort === "oldest" ? `${d.sortDate}.${sort === "newest" ? "desc" : "asc"}` : spec.by;
+    const by =
+      sort === "newest" || sort === "oldest"
+        ? `${d.sortDate}.${sort === "newest" ? "desc" : "asc"}`
+        : spec.by;
     const p: Record<string, string> = {
       [key]: String(browseId),
       sort_by: by,

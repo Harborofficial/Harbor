@@ -25,7 +25,8 @@ export default {
   "games.pokemon.videosHint": "वॉकथ्रू और सुझाव",
   "games.pokemon.bank": "सेव और पोकेमॉन",
   "games.pokemon.bankHint": "सेव संपादित करें और बॉक्स सँभालें",
-  "games.pokemon.bankIntro": "टीम संपादित करने के लिए एमुलेटर का सेव खोलें या अलग पोकेमॉन अपनी संग्रह में आयात करें।",
+  "games.pokemon.bankIntro":
+    "टीम संपादित करने के लिए एमुलेटर का सेव खोलें या अलग पोकेमॉन अपनी संग्रह में आयात करें।",
   "games.pokemon.guideSourceNote": "मूल गाइड पढ़ें या स्रोत उपलब्ध होने पर यहीं खोलें।",
   "games.pokemon.readGuide": "Bulbapedia पर पढ़ें",
   "games.pokemon.readInside": "Harbor में पढ़ें",
@@ -39,14 +40,16 @@ export default {
   "games.pokemon.saveStep2": "गेम बंद करें, फिर बैटरी सेव (.sav, .srm या .dsv) खोजें या निर्यात करें।",
   "games.pokemon.saveStep3": "Harbor में संपादन के लिए ऊपर गेम सेव खोलें चुनें।",
   "games.pokemon.findSave": "मेरा सेव कहाँ है?",
-  "games.pokemon.saveLocations": "ROM के पास या एमुलेटर के सेव फ़ोल्डर में देखें। केवल सेव स्टेट हो तो उसे एमुलेटर में लोड करें, फिर गेम के मेनू से सेव करें।",
+  "games.pokemon.saveLocations":
+    "ROM के पास या एमुलेटर के सेव फ़ोल्डर में देखें। केवल सेव स्टेट हो तो उसे एमुलेटर में लोड करें, फिर गेम के मेनू से सेव करें।",
   "games.pokemon.noSave": "अभी सेव नहीं है?",
   "games.pokemon.communitySaves": "समुदाय के सेव देखें",
   "games.pokemon.communitySavesNote": "Project Pokémon · सही गेम चुनें और योगदानकर्ता के निर्देश पढ़ें।",
   "games.pokemon.pkhexNote": "डेवलपर का सेव एडिटर, डाउनलोड और सहायता।",
-  "games.pokemon.noSaveNeeded": "बिना गेम सेव के भी पोकेमॉन फ़ाइलें आयात कर सकते हैं। सेव सिर्फ गेम की टीम या बॉक्स संपादित करने के लिए चाहिए।",
+  "games.pokemon.noSaveNeeded":
+    "बिना गेम सेव के भी पोकेमॉन फ़ाइलें आयात कर सकते हैं। सेव सिर्फ गेम की टीम या बॉक्स संपादित करने के लिए चाहिए।",
   "games.pokemon.videoUnavailable": "यहाँ वीडियो लोड नहीं हुए।",
   "games.pokemon.youtubeSearch": "YouTube पर खोजें",
   "games.hub.downloadApply": "पैच डाउनलोड करें",
-  "games.hub.manualPatch": "अपने पास मौजूद पैच या लिंक इस्तेमाल करें"
+  "games.hub.manualPatch": "अपने पास मौजूद पैच या लिंक इस्तेमाल करें",
 };

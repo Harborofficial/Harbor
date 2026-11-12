@@ -25,7 +25,14 @@ function ep(over: Partial<KitsuEpisode>): KitsuEpisode {
 }
 
 test("tt-capable multi-season episode resolves to canonical imdb coordinates", () => {
-  const e = ep({ id: 10, number: 1, seasonNumber: 1, imdbSeason: 3, imdbEpisode: 13, imdbId: "tt2560140" });
+  const e = ep({
+    id: 10,
+    number: 1,
+    seasonNumber: 1,
+    imdbSeason: 3,
+    imdbEpisode: 13,
+    imdbId: "tt2560140",
+  });
   const parent = meta("kitsu:11450", "Parent");
   const entry = meta("kitsu:11451", "Season 3 Part 2");
   const t = resolveAnimeDetailTarget(e, parent, entry);
@@ -55,7 +62,14 @@ test("pure kitsu entries keep Kitsu numbering for the videos lookup", () => {
 });
 
 test("specials stay on season 0 on both paths", () => {
-  const e = ep({ id: 13, number: 2, seasonNumber: 0, imdbSeason: 0, imdbEpisode: 2, imdbId: "tt2560140" });
+  const e = ep({
+    id: 13,
+    number: 2,
+    seasonNumber: 0,
+    imdbSeason: 0,
+    imdbEpisode: 2,
+    imdbId: "tt2560140",
+  });
   const canon = resolveAnimeDetailTarget(e, meta("kitsu:1"), meta("kitsu:2"));
   assert.equal(canon.season, 0);
   assert.equal(canon.episode, 2);
@@ -77,8 +91,19 @@ test("missing imdb mapping falls back to Kitsu coordinates", () => {
 });
 
 test("long-running absolute numbers are preserved by callers (detail uses season-relative only)", () => {
-  const e = ep({ id: 16, number: 1089, seasonNumber: 1, imdbSeason: 21, imdbEpisode: 45, imdbId: "tt0388629" });
-  const t = resolveAnimeDetailTarget(e, meta("kitsu:11243", "One Piece"), meta("kitsu:11243", "One Piece"));
+  const e = ep({
+    id: 16,
+    number: 1089,
+    seasonNumber: 1,
+    imdbSeason: 21,
+    imdbEpisode: 45,
+    imdbId: "tt0388629",
+  });
+  const t = resolveAnimeDetailTarget(
+    e,
+    meta("kitsu:11243", "One Piece"),
+    meta("kitsu:11243", "One Piece"),
+  );
   assert.equal(t.season, 21);
   assert.equal(t.episode, 45);
   assert.equal(e.number, 1089);
@@ -88,7 +113,11 @@ test("long-running absolute numbers are preserved by callers (detail uses season
 
 test("an unmapped cour never borrows its parent's canonical episode numbers", () => {
   for (const mapping of [{}, { imdbSeason: 3 }, { imdbEpisode: 13 }]) {
-    const t = resolveAnimeDetailTarget(ep({ number: 1, ...mapping }), meta("tt2560140"), meta("kitsu:part2"));
+    const t = resolveAnimeDetailTarget(
+      ep({ number: 1, ...mapping }),
+      meta("tt2560140"),
+      meta("kitsu:part2"),
+    );
     assert.equal(t.seriesId, "kitsu:part2");
     assert.equal(t.season, 1);
     assert.equal(t.episode, 1);
@@ -97,7 +126,9 @@ test("an unmapped cour never borrows its parent's canonical episode numbers", ()
 
 test("a different franchise entry's own canonical ID wins over the parent", () => {
   const t = resolveAnimeDetailTarget(
-    ep({ imdbSeason: 1, imdbEpisode: 1 }), meta("tt111"), meta("tt222"),
+    ep({ imdbSeason: 1, imdbEpisode: 1 }),
+    meta("tt111"),
+    meta("tt222"),
   );
   assert.equal(t.seriesId, "tt222");
   assert.equal(t.playback.meta.id, "tt222");

@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "목록의 기록 수: {count}",
   "games.wow.weekly.partial": "일부 등록된 기록을 확인할 수 없습니다.",
   "games.wow.weekly.empty": "이 기간에 등록된 기록이 없습니다.",
-  "games.wow.weekly.scope": "Raider.IO는 초기화 기간마다 현재 시즌의 가장 높은 쐐기돌 기록을 최대 10개 표시합니다. 새 기록이 반영되기까지 시간이 걸릴 수 있습니다.",
+  "games.wow.weekly.scope":
+    "Raider.IO는 초기화 기간마다 현재 시즌의 가장 높은 쐐기돌 기록을 최대 10개 표시합니다. 새 기록이 반영되기까지 시간이 걸릴 수 있습니다.",
   "games.helldivers.title": "은하 전쟁",
   "games.helldivers.intro": "다음 강하 지점을 선택하세요.",
   "games.helldivers.refresh": "은하 전쟁 새로고침",
@@ -77,7 +78,8 @@ export default {
   "games.warhammer.all": "전체",
   "games.warhammer.play": "플레이하기",
   "games.warhammer.face": "적과 맞서기",
-  "games.warhammer.unavailable": "게임 정보를 새로 고치지 못했습니다. 이전에 불러온 항목은 계속 표시될 수 있습니다.",
+  "games.warhammer.unavailable":
+    "게임 정보를 새로 고치지 못했습니다. 이전에 불러온 항목은 계속 표시될 수 있습니다.",
   "games.warhammer.partial": "일부 게임 정보를 사용할 수 없습니다.",
   "games.warhammer.empty": "이 역할에 해당하는 검증된 게임이 아직 없습니다.",
   "games.warhammer.scope": "각 진영을 알아가는 출발점입니다. 전체 목록은 아래에서 확인하세요.",
@@ -98,9 +100,12 @@ export default {
   "games.warframe.title": "근원계를 가로질러",
   "games.warframe.intro": "다음 출격 전에 지금 가능한 활동을 확인하세요.",
   "games.warframe.refresh": "월드 일정 새로고침",
-  "games.warframe.unavailable": "일정을 새로고침하지 못했습니다. 표시된 정보는 이전 스냅샷의 내용입니다.",
-  "games.warframe.stale": "정보가 지연되고 있습니다. 마지막으로 보고된 상태이며, 만료된 항목은 숨겨집니다.",
-  "games.warframe.expired": "이 스냅샷은 너무 오래되었습니다. 새 데이터가 도착할 때까지 현재 목록을 숨깁니다.",
+  "games.warframe.unavailable":
+    "일정을 새로고침하지 못했습니다. 표시된 정보는 이전 스냅샷의 내용입니다.",
+  "games.warframe.stale":
+    "정보가 지연되고 있습니다. 마지막으로 보고된 상태이며, 만료된 항목은 숨겨집니다.",
+  "games.warframe.expired":
+    "이 스냅샷은 너무 오래되었습니다. 새 데이터가 도착할 때까지 현재 목록을 숨깁니다.",
   "games.warframe.partial": "일정 일부를 이용할 수 없습니다.",
   "games.warframe.reported": "마지막 보고",
   "games.warframe.waiting": "새 데이터 대기 중",
@@ -137,7 +142,8 @@ export default {
   "games.warframe.noMatches": "필터에 맞는 현재 균열이 없습니다.",
   "games.warframe.more": "더 보기",
   "games.warframe.snapshot": "스냅샷: {date}",
-  "games.warframe.scope": "공통 월드 일정입니다. 참여 가능 여부는 퀘스트 진행에 따라 다릅니다. 임무 이름은 영어로 제공됩니다.",
+  "games.warframe.scope":
+    "공통 월드 일정입니다. 참여 가능 여부는 퀘스트 진행에 따라 다릅니다. 임무 이름은 영어로 제공됩니다.",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -178,11 +184,13 @@ export default {
   "games.rivals.heroRate": "각 상대에 대한 {hero}의 승률",
   "games.rivals.with": "팀원과 함께",
   "games.rivals.duoRate": "두 영웅의 공동 승률",
-  "games.rivals.scope": "모든 실력 구간에서 관측한 경쟁 6 대 6 경기입니다. 영웅당 최소 200경기, 조합당 100경기입니다. 조합 결과는 팀업 능력이나 다음 경기 예측을 의미하지 않습니다.",
+  "games.rivals.scope":
+    "모든 실력 구간에서 관측한 경쟁 6 대 6 경기입니다. 영웅당 최소 200경기, 조합당 100경기입니다. 조합 결과는 팀업 능력이나 다음 경기 예측을 의미하지 않습니다.",
   "games.rivals.snapshot": "집계: {date}",
   "games.rivals.noMatches": "필터에 맞는 영웅이 없습니다.",
   "games.rivals.unavailable": "영웅 가이드를 사용할 수 없습니다. 새로고침하세요.",
-  "games.rivals.pairsFailed": "대결 데이터를 새로고침할 수 없습니다. 표시된 조합은 이전 데이터입니다.",
+  "games.rivals.pairsFailed":
+    "대결 데이터를 새로고침할 수 없습니다. 표시된 조합은 이전 데이터입니다.",
   "games.rivals.mismatch": "제공된 데이터의 시즌이 다릅니다. 새로고침하여 같은 시즌을 비교하세요.",
   "games.rivals.sample": "{count}경기",
   "games.darktide.scriptures": "성서 회수",
@@ -198,14 +206,17 @@ export default {
   "games.darktide.unknown": "미분류",
   "games.darktide.difficulty": "난이도",
   "games.darktide.search": "지도 검색",
-  "games.darktide.stale": "마지막 확인 정보가 오래되었습니다. 새로고침하여 가능한 임무를 확인하세요.",
-  "games.darktide.failed": "임무를 새로고침할 수 없습니다. 표시된 임무는 마지막 확인 당시 정보입니다.",
+  "games.darktide.stale":
+    "마지막 확인 정보가 오래되었습니다. 새로고침하여 가능한 임무를 확인하세요.",
+  "games.darktide.failed":
+    "임무를 새로고침할 수 없습니다. 표시된 임무는 마지막 확인 당시 정보입니다.",
   "games.darktide.partial": "일부 임무 정보를 읽을 수 없습니다.",
   "games.darktide.noMatches": "필터에 맞는 임무가 없습니다.",
   "games.darktide.empty": "최신 데이터에 유효한 임무가 없습니다.",
   "games.darktide.more": "임무 더 보기",
   "games.darktide.checked": "확인: {date}",
-  "games.darktide.scope": "커뮤니티 데이터입니다. 게임 내 제공 여부와 보상은 다를 수 있으며, 캐릭터의 임무 게시판이 아닙니다.",
+  "games.darktide.scope":
+    "커뮤니티 데이터입니다. 게임 내 제공 여부와 보상은 다를 수 있으며, 캐릭터의 임무 게시판이 아닙니다.",
   "games.darktide.remaining": "{count}분 남음",
   "games.darktide.credits": "오르도 증표",
   "games.darktide.xp": "경험치",
@@ -245,9 +256,12 @@ export default {
   "games.companion.showAll": "영웅 {count}명 모두 보기",
   "games.companion.noMatches": "검색과 일치하는 영웅이 없습니다.",
   "games.companion.through": "{date}까지의 매치",
-  "games.companion.sampleNote": "모든 랭크의 커뮤니티 표본이며 영웅당 최소 100매치입니다. 예측이 아닙니다.",
-  "games.companion.unavailable": "데이터를 새로고침하지 못했습니다. 표시된 데이터는 이전 확인 시점의 것입니다.",
-  "games.companion.statsUnavailable": "영웅 통계를 사용할 수 없습니다. 영웅 목록은 계속 볼 수 있습니다.",
+  "games.companion.sampleNote":
+    "모든 랭크의 커뮤니티 표본이며 영웅당 최소 100매치입니다. 예측이 아닙니다.",
+  "games.companion.unavailable":
+    "데이터를 새로고침하지 못했습니다. 표시된 데이터는 이전 확인 시점의 것입니다.",
+  "games.companion.statsUnavailable":
+    "영웅 통계를 사용할 수 없습니다. 영웅 목록은 계속 볼 수 있습니다.",
   "games.gw2.title": "마법사의 금고",
   "games.gw2.intro": "보상을 선택하고 Astral Acclaim 사용을 계획하세요.",
   "games.gw2.refresh": "보상 새로 고침",
@@ -257,7 +271,8 @@ export default {
   "games.gw2.partial": "일부 아이템 정보를 사용할 수 없습니다. 보상 가격은 계속 포함됩니다.",
   "games.gw2.guide": "금고 가이드",
   "games.gw2.checked": "확인: {date}",
-  "games.gw2.scope": "이 Harbor 프로필에 저장됩니다. 각 선택은 상품 하나로 계산됩니다. 잔액, 구매 제한, 확장팩 이용 가능 여부는 확인하지 않습니다. 이용 조건을 확인하고 게임에서 구매하세요.",
+  "games.gw2.scope":
+    "이 Harbor 프로필에 저장됩니다. 각 선택은 상품 하나로 계산됩니다. 잔액, 구매 제한, 확장팩 이용 가능 여부는 확인하지 않습니다. 이용 조건을 확인하고 게임에서 구매하세요.",
   "games.gw2.total": "계획한 총액",
   "games.gw2.currency": "Astral Acclaim",
   "games.gw2.selected": "{count}개 상품 선택됨",
@@ -287,14 +302,16 @@ export default {
   "games.gw2.quantity": "수량: {count}",
   "games.deadlockBuilds.open": "커뮤니티 빌드",
   "games.deadlockBuilds.back": "빌드 목록으로",
-  "games.deadlockBuilds.intro": "커뮤니티 아이템 가이드입니다. 선택하기 전에 업데이트 날짜를 확인하세요.",
+  "games.deadlockBuilds.intro":
+    "커뮤니티 아이템 가이드입니다. 선택하기 전에 업데이트 날짜를 확인하세요.",
   "games.deadlockBuilds.search": "빌드 검색",
   "games.deadlockBuilds.recent": "최근 업데이트순",
   "games.deadlockBuilds.popular": "주간 즐겨찾기순",
   "games.deadlockBuilds.language": "빌드 언어",
   "games.deadlockBuilds.allLanguages": "모든 언어",
   "games.deadlockBuilds.refresh": "빌드 새로고침",
-  "games.deadlockBuilds.failed": "빌드를 새로고침하지 못했습니다. 이전 가이드는 오래된 정보일 수 있습니다.",
+  "games.deadlockBuilds.failed":
+    "빌드를 새로고침하지 못했습니다. 이전 가이드는 오래된 정보일 수 있습니다.",
   "games.deadlockBuilds.updated": "업데이트: {date}",
   "games.deadlockBuilds.undated": "업데이트 날짜 없음",
   "games.deadlockBuilds.favorites": "주간 즐겨찾기 {count}회",
@@ -306,8 +323,10 @@ export default {
   "games.deadlockBuilds.copy": "빌드 ID 복사",
   "games.deadlockBuilds.use": "빌드 ID:",
   "games.deadlockBuilds.copyFailed": "복사하지 못했습니다. ID를 선택해 직접 복사하세요.",
-  "games.deadlockBuilds.definitions": "아이템 이름과 가격은 확인된 최신 게임 데이터를 사용합니다. 오래된 가이드와 다를 수 있으며 그룹에 대안이 포함될 수 있습니다.",
-  "games.deadlockBuilds.itemsFailed": "일부 아이템 정보를 불러올 수 없습니다. 작성자의 가이드와 아이템 ID는 계속 표시됩니다.",
+  "games.deadlockBuilds.definitions":
+    "아이템 이름과 가격은 확인된 최신 게임 데이터를 사용합니다. 오래된 가이드와 다를 수 있으며 그룹에 대안이 포함될 수 있습니다.",
+  "games.deadlockBuilds.itemsFailed":
+    "일부 아이템 정보를 불러올 수 없습니다. 작성자의 가이드와 아이템 ID는 계속 표시됩니다.",
   "games.deadlockBuilds.noItems": "이 빌드에는 아이템 그룹이 없습니다.",
   "games.deadlockBuilds.group": "그룹 {number}",
   "games.deadlockBuilds.optional": "선택 사항",
@@ -329,7 +348,8 @@ export default {
   "games.rivals.guide.teamUp": "팀업 능력",
   "games.rivals.guide.base": "기본 효과",
   "games.rivals.guide.enhanced": "강화 효과",
-  "games.rivals.guide.reference": "공식 영웅 정보 · 영어. 수치는 밸런스 업데이트에 따라 달라질 수 있습니다.",
+  "games.rivals.guide.reference":
+    "공식 영웅 정보 · 영어. 수치는 밸런스 업데이트에 따라 달라질 수 있습니다.",
   "games.rivals.guide.failed": "공식 영웅 가이드를 불러오지 못했습니다.",
   "games.rivals.guide.partial": "일부 능력 정보를 사용할 수 없습니다.",
   "games.rivals.guide.checked": "확인: {date}",

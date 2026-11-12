@@ -52,7 +52,8 @@ export default {
   "games.guides.date.all": "不限时间",
   "games.guides.viewers": "{count}人正在观看",
   "games.guides.views": "{count}次观看",
-  "games.guides.import.callofdutywarzone": "将参数复制到 Warzone 的对应设置中。DPI 需在鼠标软件中设置。",
+  "games.guides.import.callofdutywarzone":
+    "将参数复制到 Warzone 的对应设置中。DPI 需在鼠标软件中设置。",
   "games.guides.import.css": "将设置复制到 Counter-Strike: Source。这些参数来自带日期的社区存档。",
   "games.guides.import.cod": "请在对应的游戏版本中使用这些参数。DPI 需在鼠标软件中设置。",
   "games.guides.noCrosshair": "此来源没有提供足够的准星参数，无法准确预览。",
@@ -76,9 +77,12 @@ export default {
   "games.guides.configNote": "玩家和创作者公开的设置。选择资料以查看来源、日期和配置。",
   "games.guides.players": "所有选手",
   "games.guides.useConfig": "使用此配置",
-  "games.guides.import.cs2": "将命令粘贴到 CS2 开发者控制台。准星代码可在「设置 → 游戏 → 准星」中导入。应用前请核对数值。",
-  "games.guides.import.valorant": "复制准星代码，然后在 VALORANT 中打开「设置 → 准星 → 导入配置代码」。其他数值可在对应设置中输入。",
-  "games.guides.import.rainbowsixsiege": "复制设置，然后在 Siege 的鼠标和显示设置中输入相应数值。DPI 需在鼠标软件中设置。",
+  "games.guides.import.cs2":
+    "将命令粘贴到 CS2 开发者控制台。准星代码可在「设置 → 游戏 → 准星」中导入。应用前请核对数值。",
+  "games.guides.import.valorant":
+    "复制准星代码，然后在 VALORANT 中打开「设置 → 准星 → 导入配置代码」。其他数值可在对应设置中输入。",
+  "games.guides.import.rainbowsixsiege":
+    "复制设置，然后在 Siege 的鼠标和显示设置中输入相应数值。DPI 需在鼠标软件中设置。",
   "games.guides.copyCrosshair": "复制准星",
   "games.guides.copyCommands": "复制命令",
   "games.guides.copySettings": "复制设置",
@@ -112,8 +116,7 @@ export default {
   "games.guides.playerNote": "由 YouTube 提供播放。如果创作者限制嵌入，请打开原视频。",
   "games.guides.readerError": "无法在此阅读该指南。请重试或打开原文。",
   "games.guides.contents": "本指南目录",
-  "games.guides.credits": "作者与许可"
-,
+  "games.guides.credits": "作者与许可",
   "games.guides.copy": "复制",
   "games.guides.previewMap": "在准星后显示地图截图",
   "games.guides.skins": "皮肤",
@@ -123,5 +126,5 @@ export default {
   "games.guides.teammates": "队友",
   "games.guides.specs": "规格参数",
   "games.guides.exportAll": "全部导出",
-  "games.guides.copyValue": "复制{label}"
+  "games.guides.copyValue": "复制{label}",
 } satisfies Record<string, string>;

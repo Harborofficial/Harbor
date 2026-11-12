@@ -39,8 +39,10 @@ export default {
   "games.league.patch": "Patch {patch}",
   "games.league.more": "Plus de champions",
   "games.league.empty": "Aucun champion ne correspond à votre recherche.",
-  "games.league.poolEmpty": "Gardez vos favoris ici. Ouvrez un champion et ajoutez-le à votre sélection.",
-  "games.league.unavailable": "Actualisation impossible. Les résultats précédents restent disponibles.",
+  "games.league.poolEmpty":
+    "Gardez vos favoris ici. Ouvrez un champion et ajoutez-le à votre sélection.",
+  "games.league.unavailable":
+    "Actualisation impossible. Les résultats précédents restent disponibles.",
   "games.league.back": "Retour aux champions",
   "games.league.addPool": "Ajouter à mes champions",
   "games.league.inPool": "Dans mes champions",
@@ -62,11 +64,14 @@ export default {
   "games.league.matchupRate": "Taux de victoire de {champion} contre chaque adversaire.",
   "games.league.noSample": "Pas encore assez de données sur les matchups.",
   "games.league.combos": "Voir le combo",
-  "games.league.combosIntro": "Courtes démonstrations sélectionnées par OP.GG. Lancez-les à votre rythme.",
+  "games.league.combosIntro":
+    "Courtes démonstrations sélectionnées par OP.GG. Lancez-les à votre rythme.",
   "games.league.watchCombo": "Voir la démonstration",
   "games.league.updated": "Source actualisée le {date}",
-  "games.league.buildEmpty": "Aucun build pour ce rôle. Essayez un autre rôle ou les guides ci-dessous.",
-  "games.league.iconsUnavailable": "Certains détails d’objets ou de runes n’ont pas pu être chargés.",
+  "games.league.buildEmpty":
+    "Aucun build pour ce rôle. Essayez un autre rôle ou les guides ci-dessous.",
+  "games.league.iconsUnavailable":
+    "Certains détails d’objets ou de runes n’ont pas pu être chargés.",
   "games.league.passive": "Passif",
   "games.league.cooldown": "Récupération : {seconds}s",
   "games.league.allyTips": "Jouer ce champion",
@@ -74,17 +79,22 @@ export default {
   "games.league.story": "Histoire du champion",
   "games.league.exploreMore": "Aller plus loin",
   "games.league.guides": "Guides vidéo",
-  "games.league.metaScope": "OP.GG fournit ce classement avec son échantillon par défaut, sans préciser le patch, la région ni le rang. Les taux de victoire utilisent les victoires et parties publiées ; les taux de sélection sont arrondis par la source. Classements et builds utilisent des échantillons distincts.",
-  "games.league.buildNote": "Chaque build a son propre échantillon. Les builds terminés favorisent les parties assez longues pour acheter les objets ; leur taux de victoire n’est pas celui du champion. Les matchups peuvent avoir peu de parties. Adaptez-vous à votre équipe et à l’adversaire. Les vidéos peuvent dater d’anciens patchs.",
-  "games.league.patchDifference": "Statistiques du build : {patch} ; objets et compétences : {assets}.",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "OP.GG fournit ce classement avec son échantillon par défaut, sans préciser le patch, la région ni le rang. Les taux de victoire utilisent les victoires et parties publiées ; les taux de sélection sont arrondis par la source. Classements et builds utilisent des échantillons distincts.",
+  "games.league.buildNote":
+    "Chaque build a son propre échantillon. Les builds terminés favorisent les parties assez longues pour acheter les objets ; leur taux de victoire n’est pas celui du champion. Les matchups peuvent avoir peu de parties. Adaptez-vous à votre équipe et à l’adversaire. Les vidéos peuvent dater d’anciens patchs.",
+  "games.league.patchDifference":
+    "Statistiques du build : {patch} ; objets et compétences : {assets}.",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "Classement",
   "games.league.tierScope": "Classé solo/duo · Émeraude+ · Monde",
   "games.league.patchFilter": "Choisir un patch",
   "games.league.allRoles": "Tous les rôles",
   "games.league.banRate": "Taux de bannissement",
   "games.league.matches": "Parties",
-  "games.league.tierNote": "Les rangs sont propres à chaque rôle. Les builds affichent les dernières données disponibles.",
+  "games.league.tierNote":
+    "Les rangs sont propres à chaque rôle. Les builds affichent les dernières données disponibles.",
   "games.official.publisherSource": "Téléchargement officiel de l’éditeur",
   "games.official.get": "Télécharger {launcher}",
 };

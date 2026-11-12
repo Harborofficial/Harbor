@@ -4,11 +4,7 @@ import { tmdbTitleCredits } from "@/lib/providers/tmdb/tmdb-title-credits";
 import type { PersonCredit, PersonDetail } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { readCollaborators, writeCollaborators } from "./collaborator-cache";
-import {
-  rankCollaborators,
-  type Collaborator,
-  type CollaboratorTitle,
-} from "./collaborator-rank";
+import { rankCollaborators, type Collaborator, type CollaboratorTitle } from "./collaborator-rank";
 import { dedupeByMedia, isCameoOrGuest, notableScore } from "./person-utils";
 
 const SAMPLE_SIZE = 20;

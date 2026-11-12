@@ -11,6 +11,9 @@ function harness() {
   let online = true;
   let heldAuth = "";
   let releaseHeld: (() => void) | undefined;
+  let clearProviderProgress = false;
+  let cwSources = { trakt: false, simkl: false, publicmetadb: false };
+  const providerCalls: any[] = [];
   const storage = {
     getItem: (key: string) => data.get(key) ?? null,
     setItem(key: string, value: string) {
@@ -37,6 +40,20 @@ function harness() {
         ? { sha256: (input: Uint8Array) => input }
         : { bytesToHex: (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16)).join("") };
     if (file === "feed/external-cw") return { removeExternalCwItem: () => {} };
+    if (file === "settings/load")
+      return {
+        loadStoredSettings: () => ({
+          cwClearProviderProgress: clearProviderProgress,
+          cwSources: { library: true, local: true, ...cwSources },
+        }),
+      };
+    if (file === "cw-provider-dismiss")
+      return {
+        clearProviderPlayback: async (item: unknown, providers: string[]) => {
+          providerCalls.push({ item, providers });
+          return { failed: [] };
+        },
+      };
     if (file === "nuvio/nuvio-client")
       return { isNuvioSignedIn: () => false, isNuvioProviderActive: () => false };
     if (file === "nuvio/nuvio-sync")
@@ -94,6 +111,13 @@ function harness() {
     data,
     writes,
     load,
+    providerCalls,
+    set clearProviderProgress(value: boolean) {
+      clearProviderProgress = value;
+    },
+    set cwSources(value: { trakt: boolean; simkl: boolean; publicmetadb: boolean }) {
+      cwSources = value;
+    },
     set failure(key: string) {
       failKey = key;
     },
@@ -154,6 +178,86 @@ test("external dismissal keeps official local resume clearing without writing to
   assert.deepEqual(result, { sync: "not-required" });
   assert.equal(h.writes.length, 0);
   assert.deepEqual(JSON.parse(h.data.get("harbor.resume")!), {});
+});
+
+test("the master toggle clears provider playback even when no provider feeds the row", async () => {
+  const h = harness();
+  h.clearProviderProgress = true;
+  h.cwSources = { trakt: false, simkl: false, publicmetadb: false };
+  const item = {
+    ...entry(),
+    external: "trakt",
+    providerPlaybackIds: { trakt: "playback-42" },
+  };
+  const result = await h.load("cw-dismiss").dismissCw(item, "fixture-auth", { acknowledged: true });
+  assert.deepEqual(result, { sync: "not-required" });
+  assert.equal(h.providerCalls.length, 1);
+  assert.deepEqual(h.providerCalls[0].providers, ["trakt", "simkl", "publicmetadb"]);
+  assert.deepEqual(h.providerCalls[0].item.providerPlaybackIds, { trakt: "playback-42" });
+});
+
+test("a deduped card clears the playback id belonging to each provider member", async () => {
+  const h = harness();
+  h.clearProviderProgress = true;
+  h.cwSources = { trakt: false, simkl: false, publicmetadb: false };
+  const item = {
+    ...entry(),
+    external: "simkl",
+    providerPlaybackIds: { simkl: "simkl-playback" },
+    cwMembers: [
+      {
+        ...entry(),
+        external: "trakt",
+        providerPlaybackIds: { trakt: "trakt-playback" },
+      },
+      {
+        ...entry(),
+        external: "publicmetadb",
+        providerPlaybackIds: { publicmetadb: "pmdb-resume" },
+      },
+      {
+        ...entry(),
+        external: "trakt",
+        state: { ...entry().state, season: 2, episode: 4, video_id: "older-b:2:4" },
+        providerPlaybackIds: { trakt: "stale-trakt-playback" },
+      },
+    ],
+  };
+  const result = await h.load("cw-dismiss").dismissCw(item, "fixture-auth", { acknowledged: true });
+  assert.deepEqual(result, { sync: "not-required" });
+  assert.equal(h.providerCalls.length, 3);
+  assert.deepEqual(
+    h.providerCalls.map((call) => call.providers),
+    [["trakt"], ["simkl"], ["publicmetadb"]],
+  );
+  assert.deepEqual(
+    h.providerCalls.map((call) => call.item.providerPlaybackIds),
+    [{ trakt: "trakt-playback" }, { simkl: "simkl-playback" }, { publicmetadb: "pmdb-resume" }],
+  );
+});
+
+test("a stale provider member cannot authorize clearing another episode", async () => {
+  const h = harness();
+  h.clearProviderProgress = true;
+  h.cwSources = { trakt: false, simkl: false, publicmetadb: false };
+  const item = {
+    ...entry(),
+    cwMembers: [
+      {
+        ...entry(),
+        external: "trakt",
+        state: { ...entry().state, season: 2, episode: 4, video_id: "older-b:2:4" },
+        providerPlaybackIds: { trakt: "stale-trakt-playback" },
+      },
+    ],
+  };
+  await h.load("cw-dismiss").dismissCw(item, "fixture-auth", { acknowledged: true });
+
+  assert.deepEqual(
+    h.providerCalls.map((call) => call.item.providerPlaybackIds),
+    [undefined, undefined, undefined],
+    "the visible card is passed instead, so the provider re-verifies the episode",
+  );
 });
 
 test("acknowledged dismissal persists official progress tombstones and newer progress restores the card", async () => {

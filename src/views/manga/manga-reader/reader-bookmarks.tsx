@@ -55,86 +55,88 @@ export function BookmarksPanel({
         className="animate-fade-in fixed inset-0 z-[94] bg-black/20 backdrop-blur-[1px]"
       />
       <div className="animate-fade-in absolute end-4 top-16 z-[95] flex max-h-[70vh] w-80 flex-col overflow-hidden rounded-2xl border border-edge-soft bg-raised/95 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.7)] backdrop-blur-xl">
-      <div className="flex items-center justify-between px-4 py-3">
-        <span className="flex items-center gap-2 text-[14px] font-semibold text-ink">
-          <Bookmark size={16} className="text-accent" />
-          {t("Bookmarks")}
-        </span>
+        <div className="flex items-center justify-between px-4 py-3">
+          <span className="flex items-center gap-2 text-[14px] font-semibold text-ink">
+            <Bookmark size={16} className="text-accent" />
+            {t("Bookmarks")}
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-7 w-7 place-items-center rounded-lg text-ink-subtle transition hover:bg-elevated hover:text-ink"
+          >
+            <X size={16} />
+          </button>
+        </div>
         <button
           type="button"
-          onClick={onClose}
-          className="grid h-7 w-7 place-items-center rounded-lg text-ink-subtle transition hover:bg-elevated hover:text-ink"
+          onClick={() => (canPick ? onPickPage() : addMangaBookmark(pid, current))}
+          className="mx-3 mb-2 flex items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-[13.5px] font-semibold text-canvas transition-transform active:scale-[0.98]"
         >
-          <X size={16} />
+          <Plus size={16} />
+          {canPick ? t("Choose a page to bookmark") : t("Bookmark this page")}
         </button>
-      </div>
-      <button
-        type="button"
-        onClick={() => (canPick ? onPickPage() : addMangaBookmark(pid, current))}
-        className="mx-3 mb-2 flex items-center justify-center gap-2 rounded-xl bg-accent py-2.5 text-[13.5px] font-semibold text-canvas transition-transform active:scale-[0.98]"
-      >
-        <Plus size={16} />
-        {canPick ? t("Choose a page to bookmark") : t("Bookmark this page")}
-      </button>
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
-        {bookmarks.length === 0 ? (
-          <p className="px-2 py-6 text-center text-[13px] leading-relaxed text-ink-muted">
-            {t("No bookmarks yet. Save your spot with the button above, in any reading mode.")}
-          </p>
-        ) : (
-          <div className="flex flex-col gap-1">
-            {bookmarks.map((bm) => (
-              <div
-                key={bm.id}
-                className="group flex items-center gap-1.5 rounded-xl px-2 py-2 transition hover:bg-elevated/60"
-              >
-                {editing === bm.id ? (
-                  <input
-                    autoFocus
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") commit(bm.id);
-                      if (e.key === "Escape") setEditing(null);
-                    }}
-                    onBlur={() => commit(bm.id)}
-                    className="min-w-0 flex-1 rounded-lg bg-canvas px-2 py-1 text-[13px] text-ink outline-none ring-1 ring-accent/50"
-                  />
-                ) : (
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+          {bookmarks.length === 0 ? (
+            <p className="px-2 py-6 text-center text-[13px] leading-relaxed text-ink-muted">
+              {t("No bookmarks yet. Save your spot with the button above, in any reading mode.")}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-1">
+              {bookmarks.map((bm) => (
+                <div
+                  key={bm.id}
+                  className="group flex items-center gap-1.5 rounded-xl px-2 py-2 transition hover:bg-elevated/60"
+                >
+                  {editing === bm.id ? (
+                    <input
+                      autoFocus
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") commit(bm.id);
+                        if (e.key === "Escape") setEditing(null);
+                      }}
+                      onBlur={() => commit(bm.id)}
+                      className="min-w-0 flex-1 rounded-lg bg-canvas px-2 py-1 text-[13px] text-ink outline-none ring-1 ring-accent/50"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onJump(bm)}
+                      className="flex min-w-0 flex-1 flex-col items-start text-start"
+                    >
+                      <span className="w-full truncate text-[13px] font-medium text-ink">
+                        {bm.name}
+                      </span>
+                      <span className="text-[11.5px] text-ink-subtle">
+                        {bm.chapterLabel} · {t("page {n}", { n: bm.page })}
+                      </span>
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => onJump(bm)}
-                    className="flex min-w-0 flex-1 flex-col items-start text-start"
+                    onClick={() => {
+                      setEditing(bm.id);
+                      setDraft(bm.name);
+                    }}
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-subtle opacity-0 transition hover:bg-raised hover:text-ink group-hover:opacity-100"
                   >
-                    <span className="w-full truncate text-[13px] font-medium text-ink">{bm.name}</span>
-                    <span className="text-[11.5px] text-ink-subtle">
-                      {bm.chapterLabel} · {t("page {n}", { n: bm.page })}
-                    </span>
+                    <Pencil size={13} />
                   </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditing(bm.id);
-                    setDraft(bm.name);
-                  }}
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-subtle opacity-0 transition hover:bg-raised hover:text-ink group-hover:opacity-100"
-                >
-                  <Pencil size={13} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => removeMangaBookmark(pid, bm.id)}
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-subtle opacity-0 transition hover:bg-raised hover:text-danger group-hover:opacity-100"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+                  <button
+                    type="button"
+                    onClick={() => removeMangaBookmark(pid, bm.id)}
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-subtle opacity-0 transition hover:bg-raised hover:text-danger group-hover:opacity-100"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 }

@@ -10,12 +10,30 @@ function wrap($: Cheerio, node: unknown): unknown {
   if (held) return held;
   const attribs = (node as { attribs?: Record<string, string> }).attribs ?? {};
   const element = {
-    get id() { return attribs.id ?? ""; },
-    get textContent() { return $(node as never).text(); },
-    getAttribute(name: string) { return attribs[name] ?? null; },
+    get id() {
+      return attribs.id ?? "";
+    },
+    get textContent() {
+      return $(node as never).text();
+    },
+    getAttribute(name: string) {
+      return attribs[name] ?? null;
+    },
     classList: { contains: (name: string) => (attribs.class ?? "").split(/\s+/).includes(name) },
-    querySelector(selector: string) { return wrap($, $(node as never).find(selector).get(0) ?? null); },
-    querySelectorAll(selector: string) { return $(node as never).find(selector).get().map((child) => wrap($, child)); },
+    querySelector(selector: string) {
+      return wrap(
+        $,
+        $(node as never)
+          .find(selector)
+          .get(0) ?? null,
+      );
+    },
+    querySelectorAll(selector: string) {
+      return $(node as never)
+        .find(selector)
+        .get()
+        .map((child) => wrap($, child));
+    },
   };
   wrappers.set(node as object, element);
   return element;
@@ -25,7 +43,10 @@ class FixtureParser {
     const $ = load(html);
     return {
       querySelector: (selector: string) => wrap($, $(selector).get(0) ?? null),
-      querySelectorAll: (selector: string) => $(selector).get().map((node) => wrap($, node)),
+      querySelectorAll: (selector: string) =>
+        $(selector)
+          .get()
+          .map((node) => wrap($, node)),
       getElementById: (id: string) => wrap($, $(`#${id}`).get(0) ?? null),
     };
   }
@@ -34,16 +55,30 @@ Object.assign(globalThis, { DOMParser: FixtureParser });
 const { parseProConfig } = await import("../src/lib/games/pro-configs.ts");
 
 const upload = (name: string) => `https://prosettings.net/wp-content/uploads/${name}`;
-const row = (field: string, label: string, value: string) => `<tr data-field="${field}"><th>${label}</th><td>${value}</td></tr>`;
+const row = (field: string, label: string, value: string) =>
+  `<tr data-field="${field}"><th>${label}</th><td>${value}</td></tr>`;
 const crosshair = Object.entries({
-  cl_crosshairstyle: ["Style", "Static Cross"], cl_crosshair_recoil: ["Follow Recoil", "No"], cl_crosshairdot: ["Dot", "Yes"],
-  cl_crosshair_length: ["Length (px)", "0"], cl_crosshair_thickness: ["Thickness (px)", "4"], cl_crosshair_gap: ["Gap (px)", "2"],
-  cl_crosshair_drawoutline: ["Outline", "No"], cl_crosshaircolor_r: ["Red", "0"], cl_crosshaircolor_g: ["Green", "255"],
-  cl_crosshaircolor_b: ["Blue", "145"], cl_crosshaircolor_a: ["Opacity", "255"], cl_crosshair_t: ["T Style", "No"],
-  cl_crosshair_dynamic_splitdist: ["Split Distance", "3"], cl_crosshair_dynamic_splitalpha_innermod: ["Inner Split Alpha", "0"],
-  cl_crosshair_dynamic_splitalpha_outermod: ["Outer Split Alpha", "1"], cl_crosshair_dynamic_maxdist_splitratio: ["Split Size Ratio", "1"],
-  cl_crosshair_dynamic_spread_limit: ["Spread Limit", "255"], cl_crosshair_screen_height: ["Screen Height", "960"],
-}).map(([field, [label, value]]) => row(field, label, value)).join("");
+  cl_crosshairstyle: ["Style", "Static Cross"],
+  cl_crosshair_recoil: ["Follow Recoil", "No"],
+  cl_crosshairdot: ["Dot", "Yes"],
+  cl_crosshair_length: ["Length (px)", "0"],
+  cl_crosshair_thickness: ["Thickness (px)", "4"],
+  cl_crosshair_gap: ["Gap (px)", "2"],
+  cl_crosshair_drawoutline: ["Outline", "No"],
+  cl_crosshaircolor_r: ["Red", "0"],
+  cl_crosshaircolor_g: ["Green", "255"],
+  cl_crosshaircolor_b: ["Blue", "145"],
+  cl_crosshaircolor_a: ["Opacity", "255"],
+  cl_crosshair_t: ["T Style", "No"],
+  cl_crosshair_dynamic_splitdist: ["Split Distance", "3"],
+  cl_crosshair_dynamic_splitalpha_innermod: ["Inner Split Alpha", "0"],
+  cl_crosshair_dynamic_splitalpha_outermod: ["Outer Split Alpha", "1"],
+  cl_crosshair_dynamic_maxdist_splitratio: ["Split Size Ratio", "1"],
+  cl_crosshair_dynamic_spread_limit: ["Spread Limit", "255"],
+  cl_crosshair_screen_height: ["Screen Height", "960"],
+})
+  .map(([field, [label, value]]) => row(field, label, value))
+  .join("");
 
 const page = `<html><body>
 <section id="cs2_mouse" class="settings-group section--mouse"><h3>Mouse</h3>
@@ -87,17 +122,37 @@ const page = `<html><body>
 test("a player page yields settings, gear, skins and teammates without carrying affiliate links", () => {
   const config = parseProConfig(page, "cs2");
   assert.equal(config.crosshair, "CSGO-VT5h9-bzS2V-hZXPc-7WkTt-rVTVP");
-  assert.deepEqual(config.groups.map((group) => group.id), ["mouse", "crosshair", "launch_options", "video_settings"]);
+  assert.deepEqual(
+    config.groups.map((group) => group.id),
+    ["mouse", "crosshair", "launch_options", "video_settings"],
+  );
   assert.equal(config.groups[0].product?.name, "Razer DeathAdder V4 Pro");
-  assert.ok(config.groups[0].product?.image.startsWith("https://prosettings.net/wp-content/uploads/"));
+  assert.ok(
+    config.groups[0].product?.image.startsWith("https://prosettings.net/wp-content/uploads/"),
+  );
   assert.equal(config.groups[2].text, "-novid -high -tickrate 128");
-  assert.deepEqual(config.groups[3].blocks?.map((block) => `${block.title}:${block.values.length}`), ["Video:2", "Advanced Video:2"]);
-  assert.deepEqual(config.skins?.map((skin) => `${skin.tag}|${skin.name}`), ["Rifles|AK-47 | Case Hardened (Factory New)"]);
-  assert.deepEqual(config.showcases?.map((showcase) => showcase.id), ["gear"]);
+  assert.deepEqual(
+    config.groups[3].blocks?.map((block) => `${block.title}:${block.values.length}`),
+    ["Video:2", "Advanced Video:2"],
+  );
+  assert.deepEqual(
+    config.skins?.map((skin) => `${skin.tag}|${skin.name}`),
+    ["Rifles|AK-47 | Case Hardened (Factory New)"],
+  );
+  assert.deepEqual(
+    config.showcases?.map((showcase) => showcase.id),
+    ["gear"],
+  );
   const monitor = config.showcases?.[0].items[0];
   assert.equal(monitor?.tag, "Monitor");
-  assert.deepEqual(monitor?.specs.map((spec) => `${spec.label}=${spec.value}`), ["Size=24\"", "Refresh Rate=600"]);
-  assert.deepEqual(config.teammates?.map((mate) => `${mate.id}/${mate.team}`), ["m0nesy/Falcons Esports"]);
+  assert.deepEqual(
+    monitor?.specs.map((spec) => `${spec.label}=${spec.value}`),
+    ['Size=24"', "Refresh Rate=600"],
+  );
+  assert.deepEqual(
+    config.teammates?.map((mate) => `${mate.id}/${mate.team}`),
+    ["m0nesy/Falcons Esports"],
+  );
   assert.ok(!JSON.stringify(config).includes("amzn.to"));
   assert.ok(!JSON.stringify(config).includes("cs.money"));
 });

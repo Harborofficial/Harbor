@@ -14,7 +14,8 @@ const MAX_CARDS = 10;
 function releases(tracks: readonly MusicTrack[]): MusicTrack[] {
   const seen = new Set<string>();
   const out: MusicTrack[] = [];
-  for (const track of tracks.filter((track) => isRecentRelease(track.releaseDate))
+  for (const track of tracks
+    .filter((track) => isRecentRelease(track.releaseDate))
     .sort((a, b) => b.releaseDate!.localeCompare(a.releaseDate!))) {
     const title = (track.album || track.title).trim();
     const artist = track.artist.trim();
@@ -52,12 +53,26 @@ function ReleaseTitle({ text }: { text: string }) {
       card.removeEventListener("blur", reset);
     };
   }, [text]);
-  return <span className="music-cta-line" ref={viewport} title={text}>
-    <span ref={line} dir="auto" className="harbor-marquee-line" data-marquee={shift !== 0 || undefined}
-      style={shift ? ({ "--harbor-marquee": `${shift}px`, animationDuration: `${marqueeDurationMs(Math.abs(shift)) / 0.52}ms` } as CSSProperties) : undefined}>
-      {text}
+  return (
+    <span className="music-cta-line" ref={viewport} title={text}>
+      <span
+        ref={line}
+        dir="auto"
+        className="harbor-marquee-line"
+        data-marquee={shift !== 0 || undefined}
+        style={
+          shift
+            ? ({
+                "--harbor-marquee": `${shift}px`,
+                animationDuration: `${marqueeDurationMs(Math.abs(shift)) / 0.52}ms`,
+              } as CSSProperties)
+            : undefined
+        }
+      >
+        {text}
+      </span>
     </span>
-  </span>;
+  );
 }
 
 export function newReleaseCtaBand(ctx: MusicBandContext): MusicBand | null {
@@ -69,7 +84,13 @@ export function newReleaseCtaBand(ctx: MusicBandContext): MusicBand | null {
     title: t("music.newRelease.title"),
     catalog: false,
     render: (title) => (
-      <Row title={title} headerDescription={t("music.newRelease.subtitle")} min={340} shape="cta" scrollKey="music:newReleaseCtas">
+      <Row
+        title={title}
+        headerDescription={t("music.newRelease.subtitle")}
+        min={340}
+        shape="cta"
+        scrollKey="music:newReleaseCtas"
+      >
         {cards.map((track) => (
           <button
             key={`${track.connectorId ?? ""}:${track.id}`}
@@ -79,11 +100,19 @@ export function newReleaseCtaBand(ctx: MusicBandContext): MusicBand | null {
             aria-label={t("music.newRelease.listen", { title: track.album || track.title })}
           >
             <span className="music-cta-art">
-              <Poster src={track.artwork} seed={track.id} ratio="square" lazy className="h-full w-full [--poster-radius:0px]" />
+              <Poster
+                src={track.artwork}
+                seed={track.id}
+                ratio="square"
+                lazy
+                className="h-full w-full [--poster-radius:0px]"
+              />
             </span>
             <span className="music-cta-body">
               <span className="music-cta-eyebrow">{t("music.newRelease.eyebrow")}</span>
-              <ReleaseTitle text={t("music.newRelease.outNow", { title: track.album || track.title })} />
+              <ReleaseTitle
+                text={t("music.newRelease.outNow", { title: track.album || track.title })}
+              />
               <span className="music-cta-artist">{track.artist}</span>
               <span className="music-cta-play">
                 <Play size={13} fill="currentColor" aria-hidden="true" />

@@ -213,9 +213,10 @@ function normaliseSteam(item: SteamItem): ShowcaseGame | null {
   if (EXCLUDED.test(item.name)) return null;
   const score = Number(item.metascore);
   const capsule = steamCapsule(String(item.id));
-  const tiny = typeof item.tiny_image === "string" && item.tiny_image.startsWith("https://")
-    ? item.tiny_image
-    : null;
+  const tiny =
+    typeof item.tiny_image === "string" && item.tiny_image.startsWith("https://")
+      ? item.tiny_image
+      : null;
   const images = tiny ? [capsule, tiny] : [capsule];
   return {
     id: `steam:${item.id}`,

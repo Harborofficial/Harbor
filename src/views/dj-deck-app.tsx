@@ -75,9 +75,7 @@ async function fitDeck(mode: "ez" | "advanced") {
   const wide = size.width / scale;
   const tall = size.height / scale;
   if (wide >= width - 2 && tall >= height - 2) return;
-  await win
-    .setSize(new LogicalSize(Math.max(width, wide), Math.max(height, tall)))
-    .catch(() => {});
+  await win.setSize(new LogicalSize(Math.max(width, wide), Math.max(height, tall))).catch(() => {});
 }
 
 async function toggleMax() {
@@ -142,7 +140,9 @@ export function DjDeckApp() {
     [],
   );
   useEffect(() => {
-    void deckWindow()?.setDecorations(nativeChrome).catch(() => {});
+    void deckWindow()
+      ?.setDecorations(nativeChrome)
+      .catch(() => {});
   }, [nativeChrome]);
   useEffect(() => {
     void readWave().then((saved) => setWave(saved === "on"));
@@ -229,43 +229,43 @@ export function DjDeckApp() {
       )}
       <header className="dj-top" data-tauri-drag-region={nativeChrome ? undefined : true}>
         <span className="dj-top-tools">
-        <span className="dj-modes" role="group" aria-label={t("dj.mode.switch")}>
-          <button type="button" data-on={!advanced || undefined} onClick={() => swap("ez")}>
-            {t("dj.mode.ez")}
-          </button>
-          <button type="button" data-on={advanced || undefined} onClick={() => swap("advanced")}>
-            {t("dj.mode.advanced")}
-          </button>
-        </span>
+          <span className="dj-modes" role="group" aria-label={t("dj.mode.switch")}>
+            <button type="button" data-on={!advanced || undefined} onClick={() => swap("ez")}>
+              {t("dj.mode.ez")}
+            </button>
+            <button type="button" data-on={advanced || undefined} onClick={() => swap("advanced")}>
+              {t("dj.mode.advanced")}
+            </button>
+          </span>
 
-        <Dropdown
-          size="sm"
-          className="dj-preset"
-          value={presetId}
-          placeholder={t("dj.preset")}
-          ariaLabel={t("dj.preset")}
-          options={MUSIC_EQ_PRESETS.map((preset) => ({
-            value: preset.id,
-            label: t(preset.labelKey),
-          }))}
-          onChange={applyPreset}
-        />
+          <Dropdown
+            size="sm"
+            className="dj-preset"
+            value={presetId}
+            placeholder={t("dj.preset")}
+            ariaLabel={t("dj.preset")}
+            options={MUSIC_EQ_PRESETS.map((preset) => ({
+              value: preset.id,
+              label: t(preset.labelKey),
+            }))}
+            onChange={applyPreset}
+          />
 
-        {advanced && (
-          <button
-            type="button"
-            className="dj-wavedrop-head"
-            aria-expanded={wave}
-            data-on={wave || undefined}
-            onClick={() => {
-              setWave(!wave);
-              writeWave(!wave);
-            }}
-          >
-            <ChevronDown size={13} aria-hidden="true" />
-            <span>{t("dj.wave.title")}</span>
-          </button>
-        )}
+          {advanced && (
+            <button
+              type="button"
+              className="dj-wavedrop-head"
+              aria-expanded={wave}
+              data-on={wave || undefined}
+              onClick={() => {
+                setWave(!wave);
+                writeWave(!wave);
+              }}
+            >
+              <ChevronDown size={13} aria-hidden="true" />
+              <span>{t("dj.wave.title")}</span>
+            </button>
+          )}
         </span>
         <span className="dj-chrome" hidden={nativeChrome}>
           <button
@@ -501,30 +501,30 @@ export function DjDeckApp() {
       {advanced && (
         <section className="dj-panels">
           <div className="dj-panel">
-          <FxBay
-            fx={fxDeck.fx}
-            adjust={fxDeck.adjust}
-            release={fxDeck.release}
-            running={fxDeck.running}
-            ready={fxDeck.ready}
-            divisions={fxDeck.divisions}
-            kinds={fxDeck.kinds}
-          />
+            <FxBay
+              fx={fxDeck.fx}
+              adjust={fxDeck.adjust}
+              release={fxDeck.release}
+              running={fxDeck.running}
+              ready={fxDeck.ready}
+              divisions={fxDeck.divisions}
+              kinds={fxDeck.kinds}
+            />
           </div>
           <div className="dj-panel">
-          <DeckB next={state.queue[state.queueIndex + 1]} />
+            <DeckB next={state.queue[state.queueIndex + 1]} />
           </div>
           <div className="dj-panel dj-panel-wide">
-          <PadDeck
-            trackId={track?.id ?? ""}
-            duration={state.duration}
-            playing={playing}
-            speed={settings.speed}
-            bpm={bpm}
-            readPosition={readPosition}
-            gain={sampleGain}
-            onGain={setSampleGain}
-          />
+            <PadDeck
+              trackId={track?.id ?? ""}
+              duration={state.duration}
+              playing={playing}
+              speed={settings.speed}
+              bpm={bpm}
+              readPosition={readPosition}
+              gain={sampleGain}
+              onGain={setSampleGain}
+            />
           </div>
         </section>
       )}

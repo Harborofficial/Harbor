@@ -124,7 +124,8 @@ const catalog15: Record<string, string> = {
     "Podczas automatycznego odtwarzania następnego odcinka zachowaj to samo wydanie lub źródło, z którego właśnie korzystano, zamiast najwyżej ocenionego strumienia Harbor. Jeśli to źródło jest niedostępne, użyty zostanie najlepszy strumień.",
   "When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.":
     "W trybie pełnoekranowym klawisz Esc wyłącza ten tryb zamiast zamykać odtwarzacz. Naciśnij Esc ponownie, aby go zamknąć. Wyłącz tę opcję, aby Esc zawsze zamykał odtwarzacz.",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "Gdy ta opcja jest wyłączona, transfer P2P zatrzymuje się natychmiast po zamknięciu lub zmianie strumienia, więc pobieranie nie trwa w tle. Włącz ją, aby pobieranie trwało po opuszczeniu strumienia. Możesz nim zarządzać lub je wstrzymać na karcie Pobrane.",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "Gdy ta opcja jest wyłączona, transfer P2P zatrzymuje się natychmiast po zamknięciu lub zmianie strumienia, więc pobieranie nie trwa w tle. Włącz ją, aby pobieranie trwało po opuszczeniu strumienia. Możesz nim zarządzać lub je wstrzymać na karcie Pobrane.",
   "When on, a connected controller moves focus around Harbor and drives the player. Turn it off to ignore all controllers.":
     "Po włączeniu tej opcji podłączony kontroler przenosi fokus w Harbor i steruje odtwarzaczem. Wyłącz ją, aby ignorować wszystkie kontrolery.",
   "When people share a collection it shows up here. Build one you love and share it, that is how it starts.":

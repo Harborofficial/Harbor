@@ -1,7 +1,8 @@
 export default {
   "games.tarkov.title": "Compteur des wipes et saisons",
   "games.tarkov.refresh": "Actualiser les dates",
-  "games.tarkov.refreshFailed": "Actualisation impossible. Les dates précédentes restent affichées.",
+  "games.tarkov.refreshFailed":
+    "Actualisation impossible. Les dates précédentes restent affichées.",
   "games.tarkov.seasonFailed": "Le calendrier des saisons n’a pas pu être chargé.",
   "games.tarkov.season": "Saison {number}",
   "games.tarkov.community": "Calendrier communautaire",
@@ -14,17 +15,19 @@ export default {
   "games.tarkov.listedStart": "Début indiqué :",
   "games.tarkov.noSeason": "Aucune saison active répertoriée",
   "games.tarkov.noSeasonDetail": "La source ne répertorie aucune saison actuelle ou à venir.",
-  "games.tarkov.scheduleNote": "Ces dates sont tenues à jour par tarkov.dev et peuvent changer. Il ne s’agit pas d’une annonce officielle de wipe.",
+  "games.tarkov.scheduleNote":
+    "Ces dates sont tenues à jour par tarkov.dev et peuvent changer. Il ne s’agit pas d’une annonce officielle de wipe.",
   "games.tarkov.seasonSource": "Dates des saisons · tarkov.dev",
   "games.tarkov.checked": "Vérifié le {time}",
   "games.tarkov.fullWipe": "Dernier wipe complet selon la source",
   "games.tarkov.historyFailed": "L’historique des wipes n’a pas pu être chargé.",
   "games.tarkov.elapsed": "{days} jours",
   "games.tarkov.noHistory": "Aucun wipe passé répertorié.",
-  "games.tarkov.modeNote": "La progression saisonnière et les wipes complets des comptes sont distincts. Cet historique ne décrit pas les réinitialisations des personnages persistants JcJ ou JcE.",
+  "games.tarkov.modeNote":
+    "La progression saisonnière et les wipes complets des comptes sont distincts. Cet historique ne décrit pas les réinitialisations des personnages persistants JcJ ou JcE.",
   "games.tarkov.historySource": "Dates des wipes · tarkov.dev",
   "games.tarkov.history": "Historique des wipes complets",
   "games.tarkov.patch": "Mise à jour",
   "games.tarkov.date": "Date de début (UTC)",
-  "games.tarkov.duration": "Avant le wipe complet suivant"
+  "games.tarkov.duration": "Avant le wipe complet suivant",
 };

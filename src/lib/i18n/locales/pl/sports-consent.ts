@@ -32,10 +32,13 @@ export default {
   "Show Sports": "Pokaż Sport",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "Pokaż Sport w nawigacji. Przed załadowaniem strony musisz zaakceptować powiadomienie Sportu.",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "Wlacz Sport bez dostawcy albo dodaj zrodlo Live TV, M3U lub Xtream.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "Wlacz Sport bez dostawcy albo dodaj zrodlo Live TV, M3U lub Xtream.",
   "Set up Live TV": "Skonfiguruj Live TV",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "Wyniki, terminarze i tabele dzialaja bez dostawcy. Harbor nie udostepnia transmisji, wiec obejrzenie meczu wymaga wlasnego zrodla Live TV, M3U lub Xtream.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "Wyniki, terminarze i tabele pochodza z publicznych danych sportowych i nie wymagaja dostawcy. Harbor nie udostepnia transmisji: obejrzenie meczu wymaga wlasnego zrodla Live TV, M3U lub Xtream.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "Wyniki, terminarze i tabele dzialaja bez dostawcy. Harbor nie udostepnia transmisji, wiec obejrzenie meczu wymaga wlasnego zrodla Live TV, M3U lub Xtream.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "Wyniki, terminarze i tabele pochodza z publicznych danych sportowych i nie wymagaja dostawcy. Harbor nie udostepnia transmisji: obejrzenie meczu wymaga wlasnego zrodla Live TV, M3U lub Xtream.",
   "Show Sports without a TV provider": "Pokaz Sport bez dostawcy TV",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "Włączenie Sportu nie oznacza akceptacji powiadomienia. Wybór pozostaje na tym urządzeniu i nie jest synchronizowany z kontem.",
