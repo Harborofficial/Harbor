@@ -271,7 +271,8 @@ const settingsFill: Record<string, string> = {
     "低速なアドオンやP2Pソースは、開始まで10秒以上かかることがあります。開始する前にストリームがスキップされる場合は、この時間を長くしてください。",
   "{n} sec": "{n}秒",
   "Only start the P2P engine when needed": "必要なときだけP2Pエンジンを起動",
-  "Harbor normally starts its P2P engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a P2P stream. Takes effect next launch.": "通常、Harborは最初のP2Pストリームへすばやく接続できるよう、起動時にP2Pエンジンを開始します。そのため、何も視聴していないときもDHTノードが動作し、ネットワークと通信します。従量制または通信量に制限のある接続では、これをオンにしてください。実際にP2Pストリームを初めて再生したときにエンジンが起動するようになります。次回の起動時から有効になります。",
+  "Harbor normally starts its P2P engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a P2P stream. Takes effect next launch.":
+    "通常、Harborは最初のP2Pストリームへすばやく接続できるよう、起動時にP2Pエンジンを開始します。そのため、何も視聴していないときもDHTノードが動作し、ネットワークと通信します。従量制または通信量に制限のある接続では、これをオンにしてください。実際にP2Pストリームを初めて再生したときにエンジンが起動するようになります。次回の起動時から有効になります。",
   "What fullscreen does": "全画面表示の動作",
   "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
     "全画面表示では画面全体を使用し、タスクバーを非表示にします。最大化では画面いっぱいに表示しつつ、タスクバーとタイトルバーを残すため、アプリを切り替えられます。",

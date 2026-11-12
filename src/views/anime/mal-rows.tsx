@@ -10,7 +10,9 @@ export function MalRows() {
   const { rails, loading, error, retry } = useMalAnimeRailsState();
   return (
     <>
-      {(error || (loading && rails.length === 0)) && <AnimeRowStatus title={t("Your MAL Lists")} loading={loading} onRetry={retry} />}
+      {(error || (loading && rails.length === 0)) && (
+        <AnimeRowStatus title={t("Your MAL Lists")} loading={loading} onRetry={retry} />
+      )}
       {rails.map((rail) => (
         <div key={rail.key} data-scroll-anchor={`row:mal:${rail.key}`}>
           <Row

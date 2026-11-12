@@ -125,6 +125,7 @@ test("kitsuMainTvSeries only follows parent_story or full_story, ignoring spinof
       lruGet: () => undefined,
       lruSet: () => ({ has: () => false, add: () => {} }),
     },
+    "@/lib/metadata-policy": { addonOnlyMetadata: () => false },
     "@/lib/cinemeta": {},
     "@/lib/maintenance": { registerEvictable: () => {} },
     "./source-fingerprint": { sourceFingerprint: (value: unknown) => JSON.stringify(value) },

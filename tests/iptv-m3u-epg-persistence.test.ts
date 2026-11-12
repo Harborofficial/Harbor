@@ -66,7 +66,9 @@ test("never replaces a user-entered guide URL", () => {
 });
 
 test("marks a header-less list as checked without inventing a guide URL", () => {
-  store.writePlaylists([{ id: "a", name: "A", url: "https://host.example.com/a.m3u", kind: "m3u" }]);
+  store.writePlaylists([
+    { id: "a", name: "A", url: "https://host.example.com/a.m3u", kind: "m3u" },
+  ]);
 
   store.recordM3uEpgDiscovery("a", null);
   store.recordM3uEpgDiscovery("a", null);
@@ -76,6 +78,14 @@ test("marks a header-less list as checked without inventing a guide URL", () => 
   assert.equal(a.epgHeaderChecked, true);
   assert.equal(
     globalThis.localStorage.getItem("harbor.iptv.playlists.v1"),
-    JSON.stringify([{ id: "a", name: "A", url: "https://host.example.com/a.m3u", kind: "m3u", epgHeaderChecked: true }]),
+    JSON.stringify([
+      {
+        id: "a",
+        name: "A",
+        url: "https://host.example.com/a.m3u",
+        kind: "m3u",
+        epgHeaderChecked: true,
+      },
+    ]),
   );
 });

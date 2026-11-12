@@ -195,9 +195,9 @@ export function saveEBookProgress(
 
 export function loadEBookResume(profile: string, bookId: string): EBookResume | null {
   try {
-    const value = JSON.parse(localStorage.getItem(resumeKey(profile, bookId)) || "null") as
-      | EBookResume
-      | null;
+    const value = JSON.parse(
+      localStorage.getItem(resumeKey(profile, bookId)) || "null",
+    ) as EBookResume | null;
     return value?.chapterId ? value : null;
   } catch {
     return null;
@@ -229,8 +229,7 @@ export function savedEBookChapters(profile: string, bookId: string): EBookChapte
     if (!key?.startsWith(prefix)) continue;
     try {
       const id = decodeURIComponent(key.slice(prefix.length));
-      if (id.endsWith(":harbor"))
-        chapters.set(id.slice(0, -7), { id: id.slice(0, -7), title: "" });
+      if (id.endsWith(":harbor")) chapters.set(id.slice(0, -7), { id: id.slice(0, -7), title: "" });
     } catch {}
   }
   for (const annotation of loadEBookAnnotations(profile, bookId))
@@ -366,5 +365,7 @@ export function migrateEBookChapterLocations(
     ...loadEBookBookmarks(profile, bookId).map((item) => item.chapterId),
     ...loadEBookAnnotations(profile, bookId).map((item) => item.chapterId),
   ]);
-  return legacy.filter((source) => remaining.has(source.chapter.id)).map((source) => source.chapter);
+  return legacy
+    .filter((source) => remaining.has(source.chapter.id))
+    .map((source) => source.chapter);
 }

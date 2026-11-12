@@ -34,6 +34,7 @@ export default {
   "games.ffxiv.sales": "Letzte Verkäufe",
   "games.ffxiv.sold": "Verkauft",
   "games.ffxiv.noSales": "Keine kürzlichen Verkäufe in dieser Momentaufnahme.",
-  "games.ffxiv.community": "Community-Daten können veraltet sein. Angebote können inzwischen verkauft worden sein.",
-  "games.ffxiv.open": "Auf Universalis ansehen"
+  "games.ffxiv.community":
+    "Community-Daten können veraltet sein. Angebote können inzwischen verkauft worden sein.",
+  "games.ffxiv.open": "Auf Universalis ansehen",
 };

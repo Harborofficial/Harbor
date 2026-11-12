@@ -138,7 +138,11 @@ export function TweakSlider({
   );
 }
 
-export const PICTURE_TEMPLATES: Array<{ label: string; sub: string; patch: Record<string, string | null> }> = [
+export const PICTURE_TEMPLATES: Array<{
+  label: string;
+  sub: string;
+  patch: Record<string, string | null>;
+}> = [
   {
     label: "Brighten dark movies",
     sub: "Lifts shadows so the pitch-black scenes are actually watchable.",
@@ -228,7 +232,10 @@ function tweakNumber(tweaks: Record<string, string>, key: string): number {
   return Number.isFinite(v) ? v : 0;
 }
 
-function matchesLook(tweaks: Record<string, string>, patch: Record<string, string | null>): boolean {
+function matchesLook(
+  tweaks: Record<string, string>,
+  patch: Record<string, string | null>,
+): boolean {
   const set = PICTURE_KEYS.filter((k) => tweaks[k] != null && tweaks[k] !== "");
   const wanted = Object.keys(patch).filter((k) => patch[k] !== null);
   if (set.length !== wanted.length) return false;
@@ -307,7 +314,9 @@ export function PictureDialsSection() {
   return (
     <Section
       title={t("Picture adjustments")}
-      subtitle={t("Choose a look or adjust each setting. Reset picture restores the original values.")}
+      subtitle={t(
+        "Choose a look or adjust each setting. Reset picture restores the original values.",
+      )}
     >
       <SettingRow
         wide
@@ -355,21 +364,21 @@ export function PictureDialsSection() {
           <PicturePreview tweaks={tweaks} />
         </div>
         <div className="hset-picture-sliders">
-      {DIALS.map((d) => (
-        <SettingRow key={d.mpvKey} wide label={t(d.label)} desc={t(d.desc)}>
-          <TweakSlider
-            tweaks={tweaks}
-            setTweak={setTweak}
-            mpvKey={d.mpvKey}
-            label={t(d.label)}
-            min={d.min}
-            max={d.max}
-            step={d.step}
-            def={d.def}
-            fmt={d.fmt}
-          />
-        </SettingRow>
-      ))}
+          {DIALS.map((d) => (
+            <SettingRow key={d.mpvKey} wide label={t(d.label)} desc={t(d.desc)}>
+              <TweakSlider
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey={d.mpvKey}
+                label={t(d.label)}
+                min={d.min}
+                max={d.max}
+                step={d.step}
+                def={d.def}
+                fmt={d.fmt}
+              />
+            </SettingRow>
+          ))}
         </div>
       </div>
     </Section>
@@ -453,7 +462,9 @@ export function ColorHdrSection() {
       <SettingRow
         wide
         label={t("Tone-mapping curve")}
-        desc={t("Controls how bright highlights are reduced to fit your display. The diagrams illustrate each curve.")}
+        desc={t(
+          "Controls how bright highlights are reduced to fit your display. The diagrams illustrate each curve.",
+        )}
         icon={<Contrast size={18} />}
       >
         <div className="grid w-full gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(172px,1fr))]">

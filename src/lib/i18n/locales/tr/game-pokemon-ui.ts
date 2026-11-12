@@ -25,8 +25,10 @@ export default {
   "games.pokemon.videosHint": "Çözümler ve ipuçları",
   "games.pokemon.bank": "Kayıtlar ve Pokémon",
   "games.pokemon.bankHint": "Kayıtları düzenle ve kutuları yönet",
-  "games.pokemon.bankIntro": "Takımını düzenlemek için emülatör kaydını aç veya Pokémonları tek tek koleksiyonuna aktar.",
-  "games.pokemon.guideSourceNote": "Özgün rehberi oku veya kaynak erişilebilir olduğunda burada aç.",
+  "games.pokemon.bankIntro":
+    "Takımını düzenlemek için emülatör kaydını aç veya Pokémonları tek tek koleksiyonuna aktar.",
+  "games.pokemon.guideSourceNote":
+    "Özgün rehberi oku veya kaynak erişilebilir olduğunda burada aç.",
   "games.pokemon.readGuide": "Bulbapedia’da oku",
   "games.pokemon.readInside": "Harbor’da oku",
   "games.pokemon.closeReader": "Okuyucuyu kapat",
@@ -34,19 +36,25 @@ export default {
   "games.pokemon.imageSaved": "{name} görseli kaydedildi",
   "games.pokemon.imageFailed": "İndirilemedi. Tekrar dene.",
   "games.pokemon.saveStart": "Emülatör mü kullanıyorsun?",
-  "games.pokemon.emulatorSave": "Oyunun kendi menüsünden kaydettiğinde emülatör bir kayıt dosyası oluşturur.",
+  "games.pokemon.emulatorSave":
+    "Oyunun kendi menüsünden kaydettiğinde emülatör bir kayıt dosyası oluşturur.",
   "games.pokemon.saveStep1": "Oyunu aç ve oyun menüsünden Kaydet’i seç.",
-  "games.pokemon.saveStep2": "Oyunu kapat, ardından pil kaydını (.sav, .srm veya .dsv) bul veya dışa aktar.",
-  "games.pokemon.saveStep3": "Harbor’da düzenlemek için yukarıdaki Oyun kaydını aç seçeneğini kullan.",
+  "games.pokemon.saveStep2":
+    "Oyunu kapat, ardından pil kaydını (.sav, .srm veya .dsv) bul veya dışa aktar.",
+  "games.pokemon.saveStep3":
+    "Harbor’da düzenlemek için yukarıdaki Oyun kaydını aç seçeneğini kullan.",
   "games.pokemon.findSave": "Kaydım nerede?",
-  "games.pokemon.saveLocations": "ROM’un yanında veya emülatörün kayıt klasöründe ara. Yalnızca durum kaydın varsa emülatörde yükle, ardından oyun menüsünden kaydet.",
+  "games.pokemon.saveLocations":
+    "ROM’un yanında veya emülatörün kayıt klasöründe ara. Yalnızca durum kaydın varsa emülatörde yükle, ardından oyun menüsünden kaydet.",
   "games.pokemon.noSave": "Henüz kaydın yok mu?",
   "games.pokemon.communitySaves": "Topluluk kayıtlarına göz at",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Tam oyununu seç ve paylaşanın notlarını kontrol et.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Tam oyununu seç ve paylaşanın notlarını kontrol et.",
   "games.pokemon.pkhexNote": "Geliştiricilerden kayıt düzenleyici, indirmeler ve yardım.",
-  "games.pokemon.noSaveNeeded": "Oyun kaydı olmadan Pokémon dosyalarını içe aktarabilirsin. Kayıt yalnızca oyunun takımını veya kutularını düzenlemek için gerekir.",
+  "games.pokemon.noSaveNeeded":
+    "Oyun kaydı olmadan Pokémon dosyalarını içe aktarabilirsin. Kayıt yalnızca oyunun takımını veya kutularını düzenlemek için gerekir.",
   "games.pokemon.videoUnavailable": "Videolar burada yüklenemedi.",
   "games.pokemon.youtubeSearch": "YouTube’da ara",
   "games.hub.downloadApply": "Yamayı indir",
-  "games.hub.manualPatch": "Elindeki yamayı veya bağlantıyı kullan"
+  "games.hub.manualPatch": "Elindeki yamayı veya bağlantıyı kullan",
 };

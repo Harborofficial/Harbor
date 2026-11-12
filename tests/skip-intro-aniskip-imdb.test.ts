@@ -12,8 +12,11 @@ const identity = read("src/lib/streams/anime-identity.ts");
 test("the eligibility gate already accepts tt and tmdb series", () => {
   // AIOMetadata and Cinemeta both hand out tt ids for series, which left AniSkip unused.
   assert.match(identity, /metaId\.startsWith\("tt"\) \|\| metaId\.startsWith\("tmdb:tv:"\)/);
-  assert.match(identity, /if \(episode\.kitsuStreamId != null\) return false;/,
-    "an id that already names its entry needs no mapping");
+  assert.match(
+    identity,
+    /if \(episode\.kitsuStreamId != null\) return false;/,
+    "an id that already names its entry needs no mapping",
+  );
 });
 
 test("AniSkip is no longer keyed off the raw kitsu id alone", () => {

@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Bohaterowie Stadionu",
   "games.overwatch.searchHeroes": "Znajdź bohatera",
   "games.overwatch.refresh": "Odśwież poradnik",
-  "games.overwatch.unavailable": "Nie udało się odświeżyć poradnika. Wcześniej wczytane informacje mogą nadal być widoczne.",
+  "games.overwatch.unavailable":
+    "Nie udało się odświeżyć poradnika. Wcześniej wczytane informacje mogą nadal być widoczne.",
   "games.overwatch.partial": "Niektóre wpisy są niedostępne.",
   "games.overwatch.checked": "Sprawdzono: {date}",
-  "games.overwatch.scope": "Informacje o bohaterach od Blizzard za pośrednictwem OverFast. Zmiany balansu mogą trafić do gry przed aktualizacją poradnika.",
-  "games.overwatch.mapsScope": "Mapy i tryby z OverFast. Obejmuje mapy Salonu gier i starsze mapy; dostępność zależy od trybu.",
+  "games.overwatch.scope":
+    "Informacje o bohaterach od Blizzard za pośrednictwem OverFast. Zmiany balansu mogą trafić do gry przed aktualizacją poradnika.",
+  "games.overwatch.mapsScope":
+    "Mapy i tryby z OverFast. Obejmuje mapy Salonu gier i starsze mapy; dostępność zależy od trybu.",
   "games.overwatch.empty": "Brak wyników. Zmień wyszukiwanie lub filtr.",
   "games.overwatch.moreHeroes": "Więcej bohaterów",
   "games.overwatch.moreMaps": "Więcej map",
@@ -30,9 +33,9 @@ export default {
   "games.overwatch.watchDemo": "Obejrzyj pokaz",
   "games.overwatch.hideDemo": "Ukryj pokaz",
   "games.overwatch.closeDemo": "Zamknij pokaz",
-  "games.overwatch.videoFailed": "Nie udało się odtworzyć pokazu. Obejrzyj go na oficjalnej stronie bohatera.",
+  "games.overwatch.videoFailed":
+    "Nie udało się odtworzyć pokazu. Obejrzyj go na oficjalnej stronie bohatera.",
   "games.overwatch.mode": "Tryb gry",
   "games.overwatch.allModes": "Wszystkie tryby",
-  "games.overwatch.searchMaps": "Szukaj map lub miejsc"
+  "games.overwatch.searchMaps": "Szukaj map lub miejsc",
 };
-

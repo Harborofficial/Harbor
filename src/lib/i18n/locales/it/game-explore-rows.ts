@@ -14,7 +14,8 @@ export default {
   "games.discovery.steamVerdict.Positive": "Positive",
   "games.discovery.steamVerdict.Very Positive": "Molto positive",
   "games.discovery.steamVerdict.Overwhelmingly Positive": "Estremamente positive",
-  "games.discovery.ratingNote.steam": "Percentuale di recensioni dei giocatori di Steam che consigliano questo gioco.",
+  "games.discovery.ratingNote.steam":
+    "Percentuale di recensioni dei giocatori di Steam che consigliano questo gioco.",
   "games.launchers.explore": "Esplora per launcher",
   "games.launchers.note": "Scopri giochi su diversi launcher per PC.",
   "games.launchers.choose": "Scegli un launcher",
@@ -23,7 +24,8 @@ export default {
   "games.launchers.visit": "Visita {name}",
   "games.launchers.picks": "Giochi selezionati",
   "games.launchers.unavailable": "Impossibile caricare i dettagli aggiornati dei giochi.",
-  "games.launchers.source": "Dettagli dei giochi da IGDB · I link dei launcher aprono i siti ufficiali.",
+  "games.launchers.source":
+    "Dettagli dei giochi da IGDB · I link dei launcher aprono i siti ufficiali.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +61,8 @@ export default {
   "games.recent.open": "Apri {name} da {source}",
   "games.recent.files": "File della fonte",
   "games.recent.empty": "Collega una fonte di giochi per vedere qui le ultime aggiunte.",
-  "games.recent.undated": "Le tue fonti non hanno ancora giochi con una data di caricamento. Sfogliale in Gestisci fonti.",
+  "games.recent.undated":
+    "Le tue fonti non hanno ancora giochi con una data di caricamento. Sfogliale in Gestisci fonti.",
   "games.recent.adult": "Contenuto per adulti · immagine sfocata",
   "games.recent.artHidden": "Immagine nascosta",
   "games.recent.artUnrated": "Classificazione dei contenuti non disponibile",
@@ -85,7 +88,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Ricavi arcade, 1980–1999",
   "games.collectionsLive.wowRecord": "Picco di abbonati paganti",
   "games.collectionsLive.wiiRecord": "Copie vendute su Wii",
-  "games.collectionsLive.manhuntRecord": "Primo gioco d’azione e avventura a cui fu negata la classificazione britannica",
+  "games.collectionsLive.manhuntRecord":
+    "Primo gioco d’azione e avventura a cui fu negata la classificazione britannica",
   "games.collectionsLive.gtaVSalesRecord": "Il gioco d’azione e avventura più venduto",
   "games.collectionsLive.blackOps3Record": "Lo sparatutto in prima persona più venduto",
   "games.collectionsLive.smashUltimateRecord": "Il picchiaduro più venduto",
@@ -109,9 +113,11 @@ export default {
   "games.collectionsLive.maddenSeriesRecord": "La serie di football americano più venduta",
   "games.collectionsLive.nba2kSeriesRecord": "La serie di basket più venduta",
   "games.collectionsLive.honorKingsRecord": "I maggiori incassi di sempre per un gioco mobile",
-  "games.collectionsLive.gearsBillionRecord": "La prima serie di sparatutto in terza persona a riuscirci",
+  "games.collectionsLive.gearsBillionRecord":
+    "La prima serie di sparatutto in terza persona a riuscirci",
   "games.collectionsLive.oldRepublicRecord": "Il MMORPG più costoso mai sviluppato",
-  "games.collectionsLive.mario64AuctionRecord": "La cifra più alta mai pagata per un gioco all’asta",
+  "games.collectionsLive.mario64AuctionRecord":
+    "La cifra più alta mai pagata per un gioco all’asta",
   "games.collectionsLive.dotaPrizeRecord": "Il montepremi esport più alto della sua epoca",
   "games.collectionsLive.ocarinaScoreRecord": "Il voto della critica più alto mai registrato",
   "games.collectionsLive.breathScoreRecord": "Il gioco open world più votato",
@@ -125,7 +131,8 @@ export default {
   "games.collectionsLive.odysseyScoreRecord": "Il gioco Switch più votato",
   "games.collectionsLive.hawkScoreRecord": "Il gioco PlayStation più votato",
   "games.collectionsLive.soulScoreRecord": "Il gioco Dreamcast più votato",
-  "games.collectionsLive.crossfirePlayersRecord": "Giocatori registrati, un record per uno sparatutto",
+  "games.collectionsLive.crossfirePlayersRecord":
+    "Giocatori registrati, un record per uno sparatutto",
   "games.collectionsLive.candyPlayersRecord": "Giocatori mensili al suo apice",
   "games.collectionsLive.gta6TrailerRecord": "Visualizzazioni del trailer in 24 ore",
   "games.collectionsLive.fortniteConcertRecord": "Spettatori a un singolo concerto nel gioco",
@@ -142,8 +149,10 @@ export default {
   "games.tournaments.checked": "Date degli organizzatori verificate il {date}",
   "games.tournaments.schedule": "Dettagli ufficiali dell’evento",
   "games.tournaments.watch": "Dove guardare",
-  "games.tournaments.channelsNote": "Canali ufficiali. La copertura segue il calendario del torneo.",
-  "games.tournaments.broadcastPending": "I dettagli della trasmissione non sono ancora confermati qui. Consulta il sito dell’organizzatore.",
+  "games.tournaments.channelsNote":
+    "Canali ufficiali. La copertura segue il calendario del torneo.",
+  "games.tournaments.broadcastPending":
+    "I dettagli della trasmissione non sono ancora confermati qui. Consulta il sito dell’organizzatore.",
   "games.tournaments.noDates": "Nessun prossimo Major confermato in questo calendario.",
   "games.launchers.topGames": "Più giocati su Steam",
   "games.launchers.chartRank": "N. {rank} tra i più giocati",

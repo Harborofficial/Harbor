@@ -1,16 +1,22 @@
 export default {
-  "games.pokemon.bankUnreadable": "一部のポケモンを読み込めませんでした（{count}件）。ファイルはこの端末に残っています。",
-  "games.pokemon.bankTruncated": "最初の10,000件を表示しています。すべてのファイルはこの端末に残っています。",
+  "games.pokemon.bankUnreadable":
+    "一部のポケモンを読み込めませんでした（{count}件）。ファイルはこの端末に残っています。",
+  "games.pokemon.bankTruncated":
+    "最初の10,000件を表示しています。すべてのファイルはこの端末に残っています。",
   "games.pokemon.showBankFolder": "バンクのフォルダーを表示",
   "games.pokemon.noChoices": "一致する項目がありません。",
   "games.pokemon.detectedSaves": "このゲームのセーブデータ",
   "games.pokemon.refreshSaves": "セーブデータを再検索",
-  "games.pokemon.discoverFailed": "セーブデータを検索できませんでした。再検索するか、ファイルを選んでください。",
-  "games.pokemon.noDetectedSaves": "セーブデータが見つかりません。ゲーム内でセーブするか、エミュレーターのセーブファイルを選んでください。",
+  "games.pokemon.discoverFailed":
+    "セーブデータを検索できませんでした。再検索するか、ファイルを選んでください。",
+  "games.pokemon.noDetectedSaves":
+    "セーブデータが見つかりません。ゲーム内でセーブするか、エミュレーターのセーブファイルを選んでください。",
   "games.pokemon.saveOrigin.harbor": "Harborのセーブデータ",
   "games.pokemon.saveOrigin.adjacent": "ROMと同じフォルダー",
-  "games.pokemon.error.pokemon_hack_export": "このROMハックの追加ポケモンデータをまだ保持できないため、バンクへの書き出しは準備中です。セーブデータの確認と編集は利用できます。",
-  "games.pokemon.error.pokemon_save_running": "編集を保存する前に、Harborでこのゲームを終了してください。プレビューはそのまま残ります。",
+  "games.pokemon.error.pokemon_hack_export":
+    "このROMハックの追加ポケモンデータをまだ保持できないため、バンクへの書き出しは準備中です。セーブデータの確認と編集は利用できます。",
+  "games.pokemon.error.pokemon_save_running":
+    "編集を保存する前に、Harborでこのゲームを終了してください。プレビューはそのまま残ります。",
   "games.pokemon.title": "あなたのポケモンの冒険",
   "games.pokemon.intro": "次の道を見つけよう。仲間を育てよう。ポケモンと、どこまでも。",
   "games.pokemon.browse": "このポケモンのゲームを調べる",
@@ -29,21 +35,26 @@ export default {
   "games.pokemon.levelRange": "Lv. {min}～{max}",
   "games.pokemon.level": "Lv. {level}",
   "games.pokemon.levelLabel": "レベル",
-  "games.pokemon.noEncounters": "このバージョンの出現情報は登録されていません。もらえるポケモン、交換、特別なイベントの情報が含まれない場合があります。",
+  "games.pokemon.noEncounters":
+    "このバージョンの出現情報は登録されていません。もらえるポケモン、交換、特別なイベントの情報が含まれない場合があります。",
   "games.pokemon.backDex": "ポケモン一覧に戻る",
   "games.pokemon.pokemonDetails": "ポケモンの詳細",
   "games.pokemon.moves": "わざ",
   "games.pokemon.evolution": "進化",
   "games.pokemon.stats": "能力・特性",
-  "games.pokemon.editionMoves": "このバージョンで覚えるわざです。レベルアップ、わざマシン、教えわざを含みます。",
+  "games.pokemon.editionMoves":
+    "このバージョンで覚えるわざです。レベルアップ、わざマシン、教えわざを含みます。",
   "games.pokemon.noMoves": "このバージョンの習得わざ情報はありません。",
-  "games.pokemon.evolutionScope": "現在のデータに基づく進化系統全体です。後の作品で追加された進化や条件は、このゲームには存在しない場合があります。",
-  "games.pokemon.currentStats": "PokeAPIの現在の種族値と特性です。過去の作品とは異なる場合があります。上のタイプ表示は、このゲームの世代に対応しています。",
+  "games.pokemon.evolutionScope":
+    "現在のデータに基づく進化系統全体です。後の作品で追加された進化や条件は、このゲームには存在しない場合があります。",
+  "games.pokemon.currentStats":
+    "PokeAPIの現在の種族値と特性です。過去の作品とは異なる場合があります。上のタイプ表示は、このゲームの世代に対応しています。",
   "games.pokemon.dexScope": "このゲームの地方図鑑です。カードの番号は全国図鑑の番号です。",
   "games.pokemon.searchPokemon": "ポケモンの名前・番号で検索",
   "games.pokemon.loadMore": "もっと見る",
   "games.pokemon.noResults": "検索条件に合うポケモンがいません。",
-  "games.pokemon.noRetailDex": "このゲームに対応する確認済みの図鑑はまだありません。ROMハックや外伝作品に、本編の図鑑をそのまま当てはめることはありません。",
+  "games.pokemon.noRetailDex":
+    "このゲームに対応する確認済みの図鑑はまだありません。ROMハックや外伝作品に、本編の図鑑をそのまま当てはめることはありません。",
   "games.pokemon.unavailable": "現在、この情報源を利用できません。もう一度お試しください。",
   "games.pokemon.readProgress": "章を選んでください。読んでいた位置と完了した章が保存されます。",
   "games.pokemon.chapters": "攻略ガイドの章",
@@ -51,28 +62,35 @@ export default {
   "games.pokemon.completed": "完了",
   "games.pokemon.markComplete": "完了にする",
   "games.pokemon.nextChapter": "次の章",
-  "games.pokemon.locationScope": "この地方の場所を調べられます。出現情報は選択したバージョンだけに絞られています。",
+  "games.pokemon.locationScope":
+    "この地方の場所を調べられます。出現情報は選択したバージョンだけに絞られています。",
   "games.pokemon.searchLocation": "道路・場所を検索",
   "games.pokemon.chooseLocation": "場所を選ぶと、出現するポケモンが表示されます。",
   "games.pokemon.noLocations": "このゲームの場所の情報はまだありません。",
-  "games.pokemon.mapScope": "Bulbagarden Archivesの原作マップです。複数作品の画像を含む場合は、画像タイトルでバージョンを確認できます。",
+  "games.pokemon.mapScope":
+    "Bulbagarden Archivesの原作マップです。複数作品の画像を含む場合は、画像タイトルでバージョンを確認できます。",
   "games.pokemon.searchMaps": "読み込み済みのマップを検索",
   "games.pokemon.moreMaps": "マップをさらに読み込む",
   "games.pokemon.noMaps": "このゲームに対応する確認済みのマップ集はまだありません。",
   "games.pokemon.searchVideos": "攻略・ヒントを検索",
-  "games.pokemon.noVideos": "動画が見つかりません。道路、ボス、ポケモンの名前で検索してみてください。",
-  "games.pokemon.sources": "ポケモンデータ：PokeAPI · 攻略：Bulbapedia · マップ：Bulbagarden Archives · 動画：YouTube。情報の範囲は作品によって異なります。",
-  "games.pokemon.bankIntro": "セーブデータを開き、ポケモンを編集して、変更を確認してから保存できます。",
+  "games.pokemon.noVideos":
+    "動画が見つかりません。道路、ボス、ポケモンの名前で検索してみてください。",
+  "games.pokemon.sources":
+    "ポケモンデータ：PokeAPI · 攻略：Bulbapedia · マップ：Bulbagarden Archives · 動画：YouTube。情報の範囲は作品によって異なります。",
+  "games.pokemon.bankIntro":
+    "セーブデータを開き、ポケモンを編集して、変更を確認してから保存できます。",
   "games.pokemon.openSave": "セーブデータを開く",
   "games.pokemon.importPokemon": "ポケモンファイルを読み込む",
-  "games.pokemon.engineMissing": "このHarborには、ポケモン用エンジンがまだインストールされていません。",
+  "games.pokemon.engineMissing":
+    "このHarborには、ポケモン用エンジンがまだインストールされていません。",
   "games.pokemon.bankError": "操作を完了できませんでした。",
   "games.pokemon.bankBrowse": "ポケモンを表示",
   "games.pokemon.gameSave": "セーブデータ",
   "games.pokemon.myBank": "マイバンク",
   "games.pokemon.readOnly": "このセーブデータは閲覧専用です。",
   "games.pokemon.bankWelcome": "ポケモンたちの居場所",
-  "games.pokemon.bankPrivacy": "セーブデータとバンクは、この端末に保存されます。エミュレーターのステートではなく、ゲーム内で保存したデータを開いてください。編集前にゲームを終了してください。",
+  "games.pokemon.bankPrivacy":
+    "セーブデータとバンクは、この端末に保存されます。エミュレーターのステートではなく、ゲーム内で保存したデータを開いてください。編集前にゲームを終了してください。",
   "games.pokemon.box": "ボックスを選択",
   "games.pokemon.party": "手持ち",
   "games.pokemon.slot": "枠 {slot}",
@@ -85,14 +103,19 @@ export default {
   "games.pokemon.edited": "{name}を編集",
   "games.pokemon.released": "セーブデータから{name}を削除",
   "games.pokemon.release": "セーブデータからの削除を準備",
-  "games.pokemon.chooseSlot": "ポケモンを選んで確認・編集できます。空き枠を選ぶと、新しく作成できます。",
-  "games.pokemon.bankCopies": "預けても、元のポケモンはセーブデータに残ります。転送後も、バンクのコピーは残ります。",
-  "games.pokemon.emptyBank": "バンクは空です。開いたセーブデータから預けるか、ポケモンファイルを読み込んでください。",
-  "games.pokemon.transferHint": "セーブデータの空き枠を選び、このポケモンの転送内容を確認してください。",
+  "games.pokemon.chooseSlot":
+    "ポケモンを選んで確認・編集できます。空き枠を選ぶと、新しく作成できます。",
+  "games.pokemon.bankCopies":
+    "預けても、元のポケモンはセーブデータに残ります。転送後も、バンクのコピーは残ります。",
+  "games.pokemon.emptyBank":
+    "バンクは空です。開いたセーブデータから預けるか、ポケモンファイルを読み込んでください。",
+  "games.pokemon.transferHint":
+    "セーブデータの空き枠を選び、このポケモンの転送内容を確認してください。",
   "games.pokemon.previewTransfer": "セーブデータへの転送を確認",
   "games.pokemon.imported": "バンクからポケモンを読み込み",
   "games.pokemon.review": "変更内容を確認",
-  "games.pokemon.reviewNote": "変更はまだ保存されていません。ゲームは終了したままにしてください。保存する前に、元のデータをバックアップします。",
+  "games.pokemon.reviewNote":
+    "変更はまだ保存されていません。ゲームは終了したままにしてください。保存する前に、元のデータをバックアップします。",
   "games.pokemon.discard": "変更を破棄",
   "games.pokemon.commit": "バックアップして保存",
   "games.pokemon.savedBackup": "保存しました。元のデータはバックアップ済みです。",
@@ -101,7 +124,8 @@ export default {
   "games.pokemon.localEngine": "ローカルセーブエンジン · GPL-3.0-or-later",
   "games.pokemon.create": "ポケモンを作成",
   "games.pokemon.showdown": "Pokémon Showdownのセット",
-  "games.pokemon.createNote": "ポケモンとレベルを選んでください。エンジンがこのゲームで可能な入手条件を探し、非対応の組み合わせは拒否します。下にShowdownのセットを貼り付けることもできます。",
+  "games.pokemon.createNote":
+    "ポケモンとレベルを選んでください。エンジンがこのゲームで可能な入手条件を探し、非対応の組み合わせは拒否します。下にShowdownのセットを貼り付けることもできます。",
   "games.pokemon.previewCreate": "ポケモンをプレビュー",
   "games.pokemon.nickname": "ニックネーム",
   "games.pokemon.nature": "性格",
@@ -111,17 +135,25 @@ export default {
   "games.pokemon.move": "わざ {number}",
   "games.pokemon.training": "個体値・努力値",
   "games.pokemon.previewEdits": "変更を確認",
-  "games.pokemon.error.pokemon_engine_missing": "このHarborには、ポケモン用エンジンがまだインストールされていません。",
+  "games.pokemon.error.pokemon_engine_missing":
+    "このHarborには、ポケモン用エンジンがまだインストールされていません。",
   "games.pokemon.error.pokemon_engine_start": "ポケモン用エンジンを起動できませんでした。",
-  "games.pokemon.error.pokemon_engine_timeout": "エンジンの処理がタイムアウトしました。セーブデータは変更されていません。",
+  "games.pokemon.error.pokemon_engine_timeout":
+    "エンジンの処理がタイムアウトしました。セーブデータは変更されていません。",
   "games.pokemon.error.pokemon_read": "選択したファイルを読み込めませんでした。",
-  "games.pokemon.error.pokemon_file": "対応するセーブデータまたはポケモンファイルを選択してください。",
-  "games.pokemon.error.pokemon_save_changed": "Harborの外でセーブデータが変更されました。開き直してから続けてください。",
-  "games.pokemon.error.pokemon_review_changed": "確認内容が古くなっています。変更をもう一度確認してください。",
-  "games.pokemon.error.pokemon_write": "ファイルを保存できませんでした。バックアップは残っています。",
-  "games.pokemon.error.pokemon_export_exists": "同じ名前のファイルが既にあります。別の名前を選択してください。",
+  "games.pokemon.error.pokemon_file":
+    "対応するセーブデータまたはポケモンファイルを選択してください。",
+  "games.pokemon.error.pokemon_save_changed":
+    "Harborの外でセーブデータが変更されました。開き直してから続けてください。",
+  "games.pokemon.error.pokemon_review_changed":
+    "確認内容が古くなっています。変更をもう一度確認してください。",
+  "games.pokemon.error.pokemon_write":
+    "ファイルを保存できませんでした。バックアップは残っています。",
+  "games.pokemon.error.pokemon_export_exists":
+    "同じ名前のファイルが既にあります。別の名前を選択してください。",
   "games.pokemon.error.pokemon_session": "セーブデータを開き直してから続けてください。",
-  "games.pokemon.error.pokemon_session_limit": "別のポケモンのセーブデータを閉じてから開いてください。",
+  "games.pokemon.error.pokemon_session_limit":
+    "別のポケモンのセーブデータを閉じてから開いてください。",
   "games.pokemon.allBoxes": "すべてのボックス",
   "games.pokemon.boxNumber": "ボックス {number}",
   "games.pokemon.moveToBox": "移動先のボックス",
@@ -153,10 +185,14 @@ export default {
   "games.pokemon.field.currentHp": "現在のHP",
   "games.pokemon.field.statusCondition": "状態異常",
   "games.pokemon.error.generic": "操作に失敗しました。選択したセーブデータは上書きされていません。",
-  "games.pokemon.error.pokemon_save_open": "このセーブデータは別のポケモン作業画面で開かれています。",
-  "games.pokemon.error.pokemon_draft_limit": "編集を続ける前に、現在の変更を保存するか破棄してください。",
-  "games.pokemon.error.pokemon_draft_changed": "セーブデータが変更されたか読み込めないため、以前の下書きを復元できませんでした。下書きはローカルの復旧用ストレージに残っています。",
-  "games.pokemon.draftKept": "未保存の変更はこの端末に残ります。同じセーブデータを開くと、下書きから続けられます。",
+  "games.pokemon.error.pokemon_save_open":
+    "このセーブデータは別のポケモン作業画面で開かれています。",
+  "games.pokemon.error.pokemon_draft_limit":
+    "編集を続ける前に、現在の変更を保存するか破棄してください。",
+  "games.pokemon.error.pokemon_draft_changed":
+    "セーブデータが変更されたか読み込めないため、以前の下書きを復元できませんでした。下書きはローカルの復旧用ストレージに残っています。",
+  "games.pokemon.draftKept":
+    "未保存の変更はこの端末に残ります。同じセーブデータを開くと、下書きから続けられます。",
   "games.pokemon.operation.edit": "ポケモンを編集",
   "games.pokemon.operation.import": "バンクから転送",
   "games.pokemon.operation.create": "ポケモンを作成",
@@ -182,7 +218,8 @@ export default {
   "games.pokemon.evolution.min_beauty": "最低うつくしさ",
   "games.pokemon.evolution.min_affection": "最低なかよし度",
   "games.pokemon.evolution.gender": "性別（1：メス、2：オス）",
-  "games.pokemon.evolution.relative_physical_stats": "こうげきとぼうぎょの比較（−1：低い、0：同じ、1：高い）",
+  "games.pokemon.evolution.relative_physical_stats":
+    "こうげきとぼうぎょの比較（−1：低い、0：同じ、1：高い）",
   "games.pokemon.evolution.time_of_day": "時間帯",
   "games.pokemon.evolution.needs_overworld_rain": "雨が必要",
   "games.pokemon.evolution.turn_upside_down": "端末を逆さにする",
@@ -190,6 +227,7 @@ export default {
   "games.pokemon.searchBank": "バンクを検索",
   "games.pokemon.movePokemon": "このセーブデータ内で移動",
   "games.pokemon.destinationSlot": "移動先の枠を選択",
-  "games.pokemon.swapHint": "移動先にポケモンがいる場合は入れ替わります。保存する前に移動内容を確認してください。",
+  "games.pokemon.swapHint":
+    "移動先にポケモンがいる場合は入れ替わります。保存する前に移動内容を確認してください。",
   "games.pokemon.previewMove": "移動を確認",
 };

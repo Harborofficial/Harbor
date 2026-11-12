@@ -12,7 +12,16 @@ import "./video-pip.css";
 type MpvEvent = { event: string; name?: string; data?: unknown };
 
 const IDLE_MS = 2200;
-const EDGES = ["North", "South", "East", "West", "NorthEast", "NorthWest", "SouthEast", "SouthWest"] as const;
+const EDGES = [
+  "North",
+  "South",
+  "East",
+  "West",
+  "NorthEast",
+  "NorthWest",
+  "SouthEast",
+  "SouthWest",
+] as const;
 
 function clock(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
@@ -59,7 +68,11 @@ export function VideoPipApp() {
       const stop = await listen<MpvEvent>("mpv://event", (event) => {
         const payload = event.payload;
         if (payload?.event === "file-loaded") {
-          void invoke<unknown>("mpv_get_property", { name: "media-title" }).then(value => { if (!cancelled && typeof value === "string") setTitle(value); }).catch(() => {});
+          void invoke<unknown>("mpv_get_property", { name: "media-title" })
+            .then((value) => {
+              if (!cancelled && typeof value === "string") setTitle(value);
+            })
+            .catch(() => {});
         }
         if (!payload || payload.event !== "property-change") return;
         const { name, data } = payload;
@@ -89,17 +102,28 @@ export function VideoPipApp() {
     let off: (() => void) | undefined;
     const refresh = () => {
       for (const name of ["media-title", "pause", "time-pos", "duration"]) {
-        void invoke<unknown>("mpv_get_property", { name }).then(value => {
-          if (cancelled) return;
-          if (name === "media-title" && typeof value === "string") setTitle(value);
-          if (name === "pause" && typeof value === "boolean") setPaused(value);
-          if (name === "time-pos" && typeof value === "number") setPosition(value);
-          if (name === "duration" && typeof value === "number") setDuration(value);
-        }).catch(() => {});
+        void invoke<unknown>("mpv_get_property", { name })
+          .then((value) => {
+            if (cancelled) return;
+            if (name === "media-title" && typeof value === "string") setTitle(value);
+            if (name === "pause" && typeof value === "boolean") setPaused(value);
+            if (name === "time-pos" && typeof value === "number") setPosition(value);
+            if (name === "duration" && typeof value === "number") setDuration(value);
+          })
+          .catch(() => {});
       }
     };
-    void listen("pip://detached-entered", refresh).then(stop => { if (cancelled) stop(); else { off = stop; refresh(); } });
-    return () => { cancelled = true; off?.(); };
+    void listen("pip://detached-entered", refresh).then((stop) => {
+      if (cancelled) stop();
+      else {
+        off = stop;
+        refresh();
+      }
+    });
+    return () => {
+      cancelled = true;
+      off?.();
+    };
   }, []);
 
   useEffect(() => {
@@ -112,12 +136,19 @@ export function VideoPipApp() {
   const toggle = useCallback(() => {
     const next = !paused;
     tracePlayback(`${next ? "pause" : "play"} source=video-pip`);
-    void invoke("mpv_set_property", { name: "pause", value: next }).catch(() => media.setError(true));
+    void invoke("mpv_set_property", { name: "pause", value: next }).catch(() =>
+      media.setError(true),
+    );
   }, [paused, media.setError]);
 
-  const seek = useCallback((seconds: number) => {
-    void invoke("mpv_command", { cmd: ["seek", floatingSeek(seconds, duration), "absolute"] }).catch(() => media.setError(true));
-  }, [duration, media.setError]);
+  const seek = useCallback(
+    (seconds: number) => {
+      void invoke("mpv_command", {
+        cmd: ["seek", floatingSeek(seconds, duration), "absolute"],
+      }).catch(() => media.setError(true));
+    },
+    [duration, media.setError],
+  );
 
   const leaveFullscreen = useCallback(async () => {
     const window = getCurrentWindow();
@@ -127,29 +158,44 @@ export function VideoPipApp() {
   }, []);
 
   const restore = useCallback(() => {
-    void leaveFullscreen().then(() => invoke("pip_window_restore")).catch(() => media.setError(true));
+    void leaveFullscreen()
+      .then(() => invoke("pip_window_restore"))
+      .catch(() => media.setError(true));
   }, [leaveFullscreen, media.setError]);
 
   const toggleFullscreen = useCallback(async () => {
-    try { const w = getCurrentWindow(); const next = !(await w.isFullscreen()); await w.setFullscreen(next); setFullscreen(next); }
-    catch { media.setError(true); }
+    try {
+      const w = getCurrentWindow();
+      const next = !(await w.isFullscreen());
+      await w.setFullscreen(next);
+      setFullscreen(next);
+    } catch {
+      media.setError(true);
+    }
   }, [media.setError]);
   useEffect(() => {
     const root = volumeRoot.current;
     const wheel = (event: WheelEvent) => {
       if (!event.deltaY) return;
-      event.preventDefault(); event.stopPropagation(); wake();
-      void media.property("volume", Math.max(0, Math.min(100, media.volume + (event.deltaY < 0 ? 5 : -5))));
+      event.preventDefault();
+      event.stopPropagation();
+      wake();
+      void media.property(
+        "volume",
+        Math.max(0, Math.min(100, media.volume + (event.deltaY < 0 ? 5 : -5))),
+      );
     };
     root?.addEventListener("wheel", wheel, { passive: false });
     return () => root?.removeEventListener("wheel", wheel);
   }, [media.volume, media.property, wake]);
 
   const stop = useCallback(() => {
-    void leaveFullscreen().then(async () => {
-      await invoke("pip_window_exit");
-      await invoke("mpv_command", { cmd: ["stop"] });
-    }).catch(() => media.setError(true));
+    void leaveFullscreen()
+      .then(async () => {
+        await invoke("pip_window_exit");
+        await invoke("mpv_command", { cmd: ["stop"] });
+      })
+      .catch(() => media.setError(true));
   }, [leaveFullscreen, media.setError]);
 
   useEffect(() => {
@@ -174,7 +220,10 @@ export function VideoPipApp() {
         seek(Math.min(duration || position + 5, position + 5));
       } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
         event.preventDefault();
-        void media.property("volume", Math.max(0, Math.min(100, media.volume + (event.key === "ArrowUp" ? 5 : -5))));
+        void media.property(
+          "volume",
+          Math.max(0, Math.min(100, media.volume + (event.key === "ArrowUp" ? 5 : -5))),
+        );
       } else if (event.key.toLowerCase() === "m") {
         void media.property("mute", !media.muted);
       } else if (event.key.toLowerCase() === "f") {
@@ -184,7 +233,20 @@ export function VideoPipApp() {
     };
     window.addEventListener("keydown", keys);
     return () => window.removeEventListener("keydown", keys);
-  }, [toggle, restore, seek, position, duration, wake, menu, fullscreen, toggleFullscreen, media.volume, media.muted, media.property]);
+  }, [
+    toggle,
+    restore,
+    seek,
+    position,
+    duration,
+    wake,
+    menu,
+    fullscreen,
+    toggleFullscreen,
+    media.volume,
+    media.muted,
+    media.property,
+  ]);
 
   const pct = duration > 0 ? Math.min(100, (position / duration) * 100) : 0;
 
@@ -196,10 +258,18 @@ export function VideoPipApp() {
       onFocusCapture={wake}
       onPointerLeave={() => setAwake(false)}
     >
-      <div className="vpip-drag" data-tauri-drag-region onDoubleClick={() => { void toggleFullscreen(); }} />
+      <div
+        className="vpip-drag"
+        data-tauri-drag-region
+        onDoubleClick={() => {
+          void toggleFullscreen();
+        }}
+      />
       <div className="vpip-chrome">
         <div className="vpip-top" data-tauri-drag-region>
-          <span className="vpip-title" data-tauri-drag-region>{title}</span>
+          <span className="vpip-title" data-tauri-drag-region>
+            {title}
+          </span>
           <div className="vpip-top-actions">
             <button type="button" onClick={restore} aria-label={t("floatingPlayer.restoreVideo")}>
               <Maximize2 size={15} />
@@ -209,7 +279,11 @@ export function VideoPipApp() {
             </button>
           </div>
         </div>
-        {media.error && <div className="vpip-error" role="alert">{t("floatingPlayer.playerError")}</div>}
+        {media.error && (
+          <div className="vpip-error" role="alert">
+            {t("floatingPlayer.playerError")}
+          </div>
+        )}
         {menu && <VideoPipSettings media={media} close={() => setMenu(false)} seek={seek} />}
         <div className="vpip-bottom">
           <button
@@ -221,8 +295,25 @@ export function VideoPipApp() {
             {paused ? <Play size={17} fill="currentColor" /> : <Pause size={17} />}
           </button>
           <div className="vpip-volume" ref={volumeRoot}>
-            <button className="vpip-transport" aria-label={t(media.muted ? "Unmute" : "Mute")} onClick={() => { void media.property("mute", !media.muted); }}>{media.muted || media.volume === 0 ? <VolumeX size={16}/> : <Volume2 size={16}/>}</button>
-            <input type="range" min={0} max={100} value={Math.min(100, media.volume)} aria-label={t("Volume")} onChange={event => { void media.property("volume", Number(event.target.value)); }}/>
+            <button
+              className="vpip-transport"
+              aria-label={t(media.muted ? "Unmute" : "Mute")}
+              onClick={() => {
+                void media.property("mute", !media.muted);
+              }}
+            >
+              {media.muted || media.volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={Math.min(100, media.volume)}
+              aria-label={t("Volume")}
+              onChange={(event) => {
+                void media.property("volume", Number(event.target.value));
+              }}
+            />
           </div>
           <div className="vpip-scrub">
             <div className="vpip-rail">
@@ -243,19 +334,56 @@ export function VideoPipApp() {
                 scrubbing.current = false;
                 seek(Number(event.currentTarget.value));
               }}
-              onPointerCancel={() => { scrubbing.current = false; }}
-              onChange={(event) => { setPosition(Number(event.target.value)); if (!scrubbing.current) seek(Number(event.target.value)); }}
+              onPointerCancel={() => {
+                scrubbing.current = false;
+              }}
+              onChange={(event) => {
+                setPosition(Number(event.target.value));
+                if (!scrubbing.current) seek(Number(event.target.value));
+              }}
             />
           </div>
           <span className="vpip-time">
             {clock(position)}
             <span className="vpip-time-total"> / {clock(duration)}</span>
           </span>
-          <button className="vpip-transport" onClick={() => setMenu(value => !value)} aria-expanded={menu} aria-label={t("floatingPlayer.playbackSettings")}><Settings2 size={17}/></button>
-          <button className="vpip-transport" onClick={() => { void toggleFullscreen(); }} aria-label={t(fullscreen ? "Exit fullscreen" : "Fullscreen")}><Maximize size={16}/></button>
+          <button
+            className="vpip-transport"
+            onClick={() => setMenu((value) => !value)}
+            aria-expanded={menu}
+            aria-label={t("floatingPlayer.playbackSettings")}
+          >
+            <Settings2 size={17} />
+          </button>
+          <button
+            className="vpip-transport"
+            onClick={() => {
+              void toggleFullscreen();
+            }}
+            aria-label={t(fullscreen ? "Exit fullscreen" : "Fullscreen")}
+          >
+            <Maximize size={16} />
+          </button>
         </div>
       </div>
-      {!fullscreen && <div className="vpip-resize">{EDGES.map(edge => <div key={edge} data-edge={edge} onPointerDown={event => { if (event.button === 0) { event.preventDefault(); void getCurrentWindow().startResizeDragging(edge).catch(() => media.setError(true)); } }}/>)}</div>}
+      {!fullscreen && (
+        <div className="vpip-resize">
+          {EDGES.map((edge) => (
+            <div
+              key={edge}
+              data-edge={edge}
+              onPointerDown={(event) => {
+                if (event.button === 0) {
+                  event.preventDefault();
+                  void getCurrentWindow()
+                    .startResizeDragging(edge)
+                    .catch(() => media.setError(true));
+                }
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

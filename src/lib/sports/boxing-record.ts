@@ -8,10 +8,12 @@ export function boxingRecord(record: string | undefined) {
     values.set(match[1].toUpperCase(), match[2]);
   }
   if (!["W", "L", "D"].every((key) => values.has(key))) return null;
-  return ([
-    ["W", "sports.boxing.wins"],
-    ["L", "sports.boxing.losses"],
-    ["D", "sports.boxing.draws"],
-    ["KO", "sports.boxing.knockouts"],
-  ] as const).flatMap(([key, label]) => values.has(key) ? [{ label, value: values.get(key)! }] : []);
+  return (
+    [
+      ["W", "sports.boxing.wins"],
+      ["L", "sports.boxing.losses"],
+      ["D", "sports.boxing.draws"],
+      ["KO", "sports.boxing.knockouts"],
+    ] as const
+  ).flatMap(([key, label]) => (values.has(key) ? [{ label, value: values.get(key)! }] : []));
 }

@@ -145,7 +145,12 @@ export function BpLeaveConfirm() {
         <div className="flex flex-col items-center gap-[clamp(5px,0.7vh,11px)]">
           <h2
             className="font-display text-ink"
-            style={{ fontSize: "clamp(28px, 3.7vh, 40px)", fontWeight: 500, lineHeight: 1.1, letterSpacing: "-0.015em" }}
+            style={{
+              fontSize: "clamp(28px, 3.7vh, 40px)",
+              fontWeight: 500,
+              lineHeight: 1.1,
+              letterSpacing: "-0.015em",
+            }}
           >
             {t("Leave the show?")}
           </h2>
@@ -169,7 +174,14 @@ export function BpLeaveConfirm() {
           >
             {t("Keep watching")}
           </button>
-          <button type="button" data-bp-focusable data-bp-chip onClick={leave} className={CHIP} style={CHIP_STYLE}>
+          <button
+            type="button"
+            data-bp-focusable
+            data-bp-chip
+            onClick={leave}
+            className={CHIP}
+            style={CHIP_STYLE}
+          >
             {t("Leave")}
           </button>
           <button

@@ -93,15 +93,15 @@ export function MusicTrackCollectionPage({
         <div className="music-library-playlist-meta">
           <h2 className="music-collection-page-title">{title}</h2>
           <div className="music-playlist-commands">
-            <MusicCollectionControls
-              tracks={visibleTracks}
-              onPlay={play}
-            />
+            <MusicCollectionControls tracks={visibleTracks} onPlay={play} />
           </div>
           <span>{t("music.card.trackCount", { count: tracks.length })}</span>
         </div>
       </div>
-      <MusicPlaylistToolbar controller={collection} recentLabel={kind === "recent" ? t("music.sort.recent") : undefined} />
+      <MusicPlaylistToolbar
+        controller={collection}
+        recentLabel={kind === "recent" ? t("music.sort.recent") : undefined}
+      />
       <LibraryTrackList
         showControls={false}
         onPlay={play}

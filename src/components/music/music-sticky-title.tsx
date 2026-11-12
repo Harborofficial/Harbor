@@ -32,7 +32,10 @@ export function MusicStickyTitle({
       const pin =
         scroller.getBoundingClientRect().top +
         Number.parseFloat(getComputedStyle(scroller).paddingTop || "0");
-      const next = (revealAfter?.current?.getBoundingClientRect().bottom ?? node.getBoundingClientRect().top) <= pin + 1;
+      const next =
+        (revealAfter?.current?.getBoundingClientRect().bottom ??
+          node.getBoundingClientRect().top) <=
+        pin + 1;
       if (next === now.current) return;
       now.current = next;
       setStuck(next);

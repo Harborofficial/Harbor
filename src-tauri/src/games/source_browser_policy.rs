@@ -243,9 +243,26 @@ pub fn browser_file(value: &str) -> Result<Url, &'static str> {
     Ok(parsed)
 }
 
+fn provider_file(provider: Host, file: &Url) -> bool {
+    let domain = file.host_str().unwrap_or("");
+    let own = |parent: &str| domain == parent || domain.ends_with(&format!(".{parent}"));
+    match provider {
+        // These serve files only from their own domain, so a persisted record stays bound to the
+        // page that issued it. The newer mirrors rotate storage and accept any public host.
+        Host::Gofile => own("gofile.io"),
+        Host::FuckingFast => own("fuckingfast.co"),
+        Host::DataNodes => own("datanodes.to"),
+        Host::Fichier => own("1fichier.com"),
+        Host::Buzzheavier => own("buzzheavier.com") || own("bzzhr.co") || own("bzzhr.to"),
+        _ => true,
+    }
+}
+
 pub fn browser_pair(page_url: &str, file_url: &str) -> Result<Host, &'static str> {
     let provider = host(page_url)?;
-    browser_file(file_url)?;
+    if !provider_file(provider, &browser_file(file_url)?) {
+        return Err("public_url");
+    }
     Ok(provider)
 }
 
@@ -369,6 +386,8 @@ mod tests {
         );
         assert!(browser_pair("https://filekeeper.net/abc123def456", "https://127.0.0.1/a.rar").is_err());
         assert!(browser_pair("http://filekeeper.net/abc123def456", GOFILE).is_err());
+        assert!(browser_pair("https://gofile.io/d/a1B2c3", "https://attacker.example/a.zip").is_err());
+        assert!(browser_pair("https://gofile.io/d/a1B2c3", "https://fuckingfast.co/dl/abc").is_err());
     }
 
     #[test]

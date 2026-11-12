@@ -31,7 +31,10 @@ function BpCreditRating({ credit, imdb }: { credit: PersonCredit; imdb?: string 
   const { settings } = useSettings();
   if (imdb && settings.showImdbBadge) {
     return (
-      <span data-bp-cell-meta className="flex items-center gap-1.5 text-[clamp(12px,1.6vh,18px)] font-semibold tabular-nums text-ink">
+      <span
+        data-bp-cell-meta
+        className="flex items-center gap-1.5 text-[clamp(12px,1.6vh,18px)] font-semibold tabular-nums text-ink"
+      >
         <ImdbIcon className="h-[1.25em] w-auto shrink-0" />
         {imdb}
       </span>
@@ -39,8 +42,15 @@ function BpCreditRating({ credit, imdb }: { credit: PersonCredit; imdb?: string 
   }
   if (!settings.showTmdbBadge || credit.voteAverage <= 0) return null;
   return (
-    <span data-bp-cell-meta className="flex items-center gap-1.5 text-[clamp(12px,1.6vh,18px)] font-semibold tabular-nums text-ink-muted">
-      <img src={tmdbLogo} alt="" className="h-[1.25em] w-auto max-w-[2.4em] shrink-0 object-contain" />
+    <span
+      data-bp-cell-meta
+      className="flex items-center gap-1.5 text-[clamp(12px,1.6vh,18px)] font-semibold tabular-nums text-ink-muted"
+    >
+      <img
+        src={tmdbLogo}
+        alt=""
+        className="h-[1.25em] w-auto max-w-[2.4em] shrink-0 object-contain"
+      />
       {credit.voteAverage.toFixed(1)}
     </span>
   );
@@ -64,7 +74,9 @@ function BpCreditCard({
   // every section at once (content-visibility skips paint, not mount), which is
   // ~300 lookups on a working actor. Custom posters need windowed credit rows
   // or a batched id resolve before they can come here.
-  const src = useProxiedImageSrc(bpCardArt(meta.poster ?? meta.background ?? undefined, bpBoxPx(CREDIT)));
+  const src = useProxiedImageSrc(
+    bpCardArt(meta.poster ?? meta.background ?? undefined, bpBoxPx(CREDIT)),
+  );
   const rating = ratings?.get(meta.id);
   const role = credit.character?.trim() || credit.job?.trim() || "";
   const sub = [role, credit.releaseInfo].filter(Boolean).join(" · ");
@@ -97,12 +109,18 @@ function BpCreditCard({
         )}
       </span>
       <span className="flex w-full flex-col gap-[2px] p-[clamp(9px,0.9vw,15px)]">
-        <span data-bp-cell-name className="line-clamp-2 text-[clamp(11.5px,1.55vh,17.5px)] font-semibold leading-tight text-ink">
+        <span
+          data-bp-cell-name
+          className="line-clamp-2 text-[clamp(11.5px,1.55vh,17.5px)] font-semibold leading-tight text-ink"
+        >
           {meta.name}
         </span>
         <BpCreditRating credit={credit} imdb={rating} />
         {sub && (
-          <span data-bp-cell-meta className="line-clamp-1 text-[clamp(12px,1.6vh,18px)] font-medium leading-tight text-ink-subtle">
+          <span
+            data-bp-cell-meta
+            className="line-clamp-1 text-[clamp(12px,1.6vh,18px)] font-medium leading-tight text-ink-subtle"
+          >
             {sub}
           </span>
         )}

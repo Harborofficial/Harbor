@@ -1,3 +1,4 @@
+import * as addonUrl from "../src/lib/addon-url.ts";
 import { streamKey } from "../src/lib/streams/identity.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -22,6 +23,7 @@ function load(path, mocks) {
   const exports = {};
   new Function("require", "exports", "window", "localStorage", code)(
     (id) => {
+      if (id === "@/lib/addon-url") return addonUrl;
       assert.ok(id in mocks, `Unexpected dependency: ${id}`);
       return mocks[id];
     },
@@ -104,7 +106,7 @@ function transport(empty = false) {
     };
   };
   const api = load("../src/lib/streams/addons.ts", {
-    "@/lib/safe-fetch": { safeFetch: fetch, safeFetchLocal: fetch },
+    "@/lib/safe-fetch": { safeFetch: fetch, safeFetchLocal: fetch, safeFetchWithTimeout: fetch },
     "./prefetch-request": {
       clearPrefetchedRequests() {},
       prefetchRequest: (_key, signal, _prefetch, run) => run(signal),
@@ -114,13 +116,14 @@ function transport(empty = false) {
     "@/lib/fetch-fallback-policy": { isHarborFetchPolicyError: () => false },
     "@/lib/local-network": { isLocalNetworkUrl: () => false },
     "./addon-detect": {
+      detectAddonFamily: () => "other",
       isAddonRanked: () => false,
       isRetiredTorboxAddon: () => false,
       isStatusOnlyAddon: () => false,
       isStremioLocalAddon: () => false,
     },
     "./cached": { hasUncachedMarker: () => false },
-    "@/lib/torrent/magnet": {},
+    "@/lib/torrent/magnet": { infoHashFromSources: () => null, infoHashFromUrl: () => null },
     "./plugins/addon": {
       ...pluginMocks,
       runPluginAddon: async (_, req, id) => {

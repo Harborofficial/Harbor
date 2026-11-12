@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "Không có số lượt",
   "games.wow.progress.counts": "{total} lượt · {timed} đúng giờ",
   "games.wow.progress.best": "Lượt tốt nhất",
-  "games.wow.progress.explore": "Khám phá lượt chơi"
+  "games.wow.progress.explore": "Khám phá lượt chơi",
 };
 export default gameWowProgress;

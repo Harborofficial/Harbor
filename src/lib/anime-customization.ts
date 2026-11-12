@@ -61,7 +61,10 @@ export function animeMoveRow<T extends { key: string }>(
   return { ...custom, order: next };
 }
 
-export function animeToggleHidden(custom: AnimeRowCustomization, key: string): AnimeRowCustomization {
+export function animeToggleHidden(
+  custom: AnimeRowCustomization,
+  key: string,
+): AnimeRowCustomization {
   const has = custom.hidden.includes(key);
   return {
     ...custom,
@@ -83,8 +86,6 @@ export function animeRenameRow(
 
 export function animeHasCustomization(custom: AnimeRowCustomization): boolean {
   return (
-    custom.order.length > 0 ||
-    custom.hidden.length > 0 ||
-    Object.keys(custom.renamed).length > 0
+    custom.order.length > 0 || custom.hidden.length > 0 || Object.keys(custom.renamed).length > 0
   );
 }

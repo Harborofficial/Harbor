@@ -1,7 +1,8 @@
 const musicGif: Record<string, string> = {
   "music.gif.title": "Trình trực quan GIF tùy chỉnh",
   "music.gif.body": "GIF của bạn phía trên thanh nhạc. Được lưu trên thiết bị này.",
-  "music.gif.timingHelp": "Chuyển động theo nhịp được nhận diện và dừng khi tạm dừng phát. Điều chỉnh chu kỳ cho phù hợp với GIF.",
+  "music.gif.timingHelp":
+    "Chuyển động theo nhịp được nhận diện và dừng khi tạm dừng phát. Điều chỉnh chu kỳ cho phù hợp với GIF.",
   "music.gif.upload": "Tải GIF lên",
   "music.gif.replace": "Thay GIF",
   "music.gif.remove": "Xóa",
@@ -16,6 +17,6 @@ const musicGif: Record<string, string> = {
   "music.gif.error.invalid": "Không đọc được GIF này. Hãy thử tệp khác.",
   "music.gif.error.large": "Chọn GIF dưới 25 MB với ít khung hình hơn hoặc khung hình nhỏ hơn.",
   "music.gif.error.storage": "Không lưu được GIF trên thiết bị này.",
-  "music.gif.error.missing": "GIF này không có sẵn. Hãy tải lên lại."
+  "music.gif.error.missing": "GIF này không có sẵn. Hãy tải lên lại.",
 };
 export default musicGif;

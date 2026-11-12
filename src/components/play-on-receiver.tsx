@@ -32,7 +32,7 @@ function readQueueCommand(raw: string): InboundQueue | null {
 
 function toMeta(command: InboundQueue): Meta {
   const type = META_TYPES.find((candidate) => candidate === command.metaType) ?? "movie";
-  return { id: command.metaId, type, name: command.name ?? "" , poster: command.poster };
+  return { id: command.metaId, type, name: command.name ?? "", poster: command.poster };
 }
 
 function toEpisode(command: InboundQueue): PlayEpisode | undefined {

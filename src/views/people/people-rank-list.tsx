@@ -5,7 +5,13 @@ import type { HarborRankExplanation, PersonRankEntry, RankSource } from "@/lib/h
 import type { Meta } from "@/lib/cinemeta";
 import { PersonRankRow } from "./person-rank-row";
 import { bandFor, PeopleTierBand } from "./people-tier-band";
-import { EmptyFiltersState, ErrorState, LoadingState, NoKeyState, OfflinePill } from "./people-states";
+import {
+  EmptyFiltersState,
+  ErrorState,
+  LoadingState,
+  NoKeyState,
+  OfflinePill,
+} from "./people-states";
 
 type Person = HarborRankExplanation | PersonRankEntry;
 

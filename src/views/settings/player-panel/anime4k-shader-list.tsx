@@ -78,7 +78,10 @@ export function Anime4kShaderList() {
       const dir = await downloadAnime4k(force);
       const active = document.activeElement;
       handOff.current =
-        !folder && active instanceof HTMLElement && active === setupRef.current && navOwnsFocus(active);
+        !folder &&
+        active instanceof HTMLElement &&
+        active === setupRef.current &&
+        navOwnsFocus(active);
       update({ playerAnime4kFolder: dir, playerAnime4kShaders: anime4kChain(dir, mode, tier) });
       if (force) {
         setJustUpdated(true);
@@ -96,7 +99,10 @@ export function Anime4kShaderList() {
   const pickMode = (m: Anime4kMode) =>
     update({ playerAnime4kMode: m, playerAnime4kShaders: anime4kChain(folder, m, tier) });
   const pickTier = (nextTier: Anime4kTier) =>
-    update({ playerAnime4kTier: nextTier, playerAnime4kShaders: anime4kChain(folder, mode, nextTier) });
+    update({
+      playerAnime4kTier: nextTier,
+      playerAnime4kShaders: anime4kChain(folder, mode, nextTier),
+    });
 
   return (
     <SettingGroup label={t("Anime4K presets")}>

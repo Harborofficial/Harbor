@@ -7,8 +7,7 @@ const ebookSources: Record<string, string> = {
     "Les extensions proviennent des dépôts que vous ajoutez. Harbor ne vérifie pas les droits sur leur contenu.",
   "Harbor does not support copyright infringement.":
     "Harbor ne soutient pas les atteintes au droit d’auteur.",
-  "Copyright & third-party sources":
-    "Droits d’auteur et sources tierces",
+  "Copyright & third-party sources": "Droits d’auteur et sources tierces",
   "Build a source for a library you are authorized to access.":
     "Créez une source pour une bibliothèque à laquelle vous êtes autorisé à accéder.",
 };

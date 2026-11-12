@@ -45,6 +45,8 @@ export type LibraryItem = {
   external?: ExternalCwSource;
   /** Other canonical ids for the same title, used to merge and dismiss CW entries. */
   altIds?: string[];
+  /** Saved playback/resume ids by external provider, used when clearing provider progress. */
+  providerPlaybackIds?: Partial<Record<"trakt" | "simkl" | "publicmetadb", string>>;
   /** Original source checkpoints represented by a verified anime CW group. */
   cwMembers?: LibraryItem[];
   isAnime?: boolean;

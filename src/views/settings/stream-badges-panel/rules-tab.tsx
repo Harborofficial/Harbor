@@ -143,7 +143,9 @@ export function RulesTab() {
   return (
     <Section
       title={t("Custom rules")}
-      subtitle={t("Your own badges, matched against the stream's name with a pattern. Great for release groups, providers, or anything the built-in badges don't cover. Imported packs land here too.")}
+      subtitle={t(
+        "Your own badges, matched against the stream's name with a pattern. Great for release groups, providers, or anything the built-in badges don't cover. Imported packs land here too.",
+      )}
     >
       <SSection
         action={
@@ -177,7 +179,9 @@ export function RulesTab() {
         {rules.length > 0 && (
           <SettingRow
             label={t("All listed rules")}
-            desc={t("Switch every rule the list currently shows. With a search active this only touches the matches.")}
+            desc={t(
+              "Switch every rule the list currently shows. With a search active this only touches the matches.",
+            )}
           >
             <SButton onClick={() => setAll(true)}>{t("Enable all")}</SButton>
             <SButton onClick={() => setAll(false)}>{t("Disable all")}</SButton>
@@ -236,7 +240,9 @@ export function RulesTab() {
         <SettingRow
           wide
           label={t("Pattern to match")}
-          desc={t("A regular expression Harbor tests against each stream title. Every stream that matches gets this badge.")}
+          desc={t(
+            "A regular expression Harbor tests against each stream title. Every stream that matches gets this badge.",
+          )}
         >
           <input
             value={pattern}
@@ -250,7 +256,9 @@ export function RulesTab() {
         <SettingRow
           wide
           label={t("Image address")}
-          desc={t("Optional. Point at a png, webp, or svg to show a picture instead of a text badge.")}
+          desc={t(
+            "Optional. Point at a png, webp, or svg to show a picture instead of a text badge.",
+          )}
         >
           <input
             value={image}
@@ -300,4 +308,3 @@ export function RulesTab() {
     </Section>
   );
 }
-

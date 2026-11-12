@@ -71,15 +71,74 @@ function fixture(respond?: (command: string, args?: any) => unknown, realCasting
     },
     react: {},
     "./catalog": {},
+    "./source-version": {
+      compatibleVocalVersion: () => true,
+      shouldResolvePreferredSource: () => false,
+    },
+    "./queue-automation": {
+      cancelMusicQueueAutomation: () => false,
+      markMusicQueueAutomationStarted: () => {},
+      ownsMusicQueueAutomation: () => false,
+    },
+    "@/lib/active-profile-id": {
+      activeProfileId: () => "default",
+      activeProfileIsPrimary: () => true,
+    },
+    "./listening-affinity": {
+      hydrateListeningAffinity: async () => {},
+      observeMusicListening: () => {},
+    },
+    "./artist-blocks": {
+      filterBlockedTracks: (tracks: unknown) => tracks,
+      hydrateArtistBlockStore: async () => {},
+    },
+    "./liked-artists": { hydrateLikedArtistStore: async () => {} },
+    "./decks": { engineSnapshot: async () => null },
+    "./queue-source": { adoptRequestedIdentity: (identity: unknown) => identity },
+    "./spotify-startup": {
+      shouldReportSpotifyStartupTimeout: () => false,
+      SPOTIFY_STARTUP_TIMEOUT_MESSAGE: "Spotify playback timed out.",
+      SPOTIFY_STARTUP_TIMEOUT_MS: 35_000,
+    },
+    "./explicit-preference": {
+      explicitnessOf: () => 0,
+      rankByExplicitness: (list: unknown[]) => list,
+    },
+    "./pinned-sources": {
+      loadPinnedSources: () => {},
+      peekPinnedSource: () => null,
+      pinSourceFor: () => {},
+      unpinSourceFor: () => {},
+    },
+    "./transport": {
+      getMusicTransport: () => ({ shuffle: false, repeat: "off" }),
+      musicAdvance: () => null,
+      musicPrevious: () => null,
+      musicWarmTargets: () => [],
+      resetMusicOrder: () => {},
+      setMusicPriorityNext: () => {},
+    },
+    "./recent-context": {
+      hydrateMusicContextTracks: async () => {},
+      hydrateMusicRecentContexts: async () => {},
+    },
+    "./recent-destinations": { hydrateMusicDestinations: async () => {} },
+    "./pinned-playlists": { hydratePinnedMusicPlaylists: async () => {} },
+    "@/lib/platform": { isWindowsDesktop: () => false },
     "./queue-order": { queueTrackKey },
     "./track-identity": { dedupeMusicTracks, sameMusicTrack },
     "./deck-sync": {
       answerDeckRequests: () => () => {},
       broadcastDeckState: () => {},
+      isDeckWindow: () => false,
       sendDeckAdopted: () => {},
+      sendDeckCommand: () => {},
       serveDeckCommands: () => () => {},
     },
-    "./deck-primary": { createDeckAdoption: () => ({ deck: () => 0, adopt: () => false }) },
+    "./deck-primary": {
+      createDeckAdoption: () => ({ deck: () => 0, adopt: () => false }),
+      nativePlaybackAdoption: () => null,
+    },
     "./liked": {
       isMusicLiked: (ids: readonly string[], t: any) => !!t && ids.includes(t.id),
       likedIdsFor: (t: any) => (t ? [t.id] : []),
@@ -101,6 +160,8 @@ function fixture(respond?: (command: string, args?: any) => unknown, realCasting
       ],
       markManuallyQueued: () => {},
       queueInsertIndex: (q: unknown[], i: number) => (i < 0 ? 0 : i + 1),
+      queueInsertAfterManualBlock: () => 0,
+      withTrackNext: (q: unknown[]) => q,
     },
     "./session-checkpoint": {
       newerCheckpoint: () => null,
@@ -109,10 +170,15 @@ function fixture(respond?: (command: string, args?: any) => unknown, realCasting
       writeCheckpointToDb: () => {},
     },
     "./playback-origin": {
+      beginMusicQueue: () => {},
       getMusicPlaybackOrigin: () => null,
       restoreMusicPlaybackOrigin: () => {},
     },
-    "./preferences": { readMusicPreference: () => null, writeMusicPreference: () => {} },
+    "./preferences": {
+      readMusicPreference: () => null,
+      readStoredMusicPreference: () => null,
+      writeMusicPreference: () => {},
+    },
     "./hidden-recents": { unhideMusicRecent: () => {} },
     "./audio-settings": {
       initializeMusicAudioSettings: async () => {},

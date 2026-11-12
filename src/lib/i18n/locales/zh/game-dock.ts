@@ -75,5 +75,5 @@ export default {
   "games.badge.unavailable": "文件不可用",
   "games.badge.notInstalled": "未安装",
   "games.home.libraryFirstTitle": "在库中打开游戏",
-  "games.home.libraryFirstNote": "每次打开游戏时，从你的库开始，而不是探索。"
+  "games.home.libraryFirstNote": "每次打开游戏时，从你的库开始，而不是探索。",
 };

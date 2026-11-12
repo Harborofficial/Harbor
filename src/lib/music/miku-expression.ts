@@ -8,7 +8,9 @@ const CLOSE_MS = 180;
 export function createMikuExpression() {
   let age = 0;
   return {
-    reset() { age = 0; },
+    reset() {
+      age = 0;
+    },
     advance(milliseconds: number, engaged: boolean) {
       if (!engaged) {
         age = 0;

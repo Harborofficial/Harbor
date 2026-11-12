@@ -7,19 +7,23 @@ const together: Record<string, string> = {
   " · paused": " · pausado",
   " · still loading": " · ainda carregando",
   " · left the video": " · saiu do vídeo",
-  "The host starts playback for the whole room.": "O anfitrião inicia a reprodução para toda a sala.",
+  "The host starts playback for the whole room.":
+    "O anfitrião inicia a reprodução para toda a sala.",
   "Waiting for the host to start": "Aguardando o host iniciar",
-  "Everyone is loaded in. Press play to start watching.": "Todo mundo está carregado. Aperte play para começar a assistir.",
+  "Everyone is loaded in. Press play to start watching.":
+    "Todo mundo está carregado. Aperte play para começar a assistir.",
   "Ready when you are": "Pronto quando você estiver",
   "Sharing {name}'s Stremio": "Compartilhando o Stremio de {name}",
-  "Your copy runs {guest}, host's runs {host}. Sync may drift.": "Sua cópia está na {guest}, a do host está na {host}. A sincronização pode desalinhar.",
+  "Your copy runs {guest}, host's runs {host}. Sync may drift.":
+    "Sua cópia está na {guest}, a do host está na {host}. A sincronização pode desalinhar.",
   "Say something…": "Diga algo…",
   "Start anyway ({n} still loading)": "Iniciar mesmo assim ({n} ainda carregando)",
   " · {n} instant": " · {n} instantâneo",
   "Cached only": "Somente em cache",
   "Cached only ({n})": "Somente em cache ({n})",
   "No sources cached": "Nenhuma fonte em cache",
-  "Sources are not cached for this title. Open the picker page to refresh.": "As fontes não estão em cache para este título. Abra a página de seleção para atualizar.",
+  "Sources are not cached for this title. Open the picker page to refresh.":
+    "As fontes não estão em cache para este título. Abra a página de seleção para atualizar.",
   "Probably not cached. Pick another?": "Provavelmente não está em cache. Escolher outro?",
   "Click any source to swap in place": "Clique em qualquer fonte para trocar no lugar",
   "Does this stream look right?": "Este stream parece correto?",
@@ -30,8 +34,10 @@ const together: Record<string, string> = {
   "Close match": "Fechar correspondência",
   "Pick another": "Escolher outro",
   "Something else": "Outra coisa",
-  "Nothing matched. Try the franchise's first film name.": "Nada correspondeu. Tente o nome do primeiro filme da franquia.",
-  "Not officially released yet. Click to search anyway in case of an early release.": "Ainda não lançado oficialmente. Clique para buscar mesmo assim, caso haja um lançamento antecipado.",
+  "Nothing matched. Try the franchise's first film name.":
+    "Nada correspondeu. Tente o nome do primeiro filme da franquia.",
+  "Not officially released yet. Click to search anyway in case of an early release.":
+    "Ainda não lançado oficialmente. Clique para buscar mesmo assim, caso haja um lançamento antecipado.",
   "Hide streams": "Ocultar streams",
   "Show streams": "Mostrar streams",
   "Flagged shown": "Sinalizados exibidos",
@@ -47,13 +53,14 @@ const together: Record<string, string> = {
   "{word} {n}s · hold for options": "{word} {n}s · segure para opções",
   "Cast to a device": "Transmitir para um dispositivo",
   "Dismiss episode panel": "Dispensar painel de episódios",
-  "Advance Continue Watching to the next episode": "Avançar Continuar Assistindo para o próximo episódio",
+  "Advance Continue Watching to the next episode":
+    "Avançar Continuar Assistindo para o próximo episódio",
   "Invite via link": "Convidar por link",
   "Watch together": "Assistir juntos",
-  "Back": "Voltar",
-  "Invite": "Convidar",
+  Back: "Voltar",
+  Invite: "Convidar",
   "Paste invite link": "Cole o link de convite",
-  "Join": "Entrar",
+  Join: "Entrar",
   "Open Settings": "Abrir Configurações",
   "Your name": "Seu nome",
   "Starting…": "Iniciando…",
@@ -66,7 +73,8 @@ const together: Record<string, string> = {
   "Show cursors": "Mostrar cursores",
   "Leave room": "Sair da sala",
   "Watch Together needs a relay.": "Assistir Juntos precisa de um relay.",
-  "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.": "Um relay é um pequeno Cloudflare Worker que repassa mensagens de play/pause/seek entre você e seus amigos. Nenhum dado de vídeo passa por ele. Implante o seu em um clique (o nível gratuito é suficiente), ou cole o link de convite de um amigo para usar o dele.",
+  "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.":
+    "Um relay é um pequeno Cloudflare Worker que repassa mensagens de play/pause/seek entre você e seus amigos. Nenhum dado de vídeo passa por ele. Implante o seu em um clique (o nível gratuito é suficiente), ou cole o link de convite de um amigo para usar o dele.",
   "Watch Together": "Assistir Juntos",
 };
 

@@ -40,13 +40,12 @@ test("unknown debrid links receive one short probe and transient failures are no
   assert.match(preflight, /if \(r\.ok \|\| r\.reason === "stub"\) memo\.set/);
 });
 
-test("warm resume lookup overlaps loading while uncached deep links remain gated", () => {
+test("resume is resolved before the initial load so playback starts in position", () => {
   const resumeStart = bridgeLoad.indexOf("const resumePromise");
-  const mediaStart = bridgeLoad.indexOf("const loadMedia = () =>");
-  const join = bridgeLoad.indexOf("Promise.all([resumePromise, loadMedia()])");
-  assert.ok(resumeStart >= 0 && mediaStart > resumeStart && join > mediaStart);
-  assert.match(bridgeLoad, /!isResumeStartReady\(resumeIdentity\)/);
-  assert.match(bridgeLoad, /if \(waitBeforeLoad\)/);
+  const loadStart = bridgeLoad.indexOf("await bridge.load({");
+  assert.ok(resumeStart >= 0 && loadStart > resumeStart);
+  assert.match(bridgeLoad, /resolved = await resumePromise/);
+  assert.match(bridgeLoad, /startAtSec:/);
 });
 
 test("Windows embedded mpv is retained across compatible VOD bitrate profiles", () => {
@@ -87,7 +86,7 @@ test("early debrid preparation is explicit, bounded, verified, and memory-only",
 });
 
 test("committed debrid playback bypasses the local proxy unless request headers require it", () => {
-  assert.match(picker, /intent !== "download" && hasProxyHeaders/);
+  assert.match(picker, /intent !== "download" && \(hasProxyHeaders \|\| r\.data\.transcode\)/);
   assert.doesNotMatch(picker, /remoteDebridPlayback|prebufferBytes/);
   assert.match(proxyClient, /args\.prebufferBytes = opts\.prebufferBytes/);
   assert.match(resolve, /if \(!userCommitted && !stream\.infoHash/);
@@ -108,8 +107,10 @@ test("startup buffering is staged and adapts without lowering media quality", ()
   assert.match(nativeMpv, /startup_profile: Option<String>/);
   assert.match(nativeMpv, /if high_bitrate \{ "32MiB" \} else \{ "16MiB" \}/);
   assert.match(mpv, /phase === "startup"/);
-  assert.match(mpv, /\["demuxer-max-bytes", highBitrate \? "256MiB" : "128MiB"\]/);
-  assert.match(mpv, /\["demuxer-max-bytes", highBitrate \? "768MiB" : "512MiB"\]/);
+  assert.match(mpv, /const auto = autoBufferProfile\(getTotalPhysBytes\(\)\)/);
+  assert.match(mpv, /Math\.min\(highBitrate \? 256 \* mib : 128 \* mib, steadyForward\)/);
+  assert.match(mpv, /\["demuxer-max-bytes", formatMpvBytes\(forward\)\]/);
+  assert.match(mpv, /\["demuxer-max-bytes", formatMpvBytes\(steadyForward\)\]/);
   assert.match(mpv, /steadyBufferLoadId !== mediaLoadId/);
   assert.match(nativeMpv, /"cache-pause-initial", "no"/);
   assert.doesNotMatch(startupProfile, /resolution.*replace|transcode|downscale/i);

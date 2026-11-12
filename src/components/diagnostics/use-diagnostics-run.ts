@@ -12,7 +12,9 @@ const TRANSMIT_STAGE = 7;
 type CollectResult = { tempPath: string; bytes: number };
 
 function prefersReducedMotion(): boolean {
-  return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  return (
+    typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+  );
 }
 
 function delay(ms: number): Promise<void> {

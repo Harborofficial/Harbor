@@ -13,12 +13,7 @@ let saveTimer: ReturnType<typeof setTimeout> | undefined;
 /** A song is the recording, not the upload that happened to answer for it last time. */
 export function pinnedSourceKey(track: Pick<MusicTrack, "title" | "artist">): string {
   const part = (value: string) =>
-    value
-      .toLocaleLowerCase()
-      .normalize("NFKD")
-      .replace(/[̀-ͯ]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
+    value.toLocaleLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim();
   const title = part(track.title ?? "");
   const artist = part(track.artist ?? "");
   return title && artist ? `${artist}|${title}` : "";
@@ -33,7 +28,8 @@ export function loadPinnedSources(): Promise<void> {
       for (const row of rows) {
         if (!Array.isArray(row) || typeof row[0] !== "string") continue;
         const value = row[1] as Partial<PinnedSource> | undefined;
-        if (!value || typeof value.connectorId !== "string" || typeof value.id !== "string") continue;
+        if (!value || typeof value.connectorId !== "string" || typeof value.id !== "string")
+          continue;
         pins.set(row[0], { connectorId: value.connectorId, id: value.id });
       }
     })

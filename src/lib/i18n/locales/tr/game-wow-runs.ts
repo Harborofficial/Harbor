@@ -19,11 +19,12 @@ export default {
   "games.wow.runs.copy": "Yetenekleri kopyala",
   "games.wow.runs.copyFailed": "Kopyalanamadı. Tekrar deneyin.",
   "games.wow.runs.party": "Grup bileşimi",
-  "games.wow.runs.snapshots": "Yayımlanan yetenekler ve ekipman sağlayıcının anlık kayıtlarıdır. Bu koşuda kullanılanlardan farklı olabilir.",
+  "games.wow.runs.snapshots":
+    "Yayımlanan yetenekler ve ekipman sağlayıcının anlık kayıtlarıdır. Bu koşuda kullanılanlardan farklı olabilir.",
   "games.wow.runs.gear": "Ekipman",
   "games.wow.runs.tank": "Tank",
   "games.wow.runs.healer": "Şifacı",
   "games.wow.runs.dps": "Hasar",
   "games.wow.runs.snapshotAt": "Ekipman kaydı: {date}",
-  "games.wow.runs.closeGear": "Ekipmanı kapat"
+  "games.wow.runs.closeGear": "Ekipmanı kapat",
 };

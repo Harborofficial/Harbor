@@ -187,7 +187,10 @@ function onlineSourceStoreKey(): string {
   return ONLINE_SOURCE_KEY_PREFIX + (id || "default");
 }
 
-function usableOnlineSource(metaId: string, entry: Pick<PlaybackEntry, "url" | "infoHash" | "addonId" | "bingeGroup" | "releaseGroup">): boolean {
+function usableOnlineSource(
+  metaId: string,
+  entry: Pick<PlaybackEntry, "url" | "infoHash" | "addonId" | "bingeGroup" | "releaseGroup">,
+): boolean {
   if (!metaId || metaId.startsWith("local:") || metaId.startsWith("iptv:")) return false;
   if (entry.url && isLocalUrl(entry.url)) return false;
   // A file path or an ordinary web URL alone cannot identify the same release
@@ -202,12 +205,21 @@ function readOnlineSources(): Record<string, PlaybackEntry> {
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
     const now = Date.now();
-    return Object.fromEntries(Object.entries(parsed).filter(([id, value]) => {
-      if (!value || typeof value !== "object") return false;
-      const item = value as PlaybackEntry;
-      return typeof item.savedAt === "number" && now - item.savedAt < TTL_MS && now >= item.savedAt && usableOnlineSource(id, item);
-    })) as Record<string, PlaybackEntry>;
-  } catch { return {}; }
+    return Object.fromEntries(
+      Object.entries(parsed).filter(([id, value]) => {
+        if (!value || typeof value !== "object") return false;
+        const item = value as PlaybackEntry;
+        return (
+          typeof item.savedAt === "number" &&
+          now - item.savedAt < TTL_MS &&
+          now >= item.savedAt &&
+          usableOnlineSource(id, item)
+        );
+      }),
+    ) as Record<string, PlaybackEntry>;
+  } catch {
+    return {};
+  }
 }
 
 /** Remember exactly which online release the user last selected, independently
@@ -222,8 +234,13 @@ function saveOnlineSource(metaId: string, entry: PlaybackEntry): void {
     // A standalone source preference must never preserve an online transport URL.
     all[metaId] = persistablePlaybackPreference(entry);
     const sorted = Object.entries(all).sort((a, b) => b[1].savedAt - a[1].savedAt);
-    localStorage.setItem(onlineSourceStoreKey(), JSON.stringify(Object.fromEntries(sorted.slice(0, MAX_ENTRIES))));
-  } catch { /* Keep the existing online preference if storage is unavailable. */ }
+    localStorage.setItem(
+      onlineSourceStoreKey(),
+      JSON.stringify(Object.fromEntries(sorted.slice(0, MAX_ENTRIES))),
+    );
+  } catch {
+    /* Keep the existing online preference if storage is unavailable. */
+  }
 }
 
 function migrateLegacy(): void {
@@ -461,7 +478,9 @@ export function savePlayback(
   const all = readAll();
   const key = entryKey(metaId, season, episode);
   const prev = all[key];
-  const thin = !entry.infoHash && !entry.addonId && !entry.url;
+  // A local file has no streaming identity. Keep the last online source so the
+  // picker can still match it instead of remembering an unplayable path.
+  const thin = !entry.infoHash && !entry.addonId && (!entry.url || isLocalUrl(entry.url));
   all[key] =
     thin && prev
       ? {
@@ -854,11 +873,20 @@ export function clearPlayback(metaId: string, season?: number, episode?: number)
   // more recent (or previously successful) source.
   const remembered = readOnlineSources();
   const preferred = remembered[metaId];
-  if (rejected && preferred && rejected.savedAt === preferred.savedAt &&
-      rejected.infoHash === preferred.infoHash && rejected.addonId === preferred.addonId &&
-      rejected.url === preferred.url) {
+  if (
+    rejected &&
+    preferred &&
+    rejected.savedAt === preferred.savedAt &&
+    rejected.infoHash === preferred.infoHash &&
+    rejected.addonId === preferred.addonId &&
+    rejected.url === preferred.url
+  ) {
     delete remembered[metaId];
-    try { localStorage.setItem(onlineSourceStoreKey(), JSON.stringify(remembered)); } catch { /* noop */ }
+    try {
+      localStorage.setItem(onlineSourceStoreKey(), JSON.stringify(remembered));
+    } catch {
+      /* noop */
+    }
   }
   const actual = all[key]?.actual;
   if (actual || all[key]?.actualByProfile)
@@ -1123,6 +1151,44 @@ export function streamMatchesPreferredSourceFallback(
   }
   if (e.source && s.source && e.source !== s.source) return false;
   return true;
+}
+
+type RememberedStreamCandidate = Parameters<typeof streamMatchesEntry>[0] &
+  Parameters<typeof streamMatchesPreferredSource>[0];
+
+/**
+ * The exact file when the addon still offers it, otherwise the same release
+ * lineage. Episode-scoped callers must reject other episodes first.
+ */
+/** A remembered source from the addon that served it, not an aggregator duplicate. */
+export function streamMatchesRememberedSource(
+  stream: RememberedStreamCandidate,
+  entry: PlaybackEntry,
+): boolean {
+  return (
+    (streamMatchesEntry(stream, entry) || streamMatchesPreferredSource(stream, entry)) &&
+    (!entry.addonId || streamOfferedByAddon(stream, entry.addonId))
+  );
+}
+
+export function findRememberedSourceMatch<T extends RememberedStreamCandidate>(
+  streams: readonly T[],
+  entry: PlaybackEntry,
+): T | null {
+  // Aggregators repeat the same file. The remembered stream is the copy from
+  // the addon that served it, not whichever duplicate answered first.
+  const served = entry.addonId
+    ? streams.filter((stream) => streamOfferedByAddon(stream, entry.addonId))
+    : [];
+  const servedExact = served.find((stream) => streamMatchesEntry(stream, entry));
+  if (servedExact) return servedExact;
+  const servedLineage = served.length
+    ? findPreferredSourceMatch(served, entry, streamMatchesPreferredSource)
+    : null;
+  if (servedLineage) return servedLineage;
+  const exact = streams.find((stream) => streamMatchesEntry(stream, entry));
+  if (exact) return exact;
+  return findPreferredSourceMatch([...streams], entry, streamMatchesPreferredSource);
 }
 
 export function preferredSourceAddonPending(

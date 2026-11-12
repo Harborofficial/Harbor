@@ -133,20 +133,22 @@ export function useCalendarData({
           Promise.all(extras)
             .then((batches) => batches.flat())
             .then((extra) =>
-              import("@/lib/calendar").then(({ fetchCustomCalendar }) => fetchCustomCalendar({
-                apiKey: settings.tmdbKey,
-                region: settings.region,
-                filters: {
-                  trackedPeople: settings.customCalendar.trackedPeople,
-                  genres: settings.customCalendar.genres,
-                  watchProviders: settings.customCalendar.watchProviders,
-                  originCountries: settings.customCalendar.originCountries,
-                  mediaTypes: settings.customCalendar.mediaTypes,
-                },
-                start,
-                end,
-                extra,
-              })),
+              import("@/lib/calendar").then(({ fetchCustomCalendar }) =>
+                fetchCustomCalendar({
+                  apiKey: settings.tmdbKey,
+                  region: settings.region,
+                  filters: {
+                    trackedPeople: settings.customCalendar.trackedPeople,
+                    genres: settings.customCalendar.genres,
+                    watchProviders: settings.customCalendar.watchProviders,
+                    originCountries: settings.customCalendar.originCountries,
+                    mediaTypes: settings.customCalendar.mediaTypes,
+                  },
+                  start,
+                  end,
+                  extra,
+                }),
+              ),
             ),
         );
       }

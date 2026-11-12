@@ -6,10 +6,13 @@ export default {
   "games.retro.keyboardOnly": "Clavier prêt · appuyez sur un bouton pour connecter la manette",
   "games.retro.resetControls": "Réinitialiser",
   "games.retro.controlsSaved": "Enregistré pour ce profil et ce système",
-  "games.retro.pressKey": "Appuyez sur une touche. Échap annule. F1, F2 et F4 sont réservées au lecteur.",
+  "games.retro.pressKey":
+    "Appuyez sur une touche. Échap annule. F1, F2 et F4 sont réservées au lecteur.",
   "games.retro.pressButton": "Appuyez sur un bouton ou déplacez un stick.",
-  "games.retro.disconnected": "Manette déconnectée. Reconnectez-la, puis reprenez quand vous voulez.",
-  "games.retro.controlsSaveFailed": "Ces commandes fonctionnent pour cette session, mais leur enregistrement a échoué.",
+  "games.retro.disconnected":
+    "Manette déconnectée. Reconnectez-la, puis reprenez quand vous voulez.",
+  "games.retro.controlsSaveFailed":
+    "Ces commandes fonctionnent pour cette session, mais leur enregistrement a échoué.",
   "games.retro.menuChord": "Select + Start : menu",
   "games.retro.pause": "Pause",
   "games.retro.resume": "Reprendre",
@@ -18,7 +21,8 @@ export default {
   "games.retro.controls": "Commandes",
   "games.retro.saveExit": "Sauver et quitter",
   "games.retro.popout": "Fenêtre séparée",
-  "games.retro.dock": "Revenir à Harbor",  "games.retro.mute": "Couper le son",
+  "games.retro.dock": "Revenir à Harbor",
+  "games.retro.mute": "Couper le son",
   "games.retro.unmute": "Activer le son",
   "games.retro.volume": "Volume",
   "games.retro.picture": "Image",
@@ -27,7 +31,8 @@ export default {
   "games.retro.fullscreen": "Plein écran",
   "games.retro.exitFullscreen": "Quitter le plein écran",
   "games.retro.playInside": "Jouer dans Harbor",
-  "games.retro.setup": "Installez une fois le lecteur {system} pour jouer ici. Votre jeu reste sur cet appareil.",
+  "games.retro.setup":
+    "Installez une fois le lecteur {system} pour jouer ici. Votre jeu reste sur cet appareil.",
   "games.retro.install": "Installer et jouer · {size} Mo",
   "games.retro.runtime": "EmulatorJS {version} · un téléchargement, disponible hors ligne",
   "games.retro.aboutRuntime": "Code source et licences",
@@ -40,5 +45,6 @@ export default {
   "games.retro.saving": "Sauvegarde en cours…",
   "games.retro.exitWithoutSave": "Quitter sans sauvegarder",
   "games.retro.moving": "Déplacement du jeu…",
-  "games.retro.moveFailed": "Impossible de déplacer le lecteur. Votre progression est sauvegardée ; choisissez Reprendre.",
+  "games.retro.moveFailed":
+    "Impossible de déplacer le lecteur. Votre progression est sauvegardée ; choisissez Reprendre.",
 } satisfies Record<string, string>;

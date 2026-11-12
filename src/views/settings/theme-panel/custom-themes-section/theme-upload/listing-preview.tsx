@@ -33,7 +33,9 @@ export function ListingPreview({
               ))}
             </div>
           )}
-          <div className={`${BADGE} absolute bottom-2 end-2 bg-black/55 text-white backdrop-blur-sm`}>
+          <div
+            className={`${BADGE} absolute bottom-2 end-2 bg-black/55 text-white backdrop-blur-sm`}
+          >
             <Star size={12} className="fill-accent text-accent" /> {t("new")}
           </div>
           <div className="absolute inset-x-0 bottom-0 flex h-1.5">

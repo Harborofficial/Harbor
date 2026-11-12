@@ -19,11 +19,12 @@ export default {
   "games.wow.runs.copy": "टैलेंट कॉपी करें",
   "games.wow.runs.copyFailed": "कॉपी नहीं हो सका। फिर कोशिश करें।",
   "games.wow.runs.party": "समूह की संरचना",
-  "games.wow.runs.snapshots": "प्रकाशित टैलेंट और उपकरण प्रदाता के स्नैपशॉट हैं। वे इस रन में इस्तेमाल हुए विकल्पों से अलग हो सकते हैं।",
+  "games.wow.runs.snapshots":
+    "प्रकाशित टैलेंट और उपकरण प्रदाता के स्नैपशॉट हैं। वे इस रन में इस्तेमाल हुए विकल्पों से अलग हो सकते हैं।",
   "games.wow.runs.gear": "उपकरण",
   "games.wow.runs.tank": "टैंक",
   "games.wow.runs.healer": "हीलर",
   "games.wow.runs.dps": "डैमेज",
   "games.wow.runs.snapshotAt": "उपकरण स्नैपशॉट: {date}",
-  "games.wow.runs.closeGear": "उपकरण बंद करें"
+  "games.wow.runs.closeGear": "उपकरण बंद करें",
 };

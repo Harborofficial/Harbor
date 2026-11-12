@@ -28,11 +28,26 @@ const EVERY = Math.max(2, Number(argv.every || 4));
 const STALL = Math.max(50, Number(argv.stall || 200));
 const LOG = typeof argv.log === "string" ? argv.log : "./.diag/tv-watch.log";
 
-const sh = (c) => execSync(c, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 64 * 1024 * 1024 });
+const sh = (c) =>
+  execSync(c, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+    maxBuffer: 64 * 1024 * 1024,
+  });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 fs.mkdirSync(LOG.replace(/[^/\\]+$/, "") || ".", { recursive: true });
 
-const COL = { Flags: 0, IntendedVsync: 1, HandleInputStart: 5, PerformTraversalsStart: 7, DrawStart: 8, SyncStart: 10, IssueDrawCommandsStart: 11, SwapBuffers: 12, FrameCompleted: 13 };
+const COL = {
+  Flags: 0,
+  IntendedVsync: 1,
+  HandleInputStart: 5,
+  PerformTraversalsStart: 7,
+  DrawStart: 8,
+  SyncStart: 10,
+  IssueDrawCommandsStart: 11,
+  SwapBuffers: 12,
+  FrameCompleted: 13,
+};
 
 function frames() {
   let out;

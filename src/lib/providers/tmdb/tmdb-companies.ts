@@ -12,9 +12,13 @@ export async function tmdbCompanyIdByName(key: string, name: string): Promise<nu
   if (companyCache.has(k)) return companyCache.get(k) ?? null;
   if (companyInflight.has(k)) return companyInflight.get(k)!;
   const p = (async () => {
-    const data = await get<{ results?: Array<{ id: number; name: string }> }>(key, "search/company", {
-      query: name,
-    });
+    const data = await get<{ results?: Array<{ id: number; name: string }> }>(
+      key,
+      "search/company",
+      {
+        query: name,
+      },
+    );
     const results = data?.results ?? [];
     const exact = results.find((r) => r.name.trim().toLowerCase() === k);
     const id = exact?.id ?? results[0]?.id ?? null;
@@ -25,7 +29,12 @@ export async function tmdbCompanyIdByName(key: string, name: string): Promise<nu
   return p;
 }
 
-export type CompanyArt = { logo: string | null; backdrop: string | null; count: number; span: string };
+export type CompanyArt = {
+  logo: string | null;
+  backdrop: string | null;
+  count: number;
+  span: string;
+};
 
 const artCache = new Map<string, CompanyArt>();
 const artInflight = new Map<string, Promise<CompanyArt>>();

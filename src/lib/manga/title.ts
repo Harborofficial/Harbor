@@ -16,14 +16,7 @@ const OPENERS = "\\(\\[\\{｛【（";
 const CLOSERS = "\\)\\]\\}｝】）";
 const BRACKETED = new RegExp(`[${OPENERS}]\\s*([^${CLOSERS}]*?)\\s*[${CLOSERS}]`, "g");
 
-const COLOR_WORDS = new Set([
-  "color",
-  "colour",
-  "colored",
-  "coloured",
-  "colorized",
-  "colorised",
-]);
+const COLOR_WORDS = new Set(["color", "colour", "colored", "coloured", "colorized", "colorised"]);
 
 // Words that can accompany a color marker inside the same bracket without
 // changing its meaning.
@@ -41,7 +34,10 @@ const EDITION_WORDS = new Set([
 ]);
 
 function isColorQualifier(inner: string): boolean {
-  const tokens = inner.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const tokens = inner
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
   if (tokens.length === 0) return false;
   let hasColor = false;
   for (const token of tokens) {

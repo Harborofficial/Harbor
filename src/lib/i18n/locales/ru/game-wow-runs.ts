@@ -3,7 +3,8 @@ export default {
   "games.wow.runs.title": "Забеги в подземелье",
   "games.wow.runs.all": "Все модификаторы",
   "games.wow.runs.current": "Текущие модификаторы",
-  "games.wow.runs.currentNote": "Соответствует текущему набору модификаторов, включая прошлые недели.",
+  "games.wow.runs.currentNote":
+    "Соответствует текущему набору модификаторов, включая прошлые недели.",
   "games.wow.runs.allNote": "Лучшие записанные забеги со всеми модификаторами в этом сезоне.",
   "games.wow.runs.page": "Страница {page}",
   "games.wow.runs.refresh": "Обновить забеги",
@@ -19,11 +20,12 @@ export default {
   "games.wow.runs.copy": "Копировать таланты",
   "games.wow.runs.copyFailed": "Не удалось скопировать. Повторите попытку.",
   "games.wow.runs.party": "Состав группы",
-  "games.wow.runs.snapshots": "Опубликованные таланты и снаряжение — снимки данных поставщика. Они могут отличаться от использованных в этом забеге.",
+  "games.wow.runs.snapshots":
+    "Опубликованные таланты и снаряжение — снимки данных поставщика. Они могут отличаться от использованных в этом забеге.",
   "games.wow.runs.gear": "Снаряжение",
   "games.wow.runs.tank": "Танк",
   "games.wow.runs.healer": "Лекарь",
   "games.wow.runs.dps": "Урон",
   "games.wow.runs.snapshotAt": "Снимок снаряжения: {date}",
-  "games.wow.runs.closeGear": "Закрыть снаряжение"
+  "games.wow.runs.closeGear": "Закрыть снаряжение",
 };

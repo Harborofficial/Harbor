@@ -20,7 +20,12 @@ export function dailySeed(value: string): string {
 }
 
 /** Stable within a calendar day, with a different starting point the following day. */
-export function dailyRotation<T>(values: readonly T[], day: string, seed: string, key: (value: T) => string): T[] {
+export function dailyRotation<T>(
+  values: readonly T[],
+  day: string,
+  seed: string,
+  key: (value: T) => string,
+): T[] {
   const out = [...values].sort((a, b) => key(a).localeCompare(key(b)));
   let state = parseInt(dailySeed(seed), 36);
   for (let i = out.length - 1; i > 0; i--) {
@@ -52,12 +57,20 @@ export function dailyMixHasVariety(tracks: readonly MusicTrack[]): boolean {
     seen.add(recording);
     counts.set(artist, (counts.get(artist) ?? 0) + 1);
   }
-  return tracks.length >= DAILY_MIN_TRACKS && tracks.length <= DAILY_TRACK_LIMIT
-    && counts.size >= DAILY_MIN_ARTISTS && [...counts.values()].every(count => count <= DAILY_ARTIST_LIMIT);
+  return (
+    tracks.length >= DAILY_MIN_TRACKS &&
+    tracks.length <= DAILY_TRACK_LIMIT &&
+    counts.size >= DAILY_MIN_ARTISTS &&
+    [...counts.values()].every((count) => count <= DAILY_ARTIST_LIMIT)
+  );
 }
 
 /** Round-robin actual recordings, not provider spellings of the same artist. */
-export function selectDailyTracks(pool: readonly MusicTrack[], day: string, seed: string): MusicTrack[] {
+export function selectDailyTracks(
+  pool: readonly MusicTrack[],
+  day: string,
+  seed: string,
+): MusicTrack[] {
   const artists = new Map<string, MusicTrack[]>();
   const seen = new Set<string>();
   for (const track of pool) {
@@ -69,8 +82,9 @@ export function selectDailyTracks(pool: readonly MusicTrack[], day: string, seed
     lane.push(track);
     artists.set(artist, lane);
   }
-  const lanes = dailyRotation([...artists], day, seed, ([key]) => key)
-    .map(([key, tracks]) => dailyRotation(tracks, day, `${seed}:${key}`, musicTrackIdentity).slice(0, DAILY_ARTIST_LIMIT));
+  const lanes = dailyRotation([...artists], day, seed, ([key]) => key).map(([key, tracks]) =>
+    dailyRotation(tracks, day, `${seed}:${key}`, musicTrackIdentity).slice(0, DAILY_ARTIST_LIMIT),
+  );
   const result: MusicTrack[] = [];
   for (let round = 0; round < DAILY_ARTIST_LIMIT; round++) {
     for (const lane of lanes) {

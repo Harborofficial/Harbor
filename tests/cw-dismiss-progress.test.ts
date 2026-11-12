@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import ts from "typescript";
+import { dedupeCwItems } from "../src/lib/cw-dedupe";
 import type { LibraryItem } from "../src/lib/stremio";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -124,6 +125,13 @@ function harness(seed?: string, onChange = () => {}, options: { nuvio?: boolean 
       },
     },
     "@/lib/feed/external-cw": { removeExternalCwItem: () => {} },
+    "@/lib/settings/load": {
+      loadStoredSettings: () => ({
+        cwClearProviderProgress: false,
+        cwSources: { trakt: false, simkl: false, publicmetadb: false },
+      }),
+    },
+    "./cw-provider-dismiss": { clearProviderPlayback: async () => ({ failed: [] }) },
   };
   const output = ts.transpileModule(read("src/lib/cw-dismiss.ts"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
@@ -267,6 +275,74 @@ test("fresh local resume overrides stale cloud recency for the same episode", ()
   assert.equal(h.api.isCwDismissed(value), false);
 });
 
+test("library maintenance timestamps cannot resurrect unchanged dismissed progress", () => {
+  const h = harness();
+  const value = item();
+  h.api.dismissCw(value, null);
+  const refreshed = { ...value, _mtime: new Date(Date.now() + 60_000).toISOString() };
+  assert.equal(h.api.isCwDismissed(refreshed), true);
+  assert.equal(
+    h.api.isCwDismissed({ ...refreshed, state: { ...value.state!, timeOffset: 300 } }),
+    false,
+  );
+});
+
+test("dismissing a stale source copy cannot lower the checkpoint", () => {
+  const h = harness();
+  const advanced = { ...item(), state: { ...item().state!, episode: 4, video_id: "tt-test:1:4" } };
+  h.api.dismissCw(advanced, null);
+  h.api.dismissCw(item("trakt"), null);
+  assert.equal(h.api.isCwDismissed(advanced), true);
+  assert.equal(h.api.isCwDismissed(item()), true);
+  h.setResume(advanced, 100, Date.now() + 1000);
+  assert.equal(h.api.isCwDismissed(advanced), false, "fresh playback can still restore it");
+});
+
+test("one dismissal hides entries whose server clock is ahead of the local clock", () => {
+  const h = harness();
+  const value = { ...item(), _mtime: new Date(Date.now() + 60_000).toISOString() };
+  h.api.dismissCw(value, null);
+  assert.equal(h.api.isCwDismissed(value), true);
+});
+
+test("a grouped dismissal covers a member whose provider clock is ahead", () => {
+  const h = harness();
+  const library = item();
+  const simkl = {
+    ...item("simkl"),
+    state: { ...item().state!, lastWatched: new Date(Date.now() + 60_000).toISOString() },
+  };
+  const grouped = { ...library, cwMembers: [library, simkl] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+
+  h.api.dismissCw(grouped, null);
+
+  assert.equal(h.api.isCwDismissed(simkl), true);
+});
+
+test("a far-future provider timestamp cannot block a later rewatch", () => {
+  const h = harness();
+  const library = item();
+  const simkl = {
+    ...item("simkl"),
+    state: { ...item().state!, lastWatched: new Date(Date.now() + 2 * 864e5).toISOString() },
+  };
+  const grouped = { ...library, cwMembers: [library, simkl] } as LibraryItem & {
+    cwMembers: LibraryItem[];
+  };
+
+  h.api.dismissCw(grouped, null);
+
+  const rewatch = { ...library, state: { ...library.state!, timeOffset: 300 } };
+  h.setResume(rewatch, 300, Date.now() + 10 * 60_000);
+  assert.equal(
+    h.api.isCwDismissed(rewatch),
+    false,
+    "progress after the skew tolerance is not swallowed by the provider's clock",
+  );
+});
+
 test("an older tracker episode cannot undo dismissal, while later episodes and fresh rewatches can", () => {
   const h = harness();
   const current = item("simkl");
@@ -335,6 +411,7 @@ function advanceHarness(
       dedupeAnimeCw: dedupeWithSameIdentity,
       cwAnimeIdentityKey: (...args: any[]) => animeIdentityHelpers().cwAnimeIdentityKey(...args),
     },
+    "@/lib/cw-dedupe": { dedupeCwItems },
     "@/lib/cw-next-display": { cwNextDisplayCoords },
     "@/lib/stremio": {
       isAnimeCwItem: (item: LibraryItem) => /^(kitsu|mal|anilist|anidb):/.test(item._id),
@@ -545,6 +622,26 @@ test("grouped source checkpoints survive reload without crossing local, library,
     reloaded.api.isCwDismissed({ ...library, external: "simkl" }),
     false,
     "a source without an observed checkpoint stays visible",
+  );
+});
+
+test("a stale copy of the same show is collapsed to the current episode", () => {
+  const h = harness();
+  const stale: LibraryItem = {
+    ...item(),
+    _id: "tt-old",
+    state: { ...item().state!, season: 2, episode: 1, video_id: "tt-old:2:1" },
+  };
+  const current: LibraryItem = {
+    ...item(),
+    _id: "tt-new",
+    name: "Test Season 3",
+    state: { ...item().state!, season: 3, episode: 7, video_id: "tt-new:3:7" },
+  };
+  const render = advanceHarness(h.api, new Map(), []);
+  assert.deepEqual(
+    render([stale, current]).map((i) => [i._id, i.state?.season, i.state?.episode]),
+    [["tt-new", 3, 7]],
   );
 });
 

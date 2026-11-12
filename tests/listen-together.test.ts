@@ -295,7 +295,12 @@ test("a mix at its defaults adds nothing to the payload an older client already 
 });
 
 test("a disabled equaliser never ships its curve, and speed still travels", () => {
-  const quiet: ListenMix = { ...DEFAULT_LISTEN_MIX, speed: 0.9, eqEnabled: false, eqBands: MIX_BANDS };
+  const quiet: ListenMix = {
+    ...DEFAULT_LISTEN_MIX,
+    speed: 0.9,
+    eqEnabled: false,
+    eqBands: MIX_BANDS,
+  };
   const state = listenStateFromTrack(HOST_TRACK as never, 0, true, "host", "host", 1, quiet);
   const read = listenMixFromState(state);
   assert.equal(read?.speed, 0.9);

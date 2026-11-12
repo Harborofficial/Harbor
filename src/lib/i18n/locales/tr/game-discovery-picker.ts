@@ -9,9 +9,12 @@ export default {
   "games.pick.heading0": "Şu an ne oynamak istersin?",
   "games.pick.heading1": "Sevdiğin birkaç oyun çok şey anlatır.",
   "games.pick.heading2": "Oynamaya değer bir şey.",
-  "games.pick.note0": "Bu akşam ne istediğini seç. Önce ruh hâline tam uyan oyunlar, ardından en yakın alternatifler gelir. Oyun modu ve diğer filtreler geçerli kalır.",
-  "games.pick.note1": "En fazla beş favori seç. Özelliklerini ve son etkinliğini birlikte değerlendireceğiz.",
-  "games.pick.note2": "Seçimlerin, ortak ilgi alanların ve oyuncu incelemeleriyle hazırlanmış bir liste.",
+  "games.pick.note0":
+    "Bu akşam ne istediğini seç. Önce ruh hâline tam uyan oyunlar, ardından en yakın alternatifler gelir. Oyun modu ve diğer filtreler geçerli kalır.",
+  "games.pick.note1":
+    "En fazla beş favori seç. Özelliklerini ve son etkinliğini birlikte değerlendireceğiz.",
+  "games.pick.note2":
+    "Seçimlerin, ortak ilgi alanların ve oyuncu incelemeleriyle hazırlanmış bir liste.",
   "games.pick.company": "Kiminle oynuyorsun?",
   "games.pick.refine": "Aramayı daralt",
   "games.pick.tagSearch": "Daha fazla etiket, tür ve özellik ara…",
@@ -37,7 +40,8 @@ export default {
   "games.pick.remove": "{name} oyununu favorilerden kaldır",
   "games.pick.addFavorite": "{name} oyununu favori olarak kullan",
   "games.pick.history": "Kütüphane etkinliğimi kullan",
-  "games.pick.historyNote": "Son oynanan, en çok oynanan, yeni eklenen ve kaydedilen oyunlar. Favoriler daha fazla ağırlık taşır.",
+  "games.pick.historyNote":
+    "Son oynanan, en çok oynanan, yeni eklenen ve kaydedilen oyunlar. Favoriler daha fazla ağırlık taşır.",
   "games.pick.signal.recent": "Son oynanan",
   "games.pick.signal.mostPlayed": "En çok oynanan",
   "games.pick.signal.added": "Yeni eklenen",
@@ -45,7 +49,8 @@ export default {
   "games.pick.hours": "sa.",
   "games.pick.noHistory": "Henüz etkinlik yok. Favori seç veya Oyunlar ayarlarından Steam'i bağla.",
   "games.pick.manualOnly": "Bu önerileri yalnızca favorilerin ve seçtiğin filtreler belirleyecek.",
-  "games.pick.addedNote": "“Yeni eklenen”, ilk içe aktarmadan sonra Harbor'da ilk görüldüğü zamandır; satın alma tarihi değildir.",
+  "games.pick.addedNote":
+    "“Yeni eklenen”, ilk içe aktarmadan sonra Harbor'da ilk görüldüğü zamandır; satın alma tarihi değildir.",
   "games.pick.because": "{name} oyununu sevdiğin için",
   "games.pick.matches": "Seçimlerine uyuyor",
   "games.pick.steamCatalog": "Steam kataloğu",
@@ -59,11 +64,14 @@ export default {
   "games.pick.undo": "Geri al",
   "games.pick.resetHidden": "Gizlenen oyunları yeniden göster",
   "games.pick.more": "Daha fazla öneri bul",
-  "games.pick.rankingNote": "Ortak Steam etiketleri, etkinlik, incelemelerin gücü ve çeşitlilikle sıralanır. Puanlar olumlu Steam incelemeleridir. Fiyat ve erişim ABD kataloğuna göredir.",
+  "games.pick.rankingNote":
+    "Ortak Steam etiketleri, etkinlik, incelemelerin gücü ve çeşitlilikle sıralanır. Puanlar olumlu Steam incelemeleridir. Fiyat ve erişim ABD kataloğuna göredir.",
   "games.pick.error": "Sıradaki oyunun biraz bekleyebilir.",
-  "games.pick.errorNote": "Oyun kataloğuna ulaşılamadı. Seçimlerin kayıtlı; hazır olduğunda tekrar dene.",
+  "games.pick.errorNote":
+    "Oyun kataloğuna ulaşılamadı. Seçimlerin kayıtlı; hazır olduğunda tekrar dene.",
   "games.pick.noMatches": "Bu gereksinimlerle henüz oyun bulunamadı.",
-  "games.pick.noMatchesNote": "Platform, fiyat veya kütüphane seçeneklerini genişlet. Ruh hâline yakın alternatifler zaten dahil.",
+  "games.pick.noMatchesNote":
+    "Platform, fiyat veya kütüphane seçeneklerini genişlet. Ruh hâline yakın alternatifler zaten dahil.",
   "games.pick.saveError": "Seçimler bu oturumda geçerli, ancak cihaza kaydedilemedi.",
   "games.pick.selected": "{count} etiket seçildi",
   "games.pick.favoriteCount": "5 favoriden {count} tanesi",
@@ -76,5 +84,5 @@ export default {
   "games.pick.owned": "Kütüphanende",
   "games.pick.closest": "Yakın alternatifler de dahil. Oyun modu ve diğer filtreler geçerli kalır.",
   "games.pick.closeMatch": "{total} ruh hâli etiketinden {count} tanesi eşleşiyor",
-  "games.pick.missing": "Bulunmayan etiketler: {tags}"
+  "games.pick.missing": "Bulunmayan etiketler: {tags}",
 };

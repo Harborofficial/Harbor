@@ -9,6 +9,7 @@ mod extract;
 pub mod moviehash;
 
 pub mod asr;
+pub mod moonshine;
 mod asr_match;
 pub mod audio_tracks;
 pub mod fingerprint;

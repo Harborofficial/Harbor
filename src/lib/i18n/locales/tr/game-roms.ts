@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "İçerik üreticilerinin oynanışları",
   "games.roms.watchVideo": "Videoyu izle",
   "games.roms.noVideos": "Bu oyunlar için henüz video listelenmemiş.",
-  "games.roms.libraryNote": "Kendi oyunlarını getir. Dosyaları içe aktar, emülatör seç ve koleksiyonunu bir arada tut.",
+  "games.roms.libraryNote":
+    "Kendi oyunlarını getir. Dosyaları içe aktar, emülatör seç ve koleksiyonunu bir arada tut.",
   "games.roms.openLibrary": "Kütüphaneyi aç",
   "games.roms.downloadCharts": "En çok indirilen ROM hack’leri",
-  "games.roms.downloadChartsNote": "Romhack Plaza’daki toplam yama indirmeleri. Yapımcı, sürüm ve gereksinimler için projeyi aç.",
+  "games.roms.downloadChartsNote":
+    "Romhack Plaza’daki toplam yama indirmeleri. Yapımcı, sürüm ve gereksinimler için projeyi aç.",
   "games.roms.downloadCount": "{count} indirme",
-  "games.roms.chartUnavailable": "İndirme listesi şu anda kullanılamıyor. Romhack Plaza’ya yine de göz atabilirsin.",
+  "games.roms.chartUnavailable":
+    "İndirme listesi şu anda kullanılamıyor. Romhack Plaza’ya yine de göz atabilirsin.",
   "games.roms.allPlatforms": "Tüm platformlar",
   "games.roms.moreReleases": "Daha fazla sürüm göster",
   "games.roms.fewerReleases": "Daha az sürüm göster",
@@ -59,14 +62,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "Seçili konsolda bu koleksiyona uyan bir oyun henüz yok.",
   "games.roms.community": "Topluluk tarafından yapıldı",
   "games.roms.hacksTitle": "Tanıdık bir oyun. Farklı bir macera.",
-  "games.roms.hacksNote": "ROM hack’lerini keşfedin, temel aldıkları özgün oyunu bulun ve yamalı kopyanızı oynamaya hazırlayın.",
+  "games.roms.hacksNote":
+    "ROM hack’lerini keşfedin, temel aldıkları özgün oyunu bulun ve yamalı kopyanızı oynamaya hazırlayın.",
   "games.roms.catalogNote": "Kataloğu konsola, türe, çıkış dönemine ve seriye göre keşfedin.",
   "games.roms.genre": "Tür",
   "games.roms.allGenres": "Tüm türler",
   "games.roms.era": "Çıkış dönemi",
   "games.roms.reset": "Filtreleri sıfırla",
   "games.roms.empty": "Başka bir oyun adı deneyin veya bu konsolun filtrelerini genişletin.",
-  "games.roms.source": "Oyun bilgileri ve oyunlar arasındaki bağlantılar IGDB’den alınır. Desteklenen oyunları Harbor’da oynamak için yerel dosyalarınızı içe aktarın.",
+  "games.roms.source":
+    "Oyun bilgileri ve oyunlar arasındaki bağlantılar IGDB’den alınır. Desteklenen oyunları Harbor’da oynamak için yerel dosyalarınızı içe aktarın.",
   "games.roms.playerScore": "IGDB oyuncu puanı · {count} değerlendirme",
   "games.roms.combinedScore": "IGDB birleşik puanı · {count} değerlendirme",
   "games.roms.sort.discussed": "En çok değerlendirilen",

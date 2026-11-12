@@ -22,7 +22,14 @@ export function useProfileTitle(
       translate: settings.translateTitles,
       imageLanguages,
     }),
-    [id, mediaType, settings.tmdbKey, settings.tmdbLanguage, settings.translateTitles, imageLanguages],
+    [
+      id,
+      mediaType,
+      settings.tmdbKey,
+      settings.tmdbLanguage,
+      settings.translateTitles,
+      imageLanguages,
+    ],
   );
   const [resolved, setResolved] = useState<{
     request: typeof request;
@@ -45,7 +52,9 @@ export function useProfileTitle(
       .catch(() => {
         /* Keep the published snapshot when metadata is unavailable. */
       });
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [visible, request]);
 
   const current = resolved?.request === request ? resolved : null;

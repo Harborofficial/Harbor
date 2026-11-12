@@ -1,3 +1,4 @@
+import { addonBaseUrl, addonResourceUrl } from "@/lib/addon-url";
 import { cachedCatalogRow, type CatalogLoad } from "@/lib/addon-catalog-cache";
 import { runLanes } from "@/lib/run-lanes";
 import { addonConfigurationKey } from "@/lib/addon-configuration-key";
@@ -49,19 +50,22 @@ export type Addon = {
 export function addonBasesForOrigin(addons: Addon[], origin: AddonOrigin | undefined): string[] {
   if (!origin) return [];
   const bases = new Set<string>();
-  if (origin.base) bases.add(origin.base.replace(/\/manifest\.json$/, ""));
+  if (origin.base) bases.add(addonBaseUrl(origin.base));
   // Catalogue keys do not always equal manifest IDs. Match the original configuration first,
   // without persisting its authenticated URL in library metadata.
   if (origin.configurationKey) {
     for (const addon of addons) {
-      if (addonConfigurationKey(addon.transportUrl) === origin.configurationKey) {
-        bases.add(addon.transportUrl.replace(/\/manifest\.json$/, ""));
+      if (
+        addonConfigurationKey(addon.transportUrl) === origin.configurationKey ||
+        addonConfigurationKey(addonBaseUrl(addon.transportUrl)) === origin.configurationKey
+      ) {
+        bases.add(addonBaseUrl(addon.transportUrl));
       }
     }
   }
   for (const addon of addons) {
     if (addon.manifest.id !== origin.id) continue;
-    bases.add(addon.transportUrl.replace(/\/manifest\.json$/, ""));
+    bases.add(addonBaseUrl(addon.transportUrl));
   }
   return [...bases];
 }
@@ -385,9 +389,9 @@ function requiredCatalogExtras(cat: CatalogDef): Array<{ name: string; value: st
 function catalogRequestUrl(base: string, cat: CatalogDef): string | null {
   const extras = requiredCatalogExtras(cat);
   if (extras === null) return null;
-  if (extras.length === 0) return `${base}/catalog/${cat.type}/${cat.id}.json`;
+  if (extras.length === 0) return addonResourceUrl(base, `catalog/${cat.type}/${cat.id}.json`);
   const parts = extras.map((e) => `${encodeURIComponent(e.name)}=${encodeURIComponent(e.value)}`);
-  return `${base}/catalog/${cat.type}/${cat.id}/${parts.join("&")}.json`;
+  return addonResourceUrl(base, `catalog/${cat.type}/${cat.id}/${parts.join("&")}.json`);
 }
 
 export function isCollectionCatalog(c: { type?: string; id?: string; name?: string }): boolean {
@@ -414,8 +418,7 @@ async function loadCatalogRow(
   addon: Addon,
   cat: CatalogDef,
 ): Promise<CatalogLoad<AddonRow | null>> {
-  let base = addon.transportUrl.replace(/\/manifest\.json$/, "");
-  if (base.startsWith("stremio://")) base = "https://" + base.slice("stremio://".length);
+  const base = addonBaseUrl(addon.transportUrl);
   const url = catalogRequestUrl(base, cat);
   if (!url) return { value: null, ok: true };
   const res = await fetchWithTimeout(url);
@@ -489,7 +492,9 @@ export async function loadAddonRows(
 }
 
 export async function fetchAddonMeta(base: string, type: string, id: string): Promise<Meta | null> {
-  const res = await fetchWithTimeout(`${base}/meta/${type}/${encodeURIComponent(id)}.json`);
+  const res = await fetchWithTimeout(
+    addonResourceUrl(base, `meta/${type}/${encodeURIComponent(id)}.json`),
+  );
   if (!res || !res.ok) return null;
   try {
     const json = await res.json();
@@ -511,7 +516,7 @@ export async function fetchAddonCatalogPage(
     parts.push(`${encodeURIComponent(e.name)}=${encodeURIComponent(e.value)}`);
   if (skip > 0) parts.push(`skip=${skip}`);
   const seg = parts.length ? `/${parts.join("&")}` : "";
-  const res = await fetchWithTimeout(`${base}/catalog/${type}/${id}${seg}.json`);
+  const res = await fetchWithTimeout(addonResourceUrl(base, `catalog/${type}/${id}${seg}.json`));
   if (!res || !res.ok) return [];
   try {
     const json = await res.json();

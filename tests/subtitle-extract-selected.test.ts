@@ -88,25 +88,37 @@ test("embedded export uses the loaded media and its own headers after player rec
       },
     },
     "./parser": { parseSubtitle },
-    "./encoding": {}, "./prepare": {}, "./save-to-disk": {},
+    "./encoding": {},
+    "./prepare": {},
+    "./save-to-disk": {},
   });
   const url = "http://127.0.0.1:4567/recovered";
   try {
     for (const headers of [undefined, { Referer: "fixture" }]) {
-      const result = await output.getCuesAnySource({
-        getLoadedMediaSource: () => ({ url, headers }),
-        getSelectedTrackCues: () => null,
-        getSelectedTrackUrl: () => null,
-        subscribe(fn: (s: unknown) => void) {
-          fn({ subtitleTracks: [{ id: "1" }, { id: "2", selected: true }] });
-          return () => {};
+      const result = await output.getCuesAnySource(
+        {
+          getLoadedMediaSource: () => ({ url, headers }),
+          getSelectedTrackCues: () => null,
+          getSelectedTrackUrl: () => null,
+          subscribe(fn: (s: unknown) => void) {
+            fn({ subtitleTracks: [{ id: "1" }, { id: "2", selected: true }] });
+            return () => {};
+          },
         },
-      }, "https://original.invalid", { Authorization: "old origin" });
+        "https://original.invalid",
+        { Authorization: "old origin" },
+      );
       assert.equal(result.source.cues[0].text, "Selected track");
       assert.deepEqual(requests.at(-1), { source: url, streamIndex: 1, headers: headers ?? null });
     }
-    assert.match(output.subtitleDownloadError("extract-failed: subtitle extraction timed out"), /timed out/);
-    assert.doesNotMatch(output.subtitleDownloadError("extract-failed: https://private.invalid/secret"), /private|secret/);
+    assert.match(
+      output.subtitleDownloadError("extract-failed: subtitle extraction timed out"),
+      /timed out/,
+    );
+    assert.doesNotMatch(
+      output.subtitleDownloadError("extract-failed: https://private.invalid/secret"),
+      /private|secret/,
+    );
   } finally {
     Object.assign(globalThis, { window: previousWindow });
   }

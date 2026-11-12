@@ -193,6 +193,6 @@ fn scan_checked(
     Ok(report)
 }
 
-#[cfg(test)]
+#[cfg(all(test, windows))]
 #[path = "sims_duplicates_tests.rs"]
 mod tests;

@@ -12,9 +12,24 @@ const DEPTS: Array<{ id: PeopleDept; label: string }> = [
 ];
 
 const GENRES = [
-  "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama",
-  "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance",
-  "Science Fiction", "Thriller", "War", "Western",
+  "Action",
+  "Adventure",
+  "Animation",
+  "Comedy",
+  "Crime",
+  "Documentary",
+  "Drama",
+  "Family",
+  "Fantasy",
+  "History",
+  "Horror",
+  "Music",
+  "Mystery",
+  "Romance",
+  "Science Fiction",
+  "Thriller",
+  "War",
+  "Western",
 ];
 
 export function PeopleFilterBar({
@@ -100,7 +115,9 @@ export function PeopleFilterBar({
           <span
             aria-hidden
             className={`pointer-events-none absolute bottom-0 h-[2px] rounded-full bg-accent ${
-              armed ? "transition-[left,width] duration-250 ease-out motion-reduce:transition-none" : ""
+              armed
+                ? "transition-[left,width] duration-250 ease-out motion-reduce:transition-none"
+                : ""
             }`}
             style={{ left: ind.left, width: ind.width }}
           />
@@ -110,7 +127,10 @@ export function PeopleFilterBar({
           <Dropdown
             value={genre ?? ""}
             onChange={(v) => onGenre(v || null)}
-            options={[{ value: "", label: t("All genres") }, ...GENRES.map((g) => ({ value: g, label: t(g) }))]}
+            options={[
+              { value: "", label: t("All genres") },
+              ...GENRES.map((g) => ({ value: g, label: t(g) })),
+            ]}
             className="w-[150px]"
           />
 
@@ -118,7 +138,10 @@ export function PeopleFilterBar({
             <Dropdown
               value={country ?? ""}
               onChange={(v) => onCountry(v || null)}
-              options={[{ value: "", label: t("All countries") }, ...countries.map((c) => ({ value: c.iso, label: c.name }))]}
+              options={[
+                { value: "", label: t("All countries") },
+                ...countries.map((c) => ({ value: c.iso, label: c.name })),
+              ]}
               className="w-[178px]"
             />
             <span className="ps-1 text-[11px] leading-tight text-ink-subtle whitespace-nowrap">
@@ -136,7 +159,6 @@ export function PeopleFilterBar({
               className="h-full w-52 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-subtle/60"
             />
           </div>
-
         </div>
       </div>
       {resultCount && (

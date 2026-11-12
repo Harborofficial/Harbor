@@ -175,7 +175,8 @@ const appFill: Record<string, string> = {
   "Connect a Suwayomi server": "Einen Suwayomi-Server verbinden",
   "Connect a controller: every press and stick move shows up here, live.":
     "Schließe einen Controller an: Jeder Tastendruck und jede Stickbewegung wird hier live angezeigt.",
-  "Connect your Trakt account to leave comments and reviews.": "Verbinde dein Trakt-Konto, um Kommentare und Rezensionen zu schreiben.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "Verbinde dein Trakt-Konto, um Kommentare und Rezensionen zu schreiben.",
   "Connected as @{username}": "Verbunden als @{username}",
   "Connected as {username}": "Verbunden als {username}",
   "Connected to AniList": "Mit AniList verbunden",

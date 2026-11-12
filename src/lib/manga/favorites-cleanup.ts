@@ -48,7 +48,10 @@ function corroborates(a: FavoriteEntry, b: FavoriteEntry): boolean {
   return sameCover(a, b) || sameAltTitle(a, b) || sameSource(a, b);
 }
 
-function mergeCluster<T extends FavoriteEntry>(cluster: readonly T[], liveSources: ReadonlySet<string>): T {
+function mergeCluster<T extends FavoriteEntry>(
+  cluster: readonly T[],
+  liveSources: ReadonlySet<string>,
+): T {
   let winner = cluster[0];
   for (const entry of cluster.slice(1)) {
     if (better(winner, entry, liveSources)) winner = entry;

@@ -170,7 +170,7 @@ export default {
   "Show all {count}": "Pokaz wszystkich ({count})",
   "{count} competing": "{count} zawodnikow",
   "Starting field": "Lista startowa",
-  "Leaderboard": "Klasyfikacja",
+  Leaderboard: "Klasyfikacja",
   "Full field": "Pelna stawka",
   "Loading event schedule…": "Ładowanie terminarza wydarzenia…",
   "Loading lineups…": "Ładowanie składów…",

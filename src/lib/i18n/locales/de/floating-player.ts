@@ -5,6 +5,7 @@ export default {
   "floatingPlayer.chapters": "Kapitel",
   "floatingPlayer.subtitleDelay": "Untertitelverzögerung",
   "floatingPlayer.playbackSpeed": "Wiedergabegeschwindigkeit",
-  "floatingPlayer.playerError": "Die Wiedergabe konnte nicht aktualisiert werden. Versuche es erneut.",
+  "floatingPlayer.playerError":
+    "Die Wiedergabe konnte nicht aktualisiert werden. Versuche es erneut.",
   "floatingPlayer.chooseChapter": "Kapitel auswählen",
 };

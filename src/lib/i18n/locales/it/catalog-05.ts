@@ -983,7 +983,8 @@ const catalog05: Record<string, string> = {
   "Nothing is uploaded and nothing ships with Harbor. Everything stays on this device and you are responsible for the images you add.":
     "Non viene caricato nulla e Harbor non include alcun contenuto. Tutto resta su questo dispositivo e sei responsabile delle immagini che aggiungi.",
   "Nothing left in today's picks": "Hai esaurito i consigli di oggi",
-  "Nothing left to confirm while P2P is disabled.": "Non resta nulla da confermare finché il P2P è disattivato.",
+  "Nothing left to confirm while P2P is disabled.":
+    "Non resta nulla da confermare finché il P2P è disattivato.",
   "Nothing left to post after removing links.":
     "Dopo la rimozione dei link non resta nulla da pubblicare.",
   "Nothing matched this filter. Try another category or change your region in Settings.":

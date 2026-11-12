@@ -99,12 +99,16 @@ export function MusicSpotifyLibrary({
   const selectedId = selected?.id;
   const player = useMusicPlayback();
   const playbackOrigin = useMusicPlaybackOrigin();
-  const [queueFill, setQueueFill] =
-    useState<Extract<MusicPlaybackOrigin, { kind: "spotify" }> | null>(null);
+  const [queueFill, setQueueFill] = useState<Extract<
+    MusicPlaybackOrigin,
+    { kind: "spotify" }
+  > | null>(null);
   const fillGeneration = useRef(0);
-  const collection = usePlaylistFilters(selectedId ?? kind, page?.tracks, { addedAt: page?.trackAddedAt, recentFirst: kind === "liked" && !selected });
+  const collection = usePlaylistFilters(selectedId ?? kind, page?.tracks, {
+    addedAt: page?.trackAddedAt,
+    recentFirst: kind === "liked" && !selected,
+  });
   const filteringCollection = collection.active || collection.filters.sort !== "default";
-
 
   const more = useRef<HTMLButtonElement | null>(null);
   const read = useCallback(
@@ -176,7 +180,15 @@ export function MusicSpotifyLibrary({
   }, [page?.nextOffset, loading, working, read, failure, filteringCollection]);
 
   useEffect(() => {
-    if (active && filteringCollection && page?.nextOffset != null && !loading && !working && !failure) void read(page.nextOffset, true);
+    if (
+      active &&
+      filteringCollection &&
+      page?.nextOffset != null &&
+      !loading &&
+      !working &&
+      !failure
+    )
+      void read(page.nextOffset, true);
   }, [active, filteringCollection, page?.nextOffset, loading, working, failure, read]);
 
   useEffect(() => {
@@ -314,9 +326,11 @@ export function MusicSpotifyLibrary({
   const title = selected?.name ?? t("music.spotifyLibrary.title");
   const play = (track: MusicTrack, queue: MusicTrack[]) => {
     const from: Extract<MusicPlaybackOrigin, { kind: "spotify" }> = {
-      kind: "spotify", id: selected?.id ?? "spotify:liked",
+      kind: "spotify",
+      id: selected?.id ?? "spotify:liked",
       name: selected?.name ?? t("music.spotifyLibrary.liked"),
-      collection: selected ? "playlist" : "liked", nextOffset: page?.nextOffset ?? null,
+      collection: selected ? "playlist" : "liked",
+      nextOffset: page?.nextOffset ?? null,
     };
     registerMusicQueueOrigin(queue, from);
     // The page only holds the pages scrolled so far. Once this queue takes over, fill it
@@ -338,17 +352,26 @@ export function MusicSpotifyLibrary({
     void readSpotifyQueuePages(wanted, offset, (tracks, nextOffset) => {
       if (fillGeneration.current !== run) return false;
       const current = getMusicPlaybackOrigin();
-      if (current?.kind !== "spotify" || current.id !== wanted.id || current.collection !== wanted.collection)
+      if (
+        current?.kind !== "spotify" ||
+        current.id !== wanted.id ||
+        current.collection !== wanted.collection
+      )
         return false;
       const snapshot = getMusicState();
       const held = new Set(snapshot.queue.map(queueTrackKey));
-      const fresh = tracks.filter(track => !held.has(queueTrackKey(track)));
+      const fresh = tracks.filter((track) => !held.has(queueTrackKey(track)));
       if (fresh.length) setMusicQueue([...snapshot.queue, ...fresh]);
       setMusicPlaybackOrigin({ ...current, nextOffset });
       return true;
     }).catch(() => {});
   }, [playbackOrigin, queueFill]);
-  useEffect(() => () => { fillGeneration.current += 1; }, []);
+  useEffect(
+    () => () => {
+      fillGeneration.current += 1;
+    },
+    [],
+  );
   const removeTrack = async (track: MusicTrack) => {
     if (!selected?.editable || working) return;
     const playlist = selected;
@@ -411,7 +434,7 @@ export function MusicSpotifyLibrary({
           <p className="mt-1 text-sm text-ink-muted">
             {selected
               ? selected.subtitle
-              : page?.accountDisplayName ?? t("music.spotifyLibrary.body")}
+              : (page?.accountDisplayName ?? t("music.spotifyLibrary.body"))}
           </p>
         </div>
         {connected && (
@@ -621,10 +644,20 @@ export function MusicSpotifyLibrary({
           ) : (
             <>
               <MusicPlaylistToolbar controller={collection} loading={loading} />
-              <LibraryTrackList title="" subtitle="" showControls={false} tracks={collection.tracks} view={collection.filters.view}
-                likedIds={player.likedIds} selectedPlaylist={null} onPlay={play}
+              <LibraryTrackList
+                title=""
+                subtitle=""
+                showControls={false}
+                tracks={collection.tracks}
+                view={collection.filters.view}
+                likedIds={player.likedIds}
+                selectedPlaylist={null}
+                onPlay={play}
                 onRemove={selected?.editable ? removeTrack : undefined}
-                emptyCopy={t(collection.active ? "music.searchEmpty" : "music.spotifyLibrary.empty")} />
+                emptyCopy={t(
+                  collection.active ? "music.searchEmpty" : "music.spotifyLibrary.empty",
+                )}
+              />
             </>
           )}
           {loading && (

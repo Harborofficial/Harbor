@@ -104,7 +104,7 @@ test("uploading a font never puts its bytes in the settings blob", () => {
 });
 
 test("a settings write that does not persist is not swallowed", () => {
-  assert.match(store, /const ok = setItemWithRecovery\(sourceKeyFor\(profileId, linked\), json\);/);
+  assert.match(store, /const ok = setItemWithRecoveryDetailed\(source, json\)\.ok;/);
   assert.match(store, /if \(!ok\) \{[\s\S]*console\.error/);
 });
 

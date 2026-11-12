@@ -9,7 +9,10 @@ function harness() {
   const movies = new Map<string, { ms: number; pct?: number }>();
   const episodes = new Map<string, { ms: number; pct?: number; season: number; episode: number }>();
   const mocks: Record<string, unknown> = {
-    "../resume": { readResumeEntry: (id: string) => movies.get(id), lastPlayedEpisode: (id: string) => episodes.get(id) },
+    "../resume": {
+      readResumeEntry: (id: string) => movies.get(id),
+      lastPlayedEpisode: (id: string) => episodes.get(id),
+    },
     "../movie-watched": { isMovieWatchedLocal: (id: string) => watched.has(id) },
     "../providers/tmdb": { tmdbImdbCached: (id: string) => aliases.get(id) },
     "../stremio": { episodeFromVideoId: () => null },
@@ -20,8 +23,12 @@ function harness() {
   }).outputText;
   const module = { exports: {} as any };
   new Function("require", "module", "exports", output)(
-    (name: string) => { assert.ok(name in mocks, `unexpected import ${name}`); return mocks[name]; },
-    module, module.exports,
+    (name: string) => {
+      assert.ok(name in mocks, `unexpected import ${name}`);
+      return mocks[name];
+    },
+    module,
+    module.exports,
   );
   return { ...module.exports, watched, aliases, movies, episodes };
 }
@@ -29,7 +36,9 @@ function harness() {
 const movie = { id: "tt100", type: "movie", name: "Fixture film" };
 const series = { id: "tt200", type: "series", name: "Fixture series" };
 const published = (id = movie.id) => ({
-  _id: id, type: "movie", state: { timeOffset: 60_000, duration: 6_000_000 },
+  _id: id,
+  type: "movie",
+  state: { timeOffset: 60_000, duration: 6_000_000 },
 });
 
 test("marking a movie watched overrides an already published in-progress preview", () => {
@@ -87,10 +96,22 @@ for (const type of ["movie", "series"] as const) {
 test("series Up Next and external progress preserve their existing semantics", () => {
   const h = harness();
   h.watched.add(series.id);
-  h.publishResumeStates([{ ...published(series.id), type: "series", upNext: true, external: "simkl",
-    state: { timeOffset: 0, duration: 0, season: 2, episode: 1 } }]);
+  h.publishResumeStates([
+    {
+      ...published(series.id),
+      type: "series",
+      upNext: true,
+      external: "simkl",
+      state: { timeOffset: 0, duration: 0, season: 2, episode: 1 },
+    },
+  ]);
   assert.deepEqual(h.resolveResume(series), {
-    season: 2, episode: 1, fraction: null, remainingMs: null, upNext: true, external: true,
+    season: 2,
+    episode: 1,
+    fraction: null,
+    remainingMs: null,
+    upNext: true,
+    external: true,
   });
 });
 

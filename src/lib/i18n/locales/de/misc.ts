@@ -91,9 +91,11 @@ const misc: Record<string, string> = {
   "Collapse sidebar": "Seitenleiste einklappen",
   "Comments are hidden": "Kommentare sind ausgeblendet",
   "Hosted elsewhere": "Extern gehostet",
-  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.": "Diese Tarife betreibt ein Dritter. Harbor ist nicht mit ihnen verbunden und erhält nichts für eine Anmeldung. Aktuelle Preise und Bedingungen stehen auf deren Seite.",
+  "A third party runs these plans. Harbor is not affiliated with them and receives nothing from a signup. Current pricing and terms are on their site.":
+    "Diese Tarife betreibt ein Dritter. Harbor ist nicht mit ihnen verbunden und erhält nichts für eine Anmeldung. Aktuelle Preise und Bedingungen stehen auf deren Seite.",
   "{name} can run on a hosted instance": "{name} kann auf einer gehosteten Instanz laufen",
-  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.": "Das betreibt ein Dritter. Harbor ist nicht mit ihnen verbunden, verkauft es nicht weiter und erhält nichts, wenn du dich anmeldest. Preis und Umfang stehen auf deren Seite.",
+  "A third party operates this. Harbor is not affiliated with them, does not resell it, and receives nothing if you sign up. Whatever it costs and whatever it includes is on their site.":
+    "Das betreibt ein Dritter. Harbor ist nicht mit ihnen verbunden, verkauft es nicht weiter und erhält nichts, wenn du dich anmeldest. Preis und Umfang stehen auf deren Seite.",
   "Show comments": "Kommentare anzeigen",
   "Hide comments": "Kommentare ausblenden",
   "Comments may take a moment to appear on Trakt":

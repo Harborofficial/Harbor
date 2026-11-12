@@ -84,7 +84,8 @@ const catalog09: Record<string, string> = {
   "Torrent name": "Nome del torrent",
   "P2P streaming": "Streaming P2P",
   Torrents: "Torrent",
-  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.": "Il P2P è disattivato. Gli stream non memorizzati nella cache non verranno riprodotti, a meno che non provengano da un servizio debrid o da un link diretto. Per usare il P2P, disattiva questa opzione.",
+  "P2P is disabled. Uncached streams will not play unless they come from a debrid service or a direct link. To use P2P, toggle this off.":
+    "Il P2P è disattivato. Gli stream non memorizzati nella cache non verranno riprodotti, a meno che non provengano da un servizio debrid o da un link diretto. Per usare il P2P, disattiva questa opzione.",
   "Total Shots": "Tiri totali",
   "Total Technical Fouls": "Falli tecnici totali",
   "Total Turnovers": "Palle perse totali",
@@ -786,7 +787,8 @@ const catalog09: Record<string, string> = {
     "Durante la riproduzione automatica dell'Episodio successivo, mantiene la stessa versione o fonte appena usata invece dello stream con il punteggio più alto di Harbor. Se la fonte non è disponibile, passa allo stream migliore.",
   "When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.":
     "A schermo intero, Esc esce dalla modalità a schermo intero invece di chiudere il player. Premi di nuovo Esc per chiuderlo. Disattiva l'opzione per fare in modo che Esc chiuda sempre il player.",
-  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.": "Se l'opzione è disattivata, un trasferimento P2P si interrompe non appena chiudi o cambi stream, così nulla continua a scaricarsi in background. Attivala per farlo proseguire anche dopo l'uscita; puoi gestire o mettere in pausa questi download dalla scheda Download.",
+  "When off, a P2P transfer stops the moment you close or switch the stream, so nothing keeps downloading in the background. Turn on to let it keep going after you leave; manage or pause those from the Downloads tab.":
+    "Se l'opzione è disattivata, un trasferimento P2P si interrompe non appena chiudi o cambi stream, così nulla continua a scaricarsi in background. Attivala per farlo proseguire anche dopo l'uscita; puoi gestire o mettere in pausa questi download dalla scheda Download.",
   "When on, a connected controller moves focus around Harbor and drives the player. Turn it off to ignore all controllers.":
     "Se l'opzione è attivata, un controller collegato sposta lo stato attivo in Harbor e controlla il player. Disattivala per ignorare tutti i controller.",
   "When people share a collection it shows up here. Build one you love and share it, that is how it starts.":

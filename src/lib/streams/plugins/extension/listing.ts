@@ -159,14 +159,16 @@ const YEAR = /\b(19[3-9][0-9]|20[0-9]{2})\b/;
  * that happen to contain one, and breaking them apart would lose them. Only `Hindi-English`, where
  * both halves are words on their own, is two statements. */
 function words(text: string): string[] {
-  return text
-    .replace(/[()[\]{}]/g, " ")
-    .split(/[\s/,|·•+&]+/u)
-    // A hyphenated pair is offered both ways: whole, and split, so a name that contains a hyphen is
-    // still readable as itself and a pair of languages is readable as two.
-    .flatMap((w) => (/-/.test(w) ? [w, ...w.split("-")] : [w]))
-    .map((w) => w.trim())
-    .filter(Boolean);
+  return (
+    text
+      .replace(/[()[\]{}]/g, " ")
+      .split(/[\s/,|·•+&]+/u)
+      // A hyphenated pair is offered both ways: whole, and split, so a name that contains a hyphen is
+      // still readable as itself and a pair of languages is readable as two.
+      .flatMap((w) => (/-/.test(w) ? [w, ...w.split("-")] : [w]))
+      .map((w) => w.trim())
+      .filter(Boolean)
+  );
 }
 
 /** Words that only mean something together: `Dual Audio` says there is more than one audio track,

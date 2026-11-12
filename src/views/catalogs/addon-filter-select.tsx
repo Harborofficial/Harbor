@@ -63,38 +63,41 @@ export function AddonFilterSelect({
           <AllAddonsIcon size={17} className="text-ink-subtle" />
         )}
         <span className="max-w-[180px] truncate">{selected ? selected.name : t("All addons")}</span>
-        <ChevronDown size={15} className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={15}
+          className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute start-0 top-[calc(100%+6px)] z-40 w-[280px] overflow-hidden rounded-2xl border border-edge bg-canvas shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">
           <div className="flex max-h-[380px] flex-col overflow-y-auto p-1.5 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-edge-soft">
-          <Row
-            active={value === "all"}
-            onClick={() => {
-              onChange("all");
-              setOpen(false);
-            }}
-          >
-            <span className="flex h-5 w-5 items-center justify-center">
-              <AllAddonsIcon size={16} className="text-ink-subtle" />
-            </span>
-            <span className="flex-1 truncate text-ink">{t("All addons")}</span>
-          </Row>
-          <div className="my-1 h-px bg-edge-soft/60" />
-          {addons.map((a) => (
             <Row
-              key={a.name}
-              active={value === a.name}
+              active={value === "all"}
               onClick={() => {
-                onChange(a.name);
+                onChange("all");
                 setOpen(false);
               }}
             >
-              <AddonMark addon={a} size={20} />
-              <span className="flex-1 truncate text-ink">{a.name}</span>
-              <span className="shrink-0 text-[11.5px] text-ink-subtle">{a.count}</span>
+              <span className="flex h-5 w-5 items-center justify-center">
+                <AllAddonsIcon size={16} className="text-ink-subtle" />
+              </span>
+              <span className="flex-1 truncate text-ink">{t("All addons")}</span>
             </Row>
-          ))}
+            <div className="my-1 h-px bg-edge-soft/60" />
+            {addons.map((a) => (
+              <Row
+                key={a.name}
+                active={value === a.name}
+                onClick={() => {
+                  onChange(a.name);
+                  setOpen(false);
+                }}
+              >
+                <AddonMark addon={a} size={20} />
+                <span className="flex-1 truncate text-ink">{a.name}</span>
+                <span className="shrink-0 text-[11.5px] text-ink-subtle">{a.count}</span>
+              </Row>
+            ))}
           </div>
         </div>
       )}

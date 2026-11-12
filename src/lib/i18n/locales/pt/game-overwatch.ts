@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Heróis do Estádio",
   "games.overwatch.searchHeroes": "Buscar herói",
   "games.overwatch.refresh": "Atualizar guia",
-  "games.overwatch.unavailable": "Não foi possível atualizar o guia. Informações carregadas anteriormente ainda podem aparecer.",
+  "games.overwatch.unavailable":
+    "Não foi possível atualizar o guia. Informações carregadas anteriormente ainda podem aparecer.",
   "games.overwatch.partial": "Alguns registros estão indisponíveis.",
   "games.overwatch.checked": "Verificado: {date}",
-  "games.overwatch.scope": "Informações de heróis da Blizzard via OverFast. Mudanças de balanceamento podem chegar ao jogo antes da atualização deste guia.",
-  "games.overwatch.mapsScope": "Mapas e modos do OverFast. Inclui mapas do Arcade e antigos; a disponibilidade varia conforme o modo.",
+  "games.overwatch.scope":
+    "Informações de heróis da Blizzard via OverFast. Mudanças de balanceamento podem chegar ao jogo antes da atualização deste guia.",
+  "games.overwatch.mapsScope":
+    "Mapas e modos do OverFast. Inclui mapas do Arcade e antigos; a disponibilidade varia conforme o modo.",
   "games.overwatch.empty": "Nenhum resultado. Tente outra busca ou filtro.",
   "games.overwatch.moreHeroes": "Mais heróis",
   "games.overwatch.moreMaps": "Mais mapas",
@@ -30,9 +33,9 @@ export default {
   "games.overwatch.watchDemo": "Ver demonstração",
   "games.overwatch.hideDemo": "Ocultar demonstração",
   "games.overwatch.closeDemo": "Fechar demonstração",
-  "games.overwatch.videoFailed": "Não foi possível reproduzir a demonstração. Abra a página oficial do herói para assisti-la.",
+  "games.overwatch.videoFailed":
+    "Não foi possível reproduzir a demonstração. Abra a página oficial do herói para assisti-la.",
   "games.overwatch.mode": "Modo de jogo",
   "games.overwatch.allModes": "Todos os modos",
-  "games.overwatch.searchMaps": "Buscar mapas ou locais"
+  "games.overwatch.searchMaps": "Buscar mapas ou locais",
 };
-

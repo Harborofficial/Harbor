@@ -26,7 +26,9 @@ function fixture(initial: Record<string, string> = {}) {
     clearTimeout: () => {},
   };
   const localStorage = {
-    get length() { return local.size; },
+    get length() {
+      return local.size;
+    },
     key: (i: number) => [...local.keys()][i] ?? null,
     getItem: (key: string) => local.get(key) ?? null,
     setItem: (key: string, value: string) => local.set(key, value),
@@ -42,10 +44,15 @@ function fixture(initial: Record<string, string> = {}) {
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     }).outputText;
     const api: any = {};
-    new Function("require", "exports", "window", "localStorage", output)((name: string) => {
-      assert.ok(name in mocks, `Unexpected dependency ${name}`);
-      return mocks[name];
-    }, api, window, localStorage);
+    new Function("require", "exports", "window", "localStorage", output)(
+      (name: string) => {
+        assert.ok(name in mocks, `Unexpected dependency ${name}`);
+        return mocks[name];
+      },
+      api,
+      window,
+      localStorage,
+    );
     return api;
   };
   const secrets = load("src/lib/secret-store.ts", {
@@ -64,8 +71,14 @@ function fixture(initial: Record<string, string> = {}) {
     "@/lib/secret-store": secrets,
   });
   return {
-    session, secrets, disk, timers,
-    selectProfile(next: string) { profile = next; session.resetForProfile(); },
+    session,
+    secrets,
+    disk,
+    timers,
+    selectProfile(next: string) {
+      profile = next;
+      session.resetForProfile();
+    },
   };
 }
 
@@ -81,7 +94,9 @@ test("loading persisted PMDB credentials notifies mounted session subscribers", 
   const h = fixture({ [`${BASE}.p1`]: JSON.stringify(SESSION) });
   h.session.getSession();
   let restored = false;
-  h.session.subscribeSession(() => { restored = h.session.isAuthenticated(); });
+  h.session.subscribeSession(() => {
+    restored = h.session.isAuthenticated();
+  });
   await h.secrets.loadSecrets();
   assert.equal(restored, true);
 });

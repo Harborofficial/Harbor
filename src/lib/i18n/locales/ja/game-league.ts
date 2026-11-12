@@ -39,8 +39,10 @@ export default {
   "games.league.patch": "パッチ{patch}",
   "games.league.more": "さらに表示",
   "games.league.empty": "検索に一致するチャンピオンはいません。",
-  "games.league.poolEmpty": "お気に入りを保存しましょう。チャンピオンを開いてプールに追加できます。",
-  "games.league.unavailable": "データを更新できませんでした。取得済みの結果は引き続き表示されます。",
+  "games.league.poolEmpty":
+    "お気に入りを保存しましょう。チャンピオンを開いてプールに追加できます。",
+  "games.league.unavailable":
+    "データを更新できませんでした。取得済みの結果は引き続き表示されます。",
   "games.league.back": "チャンピオンに戻る",
   "games.league.addPool": "マイプールに追加",
   "games.league.inPool": "マイプールに登録済み",
@@ -65,7 +67,8 @@ export default {
   "games.league.combosIntro": "OP.GGが選んだ短い実演動画。準備ができたら再生。",
   "games.league.watchCombo": "実演を見る",
   "games.league.updated": "出典の更新日時：{date}",
-  "games.league.buildEmpty": "このロールのビルドはありません。別のロールか下のガイドをご覧ください。",
+  "games.league.buildEmpty":
+    "このロールのビルドはありません。別のロールか下のガイドをご覧ください。",
   "games.league.iconsUnavailable": "一部のアイテムやルーンの詳細を読み込めませんでした。",
   "games.league.passive": "固有スキル",
   "games.league.cooldown": "クールダウン：{seconds}秒",
@@ -74,17 +77,22 @@ export default {
   "games.league.story": "チャンピオンの物語",
   "games.league.exploreMore": "さらに詳しく",
   "games.league.guides": "動画ガイド",
-  "games.league.metaScope": "OP.GGの既定サンプルによるレーン順位です。このデータにはパッチ、地域、ランク帯が明記されていません。勝率は報告された勝利数と試合数から計算し、ピック率は提供元で丸められています。順位とビルドは別のサンプルです。",
-  "games.league.buildNote": "ビルドごとにサンプルが異なります。完成アイテムのビルドは購入できるまで続いた試合に偏るため、勝率はチャンピオン全体の勝率ではありません。対面の試合数が少ない場合もあります。チームと相手に合わせて調整しましょう。動画は過去パッチの場合があります。",
-  "games.league.patchDifference": "ビルド統計は{patch}、アイテムとスキルの資料は{assets}のデータです。",
-  "games.league.attribution": "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
+  "games.league.metaScope":
+    "OP.GGの既定サンプルによるレーン順位です。このデータにはパッチ、地域、ランク帯が明記されていません。勝率は報告された勝利数と試合数から計算し、ピック率は提供元で丸められています。順位とビルドは別のサンプルです。",
+  "games.league.buildNote":
+    "ビルドごとにサンプルが異なります。完成アイテムのビルドは購入できるまで続いた試合に偏るため、勝率はチャンピオン全体の勝率ではありません。対面の試合数が少ない場合もあります。チームと相手に合わせて調整しましょう。動画は過去パッチの場合があります。",
+  "games.league.patchDifference":
+    "ビルド統計は{patch}、アイテムとスキルの資料は{assets}のデータです。",
+  "games.league.attribution":
+    "Harbor is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc.",
   "games.league.tierList": "ティアリスト",
   "games.league.tierScope": "ランク ソロ/デュオ · エメラルド以上 · 全地域",
   "games.league.patchFilter": "パッチを選択",
   "games.league.allRoles": "すべてのロール",
   "games.league.banRate": "バン率",
   "games.league.matches": "試合数",
-  "games.league.tierNote": "順位は各ロール内のものです。チャンピオンのビルドには最新のデータが表示されます。",
+  "games.league.tierNote":
+    "順位は各ロール内のものです。チャンピオンのビルドには最新のデータが表示されます。",
   "games.official.publisherSource": "公式パブリッシャーからダウンロード",
   "games.official.get": "{launcher}を入手",
 };

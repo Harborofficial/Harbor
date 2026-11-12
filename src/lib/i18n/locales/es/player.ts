@@ -371,7 +371,7 @@ const player: Record<string, string> = {
   "Zoom {pct}%": "Zoom {pct}%",
   "Search audio language": "Buscar idioma de audio",
   "No audio track in that language.": "No hay pista de audio en ese idioma.",
-  "Clear": "Borrar",
+  Clear: "Borrar",
 };
 
 export default player;

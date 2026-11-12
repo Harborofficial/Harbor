@@ -54,7 +54,9 @@ function LibraryEntry({ entry }: { entry: ShaderCatalogEntry }) {
           <Pill>{t(CONTENT_LABEL[entry.content])}</Pill>
           <Pill>{t(TIER_LABEL[entry.tier])}</Pill>
           {entry.verify && <Pill>{t("Unverified")}</Pill>}
-          {installed && <Pill on={!!state?.enabled}>{state?.enabled ? t("On") : t("Installed")}</Pill>}
+          {installed && (
+            <Pill on={!!state?.enabled}>{state?.enabled ? t("On") : t("Installed")}</Pill>
+          )}
         </RowTitle>
         <RowDesc>{t(entry.description)}</RowDesc>
         <span className="flex flex-wrap items-center">
@@ -80,7 +82,11 @@ function LibraryEntry({ entry }: { entry: ShaderCatalogEntry }) {
           <ActionButton ghost onClick={() => install(true)} disabled={busy}>
             {busy ? (
               <>
-                <Loader2 size={17} className="animate-spin motion-reduce:hidden" strokeWidth={2.4} />
+                <Loader2
+                  size={17}
+                  className="animate-spin motion-reduce:hidden"
+                  strokeWidth={2.4}
+                />
                 {t("Updating…")}
               </>
             ) : justUpdated ? (

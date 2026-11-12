@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "Natychmiastowy zakup",
   "games.osrs.sell": "Natychmiastowa sprzedaż",
   "games.osrs.unseen": "Brak obserwacji",
-  "games.osrs.observed": "Zarejestrowane transakcje, nie otwarte oferty. Dane kupna i sprzedaży mogą pochodzić z różnych chwil.",
+  "games.osrs.observed":
+    "Zarejestrowane transakcje, nie otwarte oferty. Dane kupna i sprzedaży mogą pochodzić z różnych chwil.",
   "games.osrs.history": "Historia cen",
   "games.osrs.period": "Okres",
   "games.osrs.range.6h": "Ostatnie 6 godzin",
@@ -39,8 +40,9 @@ export default {
   "games.osrs.averageSell": "Średnia sprzedaż",
   "games.osrs.chart": "Historia cen kupna i sprzedaży",
   "games.osrs.observation": "Wybierz obserwację",
-  "games.osrs.averages": "Brak transakcji pozostawia luki. Podatek giełdowy nie jest tutaj obliczany.",
+  "games.osrs.averages":
+    "Brak transakcji pozostawia luki. Podatek giełdowy nie jest tutaj obliczany.",
   "games.osrs.table": "Ostatnie 24 przedziały",
   "games.osrs.time": "Czas",
-  "games.osrs.volume": "Przedmioty w obrocie"
+  "games.osrs.volume": "Przedmioty w obrocie",
 };

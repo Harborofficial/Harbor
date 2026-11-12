@@ -64,7 +64,12 @@ export function TvPanel() {
           </>
         )}
         {groups.map((group) => (
-          <TvGroupSection key={group.id} group={group} doc={bundle.settings} profileId={profileId} />
+          <TvGroupSection
+            key={group.id}
+            group={group}
+            doc={bundle.settings}
+            profileId={profileId}
+          />
         ))}
       </div>
     </>

@@ -98,7 +98,8 @@ function first(html: string, label: string, tail?: RegExp): string | null {
 
 function unitAnchors(html: string): Array<{ unit: string; href: string; text: string }> {
   const out: Array<{ unit: string; href: string; text: string }> = [];
-  const groups = /<div class="single_page_group"><div class="tablediv">([^<]*)<\/div>([\s\S]*?)<\/div>/gi;
+  const groups =
+    /<div class="single_page_group"><div class="tablediv">([^<]*)<\/div>([\s\S]*?)<\/div>/gi;
   let group: RegExpExecArray | null;
   while ((group = groups.exec(html)) !== null) {
     const unit = plain(group[1]);
@@ -114,13 +115,7 @@ function unitAnchors(html: string): Array<{ unit: string; href: string; text: st
   return out;
 }
 
-function collect(
-  html: string,
-  facet: string,
-  label: string,
-  tail: RegExp,
-  cap: number,
-): string[] {
+function collect(html: string, facet: string, label: string, tail: RegExp, cap: number): string[] {
   const units = unitAnchors(html)
     .filter((anchor) => anchor.href.includes(`/${facet}/`))
     .sort((a, b) => a.unit.localeCompare(b.unit))

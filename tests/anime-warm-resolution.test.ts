@@ -70,7 +70,9 @@ test("the detail page seeds detection from the recorded mapping", () => {
   const detail = readFileSync(new URL("../src/views/detail.tsx", import.meta.url), "utf8");
   assert.ok(detail.includes("getAnimeCanonicalId(meta.id)"));
   assert.ok(detail.includes("recordedKitsu !== failedKitsu.current ? recordedKitsu : null"));
-  assert.ok(detail.includes("await resolveDetailAnimeEntry(k, meta, detail)"));
+  assert.ok(
+    detail.includes("await resolveDetailAnimeEntry(k, meta, detail, prioritizeMetadataAddons)"),
+  );
   const overlay = readFileSync(
     new URL("../src/components/search/search-overlay.tsx", import.meta.url),
     "utf8",

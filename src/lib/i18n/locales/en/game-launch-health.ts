@@ -7,16 +7,24 @@ export const gameLaunchHealth = {
   "games.launchHealth.check": "Check again",
   "games.launchHealth.repair": "Repair launch setup",
   "games.launchHealth.repairNamed": "Repair launch setup for {name}",
-  "games.launchHealth.note": "Checks the executable, working folder and compatibility settings without starting the game.",
+  "games.launchHealth.note":
+    "Checks the executable, working folder and compatibility settings without starting the game.",
   "games.launchHealth.changed": "Save your changes to check this launch setup.",
   "games.launchHealth.checked": "Checked {date}",
   "games.launchHealth.desktop": "Open the desktop app to check local launch files.",
-  "games.launchHealth.relocate": "Choose the game's current executable. This keeps its library entry, collections and play history.",
-  "games.launchHealth.missing": "A game file or launch folder could not be found. Reconnect its drive or update the paths below.",
-  "games.launchHealth.executable": "The selected file is not a usable executable. Choose the game's launch file below.",
-  "games.launchHealth.permission": "The selected file needs permission to run. Check its file permissions before trying again.",
-  "games.launchHealth.platform": "These launch settings need a different operating system. Choose settings for this device.",
-  "games.launchHealth.configuration": "Review the executable, launch folders and compatibility settings below.",
-  "games.launchHealth.unknownNote": "The check did not return a usable result. Your game and saved settings are unchanged.",
+  "games.launchHealth.relocate":
+    "Choose the game's current executable. This keeps its library entry, collections and play history.",
+  "games.launchHealth.missing":
+    "A game file or launch folder could not be found. Reconnect its drive or update the paths below.",
+  "games.launchHealth.executable":
+    "The selected file is not a usable executable. Choose the game's launch file below.",
+  "games.launchHealth.permission":
+    "The selected file needs permission to run. Check its file permissions before trying again.",
+  "games.launchHealth.platform":
+    "These launch settings need a different operating system. Choose settings for this device.",
+  "games.launchHealth.configuration":
+    "Review the executable, launch folders and compatibility settings below.",
+  "games.launchHealth.unknownNote":
+    "The check did not return a usable result. Your game and saved settings are unchanged.",
 };
 export default gameLaunchHealth;

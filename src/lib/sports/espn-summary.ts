@@ -23,13 +23,7 @@ import {
   parseTeamStatRows,
 } from "./match-boxscore";
 
-const FIELD_SUMMARY_GROUPS = new Set([
-  "motorsport",
-  "golf",
-  "cycling",
-  "swimming",
-  "athletics",
-]);
+const FIELD_SUMMARY_GROUPS = new Set(["motorsport", "golf", "cycling", "swimming", "athletics"]);
 
 function headerSide(c: any, group: string): SportsSide {
   return {

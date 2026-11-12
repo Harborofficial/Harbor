@@ -3,8 +3,10 @@ export default {
   "games.wow.runs.title": "Przejścia lochu",
   "games.wow.runs.all": "Wszystkie afiksy",
   "games.wow.runs.current": "Aktualne afiksy",
-  "games.wow.runs.currentNote": "Pasuje do aktualnej kombinacji afiksów, także z poprzednich tygodni.",
-  "games.wow.runs.allNote": "Najlepsze zarejestrowane przejścia ze wszystkimi afiksami w tym sezonie.",
+  "games.wow.runs.currentNote":
+    "Pasuje do aktualnej kombinacji afiksów, także z poprzednich tygodni.",
+  "games.wow.runs.allNote":
+    "Najlepsze zarejestrowane przejścia ze wszystkimi afiksami w tym sezonie.",
   "games.wow.runs.page": "Strona {page}",
   "games.wow.runs.refresh": "Odśwież przejścia",
   "games.wow.runs.unavailable": "Nie udało się wczytać danych. Spróbuj ponownie.",
@@ -19,11 +21,12 @@ export default {
   "games.wow.runs.copy": "Kopiuj talenty",
   "games.wow.runs.copyFailed": "Nie udało się skopiować. Spróbuj ponownie.",
   "games.wow.runs.party": "Skład drużyny",
-  "games.wow.runs.snapshots": "Opublikowane talenty i wyposażenie to dane zapisane przez dostawcę. Mogą różnić się od użytych podczas tego przejścia.",
+  "games.wow.runs.snapshots":
+    "Opublikowane talenty i wyposażenie to dane zapisane przez dostawcę. Mogą różnić się od użytych podczas tego przejścia.",
   "games.wow.runs.gear": "Wyposażenie",
   "games.wow.runs.tank": "Tank",
   "games.wow.runs.healer": "Uzdrowiciel",
   "games.wow.runs.dps": "Obrażenia",
   "games.wow.runs.snapshotAt": "Zapis wyposażenia: {date}",
-  "games.wow.runs.closeGear": "Zamknij wyposażenie"
+  "games.wow.runs.closeGear": "Zamknij wyposażenie",
 };

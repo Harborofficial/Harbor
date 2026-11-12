@@ -10,6 +10,7 @@ import {
 } from "@/lib/stremio";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { privateCwProfileId } from "@/lib/cw-profile";
+import { isFurther, itemIds, recordKey, sameRecord, titleKeys } from "@/lib/cw-dedupe";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
@@ -24,6 +25,79 @@ export function isNextAired(isAnime: boolean, airDate: string | undefined): bool
 function resurfaceAired(airDate: string | undefined): boolean {
   const t = airDate ? Date.parse(airDate) : NaN;
   return Number.isFinite(t) && t <= Date.now();
+}
+
+/**
+ * Hide a row copy when the same show has a newer-playback copy in another
+ * source (for example, an old IMDb card while the anime room holds the current
+ * Kitsu progress). Dedupe only sees cards that made it into the same row.
+ */
+export async function staleCwIds(
+  visible: LibraryItem[],
+  pool: LibraryItem[],
+): Promise<Set<string>> {
+  const stale = new Set<string>();
+  if (visible.length === 0 || pool.length === 0) return stale;
+  const staleRecords = new Set<string>();
+  const byId = new Map<string, LibraryItem[]>();
+  const byTitle = new Map<string, LibraryItem[]>();
+  for (const item of pool) {
+    for (const id of itemIds(item)) {
+      const list = byId.get(id);
+      if (list) list.push(item);
+      else byId.set(id, [item]);
+    }
+    if (!isAnimeCwItem(item) && !ANIME_ID.test(item._id)) continue;
+    for (const key of titleKeys(item)) {
+      const list = byTitle.get(key);
+      if (list) list.push(item);
+      else byTitle.set(key, [item]);
+    }
+  }
+  const withoutCurrent = (related: Set<LibraryItem>, item: LibraryItem) => {
+    for (const row of related) if (sameRecord(row, item)) related.delete(row);
+  };
+  for (const item of visible) {
+    if (!item.state) continue;
+    const related = new Set<LibraryItem>();
+    for (const id of itemIds(item)) for (const row of byId.get(id) ?? []) related.add(row);
+    const anime = isAnimeCwItem(item) || ANIME_ID.test(item._id);
+    if (anime) {
+      for (const key of titleKeys(item)) for (const row of byTitle.get(key) ?? []) related.add(row);
+    }
+    // The card itself is always in the pool; exclude that record before asking
+    // whether an identity lookup is needed, or the fallback never runs.
+    withoutCurrent(related, item);
+    if (related.size === 0 && anime) {
+      const ids = await relatedLibraryIds(item._id).catch(() => []);
+      for (const id of ids) for (const row of byId.get(id) ?? []) related.add(row);
+      withoutCurrent(related, item);
+    }
+    if (related.size === 0) continue;
+    let best = item;
+    for (const row of related) if (isFurther(row, best)) best = row;
+    // Only hide a card when the newer copy is actually in this row. A newer
+    // copy from a hidden source must not leave the row with no card at all.
+    // Compare records, not object references: the pool and the row can hold
+    // separate objects for the same checkpoint.
+    if (!sameRecord(best, item) && visible.some((row) => sameRecord(row, best))) {
+      staleRecords.add(recordKey(item));
+    }
+  }
+  // The consumer can only remove whole ids. Do not remove an id while any
+  // visible record with that id survives (same-content copies at other
+  // episodes); the final dedupe then keeps the newer one.
+  const visibleById = new Map<string, LibraryItem[]>();
+  for (const item of visible) {
+    if (!item.state) continue;
+    const rows = visibleById.get(item._id);
+    if (rows) rows.push(item);
+    else visibleById.set(item._id, [item]);
+  }
+  for (const [id, rows] of visibleById) {
+    if (rows.every((row) => staleRecords.has(recordKey(row)))) stale.add(id);
+  }
+  return stale;
 }
 
 function currentEpisode(i: LibraryItem): { season: number; episode: number } | null {
@@ -102,6 +176,7 @@ export async function resurfaceCandidates(
   });
   for (const i of candidates) {
     const cur = currentEpisode(i)!;
+    const isAnime = isAnimeCwItem(i) || ANIME_ID.test(i._id);
     const key = `${profileScope}|${endMode}|${i._id}:${cur.season}:${cur.episode}`;
     const cached = cache.get(key);
     let nx: ResurfaceTarget | null;
@@ -126,6 +201,9 @@ export async function resurfaceCandidates(
               waitingForAir: false,
               airDate: adj.next.airDate,
             };
+          } else if (!isAnime && !adj.next.airDate && adj.next.season > cur.season) {
+            // A future season's placeholder episode is not a countdown target.
+            nx = null;
           } else if (endMode === "timer") {
             nx = {
               season: adj.next.season,
@@ -172,6 +250,7 @@ export async function resurfaceCandidates(
           const entry = list.find(
             (e) => e.season === target.season && e.episode === target.episode,
           );
+          if (!isAnime && target.season > cur.season && !entry?.airDate) return null;
           if (entry && resurfaceAired(entry.airDate)) {
             return {
               season: target.season,
@@ -195,8 +274,12 @@ export async function resurfaceCandidates(
       // of this cache, including after switching connected accounts.
     }
     if (nx) {
-      const related = await relatedLibraryIds(i._id).catch(() => []);
-      if (related.some((r) => inCw.has(r))) continue;
+      // Identity lookup only matters for anime, where one show can be in CW
+      // under a different scheme's id. Live-action ids are consistent.
+      if (isAnime) {
+        const related = await relatedLibraryIds(i._id).catch(() => []);
+        if (related.some((r) => inCw.has(r))) continue;
+      }
       out.set(i._id, nx);
     }
   }

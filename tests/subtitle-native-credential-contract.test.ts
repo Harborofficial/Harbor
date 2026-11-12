@@ -31,10 +31,13 @@ test("safe fetch transports the opaque handle outside outbound headers", () => {
 
 test("URL and Request inputs retain the guarded native fetch path", () => {
   const safeFetch = read("src/lib/safe-fetch.ts");
-  assert.match(safeFetch, /input instanceof URL\) return tauriStringFetch\(input\.href, init\)/);
   assert.match(
     safeFetch,
-    /materializeRequest\(input, init\)\.then\(\(request\) =>[\s\S]*?tauriStringFetch\(request\.url, request\.init\)/,
+    /input instanceof URL\) return tauriStringFetch\(input\.href, init, timeoutMs\)/,
+  );
+  assert.match(
+    safeFetch,
+    /materializeRequest\(input, init\)\.then\(\(request\) =>[\s\S]*?tauriStringFetch\(request\.url, request\.init, timeoutMs\)/,
   );
 });
 

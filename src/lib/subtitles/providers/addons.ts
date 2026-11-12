@@ -1,3 +1,4 @@
+import { addonBaseUrl, addonResourceUrl } from "@/lib/addon-url";
 import { addonAccepts, type Addon } from "@/lib/addons";
 import { isLocalNetworkUrl } from "@/lib/local-network";
 import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
@@ -33,7 +34,7 @@ type RawAddonSub = ProviderSubtitleFlags & {
 };
 
 function transportBase(transportUrl: string): string {
-  return transportUrl.replace(/\/manifest\.json$/i, "").replace(/\/$/, "");
+  return addonBaseUrl(transportUrl);
 }
 
 function contentId(q: SubSearchQuery): string | null {
@@ -118,7 +119,7 @@ async function callOne(
   timeoutMs: number,
 ): Promise<RawAddonSub[]> {
   const base = transportBase(addon.transportUrl);
-  const url = `${base}/subtitles/${type}/${id}${extra}.json`;
+  const url = addonResourceUrl(base, `subtitles/${type}/${id}${extra}.json`);
   // A self-hosted addon lives on loopback, which the guarded bridge fetch
   // rejects outright ("blocked internal target"). Only a URL the user installed
   // themselves opts into local networking, so public addons keep the
@@ -140,7 +141,7 @@ async function callOne(
 
     const elapsed = Date.now() - startedAt;
     const remaining = Math.max(1_000, timeoutMs - elapsed);
-    const bareUrl = `${base}/subtitles/${type}/${id}.json`;
+    const bareUrl = addonResourceUrl(base, `subtitles/${type}/${id}.json`);
     dlog(`[addons] ${addon.manifest.name} retrying without stream hints`);
     return await withSubtitleTimeout(
       fetchAddonSubtitles(bareUrl, addon.manifest.name, doFetch),

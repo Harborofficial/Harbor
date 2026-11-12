@@ -3,7 +3,8 @@ export default {
   "games.wow.runs.title": "Dungeon-Runs",
   "games.wow.runs.all": "Alle Affixe",
   "games.wow.runs.current": "Aktuelle Affixe",
-  "games.wow.runs.currentNote": "Passend zur aktuellen Affixkombination, einschließlich früherer Wochen.",
+  "games.wow.runs.currentNote":
+    "Passend zur aktuellen Affixkombination, einschließlich früherer Wochen.",
   "games.wow.runs.allNote": "Beste erfasste Runs dieser Saison über alle Affixe hinweg.",
   "games.wow.runs.page": "Seite {page}",
   "games.wow.runs.refresh": "Runs aktualisieren",
@@ -19,11 +20,12 @@ export default {
   "games.wow.runs.copy": "Talente kopieren",
   "games.wow.runs.copyFailed": "Kopieren fehlgeschlagen. Versuche es erneut.",
   "games.wow.runs.party": "Gruppenzusammenstellung",
-  "games.wow.runs.snapshots": "Veröffentlichte Talente und Ausrüstung sind Momentaufnahmen des Anbieters. Sie können vom Stand während dieses Runs abweichen.",
+  "games.wow.runs.snapshots":
+    "Veröffentlichte Talente und Ausrüstung sind Momentaufnahmen des Anbieters. Sie können vom Stand während dieses Runs abweichen.",
   "games.wow.runs.gear": "Ausrüstung",
   "games.wow.runs.tank": "Tank",
   "games.wow.runs.healer": "Heiler",
   "games.wow.runs.dps": "Schaden",
   "games.wow.runs.snapshotAt": "Ausrüstungsstand: {date}",
-  "games.wow.runs.closeGear": "Ausrüstung schließen"
+  "games.wow.runs.closeGear": "Ausrüstung schließen",
 };

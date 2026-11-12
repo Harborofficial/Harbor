@@ -109,12 +109,13 @@ async function albumRows(artist: number, signal: AbortSignal): Promise<Obj[]> {
   for (let page = 0; page < ALBUM_PAGES; page += 1) {
     const index = page * ALBUM_PAGE;
     if (page > 0 && index >= total) break;
-    const body = await deezer(`artist/${artist}/albums?limit=${ALBUM_PAGE}&index=${index}`, signal).catch(
-      (cause) => {
-        if (page === 0) throw cause;
-        return null;
-      },
-    );
+    const body = await deezer(
+      `artist/${artist}/albums?limit=${ALBUM_PAGE}&index=${index}`,
+      signal,
+    ).catch((cause) => {
+      if (page === 0) throw cause;
+      return null;
+    });
     if (!body) break;
     const data = rows(body.data);
     found.push(...data);
@@ -150,8 +151,12 @@ function trackOf(entry: Obj, release: Release, artist: string): FreshTrack | nul
   const id = count(entry.id);
   const title = text(entry.title);
   const lead = text(obj(entry.artist).name);
-  const credits = [...new Set([lead, ...rows(entry.contributors).map(person => text(person.name))].filter(Boolean))];
-  if (!id || !title || !credits.some(name => credited(artist, name))) return null;
+  const credits = [
+    ...new Set(
+      [lead, ...rows(entry.contributors).map((person) => text(person.name))].filter(Boolean),
+    ),
+  ];
+  if (!id || !title || !credits.some((name) => credited(artist, name))) return null;
   const credit = credits.join(", ");
   const duration = count(entry.duration);
   if (!duration || !release.artwork || entry.readable === false) return null;
@@ -170,11 +175,15 @@ function trackOf(entry: Obj, release: Release, artist: string): FreshTrack | nul
   };
 }
 
-async function releaseTracks(release: Release, artist: string, signal: AbortSignal): Promise<FreshTrack[]> {
+async function releaseTracks(
+  release: Release,
+  artist: string,
+  signal: AbortSignal,
+): Promise<FreshTrack[]> {
   const body = await deezer(`album/${release.id}`, signal);
   const cover = release.artwork || image(body.cover_xl, body.cover_big, body.cover_medium);
   const picked: FreshTrack[] = [];
-  const contributor = rows(body.contributors).some(person => credited(artist, text(person.name)));
+  const contributor = rows(body.contributors).some((person) => credited(artist, text(person.name)));
   let creditLookups = 0;
   for (const entry of rows(obj(body.tracks).data)) {
     if (picked.length >= TRACKS_PER_RELEASE) break;
@@ -195,7 +204,9 @@ async function artistTracks(artist: string, signal: AbortSignal): Promise<FreshT
   if (!id) return [];
   const newest = await newestReleases(id, signal);
   if (newest.length === 0) return [];
-  const settled = await Promise.allSettled(newest.map((release) => releaseTracks(release, artist, signal)));
+  const settled = await Promise.allSettled(
+    newest.map((release) => releaseTracks(release, artist, signal)),
+  );
   if (settled.every((result) => result.status === "rejected")) {
     throw settled[0]?.status === "rejected"
       ? settled[0].reason
@@ -212,14 +223,17 @@ export async function loadArtistFreshTracks(artist: string, want: number): Promi
   let entry = artists.get(key);
   if (!entry || entry.until <= Date.now()) {
     const controller = new AbortController();
-    const value = withTimeout(artistTracks(artist, controller.signal), ARTIST_MS)
-      .finally(() => controller.abort());
+    const value = withTimeout(artistTracks(artist, controller.signal), ARTIST_MS).finally(() =>
+      controller.abort(),
+    );
     entry = { until: Date.now() + CACHE_MS, value };
     artists.delete(key);
     artists.set(key, entry);
     while (artists.size > MAX_CACHE) artists.delete(artists.keys().next().value!);
     const current = entry;
-    value.catch(() => { if (artists.get(key) === current) artists.delete(key); });
+    value.catch(() => {
+      if (artists.get(key) === current) artists.delete(key);
+    });
   }
   // Share pending work across focus events/remounts; recheck dates across midnight.
   return (await entry.value).filter((track) => isRecentRelease(track.releaseDate)).slice(0, want);

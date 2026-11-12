@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "रन की संख्या उपलब्ध नहीं",
   "games.wow.progress.counts": "{total} रन · {timed} समय पर",
   "games.wow.progress.best": "सर्वश्रेष्ठ रन",
-  "games.wow.progress.explore": "रन देखें"
+  "games.wow.progress.explore": "रन देखें",
 };
 export default gameWowProgress;

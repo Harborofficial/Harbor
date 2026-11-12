@@ -194,9 +194,7 @@ export async function loadDetailRows(
   // Most catalogues credit only the lead and bury the guests in the title.
   const names = [
     ...credited,
-    ...featuredCreditNames(item.title).filter(
-      (name) => !creditedKeys.has(artistIdentityKey(name)),
-    ),
+    ...featuredCreditNames(item.title).filter((name) => !creditedKeys.has(artistIdentityKey(name))),
   ];
   const artists = (
     await Promise.all(

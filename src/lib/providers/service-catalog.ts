@@ -12,19 +12,103 @@ export type Category = {
 
 export const CATEGORIES: Category[] = [
   { id: "all", label: "All", fetchMovies: true, fetchTv: true, movieGenres: [], tvGenres: [] },
-  { id: "movies", label: "Movies", fetchMovies: true, fetchTv: false, movieGenres: [], tvGenres: [] },
+  {
+    id: "movies",
+    label: "Movies",
+    fetchMovies: true,
+    fetchTv: false,
+    movieGenres: [],
+    tvGenres: [],
+  },
   { id: "tv", label: "TV Shows", fetchMovies: false, fetchTv: true, movieGenres: [], tvGenres: [] },
-  { id: "docs", label: "Documentaries", fetchMovies: true, fetchTv: true, movieGenres: [99], tvGenres: [99] },
-  { id: "anim", label: "Animation", fetchMovies: true, fetchTv: true, movieGenres: [16], tvGenres: [16] },
-  { id: "kids", label: "Kids & Family", fetchMovies: true, fetchTv: true, movieGenres: [10751], tvGenres: [10751] },
-  { id: "reality", label: "Reality", fetchMovies: false, fetchTv: true, movieGenres: [], tvGenres: [10764] },
-  { id: "action", label: "Action", fetchMovies: true, fetchTv: true, movieGenres: [28], tvGenres: [10759] },
-  { id: "comedy", label: "Comedy", fetchMovies: true, fetchTv: true, movieGenres: [35], tvGenres: [35] },
-  { id: "drama", label: "Drama", fetchMovies: true, fetchTv: true, movieGenres: [18], tvGenres: [18] },
-  { id: "horror", label: "Horror", fetchMovies: true, fetchTv: true, movieGenres: [27], tvGenres: [9648] },
-  { id: "scifi", label: "Sci-Fi & Fantasy", fetchMovies: true, fetchTv: true, movieGenres: [878], tvGenres: [10765] },
-  { id: "thriller", label: "Thriller", fetchMovies: true, fetchTv: false, movieGenres: [53], tvGenres: [] },
-  { id: "romance", label: "Romance", fetchMovies: true, fetchTv: false, movieGenres: [10749], tvGenres: [] },
+  {
+    id: "docs",
+    label: "Documentaries",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [99],
+    tvGenres: [99],
+  },
+  {
+    id: "anim",
+    label: "Animation",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [16],
+    tvGenres: [16],
+  },
+  {
+    id: "kids",
+    label: "Kids & Family",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [10751],
+    tvGenres: [10751],
+  },
+  {
+    id: "reality",
+    label: "Reality",
+    fetchMovies: false,
+    fetchTv: true,
+    movieGenres: [],
+    tvGenres: [10764],
+  },
+  {
+    id: "action",
+    label: "Action",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [28],
+    tvGenres: [10759],
+  },
+  {
+    id: "comedy",
+    label: "Comedy",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [35],
+    tvGenres: [35],
+  },
+  {
+    id: "drama",
+    label: "Drama",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [18],
+    tvGenres: [18],
+  },
+  {
+    id: "horror",
+    label: "Horror",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [27],
+    tvGenres: [9648],
+  },
+  {
+    id: "scifi",
+    label: "Sci-Fi & Fantasy",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [878],
+    tvGenres: [10765],
+  },
+  {
+    id: "thriller",
+    label: "Thriller",
+    fetchMovies: true,
+    fetchTv: false,
+    movieGenres: [53],
+    tvGenres: [],
+  },
+  {
+    id: "romance",
+    label: "Romance",
+    fetchMovies: true,
+    fetchTv: false,
+    movieGenres: [10749],
+    tvGenres: [],
+  },
 ];
 
 export const MAX_PER_BUCKET = 200;
@@ -77,7 +161,9 @@ export async function fetchCategoryBatch(
   const startPage = batch * perBatch + 1;
   const pages = Array.from({ length: perBatch }, (_, i) => startPage + i);
   const moviePromise: Promise<any[][]> = cat.fetchMovies
-    ? Promise.all(pages.map((p) => fetchPage(key, "movie", providerIds, region, p, cat.movieGenres)))
+    ? Promise.all(
+        pages.map((p) => fetchPage(key, "movie", providerIds, region, p, cat.movieGenres)),
+      )
     : Promise.resolve([]);
   const tvPromise: Promise<any[][]> = cat.fetchTv
     ? Promise.all(pages.map((p) => fetchPage(key, "tv", providerIds, region, p, cat.tvGenres)))

@@ -69,20 +69,28 @@ export function useGroup(id: string, onGone: () => void): GroupState {
     apply: useCallback((d: GroupDetail) => setDetail(d), []),
     join: useCallback(() => run(() => joinGroup(id), "Could not join."), [id, run]),
     leave: useCallback(
-      () => run(async () => {
-        await leaveGroup(id);
-        onGone();
-      }, "Could not leave."),
+      () =>
+        run(async () => {
+          await leaveGroup(id);
+          onGone();
+        }, "Could not leave."),
       [id, onGone, run],
     ),
-    kick: useCallback((userId: string) => run(() => removeMember(id, userId), "Could not remove member."), [id, run]),
+    kick: useCallback(
+      (userId: string) => run(() => removeMember(id, userId), "Could not remove member."),
+      [id, run],
+    ),
     destroy: useCallback(
-      () => run(async () => {
-        await deleteGroup(id);
-        onGone();
-      }, "Could not delete group."),
+      () =>
+        run(async () => {
+          await deleteGroup(id);
+          onGone();
+        }, "Could not delete group."),
       [id, onGone, run],
     ),
-    changePhoto: useCallback((blob: Blob) => run(() => setGroupAvatar(id, blob), "Could not update group photo."), [id, run]),
+    changePhoto: useCallback(
+      (blob: Blob) => run(() => setGroupAvatar(id, blob), "Could not update group photo."),
+      [id, run],
+    ),
   };
 }

@@ -61,6 +61,8 @@ export async function profileTitleMeta(
         translateTitles: true,
       })
     : original || localized;
-  const poster = await tmdbLocalizedPoster(key, tmdbId, raw?.original_language).catch(() => undefined);
+  const poster = await tmdbLocalizedPoster(key, tmdbId, raw?.original_language).catch(
+    () => undefined,
+  );
   return { title: title?.trim() || undefined, poster };
 }

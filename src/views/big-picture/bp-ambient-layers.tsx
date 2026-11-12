@@ -315,7 +315,6 @@ function BpAmbientLayersBody(v: BpAmbientView) {
         <div className="absolute inset-0" style={{ background: "var(--bp-scrim-side)" }} />
         <div className="absolute inset-0" style={{ background: PAGE_FADE }} />
         <div className="absolute inset-0" style={{ background: TOP_FADE }} />
-
       </div>
 
       {(["a", "b"] as const).map((slot) => (

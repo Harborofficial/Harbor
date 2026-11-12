@@ -467,7 +467,8 @@ export function MangaBrowse({
                 onOpen={onOpen}
                 resolveOpen={
                   tagId === FAVORITES
-                    ? (entry) => void openTitle(entry.id, entry.title, entry.altTitle, entry.sourceId)
+                    ? (entry) =>
+                        void openTitle(entry.id, entry.title, entry.altTitle, entry.sourceId)
                     : undefined
                 }
                 missing={tagId === FAVORITES && missing.has(m.id)}

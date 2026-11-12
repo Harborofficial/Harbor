@@ -14,7 +14,8 @@ export default {
   "games.discovery.steamVerdict.Positive": "Positivas",
   "games.discovery.steamVerdict.Very Positive": "Muito positivas",
   "games.discovery.steamVerdict.Overwhelmingly Positive": "Extremamente positivas",
-  "games.discovery.ratingNote.steam": "Porcentagem das análises de jogadores do Steam que recomendam este jogo.",
+  "games.discovery.ratingNote.steam":
+    "Porcentagem das análises de jogadores do Steam que recomendam este jogo.",
   "games.launchers.explore": "Explorar por launcher",
   "games.launchers.note": "Descubra jogos de diferentes launchers para PC.",
   "games.launchers.choose": "Escolher um launcher",
@@ -23,7 +24,8 @@ export default {
   "games.launchers.visit": "Visitar {name}",
   "games.launchers.picks": "Jogos selecionados",
   "games.launchers.unavailable": "Não foi possível carregar os detalhes atuais dos jogos.",
-  "games.launchers.source": "Detalhes dos jogos do IGDB · Os links dos launchers abrem os sites oficiais.",
+  "games.launchers.source":
+    "Detalhes dos jogos do IGDB · Os links dos launchers abrem os sites oficiais.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +61,8 @@ export default {
   "games.recent.open": "Abrir {name} de {source}",
   "games.recent.files": "Arquivos da fonte",
   "games.recent.empty": "Conecte uma fonte de jogos para ver as novidades aqui.",
-  "games.recent.undated": "Suas fontes ainda não têm jogos com data de envio. Explore-as em Gerenciar fontes.",
+  "games.recent.undated":
+    "Suas fontes ainda não têm jogos com data de envio. Explore-as em Gerenciar fontes.",
   "games.recent.adult": "Conteúdo adulto · imagem desfocada",
   "games.recent.artHidden": "Imagem oculta",
   "games.recent.artUnrated": "Classificação de conteúdo indisponível",
@@ -85,7 +88,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Receita em fliperamas, 1980–1999",
   "games.collectionsLive.wowRecord": "Pico de assinantes pagos",
   "games.collectionsLive.wiiRecord": "Cópias vendidas no Wii",
-  "games.collectionsLive.manhuntRecord": "Primeiro jogo de ação e aventura com classificação recusada no Reino Unido",
+  "games.collectionsLive.manhuntRecord":
+    "Primeiro jogo de ação e aventura com classificação recusada no Reino Unido",
   "games.collectionsLive.gtaVSalesRecord": "O jogo de ação e aventura mais vendido",
   "games.collectionsLive.blackOps3Record": "O jogo de tiro em primeira pessoa mais vendido",
   "games.collectionsLive.smashUltimateRecord": "O jogo de luta mais vendido",
@@ -109,7 +113,8 @@ export default {
   "games.collectionsLive.maddenSeriesRecord": "A série de futebol americano mais vendida",
   "games.collectionsLive.nba2kSeriesRecord": "A série de basquete mais vendida",
   "games.collectionsLive.honorKingsRecord": "A maior receita já obtida por um jogo mobile",
-  "games.collectionsLive.gearsBillionRecord": "A primeira série de tiro em terceira pessoa a chegar lá",
+  "games.collectionsLive.gearsBillionRecord":
+    "A primeira série de tiro em terceira pessoa a chegar lá",
   "games.collectionsLive.oldRepublicRecord": "O MMORPG mais caro já desenvolvido",
   "games.collectionsLive.mario64AuctionRecord": "O maior valor já pago por um jogo em leilão",
   "games.collectionsLive.dotaPrizeRecord": "A maior premiação de esports de sua época",
@@ -125,7 +130,8 @@ export default {
   "games.collectionsLive.odysseyScoreRecord": "O jogo de Switch mais bem avaliado",
   "games.collectionsLive.hawkScoreRecord": "O jogo de PlayStation mais bem avaliado",
   "games.collectionsLive.soulScoreRecord": "O jogo de Dreamcast mais bem avaliado",
-  "games.collectionsLive.crossfirePlayersRecord": "Jogadores cadastrados, um recorde para um jogo de tiro",
+  "games.collectionsLive.crossfirePlayersRecord":
+    "Jogadores cadastrados, um recorde para um jogo de tiro",
   "games.collectionsLive.candyPlayersRecord": "Jogadores mensais no auge",
   "games.collectionsLive.gta6TrailerRecord": "Visualizações do trailer em 24 horas",
   "games.collectionsLive.fortniteConcertRecord": "Jogadores em um único show dentro do jogo",
@@ -143,7 +149,8 @@ export default {
   "games.tournaments.schedule": "Detalhes oficiais do evento",
   "games.tournaments.watch": "Onde assistir",
   "games.tournaments.channelsNote": "Canais oficiais. A cobertura segue o calendário do torneio.",
-  "games.tournaments.broadcastPending": "Os detalhes da transmissão ainda não foram confirmados aqui. Consulte a página do organizador.",
+  "games.tournaments.broadcastPending":
+    "Os detalhes da transmissão ainda não foram confirmados aqui. Consulte a página do organizador.",
   "games.tournaments.noDates": "Nenhum próximo Major confirmado neste calendário.",
   "games.launchers.topGames": "Mais jogados no Steam",
   "games.launchers.chartRank": "Nº {rank} entre os mais jogados",

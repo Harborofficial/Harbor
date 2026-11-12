@@ -9,7 +9,8 @@ export default {
   "games.retro.pressKey": "Нажмите клавишу. Esc отменяет. F1, F2 и F4 зарезервированы для плеера.",
   "games.retro.pressButton": "Нажмите кнопку геймпада или переместите стик.",
   "games.retro.disconnected": "Геймпад отключён. Подключите его и продолжите, когда будете готовы.",
-  "games.retro.controlsSaveFailed": "Назначения работают в этом сеансе, но сохранить их не удалось.",
+  "games.retro.controlsSaveFailed":
+    "Назначения работают в этом сеансе, но сохранить их не удалось.",
   "games.retro.menuChord": "Select + Start: меню",
   "games.retro.pause": "Пауза",
   "games.retro.resume": "Продолжить",
@@ -18,7 +19,8 @@ export default {
   "games.retro.controls": "Управление",
   "games.retro.saveExit": "Сохранить и выйти",
   "games.retro.popout": "Отдельное окно",
-  "games.retro.dock": "Вернуться в Harbor",  "games.retro.mute": "Выключить звук",
+  "games.retro.dock": "Вернуться в Harbor",
+  "games.retro.mute": "Выключить звук",
   "games.retro.unmute": "Включить звук",
   "games.retro.volume": "Громкость",
   "games.retro.picture": "Изображение",
@@ -27,7 +29,8 @@ export default {
   "games.retro.fullscreen": "Полный экран",
   "games.retro.exitFullscreen": "Выйти из полного экрана",
   "games.retro.playInside": "Играть в Harbor",
-  "games.retro.setup": "Установите плеер {system} один раз и играйте здесь. Игра останется на этом устройстве.",
+  "games.retro.setup":
+    "Установите плеер {system} один раз и играйте здесь. Игра останется на этом устройстве.",
   "games.retro.install": "Установить и играть · {size} МБ",
   "games.retro.runtime": "EmulatorJS {version} · одна загрузка, доступен офлайн",
   "games.retro.aboutRuntime": "Исходный код и лицензии",
@@ -36,9 +39,11 @@ export default {
   "games.retro.saved": "Состояние сохранено",
   "games.retro.loaded": "Состояние загружено",
   "games.retro.noSave": "Сохранённого состояния пока нет",
-  "games.retro.saveFailed": "Не удалось сохранить прогресс. Попробуйте «Сохранить и выйти» ещё раз.",
+  "games.retro.saveFailed":
+    "Не удалось сохранить прогресс. Попробуйте «Сохранить и выйти» ещё раз.",
   "games.retro.saving": "Сохранение прогресса…",
   "games.retro.exitWithoutSave": "Выйти без сохранения",
   "games.retro.moving": "Перемещение игры…",
-  "games.retro.moveFailed": "Не удалось переместить плеер. Прогресс сохранён; выберите «Продолжить».",
+  "games.retro.moveFailed":
+    "Не удалось переместить плеер. Прогресс сохранён; выберите «Продолжить».",
 } satisfies Record<string, string>;

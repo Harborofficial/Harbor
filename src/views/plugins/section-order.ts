@@ -160,11 +160,7 @@ export function withMove(
 
 /** A row turned off, or back on. Named by key, so turning one off does not disturb the order of
  * the rest — which is what makes it reversible without redoing the arrangement. */
-export function withHidden(
-  order: SectionOrder,
-  rowKey: string,
-  hidden: boolean,
-): SectionOrder {
+export function withHidden(order: SectionOrder, rowKey: string, hidden: boolean): SectionOrder {
   const without = order.hidden.filter((key) => key !== rowKey);
   return hidden ? { ...order, hidden: [...without, rowKey] } : { ...order, hidden: without };
 }

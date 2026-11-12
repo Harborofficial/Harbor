@@ -7,11 +7,13 @@ export default {
   "games.searchUi.web": "Kontekst z sieci",
   "games.searchUi.settings": "Ustawienia AI",
   "games.searchUi.setup": "Połącz dostawcę AI",
-  "games.searchUi.setupNote": "Użyj tego samego konta OpenRouter lub Groq i modelu, co w pozostałych częściach Harbor.",
+  "games.searchUi.setupNote":
+    "Użyj tego samego konta OpenRouter lub Groq i modelu, co w pozostałych częściach Harbor.",
   "games.searchUi.aiHint": "Naciśnij Enter. Wybrane filtry dotyczą również wyników AI.",
   "games.searchUi.thinking": "Wyszukiwanie gier i sprawdzanie Steam…",
   "games.searchUi.verified": "{count} wyników Steam · Propozycje AI",
-  "games.searchUi.noAiResults": "Brak potwierdzonych wyników Steam z tymi filtrami. Zmień opis lub zmniejsz liczbę filtrów.",
+  "games.searchUi.noAiResults":
+    "Brak potwierdzonych wyników Steam z tymi filtrami. Zmień opis lub zmniejsz liczbę filtrów.",
   "games.searchUi.random": "Losowa gra",
   "games.searchUi.randomHint": "Wybierz losową grę pasującą do wyszukiwania i filtrów.",
   "games.searchUi.picking": "Losowanie…",
@@ -21,5 +23,5 @@ export default {
   "games.searchUi.sources": "Steam + IGDB · Gry na PC, konsole i modyfikacje ROM.",
   "games.searchUi.steamScope": "Te filtry lub ten sposób sortowania korzystają z danych Steam.",
   "games.searchUi.allCatalogs": "Przeszukaj wszystkie katalogi",
-  "games.searchUi.partial": "Niektóre wyniki są niedostępne: {providers}."
+  "games.searchUi.partial": "Niektóre wyniki są niedostępne: {providers}.",
 };

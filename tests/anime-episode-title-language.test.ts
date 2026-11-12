@@ -13,8 +13,14 @@ import type { KitsuEpisode } from "../src/lib/providers/kitsu.ts";
 
 function episode(overrides: Partial<KitsuEpisode> = {}): KitsuEpisode {
   return {
-    id: 1, number: 1, seasonNumber: 1, title: "Episode 1", synopsis: "", thumbnail: null,
-    airdate: "2026-10-02", length: 24,
+    id: 1,
+    number: 1,
+    seasonNumber: 1,
+    title: "Episode 1",
+    synopsis: "",
+    thumbnail: null,
+    airdate: "2026-10-02",
+    length: 24,
     ...overrides,
   };
 }
@@ -62,9 +68,10 @@ test("a TVDB English name replaces a Japanese pool title for an English target",
 
 test("a TMDB English name replaces a Japanese pool title for an English target", () => {
   const ep = episode({ title: "鬼の血" });
-  mergeTmdbEpisodes([ep], [
-    { id: 11, seasonNumber: 1, episodeNumber: 1, name: "Oni's Blood" } as any,
-  ]);
+  mergeTmdbEpisodes(
+    [ep],
+    [{ id: 11, seasonNumber: 1, episodeNumber: 1, name: "Oni's Blood" } as any],
+  );
   assert.equal(ep.title, "Oni's Blood");
 });
 
@@ -102,14 +109,22 @@ test("the English fallback pass replaces an original-script title the user did n
 
 test("the TMDB fallback pass respects the selected language too", () => {
   const jp = episode({ title: "鬼の血" });
-  mergeTmdbEpisodes([jp], [{ id: 11, seasonNumber: 1, episodeNumber: 1, name: "Oni's Blood" } as any], {
-    targetLang: "ja",
-  });
+  mergeTmdbEpisodes(
+    [jp],
+    [{ id: 11, seasonNumber: 1, episodeNumber: 1, name: "Oni's Blood" } as any],
+    {
+      targetLang: "ja",
+    },
+  );
   assert.equal(jp.title, "鬼の血");
   const kr = episode({ title: "鬼の血" });
-  mergeTmdbEpisodes([kr], [{ id: 11, seasonNumber: 1, episodeNumber: 1, name: "Oni's Blood" } as any], {
-    targetLang: "ko",
-  });
+  mergeTmdbEpisodes(
+    [kr],
+    [{ id: 11, seasonNumber: 1, episodeNumber: 1, name: "Oni's Blood" } as any],
+    {
+      targetLang: "ko",
+    },
+  );
   assert.equal(kr.title, "Oni's Blood");
 });
 

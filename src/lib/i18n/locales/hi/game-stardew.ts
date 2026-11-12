@@ -9,7 +9,8 @@ export default {
   "games.stardew.catalogPartial": "कुछ प्रोजेक्ट लोड नहीं हो सके। फिर कोशिश करने के लिए रीफ़्रेश करें।",
   "games.stardew.creatorChoose": "इंस्टॉलेशन की समीक्षा के लिए ऊपर गेम फ़ोल्डर चुनें।",
   "games.stardew.creatorGet": "निर्माता से डाउनलोड करें",
-  "games.stardew.creatorRoute": "अन्य डाउनलोड Nexus पर खुलते हैं। डाउनलोड के बाद निर्माता की ZIP फ़ाइल इंपोर्ट करें।",
+  "games.stardew.creatorRoute":
+    "अन्य डाउनलोड Nexus पर खुलते हैं। डाउनलोड के बाद निर्माता की ZIP फ़ाइल इंपोर्ट करें।",
   "games.stardew.snapshot": "कैटलॉग की तारीख",
   "games.stardew.moreMods": "और मॉड देखें",
   "games.stardew.downloading": "निर्माता से डाउनलोड हो रहा है…",
@@ -19,20 +20,26 @@ export default {
 
   "games.stardew.import": "मॉड ZIP आयात करें",
   "games.stardew.manage": "Harbor से प्रबंधित",
-  "games.stardew.manageNote": "डाउनलोड किया हुआ SMAPI मॉड यहाँ प्रबंधित करने के लिए आयात करें। अपडेट करने के लिए उसका नया ZIP आयात करें।",
+  "games.stardew.manageNote":
+    "डाउनलोड किया हुआ SMAPI मॉड यहाँ प्रबंधित करने के लिए आयात करें। अपडेट करने के लिए उसका नया ZIP आयात करें।",
   "games.stardew.previous": "पिछले संस्करण",
   "games.stardew.review": "बदलाव देखें",
   "games.stardew.apply": "बदलाव लागू करें",
   "games.stardew.install": "मॉड इंस्टॉल करें",
   "games.stardew.update": "मॉड अपडेट करें",
   "games.stardew.done": "बदलाव लागू हुए",
-  "games.stardew.reviewNote": "पहले Stardew Valley बंद करें। अपडेट आपकी मौजूदा config.json और बनाई गई फ़ाइलें रखते हैं। पिछले संस्करण इस PC पर रहते हैं।",
+  "games.stardew.reviewNote":
+    "पहले Stardew Valley बंद करें। अपडेट आपकी मौजूदा config.json और बनाई गई फ़ाइलें रखते हैं। पिछले संस्करण इस PC पर रहते हैं।",
   "games.stardew.removeNote": "पूरा मॉड फ़ोल्डर पिछले संस्करणों में चला जाएगा। आप इसे बाद में बहाल कर सकते हैं।",
   "games.stardew.running": "मॉड फ़ाइलें बदलने से पहले Stardew Valley और SMAPI बंद करें।",
-  "games.stardew.requirementsError": "ज़रूरी मॉड या SMAPI संस्करण मौजूद नहीं है या बहुत पुराना है। मॉड की ज़रूरतें जाँचें।",
-  "games.stardew.dependentsError": "एक चालू मॉड को यह संस्करण चाहिए। पहले उस मॉड को बंद करें या संगत संस्करण चुनें।",
-  "games.stardew.unmanagedError": "यह मॉड Harbor के रिकॉर्ड से बाहर पहले से मौजूद है। आयात करने से पहले मौजूदा कॉपी अलग रखें।",
-  "games.stardew.archiveError": "एक तैयार मॉड फ़ोल्डर वाला ZIP चुनें, अधिकतम 32 MB (निकालने के बाद 128 MB)। सोर्स कोड डाउनलोड इंस्टॉल करने योग्य मॉड नहीं हैं।",
+  "games.stardew.requirementsError":
+    "ज़रूरी मॉड या SMAPI संस्करण मौजूद नहीं है या बहुत पुराना है। मॉड की ज़रूरतें जाँचें।",
+  "games.stardew.dependentsError":
+    "एक चालू मॉड को यह संस्करण चाहिए। पहले उस मॉड को बंद करें या संगत संस्करण चुनें।",
+  "games.stardew.unmanagedError":
+    "यह मॉड Harbor के रिकॉर्ड से बाहर पहले से मौजूद है। आयात करने से पहले मौजूदा कॉपी अलग रखें।",
+  "games.stardew.archiveError":
+    "एक तैयार मॉड फ़ोल्डर वाला ZIP चुनें, अधिकतम 32 MB (निकालने के बाद 128 MB)। सोर्स कोड डाउनलोड इंस्टॉल करने योग्य मॉड नहीं हैं।",
   "games.stardew.moreFiles": "{count} और फ़ाइलें",
   "games.stardew.partialError": "कुछ मॉड जाँचे नहीं जा सके। फ़ाइलें बदलने से पहले अधूरी स्कैन की समस्या सुलझाएँ।",
   "games.stardew.linkError": "शॉर्टकट या लिंक किए फ़ोल्डर की जगह असली फ़ाइलें और फ़ोल्डर चुनें।",
@@ -72,15 +79,18 @@ export default {
   "games.stardew.scanning": "मॉड पढ़े जा रहे हैं…",
   "games.stardew.checking": "SMAPI से जाँच जारी…",
   "games.stardew.modCount": "{count} मॉड",
-  "games.stardew.scope": "हर मॉड की बताई ज़रूरतों की जाँच होती है। क्या लोड होगा, यह अब भी SMAPI तय करता है।",
-  "games.stardew.noSmapiVersion": "इंस्टॉल किए गए SMAPI का संस्करण नहीं पढ़ा जा सका। अपडेट के सुझाव उपलब्ध न हों।",
+  "games.stardew.scope":
+    "हर मॉड की बताई ज़रूरतों की जाँच होती है। क्या लोड होगा, यह अब भी SMAPI तय करता है।",
+  "games.stardew.noSmapiVersion":
+    "इंस्टॉल किए गए SMAPI का संस्करण नहीं पढ़ा जा सका। अपडेट के सुझाव उपलब्ध न हों।",
   "games.stardew.search": "मॉड खोजें",
   "games.stardew.filter": "मॉड दिखाएँ",
   "games.stardew.all": "सभी मॉड",
   "games.stardew.attention": "ध्यान देने की ज़रूरत",
   "games.stardew.updates": "अपडेट उपलब्ध",
   "games.stardew.noMatches": "इन फ़िल्टर से कोई मॉड मेल नहीं खाता।",
-  "games.stardew.share": "अपडेट जाँच में मॉड ID, संस्करण और समर्थित अपडेट कुंजियाँ SMAPI को भेजी जाती हैं। सेव और सेटिंग इसी डिवाइस पर रहती हैं।",
+  "games.stardew.share":
+    "अपडेट जाँच में मॉड ID, संस्करण और समर्थित अपडेट कुंजियाँ SMAPI को भेजी जाती हैं। सेव और सेटिंग इसी डिवाइस पर रहती हैं।",
   "games.stardew.empty": "इस फ़ोल्डर में कोई SMAPI मॉड नहीं मिला।",
   "games.stardew.partial": "कुछ फ़ोल्डर नहीं जाँचे जा सके",
   "games.stardew.notChecked": "जाँच नहीं हुई",
@@ -104,5 +114,5 @@ export default {
   "games.stardew.folderError": "Stardew Valley का वह फ़ोल्डर चुनें जिसमें गेम और Mods फ़ोल्डर हों।",
   "games.stardew.changed": "जाँच के दौरान मॉड फ़ाइलें बदल गईं। फ़ोल्डर फिर जाँचें।",
   "games.stardew.networkError": "SMAPI अपडेट की जाँच पूरी नहीं कर सका। थोड़ी देर में फिर कोशिश करें।",
-  "games.stardew.readError": "फ़ोल्डर नहीं पढ़ा जा सका। उसका स्थान और पहुँच की अनुमति जाँचकर फिर कोशिश करें।"
+  "games.stardew.readError": "फ़ोल्डर नहीं पढ़ा जा सका। उसका स्थान और पहुँच की अनुमति जाँचकर फिर कोशिश करें।",
 };

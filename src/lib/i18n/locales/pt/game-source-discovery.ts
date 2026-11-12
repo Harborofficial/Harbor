@@ -3,15 +3,19 @@ export default {
   "games.sources.links.copied": "Copiado",
 
   "games.sources.catalogProgress": "Verificando fontes · {checked}/{total}",
-  "games.sources.source_capacity": "Seus catálogos excedem o limite de 2 GB do perfil. Remova fontes que não usa e tente novamente. Os catálogos salvos não foram alterados.",
-  "games.sources.source_quota": "Não há espaço suficiente para salvar estas fontes. Libere espaço ou remova fontes que não usa e tente novamente. Os catálogos salvos não foram alterados.",
+  "games.sources.source_capacity":
+    "Seus catálogos excedem o limite de 2 GB do perfil. Remova fontes que não usa e tente novamente. Os catálogos salvos não foram alterados.",
+  "games.sources.source_quota":
+    "Não há espaço suficiente para salvar estas fontes. Libere espaço ou remova fontes que não usa e tente novamente. Os catálogos salvos não foram alterados.",
 
-  "games.sources.batch.busy": "Outra seleção de arquivos está sendo preparada. Tente novamente em instantes.",
+  "games.sources.batch.busy":
+    "Outra seleção de arquivos está sendo preparada. Tente novamente em instantes.",
   "games.sources.batch.limit": "Escolha até 200 arquivos de cada vez.",
 
   "games.sources.batch.failedFile": "Não foi possível preparar {file}.",
 
-  "games.sources.batch.restart": "Reinicie o Harbor após atualizar para baixar os arquivos selecionados juntos.",
+  "games.sources.batch.restart":
+    "Reinicie o Harbor após atualizar para baixar os arquivos selecionados juntos.",
 
   "games.torrent.start": "Baixar arquivos",
 
@@ -19,53 +23,69 @@ export default {
 
   "games.sources.verification.action": "Verificar fonte",
 
-  "games.sources.verification.waiting": "Conclua a verificação na janela da fonte. O Harbor verificará o catálogo em seguida.",
+  "games.sources.verification.waiting":
+    "Conclua a verificação na janela da fonte. O Harbor verificará o catálogo em seguida.",
 
-  "games.sources.source_verify_busy": "Outra fonte está sendo verificada. Conclua ou feche essa janela primeiro.",
+  "games.sources.source_verify_busy":
+    "Outra fonte está sendo verificada. Conclua ou feche essa janela primeiro.",
 
-  "games.sources.source_verify_failed": "Não foi possível concluir a verificação. Tente novamente ou atualize o endereço da fonte.",
+  "games.sources.source_verify_failed":
+    "Não foi possível concluir a verificação. Tente novamente ou atualize o endereço da fonte.",
 
-  "games.sources.source_verify_timeout": "O tempo de verificação esgotou. Tente novamente quando estiver pronto.",
+  "games.sources.source_verify_timeout":
+    "O tempo de verificação esgotou. Tente novamente quando estiver pronto.",
 
-  "games.sources.source_verify_unavailable": "Atualize e reinicie o Harbor para verificar esta fonte.",
+  "games.sources.source_verify_unavailable":
+    "Atualize e reinicie o Harbor para verificar esta fonte.",
 
   "games.sources.browser.direct": "Download direto",
 
   "games.sources.site.title": "Abrir um site",
-  "games.sources.site.note": "Cole uma página de download de qualquer site. O Harbor abre-a numa janela própria, escolhe lá o ficheiro, e ele é transferido para o Harbor.",
+  "games.sources.site.note":
+    "Cole uma página de download de qualquer site. O Harbor abre-a numa janela própria, escolhe lá o ficheiro, e ele é transferido para o Harbor.",
   "games.sources.site.url": "Ligação da página",
   "games.sources.site.open": "Abrir site",
   "games.sources.site.invalid": "Tem de ser uma ligação https pública.",
-  "games.sources.browser.intro": "Não precisa de conta de debrid. Escolha um arquivo no {host} e depois onde salvá-lo no Harbor.",
-  "games.sources.browser.fallback": "Se o download não começar sozinho, use o link alternativo que o {host} mostra na página. O Harbor captura o ficheiro na mesma.",
+  "games.sources.browser.intro":
+    "Não precisa de conta de debrid. Escolha um arquivo no {host} e depois onde salvá-lo no Harbor.",
+  "games.sources.browser.fallback":
+    "Se o download não começar sozinho, use o link alternativo que o {host} mostra na página. O Harbor captura o ficheiro na mesma.",
 
   "games.sources.browser.choose": "Escolher arquivo no {host}",
 
-  "games.sources.browser.waiting": "Escolha o arquivo na janela do {host}. O Harbor perguntará onde salvá-lo.",
+  "games.sources.browser.waiting":
+    "Escolha o arquivo na janela do {host}. O Harbor perguntará onde salvá-lo.",
 
   "games.sources.browser.selected": "Pronto para baixar no Harbor",
 
   "games.sources.browser.another": "Escolher outro arquivo",
 
-  "games.sources.browser.failed": "O {host} não conseguiu enviar o arquivo ao Harbor. Tente novamente ou abra no {host}.",
+  "games.sources.browser.failed":
+    "O {host} não conseguiu enviar o arquivo ao Harbor. Tente novamente ou abra no {host}.",
 
-  "games.sources.browser.timeout": "O tempo para escolher o arquivo acabou. Abra o {host} novamente.",
+  "games.sources.browser.timeout":
+    "O tempo para escolher o arquivo acabou. Abra o {host} novamente.",
 
-  "games.sources.browser.restart": "Reinicie o Harbor após atualizar para baixar diretamente do {host}.",
+  "games.sources.browser.restart":
+    "Reinicie o Harbor após atualizar para baixar diretamente do {host}.",
 
   "games.sources.retrySavedCatalog": "Tentar o catálogo salvo novamente",
 
   "games.sources.catalogUnavailable": "Catálogo salvo indisponível",
 
-  "games.sources.catalogRepair": "Atualize esta fonte para restaurar seus lançamentos. As outras fontes continuam disponíveis.",
+  "games.sources.catalogRepair":
+    "Atualize esta fonte para restaurar seus lançamentos. As outras fontes continuam disponíveis.",
 
   "games.sources.restoreCatalog": "Atualizar fonte",
 
-  "games.sources.partialResults": "Fontes indisponíveis: {count}. Os resultados podem estar incompletos.",
+  "games.sources.partialResults":
+    "Fontes indisponíveis: {count}. Os resultados podem estar incompletos.",
 
-  "games.sources.partialRecent": "Fontes indisponíveis: {count}. Os lançamentos recentes podem estar incompletos.",
+  "games.sources.partialRecent":
+    "Fontes indisponíveis: {count}. Os lançamentos recentes podem estar incompletos.",
 
-  "games.sources.source_incomplete": "Não foi possível ler alguns catálogos salvos. Restaure ou remova esses catálogos antes de adicionar mais dados.",
+  "games.sources.source_incomplete":
+    "Não foi possível ler alguns catálogos salvos. Restaure ou remova esses catálogos antes de adicionar mais dados.",
 
   "games.sources.saving": "Salvando fonte…",
 
@@ -77,7 +97,8 @@ export default {
 
   "games.sources.back": "Voltar",
 
-  "games.sources.source_blocked": "Esta fonte bloqueou a solicitação. O catálogo está indisponível no momento.",
+  "games.sources.source_blocked":
+    "Esta fonte bloqueou a solicitação. O catálogo está indisponível no momento.",
 
   "games.sources.source_restricted": "Esta fonte está indisponível por motivos legais (HTTP 451).",
 
@@ -87,25 +108,31 @@ export default {
 
   "games.sources.more": "Mostrar mais ({count} restantes)",
 
-  "games.sources.matchNote": "Escolha uma fonte para comparar os lançamentos e as opções de download.",
+  "games.sources.matchNote":
+    "Escolha uma fonte para comparar os lançamentos e as opções de download.",
 
   "games.sources.platform.native": "Versão para {platform}",
 
-  "games.sources.platform.nativeNote": "Confira os requisitos do processador e do sistema antes de baixar.",
+  "games.sources.platform.nativeNote":
+    "Confira os requisitos do processador e do sistema antes de baixar.",
 
   "games.sources.platform.compatibility": "Versão Windows · requer Wine ou Proton",
 
-  "games.sources.platform.compatibilityNote": "No Linux, configure Wine ou Proton na biblioteca local. A compatibilidade, incluindo antitrapaça, depende do jogo. Para jogos Steam, use as configurações de compatibilidade do Steam.",
+  "games.sources.platform.compatibilityNote":
+    "No Linux, configure Wine ou Proton na biblioteca local. A compatibilidade, incluindo antitrapaça, depende do jogo. Para jogos Steam, use as configurações de compatibilidade do Steam.",
 
   "games.sources.platform.other": "Versão {platform} · não nativa em {host}",
 
-  "games.sources.platform.otherNote": "Escolha uma versão para seu sistema operacional. O Harbor não pode instalar nem executar este pacote nativamente neste dispositivo.",
+  "games.sources.platform.otherNote":
+    "Escolha uma versão para seu sistema operacional. O Harbor não pode instalar nem executar este pacote nativamente neste dispositivo.",
 
   "games.sources.platform.unknown": "Plataforma não informada",
 
-  "games.sources.platform.unknownNote": "A fonte não informa o sistema operacional do pacote. Consulte o distribuidor antes de baixar.",
+  "games.sources.platform.unknownNote":
+    "A fonte não informa o sistema operacional do pacote. Consulte o distribuidor antes de baixar.",
 
-  "games.sources.platform.browseNote": "Use o Harbor para desktop para baixar e gerenciar arquivos de jogos locais.",
+  "games.sources.platform.browseNote":
+    "Use o Harbor para desktop para baixar e gerenciar arquivos de jogos locais.",
 
   "games.sources.platform.browse": "Versão para {platform}",
 
@@ -113,27 +140,26 @@ export default {
 
   "games.setup.openNative": "Abrir instalador",
 
-
-
   "games.sources.art.torrent": "Download por torrent",
 
   "games.sources.art.engine": "Motor de torrents do Harbor",
 
   "games.sources.art.reviewTorrent": "Baixar no Harbor",
 
-
-
   "games.sources.ad.note": "Prepare este arquivo com o AllDebrid e escolha onde salvá-lo.",
 
   "games.sources.ad.password": "Senha do link (opcional)",
 
-  "games.sources.ad.passwordRequired": "Este link precisa de uma senha. Digite-a e tente novamente.",
+  "games.sources.ad.passwordRequired":
+    "Este link precisa de uma senha. Digite-a e tente novamente.",
 
-  "games.sources.ad.blocked": "O AllDebrid precisa que você confirme esta conexão. Verifique seu email ou sua conta AllDebrid e tente novamente.",
+  "games.sources.ad.blocked":
+    "O AllDebrid precisa que você confirme esta conexão. Verifique seu email ou sua conta AllDebrid e tente novamente.",
 
   "games.sources.ad.quota": "Sua cota do AllDebrid para este servidor acabou.",
 
-  "games.sources.ad.unsupported": "O AllDebrid não aceita este link. Abra a fonte para escolher outro.",
+  "games.sources.ad.unsupported":
+    "O AllDebrid não aceita este link. Abra a fonte para escolher outro.",
 
   "games.sources.ad.preparing": "Preparando no AllDebrid",
 
@@ -145,7 +171,8 @@ export default {
 
   "games.sources.ad.kept": "A solicitação é mantida ao fechar. Reabra o link para consultá-la.",
 
-  "games.sources.ad.uncertain": "Esta solicitação pode já estar no AllDebrid. Verifique sua conta antes de prepará-la novamente.",
+  "games.sources.ad.uncertain":
+    "Esta solicitação pode já estar no AllDebrid. Verifique sua conta antes de prepará-la novamente.",
 
   "games.sources.ad.renew": "Prepare um novo link para baixar este arquivo.",
 
@@ -153,7 +180,8 @@ export default {
 
   "games.sources.repair.title": "Alterar link de {name}",
 
-  "games.sources.repair.note": "As entradas atuais permanecem até você revisar e salvar a substituição.",
+  "games.sources.repair.note":
+    "As entradas atuais permanecem até você revisar e salvar a substituição.",
 
   "games.sources.source_changed": "Esta fonte mudou. Revise o link novamente antes de salvar.",
 
@@ -161,7 +189,8 @@ export default {
 
   "games.sources.discovery.address": "Site ou link do catálogo",
 
-  "games.sources.discovery.hint": "Cole um site, um catálogo JSON ou um link de instalação do Hydra.",
+  "games.sources.discovery.hint":
+    "Cole um site, um catálogo JSON ou um link de instalação do Hydra.",
 
   "games.sources.discovery.choose": "Escolha um catálogo publicado neste site.",
 
@@ -173,13 +202,17 @@ export default {
 
   "games.sources.discovery.preview": "Prévia do catálogo",
 
-  "games.sources.discovery.reviewNote": "Apenas as entradas do catálogo são salvas. Os arquivos são baixados quando você os escolhe.",
+  "games.sources.discovery.reviewNote":
+    "Apenas as entradas do catálogo são salvas. Os arquivos são baixados quando você os escolhe.",
 
-  "games.sources.source_no_catalog": "Este site não publica um link de catálogo que o Harbor possa ler. Cole o link do catálogo JSON.",
+  "games.sources.source_no_catalog":
+    "Este site não publica um link de catálogo que o Harbor possa ler. Cole o link do catálogo JSON.",
 
-  "games.sources.source_url": "Digite um endereço de site, uma URL HTTP(S) de catálogo ou um link de instalação do Hydra.",
+  "games.sources.source_url":
+    "Digite um endereço de site, uma URL HTTP(S) de catálogo ou um link de instalação do Hydra.",
 
-  "games.sources.source_limit": "Limite do catálogo: 64 MB ou 150.000 versões. Limite do perfil: 2 GB ou 128 fontes.",
+  "games.sources.source_limit":
+    "Limite do catálogo: 64 MB ou 150.000 versões. Limite do perfil: 2 GB ou 128 fontes.",
 
   "games.sources.source_processing": "Não foi possível processar o catálogo. Tente novamente.",
 
@@ -201,7 +234,8 @@ export default {
 
   "games.sources.website.unavailable": "Não foi possível consultar alguns sites.",
 
-  "games.sources.website.note": "As publicações recentes ficam em cache. A pesquisa consulta o catálogo do site.",
+  "games.sources.website.note":
+    "As publicações recentes ficam em cache. A pesquisa consulta o catálogo do site.",
 
   "games.sources.links.title": "Opções de download",
 
@@ -227,7 +261,8 @@ export default {
 
   "games.sources.links.prepare": "Preparar link",
 
-  "games.sources.links.account": "O serviço recusou a conexão. Verifique a chave nas configurações de fontes.",
+  "games.sources.links.account":
+    "O serviço recusou a conexão. Verifique a chave nas configurações de fontes.",
 
   "games.sources.links.rate": "O serviço pediu que o Harbor espere. Tente novamente em instantes.",
 
@@ -235,9 +270,11 @@ export default {
 
   "games.sources.links.empty": "O serviço não retornou arquivos disponíveis para download.",
 
-  "games.sources.links.invalid": "O serviço retornou informações incompletas. Abra a fonte ou tente novamente.",
+  "games.sources.links.invalid":
+    "O serviço retornou informações incompletas. Abra a fonte ou tente novamente.",
 
-  "games.sources.links.failed": "O serviço não conseguiu preparar este link. Verifique a disponibilidade e sua conta.",
+  "games.sources.links.failed":
+    "O serviço não conseguiu preparar este link. Verifique a disponibilidade e sua conta.",
 
   "games.sources.links.destination": "Escolher destino",
 
@@ -249,11 +286,13 @@ export default {
 
   "games.sources.web.start": "Iniciar no TorBox",
 
-  "games.sources.web.note": "O TorBox baixa este link para sua conta. Quando estiver pronto, escolha um arquivo e um destino local.",
+  "games.sources.web.note":
+    "O TorBox baixa este link para sua conta. Quando estiver pronto, escolha um arquivo e um destino local.",
 
   "games.sources.web.kept": "Fechar esta janela mantém a tarefa no TorBox.",
 
-  "games.sources.web.uncertain": "Esta solicitação pode já estar no TorBox. Verifique antes de iniciar outra.",
+  "games.sources.web.uncertain":
+    "Esta solicitação pode já estar no TorBox. Verifique antes de iniciar outra.",
 
   "games.sources.web.check": "Verificar TorBox",
 
@@ -261,13 +300,15 @@ export default {
 
   "games.sources.web.more": "Verificar tarefas anteriores",
 
-  "games.sources.web.notFound": "Nenhuma tarefa correspondente encontrada. Outra pode duplicar uma solicitação atrasada.",
+  "games.sources.web.notFound":
+    "Nenhuma tarefa correspondente encontrada. Outra pode duplicar uma solicitação atrasada.",
 
   "games.sources.web.nextPage": "Página {page} verificada. Continue nas tarefas anteriores.",
 
   "games.sources.web.again": "Iniciar outra tarefa",
 
-  "games.sources.web.storage": "O Harbor não conseguiu salvar esta tarefa. Ela não será enviada novamente de forma automática.",
+  "games.sources.web.storage":
+    "O Harbor não conseguiu salvar esta tarefa. Ela não será enviada novamente de forma automática.",
 
   "games.sources.web.preparing": "Preparando no TorBox",
 
@@ -323,7 +364,8 @@ export default {
 
   "games.sources.host.queueNote": "Este servidor usa a transferência na nuvem do serviço.",
 
-  "games.sources.host.unknownNote": "Este domínio não está no diretório do provedor. Você ainda pode tentar o link.",
+  "games.sources.host.unknownNote":
+    "Este domínio não está no diretório do provedor. Você ainda pode tentar o link.",
 
   "games.sources.host.fileNote": "A disponibilidade do arquivo é verificada ao preparar o link.",
 
@@ -335,11 +377,13 @@ export default {
 
   "games.sources.pm.start": "Iniciar no Premiumize",
 
-  "games.sources.pm.note": "O Premiumize salva este link na sua nuvem. Escolha um arquivo quando estiver pronto.",
+  "games.sources.pm.note":
+    "O Premiumize salva este link na sua nuvem. Escolha um arquivo quando estiver pronto.",
 
   "games.sources.pm.kept": "Fechar mantém a transferência do Premiumize.",
 
-  "games.sources.pm.uncertain": "Esta solicitação pode já estar no Premiumize. Confira as transferências recentes antes de criar outra.",
+  "games.sources.pm.uncertain":
+    "Esta solicitação pode já estar no Premiumize. Confira as transferências recentes antes de criar outra.",
 
   "games.sources.pm.check": "Verificar Premiumize",
 
@@ -349,11 +393,13 @@ export default {
 
   "games.sources.pm.failed": "Falha na transferência",
 
-  "games.sources.pm.notFound": "Nenhuma transferência selecionada. Iniciar outra pode duplicar a solicitação.",
+  "games.sources.pm.notFound":
+    "Nenhuma transferência selecionada. Iniciar outra pode duplicar a solicitação.",
 
   "games.sources.pm.select": "Usar esta transferência",
 
-  "games.sources.pm.review": "Selecione a transferência que você enviou. O Harbor não consegue identificar sua origem automaticamente.",
+  "games.sources.pm.review":
+    "Selecione a transferência que você enviou. O Harbor não consegue identificar sua origem automaticamente.",
 
   "games.sources.pm.retry": "Tentar transferência novamente",
 
@@ -365,7 +411,8 @@ export default {
 
   "games.sources.pm.files": "Arquivos",
 
-  "games.sources.pm.container": "Esta fonte contém links. Abra-a para escolher o link de um arquivo individual.",
+  "games.sources.pm.container":
+    "Esta fonte contém links. Abra-a para escolher o link de um arquivo individual.",
 
   "games.sources.pm.folder": "Abrir pasta",
 
@@ -417,7 +464,6 @@ export default {
 
   "games.sources.batch.destination": "Escolher pasta",
 
-  "games.download.transfer_batch_names": "Alguns nomes de arquivo coincidem ou não podem ser mantidos. Escolha esses arquivos individualmente."
-
+  "games.download.transfer_batch_names":
+    "Alguns nomes de arquivo coincidem ou não podem ser mantidos. Escolha esses arquivos individualmente.",
 };
-

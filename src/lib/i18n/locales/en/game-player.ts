@@ -16,4 +16,4 @@ export default {
   "games.player.position": "Media {current} of {total}",
   "games.player.trailerNamed": "Trailer: {name}",
   "games.player.wheel": "Scroll to adjust",
-} satisfies Record<string,string>;
+} satisfies Record<string, string>;

@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { MAX_MENTIONS, mentionToken, scanMentions, segmentMentions } from "../src/lib/social/mentions.ts";
+import {
+  MAX_MENTIONS,
+  mentionToken,
+  scanMentions,
+  segmentMentions,
+} from "../src/lib/social/mentions.ts";
 import { renderBbcode } from "../src/lib/social/bbcode.ts";
 
 const withMentions = (body: string) => renderBbcode(body, new Set(scanMentions(body).notified));
@@ -74,7 +79,15 @@ test("repeats of one handle are one distinct mention whatever the case", () => {
   const { notified, ignored } = scanMentions(body);
   assert.deepEqual(notified, ["bob", "two-b", "three-c", "four-d", "five-e"]);
   assert.deepEqual(ignored, ["six-f"]);
-  assert.deepEqual(linked(body), ["@Bob", "@bob", "@BOB", "@two-b", "@three-c", "@four-d", "@five-e"]);
+  assert.deepEqual(linked(body), [
+    "@Bob",
+    "@bob",
+    "@BOB",
+    "@two-b",
+    "@three-c",
+    "@four-d",
+    "@five-e",
+  ]);
 });
 
 test("adjacent punctuation is not part of the handle", () => {

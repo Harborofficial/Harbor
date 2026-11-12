@@ -13,9 +13,20 @@ import {
 } from "@/lib/ebook/extensions";
 import { normalizeRepoUrl, repoTitle } from "@/lib/streams/plugins/manifest";
 import { PluginError } from "@/lib/streams/plugins/types";
-import { repoHost, type EntryView, type KindAdapter, type PluginView, type RepoView } from "../types";
+import {
+  repoHost,
+  type EntryView,
+  type KindAdapter,
+  type PluginView,
+  type RepoView,
+} from "../types";
 
-type Cached = { repo: EBookPluginRepo | null; error: string | null; loading: boolean; checkedAt: number | null };
+type Cached = {
+  repo: EBookPluginRepo | null;
+  error: string | null;
+  loading: boolean;
+  checkedAt: number | null;
+};
 
 const cache = new Map<string, Cached>();
 const listeners = new Set<() => void>();

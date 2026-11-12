@@ -14,6 +14,7 @@ const gameWowTalents: Record<string, string> = {
   "games.wow.talents.import": "الصق هذا الرمز في استيراد المواهب داخل WoW.",
   "games.wow.talents.descriptionUnavailable": "تفاصيل التعويذة غير متاحة.",
   "games.wow.talents.otherChoice": "الخيار الآخر · غير مختار",
-  "games.wow.talents.reference": "مرجع التعويذة الحالي من Wowhead. قد تختلف القيم حسب رتبة الموهبة والشخصية والتحديث."
+  "games.wow.talents.reference":
+    "مرجع التعويذة الحالي من Wowhead. قد تختلف القيم حسب رتبة الموهبة والشخصية والتحديث.",
 };
 export default gameWowTalents;

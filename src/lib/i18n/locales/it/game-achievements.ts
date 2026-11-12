@@ -12,30 +12,44 @@ export default {
   "games.achievementManager.changes": "Modifiche selezionate: {count}",
   "games.achievementManager.review": "Rivedi le modifiche",
   "games.achievementManager.reviewTitle": "Rivedi le modifiche Steam",
-  "games.achievementManager.reviewNote": "Applica queste modifiche a {game} sull’account Steam {id}.",
+  "games.achievementManager.reviewNote":
+    "Applica queste modifiche a {game} sull’account Steam {id}.",
   "games.achievementManager.apply": "Applica a Steam",
   "games.achievementManager.applying": "Applicazione delle modifiche…",
   "games.achievementManager.applied": "Steam ha confermato tutte le {count} modifiche.",
   "games.achievementManager.unconfirmed": "Non confermato",
-  "games.achievementManager.partial": "Steam ha confermato {count} modifiche su {total}. Aggiorna per controllare gli obiettivi rimanenti.",
+  "games.achievementManager.partial":
+    "Steam ha confermato {count} modifiche su {total}. Aggiorna per controllare gli obiettivi rimanenti.",
   "games.achievementManager.refresh": "Aggiorna da Steam",
   "games.achievementManager.back": "Continua a modificare",
   "games.achievementManager.note": "Solo le modifiche elencate saranno inviate a Steam.",
   "games.achievementManager.error.noClient": "Steam non è stato trovato su questo computer.",
-  "games.achievementManager.error.clientLoad": "Impossibile connettersi al client Steam installato.",
-  "games.achievementManager.error.clientVersion": "Questa versione del client Steam non è ancora supportata.",
+  "games.achievementManager.error.clientLoad":
+    "Impossibile connettersi al client Steam installato.",
+  "games.achievementManager.error.clientVersion":
+    "Questa versione del client Steam non è ancora supportata.",
   "games.achievementManager.error.offline": "Apri Steam, accedi e riprova.",
-  "games.achievementManager.error.accountChanged": "L’account Steam attivo è cambiato. Aggiorna prima di modificare.",
-  "games.achievementManager.error.notOwned": "L’account Steam attivo non ha accesso a questo gioco.",
-  "games.achievementManager.error.timeout": "Steam non ha restituito i dati in tempo. Prova ad aggiornare.",
-  "games.achievementManager.error.unavailable": "Impossibile leggere gli obiettivi del gioco da Steam.",
-  "games.achievementManager.error.rejected": "Steam ha rifiutato la modifica. Aggiorna per controllare lo stato attuale.",
-  "games.achievementManager.error.uncertain": "Steam non ha confermato il risultato. Aggiorna prima di apportare altre modifiche.",
-  "games.achievementManager.error.platform": "La gestione degli obiettivi è attualmente disponibile in Harbor per Windows x64.",
+  "games.achievementManager.error.accountChanged":
+    "L’account Steam attivo è cambiato. Aggiorna prima di modificare.",
+  "games.achievementManager.error.notOwned":
+    "L’account Steam attivo non ha accesso a questo gioco.",
+  "games.achievementManager.error.timeout":
+    "Steam non ha restituito i dati in tempo. Prova ad aggiornare.",
+  "games.achievementManager.error.unavailable":
+    "Impossibile leggere gli obiettivi del gioco da Steam.",
+  "games.achievementManager.error.rejected":
+    "Steam ha rifiutato la modifica. Aggiorna per controllare lo stato attuale.",
+  "games.achievementManager.error.uncertain":
+    "Steam non ha confermato il risultato. Aggiorna prima di apportare altre modifiche.",
+  "games.achievementManager.error.platform":
+    "La gestione degli obiettivi è attualmente disponibile in Harbor per Windows x64.",
   "games.achievementManager.error.invalid": "Seleziona fino a 2.000 modifiche alla volta.",
-  "games.achievementManager.error.stale": "Questi obiettivi sono cambiati su Steam. Aggiorna prima di modificare.",
-  "games.achievementManager.error.protected": "Questo obiettivo è gestito dal gioco. Harbor non può modificarlo.",
-  "games.achievementManager.error.expired": "Questa revisione è scaduta. Aggiorna prima di applicare le modifiche.",
+  "games.achievementManager.error.stale":
+    "Questi obiettivi sono cambiati su Steam. Aggiorna prima di modificare.",
+  "games.achievementManager.error.protected":
+    "Questo obiettivo è gestito dal gioco. Harbor non può modificarlo.",
+  "games.achievementManager.error.expired":
+    "Questa revisione è scaduta. Aggiorna prima di applicare le modifiche.",
   "games.achievementManager.error.busy": "È in corso un’altra richiesta di obiettivi Steam.",
   "games.details.achievementSearch": "Cerca un obiettivo",
   "games.details.achievementEmpty": "Nessun obiettivo corrisponde alla ricerca.",
@@ -47,12 +61,15 @@ export default {
   "games.discovery.steamCharts": "Classifiche Steam",
   "games.achievementManager.commit": "Applica modifiche",
   "games.achievementManager.consentTitle": "Sblocca obiettivi di Steam",
-  "games.achievementManager.consentBody": "Sblocca o blocca di nuovo gli obiettivi dell’account Steam connesso. Le selezioni restano una bozza finché non applichi le modifiche.",
-  "games.achievementManager.consentRules": "Harbor usa l’interfaccia degli obiettivi di Steam senza iniettare codice nei giochi. Restano valide le regole e i requisiti delle ricompense di ogni gioco.",
+  "games.achievementManager.consentBody":
+    "Sblocca o blocca di nuovo gli obiettivi dell’account Steam connesso. Le selezioni restano una bozza finché non applichi le modifiche.",
+  "games.achievementManager.consentRules":
+    "Harbor usa l’interfaccia degli obiettivi di Steam senza iniettare codice nei giochi. Restano valide le regole e i requisiti delle ricompense di ogni gioco.",
   "games.achievementManager.consentSam": "Ispirato alla gestione degli obiettivi di SAM",
   "games.achievementManager.consentOnce": "Mostrato una volta per questo profilo Harbor.",
   "games.achievementManager.consentAccept": "Ho capito",
-  "games.achievementManager.desktopOnly": "Usa Harbor su Windows con Steam aperto per modificare gli obiettivi.",
+  "games.achievementManager.desktopOnly":
+    "Usa Harbor su Windows con Steam aperto per modificare gli obiettivi.",
   "games.achievementManager.all": "Tutti",
   "games.achievementManager.filter": "Filtra obiettivi",
   "games.achievementManager.rewards": "Oggetti premio",
@@ -67,12 +84,16 @@ export default {
   "games.achievementManager.rewardGame": "Oggetto in {game}",
   "games.achievementManager.rewardVia": "tramite {achievement}",
   "games.achievementManager.rewardAction": "Sblocca {item}",
-  "games.achievementManager.rewardNote": "Gli oggetti sono assegnati dal gioco. Sbloccare un obiettivo non conferma la consegna; le ricompense già ottenute non vengono assegnate di nuovo.",
+  "games.achievementManager.rewardNote":
+    "Gli oggetti sono assegnati dal gioco. Sbloccare un obiettivo non conferma la consegna; le ricompense già ottenute non vengono assegnate di nuovo.",
   "games.achievementManager.progressCount": "{count} di {total} ottenuti",
   "games.achievementManager.progressLoading": "Caricamento dei tuoi progressi di Steam…",
-  "games.achievementManager.progressUnavailable": "I tuoi progressi non sono disponibili. Apri Steam o collega il tuo account Steam, poi aggiorna.",
-  "games.achievementManager.progressReadOnly": "I tuoi progressi di Steam · La consultazione non modifica gli obiettivi.",
-  "games.achievementManager.progressPublic": "Solo statistiche globali · Progressi personali non disponibili.",
+  "games.achievementManager.progressUnavailable":
+    "I tuoi progressi non sono disponibili. Apri Steam o collega il tuo account Steam, poi aggiorna.",
+  "games.achievementManager.progressReadOnly":
+    "I tuoi progressi di Steam · La consultazione non modifica gli obiettivi.",
+  "games.achievementManager.progressPublic":
+    "Solo statistiche globali · Progressi personali non disponibili.",
   "games.achievementManager.status.steam": "Connettiti a Steam",
   "games.achievementManager.status.connection": "Connessione a Steam non disponibile",
   "games.achievementManager.status.refresh": "Controlla i tuoi progressi su Steam",
@@ -88,23 +109,29 @@ export default {
   "games.achievementManager.status.filtered": "Nessun risultato",
   "games.achievementManager.status.noGames": "Nessun gioco Steam trovato",
   "games.achievementManager.status.library": "Impossibile leggere la libreria Steam",
-  "games.achievementManager.status.libraryNote": "Ripeti la scansione. I giochi di un account Steam collegato sono ancora disponibili.",
+  "games.achievementManager.status.libraryNote":
+    "Ripeti la scansione. I giochi di un account Steam collegato sono ancora disponibili.",
   "games.achievementManager.status.emptyNote": "Steam non ha restituito obiettivi per {game}.",
   "games.achievementManager.status.store": "Vedi su Steam",
-  "games.achievementManager.recentGamesNote": "Dopo questa operazione, Steam mostrerà {game} tra i giochi avviati di recente.",
+  "games.achievementManager.recentGamesNote":
+    "Dopo questa operazione, Steam mostrerà {game} tra i giochi avviati di recente.",
   "games.achievementManager.rewardOwned": "Già sbloccato",
   "games.achievementManager.pending": "In sospeso",
   "games.achievementManager.managed": "Gestiti",
   "games.achievementManager.clear": "Cancella modifiche",
-  "games.achievementManager.discardConfirm": "Aggiornando da Steam perderai le {count} modifiche selezionate.",
-  "games.achievementManager.schemaMissing": "Steam non ha dettagli degli obiettivi di questo gioco nella cache del computer, quindi qui sono di sola lettura. Avvia il gioco una volta da Steam, poi aggiorna.",
+  "games.achievementManager.discardConfirm":
+    "Aggiornando da Steam perderai le {count} modifiche selezionate.",
+  "games.achievementManager.schemaMissing":
+    "Steam non ha dettagli degli obiettivi di questo gioco nella cache del computer, quindi qui sono di sola lettura. Avvia il gioco una volta da Steam, poi aggiorna.",
   "games.achievementManager.pickGame": "Scegli un altro gioco",
   "games.achievementManager.pickTitle": "Scegli un gioco",
   "games.achievementManager.pickSearch": "Cerca nei tuoi giochi",
-  "games.achievementManager.pickNote": "Harbor può modificare gli obiettivi di un gioco dopo che Steam li ha memorizzati nella cache del computer.",
+  "games.achievementManager.pickNote":
+    "Harbor può modificare gli obiettivi di un gioco dopo che Steam li ha memorizzati nella cache del computer.",
   "games.achievementManager.pickInstalled": "Installato",
   "games.achievementManager.pickEmpty": "Nessun gioco corrisponde alla ricerca.",
-  "games.achievementManager.pickUnavailable": "Nessun gioco Steam trovato. Installa un gioco tramite Steam o collega il tuo account Steam e riprova.",
+  "games.achievementManager.pickUnavailable":
+    "Nessun gioco Steam trovato. Installa un gioco tramite Steam o collega il tuo account Steam e riprova.",
   "games.achievementManager.pickMore": "Mostra altri giochi",
   "games.achievementManager.status.getSteam": "Scarica Steam",
   "games.achievementManager.showLockedDetails": "Mostra dettagli nascosti",

@@ -1,5 +1,6 @@
 export default {
-  "games.notes.discardAction": "\u092c\u0926\u0932\u093e\u0935 \u091b\u094b\u0921\u093c\u0947\u0902",
+  "games.notes.discardAction":
+    "\u092c\u0926\u0932\u093e\u0935 \u091b\u094b\u0921\u093c\u0947\u0902",
   "games.notes.title": "मेरे नोट्स",
   "games.notes.new": "नया नोट",
   "games.notes.limit": "अधिकतम 100 नोट्स, प्रत्येक में 100,000 अक्षर और कुल 2 MB।",
@@ -28,5 +29,5 @@ export default {
   "games.notes.export": "बैकअप निर्यात करें",
   "games.notes.unsaved": "बिना सहेजे बदलाव",
   "games.notes.local": "इस Harbor प्रोफ़ाइल में संग्रहीत",
-  "games.notes.importGuide": "मेरे नोट्स में कॉपी करें"
+  "games.notes.importGuide": "मेरे नोट्स में कॉपी करें",
 };

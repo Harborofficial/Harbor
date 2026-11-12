@@ -11,12 +11,14 @@ export default {
   "games.mods.restore": "Ripristina precedente",
   "games.mods.restored": "Versione precedente ripristinata.",
   "games.mods.changeTitle": "File da modificare",
-  "games.mods.backupNote": "Le versioni sostituite restano in un backup locale. Usa Ripristina precedente nella tua configurazione per tornare indietro. Le dipendenze saranno verificate.",
+  "games.mods.backupNote":
+    "Le versioni sostituite restano in un backup locale. Usa Ripristina precedente nella tua configurazione per tornare indietro. Le dipendenze saranno verificate.",
   "games.mods.currentVersion": "Installata: {version}",
   "games.mods.current": "Installata",
-  "games.mods.versionNote": "Scegli una versione compatibile. Harbor verifica le modifiche e conserva la versione precedente in locale. Chiudi Minecraft prima di applicarle.",
+  "games.mods.versionNote":
+    "Scegli una versione compatibile. Harbor verifica le modifiche e conserva la versione precedente in locale. Chiudi Minecraft prima di applicarle.",
   "games.mods.applyChanges": "Applica modifiche",
   "games.mods.reviewChanges": "Verifica modifiche",
   "games.mods.previousVersion": "Precedente: {version}",
-  "games.mods.restoreConfirm": "Ripristinare la versione {version}? Chiudi prima Minecraft."
+  "games.mods.restoreConfirm": "Ripristinare la versione {version}? Chiudi prima Minecraft.",
 } satisfies Record<string, string>;

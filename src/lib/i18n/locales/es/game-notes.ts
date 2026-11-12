@@ -5,7 +5,8 @@ export default {
   "games.notes.limit": "Máximo: 100 notas, 100.000 caracteres por nota y 2 MB en total.",
   "games.notes.readError": "No se pudieron leer las notas. Exporta una copia antes de reintentar.",
   "games.notes.saveError": "No se pudo guardar. Tu borrador sigue aquí.",
-  "games.notes.conflict": "Las notas cambiaron en otro lugar. Exporta el borrador antes de recargar.",
+  "games.notes.conflict":
+    "Las notas cambiaron en otro lugar. Exporta el borrador antes de recargar.",
   "games.notes.invalidTitle": "Pon un título a cada nota.",
   "games.notes.discard": "¿Descartar los cambios?",
   "games.notes.delete": "¿Eliminar esta nota del borrador?",
@@ -28,5 +29,5 @@ export default {
   "games.notes.export": "Exportar copia",
   "games.notes.unsaved": "Cambios sin guardar",
   "games.notes.local": "Guardado en este perfil de Harbor",
-  "games.notes.importGuide": "Copiar a mis notas"
+  "games.notes.importGuide": "Copiar a mis notas",
 };

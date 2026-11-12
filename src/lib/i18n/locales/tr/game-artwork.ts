@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "Oyun bilgilerini içe aktar",
-  "games.metadataImport.note": "Oyunları ad, platform ve mağaza kimliğiyle eşleştirin. Mevcut eşleştirmeler korunur.",
+  "games.metadataImport.note":
+    "Oyunları ad, platform ve mağaza kimliğiyle eşleştirin. Mevcut eşleştirmeler korunur.",
   "games.metadataImport.scope": "Eşleştirilecek oyunlar",
   "games.metadataImport.progress": "{total} oyundan {count} tanesi kontrol edildi",
   "games.metadataImport.savedCount": "{count} oyun içe aktarıldı",
@@ -14,20 +15,24 @@ export default {
   "games.metadataImport.incomplete": "Çok fazla sonuç var. Bir eşleşme seçin.",
   "games.metadataImport.artwork": "İçe aktarmayı bitirmek için görselleri seçin.",
   "games.metadataImport.reviewAction": "İncele",
-  "games.metadataImport.stopNote": "Durdurmak veya kapatmak kalan işleri iptal eder. Tamamlanan içe aktarmalar korunur.",
+  "games.metadataImport.stopNote":
+    "Durdurmak veya kapatmak kalan işleri iptal eder. Tamamlanan içe aktarmalar korunur.",
   "games.metadataImport.stop": "Durdur",
   "games.metadataImport.resume": "Devam et / yeniden dene",
   "games.metadataImport.start": "Eşleşmeleri bul",
   "games.metadataImport.review": "İnceleme gerekli",
   "games.artwork.selectionSetting": "IGDB arka plan seçimi",
-  "games.artwork.selectionNote": "Yeni meta veri eşleştirmelerinde kullanılır. Mevcut görselleriniz değişmez.",
+  "games.artwork.selectionNote":
+    "Yeni meta veri eşleştirmelerinde kullanılır. Mevcut görselleriniz değişmez.",
   "games.artwork.policy.first": "İlk görsel",
   "games.artwork.policy.random": "Rastgele görsel",
   "games.artwork.policy.manual": "Ben seçeyim",
   "games.artwork.screenshotsSetting": "Çizim yoksa ekran görüntüsü kullan",
-  "games.artwork.screenshotsNote": "Yalnızca IGDB’de arka plan çizimi yoksa ekran görüntüsü kullan.",
+  "games.artwork.screenshotsNote":
+    "Yalnızca IGDB’de arka plan çizimi yoksa ekran görüntüsü kullan.",
   "games.artwork.iconSetting": "Kütüphane simgeleri için kapak kullan",
-  "games.artwork.iconNote": "Yeni eşleştirmelerde kenar çubuğunda ve hızlı kütüphanede küçük IGDB kapakları kullan. Yerel görseller önceliklidir.",
+  "games.artwork.iconNote":
+    "Yeni eşleştirmelerde kenar çubuğunda ve hızlı kütüphanede küçük IGDB kapakları kullan. Yerel görseller önceliklidir.",
   "games.artwork.importError": "Bu eşleştirmenin görselleri yüklenemedi. Tekrar deneyin.",
 
   "games.artwork.browse": "IGDB görsellerine göz at",
@@ -38,7 +43,8 @@ export default {
   "games.artwork.unknownSize": "Boyut bilinmiyor",
   "games.artwork.original": "Otomatik",
   "games.artwork.noMatch": "Bu oyun için görsel bulunamadı. Başka bir meta veri eşleşmesi deneyin.",
-  "games.artwork.localCover": "Yerel kapağınız kullanılmaya devam eder. Bu kapağı kullanmak için kütüphane özelleştirmesinden kaldırın.",
+  "games.artwork.localCover":
+    "Yerel kapağınız kullanılmaya devam eder. Bu kapağı kullanmak için kütüphane özelleştirmesinden kaldırın.",
   "games.artwork.choose": "{count} görsel",
   "games.artwork.first": "İlk görsel",
   "games.artwork.random": "Rastgele görsel",
@@ -46,5 +52,6 @@ export default {
   "games.artwork.empty": "IGDB’de bu seçenek için görsel yok.",
   "games.artwork.imageError": "Bazı görseller yüklenemedi.",
   "games.artwork.reset": "Görselleri sıfırla",
-  "games.artwork.conflict": "Görseller veya meta veriler başka bir yerde değişti. Seçiciyi yeniden açın."
+  "games.artwork.conflict":
+    "Görseller veya meta veriler başka bir yerde değişti. Seçiciyi yeniden açın.",
 } satisfies Record<string, string>;

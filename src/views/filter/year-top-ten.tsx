@@ -38,10 +38,7 @@ export function YearTopTen({ year }: { year: number }) {
     <Row
       {...posterRow}
       title={
-        <RailHeading
-          title={t(list.curator)}
-          kicker={t("Top ten films of {year}", { year })}
-        />
+        <RailHeading title={t(list.curator)} kicker={t("Top ten films of {year}", { year })} />
       }
       scrollKey={`year:top-ten:${year}`}
       onViewAll={() => openCuratedList(LIST_ID)}

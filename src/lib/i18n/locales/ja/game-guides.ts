@@ -52,17 +52,23 @@ export default {
   "games.guides.date.all": "期間指定なし",
   "games.guides.viewers": "{count}人が視聴中",
   "games.guides.views": "{count}回再生",
-  "games.guides.import.callofdutywarzone": "Warzoneの対応する設定に値をコピーしてください。DPIはマウスのソフトウェアで設定します。",
-  "games.guides.import.css": "Counter-Strike: Sourceに設定をコピーしてください。日付付きのコミュニティアーカイブの値です。",
-  "games.guides.import.cod": "対応するゲームの版でこの値を使用してください。DPIはマウスのソフトウェアで設定します。",
-  "games.guides.noCrosshair": "この情報源には正確なプレビューに必要なクロスヘアの詳細がありません。",
-  "games.guides.previewNote": "公開値に基づく静止プレビューです。解像度、移動、反動でゲーム内の表示は変わります。",
+  "games.guides.import.callofdutywarzone":
+    "Warzoneの対応する設定に値をコピーしてください。DPIはマウスのソフトウェアで設定します。",
+  "games.guides.import.css":
+    "Counter-Strike: Sourceに設定をコピーしてください。日付付きのコミュニティアーカイブの値です。",
+  "games.guides.import.cod":
+    "対応するゲームの版でこの値を使用してください。DPIはマウスのソフトウェアで設定します。",
+  "games.guides.noCrosshair":
+    "この情報源には正確なプレビューに必要なクロスヘアの詳細がありません。",
+  "games.guides.previewNote":
+    "公開値に基づく静止プレビューです。解像度、移動、反動でゲーム内の表示は変わります。",
   "games.guides.previewBackground": "プレビューの明るい背景を切り替え",
   "games.guides.crosshairPreview": "クロスヘアのプレビュー",
   "games.guides.noPlayers": "該当するプレイヤーがいません。別の名前を試してください。",
   "games.guides.playerCount": "{count}人のプレイヤー",
   "games.guides.archived": "過去の設定です。使用前にゲームの版と日付を確認してください。",
-  "games.guides.rateLimit": "この情報源はリクエストを制限しています。{seconds}秒後に再試行してください。",
+  "games.guides.rateLimit":
+    "この情報源はリクエストを制限しています。{seconds}秒後に再試行してください。",
   "games.guides.configs": "プロの設定",
   "games.guides.searchPlayers": "プレイヤーを検索",
   "games.guides.platform": "配信プラットフォーム",
@@ -73,22 +79,28 @@ export default {
   "games.guides.sourceErrorTitle": "もう一度試しましょう",
   "games.guides.more": "さらに読み込む",
   "games.guides.moreKick": "Kickでさらに見る",
-  "games.guides.configNote": "プレイヤーやクリエイターが公開した設定です。プロフィールを選ぶと出典、日付、設定を確認できます。",
+  "games.guides.configNote":
+    "プレイヤーやクリエイターが公開した設定です。プロフィールを選ぶと出典、日付、設定を確認できます。",
   "games.guides.players": "すべてのプレイヤー",
   "games.guides.useConfig": "この設定を使う",
-  "games.guides.import.cs2": "コマンドをCS2の開発者コンソールに貼り付けます。クロスヘアコードは「設定 → ゲーム → クロスヘア」からインポートできます。適用前に値を確認してください。",
-  "games.guides.import.valorant": "クロスヘアコードをコピーし、VALORANTの「設定 → クロスヘア → プロファイルコードをインポート」を開きます。その他の値は対応する設定に入力します。",
-  "games.guides.import.rainbowsixsiege": "設定をコピーし、Siegeのマウス・画面設定に値を入力します。DPIはマウスのソフトウェアで設定します。",
+  "games.guides.import.cs2":
+    "コマンドをCS2の開発者コンソールに貼り付けます。クロスヘアコードは「設定 → ゲーム → クロスヘア」からインポートできます。適用前に値を確認してください。",
+  "games.guides.import.valorant":
+    "クロスヘアコードをコピーし、VALORANTの「設定 → クロスヘア → プロファイルコードをインポート」を開きます。その他の値は対応する設定に入力します。",
+  "games.guides.import.rainbowsixsiege":
+    "設定をコピーし、Siegeのマウス・画面設定に値を入力します。DPIはマウスのソフトウェアで設定します。",
   "games.guides.copyCrosshair": "クロスヘアをコピー",
   "games.guides.copyCommands": "コマンドをコピー",
   "games.guides.copySettings": "設定をコピー",
   "games.guides.copied": "コピーしました",
   "games.guides.copyError": "コピーできませんでした。再試行してください。",
-  "games.guides.embedNote": "再生は配信者のプラットフォームが提供します。埋め込みが制限されている場合は元のページを開いてください。",
+  "games.guides.embedNote":
+    "再生は配信者のプラットフォームが提供します。埋め込みが制限されている場合は元のページを開いてください。",
   "games.guides.readerErrorTitle": "ガイドを読み込めませんでした",
   "games.guides.short": "ガイド",
   "games.guides.title": "ガイドと攻略",
-  "games.guides.note": "次の一手を見つけよう。コミュニティのガイド、攻略動画、プレイ中の配信を楽しめます。",
+  "games.guides.note":
+    "次の一手を見つけよう。コミュニティのガイド、攻略動画、プレイ中の配信を楽しめます。",
   "games.guides.written": "攻略記事",
   "games.guides.videos": "動画",
   "games.guides.live": "ライブ",
@@ -109,11 +121,12 @@ export default {
   "games.guides.previous": "前へ",
   "games.guides.next": "次へ",
   "games.guides.original": "元のページを開く",
-  "games.guides.playerNote": "YouTubeで再生します。投稿者が埋め込みを制限している場合は、元の動画を開いてください。",
-  "games.guides.readerError": "このガイドはここで読めませんでした。再試行するか元のページを開いてください。",
+  "games.guides.playerNote":
+    "YouTubeで再生します。投稿者が埋め込みを制限している場合は、元の動画を開いてください。",
+  "games.guides.readerError":
+    "このガイドはここで読めませんでした。再試行するか元のページを開いてください。",
   "games.guides.contents": "目次",
-  "games.guides.credits": "著者とライセンス"
-,
+  "games.guides.credits": "著者とライセンス",
   "games.guides.copy": "コピー",
   "games.guides.previewMap": "クロスヘアの背景にマップのスクリーンショットを表示",
   "games.guides.skins": "スキン",
@@ -123,5 +136,5 @@ export default {
   "games.guides.teammates": "チームメイト",
   "games.guides.specs": "スペック",
   "games.guides.exportAll": "すべてエクスポート",
-  "games.guides.copyValue": "{label}をコピー"
+  "games.guides.copyValue": "{label}をコピー",
 } satisfies Record<string, string>;

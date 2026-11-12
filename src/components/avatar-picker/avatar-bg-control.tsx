@@ -15,7 +15,13 @@ const PRESETS = [
   "#9a8ac4",
 ];
 
-export function AvatarBgControl({ value, onChange }: { value: string; onChange: (color: string) => void }) {
+export function AvatarBgControl({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (color: string) => void;
+}) {
   const t = useT();
   const { settings } = useSettings();
   const harborColor = settings.harborColor;

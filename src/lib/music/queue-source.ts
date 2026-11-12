@@ -31,7 +31,9 @@ export function replaceQueueTrack(
   const original = queue[index];
   if (!original || index < 0 || index >= queue.length) return queue;
   if (selected.connectorId === original.connectorId && selected.id === original.id) return queue;
-  return queue.map((item, at) => (at === index ? adoptRequestedIdentity(selected, original) : item));
+  return queue.map((item, at) =>
+    at === index ? adoptRequestedIdentity(selected, original) : item,
+  );
 }
 
 export function selectableSources(

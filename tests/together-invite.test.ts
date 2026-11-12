@@ -19,11 +19,19 @@ test("shared invites use the hosted apex and reach the native invite parser", ()
 });
 
 test("native invites reject other schemes, malformed relays and incomplete rooms", () => {
-  const query = new URLSearchParams({ "harbor-relay": "wss://relay.example.test", "harbor-room": "ABC234" });
+  const query = new URLSearchParams({
+    "harbor-relay": "wss://relay.example.test",
+    "harbor-room": "ABC234",
+  });
   assert.equal(parseTogetherDeepLink(`https://together?${query}`), null);
   assert.equal(parseTogetherDeepLink(`harbor://together/other?${query}`), null);
   assert.equal(parseTogetherDeepLink(`harbor://together?${query}&harbor-room=XYZ789`), null);
-  for (const relay of ["javascript:alert(1)", "https://relay.example.test", "wss://user:password@relay.example.test", "wss://relay.example.test/#fragment"]) {
+  for (const relay of [
+    "javascript:alert(1)",
+    "https://relay.example.test",
+    "wss://user:password@relay.example.test",
+    "wss://relay.example.test/#fragment",
+  ]) {
     query.set("harbor-relay", relay);
     assert.equal(parseTogetherDeepLink(`harbor://together?${query}`), null);
   }
@@ -35,7 +43,10 @@ test("native invites reject other schemes, malformed relays and incomplete rooms
 });
 
 test("an invite carrying the retired public relay joins through the replacement", () => {
-  const query = new URLSearchParams({ "harbor-relay": "wss://pub.harbor.site", "harbor-room": "ABC234" });
+  const query = new URLSearchParams({
+    "harbor-relay": "wss://pub.harbor.site",
+    "harbor-room": "ABC234",
+  });
   assert.deepEqual(parseTogetherDeepLink(`harbor://together?${query}`), {
     relayUrl: "wss://pub.harborcommunity.site",
     roomCode: "ABC234",

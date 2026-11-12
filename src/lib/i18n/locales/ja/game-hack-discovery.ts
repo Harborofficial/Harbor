@@ -16,28 +16,42 @@ export default {
   "games.patch.saveCopy": "新しいコピーを保存",
   "games.patch.verified": "ファイルを確認しました",
   "games.patch.ready": "パッチの準備完了",
-  "games.patch.verifiedNote": "元のゲーム、パッチ、完成したコピーが、BPSパッチに保存されたチェックサムと一致しています。",
-  "games.patch.ipsNote": "IPSには元のゲームのチェックサムがありません。保存前にプロジェクトが指定するゲームのバージョンを確認してください。",
+  "games.patch.verifiedNote":
+    "元のゲーム、パッチ、完成したコピーが、BPSパッチに保存されたチェックサムと一致しています。",
+  "games.patch.ipsNote":
+    "IPSには元のゲームのチェックサムがありません。保存前にプロジェクトが指定するゲームのバージョンを確認してください。",
   "games.patch.output": "完成したコピー",
   "games.patch.fingerprint": "ファイルの指紋 · SHA-256",
   "games.patch.fingerprints": "ファイルの指紋一覧 · SHA-256",
   "games.patch.localNote": "端末内で処理 · BPS · IPS · UPS · 最大256 MB",
-  "games.patch.desktop": "Windows、macOS、LinuxのHarborデスクトップアプリでパッチを適用できます。ファイルは端末内に保持され、元のゲームも変更されません。",
+  "games.patch.desktop":
+    "Windows、macOS、LinuxのHarborデスクトップアプリでパッチを適用できます。ファイルは端末内に保持され、元のゲームも変更されません。",
   "games.patch.done": "新たな冒険の準備完了",
-  "games.patch.preserved": "パッチを適用したコピーを保存しました。元のゲームとパッチは変更されていません。",
-  "games.patch.patch_source_mismatch": "このパッチには別のゲームファイルまたはバージョンが必要です。プロジェクトの要件を確認し、対応するファイルを選んでください。",
-  "games.patch.patch_checksum_mismatch": "パッチのチェックサムが一致しません。ファイルが不完全な可能性があります。プロジェクトから再ダウンロードしてください。",
-  "games.patch.patch_target_mismatch": "完成したコピーが期待されるチェックサムと一致しません。何も保存していません。",
+  "games.patch.preserved":
+    "パッチを適用したコピーを保存しました。元のゲームとパッチは変更されていません。",
+  "games.patch.patch_source_mismatch":
+    "このパッチには別のゲームファイルまたはバージョンが必要です。プロジェクトの要件を確認し、対応するファイルを選んでください。",
+  "games.patch.patch_checksum_mismatch":
+    "パッチのチェックサムが一致しません。ファイルが不完全な可能性があります。プロジェクトから再ダウンロードしてください。",
+  "games.patch.patch_target_mismatch":
+    "完成したコピーが期待されるチェックサムと一致しません。何も保存していません。",
   "games.patch.patch_expired": "準備の有効期限が切れました。パッチを再確認してください。",
-  "games.patch.patch_inputs_changed": "確認後に選択したファイルが変更されました。保存前にパッチを再確認してください。",
-  "games.patch.patch_output_exists": "その場所には既にファイルがあります。別の名前を指定してください。Harborは既存のファイルを上書きしません。",
-  "games.patch.patch_read_failed": "選択したファイルを読み込めませんでした。ファイルが利用可能か確認し、再選択してください。",
-  "games.patch.patch_write_failed": "コピーを保存できませんでした。フォルダーと空き容量を確認するか、別の保存先を選んでください。",
-  "games.patch.patch_too_large": "元のゲーム、パッチ、完成したコピーは、それぞれ256 MB以下である必要があります。",
+  "games.patch.patch_inputs_changed":
+    "確認後に選択したファイルが変更されました。保存前にパッチを再確認してください。",
+  "games.patch.patch_output_exists":
+    "その場所には既にファイルがあります。別の名前を指定してください。Harborは既存のファイルを上書きしません。",
+  "games.patch.patch_read_failed":
+    "選択したファイルを読み込めませんでした。ファイルが利用可能か確認し、再選択してください。",
+  "games.patch.patch_write_failed":
+    "コピーを保存できませんでした。フォルダーと空き容量を確認するか、別の保存先を選んでください。",
+  "games.patch.patch_too_large":
+    "元のゲーム、パッチ、完成したコピーは、それぞれ256 MB以下である必要があります。",
   "games.patch.patch_busy": "別のパッチを処理中です。完了後に再試行してください。",
-  "games.patch.patch_game_type": "GBA、GB、NES、SFC、NDS、ROMなど、対応するゲームファイルを選んでください。",
+  "games.patch.patch_game_type":
+    "GBA、GB、NES、SFC、NDS、ROMなど、対応するゲームファイルを選んでください。",
   "games.patch.patch_output_type": "保存時は元のゲームと同じ拡張子を使用してください。",
-  "games.patch.invalid": "このパッチを正しく読み込めませんでした。ファイルと、プロジェクトが指定するゲームのバージョンを確認してください。",
+  "games.patch.invalid":
+    "このパッチを正しく読み込めませんでした。ファイルと、プロジェクトが指定するゲームのバージョンを確認してください。",
   "games.hub.spotlight": "注目の作品",
   "games.hub.watch": "プレイ動画を見る",
   "games.hub.watchTitle": "プレイの様子を見る",
@@ -49,7 +63,8 @@ export default {
   "games.hub.viewOriginal": "原作ゲームを見る",
   "games.hub.toolkitNote": "元のゲームに適用するパッチをダウンロード。",
   "games.hub.baseVersion": "プロジェクトが指定するゲームのバージョンと地域を確認してください。",
-  "games.hub.catalogNote": "ROMハックやコンソールMODを探しましょう。機種で絞り込むか、名前で検索できます。",
+  "games.hub.catalogNote":
+    "ROMハックやコンソールMODを探しましょう。機種で絞り込むか、名前で検索できます。",
   "games.hub.findVideos": "プレイ動画を探す",
   "games.hub.resources": "ROMハックのコミュニティ",
   "games.patch.open": "パッチを適用",
@@ -60,10 +75,12 @@ export default {
   "games.atlas.sort.rated": "評価の高い順",
   "games.atlas.sort.newest": "新しい順",
   "games.atlas.sort.oldest": "古い順",
-  "games.hub.stepPatch": "原作ゲームとBPS・IPS・UPSパッチを選択してください。Harborが別のコピーを保存します。",
-  "games.patch.description": "原作ゲームとBPS・IPS・UPSパッチを選択してください。Harborが別のコピーを保存します。",
+  "games.hub.stepPatch":
+    "原作ゲームとBPS・IPS・UPSパッチを選択してください。Harborが別のコピーを保存します。",
+  "games.patch.description":
+    "原作ゲームとBPS・IPS・UPSパッチを選択してください。Harborが別のコピーを保存します。",
   "games.patch.choosePatch": "パッチを選択（BPS・IPS・UPS）",
   "games.patch.patch_unsupported": "対応しているBPS・IPS・UPSパッチではありません。",
   "games.discovery.viewGame": "ゲームを見る",
-  "games.atlas.basedOn": "原作ゲーム"
+  "games.atlas.basedOn": "原作ゲーム",
 };

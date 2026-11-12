@@ -548,6 +548,10 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     [simklStatusMap, simklWatchedMap, anilistWatchedMap],
   );
   const emptyTrakt = useMemo(() => new Set<string>(), []);
+  const cwProgressPool = useMemo(
+    () => [...libItems, ...localAnimeCw, ...simklCw, ...trackerCw],
+    [libItems, localAnimeCw, simklCw, trackerCw],
+  );
   const cwItems = useCwAdvance(
     continueWatching,
     settings.tmdbKey,
@@ -562,6 +566,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     animeDetectVer,
     settings.episodeHiding,
     settings.animeCwEnd,
+    cwProgressPool,
   );
 
   const cwSig = cwItems
@@ -977,7 +982,12 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                 key: "continueWatching",
                 name: nm,
                 node: cwReady ? (
-                  <Row title={nm} min={260} shape="landscape">
+                  <Row
+                    title={nm}
+                    min={260}
+                    shape="landscape"
+                    scrollAnchorKey={cwItems[0]?._id ?? ""}
+                  >
                     {cwItems.map((item) => (
                       <ContinueCard
                         key={item._id}

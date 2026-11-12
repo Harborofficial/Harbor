@@ -127,7 +127,9 @@ test("an enriched addon timeout still falls back to the standard subtitle endpoi
   );
   assert.match(call, /enrichedBudget/);
   assert.match(call, /retrying without stream hints/);
-  assert.match(call, /const bareUrl = `\$\{base\}\/subtitles\/\$\{type\}\/\$\{id\}\.json`/);
+  assert.ok(
+    call.includes("const bareUrl = addonResourceUrl(base, `subtitles/${type}/${id}.json`)"),
+  );
   assert.ok(
     call.indexOf("withSubtitleTimeout(") < call.indexOf("const bareUrl"),
     "the enriched request must be bounded before the bare fallback runs",

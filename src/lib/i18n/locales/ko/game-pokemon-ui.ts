@@ -25,7 +25,8 @@ export default {
   "games.pokemon.videosHint": "공략 영상과 팁",
   "games.pokemon.bank": "저장 파일과 포켓몬",
   "games.pokemon.bankHint": "저장 파일 편집과 박스 관리",
-  "games.pokemon.bankIntro": "에뮬레이터 저장 파일을 열어 팀을 편집하거나 개별 포켓몬을 컬렉션으로 가져오세요.",
+  "games.pokemon.bankIntro":
+    "에뮬레이터 저장 파일을 열어 팀을 편집하거나 개별 포켓몬을 컬렉션으로 가져오세요.",
   "games.pokemon.guideSourceNote": "원본 공략을 읽거나 출처에 연결될 때 여기에서 열 수 있습니다.",
   "games.pokemon.readGuide": "Bulbapedia에서 읽기",
   "games.pokemon.readInside": "Harbor에서 읽기",
@@ -36,17 +37,21 @@ export default {
   "games.pokemon.saveStart": "에뮬레이터를 사용하시나요?",
   "games.pokemon.emulatorSave": "게임 자체 메뉴에서 저장하면 에뮬레이터가 저장 파일을 만듭니다.",
   "games.pokemon.saveStep1": "게임을 열고 게임 메뉴에서 저장하세요.",
-  "games.pokemon.saveStep2": "게임을 닫은 뒤 배터리 저장 파일(.sav, .srm, .dsv)을 찾거나 내보내세요.",
+  "games.pokemon.saveStep2":
+    "게임을 닫은 뒤 배터리 저장 파일(.sav, .srm, .dsv)을 찾거나 내보내세요.",
   "games.pokemon.saveStep3": "위의 게임 저장 파일 열기를 선택해 Harbor에서 편집하세요.",
   "games.pokemon.findSave": "저장 파일은 어디에 있나요?",
-  "games.pokemon.saveLocations": "ROM 옆이나 에뮬레이터의 저장 폴더를 확인하세요. 상태 저장만 있다면 에뮬레이터에서 불러온 뒤 게임 메뉴에서 저장하세요.",
+  "games.pokemon.saveLocations":
+    "ROM 옆이나 에뮬레이터의 저장 폴더를 확인하세요. 상태 저장만 있다면 에뮬레이터에서 불러온 뒤 게임 메뉴에서 저장하세요.",
   "games.pokemon.noSave": "저장 파일이 없나요?",
   "games.pokemon.communitySaves": "커뮤니티 저장 파일 둘러보기",
-  "games.pokemon.communitySavesNote": "Project Pokémon · 정확한 게임을 선택하고 작성자의 설명을 확인하세요.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · 정확한 게임을 선택하고 작성자의 설명을 확인하세요.",
   "games.pokemon.pkhexNote": "개발자가 제공하는 저장 편집기, 다운로드와 도움말.",
-  "games.pokemon.noSaveNeeded": "게임 저장 파일 없이도 포켓몬 파일을 가져올 수 있습니다. 게임의 팀이나 박스를 편집할 때만 저장 파일이 필요합니다.",
+  "games.pokemon.noSaveNeeded":
+    "게임 저장 파일 없이도 포켓몬 파일을 가져올 수 있습니다. 게임의 팀이나 박스를 편집할 때만 저장 파일이 필요합니다.",
   "games.pokemon.videoUnavailable": "여기에서 영상을 불러오지 못했습니다.",
   "games.pokemon.youtubeSearch": "YouTube 검색",
   "games.hub.downloadApply": "패치 다운로드",
-  "games.hub.manualPatch": "가지고 있는 패치 또는 링크 사용"
+  "games.hub.manualPatch": "가지고 있는 패치 또는 링크 사용",
 };

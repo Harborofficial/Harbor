@@ -47,7 +47,10 @@ export function installStreamBadgePack(pack: {
     }
   }
   const n = applyArtPack(art);
-  packs = [{ id: pack.id, name: pack.name, author: pack.author, kinds }, ...packs.filter((p) => p.id !== pack.id)];
+  packs = [
+    { id: pack.id, name: pack.name, author: pack.author, kinds },
+    ...packs.filter((p) => p.id !== pack.id),
+  ];
   persist();
   return n;
 }

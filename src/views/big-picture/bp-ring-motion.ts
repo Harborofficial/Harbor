@@ -86,8 +86,7 @@ const queued = new Map<HTMLImageElement, string>();
 // that tile permanently blank AND makes a network call; across a hundred and
 // thirty tiles that is a visibly broken home screen with nothing in any log.
 // This fires `load` instead, and `loaded` is already true so React bails.
-const BLANK =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+const BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 // Measured on device: 167 poster tiles, each already at the correct small tier,
 // 300x450 at 0.515MB decoded, for 86MB of the 127MB resident. The art is not

@@ -1,6 +1,7 @@
 export default {
   "games.pick.title": "A cosa potrei giocare?",
-  "games.pick.invite": "Trova qualcosa adatto al tuo umore, ai tuoi preferiti e al tuo modo di giocare.",
+  "games.pick.invite":
+    "Trova qualcosa adatto al tuo umore, ai tuoi preferiti e al tuo modo di giocare.",
   "games.pick.start": "Trova il mio prossimo gioco",
   "games.pick.steps": "Trova un gioco",
   "games.pick.mood": "Il tuo umore",
@@ -9,8 +10,10 @@ export default {
   "games.pick.heading0": "Di cosa hai voglia?",
   "games.pick.heading1": "Bastano pochi giochi che ami.",
   "games.pick.heading2": "Qualcosa che vale la pena giocare.",
-  "games.pick.note0": "Scegli cosa ti va stasera. Prima le corrispondenze esatte, poi le alternative più vicine. La modalità di gioco e gli altri filtri restano attivi.",
-  "games.pick.note1": "Scegli fino a cinque preferiti. Considereremo le loro caratteristiche e la tua attività recente.",
+  "games.pick.note0":
+    "Scegli cosa ti va stasera. Prima le corrispondenze esatte, poi le alternative più vicine. La modalità di gioco e gli altri filtri restano attivi.",
+  "games.pick.note1":
+    "Scegli fino a cinque preferiti. Considereremo le loro caratteristiche e la tua attività recente.",
   "games.pick.note2": "Una selezione basata sulle tue scelte, interessi comuni e recensioni.",
   "games.pick.company": "Con chi giochi?",
   "games.pick.refine": "Affina la ricerca",
@@ -37,21 +40,25 @@ export default {
   "games.pick.remove": "Rimuovi {name} dai preferiti",
   "games.pick.addFavorite": "Usa {name} come preferito",
   "games.pick.history": "Usa l’attività della mia libreria",
-  "games.pick.historyNote": "Giochi recenti, più giocati, appena aggiunti e salvati. I preferiti hanno più peso.",
+  "games.pick.historyNote":
+    "Giochi recenti, più giocati, appena aggiunti e salvati. I preferiti hanno più peso.",
   "games.pick.signal.recent": "Giocato di recente",
   "games.pick.signal.mostPlayed": "Più giocato",
   "games.pick.signal.added": "Aggiunto di recente",
   "games.pick.signal.saved": "Salvato",
   "games.pick.hours": "h",
-  "games.pick.noHistory": "Nessuna attività da usare. Scegli preferiti o collega Steam nelle impostazioni Giochi.",
+  "games.pick.noHistory":
+    "Nessuna attività da usare. Scegli preferiti o collega Steam nelle impostazioni Giochi.",
   "games.pick.manualOnly": "Solo i preferiti e i filtri selezionati guideranno questi consigli.",
-  "games.pick.addedNote": "«Aggiunto di recente» indica la prima comparsa in Harbor dopo l’importazione iniziale, non la data d’acquisto.",
+  "games.pick.addedNote":
+    "«Aggiunto di recente» indica la prima comparsa in Harbor dopo l’importazione iniziale, non la data d’acquisto.",
   "games.pick.because": "Perché ti piace {name}",
   "games.pick.matches": "Corrisponde alle tue scelte",
   "games.pick.steamCatalog": "Catalogo Steam",
   "games.pick.edit": "Modifica scelte",
   "games.pick.finding": "Cerchiamo il tuo prossimo gioco…",
-  "games.pick.partial": "Alcuni dati non sono disponibili. Questi consigli usano ciò che è disponibile.",
+  "games.pick.partial":
+    "Alcuni dati non sono disponibili. Questi consigli usano ciò che è disponibile.",
   "games.pick.cached": "Include dati del catalogo salvati il {date}.",
   "games.pick.startHere": "Inizia da qui",
   "games.pick.notForMe": "Non fa per me",
@@ -59,12 +66,16 @@ export default {
   "games.pick.undo": "Annulla",
   "games.pick.resetHidden": "Mostra di nuovo i giochi scartati",
   "games.pick.more": "Trova altri consigli",
-  "games.pick.rankingNote": "Ordine basato su tag Steam condivisi, attività, solidità delle recensioni e varietà. I punteggi sono le recensioni positive di Steam. Disponibilità e prezzi del catalogo USA.",
+  "games.pick.rankingNote":
+    "Ordine basato su tag Steam condivisi, attività, solidità delle recensioni e varietà. I punteggi sono le recensioni positive di Steam. Disponibilità e prezzi del catalogo USA.",
   "games.pick.error": "Il tuo prossimo gioco può aspettare un momento.",
-  "games.pick.errorNote": "Impossibile raggiungere il catalogo. Le scelte sono salvate; riprova quando vuoi.",
+  "games.pick.errorNote":
+    "Impossibile raggiungere il catalogo. Le scelte sono salvate; riprova quando vuoi.",
   "games.pick.noMatches": "Nessun gioco trovato con questi requisiti per ora.",
-  "games.pick.noMatchesNote": "Amplia le opzioni di piattaforma, prezzo o libreria. Le tue preferenze includono già alternative simili.",
-  "games.pick.saveError": "Le scelte valgono per questa sessione, ma non sono state salvate sul dispositivo.",
+  "games.pick.noMatchesNote":
+    "Amplia le opzioni di piattaforma, prezzo o libreria. Le tue preferenze includono già alternative simili.",
+  "games.pick.saveError":
+    "Le scelte valgono per questa sessione, ma non sono state salvate sul dispositivo.",
   "games.pick.selected": "{count} tag selezionati",
   "games.pick.favoriteCount": "{count} preferiti su 5",
   "games.pick.resultsCount": "{count} risultati finora",
@@ -74,7 +85,8 @@ export default {
   "games.pick.reviews": "{count} recensioni",
   "games.pick.unrated": "Punteggio non disponibile",
   "games.pick.owned": "Nella tua libreria",
-  "games.pick.closest": "Sono incluse alternative simili. La modalità di gioco e gli altri filtri restano attivi.",
+  "games.pick.closest":
+    "Sono incluse alternative simili. La modalità di gioco e gli altri filtri restano attivi.",
   "games.pick.closeMatch": "Corrisponde a {count} tag di atmosfera su {total}",
-  "games.pick.missing": "Tag assenti: {tags}"
+  "games.pick.missing": "Tag assenti: {tags}",
 };

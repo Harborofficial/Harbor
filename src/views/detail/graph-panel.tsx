@@ -56,10 +56,7 @@ export function GraphPanel({
     const spaceBelow = window.innerHeight - anchor.bottom;
     const spaceAbove = anchor.top;
     const below = spaceBelow >= 240 || spaceBelow >= spaceAbove;
-    const height = Math.min(
-      PANEL_MAX_HEIGHT,
-      (below ? spaceBelow : spaceAbove) - GAP - 12,
-    );
+    const height = Math.min(PANEL_MAX_HEIGHT, (below ? spaceBelow : spaceAbove) - GAP - 12);
     const top = below ? anchor.bottom + GAP : anchor.top - GAP - height;
     const start = document.dir === "rtl" ? anchor.right - PANEL_WIDTH : anchor.left;
     const left = Math.max(12, Math.min(start, window.innerWidth - PANEL_WIDTH - 12));

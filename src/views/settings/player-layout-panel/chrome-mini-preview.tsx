@@ -11,7 +11,13 @@ import { usePreviewBackdrop } from "./use-preview-backdrop";
 
 const NOOP = () => {};
 
-export function ChromeMiniPreview({ theme, config }: { theme: ThemeId; config: PlayerChromeConfig }) {
+export function ChromeMiniPreview({
+  theme,
+  config,
+}: {
+  theme: ThemeId;
+  config: PlayerChromeConfig;
+}) {
   const bg = usePreviewBackdrop();
 
   const controlVariants = useMemo(
@@ -31,7 +37,13 @@ export function ChromeMiniPreview({ theme, config }: { theme: ThemeId; config: P
       volumeStyle: config.options.volumeStyle,
     };
     return theme === "stremio" ? buildStremioCtx(opts) : buildDefaultCtx(opts);
-  }, [theme, config.customIcons, controlVariants, config.options.timeFormat, config.options.volumeStyle]);
+  }, [
+    theme,
+    config.customIcons,
+    controlVariants,
+    config.options.timeFormat,
+    config.options.volumeStyle,
+  ]);
 
   const renderOne = (id: PlayerControlId) =>
     theme === "stremio" ? (
@@ -41,7 +53,12 @@ export function ChromeMiniPreview({ theme, config }: { theme: ThemeId; config: P
     );
 
   return (
-    <div inert aria-hidden="true" data-tv-skip="" className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div
+      inert
+      aria-hidden="true"
+      data-tv-skip=""
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+    >
       {bg && (
         <img
           src={bg}
@@ -61,7 +78,14 @@ export function ChromeMiniPreview({ theme, config }: { theme: ThemeId; config: P
       />
       <div className="absolute inset-x-0 bottom-0 z-30 flex flex-col gap-2 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-5 pb-3.5 pt-14">
         {theme === "stremio" ? (
-          <StremioLayout config={config} selectedId={null} onSelect={NOOP} renderOne={renderOne} isLive={false} hideSeek />
+          <StremioLayout
+            config={config}
+            selectedId={null}
+            onSelect={NOOP}
+            renderOne={renderOne}
+            isLive={false}
+            hideSeek
+          />
         ) : (
           <DefaultLayout
             config={config}

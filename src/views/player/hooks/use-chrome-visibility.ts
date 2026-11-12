@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { getSeekHovering, subscribeSeekHovering } from "@/lib/player/playback-clock";
-import { CHROME_HIDE_MS_PAUSED, CHROME_HIDE_MS_PLAYING, CHROME_HIDE_MS_RESUME } from "../player-utils";
+import {
+  CHROME_HIDE_MS_PAUSED,
+  CHROME_HIDE_MS_PLAYING,
+  CHROME_HIDE_MS_RESUME,
+} from "../player-utils";
 
 const UI_SCALE_ACTIVITY_EVENT = "harbor:ui-scale-activity";
 const UI_SCALE_RESIZE_HOLD_MS = 700;
@@ -44,7 +48,8 @@ export function useChromeVisibility(params: {
     setChromeHidden(pipModeRef.current);
     if (hideTimer.current) window.clearTimeout(hideTimer.current);
     if (resizingUiRef.current || anyMenuOpenRef.current || getSeekHovering()) return;
-    let wait = playingRef.current && !drawModeRef.current ? CHROME_HIDE_MS_PLAYING : CHROME_HIDE_MS_PAUSED;
+    let wait =
+      playingRef.current && !drawModeRef.current ? CHROME_HIDE_MS_PLAYING : CHROME_HIDE_MS_PAUSED;
     if (resumeHideRef.current) {
       resumeHideRef.current = false;
       wait = CHROME_HIDE_MS_RESUME;

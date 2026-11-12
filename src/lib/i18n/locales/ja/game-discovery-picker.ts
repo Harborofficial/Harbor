@@ -9,7 +9,8 @@ export default {
   "games.pick.heading0": "今はどんな気分？",
   "games.pick.heading1": "好きなゲームをいくつか教えてください。",
   "games.pick.heading2": "遊びたくなる一本を。",
-  "games.pick.note0": "今夜の気分を選びましょう。すべての好みに合うゲームを優先し、近い候補も表示します。プレイモードとその他の絞り込み条件は維持されます。",
+  "games.pick.note0":
+    "今夜の気分を選びましょう。すべての好みに合うゲームを優先し、近い候補も表示します。プレイモードとその他の絞り込み条件は維持されます。",
   "games.pick.note1": "お気に入りは5本まで。共通する特徴と最近のプレイ履歴を参考にします。",
   "games.pick.note2": "選択内容、共通の好み、プレイヤーのレビューをもとにした候補です。",
   "games.pick.company": "誰と遊びますか？",
@@ -37,15 +38,18 @@ export default {
   "games.pick.remove": "お気に入りから{name}を削除",
   "games.pick.addFavorite": "{name}をお気に入りにする",
   "games.pick.history": "ライブラリの履歴を使う",
-  "games.pick.historyNote": "最近プレイした、よく遊ぶ、新しく追加した、保存したゲームを参考にします。お気に入りをより重視します。",
+  "games.pick.historyNote":
+    "最近プレイした、よく遊ぶ、新しく追加した、保存したゲームを参考にします。お気に入りをより重視します。",
   "games.pick.signal.recent": "最近プレイ",
   "games.pick.signal.mostPlayed": "よく遊ぶ",
   "games.pick.signal.added": "最近追加",
   "games.pick.signal.saved": "保存済み",
   "games.pick.hours": "時間",
-  "games.pick.noHistory": "履歴がまだありません。お気に入りを選ぶか、ゲーム設定でSteamを接続してください。",
+  "games.pick.noHistory":
+    "履歴がまだありません。お気に入りを選ぶか、ゲーム設定でSteamを接続してください。",
   "games.pick.manualOnly": "お気に入りと選択したフィルターのみを使います。",
-  "games.pick.addedNote": "「最近追加」は初回取り込み後にHarborで初めて確認した時点です。購入日ではありません。",
+  "games.pick.addedNote":
+    "「最近追加」は初回取り込み後にHarborで初めて確認した時点です。購入日ではありません。",
   "games.pick.because": "{name}が好きなあなたに",
   "games.pick.matches": "選択内容に合うゲーム",
   "games.pick.steamCatalog": "Steamカタログ",
@@ -59,11 +63,14 @@ export default {
   "games.pick.undo": "元に戻す",
   "games.pick.resetHidden": "非表示のゲームを再表示",
   "games.pick.more": "もっと探す",
-  "games.pick.rankingNote": "共通するSteamタグ、履歴、レビューの信頼度、多様性で並べています。スコアはSteamの好評率です。価格と販売状況は米国カタログに基づきます。",
+  "games.pick.rankingNote":
+    "共通するSteamタグ、履歴、レビューの信頼度、多様性で並べています。スコアはSteamの好評率です。価格と販売状況は米国カタログに基づきます。",
   "games.pick.error": "次のゲーム探しは少しお待ちください。",
-  "games.pick.errorNote": "カタログに接続できませんでした。条件は保存済みです。もう一度お試しください。",
+  "games.pick.errorNote":
+    "カタログに接続できませんでした。条件は保存済みです。もう一度お試しください。",
   "games.pick.noMatches": "この条件に合う候補はまだ見つかりません。",
-  "games.pick.noMatchesNote": "プラットフォーム、価格、ライブラリの条件を広げてみてください。気分に近い候補はすでに検索対象に含まれています。",
+  "games.pick.noMatchesNote":
+    "プラットフォーム、価格、ライブラリの条件を広げてみてください。気分に近い候補はすでに検索対象に含まれています。",
   "games.pick.saveError": "条件はこのセッションで使えますが、この端末には保存できませんでした。",
   "games.pick.selected": "{count}個のタグを選択",
   "games.pick.favoriteCount": "お気に入り {count}/5本",
@@ -74,7 +81,8 @@ export default {
   "games.pick.reviews": "{count}件のレビュー",
   "games.pick.unrated": "スコアはありません",
   "games.pick.owned": "ライブラリ内",
-  "games.pick.closest": "好みに近い候補も含まれます。プレイモードとその他の絞り込み条件は維持されます。",
+  "games.pick.closest":
+    "好みに近い候補も含まれます。プレイモードとその他の絞り込み条件は維持されます。",
   "games.pick.closeMatch": "気分タグ{total}個中{count}個に一致",
-  "games.pick.missing": "付いていないタグ：{tags}"
+  "games.pick.missing": "付いていないタグ：{tags}",
 };

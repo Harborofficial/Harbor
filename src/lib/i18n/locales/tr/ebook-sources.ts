@@ -5,10 +5,8 @@ const ebookSources: Record<string, string> = {
     "Telif hakkı durumunu, yerel yasaları ve her kaynağın koşullarını kontrol etmek sizin sorumluluğunuzdadır.",
   "Extensions come from repositories you add. Harbor does not verify their content rights.":
     "Uzantılar, eklediğiniz depolardan gelir. Harbor, içeriklerinin kullanım haklarını doğrulamaz.",
-  "Harbor does not support copyright infringement.":
-    "Harbor, telif hakkı ihlallerini desteklemez.",
-  "Copyright & third-party sources":
-    "Telif hakkı ve üçüncü taraf kaynakları",
+  "Harbor does not support copyright infringement.": "Harbor, telif hakkı ihlallerini desteklemez.",
+  "Copyright & third-party sources": "Telif hakkı ve üçüncü taraf kaynakları",
   "Build a source for a library you are authorized to access.":
     "Erişim yetkiniz olan bir kitaplık için kaynak oluşturun.",
 };

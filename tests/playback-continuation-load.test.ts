@@ -90,6 +90,7 @@ test("player load preserves an explicit short position and rejects an actor swap
     load: async () => {
       calls.push("load");
     },
+    capabilities: () => ({ engine: "mpv", external: false }),
     play: async () => {
       calls.push("play");
     },
@@ -113,6 +114,7 @@ test("player load preserves an explicit short position and rejects an actor swap
     "@/lib/player/load-identity": { playerLoadIdentity },
     "@/lib/stream-proxy": { retainStreamProxy: () => {}, releaseStreamProxy: () => {} },
     "@/lib/playback-history": { isPlaybackActorCurrent: () => actorCurrent },
+    "@/lib/player/track-preferences": { initialTrackSelector: () => () => ({}) },
   };
   const source = readFileSync(
     new URL("../src/views/player/hooks/use-bridge-load.ts", import.meta.url),
@@ -127,7 +129,7 @@ test("player load preserves an explicit short position and rejects an actor swap
     return dependencies[id];
   }, exports);
   let result: any;
-  function Fixture({ name, positionMs = 2000 }: { name: string; positionMs?: number }) {
+  function Fixture({ name, positionMs = 2000 }: { name: string; positionMs?: number | null }) {
     result = exports.useBridgeLoad({
       bridgeRef: { current: bridge },
       inRoomRef: { current: false },
@@ -170,7 +172,10 @@ test("player load preserves an explicit short position and rejects an actor swap
       new Promise((resolve) => {
         release = () => resolve({ ms: 0, fromRemote: false, finished: false });
       });
-    await React.act(async () => root.render(React.createElement(Fixture, { name: "two" })));
+    // No explicit position, so the load genuinely awaits the resume lookup.
+    await React.act(async () =>
+      root.render(React.createElement(Fixture, { name: "two", positionMs: null })),
+    );
     actorCurrent = false;
     await React.act(async () => release());
     assert.deepEqual(

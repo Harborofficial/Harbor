@@ -15,11 +15,13 @@ export default {
   "games.hydra.ready": "गेम फ़ाइल मिली",
   "games.hydra.original": "Hydra की सेटिंग",
   "games.hydra.pendingNote": "आयात के बाद खेलने से पहले गेम प्रबंधन खोलकर फ़ाइल और लॉन्च सेटिंग की समीक्षा करें।",
-  "games.hydra.unsupported": "Hydra की कुछ सेटिंग स्थानांतरित नहीं हो सकीं ({count})। Hydra में उनकी समीक्षा करें।",
+  "games.hydra.unsupported":
+    "Hydra की कुछ सेटिंग स्थानांतरित नहीं हो सकीं ({count})। Hydra में उनकी समीक्षा करें।",
   "games.hydra.skipped": "हटाई गई या न पढ़ी जा सकने वाली प्रविष्टियाँ छोड़ी गईं: {count}",
   "games.hydra.done": "{games} गेम और {sources} स्रोत आयात किए गए।",
   "games.hydra.kept": "{count} मौजूदा प्रविष्टियाँ रखी गईं।",
-  "games.hydra.scope": "लाइब्रेरी विवरण और चुनी गई कैटलॉग आयात होती हैं। गेम फ़ाइलें अपने वर्तमान फ़ोल्डर में रहती हैं।",
+  "games.hydra.scope":
+    "लाइब्रेरी विवरण और चुनी गई कैटलॉग आयात होती हैं। गेम फ़ाइलें अपने वर्तमान फ़ोल्डर में रहती हैं।",
   "games.hydra.apply": "चयनित आयात करें ({count})",
   "games.hydra.stopped": "रोक दिया गया। पहले से आयात की गई प्रविष्टियाँ रखी गई हैं।",
   "games.hydra.changed": "समीक्षा के बाद Hydra बदल गया है। ताज़ा करने के लिए फ़ोल्डर फिर चुनें।",
@@ -36,5 +38,5 @@ export default {
   "games.hydra.resetTime": "आयात और मापे गए समय पर रीसेट करें",
   "games.hydra.fileLabel": "गेम फ़ाइल",
   "games.hydra.argumentsLabel": "लॉन्च विकल्प",
-  "games.hydra.prefixLabel": "संगतता फ़ोल्डर"
+  "games.hydra.prefixLabel": "संगतता फ़ोल्डर",
 };

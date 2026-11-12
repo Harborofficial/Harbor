@@ -16,28 +16,41 @@ export default {
   "games.patch.saveCopy": "Lưu bản sao mới",
   "games.patch.verified": "Đã xác minh tệp",
   "games.patch.ready": "Bản vá đã sẵn sàng",
-  "games.patch.verifiedNote": "Trò chơi gốc, bản vá và bản sao hoàn chỉnh khớp với mã kiểm tra trong bản vá BPS.",
-  "games.patch.ipsNote": "IPS không có mã kiểm tra trò chơi gốc. Hãy kiểm tra phiên bản mà dự án yêu cầu trước khi lưu.",
+  "games.patch.verifiedNote":
+    "Trò chơi gốc, bản vá và bản sao hoàn chỉnh khớp với mã kiểm tra trong bản vá BPS.",
+  "games.patch.ipsNote":
+    "IPS không có mã kiểm tra trò chơi gốc. Hãy kiểm tra phiên bản mà dự án yêu cầu trước khi lưu.",
   "games.patch.output": "Bản sao hoàn chỉnh",
   "games.patch.fingerprint": "Dấu vân tay tệp · SHA-256",
   "games.patch.fingerprints": "Dấu vân tay các tệp · SHA-256",
   "games.patch.localNote": "Trên thiết bị của bạn · BPS · IPS · UPS · Tối đa 256 MB",
-  "games.patch.desktop": "Áp dụng bản vá trong ứng dụng Harbor trên Windows, macOS hoặc Linux. Tệp vẫn nằm trên thiết bị và trò chơi gốc được giữ nguyên.",
+  "games.patch.desktop":
+    "Áp dụng bản vá trong ứng dụng Harbor trên Windows, macOS hoặc Linux. Tệp vẫn nằm trên thiết bị và trò chơi gốc được giữ nguyên.",
   "games.patch.done": "Sẵn sàng cho cuộc phiêu lưu mới",
   "games.patch.preserved": "Đã lưu bản sao được vá. Trò chơi gốc và bản vá không thay đổi.",
-  "games.patch.patch_source_mismatch": "Bản vá này cần tệp hoặc phiên bản trò chơi gốc khác. Hãy xem yêu cầu của dự án và chọn tệp phù hợp.",
-  "games.patch.patch_checksum_mismatch": "Mã kiểm tra bản vá không khớp. Tệp có thể chưa đầy đủ; hãy tải lại từ dự án.",
-  "games.patch.patch_target_mismatch": "Bản sao hoàn chỉnh không khớp với mã kiểm tra dự kiến. Chưa lưu gì.",
+  "games.patch.patch_source_mismatch":
+    "Bản vá này cần tệp hoặc phiên bản trò chơi gốc khác. Hãy xem yêu cầu của dự án và chọn tệp phù hợp.",
+  "games.patch.patch_checksum_mismatch":
+    "Mã kiểm tra bản vá không khớp. Tệp có thể chưa đầy đủ; hãy tải lại từ dự án.",
+  "games.patch.patch_target_mismatch":
+    "Bản sao hoàn chỉnh không khớp với mã kiểm tra dự kiến. Chưa lưu gì.",
   "games.patch.patch_expired": "Phiên chuẩn bị này đã hết hạn. Hãy kiểm tra lại bản vá.",
-  "games.patch.patch_inputs_changed": "Một tệp đã chọn bị thay đổi sau khi xác minh. Hãy kiểm tra lại bản vá trước khi lưu.",
-  "games.patch.patch_output_exists": "Đã có tệp ở vị trí này. Hãy chọn tên khác; Harbor không ghi đè tệp hiện có.",
-  "games.patch.patch_read_failed": "Không thể đọc một tệp đã chọn. Hãy kiểm tra xem tệp còn dùng được không rồi chọn lại.",
-  "games.patch.patch_write_failed": "Không thể lưu bản sao. Hãy kiểm tra thư mục và dung lượng trống hoặc chọn vị trí khác.",
-  "games.patch.patch_too_large": "Trò chơi gốc, bản vá và bản sao hoàn chỉnh đều phải có dung lượng không quá 256 MB.",
+  "games.patch.patch_inputs_changed":
+    "Một tệp đã chọn bị thay đổi sau khi xác minh. Hãy kiểm tra lại bản vá trước khi lưu.",
+  "games.patch.patch_output_exists":
+    "Đã có tệp ở vị trí này. Hãy chọn tên khác; Harbor không ghi đè tệp hiện có.",
+  "games.patch.patch_read_failed":
+    "Không thể đọc một tệp đã chọn. Hãy kiểm tra xem tệp còn dùng được không rồi chọn lại.",
+  "games.patch.patch_write_failed":
+    "Không thể lưu bản sao. Hãy kiểm tra thư mục và dung lượng trống hoặc chọn vị trí khác.",
+  "games.patch.patch_too_large":
+    "Trò chơi gốc, bản vá và bản sao hoàn chỉnh đều phải có dung lượng không quá 256 MB.",
   "games.patch.patch_busy": "Đang xử lý bản vá khác. Hãy thử lại khi hoàn tất.",
-  "games.patch.patch_game_type": "Chọn tệp trò chơi được hỗ trợ, như GBA, GB, NES, SFC, NDS hoặc ROM.",
+  "games.patch.patch_game_type":
+    "Chọn tệp trò chơi được hỗ trợ, như GBA, GB, NES, SFC, NDS hoặc ROM.",
   "games.patch.patch_output_type": "Giữ nguyên phần mở rộng của trò chơi gốc khi lưu bản sao.",
-  "games.patch.invalid": "Không thể đọc bản vá này. Hãy kiểm tra tệp và phiên bản trò chơi mà dự án yêu cầu.",
+  "games.patch.invalid":
+    "Không thể đọc bản vá này. Hãy kiểm tra tệp và phiên bản trò chơi mà dự án yêu cầu.",
   "games.hub.spotlight": "Nổi bật",
   "games.hub.watch": "Xem lối chơi",
   "games.hub.watchTitle": "Xem trải nghiệm thực tế",
@@ -49,7 +62,8 @@ export default {
   "games.hub.viewOriginal": "Xem trò chơi gốc",
   "games.hub.toolkitNote": "Tải bản vá cho trò chơi gốc của bạn.",
   "games.hub.baseVersion": "Dùng đúng phiên bản và khu vực của trò chơi được dự án yêu cầu.",
-  "games.hub.catalogNote": "Khám phá ROM hack và bản mod console. Lọc theo hệ máy hoặc tìm theo tên.",
+  "games.hub.catalogNote":
+    "Khám phá ROM hack và bản mod console. Lọc theo hệ máy hoặc tìm theo tên.",
   "games.hub.findVideos": "Tìm video lối chơi",
   "games.hub.resources": "Cộng đồng ROM hacking",
   "games.patch.open": "Áp dụng bản vá",
@@ -60,10 +74,12 @@ export default {
   "games.atlas.sort.rated": "Điểm cao nhất",
   "games.atlas.sort.newest": "Mới nhất",
   "games.atlas.sort.oldest": "Cũ nhất",
-  "games.hub.stepPatch": "Chọn trò chơi gốc và bản vá BPS, IPS hoặc UPS. Harbor lưu một bản sao riêng.",
-  "games.patch.description": "Chọn trò chơi gốc và bản vá BPS, IPS hoặc UPS. Harbor lưu một bản sao riêng.",
+  "games.hub.stepPatch":
+    "Chọn trò chơi gốc và bản vá BPS, IPS hoặc UPS. Harbor lưu một bản sao riêng.",
+  "games.patch.description":
+    "Chọn trò chơi gốc và bản vá BPS, IPS hoặc UPS. Harbor lưu một bản sao riêng.",
   "games.patch.choosePatch": "Chọn bản vá (BPS, IPS, UPS)",
   "games.patch.patch_unsupported": "Tệp này không phải bản vá BPS, IPS hoặc UPS được hỗ trợ.",
   "games.discovery.viewGame": "Xem trò chơi",
-  "games.atlas.basedOn": "Dựa trên trò chơi này"
+  "games.atlas.basedOn": "Dựa trên trò chơi này",
 };

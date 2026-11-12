@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "게임 정보 가져오기",
-  "games.metadataImport.note": "제목, 플랫폼, 스토어 식별 정보로 게임을 연결합니다. 기존 연결은 유지됩니다.",
+  "games.metadataImport.note":
+    "제목, 플랫폼, 스토어 식별 정보로 게임을 연결합니다. 기존 연결은 유지됩니다.",
   "games.metadataImport.scope": "연결할 게임",
   "games.metadataImport.progress": "{total}개 중 {count}개 확인",
   "games.metadataImport.savedCount": "{count}개 가져옴",
@@ -14,7 +15,8 @@ export default {
   "games.metadataImport.incomplete": "결과가 너무 많습니다. 일치하는 항목을 선택하세요.",
   "games.metadataImport.artwork": "이미지를 선택해 가져오기를 마치세요.",
   "games.metadataImport.reviewAction": "확인",
-  "games.metadataImport.stopNote": "중지하거나 닫으면 남은 작업이 취소됩니다. 완료된 항목은 유지됩니다.",
+  "games.metadataImport.stopNote":
+    "중지하거나 닫으면 남은 작업이 취소됩니다. 완료된 항목은 유지됩니다.",
   "games.metadataImport.stop": "중지",
   "games.metadataImport.resume": "계속 / 다시 시도",
   "games.metadataImport.start": "일치하는 게임 찾기",
@@ -27,7 +29,8 @@ export default {
   "games.artwork.screenshotsSetting": "아트워크가 없으면 스크린샷 사용",
   "games.artwork.screenshotsNote": "IGDB에 배경 아트워크가 없을 때만 스크린샷을 사용합니다.",
   "games.artwork.iconSetting": "라이브러리 아이콘으로 표지 사용",
-  "games.artwork.iconNote": "새 연결의 사이드바와 빠른 라이브러리에 작은 IGDB 표지를 사용합니다. 로컬 이미지가 우선합니다.",
+  "games.artwork.iconNote":
+    "새 연결의 사이드바와 빠른 라이브러리에 작은 IGDB 표지를 사용합니다. 로컬 이미지가 우선합니다.",
   "games.artwork.importError": "이 연결의 이미지를 불러오지 못했습니다. 다시 시도하세요.",
 
   "games.artwork.browse": "IGDB 이미지 둘러보기",
@@ -37,8 +40,10 @@ export default {
   "games.artwork.cover": "표지",
   "games.artwork.unknownSize": "크기 정보 없음",
   "games.artwork.original": "자동",
-  "games.artwork.noMatch": "이 게임의 이미지를 찾지 못했습니다. 다른 메타데이터 항목을 선택해 보세요.",
-  "games.artwork.localCover": "로컬 표지가 우선 적용됩니다. 이 표지를 사용하려면 라이브러리 맞춤 설정에서 로컬 표지를 해제하세요.",
+  "games.artwork.noMatch":
+    "이 게임의 이미지를 찾지 못했습니다. 다른 메타데이터 항목을 선택해 보세요.",
+  "games.artwork.localCover":
+    "로컬 표지가 우선 적용됩니다. 이 표지를 사용하려면 라이브러리 맞춤 설정에서 로컬 표지를 해제하세요.",
   "games.artwork.choose": "이미지 {count}개",
   "games.artwork.first": "첫 번째 이미지",
   "games.artwork.random": "무작위 이미지",
@@ -46,5 +51,6 @@ export default {
   "games.artwork.empty": "IGDB에 이 선택 항목의 이미지가 없습니다.",
   "games.artwork.imageError": "일부 이미지를 불러오지 못했습니다.",
   "games.artwork.reset": "이미지 초기화",
-  "games.artwork.conflict": "다른 곳에서 이미지 또는 메타데이터가 변경되었습니다. 선택 창을 다시 여세요."
+  "games.artwork.conflict":
+    "다른 곳에서 이미지 또는 메타데이터가 변경되었습니다. 선택 창을 다시 여세요.",
 } satisfies Record<string, string>;

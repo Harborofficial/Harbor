@@ -55,7 +55,9 @@ export function HeroShadowPreview() {
       </div>
 
       <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
-        {t("The shadow is what keeps the title and buttons readable. Drop it too far and the text starts fighting the artwork.")}
+        {t(
+          "The shadow is what keeps the title and buttons readable. Drop it too far and the text starts fighting the artwork.",
+        )}
       </p>
     </div>
   );

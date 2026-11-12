@@ -43,7 +43,13 @@ type RelNode = {
 
 const MAX_DEPTH = 6;
 
-export type RootMedia = { id: number; idMal: number | null; name: string; poster?: string; format?: string };
+export type RootMedia = {
+  id: number;
+  idMal: number | null;
+  name: string;
+  poster?: string;
+  format?: string;
+};
 
 function toRoot(m: RelNode): RootMedia {
   return {
@@ -69,7 +75,9 @@ async function fetchBatch(ids: number[]): Promise<RelNode[]> {
   return results.flat();
 }
 
-export async function resolveFranchiseRoots(seeds: AnilistMedia[]): Promise<Map<number, RootMedia>> {
+export async function resolveFranchiseRoots(
+  seeds: AnilistMedia[],
+): Promise<Map<number, RootMedia>> {
   const targets = seeds.filter(needsRoot);
   if (targets.length === 0) return new Map();
   const nodes = new Map<number, RelNode>();

@@ -1,8 +1,8 @@
 export default {
   "Match stats": "Thống kê trận đấu",
-  "Timeline": "Diễn biến",
+  Timeline: "Diễn biến",
   "Head to head": "Đối đầu",
-  "Standings": "Bảng xếp hạng",
+  Standings: "Bảng xếp hạng",
   "Loading team results…": "Đang tải kết quả của đội…",
   "No completed matches were returned for this team.":
     "Nguồn không trả về trận đấu đã kết thúc nào cho đội này.",

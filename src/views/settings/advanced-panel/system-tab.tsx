@@ -33,9 +33,7 @@ export function SystemTab() {
       {isTauri && (
         <Section
           title={t("Window behavior")}
-          subtitle={t(
-            "Choose what happens when you close, minimize, or switch away from Harbor.",
-          )}
+          subtitle={t("Choose what happens when you close, minimize, or switch away from Harbor.")}
         >
           <TrayRow />
         </Section>
@@ -62,7 +60,6 @@ export function SystemTab() {
           />
         </Section>
       )}
-
     </>
   );
 }

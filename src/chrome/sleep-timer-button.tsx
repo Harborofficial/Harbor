@@ -53,8 +53,7 @@ export function SleepTimerButton() {
     if (mode.kind === "minutes" && remainingMs != null)
       return t("Pausing in {time}", { time: formatRemaining(remainingMs) });
     if (mode.kind === "end_episode") return t("Pausing when this one ends");
-    if (mode.kind === "end_next_episode")
-      return t("Pausing after {n} more", { n: mode.remaining });
+    if (mode.kind === "end_next_episode") return t("Pausing after {n} more", { n: mode.remaining });
     return null;
   })();
 
@@ -154,7 +153,9 @@ export function SleepTimerButton() {
               </div>
             </div>
             <p className="px-0.5 pt-1 text-[11.5px] leading-snug text-ink-subtle">
-              {t("Playback pauses when the timer runs out. Works for movies too: one movie counts as one episode.")}
+              {t(
+                "Playback pauses when the timer runs out. Works for movies too: one movie counts as one episode.",
+              )}
             </p>
           </div>
         </div>

@@ -8,7 +8,8 @@ export default {
   "games.sidebar.customOrder": "Thứ tự của tôi",
   "games.sidebar.arrange": "Sắp xếp thanh bên",
   "games.sidebar.resetFilters": "Đặt lại bộ lọc",
-  "games.sidebar.arrangeNote": "Kéo hoặc dùng mũi tên để sắp xếp. Ghim trò chơi yêu thích hoặc ẩn mục khỏi thanh bên này.",
+  "games.sidebar.arrangeNote":
+    "Kéo hoặc dùng mũi tên để sắp xếp. Ghim trò chơi yêu thích hoặc ẩn mục khỏi thanh bên này.",
   "games.sidebar.saveFailed": "Không lưu được tùy chọn. Thay đổi có hiệu lực trong phiên này.",
   "games.sidebar.move": "Di chuyển {name}",
   "games.sidebar.up": "Chuyển {name} lên",
@@ -19,12 +20,15 @@ export default {
   "games.sidebar.hide": "Ẩn {name} khỏi thanh bên",
   "games.sidebar.pinned": "Đã ghim",
   "games.dock.welcomeTitle": "Hiện thẻ trò chơi?",
-  "games.dock.welcomeNote": "Truy cập trò chơi chỉ bằng cách di chuột. Bạn có thể tắt bất cứ lúc nào trong Cài đặt → Chủ đề và diện mạo → Giao diện.",
+  "games.dock.welcomeNote":
+    "Truy cập trò chơi chỉ bằng cách di chuột. Bạn có thể tắt bất cứ lúc nào trong Cài đặt → Chủ đề và diện mạo → Giao diện.",
   "games.dock.welcomeEnable": "Hiện thẻ trò chơi",
   "games.dock.welcomeDismiss": "Để sau",
   "games.dock.settingTitle": "Thư viện nhanh",
-  "games.dock.settingNote": "Hiện một thẻ nhẹ ở mép để truy cập nhanh thư viện của bạn. Mặc định tắt.",
-  "games.dock.launchError": "Không thể mở trò chơi. Kiểm tra cài đặt và trình khởi chạy, rồi thử lại.",
+  "games.dock.settingNote":
+    "Hiện một thẻ nhẹ ở mép để truy cập nhanh thư viện của bạn. Mặc định tắt.",
+  "games.dock.launchError":
+    "Không thể mở trò chơi. Kiểm tra cài đặt và trình khởi chạy, rồi thử lại.",
   "games.dock.launcher": "Trình khởi chạy",
   "games.dock.client": "Mở trong {launcher}",
   "games.dock.openClient": "Mở {name} trong {launcher}",
@@ -75,5 +79,5 @@ export default {
   "games.badge.unavailable": "Tệp không khả dụng",
   "games.badge.notInstalled": "Chưa cài đặt",
   "games.home.libraryFirstTitle": "Mở Games trong thư viện của bạn",
-  "games.home.libraryFirstNote": "Bắt đầu từ thư viện của bạn thay vì Khám phá mỗi khi mở Games."
+  "games.home.libraryFirstNote": "Bắt đầu từ thư viện của bạn thay vì Khám phá mỗi khi mở Games.",
 };

@@ -38,9 +38,7 @@ function leadsWithGenre(m: Meta, genre?: string): boolean {
 async function curatedPool(theme: VoyageTheme, exclude?: PoolExclude): Promise<Meta[]> {
   const ids = theme.seeds ?? [];
   if (ids.length === 0) return [];
-  const got = await Promise.all(
-    ids.map((id) => fetchMeta(theme.type, id, true).catch(() => null)),
-  );
+  const got = await Promise.all(ids.map((id) => fetchMeta(theme.type, id, true).catch(() => null)));
   return got.filter((m): m is Meta => usable(m, exclude));
 }
 

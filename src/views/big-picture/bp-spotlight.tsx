@@ -48,11 +48,7 @@ export function BpSpotlight(_props: { phase?: BpPagePhase }) {
   const mark = useProxiedImageSrc(meta?.providerBadge?.logo);
   // No ref: the spotlight is on screen by definition, so the score prefetch runs
   // at once instead of waiting on an intersection that already happened.
-  const { badges } = useBpCardBadges(
-    meta ?? EMPTY_META,
-    undefined,
-    detail?.imdbId ?? null,
-  );
+  const { badges } = useBpCardBadges(meta ?? EMPTY_META, undefined, detail?.imdbId ?? null);
 
   // Every visible field goes through the gate as one subject. Gating the meta
   // alone left the logo, the scores and the overview reading off the live title
@@ -110,31 +106,36 @@ export function BpSpotlight(_props: { phase?: BpPagePhase }) {
 
         {logo ? (
           <>
-          <img
-            src={logo}
-            alt=""
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              const h = e.currentTarget.nextElementSibling;
-              if (h instanceof HTMLElement) h.removeAttribute("hidden");
-            }}
-            // This block is keyed on the promoted title, so the logo is a fresh
-            // element on every title change and its decode would otherwise land
-            // synchronously in the frame that mounts it, beside the backdrop
-            // commit and the copy fade.
-            decoding="async"
-            data-bp-hero-logo
-            className="max-h-[clamp(104px,16.2vh,188px)] w-auto max-w-[min(32vw,380px)] self-start object-contain drop-shadow-[0_5px_22px_rgba(0,0,0,0.7)]"
-          />
-          <h1 hidden data-bp-hero-title className={`${TITLE} ${COPY_W}`}>
-            {shown.meta.name}
-          </h1>
+            <img
+              src={logo}
+              alt=""
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                const h = e.currentTarget.nextElementSibling;
+                if (h instanceof HTMLElement) h.removeAttribute("hidden");
+              }}
+              // This block is keyed on the promoted title, so the logo is a fresh
+              // element on every title change and its decode would otherwise land
+              // synchronously in the frame that mounts it, beside the backdrop
+              // commit and the copy fade.
+              decoding="async"
+              data-bp-hero-logo
+              className="max-h-[clamp(104px,16.2vh,188px)] w-auto max-w-[min(32vw,380px)] self-start object-contain drop-shadow-[0_5px_22px_rgba(0,0,0,0.7)]"
+            />
+            <h1 hidden data-bp-hero-title className={`${TITLE} ${COPY_W}`}>
+              {shown.meta.name}
+            </h1>
           </>
         ) : (
-          <h1 data-bp-hero-title className={`${TITLE} ${COPY_W}`}>{shown.meta.name}</h1>
+          <h1 data-bp-hero-title className={`${TITLE} ${COPY_W}`}>
+            {shown.meta.name}
+          </h1>
         )}
 
-        <div data-bp-hero-meta className="mt-[14px] flex flex-wrap items-center gap-x-[16px] gap-y-1 text-[clamp(15.5px,1.8vh,21px)] font-semibold tracking-[0.015em] text-ink-subtle">
+        <div
+          data-bp-hero-meta
+          className="mt-[14px] flex flex-wrap items-center gap-x-[16px] gap-y-1 text-[clamp(15.5px,1.8vh,21px)] font-semibold tracking-[0.015em] text-ink-subtle"
+        >
           {/* Not a hardcoded IMDb value. For a kitsu or mal meta,
               meta.imdbRating holds the anime score, and drawing that beside the
               IMDb mark told the user a MAL 8.2 was an IMDb 8.2. */}

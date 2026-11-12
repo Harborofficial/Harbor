@@ -21,7 +21,8 @@ export default {
   "games.osrs.buy": "Instant buy",
   "games.osrs.sell": "Instant sell",
   "games.osrs.unseen": "No observation yet",
-  "games.osrs.observed": "Reported trades, not open offers. Buy and sell observations can have different ages.",
+  "games.osrs.observed":
+    "Reported trades, not open offers. Buy and sell observations can have different ages.",
   "games.osrs.history": "Price history",
   "games.osrs.period": "Period",
   "games.osrs.range.6h": "Past 6 hours",
@@ -42,5 +43,5 @@ export default {
   "games.osrs.averages": "Missing trades leave gaps. Grand Exchange tax is not calculated here.",
   "games.osrs.table": "Latest 24 intervals",
   "games.osrs.time": "Time",
-  "games.osrs.volume": "Items traded"
+  "games.osrs.volume": "Items traded",
 };

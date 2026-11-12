@@ -4,10 +4,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   findPreferredSourceMatch,
+  findRememberedSourceMatch,
   preferredSourceAddonPending,
   streamMatchesPreferredSource,
   streamMatchesPreferredSourceFallback,
   streamMatchesReleaseLineage,
+  streamMatchesRememberedSource,
   streamMatchesSource,
 } from "../src/lib/playback-history.ts";
 
@@ -408,4 +410,57 @@ test("aggregator quality labels cannot confirm VARYG, but the release can cross 
     }),
     true,
   );
+});
+
+test("remembered episode source falls back to the same release when the exact file is gone", () => {
+  const entry = {
+    infoHash: "old-hash",
+    fileIdx: 1,
+    addonId: "torrentio",
+    parsedTitle: "Example.S01E04.1080p.WEB-DL",
+    resolution: "1080p",
+    releaseGroup: "NTB",
+    source: "WEB-DL",
+    audioLanguages: ["English"],
+    size: 1_000,
+    savedAt: 1,
+  };
+  const exact = {
+    infoHash: "old-hash",
+    fileIdx: 1,
+    addonId: "torrentio",
+    parsedTitle: "Example.S01E04.1080p.WEB-DL",
+    resolution: "1080p",
+    releaseGroupNormalized: "NTB",
+    source: "WEB-DL",
+    audioLanguages: ["English"],
+    size: 1_000,
+  };
+  const sameRelease = {
+    infoHash: "new-hash",
+    addonId: "comet",
+    url: "https://new.example/episode",
+    parsedTitle: "Example.S01E04.1080p.WEB-DL-GROUP",
+    resolution: "1080p",
+    releaseGroupNormalized: "NTB",
+    source: "WEB-DL",
+    audioLanguages: ["English"],
+    size: 1_000,
+  };
+  const otherRelease = { ...sameRelease, releaseGroupNormalized: "FLUX" };
+  const sameFileOtherAddon = { ...exact, addonId: "comet" };
+  const rememberedAddonLineage = { ...sameRelease, addonId: "torrentio" };
+
+  assert.equal(streamMatchesRememberedSource(sameFileOtherAddon, entry), false);
+  assert.equal(streamMatchesRememberedSource(sameRelease, entry), false);
+  assert.equal(streamMatchesRememberedSource(rememberedAddonLineage, entry), true);
+  assert.equal(streamMatchesRememberedSource(exact, entry), true);
+  assert.equal(findRememberedSourceMatch([sameFileOtherAddon, exact], entry), exact);
+  assert.equal(
+    findRememberedSourceMatch([sameFileOtherAddon, rememberedAddonLineage], entry),
+    rememberedAddonLineage,
+  );
+  assert.equal(findRememberedSourceMatch([sameRelease, exact], entry), exact);
+  assert.equal(findRememberedSourceMatch([otherRelease, sameRelease], entry), sameRelease);
+  assert.equal(findRememberedSourceMatch([otherRelease], entry), null);
 });

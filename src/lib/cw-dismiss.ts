@@ -14,6 +14,12 @@ import {
   resolveNuvioProfileIndex,
 } from "./nuvio/nuvio-sync";
 import { clearLocalCw } from "./local-cw";
+import { loadStoredSettings } from "@/lib/settings/load";
+import {
+  clearProviderPlayback,
+  type CwProviderSource,
+  type ProviderDismissResult,
+} from "./cw-provider-dismiss";
 
 const SIMKL_KEY = "harbor.cw.dismissed.simkl";
 const DISMISS_KEY = "harbor.cw.dismissed.v1";
@@ -260,21 +266,44 @@ function groupedSourceDismissalKey(source: string, id: string): string {
   return `group-source|${encodeURIComponent(source)}|${encodeURIComponent(id)}`;
 }
 
+type DismissCheckpoint = { s?: number; e?: number; p: number };
+
+/** Keep the furthest checkpoint when a stale source copy is dismissed later. */
+function furthestCheckpoint(
+  previous: DismissCheckpoint | undefined,
+  previousVideo: string | undefined,
+  next: DismissCheckpoint,
+  nextVideo: string | undefined,
+): { pos: DismissCheckpoint; video: string | undefined } {
+  if (!previous) return { pos: next, video: nextVideo };
+  const previousRank =
+    previous.s != null && previous.e != null ? previous.s * 100_000 + previous.e : -1;
+  const nextRank = next.s != null && next.e != null ? next.s * 100_000 + next.e : -1;
+  if (previousRank > nextRank || (previousRank === nextRank && previous.p > next.p)) {
+    return { pos: previous, video: previousVideo ?? nextVideo };
+  }
+  return { pos: next, video: nextVideo };
+}
+
 function isDismissedCheckpoint(
   item: LibraryItem,
   dismissedAt: number,
   dismissedVid: string | undefined,
-  pos: { s?: number; e?: number; p: number } | undefined,
+  pos: DismissCheckpoint | undefined,
 ): boolean {
-  // Newer progress from any source (Harbor resume, Stremio cloud _mtime/lastWatched,
-  // Trakt paused_at, Simkl watched_at) un-dismisses even when the video_id is unchanged.
-  const activity = itemActivity(item);
+  const { season, episode } = resolveEpisode(item);
+  const resume = readResumeEntry(item._id, season, episode);
+  // Only real playback can lift a checkpoint dismissal. `_mtime` also moves for
+  // library maintenance (name repair, cloud re-save, server clock skew), and
+  // treating that as new progress is what made dismissed cards return.
+  const playbackActivity = Math.max(parseMs(item.state?.lastWatched), resume?.t ?? 0);
+  const activity =
+    pos != null ? playbackActivity : Math.max(playbackActivity, parseMs(item._mtime));
   if (activity > dismissedAt) return false;
   const curVid = item.state?.video_id;
   // Further-ahead position on the same episode un-dismisses even when its timestamp
   // predates the dismissal (e.g. dismissed after watching elsewhere).
   if (pos != null && progressRatio(item) > pos.p + 0.01) {
-    const { season, episode } = resolveEpisode(item);
     if (season === pos.s && episode === pos.e) return false;
   }
   if (dismissedVid && typeof curVid === "string" && curVid) {
@@ -286,7 +315,6 @@ function isDismissedCheckpoint(
       if (ahead === null || ahead) return false;
     }
   } else if (pos != null) {
-    const { season, episode } = resolveEpisode(item);
     if (season !== pos.s || episode !== pos.e) {
       const ahead = isEpisodeAhead({ season, episode }, { season: pos.s, episode: pos.e });
       if (ahead === null || ahead) return false;
@@ -409,7 +437,56 @@ function cleanupGroupedSource(
   );
 }
 
-export type CwDismissResult = { sync: "not-required" | "synced" | "queued" };
+export type CwDismissResult = {
+  sync: "not-required" | "synced" | "queued";
+  providerFailures?: CwProviderSource[];
+};
+
+function providerDismissSources(): CwProviderSource[] {
+  try {
+    if (privateCwProfileId()) return [];
+    const settings = loadStoredSettings();
+    if (settings.cwClearProviderProgress !== true) return [];
+    // Clearing is independent of which sources feed the row. A tracker can be
+    // connected for scrobbling while its cards are hidden, and its stale resume
+    // point would otherwise survive the dismissal.
+    return ["trakt", "simkl", "publicmetadb"];
+  } catch {
+    return [];
+  }
+}
+
+function sameProviderCheckpoint(a: LibraryItem, b: LibraryItem): boolean {
+  const aEp = resolveEpisode(a);
+  const bEp = resolveEpisode(b);
+  // Deleting provider progress is irreversible: an unknown episode must be
+  // resolved through a fresh lookup, never guessed from a stale member.
+  if (aEp.season == null || aEp.episode == null) return false;
+  if (bEp.season == null || bEp.episode == null) return false;
+  return aEp.season === bEp.season && aEp.episode === bEp.episode;
+}
+
+function providerSourceOf(item: LibraryItem): CwProviderSource | null {
+  return item.external === "trakt" || item.external === "simkl" || item.external === "publicmetadb"
+    ? item.external
+    : null;
+}
+
+/**
+ * Provider pause times can come from another device's clock. Trust a little
+ * skew so a late copy stays covered, but never enough to hide real progress
+ * for hours after the dismissal.
+ */
+const DISMISS_CLOCK_SKEW_MS = 5 * 60_000;
+
+function dismissalNow(item: LibraryItem, members: readonly LibraryItem[]): number {
+  const latest = Math.max(Date.now(), itemActivity(item), ...members.map(itemActivity));
+  return Math.min(latest, Date.now() + DISMISS_CLOCK_SKEW_MS);
+}
+
+function providerFailureList(results: ProviderDismissResult[]): CwProviderSource[] {
+  return [...new Set(results.flatMap((result) => result.failed))];
+}
 
 export function dismissCw(item: LibraryItem, authKey: string | null): void;
 export function dismissCw(
@@ -423,9 +500,13 @@ export function dismissCw(
   options: { acknowledged?: boolean } = {},
 ): void | Promise<CwDismissResult> {
   loadDismissed();
+  const providerSources = providerDismissSources();
   const members = (item as LibraryItem & { cwMembers?: LibraryItem[] }).cwMembers;
   if (members?.length) {
-    const nowMs = Date.now();
+    // A provider's pause time can be ahead of the local clock. The dismissal
+    // must cover every member's activity or the hidden survivor's member
+    // reappears as a fresh card after its checkpoint is filtered out.
+    const nowMs = dismissalNow(item, members);
     const now = new Date(nowMs).toISOString();
     const times = new Map(dismissed);
     const videos = new Map(dismissedVid);
@@ -442,25 +523,40 @@ export function dismissCw(
     type SourceCheckpoint = {
       rank: number;
       p: number;
-      checkpoint?: { s?: number; e?: number; p: number };
+      checkpoint?: DismissCheckpoint;
       video?: string;
+    };
+    // A later dismissal may arrive from a stale copy. Never lower an existing
+    // checkpoint or timestamp, or the more advanced episode resurfaces beneath it.
+    const apply = (key: string, checkpoint: DismissCheckpoint | undefined, video?: string) => {
+      times.set(key, Math.max(nowMs, dismissed.get(key) ?? 0));
+      if (checkpoint) {
+        const merged = furthestCheckpoint(
+          dismissedPos.get(key),
+          dismissedVid.get(key),
+          checkpoint,
+          video,
+        );
+        positions.set(key, merged.pos);
+        if (merged.video) videos.set(key, merged.video);
+        else videos.delete(key);
+      } else {
+        // No checkpoint to compare; keep any prior one rather than weakening it.
+        if (video) videos.set(key, video);
+        else videos.delete(key);
+      }
     };
     const sourceCheckpoints = new Map<string, SourceCheckpoint>();
     for (const member of [...members, item]) {
       const ids = itemIds(member);
       const { season, episode } = resolveEpisode(member);
       const source = dismissalSource(member);
-      const vid = member.state?.video_id;
+      const vid = typeof member.state?.video_id === "string" ? member.state.video_id : undefined;
       const keys = ids.map((entryId) => groupedDismissalKey(source, entryId, vid, season, episode));
-      for (const key of keys) times.set(key, nowMs);
-      for (const key of keys) {
-        if (typeof vid === "string" && vid) videos.set(key, vid);
-        else videos.delete(key);
-      }
       const checkpoint = member.state
         ? { s: season, e: episode, p: progressRatio(member) }
         : undefined;
-      if (checkpoint) for (const key of keys) positions.set(key, checkpoint);
+      for (const key of keys) apply(key, checkpoint, vid);
 
       const rank = season == null || episode == null ? -1 : season * 100_000 + episode;
       for (const entryId of ids) {
@@ -471,16 +567,13 @@ export function dismissCw(
             rank,
             p: checkpoint?.p ?? 0,
             checkpoint,
-            video: typeof vid === "string" && vid ? vid : undefined,
+            video: vid,
           });
         }
       }
     }
     for (const [key, value] of sourceCheckpoints) {
-      times.set(key, nowMs);
-      if (value.video) videos.set(key, value.video);
-      else videos.delete(key);
-      if (value.checkpoint) positions.set(key, value.checkpoint);
+      apply(key, value.checkpoint, value.video);
     }
     persistDismissed(times, videos, options.acknowledged, positions);
     dismissed.clear();
@@ -490,6 +583,27 @@ export function dismissCw(
     for (const [key, value] of videos) dismissedVid.set(key, value);
     for (const [key, value] of positions) dismissedPos.set(key, value);
     emit();
+
+    const providerWrites: Promise<ProviderDismissResult>[] = [];
+    if (providerSources.length > 0) {
+      // A deduped show can keep an old episode next to the displayed one. Only a
+      // member whose episode matches this card may authorize deleting a
+      // provider's saved position; a stale member would clear another episode.
+      // Providers left without such a member fall back to the fresh lookup in
+      // clearProviderPlayback, which verifies the episode before deleting.
+      const byProvider = new Map<CwProviderSource, LibraryItem>();
+      const itemSource = providerSourceOf(item);
+      if (itemSource) byProvider.set(itemSource, item);
+      for (const member of members) {
+        const source = providerSourceOf(member);
+        if (!source || !providerSources.includes(source)) continue;
+        if (!sameProviderCheckpoint(item, member)) continue;
+        byProvider.set(source, member);
+      }
+      for (const provider of providerSources) {
+        providerWrites.push(clearProviderPlayback(byProvider.get(provider) ?? item, [provider]));
+      }
+    }
 
     const cleanupSeen = new Set<string>();
     const cloudIds = new Set<string>();
@@ -510,7 +624,7 @@ export function dismissCw(
       }
     }
     if (cleanupError) {
-      void Promise.allSettled(cloudWrites);
+      void Promise.allSettled([...cloudWrites, ...providerWrites]);
       throw new Error(
         "Removed from Continue Watching, but the saved position could not be cleared.",
         {
@@ -519,12 +633,23 @@ export function dismissCw(
       );
     }
     if (!options.acknowledged) {
-      void Promise.allSettled(cloudWrites);
+      void Promise.allSettled([...cloudWrites, ...providerWrites]);
       return;
     }
-    if (cloudWrites.length === 0) return Promise.resolve({ sync: "not-required" });
-    return Promise.all(cloudWrites).then(
-      (results) => ({ sync: results.every(Boolean) ? "synced" : "queued" }),
+    return Promise.all([Promise.all(cloudWrites), Promise.all(providerWrites)]).then(
+      ([cloudResults, providerResults]) => {
+        const providerFailures = providerFailureList(providerResults);
+        const sync =
+          cloudWrites.length === 0
+            ? "not-required"
+            : cloudResults.every(Boolean)
+              ? "synced"
+              : "queued";
+        return {
+          sync,
+          ...(providerFailures.length > 0 ? { providerFailures } : {}),
+        };
+      },
       () => {
         throw new Error(
           "Removed from Continue Watching on this device, but synchronization could not be saved.",
@@ -534,28 +659,50 @@ export function dismissCw(
   }
   const id = item._id;
   const now = new Date().toISOString();
-  const nowMs = Date.parse(now);
+  // Never let a stale copy or a server clock ahead of the local one move the
+  // dismissal behind existing progress, and never let it run hours ahead either.
+  const nowMs = Math.min(
+    Math.max(
+      Date.parse(now),
+      itemActivity(item),
+      ...itemIds(item).map((entryId) => dismissed.get(entryId) ?? 0),
+    ),
+    Date.now() + DISMISS_CLOCK_SKEW_MS,
+  );
   const times = new Map(dismissed);
   const videos = new Map(dismissedVid);
-  const ids = itemIds(item);
-  for (const entryId of ids) times.set(entryId, nowMs);
-  const dismissVid = item.state?.video_id;
-  for (const entryId of ids) {
-    if (typeof dismissVid === "string" && dismissVid) videos.set(entryId, dismissVid);
-    else videos.delete(entryId);
-  }
   const positions = new Map(dismissedPos);
-  if (item.state) {
-    const { season, episode } = resolveEpisode(item);
-    const checkpoint = { s: season, e: episode, p: progressRatio(item) };
-    for (const entryId of ids) positions.set(entryId, checkpoint);
-  } else {
-    for (const entryId of ids) positions.delete(entryId);
+  const ids = itemIds(item);
+  const dismissVid = typeof item.state?.video_id === "string" ? item.state.video_id : undefined;
+  const { season, episode } = resolveEpisode(item);
+  const checkpoint = item.state ? { s: season, e: episode, p: progressRatio(item) } : undefined;
+  for (const entryId of ids) {
+    times.set(entryId, nowMs);
+    if (checkpoint) {
+      const merged = furthestCheckpoint(
+        dismissedPos.get(entryId),
+        dismissedVid.get(entryId),
+        checkpoint,
+        dismissVid,
+      );
+      positions.set(entryId, merged.pos);
+      if (merged.video) videos.set(entryId, merged.video);
+      else videos.delete(entryId);
+    } else {
+      positions.delete(entryId);
+      if (dismissVid) videos.set(entryId, dismissVid);
+      else videos.delete(entryId);
+    }
   }
-  if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
-    for (const entryId of ids) times.set(`nuvio|${entryId}`, nowMs);
-  } else if (item.external) {
-    for (const entryId of ids) times.set(`${item.external}|${entryId}`, nowMs);
+  const source =
+    item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())
+      ? "nuvio"
+      : item.external;
+  if (source) {
+    for (const entryId of ids) {
+      const key = `${source}|${entryId}`;
+      times.set(key, Math.max(nowMs, dismissed.get(key) ?? 0));
+    }
   }
   persistDismissed(times, videos, options.acknowledged, positions);
   dismissed.clear();
@@ -565,6 +712,19 @@ export function dismissCw(
   for (const [key, value] of videos) dismissedVid.set(key, value);
   for (const [key, value] of positions) dismissedPos.set(key, value);
   emit();
+  const providerWrite =
+    providerSources.length > 0 ? clearProviderPlayback(item, providerSources) : null;
+  const withProviderResult = async (result: CwDismissResult): Promise<CwDismissResult> => {
+    if (!providerWrite) return result;
+    try {
+      const providerResult = await providerWrite;
+      return providerResult.failed.length > 0
+        ? { ...result, providerFailures: providerResult.failed }
+        : result;
+    } catch {
+      return { ...result, providerFailures: providerSources };
+    }
+  };
   if (item.external === "nuvio" || (isNuvioSignedIn() && isNuvioProviderActive())) {
     const { season, episode } = resolveEpisode(item);
     const slot = resolveNuvioProfileIndex();
@@ -599,7 +759,7 @@ export function dismissCw(
       if (options.acknowledged) {
         if (write && typeof write.then === "function") {
           return write.then(
-            (ok) => ({ sync: ok !== false ? "synced" : "queued" }),
+            (ok) => withProviderResult({ sync: ok !== false ? "synced" : "queued" }),
             () => {
               throw new Error(
                 "Removed from Continue Watching on this device, but synchronization could not be saved.",
@@ -607,8 +767,9 @@ export function dismissCw(
             },
           );
         }
-        return Promise.resolve({ sync: "synced" });
+        return withProviderResult({ sync: "synced" });
       }
+      if (providerWrite) void providerWrite;
       return undefined;
     } catch (err) {
       if (options.acknowledged) {
@@ -631,7 +792,11 @@ export function dismissCw(
     }
   }
   if (item.external || !authKey || !item.state || privateCwProfileId()) {
-    return options.acknowledged ? Promise.resolve({ sync: "not-required" }) : undefined;
+    if (!options.acknowledged) {
+      if (providerWrite) void providerWrite;
+      return;
+    }
+    return withProviderResult({ sync: "not-required" });
   }
   const vid = item.state.video_id ?? "";
   const kitsuThreeSeg = /^(kitsu|mal|anilist|anidb):/.test(id) && vid.split(":").length === 3;
@@ -653,10 +818,11 @@ export function dismissCw(
   );
   if (!options.acknowledged) {
     void write;
+    if (providerWrite) void providerWrite;
     return;
   }
   return write.then(
-    (synced) => ({ sync: synced ? "synced" : "queued" }),
+    (synced) => withProviderResult({ sync: synced ? "synced" : "queued" }),
     () => {
       throw new Error(
         "Removed from Continue Watching on this device, but synchronization could not be saved.",

@@ -1,8 +1,8 @@
 export default {
   "Match stats": "मैच के आँकड़े",
-  "Timeline": "घटनाक्रम",
+  Timeline: "घटनाक्रम",
   "Head to head": "आमने-सामने",
-  "Standings": "अंक तालिका",
+  Standings: "अंक तालिका",
   "Loading team results…": "टीम के परिणाम लोड हो रहे हैं…",
   "No completed matches were returned for this team.": "इस टीम के लिए कोई समाप्त मैच नहीं मिला।",
   "Team results could not be loaded. Your current schedule is still shown.":

@@ -1,4 +1,9 @@
-import { createAddonCatalogFetcher, isCollectionCatalog, normalizeName, type AddonRow } from "@/lib/addons";
+import {
+  createAddonCatalogFetcher,
+  isCollectionCatalog,
+  normalizeName,
+  type AddonRow,
+} from "@/lib/addons";
 import { isAdultAnime } from "@/lib/addons-store/adult-filter";
 import { awardFranchiseKey, uniqueWinnerFranchisesAcrossSources } from "@/lib/anime-awards";
 import type { Meta } from "@/lib/cinemeta";
@@ -9,7 +14,13 @@ import type { AnilistRail } from "@/lib/use-anilist-anime-rails";
 import type { AwardWinnerEntry } from "@/lib/use-crunchyroll-award-metas";
 import type { MalRail } from "@/lib/use-mal-anime-rails";
 import type { HomeRow } from "@/views/home/home-types";
-import { EMPTY_ROW, SPECS, TOP_PICKS_KEY, type RowPool, type RowState } from "@/views/anime/anime-rows";
+import {
+  EMPTY_ROW,
+  SPECS,
+  TOP_PICKS_KEY,
+  type RowPool,
+  type RowState,
+} from "@/views/anime/anime-rows";
 
 const RANK_CAP = 10;
 
@@ -348,13 +359,25 @@ function listRows(input: {
   rows: BpAnimeRow[];
 }): BpAnimeRow[] {
   const notice = (suffix: string, text: string): BpAnimeRow[] => [
-    { id: `${input.group}:${suffix}`, group: input.group, title: input.title, metas: [], notice: text },
+    {
+      id: `${input.group}:${suffix}`,
+      group: input.group,
+      title: input.title,
+      metas: [],
+      notice: text,
+    },
   ];
   if (!input.connected) return notice("offline", input.offline);
   if (input.rows.length > 0) return input.rows;
   if (input.state.loading) {
     return [
-      { id: `${input.group}:loading`, group: input.group, title: input.title, metas: [], loading: true },
+      {
+        id: `${input.group}:loading`,
+        group: input.group,
+        title: input.title,
+        metas: [],
+        loading: true,
+      },
     ];
   }
   if (input.state.error) return notice("failed", input.failed);

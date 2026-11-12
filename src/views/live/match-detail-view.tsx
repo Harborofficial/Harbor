@@ -33,7 +33,9 @@ import { AthleteProfileLink } from "@/views/sports/athlete-profile";
 import { TennisMatchPanel } from "./match-detail-view/tennis-match-panel";
 import { MatchDetailsPanel } from "./match-detail-view/match-details-panel";
 
-const HubEventPage = lazy(() => import("@/views/sports/hub-event-page").then((module) => ({ default: module.HubEventPage })));
+const HubEventPage = lazy(() =>
+  import("@/views/sports/hub-event-page").then((module) => ({ default: module.HubEventPage })),
+);
 
 export function MatchDetailView({
   eventGames,
@@ -257,48 +259,48 @@ function HeadToHeadMatchDetail({
           failed={failed}
           sport={sportsLeagueByTag(game.league)?.group ?? ""}
         />
-        <WhereToWatch
-          game={{ ...current, broadcasts: current.broadcasts ?? game.broadcasts }}
-        />
+        <WhereToWatch game={{ ...current, broadcasts: current.broadcasts ?? game.broadcasts }} />
         <EventOdds game={current} />
       </div>
       <div className="sh-detail-content">
         {officialBoxing ? (
           <BoxingEventDetails game={current} />
-        ) : <MatchDetailsPanel tabs={tabs} selected={tab} onChange={setTab}>
-          {loading ? (
-          <SportsMatchDetailsSkeleton />
-        ) : !detail ? (
-          <div className="sh-empty">
-            <h2>{t("Match details are not available yet.")}</h2>
-            <p>{t("The schedule is still available. Try refreshing the match details.")}</p>
-            <button className="sh-button" onClick={retry}>
-              {t("Retry")}
-            </button>
-          </div>
         ) : (
-          <>
-            {failed && (
-              <div className="sh-feed-note" role="status">
-                {t("Showing saved match details.")}
-                <button className="sh-text-button" onClick={retry}>
+          <MatchDetailsPanel tabs={tabs} selected={tab} onChange={setTab}>
+            {loading ? (
+              <SportsMatchDetailsSkeleton />
+            ) : !detail ? (
+              <div className="sh-empty">
+                <h2>{t("Match details are not available yet.")}</h2>
+                <p>{t("The schedule is still available. Try refreshing the match details.")}</p>
+                <button className="sh-button" onClick={retry}>
                   {t("Retry")}
                 </button>
               </div>
+            ) : (
+              <>
+                {failed && (
+                  <div className="sh-feed-note" role="status">
+                    {t("Showing saved match details.")}
+                    <button className="sh-text-button" onClick={retry}>
+                      {t("Retry")}
+                    </button>
+                  </div>
+                )}
+                {tab === "match" &&
+                  (isSoccer ? (
+                    <MatchPanel game={game} detail={detail} hideScoreboard hidePitch />
+                  ) : (
+                    <TennisMatchPanel detail={detail} />
+                  ))}
+                {tab === "summary" && <SummaryTab detail={detail} />}
+                {tab === "lineups" && <LineupsTab detail={detail} />}
+                {tab === "stats" && <StatsTab detail={detail} />}
+                {tab === "profile" && <MmaProfileTab detail={detail} />}
+              </>
             )}
-            {tab === "match" &&
-              (isSoccer ? (
-                <MatchPanel game={game} detail={detail} hideScoreboard hidePitch />
-              ) : (
-                <TennisMatchPanel detail={detail} />
-              ))}
-            {tab === "summary" && <SummaryTab detail={detail} />}
-            {tab === "lineups" && <LineupsTab detail={detail} />}
-            {tab === "stats" && <StatsTab detail={detail} />}
-            {tab === "profile" && <MmaProfileTab detail={detail} />}
-          </>
+          </MatchDetailsPanel>
         )}
-        </MatchDetailsPanel>}
       </div>
       {showTop && (
         <button
@@ -402,9 +404,7 @@ function LineupsTab({ detail }: { detail: SportsMatchDetail }) {
   const t = useT();
   if (!detail.homeRoster.length && !detail.awayRoster.length) {
     return (
-      <div className="text-center text-sm text-ink-subtle">
-        {t("Lineups not available yet.")}
-      </div>
+      <div className="text-center text-sm text-ink-subtle">{t("Lineups not available yet.")}</div>
     );
   }
 
@@ -645,15 +645,7 @@ function statMeasure(value: string): number | null {
   return plain ? Number(plain[0]) : null;
 }
 
-function StatRow({
-  label,
-  hVal,
-  aVal,
-}: {
-  label: ProfileStatLabel;
-  hVal: string;
-  aVal: string;
-}) {
+function StatRow({ label, hVal, aVal }: { label: ProfileStatLabel; hVal: string; aVal: string }) {
   const t = useT();
   const ranked = label !== "Stance";
   const hNum = ranked ? statMeasure(hVal || "") : null;
@@ -743,15 +735,7 @@ function MmaProfileTab({ detail }: { detail: SportsMatchDetail }) {
 function StatsTab({ detail }: { detail: SportsMatchDetail }) {
   const t = useT();
 
-  const StatsTabRow = ({
-    label,
-    hVal,
-    aVal,
-  }: {
-    label: string;
-    hVal?: string;
-    aVal?: string;
-  }) => {
+  const StatsTabRow = ({ label, hVal, aVal }: { label: string; hVal?: string; aVal?: string }) => {
     if (!hVal && !aVal) return null;
 
     const ranked = !RECORD_VALUE.test(hVal || "") && !RECORD_VALUE.test(aVal || "");
@@ -769,9 +753,7 @@ function StatsTab({ detail }: { detail: SportsMatchDetail }) {
         <span className="text-ink-subtle">
           {label === "Overall Record" ? t("Overall Record") : label}
         </span>
-        <span
-          className={`w-12 text-end font-bold ${aIsGreater ? "text-green-500" : "text-ink"}`}
-        >
+        <span className={`w-12 text-end font-bold ${aIsGreater ? "text-green-500" : "text-ink"}`}>
           {aVal || "0"}
         </span>
       </div>
@@ -795,12 +777,7 @@ function StatsTab({ detail }: { detail: SportsMatchDetail }) {
       {!!detail.allStats.length && (
         <div className="flex flex-col gap-1 rounded-2xl bg-elevated/20 p-4 ring-1 ring-edge-soft/50 shadow-sm">
           {detail.allStats.map((stat, i) => (
-            <StatsTabRow
-              key={i}
-              label={stat.label}
-              hVal={stat.homeValue}
-              aVal={stat.awayValue}
-            />
+            <StatsTabRow key={i} label={stat.label} hVal={stat.homeValue} aVal={stat.awayValue} />
           ))}
         </div>
       )}

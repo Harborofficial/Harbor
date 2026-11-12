@@ -31,6 +31,10 @@ test("a folder is titled by its own name, never by a split path", () => {
 });
 
 test("loose files at the top stay separate books while a folder groups its volumes", () => {
-  assert.match(scan, /if \(!name\)/, "only the root treats loose epubs as individual books");
-  assert.match(scan, /paths: await Promise\.all\(epubs\.map/, "a book folder keeps every volume");
+  assert.match(scan, /if \(!name\)/, "only the root treats loose files as individual books");
+  assert.match(scan, /paths: await Promise\.all\(files\.map/, "a book folder keeps every volume");
+});
+
+test("PDF files are part of the local library", () => {
+  assert.match(scan, /\\\.\(\?:epub\|pdf\)\$/i, "the scan accepts both EPUB and PDF");
 });

@@ -8,7 +8,8 @@ export default {
   "games.warhammerUniverse.sections": "Jelajahi semesta ini",
   "games.warhammerUniverse.start": "Mulai di sini",
   "games.warhammerUniverse.storyTitle": "Ikuti Titus melampaui gim",
-  "games.warhammerUniverse.storyNote": "Lanjutkan dari Space Marine 2 ke Secret Level, lalu jelajahi semestanya.",
+  "games.warhammerUniverse.storyNote":
+    "Lanjutkan dari Space Marine 2 ke Secret Level, lalu jelajahi semestanya.",
   "games.warhammerUniverse.playing": "{count} pemain di Steam sekarang",
   "games.warhammerUniverse.openSeries": "Buka serial",
   "games.warhammerUniverse.trailer": "Tonton trailer",
@@ -18,22 +19,29 @@ export default {
   "games.warhammerUniverse.screenNote": "Animasi orisinal dan film panjang dari milenium ke-41.",
   "games.warhammerUniverse.free": "Gratis di Warhammer TV",
   "games.warhammerUniverse.subscription": "Mungkin perlu langganan Warhammer+",
-  "games.warhammerUniverse.movieNote": "Film animasi tahun 2010. Buka detail Harbor untuk pemeran, trailer, dan sumber.",
-  "games.warhammerUniverse.screenScope": "Pilihan publik Warhammer TV. Hammer and Bolter mencakup beberapa dunia; ketersediaan ditentukan penyedia.",
+  "games.warhammerUniverse.movieNote":
+    "Film animasi tahun 2010. Buka detail Harbor untuk pemeran, trailer, dan sumber.",
+  "games.warhammerUniverse.screenScope":
+    "Pilihan publik Warhammer TV. Hammer and Bolter mencakup beberapa dunia; ketersediaan ditentukan penyedia.",
   "games.warhammerUniverse.lore": "Mendalami cerita",
-  "games.warhammerUniverse.loreNote": "Tokoh, faksi, dan peristiwa penting, dengan ilustrasi dari para pencipta dunia ini.",
+  "games.warhammerUniverse.loreNote":
+    "Tokoh, faksi, dan peristiwa penting, dengan ilustrasi dari para pencipta dunia ini.",
   "games.warhammerUniverse.setting": "Pilih latar",
   "games.warhammerUniverse.searchLore": "Cari tokoh, faksi, atau peristiwa",
   "games.warhammerUniverse.subjects": "{count} topik",
   "games.warhammerUniverse.watchLore": "Tonton di Warhammer TV",
-  "games.warhammerUniverse.loreScope": "Ringkasan episode resmi berbahasa Inggris. Setiap latar punya pustaka sendiri: titik awal, bukan ensiklopedia lengkap.",
+  "games.warhammerUniverse.loreScope":
+    "Ringkasan episode resmi berbahasa Inggris. Setiap latar punya pustaka sendiri: titik awal, bukan ensiklopedia lengkap.",
   "games.warhammerUniverse.fullLibrary": "Pustaka cerita lengkap",
   "games.warhammerUniverse.settingGuide": "Panduan dunia 40K",
   "games.warhammerUniverse.books": "Novel & buku audio",
   "games.warhammerUniverse.encyclopedia": "Ensiklopedia komunitas",
   "games.warhammerUniverse.videos": "Dari komunitas",
-  "games.warhammerUniverse.videosNote": "Penjelasan cerita, percakapan mendalam, dan kisah dari kreator YouTube.",
+  "games.warhammerUniverse.videosNote":
+    "Penjelasan cerita, percakapan mendalam, dan kisah dari kreator YouTube.",
   "games.warhammerUniverse.searchVideos": "Cari video Warhammer",
-  "games.warhammerUniverse.unavailable": "Sumber ini tidak dapat diperbarui. Bagian lain tetap tersedia.",
-  "games.warhammerUniverse.partial": "Pilihan ini belum lengkap. Buka perpustakaan lengkap untuk melihat lainnya."
+  "games.warhammerUniverse.unavailable":
+    "Sumber ini tidak dapat diperbarui. Bagian lain tetap tersedia.",
+  "games.warhammerUniverse.partial":
+    "Pilihan ini belum lengkap. Buka perpustakaan lengkap untuk melihat lainnya.",
 };

@@ -25,8 +25,10 @@ export default {
   "games.pokemon.videosHint": "Soluzioni e consigli",
   "games.pokemon.bank": "Salvataggi e Pokémon",
   "games.pokemon.bankHint": "Modifica salvataggi e gestisci box",
-  "games.pokemon.bankIntro": "Apri un salvataggio dell’emulatore per modificare la squadra o importa singoli Pokémon nella tua collezione.",
-  "games.pokemon.guideSourceNote": "Leggi la guida originale o aprila qui quando la fonte è disponibile.",
+  "games.pokemon.bankIntro":
+    "Apri un salvataggio dell’emulatore per modificare la squadra o importa singoli Pokémon nella tua collezione.",
+  "games.pokemon.guideSourceNote":
+    "Leggi la guida originale o aprila qui quando la fonte è disponibile.",
   "games.pokemon.readGuide": "Leggi su Bulbapedia",
   "games.pokemon.readInside": "Leggi in Harbor",
   "games.pokemon.closeReader": "Chiudi lettore",
@@ -34,19 +36,24 @@ export default {
   "games.pokemon.imageSaved": "Immagine di {name} salvata",
   "games.pokemon.imageFailed": "Download non riuscito. Riprova.",
   "games.pokemon.saveStart": "Usi un emulatore?",
-  "games.pokemon.emulatorSave": "L’emulatore crea un file di salvataggio quando salvi dal menu del gioco.",
+  "games.pokemon.emulatorSave":
+    "L’emulatore crea un file di salvataggio quando salvi dal menu del gioco.",
   "games.pokemon.saveStep1": "Apri il gioco e scegli Salva nel suo menu.",
-  "games.pokemon.saveStep2": "Chiudi il gioco, poi trova o esporta il salvataggio batteria (.sav, .srm o .dsv).",
+  "games.pokemon.saveStep2":
+    "Chiudi il gioco, poi trova o esporta il salvataggio batteria (.sav, .srm o .dsv).",
   "games.pokemon.saveStep3": "Scegli Apri salvataggio qui sopra per modificarlo in Harbor.",
   "games.pokemon.findSave": "Dov’è il mio salvataggio?",
-  "games.pokemon.saveLocations": "Cerca accanto alla ROM o nella cartella dei salvataggi dell’emulatore. Se hai solo uno stato salvato, caricalo nell’emulatore e poi salva dal menu del gioco.",
+  "games.pokemon.saveLocations":
+    "Cerca accanto alla ROM o nella cartella dei salvataggi dell’emulatore. Se hai solo uno stato salvato, caricalo nell’emulatore e poi salva dal menu del gioco.",
   "games.pokemon.noSave": "Non hai un salvataggio?",
   "games.pokemon.communitySaves": "Sfoglia salvataggi della community",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Scegli il gioco esatto e leggi le note del contributore.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Scegli il gioco esatto e leggi le note del contributore.",
   "games.pokemon.pkhexNote": "Editor di salvataggi, download e aiuto degli sviluppatori.",
-  "games.pokemon.noSaveNeeded": "Puoi importare file Pokémon senza un salvataggio. Serve solo per modificare la squadra o i box di un gioco.",
+  "games.pokemon.noSaveNeeded":
+    "Puoi importare file Pokémon senza un salvataggio. Serve solo per modificare la squadra o i box di un gioco.",
   "games.pokemon.videoUnavailable": "Impossibile caricare i video qui.",
   "games.pokemon.youtubeSearch": "Cerca su YouTube",
   "games.hub.downloadApply": "Scarica patch",
-  "games.hub.manualPatch": "Usa una patch o un link che hai già"
+  "games.hub.manualPatch": "Usa una patch o un link che hai già",
 };

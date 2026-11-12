@@ -801,15 +801,13 @@ const appFill: Record<string, string> = {
     "Esta atualização também substitui os reprodutores e as ferramentas que vêm com o Harbor, por isso ela é instalada pelo Harbor Shipyard. O Harbor fecha, o instalador termina e o Harbor abre novamente.",
   "This one installs through Harbor Shipyard, but the update manifest carries no signature for it. Harbor will not run an installer it cannot verify. Download it and run it yourself.":
     "Esta atualização é instalada pelo Harbor Shipyard, mas o manifesto de atualização não traz assinatura para ele. O Harbor não executa um instalador que não consegue verificar. Baixe o instalador e execute você mesmo.",
-  "Download installer":
-    "Baixar o instalador",
-  "Install and reopen":
-    "Instalar e reabrir",
+  "Download installer": "Baixar o instalador",
+  "Install and reopen": "Instalar e reabrir",
   "Harbor is closing. Harbor Shipyard will finish and reopen it.":
     "O Harbor está fechando. O Harbor Shipyard vai terminar e abri-lo novamente.",
   "Harbor Shipyard did not finish updating Harbor. Nothing was changed.":
     "O Harbor Shipyard não terminou de atualizar o Harbor. Nada foi alterado.",
-  "Dismiss": "Dispensar",
+  Dismiss: "Dispensar",
 };
 
 export default appFill;

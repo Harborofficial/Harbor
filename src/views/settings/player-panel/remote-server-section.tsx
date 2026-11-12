@@ -31,11 +31,22 @@ async function probeServer(url: string): Promise<TestResult> {
   const timer = window.setTimeout(() => ctrl.abort(), 1500);
   try {
     const res = await fetch(`${url}/settings`, { method: "GET", signal: ctrl.signal });
-    if (!res.ok) return { ok: false, message: tr("The server answered with status {status}. Is that a streaming server?", { status: res.status }) };
+    if (!res.ok)
+      return {
+        ok: false,
+        message: tr("The server answered with status {status}. Is that a streaming server?", {
+          status: res.status,
+        }),
+      };
     const ms = Math.max(1, Math.round(performance.now() - started));
     return { ok: true, message: tr("The server responded in {ms} ms.", { ms }) };
   } catch {
-    return { ok: false, message: tr("Could not reach the server within 1.5 seconds. Check the address and that the server machine is online.") };
+    return {
+      ok: false,
+      message: tr(
+        "Could not reach the server within 1.5 seconds. Check the address and that the server machine is online.",
+      ),
+    };
   } finally {
     window.clearTimeout(timer);
   }
@@ -89,7 +100,13 @@ export function RemoteServerSection() {
     }
   };
 
-  const pill = !saved ? PILL.off : reach === null ? PILL.checking : reach ? PILL.connected : PILL.unreachable;
+  const pill = !saved
+    ? PILL.off
+    : reach === null
+      ? PILL.checking
+      : reach
+        ? PILL.connected
+        : PILL.unreachable;
 
   return (
     <Section
@@ -143,7 +160,9 @@ export function RemoteServerSection() {
         {saved && (
           <ToggleRow
             label={t("Use exclusively (never fall back to local)")}
-            sub={t("If the remote server is unavailable, stop playback instead of streaming over P2P from this device.")}
+            sub={t(
+              "If the remote server is unavailable, stop playback instead of streaming over P2P from this device.",
+            )}
             value={settings.remoteStreamServerStrict}
             onChange={(v) => update({ remoteStreamServerStrict: v })}
           />
@@ -156,7 +175,9 @@ export function RemoteServerSection() {
           >
             <button
               type="button"
-              aria-label={testing ? t("Testing remote streaming server") : t("Test remote streaming server")}
+              aria-label={
+                testing ? t("Testing remote streaming server") : t("Test remote streaming server")
+              }
               onClick={testing ? undefined : () => void test()}
               disabled={testing}
               aria-disabled={testing}
@@ -173,11 +194,17 @@ export function RemoteServerSection() {
         )}
 
         {saved && result && (
-          <div role="status" aria-live="polite" className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
-            <span
-              className={`mt-[2px] shrink-0 ${result.ok ? "text-success" : "text-danger"}`}
-            >
-              {result.ok ? <Check size={18} strokeWidth={2.4} /> : <X size={18} strokeWidth={2.4} />}
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3"
+          >
+            <span className={`mt-[2px] shrink-0 ${result.ok ? "text-success" : "text-danger"}`}>
+              {result.ok ? (
+                <Check size={18} strokeWidth={2.4} />
+              ) : (
+                <X size={18} strokeWidth={2.4} />
+              )}
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-1">
               <span

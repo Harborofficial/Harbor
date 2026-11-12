@@ -158,6 +158,7 @@ function harness() {
     "@/lib/providers/kitsu": kitsu,
     "./kitsu-mapping": native,
     "@/lib/anilist/entry": anilistEntry,
+    "@/lib/providers/anime-franchise-root": { franchiseRoot: async (id) => id },
   });
   return {
     calls,
@@ -415,16 +416,24 @@ test("the real detail loader recovers synopsis, native playback IDs and distinct
       new Proxy(
         {
           "@/lib/media-cache": h.media,
+          "@/lib/metadata-policy": { addonOnlyMetadata: () => false },
           "@/lib/providers/kitsu": h.kitsu,
           "@/lib/providers/anime-kitsu-addon": h.addon,
           "@/lib/providers/anime-entry": h.entry,
           "@/lib/providers/anime-mapping": { ...h.mapping, applyAnidbSeasonWindow: async () => {} },
           "@/lib/providers/anime-episode-build": episodeBuild,
           "@/lib/providers/anime-episode-enrich": { enrichEpisodes: async () => {} },
+          "./anime-art-quality": {
+            pickAnimeHeroBackdrop: (sources) =>
+              sources.curated ?? sources.tmdb ?? sources.tvdb ?? sources.kitsu ?? sources.banner,
+            reusableAnimeBackdrop: (url) => url,
+          },
           "./anime-recommendations": { animeRecommendations: async () => [] },
           "@/lib/anilist/relations": { anilistFranchise: async () => [] },
           "@/lib/anilist/browse": { anilistArtById: async () => ({ banner: "banner.jpg" }) },
           "@/lib/providers/tvdb": { tvdbLangFromIso1: () => "eng" },
+          "@/lib/providers/anime-tvdb-source": { isSharedSplitTvdb: () => false },
+          "@/lib/streams/anime-identity-core": { splitFranchiseDisplaySeason: () => null },
         },
         { has: () => true, get: (target, key) => target[key] ?? optional },
       ),
@@ -459,12 +468,18 @@ test("the shared episode reader retains native playback IDs after recovering a M
     new Proxy(
       {
         "@/lib/media-cache": h.media,
+        "./metadata-policy": { addonOnlyMetadata: () => false },
+        "./meta-resource": { preferCustomMeta: () => false },
         "./providers/anime-entry": h.entry,
         "./providers/anime-kitsu-addon": h.addon,
         "./providers/anime-mapping": h.mapping,
         "./providers/kitsu": h.kitsu,
         "./providers/anizip": h.az,
         "./providers/anime-franchise-root": { franchiseRoot: async (id) => id },
+        "./metadata-sources": {
+          normalizeMetadataSourceChain: (_section, chain = []) => chain,
+          addonKeyFromSource: () => null,
+        },
         "./providers/tvdb-proxy": {
           fetchTvdbProxyImages: async () => ({}),
           pickTvdbImage: () => null,

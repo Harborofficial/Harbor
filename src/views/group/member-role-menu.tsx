@@ -42,7 +42,8 @@ export function MemberRoleMenu({
     };
   }, [open]);
 
-  const options: GroupRole[] = myRank >= ROLE_RANK.owner ? ["admin", "manager", "member"] : ["manager", "member"];
+  const options: GroupRole[] =
+    myRank >= ROLE_RANK.owner ? ["admin", "manager", "member"] : ["manager", "member"];
 
   return (
     <div ref={wrapRef} className="relative shrink-0">
@@ -77,8 +78,12 @@ export function MemberRoleMenu({
                 {opt === role && <Check size={14} strokeWidth={2.6} className="text-accent" />}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[13px] font-semibold text-ink">{t(roleLabel(opt))}</span>
-                <span className="block text-[11.5px] leading-snug text-ink-subtle">{t(DESCRIPTION[opt])}</span>
+                <span className="block text-[13px] font-semibold text-ink">
+                  {t(roleLabel(opt))}
+                </span>
+                <span className="block text-[11.5px] leading-snug text-ink-subtle">
+                  {t(DESCRIPTION[opt])}
+                </span>
               </span>
             </button>
           ))}

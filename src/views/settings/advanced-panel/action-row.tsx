@@ -25,23 +25,14 @@ export function ActionRow({
 }) {
   const unavailable = !!disabled && !cta;
   return (
-    <SettingRow
-      label={label}
-      desc={sub}
-      warn={warn}
-      lockReason={unavailable ? sub : undefined}
-    >
+    <SettingRow label={label} desc={sub} warn={warn} lockReason={unavailable ? sub : undefined}>
       {cta && (
         <button
           type="button"
           onClick={disabled ? undefined : onClick}
           aria-disabled={disabled}
           className={`${
-            tone === "danger"
-              ? ROW_ACTION_DANGER
-              : tone === "success"
-                ? BTN_SUCCESS
-                : ROW_ACTION
+            tone === "danger" ? ROW_ACTION_DANGER : tone === "success" ? BTN_SUCCESS : ROW_ACTION
           }${disabled ? " pointer-events-none opacity-45" : ""}`}
         >
           {icon}

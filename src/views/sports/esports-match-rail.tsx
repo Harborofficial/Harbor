@@ -351,11 +351,17 @@ export function EsportsMatchRail({
           />
         )}
         {teamId !== null && !stream && <Team teamId={teamId} onClose={() => setTeamId(null)} />}
-        {stream && <Broadcast key={stream.url} stream={stream} onClose={() => {
-          setStream(null);
-          setMatch(null);
-          setTeamId(null);
-        }} />}
+        {stream && (
+          <Broadcast
+            key={stream.url}
+            stream={stream}
+            onClose={() => {
+              setStream(null);
+              setMatch(null);
+              setTeamId(null);
+            }}
+          />
+        )}
       </Suspense>
     </section>
   );

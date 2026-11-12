@@ -7,7 +7,9 @@
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 38%, transparent);
   text-underline-offset: 2px;
-  transition: color 160ms ease-out, text-decoration-color 160ms ease-out;
+  transition:
+    color 160ms ease-out,
+    text-decoration-color 160ms ease-out;
 }
 
 .music-linked-bio-link:hover {

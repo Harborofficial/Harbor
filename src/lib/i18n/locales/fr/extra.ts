@@ -136,7 +136,8 @@ const extra: Record<string, string> = {
   "Browse channels": "Parcourir les chaînes",
   "Buffer fill": "Remplissage du tampon",
   "Reveal the dot on hover": "Afficher le point au survol",
-  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.": "Le point reste discret et apparaît quand vous pointez la barre. Désactivez cette option pour le garder visible en permanence.",
+  "The dot stays out of the way and appears when you point at the bar. Turn this off to keep it on screen the whole time.":
+    "Le point reste discret et apparaît quand vous pointez la barre. Désactivez cette option pour le garder visible en permanence.",
   "Buffer fill brightness": "Luminosité du remplissage du tampon",
   Build: "Version",
   "Build a named filter once, then apply it in the source picker to hide everything that doesn't match. Each filter ANDs its dimensions and ignores any you leave blank.":
@@ -181,7 +182,8 @@ const extra: Record<string, string> = {
     "Connectez un service de débridage (Real-Debrid, TorBox, AllDebrid) pour profiter instantanément de la HD, sans attendre.",
   "Connect MyAnimeList": "Connecter MyAnimeList",
   "Connect your MyAnimeList account": "Connecter votre compte MyAnimeList",
-  "Connect your Trakt account to leave comments and reviews.": "Connectez votre compte Trakt pour laisser des commentaires et des critiques.",
+  "Connect your Trakt account to leave comments and reviews.":
+    "Connectez votre compte Trakt pour laisser des commentaires et des critiques.",
   "Connected as @{username}": "Connecté en tant que @{username}",
   "Connected as @{user}": "Connecté en tant que @{user}",
   "Connected as {username}": "Connecté en tant que {username}",
@@ -195,7 +197,8 @@ const extra: Record<string, string> = {
   "Continue from last watched": "Reprendre au dernier contenu regardé",
   "Continue in your browser...": "Continuer dans votre navigateur...",
   "Copy diagnostics": "Copier les diagnostics",
-  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.": "Cette option copie au format JSON l’état du moteur et vos paramètres P2P, afin de les coller facilement dans un rapport de bug. Le dossier du moteur contient le cache DHT (dht.json) et les données des transferts actifs.",
+  "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active transfer data.":
+    "Cette option copie au format JSON l’état du moteur et vos paramètres P2P, afin de les coller facilement dans un rapport de bug. Le dossier du moteur contient le cache DHT (dht.json) et les données des transferts actifs.",
   "Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.":
     "Copiez votre liste de suivi Harbor vers Trakt, ou importez votre liste de suivi Trakt dans Harbor. Vous pouvez relancer l’opération sans risque, Trakt ignore les éléments déjà présents.",
   "Corner radius": "Rayon des coins",
@@ -720,7 +723,8 @@ const extra: Record<string, string> = {
   "Show the full notes for this build": "Afficher les notes complètes de cette version",
   "Show the IMDb rating and synopsis on episodes across the list, grid, and panel layouts.":
     "Afficher la note IMDb et le synopsis des épisodes dans les affichages en liste, en grille et en panneau.",
-  "Show the report button on every P2P stream, not just likely new releases.": "Afficher le bouton de signalement sur chaque flux P2P, et pas seulement sur les nouveautés probables.",
+  "Show the report button on every P2P stream, not just likely new releases.":
+    "Afficher le bouton de signalement sur chaque flux P2P, et pas seulement sur les nouveautés probables.",
   "Show the Skip button": "Afficher le bouton Passer",
   "Show title": "Afficher le titre",
   "Show TMDB score on cards": "Afficher la note TMDB sur les fiches",

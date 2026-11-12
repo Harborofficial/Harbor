@@ -142,7 +142,9 @@ function fail(err: unknown): never {
     if (err.status === 429) {
       throw new Error("Trakt is rate limiting this app. Wait a minute, then run the import again.");
     }
-    throw new Error(`Trakt request failed with HTTP ${err.status}. Run the import again in a moment.`);
+    throw new Error(
+      `Trakt request failed with HTTP ${err.status}. Run the import again in a moment.`,
+    );
   }
   throw err instanceof Error ? err : new Error("Trakt request failed.");
 }
@@ -197,7 +199,9 @@ export const traktSource: RatingsSource = {
     onProgress({ phase: "auth" });
     throwIfAborted(signal);
     if (!getSession()) {
-      throw new Error("Trakt is not connected. Connect your Trakt account in Settings, then run the import again.");
+      throw new Error(
+        "Trakt is not connected. Connect your Trakt account in Settings, then run the import again.",
+      );
     }
     onProgress({ phase: "fetch", fetched: 0 });
     const movies = await fetchType("movies", "Movies", 0, onProgress, signal);

@@ -102,7 +102,7 @@ import { saveNuvioState } from "@/lib/nuvio/nuvio-client";
 import { fetchNuvioAddons } from "@/lib/nuvio/nuvio-sync";
 import { fetchInstalledAddons } from "@/lib/addon-store";
 
-test("concurrent Nuvio addon fetches share one manifest burst", async () => {
+test("concurrent Nuvio addon fetches across profiles share one manifest burst", async () => {
   localStorage.clear();
   localStorage.setItem("harbor.account-provider", "nuvio");
   saveNuvioState({
@@ -115,6 +115,14 @@ test("concurrent Nuvio addon fetches share one manifest burst", async () => {
       user: { id: "user-1", email: "test@example.com" } as any,
     },
     profiles: [
+      {
+        id: "p2",
+        user_id: "user-1",
+        profile_index: 2,
+        name: "Independent Profile",
+        avatar_color_hex: "#1E88E5",
+        uses_primary_addons: false,
+      },
       {
         id: "p1",
         user_id: "user-1",
@@ -132,6 +140,7 @@ test("concurrent Nuvio addon fetches share one manifest burst", async () => {
     fetchNuvioAddons(),
     fetchNuvioAddons(),
     fetchInstalledAddons(),
+    fetchNuvioAddons(2),
   ]);
 
   assert.equal(manifestRequests.length, 2, "each addon manifest fetched exactly once");

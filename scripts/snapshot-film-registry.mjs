@@ -16,7 +16,8 @@ const LATEST_ID = "national-film-registry-latest";
 const MIN_FILMS = 900;
 const MIN_MATCHED = 880;
 const WDQS_TIMEOUT_MS = 45000;
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36";
+const UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36";
 
 const QUERY = `SELECT ?film (SAMPLE(?imdb) AS ?imdbId) (SAMPLE(?tmdb) AS ?tmdbId)
        (SAMPLE(?label) AS ?name) (MIN(?y) AS ?year)
@@ -32,7 +33,9 @@ WHERE {
 }
 GROUP BY ?film`;
 
-const PROBE_QUERY = (literals) => `SELECT ?probe ?film ?imdb (SAMPLE(?tmdb) AS ?tmdbId) (SAMPLE(?lab) AS ?name) (MIN(?y) AS ?year)
+const PROBE_QUERY = (
+  literals,
+) => `SELECT ?probe ?film ?imdb (SAMPLE(?tmdb) AS ?tmdbId) (SAMPLE(?lab) AS ?name) (MIN(?y) AS ?year)
 WHERE {
   VALUES ?probe { ${literals} }
   { ?film rdfs:label ?probe } UNION { ?film skos:altLabel ?probe }
@@ -43,7 +46,9 @@ WHERE {
 }
 GROUP BY ?probe ?film ?imdb`;
 
-const SEARCH_QUERY = (literals) => `SELECT ?probe ?item ?imdb (SAMPLE(?tmdb) AS ?tmdbId) (SAMPLE(?lab) AS ?name) (MIN(?y) AS ?year)
+const SEARCH_QUERY = (
+  literals,
+) => `SELECT ?probe ?item ?imdb (SAMPLE(?tmdb) AS ?tmdbId) (SAMPLE(?lab) AS ?name) (MIN(?y) AS ?year)
 WHERE {
   VALUES ?probe { ${literals} }
   SERVICE wikibase:mwapi {
@@ -96,7 +101,8 @@ async function fetchListing() {
   const res = await fetch(LOC_URL, { headers: { "user-agent": UA, accept: "application/json" } });
   const type = res.headers.get("content-type") ?? "";
   if (!res.ok) throw new Error(`loc.gov returned ${res.status}`);
-  if (!type.includes("application/json")) throw new Error(`loc.gov returned ${res.status} as ${type || "no content type"}`);
+  if (!type.includes("application/json"))
+    throw new Error(`loc.gov returned ${res.status} as ${type || "no content type"}`);
   const declared = Number(res.headers.get("content-length") ?? "0");
   const text = await res.text();
   const bytes = Buffer.byteLength(text);
@@ -155,7 +161,8 @@ async function fetchRegistry() {
 
 function probeTitles(films) {
   const titles = new Set();
-  for (const film of films) for (const form of titleForms(film.title, film.sort_title)) titles.add(form);
+  for (const film of films)
+    for (const form of titleForms(film.title, film.sort_title)) titles.add(form);
   return [...titles];
 }
 
@@ -164,7 +171,9 @@ async function fetchProbe(films) {
   const titles = probeTitles(films);
   const literals = titles.map((t) => JSON.stringify(t) + "@en").join(" ");
   const rows = await ask(PROBE_QUERY(literals), "wikidata titles");
-  console.log(`  wikidata titles: ${titles.length} probes for ${films.length} leftovers, ${rows.length} rows`);
+  console.log(
+    `  wikidata titles: ${titles.length} probes for ${films.length} leftovers, ${rows.length} rows`,
+  );
   return rows;
 }
 
@@ -173,7 +182,9 @@ async function fetchSearch(films) {
   const titles = probeTitles(films);
   const literals = titles.map((t) => JSON.stringify(t)).join(" ");
   const rows = await ask(SEARCH_QUERY(literals), "wikidata search");
-  console.log(`  wikidata search: ${titles.length} probes for ${films.length} leftovers, ${rows.length} rows`);
+  console.log(
+    `  wikidata search: ${titles.length} probes for ${films.length} leftovers, ${rows.length} rows`,
+  );
   return rows;
 }
 
@@ -261,7 +272,9 @@ async function main() {
     throw new Error(`${matched.length} reconciled, the floor is ${MIN_MATCHED}`);
   }
 
-  const classes = [...new Set(films.map(inductionYear).filter((y) => y != null))].sort((a, b) => a - b);
+  const classes = [...new Set(films.map(inductionYear).filter((y) => y != null))].sort(
+    (a, b) => a - b,
+  );
   const latestClass = classes[classes.length - 1];
   const snapshotDate = new Date().toISOString().slice(0, 10);
 
@@ -312,7 +325,12 @@ async function main() {
   );
   await writeFile(
     path.join(REGISTRY_DIR, "inductions.json"),
-    JSON.stringify({ builtAt: snapshotDate, latestClass, count: Object.keys(inductions).length, inductions }),
+    JSON.stringify({
+      builtAt: snapshotDate,
+      latestClass,
+      count: Object.keys(inductions).length,
+      inductions,
+    }),
   );
   await writeFile(
     path.join(REGISTRY_DIR, "entries.json"),
@@ -331,7 +349,8 @@ async function main() {
   );
   if (unmatched.length > 0) {
     console.log(`  no film record for ${unmatched.length}:`);
-    for (const f of unmatched) console.log(`    ${plain(f.year_released) || "----"}  ${plain(f.title)}`);
+    for (const f of unmatched)
+      console.log(`    ${plain(f.year_released) || "----"}  ${plain(f.title)}`);
   }
 }
 

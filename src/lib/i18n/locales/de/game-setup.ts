@@ -1,13 +1,19 @@
 export default {
-  "games.setup.setup_review": "Harbor wurde während der Installation neu gestartet. Prüfe zum Abschluss die installierten Spieldateien.",
+  "games.setup.setup_review":
+    "Harbor wurde während der Installation neu gestartet. Prüfe zum Abschluss die installierten Spieldateien.",
   "games.setup.state.starting": "Installer wird gestartet",
   "games.setup.state.waiting": "Warten auf den Installer",
   "games.setup.startingNote": "Installer wird geöffnet…",
-  "games.setup.waitingWindows": "Prüfe, ob Windows eine Berechtigung anfordert, oder fahre im Installationsfenster fort.",
-  "games.setup.waitingInstaller": "Prüfe das Installationsfenster auf eine Eingabeaufforderung. Der Fortschritt erscheint hier, sobald er verfügbar ist.",
-  "games.setup.continueInstaller": "Fahre im Installationsfenster fort. Der Fortschritt wird hier angezeigt.",
-  "games.setup.torrentNote": "Dieser Download enthält eine Torrent-Datei. Prüfe sie, um die Spieldateien und den Zielordner auszuwählen.",
-  "games.custom.launch_canceled": "Die Windows-Freigabe wurde abgebrochen. Drücke Spielen und bestätige die Windows-Abfrage.",
+  "games.setup.waitingWindows":
+    "Prüfe, ob Windows eine Berechtigung anfordert, oder fahre im Installationsfenster fort.",
+  "games.setup.waitingInstaller":
+    "Prüfe das Installationsfenster auf eine Eingabeaufforderung. Der Fortschritt erscheint hier, sobald er verfügbar ist.",
+  "games.setup.continueInstaller":
+    "Fahre im Installationsfenster fort. Der Fortschritt wird hier angezeigt.",
+  "games.setup.torrentNote":
+    "Dieser Download enthält eine Torrent-Datei. Prüfe sie, um die Spieldateien und den Zielordner auszuwählen.",
+  "games.custom.launch_canceled":
+    "Die Windows-Freigabe wurde abgebrochen. Drücke Spielen und bestätige die Windows-Abfrage.",
   "games.setup.launching": "Wird gestartet…",
   "games.setup.running": "Läuft",
   "games.setup.selectGame": "Spiel auswählen",
@@ -17,32 +23,39 @@ export default {
   "games.setup.installedFolder": "Installationsordner",
   "games.setup.locateFolder": "Installationsordner suchen",
   "games.setup.installedFiles": "Installierte Spieldateien",
-  "games.setup.recoverDestination": "Wähle den vorhandenen Ordner, in dem das Spiel installiert wurde.",
+  "games.setup.recoverDestination":
+    "Wähle den vorhandenen Ordner, in dem das Spiel installiert wurde.",
   "games.setup.state.checking": "Dateien werden geprüft",
   "games.setup.phase.verify": "Dateien überprüfen",
   "games.setup.checkedFiles": "{count} von {total} Dateien geprüft",
   "games.setup.checkProblems": "{bad} fehlerhaft · {missing} fehlen",
   "games.setup.checkingPending": "Warten auf den Prüffortschritt…",
-  "games.setup.setup_verification": "Bei der Prüfung wurden beschädigte oder fehlende Dateien gefunden. Prüfe die Ergebnisse, bevor du das Spiel hinzufügst.",
-  "games.setup.setup_verification_unknown": "Die Dateiprüfung endete ohne bestätigtes Ergebnis. Prüfe die Ergebnisse, bevor du das Spiel hinzufügst.",
+  "games.setup.setup_verification":
+    "Bei der Prüfung wurden beschädigte oder fehlende Dateien gefunden. Prüfe die Ergebnisse, bevor du das Spiel hinzufügst.",
+  "games.setup.setup_verification_unknown":
+    "Die Dateiprüfung endete ohne bestätigtes Ergebnis. Prüfe die Ergebnisse, bevor du das Spiel hinzufügst.",
   "games.setup.state.verificationFailed": "Dateiprüfung fehlgeschlagen",
   "games.setup.state.verificationUnknown": "Ergebnisse prüfen",
   "games.setup.viewProgress": "Installation anzeigen",
   "games.setup.showInstaller": "Installationsfenster anzeigen",
-  "games.setup.setup_window": "Das Installationsfenster ist nicht verfügbar. Harbor verfolgt die Installation weiter.",
+  "games.setup.setup_window":
+    "Das Installationsfenster ist nicht verfügbar. Harbor verfolgt die Installation weiter.",
   "games.setup.elapsed": "Vergangen",
   "games.setup.io": "Installer-E/A",
-  "games.setup.ioNote": "Vom Installationsprogramm und seinen Unterprozessen geschriebene Bytes, einschließlich zwischengespeicherter Schreibvorgänge.",
+  "games.setup.ioNote":
+    "Vom Installationsprogramm und seinen Unterprozessen geschriebene Bytes, einschließlich zwischengespeicherter Schreibvorgänge.",
   "games.setup.progressPending": "Warte auf Installationsfortschritt…",
   "games.setup.observedFiles": "Aktuell im Installationsordner vorhandene Dateien.",
   "games.setup.recentLocation": "Zuletzt verwendeter Speicherort",
   "games.setup.action": "Spiel einrichten",
   "games.setup.named": "{name} einrichten",
   "games.setup.title": "Spiel einrichten",
-  "games.setup.intro": "Starte die Installation, falls dieser Download ein Installationsprogramm benötigt, oder füge die Spieldatei deiner Bibliothek hinzu.",
+  "games.setup.intro":
+    "Starte die Installation, falls dieser Download ein Installationsprogramm benötigt, oder füge die Spieldatei deiner Bibliothek hinzu.",
   "games.setup.scanning": "Installations- und Spieldateien werden gesucht…",
   "games.setup.none": "Hier wurden keine Installations- oder Spieldateien gefunden.",
-  "games.setup.limited": "Dieser Ordner ist groß. Einige Dateien werden nicht angezeigt; du kannst die Spieldatei unten auswählen.",
+  "games.setup.limited":
+    "Dieser Ordner ist groß. Einige Dateien werden nicht angezeigt; du kannst die Spieldatei unten auswählen.",
   "games.setup.run": "Installation starten",
   "games.setup.extract": "Archiv entpacken",
   "games.setup.externalArchive": "Ordner zum Entpacken öffnen",
@@ -57,25 +70,36 @@ export default {
   "games.setup.continue": "Einrichtung fortsetzen",
   "games.setup.refresh": "Erneut suchen",
   "games.setup.openFolder": "Ordner öffnen",
-  "games.setup.installerNote": "Die Installation öffnet sich in einem eigenen Fenster. Wähle danach unten die ausführbare Datei des installierten Spiels aus.",
+  "games.setup.installerNote":
+    "Die Installation öffnet sich in einem eigenen Fenster. Wähle danach unten die ausführbare Datei des installierten Spiels aus.",
   "games.setup.state.running": "Installation läuft",
   "games.setup.state.finished": "Installationsprogramm geschlossen — wähle deine Spieldatei",
   "games.setup.state.failed": "Die Installation wurde nicht erfolgreich abgeschlossen",
   "games.setup.state.interrupted": "Installation prüfen — Harbor wurde währenddessen geschlossen",
   "games.setup.state.external": "Installationsprogramm in einem anderen Fenster geöffnet",
   "games.setup.exitCode": "Exitcode: {code}",
-  "games.setup.unavailable": "Die Prüfung von Installationsdateien ist in dieser Version nicht verfügbar. Du kannst weiterhin eine installierte Spieldatei auswählen oder den Downloadordner öffnen.",
-  "games.setup.setup_profile": "Diese Einrichtung gehört zu einem anderen Profil. Öffne den Download erneut.",
-  "games.setup.setup_path": "Dieser Ordner oder diese Datei ist nicht verfügbar. Wähle den aktuellen Speicherort aus.",
-  "games.setup.setup_read": "Diese Dateien konnten nicht gelesen werden. Öffne den Ordner oder suche erneut.",
-  "games.setup.setup_limit": "Zu viele Einrichtungsanfragen. Schließe dieses Fenster und versuche es erneut.",
-  "games.setup.setup_changed": "Diese Dateien haben sich geändert. Suche erneut, bevor du die Installation startest.",
+  "games.setup.unavailable":
+    "Die Prüfung von Installationsdateien ist in dieser Version nicht verfügbar. Du kannst weiterhin eine installierte Spieldatei auswählen oder den Downloadordner öffnen.",
+  "games.setup.setup_profile":
+    "Diese Einrichtung gehört zu einem anderen Profil. Öffne den Download erneut.",
+  "games.setup.setup_path":
+    "Dieser Ordner oder diese Datei ist nicht verfügbar. Wähle den aktuellen Speicherort aus.",
+  "games.setup.setup_read":
+    "Diese Dateien konnten nicht gelesen werden. Öffne den Ordner oder suche erneut.",
+  "games.setup.setup_limit":
+    "Zu viele Einrichtungsanfragen. Schließe dieses Fenster und versuche es erneut.",
+  "games.setup.setup_changed":
+    "Diese Dateien haben sich geändert. Suche erneut, bevor du die Installation startest.",
   "games.setup.setup_expired": "Diese Dateiprüfung ist abgelaufen. Suche erneut.",
-  "games.setup.setup_selection": "Dieses Installationsprogramm ist nicht mehr in der geprüften Auswahl. Suche erneut.",
+  "games.setup.setup_selection":
+    "Dieses Installationsprogramm ist nicht mehr in der geprüften Auswahl. Suche erneut.",
   "games.setup.setup_busy": "Dieses Installationsprogramm läuft bereits.",
-  "games.setup.setup_store": "Der Einrichtungsfortschritt konnte nicht gespeichert werden. Versuche es erneut.",
-  "games.setup.setup_start": "Das Installationsprogramm konnte nicht geöffnet werden. Öffne seinen Ordner und versuche es dort.",
-  "games.setup.setup_platform": "Dieses Installationsprogramm benötigt ein anderes Betriebssystem. Öffne seinen Ordner, um fortzufahren.",
+  "games.setup.setup_store":
+    "Der Einrichtungsfortschritt konnte nicht gespeichert werden. Versuche es erneut.",
+  "games.setup.setup_start":
+    "Das Installationsprogramm konnte nicht geöffnet werden. Öffne seinen Ordner und versuche es dort.",
+  "games.setup.setup_platform":
+    "Dieses Installationsprogramm benötigt ein anderes Betriebssystem. Öffne seinen Ordner, um fortzufahren.",
   "games.setup.setup_canceled": "Der Start der Installation wurde abgebrochen.",
   "games.setup.phase.check": "Dateien prüfen",
   "games.setup.phase.install": "Installieren",
@@ -83,19 +107,26 @@ export default {
   "games.setup.install": "Spiel installieren",
   "games.setup.destination": "Installieren in",
   "games.setup.chooseDestination": "Installationsordner wählen",
-  "games.setup.managedNote": "Harbor installiert das Spiel hier, findet die Spieldatei und fügt sie deiner Bibliothek hinzu.",
-  "games.setup.managedRunning": "Dein Spiel wird installiert. Du kannst dieses Fenster schließen; Harbor verfolgt den Fortschritt weiter.",
+  "games.setup.managedNote":
+    "Harbor installiert das Spiel hier, findet die Spieldatei und fügt sie deiner Bibliothek hinzu.",
+  "games.setup.managedRunning":
+    "Dein Spiel wird installiert. Du kannst dieses Fenster schließen; Harbor verfolgt den Fortschritt weiter.",
   "games.setup.detected": "Spieldatei automatisch gefunden",
   "games.setup.chooseDetected": "Wähle die Spieldatei aus, die du hinzufügen möchtest.",
   "games.setup.activity": "{size} in {count} Dateien",
-  "games.setup.activityNote": "Erfasste Dateien im Installationsordner. Das Installationsprogramm meldet keinen Gesamtfortschritt in Prozent.",
+  "games.setup.activityNote":
+    "Erfasste Dateien im Installationsordner. Das Installationsprogramm meldet keinen Gesamtfortschritt in Prozent.",
   "games.setup.registering": "Wird deiner Bibliothek hinzugefügt…",
   "games.setup.scanInstalled": "Installiertes Spiel wird gesucht…",
   "games.setup.manual": "Dateien manuell auswählen",
-  "games.setup.installedMissing": "Die Installation ist beendet, aber es wurde keine ausführbare Spieldatei gefunden. Prüfe den Installationsordner oder wähle die Datei unten aus.",
-  "games.setup.setup_destination": "Wähle einen neuen, leeren Installationsordner außerhalb des Downloadordners.",
-  "games.setup.setup_engine": "Dieses Installationsprogramm benötigt ein eigenes Fenster. Wähle „Installer starten“, um fortzufahren.",
-  "games.setup.setup_candidates": "Die Installation ist beendet, aber Harbor konnte die installierten Dateien nicht lesen. Durchsuche den Installationsordner erneut.",
+  "games.setup.installedMissing":
+    "Die Installation ist beendet, aber es wurde keine ausführbare Spieldatei gefunden. Prüfe den Installationsordner oder wähle die Datei unten aus.",
+  "games.setup.setup_destination":
+    "Wähle einen neuen, leeren Installationsordner außerhalb des Downloadordners.",
+  "games.setup.setup_engine":
+    "Dieses Installationsprogramm benötigt ein eigenes Fenster. Wähle „Installer starten“, um fortzufahren.",
+  "games.setup.setup_candidates":
+    "Die Installation ist beendet, aber Harbor konnte die installierten Dateien nicht lesen. Durchsuche den Installationsordner erneut.",
   "games.setup.state.installing": "Wird installiert",
   "games.setup.externalAction": "Installer starten",
   "games.setup.files": "Heruntergeladene Dateien",

@@ -13,5 +13,5 @@ export default {
   "games.links.error": "无法读取已保存的链接。请重试。",
   "games.links.openError": "无法打开此链接。请重试。",
   "games.links.current": "当前顺序",
-  "games.links.preview": "排序后"
+  "games.links.preview": "排序后",
 };

@@ -3,7 +3,7 @@ export default {
   "Most liked": "Nhiều lượt thích nhất",
   "Most recent": "Mới nhất",
   "Lowest rated": "Điểm thấp nhất",
-  "Longest": "Dài nhất",
+  Longest: "Dài nhất",
   "Sort reviews": "Sắp xếp đánh giá",
   "Episode reviews": "Đánh giá tập phim",
   "Gathering reviews from IMDb and Trakt…": "Đang thu thập đánh giá từ IMDb và Trakt…",
@@ -13,12 +13,14 @@ export default {
   "Translate reviews to": "Dịch đánh giá sang",
   "Translate all": "Dịch tất cả",
   "Show original": "Xem bản gốc",
-  "Translate": "Dịch",
+  Translate: "Dịch",
   "In {language}": "Bằng {language}",
   "No reviews in {language} here.": "Không có đánh giá bằng {language} ở đây.",
   "{n} reviews couldn't be translated. Try again.": "Không thể dịch {n} đánh giá. Hãy thử lại.",
   "Couldn't translate. Try again": "Không thể dịch. Thử lại",
-  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.": "Không thể tải một số bài đánh giá gần đây, vì vậy các bài đánh giá dự phòng được hiển thị sau những kết quả mới nhất.",
-  "Letterboxd didn't share review dates right now, so these are shown by popularity.": "Letterboxd hiện không cung cấp ngày đánh giá, nên chúng được sắp theo độ phổ biến.",
+  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.":
+    "Không thể tải một số bài đánh giá gần đây, vì vậy các bài đánh giá dự phòng được hiển thị sau những kết quả mới nhất.",
+  "Letterboxd didn't share review dates right now, so these are shown by popularity.":
+    "Letterboxd hiện không cung cấp ngày đánh giá, nên chúng được sắp theo độ phổ biến.",
   "Reviewers' average: {rating}": "Điểm trung bình của người đánh giá: {rating}",
 } as Record<string, string>;

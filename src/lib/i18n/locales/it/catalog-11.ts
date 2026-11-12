@@ -263,7 +263,8 @@ const catalog11: Record<string, string> = {
   "Report sent": "Segnalazione inviata",
   "Reset to original": "Ripristina l'originale",
   "Resolving manifest": "Risoluzione del manifest in corso",
-  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.": "Stesso utilizzo in sola lettura di Real-Debrid. Consente anche di mettere in coda dal selettore di riproduzione le fonti non presenti nella cache.",
+  "Same read-only usage as Real-Debrid. Also lets you queue uncached sources from the play picker.":
+    "Stesso utilizzo in sola lettura di Real-Debrid. Consente anche di mettere in coda dal selettore di riproduzione le fonti non presenti nella cache.",
   "Saved to your library.": "Salvato nella raccolta.",
   "Say a title, actor, or genre": "Pronuncia un titolo, il nome di un attore o un genere",
   "Scanning your network...": "Scansione della rete...",
@@ -338,7 +339,8 @@ const catalog11: Record<string, string> = {
   'Use the "personal" key, not the project one.':
     'Usa la chiave "personal", non quella del progetto.',
   "Use the v3 key, not the read access token.": "Usa la chiave v3, non il read access token.",
-  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.": "Serve per controllare la cache e rimuovere le restrizioni dai link. Harbor non aggiunge né rimuove mai nulla dal tuo account autonomamente.",
+  "Used to check cache and unrestrict links. Harbor never adds or removes anything on your account on its own.":
+    "Serve per controllare la cache e rimuovere le restrizioni dai link. Harbor non aggiunge né rimuove mai nulla dal tuo account autonomamente.",
   "Uses the directdl endpoint, which skips queueing for anything already cached.":
     "Usa l'endpoint directdl, che evita la coda per tutto ciò che è già nella cache.",
   "Uses up to 150 MB": "Utilizza fino a 150 MB",

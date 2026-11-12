@@ -62,7 +62,9 @@ export function EpgMatchModal({
       >
         <div className="flex items-center gap-3 border-b border-edge-soft/55 px-5 py-4">
           <div className="flex min-w-0 flex-1 flex-col">
-            <span id={titleId} className="text-[15px] font-semibold text-ink">{t("Match EPG channel")}</span>
+            <span id={titleId} className="text-[15px] font-semibold text-ink">
+              {t("Match EPG channel")}
+            </span>
             <span className="truncate text-[12px] text-ink-muted">{channel.name}</span>
           </div>
           {current && (

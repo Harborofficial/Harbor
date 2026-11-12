@@ -714,9 +714,12 @@ const catalog04: Record<string, string> = {
   "Episode 4": "Odcinek 4",
   "Episode card size": "Rozmiar karty odcinka",
   "Episode cards": "Karty odcinków",
-  "Cached source resolution and direct download links.": "Rozpoznawanie źródeł z pamięci podręcznej i bezpośrednie linki do pobierania.",
-  "Cached source resolution and cloud library access.": "Rozpoznawanie źródeł z pamięci podręcznej i dostęp do biblioteki w chmurze.",
-  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.": "Oba pokazuje razem wyniki bezpośrednie, debrid i peer-to-peer. Bezpośrednie/debrid odsuwa wyniki P2P na bok, chyba że nie ma nic innego. P2P stawia je na pierwszym miejscu.",
+  "Cached source resolution and direct download links.":
+    "Rozpoznawanie źródeł z pamięci podręcznej i bezpośrednie linki do pobierania.",
+  "Cached source resolution and cloud library access.":
+    "Rozpoznawanie źródeł z pamięci podręcznej i dostęp do biblioteki w chmurze.",
+  "Both shows direct, debrid, and peer-to-peer results together. Direct/debrid keeps P2P results out of the way unless nothing else is available. P2P puts them first.":
+    "Oba pokazuje razem wyniki bezpośrednie, debrid i peer-to-peer. Bezpośrednie/debrid odsuwa wyniki P2P na bok, chyba że nie ma nic innego. P2P stawia je na pierwszym miejscu.",
 };
 
 export default catalog04;

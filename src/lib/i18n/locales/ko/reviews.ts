@@ -3,7 +3,7 @@ export default {
   "Most liked": "좋아요순",
   "Most recent": "최신순",
   "Lowest rated": "낮은 평점순",
-  "Longest": "긴 순",
+  Longest: "긴 순",
   "Sort reviews": "리뷰 정렬",
   "Episode reviews": "에피소드 리뷰",
   "Gathering reviews from IMDb and Trakt…": "IMDb와 Trakt에서 리뷰를 모으는 중…",
@@ -13,12 +13,15 @@ export default {
   "Translate reviews to": "리뷰 번역 언어",
   "Translate all": "모두 번역",
   "Show original": "원문 보기",
-  "Translate": "번역",
+  Translate: "번역",
   "In {language}": "{language}만",
   "No reviews in {language} here.": "{language} 리뷰가 없습니다.",
-  "{n} reviews couldn't be translated. Try again.": "리뷰 {n}개를 번역하지 못했습니다. 다시 시도하세요.",
+  "{n} reviews couldn't be translated. Try again.":
+    "리뷰 {n}개를 번역하지 못했습니다. 다시 시도하세요.",
   "Couldn't translate. Try again": "번역하지 못했습니다. 다시 시도",
-  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.": "일부 최신 리뷰를 불러오지 못해 대체 리뷰가 최신 결과 뒤에 표시됩니다.",
-  "Letterboxd didn't share review dates right now, so these are shown by popularity.": "지금은 Letterboxd가 리뷰 날짜를 제공하지 않아 인기순으로 표시합니다.",
+  "Some recent reviews couldn't be loaded, so fallback reviews are shown after the newest results.":
+    "일부 최신 리뷰를 불러오지 못해 대체 리뷰가 최신 결과 뒤에 표시됩니다.",
+  "Letterboxd didn't share review dates right now, so these are shown by popularity.":
+    "지금은 Letterboxd가 리뷰 날짜를 제공하지 않아 인기순으로 표시합니다.",
   "Reviewers' average: {rating}": "리뷰어 평균: {rating}",
 } as Record<string, string>;

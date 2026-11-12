@@ -85,7 +85,12 @@ export function PublicMetaDbPanel() {
         <Section title={t("Not connected")} bare>
           <div className="flex items-start gap-6 pb-5 pt-1">
             <div className="grid size-[72px] shrink-0 place-items-center rounded-[18px] bg-elevated">
-              <img src={publicmetadbLogo} alt="" draggable={false} className="size-10 object-contain" />
+              <img
+                src={publicmetadbLogo}
+                alt=""
+                draggable={false}
+                className="size-10 object-contain"
+              />
             </div>
             <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
               <h2 className="text-[24px] font-semibold leading-8 tracking-[-0.5px] text-ink">
@@ -120,9 +125,7 @@ export function PublicMetaDbPanel() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[13px] font-medium text-ink-muted">
-                    {t("API Key")}
-                  </label>
+                  <label className="text-[13px] font-medium text-ink-muted">{t("API Key")}</label>
                   <div className="relative flex items-center">
                     <span className="pointer-events-none absolute left-3.5 text-ink-subtle">
                       <Key size={16} />
@@ -151,9 +154,7 @@ export function PublicMetaDbPanel() {
                   </div>
                 </div>
 
-                {errorMessage && (
-                  <p className="text-[13.5px] text-danger">{errorMessage}</p>
-                )}
+                {errorMessage && <p className="text-[13.5px] text-danger">{errorMessage}</p>}
 
                 <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2">
                   <button
@@ -180,7 +181,9 @@ export function PublicMetaDbPanel() {
         <>
           <Section
             title={t("Connected")}
-            subtitle={t("Harbor will scrobble your playback progress and sync watch history with PublicMetaDB.")}
+            subtitle={t(
+              "Harbor will scrobble your playback progress and sync watch history with PublicMetaDB.",
+            )}
           >
             <TrackerIdentity
               service="PublicMetaDB"
@@ -197,13 +200,17 @@ export function PublicMetaDbPanel() {
             <SettingGroup label={t("Tracking & Scrobble")}>
               <ToggleRow
                 label={t("Scrobble playback progress")}
-                sub={t("Automatically save resume points and mark completed items in PublicMetaDB as you watch.")}
+                sub={t(
+                  "Automatically save resume points and mark completed items in PublicMetaDB as you watch.",
+                )}
                 value={settings.publicmetadbScrobbleEnabled}
                 onChange={(on) => update({ publicmetadbScrobbleEnabled: on })}
               />
               <ToggleRow
                 label={t("Show in Continue Watching")}
-                sub={t("Include PublicMetaDB resume points on Harbor's Home Continue Watching rail.")}
+                sub={t(
+                  "Include PublicMetaDB resume points on Harbor's Home Continue Watching rail.",
+                )}
                 value={settings.cwSources.publicmetadb}
                 onChange={(on) =>
                   update({ cwSources: { ...settings.cwSources, publicmetadb: on } })
@@ -241,10 +248,7 @@ export function PublicMetaDbPanel() {
                     <SButton variant="primary" onClick={handleSaveUsername}>
                       {t("Save")}
                     </SButton>
-                    <SButton
-                      variant="secondary"
-                      onClick={() => setEditingUsername(false)}
-                    >
+                    <SButton variant="secondary" onClick={() => setEditingUsername(false)}>
                       {t("Cancel")}
                     </SButton>
                   </form>
@@ -273,10 +277,7 @@ export function PublicMetaDbPanel() {
                     : t("Test that your stored API key is still valid and reachable.")
                 }
               >
-                <SButton
-                  onClick={handleTestConnection}
-                  disabled={refreshing}
-                >
+                <SButton onClick={handleTestConnection} disabled={refreshing}>
                   {refreshing ? t("Testing...") : t("Test Connection")}
                 </SButton>
               </SettingRow>

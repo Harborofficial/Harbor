@@ -6,10 +6,13 @@ export default {
   "games.cleanup.review": "مراجعة الأرشيفات",
   "games.cleanup.confirm": "نقل أجزاء الأرشيف هذه إلى سلة المحذوفات؟",
   "games.cleanup.binNote": "تُستعاد المساحة عندما تفرغ سلة المحذوفات بنفسك.",
-  "games.cleanup.completedNote": "مجلد الأرشيفات المحفوظة موجود في سلة المحذوفات. استعده منها عند الحاجة.",
+  "games.cleanup.completedNote":
+    "مجلد الأرشيفات المحفوظة موجود في سلة المحذوفات. استعده منها عند الحاجة.",
   "games.cleanup.restoredNote": "عادت أجزاء الأرشيف إلى مجلدها الأصلي.",
-  "games.cleanup.uncertainNote": "تعذّر على Harbor تأكيد النتيجة. افحص المجلد الأصلي وسلة المحذوفات قبل المتابعة.",
-  "games.cleanup.recoveryNote": "قد تكون بعض الأجزاء في مجلد الحفظ المؤقت في Harbor. تابع التنظيف أو استعد الملفات دون استبدال الملفات الموجودة.",
+  "games.cleanup.uncertainNote":
+    "تعذّر على Harbor تأكيد النتيجة. افحص المجلد الأصلي وسلة المحذوفات قبل المتابعة.",
+  "games.cleanup.recoveryNote":
+    "قد تكون بعض الأجزاء في مجلد الحفظ المؤقت في Harbor. تابع التنظيف أو استعد الملفات دون استبدال الملفات الموجودة.",
   "games.cleanup.working": "جارٍ فحص ملفات الأرشيف",
   "games.cleanup.restore": "استعادة الملفات المحفوظة",
   "games.cleanup.resume": "متابعة التنظيف",
@@ -20,9 +23,11 @@ export default {
   "games.cleanup.unconfirmed": "النتيجة غير مؤكدة",
   "games.cleanup.unavailable": "حدّث تطبيق سطح المكتب لإدارة الأرشيفات المنزّلة.",
   "games.cleanup.archive_cleanup_in_use": "تستخدم عملية أخرى هذه الملفات. أوقفها ثم راجعها مجددًا.",
-  "games.cleanup.archive_cleanup_recovery": "عملية التنظيف المحفوظة تحتاج إلى مراجعة. احتفظ بالملفات وافحص مجلدها.",
+  "games.cleanup.archive_cleanup_recovery":
+    "عملية التنظيف المحفوظة تحتاج إلى مراجعة. احتفظ بالملفات وافحص مجلدها.",
   "games.cleanup.archive_cleanup_recycle": "تعذّر نقل الملفات إلى السلة. استعدها أو حاول مجددًا.",
-  "games.cleanup.archive_cleanup_receipt": "لا يوجد سجل كامل لملفات المصدر لهذه العملية. لا يمكن تنظيف أرشيفاتها هنا.",
+  "games.cleanup.archive_cleanup_receipt":
+    "لا يوجد سجل كامل لملفات المصدر لهذه العملية. لا يمكن تنظيف أرشيفاتها هنا.",
   "games.cleanup.blocker.anotherProfile": "يستخدم ملف شخصي آخر هذه الأرشيفات.",
   "games.cleanup.blocker.activeDownload": "ما زال تنزيل يحتاج إلى هذه الملفات.",
   "games.cleanup.blocker.sharing": "أوقف مشاركة هذا التورنت قبل التنظيف.",
@@ -62,8 +67,10 @@ export default {
   "games.setupShortcuts.unsupported": "الاختصارات متاحة لألعاب Windows الأصلية.",
   "games.setupShortcuts.error": "تعذّر تحديث الاختصارات. حاول مجددًا.",
 
-  "games.archive.archive_decoder": "تعذّر على Harbor فك هذا الأرشيف ضمن حدوده. جرّب أداة استخراج أخرى.",
-  "games.archive.archive_password_or_checksum": "قد تكون كلمة المرور غير صحيحة أو الأرشيف تالفًا. تحقّق من كلمة المرور أو نزّل الأرشيف مجددًا.",
+  "games.archive.archive_decoder":
+    "تعذّر على Harbor فك هذا الأرشيف ضمن حدوده. جرّب أداة استخراج أخرى.",
+  "games.archive.archive_password_or_checksum":
+    "قد تكون كلمة المرور غير صحيحة أو الأرشيف تالفًا. تحقّق من كلمة المرور أو نزّل الأرشيف مجددًا.",
   "games.archive.password": "كلمة مرور الأرشيف",
   "games.archive.passwordNote": "تُستخدم لفك الضغط هذا فقط، ولا تُحفظ في سجل التنزيلات.",
   "games.archive.archive_password": "لم تفتح كلمة المرور هذه الأرشيف. تحقّق منها وحاول مجددًا.",
@@ -71,7 +78,8 @@ export default {
   "games.archive.extractNamed": "استخراج {name}",
   "games.archive.eyebrow": "من التنزيل إلى مكتبتك",
   "games.archive.title": "استخراج ملفات اللعبة",
-  "games.archive.intro": "راجع أرشيف ZIP / 7z / RAR / TAR / TAR.GZ / ISO واختر مكان وضع ملفاته. ينشئ Harbor مجلدًا جديدًا ويحتفظ بالأرشيف الأصلي.",
+  "games.archive.intro":
+    "راجع أرشيف ZIP / 7z / RAR / TAR / TAR.GZ / ISO واختر مكان وضع ملفاته. ينشئ Harbor مجلدًا جديدًا ويحتفظ بالأرشيف الأصلي.",
   "games.archive.source": "الأرشيف",
   "games.archive.chooseSource": "اختيار أرشيف",
   "games.archive.chooseParent": "اختر مجلد الوجهة",
@@ -86,36 +94,45 @@ export default {
   "games.archive.searchPreview": "البحث في هذه المعاينة",
   "games.archive.destination": "اختر مكانًا لهذه الملفات",
   "games.archive.folderName": "اسم المجلد الجديد",
-  "games.archive.destinationNote": "لن يُستبدل أي مجلد موجود. اختر اسمًا آخر إذا كان هذا الاسم مستخدمًا.",
+  "games.archive.destinationNote":
+    "لن يُستبدل أي مجلد موجود. اختر اسمًا آخر إذا كان هذا الاسم مستخدمًا.",
   "games.archive.phase.checking": "جارٍ فحص الأرشيف",
   "games.archive.phase.extracting": "جارٍ استخراج الملفات",
   "games.archive.phase.complete": "الملفات جاهزة",
   "games.archive.ready": "جاهز للخطوة التالية",
   "games.archive.complete": "الملفات المستخرجة: {count}",
-  "games.archive.completeNote": "ملفاتك جاهزة. إذا كانت اللعبة تعمل دون تثبيت، أضف ملفها التنفيذي في الألعاب المحلية. الألعاب التي تحتاج إلى برنامج تثبيت لا تزال تتطلب إعدادها الخاص.",
+  "games.archive.completeNote":
+    "ملفاتك جاهزة. إذا كانت اللعبة تعمل دون تثبيت، أضف ملفها التنفيذي في الألعاب المحلية. الألعاب التي تحتاج إلى برنامج تثبيت لا تزال تتطلب إعدادها الخاص.",
   "games.archive.originalKept": "تم الاحتفاظ بالأرشيف الأصلي.",
   "games.archive.zipOnly": "أرشيفات ZIP / 7z / RAR / TAR / TAR.GZ / ISO · لا تُشغّل الملفات تلقائيًا",
   "games.archive.openFolder": "عرض المجلد",
   "games.archive.localLibrary": "الألعاب المحلية",
-  "games.archive.archive_profile": "تعذر تحديد ملف Harbor الشخصي هذا. افتح الألعاب مجددًا وأعد المحاولة.",
+  "games.archive.archive_profile":
+    "تعذر تحديد ملف Harbor الشخصي هذا. افتح الألعاب مجددًا وأعد المحاولة.",
   "games.archive.archive_busy": "توجد عملية أرشيف أخرى قيد التنفيذ. أكملها أو ألغها أولًا.",
   "games.archive.archive_canceled": "أُلغي الاستخراج. لا يزال الأرشيف الأصلي موجودًا.",
   "games.archive.archive_read": "تعذرت قراءة الأرشيف. تحقق من أن الملف ما زال متاحًا وأعد المحاولة.",
-  "games.archive.archive_links": "يحتوي هذا الأرشيف على روابط أو ملفات خاصة. اتبع تعليمات تثبيت المشروع بدلًا من ذلك.",
+  "games.archive.archive_links":
+    "يحتوي هذا الأرشيف على روابط أو ملفات خاصة. اتبع تعليمات تثبيت المشروع بدلًا من ذلك.",
   "games.archive.archive_limit": "يتجاوز هذا الأرشيف حدود الاستخراج الحالية في Harbor.",
   "games.archive.archive_changed": "تغيّر الأرشيف بعد مراجعته. راجعه مجددًا قبل الاستخراج.",
-  "games.archive.archive_path": "يحتوي الأرشيف على مسار لا يستطيع Harbor استخراجه بأمان. لم تُستبدل أي ملفات لعبة.",
-  "games.archive.archive_format": "هذا ليس أرشيف ZIP / 7z / RAR / TAR / TAR.GZ / ISO مدعومًا، أو أن دليله الداخلي تالف.",
+  "games.archive.archive_path":
+    "يحتوي الأرشيف على مسار لا يستطيع Harbor استخراجه بأمان. لم تُستبدل أي ملفات لعبة.",
+  "games.archive.archive_format":
+    "هذا ليس أرشيف ZIP / 7z / RAR / TAR / TAR.GZ / ISO مدعومًا، أو أن دليله الداخلي تالف.",
   "games.archive.archive_encrypted": "أدخل كلمة مرور هذا الأرشيف للمتابعة.",
-  "games.archive.archive_compression": "يستخدم ملف ZIP / 7z / RAR / TAR / TAR.GZ / ISO طريقة ضغط لا يدعمها Harbor بعد.",
+  "games.archive.archive_compression":
+    "يستخدم ملف ZIP / 7z / RAR / TAR / TAR.GZ / ISO طريقة ضغط لا يدعمها Harbor بعد.",
   "games.archive.archive_collision": "ستكتب بعض عناصر الأرشيف فوق بعضها. لم يُستخرج شيء.",
   "games.archive.archive_destination": "اختر مجلدًا متاحًا واسمًا صالحًا للمجلد الجديد.",
-  "games.archive.archive_write": "تعذرت كتابة الملفات. تحقق من مساحة الوجهة وأذوناتها، ثم راجع الأرشيف مجددًا.",
+  "games.archive.archive_write":
+    "تعذرت كتابة الملفات. تحقق من مساحة الوجهة وأذوناتها، ثم راجع الأرشيف مجددًا.",
   "games.archive.archive_exists": "هذا المجلد موجود بالفعل. اختر اسمًا مختلفًا للحفاظ على ملفاته.",
   "games.archive.archive_platform": "استخراج الأرشيفات غير متاح على هذا الجهاز.",
   "games.archive.archive_expired": "انتهت صلاحية مراجعة الأرشيف. راجعه مجددًا للمتابعة.",
   "games.archive.archive_space": "لا توجد مساحة كافية للملفات المستخرجة. اختر وجهة أخرى.",
-  "games.archive.archive_checksum": "فشل ملف داخل الأرشيف في فحص السلامة. لم تُتح نتيجة الاستخراج غير المكتملة للاستخدام.",
+  "games.archive.archive_checksum":
+    "فشل ملف داخل الأرشيف في فحص السلامة. لم تُتح نتيجة الاستخراج غير المكتملة للاستخدام.",
   "games.archive.space.title": "مساحة الوجهة",
   "games.archive.space.checking": "جارٍ فحص مساحة الوجهة…",
   "games.archive.space.free": "المتاح: {size}",
@@ -123,10 +140,12 @@ export default {
   "games.archive.space.reserved": "المحجوز لعمليات Harbor الأخرى: {size}",
   "games.archive.space.after": "المتاح بعد الاستخراج: {size}",
   "games.archive.space.shortfall": "تحتاج إلى مساحة إضافية قدرها {size}",
-  "games.archive.space.unknown": "تعذرت قراءة المساحة المتاحة. سيفحصها Harbor مجددًا عند بدء الاستخراج.",
+  "games.archive.space.unknown":
+    "تعذرت قراءة المساحة المتاحة. سيفحصها Harbor مجددًا عند بدء الاستخراج.",
   "games.archive.space.error": "تعذر فحص مساحة الوجهة.",
   "games.archive.space.refresh": "فحص المساحة مجددًا",
-  "games.archive.space.note": "يتضمن هامش أمان صغيرًا. لا تزال التطبيقات الأخرى قادرة على استخدام محرك الأقراص.",
+  "games.archive.space.note":
+    "يتضمن هامش أمان صغيرًا. لا تزال التطبيقات الأخرى قادرة على استخدام محرك الأقراص.",
   "games.archive.space.shortfallNote": "حرر مساحة أو اختر وجهة أخرى، ثم افحص مجددًا.",
   "games.archive.keepWorking": "يستمر الاستخراج في التنزيلات. يمكنك إغلاق هذه النافذة.",
   "games.archive.viewDownloads": "عرض في التنزيلات",
@@ -139,21 +158,27 @@ export default {
   "games.archive.cancelExtract": "إلغاء الاستخراج",
   "games.archive.retry": "مراجعة وإعادة المحاولة",
   "games.archive.showPartial": "عرض الملفات غير المكتملة",
-  "games.archive.partialNote": "احتفظ Harbor بالمجلد غير المكتمل. راجعه قبل حذفه؛ تبدأ إعادة المحاولة عملية استخراج جديدة.",
+  "games.archive.partialNote":
+    "احتفظ Harbor بالمجلد غير المكتمل. راجعه قبل حذفه؛ تبدأ إعادة المحاولة عملية استخراج جديدة.",
   "games.archive.progressFiles": "{count} من {total} ملفات",
   "games.archive.archive_store": "تعذر على Harbor حفظ تقدم الاستخراج. تم الاحتفاظ بملفاتك لمراجعتها.",
   "games.archive.archive_start": "تعذر بدء الاستخراج. حاول مجددًا.",
-  "games.archive.archive_history": "سجل الاستخراج ممتلئ. أزل سجلًا قديمًا للمتابعة؛ ستبقى ملفاته محفوظة.",
-  "games.archive.archive_interrupted": "أُغلق Harbor قبل اكتمال الاستخراج. راجع الموقع المحفوظ وأعد المحاولة.",
-  "games.archive.archive_parts": "هذه الأجزاء لا تشكّل أرشيفًا واحدًا. تأكد من أنها جميعًا من التنزيل نفسه.",
+  "games.archive.archive_history":
+    "سجل الاستخراج ممتلئ. أزل سجلًا قديمًا للمتابعة؛ ستبقى ملفاته محفوظة.",
+  "games.archive.archive_interrupted":
+    "أُغلق Harbor قبل اكتمال الاستخراج. راجع الموقع المحفوظ وأعد المحاولة.",
+  "games.archive.archive_parts":
+    "هذه الأجزاء لا تشكّل أرشيفًا واحدًا. تأكد من أنها جميعًا من التنزيل نفسه.",
   "games.archive.archive_tool": "دعم صيغ الأرشيف الإضافية غير متاح في هذا الإصدار.",
   "games.archive.unavailable": "حدّث تطبيق سطح المكتب لاستخدام الاستخراج في الخلفية.",
   "games.archive.continueSetup": "إعداد اللعبة",
   "games.archive.dismissRecord": "إزالة السجل · الاحتفاظ بالملفات",
-  "games.archive.archive_multipart": "صيغة الأرشيف المقسّم هذه غير مدعومة بعد. فك ضغطه بتطبيق أرشيف، ثم افتح المجلد الناتج في Harbor.",
+  "games.archive.archive_multipart":
+    "صيغة الأرشيف المقسّم هذه غير مدعومة بعد. فك ضغطه بتطبيق أرشيف، ثم افتح المجلد الناتج في Harbor.",
   "games.archive.partsCount": "{count} أجزاء للأرشيف",
   "games.archive.partsNote": "احتفظ بجميع الأجزاء في المجلد نفسه. يفك Harbor ضغطها معًا.",
   "games.archive.partsMore": "عرض المزيد من الأجزاء",
   "games.archive.setHash": "SHA-256 لمجموعة الأرشيف",
-  "games.archive.archive_missing_part": "أحد أجزاء الأرشيف مفقود. نزّل جميع الأجزاء إلى المجلد نفسه، ثم راجع الأرشيف مجددًا.",
+  "games.archive.archive_missing_part":
+    "أحد أجزاء الأرشيف مفقود. نزّل جميع الأجزاء إلى المجلد نفسه، ثم راجع الأرشيف مجددًا.",
 };

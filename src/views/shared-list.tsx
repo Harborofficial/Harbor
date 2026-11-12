@@ -30,7 +30,12 @@ export function SharedListView({
         {state === "missing" && <SharedListMissing kind="missing" onBack={goBack} />}
         {state === "ready" && summary && list && (
           <>
-            <SharedListHero summary={summary} list={list} signedIn={signedIn} onOpenProfile={onOpenProfile} />
+            <SharedListHero
+              summary={summary}
+              list={list}
+              signedIn={signedIn}
+              onOpenProfile={onOpenProfile}
+            />
             <div className="w-full">
               <SharedListPosters items={list.items} onOpenMeta={onOpenMeta} />
             </div>

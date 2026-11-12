@@ -7,6 +7,7 @@ export default {
   "games.community.previousPage": "前へ",
   "games.community.nextPage": "次へ",
   "games.community.pageNumber": "{count} ページ",
-  "games.community.reviewSource": "Steamの公開レビューです。総プレイ時間とレビュー投稿時のプレイ時間を別々に表示します。Steamの無関係なレビューのフィルターが適用されます。",
+  "games.community.reviewSource":
+    "Steamの公開レビューです。総プレイ時間とレビュー投稿時のプレイ時間を別々に表示します。Steamの無関係なレビューのフィルターが適用されます。",
   "games.community.authorOneReview": "レビュー 1 件",
 } satisfies Record<string, string>;

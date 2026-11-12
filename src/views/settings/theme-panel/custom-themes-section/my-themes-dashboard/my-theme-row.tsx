@@ -124,9 +124,7 @@ export function MyThemeRow({
             {t.ratingAvg || "-"}
             <span className="text-ink-subtle">({t.ratingCount})</span>
           </span>
-          {t.blurb && (
-            <span className={`line-clamp-1 max-w-[66ch] ${ROW_DESC}`}>{t.blurb}</span>
-          )}
+          {t.blurb && <span className={`line-clamp-1 max-w-[66ch] ${ROW_DESC}`}>{t.blurb}</span>}
         </div>
       </div>
 

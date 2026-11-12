@@ -39,7 +39,7 @@ html[data-theme-mode="light"] .media-start-page {
   margin: 0;
   font-size: 32px;
   line-height: 1.2;
-  letter-spacing: -.025em;
+  letter-spacing: -0.025em;
   font-weight: 600;
 }
 .media-start-copy h1 > span {
@@ -67,16 +67,18 @@ html[data-theme-mode="light"] .media-start-page {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 150ms var(--ease-out);
 }
 .media-start-primary > svg {
   flex-shrink: 0;
 }
 .media-start-primary:hover {
-  opacity: .88;
+  opacity: 0.88;
 }
 .media-start-primary:active {
-  transform: scale(.98);
+  transform: scale(0.98);
 }
 .media-start-primary:focus-visible {
   outline: 2px solid var(--color-accent);
@@ -127,9 +129,15 @@ html[data-theme-mode="light"] .media-start-page {
   line-height: 1.6;
 }
 @media (max-width: 640px) {
-  .media-start-page { padding: 0 24px 48px; }
-  .media-start-copy h1 { font-size: 29px; }
+  .media-start-page {
+    padding: 0 24px 48px;
+  }
+  .media-start-copy h1 {
+    font-size: 29px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .media-start-primary { transition: none; }
+  .media-start-primary {
+    transition: none;
+  }
 }

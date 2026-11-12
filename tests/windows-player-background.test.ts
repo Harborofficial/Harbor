@@ -15,7 +15,7 @@ test("background erases are suppressed only inside the interactive resize loop",
   assert.match(guard, /if msg == WM_ENTERSIZEMOVE \{\s*MAIN_IN_SIZE_MOVE\.store\(true/);
   assert.match(
     guard,
-    /msg == WM_EXITSIZEMOVE \|\| msg == WM_NCDESTROY[\s\S]*?MAIN_IN_SIZE_MOVE\.store\(false/,
+    /msg == WM_EXITSIZEMOVE \{[\s\S]*?MAIN_IN_SIZE_MOVE\.swap\(false[\s\S]*?msg == WM_NCDESTROY \{\s*MAIN_IN_SIZE_MOVE\.store\(false/,
   );
   assert.match(guard, /if msg == WM_ERASEBKGND && MAIN_IN_SIZE_MOVE\.load\(/);
   assert.match(guard, /let res = DefSubclassProc\(hwnd, msg, wparam, lparam\)/);

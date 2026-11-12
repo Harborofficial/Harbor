@@ -71,8 +71,22 @@ export function PillRail({
       >
         {children}
       </div>
-      <RailChevron side="left" visible={!edges.start} onClick={() => move(-1)} outset={6} size={38} nudgeY={-12} />
-      <RailChevron side="right" visible={!edges.end} onClick={() => move(1)} outset={6} size={38} nudgeY={-12} />
+      <RailChevron
+        side="left"
+        visible={!edges.start}
+        onClick={() => move(-1)}
+        outset={6}
+        size={38}
+        nudgeY={-12}
+      />
+      <RailChevron
+        side="right"
+        visible={!edges.end}
+        onClick={() => move(1)}
+        outset={6}
+        size={38}
+        nudgeY={-12}
+      />
     </div>
   );
 }

@@ -15,17 +15,30 @@ function load(path: string, mocks: Record<string, unknown>, storage: unknown) {
     (name: string) => {
       assert.ok(name in mocks, `unexpected import ${name}`);
       return mocks[name];
-    }, module, module.exports, storage,
+    },
+    module,
+    module.exports,
+    storage,
   );
   return module.exports;
 }
 
 function entry(name: string, folder = "/movies"): LocalEntry {
-  return { id: name, path: `${folder}/${name}.mkv`, filename: `${name}.mkv`,
-    title: name, type: "movie", year: null, folder, addedAt: 1 };
+  return {
+    id: name,
+    path: `${folder}/${name}.mkv`,
+    filename: `${name}.mkv`,
+    title: name,
+    type: "movie",
+    year: null,
+    folder,
+    addedAt: 1,
+  };
 }
 
-const settle = async () => { for (let i = 0; i < 20; i++) await Promise.resolve(); };
+const settle = async () => {
+  for (let i = 0; i < 20; i++) await Promise.resolve();
+};
 
 function harness(initial: LocalEntry[], legacy?: LocalEntry[]) {
   let persisted = structuredClone(initial);
@@ -39,33 +52,49 @@ function harness(initial: LocalEntry[], legacy?: LocalEntry[]) {
   const createLibrary = () => {
     let release!: () => void;
     const snapshot = structuredClone(persisted);
-    const pending = new Promise<LocalEntry[]>((resolve) => { release = () => resolve(snapshot); });
+    const pending = new Promise<LocalEntry[]>((resolve) => {
+      release = () => resolve(snapshot);
+    });
     const removals = load("src/lib/local-library/removals.ts", {}, storage);
-    const library = load("src/lib/local-library.ts", {
-      react: {},
-      "@/lib/episode-span": { parseEpisodeSpan: () => null },
-      "@/lib/local-library/removals": removals,
-      "@/lib/local-library/storage": {
-        loadLocalLibraryStore: () => pending,
-        saveLocalLibraryStore: async (entries: LocalEntry[]) => {
-          persisted = structuredClone(entries);
-          writes.push(persisted);
-          return true;
+    const library = load(
+      "src/lib/local-library.ts",
+      {
+        react: {},
+        "@/lib/episode-span": { parseEpisodeSpan: () => null },
+        "@/lib/local-library/removals": removals,
+        "@/lib/local-library/storage": {
+          loadLocalLibraryStore: () => pending,
+          saveLocalLibraryStore: async (entries: LocalEntry[]) => {
+            persisted = structuredClone(entries);
+            writes.push(persisted);
+            return true;
+          },
         },
       },
-    }, storage);
+      storage,
+    );
     return {
-      library, removals,
-      ready: async () => { release(); await library.localLibraryReady(); await settle(); },
+      library,
+      removals,
+      ready: async () => {
+        release();
+        await library.localLibraryReady();
+        await settle();
+      },
     };
   };
   return { ...createLibrary(), createLibrary, writes, storage };
 }
 
-const names = (library: any) => library.readLocalLibrary().map((e: LocalEntry) => e.id).sort();
+const names = (library: any) =>
+  library
+    .readLocalLibrary()
+    .map((e: LocalEntry) => e.id)
+    .sort();
 
 test("startup imports preserve older folders and never persist the incomplete snapshot", async () => {
-  const old = entry("old", "/old-folder"), fresh = entry("fresh", "/new-folder");
+  const old = entry("old", "/old-folder"),
+    fresh = entry("fresh", "/new-folder");
   const h = harness([old]);
   assert.equal(h.library.addLocalEntries([fresh]), 1);
   assert.deepEqual(names(h.library), ["fresh"], "keep the import visible while loading");
@@ -80,24 +109,32 @@ test("startup imports preserve older folders and never persist the incomplete sn
 });
 
 test("a refresh replaces the matching path while preserving other folders", async () => {
-  const old = entry("old"), other = entry("other", "/other");
+  const old = entry("old"),
+    other = entry("other", "/other");
   const h = harness([old, other]);
   h.library.addLocalEntries([{ ...old, title: "New NFO title" }]);
   await h.ready();
   assert.deepEqual(names(h.library), ["old", "other"]);
-  assert.equal(h.library.readLocalLibrary().find((e: LocalEntry) => e.id === "old").title, "New NFO title");
+  assert.equal(
+    h.library.readLocalLibrary().find((e: LocalEntry) => e.id === "old").title,
+    "New NFO title",
+  );
 });
 
 test("early corrections apply to entries still loading", async () => {
   const h = harness([entry("old"), entry("other")]);
   h.library.updateLocalEntry("old", { title: "Corrected title" });
   await h.ready();
-  assert.equal(h.library.readLocalLibrary().find((e: LocalEntry) => e.id === "old").title, "Corrected title");
+  assert.equal(
+    h.library.readLocalLibrary().find((e: LocalEntry) => e.id === "old").title,
+    "Corrected title",
+  );
   assert.equal(h.writes.length, 1);
 });
 
 test("early folder removal preserves other folders and blocks overlapping rescans", async () => {
-  const old = entry("old"), other = entry("other", "/other");
+  const old = entry("old"),
+    other = entry("other", "/other");
   const h = harness([old, other]);
   h.library.removeLocalFolder("/movies");
   h.library.addLocalEntries([old]);
@@ -110,7 +147,8 @@ test("early folder removal preserves other folders and blocks overlapping rescan
 });
 
 test("explicit reimport after an early removal restores only the selected file", async () => {
-  const old = entry("old"), other = entry("other", "/other");
+  const old = entry("old"),
+    other = entry("other", "/other");
   const h = harness([old, other]);
   h.library.removeLocalEntry(old.id);
   h.library.addLocalEntries([old], true);
@@ -137,7 +175,10 @@ test("backup restore before the first read is a replacement, followed by later e
   h.library.addLocalEntries([entry("fresh")]);
   await h.ready();
   assert.deepEqual(names(h.library), ["fresh", "restored"]);
-  assert.equal(h.library.readLocalLibrary().find((e: LocalEntry) => e.id === "restored").title, "Edited restore");
+  assert.equal(
+    h.library.readLocalLibrary().find((e: LocalEntry) => e.id === "restored").title,
+    "Edited restore",
+  );
 });
 
 test("legacy migration merges early imports and removes legacy only after saving", async () => {

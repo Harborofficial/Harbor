@@ -8,7 +8,8 @@ export default {
   "games.sidebar.customOrder": "Moja kolejność",
   "games.sidebar.arrange": "Dostosuj pasek boczny",
   "games.sidebar.resetFilters": "Resetuj filtry",
-  "games.sidebar.arrangeNote": "Przeciągnij lub użyj strzałek, aby zmienić kolejność. Przypnij gry albo ukryj je na tym pasku.",
+  "games.sidebar.arrangeNote":
+    "Przeciągnij lub użyj strzałek, aby zmienić kolejność. Przypnij gry albo ukryj je na tym pasku.",
   "games.sidebar.saveFailed": "Nie udało się zapisać ustawień. Zmiany obowiązują w tej sesji.",
   "games.sidebar.move": "Przenieś {name}",
   "games.sidebar.up": "Przenieś {name} wyżej",
@@ -19,12 +20,15 @@ export default {
   "games.sidebar.hide": "Ukryj {name} na pasku",
   "games.sidebar.pinned": "Przypięte",
   "games.dock.welcomeTitle": "Pokazać zakładkę gier?",
-  "games.dock.welcomeNote": "Wystarczy najechać kursorem, aby przejść do gier. Wyłącz ją w dowolnym momencie: Ustawienia → Motyw i wygląd → Interfejs.",
+  "games.dock.welcomeNote":
+    "Wystarczy najechać kursorem, aby przejść do gier. Wyłącz ją w dowolnym momencie: Ustawienia → Motyw i wygląd → Interfejs.",
   "games.dock.welcomeEnable": "Pokaż zakładkę gier",
   "games.dock.welcomeDismiss": "Nie teraz",
   "games.dock.settingTitle": "Szybka biblioteka",
-  "games.dock.settingNote": "Pokazuje dyskretną zakładkę przy krawędzi, aby szybko otwierać bibliotekę. Domyślnie wyłączone.",
-  "games.dock.launchError": "Nie udało się otworzyć gry. Sprawdź instalację i launcher, a następnie spróbuj ponownie.",
+  "games.dock.settingNote":
+    "Pokazuje dyskretną zakładkę przy krawędzi, aby szybko otwierać bibliotekę. Domyślnie wyłączone.",
+  "games.dock.launchError":
+    "Nie udało się otworzyć gry. Sprawdź instalację i launcher, a następnie spróbuj ponownie.",
   "games.dock.launcher": "Launchery",
   "games.dock.client": "Otwórz w {launcher}",
   "games.dock.openClient": "Otwórz {name} w {launcher}",
@@ -75,5 +79,6 @@ export default {
   "games.badge.unavailable": "Pliki niedostępne",
   "games.badge.notInstalled": "Niezainstalowane",
   "games.home.libraryFirstTitle": "Otwieraj Gry w bibliotece",
-  "games.home.libraryFirstNote": "Zaczynaj od biblioteki zamiast Odkrywaj za każdym razem, gdy otwierasz Gry."
+  "games.home.libraryFirstNote":
+    "Zaczynaj od biblioteki zamiast Odkrywaj za każdym razem, gdy otwierasz Gry.",
 };

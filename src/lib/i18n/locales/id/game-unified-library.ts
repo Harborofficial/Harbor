@@ -1,39 +1,50 @@
 export default {
-  "games.battlenet.changed": "Akun Battle.net telah berubah. Masuk kembali untuk mengganti impor profil ini.",
+  "games.battlenet.changed":
+    "Akun Battle.net telah berubah. Masuk kembali untuk mengganti impor profil ini.",
   "games.battlenet.connect": "Masuk",
-  "games.battlenet.intro": "Masuk ke Battle.net untuk mengimpor game Anda. Koneksi ini milik profil Harbor Anda saat ini.",
+  "games.battlenet.intro":
+    "Masuk ke Battle.net untuk mengimpor game Anda. Koneksi ini milik profil Harbor Anda saat ini.",
   "games.battlenet.installed": "Tampilkan game terpasang",
   "games.battlenet.uninstalled": "Tampilkan game akun yang belum terpasang",
-  "games.battlenet.partial": "Sebagian data akun tidak dapat diperbarui. Game yang sudah diimpor tetap ditampilkan.",
+  "games.battlenet.partial":
+    "Sebagian data akun tidak dapat diperbarui. Game yang sudah diimpor tetap ditampilkan.",
   "games.battlenet.unresolved": "Edisi yang tepat untuk beberapa game akun tidak dapat ditentukan.",
-  "games.battlenet.expired": "Sesi Battle.net Anda berakhir. Masuk kembali; game yang diimpor tetap tersimpan.",
+  "games.battlenet.expired":
+    "Sesi Battle.net Anda berakhir. Masuk kembali; game yang diimpor tetap tersimpan.",
   "games.battlenet.timeout": "Battle.net tidak merespons tepat waktu. Coba lagi.",
   "games.battlenet.busy": "Tindakan akun Battle.net sedang berjalan.",
-  "games.battlenet.update": "Mulai ulang aplikasi desktop Harbor yang telah diperbarui untuk menghubungkan Battle.net.",
-  "games.battlenet.error": "Battle.net tidak dapat diperbarui. Pustaka terakhir yang diimpor tetap tersimpan.",
+  "games.battlenet.update":
+    "Mulai ulang aplikasi desktop Harbor yang telah diperbarui untuk menghubungkan Battle.net.",
+  "games.battlenet.error":
+    "Battle.net tidak dapat diperbarui. Pustaka terakhir yang diimpor tetap tersimpan.",
   "games.battlenet.disconnect": "Putuskan Battle.net",
-  "games.battlenet.removeNote": "Hapus impor akun profil ini. File terpasang dan profil lainnya tetap disimpan.",
+  "games.battlenet.removeNote":
+    "Hapus impor akun profil ini. File terpasang dan profil lainnya tetap disimpan.",
   "games.battlenet.signing": "Selesaikan proses masuk di jendela Battle.net.",
   "games.battlenet.cached": "{count} game akun · Terakhir diperbarui {date}",
 
   "games.launcherSession.waiting": "Menunggu game",
   "games.launcherSession.unconfirmed": "Memeriksa status game",
   "games.launcherSession.notStarted": "Game tidak dimulai",
-  "games.launcherSession.error": "Aktivitas game tidak dapat dicatat. Buka kembali Harbor untuk mencoba lagi.",
+  "games.launcherSession.error":
+    "Aktivitas game tidak dapat dicatat. Buka kembali Harbor untuk mencoba lagi.",
 
   "games.steamImport.importedTitle": "Game yang diimpor",
   "games.steamImport.excluded": "Diabaikan oleh pengaturan impor",
   "games.steamImport.ignoreSettings": "ID Steam yang diabaikan ({count})",
   "games.steamImport.ignoreLabel": "ID Steam untuk diabaikan",
-  "games.steamImport.ignoreNote": "Lewati ID ini saat impor manual. Entri pustaka dan berkas yang ada tetap tersimpan. Kosongkan kolom untuk berhenti mengabaikannya.",
+  "games.steamImport.ignoreNote":
+    "Lewati ID ini saat impor manual. Entri pustaka dan berkas yang ada tetap tersimpan. Kosongkan kolom untuk berhenti mengabaikannya.",
   "games.steamImport.ignoreSave": "Simpan ID yang diabaikan",
   "games.steamImport.ignoreSaved": "ID yang diabaikan disimpan.",
   "games.steamImport.title": "Impor game Steam",
-  "games.steamImport.note": "Simpan catatan game dalam profil Harbor ini. Kepemilikan dan pemasangan diperiksa terpisah.",
+  "games.steamImport.note":
+    "Simpan catatan game dalam profil Harbor ini. Kepemilikan dan pemasangan diperiksa terpisah.",
   "games.steamImport.input": "ID aplikasi Steam atau URL toko",
   "games.steamImport.profile": "Pilih profil Depressurizer",
   "games.steamImport.count": "{selected} dipilih · {total} entri",
-  "games.steamImport.unavailableNote": "Entri yang tidak tersedia tidak dicentang. Pilih untuk menyimpan ID dan memuat detailnya nanti.",
+  "games.steamImport.unavailableNote":
+    "Entri yang tidak tersedia tidak dicentang. Pilih untuk menyimpan ID dan memuat detailnya nanti.",
   "games.steamImport.unknown": "Aplikasi Steam {id}",
   "games.steamImport.ready": "Detail Steam ditemukan",
   "games.steamImport.profileName": "Nama dari profil",
@@ -43,10 +54,14 @@ export default {
   "games.steamImport.invalid": "ID atau URL tidak valid",
   "games.steamImport.duplicate": "Entri duplikat",
   "games.steamImport.nonSteam": "Pintasan non-Steam · dilewati",
-  "games.steamImport.limit": "Satu profil mendukung hingga 5.000 game impor. Berkas harus di bawah 4 MB.",
-  "games.steamImport.inputError": "Masukkan ID Steam atau URL toko yang valid, atau pilih profil Depressurizer yang valid.",
-  "games.steamImport.writeError": "Impor tidak dapat disimpan. Entri yang ada tidak berubah. Coba lagi.",
-  "games.steamImport.readError": "Game impor tidak dapat dibaca. Coba lagi sebelum mengubah apa pun.",
+  "games.steamImport.limit":
+    "Satu profil mendukung hingga 5.000 game impor. Berkas harus di bawah 4 MB.",
+  "games.steamImport.inputError":
+    "Masukkan ID Steam atau URL toko yang valid, atau pilih profil Depressurizer yang valid.",
+  "games.steamImport.writeError":
+    "Impor tidak dapat disimpan. Entri yang ada tidak berubah. Coba lagi.",
+  "games.steamImport.readError":
+    "Game impor tidak dapat dibaca. Coba lagi sebelum mengubah apa pun.",
   "games.steamImport.done": "Ditambahkan ke pustaka: {count}",
   "games.steamImport.stop": "Hentikan pemeriksaan",
   "games.steamImport.restart": "Mulai ulang",
@@ -65,7 +80,8 @@ export default {
   "games.libraryStatus.finished": "Selesai",
   "games.libraryStatus.onHold": "Ditunda",
   "games.libraryStatus.stopped": "Berhenti dimainkan",
-  "games.libraryStatus.note": "Pilihan untuk salinan ini disimpan di profil Harbor ini. Waktu bermain dan pencapaian tidak akan mengubahnya.",
+  "games.libraryStatus.note":
+    "Pilihan untuk salinan ini disimpan di profil Harbor ini. Waktu bermain dan pencapaian tidak akan mengubahnya.",
 
   "games.unified.playtime": "Waktu bermain",
   "games.unified.playtime.all": "Semua waktu bermain",
@@ -78,8 +94,10 @@ export default {
   "games.unified.playtime.steam": "{time} di Steam",
   "games.unified.playtime.zeroSteam": "Belum ada waktu bermain tercatat di Steam",
   "games.unified.playtime.zeroHarbor": "Belum ada waktu bermain tercatat di Harbor",
-  "games.unified.playtime.unknownHint": "Waktu bermain akun Steam tidak tersedia, atau sumber ini tidak melaporkan waktu bermain.",
-  "games.unified.playtime.note": "Menggunakan total Steam dan waktu yang tercatat di Harbor, termasuk koreksi Anda. Waktu yang tidak tersedia dipisahkan.",
+  "games.unified.playtime.unknownHint":
+    "Waktu bermain akun Steam tidak tersedia, atau sumber ini tidak melaporkan waktu bermain.",
+  "games.unified.playtime.note":
+    "Menggunakan total Steam dan waktu yang tercatat di Harbor, termasuk koreksi Anda. Waktu yang tidak tersedia dipisahkan.",
   "games.unified.note": "Koleksi Steam, gim PC, dan ROM yang kamu impor dalam satu tampilan.",
   "games.unified.allSources": "Semua sumber",
   "games.unified.availability": "Ketersediaan",
@@ -94,15 +112,19 @@ export default {
   "games.unified.state.setup": "Perlu penyiapan",
   "games.unified.state.unknown": "Instalasi belum diperiksa",
   "games.unified.refresh": "Muat ulang koleksi lokal",
-  "games.unified.scanNote": "Beberapa koleksi tidak dapat diperiksa. Gim di dalamnya tetap tampil di sini dengan status tidak diketahui atau tidak tersedia.",
-  "games.unified.partial": "Beberapa folder tidak dapat diperiksa; sebagian instalasi mungkin belum dikenali.",
+  "games.unified.scanNote":
+    "Beberapa koleksi tidak dapat diperiksa. Gim di dalamnya tetap tampil di sini dengan status tidak diketahui atau tidak tersedia.",
+  "games.unified.partial":
+    "Beberapa folder tidak dapat diperiksa; sebagian instalasi mungkin belum dikenali.",
   "games.unified.empty": "Satukan gim kamu",
-  "games.unified.emptyNote": "Hubungkan Steam, tambahkan gim PC, atau impor folder ROM untuk melihat gim kamu di sini.",
+  "games.unified.emptyNote":
+    "Hubungkan Steam, tambahkan gim PC, atau impor folder ROM untuk melihat gim kamu di sini.",
   "games.unified.pcGames": "Kelola gim PC",
   "games.unified.roms": "Kelola ROM",
   "games.unified.steam": "Kelola Steam",
   "games.unified.results": "{count} dari {total} gim",
-  "games.unified.browser": "Menjalankan dan memasang gim secara lokal tersedia di aplikasi desktop.",
+  "games.unified.browser":
+    "Menjalankan dan memasang gim secara lokal tersedia di aplikasi desktop.",
   "games.unified.manage": "Kelola {name}",
   "games.unified.lastPlayed": "Terakhir dimainkan {date}",
   "games.unified.clear": "Hapus filter koleksi",
@@ -117,5 +139,5 @@ export default {
   "games.libraryNews.failed": "Kabar game tidak dapat dimuat.",
   "games.libraryNews.hide": "Sembunyikan kabar game",
   "games.libraryNews.show": "Tampilkan kabar game",
-  "games.libraryNews.pending": "Memeriksa kabar game…"
+  "games.libraryNews.pending": "Memeriksa kabar game…",
 };

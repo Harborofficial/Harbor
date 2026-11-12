@@ -26,7 +26,8 @@ export default {
   "games.modHub.entryNote": "मॉड खोजें और इंस्टॉल की गई सामग्री सँभालें।",
   "games.modHub.switchGame": "गेम बदलें",
   "games.modHub.creatorDownload": "निर्माता से डाउनलोड करें",
-  "games.modHub.legacyNote": "The Sims 2 और The Sims 3 के डाउनलोड निर्माता की वेबसाइट पर मिलते हैं। स्थानीय मॉड प्रबंधन अभी The Sims 4 के लिए उपलब्ध है।",
+  "games.modHub.legacyNote":
+    "The Sims 2 और The Sims 3 के डाउनलोड निर्माता की वेबसाइट पर मिलते हैं। स्थानीय मॉड प्रबंधन अभी The Sims 4 के लिए उपलब्ध है।",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "पैटर्न",
   "games.modHub.sets": "थीम वाले सेट",
@@ -42,5 +43,5 @@ export default {
   "games.modHub.creator": "निर्माता",
   "games.modHub.viewOnSource": "निर्माता का पेज",
   "games.modHub.filesPending": "प्रोजेक्ट की फ़ाइलें लोड हो रही हैं…",
-  "games.modHub.picked": "MTS की पसंद"
+  "games.modHub.picked": "MTS की पसंद",
 };

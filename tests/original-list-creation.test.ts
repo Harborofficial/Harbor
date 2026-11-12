@@ -18,6 +18,7 @@ function loader(extra: Record<string, unknown> = {}) {
     "lucide-react": icons,
     "@/lib/custom-lists": lists,
     "@/lib/membership-operations": membership,
+    "@/lib/manga-lists": { mangaLists: {} },
     "@/lib/membership-actions": {
       membershipFailureMessage: (result: { reason: string }) => result.reason,
     },

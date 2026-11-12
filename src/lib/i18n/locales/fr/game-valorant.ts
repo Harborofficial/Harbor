@@ -21,7 +21,8 @@ export default {
   "games.valorant.search": "Trouver un agent",
   "games.valorant.referenceError": "Impossible de charger les références du jeu.",
   "games.valorant.stale": "Actualisation impossible. Voici les derniers résultats chargés.",
-  "games.valorant.metaError": "Les statistiques classées sont indisponibles. Les fiches des agents restent accessibles.",
+  "games.valorant.metaError":
+    "Les statistiques classées sont indisponibles. Les fiches des agents restent accessibles.",
   "games.valorant.agents": "Classement des agents",
   "games.valorant.sort": "Trier les agents",
   "games.valorant.winSort": "Meilleur taux de victoire",
@@ -34,20 +35,24 @@ export default {
   "games.valorant.sampleNote": "Les agents avec moins de 200 apparitions figurent en dernier.",
   "games.valorant.empty": "Aucun résultat pour ces filtres.",
   "games.valorant.checked": "Vérifié le {date}",
-  "games.valorant.metaScope": "Données classées OP.GG pour le patch sélectionné. Le taux de sélection représente la part des apparitions d’agents. Les résultats reflètent l’échantillon de la source, pas tous les joueurs.",
-  "games.valorant.referenceScope": "Illustrations et références via Valorant-API. Les mises à jour peuvent être décalées. Harbor n’est pas approuvé par Riot Games.",
+  "games.valorant.metaScope":
+    "Données classées OP.GG pour le patch sélectionné. Le taux de sélection représente la part des apparitions d’agents. Les résultats reflètent l’échantillon de la source, pas tous les joueurs.",
+  "games.valorant.referenceScope":
+    "Illustrations et références via Valorant-API. Les mises à jour peuvent être décalées. Harbor n’est pas approuvé par Riot Games.",
   "games.valorant.samples": "{count} apparitions",
   "games.valorant.smallSample": "Petit échantillon",
   "games.valorant.abilities": "Compétences",
   "games.valorant.watchAbility": "Voir la compétence",
   "games.valorant.videoError": "Impossible de lire cette démonstration.",
   "games.valorant.mapMeta": "Méta des agents sur cette carte",
-  "games.valorant.mapScope": "Référence incluant les cartes hors de la rotation classée actuelle. Les noms de cartes et de positions sont en anglais.",
+  "games.valorant.mapScope":
+    "Référence incluant les cartes hors de la rotation classée actuelle. Les noms de cartes et de positions sont en anglais.",
   "games.valorant.callouts": "Positions",
   "games.valorant.compareWeapon": "Comparer avec",
   "games.valorant.weapon": "Arme",
   "games.valorant.distance": "Distance",
-  "games.valorant.damageScope": "Valeurs de base du tir principal avant armure, pénétration ou compétences. Dégâts par plomb pour les fusils à pompe.",
+  "games.valorant.damageScope":
+    "Valeurs de base du tir principal avant armure, pénétration ou compétences. Dégâts par plomb pour les fusils à pompe.",
   "games.valorant.weaponStats": "Statistiques de l’arme",
   "games.valorant.cost": "Crédits",
   "games.valorant.magazine": "Chargeur",
@@ -55,5 +60,5 @@ export default {
   "games.valorant.reload": "Rechargement · secondes",
   "games.valorant.head": "Dégâts à la tête",
   "games.valorant.body": "Dégâts au corps",
-  "games.valorant.legs": "Dégâts aux jambes"
+  "games.valorant.legs": "Dégâts aux jambes",
 };

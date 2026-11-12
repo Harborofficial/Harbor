@@ -3,8 +3,10 @@ export default {
   "games.sources.links.copied": "تم النسخ",
 
   "games.sources.catalogProgress": "جارٍ التحقق من المصادر · {checked}/{total}",
-  "games.sources.source_capacity": "تتجاوز كتالوجات المصادر حد الملف الشخصي البالغ 2 غيغابايت. أزل المصادر غير المستخدمة وحاول مجددًا. لم تتغير الكتالوجات المحفوظة.",
-  "games.sources.source_quota": "لا توجد مساحة كافية لحفظ هذه المصادر. أفرغ مساحة أو أزل المصادر غير المستخدمة، ثم حاول مجددًا. لم تتغير الكتالوجات المحفوظة.",
+  "games.sources.source_capacity":
+    "تتجاوز كتالوجات المصادر حد الملف الشخصي البالغ 2 غيغابايت. أزل المصادر غير المستخدمة وحاول مجددًا. لم تتغير الكتالوجات المحفوظة.",
+  "games.sources.source_quota":
+    "لا توجد مساحة كافية لحفظ هذه المصادر. أفرغ مساحة أو أزل المصادر غير المستخدمة، ثم حاول مجددًا. لم تتغير الكتالوجات المحفوظة.",
 
   "games.sources.batch.busy": "جارٍ تجهيز مجموعة ملفات أخرى. حاول مجددًا بعد قليل.",
   "games.sources.batch.limit": "اختر ما يصل إلى 200 ملف في المرة الواحدة.",
@@ -19,7 +21,8 @@ export default {
 
   "games.sources.verification.action": "التحقق من المصدر",
 
-  "games.sources.verification.waiting": "أكمل التحقق في نافذة المصدر. سيفحص Harbor الكتالوج بعد ذلك.",
+  "games.sources.verification.waiting":
+    "أكمل التحقق في نافذة المصدر. سيفحص Harbor الكتالوج بعد ذلك.",
 
   "games.sources.source_verify_busy": "يجري التحقق من مصدر آخر. أكمل التحقق أو أغلق نافذته أولاً.",
 
@@ -32,12 +35,15 @@ export default {
   "games.sources.browser.direct": "تنزيل مباشر",
 
   "games.sources.site.title": "افتح موقعًا",
-  "games.sources.site.note": "الصق رابط صفحة تنزيل من أي موقع. يفتحه Harbor في نافذته الخاصة، تختار الملف هناك، ثم ينزل داخل Harbor.",
+  "games.sources.site.note":
+    "الصق رابط صفحة تنزيل من أي موقع. يفتحه Harbor في نافذته الخاصة، تختار الملف هناك، ثم ينزل داخل Harbor.",
   "games.sources.site.url": "رابط الصفحة",
   "games.sources.site.open": "افتح الموقع",
   "games.sources.site.invalid": "يجب أن يكون رابط https عام.",
-  "games.sources.browser.intro": "لا تحتاج إلى حساب Debrid. اختر ملفًا على {host}، ثم اختر مكان حفظه في Harbor.",
-  "games.sources.browser.fallback": "إذا لم يبدأ التنزيل تلقائيًا، استخدم رابط {host} الاحتياطي في الصفحة. سيلتقط Harbor الملف على أي حال.",
+  "games.sources.browser.intro":
+    "لا تحتاج إلى حساب Debrid. اختر ملفًا على {host}، ثم اختر مكان حفظه في Harbor.",
+  "games.sources.browser.fallback":
+    "إذا لم يبدأ التنزيل تلقائيًا، استخدم رابط {host} الاحتياطي في الصفحة. سيلتقط Harbor الملف على أي حال.",
 
   "games.sources.browser.choose": "اختيار ملف على {host}",
 
@@ -47,11 +53,13 @@ export default {
 
   "games.sources.browser.another": "اختيار ملف آخر",
 
-  "games.sources.browser.failed": "تعذّر على {host} إرسال الملف إلى Harbor. حاول مجددًا أو افتحه على {host}.",
+  "games.sources.browser.failed":
+    "تعذّر على {host} إرسال الملف إلى Harbor. حاول مجددًا أو افتحه على {host}.",
 
   "games.sources.browser.timeout": "انتهت مهلة اختيار الملف. افتح {host} مجددًا لاختيار ملف.",
 
-  "games.sources.browser.restart": "أعد تشغيل Harbor بعد التحديث لاستخدام التنزيل المباشر من {host}.",
+  "games.sources.browser.restart":
+    "أعد تشغيل Harbor بعد التحديث لاستخدام التنزيل المباشر من {host}.",
 
   "games.sources.retrySavedCatalog": "إعادة محاولة قراءة الفهرس المحفوظ",
 
@@ -63,9 +71,11 @@ export default {
 
   "games.sources.partialResults": "المصادر غير المتاحة: {count}. قد تكون النتائج غير مكتملة.",
 
-  "games.sources.partialRecent": "المصادر غير المتاحة: {count}. قد تكون الإصدارات الحديثة غير مكتملة.",
+  "games.sources.partialRecent":
+    "المصادر غير المتاحة: {count}. قد تكون الإصدارات الحديثة غير مكتملة.",
 
-  "games.sources.source_incomplete": "تعذّرت قراءة بعض الكتالوجات المحفوظة. استعدها أو أزلها قبل إضافة المزيد من البيانات.",
+  "games.sources.source_incomplete":
+    "تعذّرت قراءة بعض الكتالوجات المحفوظة. استعدها أو أزلها قبل إضافة المزيد من البيانات.",
 
   "games.sources.saving": "جارٍ حفظ المصدر…",
 
@@ -95,17 +105,21 @@ export default {
 
   "games.sources.platform.compatibility": "إصدار Windows · يتطلب Wine أو Proton",
 
-  "games.sources.platform.compatibilityNote": "على Linux، اضبط Wine أو Proton في مكتبتك المحلية. يختلف التوافق، بما فيه مكافحة الغش، حسب اللعبة. لألعاب Steam، استخدم إعدادات التوافق في Steam.",
+  "games.sources.platform.compatibilityNote":
+    "على Linux، اضبط Wine أو Proton في مكتبتك المحلية. يختلف التوافق، بما فيه مكافحة الغش، حسب اللعبة. لألعاب Steam، استخدم إعدادات التوافق في Steam.",
 
   "games.sources.platform.other": "إصدار {platform} · ليس أصليًا على {host}",
 
-  "games.sources.platform.otherNote": "اختر إصدارًا لنظام تشغيلك. لا يستطيع Harbor تثبيت هذه الحزمة أو تشغيلها مباشرة على هذا الجهاز.",
+  "games.sources.platform.otherNote":
+    "اختر إصدارًا لنظام تشغيلك. لا يستطيع Harbor تثبيت هذه الحزمة أو تشغيلها مباشرة على هذا الجهاز.",
 
   "games.sources.platform.unknown": "المنصة غير محددة",
 
-  "games.sources.platform.unknownNote": "لا يحدد المصدر نظام تشغيل الحزمة. تحقق من معلومات الناشر قبل التنزيل.",
+  "games.sources.platform.unknownNote":
+    "لا يحدد المصدر نظام تشغيل الحزمة. تحقق من معلومات الناشر قبل التنزيل.",
 
-  "games.sources.platform.browseNote": "استخدم Harbor لسطح المكتب لتنزيل ملفات الألعاب المحلية وإدارتها.",
+  "games.sources.platform.browseNote":
+    "استخدم Harbor لسطح المكتب لتنزيل ملفات الألعاب المحلية وإدارتها.",
 
   "games.sources.platform.browse": "إصدار {platform}",
 
@@ -113,15 +127,11 @@ export default {
 
   "games.setup.openNative": "فتح المثبّت",
 
-
-
   "games.sources.art.torrent": "تنزيل تورنت",
 
   "games.sources.art.engine": "محرك التورنت في Harbor",
 
   "games.sources.art.reviewTorrent": "تنزيل عبر Harbor",
-
-
 
   "games.sources.ad.note": "جهّز هذا الملف عبر AllDebrid، ثم اختر مكان حفظه.",
 
@@ -129,7 +139,8 @@ export default {
 
   "games.sources.ad.passwordRequired": "يحتاج هذا الرابط إلى كلمة مرور. أدخلها وحاول مجددًا.",
 
-  "games.sources.ad.blocked": "يطلب AllDebrid تأكيد هذا الاتصال. راجع بريدك أو حساب AllDebrid، ثم أعد المحاولة.",
+  "games.sources.ad.blocked":
+    "يطلب AllDebrid تأكيد هذا الاتصال. راجع بريدك أو حساب AllDebrid، ثم أعد المحاولة.",
 
   "games.sources.ad.quota": "نفدت حصتك في AllDebrid لهذا المضيف.",
 
@@ -145,7 +156,8 @@ export default {
 
   "games.sources.ad.kept": "يبقى الطلب محفوظًا بعد الإغلاق. أعد فتح الرابط للتحقق منه.",
 
-  "games.sources.ad.uncertain": "قد يكون هذا الطلب موجودًا في AllDebrid. راجع حسابك قبل تجهيزه مرة أخرى.",
+  "games.sources.ad.uncertain":
+    "قد يكون هذا الطلب موجودًا في AllDebrid. راجع حسابك قبل تجهيزه مرة أخرى.",
 
   "games.sources.ad.renew": "جهّز رابطًا جديدًا لتنزيل هذا الملف.",
 
@@ -175,11 +187,13 @@ export default {
 
   "games.sources.discovery.reviewNote": "تُحفظ قوائم الكتالوج فقط. تُنزّل الملفات عندما تختارها.",
 
-  "games.sources.source_no_catalog": "لا ينشر هذا الموقع رابط كتالوج يستطيع Harbor قراءته. ألصق رابط كتالوج JSON الخاص به بدلًا من ذلك.",
+  "games.sources.source_no_catalog":
+    "لا ينشر هذا الموقع رابط كتالوج يستطيع Harbor قراءته. ألصق رابط كتالوج JSON الخاص به بدلًا من ذلك.",
 
   "games.sources.source_url": "أدخل عنوان موقع أو رابط كتالوج HTTP(S) أو رابط تثبيت Hydra.",
 
-  "games.sources.source_limit": "حد الكتالوج: 64 ميغابايت أو 150٬000 إصدار. حد الملف الشخصي: 2 غيغابايت أو 128 مصدرًا.",
+  "games.sources.source_limit":
+    "حد الكتالوج: 64 ميغابايت أو 150٬000 إصدار. حد الملف الشخصي: 2 غيغابايت أو 128 مصدرًا.",
 
   "games.sources.source_processing": "تعذرت معالجة الكتالوج. حاول مرة أخرى.",
 
@@ -235,7 +249,8 @@ export default {
 
   "games.sources.links.empty": "لم تُعد الخدمة أي ملفات قابلة للتنزيل.",
 
-  "games.sources.links.invalid": "أعادت الخدمة معلومات ملفات غير مكتملة. افتح المصدر أو حاول مجددًا.",
+  "games.sources.links.invalid":
+    "أعادت الخدمة معلومات ملفات غير مكتملة. افتح المصدر أو حاول مجددًا.",
 
   "games.sources.links.failed": "تعذر على الخدمة تجهيز هذا الرابط. تحقق من توفره ومن حسابك.",
 
@@ -323,7 +338,8 @@ export default {
 
   "games.sources.host.queueNote": "يستخدم هذا المضيف مسار النقل السحابي للخدمة.",
 
-  "games.sources.host.unknownNote": "هذا النطاق غير مدرج في دليل المزوّد. يمكنك تجربة الرابط رغم ذلك.",
+  "games.sources.host.unknownNote":
+    "هذا النطاق غير مدرج في دليل المزوّد. يمكنك تجربة الرابط رغم ذلك.",
 
   "games.sources.host.fileNote": "يتم فحص توفر الملف عند تجهيز الرابط.",
 
@@ -339,7 +355,8 @@ export default {
 
   "games.sources.pm.kept": "يبقى نقل Premiumize محفوظًا عند الإغلاق.",
 
-  "games.sources.pm.uncertain": "قد يكون هذا الطلب موجودًا في Premiumize. راجع عمليات النقل الأخيرة قبل إنشاء طلب آخر.",
+  "games.sources.pm.uncertain":
+    "قد يكون هذا الطلب موجودًا في Premiumize. راجع عمليات النقل الأخيرة قبل إنشاء طلب آخر.",
 
   "games.sources.pm.check": "فحص Premiumize",
 
@@ -353,7 +370,8 @@ export default {
 
   "games.sources.pm.select": "استخدام هذا النقل",
 
-  "games.sources.pm.review": "اختر عملية النقل التي أرسلتها. لا يستطيع Harbor مطابقة مصدرها تلقائيًا.",
+  "games.sources.pm.review":
+    "اختر عملية النقل التي أرسلتها. لا يستطيع Harbor مطابقة مصدرها تلقائيًا.",
 
   "games.sources.pm.retry": "إعادة محاولة النقل",
 
@@ -417,7 +435,6 @@ export default {
 
   "games.sources.batch.destination": "اختيار مجلد",
 
-  "games.download.transfer_batch_names": "بعض أسماء الملفات متطابقة أو لا يمكن حفظها دون تغيير. اختر هذه الملفات كلًا على حدة."
-
+  "games.download.transfer_batch_names":
+    "بعض أسماء الملفات متطابقة أو لا يمكن حفظها دون تغيير. اختر هذه الملفات كلًا على حدة.",
 };
-

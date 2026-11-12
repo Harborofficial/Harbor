@@ -65,7 +65,10 @@ test("above the floor, a barely qualifying high rating loses to a massively vote
     credit({ title: "Ordinary E", voteAverage: 5.5, voteCount: 9000 }),
   ];
   const ranked = rankByRating([boutique, blockbuster, ...ordinary], 10);
-  assert.deepEqual(ranked.slice(0, 2).map((c) => c.title), ["Blockbuster", "Boutique"]);
+  assert.deepEqual(
+    ranked.slice(0, 2).map((c) => c.title),
+    ["Blockbuster", "Boutique"],
+  );
 });
 
 test("the prior is not inflated by a swarm of thinly voted outliers", () => {

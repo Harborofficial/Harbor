@@ -83,7 +83,8 @@ export function useDownloadTitle(meta: Meta, isCurrent: () => boolean) {
         if (match) {
           const targetLanguage = effectiveTmdbLanguage();
           const languageBase = tmdbLanguageBase(targetLanguage);
-          const wantsTranslations = settings.translateTitles && !!languageBase && languageBase !== "en";
+          const wantsTranslations =
+            settings.translateTitles && !!languageBase && languageBase !== "en";
           const header = await get<TitleHeader>(settings.tmdbKey, `${match[1]}/${match[2]}`, {
             language: targetLanguage || "en",
             ...(wantsTranslations ? { append_to_response: "translations" } : {}),
@@ -132,13 +133,7 @@ export function useDownloadTitle(meta: Meta, isCurrent: () => boolean) {
     return () => {
       cancelled = true;
     };
-  }, [
-    meta,
-    authKey,
-    settings.tmdbKey,
-    settings.tmdbLanguage,
-    anime,
-  ]);
+  }, [meta, authKey, settings.tmdbKey, settings.tmdbLanguage, anime]);
 
   const display = resolved?.meta ?? meta;
   useEffect(() => {

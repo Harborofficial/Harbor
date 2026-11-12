@@ -4,11 +4,7 @@ import { useSettings } from "@/lib/settings";
 import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
 import { useBpT } from "../../bp-i18n";
 import { BpSubtitlePreview } from "../bp-subtitle-preview";
-import {
-  BP_ROW_FLUSH,
-  BpDecisionNote,
-  BpDecisionScroll,
-} from "../bp-step-parts";
+import { BP_ROW_FLUSH, BpDecisionNote, BpDecisionScroll } from "../bp-step-parts";
 
 const COMMON = 24;
 const PER_ROW = 4;

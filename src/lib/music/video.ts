@@ -146,8 +146,7 @@ export function musicVideoStream(
       const next = await proxied(stream);
       if (expires > Date.now()) {
         streamCache.set(key, { expires, stream: next.stream, sessions: next.sessions });
-        while (streamCache.size > STREAM_LIMIT)
-          dropCached(streamCache.keys().next().value!);
+        while (streamCache.size > STREAM_LIMIT) dropCached(streamCache.keys().next().value!);
       } else {
         releaseSessions(next.sessions);
       }

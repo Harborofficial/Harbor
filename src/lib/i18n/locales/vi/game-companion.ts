@@ -13,13 +13,15 @@ export default {
   "games.wow.weekly.period": "Kỳ đặt lại",
   "games.wow.weekly.current": "Kỳ hiện tại",
   "games.wow.weekly.previous": "Kỳ trước",
-  "games.wow.weekly.awaiting": "Đang chờ dữ liệu kỳ đặt lại hiện tại để hiển thị lượt chạy trong tuần.",
+  "games.wow.weekly.awaiting":
+    "Đang chờ dữ liệu kỳ đặt lại hiện tại để hiển thị lượt chạy trong tuần.",
   "games.wow.weekly.unavailable": "Không có dữ liệu lượt chạy cho kỳ này.",
   "games.wow.weekly.highest": "Chìa khóa cao nhất trong danh sách",
   "games.wow.weekly.shown": "Số lượt chạy trong danh sách: {count}",
   "games.wow.weekly.partial": "Không thể xác minh một số lượt chạy đã ghi nhận.",
   "games.wow.weekly.empty": "Chưa ghi nhận lượt chạy nào trong kỳ này.",
-  "games.wow.weekly.scope": "Raider.IO liệt kê tối đa 10 chìa khóa cao nhất của mùa hiện tại cho mỗi kỳ đặt lại. Các lượt chạy mới có thể mất thời gian để xuất hiện.",
+  "games.wow.weekly.scope":
+    "Raider.IO liệt kê tối đa 10 chìa khóa cao nhất của mùa hiện tại cho mỗi kỳ đặt lại. Các lượt chạy mới có thể mất thời gian để xuất hiện.",
   "games.helldivers.title": "Chiến tranh Thiên hà",
   "games.helldivers.intro": "Chọn điểm đổ bộ tiếp theo.",
   "games.helldivers.refresh": "Làm mới Chiến tranh Thiên hà",
@@ -54,7 +56,8 @@ export default {
   "games.helldivers.disabled": "Nguồn đánh dấu hành tinh này không khả dụng.",
   "games.helldivers.liberated": "Đã giải phóng",
   "games.helldivers.recovery": "Địch hồi phục: {rate}/giờ",
-  "games.helldivers.recoveryNote": "Đây là tốc độ hồi phục của địch, không phải tốc độ giải phóng thực.",
+  "games.helldivers.recoveryNote":
+    "Đây là tốc độ hồi phục của địch, không phải tốc độ giải phóng thực.",
   "games.helldivers.event": "Sự kiện hành tinh",
   "games.helldivers.eventHealth": "Máu sự kiện còn lại: {percent}",
   "games.helldivers.regions": "Khu vực",
@@ -84,13 +87,16 @@ export default {
   "games.warhammer.evidence": "Thông tin nhà phát hành về {name}",
   "games.warhammer.crossover": "Giao thoa 40K / Age of Sigmar",
   "games.warhammer.faction.marines": "Space Marines",
-  "games.warhammer.lore.marines": "Những chiến binh bọc giáp của nhân loại, được tổ chức thành các Chapter riêng.",
+  "games.warhammer.lore.marines":
+    "Những chiến binh bọc giáp của nhân loại, được tổ chức thành các Chapter riêng.",
   "games.warhammer.faction.mechanicus": "Adeptus Mechanicus",
-  "games.warhammer.lore.mechanicus": "Giới tu sĩ tôn thờ máy móc của Imperium, gìn giữ công nghệ cổ đại.",
+  "games.warhammer.lore.mechanicus":
+    "Giới tu sĩ tôn thờ máy móc của Imperium, gìn giữ công nghệ cổ đại.",
   "games.warhammer.faction.necrons": "Necrons",
   "games.warhammer.lore.necrons": "Các triều đại cổ xưa thức tỉnh trong cơ thể kim loại sống.",
   "games.warhammer.faction.orks": "Orks",
-  "games.warhammer.lore.orks": "Những kẻ da xanh hiếu chiến với cỗ máy chắp vá phục vụ chiến tranh.",
+  "games.warhammer.lore.orks":
+    "Những kẻ da xanh hiếu chiến với cỗ máy chắp vá phục vụ chiến tranh.",
   "games.warhammer.faction.tyranids": "Tyranids",
   "games.warhammer.lore.tyranids": "Các hạm đội tổ ong ngoài hành tinh nuốt chửng cả thế giới.",
   "games.warhammer.faction.chaos": "Thế lực Chaos",
@@ -98,8 +104,10 @@ export default {
   "games.warframe.title": "Khắp Hệ Origin",
   "games.warframe.intro": "Xem nội dung đang có trước nhiệm vụ tiếp theo.",
   "games.warframe.refresh": "Làm mới lịch thế giới",
-  "games.warframe.unavailable": "Không thể làm mới lịch. Thông tin đang hiển thị thuộc bản ghi trước.",
-  "games.warframe.stale": "Nguồn đang chậm. Đây là trạng thái được báo cáo gần nhất; mục hết hạn đã ẩn.",
+  "games.warframe.unavailable":
+    "Không thể làm mới lịch. Thông tin đang hiển thị thuộc bản ghi trước.",
+  "games.warframe.stale":
+    "Nguồn đang chậm. Đây là trạng thái được báo cáo gần nhất; mục hết hạn đã ẩn.",
   "games.warframe.expired": "Bản ghi này quá cũ. Danh sách hiện tại sẽ ẩn đến khi có dữ liệu mới.",
   "games.warframe.partial": "Một số phần của lịch chưa khả dụng.",
   "games.warframe.reported": "Báo cáo gần nhất",
@@ -137,7 +145,8 @@ export default {
   "games.warframe.noMatches": "Không có khe nứt hiện tại khớp bộ lọc.",
   "games.warframe.more": "Xem thêm",
   "games.warframe.snapshot": "Bản ghi: {date}",
-  "games.warframe.scope": "Lịch thế giới dùng chung. Quyền truy cập phụ thuộc tiến độ nhiệm vụ cốt truyện. Tên nhiệm vụ được cung cấp bằng tiếng Anh.",
+  "games.warframe.scope":
+    "Lịch thế giới dùng chung. Quyền truy cập phụ thuộc tiến độ nhiệm vụ cốt truyện. Tên nhiệm vụ được cung cấp bằng tiếng Anh.",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -148,9 +157,11 @@ export default {
   "games.warframe.state.corpus": "Corpus",
   "games.warframe.state.grineer": "Grineer",
   "games.rivals.title": "Chọn anh hùng của bạn",
-  "games.rivals.intro": "Khám phá các anh hùng, so sánh đối thủ và tìm đồng đội cho trận tiếp theo.",
+  "games.rivals.intro":
+    "Khám phá các anh hùng, so sánh đối thủ và tìm đồng đội cho trận tiếp theo.",
   "games.rivals.refresh": "Làm mới hướng dẫn",
-  "games.rivals.statsFailed": "Không thể làm mới thống kê. Các số liệu đang hiển thị thuộc lần thống kê trước.",
+  "games.rivals.statsFailed":
+    "Không thể làm mới thống kê. Các số liệu đang hiển thị thuộc lần thống kê trước.",
   "games.rivals.artFailed": "Không thể làm mới hình ảnh và vai trò chính thức.",
   "games.rivals.stale": "Một số thống kê đã cũ hơn hai ngày. Kiểm tra ngày trước khi so sánh.",
   "games.rivals.partial": "Không thể đọc một số bản ghi. Mẫu có thể chưa đầy đủ.",
@@ -178,12 +189,15 @@ export default {
   "games.rivals.heroRate": "Tỷ lệ thắng của {hero} trước từng đối thủ",
   "games.rivals.with": "Cùng đồng đội",
   "games.rivals.duoRate": "Tỷ lệ thắng chung của cặp",
-  "games.rivals.scope": "Các trận cạnh tranh 6 đấu 6 được quan sát, ở mọi trình độ. Ít nhất 200 trận mỗi anh hùng và 100 trận mỗi cặp. Kết quả cặp không thể hiện kỹ năng phối hợp hay dự đoán trận tiếp theo.",
+  "games.rivals.scope":
+    "Các trận cạnh tranh 6 đấu 6 được quan sát, ở mọi trình độ. Ít nhất 200 trận mỗi anh hùng và 100 trận mỗi cặp. Kết quả cặp không thể hiện kỹ năng phối hợp hay dự đoán trận tiếp theo.",
   "games.rivals.snapshot": "Dữ liệu: {date}",
   "games.rivals.noMatches": "Không có anh hùng khớp bộ lọc.",
   "games.rivals.unavailable": "Hướng dẫn không khả dụng. Hãy làm mới.",
-  "games.rivals.pairsFailed": "Không thể làm mới dữ liệu đối đầu. Các cặp đang hiển thị thuộc lần thống kê trước.",
-  "games.rivals.mismatch": "Dữ liệu các nguồn thuộc các mùa khác nhau. Làm mới để so sánh dữ liệu phù hợp.",
+  "games.rivals.pairsFailed":
+    "Không thể làm mới dữ liệu đối đầu. Các cặp đang hiển thị thuộc lần thống kê trước.",
+  "games.rivals.mismatch":
+    "Dữ liệu các nguồn thuộc các mùa khác nhau. Làm mới để so sánh dữ liệu phù hợp.",
   "games.rivals.sample": "{count} trận",
   "games.darktide.scriptures": "Thu hồi kinh sách",
   "games.darktide.grimoires": "Thu hồi sách phép",
@@ -199,13 +213,15 @@ export default {
   "games.darktide.difficulty": "Độ khó",
   "games.darktide.search": "Tìm bản đồ",
   "games.darktide.stale": "Lần kiểm tra trước đã cũ. Làm mới để xem nhiệm vụ hiện có.",
-  "games.darktide.failed": "Không thể làm mới nhiệm vụ. Các nhiệm vụ đang hiển thị là từ lần kiểm tra trước.",
+  "games.darktide.failed":
+    "Không thể làm mới nhiệm vụ. Các nhiệm vụ đang hiển thị là từ lần kiểm tra trước.",
   "games.darktide.partial": "Không thể đọc một số bản ghi nhiệm vụ.",
   "games.darktide.noMatches": "Không có nhiệm vụ khớp bộ lọc.",
   "games.darktide.empty": "Không có nhiệm vụ còn hạn trong dữ liệu mới nhất.",
   "games.darktide.more": "Xem thêm nhiệm vụ",
   "games.darktide.checked": "Đã kiểm tra {date}",
-  "games.darktide.scope": "Dữ liệu cộng đồng. Tính khả dụng và phần thưởng trong game có thể khác; đây không phải bảng nhiệm vụ của nhân vật bạn.",
+  "games.darktide.scope":
+    "Dữ liệu cộng đồng. Tính khả dụng và phần thưởng trong game có thể khác; đây không phải bảng nhiệm vụ của nhân vật bạn.",
   "games.darktide.remaining": "Còn {count} phút",
   "games.darktide.credits": "Phiếu Ordo",
   "games.darktide.xp": "KN",
@@ -245,8 +261,10 @@ export default {
   "games.companion.showAll": "Xem tất cả {count} tướng",
   "games.companion.noMatches": "Không có tướng phù hợp.",
   "games.companion.through": "Các trận tính đến {date}",
-  "games.companion.sampleNote": "Mẫu cộng đồng ở mọi bậc hạng; ít nhất 100 trận mỗi tướng. Không phải dự đoán.",
-  "games.companion.unavailable": "Không thể làm mới dữ liệu. Dữ liệu hiển thị là từ lần kiểm tra trước.",
+  "games.companion.sampleNote":
+    "Mẫu cộng đồng ở mọi bậc hạng; ít nhất 100 trận mỗi tướng. Không phải dự đoán.",
+  "games.companion.unavailable":
+    "Không thể làm mới dữ liệu. Dữ liệu hiển thị là từ lần kiểm tra trước.",
   "games.companion.statsUnavailable": "Chưa có thống kê tướng. Bạn vẫn có thể xem danh sách tướng.",
   "games.gw2.title": "Kho báu Pháp sư",
   "games.gw2.intro": "Chọn phần thưởng và lên kế hoạch dùng Astral Acclaim.",
@@ -257,7 +275,8 @@ export default {
   "games.gw2.partial": "Một số chi tiết vật phẩm không có sẵn. Giá phần thưởng vẫn được tính.",
   "games.gw2.guide": "Hướng dẫn kho báu",
   "games.gw2.checked": "Đã kiểm tra: {date}",
-  "games.gw2.scope": "Được lưu trong hồ sơ Harbor này. Mỗi lựa chọn tính một ưu đãi; số dư, giới hạn mua và quyền truy cập bản mở rộng không được kiểm tra. Xác nhận tình trạng có sẵn rồi mua trong trò chơi.",
+  "games.gw2.scope":
+    "Được lưu trong hồ sơ Harbor này. Mỗi lựa chọn tính một ưu đãi; số dư, giới hạn mua và quyền truy cập bản mở rộng không được kiểm tra. Xác nhận tình trạng có sẵn rồi mua trong trò chơi.",
   "games.gw2.total": "Tổng dự kiến",
   "games.gw2.currency": "Astral Acclaim",
   "games.gw2.selected": "Đã chọn {count} ưu đãi",
@@ -287,14 +306,16 @@ export default {
   "games.gw2.quantity": "Số lượng: {count}",
   "games.deadlockBuilds.open": "Bản dựng cộng đồng",
   "games.deadlockBuilds.back": "Quay lại bản dựng",
-  "games.deadlockBuilds.intro": "Hướng dẫn trang bị từ cộng đồng. Hãy xem ngày cập nhật trước khi chọn.",
+  "games.deadlockBuilds.intro":
+    "Hướng dẫn trang bị từ cộng đồng. Hãy xem ngày cập nhật trước khi chọn.",
   "games.deadlockBuilds.search": "Tìm bản dựng",
   "games.deadlockBuilds.recent": "Mới cập nhật",
   "games.deadlockBuilds.popular": "Yêu thích trong tuần",
   "games.deadlockBuilds.language": "Ngôn ngữ bản dựng",
   "games.deadlockBuilds.allLanguages": "Mọi ngôn ngữ",
   "games.deadlockBuilds.refresh": "Làm mới bản dựng",
-  "games.deadlockBuilds.failed": "Không thể làm mới bản dựng. Hướng dẫn đã tải trước đó có thể đã cũ.",
+  "games.deadlockBuilds.failed":
+    "Không thể làm mới bản dựng. Hướng dẫn đã tải trước đó có thể đã cũ.",
   "games.deadlockBuilds.updated": "Cập nhật {date}",
   "games.deadlockBuilds.undated": "Không rõ ngày cập nhật",
   "games.deadlockBuilds.favorites": "{count} lượt yêu thích trong tuần",
@@ -306,8 +327,10 @@ export default {
   "games.deadlockBuilds.copy": "Sao chép ID bản dựng",
   "games.deadlockBuilds.use": "ID bản dựng:",
   "games.deadlockBuilds.copyFailed": "Sao chép thất bại. Chọn ID để sao chép thủ công.",
-  "games.deadlockBuilds.definitions": "Tên và giá trang bị dùng dữ liệu trò chơi mới nhất đã biết. Hướng dẫn cũ có thể khác; các nhóm có thể chứa lựa chọn thay thế.",
-  "games.deadlockBuilds.itemsFailed": "Một số chi tiết trang bị không có sẵn. Hướng dẫn của tác giả và ID trang bị vẫn hiển thị.",
+  "games.deadlockBuilds.definitions":
+    "Tên và giá trang bị dùng dữ liệu trò chơi mới nhất đã biết. Hướng dẫn cũ có thể khác; các nhóm có thể chứa lựa chọn thay thế.",
+  "games.deadlockBuilds.itemsFailed":
+    "Một số chi tiết trang bị không có sẵn. Hướng dẫn của tác giả và ID trang bị vẫn hiển thị.",
   "games.deadlockBuilds.noItems": "Bản dựng này không có nhóm trang bị.",
   "games.deadlockBuilds.group": "Nhóm {number}",
   "games.deadlockBuilds.optional": "Tùy chọn",
@@ -329,7 +352,8 @@ export default {
   "games.rivals.guide.teamUp": "Kỹ năng phối hợp",
   "games.rivals.guide.base": "Hiệu ứng cơ bản",
   "games.rivals.guide.enhanced": "Hiệu ứng cường hóa",
-  "games.rivals.guide.reference": "Tài liệu tướng chính thức · Tiếng Anh. Chỉ số có thể thay đổi sau các bản cập nhật cân bằng.",
+  "games.rivals.guide.reference":
+    "Tài liệu tướng chính thức · Tiếng Anh. Chỉ số có thể thay đổi sau các bản cập nhật cân bằng.",
   "games.rivals.guide.failed": "Không thể tải hướng dẫn tướng chính thức.",
   "games.rivals.guide.partial": "Một số chi tiết kỹ năng không có sẵn.",
   "games.rivals.guide.checked": "Đã kiểm tra {date}",

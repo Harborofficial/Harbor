@@ -67,7 +67,12 @@ export function KidsSetupPanel({
                       on ? "ring-4 ring-white" : "ring-2 ring-white/40"
                     }`}
                   >
-                    <img src={src} alt="" draggable={false} className="h-full w-full object-cover" />
+                    <img
+                      src={src}
+                      alt=""
+                      draggable={false}
+                      className="h-full w-full object-cover"
+                    />
                   </span>
                   {on && (
                     <span className="absolute -bottom-0.5 -end-0.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#0c4a6e] shadow-md">
@@ -107,7 +112,9 @@ export function KidsSetupPanel({
             ))}
           </div>
           <p className="mt-2 text-[14px] leading-5 text-white/90">
-            {t("Stops playback when the daily limit is reached. A parent PIN lets you allow more time.")}
+            {t(
+              "Stops playback when the daily limit is reached. A parent PIN lets you allow more time.",
+            )}
           </p>
         </Section>
 
@@ -139,7 +146,9 @@ export function KidsSetupPanel({
           <p className="mt-2 text-[14px] leading-5 text-white/90" role="status">
             {parentPin && parentPin.length !== 4
               ? t("Enter all 4 digits to save this PIN.")
-              : t("Optional. Used to allow more watch time. Without a PIN, switch profiles when time is up.")}
+              : t(
+                  "Optional. Used to allow more watch time. Without a PIN, switch profiles when time is up.",
+                )}
           </p>
         </Section>
       </div>

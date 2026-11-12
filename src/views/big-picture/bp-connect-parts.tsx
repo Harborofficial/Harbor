@@ -14,8 +14,7 @@ import type { HandoffQr } from "@/lib/tv-handoff/handoff-qr";
 export const TITLE =
   "font-display text-[clamp(34px,4.6vh,46px)] font-semibold leading-tight tracking-[-0.01em] text-ink";
 export const BODY = "text-[clamp(16px,2.2vh,21px)] font-medium leading-snug";
-const CARD =
-  "rounded-[var(--bp-r-lg)] bg-[var(--bp-panel)] p-[clamp(16px,2.2vh,28px)]";
+const CARD = "rounded-[var(--bp-r-lg)] bg-[var(--bp-panel)] p-[clamp(16px,2.2vh,28px)]";
 
 const QR_SIDE = "clamp(190px,30vh,250px)";
 

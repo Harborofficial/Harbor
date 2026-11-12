@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "स्टाइल वाले (ASS) सबटाइटल अपने रंग, आकार और स्क्रीन पर लिखे टेक्स्ट की जगह बनाए रखते हैं, लेकिन आपका फ़ॉन्ट इस्तेमाल करते हैं।",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor अपने सबटाइटल आपके mpv को भेजता है। mpv के अपने सबटाइटल मेनू में से कोई एक चुनें।",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "स्टाइल वाले (ASS) सबटाइटल अपने रंग, आकार और स्क्रीन पर लिखे टेक्स्ट की जगह बनाए रखते हैं, लेकिन आपका फ़ॉन्ट इस्तेमाल करते हैं।",
 };
 
 export default subtitles;

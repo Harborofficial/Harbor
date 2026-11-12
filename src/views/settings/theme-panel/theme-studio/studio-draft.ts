@@ -24,9 +24,16 @@ export function cssColorToHex(input: string): string {
   }
 }
 
-export function emptyDraft(seed?: ThemePreset, navigation: NavCustomization = { order: [], hidden: [], renamed: {} }): Draft {
+export function emptyDraft(
+  seed?: ThemePreset,
+  navigation: NavCustomization = { order: [], hidden: [], renamed: {} },
+): Draft {
   const nav = seed?.navCustomization ?? navigation;
-  const navCustomization = { order: [...nav.order], hidden: [...nav.hidden], renamed: { ...nav.renamed } };
+  const navCustomization = {
+    order: [...nav.order],
+    hidden: [...nav.hidden],
+    renamed: { ...nav.renamed },
+  };
   if (!seed) {
     return {
       navCustomization,

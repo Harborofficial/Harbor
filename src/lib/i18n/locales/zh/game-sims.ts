@@ -1,5 +1,6 @@
 export default {
-  "games.sims.catalogUpdateRequired": "更新并重启 Harbor，即可浏览《模拟人生 2》和《模拟人生 3》的下载内容。",
+  "games.sims.catalogUpdateRequired":
+    "更新并重启 Harbor，即可浏览《模拟人生 2》和《模拟人生 3》的下载内容。",
   "games.sims.creatorNotesTitle": "作者链接 · {count}",
   "games.sims.creatorNotesNote": "来自作者说明中的链接。打开页面查看操作说明。",
   "games.sims.ccBuildTitle": "此建筑使用的内容",
@@ -89,7 +90,8 @@ export default {
   "games.sims.mtsCatTraits": "特征",
   "games.sims.mtsCatMisc": "其他",
   "games.sims.mtsCatTools": "工具",
-  "games.sims.mtsIntro": "将模组或自定义内容导入 Harbor。粘贴其《模拟人生4》下载页面，然后选择所需文件。",
+  "games.sims.mtsIntro":
+    "将模组或自定义内容导入 Harbor。粘贴其《模拟人生4》下载页面，然后选择所需文件。",
   "games.sims.mtsPage": "下载页面",
   "games.sims.mtsLoad": "查找文件",
   "games.sims.mtsBrowse": "浏览 Mod The Sims",
@@ -97,7 +99,8 @@ export default {
   "games.sims.mtsZip": "选择 ZIP 文件可直接导入。其他格式请从作者页面下载，并先解压模组。",
   "games.sims.mtsPageError": "请使用 Mod The Sims 上公开的《模拟人生4》下载页面。",
   "games.sims.depsTitle": "模组要求",
-  "games.sims.depsNote": "使用创作者元数据查找所需的模组文件，并检查所选安装中的资料包条件。这不会验证游戏内兼容性。",
+  "games.sims.depsNote":
+    "使用创作者元数据查找所需的模组文件，并检查所选安装中的资料包条件。这不会验证游戏内兼容性。",
   "games.sims.depsScan": "检查要求",
   "games.sims.depsNone": "已检查的文件中没有声明模组要求。",
   "games.sims.depsCoverage": "已检查 {count} 个文件 · {manifests} 个含元数据",
@@ -122,7 +125,8 @@ export default {
   "games.sims.infoFeatures": "所需功能：",
 
   "games.sims.duplicatesTitle": "重复文件",
-  "games.sims.duplicatesNote": "查找 Mods 文件夹中内容完全相同的副本。不检查版本差异或其他模组冲突。",
+  "games.sims.duplicatesNote":
+    "查找 Mods 文件夹中内容完全相同的副本。不检查版本差异或其他模组冲突。",
   "games.sims.duplicatesScan": "检查重复文件",
   "games.sims.duplicatesAgain": "重新检查",
   "games.sims.duplicatesFound": "发现 {count} 组相同文件",
@@ -144,14 +148,16 @@ export default {
   "games.sims.lotGuide": "作者指南",
   "games.sims.lotNew": "全新安装",
   "games.sims.lotCompatibility": "应用此版本前，请阅读作者的兼容性说明。",
-  "games.sims.lotDependencyError": "已启用的模组需要经过验证的 Core Library。请保持所需版本已安装并启用。",
+  "games.sims.lotDependencyError":
+    "已启用的模组需要经过验证的 Core Library。请保持所需版本已安装并启用。",
   "games.sims.lotTargetError": "此分组与作者的发行版不匹配。请选择对应的分组或单独安装。",
 
   "games.sims.creatorExisting": "现有安装",
   "games.sims.creatorManage": "检查现有文件",
   "games.sims.creatorAdoptNote": "先将这些文件交由 Harbor 管理，再选择作者发布的版本进行更新。",
   "games.sims.creatorLinkNote": "检查此组的更新。Harbor 会保留之前的文件和你的设置。",
-  "games.sims.creatorTarget": "此组包含不属于所选版本的模组文件。请先将它们分到另一组，再更新 MCCC。",
+  "games.sims.creatorTarget":
+    "此组包含不属于所选版本的模组文件。请先将它们分到另一组，再更新 MCCC。",
   "games.sims.creatorExistingError": "MCCC 文件已存在。请先管理这些文件，再添加作者发布的版本。",
   "games.sims.creatorRefresh": "刷新发布版本",
   "games.sims.creatorTitle": "从作者处获取",
@@ -177,9 +183,11 @@ export default {
   "games.sims.trayRemove": "从资料库移除",
   "games.sims.trayRestore": "恢复到资料库",
   "games.sims.trayNote": "导入下载的地段、房间或家庭。Harbor 会将相关文件一起保存在 Tray 中。",
-  "games.sims.trayReviewNote": "Tray 文件直接放入资料库文件夹。附带的自定义内容会成为单独管理的模组组。",
+  "games.sims.trayReviewNote":
+    "Tray 文件直接放入资料库文件夹。附带的自定义内容会成为单独管理的模组组。",
   "games.sims.trayRemoveNote": "移除导入的资料库文件并保留恢复副本。附带的自定义内容仍保持安装。",
-  "games.sims.trayDone": "资料库文件已更新。在《模拟人生4》中打开“我的资料库”，必要时启用“包含自定义内容”。",
+  "games.sims.trayDone":
+    "资料库文件已更新。在《模拟人生4》中打开“我的资料库”，必要时启用“包含自定义内容”。",
   "games.sims.trayPlayNote": "在游戏中打开“我的资料库”。仍需安装所需的资料片和自定义内容。",
   "games.sims.trayCc": "附带的自定义内容单独管理。",
   "games.sims.trayEmpty": "导入下载的作品以在此管理。",
@@ -205,7 +213,8 @@ export default {
   "games.sims.testBatch": "检查这一批",
   "games.sims.testBatchNote": "本次测试启用了所选分组中的这些分组。问题是否再次出现？",
   "games.sims.testSuspect": "检查这个分组",
-  "games.sims.testSuspectNote": "启用这个分组后问题再次出现。请检查其依赖要求和更新。其他模组或相互作用也可能参与其中。",
+  "games.sims.testSuspectNote":
+    "启用这个分组后问题再次出现。请检查其依赖要求和更新。其他模组或相互作用也可能参与其中。",
   "games.sims.testInconclusive": "未能定位分组",
   "games.sims.testBaselineFailed": "禁用所选分组后问题仍然存在。请检查游戏本身或未纳入测试的模组。",
   "games.sims.testInconclusiveNote": "问题未能稳定复现。可能与多个模组组合或存档有关。",
@@ -215,13 +224,17 @@ export default {
   "games.sims.testGone": "问题已消失",
   "games.sims.testIncluded": "本次测试的分组",
   "games.sims.testHelp": "EA 模组问题排查指南",
-  "games.sims.testRestoreNote": "将各分组的启用状态恢复到测试开始时。保留当前作者设置，不会恢复游戏存档。",
-  "games.sims.testReviewNote": "请关闭 The Sims 4，检查分组后再应用。测试时请勿保存就退出，以免存档移除暂时缺失的自定义内容。",
-  "games.sims.testChooseNote": "选择要测试的分组。将依赖文件放在一起，或把共享库排除在测试之外，让其保持启用。",
+  "games.sims.testRestoreNote":
+    "将各分组的启用状态恢复到测试开始时。保留当前作者设置，不会恢复游戏存档。",
+  "games.sims.testReviewNote":
+    "请关闭 The Sims 4，检查分组后再应用。测试时请勿保存就退出，以免存档移除暂时缺失的自定义内容。",
+  "games.sims.testChooseNote":
+    "选择要测试的分组。将依赖文件放在一起，或把共享库排除在测试之外，让其保持启用。",
   "games.sims.testBackup": "测试前备份存档",
 
   "games.sims.adopt": "管理现有模组",
-  "games.sims.adoptNote": "请先关闭 The Sims 4。从同一个文件夹选择一个模组或相关自定义内容，并包含其设置文件。所列文件将移入一个 Harbor 分组，其他文件保持原位。",
+  "games.sims.adoptNote":
+    "请先关闭 The Sims 4。从同一个文件夹选择一个模组或相关自定义内容，并包含其设置文件。所列文件将移入一个 Harbor 分组，其他文件保持原位。",
   "games.sims.adoptFrom": "当前文件夹",
   "games.sims.adoptTo": "移至",
   "games.sims.adoptFolder": "请从 Mods 内的同一个文件夹选择相关文件。",
@@ -245,14 +258,16 @@ export default {
   "games.sims.deleteSet": "删除组合",
   "games.sims.saveSet": "保存组合",
   "games.sims.applySet": "切换模组组合",
-  "games.sims.setReviewNote": "请先关闭《模拟人生4》。只更改列出的组；之后导入的模组保持原样。禁用自定义内容时保存游戏可能会改变家庭或建筑。",
+  "games.sims.setReviewNote":
+    "请先关闭《模拟人生4》。只更改列出的组；之后导入的模组保持原样。禁用自定义内容时保存游戏可能会改变家庭或建筑。",
   "games.sims.setBackup": "切换前备份存档",
   "games.sims.setBackupDone": "备份可在存档备份中找到。",
   "games.sims.setUnchanged": "此组合已与当前配置一致。",
   "games.sims.setScan": "无法扫描部分模组文件夹。请先解决问题再切换组合。",
   "games.sims.savesLabelHint": "添加新模组前",
   "games.sims.savesRunning": "备份或恢复存档前请关闭《模拟人生4》。Harbor 必须能够确认游戏已退出。",
-  "games.sims.savesIntro": "更改模组前先备份存档，并关闭《模拟人生4》。备份不包含模组或 Tray 文件夹中的家庭。",
+  "games.sims.savesIntro":
+    "更改模组前先备份存档，并关闭《模拟人生4》。备份不包含模组或 Tray 文件夹中的家庭。",
   "games.sims.title": "你的模组与自定义内容",
   "games.sims.intro": "整理下载的内容，更新时保留之前的版本。",
   "games.sims.choose": "选择模拟人生文件夹",
@@ -266,8 +281,10 @@ export default {
   "games.sims.recover": "恢复中断的更改",
   "games.sims.name": "模组或合集名称",
   "games.sims.nameError": "请为这组内容起一个简短的名称。",
-  "games.sims.reviewNote": "请先退出《模拟人生4》。每次导入一个模组或一组相关的自定义内容。更新时会保留作者设置。游玩前请检查作者列出的要求。",
-  "games.sims.removeNote": "请先退出《模拟人生4》。移除自定义内容后保存游戏可能会改变家庭或建筑。移除的文件会保留在备份中，禁用的文件会移到Mods外。",
+  "games.sims.reviewNote":
+    "请先退出《模拟人生4》。每次导入一个模组或一组相关的自定义内容。更新时会保留作者设置。游玩前请检查作者列出的要求。",
+  "games.sims.removeNote":
+    "请先退出《模拟人生4》。移除自定义内容后保存游戏可能会改变家庭或建筑。移除的文件会保留在备份中，禁用的文件会移到Mods外。",
   "games.sims.recovery": "之前的更改中断了。请先恢复之前的配置，再进行其他更改。",
   "games.sims.success": "模组文件已更新。",
   "games.sims.applying": "正在应用更改，请保持Harbor开启…",
@@ -275,12 +292,15 @@ export default {
   "games.sims.skipped": "已跳过的文档和图片 · {count}",
   "games.sims.preview": "此文件内嵌的预览图",
   "games.sims.connect": "先选择你的模拟人生文件夹",
-  "games.sims.folderNote": "请选择包含Mods、saves和Options.ini的《模拟人生4》用户数据文件夹。如果尚未创建，请先启动一次游戏。",
+  "games.sims.folderNote":
+    "请选择包含Mods、saves和Options.ini的《模拟人生4》用户数据文件夹。如果尚未创建，请先启动一次游戏。",
   "games.sims.version": "游戏版本 {version}",
   "games.sims.refresh": "刷新模组文件",
   "games.sims.checkSettings": "检查游戏设置",
-  "games.sims.settingsNote": "模组或脚本已禁用，或无法读取相关设置。请在《模拟人生4》的游戏选项 → 其他中启用自定义内容和脚本模组，然后重启游戏。游戏更新可能会关闭这些选项。",
-  "games.sims.resourceNote": "无法确认Mods/Resource.cfg中对子文件夹内package文件的加载规则。游玩前请检查游戏原有的模组配置。",
+  "games.sims.settingsNote":
+    "模组或脚本已禁用，或无法读取相关设置。请在《模拟人生4》的游戏选项 → 其他中启用自定义内容和脚本模组，然后重启游戏。游戏更新可能会关闭这些选项。",
+  "games.sims.resourceNote":
+    "无法确认Mods/Resource.cfg中对子文件夹内package文件的加载规则。游玩前请检查游戏原有的模组配置。",
   "games.sims.partial": "无法扫描部分文件或链接文件夹。此列表可能不完整。",
   "games.sims.eaHelp": "EA模组设置指南",
   "games.sims.managed": "已管理的模组",
@@ -292,8 +312,10 @@ export default {
   "games.sims.script": "脚本模组",
   "games.sims.settings": "作者设置",
   "games.sims.managedNote": "每次导入的内容会保持为一组。你可以在这里启用、更新或移除整个模组。",
-  "games.sims.filesNote": "这里只显示Mods中已有的文件，不会修改它们。图片来自文件内嵌的预览图（若有）。",
-  "games.sims.backupsNote": "之前的版本保存在这台电脑上。如果模组仍已安装，恢复版本时会保留当前的作者设置。",
+  "games.sims.filesNote":
+    "这里只显示Mods中已有的文件，不会修改它们。图片来自文件内嵌的预览图（若有）。",
+  "games.sims.backupsNote":
+    "之前的版本保存在这台电脑上。如果模组仍已安装，恢复版本时会保留当前的作者设置。",
   "games.sims.patchChanged": "导入后游戏已更新",
   "games.sims.compatibility": "文件检查不代表兼容性确认。游戏更新后请检查模组。",
   "games.sims.tooDeep": "脚本所在位置超过一层子文件夹。",
@@ -302,12 +324,16 @@ export default {
   "games.sims.emptyBackups": "更新或移除后，之前的版本会显示在这里。",
   "games.sims.emptyFiles": "Mods中未找到支持的文件。",
   "games.sims.desktop": "模组管理需要Windows版Harbor桌面应用的最新版本。",
-  "games.sims.folderError": "请选择《模拟人生4》的真实用户数据文件夹，不要选择快捷方式或链接文件夹。必须包含Mods、saves、GameVersion.txt和Options.ini。",
+  "games.sims.folderError":
+    "请选择《模拟人生4》的真实用户数据文件夹，不要选择快捷方式或链接文件夹。必须包含Mods、saves、GameVersion.txt和Options.ini。",
   "games.sims.readError": "无法读取这些文件。请检查文件夹访问权限后重试。",
-  "games.sims.formatError": "此文件不是支持的《模拟人生4》模组，或压缩包已损坏。这里不能导入可执行文件、嵌套压缩包和Tray文件。",
-  "games.sims.layoutError": "压缩包包含独立的模组文件夹或重复文件名。请逐个导入模组，以保持各自的文件完整。",
+  "games.sims.formatError":
+    "此文件不是支持的《模拟人生4》模组，或压缩包已损坏。这里不能导入可执行文件、嵌套压缩包和Tray文件。",
+  "games.sims.layoutError":
+    "压缩包包含独立的模组文件夹或重复文件名。请逐个导入模组，以保持各自的文件完整。",
   "games.sims.running": "更改模组文件前请退出《模拟人生4》。Harbor必须能够确认游戏已经关闭。",
-  "games.sims.duplicate": "其他Mods文件夹中已有同名模组文件。导入或启用这组内容前，请先解决重复问题。",
+  "games.sims.duplicate":
+    "其他Mods文件夹中已有同名模组文件。导入或启用这组内容前，请先解决重复问题。",
   "games.sims.recordError": "无法验证本地模组记录。你的文件已保留。更改配置前请恢复原始记录。",
-  "games.sims.reviewError": "此更改预览对当前用户档案无效。请关闭后重新检查文件。"
+  "games.sims.reviewError": "此更改预览对当前用户档案无效。请关闭后重新检查文件。",
 } satisfies Record<string, string>;

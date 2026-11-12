@@ -35,7 +35,9 @@ export function PluginsPanel() {
         <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
           <Info size={18} strokeWidth={2.2} className="mt-[2px] shrink-0 text-ink-subtle" />
           <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
-            {t("Plugins run in the desktop app. Open Harbor on your computer to add and manage them.")}
+            {t(
+              "Plugins run in the desktop app. Open Harbor on your computer to add and manage them.",
+            )}
           </p>
         </div>
       </Section>

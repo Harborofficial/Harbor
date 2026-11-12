@@ -9,6 +9,8 @@ export function isManuallyStoppedForAutoPreDownload(
   download: Pick<DownloadItem, "status" | "canceledAt"> | null | undefined,
   enabledAt: number,
 ): boolean {
-  return download?.status === "canceled" &&
-    (download.canceledAt ?? 0) >= (Number.isFinite(enabledAt) ? enabledAt : 0);
+  return (
+    download?.status === "canceled" &&
+    (download.canceledAt ?? 0) >= (Number.isFinite(enabledAt) ? enabledAt : 0)
+  );
 }

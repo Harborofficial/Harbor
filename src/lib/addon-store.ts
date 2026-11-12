@@ -416,13 +416,47 @@ function validateManifest(
   return { ok: true, manifest: obj as Addon["manifest"] };
 }
 
-export async function fetchManifestAt(transportUrl: string): Promise<Addon["manifest"]> {
+const pendingManifests = new Map<string, Promise<Addon["manifest"]>>();
+const manifestCooldowns = new Map<string, { until: number; error: Error }>();
+
+export function fetchManifestAt(transportUrl: string): Promise<Addon["manifest"]> {
+  const pending = pendingManifests.get(transportUrl);
+  if (pending) return pending;
+  const cooldown = manifestCooldowns.get(transportUrl);
+  if (cooldown && cooldown.until > Date.now()) return Promise.reject(cooldown.error);
+  manifestCooldowns.delete(transportUrl);
+  const request = fetchManifestUncached(transportUrl).finally(() => {
+    pendingManifests.delete(transportUrl);
+  });
+  pendingManifests.set(transportUrl, request);
+  return request;
+}
+
+async function fetchManifestUncached(transportUrl: string): Promise<Addon["manifest"]> {
   // A self-hosted addon lives on loopback/LAN, which the guarded bridge fetch
   // rejects outright ("blocked internal target"). The URL came from the user, so
   // it may reach the local network — public URLs keep the DNS-rebinding guard.
   const doFetch = isLocalNetworkUrl(transportUrl) ? safeFetchLocal : fetch;
   const res = await doFetch(transportUrl, { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`Manifest fetch failed (HTTP ${res.status}). Check the URL.`);
+  if (!res.ok) {
+    const error = new Error(`Manifest fetch failed (HTTP ${res.status}). Check the URL.`);
+    if (res.status === 429) {
+      // Profile switches and picker retries must honor the same server cooldown.
+      const retryAfter = res.headers?.get("retry-after")?.trim();
+      const seconds = retryAfter ? Number(retryAfter) : NaN;
+      const until =
+        Number.isFinite(seconds) && seconds >= 0
+          ? Date.now() + seconds * 1000
+          : retryAfter
+            ? Date.parse(retryAfter)
+            : NaN;
+      manifestCooldowns.set(transportUrl, {
+        until: Number.isFinite(until) && until > Date.now() ? until : Date.now() + 60_000,
+        error,
+      });
+    }
+    throw error;
+  }
   let json: unknown;
   try {
     json = await res.json();

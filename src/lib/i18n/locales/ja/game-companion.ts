@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "この一覧の記録数：{count}",
   "games.wow.weekly.partial": "一部の記録を確認できませんでした。",
   "games.wow.weekly.empty": "この期間の記録はありません。",
-  "games.wow.weekly.scope": "Raider.IOは現在のシーズンから、リセットごとにレベル上位10件までを表示します。新しい記録の反映には時間がかかる場合があります。",
+  "games.wow.weekly.scope":
+    "Raider.IOは現在のシーズンから、リセットごとにレベル上位10件までを表示します。新しい記録の反映には時間がかかる場合があります。",
   "games.helldivers.title": "銀河戦争",
   "games.helldivers.intro": "次の降下先を選ぼう。",
   "games.helldivers.refresh": "銀河戦争を更新",
@@ -77,7 +78,8 @@ export default {
   "games.warhammer.all": "すべて",
   "games.warhammer.play": "操作する側",
   "games.warhammer.face": "敵として登場",
-  "games.warhammer.unavailable": "ゲーム情報を更新できませんでした。読み込み済みの項目は引き続き表示される場合があります。",
+  "games.warhammer.unavailable":
+    "ゲーム情報を更新できませんでした。読み込み済みの項目は引き続き表示される場合があります。",
   "games.warhammer.partial": "一部のゲーム情報を取得できません。",
   "games.warhammer.empty": "この役割に該当する確認済みのゲームはまだありません。",
   "games.warhammer.scope": "各勢力を知るための入り口です。全カタログは下にあります。",
@@ -99,8 +101,10 @@ export default {
   "games.warframe.intro": "次の出撃前に、今できることを確認。",
   "games.warframe.refresh": "ワールド情報を更新",
   "games.warframe.unavailable": "情報を更新できませんでした。表示中の詳細は前回取得したものです。",
-  "games.warframe.stale": "情報源に遅延があります。最後に報告された状態を表示し、期限切れの項目は非表示にしています。",
-  "games.warframe.expired": "この情報は古すぎます。新しいデータを取得するまで現在の一覧を非表示にします。",
+  "games.warframe.stale":
+    "情報源に遅延があります。最後に報告された状態を表示し、期限切れの項目は非表示にしています。",
+  "games.warframe.expired":
+    "この情報は古すぎます。新しいデータを取得するまで現在の一覧を非表示にします。",
   "games.warframe.partial": "一部の情報を利用できません。",
   "games.warframe.reported": "最終報告",
   "games.warframe.waiting": "新しいデータを待機中",
@@ -137,7 +141,8 @@ export default {
   "games.warframe.noMatches": "条件に合う現在の亀裂はありません。",
   "games.warframe.more": "もっと見る",
   "games.warframe.snapshot": "取得時点: {date}",
-  "games.warframe.scope": "共通のワールド予定です。参加可否はクエストの進行状況によります。ミッション名は英語で提供されます。",
+  "games.warframe.scope":
+    "共通のワールド予定です。参加可否はクエストの進行状況によります。ミッション名は英語で提供されます。",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -178,12 +183,14 @@ export default {
   "games.rivals.heroRate": "各相手に対する{hero}の勝率",
   "games.rivals.with": "味方との組み合わせ",
   "games.rivals.duoRate": "ペア共通の勝率",
-  "games.rivals.scope": "全スキル帯の競技6対6の観測データ。ヒーローごとに最低200試合、ペアごとに100試合。ペアの結果は連携スキルの存在や次の試合の予測を示しません。",
+  "games.rivals.scope":
+    "全スキル帯の競技6対6の観測データ。ヒーローごとに最低200試合、ペアごとに100試合。ペアの結果は連携スキルの存在や次の試合の予測を示しません。",
   "games.rivals.snapshot": "集計日時：{date}",
   "games.rivals.noMatches": "条件に合うヒーローはいません。",
   "games.rivals.unavailable": "ガイドを利用できません。更新をお試しください。",
   "games.rivals.pairsFailed": "対戦データを更新できませんでした。表示中のペアは前回のデータです。",
-  "games.rivals.mismatch": "提供元のデータは異なるシーズンのものです。更新して同じシーズンのデータで比較してください。",
+  "games.rivals.mismatch":
+    "提供元のデータは異なるシーズンのものです。更新して同じシーズンのデータで比較してください。",
   "games.rivals.sample": "{count}試合",
   "games.darktide.scriptures": "聖典を回収",
   "games.darktide.grimoires": "魔導書を回収",
@@ -198,14 +205,16 @@ export default {
   "games.darktide.unknown": "未分類",
   "games.darktide.difficulty": "難易度",
   "games.darktide.search": "マップを検索",
-  "games.darktide.stale": "前回の確認から時間が経っています。更新して利用可能なミッションを確認してください。",
+  "games.darktide.stale":
+    "前回の確認から時間が経っています。更新して利用可能なミッションを確認してください。",
   "games.darktide.failed": "ミッションを更新できませんでした。表示内容は前回確認時のものです。",
   "games.darktide.partial": "一部のミッションを読み取れませんでした。",
   "games.darktide.noMatches": "条件に合うミッションはありません。",
   "games.darktide.empty": "最新データに有効期限内のミッションがありません。",
   "games.darktide.more": "さらに表示",
   "games.darktide.checked": "確認日時：{date}",
-  "games.darktide.scope": "コミュニティ提供のデータです。ゲーム内の提供状況や報酬は異なる場合があります。あなたのキャラクターのミッションボードではありません。",
+  "games.darktide.scope":
+    "コミュニティ提供のデータです。ゲーム内の提供状況や報酬は異なる場合があります。あなたのキャラクターのミッションボードではありません。",
   "games.darktide.remaining": "残り{count}分",
   "games.darktide.credits": "オルドの証票",
   "games.darktide.xp": "経験値",
@@ -245,9 +254,12 @@ export default {
   "games.companion.showAll": "全{count}ヒーローを表示",
   "games.companion.noMatches": "検索に一致するヒーローはいません。",
   "games.companion.through": "{date}までのマッチ",
-  "games.companion.sampleNote": "全ランクのコミュニティ標本。各ヒーロー100マッチ以上。予測ではありません。",
-  "games.companion.unavailable": "データを更新できませんでした。表示中のデータは前回確認時のものです。",
-  "games.companion.statsUnavailable": "ヒーロー統計を取得できません。ヒーローガイドは閲覧できます。",
+  "games.companion.sampleNote":
+    "全ランクのコミュニティ標本。各ヒーロー100マッチ以上。予測ではありません。",
+  "games.companion.unavailable":
+    "データを更新できませんでした。表示中のデータは前回確認時のものです。",
+  "games.companion.statsUnavailable":
+    "ヒーロー統計を取得できません。ヒーローガイドは閲覧できます。",
   "games.gw2.title": "魔術師の宝庫",
   "games.gw2.intro": "報酬を選び、Astral Acclaimの使い道を計画しましょう。",
   "games.gw2.refresh": "報酬を更新",
@@ -257,7 +269,8 @@ export default {
   "games.gw2.partial": "一部のアイテム情報を取得できません。価格は合計に含まれています。",
   "games.gw2.guide": "宝庫ガイド",
   "games.gw2.checked": "確認日時：{date}",
-  "games.gw2.scope": "このHarborプロフィールに保存されます。各選択は1つのオファーとして計算されます。残高、購入制限、拡張版へのアクセスは確認されません。入手条件を確認してゲーム内で購入してください。",
+  "games.gw2.scope":
+    "このHarborプロフィールに保存されます。各選択は1つのオファーとして計算されます。残高、購入制限、拡張版へのアクセスは確認されません。入手条件を確認してゲーム内で購入してください。",
   "games.gw2.total": "予定合計",
   "games.gw2.currency": "Astral Acclaim",
   "games.gw2.selected": "{count}件を選択済み",
@@ -287,14 +300,16 @@ export default {
   "games.gw2.quantity": "数量：{count}",
   "games.deadlockBuilds.open": "コミュニティビルド",
   "games.deadlockBuilds.back": "ビルド一覧に戻る",
-  "games.deadlockBuilds.intro": "コミュニティのアイテムガイドです。選ぶ前に更新日を確認してください。",
+  "games.deadlockBuilds.intro":
+    "コミュニティのアイテムガイドです。選ぶ前に更新日を確認してください。",
   "games.deadlockBuilds.search": "ビルドを検索",
   "games.deadlockBuilds.recent": "最近更新された順",
   "games.deadlockBuilds.popular": "週間お気に入り順",
   "games.deadlockBuilds.language": "ビルドの言語",
   "games.deadlockBuilds.allLanguages": "すべての言語",
   "games.deadlockBuilds.refresh": "ビルドを更新",
-  "games.deadlockBuilds.failed": "ビルドを更新できませんでした。以前のガイドは古い可能性があります。",
+  "games.deadlockBuilds.failed":
+    "ビルドを更新できませんでした。以前のガイドは古い可能性があります。",
   "games.deadlockBuilds.updated": "更新日：{date}",
   "games.deadlockBuilds.undated": "更新日不明",
   "games.deadlockBuilds.favorites": "週間お気に入り：{count}",
@@ -305,9 +320,12 @@ export default {
   "games.deadlockBuilds.copied": "コピーしました",
   "games.deadlockBuilds.copy": "ビルドIDをコピー",
   "games.deadlockBuilds.use": "ビルドID：",
-  "games.deadlockBuilds.copyFailed": "コピーできませんでした。IDを選択して手動でコピーしてください。",
-  "games.deadlockBuilds.definitions": "アイテム名と価格は取得可能な最新ゲームデータを使用しています。古いガイドと異なる場合があり、グループには代替候補も含まれます。",
-  "games.deadlockBuilds.itemsFailed": "一部のアイテム情報を取得できません。作者のガイドとアイテムIDは引き続き表示されます。",
+  "games.deadlockBuilds.copyFailed":
+    "コピーできませんでした。IDを選択して手動でコピーしてください。",
+  "games.deadlockBuilds.definitions":
+    "アイテム名と価格は取得可能な最新ゲームデータを使用しています。古いガイドと異なる場合があり、グループには代替候補も含まれます。",
+  "games.deadlockBuilds.itemsFailed":
+    "一部のアイテム情報を取得できません。作者のガイドとアイテムIDは引き続き表示されます。",
   "games.deadlockBuilds.noItems": "このビルドにはアイテムグループがありません。",
   "games.deadlockBuilds.group": "グループ{number}",
   "games.deadlockBuilds.optional": "任意",
@@ -329,7 +347,8 @@ export default {
   "games.rivals.guide.teamUp": "連携スキル",
   "games.rivals.guide.base": "基本効果",
   "games.rivals.guide.enhanced": "強化効果",
-  "games.rivals.guide.reference": "公式ヒーロー資料 · 英語。数値はバランス調整で変更される場合があります。",
+  "games.rivals.guide.reference":
+    "公式ヒーロー資料 · 英語。数値はバランス調整で変更される場合があります。",
   "games.rivals.guide.failed": "公式ヒーローガイドを読み込めませんでした。",
   "games.rivals.guide.partial": "一部のアビリティ情報を取得できません。",
   "games.rivals.guide.checked": "確認日時：{date}",

@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}+ / 100",
   "games.studioCatalog.minimumVotes.all": "Dowolna liczba ocen",
   "games.studioCatalog.minimumVotes.value": "{count}+ ocen",
-  "games.studioCatalog.ratingFloor": "Wyniki wymagają co najmniej 5 ocen."
+  "games.studioCatalog.ratingFloor": "Wyniki wymagają co najmniej 5 ocen.",
 };

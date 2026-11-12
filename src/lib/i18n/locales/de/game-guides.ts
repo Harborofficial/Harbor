@@ -3,7 +3,8 @@ export default {
   "games.guides.saveTxt": "Als TXT speichern",
   "games.guides.savePdf": "Als PDF speichern",
   "games.guides.preparingPdf": "PDF wird erstellt…",
-  "games.guides.exportError": "Der Guide konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.",
+  "games.guides.exportError":
+    "Der Guide konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.",
   "games.guides.filters": "Filter",
   "games.guides.clearFilters": "Filter löschen",
   "games.guides.popular": "Am beliebtesten",
@@ -52,11 +53,16 @@ export default {
   "games.guides.date.all": "Beliebig",
   "games.guides.viewers": "{count} schauen zu",
   "games.guides.views": "{count} Aufrufe",
-  "games.guides.import.callofdutywarzone": "Kopiere die Einstellungen in die entsprechenden Warzone-Einstellungen. DPI stellst du in der Maussoftware ein.",
-  "games.guides.import.css": "Kopiere die Einstellungen und trage sie in Counter-Strike: Source ein. Sie stammen aus datierten Community-Archiven.",
-  "games.guides.import.cod": "Verwende diese Werte in der passenden Spielversion. DPI stellst du in der Maussoftware ein.",
-  "games.guides.noCrosshair": "Diese Quelle liefert zu wenige Fadenkreuzdetails für eine zuverlässige Vorschau.",
-  "games.guides.previewNote": "Statische Vorschau veröffentlichter Werte. Auflösung, Bewegung und Rückstoß können das Ergebnis im Spiel verändern.",
+  "games.guides.import.callofdutywarzone":
+    "Kopiere die Einstellungen in die entsprechenden Warzone-Einstellungen. DPI stellst du in der Maussoftware ein.",
+  "games.guides.import.css":
+    "Kopiere die Einstellungen und trage sie in Counter-Strike: Source ein. Sie stammen aus datierten Community-Archiven.",
+  "games.guides.import.cod":
+    "Verwende diese Werte in der passenden Spielversion. DPI stellst du in der Maussoftware ein.",
+  "games.guides.noCrosshair":
+    "Diese Quelle liefert zu wenige Fadenkreuzdetails für eine zuverlässige Vorschau.",
+  "games.guides.previewNote":
+    "Statische Vorschau veröffentlichter Werte. Auflösung, Bewegung und Rückstoß können das Ergebnis im Spiel verändern.",
   "games.guides.previewBackground": "Hellen Vorschauhintergrund umschalten",
   "games.guides.crosshairPreview": "Fadenkreuzvorschau",
   "games.guides.noPlayers": "Keine passenden Spieler. Versuche einen anderen Namen.",
@@ -69,26 +75,33 @@ export default {
   "games.guides.allPlatforms": "Alle Plattformen",
   "games.guides.refresh": "Streams aktualisieren",
   "games.guides.twitchUnavailable": "Twitch-Streams lassen sich derzeit auf Twitch ansehen.",
-  "games.guides.partial": "Einige Quellen wurden nicht geladen. Verfügbare Ergebnisse werden angezeigt.",
+  "games.guides.partial":
+    "Einige Quellen wurden nicht geladen. Verfügbare Ergebnisse werden angezeigt.",
   "games.guides.sourceErrorTitle": "Versuchen wir es noch einmal",
   "games.guides.more": "Mehr laden",
   "games.guides.moreKick": "Mehr auf Kick",
-  "games.guides.configNote": "Veröffentlichte Einstellungen von Spielern und Creators. Wähle ein Profil, um Quelle, Datum und Setup zu sehen.",
+  "games.guides.configNote":
+    "Veröffentlichte Einstellungen von Spielern und Creators. Wähle ein Profil, um Quelle, Datum und Setup zu sehen.",
   "games.guides.players": "Alle Spieler",
   "games.guides.useConfig": "Dieses Setup nutzen",
-  "games.guides.import.cs2": "Füge die Befehle in die Entwicklerkonsole von CS2 ein. Fadenkreuzcodes importierst du unter Einstellungen → Spiel → Fadenkreuz. Prüfe die Werte vor dem Anwenden.",
-  "games.guides.import.valorant": "Kopiere den Fadenkreuzcode und öffne in VALORANT Einstellungen → Fadenkreuz → Profilcode importieren. Andere Werte trägst du in den passenden Einstellungen ein.",
-  "games.guides.import.rainbowsixsiege": "Kopiere die Einstellungen und trage sie in Sieges Maus- und Anzeigeeinstellungen ein. DPI stellst du in deiner Maussoftware ein.",
+  "games.guides.import.cs2":
+    "Füge die Befehle in die Entwicklerkonsole von CS2 ein. Fadenkreuzcodes importierst du unter Einstellungen → Spiel → Fadenkreuz. Prüfe die Werte vor dem Anwenden.",
+  "games.guides.import.valorant":
+    "Kopiere den Fadenkreuzcode und öffne in VALORANT Einstellungen → Fadenkreuz → Profilcode importieren. Andere Werte trägst du in den passenden Einstellungen ein.",
+  "games.guides.import.rainbowsixsiege":
+    "Kopiere die Einstellungen und trage sie in Sieges Maus- und Anzeigeeinstellungen ein. DPI stellst du in deiner Maussoftware ein.",
   "games.guides.copyCrosshair": "Fadenkreuz kopieren",
   "games.guides.copyCommands": "Befehle kopieren",
   "games.guides.copySettings": "Einstellungen kopieren",
   "games.guides.copied": "Kopiert",
   "games.guides.copyError": "Kopieren fehlgeschlagen. Versuche es erneut.",
-  "games.guides.embedNote": "Die Wiedergabe erfolgt über die Plattform des Erstellers. Falls Einbetten eingeschränkt ist, öffne das Original.",
+  "games.guides.embedNote":
+    "Die Wiedergabe erfolgt über die Plattform des Erstellers. Falls Einbetten eingeschränkt ist, öffne das Original.",
   "games.guides.readerErrorTitle": "Dieser Guide konnte nicht geladen werden",
   "games.guides.short": "Guides",
   "games.guides.title": "Guides & Komplettlösungen",
-  "games.guides.note": "Finde deinen nächsten Schritt. Lies Community-Guides, sieh dir Lösungen an oder schaue beim Spielen zu.",
+  "games.guides.note":
+    "Finde deinen nächsten Schritt. Lies Community-Guides, sieh dir Lösungen an oder schaue beim Spielen zu.",
   "games.guides.written": "Text-Guides",
   "games.guides.videos": "Videos",
   "games.guides.live": "Live",
@@ -109,11 +122,12 @@ export default {
   "games.guides.previous": "Zurück",
   "games.guides.next": "Weiter",
   "games.guides.original": "Original öffnen",
-  "games.guides.playerNote": "Wiedergabe über YouTube. Falls der Ersteller Einbetten nicht erlaubt, öffne das Originalvideo.",
-  "games.guides.readerError": "Dieser Guide lässt sich hier nicht lesen. Versuche es erneut oder öffne das Original.",
+  "games.guides.playerNote":
+    "Wiedergabe über YouTube. Falls der Ersteller Einbetten nicht erlaubt, öffne das Originalvideo.",
+  "games.guides.readerError":
+    "Dieser Guide lässt sich hier nicht lesen. Versuche es erneut oder öffne das Original.",
   "games.guides.contents": "In diesem Guide",
-  "games.guides.credits": "Autoren & Lizenz"
-,
+  "games.guides.credits": "Autoren & Lizenz",
   "games.guides.copy": "Kopieren",
   "games.guides.previewMap": "Map-Screenshot hinter dem Fadenkreuz anzeigen",
   "games.guides.skins": "Skins",
@@ -123,5 +137,5 @@ export default {
   "games.guides.teammates": "Teamkollegen",
   "games.guides.specs": "Technische Daten",
   "games.guides.exportAll": "Alles exportieren",
-  "games.guides.copyValue": "{label} kopieren"
+  "games.guides.copyValue": "{label} kopieren",
 } satisfies Record<string, string>;

@@ -51,13 +51,17 @@ export function useAvatarImport(section: string) {
     }
   };
 
-  const runPackImport = async (source: { pack: Parameters<typeof resolvePackGroups>[0]; baseDir: string } | null) => {
+  const runPackImport = async (
+    source: { pack: Parameters<typeof resolvePackGroups>[0]; baseDir: string } | null,
+  ) => {
     if (!source) return;
     setPackError(null);
     setImporting({ done: 0, total: 0 });
     try {
-      const { groups, skipped } = await resolvePackGroups(source.pack, source.baseDir, (done, total) =>
-        setImporting({ done, total }),
+      const { groups, skipped } = await resolvePackGroups(
+        source.pack,
+        source.baseDir,
+        (done, total) => setImporting({ done, total }),
       );
       setImporting(null);
       if (!groups.length) {
@@ -65,10 +69,13 @@ export function useAvatarImport(section: string) {
         return;
       }
       await commitGroups(groups);
-      if (skipped > 0) setPackError(t("{n} images in that pack could not be loaded.", { n: skipped }));
+      if (skipped > 0)
+        setPackError(t("{n} images in that pack could not be loaded.", { n: skipped }));
     } catch (err) {
       setImporting(null);
-      setPackError(err instanceof AvatarPackError ? err.message : t("That pack could not be imported."));
+      setPackError(
+        err instanceof AvatarPackError ? err.message : t("That pack could not be imported."),
+      );
     }
   };
 
@@ -78,7 +85,9 @@ export function useAvatarImport(section: string) {
       try {
         await runPackImport(await pickPackNative());
       } catch (err) {
-        setPackError(err instanceof AvatarPackError ? err.message : t("That pack could not be imported."));
+        setPackError(
+          err instanceof AvatarPackError ? err.message : t("That pack could not be imported."),
+        );
       }
     } else packRef.current?.click();
   };
@@ -91,7 +100,9 @@ export function useAvatarImport(section: string) {
     try {
       await runPackImport(await readPackFromFile(file));
     } catch (err) {
-      setPackError(err instanceof AvatarPackError ? err.message : t("That pack could not be imported."));
+      setPackError(
+        err instanceof AvatarPackError ? err.message : t("That pack could not be imported."),
+      );
     }
   };
 

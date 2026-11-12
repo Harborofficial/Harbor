@@ -94,6 +94,11 @@ function player(localStorage: unknown) {
         compatibleVocalVersion: () => true,
         shouldResolvePreferredSource: () => false,
       },
+      "./spotify-startup": {
+        shouldReportSpotifyStartupTimeout: () => false,
+        SPOTIFY_STARTUP_TIMEOUT_MESSAGE: "Spotify playback timed out.",
+        SPOTIFY_STARTUP_TIMEOUT_MS: 35_000,
+      },
       "./queue-automation": {
         cancelMusicQueueAutomation: () => {},
         markMusicQueueAutomationStarted: () => {},

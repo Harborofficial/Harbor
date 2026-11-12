@@ -18,7 +18,8 @@ export default {
   "games.dota.attribute.agi": "Kelincahan",
   "games.dota.attribute.int": "Kecerdasan",
   "games.dota.attribute.all": "Universal",
-  "games.dota.trendsScope": "Sampel OpenDota: tujuh hari UTC termasuk hari ini. Peringkat adalah rata-rata pertandingan; Turbo dan pertandingan profesional dipisahkan.",
+  "games.dota.trendsScope":
+    "Sampel OpenDota: tujuh hari UTC termasuk hari ini. Peringkat adalah rata-rata pertandingan; Turbo dan pertandingan profesional dipisahkan.",
   "games.dota.wins": "kemenangan",
   "games.dota.picks": "{count} pilihan",
   "games.dota.noSample": "Tanpa sampel",
@@ -26,7 +27,8 @@ export default {
   "games.dota.moreHeroes": "Hero lainnya",
   "games.dota.matchups": "Pertemuan profesional",
   "games.dota.refreshMatchups": "Segarkan pertemuan",
-  "games.dota.matchupsScope": "Kemenangan {hero} melawan setiap lawan dalam pertandingan profesional yang tercatat selama setahun terakhir. Termasuk patch lama; tidak mengikuti filter peringkat.",
+  "games.dota.matchupsScope":
+    "Kemenangan {hero} melawan setiap lawan dalam pertandingan profesional yang tercatat selama setahun terakhir. Termasuk patch lama; tidak mengikuti filter peringkat.",
   "games.dota.opponent": "Cari lawan",
   "games.dota.minimum": "Minimum pertandingan",
   "games.dota.minGames": "{count}+ pertandingan",
@@ -48,5 +50,5 @@ export default {
   "games.dota.sample.5": "Legend",
   "games.dota.sample.6": "Ancient",
   "games.dota.sample.7": "Divine",
-  "games.dota.sample.8": "Immortal"
+  "games.dota.sample.8": "Immortal",
 };

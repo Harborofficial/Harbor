@@ -22,5 +22,5 @@ export default {
   "games.match.remove": "移除匹配",
   "games.match.source": "图片和详情来自 IGDB",
   "games.match.note": "选择与文件对应的版本。Harbor 会保留原始文件及文件名。",
-  "games.match.empty": "试试去掉地区或修订标记后的游戏名称。"
+  "games.match.empty": "试试去掉地区或修订标记后的游戏名称。",
 };

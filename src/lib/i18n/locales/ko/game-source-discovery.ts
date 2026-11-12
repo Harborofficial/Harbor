@@ -3,15 +3,18 @@ export default {
   "games.sources.links.copied": "복사됨",
 
   "games.sources.catalogProgress": "소스 확인 중 · {checked}/{total}",
-  "games.sources.source_capacity": "소스 카탈로그가 프로필 한도인 2 GB를 초과했습니다. 사용하지 않는 소스를 삭제하고 다시 시도하세요. 저장된 카탈로그는 변경되지 않았습니다.",
-  "games.sources.source_quota": "이 소스를 저장할 공간이 부족합니다. 공간을 확보하거나 사용하지 않는 소스를 삭제한 후 다시 시도하세요. 저장된 카탈로그는 변경되지 않았습니다.",
+  "games.sources.source_capacity":
+    "소스 카탈로그가 프로필 한도인 2 GB를 초과했습니다. 사용하지 않는 소스를 삭제하고 다시 시도하세요. 저장된 카탈로그는 변경되지 않았습니다.",
+  "games.sources.source_quota":
+    "이 소스를 저장할 공간이 부족합니다. 공간을 확보하거나 사용하지 않는 소스를 삭제한 후 다시 시도하세요. 저장된 카탈로그는 변경되지 않았습니다.",
 
   "games.sources.batch.busy": "다른 파일 선택을 준비 중입니다. 잠시 후 다시 시도하세요.",
   "games.sources.batch.limit": "한 번에 최대 200개 파일을 선택하세요.",
 
   "games.sources.batch.failedFile": "{file}을(를) 준비하지 못했습니다.",
 
-  "games.sources.batch.restart": "선택한 파일을 함께 다운로드하려면 업데이트 후 Harbor를 다시 시작하세요.",
+  "games.sources.batch.restart":
+    "선택한 파일을 함께 다운로드하려면 업데이트 후 Harbor를 다시 시작하세요.",
 
   "games.torrent.start": "파일 다운로드",
 
@@ -19,53 +22,67 @@ export default {
 
   "games.sources.verification.action": "소스 확인",
 
-  "games.sources.verification.waiting": "소스 창에서 인증을 완료하세요. 이후 Harbor가 카탈로그를 확인합니다.",
+  "games.sources.verification.waiting":
+    "소스 창에서 인증을 완료하세요. 이후 Harbor가 카탈로그를 확인합니다.",
 
-  "games.sources.source_verify_busy": "다른 소스를 확인 중입니다. 먼저 해당 인증을 완료하거나 창을 닫으세요.",
+  "games.sources.source_verify_busy":
+    "다른 소스를 확인 중입니다. 먼저 해당 인증을 완료하거나 창을 닫으세요.",
 
-  "games.sources.source_verify_failed": "인증을 완료하지 못했습니다. 다시 시도하거나 소스 주소를 수정하세요.",
+  "games.sources.source_verify_failed":
+    "인증을 완료하지 못했습니다. 다시 시도하거나 소스 주소를 수정하세요.",
 
   "games.sources.source_verify_timeout": "인증 시간이 초과되었습니다. 준비되면 다시 시도하세요.",
 
-  "games.sources.source_verify_unavailable": "이 소스를 확인하려면 Harbor를 업데이트하고 다시 시작하세요.",
+  "games.sources.source_verify_unavailable":
+    "이 소스를 확인하려면 Harbor를 업데이트하고 다시 시작하세요.",
 
   "games.sources.browser.direct": "직접 다운로드",
 
   "games.sources.site.title": "사이트 열기",
-  "games.sources.site.note": "어떤 사이트든 다운로드 페이지를 붙여 넣으세요. Harbor가 자체 창에서 열고, 거기서 파일을 고르면 Harbor로 내려받습니다.",
+  "games.sources.site.note":
+    "어떤 사이트든 다운로드 페이지를 붙여 넣으세요. Harbor가 자체 창에서 열고, 거기서 파일을 고르면 Harbor로 내려받습니다.",
   "games.sources.site.url": "페이지 링크",
   "games.sources.site.open": "사이트 열기",
   "games.sources.site.invalid": "공개된 https 링크여야 합니다.",
-  "games.sources.browser.intro": "Debrid 계정이 필요하지 않습니다. {host}에서 파일을 선택한 다음 Harbor에서 저장 위치를 선택하세요.",
-  "games.sources.browser.fallback": "다운로드가 자동으로 시작되지 않으면 {host} 페이지에 표시된 대체 링크를 사용하세요. Harbor가 파일을 그대로 받아옵니다.",
+  "games.sources.browser.intro":
+    "Debrid 계정이 필요하지 않습니다. {host}에서 파일을 선택한 다음 Harbor에서 저장 위치를 선택하세요.",
+  "games.sources.browser.fallback":
+    "다운로드가 자동으로 시작되지 않으면 {host} 페이지에 표시된 대체 링크를 사용하세요. Harbor가 파일을 그대로 받아옵니다.",
 
   "games.sources.browser.choose": "{host}에서 파일 선택",
 
-  "games.sources.browser.waiting": "{host} 창에서 파일을 선택하세요. Harbor에서 저장 위치를 묻습니다.",
+  "games.sources.browser.waiting":
+    "{host} 창에서 파일을 선택하세요. Harbor에서 저장 위치를 묻습니다.",
 
   "games.sources.browser.selected": "Harbor에서 다운로드할 준비 완료",
 
   "games.sources.browser.another": "다른 파일 선택",
 
-  "games.sources.browser.failed": "{host}에서 Harbor로 파일을 전달하지 못했습니다. 다시 시도하거나 {host}에서 여세요.",
+  "games.sources.browser.failed":
+    "{host}에서 Harbor로 파일을 전달하지 못했습니다. 다시 시도하거나 {host}에서 여세요.",
 
-  "games.sources.browser.timeout": "파일 선택 시간이 초과되었습니다. {host}을 다시 열어 파일을 선택하세요.",
+  "games.sources.browser.timeout":
+    "파일 선택 시간이 초과되었습니다. {host}을 다시 열어 파일을 선택하세요.",
 
-  "games.sources.browser.restart": "{host} 직접 다운로드를 사용하려면 업데이트 후 Harbor를 다시 시작하세요.",
+  "games.sources.browser.restart":
+    "{host} 직접 다운로드를 사용하려면 업데이트 후 Harbor를 다시 시작하세요.",
 
   "games.sources.retrySavedCatalog": "저장된 카탈로그 다시 읽기",
 
   "games.sources.catalogUnavailable": "저장된 카탈로그를 사용할 수 없음",
 
-  "games.sources.catalogRepair": "이 소스를 새로고침하여 릴리스를 복구하세요. 다른 소스는 계속 사용할 수 있습니다.",
+  "games.sources.catalogRepair":
+    "이 소스를 새로고침하여 릴리스를 복구하세요. 다른 소스는 계속 사용할 수 있습니다.",
 
   "games.sources.restoreCatalog": "소스 새로고침",
 
   "games.sources.partialResults": "사용할 수 없는 소스: {count}. 일부 결과가 누락될 수 있습니다.",
 
-  "games.sources.partialRecent": "사용할 수 없는 소스: {count}. 최근 릴리스가 일부 누락될 수 있습니다.",
+  "games.sources.partialRecent":
+    "사용할 수 없는 소스: {count}. 최근 릴리스가 일부 누락될 수 있습니다.",
 
-  "games.sources.source_incomplete": "저장된 카탈로그 중 일부를 읽을 수 없습니다. 데이터를 추가하기 전에 복구하거나 제거하세요.",
+  "games.sources.source_incomplete":
+    "저장된 카탈로그 중 일부를 읽을 수 없습니다. 데이터를 추가하기 전에 복구하거나 제거하세요.",
 
   "games.sources.saving": "소스 저장 중…",
 
@@ -77,7 +94,8 @@ export default {
 
   "games.sources.back": "뒤로",
 
-  "games.sources.source_blocked": "이 소스가 요청을 차단했습니다. 현재 카탈로그를 이용할 수 없습니다.",
+  "games.sources.source_blocked":
+    "이 소스가 요청을 차단했습니다. 현재 카탈로그를 이용할 수 없습니다.",
 
   "games.sources.source_restricted": "이 소스는 법적인 이유로 이용할 수 없습니다 (HTTP 451).",
 
@@ -95,17 +113,21 @@ export default {
 
   "games.sources.platform.compatibility": "Windows 버전 · Wine 또는 Proton 필요",
 
-  "games.sources.platform.compatibilityNote": "Linux에서는 로컬 라이브러리에서 Wine 또는 Proton을 설정하세요. 안티치트를 포함한 호환성은 게임마다 다릅니다. Steam 게임은 Steam의 호환성 설정을 사용하세요.",
+  "games.sources.platform.compatibilityNote":
+    "Linux에서는 로컬 라이브러리에서 Wine 또는 Proton을 설정하세요. 안티치트를 포함한 호환성은 게임마다 다릅니다. Steam 게임은 Steam의 호환성 설정을 사용하세요.",
 
   "games.sources.platform.other": "{platform} 버전 · {host}에서 기본 실행 불가",
 
-  "games.sources.platform.otherNote": "운영체제에 맞는 버전을 선택하세요. Harbor는 이 기기에서 이 패키지를 기본 방식으로 설치하거나 실행할 수 없습니다.",
+  "games.sources.platform.otherNote":
+    "운영체제에 맞는 버전을 선택하세요. Harbor는 이 기기에서 이 패키지를 기본 방식으로 설치하거나 실행할 수 없습니다.",
 
   "games.sources.platform.unknown": "플랫폼 미지정",
 
-  "games.sources.platform.unknownNote": "소스에 패키지의 운영체제가 명시되지 않았습니다. 다운로드 전에 배급사 정보를 확인하세요.",
+  "games.sources.platform.unknownNote":
+    "소스에 패키지의 운영체제가 명시되지 않았습니다. 다운로드 전에 배급사 정보를 확인하세요.",
 
-  "games.sources.platform.browseNote": "로컬 게임 파일을 다운로드하고 관리하려면 Harbor 데스크톱을 사용하세요.",
+  "games.sources.platform.browseNote":
+    "로컬 게임 파일을 다운로드하고 관리하려면 Harbor 데스크톱을 사용하세요.",
 
   "games.sources.platform.browse": "{platform} 버전",
 
@@ -113,27 +135,26 @@ export default {
 
   "games.setup.openNative": "설치 프로그램 열기",
 
-
-
   "games.sources.art.torrent": "토렌트 다운로드",
 
   "games.sources.art.engine": "Harbor 토렌트 엔진",
 
   "games.sources.art.reviewTorrent": "Harbor에서 다운로드",
 
-
-
   "games.sources.ad.note": "AllDebrid로 파일을 준비한 뒤 저장할 위치를 선택하세요.",
 
   "games.sources.ad.password": "링크 비밀번호(선택 사항)",
 
-  "games.sources.ad.passwordRequired": "이 링크에는 비밀번호가 필요합니다. 입력한 뒤 다시 시도하세요.",
+  "games.sources.ad.passwordRequired":
+    "이 링크에는 비밀번호가 필요합니다. 입력한 뒤 다시 시도하세요.",
 
-  "games.sources.ad.blocked": "AllDebrid에서 연결 확인이 필요합니다. 이메일 또는 AllDebrid 계정을 확인한 뒤 다시 시도하세요.",
+  "games.sources.ad.blocked":
+    "AllDebrid에서 연결 확인이 필요합니다. 이메일 또는 AllDebrid 계정을 확인한 뒤 다시 시도하세요.",
 
   "games.sources.ad.quota": "이 호스트의 AllDebrid 할당량을 모두 사용했습니다.",
 
-  "games.sources.ad.unsupported": "AllDebrid가 이 링크를 지원하지 않습니다. 출처를 열어 다른 링크를 선택하세요.",
+  "games.sources.ad.unsupported":
+    "AllDebrid가 이 링크를 지원하지 않습니다. 출처를 열어 다른 링크를 선택하세요.",
 
   "games.sources.ad.preparing": "AllDebrid에서 준비 중",
 
@@ -145,7 +166,8 @@ export default {
 
   "games.sources.ad.kept": "닫아도 요청이 유지됩니다. 링크를 다시 열어 확인하세요.",
 
-  "games.sources.ad.uncertain": "이 요청이 이미 AllDebrid에 있을 수 있습니다. 다시 준비하기 전에 계정을 확인하세요.",
+  "games.sources.ad.uncertain":
+    "이 요청이 이미 AllDebrid에 있을 수 있습니다. 다시 준비하기 전에 계정을 확인하세요.",
 
   "games.sources.ad.renew": "이 파일을 다운로드하려면 새 링크를 준비하세요.",
 
@@ -173,13 +195,17 @@ export default {
 
   "games.sources.discovery.preview": "카탈로그 미리보기",
 
-  "games.sources.discovery.reviewNote": "카탈로그 항목만 저장됩니다. 파일은 직접 선택할 때 다운로드됩니다.",
+  "games.sources.discovery.reviewNote":
+    "카탈로그 항목만 저장됩니다. 파일은 직접 선택할 때 다운로드됩니다.",
 
-  "games.sources.source_no_catalog": "이 웹사이트에는 Harbor가 읽을 수 있는 카탈로그 링크가 없습니다. JSON 카탈로그 링크를 붙여넣으세요.",
+  "games.sources.source_no_catalog":
+    "이 웹사이트에는 Harbor가 읽을 수 있는 카탈로그 링크가 없습니다. JSON 카탈로그 링크를 붙여넣으세요.",
 
-  "games.sources.source_url": "웹사이트 주소, HTTP(S) 카탈로그 URL 또는 Hydra 설치 링크를 입력하세요.",
+  "games.sources.source_url":
+    "웹사이트 주소, HTTP(S) 카탈로그 URL 또는 Hydra 설치 링크를 입력하세요.",
 
-  "games.sources.source_limit": "카탈로그 한도: 64 MB 또는 150,000개 릴리스. 프로필 한도: 2 GB 또는 128개 소스.",
+  "games.sources.source_limit":
+    "카탈로그 한도: 64 MB 또는 150,000개 릴리스. 프로필 한도: 2 GB 또는 128개 소스.",
 
   "games.sources.source_processing": "카탈로그를 처리하지 못했습니다. 다시 시도하세요.",
 
@@ -201,7 +227,8 @@ export default {
 
   "games.sources.website.unavailable": "일부 웹사이트를 확인하지 못했습니다.",
 
-  "games.sources.website.note": "최근 게시물은 캐시됩니다. 검색은 웹사이트 카탈로그에서 수행됩니다.",
+  "games.sources.website.note":
+    "최근 게시물은 캐시됩니다. 검색은 웹사이트 카탈로그에서 수행됩니다.",
 
   "games.sources.links.title": "다운로드 옵션",
 
@@ -249,11 +276,13 @@ export default {
 
   "games.sources.web.start": "TorBox에서 시작",
 
-  "games.sources.web.note": "TorBox가 이 링크를 계정에 다운로드합니다. 준비되면 파일과 로컬 저장 위치를 선택하세요.",
+  "games.sources.web.note":
+    "TorBox가 이 링크를 계정에 다운로드합니다. 준비되면 파일과 로컬 저장 위치를 선택하세요.",
 
   "games.sources.web.kept": "창을 닫아도 TorBox 작업은 유지됩니다.",
 
-  "games.sources.web.uncertain": "이 요청이 이미 TorBox에 있을 수 있습니다. 새 작업을 시작하기 전에 확인하세요.",
+  "games.sources.web.uncertain":
+    "이 요청이 이미 TorBox에 있을 수 있습니다. 새 작업을 시작하기 전에 확인하세요.",
 
   "games.sources.web.check": "TorBox 확인",
 
@@ -261,13 +290,15 @@ export default {
 
   "games.sources.web.more": "이전 작업 확인",
 
-  "games.sources.web.notFound": "일치하는 작업이 없습니다. 새 작업이 지연된 요청과 중복될 수 있습니다.",
+  "games.sources.web.notFound":
+    "일치하는 작업이 없습니다. 새 작업이 지연된 요청과 중복될 수 있습니다.",
 
   "games.sources.web.nextPage": "{page}페이지를 확인했습니다. 이전 작업을 계속 확인하세요.",
 
   "games.sources.web.again": "다른 작업 시작",
 
-  "games.sources.web.storage": "Harbor가 작업을 저장하지 못했습니다. 자동으로 다시 전송하지 않습니다.",
+  "games.sources.web.storage":
+    "Harbor가 작업을 저장하지 못했습니다. 자동으로 다시 전송하지 않습니다.",
 
   "games.sources.web.preparing": "TorBox에서 준비 중",
 
@@ -323,7 +354,8 @@ export default {
 
   "games.sources.host.queueNote": "이 호스트는 서비스의 클라우드 전송을 사용합니다.",
 
-  "games.sources.host.unknownNote": "이 도메인은 제공업체 목록에 없습니다. 링크를 시도할 수는 있습니다.",
+  "games.sources.host.unknownNote":
+    "이 도메인은 제공업체 목록에 없습니다. 링크를 시도할 수는 있습니다.",
 
   "games.sources.host.fileNote": "링크를 준비할 때 파일 이용 가능 여부를 확인합니다.",
 
@@ -335,11 +367,13 @@ export default {
 
   "games.sources.pm.start": "Premiumize에서 시작",
 
-  "games.sources.pm.note": "Premiumize가 이 링크를 클라우드에 저장합니다. 준비가 되면 파일을 선택하세요.",
+  "games.sources.pm.note":
+    "Premiumize가 이 링크를 클라우드에 저장합니다. 준비가 되면 파일을 선택하세요.",
 
   "games.sources.pm.kept": "닫아도 Premiumize 전송은 유지됩니다.",
 
-  "games.sources.pm.uncertain": "이 요청이 이미 Premiumize에 있을 수 있습니다. 새로 만들기 전에 최근 전송을 확인하세요.",
+  "games.sources.pm.uncertain":
+    "이 요청이 이미 Premiumize에 있을 수 있습니다. 새로 만들기 전에 최근 전송을 확인하세요.",
 
   "games.sources.pm.check": "Premiumize 확인",
 
@@ -349,11 +383,13 @@ export default {
 
   "games.sources.pm.failed": "전송 실패",
 
-  "games.sources.pm.notFound": "전송을 선택하지 않았습니다. 다시 시작하면 요청이 중복될 수 있습니다.",
+  "games.sources.pm.notFound":
+    "전송을 선택하지 않았습니다. 다시 시작하면 요청이 중복될 수 있습니다.",
 
   "games.sources.pm.select": "이 전송 사용",
 
-  "games.sources.pm.review": "제출한 전송을 선택하세요. Harbor는 출처를 자동으로 확인할 수 없습니다.",
+  "games.sources.pm.review":
+    "제출한 전송을 선택하세요. Harbor는 출처를 자동으로 확인할 수 없습니다.",
 
   "games.sources.pm.retry": "전송 재시도",
 
@@ -365,7 +401,8 @@ export default {
 
   "games.sources.pm.files": "파일",
 
-  "games.sources.pm.container": "이 출처에는 링크가 포함되어 있습니다. 열어서 개별 파일 링크를 선택하세요.",
+  "games.sources.pm.container":
+    "이 출처에는 링크가 포함되어 있습니다. 열어서 개별 파일 링크를 선택하세요.",
 
   "games.sources.pm.folder": "폴더 열기",
 
@@ -417,7 +454,6 @@ export default {
 
   "games.sources.batch.destination": "폴더 선택",
 
-  "games.download.transfer_batch_names": "일부 파일 이름이 중복되거나 그대로 저장할 수 없습니다. 해당 파일을 하나씩 선택하세요."
-
+  "games.download.transfer_batch_names":
+    "일부 파일 이름이 중복되거나 그대로 저장할 수 없습니다. 해당 파일을 하나씩 선택하세요.",
 };
-

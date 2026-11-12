@@ -100,17 +100,18 @@ export function useBpGenreGrid(genre: string): BpGenreFeed {
   // Order matters. A grid that already has content stays a grid even if a later
   // page comes back empty, otherwise scrolling to the bottom of a working shelf
   // replaces it with an error screen.
-  const status: BpGenreStatus = shown.length > 0
-    ? "ready"
-    : loading
-      ? "loading"
-      : !settings.tmdbKey
-        ? "no-key"
-        : metas.length > 0
-          ? "filtered"
-          : failed
-            ? "failed"
-            : "empty";
+  const status: BpGenreStatus =
+    shown.length > 0
+      ? "ready"
+      : loading
+        ? "loading"
+        : !settings.tmdbKey
+          ? "no-key"
+          : metas.length > 0
+            ? "filtered"
+            : failed
+              ? "failed"
+              : "empty";
 
   return { metas: shown, status, more, retry: restart };
 }

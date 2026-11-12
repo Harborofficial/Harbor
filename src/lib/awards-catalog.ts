@@ -278,9 +278,7 @@ export const AWARD_CATALOG: Record<AwardType, AwardMeta> = {
     description:
       "The celebration of British filmmaking outside the studio system. BIFA wins regularly launch films and careers straight into the BAFTA and Oscar conversation.",
     founded: 1998,
-    categories: [
-      { key: "best_film", name: "Best British Independent Film" },
-    ],
+    categories: [{ key: "best_film", name: "Best British Independent Film" }],
   },
   other: {
     type: "other",

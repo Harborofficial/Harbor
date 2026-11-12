@@ -11,11 +11,7 @@ export async function dropPmdbShow(
 ): Promise<boolean> {
   options.assertCurrent?.();
   if (!isAuthenticated()) return false;
-  if (
-    target.media_type !== "tv" ||
-    !Number.isInteger(target.tmdb_id) ||
-    (target.tmdb_id ?? 0) <= 0
-  )
+  if (target.media_type !== "tv" || !Number.isInteger(target.tmdb_id) || (target.tmdb_id ?? 0) <= 0)
     return false;
 
   try {

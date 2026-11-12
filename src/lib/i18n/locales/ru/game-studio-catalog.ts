@@ -11,5 +11,5 @@ export default {
   "games.studioCatalog.minimumRating.value": "{count}+ / 100",
   "games.studioCatalog.minimumVotes.all": "Любое число оценок",
   "games.studioCatalog.minimumVotes.value": "От {count} оценок",
-  "games.studioCatalog.ratingFloor": "Для рейтинга требуется не менее 5 оценок."
+  "games.studioCatalog.ratingFloor": "Для рейтинга требуется не менее 5 оценок.",
 };

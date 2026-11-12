@@ -71,7 +71,9 @@ function migrateLegacy(legacy: string): string {
 }
 
 export function normalizeTitle(title: string): string {
-  return stripColorTag(title).toLowerCase().replace(/[^a-z0-9]+/g, "");
+  return stripColorTag(title)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
 }
 
 function titleVariants(candidate: string, altTitles?: string[]): string[] {

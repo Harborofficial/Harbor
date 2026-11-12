@@ -1,4 +1,4 @@
-const gameHub: Record<string,string> = {
+const gameHub: Record<string, string> = {
   "games.hub.filesTitle": "Proje dosyaları",
   "games.hub.videoUnavailable": "Oynanış videoları yüklenemedi.",
   "games.hub.noVideos": "Bu ROM hackleri için henüz video listelenmiyor.",
@@ -7,10 +7,13 @@ const gameHub: Record<string,string> = {
   "games.hub.allOriginals": "Tüm orijinal oyunlar",
   "games.hub.searchOriginal": "Orijinal oyun bul…",
   "games.hub.getFiles": "Dosyaları al",
-  "games.hub.packNote": "Bu proje bir mod paketi kullanır. Sisteminiz için yapımcının kurulum rehberini izleyin.",
-  "games.hub.noDownload": "Doğrudan yama indirme bağlantısı bulunamadı. Proje sitesini açın veya dosya bağlantısını yapıştırın.",
+  "games.hub.packNote":
+    "Bu proje bir mod paketi kullanır. Sisteminiz için yapımcının kurulum rehberini izleyin.",
+  "games.hub.noDownload":
+    "Doğrudan yama indirme bağlantısı bulunamadı. Proje sitesini açın veya dosya bağlantısını yapıştırın.",
   "games.hub.downloadFailed": "Dosyalar alınamadı. Tekrar deneyin veya proje sitesini açın.",
-  "games.hub.downloadNote": "Yapımcının yamasını indirin, ardından uygulanacak orijinal oyunu seçin.",
+  "games.hub.downloadNote":
+    "Yapımcının yamasını indirin, ardından uygulanacak orijinal oyunu seçin.",
   "games.hub.downloadLink": "İndirme bağlantısı yapıştır",
   "games.hub.gettingFiles": "Dosyalar kontrol ediliyor…",
   "games.hub.creatorNotes": "Yapımcının talimatları",
@@ -20,18 +23,22 @@ const gameHub: Record<string,string> = {
   "games.hub.toolkitNote": "Orijinal oyununuz için bir yama indirin.",
   "games.hub.communityMade": "Topluluk tarafından yapıldı",
   "games.hub.title": "ROM hackleri",
-  "games.hub.note": "Yeni maceralar, yeniden yorumlanan klasikler. Bir hack bul, kaydet ve yamalı kopyanı Harbor’da oyna.",
+  "games.hub.note":
+    "Yeni maceralar, yeniden yorumlanan klasikler. Bir hack bul, kaydet ve yamalı kopyanı Harbor’da oyna.",
   "games.hub.hacksFor": "{name} için hackler",
   "games.hub.baseNote": "Topluluğun bu oyundan neler ürettiğini keşfet.",
   "games.hub.how": "ROM hacki nasıl oynanır?",
   "games.hub.stepFind": "Proje sitesini ve gerekli orijinal oyunu bulmak için bir hack aç.",
-  "games.hub.stepPatch": "Orijinal ROM’unu ve BPS veya IPS yamasını seç. Harbor dosyaları denetler ve ayrı bir kopya kaydeder.",
-  "games.hub.stepPlay": "Kopyayı kitaplığına ekle. Desteklenen sistemleri Harbor’da veya ayarladığın emülatörde oyna.",
+  "games.hub.stepPatch":
+    "Orijinal ROM’unu ve BPS veya IPS yamasını seç. Harbor dosyaları denetler ve ayrı bir kopya kaydeder.",
+  "games.hub.stepPlay":
+    "Kopyayı kitaplığına ekle. Desteklenen sistemleri Harbor’da veya ayarladığın emülatörde oyna.",
   "games.hub.byOriginal": "Orijinal oyuna göre hackler",
   "games.hub.allHacks": "Tüm hacklere göz at",
   "games.hub.baseUnlisted": "Orijinal oyun belirtilmemiş",
   "games.hub.makePlayable": "Oynamaya hazırla",
-  "games.hub.installNote": "Yamayı proje sitesinden al ve kendi kopyana uygula. Önce gereken sürümü kontrol et.",
+  "games.hub.installNote":
+    "Yamayı proje sitesinden al ve kendi kopyana uygula. Önce gereken sürümü kontrol et.",
   "games.hub.moreFor": "{name} için daha fazla hack",
   "games.hub.project": "Proje sitesi",
   "games.hub.relatedError": "İlgili hackler yüklenemedi.",
@@ -41,11 +48,14 @@ const gameHub: Record<string,string> = {
   "games.hub.added": "Kitaplığa eklendi",
   "games.hub.addLibrary": "Kitaplığa ekle",
   "games.collectionsLive.greats": "Tüm zamanların harikaları",
-  "games.collectionsLive.greatsNote": "En az 100 oyuncu ve eleştirmen değerlendirmesiyle IGDB’nin en yüksek puanlı oyunları.",
+  "games.collectionsLive.greatsNote":
+    "En az 100 oyuncu ve eleştirmen değerlendirmesiyle IGDB’nin en yüksek puanlı oyunları.",
   "games.collectionsLive.coop": "Birlikte daha iyi",
-  "games.collectionsLive.coopNote": "En az 100 IGDB değerlendirmesi olan yüksek puanlı eşli oyunlar. Modlar platforma göre değişir.",
+  "games.collectionsLive.coopNote":
+    "En az 100 IGDB değerlendirmesi olan yüksek puanlı eşli oyunlar. Modlar platforma göre değişir.",
   "games.collectionsLive.records": "Rekor kitaplarındaki oyunlar",
-  "games.collectionsLive.recordsNote": "Her birinin hikayesi ve kaynağıyla dikkat çekici başarılar.",
+  "games.collectionsLive.recordsNote":
+    "Her birinin hikayesi ve kaynağıyla dikkat çekici başarılar.",
   "games.collectionsLive.minecraft": "Minecraft",
   "games.collectionsLive.minecraftRecord": "Tüm sürümlerde satılan kopya",
   "games.collectionsLive.minecraftDate": "Nisan 2025",
@@ -56,6 +66,6 @@ const gameHub: Record<string,string> = {
   "games.collectionsLive.gtaRecord": "Yalnızca üç günde satış",
   "games.collectionsLive.gtaDate": "Eylül 2013",
   "games.atlas.kind.greats": "Tüm zamanların harikaları",
-  "games.atlas.kind.coop": "Eşli oyunlar"
+  "games.atlas.kind.coop": "Eşli oyunlar",
 };
 export default gameHub;

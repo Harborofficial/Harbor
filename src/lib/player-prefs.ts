@@ -29,7 +29,9 @@ export function registerPlayerSubDelayTrackKindResolver(
     if (subDelayTrackKindResolver === resolver) subDelayTrackKindResolver = previous;
   };
 }
-export function registerPlayerSubDelayMapper(mapper: (metaId: string, sec: number) => number): () => void {
+export function registerPlayerSubDelayMapper(
+  mapper: (metaId: string, sec: number) => number,
+): () => void {
   const previous = subDelayMapper;
   subDelayMapper = mapper;
   return () => {
@@ -72,13 +74,15 @@ export function writePlayerPrefs(metaId: string, patch: Partial<PerShowPrefs>): 
   if (!metaId) return;
   const store = loadStore();
   const prev = store[metaId] ?? { updatedAt: 0 };
-  const mapped = typeof patch.subDelaySec === "number" && subDelayMapper
-    ? { ...patch, subDelaySec: subDelayMapper(metaId, patch.subDelaySec) }
-    : patch;
-  const trackKind = typeof patch.subDelaySec === "number"
-    ? subDelayTrackKindResolver?.(metaId) : null;
+  const mapped =
+    typeof patch.subDelaySec === "number" && subDelayMapper
+      ? { ...patch, subDelaySec: subDelayMapper(metaId, patch.subDelaySec) }
+      : patch;
+  const trackKind =
+    typeof patch.subDelaySec === "number" ? subDelayTrackKindResolver?.(metaId) : null;
   store[metaId] = {
-    ...prev, ...mapped,
+    ...prev,
+    ...mapped,
     ...(trackKind ? { subDelayTrackKind: trackKind } : {}),
     updatedAt: Date.now(),
   };

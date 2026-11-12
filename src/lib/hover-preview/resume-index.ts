@@ -69,11 +69,7 @@ function fallbackLookup(meta: Meta): PreviewResume | null {
       const hasPct = typeof pct === "number" && Number.isFinite(pct);
       const clampedPct = hasPct ? Math.min(1, Math.max(0, pct)) : null;
       const fraction =
-        clampedPct != null
-          ? clampedPct
-          : minutes
-            ? Math.min(1, last.ms / (minutes * 60000))
-            : null;
+        clampedPct != null ? clampedPct : minutes ? Math.min(1, last.ms / (minutes * 60000)) : null;
       if (fraction !== null && fraction >= FRESH_FRACTION) return null;
       const remainingMs =
         clampedPct != null && minutes != null
@@ -99,11 +95,7 @@ function fallbackLookup(meta: Meta): PreviewResume | null {
     const hasPct = typeof pct === "number" && Number.isFinite(pct);
     const clampedPct = hasPct ? Math.min(1, Math.max(0, pct)) : null;
     const fraction =
-      clampedPct != null
-        ? clampedPct
-        : minutes
-          ? Math.min(1, entry.ms / (minutes * 60000))
-          : null;
+      clampedPct != null ? clampedPct : minutes ? Math.min(1, entry.ms / (minutes * 60000)) : null;
     if (fraction !== null && fraction >= FRESH_FRACTION) return null;
     const remainingMs =
       clampedPct != null && minutes != null

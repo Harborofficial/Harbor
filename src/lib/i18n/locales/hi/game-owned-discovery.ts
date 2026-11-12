@@ -10,7 +10,8 @@ export default {
   "games.calendar.search": "सहेजे गए गेम खोजें",
   "games.calendar.platform": "रिलीज़ का प्लेटफ़ॉर्म",
   "games.calendar.allPlatforms": "सभी प्लेटफ़ॉर्म",
-  "games.calendar.dates": "प्रकाशकों की बताई तारीखें बदल सकती हैं। Steam की तारीखें अमेरिकी स्टोर से ली जाती हैं; IGDB के रिकॉर्ड में प्लेटफ़ॉर्म और क्षेत्र दिखाए जाते हैं।",
+  "games.calendar.dates":
+    "प्रकाशकों की बताई तारीखें बदल सकती हैं। Steam की तारीखें अमेरिकी स्टोर से ली जाती हैं; IGDB के रिकॉर्ड में प्लेटफ़ॉर्म और क्षेत्र दिखाए जाते हैं।",
   "games.calendar.noDays": "जाँचे गए किसी भी गेम के लिए {month} में रिलीज़ का सटीक दिन नहीं दिया गया है।",
   "games.calendar.windows": "संभावित रिलीज़ अवधि",
   "games.calendar.windowsNote": "इन योजनाओं में यह महीना शामिल है, लेकिन कोई सटीक दिन नहीं बताया गया है।",
@@ -34,7 +35,8 @@ export default {
   "games.watchlist.coverage": "{total} गेम में से {count} की जाँच की गई",
   "games.watchlist.refresh": "रिलीज़ की तारीख़ें रीफ़्रेश करें",
   "games.watchlist.unavailable": "रिलीज़ की तारीख़ उपलब्ध नहीं",
-  "games.watchlist.partial": "कुछ रिलीज़ की तारीख़ें जाँची नहीं जा सकीं। जहाँ उपलब्ध है, वहाँ सहेजी गई जानकारी दिखाई जा रही है।",
+  "games.watchlist.partial":
+    "कुछ रिलीज़ की तारीख़ें जाँची नहीं जा सकीं। जहाँ उपलब्ध है, वहाँ सहेजी गई जानकारी दिखाई जा रही है।",
   "games.watchlist.noMatch": "इन फ़िल्टर से कोई पसंदीदा गेम मेल नहीं खाता।",
   "games.watchlist.dateNote": "तारीख़ें Steam और IGDB से ली जाती हैं। रिलीज़ की योजनाएँ बदल सकती हैं।",
   "games.watchlist.remove": "{name} को पसंदीदा से हटाएँ",
@@ -54,9 +56,11 @@ export default {
   "games.owned.pickHint": "इन नतीजों में से कोई भी गेम रैंडम तरीके से खोलें।",
   "games.owned.clear": "लाइब्रेरी फ़िल्टर हटाएँ",
   "games.owned.scanning": "स्थानीय इंस्टॉलेशन जाँचे जा रहे हैं…",
-  "games.owned.scanUnavailable": "स्थानीय इंस्टॉलेशन की स्थिति उपलब्ध नहीं है। इस डिवाइस की जाँच करने के लिए रीफ़्रेश करें।",
+  "games.owned.scanUnavailable":
+    "स्थानीय इंस्टॉलेशन की स्थिति उपलब्ध नहीं है। इस डिवाइस की जाँच करने के लिए रीफ़्रेश करें।",
   "games.owned.partial": "कुछ Steam फ़ोल्डर जाँचे नहीं जा सके। कुछ इंस्टॉलेशन की पहचान छूट सकती है।",
   "games.owned.results": "{total} में से {count} गेम",
-  "games.owned.playtimeNote": "खेलने का इतिहास पिछली Steam सिंक से लिया गया है। खेलने का समय दर्ज न होना यह नहीं बताता कि गेम पूरा किया गया है या नहीं।",
-  "games.owned.resetAvailability": "इंस्टॉलेशन की सभी स्थितियों वाले गेम दिखाएँ"
+  "games.owned.playtimeNote":
+    "खेलने का इतिहास पिछली Steam सिंक से लिया गया है। खेलने का समय दर्ज न होना यह नहीं बताता कि गेम पूरा किया गया है या नहीं।",
+  "games.owned.resetAvailability": "इंस्टॉलेशन की सभी स्थितियों वाले गेम दिखाएँ",
 };

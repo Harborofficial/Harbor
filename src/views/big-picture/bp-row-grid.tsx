@@ -60,9 +60,7 @@ export function useBpRowGrid(): {
     if (!rowKey) return;
     const frame = window.requestAnimationFrame(() => {
       const root = document.querySelector<HTMLElement>("[data-bp-root]");
-      const section = root?.querySelector<HTMLElement>(
-        `[data-bp-row-key="${CSS.escape(rowKey)}"]`,
-      );
+      const section = root?.querySelector<HTMLElement>(`[data-bp-row-key="${CSS.escape(rowKey)}"]`);
       if (!root || !section) return;
       // Every row but the one holding the ring is content-visibility: auto, and
       // skipped content reports a zero rect and refuses focus().
@@ -172,13 +170,7 @@ export function BpRowGrid({
         <BpGridScroller>
           <BpGrid columns={BP_POSTER_COLUMNS}>
             {metas.map((m, i) => (
-              <BpTile
-                key={`${m.id}-${i}`}
-                meta={m}
-                onSelect={onSelect}
-                autofocus={i === 0}
-                fluid
-              />
+              <BpTile key={`${m.id}-${i}`} meta={m} onSelect={onSelect} autofocus={i === 0} fluid />
             ))}
           </BpGrid>
         </BpGridScroller>

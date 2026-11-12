@@ -1,8 +1,8 @@
 const bpSources: Record<string, string> = {
   "{shown} of {total} sources": "{shown} из {total} источников",
   "Switch source": "Сменить источник",
-  "Cached": "В кеше",
-  "Largest": "Самые большие",
+  Cached: "В кеше",
+  Largest: "Самые большие",
   "Most seeders": "Больше сидов",
   "Looking for sources": "Поиск источников",
   "No sources match these filters": "Нет источников, подходящих под эти фильтры",
@@ -14,7 +14,7 @@ const bpSources: Record<string, string> = {
     "Ваш debrid-сервис не отвечает. Попробуйте другой источник.",
   "{n} seeds": "Сидов: {n}",
   "{count} collections": "Коллекций: {count}",
-  "Unavailable": "Недоступно",
+  Unavailable: "Недоступно",
 };
 
 export default bpSources;

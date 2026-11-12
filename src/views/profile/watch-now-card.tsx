@@ -35,7 +35,12 @@ export function WatchNowCard({ watching }: { watching?: ProfileWatching }) {
   const t = useT();
   const { openMeta, openManga } = useView();
   const livePos = useLivePosition(watching);
-  const media = useProfileTitle(watching?.metaId, watching?.title, watching?.posterUrl, watching?.metaType);
+  const media = useProfileTitle(
+    watching?.metaId,
+    watching?.title,
+    watching?.posterUrl,
+    watching?.metaType,
+  );
   if (!watching || (watching.kind !== "party" && !watching.title)) return null;
 
   const isParty = watching.kind === "party";
@@ -48,7 +53,8 @@ export function WatchNowCard({ watching }: { watching?: ProfileWatching }) {
         }
         openMeta({
           id: watching.metaId as string,
-          type: watching.metaType === "series" || watching.metaType === "anime" ? "series" : "movie",
+          type:
+            watching.metaType === "series" || watching.metaType === "anime" ? "series" : "movie",
           name: media.title ?? "",
           poster: media.poster,
         });
@@ -67,7 +73,8 @@ export function WatchNowCard({ watching }: { watching?: ProfileWatching }) {
         : t("Watch now");
   const sub =
     isParty && watching.partySize
-      ? t("{count} aboard", { count: watching.partySize }) + (watching.sub ? ` · ${watching.sub}` : "")
+      ? t("{count} aboard", { count: watching.partySize }) +
+        (watching.sub ? ` · ${watching.sub}` : "")
       : (watching.sub ?? "");
 
   return (

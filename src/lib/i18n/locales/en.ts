@@ -1,3 +1,4 @@
+import ebookPdf from "./en/ebook-pdf";
 import playOrders from "./en/play-orders";
 import gameRomLibrary from "./en/game-rom-library";
 import gameNotes from "./en/game-notes";
@@ -496,6 +497,7 @@ const en: Record<string, string> = {
   ...gameRomLibrary,
   ...gameNotes,
   ...playOrders,
+  ...ebookPdf,
 };
 
 export default en;

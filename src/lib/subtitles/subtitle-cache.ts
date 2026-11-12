@@ -3,12 +3,7 @@ import {
   configureSubSourceCache,
   type SourceSubCandidate,
 } from "@/lib/subtitles/autosync/sub-sources";
-import {
-  configureCache,
-  type OsSub,
-} from "@/lib/subtitles/autosync/opensubtitles";
-
-
+import { configureCache, type OsSub } from "@/lib/subtitles/autosync/opensubtitles";
 
 type StoredEntry = { expires: number; value: unknown };
 type Entry<T> = { expires: number; value: T };

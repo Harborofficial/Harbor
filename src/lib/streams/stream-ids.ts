@@ -22,9 +22,14 @@ export function preferredAnimeImdbStreamId(
   if (episode) {
     const { imdbSeason, imdbEpisode } = episode;
     if (
-      typeof imdbSeason !== "number" || !Number.isInteger(imdbSeason) || imdbSeason < 0 ||
-      typeof imdbEpisode !== "number" || !Number.isInteger(imdbEpisode) || imdbEpisode < 1
-    ) return undefined;
+      typeof imdbSeason !== "number" ||
+      !Number.isInteger(imdbSeason) ||
+      imdbSeason < 0 ||
+      typeof imdbEpisode !== "number" ||
+      !Number.isInteger(imdbEpisode) ||
+      imdbEpisode < 1
+    )
+      return undefined;
     candidate = `${id}:${imdbSeason}:${imdbEpisode}`;
   }
   // Only prefer identities already emitted by the episode-aware candidate builder.
@@ -177,9 +182,10 @@ export function buildStreamIds(
 
   if (unverifiedAnimeId) push(unverifiedAnimeId);
 
-  // The shared provider's S17 belongs to Bleach (2004), not TYBW's own
-  // catalog entry. Keep its numbering as a result alias, never a show query.
-  if (splitAnimeStreamCoordinates(episode?.kitsuStreamId) && (episode?.imdbSeason ?? 0) >= 17) {
+  // A split-franchise child (e.g. TYBW) shares its provider id with the base
+  // show. That provider's season/episode numbering belongs to the base entry,
+  // not this cour, so keep it as an alias only and never query it.
+  if (splitAnimeStreamCoordinates(episode?.kitsuStreamId)) {
     return out.filter((id) => !id.startsWith("tt") && !id.startsWith("tmdb:"));
   }
   return out;

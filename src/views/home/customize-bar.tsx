@@ -142,15 +142,7 @@ export function CustomizeBar({
   );
 }
 
-function OptionToggle({
-  label,
-  on,
-  onClick,
-}: {
-  label: string;
-  on: boolean;
-  onClick: () => void;
-}) {
+function OptionToggle({ label, on, onClick }: { label: string; on: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}

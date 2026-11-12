@@ -31,7 +31,9 @@ class SoundEffects {
   private getCtx() {
     if (typeof window === "undefined") return null;
     if (!this.ctx) {
-      const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const Ctor =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.ctx = new Ctor();
       this.masterGain = this.ctx.createGain();
       this.masterGain.gain.value = this.currentVolume;
@@ -112,7 +114,8 @@ class SoundEffects {
 
   open() {
     if (this.activeTheme === "none") return;
-    if (this.activeTheme === "glass") this.playGlass({ freq: 720, dur: 0.5, vol: 0.04, modRatio: 3 });
+    if (this.activeTheme === "glass")
+      this.playGlass({ freq: 720, dur: 0.5, vol: 0.04, modRatio: 3 });
     else if (this.activeTheme === "modern") {
       this.playTone(523.25, "sine", 0.3, 0.03);
       this.playTone(659.25, "sine", 0.3, 0.025);

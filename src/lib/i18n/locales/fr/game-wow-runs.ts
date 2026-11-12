@@ -3,7 +3,8 @@ export default {
   "games.wow.runs.title": "Parcours de donjon",
   "games.wow.runs.all": "Tous les affixes",
   "games.wow.runs.current": "Affixes actuels",
-  "games.wow.runs.currentNote": "Correspond à la combinaison actuelle d’affixes, y compris les semaines précédentes.",
+  "games.wow.runs.currentNote":
+    "Correspond à la combinaison actuelle d’affixes, y compris les semaines précédentes.",
   "games.wow.runs.allNote": "Meilleurs parcours enregistrés pour tous les affixes de cette saison.",
   "games.wow.runs.page": "Page {page}",
   "games.wow.runs.refresh": "Actualiser les parcours",
@@ -19,11 +20,12 @@ export default {
   "games.wow.runs.copy": "Copier les talents",
   "games.wow.runs.copyFailed": "Copie impossible. Réessayez.",
   "games.wow.runs.party": "Composition du groupe",
-  "games.wow.runs.snapshots": "Les talents et équipements publiés sont des relevés du fournisseur. Ils peuvent différer de ceux utilisés pendant ce parcours.",
+  "games.wow.runs.snapshots":
+    "Les talents et équipements publiés sont des relevés du fournisseur. Ils peuvent différer de ceux utilisés pendant ce parcours.",
   "games.wow.runs.gear": "Équipement",
   "games.wow.runs.tank": "Tank",
   "games.wow.runs.healer": "Soigneur",
   "games.wow.runs.dps": "Dégâts",
   "games.wow.runs.snapshotAt": "Relevé d’équipement : {date}",
-  "games.wow.runs.closeGear": "Fermer l’équipement"
+  "games.wow.runs.closeGear": "Fermer l’équipement",
 };

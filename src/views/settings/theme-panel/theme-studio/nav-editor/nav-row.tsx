@@ -140,17 +140,31 @@ export function NavRow({
           {t("Renamed")}
         </button>
       )}
-      <MoveBtn ref={upRef} label={t("Move {name} up", { name })} disabled={isFirst} onClick={() => move(true)}>
+      <MoveBtn
+        ref={upRef}
+        label={t("Move {name} up", { name })}
+        disabled={isFirst}
+        onClick={() => move(true)}
+      >
         <ChevronUp size={16} strokeWidth={2.4} />
       </MoveBtn>
-      <MoveBtn ref={downRef} label={t("Move {name} down", { name })} disabled={isLast} onClick={() => move(false)}>
+      <MoveBtn
+        ref={downRef}
+        label={t("Move {name} down", { name })}
+        disabled={isLast}
+        onClick={() => move(false)}
+      >
         <ChevronDown size={16} strokeWidth={2.4} />
       </MoveBtn>
       <button
         type="button"
         onClick={onToggleHidden}
         title={hidden ? t("Show in nav") : t("Hide from nav")}
-        aria-label={hidden ? t("Show {name} in navigation", { name }) : t("Hide {name} from navigation", { name })}
+        aria-label={
+          hidden
+            ? t("Show {name} in navigation", { name })
+            : t("Hide {name} from navigation", { name })
+        }
         aria-pressed={hidden}
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${
           hidden

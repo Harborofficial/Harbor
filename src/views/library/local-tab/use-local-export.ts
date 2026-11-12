@@ -59,7 +59,11 @@ export function useLocalExport(setToast: (msg: string) => void) {
         const res = await exportSeries(key, eps, exportSizes);
         if (res.ok) {
           ok += 1;
-          if (res.localArt) updateLocalEntries(eps.map((e) => e.id), { localArt: res.localArt });
+          if (res.localArt)
+            updateLocalEntries(
+              eps.map((e) => e.id),
+              { localArt: res.localArt },
+            );
         } else {
           fail += 1;
           reason = reason ?? res.reason;

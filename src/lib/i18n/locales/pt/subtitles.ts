@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "Legendas estilizadas (ASS) mantêm as cores, o tamanho e a posição das placas, mas usam sua fonte.",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "O Harbor envia as legendas dele para o seu mpv. Escolha uma no menu de legendas do próprio mpv.",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "Legendas estilizadas (ASS) mantêm as cores, o tamanho e a posição das placas, mas usam sua fonte.",
 };
 
 export default subtitles;

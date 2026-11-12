@@ -261,17 +261,13 @@
 .hbk:hover .hbk-block,
 .hbk:focus-within .hbk-block {
   transform: rotateY(var(--hbk-turn)) translateZ(7px);
-  transition:
-    transform 460ms linear(0, 0.36 20%, 0.74 38%, 0.97 55%, 1.03 70%, 1.004 86%, 1)
-      150ms;
+  transition: transform 460ms linear(0, 0.36 20%, 0.74 38%, 0.97 55%, 1.03 70%, 1.004 86%, 1) 150ms;
 }
 
 .hbk:hover .hbk-cover,
 .hbk:focus-within .hbk-cover {
   transform: rotateY(var(--hbk-open));
-  transition:
-    transform 560ms linear(0, 0.32 18%, 0.7 36%, 0.95 54%, 1.035 70%, 1.006 86%, 1)
-      150ms;
+  transition: transform 560ms linear(0, 0.32 18%, 0.7 36%, 0.95 54%, 1.035 70%, 1.006 86%, 1) 150ms;
 }
 
 .hbk[data-mode="lift"]:hover .hbk-block,
@@ -344,7 +340,6 @@
   .hbk-edge {
     transition: none;
   }
-
 }
 
 [data-ebook-page] .harbor-row-track {

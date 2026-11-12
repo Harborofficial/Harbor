@@ -84,7 +84,10 @@ export function ShownBadgesPicker({
   const t = useT();
   useEscape(onClose);
   const options = useMemo(() => pickableBadges(badges), [badges]);
-  const verifiedBadge = useMemo(() => badges.find((b) => badgeKey(b.name) === "verified"), [badges]);
+  const verifiedBadge = useMemo(
+    () => badges.find((b) => badgeKey(b.name) === "verified"),
+    [badges],
+  );
   const [showVerified, setShowVerified] = useState(!hideVerified);
   const [selected, setSelected] = useState<string[]>(() => {
     const valid = new Set(options.map((b) => badgeKey(b.name)));
@@ -123,7 +126,11 @@ export function ShownBadgesPicker({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[185] flex items-center justify-center p-4" role="dialog" aria-modal>
+    <div
+      className="fixed inset-0 z-[185] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal
+    >
       <button aria-label={t("Close")} className="absolute inset-0 bg-black/55" onClick={onClose} />
       <div className="relative flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-surface ring-1 ring-edge">
         <div className="flex items-center justify-between border-b border-edge-soft px-6 py-4">
@@ -139,13 +146,18 @@ export function ShownBadgesPicker({
 
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <p className="pb-3 text-[13px] text-ink-muted">
-            {t("Pick up to {max} badges to show by your name. Tap in the order you want them to appear.", { max: MAX_SHOWN_BADGES })}
+            {t(
+              "Pick up to {max} badges to show by your name. Tap in the order you want them to appear.",
+              { max: MAX_SHOWN_BADGES },
+            )}
           </p>
           {options.length === 0 && !verifiedBadge ? (
             <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-edge py-12 text-center">
               <Award size={24} className="text-ink-subtle" />
               <p className="mt-2 text-[14px] text-ink-muted">{t("No badges to show yet")}</p>
-              <p className="mt-1 text-[12px] text-ink-subtle">{t("Earn badges and they will appear here to feature")}</p>
+              <p className="mt-1 text-[12px] text-ink-subtle">
+                {t("Earn badges and they will appear here to feature")}
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">

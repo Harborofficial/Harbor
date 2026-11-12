@@ -42,11 +42,7 @@ test("every numeric keypad stays left to right", () => {
 test("the ten-foot keypad stays left to right too", () => {
   for (const p of BP_KEYPADS) {
     const src = read(p);
-    assert.match(
-      src,
-      /dir="ltr"\s*\n\s*data-bp-grid/,
-      `${p} keypad would render 3,2,1 in Arabic`,
-    );
+    assert.match(src, /dir="ltr"\s*\n\s*data-bp-grid/, `${p} keypad would render 3,2,1 in Arabic`);
     assert.match(
       src,
       /<div dir="ltr" className="flex items-center gap-\[clamp\(10px,1\.2vh,18px\)\]" aria-hidden>/,

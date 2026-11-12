@@ -79,8 +79,7 @@ export function listPendingResumes(): PendingResume[] {
 
 function sameSnapshot(a: PendingResume, b: PendingResume): boolean {
   return (
-    a.key === b.key && a.at === b.at &&
-    a.positionMs === b.positionMs && a.runtimeMs === b.runtimeMs
+    a.key === b.key && a.at === b.at && a.positionMs === b.positionMs && a.runtimeMs === b.runtimeMs
   );
 }
 
@@ -129,7 +128,13 @@ export async function syncPendingResume(
   const at = Date.now();
   const key = recordPendingResume(target, positionMs, runtimeMs, at);
   if (!key) return false;
-  const snapshot = { key, target, at, positionMs: Math.round(positionMs), runtimeMs: Math.round(runtimeMs) };
+  const snapshot = {
+    key,
+    target,
+    at,
+    positionMs: Math.round(positionMs),
+    runtimeMs: Math.round(runtimeMs),
+  };
   try {
     const ok = await send();
     if (ok && owner === storageKey() && started === generation) {

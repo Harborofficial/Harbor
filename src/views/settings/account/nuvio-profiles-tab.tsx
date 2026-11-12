@@ -14,7 +14,7 @@ import { Section, ROW_TITLE, ROW_DESC } from "../shared";
 import { SettingGroup, ROW_ACTION_PRIMARY } from "../kit";
 import { useSettings } from "@/lib/settings";
 import { useProfiles } from "@/lib/profiles";
-import { getSecondaryPrivileges } from "@/lib/settings/defaults";
+import { getSecondaryPrivileges } from "@/lib/profiles/privileges";
 import { SecondaryPrivilegesCard } from "./secondary-privileges-card";
 import { StartupDefaults } from "./startup-defaults";
 import { SettingsScopeCard } from "./settings-scope-card";

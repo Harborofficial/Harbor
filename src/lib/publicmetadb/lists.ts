@@ -13,13 +13,15 @@ export class PmdbListError extends Error {
   reason: "read" | "missing" | "create" | "add" | "remove";
 
   constructor(reason: PmdbListError["reason"]) {
-    super({
-      read: "Couldn't load PublicMetaDB lists. Try refreshing.",
-      missing: "This PublicMetaDB list is unavailable. Choose another list in Library.",
-      create: "Couldn't create your PublicMetaDB watchlist. Try again.",
-      add: "Couldn't add this title to the PublicMetaDB list. Try again.",
-      remove: "Couldn't remove this title from the PublicMetaDB list. Try again.",
-    }[reason]);
+    super(
+      {
+        read: "Couldn't load PublicMetaDB lists. Try refreshing.",
+        missing: "This PublicMetaDB list is unavailable. Choose another list in Library.",
+        create: "Couldn't create your PublicMetaDB watchlist. Try again.",
+        add: "Couldn't add this title to the PublicMetaDB list. Try again.",
+        remove: "Couldn't remove this title from the PublicMetaDB list. Try again.",
+      }[reason],
+    );
     this.name = "PmdbListError";
     this.reason = reason;
   }
@@ -45,7 +47,9 @@ function emit(): void {
 export const getPmdbListsVersion = () => version;
 export function subscribePmdbLists(fn: () => void): () => void {
   subscribers.add(fn);
-  return () => { subscribers.delete(fn); };
+  return () => {
+    subscribers.delete(fn);
+  };
 }
 
 function preferenceKey(): string {
@@ -53,7 +57,11 @@ function preferenceKey(): string {
 }
 
 export function getPmdbDefaultListId(): string | null {
-  try { return localStorage.getItem(preferenceKey()) || null; } catch { return null; }
+  try {
+    return localStorage.getItem(preferenceKey()) || null;
+  } catch {
+    return null;
+  }
 }
 
 export function setPmdbDefaultListId(id: string | null): void {
@@ -79,7 +87,10 @@ export function capturePmdbListOwner(assertCurrent?: () => void): () => void {
   return () => {
     assertCurrent?.();
     if (!session || activeProfileId() !== profile || getSession() !== session)
-      throw new DOMException("PublicMetaDB list operation cancelled after account change", "AbortError");
+      throw new DOMException(
+        "PublicMetaDB list operation cancelled after account change",
+        "AbortError",
+      );
   };
 }
 
@@ -89,7 +100,8 @@ async function readPages<T extends { id: string }>(path: string, guard: () => vo
   for (let page = 1; page <= 100; page++) {
     guard();
     const res = await pmdbRequest<{ items: T[]; total?: number; totalPages?: number }>(
-      `${path}?page=${page}&perPage=100`, { method: "GET" },
+      `${path}?page=${page}&perPage=100`,
+      { method: "GET" },
     );
     guard();
     if (!Array.isArray(res?.items)) throw new PmdbListError("read");
@@ -117,7 +129,8 @@ export async function fetchPmdbLists(
   guard();
   const session = getSession()!;
   const profile = activeProfileId();
-  if (!options.refresh && cached?.profile === profile && cached.session === session) return cached.lists;
+  if (!options.refresh && cached?.profile === profile && cached.session === session)
+    return cached.lists;
   try {
     const lists = await readPages<PmdbList>("/api/external/lists", guard);
     if (lists.some((list) => list.type !== "watchlist" && list.type !== "custom"))
@@ -133,7 +146,10 @@ export async function fetchPmdbLists(
 
 export async function resolvePmdbList(options: PmdbListOptions = {}): Promise<PmdbList | null> {
   const id = options.listId === undefined ? getPmdbDefaultListId() : options.listId;
-  const lists = await fetchPmdbLists({ refresh: options.strict, assertCurrent: options.assertCurrent });
+  const lists = await fetchPmdbLists({
+    refresh: options.strict,
+    assertCurrent: options.assertCurrent,
+  });
   if (id) {
     const list = lists.find((list) => list.id === id);
     if (!list) throw new PmdbListError("missing");
@@ -142,12 +158,24 @@ export async function resolvePmdbList(options: PmdbListOptions = {}): Promise<Pm
   return lists.find((list) => list.type === "watchlist") ?? null;
 }
 
-export async function fetchPmdbListItems(listId: string, assertCurrent?: () => void): Promise<PmdbListItem[]> {
+export async function fetchPmdbListItems(
+  listId: string,
+  assertCurrent?: () => void,
+): Promise<PmdbListItem[]> {
   const guard = capturePmdbListOwner(assertCurrent);
   try {
-    const items = await readPages<PmdbListItem>(`/api/external/lists/${encodeURIComponent(listId)}/items`, guard);
-    if (items.some((item) => (item.list_id != null && item.list_id !== listId) ||
-      !Number.isFinite(item.tmdb_id) || (item.media_type !== "movie" && item.media_type !== "tv")))
+    const items = await readPages<PmdbListItem>(
+      `/api/external/lists/${encodeURIComponent(listId)}/items`,
+      guard,
+    );
+    if (
+      items.some(
+        (item) =>
+          (item.list_id != null && item.list_id !== listId) ||
+          !Number.isFinite(item.tmdb_id) ||
+          (item.media_type !== "movie" && item.media_type !== "tv"),
+      )
+    )
       throw new PmdbListError("read");
     return items.map((item) => ({ ...item, list_id: listId }));
   } catch (error) {
@@ -169,7 +197,8 @@ async function ensureWatchlist(): Promise<PmdbList> {
     try {
       guard();
       const res = await pmdbRequest<{ item?: PmdbList }>("/api/external/lists", {
-        method: "POST", body: { name: "Watchlist", type: "watchlist", is_public: false },
+        method: "POST",
+        body: { name: "Watchlist", type: "watchlist", is_public: false },
       });
       guard();
       if (!res?.item?.id || res.item.type !== "watchlist") throw new PmdbListError("create");
@@ -179,7 +208,11 @@ async function ensureWatchlist(): Promise<PmdbList> {
       guard();
       // The website or another client may have initialized the watchlist meanwhile.
       if (error instanceof PmdbApiError && error.status === 409) {
-        const existing = await resolvePmdbList({ listId: null, strict: true, assertCurrent: guard });
+        const existing = await resolvePmdbList({
+          listId: null,
+          strict: true,
+          assertCurrent: guard,
+        });
         if (existing) return existing;
       }
       throw new PmdbListError("create");
@@ -187,11 +220,17 @@ async function ensureWatchlist(): Promise<PmdbList> {
   })();
   const operation = { profile, session, promise };
   creating = operation;
-  try { return await promise; } finally { if (creating === operation) creating = null; }
+  try {
+    return await promise;
+  } finally {
+    if (creating === operation) creating = null;
+  }
 }
 
 export async function changePmdbList(
-  target: PmdbTarget, add: boolean, options: PmdbListOptions = {},
+  target: PmdbTarget,
+  add: boolean,
+  options: PmdbListOptions = {},
 ): Promise<void> {
   const guard = capturePmdbListOwner(options.assertCurrent);
   guard();
@@ -206,15 +245,21 @@ export async function changePmdbList(
     if (add) {
       guard();
       const res = await pmdbRequest<{ success?: boolean } | undefined>(path, {
-        method: "POST", body: { tmdb_id: target.tmdb_id, media_type: target.media_type },
+        method: "POST",
+        body: { tmdb_id: target.tmdb_id, media_type: target.media_type },
       });
       if (res?.success === false) throw new PmdbListError("add");
     } else {
       const items = await fetchPmdbListItems(list.id, guard);
-      const item = items.find((item) => item.tmdb_id === target.tmdb_id && item.media_type === target.media_type);
+      const item = items.find(
+        (item) => item.tmdb_id === target.tmdb_id && item.media_type === target.media_type,
+      );
       if (!item) return;
       guard();
-      const res = await pmdbRequest<{ success?: boolean } | undefined>(`${path}/${encodeURIComponent(item.id)}`, { method: "DELETE" });
+      const res = await pmdbRequest<{ success?: boolean } | undefined>(
+        `${path}/${encodeURIComponent(item.id)}`,
+        { method: "DELETE" },
+      );
       if (res?.success === false) throw new PmdbListError("remove");
     }
     guard();

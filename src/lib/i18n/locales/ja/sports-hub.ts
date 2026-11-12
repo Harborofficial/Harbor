@@ -175,7 +175,7 @@ export default {
   "Show all {count}": "{count} 件すべて表示",
   "{count} competing": "{count} 名が出場",
   "Starting field": "スタートリスト",
-  "Leaderboard": "順位表",
+  Leaderboard: "順位表",
   "Full field": "出場者一覧",
   "Loading event schedule…": "イベント日程を読み込み中…",
   "Loading lineups…": "ラインナップを読み込み中…",

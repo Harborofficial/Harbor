@@ -3,7 +3,6 @@ export default {
   "games.modHub.noFolderFound": "No folder found automatically",
   "games.modHub.scanFolders": "Check common folders",
 
-
   "games.modHub.title": "Mods",
   "games.modHub.intro": "Find something new to play with.",
   "games.modHub.featured": "Featured project",
@@ -27,7 +26,8 @@ export default {
   "games.modHub.entryNote": "Browse mods and manage your installed content.",
   "games.modHub.switchGame": "Change game",
   "games.modHub.creatorDownload": "Download from the creator",
-  "games.modHub.legacyNote": "Sims 2 and Sims 3 downloads are available from the creator. Local mod management currently supports The Sims 4.",
+  "games.modHub.legacyNote":
+    "Sims 2 and Sims 3 downloads are available from the creator. Local mod management currently supports The Sims 4.",
   "games.modHub.bodyShop": "Body Shop",
   "games.modHub.patterns": "Patterns",
   "games.modHub.sets": "Themed sets",
@@ -43,5 +43,5 @@ export default {
   "games.modHub.creator": "Creator",
   "games.modHub.viewOnSource": "Creator’s page",
   "games.modHub.filesPending": "Loading project files…",
-  "games.modHub.picked": "MTS pick"
+  "games.modHub.picked": "MTS pick",
 };

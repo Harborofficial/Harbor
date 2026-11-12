@@ -7,8 +7,7 @@ const ebookSources: Record<string, string> = {
     "Ekstensi berasal dari repositori yang Anda tambahkan. Harbor tidak memverifikasi hak atas kontennya.",
   "Harbor does not support copyright infringement.":
     "Harbor tidak mendukung pelanggaran hak cipta.",
-  "Copyright & third-party sources":
-    "Hak cipta dan sumber pihak ketiga",
+  "Copyright & third-party sources": "Hak cipta dan sumber pihak ketiga",
   "Build a source for a library you are authorized to access.":
     "Buat sumber untuk perpustakaan yang boleh Anda akses.",
 };

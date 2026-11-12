@@ -188,7 +188,9 @@ async function jikanQuery(
   if (existing) return existing;
 
   const p = (async () => {
-    const j = await animeCatalogRequest<JikanAnime[]>(`${path}${qs.toString() ? `?${qs.toString()}` : ""}`);
+    const j = await animeCatalogRequest<JikanAnime[]>(
+      `${path}${qs.toString() ? `?${qs.toString()}` : ""}`,
+    );
     if (!Array.isArray(j.data)) throw new Error("Invalid anime catalog list");
     const metas = await metasFromJikan(j.data);
     catalogSet(key, metas);
@@ -260,17 +262,24 @@ export const jikanSearchByTitle = (title: string, limit = 1) =>
 // instead, because the caller persists this result forever and a failure cached
 // as a no-match disables that franchise for the life of the device.
 export async function jikanResolveMalId(title: string): Promise<number | null> {
-  const j = await animeCatalogRequest<Array<{ mal_id?: number }>>(`/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true&order_by=popularity&sort=asc`);
+  const j = await animeCatalogRequest<Array<{ mal_id?: number }>>(
+    `/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true&order_by=popularity&sort=asc`,
+  );
   if (!Array.isArray(j.data)) throw new Error("Invalid anime search response");
   return j.data[0]?.mal_id ?? null;
 }
 
 export async function jikanRecommendationsForMalId(malId: number): Promise<Meta[]> {
   if (addonOnlyMetadata()) return [];
-  const j = await animeCatalogRequest<Array<{ entry?: JikanAnime; votes?: number }>>(`/anime/${malId}/recommendations`);
+  const j = await animeCatalogRequest<Array<{ entry?: JikanAnime; votes?: number }>>(
+    `/anime/${malId}/recommendations`,
+  );
   if (!Array.isArray(j.data)) throw new Error("Invalid anime recommendations response");
-  const animes = [...j.data].sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0))
-    .map(item => item.entry).filter((entry): entry is JikanAnime => !!entry?.mal_id).slice(0, 12);
+  const animes = [...j.data]
+    .sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0))
+    .map((item) => item.entry)
+    .filter((entry): entry is JikanAnime => !!entry?.mal_id)
+    .slice(0, 12);
   return metasFromJikan(animes);
 }
 

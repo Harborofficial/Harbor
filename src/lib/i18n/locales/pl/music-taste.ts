@@ -103,6 +103,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.recordings": "Nagrania",
   "music.artist.limited": "To źródło udostępnia wybór, który może nie obejmować całego katalogu.",
   "music.rockHall.title": "Rock & Roll Hall of Fame",
-  "music.rockHall.subtitle": "Każdy rocznik od 1986, prosto z Wikipedii"
+  "music.rockHall.subtitle": "Każdy rocznik od 1986, prosto z Wikipedii",
 };
 export default musicTaste;

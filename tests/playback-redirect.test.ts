@@ -91,7 +91,9 @@ test("cancelling during resolution discards the returned URL", async () => {
 function pickerHarness(
   intent = "play",
   resolveStream = async (stream: { url: string }) => ({
-    ok: true, via: "direct", data: { url: stream.url },
+    ok: true,
+    via: "direct",
+    data: { url: stream.url },
   }),
 ) {
   const opened: any[] = [],
@@ -200,7 +202,10 @@ test("manual selection loads the final URL and preserves the original source in 
 test("manual Torrentio selection supersedes a pending AIOStreams resolution", async () => {
   let finish!: () => void;
   const h = pickerHarness("play", async (stream) => {
-    if (stream.url === original) await new Promise<void>((resolve) => { finish = resolve; });
+    if (stream.url === original)
+      await new Promise<void>((resolve) => {
+        finish = resolve;
+      });
     return { ok: true, via: "direct", data: { url: stream.url } };
   });
   h.api.onPlay({ addonId: "aiostreams", url: original }, true, false, true);
@@ -208,9 +213,15 @@ test("manual Torrentio selection supersedes a pending AIOStreams resolution", as
   await flushPromises();
   finish();
   await flushPromises();
-  assert.deepEqual(h.opened.map((src) => src.streamRef.addonId), ["torrentio"]);
+  assert.deepEqual(
+    h.opened.map((src) => src.streamRef.addonId),
+    ["torrentio"],
+  );
   assert.equal(h.opened[0].autoFired, false);
-  assert.deepEqual(h.history.map((entry) => entry.addonId), ["torrentio"]);
+  assert.deepEqual(
+    h.history.map((entry) => entry.addonId),
+    ["torrentio"],
+  );
 });
 
 test("instant-play and downloads keep their existing paths", async () => {

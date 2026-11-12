@@ -79,7 +79,10 @@ export function renameMangaBookmark(pid: string, id: string, name: string): void
 }
 
 export function removeMangaBookmark(pid: string, id: string): void {
-  write(pid, listMangaBookmarks(pid).filter((b) => b.id !== id));
+  write(
+    pid,
+    listMangaBookmarks(pid).filter((b) => b.id !== id),
+  );
   notify();
 }
 

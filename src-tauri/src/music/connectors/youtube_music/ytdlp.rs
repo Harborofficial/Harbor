@@ -32,7 +32,8 @@ pub async fn stream(app: &tauri::AppHandle, video_id: &str) -> Result<MusicStrea
     crate::ytdlp_update::run_validated(app, args, TIMEOUT, "music stream", |output| async move {
         let stream = parse(&String::from_utf8_lossy(&output.stdout))?;
         super::super::super::stream_probe::validate_stream(stream).await
-    }).await
+    })
+    .await
 }
 
 /// The music video behind a track, for the YouTube Music style video pane.

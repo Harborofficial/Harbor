@@ -1,11 +1,14 @@
 export default {
-  "games.notes.discardAction": "\u041e\u0442\u043c\u0435\u043d\u0438\u0442\u044c \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f",
+  "games.notes.discardAction":
+    "\u041e\u0442\u043c\u0435\u043d\u0438\u0442\u044c \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f",
   "games.notes.title": "Мои заметки",
   "games.notes.new": "Новая заметка",
   "games.notes.limit": "До 100 заметок по 100 000 символов, всего до 2 МБ.",
-  "games.notes.readError": "Не удалось прочитать заметки. Экспортируйте копию перед повторной попыткой.",
+  "games.notes.readError":
+    "Не удалось прочитать заметки. Экспортируйте копию перед повторной попыткой.",
   "games.notes.saveError": "Не удалось сохранить. Черновик сохранён в редакторе.",
-  "games.notes.conflict": "Заметки изменены в другом месте. Экспортируйте черновик перед перезагрузкой.",
+  "games.notes.conflict":
+    "Заметки изменены в другом месте. Экспортируйте черновик перед перезагрузкой.",
   "games.notes.invalidTitle": "Укажите заголовок каждой заметки.",
   "games.notes.discard": "Отменить несохранённые изменения?",
   "games.notes.delete": "Удалить заметку из черновика?",
@@ -28,5 +31,5 @@ export default {
   "games.notes.export": "Экспорт копии",
   "games.notes.unsaved": "Несохранённые изменения",
   "games.notes.local": "Хранится в этом профиле Harbor",
-  "games.notes.importGuide": "Копировать в мои заметки"
+  "games.notes.importGuide": "Копировать в мои заметки",
 };

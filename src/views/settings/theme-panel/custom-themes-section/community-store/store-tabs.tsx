@@ -16,5 +16,7 @@ export function StoreTabs({
   active: StoreTab;
   onSelect: (t: StoreTab) => void;
 }) {
-  return <MarketSegmented items={TABS} active={active} onSelect={(id) => onSelect(id as StoreTab)} />;
+  return (
+    <MarketSegmented items={TABS} active={active} onSelect={(id) => onSelect(id as StoreTab)} />
+  );
 }

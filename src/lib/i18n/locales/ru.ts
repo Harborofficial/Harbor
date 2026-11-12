@@ -306,9 +306,9 @@ const ru: Record<string, string> = {
   ...contextActionsFallback,
 
   ...ebookSources,
+  ...uiFallback,
   ...coverage,
   ...subtitles,
-  ...uiFallback,
   ...gap,
   ...chrome,
   ...common,

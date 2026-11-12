@@ -170,7 +170,13 @@ function buildSeeds(awardType: AwardType): {
               prev.work = e.workTitle;
             }
           } else {
-            map.set(k, { name, role: group.category.name, work: e.workTitle, year: e.year, wins: 1 });
+            map.set(k, {
+              name,
+              role: group.category.name,
+              work: e.workTitle,
+              year: e.year,
+              wins: 1,
+            });
           }
         }
       }

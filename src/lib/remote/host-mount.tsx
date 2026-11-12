@@ -60,7 +60,10 @@ function broadcast(msg: RemoteServerMessage) {
 }
 
 function pushSnapshot(force = false) {
-  const snapshot = { ...buildRemoteSnapshot(getPlaybackPosition()), manga: buildRemoteMangaState() };
+  const snapshot = {
+    ...buildRemoteSnapshot(getPlaybackPosition()),
+    manga: buildRemoteMangaState(),
+  };
   if (!force) {
     const { updatedAt: _ignored, ...rest } = snapshot;
     void _ignored;

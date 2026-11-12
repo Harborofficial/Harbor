@@ -6,12 +6,14 @@ export default {
   "games.calendar.search": "Search saved games",
   "games.calendar.platform": "Release platform",
   "games.calendar.allPlatforms": "All platforms",
-  "games.calendar.dates": "Publisher dates can change. Steam dates use the US store; IGDB records show their platform and region.",
+  "games.calendar.dates":
+    "Publisher dates can change. Steam dates use the US store; IGDB records show their platform and region.",
   "games.calendar.noDays": "No checked games have an exact release day in {month}.",
   "games.calendar.windows": "Release windows",
   "games.calendar.windowsNote": "These plans overlap this month but do not name an exact day.",
   "games.calendar.undated": "No confirmed date",
-  "games.calendar.undatedNote": "Unannounced, unavailable and unchecked dates stay off the calendar.",
+  "games.calendar.undatedNote":
+    "Unannounced, unavailable and unchecked dates stay off the calendar.",
   "games.calendar.cancelled": "Cancelled releases excluded: {count}.",
   "games.calendar.unchecked": "Date not checked yet",
   "games.watchlist.note": "Follow releases for your favorite games.",
@@ -30,7 +32,8 @@ export default {
   "games.watchlist.coverage": "Checked {count} of {total} games",
   "games.watchlist.refresh": "Refresh release dates",
   "games.watchlist.unavailable": "Release date unavailable",
-  "games.watchlist.partial": "Some release dates could not be checked. Saved information is shown where available.",
+  "games.watchlist.partial":
+    "Some release dates could not be checked. Saved information is shown where available.",
   "games.watchlist.noMatch": "No favorites match these filters.",
   "games.watchlist.dateNote": "Dates come from Steam and IGDB. Release plans can change.",
   "games.watchlist.remove": "Remove {name} from Favorites",
@@ -50,9 +53,12 @@ export default {
   "games.owned.pickHint": "Open a random game from these results.",
   "games.owned.clear": "Clear library filters",
   "games.owned.scanning": "Checking local installations…",
-  "games.owned.scanUnavailable": "Local installation status is unavailable. Refresh to check this device.",
-  "games.owned.partial": "Some Steam folders could not be checked. Installation matches may be incomplete.",
+  "games.owned.scanUnavailable":
+    "Local installation status is unavailable. Refresh to check this device.",
+  "games.owned.partial":
+    "Some Steam folders could not be checked. Installation matches may be incomplete.",
   "games.owned.results": "{count} of {total} games",
-  "games.owned.playtimeNote": "Play history comes from the last Steam sync. No recorded playtime is not a completion status.",
-  "games.owned.resetAvailability": "Show games with any installation status"
+  "games.owned.playtimeNote":
+    "Play history comes from the last Steam sync. No recorded playtime is not a completion status.",
+  "games.owned.resetAvailability": "Show games with any installation status",
 };

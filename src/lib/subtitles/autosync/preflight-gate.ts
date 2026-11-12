@@ -1,7 +1,10 @@
 import type { TrackInfo } from "@/lib/player/bridge";
 import { normalizeLang } from "@/lib/subtitles/language";
 
-type PreflightTrack = Pick<TrackInfo, "external" | "lang" | "prepared" | "timingStatus" | "selected">;
+type PreflightTrack = Pick<
+  TrackInfo,
+  "external" | "lang" | "prepared" | "timingStatus" | "selected"
+>;
 
 export function hasNaturallyAlignedPreparedCandidate(
   tracks: readonly PreflightTrack[],

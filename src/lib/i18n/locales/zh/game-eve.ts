@@ -60,5 +60,5 @@ export default {
   "games.eve.influence": "影响力",
   "games.eve.systems": "星系数量 · {count}",
   "games.eve.boss": "首领已出现",
-  "games.eve.routeThere": "前往此处"
+  "games.eve.routeThere": "前往此处",
 };

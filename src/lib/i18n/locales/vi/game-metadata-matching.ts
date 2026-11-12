@@ -15,12 +15,14 @@ export default {
   "games.metadata.type.fork": "Bản phân nhánh",
   "games.metadata.type.pack": "Gói nội dung",
   "games.metadata.type.update": "Bản cập nhật",
-  "games.metadata.note": "Chọn hình ảnh và thông tin trò chơi. Trình khởi chạy và tệp không thay đổi.",
-  "games.metadata.conflict": "Liên kết của trò chơi đã thay đổi ở cửa sổ khác. Đóng rồi mở lại để xem lựa chọn mới nhất.",
+  "games.metadata.note":
+    "Chọn hình ảnh và thông tin trò chơi. Trình khởi chạy và tệp không thay đổi.",
+  "games.metadata.conflict":
+    "Liên kết của trò chơi đã thay đổi ở cửa sổ khác. Đóng rồi mở lại để xem lựa chọn mới nhất.",
   "games.match.title": "Tìm hình ảnh và thông tin",
   "games.match.use": "Dùng trò chơi này",
   "games.match.remove": "Xóa liên kết",
   "games.match.source": "Hình ảnh và thông tin từ IGDB",
   "games.match.note": "Chọn phiên bản khớp với tệp. Harbor giữ nguyên tệp gốc và tên tệp.",
-  "games.match.empty": "Thử tên trò chơi không kèm nhãn khu vực hoặc bản sửa đổi."
+  "games.match.empty": "Thử tên trò chơi không kèm nhãn khu vực hoặc bản sửa đổi.",
 };

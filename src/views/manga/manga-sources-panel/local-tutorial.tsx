@@ -21,13 +21,21 @@ function TreeRow({
   return (
     <div className="flex items-center gap-2 py-[3px]" style={{ paddingInlineStart: depth * 22 }}>
       <Icon size={16} className={accent ? "text-accent" : "text-ink-subtle"} />
-      <span className={`text-[13.5px] ${accent ? "font-semibold text-ink" : "text-ink-muted"}`}>{label}</span>
+      <span className={`text-[13.5px] ${accent ? "font-semibold text-ink" : "text-ink-muted"}`}>
+        {label}
+      </span>
       {hint && <span className="text-[11.5px] text-ink-subtle">{hint}</span>}
     </div>
   );
 }
 
-export function LocalFolderTutorial({ onClose, onChoose }: { onClose: () => void; onChoose: () => void }) {
+export function LocalFolderTutorial({
+  onClose,
+  onChoose,
+}: {
+  onClose: () => void;
+  onChoose: () => void;
+}) {
   const t = useT();
   return createPortal(
     <div
@@ -60,11 +68,22 @@ export function LocalFolderTutorial({ onClose, onChoose }: { onClose: () => void
 
         <div className="rounded-xl bg-canvas p-4 ring-1 ring-edge-soft">
           <TreeRow depth={0} icon={FolderOpen} label="My Manga" hint={t("the folder you pick")} />
-          <TreeRow depth={1} icon={Folder} label="One Piece" hint={t("← name it like the manga")} accent />
+          <TreeRow
+            depth={1}
+            icon={Folder}
+            label="One Piece"
+            hint={t("← name it like the manga")}
+            accent
+          />
           <TreeRow depth={2} icon={Folder} label="Chapter 1" />
           <TreeRow depth={3} icon={ImageIcon} label="001.jpg" />
           <TreeRow depth={3} icon={ImageIcon} label="002.jpg" />
-          <TreeRow depth={2} icon={FileArchive} label="Chapter 2.cbz" hint={t("← folder or .cbz / .zip")} />
+          <TreeRow
+            depth={2}
+            icon={FileArchive}
+            label="Chapter 2.cbz"
+            hint={t("← folder or .cbz / .zip")}
+          />
           <TreeRow depth={1} icon={Folder} label="Berserk" accent />
           <TreeRow depth={2} icon={ImageIcon} label="cover.jpg" hint={t("optional cover")} />
         </div>

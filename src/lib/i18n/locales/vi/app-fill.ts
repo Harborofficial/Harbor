@@ -723,7 +723,7 @@ const appFill: Record<string, string> = {
     "Harbor đang đóng. Harbor Shipyard sẽ hoàn tất cài đặt rồi mở lại ứng dụng.",
   "Harbor Shipyard did not finish updating Harbor. Nothing was changed.":
     "Harbor Shipyard chưa hoàn tất cập nhật Harbor. Không có gì thay đổi.",
-  "Dismiss": "Bỏ qua",
+  Dismiss: "Bỏ qua",
 };
 
 export default appFill;

@@ -15,7 +15,9 @@ export default {
   "artwork.resetLaunch": "시작 로고 초기화",
   "artwork.local": "이 기기에 저장됩니다. 동작 줄이기를 사용하면 정지 이미지가 표시됩니다.",
   "artwork.error.large": "더 작은 파일을 선택하세요. 최대 8 MB, 4096 × 4096 픽셀입니다.",
-  "artwork.error.external": "이 애니메이션은 외부 미디어를 사용합니다. 이미지를 포함하여 내보내세요.",
+  "artwork.error.external":
+    "이 애니메이션은 외부 미디어를 사용합니다. 이미지를 포함하여 내보내세요.",
   "artwork.error.storage": "이 기기에 파일을 저장할 수 없습니다. 이전 선택은 변경되지 않았습니다.",
-  "artwork.error.invalid": "파일을 읽을 수 없습니다. Lottie(.json 또는 .lottie), GIF, PNG, JPEG 또는 WebP를 선택하세요."
+  "artwork.error.invalid":
+    "파일을 읽을 수 없습니다. Lottie(.json 또는 .lottie), GIF, PNG, JPEG 또는 WebP를 선택하세요.",
 };

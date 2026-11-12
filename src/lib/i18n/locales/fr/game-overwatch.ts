@@ -12,11 +12,14 @@ export default {
   "games.overwatch.stadium": "Héros du Stadium",
   "games.overwatch.searchHeroes": "Rechercher un héros",
   "games.overwatch.refresh": "Actualiser le guide",
-  "games.overwatch.unavailable": "Le guide n'a pas pu être actualisé. Les informations déjà chargées peuvent rester affichées.",
+  "games.overwatch.unavailable":
+    "Le guide n'a pas pu être actualisé. Les informations déjà chargées peuvent rester affichées.",
   "games.overwatch.partial": "Certaines entrées sont indisponibles.",
   "games.overwatch.checked": "Vérifié le {date}",
-  "games.overwatch.scope": "Informations sur les héros de Blizzard via OverFast. Les ajustements d'équilibrage peuvent arriver en jeu avant la mise à jour du guide.",
-  "games.overwatch.mapsScope": "Cartes et modes issus d'OverFast. Inclut l'Arcade et les anciennes cartes ; leur disponibilité dépend du mode.",
+  "games.overwatch.scope":
+    "Informations sur les héros de Blizzard via OverFast. Les ajustements d'équilibrage peuvent arriver en jeu avant la mise à jour du guide.",
+  "games.overwatch.mapsScope":
+    "Cartes et modes issus d'OverFast. Inclut l'Arcade et les anciennes cartes ; leur disponibilité dépend du mode.",
   "games.overwatch.empty": "Aucun résultat. Essayez une autre recherche ou un autre filtre.",
   "games.overwatch.moreHeroes": "Plus de héros",
   "games.overwatch.moreMaps": "Plus de cartes",
@@ -30,9 +33,9 @@ export default {
   "games.overwatch.watchDemo": "Voir la démonstration",
   "games.overwatch.hideDemo": "Masquer la démonstration",
   "games.overwatch.closeDemo": "Fermer la démonstration",
-  "games.overwatch.videoFailed": "Impossible de lire cette démonstration. Consultez la page officielle du héros pour la regarder.",
+  "games.overwatch.videoFailed":
+    "Impossible de lire cette démonstration. Consultez la page officielle du héros pour la regarder.",
   "games.overwatch.mode": "Mode de jeu",
   "games.overwatch.allModes": "Tous les modes",
-  "games.overwatch.searchMaps": "Rechercher une carte ou un lieu"
+  "games.overwatch.searchMaps": "Rechercher une carte ou un lieu",
 };
-

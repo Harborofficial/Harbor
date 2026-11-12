@@ -21,7 +21,8 @@ export default {
   "games.valorant.search": "Buscar agente",
   "games.valorant.referenceError": "No se pudo cargar la referencia del juego.",
   "games.valorant.stale": "No se pudo actualizar. Se muestran los últimos resultados cargados.",
-  "games.valorant.metaError": "Las estadísticas competitivas no están disponibles. Puedes consultar los agentes.",
+  "games.valorant.metaError":
+    "Las estadísticas competitivas no están disponibles. Puedes consultar los agentes.",
   "games.valorant.agents": "Clasificación de agentes",
   "games.valorant.sort": "Ordenar agentes",
   "games.valorant.winSort": "Mayor tasa de victorias",
@@ -34,20 +35,24 @@ export default {
   "games.valorant.sampleNote": "Los agentes con menos de 200 apariciones se muestran al final.",
   "games.valorant.empty": "Ningún resultado con estos filtros.",
   "games.valorant.checked": "Comprobado: {date}",
-  "games.valorant.metaScope": "Datos competitivos de OP.GG para el parche seleccionado. La tasa de selección es la proporción de apariciones de agentes. Los resultados representan la muestra de la fuente, no a todos los jugadores.",
-  "games.valorant.referenceScope": "Imágenes y referencias del juego mediante Valorant-API. Las actualizaciones pueden retrasarse. Harbor no está respaldado por Riot Games.",
+  "games.valorant.metaScope":
+    "Datos competitivos de OP.GG para el parche seleccionado. La tasa de selección es la proporción de apariciones de agentes. Los resultados representan la muestra de la fuente, no a todos los jugadores.",
+  "games.valorant.referenceScope":
+    "Imágenes y referencias del juego mediante Valorant-API. Las actualizaciones pueden retrasarse. Harbor no está respaldado por Riot Games.",
   "games.valorant.samples": "{count} apariciones",
   "games.valorant.smallSample": "Muestra pequeña",
   "games.valorant.abilities": "Habilidades",
   "games.valorant.watchAbility": "Ver habilidad",
   "games.valorant.videoError": "No se pudo reproducir esta demostración.",
   "games.valorant.mapMeta": "Meta de agentes en este mapa",
-  "games.valorant.mapScope": "Referencia de mapas, incluidos los que están fuera de la rotación competitiva actual. Nombres e indicaciones en inglés.",
+  "games.valorant.mapScope":
+    "Referencia de mapas, incluidos los que están fuera de la rotación competitiva actual. Nombres e indicaciones en inglés.",
   "games.valorant.callouts": "Ubicaciones",
   "games.valorant.compareWeapon": "Comparar con",
   "games.valorant.weapon": "Arma",
   "games.valorant.distance": "Distancia",
-  "games.valorant.damageScope": "Valores base del disparo principal antes de armadura, penetración o habilidades. Las escopetas muestran daño por perdigón.",
+  "games.valorant.damageScope":
+    "Valores base del disparo principal antes de armadura, penetración o habilidades. Las escopetas muestran daño por perdigón.",
   "games.valorant.weaponStats": "Estadísticas del arma",
   "games.valorant.cost": "Créditos",
   "games.valorant.magazine": "Cargador",
@@ -55,5 +60,5 @@ export default {
   "games.valorant.reload": "Recarga · segundos",
   "games.valorant.head": "Daño en cabeza",
   "games.valorant.body": "Daño en cuerpo",
-  "games.valorant.legs": "Daño en piernas"
+  "games.valorant.legs": "Daño en piernas",
 };

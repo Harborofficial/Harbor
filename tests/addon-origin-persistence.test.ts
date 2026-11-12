@@ -19,7 +19,9 @@ test("persisted addon origins never retain configured transport URLs", () => {
     id: "community.addon",
     name: "Community addon",
     logo: "https://images.example/logo.png",
-    configurationKey: createHash("sha256").update("https://addon.example/secret-api-key").digest("hex"),
+    configurationKey: createHash("sha256")
+      .update("https://addon.example/secret-api-key")
+      .digest("hex"),
   });
   assert.doesNotMatch(JSON.stringify(origin), /secret-api-key/);
 });

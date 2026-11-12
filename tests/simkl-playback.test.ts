@@ -38,15 +38,19 @@ class StubSimklApiError extends Error {
 
 function playback(sessions: unknown[], existing?: { ms: number; t: number }) {
   const writes: unknown[][] = [];
+  const requests: string[] = [];
   let failure: Error | null = null;
-  const session = {};
+  let session = {};
+  let onRequest: (() => void) | null = null;
   const source = readFileSync(new URL("../src/lib/simkl/playback.ts", import.meta.url), "utf8");
   const mocks: Record<string, unknown> = {
     "./session": { getSession: () => session },
     "./ids": idsModule,
     "./client": {
-      simklRequest: async () => {
+      simklRequest: async (path: string) => {
+        requests.push(path);
         if (failure) throw failure;
+        onRequest?.();
         return sessions;
       },
       SimklApiError: StubSimklApiError,
@@ -75,9 +79,16 @@ function playback(sessions: unknown[], existing?: { ms: number; t: number }) {
   return {
     api: module.exports as typeof import("../src/lib/simkl/playback"),
     writes,
+    requests,
     StubSimklApiError,
     failRequests: (error: Error | null) => {
       failure = error;
+    },
+    setSession: (next: unknown) => {
+      session = next;
+    },
+    setOnRequest: (fn: (() => void) | null) => {
+      onRequest = fn;
     },
   };
 }
@@ -89,7 +100,7 @@ test("Simkl paused episodes retain timestamp, episode identity and resume progre
     {
       progress: 45.5,
       paused_at: pausedAt,
-      show: { title: "Fixture show", ids: { imdb: "tt1234567" } },
+      show: { title: "Fixture show", ids: { imdb: "tt1234567", tmdb: 1234 } },
       episode: { season: 1, episode: 5 },
     },
     {
@@ -105,6 +116,7 @@ test("Simkl paused episodes retain timestamp, episode identity and resume progre
     items.map((item) => item.state?.video_id),
     ["tt1234567:1:5", "tt1234567:1:6"],
   );
+  assert.deepEqual(items[0].altIds, ["tmdb:tv:1234"]);
   assert.equal(items[0].state?.lastWatched, pausedAt);
   assert.equal(items[0]._mtime, pausedAt);
   assert.equal(items[0].state?.timeOffset, 1_201_200);
@@ -257,4 +269,78 @@ test("a missing sessions endpoint reports no active playback", async () => {
   const h = playback([]);
   h.failRequests(new h.StubSimklApiError(404, "no sessions"));
   assert.equal(await h.api.hasActiveSimklPlayback("tt1234567", { season: 1, episode: 5 }), false);
+});
+
+test("the deletion snapshot requests the unfiltered list", async () => {
+  const h = playback([
+    {
+      progress: 45,
+      paused_at: "2026-09-29T10:30:00.000Z",
+      show: { title: "Fixture show", ids: { imdb: "tt1234567" } },
+      episode: { season: 1, episode: 5 },
+    },
+  ]);
+
+  const snapshot = await h.api.fetchSimklPlaybackSnapshot();
+
+  assert.equal(snapshot.complete, true);
+  assert.equal(snapshot.items.length, 1);
+  assert.match(h.requests[0], /hide_watched=false/);
+});
+
+test("the deletion snapshot fails closed at the page limit", async () => {
+  const h = playback(
+    Array.from({ length: 40 }, (_, index) => ({
+      progress: 45,
+      paused_at: "2026-09-29T10:30:00.000Z",
+      show: { title: "Fixture show", ids: { imdb: "tt1234567" } },
+      episode: { season: 1, number: index + 1 },
+    })),
+  );
+
+  const snapshot = await h.api.fetchSimklPlaybackSnapshot();
+
+  assert.equal(snapshot.complete, false);
+  assert.equal(snapshot.items.length, 40);
+});
+
+test("the deletion snapshot treats a list 404 as a failed read", async () => {
+  const h = playback([]);
+  h.failRequests(new h.StubSimklApiError(404, "no sessions"));
+
+  await assert.rejects(() => h.api.fetchSimklPlaybackSnapshot());
+});
+
+test("the deletion snapshot reports a session change", async () => {
+  const h = playback([]);
+  h.setOnRequest(() => h.setSession({}));
+
+  await assert.rejects(() => h.api.fetchSimklPlaybackSnapshot(), /session changed/);
+});
+
+test("the deletion snapshot keeps distinct playback ids for the same episode", async () => {
+  const h = playback([
+    {
+      id: 1,
+      progress: 45,
+      paused_at: "2026-09-29T10:30:00.000Z",
+      show: { title: "Fixture show", ids: { imdb: "tt1234567" } },
+      episode: { season: 1, number: 5 },
+    },
+    {
+      id: 2,
+      progress: 45,
+      paused_at: "2026-09-29T10:30:00.000Z",
+      show: { title: "Fixture show", ids: { imdb: "tt1234567" } },
+      episode: { season: 1, number: 5 },
+    },
+  ]);
+
+  const snapshot = await h.api.fetchSimklPlaybackSnapshot();
+
+  assert.equal(snapshot.items.length, 2);
+  assert.deepEqual(snapshot.items.map((entry) => entry.providerPlaybackIds?.simkl).sort(), [
+    "1",
+    "2",
+  ]);
 });

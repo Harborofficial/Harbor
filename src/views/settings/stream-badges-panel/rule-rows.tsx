@@ -1,10 +1,5 @@
 import { Trash2 } from "../icons";
-import {
-  badgeLabel,
-  FormatBadge,
-  RuleBadgeChip,
-  type BadgeKind,
-} from "@/components/format-badge";
+import { badgeLabel, FormatBadge, RuleBadgeChip, type BadgeKind } from "@/components/format-badge";
 import { setBadgeRules, type CustomBadgeRule } from "@/lib/stream-badges";
 import { useT } from "@/lib/i18n";
 import { ROW_ACTION_DANGER, SettingRow } from "../kit";
@@ -51,9 +46,7 @@ export function RuleRow({ rule, all }: { rule: CustomBadgeRule; all: CustomBadge
         value={rule.enabled ? "on" : "off"}
         options={ON_OFF}
         onChange={(v) =>
-          setBadgeRules(
-            all.map((r) => (r.id === rule.id ? { ...r, enabled: v === "on" } : r)),
-          )
+          setBadgeRules(all.map((r) => (r.id === rule.id ? { ...r, enabled: v === "on" } : r)))
         }
       />
       <SButton

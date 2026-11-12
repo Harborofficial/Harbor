@@ -1,3 +1,4 @@
+import { addonBaseUrl } from "@/lib/addon-url";
 import type { Meta } from "@/lib/cinemeta";
 import { exitBigPicture, pushBigPicture } from "@/lib/big-picture";
 import { resolveMangaIdByTitle } from "@/lib/search-manga-resolve";
@@ -24,7 +25,7 @@ const WIDE = "clamp(230px, 19vw, 380px)";
 const HERO = "clamp(360px, 30vw, 620px)";
 
 function addonBase(transportUrl: string): string {
-  return transportUrl.replace(/\/manifest\.json$/, "");
+  return addonBaseUrl(transportUrl);
 }
 
 // A franchise row's manga entries carry an AniList id, and the reader is keyed by

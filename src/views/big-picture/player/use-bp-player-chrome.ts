@@ -26,10 +26,7 @@ export type BpPlayerChrome = {
  * desktop player's own chrome timer: that one wakes on mouse movement and hides
  * on a keyboard pause, neither of which describes a remote in a living room.
  */
-export function useBpPlayerChrome(params: {
-  playing: boolean;
-  pinned: boolean;
-}): BpPlayerChrome {
+export function useBpPlayerChrome(params: { playing: boolean; pinned: boolean }): BpPlayerChrome {
   const { playing, pinned } = params;
   const [phase, setPhase] = useState<BpChromePhase>("up");
   const [mounted, setMounted] = useState(true);

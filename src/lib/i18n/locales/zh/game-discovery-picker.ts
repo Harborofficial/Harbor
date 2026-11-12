@@ -9,7 +9,8 @@ export default {
   "games.pick.heading0": "现在想玩什么？",
   "games.pick.heading1": "几款心爱的游戏就很有帮助。",
   "games.pick.heading2": "值得一玩的游戏。",
-  "games.pick.note0": "选出今晚想玩的风格。优先显示完全匹配的游戏，再提供最接近的选择。游玩模式和其他筛选条件仍然有效。",
+  "games.pick.note0":
+    "选出今晚想玩的风格。优先显示完全匹配的游戏，再提供最接近的选择。游玩模式和其他筛选条件仍然有效。",
   "games.pick.note1": "最多选择五款最爱。我们会结合它们的特点和你最近的游玩记录。",
   "games.pick.note2": "根据你的选择、共同兴趣和玩家评测筛选推荐。",
   "games.pick.company": "和谁一起玩？",
@@ -59,7 +60,8 @@ export default {
   "games.pick.undo": "撤销",
   "games.pick.resetHidden": "重新显示已隐藏的游戏",
   "games.pick.more": "寻找更多推荐",
-  "games.pick.rankingNote": "根据共同Steam标签、活动、评测可信度和多样性排序。分数是Steam好评率。价格和销售情况以美国目录为准。",
+  "games.pick.rankingNote":
+    "根据共同Steam标签、活动、评测可信度和多样性排序。分数是Steam好评率。价格和销售情况以美国目录为准。",
   "games.pick.error": "寻找下一款游戏，请稍等。",
   "games.pick.errorNote": "无法连接游戏目录。选择已保存，请稍后重试。",
   "games.pick.noMatches": "暂未找到符合这些要求的游戏。",
@@ -76,5 +78,5 @@ export default {
   "games.pick.owned": "在你的游戏库中",
   "games.pick.closest": "已包含相近的选择。游玩模式和其他筛选条件仍然有效。",
   "games.pick.closeMatch": "匹配 {total} 个心情标签中的 {count} 个",
-  "games.pick.missing": "未标注：{tags}"
+  "games.pick.missing": "未标注：{tags}",
 };

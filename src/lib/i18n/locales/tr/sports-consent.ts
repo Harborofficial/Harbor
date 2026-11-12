@@ -32,10 +32,13 @@ export default {
   "Show Sports": "Spor’u göster",
   "Show Sports in navigation. You must acknowledge the Sports notice before the page loads.":
     "Spor’u gezinme menüsünde göster. Sayfa yüklenmeden önce Spor bildirimini kabul etmelisiniz.",
-  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.": "Sporu saglayici olmadan ac ya da bir Live TV, M3U veya Xtream kaynagi ekle.",
+  "Turn on Sports without a provider, or add a Live TV, M3U or Xtream source.":
+    "Sporu saglayici olmadan ac ya da bir Live TV, M3U veya Xtream kaynagi ekle.",
   "Set up Live TV": "Live TV kur",
-  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.": "Skorlar, fiksturler ve puan durumlari saglayici olmadan calisir. Harbor yayin saglamaz, bu yuzden mac izlemek icin kendi Live TV, M3U veya Xtream kaynagin gerekir.",
-  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.": "Skorlar, fiksturler ve puan durumlari herkese acik spor verilerinden gelir ve saglayici gerektirmez. Harbor yayin saglamaz: mac izlemek icin kendi Live TV, M3U veya Xtream kaynagin gerekir.",
+  "Scores, schedules and standings work without a provider. Harbor does not supply streams, so watching a game needs your own Live TV, M3U or Xtream source.":
+    "Skorlar, fiksturler ve puan durumlari saglayici olmadan calisir. Harbor yayin saglamaz, bu yuzden mac izlemek icin kendi Live TV, M3U veya Xtream kaynagin gerekir.",
+  "Scores, schedules and standings come from public sports data and need no provider. Harbor does not supply streams: watching a game still needs your own Live TV, M3U or Xtream source.":
+    "Skorlar, fiksturler ve puan durumlari herkese acik spor verilerinden gelir ve saglayici gerektirmez. Harbor yayin saglamaz: mac izlemek icin kendi Live TV, M3U veya Xtream kaynagin gerekir.",
   "Show Sports without a TV provider": "Sporu TV saglayicisi olmadan goster",
   "Enabling Sports does not accept the notice. Your choice is kept on this device and is not synced to your account.":
     "Spor’u etkinleştirmek bildirimi kabul etmez. Seçiminiz bu cihazda tutulur ve hesabınızla eşitlenmez.",

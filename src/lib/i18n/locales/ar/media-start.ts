@@ -6,7 +6,7 @@ const mediaStart: Record<string, string> = {
   "start.live.playlist": "أضف قائمة تشغيل باستخدام رابط M3U.",
   "start.live.guide": "أضف جدول البرامج لقنواتك.",
   "start.manga.extensions": "أضف مصادر مانغا من مستودع تثق به.",
-  "start.server": "اربط مكتبة على خادمك الخاص."
+  "start.server": "اربط مكتبة على خادمك الخاص.",
 };
 
 export default mediaStart;

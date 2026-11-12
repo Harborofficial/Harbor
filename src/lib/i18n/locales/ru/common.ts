@@ -65,9 +65,11 @@ const common: Record<string, string> = {
   "{h}h {m}m left": "осталось {h} ч {m} мин",
   "{pct}% watched": "просмотрено {pct}%",
   "Quick age check": "Быстрая проверка возраста",
-  "A quick age check before adult add-ons unlock. Answer three everyday questions any adult would know, and you're in.": "Быстрая проверка возраста перед доступом к дополнениям для взрослых. Ответьте на три простых вопроса, которые знает любой взрослый, и доступ откроется.",
+  "A quick age check before adult add-ons unlock. Answer three everyday questions any adult would know, and you're in.":
+    "Быстрая проверка возраста перед доступом к дополнениям для взрослых. Ответьте на три простых вопроса, которые знает любой взрослый, и доступ откроется.",
   "You're verified": "Проверка пройдена",
-  "That's not it. Try a fresh round in a moment.": "Неверно. Чуть позже попробуйте ещё раз с новыми вопросами.",
+  "That's not it. Try a fresh round in a moment.":
+    "Неверно. Чуть позже попробуйте ещё раз с новыми вопросами.",
 };
 
 export default common;

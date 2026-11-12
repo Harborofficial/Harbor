@@ -34,5 +34,5 @@ export default {
   "games.fortnite.genre.party-mini-games": "派对与小游戏",
   "games.fortnite.genre.music-rhythm": "音乐与节奏",
   "games.fortnite.genre.horror": "恐怖",
-  "games.fortnite.genre.deathrun-platformer": "死亡跑酷与平台跳跃"
+  "games.fortnite.genre.deathrun-platformer": "死亡跑酷与平台跳跃",
 };

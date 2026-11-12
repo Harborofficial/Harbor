@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "Napisy ze stylami (ASS) zachowują swoje kolory, rozmiar i położenie napisów ekranowych, ale używają Twojej czcionki.",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor wysyła swoje napisy do Twojego mpv. Wybierz je w menu napisów w mpv.",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "Napisy ze stylami (ASS) zachowują swoje kolory, rozmiar i położenie napisów ekranowych, ale używają Twojej czcionki.",
 };
 
 export default subtitles;

@@ -9,19 +9,33 @@ export function MusicPlaylistLoading() {
     const timer = setTimeout(() => setVisible(true), 180);
     return () => clearTimeout(timer);
   }, []);
-  return <div aria-busy="true" aria-label={t("music.loading")} style={{ minHeight: 480 }}>
-    {visible && <>
-      <div className="music-library-playlist-hero" aria-hidden="true" style={{ marginBottom: 40 }}>
-        <span className="music-skeleton-fill music-skeleton-cover-square" />
-        <div className="music-library-playlist-meta">
-          <span className="music-skeleton-fill" style={{ width: "min(340px, 85%)", height: 34, marginBottom: 12 }} />
-          <span className="music-skeleton-fill" style={{ width: 52, height: 52, borderRadius: "50%" }} />
-          <span className="music-skeleton-fill music-skeleton-subtitle" style={{ width: 80 }} />
-        </div>
-      </div>
-      <MusicTrackRowsSkeleton rows={6} />
-    </>}
-  </div>;
+  return (
+    <div aria-busy="true" aria-label={t("music.loading")} style={{ minHeight: 480 }}>
+      {visible && (
+        <>
+          <div
+            className="music-library-playlist-hero"
+            aria-hidden="true"
+            style={{ marginBottom: 40 }}
+          >
+            <span className="music-skeleton-fill music-skeleton-cover-square" />
+            <div className="music-library-playlist-meta">
+              <span
+                className="music-skeleton-fill"
+                style={{ width: "min(340px, 85%)", height: 34, marginBottom: 12 }}
+              />
+              <span
+                className="music-skeleton-fill"
+                style={{ width: 52, height: 52, borderRadius: "50%" }}
+              />
+              <span className="music-skeleton-fill music-skeleton-subtitle" style={{ width: 80 }} />
+            </div>
+          </div>
+          <MusicTrackRowsSkeleton rows={6} />
+        </>
+      )}
+    </div>
+  );
 }
 
 export function MusicTrackRowsSkeleton({ rows = 6 }: { rows?: number }) {
@@ -130,7 +144,10 @@ export function MusicHomeHeroSkeleton() {
         <div className="music-home-feature-copy">
           <div className="music-home-feature-swap">
             <span className="music-home-eyebrow">
-              <span className="music-skeleton-fill music-skeleton-line" style={{ width: "104px" }} />
+              <span
+                className="music-skeleton-fill music-skeleton-line"
+                style={{ width: "104px" }}
+              />
             </span>
             <h2>
               <span className="music-skeleton-fill music-skeleton-line" style={{ width: "88%" }} />

@@ -1,8 +1,8 @@
 const bpSources: Record<string, string> = {
   "{shown} of {total} sources": "{shown} من {total} مصدر",
   "Switch source": "تبديل المصدر",
-  "Cached": "مخزن مؤقتا",
-  "Largest": "الأكبر",
+  Cached: "مخزن مؤقتا",
+  Largest: "الأكبر",
   "Most seeders": "الأكثر موزعين",
   "Looking for sources": "جاري البحث عن مصادر",
   "No sources match these filters": "لا توجد مصادر تطابق هذه المرشحات",
@@ -14,7 +14,7 @@ const bpSources: Record<string, string> = {
     "خدمة debrid لا تستجيب. جرب مصدرا آخر.",
   "{n} seeds": "{n} موزع",
   "{count} collections": "{count} مجموعة",
-  "Unavailable": "غير متاح",
+  Unavailable: "غير متاح",
 };
 
 export default bpSources;

@@ -7,7 +7,13 @@ type Hsl = { h: number; s: number; l: number };
 export function hexToHsl(hex: string): Hsl | null {
   const m = hex.replace(/^#/, "");
   if (m.length !== 3 && m.length !== 6) return null;
-  const full = m.length === 3 ? m.split("").map((c) => c + c).join("") : m;
+  const full =
+    m.length === 3
+      ? m
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : m;
   const r = parseInt(full.slice(0, 2), 16) / 255;
   const g = parseInt(full.slice(2, 4), 16) / 255;
   const b = parseInt(full.slice(4, 6), 16) / 255;
@@ -93,7 +99,9 @@ export function paletteDistance(a: StoreTheme, target: Hsl): number {
   const hsl = paletteOf(a);
   if (!hsl.length) return 999;
   return Math.min(
-    ...hsl.map((c) => hueDist(c.h, target.h) / 180 + Math.abs(c.l - target.l) + Math.abs(c.s - target.s)),
+    ...hsl.map(
+      (c) => hueDist(c.h, target.h) / 180 + Math.abs(c.l - target.l) + Math.abs(c.s - target.s),
+    ),
   );
 }
 

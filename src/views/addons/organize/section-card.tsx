@@ -52,7 +52,9 @@ export function SectionCard({
           >
             {title}
           </h2>
-          <p className={`text-[12.5px] leading-relaxed ${flat ? "max-w-[70ch] text-ink-subtle" : "text-ink-muted"}`}>
+          <p
+            className={`text-[12.5px] leading-relaxed ${flat ? "max-w-[70ch] text-ink-subtle" : "text-ink-muted"}`}
+          >
             {sub}
           </p>
         </div>
@@ -169,7 +171,12 @@ function OrganizeRow({
       >
         <GripVertical size={18} strokeWidth={2.2} />
       </span>
-      <AddonLogo addonId={entry.addonId} addonName={entry.name} manifestLogo={entry.logo} size="lg" />
+      <AddonLogo
+        addonId={entry.addonId}
+        addonName={entry.name}
+        manifestLogo={entry.logo}
+        size="lg"
+      />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
         <span className="max-w-full truncate text-[15px] font-medium text-ink">{entry.name}</span>
         {entry.muted ? (

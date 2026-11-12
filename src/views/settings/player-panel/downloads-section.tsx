@@ -24,7 +24,9 @@ export function DownloadsSection() {
         if (!cancelled) setSystemDefault(d);
       })
       .catch(() => {})
-      .finally(() => { if (!cancelled) setLoadingDefault(false); });
+      .finally(() => {
+        if (!cancelled) setLoadingDefault(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -98,7 +100,11 @@ export function DownloadsSection() {
           onChange={(value) => update({ ebookDownloadCreateFolders: value })}
         />
       </DownloadLocation>
-      {error && <p role="alert" className="text-[15px] text-danger">{error}</p>}
+      {error && (
+        <p role="alert" className="text-[15px] text-danger">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -136,7 +142,8 @@ function DownloadLocation({
         }
         desc={
           <span className="block break-all font-mono text-[15.5px] leading-[22px] text-ink">
-            {current || (loading ? t("Finding your Downloads folder…") : t("Default Downloads folder"))}
+            {current ||
+              (loading ? t("Finding your Downloads folder…") : t("Default Downloads folder"))}
           </span>
         }
       >

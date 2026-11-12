@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "Impor metadata game",
-  "games.metadataImport.note": "Cocokkan game berdasarkan judul, platform, dan identitas toko. Kecocokan yang sudah ada tetap dipertahankan.",
+  "games.metadataImport.note":
+    "Cocokkan game berdasarkan judul, platform, dan identitas toko. Kecocokan yang sudah ada tetap dipertahankan.",
   "games.metadataImport.scope": "Game yang akan dicocokkan",
   "games.metadataImport.progress": "{count} dari {total} diperiksa",
   "games.metadataImport.savedCount": "{count} diimpor",
@@ -14,20 +15,24 @@ export default {
   "games.metadataImport.incomplete": "Terlalu banyak hasil. Pilih kecocokan.",
   "games.metadataImport.artwork": "Pilih gambar untuk menyelesaikan impor.",
   "games.metadataImport.reviewAction": "Tinjau",
-  "games.metadataImport.stopNote": "Berhenti atau tutup untuk membatalkan pekerjaan tersisa. Impor yang selesai tetap disimpan.",
+  "games.metadataImport.stopNote":
+    "Berhenti atau tutup untuk membatalkan pekerjaan tersisa. Impor yang selesai tetap disimpan.",
   "games.metadataImport.stop": "Berhenti",
   "games.metadataImport.resume": "Lanjutkan / coba lagi",
   "games.metadataImport.start": "Cari kecocokan",
   "games.metadataImport.review": "Perlu ditinjau",
   "games.artwork.selectionSetting": "Pilihan latar IGDB",
-  "games.artwork.selectionNote": "Digunakan untuk pencocokan metadata baru. Gambar yang sudah ada tidak berubah.",
+  "games.artwork.selectionNote":
+    "Digunakan untuk pencocokan metadata baru. Gambar yang sudah ada tidak berubah.",
   "games.artwork.policy.first": "Gambar pertama",
   "games.artwork.policy.random": "Gambar acak",
   "games.artwork.policy.manual": "Biar saya pilih",
   "games.artwork.screenshotsSetting": "Gunakan tangkapan layar jika karya gambar tidak tersedia",
-  "games.artwork.screenshotsNote": "Gunakan tangkapan layar hanya jika IGDB tidak memiliki karya gambar latar.",
+  "games.artwork.screenshotsNote":
+    "Gunakan tangkapan layar hanya jika IGDB tidak memiliki karya gambar latar.",
   "games.artwork.iconSetting": "Gunakan sampul sebagai ikon pustaka",
-  "games.artwork.iconNote": "Gunakan sampul IGDB kecil di bilah samping dan pustaka cepat untuk pencocokan baru. Gambar lokal tetap diutamakan.",
+  "games.artwork.iconNote":
+    "Gunakan sampul IGDB kecil di bilah samping dan pustaka cepat untuk pencocokan baru. Gambar lokal tetap diutamakan.",
   "games.artwork.importError": "Gambar untuk pencocokan ini tidak dapat dimuat. Coba lagi.",
 
   "games.artwork.browse": "Jelajahi gambar IGDB",
@@ -38,13 +43,15 @@ export default {
   "games.artwork.unknownSize": "Ukuran tidak tersedia",
   "games.artwork.original": "Otomatis",
   "games.artwork.noMatch": "Tidak ada gambar untuk game ini. Coba kecocokan metadata lain.",
-  "games.artwork.localCover": "Sampul lokal tetap digunakan. Hapus melalui penyesuaian pustaka untuk memakai sampul ini.",
+  "games.artwork.localCover":
+    "Sampul lokal tetap digunakan. Hapus melalui penyesuaian pustaka untuk memakai sampul ini.",
   "games.artwork.choose": "{count} gambar",
   "games.artwork.first": "Gambar pertama",
   "games.artwork.random": "Gambar acak",
-  "games.artwork.screenshotFallback": "Tidak ada ilustrasi. Tangkapan layar ditampilkan sebagai gantinya.",
+  "games.artwork.screenshotFallback":
+    "Tidak ada ilustrasi. Tangkapan layar ditampilkan sebagai gantinya.",
   "games.artwork.empty": "IGDB tidak memiliki gambar untuk pilihan ini.",
   "games.artwork.imageError": "Beberapa gambar gagal dimuat.",
   "games.artwork.reset": "Reset gambar",
-  "games.artwork.conflict": "Gambar atau metadata berubah di tempat lain. Buka kembali pemilih."
+  "games.artwork.conflict": "Gambar atau metadata berubah di tempat lain. Buka kembali pemilih.",
 } satisfies Record<string, string>;

@@ -21,12 +21,17 @@ export type DubFeedEntry = {
   title?: { romaji?: string | null; english?: string | null; native?: string | null } | null;
   coverImage?: { extraLarge?: string | null; medium?: string | null; color?: string | null } | null;
   bannerImage?: string | null;
-  airingSchedule?: { nodes?: Array<{ episode?: number | null; airingAt?: number | string | null }> | null } | null;
+  airingSchedule?: {
+    nodes?: Array<{ episode?: number | null; airingAt?: number | string | null }> | null;
+  } | null;
 };
 
 let feedCache: { entries: DubFeedEntry[]; at: number } | null = null;
 const FEED_STALE_MS = 30 * 60 * 1000;
-const resolvedKitsuIds = new Map<number, { mal: number | null; anilist: number | null; at: number; }>();
+const resolvedKitsuIds = new Map<
+  number,
+  { mal: number | null; anilist: number | null; at: number }
+>();
 const resolvingKitsuIds = new Map<number, Promise<void>>();
 
 function notifySubscribers(): void {

@@ -3,11 +3,13 @@ export default {
   "games.audience.deck": "Steam Deck · самые популярные",
   "games.audience.deckNote": "Самые популярные игры на Steam Deck · за неделю",
   "games.audience.deckSource": "Steam Deck · недельный рейтинг",
-  "games.audience.deckCoverage": "Недельный рейтинг Steam Deck от Valve обновляется автоматически. Число одновременно играющих пользователей для этого рейтинга не публикуется.",
+  "games.audience.deckCoverage":
+    "Недельный рейтинг Steam Deck от Valve обновляется автоматически. Число одновременно играющих пользователей для этого рейтинга не публикуется.",
   "games.audience.xbox": "Xbox · самые популярные",
   "games.audience.xboxNote": "Самые популярные игры Xbox · США",
   "games.audience.xboxSource": "Xbox · текущий рейтинг",
-  "games.audience.xboxCoverage": "Текущий рейтинг Xbox от Microsoft для США обновляется автоматически. Xbox не публикует число игроков.",
+  "games.audience.xboxCoverage":
+    "Текущий рейтинг Xbox от Microsoft для США обновляется автоматически. Xbox не публикует число игроков.",
   "games.audience.xboxChecked": "Проверено {date}",
   "games.audience.xboxView": "Открыть в Xbox",
   "games.audience.pc": "ПК · все лаунчеры",
@@ -19,6 +21,7 @@ export default {
   "games.audience.monthlyRank": "Место за месяц: {rank}",
   "games.audience.onSteamNow": "сейчас в Steam",
   "games.audience.source": "Newzoo · активные игроки за месяц",
-  "games.audience.coverage": "Опубликованный топ-10 по активным игрокам за месяц на 37 рынках, кроме Китая и Индии. Рейтинг за указанный период, не текущая численность и не мировой рейтинг.",
-  "games.audience.snapshot": "Newzoo · опубликованный рейтинг · {month}"
+  "games.audience.coverage":
+    "Опубликованный топ-10 по активным игрокам за месяц на 37 рынках, кроме Китая и Индии. Рейтинг за указанный период, не текущая численность и не мировой рейтинг.",
+  "games.audience.snapshot": "Newzoo · опубликованный рейтинг · {month}",
 };

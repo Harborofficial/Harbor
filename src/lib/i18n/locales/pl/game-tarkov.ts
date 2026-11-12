@@ -14,17 +14,19 @@ export default {
   "games.tarkov.listedStart": "Podany początek:",
   "games.tarkov.noSeason": "Brak aktywnego sezonu w źródle",
   "games.tarkov.noSeasonDetail": "Źródło nie podaje obecnego ani nadchodzącego sezonu.",
-  "games.tarkov.scheduleNote": "Daty są utrzymywane przez tarkov.dev i mogą się zmienić. To nie jest oficjalna zapowiedź wipe’a.",
+  "games.tarkov.scheduleNote":
+    "Daty są utrzymywane przez tarkov.dev i mogą się zmienić. To nie jest oficjalna zapowiedź wipe’a.",
   "games.tarkov.seasonSource": "Daty sezonów · tarkov.dev",
   "games.tarkov.checked": "Sprawdzono: {time}",
   "games.tarkov.fullWipe": "Ostatni pełny wipe w źródle",
   "games.tarkov.historyFailed": "Nie udało się wczytać historii wipe’ów.",
   "games.tarkov.elapsed": "{days} dni",
   "games.tarkov.noHistory": "Brak wcześniejszych wipe’ów.",
-  "games.tarkov.modeNote": "Postęp sezonowy i pełne wipe’y kont są osobne. Ta historia nie opisuje resetów trwałych postaci PvP ani PvE.",
+  "games.tarkov.modeNote":
+    "Postęp sezonowy i pełne wipe’y kont są osobne. Ta historia nie opisuje resetów trwałych postaci PvP ani PvE.",
   "games.tarkov.historySource": "Daty wipe’ów · tarkov.dev",
   "games.tarkov.history": "Historia pełnych wipe’ów",
   "games.tarkov.patch": "Aktualizacja",
   "games.tarkov.date": "Data rozpoczęcia (UTC)",
-  "games.tarkov.duration": "Do następnego pełnego wipe’a"
+  "games.tarkov.duration": "Do następnego pełnego wipe’a",
 };

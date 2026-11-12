@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Check, ChevronDown, LoaderCircle, Radio, Unplug } from "@/components/icons/music-icons";
+import {
+  ArrowUpRight,
+  Check,
+  ChevronDown,
+  LoaderCircle,
+  Radio,
+  Unplug,
+} from "@/components/icons/music-icons";
 import { useT } from "@/lib/i18n";
 import {
   completeLastFmAuth,
@@ -135,7 +142,13 @@ export function MusicLastFm({ embedded = false }: { embedded?: boolean } = {}) {
       )}
 
       {connected ? (
-        <div className={embedded ? "flex flex-wrap items-center gap-2" : "space-y-2 border-t border-edge-soft p-3"}>
+        <div
+          className={
+            embedded
+              ? "flex flex-wrap items-center gap-2"
+              : "space-y-2 border-t border-edge-soft p-3"
+          }
+        >
           {username && (
             <button
               type="button"
@@ -163,7 +176,9 @@ export function MusicLastFm({ embedded = false }: { embedded?: boolean } = {}) {
       ) : (
         open && (
           <div className={embedded ? "space-y-4" : "space-y-4 border-t border-edge-soft p-3"}>
-            <p className="text-[13px] leading-relaxed text-ink-muted">{t("music.lastfm.keyHelp")}</p>
+            <p className="text-[13px] leading-relaxed text-ink-muted">
+              {t("music.lastfm.keyHelp")}
+            </p>
 
             <div className="flex flex-wrap gap-2">
               <button
@@ -222,13 +237,23 @@ export function MusicLastFm({ embedded = false }: { embedded?: boolean } = {}) {
               {pendingToken ? t("music.lastfm.finish") : t("music.lastfm.authorize")}
             </button>
             {pendingToken && (
-              <p className="text-[12px] leading-relaxed text-ink-subtle">{t("music.lastfm.browserPrompt")}</p>
+              <p className="text-[12px] leading-relaxed text-ink-subtle">
+                {t("music.lastfm.browserPrompt")}
+              </p>
             )}
           </div>
         )
       )}
       {error && (
-        <p className={embedded ? "pt-3 text-[12px] text-danger" : "border-t border-danger/25 px-3 py-2 text-[12px] text-danger"}>{error}</p>
+        <p
+          className={
+            embedded
+              ? "pt-3 text-[12px] text-danger"
+              : "border-t border-danger/25 px-3 py-2 text-[12px] text-danger"
+          }
+        >
+          {error}
+        </p>
       )}
     </section>
   );

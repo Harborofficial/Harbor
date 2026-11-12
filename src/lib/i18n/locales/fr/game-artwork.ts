@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "Importer les données des jeux",
-  "games.metadataImport.note": "Associez les jeux selon leur titre, plateforme et identifiant de boutique. Les associations existantes sont conservées.",
+  "games.metadataImport.note":
+    "Associez les jeux selon leur titre, plateforme et identifiant de boutique. Les associations existantes sont conservées.",
   "games.metadataImport.scope": "Jeux à associer",
   "games.metadataImport.progress": "{count} sur {total} vérifiés",
   "games.metadataImport.savedCount": "{count} importés",
@@ -14,20 +15,24 @@ export default {
   "games.metadataImport.incomplete": "Trop de résultats. Choisissez une correspondance.",
   "games.metadataImport.artwork": "Choisissez les images pour terminer l’import.",
   "games.metadataImport.reviewAction": "Vérifier",
-  "games.metadataImport.stopNote": "Arrêter ou fermer annule le travail restant. Les imports terminés sont conservés.",
+  "games.metadataImport.stopNote":
+    "Arrêter ou fermer annule le travail restant. Les imports terminés sont conservés.",
   "games.metadataImport.stop": "Arrêter",
   "games.metadataImport.resume": "Continuer / réessayer",
   "games.metadataImport.start": "Chercher des correspondances",
   "games.metadataImport.review": "À vérifier",
   "games.artwork.selectionSetting": "Choix du fond IGDB",
-  "games.artwork.selectionNote": "Utilisé pour les nouvelles associations de métadonnées. Vos images actuelles restent inchangées.",
+  "games.artwork.selectionNote":
+    "Utilisé pour les nouvelles associations de métadonnées. Vos images actuelles restent inchangées.",
   "games.artwork.policy.first": "Première image",
   "games.artwork.policy.random": "Image aléatoire",
   "games.artwork.policy.manual": "Me laisser choisir",
   "games.artwork.screenshotsSetting": "Utiliser des captures si les illustrations manquent",
-  "games.artwork.screenshotsNote": "Utiliser une capture uniquement si IGDB ne propose aucune illustration de fond.",
+  "games.artwork.screenshotsNote":
+    "Utiliser une capture uniquement si IGDB ne propose aucune illustration de fond.",
   "games.artwork.iconSetting": "Utiliser les jaquettes comme icônes",
-  "games.artwork.iconNote": "Utiliser de petites jaquettes IGDB dans la barre latérale et la bibliothèque rapide pour les nouvelles associations. Les images locales restent prioritaires.",
+  "games.artwork.iconNote":
+    "Utiliser de petites jaquettes IGDB dans la barre latérale et la bibliothèque rapide pour les nouvelles associations. Les images locales restent prioritaires.",
   "games.artwork.importError": "Impossible de charger les images de cette association. Réessayez.",
 
   "games.artwork.browse": "Parcourir les visuels IGDB",
@@ -37,14 +42,17 @@ export default {
   "games.artwork.cover": "Jaquette",
   "games.artwork.unknownSize": "Dimensions indisponibles",
   "games.artwork.original": "Automatique",
-  "games.artwork.noMatch": "Aucun visuel trouvé pour ce jeu. Essayez une autre correspondance de métadonnées.",
-  "games.artwork.localCover": "Votre jaquette locale reste utilisée. Retirez-la dans la personnalisation de la bibliothèque pour utiliser celle-ci.",
+  "games.artwork.noMatch":
+    "Aucun visuel trouvé pour ce jeu. Essayez une autre correspondance de métadonnées.",
+  "games.artwork.localCover":
+    "Votre jaquette locale reste utilisée. Retirez-la dans la personnalisation de la bibliothèque pour utiliser celle-ci.",
   "games.artwork.choose": "{count} images",
   "games.artwork.first": "Première image",
   "games.artwork.random": "Image aléatoire",
-  "games.artwork.screenshotFallback": "Aucune illustration disponible. Des captures d’écran sont proposées.",
+  "games.artwork.screenshotFallback":
+    "Aucune illustration disponible. Des captures d’écran sont proposées.",
   "games.artwork.empty": "IGDB ne propose aucune image pour ce choix.",
   "games.artwork.imageError": "Certaines images n’ont pas pu être chargées.",
   "games.artwork.reset": "Réinitialiser les visuels",
-  "games.artwork.conflict": "Les visuels ou métadonnées ont changé ailleurs. Rouvrez le sélecteur."
+  "games.artwork.conflict": "Les visuels ou métadonnées ont changé ailleurs. Rouvrez le sélecteur.",
 } satisfies Record<string, string>;

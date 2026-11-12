@@ -52,16 +52,22 @@ export default {
   "games.guides.date.all": "Tüm zamanlar",
   "games.guides.viewers": "{count} kişi izliyor",
   "games.guides.views": "{count} görüntüleme",
-  "games.guides.import.callofdutywarzone": "Değerleri ilgili Warzone ayarlarına kopyalayın. DPI, fare yazılımından ayarlanır.",
-  "games.guides.import.css": "Ayarları Counter-Strike: Source’a kopyalayın. Bunlar tarihli topluluk arşivlerinden alınmıştır.",
-  "games.guides.import.cod": "Bu değerleri ilgili oyun sürümünde kullanın. DPI, fare yazılımından ayarlanır.",
-  "games.guides.noCrosshair": "Bu kaynak güvenilir bir önizleme için yeterli nişangâh ayrıntısı sunmuyor.",
-  "games.guides.previewNote": "Yayımlanan değerlerin sabit önizlemesi. Çözünürlük, hareket ve geri tepme oyun içi sonucu değiştirebilir.",
+  "games.guides.import.callofdutywarzone":
+    "Değerleri ilgili Warzone ayarlarına kopyalayın. DPI, fare yazılımından ayarlanır.",
+  "games.guides.import.css":
+    "Ayarları Counter-Strike: Source’a kopyalayın. Bunlar tarihli topluluk arşivlerinden alınmıştır.",
+  "games.guides.import.cod":
+    "Bu değerleri ilgili oyun sürümünde kullanın. DPI, fare yazılımından ayarlanır.",
+  "games.guides.noCrosshair":
+    "Bu kaynak güvenilir bir önizleme için yeterli nişangâh ayrıntısı sunmuyor.",
+  "games.guides.previewNote":
+    "Yayımlanan değerlerin sabit önizlemesi. Çözünürlük, hareket ve geri tepme oyun içi sonucu değiştirebilir.",
   "games.guides.previewBackground": "Açık önizleme arka planını değiştir",
   "games.guides.crosshairPreview": "Nişangâh önizlemesi",
   "games.guides.noPlayers": "Eşleşen oyuncu yok. Başka bir ad deneyin.",
   "games.guides.playerCount": "{count} oyuncu",
-  "games.guides.archived": "Geçmiş tarihli ayarlar. Kullanmadan önce oyun sürümünü ve tarihi kontrol edin.",
+  "games.guides.archived":
+    "Geçmiş tarihli ayarlar. Kullanmadan önce oyun sürümünü ve tarihi kontrol edin.",
   "games.guides.rateLimit": "Bu kaynak istekleri sınırlıyor. {seconds} sn sonra tekrar deneyin.",
   "games.guides.configs": "Profesyonel ayarlar",
   "games.guides.searchPlayers": "Oyuncu ara",
@@ -73,22 +79,28 @@ export default {
   "games.guides.sourceErrorTitle": "Tekrar deneyelim",
   "games.guides.more": "Daha fazla yükle",
   "games.guides.moreKick": "Kick’te daha fazla",
-  "games.guides.configNote": "Oyuncuların ve içerik üreticilerinin yayımladığı ayarlar. Kaynağı, tarihi ve kurulumu görmek için bir profil seçin.",
+  "games.guides.configNote":
+    "Oyuncuların ve içerik üreticilerinin yayımladığı ayarlar. Kaynağı, tarihi ve kurulumu görmek için bir profil seçin.",
   "games.guides.players": "Tüm oyuncular",
   "games.guides.useConfig": "Bu ayarları kullan",
-  "games.guides.import.cs2": "Komutları CS2 geliştirici konsoluna yapıştırın. Nişangâh kodlarını Ayarlar → Oyun → Nişangâh bölümünden içe aktarın. Uygulamadan önce değerleri kontrol edin.",
-  "games.guides.import.valorant": "Nişangâh kodunu kopyalayıp VALORANT’ta Ayarlar → Nişangâh → Profil kodunu içe aktar bölümünü açın. Diğer değerleri ilgili ayarlara girin.",
-  "games.guides.import.rainbowsixsiege": "Ayarları kopyalayıp Siege’in fare ve görüntü ayarlarına girin. DPI, fare yazılımından ayarlanır.",
+  "games.guides.import.cs2":
+    "Komutları CS2 geliştirici konsoluna yapıştırın. Nişangâh kodlarını Ayarlar → Oyun → Nişangâh bölümünden içe aktarın. Uygulamadan önce değerleri kontrol edin.",
+  "games.guides.import.valorant":
+    "Nişangâh kodunu kopyalayıp VALORANT’ta Ayarlar → Nişangâh → Profil kodunu içe aktar bölümünü açın. Diğer değerleri ilgili ayarlara girin.",
+  "games.guides.import.rainbowsixsiege":
+    "Ayarları kopyalayıp Siege’in fare ve görüntü ayarlarına girin. DPI, fare yazılımından ayarlanır.",
   "games.guides.copyCrosshair": "Nişangâhı kopyala",
   "games.guides.copyCommands": "Komutları kopyala",
   "games.guides.copySettings": "Ayarları kopyala",
   "games.guides.copied": "Kopyalandı",
   "games.guides.copyError": "Kopyalanamadı. Tekrar deneyin.",
-  "games.guides.embedNote": "Oynatma, içerik üreticisinin platformu tarafından sağlanır. Gömülü oynatma kısıtlıysa asıl kaynağı açın.",
+  "games.guides.embedNote":
+    "Oynatma, içerik üreticisinin platformu tarafından sağlanır. Gömülü oynatma kısıtlıysa asıl kaynağı açın.",
   "games.guides.readerErrorTitle": "Bu rehber yüklenemedi",
   "games.guides.short": "Rehberler",
   "games.guides.title": "Rehberler ve çözümler",
-  "games.guides.note": "Sonraki adımını bul. Topluluk rehberlerini oku, çözüm videolarını veya oyun yayınlarını izle.",
+  "games.guides.note":
+    "Sonraki adımını bul. Topluluk rehberlerini oku, çözüm videolarını veya oyun yayınlarını izle.",
   "games.guides.written": "Yazılı rehberler",
   "games.guides.videos": "Videolar",
   "games.guides.live": "Canlı",
@@ -109,11 +121,11 @@ export default {
   "games.guides.previous": "Önceki",
   "games.guides.next": "Sonraki",
   "games.guides.original": "Orijinali aç",
-  "games.guides.playerNote": "YouTube üzerinden oynatılır. İçerik üreticisi yerleştirmeyi kısıtlarsa orijinal videoyu aç.",
+  "games.guides.playerNote":
+    "YouTube üzerinden oynatılır. İçerik üreticisi yerleştirmeyi kısıtlarsa orijinal videoyu aç.",
   "games.guides.readerError": "Bu rehber burada okunamadı. Tekrar dene veya orijinali aç.",
   "games.guides.contents": "Bu rehberde",
-  "games.guides.credits": "Yazarlar ve lisans"
-,
+  "games.guides.credits": "Yazarlar ve lisans",
   "games.guides.copy": "Kopyala",
   "games.guides.previewMap": "Nişangahın arkasında harita ekran görüntüsü göster",
   "games.guides.skins": "Kaplamalar",
@@ -123,5 +135,5 @@ export default {
   "games.guides.teammates": "Takım arkadaşları",
   "games.guides.specs": "Teknik özellikler",
   "games.guides.exportAll": "Tümünü dışa aktar",
-  "games.guides.copyValue": "{label} kopyala"
+  "games.guides.copyValue": "{label} kopyala",
 } satisfies Record<string, string>;

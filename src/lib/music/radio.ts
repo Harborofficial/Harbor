@@ -408,8 +408,15 @@ function rank(seed: Seed, candidates: Candidate[]): Candidate[] {
   return spaced;
 }
 
-async function build(seeds: Seed[], exclude: Set<string>, size: number, heard?: ReadonlySet<string>): Promise<MusicTrack[]> {
-  const candidates = (await gather(seeds, exclude)).filter(candidate => !heard?.has(musicTrackIdentity(candidate.track)));
+async function build(
+  seeds: Seed[],
+  exclude: Set<string>,
+  size: number,
+  heard?: ReadonlySet<string>,
+): Promise<MusicTrack[]> {
+  const candidates = (await gather(seeds, exclude)).filter(
+    (candidate) => !heard?.has(musicTrackIdentity(candidate.track)),
+  );
   await enrich(candidates);
   return rank(seeds[0], candidates)
     .slice(0, size)
@@ -508,7 +515,11 @@ export async function loadSimilarTracks(track: MusicTrack): Promise<MusicTrack[]
 }
 
 /** Exclude history before ranking so familiar songs cannot crowd out new recommendations. */
-export async function loadUnheardMusic(track: MusicTrack, excluded: readonly MusicTrack[], heard?: ReadonlySet<string>): Promise<MusicTrack[]> {
+export async function loadUnheardMusic(
+  track: MusicTrack,
+  excluded: readonly MusicTrack[],
+  heard?: ReadonlySet<string>,
+): Promise<MusicTrack[]> {
   const seed = await resolveSeed(track);
   return build([seed], new Set([track, ...excluded].map(trackKey)), EXTEND_SIZE, heard);
 }

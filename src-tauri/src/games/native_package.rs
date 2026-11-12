@@ -1,11 +1,13 @@
-use std::{
-    fs,
-    io::{Cursor, Read},
-    path::{Component, Path, PathBuf},
-};
+use std::path::Path;
 
 /// Bundle identity comes from Info.plist, not an arbitrary executable inside Contents.
+#[cfg(target_os = "macos")]
 pub fn bundle_executable(bundle: &Path) -> Result<PathBuf, &'static str> {
+    use std::{
+        fs,
+        io::{Cursor, Read},
+        path::{Component, PathBuf},
+    };
     let root = bundle.canonicalize().map_err(|_| "launch_missing")?;
     let info = root.join("Contents/Info.plist");
     let mut file = fs::File::open(info)
@@ -91,6 +93,8 @@ pub fn foreign_binary(header: &[u8], os: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(target_os = "macos")]
+    use std::{fs, path::PathBuf};
     #[test]
     fn package_handlers_are_host_specific() {
         assert!(external_installer(Path::new("Game.dmg"), "macos"));
@@ -108,6 +112,7 @@ mod tests {
         assert!(foreign_binary(&[0xcf, 0xfa, 0xed, 0xfe], "linux"));
         assert!(!foreign_binary(b"#!/bin/sh", "linux"));
     }
+    #[cfg(target_os = "macos")]
     #[test]
     fn bundles_require_the_declared_executable_and_reject_traversal() {
         let dir = std::env::var_os("HARBOR_GAME_TEST_ROOT")
@@ -157,6 +162,7 @@ pub fn allow_execution(value: String) -> Result<String, &'static str> {
     }
     #[cfg(target_os = "linux")]
     {
+        use std::{fs, io::Read};
         use std::os::unix::fs::PermissionsExt;
         let selected = Path::new(&value);
         if !selected.is_absolute() || value.len() > 8192 {
@@ -194,6 +200,7 @@ mod permission_tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn permission_repair_only_changes_the_selected_native_files_owner_bit() {
+        use std::{fs, path::PathBuf};
         use std::os::unix::fs::{symlink, PermissionsExt};
         let root = std::env::var_os("HARBOR_GAME_TEST_ROOT")
             .map(PathBuf::from)

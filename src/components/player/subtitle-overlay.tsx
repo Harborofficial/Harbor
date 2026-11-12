@@ -74,7 +74,8 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({
     align === "left" ? "items-start" : align === "right" ? "items-end" : "items-center";
 
   const borderSize = useMemo(
-    () => Math.max(0.5, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive * 2) / 2),
+    () =>
+      Math.max(0.5, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive * 2) / 2),
     [settings.subBorderSize, responsive],
   );
   const borderColor = settings.subBorderColor || "#000000";

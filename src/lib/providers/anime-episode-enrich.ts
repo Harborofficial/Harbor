@@ -166,8 +166,9 @@ async function enrichTvdbThumbs(
 function episodeImdbRating(
   ep: KitsuEpisode,
   ratings: ReadonlyMap<string, number>,
+  seasonOverride?: number | null,
 ): number | undefined {
-  const season = ep.imdbSeason ?? ep.seasonNumber ?? 1;
+  const season = seasonOverride ?? ep.imdbSeason ?? ep.seasonNumber ?? 1;
   const num = ep.imdbEpisode ?? ep.number;
   return (
     ratings.get(`${season}:${num}`) ??
@@ -178,7 +179,11 @@ function episodeImdbRating(
 export function withEpisodeImdbRatings(
   episodes: KitsuEpisode[],
   ratings: ReadonlyMap<string, number>,
-  options?: { seriesMetaId?: string | null; seriesImdbId?: string | null },
+  options?: {
+    seriesMetaId?: string | null;
+    seriesImdbId?: string | null;
+    ratingSeason?: number | null;
+  },
 ): KitsuEpisode[] {
   if (ratings.size === 0) return episodes;
   const unaired = unairedIndexes(episodes);
@@ -194,7 +199,7 @@ export function withEpisodeImdbRatings(
     // Early addon rows may still carry cour-local numbering. Wait for mapped
     // coordinates before displaying a series rating on those rows.
     if (unaired.has(i) || ep.imdbSeason == null || ep.imdbEpisode == null) return ep;
-    const rating = episodeImdbRating(ep, ratings);
+    const rating = episodeImdbRating(ep, ratings, options?.ratingSeason);
     if (rating == null || !Number.isFinite(rating) || rating <= 0 || rating > 10) return ep;
     if (ep.rating === rating && ep.ratingIsImdb) return ep;
     changed = true;

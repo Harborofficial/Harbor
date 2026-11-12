@@ -27,7 +27,8 @@ export default {
   "games.artwork.screenshotsSetting": "没有美术图时使用截图",
   "games.artwork.screenshotsNote": "仅在 IGDB 没有背景美术图时使用截图。",
   "games.artwork.iconSetting": "使用封面作为游戏库图标",
-  "games.artwork.iconNote": "为新匹配的游戏在侧边栏和快捷游戏库中使用小尺寸 IGDB 封面。本地图片优先。",
+  "games.artwork.iconNote":
+    "为新匹配的游戏在侧边栏和快捷游戏库中使用小尺寸 IGDB 封面。本地图片优先。",
   "games.artwork.importError": "无法加载此匹配的图片。请重试。",
 
   "games.artwork.browse": "浏览 IGDB 图片",
@@ -38,7 +39,8 @@ export default {
   "games.artwork.unknownSize": "尺寸未知",
   "games.artwork.original": "自动",
   "games.artwork.noMatch": "未找到此游戏的图片。请尝试选择其他元数据匹配项。",
-  "games.artwork.localCover": "仍会优先使用本地封面。请在游戏库自定义中移除本地封面，以使用此封面。",
+  "games.artwork.localCover":
+    "仍会优先使用本地封面。请在游戏库自定义中移除本地封面，以使用此封面。",
   "games.artwork.choose": "{count} 张图片",
   "games.artwork.first": "第一张图片",
   "games.artwork.random": "随机图片",
@@ -46,5 +48,5 @@ export default {
   "games.artwork.empty": "IGDB 没有此选项的图片。",
   "games.artwork.imageError": "部分图片无法加载。",
   "games.artwork.reset": "重置图片",
-  "games.artwork.conflict": "图片或元数据已在其他位置更改。请重新打开选择窗口。"
+  "games.artwork.conflict": "图片或元数据已在其他位置更改。请重新打开选择窗口。",
 } satisfies Record<string, string>;

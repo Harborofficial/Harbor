@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "أعداد الجولات غير متاحة",
   "games.wow.progress.counts": "{total} جولات · {timed} ضمن الوقت",
   "games.wow.progress.best": "أفضل جولة",
-  "games.wow.progress.explore": "استكشاف الجولات"
+  "games.wow.progress.explore": "استكشاف الجولات",
 };
 export default gameWowProgress;

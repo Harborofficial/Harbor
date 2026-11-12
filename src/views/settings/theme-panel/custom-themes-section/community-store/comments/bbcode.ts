@@ -7,7 +7,10 @@ export type CNode =
   | { t: "link"; href: string; label: string }
   | { t: "img"; src: string };
 
-type Tok = { k: "text"; v: string } | { k: "open"; tag: string; arg?: string } | { k: "close"; tag: string };
+type Tok =
+  | { k: "text"; v: string }
+  | { k: "open"; tag: string; arg?: string }
+  | { k: "close"; tag: string };
 
 type Frame = { tag: string; arg?: string; children: CNode[] };
 
@@ -114,7 +117,14 @@ function autolink(nodes: CNode[], inCode: boolean): CNode[] {
   const out: CNode[] = [];
   for (const n of nodes) {
     if (n.t === "text" && !inCode) out.push(...splitUrls(n.v));
-    else if (n.t === "b" || n.t === "i" || n.t === "u" || n.t === "s" || n.t === "code" || n.t === "quote")
+    else if (
+      n.t === "b" ||
+      n.t === "i" ||
+      n.t === "u" ||
+      n.t === "s" ||
+      n.t === "code" ||
+      n.t === "quote"
+    )
       out.push({ ...n, children: autolink(n.children, inCode || n.t === "code") });
     else out.push(n);
   }

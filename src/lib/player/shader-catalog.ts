@@ -1,4 +1,3 @@
-
 export type ShaderStage = "prescale" | "restore" | "chroma" | "sharpen" | "tonemap";
 export type ShaderContent = "all" | "anime" | "hdr" | "live";
 

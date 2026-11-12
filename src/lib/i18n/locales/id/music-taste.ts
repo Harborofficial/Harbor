@@ -63,7 +63,8 @@ const musicTaste: Record<string, string> = {
   "music.explore.performance": "Layak ditonton",
   "music.explore.stage": "Panggung & sesi",
   "music.explore.liveFrom": "{artist} secara langsung",
-  "music.explore.performanceHint": "Panggung besar, sesi akrab, dan penampilan untuk ditonton lagi.",
+  "music.explore.performanceHint":
+    "Panggung besar, sesi akrab, dan penampilan untuk ditonton lagi.",
   "music.explore.watchPerformance": "Tonton penampilan",
   "music.explore.events": "Barisan depan festival",
   "music.explore.eventHint": "Set terbaru lebih dulu. Pilih acara dan jelajahi tahunnya.",
@@ -104,6 +105,6 @@ const musicTaste: Record<string, string> = {
   "music.artist.limited":
     "Sumber ini menyediakan pilihan yang mungkin tidak mencakup seluruh katalog.",
   "music.rockHall.title": "Rock & Roll Hall of Fame",
-  "music.rockHall.subtitle": "Setiap angkatan sejak 1986, langsung dari Wikipedia"
+  "music.rockHall.subtitle": "Setiap angkatan sejak 1986, langsung dari Wikipedia",
 };
 export default musicTaste;

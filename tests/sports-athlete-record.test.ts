@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { athleteRecordUrl, isEspnAthleteId, parseAthleteRecord } from "../src/lib/sports/athlete-record";
+import {
+  athleteRecordUrl,
+  isEspnAthleteId,
+  parseAthleteRecord,
+} from "../src/lib/sports/athlete-record";
 
 test("the overall career line is read, not the first row that happens to be there", () => {
   assert.equal(

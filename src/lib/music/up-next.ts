@@ -16,7 +16,7 @@ export function useUpNextSuggestions(
 ): UpNextSuggestions {
   const key = track ? keyOf(track) : "";
   const [state, setState] = useState<UpNextSuggestions>(() => ({
-    tracks: key ? cache.get(key) ?? [] : [],
+    tracks: key ? (cache.get(key) ?? []) : [],
     loading: false,
   }));
 

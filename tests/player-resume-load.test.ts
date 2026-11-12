@@ -14,6 +14,7 @@ function harness() {
     load: async (src: any) => {
       loads.push(src);
     },
+    capabilities: () => ({ engine: "mpv", external: false }),
     play: async () => {
       plays++;
     },
@@ -48,6 +49,7 @@ function harness() {
     "@/lib/player/load-identity": { playerLoadIdentity },
     "@/lib/stream-proxy": { releaseStreamProxy() {}, retainStreamProxy() {} },
     "@/lib/playback-history": { isPlaybackActorCurrent: () => true },
+    "@/lib/player/track-preferences": { initialTrackSelector: () => () => ({}) },
   });
   return {
     ...h,

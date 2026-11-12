@@ -97,7 +97,8 @@ export function useSkipSegments(
     let cancelled = false;
     resolveAnimeIdentity(meta.id, episodeImdbId, coords)
       .then((identity) => {
-        if (!cancelled && identity) setMapped({ kitsuId: identity.kitsuId, number: identity.number });
+        if (!cancelled && identity)
+          setMapped({ kitsuId: identity.kitsuId, number: identity.number });
       })
       .catch(() => {});
     return () => {
@@ -242,10 +243,7 @@ export function useAdSegments(
   return segs;
 }
 
-export function activeSegment(
-  segments: SkipSegment[],
-  positionSec: number,
-): SkipSegment | null {
+export function activeSegment(segments: SkipSegment[], positionSec: number): SkipSegment | null {
   for (const s of segments) {
     if (positionSec >= s.startSec && positionSec < s.endSec - 0.75) return s;
   }
@@ -264,9 +262,13 @@ export function prefetchSegments(meta: Meta, episode?: PlayEpisode): void {
       .catch(() => {});
   } else if (animeIdentityEligible(meta.id, episode)) {
     resolveAnimeIdentity(meta.id, episode?.imdbId ?? null, episode)
-      .then((identity) => (identity ? kitsuToMal(identity.kitsuId).then((malId) =>
-        malId == null ? undefined : fetchAniSkipSegments(malId, identity.number, 0),
-      ) : undefined))
+      .then((identity) =>
+        identity
+          ? kitsuToMal(identity.kitsuId).then((malId) =>
+              malId == null ? undefined : fetchAniSkipSegments(malId, identity.number, 0),
+            )
+          : undefined,
+      )
       .catch(() => {});
   }
 

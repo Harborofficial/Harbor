@@ -17,5 +17,6 @@ export default {
   "artwork.error.large": "请选择更小的文件：最大 8 MB，尺寸不超过 4096 × 4096 像素。",
   "artwork.error.external": "此动画使用外部媒体。请在导出时嵌入图片。",
   "artwork.error.storage": "无法在此设备上保存文件。之前的选择未更改。",
-  "artwork.error.invalid": "无法读取此文件。请选择 Lottie（.json 或 .lottie）、GIF、PNG、JPEG 或 WebP。"
+  "artwork.error.invalid":
+    "无法读取此文件。请选择 Lottie（.json 或 .lottie）、GIF、PNG、JPEG 或 WebP。",
 };

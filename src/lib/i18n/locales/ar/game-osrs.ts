@@ -42,5 +42,5 @@ export default {
   "games.osrs.averages": "الصفقات المفقودة تترك فراغات. لا تُحسب ضريبة البورصة الكبرى هنا.",
   "games.osrs.table": "آخر 24 فترة",
   "games.osrs.time": "الوقت",
-  "games.osrs.volume": "العناصر المتداولة"
+  "games.osrs.volume": "العناصر المتداولة",
 };

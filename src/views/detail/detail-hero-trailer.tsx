@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
-import { fetchFirstTrailer, resolveTrailerQuality, trailerSrc, type TrailerInfo } from "@/lib/trailer";
+import {
+  fetchFirstTrailer,
+  resolveTrailerQuality,
+  trailerSrc,
+  type TrailerInfo,
+} from "@/lib/trailer";
 import { useTrailerVideo } from "@/lib/use-trailer-video";
 import { useSettings } from "@/lib/settings";
 import { usePageVisible } from "@/lib/visibility";
@@ -37,7 +42,11 @@ export function DetailHeroTrailer({
     setMuted(!settings.detailTrailerAudio);
     if (candidateIds.length === 0) return;
     let cancelled = false;
-    fetchFirstTrailer(candidateIds, resolveTrailerQuality(settings.autoplayTrailerQuality), () => !cancelled).then((i) => {
+    fetchFirstTrailer(
+      candidateIds,
+      resolveTrailerQuality(settings.autoplayTrailerQuality),
+      () => !cancelled,
+    ).then((i) => {
       if (!cancelled) setInfo(i);
     });
     return () => {

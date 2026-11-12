@@ -79,7 +79,9 @@ export function logoTone(src: string): LogoTone | Promise<LogoTone> {
 }
 
 export function useLogoTone(src: string | null): LogoTone | null {
-  const [tone, setTone] = useState<LogoTone | null>(() => (src ? cachePeek<LogoTone>(`tone:${src}`) : null));
+  const [tone, setTone] = useState<LogoTone | null>(() =>
+    src ? cachePeek<LogoTone>(`tone:${src}`) : null,
+  );
   useEffect(() => {
     if (!src) return;
     const hit = logoTone(src);

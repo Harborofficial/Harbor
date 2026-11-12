@@ -16,6 +16,8 @@ export default {
   "artwork.local": "Salvo neste dispositivo. O movimento reduzido usa uma imagem estática.",
   "artwork.error.large": "Escolha um arquivo menor: até 8 MB e 4096 × 4096 pixels.",
   "artwork.error.external": "Esta animação usa mídia externa. Exporte com as imagens incorporadas.",
-  "artwork.error.storage": "Não foi possível salvar o arquivo neste dispositivo. A escolha anterior foi mantida.",
-  "artwork.error.invalid": "Não foi possível ler o arquivo. Escolha Lottie (.json ou .lottie), GIF, PNG, JPEG ou WebP."
+  "artwork.error.storage":
+    "Não foi possível salvar o arquivo neste dispositivo. A escolha anterior foi mantida.",
+  "artwork.error.invalid":
+    "Não foi possível ler o arquivo. Escolha Lottie (.json ou .lottie), GIF, PNG, JPEG ou WebP.",
 };

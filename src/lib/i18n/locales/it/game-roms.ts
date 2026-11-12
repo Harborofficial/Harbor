@@ -18,12 +18,14 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "Partite dei creator",
   "games.roms.watchVideo": "Guarda il video",
   "games.roms.noVideos": "Non ci sono ancora video per questi giochi.",
-  "games.roms.libraryNote": "Porta i tuoi giochi. Importa i file, scegli un emulatore e riunisci la tua collezione.",
+  "games.roms.libraryNote":
+    "Porta i tuoi giochi. Importa i file, scegli un emulatore e riunisci la tua collezione.",
   "games.roms.openLibrary": "Apri la libreria",
   "games.roms.downloadCharts": "ROM hack più scaricati",
   "games.roms.downloadChartsNote": "Per download delle patch su Romhack Plaza.",
   "games.roms.downloadCount": "{count} download",
-  "games.roms.chartUnavailable": "La classifica non è disponibile al momento. Puoi comunque visitare Romhack Plaza.",
+  "games.roms.chartUnavailable":
+    "La classifica non è disponibile al momento. Puoi comunque visitare Romhack Plaza.",
   "games.roms.allPlatforms": "Tutte le piattaforme",
   "games.roms.moreReleases": "Mostra altre uscite",
   "games.roms.fewerReleases": "Mostra meno uscite",
@@ -55,8 +57,10 @@ const gameRoms: Record<string, string> = {
   "games.roms.seeAll": "Mostra tutto",
   "games.roms.franchises": "Ritrova una serie preferita",
   "games.roms.franchiseNote": "Esplora giochi e serie collegati attraverso le generazioni.",
-  "games.roms.noFranchises": "Non sono ancora disponibili informazioni sulle serie di questi giochi.",
-  "games.roms.noCollection": "Nessun gioco corrisponde ancora a questa raccolta sulla console selezionata.",
+  "games.roms.noFranchises":
+    "Non sono ancora disponibili informazioni sulle serie di questi giochi.",
+  "games.roms.noCollection":
+    "Nessun gioco corrisponde ancora a questa raccolta sulla console selezionata.",
   "games.roms.community": "Creato dalla community",
   "games.roms.hacksTitle": "Un gioco familiare. Un’avventura diversa.",
   "games.roms.hacksNote": "Giochi classici modificati dai fan.",
@@ -66,7 +70,8 @@ const gameRoms: Record<string, string> = {
   "games.roms.era": "Epoca di uscita",
   "games.roms.reset": "Reimposta filtri",
   "games.roms.empty": "Prova un altro titolo o amplia i filtri per questa console.",
-  "games.roms.source": "Metadati e collegamenti tra giochi da IGDB. Importa i tuoi file locali per giocare ai titoli supportati in Harbor.",
+  "games.roms.source":
+    "Metadati e collegamenti tra giochi da IGDB. Importa i tuoi file locali per giocare ai titoli supportati in Harbor.",
   "games.roms.playerScore": "Valutazione dei giocatori IGDB · {count} valutazioni",
   "games.roms.combinedScore": "Valutazione combinata IGDB · {count} valutazioni",
   "games.roms.sort.discussed": "Più valutazioni",

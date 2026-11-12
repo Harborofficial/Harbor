@@ -21,8 +21,16 @@ export function scanKotlin(sourceRaw) {
   let block = 0;
   while (i < n) {
     if (block > 0) {
-      if (src.startsWith("/*", i)) { block += 1; i += 2; continue; }
-      if (src.startsWith("*/", i)) { block -= 1; i += 2; continue; }
+      if (src.startsWith("/*", i)) {
+        block += 1;
+        i += 2;
+        continue;
+      }
+      if (src.startsWith("*/", i)) {
+        block -= 1;
+        i += 2;
+        continue;
+      }
       i += 1;
       continue;
     }
@@ -30,7 +38,11 @@ export function scanKotlin(sourceRaw) {
       while (i < n && src[i] !== "\n") i += 1;
       continue;
     }
-    if (src.startsWith("/*", i)) { block = 1; i += 2; continue; }
+    if (src.startsWith("/*", i)) {
+      block = 1;
+      i += 2;
+      continue;
+    }
     if (src[i] === APOS) {
       let j = i + 1;
       while (j < n && src[j] !== APOS && src[j] !== "\n") j += src[j] === BSLASH ? 2 : 1;
@@ -50,13 +62,24 @@ export function scanKotlin(sourceRaw) {
       let escaped = false;
       let closed = false;
       while (j < n) {
-        if (src[j] === BSLASH) { buf += src.slice(j, j + 2); escaped = true; j += 2; continue; }
-        if (src[j] === QUOTE) { closed = true; break; }
+        if (src[j] === BSLASH) {
+          buf += src.slice(j, j + 2);
+          escaped = true;
+          j += 2;
+          continue;
+        }
+        if (src[j] === QUOTE) {
+          closed = true;
+          break;
+        }
         if (src[j] === "\n") break;
         buf += src[j];
         j += 1;
       }
-      if (!closed) { i = start + 1; continue; }
+      if (!closed) {
+        i = start + 1;
+        continue;
+      }
       strings.push({ value: buf, start, end: j + 1, line: lineIndex[start], escaped });
       i = j + 1;
       continue;
@@ -118,14 +141,18 @@ function argSlots(sc, open, close) {
     const c = sc.src[k];
     if (OPENS.includes(c)) depth += 1;
     else if (CLOSES.includes(c)) depth -= 1;
-    else if (c === "," && depth === 0) { slots.push([start, k]); start = k + 1; }
+    else if (c === "," && depth === 0) {
+      slots.push([start, k]);
+      start = k + 1;
+    }
   }
   slots.push([start, close]);
   return slots;
 }
 
 const FALLBACK_LAMBDA = /(ifEmpty|ifBlank)$/;
-const LITERAL_SLOT = /^\s*(?:[A-Za-z_]\w*\s*=\s*)?"(?:[^"\\]|\\.)*"(?:\s*\+\s*"(?:[^"\\]|\\.)*")*\s*,\s*$/;
+const LITERAL_SLOT =
+  /^\s*(?:[A-Za-z_]\w*\s*=\s*)?"(?:[^"\\]|\\.)*"(?:\s*\+\s*"(?:[^"\\]|\\.)*")*\s*,\s*$/;
 const RES_SLOT = /^\s*(?:[A-Za-z_]\w*\s*=\s*)?R\.(?:string|plurals)\.\w+\s*,\s*$/;
 
 function receiverCarriesResource(sc, brace) {
@@ -159,7 +186,11 @@ export function boundToResource(sc, tok) {
   if (close < 0) return null;
   const slots = argSlots(sc, open, close);
   let mine = -1;
-  for (let a = 0; a < slots.length; a += 1) if (tok.start >= slots[a][0] && tok.end <= slots[a][1]) { mine = a; break; }
+  for (let a = 0; a < slots.length; a += 1)
+    if (tok.start >= slots[a][0] && tok.end <= slots[a][1]) {
+      mine = a;
+      break;
+    }
   if (mine < 0) return null;
   if (!LITERAL_SLOT.test(sc.src.slice(slots[mine][0], slots[mine][1]) + ",")) return null;
   for (let a = 0; a < slots.length; a += 1) {
@@ -169,8 +200,10 @@ export function boundToResource(sc, tok) {
   return null;
 }
 
-const COLLECTIONS = /(?:^|[^\w.])(mapOf|listOf|setOf|arrayOf|mutableListOf|mutableMapOf|mutableSetOf|linkedMapOf|hashMapOf|sortedMapOf|buildList|buildMap|listOfNotNull|persistentListOf)\s*\($/;
-const COMPARE = /(?:startsWith|endsWith|contains|equals|indexOf|removePrefix|removeSuffix|substringAfter|substringBefore|split|replace)\s*\($/;
+const COLLECTIONS =
+  /(?:^|[^\w.])(mapOf|listOf|setOf|arrayOf|mutableListOf|mutableMapOf|mutableSetOf|linkedMapOf|hashMapOf|sortedMapOf|buildList|buildMap|listOfNotNull|persistentListOf)\s*\($/;
+const COMPARE =
+  /(?:startsWith|endsWith|contains|equals|indexOf|removePrefix|removeSuffix|substringAfter|substringBefore|split|replace)\s*\($/;
 const AUTH = /^(Bearer|Basic|Token|Digest|Bot|OAuth) /;
 
 export function classifyKind(sc, tok) {
@@ -198,7 +231,11 @@ const CODEISH = /[_$]\w+\(|\bfun\b|\bval\b|application\/|text\//;
 function unbalancedTemplate(v) {
   let depth = 0;
   for (let i = 0; i < v.length; i += 1) {
-    if (v[i] === "$" && v[i + 1] === "{") { depth += 1; i += 1; continue; }
+    if (v[i] === "$" && v[i + 1] === "{") {
+      depth += 1;
+      i += 1;
+      continue;
+    }
     if (v[i] === "}" && depth > 0) depth -= 1;
   }
   return depth > 0;

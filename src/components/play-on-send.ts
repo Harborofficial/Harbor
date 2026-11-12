@@ -59,10 +59,7 @@ type Dispatch = {
   onLegacy: () => PlayOnResult | PlayOnConfigResult | null;
 };
 
-function run(
-  instance: HarborInstance,
-  plan: Dispatch,
-): Promise<PlayOnResult | PlayOnConfigResult> {
+function run(instance: HarborInstance, plan: Dispatch): Promise<PlayOnResult | PlayOnConfigResult> {
   return new Promise<PlayOnResult | PlayOnConfigResult>((resolve) => {
     let socket: WebSocket;
     try {
@@ -271,7 +268,8 @@ export function failureText(reason: string): string {
   if (reason === "remote-off") return "Remote control is off on that Harbor";
   if (reason === "off") return "Remote control is switched off on that Harbor";
   if (reason === "not-paired") return "Pair with that Harbor before you can drive it";
-  if (reason === "untrusted") return "That Harbor does not trust this computer. Pair with it again.";
+  if (reason === "untrusted")
+    return "That Harbor does not trust this computer. Pair with it again.";
   if (reason === "expired") return "That Harbor forgot this computer. Pair with it again.";
   if (reason === "no-response") return "That Harbor did not answer";
   if (reason === "no-ack") return "That Harbor answered but never confirmed the command";

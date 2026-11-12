@@ -359,7 +359,7 @@ const player: Record<string, string> = {
   "{word} {n}s · hold for options": "{word} {n} s · maintenez pour afficher les options",
   "Search audio language": "Rechercher une langue audio",
   "No audio track in that language.": "Aucune piste audio dans cette langue.",
-  "Clear": "Effacer",
+  Clear: "Effacer",
 };
 
 export default player;

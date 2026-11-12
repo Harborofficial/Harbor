@@ -63,7 +63,9 @@ export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isA
   const mediaType: "movie" | "tv" = detail.kind === "tv" ? "tv" : "movie";
 
   const fmtMoney = (n?: number) =>
-    n && n > 0 ? `$${(n / 1_000_000).toFixed(n >= 1_000_000_000 ? 2 : 0)}${n >= 1_000_000_000 ? "B" : "M"}` : null;
+    n && n > 0
+      ? `$${(n / 1_000_000).toFixed(n >= 1_000_000_000 ? 2 : 0)}${n >= 1_000_000_000 ? "B" : "M"}`
+      : null;
 
   const { settings } = useSettings();
   const tmdbKey = settings.tmdbKey;
@@ -162,9 +164,11 @@ export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isA
     fmtMoney(detail.revenue) != null
       ? { label: t("Revenue"), kind: "text", value: fmtMoney(detail.revenue)! }
       : null,
-    ...(production ? productionRows(production, t) : []).map(
-      (row): Row => ({ label: row.label, kind: "node", node: row.node }),
-    ),
+    ...(production ? productionRows(production, t) : []).map((row): Row => ({
+      label: row.label,
+      kind: "node",
+      node: row.node,
+    })),
     criticism.length > 0
       ? {
           label: t("Discussed on"),

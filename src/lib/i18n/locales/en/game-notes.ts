@@ -2,7 +2,8 @@ export default {
   "games.notes.discardAction": "Discard changes",
   "games.notes.title": "My notes",
   "games.notes.new": "New note",
-  "games.notes.limit": "Notes are too large. Use up to 100 notes, 100,000 characters each, and 2 MB total.",
+  "games.notes.limit":
+    "Notes are too large. Use up to 100 notes, 100,000 characters each, and 2 MB total.",
   "games.notes.readError": "Could not read these notes. Export a backup before retrying.",
   "games.notes.saveError": "Could not save. Your draft is still here.",
   "games.notes.conflict": "These notes changed elsewhere. Export your draft before reloading.",
@@ -19,7 +20,8 @@ export default {
   "games.notes.up": "Move note up",
   "games.notes.down": "Move note down",
   "games.notes.image": "Open image",
-  "games.notes.emptyBody": "Keep strategies, reminders, and discoveries here. Markdown is supported.",
+  "games.notes.emptyBody":
+    "Keep strategies, reminders, and discoveries here. Markdown is supported.",
   "games.notes.noteTitle": "Note title",
   "games.notes.body": "Note text (Markdown)",
   "games.notes.empty": "Your own game notebook",
@@ -28,5 +30,5 @@ export default {
   "games.notes.export": "Export backup",
   "games.notes.unsaved": "Unsaved changes",
   "games.notes.local": "Stored in this Harbor profile",
-  "games.notes.importGuide": "Copy to my notes"
+  "games.notes.importGuide": "Copy to my notes",
 };

@@ -12,19 +12,24 @@ import { SeekImageUpload, openSeekImageDialog } from "./seek-image-upload";
 import { useT } from "@/lib/i18n";
 import { PreviewImage } from "../preview-image";
 
-const STYLES: Array<{ id: "flat" | "glass" | "pinstripe" | "rainbow"; label: string; sub: string }> = [
+const STYLES: Array<{
+  id: "flat" | "glass" | "pinstripe" | "rainbow";
+  label: string;
+  sub: string;
+}> = [
   { id: "flat", label: "Flat", sub: "Solid fill, no texture. Cleanest baseline." },
   { id: "glass", label: "Glass", sub: "Subtle Apple-like sheen on the filled portion." },
   { id: "pinstripe", label: "Pinstripe", sub: "Diagonal stripes across the fill, retro vibe." },
   { id: "rainbow", label: "Rainbow", sub: "Six horizontal stripes. Pairs with nyan cat dot." },
 ];
 
-const SHAPES: Array<{ id: "circle" | "square" | "image" | "hidden"; label: string; sub: string }> = [
-  { id: "circle", label: "Circle", sub: "The default round dot." },
-  { id: "square", label: "Square", sub: "Rounded square in the same color." },
-  { id: "image", label: "Custom image", sub: "PNG, GIF, WebP, or SVG. Animated GIFs play." },
-  { id: "hidden", label: "Hidden", sub: "No dot, just the bar." },
-];
+const SHAPES: Array<{ id: "circle" | "square" | "image" | "hidden"; label: string; sub: string }> =
+  [
+    { id: "circle", label: "Circle", sub: "The default round dot." },
+    { id: "square", label: "Square", sub: "Rounded square in the same color." },
+    { id: "image", label: "Custom image", sub: "PNG, GIF, WebP, or SVG. Animated GIFs play." },
+    { id: "hidden", label: "Hidden", sub: "No dot, just the bar." },
+  ];
 
 const PRESET_COLORS = [
   "",

@@ -184,7 +184,16 @@ export function useBpAnimeHero(
       .finally(() => {
         buildingRef.current = false;
       });
-  }, [rowsByKey, seed, hero.metas.length, anilistTrending, settings.tmdbKey, filterSig, buildHosted, filterOpts]);
+  }, [
+    rowsByKey,
+    seed,
+    hero.metas.length,
+    anilistTrending,
+    settings.tmdbKey,
+    filterSig,
+    buildHosted,
+    filterOpts,
+  ]);
 
   const slides = useMemo(() => {
     void poolVersion;

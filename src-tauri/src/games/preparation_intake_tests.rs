@@ -191,11 +191,12 @@ async fn six_real_process_exit_boundaries_recover_one_operation_without_renderer
         for phase in ["accepted", "adopted", "acknowledged"] {
             let root = root();
             let output = fs::File::create(root.join("child.log")).unwrap();
+            let module = module_path!().split_once("::").unwrap().1;
             let mut child = Command::new(std::env::current_exe().unwrap())
                 .args([
-                    "--exact",
-                    "p2p::preparation_tests::intake::acquisition_exit_child",
-                    "--nocapture",
+                    "--exact".into(),
+                    format!("{module}::acquisition_exit_child"),
+                    "--nocapture".into(),
                 ])
                 .env("HARBOR_PREPARATION_EXIT_ROOT", &root)
                 .env("HARBOR_PREPARATION_EXIT_ENGINE", engine)

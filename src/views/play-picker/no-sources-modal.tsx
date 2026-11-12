@@ -14,7 +14,8 @@ export function NoSourcesConfiguredModal({ meta }: { meta: Meta }) {
           No streaming sources yet
         </h2>
         <p className="mt-3 text-[14px] leading-relaxed text-ink-muted">
-          Harbor needs at least one streaming source before it can play {title}. Pick one of the options below to get set up.
+          Harbor needs at least one streaming source before it can play {title}. Pick one of the
+          options below to get set up.
         </p>
         <ul className="mt-3 space-y-1.5 text-[13.5px] leading-relaxed text-ink-muted">
           <li>· Install a stream addon (Torrentio, Comet, MediaFusion).</li>

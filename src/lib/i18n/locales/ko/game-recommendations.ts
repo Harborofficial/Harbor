@@ -6,9 +6,11 @@ export default {
   "games.recommend.filterTitle": "추천에서 제외",
   "games.recommend.hideLibrary": "내 라이브러리의 게임",
   "games.recommend.hideSaved": "저장한 게임",
-  "games.recommend.libraryNote": "라이브러리 포함 여부는 감지된 게임, 연결된 가져오기 항목, 마지막 Steam 동기화 정보를 바탕으로 확인해요.",
+  "games.recommend.libraryNote":
+    "라이브러리 포함 여부는 감지된 게임, 연결된 가져오기 항목, 마지막 Steam 동기화 정보를 바탕으로 확인해요.",
   "games.recommend.steamSynced": "Steam 라이브러리 동기화: {date}",
-  "games.recommend.steamUnavailable": "Steam 보유 게임 정보를 확인할 수 없어요. 로컬 라이브러리의 게임은 계속 반영돼요.",
+  "games.recommend.steamUnavailable":
+    "Steam 보유 게임 정보를 확인할 수 없어요. 로컬 라이브러리의 게임은 계속 반영돼요.",
   "games.recommend.inLibrary": "내 라이브러리에 있음",
   "games.recommend.removeSaved": "저장한 게임에서 {name} 제거",
   "games.recommend.forYou": "맞춤 추천",
@@ -21,8 +23,10 @@ export default {
   "games.recommend.recent": "최근 플레이",
   "games.recommend.reset": "숨긴 게임 다시 표시",
   "games.recommend.empty": "취향에 맞게 찾아보세요",
-  "games.recommend.emptyNote": "관심 있는 게임을 저장하거나 라이브러리에서 플레이하면 여기에 추천이 표시됩니다.",
-  "games.recommend.signalsOff": "위에서 저장한 게임 또는 최근 플레이를 켜서 추천을 맞춤 설정하세요.",
+  "games.recommend.emptyNote":
+    "관심 있는 게임을 저장하거나 라이브러리에서 플레이하면 여기에 추천이 표시됩니다.",
+  "games.recommend.signalsOff":
+    "위에서 저장한 게임 또는 최근 플레이를 켜서 추천을 맞춤 설정하세요.",
   "games.recommend.save": "{name} 저장",
   "games.recommend.hide": "추천에서 {name} 숨기기",
   "games.recommend.hideShort": "관심 없음",
@@ -31,13 +35,16 @@ export default {
   "games.recommend.unavailable": "관련 정보를 아직 불러오지 못했어요.",
   "games.recommend.retryNote": "라이브러리는 그대로 있어요. 관련 게임을 다시 불러와 보세요.",
   "games.recommend.caughtUp": "다른 방향으로 찾아보세요.",
-  "games.recommend.caughtUpNote": "필터를 끄거나, 숨긴 추천을 복원하거나, 다른 관심 게임을 저장해 보세요.",
+  "games.recommend.caughtUpNote":
+    "필터를 끄거나, 숨긴 추천을 복원하거나, 다른 관심 게임을 저장해 보세요.",
   "games.recommend.finding": "내 게임과 관련된 작품을 찾는 중…",
-  "games.recommend.source": "라이브러리를 바탕으로 Steam 태그와 IGDB에서 고른 추천입니다. 숨김 설정은 이 프로필에만 적용됩니다.",
+  "games.recommend.source":
+    "라이브러리를 바탕으로 Steam 태그와 IGDB에서 고른 추천입니다. 숨김 설정은 이 프로필에만 적용됩니다.",
   "games.recommend.retrySome": "불러오지 못한 관련 정보 재시도",
   "games.recommend.saveError": "이 기기에 탐색 설정을 저장하지 못했어요. 다시 시도해 주세요.",
   "games.recommend.influences": "추천에 반영되는 게임",
-  "games.recommend.influencesNote": "Harbor가 참고할 게임을 선택하세요. 라이브러리는 바뀌지 않아요.",
+  "games.recommend.influencesNote":
+    "Harbor가 참고할 게임을 선택하세요. 라이브러리는 바뀌지 않아요.",
   "games.recommend.exclude": "{name} 참고하지 않기",
   "games.recommend.excluded": "추천 기준에서 제외된 게임 ({count})",
   "games.recommend.useAgain": "{name} 다시 참고하기",
@@ -50,6 +57,5 @@ export default {
   "games.recommend.allExcluded": "모든 추천 기준이 제외되어 있어요.",
   "games.recommend.allExcludedNote": "추천 조정에서 게임을 복원하거나 다른 관심 게임을 저장하세요.",
   "games.recommend.saved": "저장한 게임",
-  "games.recommend.close": "추천 설정 닫기"
+  "games.recommend.close": "추천 설정 닫기",
 };
-

@@ -136,9 +136,13 @@ export function FieldPreview({
           <div className="sh-field-tools">
             {basketball && (
               <span>
-                <TeamProfileLink team={teamIdentity(game, "home")}>{game.home.name}</TeamProfileLink>{" "}
+                <TeamProfileLink team={teamIdentity(game, "home")}>
+                  {game.home.name}
+                </TeamProfileLink>{" "}
                 ·{" "}
-                <TeamProfileLink team={teamIdentity(game, "away")}>{game.away.name}</TeamProfileLink>
+                <TeamProfileLink team={teamIdentity(game, "away")}>
+                  {game.away.name}
+                </TeamProfileLink>
               </span>
             )}
             {!basketball && (

@@ -61,6 +61,20 @@ function harness(t, options = {}) {
   const effects = new Map();
   let cursor = 0;
   let pending = [];
+  function scheduleEffect(effect, deps) {
+    const index = cursor++;
+    const previous = effects.get(index);
+    if (
+      previous &&
+      deps?.length === previous.deps?.length &&
+      deps.every((value, i) => Object.is(value, previous.deps[i]))
+    )
+      return;
+    pending.push(() => {
+      previous?.cleanup?.();
+      effects.set(index, { deps, cleanup: effect() });
+    });
+  }
   const react = {
     useRef(initial) {
       const index = cursor++;
@@ -77,19 +91,17 @@ function harness(t, options = {}) {
       ];
     },
     useEffect(effect, deps) {
-      const index = cursor++;
-      const previous = effects.get(index);
-      if (
-        previous &&
-        deps?.length === previous.deps?.length &&
-        deps.every((value, i) => Object.is(value, previous.deps[i]))
-      )
-        return;
-      pending.push(() => {
-        previous?.cleanup?.();
-        effects.set(index, { deps, cleanup: effect() });
-      });
+      scheduleEffect(effect, deps);
     },
+    useLayoutEffect(effect, deps) {
+      scheduleEffect(effect, deps);
+    },
+    lazy(load) {
+      const component = () => null;
+      component.preload = load;
+      return component;
+    },
+    Suspense: Symbol("suspense"),
   };
   const jsx = (type, props) => ({ type, props });
   const mocks = {
@@ -100,6 +112,10 @@ function harness(t, options = {}) {
     "@/lib/settings": { useSettings: () => ({ settings, update() {} }) },
     "@/lib/view": { useView: () => ({}) },
     "@/lib/i18n": { useT: () => (value) => value },
+    "@/lib/profiles": {
+      useProfiles: () => ({ activeProfile: { id: "default", kid: false }, profiles: [] }),
+    },
+    "@/lib/features/install": { useInstallFeatures: () => ({ games: false }) },
     "@/lib/use-exit-presence": {
       useExitPresence: () => ({ mounted: search.open, closing: false }),
     },

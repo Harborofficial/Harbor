@@ -23,7 +23,8 @@ export default {
   "games.launchers.visit": "Odwiedź {name}",
   "games.launchers.picks": "Wybrane gry",
   "games.launchers.unavailable": "Nie udało się wczytać aktualnych informacji o grach.",
-  "games.launchers.source": "Informacje o grach z IGDB · Linki do launcherów otwierają oficjalne strony.",
+  "games.launchers.source":
+    "Informacje o grach z IGDB · Linki do launcherów otwierają oficjalne strony.",
 
   "games.catalog.mode.20": "MMO",
   "games.tag.mmorpg": "MMORPG",
@@ -59,7 +60,8 @@ export default {
   "games.recent.open": "Otwórz {name} ze źródła {source}",
   "games.recent.files": "Pliki źródłowe",
   "games.recent.empty": "Połącz źródło gier, aby zobaczyć tutaj najnowsze dodatki.",
-  "games.recent.undated": "Twoje źródła nie mają jeszcze gier z datą dodania. Przejrzyj je w Zarządzaj źródłami.",
+  "games.recent.undated":
+    "Twoje źródła nie mają jeszcze gier z datą dodania. Przejrzyj je w Zarządzaj źródłami.",
   "games.recent.adult": "Treść dla dorosłych · rozmyta grafika",
   "games.recent.artHidden": "Grafika ukryta",
   "games.recent.artUnrated": "Klasyfikacja treści niedostępna",
@@ -85,7 +87,8 @@ export default {
   "games.collectionsLive.pacmanRecord": "Przychody z automatów, 1980–1999",
   "games.collectionsLive.wowRecord": "Szczytowa liczba płatnych subskrybentów",
   "games.collectionsLive.wiiRecord": "Kopie sprzedane na Wii",
-  "games.collectionsLive.manhuntRecord": "Pierwsza przygodowa gra akcji bez przyznanej klasyfikacji w Wielkiej Brytanii",
+  "games.collectionsLive.manhuntRecord":
+    "Pierwsza przygodowa gra akcji bez przyznanej klasyfikacji w Wielkiej Brytanii",
   "games.collectionsLive.gtaVSalesRecord": "Najlepiej sprzedająca się gra akcji i przygodowa",
   "games.collectionsLive.blackOps3Record": "Najlepiej sprzedająca się strzelanka FPP",
   "games.collectionsLive.smashUltimateRecord": "Najlepiej sprzedająca się bijatyka",
@@ -98,15 +101,20 @@ export default {
   "games.collectionsLive.pokemonSeriesRecord": "Najlepiej sprzedająca się seria gier RPG",
   "games.collectionsLive.simsSeriesRecord": "Najlepiej sprzedająca się seria symulatorów życia",
   "games.collectionsLive.fifaSeriesRecord": "Najlepiej sprzedająca się seria sportowa",
-  "games.collectionsLive.gtaSeriesRecord": "Najlepiej sprzedająca się seria gier akcji i przygodowych",
+  "games.collectionsLive.gtaSeriesRecord":
+    "Najlepiej sprzedająca się seria gier akcji i przygodowych",
   "games.collectionsLive.residentSeriesRecord": "Najlepiej sprzedająca się seria survival horror",
   "games.collectionsLive.metalGearSeriesRecord": "Najlepiej sprzedająca się seria skradanek",
-  "games.collectionsLive.haloSeriesRecord": "Najlepiej sprzedająca się seria strzelanek science fiction",
+  "games.collectionsLive.haloSeriesRecord":
+    "Najlepiej sprzedająca się seria strzelanek science fiction",
   "games.collectionsLive.mortalSeriesRecord": "Najlepiej sprzedająca się seria bijatyk",
-  "games.collectionsLive.granTurismoSeriesRecord": "Najlepiej sprzedająca się seria symulatorów jazdy",
-  "games.collectionsLive.commandSeriesRecord": "Najlepiej sprzedająca się seria strategii czasu rzeczywistego",
+  "games.collectionsLive.granTurismoSeriesRecord":
+    "Najlepiej sprzedająca się seria symulatorów jazdy",
+  "games.collectionsLive.commandSeriesRecord":
+    "Najlepiej sprzedająca się seria strategii czasu rzeczywistego",
   "games.collectionsLive.justDanceSeriesRecord": "Najlepiej sprzedająca się seria gier tanecznych",
-  "games.collectionsLive.maddenSeriesRecord": "Najlepiej sprzedająca się seria o futbolu amerykańskim",
+  "games.collectionsLive.maddenSeriesRecord":
+    "Najlepiej sprzedająca się seria o futbolu amerykańskim",
   "games.collectionsLive.nba2kSeriesRecord": "Najlepiej sprzedająca się seria koszykarska",
   "games.collectionsLive.honorKingsRecord": "Najwyższe przychody gry mobilnej w historii",
   "games.collectionsLive.gearsBillionRecord": "Pierwsza seria strzelanek TPP, która to osiągnęła",
@@ -142,8 +150,10 @@ export default {
   "games.tournaments.checked": "Daty organizatorów sprawdzone {date}",
   "games.tournaments.schedule": "Oficjalne informacje o wydarzeniu",
   "games.tournaments.watch": "Gdzie oglądać",
-  "games.tournaments.channelsNote": "Oficjalne kanały. Transmisje zgodnie z harmonogramem turnieju.",
-  "games.tournaments.broadcastPending": "Szczegóły transmisji nie zostały tu jeszcze potwierdzone. Sprawdź stronę organizatora.",
+  "games.tournaments.channelsNote":
+    "Oficjalne kanały. Transmisje zgodnie z harmonogramem turnieju.",
+  "games.tournaments.broadcastPending":
+    "Szczegóły transmisji nie zostały tu jeszcze potwierdzone. Sprawdź stronę organizatora.",
   "games.tournaments.noDates": "W tym kalendarzu nie potwierdzono nadchodzącego Majora.",
   "games.launchers.topGames": "Najczęściej grane na Steam",
   "games.launchers.chartRank": "{rank}. miejsce wśród najczęściej granych",

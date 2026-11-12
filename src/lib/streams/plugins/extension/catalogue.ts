@@ -37,7 +37,10 @@ export function isExtensionCatalogueBase(base: string): boolean {
 
 /** Providers are not filtered by their declared home page flag: the layer stands a row up for a
  * provider that answers the call without declaring one, and that row is its only entry point. */
-export function providersOf(plugin: InstalledStreamPlugin, all: BridgeProvider[]): BridgeProvider[] {
+export function providersOf(
+  plugin: InstalledStreamPlugin,
+  all: BridgeProvider[],
+): BridgeProvider[] {
   const named = new Set(plugin.native?.providerIds ?? []);
   const extensionId = plugin.native?.extensionId ?? plugin.entryId;
   return all
@@ -146,10 +149,7 @@ function rememberPage(key: string, metas: Meta[]): void {
   }
 }
 
-export async function extensionCatalogueMetas(
-  cat: PluginCatalogue,
-  page: number,
-): Promise<Meta[]> {
+export async function extensionCatalogueMetas(cat: PluginCatalogue, page: number): Promise<Meta[]> {
   const asked = Math.max(1, Math.trunc(page));
   const key = rowKey(cat);
   const last = exhausted.get(key);

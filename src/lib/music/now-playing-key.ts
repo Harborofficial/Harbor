@@ -62,8 +62,10 @@ export function nowPlayingMatches(
   if (!track) return false;
   const matches = (id: string, connectorId?: string | null) => {
     const connector = connectorId ?? null;
-    return (!!now.id && now.id === id && now.connectorId === connector)
-      || (!!now.originId && now.originId === id && now.originConnectorId === connector);
+    return (
+      (!!now.id && now.id === id && now.connectorId === connector) ||
+      (!!now.originId && now.originId === id && now.originConnectorId === connector)
+    );
   };
   if (matches(track.id, track.connectorId)) return true;
   // Saved rows can already be resolved uploads. Compare their original recording too,

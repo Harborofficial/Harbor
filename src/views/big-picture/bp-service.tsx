@@ -73,7 +73,9 @@ export function BpService({
         </h2>
         <p className="max-w-[46ch] text-[clamp(13px,1.85vh,21px)] text-ink-muted">
           {hasKey
-            ? t("Nothing matched this filter. Try another category or change your region in Settings.")
+            ? t(
+                "Nothing matched this filter. Try another category or change your region in Settings.",
+              )
             : t("Add a TMDB key in Setup to power this view.")}
         </p>
         <button

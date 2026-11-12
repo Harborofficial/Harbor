@@ -5,6 +5,8 @@ const subtitles: Record<string, string> = {
     "Les sous-titres stylisés (ASS) conservent leurs couleurs, leur taille et la position des panneaux, mais utilisent votre police.",
   "Harbor sends its subtitles to your mpv. Pick one in mpv's own subtitle menu.":
     "Harbor envoie ses sous-titres à votre mpv. Choisissez-en un dans le menu des sous-titres de mpv.",
+  "Keeps the file's colors, size, and sign placement, but swaps in your font.":
+    "Les sous-titres stylisés (ASS) conservent leurs couleurs, leur taille et la position des panneaux, mais utilisent votre police.",
 };
 
 export default subtitles;

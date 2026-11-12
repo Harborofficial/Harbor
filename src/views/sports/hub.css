@@ -487,14 +487,19 @@
   height: 22px;
 }
 .sh-event-rail::-webkit-scrollbar-track {
-  background: linear-gradient(var(--color-edge-soft), var(--color-edge-soft)) center / 100% 2px no-repeat;
+  background: linear-gradient(var(--color-edge-soft), var(--color-edge-soft)) center / 100% 2px
+    no-repeat;
 }
 .sh-event-rail::-webkit-scrollbar-thumb {
   min-width: 52px;
   border: 5px solid transparent;
   border-radius: 12px;
   background-color: var(--color-raised);
-  background-image: repeating-linear-gradient(90deg, var(--color-ink-muted) 0 1px, transparent 1px 4px);
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-ink-muted) 0 1px,
+    transparent 1px 4px
+  );
   background-size: 9px 6px;
   background-position: center;
   background-repeat: no-repeat;
@@ -1765,9 +1770,16 @@
   overflow-wrap: anywhere;
 }
 @container (max-width: 650px) {
-  .sh-fixture-esports { gap: 10px; }
-  .sh-fixture-esports-logos { gap: 4px; }
-  .sh-fixture-esports-logos .ea-image { width: 26px; height: 26px; }
+  .sh-fixture-esports {
+    gap: 10px;
+  }
+  .sh-fixture-esports-logos {
+    gap: 4px;
+  }
+  .sh-fixture-esports-logos .ea-image {
+    width: 26px;
+    height: 26px;
+  }
 }
 .sh-sport-tabs {
   padding-block: 18px 14px;
@@ -2024,7 +2036,13 @@
 }
 .sh-match-sport-pills:not([data-start]):not([data-end]),
 .sh-match-league-pills:not([data-start]):not([data-end]) {
-  mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 28px,
+    #000 calc(100% - 28px),
+    transparent 100%
+  );
 }
 .sh-match-sport-pills button,
 .sh-match-league-pills button {
@@ -3401,11 +3419,21 @@
   max-height: 100%;
   overflow: hidden;
 }
-.sh-carousel .sh-hero-copy[data-long] h2 { font-size: clamp(26px, 3.1cqw, 50px); }
-.sh-carousel .sh-hero-copy[data-longest] h2 { font-size: clamp(23px, 2.6cqw, 41px); }
-.sh-carousel .sh-hero-copy[data-long] .sh-vs { padding: 6px 0; }
-.sh-carousel .sh-hero-copy[data-long] h2 { margin-bottom: 18px; }
-.sh-carousel .sh-hero-copy[data-long] .sh-hero-actions { margin-top: 22px; }
+.sh-carousel .sh-hero-copy[data-long] h2 {
+  font-size: clamp(26px, 3.1cqw, 50px);
+}
+.sh-carousel .sh-hero-copy[data-longest] h2 {
+  font-size: clamp(23px, 2.6cqw, 41px);
+}
+.sh-carousel .sh-hero-copy[data-long] .sh-vs {
+  padding: 6px 0;
+}
+.sh-carousel .sh-hero-copy[data-long] h2 {
+  margin-bottom: 18px;
+}
+.sh-carousel .sh-hero-copy[data-long] .sh-hero-actions {
+  margin-top: 22px;
+}
 .sh-carousel .sh-carousel-bottom {
   height: 78px;
   min-height: 78px;

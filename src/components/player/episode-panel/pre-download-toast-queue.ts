@@ -16,8 +16,7 @@ export function enqueuePreDownloadToast<K extends string>(
   next: PreDownloadToastItem<K>,
 ): PreDownloadToastItem<K>[] {
   if (next.kind === "enabled" || next.kind === "disabled") return [next];
-  if (queue.some((item) => item.kind === next.kind && item.label === next.label))
-    return [...queue];
+  if (queue.some((item) => item.kind === next.kind && item.label === next.label)) return [...queue];
   return [...queue.slice(0, 4), next];
 }
 
@@ -26,7 +25,7 @@ export function visiblePreDownloadToast<K extends string>(
   queue: readonly PreDownloadToastItem<K>[],
   notificationsEnabled: boolean,
 ): PreDownloadToastItem<K> | null {
-  return notificationsEnabled ? queue[0] ?? null : null;
+  return notificationsEnabled ? (queue[0] ?? null) : null;
 }
 
 /** A stale timer must never dismiss the newly shown notification. */

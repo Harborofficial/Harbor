@@ -1,6 +1,7 @@
 export default {
   "games.metadataImport.title": "ゲーム情報をインポート",
-  "games.metadataImport.note": "タイトル、プラットフォーム、ストアの識別情報で照合します。既存の関連付けは維持されます。",
+  "games.metadataImport.note":
+    "タイトル、プラットフォーム、ストアの識別情報で照合します。既存の関連付けは維持されます。",
   "games.metadataImport.scope": "照合するゲーム",
   "games.metadataImport.progress": "{total}件中{count}件を確認済み",
   "games.metadataImport.savedCount": "{count}件をインポート",
@@ -8,13 +9,15 @@ export default {
   "games.metadataImport.searching": "一致するゲームを検索中…",
   "games.metadataImport.saved": "インポート済み",
   "games.metadataImport.skipped": "関連付け済み",
-  "games.metadataImport.failed": "インポートできませんでした。再試行するか、ゲームを確認してください。",
+  "games.metadataImport.failed":
+    "インポートできませんでした。再試行するか、ゲームを確認してください。",
   "games.metadataImport.ambiguous": "選ぶ前にタイトルとエディションを確認してください。",
   "games.metadataImport.noMatch": "一致する情報がありません。別のタイトルで検索してください。",
   "games.metadataImport.incomplete": "結果が多すぎます。一致するゲームを選んでください。",
   "games.metadataImport.artwork": "画像を選んでインポートを完了してください。",
   "games.metadataImport.reviewAction": "確認",
-  "games.metadataImport.stopNote": "停止または閉じると残りの作業を中止します。完了したインポートは保持されます。",
+  "games.metadataImport.stopNote":
+    "停止または閉じると残りの作業を中止します。完了したインポートは保持されます。",
   "games.metadataImport.stop": "停止",
   "games.metadataImport.resume": "続行／再試行",
   "games.metadataImport.start": "一致するゲームを検索",
@@ -25,9 +28,11 @@ export default {
   "games.artwork.policy.random": "ランダムな画像",
   "games.artwork.policy.manual": "自分で選ぶ",
   "games.artwork.screenshotsSetting": "アートワークがない場合はスクリーンショットを使う",
-  "games.artwork.screenshotsNote": "IGDBに背景アートワークがない場合のみスクリーンショットを使用します。",
+  "games.artwork.screenshotsNote":
+    "IGDBに背景アートワークがない場合のみスクリーンショットを使用します。",
   "games.artwork.iconSetting": "ライブラリのアイコンにカバーを使う",
-  "games.artwork.iconNote": "新しい一致ではサイドバーとクイックライブラリに小さいIGDBカバーを使用します。ローカル画像が優先されます。",
+  "games.artwork.iconNote":
+    "新しい一致ではサイドバーとクイックライブラリに小さいIGDBカバーを使用します。ローカル画像が優先されます。",
   "games.artwork.importError": "この一致の画像を読み込めませんでした。もう一度お試しください。",
 
   "games.artwork.browse": "IGDBの画像を探す",
@@ -38,13 +43,16 @@ export default {
   "games.artwork.unknownSize": "サイズ不明",
   "games.artwork.original": "自動",
   "games.artwork.noMatch": "このゲームの画像が見つかりません。別のメタデータ候補を選んでください。",
-  "games.artwork.localCover": "ローカルのカバーが優先されます。このカバーを使うには、ライブラリのカスタマイズでローカルのカバーを解除してください。",
+  "games.artwork.localCover":
+    "ローカルのカバーが優先されます。このカバーを使うには、ライブラリのカスタマイズでローカルのカバーを解除してください。",
   "games.artwork.choose": "{count}枚の画像",
   "games.artwork.first": "最初の画像",
   "games.artwork.random": "ランダムな画像",
-  "games.artwork.screenshotFallback": "アートワークがないため、スクリーンショットを表示しています。",
+  "games.artwork.screenshotFallback":
+    "アートワークがないため、スクリーンショットを表示しています。",
   "games.artwork.empty": "この選択肢の画像はIGDBにありません。",
   "games.artwork.imageError": "一部の画像を読み込めませんでした。",
   "games.artwork.reset": "画像をリセット",
-  "games.artwork.conflict": "画像またはメタデータが別の場所で変更されました。選択画面を開き直してください。"
+  "games.artwork.conflict":
+    "画像またはメタデータが別の場所で変更されました。選択画面を開き直してください。",
 } satisfies Record<string, string>;

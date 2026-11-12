@@ -15,7 +15,8 @@ const REPO_ISSUE = "https://github.com/harborstremio/harbor/issues/new";
 const QUAL =
   "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
 
-const SCALE_LABEL = "text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle";
+const SCALE_LABEL =
+  "text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle";
 
 type Stop = {
   label: string;
@@ -84,7 +85,9 @@ export function BuildFeedback() {
         <SettingRow wide icon={icon} label={t(TITLE)} desc={rated}>
           <div className="flex w-full flex-col items-start gap-3">
             <p className={`max-w-[66ch] ${ROW_DESC}`}>
-              {t("Sorry this one is not better. Tell us what went wrong and we will fix it for you.")}
+              {t(
+                "Sorry this one is not better. Tell us what went wrong and we will fix it for you.",
+              )}
             </p>
             <div className="flex flex-wrap items-center gap-2.5">
               <SButton variant="primary" onClick={() => openIssue(committed)}>
@@ -129,7 +132,9 @@ export function BuildFeedback() {
       label={
         <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
           <span className="min-w-0">{t(TITLE)}</span>
-          {IS_BETA_BUILD && <span className={`${QUAL} bg-accent-soft text-accent`}>{t("Beta")}</span>}
+          {IS_BETA_BUILD && (
+            <span className={`${QUAL} bg-accent-soft text-accent`}>{t("Beta")}</span>
+          )}
         </span>
       }
       desc={t("Does Harbor {version} feel better or worse than the version you had before?", {
@@ -158,7 +163,9 @@ export function BuildFeedback() {
                 tabIndex={on ? 0 : -1}
                 onClick={() => setValue(i)}
                 className={`harbor-press-pop flex h-14 items-center justify-center rounded-[10px] border outline-none transition-colors duration-150 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
-                  on ? `border-edge bg-elevated ${s.tone}` : "border-edge-soft text-ink-subtle hover:text-ink"
+                  on
+                    ? `border-edge bg-elevated ${s.tone}`
+                    : "border-edge-soft text-ink-subtle hover:text-ink"
                 }`}
               >
                 <s.Icon size={on ? 26 : 22} strokeWidth={2} />
@@ -169,7 +176,9 @@ export function BuildFeedback() {
 
         <div className="flex items-center justify-between gap-3">
           <span className={SCALE_LABEL}>{t("Worse")}</span>
-          <span className="text-[15.5px] font-semibold leading-[22px] text-ink">{t(cur.label)}</span>
+          <span className="text-[15.5px] font-semibold leading-[22px] text-ink">
+            {t(cur.label)}
+          </span>
           <span className={SCALE_LABEL}>{t("Better")}</span>
         </div>
 

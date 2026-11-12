@@ -44,7 +44,9 @@ function mimeFor(name: string): string {
   return "image/jpeg";
 }
 
-async function listDir(path: string): Promise<{ dirs: string[]; images: string[]; archives: string[] }> {
+async function listDir(
+  path: string,
+): Promise<{ dirs: string[]; images: string[]; archives: string[] }> {
   const { readDir } = await fsMod();
   const entries = await readDir(path).catch(() => [] as Awaited<ReturnType<typeof readDir>>);
   const dirs: string[] = [];
@@ -111,7 +113,13 @@ export function makeLocalProvider(root: string): MangaProvider {
       const { dirs, images, archives } = await listDir(id);
       const out: MangaChapter[] = [];
       for (const name of dirs) {
-        out.push({ id: joinPath(id, name), chapter: chapterNumber(name), title: name, pages: 1, language: "en" });
+        out.push({
+          id: joinPath(id, name),
+          chapter: chapterNumber(name),
+          title: name,
+          pages: 1,
+          language: "en",
+        });
       }
       for (const name of archives) {
         out.push({
@@ -136,7 +144,9 @@ export function makeLocalProvider(root: string): MangaProvider {
         const bytes = await readFile(chapterId);
         const { readCbzImages } = await import("./cbz");
         const imgs = (await readCbzImages(bytes)).sort((a, b) => naturalCmp(a.name, b.name));
-        const urls = imgs.map((im) => URL.createObjectURL(new Blob([im.data], { type: mimeFor(im.name) })));
+        const urls = imgs.map((im) =>
+          URL.createObjectURL(new Blob([im.data], { type: mimeFor(im.name) })),
+        );
         cacheBlobs(chapterId, urls);
         return urls;
       }

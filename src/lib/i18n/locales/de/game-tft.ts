@@ -3,13 +3,15 @@ export default {
   "games.tft.intro": "Stelle vor deinem nächsten Match ein Team zusammen.",
   "games.tft.version": "Datenversion {version}",
   "games.tft.refresh": "Referenz aktualisieren",
-  "games.tft.refreshFailed": "Aktualisierung fehlgeschlagen. Die bisherige Referenz bleibt verfügbar.",
+  "games.tft.refreshFailed":
+    "Aktualisierung fehlgeschlagen. Die bisherige Referenz bleibt verfügbar.",
   "games.tft.loadFailed": "Die Champion-Referenz konnte nicht geladen werden.",
   "games.tft.set": "Set",
   "games.tft.current": "Aktuell",
   "games.tft.code": "Teamcode einfügen",
   "games.tft.import": "Importieren",
-  "games.tft.invalidCode": "Dieser Code ist ungültig oder enthält Champions aus einem nicht verfügbaren Set.",
+  "games.tft.invalidCode":
+    "Dieser Code ist ungültig oder enthält Champions aus einem nicht verfügbaren Set.",
   "games.tft.checked": "Geprüft am {date}",
   "games.tft.english": "Spielbeschreibungen sind auf Englisch.",
   "games.tft.yourTeam": "Dein Team",
@@ -19,8 +21,10 @@ export default {
   "games.tft.save": "Team speichern",
   "games.tft.savedTeams": "Gespeicherte Teams",
   "games.tft.delete": "Gespeichertes Team löschen",
-  "games.tft.note": "Jeder Champion wird einmal gezählt. Gegenstände und Sondereffekte können Attribute oder Teamplätze verändern.",
-  "games.tft.saveFailed": "Speichern auf diesem Gerät fehlgeschlagen. Dein aktuelles Team bleibt erhalten.",
+  "games.tft.note":
+    "Jeder Champion wird einmal gezählt. Gegenstände und Sondereffekte können Attribute oder Teamplätze verändern.",
+  "games.tft.saveFailed":
+    "Speichern auf diesem Gerät fehlgeschlagen. Dein aktuelles Team bleibt erhalten.",
   "games.tft.missing": "Einige gespeicherte Champions sind nicht mehr in diesem Set.",
   "games.tft.imported": "Team importiert.",
   "games.tft.full": "Ein Teamcode fasst bis zu 10 verschiedene Champions.",
@@ -54,5 +58,5 @@ export default {
   "games.tft.stat.scaleHPRegen": "Lebensregeneration",
   "games.tft.stat.set14AmpIcon": "Schadensverstärkung",
   "games.tft.stat.TFTManaRegen": "Manaregeneration",
-  "games.tft.stat.scaleSV": "Omnivampir"
+  "games.tft.stat.scaleSV": "Omnivampir",
 };

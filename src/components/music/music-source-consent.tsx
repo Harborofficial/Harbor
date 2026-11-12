@@ -45,7 +45,6 @@ export function MusicSourceConsent() {
     return () => window.removeEventListener(MUSIC_SOURCE_CONSENT_EVENT, show);
   }, [consent]);
 
-
   if (!open) return null;
   const toggle = (source: GatedMusicSource) =>
     setPicked((current) =>

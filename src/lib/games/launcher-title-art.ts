@@ -1,14 +1,24 @@
 /** Exact identities only; original publisher marks are documented with the assets. */
 export function launcherTitleLogo(igdbId?: number): string | undefined {
-  return igdbId === 1595 ? "/games/launchers/star-citizen-logo.svg"
-    : igdbId === 19128 ? "/games/launchers/squadron-42-logo.svg"
-    : igdbId === 1905 ? "/games/publisher/fortnite-logo.svg"
-    : igdbId === 115 ? "/games/publisher/league-logo.png"
-    : igdbId === 120176 ? "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/d0fa540f2c0e641c4bef56ddf0adb86dcf0b5ab0-368x118.svg"
-    : igdbId === 17269 ? "/games/publisher/roblox-logo.svg"
-    : igdbId === 126459 ? "/games/valorant/wordmark.png"
-    : igdbId === 260 ? "https://app-images.ea.com/ps9x41qn6x3c/54nXOJmoe3ufGPsrGbLs0T/ebaef673f7e5cce7d653963ab829c7fb/the-sims-3-ce-m-keyart-logo-en.png"
-    : igdbId === 135400 ? "/games/minecraft/wordmark.svg" : undefined;
+  return igdbId === 1595
+    ? "/games/launchers/star-citizen-logo.svg"
+    : igdbId === 19128
+      ? "/games/launchers/squadron-42-logo.svg"
+      : igdbId === 1905
+        ? "/games/publisher/fortnite-logo.svg"
+        : igdbId === 115
+          ? "/games/publisher/league-logo.png"
+          : igdbId === 120176
+            ? "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/d0fa540f2c0e641c4bef56ddf0adb86dcf0b5ab0-368x118.svg"
+            : igdbId === 17269
+              ? "/games/publisher/roblox-logo.svg"
+              : igdbId === 126459
+                ? "/games/valorant/wordmark.png"
+                : igdbId === 260
+                  ? "https://app-images.ea.com/ps9x41qn6x3c/54nXOJmoe3ufGPsrGbLs0T/ebaef673f7e5cce7d653963ab829c7fb/the-sims-3-ce-m-keyart-logo-en.png"
+                  : igdbId === 135400
+                    ? "/games/minecraft/wordmark.svg"
+                    : undefined;
 }
 
 // Lead scenes inspected October 1, 2026; avoid provider title cards on white.
@@ -35,7 +45,10 @@ const scenes: Readonly<Record<number, string>> = {
 };
 export function launcherSceneArtwork(igdbId?: number): string | undefined {
   // EA's exact Sims3 offer supplies text-free key art; IGDB's first art is a logo card.
-  if (igdbId === 260) return "https://app-images.ea.com/ps9x41qn6x3c/osNEUuWLs4zrlZCYjbl75/78558e20a8dbe733814a543b0e729fa5/the-sims-3-ce-m-keyart-16x9-en.jpg";
+  if (igdbId === 260)
+    return "https://app-images.ea.com/ps9x41qn6x3c/osNEUuWLs4zrlZCYjbl75/78558e20a8dbe733814a543b0e729fa5/the-sims-3-ce-m-keyart-16x9-en.jpg";
   const image = igdbId === undefined ? undefined : scenes[igdbId];
-  return image ? `https://images.igdb.com/igdb/image/upload/t_screenshot_huge/${image}.jpg` : undefined;
+  return image
+    ? `https://images.igdb.com/igdb/image/upload/t_screenshot_huge/${image}.jpg`
+    : undefined;
 }

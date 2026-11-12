@@ -10,12 +10,16 @@ export default {
   "games.calendar.search": "Cerca nei giochi salvati",
   "games.calendar.platform": "Piattaforma di uscita",
   "games.calendar.allPlatforms": "Tutte le piattaforme",
-  "games.calendar.dates": "Le date annunciate dagli editori possono cambiare. Le date di Steam provengono dal negozio statunitense; le voci di IGDB indicano piattaforma e regione.",
-  "games.calendar.noDays": "Nessun gioco verificato ha un giorno di uscita preciso nel mese di {month}.",
+  "games.calendar.dates":
+    "Le date annunciate dagli editori possono cambiare. Le date di Steam provengono dal negozio statunitense; le voci di IGDB indicano piattaforma e regione.",
+  "games.calendar.noDays":
+    "Nessun gioco verificato ha un giorno di uscita preciso nel mese di {month}.",
   "games.calendar.windows": "Periodi di uscita",
-  "games.calendar.windowsNote": "Questi periodi previsti includono questo mese, ma non indicano un giorno preciso.",
+  "games.calendar.windowsNote":
+    "Questi periodi previsti includono questo mese, ma non indicano un giorno preciso.",
   "games.calendar.undated": "Nessuna data confermata",
-  "games.calendar.undatedNote": "Le date non annunciate, non disponibili o non ancora verificate non compaiono nel calendario.",
+  "games.calendar.undatedNote":
+    "Le date non annunciate, non disponibili o non ancora verificate non compaiono nel calendario.",
   "games.calendar.cancelled": "Voci relative a uscite annullate escluse: {count}.",
   "games.calendar.unchecked": "Data non ancora verificata",
   "games.watchlist.note": "Segui le uscite dei tuoi giochi preferiti.",
@@ -34,9 +38,11 @@ export default {
   "games.watchlist.coverage": "Controllati {count} giochi su {total}",
   "games.watchlist.refresh": "Aggiorna le date di uscita",
   "games.watchlist.unavailable": "Data di uscita non disponibile",
-  "games.watchlist.partial": "Non è stato possibile verificare alcune date di uscita. Le informazioni salvate vengono mostrate quando disponibili.",
+  "games.watchlist.partial":
+    "Non è stato possibile verificare alcune date di uscita. Le informazioni salvate vengono mostrate quando disponibili.",
   "games.watchlist.noMatch": "Nessun preferito corrisponde a questi filtri.",
-  "games.watchlist.dateNote": "Le date provengono da Steam e IGDB. Le uscite previste possono cambiare.",
+  "games.watchlist.dateNote":
+    "Le date provengono da Steam e IGDB. Le uscite previste possono cambiare.",
   "games.watchlist.remove": "Rimuovi {name} dai preferiti",
   "games.watchlist.saved": "Informazioni salvate",
   "games.owned.availability": "Su questo dispositivo",
@@ -54,9 +60,12 @@ export default {
   "games.owned.pickHint": "Apri un gioco a caso tra questi risultati.",
   "games.owned.clear": "Azzera i filtri della libreria",
   "games.owned.scanning": "Verifica delle installazioni locali…",
-  "games.owned.scanUnavailable": "Lo stato delle installazioni locali non è disponibile. Aggiorna per verificare questo dispositivo.",
-  "games.owned.partial": "Non è stato possibile verificare alcune cartelle di Steam. Alcune installazioni potrebbero non essere state riconosciute.",
+  "games.owned.scanUnavailable":
+    "Lo stato delle installazioni locali non è disponibile. Aggiorna per verificare questo dispositivo.",
+  "games.owned.partial":
+    "Non è stato possibile verificare alcune cartelle di Steam. Alcune installazioni potrebbero non essere state riconosciute.",
   "games.owned.results": "{count} giochi su {total}",
-  "games.owned.playtimeNote": "La cronologia di gioco proviene dall’ultima sincronizzazione di Steam. L’assenza di tempo di gioco registrato non indica se un gioco è stato completato.",
-  "games.owned.resetAvailability": "Mostra i giochi con qualsiasi stato di installazione"
+  "games.owned.playtimeNote":
+    "La cronologia di gioco proviene dall’ultima sincronizzazione di Steam. L’assenza di tempo di gioco registrato non indica se un gioco è stato completato.",
+  "games.owned.resetAvailability": "Mostra i giochi con qualsiasi stato di installazione",
 };

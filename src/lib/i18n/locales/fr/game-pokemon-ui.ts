@@ -14,8 +14,10 @@ export default {
   "games.pokemon.videosHint": "Solutions et conseils",
   "games.pokemon.bank": "Sauvegardes et Pokémon",
   "games.pokemon.bankHint": "Modifier les sauvegardes et les boîtes",
-  "games.pokemon.bankIntro": "Ouvrez une sauvegarde de votre émulateur pour modifier votre équipe ou importez des Pokémon dans votre collection.",
-  "games.pokemon.guideSourceNote": "Lisez le guide original ou ouvrez-le ici lorsque la source est disponible.",
+  "games.pokemon.bankIntro":
+    "Ouvrez une sauvegarde de votre émulateur pour modifier votre équipe ou importez des Pokémon dans votre collection.",
+  "games.pokemon.guideSourceNote":
+    "Lisez le guide original ou ouvrez-le ici lorsque la source est disponible.",
   "games.pokemon.readGuide": "Lire sur Bulbapedia",
   "games.pokemon.readInside": "Lire dans Harbor",
   "games.pokemon.closeReader": "Fermer le lecteur",
@@ -23,19 +25,25 @@ export default {
   "games.pokemon.imageSaved": "Image de {name} enregistrée",
   "games.pokemon.imageFailed": "Téléchargement impossible. Réessayez.",
   "games.pokemon.saveStart": "Vous utilisez un émulateur ?",
-  "games.pokemon.emulatorSave": "Votre émulateur crée un fichier de sauvegarde lorsque vous sauvegardez depuis le menu du jeu.",
+  "games.pokemon.emulatorSave":
+    "Votre émulateur crée un fichier de sauvegarde lorsque vous sauvegardez depuis le menu du jeu.",
   "games.pokemon.saveStep1": "Ouvrez votre jeu et choisissez Sauvegarder dans son menu.",
-  "games.pokemon.saveStep2": "Fermez le jeu, puis trouvez ou exportez sa sauvegarde de batterie (.sav, .srm ou .dsv).",
-  "games.pokemon.saveStep3": "Choisissez Ouvrir une sauvegarde ci-dessus pour la modifier dans Harbor.",
+  "games.pokemon.saveStep2":
+    "Fermez le jeu, puis trouvez ou exportez sa sauvegarde de batterie (.sav, .srm ou .dsv).",
+  "games.pokemon.saveStep3":
+    "Choisissez Ouvrir une sauvegarde ci-dessus pour la modifier dans Harbor.",
   "games.pokemon.findSave": "Où est ma sauvegarde ?",
-  "games.pokemon.saveLocations": "Cherchez à côté de votre ROM ou dans le dossier de sauvegardes de l’émulateur. Si vous avez seulement un état instantané, chargez-le dans l’émulateur puis sauvegardez depuis le menu du jeu.",
+  "games.pokemon.saveLocations":
+    "Cherchez à côté de votre ROM ou dans le dossier de sauvegardes de l’émulateur. Si vous avez seulement un état instantané, chargez-le dans l’émulateur puis sauvegardez depuis le menu du jeu.",
   "games.pokemon.noSave": "Pas encore de sauvegarde ?",
   "games.pokemon.communitySaves": "Parcourir les sauvegardes communautaires",
-  "games.pokemon.communitySavesNote": "Project Pokémon · Choisissez le jeu exact et lisez les notes du contributeur.",
+  "games.pokemon.communitySavesNote":
+    "Project Pokémon · Choisissez le jeu exact et lisez les notes du contributeur.",
   "games.pokemon.pkhexNote": "Éditeur de sauvegardes, téléchargements et aide des développeurs.",
-  "games.pokemon.noSaveNeeded": "Vous pouvez importer des fichiers Pokémon sans sauvegarde. Une sauvegarde est nécessaire uniquement pour modifier l’équipe ou les boîtes d’un jeu.",
+  "games.pokemon.noSaveNeeded":
+    "Vous pouvez importer des fichiers Pokémon sans sauvegarde. Une sauvegarde est nécessaire uniquement pour modifier l’équipe ou les boîtes d’un jeu.",
   "games.pokemon.videoUnavailable": "Impossible de charger les vidéos ici.",
   "games.pokemon.youtubeSearch": "Rechercher sur YouTube",
   "games.hub.downloadApply": "Télécharger le patch",
-  "games.hub.manualPatch": "Utiliser un patch ou un lien existant"
+  "games.hub.manualPatch": "Utiliser un patch ou un lien existant",
 };

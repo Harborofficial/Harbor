@@ -5,8 +5,7 @@ import { listingTitle, readListing } from "../src/lib/streams/plugins/extension/
 
 test("the title is cut where the provider's own detail starts", () => {
   // The real line, as a provider sends it.
-  const raw =
-    "Zakir Khan: Papa Yaar (2026) WEB-DL Hindi Stand-Up Special and more info ahead";
+  const raw = "Zakir Khan: Papa Yaar (2026) WEB-DL Hindi Stand-Up Special and more info ahead";
   assert.equal(readListing(raw).title, "Zakir Khan: Papa Yaar");
   assert.equal(readListing(raw).year, 2026);
   assert.deepEqual(readListing(raw).languages, ["Hindi"]);
@@ -51,7 +50,10 @@ test("languages are read by whole word, so a provider's own compound name is not
 test("a pair of languages written with a hyphen is two languages", () => {
   // Written as one token, neither half is a language on its own. It is read both ways so that a
   // name containing a hyphen — WEB-DL, Blu-Ray, HD-Rip — is still readable as itself.
-  assert.deepEqual(readListing("Series (2024) {Hindi-English} 1080p").languages, ["Hindi", "English"]);
+  assert.deepEqual(readListing("Series (2024) {Hindi-English} 1080p").languages, [
+    "Hindi",
+    "English",
+  ]);
   assert.deepEqual(readListing("Film (2024) Hindi-English 1080p").languages, ["Hindi", "English"]);
 });
 
@@ -77,7 +79,11 @@ test("a language written twice is one language", () => {
 
 test("a file that says it has several audio tracks is said to, without inventing which", () => {
   for (const wording of ["Multi Audio", "Multi", "Dual Audio", "MultiAudio"]) {
-    assert.deepEqual(readListing(`Film (2020) ${wording} 1080p`).languages, ["Multi audio"], wording);
+    assert.deepEqual(
+      readListing(`Film (2020) ${wording} 1080p`).languages,
+      ["Multi audio"],
+      wording,
+    );
   }
 });
 
@@ -139,7 +145,11 @@ test("a size is read as part of the line rather than as a quality badge", () => 
 test("the punctuation a provider separates a line with does not hide a word", () => {
   // [Hindi] and {Hindi} and Hindi: are the same statement as Hindi.
   for (const wording of ["[Hindi]", "Hindi:", "/Hindi/", "Hindi|"]) {
-    assert.deepEqual(readListing(`Film (2020) 720p ${wording} WEB-DL`).languages, ["Hindi"], wording);
+    assert.deepEqual(
+      readListing(`Film (2020) 720p ${wording} WEB-DL`).languages,
+      ["Hindi"],
+      wording,
+    );
   }
 });
 

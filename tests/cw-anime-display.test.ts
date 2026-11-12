@@ -24,6 +24,21 @@ const META: AnimeKitsuMeta = {
 };
 const lookup = async (metaId: string) => (metaId === "kitsu:45619" ? META : null);
 
+const TYBW_VIDEO = {
+  id: "kitsu:49444:11",
+  title: "GOD OF THUNDER",
+  season: 1,
+  episode: 11,
+  imdbSeason: 4,
+  imdbEpisode: 11,
+};
+const TYBW_META: AnimeKitsuMeta = {
+  id: "kitsu:49444",
+  type: "series",
+  name: "BLEACH: Thousand-Year Blood War",
+  videos: [TYBW_VIDEO],
+};
+
 function item(
   _id: string,
   episode: number,
@@ -97,6 +112,19 @@ test("the resolver finds the Kitsu video for a native anime row", async () => {
   });
 });
 
+test("the played Kitsu stream identifies its own cour on a catalog row", async () => {
+  let seen = "";
+  const courLookup = async (metaId: string) => {
+    seen = metaId;
+    return metaId === "kitsu:49444" ? TYBW_META : null;
+  };
+  const row = item("tt0434665", 11, "kitsu:49444:11");
+  row.state.season = 4;
+  const video = await resolveCwAnimeVideo(row, { season: 4, episode: 11 }, courLookup);
+  assert.equal(seen, "kitsu:49444");
+  assert.equal(video?.id, "kitsu:49444:11");
+});
+
 test("the resolver follows a recorded catalog-to-anime mapping", async () => {
   recordAnimeCwId("tt13706018", "kitsu:45619");
   const video = await resolveCwAnimeVideo(item("tt13706018", 1), { season: 1, episode: 1 }, lookup);
@@ -119,7 +147,11 @@ test("ordinary titles and missing native episodes never fetch anime metadata", a
     return lookup(metaId);
   };
   assert.equal(
-    await resolveCwAnimeVideo(item("tt0133093", 1), { season: 1, episode: 1 }, counting),
+    await resolveCwAnimeVideo(
+      item("tt0133093", 1, "tt0133093:1:1"),
+      { season: 1, episode: 1 },
+      counting,
+    ),
     null,
   );
   assert.equal(await resolveCwAnimeVideo(item("kitsu:45619", 1), null, counting), null);

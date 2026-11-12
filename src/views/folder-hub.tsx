@@ -1,3 +1,4 @@
+import { addonBaseUrl } from "@/lib/addon-url";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, LayoutGrid, List } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -263,7 +264,7 @@ export function FolderHubView({
           const addon = (await loadAddons()).find((a) => a.manifest.id === source.addonId);
           if (!addon) return [];
           return createAddonCatalogFetcher({
-            base: addon.transportUrl.replace(/\/manifest\.json$/, ""),
+            base: addonBaseUrl(addon.transportUrl),
             type: source.type,
             id: source.catalogId,
           })(page, loaded);

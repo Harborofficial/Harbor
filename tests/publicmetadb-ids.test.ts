@@ -8,11 +8,7 @@ import {
   resolvePmdbTarget,
   stremioIdToPmdbTarget,
 } from "../src/lib/publicmetadb/ids.ts";
-import {
-  getSession,
-  setSession,
-  updateSessionUsername,
-} from "../src/lib/publicmetadb/session.ts";
+import { getSession, setSession, updateSessionUsername } from "../src/lib/publicmetadb/session.ts";
 
 test("stremioIdToPmdbTarget resolves TMDB movie IDs", () => {
   assert.deepEqual(stremioIdToPmdbTarget("tmdb:movie:550", undefined, "movie"), {
@@ -27,15 +23,12 @@ test("stremioIdToPmdbTarget resolves TMDB TV show and episode IDs", () => {
     media_type: "tv",
   });
 
-  assert.deepEqual(
-    stremioIdToPmdbTarget("tmdb:tv:1399", { season: 1, episode: 1 }, "series"),
-    {
-      tmdb_id: 1399,
-      media_type: "tv",
-      season: 1,
-      episode: 1,
-    },
-  );
+  assert.deepEqual(stremioIdToPmdbTarget("tmdb:tv:1399", { season: 1, episode: 1 }, "series"), {
+    tmdb_id: 1399,
+    media_type: "tv",
+    season: 1,
+    episode: 1,
+  });
 
   assert.deepEqual(stremioIdToPmdbTarget("tmdb:tv:1399:2:5"), {
     tmdb_id: 1399,
@@ -58,16 +51,13 @@ test("stremioIdToPmdbTarget resolves IMDb IDs for movies and series", () => {
     media_type: "tv",
   });
 
-  assert.deepEqual(
-    stremioIdToPmdbTarget("tt0903747", { season: 2, episode: 4 }, "series"),
-    {
-      id_type: "imdb",
-      id_value: "tt0903747",
-      media_type: "tv",
-      season: 2,
-      episode: 4,
-    },
-  );
+  assert.deepEqual(stremioIdToPmdbTarget("tt0903747", { season: 2, episode: 4 }, "series"), {
+    id_type: "imdb",
+    id_value: "tt0903747",
+    media_type: "tv",
+    season: 2,
+    episode: 4,
+  });
 
   assert.deepEqual(stremioIdToPmdbTarget("tt0903747:1:1"), {
     id_type: "imdb",
@@ -124,37 +114,28 @@ function stubOfflineAniZip() {
 test("resolvePmdbEpisodeTarget resolves direct TMDB, IMDb, and MAL episodes", async () => {
   const restore = stubOfflineAniZip();
   try {
-    assert.deepEqual(
-      await resolvePmdbEpisodeTarget("tmdb:tv:1399", { season: 1, episode: 1 }),
-      {
-        tmdb_id: 1399,
-        media_type: "tv",
-        season: 1,
-        episode: 1,
-      },
-    );
+    assert.deepEqual(await resolvePmdbEpisodeTarget("tmdb:tv:1399", { season: 1, episode: 1 }), {
+      tmdb_id: 1399,
+      media_type: "tv",
+      season: 1,
+      episode: 1,
+    });
 
-    assert.deepEqual(
-      await resolvePmdbEpisodeTarget("tt0903747", { season: 3, episode: 2 }),
-      {
-        id_type: "imdb",
-        id_value: "tt0903747",
-        media_type: "tv",
-        season: 3,
-        episode: 2,
-      },
-    );
+    assert.deepEqual(await resolvePmdbEpisodeTarget("tt0903747", { season: 3, episode: 2 }), {
+      id_type: "imdb",
+      id_value: "tt0903747",
+      media_type: "tv",
+      season: 3,
+      episode: 2,
+    });
 
-    assert.deepEqual(
-      await resolvePmdbEpisodeTarget("mal:21", { season: 1, episode: 7 }),
-      {
-        id_type: "mal",
-        id_value: "21",
-        media_type: "tv",
-        season: 1,
-        episode: 7,
-      },
-    );
+    assert.deepEqual(await resolvePmdbEpisodeTarget("mal:21", { season: 1, episode: 7 }), {
+      id_type: "mal",
+      id_value: "21",
+      media_type: "tv",
+      season: 1,
+      episode: 7,
+    });
   } finally {
     restore();
   }
@@ -274,7 +255,10 @@ test("resolvePmdbEpisodeTarget maps anime cour episodes to canonical TMDB series
       id_value: "tt13706018",
     });
 
-    const anilistTarget = await resolvePmdbEpisodeTarget("anilist:142838", { season: 1, episode: 1 });
+    const anilistTarget = await resolvePmdbEpisodeTarget("anilist:142838", {
+      season: 1,
+      episode: 1,
+    });
     assert.deepEqual(anilistTarget, {
       tmdb_id: 120089,
       media_type: "tv",
@@ -391,42 +375,68 @@ test("resolvePmdbEpisodeTarget preserves season for normal multi-season anime", 
 
 test("whole-show AniZip mappings cannot turn canonical S2E1 into S1E1", async () => {
   const original = globalThis.fetch;
-  globalThis.fetch = async () => new Response(JSON.stringify({
-    mappings: { themoviedb_id: 1429, imdb_id: "tt2560140" },
-    episodes: {
-      "1": { seasonNumber: 1, episodeNumber: 1, absoluteEpisodeNumber: 1 },
-      "26": { seasonNumber: 2, episodeNumber: 1, absoluteEpisodeNumber: 26 },
-    },
-  }), { headers: { "content-type": "application/json" } });
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        mappings: { themoviedb_id: 1429, imdb_id: "tt2560140" },
+        episodes: {
+          "1": { seasonNumber: 1, episodeNumber: 1, absoluteEpisodeNumber: 1 },
+          "26": { seasonNumber: 2, episodeNumber: 1, absoluteEpisodeNumber: 26 },
+        },
+      }),
+      { headers: { "content-type": "application/json" } },
+    );
   try {
     for (const id of ["tt2560140", "tmdb:tv:1429"]) {
-      const target = await resolvePmdbEpisodeTarget(id, {
-        season: 2, episode: 1, imdbSeason: 2, imdbEpisode: 1, absoluteNumber: 26,
-      }, "tt2560140");
+      const target = await resolvePmdbEpisodeTarget(
+        id,
+        {
+          season: 2,
+          episode: 1,
+          imdbSeason: 2,
+          imdbEpisode: 1,
+          absoluteNumber: 26,
+        },
+        "tt2560140",
+      );
       assert.equal(target?.season, 2);
       assert.equal(target?.episode, 1);
     }
-  } finally { globalThis.fetch = original; }
+  } finally {
+    globalThis.fetch = original;
+  }
 });
 
 test("verified canonical coordinates take precedence over conflicting anime entry coordinates", async () => {
   const original = globalThis.fetch;
-  globalThis.fetch = async () => new Response(JSON.stringify({
-    mappings: { themoviedb_id: 1429, imdb_id: "tt2560140" },
-    episodes: { "1": { seasonNumber: 1, episodeNumber: 1 } },
-  }), { headers: { "content-type": "application/json" } });
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        mappings: { themoviedb_id: 1429, imdb_id: "tt2560140" },
+        episodes: { "1": { seasonNumber: 1, episodeNumber: 1 } },
+      }),
+      { headers: { "content-type": "application/json" } },
+    );
   try {
     const target = await resolvePmdbEpisodeTarget("kitsu:998877", {
-      season: 1, episode: 1, imdbSeason: 2, imdbEpisode: 1,
+      season: 1,
+      episode: 1,
+      imdbSeason: 2,
+      imdbEpisode: 1,
     });
     assert.equal(target?.season, 2);
     assert.equal(target?.episode, 1);
-  } finally { globalThis.fetch = original; }
+  } finally {
+    globalThis.fetch = original;
+  }
 });
 
 test("direct series targets preserve verified canonical coordinates without an absolute number", async () => {
   const target = await resolvePmdbEpisodeTarget("tt2560140", {
-    season: 1, episode: 1, imdbSeason: 2, imdbEpisode: 1,
+    season: 1,
+    episode: 1,
+    imdbSeason: 2,
+    imdbEpisode: 1,
   });
   assert.equal(target?.season, 2);
   assert.equal(target?.episode, 1);
@@ -436,12 +446,20 @@ test("IMDb episodes preserve canonical coordinates when AniZip is unavailable", 
   const restore = stubOfflineAniZip();
   try {
     const target = await resolvePmdbEpisodeTarget("tt9988776655", {
-      season: 1, episode: 1, imdbSeason: 2, imdbEpisode: 1, absoluteNumber: 26,
+      season: 1,
+      episode: 1,
+      imdbSeason: 2,
+      imdbEpisode: 1,
+      absoluteNumber: 26,
     });
     assert.deepEqual(target, {
-      id_type: "imdb", id_value: "tt9988776655", media_type: "tv", season: 2, episode: 1,
+      id_type: "imdb",
+      id_value: "tt9988776655",
+      media_type: "tv",
+      season: 2,
+      episode: 1,
     });
-  } finally { restore(); }
+  } finally {
+    restore();
+  }
 });
-
-

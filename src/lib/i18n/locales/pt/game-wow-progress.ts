@@ -14,6 +14,6 @@ const gameWowProgress: Record<string, string> = {
   "games.wow.progress.noCounts": "Contagem de runs indisponível",
   "games.wow.progress.counts": "{total} runs · {timed} no tempo",
   "games.wow.progress.best": "Melhor run",
-  "games.wow.progress.explore": "Explorar runs"
+  "games.wow.progress.explore": "Explorar runs",
 };
 export default gameWowProgress;

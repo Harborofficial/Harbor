@@ -57,7 +57,11 @@ export function ModeStrip({
   const firstUrl = useRef(pages[0]);
   const firstDir = useRef(horizontal);
   const firstRtl = useRef(rtl);
-  if (firstUrl.current !== pages[0] || firstDir.current !== horizontal || firstRtl.current !== rtl) {
+  if (
+    firstUrl.current !== pages[0] ||
+    firstDir.current !== horizontal ||
+    firstRtl.current !== rtl
+  ) {
     firstUrl.current = pages[0];
     firstDir.current = horizontal;
     firstRtl.current = rtl;
@@ -73,9 +77,7 @@ export function ModeStrip({
         if (performance.now() < quietUntil.current) return;
         if (performance.now() - lastScrollSend.current < OBSERVER_FALLBACK_MS) return;
         const rRoot = root.getBoundingClientRect();
-        const center = horizontal
-          ? rRoot.left + rRoot.width / 2
-          : rRoot.top + rRoot.height / 2;
+        const center = horizontal ? rRoot.left + rRoot.width / 2 : rRoot.top + rRoot.height / 2;
         for (const e of entries) {
           if (!e.isIntersecting) continue;
           const box = (e.target as HTMLElement).getBoundingClientRect();
@@ -118,9 +120,7 @@ export function ModeStrip({
       if (now - last < 50 || now < quietUntil.current) return;
       last = now;
       const rRoot = root.getBoundingClientRect();
-      const center = horizontal
-        ? rRoot.left + rRoot.width / 2
-        : rRoot.top + rRoot.height / 2;
+      const center = horizontal ? rRoot.left + rRoot.width / 2 : rRoot.top + rRoot.height / 2;
       for (let i = 0; i < els.current.length; i++) {
         const el = els.current[i];
         if (!el) continue;
@@ -214,7 +214,11 @@ export function ModeStrip({
       ref={rootRef}
       dir={horizontal ? (rtl ? "rtl" : "ltr") : undefined}
       className={`h-full w-full overscroll-contain ${
-        horizontal ? "overflow-x-auto" : zoomed ? "overflow-x-auto overflow-y-auto" : "overflow-y-auto"
+        horizontal
+          ? "overflow-x-auto"
+          : zoomed
+            ? "overflow-x-auto overflow-y-auto"
+            : "overflow-y-auto"
       }`}
       style={onZoom ? { touchAction: "pan-x pan-y" } : undefined}
       onClick={onRootClick}

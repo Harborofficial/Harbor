@@ -75,10 +75,14 @@ export function WhisperModelRow() {
   const description = checking
     ? t("Checking speech model…")
     : !supported
-      ? t("Whisper is not included in this build. Install a Windows Harbor build with Whisper support.")
+      ? t(
+          "Whisper is not included in this build. Install a Windows Harbor build with Whisper support.",
+        )
       : installed
         ? t("Installed locally. The model is used for difficult subtitle sync attempts.")
-        : t("Optional one-time download. Speech recognition runs on your device; the model is kept between app updates.");
+        : t(
+            "Optional one-time download. Speech recognition runs on your device; the model is kept between app updates.",
+          );
 
   return (
     <>
@@ -107,7 +111,11 @@ export function WhisperModelRow() {
         </p>
       )}
       {busy === "download" && (
-        <div role="status" aria-live="polite" className="flex flex-col gap-1.5 ps-4 text-[13px] text-ink-muted">
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex flex-col gap-1.5 ps-4 text-[13px] text-ink-muted"
+        >
           <span>
             {progress
               ? percentage !== null
@@ -116,7 +124,12 @@ export function WhisperModelRow() {
               : t("Connecting to model server…")}
           </span>
           {percentage !== null && (
-            <progress value={percentage} max={100} aria-label={t("Whisper model download progress")} className="h-2 w-full max-w-[440px]" />
+            <progress
+              value={percentage}
+              max={100}
+              aria-label={t("Whisper model download progress")}
+              className="h-2 w-full max-w-[440px]"
+            />
           )}
         </div>
       )}

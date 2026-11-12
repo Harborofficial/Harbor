@@ -196,7 +196,8 @@ const catalog05: Record<string, string> = {
   "Fast Hands": "Szybkie ręce",
   "Fast Mouth": "Cięty język",
   "Fast · recommended for chapters": "Szybki · zalecany do rozdziałów",
-  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.": "Szybszy i cichszy niż P2P, jeśli już opłacasz Usenet. Skonfiguruj go na stronie dodatku i wklej zwrócony adres URL manifestu.",
+  "Faster and quieter than P2P if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.":
+    "Szybszy i cichszy niż P2P, jeśli już opłacasz Usenet. Skonfiguruj go na stronie dodatku i wklej zwrócony adres URL manifestu.",
   "Favicon must be an https URL.": "Favicon musi być adresem URL https.",
   "Favorite Anime": "Ulubione anime",
   "Favorite Characters": "Ulubione postacie",
@@ -231,7 +232,8 @@ const catalog05: Record<string, string> = {
   Feishin: "Feishin",
   "Fetches DuckDuckGo results and feeds top hits into the model prompt.":
     "Pobiera wyniki z DuckDuckGo i dodaje najlepsze trafienia do promptu modelu.",
-  "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.": "Pobiera mały publiczny plik testowy przez P2P, a następnie krok po kroku sprawdza wychodzące połączenia UDP i HTTPS, inicjalizację DHT oraz dostępność trackera.",
+  "Fetches a small public test file over P2P, then reports UDP and HTTPS egress, DHT bootstrap and tracker reachability step by step.":
+    "Pobiera mały publiczny plik testowy przez P2P, a następnie krok po kroku sprawdza wychodzące połączenia UDP i HTTPS, inicjalizację DHT oraz dostępność trackera.",
   "Fetching library index…": "Pobieranie indeksu biblioteki…",
   "Fetching…": "Pobieranie…",
   Fiction: "Literatura piękna",
@@ -719,7 +721,8 @@ const catalog05: Record<string, string> = {
   "Hand-tuned colors. Edit them in the section above.":
     "Ręcznie dobrane kolory. Możesz je edytować w sekcji powyżej.",
   Handle: "Identyfikator",
-  "Handles P2P playback and transcoding for this machine.": "Obsługuje odtwarzanie P2P i transkodowanie na tym urządzeniu.",
+  "Handles P2P playback and transcoding for this machine.":
+    "Obsługuje odtwarzanie P2P i transkodowanie na tym urządzeniu.",
   "Hang tight, won't be a sec.": "Chwila, to potrwa tylko moment.",
   "Hangout Comedy": "Komedie o wspólnym spędzaniu czasu",
   "Harbor Rank scores a whole career, not a single hit. Four things move a rank: how good the work is on average, how much of it earned wide acclaim, the major awards it won, and how often the person carried the work as a lead. Each pillar is weighted, added up, then adjusted for the breadth and recency of the body of work. Every number that feeds a score is shown on the card, so you can always see why.":

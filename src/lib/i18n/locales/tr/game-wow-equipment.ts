@@ -3,7 +3,8 @@ export default {
   "games.wow.equipment.none": "Kayıt yok",
   "games.wow.equipment.detailsUnavailable": "Ayrıntılar kullanılamıyor",
   "games.wow.equipment.unavailable": "Bu karakterin ekipmanı kullanılamıyor.",
-  "games.wow.equipment.note": "Raider.IO’nun son güncellemesindeki ekipman. Mevcut donanımını oyun içinde kontrol et.",
+  "games.wow.equipment.note":
+    "Raider.IO’nun son güncellemesindeki ekipman. Mevcut donanımını oyun içinde kontrol et.",
   "games.wow.equipment.partial": "Kuşanılmış bazı eşyalar okunamadı.",
   "games.wow.equipment.level": "Eşya seviyesi {level}",
   "games.wow.equipment.gems": "Mücevherler",
@@ -25,5 +26,5 @@ export default {
   "games.wow.equipment.mainhand": "Ana el",
   "games.wow.equipment.offhand": "İkinci el",
   "games.wow.equipment.shirt": "Gömlek",
-  "games.wow.equipment.tabard": "Tabard"
+  "games.wow.equipment.tabard": "Tabard",
 };

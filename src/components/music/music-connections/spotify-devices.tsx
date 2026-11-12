@@ -46,7 +46,9 @@ export function SpotifyPlaybackTarget({ onPaired }: { onPaired?: () => void }) {
         if (current) setLocalReady(status.playbackReady);
       })
       .catch(() => {});
-    return () => { current = false; };
+    return () => {
+      current = false;
+    };
   }, []);
 
   const choose = (device: string | null) => {
@@ -66,9 +68,7 @@ export function SpotifyPlaybackTarget({ onPaired }: { onPaired?: () => void }) {
           <p className="text-[13px] font-semibold leading-6 text-ink">
             {t("music.spotifyDevices.title")}
           </p>
-          <p className="text-[13px] leading-5 text-ink-muted">
-            {t("music.spotifyDevices.body")}
-          </p>
+          <p className="text-[13px] leading-5 text-ink-muted">{t("music.spotifyDevices.body")}</p>
           <p className="mt-1 text-[12px] font-medium text-ink-muted" role="status">
             {t(
               localReady === null
@@ -86,7 +86,11 @@ export function SpotifyPlaybackTarget({ onPaired }: { onPaired?: () => void }) {
           className="inline-flex min-h-11 items-center gap-2 rounded-full border border-edge px-4 text-[12px] font-medium text-ink hover:bg-elevated disabled:opacity-40"
         >
           {loading ? (
-            <LoaderCircle size={16} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            <LoaderCircle
+              size={16}
+              className="animate-spin motion-reduce:animate-none"
+              aria-hidden="true"
+            />
           ) : (
             <RotateCcw size={16} aria-hidden="true" />
           )}
@@ -105,7 +109,9 @@ export function SpotifyPlaybackTarget({ onPaired }: { onPaired?: () => void }) {
             <span className="min-w-0 flex-1 truncate text-[13px] text-ink">
               {t("music.spotifyDevices.harbor")}
             </span>
-            {target === null && <Check size={17} aria-hidden="true" className="shrink-0 text-ink" />}
+            {target === null && (
+              <Check size={17} aria-hidden="true" className="shrink-0 text-ink" />
+            )}
           </button>
         </li>
         {devices.map((device) => (

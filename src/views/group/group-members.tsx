@@ -66,7 +66,9 @@ export function GroupMembers({
           </span>
         </button>
       )}
-      {error && <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
+      {error && (
+        <p className="rounded-md bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>
+      )}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {ordered.map((m, i) => (
           <MemberCard
@@ -112,7 +114,11 @@ function MemberCard({
   const editableRole = canManageRoles && member.role !== "owner" && ROLE_RANK[member.role] < myRank;
   return (
     <div
-      style={{ animationDelay: `${Math.min(index * 30, 300)}ms`, animationDuration: "400ms", animationFillMode: "both" }}
+      style={{
+        animationDelay: `${Math.min(index * 30, 300)}ms`,
+        animationDuration: "400ms",
+        animationFillMode: "both",
+      }}
       className="group/member flex items-center gap-3 rounded-lg bg-surface p-3 ring-1 ring-edge-soft transition-colors hover:bg-elevated motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1"
     >
       <UserHoverCard handle={member.handle}>
@@ -123,7 +129,9 @@ function MemberCard({
         >
           <Avatar src={member.avatarUrl} size={42} online={member.online} alias={member.alias} />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13.5px] font-semibold text-ink">{member.alias}</span>
+            <span className="block truncate text-[13.5px] font-semibold text-ink">
+              {member.alias}
+            </span>
             <span className="block truncate text-[12px] text-ink-subtle">
               {member.slogan || `@${member.handle}`}
             </span>

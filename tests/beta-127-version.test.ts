@@ -6,11 +6,15 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
-test("beta 0.9.128 version metadata and offline notes agree", () => {
-  assert.equal(JSON.parse(read("package.json")).version, "0.9.128");
-  assert.equal(JSON.parse(read("src-tauri/tauri.conf.json")).version, "0.9.128");
-  assert.match(read("src-tauri/Cargo.toml"), /version = "0\.9\.128"/);
-  assert.match(read("src-tauri/Cargo.lock"), /name = "harbor"\r?\nversion = "0\.9\.128"/);
+test("version metadata agrees and the beta 0.9.128 offline notes remain", () => {
+  const version = JSON.parse(read("package.json")).version;
+  const escaped = version.replace(/\./g, "\\.");
+  assert.equal(JSON.parse(read("src-tauri/tauri.conf.json")).version, version);
+  assert.match(read("src-tauri/Cargo.toml"), new RegExp(`^version = "${escaped}"$`, "m"));
+  assert.match(
+    read("src-tauri/Cargo.lock"),
+    new RegExp(`name = "harbor"\\r?\\nversion = "${escaped}"`),
+  );
   const notes = JSON.parse(read("src/lib/updater/bundled-release-notes.json")).notes;
   assert.equal(notes["0.9.128"].title, "Harbor Beta 0.9.128");
   assert.ok(notes["0.9.127"]);

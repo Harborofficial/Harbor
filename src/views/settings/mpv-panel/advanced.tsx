@@ -15,7 +15,9 @@ export function AdvancedMpvSection() {
   return (
     <Section
       title={t("Advanced (mpv.conf)")}
-      subtitle={t("Enter one mpv option per line, such as brightness=5. These override the video settings on other pages. Incorrect options can affect playback. Restart playback to apply changes.")}
+      subtitle={t(
+        "Enter one mpv option per line, such as brightness=5. These override the video settings on other pages. Incorrect options can affect playback. Restart playback to apply changes.",
+      )}
     >
       <textarea
         value={value}
@@ -26,26 +28,38 @@ export function AdvancedMpvSection() {
         placeholder={"tone-mapping=hable\ninverse-tone-mapping=yes\nbrightness=5\nsub-scale=1.2"}
         className="block w-full resize-y rounded-[10px] border border-edge-soft bg-elevated px-4 py-3 font-mono text-[15.5px] leading-[22px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       />
-      <p role="status" className="flex max-w-[70ch] flex-wrap items-center gap-x-4 gap-y-1 text-[15.5px] leading-[22px]">
+      <p
+        role="status"
+        className="flex max-w-[70ch] flex-wrap items-center gap-x-4 gap-y-1 text-[15.5px] leading-[22px]"
+      >
         {check.valid > 0 && (
           <span className="font-medium text-success">
-            {check.valid === 1 ? t("1 option formatted correctly") : t("{n} options formatted correctly", { n: check.valid })}
+            {check.valid === 1
+              ? t("1 option formatted correctly")
+              : t("{n} options formatted correctly", { n: check.valid })}
           </span>
         )}
         {check.skipped > 0 && (
           <span className="text-ink-subtle">
-            {check.skipped === 1 ? t("1 line skipped (not valid)") : t("{n} lines skipped (not valid)", { n: check.skipped })}
+            {check.skipped === 1
+              ? t("1 line skipped (not valid)")
+              : t("{n} lines skipped (not valid)", { n: check.skipped })}
           </span>
         )}
         {check.valid === 0 && check.skipped === 0 && (
-          <span className="text-ink-subtle">{t("No custom options. Harbor uses your video settings.")}</span>
+          <span className="text-ink-subtle">
+            {t("No custom options. Harbor uses your video settings.")}
+          </span>
         )}
       </p>
       {check.risky.length > 0 && (
         <RowNote>
-          {t("Heads up: {keys} can load outside scripts or open your player to the network. Only keep these if you know exactly what they do.", {
-            keys: check.risky.join(", "),
-          })}
+          {t(
+            "Heads up: {keys} can load outside scripts or open your player to the network. Only keep these if you know exactly what they do.",
+            {
+              keys: check.risky.join(", "),
+            },
+          )}
         </RowNote>
       )}
       {compiled && (

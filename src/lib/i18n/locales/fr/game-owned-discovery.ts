@@ -5,17 +5,20 @@ export default {
   "games.save": "Ajouter aux favoris",
   "games.calendar.source": "Jeux enregistrés",
   "games.calendar.hint": "Dates de sortie de vos jeux enregistrés",
-  "games.calendar.note": "Planifiez vos prochaines parties selon les sorties de vos jeux enregistrés.",
+  "games.calendar.note":
+    "Planifiez vos prochaines parties selon les sorties de vos jeux enregistrés.",
   "games.calendar.empty": "Enregistrez un jeu dans Jeux pour suivre ici sa sortie prévue.",
   "games.calendar.search": "Rechercher dans les jeux enregistrés",
   "games.calendar.platform": "Plateforme de sortie",
   "games.calendar.allPlatforms": "Toutes les plateformes",
-  "games.calendar.dates": "Les dates annoncées par les éditeurs peuvent changer. Les dates Steam proviennent du magasin américain ; les entrées IGDB indiquent leur plateforme et leur région.",
+  "games.calendar.dates":
+    "Les dates annoncées par les éditeurs peuvent changer. Les dates Steam proviennent du magasin américain ; les entrées IGDB indiquent leur plateforme et leur région.",
   "games.calendar.noDays": "Aucun jeu vérifié n’a de jour de sortie précis en {month}.",
   "games.calendar.windows": "Périodes de sortie",
   "games.calendar.windowsNote": "Ces périodes prévues incluent ce mois, sans préciser de jour.",
   "games.calendar.undated": "Aucune date confirmée",
-  "games.calendar.undatedNote": "Les dates non annoncées, indisponibles ou non vérifiées ne figurent pas dans le calendrier.",
+  "games.calendar.undatedNote":
+    "Les dates non annoncées, indisponibles ou non vérifiées ne figurent pas dans le calendrier.",
   "games.calendar.cancelled": "Entrées de sorties annulées exclues : {count}.",
   "games.calendar.unchecked": "Date pas encore vérifiée",
   "games.watchlist.note": "Suivez les sorties de vos jeux favoris.",
@@ -34,9 +37,11 @@ export default {
   "games.watchlist.coverage": "{count} jeux vérifiés sur {total}",
   "games.watchlist.refresh": "Actualiser les dates de sortie",
   "games.watchlist.unavailable": "Date de sortie indisponible",
-  "games.watchlist.partial": "Certaines dates de sortie n’ont pas pu être vérifiées. Les informations enregistrées sont affichées lorsqu’elles sont disponibles.",
+  "games.watchlist.partial":
+    "Certaines dates de sortie n’ont pas pu être vérifiées. Les informations enregistrées sont affichées lorsqu’elles sont disponibles.",
   "games.watchlist.noMatch": "Aucun favori ne correspond à ces filtres.",
-  "games.watchlist.dateNote": "Les dates proviennent de Steam et d’IGDB. Les dates de sortie prévues peuvent changer.",
+  "games.watchlist.dateNote":
+    "Les dates proviennent de Steam et d’IGDB. Les dates de sortie prévues peuvent changer.",
   "games.watchlist.remove": "Retirer {name} des favoris",
   "games.watchlist.saved": "Informations enregistrées",
   "games.owned.availability": "Sur cet appareil",
@@ -54,9 +59,12 @@ export default {
   "games.owned.pickHint": "Ouvrir un jeu au hasard parmi ces résultats.",
   "games.owned.clear": "Effacer les filtres de la bibliothèque",
   "games.owned.scanning": "Vérification des installations locales…",
-  "games.owned.scanUnavailable": "L’état des installations locales est indisponible. Actualisez pour vérifier cet appareil.",
-  "games.owned.partial": "Certains dossiers Steam n’ont pas pu être vérifiés. Certaines installations peuvent ne pas être reconnues.",
+  "games.owned.scanUnavailable":
+    "L’état des installations locales est indisponible. Actualisez pour vérifier cet appareil.",
+  "games.owned.partial":
+    "Certains dossiers Steam n’ont pas pu être vérifiés. Certaines installations peuvent ne pas être reconnues.",
   "games.owned.results": "{count} jeux sur {total}",
-  "games.owned.playtimeNote": "L’historique de jeu provient de la dernière synchronisation Steam. L’absence de temps de jeu enregistré n’indique pas si un jeu est terminé.",
-  "games.owned.resetAvailability": "Afficher les jeux quel que soit leur état d’installation"
+  "games.owned.playtimeNote":
+    "L’historique de jeu provient de la dernière synchronisation Steam. L’absence de temps de jeu enregistré n’indique pas si un jeu est terminé.",
+  "games.owned.resetAvailability": "Afficher les jeux quel que soit leur état d’installation",
 };

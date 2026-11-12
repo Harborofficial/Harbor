@@ -18,12 +18,15 @@ const gameRoms: Record<string, string> = {
   "games.roms.creators": "Прохождения авторов",
   "games.roms.watchVideo": "Смотреть видео",
   "games.roms.noVideos": "Для этих игр пока нет видео.",
-  "games.roms.libraryNote": "Добавьте свои игры. Импортируйте файлы, выберите эмулятор и соберите коллекцию вместе.",
+  "games.roms.libraryNote":
+    "Добавьте свои игры. Импортируйте файлы, выберите эмулятор и соберите коллекцию вместе.",
   "games.roms.openLibrary": "Открыть библиотеку",
   "games.roms.downloadCharts": "Самые скачиваемые ROM-хаки",
-  "games.roms.downloadChartsNote": "Загрузки патчей за всё время на Romhack Plaza. Автор, версия и требования указаны на странице проекта.",
+  "games.roms.downloadChartsNote":
+    "Загрузки патчей за всё время на Romhack Plaza. Автор, версия и требования указаны на странице проекта.",
   "games.roms.downloadCount": "Загрузок: {count}",
-  "games.roms.chartUnavailable": "Рейтинг загрузок сейчас недоступен. Вы всё ещё можете открыть Romhack Plaza.",
+  "games.roms.chartUnavailable":
+    "Рейтинг загрузок сейчас недоступен. Вы всё ещё можете открыть Romhack Plaza.",
   "games.roms.allPlatforms": "Все платформы",
   "games.roms.moreReleases": "Показать больше выпусков",
   "games.roms.fewerReleases": "Показать меньше выпусков",
@@ -59,14 +62,16 @@ const gameRoms: Record<string, string> = {
   "games.roms.noCollection": "На выбранной консоли пока нет игр, подходящих под эту подборку.",
   "games.roms.community": "Создано сообществом",
   "games.roms.hacksTitle": "Знакомая игра. Другое приключение.",
-  "games.roms.hacksNote": "Находите ROM-хаки, узнавайте, на каких оригинальных играх они основаны, и готовьте свою копию с патчем к игре.",
+  "games.roms.hacksNote":
+    "Находите ROM-хаки, узнавайте, на каких оригинальных играх они основаны, и готовьте свою копию с патчем к игре.",
   "games.roms.catalogNote": "Изучайте каталог по консолям, жанрам, периоду выхода и сериям.",
   "games.roms.genre": "Жанр",
   "games.roms.allGenres": "Все жанры",
   "games.roms.era": "Период выхода",
   "games.roms.reset": "Сбросить фильтры",
   "games.roms.empty": "Попробуйте другое название или расширьте фильтры для этой консоли.",
-  "games.roms.source": "Метаданные игр и связи между ними предоставлены IGDB. Импортируйте локальные файлы, чтобы играть в поддерживаемые игры в Harbor.",
+  "games.roms.source":
+    "Метаданные игр и связи между ними предоставлены IGDB. Импортируйте локальные файлы, чтобы играть в поддерживаемые игры в Harbor.",
   "games.roms.playerScore": "Оценка игроков IGDB · оценок: {count}",
   "games.roms.combinedScore": "Общая оценка IGDB · оценок: {count}",
   "games.roms.sort.discussed": "Больше всего оценок",

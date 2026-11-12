@@ -19,7 +19,8 @@ export default {
   "games.wow.weekly.shown": "Bu listedeki koşular: {count}",
   "games.wow.weekly.partial": "Bazı kayıtlı koşular doğrulanamadı.",
   "games.wow.weekly.empty": "Bu sıfırlamada kayıtlı koşu yok.",
-  "games.wow.weekly.scope": "Raider.IO, her sıfırlama için mevcut sezonun en yüksek 10 anahtarına kadar listeler. Yeni koşuların görünmesi zaman alabilir.",
+  "games.wow.weekly.scope":
+    "Raider.IO, her sıfırlama için mevcut sezonun en yüksek 10 anahtarına kadar listeler. Yeni koşuların görünmesi zaman alabilir.",
   "games.helldivers.title": "Galaktik Savaş",
   "games.helldivers.intro": "Sonraki iniş noktanı seç.",
   "games.helldivers.refresh": "Galaktik Savaşı yenile",
@@ -77,20 +78,24 @@ export default {
   "games.warhammer.all": "Tümü",
   "games.warhammer.play": "Olarak oyna",
   "games.warhammer.face": "Karşı savaş",
-  "games.warhammer.unavailable": "Oyunlar yenilenemedi. Önceden yüklenen kayıtlar gösterilmeye devam edebilir.",
+  "games.warhammer.unavailable":
+    "Oyunlar yenilenemedi. Önceden yüklenen kayıtlar gösterilmeye devam edebilir.",
   "games.warhammer.partial": "Bazı oyunlara ulaşılamıyor.",
   "games.warhammer.empty": "Bu rol için henüz doğrulanmış bağlantı yok.",
   "games.warhammer.scope": "Her taraf için bir başlangıç noktası. Tam kataloğu aşağıda keşfet.",
   "games.warhammer.evidence": "{name} için yayıncı bilgileri",
   "games.warhammer.crossover": "40K / Age of Sigmar ortak evreni",
   "games.warhammer.faction.marines": "Space Marines",
-  "games.warhammer.lore.marines": "İnsanlığın zırhlı şampiyonları, ayrı birlikler halinde örgütlenir.",
+  "games.warhammer.lore.marines":
+    "İnsanlığın zırhlı şampiyonları, ayrı birlikler halinde örgütlenir.",
   "games.warhammer.faction.mechanicus": "Adeptus Mechanicus",
-  "games.warhammer.lore.mechanicus": "İmparatorluğun makinelere tapan rahipleri kadim teknolojileri korur.",
+  "games.warhammer.lore.mechanicus":
+    "İmparatorluğun makinelere tapan rahipleri kadim teknolojileri korur.",
   "games.warhammer.faction.necrons": "Necronlar",
   "games.warhammer.lore.necrons": "Kadim hanedanlar canlı metalden bedenlerde uyanır.",
   "games.warhammer.faction.orks": "Orklar",
-  "games.warhammer.lore.orks": "Savaş tutkunu yeşil derililer ve savaş için yapılmış derme çatma makineleri.",
+  "games.warhammer.lore.orks":
+    "Savaş tutkunu yeşil derililer ve savaş için yapılmış derme çatma makineleri.",
   "games.warhammer.faction.tyranids": "Tyranidler",
   "games.warhammer.lore.tyranids": "Bütün dünyaları tüketen uzaylı kovan filoları.",
   "games.warhammer.faction.chaos": "Kaos güçleri",
@@ -98,9 +103,12 @@ export default {
   "games.warframe.title": "Origin Sistemi boyunca",
   "games.warframe.intro": "Bir sonraki görevin öncesinde neler olduğuna bak.",
   "games.warframe.refresh": "Dünya takvimini yenile",
-  "games.warframe.unavailable": "Takvim yenilenemedi. Gösterilen ayrıntılar önceki anlık görüntüdendir.",
-  "games.warframe.stale": "Kaynak gecikmeli. Bunlar son bildirilen durumlar; süresi dolan kayıtlar gizlidir.",
-  "games.warframe.expired": "Bu anlık görüntü çok eski. Yeni veri gelene kadar güncel listeler gizlenir.",
+  "games.warframe.unavailable":
+    "Takvim yenilenemedi. Gösterilen ayrıntılar önceki anlık görüntüdendir.",
+  "games.warframe.stale":
+    "Kaynak gecikmeli. Bunlar son bildirilen durumlar; süresi dolan kayıtlar gizlidir.",
+  "games.warframe.expired":
+    "Bu anlık görüntü çok eski. Yeni veri gelene kadar güncel listeler gizlenir.",
   "games.warframe.partial": "Takvimin bazı bölümleri kullanılamıyor.",
   "games.warframe.reported": "Son bildirilen",
   "games.warframe.waiting": "Yeni veri bekleniyor",
@@ -137,7 +145,8 @@ export default {
   "games.warframe.noMatches": "Bu filtrelere uyan güncel çatlak yok.",
   "games.warframe.more": "Daha fazla göster",
   "games.warframe.snapshot": "Anlık görüntü: {date}",
-  "games.warframe.scope": "Ortak dünya takvimi. Erişim, görev ilerlemenize bağlıdır. Görev adları İngilizce sağlanır.",
+  "games.warframe.scope":
+    "Ortak dünya takvimi. Erişim, görev ilerlemenize bağlıdır. Görev adları İngilizce sağlanır.",
   "games.warframe.world.cetus": "Plains of Eidolon",
   "games.warframe.world.vallis": "Orb Vallis",
   "games.warframe.world.cambion": "Cambion Drift",
@@ -148,11 +157,14 @@ export default {
   "games.warframe.state.corpus": "Corpus",
   "games.warframe.state.grineer": "Grineer",
   "games.rivals.title": "Kahramanını seç",
-  "games.rivals.intro": "Kahramanları keşfet, rakipleri karşılaştır ve sıradaki maç için takım arkadaşları bul.",
+  "games.rivals.intro":
+    "Kahramanları keşfet, rakipleri karşılaştır ve sıradaki maç için takım arkadaşları bul.",
   "games.rivals.refresh": "Kahraman rehberini yenile",
-  "games.rivals.statsFailed": "İstatistikler yenilenemedi. Gösterilen sayılar önceki verilerden alınmıştır.",
+  "games.rivals.statsFailed":
+    "İstatistikler yenilenemedi. Gösterilen sayılar önceki verilerden alınmıştır.",
   "games.rivals.artFailed": "Resmî görseller ve roller yenilenemedi.",
-  "games.rivals.stale": "Bazı istatistikler iki günden eski. Karşılaştırmadan önce tarihleri kontrol et.",
+  "games.rivals.stale":
+    "Bazı istatistikler iki günden eski. Karşılaştırmadan önce tarihleri kontrol et.",
   "games.rivals.partial": "Bazı kayıtlar okunamadı. Örneklem eksik olabilir.",
   "games.rivals.role": "Kahraman rolü",
   "games.rivals.all": "Tümü",
@@ -178,12 +190,15 @@ export default {
   "games.rivals.heroRate": "{hero} için her rakibe karşı kazanma oranı",
   "games.rivals.with": "Takım arkadaşlarıyla",
   "games.rivals.duoRate": "İkilinin ortak kazanma oranı",
-  "games.rivals.scope": "Tüm beceri seviyelerinde gözlemlenen rekabetçi 6'ya 6 maçlar. Kahraman başına en az 200, ikili başına 100 maç. İkili sonuçları bir takım yeteneği veya sonraki maç tahmini anlamına gelmez.",
+  "games.rivals.scope":
+    "Tüm beceri seviyelerinde gözlemlenen rekabetçi 6'ya 6 maçlar. Kahraman başına en az 200, ikili başına 100 maç. İkili sonuçları bir takım yeteneği veya sonraki maç tahmini anlamına gelmez.",
   "games.rivals.snapshot": "Veri tarihi: {date}",
   "games.rivals.noMatches": "Bu filtrelere uyan kahraman yok.",
   "games.rivals.unavailable": "Rehber kullanılamıyor. Yenilemeyi dene.",
-  "games.rivals.pairsFailed": "Eşleşme verileri yenilenemedi. Gösterilen ikililer önceki verilerden alınmıştır.",
-  "games.rivals.mismatch": "Kaynakların verileri farklı sezonlara ait. Uyumlu verileri karşılaştırmak için yenile.",
+  "games.rivals.pairsFailed":
+    "Eşleşme verileri yenilenemedi. Gösterilen ikililer önceki verilerden alınmıştır.",
+  "games.rivals.mismatch":
+    "Kaynakların verileri farklı sezonlara ait. Uyumlu verileri karşılaştırmak için yenile.",
   "games.rivals.sample": "{count} maç",
   "games.darktide.scriptures": "Kutsal metinleri topla",
   "games.darktide.grimoires": "Büyü kitaplarını topla",
@@ -205,7 +220,8 @@ export default {
   "games.darktide.empty": "Son verilerde süresi dolmamış görev yok.",
   "games.darktide.more": "Daha fazla görev",
   "games.darktide.checked": "Kontrol: {date}",
-  "games.darktide.scope": "Topluluk verileri. Oyun içindeki erişim ve ödüller farklı olabilir; bu, karakterinin görev panosu değildir.",
+  "games.darktide.scope":
+    "Topluluk verileri. Oyun içindeki erişim ve ödüller farklı olabilir; bu, karakterinin görev panosu değildir.",
   "games.darktide.remaining": "{count} dk kaldı",
   "games.darktide.credits": "Ordo kuponları",
   "games.darktide.xp": "DP",
@@ -245,19 +261,24 @@ export default {
   "games.companion.showAll": "{count} kahramanın tümünü göster",
   "games.companion.noMatches": "Aramanızla eşleşen kahraman yok.",
   "games.companion.through": "{date} tarihine kadarki maçlar",
-  "games.companion.sampleNote": "Tüm rütbelerden topluluk örneklemi; kahraman başına en az 100 maç. Tahmin değildir.",
-  "games.companion.unavailable": "Veriler yenilenemedi. Gösterilen veriler önceki kontrolden kalmadır.",
-  "games.companion.statsUnavailable": "Kahraman istatistikleri kullanılamıyor. Kahramanlara göz atabilirsiniz.",
+  "games.companion.sampleNote":
+    "Tüm rütbelerden topluluk örneklemi; kahraman başına en az 100 maç. Tahmin değildir.",
+  "games.companion.unavailable":
+    "Veriler yenilenemedi. Gösterilen veriler önceki kontrolden kalmadır.",
+  "games.companion.statsUnavailable":
+    "Kahraman istatistikleri kullanılamıyor. Kahramanlara göz atabilirsiniz.",
   "games.gw2.title": "Büyücünün Kasası",
   "games.gw2.intro": "Ödülleri seçin ve Astral Acclaim kullanımınızı planlayın.",
   "games.gw2.refresh": "Ödülleri yenile",
   "games.gw2.unavailable": "Ödüller yenilenemedi. Önceki bilgiler güncelliğini yitirmiş olabilir.",
   "games.gw2.ends": "Sezon bitişi: {date}",
   "games.gw2.expired": "Bu sezon etkin değil. Ödülleri planlamadan önce yenileyin.",
-  "games.gw2.partial": "Bazı eşya ayrıntıları kullanılamıyor. Ödül fiyatları hesaba katılmaya devam ediyor.",
+  "games.gw2.partial":
+    "Bazı eşya ayrıntıları kullanılamıyor. Ödül fiyatları hesaba katılmaya devam ediyor.",
   "games.gw2.guide": "Kasa rehberi",
   "games.gw2.checked": "Kontrol: {date}",
-  "games.gw2.scope": "Bu Harbor profiline kaydedilir. Her seçim bir teklifi hesaplar; bakiyeniz, satın alma sınırları ve genişleme erişimi kontrol edilmez. Kullanılabilirliği doğrulayıp oyun içinde satın alın.",
+  "games.gw2.scope":
+    "Bu Harbor profiline kaydedilir. Her seçim bir teklifi hesaplar; bakiyeniz, satın alma sınırları ve genişleme erişimi kontrol edilmez. Kullanılabilirliği doğrulayıp oyun içinde satın alın.",
   "games.gw2.total": "Planlanan toplam",
   "games.gw2.currency": "Astral Acclaim",
   "games.gw2.selected": "{count} teklif seçildi",
@@ -287,14 +308,16 @@ export default {
   "games.gw2.quantity": "Miktar: {count}",
   "games.deadlockBuilds.open": "Topluluk dizilimleri",
   "games.deadlockBuilds.back": "Dizilimlere dön",
-  "games.deadlockBuilds.intro": "Topluluğun eşya rehberleri. Seçmeden önce güncelleme tarihlerini kontrol edin.",
+  "games.deadlockBuilds.intro":
+    "Topluluğun eşya rehberleri. Seçmeden önce güncelleme tarihlerini kontrol edin.",
   "games.deadlockBuilds.search": "Dizilim ara",
   "games.deadlockBuilds.recent": "Son güncellenenler",
   "games.deadlockBuilds.popular": "Haftalık favoriler",
   "games.deadlockBuilds.language": "Dizilim dili",
   "games.deadlockBuilds.allLanguages": "Tüm diller",
   "games.deadlockBuilds.refresh": "Dizilimleri yenile",
-  "games.deadlockBuilds.failed": "Dizilimler yenilenemedi. Önceden yüklenen rehberler güncel olmayabilir.",
+  "games.deadlockBuilds.failed":
+    "Dizilimler yenilenemedi. Önceden yüklenen rehberler güncel olmayabilir.",
   "games.deadlockBuilds.updated": "Güncelleme: {date}",
   "games.deadlockBuilds.undated": "Güncelleme tarihi bilinmiyor",
   "games.deadlockBuilds.favorites": "{count} haftalık favori",
@@ -306,8 +329,10 @@ export default {
   "games.deadlockBuilds.copy": "Dizilim kimliğini kopyala",
   "games.deadlockBuilds.use": "Dizilim kimliği:",
   "games.deadlockBuilds.copyFailed": "Kopyalanamadı. Elle kopyalamak için kimliği seçin.",
-  "games.deadlockBuilds.definitions": "Eşya adları ve maliyetleri bilinen en yeni oyun verilerinden gelir. Eski rehberler farklı olabilir; gruplar alternatifler içerebilir.",
-  "games.deadlockBuilds.itemsFailed": "Bazı eşya ayrıntıları kullanılamıyor. Yazarın rehberi ve eşya kimlikleri görünür kalır.",
+  "games.deadlockBuilds.definitions":
+    "Eşya adları ve maliyetleri bilinen en yeni oyun verilerinden gelir. Eski rehberler farklı olabilir; gruplar alternatifler içerebilir.",
+  "games.deadlockBuilds.itemsFailed":
+    "Bazı eşya ayrıntıları kullanılamıyor. Yazarın rehberi ve eşya kimlikleri görünür kalır.",
   "games.deadlockBuilds.noItems": "Bu dizilimde eşya grubu yok.",
   "games.deadlockBuilds.group": "Grup {number}",
   "games.deadlockBuilds.optional": "İsteğe bağlı",
@@ -329,7 +354,8 @@ export default {
   "games.rivals.guide.teamUp": "Takım yetenekleri",
   "games.rivals.guide.base": "Temel etki",
   "games.rivals.guide.enhanced": "Güçlendirilmiş etki",
-  "games.rivals.guide.reference": "Resmî kahraman rehberi · İngilizce. Değerler denge güncellemeleriyle değişebilir.",
+  "games.rivals.guide.reference":
+    "Resmî kahraman rehberi · İngilizce. Değerler denge güncellemeleriyle değişebilir.",
   "games.rivals.guide.failed": "Resmî kahraman rehberi yüklenemedi.",
   "games.rivals.guide.partial": "Bazı yetenek ayrıntıları kullanılamıyor.",
   "games.rivals.guide.checked": "Kontrol: {date}",

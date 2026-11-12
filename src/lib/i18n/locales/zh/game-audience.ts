@@ -3,7 +3,8 @@ export default {
   "games.audience.deck": "Steam Deck · 最热玩",
   "games.audience.deckNote": "Steam Deck 最热玩游戏 · 过去一周",
   "games.audience.deckSource": "Steam Deck · 每周热玩榜",
-  "games.audience.deckCoverage": "Valve 的 Steam Deck 每周排行榜会自动刷新。此榜单不公布同时在线玩家人数。",
+  "games.audience.deckCoverage":
+    "Valve 的 Steam Deck 每周排行榜会自动刷新。此榜单不公布同时在线玩家人数。",
   "games.audience.xbox": "Xbox · 热门游戏",
   "games.audience.xboxNote": "玩家最常玩的 Xbox 游戏 · 美国",
   "games.audience.xboxSource": "Xbox · 当前热门榜",
@@ -19,6 +20,7 @@ export default {
   "games.audience.monthlyRank": "月度排名 {rank}",
   "games.audience.onSteamNow": "正在 Steam 游玩",
   "games.audience.source": "Newzoo · 月活跃玩家",
-  "games.audience.coverage": "按中国和印度以外的 37 个市场的月活跃玩家统计的公开前十名。这是指定月份的排名，并非实时人数或全球排名。",
-  "games.audience.snapshot": "Newzoo · 已发布榜单 · {month}"
+  "games.audience.coverage":
+    "按中国和印度以外的 37 个市场的月活跃玩家统计的公开前十名。这是指定月份的排名，并非实时人数或全球排名。",
+  "games.audience.snapshot": "Newzoo · 已发布榜单 · {month}",
 };

@@ -14,13 +14,19 @@ function load(path: string, mocks: Record<string, unknown>) {
   }).outputText;
   const module = { exports: {} as any };
   new Function("require", "module", "exports", output)(
-    (name: string) => { assert.ok(name in mocks, `unexpected import ${name}`); return mocks[name]; },
-    module, module.exports,
+    (name: string) => {
+      assert.ok(name in mocks, `unexpected import ${name}`);
+      return mocks[name];
+    },
+    module,
+    module.exports,
   );
   return module.exports;
 }
 
-const settle = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
+const settle = async () => {
+  for (let i = 0; i < 12; i++) await Promise.resolve();
+};
 
 test("overview requests deduplicate, cache per language and key, and retry failed fetches", async () => {
   const requests: { key: string; language: string; resolve: (value: unknown) => void }[] = [];
@@ -30,7 +36,9 @@ test("overview requests deduplicate, cache per language and key, and retry faile
       get: (key: string, _: string, params: { language: string }) =>
         new Promise((resolve) => requests.push({ key, language: params.language, resolve })),
     },
-    "../../cache": { lruSet: (cache: Map<string, unknown>, key: string, value: unknown) => cache.set(key, value) },
+    "../../cache": {
+      lruSet: (cache: Map<string, unknown>, key: string, value: unknown) => cache.set(key, value),
+    },
     "../../settings/load": { loadStoredSettings: () => ({ translateTitles: true }) },
     "./tmdb-image-rungs": {},
     "./tmdb-title-fallback": { pickTmdbTitle, tmdbEnglishTitle, tmdbLanguageBase },
@@ -62,13 +70,19 @@ function hookHarness() {
   const settings = { tmdbKey: "fixture", tmdbLanguage: "ar", translateDescriptions: true };
   const requests: { id: string; language: string; resolve: (value?: string) => void }[] = [];
   const mappings: string[] = [];
-  const same = (a?: unknown[], b?: unknown[]) => a && b && a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
+  const same = (a?: unknown[], b?: unknown[]) =>
+    a && b && a.length === b.length && a.every((v, i) => Object.is(v, b[i]));
   const { useLocalizedOverview } = load("src/lib/use-localized-overview.ts", {
     react: {
       useState: (initial: unknown) => {
         const i = slot++;
         if (!(i in slots)) slots[i] = initial;
-        return [slots[i], (v: unknown) => { slots[i] = v; }];
+        return [
+          slots[i],
+          (v: unknown) => {
+            slots[i] = v;
+          },
+        ];
       },
       useMemo: (fn: () => unknown, deps: unknown[]) => {
         const i = slot++;
@@ -78,7 +92,10 @@ function hookHarness() {
       useEffect: (fn: () => unknown, deps: unknown[]) => {
         const i = slot++;
         if (same(slots[i]?.deps, deps)) return;
-        effects.push(() => { slots[i]?.cleanup?.(); slots[i] = { deps, cleanup: fn() }; });
+        effects.push(() => {
+          slots[i]?.cleanup?.();
+          slots[i] = { deps, cleanup: fn() };
+        });
       },
     },
     "@/lib/settings": { useSettings: () => ({ settings }) },
@@ -87,15 +104,23 @@ function hookHarness() {
         new Promise<string | undefined>((resolve) => requests.push({ id, language, resolve })),
     },
     "@/lib/providers/tmdb/tmdb-imdb-resolve": {
-      tmdbIdFromImdb: async (_: string, id: string) => { mappings.push(id); return "tmdb:movie:42"; },
+      tmdbIdFromImdb: async (_: string, id: string) => {
+        mappings.push(id);
+        return "tmdb:movie:42";
+      },
     },
   });
-  return { settings, requests, mappings, render(id = "tmdb:movie:1", fallback = "Catalog text", resolveImdb = false) {
-    slot = 0;
-    const value = useLocalizedOverview({ id, type: "movie", description: fallback }, resolveImdb);
-    effects.splice(0).forEach((run) => run());
-    return value;
-  } };
+  return {
+    settings,
+    requests,
+    mappings,
+    render(id = "tmdb:movie:1", fallback = "Catalog text", resolveImdb = false) {
+      slot = 0;
+      const value = useLocalizedOverview({ id, type: "movie", description: fallback }, resolveImdb);
+      effects.splice(0).forEach((run) => run());
+      return value;
+    },
+  };
 }
 
 test("localized overview replaces catalog text and follows live language changes", async () => {

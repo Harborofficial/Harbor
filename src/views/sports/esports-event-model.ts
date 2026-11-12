@@ -79,16 +79,10 @@ export function esportsEventSummaries(
     const summary: EsportsEventSummary = {
       ...group,
       status:
-        group.liveCount > 0
-          ? "live"
-          : recentCount === group.matchCount
-            ? "completed"
-            : "upcoming",
+        group.liveCount > 0 ? "live" : recentCount === group.matchCount ? "completed" : "upcoming",
     };
     const tournament =
-      summary.game === "cs2"
-        ? summary.eventIds.map((id) => byId.get(id)).find(Boolean)
-        : undefined;
+      summary.game === "cs2" ? summary.eventIds.map((id) => byId.get(id)).find(Boolean) : undefined;
     if (!tournament) return summary;
     return {
       ...summary,

@@ -2,19 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import { Award, Captions, Check, Eye, HardDrive, Sparkles, Tag, Trophy, Type } from "../icons";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { ROW_DESC, Section, Segmented, ToggleRow } from "../shared";
+import { ROW_DESC, Section, Segmented, ToggleRow, settingsAnchor } from "../shared";
 import { SettingGroup, SettingRow, Nested, SettingsWorkbench } from "../kit";
 import { SongCardStylePicker } from "../song-card-style-picker";
 import { HoverStyleGallery } from "../hover-style-preview";
 import { CardOverlayPreview } from "../card-overlay-preview";
 import { RatingsMatrix } from "../ratings-matrix";
-import { CardBadgesPanel, CardScoresPreview, WatchlistControl, type PreviewFlags } from "../card-badges-panel";
+import {
+  CardBadgesPanel,
+  CardScoresPreview,
+  WatchlistControl,
+  type PreviewFlags,
+} from "../card-badges-panel";
 import { TV_CARD_MIN } from "@/components/row";
 
 export function CardsTab() {
   const { settings: baseSettings, update } = useSettings();
   const [layout, setLayout] = useState<"poster" | "tv">(baseSettings.rowCardStyle);
-  const settings = layout === "tv" ? { ...baseSettings, ...baseSettings.tvCardOptions } : baseSettings;
+  const settings =
+    layout === "tv" ? { ...baseSettings, ...baseSettings.tvCardOptions } : baseSettings;
   const tvPreviewCardWidth = Math.max(72, Math.round(TV_CARD_MIN * settings.posterScale));
   const updateCard = (patch: Partial<typeof settings>) => {
     if (layout === "poster") {
@@ -71,12 +77,15 @@ export function CardsTab() {
     <>
       <Segmented
         value={layout}
-        options={[{ value: "poster", label: t("Poster") }, { value: "tv", label: t("TV") }]}
+        options={[
+          { value: "poster", label: t("Poster") },
+          { value: "tv", label: t("TV") },
+        ]}
         onChange={(v) => setLayout(v as "poster" | "tv")}
       />
       <Section
         title={layout === "poster" ? t("On the poster") : t("On the TV")}
-        anchorTitle="Card overlays"
+        id={settingsAnchor("Card overlays")}
       >
         <ToggleRow
           label={t("Show tags on cards")}
@@ -91,14 +100,22 @@ export function CardsTab() {
           compact
           widePreview={layout === "tv"}
           widePreviewWidth={tvPreviewCardWidth + 40}
-          preview={<CardOverlayPreview layout={layout} settings={settings} cardWidth={tvPreviewCardWidth} />}
+          preview={
+            <CardOverlayPreview
+              layout={layout}
+              settings={settings}
+              cardWidth={tvPreviewCardWidth}
+            />
+          }
         >
           <SettingRow
             wide
             label={t("Award display mode")}
             desc={t(
               layout === "tv"
-                ? t("Choose how award wins appear on cards. TV award tabs are always shown at the top.")
+                ? t(
+                    "Choose how award wins appear on cards. TV award tabs are always shown at the top.",
+                  )
                 : t("Choose how award wins appear on cards. You can position award tabs below."),
             )}
             icon={<Award size={18} strokeWidth={2} />}
@@ -114,7 +131,6 @@ export function CardsTab() {
                 const display = v as "tabs" | "badge" | "none";
                 updateCard({
                   cardAwardDisplay: display,
-                  awardTabs: display === "tabs",
                 });
               }}
             />
@@ -212,29 +228,29 @@ export function CardsTab() {
           }
         >
           <RatingsMatrix settings={settings} update={updateCard} />
-        <CardBadgesPanel
-          settings={settings}
-          update={updateCard}
-          enabledBadgeCount={enabledBadgeCount}
-          layout={layout}
-        />
-        {settings.showMalBadge && (
-          <SettingRow
-            label={t("Anime card rating source")}
-            desc={t(
-              "Pick which score anime cards show. IMDb falls back to MAL when a title has no IMDb rating yet.",
-            )}
-          >
-            <Segmented
-              value={settings.animeCardRating}
-              options={[
-                { value: "mal", label: t("MAL") },
-                { value: "imdb", label: t("IMDb") },
-              ]}
+          <CardBadgesPanel
+            settings={settings}
+            update={updateCard}
+            enabledBadgeCount={enabledBadgeCount}
+            layout={layout}
+          />
+          {settings.showMalBadge && (
+            <SettingRow
+              label={t("Anime card rating source")}
+              desc={t(
+                "Pick which score anime cards show. IMDb falls back to MAL when a title has no IMDb rating yet.",
+              )}
+            >
+              <Segmented
+                value={settings.animeCardRating}
+                options={[
+                  { value: "mal", label: t("MAL") },
+                  { value: "imdb", label: t("IMDb") },
+                ]}
                 onChange={(v) => updateCard({ animeCardRating: v as "mal" | "imdb" })}
-            />
-          </SettingRow>
-        )}
+              />
+            </SettingRow>
+          )}
         </SettingsWorkbench>
       </Section>
 
@@ -277,8 +293,7 @@ export function CardsTab() {
                   )
                 }
               />
-              {(settings.cardHoverStyle === "default" ||
-                settings.cardHoverStyle === "marquee") && (
+              {(settings.cardHoverStyle === "default" || settings.cardHoverStyle === "marquee") && (
                 <SettingRow
                   wide
                   label={t("Open preview")}

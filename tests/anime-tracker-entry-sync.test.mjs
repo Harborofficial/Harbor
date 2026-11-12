@@ -2,12 +2,17 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
-import { playbackParams, playbackPersistenceHarness } from "./helpers/playback-persistence-harness.ts";
+import {
+  playbackParams,
+  playbackPersistenceHarness,
+} from "./helpers/playback-persistence-harness.ts";
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 function deferred() {
   let resolve;
-  const promise = new Promise((done) => { resolve = done; });
+  const promise = new Promise((done) => {
+    resolve = done;
+  });
   return { promise, resolve };
 }
 
@@ -26,10 +31,24 @@ function autosave(episode, metaId = "kitsu:45619", resolveIdentity) {
   return h;
 }
 
-function tracker(service, { total = 13, current = 0, status, rewatching = false, switchDuring, stateful = false, storage, server } = {}) {
-  let profile = "a", session = {};
+function tracker(
+  service,
+  {
+    total = 13,
+    current = 0,
+    status,
+    rewatching = false,
+    switchDuring,
+    stateful = false,
+    storage,
+    server,
+  } = {},
+) {
+  let profile = "a",
+    session = {};
   const store = storage ?? new Map();
-  const writes = [], events = [];
+  const writes = [],
+    events = [];
   const state = server ?? {
     current,
     status: status ?? (service === "anilist" ? "CURRENT" : "watching"),
@@ -38,7 +57,8 @@ function tracker(service, { total = 13, current = 0, status, rewatching = false,
     times: 0,
   };
   const request = async (query, options) => {
-    const write = service === "anilist" ? query.startsWith("mutation") : options?.method === "PATCH";
+    const write =
+      service === "anilist" ? query.startsWith("mutation") : options?.method === "PATCH";
     if (write) {
       const fields = service === "anilist" ? options : Object.fromEntries(options.body);
       writes.push(fields);
@@ -51,7 +71,8 @@ function tracker(service, { total = 13, current = 0, status, rewatching = false,
           else if (total > 0 && state.current >= total) state.status = "COMPLETED";
           if (fields.repeat != null) state.repeat = Number(fields.repeat);
         } else {
-          if (fields.num_watched_episodes != null) state.current = Number(fields.num_watched_episodes);
+          if (fields.num_watched_episodes != null)
+            state.current = Number(fields.num_watched_episodes);
           if (fields.status != null) state.status = fields.status;
           if (fields.is_rewatching != null) state.rewatching = fields.is_rewatching === "true";
           if (fields.num_times_rewatched != null) state.times = Number(fields.num_times_rewatched);
@@ -64,29 +85,56 @@ function tracker(service, { total = 13, current = 0, status, rewatching = false,
     if (switchDuring === "profile") profile = "b";
     if (switchDuring === "account") session = {};
     return service === "anilist"
-      ? { Media: { id: 1, episodes: total, mediaListEntry: { progress: stateful ? state.current : current, status: stateful ? state.status : status ?? "CURRENT", repeat: stateful ? state.repeat : 0 } } }
-      : { num_episodes: total, my_list_status: { num_episodes_watched: stateful ? state.current : current, status: stateful ? state.status : status ?? "watching", is_rewatching: stateful ? state.rewatching : rewatching, num_times_rewatched: stateful ? state.times : 0 } };
+      ? {
+          Media: {
+            id: 1,
+            episodes: total,
+            mediaListEntry: {
+              progress: stateful ? state.current : current,
+              status: stateful ? state.status : (status ?? "CURRENT"),
+              repeat: stateful ? state.repeat : 0,
+            },
+          },
+        }
+      : {
+          num_episodes: total,
+          my_list_status: {
+            num_episodes_watched: stateful ? state.current : current,
+            status: stateful ? state.status : (status ?? "watching"),
+            is_rewatching: stateful ? state.rewatching : rewatching,
+            num_times_rewatched: stateful ? state.times : 0,
+          },
+        };
   };
   const dependencies = {
     "@/lib/active-profile-id": { activeProfileId: () => profile },
     "@/lib/providers/anime-mapping": { kitsuToAnilist: async () => 1 },
     "./mutations": { resolveMalMediaId: async () => 1 },
     "./session": { isAuthenticated: () => true, getSession: () => session },
-    "./client": service === "anilist"
-      ? { anilistRequest: request, AnilistApiError: class extends Error {} }
-      : { malRequest: request, MalApiError: class extends Error {} },
+    "./client":
+      service === "anilist"
+        ? { anilistRequest: request, AnilistApiError: class extends Error {} }
+        : { malRequest: request, MalApiError: class extends Error {} },
   };
   const source = readFileSync(new URL(`../src/lib/${service}/sync.ts`, import.meta.url), "utf8");
   const code = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   const exports = {};
-  new Function("require", "exports", "localStorage", code)((id) => {
-    assert.ok(id in dependencies, `Unexpected import ${id}`);
-    return dependencies[id];
-  }, exports, { getItem: (key) => store.get(key), setItem: (key, value) => store.set(key, value) });
+  new Function("require", "exports", "localStorage", code)(
+    (id) => {
+      assert.ok(id in dependencies, `Unexpected import ${id}`);
+      return dependencies[id];
+    },
+    exports,
+    { getItem: (key) => store.get(key), setItem: (key, value) => store.set(key, value) },
+  );
   exports.subscribeSync((event) => events.push(event));
-  return { writes, events, storage: store, server: state,
+  return {
+    writes,
+    events,
+    storage: store,
+    server: state,
     sync: exports[service === "anilist" ? "syncAnimeProgress" : "syncMalProgress"],
     mark: exports[service === "anilist" ? "markAnimeWatching" : "markMalWatching"],
   };
@@ -95,9 +143,19 @@ function tracker(service, { total = 13, current = 0, status, rewatching = false,
 for (const service of ["anilist", "mal"]) {
   for (const total of [13, 25, 0]) {
     test(`${service}: cour E1 stays E1 with total ${total}, even when franchise absolute is 13`, async () => {
-      const h = autosave({ season: 1, episode: 1, imdbSeason: 2, imdbEpisode: 13, absoluteNumber: 13 });
+      const h = autosave({
+        season: 1,
+        episode: 1,
+        imdbSeason: 2,
+        imdbEpisode: 13,
+        absoluteNumber: 13,
+      });
       const args = h.trackerProgress.find((call) => call[0] === service).slice(1);
-      assert.equal(h.trackerStatus.length, 0, "do not race a redundant watching write against progress");
+      assert.equal(
+        h.trackerStatus.length,
+        0,
+        "do not race a redundant watching write against progress",
+      );
       assert.deepEqual(args, ["kitsu:45619", 1, "Test series", 2, true]);
       const api = tracker(service, { total });
       await api.sync(...args);
@@ -113,7 +171,8 @@ for (const service of ["anilist", "mal"]) {
   test(`${service}: an identity-resolved full-entry finale completes exactly at total`, async () => {
     const h = autosave(
       { season: 2, episode: 1, imdbSeason: 2, imdbEpisode: 1, absoluteNumber: 999 },
-      "tmdb:tv:100", async () => ({ kitsuId: 99, number: 25 }),
+      "tmdb:tv:100",
+      async () => ({ kitsuId: 99, number: 25 }),
     );
     await settle();
     const args = h.trackerProgress.find((call) => call[0] === service).slice(1);
@@ -125,7 +184,10 @@ for (const service of ["anilist", "mal"]) {
   });
 
   test(`${service}: a scoped long-running stream writes its own absolute episode with unknown total`, async () => {
-    const h = autosave({ season: 21, episode: 45, kitsuStreamId: "kitsu:12:1089", absoluteNumber: 9999 }, "tt0388629");
+    const h = autosave(
+      { season: 21, episode: 45, kitsuStreamId: "kitsu:12:1089", absoluteNumber: 9999 },
+      "tt0388629",
+    );
     const args = h.trackerProgress.find((call) => call[0] === service).slice(1);
     assert.equal(args[0], "kitsu:12");
     assert.equal(args[1], 1089);
@@ -143,9 +205,10 @@ for (const service of ["anilist", "mal"]) {
   });
 
   test(`${service}: finished entries sync as rewatches unless counting is off`, async () => {
-    const cases = service === "anilist"
-      ? [{ status: "COMPLETED" }, { status: "REPEATING" }]
-      : [{ status: "completed" }, { rewatching: true }];
+    const cases =
+      service === "anilist"
+        ? [{ status: "COMPLETED" }, { status: "REPEATING" }]
+        : [{ status: "completed" }, { rewatching: true }];
     for (const options of cases) {
       const api = tracker(service, options);
       await api.sync("kitsu:1", 2, "Fixture");
@@ -155,7 +218,11 @@ for (const service of ["anilist", "mal"]) {
       if (service === "mal") assert.equal(api.writes[0].is_rewatching, "true");
       const off = tracker(service, options);
       await off.sync("kitsu:1", 2, "Fixture", undefined, false);
-      assert.equal(off.writes.length, 0, "counting off leaves the entry exactly as the user set it");
+      assert.equal(
+        off.writes.length,
+        0,
+        "counting off leaves the entry exactly as the user set it",
+      );
     }
   });
 
@@ -201,7 +268,12 @@ for (const service of ["anilist", "mal"]) {
     const args = ["kitsu:45619", 13, "Test series", 1, true];
     await first.sync(...args);
     assert.equal(first.writes.length, 1, "the first watch completes once");
-    const restarted = tracker(service, { total: 13, stateful: true, storage, server: first.server });
+    const restarted = tracker(service, {
+      total: 13,
+      stateful: true,
+      storage,
+      server: first.server,
+    });
     await restarted.sync(...args);
     await restarted.sync(...args);
     assert.equal(restarted.writes.length, 0, "replaying the finale after a restart must not count");
@@ -211,7 +283,12 @@ for (const service of ["anilist", "mal"]) {
     const storage = new Map();
     const first = tracker(service, { total: 13, current: 12, stateful: true, storage });
     await first.sync("kitsu:45619", 13, "Test series", 1, true);
-    const restarted = tracker(service, { total: 13, stateful: true, storage, server: first.server });
+    const restarted = tracker(service, {
+      total: 13,
+      stateful: true,
+      storage,
+      server: first.server,
+    });
     await restarted.sync("kitsu:45619", 1, "Test series", 1, true);
     assert.equal(restarted.writes.length, 1);
     assert.equal(restarted.writes[0].status, service === "anilist" ? "REPEATING" : "watching");
@@ -232,7 +309,10 @@ for (const service of ["anilist", "mal"]) {
       const progress = tracker(service, { switchDuring });
       await progress.sync("kitsu:1", 2, "Fixture");
       assert.equal(progress.writes.length, 0);
-      const watching = tracker(service, { switchDuring, status: service === "anilist" ? "PLANNING" : "plan_to_watch" });
+      const watching = tracker(service, {
+        switchDuring,
+        status: service === "anilist" ? "PLANNING" : "plan_to_watch",
+      });
       await watching.mark("kitsu:1", "Fixture");
       assert.equal(watching.writes.length, 0);
       assert.equal(watching.events.length, 0);
@@ -243,7 +323,11 @@ for (const service of ["anilist", "mal"]) {
 for (const switchDuring of ["profile", "account"]) {
   test(`async anime identity resolution cannot send progress to a changed ${switchDuring}`, async () => {
     const gate = deferred();
-    const h = autosave({ season: 2, episode: 1, imdbSeason: 2, imdbEpisode: 1 }, "tmdb:tv:100", () => gate.promise);
+    const h = autosave(
+      { season: 2, episode: 1, imdbSeason: 2, imdbEpisode: 1 },
+      "tmdb:tv:100",
+      () => gate.promise,
+    );
     if (switchDuring === "profile") h.setProfile("another");
     else h.switchTrackerSession();
     gate.resolve({ kitsuId: 99, number: 1 });
@@ -255,9 +339,25 @@ for (const switchDuring of ["profile", "account"]) {
 
 test("failed identity resolution retains a known cour target without franchise absolute promotion", async () => {
   const h = autosave(
-    { season: 1, episode: 1, sourceMetaId: "kitsu:45619", imdbSeason: 3, imdbEpisode: 13, absoluteNumber: 50 },
-    "kitsu:45398", async () => { throw new Error("No mapping"); },
+    {
+      season: 1,
+      episode: 1,
+      sourceMetaId: "kitsu:45619",
+      imdbSeason: 3,
+      imdbEpisode: 13,
+      absoluteNumber: 50,
+    },
+    "kitsu:45398",
+    async () => {
+      throw new Error("No mapping");
+    },
   );
   await settle();
-  assert.deepEqual(h.trackerProgress.map((call) => call.slice(1, 3)), [["kitsu:45619", 1], ["kitsu:45619", 1]]);
+  assert.deepEqual(
+    h.trackerProgress.map((call) => call.slice(1, 3)),
+    [
+      ["kitsu:45619", 1],
+      ["kitsu:45619", 1],
+    ],
+  );
 });
